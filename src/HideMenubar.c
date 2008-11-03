@@ -44,7 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // also hides desktop corners
 
-#include "Hide Menubar.h"
+#include "HideMenubar.h"
 
 // ShowHideMBar.c -- from Hide Menubar Etc. from Feb 96 Developer Toolchest Disc
 //

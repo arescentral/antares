@@ -43,23 +43,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Resources.h"
 
-#include "Ares Global Type.h"
+#include "AresGlobalType.h"
 #ifndef kMathSpecial
-#include "Math Special.h"
+#include "MathSpecial.h"
 #endif
 
 #include "Error.h"
 #include "Debug.h"
 #include "Options.h"
 
-#include "Single Data File.h"
+#include "SingleDataFile.h"
 
 #ifndef kSoundFX
-#include "Sound FX.h"
+#include "SoundFX.h"
 #endif
-#include "Handle Handling.h"
+#include "HandleHandling.h"
 
-#include "Ares_ResFile.h"
+#include "AresResFile.h"
 
 #define kSoundFXError           "\pSNDX"
 #define kSoundResID             500

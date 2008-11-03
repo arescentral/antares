@@ -45,26 +45,26 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Resources.h"
 
 #ifndef kSpaceObject
-#include "Space Object.h"
+#include "SpaceObject.h"
 #endif
 
-#include "Ares Global Type.h"
-#include "Space Object Handling.h"
-#include "String Handling.h"
-#include "Universe Unit.h"
-#include "Ares Cheat.h"
+#include "AresGlobalType.h"
+#include "SpaceObjectHandling.h"
+#include "StringHandling.h"
+#include "UniverseUnit.h"
+#include "AresCheat.h"
 
 #ifndef kAnyChar
 #include "AnyChar.h"
 #endif
 
-#include "Math Macros.h"
+#include "MathMacros.h"
 
 #include "Error.h"
 #include "Debug.h"
-#include "Handle Handling.h"
+#include "HandleHandling.h"
 #ifndef kSoundFX
-#include "Sound FX.h"
+#include "SoundFX.h"
 #endif
 #include "Randomize.h"
 

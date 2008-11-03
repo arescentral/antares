@@ -44,19 +44,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <QDOffscreen.h>
 #include <Palettes.h>
 
-#include "Ares Global Type.h"
+#include "AresGlobalType.h"
 #include "Options.h"
 
 #include "Error.h"
-#include "GDevice Handling.h"
+#include "GDeviceHandling.h"
 #include "Debug.h"
 
-#include "Offscreen GWorld.h"
+#include "OffscreenGWorld.h"
 
 //#define   kByteLevelTesting
 
 #ifdef kByteLevelTesting
-#include "Sprite Handling.h"    // for testbyte debigging kludge
+#include "SpriteHandling.h"    // for testbyte debigging kludge
 #endif
 
 #define kOffscreenError     "\pGWLD"

@@ -44,22 +44,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Resources.h"
 
-#include "Ares Global Type.h"
-#include "Alt Preferences.h"
+#include "AresGlobalType.h"
+#include "AltPreferences.h"
 #include "StdPrefsLib.h"
 
-#include "String Handling.h"
+#include "StringHandling.h"
 #include "AnyChar.h"
 #include "Error.h"
 #include "Debug.h"
-#include "Key Map Translation.h"
-#include "Copy Protection.h" // is included in prefs
-#include "Ares Preferences.h"
+#include "KeyMapTranslation.h"
+#include "CopyProtection.h" // is included in prefs
+#include "AresPreferences.h"
 #include "Options.h"
-#include "Ares NetworkSprocket.h"
-#include "Ambrosia_Serial.h"
+#include "AresNetworkSprocket.h"
+#include "AmbrosiaSerial.h"
 
-//#include "Public Serial Dialog.h"
+//#include "PublicSerialDialog.h"
 //#include "publicserial.h"
 
 #define kPreferenceFileCreator      'ar12'  // normally 'ar12'

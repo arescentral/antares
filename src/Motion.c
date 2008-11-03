@@ -48,34 +48,34 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "ToolUtils.h"
 
 
-#include "Ares Global Type.h"
+#include "AresGlobalType.h"
 #include <QDOffscreen.h>
 #include <Timer.h>
 
 #include "Processor.h"
 
-#include "Space Object.h"
-#include "Space Object Handling.h"
+#include "SpaceObject.h"
+#include "SpaceObjectHandling.h"
 #include "Rotation.h"
-#include "Offscreen GWorld.h"
+#include "OffscreenGWorld.h"
 #include "NatePixTable.h"
-#include "Math Macros.h"
+#include "MathMacros.h"
 #include "Debug.h"
 #include "Error.h"
 
 #include "Randomize.h"
-#include "Player Ship.h"
-#include "Screen Label.h"
-#include "Ares Network.h"
-#include "Math Macros.h"
-#include "Handle Handling.h"
-#include "Universe Unit.h"
+#include "PlayerShip.h"
+#include "ScreenLabel.h"
+#include "AresNetwork.h"
+#include "MathMacros.h"
+#include "HandleHandling.h"
+#include "UniverseUnit.h"
 
 #ifndef kSoundFX
-#include "Sound FX.h"
+#include "SoundFX.h"
 #endif
 
-#include "Non-player Ship.h"
+#include "NonPlayerShip.h"
 
 #ifndef kSpriteHandling
 #include "SpriteHandling.h"

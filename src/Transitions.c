@@ -41,7 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     #include <string.h>
 #endif // TARGET_OS_WIN32
 
-#include "Ares Global Type.h"
+#include "AresGlobalType.h"
 #include "Quickdraw.h"
 #ifndef __PALETTES__
 #include <Palettes.h>
@@ -49,11 +49,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Resources.h"
 
 #include "Debug.h"
-#include "Ares Main.h"
-#include "Handle Handling.h"
+#include "AresMain.h"
+#include "HandleHandling.h"
 
-#include "Color Translation.h"
-#include "Key Map Translation.h"
+#include "ColorTranslation.h"
+#include "KeyMapTranslation.h"
 
 #include "Music.h"
 

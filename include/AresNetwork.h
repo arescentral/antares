@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #endif
 
 #ifndef kSpaceObject
-#include "Space Object.h"
+#include "SpaceObject.h"
 #endif
 
 #define kAresNetwork

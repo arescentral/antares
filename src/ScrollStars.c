@@ -44,7 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Resources.h"
 
-#include "Ares Global Type.h"
+#include "AresGlobalType.h"
 #include "Error.h"
 #include "Debug.h"
 
@@ -54,19 +54,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "NateDraw.h"
 #endif
 
-#include "Math Macros.h"
+#include "MathMacros.h"
 
 #ifndef kSpaceObject
-#include "Space Object.h"
+#include "SpaceObject.h"
 #endif
 
 #include <QDOffscreen.h>
-#include "Offscreen GWorld.h"
-#include "Color Translation.h"
+#include "OffscreenGWorld.h"
+#include "ColorTranslation.h"
 #include "Randomize.h"
-#include "Handle Handling.h"
+#include "HandleHandling.h"
 
-#include "Scroll Stars.h"
+#include "ScrollStars.h"
 
 #ifdef powerc
 #define kScrollStarNum          125

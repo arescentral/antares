@@ -44,14 +44,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Error.h"
 #include "Debug.h"
 
-#include "Math Macros.h"
+#include "MathMacros.h"
 
 #include "NateDraw.h"
 
 // #define kByteLevelTesting
 
 #ifdef kByteLevelTesting
-#include "Sprite Handling.h" // for test byte debugging kludge
+#include "SpriteHandling.h" // for test byte debugging kludge
 #endif
 
 #define mHBlitz( mdbyte, mrunLen, mcolor, mcount) \

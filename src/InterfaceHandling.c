@@ -52,27 +52,27 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Error.h"
 #include "Debug.h"
-#include "Set Font By String.h"
+#include "SetFontByString.h"
 
-#include "Key Map Translation.h"
+#include "KeyMapTranslation.h"
 
-#include "Player Interface Items.h"
-#include "Player Interface Drawing.h"
-#include "Handle Handling.h"
+#include "PlayerInterfaceItems.h"
+#include "PlayerInterfaceDrawing.h"
+#include "HandleHandling.h"
 
 #ifndef kAnyChar
 #include "AnyChar.h"
 #endif
 
-#include "Color Translation.h"
+#include "ColorTranslation.h"
 
-#include "Sound FX.h"               // for button on/off
+#include "SoundFX.h"              // for button on/off
 
-#include "Interface Handling.h"
-#include "Offscreen GWorld.h"
+#include "InterfaceHandling.h"
+#include "OffscreenGWorld.h"
 
-#include "Ares_ResFile.h"
-#include "Ares Global Type.h"
+#include "AresResFile.h"
+#include "AresGlobalType.h"
 
 #define kMakeInterfaceItem      20
 

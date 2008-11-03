@@ -47,13 +47,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "math.h"
 #include "Error.h"
 #include "Debug.h"
-#include "Handle Handling.h"
+#include "HandleHandling.h"
 
 #ifndef kMathSpecial
-#include "Math Special.h"
+#include "MathSpecial.h"
 #endif
 
-#include "Math Macros.h"
+#include "MathMacros.h"
 
 #include "Rotation.h"
 

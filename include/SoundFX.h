@@ -36,7 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #endif
 
 #ifndef kMathSpecial
-#include "Math Special.h"
+#include "MathSpecial.h"
 #endif
 /* Sound defs */
 

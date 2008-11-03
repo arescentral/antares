@@ -42,7 +42,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     #include <string.h>
 #endif // TARGET_OS_WIN32
 
-#include "String Handling.h"
+#include "StringHandling.h"
 
 void CopyPString( unsigned char *to, unsigned char *from)
 

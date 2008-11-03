@@ -45,28 +45,28 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Resources.h"
 
 #include <QDOffscreen.h>
-#include "Ares Global Type.h"
+#include "AresGlobalType.h"
 #include "Error.h"
 #include "AnyChar.h"
-#include "Direct Text.h"
-#include "Color Translation.h"
+#include "DirectText.h"
+#include "ColorTranslation.h"
 #include "Debug.h"
-#include "Player Interface Drawing.h" // for long messages
-#include "Key Map Translation.h"
+#include "PlayerInterfaceDrawing.h" // for long messages
+#include "KeyMapTranslation.h"
 
 #ifndef kSpriteHandling
-#include "Sprite Handling.h"
+#include "SpriteHandling.h"
 #endif
 
-#include "Offscreen GWorld.h"
-#include "Handle Handling.h"
-#include "Screen Label.h"
+#include "OffscreenGWorld.h"
+#include "HandleHandling.h"
+#include "ScreenLabel.h"
 
-#include "Message Screen.h"
+#include "MessageScreen.h"
 #include "Options.h"
-#include "Scenario Maker.h"
+#include "ScenarioMaker.h"
 
-#include "Player Interface.h"   // for Replace_KeyCode_Strings_With_Actual_Key_Names
+#include "PlayerInterface.h"  // for Replace_KeyCode_Strings_With_Actual_Key_Names
 
 #define kMessageScreenLeft      200
 #define kMessageScreenTop       454

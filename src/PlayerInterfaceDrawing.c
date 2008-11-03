@@ -46,12 +46,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Debug.h"
 #include "Error.h"
 
-#include "Player Interface Items.h"
-#include "Player Interface Drawing.h"
-#include "Color Translation.h"
-#include "Key Map Translation.h"
-#include "Handle Handling.h"
-#include "Direct Text.h"
+#include "PlayerInterfaceItems.h"
+#include "PlayerInterfaceDrawing.h"
+#include "ColorTranslation.h"
+#include "KeyMapTranslation.h"
+#include "HandleHandling.h"
+#include "DirectText.h"
 
 #ifndef kNateDraw
 #include "NateDraw.h"

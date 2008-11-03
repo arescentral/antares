@@ -20,11 +20,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // Motion.h
 
 #ifndef kSpaceObject
-#include "Space Object.h"
+#include "SpaceObject.h"
 #endif
 
 #ifndef kMathSpecial
-#include "Math Special.h"
+#include "MathSpecial.h"
 #endif
 
 #pragma options align=mac68k

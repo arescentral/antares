@@ -27,15 +27,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #endif
 
 #ifndef kSpriteHandling
-#include "Sprite Handling.h"
+#include "SpriteHandling.h"
 #endif
 
 #ifndef kMathSpecial
-#include "Math Special.h"
+#include "MathSpecial.h"
 #endif
 
 #ifndef kSoundFX
-#include "Sound FX.h"
+#include "SoundFX.h"
 #endif
 
 #ifndef kScenario

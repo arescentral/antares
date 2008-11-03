@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 & scenarios. Used in Sound FX.c, Scenario Maker.c, and Sprite Handling.c.
 */
 
-#include "Ares Demo Scanner.h"
+#include "AresDemoScanner.h"
 
 #ifndef kCreateAresDemoData
 //#define   kUseSingleDemoFile

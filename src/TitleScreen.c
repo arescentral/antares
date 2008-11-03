@@ -43,10 +43,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Resources.h"
 
-#include "Offscreen GWorld.h"
+#include "OffscreenGWorld.h"
 
-#include "Title Screen.h"
-#include "Handle Handling.h"
+#include "TitleScreen.h"
+#include "HandleHandling.h"
 
 #include "Error.h"
 #include "Debug.h"

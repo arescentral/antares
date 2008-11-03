@@ -42,22 +42,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /* - this project
 *******************************************/
 #ifndef kSpaceObject
-#include "Space Object Handling.h"
+#include "SpaceObjectHandling.h"
 #endif
 
-#include "Scenario_Data.h"
-#include "Ares Global Type.h"
+#include "ScenarioData.h"
+#include "AresGlobalType.h"
 #include "Scenario.h"
-#include "Scenario Maker.h"
+#include "ScenarioMaker.h"
 #include "Races.h"
 
-#include "Handle Handling.h"
+#include "HandleHandling.h"
 
 #include "Error.h"
 #include "Debug.h"
-#include "Ambrosia_Serial.h"
+#include "AmbrosiaSerial.h"
 
-#include "Ares_External_File.h"
+#include "AresExternalFile.h"
 
 #pragma mark **DEFINITIONS**
 /******************************************\

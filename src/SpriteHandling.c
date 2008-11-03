@@ -49,28 +49,28 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #endif
 
 #include "Error.h"
-#include "Offscreen GWorld.h"
+#include "OffscreenGWorld.h"
 #include "Debug.h"
 #include "Processor.h"
-#include "Math Macros.h"
-#include "Macro Colors.h"
+#include "MathMacros.h"
+#include "MacroColors.h"
 #include "NatePixTable.h"
-#include "Color Translation.h"
-#include "Direct Text.h"
-#include "Handle Handling.h"
+#include "ColorTranslation.h"
+#include "DirectText.h"
+#include "HandleHandling.h"
 #include "Rotation.h"
 #include "Randomize.h" // for static table
 
-#include "Single Data File.h"
-#include "Ares_ResFile.h"
-#include "Ares Global Type.h"
+#include "SingleDataFile.h"
+#include "AresResFile.h"
+#include "AresGlobalType.h"
 
 #ifndef kNateDraw
 #include "NateDraw.h"
 #endif
 
 #ifndef kSpriteHandling
-#include "Sprite Handling.h"
+#include "SpriteHandling.h"
 #endif
 
 #define kMaxSpriteNum           500//300

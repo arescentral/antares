@@ -27,32 +27,32 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //#define kAllowNetSprocket
 //#endif
 
-#include "Wrap_GameRanger.h"
+#include "WrapGameRanger.h"
 
 #include "Speech.h"
-#include "Ares Global Type.h"
+#include "AresGlobalType.h"
 #include "Error.h"
 #include "Debug.h"
-#include "String Handling.h"
+#include "StringHandling.h"
 #include "Randomize.h"
-#include "Ares Preferences.h"
-#include "Ares Cheat.h"
+#include "AresPreferences.h"
+#include "AresCheat.h"
 #include "Options.h"
 
-#include "Key Map Translation.h"
+#include "KeyMapTranslation.h"
 
 #ifndef kSpaceObject
-#include "Space Object.h"
+#include "SpaceObject.h"
 #endif
-#include "Scenario Maker.h"
-#include "Key Codes.h"
+#include "ScenarioMaker.h"
+#include "KeyCodes.h"
 #include "Admiral.h"
 #include "Minicomputer.h"
-#include "Player Ship.h"
-#include "Message Screen.h"
+#include "PlayerShip.h"
+#include "MessageScreen.h"
 
 #include "NetSprocketGlue.h"
-#include "Ares NetworkSprocket.h"
+#include "AresNetworkSprocket.h"
 #include "Processor.h"
 
 #define kDebugFileName      "\p_Debug Ares "

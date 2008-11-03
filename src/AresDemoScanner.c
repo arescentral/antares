@@ -59,20 +59,20 @@ scn12 = dch 4/rch13 -> cond 63 Countr >= -> action 458 declare winner 0 next:-1 
 
 #include "Resources.h"
 
-#include "Ares Global Type.h"
-#include "Ares Demo Scanner.h"
+#include "AresGlobalType.h"
+#include "AresDemoScanner.h"
 
 #include <QDOffscreen.h>
 
 #ifndef kSpaceObject
-#include "Space Object Handling.h"
+#include "SpaceObjectHandling.h"
 #endif
 
-#include "Scenario Maker.h"
-#include "Ares Preferences.h"
+#include "ScenarioMaker.h"
+#include "AresPreferences.h"
 
-#include "Offscreen GWorld.h"
-#include "Player Interface.h"
+#include "OffscreenGWorld.h"
+#include "PlayerInterface.h"
 
 #include "Debug.h"
 #include "Error.h"

@@ -47,11 +47,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define kQDOffscreen
 #endif
 
-#include "Sprite Cursor.h"
+#include "SpriteCursor.h"
 
 #include "NatePixTable.h"
-#include "Offscreen GWorld.h"
-#include "Color Translation.h"
+#include "OffscreenGWorld.h"
+#include "ColorTranslation.h"
 
 #include "Error.h"
 

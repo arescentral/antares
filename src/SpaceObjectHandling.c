@@ -47,41 +47,41 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "GXMath.h"
 #include "ToolUtils.h"
 
-#include "Ares Global Type.h"
+#include "AresGlobalType.h"
 
 #ifndef kSpaceObject
-#include "Space Object.h"
+#include "SpaceObject.h"
 #endif
 
 #ifndef kSpriteHandling
-#include "Sprite Handling.h"
+#include "SpriteHandling.h"
 #endif
 
-#include "Color Translation.h"
+#include "ColorTranslation.h"
 
-#include "Ares Demo Scanner.h"
+#include "AresDemoScanner.h"
 
-#include "Offscreen GWorld.h"
+#include "OffscreenGWorld.h"
 #include "Error.h"
 #include "Debug.h"
 #include "Rotation.h"
 #include "Motion.h"
 #include "Randomize.h"
-#include "Math Macros.h"
-#include "Screen Label.h"
+#include "MathMacros.h"
+#include "ScreenLabel.h"
 #include "Admiral.h"
-#include "Scenario Maker.h"
-#include "Scroll Stars.h"
-#include "Message Screen.h"
-#include "Handle Handling.h"
+#include "ScenarioMaker.h"
+#include "ScrollStars.h"
+#include "MessageScreen.h"
+#include "HandleHandling.h"
 #include "Beam.h"
-#include "Universe Unit.h"
+#include "UniverseUnit.h"
 #include "Transitions.h"
 #include "Options.h"
-#include "Player Ship.h"
+#include "PlayerShip.h"
 #include "Minicomputer.h" // for MiniComputer_SetScreenAndLineHack
 
-#include "Space Object Handling.h"
+#include "SpaceObjectHandling.h"
 #define kTestSpriteError    "\pSOHD"
 
 #define kActionQueueLength      120

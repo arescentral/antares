@@ -42,17 +42,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /* - this project
 *******************************************/
 #include "NateDraw.h"
-#include "Sprite Handling.h"
+#include "SpriteHandling.h"
 #include "Scenario.h"
-#include "Ares Global Type.h"
-#include "Scenario Maker.h"
-#include "Color Translation.h"
+#include "AresGlobalType.h"
+#include "ScenarioMaker.h"
+#include "ColorTranslation.h"
 #include "Admiral.h"
 #include "Error.h"
 #include "NatePixTable.h"
 #include "Debug.h"
 
-#include "Briefing_Renderer.h"
+#include "BriefingRenderer.h"
 
 #pragma mark **DEFINITIONS**
 /******************************************\

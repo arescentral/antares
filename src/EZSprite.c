@@ -50,16 +50,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #endif
 
 #include "Error.h"
-#include "Offscreen GWorld.h"
+#include "OffscreenGWorld.h"
 #include "Debug.h"
 #ifndef kSpriteHandling
-#include "Sprite Handling.h"
+#include "SpriteHandling.h"
 #endif
 #include "NatePixTable.h"
 #ifndef kNateDraw
 #include "NateDraw.h"
 #endif
-#include "Handle Handling.h"
+#include "HandleHandling.h"
 
 extern  WindowPtr       gTheWindow;
 extern  PixMapHandle    thePixMapHandle;

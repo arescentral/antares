@@ -42,8 +42,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Resources.h"
 
-#include "Version String.h"
-#include "String Handling.h"
+#include "VersionString.h"
+#include "StringHandling.h"
 
 void GetVersionString(StringPtr dest, short useResFile)
 {

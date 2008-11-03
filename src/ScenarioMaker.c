@@ -43,43 +43,43 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Resources.h"
 
 #ifndef kSpaceObject
-#include "Space Object Handling.h"
+#include "SpaceObjectHandling.h"
 #endif
-#include "Ares Global Type.h"
-#include "Planets Bases Stations.h"
-#include "Non-player Ship.h"
-#include "Player Ship.h"
-#include "Screen Label.h"
-#include "Scenario Maker.h"
+#include "AresGlobalType.h"
+#include "PlanetsBasesStations.h"
+#include "NonPlayerShip.h"
+#include "PlayerShip.h"
+#include "ScreenLabel.h"
+#include "ScenarioMaker.h"
 #include "Instruments.h"
-#include "Message Screen.h"
+#include "MessageScreen.h"
 #include "Admiral.h"
-#include "Universe Unit.h"
-#include "Scroll Stars.h"
-#include "Player Interface.h"
-#include "Math Macros.h"
+#include "UniverseUnit.h"
+#include "ScrollStars.h"
+#include "PlayerInterface.h"
+#include "MathMacros.h"
 #include "NatePixTable.h"
-#include "Handle Handling.h"
+#include "HandleHandling.h"
 #include "Options.h"
 #include "Beam.h"
 #include "Randomize.h"
 #include "Rotation.h"
-#include "Time Unit.h"
+#include "TimeUnit.h"
 #include "Motion.h"
 #include "Races.h"
 #include "Minicomputer.h"
-#include "Message Screen.h" // for checking which message we're lookg at
-#include "Color Translation.h"
+#include "MessageScreen.h" // for checking which message we're lookg at
+#include "ColorTranslation.h"
 
-#include "Ares NetworkSprocket.h"
+#include "AresNetworkSprocket.h"
 
-#include "Single Data File.h"
-#include "Ares_ResFile.h"
+#include "SingleDataFile.h"
+#include "AresResFile.h"
 
 #include "Error.h"
 #include "Debug.h"
 
-#include "Key Map Translation.h"        // major hack for testing
+#include "KeyMapTranslation.h"        // major hack for testing
 
 #define kScenarioError          "\pSCNR"
 

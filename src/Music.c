@@ -61,7 +61,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     Internet: rosset@dial.eunet.ch
 */
 /********************************************************/
-#include "Ares Global Type.h"
+#include "AresGlobalType.h"
 #include "MAD.h"
 #include "RDriver.h"
 #include "Sound.h"
@@ -73,7 +73,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Music.h"
 #include "Options.h"
 #ifndef kSoundFX
-#include "Sound FX.h"
+#include "SoundFX.h"
 #endif
 #define kTrackNumber    4
 

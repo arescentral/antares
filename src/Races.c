@@ -44,11 +44,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Resources.h"
 
-#include "Ares Global Type.h"
+#include "AresGlobalType.h"
 #include "Error.h"
 #include "Debug.h"
 
-#include "Handle Handling.h"
+#include "HandleHandling.h"
 
 #include "Races.h"
 

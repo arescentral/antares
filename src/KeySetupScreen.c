@@ -41,22 +41,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #pragma mark _this library includes_
 /* - this project
 *******************************************/
-#include "Interface Handling.h"
-#include "Ares Preferences.h"
-#include "Ares Global Type.h"
+#include "InterfaceHandling.h"
+#include "AresPreferences.h"
+#include "AresGlobalType.h"
 #include "Error.h"
-#include "Key Map Translation.h"
+#include "KeyMapTranslation.h"
 #include "Options.h"
-#include "Player Interface.h"
-#include "Sound FX.h"
-#include "Hide Menubar.h"
-#include "Ares Main.h"
-#include "Offscreen GWorld.h"
+#include "PlayerInterface.h"
+#include "SoundFX.h"
+#include "HideMenubar.h"
+#include "AresMain.h"
+#include "OffscreenGWorld.h"
 #include "Debug.h"
-#include "String Handling.h"
-#include "Color Translation.h"
+#include "StringHandling.h"
+#include "ColorTranslation.h"
 
-#include "Key_Setup_Screen.h"
+#include "KeySetupScreen.h"
 
 #pragma mark **DEFINITIONS**
 /******************************************\

@@ -17,7 +17,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-// Non-player ships
+// NonPlayer ships
 #ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
 #endif // __CONDITIONALMACROS__
@@ -48,45 +48,45 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "ToolUtils.h"
 
 
-#include "Ares Global Type.h"
+#include "AresGlobalType.h"
 
 #include "Error.h"
 #include "Debug.h"
 
 #include "Rotation.h"
-#include "Space Object Handling.h"
+#include "SpaceObjectHandling.h"
 #include "Randomize.h"
-#include "Universe Unit.h"
-#include "Ares Network.h"
-#include "Math Macros.h"
-#include "Message Screen.h"
-#include "Key Codes.h"
-#include "Screen Label.h"
-#include "Scenario Maker.h"
+#include "UniverseUnit.h"
+#include "AresNetwork.h"
+#include "MathMacros.h"
+#include "MessageScreen.h"
+#include "KeyCodes.h"
+#include "ScreenLabel.h"
+#include "ScenarioMaker.h"
 #include "Admiral.h"
-#include "Scroll Stars.h"   // for resetting the player ship
-#include "Universe Unit.h"
-#include "Time Unit.h"
+#include "ScrollStars.h"  // for resetting the player ship
+#include "UniverseUnit.h"
+#include "TimeUnit.h"
 
 // HACK FOR TESTING
 #include "Motion.h"
 // HACK FOR TESTING
-#include "Key Map Translation.h"
+#include "KeyMapTranslation.h"
 
 #ifndef kSoundFX
-#include "Sound FX.h"
+#include "SoundFX.h"
 #endif
 
 #include "Transitions.h"
 
-#include "Offscreen GWorld.h"       // a hack
-#include "Color Translation.h"      // a hack
+#include "OffscreenGWorld.h"      // a hack
+#include "ColorTranslation.h"     // a hack
 
-#include "Shots Beams Explosions.h"
+#include "ShotsBeamsExplosions.h"
 
-#include "Player Ship.h"
+#include "PlayerShip.h"
 
-#include "Non-player Ship.h"
+#include "NonPlayerShip.h"
 
 #define kDirectionError         5           // how picky in degrees we are about angle
 #define kShootAngle             15          // how picky we are about shooting in degrees

@@ -144,7 +144,7 @@ typedef enum
 } briefingPointKindType;
 
 #ifndef kSpaceObject
-#include "Space Object.h"
+#include "SpaceObject.h"
 #endif
 
 /*

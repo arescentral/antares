@@ -47,55 +47,55 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Resources.h"
 
 #include <QDOffscreen.h>
-#include "Ares Global Type.h"
+#include "AresGlobalType.h"
 
 #include "Debug.h"
 #include "Error.h"
 
-#include "Interface Handling.h"
+#include "InterfaceHandling.h"
 
-#include "String Handling.h"
-#include "String Numerics.h"
-#include "Key Map Translation.h"
-#include "Color Translation.h"
-#include "Offscreen GWorld.h"
-#include "Player Interface.h"
-#include "Ares Preferences.h"
-#include "Key Codes.h"
-#include "Scenario Maker.h"
+#include "StringHandling.h"
+#include "StringNumerics.h"
+#include "KeyMapTranslation.h"
+#include "ColorTranslation.h"
+#include "OffscreenGWorld.h"
+#include "PlayerInterface.h"
+#include "AresPreferences.h"
+#include "KeyCodes.h"
+#include "ScenarioMaker.h"
 #include "Instruments.h"
 #ifndef kSoundFX
-#include "Sound FX.h"               // for button on/off
+#include "SoundFX.h"               // for button on/off
 #endif
-#include "Ares Main.h"
-#include "Handle Handling.h"
-#include "Scroll Stars.h"
-#include "Ares NetworkSprocket.h"
+#include "AresMain.h"
+#include "HandleHandling.h"
+#include "ScrollStars.h"
+#include "AresNetworkSprocket.h"
 #include "NatePixTable.h"
-#include "Direct Text.h"
+#include "DirectText.h"
 #include "Options.h"
-//#include "Copy Protection.h"  // included in prefs
+//#include "CopyProtection.h"  // included in prefs
 #include "Transitions.h"
 #include "Music.h"
-#include "Hide Menubar.h"
-#include "GDevice Handling.h"
-#include "Message Screen.h"
-#include "Title Screen.h"           // for CenterRectInRect
+#include "HideMenubar.h"
+#include "GDeviceHandling.h"
+#include "MessageScreen.h"
+#include "TitleScreen.h"           // for CenterRectInRect
 #ifndef kAresNetwork
-#include "Ares Network.h"
+#include "AresNetwork.h"
 #endif
-#include "Ares Movie Player.h"
+#include "AresMoviePlayer.h"
 #include "Races.h"
-#include "Net Setup Screen.h"
-#include "Wrap_GameRanger.h"
-#include "Key_Setup_Screen.h"
-#include "Briefing_Renderer.h"
+#include "NetSetupScreen.h"
+#include "WrapGameRanger.h"
+#include "KeySetupScreen.h"
+#include "BriefingRenderer.h"
 #ifndef __REGISTRATION_TOOL__
-#include "Registration_Tool.h"
+#include "RegistrationTool.h"
 #endif
-#include "Ambrosia_Serial.h"
+#include "AmbrosiaSerial.h"
 
-#include "Ares_External_File.h"
+#include "AresExternalFile.h"
 
 #define kThisVersion    0x00000201  // last was 200; last was 104
 

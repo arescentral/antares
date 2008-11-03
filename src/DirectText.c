@@ -46,11 +46,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <QDOffscreen.h>
 #include "Debug.h"
 #include "Error.h"
-#include "Offscreen GWorld.h"
+#include "OffscreenGWorld.h"
 #include "Processor.h"
-#include "Handle Handling.h"
+#include "HandleHandling.h"
 
-#include "Direct Text.h"
+#include "DirectText.h"
 
 #define kDirectTextError    "\pTEXT"
 

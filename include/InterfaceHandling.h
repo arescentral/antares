@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // Interface Handling.h
 
 #ifndef kPlayerInterfaceItems
-#include "Player Interface Items.h"
+#include "PlayerInterfaceItems.h"
 #endif
 
 #ifndef kAnyChar

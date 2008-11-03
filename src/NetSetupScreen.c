@@ -44,39 +44,39 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <QDOffscreen.h>
 
-#include "Ares Global Type.h"
+#include "AresGlobalType.h"
 
 #include "Debug.h"
 #include "Error.h"
 
-#include "String Handling.h"
-#include "String Numerics.h"
-#include "Interface Handling.h"
-#include "Ares NetworkSprocket.h"
+#include "StringHandling.h"
+#include "StringNumerics.h"
+#include "InterfaceHandling.h"
+#include "AresNetworkSprocket.h"
 #include "Races.h"
-#include "Hide Menubar.h"
-#include "Handle Handling.h"
-#include "Scenario Maker.h"
-#include "Direct Text.h"
-#include "Player Interface.h"
+#include "HideMenubar.h"
+#include "HandleHandling.h"
+#include "ScenarioMaker.h"
+#include "DirectText.h"
+#include "PlayerInterface.h"
 #include "Options.h"
-#include "Color Translation.h"
-#include "Offscreen GWorld.h"
-#include "Title Screen.h" // for CenterRectInRect
-#include "Message Screen.h" // for retroText drawing
-#include "Single Data File.h" // to determine whether or not to allow changing of mission or race
+#include "ColorTranslation.h"
+#include "OffscreenGWorld.h"
+#include "TitleScreen.h" // for CenterRectInRect
+#include "MessageScreen.h" // for retroText drawing
+#include "SingleDataFile.h" // to determine whether or not to allow changing of mission or race
 #include "EZSprite.h"
-#include "icl8 to cicn.h"
+#include "Icl8ToCicn.h"
 #include "IconSuiteFromAlias.h"
-#include "Ares_ResFile.h"
-#include "Smart_File.h"
+#include "AresResFile.h"
+#include "SmartFile.h"
 
-#include "Ares Main.h"
+#include "AresMain.h"
 
-#include "Net Setup Screen.h"
+#include "NetSetupScreen.h"
 
-#include "Ambrosia_Serial.h"
-#include "Ares_External_File.h"
+#include "AmbrosiaSerial.h"
+#include "AresExternalFile.h"
 
 #define kHasCustomIcon      0x0400
 

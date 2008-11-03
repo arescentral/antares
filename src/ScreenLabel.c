@@ -43,19 +43,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Resources.h"
 
 #include <QDOffscreen.h>
-#include "Ares Global Type.h"
-#include "Screen Label.h"
-#include "Offscreen GWorld.h"
-#include "Direct Text.h"
-#include "String Handling.h"
-#include "Math Macros.h"
-#include "Color Translation.h"
-#include "Handle Handling.h"
+#include "AresGlobalType.h"
+#include "ScreenLabel.h"
+#include "OffscreenGWorld.h"
+#include "DirectText.h"
+#include "StringHandling.h"
+#include "MathMacros.h"
+#include "ColorTranslation.h"
+#include "HandleHandling.h"
 #include "Admiral.h"            // hack for checking strength
-//#include "Math Special.h"     // ""                 ""
+//#include "MathSpecial.h"      // ditto
 #include "Error.h"
 #include "Debug.h"
-#include "Sprite Cursor.h"  // for hint line
+#include "SpriteCursor.h"  // for hint line
 
 #define kScreenLabelError       "\pSCLB"
 #define kUseLabels

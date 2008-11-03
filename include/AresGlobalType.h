@@ -25,10 +25,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define kMaxPlayerNum               4 // kMaxScenarioPlayerNum in Scenario.h
 
 #ifndef kSoundFX
-#include "Sound FX.h"
+#include "SoundFX.h"
 #endif
 
-#include "Scenario_Data.h"
+#include "ScenarioData.h"
 
 #include "ICAPI.h"
 

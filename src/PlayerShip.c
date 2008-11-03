@@ -48,47 +48,47 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "GXMath.h"
 #include "ToolUtils.h"
 
-#include "Ares Global Type.h"
+#include "AresGlobalType.h"
 #include "Error.h"
 #include "Debug.h"
 
 #ifndef kSpaceObject
-#include "Space Object.h"
+#include "SpaceObject.h"
 #endif
 
-#include "Key Codes.h"
+#include "KeyCodes.h"
 #include "Rotation.h"
-#include "Ares Preferences.h"
-#include "Space Object Handling.h"
-#include "Message Screen.h"
+#include "AresPreferences.h"
+#include "SpaceObjectHandling.h"
+#include "MessageScreen.h"
 #include "Randomize.h"
-#include "Universe Unit.h"
-#include "Color Translation.h"
-#include "Screen Label.h"
-#include "Non-player Ship.h"
+#include "UniverseUnit.h"
+#include "ColorTranslation.h"
+#include "ScreenLabel.h"
+#include "NonPlayerShip.h"
 #include "Admiral.h"
-#include "String Handling.h"
-#include "Math Macros.h"
+#include "StringHandling.h"
+#include "MathMacros.h"
 
-#include "Scroll Stars.h"
-#include "Shots Beams Explosions.h"
+#include "ScrollStars.h"
+#include "ShotsBeamsExplosions.h"
 #include "Minicomputer.h"
 #include "Options.h"
-#include "Scenario Maker.h"
-#include "Direct Text.h"
+#include "ScenarioMaker.h"
+#include "DirectText.h"
 
-#include "Key Map Translation.h"        // major hack for testing
+#include "KeyMapTranslation.h"        // major hack for testing
 
-#include "Ares NetworkSprocket.h"
-#include "Ares Cheat.h"
+#include "AresNetworkSprocket.h"
+#include "AresCheat.h"
 
 #ifndef kSoundFX
-#include "Sound FX.h"
+#include "SoundFX.h"
 #endif
 
 
 
-#include "Player Ship.h"
+#include "PlayerShip.h"
 
 #define kSendMessageVOffset     20
 

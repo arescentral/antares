@@ -42,7 +42,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #pragma mark _this library includes_
 /* - this project
 *******************************************/
-#include "Wrap_GameRanger.h"
+#include "WrapGameRanger.h"
 #include "NetSprocketGlue.h"
 
 #pragma mark **DEFINITIONS**

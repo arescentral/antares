@@ -46,8 +46,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Error.h"
 #include <Palettes.h>
-#include "Dialog Font.h"
-#include "Set Font By String.h"
+#include "DialogFont.h"
+#include "SetFontByString.h"
 
 #define ERROR_STR_ID    800
 #define ERROR_ALERT_ID  800

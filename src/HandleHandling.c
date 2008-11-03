@@ -52,20 +52,20 @@ If you need to allocate a handle and keep it locked all the time, do it through 
 
 #include <QDOffscreen.h>
 
-#include "Direct Text.h"
-#include "String Handling.h"
+#include "DirectText.h"
+#include "StringHandling.h"
 
 #ifndef kSoundFX
-#include "Sound FX.h"
+#include "SoundFX.h"
 #endif
 
 #ifndef kSpriteHandling
-#include "Sprite Handling.h"
+#include "SpriteHandling.h"
 #endif
 
-#include "Screen Label.h"
+#include "ScreenLabel.h"
 
-#include "Handle Handling.h"
+#include "HandleHandling.h"
 
 #include "Error.h"
 #include "Debug.h"

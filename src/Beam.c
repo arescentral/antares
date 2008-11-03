@@ -42,23 +42,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #endif // TARGET_OS_WIN32
 
 #include <QDOffscreen.h>
-#include "Ares Global Type.h"
+#include "AresGlobalType.h"
 #include "Error.h"
 #include "Debug.h"
-#include "Math Macros.h"
+#include "MathMacros.h"
 #include "Rotation.h"
 
-#include "Handle Handling.h"
+#include "HandleHandling.h"
 #include "Options.h"
 
 #ifndef kNateDraw
 #include "NateDraw.h"
 #endif
-#include "Color Translation.h"
+#include "ColorTranslation.h"
 #include "Randomize.h"
 
 #include "Beam.h"
-#include "Universe Unit.h"
+#include "UniverseUnit.h"
 
 #define kBeamError      "\pBEAM"
 

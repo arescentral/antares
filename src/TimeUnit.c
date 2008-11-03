@@ -46,12 +46,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "GXMath.h"
 #include "ToolUtils.h"
 
-#include "Ares Global Type.h"
+#include "AresGlobalType.h"
 #include <Timer.h>
 
-#include "Time Unit.h"
+#include "TimeUnit.h"
 #ifndef kMathSpecial
-#include "Math Special.h"
+#include "MathSpecial.h"
 #endif
 
 extern aresGlobalType   *gAresGlobal;

@@ -45,9 +45,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Sound.h"
 
 #include "Error.h"
-#include "GDevice Handling.h"
+#include "GDeviceHandling.h"
 #include "Debug.h"
-#include "Player Interface.h"
+#include "PlayerInterface.h"
 
 #define kMaxDevice  4
 

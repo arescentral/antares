@@ -41,10 +41,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     #include <string.h>
 #endif // TARGET_OS_WIN32
 
-#include "Ares Global Type.h"
+#include "AresGlobalType.h"
 #include <Palettes.h>
-#include "Ares Movie Player.h"
-#include "Key Map Translation.h"
+#include "AresMoviePlayer.h"
+#include "KeyMapTranslation.h"
 #include "Debug.h"
 #include "Randomize.h"
 #include "Options.h"

@@ -59,7 +59,7 @@ I check against the resource files refNum just to make sure I'm not accidentally
 delving into the System.
 */
 
-#include "icl8 to cicn.h"
+#include "Icl8ToCicn.h"
 
 Boolean Ploticl8ToCICN( short resID, short resRefNum, Rect *destRect,
     Handle icl8Handle, Handle ICNnHandle)

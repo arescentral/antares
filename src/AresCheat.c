@@ -43,16 +43,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Debug.h"
 
-#include "Ares NetworkSprocket.h"
-#include "Ares Global Type.h"
-#include "Handle Handling.h"
-#include "Message Screen.h"
+#include "AresNetworkSprocket.h"
+#include "AresGlobalType.h"
+#include "HandleHandling.h"
+#include "MessageScreen.h"
 #include "Admiral.h"
-#include "String Handling.h"
-#include "String Numerics.h"
+#include "StringHandling.h"
+#include "StringNumerics.h"
 #include "strlist.h"
-#include "Player Ship.h"
-#include "Ares Cheat.h"
+#include "PlayerShip.h"
+#include "AresCheat.h"
 
 #define kCheatStringListID      750
 #define kCheatFeedbackOnID      751

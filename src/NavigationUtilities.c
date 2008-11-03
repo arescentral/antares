@@ -38,16 +38,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #pragma mark _bp libraries includes_
 /* - bp libraries
 *******************************************/
-//#include "Window Dispatch.h"
+//#include "WindowDispatch.h"
 #include "str_bp.h"
 
 #pragma mark _this library includes_
 /* - this project
 *******************************************/
-#include "Ares Global Type.h"
-#include "Offscreen GWorld.h"
+#include "AresGlobalType.h"
+#include "OffscreenGWorld.h"
 
-#include "Navigation_Utilities.h"
+#include "NavigationUtilities.h"
 
 #pragma mark **DEFINITIONS**
 /******************************************\

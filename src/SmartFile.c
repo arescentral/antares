@@ -44,10 +44,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /* - this project
 *******************************************/
 
-#include "Old_File.h"
-#include "Navigation_Utilities.h"
+#include "OldFile.h"
+#include "NavigationUtilities.h"
 
-#include "Smart_File.h"
+#include "SmartFile.h"
 
 #pragma mark **DEFINITIONS**
 /******************************************\

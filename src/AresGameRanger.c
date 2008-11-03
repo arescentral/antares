@@ -33,7 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #pragma mark _third party includes_
 /* - third party libraries
 *******************************************/
-#include "Wrap_GameRanger.h"
+#include "WrapGameRanger.h"
 
 #pragma mark _bp libraries includes_
 /* - bp libraries
@@ -42,10 +42,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #pragma mark _this library includes_
 /* - this project
 *******************************************/
-#include "Ares Global Type.h"
+#include "AresGlobalType.h"
 #include "Processor.h"
 
-#include "Ares_GameRanger.h"
+#include "AresGameRanger.h"
 
 #pragma mark **DEFINITIONS**
 /******************************************\

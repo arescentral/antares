@@ -50,24 +50,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Error.h"
 #include "Debug.h"
-#include "Ares Global Type.h"
+#include "AresGlobalType.h"
 
-#include "Offscreen GWorld.h"
+#include "OffscreenGWorld.h"
 
 #ifndef kSpriteHandling
-#include "Sprite Handling.h"
+#include "SpriteHandling.h"
 #endif
 #include "NatePixTable.h"
 #ifndef kSpaceObject
-#include "Space Object Handling.h"
+#include "SpaceObjectHandling.h"
 #endif
 #include "Races.h"
 #include "AnyChar.h"
 
-#include "Ares Guide Maker.h"
+#include "AresGuideMaker.h"
 
-#include "String Numerics.h"
-#include "String Handling.h"
+#include "StringNumerics.h"
+#include "StringHandling.h"
 
 #include "LoadClip2Gif.h"
 

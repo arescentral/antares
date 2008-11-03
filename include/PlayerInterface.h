@@ -20,13 +20,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // Player Interface.h
 
 #ifndef kAresNetwork
-#include "Ares Network.h"
+#include "AresNetwork.h"
 #endif
 #ifndef kPlayerInterfaceItems
-#include "Player Interface Items.h"
+#include "PlayerInterfaceItems.h"
 #endif
 #ifndef kPlayerInterfaceDrawing
-#include "Player Interface Drawing.h"
+#include "PlayerInterfaceDrawing.h"
 #endif
 
 #pragma options align=mac68k

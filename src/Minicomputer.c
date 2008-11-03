@@ -44,42 +44,42 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Resources.h"
 
-#include "Ares Global Type.h"
+#include "AresGlobalType.h"
 #include <QDOffscreen.h>
 
 #include "Error.h"
 #include "Debug.h"
 
 #ifndef kSpriteHandling
-#include "Sprite Handling.h"
+#include "SpriteHandling.h"
 #endif
 #include "NatePixTable.h"
 
-#include "Offscreen GWorld.h"
-#include "Key Codes.h"
-#include "Key Map Translation.h"
+#include "OffscreenGWorld.h"
+#include "KeyCodes.h"
+#include "KeyMapTranslation.h"
 
 #include "AnyChar.h"
-#include "Direct Text.h"
-#include "Color Translation.h"
+#include "DirectText.h"
+#include "ColorTranslation.h"
 #ifndef kSoundFX
-#include "Sound FX.h"
+#include "SoundFX.h"
 #endif
-#include "Handle Handling.h"
+#include "HandleHandling.h"
 
-#include "Space Object Handling.h"
+#include "SpaceObjectHandling.h"
 #include "Admiral.h"
-#include "Scenario Maker.h"
-#include "Message Screen.h"
-#include "Scroll Stars.h"
+#include "ScenarioMaker.h"
+#include "MessageScreen.h"
+#include "ScrollStars.h"
 #include "Instruments.h"
-#include "Player Ship.h"
-#include "Ares NetworkSprocket.h"
+#include "PlayerShip.h"
+#include "AresNetworkSprocket.h"
 #include "Options.h"
 
-#include "String Numerics.h"
+#include "StringNumerics.h"
 #include "strlist.h"
-#include "String Handling.h"
+#include "StringHandling.h"
 
 #include "Minicomputer.h"
 

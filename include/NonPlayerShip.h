@@ -17,14 +17,14 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-// Non-player Ship.h
+// NonPlayer Ship.h
 
 #ifndef kSpaceObject
-#include "Space Object.h"
+#include "SpaceObject.h"
 #endif
 
 #ifndef kNateDraw
-#include "Nate Draw.h"
+#include "NateDraw.h"
 #endif
 
 #pragma options align=mac68k

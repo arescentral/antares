@@ -42,9 +42,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     #include <string.h>
 #endif // TARGET_OS_WIN32
 
-#include "String Numerics.h"
-#include "String Handling.h"
-#include "Set Font By String.h"
+#include "StringNumerics.h"
+#include "StringHandling.h"
+#include "SetFontByString.h"
 #include "Error.h"
 
 #include "Debug.h"

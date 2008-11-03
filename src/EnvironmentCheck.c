@@ -52,12 +52,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Resources.h"
 
-#include "Ares Global Type.h"
-#include "Environment Check.h"
+#include "AresGlobalType.h"
+#include "EnvironmentCheck.h"
 #include <Sound.h>
 #include "Processor.h"
 #include "Options.h"
-#include "Key Map Translation.h"
+#include "KeyMapTranslation.h"
 
 #define kEnvironmentErrorAlert      801
 #define kEnvironmentWarningAlert    802
