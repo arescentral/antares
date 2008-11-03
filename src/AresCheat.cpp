@@ -18,18 +18,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 // Ares Cheat
+
+#include "AresCheat.h"
+
+#include "Admiral.h"
+#include "AresGlobalType.h"
+#include "AresNetworkSprocket.h"
 #include "ConditionalMacros.h"
 #include "Debug.h"
-#include "AresNetworkSprocket.h"
-#include "AresGlobalType.h"
 #include "HandleHandling.h"
 #include "MessageScreen.h"
-#include "Admiral.h"
+#include "PlayerShip.h"
 #include "StringHandling.h"
 #include "StringNumerics.h"
 #include "strlist.h"
-#include "PlayerShip.h"
-#include "AresCheat.h"
 
 #define kCheatStringListID      750
 #define kCheatFeedbackOnID      751

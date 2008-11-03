@@ -21,48 +21,51 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /* Tells Interface Handling what to do, and actually does the work.
 */
-#include "ConditionalMacros.h"
-#include "Resources.h"
-#include <QDOffscreen.h>
-#include "AresGlobalType.h"
-#include "Debug.h"
-#include "Error.h"
-#include "InterfaceHandling.h"
-#include "StringHandling.h"
-#include "StringNumerics.h"
-#include "KeyMapTranslation.h"
-#include "ColorTranslation.h"
-#include "OffscreenGWorld.h"
+
 #include "PlayerInterface.h"
-#include "AresPreferences.h"
-#include "KeyCodes.h"
-#include "ScenarioMaker.h"
-#include "Instruments.h"
-#include "SoundFX.h"               // for button on/off
-#include "AresMain.h"
-#include "HandleHandling.h"
-#include "ScrollStars.h"
-#include "AresNetworkSprocket.h"
-#include "NatePixTable.h"
-#include "DirectText.h"
-#include "Options.h"
-//#include "CopyProtection.h"  // included in prefs
-#include "Transitions.h"
-#include "Music.h"
-#include "HideMenubar.h"
-#include "GDeviceHandling.h"
-#include "MessageScreen.h"
-#include "TitleScreen.h"           // for CenterRectInRect
-#include "AresNetwork.h"
-#include "AresMoviePlayer.h"
-#include "Races.h"
-#include "NetSetupScreen.h"
-#include "WrapGameRanger.h"
-#include "KeySetupScreen.h"
-#include "BriefingRenderer.h"
-#include "RegistrationTool.h"
+
+#include <QDOffscreen.h>
+
 #include "AmbrosiaSerial.h"
 #include "AresExternalFile.h"
+#include "AresGlobalType.h"
+#include "AresMain.h"
+#include "AresMoviePlayer.h"
+#include "AresNetwork.h"
+#include "AresNetworkSprocket.h"
+#include "AresPreferences.h"
+#include "BriefingRenderer.h"
+#include "ColorTranslation.h"
+#include "ConditionalMacros.h"
+//#include "CopyProtection.h"  // included in prefs
+#include "Debug.h"
+#include "DirectText.h"
+#include "Error.h"
+#include "GDeviceHandling.h"
+#include "HandleHandling.h"
+#include "HideMenubar.h"
+#include "Instruments.h"
+#include "InterfaceHandling.h"
+#include "KeyCodes.h"
+#include "KeyMapTranslation.h"
+#include "KeySetupScreen.h"
+#include "MessageScreen.h"
+#include "Music.h"
+#include "NatePixTable.h"
+#include "NetSetupScreen.h"
+#include "OffscreenGWorld.h"
+#include "Options.h"
+#include "Races.h"
+#include "RegistrationTool.h"
+#include "Resources.h"
+#include "ScenarioMaker.h"
+#include "ScrollStars.h"
+#include "SoundFX.h"               // for button on/off
+#include "StringHandling.h"
+#include "StringNumerics.h"
+#include "TitleScreen.h"           // for CenterRectInRect
+#include "Transitions.h"
+#include "WrapGameRanger.h"
 
 #define kThisVersion    0x00000201  // last was 200; last was 104
 

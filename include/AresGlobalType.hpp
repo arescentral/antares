@@ -22,14 +22,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // Ares Global Type.h
 
+#include "ICAPI.h"
+#include "ScenarioData.h"
+#include "SoundFX.h"
+
 #pragma options align=mac68k
 
 #define kDefaultOptions             (kOptionScreenSmall | kOptionBlackground | kOptionMusicIdle)
 #define kMaxPlayerNum               4 // kMaxScenarioPlayerNum in Scenario.h
-
-#include "SoundFX.h"
-#include "ScenarioData.h"
-#include "ICAPI.h"
 
 #define kKeyControlNum          19
 #define kKeyExtendedControlNum  44//44//34

@@ -17,15 +17,17 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "ConditionalMacros.h"
-#include "Resources.h"
-//#include <math routines.h>
-#include "GXMath.h"
-#include "ToolUtils.h"
-#include "AresGlobalType.h"
-#include <Timer.h>
 #include "TimeUnit.h"
+
+//#include <math routines.h>
+#include <Timer.h>
+
+#include "AresGlobalType.h"
+#include "ConditionalMacros.h"
+#include "GXMath.h"
 #include "MathSpecial.h"
+#include "Resources.h"
+#include "ToolUtils.h"
 
 extern aresGlobalType   *gAresGlobal;
 //long          gAresGlobal->gGameTime = 0, gAresGlobal->gGameStartTime = 0;

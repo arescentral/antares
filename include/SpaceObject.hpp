@@ -22,11 +22,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // Space Object.h
 
-#include "NateDraw.h"
-#include "SpriteHandling.h"
 #include "MathSpecial.h"
-#include "SoundFX.h"
+#include "NateDraw.h"
 #include "Scenario.h"
+#include "SoundFX.h"
+#include "SpriteHandling.h"
 
 #pragma options align=mac68k
 

@@ -18,13 +18,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 /* Graphics Device Interface */
-#include "ConditionalMacros.h"
-#include <Palettes.h>
-#include "Sound.h"
-#include "Error.h"
+
 #include "GDeviceHandling.h"
+
+#include <Palettes.h>
+
+#include "ConditionalMacros.h"
 #include "Debug.h"
+#include "Error.h"
 #include "PlayerInterface.h"
+#include "Sound.h"
 
 #define kMaxDevice  4
 

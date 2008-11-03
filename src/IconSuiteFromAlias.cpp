@@ -21,31 +21,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 |**| IconSuiteFromAlias.c
 \******************************************/
 
-#pragma mark **INCLUDES**
-/******************************************\
-|**| #includes
-\******************************************/
-
-#pragma mark _system includes_
-/* - system
-*******************************************/
+#include "IconSuiteFromAlias.h"
 
 #include <AEPackObject.h>
 
-#pragma mark _third party includes_
-/* - third party libraries
-*******************************************/
-
-#pragma mark _bp libraries includes_
-/* - bp libraries
-*******************************************/
 //#include "BP_Error.h"
-
-#pragma mark _this library includes_
-/* - this project
-*******************************************/
-
-#include "IconSuiteFromAlias.h"
 
 #pragma mark **DEFINITIONS**
 /******************************************\

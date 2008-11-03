@@ -21,22 +21,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 //#define pGenerateImages
 
-#include "ConditionalMacros.h"
-#include "Resources.h"
-#include <QDOffscreen.h>
-#include "Error.h"
-#include "Debug.h"
-#include "AresGlobalType.h"
-#include "OffscreenGWorld.h"
-#include "SpriteHandling.h"
-#include "NatePixTable.h"
-#include "SpaceObjectHandling.h"
-#include "Races.h"
-#include "AnyChar.h"
 #include "AresGuideMaker.h"
-#include "StringNumerics.h"
-#include "StringHandling.h"
+
+#include <QDOffscreen.h>
+
+#include "AnyChar.h"
+#include "AresGlobalType.h"
+#include "ConditionalMacros.h"
+#include "Debug.h"
+#include "Error.h"
 #include "LoadClip2Gif.h"
+#include "NatePixTable.h"
+#include "OffscreenGWorld.h"
+#include "Races.h"
+#include "Resources.h"
+#include "SpaceObjectHandling.h"
+#include "SpriteHandling.h"
+#include "StringHandling.h"
+#include "StringNumerics.h"
 
 #define kSpriteBoundsWidth  128
 #define kSpriteBoundsHeight 128

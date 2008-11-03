@@ -18,15 +18,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 /* Offscreen Graphics: new & clean, using GWorlds etc */
-#include "ConditionalMacros.h"
+
+#include "OffscreenGWorld.h"
+
 #include <QDOffscreen.h>
 #include <Palettes.h>
+
 #include "AresGlobalType.h"
-#include "Options.h"
+#include "ConditionalMacros.h"
+#include "Debug.h"
 #include "Error.h"
 #include "GDeviceHandling.h"
-#include "Debug.h"
-#include "OffscreenGWorld.h"
+#include "Options.h"
 
 //#define   kByteLevelTesting
 

@@ -19,21 +19,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // Scroll Stars.c *** also includes drawing for BEAMS, since they involve direct-screen lines
 
-#include "ConditionalMacros.h"
-#include "Resources.h"
+#include "ScrollStars.h"
+
+#include <QDOffscreen.h>
+
 #include "AresGlobalType.h"
-#include "Error.h"
+#include "ColorTranslation.h"
+#include "ConditionalMacros.h"
 #include "Debug.h"
+#include "Error.h"
+#include "HandleHandling.h"
+#include "MathMacros.h"
 #include "Motion.h"
 #include "NateDraw.h"
-#include "MathMacros.h"
-#include "SpaceObject.h"
-#include <QDOffscreen.h>
 #include "OffscreenGWorld.h"
-#include "ColorTranslation.h"
+#include "SpaceObject.h"
 #include "Randomize.h"
-#include "HandleHandling.h"
-#include "ScrollStars.h"
+#include "Resources.h"
 
 #ifdef powerc
 #define kScrollStarNum          125

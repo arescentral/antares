@@ -17,17 +17,19 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "ConditionalMacros.h"
-#include "Resources.h"
 #include "EZSprite.h"
+
 #include <QDOffscreen.h>
-#include "Error.h"
-#include "OffscreenGWorld.h"
+
+#include "ConditionalMacros.h"
 #include "Debug.h"
-#include "SpriteHandling.h"
-#include "NatePixTable.h"
-#include "NateDraw.h"
+#include "Error.h"
 #include "HandleHandling.h"
+#include "NateDraw.h"
+#include "NatePixTable.h"
+#include "OffscreenGWorld.h"
+#include "Resources.h"
+#include "SpriteHandling.h"
 
 extern  WindowPtr       gTheWindow;
 extern  PixMapHandle    thePixMapHandle;

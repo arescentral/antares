@@ -21,29 +21,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 |**| Wrap_GameRanger.c
 \******************************************/
 
-#pragma mark **INCLUDES**
-/******************************************\
-|**| #includes
-\******************************************/
-
-#pragma mark _system includes_
-/* - system
-*******************************************/
-
-#pragma mark _third party includes_
-/* - third party libraries
-*******************************************/
-#include "GameRanger.h"
-
-#pragma mark _bp libraries includes_
-/* - bp libraries
-*******************************************/
-
-#pragma mark _this library includes_
-/* - this project
-*******************************************/
 #include "WrapGameRanger.h"
+
 #include "Debug.h"
+#include "GameRanger.h"
 
 #pragma mark **DEFINITIONS**
 /******************************************\

@@ -21,38 +21,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 |**| Briefing_Renderer.c
 \******************************************/
 
-#pragma mark **INCLUDES**
-/******************************************\
-|**| #includes
-\******************************************/
-
-#pragma mark _system includes_
-/* - system
-*******************************************/
-
-#pragma mark _third party includes_
-/* - third party libraries
-*******************************************/
-
-#pragma mark _bp libraries includes_
-/* - bp libraries
-*******************************************/
-
-#pragma mark _this library includes_
-/* - this project
-*******************************************/
-
-#include "NateDraw.h"
-#include "SpriteHandling.h"
-#include "Scenario.h"
-#include "AresGlobalType.h"
-#include "ScenarioMaker.h"
-#include "ColorTranslation.h"
-#include "Admiral.h"
-#include "Error.h"
-#include "NatePixTable.h"
-#include "Debug.h"
 #include "BriefingRenderer.h"
+
+#include "Admiral.h"
+#include "AresGlobalType.h"
+#include "ColorTranslation.h"
+#include "Debug.h"
+#include "Error.h"
+#include "NateDraw.h"
+#include "NatePixTable.h"
+#include "Scenario.h"
+#include "ScenarioMaker.h"
+#include "SpriteHandling.h"
 
 #pragma mark **DEFINITIONS**
 /******************************************\

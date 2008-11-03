@@ -22,24 +22,27 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /*  Liaison between the application and Interface Drawing.  Takes in events ( key events, mouse
     down events), hilights and scrolls as needed, and returns results.  Also handles editable text.
 */
-#include "ConditionalMacros.h"
-#include "Resources.h"
-#include "MixedMode.h"
-#include <QDOffscreen.h>
-#include "Error.h"
-#include "Debug.h"
-#include "SetFontByString.h"
-#include "KeyMapTranslation.h"
-#include "PlayerInterfaceItems.h"
-#include "PlayerInterfaceDrawing.h"
-#include "HandleHandling.h"
-#include "AnyChar.h"
-#include "ColorTranslation.h"
-#include "SoundFX.h"              // for button on/off
+
 #include "InterfaceHandling.h"
-#include "OffscreenGWorld.h"
+
+#include <QDOffscreen.h>
+
+#include "AnyChar.h"
 #include "AresResFile.h"
 #include "AresGlobalType.h"
+#include "ColorTranslation.h"
+#include "ConditionalMacros.h"
+#include "Debug.h"
+#include "Error.h"
+#include "HandleHandling.h"
+#include "KeyMapTranslation.h"
+#include "MixedMode.h"
+#include "OffscreenGWorld.h"
+#include "PlayerInterfaceDrawing.h"
+#include "PlayerInterfaceItems.h"
+#include "Resources.h"
+#include "SetFontByString.h"
+#include "SoundFX.h"              // for button on/off
 
 #define kMakeInterfaceItem      20
 

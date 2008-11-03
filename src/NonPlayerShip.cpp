@@ -18,43 +18,39 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 // NonPlayer ships
-#include "ConditionalMacros.h"
-#include "Resources.h"
+
+#include "NonPlayerShip.h"
+
 //#include <math routines.h>
-#include "GXMath.h"
-#include "ToolUtils.h"
+
+#include "Admiral.h"
 #include "AresGlobalType.h"
-#include "Error.h"
-#include "Debug.h"
-#include "Rotation.h"
-#include "SpaceObjectHandling.h"
-#include "Randomize.h"
-#include "UniverseUnit.h"
 #include "AresNetwork.h"
+#include "ColorTranslation.h"     // a hack
+#include "ConditionalMacros.h"
+#include "Debug.h"
+#include "Error.h"
+#include "GXMath.h"
+#include "KeyCodes.h"
+#include "KeyMapTranslation.h"  // HACK FOR TESTING
 #include "MathMacros.h"
 #include "MessageScreen.h"
-#include "KeyCodes.h"
-#include "ScreenLabel.h"
-#include "ScenarioMaker.h"
-#include "Admiral.h"
-#include "ScrollStars.h"  // for resetting the player ship
-#include "UniverseUnit.h"
-#include "TimeUnit.h"
-
-// HACK FOR TESTING
-#include "Motion.h"
-// HACK FOR TESTING
-#include "KeyMapTranslation.h"
-
-#include "SoundFX.h"
-#include "Transitions.h"
-
+#include "Motion.h"  // HACK FOR TESTING
 #include "OffscreenGWorld.h"      // a hack
-#include "ColorTranslation.h"     // a hack
-
-#include "ShotsBeamsExplosions.h"
 #include "PlayerShip.h"
-#include "NonPlayerShip.h"
+#include "Randomize.h"
+#include "Resources.h"
+#include "Rotation.h"
+#include "ScenarioMaker.h"
+#include "ScreenLabel.h"
+#include "ScrollStars.h"  // for resetting the player ship
+#include "ShotsBeamsExplosions.h"
+#include "SoundFX.h"
+#include "SpaceObjectHandling.h"
+#include "TimeUnit.h"
+#include "ToolUtils.h"
+#include "Transitions.h"
+#include "UniverseUnit.h"
 
 #define kDirectionError         5           // how picky in degrees we are about angle
 #define kShootAngle             15          // how picky we are about shooting in degrees

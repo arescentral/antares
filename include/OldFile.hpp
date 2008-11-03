@@ -24,27 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 |**| Old_File.h
 \******************************************/
 
-#pragma mark **INCLUDES**
-/******************************************\
-|**| #includes
-\******************************************/
-
-#pragma mark _system includes_
-/* - system
-*******************************************/
-
-#pragma mark _third party includes_
-/* - third party libraries
-*******************************************/
-
-#pragma mark _bp libraries includes_
-/* - bp libraries
-*******************************************/
-
-#pragma mark _this library includes_
-/* - this project
-*******************************************/
-
 #pragma mark **DEFINITIONS**
 /******************************************\
 |**| #defines

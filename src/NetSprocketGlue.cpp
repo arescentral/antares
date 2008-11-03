@@ -20,8 +20,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // NetSprocketGlue.h
 
 #include "NetSprocketGlue.h"
-#include "Processor.h"
+
 #include "GameRanger.h"
+#include "Processor.h"
 
 #ifndef powerc
 #pragma mpwc on

@@ -22,8 +22,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /* PROCESSOR.H */
 
-//#define   POWER_PC            FALSE
 #include "ConditionalMacros.h"
+
+//#define   POWER_PC            FALSE
 
 #ifndef kMyProcessor
 #define kMyProcessor

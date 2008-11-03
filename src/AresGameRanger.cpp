@@ -21,32 +21,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 |**| Ares_GameRanger.c
 \******************************************/
 
-#pragma mark **INCLUDES**
-/******************************************\
-|**| #includes
-\******************************************/
-
-#pragma mark _system includes_
-/* - system
-*******************************************/
-
-#pragma mark _third party includes_
-/* - third party libraries
-*******************************************/
-
-#include "WrapGameRanger.h"
-
-#pragma mark _bp libraries includes_
-/* - bp libraries
-*******************************************/
-
-#pragma mark _this library includes_
-/* - this project
-*******************************************/
+#include "AresGameRanger.h"
 
 #include "AresGlobalType.h"
 #include "Processor.h"
-#include "AresGameRanger.h"
+#include "WrapGameRanger.h"
 
 #pragma mark **DEFINITIONS**
 /******************************************\

@@ -20,11 +20,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef ANTARES_SINGLE_DATA_FILE_HPP_
 #define ANTARES_SINGLE_DATA_FILE_HPP_
 
+#include "AresDemoScanner.h"
+
 /* Set this to true if you want to only use one data file for sound, sprites,
 & scenarios. Used in Sound FX.c, Scenario Maker.c, and Sprite Handling.c.
 */
-
-#include "AresDemoScanner.h"
 
 #ifndef kCreateAresDemoData
 //#define   kUseSingleDemoFile

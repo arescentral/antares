@@ -19,11 +19,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /* Error Handling */
 
-#include "ConditionalMacros.h"
-#include "Resources.h"
 #include "Error.h"
+
 #include <Palettes.h>
+
+#include "ConditionalMacros.h"
 #include "DialogFont.h"
+#include "Resources.h"
 #include "SetFontByString.h"
 
 #define ERROR_STR_ID    800

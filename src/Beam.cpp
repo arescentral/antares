@@ -18,19 +18,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 // Beam.c
-#include "ConditionalMacros.h"
-#include <QDOffscreen.h>
-#include "AresGlobalType.h"
-#include "Error.h"
-#include "Debug.h"
-#include "MathMacros.h"
-#include "Rotation.h"
-#include "HandleHandling.h"
-#include "Options.h"
-#include "NateDraw.h"
-#include "ColorTranslation.h"
-#include "Randomize.h"
+
 #include "Beam.h"
+
+#include <QDOffscreen.h>
+
+#include "AresGlobalType.h"
+#include "ColorTranslation.h"
+#include "ConditionalMacros.h"
+#include "Debug.h"
+#include "Error.h"
+#include "HandleHandling.h"
+#include "MathMacros.h"
+#include "NateDraw.h"
+#include "Options.h"
+#include "Randomize.h"
+#include "Rotation.h"
 #include "UniverseUnit.h"
 
 #define kBeamError      "\pBEAM"

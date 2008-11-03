@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ANTARES_EZSPRITE_HPP_
 
 // EZSprite.h
+
 #include "SpriteHandling.h"
 
 void EZDrawSpriteOffByID( short, long, long, unsigned char, Rect *);

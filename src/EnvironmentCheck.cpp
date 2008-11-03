@@ -27,14 +27,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     Shows sample usage of the Witch Doctor.
 */
 
-#include "ConditionalMacros.h"
-#include "Resources.h"
-#include "AresGlobalType.h"
 #include "EnvironmentCheck.h"
+
 #include <Sound.h>
-#include "Processor.h"
-#include "Options.h"
+
+#include "AresGlobalType.h"
+#include "ConditionalMacros.h"
 #include "KeyMapTranslation.h"
+#include "Options.h"
+#include "Processor.h"
+#include "Resources.h"
 
 #define kEnvironmentErrorAlert      801
 #define kEnvironmentWarningAlert    802

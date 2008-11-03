@@ -18,34 +18,36 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 // Motion.c
-#include "ConditionalMacros.h"
-#include "Resources.h"
+
+#include "Motion.h"
+
 //#include <math routines.h>
-#include "GXMath.h"
-#include "ToolUtils.h"
-#include "AresGlobalType.h"
 #include <QDOffscreen.h>
 #include <Timer.h>
-#include "Processor.h"
-#include "SpaceObject.h"
-#include "SpaceObjectHandling.h"
-#include "Rotation.h"
-#include "OffscreenGWorld.h"
-#include "NatePixTable.h"
-#include "MathMacros.h"
+
+#include "AresGlobalType.h"
+#include "AresNetwork.h"
+#include "ConditionalMacros.h"
 #include "Debug.h"
 #include "Error.h"
-#include "Randomize.h"
-#include "PlayerShip.h"
-#include "ScreenLabel.h"
-#include "AresNetwork.h"
-#include "MathMacros.h"
+#include "GXMath.h"
 #include "HandleHandling.h"
-#include "UniverseUnit.h"
-#include "SoundFX.h"
+#include "MathMacros.h"
+#include "NatePixTable.h"
 #include "NonPlayerShip.h"
+#include "OffscreenGWorld.h"
+#include "PlayerShip.h"
+#include "Processor.h"
+#include "Randomize.h"
+#include "Resources.h"
+#include "Rotation.h"
+#include "ScreenLabel.h"
+#include "SoundFX.h"
+#include "SpaceObject.h"
+#include "SpaceObjectHandling.h"
 #include "SpriteHandling.h"
-#include "Motion.h"
+#include "ToolUtils.h"
+#include "UniverseUnit.h"
 
 #define kCenterScaleSize    983040L//61440L         // = 240 * SCALE_SCALE
 #define kMotionError        "\pMOTN"

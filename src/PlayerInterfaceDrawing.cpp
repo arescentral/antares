@@ -18,18 +18,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 // Ares Controls.c
-#include "ConditionalMacros.h"
-#include "Resources.h"
-#include "Debug.h"
-#include "Error.h"
-#include "PlayerInterfaceItems.h"
+
 #include "PlayerInterfaceDrawing.h"
-#include "ColorTranslation.h"
-#include "KeyMapTranslation.h"
-#include "HandleHandling.h"
-#include "DirectText.h"
-#include "NateDraw.h"
+
 #include "AnyChar.h"
+#include "ColorTranslation.h"
+#include "ConditionalMacros.h"
+#include "Debug.h"
+#include "DirectText.h"
+#include "Error.h"
+#include "HandleHandling.h"
+#include "KeyMapTranslation.h"
+#include "NateDraw.h"
+#include "PlayerInterfaceItems.h"
+#include "Resources.h"
 
 #define kInterfaceLargeHBorder      13
 #define kInterfaceSmallHBorder      3

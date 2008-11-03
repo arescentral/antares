@@ -19,13 +19,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // Races.c
 
-#include "ConditionalMacros.h"
-#include "Resources.h"
-#include "AresGlobalType.h"
-#include "Error.h"
-#include "Debug.h"
-#include "HandleHandling.h"
 #include "Races.h"
+
+#include "AresGlobalType.h"
+#include "ConditionalMacros.h"
+#include "Debug.h"
+#include "Error.h"
+#include "HandleHandling.h"
+#include "Resources.h"
 
 #define kRaceError          "\pRACE"
 

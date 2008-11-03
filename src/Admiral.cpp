@@ -19,22 +19,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // Admiral.c
 
-#include "ConditionalMacros.h"
-#include "Resources.h"
-#include "SpaceObject.h"
+#include "Admiral.h"
+
+#include "AnyChar.h"
+#include "AresCheat.h"
 #include "AresGlobalType.h"
+#include "ConditionalMacros.h"
+#include "Debug.h"
+#include "Error.h"
+#include "HandleHandling.h"
+#include "MathMacros.h"
+#include "Randomize.h"
+#include "Resources.h"
+#include "SoundFX.h"
+#include "SpaceObject.h"
 #include "SpaceObjectHandling.h"
 #include "StringHandling.h"
 #include "UniverseUnit.h"
-#include "AresCheat.h"
-#include "AnyChar.h"
-#include "MathMacros.h"
-#include "Error.h"
-#include "Debug.h"
-#include "HandleHandling.h"
-#include "SoundFX.h"
-#include "Randomize.h"
-#include "Admiral.h"
 
 #define kConvoySpeed                3
 

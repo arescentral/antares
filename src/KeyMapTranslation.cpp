@@ -18,10 +18,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 // Key Map Translation.c
-#include "ConditionalMacros.h"
-#include "Resources.h"
+
 #include "KeyMapTranslation.h"
+
+#include "ConditionalMacros.h"
 #include "Error.h"
+#include "Resources.h"
 
 #define kKeyMapError            "\pKEYM"
 

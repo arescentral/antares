@@ -22,7 +22,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /* SOUND FX.H */
 
+#include "MathSpecial.h"
 #include "Processor.h"
+#include "Sound.h"
 
 //#ifdef powerc
 //#define kAllowSoundSprocket
@@ -32,12 +34,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <SoundSprocket.h>
 #include <SoundComponents.h>
 #endif
-
-#include "MathSpecial.h"
-/* Sound defs */
-
-#include "Sound.h"
-
 
 #define kSoundNum           48
 #define kMaxChannelNum      3

@@ -21,12 +21,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /* Special Math Functions */
 
-#include "ConditionalMacros.h"
-#include "Resources.h"
-#include "GXMath.h"
-#include <ToolUtils.h>
-#include "Processor.h"
 #include "MathSpecial.h"
+
+#include <ToolUtils.h>
+
+#include "ConditionalMacros.h"
+#include "GXMath.h"
+#include "Processor.h"
+#include "Resources.h"
 
 /****** FOR THE SQUARE ROOT CODE:
           Saturday, May 14, 1994 11:01:56 AM

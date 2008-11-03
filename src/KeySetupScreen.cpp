@@ -21,42 +21,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 |**| Key_Setup_Screen.c
 \******************************************/
 
-#pragma mark **INCLUDES**
-/******************************************\
-|**| #includes
-\******************************************/
+#include "KeySetupScreen.h"
 
-#pragma mark _system includes_
-/* - system
-*******************************************/
-
-#pragma mark _third party includes_
-/* - third party libraries
-*******************************************/
-
-#pragma mark _bp libraries includes_
-/* - bp libraries
-*******************************************/
-
-#pragma mark _this library includes_
-/* - this project
-*******************************************/
-
-#include "InterfaceHandling.h"
-#include "AresPreferences.h"
 #include "AresGlobalType.h"
+#include "AresMain.h"
+#include "AresPreferences.h"
+#include "ColorTranslation.h"
+#include "Debug.h"
 #include "Error.h"
+#include "HideMenubar.h"
+#include "InterfaceHandling.h"
 #include "KeyMapTranslation.h"
+#include "OffscreenGWorld.h"
 #include "Options.h"
 #include "PlayerInterface.h"
 #include "SoundFX.h"
-#include "HideMenubar.h"
-#include "AresMain.h"
-#include "OffscreenGWorld.h"
-#include "Debug.h"
 #include "StringHandling.h"
-#include "ColorTranslation.h"
-#include "KeySetupScreen.h"
 
 #pragma mark **DEFINITIONS**
 /******************************************\

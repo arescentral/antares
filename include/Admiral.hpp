@@ -22,8 +22,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // Admiral.h
 
-#include "Scenario.h"
 #include "AnyChar.h"
+#include "Scenario.h"
 
 #pragma options align=mac68k
 

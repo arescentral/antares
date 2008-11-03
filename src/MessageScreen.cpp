@@ -19,25 +19,28 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // Message Screen.c -- also the destination screen
 // must be initialized AFTER Screen Label.c
-#include "ConditionalMacros.h"
-#include "Resources.h"
-#include <QDOffscreen.h>
-#include "AresGlobalType.h"
-#include "Error.h"
-#include "AnyChar.h"
-#include "DirectText.h"
-#include "ColorTranslation.h"
-#include "Debug.h"
-#include "PlayerInterfaceDrawing.h" // for long messages
-#include "KeyMapTranslation.h"
-#include "SpriteHandling.h"
-#include "OffscreenGWorld.h"
-#include "HandleHandling.h"
-#include "ScreenLabel.h"
+
 #include "MessageScreen.h"
+
+#include <QDOffscreen.h>
+
+#include "AnyChar.h"
+#include "AresGlobalType.h"
+#include "ColorTranslation.h"
+#include "ConditionalMacros.h"
+#include "Debug.h"
+#include "DirectText.h"
+#include "Error.h"
+#include "HandleHandling.h"
+#include "KeyMapTranslation.h"
+#include "OffscreenGWorld.h"
 #include "Options.h"
-#include "ScenarioMaker.h"
 #include "PlayerInterface.h"  // for Replace_KeyCode_Strings_With_Actual_Key_Names
+#include "PlayerInterfaceDrawing.h" // for long messages
+#include "Resources.h"
+#include "ScenarioMaker.h"
+#include "ScreenLabel.h"
+#include "SpriteHandling.h"
 
 #define kMessageScreenLeft      200
 #define kMessageScreenTop       454

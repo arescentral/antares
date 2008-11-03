@@ -34,18 +34,20 @@ scn 5 = dch 3/rch 4 -> cond 057 Owner -> action 289 declare winner 0 next:4 <-> 
 scn12 = dch 4/rch13 -> cond 63 Countr >= -> action 458 declare winner 0 next:-1 <-> next:14
 */
 
-#include "ConditionalMacros.h"
-#include "Resources.h"
-#include "AresGlobalType.h"
 #include "AresDemoScanner.h"
+
 #include <QDOffscreen.h>
-#include "SpaceObjectHandling.h"
-#include "ScenarioMaker.h"
+
+#include "AresGlobalType.h"
 #include "AresPreferences.h"
-#include "OffscreenGWorld.h"
-#include "PlayerInterface.h"
+#include "ConditionalMacros.h"
 #include "Debug.h"
 #include "Error.h"
+#include "OffscreenGWorld.h"
+#include "PlayerInterface.h"
+#include "Resources.h"
+#include "SpaceObjectHandling.h"
+#include "ScenarioMaker.h"
 
 extern aresGlobalType *gAresGlobal;
 

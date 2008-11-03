@@ -21,38 +21,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 |**| Ares_External_File.c
 \******************************************/
 
-#pragma mark **INCLUDES**
-/******************************************\
-|**| #includes
-\******************************************/
-
-#pragma mark _system includes_
-/* - system
-*******************************************/
-
-#pragma mark _third party includes_
-/* - third party libraries
-*******************************************/
-
-#pragma mark _bp libraries includes_
-/* - bp libraries
-*******************************************/
-
-#pragma mark _this library includes_
-/* - this project
-*******************************************/
-
-#include "SpaceObjectHandling.h"
-#include "ScenarioData.h"
-#include "AresGlobalType.h"
-#include "Scenario.h"
-#include "ScenarioMaker.h"
-#include "Races.h"
-#include "HandleHandling.h"
-#include "Error.h"
-#include "Debug.h"
-#include "AmbrosiaSerial.h"
 #include "AresExternalFile.h"
+
+#include "AmbrosiaSerial.h"
+#include "AresGlobalType.h"
+#include "Debug.h"
+#include "Error.h"
+#include "HandleHandling.h"
+#include "Races.h"
+#include "Scenario.h"
+#include "ScenarioData.h"
+#include "ScenarioMaker.h"
+#include "SpaceObjectHandling.h"
 
 #pragma mark **DEFINITIONS**
 /******************************************\

@@ -18,15 +18,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 // Ares Movie Player.c
-#include "ConditionalMacros.h"
-#include "AresGlobalType.h"
-#include <Palettes.h>
+
 #include "AresMoviePlayer.h"
-#include "KeyMapTranslation.h"
+
+#include <Palettes.h>
+
+#include "AresGlobalType.h"
+#include "ConditionalMacros.h"
 #include "Debug.h"
-#include "Randomize.h"
-#include "Options.h"
 #include "Error.h"
+#include "KeyMapTranslation.h"
+#include "Options.h"
+#include "Randomize.h"
 
 #define kSoundVolumeMultiplier  32  // = 256 (1.0) / 8 (kMaxSoundVolumePreference)
 

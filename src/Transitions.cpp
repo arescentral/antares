@@ -18,19 +18,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 /* Transitions Color Animations.c */
-#include "ConditionalMacros.h"
-#include "AresGlobalType.h"
-#include "Quickdraw.h"
+
+#include "Transitions.h"
+
 #include <Palettes.h>
-#include "Resources.h"
-#include "Debug.h"
+
+#include "AresGlobalType.h"
 #include "AresMain.h"
-#include "HandleHandling.h"
 #include "ColorTranslation.h"
+#include "ConditionalMacros.h"
+#include "Debug.h"
+#include "Error.h"
+#include "HandleHandling.h"
 #include "KeyMapTranslation.h"
 #include "Music.h"
-#include "Transitions.h"
-#include "Error.h"
+#include "Quickdraw.h"
+#include "Resources.h"
 
 //#define   kDontMessWithColors
 

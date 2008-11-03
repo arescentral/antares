@@ -17,87 +17,101 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "ConditionalMacros.h"
-#include "Resources.h"
-#include "GXMath.h"
-#include "ToolUtils.h"
-#include "Traps.h"
-#include "Fonts.h"
-//#include <profiler.h>
+#include "AresMain.h"
+
 #include <Timer.h>
 #include <Palettes.h>
+//#include <stdio.h>        // for _DATE_ & _TIME_ macros
 
 #define kProfiling_On   0
-
 #if kProfiling_On
 #include <profiler.h>
 #endif
 
-//#include <stdio.h>        // for _DATE_ & _TIME_ macros
+#include "Admiral.h"
+#include "AmbrosiaSerial.h"
+#include "AresAppleEvent.h"
+#include "AresCheat.h"
+#include "AresDemoScanner.h"
+#include "AresExternalFile.h"
+#include "AresGameRanger.h"
+#include "AresGlobalType.h"
+#include "AresGuideMaker.h"
+#include "AresMoviePlayer.h"
+#include "AresNetwork.h"
+#include "AresNetworkSprocket.h"
+#include "AresPreferences.h"
+#include "AresResFile.h"
+
+#include "Beam.h"
+
+#include "ColorTranslation.h"
+#include "ConditionalMacros.h"
+//#include "CopyProtection.h"  // is included in prefs
 
 #include "Debug.h"
-#include "AresDemoScanner.h"
-#include "AresGuideMaker.h"
-#include "WrapGameRanger.h"
-
-//#include "CopyProtection.h"  // is included in prefs
-#include "SetFontByString.h"
-#include "VersionString.h"
-#include "GDeviceHandling.h"
-#include "Error.h"
-#include "OffscreenGWorld.h"
-#include "SpriteHandling.h"
-#include "SpriteCursor.h"
-#include "ColorTranslation.h"
-#include "Transitions.h"
-#include "Rotation.h"
-#include "Processor.h"
-#include "SpaceObjectHandling.h"
 #include "DirectText.h"
-#include "MessageScreen.h"
-#include "TitleScreen.h"
-#include "ScreenLabel.h"
+
+#include "EnvironmentCheck.h"
+#include "Error.h"
+
+#include "Fonts.h"
+
+#include "GDeviceHandling.h"
+#include "GXMath.h"
+
 #include "HandleHandling.h"
-#include "Options.h"
-#include "StringHandling.h"
 #include "HideMenubar.h"
-#include "TimeLimit.h"
-#include "NetSetupScreen.h"
-#include "AresCheat.h"
-#include "AresAppleEvent.h"
-#include "AresGameRanger.h"
-#include "AmbrosiaSerial.h"
-#include "AresResFile.h"
-#include "SoundFX.h"
-#include "Randomize.h"
-#include "MathSpecial.h"
-#include "AresGlobalType.h"
-#include "TimeUnit.h"
-#include "Motion.h"
-#include "PlayerShip.h"
-#include "NonPlayerShip.h"
-#include "ScrollStars.h"
-#include "AresPreferences.h"
-#include "AresNetwork.h"
+
 #include "Instruments.h"
 #include "InterfaceHandling.h"
-#include "PlayerInterface.h"
-#include "KeyMapTranslation.h"
-#include "KeyCodes.h"
-#include "ShotsBeamsExplosions.h"
-#include "ScenarioMaker.h"
-#include "Admiral.h"
-#include "Music.h"
-#include "Minicomputer.h"
-#include "EnvironmentCheck.h"
-#include "AresMoviePlayer.h"
-#include "Beam.h"
-#include "AresNetworkSprocket.h"
-#include "AresExternalFile.h"
-#include "NateDraw.h"
-#include "RegistrationTool.h"
-#include "AresMain.h"
 
+#include "KeyCodes.h"
+#include "KeyMapTranslation.h"
+
+#include "MathSpecial.h"
+#include "MessageScreen.h"
+#include "Minicomputer.h"
+#include "Motion.h"
+#include "Music.h"
+
+#include "NateDraw.h"
+#include "NetSetupScreen.h"
+#include "NonPlayerShip.h"
+
+#include "OffscreenGWorld.h"
+#include "Options.h"
+
+#include "PlayerInterface.h"
+#include "PlayerShip.h"
+#include "Processor.h"
+
+#include "Randomize.h"
+#include "RegistrationTool.h"
+#include "Resources.h"
+#include "Rotation.h"
+
+#include "ScenarioMaker.h"
+#include "ScreenLabel.h"
+#include "ScrollStars.h"
+#include "SetFontByString.h"
+#include "ShotsBeamsExplosions.h"
+#include "SoundFX.h"
+#include "SpaceObjectHandling.h"
+#include "SpriteCursor.h"
+#include "SpriteHandling.h"
+#include "StringHandling.h"
+
+#include "TimeLimit.h"
+#include "TimeUnit.h"
+#include "TitleScreen.h"
+#include "ToolUtils.h"
+#include "Transitions.h"
+#include "Traps.h"
+
+#include "VersionString.h"
+
+#include "WrapGameRanger.h"
 
 //#define   kTempNet
 

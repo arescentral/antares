@@ -19,15 +19,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // Rotation.c
 
-#include "ConditionalMacros.h"
-#include "Resources.h"
-#include "math.h"
-#include "Error.h"
-#include "Debug.h"
-#include "HandleHandling.h"
-#include "MathSpecial.h"
-#include "MathMacros.h"
 #include "Rotation.h"
+
+#include "ConditionalMacros.h"
+#include "Debug.h"
+#include "Error.h"
+#include "HandleHandling.h"
+#include "math.h"
+#include "MathMacros.h"
+#include "MathSpecial.h"
+#include "Resources.h"
 
 #define kRotationError  "\pROTN"
 

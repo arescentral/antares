@@ -18,13 +18,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 // Ares Title Screen
-#include "ConditionalMacros.h"
-#include "Resources.h"
-#include "OffscreenGWorld.h"
+
 #include "TitleScreen.h"
-#include "HandleHandling.h"
-#include "Error.h"
+
+#include "ConditionalMacros.h"
 #include "Debug.h"
+#include "Error.h"
+#include "HandleHandling.h"
+#include "OffscreenGWorld.h"
+#include "Resources.h"
 
 #define kTitleScreenID      502
 #define kPublisherScreenID  2000

@@ -19,12 +19,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /* DebugWindow */
 
-#include "ConditionalMacros.h"
-#include "StringNumerics.h"
-#include "StringHandling.h"
-#include "SetFontByString.h"
-#include "Error.h"
 #include "Debug.h"
+
+#include "ConditionalMacros.h"
+#include "Error.h"
+#include "SetFontByString.h"
+#include "StringHandling.h"
+#include "StringNumerics.h"
 
 #define LINE_HEIGHT         11
 #define WINDOW_HEIGHT       50      /* Window height in lines */

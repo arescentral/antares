@@ -23,8 +23,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // Direct Text.h
 
 #include "AnyChar.h"
-#include "SpriteHandling.h"
 #include "Processor.h"
+#include "SpriteHandling.h"
 
 #pragma options align=mac68k
 

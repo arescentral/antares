@@ -18,26 +18,29 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 /* SpriteHandling */
-#include "ConditionalMacros.h"
-#include "Resources.h"
+
+#include "SpriteHandling.h"
+
 #include <QDOffscreen.h>
-#include "Error.h"
-#include "OffscreenGWorld.h"
-#include "Debug.h"
-#include "Processor.h"
-#include "MathMacros.h"
-#include "MacroColors.h"
-#include "NatePixTable.h"
-#include "ColorTranslation.h"
-#include "DirectText.h"
-#include "HandleHandling.h"
-#include "Rotation.h"
-#include "Randomize.h" // for static table
-#include "SingleDataFile.h"
+
 #include "AresResFile.h"
 #include "AresGlobalType.h"
+#include "ColorTranslation.h"
+#include "ConditionalMacros.h"
+#include "Debug.h"
+#include "DirectText.h"
+#include "Error.h"
+#include "HandleHandling.h"
+#include "MacroColors.h"
+#include "MathMacros.h"
 #include "NateDraw.h"
-#include "SpriteHandling.h"
+#include "NatePixTable.h"
+#include "OffscreenGWorld.h"
+#include "Processor.h"
+#include "Randomize.h" // for static table
+#include "Resources.h"
+#include "Rotation.h"
+#include "SingleDataFile.h"
 
 #define kMaxSpriteNum           500//300
 

@@ -17,6 +17,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#include "Icl8ToCicn.h"
+
 #include "ConditionalMacros.h"
 #include "Resources.h"
 
@@ -36,8 +38,6 @@ draw the 8-bit version of the icon.
 I check against the resource files refNum just to make sure I'm not accidentally
 delving into the System.
 */
-
-#include "Icl8ToCicn.h"
 
 Boolean Ploticl8ToCICN( short resID, short resRefNum, Rect *destRect,
     Handle icl8Handle, Handle ICNnHandle)

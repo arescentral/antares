@@ -17,37 +17,39 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "ConditionalMacros.h"
-#include "Resources.h"
-#include <QDOffscreen.h>
-#include "AresGlobalType.h"
-#include "Debug.h"
-#include "Error.h"
-#include "StringHandling.h"
-#include "StringNumerics.h"
-#include "InterfaceHandling.h"
-#include "AresNetworkSprocket.h"
-#include "Races.h"
-#include "HideMenubar.h"
-#include "HandleHandling.h"
-#include "ScenarioMaker.h"
-#include "DirectText.h"
-#include "PlayerInterface.h"
-#include "Options.h"
-#include "ColorTranslation.h"
-#include "OffscreenGWorld.h"
-#include "TitleScreen.h" // for CenterRectInRect
-#include "MessageScreen.h" // for retroText drawing
-#include "SingleDataFile.h" // to determine whether or not to allow changing of mission or race
-#include "EZSprite.h"
-#include "Icl8ToCicn.h"
-#include "IconSuiteFromAlias.h"
-#include "AresResFile.h"
-#include "SmartFile.h"
-#include "AresMain.h"
 #include "NetSetupScreen.h"
+
+#include <QDOffscreen.h>
+
 #include "AmbrosiaSerial.h"
 #include "AresExternalFile.h"
+#include "AresGlobalType.h"
+#include "AresMain.h"
+#include "AresNetworkSprocket.h"
+#include "AresResFile.h"
+#include "ColorTranslation.h"
+#include "ConditionalMacros.h"
+#include "Debug.h"
+#include "DirectText.h"
+#include "Error.h"
+#include "EZSprite.h"
+#include "HandleHandling.h"
+#include "HideMenubar.h"
+#include "Icl8ToCicn.h"
+#include "IconSuiteFromAlias.h"
+#include "InterfaceHandling.h"
+#include "MessageScreen.h" // for retroText drawing
+#include "OffscreenGWorld.h"
+#include "Options.h"
+#include "PlayerInterface.h"
+#include "Races.h"
+#include "Resources.h"
+#include "ScenarioMaker.h"
+#include "SingleDataFile.h" // to determine whether or not to allow changing of mission or race
+#include "SmartFile.h"
+#include "StringHandling.h"
+#include "StringNumerics.h"
+#include "TitleScreen.h" // for CenterRectInRect
 
 #define kHasCustomIcon      0x0400
 

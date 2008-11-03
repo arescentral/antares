@@ -18,11 +18,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 // Color Translation.c
-#include "ConditionalMacros.h"
-#include "Error.h"
-#include "Debug.h"
-#include "HandleHandling.h"
+
 #include "ColorTranslation.h"
+
+#include "ConditionalMacros.h"
+#include "Debug.h"
+#include "Error.h"
+#include "HandleHandling.h"
 
 #define kColorTransError        "\pCLTR"
 

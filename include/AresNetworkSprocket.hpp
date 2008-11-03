@@ -22,10 +22,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /* Ares NetworkSprocket.h */
 
+#include <NetSprocket.h>
+
+#include "AnyChar.h"
 #include "ConditionalMacros.h"
 #include "Processor.h"
-#include "AnyChar.h"
-#include <NetSprocket.h>
 
 #pragma options align=mac68k
 

@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ANTARES_ARES_MOVIE_PLAYER_HPP_
 
 // Ares Movie Player.h
+
 #include "Movies.h"
 
 #pragma options align=mac68k

@@ -19,23 +19,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // Ares Preferences
 
-#include "ConditionalMacros.h"
-#include "Resources.h"
-#include "AresGlobalType.h"
+#include "AresPreferences.h"
+
 #include "AltPreferences.h"
+#include "AmbrosiaSerial.h"
+#include "AnyChar.h"
+#include "AresGlobalType.h"
+#include "AresNetworkSprocket.h"
+#include "ConditionalMacros.h"
+#include "CopyProtection.h" // is included in prefs
+#include "Debug.h"
+#include "Error.h"
+#include "KeyMapTranslation.h"
+#include "Options.h"
+//#include "publicserial.h"
+//#include "PublicSerialDialog.h"
+#include "Resources.h"
 #include "StdPrefsLib.h"
 #include "StringHandling.h"
-#include "AnyChar.h"
-#include "Error.h"
-#include "Debug.h"
-#include "KeyMapTranslation.h"
-#include "CopyProtection.h" // is included in prefs
-#include "AresPreferences.h"
-#include "Options.h"
-#include "AresNetworkSprocket.h"
-#include "AmbrosiaSerial.h"
-//#include "PublicSerialDialog.h"
-//#include "publicserial.h"
 
 #define kPreferenceFileCreator      'ar12'  // normally 'ar12'
 #define kPreferenceFileType         'pref'

@@ -17,9 +17,19 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "ConditionalMacros.h"
-#include "Resources.h"
+#include "Music.h"
 
+#include "AIFF.h"
+#include "AresGlobalType.h"
+#include "ConditionalMacros.h"
+#include "Debug.h"
+#include "Error.h"
+#include "MAD.h"
+#include "Options.h"
+#include "RDriver.h"
+#include "Resources.h"
+#include "Sound.h"
+#include "SoundFX.h"
 
 /********************************************************/
 /*
@@ -39,17 +49,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     Internet: rosset@dial.eunet.ch
 */
 /********************************************************/
-
-#include "AresGlobalType.h"
-#include "MAD.h"
-#include "RDriver.h"
-#include "Sound.h"
-#include "AIFF.h"
-#include "Error.h"
-#include "Debug.h"
-#include "Music.h"
-#include "Options.h"
-#include "SoundFX.h"
 
 #define kTrackNumber    4
 

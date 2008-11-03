@@ -26,12 +26,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /*             NatePixTable handling                  */
 /*                                                    */
 /******************************************************/
+
+#include "NatePixTable.h"
+
+#include "ColorTranslation.h"
 #include "ConditionalMacros.h"
+#include "Debug.h"
 #include "Resources.h"
 #include "Sound.h"
-#include "ColorTranslation.h"
-#include "Debug.h"
-#include "NatePixTable.h"
 
 #define EMPTY_NATE_PIX_SIZE         8L
 

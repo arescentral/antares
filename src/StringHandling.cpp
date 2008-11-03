@@ -19,8 +19,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /* String Handling.c */
 
-#include "ConditionalMacros.h"
 #include "StringHandling.h"
+
+#include "ConditionalMacros.h"
 
 void CopyPString( unsigned char *to, unsigned char *from)
 

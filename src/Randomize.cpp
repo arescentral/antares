@@ -19,14 +19,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /* Randomize.c */
 
-#include "ConditionalMacros.h"
-#include "Resources.h"
+#include "Randomize.h"
+
 #include "AresGlobalType.h"
+#include "AresPreferences.h"
+#include "ConditionalMacros.h"
 #include "Debug.h"
 #include "Error.h"
-#include "AresPreferences.h"
+#include "Resources.h"
 #include "StringHandling.h"
-#include "Randomize.h"
 
 #define kRandomError    "\pRAND"
 

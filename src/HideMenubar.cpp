@@ -19,11 +19,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // Hide Menubar.c
 
+#include "HideMenubar.h"
+
+#include <QuickDraw.h>
+#include <LowMem.h>
+
 #include "ConditionalMacros.h"
 
 // also hides desktop corners
-
-#include "HideMenubar.h"
 
 // ShowHideMBar.c -- from Hide Menubar Etc. from Feb 96 Developer Toolchest Disc
 //
@@ -38,9 +41,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 // 12/10/93 david   first cut
 
-
-#include <QuickDraw.h>
-#include <LowMem.h>
 
 /**\
 |**| ==============================================================================

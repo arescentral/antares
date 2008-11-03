@@ -18,15 +18,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 // Direct Text.c -- Ares Interfaces MUST be opened first --
-#include "ConditionalMacros.h"
-#include "Resources.h"
+
+#include "DirectText.h"
+
 #include <QDOffscreen.h>
+
+#include "ConditionalMacros.h"
 #include "Debug.h"
 #include "Error.h"
+#include "HandleHandling.h"
 #include "OffscreenGWorld.h"
 #include "Processor.h"
-#include "HandleHandling.h"
-#include "DirectText.h"
+#include "Resources.h"
 
 #define kDirectTextError    "\pTEXT"
 

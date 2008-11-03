@@ -18,17 +18,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 /* Sound Player.c */
-#include "ConditionalMacros.h"
-#include "Resources.h"
-#include "AresGlobalType.h"
-#include "MathSpecial.h"
-#include "Error.h"
-#include "Debug.h"
-#include "Options.h"
-#include "SingleDataFile.h"
+
 #include "SoundFX.h"
-#include "HandleHandling.h"
+
+#include "AresGlobalType.h"
 #include "AresResFile.h"
+#include "ConditionalMacros.h"
+#include "Debug.h"
+#include "Error.h"
+#include "HandleHandling.h"
+#include "MathSpecial.h"
+#include "Options.h"
+#include "Resources.h"
+#include "SingleDataFile.h"
 
 #define kSoundFXError           "\pSNDX"
 #define kSoundResID             500

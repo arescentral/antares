@@ -17,22 +17,24 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "ConditionalMacros.h"
-#include "Resources.h"
-#include <QDOffscreen.h>
-#include "AresGlobalType.h"
 #include "ScreenLabel.h"
-#include "OffscreenGWorld.h"
-#include "DirectText.h"
-#include "StringHandling.h"
-#include "MathMacros.h"
-#include "ColorTranslation.h"
-#include "HandleHandling.h"
+
+#include <QDOffscreen.h>
+
 #include "Admiral.h"            // hack for checking strength
-//#include "MathSpecial.h"      // ditto
-#include "Error.h"
+#include "AresGlobalType.h"
+#include "ColorTranslation.h"
+#include "ConditionalMacros.h"
 #include "Debug.h"
+#include "DirectText.h"
+#include "Error.h"
+#include "HandleHandling.h"
+#include "MathMacros.h"
+//#include "MathSpecial.h"      // hack for checking strength
+#include "OffscreenGWorld.h"
+#include "Resources.h"
 #include "SpriteCursor.h"  // for hint line
+#include "StringHandling.h"
 
 #define kScreenLabelError       "\pSCLB"
 #define kUseLabels

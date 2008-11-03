@@ -20,31 +20,32 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // Instruments.c
 // REQUIRES THAT ARES INTERFACES DATA FILE HAS BEEN OPENED!
 
-#include "ConditionalMacros.h"
-#include "Resources.h"
-//#include <math routines.h>
-#include "GXMath.h"
-#include "ToolUtils.h"
-#include <QDOffscreen.h>
-#include "AresGlobalType.h"
-#include "Error.h"
-#include "Debug.h"
-#include "NateDraw.h"
-#include "ColorTranslation.h"
-#include "SpaceObject.h"
-#include "OffscreenGWorld.h"
-#include "MathMacros.h"
-#include "UniverseUnit.h"
-#include "ScreenLabel.h"
-#include "PlayerShip.h"
-#include "Minicomputer.h"
-#include "HandleHandling.h"
-#include "Rotation.h"
-#include "Admiral.h"
-#include "PlayerShip.h" // for handling mouse clicks
-#include "SpriteCursor.h"
-//#include "SoundFX.h"
 #include "Instruments.h"
+
+//#include <math routines.h>
+#include <QDOffscreen.h>
+
+#include "Admiral.h"
+#include "AresGlobalType.h"
+#include "ColorTranslation.h"
+#include "ConditionalMacros.h"
+#include "Debug.h"
+#include "Error.h"
+#include "GXMath.h"
+#include "HandleHandling.h"
+#include "MathMacros.h"
+#include "Minicomputer.h"
+#include "NateDraw.h"
+#include "OffscreenGWorld.h"
+#include "PlayerShip.h"
+#include "Resources.h"
+#include "Rotation.h"
+#include "ScreenLabel.h"
+//#include "SoundFX.h"
+#include "SpaceObject.h"
+#include "SpriteCursor.h"
+#include "ToolUtils.h"
+#include "UniverseUnit.h"
 
 #define kRadarBlipNum       50L
 #define kRadarColor         GREEN

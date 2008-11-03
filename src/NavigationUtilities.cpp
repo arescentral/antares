@@ -21,35 +21,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 |**| Navigation_Utilities.c
 \******************************************/
 
-#pragma mark **INCLUDES**
-/******************************************\
-|**| #includes
-\******************************************/
-
-#pragma mark _system includes_
-/* - system
-*******************************************/
+#include "NavigationUtilities.h"
 
 #include <Navigation.h>
 
-#pragma mark _third party includes_
-/* - third party libraries
-*******************************************/
-
-#pragma mark _bp libraries includes_
-/* - bp libraries
-*******************************************/
-
-//#include "WindowDispatch.h"
-#include "str_bp.h"
-
-#pragma mark _this library includes_
-/* - this project
-*******************************************/
-
 #include "AresGlobalType.h"
 #include "OffscreenGWorld.h"
-#include "NavigationUtilities.h"
+#include "str_bp.h"
+//#include "WindowDispatch.h"
 
 #pragma mark **DEFINITIONS**
 /******************************************\

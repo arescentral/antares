@@ -25,18 +25,20 @@ into those handles are reset.
 If you need to allocate a handle and keep it locked all the time, do it through here.
 */
 
-#include "ConditionalMacros.h"
-#include "Resources.h"
+#include "HandleHandling.h"
+
 #include <QDOffscreen.h>
+
+#include "ConditionalMacros.h"
+#include "Debug.h"
 #include "DirectText.h"
-#include "StringHandling.h"
+#include "Error.h"
+#include "Randomize.h"
+#include "Resources.h"
+#include "ScreenLabel.h"
 #include "SoundFX.h"
 #include "SpriteHandling.h"
-#include "ScreenLabel.h"
-#include "HandleHandling.h"
-#include "Error.h"
-#include "Debug.h"
-#include "Randomize.h"
+#include "StringHandling.h"
 
 // HACK FOR FINDING MOTION BUG:
 #include "Motion.h"

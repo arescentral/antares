@@ -17,14 +17,16 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include "ConditionalMacros.h"
-#include "Resources.h"
-#include <QDOffscreen.h>
 #include "SpriteCursor.h"
+
+#include <QDOffscreen.h>
+
+#include "ColorTranslation.h"
+#include "ConditionalMacros.h"
+#include "Error.h"
 #include "NatePixTable.h"
 #include "OffscreenGWorld.h"
-#include "ColorTranslation.h"
-#include "Error.h"
+#include "Resources.h"
 
 extern  GWorldPtr       gOffWorld, gRealWorld, gSaveWorld;
 extern  PixMapHandle    thePixMapHandle;

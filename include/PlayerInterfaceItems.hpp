@@ -22,8 +22,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // Player Interface Items.h
 
-#include "NateDraw.h"
 #include "AnyChar.h"
+#include "NateDraw.h"
 
 #pragma options align=mac68k
 
