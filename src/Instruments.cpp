@@ -19,23 +19,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // Instruments.c
 // REQUIRES THAT ARES INTERFACES DATA FILE HAS BEEN OPENED!
+
 #include "ConditionalMacros.h"
-
-#if TARGET_OS_WIN32
-    #include <QuickTimeVR.h>
-    #include "QTUtilities.h"
-    #include "QTVRUtilities.h"
-    #include <TextUtils.h>
-    #include <Script.h>
-    #include <string.h>
-#endif // TARGET_OS_WIN32
-
 #include "Resources.h"
-
 //#include <math routines.h>
 #include "GXMath.h"
 #include "ToolUtils.h"
-
 #include <QDOffscreen.h>
 #include "AresGlobalType.h"
 #include "Error.h"

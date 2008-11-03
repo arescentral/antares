@@ -19,16 +19,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // NateDraw.c : special on- and off-screen drawing -- not to be confused with original "Arcade Proj" Natedraw
 #include "ConditionalMacros.h"
-
-#if TARGET_OS_WIN32
-    #include <QuickTimeVR.h>
-    #include "QTUtilities.h"
-    #include "QTVRUtilities.h"
-    #include <TextUtils.h>
-    #include <Script.h>
-    #include <string.h>
-#endif // TARGET_OS_WIN32
-
 #include "Error.h"
 #include "Debug.h"
 #include "MathMacros.h"

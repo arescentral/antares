@@ -35,16 +35,6 @@ scn12 = dch 4/rch13 -> cond 63 Countr >= -> action 458 declare winner 0 next:-1 
 */
 
 #include "ConditionalMacros.h"
-
-#if TARGET_OS_WIN32
-    #include <QuickTimeVR.h>
-    #include "QTUtilities.h"
-    #include "QTVRUtilities.h"
-    #include <TextUtils.h>
-    #include <Script.h>
-    #include <string.h>
-#endif // TARGET_OS_WIN32
-
 #include "Resources.h"
 #include "AresGlobalType.h"
 #include "AresDemoScanner.h"

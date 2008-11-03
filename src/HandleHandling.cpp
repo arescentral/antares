@@ -26,16 +26,6 @@ If you need to allocate a handle and keep it locked all the time, do it through 
 */
 
 #include "ConditionalMacros.h"
-
-#if TARGET_OS_WIN32
-    #include <QuickTimeVR.h>
-    #include "QTUtilities.h"
-    #include "QTVRUtilities.h"
-    #include <TextUtils.h>
-    #include <Script.h>
-    #include <string.h>
-#endif // TARGET_OS_WIN32
-
 #include "Resources.h"
 #include <QDOffscreen.h>
 #include "DirectText.h"

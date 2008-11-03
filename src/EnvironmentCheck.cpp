@@ -28,16 +28,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include "ConditionalMacros.h"
-
-#if TARGET_OS_WIN32
-    #include <QuickTimeVR.h>
-    #include "QTUtilities.h"
-    #include "QTVRUtilities.h"
-    #include <TextUtils.h>
-    #include <Script.h>
-    #include <string.h>
-#endif // TARGET_OS_WIN32
-
 #include "Resources.h"
 #include "AresGlobalType.h"
 #include "EnvironmentCheck.h"
