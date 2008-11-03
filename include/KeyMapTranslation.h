@@ -70,7 +70,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define mQKey( mKeyMap)         (((mKeyMap)[0] >> 20) & 0x01)   // Q for Quitting
 #define mCommandKey( mKeyMap)   (((mKeyMap)[1] >> 15) & 0x01)   // command key
 #define mLeftArrowKey( mKeyMap) (((mKeyMap)[3] >> 3) & 0x01 )   // left arrow/backspace
-#define mAnythingButReturn      
+#define mAnythingButReturn
 #define kModifierKeyMask    (0x0008 | 0x8000 | 0x0004 | 0x0001 | 0x0002) // applies only to keyMap[1]
 
 #else   // not MAC!
@@ -115,7 +115,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define mQKey( mKeyMap)         (((EndianU32_BtoN((mKeyMap)[0].bigEndianValue)) >> 20) & 0x01)  // Q for Quitting
 #define mCommandKey( mKeyMap)   (((EndianU32_BtoN((mKeyMap)[1].bigEndianValue)) >> 15) & 0x01)  // command key
 #define mLeftArrowKey( mKeyMap) (((EndianU32_BtoN((mKeyMap)[3].bigEndianValue)) >> 3) & 0x01 )  // left arrow/backspace
-#define mAnythingButReturn      
+#define mAnythingButReturn
 #define kModifierKeyMask    (0x0008 | 0x8000 | 0x0004 | 0x0001 | 0x0002) // applies only to keyMap[1]
 
 #endif

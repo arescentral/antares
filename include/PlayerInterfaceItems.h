@@ -103,7 +103,7 @@ typedef struct
     short               pictureID;
     Boolean             visibleBounds;
 } interfacePictureRectType;
- 
+
 typedef struct
 {
     interfaceLabelType          label;
@@ -142,7 +142,7 @@ typedef struct
         interfacePictureRectType    pictureRect;
         interfaceTabBoxType         tabBox;
     } item;
-    
+
     unsigned char       color;
     interfaceKindType   kind;
     interfaceStyleType  style;

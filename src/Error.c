@@ -73,9 +73,9 @@ void ShowErrorNoRecover( int whichError, StringPtr sourceCode, int sourceNum)
 
 {
     Str255  s1, s3;
-    
+
 //  if ( theDevice != nil) RestoreDeviceClut( theDevice);
-    
+
     GetIndString( s1, ERROR_STR_ID, whichError);
     if ( sourceCode == nil)
         ParamText( s1, nil, nil, nil);
@@ -94,7 +94,7 @@ void ShowErrorRecover( int whichError, StringPtr sourceCode, int sourceNum)
     Str255  s1, s3;
 
 //  if ( theDevice != nil) RestoreDeviceClut( theDevice);
-    
+
     GetIndString( s1, ERROR_STR_ID, whichError);
     if ( sourceCode == nil)
         ParamText( s1, nil, nil, nil);
@@ -110,7 +110,7 @@ void ShowSimpleStringAlert( StringPtr string1, StringPtr string2, StringPtr stri
 
 {
 //  if ( theDevice != nil) RestoreDeviceClut( theDevice);
-    
+
     ParamText( string1, string2, string3, string4);
     StopAlert( 805, nil);
 }
@@ -120,7 +120,7 @@ void ShowSimpleStrResAlert( short ResID, short num1, short num2, short num3, sho
 {
     Str255      s1, s2, s3, s4;
     StringPtr   sp1 = nil, sp2 = nil, sp3 = nil, sp4 = nil;
-    
+
     if ( ResID >= 0)
     {
         if ( num1 > 0)
@@ -172,7 +172,7 @@ void ShowErrorAny(  errorRecoverType recover,
     Boolean         done = false, quit = false;
     Rect            itemRect;
     Handle          itemHandle;
-    
+
 #pragma unused ( caller, callerNum)
     ParamText( "\p", "\p", "\p", "\p");
     InitCursor();
@@ -201,7 +201,7 @@ void ShowErrorAny(  errorRecoverType recover,
         }
     }
 #ifdef kDebugError
-    
+
     ErrPStringFromCString( (unsigned char *)callerString, (unsigned char *)caller);
     ErrConcatenatePString( callerString, "\p, #");
     NumToString( callerNum, s4);
@@ -210,12 +210,12 @@ void ShowErrorAny(  errorRecoverType recover,
 #endif
 
 //  if ( theDevice != nil) RestoreDeviceClut( theDevice);
-    
+
     ParamText( sp1, sp2, sp3, sp4);
 //  StopAlert( kAnyAlertID, nil);
     GetPort( &oldPort);
     theDialog = GetNewDialog( kAnyErrorDialogID, nil, (WindowPtr)-1L);
-    
+
     if ( theDialog == nil) DebugStr("\pNo Error Dialog!");
     SetWRefCon( theDialog, (long)kAnyErrorDialogID);
     MacSetPort( (GrafPtr)theDialog);
@@ -235,9 +235,9 @@ void ShowErrorAny(  errorRecoverType recover,
         }
         SetDialogDefaultItem( theDialog, kContinueButton);
     }
-    
+
     MacShowWindow( theDialog);
-    
+
     done = false;
     while ( done == false)
     {
@@ -247,12 +247,12 @@ void ShowErrorAny(  errorRecoverType recover,
             case kContinueButton:
                 done = true;
                 break;
-            
+
             case kQuitButton:
                 done = true;
                 quit = true;
                 break;
-            
+
         }
     }
     if ( theDialog != nil) DisposeDialog( theDialog);
@@ -275,7 +275,7 @@ void ShowErrorOfTypeOccurred( errorRecoverType recover, short resID, short strin
     OSErr error, char *caller, long callerNum)
 {
     Str255  occurredString, errorString;
-    
+
     GetIndString( occurredString, kErrorStrID, kOccurredError);
     NumToString( error, errorString);
     ErrConcatenatePString( errorString, occurredString);
@@ -287,7 +287,7 @@ void ErrPStringFromCString( unsigned char *pString, unsigned char *cString)
 
 {
     unsigned char   *len;
-    
+
     len = pString;
     pString++;
     *len = 0;
@@ -305,7 +305,7 @@ void ErrConcatenatePString( StringPtr dString, StringPtr sString)
 {
     unsigned char   *dc, *sc;
     int     i;
-    
+
     dc = dString + (long)*dString + 1L;
     sc = sString + 1L;
     for ( i = 0; i < *sString; i++)

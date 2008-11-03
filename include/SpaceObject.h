@@ -127,7 +127,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define kIsPlayerShip               0x00000200  // this is the ship we focus on
 #define kCanBeDestination           0x00000400  // can be selected as a place to go to
 #define kCanEngage                  0x00000800  // can go into engage mode
-#define kCanEvade                   0x00001000  // can go into evade mode   
+#define kCanEvade                   0x00001000  // can go into evade mode
 #define kCanAcceptMessages          0x00002000  // can accept a message from player
 #define kCanAcceptBuild             0x00004000  // can accept a build message
 #define kCanAcceptDestination       0x00008000  // can accept destination message
@@ -184,7 +184,7 @@ should never be turned on permanently!
 #define kBuildFlagBit10                 0x00000200
 #define kBuildFlagBit11                 0x00000400
 #define kBuildFlagBit12                 0x00000800
-#define kBuildFlagBit13                 0x00001000  
+#define kBuildFlagBit13                 0x00001000
 #define kBuildFlagBit14                 0x00002000
 #define kBuildFlagBit15                 0x00004000
 #define kBuildFlagBit16                 0x00008000
@@ -224,7 +224,7 @@ build flag. */
 #define kOrderFlagBit10                 0x00000200
 #define kOrderFlagBit11                 0x00000400
 #define kOrderFlagBit12                 0x00000800
-#define kOrderFlagBit13                 0x00001000  
+#define kOrderFlagBit13                 0x00001000
 #define kOrderFlagBit14                 0x00002000
 #define kOrderFlagBit15                 0x00004000
 #define kOrderFlagBit16                 0x00008000
@@ -378,12 +378,12 @@ typedef enum
 /* objectActionType:
     Defines any action that an object can take.  Conditions that can cause an action to execute are:
     destroy, expire, create, collide, activate, or message.
-*/  
+*/
 
 typedef union
 {
 
-    // createObject: make another type of object appear     
+    // createObject: make another type of object appear
     struct
     {
         long                    whichBaseType;      // what type
@@ -393,7 +393,7 @@ typedef union
         Boolean                 directionRelative;  // determines initial heading
         long                    randomDistance;     // if not 0, then object will be created in random direction from 0 to this away
     } createObject;
-    
+
     // playSound: play a sound effect
     struct
     {
@@ -405,7 +405,7 @@ typedef union
         long                    idMinimum;
         long                    idRange;
     } playSound;
-    
+
     // alterObject: change some attribute of an object
     struct
     {
@@ -414,7 +414,7 @@ typedef union
         long                    minimum;
         long                    range;
     } alterObject;
-    
+
     // makeSpark
     struct
     {
@@ -423,32 +423,32 @@ typedef union
         smallFixedType          velocityRange;
         unsigned char           color;
     } makeSparks;
-    
+
     // release energy
     struct
     {
         smallFixedType          percent;
     } releaseEnergy;
-    
+
     // land at
     struct
     {
         long                    landingSpeed;
     } landAt;
-    
+
     // enter warp
     struct
     {
         smallFixedType          warpSpeed;
     } enterWarp;
-    
+
     // Display message
     struct
     {
         short                   resID;
         short                   pageNum;
     } displayMessage;
-    
+
     // Change score
     struct
     {
@@ -456,7 +456,7 @@ typedef union
         long                    whichScore;     // each player can have many "scores"
         long                    amount;
     } changeScore;
-    
+
     // Declare winner
     struct
     {
@@ -464,13 +464,13 @@ typedef union
         long                    nextLevel;      // -1 = none
         long                    textID;         // id of "debriefing" text
     } declareWinner;
-    
+
     // killObject: cause object to expire
     struct
     {
         dieVerbIDType           dieType;
     } killObject;
-    
+
     // colorFlash: flash whole screen to a color
     struct
     {
@@ -478,13 +478,13 @@ typedef union
         unsigned char           color;          // color of flash
         unsigned char           shade;          // brightness of flash
     } colorFlash;
-    
+
     // keys: disable or enable keys/ for tutorial
     struct
     {
         unsigned long           keyMask;
     } keys;
-    
+
     // zoomLevel; manually set zoom level
     struct
     {
@@ -508,7 +508,7 @@ typedef struct
     unsigned long               inclusiveFilter;        // if it has ALL these attributes, OK -- for non-reflective verbs
     unsigned long               exclusiveFilter;        // don't execute if it has ANY of these
     short                       owner;                  // 0 no matter, 1 same owner, -1 different owner
-    
+
     argumentType                argument;
 } OLDobjectActionType;
 
@@ -530,9 +530,9 @@ typedef struct
 
 typedef enum
 {
-    eKineticBeamKind =                  0,  // has velocity, moves 
+    eKineticBeamKind =                  0,  // has velocity, moves
     eStaticObjectToObjectKind =         1,  // static line connects 2 objects
-    eStaticObjectToRelativeCoordKind =  2,  // static line goes from object to coord 
+    eStaticObjectToRelativeCoordKind =  2,  // static line goes from object to coord
     eBoltObjectToObjectKind =           3,  // lightning bolt, connects 2 objects
     eBoltObjectToRelativeCoordKind =    4   // lightning bolt, from object to coord
 } beamKindType;
@@ -576,23 +576,23 @@ typedef union objectFrameType
             smallFixedType          maxTurnRate;        // max rate at which object can turn
             smallFixedType          turnAcceleration;   // rate at which object reaches maxTurnRate
         } rotation;
-        
+
         // animation: objects whose appearence does not depend on direction
         struct
         {
             long                    firstShape;         // first shape in range
             long                    lastShape;          // last shape (inclusive)
-            
+
             long                    frameDirection;     // direction (either -1, 0, or 1)
             long                    frameDirectionRange;    // either 0, 1, or 2
-            
+
             long                    frameSpeed;         // speed at which object animates
-            long                    frameSpeedRange;    // random addition to speed 
-            
+            long                    frameSpeedRange;    // random addition to speed
+
             long                    frameShape;         // starting shape #
             long                    frameShapeRange;    // random addition to starting shape #
         } animation;
-        
+
         // beam: have no associated sprite
         struct
         {
@@ -601,7 +601,7 @@ typedef union objectFrameType
             long                    accuracy;           // for non-normal beams, how accurate
             long                    range;
         } beam;
-        
+
         // weapon: weapon objects have no physical form, and can only be activated
         struct
         {
@@ -621,44 +621,44 @@ typedef struct
     long                    baseClass;
     long                    baseRace;
     long                    price;
-    
+
     smallFixedType          offenseValue;
 //  smallFixedType          defenseValue;
     long                    destinationClass;           // for computer
-    
+
     smallFixedType          maxVelocity;                // maximum speed
     smallFixedType          warpSpeed;                  // multiplier of speed at warp (0 if cannot)
     unsigned long           warpOutDistance;                // distance at which to come out of warp
-    
+
     smallFixedType          initialVelocity;            // initial minimum velocity (usually relative)
     smallFixedType          initialVelocityRange;       // random addition to initial velocity
-    
+
     smallFixedType          mass;                       // how quickly thrust acheives max
     smallFixedType          maxThrust;                  // maximum amount of thrust
-    
+
     long                    health;                     // starting health
     long                    damage;                     // damage caused by impact
     long                    energy;                     // starting energy for material objects
-    
+
     long                    initialAge;                 // starting minimum age
     long                    initialAgeRange;            // random addition to starting age --
                                                         // for neutral death objects =
                                                         // size of occupying force (HACK)
-    
+
     long                    naturalScale;               // natural scale relative to %100
-    
+
     short                   pixLayer;                   // 0 = no layer 1->3 = back to front
     short                   pixResID;                   // resID of SMIV
     long                    tinySize;                   // size of representation on radar (0 = 1 pixel)
     unsigned char           shieldColor;                // color on radar (0 = don't put on radar)
-    
+
     long                    initialDirection;           // initial direction (usually relative)
     long                    initialDirectionRange;      // random addition to initial direction
-    
+
     long                    pulse;                      // pulse weapon baseObject #(kNoWeapon = none)
     long                    beam;                       // beam weapon baseObject #
     long                    special;                    // special weapon baseObject #
-    
+
     long                    pulsePositionNum;           // # of places from which pulse can fire
     long                    beamPositionNum;            // # of places from which beam can fire
     long                    specialPositionNum;         // # of places from which special can fire
@@ -672,7 +672,7 @@ typedef struct
 //  long                    pulseDirection;             // direction relative to shooter
 //  long                    beamDirection;              // direction relative to shooter
     long                    specialDirection;           // direction relative to shooter
-    
+
     long                    arriveActionDistance;               // distance^2 at which arrive action is triggered on dest
 
 /*  objectActionType        destroyAction[kMaxDestroyAction];   // what happens when object is destroyed
@@ -694,7 +694,7 @@ typedef struct
     long                    activateActionNum;
     long                    arriveAction;   // what happens when object arrives at destination
     long                    arriveActionNum;
-    
+
     objectFrameType         frame;
 /*
     union
@@ -707,23 +707,23 @@ typedef struct
             smallFixedType          maxTurnRate;        // max rate at which object can turn
             smallFixedType          turnAcceleration;   // rate at which object reaches maxTurnRate
         } rotation;
-        
+
         // animation: objects whose appearence does not depend on direction
         struct
         {
             long                    firstShape;         // first shape in range
             long                    lastShape;          // last shape (inclusive)
-            
+
             long                    frameDirection;     // direction (either -1, 0, or 1)
             long                    frameDirectionRange;    // either 0, 1, or 2
-            
+
             long                    frameSpeed;         // speed at which object animates
-            long                    frameSpeedRange;    // random addition to speed 
-            
+            long                    frameSpeedRange;    // random addition to speed
+
             long                    frameShape;         // starting shape #
             long                    frameShapeRange;    // random addition to starting shape #
         } animation;
-        
+
         // beam: have no associated sprite
         struct
         {
@@ -732,7 +732,7 @@ typedef struct
             long                    accuracy;           // for non-normal beams, how accurate
             long                    range;
         } beam;
-        
+
         // weapon: weapon objects have no physical form, and can only be activated
         struct
         {
@@ -779,19 +779,19 @@ typedef struct spaceObjectType
     baseObjectType          *baseType;
     long                    whichBaseObject;
     long                    entryNumber;            // major hack?
-    
+
     unsigned long           keysDown;
-    
+
     long                    tinySize;
     unsigned char           tinyColor;
-    
+
     long                    direction;
     long                    directionGoal;
     smallFixedType          turnVelocity;
     smallFixedType          turnFraction;
-    
+
     long                    offlineTime;
-    
+
     coordPointType          location;
     coordPointType          lastLocation;
     long                    lastDir;
@@ -804,7 +804,7 @@ typedef struct spaceObjectType
     long                    previousObjectNumber;
     spaceObjectTypePtr      nextObject;
     long                    nextObjectNumber;
-    
+
     long                    runTimeFlags;       // distance from origin to destination
     coordPointType          destinationLocation;// coords of our destination ( or kNoDestination)
     long                    destinationObject;  // which object?  or kNoDestinationObject -- or, if we're a dest, our corresponding destBalance for AI
@@ -812,22 +812,22 @@ typedef struct spaceObjectType
     long                    destObjectDest;     // # of our destination's destination in case it dies
     long                    destObjectID;       // ID of our dest object
     long                    destObjectDestID;   // id of our dest's destination
-    
+
 //  smallFixedType          balance[kScenarioPlayerNum];
     smallFixedType          localFriendStrength;
     smallFixedType          localFoeStrength;
     smallFixedType          escortStrength;
     smallFixedType          remoteFriendStrength;
     smallFixedType          remoteFoeStrength;
-    
+
     smallFixedType          bestConsideredTargetValue;
     smallFixedType          currentTargetValue;
     long                    bestConsideredTargetNumber;
-    
+
     long                    timeFromOrigin;     // time it's been since we left
     fixedPointType          idealLocationCalc;  // calced when we got origin
     coordPointType          originLocation;     // coords of our origin
-    
+
     fixedPointType          motionFraction;
     fixedPointType          velocity;
     smallFixedType          thrust;
@@ -836,7 +836,7 @@ typedef struct spaceObjectType
     longPointType           scaledSize;
     longRect                absoluteBounds;
     long                    randomSeed;
-    
+
     union
     {
 //      struct
@@ -858,7 +858,7 @@ typedef struct spaceObjectType
             beamType            *beam;
         } beam;
     } frame;
-    
+
     long                    health;
     long                    energy;
     long                    battery;
@@ -871,13 +871,13 @@ typedef struct spaceObjectType
     short                   beamCharge;
     short                   specialCharge;
     short                   active;
-    
+
     long                    warpEnergyCollected;
-    
+
     short                   layer;
     spriteType              *sprite;
     long                    whichSprite;
-    
+
     UnsignedWide            distanceFromPlayer;
     unsigned long           closestDistance;
     long                    closestObject;
@@ -889,10 +889,10 @@ typedef struct spaceObjectType
     long                    longestWeaponRange;
     long                    shortestWeaponRange;
     long                    engageRange;            // either longestWeaponRange or kEngageRange
-    
+
     kPresenceStateType      presenceState;
     long                    presenceData;
-    
+
     long                    hitState;
     long                    cloakState;
     dutyType                duty;
@@ -903,22 +903,22 @@ typedef struct spaceObjectType
     long                    pulseTime;
     long                    pulseAmmo;
     long                    pulsePosition;
-    
+
     baseObjectType          *beamBase;
     long                    beamType;
     long                    beamTime;
     long                    beamAmmo;
     long                    beamPosition;
-    
+
     baseObjectType          *specialBase;
     long                    specialType;
     long                    specialTime;
     long                    specialAmmo;
     long                    specialPosition;
-    
+
     long                    periodicTime;
     long                    whichLabel;
-    
+
     unsigned long           myPlayerFlag;
     unsigned long           seenByPlayerFlags;
     unsigned long           hostileTowardsFlags;
@@ -926,6 +926,6 @@ typedef struct spaceObjectType
     unsigned char           shieldColor;
     unsigned char           originalColor;
 } spaceObjectType;
-    
+
 #pragma options align=reset
 #endif kSpaceObject

@@ -25,7 +25,7 @@ void CopyAnyCharPString( anyCharType *to, anyCharType *from)
 
 {
     short       i, l;
-    
+
     *to = *from;
     l = *to;
     to++;
@@ -38,17 +38,17 @@ void InsertAnyCharPStringInPString( anyCharType *to, anyCharType *from, long off
 {
     anyCharType *dc, *sc;
     long        count, flen;
-    
+
     if ( offset <= *to)
     {
         if ( (*to + *from) > kAnyCharPStringMaxLen) flen = kAnyCharPStringMaxLen - (long)*from;
         else flen = *from;
-        
+
         count = *to - (offset);
         dc = to + offset + 1 + flen + ( count - 1);
         sc = to + offset + 1 + ( count - 1);
         *to += flen;
-        
+
         // move part that will be replaced
         while ( count > 0)
         {
@@ -57,11 +57,11 @@ void InsertAnyCharPStringInPString( anyCharType *to, anyCharType *from, long off
             sc--;
             count--;
         }
-        
+
         dc = to + offset + 1;
         sc = from + 1;
         count = flen; // count = chars over max len
-        
+
         while ( count > 0)
         {
             *dc = *sc;
@@ -76,7 +76,7 @@ void CutCharsFromAnyCharPString( anyCharType *string, long start, long length)
 {
     anyCharType *dc, *sc;
     long        count;
-    
+
     if ( start <= *string)
     {
         if (( start + length) > *string)
@@ -94,5 +94,5 @@ void CutCharsFromAnyCharPString( anyCharType *string, long start, long length)
             count--;
         }
         *string -= length;
-    }   
+    }
 }

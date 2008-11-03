@@ -107,15 +107,15 @@ OSErr EF_OpenExternalFile( void)
 {
     Handle  tempScenarioInfo = nil;
     short   oldResFile = CurResFile(), homeResFile;
-    
+
     if ( gAresGlobal->externalFileRefNum != -1)
         CloseResFile( gAresGlobal->externalFileRefNum);
-    
+
     if ( gAresGlobal->externalFileSpec.name[0] > 0)
     {
         gAresGlobal->externalFileRefNum =
             FSpOpenResFile( &gAresGlobal->externalFileSpec, fsRdPerm);
-        
+
         if ( gAresGlobal->externalFileRefNum > 0)
             UseResFile( gAresGlobal->externalFileRefNum);
         else
@@ -128,8 +128,8 @@ OSErr EF_OpenExternalFile( void)
     {
         gAresGlobal->externalFileRefNum = -1;
     }
-    
-        
+
+
     // scenario info
     tempScenarioInfo = GetResource( 'nlAG', 128);
     if ( tempScenarioInfo != nil)
@@ -153,7 +153,7 @@ OSErr EF_OpenExternalFile( void)
         gAresGlobal->externalFileRefNum = -1;
         return resNotFound;
     }
-    
+
     // scenario stuff
     if ( gAresGlobal->gScenarioData != nil)
     {
@@ -179,7 +179,7 @@ OSErr EF_OpenExternalFile( void)
         DisposeHandle( gAresGlobal->gScenarioBriefData);
         gAresGlobal->gScenarioBriefData = nil;
     }
-    
+
     // races
     if ( gAresGlobal->gRaceData != nil)
     {
@@ -187,7 +187,7 @@ OSErr EF_OpenExternalFile( void)
         DisposeHandle( gAresGlobal->gRaceData);
         gAresGlobal->gRaceData = nil;
     }
-    
+
     // object stuff
     if ( gBaseObjectData != nil)
     {
@@ -195,7 +195,7 @@ OSErr EF_OpenExternalFile( void)
         DisposeHandle( gBaseObjectData);
         gBaseObjectData = nil;
     }
-    
+
     if ( gObjectActionData != nil)
     {
         HHDeregisterHandle( &gObjectActionData);
@@ -204,7 +204,7 @@ OSErr EF_OpenExternalFile( void)
     }
 
     // load all the new stuff
-    
+
     // scenario stuff
     gAresGlobal->gScenarioData = GetResource( kScenarioResType, kScenarioResID);
     if ( gAresGlobal->gScenarioData == nil)
@@ -222,10 +222,10 @@ OSErr EF_OpenExternalFile( void)
     DetachResource( gAresGlobal->gScenarioData);
 
     mDataHandleLockAndRegister( gAresGlobal->gScenarioData, nil, nil, CorrectThisScenarioPtr, "\pgAresGlobal->gScenarioData")
-    
+
     gAresGlobal->scenarioNum = GetHandleSize( gAresGlobal->gScenarioData) /
         sizeof( scenarioType);
-    
+
     gAresGlobal->gScenarioInitialData = GetResource( kScenarioInitialResType, kScenarioInitialResID);
     if ( gAresGlobal->gScenarioInitialData == nil)
     {
@@ -235,10 +235,10 @@ OSErr EF_OpenExternalFile( void)
     DetachResource( gAresGlobal->gScenarioInitialData);
 
     mDataHandleLockAndRegister( gAresGlobal->gScenarioInitialData, nil, nil, nil, "\pgAresGlobal->gScenarioInitialData")
-    
+
     gAresGlobal->maxScenarioInitial = GetHandleSize(
         gAresGlobal->gScenarioInitialData) / sizeof( scenarioInitialType);
-        
+
     gAresGlobal->gScenarioConditionData = GetResource( kScenarioConditionResType, kScenarioConditionResID);
     if ( gAresGlobal->gScenarioConditionData == nil)
     {
@@ -248,10 +248,10 @@ OSErr EF_OpenExternalFile( void)
     DetachResource( gAresGlobal->gScenarioConditionData);
 
     mDataHandleLockAndRegister( gAresGlobal->gScenarioConditionData, nil, nil, nil, "\pgAresGlobal->gScenarioConditionData")
-    
+
     gAresGlobal->maxScenarioCondition = GetHandleSize(
         gAresGlobal->gScenarioConditionData) / sizeof( scenarioConditionType);
-        
+
     gAresGlobal->gScenarioBriefData = GetResource( kScenarioBriefResType, kScenarioBriefResID);
     if ( gAresGlobal->gScenarioBriefData == nil)
     {
@@ -264,7 +264,7 @@ OSErr EF_OpenExternalFile( void)
 
     gAresGlobal->maxScenarioBrief = GetHandleSize(
         gAresGlobal->gScenarioBriefData) / sizeof( briefPointType);
-        
+
     // races
     if ( gAresGlobal->gRaceData == nil)
     {
@@ -278,8 +278,8 @@ OSErr EF_OpenExternalFile( void)
 
         mDataHandleLockAndRegister( gAresGlobal->gRaceData, nil, nil, nil, "\pgAresGlobal->gRaceData")
     }
-    
-    // object stuff 
+
+    // object stuff
     gBaseObjectData = GetResource( kBaseObjectResType, kBaseObjectResID);
     if ( gBaseObjectData == nil)
     {
@@ -293,7 +293,7 @@ OSErr EF_OpenExternalFile( void)
 
     gAresGlobal->maxBaseObject = GetHandleSize( gBaseObjectData) /
         sizeof( baseObjectType);
-        
+
     gObjectActionData = GetResource( kObjectActionResType, kObjectActionResID);
     if ( gObjectActionData == nil)
     {
@@ -305,9 +305,9 @@ OSErr EF_OpenExternalFile( void)
 
     gAresGlobal->maxObjectAction = GetHandleSize( gObjectActionData)
         / sizeof( objectActionType);
-        
+
     gAresGlobal->okToOpenFile = false;
-    
+
     CorrectAllBaseObjectColor();
     ResetAllSpaceObjects();
     ResetActionQueueData();

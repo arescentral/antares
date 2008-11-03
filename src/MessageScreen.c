@@ -164,7 +164,7 @@ int InitMessageScreen( void)
     anyCharType     *anyChar, nilLabel = 0;
     long            i, *l, propersize;
     longMessageType *tmessage = nil;
-    
+
     gAresGlobal->gTrueClipBottom = CLIP_BOTTOM;
     propersize = (sizeof( anyCharType) *(long)kMaxMessageLength) + (long)kAnyCharOffsetStart;
     gAresGlobal->gMessageData = NewHandle( (sizeof( anyCharType) *
@@ -189,7 +189,7 @@ int InitMessageScreen( void)
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 5);
         return( MEMORY_ERROR);
     }
-    
+
     mHandleLockAndRegister( gAresGlobal->gMessageData, nil, nil, nil, "\pgAresGlobal->gMessageData")
     mHandleLockAndRegister( gAresGlobal->gStatusString, nil, nil, nil, "\pgAresGlobal->gStatusString")
     mHandleLockAndRegister( gAresGlobal->gLongMessageData, nil, nil, nil, "\pgAresGlobal->gLongMessageData")
@@ -198,10 +198,10 @@ int InitMessageScreen( void)
     *l = kAnyCharOffsetStart;
     l = (long *)*gAresGlobal->gMessageData + kLongOffsetFirstFree;
     *l = kAnyCharOffsetStart;
-        
+
     anyChar = (anyCharType *)*gAresGlobal->gMessageData;
     anyChar += kAnyCharOffsetStart;
-    
+
     for ( i = 0; i < kMaxMessageLength; i++) // kMaxMessageLength
     {
         *anyChar = kMessageEndChar;
@@ -211,7 +211,7 @@ int InitMessageScreen( void)
     gAresGlobal->gMessageLabelNum = AddScreenLabel( kMessageScreenLeft,
                         kMessageScreenTop, 0, 0,
                         &nilLabel, nil, FALSE, kMessageColor);
-        
+
     if ( gAresGlobal->gMessageLabelNum < 0)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kAddScreenLabelError, -1, -1, -1, __FILE__, 3);
@@ -224,7 +224,7 @@ int InitMessageScreen( void)
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kAddScreenLabelError, -1, -1, -1, __FILE__, 4);
         return( MEMORY_ERROR);
     }
-        
+
     tmessage = (longMessageType *)*gAresGlobal->gLongMessageData;
     tmessage->startResID =  tmessage->endResID = tmessage->lastResID = tmessage->currentResID =
         -1;
@@ -270,7 +270,7 @@ void ClearMessage( void)
     long    i, *l;
     anyCharType     *anyChar, nilLabel = 0;
     longMessageType *tmessage;
-    
+
     l = (long *)*gAresGlobal->gMessageData + kLongOffsetFirstChar;
     *l = kAnyCharOffsetStart;
     l = (long *)*gAresGlobal->gMessageData + kLongOffsetFirstFree;
@@ -306,7 +306,7 @@ void ClearMessage( void)
     tmessage->labelMessageID = AddScreenLabel( 0, 0, 0, 0, &nilLabel, nil,
         false, SKY_BLUE);
     SetScreenLabelKeepOnScreenAnyway( tmessage->labelMessageID, true);
-    
+
 #endif
 }
 
@@ -316,36 +316,36 @@ void AppendStringToMessage( anyCharType *string)
 #ifdef kUseMessage
     anyCharType     strLen, *message;
     long            *freeoffset;
-    
-    
+
+
     // get the offset to the first free character
     freeoffset = (long *)*gAresGlobal->gMessageData + kLongOffsetFirstFree;
-    
+
     // set the destination char (message) to the first free character
     message = (anyCharType *)*gAresGlobal->gMessageData + *freeoffset;
-    
+
     // get the length of the source string
     strLen = *string++;
-    
+
     // copy the string
     while (strLen != 0)
     {
         // copy the character
         *message++ = *string++;
-        
+
         // increase the first free character offset
         (*freeoffset)++;
-        
+
         // if the first free characrer offset == the length of our data (in chars) then wrap around
         if ( *freeoffset >= kAnyCharLastChar)
         {
             // reset offset to first char data (after the two longs of offsets)
             *freeoffset = kAnyCharOffsetStart;
-            
+
             // reset the destination char to the first free char
             message = (anyCharType *)*gAresGlobal->gMessageData + *freeoffset;
         }
-        
+
         strLen--;
     }
 #endif
@@ -356,26 +356,26 @@ void StartMessage( void)
 {
     anyCharType     *message;
     long            *freeoffset;
-    
-    
+
+
     // get the offset to the first free character
     freeoffset = (long *)*gAresGlobal->gMessageData + kLongOffsetFirstFree;
-    
+
     // set the destination char (message) to the first free character
     message = (anyCharType *)*gAresGlobal->gMessageData + *freeoffset;
-    
+
     // we should be on the special end char, which we turn into a separator char
     *message++ = kMessageSeparateChar;
-    
+
     // increase the first free character offset
     (*freeoffset)++;
-    
+
     // if the first free characrer offset == the length of our data (in chars) then wrap around
     if ( *freeoffset >= kAnyCharLastChar)
     {
         // reset offset to first char data (after the two longs of offsets)
         *freeoffset = kAnyCharOffsetStart;
-        
+
         // reset the destination char to the first free char
         message = (anyCharType *)*gAresGlobal->gMessageData + *freeoffset;
     }
@@ -386,15 +386,15 @@ void EndMessage( void)
 {
     anyCharType     *message;
     long            *freeoffset;
-    
-    
+
+
     // get the offset to the first free character
     freeoffset = (long *)*gAresGlobal->gMessageData + kLongOffsetFirstFree;
-    
+
     // set the destination char (message) to the first free character
     message = (anyCharType *)*gAresGlobal->gMessageData + *freeoffset;
-    
-    // the last char we're resting on gets turned into an end char, since this should be the last message   
+
+    // the last char we're resting on gets turned into an end char, since this should be the last message
     *message = kMessageEndChar;
 }
 
@@ -402,9 +402,9 @@ void StartLongMessage( short startResID, short endResID)
 
 {
     longMessageType *tmessage;
-    
+
     tmessage = (longMessageType *)*gAresGlobal->gLongMessageData;
-    
+
     if ( tmessage->currentResID != -1)
     {
         tmessage->startResID = startResID;
@@ -444,9 +444,9 @@ void StartStringMessage( anyCharType *string)
 
 {
     longMessageType *tmessage;
-    
+
     tmessage = (longMessageType *)*gAresGlobal->gLongMessageData;
-    
+
     tmessage->newStringMessage = true;
     if ( tmessage->currentResID != -1)
     {
@@ -494,7 +494,7 @@ void ClipToCurrentLongMessage( void)
     transColorType  *transColor;
     anyCharType     *ac;
     long            count;
-    
+
     tmessage = (longMessageType *)*gAresGlobal->gLongMessageData;
     if (( tmessage->currentResID != tmessage->lastResID) || ( tmessage->newStringMessage))
     {
@@ -503,7 +503,7 @@ void ClipToCurrentLongMessage( void)
         {
             CLIP_BOTTOM = gAresGlobal->gTrueClipBottom;
         }
-        
+
         // draw in offscreen world
         if (( tmessage->currentResID >= 0) && ( tmessage->stage == kClipStage))
         {
@@ -534,7 +534,7 @@ void ClipToCurrentLongMessage( void)
                     tmessage->labelMessage = true;
                 }
                 else tmessage->labelMessage = false;
-                                
+
             }
             if ( textData != nil)
             {
@@ -550,7 +550,7 @@ void ClipToCurrentLongMessage( void)
                 tmessage->textHeight = DetermineDirectTextHeightInWidth( &tmessage->retroTextSpec,
                 (CLIP_RIGHT - CLIP_LEFT) - kHBufferTotal);
                 tmessage->textHeight += kLongMessageVPadDouble;
-                
+
                 if ( tmessage->labelMessage == false)
                     CLIP_BOTTOM = gAresGlobal->gTrueClipBottom - tmessage->textHeight;
                 else
@@ -583,14 +583,14 @@ void ClipToCurrentLongMessage( void)
 void DrawCurrentLongMessage( long timePass)
 
 {
-    PixMapHandle    offPixBase; 
+    PixMapHandle    offPixBase;
     Rect            tRect, uRect;
     longRect        lRect, cRect;
     transColorType  *transColor;
     short           textHeight = 0, i;
     longMessageType *tmessage;
     unsigned char   color;
-    
+
     tmessage = (longMessageType *)*gAresGlobal->gLongMessageData;
     if (( tmessage->currentResID != tmessage->lastResID) ||
         ( tmessage->newStringMessage))
@@ -602,7 +602,7 @@ void DrawCurrentLongMessage( long timePass)
         {
             CheckScenarioConditions( 0);
         }
-        
+
         if (tmessage->lastResID >= 0)
         {
             if ( tmessage->lastLabelMessage)
@@ -624,7 +624,7 @@ void DrawCurrentLongMessage( long timePass)
                 NormalizeColors();
             }
         }
-        
+
         // draw in offscreen world
         if (( tmessage->currentResID >= 0) && ( tmessage->stage == kShowStage))
         {
@@ -654,7 +654,7 @@ void DrawCurrentLongMessage( long timePass)
                 } else
                 {
                     SetScreenLabelAge( tmessage->labelMessageID, 0);
-                    
+
                     MessageLabel_Set_Special( tmessage->labelMessageID,
                         tmessage->retroTextSpec.text);
                 }
@@ -700,7 +700,7 @@ void DrawCurrentLongMessage( long timePass)
                 while ( tmessage->charDelayCount > 0)
                 {
                     i = 3;
-                    
+
                     if (( tmessage->retroTextSpec.text != nil) &&
                         ( tmessage->retroTextSpec.thisPosition < tmessage->retroTextSpec.textLength))
                     {
@@ -712,17 +712,17 @@ void DrawCurrentLongMessage( long timePass)
                         tRect.bottom = tRect.top + mDirectFontHeight +
                             tmessage->retroTextSpec.topBuffer +
                             tmessage->retroTextSpec.bottomBuffer;
-                        
+
                         lRect.left += kHBuffer;
                         lRect.right -= kHBuffer;
-                        
+
                         DrawRetroTextCharInRect( &(tmessage->retroTextSpec),
                             3, &lRect, &lRect,*offPixBase, 0, 0);
 //                           *thePixMapHandle, gNatePortLeft, gNatePortTop);
 
                         lRect.left -= kHBuffer;
                         lRect.right += kHBuffer;
-                        
+
                         uRect.left = tmessage->retroTextSpec.xpos;
                         uRect.top = tmessage->retroTextSpec.ypos -
                             (mDirectFontAscent  + tmessage->retroTextSpec.topBuffer);
@@ -756,7 +756,7 @@ void EndLongMessage( void)
 
 {
     longMessageType *tmessage;
-    
+
     tmessage = (longMessageType *)*gAresGlobal->gLongMessageData;
     tmessage->previousStartResID = tmessage->startResID;
     tmessage->previousEndResID = tmessage->endResID;
@@ -769,13 +769,13 @@ void EndLongMessage( void)
         DisposeHandle( tmessage->retroTextSpec.text);
         tmessage->retroTextSpec.text = nil;
     }
-    CopyAnyCharPString( tmessage->lastStringMessage, tmessage->stringMessage);  
+    CopyAnyCharPString( tmessage->lastStringMessage, tmessage->stringMessage);
 }
 
 void AdvanceCurrentLongMessage( void)
 {
     longMessageType *tmessage;
-    
+
     tmessage = (longMessageType *)*gAresGlobal->gLongMessageData;
     if ( tmessage->currentResID != -1)
     {
@@ -794,7 +794,7 @@ void AdvanceCurrentLongMessage( void)
 void PreviousCurrentLongMessage( void)
 {
     longMessageType *tmessage;
-    
+
     tmessage = (longMessageType *)*gAresGlobal->gLongMessageData;
     if ( tmessage->currentResID != -1)
     {
@@ -812,7 +812,7 @@ void PreviousCurrentLongMessage( void)
 void ReplayLastLongMessage( void)
 {
     longMessageType *tmessage;
-    
+
     tmessage = (longMessageType *)*gAresGlobal->gLongMessageData;
     if (( tmessage->previousStartResID >= 0) && ( tmessage->currentResID < 0))
     {
@@ -832,10 +832,10 @@ void DrawMessageScreen( long byUnits)
     static anyCharType  nilLabel = 0;
     long            *firstoffset, offset;
     Boolean         allSpaces = TRUE;
-    
+
     // increase the amount of time current message has been shown
     gAresGlobal->gMessageTimeCount += byUnits;
-    
+
     // if it's been shown for too long, then get the next message
     if ( gAresGlobal->gMessageTimeCount > kMessageDisplayTime)
     {
@@ -846,31 +846,31 @@ void DrawMessageScreen( long byUnits)
         if ( *anyChar != kMessageEndChar)
         {
             offset = *firstoffset;
-            
+
             do
             {
                 // increase dest char
                 anyChar++;
-                
+
                 // increase offset copy
                 offset++;
-                
+
                 // if the offset == the length of our data (in chars) then wrap around
                 if ( offset >= kAnyCharLastChar)
                 {
                     // reset offset to first char data (after the two longs of offsets)
                     offset = kAnyCharOffsetStart;
-                    
+
                     // reset the destination char to the first free char
                     anyChar = (anyCharType *)*gAresGlobal->gMessageData + offset;
-                }           
+                }
             } while (( *anyChar != kMessageSeparateChar) && ( *anyChar != kMessageEndChar));
             *firstoffset = offset;
         }
     }
-        
+
     mSetDirectFont( kTacticalFontNum)
-    
+
     // get the offset to the first current char
     firstoffset = (long *)*gAresGlobal->gMessageData + kLongOffsetFirstChar;
     anyChar = (anyCharType *)*gAresGlobal->gMessageData + *firstoffset;
@@ -880,40 +880,40 @@ void DrawMessageScreen( long byUnits)
         *tLen = 0;
         dChar++;
         offset = *firstoffset;
-        
+
         do
         {
             // increase dest char
             anyChar++;
-            
+
             // increase offset copy
             offset++;
-            
+
             // if the offset == the length of our data (in chars) then wrap around
             if ( offset >= kAnyCharLastChar)
             {
                 // reset offset to first char data (after the two longs of offsets)
                 offset = kAnyCharOffsetStart;
-                
+
                 // reset the destination char to the first free char
                 anyChar = (anyCharType *)*gAresGlobal->gMessageData + offset;
             }
             *dChar = *anyChar;
             dChar++;
-            *tLen += 1;         
+            *tLen += 1;
         } while (( *anyChar != kMessageSeparateChar) && ( *anyChar != kMessageEndChar));
         *tLen -= 1;
-        
+
         if ( gAresGlobal->gMessageTimeCount < kRaiseTime)
         {
-            SetScreenLabelPosition( gAresGlobal->gMessageLabelNum, kMessageScreenLeft, 
+            SetScreenLabelPosition( gAresGlobal->gMessageLabelNum, kMessageScreenLeft,
                     CLIP_BOTTOM - gAresGlobal->gMessageTimeCount);
         } else if ( gAresGlobal->gMessageTimeCount > kLowerTime)
         {
             SetScreenLabelPosition( gAresGlobal->gMessageLabelNum, kMessageScreenLeft,
                     CLIP_BOTTOM - ( kMessageDisplayTime - gAresGlobal->gMessageTimeCount));
         }
-        
+
         SetScreenLabelString( gAresGlobal->gMessageLabelNum, tString);
     } else
     {
@@ -939,7 +939,7 @@ void SetStatusString( anyCharType *s, Boolean drawNow, unsigned char color)
     {
         **gAresGlobal->gStatusString = 0;
     }
-    
+
     if ( drawNow) UpdateStatusString();
 */
     SetScreenLabelColor( gAresGlobal->gStatusLabelNum, color);
@@ -952,9 +952,9 @@ void UpdateStatusString( void)
 
 {
 
-/*  
+/*
     mSetDirectFont( kMessageFontNum)
-    
+
     offPixBase = GetGWorldPixMap( gOffWorld);
     DrawInOffWorld();
     SetLongRect( &lRect, kDestinationLeft, kDestinationTop, kDestinationRight,
@@ -1026,7 +1026,7 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
                     }
                     x = 0 + retroTextSpec->tabSize * wordLen;
                     break;
-                
+
                 case kCodeForeColorChar:
                 case kCodeBackColorChar:
                     thisChar++;
@@ -1036,7 +1036,7 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
                     charNum++;
                     (*lineLengthList)++;
                     break;
-                
+
                 case kCodeChar:
                     mDirectCharWidth( charWidth, *thisChar, widthPtr)
                     x += charWidth;
@@ -1098,12 +1098,12 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
     long            charNum = 0, y = bounds->top + mDirectFontAscent + retroTextSpec->topBuffer, x = bounds->left,
                     oldx = 0, oldCharNum, wordLen;
     unsigned char   *widthPtr, charWidth, wrapState, /* 0 = none, 1 = once, 2 = more than once*/
-                    oldColor = retroTextSpec->color, oldBackColor = retroTextSpec->backColor, tempColor;    
+                    oldColor = retroTextSpec->color, oldBackColor = retroTextSpec->backColor, tempColor;
     anyCharType     *thisChar = (anyCharType *)*retroTextSpec->text, *thisWordChar, thisWord[255];
     longRect        backRect, lineRect;
     unsigned char   calcColor, calcShade;
     transColorType  *transColor;
-    
+
     while ( charNum < retroTextSpec->textLength)
     {
         if ( *thisChar == kReturnChar)
@@ -1114,7 +1114,7 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
             lineRect.bottom = lineRect.top + mDirectFontHeight + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
             DrawNateRectClipped( destMap, &lineRect, clipRect, (portLeft << (long)2),
                 portTop, retroTextSpec->backColor);
-                
+
             y += mDirectFontHeight + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
             x = bounds->left;
             thisChar++;
@@ -1156,7 +1156,7 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
                     DrawNateRectClipped( destMap, &backRect, clipRect, (portLeft << (long)2),
                         portTop, retroTextSpec->backColor);
                     break;
-                
+
                 case kCodeChar:
                     oldx = backRect.left = x;
                     backRect.top = y - (mDirectFontAscent + retroTextSpec->topBuffer);
@@ -1172,21 +1172,21 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
                     DrawDirectTextStringClipped( thisWord, retroTextSpec->color, destMap, clipRect, portLeft,
                             portTop);
                     break;
-                    
+
                 case kCodeInvertChar:
                     tempColor = retroTextSpec->color;
                     retroTextSpec->color = retroTextSpec->backColor;
                     retroTextSpec->backColor = tempColor;
                     break;
-                
+
                 case kCodeForeColorChar:
                     thisChar++;
-                    charNum++;          
+                    charNum++;
                     (retroTextSpec->thisPosition)++;
                     (retroTextSpec->linePosition)++;
                     calcColor = mHexDigitValue(*thisChar);
                     thisChar++;
-                    charNum++;          
+                    charNum++;
                     (retroTextSpec->thisPosition)++;
                     (retroTextSpec->linePosition)++;
                     calcShade = mHexDigitValue(*thisChar);
@@ -1195,10 +1195,10 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
 
                 case kCodeBackColorChar:
                     thisChar++;
-                    charNum++;          
+                    charNum++;
                     calcColor = mHexDigitValue(*thisChar);
                     thisChar++;
-                    charNum++;          
+                    charNum++;
                     calcShade = mHexDigitValue(*thisChar);
                     if (( calcColor == 0) && (calcShade == 0)) retroTextSpec->backColor = 0xff;
                     else
@@ -1206,14 +1206,14 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
                         mGetTranslateColorShade( calcColor, calcShade, retroTextSpec->backColor, transColor)
                     }
                     break;
-                
+
                 case kCodeRevertChar:
                     retroTextSpec->color = retroTextSpec->originalColor;
                     retroTextSpec->backColor = retroTextSpec->originalBackColor;
                     break;
             }
             thisChar++;
-            charNum++;          
+            charNum++;
         } else
         {
             backRect.left = x;
@@ -1281,7 +1281,7 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
     unsigned char   tempColor, calcColor, calcShade;
     transColorType  *transColor;
     Boolean         drawCursor = ( charsToDo > 0);
-    
+
     cursorRect.left = retroTextSpec->xpos;
     cursorRect.top = retroTextSpec->ypos -
         (mDirectFontAscent  + retroTextSpec->topBuffer);
@@ -1293,9 +1293,9 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
     if ( retroTextSpec->originalBackColor != WHITE)
         DrawNateRectClipped( destMap, &tlRect, clipRect, (portLeft << (long)2),
             portTop, retroTextSpec->originalBackColor);
-    
+
     if ( charsToDo <= 0) charsToDo = retroTextSpec->lineLength[retroTextSpec->lineCount];
-    
+
     while (( charsToDo > 0) && ( retroTextSpec->thisPosition <
         retroTextSpec->textLength))
     {
@@ -1327,7 +1327,7 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
                         DrawNateRectClipped( destMap, &tlRect, clipRect, (portLeft << (long)2), portTop,
                             retroTextSpec->backColor);
                     break;
-                
+
                 case kCodeChar:
                     oldx = cursorRect.left = retroTextSpec->xpos;
                     cursorRect.top = retroTextSpec->ypos - (mDirectFontAscent + retroTextSpec->topBuffer);
@@ -1349,13 +1349,13 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
                             destMap, clipRect, portLeft,
                             portTop);
                     break;
-                    
+
                 case kCodeInvertChar:
                     tempColor = retroTextSpec->color;
                     retroTextSpec->nextColor = retroTextSpec->backColor;
                     retroTextSpec->nextBackColor = tempColor;
                     break;
-                
+
                 case kCodeForeColorChar:
                     thisChar++;
                     charsToDo--;
@@ -1389,7 +1389,7 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
                         mGetTranslateColorShade( calcColor, calcShade, retroTextSpec->nextBackColor, transColor)
                     }
                     break;
-                
+
                 case kCodeRevertChar:
                     retroTextSpec->nextColor = retroTextSpec->originalColor;
                     retroTextSpec->nextBackColor = retroTextSpec->originalBackColor;
@@ -1413,7 +1413,7 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
             else
                 thisWord[1] = *thisChar;
 //          thisWord[1] = ' ';
-            
+
             retroTextSpec->color = retroTextSpec->nextColor;
             retroTextSpec->backColor = retroTextSpec->nextBackColor;
             cursorRect.left = retroTextSpec->xpos;
@@ -1444,7 +1444,7 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
             if ( retroTextSpec->backColor != WHITE)
                 DrawNateRectClipped( destMap, &tlRect, clipRect, (portLeft << (long)2), portTop,
                     retroTextSpec->backColor);
-            
+
             retroTextSpec->linePosition = 0;
             retroTextSpec->ypos += mDirectFontHeight + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
             retroTextSpec->xpos = bounds->left;
@@ -1455,7 +1455,7 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
         } else
         {
         }
-        
+
     }
     if ( retroTextSpec->thisPosition < retroTextSpec->textLength)
     {
@@ -1475,11 +1475,11 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
 /* MessageLabel_Set_Special
     for ambrosia emergency tutorial; Sets screen label given specially formatted
     text. Text must have its own line breaks so label fits on screen.
-    
+
     First few chars of text must be in this format:
-    
+
     #tnnn...#
-    
+
     Where '#' is literal;
     t = one of three characters: 'L' for left, 'R' for right, and 'O' for object
     nnn... are digits specifying value (distance from top, or initial object #)
@@ -1491,18 +1491,18 @@ void MessageLabel_Set_Special( short id, Handle text)
     Str255  s;
     Point   attachPoint = {0, 0};
     Boolean hintLine = false;
-    
+
     s[0] = 0;
     if ( text == nil) return;
     textLength = GetHandleSize( text);
     c = *text;
-    
+
     // if not legal, bail
     if ( *c != '#') return;
-    
+
     c++;
     charNum++;
-    
+
     whichType = *c;
     c++;
     charNum++;
@@ -1515,7 +1515,7 @@ void MessageLabel_Set_Special( short id, Handle text)
         charNum++;
         safetyCount++;
     }
-    
+
     c++;
     charNum++;
     if ( *c == '#') // also a hint line attached
@@ -1536,7 +1536,7 @@ void MessageLabel_Set_Special( short id, Handle text)
 
         c++;
         charNum++;
-        
+
         safetyCount = 0;
         while (( *c != '#') && ( charNum < textLength) && ( safetyCount < 10)) // arbitrary safety net
         {
@@ -1570,7 +1570,7 @@ void MessageLabel_Set_Special( short id, Handle text)
         case 'R':
             SetScreenLabelOffset( id, 0, 0);
 
-            SetScreenLabelPosition( id, gAresGlobal->gRightPanelLeftEdge - 
+            SetScreenLabelPosition( id, gAresGlobal->gRightPanelLeftEdge -
                 (GetScreenLabelWidth( id)+10), gAresGlobal->gInstrumentTop +
                 value);
             break;
@@ -1581,22 +1581,22 @@ void MessageLabel_Set_Special( short id, Handle text)
             SetScreenLabelPosition( id, 138, gAresGlobal->gInstrumentTop +
                 value);
             break;
-        
+
         case 'O':
             {
                 spaceObjectType         *o;
                 scenarioInitialType     *initial;
-                
+
                 mGetRealObjectFromInitial( o, initial, value)
-                
+
                 SetScreenLabelOffset( id, -(GetScreenLabelWidth( id)/2), 64);
 
                 SetScreenLabelObject( id, o);
-                
+
                 hintLine = true;
             }
             break;
-            
+
     }
     attachPoint.v -= 2;
     SetScreenLabelAttachedHintLine( id, hintLine, attachPoint);

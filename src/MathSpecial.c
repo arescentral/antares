@@ -84,7 +84,7 @@ machine that doesn't even have to be binary, although of course it is
 unlikely that shifting will be fast on a non-binary machine).
 
 I saw two assembly versions.  One, which was quite long, very tightly
-optimized, and attributed to Motorola, was indeed faster than my short 
+optimized, and attributed to Motorola, was indeed faster than my short
 simple C version, but not by all that much.  Also, it always truncated,
 where mine would produce the correctly rounded result (or the truncated
 result by commenting out one line if that's really what you wanted).
@@ -93,7 +93,7 @@ The other, very short assembler version was hopelessly flawed.  It
 computed an initial guess that could be off by a factor of two, and
 then did *ONE* iteration of Newton's method, and stopped there, producing
 a value that was not even close (in absolute terms), even when it did
-not lose all significance due to overflow.  If asked to take the square 
+not lose all significance due to overflow.  If asked to take the square
 root of zero, it would divide by zero.  It probably was fast (when it
 didn't crash), but who cares how quickly you get the wrong answer?
 
@@ -104,18 +104,18 @@ have the original message, but I seem to recall the max running time
 was something like 1262 cycles on a 68000, and (quite a bit) faster
 on small values.  I modified my C version to special-case small values
 too, and unwind the iterations of the main loop up to the iteration that
-finds the high bit of the root.  The main benefit of special-casing small 
-values is so I don't have to worry about that boundary in the remaining 
-code -- I am then guaranteed that the (unrounded) root is at least two 
-bits long.  And although I am not displeased by the improved efficiency, 
-my main reason for unwinding the first iterations was to remove the 
-restriction in the prior version that it would only work on machines in 
-which the number of bits in an unsigned long was even.  This code will 
-now work even on machines with odd integer sizes.  (Yes, Virginia, such 
-machines do exist!  An example is the Unisys A-series computers, in which 
-ALL arithmetic is done in floating point, and integers are just the special 
-case where the exponent is zero and the integer value is stored in the 
-39-bit mantissa of a 48-bit word.)  
+finds the high bit of the root.  The main benefit of special-casing small
+values is so I don't have to worry about that boundary in the remaining
+code -- I am then guaranteed that the (unrounded) root is at least two
+bits long.  And although I am not displeased by the improved efficiency,
+my main reason for unwinding the first iterations was to remove the
+restriction in the prior version that it would only work on machines in
+which the number of bits in an unsigned long was even.  This code will
+now work even on machines with odd integer sizes.  (Yes, Virginia, such
+machines do exist!  An example is the Unisys A-series computers, in which
+ALL arithmetic is done in floating point, and integers are just the special
+case where the exponent is zero and the integer value is stored in the
+39-bit mantissa of a 48-bit word.)
 
 My improved C version appears at the end of this message.
 
@@ -123,7 +123,7 @@ I compiled it with MPW C with no special optimizations, tested it
 thoroughly, and then disassembled the code and calculated the running
 time on a 68000.  (On later machines, the presence of the cache makes
 accurate timings much more difficult to do by hand.)  I did not make
-any attempt to "improve" the C-generated code, although there are some 
+any attempt to "improve" the C-generated code, although there are some
 easy and obvious optimizations available.  The running time for my
 version (the one that correctly rounds), counting the RTS and the
 (quite unnecessary) LINK/MOVEM.L/.../MOVE.L <rslt>,D0/MOVEM.L/UNLK is:
@@ -149,17 +149,17 @@ version (the one that correctly rounds), counting the RTS and the
 
 If my memory serves me right, this is only about 8% slower than the
 hand-crafted Motorola code, which I think is a cheap price to pay for
-the portability.  Especially considering that most of that difference 
-is due to the fact that they split the general loop into a main loop 
-that could get away with word-size operations for some variables, and 
+the portability.  Especially considering that most of that difference
+is due to the fact that they split the general loop into a main loop
+that could get away with word-size operations for some variables, and
 a few unwound iterations that had to use long-sized operands.  Notice
-that this is counterproductive on 68020 and up, where long operations 
+that this is counterproductive on 68020 and up, where long operations
 are just as fast as word operations when the operands are in registers,
-and the only effect of unwinding the last two iterations is to 
-guarantee that they won't be in the cache.  
+and the only effect of unwinding the last two iterations is to
+guarantee that they won't be in the cache.
 
 The compiled 68K code fits in 104 bytes (decimal). (96 bytes without
-the debugger symbol. This really was a vanilla compile.)  How big was 
+the debugger symbol. This really was a vanilla compile.)  How big was
 your code?  How big is the code cache on your machine?  How much of
 your caller's code do you push out of the cache?
 
@@ -195,7 +195,7 @@ unsigned long lsqrt (unsigned long n)
     unsigned long half;         // 1/2
 
     residue = n;                // n - (x = 0)^2, with suitable alignment
-    
+
     // if the correct answer fits in two bits, pull it out of a magic hat
 #ifndef lsqrt_truncate
     if (residue <= 12)
@@ -206,10 +206,10 @@ unsigned long lsqrt (unsigned long n)
 #endif
     root = lsqrt_max4pow;       // x + 1/4, shifted all the way left
 //  half = root + root;         // 1/2, shifted likewise
-    
-    // Unwind iterations corresponding to leading zero bits 
+
+    // Unwind iterations corresponding to leading zero bits
     while (root > residue) root >>= 2;
-    
+
     // Unwind the iteration corresponding to the first one bit
     // Operations have been rearranged and combined for efficiency
     // Initialization of half is folded into this iteration
@@ -231,7 +231,7 @@ unsigned long lsqrt (unsigned long n)
 #ifndef lsqrt_truncate
     if (root < residue) ++root;  // round up if (x+1/2)^2 < n
 #endif
-    
+
     return root;        // Guaranteed to be correctly rounded (or truncated)
     }
 
@@ -244,12 +244,12 @@ unsigned long lsqrt (unsigned long n)
 #ifndef powerc
 wide * MyWideSubtract(wide *target, const wide *source)
 {
-    
+
     target->hi -= source->hi;
     if (target->lo < source->lo)
         target->hi--;
     target->lo -= source->lo;
-    
+
     return target;
 }
 #endif
@@ -260,18 +260,18 @@ Fixed MyFixRatio( short numer, short denom)
 {
     long    longdenom, result;
     unsigned long   t;
-    
+
     longdenom = denom;
     if ( !longdenom) goto label1;
-    
+
     result = numer;
     result &= 0x0000ffff;
     if ( numer == denom) goto label3;
-    
+
     result = (( result >> 16L) & 0x0000ffff) | (( result << 16L) & 0xffff0000);
     result /= longdenom;
     return( (Fixed)result);
-    
+
 label1:
     result = 0x7fffffff;
     if ( numer >= 0) goto label2;
@@ -291,7 +291,7 @@ void MyMulDoubleLong( long a, long b, wide *dest)
 
 {
     #pragma unused( a, b, dest)
-    
+
 //  Debugger();
 //  LongMul( a, b, dest);
 }
@@ -300,7 +300,7 @@ void MyWideAddC( wide *target, const wide *source)
 {
     unsigned long   ur0, ur5;
     long            sr7, sr6, sr4, sr0;
-    
+
     ur0 = target->lo;
     ur5 = source->lo;
     sr7 = target->hi;
@@ -328,7 +328,7 @@ asm void MyWideAdd( UnsignedWide *target, const UnsignedWide *source)
     unsigned long register  dr0, dr5;
     long register           dr4, dr6, dr7;
     register UnsignedWide   *ar2, *ar3;
-    
+
     fralloc +
 
     movea.l     target,ar2;
@@ -343,16 +343,16 @@ asm void MyWideAdd( UnsignedWide *target, const UnsignedWide *source)
     addi.l      #1, dr4;                                // sr4 += 1;
     CMP.L       dr5, dr0;                               // if ( ur0 > ur5)
     BHI.S       asm_wa_med_1;                           //  goto wa_med_1;
-    
+
     add.l       dr7, dr4;                               // sr4 += sr7;
     move.l      dr4, struct(wide.hi)(a2);               // target->hi = sr4;
     jmp         asm_wa_med_2;
-    
+
 asm_wa_med_1:
     move.l      struct(wide.hi)(ar2), dr0;              // sr0 = target->hi;
     add.l       dr6, dr0;
     move.l      dr0, struct(wide.hi)(a2);
-        
+
 asm_wa_med_2:
     frfree
 //  rtd         #8;

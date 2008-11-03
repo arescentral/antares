@@ -50,7 +50,7 @@ void GetVersionString(StringPtr dest, short useResFile)
     Handle      versRes = nil;
     StringPtr   source = nil;
     short       refNum = CurResFile();
-    
+
     dest[0] = 0;
     UseResFile( useResFile);
     versRes = GetResource('vers', 1);

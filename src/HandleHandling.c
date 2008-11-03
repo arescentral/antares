@@ -104,13 +104,13 @@ short HandleHandlerInit( void)
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
         return( MEMORY_ERROR);
     }
-    
+
 //  mHandleLockAndRegister( gHandleData, nil, nil, nil)
     MoveHHi( gHandleData);
     HLock( gHandleData);
     ResetAllHandleData();
-    
-    return( kNoError);      
+
+    return( kNoError);
 }
 
 void HandleHandlerCleanup( void)
@@ -124,7 +124,7 @@ void ResetAllHandleData( void)
 {
     short           i = 0;
     handleDataType  *h = (handleDataType *)*gHandleData;
-    
+
     for ( i = 0; i < kMaxHandleHandleNum; i++)
     {
         h->hand = nil;
@@ -147,7 +147,7 @@ short HHRegisterHandle( Handle *newHandle,
     handleDataType  *h = (handleDataType *)*gHandleData;
     OSErr           err;
     SignedByte      hstate;
-    
+
     hstate = HGetState( *newHandle);
     if ( hstate & 0x40) ShowErrorAny( eContinueErr, -1, "\pPurgable Handle: ", name, nil, nil, -1, -1, -1, -1, __FILE__, 0);
     HHMaxMem();
@@ -158,7 +158,7 @@ short HHRegisterHandle( Handle *newHandle,
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kNoMoreHandlesError, -1, -1, -1, __FILE__, 2);
         return( MEMORY_ERROR);
     }
-    
+
 //  WriteDebugLine((char *)"\pNewHan:");
 //  WriteDebugLong( i);
 
@@ -180,7 +180,7 @@ short HHRegisterHandle( Handle *newHandle,
 
 //  HHMaxMem();
 //  HHCheckAllHandles();
-    
+
     return( kNoError);
 }
 
@@ -189,7 +189,7 @@ void HHDeregisterHandle( Handle *killHandle)
 {
     short            i = 0;
     handleDataType  *h = (handleDataType *)*gHandleData;
-    
+
     while (( h->hand != killHandle) && ( i < kMaxHandleHandleNum)) { h++; i++;}
     if ( i < kMaxHandleHandleNum)
     {
@@ -208,7 +208,7 @@ void HHMaxMem( void)
     short           i = 0;
     handleDataType  *h = (handleDataType *)*gHandleData;
     Str255          debug;
-    
+
 //  WriteDebugLine((char *)"\p<MAXMEM");
 
 //  HHCheckAllHandles();
@@ -242,11 +242,11 @@ void HHMaxMem( void)
     }
 
     HUnlock( gHandleData);
-    
+
     free = MaxMem( &grow);
 
     HLock( gHandleData);
-    
+
     h = (handleDataType *)*gHandleData;
     for ( i = 0; i < kMaxHandleHandleNum; i++)
     {
@@ -295,14 +295,14 @@ Handle HHNewHandle( long newSize)
 
 {
     Handle  aNewHandle = nil;
-    
+
     aNewHandle = NewHandle( newSize);
     if ( aNewHandle == nil)
     {
         HHMaxMem();
         aNewHandle = NewHandle( newSize);
     }
-    
+
     return ( aNewHandle);
 }
 
@@ -310,7 +310,7 @@ Handle HHGetResource( ResType resourceType, short resID)
 
 {
     Handle  aNewHandle = nil;
-    
+
 //  HHMaxMem();
     aNewHandle = GetResource( resourceType, resID);
     if ( aNewHandle == nil)
@@ -327,7 +327,7 @@ Handle HHGetResource( ResType resourceType, short resID)
 void HHConcatenateHandle( Handle destHandle, Handle sourceHandle)
 {
     SignedByte  sourceHandleState, destHandleState;
-    
+
     if (( destHandle != nil) && ( sourceHandle != nil))
     {
         sourceHandleState = HGetState( sourceHandle);
@@ -349,30 +349,30 @@ void HHClearHandle( Handle aHandle)
 {
     unsigned char   *c = (unsigned char *)*aHandle, value = 0;
     long            handleSize = GetHandleSize( aHandle);
-    
+
     while ( handleSize > 0)
     {
         *c = Randomize( 0x100); //value++;//
         c++;
         handleSize--;
     }
-//  HHCheckAllHandles();    
+//  HHCheckAllHandles();
 }
 
 void HHCheckHandle( Handle oneHandle, Handle twoHandle)
 {
     unsigned char   *onec = (unsigned char *)*oneHandle, *twoc  = (unsigned char *)*twoHandle;
     long            oneHandleSize = GetHandleSize( oneHandle), twoHandleSize = GetHandleSize( twoHandle);
-    
+
     if ( oneHandleSize != twoHandleSize) MyDebugString("\pNot Even CLOSE!");
-    
+
     if ( *onec != *twoc) MyDebugString("\pZoinks!");
     while (( oneHandleSize > 0) && ( *onec == *twoc))
     {
         oneHandleSize--;
         onec++;
         twoc++;
-        
+
         if ((oneHandleSize > 0) && ( *onec != *twoc))
         {
             MyDebugString("\pZoops!");
@@ -387,20 +387,20 @@ void HHBetterCheckHandle( Handle oneHandle, Handle twoHandle, StringPtr s)
     long            oneHandleSize = GetHandleSize( oneHandle), twoHandleSize = GetHandleSize( twoHandle);
     Str255          debugstr;
     Boolean         equal = true;
-    
+
     CopyPString( debugstr, s);
     if ( oneHandleSize != twoHandleSize)
     {
         equal = false;
         ConcatenatePString( s, "\p sizes not equal!");
     }
-    
+
     if (!(equal) && ( *onec != *twoc))
     {
         equal = false;
         ConcatenatePString( s, "\p first byte not equal!");
     }
-    
+
     if ( !equal)
     {
         while (( oneHandleSize > 0) && ( *onec == *twoc))
@@ -408,7 +408,7 @@ void HHBetterCheckHandle( Handle oneHandle, Handle twoHandle, StringPtr s)
             oneHandleSize--;
             onec++;
             twoc++;
-            
+
             if ((oneHandleSize > 0) && ( *onec != *twoc))
             {
                 equal = false;
@@ -424,7 +424,7 @@ void HHCheckAllHandles( void)
 {
     handleDataType  *h = (handleDataType *)*gHandleData;
     long            i;
-    
+
     for ( i = 0; i < kMaxHandleHandleNum; i++)
     {
         if (( h->hand != nil) && ( h->checkHandle != nil))

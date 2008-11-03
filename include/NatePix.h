@@ -45,7 +45,7 @@ typedef struct {
     rowBytes        int;    (holds correct row width in bytes - no mask)
     bounds          Rect;   (should be same as PixMap's)
     } BitMap;
-    
+
     typedef of PixMap (V-53-54):
 
 typedef *PixMapPtr  PixMapHandle;

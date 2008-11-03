@@ -72,7 +72,7 @@ short InitSpriteCursor( void)
     {
         return( MEMORY_ERROR);
     }
-    
+
     ResetSpriteCursor();
     return( kNoError);
 }
@@ -103,7 +103,7 @@ void ResetSpriteCursor( void)
     gSpriteCursor->sprite.whichLayer = 0;
     gSpriteCursor->sprite.tinyColor = 0;
     gSpriteCursor->sprite.killMe = false;
-    
+
     gSpriteCursor->showLevel = kSpriteCursorHidden;
 
     gSpriteCursor->thisShowLine = gSpriteCursor->lastShowLine = false;
@@ -162,7 +162,7 @@ void EraseSpriteCursorSprite( void)
 
 {
     PixMapHandle    savePixBase, offPixBase;
-    
+
     savePixBase = GetGWorldPixMap( gSaveWorld);
     offPixBase = GetGWorldPixMap( gOffWorld);
     if ( gSpriteCursor->sprite.table != nil)
@@ -178,7 +178,7 @@ void EraseSpriteCursorSprite( void)
     if ( gSpriteCursor->thisShowLine)
     {
         longRect    tc;
-        
+
         SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
         CopyNateLine( *savePixBase, *offPixBase,
@@ -196,7 +196,7 @@ void EraseSpriteCursorSprite( void)
     } else if ( gSpriteCursor->lastShowLine)
     {
         longRect    tc;
-        
+
         SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
         CopyNateLine( *savePixBase, *offPixBase,
@@ -224,7 +224,7 @@ void DrawSpriteCursorSprite( longRect *clipRect)
     Handle          pixTable;
     int             whichShape;
     Rect            tRect;
-    
+
     pixMap = GetGWorldPixMap( gOffWorld);
     savePixBase = GetGWorldPixMap( gSaveWorld);
     if (( gSpriteCursor->sprite.table != nil) &&
@@ -234,10 +234,10 @@ void DrawSpriteCursorSprite( longRect *clipRect)
             gSpriteCursor->where.h + 16, gSpriteCursor->where.v + 16);
         ChunkCopyPixMapToPixMap( *pixMap, &tRect, *savePixBase);
     }
-        
+
     if ( gSpriteCursor->thisShowLine)
     {
-        
+
         SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
         CopyNateLine( *pixMap, *savePixBase,
@@ -253,7 +253,7 @@ void DrawSpriteCursorSprite( longRect *clipRect)
             gSpriteCursor->thisLineEnd.h, gSpriteCursor->thisLineEnd.v+2,
             0, 0);
     }
-    
+
     if (( gSpriteCursor->sprite.table != nil) &&
         ( gSpriteCursor->showLevel >= kSpriteCursorVisible))
     {
@@ -266,7 +266,7 @@ void DrawSpriteCursorSprite( longRect *clipRect)
         aSpritePix.center.v = GetNatePixTableNatePixVRef( pixTable, whichShape);
         aSpritePix.width = GetNatePixTableNatePixWidth( pixTable, whichShape);
         aSpritePix.height = GetNatePixTableNatePixHeight( pixTable, whichShape);
-        
+
         OptScaleSpritePixInPixMap( &aSpritePix, gSpriteCursor->where, SCALE_SCALE,
                 &sRect, clipRect, pixMap);
         mCopyAnyRect( gSpriteCursor->sprite.thisRect, sRect)
@@ -275,28 +275,28 @@ void DrawSpriteCursorSprite( longRect *clipRect)
         gSpriteCursor->sprite.thisRect.left = gSpriteCursor->sprite.thisRect.top = 0;
         gSpriteCursor->sprite.thisRect.right = gSpriteCursor->sprite.thisRect.bottom = -1;
     }
-    
+
 
     if ( gSpriteCursor->thisShowLine)
     {
 //      ShowHintLine( gSpriteCursor->thisLineStart, gSpriteCursor->thisLineEnd,
 //              SKY_BLUE, gFlashingLineColor);
-                
+
 //      if ( gFlashingLineColor == GREEN) gFlashingLineColor = RED;
 //      else if ( gFlashingLineColor == RED) gFlashingLineColor = BLUE;
 //      else gFlashingLineColor = GREEN;
         gFlashingLineColor--;
         if ( gFlashingLineColor < 2) gFlashingLineColor = 14;
 
-        DrawNateLine( *pixMap, &tc, 
+        DrawNateLine( *pixMap, &tc,
             gSpriteCursor->thisLineStart.h, gSpriteCursor->thisLineStart.v+2,
             gSpriteCursor->thisLineEnd.h, gSpriteCursor->thisLineEnd.v+2,
             0, 0, gSpriteCursor->thisLineColorDark);
-        DrawNateLine( *pixMap, &tc, 
+        DrawNateLine( *pixMap, &tc,
             gSpriteCursor->thisLineStart.h, gSpriteCursor->thisLineStart.v+1,
             gSpriteCursor->thisLineEnd.h, gSpriteCursor->thisLineEnd.v+1,
             0, 0, gSpriteCursor->thisLineColor);
-        DrawNateLine( *pixMap, &tc, 
+        DrawNateLine( *pixMap, &tc,
             gSpriteCursor->thisLineStart.h, gSpriteCursor->thisLineStart.v,
             gSpriteCursor->thisLineEnd.h, gSpriteCursor->thisLineEnd.v,
             0, 0, gSpriteCursor->thisLineColor);
@@ -309,7 +309,7 @@ void ShowSpriteCursorSprite( void)
     Rect            tRect;
     PixMapHandle    pixMap;
     longRect        tc;
-    
+
     SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
     pixMap = GetGWorldPixMap( gOffWorld);
@@ -325,21 +325,21 @@ void ShowSpriteCursorSprite( void)
             if ( gSpriteCursor->sprite.lastRect.right > gSpriteCursor->sprite.lastRect.left)
             {
                 // show lastRect
-                
+
                 ChunkCopyPixMapToScreenPixMap( *pixMap, &(gSpriteCursor->sprite.lastRect),
                         *thePixMapHandle);
-                
-                
+
+
             }
         // else if lastRect is null (we now know this rect isn't)
         } else if (( gSpriteCursor->sprite.lastRect.right <= gSpriteCursor->sprite.lastRect.left) ||
             ( gSpriteCursor->sprite.lastRect.bottom <= gSpriteCursor->sprite.lastRect.top))
         {
             // then show thisRect
-            
+
             ChunkCopyPixMapToScreenPixMap( *pixMap,
                 &(gSpriteCursor->sprite.thisRect), *thePixMapHandle);
-            
+
         // else if the rects don't intersect
         } else if ( ( gSpriteCursor->sprite.lastRect.right <
                         ( gSpriteCursor->sprite.thisRect.left - 32)) ||
@@ -351,21 +351,21 @@ void ShowSpriteCursorSprite( void)
                         ( gSpriteCursor->sprite.thisRect.bottom + 32)))
         {
             // then draw them individually
-            
-            
+
+
             ChunkCopyPixMapToScreenPixMap( *pixMap, &(gSpriteCursor->sprite.lastRect),
                     *thePixMapHandle);
             ChunkCopyPixMapToScreenPixMap( *pixMap, &(gSpriteCursor->sprite.thisRect),
                     *thePixMapHandle);
-            
+
         // else the rects do intersect (and we know are both non-null)
         } else
         {
             tRect = gSpriteCursor->sprite.thisRect;
             mBiggestRect( tRect, gSpriteCursor->sprite.lastRect)
-            
+
             ChunkCopyPixMapToScreenPixMap( *pixMap, &tRect, *thePixMapHandle);
-            
+
         }
         gSpriteCursor->sprite.lastRect = gSpriteCursor->sprite.thisRect;
     }
@@ -383,7 +383,7 @@ void ShowSpriteCursorSprite( void)
             &tc, gSpriteCursor->lastLineStart.h, gSpriteCursor->lastLineStart.v+2,
             gSpriteCursor->lastLineEnd.h, gSpriteCursor->lastLineEnd.v+2,
             gNatePortLeft << 2, gNatePortTop);
-        
+
     }
     if ( gSpriteCursor->thisShowLine)
     {
@@ -421,7 +421,7 @@ void ShowHintLine( Point fromWhere, Point toWhere,
 
     mGetTranslateColorShade( color, brightness, gSpriteCursor->thisLineColor, transColor)
     mGetTranslateColorShade( color, VERY_DARK, gSpriteCursor->thisLineColorDark, transColor)
-    
+
 }
 
 void HideHintLine( void)
@@ -436,5 +436,5 @@ void ResetHintLine( void)
         gSpriteCursor->thisLineEnd.h = gSpriteCursor->thisLineEnd.v =
         gSpriteCursor->lastLineStart.h = gSpriteCursor->lastLineStart.v =
         gSpriteCursor->lastLineEnd.h = gSpriteCursor->lastLineEnd.v = -1;
-    gSpriteCursor->thisLineColor = gSpriteCursor->thisLineColorDark = 0;    
+    gSpriteCursor->thisLineColor = gSpriteCursor->thisLineColorDark = 0;
 }

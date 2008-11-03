@@ -43,7 +43,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Sound.h"
 
 
-#define kSoundNum           48  
+#define kSoundNum           48
 #define kMaxChannelNum      3
 
 #define kMaxVolumePreference    8

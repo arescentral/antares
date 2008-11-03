@@ -58,9 +58,9 @@ void GetKeyMapFromKeyNum( short keyNum, KeyMap keyMap)
     keyNum--;
     for ( wmap = 0; wmap < 4; wmap++)
 #if TARGET_OS_MAC
-        keyMap[wmap] = 0;   
+        keyMap[wmap] = 0;
 #else
-        keyMap[wmap].bigEndianValue = 0;    
+        keyMap[wmap].bigEndianValue = 0;
 #endif TARGET_OS_MAC
     wbit = keyNum % 32;
     wmap = keyNum / 32;
@@ -77,7 +77,7 @@ short GetKeyNumFromKeyMap( KeyMap keyMap)
 
 {
     int         i, j, wmap, wbit, fixbit, keyispressed = 0;
-        
+
     for ( i = 0; i < 4; i++)
     {
         for ( j = 0; j < 32; j++)
@@ -89,8 +89,8 @@ short GetKeyNumFromKeyMap( KeyMap keyMap)
 #endif TARGET_OS_MAC
             {
                 wmap = i;
-                wbit = j; 
-                i = 4;   
+                wbit = j;
+                i = 4;
                 j = 32;
                 keyispressed = 1;
             }
@@ -107,7 +107,7 @@ Boolean DoesKeyMapContainKeyNum( KeyMap smap, short keyNum)
 {
     KeyMap  dmap;
     short   i;
-    
+
     GetKeyMapFromKeyNum( keyNum, dmap);
     for ( i = 0; i < 4; i++)
     {
@@ -139,7 +139,7 @@ Boolean TimedWaitForAnyEvent( long time)
     long    starttime = TickCount();
     KeyMap  keyMap;
     Boolean result = false;
-    
+
     do
     {
         GetKeys(keyMap);
@@ -167,7 +167,7 @@ Boolean ControlKey( void)
 
 {
     KeyMap  keyMap;
-    
+
     GetKeys( keyMap);
 #if TARGET_OS_MAC
     return( (keyMap[1] >> 3) & 0x01 );
@@ -180,7 +180,7 @@ Boolean CommandKey( void)
 
 {
     KeyMap  keyMap;
-    
+
     GetKeys( keyMap);
 #if TARGET_OS_MAC
     return( (keyMap[1] >> 15) & 0x01 );
@@ -193,7 +193,7 @@ Boolean OptionKey( void)
 
 {
     KeyMap  keyMap;
-    
+
     GetKeys( keyMap);
 #if TARGET_OS_MAC
     return( (keyMap[1] >> 2) & 0x01 );
@@ -206,7 +206,7 @@ Boolean ShiftKey( void)
 
 {
     KeyMap  keyMap;
-    
+
     GetKeys( keyMap);
 #if TARGET_OS_MAC
     return( keyMap[1] & 0x01 );
@@ -218,7 +218,7 @@ Boolean ShiftKey( void)
 Boolean EscapeKey( void)
 {
     KeyMap  keyMap;
-    
+
     GetKeys( keyMap);
 #if TARGET_OS_MAC
     return( (keyMap[1] >> 13) & 0x01);
@@ -230,7 +230,7 @@ Boolean EscapeKey( void)
 Boolean PeriodKey( void)
 {
     KeyMap  keyMap;
-    
+
     GetKeys( keyMap);
 #if TARGET_OS_MAC
     return( (keyMap[1] >> 23) & 0x01);
@@ -242,7 +242,7 @@ Boolean PeriodKey( void)
 Boolean QKey( void)
 {
     KeyMap  keyMap;
-    
+
     GetKeys( keyMap);
     return (mQKey( keyMap));
 }
@@ -264,19 +264,19 @@ Boolean AnyRealKeyDown( void)
 
 {
     KeyMap  keyMap;
-    
+
     GetKeys( keyMap);
-    
+
 #if TARGET_OS_MAC
     keyMap[3] &= ~0x80; // mask out power key
     keyMap[1] &= ~0x02; // mask out caps lock key
-    
+
     if (( keyMap[0]) || ( keyMap[1]) || ( keyMap[2]) ||
         ( keyMap[3])) return ( TRUE);
 #else
     keyMap[3].bigEndianValue &= EndianU32_NtoB(~0x80);  // mask out power key
     keyMap[1].bigEndianValue &= EndianU32_NtoB(~0x02);  // mask out caps lock key
-    
+
     if (( keyMap[0].bigEndianValue) || ( keyMap[1].bigEndianValue) || ( keyMap[2].bigEndianValue) ||
         ( keyMap[3].bigEndianValue)) return ( TRUE);
 #endif TARGET_OS_MAC
@@ -289,14 +289,14 @@ Boolean AnyModifierKeyDown( void) // checks for shift, option, command, control
     if ( OptionKey()) return true;
     if ( ShiftKey()) return true;
     if ( CommandKey()) return true;
-    
+
     return false;
 }
 
 Boolean AnyKeyButThisOne( KeyMap keyMap, long whichWord, long whichBit)
 {
     long    i;
-    
+
     for ( i = 0; i < 4; i++)
     {
         if ( i != whichWord)
@@ -315,7 +315,7 @@ Boolean AnyKeyButThisOne( KeyMap keyMap, long whichWord, long whichBit)
 #endif TARGET_OS_MAC
         }
     }
-    
+
     return false;
 }
 
@@ -325,7 +325,7 @@ long GetAsciiFromKeyMap( KeyMap sourceKeyMap, KeyMap previousKeyMap)
     long            result;
     Ptr             KCHRPtr;
     KeyMap          keyMap;
-    
+
     if ( previousKeyMap == nil)
     {
         for ( count = 0; count < 4; count++)
@@ -341,27 +341,27 @@ long GetAsciiFromKeyMap( KeyMap sourceKeyMap, KeyMap previousKeyMap)
 
     if ( keyMap[1] & 0x0008)
     {
-        keyMap[1] &= ~0x0008;   
+        keyMap[1] &= ~0x0008;
     }   // turn off control key
-    
+
     if ( keyMap[1] & 0x8000)
     {
         modifiers |= cmdKey;
         keyMap[1] &= ~0x8000;   // turn off command key
     }
-    
+
     if ( keyMap[1] & 0x0004)
     {
         modifiers |= optionKey;
         keyMap[1] &= ~0x0004;   // turn off option key
     }
-    
+
     if ( keyMap[1] & 0x0001)
     {
         modifiers |= shiftKey;
         keyMap[1] &= ~0x0001;   // turn off shift key
     }
-    
+
     if ( keyMap[1] & 0x0002)
     {
         modifiers |= alphaLock;
@@ -380,27 +380,27 @@ long GetAsciiFromKeyMap( KeyMap sourceKeyMap, KeyMap previousKeyMap)
 
     if ( keyMap[1].bigEndianValue & EndianU32_NtoB(0x0008))
     {
-        keyMap[1].bigEndianValue &= EndianU32_NtoB(~0x0008);    
+        keyMap[1].bigEndianValue &= EndianU32_NtoB(~0x0008);
     }   // turn off control key
-    
+
     if ( keyMap[1].bigEndianValue & EndianU32_NtoB(0x8000))
     {
         modifiers |= cmdKey;
         keyMap[1].bigEndianValue &= EndianU32_NtoB(~0x8000);    // turn off command key
     }
-    
+
     if ( keyMap[1].bigEndianValue & EndianU32_NtoB(0x0004))
     {
         modifiers |= optionKey;
         keyMap[1].bigEndianValue &= EndianU32_NtoB(~0x0004);    // turn off option key
     }
-    
+
     if ( keyMap[1].bigEndianValue & EndianU32_NtoB(0x0001))
     {
         modifiers |= shiftKey;
         keyMap[1].bigEndianValue &= EndianU32_NtoB(~0x0001);    // turn off shift key
     }
-    
+
     if ( keyMap[1].bigEndianValue & EndianU32_NtoB(0x0002))
     {
         modifiers |= alphaLock;
@@ -411,14 +411,14 @@ long GetAsciiFromKeyMap( KeyMap sourceKeyMap, KeyMap previousKeyMap)
     whichKeyCode = (GetKeyNumFromKeyMap( keyMap) - 1) | modifiers;
     KCHRPtr = (Ptr)GetScriptManagerVariable( smKCHRCache);
     result = KeyTranslate( KCHRPtr, whichKeyCode, &gKeyTranslateState);
-    
+
     return( result);
 }
 
 long GetAsciiFromKeyNum( short keyNum)
 {
     Ptr             KCHRPtr;
-    
+
     KCHRPtr = (Ptr)GetScriptManagerVariable( smKCHRCache);
     return ( KeyTranslate( KCHRPtr, keyNum - 1, &gKeyTranslateState));
 }

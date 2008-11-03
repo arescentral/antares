@@ -62,7 +62,7 @@ void InitMoviePlayer( void)
 {
 #ifdef kUseMovies
     OSErr                       err;
-    
+
     if ( gAresGlobal->gOptions & kOptionQuicktime)
     {
         err = EnterMovies();
@@ -79,7 +79,7 @@ void CleanupMoviePlayer( void)
     }
 #endif
 }
-    
+
 
 void PlayMovieByName( StringPtr filePath, WindowPtr aWindow, Boolean doubleIt, GDHandle device)
 
@@ -95,21 +95,21 @@ void PlayMovieByName( StringPtr filePath, WindowPtr aWindow, Boolean doubleIt, G
     PaletteHandle               thePalette = nil, originalPalette = nil;
     Fixed                       movieRate;
     TimeValue               movieTime;
-    
+
 #pragma unused ( device)
     if ( gAresGlobal->gOptions & kOptionQuicktime)
     {
 
         err = FSMakeFSSpec( 0, 0L, filePath, &fileSpec);
-        if ( err == noErr) 
+        if ( err == noErr)
         {
             err = OpenMovieFile ( &fileSpec, &movieResFile, fsRdPerm);
-            if (err == noErr) 
+            if (err == noErr)
             {
                 short               movieResID = 0;                     /* want first movie */
                 Str255              movieName;
                 Boolean             wasChanged;
-            
+
                 err = NewMovieFromFile (&aMovie, movieResFile, &movieResID, movieName,  newMovieActive,
                                         &wasChanged);
                 CloseMovieFile (movieResFile);
@@ -128,7 +128,7 @@ void PlayMovieByName( StringPtr filePath, WindowPtr aWindow, Boolean doubleIt, G
             }
 */
             GetMovieBox (aMovie, &movieBox);
-    
+
     /*
             // make a new window centered in the device of choice
             windowRect = movieBox;
@@ -141,14 +141,14 @@ void PlayMovieByName( StringPtr filePath, WindowPtr aWindow, Boolean doubleIt, G
                             (WindowPtr)-1, false, 703);
             ShowWindow( (WindowPtr)movieWindow);
     */
-            
+
             // if we have a custom color table for this movie
             MacFillRect( &(aWindow->portRect), &(qd.black));
             if ( GetMovieColorTable( aMovie, &theClut) != noErr)
             {
                 MyDebugString("\pCan't GetMovieColorTable");
             }
-            
+
             if ( theClut == nil)
             {
                 WriteDebugLine((char *)"\pNo CLUT!");
@@ -169,23 +169,23 @@ void PlayMovieByName( StringPtr filePath, WindowPtr aWindow, Boolean doubleIt, G
                             (**theClut).ctTable[count].rgb.blue = 0;//Randomize( 32768);
                     }
                 }
-                
+
                 if ( SetMovieColorTable( aMovie, theClut) != noErr)
                 {
                     MyDebugString("\pCan't SetMovieColorTable");
                 }
             }
-            
+
             thePalette = NewPalette( (**theClut).ctSize, theClut, pmExplicit + pmTolerant, 0);
-    
-    
+
+
             originalPalette = GetPalette( aWindow);
             if ( originalPalette != nil)
             {
                 SetPalette( (WindowPtr)aWindow, thePalette, false);
-                ActivatePalette( (WindowPtr)aWindow);               
+                ActivatePalette( (WindowPtr)aWindow);
             }
-    
+
             if ( (( movieBox.right - movieBox.left) <= (( aWindow->portRect.right -
                 aWindow->portRect.left) / 2)) && (( movieBox.bottom - movieBox.top) <= (( aWindow->portRect.bottom -
                 aWindow->portRect.top) / 2)) && ( doubleIt))
@@ -201,13 +201,13 @@ void PlayMovieByName( StringPtr filePath, WindowPtr aWindow, Boolean doubleIt, G
             SetMovieBox( aMovie, &movieBox);
             SetMovieGWorld( aMovie, (CGrafPtr)aWindow, nil);
             SetMovieVolume( aMovie, kSoundVolumeMultiplier * gAresGlobal->gSoundVolume);
-            
+
             HideCursor();
             movieRate = GetMovieRate( aMovie);
             movieTime = 0;//GetMovieDuration( aMovie);
             if ( PrerollMovie ( aMovie, movieTime, movieRate) != noErr) SysBeep( 20);
             StartMovie (aMovie);
-            while ( !IsMovieDone(aMovie) && !done ) 
+            while ( !IsMovieDone(aMovie) && !done )
             {
                 MoviesTask (aMovie, DoTheRightThing);
                 if ( !ShiftKey())
@@ -216,16 +216,16 @@ void PlayMovieByName( StringPtr filePath, WindowPtr aWindow, Boolean doubleIt, G
             MacShowCursor();
             DisposeMovie (aMovie);
             MacFillRect( &(aWindow->portRect), &(qd.black));
-            
+
     //      DisposeWindow( (WindowPtr)movieWindow);
             if ( theClut != nil) DisposeCTable( theClut);
             if ( originalPalette != nil)
             {
                 SetPalette( (WindowPtr)aWindow, originalPalette, false);
-                ActivatePalette( (WindowPtr)aWindow);               
+                ActivatePalette( (WindowPtr)aWindow);
             }
             if ( thePalette != nil) DisposePalette( thePalette);
-            
+
 /*          if ( depthSet)
             {
                 SetDepth( device, 8, 1, 1);
@@ -250,20 +250,20 @@ OSErr LoadMiniMovie( StringPtr filePath, Movie *aMovie, Rect *destRect, WindowPt
     Boolean                     done = false;
     Fixed                       movieRate;
     TimeValue                   movieTime;
-    
+
     if ( gAresGlobal->gOptions & kOptionQuicktime)
     {
 
         err = FSMakeFSSpec( 0, 0L, filePath, &fileSpec);
-        if ( err == noErr) 
+        if ( err == noErr)
         {
             err = OpenMovieFile ( &fileSpec, &movieResFile, fsRdPerm);
-            if (err == noErr) 
+            if (err == noErr)
             {
                 short               movieResID = 0;                     /* want first movie */
                 Str255              movieName;
                 Boolean             wasChanged;
-            
+
                 err = NewMovieFromFile ( aMovie, movieResFile, &movieResID, movieName,  newMovieActive,
                                         &wasChanged);
                 CloseMovieFile (movieResFile);
@@ -273,7 +273,7 @@ OSErr LoadMiniMovie( StringPtr filePath, Movie *aMovie, Rect *destRect, WindowPt
                 WriteDebugLine( (char *)filePath);
                 return( err);
             }
-        } else 
+        } else
         {
             WriteDebugLine( (char *)"\pCouldn't Find Movie");
             return( err);
@@ -281,7 +281,7 @@ OSErr LoadMiniMovie( StringPtr filePath, Movie *aMovie, Rect *destRect, WindowPt
         if ( *aMovie != nil)
         {
             MacSetPort( aWindow);
-            
+
             GetMovieBox (*aMovie, &movieBox);
 
             if ( (( movieBox.right - movieBox.left) <= (( destRect->right -
@@ -295,15 +295,15 @@ OSErr LoadMiniMovie( StringPtr filePath, Movie *aMovie, Rect *destRect, WindowPt
                 ((movieBox.right - movieBox.left) / 2) + destRect->left;
             offV = ((destRect->bottom - destRect->top) / 2) -
                 ((movieBox.bottom - movieBox.top) / 2) + destRect->top;
-            
+
             MacOffsetRect (&movieBox, offH, offV);
 
             MacFillRect( &movieBox, &(qd.black));
-                        
+
             SetMovieGWorld (*aMovie, (CGrafPtr)aWindow, nil);
             SetMovieVolume( *aMovie, kSoundVolumeMultiplier * gAresGlobal->gSoundVolume);
             SetMovieBox (*aMovie, &movieBox);
-            
+
             movieRate = GetMovieRate( *aMovie);
             movieTime = 0;//GetMovieDuration( *aMovie);
 
@@ -328,15 +328,15 @@ OSErr StartMiniMovie( Movie aMovie)
 {
 #ifdef kUseMovies
     OSErr err;
-    
+
     if ( aMovie != nil) StartMovie( aMovie);
     err = GetMoviesError();
 //  if ( err != noErr) Debugger();
-    
+
     return( err);
 #else
     return( noErr);
-#endif  
+#endif
 }
 
 // returns true if movie is done
@@ -346,7 +346,7 @@ Boolean DoMiniMovieTask( Movie aMovie)
 #ifdef kUseMovies
     OSErr   err;
     Boolean done = false;
-    
+
     if ( aMovie == nil) return( true);
     else
     {
@@ -361,7 +361,7 @@ Boolean DoMiniMovieTask( Movie aMovie)
 //          if ( err != noErr) Debugger();
             return( false);
         }
-    }   
+    }
 #endif
     return( true);
 }
@@ -372,7 +372,7 @@ OSErr CleanUpMiniMovie( Movie *aMovie)
 #ifdef kUseMovies
     OSErr   err;
     Rect    movieBox;
-    
+
     if ( *aMovie != nil)
     {
         GetMovieBox( *aMovie, &movieBox);
@@ -387,6 +387,6 @@ OSErr CleanUpMiniMovie( Movie *aMovie)
         if ( err != noErr) return err;//Debugger();
         *aMovie = nil;
     }
-#endif  
+#endif
     return ( noErr);
 }

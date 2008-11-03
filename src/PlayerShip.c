@@ -134,7 +134,7 @@ void ResetPlayerShip( long which)
     spaceObjectType *theShip = (spaceObjectType *)*gSpaceObjectData + which;
     anyCharType     nilLabel = 0;
     long            h;
-    
+
     WriteDebugLine((char *)"\pPLAYER:");
     WriteDebugLong( which);
     gAresGlobal->gPlayerShipNumber = which;
@@ -149,17 +149,17 @@ void ResetPlayerShip( long which)
     gAresGlobal->keyMask = 0;
     for ( h = 0; h < 4; h++)
     {
-#if TARGET_OS_MAC   
+#if TARGET_OS_MAC
         gAresGlobal->gLastKeyMap[h] = 0;
         gAresGlobal->gLastMessageKeyMap[h] = 0;
 #else
         gAresGlobal->gLastKeyMap[h].bigEndianValue = 0;
-        gAresGlobal->gLastMessageKeyMap[h].bigEndianValue = 0;      
+        gAresGlobal->gLastMessageKeyMap[h].bigEndianValue = 0;
 #endif TARGET_OS_MAC
     }
     gAresGlobal->gZoomMode = kNearestFoeZoom;
     gAresGlobal->gKeyMapBufferTop = gAresGlobal->gKeyMapBufferBottom = 0;
-    
+
     for ( h = 0; h < kHotKeyNum; h++)
     {
         gAresGlobal->hotKey[h].objectNum = -1;
@@ -186,7 +186,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
     unsigned char   *getwidchar, *getwidwid;
     long            width, height, strlen, shortcutKey = -1;
     Str255          s;
-    
+
     if ( gAresGlobal->gPlayerShipNumber < 0) return ( everPaused);
 
     GetKeys( keyMap);
@@ -197,13 +197,13 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
         if ( gAresGlobal->gLastKeyMap[h].bigEndianValue !=
             keyMap[h].bigEndianValue) newKeys = true;
 #endif TARGET_OS_MAC
-    
+
     gAresGlobal->gLastKeys = gAresGlobal->gTheseKeys;
-    
+
     if ( theKeys == 0xffffffff)
     {
         gAresGlobal->gTheseKeys = 0;
-        
+
 //#ifndef kNonPlayableDemo
         for ( b = 0; b < kKeyControlNum; b++)
         {
@@ -248,7 +248,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
             gAresGlobal->gTheseKeys |= distance & (kZoomOutKey | kZoomInKey);
         }
     }
-    
+
     if ( *enterMessage) gAresGlobal->gTheseKeys = 0;
     while (( gAresGlobal->gKeyMapBufferBottom != gAresGlobal->gKeyMapBufferTop))
         // && ( gAresGlobal->gOptions & kOptionNetworkOn))
@@ -290,7 +290,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
                     }
 #if NETSPROCKET_AVAILABLE
                     SendInGameTextMessage( (Ptr)(message + 1), mGetAnyCharPStringLength( message));
-#endif NETSPROCKET_AVAILABLE                    
+#endif NETSPROCKET_AVAILABLE
                 }
                 message[0] = 0;
                 SetScreenLabelPosition( gAresGlobal->gSendMessageLabel, CLIP_LEFT +
@@ -335,10 +335,10 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
                 {
                     strlen -= (strlen + width) - (CLIP_RIGHT);
                 }
-                RecalcScreenLabelSize( gAresGlobal->gSendMessageLabel);         
+                RecalcScreenLabelSize( gAresGlobal->gSendMessageLabel);
                 SetScreenLabelPosition( gAresGlobal->gSendMessageLabel, strlen, CLIP_TOP +
                     (((gAresGlobal->gTrueClipBottom - CLIP_TOP) / 2) + kSendMessageVOffset));
-            }   
+            }
         } else //if  ( gAresGlobal->gOptions & kOptionNetworkOn)
         {
             if ( (mReturnKey( *bufMap)) && ( !(gAresGlobal->keyMask & kReturnKeyMask)))
@@ -415,10 +415,10 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
             {
                 strlen -= (strlen + width) - (CLIP_RIGHT);
             }
-            RecalcScreenLabelSize( gAresGlobal->gSendMessageLabel);         
+            RecalcScreenLabelSize( gAresGlobal->gSendMessageLabel);
             SetScreenLabelPosition( gAresGlobal->gSendMessageLabel, strlen, CLIP_TOP +
                 (((gAresGlobal->gTrueClipBottom - CLIP_TOP) / 2) + kSendMessageVOffset));
-        }   
+        }
     } else if  ( gAresGlobal->gOptions & kOptionNetworkOn)
     {
         if (( mReturnKey( keyMap)) && ((!mReturnKey( gAresGlobal->gLastKeyMap)))) *enterMessage = true;
@@ -447,7 +447,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
             gAresGlobal->gZoomMode = 0;
         }
     }
-    
+
 //  if ((( gAresGlobal->gOptions & kOptionSubstituteFKeys) ?
 //      ((!*enterMessage) && ( mNOFScale221Key( keyMap))):( mScale221Key( keyMap))))
 
@@ -480,7 +480,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
 //  {
 //      gAresGlobal->gZoomMode = 1;
 //  }
-    
+
     if ( !*enterMessage)
     {
         if ((!(gAresGlobal->gOptions & kOptionSubstituteFKeys)) &&
@@ -497,39 +497,39 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
                     3,  // the special screen
                     1   // kSpecialMiniTransfer
                     );
-    #endif NETSPROCKET_AVAILABLE            
+    #endif NETSPROCKET_AVAILABLE
             }
         }
         if (( ( mScale121Key( keyMap))))
         {
             gAresGlobal->gZoomMode = 1;
         }
-        
+
         if ((  ( mScale122Key( keyMap))))
         {
             gAresGlobal->gZoomMode = 2;
         }
-        
+
         if ((  ( mScale124Key( keyMap))))
         {
             gAresGlobal->gZoomMode = 3;
         }
-        
+
         if ((  ( mScale1216Key( keyMap))))
         {
             gAresGlobal->gZoomMode = 4;
         }
-        
+
         if ((  ( mScaleHostileKey( keyMap))))
         {
             gAresGlobal->gZoomMode = 5;
         }
-        
+
         if ((  ( mScaleObjectKey( keyMap))))
         {
             gAresGlobal->gZoomMode = 6;
         }
-        
+
         if ((  ( mScaleAllKey( keyMap))))
         {
             gAresGlobal->gZoomMode = 7;
@@ -542,7 +542,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
         GetIndString( s, kMessageStringID, gAresGlobal->gZoomMode + kZoomStringOffset);
         SetStatusString( s, TRUE, kStatusLabelColor);
     }
-    
+
     theShip = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
 //  theShip->attributes &= ~kIsHumanControlled;
     if ( !theShip->active) return ( everPaused);
@@ -565,11 +565,11 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
             }
         }
     } else gAresGlobal->gAlarmCount = -1;
-        
+
     if ( !(theShip->attributes & kIsHumanControlled)) return( everPaused);
-    
+
     baseObject = theShip->baseType;
-    
+
     MiniComputerHandleKeys( gAresGlobal->gTheseKeys, gAresGlobal->gLastKeys);
     if ( (mMessageNextKey( keyMap)) && (!(mMessageNextKey(gAresGlobal->gLastKeyMap))) && (!*enterMessage))
         AdvanceCurrentLongMessage();
@@ -603,14 +603,14 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
                     if ( !SendSelectMessage( gAresGlobal->gGameTime + gNetLatency,
                         gAresGlobal->gPlayerShipNumber, true))
                         StopNetworking();
-#endif NETSPROCKET_AVAILABLE                        
+#endif NETSPROCKET_AVAILABLE
                 }
             }
         }
         gAresGlobal->gDestKeyTime = 0;
         gAresGlobal->destKeyUsedForSelection = false;
     }
-    
+
 // NEW -- do hot key selection
     b = -1;
     for ( a = 0; a < kHotKeyNum; a++)
@@ -620,7 +620,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
             b = a;
         }
     }
-    
+
     if ( b >= 0)
     {
         if ( b != gAresGlobal->lastHotKey)
@@ -630,7 +630,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
             gAresGlobal->hotKey_target = false;
             if ( gAresGlobal->gTheseKeys & kDestinationKey)
                 gAresGlobal->hotKey_target = true;
-                
+
         } else
         {
             gAresGlobal->hotKeyDownTime += timePass;
@@ -639,14 +639,14 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
     {
         b = gAresGlobal->lastHotKey;
         gAresGlobal->lastHotKey = -1;
-        
+
         if ( gAresGlobal->hotKeyDownTime > 45)
         {
             if ( gAresGlobal->lastSelectedObject >= 0)
             {
                 selectShip = (spaceObjectType *)*gSpaceObjectData +
                                 gAresGlobal->lastSelectedObject;
-                
+
                 if ( selectShip->active)
                 {
                     gAresGlobal->hotKey[b].objectNum =
@@ -692,7 +692,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
                                 gAresGlobal->hotKey[b].objectNum,
                                 (a != 0)?(true):(false)))
                             StopNetworking();
-    #endif NETSPROCKET_AVAILABLE                        
+    #endif NETSPROCKET_AVAILABLE
                     }
                 } else
                 {
@@ -700,11 +700,11 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
                 }
             }
             gAresGlobal->hotKeyDownTime = 0;
-    
+
         }
     }
 // end new hotkey selection
-    
+
     // for this we check lastKeys against theseKeys & relevent keys now being pressed
     if (( attributes) && ( !(gAresGlobal->gLastKeys & attributes)) &&
             (!gAresGlobal->gMouseActive))
@@ -758,7 +758,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
                 dcalc = difference;
                 difference =  ABS( (long)theShip->location.v - (long)selectShip->location.v);
                 distance = difference;
-                
+
                 if (( dcalc > kMaximumRelevantDistance) ||
                     ( distance > kMaximumRelevantDistance))
                 {
@@ -785,7 +785,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
         {
             hugeDistance.hi = hugeDistance.lo = 0;
         }
-        
+
 /*      WriteDebugDivider();
         WriteDebugLong( hugeDistance.lo);
         WriteDebugLong( selectShipNum);
@@ -794,7 +794,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
         WriteDebugLong( theShip->direction);
 */      selectShipNum = GetManualSelectObject( theShip, 0, attributes,
                                                 nonattributes, &hugeDistance, selectShipNum, friendOrFoe);
-        
+
         if ( selectShipNum >= 0)
         {
             if ( (gAresGlobal->gTheseKeys & kDestinationKey) || ( gAresGlobal->gTheseKeys & kSelectFoeKey))
@@ -827,7 +827,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
                     SetPlayerSelectShip( selectShipNum, true, gAresGlobal->gPlayerAdmiralNumber);
                 } else
                 {
-#if NETSPROCKET_AVAILABLE               
+#if NETSPROCKET_AVAILABLE
                     if ( !SendSelectMessage( gAresGlobal->gGameTime + gNetLatency, selectShipNum, true))
                         StopNetworking();
 #endif
@@ -863,7 +863,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
                     SetPlayerSelectShip( selectShipNum, false, gAresGlobal->gPlayerAdmiralNumber);
                 } else
                 {
-#if NETSPROCKET_AVAILABLE               
+#if NETSPROCKET_AVAILABLE
                     if ( !SendSelectMessage( gAresGlobal->gGameTime + gNetLatency, selectShipNum, false))
                         StopNetworking();
 #endif NETSPROCKET_AVAILABLE
@@ -880,7 +880,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
         {
             theShip->keysDown = gAresGlobal->gTheseKeys | kAutoPilotKey;
             gAresGlobal->gAutoPilotOff = false;
-        } else              
+        } else
         {
             theShip->keysDown = (theShip->keysDown & ( ~kMiscKeyMask)) |
                             (gAresGlobal->gTheseKeys & ( kMiscKeyMask));
@@ -904,7 +904,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
         }
         */
     }
-    
+
     if (( gAresGlobal->gTheseKeys & kWarpKey) &&
         ( gAresGlobal->gTheseKeys & kDestinationKey))
     {
@@ -929,9 +929,9 @@ void PlayerShipHandleClick( Point where)
     spaceObjectType *theShip = nil, *selectShip = nil;
     long            selectShipNum;
     Rect            bounds;
-    
+
     if ( gAresGlobal->keyMask & kMouseMask) return;
-    
+
     gAresGlobal->gDestKeyTime = -1;
     if ( gAresGlobal->gPlayerShipNumber >= 0)
     {
@@ -942,11 +942,11 @@ void PlayerShipHandleClick( Point where)
             bounds.top = where.v - kCursorBoundsSize;
             bounds.right = where.h + kCursorBoundsSize;
             bounds.bottom = where.v + kCursorBoundsSize;
-            
+
             if ( theShip->keysDown & kDestinationKey)
             {
                 selectShipNum = GetAdmiralDestinationObject( gAresGlobal->gPlayerAdmiralNumber);
-                
+
                 selectShipNum = GetSpritePointSelectObject( &bounds, theShip, 0,
                                                         kCanBeDestination | kIsDestination,//kCanThink | kIsDestination,
                                                         0, selectShipNum, 0);
@@ -971,7 +971,7 @@ void PlayerShipHandleClick( Point where)
                         SetScreenLabelString( gAresGlobal->gDestinationLabel, (anyCharType *)s);
     //                  SetDestinationString( s, TRUE);
                     }
-    
+
                     SetObjectDestination( theShip, nil);
                     */
                     if ( !(gAresGlobal->gOptions & kOptionNetworkOn))
@@ -979,7 +979,7 @@ void PlayerShipHandleClick( Point where)
                         SetPlayerSelectShip( selectShipNum, true, gAresGlobal->gPlayerAdmiralNumber);
                     } else
                     {
-#if NETSPROCKET_AVAILABLE                   
+#if NETSPROCKET_AVAILABLE
                         if ( !SendSelectMessage( gAresGlobal->gGameTime + gNetLatency, selectShipNum, true))
                             StopNetworking();
 #endif NETSPROCKET_AVAILABLE
@@ -1016,7 +1016,7 @@ void PlayerShipHandleClick( Point where)
                         SetPlayerSelectShip( selectShipNum, false, gAresGlobal->gPlayerAdmiralNumber);
                     } else
                     {
-#if NETSPROCKET_AVAILABLE                   
+#if NETSPROCKET_AVAILABLE
                         if ( !SendSelectMessage( gAresGlobal->gGameTime + gNetLatency, selectShipNum, false))
                             StopNetworking();
 #endif NETSPROCKET_AVAILABLE
@@ -1032,7 +1032,7 @@ void SetPlayerSelectShip( long whichShip, Boolean target, long admiralNumber)
     spaceObjectType *selectShip = (spaceObjectType *)*gSpaceObjectData + whichShip,
                     *theShip = GetAdmiralFlagship( admiralNumber);
     Str255          s;
-    
+
     if ( admiralNumber == gAresGlobal->gPlayerAdmiralNumber)
     {
         gAresGlobal->lastSelectedObject = whichShip;
@@ -1055,9 +1055,9 @@ void SetPlayerSelectShip( long whichShip, Boolean target, long admiralNumber)
             {
                 CopyPString( s,
                     GetDestBalanceName( selectShip->destinationObject));
-                
+
                 HotKey_AppendString( selectShip, s);
-                
+
                 SetScreenLabelString( gAresGlobal->gDestinationLabel,
                     s );
             } else
@@ -1066,12 +1066,12 @@ void SetPlayerSelectShip( long whichShip, Boolean target, long admiralNumber)
                     selectShip->whichBaseObject + 1);
 
                 HotKey_AppendString( selectShip, s);
-                
+
                 SetScreenLabelString( gAresGlobal->gDestinationLabel,
                     (anyCharType *)s);
             }
         }
-        
+
         if ( !( theShip->attributes & kOnAutoPilot))
             SetObjectDestination( theShip, nil);
     } else
@@ -1119,12 +1119,12 @@ void ChangePlayerShipNumber( long whichAdmiral, long newShipNumber)
     mWriteDebugString("\pXFER");
     WriteDebugLong( whichAdmiral);
     WriteDebugLong( newShipNumber);
-    
+
     if ( whichAdmiral == gAresGlobal->gPlayerAdmiralNumber)
     {
         anObject->attributes &= (~kIsHumanControlled) & (~kIsPlayerShip);
         if ( newShipNumber != gAresGlobal->gPlayerShipNumber)
-        {   
+        {
             gAresGlobal->gPlayerShipNumber = newShipNumber;
             ResetScrollStars( gAresGlobal->gPlayerShipNumber);
         }
@@ -1136,7 +1136,7 @@ void ChangePlayerShipNumber( long whichAdmiral, long newShipNumber)
             anObject->attributes |= (kIsHumanControlled) | (kIsPlayerShip);
 //      else
 //          anObject->attributes |= kIsPlayerShip;
-            
+
         if ( newShipNumber == GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber))
         {
             SetScreenLabelAge( gAresGlobal->gSelectionLabel, kLabelOffVisibleTime);
@@ -1149,7 +1149,7 @@ void ChangePlayerShipNumber( long whichAdmiral, long newShipNumber)
     {
         anObject->attributes &= ~(kIsRemote | kIsPlayerShip);
         anObject = (spaceObjectType *)*gSpaceObjectData + newShipNumber;
-        anObject->attributes |= (kIsRemote | kIsPlayerShip);        
+        anObject->attributes |= (kIsRemote | kIsPlayerShip);
     }
     SetAdmiralFlagship( whichAdmiral, newShipNumber);
 }
@@ -1157,7 +1157,7 @@ void ChangePlayerShipNumber( long whichAdmiral, long newShipNumber)
 void TogglePlayerAutoPilot( spaceObjectType *theShip)
 {
     Str255  s;
-    
+
     if ( theShip->attributes & kOnAutoPilot)
     {
         theShip->attributes &= ~kOnAutoPilot;
@@ -1183,7 +1183,7 @@ void TogglePlayerAutoPilot( spaceObjectType *theShip)
 Boolean IsPlayerShipOnAutoPilot( void)
 {
     spaceObjectType *theShip;
-    
+
     if ( gAresGlobal->gPlayerShipNumber < 0) return false;
     theShip = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
     if ( theShip->attributes & kOnAutoPilot) return true;
@@ -1194,7 +1194,7 @@ void PlayerShipGiveCommand( long whichAdmiral)
 {
     spaceObjectType *selectShip;
     long selectShipNum = GetAdmiralConsiderObject( whichAdmiral);
-    
+
     if ( selectShipNum >= 0)
     {
                     DebugFileAppendString( "\pGO\t");
@@ -1215,7 +1215,7 @@ void PlayerShipBodyExpire( spaceObjectType *theShip, Boolean sourceIsBody)
 {
     spaceObjectType *selectShip = nil;
     long            selectShipNum;
-    
+
     mWriteDebugString("\pBody Expire");
     selectShipNum = GetAdmiralConsiderObject( theShip->owner);
 
@@ -1288,7 +1288,7 @@ void HandleTextMessageKeys( KeyMap keyMap, KeyMap lastKeyMap,
     Boolean         newKeys = false, anyKeys = false;
     short           h;
     KeyMap          *bufferMap;
-    
+
     for ( h = 0; h < 4; h++)
     {
 #if TARGET_OS_MAC
@@ -1321,7 +1321,7 @@ void HandleTextMessageKeys( KeyMap keyMap, KeyMap lastKeyMap,
 long HotKey_GetFromObject( spaceObjectType *object)
 {
     long    i = 0;
-    
+
     if ( object == nil) return -1;
     if ( !object->active) return -1;
     while ( i < kHotKeyNum)
@@ -1342,12 +1342,12 @@ StringPtr HotKey_AppendString( spaceObjectType *object, StringPtr s)
 {
     long    h = HotKey_GetFromObject( object), keyNum;
     Str255  keyName;
-    
+
     if ( h < 0) return s;
     keyNum = GetKeyNumFromKeyMap(
         gAresGlobal->gKeyControl[h + kFirstHotKeyNum]);
     if ( keyNum < 0) return s;
-    
+
     GetIndString( keyName, kKeyMapNameLongID, keyNum);
     ConcatenatePString( s, "\p < ");
     ConcatenatePString( s, keyName);
@@ -1360,13 +1360,13 @@ void Update_LabelStrings_ForHotKeyChange( void)
     spaceObjectType *selectShip;
     long            whichShip;
     Str255          s;
-    
+
     whichShip = GetAdmiralDestinationObject( gAresGlobal->gPlayerAdmiralNumber);
     if ( whichShip >= 0)
-    
+
     {
         selectShip = (spaceObjectType *)*gSpaceObjectData + whichShip;
-    
+
 //      if ( admiralNumber == gAresGlobal->gPlayerAdmiralNumber)
         {
             SetScreenLabelObject( gAresGlobal->gDestinationLabel, selectShip);
@@ -1379,9 +1379,9 @@ void Update_LabelStrings_ForHotKeyChange( void)
             {
                 CopyPString( s,
                     GetDestBalanceName( selectShip->destinationObject));
-                
+
                 HotKey_AppendString( selectShip, s);
-                
+
                 SetScreenLabelString( gAresGlobal->gDestinationLabel,
                     s );
             } else
@@ -1390,14 +1390,14 @@ void Update_LabelStrings_ForHotKeyChange( void)
                     selectShip->whichBaseObject + 1);
 
                 HotKey_AppendString( selectShip, s);
-                
+
                 SetScreenLabelString( gAresGlobal->gDestinationLabel,
                     (anyCharType *)s);
             }
         }
-        
+
     }
-    
+
     whichShip = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
     if ( whichShip >= 0)
     {

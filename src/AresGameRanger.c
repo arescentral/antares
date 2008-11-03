@@ -105,7 +105,7 @@ OSErr AGR_Init( void)
     {
         gAresGlobal->useGameRanger = false;
     }
-    
+
     return result;
 
 }

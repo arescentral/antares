@@ -152,7 +152,7 @@ void CheckHandleForNil( Handle);
 void InitAresGuide( void)
 {
     OSErr   err;
-    
+
     err = LoadClip2Gif();
     if ( err != noErr)
     {
@@ -171,7 +171,7 @@ void MakeAresGuide( void)
     long                    count, whichShape;
     short                   raceNum;
     weaponDataType          weaponData;
-    
+
     range.minmass=0x7fffffff;
     range.maxmass=-1;
     range.minturn=0x7fffffff;
@@ -202,9 +202,9 @@ void MakeAresGuide( void)
     range.maxwdamage=-1;
     range.minwenergy=0x7fffffff;
     range.maxwenergy=-1;
-    
+
     InitAresGuide();
-    
+
     // 1st pass guage mins & maxs
     baseObject = (baseObjectType *)*gBaseObjectData;
 
@@ -234,11 +234,11 @@ void MakeAresGuide( void)
                 GetWeaponData( baseObject->special, &weaponData);
                 AdjustRangeFromWeaponData( &weaponData, &range);
             }
-                
+
         }
         baseObject++;
     }
-    
+
 
     baseObject = (baseObjectType *)*gBaseObjectData;
 
@@ -277,12 +277,12 @@ void MakeAresGuide( void)
     for ( count = 0; count < kMaxBaseObject; count++) // kMaxBaseObject
     {
         baseObject = (baseObjectType *)*gBaseObjectData + count;
-        if (baseObject->internalFlags & 0x40000000) 
+        if (baseObject->internalFlags & 0x40000000)
         {
             newText = sourceText;
             HandToHand( &newText);
             CheckHandleForNil( newText);
-            
+
             raceNum = GetRaceNumFromID( baseObject->baseRace);
             if ( raceNum >= 0)
             {
@@ -291,7 +291,7 @@ void MakeAresGuide( void)
             {
                 GetIndString(  ss2, 6454, 23);
             }
-            
+
             // title
             GetIndString( scrapString, 5000, count + 1);
             ConcatenatePString( scrapString, "\p, ");
@@ -329,7 +329,7 @@ void MakeAresGuide( void)
                 ReplaceIndStringWithStringInHandle( 6453, 9, scrapString, newText);
                 InsertGraphText( baseObject->frame.rotation.maxTurnRate, range.minturn, range.maxturn, 6453, 10, newText);
             }
-            
+
             // accel
             SmallFixedToString( baseObject->maxThrust, scrapString);
             ReplaceIndStringWithStringInHandle( 6453, 11, scrapString, newText);
@@ -344,7 +344,7 @@ void MakeAresGuide( void)
             SmallFixedToString( baseObject->warpSpeed, scrapString);
             ReplaceIndStringWithStringInHandle( 6453, 15, scrapString, newText);
             InsertGraphText( baseObject->warpSpeed, range.minwarp, range.maxwarp, 6453, 16, newText);
-            
+
             // shields
             NumToString( baseObject->health, scrapString);
             ReplaceIndStringWithStringInHandle( 6453, 17, scrapString, newText);
@@ -370,33 +370,33 @@ void MakeAresGuide( void)
             {
                 GetIndString( scrapString, 5000, baseObject->pulse + 1);
                 ReplaceIndStringWithStringInHandle( 6453, 4, scrapString, newText);
-                
+
                 GetWeaponData( baseObject->pulse, &weaponData);
                 InsertWeaponText( 6453, 25, newText, &weaponData, &range);
             } else
             {
                 ReplaceIndStringWithIndStringInHandle( 6453, 4, 6454, 24, newText);
             }
-            
+
             // weapon 2
             if ( baseObject->beam != kNoWeapon)
             {
                 GetIndString( scrapString, 5000, baseObject->beam + 1);
                 ReplaceIndStringWithStringInHandle( 6453, 5, scrapString, newText);
-                
+
                 GetWeaponData( baseObject->beam, &weaponData);
                 InsertWeaponText( 6453, 41, newText, &weaponData, &range);
             } else
             {
                 ReplaceIndStringWithIndStringInHandle( 6453, 5, 6454, 24, newText);
             }
-            
+
             // weapon 3
             if ( baseObject->special != kNoWeapon)
             {
                 GetIndString( scrapString, 5000, baseObject->special + 1);
                 ReplaceIndStringWithStringInHandle( 6453, 6, scrapString, newText);
-                
+
                 GetWeaponData( baseObject->special, &weaponData);
                 InsertWeaponText( 6453, 57, newText, &weaponData, &range);
             } else
@@ -406,7 +406,7 @@ void MakeAresGuide( void)
 
             InsertGraphicText( count, baseObject->pixResID, newText);
             InsertIndexText( count, baseObject->baseRace, newText);
-            
+
             GetFileNameFromObject( count, scrapString);
             MoveHHi( newText);
             HLock( newText);
@@ -422,7 +422,7 @@ void MakeAresGuide( void)
 void InsertWeaponText( short resID, short startNum, Handle newText, weaponDataType *data, fieldRangeType *range)
 {
     Str255  scrapString;
-    
+
     // ammo
     if ( data->ammo < 0)
     {
@@ -433,7 +433,7 @@ void InsertWeaponText( short resID, short startNum, Handle newText, weaponDataTy
         ReplaceIndStringWithStringInHandle( resID, startNum + 0, scrapString, newText);
         InsertGraphText( data->ammo, range->minwammo, range->maxwammo, resID, startNum + 1, newText);
     }
-    
+
     // fireTime
     SmallFixedToString( data->fireTime, scrapString);
     ReplaceIndStringWithStringInHandle( resID, startNum + 2, scrapString, newText);
@@ -498,7 +498,7 @@ OSErr ConvertSpriteIntoGIF( short resID, long whichShape, StringPtr forceName)
     OSErr               err = noErr;
     FSSpec              newFile;
     GrafPtr             oldPort;
-    
+
     GetPort( &oldPort);
     mWriteDebugString("\pOpening:");
     WriteDebugLong( resID);
@@ -511,19 +511,19 @@ OSErr ConvertSpriteIntoGIF( short resID, long whichShape, StringPtr forceName)
         if ( spriteTable == nil) return ( -1);
         mWriteDebugString("\padded.");
     }
-    
+
     DrawInOffWorld();
     NormalizeColors();
     MacSetRect( &r, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     PaintRect( &r);
 
     // set up the sprite
-    
+
     dRect.left = 0;
     dRect.right = kSpriteBoundsWidth;
     dRect.top = 0;
     dRect.bottom = kSpriteBoundsHeight;
-    
+
     pixData = GetNatePixTableNatePixData( spriteTable, whichShape);
 
     aSpritePix.data = &pixData;
@@ -531,20 +531,20 @@ OSErr ConvertSpriteIntoGIF( short resID, long whichShape, StringPtr forceName)
     aSpritePix.center.v = GetNatePixTableNatePixVRef( spriteTable, whichShape);
     aSpritePix.width = GetNatePixTableNatePixWidth( spriteTable, whichShape);
     aSpritePix.height = GetNatePixTableNatePixHeight( spriteTable, whichShape);
-    
+
     // calculate the correct size
-    
+
 /*  tlong = (long)(kSpriteBoundsHeight - 2) * SCALE_SCALE;
     tlong /= aSpritePix.height;
     thisScale = (long)(kSpriteBoundsWidth - 2) * SCALE_SCALE;
     thisScale /= aSpritePix.width;
-    
+
     if ( tlong < thisScale) thisScale = tlong;
     if ( thisScale > SCALE_SCALE) thisScale = SCALE_SCALE;
 */
     thisScale = SCALE_SCALE;
     // calculate the correct position
-    
+
     coord.h = aSpritePix.center.h;
     coord.h *= thisScale;
     coord.h >>= SHIFT_SCALE;
@@ -562,15 +562,15 @@ OSErr ConvertSpriteIntoGIF( short resID, long whichShape, StringPtr forceName)
     tlong >>= SHIFT_SCALE;
     where.v = ( kSpriteBoundsHeight / 2) - ( tlong / 2);
     where.v += dRect.top + coord.v;
-    
-    
+
+
     // draw the sprite
 
     OptScaleSpritePixInPixMap( &aSpritePix, where, thisScale,
             &spriteRect, &dRect, offPixBase);
 
     // clean up the sprite
-    
+
     SetAllPixTablesNoKeep();
     RemoveAllUnusedPixTables();
 
@@ -582,18 +582,18 @@ OSErr ConvertSpriteIntoGIF( short resID, long whichShape, StringPtr forceName)
         MacSetPort( oldPort);
         return( err);
     }
-    
+
     // make the gif
-    
+
     newPic = MakePicHandleFromScreen( offPixBase, &r);
     if ( newPic == nil) Debugger();
-    err = ConvertPictToGIFFile( newPic, 
+    err = ConvertPictToGIFFile( newPic,
         &newFile,
         0,                  //interlaced,
         transparencyNo,     //transparency,
         8,                  //depth,
         colorPaletteSystem);//colors);
-    
+
     // clean up the picture
     KillPicture( newPic);
     MacSetPort( oldPort);
@@ -611,12 +611,12 @@ void ConvertPortraitIntoGIF( long whichObject, StringPtr fileName)
     {
         return;
     }
-    
+
     // make the gif
-    
+
     newPic = GetPicture( whichObject + 1001);
     if ( newPic == nil) return;
-    err = ConvertPictToGIFFile( newPic, 
+    err = ConvertPictToGIFFile( newPic,
         &newFile,
         0,                  //interlaced,
         transparencyNo,     //transparency,
@@ -628,7 +628,7 @@ void ConvertPortraitIntoGIF( long whichObject, StringPtr fileName)
 PicHandle MakePicHandleFromScreen( PixMapHandle sourceMap, Rect *sourceRect)
 {
     PicHandle   newPic = nil;
-    
+
     newPic = OpenPicture( sourceRect);
     if ( newPic != nil)
     {
@@ -645,7 +645,7 @@ void AdjustRangeFromObject( baseObjectType *o, fieldRangeType *range)
     {
         if ( o->mass < range->minmass) range->minmass = o->mass;
         if ( o->mass > range->maxmass) range->maxmass = o->mass;
-        
+
         if ( o->attributes & kCanTurn)
         {
             if ( o->frame.rotation.maxTurnRate < range->minturn)
@@ -653,50 +653,50 @@ void AdjustRangeFromObject( baseObjectType *o, fieldRangeType *range)
             if ( o->frame.rotation.maxTurnRate > range->maxturn)
                 range->maxturn = o->frame.rotation.maxTurnRate;
         }
-        
+
         if ( o->maxThrust < range->minaccel) range->minaccel = o->maxThrust;
         if ( o->maxThrust > range->maxaccel) range->maxaccel = o->maxThrust;
-        
+
         if ( o->maxVelocity < range->minvel) range->minvel = o->maxVelocity;
         if ( o->maxVelocity > range->maxvel) range->maxvel = o->maxVelocity;
-        
+
         if ( o->warpSpeed < range->minwarp) range->minwarp = o->warpSpeed;
         if ( o->warpSpeed > range->maxwarp) range->maxwarp = o->warpSpeed;
-        
+
         if ( o->health < range->minshields) range->minshields = o->health;
         if ( o->health > range->maxshields) range->maxshields = o->health;
-        
+
         if ( o->price < range->mincost) range->mincost = o->price;
         if ( o->price > range->maxcost) range->maxcost = o->price;
-        
+
         if ( o->buildTime < range->minbuild) range->minbuild = o->buildTime;
         if ( o->buildTime > range->maxbuild) range->maxbuild = o->buildTime;
-        
+
         if ( o->energy < range->minenergy) range->minenergy = o->energy;
         if ( o->energy > range->maxenergy) range->maxenergy = o->energy;
     }/* else
     {
         if ( o->frame.weapon.ammo < range->minwammo) range->minwammo = o->frame.weapon.ammo;
         if ( o->frame.weapon.ammo > range->maxwammo) range->maxwammo = o->frame.weapon.ammo;
-        
+
         if ( o->frame.weapon.fireTime < range->minwfire) range->minwfire = o->frame.weapon.fireTime;
         if ( o->frame.weapon.fireTime > range->maxwfire) range->maxwfire = o->frame.weapon.fireTime;
-        
+
         if ( o->frame.weapon.range < range->minwrange) range->minwrange = o->frame.weapon.range;
         if ( o->frame.weapon.range > range->maxwrange) range->minwrange = o->frame.weapon.range;
-        
+
         if ( o->frame.weapon.energyCost < range->minwenergy) range->minwenergy = o->frame.weapon.energyCost;
         if ( o->frame.weapon.energyCost > range->maxwenergy) range->maxwenergy = o->frame.weapon.energyCost;
     }*/
-    
-    
+
+
 }
 
 void AdjustRangeFromWeaponData( weaponDataType *w, fieldRangeType *range)
 {
     if ( w->ammo < range->minwammo) range->minwammo = w->ammo;
     if ( w->ammo > range->maxwammo) range->maxwammo = w->ammo;
-    
+
     if ( w->fireTime < range->minwfire) range->minwfire = w->fireTime;
     if ( w->fireTime > range->maxwfire) range->maxwfire = w->fireTime;
 
@@ -705,10 +705,10 @@ void AdjustRangeFromWeaponData( weaponDataType *w, fieldRangeType *range)
 
     if ( w->range < range->minwrange) range->minwrange = w->range;
     if ( w->range > range->maxwrange) range->minwrange = w->range;
-    
+
     if ( w->damage < range->minwdamage) range->minwdamage = w->damage;
     if ( w->damage > range->maxwdamage) range->maxwdamage = w->damage;
-    
+
     if ( w->energyCost < range->minwenergy) range->minwenergy = w->energyCost;
     if ( w->energyCost > range->maxwenergy) range->maxwenergy = w->energyCost;
 }
@@ -719,15 +719,15 @@ void GetWeaponData( long whichWeapon, weaponDataType *data)
     long                mostDamage, actionNum, mostSpeed;
     objectActionType    *action;
     Boolean             isGuided = false;
-    
+
     if ( whichWeapon != kNoShip)
     {
         weaponObject = (baseObjectType *)*gBaseObjectData + whichWeapon;
-                    
+
         /* damage; this is tricky--we have to guess by walking through activate actions,
             and for all the createObject actions, see which creates the most damaging
             object.  We calc this first so we can use isGuided*/
-        
+
         mostDamage = mostSpeed = 0;
         isGuided = false;
         if ( weaponObject->activateActionNum > 0)
@@ -746,13 +746,13 @@ void GetWeaponData( long whichWeapon, weaponDataType *data)
                 action++;
             }
         }
-        
+
         data->guided = isGuided;
         // is autotarget
         if ( weaponObject->attributes & kAutoTarget)
             data->autoTarget = true;
         else data->autoTarget = false;
-        
+
         // range
         data->range = lsqrt(weaponObject->frame.weapon.range);
 
@@ -783,10 +783,10 @@ OSErr SaveBlockToFile( Ptr data, long len, StringPtr fileName)
     FSSpec  newFile;
     short   newRefNum;
     long    count;
-    
+
     if ( data != nil)
     {
-        
+
         err = FSMakeFSSpec( 0, 0, fileName, &newFile);
         if (( err != noErr) && ( err != fnfErr))
             ShowSimpleStringAlert( "\pCouldn't make FSSpec out of", fileName, nil, nil);
@@ -818,7 +818,7 @@ void AppendStringToHandle( StringPtr s, Handle data)
 {
     char    *c, *sc, lenCount;
     long    fileLen;
-    
+
     CheckStringForNil( s);
     if ( data != nil)
     {
@@ -847,7 +847,7 @@ void AppendStringToHandle( StringPtr s, Handle data)
 void ReplaceIndStringWithIndStringInHandle( long destID, long destNum, long sourceID, long sourceNum, Handle data)
 {
     Str255      sourceString, destString;
-    
+
     GetIndString( destString, destID, destNum);
     GetIndString( sourceString, sourceID, sourceNum);
     CheckStringForNil( sourceString);
@@ -857,7 +857,7 @@ void ReplaceIndStringWithIndStringInHandle( long destID, long destNum, long sour
 void ReplaceIndStringWithStringInHandle( long destID, long destNum, StringPtr sourceString, Handle data)
 {
     Str255      destString;
-    
+
     GetIndString( destString, destID, destNum);
     CheckStringForNil( sourceString);
     Munger( data, 0, (destString + 1), *destString, sourceString + 1, *sourceString);
@@ -866,7 +866,7 @@ void ReplaceIndStringWithStringInHandle( long destID, long destNum, StringPtr so
 void ReplaceIndStringWithHandleInHandle( long destID, long destNum, Handle insertData, Handle data)
 {
     Str255      destString;
-    
+
     CheckHandleForNil( insertData);
     HLock( insertData);
     GetIndString( destString, destID, destNum);
@@ -879,7 +879,7 @@ void GetFileNameFromObject( long whichObject, StringPtr name)
     baseObjectType  *o;
     short           raceNum;
     Str255          shipName;
-    
+
     o = mGetBaseObjectPtr( whichObject);
     raceNum = GetRaceNumFromID( o->baseRace);
     if ( raceNum >= 0)
@@ -899,7 +899,7 @@ void GetFileNameFromObject( long whichObject, StringPtr name)
 void GetFileNameFromSprite( long whichSprite, StringPtr name)
 {
     Str255  tString;
-    
+
     CopyPString(name, "\psprite");
     NumToNDigitString( whichSprite, tString, 5);
     ConcatenatePString( name, tString);
@@ -909,7 +909,7 @@ void GetFileNameFromSprite( long whichSprite, StringPtr name)
 void GetFileNameFromPortrait( long whichObject, StringPtr name)
 {
     Str255  tString;
-    
+
     whichObject += 1001;
     CopyPString(name, "\pportrait");
     NumToNDigitString( whichObject, tString, 5);
@@ -920,7 +920,7 @@ void GetFileNameFromPortrait( long whichObject, StringPtr name)
 void NumToNDigitString( long num, StringPtr s, long digits)
 {
     unsigned char   *c = s;
-    
+
 /*  *c = 3;
     c++;
     *c = '0' + ( num / 100);
@@ -950,14 +950,14 @@ void InsertGraphText( long val, long minval, long maxval, short resID, short str
     {
         ReplaceIndStringWithHandleInHandle(  resID, strNum, graphText, newText);
         DisposeHandle( graphText);
-    }           
+    }
 }
 
 Handle GetGraphText( long val)
 {
     Handle  newData = nil;
     Str255  s;
-    
+
     GetIndString( s, 6454, 8);
     newData = NewHandleFromString( s);
     if ( newData == nil) return nil;
@@ -970,7 +970,7 @@ Handle GetGraphText( long val)
         GetIndString( s, 6454, 10);
         AppendStringToHandle( s, newData);
     }
-    
+
     if ( val < kGraphWidth)
     {
         GetIndString( s, 6454, 11);
@@ -990,7 +990,7 @@ void InsertGraphicText( long whichObject, long whichSprite, Handle text)
     Handle      newData = nil;
     Str255      s;
     PicHandle   pic;
-    
+
     if ( whichSprite >= 0)
     {
         GetIndString( s, 6454, 17);
@@ -1011,21 +1011,21 @@ void InsertGraphicText( long whichObject, long whichSprite, Handle text)
         GetIndString( s, 6454, 19);
         newData = NewHandleFromString( s);
         if ( newData == nil) return;
-        
+
         GetFileNameFromPortrait( whichObject, s);
         AppendStringToHandle( s, newData);
         GetIndString( s, 6454, 20);
         AppendStringToHandle( s, newData);
         NumToString( (**pic).picFrame.right - (**pic).picFrame.left, s);
         AppendStringToHandle( s, newData);
-        
+
         GetIndString( s, 6454, 21);
         AppendStringToHandle( s, newData);
         NumToString( (**pic).picFrame.bottom - (**pic).picFrame.top, s);
         AppendStringToHandle( s, newData);
         GetIndString( s, 6454, 22);
         AppendStringToHandle( s, newData);
-        
+
         ReplaceIndStringWithHandleInHandle( 6453, 74, newData, text);
         DisposeHandle( newData);
         ReleaseResource( (Handle)pic);
@@ -1040,7 +1040,7 @@ void InsertIndexText( long whichObject, long myRace, Handle text)
     Boolean         raceHasName = true;
     baseObjectType  *o;
     long            lowestClass, highestClass, thisClass, nextClass, count;
-    
+
     while ( raceHasName)
     {
         raceID = GetRaceIDFromNum( raceNum);
@@ -1064,14 +1064,14 @@ void InsertIndexText( long whichObject, long myRace, Handle text)
         AppendStringToHandle( s, newData);
         GetIndString( s, 6454, 16); // </A>
         AppendStringToHandle( s, newData);
-        
+
         if ( raceID == myRace)
         {
             o = (baseObjectType *)*gBaseObjectData;
-            
+
             lowestClass = 0x7fffffff;
             highestClass = 0;
-            
+
             for ( count = 0; count < kMaxBaseObject; count++)
             {
                 if (( o->internalFlags & 0x40000000) && ( o->baseRace == myRace))
@@ -1127,13 +1127,13 @@ void InsertIndexText( long whichObject, long myRace, Handle text)
                 }
             } while ( nextClass > thisClass);
         }
-        
+
         raceNum++;
         s[0] = 0;
         GetRaceString( s, kRaceAdjective, raceNum);
         if ( s[0] == 0) raceHasName = false;
     }
-    
+
     ReplaceIndStringWithHandleInHandle( 6453, 75, newData, text);
 }
 
@@ -1142,10 +1142,10 @@ long GetPreviousIndexBaseObject( long whichObject)
     long            highestClass = -1, count, resultObject = -1;
     baseObjectType  *source, *o;
     short           previousRace;
-    
+
     // 1st, look for the object of same race with the largest class _below_ our class
     source = mGetBaseObjectPtr( whichObject);
-    
+
     o = (baseObjectType *)*gBaseObjectData;
     for ( count = 0; count < kMaxBaseObject; count++)
     {
@@ -1163,7 +1163,7 @@ long GetPreviousIndexBaseObject( long whichObject)
         }
         o++;
     }
-    
+
     // if nothing found, find LAST, HIGHEST class object of previous race
     if ( resultObject < 0)
     {
@@ -1172,7 +1172,7 @@ long GetPreviousIndexBaseObject( long whichObject)
         previousRace--;
         previousRace = GetRaceIDFromNum( previousRace);
         highestClass = -1;
-        
+
         o = (baseObjectType *)*gBaseObjectData;
         for ( count = 0; count < kMaxBaseObject; count++)
         {
@@ -1191,7 +1191,7 @@ Handle NewHandleFromString( StringPtr s)
 {
     char    *c, *sc, lenCount;
     Handle  data = nil;
-    
+
     CheckStringForNil( s);
     sc = ( char *)s;
     data = NewHandle( ((long)*sc));
@@ -1217,7 +1217,7 @@ void CheckStringForNil( StringPtr s)
 {
     char    *c = (char *)s;
     short   len = *c;
-    
+
     c++;
     while ( len > 0)
     {
@@ -1231,7 +1231,7 @@ void CheckHandleForNil( Handle data)
 {
     char    *c;
     short   len;
-    
+
     if ( data == nil)
     {
         MyDebugString("\pNil Data!");

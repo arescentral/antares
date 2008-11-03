@@ -67,7 +67,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 typedef struct
 {
     long    seed;
-    OSType  sig;    
+    OSType  sig;
 } debugRandomType;
 
 extern aresGlobalType           *gAresGlobal;
@@ -80,7 +80,7 @@ Handle  gDebugRandomSave = nil;
 
 int RandomInit( void)
 {
-                    
+
     short   refNum = CurResFile();
 
 #ifdef kSaveToDebugFile
@@ -128,8 +128,8 @@ void RandomCleanup( void)
         } else SysBeep( 20);
 #endif
         HUnlock( gDebugRandomSave);
-        DisposeHandle( gDebugRandomSave);   
-        gDebugRandomSave = nil;     
+        DisposeHandle( gDebugRandomSave);
+        gDebugRandomSave = nil;
     }
 #ifdef kSaveToDebugFile
     DebugFileSave( kDebugFileName);
@@ -140,7 +140,7 @@ void RandomCleanup( void)
 int Randomize( int range)
 {
     long rawResult;
-    
+
     if ( range == 0) return ( 0);
     rawResult = Random();
     if (rawResult < 0) rawResult *= -1;
@@ -153,7 +153,7 @@ void DebugRandomReset( void)
     DebugFileCleanup();
     DebugFileInit();
     DebugFileAppendString("\p<START DEBUG FILE>\r\r");
-#endif  
+#endif
     gDebugWhichRandom = 0;
 }
 
@@ -183,7 +183,7 @@ short DebugRandomSeeded( short range, long *seed, char *file, OSType sig, long o
     DebugFileAppendLong( result);
     DebugFileAppendString( "\p\r");
     */
-    
+
 #ifdef kSaveToDebugFile
     if ( *seed == gRandomSeed)
     {
@@ -207,7 +207,7 @@ short DebugRandomSeeded( short range, long *seed, char *file, OSType sig, long o
 #ifdef kRandomRecord
         Str255  s1;
         char    *hackchar;
-        
+
         hackchar = (char *)&sig;
         s1[0] = 4;
         s1[1] = *hackchar++;
@@ -225,7 +225,7 @@ short DebugRandomSeeded( short range, long *seed, char *file, OSType sig, long o
             DebugFileSave( kDebugFileName);
 #endif
             RandomCleanup();
-        }   
+        }
 #else
         if ( gDebugWhichRandom >= kRandomDebugTableSize)
         {
@@ -235,21 +235,21 @@ short DebugRandomSeeded( short range, long *seed, char *file, OSType sig, long o
         {
             Str255  s1, s2;
             char    *hackchar;
-            
+
             hackchar = (char *)&sig;
             s2[0] = 4;
             s2[1] = *hackchar++;
             s2[2] = *hackchar++;
             s2[3] = *hackchar++;
             s2[4] = *hackchar++;
-            
+
             hackchar = (char *)&dr->sig;
             s1[0] = 4;
             s1[1] = *hackchar++;
             s1[2] = *hackchar++;
             s1[3] = *hackchar++;
             s1[4] = *hackchar++;
-            
+
             ShowSimpleStringAlert( "\pWrong SIG (want/got): ", s1, "\p / ", s2);
 
 #ifdef kSaveToDebugFile
@@ -257,7 +257,7 @@ short DebugRandomSeeded( short range, long *seed, char *file, OSType sig, long o
             DebugFileAppendString(s1);
             DebugFileAppendString("\p Got: ");
             DebugFileAppendString(s2);
-        
+
             DebugFileAppendString("\p\r\r<END DEBUG FILE>");
             DebugFileSave( kDebugFileName);
 #endif
@@ -267,16 +267,16 @@ short DebugRandomSeeded( short range, long *seed, char *file, OSType sig, long o
         {
             Str255  s1, s2, s3;
             char    *hackchar;
-            
+
             hackchar = (char *)&dr->sig;
             s1[0] = 4;
             s1[1] = *hackchar++;
             s1[2] = *hackchar++;
             s1[3] = *hackchar++;
             s1[4] = *hackchar++;
-            
+
             NumToString( dr->seed, s2);
-            NumToString( *seed, s3);            
+            NumToString( *seed, s3);
             ShowSimpleStringAlert( "\pWrong SEED (want/got): ", s2, s1, s3);
 
 #ifdef kSaveToDebugFile
@@ -284,7 +284,7 @@ short DebugRandomSeeded( short range, long *seed, char *file, OSType sig, long o
             DebugFileAppendString(s2);
             DebugFileAppendString("\p Got: ");
             DebugFileAppendString(s3);
-            
+
             DebugFileAppendString("\p\r\r<END DEBUG FILE>");
             DebugFileSave( kDebugFileName);
 #endif
@@ -302,7 +302,7 @@ short XRandomSeeded( short range, long *seed)
 {
     short   r;
     long    l;
-    
+
     /*
     qd.randSeed = 150000; //128000;
     WriteDebugInt( Random());
@@ -310,9 +310,9 @@ short XRandomSeeded( short range, long *seed)
     qd.randSeed = 150000;
     WriteDebugInt( Randomize( range));
     */
-    
+
 //  *seed = (*seed * 16807L) & 0x7fffffff;// % 2147483647L;
-    *seed = 1664525 * *seed + 1013904223; 
+    *seed = 1664525 * *seed + 1013904223;
     l = *seed & 0x00007fff;
     l *= (long)range;
 

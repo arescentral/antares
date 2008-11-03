@@ -62,10 +62,10 @@ void ResetLastTime( long defecit)
 
 {
     UnsignedWide defecitTime;
-    
+
     defecitTime.hi = 0;
     defecitTime.lo = defecit * kTimeUnit;
-    
+
     Microseconds( &gAresGlobal->gLastTime);
 //  WideSubtract( (wide *)&gAresGlobal->gLastTime, (wide *)&defecitTime);
     gAresGlobal->gGameStartTime = TickCount();// - defecit;
@@ -75,7 +75,7 @@ long GetTimeLapse( void)
 
 {
     UnsignedWide            thisTime;
-    
+
     Microseconds( &thisTime);
     WideSubtract( (wide *)&thisTime, (wide *)&gAresGlobal->gLastTime);
     return ( thisTime.lo / kTimeUnit);

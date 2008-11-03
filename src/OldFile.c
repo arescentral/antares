@@ -74,7 +74,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define  iPopupItem                             10
 #define rSelectDirectoryDialog  131
 #define  iSelectButton                          10
-#define rErrorStrings                           128 
+#define rErrorStrings                           128
 #define  eInstallHandler                        1000
 #define  eMaxWindows                            1001
 #define  eFileIsOpen                            opWrErr
@@ -166,7 +166,7 @@ pascal SInt16  hookFunctionOpenDialog(SInt16 item,DialogPtr theDialog,void *data
     SInt16  theType;
     Handle  controlHdl;
     Rect        theRect;
-    
+
 #pragma unused ( dataPtr)
 
     switch(item)
@@ -176,7 +176,7 @@ pascal SInt16  hookFunctionOpenDialog(SInt16 item,DialogPtr theDialog,void *data
             SetControlValue((ControlHandle) controlHdl,gCurrentType);
             return sfHookNullEvent;
             break;
-            
+
         case iPopupItem:
             GetDialogItem(theDialog,iPopupItem,&theType,&controlHdl,&theRect);
             theType = GetControlValue((ControlHandle) controlHdl);
@@ -187,7 +187,7 @@ pascal SInt16  hookFunctionOpenDialog(SInt16 item,DialogPtr theDialog,void *data
             }
             break;
     }
-    
+
     return item;
 }
 
@@ -200,10 +200,10 @@ OSErr  doDirectorySelectionDialog( StandardFileReply *stdFileReplyStruct)
     FileFilterYDUPP     filterFunctionDirSelectUPP;
     DlgHookYDUPP        hookFunctionDirSelectUPP;
     OSErr               error = noErr;
-    
+
     if ( stdFileReplyStruct == nil) return paramErr;
     stdFileReplyStruct->sfGood = false;
-    
+
     filterFunctionDirSelectUPP = NewFileFilterYDProc((FileFilterYDProcPtr) filterFunctionDirSelect);
     hookFunctionDirSelectUPP = NewDlgHookYDProc((DlgHookYDProcPtr) hookFunctionDirSelect);
 
@@ -222,7 +222,7 @@ OSErr  doDirectorySelectionDialog( StandardFileReply *stdFileReplyStruct)
     DisposeRoutineDescriptor(hookFunctionDirSelectUPP);
 
     return error;
-}       
+}
 
 // ************************************************************** filterFunctionDirSelect
 
@@ -258,7 +258,7 @@ pascal SInt16  hookFunctionDirSelect(SInt16 item,DialogPtr theDialog,
         if(IdenticalString(theName,gPrevSelectedName,NULL) != 0)
         {
             doCopyPString(theName,gPrevSelectedName);
-    
+
             GetDialogItem(theDialog,iSelectButton,&itemType,&itemHdl,&itemRect);
             width = (itemRect.right - itemRect.left) - StringWidth("\pSelect  '    ");
             TruncString(width,theName,smTruncMiddle);

@@ -71,7 +71,7 @@ typedef struct
             long            spaceObjectNum;
         } spaceObjectData;
     } header;
-} datagramHeaderType;   
+} datagramHeaderType;
 
 typedef enum
 {
@@ -79,21 +79,21 @@ typedef enum
     kWhatIsYourName = 2,                // host requests client name
     kWeAreStarting = 3,                 // host tells client to prepare for beginning
     kWeAreCanceling = 4,                // host tells client that game is canceled
-    
+
     kIReceivedInvite = 5,               // client tells host that invite received OK
     kIAcceptInvite = 6,                 // client tells host that user OKs invite
     kIDeclineInvite = 7,                // client tells host that user declines invite
     kMyNameIs = 8,                      // client response to host name request
-    
+
     kYourNumberIs = 9,                  // host assigns client a client number
     kPlayerNumberData = 10,             // host gives client another client's # and address
-    
+
     kNewSpaceObject = 11,               // anybody tells client to add a new object
     kRefreshThisSpaceObject = 12,       // annybody tells client to update object's info
-    
+
     kImReady = 13,                      // generic simple I'm Ready message
     kStartTiming = 14                   // simple message to start global timer
-    
+
 } netMessageType;
 
 

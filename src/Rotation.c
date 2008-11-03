@@ -66,7 +66,7 @@ int RotationInit( void)
 
 {
     long        i = 0;
-    
+
 /*
     gRotTable = NewHandle( sizeof( smallFixedType) * 2L * (long)ROT_POS);
     if ( gRotTable == 0L)
@@ -122,7 +122,7 @@ void SetRotPoint( smallFixedType x, smallFixedType y, long rotpos)
 
 {
     smallFixedType      *i;
-    
+
     i = (smallFixedType *)*gRotTable + (long)rotpos * 2L;
     *i = x;
     i++;
@@ -133,14 +133,14 @@ void GetRotPoint( smallFixedType *x, smallFixedType *y, long rotpos)
 
 {
     smallFixedType      *i;
-    
+
     i = (smallFixedType *)*gRotTable + (long)rotpos * 2L;
     *x = *i;
     i++;
     *y = *i;
 }
 
-        
+
 void RotatePoint( long sx, long sy, smallFixedType *x, smallFixedType *y, long theta)
 
 {
@@ -149,7 +149,7 @@ void RotatePoint( long sx, long sy, smallFixedType *x, smallFixedType *y, long t
 /*
     double fx, fx2, fy, fcos, fsin, rot, d;
     long        rx, ry;
-    
+
     fx = fx2 = sx;
     fy = sy;
     d = theta;
@@ -174,8 +174,8 @@ void RotatePoint( long sx, long sy, smallFixedType *x, smallFixedType *y, long t
         fsin = -1;
     }
     fx = fx * fcos - fy * fsin;
-    fy = fx2 * fsin + fy * fcos;    
-    
+    fy = fx2 * fsin + fy * fcos;
+
     *x = fx * kFixedWholeMultiplier;    //  * 65536
     *y = fy * kFixedWholeMultiplier;
 */
@@ -185,10 +185,10 @@ long GetAngleFromVector( long x, long y)
 
 {
     long        *h, *v, a, b, test = 0, best = 0, whichBest = -1, whichAngle;
-    
+
     a = x;
     b = y;
-    
+
     if ( a < 0) a = -a;
     if ( b < 0) b = -b;
     if ( b < a)
@@ -235,5 +235,5 @@ long GetAngleFromVector( long x, long y)
     } else if ( y < 0) whichBest = ROT_180 - whichBest;
     if ( whichBest == ROT_POS) whichBest = ROT_0;
     return ( whichBest);
-    
+
 }

@@ -96,31 +96,31 @@ int AdmiralInit( void)
 
 {
     gAresGlobal->gAdmiralData = NewHandle( sizeof( admiralType) * (long)kScenarioPlayerNum);
-    
+
     if ( gAresGlobal->gAdmiralData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
         return( MEMORY_ERROR);
     }
-    
+
     /*
     MoveHHi( gAresGlobal->gAdmiralData);
     HLock( gAresGlobal->gAdmiralData);
     */
     mHandleLockAndRegister( gAresGlobal->gAdmiralData, nil, nil, nil, "\pgAresGlobal->gAdmiralData")
     ResetAllAdmirals();
-    
+
     gAresGlobal->gDestBalanceData = NewHandle( sizeof( destBalanceType) * (long)kMaxDestObject);
-    
+
     if ( gAresGlobal->gDestBalanceData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 2);
         return( MEMORY_ERROR);
     }
     mHandleLockAndRegister( gAresGlobal->gDestBalanceData, nil, nil, nil, "\pgAresGlobal->gDestBalanceData")
-    
+
     ResetAllDestObjectData();
-    
+
     return ( kNoError);
 }
 
@@ -136,9 +136,9 @@ void ResetAllAdmirals( void)
 {
     short       i, j;
     admiralType *a;
-    
+
     a = ( admiralType *)*gAresGlobal->gAdmiralData;
-    
+
     for ( i = 0; i < kScenarioPlayerNum; i++)
     {
         a->active = FALSE;
@@ -156,7 +156,7 @@ void ResetAllAdmirals( void)
         a->blitzkrieg = 0;
         a->shipsLeft = 0;
         for ( j = 0; j < kAdmiralScoreNum; j++) a->score[j] = 0;
-        
+
         for ( j = 0; j < kMaxNumAdmiralCanBuild; j++)
         {
             a->canBuildType[j].baseNum = -1;
@@ -173,7 +173,7 @@ void ResetAllDestObjectData( void)
 {
     short           i, j;
     destBalanceType *d = mGetDestObjectBalancePtr( 0);
-    
+
     for ( i = 0; i < kMaxDestObject; i++)
     {
         d->whichObject = kDestNoObject;
@@ -201,24 +201,24 @@ long MakeNewAdmiral( long flagship, long destinationObject, destinationType dTyp
     admiralType     *a;
     Str255          s;
     spaceObjectType *destObject;
-    
+
     a = ( admiralType *)*gAresGlobal->gAdmiralData;
-    
+
     while (( a->active) && ( n < kScenarioPlayerNum)) { a++; n++; }
-    
+
     if ( n == kScenarioPlayerNum) return ( kNoFreeAdmiral);
-    
+
     a->active = TRUE;
     a->attributes = attributes;
     a->earningPower = earningPower;
-    
+
     a->destinationObject = destinationObject;
     if ( destinationObject >= 0)
     {
         destObject = (spaceObjectType *)*gSpaceObjectData + destinationObject;
         a->destinationObjectID = destObject->id;
     } else a->destinationObjectID = -1;
-    
+
     a->flagship = flagship;
     if ( flagship >= 0)
     {
@@ -228,7 +228,7 @@ long MakeNewAdmiral( long flagship, long destinationObject, destinationType dTyp
     {
         a->flagshipID = -1;
     }
-    
+
     a->destType = dType;
     a->race = race;
     a->color = 0;
@@ -245,7 +245,7 @@ long MakeNewAdmiral( long flagship, long destinationObject, destinationType dTyp
     a->totalBuildChance = 0;
     a->hopeToBuild = -1;
     a->shipsLeft = 0;
-    
+
     if (( nameResID >= 0))
     {
         GetIndString( s, nameResID, nameStrNum);
@@ -264,7 +264,7 @@ long MakeNewDestination( long whichObject, long *canBuildType, smallFixedType ea
     destBalanceType *d = mGetDestObjectBalancePtr( 0);
     Str255          s;
     spaceObjectType *object = (spaceObjectType *)*gSpaceObjectData + whichObject;
-    
+
     while (( i < kMaxDestObject) && ( d->whichObject != kDestNoObject)) { i++; d++;}
     if ( i == kMaxDestObject) return( -1);
     else
@@ -272,7 +272,7 @@ long MakeNewDestination( long whichObject, long *canBuildType, smallFixedType ea
         d->whichObject = whichObject;
         d->earn = earn;
         d->totalBuildTime = d->buildTime = 0;
-        
+
         if ( canBuildType != nil)
         {
             for ( j = 0; j < kMaxTypeBaseCanBuild; j++)
@@ -287,14 +287,14 @@ long MakeNewDestination( long whichObject, long *canBuildType, smallFixedType ea
                 d->canBuildType[j] = kNoShip;
             }
         }
-        
+
         if (( nameResID >= 0))
         {
             GetIndString( s, nameResID, nameStrNum);
             if ( *s > kDestinationNameLen) *s = kDestinationNameLen;
             CopyPString( (unsigned char *)d->name, (unsigned char *)s);
         }
-        
+
         if ( object->attributes & kNeutralDeath)
         {
             for ( j = 0; j < kScenarioPlayerNum; j++)
@@ -303,7 +303,7 @@ long MakeNewDestination( long whichObject, long *canBuildType, smallFixedType ea
             if ( object->owner >= 0)
                 d->occupied[object->owner] = object->baseType->initialAgeRange;
         }
-        
+
         return( i);
     }
 }
@@ -318,7 +318,7 @@ void RemoveDestination( long whichDestination)
     if (( whichDestination >= 0) && ( whichDestination < kMaxDestObject))
     {
         a = ( admiralType *)*gAresGlobal->gAdmiralData;
-        
+
         for ( i = 0; i < kScenarioPlayerNum; i++)
         {
             if ( a->active)
@@ -326,7 +326,7 @@ void RemoveDestination( long whichDestination)
     //          WriteDebugLong( i);
                 if ( a->destinationObject == d->whichObject)
                 {
-                    a->destinationObject = kNoDestinationObject;    
+                    a->destinationObject = kNoDestinationObject;
                     a->destinationObjectID = -1;
                     a->destType = kNoDestinationType;
 
@@ -335,14 +335,14 @@ void RemoveDestination( long whichDestination)
                 if ( a->considerDestination == whichDestination)
                 {
                     a->considerDestination = kNoDestinationObject;
-                
+
     //              mWriteDebugString("\pacondest");
                 }
-                
+
                 if ( a->buildAtObject == whichDestination)
                 {
                     a->buildAtObject = kNoShip;
-                    
+
     //              mWriteDebugString("\pabuildob");
                 }
             }
@@ -357,7 +357,7 @@ void RemoveDestination( long whichDestination)
         {
             d->canBuildType[i] = kNoShip;
         }
-        
+
         for ( i = 0; i < kScenarioPlayerNum; i++)
         {
             d->occupied[i] = 0;
@@ -376,7 +376,7 @@ void RecalcAllAdmiralBuildData( void)
     baseObjectType  *baseObject = nil;
     destBalanceType *d = mGetDestObjectBalancePtr( 0);
     long            l;
-    
+
     // first clear all the data
     for ( i = 0; i < kScenarioPlayerNum; i++)
     {
@@ -390,7 +390,7 @@ void RecalcAllAdmiralBuildData( void)
         a->hopeToBuild = -1;
         a++;
     }
-    
+
     for ( i = 0; i < kMaxDestObject; i++)
     {
         if ( d->whichObject != kDestNoObject)
@@ -464,12 +464,12 @@ void SetAdmiralFlagship( long whichAdmiral, long whichShip)
 {
     admiralType     *a;
     spaceObjectType *anObject;
-    
+
     if ( whichAdmiral < 0)
     {
         MyDebugString("\pCan't set flagship of -1 admiral.");
     }
-    
+
     a = ( admiralType *)*gAresGlobal->gAdmiralData + whichAdmiral;
     if ( whichShip >= 0)
     {
@@ -510,7 +510,7 @@ void SetAdmiralEarningPower( long whichAdmiral, smallFixedType power)
 smallFixedType GetAdmiralEarningPower( long whichAdmiral)
 {
     admiralType     *a;
-    
+
     if ( whichAdmiral >= 0)
     {
         a = ( admiralType *)*gAresGlobal->gAdmiralData + whichAdmiral;
@@ -533,7 +533,7 @@ void SetAdmiralDestinationObject( long whichAdmiral, long whichObject, destinati
     } else a->destinationObjectID = -1;
     a->destType = dType;
 }
-    
+
 long GetAdmiralDestinationObject( long whichAdmiral)
 
 {
@@ -541,7 +541,7 @@ long GetAdmiralDestinationObject( long whichAdmiral)
     spaceObjectType *destObject;
 
     a = ( admiralType *)*gAresGlobal->gAdmiralData + whichAdmiral;
-    
+
     if ( a->destinationObject < 0)
         return ( a->destinationObject);
 
@@ -563,7 +563,7 @@ void SetAdmiralConsiderObject( long whichAdmiral, long whichObject)
                         whichObject;
     destBalanceType *d = mGetDestObjectBalancePtr( 0);
     long            buildAtNum, l;
-    
+
     if ( whichAdmiral < 0) MyDebugString("\pCan't set consider ship for -1 admiral.");
     a = ( admiralType *)*gAresGlobal->gAdmiralData + whichAdmiral;
     a->considerShip = whichObject;
@@ -623,7 +623,7 @@ long GetAdmiralConsiderObject( long whichAdmiral)
     admiralType     *a;
     spaceObjectType *anObject;
     a = ( admiralType *)*gAresGlobal->gAdmiralData + whichAdmiral;
-    
+
     if ( whichAdmiral < 0) return( -1);
     if ( a->considerShip >= 0)
     {
@@ -652,7 +652,7 @@ long GetAdmiralBuildAtObject( long whichAdmiral)
     admiralType     *a;
     destBalanceType *destBalance;
     spaceObjectType *anObject;
-    
+
     a = ( admiralType *)*gAresGlobal->gAdmiralData + whichAdmiral;
     if ( a->buildAtObject >= 0)
     {
@@ -674,7 +674,7 @@ void SetAdmiralBuildAtObject( long whichAdmiral, long whichObject)
     spaceObjectType *anObject= (spaceObjectType *)*gSpaceObjectData + whichObject;
     destBalanceType *d = mGetDestObjectBalancePtr( 0);
     long            buildAtNum, l;
-    
+
     if ( whichAdmiral < 0) MyDebugString("\pCan't set consider ship for -1 admiral.");
     a = ( admiralType *)*gAresGlobal->gAdmiralData + whichAdmiral;
     if ( whichObject >= 0)
@@ -704,7 +704,7 @@ anyCharType *GetAdmiralBuildAtName( long whichAdmiral)
 {
     admiralType     *a;
     destBalanceType *destObject;
-    
+
     a = ( admiralType *)*gAresGlobal->gAdmiralData + whichAdmiral;
     destObject = mGetDestObjectBalancePtr( a->buildAtObject);
     return ( destObject->name);
@@ -714,7 +714,7 @@ void SetAdmiralBuildAtName( long whichAdmiral, StringPtr name)
 {
     admiralType     *a;
     destBalanceType *destObject;
-    
+
     a = ( admiralType *)*gAresGlobal->gAdmiralData + whichAdmiral;
     destObject = mGetDestObjectBalancePtr( a->buildAtObject);
     if ( name[0] > kDestinationNameLen) name[0] = kDestinationNameLen;
@@ -725,7 +725,7 @@ anyCharType *GetDestBalanceName( long whichDestObject)
 
 {
     destBalanceType *destObject;
-    
+
     destObject = mGetDestObjectBalancePtr( whichDestObject);
     return ( destObject->name);
 }
@@ -734,7 +734,7 @@ anyCharType *GetAdmiralName( long whichAdmiral)
 
 {
     admiralType     *a;
-    
+
     if (( whichAdmiral >= 0) && ( whichAdmiral < kScenarioPlayerNum))
     {
         a = ( admiralType *)*gAresGlobal->gAdmiralData + whichAdmiral;
@@ -746,13 +746,13 @@ void SetAdmiralName( long whichAdmiral, anyCharType *name)
 
 {
     admiralType     *a;
-    
+
     if (( whichAdmiral >= 0) && ( whichAdmiral < kScenarioPlayerNum))
     {
         a = ( admiralType *)*gAresGlobal->gAdmiralData + whichAdmiral;
         if ( *name > kAdmiralNameLen) *name = kAdmiralNameLen;
         CopyPString( (unsigned char *)a->name, (unsigned char *)name);
-        
+
     }
 }
 
@@ -768,7 +768,7 @@ void SetObjectDestination( spaceObjectType *o)
     unsigned long   distance, time;
     float           f;
     smallFixedType  strategicValue;
-    
+
     if ( o->owner == kNoOwner)
     {
         o->destinationObject = kNoDestinationObject;
@@ -778,10 +778,10 @@ void SetObjectDestination( spaceObjectType *o)
         o->originLocation = o->location;
         return;
     }
-    
+
     if (( o->owner < 0) || ( o->owner >= kScenarioPlayerNum)) { WriteDebugLong( o->owner); return;}
     a = ( admiralType *)*gAresGlobal->gAdmiralData + o->owner;
-    
+
     if (( !a->active) || ( a->destType == kNoDestinationType) ||
         ( a->destinationObject == kNoDestinationObject))
     {
@@ -792,9 +792,9 @@ void SetObjectDestination( spaceObjectType *o)
         o->originLocation = o->location;
     } else
     {
-        
-        // if this is a destination object, we need to calc balance for all players     
-        
+
+        // if this is a destination object, we need to calc balance for all players
+
         // first get rid of original balance
         if ( o->destinationObject != kNoDestinationObject)
         {
@@ -811,7 +811,7 @@ void SetObjectDestination( spaceObjectType *o)
                 } else destBalance->balance[count] += strategicValue;
             }
         }
-                    
+
         if ( a->destinationObject != kNoDestinationObject)
         {
             dObject = (spaceObjectType *)*gSpaceObjectData + a->destinationObject;
@@ -827,7 +827,7 @@ void SetObjectDestination( spaceObjectType *o)
                 } else destBalance->balance[count] -= strategicValue;
             }
         }
-                            
+
         dObject = (spaceObjectType *)*gSpaceObjectData + a->destinationObject;
 
         if ( a->destType == kCoordinateDestinationType)
@@ -874,16 +874,16 @@ void SetObjectLocationDestination( spaceObjectType *o, coordPointType *where)
 
     // if this object can't accept a destination, then forget it
     if ( !(o->attributes & kCanAcceptDestination)) return;
-    
+
     // if this object has a locked destination, then forget it
     if ( o->attributes & kStaticDestination) return;
-    
+
     // if the owner is not legal, something is very very wrong
     if (( o->owner < 0) || ( o->owner >= kScenarioPlayerNum)) { WriteDebugLong( o->owner); return;}
 
     // get the admiral
     a = ( admiralType *)*gAresGlobal->gAdmiralData + o->owner;
-    
+
     // if the admiral is not legal, or the admiral has no destination, then forget about it
     if ( !a->active)
     {
@@ -908,7 +908,7 @@ void SetObjectLocationDestination( spaceObjectType *o, coordPointType *where)
         // remove this object from its destination
         if ( o->destinationObject != kNoDestinationObject)
             RemoveObjectFromDestination( o);
-        
+
         o->destinationLocation = o->originLocation = *where;
         o->destinationObject = kNoDestinationObject;
         o->destObjectPtr = nil;
@@ -922,7 +922,7 @@ void SetObjectDestination( spaceObjectType *o, spaceObjectType *overrideObject)
 {
     admiralType     *a;
     spaceObjectType *dObject = overrideObject;
-    
+
 /*  DebugFileAppendString( "\pDT\t");
     DebugFileAppendLong( o->entryNumber);
     DebugFileAppendString( "\p\t");
@@ -930,10 +930,10 @@ void SetObjectDestination( spaceObjectType *o, spaceObjectType *overrideObject)
         DebugFileAppendLong( overrideObject->entryNumber);
     else
         DebugFileAppendString("\p-");
-    DebugFileAppendString( "\p\t");     
+    DebugFileAppendString( "\p\t");
 */
     /* MORE DEBUGFILE BELOW! */
-    
+
     // if the object does not have an alliance, then something is wrong here--forget it
     if ( o->owner <= kNoOwner)
     {
@@ -955,20 +955,20 @@ void SetObjectDestination( spaceObjectType *o, spaceObjectType *overrideObject)
 //      Debugger();
         return;
     }
-    
+
     // if this object has a locked destination, then forget it
     if (( o->attributes & kStaticDestination) && ( overrideObject == nil))
     {
 //      Debugger();
         return;
     }
-    
+
     // HACK for now: if the object doesn't have a "normal" presence, then forget it
 //  if ( o->presenceState != kNormalPresence) return;
-    
+
     // if the owner is not legal, something is very very wrong
     if (( o->owner < 0) || ( o->owner >= kScenarioPlayerNum))
-    {   
+    {
         WriteDebugLong( o->owner);
 //      Debugger();
         return;
@@ -976,7 +976,7 @@ void SetObjectDestination( spaceObjectType *o, spaceObjectType *overrideObject)
 
     // get the admiral
     a = ( admiralType *)*gAresGlobal->gAdmiralData + o->owner;
-    
+
     // if the admiral is not legal, or the admiral has no destination, then forget about it
     if (( dObject == nil) && (( !a->active) ||
         ( a->destType == kNoDestinationType) ||
@@ -994,8 +994,8 @@ void SetObjectDestination( spaceObjectType *o, spaceObjectType *overrideObject)
 //      Debugger();
     } else
     // the object is OK, the admiral is OK, then go about setting its destination
-    {   
-    
+    {
+
         // first make sure we're still looking at the same object
         if ( dObject == nil)
             dObject = (spaceObjectType *)*gSpaceObjectData + a->destinationObject;
@@ -1023,14 +1023,14 @@ void SetObjectDestination( spaceObjectType *o, spaceObjectType *overrideObject)
                 dObject = (spaceObjectType *)dObject->destObjectPtr;
             else dObject = nil;
         }
-        
+
         // if the reference is not circular, then continue
         if ( dObject != o)
         */
             // remove this object from its destination
             if ( o->destinationObject != kNoDestinationObject)
                 RemoveObjectFromDestination( o);
-            
+
             // add this object to its destination
             if ( o != dObject)
             {
@@ -1041,7 +1041,7 @@ void SetObjectDestination( spaceObjectType *o, spaceObjectType *overrideObject)
                 o->destObjectDest = dObject->destinationObject;
                 o->destObjectDestID = dObject->destObjectID;
                 o->destObjectID = dObject->id;
-                
+
                 if ( dObject->owner == o->owner)
                 {
                     dObject->remoteFriendStrength += o->baseType->offenseValue;
@@ -1069,7 +1069,7 @@ void SetObjectDestination( spaceObjectType *o, spaceObjectType *overrideObject)
                         o->duty = eAssaultDuty;
                 }
             } else
-            {               
+            {
                 o->destinationObject = kNoDestinationObject;
                 o->destObjectDest = kNoDestinationObject;
                 o->destObjectPtr = nil;
@@ -1086,7 +1086,7 @@ void SetObjectDestination( spaceObjectType *o, spaceObjectType *overrideObject)
                 if (( dObject->destinationObject != kNoDestinationObject) && ( !(dObject->attributes & kIsDestination)))
                 {
                     dObject = (spaceObjectType *)dObject->destObjectPtr;
-        
+
                     for ( count = 0; count < kScenarioPlayerNum; count++)
                     {
                         dObject->balance[count] += o->balance[count];
@@ -1095,7 +1095,7 @@ void SetObjectDestination( spaceObjectType *o, spaceObjectType *overrideObject)
             }
             */
         } else
-        {               
+        {
             o->destinationObject = kNoDestinationObject;
             o->destObjectDest = kNoDestinationObject;
             o->destObjectPtr = nil;
@@ -1106,14 +1106,14 @@ void SetObjectDestination( spaceObjectType *o, spaceObjectType *overrideObject)
 //          DebugFileAppendString("\p-\r");
         }
 
-    }   
+    }
 }
 
 void RemoveObjectFromDestination( spaceObjectType *o)
 
 {
     spaceObjectType *dObject;
-    
+
     dObject  = o;
     /*
     while ( dObject != nil)
@@ -1144,12 +1144,12 @@ void RemoveObjectFromDestination( spaceObjectType *o)
             }
         }
     }
-    
+
     o->destinationObject = kNoDestinationObject;
     o->destObjectDest = kNoDestinationObject;
     o->destObjectID = -1;
     o->destObjectPtr = nil;
-    
+
 }
 
 void AdmiralThink( void)
@@ -1159,12 +1159,12 @@ void AdmiralThink( void)
     admiralType     *a =( admiralType *)*gAresGlobal->gAdmiralData;
     spaceObjectType *anObject, *destObject, *otherDestObject, *stepObject;
     destBalanceType *destBalance;
-    long            origObject, origDest, baseNum, 
+    long            origObject, origDest, baseNum,
                     difference;
     smallFixedType  friendValue, foeValue, thisValue;
     baseObjectType  *baseObject;
     longPointType   gridLoc;
-    
+
     destBalance = mGetDestObjectBalancePtr( 0);
     for ( i = 0; i < kMaxDestObject; i++)
     {
@@ -1179,7 +1179,7 @@ void AdmiralThink( void)
                 destBalance->buildObjectBaseNum = kNoShip;
             }
         }
-        
+
         anObject = ( spaceObjectType *)*gSpaceObjectData + destBalance->whichObject;
         if ( anObject->owner >= 0)
         {
@@ -1209,7 +1209,7 @@ void AdmiralThink( void)
                     }
 //                  WriteDebugLine((char *)"\pEndBlitz!");
 //                  WriteDebugLong( i);
-                } 
+                }
             } else
             {
                 a->blitzkrieg++;
@@ -1225,11 +1225,11 @@ void AdmiralThink( void)
                         }
                         anObject++;
                     }
-//                  WriteDebugLine((char *)"\p>BLITZKRIEG<");                   
+//                  WriteDebugLine((char *)"\p>BLITZKRIEG<");
 //                  WriteDebugLong( i);
-                } 
-            }   
-                    
+                }
+            }
+
             // get the current object
             if ( a->considerShip < 0)
             {
@@ -1240,16 +1240,16 @@ void AdmiralThink( void)
             {
                 anObject = (spaceObjectType *)*gSpaceObjectData + a->considerShip;
             }
-            
+
             if ( a->destinationObject < 0) a->destinationObject = gRootObjectNumber;
-            
+
             if ( anObject->active != kObjectInUse)
             {
                 a->considerShip = gRootObjectNumber;
                 anObject = (spaceObjectType *)*gSpaceObjectData + a->considerShip;
                 a->considerShipID = anObject->id;
             }
-            
+
             if ( a->destinationObject >= 0)
             {
                 destObject = (spaceObjectType *)*gSpaceObjectData + a->destinationObject;
@@ -1262,7 +1262,7 @@ void AdmiralThink( void)
                 do
                 {
                     a->destinationObject = destObject->nextObjectNumber;
-                
+
                     // if we've gone through all of the objects
                     if ( a->destinationObject < 0)
                     {
@@ -1296,8 +1296,8 @@ void AdmiralThink( void)
                         {
                             a->thisFreeEscortStrength += anObject->baseType->offenseValue;
                         }
-                    
-                        anObject->bestConsideredTargetValue = 0xffffffff;               
+
+                        anObject->bestConsideredTargetValue = 0xffffffff;
                         // start back with 1st ship
                         a->destinationObject = gRootObjectNumber;
                         destObject = gRootObject;
@@ -1321,7 +1321,7 @@ void AdmiralThink( void)
                                 a->considerShipID = anObject->id;
                                 a->lastFreeEscortStrength = a->thisFreeEscortStrength;
                                 a->thisFreeEscortStrength = 0;
-                            } else 
+                            } else
                             {
                                 anObject = (spaceObjectType *)anObject->nextObject;
                                 a->considerShipID = anObject->id;
@@ -1337,7 +1337,7 @@ void AdmiralThink( void)
                 } while ((( !(destObject->attributes & (kCanBeDestination))) || ( a->destinationObject == a->considerShip) ||
                 ( destObject->active != kObjectInUse) || (!( destObject->attributes & kCanBeDestination))) &&
                 ( a->destinationObject != origDest));
-                
+
             // if our object is legal and our destination is legal
             if (( anObject->owner == i) && ( anObject->attributes & kCanAcceptDestination) &&
                 ( anObject->active == kObjectInUse) &&
@@ -1365,7 +1365,7 @@ void AdmiralThink( void)
                     friendValue = otherDestObject->localFoeStrength;
                 }
 
-                
+
                 thisValue = kUnimportantTarget;
                 if ( destObject->owner == anObject->owner)
                 {
@@ -1380,7 +1380,7 @@ void AdmiralThink( void)
                                 thisValue = kMostImportantTarget;
                             else if ( foeValue > (friendValue >> (smallFixedType)1))
                                 thisValue = kVeryImportantTarget;
-                            else thisValue = kUnimportantTarget;                                
+                            else thisValue = kUnimportantTarget;
                         } else
                         {
                             if (( a->blitzkrieg > 0) && ( anObject->duty == eGuardDuty))
@@ -1504,7 +1504,7 @@ void AdmiralThink( void)
                     if ( anObject->baseType->orderFlags & kHardTargetIsFriend)
                         thisValue = 0;
                 }
-                
+
                 difference = ABS( (long)destObject->location.h - (long)anObject->location.h);
                 gridLoc.h = difference;
                 difference =  ABS( (long)destObject->location.v - (long)anObject->location.v);
@@ -1515,15 +1515,15 @@ void AdmiralThink( void)
                     if ( anObject->baseType->orderFlags & kTargetIsLocal)
                         thisValue <<= (smallFixedType)3;
                     if ( anObject->baseType->orderFlags & kHardTargetIsRemote)
-                        thisValue = 0;                  
+                        thisValue = 0;
                 } else
                 {
                     if ( anObject->baseType->orderFlags & kTargetIsRemote)
                         thisValue <<= (smallFixedType)3;
                     if ( anObject->baseType->orderFlags & kHardTargetIsLocal)
-                        thisValue = 0;                  
+                        thisValue = 0;
                 }
-        
+
 
                 if (( (anObject->baseType->orderFlags & kLevelKeyTagMask) != 0) &&
                     ( (anObject->baseType->orderFlags & kLevelKeyTagMask) ==
@@ -1536,7 +1536,7 @@ void AdmiralThink( void)
                 {
                     thisValue = 0;
                 }
-                
+
                 if ( thisValue > 0)
                     thisValue += RandomSeeded( thisValue >> (long)1, &(anObject->randomSeed), 'adm4', anObject->whichBaseObject) - (thisValue >> (long)2);
                 if ( thisValue > anObject->bestConsideredTargetValue)
@@ -1548,7 +1548,7 @@ void AdmiralThink( void)
 //                  thisValue <<= (smallFixedType)3;
             }
         }
-        
+
         // if we've saved enough for our dreams
         if ( a->cash > a->saveGoal)
         {
@@ -1558,7 +1558,7 @@ void AdmiralThink( void)
                 if ( a->buildAtObject < 0) a->buildAtObject = 0;
                 origDest = a->buildAtObject;
                 destBalance = mGetDestObjectBalancePtr( a->buildAtObject);
-                
+
                 // try to find the next destination object that we own & that can build
                 do
                 {
@@ -1576,7 +1576,7 @@ void AdmiralThink( void)
                             anObject = nil;
                     } else anObject = nil;
                 } while (( anObject == nil) && ( a->buildAtObject != origDest));
-                
+
                 // if we have a legal object
                 if ( anObject != nil)
                 {
@@ -1602,7 +1602,7 @@ void AdmiralThink( void)
                                 if ( a->hopeToBuild >= 0)
                                 {
                                     mGetBaseObjectFromClassRace( baseObject, baseNum, a->hopeToBuild, a->race)
-    /*                      
+    /*
                                     if (    (baseObject->buildFlags & kSufficientEscortsExist) &&
                                             ( baseObject->friendDefecit > a->lastFreeEscortStrength) &&
                                             ( k < 7))
@@ -1635,7 +1635,7 @@ void AdmiralThink( void)
                                             anObject++;
                                         }
                                     }
-                                    
+
                                     if ( baseObject->buildFlags & kMatchingFoeExists)
                                     {
                                         thisValue = 0;
@@ -1682,7 +1682,7 @@ void AdmiralThink( void)
                             } else a->saveGoal = mLongToFixed(baseObject->price);
                         } // otherwise just wait until we get to it
                     }
-                }                   
+                }
             }
         }
         a++;
@@ -1695,7 +1695,7 @@ smallFixedType HackGetObjectStrength( spaceObjectType *anObject)
     spaceObjectType *tObject = anObject;
     longPointType   gridLoc;
     long            owner = anObject->owner;
-    
+
     gridLoc = anObject->distanceGrid;
     while ( anObject->nextFarObject != nil)
     {
@@ -1703,7 +1703,7 @@ smallFixedType HackGetObjectStrength( spaceObjectType *anObject)
             tObject = anObject;
         anObject = (spaceObjectType *)anObject->nextFarObject;
     }
-    
+
     if ( tObject->owner == owner)
     {
 //      return( mLongToFixed( tObject->entryNumber));
@@ -1727,25 +1727,25 @@ void AdmiralBuildAtObject( long whichAdmiral, long baseTypeNum, long whichDestOb
     long            newObject;
     coordPointType  coord;
     fixedPointType  v = {0, 0};
-    
+
     if (( baseTypeNum >= 0) && ( admiral->buildAtObject >= 0))
     {
-            
+
             buildAtObject = (spaceObjectType *)*gSpaceObjectData + buildAtDest->whichObject;
             coord = buildAtObject->location;
-            
+
 //          newObject = CreateAnySpaceObject( baseTypeNum, &v, &coord, 0, whichAdmiral, 0, nil, -1, -1, -1);
             newObject = CreateAnySpaceObject( baseTypeNum, &v, &coord, 0, whichAdmiral, 0, -1);
-                        
+
             if ( newObject >= 0)
-            {               
+            {
                 buildAtObject = (spaceObjectType *)*gSpaceObjectData + newObject;
                 SetObjectDestination( buildAtObject, nil);
 //              if ( admiral->attributes & kAIsHuman)
                 if ( whichAdmiral == gAresGlobal->gPlayerAdmiralNumber)
                     PlayVolumeSound(  kComputerBeep2, kMediumVolume, kMediumPersistence, kLowPrioritySound);
             }
-            
+
     }
 }
 
@@ -1756,7 +1756,7 @@ Boolean AdmiralScheduleBuild( long whichAdmiral, long buildWhichType)
     destBalanceType *buildAtDest = mGetDestObjectBalancePtr( admiral->buildAtObject);
     baseObjectType  *buildBaseObject = nil;
     long            baseNum;
-    
+
     GetAdmiralBuildAtObject( whichAdmiral);
     if (( buildWhichType >= 0) && ( buildWhichType < kMaxTypeBaseCanBuild) &&
             ( admiral->buildAtObject >= 0) && ( buildAtDest->buildTime <= 0))
@@ -1783,7 +1783,7 @@ Boolean AdmiralScheduleBuild( long whichAdmiral, long buildWhichType)
 void StopBuilding( long whichDestObject)
 {
     destBalanceType *destObject;
-    
+
     destObject = mGetDestObjectBalancePtr( whichDestObject);
     destObject->totalBuildTime = destObject->buildTime = 0;
     destObject->buildObjectBaseNum = kNoShip;
@@ -1793,7 +1793,7 @@ void PayAdmiral( long whichAdmiral, smallFixedType howMuch)
 
 {
     admiralType     *admiral = ( admiralType *)*gAresGlobal->gAdmiralData + whichAdmiral;
-    
+
     if (( whichAdmiral >= 0) && ( whichAdmiral < kScenarioPlayerNum))
     {
 //      admiral->cash += howMuch * 100;
@@ -1805,7 +1805,7 @@ void PayAdmiralAbsolute( long whichAdmiral, smallFixedType howMuch)
 
 {
     admiralType     *admiral = ( admiralType *)*gAresGlobal->gAdmiralData + whichAdmiral;
-    
+
     if (( whichAdmiral >= 0) && ( whichAdmiral < kScenarioPlayerNum))
     {
         admiral->cash += howMuch;
@@ -1847,7 +1847,7 @@ long GetAdmiralShipsLeft( long whichAdmiral)
 long AlterDestinationObjectOccupation( long whichDestination, long whichAdmiral, long amount)
 {
     destBalanceType *d = mGetDestObjectBalancePtr( whichDestination);
-    
+
 //  WriteDebugLine((char *)"\pAlterOcc");
     if ( whichAdmiral >= 0)
     {
@@ -1860,7 +1860,7 @@ void ClearAllOccupants( long whichDestination, long whichAdmiral, long fullAmoun
 {
     destBalanceType *d = mGetDestObjectBalancePtr( whichDestination);
     long            i;
-    
+
 //  WriteDebugLine((char *)"\pClearAllOcc");
     for ( i = 0; i < kScenarioPlayerNum; i++)
     {
@@ -1874,7 +1874,7 @@ void AddKillToAdmiral( spaceObjectType *anObject)
 {
     admiralType     *admiral = ( admiralType *)*gAresGlobal->gAdmiralData +
         gAresGlobal->gPlayerAdmiralNumber; // only for player
-    
+
     if ( anObject->attributes & kCanAcceptDestination)
     {
         if ( anObject->owner == gAresGlobal->gPlayerAdmiralNumber)

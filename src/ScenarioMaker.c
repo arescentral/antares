@@ -148,7 +148,7 @@ short ScenarioMakerInit( void)
             ReleaseResource( tempScenarioInfo);
         }
     }
-    
+
     if ( gAresGlobal->gScenarioData == nil)
     {
         gAresGlobal->gScenarioData = GetResource( kScenarioResType, kScenarioResID);
@@ -163,11 +163,11 @@ short ScenarioMakerInit( void)
 
         gAresGlobal->scenarioNum = GetHandleSize( gAresGlobal->gScenarioData) /
             sizeof( scenarioType);
-    
+
     }
-    
+
     if ( gAresGlobal->gScenarioInitialData == nil)
-    {   
+    {
         gAresGlobal->gScenarioInitialData = GetResource( kScenarioInitialResType, kScenarioInitialResID);
         if ( gAresGlobal->gScenarioInitialData == nil)
         {
@@ -180,14 +180,14 @@ short ScenarioMakerInit( void)
 
         gAresGlobal->maxScenarioInitial = GetHandleSize(
             gAresGlobal->gScenarioInitialData) / sizeof( scenarioInitialType);
-        
-    }   
-    
+
+    }
+
     if ( gAresGlobal->gScenarioConditionData == nil)
     {
         gAresGlobal->gScenarioConditionData = GetResource( kScenarioConditionResType, kScenarioConditionResID);
         if ( gAresGlobal->gScenarioConditionData == nil)
-        {   
+        {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioConditionDataError, -1, -1, -1, __FILE__, 4);
             return( RESOURCE_ERROR);
         }
@@ -197,11 +197,11 @@ short ScenarioMakerInit( void)
 
         gAresGlobal->maxScenarioCondition = GetHandleSize(
             gAresGlobal->gScenarioConditionData) / sizeof( scenarioConditionType);
-        
+
     }
-    
+
     if ( gAresGlobal->gScenarioBriefData == nil)
-    {   
+    {
         gAresGlobal->gScenarioBriefData = GetResource( kScenarioBriefResType, kScenarioBriefResID);
         if ( gAresGlobal->gScenarioBriefData == nil)
         {
@@ -214,9 +214,9 @@ short ScenarioMakerInit( void)
 
         gAresGlobal->maxScenarioBrief = GetHandleSize(
             gAresGlobal->gScenarioBriefData) / sizeof( briefPointType);
-        
+
     }
-        
+
     return ( InitRaces());
 }
 
@@ -247,12 +247,12 @@ Boolean ConstructScenario( long which)
     Rect                    loadingRect;
     long                    stepNumber, currentStep = 0;
     Str255              s;
-    
+
     v.h = 0; v.v = 0;
-    
+
     WriteDebugLine((char *)"\pSIZE:");
     WriteDebugLong( sizeof( scenarioInitialType));
-    
+
     ResetAllSpaceObjects();
     ResetActionQueueData();
     ResetBeams();
@@ -265,12 +265,12 @@ Boolean ConstructScenario( long which)
     ResetMotionGlobals();
     gAbsoluteScale = kTimesTwoScale; //SCALE_SCALE;
     gAresGlobal->gSynchValue = 0;
-    
+
     if ( gAresGlobal->gOptions & kOptionNetworkOn)
     {
-#if NETSPROCKET_AVAILABLE   
+#if NETSPROCKET_AVAILABLE
         if ( IAmHosting())
-        {   
+        {
             gAresGlobal->gThisScenarioNumber = which;
             gRandomSeed = Randomize( 32760);
             SendStartMessage();
@@ -286,31 +286,31 @@ Boolean ConstructScenario( long which)
                     return( false);
                 }
             }
-            which = gAresGlobal->gThisScenarioNumber;   
+            which = gAresGlobal->gThisScenarioNumber;
         }
 #endif
     } else
     {
         gAresGlobal->gThisScenarioNumber = which;
     }
-    
-    
+
+
     count = GetScenarioAngle( gAresGlobal->gThisScenarioNumber);
     if ( count < 0)
         gAresGlobal->gScenarioRotation = RandomSeeded( ROT_POS, &gRandomSeed, 'scm0', -1);
     else
         gAresGlobal->gScenarioRotation = count;
-        
+
     gThisScenario = (scenarioType *)*gAresGlobal->gScenarioData + which;
-    
+
     gAresGlobal->gScenarioWinner = kScenarioWinnerNoPlayer | kScenarioWinnerNoNext | kScenarioWinnerNoText;
-    
+
     SetMiniScreenStatusStrList( gThisScenario->scoreStringResID);
-    
+
 //  WriteDebugDivider();
 
     /* *** BEGIN INIT ADMIRALS ***                                  */
-    
+
     mWriteDebugString("\pSCN#");
     WriteDebugLong( which);
     WriteDebugLong( gThisScenario->playerNum);
@@ -318,12 +318,12 @@ Boolean ConstructScenario( long which)
     {
         gThisScenario->player[count].admiralNumber = -1;
     }
-    
+
     for ( count = 0; count < gThisScenario->playerNum; count++)
     {
         if ( gAresGlobal->gOptions & kOptionNetworkOn)
         {
-#if NETSPROCKET_AVAILABLE           
+#if NETSPROCKET_AVAILABLE
             if ( gThisScenario->player[count].playerType == kComputerPlayer)
             {
                 gThisScenario->player[count].admiralNumber =
@@ -331,7 +331,7 @@ Boolean ConstructScenario( long which)
                                             kAIsComputer, gThisScenario->player[count].playerRace,
                                             gThisScenario->player[count].nameResID,
                                             gThisScenario->player[count].nameStrNum,
-                                            gThisScenario->player[count].earningPower); 
+                                            gThisScenario->player[count].earningPower);
                 PayAdmiral( gThisScenario->player[count].admiralNumber, mLongToFixed( 5000));
             } else if ( GetPlayerRace( count) >= 0)
             {
@@ -384,14 +384,14 @@ Boolean ConstructScenario( long which)
                 gThisScenario->player[count].admiralNumber = MakeNewAdmiral( kNoShip, kNoDestinationObject, kNoDestinationType,
                                             kAIsComputer, gThisScenario->player[count].playerRace,
                                                     gThisScenario->player[count].nameResID,
-                                                    gThisScenario->player[count].nameStrNum, gThisScenario->player[count].earningPower);    
+                                                    gThisScenario->player[count].nameStrNum, gThisScenario->player[count].earningPower);
                 PayAdmiral( gThisScenario->player[count].admiralNumber, mLongToFixed( 5000));
             }
         }
     }
 
     /* *** END INIT ADMIRALS ***                                        */
-    
+
     ///// FIRST SELECT WHAT MEDIA WE NEED TO USE:
 
     // uncheck all base objects
@@ -399,16 +399,16 @@ Boolean ConstructScenario( long which)
     // uncheck all sounds
     SetAllSoundsNoKeep();
     SetAllPixTablesNoKeep();
-    
+
     stepNumber = gThisScenario->initialNum * 4L + (gThisScenario->startTime & kScenario_StartTimeMask); // for each run through the initial num
     GetIndString( s, kLevelNameID, gThisScenario->levelNameStrNum);
     DoLoadingInterface( &loadingRect, s);
     UpdateLoadingInterface( currentStep, stepNumber, &loadingRect);
-    
+
     WriteDebugLine((char *)"\p- C H E C K -");
 
     // for each initial object
-    
+
     if ( gAresGlobal->scenarioFileInfo.energyBlobID < 0)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, "\pNo energy blob defined",
@@ -484,7 +484,7 @@ Boolean ConstructScenario( long which)
         {
             CheckBaseObjectMedia( baseObject, GetAdmiralColor(initial->owner));
         }
-        
+
         // check any objects this object can build
         for ( c2 = 0; c2 < kMaxTypeBaseCanBuild; c2++)
         {
@@ -504,8 +504,8 @@ Boolean ConstructScenario( long which)
                 }
             }
         }
-    }                   
-    
+    }
+
     // check media for all condition actions
     condition = mGetScenarioCondition( gThisScenario, 0);
     for ( count = 0; count < gThisScenario->conditionNum; count++)
@@ -515,7 +515,7 @@ Boolean ConstructScenario( long which)
 
 //      condition++;
     }
-    
+
     // make sure we check things whose owner may change
     for ( count = 0; count < kMaxBaseObject; count++)
     {
@@ -531,11 +531,11 @@ Boolean ConstructScenario( long which)
     }
 
     SetAllBaseObjectsUnchecked();
-    
+
     WriteDebugLine((char *)"\p- A D D -");
     RemoveAllUnusedSounds();
     RemoveAllUnusedPixTables();
-    
+
     for ( count = 0; count < gThisScenario->playerNum; count++)
     {
         baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.energyBlobID);
@@ -597,12 +597,12 @@ Boolean ConstructScenario( long which)
         {
             AddBaseObjectMedia( type, GetAdmiralColor(initial->owner));
         }
-        
+
         // we may have just moved memory, so let's make sure our ptrs are correct
 //      scenario = (scenarioType *)*gAresGlobal->gScenarioData + which;
         initial = mGetScenarioInitial( gThisScenario, count);
         baseObject = mGetBaseObjectPtr( type);
-        
+
         // make sure we're not overriding the sprite
         if ( initial->spriteIDOverride >= 0)
         {
@@ -613,10 +613,10 @@ Boolean ConstructScenario( long which)
             } else
             {
                 AddPixTable( initial->spriteIDOverride);
-            }   
+            }
 //          scenario = (scenarioType *)*gAresGlobal->gScenarioData + which;
         }
-        
+
         // check any objects this object can build
         for ( c2 = 0; c2 < kMaxTypeBaseCanBuild; c2++)
         {
@@ -638,7 +638,7 @@ Boolean ConstructScenario( long which)
                 }
             }
         }
-    }                   
+    }
 
     // add media for all condition actions
     condition = mGetScenarioCondition( gThisScenario, 0);
@@ -670,8 +670,8 @@ Boolean ConstructScenario( long which)
         }
     }
 
-    SetAllBaseObjectsUnchecked();   
-    
+    SetAllBaseObjectsUnchecked();
+
     // begin init admirals used to be here
     condition = mGetScenarioCondition( gThisScenario, 0);
     for ( count = 0; count < gThisScenario->conditionNum; count++)
@@ -682,13 +682,13 @@ Boolean ConstructScenario( long which)
             condition->flags &= ~kHasBeenTrue;
         condition++;
     }
-    
+
     for ( ; count < kScenarioEndgameNum; count++)
     {
     }
-    
+
 //  WriteDebugDivider();
-    
+
     initial = mGetScenarioInitial( gThisScenario, 0);
     for ( count = 0; count < gThisScenario->initialNum; count++)
     {
@@ -702,9 +702,9 @@ Boolean ConstructScenario( long which)
             if ( initial->owner > kScenarioNoOwner)
                 owner = gThisScenario->player[initial->owner].admiralNumber;
             else owner = kScenarioNoOwner;
-                
+
             specialAttributes = initial->attributes & ( ~kInitialAttributesMask);
-            if ( initial->attributes & kIsPlayerShip) 
+            if ( initial->attributes & kIsPlayerShip)
             {
                 if ( GetAdmiralFlagship( owner) == nil)
                 {
@@ -734,8 +734,8 @@ Boolean ConstructScenario( long which)
                     specialAttributes &= ~kIsPlayerShip;
                 }
             }
-            
-    
+
+
             type = initial->type;
             if ((gAresGlobal->gOptions & kOptionNetworkOn) && (GetAdmiralRace( initial->owner) >= 0) &&
                 ( !(initial->attributes & kFixedRace)))
@@ -758,13 +758,13 @@ Boolean ConstructScenario( long which)
                                                 initial->nameResID,
                                                 initial->nameStrNum,
                                                 initial->spriteIDOverride);
-*/          
+*/
             initial->realObjectNumber = newShipNum = CreateAnySpaceObject( type, &v, &coord,
                                                 gAresGlobal->gScenarioRotation,
                                                 owner,
                                                 specialAttributes,
                                                 initial->spriteIDOverride);
-            
+
             anObject = (spaceObjectType *)*gSpaceObjectData + (long)newShipNum;
             if ( anObject->attributes & kIsDestination)
             {
@@ -790,7 +790,7 @@ Boolean ConstructScenario( long which)
                     }
                 }
             }
-            
+
             if ( anObject->attributes & kIsDestination)
             {
                 if ( owner >= 0)
@@ -804,14 +804,14 @@ Boolean ConstructScenario( long which)
                         }
                     }
                 }
-            }       
+            }
         } else
         {
             initial->realObjectNumber = -1;
         }
         initial++;
     }
-    
+
     // double back and set up any defined initial destinations
     for ( count = 0; count < gThisScenario->initialNum; count++)
     {
@@ -826,7 +826,7 @@ Boolean ConstructScenario( long which)
             if ( initial->owner > kScenarioNoOwner)
             {
                 // get the correct admiral #
-                
+
                 owner = gThisScenario->player[initial->owner].admiralNumber;
                 initial = mGetScenarioInitial( gThisScenario, initial->initialDestination);
 
@@ -834,9 +834,9 @@ Boolean ConstructScenario( long which)
                 SetAdmiralDestinationObject( owner,
                     initial->realObjectNumber,
                     kObjectDestinationType);
-                
+
                 // now give the mapped initial object the admiral's destination
-                
+
                 initial = mGetScenarioInitial( gThisScenario, count);
                 anObject = (spaceObjectType *)*gSpaceObjectData + (long)initial->realObjectNumber;
                 specialAttributes = anObject->attributes; // preserve the attributes
@@ -849,7 +849,7 @@ Boolean ConstructScenario( long which)
 
     // set up all the admiral's destination objects
     RecalcAllAdmiralBuildData();
-    
+
     mWriteDebugString("\pPlayerAdmiral");
     WriteDebugLong( gAresGlobal->gPlayerAdmiralNumber);
     if ( gAresGlobal->gOptions & kOptionNetworkOn)
@@ -863,13 +863,13 @@ Boolean ConstructScenario( long which)
                 mWriteDebugString("\pAdmiral Needs Flagship!");
                 anObject = (spaceObjectType *)*gSpaceObjectData;
                 count = 0;
-                while ((((anObject->attributes & kCanThink) != kCanThink) || 
+                while ((((anObject->attributes & kCanThink) != kCanThink) ||
                     (anObject->owner != c2)) && ( count < kMaxSpaceObject))
                 {
                     count++;
                     anObject++;
                 }
-                
+
                 if ( count < kMaxSpaceObject)
                 {
                     mWriteDebugString("\pGot it!");
@@ -904,7 +904,7 @@ Boolean ConstructScenario( long which)
         }
         anObject++;
     }
-*/  
+*/
     ClearMessage();
 
     c2 = 0;
@@ -936,7 +936,7 @@ Boolean ConstructScenario( long which)
     {
         if ( !DoMissionInterface( which)) return( false);
     }
-        
+
     if ( gAresGlobal->gOptions & kOptionNetworkOn)
     {
 #if NETSPROCKET_AVAILABLE
@@ -954,7 +954,7 @@ Boolean ConstructScenario( long which)
         } while (type != eStartToPlayMessage);
 #endif NETSPROCKET_AVAILABLE
     }
-        
+
 
     ResetInstruments();
     return( true);
@@ -966,7 +966,7 @@ void SetAllBaseObjectsUnchecked( void)
 {
     baseObjectType  *aBase = (baseObjectType *)*gBaseObjectData;
     long            count;
-    
+
     for ( count = 0; count < kMaxBaseObject; count++)
     {
 //      aBase->attributes &= ~kHaveCheckedMedia;
@@ -979,7 +979,7 @@ void CheckBaseObjectMedia( baseObjectType *aBase, unsigned char color)
 
 {
     baseObjectType  *weapon;
-    
+
     if ( !(aBase->internalFlags & (0x00000001 <<(long)color)))
     {
         aBase->internalFlags |= (0x00000001 <<(long)color);
@@ -993,7 +993,7 @@ void CheckBaseObjectMedia( baseObjectType *aBase, unsigned char color)
             if ( aBase->pixResID != kNoSpriteTable)
                 KeepPixTable( aBase->pixResID);
         }
-        
+
         CheckActionMedia( aBase->destroyAction, (aBase->destroyActionNum & kDestroyActionNotMask), color);
         CheckActionMedia( aBase->expireAction, (aBase->expireActionNum & kDestroyActionNotMask), color);
         CheckActionMedia( aBase->createAction, aBase->createActionNum, color);
@@ -1026,7 +1026,7 @@ void CheckActionMedia( long whichAction, long actionNum, unsigned char color)
     objectActionType    *action = (objectActionType *)*gObjectActionData + whichAction;
     Boolean             OKtoExecute;
     long                count;
-        
+
     while (( action->verb != kNoAction) && ( actionNum > 0))
     {
         switch ( action->verb)
@@ -1054,7 +1054,7 @@ void CheckActionMedia( long whichAction, long actionNum, unsigned char color)
                         baseObject = mGetBaseObjectPtr( action->argument.alterObject.minimum);
                         CheckBaseObjectMedia( baseObject, color);
                         break;
-                    
+
                     case kAlterOwner:
                         baseObject = (baseObjectType *)*gBaseObjectData;
                         for ( count = 0; count < kMaxBaseObject; count++)
@@ -1079,19 +1079,19 @@ void CheckActionMedia( long whichAction, long actionNum, unsigned char color)
                             baseObject++;
                         }
                         break;
-                    
+
                     default:
                         break;
-                
-                }       
+
+                }
                 break;
-                
+
             case kMakeSparks:
             case kNoAction:
             case kDie:
             default:
                 break;
-        }           
+        }
         actionNum--;
         action++;
     }
@@ -1101,7 +1101,7 @@ void AddBaseObjectMedia( long whichBase, unsigned char color)
 
 {
     baseObjectType      *aBase = mGetBaseObjectPtr( whichBase);
-    
+
     mWriteDebugString("\pADDBASE:");
     WriteDebugLong( whichBase);
     if ( !(aBase->internalFlags & (0x00000001 <<(long)color)))
@@ -1119,14 +1119,14 @@ void AddBaseObjectMedia( long whichBase, unsigned char color)
             }
             aBase = mGetBaseObjectPtr( whichBase);
         }
-        
+
         AddBaseObjectActionMedia( whichBase, kDestroyActionType, color);
         AddBaseObjectActionMedia( whichBase, kExpireActionType, color);
         AddBaseObjectActionMedia( whichBase, kCreateActionType, color);
         AddBaseObjectActionMedia( whichBase, kCollideActionType, color);
         AddBaseObjectActionMedia( whichBase, kActivateActionType, color);
         AddBaseObjectActionMedia( whichBase, kArriveActionType, color);
-        
+
         aBase = mGetBaseObjectPtr( whichBase);
         if ( aBase->pulse != kNoWeapon)
         {
@@ -1154,12 +1154,12 @@ void AddBaseObjectActionMedia( long whichBase, long whichType, unsigned char col
     baseObjectType      *baseObject = nil;
     long                count = 0;
     objectActionType    *action = nil;
-    
+
     do
     {
         baseObject = mGetBaseObjectPtr( whichBase);
-        mGetActionFromBaseTypeNum( action, baseObject, whichType, count)        
-        
+        mGetActionFromBaseTypeNum( action, baseObject, whichType, count)
+
         AddActionMedia( action, color);
         count++;
     } while ( action != nil);
@@ -1170,7 +1170,7 @@ void AddActionMedia( objectActionType *action, unsigned char color)
     baseObjectType      *baseObject = nil;
     long                count = 0, l1, l2;
     Boolean             OKtoExecute;
-    
+
     if ( action != nil)
     {
         switch ( action->verb)
@@ -1195,7 +1195,7 @@ void AddActionMedia( objectActionType *action, unsigned char color)
             case kNoAction:
                 action = nil;   // get us out of loop
                 break;
-                
+
             case kAlter:
                 switch( action->argument.alterObject.alterType)
                 {
@@ -1248,7 +1248,7 @@ void GetInitialCoord( scenarioInitialType *initial, coordPointType *coord, long 
 {
     long    lcos, lsin, lscrap;
 //  double  dcos, dsin, dscrap;
-    
+
 //  Debugger();
 /*
     mGetRotPoint( lcos, lsin, rotation)
@@ -1264,7 +1264,7 @@ void GetInitialCoord( scenarioInitialType *initial, coordPointType *coord, long 
     lscrap = dscrap;
     coord->h = kUniversalCenter;
     coord->h += lscrap;
-    
+
     dscrap = (double)initial->location.h * dsin;
     dscrap += (double)initial->location.v * dcos;
     lscrap = dscrap;
@@ -1280,7 +1280,7 @@ void GetInitialCoord( scenarioInitialType *initial, coordPointType *coord, long 
     lscrap -= mMultiplyFixed(initial->location.v, lsin);
     coord->h = kUniversalCenter;
     coord->h += lscrap;
-    
+
     lscrap = mMultiplyFixed(initial->location.h, lsin);
     lscrap += mMultiplyFixed(initial->location.v, lcos);
     coord->v = kUniversalCenter;
@@ -1313,9 +1313,9 @@ void CheckScenarioConditions( long timePass)
     scenarioInitialType     *initial;
     longPointType           offset = {0, 0};
     Boolean                 conditionTrue = FALSE;
-    
+
 #pragma unused( timePass)
-    
+
         condition = mGetScenarioCondition( gThisScenario, 0);
         for ( i = 0; i < gThisScenario->conditionNum; i++)
         {
@@ -1332,7 +1332,7 @@ void CheckScenarioConditions( long timePass)
                             conditionTrue = TRUE;
                         }
                         break;
-                    
+
                     case kCounterGreaterCondition:
                         l = mGetRealAdmiralNum(condition->conditionArgument.counter.whichPlayer);
                         if ( GetAdmiralScore( l, condition->conditionArgument.counter.whichCounter) >=
@@ -1341,7 +1341,7 @@ void CheckScenarioConditions( long timePass)
                             conditionTrue = TRUE;
                         }
                         break;
-                    
+
                     case kCounterNotCondition:
                         l = mGetRealAdmiralNum(condition->conditionArgument.counter.whichPlayer);
                         if ( GetAdmiralScore( l, condition->conditionArgument.counter.whichCounter) !=
@@ -1350,7 +1350,7 @@ void CheckScenarioConditions( long timePass)
                             conditionTrue = TRUE;
                         }
                         break;
-                    
+
                     case kDestructionCondition:
                         sObject = nil;
                         mGetRealObjectFromInitial( sObject, initial, condition->conditionArgument.longValue)
@@ -1359,7 +1359,7 @@ void CheckScenarioConditions( long timePass)
                             conditionTrue = TRUE;
                         }
                         break;
-                    
+
                     case kOwnerCondition:
                         sObject = nil;
                         mGetRealObjectFromInitial( sObject, initial, condition->subjectObject)
@@ -1370,17 +1370,17 @@ void CheckScenarioConditions( long timePass)
                             {
                                 conditionTrue = TRUE;
                             }
-    
+
                         }
                         break;
-                    
+
                     case kTimeCondition:
                         if ( gAresGlobal->gGameTime >= condition->conditionArgument.longValue)
                         {
                             conditionTrue = true;
                         }// else WriteDebugLong( gAresGlobal->gGameTime);
                         break;
-                    
+
                     case kProximityCondition:
                         sObject = dObject = nil;
                         mWriteDebugString("\pkProximityCondition");
@@ -1410,7 +1410,7 @@ void CheckScenarioConditions( long timePass)
                             }
                         }
                         break;
-                        
+
                     case kDistanceGreaterCondition:
                         sObject = dObject = nil;
                         mGetRealObjectFromInitial( sObject, initial, condition->subjectObject)
@@ -1437,7 +1437,7 @@ void CheckScenarioConditions( long timePass)
                             }
                         }
                         break;
-                        
+
                     case kHalfHealthCondition:
                         sObject = nil;
                         mGetRealObjectFromInitial( sObject, initial, condition->subjectObject)
@@ -1454,7 +1454,7 @@ void CheckScenarioConditions( long timePass)
                             WriteDebugLong( sObject->health);
                         }
                         break;
-                    
+
                     case kIsAuxiliaryObject:
                         sObject = nil;
                         mGetRealObjectFromInitial( sObject, initial, condition->subjectObject)
@@ -1471,7 +1471,7 @@ void CheckScenarioConditions( long timePass)
                             }
                         }
                         break;
-                        
+
                     case kIsTargetObject:
                         sObject = nil;
                         mGetRealObjectFromInitial( sObject, initial, condition->subjectObject)
@@ -1488,7 +1488,7 @@ void CheckScenarioConditions( long timePass)
                             }
                         }
                         break;
-                    
+
                     case kVelocityLessThanEqualToCondition:
                         sObject = nil;
                         mGetRealObjectFromInitial( sObject, initial, condition->subjectObject)
@@ -1501,14 +1501,14 @@ void CheckScenarioConditions( long timePass)
                             }
                         }
                         break;
-                    
+
                     case kNoShipsLeftCondition:
                         if ( GetAdmiralShipsLeft( condition->conditionArgument.longValue) <= 0)
                         {
                             conditionTrue = true;
                         }
                         break;
-                        
+
                     case kCurrentMessageCondition:
                         {
                             longMessageType *tmessage;
@@ -1519,12 +1519,12 @@ void CheckScenarioConditions( long timePass)
                             {
                                 conditionTrue = true;
                             }
-                            
+
                         }
                         break;
-                    
+
                     case kCurrentComputerCondition:
-                        if (( gAresGlobal->gMiniScreenData.currentScreen == 
+                        if (( gAresGlobal->gMiniScreenData.currentScreen ==
                             condition->conditionArgument.location.h) &&
                             ((condition->conditionArgument.location.v < 0) ||
                                 (gAresGlobal->gMiniScreenData.selectLine ==
@@ -1533,7 +1533,7 @@ void CheckScenarioConditions( long timePass)
                             conditionTrue = true;
                         }
                         break;
-                    
+
                     case kZoomLevelCondition:
                         if ( gAresGlobal->gZoomMode ==
                             condition->conditionArgument.longValue)
@@ -1541,19 +1541,19 @@ void CheckScenarioConditions( long timePass)
                             conditionTrue = true;
                         }
                         break;
-                    
+
                     case kAutopilotCondition:
                         conditionTrue = IsPlayerShipOnAutoPilot();
 
                         break;
-                        
+
                     case kNotAutopilotCondition:
                         conditionTrue = !IsPlayerShipOnAutoPilot();
                         break;
-                    
+
                     case kObjectIsBeingBuilt:
                         {
-                    
+
                             destBalanceType     *buildAtObject = nil;
 
 //                          if ( sObject != nil)
@@ -1569,7 +1569,7 @@ void CheckScenarioConditions( long timePass)
                             }
                         }
                         break;
-                    
+
                     case kDirectIsSubjectTarget:
                         mGetRealObjectFromInitial( sObject, initial, condition->subjectObject)
                         mGetRealObjectFromInitial( dObject, initial, condition->directObject)
@@ -1579,7 +1579,7 @@ void CheckScenarioConditions( long timePass)
                                 conditionTrue = true;
                         }
                         break;
-                    
+
                     case kSubjectIsPlayerCondition:
                         sObject = nil;
                         mGetRealObjectFromInitial( sObject, initial, condition->subjectObject)
@@ -1589,7 +1589,7 @@ void CheckScenarioConditions( long timePass)
                                 conditionTrue = true;
                         }
                         break;
-                    
+
 //                  case kVelocityLessThanEqualToCondition:
 //                      mGetRealObjectFromInitial( sObject, initial, condition->subjectObject)
 //                      if ( sObject != nil)
@@ -1598,16 +1598,16 @@ void CheckScenarioConditions( long timePass)
 //                              conditionTrue = true;
 //                      }
 //                      break;
-                        
+
                     default:
                         break;
-                    
+
                 }
                 if ( conditionTrue)
                 {
 //                  WriteDebugLine((char *)"\pTRUE!");
 //                  WriteDebugLong( i);
-                    
+
                     condition->flags |= kHasBeenTrue;
                     sObject = nil;
                     dObject = nil;
@@ -1618,14 +1618,14 @@ void CheckScenarioConditions( long timePass)
                 }
             }
             condition++;
-        }           
+        }
 }
 
 void SetScenarioConditionTrueYet( long whichCondition, Boolean state)
 
 {
     scenarioConditionType   *condition = nil;
-    
+
     condition = mGetScenarioCondition( gThisScenario, whichCondition);
     if ( state)
     {
@@ -1643,9 +1643,9 @@ void SetScenarioConditionTrueYet( long whichCondition, Boolean state)
 Boolean GetScenarioConditionTrue( long whichCondition)
 {
     scenarioConditionType   *condition = nil;
-    
+
     condition = mGetScenarioCondition( gThisScenario, whichCondition);
-    
+
     if ( condition->flags & kHasBeenTrue) return( true);
     else return( false);
 }
@@ -1668,23 +1668,23 @@ void UnhideInitialObject( long whichInitial)
     unsigned long           specialAttributes;
     long                    newShipNum, owner, type, saveDest, baseClass, race;
     baseObjectType          *baseObject;
-    
+
     v.h = 0;
     v.v = 0;
     initial = mGetScenarioInitial( gThisScenario, 0);
     mGetRealObjectFromInitial( anObject, initial, whichInitial)
-    if ( anObject == nil) 
+    if ( anObject == nil)
     {
 //      if (initial->attributes & kInitiallyHidden)
         {
             GetInitialCoord( initial, &coord, gAresGlobal->gScenarioRotation);
-            
+
             if ( initial->owner > kScenarioNoOwner)
                 owner = gThisScenario->player[initial->owner].admiralNumber;
             else owner = kScenarioNoOwner;
-                
+
             specialAttributes = initial->attributes & ( ~kInitialAttributesMask);
-            if ( initial->attributes & kIsPlayerShip) 
+            if ( initial->attributes & kIsPlayerShip)
             {
                 if ( GetAdmiralFlagship( owner) == nil)
                 {
@@ -1710,8 +1710,8 @@ void UnhideInitialObject( long whichInitial)
                     specialAttributes &= ~kIsPlayerShip;
                 }
             }
-            
-    
+
+
             type = initial->type;
             if ((gAresGlobal->gOptions & kOptionNetworkOn) && (GetAdmiralRace( initial->owner) >= 0) &&
                 ( !(initial->attributes & kFixedRace)))
@@ -1733,7 +1733,7 @@ void UnhideInitialObject( long whichInitial)
             initial->realObjectNumber = newShipNum = CreateAnySpaceObject( type, &v, &coord, 0, owner,
                                                 specialAttributes,
                                                 initial->spriteIDOverride);
-            
+
             anObject = (spaceObjectType *)*gSpaceObjectData + (long)newShipNum;
             initial = mGetScenarioInitial( gThisScenario, whichInitial);
 
@@ -1770,36 +1770,36 @@ void UnhideInitialObject( long whichInitial)
                     ResetPlayerShip( newShipNum);
                 }
             }
-            
+
             if ( initial->initialDestination >= 0)
             {
                 // only objects controlled by an Admiral can have destinations
                 if ( initial->owner > kScenarioNoOwner)
                 {
                     // get the correct admiral #
-                    
+
                     owner = gThisScenario->player[initial->owner].admiralNumber;
-                    
+
                     // INITIAL IS BEING CHANGED HERE
                     initial = mGetScenarioInitial( gThisScenario, initial->initialDestination);
                     if ( initial->realObjectNumber >= 0)
                     {
                         saveDest = GetAdmiralDestinationObject( owner); // save the original dest
-                        
+
                         // set the admiral's dest object to the mapped initial dest object
                         SetAdmiralDestinationObject( owner,
                             initial->realObjectNumber,
                             kObjectDestinationType);
-                        
+
                         // now give the mapped initial object the admiral's destination
-                        
+
                         initial = mGetScenarioInitial( gThisScenario, whichInitial);
                         anObject = (spaceObjectType *)*gSpaceObjectData + (long)initial->realObjectNumber;
                         specialAttributes = anObject->attributes; // preserve the attributes
                         anObject->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
                         SetObjectDestination( anObject, nil);
                         anObject->attributes = specialAttributes;
-                        
+
                         SetAdmiralDestinationObject( owner, saveDest, kObjectDestinationType);
 
                     }
@@ -1831,7 +1831,7 @@ void DeclareWinner( long whichPlayer, long nextLevel, long textID)
         {
             gAresGlobal->gScenarioWinner = ( nextLevel << kScenarioWinnerNextShift);
         } else gAresGlobal->gScenarioWinner = kScenarioWinnerNoNext;
-        if ( textID >= 0) 
+        if ( textID >= 0)
         {
             gAresGlobal->gScenarioWinner |= ( textID << kScenarioWinnerTextShift);
         }
@@ -1872,12 +1872,12 @@ void GetScenarioFullScaleAndCorner( long whichScenario, long rotation,
     longPointType   coord, otherCoord, tempCoord;
     scenarioType    *scenario = (scenarioType *)*gAresGlobal->gScenarioData + whichScenario;
     scenarioInitialType     *initial;
-    
-    
+
+
 #pragma unused( rotation)
     mustFit = bounds->bottom - bounds->top;
     if ( ( bounds->right - bounds->left) < mustFit) mustFit = bounds->right - bounds->left;
-    
+
     biggest = 0;
     for ( count = 0; count < scenario->initialNum; count++)
     {
@@ -1885,12 +1885,12 @@ void GetScenarioFullScaleAndCorner( long whichScenario, long rotation,
         if ( !(initial->attributes & kInitiallyHidden))
         {
             GetInitialCoord( initial, (coordPointType *)&coord, gAresGlobal->gScenarioRotation);
-    
+
             for ( otherCount = 0; otherCount < scenario->initialNum; otherCount++)
             {
                 initial = mGetScenarioInitial( scenario, otherCount);
                 GetInitialCoord( initial, (coordPointType *)&otherCoord, gAresGlobal->gScenarioRotation);
-    
+
                 if ( ABS( otherCoord.h - coord.h) > biggest)
                     biggest = ABS( otherCoord.h - coord.h);
                 if ( ABS( otherCoord.v - coord.v) > biggest)
@@ -1898,12 +1898,12 @@ void GetScenarioFullScaleAndCorner( long whichScenario, long rotation,
             }
         }
     }
-    
+
     biggest += biggest >> 2L;
-    
+
     *scale = SCALE_SCALE * mustFit;
     *scale /= biggest;
-    
+
     otherCoord.h = kUniversalCenter;
     otherCoord.v = kUniversalCenter;
     coord.h = kUniversalCenter;
@@ -1914,12 +1914,12 @@ void GetScenarioFullScaleAndCorner( long whichScenario, long rotation,
         if ( !(initial->attributes & kInitiallyHidden))
         {
             GetInitialCoord( initial, (coordPointType *)&tempCoord, gAresGlobal->gScenarioRotation);
-            
+
             if ( (tempCoord.h) < coord.h)
                 coord.h = tempCoord.h;
             if ( (tempCoord.v) < coord.v)
                 coord.v = tempCoord.v;
-    
+
             if ( (tempCoord.h) > otherCoord.h)
                 otherCoord.h = tempCoord.h;
             if ( (tempCoord.v) > otherCoord.v)
@@ -1927,7 +1927,7 @@ void GetScenarioFullScaleAndCorner( long whichScenario, long rotation,
         }
         initial++;
     }
-    
+
     biggest = ( bounds->right - bounds->left);
     biggest *= SCALE_SCALE;
     biggest /= *scale;
@@ -1938,7 +1938,7 @@ void GetScenarioFullScaleAndCorner( long whichScenario, long rotation,
     biggest /= *scale;
     biggest /= 2;
     corner->v = ( coord.v + ( otherCoord.v - coord.v) / 2) - biggest;
-    
+
 }
 
 
@@ -1946,14 +1946,14 @@ long GetBriefPointNumber( long whichScenario)
 
 {
     scenarioType    *scenario = (scenarioType *)*gAresGlobal->gScenarioData + whichScenario;
-    
+
     return ( scenario->briefPointNum & kScenarioBriefMask);
 }
 
 long GetScenarioAngle( long whichScenario)
 {
     scenarioType    *scenario = (scenarioType *)*gAresGlobal->gScenarioData + whichScenario;
-    
+
     if ( scenario->briefPointNum & kScenarioAngleMask)
         return (( (scenario->briefPointNum & kScenarioAngleMask) >> kScenarioAngleShift) - 1) * 2;
     else
@@ -1964,13 +1964,13 @@ long GetScenarioNumberFromChapterNumber( long whichChapter)
 {
     scenarioType    *aScenario = (scenarioType *)*gAresGlobal->gScenarioData;
     long            whichScenario = 0;
-    
+
     while (( whichScenario < kScenarioNum) && ( aScenario->levelNameStrNum != whichChapter))
     {
         whichScenario++;
         aScenario++;
     }
-    
+
     if ( whichScenario == kScenarioNum) return ( -1);
     else return( whichScenario);
 }
@@ -1979,7 +1979,7 @@ void GetScenarioStarMapPoint( long whichScenario, Point *starPoint)
 
 {
     scenarioType    *scenario = (scenarioType *)*gAresGlobal->gScenarioData + whichScenario;
-    
+
     starPoint->h = scenario->starMapH;
     starPoint->v = scenario->starMapV;
 }
@@ -1987,7 +1987,7 @@ void GetScenarioStarMapPoint( long whichScenario, Point *starPoint)
 long GetChapterNumberFromScenarioNumber( long whichScenario)
 {
     scenarioType    *aScenario = (scenarioType *)*gAresGlobal->gScenarioData + whichScenario;
-    
+
     if ( whichScenario < 0) return ( -1);
     return( aScenario->levelNameStrNum);
 }
@@ -1997,10 +1997,10 @@ scenarioType *GetScenarioPtrFromChapter( long whichChapter)
     scenarioType    *aScenario =
                         (scenarioType *)*gAresGlobal->gScenarioData +
                         GetScenarioNumberFromChapterNumber( whichChapter);
-    
+
     if ( whichChapter < 0) return ( nil);
     else return( aScenario);
-    
+
 }
 
 void GetScenarioName( long whichScenario, StringPtr scenarioName)
@@ -2044,7 +2044,7 @@ long GetNextScenarioChapter( long whichScenario)
 {
     scenarioType    *aScenario = (scenarioType *)*gAresGlobal->gScenarioData + whichScenario, *newScenario = nil;
     long            newScenarioNum, newChapterNum = aScenario->levelNameStrNum + 1;
-    
+
     newScenarioNum = GetScenarioNumberFromChapterNumber( newChapterNum);
     if ( newScenarioNum >= 0)
     {
@@ -2061,15 +2061,15 @@ long GetNextScenarioChapter( long whichScenario)
     }
     if (( newChapterNum <= GetScenarioNumber()) && ( newScenario != nil)) return ( newScenarioNum);
     else return ( -1);
-        
+
 }
 
 long GetFirstNetworkScenario( void)
 {
     long            result = 1;
-    
+
     // do something here to find first networkable scenario
-    
+
     while ( (!ThisChapterIsNetworkable( result)) &&
         ( result <= GetScenarioNumber()))
         result++;
@@ -2080,34 +2080,34 @@ long GetFirstNetworkScenario( void)
 long GetNextNetworkScenario( long thisChapter)
 {
     long            result = thisChapter;
-    
+
     do
     {
         thisChapter++;
-        
+
         if (( thisChapter <= GetScenarioNumber()) && ( ThisChapterIsNetworkable( thisChapter)))
         {
             result = thisChapter;
         }
     } while (( thisChapter <= GetScenarioNumber()) && ( !ThisChapterIsNetworkable( thisChapter))) ;
-        
+
     return( result);
 }
 
 long GetPreviousNetworkScenario( long thisChapter)
 {
     long            result = thisChapter;
-    
+
     do
     {
         thisChapter--;
-        
+
         if (( thisChapter > 0) && ( ThisChapterIsNetworkable( thisChapter)))
         {
             result = thisChapter;
         }
     } while (( thisChapter > 0) && ( !ThisChapterIsNetworkable( thisChapter)));
-        
+
     return( result);
 }
 
@@ -2116,10 +2116,10 @@ Boolean ThisChapterIsNetworkable( long whichChapter)
 {
     scenarioType    *aScenario = (scenarioType *)*gAresGlobal->gScenarioData + GetScenarioNumberFromChapterNumber( whichChapter);
     long            i;
-    
+
     if (( whichChapter < 0) || ( whichChapter > GetScenarioNumber()))
         return false;
-        
+
     for ( i = 0; i < kScenarioPlayerNum; i++)
     {
         if ( aScenario->player[i].playerType == kNetworkHumanPlayer) return( true);

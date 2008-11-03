@@ -101,19 +101,19 @@ void MakeDemoDataHack( void)
             *boolPtr = nil;
     long    count = 0, c2;
     scenarioType    *aScenario;
-    
+
     boolPtr = baseObjectKeepList;
     for ( count = 0; count < kMaxBaseObject; count++)
     {
         *boolPtr = false;
         boolPtr++;
     }
-    
+
     SetAllSoundsNoKeep();
     SetAllPixTablesNoKeep();
     RemoveAllUnusedSounds();
     RemoveAllUnusedPixTables();
-    
+
     ScanLevel( 0, baseObjectKeepList);
     CopyAllBriefingData( 0); // = 1; really, 13 = 1
 
@@ -124,18 +124,18 @@ void MakeDemoDataHack( void)
     CopyAllBriefingData( 12); // = 3; really, 0 = 3
 
     ScanLevel( 21, baseObjectKeepList);
-    CopyAllBriefingData( 21);   
-    
+    CopyAllBriefingData( 21);
+
     ScanLevel( 23, baseObjectKeepList); // can't be played
-    CopyAllBriefingData( 23);   
+    CopyAllBriefingData( 23);
 
     ScanLevel( 13, baseObjectKeepList); // can't be played
-    CopyAllBriefingData( 13);   
+    CopyAllBriefingData( 13);
 
     ClearAndCopyAllUnusedBaseObjects( baseObjectKeepList);
     CopyAllUsedPixTables();
     CopyAllUsedSounds();
-    
+
     DisposePtr( (Ptr)baseObjectKeepList);
 
     aScenario = (scenarioType *)*gAresGlobal->gScenarioData;
@@ -200,7 +200,7 @@ void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
     scenarioConditionType   *condition;
     scenarioInitialType     *initial;
     objectActionType        *action;
-    
+
     SetAllBaseObjectsUnchecked();
 
     gAresGlobal->gThisScenarioNumber = whatLevel;
@@ -208,11 +208,11 @@ void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
     ///// FIRST SELECT WHAT MEDIA WE NEED TO USE:
     // uncheck all base objects
     // uncheck all sounds
-    
+
     WriteDebugLine((char *)"\p- C H E C K -");
 
     // for each initial object
-    
+
     baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.energyBlobID);
     if ( baseObject != nil)
         CheckBaseObjectMedia( baseObject, 0);
@@ -252,8 +252,8 @@ void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
             }
         }
         initial++;
-    }                   
-    
+    }
+
     // check media for all condition actions
     condition = mGetScenarioCondition( gThisScenario, 0);
     for ( count = 0; count < gThisScenario->conditionNum; count++)
@@ -273,7 +273,7 @@ void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
         baseObjectKeepList++;
         baseObject++;
     }
-    
+
     SetAllBaseObjectsUnchecked();
 
     // **************************
@@ -309,16 +309,16 @@ void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
         baseObject = mGetBaseObjectPtr( initial->type);
         // check the media for this object
         AddBaseObjectMedia( initial->type, 0);
-        
+
         // we may have just moved memory, so let's make sure our ptrs are correct
         initial = mGetScenarioInitial( gThisScenario, count);
-        
+
         // make sure we're not overriding the sprite
         if ( initial->spriteIDOverride >= 0)
         {
             AddPixTable( initial->spriteIDOverride);
         }
-        
+
         // check any objects this object can build
         for ( c2 = 0; c2 < kMaxTypeBaseCanBuild; c2++)
         {
@@ -338,7 +338,7 @@ void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
                 }
             }
         }
-    }                   
+    }
 
     // add media for all condition actions
     condition = mGetScenarioCondition( gThisScenario, 0);
@@ -365,14 +365,14 @@ void ClearAndCopyAllUnusedBaseObjects( Boolean *baseObjectKeepList)
     long            count;
     baseObjectType  *anObject;
     unsigned char   *nilObject = (unsigned char *)NewPtr( sizeof( baseObjectType)), *c = nil;
-    
+
     c = nilObject;
     for ( count = 0; count < sizeof( baseObjectType); count++)
     {
         *c = 0;
         c++;
     }
-    
+
     for ( count = 0; count < kMaxBaseObject; count++)
     {
         anObject = mGetBaseObjectPtr( count);
@@ -382,9 +382,9 @@ void ClearAndCopyAllUnusedBaseObjects( Boolean *baseObjectKeepList)
         }
         baseObjectKeepList++;
     }
-    
+
     DisposePtr( (Ptr)nilObject);
-    
+
     SaveAnyResourceInPreferences( kBaseObjectResType, kBaseObjectResID, nil, gBaseObjectData, true);
 }
 
@@ -395,7 +395,7 @@ void CopyAllUsedPixTables( void)
 
 {
     long        count;
-    
+
     for ( count = 0; count < kMaxPixTableEntry; count++)
     {
         if ( gPixTable[count].resource != nil)
@@ -412,7 +412,7 @@ void CopyAllUsedSounds( void)
 
 {
     long    count;
-    
+
     for ( count = 0; count < kSoundNum; count++)
     {
         if ( gAresGlobal->gSound[count].soundHandle != nil)
@@ -434,7 +434,7 @@ void CopyAllBriefingData( long whatLevel)
     inlinePictType          inlinePictList[kMaxInlinePictNum];
     long                    whichBriefNum, length;
     briefPointType          *brief = nil;
-    
+
     for ( whichBriefNum = 0; whichBriefNum < GetBriefPointNumber( whatLevel); whichBriefNum++)
     {
         brief = mGetScenarioBrief( scenario, whichBriefNum);
@@ -442,19 +442,19 @@ void CopyAllBriefingData( long whatLevel)
         {
             inlinePictList[length].id = -1;
         }
-        
+
         textData = GetResource( 'TEXT', brief->contentResID);
         if ( textData != nil)
         {
             DetachResource( textData);
-            
+
             SaveAnyResourceInPreferences( 'TEXT', brief->contentResID, nil,
                 textData, true);
 
             HLockHi( textData);
-            
+
             length = GetHandleSize( textData);
-    
+
             DrawInterfaceTextInRect( &tRect, (anyCharType *)*textData, length,
                             kLarge, 3, *offMap, 0, 0, inlinePictList);
 
@@ -462,7 +462,7 @@ void CopyAllBriefingData( long whatLevel)
             brief = mGetScenarioBrief( scenario, whichBriefNum);
             HUnlock( textData);
             DisposeHandle( textData);
-            
+
             for ( length = 0; length < kMaxInlinePictNum; length++)
             {
                 if ( inlinePictList[length].id > 0)
@@ -474,9 +474,9 @@ void CopyAllBriefingData( long whatLevel)
 
                         SaveAnyResourceInPreferences( 'PICT', inlinePictList[length].id, nil,
                             textData, true);
-                        
+
                         DisposeHandle( textData);
-                    }   
+                    }
                 }
             }
         }

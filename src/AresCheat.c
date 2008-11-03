@@ -78,7 +78,7 @@ void AresCheatInit( void)
 {
     gAresGlobal->gAresCheatStrings = GetStringList( kCheatStringListID);
     if ( gAresGlobal->gAresCheatStrings == nil) return;
-    
+
     mDataHandleLockAndRegister( gAresGlobal->gAresCheatStrings, nil, nil, nil, "\pgAresCheatStrings")
 
 }
@@ -93,7 +93,7 @@ short GetCheatNumFromString( StringPtr s)
 //  return( -1);
     Str255  codeString;
     short       strLen;
-    
+
     strLen = s[0];
     codeString[0] = strLen;
     while ( strLen > 0)
@@ -109,25 +109,25 @@ void ExecuteCheat( short whichCheat, long whichPlayer)
     long                    i;
     spaceObjectType *anObject = nil;
     Str255              s;
-    
+
     mWriteDebugString("\pWhich Cheat:");
     WriteDebugLong( whichCheat);
     mWriteDebugString("\pWhich Player:");
     WriteDebugLong( whichPlayer);
     WriteDebugHex( gAresGlobal->gActiveCheats[whichPlayer], 8);
-    
+
     if ( whichCheat == kNameObjectCheat)
     {
         gAresGlobal->gActiveCheats[whichPlayer] |= kNameObjectBit;
         CheatFeedback( whichCheat, true, whichPlayer);
         return;
-    } 
+    }
 
 #if NETSPROCKET_AVAILABLE
     if ( GetAllNetPlayersCheating())
 #else
     if ( true)
-#endif NETSPROCKET_AVAILABLE    
+#endif NETSPROCKET_AVAILABLE
     {
         switch( whichCheat)
         {
@@ -145,7 +145,7 @@ void ExecuteCheat( short whichCheat, long whichPlayer)
                 PayAdmiralAbsolute( whichPlayer, mLongToFixed( 5000));
                 CheatFeedback( whichCheat, true, whichPlayer);
                 break;
-            
+
             case kAutoPlayCheat:
                 if ( gAresGlobal->gActiveCheats[whichPlayer] & kAutoPlayBit)
                 {
@@ -167,7 +167,7 @@ void ExecuteCheat( short whichCheat, long whichPlayer)
 //                  SetAdmiralAttributes( whichPlayer, kAIsComputer);
                 }
                 break;
-            
+
             case kBuildFastCheat:
                 if ( gAresGlobal->gActiveCheats[whichPlayer] & kBuildFastBit)
                 {
@@ -179,7 +179,7 @@ void ExecuteCheat( short whichCheat, long whichPlayer)
                     CheatFeedback( whichCheat, true, whichPlayer);
                 }
                 break;
-            
+
             case kObserverCheat:
                 anObject = GetAdmiralFlagship( whichPlayer);
                 if ( anObject != nil)
@@ -188,21 +188,21 @@ void ExecuteCheat( short whichCheat, long whichPlayer)
                     CheatFeedback( whichCheat, true, whichPlayer);
                 }
                 break;
-            
+
             case kRaisePayRateCheat:
                 SetAdmiralEarningPower( whichPlayer, GetAdmiralEarningPower( whichPlayer) +
                     0x00000020);
                 SmallFixedToString( GetAdmiralEarningPower( whichPlayer), s);
                 CheatFeedbackPlus( whichCheat, true, whichPlayer, s);
                 break;
-                
+
             case kLowerPayRateCheat:
                 SetAdmiralEarningPower( whichPlayer, GetAdmiralEarningPower( whichPlayer) -
                     0x00000020);
                 SmallFixedToString( GetAdmiralEarningPower( whichPlayer), s);
                 CheatFeedbackPlus( whichCheat, true, whichPlayer, s);
                 break;
-                
+
         }
     } else
     {
@@ -229,7 +229,7 @@ void CheatFeedback( short whichCheat, Boolean activate, long whichPlayer)
 {
     Str255          s, feedback;
     anyCharType     *name;
-    
+
     if ( activate) GetIndString( feedback, kCheatFeedbackOnID, whichCheat);
     else GetIndString( feedback, kCheatFeedbackOffID, whichCheat);
     name = GetAdmiralName( whichPlayer);
@@ -245,7 +245,7 @@ void CheatFeedbackPlus( short whichCheat, Boolean activate, long whichPlayer,
 {
     Str255          s, feedback;
     anyCharType     *name;
-    
+
     if ( activate) GetIndString( feedback, kCheatFeedbackOnID, whichCheat);
     else GetIndString( feedback, kCheatFeedbackOffID, whichCheat);
     name = GetAdmiralName( whichPlayer);

@@ -75,18 +75,18 @@ void EZDrawSpriteOffByID( short resID, long whichShape, long scale, unsigned cha
     spritePix           aSpritePix;
     PixMapHandle        offPixBase = GetGWorldPixMap( gOffWorld);
     char                *pixData;
-    
+
     GetPort( &oldPort);
     EZMakeSpriteFromID( resID, &spriteTable, &aSpritePix, &pixData, whichShape);
     if ( spriteTable == nil) return;
-    
+
     if ( color != 0) ColorizeNatePixTableColor( spriteTable, color);
     else RemapNatePixTableColor( spriteTable);
-    
+
     DrawInOffWorld();
     NormalizeColors();
     EZDrawSpriteCenteredInRectBySprite( &aSpritePix, offPixBase, scale, bounds);
-    
+
     ReleaseResource( spriteTable);
 
     MacSetPort( oldPort);
@@ -95,7 +95,7 @@ void EZDrawSpriteOffByID( short resID, long whichShape, long scale, unsigned cha
 /* EZDrawSpriteOffToOnByID
     Draws sprite from offworld to on, given res id, shape, scale, color, and
     bounding box. Centers in and clips to bounding box.
-    
+
     The sprite data is released before this returns. Not for animation.
 */
 
@@ -107,23 +107,23 @@ void EZDrawSpriteOffToOnByID( short resID, long whichShape, long scale,
     spritePix           aSpritePix;
     PixMapHandle        offPixBase = GetGWorldPixMap( gOffWorld);
     char                *pixData;
-    
+
     GetPort( &oldPort);
     EZMakeSpriteFromID( resID, &spriteTable, &aSpritePix, &pixData, whichShape);
     if ( spriteTable == nil) return;
-    
+
     if ( color != 0) ColorizeNatePixTableColor( spriteTable, color);
     else RemapNatePixTableColor( spriteTable);
-    
+
     DrawInOffWorld();
     NormalizeColors();
     EZDrawSpriteCenteredInRectBySprite( &aSpritePix, offPixBase, scale, bounds);
-    
+
     ReleaseResource( spriteTable);
 
     DrawInRealWorld();
     CopyOffWorldToRealWorld( gTheWindow, bounds);
-    
+
     MacSetPort( oldPort);
 }
 
@@ -134,12 +134,12 @@ void EZDrawSpriteCenteredInRectBySprite( spritePix *aSpritePix,
     long                tlong;
     Point               where;
     longRect            dRect, spriteRect;
-    
+
     dRect.left = bounds->left;
     dRect.right = bounds->right;
     dRect.top = bounds->top;
     dRect.bottom = bounds->bottom;
-    
+
     coord.h = aSpritePix->center.h;
     coord.h *= thisScale;
     coord.h >>= SHIFT_SCALE;
@@ -157,8 +157,8 @@ void EZDrawSpriteCenteredInRectBySprite( spritePix *aSpritePix,
     tlong >>= SHIFT_SCALE;
     where.v = ( (bounds->bottom - bounds->top) / 2) - ( tlong / 2);
     where.v += dRect.top + coord.v;
-    
-    
+
+
     // draw the sprite
 
     OptScaleSpritePixInPixMap( aSpritePix, where, thisScale,
@@ -198,27 +198,27 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
     longRect            dRect, spriteRect;
     coordPointType      coord;
     GrafPtr             oldPort;
-    
+
     GetPort( &oldPort);
     mWriteDebugString("\pOpening:");
     WriteDebugLong( resID);
     spriteTable = GetResource( kPixResType, resID);
     if ( spriteTable == nil) return;
     HLock( spriteTable);
-    
+
     if ( color != 0) ColorizeNatePixTableColor( spriteTable, color);
     else RemapNatePixTableColor( spriteTable);
-    
+
     DrawInOffWorld();
     NormalizeColors();
-    
+
     // set up the sprite
-    
+
     dRect.left = bounds->left;
     dRect.right = bounds->right;
     dRect.top = bounds->top;
     dRect.bottom = bounds->bottom;
-    
+
     pixData = GetNatePixTableNatePixData( spriteTable, whichShape);
 
     aSpritePix.data = &pixData;
@@ -226,10 +226,10 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
     aSpritePix.center.v = GetNatePixTableNatePixVRef( spriteTable, whichShape);
     aSpritePix.width = GetNatePixTableNatePixWidth( spriteTable, whichShape);
     aSpritePix.height = GetNatePixTableNatePixHeight( spriteTable, whichShape);
-    
+
     thisScale = scale;//SCALE_SCALE;
     // calculate the correct position
-    
+
     coord.h = aSpritePix.center.h;
     coord.h *= thisScale;
     coord.h >>= SHIFT_SCALE;
@@ -247,19 +247,19 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
     tlong >>= SHIFT_SCALE;
     where.v = ( (bounds->bottom - bounds->top) / 2) - ( tlong / 2);
     where.v += dRect.top + coord.v;
-    
-    
+
+
     // draw the sprite
 
     OptScaleSpritePixInPixMap( &aSpritePix, where, thisScale,
             &spriteRect, &dRect, offPixBase);
 
     // clean up the sprite
-    
+
     ReleaseResource( spriteTable);
 
     DrawInRealWorld();
     CopyOffWorldToRealWorld( gTheWindow, bounds);
-    
+
     MacSetPort( oldPort);
 }

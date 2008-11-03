@@ -145,7 +145,7 @@ static longPointType    cAdjacentUnits[] = {
                                             { 0, 1},
                                             { 1, 1}
                                             };
-                                            
+
 coordPointType          gGlobalCorner;
 //long                  gAresGlobal->gClosestObject = 0, gAresGlobal->gFarthestObject = 0, gAresGlobal->gCenterScaleH = 0, gAresGlobal->gCenterScaleV = 0;
 //Handle                    gAresGlobal->gProximityGrid = nil;
@@ -159,20 +159,20 @@ int InitMotion( void)
     short                   x, y, i;
     proximityUnitType       *p;
     long                    adjacentAdd = 0, ux, uy, sx, sy;
-    
+
     gAresGlobal->gCenterScaleH = (gPlayScreenWidth / 2) * SCALE_SCALE;
     gAresGlobal->gCenterScaleV = (gPlayScreenHeight / 2) * SCALE_SCALE;
-    
+
     gAresGlobal->gProximityGrid = NewHandle( sizeof( proximityUnitType) * (long)kProximityGridDataLength);
     if ( gAresGlobal->gProximityGrid == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
         return( MEMORY_ERROR);
     }
-    
+
     MoveHHi( gAresGlobal->gProximityGrid);
     HLock( gAresGlobal->gProximityGrid);
-    
+
 //  mHandleLockAndRegister( gAresGlobal->gProximityGrid, nil, nil, nil)
 
     // initialize the proximityGrid & set up the needed lookups (see Notebook 2 p.34)
@@ -186,11 +186,11 @@ int InitMotion( void)
             for ( i = 0; i < kUnitsToCheckNumber; i++)
             {
 //              if (( y == 0) && ( x == 1) && ( i == 1)) Debugger();
-                
+
                 ux = x;
                 uy = y;
                 sx = sy = 0;
-                
+
                 ux += cAdjacentUnits[i].h;
                 if ( ux < 0)
                 {
@@ -201,7 +201,7 @@ int InitMotion( void)
                     ux -= kProximitySuperSize;
                     sx++;
                 }
-                
+
                 uy += cAdjacentUnits[i].v;
                 if ( uy < 0)
                 {
@@ -214,12 +214,12 @@ int InitMotion( void)
                 }
                 p->unitsToCheck[i].adjacentUnit = (uy << kProximityWidthMultiply) + ux;
                 p->unitsToCheck[i].adjacentUnit -= adjacentAdd;
-                
-                
+
+
 //              WriteDebugLong( p->unitsToCheck[i].adjacentUnit);
-                
+
                 adjacentAdd += p->unitsToCheck[i].adjacentUnit;
-                
+
                 p->unitsToCheck[i].superOffset.h = sx;
                 p->unitsToCheck[i].superOffset.v = sy;
             }
@@ -234,7 +234,7 @@ void ResetMotionGlobals( void)
 {
     proximityUnitType   *proximityObject;
     long                i;
-    
+
     gGlobalCorner.h = gGlobalCorner.v = 0;
     gAresGlobal->gClosestObject = 0;
     gAresGlobal->gFarthestObject = 0;
@@ -252,11 +252,11 @@ void HackCheckProxGrid( long sayswho)
 {
     if ( gHackMoitionInitedYet)
     {
-    
+
     proximityUnitType       *p = (proximityUnitType *)*gAresGlobal->gProximityGrid;
     long                    count, c2;
-    
-    
+
+
     for ( count = 0; count < kProximityGridDataLength; count++)
     {
         for ( c2 = 0; c2 < kUnitsToCheckNumber; c2++)
@@ -268,9 +268,9 @@ void HackCheckProxGrid( long sayswho)
         }
         p++;
     }
-    
+
     }
-                
+
 }
 
 void MotionCleanup( void)
@@ -292,18 +292,18 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
     baseObjectType          *baseObject;
 
 #pragma unused( table, tableLength)
-    
+
     if ( unitsToDo == 0) return;
-    
+
     for ( jl = 0; jl < unitsToDo; jl++)
-    {                   
+    {
         anObject = gRootObject;
         while ( anObject != nil)
         {
             if ( anObject->active == kObjectInUse)
             {
                 baseObject = anObject->baseType;
-                
+
 //              if  ( !( anObject->attributes & kIsStationary))
                 if (( anObject->maxVelocity != 0) || ( anObject->attributes & kCanTurn))
                 {
@@ -318,24 +318,24 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                             h = (( anObject->turnFraction -
                                 kFixedPlusPointFive) >> kFixedBitShiftNumber) + 1;
                         anObject->direction += h;
-                        anObject->turnFraction -= mLongToFixed(h); 
-                        
-                        while ( anObject->direction >= ROT_POS) 
+                        anObject->turnFraction -= mLongToFixed(h);
+
+                        while ( anObject->direction >= ROT_POS)
                             anObject->direction -= ROT_POS;
                         while ( anObject->direction < 0)
                             anObject->direction += ROT_POS;
                     }
-                
+
                     if ( anObject->thrust != 0)
                     {
                         if ( anObject->thrust > 0)
                         {
                             // get the goal dh & dv
-                            
+
                             mGetRotPoint( fa, fb, anObject->direction);
-                            
-                            // multiply by max velocity 
-                            
+
+                            // multiply by max velocity
+
                             if (/*( anObject->presenceState == kWarpInPresence) ||*/
                                 ( anObject->presenceState == kWarpingPresence) ||
                                 ( anObject->presenceState == kWarpOutPresence))
@@ -347,12 +347,12 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                                 fa = mMultiplyFixed( anObject->maxVelocity, fa);
                                 fb = mMultiplyFixed( anObject->maxVelocity, fb);
                             }
-                            
+
                             // the difference between our actual vector and our goal vector is our new vector
-                            
+
                             fa = fa - anObject->velocity.h;
                             fb = fb - anObject->velocity.v;
-                            
+
                             useThrust = anObject->thrust;
                         } else
                         {
@@ -361,9 +361,9 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
 //                              useThrust = -(anObject->thrust>>1L);
                             useThrust = -anObject->thrust;
                         }
-    
+
                         // get the angle of our new vector
-                        
+
                         if ( fa == 0)
                         {
                             if ( fb < 0)
@@ -376,34 +376,34 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                             #else
                             aFixed = FixRatio( (int)fa, (int)fb);
                             #endif
-                            
+
                             angle = AngleFromSlope( aFixed);
                             if ( fa > 0) angle += 180;
                             if ( angle >= 360) angle -= 360;
                         }
-                        
+
                         // get the maxthrust of new vector
-                        
+
                         mGetRotPoint( fh, fv, (long)angle);
-                        
+
                         fh = mMultiplyFixed( useThrust, fh);
                         fv = mMultiplyFixed( useThrust, fv);
-                        
+
                         // if our new vector excedes our max thrust, it must be limited
-                        
+
                         if ( fh < 0)
                         {
-                            if ( fa < fh) 
+                            if ( fa < fh)
                                 fa = fh;
                         } else
                         {
                             if ( fa > fh)
                                 fa = fh;
                         }
-                        
+
                         if ( fv < 0)
                         {
-                            if ( fb < fv) 
+                            if ( fb < fv)
                                 fb = fv;
                         } else
                         {
@@ -415,7 +415,7 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                         anObject->velocity.v += fb;
 
                     }
-                    
+
                     anObject->motionFraction.h += anObject->velocity.h;
                     anObject->motionFraction.v += anObject->velocity.v;
 
@@ -424,7 +424,7 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                     else
                         h = (( anObject->motionFraction.h - kFixedPlusPointFive) >> kFixedBitShiftNumber) + 1;
                     anObject->location.h -= h;
-                    anObject->motionFraction.h -= mLongToFixed(h); 
+                    anObject->motionFraction.h -= mLongToFixed(h);
 
                     if ( anObject->motionFraction.v >= 0)
                         v = ( anObject->motionFraction.v + kFixedPlusPointFive) >> kFixedBitShiftNumber;
@@ -432,9 +432,9 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                         v = (( anObject->motionFraction.v - kFixedPlusPointFive) >> kFixedBitShiftNumber) + 1;
                     anObject->location.v -= v;
                     anObject->motionFraction.v -= mLongToFixed(v);
-                    
+
                 } // if ( object is not stationary)
-                
+
 //              if ( anObject->attributes & kIsPlayerShip)
                 if ( anObject == gScrollStarObject)
                 {
@@ -444,7 +444,7 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                 }
 
                 // check to see if it's out of bounds
-                
+
 /*              if (( anObject->owner < 0) && ( !(anObject->attributes & kIsDestination)))
                 {
                     if (( anObject->location.h < kUniverseTopLeft) ||
@@ -490,7 +490,7 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
 
                     }
                 }
-            
+
                 // deal with self-animating shapes
                 if ( anObject->attributes & kIsSelfAnimated)
                 {
@@ -556,10 +556,10 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                             {
                                 spaceObjectType *target = (spaceObjectType *)
                                     anObject->frame.beam.beam->toObject;
-                                
+
                                 if ((target->active) &&
                                     (target->id == anObject->frame.beam.beam->toObjectID))
-                                {   
+                                {
                                     anObject->location =
                                         anObject->frame.beam.beam->objectLocation =
                                             target->location;
@@ -573,10 +573,10 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                             {
                                 spaceObjectType *target = (spaceObjectType *)
                                     anObject->frame.beam.beam->fromObject;
-                                    
+
                                 if ((target->active) &&
                                     ( target->id == anObject->frame.beam.beam->fromObjectID))
-                        
+
                                 {
                                     anObject->frame.beam.beam->lastGlobalLocation =
                                         anObject->frame.beam.beam->lastApparentLocation =
@@ -595,14 +595,14 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                             {
                                 spaceObjectType *target = (spaceObjectType *)
                                     anObject->frame.beam.beam->fromObject;
-                                
+
                                 if (( target->active) &&
                                     ( target->id == anObject->frame.beam.beam->fromObjectID))
                                 {
                                     anObject->frame.beam.beam->lastGlobalLocation =
                                         anObject->frame.beam.beam->lastApparentLocation =
                                             target->location;
-                                                            
+
                                     anObject->location.h =
                                         anObject->frame.beam.beam->objectLocation.h =
                                         target->location.h +
@@ -637,13 +637,13 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
 //  gAresGlobal->gFarthestObject = 0;
     longDist = 0;
     anObject = gRootObject;
-    
+
     while ( anObject != nil)
     {
         if ( anObject->active == kObjectInUse)
         {
             baseObject = anObject->baseType;
-        
+
             if ( !(anObject->attributes & kIsBeam) && ( anObject->sprite != nil))
             {
                 h = ( anObject->location.h - gGlobalCorner.h) * gAbsoluteScale;
@@ -652,7 +652,7 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                     anObject->sprite->where.h = h + CLIP_LEFT;
                 else
                     anObject->sprite->where.h = -kSpriteMaxSize;
-                    
+
                 h = (anObject->location.v - gGlobalCorner.v) * gAbsoluteScale;
                 h >>= SHIFT_SCALE; /*+ CLIP_TOP*/;
                 if (( h > -kSpriteMaxSize) && ( h < kSpriteMaxSize))
@@ -660,7 +660,7 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                 else
                     anObject->sprite->where.v = -kSpriteMaxSize;
 
-                            
+
                 if ( anObject->hitState != 0)
                 {
                     anObject->hitState -= unitsToDo << 2L;
@@ -712,8 +712,8 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                         }
                     }
                 }
-                    
-                                    
+
+
                 if ( anObject->attributes & kIsSelfAnimated)
                 {
                     if ( baseObject->frame.animation.frameSpeed != 0)
@@ -742,23 +742,23 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
     short                   cs, ce;
     Boolean                 beamHit;
     unsigned long           distance, dcalc/*,
-                            closestDist = kMaximumRelevantDistanceSquared + kMaximumRelevantDistanceSquared*/;                          
+                            closestDist = kMaximumRelevantDistanceSquared + kMaximumRelevantDistanceSquared*/;
     proximityUnitType       *proximityObject, *currentProximity;
     UnsignedWide            hackTimeStart, hackTimePassed;
 
     spritePix               oldStyleSprite; // a temporary hack
     long                    magicHack1 = 0, magicHack2 = 0, magicHack3 = 0;
     UnsignedWide                    farthestDist = {0, 0}, hugeDistance, wideScrap, closestDist = {0x7fffffff,0xffffffff};
-        
+
     Microseconds( &hackTimeStart);
 
-    // set up player info so we can find closest ship (for scaling)                 
+    // set up player info so we can find closest ship (for scaling)
     if ( gAresGlobal->gPlayerShipNumber >= 0)
         player = table + gAresGlobal->gPlayerShipNumber;
     else player = nil;
     gAresGlobal->gClosestObject = 0;
     gAresGlobal->gFarthestObject = 0;
-    
+
     // reset the collision grid
     proximityObject = (proximityUnitType *)*gAresGlobal->gProximityGrid;
     for ( i = 0; i < kProximityGridDataLength; i++)
@@ -766,7 +766,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
         proximityObject->nearObject = proximityObject->farObject = nil;
         proximityObject++;
     }
-    
+
 
     aObject = gRootObject;
     if ( aObject == nil) ExitToShell();
@@ -787,14 +787,14 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
 
     //              if ( aObject->attributes & kIsBeam)
     //                  aObject->frame.beam.killMe = TRUE;
-                    
+
                     ExecuteObjectActions( aObject->baseType->expireAction,
                             aObject->baseType->expireActionNum
                              & kDestroyActionNotMask, aObject, nil, nil, true);
-                            
+
                 }
             }
-            
+
             if ( aObject->periodicTime > 0)
             {
                 aObject->periodicTime--;
@@ -871,50 +871,50 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
         }
 
         if (( aObject->active) && ( aObject->attributes & kConsiderDistanceAttributes))
-        {           
+        {
             aObject->localFriendStrength = aObject->baseType->offenseValue;
             aObject->localFoeStrength = 0;
             aObject->closestObject = -1;
             aObject->closestDistance = kMaximumRelevantDistanceSquared;
             aObject->absoluteBounds.right = aObject->absoluteBounds.left = 0;
-            
+
             // xs = collision unit, xe = super unit
             xs = aObject->location.h;
             xs >>= kCollisionUnitBitShift;
             xe = xs >> kCollisionSuperExtraShift;
             xs &= kProximityUnitAndModulo;
-            
+
             ys = aObject->location.v;
             ys >>= kCollisionUnitBitShift;
             ye = ys >> kCollisionSuperExtraShift;
             ys &= kProximityUnitAndModulo;
-            
+
             proximityObject = (proximityUnitType *)*gAresGlobal->gProximityGrid +
                                 (ys << kProximityWidthMultiply) + xs;
             aObject->nextNearObject = proximityObject->nearObject;
             proximityObject->nearObject = (spaceObjectTypePtr)aObject;
             aObject->collisionGrid.h = xe;
             aObject->collisionGrid.v = ye;
-            
+
             xe >>= kDistanceUnitExtraShift;
             xs = xe >> kDistanceSuperExtraShift;
             xe &= kProximityUnitAndModulo;
-            
+
             ye >>= kDistanceUnitExtraShift;
             ys = ye >> kDistanceSuperExtraShift;
             ye &= kProximityUnitAndModulo;
-            
+
             proximityObject = (proximityUnitType *)*gAresGlobal->gProximityGrid +
                                 (ye << kProximityWidthMultiply) + xe;
             aObject->nextFarObject = proximityObject->farObject;
             proximityObject->farObject = (spaceObjectTypePtr)aObject;
             aObject->distanceGrid.h = xs;
             aObject->distanceGrid.v = ys;
-            
+
             if ( !(aObject->attributes & kIsDestination))
                 aObject->seenByPlayerFlags = 0x80000000;
             aObject->runTimeFlags &= ~kIsHidden;
-                    
+
             if ( aObject->sprite != nil)
             {
                 aObject->sprite->tinySize = aObject->tinySize;
@@ -934,7 +934,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
             }
 //          magicHack1 += aObject->id;
         }
-        
+
         aObject = (spaceObjectType *)aObject->nextObject;
     }
 
@@ -954,14 +954,14 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
                     ( aObject->sprite != nil))
                 {
                     GetOldSpritePixData( aObject->sprite, &oldStyleSprite);
-                    
+
                     scaleCalc = ((long)oldStyleSprite.width * aObject->naturalScale);
                     scaleCalc >>= SHIFT_SCALE;
                     aObject->scaledSize.h = scaleCalc;
                     scaleCalc = ((long)oldStyleSprite.height * aObject->naturalScale);
                     scaleCalc >>= SHIFT_SCALE;
                     aObject->scaledSize.v = scaleCalc;
-            
+
                     scaleCalc = (long)oldStyleSprite.center.h * aObject->naturalScale;
                     scaleCalc >>= SHIFT_SCALE;
                     aObject->scaledCornerOffset.h = -scaleCalc;
@@ -1018,21 +1018,21 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
                                     ( bObject->sprite != nil))
                                 {
                                     GetOldSpritePixData( bObject->sprite, &oldStyleSprite);
-                                    
+
                                     scaleCalc = ((long)oldStyleSprite.width * bObject->naturalScale);
                                     scaleCalc >>= SHIFT_SCALE;
                                     bObject->scaledSize.h = scaleCalc;
                                     scaleCalc = ((long)oldStyleSprite.height * bObject->naturalScale);
                                     scaleCalc >>= SHIFT_SCALE;
                                     bObject->scaledSize.v = scaleCalc;
-                            
+
                                     scaleCalc = (long)oldStyleSprite.center.h * bObject->naturalScale;
                                     scaleCalc >>= SHIFT_SCALE;
                                     bObject->scaledCornerOffset.h = -scaleCalc;
                                     scaleCalc = (long)oldStyleSprite.center.v * bObject->naturalScale;
                                     scaleCalc >>= SHIFT_SCALE;
                                     bObject->scaledCornerOffset.v = -scaleCalc;
-                
+
                                     bObject->absoluteBounds.left = bObject->location.h +
                                                                 bObject->scaledCornerOffset.h;
                                     bObject->absoluteBounds.right = bObject->absoluteBounds.left +
@@ -1060,7 +1060,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
                                             if (( sObject->attributes & kCanBeHit) && ( dObject->attributes & kCanCollide))
                                                 HitObject( sObject, dObject);
                                         }
-                                    } else 
+                                    } else
                                     {
             //                          WriteDebugLong( bObject->active);
                                         if ( bObject->attributes & kIsBeam)
@@ -1072,12 +1072,12 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
                                             sObject = aObject;
                                             dObject = bObject;
                                         }
-                                        
+
                                         xs = sObject->location.h;
                                         ys = sObject->location.v;
                                         xe = sObject->frame.beam.beam->lastGlobalLocation.h;
                                         ye = sObject->frame.beam.beam->lastGlobalLocation.v;
-                                        
+
                                         cs = mClipCode( xs, ys, dObject->absoluteBounds);
                                         ce = mClipCode( xe, ye, dObject->absoluteBounds);
                                         beamHit = TRUE;
@@ -1086,7 +1086,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
                                             cs = ce = 1;
                                             beamHit = FALSE;
                                         }
-                                        
+
                                         while ( cs | ce)
                                         {
                                             if ( cs & ce)
@@ -1154,7 +1154,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
 //                                  bObject->friendStrength += aObject->baseType->offenseValue;
 //                                  bObject->friendStrength += kFixedOne;
                                 }
-                                
+
                                 // check to see if the 2 objects occupy same physical space
                                 if  (((bObject->attributes & aObject->attributes) & kOccupiesSpace) &&
                                     ( bObject->owner != aObject->owner))
@@ -1245,12 +1245,12 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
                                     ( distance > kMaximumRelevantDistance))
                                     distance = kMaximumRelevantDistanceSquared;
                                 else distance = distance * distance + dcalc * dcalc;
-                                
+
                                 if ( distance < kMaximumRelevantDistanceSquared)
                                 {
                                     aObject->seenByPlayerFlags |= bObject->myPlayerFlag;
                                     bObject->seenByPlayerFlags |= aObject->myPlayerFlag;
-                                    
+
                                     if ( bObject->attributes & kHideEffect)
                                     {
                                         aObject->runTimeFlags |= kIsHidden;
@@ -1261,7 +1261,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
                                         bObject->runTimeFlags |= kIsHidden;
                                     }
                                 }
-                                
+
                                 if  (
                                         (
                                             (aObject->baseType->buildFlags & kCanOnlyEngage) ||
@@ -1277,13 +1277,13 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
                                             )
                                         )
                                     ) goto hackANoEngageMatch;
-                                            
+
                                 if (( distance < aObject->closestDistance) && (bObject->attributes & kPotentialTarget))
                                 {
                                     aObject->closestDistance = distance;
                                     aObject->closestObject = bObject->entryNumber;
                                 }
-                                
+
                             hackANoEngageMatch:
                                 if  (
                                         (
@@ -1332,7 +1332,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
             proximityObject++;
         }
     }
-                    
+
     Microseconds( &hackTimePassed);
     WideSubtract( (wide *)&hackTimePassed, (wide *)&hackTimeStart);
 //  WriteDebugLong( hackTimePassed.lo);
@@ -1340,7 +1340,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
 // here, it doesn't matter in what order we step through the table
     aObject = table;
     dcalc = (unsigned long)1 << (unsigned long)gAresGlobal->gPlayerAdmiralNumber;
-    
+
     for ( i = 0; i < tableLength; i++)
     {
         if (aObject->active == kObjectToBeFreed)
@@ -1406,7 +1406,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
                 aObject->previousObject = nil;
                 aObject->previousObjectNumber = -1;
             }
-            
+
         }
         if ( aObject->active)
         {
@@ -1426,7 +1426,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
             }
             if ( aObject->attributes & kIsBeam)
             {
-                aObject->frame.beam.beam->lastGlobalLocation = aObject->location;   
+                aObject->frame.beam.beam->lastGlobalLocation = aObject->location;
             }
         }
         aObject->lastLocation = aObject->location;
@@ -1451,7 +1451,7 @@ void CorrectPhysicalSpace( spaceObjectType *aObject, spaceObjectType *bObject)
     smallFixedType  force, totalMass, tfix;
     short           angle;
     Fixed           aFixed;
-    
+
 
 /*  DebugFileAppendString( "\pPY\t");
     DebugFileAppendLong( aObject->entryNumber);
@@ -1470,7 +1470,7 @@ void CorrectPhysicalSpace( spaceObjectType *aObject, spaceObjectType *bObject)
     force = lsqrt( force);  // tvel = force
     ah = bObject->location.h - aObject->location.h;
     av = bObject->location.v - aObject->location.v;
-    
+
     if ( ah == 0)
     {
         if ( av < 0)
@@ -1483,7 +1483,7 @@ void CorrectPhysicalSpace( spaceObjectType *aObject, spaceObjectType *bObject)
         #else
         aFixed = FixRatio( (int)ah, (int)av);
         #endif
-        
+
         angle = AngleFromSlope( aFixed);
         if ( ah > 0) angle += 180;
         if ( angle >= 360) angle -= 360;
@@ -1504,7 +1504,7 @@ void CorrectPhysicalSpace( spaceObjectType *aObject, spaceObjectType *bObject)
 //  tvel.v = mMultiplyFixed( aObject->baseType->maxVelocity, tvel.v);
     aObject->velocity.v = tvel.v;
     aObject->velocity.h = tvel.h;
-    
+
     mAddAngle( angle, 180);
     tfix = bObject->baseType->mass;
     tfix = mMultiplyFixed( tfix, force);
@@ -1521,7 +1521,7 @@ void CorrectPhysicalSpace( spaceObjectType *aObject, spaceObjectType *bObject)
 //  tvel.v = mMultiplyFixed( bObject->baseType->maxVelocity, tvel.v);
     bObject->velocity.v = tvel.v;
     bObject->velocity.h = tvel.h;
-    
+
     ah = aObject->location.h - aObject->absoluteBounds.left;
     ad = aObject->absoluteBounds.right - aObject->location.h;
     av = aObject->location.v - aObject->absoluteBounds.top;
@@ -1531,7 +1531,7 @@ void CorrectPhysicalSpace( spaceObjectType *aObject, spaceObjectType *bObject)
     bd = bObject->absoluteBounds.right - bObject->location.h;
     bv = bObject->location.v - bObject->absoluteBounds.top;
     bdir = bObject->absoluteBounds.bottom - bObject->location.v;
-    
+
     if ( (aObject->velocity.h || aObject->velocity.v || bObject->velocity.h ||
         bObject->velocity.v))
     {
@@ -1548,7 +1548,7 @@ void CorrectPhysicalSpace( spaceObjectType *aObject, spaceObjectType *bObject)
             else
                 h = (( aObject->motionFraction.h - kFixedPlusPointFive) >> kFixedBitShiftNumber) + 1;
             aObject->location.h -= h;
-            aObject->motionFraction.h -= mLongToFixed(h); 
+            aObject->motionFraction.h -= mLongToFixed(h);
 
             if ( aObject->motionFraction.v >= 0)
                 v = ( aObject->motionFraction.v + kFixedPlusPointFive) >> kFixedBitShiftNumber;
@@ -1565,7 +1565,7 @@ void CorrectPhysicalSpace( spaceObjectType *aObject, spaceObjectType *bObject)
             else
                 h = (( bObject->motionFraction.h - kFixedPlusPointFive) >> kFixedBitShiftNumber) + 1;
             bObject->location.h -= h;
-            bObject->motionFraction.h -= mLongToFixed(h); 
+            bObject->motionFraction.h -= mLongToFixed(h);
 
             if ( bObject->motionFraction.v >= 0)
                 v = ( bObject->motionFraction.v + kFixedPlusPointFive) >> kFixedBitShiftNumber;
@@ -1573,12 +1573,12 @@ void CorrectPhysicalSpace( spaceObjectType *aObject, spaceObjectType *bObject)
                 v = (( bObject->motionFraction.v - kFixedPlusPointFive) >> kFixedBitShiftNumber) + 1;
             bObject->location.v -= v;
             bObject->motionFraction.v -= mLongToFixed(v);
-            
+
             aObject->absoluteBounds.left = aObject->location.h - ah;
             aObject->absoluteBounds.right = aObject->location.h + ad;
             aObject->absoluteBounds.top = aObject->location.v - av;
             aObject->absoluteBounds.bottom = aObject->location.v + adir;
-            
+
             bObject->absoluteBounds.left = bObject->location.h - bh;
             bObject->absoluteBounds.right = bObject->location.h + bd;
             bObject->absoluteBounds.top = bObject->location.v - bv;

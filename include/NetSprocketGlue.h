@@ -54,10 +54,10 @@ to the NetSprocket functions I use. For details, see TN1077.
 enum {
 /*
 OSStatus NSpInitialize(
-    UInt32                      inStandardMessageSize, 
-    UInt32                      inBufferSize, 
-    UInt32                      inQElements, 
-    NSpGameID                   inGameID, 
+    UInt32                      inStandardMessageSize,
+    UInt32                      inBufferSize,
+    UInt32                      inQElements,
+    NSpGameID                   inGameID,
     UInt32                      inTimeout);
 */
     kNSpInitialize_ProcInfo = kCStackBased
@@ -67,21 +67,21 @@ OSStatus NSpInitialize(
         | STACK_ROUTINE_PARAMETER( 3, SIZE_CODE(sizeof(UInt32)))
         | STACK_ROUTINE_PARAMETER( 4, SIZE_CODE(sizeof(NSpGameID)))
         | STACK_ROUTINE_PARAMETER( 5, SIZE_CODE(sizeof(UInt32))),
-    
+
 /*
 OSStatus NSpGame_Dispose(
-    NSpGameReference            inGame, 
+    NSpGameReference            inGame,
     NSpFlags                    inFlags);
 */
     kNSpGame_Dispose_ProcInfo = kCStackBased
         | RESULT_SIZE( SIZE_CODE(sizeof( OSStatus)))
         | STACK_ROUTINE_PARAMETER( 1, SIZE_CODE(sizeof(NSpGameReference)))
         | STACK_ROUTINE_PARAMETER( 2, SIZE_CODE(sizeof(NSpFlags))),
-    
+
 /*
 OSStatus NSpPlayer_GetInfo(
-    NSpGameReference            inGame, 
-    NSpPlayerID                 inPlayerID, 
+    NSpGameReference            inGame,
+    NSpPlayerID                 inPlayerID,
     NSpPlayerInfoPtr*           outInfo);
 */
     kNSpPlayer_GetInfo_ProcInfo = kCStackBased
@@ -92,7 +92,7 @@ OSStatus NSpPlayer_GetInfo(
 
 /*
 OSStatus NSpProtocol_ExtractDefinitionString(
-    NSpProtocolReference        inProtocolRef, 
+    NSpProtocolReference        inProtocolRef,
     char*                       outDefinitionString);
 */
     kNSpProtocol_ExtractDefinitionString_ProcInfo = kCStackBased
@@ -130,7 +130,7 @@ void NSpProtocolList_Dispose(
 /*
 NSpProtocolReference NSpProtocol_CreateAppleTalk(
     ConstStr31Param             inNBPName,
-    ConstStr31Param             inNBPType, 
+    ConstStr31Param             inNBPType,
     UInt32                      inMaxRTT,
     UInt32                      inMinThruput);
 */
@@ -181,7 +181,7 @@ NSpPlayerID NSpPlayer_GetMyID(
 
 /*
 void NSpPlayer_ReleaseInfo(
-    NSpGameReference            inGame, 
+    NSpGameReference            inGame,
     NSpPlayerInfoPtr            inInfo);
 */
     kNSpPlayer_ReleaseInfo_ProcInfo = kCStackBased
@@ -190,8 +190,8 @@ void NSpPlayer_ReleaseInfo(
 
 /*
 UInt32 NSpPlayer_GetRoundTripTime(
-    NSpGameReference            inGame, 
-    NSpPlayerID                 inPlayer); 
+    NSpGameReference            inGame,
+    NSpPlayerID                 inPlayer);
 */
     kNSpPlayer_GetRoundTripTime_ProcInfo = kCStackBased
         | RESULT_SIZE( SIZE_CODE(sizeof( UInt32)))
@@ -200,8 +200,8 @@ UInt32 NSpPlayer_GetRoundTripTime(
 
 /*
 UInt32 NSpPlayer_GetThruput(
-    NSpGameReference            inGame, 
-    NSpPlayerID                 inPlayer); 
+    NSpGameReference            inGame,
+    NSpPlayerID                 inPlayer);
 */
     kNSpPlayer_GetThruput_ProcInfo = kCStackBased
         | RESULT_SIZE( SIZE_CODE(sizeof( UInt32)))
@@ -210,10 +210,10 @@ UInt32 NSpPlayer_GetThruput(
 
 /*
 NSpAddressReference NSpDoModalJoinDialog(
-    ConstStr31Param             inGameType, 
+    ConstStr31Param             inGameType,
     ConstStr255Param            inEntityListLabel,
-    Str31                       ioName, 
-    Str31                       ioPassword, 
+    Str31                       ioName,
+    Str31                       ioPassword,
     NSpEventProcPtr             inEventProcPtr);
 */
     kNSpDoModalJoinDialog_ProcInfo = kCStackBased
@@ -226,10 +226,10 @@ NSpAddressReference NSpDoModalJoinDialog(
 
 /*
 Boolean NSpDoModalHostDialog(
-    NSpProtocolListReference    ioProtocolList, 
-    Str31                       ioGameName, 
+    NSpProtocolListReference    ioProtocolList,
+    Str31                       ioGameName,
     Str31                       ioPlayerName,
-    Str31                       ioPassword, 
+    Str31                       ioPassword,
     NSpEventProcPtr             inEventProcPtr);
 */
     kNSpDoModalHostDialog_ProcInfo = kCStackBased
@@ -242,13 +242,13 @@ Boolean NSpDoModalHostDialog(
 
 /*
 OSStatus NSpGame_Host(
-    NSpGameReference*           outGame, 
-    NSpProtocolListReference    inProtocolList, 
-    UInt32                      inMaxPlayers, 
-    ConstStr31Param             inGameName, 
+    NSpGameReference*           outGame,
+    NSpProtocolListReference    inProtocolList,
+    UInt32                      inMaxPlayers,
+    ConstStr31Param             inGameName,
     ConstStr31Param             inPassword,
-    ConstStr31Param             inPlayerName, 
-    NSpPlayerType               inPlayerType, 
+    ConstStr31Param             inPlayerName,
+    NSpPlayerType               inPlayerType,
     NSpTopology                 inTopology,
     NSpFlags                    inFlags);
 */
@@ -265,13 +265,13 @@ OSStatus NSpGame_Host(
         | STACK_ROUTINE_PARAMETER( 9, SIZE_CODE(sizeof(NSpFlags))),
 /*
 OSStatus NSpGame_Join(
-    NSpGameReference*           outGame, 
-    NSpAddressReference         inAddress, 
+    NSpGameReference*           outGame,
+    NSpAddressReference         inAddress,
     ConstStr31Param             inName,
     ConstStr31Param             inPassword,
-    NSpPlayerType               inType, 
+    NSpPlayerType               inType,
     void*                       inCustomData,
-    UInt32                      inCustomDataLen,  
+    UInt32                      inCustomDataLen,
     NSpFlags                    inFlags);
 */
     kNSpGame_Join_ProcInfo = kCStackBased
@@ -300,8 +300,8 @@ void NSpClearMessageHeader(
 
 /*
 OSStatus NSpMessage_Send(
-    NSpGameReference            inGame, 
-    NSpMessageHeader*           inMessage, 
+    NSpGameReference            inGame,
+    NSpMessageHeader*           inMessage,
     NSpFlags                    inFlags);
 */
     kNSpMessage_Send_ProcInfo = kCStackBased
@@ -320,7 +320,7 @@ NSpMessageHeader *NSpMessage_Get(
 
 /*
 void NSpMessage_Release(
-    NSpGameReference            inGame, 
+    NSpGameReference            inGame,
     NSpMessageHeader*           inMessage);
 */
     kNSpMessage_Release_ProcInfo = kCStackBased
@@ -329,29 +329,29 @@ void NSpMessage_Release(
 };
 
 typedef OSStatus ( *NSpInitialize_ProcPtr)(
-    UInt32                      inStandardMessageSize, 
-    UInt32                      inBufferSize, 
-    UInt32                      inQElements, 
-    NSpGameID                   inGameID, 
+    UInt32                      inStandardMessageSize,
+    UInt32                      inBufferSize,
+    UInt32                      inQElements,
+    NSpGameID                   inGameID,
     UInt32                      inTimeout);
 
 typedef OSStatus (*NSpGame_Dispose_ProcPtr)(
-    NSpGameReference            inGame, 
+    NSpGameReference            inGame,
     NSpFlags                    inFlags);
 
 typedef OSStatus (*NSpPlayer_GetInfo_ProcPtr)(
-    NSpGameReference            inGame, 
-    NSpPlayerID                 inPlayerID, 
+    NSpGameReference            inGame,
+    NSpPlayerID                 inPlayerID,
     NSpPlayerInfoPtr*           outInfo);
 
 typedef OSStatus (*NSpProtocol_ExtractDefinitionString_ProcPtr)(
-    NSpProtocolReference        inProtocolRef, 
+    NSpProtocolReference        inProtocolRef,
     char*                       outDefinitionString);
 
 typedef OSStatus (*NSpProtocolList_Append_ProcPtr)(
     NSpProtocolListReference    inProtocolList,
     NSpProtocolReference        inProtocolRef);
-    
+
 typedef OSStatus (*NSpProtocolList_New_ProcPtr)(
     NSpProtocolReference        inProtocolRef,
     NSpProtocolListReference*   outList);
@@ -361,10 +361,10 @@ typedef void (*NSpProtocolList_Dispose_ProcPtr)(
 
 typedef NSpProtocolReference (*NSpProtocol_CreateAppleTalk_ProcPtr)(
     ConstStr31Param             inNBPName,
-    ConstStr31Param             inNBPType, 
+    ConstStr31Param             inNBPType,
     UInt32                      inMaxRTT,
     UInt32                      inMinThruput);
-    
+
 typedef NSpProtocolReference (*NSpProtocol_CreateIP_ProcPtr)(
     InetPort                    inPort,
     UInt32                      inMaxRTT,
@@ -381,50 +381,50 @@ typedef NSpPlayerID (*NSpPlayer_GetMyID_ProcPtr)(
     NSpGameReference            inGame);
 
 typedef void (*NSpPlayer_ReleaseInfo_ProcPtr)(
-    NSpGameReference            inGame, 
+    NSpGameReference            inGame,
     NSpPlayerInfoPtr            inInfo);
 
 typedef UInt32 (*NSpPlayer_GetRoundTripTime_ProcPtr)(
-    NSpGameReference            inGame, 
-    NSpPlayerID                 inPlayer); 
+    NSpGameReference            inGame,
+    NSpPlayerID                 inPlayer);
 
 typedef UInt32 (*NSpPlayer_GetThruput_ProcPtr)(
-    NSpGameReference            inGame, 
-    NSpPlayerID                 inPlayer); 
+    NSpGameReference            inGame,
+    NSpPlayerID                 inPlayer);
 
 typedef NSpAddressReference (*NSpDoModalJoinDialog_ProcPtr)(
-    ConstStr31Param             inGameType, 
+    ConstStr31Param             inGameType,
     ConstStr255Param            inEntityListLabel,
-    Str31                       ioName, 
-    Str31                       ioPassword, 
+    Str31                       ioName,
+    Str31                       ioPassword,
     NSpEventProcPtr             inEventProcPtr);
 
 typedef Boolean (*NSpDoModalHostDialog_ProcPtr)(
-    NSpProtocolListReference    ioProtocolList, 
-    Str31                       ioGameName, 
+    NSpProtocolListReference    ioProtocolList,
+    Str31                       ioGameName,
     Str31                       ioPlayerName,
-    Str31                       ioPassword, 
+    Str31                       ioPassword,
     NSpEventProcPtr             inEventProcPtr);
 
 typedef OSStatus (*NSpGame_Host_ProcPtr)(
-    NSpGameReference*           outGame, 
-    NSpProtocolListReference    inProtocolList, 
-    UInt32                      inMaxPlayers, 
-    ConstStr31Param             inGameName, 
+    NSpGameReference*           outGame,
+    NSpProtocolListReference    inProtocolList,
+    UInt32                      inMaxPlayers,
+    ConstStr31Param             inGameName,
     ConstStr31Param             inPassword,
-    ConstStr31Param             inPlayerName, 
-    NSpPlayerType               inPlayerType, 
+    ConstStr31Param             inPlayerName,
+    NSpPlayerType               inPlayerType,
     NSpTopology                 inTopology,
     NSpFlags                    inFlags);
 
 typedef OSStatus (*NSpGame_Join_ProcPtr)(
-    NSpGameReference*           outGame, 
-    NSpAddressReference         inAddress, 
+    NSpGameReference*           outGame,
+    NSpAddressReference         inAddress,
     ConstStr31Param             inName,
     ConstStr31Param             inPassword,
-    NSpPlayerType               inType, 
+    NSpPlayerType               inType,
     void*                       inCustomData,
-    UInt32                      inCustomDataLen,  
+    UInt32                      inCustomDataLen,
     NSpFlags                    inFlags);
 
 typedef void (*NSpReleaseAddressReference_ProcPtr)(
@@ -434,38 +434,38 @@ typedef void (*NSpClearMessageHeader_ProcPtr)(
     NSpMessageHeader*           inMessage);
 
 typedef OSStatus (*NSpMessage_Send_ProcPtr)(
-    NSpGameReference            inGame, 
-    NSpMessageHeader*           inMessage, 
+    NSpGameReference            inGame,
+    NSpMessageHeader*           inMessage,
     NSpFlags                    inFlags);
 
 typedef NSpMessageHeader *(*NSpMessage_Get_ProcPtr)(
     NSpGameReference            inGame);
 
 typedef void (*NSpMessage_Release_ProcPtr)(
-    NSpGameReference            inGame, 
+    NSpGameReference            inGame,
     NSpMessageHeader*           inMessage);
 
 Boolean NetSprocketGlueInit( void);
 void NetSprocketGlueCleanup( void);
 
 OSStatus Glue_NSpInitialize(
-    UInt32                      inStandardMessageSize, 
-    UInt32                      inBufferSize, 
-    UInt32                      inQElements, 
-    NSpGameID                   inGameID, 
+    UInt32                      inStandardMessageSize,
+    UInt32                      inBufferSize,
+    UInt32                      inQElements,
+    NSpGameID                   inGameID,
     UInt32                      inTimeout);
 
 OSStatus Glue_NSpGame_Dispose(
-    NSpGameReference            inGame, 
+    NSpGameReference            inGame,
     NSpFlags                    inFlags);
 
 OSStatus Glue_NSpPlayer_GetInfo(
-    NSpGameReference            inGame, 
-    NSpPlayerID                 inPlayerID, 
+    NSpGameReference            inGame,
+    NSpPlayerID                 inPlayerID,
     NSpPlayerInfoPtr*           outInfo);
 
 OSStatus Glue_NSpProtocol_ExtractDefinitionString(
-    NSpProtocolReference        inProtocolRef, 
+    NSpProtocolReference        inProtocolRef,
     char*                       outDefinitionString);
 
 OSStatus Glue_NSpProtocolList_New(
@@ -481,7 +481,7 @@ void Glue_NSpProtocolList_Dispose(
 
 NSpProtocolReference Glue_NSpProtocol_CreateAppleTalk(
     ConstStr31Param             inNBPName,
-    ConstStr31Param             inNBPType, 
+    ConstStr31Param             inNBPType,
     UInt32                      inMaxRTT,
     UInt32                      inMinThruput);
 
@@ -501,50 +501,50 @@ NSpPlayerID Glue_NSpPlayer_GetMyID(
     NSpGameReference            inGame);
 
 void Glue_NSpPlayer_ReleaseInfo(
-    NSpGameReference            inGame, 
+    NSpGameReference            inGame,
     NSpPlayerInfoPtr            inInfo);
 
 UInt32 Glue_NSpPlayer_GetRoundTripTime(
-    NSpGameReference            inGame, 
-    NSpPlayerID                 inPlayer); 
+    NSpGameReference            inGame,
+    NSpPlayerID                 inPlayer);
 
 UInt32 Glue_NSpPlayer_GetThruput(
-    NSpGameReference            inGame, 
-    NSpPlayerID                 inPlayer); 
+    NSpGameReference            inGame,
+    NSpPlayerID                 inPlayer);
 
 NSpAddressReference Glue_NSpDoModalJoinDialog(
-    ConstStr31Param             inGameType, 
+    ConstStr31Param             inGameType,
     ConstStr255Param            inEntityListLabel,
-    Str31                       ioName, 
-    Str31                       ioPassword, 
+    Str31                       ioName,
+    Str31                       ioPassword,
     NSpEventProcPtr             inEventProcPtr);
 
 Boolean Glue_NSpDoModalHostDialog(
-    NSpProtocolListReference    ioProtocolList, 
-    Str31                       ioGameName, 
+    NSpProtocolListReference    ioProtocolList,
+    Str31                       ioGameName,
     Str31                       ioPlayerName,
-    Str31                       ioPassword, 
+    Str31                       ioPassword,
     NSpEventProcPtr             inEventProcPtr);
 
 OSStatus Glue_NSpGame_Host(
-    NSpGameReference*           outGame, 
-    NSpProtocolListReference    inProtocolList, 
-    UInt32                      inMaxPlayers, 
-    ConstStr31Param             inGameName, 
+    NSpGameReference*           outGame,
+    NSpProtocolListReference    inProtocolList,
+    UInt32                      inMaxPlayers,
+    ConstStr31Param             inGameName,
     ConstStr31Param             inPassword,
-    ConstStr31Param             inPlayerName, 
-    NSpPlayerType               inPlayerType, 
+    ConstStr31Param             inPlayerName,
+    NSpPlayerType               inPlayerType,
     NSpTopology                 inTopology,
     NSpFlags                    inFlags);
 
 OSStatus Glue_NSpGame_Join(
-    NSpGameReference*           outGame, 
-    NSpAddressReference         inAddress, 
+    NSpGameReference*           outGame,
+    NSpAddressReference         inAddress,
     ConstStr31Param             inName,
     ConstStr31Param             inPassword,
-    NSpPlayerType               inType, 
+    NSpPlayerType               inType,
     void*                       inCustomData,
-    UInt32                      inCustomDataLen,  
+    UInt32                      inCustomDataLen,
     NSpFlags                    inFlags);
 
 void Glue_NSpReleaseAddressReference(
@@ -554,15 +554,15 @@ void Glue_NSpClearMessageHeader(
     NSpMessageHeader*           inMessage);
 
 OSStatus Glue_NSpMessage_Send(
-    NSpGameReference            inGame, 
-    NSpMessageHeader*           inMessage, 
+    NSpGameReference            inGame,
+    NSpMessageHeader*           inMessage,
     NSpFlags                    inFlags);
 
 NSpMessageHeader *Glue_NSpMessage_Get(
     NSpGameReference            inGame);
 
 void Glue_NSpMessage_Release(
-    NSpGameReference            inGame, 
+    NSpGameReference            inGame,
     NSpMessageHeader*           inMessage);
 
 #ifndef powerc

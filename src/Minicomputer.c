@@ -334,16 +334,16 @@ int MiniScreenInit( void)
     mHandleLockAndRegister( gAresGlobal->gMiniScreenHandle, nil, nil, CorrectMiniScreenGlobalPtr, "\pgAresGlobal->gMiniScreenHandle")
 
     gMiniScreenData = (miniComputerDataType *)*gAresGlobal->gMiniScreenHandle;
-*/  
+*/
     gAresGlobal->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
     gAresGlobal->gMiniScreenData.currentScreen = kMainMiniScreen;
     gAresGlobal->gMiniScreenData.pollTime = 0;
     gAresGlobal->gMiniScreenData.buildTimeBarValue = 0;
     gAresGlobal->gMiniScreenData.clickLine = kMiniScreenNoLineSelected;
-    
+
     gAresGlobal->gMiniScreenData.lineData = NewHandle( sizeof( miniScreenLineType)
          * (long)kMiniScreenTrueLineNum);
-    
+
     if ( gAresGlobal->gMiniScreenData.lineData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
@@ -355,7 +355,7 @@ int MiniScreenInit( void)
     HLock( gMiniScreenData->lineData);
     */
     mHandleLockAndRegister( gAresGlobal->gMiniScreenData.lineData, nil, nil, nil, "\pgAresGlobal->gMiniScreenData.lineData")
-    
+
     gAresGlobal->gMiniScreenData.objectData = NewHandle( sizeof( spaceObjectType) * (long)kMiniObjectDataNum);
     if ( gAresGlobal->gMiniScreenData.lineData == nil)
     {
@@ -363,10 +363,10 @@ int MiniScreenInit( void)
         return ( MEMORY_ERROR);
     }
     mHandleLockAndRegister( gAresGlobal->gMiniScreenData.objectData, nil, nil, nil, "\pgAresGlobal->gMiniScreenData.objectData");
-    
+
     ClearMiniScreenLines();
     ClearMiniObjectData();
-    
+
     return( kNoError);
 }
 
@@ -409,9 +409,9 @@ void ClearMiniScreenLines( void)
 {
     long                a, b;
     miniScreenLineType  *c;
-    
+
     c = (miniScreenLineType *)*gAresGlobal->gMiniScreenData.lineData;
-    
+
     for ( b = 0; b < kMiniScreenTrueLineNum; b++)
     {
         c->string[0] = kMiniScreenCharWidth;
@@ -433,7 +433,7 @@ void ClearMiniObjectData( void)
 
 {
     spaceObjectType *o;
-    
+
     o = mGetMiniObjectPtr( kMiniSelectObjectNum);
     o->id = -1;
     o->beamType = -1;
@@ -463,7 +463,7 @@ void ClearMiniObjectData( void)
     o->pixResID = -1;
     o->attributes = 0;
     o->baseType = nil;
-    
+
     gAresGlobal->gMiniScreenData.buildTimeBarValue = 0;
     gAresGlobal->gMiniScreenData.pollTime = 0;
 }
@@ -473,14 +473,14 @@ void DrawMiniScreen( void)
 {
     Rect                mRect;
     longRect            lRect, cRect;
-    PixMapHandle        offPixBase; 
+    PixMapHandle        offPixBase;
     miniScreenLineType  *c;
     unsigned char       color, lightcolor, darkcolor, textcolor, lineColor = kMiniScreenColor;
     transColorType      *transColor;
     long                count, lineCorrect = 0;
-    
+
     mSetDirectFont( kComputerFontNum)
-    
+
     offPixBase = GetGWorldPixMap( gOffWorld);
     DrawInOffWorld();
     SetLongRect( &lRect, kMiniScreenLeft, kMiniScreenTop + gAresGlobal->gInstrumentTop, kMiniScreenRight,
@@ -493,9 +493,9 @@ void DrawMiniScreen( void)
     mRect.top = kMiniScreenTop + gAresGlobal->gInstrumentTop;
     mRect.right = kMiniScreenRight;
     mRect.bottom = kMiniScreenBottom + gAresGlobal->gInstrumentTop;
-    
+
     c = (miniScreenLineType *)*gAresGlobal->gMiniScreenData.lineData;
-    
+
     for ( count = 0; count < kMiniScreenTrueLineNum; count++)
     {
         if ( count == kMiniScreenCharHeight)
@@ -510,7 +510,7 @@ void DrawMiniScreen( void)
             lineCorrect = -kMiniScreenCharHeight;
             lineColor = kMiniButColor;
         }
-                
+
         if ( c->underline)
         {
             MoveTo( mRect.left, mRect.top + (count + lineCorrect) * ((
@@ -519,7 +519,7 @@ void DrawMiniScreen( void)
             MacLineTo( mRect.right - 1, mRect.top + (count + lineCorrect) * ((
                 gDirectText->height) /* * 2 */) + gDirectText->ascent /* * 2 */);
         }
-        
+
         if ( c->hiliteLeft < c->hiliteRight)
         {
             if ( c->selectable == selectDim)
@@ -543,13 +543,13 @@ void DrawMiniScreen( void)
 //                      DrawNateRect( *offPixBase, &cRect, 0, 0, color);
                     }
                     break;
-                
+
                 case buttonOffLineKind:
                     cRect.left = c->hiliteLeft - 2;
                     cRect.top = lRect.top + (( count + lineCorrect) * ( gDirectText->height /* * 2 */));
                     cRect.right = c->hiliteRight + 2;
                     cRect.bottom = cRect.top + gDirectText->height /* * 2 */;
-    
+
                     mGetTranslateColorShade( lineColor, MEDIUM, color, transColor)
                     mGetTranslateColorShade( lineColor, LIGHT, lightcolor, transColor)
                     mGetTranslateColorShade( lineColor, DARK, darkcolor, transColor)
@@ -561,17 +561,17 @@ void DrawMiniScreen( void)
                     cRect.top = lRect.top + (( count + lineCorrect) * ( gDirectText->height /* * 2 */));
                     cRect.right = lRect.right; //c->hiliteRight + 2;
                     cRect.bottom = cRect.top + gDirectText->height /* * 2 */;
-    
+
                     mGetTranslateColorShade( lineColor, LIGHT, color, transColor)
                     mGetTranslateColorShade( lineColor, VERY_LIGHT, lightcolor, transColor)
                     mGetTranslateColorShade( lineColor, MEDIUM, darkcolor, transColor)
                     DrawNateShadedRect( *offPixBase, &cRect, &lRect, 0, 0, color, lightcolor, darkcolor);
                     textcolor = BLACK;
                     break;
-                    
+
             }
-        } else 
-        {           
+        } else
+        {
             if ( c->selectable == selectDim)
                 textcolor = GetTranslateColorShade( lineColor, MEDIUM);
             else
@@ -593,16 +593,16 @@ void DrawAndShowMiniScreenLine( long whichLine)
 {
     Rect                tRect;
     longRect            lRect, cRect;
-    PixMapHandle        offPixBase; 
+    PixMapHandle        offPixBase;
     miniScreenLineType  *c;
     unsigned char       color, textcolor, lineColor = kMiniScreenColor, lightcolor, darkcolor;
     transColorType      *transColor;
     long                lineCorrect = 0;
-    
+
     if ( whichLine < 0) return;
-    
+
     mSetDirectFont( kComputerFontNum)
-    
+
     offPixBase = GetGWorldPixMap( gOffWorld);
     DrawInOffWorld();
     if ( whichLine < kMiniScreenCharHeight)
@@ -622,12 +622,12 @@ void DrawAndShowMiniScreenLine( long whichLine)
         cRect.top = lRect.top + (whichLine - kMiniScreenCharHeight) * gDirectText->height;
         cRect.bottom = cRect.top + gDirectText->height;
     }
-    
+
     color = GetTranslateColorShade( lineColor, DARKEST);
     DrawNateRect( *offPixBase, &cRect, 0, 0, color);
 
     c = (miniScreenLineType *)*gAresGlobal->gMiniScreenData.lineData + whichLine;
-    
+
     if ( c->underline)
     {
         MoveTo( lRect.left, lRect.top + (whichLine + lineCorrect) * ((
@@ -636,7 +636,7 @@ void DrawAndShowMiniScreenLine( long whichLine)
         MacLineTo( lRect.right - 1, lRect.top + (whichLine + lineCorrect) * ((
             gDirectText->height) /* * 2 */) + gDirectText->ascent /* * 2 */);
     }
-    
+
     if ( c->hiliteLeft < c->hiliteRight)
     {
         if ( c->selectable == selectDim)
@@ -660,7 +660,7 @@ void DrawAndShowMiniScreenLine( long whichLine)
 //                      DrawNateRect( *offPixBase, &cRect, 0, 0, color);
                     }
                 break;
-            
+
             case buttonOffLineKind:
                 cRect.left = c->hiliteLeft - 2;
                 cRect.top = lRect.top + (( whichLine + lineCorrect) * ( gDirectText->height /* * 2 */));
@@ -672,7 +672,7 @@ void DrawAndShowMiniScreenLine( long whichLine)
                 mGetTranslateColorShade( lineColor, DARK, darkcolor, transColor)
                 DrawNateShadedRect( *offPixBase, &cRect, &lRect, 0, 0, color, lightcolor, darkcolor);
                 break;
-                
+
             case buttonOnLineKind:
                 cRect.left = c->hiliteLeft - 2;
                 cRect.top = lRect.top + (( whichLine + lineCorrect) * ( gDirectText->height /* * 2 */));
@@ -695,25 +695,25 @@ void DrawAndShowMiniScreenLine( long whichLine)
     }
     MoveTo( lRect.left + kMiniScreenLeftBuffer, lRect.top + (whichLine + lineCorrect) * ((
         gDirectText->height) /* * 2 */) + gDirectText->ascent /* * 2 */);
-        
+
     DrawDirectTextStringClipped(    c->string, textcolor,
                                     *offPixBase, &lRect, 0, 0);
     NormalizeColors();
     DrawInRealWorld();
     NormalizeColors();
-    
+
     tRect.left = lRect.left;
     tRect.right = kMiniScreenRight;
     tRect.top = lRect.top + (( whichLine + lineCorrect) * ( gDirectText->height /* * 2 */));
     tRect.bottom = tRect.top + gDirectText->height/* * 2 */;
-    ChunkCopyPixMapToScreenPixMap( *offPixBase, &tRect, *thePixMapHandle);  
+    ChunkCopyPixMapToScreenPixMap( *offPixBase, &tRect, *thePixMapHandle);
 }
 
 void ShowWholeMiniScreen( void)
 
-{   
+{
     Rect                tRect;
-    PixMapHandle        offPixBase; 
+    PixMapHandle        offPixBase;
 
     offPixBase = GetGWorldPixMap( gOffWorld);
 
@@ -733,14 +733,14 @@ void MakeMiniScreenFromIndString( short whichString)
     miniScreenLineType  *line;
     short               lineNum = 0, charNum, count;
     Rect                mRect;
-    
+
     mSetDirectFont( kComputerFontNum)
-    
+
     MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + gAresGlobal->gInstrumentTop, kMiniScreenRight,
                 kMiniScreenBottom + gAresGlobal->gInstrumentTop);
     ClearMiniScreenLines();
     gAresGlobal->gMiniScreenData.currentScreen = whichString;
-    
+
     GetIndString( s, kMiniScreenStringID, whichString);
     c = (anyCharType *)s;
     len = *c;
@@ -748,19 +748,19 @@ void MakeMiniScreenFromIndString( short whichString)
     charNum = 1;
     line = (miniScreenLineType *)*gAresGlobal->gMiniScreenData.lineData;
     gAresGlobal->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
-    
+
     while (( len > 0) && ( lineNum < kMiniScreenTrueLineNum))
     {
         while ( *c == kMiniScreenSpecChar)
         {
             c++;
             len--;
-            
+
             switch( *c)
             {
                 case kUnderlineEndLineChar:
                     line->underline = TRUE;
-                    
+
                     // ||| NO BREAK
                     // VVV fall through to kEndLineChar
                 case kEndLineChar:
@@ -776,7 +776,7 @@ void MakeMiniScreenFromIndString( short whichString)
                     c++;
                     len--;
                     break;
-                
+
                 case kSelectableLineChar:
                     line->selectable = selectable;
                     if ( gAresGlobal->gMiniScreenData.selectLine == kMiniScreenNoLineSelected)
@@ -794,18 +794,18 @@ void MakeMiniScreenFromIndString( short whichString)
                     len--;
                     line->hiliteLeft = mRect.left + kMiniScreenLeftBuffer + gDirectText->logicalWidth * (charNum - 1);
                     break;
-                
+
                 case kEndHiliteChar:
                     c++;
                     len--;
                     line->hiliteRight = mRect.left + kMiniScreenLeftBuffer + gDirectText->logicalWidth * (charNum - 1) - 1;
                     break;
-                
+
                 case kIntoButtonChar:
                     line->lineKind = buttonOffLineKind;
                     line->whichButton = kInLineButton;
                     line->hiliteLeft = mRect.left + kMiniScreenLeftBuffer + gDirectText->logicalWidth * (charNum - 1);
-                    
+
                     GetKeyNumName( keyname, GetKeyNumFromKeyMap( gAresGlobal->gKeyControl[kCompAcceptKeyNum]));
                     keyc = (anyCharType *)keyname;
                     keyNameLen = *keyc;
@@ -815,14 +815,14 @@ void MakeMiniScreenFromIndString( short whichString)
                     {
                         keyName[count] = ' ';
                     }
-                    
+
                     for ( count = 0; count < keyNameLen; count++)
                     {
                         keyName[count + ((kKeyNameLength  - keyNameLen) / 2)] =
                             *keyc;
                         keyc++;
                     }
-                    
+
                     for ( count = 0; count < kKeyNameLength; count++)
                     {
                         if ( charNum > kMiniScreenCharWidth)
@@ -844,16 +844,16 @@ void MakeMiniScreenFromIndString( short whichString)
                     }
 
                     line->hiliteRight = mRect.left + kMiniScreenLeftBuffer + gDirectText->logicalWidth * (charNum - 1) - 1;
-                    
+
                     c++;
                     len--;
                     break;
-                    
+
                 case kOutOfButtonChar:
                     line->lineKind = buttonOffLineKind;
                     line->whichButton = kOutLineButton;
                     line->hiliteLeft = mRect.left + kMiniScreenLeftBuffer + gDirectText->logicalWidth * (charNum - 1);
-                    
+
                     GetKeyNumName( keyname, GetKeyNumFromKeyMap( gAresGlobal->gKeyControl[kCompCancelKeyNum]));
                     keyc = (anyCharType *)keyname;
                     keyNameLen = *keyc;
@@ -863,14 +863,14 @@ void MakeMiniScreenFromIndString( short whichString)
                     {
                         keyName[count] = ' ';
                     }
-                    
+
                     for ( count = 0; count < keyNameLen; count++)
                     {
                         keyName[count + ((kKeyNameLength  - keyNameLen) / 2)] =
                             *keyc;
                         keyc++;
                     }
-                    
+
                     for ( count = 0; count < kKeyNameLength; count++)
                     {
                         if ( charNum > kMiniScreenCharWidth)
@@ -890,7 +890,7 @@ void MakeMiniScreenFromIndString( short whichString)
                     }
 
                     line->hiliteRight = mRect.left + kMiniScreenLeftBuffer + gDirectText->logicalWidth * (charNum - 1) - 1;
-                    
+
                     c++;
                     len--;
                     break;
@@ -913,12 +913,12 @@ void MakeMiniScreenFromIndString( short whichString)
                     c++;
                     len--;
                     break;
-                            
+
                 default:
                     break;
             }
         }
-        
+
         if (( len > 0) && ( lineNum < kMiniScreenTrueLineNum))
         {
             if ( charNum > kMiniScreenCharWidth)
@@ -935,7 +935,7 @@ void MakeMiniScreenFromIndString( short whichString)
             }
             line->string[charNum] = *c;
             charNum++;
-        
+
             len--;
             c++;
         }
@@ -948,7 +948,7 @@ void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)
     miniScreenLineType  *line;
     long                count, scrap;
     Rect                mRect;
-    
+
     if (( theseKeys | lastKeys) & kCompAcceptKey)
     {
         // find out which line, if any, contains this button
@@ -959,7 +959,7 @@ void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)
             count++;
             line++;
         }
-        
+
         // hilite/unhilite this button
         if ( count < kMiniScreenTrueLineNum)
         {
@@ -972,7 +972,7 @@ void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)
             {
                 line->lineKind = buttonOffLineKind;
                 DrawAndShowMiniScreenLine( count);
-                
+
                 MiniComputerDoAccept();
             }
         }
@@ -988,7 +988,7 @@ void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)
             count++;
             line++;
         }
-        
+
         if ( count < kMiniScreenCharHeight)
         {
             MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + gAresGlobal->gInstrumentTop, kMiniScreenRight,
@@ -1011,7 +1011,7 @@ void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)
             {
                 line->lineKind = buttonOffLineKind;
                 DrawAndShowMiniScreenLine( count);
-                
+
                 MiniComputerDoCancel();
             }
         }
@@ -1051,7 +1051,7 @@ void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)
             DrawAndShowMiniScreenLine( scrap);
         }
     }
-        
+
     if (( theseKeys & kCompDownKey) && ( !(lastKeys & kCompDownKey)) && ( gAresGlobal->gMiniScreenData.selectLine !=
             kMiniScreenNoLineSelected))
     {
@@ -1087,7 +1087,7 @@ void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)
             DrawAndShowMiniScreenLine( scrap);
         }
     }
-        
+
 
 }
 
@@ -1118,7 +1118,7 @@ void MiniComputerHandleNull( long unitsToDo)
                 {
                     line = (miniScreenLineType *)*gAresGlobal->gMiniScreenData.lineData + kBuildScreenFirstTypeLine;
                     lineNum = kBuildScreenFirstTypeLine;
-                    
+
                     for ( count = 0; count < kMaxShipCanBuild; count++)
                     {
                         buildObject = (baseObjectType *)line->sourceData;
@@ -1150,14 +1150,14 @@ void MiniComputerHandleNull( long unitsToDo)
                         lineNum++;
                     }
                 }
-                
+
                 break;
         }
         */
 
-    
+
         // handle control/command/selected object
-        
+
         myObject = mGetMiniObjectPtr( kMiniSelectObjectNum);
         count = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
         if ( count >= 0)
@@ -1205,7 +1205,7 @@ void MiniComputerHandleNull( long unitsToDo)
             newObject.baseType = nil;
         }
         UpdateMiniShipData( myObject, &newObject, SKY_BLUE, kMiniTargetTop, kMiniTargetObjectNum + 1);
-        
+
         count = GetAdmiralBuildAtObject( gAresGlobal->gPlayerAdmiralNumber);
         if ( count >= 0)
         {
@@ -1255,7 +1255,7 @@ void UpdateMiniScreenLines( void)
     baseObjectType      *buildObject = nil;
     long                lineNum, count;
     Rect                mRect;
-    
+
     MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + gAresGlobal->gInstrumentTop, kMiniScreenRight,
                         kMiniScreenBottom + gAresGlobal->gInstrumentTop);
     switch( gAresGlobal->gMiniScreenData.currentScreen)
@@ -1285,7 +1285,7 @@ void UpdateMiniScreenLines( void)
             {
                 line = (miniScreenLineType *)*gAresGlobal->gMiniScreenData.lineData + kBuildScreenFirstTypeLine;
                 lineNum = kBuildScreenFirstTypeLine;
-                
+
                 for ( count = 0; count < kMaxShipCanBuild; count++)
                 {
                     buildObject = (baseObjectType *)line->sourceData;
@@ -1319,9 +1319,9 @@ void UpdateMiniScreenLines( void)
                     lineNum++;
                 }
             }
-            
+
             break;
-        
+
         case kStatusMiniScreen:
             for ( count = kStatusMiniScreenFirstLine; count <
                 kMiniScreenCharHeight; count++)
@@ -1336,7 +1336,7 @@ void UpdateMiniScreenLines( void)
                     MiniComputerMakeStatusString( count, line->string);
                     DrawAndShowMiniScreenLine( count);
                 }
-                
+
             }
             break;
     }
@@ -1354,7 +1354,7 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
     Boolean             update = FALSE;
     anyCharType         digit[3], *digitp;
     long                scratch;
-    
+
     offPixBase = GetGWorldPixMap( gOffWorld);
     mSetDirectFont( kComputerFontNum)
 
@@ -1364,14 +1364,14 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
     lRect.bottom = clipRect.bottom = kMiniAmmoBottom + gAresGlobal->gInstrumentTop;
 
     if ( thisOne != lastOne)
-    {       
+    {
         mGetTranslateColorShade( RED, VERY_LIGHT, lightcolor, transColor)
-        
+
         lRect.left = kMiniAmmoLeftOne;
         lRect.right = lRect.left + kMiniAmmoSingleWidth;
-        
+
         DrawNateRect( *offPixBase, &lRect, 0, 0, BLACK);
-        
+
         if ( thisOne >= 0)
         {
             digitp = digit;
@@ -1383,27 +1383,27 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
             digitp++;
             scratch = (thisOne % 100) / 10;
             *digitp = '0' + scratch;
-            
+
             digitp++;
             scratch = thisOne % 10;
             *digitp = '0' + scratch;
-            
+
             MoveTo( lRect.left + kMiniAmmoTextHBuffer, lRect.bottom-1/*lRect.top + gDirectText->ascent*/);
 
             DrawDirectTextStringClipped( digit, lightcolor, *offPixBase,
                                         &clipRect, 0, 0);
         }
-        
+
         update = TRUE;
     }
-    
+
     if ( thisTwo != lastTwo)
-    {       
+    {
         mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, lightcolor, transColor)
-        
+
         lRect.left = kMiniAmmoLeftTwo;
         lRect.right = lRect.left + kMiniAmmoSingleWidth;
-        
+
         DrawNateRect( *offPixBase, &lRect, 0, 0, BLACK);
 
         if ( thisTwo >= 0)
@@ -1417,7 +1417,7 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
             digitp++;
             scratch = (thisTwo % 100) / 10;
             *digitp = '0' + scratch;
-            
+
             digitp++;
             scratch = thisTwo % 10;
             *digitp = '0' + scratch;
@@ -1431,12 +1431,12 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
     }
 
     if ( thisSpecial != lastSpecial)
-    {       
+    {
         mGetTranslateColorShade( ORANGE, VERY_LIGHT, lightcolor, transColor)
-        
+
         lRect.left = kMiniAmmoLeftSpecial;
         lRect.right = lRect.left + kMiniAmmoSingleWidth;
-        
+
         DrawNateRect( *offPixBase, &lRect, 0, 0, BLACK);
 
         if ( thisSpecial >= 0)
@@ -1450,7 +1450,7 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
             digitp++;
             scratch = (thisSpecial % 100) / 10;
             *digitp = '0' + scratch;
-            
+
             digitp++;
             scratch = thisSpecial % 10;
             *digitp = '0' + scratch;
@@ -1469,11 +1469,11 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
         mRect.right = clipRect.right;
         mRect.top = clipRect.top;
         mRect.bottom = clipRect.bottom;
-        
+
         // copy the dirty rect
         ChunkCopyPixMapToScreenPixMap( *offPixBase, &mRect, *thePixMapHandle);
     }
-    
+
     lastOne = thisOne;
     lastTwo = thisTwo;
     lastSpecial = thisSpecial;
@@ -1511,15 +1511,15 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     mSetDirectFont( kComputerFontNum)
 
     uRect.left = uRect.top = uRect.bottom = -1;
-    
+
     if ( oldObject->id != newObject->id)
     {
-        
+
         mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, 0, 0, kMiniScreenWidth, lRect, offPixBase)
         mGetTranslateColorShade( headerColor, LIGHT, color, transColor)
         mGetTranslateColorShade( headerColor, VERY_LIGHT, lightcolor, transColor)
         mGetTranslateColorShade( headerColor, MEDIUM, darkcolor, transColor)
-        
+
         DrawNateShadedRect( *offPixBase, &lRect, &clipRect, 0, 0, color, lightcolor, darkcolor);
 
         MoveTo( lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent);
@@ -1529,13 +1529,13 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                                     &clipRect, 0, 0);
         uRect = lRect;
         uRect = clipRect;
-        
+
         if ( newObject->attributes & kIsDestination)
         {
             // blacken the line for the object type name
             mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth, lRect, offPixBase)
 
-            // get the color for writing the name           
+            // get the color for writing the name
             mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, color, transColor)
 
             // move to the 1st line in the selection miniscreen
@@ -1543,7 +1543,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
 
             DrawDirectTextStringClipped( GetDestBalanceName( newObject->destinationObject), color, *offPixBase,
                                         &clipRect, 0, 0);
-/*          
+/*
             SmallFixedToString( HackGetObjectStrength( newObject), s);
             DrawDirectTextStringClipped( s, color, *offPixBase,
                                         &clipRect, 0, 0);
@@ -1556,25 +1556,25 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
             }
         } else if ( oldObject->whichBaseObject != newObject->whichBaseObject)
         {
-    
+
             // blacken the line for the object type name
             mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth, lRect, offPixBase)
-            
+
             if ( newObject->whichBaseObject >= 0)
             {
-            
-                // get the color for writing the name           
+
+                // get the color for writing the name
                 mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, color, transColor)
                 GetIndString( s, kSpaceObjectShortNameResID, newObject->whichBaseObject + 1);
 //              SmallFixedToString( HackGetObjectStrength( newObject), s);
-            
+
                 // move to the 1st line in the selection miniscreen
                 MoveTo( lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent);
-                    
+
                 // write the name
                 DrawDirectTextStringClipped( s, color, *offPixBase, &clipRect, 0, 0);
             }
-            
+
             if ( uRect.left == -1)
             {
                 uRect = lRect;
@@ -1583,7 +1583,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                 mBiggestRect( uRect, lRect)
             }
         }
-    }                           
+    }
         // set the rect for drawing the "icon" of the object type
 
     if ( oldObject->pixResID != newObject->pixResID)
@@ -1592,7 +1592,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         dRect.top = screenTop + gAresGlobal->gInstrumentTop + kMiniIconMacLineTop;
         dRect.right = kMiniScreenLeft + kMiniIconWidth;
         dRect.bottom = dRect.top + kMiniIconHeight;
-        
+
         // erase the area
 
         DrawNateRect( *offPixBase, &dRect, 0, 0, BLACK);
@@ -1600,35 +1600,35 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         if (( newObject->whichBaseObject >= 0) && ( newObject->pixResID >= 0))
         {
             pixTable =  GetPixTable( newObject->pixResID);
-            
+
             if ( pixTable != nil)
             {
-                if ( newObject->attributes & kIsSelfAnimated)   
+                if ( newObject->attributes & kIsSelfAnimated)
                     whichShape = newObject->baseType->frame.animation.firstShape >> kFixedBitShiftNumber;
                 else
                     whichShape = 0;
 
                 // get the picture data
                 pixData = GetNatePixTableNatePixData( pixTable, whichShape);
-    
+
                 aSpritePix.data = &pixData;
                 aSpritePix.center.h = GetNatePixTableNatePixHRef( pixTable, whichShape);
                 aSpritePix.center.v = GetNatePixTableNatePixVRef( pixTable, whichShape);
                 aSpritePix.width = GetNatePixTableNatePixWidth( pixTable, whichShape);
                 aSpritePix.height = GetNatePixTableNatePixHeight( pixTable, whichShape);
-                
+
                 // calculate the correct size
-                
+
                 tlong = (long)(kMiniIconHeight - 2) * SCALE_SCALE;
                 tlong /= aSpritePix.height;
                 thisScale = (long)(kMiniIconWidth - 2) * SCALE_SCALE;
                 thisScale /= aSpritePix.width;
-                
+
                 if ( tlong < thisScale) thisScale = tlong;
                 if ( thisScale > SCALE_SCALE) thisScale = SCALE_SCALE;
-    
+
                 // calculate the correct position
-                
+
                 coord.h = aSpritePix.center.h;
                 coord.h *= thisScale;
                 coord.h >>= SHIFT_SCALE;
@@ -1646,18 +1646,18 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                 tlong >>= SHIFT_SCALE;
                 where.v = ( kMiniIconHeight / 2) - ( tlong / 2);
                 where.v += dRect.top + coord.v;
-                
-                
+
+
                 // draw the sprite
-    
+
                 OptScaleSpritePixInPixMap( &aSpritePix, where, thisScale,
                         &spriteRect, &dRect, offPixBase);
             }
         }
-        
+
         mGetTranslateColorShade( PALE_GREEN, MEDIUM, color, transColor)
         DrawNateVBracket( *offPixBase, &dRect, &clipRect, 0, 0, color);
-        
+
         if ( uRect.left == -1)
         {
             uRect = dRect;
@@ -1667,14 +1667,14 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
             mBiggestRect( uRect, dRect)
         }
     }
-    
+
     if ( oldObject->health != newObject->health)
     {
         dRect.left = kMiniHealthLeft;
         dRect.top = screenTop + gAresGlobal->gInstrumentTop + kMiniIconMacLineTop;
         dRect.right = dRect.left + kMiniBarWidth;
         dRect.bottom = dRect.top + kMiniIconHeight;
-        
+
         // erase the area
 
         DrawNateRect( *offPixBase, &dRect, 0, 0, BLACK);
@@ -1687,7 +1687,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                 tlong /= newObject->baseType->health;
 
                 mGetTranslateColorShade( SKY_BLUE, DARK, color, transColor)
-                
+
                 lRect.left = dRect.left + 2;
                 lRect.top = dRect.top + 2;
                 lRect.right = dRect.right - 2;
@@ -1703,7 +1703,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                 DrawNateVBracket( *offPixBase, &dRect, &clipRect, 0, 0, color);
             }
         }
-        
+
 
         if ( uRect.left == -1)
         {
@@ -1713,16 +1713,16 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         {
             mBiggestRect( uRect, dRect)
         }
-        
+
     }
 
     if (oldObject->energy != newObject->energy)
-    {           
+    {
         dRect.left = kMiniEnergyLeft;
         dRect.top = screenTop + gAresGlobal->gInstrumentTop + kMiniIconMacLineTop;
         dRect.right = dRect.left + kMiniBarWidth;
         dRect.bottom = dRect.top + kMiniIconHeight;
-        
+
         // erase the area
 
         DrawNateRect( *offPixBase, &dRect, 0, 0, BLACK);
@@ -1733,9 +1733,9 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
             {
                 tlong = newObject->energy * (long)kMiniBarHeight;
                 tlong /= newObject->baseType->energy;
-                
+
                 mGetTranslateColorShade( YELLOW, DARK, color, transColor)
-                
+
                 lRect.left = dRect.left + 2;
                 lRect.top = dRect.top + 2;
                 lRect.right = dRect.right - 2;
@@ -1746,7 +1746,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                 lRect.top = dRect.bottom - 2 - tlong;
                 lRect.bottom = dRect.bottom - 2;
                 DrawNateRect( *offPixBase, &lRect, 0, 0, color);
-        
+
                 mGetTranslateColorShade( YELLOW, MEDIUM, color, transColor)
                 DrawNateVBracket( *offPixBase, &dRect, &clipRect, 0, 0, color);
             }
@@ -1767,19 +1767,19 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         // blacken the line for the weapon1 name
         mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, offPixBase)
 
-        // get the color for writing the name           
+        // get the color for writing the name
         mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, color, transColor)
-        
+
         // move to the 1st line in the selection miniscreen
         MoveTo( lRect.left, lRect.top + gDirectText->ascent);
-            
+
         // write the name
         if ( newObject->beamType >= 0)
         {
             GetIndString( s, kSpaceObjectShortNameResID, newObject->beamType + 1);
             DrawDirectTextStringClipped( s, color, *offPixBase, &clipRect, 0, 0);
         }
-                                        
+
         if ( uRect.left == -1)
         {
             uRect = lRect;
@@ -1795,19 +1795,19 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         // blacken the line for the weapon1 name
         mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, offPixBase)
 
-        // get the color for writing the name           
+        // get the color for writing the name
         mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, color, transColor)
-        
+
         // move to the 1st line in the selection miniscreen
         MoveTo( lRect.left, lRect.top + gDirectText->ascent);
-            
+
         // write the name
         if ( newObject->pulseType >= 0)
         {
             GetIndString( s, kSpaceObjectShortNameResID, newObject->pulseType + 1);
             DrawDirectTextStringClipped( s, color, *offPixBase, &clipRect, 0, 0);
         }
-                                        
+
         if ( uRect.left == -1)
         {
             uRect = lRect;
@@ -1817,25 +1817,25 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
             mBiggestRect( uRect, lRect)
         }
     }
-    
+
     if (( oldObject->specialType != newObject->specialType) && ( ! (newObject->attributes & kIsDestination)))
     {
         // blacken the line for the weapon1 name
         mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, offPixBase)
 
-        // get the color for writing the name           
+        // get the color for writing the name
         mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, color, transColor)
-        
+
         // move to the 1st line in the selection miniscreen
         MoveTo( lRect.left, lRect.top + gDirectText->ascent);
-            
+
         // write the name
         if ( newObject->specialType >= 0)
         {
             GetIndString( s, kSpaceObjectShortNameResID, newObject->specialType + 1);
             DrawDirectTextStringClipped( s, color, *offPixBase, &clipRect, 0, 0);
         }
-                                        
+
         if ( uRect.left == -1)
         {
             uRect = lRect;
@@ -1853,7 +1853,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
 
         // move to the 1st line in the selection miniscreen
         MoveTo( lRect.left, lRect.top + gDirectText->ascent);
-            
+
         // write the name
         if ( newObject->destinationObject >= 0)
         {
@@ -1861,7 +1861,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
             {
                 dObject = ( spaceObjectType *)newObject->destObjectPtr;
 
-                // get the color for writing the name           
+                // get the color for writing the name
                 if ( dObject->owner == gAresGlobal->gPlayerAdmiralNumber)
                 {
                     mGetTranslateColorShade( GREEN, VERY_LIGHT, color, transColor)
@@ -1869,7 +1869,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                 {
                     mGetTranslateColorShade( RED, VERY_LIGHT, color, transColor)
                 }
-                
+
                 if ( dObject->attributes & kIsDestination)
                 {
                     DrawDirectTextStringClipped( GetDestBalanceName( dObject->destinationObject), color, *offPixBase,
@@ -1881,7 +1881,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                 }
             }
         }
-                                        
+
         if ( uRect.left == -1)
         {
             uRect = lRect;
@@ -1899,10 +1899,10 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     mRect.right = uRect.right;
     mRect.top = uRect.top;
     mRect.bottom = uRect.bottom;
-    
+
     // copy the dirty rect
     ChunkCopyPixMapToScreenPixMap( *offPixBase, &mRect, *thePixMapHandle);
-    
+
     mCopyMiniSpaceObject( *oldObject, *newObject)
 }
 
@@ -1923,7 +1923,7 @@ void MiniComputerDoAccept( void)
     }
 /*  spaceObjectType *anObject, *anotherObject;
     long            l;
-    
+
     switch ( gAresGlobal->gMiniScreenData.currentScreen)
     {
         case kMainMiniScreen:
@@ -1935,25 +1935,25 @@ void MiniComputerDoAccept( void)
                     DrawMiniScreen();
                     ShowWholeMiniScreen();
                     break;
-                
+
                 case kMainMiniSpecial:
                     MakeMiniScreenFromIndString( kSpecialMiniScreen);
                     DrawMiniScreen();
                     ShowWholeMiniScreen();
                     break;
-                    
+
                 case kMainMiniMessage:
                     MakeMiniScreenFromIndString( kMessageMiniScreen);
                     DrawMiniScreen();
                     ShowWholeMiniScreen();
                     break;
-                    
+
                 default:
                     break;
             }
-            
+
             break;
-            
+
         case kBuildMiniScreen:
             if ( gAresGlobal->gMiniScreenData.selectLine != kMiniScreenNoLineSelected)
                 if (AdmiralScheduleBuild( gAresGlobal->gPlayerAdmiralNumber,
@@ -1962,7 +1962,7 @@ void MiniComputerDoAccept( void)
                     mPlayBeepBad;
                 }
             break;
-        
+
         case kSpecialMiniScreen:
             switch ( gAresGlobal->gMiniScreenData.selectLine)
             {
@@ -1976,11 +1976,11 @@ void MiniComputerDoAccept( void)
                             (anotherObject->attributes & ( kCanAcceptDestination)))
                         {
                             ChangePlayerShipNumber( l);
-                            
+
                         }
                     }
                     break;
-                
+
                 case kSpecialMiniFire1:
                     l = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
                     if (( l != kNoShip) && ( l != gAresGlobal->gPlayerShipNumber))
@@ -1993,7 +1993,7 @@ void MiniComputerDoAccept( void)
                         }
                     }
                     break;
-                    
+
                 case kSpecialMiniFire2:
                     l = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
                     if (( l != kNoShip) && ( l != gAresGlobal->gPlayerShipNumber))
@@ -2006,7 +2006,7 @@ void MiniComputerDoAccept( void)
                         }
                     }
                     break;
-                    
+
                 case kSpecialMiniFireSpecial:
                     l = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
                     if (( l != kNoShip) && ( l != gAresGlobal->gPlayerShipNumber))
@@ -2019,7 +2019,7 @@ void MiniComputerDoAccept( void)
                         }
                     }
                     break;
-                
+
                 case kSpecialMiniHold:
                     l = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
                     if (( l != kNoShip) && ( l != gAresGlobal->gPlayerShipNumber))
@@ -2028,7 +2028,7 @@ void MiniComputerDoAccept( void)
                         SetObjectLocationDestination( anObject, &(anObject->location));
                     }
                     break;
-                
+
                 case kSpecialMiniGoToMe:
                     l = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
                     if (( l != kNoShip) && ( l != gAresGlobal->gPlayerShipNumber) && ( gAresGlobal->gPlayerShipNumber != kNoShip))
@@ -2038,27 +2038,27 @@ void MiniComputerDoAccept( void)
                         SetObjectLocationDestination( anObject, &(anotherObject->location));
                     }
                     break;
-                    
+
                 default:
                     break;
             }
             break;
-            
+
         case kMessageMiniScreen:
             switch ( gAresGlobal->gMiniScreenData.selectLine)
             {
                 case kMessageMiniNext:
                     AdvanceCurrentLongMessage();
                     break;
-                
+
                 case kMessageMiniLast:
                     ReplayLastLongMessage();
                     break;
-                
+
                 case kMessageMiniPrevious:
                     PreviousCurrentLongMessage();
                     break;
-                
+
                 default:
                     break;
             }
@@ -2074,7 +2074,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
 {
     spaceObjectType *anObject, *anotherObject;
     long            l;
-    
+
     switch ( whichPage)
     {
         case kMainMiniScreen:
@@ -2088,19 +2088,19 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                         DrawMiniScreen();
                         ShowWholeMiniScreen();
                         break;
-                    
+
                     case kMainMiniSpecial:
                         MakeMiniScreenFromIndString( kSpecialMiniScreen);
                         DrawMiniScreen();
                         ShowWholeMiniScreen();
                         break;
-                        
+
                     case kMainMiniMessage:
                         MakeMiniScreenFromIndString( kMessageMiniScreen);
                         DrawMiniScreen();
                         ShowWholeMiniScreen();
                         break;
-                    
+
                     case kMainMiniStatus:
                         MakeMiniScreenFromIndString( kStatusMiniScreen);
                         MiniComputerSetStatusStrings();
@@ -2112,11 +2112,11 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                         break;
                 }
             }
-            
+
             break;
-            
+
         case kBuildMiniScreen:
-            if ( gAresGlobal->keyMask & kComputerBuildMenu) return;     
+            if ( gAresGlobal->keyMask & kComputerBuildMenu) return;
             if ( whichLine != kMiniScreenNoLineSelected)
             {
                 if ( CountObjectsOfBaseType( -1, -1) <
@@ -2134,13 +2134,13 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                     {
                         SetStatusString( "\pMaximum number of ships built", TRUE,
                             ORANGE);
-                    }   
+                    }
                 }
             }
             break;
-        
+
         case kSpecialMiniScreen:
-            if ( gAresGlobal->keyMask & kComputerSpecialMenu) return;       
+            if ( gAresGlobal->keyMask & kComputerSpecialMenu) return;
             switch ( whichLine)
             {
                 case kSpecialMiniTransfer:
@@ -2163,7 +2163,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                                     mPlayBeepBad;
                             } else
                             {
-                                ChangePlayerShipNumber( whichAdmiral, l);                           
+                                ChangePlayerShipNumber( whichAdmiral, l);
                             }
 /*
                             if (    ( anObject->active) &&
@@ -2173,7 +2173,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                                     ( !(anotherObject->attributes & kStaticDestination))
                                 )
                             {
-                                ChangePlayerShipNumber( whichAdmiral, l);                           
+                                ChangePlayerShipNumber( whichAdmiral, l);
                             } else
                             {
                                 if ( whichAdmiral == gAresGlobal->gPlayerAdmiralNumber)
@@ -2186,7 +2186,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                         }
                     }
                     break;
-                
+
                 case kSpecialMiniFire1:
                     l = GetAdmiralConsiderObject( whichAdmiral);
                     if (( l != kNoShip))
@@ -2199,7 +2199,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                         }
                     }
                     break;
-                    
+
                 case kSpecialMiniFire2:
                     l = GetAdmiralConsiderObject( whichAdmiral);
                     if (( l != kNoShip))
@@ -2212,7 +2212,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                         }
                     }
                     break;
-                    
+
                 case kSpecialMiniFireSpecial:
                     l = GetAdmiralConsiderObject( whichAdmiral);
                     if (( l != kNoShip))
@@ -2225,7 +2225,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                         }
                     }
                     break;
-                
+
                 case kSpecialMiniHold:
                     l = GetAdmiralConsiderObject( whichAdmiral);
                     if (( l != kNoShip))
@@ -2234,7 +2234,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                         SetObjectLocationDestination( anObject, &(anObject->location));
                     }
                     break;
-                
+
                 case kSpecialMiniGoToMe:
                     l = GetAdmiralConsiderObject( whichAdmiral);
                     if (( l != kNoShip))
@@ -2244,14 +2244,14 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                         SetObjectLocationDestination( anObject, &(anotherObject->location));
                     }
                     break;
-                    
+
                 default:
                     break;
             }
             break;
-            
+
         case kMessageMiniScreen:
-            if ( gAresGlobal->keyMask & kComputerMessageMenu) return;       
+            if ( gAresGlobal->keyMask & kComputerMessageMenu) return;
             if ( whichAdmiral == gAresGlobal->gPlayerAdmiralNumber)
             {
                 switch ( whichLine)
@@ -2259,15 +2259,15 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                     case kMessageMiniNext:
                         AdvanceCurrentLongMessage();
                         break;
-                    
+
                     case kMessageMiniLast:
                         ReplayLastLongMessage();
                         break;
-                    
+
                     case kMessageMiniPrevious:
                         PreviousCurrentLongMessage();
                         break;
-                    
+
                     default:
                         break;
                 }
@@ -2291,9 +2291,9 @@ void MiniComputerDoCancel( void)
             MakeMiniScreenFromIndString( kMainMiniScreen);
             DrawMiniScreen();
             ShowWholeMiniScreen();
-            
+
             break;
-        
+
         default:
             break;
     }
@@ -2312,7 +2312,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
     anyCharType         *namechar;
     short               namelen, linelen;
     Rect                mRect;
-    
+
     MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + gAresGlobal->gInstrumentTop, kMiniScreenRight,
                 kMiniScreenBottom + gAresGlobal->gInstrumentTop);
 
@@ -2334,7 +2334,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 
             line = (miniScreenLineType *)*gAresGlobal->gMiniScreenData.lineData + kBuildScreenFirstTypeLine;
             lineNum = kBuildScreenFirstTypeLine;
-            
+
             for ( count = 0; count < kMaxShipCanBuild; count++)
             {
                 mGetBaseObjectFromClassRace( buildObject, baseNum, buildAtObject->canBuildType[count], admiral->race)
@@ -2381,7 +2381,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
         } else
         {
             gAresGlobal->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
-            
+
             line =
                 (miniScreenLineType *)*gAresGlobal->gMiniScreenData.lineData +
                 kBuildScreenFirstTypeLine;
@@ -2404,10 +2404,10 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 /* MiniComputerGetPriceOfCurrentSelection:
     If the Build Menu is up, returns the price of the currently selected
     ship, regardless of whether or not it is affordable.
-    
+
     If the selection is not legal, or the current Menu is not the Build Menu,
     returns 0
-*/ 
+*/
 
 long MiniComputerGetPriceOfCurrentSelection( void)
 {
@@ -2417,16 +2417,16 @@ long MiniComputerGetPriceOfCurrentSelection( void)
     if (( gAresGlobal->gMiniScreenData.currentScreen != kBuildMiniScreen) ||
             ( gAresGlobal->gMiniScreenData.selectLine == kMiniScreenNoLineSelected))
         return (0);
-    
+
         line = (miniScreenLineType *)*gAresGlobal->gMiniScreenData.lineData +
             gAresGlobal->gMiniScreenData.selectLine;
 
         if ( line->value < 0) return( 0);
 
         buildObject = mGetBaseObjectPtr( line->value);
-        
+
         if ( buildObject->price < 0) return( 0);
-        
+
         return( mLongToFixed(buildObject->price));
 }
 
@@ -2434,7 +2434,7 @@ void MiniComputerSetStatusStrings( void)
 {
     /* the strings must be in this format:
         type\number\player\negativevalue\falsestring\truestring\basestring\poststring
-        
+
         where type = 0...5
 #define kNoStatusData               -1  // no status for this line
 #define kPlainTextStatus            0
@@ -2445,32 +2445,32 @@ void MiniComputerSetStatusStrings( void)
 #define kSmallFixedMinusValue       5   // small fixed - designated score
 
         number = which score/condition #
-        
+
         player = which player score (if any); -1 = you, -2 = first not you
         ( 0 if you're player 1, 1 if you're player 0)
-        
+
         negative value = value to use for kIntegerMinusValue or kSmallFixedMinusValue
-        
+
         falsestring = string to use if false
-        
+
         truestring = string to use if true
-        
+
         basestring = first part of string
-        
-        for example, the string 1\0\\0\0\N\Y\SHIP DESTROYED: 
+
+        for example, the string 1\0\\0\0\N\Y\SHIP DESTROYED:
         would result in the status line SHIP DESTROYED, based on condition 0;
         if false, line reads SHIP DESTROYED: N, and if true SHIP DESTROYED: Y
-        
-        example #2, string 2\1\0\10\\\Samples Left: 
+
+        example #2, string 2\1\0\10\\\Samples Left:
         would result in the status line "Samples Left: " + score 1 of player 0
         so if player 0's score 1 was 3, the line would read:
         Samples Left: 7
     */
-    
+
     short               count, charNum, value;
     Str255              sourceString;
     miniScreenLineType  *line;
-    
+
     if ( gAresGlobal->gMissionStatusStrList == nil)
     {
         for ( count = kStatusMiniScreenFirstLine; count < kMiniScreenCharHeight;
@@ -2484,7 +2484,7 @@ void MiniComputerSetStatusStrings( void)
         }
         return;
     }
-    
+
     for ( count = kStatusMiniScreenFirstLine; count < kMiniScreenCharHeight;
         count++)
     {
@@ -2519,10 +2519,10 @@ void MiniComputerSetStatusStrings( void)
                     charNum++;
                 }
                 charNum++;
-                
+
                 if (( value >= 0) && ( value <= kMaxStatusTypeValue))
                     line->statusType = value;
-                
+
                 //////////////////////////////////////////////
                 // get score/condition number
                 value = 0;
@@ -2534,9 +2534,9 @@ void MiniComputerSetStatusStrings( void)
                     charNum++;
                 }
                 charNum++;
-                
+
                 line->whichStatus = value;
-                
+
                 //////////////////////////////////////////////
                 // get player number
                 value = 0;
@@ -2548,7 +2548,7 @@ void MiniComputerSetStatusStrings( void)
                     charNum++;
                 }
                 charNum++;
-                
+
                 line->statusPlayer = value;
 
                 //////////////////////////////////////////////
@@ -2562,7 +2562,7 @@ void MiniComputerSetStatusStrings( void)
                     charNum++;
                 }
                 charNum++;
-                
+
                 line->negativeValue = value;
 
                 //////////////////////////////////////////////
@@ -2576,7 +2576,7 @@ void MiniComputerSetStatusStrings( void)
                     charNum++;
                 }
                 charNum++;
-                
+
                 //////////////////////////////////////////////
                 // get trueString
                 line->statusTrue[0] = 0;
@@ -2593,7 +2593,7 @@ void MiniComputerSetStatusStrings( void)
                 charNum++;
                 line->statusType = kPlainTextStatus;
             }
-            
+
             //////////////////////////////////////////////
             // get statusString
             line->statusString[0] = 0;
@@ -2605,7 +2605,7 @@ void MiniComputerSetStatusStrings( void)
                 charNum++;
             }
             charNum++;
-            
+
             //////////////////////////////////////////////
             // get postString
             line->postString[0] = 0;
@@ -2615,7 +2615,7 @@ void MiniComputerSetStatusStrings( void)
                 line->postString[line->postString[0]] = sourceString[charNum];
                 charNum++;
             }
-            
+
             line->value = MiniComputerGetStatusValue( count);
             MiniComputerMakeStatusString( count, line->string);
         } else
@@ -2623,7 +2623,7 @@ void MiniComputerSetStatusStrings( void)
             line->statusType = kNoStatusData;
             line->value = -1;
             line->string[0] = 0;
-        }   
+        }
     }
 }
 
@@ -2631,12 +2631,12 @@ void MiniComputerMakeStatusString( long whichLine, StringPtr destString)
 {
     miniScreenLineType  *line;
     Str255              tempString;
-    
+
     line = (miniScreenLineType *)*gAresGlobal->gMiniScreenData.lineData +
         whichLine;
-    
+
     destString[0] = 0;
-    
+
     if ( line->statusType != kNoStatusData)
         CopyPString( destString, line->statusString);
     else
@@ -2644,7 +2644,7 @@ void MiniComputerMakeStatusString( long whichLine, StringPtr destString)
         destString[0] = 0;
         return;
     }
-    
+
     switch ( line->statusType)
     {
         case kTrueFalseCondition:
@@ -2656,13 +2656,13 @@ void MiniComputerMakeStatusString( long whichLine, StringPtr destString)
                 ConcatenatePString( destString, line->statusFalse);
             }
             break;
-            
+
         case kIntegerValue:
         case kIntegerMinusValue:
             NumToString( line->value, tempString);
             ConcatenatePString( destString, tempString);
             break;
-        
+
         case kSmallFixedValue:
         case kSmallFixedMinusValue:
             SmallFixedToString( line->value, tempString);
@@ -2676,19 +2676,19 @@ void MiniComputerMakeStatusString( long whichLine, StringPtr destString)
 long MiniComputerGetStatusValue( long whichLine)
 {
     miniScreenLineType  *line;
-    
+
     line = (miniScreenLineType *)*gAresGlobal->gMiniScreenData.lineData +
         whichLine;
-    
+
     if ( line->statusType == kNoStatusData)
         return( -1);
-    
+
     switch ( line->statusType)
     {
         case kPlainTextStatus:
             return( 0);
             break;
-            
+
         case kTrueFalseCondition:
             if ( GetScenarioConditionTrue( line->whichStatus))
             {
@@ -2698,19 +2698,19 @@ long MiniComputerGetStatusValue( long whichLine)
                 return( 0);
             }
             break;
-            
+
         case kIntegerValue:
         case kSmallFixedValue:
             return( GetAdmiralScore( GetRealAdmiralNumber( line->statusPlayer),
                 line->whichStatus));
             break;
-        
+
         case kIntegerMinusValue:
         case kSmallFixedMinusValue:
             return( line->negativeValue - GetAdmiralScore(
                 GetRealAdmiralNumber( line->statusPlayer), line->whichStatus));
             break;
-        
+
         default:
             return( 0);
             break;
@@ -2723,7 +2723,7 @@ void MiniComputerHandleClick( Point where)
     Rect        mRect;
     long        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
     miniScreenLineType  *line;
-    
+
     mSetDirectFont( kComputerFontNum)
     line = (miniScreenLineType *)*gAresGlobal->gMiniScreenData.lineData;
     scrap = 0;
@@ -2734,7 +2734,7 @@ void MiniComputerHandleClick( Point where)
         scrap++;
         line++;
     }
-    
+
     MacSetRect( &mRect, kButBoxLeft, kButBoxTop + gAresGlobal->gInstrumentTop, kButBoxRight,
                 kButBoxBottom + gAresGlobal->gInstrumentTop);
 
@@ -2782,7 +2782,7 @@ void MiniComputerHandleClick( Point where)
         }
     } else
     {
-    
+
         // make sure both buttons are off
         if ( inLineButtonLine >= 0)
         {
@@ -2802,10 +2802,10 @@ void MiniComputerHandleClick( Point where)
                 DrawAndShowMiniScreenLine( outLineButtonLine);
             }
         }
-                
+
         MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + gAresGlobal->gInstrumentTop, kMiniScreenRight,
                 kMiniScreenBottom + gAresGlobal->gInstrumentTop);
-    
+
         // if click is in main menu screen
         if ( MacPtInRect( where, &mRect))
         {
@@ -2832,7 +2832,7 @@ void MiniComputerHandleClick( Point where)
                 DrawAndShowMiniScreenLine( gAresGlobal->gMiniScreenData.selectLine);
             }
         } else gAresGlobal->gMiniScreenData.clickLine = kMiniScreenNoLineSelected;
-    }       
+    }
 }
 
 void MiniComputerHandleDoubleClick( Point where)
@@ -2841,7 +2841,7 @@ void MiniComputerHandleDoubleClick( Point where)
     Rect        mRect;
     long        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
     miniScreenLineType  *line;
-    
+
     mSetDirectFont( kComputerFontNum)
     line = (miniScreenLineType *)*gAresGlobal->gMiniScreenData.lineData;
     scrap = 0;
@@ -2852,7 +2852,7 @@ void MiniComputerHandleDoubleClick( Point where)
         scrap++;
         line++;
     }
-    
+
     MacSetRect( &mRect, kButBoxLeft, kButBoxTop + gAresGlobal->gInstrumentTop, kButBoxRight,
                 kButBoxBottom + gAresGlobal->gInstrumentTop);
 
@@ -2898,7 +2898,7 @@ void MiniComputerHandleDoubleClick( Point where)
         }
     } else
     {
-    
+
         // make sure both buttons are off
         if ( inLineButtonLine >= 0)
         {
@@ -2918,10 +2918,10 @@ void MiniComputerHandleDoubleClick( Point where)
                 DrawAndShowMiniScreenLine( outLineButtonLine);
             }
         }
-                
+
         MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + gAresGlobal->gInstrumentTop, kMiniScreenRight,
                 kMiniScreenBottom + gAresGlobal->gInstrumentTop);
-    
+
         // if click is in main menu screen
         if ( MacPtInRect( where, &mRect))
         {
@@ -2939,7 +2939,7 @@ void MiniComputerHandleDoubleClick( Point where)
                     line->hiliteLeft = line->hiliteRight = 0;
                     DrawAndShowMiniScreenLine( gAresGlobal->gMiniScreenData.selectLine);
                 }
-                
+
                 lineNum = mGetLineNumFromV( where.v);
                 line = (miniScreenLineType *)*gAresGlobal->gMiniScreenData.lineData + lineNum;
                 if (( line->selectable == selectable) || (line->selectable == selectDim))
@@ -2953,7 +2953,7 @@ void MiniComputerHandleDoubleClick( Point where)
                 }
             }
         }
-    }       
+    }
 }
 
 void MiniComputerHandleMouseUp( Point where)
@@ -2962,7 +2962,7 @@ void MiniComputerHandleMouseUp( Point where)
     Rect        mRect;
     long        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
     miniScreenLineType  *line;
-    
+
     mSetDirectFont( kComputerFontNum)
     line = (miniScreenLineType *)*gAresGlobal->gMiniScreenData.lineData;
     scrap = 0;
@@ -2973,7 +2973,7 @@ void MiniComputerHandleMouseUp( Point where)
         scrap++;
         line++;
     }
-    
+
     MacSetRect( &mRect, kButBoxLeft, kButBoxTop + gAresGlobal->gInstrumentTop, kButBoxRight,
                 kButBoxBottom + gAresGlobal->gInstrumentTop);
 
@@ -3008,7 +3008,7 @@ void MiniComputerHandleMouseStillDown( Point where)
     Rect        mRect;
     long        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
     miniScreenLineType  *line;
-    
+
     mSetDirectFont( kComputerFontNum)
     line = (miniScreenLineType *)*gAresGlobal->gMiniScreenData.lineData;
     scrap = 0;
@@ -3019,7 +3019,7 @@ void MiniComputerHandleMouseStillDown( Point where)
         scrap++;
         line++;
     }
-    
+
     MacSetRect( &mRect, kButBoxLeft, kButBoxTop + gAresGlobal->gInstrumentTop, kButBoxRight,
                 kButBoxBottom + gAresGlobal->gInstrumentTop);
 
@@ -3046,7 +3046,7 @@ void MiniComputerHandleMouseStillDown( Point where)
             }
         } else ( lineNum = -1);
     } else lineNum = -1;
-    
+
     if ( lineNum == -1)
     {
         line = (miniScreenLineType *)*gAresGlobal->gMiniScreenData.lineData + inLineButtonLine;
@@ -3068,7 +3068,7 @@ void MiniComputerHandleMouseStillDown( Point where)
 void MiniComputer_SetScreenAndLineHack( long whichScreen, long whichLine)
 {
     Point   w;
-    
+
     switch ( whichScreen)
     {
         case kBuildMiniScreen:
@@ -3077,19 +3077,19 @@ void MiniComputer_SetScreenAndLineHack( long whichScreen, long whichLine)
             DrawMiniScreen();
             ShowWholeMiniScreen();
             break;
-        
+
         case kSpecialMiniScreen:
             MakeMiniScreenFromIndString( kSpecialMiniScreen);
             DrawMiniScreen();
             ShowWholeMiniScreen();
             break;
-            
+
         case kMessageMiniScreen:
             MakeMiniScreenFromIndString( kMessageMiniScreen);
             DrawMiniScreen();
             ShowWholeMiniScreen();
             break;
-        
+
         case kStatusMiniScreen:
             MakeMiniScreenFromIndString( kStatusMiniScreen);
             MiniComputerSetStatusStrings();
@@ -3103,7 +3103,7 @@ void MiniComputer_SetScreenAndLineHack( long whichScreen, long whichLine)
             ShowWholeMiniScreen();
             break;
     }
-    
+
     mSetDirectFont( kComputerFontNum)
     w.v = (whichLine * gDirectText->height) + ( kMiniScreenTop +
                     gAresGlobal->gInstrumentTop);

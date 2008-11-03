@@ -75,7 +75,7 @@ if ( (moldsize + mplussize) > kMaxDebugFileSize)\
     muselen = moldsize;\
     SetHandleSize( gDebugData, fileLen + (long)*sc);\
 }
-     
+
 extern GDHandle     theDevice;
 
 WindowPtr   gDebugWindow = nil;
@@ -90,13 +90,13 @@ void DebugWindowInit( WindowPtr behindWindow)
 
 {
     Rect    tRect, dRect;
-    
+
     GetDeviceRect( theDevice, &dRect);
     MacSetRect( &tRect, dRect.right - WINDOW_WIDTH - 4, dRect.bottom - WINDOW_HEIGHT *
             LINE_HEIGHT - 4, dRect.right - 4, dRect.bottom - 4);
     gDebugWindow = NewWindow( nil, &tRect, "\pDebug", FALSE, noGrowDocProc, behindWindow,
             TRUE, 800);
-    
+
 #ifdef kDebugWindowActive
     ShowHide (gDebugWindow, TRUE);
 #else
@@ -124,7 +124,7 @@ void ScrollDebugWindowUp( void)
     GrafPtr     oldPort;
     RgnHandle   tRgn;
     Rect        tRect;
-    
+
     SetRect( &tRect, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT * LINE_HEIGHT);
     GetPort( &oldPort);
     SetPort( gDebugWindow);
@@ -136,7 +136,7 @@ void ScrollDebugWindowUp( void)
     DisposeRgn( tRgn);
     SetPort( oldPort);
 #endif
-}   
+}
 
 void WriteDebugLine( char *text)
 
@@ -153,7 +153,7 @@ void WriteDebugLine( char *text)
     DrawString( (StringPtr)text);
     SetPort( oldPort);
 #endif
-}   
+}
 
 void WriteDebugChar( char c)
 
@@ -170,7 +170,7 @@ void WriteDebugChar( char c)
     DrawChar( c);
     SetPort( oldPort);
 #endif
-}   
+}
 
 void WriteDebugHex( unsigned long val, unsigned long places)
 
@@ -178,7 +178,7 @@ void WriteDebugHex( unsigned long val, unsigned long places)
 #ifdef kDebugWindowActive
     GrafPtr         oldPort;
     unsigned long   count, digit;
-    
+
     GetPort( &oldPort);
     SetPort( gDebugWindow);
     TextFont( monaco);
@@ -198,7 +198,7 @@ void WriteDebugHex( unsigned long val, unsigned long places)
     }
     SetPort( oldPort);
 #endif
-}   
+}
 
 
 void WriteDebugFixed( Fixed f)
@@ -226,10 +226,10 @@ void WriteDebugFixed( Fixed f)
     if ( f < 0)
         NumToString( (( 0x0000ffff - (f & 0x0000ffff)) * 100) / 6554L, s);
     else NumToString( ((f & 0x0000ffff) * 100) / 6554L, s);
-    DrawString( s); 
+    DrawString( s);
     SetPort( oldPort);
 #endif
-}   
+}
 
 
 void WriteDebugSmallFixed( smallFixedType f)
@@ -245,10 +245,10 @@ void WriteDebugSmallFixed( smallFixedType f)
     ScrollDebugWindowUp();
     MoveTo( 0, WINDOW_HEIGHT * LINE_HEIGHT - 4);
     SmallFixedToString( f, s);
-    DrawString( s); 
+    DrawString( s);
     SetPort( oldPort);
 #endif
-}   
+}
 
 
 void WriteDebugInt( int i)
@@ -257,7 +257,7 @@ void WriteDebugInt( int i)
 #ifdef kDebugWindowActive
     Str255  s;
     RGBColor    c;
-    
+
     c.red = c.blue = c.green = 0;
     RGBForeColor ( &c);
     c.red = c.blue = c.green = 65535;
@@ -265,7 +265,7 @@ void WriteDebugInt( int i)
     NumToString( (long)i, s);
     WriteDebugLine( (char *)s);
 #endif
-}   
+}
 
 
 void WriteDebug2Int( int i, int j)
@@ -286,20 +286,20 @@ void WriteDebug2Int( int i, int j)
     DrawChar(':');
     NumToString( (long)j, s);
     DrawString( s);
-    SetPort( oldPort);  
+    SetPort( oldPort);
 #endif
-}   
+}
 
 
 void WriteDebugLong( long l)
 {
 #ifdef kDebugWindowActive
     Str255  s;
-    
+
     NumToString( l, s);
     WriteDebugLine( (char *)s);
 #endif
-}   
+}
 
 
 void MoveDebugToFront( void)
@@ -312,7 +312,7 @@ void MoveDebugToFront( void)
     SelectWindow( gDebugWindow);
     SetPort( oldPort);
 #endif
-}   
+}
 
 
 void WriteDebugDivider( void)
@@ -330,7 +330,7 @@ void WriteDebugDivider( void)
     LineTo( WINDOW_WIDTH, WINDOW_HEIGHT * LINE_HEIGHT - 4);
     SetPort( oldPort);
 #endif
-}   
+}
 
 
 void WriteDebugHexDump( Ptr data, long len)
@@ -338,30 +338,30 @@ void WriteDebugHexDump( Ptr data, long len)
 {
 #ifdef kDebugWindowActive
     unsigned long   *dp;
-    
+
     len >>= 2;
-    
+
     dp = (unsigned long *)data;
-    
+
     while ( len > 0)
     {
         WriteDebugHex( *dp++, 4);
         len--;
     }
 #endif
-}   
+}
 
 
 unsigned long powerto ( unsigned long x, unsigned long exponent)
 
 {
     unsigned long   count;
-    
+
     if ( exponent == 0) return ( 1);
     for ( count = 1; count < exponent; count ++)
         x *= x;
     return ( x);
-}   
+}
 
 
 #if TARGET_OS_MAC
@@ -369,11 +369,11 @@ Boolean CommandPeriod( void)
 
 {
     KeyMap  keyMap;
-    
+
     GetKeys( keyMap);
     if ( ((keyMap[1] >> 23) & 0x01) && ((keyMap[1] >> 15) & 0x01)) return ( TRUE);
     else return ( FALSE);
-}   
+}
 #endif TARGET_OS_MAC
 
 void DebugFileInit( void)
@@ -381,7 +381,7 @@ void DebugFileInit( void)
 {
 #ifdef kDebugFileActive
     char        *c;
-    
+
     gDebugData = NewHandle( 1);
     if ( gDebugData != nil)
     {
@@ -409,7 +409,7 @@ void DebugFileAppendString( StringPtr s)
 #ifdef kDebugFileActive
     char    *c, *sc, lenCount;
     long    fileLen, scrap;
-    
+
 #pragma unused ( s)
 
     if ( gDebugData != nil)
@@ -482,7 +482,7 @@ void DebugFileAppendCString( char *s)
 #pragma unused ( s)
 #endif
 }
-    
+
 void DebugFileAppendLong( long l)
 {
 #ifdef kDebugFileActive
@@ -491,7 +491,7 @@ void DebugFileAppendLong( long l)
         char    *c, *sc, lenCount;
         long    fileLen, scrap;
         Str255  s;
-        
+
         NumToString( l, s);
         sc = (char *)s;
 #ifdef kMaxDebugFileSize
@@ -527,7 +527,7 @@ void DebugFileAppendLongHex( long l)
     char    *c, *sc, lenCount;
     long    fileLen, scrap;
     Str255  s;
-    
+
     if ( gDebugData != nil)
     {
         NumToHexString( l, s, 4);
@@ -565,7 +565,7 @@ void DebugFileAppendSmallFixed( smallFixedType f)
     char    *c, *sc, lenCount;
     long    fileLen, scrap;
     Str255  s;
-    
+
     if ( gDebugData != nil)
     {
         SmallFixedToString( f, s);
@@ -605,11 +605,11 @@ void DebugFileSave( StringPtr fileName)
     short   newRefNum;
     long    count, rawResult, range = 32768;
     Str255  timeName, timeString;
-    
+
     rawResult = Random();
     if (rawResult < 0) rawResult *= -1;
     rawResult =  (rawResult * range) / 32768;
-    
+
     if ( gDebugData != nil)
     {
         CopyPString( (unsigned char *)timeName, (unsigned char *)fileName);
@@ -617,7 +617,7 @@ void DebugFileSave( StringPtr fileName)
 //      ReplacePStringChar( timeString, '-', ':');
         NumToString( rawResult, timeString);
         ConcatenatePString( (unsigned char *)timeName, (unsigned char *)timeString);
-        
+
         err = FSMakeFSSpec( 0, 0, timeName, &newFile);
 //      if ( err != noErr) ShowSimpleStringAlert( "\pCouldn't make FSSpec out of", timeName, nil, nil);
         err = FSpCreate( &newFile, 'CWIE', 'TEXT', smSystemScript);

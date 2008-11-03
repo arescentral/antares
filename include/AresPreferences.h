@@ -43,7 +43,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define kPBit10                     0x00000200
 #define kPBit11                     0x00000400
 #define kPBit12                     0x00000800
-#define kPBit13                     0x00001000  
+#define kPBit13                     0x00001000
 #define kPBit14                     0x00002000
 #define kPBit15                     0x00004000
 #define kPBit16                     0x00008000

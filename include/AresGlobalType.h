@@ -192,19 +192,19 @@ typedef struct
     long            maxBaseObject;
     long            maxObjectAction;
     long            scenarioNum;
-    
+
     Str255          otherPlayerScenarioFileName;    // x-ares; 3rd part net files
     Str255          otherPlayerScenarioFileURL;     // ''
     unsigned long   otherPlayerScenarioFileVersion;
     unsigned long   otherPlayerScenarioFileCheckSum;
-    
+
     Boolean         internetConfigPresent;
     ICInstance      internetConfig;
-    
+
     hotKeyType      hotKey[kHotKeyNum];
     long            hotKeyDownTime;
     long            lastHotKey;
-    
+
     long            lastSelectedObject;
     long            lastSelectedObjectID;
     Boolean         destKeyUsedForSelection;

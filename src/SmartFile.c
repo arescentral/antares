@@ -61,7 +61,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /* - macros
 *******************************************/
 
-#ifdef powerc   
+#ifdef powerc
 #define Has_Navigation_Services     NavServicesAvailable()
 #else
 #define Has_Navigation_Services     false
@@ -103,13 +103,13 @@ OSErr SmartFile_SelectFolder( FSSpecPtr destFile, StringPtr windowName,
     StringPtr prompt)
 {
     OSErr   error = noErr;
-    
+
     if ( destFile == nil) return paramErr;
     if ( !Has_Navigation_Services)  // this is a macro that's safe to call any
                                     // time
     {
         StandardFileReply   fileReply;
-        
+
         error = doDirectorySelectionDialog( &fileReply);
         if (( fileReply.sfGood) || ( gDirectorySelectionFlag))
         {
@@ -118,20 +118,20 @@ OSErr SmartFile_SelectFolder( FSSpecPtr destFile, StringPtr windowName,
         } else return userCanceledErr;
     } else
     {
-#ifdef powerc   
+#ifdef powerc
         return NS_SelectFolderObject( destFile, windowName, prompt);
 #endif
     }
-    return noErr;   
+    return noErr;
 }
 
 OSErr SmartFile_SaveAs( FSSpecPtr destFile, StringPtr fileName,
     StringPtr appName, OSType fileTypeToSave, OSType fileCreator)
 {
     OSErr               error = noErr;
-    
+
     if ( destFile == nil) return paramErr;
-    
+
     if ( !Has_Navigation_Services)  // this is a macro that's safe to call any
                                     // time
     {
@@ -152,19 +152,19 @@ OSErr SmartFile_SaveAs( FSSpecPtr destFile, StringPtr fileName,
         } else return userCanceledErr;
     } else
     {
-#ifdef powerc   
+#ifdef powerc
         return NS_SaveAs( destFile, fileName, appName, fileTypeToSave,
                             fileCreator);
 #endif
     }
-    
+
     return noErr;
 }
 
 OSErr SmartFile_SelectFile( FSSpecPtr destFile, short openListResID)
 {
     OSErr               error = noErr;
-    
+
     if ( !Has_Navigation_Services)
     {
         Handle              openFileTypeResource =
@@ -173,9 +173,9 @@ OSErr SmartFile_SelectFile( FSSpecPtr destFile, short openListResID)
         OSType              *osType = nil;
         long                typeNum, i;
         StandardFileReply   fileReply;
-        
+
         if ( openFileTypeResource == nil) return resNotFound;
-        
+
         typeNum = *((long *)((*openFileTypeResource) + 4));
         if ( typeNum > 4) typeNum = 4;
         for ( i = 0; i < typeNum; i++)
@@ -183,7 +183,7 @@ OSErr SmartFile_SelectFile( FSSpecPtr destFile, short openListResID)
             osType = (OSType *)((*openFileTypeResource) + 8 + ( 4 * i));
             typeList[i] = *osType;
         }
-        
+
         ReleaseResource( openFileTypeResource);
         StandardGetFile( 0, typeNum, typeList, &fileReply);
         if ( fileReply.sfGood)
@@ -193,10 +193,10 @@ OSErr SmartFile_SelectFile( FSSpecPtr destFile, short openListResID)
         } else return userCanceledErr;
     } else
     {
-#ifdef powerc   
+#ifdef powerc
         return NS_SelectFileObject( destFile, openListResID);
 #endif
     }
-    
+
     return noErr;
 }

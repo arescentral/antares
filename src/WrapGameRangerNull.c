@@ -105,7 +105,7 @@ OSErr       Wrap_GRInstallResumeHandler(void)
 Boolean     Wrap_GRCheckAEForCmd(const AppleEvent *theEvent)
 {
     #pragma unused( theEvent)
-    
+
     return false;
 }
 
@@ -126,7 +126,7 @@ Boolean     Wrap_GRIsWaitingCmd(void)
 
 void        Wrap_GRGetWaitingCmd(void)
 {
-    
+
 }
 
 Boolean     Wrap_GRIsCmd(void)
@@ -179,7 +179,7 @@ void        Wrap_GRReset(void)
 
 void        Wrap_GRHostReady(void)
 {
-    
+
 }
 
 void        Wrap_GRGameBegin(void)
@@ -189,22 +189,22 @@ void        Wrap_GRGameBegin(void)
 
 void        Wrap_GRStatScore(SInt32 score)
 {
-    #pragma unused( score)  
+    #pragma unused( score)
 }
 
 void        Wrap_GRStatOtherScore(SInt32 score)
 {
-    #pragma unused( score)  
+    #pragma unused( score)
 }
 
 void        Wrap_GRGameEnd(void)
 {
-    
+
 }
 
 void        Wrap_GRHostClosed(void)
 {
-    
+
 }
 
 

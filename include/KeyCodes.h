@@ -96,7 +96,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //#define   kAdoptTargetKeyNum          21          // doesn't exist
 #define kAdoptTargetKey             0x00200000  // used so player ship can set its dest
                                                 // based on admiral's target
-                                                
+
 #define kMouseMask                  0x80000000  // for disabling for tutorial
 #define kReturnKeyMask              0x40000000  // ''
 #define kShortcutZoomMask           0x20000000  // ''
@@ -106,8 +106,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define kManualOverrideFlag         0x80000000
 
 /*
-#define kCompDownKeyNum             18  
-#define kCompDownKey                0x00040000  
+#define kCompDownKeyNum             18
+#define kCompDownKey                0x00040000
 #define kCompAcceptKeyNum           19
 #define kCompAcceptKey              0x00080000
 #define kCompCancelKeyNum           20
@@ -172,7 +172,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define mEnterTextKey           mReturnKey
 #define mQuitKey1( mmkeymap)    (mQKey( mmkeymap))
 #define mQuitKey2( mmkeymap)    (mCommandKey( mmkeymap))
-#define mQuitKeys( mmkeymap)    ((mQuitKey1( mmkeymap)) && ( mQuitKey2(mmkeymap))) 
+#define mQuitKeys( mmkeymap)    ((mQuitKey1( mmkeymap)) && ( mQuitKey2(mmkeymap)))
 #define mRestartResumeKey       mEscKey
 
 //#define   mNOFHelpKey             m1Key

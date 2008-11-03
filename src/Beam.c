@@ -83,7 +83,7 @@ short InitBeams( void)
 {
     beamType    *beam;
     short           i;
-    
+
     gAresGlobal->gBeamData = NewHandle( sizeof( beamType) * (long)kBeamNum);
     if ( gAresGlobal->gBeamData == nil)
     {
@@ -92,14 +92,14 @@ short InitBeams( void)
     }
 
     mHandleLockAndRegister( gAresGlobal->gBeamData, nil, nil, ResolveBeamData, "\pgAresGlobal->gBeamData")
-    
+
     beam = ( beamType *)*gAresGlobal->gBeamData;
     for ( i = 0; i < kBeamNum; i++)
     {
         beam->active = false;
-        
+
         beam++;
-    }   
+    }
     return( kNoError);
 }
 
@@ -112,13 +112,13 @@ void ResetBeams( void)
 {
     beamType    *aBeam = ( beamType *)*gAresGlobal->gBeamData;
     short       i;
-    
+
     for ( i = 0; i < kBeamNum; i++)
     {
-        aBeam->active = false;      
-        aBeam->thisLocation.left = aBeam->thisLocation.right = 
+        aBeam->active = false;
+        aBeam->thisLocation.left = aBeam->thisLocation.right =
             aBeam->thisLocation.top = aBeam->thisLocation.bottom = 0;
-        aBeam->lastLocation.left = aBeam->lastLocation.right = 
+        aBeam->lastLocation.left = aBeam->lastLocation.right =
             aBeam->lastLocation.top = aBeam->lastLocation.bottom = 0;
         aBeam->lastGlobalLocation.h = aBeam->lastGlobalLocation.v = 0;
         aBeam->objectLocation.h = aBeam->objectLocation.v = 0;
@@ -134,8 +134,8 @@ beamType *AddBeam(coordPointType *location, unsigned char color,
 {
     beamType    *aBeam = ( beamType *)*gAresGlobal->gBeamData;
     long        h;
-    
-    *whichBeam = 0; 
+
+    *whichBeam = 0;
     while (( aBeam->active) && ( *whichBeam < kBeamNum))
     {
         aBeam++;
@@ -149,22 +149,22 @@ beamType *AddBeam(coordPointType *location, unsigned char color,
     {
         aBeam->lastGlobalLocation = aBeam->objectLocation =
             aBeam->lastApparentLocation = *location;
-        aBeam->killMe = false;          
+        aBeam->killMe = false;
         aBeam->active = true;
         aBeam->color = color;
-        
+
         h = (location->h - gGlobalCorner.h) * gAbsoluteScale;
         h >>= SHIFT_SCALE;
         aBeam->thisLocation.left = aBeam->thisLocation.right = h + CLIP_LEFT;
         h = (location->v - gGlobalCorner.v) * gAbsoluteScale;
         h >>= SHIFT_SCALE; //+ CLIP_TOP
         aBeam->thisLocation.top = aBeam->thisLocation.bottom = h;
-        
+
         aBeam->lastLocation.left = aBeam->lastLocation.right =
                 aBeam->thisLocation.left;
         aBeam->lastLocation.top = aBeam->lastLocation.bottom =
                 aBeam->thisLocation.top;
-        
+
         aBeam->beamKind = kind;
         aBeam->accuracy = accuracy;
         aBeam->range = range;
@@ -184,7 +184,7 @@ void SetSpecialBeamAttributes( spaceObjectType *beamObject, spaceObjectType *sou
 {
     spaceObjectType *target;
     long            h, v;
-    
+
     beamObject->frame.beam.beam->fromObjectNumber = sourceObject->entryNumber;
     beamObject->frame.beam.beam->fromObjectID = sourceObject->id;
     beamObject->frame.beam.beam->fromObject = ( spaceObjectTypePtr) sourceObject;
@@ -193,20 +193,20 @@ void SetSpecialBeamAttributes( spaceObjectType *beamObject, spaceObjectType *sou
     {
         target = (spaceObjectType *)*gSpaceObjectData +
             sourceObject->targetObjectNumber;
-        
+
         if ( ( target->active) && ( target->id == sourceObject->targetObjectID))
         {
 //          beamObject->frame.beam.beam->fromObjectNumber = sourceObject->entryNumber;
 //          beamObject->frame.beam.beam->fromObjectID = sourceObject->id;
 //          beamObject->frame.beam.beam->fromObject = ( spaceObjectTypePtr) sourceObject;
-            
+
             if ( target->location.h > beamObject->location.h)
                 h = target->location.h - beamObject->location.h;
             else h = beamObject->location.h - target->location.h;
             if ( target->location.v > beamObject->location.v)
                 v = target->location.v - beamObject->location.v;
             else v = beamObject->location.v - target->location.v;
-            
+
             if (((( h * h) + ( v * v)) >
                 ( beamObject->frame.beam.beam->range *
                     beamObject->frame.beam.beam->range)) ||
@@ -239,11 +239,11 @@ void SetSpecialBeamAttributes( spaceObjectType *beamObject, spaceObjectType *sou
                         target->location.v - sourceObject->location.v;
                     beamObject->frame.beam.beam->toRelativeCoord.h +=
                         - beamObject->frame.beam.beam->accuracy +
-                        RandomSeeded( (short)(beamObject->frame.beam.beam->accuracy << (long)1), 
+                        RandomSeeded( (short)(beamObject->frame.beam.beam->accuracy << (long)1),
                                     &(beamObject->randomSeed), 'beam', 1);
                     beamObject->frame.beam.beam->toRelativeCoord.v +=
                         - beamObject->frame.beam.beam->accuracy +
-                        RandomSeeded( (short)(beamObject->frame.beam.beam->accuracy << (long)1), 
+                        RandomSeeded( (short)(beamObject->frame.beam.beam->accuracy << (long)1),
                                     &(beamObject->randomSeed), 'beam', 1);
 
                 } else
@@ -252,7 +252,7 @@ void SetSpecialBeamAttributes( spaceObjectType *beamObject, spaceObjectType *sou
                         target->entryNumber;
                     beamObject->frame.beam.beam->toObjectID = target->id;
                     beamObject->frame.beam.beam->toObject =
-                        ( spaceObjectTypePtr)target;            
+                        ( spaceObjectTypePtr)target;
                 }
             }
         } else // target not valid
@@ -298,7 +298,7 @@ void DetermineBeamRelativeCoordFromAngle( spaceObjectType *beamObject,
     long            h = angle;
     smallFixedType  fcos, fsin, x = 0,
         y = mLongToFixed( beamObject->frame.beam.beam->range);
-    
+
     mAddAngle( h, -90);
     mGetRotPoint( fcos, fsin, (long)h)
     fcos = -fcos;
@@ -324,14 +324,14 @@ void DrawAllBeams( void)
     longRect        bounds;
     long            h;
     PixMapHandle    whatWorld = thePixMapHandle;
-    
+
     if (( gAresGlobal->gOptions & kOptionQDOnly)) whatWorld = GetGWorldPixMap( gOffWorld);
-    
+
     bounds.left = CLIP_LEFT;
     bounds.right = CLIP_RIGHT;
     bounds.top = CLIP_TOP;
     bounds.bottom = CLIP_BOTTOM;
-        
+
     for ( i = 0; i < kBeamNum; i++)
     {
         if ( aBeam->active)
@@ -352,10 +352,10 @@ void DrawAllBeams( void)
                 h = (aBeam->objectLocation.v - gGlobalCorner.v) * gAbsoluteScale;
                 h >>= SHIFT_SCALE; //+ CLIP_TOP;
                 aBeam->thisLocation.top = h;
-                
+
                 aBeam->lastApparentLocation.h = aBeam->objectLocation.h;
                 aBeam->lastApparentLocation.v = aBeam->objectLocation.v;
-            }   
+            }
             if (( !aBeam->killMe) && ( aBeam->active != kObjectToBeFreed))
             {
                 if ( aBeam->color)
@@ -399,14 +399,14 @@ void DrawAllBeams( void)
     long            h, v;
     PixMapHandle    whatWorld = GetGWorldPixMap( gOffWorld);
     unsigned char   currentColor;
-    
+
     if (( gAresGlobal->gOptions & kOptionQDOnly)) whatWorld = GetGWorldPixMap( gOffWorld);
-    
+
     bounds.left = CLIP_LEFT;
     bounds.right = CLIP_RIGHT;
     bounds.top = CLIP_TOP;
     bounds.bottom = CLIP_BOTTOM;
-        
+
     for ( i = 0; i < kBeamNum; i++)
     {
         if ( aBeam->active)
@@ -427,10 +427,10 @@ void DrawAllBeams( void)
                 h = (aBeam->objectLocation.v - gGlobalCorner.v) * gAbsoluteScale;
                 h >>= SHIFT_SCALE; //+ CLIP_TOP;
                 aBeam->thisLocation.top = h;
-                
+
                 aBeam->lastApparentLocation.h = aBeam->objectLocation.h;
                 aBeam->lastApparentLocation.v = aBeam->objectLocation.v;
-            }   
+            }
 
             if ( aBeam->color)
             {
@@ -481,7 +481,7 @@ void DrawAllBeams( void)
                             aBeam->boltCycleTime = 0;
                             aBeam->thisBoltPoint[0].h = aBeam->thisLocation.left;
                             aBeam->thisBoltPoint[0].v = aBeam->thisLocation.top;
-                            aBeam->thisBoltPoint[kBoltPointNum - 1].h = 
+                            aBeam->thisBoltPoint[kBoltPointNum - 1].h =
                                 aBeam->thisLocation.right;
                             aBeam->thisBoltPoint[kBoltPointNum - 1].v =
                                 aBeam->thisLocation.bottom;
@@ -559,14 +559,14 @@ void ShowAllBeams( void)
     longRect        bounds;
     PixMapHandle    offWorld = GetGWorldPixMap( gOffWorld),
                     onWorld = thePixMapHandle;
-    
+
     if (( gAresGlobal->gOptions & kOptionQDOnly)) onWorld = GetGWorldPixMap( gOffWorld);
-    
+
     bounds.left = CLIP_LEFT;
     bounds.right = CLIP_RIGHT;
     bounds.top = CLIP_TOP;
     bounds.bottom = CLIP_BOTTOM;
-        
+
     for ( i = 0; i < kBeamNum; i++)
     {
         if ( aBeam->active)
@@ -622,7 +622,7 @@ void ShowAllBeams( void)
                         aBeam->lastBoltPoint[j].v =
                             aBeam->thisBoltPoint[j].v;
                     }
-                        
+
                 } else
                 {
                     CopyNateLine( *offWorld, *onWorld, &bounds,
@@ -665,7 +665,7 @@ void ResolveBeamData( Handle beamData)
     beamType        *aBeam = ( beamType *)*gAresGlobal->gBeamData;
     short           i;
     spaceObjectType *anObject;
-    
+
 #pragma unused ( beamData)
     for ( i = 0; i < kBeamNum; i++)
     {

@@ -55,7 +55,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     16 Tranchees
     1206 GENEVA
     SWITZERLAND
-    
+
     FAX: (41 22) 346 11 97
     Compuserve: 100277,164
     Internet: rosset@dial.eunet.ch
@@ -94,7 +94,7 @@ int MusicInit( void)
 {
     MADDriverSettings   init;
     OSErr               error;
-    
+
     if ( gAresGlobal->gOptions & kOptionMusicDriver)
     {
     #ifdef kUseMusic
@@ -115,7 +115,7 @@ int MusicInit( void)
         init.ReverbSize         = 0;                            // Reverb delay duration (in ms, min = 25 ms, max 1 sec = 1000 ms)
         init.ReverbStrength     = 0;                        // Reverb strength in % (0 <-> 70)
         init.TickRemover        = false;                        // Remove volume/sample/loop ticks.
-*/  
+*/
 init.numChn             = 4;
 init.outPutBits         = 8;
 init.outPutRate         = rate22khz;
@@ -149,7 +149,7 @@ init.sysMemory          = false;
         init.ReverbSize         = 0;                            // Reverb delay duration (in ms, min = 25 ms, max 1 sec = 1000 ms)
         init.ReverbStrength     = 0;                        // Reverb strength in % (0 <-> 70)
         init.TickRemover        = true;                     // Remove volume/sample/loop ticks.
-*/  
+*/
 init.numChn             = 4;
 init.outPutBits         = 8;
 init.outPutRate         = rate22khz;
@@ -213,7 +213,7 @@ void PlaySong( void)
 
 {
     OSErr   err;
-        
+
     if ( gAresGlobal->gOptions & kOptionMusicDriver)
     {
     #ifdef kUseMusic
@@ -276,11 +276,11 @@ void StopAndUnloadSong( void)
 
 void LoadSong( short resID)
 
-{   
+{
     OSErr   err;
-    
+
     if ( resID <= 0) return;
-    
+
     if ( gAresGlobal->gOptions & kOptionMusicDriver)
     {
     #ifdef kUseMusic
@@ -315,7 +315,7 @@ void SetSongVolume( long volume)
     {
     #ifdef kUseMusic
         short   i;
-    
+
         for ( i = 0; i < kTrackNumber; i++)
         {
             MADDriver->VolExt[i] = volume;

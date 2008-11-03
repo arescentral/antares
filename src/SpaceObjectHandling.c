@@ -136,14 +136,14 @@ int SpaceObjectHandlingInit( void)
 
 {
     Boolean correctBaseObjectColor = false;
-    
+
     gSpaceObjectData = NewHandle( sizeof( spaceObjectType) * (long)kMaxSpaceObject);
     if ( gSpaceObjectData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
         return( MEMORY_ERROR);
     }
-    
+
     /*
     MoveHHi( gSpaceObjectData);
     HLock( gSpaceObjectData);
@@ -166,7 +166,7 @@ int SpaceObjectHandlingInit( void)
 
         gAresGlobal->maxBaseObject = GetHandleSize( gBaseObjectData) /
             sizeof( baseObjectType);
-        
+
         correctBaseObjectColor = true;
     }
 
@@ -189,7 +189,7 @@ int SpaceObjectHandlingInit( void)
         gAresGlobal->maxObjectAction = GetHandleSize( gObjectActionData)
             / sizeof( objectActionType);
     }
-    
+
     gActionQueueData = NewHandle( sizeof( actionQueueType) * (long)kActionQueueLength);
     if ( gActionQueueData == nil)
     {
@@ -221,7 +221,7 @@ void ResetAllSpaceObjects( void)
 {
     spaceObjectType *anObject = nil;
     short           i;
-    
+
     gRootObject = nil;
     gRootObjectNumber = -1;
     anObject = (spaceObjectType *)*gSpaceObjectData;
@@ -258,11 +258,11 @@ void ResetAllSpaceObjects( void)
         anObject->destObjectPtr = nil;
         anObject->destObjectDest = 0;
         anObject->destObjectID = 0;
-        anObject->remoteFoeStrength = anObject->remoteFriendStrength = anObject->escortStrength = 
+        anObject->remoteFoeStrength = anObject->remoteFriendStrength = anObject->escortStrength =
             anObject->localFoeStrength = anObject->localFriendStrength = 0;
         anObject->bestConsideredTargetValue = anObject->currentTargetValue = 0xffffffff;
         anObject->bestConsideredTargetNumber = -1;
-        
+
         anObject->timeFromOrigin = 0;
         anObject->motionFraction.h = anObject->motionFraction.v = 0;
         anObject->velocity.h = anObject->velocity.v = 0;
@@ -308,7 +308,7 @@ void ResetAllSpaceObjects( void)
         anObject->specialTime = 0;
         anObject->specialAmmo = 0;
         anObject->specialPosition = 0;
-        
+
         anObject->whichLabel = 0;
         anObject->offlineTime = 0;
         anObject->periodicTime = 0;
@@ -321,11 +321,11 @@ void ResetActionQueueData( void)
 {
     actionQueueType *action = (actionQueueType *)*gActionQueueData;
     long            i;
-    
+
     WriteDebugLine((char *)"\p>RESETACT");
     gFirstActionQueueNumber = -1;
     gFirstActionQueue = nil;
-    
+
     for ( i = 0; i < kActionQueueLength; i++)
     {
         action->actionNum = -1;
@@ -365,9 +365,9 @@ int AddSpaceObject( spaceObjectType *sourceObject)
     unsigned char   tinyColor, tinyShade;
     transColorType  *transColor;
     short           whichShape = 0, angle;
-    
+
     destObject = (spaceObjectType *)*gSpaceObjectData;
-    
+
     while (( destObject->active) && ( whichObject < kMaxSpaceObject))
     {
         whichObject++;
@@ -378,7 +378,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
 //      DebugStr("\pNo Free Objects!");
         return( -1);
     }
-    
+
     if ( sourceObject->pixResID != kNoSpriteTable)
     {
         spriteTable = GetPixTable( sourceObject->pixResID);
@@ -395,10 +395,10 @@ int AddSpaceObject( spaceObjectType *sourceObject)
     {
         spriteTable = nil;
     }
-    
+
 //  sourceObject->id = whichObject;
     *destObject = *sourceObject;
-    
+
     destObject->lastLocation = destObject->location;
     destObject->collideObject = nil;
     destObject->lastLocation.h += 100000;
@@ -415,7 +415,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
 //  where.h = destObject->location.h - gGlobalCorner.h + CLIP_LEFT;
 //  where.v = destObject->location.v - gGlobalCorner.v /*+ CLIP_TOP*/;
     if ( destObject->sprite != nil) RemoveSprite( destObject->sprite);
-    
+
     if ( spriteTable != nil)
     {
         switch( destObject->layer)
@@ -423,21 +423,21 @@ int AddSpaceObject( spaceObjectType *sourceObject)
             case kFirstSpriteLayer:
                 tinyShade = MEDIUM;
                 break;
-            
+
             case kMiddleSpriteLayer:
                 tinyShade = LIGHT;
                 break;
-            
+
             case kLastSpriteLayer:
                 tinyShade = VERY_LIGHT;
                 break;
-            
+
             default:
                 tinyShade = DARK;
                 break;
         }
-        
-        if ( destObject->tinySize == 0) 
+
+        if ( destObject->tinySize == 0)
         {
             tinyColor = kNoTinyColor;
         } else if ( destObject->owner == gAresGlobal->gPlayerAdmiralNumber)
@@ -460,12 +460,12 @@ int AddSpaceObject( spaceObjectType *sourceObject)
             mAddAngle( angle, destObject->baseType->frame.rotation.rotRes >> 1)
             whichShape = angle / destObject->baseType->frame.rotation.rotRes;
         }
-        
+
         destObject->sprite = AddSprite( where, spriteTable, sourceObject->pixResID, whichShape,
             destObject->naturalScale, destObject->tinySize, destObject->layer, tinyColor,
             &(destObject->whichSprite));
         destObject->tinyColor = tinyColor;
-        
+
         if ( destObject->sprite == nil)
         {
 //          DebugStr("\pNo Sprites!");
@@ -475,7 +475,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
             return( -1);
         }
         GetOldSpritePixData( destObject->sprite, &oldStyleSprite);
-        
+
         scaleCalc = ((long)oldStyleSprite.width * destObject->naturalScale);
         scaleCalc >>= SHIFT_SCALE;
         destObject->scaledSize.h = scaleCalc;
@@ -489,7 +489,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
         scaleCalc = (long)oldStyleSprite.center.v * destObject->naturalScale;
         scaleCalc >>= SHIFT_SCALE;
         destObject->scaledCornerOffset.v = -scaleCalc;
-            
+
     } else
     {
         destObject->scaledCornerOffset.h = destObject->scaledCornerOffset.v = 0;
@@ -497,7 +497,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
         destObject->sprite = nil;
         destObject->whichSprite = kNoSprite;
     }
-    
+
     if ( destObject->attributes & kIsBeam)
     {
         destObject->frame.beam.beam = AddBeam( &(destObject->location),
@@ -527,14 +527,14 @@ int AddSpaceObject( spaceObjectType *sourceObject)
     destObject->entryNumber = whichObject;
     destObject->cloakState = destObject->hitState = 0;
     destObject->duty = eNoDuty;
-    
+
 //  WriteDebugLine((char *)"\pAddObjOwner:");
 //  WriteDebugLong( destObject->owner);
-    
+
 //  if ( destObject->attributes & kCanThink)
 //      SetObjectDestination( destObject);
 //  else destObject->destinationObject = kNoDestinationObject;
-    
+
 /*
     if ( destObject->attributes & kIsDestination)
         destObject->destinationObject = MakeNewDestination( whichObject, canBuildType,
@@ -552,11 +552,11 @@ int AddNumberedSpaceObject( spaceObjectType *sourceObject, long whichObject)
     Point           where;
     spritePix       oldStyleSprite;
     long            scaleCalc;
-    
+
     destObject = (spaceObjectType *)*gSpaceObjectData + whichObject;
-    
+
     if ( whichObject == kMaxSpaceObject) return( -1);
-    
+
     if ( sourceObject->pixResID == kNoSpriteTable)
     {
         spriteTable = GetPixTable( sourceObject->pixResID);
@@ -568,13 +568,13 @@ int AddNumberedSpaceObject( spaceObjectType *sourceObject, long whichObject)
                 WriteDebugLine((char *)"\pSOBJ Error");
                 return (-1);
             }
-                
+
         }
     } else
     {
         spriteTable = nil;
     }
-    
+
 //  sourceObject->id = whichObject;
     *destObject = *sourceObject;
     where.h = destObject->location.h - gGlobalCorner.h + CLIP_LEFT;
@@ -586,7 +586,7 @@ int AddNumberedSpaceObject( spaceObjectType *sourceObject, long whichObject)
                             destObject->tinySize, destObject->tinyColor);
 
         GetOldSpritePixData( destObject->sprite, &oldStyleSprite);
-        
+
         scaleCalc = ((long)oldStyleSprite.width * destObject->naturalScale);
         scaleCalc >>= SHIFT_SCALE;
         destObject->scaledSize.h = scaleCalc;
@@ -637,7 +637,7 @@ void CorrectAllBaseObjectColor( void)
     short           i;
     transColorType  *transColor;
     unsigned char   fixColor;
-    
+
     for ( i = 0; i < kMaxBaseObject; i++)
     {
         if (( aBase->shieldColor != kNoTinyColor) && ( aBase->shieldColor != 0))
@@ -655,10 +655,10 @@ void CorrectAllBaseObjectColor( void)
                 aBase->frame.beam.color = 0;
             }
         }
-        
+
 //      if (( aBase->attributes & kCanThink) && ( aBase->warpSpeed <= 0))
 //          aBase->warpSpeed = mLongToFixed( 50);
-        
+
         if ( aBase->attributes & kIsSelfAnimated)
         {
             aBase->frame.animation.firstShape <<= kFixedBitShiftNumber;
@@ -681,11 +681,11 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
     smallFixedType  f;
     fixedPointType  newVel;
     long            l;
-    
+
 //  DebugFileAppendString( "\pIN\t");
 
     dObject->offlineTime = 0;
-    
+
     dObject->randomSeed = (long)seed;
 //  DebugFileAppendLong( dObject->randomSeed);
 //  DebugFileAppendString( "\p\t");
@@ -708,7 +708,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
     {
         dObject->id =RandomSeeded( 32768, &(dObject->randomSeed), 'soh0', whichBaseObject);
     } while ( dObject->id == -1);
-        
+
     dObject->distanceGrid.h = dObject->distanceGrid.v = dObject->collisionGrid.h = dObject->collisionGrid.v = 0;
     if ( sObject->activateActionNum & kPeriodicActionTimeMask)
     {
@@ -716,7 +716,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
             RandomSeeded( (short)((sObject->activateActionNum & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift),
             &(dObject->randomSeed), 'soh1', whichBaseObject);
     } else dObject->periodicTime = 0;
-    
+
     r = sObject->initialDirection;
     mAddAngle( r, direction)
     if ( sObject->initialDirectionRange > 0)
@@ -728,7 +728,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
     dObject->direction = r;
 //  DebugFileAppendLong( dObject->direction);
 //  DebugFileAppendString( "\p\t");
-    
+
     f = sObject->initialVelocity;
     if ( sObject->initialVelocityRange > 0)
     {
@@ -738,13 +738,13 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
     mGetRotPoint( newVel.h, newVel.v, r)
     newVel.h = mMultiplyFixed( newVel.h, f);
     newVel.v = mMultiplyFixed( newVel.v, f);
-    
+
     if ( velocity != nil)
     {
         newVel.h += velocity->h;
         newVel.v += velocity->v;
     }
-    
+
     dObject->velocity.h = newVel.h;
     dObject->velocity.v = newVel.v;
     dObject->maxVelocity = sObject->maxVelocity;
@@ -757,8 +757,8 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
         dObject->thrust = 0;
     else
         dObject->thrust = sObject->maxThrust;
-        
-    
+
+
     dObject->energy = sObject->energy;
     dObject->rechargeTime = dObject->pulseCharge = dObject->beamCharge = dObject->specialCharge = 0;
     dObject->warpEnergyCollected = 0;
@@ -786,13 +786,13 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
         {
             dObject->balance[i] = 0;
         }
-    }   
+    }
 */
-    dObject->remoteFoeStrength = dObject->remoteFriendStrength = dObject->escortStrength = 
+    dObject->remoteFoeStrength = dObject->remoteFriendStrength = dObject->escortStrength =
         dObject->localFoeStrength = dObject->localFriendStrength = 0;
     dObject->bestConsideredTargetValue = dObject->currentTargetValue = 0xffffffff;
     dObject->bestConsideredTargetNumber = -1;
-        
+
     // not setting: scaledCornerOffset, scaledSize, absoluteBounds;
 
     if ( dObject->attributes & kCanTurn)
@@ -831,9 +831,9 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
 //      dObject->frame.beam.killMe = FALSE;
     }
 //  DebugFileAppendString( "\p\t");
-    
+
     // not setting lastTimeUpdate;
-    
+
     dObject->health = sObject->health;
 
     // not setting owner
@@ -845,31 +845,31 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
 //  DebugFileAppendLong( dObject->age);
 //  DebugFileAppendString( "\p\r");
     dObject->naturalScale = sObject->naturalScale;
-    
+
     // not setting id
-    
+
     dObject->active = kObjectInUse;
     dObject->nextNearObject = dObject->nextFarObject = nil;
-    
+
     // not setting sprite, targetObjectNumber, lastTarget, lastTargetDistance;
-    
+
     dObject->closestDistance = kMaximumRelevantDistanceSquared;
     dObject->targetObjectNumber = dObject->lastTarget = dObject->targetObjectID = kNoShip;
     dObject->lastTargetDistance = dObject->targetAngle = 0;
-    
+
     dObject->closestObject = kNoShip;
     dObject->presenceState = kNormalPresence;
     dObject->presenceData = 0;
-    
+
     if ( spriteIDOverride == -1)
         dObject->pixResID = sObject->pixResID;
     else dObject->pixResID = spriteIDOverride;
-    
+
     if ( sObject->attributes & kCanThink)
     {
         dObject->pixResID += ((short)GetAdmiralColor( owner) << kSpriteTableColorShift);
     }
-    
+
     dObject->pulseType = sObject->pulse;
     if ( dObject->pulseType != kNoWeapon)
         dObject->pulseBase = mGetBaseObjectPtr( dObject->pulseType);
@@ -884,7 +884,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
     else dObject->specialBase = nil;
     dObject->longestWeaponRange = 0;
     dObject->shortestWeaponRange = kMaximumRelevantDistance;
-    
+
     if ( dObject->pulseType != kNoWeapon)
     {
         weaponBase = dObject->pulseBase;
@@ -897,7 +897,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
             if ( r < dObject->shortestWeaponRange) dObject->shortestWeaponRange = r;
         }
     } else dObject->pulseTime = 0;
-    
+
     if ( dObject->beamType != kNoWeapon)
     {
         weaponBase = dObject->beamBase;
@@ -910,7 +910,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
             if ( r < dObject->shortestWeaponRange) dObject->shortestWeaponRange = r;
         }
     } else dObject->beamTime = 0;
-    
+
     if ( dObject->specialType != kNoWeapon)
     {
         weaponBase = dObject->specialBase;
@@ -923,7 +923,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
             if ( r < dObject->shortestWeaponRange) dObject->shortestWeaponRange = r;
         }
     } else dObject->specialTime = 0;
-    
+
     // if we don't have any weapon, then shortest range is 0 too
     if ( dObject->longestWeaponRange == 0) dObject->shortestWeaponRange = 0;
     if ( dObject->longestWeaponRange > kEngageRange)
@@ -949,7 +949,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
     short           angle;
     long            r;
     Handle          spriteTable;
-    
+
     dObject->attributes = sObject->attributes | (dObject->attributes &
         (kIsHumanControlled | kIsRemote | kIsPlayerShip | kStaticDestination));
     dObject->baseType = sObject;
@@ -995,22 +995,22 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
     }
 
     dObject->maxVelocity = sObject->maxVelocity;
-    
+
     dObject->age = sObject->initialAge + RandomSeeded( (short)sObject->initialAgeRange,
         &(dObject->randomSeed), 'soh7', whichBaseObject);
 
     dObject->naturalScale = sObject->naturalScale;
-    
+
     // not setting id
-    
+
     dObject->active = kObjectInUse;
-    
+
     // not setting sprite, targetObjectNumber, lastTarget, lastTargetDistance;
-    
+
     if ( spriteIDOverride == -1)
         dObject->pixResID = sObject->pixResID;
     else dObject->pixResID = spriteIDOverride;
-    
+
     if ( sObject->attributes & kCanThink)
     {
         dObject->pixResID += ((short)GetAdmiralColor( dObject->owner) << kSpriteTableColorShift);
@@ -1030,7 +1030,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
     else dObject->specialBase = nil;
     dObject->longestWeaponRange = 0;
     dObject->shortestWeaponRange = kMaximumRelevantDistance;
-    
+
     // check periodic time
     if ( sObject->activateActionNum & kPeriodicActionTimeMask)
     {
@@ -1038,7 +1038,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
             RandomSeeded( (short)((sObject->activateActionNum & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift),
             &(dObject->randomSeed), 'soh8', whichBaseObject);
     } else dObject->periodicTime = 0;
-    
+
     if ( dObject->pulseType != kNoWeapon)
     {
         weaponBase = dObject->pulseBase;
@@ -1058,7 +1058,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
             if ( r < dObject->shortestWeaponRange) dObject->shortestWeaponRange = r;
         }
     } else dObject->pulseTime = 0;
-    
+
     if ( dObject->beamType != kNoWeapon)
     {
         weaponBase = dObject->beamBase;
@@ -1078,7 +1078,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
             if ( r < dObject->shortestWeaponRange) dObject->shortestWeaponRange = r;
         }
     } else dObject->beamTime = 0;
-    
+
     if ( dObject->specialType != kNoWeapon)
     {
         weaponBase = dObject->specialBase;
@@ -1098,14 +1098,14 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
             if ( r < dObject->shortestWeaponRange) dObject->shortestWeaponRange = r;
         }
     } else dObject->specialTime = 0;
-    
+
     // if we don't have any weapon, then shortest range is 0 too
     if ( dObject->longestWeaponRange == 0) dObject->shortestWeaponRange = 0;
     if ( dObject->longestWeaponRange > kEngageRange)
         dObject->engageRange = dObject->longestWeaponRange;
     else
         dObject->engageRange = kEngageRange;
-    
+
     // HANDLE THE NEW SPRITE DATA:
     if ( dObject->pixResID != kNoSpriteTable)
     {
@@ -1117,7 +1117,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
             spriteTable = AddPixTable( dObject->pixResID);
 //          if ( spriteTable == nil) Debugger();
         }
-        
+
         dObject->sprite->table = spriteTable;
         dObject->sprite->tinySize = sObject->tinySize;
         dObject->sprite->whichLayer = sObject->pixLayer;
@@ -1149,13 +1149,13 @@ void AddActionToQueue( objectActionType *action, long actionNumber, long actionT
     long                queueNumber = 0;
     actionQueueType     *actionQueue = (actionQueueType *)*gActionQueueData,
                         *nextQueue = gFirstActionQueue, *previousQueue = nil;
-    
+
     while (( actionQueue->action != nil) && ( queueNumber < kActionQueueLength))
     {
         actionQueue++;
         queueNumber++;
     }
-    
+
     if ( queueNumber == kActionQueueLength) return; //DebugStr("\pActionQueue FULL!");
 //  delayTime += gAresGlobal->gGameTime;
     actionQueue->action = action;
@@ -1163,7 +1163,7 @@ void AddActionToQueue( objectActionType *action, long actionNumber, long actionT
     actionQueue->scheduledTime = delayTime;
     actionQueue->subjectObject = subjectObject;
     actionQueue->actionToDo = actionToDo;
-    
+
     if ( offset == nil)
     {
         actionQueue->offset.h = actionQueue->offset.v = 0;
@@ -1172,7 +1172,7 @@ void AddActionToQueue( objectActionType *action, long actionNumber, long actionT
         actionQueue->offset.h = offset->h;
         actionQueue->offset.v = offset->v;
     }
-    
+
     if ( subjectObject != nil)
     {
         actionQueue->subjectObjectNum = subjectObject->entryNumber;
@@ -1192,7 +1192,7 @@ void AddActionToQueue( objectActionType *action, long actionNumber, long actionT
         actionQueue->directObjectNum = -1;
         actionQueue->directObjectID = -1;
     }
-    
+
     while (( nextQueue != nil) && ( nextQueue->scheduledTime < delayTime))
     {
         previousQueue = nextQueue;
@@ -1208,13 +1208,13 @@ void AddActionToQueue( objectActionType *action, long actionNumber, long actionT
     {
         actionQueue->nextActionQueue = previousQueue->nextActionQueue;
         actionQueue->nextActionQueueNum = previousQueue->nextActionQueueNum;
-        
+
         previousQueue->nextActionQueue = actionQueue;
         previousQueue->nextActionQueueNum = queueNumber;
     }
 //  if ( gFirstActionQueue != nil) WriteDebugLong( gFirstActionQueue->scheduledTime);
 //  WriteDebugLong( gAresGlobal->gGameTime);
-//  WriteDebugLine((char *)"\p<ADDACT");    
+//  WriteDebugLine((char *)"\p<ADDACT");
 }
 
 void ExecuteActionQueue( long unitsToDo)
@@ -1223,7 +1223,7 @@ void ExecuteActionQueue( long unitsToDo)
 //  actionQueueType     *actionQueue = gFirstActionQueue;
     actionQueueType     *actionQueue = (actionQueueType *)*gActionQueueData;
     long                        subjectid, directid, i;
-    
+
     for ( i = 0; i < kActionQueueLength; i++)
     {
         if ( actionQueue->action != nil)
@@ -1232,7 +1232,7 @@ void ExecuteActionQueue( long unitsToDo)
         }
         actionQueue++;
     }
-    
+
     actionQueue = gFirstActionQueue;
     while (( gFirstActionQueue != nil) &&
         ( gFirstActionQueue->action != nil) &&
@@ -1246,8 +1246,8 @@ void ExecuteActionQueue( long unitsToDo)
             if ( gFirstActionQueue->subjectObject->active)
                 subjectid = gFirstActionQueue->subjectObject->id;
         }
-            
-        if ( gFirstActionQueue->directObject != nil) 
+
+        if ( gFirstActionQueue->directObject != nil)
         {
             if ( gFirstActionQueue->directObject->active)
                 directid = gFirstActionQueue->directObject->id;
@@ -1262,7 +1262,7 @@ void ExecuteActionQueue( long unitsToDo)
             mWriteDebugString("\pExec Q:");
             WriteDebugLong( gFirstActionQueue->actionNum);
             WriteDebugLong( gFirstActionQueue->actionToDo);
-            
+
             ExecuteObjectActions( gFirstActionQueue->actionNum, gFirstActionQueue->actionToDo,
                 gFirstActionQueue->subjectObject, gFirstActionQueue->directObject,
                 &(gFirstActionQueue->offset), false);
@@ -1278,12 +1278,12 @@ void ExecuteActionQueue( long unitsToDo)
         gFirstActionQueue->directObjectNum = -1;
         gFirstActionQueue->directObjectID = -1;
         gFirstActionQueue->offset.h = gFirstActionQueue->offset.v = 0;
-        
+
         actionQueue = gFirstActionQueue;
-        
+
         gFirstActionQueueNumber = gFirstActionQueue->nextActionQueueNum;
         gFirstActionQueue = gFirstActionQueue->nextActionQueue;
-        
+
         actionQueue->nextActionQueueNum = -1;
         actionQueue->nextActionQueue = nil;
     }
@@ -1292,9 +1292,9 @@ void ExecuteActionQueue( long unitsToDo)
 void ExecuteObjectActions( long whichAction, long actionNum,
                 spaceObjectType *sObject, spaceObjectType *dObject, longPointType *offset,
                 Boolean allowDelay)
-                
+
 {
-    
+
     spaceObjectType *anObject, *playerPtr, *originalSObject = sObject,
                     *originalDObject = dObject;
     baseObjectType  *baseObject;
@@ -1311,7 +1311,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
     transColorType  *transColor;
     unsigned char   tinyColor;
     Str255          s;
-    
+
 //  WriteDebugLine( (char *)"\pEX\t");
 //  WriteDebugLine( gAresGlobal->gGameTime);
 //  WriteDebugLine( "\p\t");
@@ -1329,7 +1329,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
             dObject = GetObjectFromInitialNumber( action->initialDirectOverride);
          else
             dObject = originalDObject;
-            
+
         if (( action->delay > 0) && ( allowDelay))
         {
             AddActionToQueue( action, whichAction, actionNum,
@@ -1337,12 +1337,12 @@ void ExecuteObjectActions( long whichAction, long actionNum,
             return;
         }
         allowDelay = true;
-            
+
 //      WriteDebugLine((char *)"\pACTION");
 
         anObject = dObject;
         if (( action->reflexive) || ( anObject == nil)) anObject = sObject;
-        
+
         OKtoExecute = false;
         if ( anObject == nil)
         {
@@ -1372,8 +1372,8 @@ void ExecuteObjectActions( long whichAction, long actionNum,
             {
                 OKtoExecute = true;
             }
-                
-        }       
+
+        }
 /*
         if (    ( anObject == nil) ||
                 (( action->exclusiveFilter == 0xffffffff) &&
@@ -1396,7 +1396,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 //                  WriteDebugLong(action->argument.createObject.whichBaseType);
 //                  WriteDebugLong(action->argument.createObject.howManyMinimum);
 //                  WriteDebugLong(action->argument.createObject.howManyRange);
-                    
+
                     baseObject = mGetBaseObjectPtr( action->argument.createObject.whichBaseType);
                     end = action->argument.createObject.howManyMinimum;
                     if ( action->argument.createObject.howManyRange > 0)
@@ -1426,7 +1426,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                             newLocation.h += offset->h;
                             newLocation.v += offset->v;
                         }
-                        
+
                         if ( action->argument.createObject.randomDistance > 0)
                         {
                             newLocation.h += RandomSeeded( (short)action->argument.createObject.randomDistance << (short)1,
@@ -1438,12 +1438,12 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                     action->argument.createObject.whichBaseType)
                                     - action->argument.createObject.randomDistance;
                         }
-                        
+
 //                      l = CreateAnySpaceObject( action->argument.createObject.whichBaseType, &fpoint,
 //                              &newLocation, l, anObject->owner, 0, nil, -1, -1, -1);
                         l = CreateAnySpaceObject( action->argument.createObject.whichBaseType, &fpoint,
                                 &newLocation, l, anObject->owner, 0, -1);
-                        
+
                         if ( l >= 0)
                         {
                             spaceObjectType *newObject = (spaceObjectType *)*gSpaceObjectData + l;
@@ -1478,12 +1478,12 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                             newObject->targetObjectNumber = anObject->targetObjectNumber;
                             newObject->targetObjectID = anObject->targetObjectID;
                             newObject->closestObject = newObject->targetObjectNumber;
-                            
+
                             /*
                                 ugly though it is, we have to fill in the rest of
                                 a new beam's fields after it's created.
                             */
-                            
+
                             if ( newObject->attributes & kIsBeam)
                             {
                                 if ( newObject->frame.beam.beam->beamKind !=
@@ -1498,9 +1498,9 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 
                         end--;
                     }
-                    
+
                     break;
-                
+
                 case kPlaySound:
 //                  WriteDebugLine((char *)"\pSOUND");
                     l = action->argument.playSound.volumeMinimum;
@@ -1513,7 +1513,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                             'so33', -1);
                     }
                     if ( !action->argument.playSound.absolute)
-                    {                       
+                    {
                         mPlayDistanceSound( distance, l, anObject, angle, action->argument.playSound.persistence, action->argument.playSound.priority, m, ul2, playerPtr)
                     } else
                     {
@@ -1521,9 +1521,9 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                     action->argument.playSound.persistence,
                                     action->argument.playSound.priority);
                     }
-                    
+
                     break;
-                    
+
                 case kMakeSparks:
                     if ( anObject->sprite != nil)
                     {
@@ -1543,14 +1543,14 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                             location.h = l + CLIP_LEFT;
                         else
                             location.h = -kSpriteMaxSize;
-                            
+
                         l = (anObject->location.v - gGlobalCorner.v) * gAbsoluteScale;
                         l >>= SHIFT_SCALE; /*+ CLIP_TOP*/;
                         if (( l > -kSpriteMaxSize) && ( l < kSpriteMaxSize))
                             location.v = l + CLIP_TOP;
                         else
                             location.v = -kSpriteMaxSize;
-                        
+
                         MakeNewSparks(  action->argument.makeSparks.howMany,                    // sparkNum
                                         action->argument.makeSparks.speed,                      // sparkSpeed
                                         action->argument.makeSparks.velocityRange,      // velocity
@@ -1563,7 +1563,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                 case kDie:
 //                  WriteDebugLine((char *)"\pDIE");
 //                  WriteDebugLong( anObject->id);
-                    
+
 //                  if ( anObject->attributes & kIsBeam)
 //                      anObject->frame.beam.killMe = TRUE;
                     switch ( action->argument.killObject.dieType)
@@ -1589,7 +1589,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                 sObject->active = kObjectToBeFreed;
                             }
                             break;
-                        
+
                         case kDieDestroy:
                             if ( sObject != nil)
                             {
@@ -1603,7 +1603,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                 DestroyObject( sObject);
                             }
                             break;
-                            
+
                         default:
                             // if the object is occupied by a human, eject him since he can't die
                             if (( anObject->attributes & (kIsPlayerShip | kRemoteOrHuman)) &&
@@ -1615,13 +1615,13 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                             break;
                     }
                     break;
-                
+
                 case kNilTarget:
                     anObject->targetObjectNumber = kNoShip;
                     anObject->targetObjectID = kNoShip;
                     anObject->lastTarget = kNoShip;
                     break;
-                    
+
                 case kAlter:
 //                  WriteDebugLine((char *)"\pALTER");
                     switch( action->argument.alterObject.alterType)
@@ -1634,7 +1634,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                         case kAlterEnergy:
 //                  WriteDebugLine((char *)"\pNRG");
 //                  WriteDebugLong( sObject->id);
-                        
+
                             if ( action->argument.alterObject.minimum > 10000)
                             {
                                 WriteDebugLine((char *)"\pNRG");
@@ -1645,7 +1645,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                             AlterObjectEnergy( anObject,
                                 action->argument.alterObject.minimum);
                             break;
-                        
+
                         case 919191://kAlterSpecial:
 //                  WriteDebugLine((char *)"\pSpecial");
                             anObject->specialType = action->argument.alterObject.minimum;
@@ -1657,7 +1657,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                             if ( baseObject->frame.weapon.range < anObject->shortestWeaponRange)
                                 anObject->shortestWeaponRange = baseObject->frame.weapon.range;
                             break;
-                        
+
                         case kAlterHidden:
 //                          WriteDebugLine((char *)"\p>Unhide");
                             l = 0;
@@ -1667,11 +1667,11 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                 l++;
                             } while ( l <= action->argument.alterObject.range);
                             break;
-                        
+
                         case kAlterCloak:
                             AlterObjectCloakState( anObject, true);
                             break;
-                        
+
                         case kAlterSpin:
                             if ( anObject->attributes & kCanTurn)
                             {
@@ -1696,7 +1696,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                 }
                                 anObject->turnVelocity = f;
                                 /*
-                                anObject->frame.rotation.turnVelocity = 
+                                anObject->frame.rotation.turnVelocity =
                                         mMultiplyFixed( anObject->baseType->frame.rotation.maxTurnRate,
                                             action->argument.alterObject.minimum);
 
@@ -1721,7 +1721,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 //                          WriteDebugLong( anObject->offlineTime);
                             anObject->offlineTime = mFixedToLong( anObject->offlineTime);
                             break;
-                        
+
                         case kAlterVelocity:
 //                          if ( action->reflexive) WriteDebugLine((char *)"\pREFLEX!");
                             if ( sObject != nil)
@@ -1747,9 +1747,9 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                                 f /= dObject->baseType->mass;
                                                 f <<= 6L;
                                                 dObject->velocity.v += f;
-                                                
+
                                                 // make sure we're not going faster than our top speed
-                                                                            
+
                                                 if ( dObject->velocity.h == 0)
                                                 {
                                                     if ( dObject->velocity.v < 0)
@@ -1762,7 +1762,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                                     #else
                                                     aFixed = FixRatio( (int)dObject->velocity.h, (int)dObject->velocity.v);
                                                     #endif
-                                                    
+
                                                     angle = AngleFromSlope( aFixed);
                                                     if ( dObject->velocity.h > 0) angle += 180;
                                                     if ( angle >= 360) angle -= 360;
@@ -1780,9 +1780,9 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 //                                              f /= dObject->baseType->mass;
 //                                              f <<= 6L;
                                                 dObject->velocity.v += f;
-                                                
+
                                                 // make sure we're not going faster than our top speed
-                                                                            
+
                                                 if ( dObject->velocity.h == 0)
                                                 {
                                                     if ( dObject->velocity.v < 0)
@@ -1795,33 +1795,33 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                                     #else
                                                     aFixed = FixRatio( (int)dObject->velocity.h, (int)dObject->velocity.v);
                                                     #endif
-                                                    
+
                                                     angle = AngleFromSlope( aFixed);
                                                     if ( dObject->velocity.h > 0) angle += 180;
                                                     if ( angle >= 360) angle -= 360;
                                                 }
                                             }
-                                            
+
                                             // get the maxthrust of new vector
-                                            
+
                                             mGetRotPoint( f, f2, (long)angle);
-                                            
+
                                             f = mMultiplyFixed( dObject->maxVelocity, f);
                                             f2 = mMultiplyFixed( dObject->maxVelocity, f2);
-                                            
+
                                             if ( f < 0)
                                             {
-                                                if ( dObject->velocity.h < f) 
+                                                if ( dObject->velocity.h < f)
                                                     dObject->velocity.h = f;
                                             } else
                                             {
                                                 if ( dObject->velocity.h > f)
                                                     dObject->velocity.h = f;
                                             }
-                                            
+
                                             if ( f2 < 0)
                                             {
-                                                if ( dObject->velocity.v < f2) 
+                                                if ( dObject->velocity.v < f2)
                                                     dObject->velocity.v = f2;
                                             } else
                                             {
@@ -1859,10 +1859,10 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 //                                      WriteDebugLine((char *)"\pAbsolute Vel!");
                                     }
                                 }
-            
+
                             }// else DebugStr("\pAlter Vel Nil");
                             break;
-                        
+
                         case kAlterMaxVelocity:
                             if ( action->argument.alterObject.minimum < 0)
                             {
@@ -1873,7 +1873,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                     action->argument.alterObject.minimum;
                             }
                             break;
-                            
+
                         case kAlterThrust:
                             f = action->argument.alterObject.minimum +
                                 RandomSeeded( action->argument.alterObject.range, &(anObject->randomSeed),
@@ -1886,14 +1886,14 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                 anObject->thrust = f;
                             }
                             break;
-                            
+
                         case kAlterBaseType:
                             WriteDebugLine((char *)"\pAlterBase!");
                             if ( (action->reflexive) || ( dObject != nil))
                             ChangeObjectBaseType( anObject, action->argument.alterObject.minimum, -1,
                                 action->argument.alterObject.relative);
                             break;
-                            
+
                         case kAlterOwner:
 /*                          anObject->owner = action->argument.alterObject.minimum;
                             if ( anObject->attributes & kIsDestination)
@@ -1915,7 +1915,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                         action->argument.alterObject.minimum, false);
                             }
                             break;
-                        
+
                         case kAlterConditionTrueYet:
 //                  WriteDebugLine((char *)"\pTRUEYET");
                             if ( action->argument.alterObject.range <= 0)
@@ -1937,14 +1937,14 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                     SetScenarioConditionTrueYet( l,
                                                             action->argument.alterObject.relative);
                                 }
-                                        
+
                             }
                             break;
-                            
+
                         case kAlterOccupation:
                             AlterObjectOccupation( anObject, sObject->owner, action->argument.alterObject.minimum, true);
                             break;
-                            
+
                         case kAlterAbsoluteCash:
                             if ( action->argument.alterObject.relative)
                             {
@@ -1958,9 +1958,9 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                     action->argument.alterObject.minimum);
                             }
                             break;
-                        
+
                         case kAlterAge:
-                            l = action->argument.alterObject.minimum + 
+                            l = action->argument.alterObject.minimum +
                                     RandomSeeded( action->argument.alterObject.range,
                                         &(anObject->randomSeed), 'so17', anObject->whichBaseObject);
 
@@ -1969,7 +1969,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                 if ( anObject->age >= 0)
                                 {
                                     anObject->age += l;
-                                    
+
                                     if ( anObject->age < 0) anObject->age = 0;
                                 } else
                                 {
@@ -1980,7 +1980,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                 anObject->age = l;
                             }
                             break;
-                        
+
                         case kAlterLocation:
                             if ( action->argument.alterObject.relative)
                             {
@@ -2010,7 +2010,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                             anObject->location.h = newLocation.h;
                             anObject->location.v = newLocation.v;
                             break;
-                        
+
                         case kAlterAbsoluteLocation:
                             if ( action->argument.alterObject.relative)
                             {
@@ -2024,7 +2024,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                     &anObject->location);
                             }
                             break;
-                            
+
                         case kAlterWeapon1:
                             anObject->pulseType = action->argument.alterObject.minimum;
                             if ( anObject->pulseType != kNoWeapon)
@@ -2046,7 +2046,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                 anObject->pulseTime = 0;
                             }
                             break;
-                        
+
                         case kAlterWeapon2:
                             anObject->beamType = action->argument.alterObject.minimum;
                             if ( anObject->beamType != kNoWeapon)
@@ -2068,7 +2068,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                 anObject->beamTime = 0;
                             }
                             break;
-                        
+
                         case kAlterSpecial:
                             anObject->specialType = action->argument.alterObject.minimum;
                             if ( anObject->specialType != kNoWeapon)
@@ -2090,16 +2090,16 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                 anObject->specialTime = 0;
                             }
                             break;
-                        
+
                         case kAlterLevelKeyTag:
                             break;
-                            
+
                         default:
                             break;
-                        
+
                     }
                     break;
-                
+
                 case kLandAt:
 //                  DebugStr("\pLand At!");
 //                  WriteDebugLine((char *)"\pLANDAT");
@@ -2113,7 +2113,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     sObject->presenceData = sObject->baseType->naturalScale |
                         (action->argument.landAt.landingSpeed << kPresenceDataHiWordShift);
                     break;
-                
+
                 case kEnterWarp:
 //                  WriteDebugLine((char *)"\pWARPIN");
                     sObject->presenceState = kWarpInPresence;
@@ -2126,7 +2126,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     CreateAnySpaceObject( gAresGlobal->scenarioFileInfo.warpInFlareID, &(newVel),
                         &(sObject->location), sObject->direction, kNoOwner, 0, -1);
                     break;
-                
+
                 case kChangeScore:
                     if (( action->argument.changeScore.whichPlayer == -1) && ( anObject != nil))
                         l = anObject->owner;
@@ -2142,7 +2142,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                         checkConditions = true;
                     }
                     break;
-                        
+
                 case kDeclareWinner:
 //                  WriteDebugLine((char *)"\pDCLRWIN");
                     if (( action->argument.declareWinner.whichPlayer == -1) && ( anObject != nil))
@@ -2153,7 +2153,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     }
                     DeclareWinner( l, action->argument.declareWinner.nextLevel, action->argument.declareWinner.textID);
                     break;
-                    
+
                 case kDisplayMessage:
                     if ( !(gAresGlobal->gOptions & kOptionAutoPlay))
                     {
@@ -2161,9 +2161,9 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                             action->argument.displayMessage.pageNum - 1);
                         checkConditions = true;
                     }
-                    
+
                     break;
-                
+
                 case kSetDestination:
 //                  WriteDebugLine((char *)"\pSETDEST");
                     ul1 = sObject->attributes;
@@ -2174,28 +2174,28 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     SetObjectDestination( sObject, anObject);
                     sObject->attributes = ul1;
                     break;
-                
+
                 case kActivateSpecial:
                     WriteDebugLine((char *)"\pActivate Special!");
                     ActivateObjectSpecial( sObject);
                     break;
-                
+
                 case kColorFlash:
                     mGetTranslateColorShade( action->argument.colorFlash.color, action->argument.colorFlash.shade, tinyColor, transColor)
                     StartBooleanColorAnimation( action->argument.colorFlash.length,
                         action->argument.colorFlash.length, tinyColor);//GetTranslateColorShade( AQUA, VERY_LIGHT));
                     break;
-                
+
                 case kEnableKeys:
                     gAresGlobal->keyMask = gAresGlobal->keyMask &
                                                     ~action->argument.keys.keyMask;
                     break;
-                
+
                 case kDisableKeys:
                     gAresGlobal->keyMask = gAresGlobal->keyMask |
                                                     action->argument.keys.keyMask;
                     break;
-                    
+
                 case kSetZoom:
                     if (action->argument.zoom.zoomLevel != gAresGlobal->gZoomMode)
                     {
@@ -2205,16 +2205,16 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                         SetStatusString( s, TRUE, kStatusLabelColor);
                     }
                     break;
-                
+
                 case kComputerSelect:
                     MiniComputer_SetScreenAndLineHack( action->argument.computerSelect.screenNumber,
                         action->argument.computerSelect.lineNumber);
                     break;
-                
+
                 case kAssumeInitialObject:
                 {
                     scenarioInitialType *initialObject;
-                    
+
                     initialObject = mGetScenarioInitial( gThisScenario, (action->argument.assumeInitial.whichInitialObject+GetAdmiralScore(0, 0)));
                     if ( initialObject != nil)
                     {
@@ -2223,17 +2223,17 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     }
                 }
                     break;
-                    
+
                 default:
                     break;
             }
         }
-            
+
         actionNum--;
         action++;
         whichAction++;
     }
-    
+
     if ( checkConditions) CheckScenarioConditions( 0);
 }
 
@@ -2271,7 +2271,7 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
 long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
             coordPointType *location, long direction, long owner,
             unsigned long specialAttributes, short spriteIDOverride)
-            
+
 {
     spaceObjectType *madeObject = nil, newObject, *player = nil;
     long            newObjectNumber;
@@ -2345,13 +2345,13 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
         newObject.distanceFromPlayer.lo = distance;
         */
     }
-        
+
 //  WriteDebugLine((char *)"\pOwnerBirth:");
 //  WriteDebugLong( owner);
-    
+
     newObject.sprite = nil;
     newObject.id = (long)RandomSeeded( 16384, &gRandomSeed, 'so19', whichBase);
-        
+
     if ( newObject.attributes & kCanTurn)
     {
     } else if ( newObject.attributes & kIsSelfAnimated)
@@ -2361,21 +2361,21 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
     }else if ( newObject.attributes & kIsBeam)
     {
 /*      newObject.frame.beam.lastGlobalLocation = *location;
-        newObject.frame.beam.killMe = FALSE;            
-    
+        newObject.frame.beam.killMe = FALSE;
+
         h = ( newObject.location.h - gGlobalCorner.h) * gAbsoluteScale;
         h >>= SHIFT_SCALE;
         newObject.frame.beam.thisLocation.left = h + CLIP_LEFT;
         h = (newObject.location.v - gGlobalCorner.v) * gAbsoluteScale;
         h >>= SHIFT_SCALE; //+ CLIP_TOP
         newObject.frame.beam.thisLocation.top = h;
-    
+
         newObject.frame.beam.lastLocation.left = newObject.frame.beam.lastLocation.right =
                 newObject.frame.beam.thisLocation.left;
         newObject.frame.beam.lastLocation.top = newObject.frame.beam.lastLocation.bottom =
                 newObject.frame.beam.thisLocation.top;
 */  }
-        
+
 //  newObjectNumber = AddSpaceObject( &newObject, canBuildType,
 //      nameResID, nameStrNum);
     newObjectNumber = AddSpaceObject( &newObject);
@@ -2394,7 +2394,7 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
             DebugFileAppendLong( gAresGlobal->gGameTime);
             DebugFileAppendString( "\p\t\t");
             DebugFileAppendLong( madeObject->sprite->whichShape);
-            DebugFileAppendString( "\p\r");         
+            DebugFileAppendString( "\p\r");
         }
 */      ExecuteObjectActions( madeObject->baseType->createAction, madeObject->baseType->createActionNum,
                             madeObject, nil, nil, true);
@@ -2436,7 +2436,7 @@ long DebugCreateAnySpaceObject( long whichBase, fixedPointType *velocity,
         DebugFileAppendLong( location->h);
     }
     DebugFileAppendString( "\p\r");
-*/  
+*/
 //  return ( XCreateAnySpaceObject( whichBase, velocity, location, direction, owner, specialAttributes,
 //          canBuildType, nameResID, nameStrNum, spriteIDOverride));
     return( -1);
@@ -2446,9 +2446,9 @@ long CountObjectsOfBaseType( long whichType, long owner)
 
 {
     long    count, result = 0;
-    
+
     spaceObjectType *anObject;
-    
+
     anObject = (spaceObjectType *)*gSpaceObjectData;
     for ( count = 0; count < kMaxSpaceObject; count++)
     {
@@ -2465,16 +2465,16 @@ long GetNextObjectWithAttributes( long startWith, unsigned long attributes, Bool
 {
     long    original = startWith, result = 0;
     spaceObjectType *anObject;
-    
+
     anObject = (spaceObjectType *)*gSpaceObjectData + startWith;
-    
+
     if ( exclude)
     {
         do
         {
             startWith = anObject->nextObjectNumber;
             anObject = (spaceObjectType *)anObject->nextObject;
-            
+
             if ( anObject == nil)
             {
                 startWith = gRootObjectNumber;
@@ -2489,7 +2489,7 @@ long GetNextObjectWithAttributes( long startWith, unsigned long attributes, Bool
         {
             startWith = anObject->nextObjectNumber;
             anObject = (spaceObjectType *)anObject->nextObject;
-            
+
             if ( anObject == nil)
             {
                 startWith = gRootObjectNumber;
@@ -2507,7 +2507,7 @@ void ResolveSpaceObjectData( Handle spaceData)
     short           i;
     spaceObjectType *anObject, *bObject;
     actionQueueType *action = (actionQueueType *)*gActionQueueData;
-    
+
 #pragma unused( spaceData)
 //  mWriteDebugString("\pZONK!");
     anObject = (spaceObjectType *)*gSpaceObjectData;
@@ -2518,12 +2518,12 @@ void ResolveSpaceObjectData( Handle spaceData)
     {
         gRootObject = nil;
     }
-    
+
     if ( gAresGlobal->gScrollStarNumber >= 0)
     {
         gScrollStarObject = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gScrollStarNumber;
     }
-    
+
     for ( i = 0; i < kMaxSpaceObject; i++)
     {
         anObject->baseType = (baseObjectType *)*gBaseObjectData + anObject->whichBaseObject;
@@ -2535,14 +2535,14 @@ void ResolveSpaceObjectData( Handle spaceData)
 
         if (( anObject->sprite != nil) && ( anObject->whichSprite != kNoSprite))
             anObject->sprite = (spriteType *)*gSpriteTable + anObject->whichSprite;
-            
+
         if (( anObject->beamBase != nil) && ( anObject->beamType != kNoWeapon))
             anObject->beamBase = mGetBaseObjectPtr( anObject->beamType);
         if (( anObject->pulseBase != nil) && ( anObject->pulseType != kNoWeapon))
             anObject->pulseBase = mGetBaseObjectPtr( anObject->pulseType);
         if (( anObject->specialBase != nil) && ( anObject->specialType != kNoWeapon))
             anObject->specialBase = mGetBaseObjectPtr( anObject->specialType);
-        
+
         if ( anObject->nextObjectNumber >= 0)
         {
             bObject = (spaceObjectType *)*gSpaceObjectData + anObject->nextObjectNumber;
@@ -2581,7 +2581,7 @@ void ResolveObjectActionData( Handle actionData)
 {
     actionQueueType *action = (actionQueueType *)*gActionQueueData;
     long            i;
-    
+
 #pragma unused( actionData)
 //  mWriteDebugString("\pResolve ACTION");
     if ( gActionQueueData != nil)
@@ -2600,7 +2600,7 @@ void ResolveActionQueueData( Handle queueData)
 {
     actionQueueType *action = (actionQueueType *)*gActionQueueData;
     long            i;
-    
+
 #pragma unused( queueData)
 //  mWriteDebugString("\pResolve Action QUEUE");
     if ( gActionQueueData != nil)
@@ -2684,7 +2684,7 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, Boolean message)
     Str255          s;
     unsigned char   tinyShade, tinyColor;
     transColorType  *transColor;
-    
+
     if ( anObject->owner != owner)
     {
         // if the object is occupied by a human, eject him since he can't change sides
@@ -2693,7 +2693,7 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, Boolean message)
         {
             CreateFloatingBodyOfPlayer( anObject);
         }
-        
+
         anObject->owner = owner;
 
         if (( owner >= 0) && ( anObject->attributes & kIsDestination))
@@ -2708,9 +2708,9 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, Boolean message)
             }
             if ( GetAdmiralDestinationObject( owner) < 0)
                 SetAdmiralDestinationObject( owner, anObject->entryNumber, kObjectDestinationType);
-            
+
         }
-        
+
         if ( anObject->attributes & kNeutralDeath)
             anObject->attributes = anObject->baseType->attributes;
 
@@ -2722,20 +2722,20 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, Boolean message)
                 case kFirstSpriteLayer:
                     tinyShade = MEDIUM;
                     break;
-                
+
                 case kMiddleSpriteLayer:
                     tinyShade = LIGHT;
                     break;
-                
+
                 case kLastSpriteLayer:
                     tinyShade = VERY_LIGHT;
                     break;
-                
+
                 default:
                     tinyShade = DARK;
                     break;
             }
-            
+
             if ( owner == gAresGlobal->gPlayerAdmiralNumber)
             {
                 mGetTranslateColorShade( kFriendlyColor, tinyShade, tinyColor, transColor)
@@ -2757,7 +2757,7 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, Boolean message)
                     ((short)GetAdmiralColor( originalOwner)
                     << kSpriteTableColorShift))))
                 {
-                
+
                     anObject->pixResID =
                         anObject->baseType->pixResID | ((short)GetAdmiralColor( owner)
                         << kSpriteTableColorShift);
@@ -2770,12 +2770,12 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, Boolean message)
                 }
             }
         }
-        
-        anObject->remoteFoeStrength = anObject->remoteFriendStrength = anObject->escortStrength = 
+
+        anObject->remoteFoeStrength = anObject->remoteFriendStrength = anObject->escortStrength =
             anObject->localFoeStrength = anObject->localFriendStrength = 0;
         anObject->bestConsideredTargetValue = anObject->currentTargetValue = 0xffffffff;
         anObject->bestConsideredTargetNumber = -1;
-        
+
         fixObject = (spaceObjectType *)*gSpaceObjectData;
         for ( i = 0; i < kMaxSpaceObject; i++)
         {
@@ -2841,7 +2841,7 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, Boolean message)
             }
         }
         if ( anObject->attributes & kIsDestination)
-            RecalcAllAdmiralBuildData();    
+            RecalcAllAdmiralBuildData();
     }
 //  if ( anObject->attributes & kIsEndgameObject) CheckEndgame();
 }
@@ -2862,7 +2862,7 @@ void AlterObjectCloakState( spaceObjectType *anObject, Boolean cloak)
     long            l = kMaxSoundVolume, longscrap = kMaxSoundVolume;
     unsigned long   difference, ul1, ul2;
     spaceObjectType *playerPtr;
-    
+
     if ( (cloak) && ( anObject->cloakState == 0))
     {
         anObject->cloakState = 1;
@@ -2910,12 +2910,12 @@ void DestroyObject( spaceObjectType *anObject)
                 }
                 fixObject++;
             }
-            
+
             AlterObjectOwner( anObject, -1, true);
             anObject->attributes &= ~(kHated | kCanEngage | kCanCollide | kCanBeHit);
             ExecuteObjectActions( anObject->baseType->destroyAction,
                     anObject->baseType->destroyActionNum & kDestroyActionNotMask,
-                    anObject, nil, nil, true);          
+                    anObject, nil, nil, true);
         } else
         {
             AddKillToAdmiral( anObject);
@@ -2932,14 +2932,14 @@ void DestroyObject( spaceObjectType *anObject)
                     energyNum--;
                 }
             }
-            
+
             // if it's a destination, we keep anyone from thinking they have it as a destination
             // (all at once since this should be very rare)
             if (( anObject->attributes & kIsDestination) &&
                 (!(anObject->baseType->destroyActionNum & kDestroyActionDontDieFlag)))
             {
 //              mWriteDebugString( "\pKillDest");
-                
+
                 RemoveDestination( anObject->destinationObject);
                 fixObject = (spaceObjectType *)*gSpaceObjectData;
                 for ( i = 0; i < kMaxSpaceObject; i++)
@@ -2968,7 +2968,7 @@ void DestroyObject( spaceObjectType *anObject)
             if ( anObject->attributes & kCanAcceptDestination) RemoveObjectFromDestination( anObject);
             if (!(anObject->baseType->destroyActionNum & kDestroyActionDontDieFlag))
                 anObject->active = kObjectToBeFreed;
-        
+
     //      if ( anObject->attributes & kIsEndgameObject)
     //          CheckEndgame();
         }
@@ -2984,7 +2984,7 @@ void ActivateObjectSpecial( spaceObjectType *anObject)
     longPointType   offset;
     short           h;
     smallFixedType  fcos, fsin;
-    
+
     if (( anObject->specialTime <= 0) && ( anObject->specialType != kNoWeapon))
     {
         weaponObject = anObject->specialBase;
@@ -3023,11 +3023,11 @@ void CreateFloatingBodyOfPlayer( spaceObjectType *anObject)
 
 //  count = CreateAnySpaceObject( gAresGlobal->scenarioFileInfo.playerBodyID, &(anObject->velocity),
 //      &(anObject->location), anObject->direction, anObject->owner, 0, nil, -1, -1, -1);
-    
+
     // if we're already in a body, don't create a body from it
     // a body expiring is handled elsewhere
     if ( anObject->whichBaseObject == gAresGlobal->scenarioFileInfo.playerBodyID) return;
-    
+
     count = CreateAnySpaceObject( gAresGlobal->scenarioFileInfo.playerBodyID, &(anObject->velocity),
         &(anObject->location), anObject->direction, anObject->owner, 0, -1);
     if ( count >= 0)
@@ -3076,7 +3076,7 @@ void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord
     lscrap -= mMultiplyFixed(v, lsin);
     coord->h = kUniversalCenter;
     coord->h += lscrap;
-    
+
     lscrap = mMultiplyFixed(h, lsin);
     lscrap += mMultiplyFixed(v, lcos);
     coord->v = kUniversalCenter;

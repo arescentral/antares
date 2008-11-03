@@ -67,14 +67,14 @@ PixMapHandle            thePixMapHandle = nil;
 
 Boolean ChooseTheDevice ( int depth, Boolean setDepth)
 
-{   
+{
     gOriginalDeviceDepth = depth;
     theDevice = GetBestDevice ( &gOriginalDeviceDepth, WORLD_WIDTH, WORLD_HEIGHT);
     if ( theDevice != nil)
     {
         if ( setDepth) SetColorDepth( theDevice, depth);
         thePixMapHandle = (*theDevice)->gdPMap;
-        
+
     }
     return ( theDevice != nil);
 }
@@ -88,7 +88,7 @@ Boolean UserChooseTheDevice( int depth, Boolean setDepth, Rect *bounds)
     Rect            deviceRect;
     EventRecord     theEvent;
     WindowPtr       whichWindow;
-    
+
     for ( i = 0; i < kMaxDevice; i++)
     {
         deviceWindow[i].whichDevice = nil;
@@ -112,7 +112,7 @@ Boolean UserChooseTheDevice( int depth, Boolean setDepth, Rect *bounds)
         }
         currentDevice = GetNextDevice( currentDevice);
     }
-    
+
     // if there's no devices, we cannot go on
     if ( deviceNum < 1)
     {
@@ -126,7 +126,7 @@ Boolean UserChooseTheDevice( int depth, Boolean setDepth, Rect *bounds)
         return( true);
     }
     // otherwise, go on
-    
+
     for ( i = 0; i < deviceNum; i++)
     {
         MacSetRect( &deviceRect, 0, 0, 200, 200);
@@ -139,14 +139,14 @@ Boolean UserChooseTheDevice( int depth, Boolean setDepth, Rect *bounds)
     while ( chosenWindow == -1)
     {
         Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
-        
-        switch ( theEvent.what ) 
+
+        switch ( theEvent.what )
         {
             case nullEvent:
                 break;
 
             case mouseDown:
-                whichPart = MacFindWindow (theEvent.where,  &whichWindow);  
+                whichPart = MacFindWindow (theEvent.where,  &whichWindow);
                 switch (whichPart)
                 {
                     case inMenuBar:
@@ -168,24 +168,24 @@ Boolean UserChooseTheDevice( int depth, Boolean setDepth, Rect *bounds)
                         }
                         if ( chosenWindow < 0) SysBeep(20);
                         break;
-                        
+
                     case inDrag:
                         SysBeep(20);
                         break;
-                        
+
                     case inGoAway:
                         SysBeep(20);
                         break;
                 }
                 break;
-                
+
             case mouseUp:
                 break;
-                
+
             case keyDown:
             case autoKey:
                 break;
-            
+
             case updateEvt:
                 whichWindow = (WindowPtr)theEvent.message;
                 if ( whichWindow != nil)
@@ -203,7 +203,7 @@ Boolean UserChooseTheDevice( int depth, Boolean setDepth, Rect *bounds)
                 break;
         }
     }
-    
+
     for ( i = 0; i < kMaxDevice; i++)
     {
         if ( deviceWindow[i].window != nil)
@@ -211,7 +211,7 @@ Boolean UserChooseTheDevice( int depth, Boolean setDepth, Rect *bounds)
             DisposeWindow( deviceWindow[i].window);
         }
     }
-    
+
     if ( chosenWindow >= 0)
     {
         SetTheDevice( deviceWindow[chosenWindow].whichDevice, depth, setDepth);
@@ -233,7 +233,7 @@ void SetTheDevice( GDHandle thisdevice, int depth, Boolean setDepth)
     if ( theDevice != nil)
     {
         if ( setDepth) SetColorDepth( theDevice, depth);
-        thePixMapHandle = (*theDevice)->gdPMap;     
+        thePixMapHandle = (*theDevice)->gdPMap;
     }
 }
 
@@ -249,7 +249,7 @@ void CenterRectInDevice( GDHandle device, Rect *rect)
 {
     Rect        dRect;
     int         w, h;
-    
+
 //  dRect = (*(*device)->gdPMap)->bounds;
     dRect =(*device)->gdRect;
 //  if ( device == GetMainDevice())
@@ -275,7 +275,7 @@ void ShieldCursorInDevice( void)
 {
     Rect    tRect;
     Point   p;
-    
+
     GetDeviceRect( theDevice, &tRect);
     p.h = p.v = 0;
     ShieldCursor( &tRect, p);
@@ -299,10 +299,10 @@ int GetDeviceDepth( GDHandle device)
 
 {
     PixMapHandle    pmap;
-    
+
     pmap = (**device).gdPMap;
     return( (**pmap).pixelSize);
-    
+
 }
 
 GDHandle GetBestDevice( int *trueDepth, int width, int height)
@@ -313,7 +313,7 @@ GDHandle GetBestDevice( int *trueDepth, int width, int height)
     Rect        deviceRect;
     Boolean     bestAtRightDepth = FALSE;
     int         depth = *trueDepth;
-    
+
     resultDevice = GetMainDevice();
     GetDeviceRect( resultDevice, &deviceRect);
     // if the main device is not at correct depth, or is not of the minimum size

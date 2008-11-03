@@ -124,7 +124,7 @@ pascal OSErr HandleOApp( AppleEvent *theAppleEvent, AppleEvent *reply, long refc
     error = GotRequiredParams( theAppleEvent);
     if ( error != noErr) return ( error);
     // no action
-    
+
     return( noErr);
 }
 
@@ -132,47 +132,47 @@ pascal OSErr HandleQuit( AppleEvent *theAppleEvent, AppleEvent *reply, long refc
 
 {
     OSErr   error;
-    
+
 #pragma unused( reply, refcon)
 
     error = GotRequiredParams( theAppleEvent);
     if ( error != noErr) return ( error);
-    
+
 //  DoQuit( true);
     gAresGlobal->returnToMain = true;
     gAresGlobal->isQuitting = true;
-    
+
     return( noErr);
 }
 
 pascal OSErr HandlePrint( AppleEvent *theAppleEvent, AppleEvent *reply, long refcon)
 {
     OSErr error;
-    
+
 #pragma unused( reply, refcon)
 
     error = GotRequiredParams( theAppleEvent);
     if ( error != noErr) return ( error);
-    
+
     // no action
-    
+
     return( noErr);
 }
 
 pascal OSErr HandleAnswer( AppleEvent *theAppleEvent, AppleEvent *reply, long refcon)
 {
     OSErr error = noErr;
-    
+
 #pragma unused( theAppleEvent, reply, refcon)
 
 //  error = GotRequiredParams( theAppleEvent);
-    if ( error != noErr) 
+    if ( error != noErr)
     {
         return ( error);
     }
-    
+
     // no action
-    
+
     return( noErr);
 }
 
@@ -186,7 +186,7 @@ pascal OSErr HandleOpenDoc( AppleEvent *theAppleEvent, AppleEvent *reply,
     Size        actualSize;
     AEKeyword   keywd;
     DescType    returnedType;
-    
+
 #pragma unused( reply, refcon)
 
     //    {get the direct parameter--a descriptor list--and put it into doclist
@@ -206,8 +206,8 @@ pascal OSErr HandleOpenDoc( AppleEvent *theAppleEvent, AppleEvent *reply,
                 // and open
                 for ( index = 1; index <= itemsInList; index++)
                 {
-                    error = AEGetNthPtr(&docList, index, typeFSS, 
-                                           &keywd, &returnedType, &myFSS, 
+                    error = AEGetNthPtr(&docList, index, typeFSS,
+                                           &keywd, &returnedType, &myFSS,
                                            sizeof(myFSS), &actualSize);
                     if ( error == noErr)
                     {
@@ -231,7 +231,7 @@ pascal OSErr HandleOpenDoc( AppleEvent *theAppleEvent, AppleEvent *reply,
                         NewPrefsStartup( false);
 */                  }
                 }
-            } 
+            }
         } else
         {
             ignoreError = AEDisposeDesc( &docList);
@@ -251,7 +251,7 @@ pascal OSErr GotRequiredParams( AppleEvent *theAppleEvent)
     DescType    theType;
     Size        theSize;
     OSErr       error;
-    
+
     error = AEGetAttributePtr( theAppleEvent, keyMissedKeywordAttr, typeWildCard, &theType, nil,
             0, &theSize);
     if (error == errAEDescNotFound) // all required params gotten
@@ -298,7 +298,7 @@ OSErr AAE_Init( void)
         ShowErrorOfTypeOccurred( eQuitErr, kErrorStrID, kAEInitErr, err, __FILE__, 1);
         return err;
     }
-    
+
     upp = NewAEEventHandlerProc( (AEEventHandlerProcPtr)HandlePrint);
     err = AEInstallEventHandler( kCoreEventClass, kAEPrint,
             upp, 0, false);
@@ -324,7 +324,7 @@ OSErr AAE_Init( void)
 //      ShowErrorOfTypeOccurred( eQuitErr, kErrorStrID, kAEInitErr, err, __FILE__, 4);
 //      return err;
 //  }
-    
+
     gAresGlobal->aeInited = true;
     return noErr;
 }

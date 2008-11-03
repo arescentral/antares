@@ -164,7 +164,7 @@ static void ConflictText_Update( tempKeyControlType *keyControls)
     long    i, j;
     Str255  textString, tString;
     Boolean conflictFound = false;
-    
+
     textString[0] = 0;
     for ( i = 0; i < kKeyExtendedControlNum; i++)
     {
@@ -220,7 +220,7 @@ static void KeyControlButton_SetFlash( long whichKey, long currentTab,
                                     whichButton = -1;
     interfaceItemType       *anItem;
     Boolean                 hilite = false;
-    
+
     if ( whichTab != currentTab) whichButton = kShipTabNum + whichTab;
     else
     {
@@ -234,7 +234,7 @@ static void KeyControlButton_SetFlash( long whichKey, long currentTab,
 
     anItem = GetAnyInterfaceItemPtr( whichButton);
     if ( anItem == nil) return;
-    
+
     if ( !flash)
     {
         anItem->color = AQUA;
@@ -273,9 +273,9 @@ Boolean Key_Setup_Screen_Do( void)
     tempKeyControlType      *tempKeyControls;
     long                    lastFlashTime = 0;
     interfaceItemType       *anItem;
-    
+
     BlackenOffscreen();
-    
+
     FlushEvents(everyEvent, 0);
     tempKeyControls = (tempKeyControlType *)NewPtr( sizeof( long) *
         kKeyExtendedControlNum);
@@ -284,13 +284,13 @@ Boolean Key_Setup_Screen_Do( void)
         SysBeep(20);
         return false;
     }
-    
+
     for ( i = 0; i < kKeyExtendedControlNum; i++)
     {
         tempKeyControls[i].keyNum = GetKeyNumFromKeyMap( gAresGlobal->gKeyControl[i]);
         tempKeyControls[i].conflicts = false;
     }
-    
+
     error = OpenInterface( kKeyScreenID);
     if ( error == kNoError)
     {
@@ -298,23 +298,23 @@ Boolean Key_Setup_Screen_Do( void)
 
 //      SwitchAnyRadioOrCheckbox( kKeySubstituteCheckbox,
 //          ((options & kOptionSubstituteFKeys) ? (true):(false)));
-        
+
         tabItemNum = AppendInterface( kShipTabID, kTabBoxNum, true);
         whichTab = kShipTabNum;
         currentMaxKey = kShipKeyNum;
         currentKeyOffset = kShipKeyIndexOffset;
-        
+
         for ( i = 0; i < currentMaxKey; i++)
         {
             SetButtonKeyNum( kFirstKey + i,
                 tempKeyControls[i + currentKeyOffset].keyNum);
         }
-    
+
         DrawInterfaceOneAtATime();
         ConflictText_Update( tempKeyControls);
-        
+
         DrawStringInInterfaceItem( kConflictText, nil);
-        
+
         while ( !done)
         {
             InterfaceIdle();
@@ -323,7 +323,7 @@ Boolean Key_Setup_Screen_Do( void)
                 GetKeys( keyMap);
                 keyNum = GetKeyNumFromKeyMap( keyMap);
                 if ( currentKey > 0) keyNum = currentKey;
-                
+
                 // make sure it's not a reserved key
                 if ( IsKeyReserved( keyMap, ((options & kOptionSubstituteFKeys) ?
                     ( true):(false))))
@@ -332,7 +332,7 @@ Boolean Key_Setup_Screen_Do( void)
                         kShortPersistence, kMustPlaySound);
                     keyNum = -1;
                 }
-                
+
                 // make sure it's not a key that's already in use
                 checkKey = 0;
 
@@ -350,7 +350,7 @@ Boolean Key_Setup_Screen_Do( void)
                         GetKeys( keyMap);
                         currentKey = GetKeyNumFromKeyMap( keyMap);
                     } while ( currentKey > 0);
-                    
+
                     SetStatusOfAnyInterfaceItem( whichKeyButton + kFirstKey,
                         kActive, TRUE);
                     whichKeyButton++;
@@ -376,7 +376,7 @@ Boolean Key_Setup_Screen_Do( void)
             Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
-                switch ( theEvent.what ) 
+                switch ( theEvent.what )
                 {
                     case nullEvent:
                         if ( (TickCount() - lastFlashTime) > 12)
@@ -384,8 +384,8 @@ Boolean Key_Setup_Screen_Do( void)
                             interfaceItemStatusType     doneButtonStatus = kActive;
                             for ( i = 0; i < kKeyExtendedControlNum; i++)
                             {
-                                
-                                
+
+
                                 if ( tempKeyControls[i].conflicts)
                                 {
                                     doneButtonStatus = kDimmed;
@@ -400,7 +400,7 @@ Boolean Key_Setup_Screen_Do( void)
                                 true);
                             SetStatusOfAnyInterfaceItem( kKeyOptionButton, doneButtonStatus,
                                 true);
-                            lastFlashTime = TickCount();                            
+                            lastFlashTime = TickCount();
                         }
                         InterfaceIdle();
                         if ( gAresGlobal->gOptions & kOptionInBackground)
@@ -412,14 +412,14 @@ Boolean Key_Setup_Screen_Do( void)
                         {
                             done = true;
                             result = false;
-                        }   
+                        }
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
                         break;
                     case updateEvt:
                         whichWindow = ( CWindowPtr)theEvent.message;
-        
+
                         if ( whichWindow == gTheWindow)
                         {
                             BeginUpdate( (WindowPtr)whichWindow);
@@ -442,7 +442,7 @@ Boolean Key_Setup_Screen_Do( void)
                         MacSetPort( (WindowPtr)gTheWindow);
 
                         break;
-                        
+
                     case mouseDown:
                         where = theEvent.where;
                         GlobalToLocal( &where);
@@ -457,7 +457,7 @@ Boolean Key_Setup_Screen_Do( void)
 //                      whichItem = InterfaceKeyDown( theEvent.message);
                         break;
                 }
-                
+
                 if (( whichItem >= kFirstKey) &&
                     (whichItem < (kFirstKey + currentMaxKey)))
                 {
@@ -469,7 +469,7 @@ Boolean Key_Setup_Screen_Do( void)
                     whichKeyButton = whichItem - kFirstKey;
 //                  DrawKeyControlPicture( whichKeyButton);
                 }
-                
+
                 switch ( whichItem)
                 {
                     case kKeyCancelButton:
@@ -483,7 +483,7 @@ Boolean Key_Setup_Screen_Do( void)
                         result = FALSE;
                         done = TRUE;
                         break;
-                        
+
                     case kShipTabNum:
                     case kCommandTabNum:
                     case kShortcutTabNum:
@@ -506,7 +506,7 @@ Boolean Key_Setup_Screen_Do( void)
                         }
                         SwitchAnyRadioOrCheckbox( whichTab, true);
                         DrawAnyInterfaceItemOffToOn( GetAnyInterfaceItemPtr( whichTab));
-                        
+
                         whichKeyButton = -1;
                         keyNum = 0;
                         currentKey = 0;
@@ -518,21 +518,21 @@ Boolean Key_Setup_Screen_Do( void)
                                 currentMaxKey = kShipKeyNum;
                                 currentKeyOffset = kShipKeyIndexOffset;
                                 break;
-                                
+
                             case kCommandTabNum:
                                 tabItemNum = AppendInterface( kCommandTabID,
                                     kTabBoxNum, true);
                                 currentMaxKey = kCommandKeyNum;
                                 currentKeyOffset = kCommandKeyIndexOffset;
                                 break;
-                                
+
                             case kShortcutTabNum:
                                 tabItemNum = AppendInterface( kShortcutTabID,
                                     kTabBoxNum, true);
                                 currentMaxKey = kShortcutKeyNum;
                                 currentKeyOffset = kShortcutKeyIndexOffset;
                                 break;
-                                
+
                             case kUtilityTabNum:
                                 tabItemNum = AppendInterface( kUtilityTabID,
                                     kTabBoxNum, true);
@@ -556,9 +556,9 @@ Boolean Key_Setup_Screen_Do( void)
 
                         DrawInterfaceRange( kPreTabItemNum,
                             kPreTabItemNum + tabItemNum, kTabBoxNum);
-                        break;  
+                        break;
                 }
-                        
+
             }
         }
         if ( !cancel)

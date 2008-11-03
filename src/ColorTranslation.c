@@ -87,7 +87,7 @@ void MakeColorTranslatorTable( CTabHandle referenceTable)
     CTabHandle          deviceTable = nil;
     PixMapHandle        devicePixMap;
     RGBColor            paletteColor, deviceColor;
-        
+
     devicePixMap = (*theDevice)->gdPMap;
     deviceTable = (**devicePixMap).pmTable;
     entry = (transColorType *)*gColorTranslateTable;
@@ -114,7 +114,7 @@ void MakeColorTranslatorTable( CTabHandle referenceTable)
             }
         }
         entry++;
-    }               
+    }
 //  DisposHandle( (Handle)referenceTable);
 }
 
@@ -122,7 +122,7 @@ unsigned char GetRetroIndex( unsigned char which)
 
 {
     transColorType  *entry;
-    
+
     entry = (transColorType *)*gColorTranslateTable + (long)which;
     return( entry->retroColor);
 }
@@ -131,7 +131,7 @@ unsigned char GetTranslateIndex( unsigned char which)
 
 {
     transColorType  *entry;
-    
+
     entry = (transColorType *)*gColorTranslateTable + (long)which;
     return( entry->trueColor);
 }
@@ -140,7 +140,7 @@ unsigned char GetTranslateColorShade( unsigned char color, unsigned char shade)
 
 {
     transColorType  *entry;
-    
+
     entry = (transColorType *)*gColorTranslateTable + (long)((16 - shade) + 1 +
             color * 16);
     return( entry->trueColor);
@@ -151,7 +151,7 @@ void SetTranslateColorShadeFore( unsigned char color, unsigned char shade)
 {
     RGBColor        c;
     transColorType  *entry;
-    
+
     entry = (transColorType *)*gColorTranslateTable + (long)((16 - shade) + 1L +
             (long)color * 16L);
     Index2Color( (long)entry->trueColor, &c);
@@ -162,18 +162,18 @@ void GetRGBTranslateColorShade( RGBColor *c, unsigned char color, unsigned char 
 
 {
     transColorType  *entry;
-    
+
     entry = (transColorType *)*gColorTranslateTable + (long)((16 - shade) + 1L +
             (long)color * 16L);
     Index2Color( (long)entry->trueColor, c);
 }
- 
+
 void SetTranslateColorFore( unsigned char color)
 
 {
     RGBColor        c;
     transColorType  *entry;
-    
+
     entry = (transColorType *)*gColorTranslateTable + (long)color;
     Index2Color( (long)entry->trueColor, &c);
     RGBForeColor( &c);
@@ -183,7 +183,7 @@ void GetRGBTranslateColor( RGBColor *c, unsigned char color)
 
 {
     transColorType  *entry;
-    
+
     entry = (transColorType *)*gColorTranslateTable + (long)color;
     Index2Color( (long)entry->trueColor, c);
 }
@@ -192,7 +192,7 @@ void DefaultColors( void)
 
 {
     RGBColor    c;
-    
+
     c.red = c.blue = c.green = 0;
     RGBForeColor ( &c);
     c.red = c.blue = c.green = 65535;

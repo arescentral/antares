@@ -147,18 +147,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     hoff & voff are the h & v offsets frop the left and top edges of the destination map
     (ie the top & right edges of the destination window)
     CLIPS to destPix->bounds, NOT counting hoff & voff
-*/  
+*/
 void DrawNateRect( PixMap *destPix, longRect *destRect, long hoff, long voff, unsigned char color)
 
 {
     long            *dlong, drowPlus, x, y, colorlong, leftBytes, rightBytes, right;
     unsigned char   *dbyte;
-    
+
     colorlong = color;
     colorlong |= colorlong << 8;
     colorlong |= colorlong << 8;
     colorlong |= colorlong << 8;
-    
+
 /*
 // our destRect is always assuming an origin of 0,0 right?  So we have to fix this:
     if (( destRect->right <= destPix->bounds.left) || ( destRect->left >= destPix->bounds.right)
@@ -167,8 +167,8 @@ void DrawNateRect( PixMap *destPix, longRect *destRect, long hoff, long voff, un
         destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
         return;
     }
-    
-*/  
+
+*/
     if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds.right - destPix->bounds.left))
         || ( destRect->bottom <= 0) || ( destRect->top >= (destPix->bounds.bottom - destPix->bounds.top)))
     {
@@ -177,7 +177,7 @@ void DrawNateRect( PixMap *destPix, longRect *destRect, long hoff, long voff, un
     }
 
     drowPlus = destPix->rowBytes & 0x3fff;
-    
+
     if ( destRect->left < 0)
         destRect->left = 0;
     if ( destRect->right > ( destPix->bounds.right - destPix->bounds.left))
@@ -186,32 +186,32 @@ void DrawNateRect( PixMap *destPix, longRect *destRect, long hoff, long voff, un
         destRect->top = 0;
     if ( destRect->bottom > (destPix->bounds.bottom - destPix->bounds.top))
         destRect->bottom = (destPix->bounds.bottom - destPix->bounds.top);
-    
+
     leftBytes = destRect->right - destRect->left;
     if ( leftBytes > 4)
     {
         leftBytes = destRect->left + 4;
         leftBytes -= leftBytes & 0x00000003;
-        
+
         if ( leftBytes == destRect->left) leftBytes = 0;
         else leftBytes = leftBytes - destRect->left;
-        
+
         rightBytes = destRect->right;
         rightBytes -= rightBytes & 0x00000003;
-        
+
         if ( rightBytes < destRect->right) rightBytes = destRect->right - rightBytes;
         else rightBytes = 0;
-        
+
         dbyte = (unsigned char *)destPix->baseAddr + (destRect->top + voff) * drowPlus +
                     destRect->left + hoff;
-                    
+
         drowPlus = drowPlus - (destRect->right - destRect->left);
-        
+
         y = destRect->bottom - destRect->top;
         right = destRect->right;
         right -= destRect->left + leftBytes + rightBytes;
         right >>= 2;
-        
+
         while ( y-- > 0)
         {
             x = leftBytes;
@@ -222,7 +222,7 @@ void DrawNateRect( PixMap *destPix, longRect *destRect, long hoff, long voff, un
 #endif
                 *dbyte++ = color;
             }
-            
+
             dlong = (long *)dbyte;
             x = right;
             while ( x-- > 0)
@@ -232,7 +232,7 @@ void DrawNateRect( PixMap *destPix, longRect *destRect, long hoff, long voff, un
 #endif
                 *dlong++ = colorlong;
             }
-            
+
             dbyte = (unsigned char *)dlong;
             x = rightBytes;
             while ( x-- > 0)
@@ -242,14 +242,14 @@ void DrawNateRect( PixMap *destPix, longRect *destRect, long hoff, long voff, un
 #endif
                 *dbyte++ = color;
             }
-                
+
             dbyte += drowPlus;
         }
     } else
     {
         dbyte = (unsigned char *)destPix->baseAddr + (destRect->top + voff) * drowPlus +
                     destRect->left + hoff;
-                    
+
         drowPlus = drowPlus - leftBytes;
         y = destRect->bottom - destRect->top;
         while ( y-- > 0)
@@ -273,12 +273,12 @@ void DrawNateRectVScan( PixMap *destPix, longRect *destRect, long hoff, long vof
     long            *dlong, drowPlus, x, y, colorlong, leftBytes, rightBytes, right,
                     longMask = 0xff00ff00;
     unsigned char   *dbyte, leftMask = 0xff, rightMask = 0xff, leftMaskReset = 0xff;
-    
+
     colorlong = color;
     colorlong |= colorlong << 8;
     colorlong |= colorlong << 8;
     colorlong |= colorlong << 8;
-    
+
 /*
 // our destRect is always assuming an origin of 0,0 right?  So we have to fix this:
     if (( destRect->right <= destPix->bounds.left) || ( destRect->left >= destPix->bounds.right)
@@ -287,8 +287,8 @@ void DrawNateRectVScan( PixMap *destPix, longRect *destRect, long hoff, long vof
         destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
         return;
     }
-    
-*/  
+
+*/
     if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds.right - destPix->bounds.left))
         || ( destRect->bottom <= 0) || ( destRect->top >= (destPix->bounds.bottom - destPix->bounds.top)))
     {
@@ -297,7 +297,7 @@ void DrawNateRectVScan( PixMap *destPix, longRect *destRect, long hoff, long vof
     }
 
     drowPlus = destPix->rowBytes & 0x3fff;
-    
+
     if ( destRect->left < 0)
         destRect->left = 0;
     if ( destRect->right > ( destPix->bounds.right - destPix->bounds.left))
@@ -306,7 +306,7 @@ void DrawNateRectVScan( PixMap *destPix, longRect *destRect, long hoff, long vof
         destRect->top = 0;
     if ( destRect->bottom > (destPix->bounds.bottom - destPix->bounds.top))
         destRect->bottom = (destPix->bounds.bottom - destPix->bounds.top);
-    
+
     if (( (destRect->left & destRect->top) & 0x01) ||
         (!((destRect->left & 0x01) | destRect->top &0x01)))
     {
@@ -314,39 +314,39 @@ void DrawNateRectVScan( PixMap *destPix, longRect *destRect, long hoff, long vof
         longMask ^= 0xffffffff;
         rightMask ^= 0xff;
     }
-    
+
     leftBytes = destRect->right - destRect->left;
     if ( leftBytes > 4)
     {
         leftBytes = destRect->left + 4;
         leftBytes -= leftBytes & 0x00000003;
-        
+
         if ( leftBytes == destRect->left) leftBytes = 0;
         else leftBytes = leftBytes - destRect->left;
-        
+
         if ( leftBytes & 0x01)
         {
             longMask ^= 0xffffffff;
             rightMask ^= 0xff;
             leftMaskReset = 0x00;
         }
-        
+
         rightBytes = destRect->right;
         rightBytes -= rightBytes & 0x00000003;
-        
+
         if ( rightBytes < destRect->right) rightBytes = destRect->right - rightBytes;
         else rightBytes = 0;
-        
+
         dbyte = (unsigned char *)destPix->baseAddr + (destRect->top + voff) * drowPlus +
                     destRect->left + hoff;
-                    
+
         drowPlus = drowPlus - (destRect->right - destRect->left);
-        
+
         y = destRect->bottom - destRect->top;
         right = destRect->right;
         right -= destRect->left + leftBytes + rightBytes;
         right >>= 2;
-        
+
         while ( y-- > 0)
         {
             x = leftBytes;
@@ -360,7 +360,7 @@ void DrawNateRectVScan( PixMap *destPix, longRect *destRect, long hoff, long vof
                 dbyte++;
             }
             leftMask ^= leftMaskReset;
-            
+
             dlong = (long *)dbyte;
             x = right;
             while ( x-- > 0)
@@ -373,7 +373,7 @@ void DrawNateRectVScan( PixMap *destPix, longRect *destRect, long hoff, long vof
             }
             longMask ^= 0xffffffff;
             rightMask = longMask & 0x000000ff;
-            
+
             dbyte = (unsigned char *)dlong;
             x = rightBytes;
             while ( x-- > 0)
@@ -385,14 +385,14 @@ void DrawNateRectVScan( PixMap *destPix, longRect *destRect, long hoff, long vof
                 dbyte++;
                 rightMask ^= 0xff;
             }
-                
+
             dbyte += drowPlus;
         }
     } else
     {
         dbyte = (unsigned char *)destPix->baseAddr + (destRect->top + voff) * drowPlus +
                     destRect->left + hoff;
-                    
+
         drowPlus = drowPlus - leftBytes;
         y = destRect->bottom - destRect->top;
         while ( y-- > 0)
@@ -416,12 +416,12 @@ void DrawNateRectClipped( PixMap *destPix, longRect *destRect, longRect *clipRec
 {
     long            *dlong, drowPlus, x, y, colorlong, leftBytes, rightBytes, right;
     unsigned char   *dbyte;
-    
+
     colorlong = color;
     colorlong |= colorlong << 8;
     colorlong |= colorlong << 8;
     colorlong |= colorlong << 8;
-    
+
 /*  if (( destRect->right <= destPix->bounds.left) || ( destRect->left >= destPix->bounds.right)
         || ( destRect->bottom <= destPix->bounds.top) || ( destRect->top >= destPix->bounds.bottom))
     {
@@ -435,9 +435,9 @@ void DrawNateRectClipped( PixMap *destPix, longRect *destRect, longRect *clipRec
         destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
         return;
     }
-    
+
     drowPlus = destPix->rowBytes & 0x3fff;
-    
+
     if ( destRect->left < clipRect->left)
         destRect->left = clipRect->left;
     if ( destRect->right > clipRect->right)
@@ -446,32 +446,32 @@ void DrawNateRectClipped( PixMap *destPix, longRect *destRect, longRect *clipRec
         destRect->top = clipRect->top;
     if ( destRect->bottom > clipRect->bottom)
         destRect->bottom = clipRect->bottom;
-    
+
     leftBytes = destRect->right - destRect->left;
     if ( leftBytes > 4)
     {
         leftBytes = destRect->left + 4;
         leftBytes -= leftBytes & 0x00000003;
-        
+
         if ( leftBytes == destRect->left) leftBytes = 0;
         else leftBytes = leftBytes - destRect->left;
-        
+
         rightBytes = destRect->right;
         rightBytes -= rightBytes & 0x00000003;
-        
+
         if ( rightBytes < destRect->right) rightBytes = destRect->right - rightBytes;
         else rightBytes = 0;
-        
+
         dbyte = (unsigned char *)destPix->baseAddr + (destRect->top + voff) * drowPlus +
                     destRect->left + hoff;
-                    
+
         drowPlus = drowPlus - (destRect->right - destRect->left);
-        
+
         y = destRect->bottom - destRect->top;
         right = destRect->right;
         right -= destRect->left + leftBytes + rightBytes;
         right >>= 2;
-        
+
         while ( y-- > 0)
         {
             x = leftBytes;
@@ -482,7 +482,7 @@ void DrawNateRectClipped( PixMap *destPix, longRect *destRect, longRect *clipRec
 #endif
                 *dbyte++ = color;
             }
-            
+
             dlong = (long *)dbyte;
             x = right;
             while ( x-- > 0)
@@ -492,7 +492,7 @@ void DrawNateRectClipped( PixMap *destPix, longRect *destRect, longRect *clipRec
 #endif
                 *dlong++ = colorlong;
             }
-            
+
             dbyte = (unsigned char *)dlong;
             x = rightBytes;
             while ( x-- > 0)
@@ -502,14 +502,14 @@ void DrawNateRectClipped( PixMap *destPix, longRect *destRect, longRect *clipRec
 #endif
                 *dbyte++ = color;
             }
-                
+
             dbyte += drowPlus;
         }
     } else
     {
         dbyte = (unsigned char *)destPix->baseAddr + (destRect->top + voff) * drowPlus +
                     destRect->left + hoff;
-                    
+
         drowPlus = drowPlus - leftBytes;
         y = destRect->bottom - destRect->top;
         while ( y-- > 0)
@@ -533,12 +533,12 @@ void DrawNateRectVScanClipped( PixMap *destPix, longRect *destRect, longRect *cl
 {
     long            *dlong, drowPlus, x, y, colorlong, leftBytes, rightBytes, right;
     unsigned char   *dbyte;
-    
+
     colorlong = color;
     colorlong |= colorlong << 8;
     colorlong |= colorlong << 8;
     colorlong |= colorlong << 8;
-    
+
 /*  if (( destRect->right <= destPix->bounds.left) || ( destRect->left >= destPix->bounds.right)
         || ( destRect->bottom <= destPix->bounds.top) || ( destRect->top >= destPix->bounds.bottom))
     {
@@ -552,9 +552,9 @@ void DrawNateRectVScanClipped( PixMap *destPix, longRect *destRect, longRect *cl
         destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
         return;
     }
-    
+
     drowPlus = destPix->rowBytes & 0x3fff;
-    
+
     if ( destRect->left < clipRect->left)
         destRect->left = clipRect->left;
     if ( destRect->right > clipRect->right)
@@ -563,32 +563,32 @@ void DrawNateRectVScanClipped( PixMap *destPix, longRect *destRect, longRect *cl
         destRect->top = clipRect->top;
     if ( destRect->bottom > clipRect->bottom)
         destRect->bottom = clipRect->bottom;
-    
+
     leftBytes = destRect->right - destRect->left;
     if ( leftBytes > 4)
     {
         leftBytes = destRect->left + 4;
         leftBytes -= leftBytes & 0x00000003;
-        
+
         if ( leftBytes == destRect->left) leftBytes = 0;
         else leftBytes = leftBytes - destRect->left;
-        
+
         rightBytes = destRect->right;
         rightBytes -= rightBytes & 0x00000003;
-        
+
         if ( rightBytes < destRect->right) rightBytes = destRect->right - rightBytes;
         else rightBytes = 0;
-        
+
         dbyte = (unsigned char *)destPix->baseAddr + (destRect->top + voff) * drowPlus +
                     destRect->left + hoff;
-                    
+
         drowPlus = drowPlus - (destRect->right - destRect->left);
-        
+
         y = destRect->bottom - destRect->top;
         right = destRect->right;
         right -= destRect->left + leftBytes + rightBytes;
         right >>= 2;
-        
+
         while ( y-- > 0)
         {
             y--;
@@ -600,7 +600,7 @@ void DrawNateRectVScanClipped( PixMap *destPix, longRect *destRect, longRect *cl
 #endif
                 *dbyte++ = color;
             }
-            
+
             dlong = (long *)dbyte;
             x = right;
             while ( x-- > 0)
@@ -610,7 +610,7 @@ void DrawNateRectVScanClipped( PixMap *destPix, longRect *destRect, longRect *cl
 #endif
                 *dlong++ = colorlong;
             }
-            
+
             dbyte = (unsigned char *)dlong;
             x = rightBytes;
             while ( x-- > 0)
@@ -620,14 +620,14 @@ void DrawNateRectVScanClipped( PixMap *destPix, longRect *destRect, longRect *cl
 #endif
                 *dbyte++ = color;
             }
-                
+
             dbyte += drowPlus + (destPix->rowBytes & 0x3fff);
         }
     } else
     {
         dbyte = (unsigned char *)destPix->baseAddr + (destRect->top + voff) * drowPlus +
                     destRect->left + hoff;
-                    
+
         drowPlus = drowPlus - leftBytes;
         y = destRect->bottom - destRect->top;
         while ( y-- > 0)
@@ -654,17 +654,17 @@ void DrawNateTriangleUpClipped( PixMap *destPix, longRect *destRect,
     long            drowPlus, x, leftEdge, rightPlus, trueWidth, count;
     unsigned char   *dbyte;
     Boolean         clipped = false;
-    
+
     if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds.right - destPix->bounds.left))
         || ( destRect->bottom <= 0) || ( destRect->top >= (destPix->bounds.bottom - destPix->bounds.top)))
     {
         destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
         return;
     }
-    
+
     drowPlus = destPix->rowBytes & 0x3fff;
     trueWidth = destRect->right - destRect->left;
-    
+
     if ( destRect->left < clipRect->left)
     {
         destRect->left = clipRect->left;
@@ -685,7 +685,7 @@ void DrawNateTriangleUpClipped( PixMap *destPix, longRect *destRect,
         destRect->bottom = clipRect->bottom;
         clipped = true;
     }
-    
+
     if ( clipped) return;
 
     if ( trueWidth == 0)
@@ -695,7 +695,7 @@ void DrawNateTriangleUpClipped( PixMap *destPix, longRect *destRect,
         *dbyte = color;
         return;
     }
-    
+
     leftEdge = 0;
     x = rightPlus = trueWidth - 1;
     dbyte = (unsigned char *)destPix->baseAddr + ((destRect->top + voff) *
@@ -706,7 +706,7 @@ void DrawNateTriangleUpClipped( PixMap *destPix, longRect *destRect,
         *(dbyte++) = color;
         x--;
     }
-    
+
     if ( rightPlus > 0)
     {
         dbyte += drowPlus - 1;
@@ -719,7 +719,7 @@ void DrawNateTriangleUpClipped( PixMap *destPix, longRect *destRect,
     }
     drowPlus += 1;
     rightPlus -= 2;
-    dbyte += drowPlus;      
+    dbyte += drowPlus;
     drowPlus += 1;
 
     while ( rightPlus >= 0)
@@ -727,10 +727,10 @@ void DrawNateTriangleUpClipped( PixMap *destPix, longRect *destRect,
 /*      *dbyte = color;
         dbyte += rightPlus;
         *dbyte = color;
-*/      
+*/
         mHBlitz( dbyte, rightPlus + 1, color, count)
         dbyte--;
-        
+
         if ( rightPlus > 0)
         {
             dbyte += drowPlus;
@@ -744,7 +744,7 @@ void DrawNateTriangleUpClipped( PixMap *destPix, longRect *destRect,
 
         drowPlus += 1;
         rightPlus -= 2;
-        dbyte += drowPlus;      
+        dbyte += drowPlus;
         drowPlus += 1;
     }
 }
@@ -756,17 +756,17 @@ void DrawNatePlusClipped( PixMap *destPix, longRect *destRect,
     long            drowPlus, x, half, trueWidth, count;
     unsigned char   *dbyte;
     Boolean         clipped = false;
-    
+
     if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds.right - destPix->bounds.left))
         || ( destRect->bottom <= 0) || ( destRect->top >= (destPix->bounds.bottom - destPix->bounds.top)))
     {
         destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
         return;
     }
-    
+
     drowPlus = destPix->rowBytes & 0x3fff;
     trueWidth = destRect->right - destRect->left - 1;
-    
+
     if ( destRect->left < clipRect->left)
     {
         destRect->left = clipRect->left;
@@ -787,7 +787,7 @@ void DrawNatePlusClipped( PixMap *destPix, longRect *destRect,
         destRect->bottom = clipRect->bottom;
         clipped = true;
     }
-    
+
     if ( clipped) return;
 
     if ( trueWidth == 0)
@@ -797,7 +797,7 @@ void DrawNatePlusClipped( PixMap *destPix, longRect *destRect,
         *dbyte = color;
         return;
     }
-    
+
     if ( !(trueWidth & 0x00000001)) trueWidth--;
     if ( trueWidth < 3)
     {
@@ -859,7 +859,7 @@ void DrawNatePlusClipped( PixMap *destPix, longRect *destRect,
             x++;
         }
     }
-    
+
 }
 
 void DrawNateSquareClipped( PixMap *destPix, longRect *destRect,
@@ -869,17 +869,17 @@ void DrawNateSquareClipped( PixMap *destPix, longRect *destRect,
     long            drowPlus, x, rightPlus, trueWidth;
     unsigned char   *dbyte;
     Boolean         clipped = false;
-    
+
     if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds.right - destPix->bounds.left))
         || ( destRect->bottom <= 0) || ( destRect->top >= (destPix->bounds.bottom - destPix->bounds.top)))
     {
         destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
         return;
     }
-    
+
     drowPlus = destPix->rowBytes & 0x3fff;
     trueWidth = destRect->right - destRect->left - 1;
-    
+
     if ( destRect->left < clipRect->left)
     {
         destRect->left = clipRect->left;
@@ -900,7 +900,7 @@ void DrawNateSquareClipped( PixMap *destPix, longRect *destRect,
         destRect->bottom = clipRect->bottom;
         clipped = true;
     }
-    
+
     if ( clipped) return;
 
     if ( trueWidth == 0)
@@ -910,7 +910,7 @@ void DrawNateSquareClipped( PixMap *destPix, longRect *destRect,
         *dbyte = color;
         return;
     }
-    
+
     dbyte = (unsigned char *)destPix->baseAddr + ((destRect->top + voff) *
         drowPlus) + destRect->left + hoff;
 
@@ -923,11 +923,11 @@ void DrawNateSquareClipped( PixMap *destPix, longRect *destRect,
         *(dbyte++) = color;
         x++;
     }
-    
+
     if ( trueWidth == 0) return;
-    
+
     dbyte += drowPlus - 1;
-    
+
     if ( trueWidth > 1)
     {
         x = 2;
@@ -956,17 +956,17 @@ void DrawNateDiamondClipped( PixMap *destPix, longRect *destRect,
     long            drowPlus, leftEdge, rightPlus, trueWidth, count;
     unsigned char   *dbyte;
     Boolean         clipped = false;
-    
+
     if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds.right - destPix->bounds.left))
         || ( destRect->bottom <= 0) || ( destRect->top >= (destPix->bounds.bottom - destPix->bounds.top)))
     {
         destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
         return;
     }
-    
+
     drowPlus = destPix->rowBytes & 0x3fff;
     trueWidth = destRect->right - destRect->left - 1;
-    
+
     if ( destRect->left < clipRect->left)
     {
         destRect->left = clipRect->left;
@@ -987,7 +987,7 @@ void DrawNateDiamondClipped( PixMap *destPix, longRect *destRect,
         destRect->bottom = clipRect->bottom;
         clipped = true;
     }
-    
+
     if ( clipped) return;
 
     if ( trueWidth == 0)
@@ -997,10 +997,10 @@ void DrawNateDiamondClipped( PixMap *destPix, longRect *destRect,
         *dbyte = color;
         return;
     }
-    
+
     leftEdge = (trueWidth >> (long)1) + (trueWidth & 1);
     rightPlus = ((trueWidth >> (long)1) + 1) - leftEdge;
-    
+
     dbyte = (unsigned char *)destPix->baseAddr + ((destRect->top + voff) *
         drowPlus) + destRect->left + hoff + leftEdge;
     drowPlus -= rightPlus + 1;
@@ -1042,7 +1042,7 @@ void DrawNateDiamondClipped( PixMap *destPix, longRect *destRect,
         drowPlus += 2;
         rightPlus -= 2;
         leftEdge--;
-    }   
+    }
 }
 
 void DrawNateVBracket( PixMap *destPix, longRect *destRect, longRect *clipRect, long hoff, long voff,
@@ -1051,17 +1051,17 @@ void DrawNateVBracket( PixMap *destPix, longRect *destRect, longRect *clipRect, 
 {
     long            rowBytes = 0;
     unsigned char   *aByte;
-    
+
     DrawNateLine ( destPix, clipRect, destRect->left, destRect->top, destRect->right - 1,
                     destRect->top, hoff, voff, color);
     DrawNateLine ( destPix, clipRect, destRect->left, destRect->bottom - 1, destRect->right - 1,
                     destRect->bottom - 1, hoff, voff, color);
-    
+
     mGetRowBytes( rowBytes, destPix)
 
     mSetNatePixel( aByte, rowBytes, destRect->left, destRect->top + 1, hoff, voff, destPix, color)
     mSetNatePixel( aByte, rowBytes, destRect->right - 1, destRect->top + 1, hoff, voff, destPix, color)
-    
+
     mSetNatePixel( aByte, rowBytes, destRect->left, destRect->bottom - 2, hoff, voff, destPix, color)
     mSetNatePixel( aByte, rowBytes, destRect->right - 1, destRect->bottom - 2, hoff, voff, destPix, color)
 }
@@ -1071,7 +1071,7 @@ void DrawNateShadedRect( PixMap *destPix, longRect *destRect, longRect *clipRect
 
 {
     longRect    tRect = *destRect;
-        
+
     tRect.right--;
     tRect.bottom--;
 
@@ -1086,9 +1086,9 @@ void DrawNateShadedRect( PixMap *destPix, longRect *destRect, longRect *clipRect
                     tRect.bottom, hoff, voff, darkcolor);
     tRect.left++;
     tRect.top++;
-    
+
     DrawNateRectClipped( destPix, &tRect, clipRect, hoff, voff, fillcolor);
-    
+
 }
 
 void BiggestRect( Rect  *dRect, Rect *sRect)
@@ -1134,7 +1134,7 @@ void SetLongRect( longRect *dRect, long left, long top, long right, long bottom)
   Subject:        (1 of 2) Re: Need a Fast Line Drawing Algorithm
   To:             mac.programmer
 Enough people wrote me asking for this that I'm posting it to c.s.m.p. in
-addition to mailing it to Eric.  The specific example is for Borland C++, 
+addition to mailing it to Eric.  The specific example is for Borland C++,
 but it gets the point across rather nicely.  I found this in an archive of
 Michael Abrash's columns from DDJ.
 
@@ -1355,7 +1355,7 @@ fills, or more 3-D animation, or some new 2-D animation topics--or maybe
 something completely different.  Your suggestions are, as always,
 welcome.
 
--- 
+--
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 Howard Berkey                                       howard@sirius.com
 "'La-Z-Boy'?  What's the next brand, 'Hopeless Slack-Ass'?" - Frazier
@@ -1390,7 +1390,7 @@ by Michael Abrash
 [LISTING ONE]
 
 /* Run-length slice line drawing implementation for mode 0x13, the VGA's
-320x200 256-color mode. Not optimized! Tested with Borland C++ 3.0 in 
+320x200 256-color mode. Not optimized! Tested with Borland C++ 3.0 in
 the small model. */
 
 /* Draws a line between the specified endpoints in color Color. */
@@ -1402,7 +1402,7 @@ void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
     long            WholeStep, InitialPixelCount, FinalPixelCount, i, RunLength;
     unsigned char   *dbyte;
     short           cs = mClipCode( XStart, YStart, *clipRect), ce = mClipCode( XEnd, YEnd, *clipRect);
-    
+
     while ( cs | ce)
     {
         if ( cs & ce) return;
@@ -1456,7 +1456,7 @@ void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
             ce = mClipCode( XEnd, YEnd, *clipRect);
         }
     }
-    
+
    /* We'll always draw top to bottom, to reduce the number of cases we have to
    handle, and to make lines between the same endpoints draw the same pixels */
     if (YStart > YEnd)
@@ -1468,8 +1468,8 @@ void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
         XStart = XEnd;
         XEnd = Temp;
     }
-    
-    
+
+
     /* Point to the bitmap address first pixel to draw */
     drowPlus = destPix->rowBytes & 0x3fff;
     dbyte = (unsigned char *)destPix->baseAddr + (YStart + voff) * drowPlus +
@@ -1581,7 +1581,7 @@ void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
 #ifdef kByteLevelTesting
         TestByte( (char *)dbyte, destPix, "\pHRUN2");
 #endif
-        
+
         /* Draw all full runs */
         for (i=0; i<(YDelta-1); i++)
         {
@@ -1662,7 +1662,7 @@ void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
 
 #ifdef kByteLevelTesting
         TestByte( (char *)dbyte, destPix, "\pVRUN2");
-#endif      
+#endif
         /* Draw all full runs */
         for (i=0; i<(XDelta-1); i++)
         {
@@ -1708,7 +1708,7 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
     long            WholeStep, InitialPixelCount, FinalPixelCount, i, RunLength;
     unsigned char   *sbyte, *dbyte;
     short           cs = mClipCode( XStart, YStart, *clipRect), ce = mClipCode( XEnd, YEnd, *clipRect);
-        
+
     while ( cs | ce)
     {
         if ( cs & ce) return;
@@ -1762,7 +1762,7 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
             ce = mClipCode( XEnd, YEnd, *clipRect);
         }
     }
-    
+
    /* We'll always draw top to bottom, to reduce the number of cases we have to
    handle, and to make lines between the same endpoints draw the same pixels */
     if (YStart > YEnd)
@@ -1774,16 +1774,16 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
         XStart = XEnd;
         XEnd = Temp;
     }
-    
-    
+
+
     /* Point to the bitmap address first pixel to draw */
     drowPlus = destPix->rowBytes & 0x3fff;
     dbyte = (unsigned char *)destPix->baseAddr + (YStart + voff) * drowPlus +
                 XStart + hoff;
-    
+
     srowPlus = sourcePix->rowBytes & 0x3fff;
     sbyte = (unsigned char *)sourcePix->baseAddr + (YStart) * srowPlus + XStart;
-    
+
     /* Figure out whether we're going left or right, and how far we're
         going horizontally */
     if ((XDelta = XEnd - XStart) < 0)
@@ -1893,7 +1893,7 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
 #ifdef kByteLevelTesting
         TestByte( (char *)dbyte, destPix, "\pHRUN2");
 #endif
-        
+
         /* Draw all full runs */
         for (i=0; i<(YDelta-1); i++)
         {
@@ -1974,7 +1974,7 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
 
 #ifdef kByteLevelTesting
         TestByte( (char *)dbyte, destPix, "\pVRUN2");
-#endif      
+#endif
         /* Draw all full runs */
         for (i=0; i<(XDelta-1); i++)
         {
@@ -2011,7 +2011,7 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
 
 /* Draws a horizontal run of pixels, then advances the bitmap pointer to
     the first pixel of the next run. */
-    
+
 /*
 void DrawHorizontalRun( unsigned char **dbyte, long XAdvance,
     long RunLength, long Color, long drowPlus)
@@ -2024,7 +2024,7 @@ void DrawHorizontalRun( unsigned char **dbyte, long XAdvance,
         *Workingdbyte = Color;
         Workingdbyte += XAdvance;
     }
-    // Advance to the next scan line 
+    // Advance to the next scan line
     Workingdbyte += SCREEN_WIDTH;
     *dbyte = Workingdbyte;
 }
@@ -2045,24 +2045,24 @@ void DrawVerticalRun(char far **dbyte, int XAdvance,
         *Workingdbyte = Color;
         Workingdbyte += SCREEN_WIDTH;
     }
-// Advance to the next column 
+// Advance to the next column
     Workingdbyte += XAdvance;
     *dbyte = Workingdbyte;
 }
 */
 
 void DashNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart, long XEnd,
-                    long YEnd, long hoff, long voff, unsigned char Color, unsigned char dashon, 
+                    long YEnd, long hoff, long voff, unsigned char Color, unsigned char dashon,
                     unsigned char dashoff, unsigned char dashcount)
 {
     long            Temp, AdjUp, AdjDown, ErrorTerm, XAdvance, XDelta, YDelta, drowPlus;
     long            WholeStep, InitialPixelCount, FinalPixelCount, i, RunLength;
     unsigned char   *dbyte;
     short           cs = mClipCode( XStart, YStart, *clipRect), ce = mClipCode( XEnd, YEnd, *clipRect);
-    
+
     dashoff += dashon;
     dashcount %= dashoff;
-    
+
     while ( cs | ce)
     {
         if ( cs & ce) return;
@@ -2116,7 +2116,7 @@ void DashNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
             ce = mClipCode( XEnd, YEnd, *clipRect);
         }
     }
-    
+
    /* We'll always draw top to bottom, to reduce the number of cases we have to
    handle, and to make lines between the same endpoints draw the same pixels */
     if (YStart > YEnd)
@@ -2128,8 +2128,8 @@ void DashNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
         XStart = XEnd;
         XEnd = Temp;
     }
-    
-    
+
+
     /* Point to the bitmap address first pixel to draw */
     drowPlus = destPix->rowBytes & 0x3fff;
     dbyte = (unsigned char *)destPix->baseAddr + (YStart + voff) * drowPlus +
@@ -2177,7 +2177,7 @@ void DashNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
             }
             if ( dashcount == dashoff) dashcount = 0;
         }
-                
+
         return;
     }
     if (YDelta == 0)
@@ -2233,7 +2233,7 @@ void DashNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
                 dashcount++;
             }
             if ( dashcount == dashoff) dashcount = 0;
-        }       
+        }
         return;
     }
 
@@ -2281,7 +2281,7 @@ void DashNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
         /* Draw the first, partial run of pixels */
         mDashHorizontalRun( dbyte, XAdvance, InitialPixelCount, Color, drowPlus, Temp, dashon, dashoff, dashcount);
 
-        
+
         /* Draw all full runs */
         for (i=0; i<(YDelta-1); i++)
         {

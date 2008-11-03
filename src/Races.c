@@ -72,7 +72,7 @@ short InitRaces( void)
 
         mDataHandleLockAndRegister( gAresGlobal->gRaceData, nil, nil, nil, "\pgAresGlobal->gRaceData")
     }
-        
+
     return( kNoError);
 }
 
@@ -90,9 +90,9 @@ short GetNextLegalRace( short raceNum, short playerNum, scenarioType *scenario)
 {
     if ( scenario == nil) return -1;
     if ( playerNum >= scenario->playerNum) return raceNum;
-    
+
     raceNum++;
-    
+
     while (( raceNum < kRaceNum) &&
             ( !(scenario->player[playerNum].netRaceFlags & ( 0x0001 << raceNum))))
     {
@@ -111,9 +111,9 @@ short GetPreviousLegalRace( short raceNum, short playerNum, scenarioType *scenar
 {
     if ( scenario == nil) return -1;
     if ( playerNum >= scenario->playerNum) return raceNum;
-    
+
     raceNum--;
-        
+
     while (( raceNum >= 0) &&
             ( !(scenario->player[playerNum].netRaceFlags & ( 0x0001 << raceNum))))
     {
@@ -126,7 +126,7 @@ short GetPreviousLegalRace( short raceNum, short playerNum, scenarioType *scenar
 Boolean IsRaceLegal( short raceNum, short playerNum, scenarioType *scenario)
 {
     if ( playerNum >= scenario->playerNum) return false;
-    
+
     if (scenario->player[playerNum].netRaceFlags & ( 0x0001 << raceNum)) return ( true);
     else return( false);
 }
@@ -146,7 +146,7 @@ void GetRaceString( StringPtr string, short whatString, short raceNum)
 smallFixedType GetRaceAdvantage( short raceNum)
 {
     raceType    *race = (raceType *)*gAresGlobal->gRaceData + (long)raceNum;
-    
+
     if ( raceNum >= 0)
     {
         return race->advantage;
@@ -160,13 +160,13 @@ short GetRaceNumFromID( short raceID)
 {
     raceType    *race = (raceType *)*gAresGlobal->gRaceData;
     short       raceNum = 0;
-    
+
     while ( (race->id != raceID) && ( raceNum < kRaceNum))
     {
         raceNum++;
         race++;
     }
-    
+
     if ( raceNum >= kRaceNum) return( -1);
     else return( raceNum);
 }
@@ -176,7 +176,7 @@ short GetRaceNumFromID( short raceID)
 short GetRaceIDFromNum( short raceNum)
 {
     raceType    *race = (raceType *)*gAresGlobal->gRaceData + (long)raceNum;
-    
+
     if (( raceNum >= 0) && ( raceNum < kRaceNum))
     {
         return( race->id);
@@ -189,8 +189,8 @@ short GetRaceIDFromNum( short raceNum)
 unsigned char GetApparentColorFromRace( short raceNum)
 {
     raceType    *race = (raceType *)*gAresGlobal->gRaceData + (long)raceNum;
-    
-    
+
+
     if (( raceNum >= 0) && ( raceNum < kRaceNum))
     {
         return( race->apparentColor);

@@ -414,8 +414,8 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
     mainScreenResultType    result = kNullResult;
     long                    startDemoTime = TickCount();
     CWindowPtr              whichWindow;
-    
-    
+
+
     *demoLevel = -1;
     FlushEvents(everyEvent, 0);
 /*  if ( gAresGlobal->gameRangerPending)
@@ -429,8 +429,8 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
                         result = kMainQuit;
                         done = true;
                         return result;
-    }   
-*/  
+    }
+*/
     BlackenOffscreen();
     error = OpenInterface( kMainScreenResID);
     if ( error == kNoError)
@@ -439,7 +439,7 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
         {
             SetStatusOfAnyInterfaceItem( kMainNetworkButton, kDimmed, FALSE);
         }
-        
+
         if ( gAresGlobal->gOptions & kOptionNoSinglePlayer)
         {
             SetStatusOfAnyInterfaceItem( kMainPlayButton, kDimmed, false);
@@ -449,11 +449,11 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
         AutoFadeFrom( 30, FALSE);
         while ( !done)
         {
-            
+
             if ( !gAresGlobal->haveSeenRTNotice)
             {
                 Ambrosia_Update_Registered();
-                
+
                 if ( !Ambrosia_Is_Registered())
                 {
                     SetMBarState( true, theDevice);
@@ -466,9 +466,9 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
             InterfaceIdle();
             Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
             gAresGlobal->returnToMain = false;
-                
+
             whichItem = -1;
-            switch ( theEvent.what ) 
+            switch ( theEvent.what )
             {
                 case nullEvent:
                     InterfaceIdle();
@@ -497,15 +497,15 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
 
                         Wrap_GRGetWaitingCmd();
 
-                        
+
                     }
                     break;
-                
+
                 case osEvt:
 //                  HandleOSEvent( &theEvent);
                     startDemoTime = TickCount();
                     break;
-                    
+
                 case mouseDown:
                     startDemoTime = TickCount();
                     where = theEvent.where;
@@ -516,7 +516,7 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
                         result = kMainQuit;
                         done = true;
                     }
-                    
+
                     whichItem = InterfaceMouseDown( where);
                     break;
                 case mouseUp:
@@ -528,10 +528,10 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
                         result = kMainQuit;
                         done = true;
                     }
-                    
+
                     startDemoTime = TickCount();
                     whichChar = theEvent.message & charCodeMask;
-                    
+
                     if (( whichChar >= '0') && ( whichChar <= '9'))
                     {
                         *demoLevel = whichChar - '0';
@@ -551,14 +551,14 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
                         PlayVolumeSound( kCloakOff, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
                         stickyCheat = true;
                     } else readyToCheat = false;
-                    
+
                     whichItem = InterfaceKeyDown( theEvent.message);
                     break;
-                
+
                 case updateEvt:
                     startDemoTime = TickCount();
                     whichWindow = ( CWindowPtr)theEvent.message;
-    
+
                     if ( whichWindow == gTheWindow)
                     {
                         BeginUpdate( (WindowPtr)whichWindow);
@@ -588,7 +588,7 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
                     done = TRUE;
                     result = kMainQuit;
                     break;
-                
+
                 case kMainDemoButton:
                     done = TRUE;
                     if ( timeout)
@@ -596,26 +596,26 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
                     else
                         result = kMainDemo;
                     break;
-                
+
                 case kMainTrainButton:
                     done = true;
                     result = kMainTrain;
                     break;
-                    
+
                 case kMainPlayButton:
                     result = kMainPlay;
                     done = TRUE;
                     break;
-                
+
                 case kMainNetworkButton:
                     result = kMainNetwork;
                     done = TRUE;
                     break;
-                
+
                 case kMainAboutButton:
 //                  result = kMainAbout;
 //                  done = true;
-                    
+
                     CloseInterface();
 //                  DoAboutAresInterface();
                     DoScrollText( (WindowPtr)gTheWindow, 6500, 2/*kScrollTextSpeed*/,
@@ -631,14 +631,14 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
                     }
                     DrawEntireInterface();
                     startDemoTime = TickCount();
-                    
+
                     break;
-                    
+
                 case kMainOptionsButton:
 //                  #ifndef kNonPlayableDemo
                     CloseInterface();
                     DoOptionsInterface();
-                    
+
                     OpenInterface( kMainScreenResID);
                     if ( !(gAresGlobal->gOptions & kOptionNetworkAvailable))// NetSprocketPresent())
                     {
@@ -648,15 +648,15 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
                     {
                         SetStatusOfAnyInterfaceItem( kMainPlayButton, kDimmed, false);
                     }
-                    
+
                     DrawEntireInterface();
 //                  #endif
                     startDemoTime = TickCount();
                     break;
-                
+
             }
-                        
-            
+
+
         }
         CloseInterface();
     }
@@ -673,7 +673,7 @@ void DoAboutAresInterface( void)
     EventRecord             theEvent;
     char                    whichChar;
     CWindowPtr              whichWindow;
-    
+
     FlushEvents(everyEvent, 0);
     BlackenWindow();
 
@@ -681,16 +681,16 @@ void DoAboutAresInterface( void)
     if ( error == kNoError)
     {
         DrawEntireInterface();
-                
+
         while ( !done)
         {
-            
+
             InterfaceIdle();
 
             Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
-                switch ( theEvent.what ) 
+                switch ( theEvent.what )
                 {
                     case nullEvent:
                         InterfaceIdle();
@@ -702,7 +702,7 @@ void DoAboutAresInterface( void)
                         if ( gAresGlobal->returnToMain)
                         {
                             done = true;
-                        }   
+                        }
                         break;
 
                     case osEvt:
@@ -710,7 +710,7 @@ void DoAboutAresInterface( void)
                         break;
                     case updateEvt:
                         whichWindow = ( CWindowPtr)theEvent.message;
-        
+
                         if ( whichWindow == gTheWindow)
                         {
                             BeginUpdate( (WindowPtr)whichWindow);
@@ -733,8 +733,8 @@ void DoAboutAresInterface( void)
                         MacSetPort( (WindowPtr)gTheWindow);
 
                         break;
-                        
-                        
+
+
                     case mouseDown:
                         where = theEvent.where;
                         GlobalToLocal( &where);
@@ -755,12 +755,12 @@ void DoAboutAresInterface( void)
                         done = TRUE;
                         break;
                 }
-                        
+
             }
         }
         CloseInterface();
     }
-}       
+}
 
 void DoLoadingInterface( Rect *contentRect, StringPtr levelName)
 
@@ -769,24 +769,24 @@ void DoLoadingInterface( Rect *contentRect, StringPtr levelName)
     unsigned char           color, *strPtr;
     transColorType          *transColor;
     longRect                lRect, clipRect, boundsRect;
-    PixMapHandle            offMap = GetGWorldPixMap( gOffWorld);   
+    PixMapHandle            offMap = GetGWorldPixMap( gOffWorld);
     Rect                    tRect;
     retroTextSpecType       retroTextSpec;
     long                    height, waitTime;
-    
+
     BlackenWindow();
 
     error = OpenInterface( kLoadingScreenID);
     if ( error == kNoError)
     {
         DrawEntireInterface();
-        
+
         GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( 0), contentRect); // item 0 = loading rect
         CloseInterface();
-        
+
 // it is assumed that we're "recovering" from a fade-out
         AutoFadeFrom( 10, FALSE);
-        
+
         DrawInRealWorld();
         mSetDirectFont( kTitleFontNum)
         mGetTranslateColorShade( PALE_GREEN, LIGHT, color, transColor)
@@ -800,7 +800,7 @@ void DoLoadingInterface( Rect *contentRect, StringPtr levelName)
         strPtr = levelName + 1;
         retroTextSpec.textLength = *levelName;
         retroTextSpec.text = (char **)&strPtr;
-        
+
         retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
         retroTextSpec.tabSize =220;
         mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, retroTextSpec.color, transColor)
@@ -819,7 +819,7 @@ void DoLoadingInterface( Rect *contentRect, StringPtr levelName)
         boundsRect.bottom = boundsRect.top + retroTextSpec.autoHeight;
         retroTextSpec.xpos = boundsRect.left;
         retroTextSpec.ypos = boundsRect.top + mDirectFontAscent;
-        
+
         clipRect.left = 0;
         clipRect.right = clipRect.left + WORLD_WIDTH;
         clipRect.top = 0;
@@ -830,12 +830,12 @@ void DoLoadingInterface( Rect *contentRect, StringPtr levelName)
             PlayVolumeSound(  kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
             DrawRetroTextCharInRect( &retroTextSpec, 3, &boundsRect, &clipRect, *thePixMapHandle, gNatePortLeft,
                 gNatePortTop);
-            
+
             waitTime = TickCount();
             while (( TickCount() - waitTime) < 3) { /* DO NOTHING */ };
         }
 
-                
+
 //      DrawDirectTextStringClipped( levelName, color, *offMap, &lRect, 0, 0);
         LongRectToRect( &boundsRect, &tRect);
 //      CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &tRect);
@@ -851,9 +851,9 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
     longRect        clipRect;
     Rect            tRect;
     RGBColor        fadeColor = {0, 0, 0};
-    PixMapHandle    offMap = GetGWorldPixMap( gOffWorld);   
+    PixMapHandle    offMap = GetGWorldPixMap( gOffWorld);
     Str255          string;
-    
+
     if ( total < 0)
     {
         DrawInOffWorld();
@@ -863,16 +863,16 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
 
         mSetDirectFont( kButtonFontNum);
         mGetDirectStringDimensions( string, width, height, strlen, getwidchar, getwidwid)
-        
+
         mCopyAnyRect( clipRect, *contentRect);
         MacSetRect( &tRect, 0, 0, width, height);
         CenterRectInRect( &tRect, contentRect);
-        
+
         mGetTranslateColorShade( kLoadingScreenColor, LIGHTER, color, transColor)
         MoveTo( tRect.left, tRect.top + mDirectFontAscent);
         DrawDirectTextStringClipped( string, color, *offMap, &clipRect, 0, 0);
-        
-        
+
+
         DrawInRealWorld();
         DefaultColors();
         CopyOffWorldToRealWorld((WindowPtr)gTheWindow, contentRect);
@@ -912,7 +912,7 @@ short DoPlayAgain( Boolean allowResume, Boolean allowSkip) // return 0 = quit, 1
     EventRecord             theEvent;
     char                    whichChar;
     CWindowPtr              whichWindow;
-    
+
 //  BlackenWindow();
 
     FlushEvents(everyEvent, 0);
@@ -930,7 +930,7 @@ short DoPlayAgain( Boolean allowResume, Boolean allowSkip) // return 0 = quit, 1
         DefaultColors();
         PaintRect( &tRect);
         DrawInRealWorld();
-        
+
         if ( gAresGlobal->gOptions & kOptionNetworkOn)
         {
             SetStatusOfAnyInterfaceItem( kPlayAgainOKButton, kDimmed, false);
@@ -946,13 +946,13 @@ short DoPlayAgain( Boolean allowResume, Boolean allowSkip) // return 0 = quit, 1
 
         while ( !done)
         {
-            
+
             InterfaceIdle();
 
             Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
-                switch ( theEvent.what ) 
+                switch ( theEvent.what )
                 {
                     case nullEvent:
                         InterfaceIdle();
@@ -964,14 +964,14 @@ short DoPlayAgain( Boolean allowResume, Boolean allowSkip) // return 0 = quit, 1
                         if ( gAresGlobal->returnToMain)
                         {
                             done = true;
-                        }   
+                        }
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
                         break;
                     case updateEvt:
                         whichWindow = ( CWindowPtr)theEvent.message;
-        
+
                         if ( whichWindow == gTheWindow)
                         {
                             BeginUpdate( (WindowPtr)whichWindow);
@@ -994,8 +994,8 @@ short DoPlayAgain( Boolean allowResume, Boolean allowSkip) // return 0 = quit, 1
                         MacSetPort( (WindowPtr)gTheWindow);
 
                         break;
-                        
-                        
+
+
                     case mouseDown:
                         where = theEvent.where;
                         GlobalToLocal( &where);
@@ -1007,7 +1007,7 @@ short DoPlayAgain( Boolean allowResume, Boolean allowSkip) // return 0 = quit, 1
                     case keyDown:
                     case autoKey:
                         whichChar = theEvent.message & charCodeMask;
-                        
+
                         whichItem = InterfaceKeyDown( theEvent.message);
                         break;
                 }
@@ -1017,23 +1017,23 @@ short DoPlayAgain( Boolean allowResume, Boolean allowSkip) // return 0 = quit, 1
                         done = TRUE;
                         result = 1;
                         break;
-                    
+
                     case kPlayAgainNoButton:
                         done = true;
                         result = 0;
                         break;
-                    
+
                     case kPlayAgainResumeButton:
                         done = true;
                         result = 2;
                         break;
-                    
+
                     case 5:
                         done = true;
                         result = 3;
                         break;
                 }
-                        
+
             }
         }
         DrawInOffWorld();
@@ -1060,7 +1060,7 @@ void DoNetSettings( void)
     EventRecord             theEvent;
     char                    whichChar;
     CWindowPtr              whichWindow;
-    
+
 //  BlackenWindow();
 
     FlushEvents(everyEvent, 0);
@@ -1076,7 +1076,7 @@ void DoNetSettings( void)
         CopyOffWorldToSaveWorld( &tRect);
         PaintRect( &tRect);
         DrawInRealWorld();
-        
+
         currentRegistered = GetRegisteredSetting();
         currentDelay = GetResendDelay();
         if ( currentDelay <= 60) currentDelay = 0;
@@ -1105,7 +1105,7 @@ void DoNetSettings( void)
                 SwitchAnyRadioOrCheckbox( i, false);
             }
         }
-        
+
         SwitchAnyRadioOrCheckbox( kNetSettingsLowerBandwidthCheck, currentBandwidth);
 
         DrawAllItemsOfKind( kPictureRect, FALSE, false, false);
@@ -1119,13 +1119,13 @@ void DoNetSettings( void)
 
         while ( !done)
         {
-            
+
             InterfaceIdle();
 
             Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
-                switch ( theEvent.what ) 
+                switch ( theEvent.what )
                 {
                     case nullEvent:
                         InterfaceIdle();
@@ -1138,14 +1138,14 @@ void DoNetSettings( void)
                         {
                             cancel = true;
                             done = true;
-                        }   
+                        }
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
                         break;
                     case updateEvt:
                         whichWindow = ( CWindowPtr)theEvent.message;
-        
+
                         if ( whichWindow == gTheWindow)
                         {
                             BeginUpdate( (WindowPtr)whichWindow);
@@ -1168,8 +1168,8 @@ void DoNetSettings( void)
                         MacSetPort( (WindowPtr)gTheWindow);
 
                         break;
-                        
-                        
+
+
                     case mouseDown:
                         where = theEvent.where;
                         GlobalToLocal( &where);
@@ -1181,7 +1181,7 @@ void DoNetSettings( void)
                     case keyDown:
                     case autoKey:
                         whichChar = theEvent.message & charCodeMask;
-                        
+
                         whichItem = InterfaceKeyDown( theEvent.message);
                         break;
                 }
@@ -1190,16 +1190,16 @@ void DoNetSettings( void)
                     case kNetSettingsOKButton:
                         done = TRUE;
                         break;
-                    
+
                     case kNetSettingsCancelButton:
                         done = true;
                         cancel = true;
                         break;
-                        
+
                     case kNetSettingsLowerBandwidthCheck:
                         currentBandwidth = !currentBandwidth;
                         break;
-                        
+
                     default:
                         if (( whichItem >= kNetSettingsFirstRegisteredRadio) &&
                             ( whichItem <= kNetSettingsLastRegisteredRadio))
@@ -1222,9 +1222,9 @@ void DoNetSettings( void)
                             SwitchAnyRadioOrCheckbox( currentDelay +
                                 kNetSettingsFirstDelayRadio, true);
                         }
-                        break;                          
+                        break;
                 }
-                        
+
             }
         }
         DrawInOffWorld();
@@ -1235,7 +1235,7 @@ void DoNetSettings( void)
         DrawInRealWorld();
         CloseInterface();
     }
-    
+
     if ( !cancel)
     {
         SetRegisteredSetting( currentRegistered);
@@ -1248,17 +1248,17 @@ void DoNetSettings( void)
                 SetResendDelay( 60);
                 SendInGameMiscLongMessage( 0, eSetResendDelayMessage, 60, true, false);
                 break;
-            
+
             case 1:
                 SetResendDelay( 120);
                 SendInGameMiscLongMessage( 0, eSetResendDelayMessage, 120, true, false);
                 break;
-            
+
             case 2:
                 SetResendDelay( 240);
                 SendInGameMiscLongMessage( 0, eSetResendDelayMessage, 240, true, false);
                 break;
-    /*      
+    /*
             case 3:
                 SetResendDelay( 360);
                 SendInGameMiscLongMessage( 0, eSetResendDelayMessage, 360, true, false);
@@ -1286,7 +1286,7 @@ void DoHelpScreen( void)
     retroTextSpecType       retroTextSpec;
     transColorType          *transColor;
     PixMapHandle            offMap;
-    
+
     FlushEvents(everyEvent, 0);
     if ( gAresGlobal->gOptions & kOptionSubstituteFKeys)
         error = OpenInterface( kNOFHelpScreenID);
@@ -1304,7 +1304,7 @@ void DoHelpScreen( void)
         CopyOffWorldToSaveWorld( &tRect);
         PaintRect( &tRect);
         DrawInRealWorld();
-        
+
         DrawAllItemsOfKind( kPictureRect, FALSE, false, false);
         DrawAllItemsOfKind( kLabeledRect, TRUE, FALSE, FALSE);
         DrawAllItemsOfKind( kPlainRect, TRUE, FALSE, FALSE);
@@ -1320,7 +1320,7 @@ void DoHelpScreen( void)
         if ( retroTextSpec.text != nil)
         {
             DetachResource( retroTextSpec.text);
-            
+
 /*          for ( l = 0; l < kKeyControlNum; l++)
             {
                 GetKeyNumName( numString, GetKeyNumFromKeyMap( gAresGlobal->gKeyControl[l]));
@@ -1335,12 +1335,12 @@ void DoHelpScreen( void)
                     // DO NOTHING
                  };
             }
-*/          
+*/
             Replace_KeyCode_Strings_With_Actual_Key_Names( retroTextSpec.text, kKeyMapNameID,
                 4);
-                
+
             retroTextSpec.textLength = GetHandleSize( retroTextSpec.text);
-            
+
             mSetDirectFont( kComputerFontNum)
             retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
             retroTextSpec.tabSize = 220;
@@ -1362,13 +1362,13 @@ void DoHelpScreen( void)
             boundsRect.bottom = boundsRect.top + retroTextSpec.autoHeight;
             retroTextSpec.xpos = boundsRect.left;
             retroTextSpec.ypos = boundsRect.top + mDirectFontAscent;
-            
+
             clipRect.left = 0;
             clipRect.right = clipRect.left + WORLD_WIDTH;
             clipRect.top = 0;
             clipRect.bottom = clipRect.top + WORLD_HEIGHT;
             RectToLongRect( &textRect, &clipRect);
-            
+
             offMap = GetGWorldPixMap( gOffWorld);
             DrawDirectTextInRect( &retroTextSpec, &clipRect, &clipRect, *offMap, 0, 0);
             CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &tRect);
@@ -1378,24 +1378,24 @@ void DoHelpScreen( void)
                 PlayVolumeSound(  kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
                 DrawRetroTextCharInRect( &retroTextSpec, -1, &boundsRect, &clipRect, *thePixMapHandle, gNatePortLeft,
                     gNatePortTop);
-                
+
                 waitTime = TickCount();
                 while (( TickCount() - waitTime) < 3);
             }
 */          DisposeHandle( retroTextSpec.text);
         }
-        
+
         while ( AnyRealKeyDown()) { /* DO NOTHING */ };
 
         while ( !done)
         {
-            
+
             InterfaceIdle();
 
             Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
-                switch ( theEvent.what ) 
+                switch ( theEvent.what )
                 {
                     case nullEvent:
                         InterfaceIdle();
@@ -1408,13 +1408,13 @@ void DoHelpScreen( void)
                         if ( gAresGlobal->returnToMain)
                         {
                             done = true;
-                        }   
+                        }
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
                         break;
                     case updateEvt:
                         whichWindow = ( CWindowPtr)theEvent.message;
-        
+
                         if ( whichWindow == gTheWindow)
                         {
                             BeginUpdate( (WindowPtr)whichWindow);
@@ -1437,8 +1437,8 @@ void DoHelpScreen( void)
                         MacSetPort( (WindowPtr)gTheWindow);
 
                         break;
-                        
-                        
+
+
                     case mouseDown:
                         where = theEvent.where;
                         GlobalToLocal( &where);
@@ -1450,7 +1450,7 @@ void DoHelpScreen( void)
                     case keyDown:
                     case autoKey:
                         whichChar = theEvent.message & charCodeMask;
-                        
+
                         whichItem = InterfaceKeyDown( theEvent.message);
                         break;
                 }
@@ -1459,9 +1459,9 @@ void DoHelpScreen( void)
                     case kHelpScreenDoneButton:
                         done = TRUE;
                         break;
-                    
+
                 }
-                        
+
             }
         }
         DrawInOffWorld();
@@ -1482,12 +1482,12 @@ void StartPauseIndicator(StringPtr pauseString, unsigned char hue)
     PixMapHandle    offMap = GetGWorldPixMap( gOffWorld), saveMap = GetGWorldPixMap( gSaveWorld);
     transColorType  *transColor;
     longRect        clipRect;
-    
+
 #pragma unused( hue)
     mSetDirectFont( kTitleFontNum);
     mGetDirectStringDimensions( pauseString, width, height, strlen, getwidchar, getwidwid)
     MacSetRect( &tRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, gAresGlobal->gTrueClipBottom);
-    
+
     MacSetRect( &stringRect, 0, 0, width, height);
     CenterRectInRect( &stringRect, &tRect);
     mCopyAnyRect( tRect, stringRect);
@@ -1503,9 +1503,9 @@ void StartPauseIndicator(StringPtr pauseString, unsigned char hue)
     DefaultColors();
     CopySaveWorldToOffWorld( &tRect);
     DrawInOffWorld();
-    
+
     mCopyAnyRect( clipRect, tRect);
-    
+
     mGetTranslateColorShade( GREEN, DARKER, color, transColor)
 //  DrawNateRectClipped( *offMap, &clipRect, &clipRect, 0, 0,color);
     for ( count = clipRect.top + 2; count < clipRect.bottom; count += 2)
@@ -1518,7 +1518,7 @@ void StartPauseIndicator(StringPtr pauseString, unsigned char hue)
     DrawNateVBracket( *offMap, &clipRect, &clipRect, 0, 0,color);
     MoveTo( stringRect.left, stringRect.top + mDirectFontAscent);
     DrawDirectTextStringClipped( pauseString, color, *offMap, &clipRect, 0, 0);
-    
+
     DrawInRealWorld();
     DefaultColors();
     mCopyAnyRect( tRect, clipRect);
@@ -1531,18 +1531,18 @@ void StopPauseIndicator( StringPtr pauseString)
     long            width, height, strlen;
     Rect            tRect, stringRect;
     PixMapHandle    offMap = GetGWorldPixMap( gOffWorld), saveMap = GetGWorldPixMap( gSaveWorld);
-    
+
     mSetDirectFont( kTitleFontNum);
     mGetDirectStringDimensions( pauseString, width, height, strlen, getwidchar, getwidwid)
     MacSetRect( &tRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, gAresGlobal->gTrueClipBottom);
-    
+
     MacSetRect( &stringRect, 0, 0, width, height);
     CenterRectInRect( &stringRect, &tRect);
     stringRect.left -= 4;
     stringRect.top -= 4;
     stringRect.right += 4;
     stringRect.bottom += 4;
-    
+
     DrawInOffWorld();
     DefaultColors();
     CopySaveWorldToOffWorld( &stringRect);
@@ -1551,7 +1551,7 @@ void StopPauseIndicator( StringPtr pauseString)
     DrawInOffWorld();
     DefaultColors();
     PaintRect( &stringRect);
-    
+
     DrawInRealWorld();
     DefaultColors();
 }
@@ -1585,20 +1585,20 @@ void DoOptionsInterface( void)
     OSErr                   err;
     preferencesDataType     *prefsData = nil;
     Rect                    volumeRect;
-    
+
     BlackenWindow();
-    
+
     FlushEvents(everyEvent, 0);
     err = HandToHand( &tempPrefs);
     if (( tempPrefs == nil) || ( err != noErr))
     {
         return;
     }
-    
+
     MoveHHi( tempPrefs);
     HLock( tempPrefs);
     prefsData = (preferencesDataType *)*gAresGlobal->gPreferencesData;
-    
+
     error = OpenInterface( kOptionsScreenID);
     SetOptionCheckboxes( prefsData->options);
     if ( !(gAresGlobal->gOptions & kOptionSpeechAvailable)) SetStatusOfAnyInterfaceItem( kOptionSpeechOnButton, kDimmed, false);
@@ -1622,7 +1622,7 @@ void DoOptionsInterface( void)
             Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
-                switch ( theEvent.what ) 
+                switch ( theEvent.what )
                 {
                     case nullEvent:
                         InterfaceIdle();
@@ -1634,14 +1634,14 @@ void DoOptionsInterface( void)
                         if ( gAresGlobal->returnToMain)
                         {
                             done = true;
-                        }   
+                        }
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
                         break;
                     case updateEvt:
                         whichWindow = ( CWindowPtr)theEvent.message;
-        
+
                         if ( whichWindow == gTheWindow)
                         {
                             BeginUpdate( (WindowPtr)whichWindow);
@@ -1664,7 +1664,7 @@ void DoOptionsInterface( void)
                         MacSetPort( (WindowPtr)gTheWindow);
 
                         break;
-                        
+
                     case mouseDown:
                         where = theEvent.where;
                         GlobalToLocal( &where);
@@ -1685,17 +1685,17 @@ void DoOptionsInterface( void)
                         done = TRUE;
                         cancel = TRUE;
                         break;
-                    
+
                     case kOptionDoneButton:
                         done = TRUE;
-                        
+
                         // if we've changed screen size
 /*                      if ( (prefsData->options & ( kOptionScreenSmall | kOptionScreenMedium |
                                 kOptionScreenLarge)) != ( gAresGlobal->gOptions & ( kOptionScreenSmall | kOptionScreenMedium |
                                 kOptionScreenLarge)))
                         {
                             whichItem = ResizeWindowDialog( 2500);
-                            
+
                             // if cancel was hit then revert screen size options
                             if ( whichItem < 0)
                             {
@@ -1705,9 +1705,9 @@ void DoOptionsInterface( void)
                                                 kOptionScreenLarge);
                             }
                         }
-                        
+
 */                      break;
-                    
+
                     case kOptionSoundUpButton:
                         if ( prefsData->volume < kMaxVolumePreference)
                         {
@@ -1729,7 +1729,7 @@ void DoOptionsInterface( void)
                         }
                         PlayVolumeSound( kComputerBeep2, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
                         break;
-                        
+
                     case kOptionSoundDownButton:
                         if ( prefsData->volume > 0)
                         {
@@ -1751,15 +1751,15 @@ void DoOptionsInterface( void)
                         }
                         PlayVolumeSound( kComputerBeep2, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
                         break;
-                        
+
                     case kOptionKeyControlButton:
 //                      #ifndef kNonPlayableDemo
                         CloseInterface();
-                        
+
                         done = Key_Setup_Screen_Do();//DoKeyInterface();
-                        
+
                         OpenInterface( kOptionsScreenID);
-                        
+
                         BlackenOffscreen();
                         if ( !done)
                         {
@@ -1769,11 +1769,11 @@ void DoOptionsInterface( void)
                         }
 //                      #endif
                         break;
-                    
+
                     case kOptionGameMusicButton:
                         prefsData->options ^= kOptionMusicPlay;
                         break;
-                    
+
                     case kOptionIdleMusicButton:
                         prefsData->options ^= kOptionMusicIdle;
                         if ( prefsData->options & kOptionMusicIdle)
@@ -1790,14 +1790,14 @@ void DoOptionsInterface( void)
                     case kOptionSpeechOnButton:
                         prefsData->options ^= kOptionSpeechOn;
                         break;
-                    
-                    
+
+
 /*                  case kOptionQuickDrawButton:
                         prefsData->options ^= kOptionQDOnly;
                         break;
-*/                      
+*/
                 }
-                        
+
             }
         }
         if ( !cancel)
@@ -1821,12 +1821,12 @@ void DoOptionsInterface( void)
                     LoadSong( kTitleSongID);
                     SetSongVolume( kMaxMusicVolume);
                     PlaySong();
-                }   
+                }
             } else if ( SongIsPlaying())
             {
                 StopAndUnloadSong();
             }
-            
+
         }
         CloseInterface();
     }
@@ -1853,21 +1853,21 @@ void DrawOptionVolumeLevel( Rect *bounds, long level)
 {
     long        notchWidth = (( bounds->right - bounds->left) / ( kMaxVolumePreference)),
                 notchHeight = (( bounds->bottom - bounds->top) - 4), count, shade;
-    
+
     Rect        notchBounds, tRect, graphicRect;
-    
-    notchBounds.left = bounds->left + ((( bounds->right - bounds->left) / 2) - 
+
+    notchBounds.left = bounds->left + ((( bounds->right - bounds->left) / 2) -
         (( notchWidth * (kMaxVolumePreference))/ 2));
     notchBounds.top = bounds->top + 2;
     notchBounds.bottom = notchBounds.top + notchHeight;
     notchBounds.right = notchBounds.left + (( notchWidth * (kMaxVolumePreference))/ 2);
-    
+
     DrawInOffWorld();
-    
+
     MacSetRect( &tRect, notchBounds.left, notchBounds.top,
           notchBounds.left + notchWidth - 2,
         notchBounds.bottom);
-        
+
     shade = 2;
     for ( count = 0; count < level; count++)
     {
@@ -1880,7 +1880,7 @@ void DrawOptionVolumeLevel( Rect *bounds, long level)
         tRect.right = tRect.left + notchWidth - 2;
         shade += 2;
     }
-    
+
     NormalizeColors();
     for ( count = level; count < ( kMaxVolumePreference); count++)
     {
@@ -1891,7 +1891,7 @@ void DrawOptionVolumeLevel( Rect *bounds, long level)
         tRect.left += notchWidth;
         tRect.right = tRect.left + notchWidth - 2;
     }
-    
+
     DrawInRealWorld();
     NormalizeColors();
     CopyOffWorldToRealWorld((WindowPtr)gTheWindow, bounds);
@@ -1909,9 +1909,9 @@ Boolean DoKeyInterface( void)
     CWindowPtr              whichWindow;
     preferencesDataType     *prefsData = nil;
     unsigned long           options = gAresGlobal->gOptions;
-    
+
     BlackenOffscreen();
-    
+
     FlushEvents(everyEvent, 0);
     error = OpenInterface( kKeyScreenID);
     if ( error == kNoError)
@@ -1921,12 +1921,12 @@ Boolean DoKeyInterface( void)
             SetButtonKeyNum( i,
                 GetKeyNumFromKeyMap( gAresGlobal->gKeyControl[i]));
         }
-    
+
         prefsData = (preferencesDataType *)*gAresGlobal->gPreferencesData;
 
         SwitchAnyRadioOrCheckbox( kKeySubstituteCheckbox,
             ((options & kOptionSubstituteFKeys) ? (true):(false)));
-        
+
         DrawInterfaceOneAtATime();
         while ( !done)
         {
@@ -1936,7 +1936,7 @@ Boolean DoKeyInterface( void)
                 GetKeys( keyMap);
                 keyNum = GetKeyNumFromKeyMap( keyMap);
                 if ( currentKey > 0) keyNum = currentKey;
-                
+
                 // make sure it's not a reserved key
                 if ( IsKeyReserved( keyMap, ((options & kOptionSubstituteFKeys) ?
                     ( true):(false))))
@@ -1944,7 +1944,7 @@ Boolean DoKeyInterface( void)
                     PlayVolumeSound( kWarningTone, kMediumLowVolume, kShortPersistence, kMustPlaySound);
                     keyNum = -1;
                 }
-                
+
                 // make sure it's not a key that's already in use
                 checkKey = 0;
                 while (( checkKey < kKeyControlNum) &&
@@ -1974,7 +1974,7 @@ Boolean DoKeyInterface( void)
                         GetKeys( keyMap);
                         currentKey = GetKeyNumFromKeyMap( keyMap);
                     } while ( currentKey > 0);
-                    
+
                     SetStatusOfAnyInterfaceItem( whichKeyButton, kActive, TRUE);
                     whichKeyButton++;
                     if ( whichKeyButton >= kKeyControlNum) whichKeyButton = 0;
@@ -1986,7 +1986,7 @@ Boolean DoKeyInterface( void)
             Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
-                switch ( theEvent.what ) 
+                switch ( theEvent.what )
                 {
                     case nullEvent:
                         InterfaceIdle();
@@ -1999,14 +1999,14 @@ Boolean DoKeyInterface( void)
                         {
                             done = true;
                             result = false;
-                        }   
+                        }
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
                         break;
                     case updateEvt:
                         whichWindow = ( CWindowPtr)theEvent.message;
-        
+
                         if ( whichWindow == gTheWindow)
                         {
                             BeginUpdate( (WindowPtr)whichWindow);
@@ -2029,7 +2029,7 @@ Boolean DoKeyInterface( void)
                         MacSetPort( (WindowPtr)gTheWindow);
 
                         break;
-                        
+
                     case mouseDown:
                         where = theEvent.where;
                         GlobalToLocal( &where);
@@ -2044,7 +2044,7 @@ Boolean DoKeyInterface( void)
 //                      whichItem = InterfaceKeyDown( theEvent.message);
                         break;
                 }
-                
+
                 if (( whichItem >= 0) &&  (whichItem < kKeyControlNum))
                 {
                     if (( whichKeyButton >= 0) &&  (whichKeyButton < kKeyControlNum))
@@ -2053,7 +2053,7 @@ Boolean DoKeyInterface( void)
                     whichKeyButton = whichItem;
                     DrawKeyControlPicture( whichKeyButton);
                 }
-                
+
                 switch ( whichItem)
                 {
                     case kKeyCancelButton:
@@ -2067,7 +2067,7 @@ Boolean DoKeyInterface( void)
                         result = FALSE;
                         done = TRUE;
                         break;
-                        
+
                     case kKeySubstituteCheckbox:
                         options ^= kOptionSubstituteFKeys;
 
@@ -2102,10 +2102,10 @@ Boolean DoKeyInterface( void)
                                 ((options & kOptionSubstituteFKeys) ? (true):(false)));
                             RefreshInterfaceItem( kKeySubstituteCheckbox);
                         }
-                        
+
                         break;
                 }
-                        
+
             }
         }
         if ( !cancel)
@@ -2136,13 +2136,13 @@ Boolean BothCommandAndQ( void)
 {
     Boolean command = false, q = false;
     short   b;
-    
+
     for ( b = 0; b < kKeyExtendedControlNum; b++)
     {
         if ( mQKey( gAresGlobal->gKeyControl[b])) q = true;
         if ( mCommandKey( gAresGlobal->gKeyControl[b])) command = true;
     }
-    
+
     if (( q) && ( command)) return ( true);
     else return( false);
 }
@@ -2183,7 +2183,7 @@ Boolean IsKeyReserved( KeyMap keyMap, Boolean alternateFKey)
         if ( mScaleObjectKey( keyMap)) return( true);
         if ( mScaleAllKey( keyMap)) return( true);
     }
-*/  
+*/
     // not related to fkey
 //  if ( mDeleteKey( keyMap)) return( true);
     if ( mPauseKey( keyMap)) return( true);
@@ -2197,7 +2197,7 @@ void DrawKeyControlPicture( long whichKey)
 {
     Rect    tRect, newRect;
     PicHandle       thePict = nil;
-    
+
     GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kKeyIllustrationBox), &tRect);
 
     DrawInOffWorld();
@@ -2233,7 +2233,7 @@ void DrawKeyControlPicture( long whichKey)
     }
     DrawInRealWorld();
     CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &tRect);
-    
+
 }
 
 
@@ -2249,7 +2249,7 @@ netResultType StartNetworkGameSetup( void)
     char                    whichChar;
     netResultType           result = kCancel;
     CWindowPtr              whichWindow;
-    
+
     if ( gAresGlobal->gameRangerPending)
     {
         if ( Wrap_GRIsHostCmd())
@@ -2260,7 +2260,7 @@ netResultType StartNetworkGameSetup( void)
             whichItem = kNetSetupJoinButton;
         }
     }
-    
+
     FlushEvents(everyEvent, 0);
     if ( whichItem == -1)
     {
@@ -2276,7 +2276,7 @@ netResultType StartNetworkGameSetup( void)
                 Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
                 {
                     whichItem = -1;
-                    switch ( theEvent.what ) 
+                    switch ( theEvent.what )
                     {
                         case nullEvent:
                             InterfaceIdle();
@@ -2284,20 +2284,20 @@ netResultType StartNetworkGameSetup( void)
                             {
                             } else if (AutoShowHideMenubar( theEvent.where, theDevice))
                             {
-                                
+
                             }
                             if ( gAresGlobal->returnToMain)
                             {
                                 done = true;
                                 result = kCancel;
-                            }   
+                            }
                             break;
                         case osEvt:
 //                          HandleOSEvent( &theEvent);
                             break;
                         case updateEvt:
                             whichWindow = ( CWindowPtr)theEvent.message;
-            
+
                             if ( whichWindow == gTheWindow)
                             {
                                 BeginUpdate( (WindowPtr)whichWindow);
@@ -2334,7 +2334,7 @@ netResultType StartNetworkGameSetup( void)
                             break;
 
                     }
-                    
+
                     switch ( whichItem)
                     {
                         case kNetSetupCancelButton:
@@ -2354,7 +2354,7 @@ netResultType StartNetworkGameSetup( void)
                             done = TRUE;
                             break;
                     }
-                            
+
                 }
             }
             CloseInterface();
@@ -2383,11 +2383,11 @@ void DrawStringInInterfaceItem( long whichItem, StringPtr string)
     PixMapHandle        offMap = GetGWorldPixMap( gOffWorld);
     Rect                tRect;
     interfaceItemType   *anItem;
-    
+
     DrawInOffWorld();
     DefaultColors();
     GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( whichItem), &tRect);
-    
+
     PaintRect( &tRect);
     anItem = GetAnyInterfaceItemPtr( whichItem);
     if ( string != nil)
@@ -2415,7 +2415,7 @@ netResultType ClientWaitInterface( void)
                             serialDenominator;
     Str255                  s;
     CWindowPtr              whichWindow;
-    
+
     if ( gAresGlobal->gameRangerPending)
     {
         gAresGlobal->gameRangerPending = false;
@@ -2427,7 +2427,7 @@ netResultType ClientWaitInterface( void)
     error = OpenInterface( kClientWaitID);
     if ( error == kNoError)
     {
-        SetStatusOfAnyInterfaceItem( kClientWaitCancelButton, kDimmed, false);      
+        SetStatusOfAnyInterfaceItem( kClientWaitCancelButton, kDimmed, false);
         DrawInterfaceOneAtATime();
         GetIndString( s, kClientWaitStrID, 18);
 //      CopyPString(s, "\pLooking for host (cannont cancel).");
@@ -2442,16 +2442,16 @@ netResultType ClientWaitInterface( void)
             GetIndString( s, kClientWaitStrID, 19);
             DrawStringInInterfaceItem( kClientWaitStatusRect, s);
         }
-        
-        SetStatusOfAnyInterfaceItem( kClientWaitCancelButton, kActive, true);       
-        
+
+        SetStatusOfAnyInterfaceItem( kClientWaitCancelButton, kActive, true);
+
         while ( !done)
         {
             InterfaceIdle();
             Ares_WaitNextEvent (everyEvent, &theEvent, 0, nil);
             {
                 whichItem = -1;
-                switch ( theEvent.what ) 
+                switch ( theEvent.what )
                 {
                     case nullEvent:
                         InterfaceIdle();
@@ -2463,14 +2463,14 @@ netResultType ClientWaitInterface( void)
                         if ( gAresGlobal->returnToMain)
                         {
                             whichItem = kClientWaitCancelButton;
-                        }   
+                        }
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
                         break;
                     case updateEvt:
                         whichWindow = ( CWindowPtr)theEvent.message;
-        
+
                         if ( whichWindow == gTheWindow)
                         {
                             BeginUpdate( (WindowPtr)whichWindow);
@@ -2492,7 +2492,7 @@ netResultType ClientWaitInterface( void)
                         }
                         MacSetPort( (WindowPtr)gTheWindow);
                         break;
-                        
+
                     case mouseDown:
                         where = theEvent.where;
                         GlobalToLocal( &where);
@@ -2507,7 +2507,7 @@ netResultType ClientWaitInterface( void)
                         whichItem = InterfaceKeyDown( theEvent.message);
                         break;
                 }
-                
+
                 switch ( whichItem)
                 {
                     case kClientWaitCancelButton:
@@ -2521,7 +2521,7 @@ netResultType ClientWaitInterface( void)
                     theMessage = ProcessPreGameMessages( nil, &version, &serialNumerator,
                         &serialDenominator, nil,
                         &roundTripTime, 0, nil, nil, nil, nil);
-                     
+
                     switch( theMessage)
                     {
                         case eHostAcceptsMessage:
@@ -2561,7 +2561,7 @@ netResultType ClientWaitInterface( void)
                                 SendPreGameVerboseMessage( eClientReadyMessage,
                                     kThisVersion, gAresGlobal->gSerialNumerator,
                                     gAresGlobal->gSerialDenominator, 0);
-                                
+
                                 if ( version < kThisVersion)
                                     ShowErrorAny( eContinueOnlyErr, kErrorStrID,
                                         nil, nil, nil, nil, kOlderVersionError, -1, -1, -1, __FILE__, 0);
@@ -2571,19 +2571,19 @@ netResultType ClientWaitInterface( void)
                                 else
                                     ShowErrorAny( eContinueOnlyErr, kErrorStrID,
                                         nil, nil, nil, nil, kSameSerialNumberError, -1, -1, -1, __FILE__, 0);
-                                
+
                             }
                             break;
-                        
+
                         case eHostDeclinesMessage:
                             GetIndString( s, kClientWaitStrID, kClientWaitHostDeclinedStrNum);
                             DrawStringInInterfaceItem( kClientWaitStatusRect, s);
                             StopNetworking();
                             break;
-                            
+
                     }
                 } while ( theMessage != eNoMessage);
-                        
+
             }
         }
         CloseInterface();
@@ -2592,7 +2592,7 @@ netResultType ClientWaitInterface( void)
 #else
     return ( kCancel);
 #endif NETSPROCKET_AVAILABLE
-}       
+}
 
 netResultType HostAcceptClientInterface( void)
 
@@ -2610,7 +2610,7 @@ netResultType HostAcceptClientInterface( void)
     Str31                   s;
     StringPtr               name;
     CWindowPtr              whichWindow;
-    
+
     if ( gAresGlobal->gameRangerPending)
     {
         gAresGlobal->gameRangerPending = false;
@@ -2619,7 +2619,7 @@ netResultType HostAcceptClientInterface( void)
         Wrap_GRHostReady();
     }
 
-    
+
     FlushEvents(everyEvent, 0);
     error = OpenInterface( kNetHostID);
     if ( error == kNoError)
@@ -2640,7 +2640,7 @@ netResultType HostAcceptClientInterface( void)
             Ares_WaitNextEvent (everyEvent, &theEvent, 0, nil);
             {
                 whichItem = -1;
-                switch ( theEvent.what ) 
+                switch ( theEvent.what )
                 {
                     case nullEvent:
                         InterfaceIdle();
@@ -2652,7 +2652,7 @@ netResultType HostAcceptClientInterface( void)
                         if ( gAresGlobal->returnToMain)
                         {
                             whichItem = kHostCancelButton;
-                        }   
+                        }
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
@@ -2670,10 +2670,10 @@ netResultType HostAcceptClientInterface( void)
                         whichChar = theEvent.message & charCodeMask;
                         whichItem = InterfaceKeyDown( theEvent.message);
                         break;
-    
+
                     case updateEvt:
                         whichWindow = ( CWindowPtr)theEvent.message;
-        
+
                         if ( whichWindow == gTheWindow)
                         {
                             BeginUpdate( (WindowPtr)whichWindow);
@@ -2696,7 +2696,7 @@ netResultType HostAcceptClientInterface( void)
                         MacSetPort( (WindowPtr)gTheWindow);
                         break;
                 }
-                
+
                 switch ( whichItem)
                 {
                     case kHostCancelButton:
@@ -2704,20 +2704,20 @@ netResultType HostAcceptClientInterface( void)
                         result = kCancel;
                         StopNetworking();
                         break;
-                    
+
                     case kHostAcceptButton:
                         SendPreGameVerboseMessage( eHostAcceptsMessage, kThisVersion,
                             gAresGlobal->gSerialNumerator,
                             gAresGlobal->gSerialDenominator,
                             0);
                         break;
-                    
+
                     case kHostDeclineButton:
                         SendPreGameBasicMessage( eHostDeclinesMessage);
                         break;
-                        
-                        
-                }                       
+
+
+                }
             }
 //          SendPreGameBasicMessage( eRoundTripGetReadyMessage);
             do
@@ -2749,7 +2749,7 @@ netResultType HostAcceptClientInterface( void)
                             DrawStringInInterfaceItem( kHostHostNameRect, s);
                         }
                         break;
-                
+
                     case eClientReadyMessage:
                         if ( version < kThisVersion)
                         {
@@ -2785,7 +2785,7 @@ netResultType HostAcceptClientInterface( void)
 #else
     return( kCancel);
 #endif
-}       
+}
 
 /*
 netResultType HostNetworkGameSetup( void)
@@ -2804,21 +2804,21 @@ netResultType HostNetworkGameSetup( void)
     netSetupDataType        netData, *receivedData = nil;
     long                    lastPoll = 0;
     Str255                  s;
-    
+
     // clear the screen
-    
+
     BlackenWindow();
-    
+
     // get the interface in memory
-    
+
     error = OpenInterface( kNetHostID);
     SetInterfaceListCallback( kHostAvailableList, GetClientListLength, GetClientListName,
                         IsThisClientHilited);
     SetInterfaceListCallback( kHostInGameList, GetInGameListLength, GetInGameListName,
                         IsThisInGameHilited);
-    
+
     // create & clear the list of incoming address from name binding search
-    
+
     addressList = NewHandle( sizeof( AddrBlock) * (long)kMaxAvailableClient);
     if ( addressList == nil)
         error = MEMORY_ERROR;
@@ -2827,9 +2827,9 @@ netResultType HostNetworkGameSetup( void)
         MoveHHi( addressList);
         HLock( addressList);
     }
-    
+
     // clear the list of client entities
-    
+
     aClient = ( netClientEntity *)*gClientEntity;
     for ( count = 0; count < kMaxAvailableClient; count++)
     {
@@ -2839,22 +2839,22 @@ netResultType HostNetworkGameSetup( void)
         aClient++;
     }
     aClient = ( netClientEntity *)*gClientEntity;
-    
+
     // if all is OK, proceed
-    
+
     if ( error == kNoError)
     {
-    
+
         // draw the entire interface
-    
+
         DrawEntireInterface();
-        
+
         // repeat until done
-        
+
         while ( !done)
         {
             // first clear the address list and the client list's stillThere flags
-            
+
             anAddress = ( AddrBlock *)*addressList;
             aClient = ( netClientEntity *)*gClientEntity;
             for ( count = 0; count < kMaxAvailableClient; count++)
@@ -2864,69 +2864,69 @@ netResultType HostNetworkGameSetup( void)
                 anAddress++;
                 aClient++;
             }
-            
+
             SetStatusOfAnyInterfaceItem( kHostInviteButton, kDimmed, TRUE);
             SetStatusOfAnyInterfaceItem( kHostCancelButton, kDimmed, TRUE);
             SetStatusOfAnyInterfaceItem( kHostBeginButton, kDimmed, TRUE);
-            
+
             // get all addresses from name binding protocol (NBP)
-            
+
             WriteDebugLine( (char *)"\pPolling");
             addressesFound = NatewerkGetName( (AddrBlock *)*addressList, kAresNetObjectName,
                             kAresNetTypeName, kMaxAvailableClient);
             WriteDebugLine( (char *)"\pPolled");
             lastPoll = TickCount();
-            
+
             // step through list of address we got
-            
+
             anAddress = ( AddrBlock *)*addressList;
             while ( addressesFound > 0)
             {
                 WriteDebugLine( ( char *)"\pICU!");
                 // if we did in fact find this address (should not be needed)
-                
+
                 if ( anAddress->aSocket != 0)
                 {
-                
+
                     // if the client exists and we have the same address, set stillThere flag
-                         
+
                     aClient = GetClientAddressMatch( anAddress);
                     if ( aClient != nil)
                         aClient->stillThere = TRUE;
-                    
+
                     // if this address is not yet listed, add it
-                    
+
                     else
                     {
-                        
+
                         // search for free client slot in list
-                        
+
                         count = 0;
                         aClient = ( netClientEntity *)*gClientEntity;
-                        
+
                         while (( count < kMaxAvailableClient) && ( aClient->status != kDoesNotExist))
                         {
                             count++;
                             aClient++;
                         }
-                        
+
                         // if we have a free client, then add address
-                        
+
                         if ( count < kMaxAvailableClient)
                         {
-                            WriteDebugLine((char *)"\pAdd Client"); 
+                            WriteDebugLine((char *)"\pAdd Client");
                             // we don't know the player's name yet, so we can't list it
-                            
+
                             aClient->status = kHasNoName;
                             aClient->entity.address = *anAddress;
                             aClient->stillThere = TRUE;
-                            
+
                             // send a What Is Your Name? Message
-                            
+
                             netData.type = kWhatIsYourName;
                             netData.address = gMyNetEntity.address;
                             CopyPString( (char *)&(netData.name), (char *)&(gMyNetEntity.name));
-                            
+
                             error = NatewerkSendData( aClient->entity.address,
                                                     gMyNetEntity.address.aSocket, (Ptr)&netData,
                                                     (short)sizeof( netSetupDataType));
@@ -2937,42 +2937,42 @@ netResultType HostNetworkGameSetup( void)
                 addressesFound--;
                 anAddress++;
             }   // end of walk through address list
-            
+
             // now remove any clients who aren't still there
-            
+
             aClient = ( netClientEntity *)*gClientEntity;
-            
+
             for ( count = 0; count < kMaxAvailableClient; count++)
             {
                 if (( aClient->status != kDoesNotExist) && ( !(aClient->stillThere)))
                     aClient->status = kDoesNotExist;
                 aClient++;
             }
-            
+
             RefreshInterfaceItem( kHostAvailableList);
             SetStatusOfAnyInterfaceItem( kHostCancelButton, kDimmed, TRUE);
             if ( GetSelectClient() != nil) SetStatusOfAnyInterfaceItem( kHostInviteButton, kDimmed, TRUE);
             if ( GetInGameListLength() > 0) SetStatusOfAnyInterfaceItem( kHostBeginButton, kDimmed, TRUE);
-            
+
             while (( !done) && (( TickCount() - lastPoll) < kHostPollTime))
             {
                 // process any messages we may have received
-                
+
                 while ( GetTopUsedQueue() != nil)
                 {
                     receivedData = ( netSetupDataType *)GetTopUsedQueue();
-                    
+
                     switch( receivedData->type)
                     {
-                    
+
                         // we received a invitation receipt
-                        
+
                         case kIReceivedInvite:
-                        
+
                             // which client sent it?
-                            
+
                             aClient = GetClientAddressMatch( &(receivedData->address));
-                            
+
                             if ( aClient != nil)
                             {
                                 if ( aClient->status == kInvitedNoResponse)
@@ -2981,17 +2981,17 @@ netResultType HostNetworkGameSetup( void)
                                     RefreshInterfaceItem( kHostAvailableList);
                                 } else WriteDebugLine( (char *)"\p<Rcvd Err1");
                             } else WriteDebugLine( (char *)"\p<Rcvd Err2");
-                            
+
                             break;
-                        
+
                         // we received an acception
-                            
+
                         case kIAcceptInvite:
-                        
+
                             // which client sent it?
-                            
+
                             aClient = GetClientAddressMatch( &(receivedData->address));
-                            
+
                             if ( aClient != nil)
                             {
                                 if ( aClient->status == kResponding)
@@ -2999,23 +2999,23 @@ netResultType HostNetworkGameSetup( void)
                                     aClient->status = kInGame;
                                     RefreshInterfaceItem( kHostInGameList);
                                     SetStatusOfAnyInterfaceItem( kHostBeginButton, kDimmed, TRUE);
-                                    
+
                                     GetIndString( s, kContentStringID, kContentNetAcceptNum);
                                     DrawStringInInterfaceContent( kHostStatusRect, s);
                                 }
                                 else WriteDebugLine( (char *)"\p<Accpt Err1");
                             } else WriteDebugLine( (char *)"\p<Accpt Err2");
-                            
+
                             break;
-                            
+
                         // we received an declention
-                            
+
                         case kIDeclineInvite:
-                        
+
                             // which client sent it?
-                            
+
                             aClient = GetClientAddressMatch( &(receivedData->address));
-                            
+
                             if ( aClient != nil)
                             {
                                 if ( aClient->status == kResponding)
@@ -3026,16 +3026,16 @@ netResultType HostNetworkGameSetup( void)
                                 }
                                 else WriteDebugLine( (char *)"\p<Dcln Err1");
                             } else WriteDebugLine( (char *)"\p<Dcln Err2");
-                            
+
                             break;
-    
+
                         // we received a name
-                            
+
                         case kMyNameIs:
                             // which client sent it?
-                            
+
                             aClient = GetClientAddressMatch( &(receivedData->address));
-                            
+
                             if ( aClient != nil)
                             {
                                 if ( aClient->status == kHasNoName)
@@ -3045,22 +3045,22 @@ netResultType HostNetworkGameSetup( void)
                                     RefreshInterfaceItem( kHostAvailableList);
                                 } else WriteDebugLine( (char *)"\p<Mynm Err1");
                             } else WriteDebugLine( (char *)"\p<Mynm Err2");
-                            
+
                             break;
-                            
+
                         default:
-                            
+
                             WriteDebugLine((char *)"Unexpctd Msg");
                             break;
                     }
                     PopTopUsedQueue();
                 }
-                
+
                 InterfaceIdle();
                 if (Ares_WaitNextEvent (everyEvent, &theEvent, 0, nil))
                 {
                     whichItem = -1;
-                    switch ( theEvent.what ) 
+                    switch ( theEvent.what )
                     {
                         case nullEvent:
                             InterfaceIdle();
@@ -3081,27 +3081,27 @@ netResultType HostNetworkGameSetup( void)
                             whichItem = InterfaceKeyDown( theEvent.message);
                             break;
                     }
-                    
+
                     switch ( whichItem)
                     {
-                        
+
                         case kHostAvailableList:
-                
+
                             SetStatusOfAnyInterfaceItem( kHostInviteButton,
                                     ((GetSelectClient() != nil) ? ( kActive):( kDimmed)), TRUE);
                             break;
-                            
+
                         // user hit cancel button
-                        
+
                         case kHostBeginButton:
-                        
+
                             done = TRUE;
                             result = kHost;
                             gNetworkStatus = hostWorking;
                             // walk through client list and send everyone who is included a cancel msg
-    
+
                             aClient = ( netClientEntity *)*gClientEntity;
-                            
+
                             for ( count = 0; count < kMaxAvailableClient; count++)
                             {
                                 if ( aClient->status == kInGame)
@@ -3109,28 +3109,28 @@ netResultType HostNetworkGameSetup( void)
                                     netData.type = kWeAreStarting;
                                     netData.address = gMyNetEntity.address;
                                     CopyPString( (char *)&(netData.name), (char *)&(gMyNetEntity.name));
-                                    
+
                                     error = NatewerkSendData( aClient->entity.address,
                                                         gMyNetEntity.address.aSocket, (Ptr)&netData,
                                                         (short)sizeof( netSetupDataType));
-                                                        
+
                                     if ( error) WriteDebugLine( (char *)"\p>Cncl Err");
                                 }
                                 aClient++;
                             }
-                            
+
                             result = HostBeginGame();
-                            
+
                             break;
 
                         case kHostCancelButton:
                             done = TRUE;
                             result = kCancel;
-                            
+
                             // walk through client list and send everyone who is included a cancel msg
-    
+
                             aClient = ( netClientEntity *)*gClientEntity;
-                            
+
                             for ( count = 0; count < kMaxAvailableClient; count++)
                             {
                                 if (( aClient->status == kInGame) || ( aClient->status == kResponding))
@@ -3138,34 +3138,34 @@ netResultType HostNetworkGameSetup( void)
                                     netData.type = kWeAreCanceling;
                                     netData.address = gMyNetEntity.address;
                                     CopyPString( (char *)&(netData.name), (char *)&(gMyNetEntity.name));
-                                    
+
                                     error = NatewerkSendData( aClient->entity.address,
                                                         gMyNetEntity.address.aSocket, (Ptr)&netData,
                                                         (short)sizeof( netSetupDataType));
-                                                        
+
                                     if ( error) WriteDebugLine( (char *)"\p>Cncl Err");
                                 }
                                 aClient++;
                             }
-                            
+
                             break;
-                            
+
                             // user hit invite button
-                            
+
                             case kHostInviteButton:
-                            
+
                             // which client is selected?
-                            
+
                             aClient = GetSelectClient();
-                            
+
                             if ( aClient != nil)
                             {
                                 aClient->status = kInvitedNoResponse;
-                                
+
                                 netData.type = kYouAreInvited;
                                 netData.address = gMyNetEntity.address;
                                 CopyPString( (char *)&(netData.name), (char *)&(gMyNetEntity.name));
-                                
+
                                 error = NatewerkSendData( aClient->entity.address,
                                                     gMyNetEntity.address.aSocket, (Ptr)&netData,
                                                     (short)sizeof( netSetupDataType));
@@ -3176,13 +3176,13 @@ netResultType HostNetworkGameSetup( void)
                                 } else
                                     WriteDebugLine( (char *)"\p>Invt Err");
                             }
-                            
+
                             break;
-                            
-                                
-                                
+
+
+
                     }
-                            
+
                 }
             } // while ( ( TickCount() - lastPoll) < kHostPollTime)
         } // while ( !done)
@@ -3191,7 +3191,7 @@ netResultType HostNetworkGameSetup( void)
     }
     WriteDebugLine((char *)"\pHost Int OK");
     return ( result);
-}       
+}
 
 netResultType ClientNetworkGameSetup( void)
 
@@ -3205,16 +3205,16 @@ netResultType ClientNetworkGameSetup( void)
     netResultType           result = kCancel;
     netClientEntity         *hostChoice = nil, *aHost, *proposingHost = nil;
     netSetupDataType        netData, *receivedData = nil;
-    
+
     BlackenWindow();
 
     error = OpenInterface( kNetClientID);
     if ( error == kNoError)
     {
         DrawEntireInterface();
-        
+
         // first clear the host list
-        
+
         aHost = ( netClientEntity *)*gClientEntity;
         for ( count = 0; count < kMaxAvailableHost; count++)
         {
@@ -3222,71 +3222,71 @@ netResultType ClientNetworkGameSetup( void)
             aHost->entity.address.aNode = aHost->entity.address.aNet = aHost->entity.address.aSocket = 0;
             aHost++;
         }
-        
+
         // make our presence known by posting Ares entity name (players name n/a)
-        
+
         if ( error == kNoError)
             error = NatewerkPostName( gMyNetEntity.address.aSocket, kAresNetObjectName,
                                 kAresNetTypeName);
-                                
+
         if ( error) WriteDebugLine( (char *)"\pPost Err");
         else WriteDebugLine( (char *)"\pPost OK");
-        
+
         while ( !done)
         {
             // process the incoming message queue
-            
+
             while ( GetTopUsedQueue() != nil)
             {
                 receivedData = ( netSetupDataType *)GetTopUsedQueue();
-                
+
                 switch ( receivedData->type)
                 {
-                    
+
                     // we received a what is your name? messge
-                    
+
                     case kWhatIsYourName:
-                        
+
                         if ( hostChoice == nil)
                         {
                             netData.type = kMyNameIs;
                             netData.address = gMyNetEntity.address;
                             CopyPString( (char *)&(netData.name), (char *)&(gMyNetEntity.name));
-                            
+
                             error = NatewerkSendData( receivedData->address,
                                                 gMyNetEntity.address.aSocket, (Ptr)&netData,
                                                 (short)sizeof( netSetupDataType));
-                            
+
                             if ( error) WriteDebugLine( (char *)"\pSndNm Err");
                         }
-                        
+
                         break;
-                    
+
                     // we received a cancel message before we accepted/declined
-                    
+
                     case kWeAreCanceling:
-                        
+
                         // step through our host list
                         aHost = ( netClientEntity *)*gClientEntity;
                         for ( count = 0; count < kMaxAvailableHost; count++)
                         {
                             // if we got cancel message from this host
-                            
+
                             if (( aHost->status != kDoesNotExist) &&
                                 ( mSameAddress( &(aHost->entity.address), &(receivedData->address))))
                             {
-                            
+
                             // then this host goes away
-                            
+
                                 aHost->status = kDoesNotExist;
                                 aHost->entity.address.aNode = aHost->entity.address.aNet =
                                                         aHost->entity.address.aSocket = 0;
-                                                        
+
                                 // if this host is the one we currently see as inviting us
                                 if ( aHost == proposingHost)
                                 {
                                     // then it is no longer the proposing host
-                                    
+
                                     proposingHost = nil;
                                     SetStatusOfAnyInterfaceItem( kClientAcceptButton, kDimmed, TRUE);
                                     SetStatusOfAnyInterfaceItem( kClientDeclineButton, kDimmed, TRUE);
@@ -3295,30 +3295,30 @@ netResultType ClientNetworkGameSetup( void)
                             }
                             aHost++;
                         }
-                        
+
                         break;
-                    
+
                     // we received an invitation
-                    
+
                     case kYouAreInvited:
-                    
+
                         //  1st send receipt of invitation
-                    
+
                         netData.type = kIReceivedInvite;
                         netData.address = gMyNetEntity.address;
                         CopyPString( (char *)&(netData.name), (char *)&(gMyNetEntity.name));
-                        
+
                         error = NatewerkSendData( receivedData->address,
                                             gMyNetEntity.address.aSocket, (Ptr)&netData,
                                             (short)sizeof( netSetupDataType));
-                        
+
                         if ( error) WriteDebugLine( (char *)"\p<Invte Err0");
-                            
+
                         // 2nd make sure we haven't been invited by this guy before
-                        
+
                         aHost = ( netClientEntity *)*gClientEntity;
                         responded = FALSE;
-                        
+
                         for ( count = 0; count < kMaxAvailableHost; count++)
                         {
                             if ( mSameAddress( &(aHost->entity.address), &(receivedData->address)))
@@ -3337,9 +3337,9 @@ netResultType ClientNetworkGameSetup( void)
                             }
                             aHost++;
                         }
-                        
+
                         // find a free host
-                        
+
                         if ( !responded)
                         {
                             aHost = ( netClientEntity *)*gClientEntity;
@@ -3349,9 +3349,9 @@ netResultType ClientNetworkGameSetup( void)
                                 count++;
                                 aHost++;
                             }
-                            
+
                             // if we still have room in our host list
-                            
+
                             if ( count != kMaxAvailableHost)
                             {
                                 aHost->entity.address = receivedData->address;
@@ -3359,13 +3359,13 @@ netResultType ClientNetworkGameSetup( void)
                                 aHost->status = kAvailable;
                             } else WriteDebugLine( (char *)"\p<Invte Err2");
                         }
-                        
+
                         break;
-                                                
+
                     default:
-                        
+
                         WriteDebugLine( (char *)"\p<Msg Err");
-                        
+
                         break;
                 }
                 PopTopUsedQueue();
@@ -3378,7 +3378,7 @@ netResultType ClientNetworkGameSetup( void)
                 count++;
                 aHost++;
             }
-            
+
             if (( count < kMaxAvailableHost) && ( proposingHost != aHost))
             {
                 if ( proposingHost == nil)
@@ -3389,13 +3389,13 @@ netResultType ClientNetworkGameSetup( void)
                 proposingHost = aHost;
                 DrawStringInInterfaceContent( kClientHostNameRect, proposingHost->entity.name);
             }
-            
+
             InterfaceIdle();
 
             if (Ares_WaitNextEvent (everyEvent, &theEvent, 0, nil))
             {
                 whichItem = -1;
-                switch ( theEvent.what ) 
+                switch ( theEvent.what )
                 {
                     case nullEvent:
                         InterfaceIdle();
@@ -3438,11 +3438,11 @@ netResultType ClientNetworkGameSetup( void)
                         done = TRUE;
                         result = kCancel;
                         break;
-                    
+
                     case kClientAcceptButton:
-                    
+
                         if ( proposingHost != nil)
-                        {                   
+                        {
                             aHost = ( netClientEntity *)*gClientEntity;
                             for ( count = 0; count < kMaxAvailableHost; count++)
                             {
@@ -3462,14 +3462,14 @@ netResultType ClientNetworkGameSetup( void)
                             netData.type = kIAcceptInvite;
                             netData.address = gMyNetEntity.address;
                             CopyPString( (char *)&(netData.name), (char *)&(gMyNetEntity.name));
-                            
+
                             error = NatewerkSendData( receivedData->address,
                                                 gMyNetEntity.address.aSocket, (Ptr)&netData,
                                                 (short)sizeof( netSetupDataType));
-                            
+
                             if ( error) WriteDebugLine( (char *)"\p>Acpt Err");
                             done = TRUE;
-                            
+
                             CloseInterface();
                             result = ClientNetworkWaitForHost();
                         }
@@ -3477,15 +3477,15 @@ netResultType ClientNetworkGameSetup( void)
 
                     case kClientDeclineButton:
                         if ( proposingHost != nil)
-                        {                   
+                        {
                             netData.type = kIDeclineInvite;
                             netData.address = gMyNetEntity.address;
                             CopyPString( (char *)&(netData.name), (char *)&(gMyNetEntity.name));
-                            
+
                             error = NatewerkSendData( receivedData->address,
                                                 gMyNetEntity.address.aSocket, (Ptr)&netData,
                                                 (short)sizeof( netSetupDataType));
-                            
+
                             if ( error) WriteDebugLine( (char *)"\p>Dcln Err");
                             proposingHost->status = kNotInterested;
                             proposingHost = nil;
@@ -3494,16 +3494,16 @@ netResultType ClientNetworkGameSetup( void)
                             RefreshInterfaceItem( kClientHostNameRect);
                         }
                         break;
-                        
+
                 }
-                        
+
             }
         }
         CloseInterface();
     }
     NatewerkRemoveName( kAresNetObjectName, kAresNetTypeName);
     return ( result);
-}       
+}
 
 netResultType ClientNetworkWaitForHost( void)
 
@@ -3517,43 +3517,43 @@ netResultType ClientNetworkWaitForHost( void)
     netResultType           result = kCancel;
     netClientEntity         *hostChoice = nil, *aHost, *proposingHost = nil;
     netSetupDataType        netData, *receivedData = nil;
-    
+
     BlackenWindow();
 
     error = OpenInterface( kClientWaitID);
     if ( error == kNoError)
     {
         DrawEntireInterface();
-                
+
         while ( !done)
         {
             // process the incoming message queue
-            
+
             while ( GetTopUsedQueue() != nil)
             {
                 receivedData = ( netSetupDataType *)GetTopUsedQueue();
-                
+
                 switch ( receivedData->type)
                 {
                     case kWeAreCanceling:
-                        
+
                         done = TRUE;
                         result = kCancel;
                         break;
-                    
+
                     case kWeAreStarting:
-                        
+
                         gNetworkStatus = clientWorking;
                         done = TRUE;
-                        
+
                         PopTopUsedQueue();
                         result = ClientBeginGame();
                         break;
-                        
+
                     default:
-                        
+
                         WriteDebugLine( (char *)"\p<Msg Err");
-                        
+
                         break;
                 }
                 PopTopUsedQueue();
@@ -3564,7 +3564,7 @@ netResultType ClientNetworkWaitForHost( void)
             if (Ares_WaitNextEvent (everyEvent, &theEvent, 0, nil))
             {
                 whichItem = -1;
-                switch ( theEvent.what ) 
+                switch ( theEvent.what )
                 {
                     case nullEvent:
                         InterfaceIdle();
@@ -3587,16 +3587,16 @@ netResultType ClientNetworkWaitForHost( void)
                 }
                 switch ( whichItem)
                 {
-                        
+
                 }
-                        
+
             }
         }
         CloseInterface();
     }
     return ( result);
 }
-*/      
+*/
 /*
 netResultType HostBeginGame( void)
 
@@ -3618,7 +3618,7 @@ void BlackenWindow( void)
 
 {
     Rect    tRect;
-    
+
     MacSetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     DrawInSaveWorld();
     DefaultColors();
@@ -3635,7 +3635,7 @@ void BlackenOffscreen( void)
 
 {
     Rect    tRect;
-    
+
     MacSetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     DrawInSaveWorld();
     DefaultColors();
@@ -3649,7 +3649,7 @@ void BlackenOffscreen( void)
 
 /*
         Here's the set up for multiple textEdit items:
-        
+
         InterfaceTextEditItemInit( 9);
         InterfaceTextEditSetText( 9, ( anyCharType *)"\pThis is a larger test string.");
         InterfaceTextEditDeactivate( 9);
@@ -3663,7 +3663,7 @@ short GetClientListLength( void)
 {
     netClientEntity     *aClient;
     short               i, result = 0;
-    
+
     aClient = ( netClientEntity *)*gClientEntity;
     for ( i = 0; i < kMaxAvailableClient; i++)
     {
@@ -3676,11 +3676,11 @@ short GetClientListLength( void)
 */
 /*
 void GetClientListName( short which, anyCharType *s)
-    
+
 {
     netClientEntity     *aClient;
     short               availCount = 0, count = 0;
-    
+
     aClient = ( netClientEntity *)*gClientEntity + (long)which;
     while (( count < kMaxAvailableClient) && ( availCount < which))
     {
@@ -3699,7 +3699,7 @@ Boolean IsThisClientHilited( short which, Boolean set)
 {
     netClientEntity     *aClient;
     short               i, listNum = 0;
-    
+
     if ( !set)
     {
         aClient = ( netClientEntity *)*gClientEntity + (long)which;
@@ -3716,7 +3716,7 @@ Boolean IsThisClientHilited( short which, Boolean set)
                     aClient->selected = TRUE;
                 RefreshInterfaceListEntry( kHostAvailableList, listNum);
                 listNum++;
-            }   
+            }
             aClient++;
         }
         return ( TRUE);
@@ -3729,7 +3729,7 @@ netClientEntity *GetSelectClient( void)
 {
     netClientEntity     *aClient = nil;
     short               i;
-    
+
     aClient = ( netClientEntity *)*gClientEntity;
     for ( i = 0; i < kMaxAvailableClient; i++)
     {
@@ -3745,7 +3745,7 @@ short GetInGameListLength( void)
 {
     netClientEntity     *aClient;
     short               i, result = 0;
-    
+
     aClient = ( netClientEntity *)*gClientEntity;
     for ( i = 0; i < kMaxAvailableClient; i++)
     {
@@ -3759,11 +3759,11 @@ short GetInGameListLength( void)
 
 /*
 void GetInGameListName( short which, anyCharType *s)
-    
+
 {
     netClientEntity     *aClient;
     short               availCount = 0, count = 0;
-    
+
     aClient = ( netClientEntity *)*gClientEntity + (long)which;
     while (( count < kMaxAvailableClient) && ( availCount < which))
     {
@@ -3796,16 +3796,16 @@ long DoSelectLevelInterface( long startChapter)
     interfaceItemType       *anItem;
     Handle                  textData = nil;
     Rect                        totalRect;
-    PixMapHandle            saveMap, offMap;    
+    PixMapHandle            saveMap, offMap;
     CWindowPtr              whichWindow;
     Str255                  chapterName, cheatString;
     long                    thisLevel = GetScenarioNumberFromChapterNumber(
                                         startChapter),
                             thisChapter = startChapter,
                             lastChapter = startChapter;
-    
+
     cheatString[0] = 0;
-    
+
     if ( ThisChapterIsNetworkable( thisChapter)) thisChapter = 1;
     if ( ThisChapterIsNetworkable( thisChapter))
     {
@@ -3816,7 +3816,7 @@ long DoSelectLevelInterface( long startChapter)
         startChapter = GetStartingLevelPreference();
         thisLevel = GetScenarioNumberFromChapterNumber( startChapter);
     }
-    
+
     BlackenWindow();
     FlushEvents(everyEvent, 0);
     error = OpenInterface( kSelectLevelID);
@@ -3839,13 +3839,13 @@ long DoSelectLevelInterface( long startChapter)
         DrawInterfaceOneAtATime();
 
         anItem = GetAnyInterfaceItemPtr( kSelectLevelNameBox);
-        
+
         GetScenarioName( thisLevel, chapterName);
         DrawLevelNameInBox( chapterName, kTitleFontNum, -1, kSelectLevelNameBox);
 
 // it is assumed that we're "recovering" from a fade-out
         AutoFadeFrom( 60, FALSE);
-        MacShowCursor();    
+        MacShowCursor();
         while ( !done)
         {
             InterfaceIdle();
@@ -3853,11 +3853,11 @@ long DoSelectLevelInterface( long startChapter)
             Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
-                switch ( theEvent.what ) 
+                switch ( theEvent.what )
                 {
                     case updateEvt:
                         whichWindow = ( CWindowPtr)theEvent.message;
-        
+
                         if ( whichWindow == gTheWindow)
                         {
                             BeginUpdate( (WindowPtr)whichWindow);
@@ -3880,8 +3880,8 @@ long DoSelectLevelInterface( long startChapter)
                         MacSetPort( (WindowPtr)gTheWindow);
 
                         break;
-                        
-                    case nullEvent:                     
+
+                    case nullEvent:
                         InterfaceIdle();
                         if ( gAresGlobal->gOptions & kOptionInBackground)
                         {
@@ -3891,8 +3891,8 @@ long DoSelectLevelInterface( long startChapter)
                         if ( gAresGlobal->returnToMain)
                         {
                             whichItem = kSelectLevelCancelButton;
-                        }   
-                        
+                        }
+
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
@@ -3940,7 +3940,7 @@ long DoSelectLevelInterface( long startChapter)
                                     {
                                         PlayVolumeSound( kCloakOn, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
                                         SaveStartingLevelPreferences( x);
-                                        thisChapter = x;                            
+                                        thisChapter = x;
                                     }
                                 } else
                                 {
@@ -3958,7 +3958,7 @@ long DoSelectLevelInterface( long startChapter)
                             thisChapter++;
                         }
                         break;
-                        
+
                     case kSelectLevelPreviousButton:
                         if ( thisChapter > 1)
                         {
@@ -3966,7 +3966,7 @@ long DoSelectLevelInterface( long startChapter)
 /*                          thisLevel = GetScenarioNumberFromChapterNumber( thisChapter);
                             GetScenarioName( thisLevel, chapterName);
                             DrawLevelNameInBox( chapterName, kTitleFontNum, -1, kSelectLevelNameBox);
-                            
+
                             if ( GetScenarioPlayerNum( thisLevel) <= 0)
                                 SetStatusOfAnyInterfaceItem( kSelectLevelOKButton, kDimmed, true);
                             else
@@ -3977,19 +3977,19 @@ long DoSelectLevelInterface( long startChapter)
                     case kSelectLevelOKButton:
                         done = TRUE;
                         break;
-                    
+
                     case kSelectLevelCancelButton:
                         thisLevel = -1;
                         done = true;
                         break;
-                    
+
                 }
                 if (( thisChapter != lastChapter) && ( thisLevel >= 0))
                 {
                     thisLevel = GetScenarioNumberFromChapterNumber( thisChapter);
                     GetScenarioName( thisLevel, chapterName);
                     DrawLevelNameInBox( chapterName, kTitleFontNum, -1, kSelectLevelNameBox);
-                    
+
                     if ( thisChapter >= GetStartingLevelPreference())
                     {
                         SetStatusOfAnyInterfaceItem( kSelectLevelNextButton, kDimmed, true);
@@ -4006,7 +4006,7 @@ long DoSelectLevelInterface( long startChapter)
                         SetStatusOfAnyInterfaceItem( kSelectLevelPreviousButton, kActive, true);
                     }
 
-                    
+
                     if (( GetScenarioPlayerNum( thisLevel) <= 0) || ( ThisChapterIsNetworkable( thisChapter)))
                         SetStatusOfAnyInterfaceItem( kSelectLevelOKButton, kDimmed, true);
                     else
@@ -4014,7 +4014,7 @@ long DoSelectLevelInterface( long startChapter)
                     lastChapter = thisChapter;
                 }
             }
-            
+
         }
         CloseInterface();
     }
@@ -4027,17 +4027,17 @@ void DrawLevelNameInBox( StringPtr name, long fontNum, short descriptionTextID,
     longRect                clipRect;
     Rect                    tRect;
     unsigned char           *strPtr;
-    PixMapHandle            offMap; 
+    PixMapHandle            offMap;
     retroTextSpecType       retroTextSpec;
     transColorType          *transColor;
     interfaceItemType       *anItem;
     long                    height, descriptionLength = 0;
     Handle                  textData = nil;
-    
+
     offMap = GetGWorldPixMap( gOffWorld);
     anItem = GetAnyInterfaceItemPtr( itemNum);
     strPtr = name + 1;
-    
+
     if ( descriptionTextID > 0)
     {
         textData = GetResource( 'TEXT', descriptionTextID);
@@ -4049,7 +4049,7 @@ void DrawLevelNameInBox( StringPtr name, long fontNum, short descriptionTextID,
             descriptionLength = GetHandleSize( textData);
         }
     }
-    
+
     descriptionLength += (long)name[0];
     retroTextSpec.textLength = descriptionLength;
     retroTextSpec.text = NewHandle( descriptionLength);
@@ -4058,7 +4058,7 @@ void DrawLevelNameInBox( StringPtr name, long fontNum, short descriptionTextID,
         if ( textData != nil) DisposeHandle( textData);
         return;
     }
-    
+
     MoveHHi( retroTextSpec.text);
     HLock( retroTextSpec.text);
     BlockMove( name + 1, *retroTextSpec.text, (long)name[0]);
@@ -4067,7 +4067,7 @@ void DrawLevelNameInBox( StringPtr name, long fontNum, short descriptionTextID,
         BlockMove( *textData, *retroTextSpec.text + (long)name[0], GetHandleSize( textData));
         DisposeHandle( textData);
     }
-    
+
     retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
     retroTextSpec.tabSize =220;
     mGetTranslateColorShade( AQUA, VERY_LIGHT, retroTextSpec.color, transColor)
@@ -4077,13 +4077,13 @@ void DrawLevelNameInBox( StringPtr name, long fontNum, short descriptionTextID,
     retroTextSpec.originalBackColor = retroTextSpec.nextBackColor = retroTextSpec.backColor;
     retroTextSpec.topBuffer = 2;
     retroTextSpec.bottomBuffer = 0;
-    
+
     mSetDirectFont( fontNum)
     height = DetermineDirectTextHeightInWidth( &retroTextSpec, anItem->bounds.right - anItem->bounds.left);
 
     retroTextSpec.xpos = anItem->bounds.left;
     retroTextSpec.ypos = anItem->bounds.left + mDirectFontAscent;
-    
+
 //  clipRect.left = 0;
 //  clipRect.right = clipRect.left + WORLD_WIDTH;
 //  clipRect.top = 0;
@@ -4114,13 +4114,13 @@ Boolean DoMissionInterface( long whichScenario)
                             thisMissionWaitTime = 0;
     Rect                    tRect, mapRect, totalRect;
     coordPointType          corner;
-    PixMapHandle            saveMap, offMap;    
+    PixMapHandle            saveMap, offMap;
     CWindowPtr              whichWindow;
     inlinePictType          inlinePict[kMaxInlinePictNum];
-    
+
     FlushEvents(everyEvent, 0);
     if ( GetBriefPointNumber( whichScenario) < 1) return true;
-    
+
     error = OpenInterface( kMissionBriefingScreenID);
 //  HHCheckAllHandles();
     saveMap = GetGWorldPixMap( gSaveWorld);
@@ -4137,11 +4137,11 @@ Boolean DoMissionInterface( long whichScenario)
         CopyOffWorldToSaveWorld( &totalRect);
 // it is assumed that we're "recovering" from a fade-out
         AutoFadeFrom( 60, FALSE);
-        
+
         GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kMissionMapRect), &mapRect);
-        
+
         DrawInSaveWorld();
-        
+
         for ( length = 0; length < 500; length++)
         {
             SetTranslateColorShadeFore( GRAY, Randomize( kVisibleShadeNum) + DARKEST);
@@ -4152,7 +4152,7 @@ Boolean DoMissionInterface( long whichScenario)
         }
         NormalizeColors();
         DrawInRealWorld();
-        
+
         CopySaveWorldToOffWorld( &totalRect);
         CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &totalRect);
 
@@ -4185,7 +4185,7 @@ Boolean DoMissionInterface( long whichScenario)
                                 &mapRect, &tRect, inlinePict) * 2;
         thisMissionWaitTime += thisMissionWaitTime / 2;
 
-        
+
 /////////////////////////////////////
 // Display free memory
 /*      DrawInRealWorld();
@@ -4198,7 +4198,7 @@ Boolean DoMissionInterface( long whichScenario)
 //
 /////////////////////////////////////
         nextStartTime = TickCount();
-        
+
         while ( !done)
         {
             InterfaceIdle();
@@ -4206,11 +4206,11 @@ Boolean DoMissionInterface( long whichScenario)
             Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
-                switch ( theEvent.what ) 
+                switch ( theEvent.what )
                 {
                     case updateEvt:
                         whichWindow = ( CWindowPtr)theEvent.message;
-        
+
                         if ( whichWindow == gTheWindow)
                         {
                             BeginUpdate( (WindowPtr)whichWindow);
@@ -4244,8 +4244,8 @@ Boolean DoMissionInterface( long whichScenario)
                         MacSetPort( (WindowPtr)gTheWindow);
 
                         break;
-                        
-                    case nullEvent:                     
+
+                    case nullEvent:
                         InterfaceIdle();
                         if ( gAresGlobal->gOptions & kOptionInBackground)
                         {
@@ -4269,7 +4269,7 @@ Boolean DoMissionInterface( long whichScenario)
                         {
                             done = true;
                             cancel = true;
-                        }   
+                        }
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
@@ -4298,7 +4298,7 @@ Boolean DoMissionInterface( long whichScenario)
                             done = true;
                             cancel = true;
                         }
-                        
+
                         whichChar = theEvent.message & charCodeMask;
                         if (( whichChar >= '1') && ( whichChar <= '9'))
                         {
@@ -4315,7 +4315,7 @@ Boolean DoMissionInterface( long whichScenario)
                             }
                         }
                         whichItem = InterfaceKeyDown( theEvent.message);
-                        
+
                         break;
                 }
                 switch ( whichItem)
@@ -4328,7 +4328,7 @@ Boolean DoMissionInterface( long whichScenario)
                             thisMissionWaitTime = UpdateMissionBriefPoint( &dataItem, whichBriefPoint, whichScenario,
                                     &corner, scale, mustFit, &mapRect, &tRect, inlinePict) * 2;
                             thisMissionWaitTime += thisMissionWaitTime / 2;
-                            if ( whichBriefPoint >= 
+                            if ( whichBriefPoint >=
                                 (( GetBriefPointNumber( whichScenario) + kMissionBriefPointOffset) - 1))
                             {
                                 SetStatusOfAnyInterfaceItem( kMissionNextButton, kDimmed, true);
@@ -4341,7 +4341,7 @@ Boolean DoMissionInterface( long whichScenario)
                             }
                         }
                         break;
-                        
+
                     case kMissionPreviousButton:
                         if ( whichBriefPoint > 0)
                         {
@@ -4367,9 +4367,9 @@ Boolean DoMissionInterface( long whichScenario)
                     case kMissionDoneButton:
                         done = TRUE;
                         break;
-                    
+
                 }
-                        
+
             }
         }
         CloseInterface();
@@ -4396,20 +4396,20 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
     unsigned char   color;
     longRect        longClipRect, starRect;
     inlinePictType  *thisInlinePict;
-    
+
 #pragma unused( mustFit)
 
     HideCursor();
     GetAnyInterfaceItemGraphicBounds( dataItem, &oldRect);
     CopySaveWorldToOffWorld( usedRect);
-    
+
     DrawInOffWorld();
 //  HHCheckAllHandles();
-    
+
     if ( whichBriefPoint >=kMissionBriefPointOffset)
     {
         whichBriefPoint -= kMissionBriefPointOffset;
-            
+
         BriefPoint_Data_Get( whichBriefPoint, whichScenario, &headerID, &headerNumber, &contentID,
                                  &hiliteBounds, corner, scale, 16, 32, bounds);
 
@@ -4417,7 +4417,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
         if ( textData != nil)
         {
             HLockHi( textData);
-            
+
             textlength = length = GetHandleSize( textData);
             textHeight = GetInterfaceTextHeightFromWidth( (anyCharType *)*textData, length,
                             dataItem->style, kMissionDataWidth);
@@ -4440,8 +4440,8 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
                 dataItem->bounds.left = hiliteBounds.right + kMissionDataHBuffer;
                 dataItem->bounds.right = dataItem->bounds.left + kMissionDataWidth;
             }
-            
-            dataItem->bounds.top = hiliteBounds.top + ( hiliteBounds.bottom - hiliteBounds.top) / 2 - 
+
+            dataItem->bounds.top = hiliteBounds.top + ( hiliteBounds.bottom - hiliteBounds.top) / 2 -
                                     textHeight / 2;
             dataItem->bounds.bottom = dataItem->bounds.top + textHeight;
             if ( dataItem->bounds.top < ( bounds->top + kMissionDataTopBuffer))
@@ -4465,7 +4465,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
                 dataItem->bounds.right = bounds->right - kMissionDataVBuffer;
                 dataItem->bounds.left = dataItem->bounds.right - kMissionDataWidth;
             }
-            
+
             SetTranslateColorShadeFore( kMissionDataHiliteColor, VERY_LIGHT);
             hiliteBounds.right++;
             hiliteBounds.bottom++;
@@ -4493,7 +4493,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
                 MacLineTo( newRect.left - kMissionLineHJog, newRect.bottom - 1);
                 MacLineTo( newRect.left - 2, newRect.bottom - 1);
             }
-            
+
         }
         dataItem->item.labeledRect.label.stringID = headerID;
         dataItem->item.labeledRect.label.stringNumber = headerNumber;
@@ -4510,7 +4510,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
                             dataItem->style, dataItem->color, *offMap, 0, 0, inlinePict);
             ReleaseResource( textData);
         }
-        
+
         DrawInRealWorld();
         NormalizeColors();
 
@@ -4518,7 +4518,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
         BiggestRect( &newRect, &oldRect);
         BiggestRect( &newRect, &hiliteBounds);
         oldRect = *usedRect;
-        BiggestRect( &oldRect, &newRect); 
+        BiggestRect( &oldRect, &newRect);
         CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &oldRect);
         *usedRect = newRect;
     } else // it's a special briefpoint!
@@ -4547,34 +4547,34 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
                 GetScenarioStarMapPoint( whichScenario, &starPoint);
                 starPoint.h += bounds->left;
                 starPoint.v += bounds->top;
-                
+
                 mGetTranslateColorShade( GOLD, VERY_LIGHT, color, transColor)
                 RectToLongRect( bounds, &longClipRect);
                 starRect.left = starPoint.h - kMissionStarPointWidth;
                 starRect.top = starPoint.v - kMissionStarPointHeight;
                 starRect.right = starPoint.h + kMissionStarPointWidth;
                 starRect.bottom = starPoint.v + kMissionStarPointHeight;
-                
+
                 DrawNateVBracket( *offMap, &starRect, &longClipRect, 0, 0,color);
-                DrawNateLine( *offMap, &longClipRect, starPoint.h, 
+                DrawNateLine( *offMap, &longClipRect, starPoint.h,
                             starPoint.v + kMissionStarPointHeight,
                             starPoint.h,
                             bounds->bottom, 0, 0, color);
-                DrawNateLine( *offMap, &longClipRect, starPoint.h, 
+                DrawNateLine( *offMap, &longClipRect, starPoint.h,
                             starPoint.v - kMissionStarPointHeight,
                             starPoint.h,
                             bounds->top, 0, 0, color);
-                DrawNateLine( *offMap, &longClipRect, starPoint.h - kMissionStarPointWidth, 
+                DrawNateLine( *offMap, &longClipRect, starPoint.h - kMissionStarPointWidth,
                             starPoint.v,
                             bounds->left,
                             starPoint.v, 0, 0, color);
-                DrawNateLine( *offMap, &longClipRect, starPoint.h + kMissionStarPointWidth, 
+                DrawNateLine( *offMap, &longClipRect, starPoint.h + kMissionStarPointWidth,
                             starPoint.v,
                             bounds->right,
                             starPoint.v, 0, 0, color);
 
                 oldRect = *usedRect;
-                BiggestRect( &oldRect, &newRect); 
+                BiggestRect( &oldRect, &newRect);
                 DrawInRealWorld();
                 NormalizeColors();
                 CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &oldRect);
@@ -4591,11 +4591,11 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
             textlength = 50;
         }
     }
-    
+
     MacShowCursor();
-    
+
     return( textlength);
-}       
+}
 
 void ShowObjectData( Point where, short pictID, Rect *clipRect)
 {
@@ -4616,9 +4616,9 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
         i++;
         baseObject++;
     }
-        
+
     if ( i >= kMaxBaseObject) return;
-    
+
 //  if (( (pictID - kFirstShipDataPictID) >= 0) && (( pictID - kFirstShipDataPictID) < kMaxBaseObject))
     {
         HideCursor();
@@ -4627,7 +4627,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
         if ( retroTextSpec.text != nil)
         {
             DetachResource( retroTextSpec.text);
-            
+
             // *** Replace place-holders in text with real data, using the fabulous Munger routine
             // an object or a ship?
             if ( baseObject->attributes & kCanThink)
@@ -4675,8 +4675,8 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
             Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
 
             // now, check for weapons!
-            
-            
+
+
             GetIndString( numString, kShipDataNameID, kShipDataPulseStringNum);
             weaponText = CreateWeaponDataText( baseObject->pulse, numString);
             if ( weaponText != nil)
@@ -4686,7 +4686,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
                 HUnlock( weaponText);
                 DisposeHandle( weaponText);
             }
-                    
+
             GetIndString( numString, kShipDataNameID, kShipDataBeamStringNum);
             weaponText = CreateWeaponDataText( baseObject->beam, numString);
             if ( weaponText != nil)
@@ -4696,7 +4696,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
                 HUnlock( weaponText);
                 DisposeHandle( weaponText);
             }
-                    
+
             GetIndString( numString, kShipDataNameID, kShipDataSpecialStringNum);
             weaponText = CreateWeaponDataText( baseObject->special, numString);
             if ( weaponText != nil)
@@ -4706,10 +4706,10 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
                 HUnlock( weaponText);
                 DisposeHandle( weaponText);
             }
-                    
-            
+
+
             retroTextSpec.textLength = GetHandleSize( retroTextSpec.text);
-            
+
             mSetDirectFont( kButtonFontNum)
             retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
             retroTextSpec.tabSize = 100;
@@ -4721,12 +4721,12 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
             retroTextSpec.bottomBuffer = 1;
 
             height = DetermineDirectTextHeightInWidth( &retroTextSpec, kShipDataWidth);
-            
+
             dataRect.left = (where.h) - ( retroTextSpec.autoWidth / 2);
             dataRect.right = dataRect.left + retroTextSpec.autoWidth;
             dataRect.top = (where.v) - ( retroTextSpec.autoHeight / 2);
             dataRect.bottom = dataRect.top + retroTextSpec.autoHeight;
-            
+
             if ( dataRect.left < clipRect->left)
             {
                 MacOffsetRect( &dataRect, clipRect->left - dataRect.left + 1, 0);
@@ -4744,7 +4744,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
             }
             retroTextSpec.xpos = dataRect.left;
             retroTextSpec.ypos = dataRect.top + mDirectFontAscent;
-            
+
     //      clipRect.left = dataRect.left;
     //      clipRect.right = dataRect.right;
     //      clipRect.top = dataRect.top;
@@ -4758,25 +4758,25 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
             SetTranslateColorShadeFore( GREEN, VERY_LIGHT);
             MacFrameRect( &dataRect);
             NormalizeColors();
-            
+
 //          DrawDirectTextInRect( &retroTextSpec, &lRect, &lRect, *thePixMapHandle, gNatePortLeft, gNatePortTop);
-        
+
             while (( retroTextSpec.thisPosition < retroTextSpec.textLength) && (( Button()) || (AnyRealKeyDown())))
             {
                 PlayVolumeSound(  kComputerBeep3, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
                 DrawRetroTextCharInRect( &retroTextSpec, 24, &lRect, &lRect, *thePixMapHandle, gNatePortLeft,
                     gNatePortTop);
-                
+
                 waitTime = TickCount();
                 while (( TickCount() - waitTime) < 3) { /* DO NOTHING */ };
             }
-        
+
             DisposeHandle( retroTextSpec.text);
         }
 
         MacShowCursor();
         while (( Button()) || (AnyRealKeyDown())) { /* DO NOTHING */ };
-        
+
         CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &dataRect);
     }
 }
@@ -4789,20 +4789,20 @@ Handle CreateWeaponDataText( long whichWeapon, StringPtr weaponName)
     long                mostDamage, actionNum;
     objectActionType    *action;
     Boolean             isGuided = false;
-    
+
     if ( whichWeapon != kNoShip)
     {
         weaponObject = (baseObjectType *)*gBaseObjectData + whichWeapon;
-        
+
         weaponText = GetResource( 'TEXT', kWeaponDataTextID);
         if ( weaponText != nil)
         {
             DetachResource( weaponText);
-            
+
             /* damage; this is tricky--we have to guess by walking through activate actions,
                 and for all the createObject actions, see which creates the most damaging
                 object.  We calc this first so we can use isGuided*/
-            
+
             mostDamage = 0;
             isGuided = false;
             if ( weaponObject->activateActionNum > 0)
@@ -4820,16 +4820,16 @@ Handle CreateWeaponDataText( long whichWeapon, StringPtr weaponName)
                     action++;
                 }
             }
-            
+
             // weapon name #
             GetIndString( tempString, kShipDataKeyStringID, kWeaponNumberStringNum);
             Munger( weaponText, 0, (tempString + 1), *tempString, weaponName + 1, *weaponName);
-            
+
             // weapon name
             GetIndString( numString, 5000, whichWeapon + 1);
             GetIndString( tempString, kShipDataKeyStringID, kWeaponNameStringNum);
             Munger( weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
-            
+
             // is guided
             if ( isGuided)
                 GetIndString( numString, kShipDataNameID, kShipDataYesStringNum);
@@ -4837,7 +4837,7 @@ Handle CreateWeaponDataText( long whichWeapon, StringPtr weaponName)
                 GetIndString( numString, kShipDataNameID, kShipDataNoStringNum);
             GetIndString( tempString, kShipDataKeyStringID, kWeaponGuidedStringNum);
             Munger( weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
-            
+
             // is autotarget
             if ( weaponObject->attributes & kAutoTarget)
                 GetIndString( numString, kShipDataNameID, kShipDataYesStringNum);
@@ -4845,12 +4845,12 @@ Handle CreateWeaponDataText( long whichWeapon, StringPtr weaponName)
                 GetIndString( numString, kShipDataNameID, kShipDataNoStringNum);
             GetIndString( tempString, kShipDataKeyStringID, kWeaponAutoTargetStringNum);
             Munger( weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
-            
+
             // range
             NumToString( lsqrt(weaponObject->frame.weapon.range), numString);
             GetIndString( tempString, kShipDataKeyStringID, kWeaponRangeStringNum);
             Munger( weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
-            
+
             if ( mostDamage > 0)
             {
                 NumToString( mostDamage, numString);
@@ -4862,7 +4862,7 @@ Handle CreateWeaponDataText( long whichWeapon, StringPtr weaponName)
                 GetIndString( tempString, kShipDataKeyStringID, kWeaponDamageStringNum);
                 Munger( weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
             }
-            
+
         }
     }
     return ( weaponText);
@@ -4884,7 +4884,7 @@ void ShowSuccessAnimation( WindowPtr thePort)
     Boolean         warp;
     char            hackString[] = "\pMISSION COMPLETE";
     transColorType  *transColor;
-    
+
     SetLongRect( &starBounds, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     LongRectToRect( &starBounds, &tRect);
     DrawInSaveWorld();
@@ -4897,7 +4897,7 @@ void ShowSuccessAnimation( WindowPtr thePort)
 // we assume we're recovering from a fade-out
 
     AutoFadeFrom( 1, FALSE);
-    
+
     SetAllSoundsNoKeep();
     RemoveAllUnusedSounds();
     shipSprite = HHGetResource( kPixResType, kDebriefShipResID);
@@ -4907,7 +4907,7 @@ void ShowSuccessAnimation( WindowPtr thePort)
         MoveHHi( shipSprite);
         HLock( shipSprite);
         RemapNatePixTableColor( shipSprite);
-    
+
         AddSound( 516);
         pixData = GetNatePixTableNatePixData( shipSprite, kDebriefShipShapeNum);
 
@@ -4916,7 +4916,7 @@ void ShowSuccessAnimation( WindowPtr thePort)
         aSpritePix.center.v = GetNatePixTableNatePixVRef( shipSprite, kDebriefShipShapeNum);
         aSpritePix.width = GetNatePixTableNatePixWidth( shipSprite, kDebriefShipShapeNum);
         aSpritePix.height = GetNatePixTableNatePixHeight( shipSprite, kDebriefShipShapeNum);
-        
+
         vanishingPoint.h = kDebriefVanishH + ( WORLD_WIDTH - kSmallScreenWidth) / 2;
         vanishingPoint.v = kDebriefVanishV + ( WORLD_HEIGHT - kSmallScreenHeight) / 2;
         shipPoint.h = -256;
@@ -4924,13 +4924,13 @@ void ShowSuccessAnimation( WindowPtr thePort)
 
         OptScaleSpritePixInPixMap( &aSpritePix, shipPoint, SCALE_SCALE,
                 &spriteBounds, &starBounds, pixMap);
-        
+
         LongRectToRect( &spriteBounds, &lastBounds);
         HideCursor();
-        
+
         LongRectToRect( &spriteBounds, &tRect);
 //      ChunkCopyPixMapToScreenPixMap( *pixMap, &tRect, *thePixMapHandle);
-        
+
 
         Reset3DStars( vanishingPoint, &starBounds);
         lastTime = TickCount();
@@ -4940,11 +4940,11 @@ void ShowSuccessAnimation( WindowPtr thePort)
         ztimes = 1;
         startimes = 1;
         warpcount = 0;
-        
+
         while ( (!AnyRealKeyDown()) && ( zpoint > kDebriefZMin))
         {
             ChunkCopyPixMapToPixMap( *saveMap, &(lastBounds), *pixMap);
-            
+
             PrepareToMoveScrollStars();
             do
             {
@@ -4958,10 +4958,10 @@ void ShowSuccessAnimation( WindowPtr thePort)
                 startimes = 8;
                 ztimes = 4;
             }
-            
+
             Move3DStars( vanishingPoint, unitsToDo * startimes, &starBounds);
             Draw3DStars( warp, &starBounds, pixMap);
-            
+
             shipScale = (1 + zpoint * zpoint) / kDebriefZScaleMultiple;
             hpos = (zpoint * zpoint) / kDebriefShipHMultiple;
             hpos = vanishingPoint.h - hpos;
@@ -4975,9 +4975,9 @@ void ShowSuccessAnimation( WindowPtr thePort)
             LongRectToRect( &spriteBounds, &theseBounds);
             tRect = theseBounds;
             BiggestRect( &tRect, &lastBounds);
-            
+
             Show3DStars( TRUE, &starBounds, pixMap);
-                        
+
             ChunkCopyPixMapToScreenPixMap( *pixMap, &tRect, *thePixMapHandle);
             lastBounds = theseBounds;
             zpoint -= 30 * unitsToDo * ztimes;
@@ -4998,15 +4998,15 @@ void ShowSuccessAnimation( WindowPtr thePort)
                 CopyOffWorldToRealWorld( thePort, &tRect);
                 PlayVolumeSound( 516, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
             }*/
-            
+
         }
-        
+
         autoTimeStart = TickCount();
-        
+
         while (( !AnyRealKeyDown()) && (( TickCount() - autoTimeStart) < kDebriefTimeOutTime))
         {
             mSetDirectFont( kTitleFontNum)
-            
+
             PrepareToMoveScrollStars();
             do
             {
@@ -5015,18 +5015,18 @@ void ShowSuccessAnimation( WindowPtr thePort)
             lastTime = TickCount();
             Move3DStars( vanishingPoint, unitsToDo * startimes, &starBounds);
             Draw3DStars( warp, &starBounds, pixMap);
-            
+
             mGetDirectStringDimensions( hackString, hpos, zpoint, ztimes, getwidchar, getwidwid)
             mGetTranslateColorShade( RED, VERY_LIGHT, color, transColor)
             tRect.left = (WORLD_WIDTH / 2) - (hpos / 2);
             tRect.top = (WORLD_HEIGHT / 2) - gDirectText->ascent / 2;
             tRect.right = tRect.left + hpos;
             tRect.bottom = tRect.top + zpoint;
-            
+
             MoveTo( tRect.left, tRect.top + gDirectText->ascent);
             DrawDirectTextStringClipped( (anyCharType *)hackString, color, *pixMap, &starBounds,
                 0, 0);
-            
+
             ChunkCopyPixMapToScreenPixMap( *pixMap, &tRect, *thePixMapHandle);
             Show3DStars( TRUE, &starBounds, pixMap);
         }
@@ -5045,18 +5045,18 @@ void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, lo
     transColorType      *transColor;
     Str255              tempString, numString;
     PixMapHandle        offMap = GetGWorldPixMap( gOffWorld);
-    
+
 #pragma unused( thePort, parScore)
 //  MacSetPort( thePort);
 //  BlackenWindow();
-    
+
     // ** CALCULATE THE SCORE
     /*  for time you get a max of 100 points
         50 points for par
         0-50 for par -> 2 x par
         50-100 for par -> 1/2 par
     */
-    
+
     if ( yourlength < parlength)
     {
         if ( yourlength > ( parlength / 2))
@@ -5084,7 +5084,7 @@ void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, lo
             score += ((kLossesPoints * 2) * parloss - kLossesPoints * yourloss) / parloss;
         } else score += 0;
     } else score += kLossesPoints;
-    
+
     if ( yourkill < parkill)
     {
         if ( yourkill > ( parkill / 2))
@@ -5098,12 +5098,12 @@ void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, lo
             score += ((kKillsPoints * 2) * parkill - kKillsPoints * yourkill) / parkill + kKillsPoints;
         } else score += kKillsPoints * 2;
     } else score += kKillsPoints;
-    
+
     retroTextSpec.text = GetResource( 'TEXT', kSummaryTextID);
     if ( retroTextSpec.text != nil)
     {
         DetachResource( retroTextSpec.text);
-        
+
         // *** Replace place-holders in text with real data, using the fabulous Munger routine
         // your minutes
         NumToString( yourlength / 60, numString);
@@ -5113,7 +5113,7 @@ void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, lo
         NumToString( yourlength % 60, numString);
 //      WriteDebugLine((char *)numString);
 //      WriteDebugLong( yourlength % 60);
-        
+
         mDoubleDigitize( numString);
         GetIndString( tempString, kSummaryKeyStringID, kYourSecStringNum);
         Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
@@ -5170,9 +5170,9 @@ void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, lo
         else GetIndString( numString, 6002, 9); // = N/A
         GetIndString( tempString, kSummaryKeyStringID, kParScoreStringNum);
         Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
-        
+
         retroTextSpec.textLength = GetHandleSize( retroTextSpec.text);
-        
+
         mSetDirectFont( kButtonFontNum)
         retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
         retroTextSpec.tabSize = 60;
@@ -5194,7 +5194,7 @@ void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, lo
         boundsRect.bottom = boundsRect.top + retroTextSpec.autoHeight;
         retroTextSpec.xpos = boundsRect.left;
         retroTextSpec.ypos = boundsRect.top + mDirectFontAscent;
-        
+
         clipRect.left = 0;
         clipRect.right = clipRect.left + WORLD_WIDTH;
         clipRect.top = 0;
@@ -5209,13 +5209,13 @@ void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, lo
         mCopyAnyRect( tRect, tlRect);
         CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &tRect);
 //  DrawDirectTextInRect( &retroTextSpec, &clipRect, *thePixMapHandle, gNatePortLeft, gNatePortTop);
-        
+
         while ( retroTextSpec.thisPosition < retroTextSpec.textLength)
         {
             PlayVolumeSound(  kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
             DrawRetroTextCharInRect( &retroTextSpec, 3, &boundsRect, &clipRect, *thePixMapHandle, gNatePortLeft,
                 gNatePortTop);
-            
+
             waitTime = TickCount();
             while (( TickCount() - waitTime) < 3) { /* DO NOTHING */ };
         }
@@ -5226,7 +5226,7 @@ void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, lo
 //  WriteDebugLong( yourlength);
 /*  while ( AnyRealKeyDown());
     autoTimeStart = TickCount();
-    
+
     while (( !AnyRealKeyDown()) && (!(( gAresGlobal->gOptions & (kOptionAutoPlay | kOptionReplay)) && (( TickCount() - autoTimeStart) < kDebriefTimeOutTime))));
 */
 }
@@ -5241,24 +5241,24 @@ void DoMissionDebriefingText( WindowPtr thePort, long textID, long yourlength, l
     Boolean             bailOut = false, doScore = (parScore >= 0);
     PixMapHandle        offMap = GetGWorldPixMap( gOffWorld);
     interfaceItemType       dataItem;
-    
+
     MacSetRect( &tRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
     MacSetRect( &iRect, 0, 0, kDebriefTextWidth, 1);
 
-    dataItem.style = kLarge;    
+    dataItem.style = kLarge;
     textData = HHGetResource( 'TEXT', textID);
     if ( textData != nil)
     {
         HLockHi( textData);
-        
+
         textlength = length = GetHandleSize( textData);
         textHeight = GetInterfaceTextHeightFromWidth( (anyCharType *)*textData, length,
                         dataItem.style, kDebriefTextWidth);
         if ( doScore) textHeight += kScoreTableHeight;
-        
+
         iRect.bottom = iRect.top + textHeight;
         CenterRectInRect( &iRect, &tRect);
-        
+
         RectToLongRect( &iRect, &(dataItem.bounds));
         dataItem.color = GOLD;
         dataItem.kind = kLabeledRect;
@@ -5271,28 +5271,28 @@ void DoMissionDebriefingText( WindowPtr thePort, long textID, long yourlength, l
         GetAnyInterfaceItemGraphicBounds( &dataItem, &tRect);
         SetTranslateColorFore( BLACK);
         PaintRect( &tRect);
-        
+
         DrawAnyInterfaceItem( &dataItem, *offMap, 0, 0);
 
         LongRectToRect( &(dataItem.bounds), &tRect);
         DrawInterfaceTextInRect( &tRect, (anyCharType *)*textData, length,
                             dataItem.style, dataItem.color, *offMap, 0, 0, nil);
-        
+
         ReleaseResource( textData);
-        
+
         DrawInRealWorld();
         NormalizeColors();
 
         GetAnyInterfaceItemGraphicBounds( &dataItem, &tRect);
         CopyOffWorldToRealWorld( thePort, &tRect);
-        
+
         if ( doScore)
         {
             scoreRect.left = dataItem.bounds.left;
             scoreRect.right = dataItem.bounds.right;
             scoreRect.bottom = dataItem.bounds.bottom;
             scoreRect.top = scoreRect.bottom - kScoreTableHeight;
-            
+
             DoMissionDebriefing( thePort, &scoreRect, yourlength, parlength, yourloss, parloss,
                         yourkill, parkill, parScore);
         }
@@ -5317,14 +5317,14 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
     transColorType      *transColor;
     Str255              movieName;
     Rect                tRect, uRect, vRect, pictRect, pictSourceRect, movieRect;
-    PixMapHandle        offMap = GetGWorldPixMap( gOffWorld), saveMap = GetGWorldPixMap( gSaveWorld);   
+    PixMapHandle        offMap = GetGWorldPixMap( gOffWorld), saveMap = GetGWorldPixMap( gSaveWorld);
     Handle              textHandle;
     anyCharType         *thisChar = nil, *sectionStart = nil, *nextChar;
     PicHandle           thePict = nil, bgPict = nil;
     Boolean             sectionOver, abort = false, wasPicture = true;
     Movie               theMovie = nil;
     RgnHandle           clipRgn = nil;
-    
+
     if (( gAresGlobal->gOptions & kOptionMusicIdle) && ( songID >= 0))
     {
         if ( SongIsPlaying())
@@ -5338,10 +5338,10 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
 
     MacSetPort( thePort);
     HideCursor();
-    
+
     BlackenWindow();
-    
-    
+
+
     textHandle = GetResource( 'TEXT', textID);
     if ( ResError() != noErr) return;//Debugger();
     if ( textHandle != nil)
@@ -5352,42 +5352,42 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
         if ( MemError() != noErr) return;//Debugger();
 
         mSetDirectFont( textFontNum)
-    
+
         boundsRect.left = (WORLD_WIDTH / 2) - ( scrollWidth / 2);
         boundsRect.right = boundsRect.left + scrollWidth;
         boundsRect.top = (WORLD_HEIGHT / 2) - ( kScrollTextHeight / 2);
         boundsRect.bottom = boundsRect.top + kScrollTextHeight;
-        
+
         textRect.left = boundsRect.left;
         textRect.right = boundsRect.right;
         textRect.top = boundsRect.bottom;
         textRect.bottom = textRect.top + mDirectFontHeight + kScrollTextLineBuffer + 1;
-        
+
         scrollRect.left = boundsRect.left;
         scrollRect.right = boundsRect.right;
         scrollRect.top = boundsRect.top;
         scrollRect.bottom = textRect.bottom;
-        
+
         movieRect.left = boundsRect.left;
         movieRect.right = boundsRect.right;
         movieRect.bottom = boundsRect.top;
         movieRect.top = movieRect.bottom - kScrollMovieHeight;
-        
+
         mCopyAnyRect( tRect, scrollRect);
         clipRgn = NewRgn();
         if ( clipRgn == nil) return;
         OpenRgn();
         FrameRect( &tRect);
         CloseRgn( clipRgn);
-        
+
         DrawInRealWorld();
         MacSetPort( thePort);
-        
+
 /*      if ( LoadMiniMovie("\p:Ares Data Folder:Title", &theMovie, &movieRect, thePort, false) != noErr)
             Debugger();
 
         StartMiniMovie( theMovie);
-*/      
+*/
         DrawNateRect( *offMap, &scrollRect, 0, 0, 0xff);
         /* Here's the behavior:
             a section is started with a '#' followed by a '+'
@@ -5397,12 +5397,12 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
             the number must be terminated by a return
             if there is no number after # then it must be followed by a return
         */
-        
+
         // look for beginning of section
         charNum = 0;
         textLength = GetHandleSize( textHandle);
         sectionStart = (anyCharType *)*textHandle;
-        
+
         // while we still have text to do
         while (( charNum < textLength) && ( !abort))
         {
@@ -5464,7 +5464,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                             {
                                 if ( theMovie != nil) CleanUpMiniMovie( &theMovie);
                                 movieName[0] = 0;
-                                
+
                                 sectionStart++;
                                 charNum++;
                                 l = 1;
@@ -5489,7 +5489,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                     }
                 }
             }
-            
+
             // now find end of section; either delimiter or end of text
             thisChar = sectionStart;
             sectionOver = false;
@@ -5508,7 +5508,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                         thisChar++;
                         sectionLength++;
                     }
-                            
+
                 } else
                 {
                     charNum++;
@@ -5524,9 +5524,9 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                 {
                     sectionStart = thisChar;
                     HLockHi( retroTextSpec.text);
-                    
+
                     retroTextSpec.textLength = GetHandleSize( retroTextSpec.text);
-                    
+
                     retroTextSpec.thisPosition = retroTextSpec.linePosition =
                         retroTextSpec.lineCount = 0;
                     retroTextSpec.tabSize = scrollWidth / 2;
@@ -5537,7 +5537,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                     retroTextSpec.originalBackColor = retroTextSpec.nextBackColor = retroTextSpec.backColor;
                     retroTextSpec.topBuffer = kScrollTextLineBuffer;
                     retroTextSpec.bottomBuffer = 0;
-                    
+
                     height = DetermineDirectTextHeightInWidth( &retroTextSpec,
                         scrollWidth-(kScrollText_Buffer<<1));
 
@@ -5545,26 +5545,26 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                     clipRect.right = clipRect.left + WORLD_WIDTH;
                     clipRect.top = 0;
                     clipRect.bottom = clipRect.top + WORLD_HEIGHT;
-                                        
+
                     if ( pictID != 0)
                     {
                         thePict = (PicHandle)GetResource( 'PICT', pictID);
 //                      if ( ResError() != noErr) Debugger();
-                        
+
                         if ( thePict != nil)
                         {
                             HLockHi( (Handle)thePict);
                             wasPicture = true;
-                            pictRect.left = ( scrollWidth / 2) - 
+                            pictRect.left = ( scrollWidth / 2) -
                                 ((((**thePict).picFrame.right - (**thePict).picFrame.left)) / 2) +
                                 boundsRect.left;
                             pictRect.right = pictRect.left + (((**thePict).picFrame.right - (**thePict).picFrame.left));
                             pictRect.top = boundsRect.bottom;
 //                          pictRect.bottom = pictRect.top + ((**thePict).picFrame.bottom - (**thePict).picFrame.top);
                             pictRect.bottom = pictRect.top + mDirectFontHeight + kScrollTextLineBuffer;
-                            
+
                             pictSourceRect = (**thePict).picFrame;
-                            pictSourceRect.left = ( scrollWidth / 2) - 
+                            pictSourceRect.left = ( scrollWidth / 2) -
                                 ((((**thePict).picFrame.right - (**thePict).picFrame.left)) / 2) +
                                 boundsRect.left;
                             pictSourceRect.right = pictRect.left + (((**thePict).picFrame.right - (**thePict).picFrame.left));
@@ -5573,7 +5573,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                                 if ( bgPict != nil)
                                 {
                                     Rect    bgRect = (**bgPict).picFrame;
-                                    
+
                                     OffsetRect( &bgRect, -bgRect.left, -bgRect.top);
                                     OffsetRect( &bgRect, scrollRect.left,
                                         pictSourceRect.top - bgVOffset);
@@ -5603,7 +5603,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                                 CopyBits( (BitMap *)*saveMap, (BitMap *)*offMap,
                                     &pictSourceRect, &pictRect,
                                     srcCopy, nil);
-                                    
+
                                 LongRectToRect( &scrollRect, &tRect);
                                 uRect = tRect;
                                 MacOffsetRect( &uRect, 0, -1);
@@ -5618,18 +5618,18 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                                         l++)
                                 {
                                     DrawInOffWorld();
-                                    
+
 //                                  CopyBits( (BitMap *)*offMap, (BitMap *)*offMap, &tRect, &uRect,
 //                                      srcCopy, nil);
                                     ScrollRect( &tRect, 0, -1, clipRgn);
                                     DrawInRealWorld();
-                                    
+
 //                                  DrawNateLine(  *offMap, &scrollRect, scrollRect.left, pictRect.bottom - 1, scrollRect.right - 1,
 //                                      pictRect.bottom - 1, 0, 0, BLACK);
                                     DrawNateLine(  *offMap, &scrollRect, scrollRect.left, scrollRect.bottom - 1, scrollRect.right - 1,
                                         scrollRect.bottom - 1, 0, 0, BLACK);
                                     CopyOffWorldToRealWorld( thePort, &vRect);
-                                    
+
                                     bgVOffset++;
                                     if ( bgVOffset >= kBackground_Height) bgVOffset = 0;
 
@@ -5640,7 +5640,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                                             CleanUpMiniMovie( &theMovie);
                                         }
                                     }
-                                    
+
                                     while (( TickCount() - waitTime) < scrollSpeed) { /* DO NOTHING */ };
                                     waitTime = TickCount();
                                     if ( AnyModifierKeyDown())
@@ -5656,8 +5656,8 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                                     }
                                     if ( AnyEvent()) abort = true;
                                 }
-                                
-                                MacOffsetRect( &pictSourceRect, 0, (mDirectFontHeight + kScrollTextLineBuffer));    
+
+                                MacOffsetRect( &pictSourceRect, 0, (mDirectFontHeight + kScrollTextLineBuffer));
                             }
                             HUnlock( (Handle)thePict);
                             ReleaseResource( (Handle)thePict);
@@ -5667,7 +5667,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                     if  ( wasPicture)
                     {
                         Rect    bgRect = (**bgPict).picFrame;
-                        
+
                         wasPicture = false;
                         DrawInSaveWorld();
                         if ( bgPict != nil)
@@ -5688,7 +5688,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                     while (( retroTextSpec.thisPosition < retroTextSpec.textLength) && (!abort))
                     {
                         Rect    bgRect, stRect;
-                        
+
                         retroTextSpec.xpos = textRect.left + 6;
                         retroTextSpec.ypos = textRect.top + mDirectFontAscent + kScrollTextLineBuffer;
 
@@ -5727,10 +5727,10 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                         LongRectToRect( &scrollRect, &tRect);
                         uRect = tRect;
                         MacOffsetRect( &uRect, 0, -1);
-                        
+
                         bgVOffset++;
                         if ( bgVOffset >= kBackground_Height) bgVOffset = 0;
-                        
+
                         LongRectToRect( &boundsRect, &vRect);
                         for (   l = 0;
                                 ((l < (mDirectFontHeight + kScrollTextLineBuffer)) &&
@@ -5741,10 +5741,10 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
 //                          CopyBits( (BitMap *)*offMap, (BitMap *)*offMap, &tRect, &uRect,
 //                              srcCopy, nil);
                             ScrollRect( &tRect, 0, -1, clipRgn);
-                            
+
                             bgVOffset++;
                             if ( bgVOffset >= kBackground_Height) bgVOffset = 0;
-                            
+
                             DrawNateLine(  *offMap, &scrollRect, scrollRect.left, scrollRect.bottom - 1, scrollRect.right - 1,
                                 scrollRect.bottom - 1, 0, 0, BLACK);
                             DrawInRealWorld();
@@ -5757,7 +5757,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                                     CleanUpMiniMovie( &theMovie);
                                 }
                             }
-                            
+
                             while (( TickCount() - waitTime) < scrollSpeed) { /* DO NOTHING */ };
                             waitTime = TickCount();
                             if ( AnyModifierKeyDown())
@@ -5772,7 +5772,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                                 }
                             }
                             if ( AnyEvent()) abort = true;
-                        }           
+                        }
                     }
                     HUnlock( retroTextSpec.text);
                     if ( MemError() != noErr) return;//Debugger();
@@ -5782,7 +5782,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                 }// else DebugStr("\pNil Handle");
             }// else DebugStr("\pError");
         }
-        
+
         for (   l = 0;
                 ((l < kScrollTextHeight) &&
                     (!abort));
@@ -5833,7 +5833,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
     if ( theMovie != nil) CleanUpMiniMovie( &theMovie);
 //  while (( !AnyRealKeyDown()) && (!abort) && (!(( gAresGlobal->gOptions & (kOptionAutoPlay | kOptionReplay)) && (( TickCount() - autoTimeStart) < kDebriefTimeOutTime))));
     MacShowCursor();
-    
+
     if (( SongIsPlaying()) && ( songID >= 0))
     {
         StopAndUnloadSong();
@@ -5848,16 +5848,16 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
 void HandleOSEvent( EventRecord *event)
 {
     long    eventType = event->message;
-    
+
     eventType >>= 24L;
     eventType &= 0xff;
-    
+
     switch (eventType)
     {
         case mouseMovedMessage:
     //                          DoIdle(event); {mouse-moved same as idle for this app}
             break;
-    
+
         case suspendResumeMessage:
             if ( event->message & resumeFlag)
             {
@@ -5903,7 +5903,7 @@ Boolean Ares_WaitNextEvent( short eventMask, EventRecord *theEvent,
     unsigned long sleep, RgnHandle mouseRgn)
 {
     Boolean result = WaitNextEvent( eventMask, theEvent, sleep, mouseRgn);
-    
+
     if ( gAresGlobal != nil)
     {
         switch( theEvent->what)
@@ -5914,11 +5914,11 @@ Boolean Ares_WaitNextEvent( short eventMask, EventRecord *theEvent,
                     AEProcessAppleEvent( theEvent);
                 }
                 break;
-            
+
             case osEvt:
                 HandleOSEvent( theEvent);
                 break;
-            
+
         }
     }
 
@@ -5948,7 +5948,7 @@ void Replace_KeyCode_Strings_With_Actual_Key_Names( Handle text, short resID,
 {
     long    l;
     Str255  numString, tempString;
-    
+
     for ( l = 0; l < kKeyExtendedControlNum; l++)
     {
 //      GetKeyNumName( numString, GetKeyNumFromKeyMap( gAresGlobal->gKeyControl[l]));

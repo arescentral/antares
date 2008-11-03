@@ -97,10 +97,10 @@ aresVersionType AresVersion_Get_FromString( StringPtr s)
 {
     aresVersionType     result = 0;
     long                i = 1, v = 0;
-    
+
     mAssert( s != nil);
     if ( s == nil) return 0;
-    
+
     // N.x.x.c
     while (( i <= s[0]) && ( mChar_is_whitespace( s[i]))) i++;
 
@@ -112,16 +112,16 @@ aresVersionType AresVersion_Get_FromString( StringPtr s)
         i++;
     }
     result = v << 24;
-    
+
     // x.N.x.c
     while (( i <= s[0]) && ( mChar_is_whitespace( s[i]))) i++;
     if (( i > s[0]) || (( s[i] != '.') && ( !mChar_is_numeric( s[i]))))
         return result;
-    
+
     if ( s[i] == '.') i++;
-    
+
     while (( i <= s[0]) && ( mChar_is_whitespace( s[i]))) i++;
-    
+
     v = 0;
     while (( i <= s[0]) && ( mChar_is_numeric( s[i])))
     {
@@ -137,9 +137,9 @@ aresVersionType AresVersion_Get_FromString( StringPtr s)
         return result;
 
     if ( s[i] == '.') i++;
-    
+
     while (( i <= s[0]) && ( mChar_is_whitespace( s[i]))) i++;
-    
+
     v = 0;
 
     while (( i <= s[0]) && ( mChar_is_numeric( s[i])))
@@ -161,11 +161,11 @@ StringPtr String_Get_FromAresVersion( StringPtr s, aresVersionType t)
 {
     unsigned char   *c = (unsigned char *)&t;
     Str255          numString;
-    
+
     mAssert( s != nil);
     if ( s == nil) return nil;
 
-    // N.x.x.c  
+    // N.x.x.c
     NumToString( *c, s);
 
     // n.X.x.c

@@ -302,13 +302,13 @@ long DoTabbedNetLevelInterface( void)
     unsigned char           beginButtonRealColor, val1, val2, val3, val4, runColor, runLen;
     Str255                  tstring, whyDisabledString;
     CIconHandle             tempIcon;
-    
+
     mWriteDebugString("\pEnter NetSetup");
     EraseOffWorld();
     EraseSaveWorld();
     gAresGlobal->gThisScenarioNumber = gRandomSeed = -1;
 
-        
+
     if ( !Ambrosia_Is_Registered())
     {
         SetNetRace( GetRaceNumFromID( 100));
@@ -347,7 +347,7 @@ long DoTabbedNetLevelInterface( void)
     setup.opponentKills             = 0;
     setup.opponentLosses                = 0;
     setup.whyScenarioNotLoaded[0]       = 0;
-    
+
     setup.myPortraitData            = NewPtr( kPortraitSize * kPortraitSize);
     if ( setup.myPortraitData == nil) MyDebugString("\pCan't allocate space for your portrait.");
     ClearPortrait( (unsigned char *)setup.myPortraitData);
@@ -361,9 +361,9 @@ long DoTabbedNetLevelInterface( void)
     }
     for ( i = 0; i < kTimeSampleNum; i++)
         setup.sampleLag[i] = 0;
-    
+
     FlushEvents(everyEvent, 0);
-    
+
     error = OpenInterface( kNetLevelID);
 
     if ( error == kNoError)
@@ -395,7 +395,7 @@ long DoTabbedNetLevelInterface( void)
             setup.thisChapter = GetFirstNetworkScenario();
         }
         scenario = GetScenarioPtrFromChapter( setup.thisChapter);
-        
+
         if ( scenario != nil)
         {
             if ( !IsRaceLegal( setup.myRace, setup.myNum, scenario))
@@ -409,7 +409,7 @@ long DoTabbedNetLevelInterface( void)
         else if ( setup.currentDelayValue <= 120) setup.currentDelay = 1;
         else if ( setup.currentDelayValue <= 240) setup.currentDelay = 2;
         else setup.currentDelay = 3;
-        
+
         tabItemNum = AppendInterface( kNetLevelLevelTabID, kNetLevelTabBox,
             true);
         ActivateLevelTab( &setup, false);
@@ -421,10 +421,10 @@ long DoTabbedNetLevelInterface( void)
             DrawStringInInterfaceItem( kWhyDisabledNetLevelText, tstring);
         }
         ShowNetLevelName( setup.thisChapter);
-        
+
         anItem = GetAnyInterfaceItemPtr( kNetLevelOKButton);
         beginButtonRealColor = anItem->color;
-        
+
 /*      if ( IAmHosting())
         {
             SendPreGameShortMessage( eSetLatencyMessage, setup.currentLatency);
@@ -449,8 +449,8 @@ long DoTabbedNetLevelInterface( void)
 
 //          SendPreGameAnyMessage( setup.sampleNum, setup.currentRegistered > 1,
 //               eDummyMessage, 0, 0, false);
-        
-        GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kFirstPlayerItemGroup + 
+
+        GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kFirstPlayerItemGroup +
             (setup.myNum * kPlayerItemGroupSize) + kPlayerGroupPortraitNum), &tRect);
         tRect.right = tRect.left + 32;
         tRect.bottom = tRect.top + 32;
@@ -474,21 +474,21 @@ long DoTabbedNetLevelInterface( void)
         UpdateSampleShip( &setup, 1);
         UpdatePlayerData( &setup, 0);
         UpdatePlayerData( &setup, 1);
-        
+
 /*      while ( GetPortraitHRun(  &setup.outPortX, &setup.outPortY, &runColor, &runLen,
             (unsigned char *)setup.myPortraitData))
         {
             AddPortraitHRun( &setup.inPortX, &setup.inPortY, runColor, runLen,
                 (unsigned char *)setup.opponentPortraitData);
         }
-        GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kFirstPlayerItemGroup + 
+        GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kFirstPlayerItemGroup +
             (setup.opponentNum * kPlayerItemGroupSize) + kPlayerGroupPortraitNum), &tRect);
         DisplayPortraitData( tRect.left, tRect.top, (unsigned char *)setup.opponentPortraitData);
         setup.inPortX                   = 0;
         setup.inPortY                   = 0;
         setup.outPortX                  = 0;
         setup.outPortY                  = 0;
-*/      
+*/
         dummyRequestTime = setup.lastSampleTime = TickCount();
         while ( !done)
         {
@@ -510,12 +510,12 @@ long DoTabbedNetLevelInterface( void)
                     lastFlashTime = TickCount();
                 }
             }
-            
+
             InterfaceIdle();
             Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
-                switch ( theEvent.what ) 
+                switch ( theEvent.what )
                 {
                     case nullEvent:
                         if ( gAresGlobal->returnToMain)
@@ -538,22 +538,22 @@ long DoTabbedNetLevelInterface( void)
                                 switch( setup.whichTab)
                                 {
                                     case kNetLevelLevelTabNum:
-                                        whichItem = whichItem - kNetLevelItemNum + 
+                                        whichItem = whichItem - kNetLevelItemNum +
                                             kNetLevelLevelStrNum;
                                         break;
-                                    
+
                                     case kNetLevelPlayerTabNum:
-                                        whichItem = whichItem - kNetLevelItemNum + 
+                                        whichItem = whichItem - kNetLevelItemNum +
                                             kNetLevelPlayerStrNum;
                                         break;
 
                                     case kNetLevelSettingTabNum:
-                                        whichItem = whichItem - kNetLevelItemNum + 
+                                        whichItem = whichItem - kNetLevelItemNum +
                                             kNetLevelSettingsStrNum;
                                         break;
                                 }
                             } else whichItem += 1;
-                            
+
                             if ( whichItem != helpItem)
                             {
                                 GetIndString( tstring, kNetLevelHelpStrID, whichItem);
@@ -566,7 +566,7 @@ long DoTabbedNetLevelInterface( void)
                             DrawStringInInterfaceItem( kNetLevelHelpBox, nil);
                             helpItem = whichItem;
                         }
-                        
+
                         if ( setup.incomingCharBottom != setup.incomingCharTop)
                         {
                             PlayVolumeSound( kComputerBeep3, kMediumLowVolume, kShortPersistence, kMustPlaySound);
@@ -574,7 +574,7 @@ long DoTabbedNetLevelInterface( void)
                                 setup.incomingChar[setup.incomingCharBottom], true);
                             mIncreaseBufferCounter(setup.incomingCharBottom);
                         }
-                        
+
                         if (( (TickCount() - dummyRequestTime) > waitTime) && ( messageToResend))
                         {
 /*                          setup.sampleLag[setup.sampleNum % kTimeSampleNum] = TickCount() -
@@ -585,7 +585,7 @@ long DoTabbedNetLevelInterface( void)
                             NetLevelDrawLagGraph( &setup);
 */
                             if ( setup.currentRegistered > 0) waitTime = 600;
-                            
+
                             if (( !IAmHosting()) && ( setup.sampleNum > 0))
                             {
 //                              SendPreGameDummyMessage( setup.sampleNum - 1,
@@ -616,15 +616,15 @@ long DoTabbedNetLevelInterface( void)
                             {
                                 case eNoMessage:
                                     break;
-                                    
+
                                 case eStartToLoadLevelMessage:
                                     setup.opponentReady = true;
                                     break;
-                                
+
                                 case ePreGameOpenScenarioMessage:
                                     OpenOtherScenarioFile( &setup);
                                     break;
-                                    
+
                                 case ePreGameGotScenarioMessage:
                                     if ( setup.opponentHasArrived)
                                     {
@@ -639,7 +639,7 @@ long DoTabbedNetLevelInterface( void)
                                     SetCurrentNetRace( &setup);
                                     SendPreGameShortMessage( eSetRaceMessage, setup.myRace);
                                     break;
-                                    
+
                                 case ePreGameNoScenarioMessage:
                                     GetIndString( whyDisabledString, 2010, 2);
                                     CopyPString( gAresGlobal->otherPlayerScenarioFileName,
@@ -647,7 +647,7 @@ long DoTabbedNetLevelInterface( void)
                                     ShowWhyNetLevelNotLoaded( &setup,
                                         whyDisabledString);
                                     break;
-                                    
+
                                 case ePreGameOldVersionScenarioMessage:
                                     GetIndString( whyDisabledString, 2010, 3);
                                     CopyPString( gAresGlobal->otherPlayerScenarioFileName,
@@ -655,7 +655,7 @@ long DoTabbedNetLevelInterface( void)
                                     ShowWhyNetLevelNotLoaded( &setup,
                                         whyDisabledString);
                                     break;
-                                    
+
                                 case ePreGameNewVersionScenarioMessage:
                                     if ( gAresGlobal->internetConfigPresent)
                                     {
@@ -672,7 +672,7 @@ long DoTabbedNetLevelInterface( void)
                                     ShowWhyNetLevelNotLoaded( &setup,
                                         whyDisabledString);
                                     break;
-                                    
+
                                 case ePreGameWrongCheckSumScenarioMessage:
                                     if ( gAresGlobal->internetConfigPresent)
                                     {
@@ -689,16 +689,16 @@ long DoTabbedNetLevelInterface( void)
                                     ShowWhyNetLevelNotLoaded( &setup,
                                         whyDisabledString);
                                     break;
-                                    
+
                                 case eCancelMessage:
                                 case kNSpPlayerLeft:
                                     done = true;
                                     cancel = true;
 
                                     StopNetworking();
-                                    
+
                                     break;
-                                
+
                                 case eReadyForNetSetupMessage:
                                     if ( !setup.opponentHasArrived)
                                     {
@@ -722,74 +722,74 @@ long DoTabbedNetLevelInterface( void)
                                         SendPreGameVerboseMessage( eRelayPlayerStatsMessage, GetNetMinutesPlayed(),
                                             GetNetKills(), GetNetLosses(), 0);
                                         setup.opponentHasArrived = true;
-                                        
+
                                         switch( setup.whichTab)
                                         {
                                             case kNetLevelLevelTabNum:
                                                 ActivateLevelTab( &setup, true);
                                                 break;
-                                            
+
                                             case kNetLevelPlayerTabNum:
                                                 ActivatePlayerTab( &setup, true);
                                                 break;
-                                            
+
                                             case kNetLevelSettingTabNum:
                                                 ActivateSettingTab( &setup, true);
                                                 break;
                                         }
                                     }
                                     break;
-                                    
+
                                 case eAdmiralNumberMessage:
                                     UpdatePlayerData( &setup, setup.opponentNum);
                                     break;
-                                    
+
                                 case eSetLevelMessage:
                                     setup.thisChapter = newLevel;
                                     SetNetLevelNum( &setup);
                                     SetCurrentNetRace( &setup);
                                     SendPreGameShortMessage( eSetRaceMessage, setup.myRace);
                                     break;
-                                
+
                                 case eSetLatencyMessage:
                                     setup.currentLatency = newLevel;
                                     SetNetLag( &setup);
                                     break;
-                                
+
                                 case eHostIsPlayer2Message:
                                     setup.hostIsPlayer2 = newLevel;
                                     SetNetHostIsPlayer2( &setup);
                                     break;
-                                
+
                                 case eSetRaceMessage:
                                     setup.opponentRace = newLevel;
                                     SetCurrentNetRace( &setup);
                                     break;
-                                
+
                                 case eSetRegisteredStateMessage:
                                     SetNetRegistered( &setup, newLevel);
                                     break;
-                                
+
                                 case eSetResendDelayMessage:
                                     SetNetDelay( &setup, newLevel);
                                     break;
-                                
+
                                 case eSetBandwidthMessage:
                                     setup.currentBandwidth = newLevel;
                                     SetNetLowerBandwidth( &setup);
                                     break;
-                                
+
                                 case eTextMessage:
 //                                  ShowNetTextMessage( &setup, false);
                                     break;
-                                
+
                                 case eRelayPlayerStatsMessage:
                                     setup.opponentMinutesPlayed = newLevel;
                                     setup.opponentKills = longData2;
                                     setup.opponentLosses = longData3;
                                     UpdatePlayerData( &setup, setup.opponentNum);
                                     break;
-                                    
+
                                 case eDummyMessage: case ePreGameCharacterMessage:
                                 case ePreGamePortraitMessage:
                                     if (( newLevel == setup.sampleNum) && ( !gotDummy))
@@ -809,7 +809,7 @@ long DoTabbedNetLevelInterface( void)
                                         dummyRequestTime = setup.lastSampleTime = TickCount();
                                         NetLevelDrawLagGraph( &setup);
                                         gotDummy = true;
-                                        
+
                                         if ( message == ePreGameCharacterMessage)
                                         {
                                             setup.incomingChar[setup.incomingCharTop] =
@@ -825,7 +825,7 @@ long DoTabbedNetLevelInterface( void)
                                                     setup.incomingChar[setup.incomingCharTop] =
                                                         val3;
                                                     mIncreaseBufferCounter(setup.incomingCharTop);
-                                                    
+
                                                     if ( val4 != 0)
                                                     {
                                                         setup.incomingChar[setup.incomingCharTop] =
@@ -833,7 +833,7 @@ long DoTabbedNetLevelInterface( void)
                                                         mIncreaseBufferCounter(setup.incomingCharTop);
                                                     }
                                                 }
-                                            } 
+                                            }
                                         } else if ( message == ePreGamePortraitMessage)
                                         {
                                             mWriteDebugString("\p<PORT");
@@ -853,7 +853,7 @@ long DoTabbedNetLevelInterface( void)
                                                 AddPortraitHRun( &setup.inPortX,
                                                     &setup.inPortY, runColor, runLen,
                                                     (unsigned char *)setup.opponentPortraitData);
-                                                
+
                                                 if ( val3 != 0)
                                                 {
                                                     runColor = val3 >> 4;
@@ -862,7 +862,7 @@ long DoTabbedNetLevelInterface( void)
                                                     AddPortraitHRun( &setup.inPortX,
                                                         &setup.inPortY, runColor, runLen,
                                                         (unsigned char *)setup.opponentPortraitData);
-                                                    
+
                                                     if ( val4 != 0)
                                                     {
                                                         runColor = val4 >> 4;
@@ -882,7 +882,7 @@ long DoTabbedNetLevelInterface( void)
                                             DisplayPortraitData( tRect.left, tRect.top,
                                                 (unsigned char *)setup.opponentPortraitData,
                                                 kOpponentCommColor);
-                                            
+
                                         }
                                     } else if ( newLevel < setup.sampleNum)
                                     {
@@ -890,7 +890,7 @@ long DoTabbedNetLevelInterface( void)
 //                                          setup.currentRegistered > 0, -1);
                                     }
                                     break;
-                                
+
                                 case eClientMakeChangesMessage:
                                     if (( !IAmHosting()) && ( !setup.imReady))
                                     {
@@ -986,7 +986,7 @@ long DoTabbedNetLevelInterface( void)
                                     setup.currentRegistered > 1,
                                     ePreGamePortraitMessage,
                                     val1, val2, val3, val4, false);
-                                
+
                             } else
                             {
                                 messageToResend = true;
@@ -1018,7 +1018,7 @@ long DoTabbedNetLevelInterface( void)
                         break;
                     case updateEvt:
                         whichWindow = ( CWindowPtr)theEvent.message;
-        
+
                         if ( whichWindow == gTheWindow)
                         {
                             BeginUpdate( (WindowPtr)whichWindow);
@@ -1041,7 +1041,7 @@ long DoTabbedNetLevelInterface( void)
                         SetPort( (WindowPtr)gTheWindow);
 
                         break;
-                        
+
                     case mouseDown:
                         where = theEvent.where;
                         GlobalToLocal( &where);
@@ -1053,7 +1053,7 @@ long DoTabbedNetLevelInterface( void)
                             case kNetLevelLevelTabNum:
                                 HandleLevelTabHit( whichItem, where, &setup);
                                 break;
-                            
+
                             case kNetLevelPlayerTabNum:
                                 HandlePlayerTabHit( whichItem, where, &setup);
                                 break;
@@ -1071,13 +1071,13 @@ long DoTabbedNetLevelInterface( void)
                         whichChar = theEvent.message & charCodeMask;
                         whichItem = InterfaceKeyDown( theEvent.message);
                         where.h = where.v = 0xffff;
-                        
+
                         switch( setup.whichTab)
                         {
                             case kNetLevelLevelTabNum:
                                 HandleLevelTabHit( whichItem, where, &setup);
                                 break;
-                            
+
                             case kNetLevelPlayerTabNum:
                                 HandlePlayerTabHit( whichItem, where, &setup);
                                 break;
@@ -1104,7 +1104,7 @@ long DoTabbedNetLevelInterface( void)
                         SendPreGameBasicMessage( eCancelMessage);
                         StopNetworking();
                         break;
-                    
+
                     case kNetLevelOKButton:
                         setup.imReady = true;
                         setup.canMakeChanges = false;
@@ -1112,11 +1112,11 @@ long DoTabbedNetLevelInterface( void)
                         SetStatusOfAnyInterfaceItem( kNetLevelOKButton, kDimmed, true);
                         SetNetLevelCanMakeChanges( &setup, false);
                         break;
-                    
+
 /*                  case kNetLevelSendTextButton:
                         SendNetTextMessage( &setup);
                         break;
-*/                  
+*/
                     case kNetLevelChangesCheck:
                         if ( GetAnyRadioOrCheckboxOn( kNetLevelChangesCheck))
                         {
@@ -1128,7 +1128,7 @@ long DoTabbedNetLevelInterface( void)
                             SendPreGameShortMessage( eClientMakeChangesMessage, false);
                         }
                         break;
-                        
+
                     case kNetLevelLevelTabNum:
                     case kNetLevelPlayerTabNum:
                     case kNetLevelSettingTabNum:
@@ -1136,7 +1136,7 @@ long DoTabbedNetLevelInterface( void)
                         {
                             case kNetLevelLevelTabNum:
                                 break;
-                            
+
                             case kNetLevelPlayerTabNum:
                                 break;
 
@@ -1147,7 +1147,7 @@ long DoTabbedNetLevelInterface( void)
                         ShortenInterface( tabItemNum);
                         SwitchAnyRadioOrCheckbox( setup.whichTab, false);
                         DrawAnyInterfaceItemOffToOn( GetAnyInterfaceItemPtr( setup.whichTab));
-                
+
                         setup.whichTab = whichItem;
                         switch( setup.whichTab)
                         {
@@ -1194,9 +1194,9 @@ long DoTabbedNetLevelInterface( void)
                                 break;
                         }
                 }
-                        
+
             }
-                        
+
         }
         if ( !cancel)
         {
@@ -1230,7 +1230,7 @@ void SetNetLevelCanMakeChanges( netSetupType *setup, Boolean canMakeChanges)
 {
     interfaceItemType   *tabBox = GetAnyInterfaceItemPtr( kNetLevelTabBox);
     Rect                    tabBounds;
-    
+
     GetAnyInterfaceItemContentBounds( tabBox, &tabBounds);
     setup->canMakeChanges = canMakeChanges;
     switch( setup->whichTab)
@@ -1238,11 +1238,11 @@ void SetNetLevelCanMakeChanges( netSetupType *setup, Boolean canMakeChanges)
         case kNetLevelLevelTabNum:
             ActivateLevelTab( setup, true);
             break;
-        
+
         case kNetLevelPlayerTabNum:
             ActivatePlayerTab( setup, true);
             break;
-        
+
         case kNetLevelSettingTabNum:
             ActivateSettingTab( setup, true);
             break;
@@ -1253,7 +1253,7 @@ void SetNetLevelCanMakeChanges( netSetupType *setup, Boolean canMakeChanges)
 void ActivateLevelTab( netSetupType *setup, Boolean drawLive)
 {
     Str255          whyDisabledString;
-    
+
 if (( !Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
 {
         SetStatusOfAnyInterfaceItem( kNextNetLevelButton, kDimmed, drawLive);
@@ -1296,7 +1296,7 @@ if (( !Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
         else
             SetStatusOfAnyInterfaceItem( kOpenNetLevelButton, kDimmed, true);
     }
-    
+
     if (( GetScenarioPlayerNum(
         GetScenarioNumberFromChapterNumber( setup->thisChapter)) <= 0) ||
         ( !setup->opponentHasArrived) || (setup->imReady) ||
@@ -1310,7 +1310,7 @@ if (( !Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
             GetIndString( whyDisabledString, 2010, 1);
             DrawStringInInterfaceItem( kWhyDisabledNetLevelText, nil);
         }
-}   
+}
 
 }
 
@@ -1319,23 +1319,23 @@ void HandleLevelTabHit( short whichItem, Point where, netSetupType *setup)
     scenarioType        *scenario = nil;
     interfaceItemType   *item;
     Rect                tRect;
-    
+
     item = GetAnyInterfaceItemPtr( kNetLevelBox);
     GetAnyInterfaceItemGraphicBounds( item, &tRect);
-        
+
     if ( MacPtInRect( where, &tRect))
     {
         if (( gAresGlobal->otherPlayerScenarioFileURL[0] > 0) &&
             ( !setup->scenarioLoaded))
             LaunchURL( gAresGlobal->otherPlayerScenarioFileURL);
-        
+
     } else switch( whichItem)
     {
         case kNextNetLevelButton:
             if ( GetNextNetworkScenario( setup->thisChapter) > setup->thisChapter)
             {
                 setup->thisChapter = GetNextNetworkScenario( setup->thisChapter);
-                SetNetLevelNum( setup);             
+                SetNetLevelNum( setup);
             }
 
             SendPreGameShortMessage( eSetRaceMessage, setup->myRace);
@@ -1352,16 +1352,16 @@ void HandleLevelTabHit( short whichItem, Point where, netSetupType *setup)
             SendPreGameShortMessage( eSetRaceMessage, setup->myRace);
             SendPreGameShortMessage( eSetLevelMessage, setup->thisChapter);
             break;
-        
+
         case kOpenNetLevelButton:
         {
             FSSpec  destFile;
-            
+
             if ( SmartFile_SelectFile( &destFile, 301) == noErr)
             {
                 BlockMove( &destFile, &gAresGlobal->externalFileSpec,
                     sizeof( FSSpec));
-                    
+
                 if ( EF_OpenExternalFile() == noErr)
                 {
                     if ( !ThisChapterIsNetworkable( setup->thisChapter))
@@ -1379,7 +1379,7 @@ void HandleLevelTabHit( short whichItem, Point where, netSetupType *setup)
                         }
                     }
                     scenario = GetScenarioPtrFromChapter( setup->thisChapter);
-                
+
                     setup->scenarioLoaded = false;
                     SetStatusOfAnyInterfaceItem( kNetLevelOKButton,
                         kDimmed, true);
@@ -1390,21 +1390,21 @@ void HandleLevelTabHit( short whichItem, Point where, netSetupType *setup)
                         gAresGlobal->scenarioFileInfo.version,
                         gAresGlobal->scenarioFileInfo.checkSum);
 
-                        
+
 /*                  if ( !IsRaceLegal( setup->myRace, setup->myNum, scenario))
                     {
                         setup->myRace =
                             GetRaceNumFromID(
                                 scenario->player[setup->myNum].playerRace);
                     }
-*/                  
+*/
 //                  SetNetLevelNum( setup);
 //                  SendPreGameShortMessage( eSetLevelMessage, setup->thisChapter);
 
 //                  SetCurrentNetRace( setup);
 //                  SendPreGameShortMessage( eSetRaceMessage, setup->myRace);
                 }
-                
+
             }
         }
             break;
@@ -1415,14 +1415,14 @@ void SetNetLevelNum( netSetupType *setup)
 {
     Str255          chapterName;
     scenarioType    *scenario;
-    
+
     if ( setup->whichTab == kNetLevelLevelTabNum)
     {
         GetScenarioName( GetScenarioNumberFromChapterNumber( setup->thisChapter),
             chapterName);
         if ( setup->scenarioLoaded)
         {
-            DrawLevelNameInBox( chapterName, kButtonFontNum, 
+            DrawLevelNameInBox( chapterName, kButtonFontNum,
                 GetScenarioPrologueID(
                     GetScenarioNumberFromChapterNumber(
                         setup->thisChapter)), kNetLevelBox);
@@ -1430,7 +1430,7 @@ void SetNetLevelNum( netSetupType *setup)
         {
             ShowWhyNetLevelNotLoaded( setup, nil);
         }
-        
+
         if (( !Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
         {
             SetStatusOfAnyInterfaceItem( kNextNetLevelButton, kDimmed, true);
@@ -1474,7 +1474,7 @@ void SetNetLevelNum( netSetupType *setup)
         else
             SetStatusOfAnyInterfaceItem( kNetLevelOKButton, kActive, true);
     }
-    
+
     scenario = GetScenarioPtrFromChapter( setup->thisChapter);
     if ( scenario != nil)
     {
@@ -1485,7 +1485,7 @@ void SetNetLevelNum( netSetupType *setup)
                 GetRaceNumFromID( scenario->player[setup->myNum].playerRace);
         }
     }
-    
+
 }
 
 void ActivatePlayerTab( netSetupType *setup, Boolean drawLive)
@@ -1542,7 +1542,7 @@ void HandlePlayerTabHit( short whichItem, Point where, netSetupType *setup)
 {
     scenarioType    *scenario = nil;
     Rect            colorRect;
-    
+
     GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kNetLevelColorBox),
         &colorRect);
     if ( PtInRect( where, &colorRect))
@@ -1567,7 +1567,7 @@ void HandlePlayerTabHit( short whichItem, Point where, netSetupType *setup)
                 }
             }
             break;
-        
+
         case kPreviousRaceButton:
             scenario = GetScenarioPtrFromChapter( setup->thisChapter);
             if ( scenario != nil)
@@ -1581,7 +1581,7 @@ void HandlePlayerTabHit( short whichItem, Point where, netSetupType *setup)
                 }
             }
             break;
-        
+
         case kHostIsPlayer2CheckBox:
             if ( GetAnyRadioOrCheckboxOn( kHostIsPlayer2CheckBox))
             {
@@ -1602,7 +1602,7 @@ void SetNetHostIsPlayer2( netSetupType *setup)
     scenarioType    *scenario;
     Str255          tempString;
     long                myID, opponentID;
-    
+
     myID = GetPlayerIDFromNum( setup->myNum);
     opponentID = GetPlayerIDFromNum( setup->opponentNum);
     if (setup->whichTab == kNetLevelPlayerTabNum)
@@ -1648,7 +1648,7 @@ void SetNetHostIsPlayer2( netSetupType *setup)
     scenario = GetScenarioPtrFromChapter( setup->thisChapter);
 /*  setup->myRace = GetNetRace();
     if ( !(IsRaceLegal( setup->myRace, scenario)))
-    {   
+    {
         setup->myRace =
             GetRaceNumFromID( scenario->player[setup->myNum].playerRace);
     }
@@ -1668,16 +1668,16 @@ void SetCurrentNetRace( netSetupType *setup)
     Boolean         tabActive = (setup->whichTab == kNetLevelPlayerTabNum);
     scenarioType    *scenario;
     Point           where;
-    
+
     where.h = where.v = -1;
-    
+
     UpdatePlayerData( setup, 0);
     UpdatePlayerData( setup, 1);
-    
+
     if ( tabActive)
     {
         NetLevelShowRaces( setup->myRace, setup->opponentRace);
-    
+
         scenario = GetScenarioPtrFromChapter( setup->thisChapter);
 if ( (Ambrosia_Is_Registered()) && ( scenario != nil))
 {
@@ -1688,7 +1688,7 @@ if ( (Ambrosia_Is_Registered()) && ( scenario != nil))
         {
             SetStatusOfAnyInterfaceItem( kPreviousRaceButton, kDimmed, true);
         }
-        
+
         if ( GetNextLegalRace( setup->myRace, setup->myNum, scenario) >= 0)
         {
             SetStatusOfAnyInterfaceItem( kNextRaceButton, kActive, true);
@@ -1712,7 +1712,7 @@ if ( (Ambrosia_Is_Registered()) && ( scenario != nil))
 void ActivateSettingTab( netSetupType *setup, Boolean drawLive)
 {
     short i;
-    
+
     if (( !setup->canMakeChanges) || ( !setup->opponentHasArrived) ||
         ( !setup->scenarioLoaded))
     {
@@ -1779,7 +1779,7 @@ void ActivateSettingTab( netSetupType *setup, Boolean drawLive)
             SwitchAnyRadioOrCheckbox( i, false);
         }
     }
-    
+
     SwitchAnyRadioOrCheckbox( kNetLevelLowerBandwidth, setup->currentBandwidth);
 }
 
@@ -1796,7 +1796,7 @@ void HandleSettingTabHit( short whichItem, Point where, netSetupType *setup)
                 SendPreGameShortMessage( eSetLatencyMessage, setup->currentLatency);
             }
             break;
-            
+
         case kNetLevelIncreaseLagButton:
             if ( setup->currentLatency <=  (kMaxMessageLatency - kMessageLatencyUnit))
             {
@@ -1842,7 +1842,7 @@ void HandleSettingTabHit( short whichItem, Point where, netSetupType *setup)
 // this must be modified to send delay in seconds, not delay "position"
                 SendPreGameShortMessage( eSetResendDelayMessage, setup->currentDelayValue);
             }
-            break;                          
+            break;
     }
 }
 
@@ -1853,15 +1853,15 @@ long GetDelayValueFromDelayRadio( short currentDelay)
         case 0:
             return( 60);
             break;
-        
+
         case 1:
             return( 120);
             break;
-        
+
         case 2:
             return( 240);
             break;
-        
+
         default:
             return( 60);
             break;
@@ -1880,7 +1880,7 @@ void SetNetLowerBandwidth( netSetupType *setup)
 void SetNetLag( netSetupType *setup)
 {
     Boolean     tabActive = ( setup->whichTab == kNetLevelSettingTabNum);
-    
+
     if ( tabActive)
     {
         if (( !setup->canMakeChanges) || ( !setup->opponentHasArrived) ||
@@ -1917,9 +1917,9 @@ void SetNetRegistered( netSetupType *setup, short setting)
             kNetSettingsFirstRegisteredRadio, false);
         RefreshInterfaceItem( setup->currentRegistered +
             kNetSettingsFirstRegisteredRadio);
-    
+
         setup->currentRegistered = setting;
-    
+
         SwitchAnyRadioOrCheckbox( setup->currentRegistered +
             kNetSettingsFirstRegisteredRadio, true);
         RefreshInterfaceItem( setup->currentRegistered +
@@ -1933,13 +1933,13 @@ void SetNetRegistered( netSetupType *setup, short setting)
 void SetNetDelay( netSetupType *setup, short setting)
 {
     long newDelay;
-    
+
     setup->currentDelayValue = setting;
     if ( setup->currentDelayValue <= 60) newDelay = 0;
     else if ( setup->currentDelayValue <= 120) newDelay = 1;
     else if ( setup->currentDelayValue <= 240) newDelay = 2;
     else newDelay = 3;
-    
+
     if ( setup->whichTab == kNetLevelSettingTabNum)
     {
         SwitchAnyRadioOrCheckbox( setup->currentDelay +
@@ -1971,7 +1971,7 @@ void ShowNetLevelName( long thisChapter)
 void ShowWhyNetLevelNotLoaded( netSetupType *setup, StringPtr why)
 {
     Str255  s;
-    
+
     if ( why != nil)
     {
         CopyPString( s, "\p-- ");
@@ -1982,7 +1982,7 @@ void ShowWhyNetLevelNotLoaded( netSetupType *setup, StringPtr why)
     }
 
     if ( setup->whichTab != kNetLevelLevelTabNum) return;
-    
+
     DrawStringInInterfaceItem(
         kNetLevelBox, setup->whyScenarioNotLoaded);
 }
@@ -1996,7 +1996,7 @@ void NetLevelShowLag( long lag, long recommended)
     transColorType  *transColor;
     longRect        clipRect;
     Str255          string, numString;
-    
+
     GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kNetLevelLagBox), &tRect);
     mCopyAnyRect( clipRect, tRect);
     DrawInOffWorld();
@@ -2017,30 +2017,30 @@ void NetLevelShowLag( long lag, long recommended)
         mGetTranslateColorShade( AQUA, MEDIUM, color, transColor)
         MoveTo( stringRect.left, stringRect.top + mDirectFontAscent);
         DrawDirectTextStringClipped( string, color, *offMap, &clipRect, 0, 0);
-        
+
         mCopyAnyRect( bottomRect, tRect);
         bottomRect.top = stringRect.bottom;
     } else
     {
         mCopyAnyRect( bottomRect, tRect);
     }
-    
+
     NumToString( lag, string);
     mSetDirectFont( kTitleFontNum);
     mGetDirectStringDimensions( string, width, height, strlen, getwidchar, getwidwid)
-    
+
     SetRect( &stringRect, 0, 0, width, height);
     CenterRectInRect( &stringRect, &bottomRect);
-    
+
     mGetTranslateColorShade( AQUA, LIGHTER, color, transColor)
     MoveTo( stringRect.left, stringRect.top + mDirectFontAscent);
     DrawDirectTextStringClipped( string, color, *offMap, &clipRect, 0, 0);
-    
-    
+
+
     DrawInRealWorld();
     DefaultColors();
     CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &tRect);
-    
+
 }
 
 void NetLevelShowRaces( short myRace, short opponentRace)
@@ -2052,7 +2052,7 @@ void NetLevelShowRaces( short myRace, short opponentRace)
     transColorType  *transColor;
     longRect        clipRect;
     Str255          string, raceString;
-    
+
     GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kNetLevelRaceBox), &tRect);
     mCopyAnyRect( clipRect, tRect);
     DrawInOffWorld();
@@ -2062,7 +2062,7 @@ void NetLevelShowRaces( short myRace, short opponentRace)
     GetIndString( string, 2004, 16);    // you:
     GetRaceString( raceString, kRaceAdjective, myRace);
     ConcatenatePString( (unsigned char *)string, (unsigned char *)raceString);
-    
+
     mSetDirectFont( kButtonSmallFontNum);
     mGetDirectStringDimensions( string, width, height, strlen, getwidchar, getwidwid)
     SetRect( &stringRect, 0, 0, width, height);
@@ -2073,17 +2073,17 @@ void NetLevelShowRaces( short myRace, short opponentRace)
     mGetTranslateColorShade( GREEN, LIGHTER, color, transColor)
     MoveTo( stringRect.left, stringRect.top + mDirectFontAscent);
     DrawDirectTextStringClipped( string, color, *offMap, &clipRect, 0, 0);
-    
+
     mCopyAnyRect( bottomRect, tRect);
     bottomRect.top = stringRect.bottom;
-    
+
     GetIndString( string, 2004, 17);    // opponent:
     GetRaceString( raceString, kRaceAdjective, opponentRace);
     ConcatenatePString( (unsigned char *)string, (unsigned char *)raceString);
 
     mSetDirectFont( kButtonSmallFontNum);
     mGetDirectStringDimensions( string, width, height, strlen, getwidchar, getwidwid)
-    
+
     SetRect( &stringRect, 0, 0, width, height);
     CenterRectInRect( &stringRect, &bottomRect);
     stringRect.top = tRect.top + spacingHeight * 2 + height;
@@ -2091,15 +2091,15 @@ void NetLevelShowRaces( short myRace, short opponentRace)
     mGetTranslateColorShade( RED, LIGHTER, color, transColor)
     MoveTo( stringRect.left, stringRect.top + mDirectFontAscent);
     DrawDirectTextStringClipped( string, color, *offMap, &clipRect, 0, 0);
-        
+
     DrawInRealWorld();
     DefaultColors();
     CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &tRect);
-    
+
 }
 
 /* NetLevelSetColor: sets & shows admiral color; if color = 0xff, uses where
-as click. 
+as click.
 */
 unsigned char NetLevelSetColor( netSetupType *setup,
     unsigned char color, unsigned char myApparentColor,
@@ -2128,7 +2128,7 @@ unsigned char NetLevelSetColor( netSetupType *setup,
     long    race, count, scale;
     baseObjectType  *base = nil;
     unsigned char   originalColor;
-    
+
     color = GetNetEnemyColor();
     race = GetRaceIDFromNum( setup->opponentRace);
     mGetBaseObjectFromClassRace( base, count, 200, race)
@@ -2141,7 +2141,7 @@ unsigned char NetLevelSetColor( netSetupType *setup,
     {
         whichShape = 135 / base->frame.rotation.rotRes;
     } else whichShape = 0;
-    
+
     if ( allowColors)
     {
         if ( myApparentColor != 0)
@@ -2154,12 +2154,12 @@ unsigned char NetLevelSetColor( netSetupType *setup,
                 legalColor[i] = -1;
         }
     }
-    
+
     for( i = 0; i < COLOR_NUM; i++)
     {
         if ( legalColor[i] != 0) colorNum++;
     }
-    
+
     if ( tabActive)
     {
         GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kNetLevelColorBox), &boundsRect);
@@ -2184,14 +2184,14 @@ unsigned char NetLevelSetColor( netSetupType *setup,
                 swatchRect[i].top = boundsRect.top + kColorBoxSpacing;
                 swatchRect[i].right = swatchRect[i].left + swatchWidth;
                 swatchRect[i].bottom = boundsRect.bottom - kColorBoxSpacing;
-                
+
                 thisPosition++;
             } else
             {
                 SetRect( &swatchRect[i], 0, 0, -1, -1);
             }
         }
-        
+
         if ( handleClick)
         {
             i = 0;
@@ -2204,7 +2204,7 @@ unsigned char NetLevelSetColor( netSetupType *setup,
             }
         }
     }
-    
+
 //  if ( legalColor[color] <= 0) color = 0xff;
     if ( legalColor[color] <= 0)
     {
@@ -2219,7 +2219,7 @@ unsigned char NetLevelSetColor( netSetupType *setup,
 
     }
     if ( color == 0xff) color = 0;
-    
+
     if ( tabActive)
     {
         for ( i = 0; i < COLOR_NUM; i++)
@@ -2249,7 +2249,7 @@ unsigned char NetLevelSetColor( netSetupType *setup,
                         PenPat( &qd.gray);
                         PaintRect( &swatchRect[i]);
                         PenNormal();
-                        
+
                     } else
                     {
                         SetTranslateColorShadeFore( i, LIGHT);
@@ -2258,7 +2258,7 @@ unsigned char NetLevelSetColor( netSetupType *setup,
                     }
 //                  PaintRect( &swatchRect[i]);
                 }
-                
+
                 if ( i == color)
                 {
                     tRect = swatchRect[i];
@@ -2266,17 +2266,17 @@ unsigned char NetLevelSetColor( netSetupType *setup,
                     SetTranslateColorFore( 0x00);
 //                  FrameRect( &tRect);
                 }
-                
+
                 thisPosition++;
             }
         }
-        
+
         NormalizeColors();
         DrawInRealWorld();
         NormalizeColors();
         CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &boundsRect);
     }
-                            
+
     return( color);
 }
 
@@ -2289,21 +2289,21 @@ void NetLevelDrawLagGraph( netSetupType *setup)
     transColorType  *transColor;
     unsigned char   color, *getwidchar, *getwidwid;
     PixMapHandle    offMap = GetGWorldPixMap( gOffWorld);
-    
+
     if ( setup->whichTab == kNetLevelSettingTabNum)
     {
         GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kNetLagGraphBox), &graphBounds);
         DrawInOffWorld();
         NormalizeColors();
         PaintRect( &graphBounds);
-        
+
         mSetDirectFont( kButtonSmallFontNum)
 
         mCopyAnyRect( clipRect, graphBounds);
 
         graphBounds.top += 2;
         graphBounds.bottom -= 2;
-        
+
         whichSample = setup->sampleNum % kTimeSampleNum;
         whichSample--;
         if ( whichSample < 0) whichSample = kTimeSampleNum - 2;
@@ -2319,10 +2319,10 @@ void NetLevelDrawLagGraph( netSetupType *setup)
             y += graphBounds.top;
             if ( y < graphBounds.top) y = graphBounds.top;
             if ( y > graphBounds.bottom - 1) y = graphBounds.bottom - 1;
-            
+
             if ( i < (kTimeSampleNum - 2)) LineTo( x, y);
             else MoveTo( x, y);
-            
+
             whichSample--;
             if ( whichSample < 0) whichSample = kTimeSampleNum - 2;
         }
@@ -2343,7 +2343,7 @@ void NetLevelDrawLagGraph( netSetupType *setup)
         mGetDirectStringDimensions( s, width, height, strlen, getwidchar, getwidwid)
         lagRect.left = graphBounds.left + 2;
         lagRect.right = lagRect.left + width + 3;
-        lagRect.top = y - height - 2, 
+        lagRect.top = y - height - 2,
         lagRect.bottom = lagRect.top + height + 2;
         if ( lagRect.top <= ( graphBounds.top + 1))
         {
@@ -2355,7 +2355,7 @@ void NetLevelDrawLagGraph( netSetupType *setup)
         }
         SetTranslateColorShadeFore( YELLOW, DARKER);
         PaintRect( &lagRect);
-        
+
         MoveTo( lagRect.left + 2, lagRect.top + mDirectFontAscent + 1);
         mGetTranslateColorShade( YELLOW, LIGHT, color, transColor)
         DrawDirectTextStringClipped( s, color, *offMap, &clipRect, 0, 0);
@@ -2379,7 +2379,7 @@ void NetLevelDrawLagGraph( netSetupType *setup)
         mGetDirectStringDimensions( s, width, height, strlen, getwidchar, getwidwid)
         recRect.left = graphBounds.left + 2;
         recRect.right = recRect.left + width + 3;
-        recRect.top = y + 1, 
+        recRect.top = y + 1,
         recRect.bottom = recRect.top + height + 2;
         if ( recRect.top <= (graphBounds.top + 1))
         {
@@ -2396,7 +2396,7 @@ void NetLevelDrawLagGraph( netSetupType *setup)
         }
         SetTranslateColorShadeFore( GREEN, DARKER);
         PaintRect( &recRect);
-        
+
         MoveTo( recRect.left + 2, recRect.top + mDirectFontAscent + 1);
         mGetTranslateColorShade( GREEN, LIGHT, color, transColor)
         DrawDirectTextStringClipped( s, color, *offMap, &clipRect, 0, 0);
@@ -2405,7 +2405,7 @@ void NetLevelDrawLagGraph( netSetupType *setup)
         graphBounds.bottom += 2;
         SetTranslateColorShadeFore( AQUA, MEDIUM);
         FrameRect( &graphBounds);
-        
+
         NormalizeColors();
         DrawInRealWorld();
         NormalizeColors();
@@ -2416,7 +2416,7 @@ void NetLevelDrawLagGraph( netSetupType *setup)
 long NetLevelGetLagHighestBelow( netSetupType *setup, long belowWhat)
 {
     long    result = 0, i;
-    
+
     for ( i = 0; i < kTimeSampleNum; i++)
     {
         if ( i != ( setup->sampleNum % kTimeSampleNum))
@@ -2432,23 +2432,23 @@ long NetLevelGetLagMean( netSetupType *setup)
 {
     float   f = 0;
     long    i;
-    
+
     for ( i = 0; i < kTimeSampleNum; i++)
     {
         if ( i != ( setup->sampleNum % kTimeSampleNum))
             f += setup->sampleLag[i];
     }
-    
+
     f /= (float)(kTimeSampleNum - 1);
     f += .5;
     return((long)f);
 }
-    
+
 long NetLevelGetLagStandardDeviation( netSetupType *setup, long mean)
 {
     float   f = 0;
     long    i, l;
-    
+
     for ( i = 0; i < kTimeSampleNum; i++)
     {
         if ( i != ( setup->sampleNum % kTimeSampleNum))
@@ -2467,7 +2467,7 @@ long NetLevelGetLagStandardDeviation( netSetupType *setup, long mean)
 
 void ShowNetTextMessage( netSetupType *setup, Boolean fromMyself)
 {
-    PixMapHandle    offMap = GetGWorldPixMap( gOffWorld);   
+    PixMapHandle    offMap = GetGWorldPixMap( gOffWorld);
 
 #pragma unused( setup, fromMyself)
 // ------------------------
@@ -2532,15 +2532,15 @@ void ShowNetTextMessage( netSetupType *setup, Boolean fromMyself)
         NormalizeColors();
         CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &tRect);
     }
-    
+
     mCopyAnyRect( retroBounds, commBox)
     retroBounds.top = setup->currentLineTop;
     retroBounds.bottom = setup->currentLineTop + height;
     mCopyAnyRect( tRect, retroBounds);
-    
+
     setup->retroTextSpec.xpos = retroBounds.left;
     setup->retroTextSpec.ypos = retroBounds.top + mDirectFontAscent;
-    
+
     while ( setup->retroTextSpec.thisPosition < setup->retroTextSpec.textLength)
     {
         PlayVolumeSound(  kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
@@ -2551,7 +2551,7 @@ void ShowNetTextMessage( netSetupType *setup, Boolean fromMyself)
         DrawInRealWorld();
         NormalizeColors();
         CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &tRect);
-        
+
         waitTime = TickCount();
         while (( TickCount() - waitTime) < 3)
         {
@@ -2569,7 +2569,7 @@ void ShowNetTextMessage( netSetupType *setup, Boolean fromMyself)
 
 void SendNetTextMessage( netSetupType *setup)
 {
-#pragma unused( setup)  
+#pragma unused( setup)
 /*  if ( GetInterfaceTextEditLength( kNetLevelEnterTextBox) == 0)
         return;
 
@@ -2579,23 +2579,23 @@ void SendNetTextMessage( netSetupType *setup)
     CopyInterfaceTextEditContents( kNetLevelEnterTextBox,
         (anyCharType *)*(setup->retroTextSpec.text),
         &setup->retroTextSpec.textLength);
-        
+
     // prepend my name
     GetIndString( tempString, 2004, 21);
     Munger( setup->retroTextSpec.text, 0, nil, 0, tempString + 1, tempString[0]);
     setup->retroTextSpec.textLength += tempString[0];
-    
+
     myName = GetPlayerName( setup->myNum); // -1 = get this machine's name
     Munger( setup->retroTextSpec.text, 0, nil, 0, myName + 1, myName[0]);
     setup->retroTextSpec.textLength += myName[0];
-    
+
     GetIndString( tempString, 2004, 20);
     Munger( setup->retroTextSpec.text, 0, nil, 0, tempString + 1, tempString[0]);
     setup->retroTextSpec.textLength += tempString[0];
 
     SendPreGameTextMessage( *setup->retroTextSpec.text, GetHandleSize( setup->retroTextSpec.text));
     ShowNetTextMessage( setup, true);
-    
+
     InterfaceTextEditSetText( kNetLevelEnterTextBox, ( anyCharType *)"\p");
     InterfaceTextEditSelectAll( kNetLevelEnterTextBox);
     InterfaceTextEditActivate( kNetLevelEnterTextBox);
@@ -2611,12 +2611,12 @@ void AddCharToVisibleString( netSetupType *setup, long whichPlayer,
     Rect            tRect;
     unsigned char   *getwidchar, *getwidwid, color, textColor, shade;
     long            width, height, strlen, count, count2,
-                    whichItem = kFirstPlayerItemGroup + kPlayerGroupTextNum + 
+                    whichItem = kFirstPlayerItemGroup + kPlayerGroupTextNum +
                         (whichPlayer * kPlayerItemGroupSize),
                     leftOffset = 0;
     Str255          totalString, tempString;
     short           shadeNum = 0;
-    
+
     if ( whichPlayer == setup->myNum)
     {
         textColor = kMyCommColor;
@@ -2632,7 +2632,7 @@ void AddCharToVisibleString( netSetupType *setup, long whichPlayer,
         setup->visibleString[whichPlayer][setup->visibleString[whichPlayer][0]] =
             what;
     }
-    
+
     count = 1;
     while ( count <= setup->visibleString[whichPlayer][0])
     {
@@ -2650,7 +2650,7 @@ void AddCharToVisibleString( netSetupType *setup, long whichPlayer,
             }
         } else count++;
     }
-    
+
     count = 1;
     shadeNum = 0;
     totalString[0] = setup->visibleString[whichPlayer][0];
@@ -2666,7 +2666,7 @@ void AddCharToVisibleString( netSetupType *setup, long whichPlayer,
         }
         count++;
     }
-        
+
     GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( whichItem), &tRect);
     mCopyAnyRect( clipRect, tRect);
     DrawInOffWorld();
@@ -2711,7 +2711,7 @@ void AddCharToVisibleString( netSetupType *setup, long whichPlayer,
         shadeNum += 4;
         DrawDirectTextStringClipped( tempString, color, *offMap, &clipRect, 0, 0);
     }
-    
+
     tRect.left -= 2;
     tRect.right += 2;
     DefaultColors();
@@ -2725,7 +2725,7 @@ void ConvertOffscreenRectToPortraitData( short left, short top, unsigned char *d
     PixMapHandle    offMap = GetGWorldPixMap( gOffWorld);
     long            rowBytes = (*offMap)->rowBytes & 0x3fff, h, v, debugCount = 0;
     unsigned char   *source, p;
-    
+
 
     source = (unsigned char *)(*offMap)->baseAddr + (long)top * rowBytes + (long)left;
     rowBytes -= kPortraitSize;
@@ -2748,7 +2748,7 @@ void ConvertOffscreenRectToPortraitData( short left, short top, unsigned char *d
             *data++ = p;
             debugCount++;
         }
-        source += rowBytes; 
+        source += rowBytes;
     }
 }
 
@@ -2765,7 +2765,7 @@ void DisplayPortraitData( short left, short top, unsigned char *data, unsigned c
     SetRect( &tRect, left, top, left + (kPortraitSize + kPortraitMargin) * 2,
         top + (kPortraitSize + kPortraitMargin) * 2);
     PaintRect( &tRect);
-    
+
     dest = (unsigned char *)(*offMap)->baseAddr + (long)(top + kPortraitMargin) * rowBytes + (long)left + kPortraitMargin;
     dest2 = dest + rowBytes;
     rowBytes = (rowBytes * 2) - ( kPortraitSize * 2);
@@ -2792,11 +2792,11 @@ void DisplayPortraitData( short left, short top, unsigned char *data, unsigned c
             *dest2++ = p;
         }
         dest += rowBytes;
-        dest2 += rowBytes; 
+        dest2 += rowBytes;
     }
     DrawInRealWorld();
     DefaultColors();
-    CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &tRect); 
+    CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &tRect);
 }
 
 Boolean GetPortraitHRun( long *x, long *y, unsigned char *originalColor, unsigned char *length,
@@ -2805,11 +2805,11 @@ Boolean GetPortraitHRun( long *x, long *y, unsigned char *originalColor, unsigne
     unsigned char   *color;
 
     *length = 0;
-    if ( *y >= kPortraitSize) return ( false);  
+    if ( *y >= kPortraitSize) return ( false);
 
     color = data + (*y * (long)kPortraitSize) + *x;
     *originalColor = *color;
-    
+
     do
     {
         (*length)++;
@@ -2829,7 +2829,7 @@ void AddPortraitHRun( long *x, long *y, unsigned char color, unsigned char lengt
 
 {
     unsigned char   *dest;
-     
+
     if (( length == 0) || ( *y >= kPortraitSize)) return;
     if ( *x >= kPortraitSize)
     {
@@ -2838,7 +2838,7 @@ void AddPortraitHRun( long *x, long *y, unsigned char color, unsigned char lengt
         return;
     }
     dest = data + (*y * (long)kPortraitSize) + *x;
-    
+
     while ( length != 0)
     {
         if ( *x >= kPortraitSize)
@@ -2847,7 +2847,7 @@ void AddPortraitHRun( long *x, long *y, unsigned char color, unsigned char lengt
             *x = 0;
             return;
         }
-        
+
         length--;
         *dest++ = color;
         (*x)++;
@@ -2862,7 +2862,7 @@ void AddPortraitHRun( long *x, long *y, unsigned char color, unsigned char lengt
 void ClearPortrait( unsigned char *data)
 {
     long    l = kPortraitSize * kPortraitSize;
-    
+
     while ( l-- > 0)
     {
         *data++ = 0xff;
@@ -2878,11 +2878,11 @@ void ClearPortrait( unsigned char *data)
     copying the gworlds contents to the true destination, then deleting the
     GWorld. I am also getting the icl8 resource, and confirming that it belongs
     to the portrait file before using it.
-    
+
     Added with Ambrosia release --
     now tries to use scriptable Finder to get icon; works better; can understand
     new 8.6 icons.
-    
+
 */
 //-16455
 
@@ -2897,16 +2897,16 @@ Boolean PlotCustomIcon( Rect *bounds)
     Handle              iconSuiteHandle, testIconData, icl8Handle, ICNnHandle;
     IconSelectorValue   iconKind;
     FSSpec              portraitFileSpec;
-    
+
     anErr = HGetVol( volName, &vRefNum, &dirID);
     if ( anErr != noErr) return( false);
-    
-    anErr = HGetFInfo( vRefNum, dirID, kPortraitFileName, &fndrInfo);   
+
+    anErr = HGetFInfo( vRefNum, dirID, kPortraitFileName, &fndrInfo);
     if ( anErr != noErr) return( false);
-    
+
     if ( (fndrInfo.fdFlags & kHasCustomIcon) == 0) return( false);
 
-#ifdef powerc   
+#ifdef powerc
     anErr = FSMakeFSSpec( vRefNum, dirID, kPortraitFileName, &portraitFileSpec);
     if ( anErr != noErr) goto PlotCustomIcon_oldWay;
 
@@ -2915,7 +2915,7 @@ Boolean PlotCustomIcon( Rect *bounds)
 
     DrawInOffWorld();
     DefaultColors();
-    
+
     testIconData = nil;
     anErr = GetIconFromSuite( &ICNnHandle, iconSuiteHandle, 'ICN#');
     anErr = GetIconFromSuite( &icl8Handle, iconSuiteHandle, 'icl8');
@@ -2926,9 +2926,9 @@ Boolean PlotCustomIcon( Rect *bounds)
 //      PlotIconHandle( bounds, atNone, ttNone, testIconData);
         Ploticl8ToCICN( 0, 0, bounds, icl8Handle, ICNnHandle);
     } else goto PlotCustomIcon_oldWay;
-    
+
     DisposeIconSuite( iconSuiteHandle, true);
-    
+
     DrawInRealWorld();
     DefaultColors();
     return true;
@@ -2936,20 +2936,20 @@ Boolean PlotCustomIcon( Rect *bounds)
 
 PlotCustomIcon_oldWay:
     anErr = noErr;
-    
+
     refID = ARF_OpenResFile( kPortraitFileName);
     if ( refID == -1)
     {
         return false;
     }
-    
+
 //  UseResFile( refID);
-    
+
     DrawInOffWorld();
     DefaultColors();
-    
+
     PaintRect( bounds);
-    
+
 //  anErr = PlotIconID( bounds, atNone, ttNone, -16455);
     // see Ploticl8ToCICN on why I can't just use PlotIconSuite
     if ( !Ploticl8ToCICN( -16455, refID, bounds, nil, nil))
@@ -2975,7 +2975,7 @@ PlotCustomIcon_oldWay:
             WriteDebugLong( anErr);
             return( false);
         }
-        
+
         anErr = PlotIconSuite( bounds, atNone, ttNone, iconSuiteHandle);
         if ( anErr != noErr)
         {
@@ -2985,7 +2985,7 @@ PlotCustomIcon_oldWay:
         }
         DisposeIconSuite( iconSuiteHandle, true);
     }
-    
+
     DrawInRealWorld();
     DefaultColors();
 
@@ -3000,7 +3000,7 @@ short GetSpriteResIDFromRace( short race, long *whichShape)
     baseObjectType  *base = nil;
     long            count;
     short           spriteID = -1;
-    
+
     race = GetRaceIDFromNum( race);
     mGetBaseObjectFromClassRace( base, count, 200, race)
     if ( base != nil) spriteID = base->pixResID;
@@ -3021,7 +3021,7 @@ void UpdateSampleShip( netSetupType *setup, long whichPlayer)
     long            whichShape;
     unsigned char   color = 0, backColor;
     Rect            tRect;
-    
+
     if ( whichPlayer == setup->myNum)
     {
         race = setup->myRace;
@@ -3032,11 +3032,11 @@ void UpdateSampleShip( netSetupType *setup, long whichPlayer)
         color = setup->opponentColor;
         backColor = kOpponentCommColor;
     }
-    
+
     spriteID = GetSpriteResIDFromRace( race, &whichShape);
-    GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kFirstPlayerItemGroup + 
+    GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kFirstPlayerItemGroup +
         (whichPlayer * kPlayerItemGroupSize) + kPlayerGroupShipNum), &tRect);
-    
+
     DrawInOffWorld();
     DefaultColors();
     SetTranslateColorShadeFore( backColor, DARKEST);
@@ -3062,7 +3062,7 @@ void UpdatePlayerData( netSetupType *setup, long whichPlayer)
     short               race, minutesPlayed, kills, losses;
     unsigned char       color;
     Boolean             isRegistered;
-    
+
     if ( whichPlayer == setup->myNum)
     {
         race = setup->myRace;
@@ -3082,13 +3082,13 @@ void UpdatePlayerData( netSetupType *setup, long whichPlayer)
         if ( GetOpponentIsUnregistered()) isRegistered = false;
         else isRegistered = true;
     }
-    
+
     retroTextSpec.text = GetResource( 'TEXT', kPlayerDataTextID);
     if ( retroTextSpec.text != nil)
     {
         DetachResource( retroTextSpec.text);
 
-        GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kFirstPlayerItemGroup + 
+        GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kFirstPlayerItemGroup +
             (whichPlayer * kPlayerItemGroupSize) + kPlayerGroupDataNum), &bounds);
 
         // player #
@@ -3111,7 +3111,7 @@ void UpdatePlayerData( netSetupType *setup, long whichPlayer)
         ConcatenatePString( (unsigned char *)numString, (unsigned char *)tString2);
         ConcatenatePString( (unsigned char *)numString, "\p)");
         Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
-        
+
         // time played
         if ( minutesPlayed < 60)
         {
@@ -3146,7 +3146,7 @@ void UpdatePlayerData( netSetupType *setup, long whichPlayer)
         NumToString( losses, numString);
         GetIndString( tempString, kPlayerDataKeyStringID, kPlayerLossesKeyStringNum);
         Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
-        
+
         retroTextSpec.textLength = GetHandleSize( retroTextSpec.text);
 
         mSetDirectFont( kButtonSmallFontNum)
@@ -3162,26 +3162,26 @@ void UpdatePlayerData( netSetupType *setup, long whichPlayer)
         mCopyAnyRect( clipRect, bounds)
         mCopyAnyRect( inRect, bounds)
 //      InsetRect( &inRect, 2, 2);
-        
+
         height = DetermineDirectTextHeightInWidth( &retroTextSpec, inRect.right - inRect.left);
-        
+
         retroTextSpec.xpos = inRect.left;
         retroTextSpec.ypos = inRect.top + mDirectFontAscent;
-        
+
         RectToLongRect( &inRect, &lRect);
-        
+
         DrawInOffWorld();
         DefaultColors();
         SetTranslateColorShadeFore( color, DARKEST);
         PaintRect( &bounds);
         DefaultColors();
-            
+
         DrawDirectTextInRect( &retroTextSpec, &lRect, &clipRect, *offPixMap, 0, 0);
-        
+
         DrawInRealWorld();
         DefaultColors();
         CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &bounds);
-        
+
         DisposeHandle( retroTextSpec.text);
     }
 }
@@ -3199,8 +3199,8 @@ void DrawPortraitByPlayerNum( netSetupType *setup, long whichPlayer)
     {
         data = (unsigned char *)setup->opponentPortraitData;
         color = kOpponentCommColor;
-    }   
-    GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kFirstPlayerItemGroup + 
+    }
+    GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kFirstPlayerItemGroup +
         (whichPlayer * kPlayerItemGroupSize) + kPlayerGroupPortraitNum), &tRect);
     tRect.right = tRect.left + 32;
     tRect.bottom = tRect.top + 32;
@@ -3211,7 +3211,7 @@ void OpenOtherScenarioFile( netSetupType *setup)
 {
     FSSpec  destFile;
     Str255  whyDisabledString, filePath;
-    
+
     if ( gAresGlobal->otherPlayerScenarioFileName[0] > 0)
     {
         CopyPString( filePath, "\p:Ares Net Scenarios Folder:");
@@ -3220,7 +3220,7 @@ void OpenOtherScenarioFile( netSetupType *setup)
     {
         filePath[0] = 0;
     }
-    
+
     if ( (filePath[0] == 0) || (ARF_OpenResFile_External( filePath,
         &destFile) == noErr))
     {
@@ -3232,7 +3232,7 @@ void OpenOtherScenarioFile( netSetupType *setup)
         {
             gAresGlobal->externalFileSpec.name[0] = 0;
         }
-            
+
         if ( EF_OpenExternalFile() == noErr)
         {
             if ( gAresGlobal->scenarioFileInfo.version <
@@ -3266,7 +3266,7 @@ void OpenOtherScenarioFile( netSetupType *setup)
                     whyDisabledString);
                 setup->scenarioLoaded = false;
                 return;
-                
+
             } else if ( gAresGlobal->scenarioFileInfo.checkSum !=
                 gAresGlobal->otherPlayerScenarioFileCheckSum)
             {
@@ -3296,7 +3296,7 @@ void OpenOtherScenarioFile( netSetupType *setup)
             setup->scenarioLoaded = true;
             return;
         }
-        
+
     }
     SetStatusOfAnyInterfaceItem( kNetLevelOKButton,
         kDimmed, true);

@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     From The Witches' Brew
     (it's just a name, folks. I'm not into the occult or anything like that!)
     12/2/95
-    
+
     Shows sample usage of the Witch Doctor.
 */
 
@@ -74,10 +74,10 @@ Boolean EnvironmentCheck( void)
 #if TARGET_OS_MAC
     long        gestaltInfo;
     NumVersion  *aVersion;
-    
+
     gAresGlobal->gOptions |= kOptionMusicDriver | kOptionQuicktime | kOptionSpeechAvailable;
     if ( ShiftKey()) gAresGlobal->gOptions &= ~kOptionMusicDriver;
-    
+
 //  Debugger();
 // check System 7 or later
     if ( !(MySWRoutineAvailable( _Gestalt)))
@@ -85,7 +85,7 @@ Boolean EnvironmentCheck( void)
         EnvironmentError( 14);
         return( false);
     }
-    
+
     if ( Gestalt(gestaltSystemVersion, &gestaltInfo) != noErr)
     {
         SysBeep( 20);
@@ -109,7 +109,7 @@ Boolean EnvironmentCheck( void)
             gAresGlobal->gOptions |= kOptionUseSystemHideMenuBar;
         }
     }
-    
+
 // check Color QuickDraw
     if ( Gestalt(gestaltQuickdrawVersion, &gestaltInfo) != noErr)
     {
@@ -122,7 +122,7 @@ Boolean EnvironmentCheck( void)
         return( false);
     }
 
-// check 68020 or better    
+// check 68020 or better
     if ( Gestalt(gestaltProcessorType, &gestaltInfo) != noErr)
     {
         EnvironmentError( 16);
@@ -161,9 +161,9 @@ Boolean EnvironmentCheck( void)
             else gAresGlobal->gOptions &= ~kOptionQuicktime;
         }
     }
-    
+
 // make sure QuickTime is native, too
-    
+
 #ifdef powercc
     if ( Gestalt(gestaltQuickTimeFeatures, &gestaltInfo) != noErr)
     {
@@ -178,7 +178,7 @@ Boolean EnvironmentCheck( void)
         }
     }
 #endif
-    
+
     if ( Gestalt( gestaltSpeechAttr, &gestaltInfo) != noErr)
     {
         gAresGlobal->gOptions &= ~kOptionSpeechAvailable;
@@ -194,7 +194,7 @@ Boolean EnvironmentCheck( void)
     }
 
 /* DISABLED--PROBLEM IN SOUND HEADER FILE
-// check for SoundManager 3 (warn if not 3.1 & PPC) 
+// check for SoundManager 3 (warn if not 3.1 & PPC)
     if ( !(MySWRoutineAvailable( _SoundDispatch)))
     {
         EnvironmentError( 13);
@@ -265,11 +265,11 @@ Boolean MySWRoutineAvailable( short trapWord)
 {
 #if TARGET_OS_MAC
     TrapType    trType;
-    
+
 // first determine whether it is an Operating System or Toolbox routine
     if ( trapWord & 0x0800) trType = ToolTrap;
     else trType = OSTrap;
-// filter cases where older systems mask with $1FF rather than $3FF 
+// filter cases where older systems mask with $1FF rather than $3FF
     if (( trType == ToolTrap) && (( trapWord & 0x03ff) >= 0x200) &&
         GetToolboxTrapAddress( 0xa86e) == GetToolboxTrapAddress( 0xaa6e))
             return( false);

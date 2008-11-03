@@ -85,7 +85,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define kEndgameNum9                        0x00000200
 #define kEndgameNum10                       0x00000400
 #define kEndgameNum11                       0x00000800
-#define kEndgameNum12                       0x00001000  
+#define kEndgameNum12                       0x00001000
 #define kEndgameNum13                       0x00002000
 #define kEndgameNum14                       0x00004000
 #define kEndgameNum15                       0x00008000
@@ -166,7 +166,7 @@ typedef struct
             long            objectNum;
             Boolean         objectVisible;
         } objectBriefType;
-        
+
         struct
         {
             longPointType   location;

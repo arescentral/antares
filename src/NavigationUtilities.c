@@ -74,18 +74,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     TEHandle        theTE;
     short           docTop;
     RgnHandle       hiliteRgn;
-    
+
     ControlHandle   vScroll;
     ControlHandle   hScroll;
     short           vScrollPos;
-    
+
     short           fRefNum;
     short           dirty;
-    
+
     Handle          undoDragText;
     short           undoSelStart;
     short           undoSelEnd;
-    
+
     short           lastSelStart;
     short           lastSelEnd;
 
@@ -114,8 +114,8 @@ extern aresGlobalType   *gAresGlobal;
 /******************************************\
 |**| private function prototypes
 \******************************************/
-pascal void myEventProc(const NavEventCallbackMessage callBackSelector, 
-                        NavCBRecPtr callBackParms, 
+pascal void myEventProc(const NavEventCallbackMessage callBackSelector,
+                        NavCBRecPtr callBackParms,
                         NavCallBackUserData callBackUD);
 
 
@@ -131,17 +131,17 @@ OSErr AEGetDescData(const AEDesc *desc, DescType *typeCode, void *dataBuffer, By
 \******************************************/
 
 OSErr NS_SelectFileObject( FSSpecPtr destFile, short openListResID)
-{   
+{
     NavReplyRecord      theReply;
     NavDialogOptions    dialogOptions;
     OSErr               theErr = noErr;
     NavEventUPP         eventUPP = NewNavEventProc(myEventProc);
     NavTypeListHandle   openList = nil;
-    
+
     theErr = NavGetDefaultDialogOptions(&dialogOptions);
-    
+
 //  GetIndString(dialogOptions.message,rAppStringsID,sChooseObject);
-    
+
     if ( openListResID > 0)
     {
         openList = (NavTypeListHandle)GetResource( 'open', openListResID);
@@ -158,88 +158,88 @@ OSErr NS_SelectFileObject( FSSpecPtr destFile, short openListResID)
                                 nil,
                                 (NavTypeListHandle)openList,
                                 (NavCallBackUserData)nil/*&gDocumentList*/);
-    
+
     DisposeRoutineDescriptor(eventUPP);
 
     if ((theReply.validRecord)&&(theErr == noErr))
         {
-        // grab the target FSSpec from the AEDesc:  
-//      FSSpec      finalFSSpec;    
+        // grab the target FSSpec from the AEDesc:
+//      FSSpec      finalFSSpec;
         AEDesc      resultDesc;
 //      AliasHandle alias;
-        
+
         if ((theErr = AECoerceDesc(&(theReply.selection),typeFSS,&resultDesc)) ==
             noErr)
             if ((theErr = AEGetDescData ( &resultDesc, NULL, destFile,
                     sizeof ( FSSpec ), NULL )) == noErr)
                 {
                 // 'finalFSSpec' is the selected directory...
-                
+
 //              theErr = NewAlias( &finalFSSpec, destFile, &alias);
 //              if ( theErr != noErr) return theErr;
 //              DisposeHandle( (Handle)alias);
                 }
         AEDisposeDesc(&resultDesc);
-        
+
         theErr = NavDisposeReply(&theReply);
         }
-    
-    if ( openList != nil) ReleaseResource( (Handle)openList);   
+
+    if ( openList != nil) ReleaseResource( (Handle)openList);
     return theErr;
 }
 
 OSErr NS_SelectFolderObject( FSSpecPtr destFile, StringPtr windowName,
     StringPtr prompt)
-{   
+{
     NavReplyRecord      theReply;
     NavDialogOptions    dialogOptions;
     OSErr               theErr = noErr;
     NavEventUPP         eventUPP = NewNavEventProc(myEventProc);
-    
+
     theErr = NavGetDefaultDialogOptions(&dialogOptions);
-    
+
 //  GetIndString(dialogOptions.message,rAppStringsID,sChooseObject);
-    
+
     if ( windowName != nil)
         pstrcpy( dialogOptions.windowTitle, windowName);
-    
+
     if ( prompt != nil)
         pstrcpy( dialogOptions.message, prompt);
-        
+
     dialogOptions.preferenceKey = kSelectObjectPrefKey;
-    
+
     theErr = NavChooseFolder(   NULL,
                                 &theReply,
                                 &dialogOptions,
                                 eventUPP,
                                 NULL,
                                 (NavCallBackUserData)nil/*&gDocumentList*/);
-    
+
     DisposeRoutineDescriptor(eventUPP);
 
     if ((theReply.validRecord)&&(theErr == noErr))
         {
-        // grab the target FSSpec from the AEDesc:  
-//      FSSpec      finalFSSpec;    
+        // grab the target FSSpec from the AEDesc:
+//      FSSpec      finalFSSpec;
         AEDesc      resultDesc;
 //      AliasHandle alias;
-        
+
         if ((theErr = AECoerceDesc(&(theReply.selection),typeFSS,&resultDesc)) ==
             noErr)
             if ((theErr = AEGetDescData ( &resultDesc, NULL, destFile,
                     sizeof ( FSSpec ), NULL )) == noErr)
                 {
                 // 'finalFSSpec' is the selected directory...
-                
+
 //              theErr = NewAlias( &finalFSSpec, destFile, &alias);
 //              if ( theErr != noErr) return theErr;
 //              DisposeHandle( (Handle)alias);
                 }
         AEDisposeDesc(&resultDesc);
-        
+
         theErr = NavDisposeReply(&theReply);
         }
-        
+
     return theErr;
 }
 
@@ -264,7 +264,7 @@ OSErr NS_SaveAs( FSSpecPtr destFile, StringPtr fileName, StringPtr appName,
 
     pstrcpy( dialogOptions.savedFileName, fileName);
     pstrcpy( dialogOptions.clientName, appName);
-    
+
 //  if (theDocument->theTE != NULL) // which document type is it?
 //      fileTypeToSave = kFileType;
 //  else
@@ -283,10 +283,10 @@ OSErr NS_SaveAs( FSSpecPtr destFile, StringPtr fileName, StringPtr appName,
 
     if (theReply.validRecord && theErr == noErr)
         {
-//      FSSpec  finalFSSpec;    
-        AEDesc  resultDesc; 
+//      FSSpec  finalFSSpec;
+        AEDesc  resultDesc;
         resultDesc.dataHandle = 0L;
-        
+
         // retrieve the returned selection:
         if ((theErr = AEGetNthDesc(&(theReply.selection),1,typeFSS,NULL,&resultDesc)) == noErr)
             {
@@ -299,17 +299,17 @@ OSErr NS_SaveAs( FSSpecPtr destFile, StringPtr fileName, StringPtr appName,
                 FSpCreateResFile( destFile, fileCreator, fileTypeToSave,
                     theReply.keyScript);
                 result = ResError();
-                
+
                 if (result != noErr)
                     {
                     SysBeep(5);
                     return result;
                     }
                 }
-                
+
 //          if (theDocument->fRefNum)
 //              result = FSClose(theDocument->fRefNum);
-            
+
 //          result = FSpOpenDF(destFile,fsRdWrPerm,&theDocument->fRefNum);
 //          if (result)
 //              {
@@ -339,11 +339,11 @@ OSErr NS_SaveAs( FSSpecPtr destFile, StringPtr fileName, StringPtr appName,
 
 // *****************************************************************************
 // *
-// *    myEventProc()   
+// *    myEventProc()
 // *
 // *****************************************************************************
-pascal void myEventProc(const NavEventCallbackMessage   callBackSelector, 
-                        NavCBRecPtr                     callBackParms, 
+pascal void myEventProc(const NavEventCallbackMessage   callBackSelector,
+                        NavCBRecPtr                     callBackParms,
                         NavCallBackUserData             callBackUD)
 {
 #pragma unused (callBackUD)
@@ -351,7 +351,7 @@ pascal void myEventProc(const NavEventCallbackMessage   callBackSelector,
     CWindowPtr  whichWindow = NULL;
     short       index = 0;
     NavEventData    neData = callBackParms->eventData;
-    
+
 //  if (callBackUD != 0)
     switch (callBackSelector)
     {
@@ -363,7 +363,7 @@ pascal void myEventProc(const NavEventCallbackMessage   callBackSelector,
             {
                 case nullEvent:
                     break;
-                    
+
                 case updateEvt:
                     whichWindow = (CWindowPtr)callBackParms->eventData.eventDataParms.event->message;
                     if ( whichWindow == gTheWindow)

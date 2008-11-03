@@ -95,7 +95,7 @@ typedef struct
     unsigned long               packedData1;    // sanity/page/line/time
     unsigned long               packedData2;    // from admiralNum/target/whichShip/keysdown
 } packedDataType;
-    
+
 typedef struct
 {
     NSpMessageHeader            header;
@@ -146,7 +146,7 @@ enum
     eBarfOutDebugDataMessage    = 10032,    // write out debug data (if any)
     eStartTextMessage           = 10033,    // begin new incoming text message
     eAddTextMessage             = 10034,    // add chars to text message
-    eEndTextMessage             = 10035,    // end incoming text message & process  
+    eEndTextMessage             = 10035,    // end incoming text message & process
     ePackedMessage              = 10036,    // the new, basic ingame message
     eSetBandwidthMessage        = 10037,
     eStopPlayingMessage         = 10038,    // end game but return to net setup

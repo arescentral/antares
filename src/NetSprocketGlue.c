@@ -70,7 +70,7 @@ Boolean NetSprocketGlueInit( void)
 {
 #ifdef kUseCFMGlue
     long    gestaltInfo;
-    
+
     if ( Gestalt( gestaltCFMAttr, &gestaltInfo) != noErr)
     {
         return( false);
@@ -131,7 +131,7 @@ Boolean NetSprocketGlueInit( void)
     gNSpGlue->NSpProtocolList_GetCount_Proc = (UniversalProcPtr)kUnresolvedCFragSymbolAddress;
     Find_Symbol( (Ptr *)&gNSpGlue->NSpProtocolList_GetCount_Proc, "\pNSpProtocolList_GetCount", kNSpProtocolList_GetCount_ProcInfo);
     if ( (Ptr)gNSpGlue->NSpProtocolList_GetCount_Proc == (Ptr)kUnresolvedCFragSymbolAddress) return( false);
-    
+
 //  NSpProtocolList_GetIndexedRef
     gNSpGlue->NSpProtocolList_GetIndexedRef_Proc = (UniversalProcPtr)kUnresolvedCFragSymbolAddress;
     Find_Symbol( (Ptr *)&gNSpGlue->NSpProtocolList_GetIndexedRef_Proc, "\pNSpProtocolList_GetIndexedRef", kNSpProtocolList_GetIndexedRef_ProcInfo);
@@ -202,7 +202,7 @@ Boolean NetSprocketGlueInit( void)
     Find_Symbol( (Ptr *)&gNSpGlue->NSpMessage_Release_Proc, "\pNSpMessage_Release", kNSpMessage_Release_ProcInfo);
     if ( (Ptr)gNSpGlue->NSpMessage_Release_Proc == (Ptr)kUnresolvedCFragSymbolAddress) return( false);
 
-    return( true);  
+    return( true);
 #endif
     return( false); // shouldn't be called if PPC or CFM-68K
 }
@@ -250,7 +250,7 @@ void NetSprocketGlueCleanup( void)
 //  NSpProtocolList_GetCount
     if ( (Ptr)gNSpGlue->NSpProtocolList_GetCount_Proc != (Ptr)kUnresolvedCFragSymbolAddress)
         DisposeRoutineDescriptorTrap( gNSpGlue->NSpProtocolList_GetCount_Proc);
-    
+
 //  NSpProtocolList_GetIndexedRef
     if ( (Ptr)gNSpGlue->NSpProtocolList_GetIndexedRef_Proc != (Ptr)kUnresolvedCFragSymbolAddress)
         DisposeRoutineDescriptorTrap( gNSpGlue->NSpProtocolList_GetIndexedRef_Proc);
@@ -310,73 +310,73 @@ void NetSprocketGlueCleanup( void)
 }
 
 OSStatus Glue_NSpInitialize(
-    UInt32                      inStandardMessageSize, 
-    UInt32                      inBufferSize, 
-    UInt32                      inQElements, 
-    NSpGameID                   inGameID, 
+    UInt32                      inStandardMessageSize,
+    UInt32                      inBufferSize,
+    UInt32                      inQElements,
+    NSpGameID                   inGameID,
     UInt32                      inTimeout)
 {
 #ifndef kUseCFMGlue
     return( NSpInitialize(
-            inStandardMessageSize, 
-            inBufferSize, 
-            inQElements, 
-            inGameID, 
+            inStandardMessageSize,
+            inBufferSize,
+            inQElements,
+            inGameID,
             inTimeout));
 #else
     return( ((NSpInitialize_ProcPtr)gNSpGlue->NSpInitialize_Proc)(
-            inStandardMessageSize, 
-            inBufferSize, 
-            inQElements, 
-            inGameID, 
+            inStandardMessageSize,
+            inBufferSize,
+            inQElements,
+            inGameID,
             inTimeout));
 #endif
 }
 
 OSStatus Glue_NSpGame_Dispose(
-    NSpGameReference            inGame, 
+    NSpGameReference            inGame,
     NSpFlags                    inFlags)
 {
 #ifndef kUseCFMGlue
     return( NSpGame_Dispose(
-            inGame, 
+            inGame,
             inFlags));
 #else
     return( ((NSpGame_Dispose_ProcPtr)gNSpGlue->NSpGame_Dispose_Proc)(
-            inGame, 
+            inGame,
             inFlags));
 #endif
 }
 
 OSStatus Glue_NSpPlayer_GetInfo(
-    NSpGameReference            inGame, 
-    NSpPlayerID                 inPlayerID, 
+    NSpGameReference            inGame,
+    NSpPlayerID                 inPlayerID,
     NSpPlayerInfoPtr*           outInfo)
 {
 #ifndef kUseCFMGlue
     return( NSpPlayer_GetInfo(
-            inGame, 
-            inPlayerID, 
+            inGame,
+            inPlayerID,
             outInfo));
 #else
     return( ((NSpPlayer_GetInfo_ProcPtr)gNSpGlue->NSpPlayer_GetInfo_Proc)(
-            inGame, 
-            inPlayerID, 
+            inGame,
+            inPlayerID,
             outInfo));
 #endif
 }
 
 OSStatus Glue_NSpProtocol_ExtractDefinitionString(
-    NSpProtocolReference        inProtocolRef, 
+    NSpProtocolReference        inProtocolRef,
     char*                       outDefinitionString)
 {
 #ifndef kUseCFMGlue
     return( NSpProtocol_ExtractDefinitionString(
-            inProtocolRef, 
+            inProtocolRef,
             outDefinitionString));
 #else
     return( ((NSpProtocol_ExtractDefinitionString_ProcPtr)gNSpGlue->NSpProtocol_ExtractDefinitionString_Proc)(
-            inProtocolRef, 
+            inProtocolRef,
             outDefinitionString));
 #endif
 }
@@ -425,20 +425,20 @@ void Glue_NSpProtocolList_Dispose(
 
 NSpProtocolReference Glue_NSpProtocol_CreateAppleTalk(
     ConstStr31Param             inNBPName,
-    ConstStr31Param             inNBPType, 
+    ConstStr31Param             inNBPType,
     UInt32                      inMaxRTT,
     UInt32                      inMinThruput)
 {
 #ifndef kUseCFMGlue
     return( NSpProtocol_CreateAppleTalk(
             inNBPName,
-            inNBPType, 
+            inNBPType,
             inMaxRTT,
             inMinThruput));
 #else
     return (((NSpProtocol_CreateAppleTalk_ProcPtr)gNSpGlue->NSpProtocol_CreateAppleTalk_Proc)(
             inNBPName,
-            inNBPType, 
+            inNBPType,
             inMaxRTT,
             inMinThruput));
 #endif
@@ -502,176 +502,176 @@ NSpPlayerID Glue_NSpPlayer_GetMyID(
 }
 
 void Glue_NSpPlayer_ReleaseInfo(
-    NSpGameReference            inGame, 
+    NSpGameReference            inGame,
     NSpPlayerInfoPtr            inInfo)
 {
 #ifndef kUseCFMGlue
-    
+
     NSpPlayer_ReleaseInfo(
-            inGame, 
+            inGame,
             inInfo);
 #else
     (( NSpPlayer_ReleaseInfo_ProcPtr)gNSpGlue->NSpPlayer_ReleaseInfo_Proc)(
-            inGame, 
+            inGame,
             inInfo);
 #endif
 }
 
 UInt32 Glue_NSpPlayer_GetRoundTripTime(
-    NSpGameReference            inGame, 
+    NSpGameReference            inGame,
     NSpPlayerID                 inPlayer)
 {
 #ifndef kUseCFMGlue
     return( NSpPlayer_GetRoundTripTime(
-            inGame, 
+            inGame,
             inPlayer));
 #else
     return( ((NSpPlayer_GetRoundTripTime_ProcPtr)gNSpGlue->NSpPlayer_GetRoundTripTime_Proc)(
-            inGame, 
+            inGame,
             inPlayer));
 #endif
 }
 
 UInt32 Glue_NSpPlayer_GetThruput(
-    NSpGameReference            inGame, 
+    NSpGameReference            inGame,
     NSpPlayerID                 inPlayer)
 {
 #ifndef kUseCFMGlue
     return( NSpPlayer_GetThruput(
-            inGame, 
+            inGame,
             inPlayer));
 #else
     return( ((NSpPlayer_GetThruput_ProcPtr)gNSpGlue->NSpPlayer_GetThruput_Proc)(
-            inGame, 
+            inGame,
             inPlayer));
 #endif
 }
 
 NSpAddressReference Glue_NSpDoModalJoinDialog(
-    ConstStr31Param             inGameType, 
+    ConstStr31Param             inGameType,
     ConstStr255Param            inEntityListLabel,
-    Str31                       ioName, 
-    Str31                       ioPassword, 
+    Str31                       ioName,
+    Str31                       ioPassword,
     NSpEventProcPtr             inEventProcPtr)
 {
 #ifndef kUseCFMGlue
     return( GRNSpDoModalJoinDialog(
-            inGameType, 
+            inGameType,
             inEntityListLabel,
-            ioName, 
-            ioPassword, 
+            ioName,
+            ioPassword,
             inEventProcPtr));
 //  return( NSpDoModalJoinDialog(
-//          inGameType, 
+//          inGameType,
 //          inEntityListLabel,
-//          ioName, 
-//          ioPassword, 
+//          ioName,
+//          ioPassword,
 //          inEventProcPtr));
 #else
     return( ((NSpDoModalJoinDialog_ProcPtr)gNSpGlue->NSpDoModalJoinDialog_Proc)(
-            inGameType, 
+            inGameType,
             inEntityListLabel,
-            ioName, 
-            ioPassword, 
+            ioName,
+            ioPassword,
             inEventProcPtr));
 #endif
 }
 
 Boolean Glue_NSpDoModalHostDialog(
-    NSpProtocolListReference    ioProtocolList, 
-    Str31                       ioGameName, 
+    NSpProtocolListReference    ioProtocolList,
+    Str31                       ioGameName,
     Str31                       ioPlayerName,
-    Str31                       ioPassword, 
+    Str31                       ioPassword,
     NSpEventProcPtr             inEventProcPtr)
 {
 #ifndef kUseCFMGlue
         return( GRNSpDoModalHostDialog(
-                ioProtocolList, 
-                ioGameName, 
+                ioProtocolList,
+                ioGameName,
                 ioPlayerName,
-                ioPassword, 
+                ioPassword,
                 inEventProcPtr));
 //      return( NSpDoModalHostDialog(
-//              ioProtocolList, 
-//              ioGameName, 
+//              ioProtocolList,
+//              ioGameName,
 //              ioPlayerName,
-//              ioPassword, 
+//              ioPassword,
 //              inEventProcPtr));
 #else
     return( ((NSpDoModalHostDialog_ProcPtr)gNSpGlue->NSpDoModalHostDialog_Proc)(
-            ioProtocolList, 
-            ioGameName, 
+            ioProtocolList,
+            ioGameName,
             ioPlayerName,
-            ioPassword, 
+            ioPassword,
             inEventProcPtr));
 #endif
 }
 
 OSStatus Glue_NSpGame_Host(
-    NSpGameReference*           outGame, 
-    NSpProtocolListReference    inProtocolList, 
-    UInt32                      inMaxPlayers, 
-    ConstStr31Param             inGameName, 
+    NSpGameReference*           outGame,
+    NSpProtocolListReference    inProtocolList,
+    UInt32                      inMaxPlayers,
+    ConstStr31Param             inGameName,
     ConstStr31Param             inPassword,
-    ConstStr31Param             inPlayerName, 
-    NSpPlayerType               inPlayerType, 
+    ConstStr31Param             inPlayerName,
+    NSpPlayerType               inPlayerType,
     NSpTopology                 inTopology,
     NSpFlags                    inFlags)
 {
 #ifndef kUseCFMGlue
     return( NSpGame_Host(
-            outGame, 
-            inProtocolList, 
-            inMaxPlayers, 
-            inGameName, 
+            outGame,
+            inProtocolList,
+            inMaxPlayers,
+            inGameName,
             inPassword,
-            inPlayerName, 
-            inPlayerType, 
+            inPlayerName,
+            inPlayerType,
             inTopology,
             inFlags));
 #else
     return( ((NSpGame_Host_ProcPtr)gNSpGlue->NSpGame_Host_Proc)(
-            outGame, 
-            inProtocolList, 
-            inMaxPlayers, 
-            inGameName, 
+            outGame,
+            inProtocolList,
+            inMaxPlayers,
+            inGameName,
             inPassword,
-            inPlayerName, 
-            inPlayerType, 
+            inPlayerName,
+            inPlayerType,
             inTopology,
             inFlags));
 #endif
 }
 
 OSStatus Glue_NSpGame_Join(
-    NSpGameReference*           outGame, 
-    NSpAddressReference         inAddress, 
+    NSpGameReference*           outGame,
+    NSpAddressReference         inAddress,
     ConstStr31Param             inName,
     ConstStr31Param             inPassword,
-    NSpPlayerType               inType, 
+    NSpPlayerType               inType,
     void*                       inCustomData,
-    UInt32                      inCustomDataLen,  
+    UInt32                      inCustomDataLen,
     NSpFlags                    inFlags)
 {
 #ifndef kUseCFMGlue
     return( NSpGame_Join(
-            outGame, 
-            inAddress, 
+            outGame,
+            inAddress,
             inName,
             inPassword,
-            inType, 
+            inType,
             inCustomData,
-            inCustomDataLen,  
+            inCustomDataLen,
             inFlags));
 #else
     return( ((NSpGame_Join_ProcPtr)gNSpGlue->NSpGame_Join_Proc)(
-            outGame, 
-            inAddress, 
+            outGame,
+            inAddress,
             inName,
             inPassword,
-            inType, 
+            inType,
             inCustomData,
-            inCustomDataLen,  
+            inCustomDataLen,
             inFlags));
 #endif
 }
@@ -701,19 +701,19 @@ void Glue_NSpClearMessageHeader(
 }
 
 OSStatus Glue_NSpMessage_Send(
-    NSpGameReference            inGame, 
-    NSpMessageHeader*           inMessage, 
+    NSpGameReference            inGame,
+    NSpMessageHeader*           inMessage,
     NSpFlags                    inFlags)
 {
 #ifndef kUseCFMGlue
     return( NSpMessage_Send(
-            inGame, 
-            inMessage, 
+            inGame,
+            inMessage,
             inFlags));
 #else
     return( ((NSpMessage_Send_ProcPtr)gNSpGlue->NSpMessage_Send_Proc)(
-            inGame, 
-            inMessage, 
+            inGame,
+            inMessage,
             inFlags));
 #endif
 }
@@ -731,16 +731,16 @@ NSpMessageHeader *Glue_NSpMessage_Get(
 }
 
 void Glue_NSpMessage_Release(
-    NSpGameReference            inGame, 
+    NSpGameReference            inGame,
     NSpMessageHeader*           inMessage)
 {
 #ifndef kUseCFMGlue
     NSpMessage_Release(
-            inGame, 
+            inGame,
             inMessage);
 #else
     ((NSpMessage_Release_ProcPtr)gNSpGlue->NSpMessage_Release_Proc)(
-            inGame, 
+            inGame,
             inMessage);
 #endif
 }
@@ -781,7 +781,7 @@ static OSErr Find_Symbol(Ptr* pSymAddr,
             sOSErr = gestaltUnknownErr;
             break;
     }
-    
+
     if (sCID == 0)                              // If we haven't connected to the library yet...
     {
         sOSErr = GetSharedLibrary("\pNetSprocketLib",sArchType,kLoadCFrag,&sCID,&mainAddr,errMessage);

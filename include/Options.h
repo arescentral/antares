@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define kOptionNoScaleUp                0x00000200
 #define kOptionRecord                   0x00000400
 #define kOptionReplay                   0x00000800
-#define kOptionSpeechOn                 0x00001000  
+#define kOptionSpeechOn                 0x00001000
 #define kOptionSubstituteFKeys          0x00002000
 #define kOptionHaveSeenIntro            0x00004000
 #define kOptionNoSinglePlayer           0x00008000

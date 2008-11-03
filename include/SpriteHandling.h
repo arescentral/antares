@@ -54,7 +54,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                                 // (should be 32)
 
 #define kOneSixteenthScale      256
-#define kOneEighthScale         512     
+#define kOneEighthScale         512
 #define kOneQuarterScale        1024//64
 #define kThreeQuarterScale      3072//192
 #define kOneHalfScale           2048//128
@@ -108,18 +108,18 @@ typedef struct {
     short           whichLayer;
     unsigned char   tinyColor;
     Boolean         killMe;
-    
+
     Rect        thisRect;
     Rect        lastRect;
     } spriteType;
-    
+
 
 typedef struct {
     Handle      resource;
     int         resID;
     Boolean     keepMe;
     } pixTableType;
-    
+
 void SpriteHandlingInit( void);
 void CleanupSpriteHandling( void);
 void ResetAllSprites( void);

@@ -94,10 +94,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 OSErr GetIconSuiteFromFSSpec(FSSpecPtr hfsObj, Handle *iconSuite);
 Boolean HaveScriptableFinder( void);
 OSErr SendAppleEvent(AppleEvent *ae, AppleEvent *reply, AESendMode sendMode);
-OSErr MakeAppleEvent(AEEventClass aeClass, AEEventID aeID, 
+OSErr MakeAppleEvent(AEEventClass aeClass, AEEventID aeID,
             AEDesc *target, AppleEvent *ae);
 OSErr MakeSpecifierForFile(FSSpecPtr hfsObj, AEDesc *fileSpecifier);
-OSErr MakePropertySpecifierForSpecifier(DescType property, 
+OSErr MakePropertySpecifierForSpecifier(DescType property,
             AEDesc *ofSpecifier, AEDesc *propertySpecifier);
 OSErr BuildIconSuiteFromAEDesc(Boolean largeIcons, Handle *iconSuite, AEDesc *iconFam);
 Boolean FinderIsRunning( void);
@@ -120,26 +120,26 @@ pascal Boolean IdleHandle( EventRecord *theEvent, long *sleepTime, RgnHandle *mo
     long        menuChoice;
 
     if ( *sleepTime != 5) *sleepTime = 5;
-        
-    switch ( theEvent->what ) 
+
+    switch ( theEvent->what )
     {
         case osEvt:
             menuChoice = theEvent->message;
             menuChoice >>= 24L;
             menuChoice &= 0xff;
-            
+
             switch (menuChoice)
             {
                 case mouseMovedMessage:
 //                          DoIdle(event); {mouse-moved same as idle for this app}
                     break;
-            
+
                 case suspendResumeMessage:
 //                  DoSuspendResumeEvent( theEvent);// handle supend/resume event}
                     break;
             }
             break;
-            
+
         case activateEvt:
 //          if ( gTimerGlobal->window != nil)
 //          {
@@ -150,10 +150,10 @@ pascal Boolean IdleHandle( EventRecord *theEvent, long *sleepTime, RgnHandle *mo
                 whichWindow = (CWindowPtr)theEvent->message;
 //              ActivateEvent((theEvent->modifiers & activeFlag)?(true):(false));
             break;
-            
+
         case nullEvent:
             break;
-                                    
+
         case updateEvt:
 //          if ( gTimerGlobal->window != nil)
             {
@@ -163,12 +163,12 @@ pascal Boolean IdleHandle( EventRecord *theEvent, long *sleepTime, RgnHandle *mo
         EndUpdate( (WindowPtr)whichWindow);
             }
             break;
-    
-            
+
+
         case kHighLevelEvent:
 //          HandleHighLevelEvent( theEvent);
             break;
-        
+
     }
     return( false);
 }
@@ -207,13 +207,13 @@ OSErr GetIconSuiteFromFSSpec(FSSpecPtr hfsObj, Handle *iconSuite)
     //
     // Make a GetData Apple event to send to the Finder
     //
-    err = MakeAppleEvent(kAECoreSuite, kAEGetData, &pFinderTarget, 
+    err = MakeAppleEvent(kAECoreSuite, kAEGetData, &pFinderTarget,
                 &finderEvent);
     require_num(err == noErr, MakeAppleEvent,
         "An error occured while getting a file's icon",
         "Couldn't make an AppleEvent because an error of type %d occured",
         err);
-    
+
     //
     // Make an object specifier for the interesting file
     //
@@ -222,17 +222,17 @@ OSErr GetIconSuiteFromFSSpec(FSSpecPtr hfsObj, Handle *iconSuite)
         "An error occured while getting a file's icon",
         "Couldn't MakeSpecifierForFile because an error of type %d occured",
         err);
-    
+
     //
     // Make an icon family property specifier for the file
     //
-    err = MakePropertySpecifierForSpecifier(pIconBitmap, &fileSpecifier, 
+    err = MakePropertySpecifierForSpecifier(pIconBitmap, &fileSpecifier,
                 &iconPropertySpecifier);
     require_num(err == noErr, MakePropertySpecifierForSpecifier,
         "An error occured while getting a file's icon",
         "Couldn't MakePropertySpecifierForSpecifier because an error of type %d occured",
         err);
-    
+
     //
     // Stuff it in the Apple event and send it
     //
@@ -248,25 +248,25 @@ OSErr GetIconSuiteFromFSSpec(FSSpecPtr hfsObj, Handle *iconSuite)
         "An error occured while getting a file's icon",
         "Couldn't send an AppleEvent because an error of type %d occured",
         err);
-    
+
     //
     // Now the Finder may have sent us an error number
     //
-    err = AEGetParamPtr(&replyEvent, keyErrorNumber, typeLongInteger, 
+    err = AEGetParamPtr(&replyEvent, keyErrorNumber, typeLongInteger,
                         &returnType, &returnLong, sizeof(long), &returnSize);
     if (err == noErr)
         err = (OSErr) returnLong;
 
-    else {      
+    else {
         //
         // If not, get the icon family and build an icon suite
         //
-        err = AEGetParamDesc(&replyEvent, keyDirectObject, typeWildCard, &iconFamily);  
+        err = AEGetParamDesc(&replyEvent, keyDirectObject, typeWildCard, &iconFamily);
         require_num(err == noErr, AEGetParamDesc,
         "An error occured while getting a file's icon",
         "Couldn't AEGetParamDesc because an error of type %d occured",
         err);
-    
+
         err = BuildIconSuiteFromAEDesc(false, iconSuite, &iconFamily);
         if ( err != noErr)
         {
@@ -313,7 +313,7 @@ Boolean HaveScriptableFinder( void)
     OSErr       err;
 
     haveScriptableFinder = false;
-    
+
     err = Gestalt(gestaltFinderAttr, &response);
     require_num(err == noErr, Gestalt,
         "An error occured while checking for the Scriptable Finder",
@@ -340,13 +340,13 @@ OSErr SendAppleEvent(AppleEvent *ae, AppleEvent *reply, AESendMode sendMode)
 
 
     if (reply == NULL) {
-        err = AESend(ae, &throwAwayReply, sendMode, 
+        err = AESend(ae, &throwAwayReply, sendMode,
                     kAENormalPriority, kAEDefaultTimeout, idleFunction, NULL);
         if (err == noErr)
             AEDisposeDesc(&throwAwayReply);
     }
     else
-        err = AESend(ae, reply, sendMode, 
+        err = AESend(ae, reply, sendMode,
                     kAENormalPriority, kAEDefaultTimeout, idleFunction, NULL);
 
     return err;
@@ -356,7 +356,7 @@ OSErr SendAppleEvent(AppleEvent *ae, AppleEvent *reply, AESendMode sendMode)
 //----------------------------------------------------------------------------
 // MakeAppleEvent
 //----------------------------------------------------------------------------
-OSErr MakeAppleEvent(AEEventClass aeClass, AEEventID aeID, 
+OSErr MakeAppleEvent(AEEventClass aeClass, AEEventID aeID,
             AEDesc *target, AppleEvent *ae)
 {
     OSErr err = noErr;
@@ -370,9 +370,9 @@ OSErr MakeAppleEvent(AEEventClass aeClass, AEEventID aeID,
     }
 
     if (!err)
-        err = AECreateAppleEvent(aeClass, aeID, target, 
+        err = AECreateAppleEvent(aeClass, aeID, target,
             kAutoGenerateReturnID, kAnyTransactionID, ae);
-    
+
     return err;
 }
 
@@ -392,7 +392,7 @@ OSErr MakeSpecifierForFile(FSSpecPtr hfsObj, AEDesc *fileSpecifier)
     require_plain(err == noErr, NewAlias);
 
     HLock((Handle) fileAlias);
-    err = AECreateDesc(typeAlias, (Ptr) *fileAlias, 
+    err = AECreateDesc(typeAlias, (Ptr) *fileAlias,
                 GetHandleSize((Handle) fileAlias), &hfsData);
     HUnlock((Handle) fileAlias);
     DisposeHandle((Handle) fileAlias);
@@ -403,8 +403,8 @@ OSErr MakeSpecifierForFile(FSSpecPtr hfsObj, AEDesc *fileSpecifier)
     // (i.e., "file of <null>", or just "file")
     //
     nullDesc.descriptorType = typeNull;
-    nullDesc.dataHandle = NULL; 
-    err = CreateObjSpecifier(typeWildCard, &nullDesc, 
+    nullDesc.dataHandle = NULL;
+    err = CreateObjSpecifier(typeWildCard, &nullDesc,
                 formAlias, &hfsData, false, fileSpecifier);
 
 AECreateDesc:
@@ -416,12 +416,12 @@ NewAlias:
 //----------------------------------------------------------------------------
 // MakePropertySpecifierForSpecifier
 //----------------------------------------------------------------------------
-OSErr MakePropertySpecifierForSpecifier(DescType property, 
+OSErr MakePropertySpecifierForSpecifier(DescType property,
             AEDesc *ofSpecifier, AEDesc *propertySpecifier)
 {
     OSErr       err;
     AEDesc      keyData;
-    
+
     //
     // Create a 'type' AEDesc with the desired property
     //
@@ -432,10 +432,10 @@ OSErr MakePropertySpecifierForSpecifier(DescType property,
     // With it create a property specifier for the object specifier
     // passed to us.
     //
-    err = CreateObjSpecifier(cProperty, ofSpecifier, 
+    err = CreateObjSpecifier(cProperty, ofSpecifier,
                 formPropertyID, &keyData, false, propertySpecifier);
 
-    (void) AEDisposeDesc(&keyData); 
+    (void) AEDisposeDesc(&keyData);
 AECreateDesc:
     return err;
 }
@@ -478,19 +478,19 @@ OSErr BuildIconSuiteFromAEDesc(Boolean largeIcons, Handle *iconSuite, AEDesc *ic
     require(buffer != NULL, NewPtr,
         "Out of memory error",
         "Couldn't allocate memory to build an icon suite.");
-    
+
     err = NewIconSuite(&suite);
     require_num(err == noErr, NewIconSuite,
         "An error occurred while building an icon suite",
         "Couldn't create a new suite because an error of type %d occurred",
         err);
-    
+
     err = AECoerceDesc(iconFam, typeAERecord, (AEDesc *) &rec);
     require_num(err == noErr, AECoerceDesc,
         "An error occurred while building an icon suite",
         "Couldn't coerce the description because an error of type %d occurred",
         err);
-    
+
     for ( i = 0; i < 2; i++)
     {
         if ( i == 0) {
@@ -502,7 +502,7 @@ OSErr BuildIconSuiteFromAEDesc(Boolean largeIcons, Handle *iconSuite, AEDesc *ic
             maskType = small1BitMask;
         }
 
-            
+
         for (count = 0; count < 3; count ++) {
             //
             // loop through the icons and grab the data from the AERecord for
@@ -510,9 +510,9 @@ OSErr BuildIconSuiteFromAEDesc(Boolean largeIcons, Handle *iconSuite, AEDesc *ic
             //
             iconType = type[count];
             size = GetSizeFromIconType(iconType);
-            err = AEGetKeyPtr(&rec, iconType, iconType, &typeCode, 
+            err = AEGetKeyPtr(&rec, iconType, iconType, &typeCode,
                             buffer, maxSize, &iconSize);
-        
+
             if (err == noErr) {
                 //
                 // We don't set the error code for this unless the NewHandle
@@ -520,11 +520,11 @@ OSErr BuildIconSuiteFromAEDesc(Boolean largeIcons, Handle *iconSuite, AEDesc *ic
                 // have an icon for one that we're interested in.
                 //
                 icon = NewHandle(size);
-        
+
                 if (icon != NULL) {
                     //
                     // OK, the memory alloc succeeded and we have data. Copy
-                    // it into the allocated icon and add it to the suite. 
+                    // it into the allocated icon and add it to the suite.
                     // Set atLeastOne to true, to indicate later that we did
                     // in fact add at least one icon to this suite.
                     //
@@ -582,16 +582,16 @@ Boolean FinderIsRunning( void)
         pInfo.processName       = NULL;
         pInfo.processAppSpec    = NULL;
         pInfo.processInfoLength = sizeof(ProcessInfoRec);
-    
+
         err = GetProcessInformation(&psn, &pInfo);
-    
-        if ((err == noErr) 
-            && (pInfo.processSignature == 'MACS') 
+
+        if ((err == noErr)
+            && (pInfo.processSignature == 'MACS')
             && (pInfo.processType == 'FNDR'))
-            
+
             foundIt = true;
     }
-    
+
     return foundIt;
 }
 
@@ -607,7 +607,7 @@ static Size GetSizeFromIconType(DescType iconType)
             size = kLarge8BitIconSize;
             break;
         case large4BitData:
-            size = kLarge4BitIconSize;      
+            size = kLarge4BitIconSize;
             break;
         case large1BitMask:
             size = kLargeIconSize;
@@ -639,14 +639,14 @@ void DrawAliasSmallIcon( AliasHandle alias, short left, short top)
     OSStatus    error = noErr;
     Boolean     changed;
     Str255      s;
-    
+
     error = ResolveAlias( nil, alias, &fspec, &changed);
     if ( error != noErr)
     {
         NumToString( error, s);
 //              DebugStr( s);
     }
-    
+
     error = GetIconSuiteFromFSSpec( &fspec, &iconSuite);
     if ( error != noErr)
     {
@@ -662,7 +662,7 @@ void DrawAliasSmallIcon( AliasHandle alias, short left, short top)
         error = PlotIconSuite (&iconRect,kAlignNone,kTransformNone, iconSuite);
         DisposeIconSuite( iconSuite, true);
     }
-    
+
 }
 
 void DrawFSpecSmallIcon( FSSpec *fspec, short left, short top)
@@ -687,7 +687,7 @@ void DrawFSpecSmallIcon( FSSpec *fspec, short left, short top)
         error = PlotIconSuite (&iconRect,kAlignNone,kTransformNone, iconSuite);
         DisposeIconSuite( iconSuite, true);
     }
-    
+
 }
 
 Handle GetIconSuiteFromAlias( AliasHandle alias)
@@ -702,13 +702,13 @@ Handle GetIconSuiteFromAlias( AliasHandle alias)
     {
         return nil;
     }
-    
+
     error = GetIconSuiteFromFSSpec( &fspec, &iconSuite);
     if ( error != noErr)
     {
         return nil;
     }
-    
+
     return iconSuite;
 }
 

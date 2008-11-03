@@ -167,7 +167,7 @@ void NonplayerShipThink( long timePass)
     unsigned char   friendSick, foeSick, neutralSick;
     transColorType  *transColor;
     unsigned long   sickCount = gAresGlobal->gGameTime / 9;
-    
+
     gAresGlobal->gSynchValue = gRandomSeed;
     sickCount &= 0x00000003;
     if ( sickCount == 0)
@@ -198,18 +198,18 @@ void NonplayerShipThink( long timePass)
         anAdmiral->shipsLeft = 0;
         anAdmiral++;
     }
-    
+
 // it probably doesn't matter what order we do this in, but we'll do it in the "ideal" order anyway
-    
+
     anObject = gRootObject;
-    
+
     while ( anObject != nil)
     {
         if (anObject->active)
         {
             gAresGlobal->gSynchValue += anObject->location.h;
             gAresGlobal->gSynchValue += anObject->location.v;
-            
+
 /*          DebugFileAppendLong( anObject->whichBaseObject);
             DebugFileAppendString( "\p\t");
             DebugFileAppendLong( anObject->entryNumber);
@@ -237,7 +237,7 @@ void NonplayerShipThink( long timePass)
 //          {
 //              PayAdmiral( anObject->owner, 1);
 //          }
-            
+
             // strobe its symbol if it's not feeling well
             if ( anObject->sprite != nil)
             {
@@ -267,13 +267,13 @@ void NonplayerShipThink( long timePass)
                     anAdmiral = mGetAdmiralPtr( anObject->owner);
                     anAdmiral->shipsLeft++;
                 }
-                
+
                 switch( anObject->presenceState)
                 {
                     case kNormalPresence:
                         keysDown = ThinkObjectNormalPresence( anObject, baseObject, timePass);
                         break;
-                        
+
                     case kWarpingPresence:
                         keysDown = ThinkObjectWarpingPresence( anObject);
                         break;
@@ -281,16 +281,16 @@ void NonplayerShipThink( long timePass)
                     case kWarpInPresence:
                         keysDown = ThinkObjectWarpInPresence( anObject);
                         break;
-                    
+
                     case kWarpOutPresence:
                         keysDown = ThinkObjectWarpOutPresence( anObject, baseObject);
                         break;
-                    
+
                     case kLandingPresence:
                         keysDown = ThinkObjectLandingPresence( anObject);
                         break;
                 }
-                
+
                 if (( !(anObject->attributes & kRemoteOrHuman)) ||
                     ( anObject->attributes & kOnAutoPilot))
                 {
@@ -364,10 +364,10 @@ void NonplayerShipThink( long timePass)
                     {
                         anObject->keysDown &= ~kManualOverrideFlag;
                     }
-                }   
-                
+                }
+
                 // Take care of any "keys" being pressed
-                
+
 /*              if ( ( anObject->attributes & ( kIsRemote | kIsHumanControlled)))
                 {
                     DebugFileAppendString( "\pKY\t");
@@ -377,9 +377,9 @@ void NonplayerShipThink( long timePass)
                     DebugFileAppendString( "\p\t");
                     DebugFileAppendLong( anObject->location.h);
                     DebugFileAppendString( "\p\r");
-                    
+
                 }
-*/  
+*/
 /*          DebugFileAppendLong( anObject->closestDistance);
             DebugFileAppendString( "\p\t");
             DebugFileAppendLong( anObject->closestObject);
@@ -400,19 +400,19 @@ void NonplayerShipThink( long timePass)
                 {
                     SetObjectDestination( anObject, nil);
                 }
-                
+
                 if ( anObject->keysDown & kAutoPilotKey)
                 {
                     TogglePlayerAutoPilot( anObject);
                 }
-                
+
                 if ( anObject->keysDown & kGiveCommandKey)
                 {
                     PlayerShipGiveCommand( anObject->owner);
                 }
-                
+
                 anObject->keysDown &= ~kSpecialKeyMask;
-                
+
                 if ( anObject->offlineTime > 0)
                 {
                     if ( RandomSeeded( anObject->offlineTime, &(anObject->randomSeed),
@@ -420,7 +420,7 @@ void NonplayerShipThink( long timePass)
                         anObject->keysDown = 0;
                     anObject->offlineTime--;
                 }
-                
+
                 if ( ( anObject->attributes & kRemoteOrHuman) &&
                     ( !(anObject->attributes & kCanThink)) && ( anObject->age < 120))
                 {
@@ -452,10 +452,10 @@ void NonplayerShipThink( long timePass)
                             } else anObject->turnVelocity = 0;
                         }
                 }
-                
+
                 if ( anObject->keysDown & kUpKey)
                 {
-                
+
                     if (!(( anObject->presenceState == kWarpInPresence) ||
                         ( anObject->presenceState == kWarpingPresence) ||
                         ( anObject->presenceState == kWarpOutPresence)))
@@ -472,14 +472,14 @@ void NonplayerShipThink( long timePass)
                     }
                     anObject->thrust = -baseObject->maxThrust;
                 } else anObject->thrust = 0;
-                
+
                 if ( anObject->rechargeTime < kRechargeSpeed)
                 {
                     anObject->rechargeTime++;
                 } else
                 {
                     anObject->rechargeTime = 0;
-                    
+
                     if ( anObject->presenceState == kWarpingPresence)
                     {
                         anObject->energy -= 1;
@@ -498,14 +498,14 @@ void NonplayerShipThink( long timePass)
                             anObject->battery -= kEnergyChunk;
                             anObject->energy += kEnergyChunk;
                         }
-                        
+
                         if (( anObject->health < ( baseObject->health >> (long)1)) &&
                             ( anObject->energy > kHealthRatio))
                         {
                             anObject->health++;
                             anObject->energy -= kHealthRatio;
                         }
-                        
+
                         if ( anObject->pulseType != kNoWeapon)
                         {
                             if (( anObject->pulseAmmo <
@@ -514,7 +514,7 @@ void NonplayerShipThink( long timePass)
                             {
                                 anObject->pulseCharge++;
                                 anObject->energy -= kWeaponRatio;
-                                
+
                                 if (( anObject->pulseBase->frame.weapon.restockCost >= 0)
                                     && (anObject->pulseCharge >=
                                     anObject->pulseBase->frame.weapon.restockCost))
@@ -525,7 +525,7 @@ void NonplayerShipThink( long timePass)
                                 }
                             }
                         }
-                            
+
                         if ( anObject->beamType != kNoWeapon)
                         {
                             if (( anObject->beamAmmo <
@@ -534,7 +534,7 @@ void NonplayerShipThink( long timePass)
                             {
                                 anObject->beamCharge++;
                                 anObject->energy -= kWeaponRatio;
-                                
+
                                 if ((anObject->beamBase->frame.weapon.restockCost >= 0) &&
                                     ( anObject->beamCharge >=
                                     anObject->beamBase->frame.weapon.restockCost))
@@ -545,7 +545,7 @@ void NonplayerShipThink( long timePass)
                                 }
                             }
                         }
-                            
+
                         if ( anObject->specialType != kNoWeapon)
                         {
                             if (( anObject->specialAmmo <
@@ -554,7 +554,7 @@ void NonplayerShipThink( long timePass)
                             {
                                 anObject->specialCharge++;
                                 anObject->energy -= kWeaponRatio;
-                                
+
                                 if (( anObject->specialBase->frame.weapon.restockCost >= 0)
                                     && ( anObject->specialCharge >=
                                     anObject->specialBase->frame.weapon.restockCost))
@@ -567,14 +567,14 @@ void NonplayerShipThink( long timePass)
                         }
                     }
                 }
-                
+
                 // targetObject is set for all three weapons -- do not change
                 if ( anObject->targetObjectNumber >= 0)
                 {
                     targetObject = (spaceObjectType *)*gSpaceObjectData +
                         anObject->targetObjectNumber;
                 } else targetObject = nil;
-                
+
                 if ( anObject->pulseTime > 0) anObject->pulseTime -= timePass;
                 if (( anObject->keysDown & kOneKey) && ( anObject->pulseTime <= 0) &&
                     ( anObject->pulseType != kNoWeapon))
@@ -600,20 +600,20 @@ void NonplayerShipThink( long timePass)
                         anObject->pulsePosition++;
                         if ( anObject->pulsePosition >= baseObject->pulsePositionNum)
                             anObject->pulsePosition = 0;
-                
+
                         h = anObject->direction;
                         mAddAngle( h, -90);
                         mGetRotPoint( fcos, fsin, (long)h)
                         fcos = -fcos;
                         fsin = -fsin;
-                
+
                         offset.h = mMultiplyFixed( baseObject->pulsePosition[anObject->pulsePosition].h, fcos);
                         offset.h -= mMultiplyFixed( baseObject->pulsePosition[anObject->pulsePosition].v, fsin);
                         offset.v = mMultiplyFixed( baseObject->pulsePosition[anObject->pulsePosition].h, fsin);
                         offset.v += mMultiplyFixed( baseObject->pulsePosition[anObject->pulsePosition].v, fcos);
                         offset.h = mFixedToLong( offset.h);
                         offset.v = mFixedToLong( offset.v);
-                
+
                         anObject->pulseTime = weaponObject->frame.weapon.fireTime;
                         if ( weaponObject->frame.weapon.ammo > 0)
                             anObject->pulseAmmo--;
@@ -625,7 +625,7 @@ void NonplayerShipThink( long timePass)
                 if ( anObject->beamTime > 0) anObject->beamTime -= timePass;
                 if (( anObject->keysDown & kTwoKey) && ( anObject->beamTime <= 0 ) &&
                     ( anObject->beamType != kNoWeapon) )
-                {                   
+                {
                     weaponObject = anObject->beamBase;
                     if ( (anObject->energy >= weaponObject->frame.weapon.energyCost)
                         && (( weaponObject->frame.weapon.ammo < 0) ||
@@ -637,30 +637,30 @@ void NonplayerShipThink( long timePass)
                         anObject->beamPosition++;
                         if ( anObject->beamPosition >= baseObject->beamPositionNum)
                             anObject->beamPosition = 0;
-                        
+
                         h = anObject->direction;
                         mAddAngle( h, -90);
                         mGetRotPoint( fcos, fsin, (long)h)
                         fcos = -fcos;
                         fsin = -fsin;
-                
+
                         offset.h = mMultiplyFixed( baseObject->beamPosition[anObject->beamPosition].h, fcos);
                         offset.h -= mMultiplyFixed( baseObject->beamPosition[anObject->beamPosition].v, fsin);
                         offset.v = mMultiplyFixed( baseObject->beamPosition[anObject->beamPosition].h, fsin);
                         offset.v += mMultiplyFixed( baseObject->beamPosition[anObject->beamPosition].v, fcos);
                         offset.h = mFixedToLong( offset.h);
                         offset.v = mFixedToLong( offset.v);
-                
+
                         anObject->beamTime = weaponObject->frame.weapon.fireTime;
                         if ( weaponObject->frame.weapon.ammo > 0) anObject->beamAmmo--;
                         ExecuteObjectActions( weaponObject->activateAction,
                                             weaponObject->activateActionNum, anObject,
                                             targetObject, &offset, true);
                     }
-                
+
                 }
                 if ( anObject->specialTime > 0) anObject->specialTime -= timePass;
-                
+
                 if (( anObject->keysDown & kEnterKey) && ( anObject->specialTime <= 0)
                     && ( anObject->specialType != kNoWeapon))
                 {
@@ -684,20 +684,20 @@ void NonplayerShipThink( long timePass)
                         if ( anObject->specialPosition >=
                                 baseObject->specialPositionNum)
                             anObject->specialPosition = 0;
-                
+
                         h = anObject->direction;
                         mAddAngle( h, -90);
                         mGetRotPoint( fcos, fsin, (long)h)
                         fcos = -fcos;
                         fsin = -fsin;
-                
+
                         offset.h = mMultiplyFixed( baseObject->specialPosition[anObject->specialPosition].h, fcos);
                         offset.h -= mMultiplyFixed( baseObject->specialPosition[anObject->specialPosition].v, fsin);
                         offset.v = mMultiplyFixed( baseObject->specialPosition[anObject->specialPosition].h, fsin);
                         offset.v += mMultiplyFixed( baseObject->specialPosition[anObject->specialPosition].v, fcos);
                         offset.h = mFixedToLong( offset.h);
                         offset.v = mFixedToLong( offset.v);
-                
+
                         anObject->specialTime = weaponObject->frame.weapon.fireTime;
                         if ( weaponObject->frame.weapon.ammo > 0)
                             anObject->specialAmmo--;
@@ -713,7 +713,7 @@ void NonplayerShipThink( long timePass)
                                             targetObject, nil, true);
                     }
                 }
-                
+
                 if (( anObject->keysDown & kWarpKey) && ( baseObject->warpSpeed > 0) &&
                     ( anObject->energy > 0))
                 {
@@ -745,7 +745,7 @@ void NonplayerShipThink( long timePass)
 
             }
         }
-        
+
         anObject = (spaceObjectType *)anObject->nextObject;
     }
 }
@@ -762,17 +762,17 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
     short           angle, theta, beta;
     smallFixedType  calcv, fdist;
     longPointType   offset;
-            
+
     if ((!(anObject->attributes & kRemoteOrHuman))
         || ( anObject->attributes & kOnAutoPilot))
     {
         // set all keys off
         keysDown &= kSpecialKeyMask;
         // if target object exists and is within engage range
-        
+
         ThinkObjectResolveTarget( anObject, &dest, &distance, &targetObject);
 //      if (( dest.h == 0xffffffff) || ( dest.v == 0xffffffff) || ( distance == 0xffffffff)) DebugStr("\pResolve 1");
-        
+
 ///--->>> BEGIN TARGETING <<<---///
         if (    ( anObject->targetObjectNumber != kNoShip) &&
                 (
@@ -791,11 +791,11 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
             keysDown |= ThinkObjectEngageTarget( anObject, targetObject, distance, &theta, timePass);
 //          if ( theta == 0xffff) DebugStr("\pEngage 1");
 ///--->>> END TARGETING <<<---///
-            
-            
+
+
             // if I'm in target object's range & it's looking at us & my health is less
             // than 1/2 its -- or I can't engage it
-            if (    ( anObject->attributes & kCanEvade) && 
+            if (    ( anObject->attributes & kCanEvade) &&
                     ( targetObject->attributes & kCanBeEvaded) &&
                     ( distance < targetObject->longestWeaponRange) &&
                     (targetObject->attributes & kHated) &&
@@ -906,7 +906,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                     mAddAngle( anObject->direction, beta)
                     keysDown |= kUpKey;
                 }
-            
+
             // if we're not afraid, then
             } else
             {
@@ -915,7 +915,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                 if (( distance > anObject->shortestWeaponRange) ||
                         ( anObject->attributes & kIsGuided))
                     keysDown |= kUpKey;
-                
+
                 // if we are as close as we like
                 else
                 {
@@ -933,12 +933,12 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                         keysDown |= kUpKey;
                         anObject->lastTargetDistance = distance;
                     }
-                }                           
+                }
             }
-            
+
             if ( anObject->targetObjectNumber ==
                     anObject->destinationObject)
-            {       
+            {
                 if ( distance < baseObject->arriveActionDistance)
                 {
                     if ( baseObject->arriveAction >= 0)
@@ -976,13 +976,13 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
             {
                 keysDown |= ThinkObjectEngageTarget( anObject, targetObject, distance, &theta, timePass);
 //              if ( theta == 0xffff) DebugStr("\pEngage 2");
-    
+
                 if (( targetObject->attributes & kCanBeEngaged) &&
                     ( anObject->attributes & kCanEngage) &&
                     ( distance < anObject->longestWeaponRange) &&
                     ( targetObject->attributes & kHated))
                 {
-                } else if ( ( anObject->attributes & kCanEvade) && 
+                } else if ( ( anObject->attributes & kCanEvade) &&
                             (targetObject->attributes & kHated) &&
                             ( targetObject->attributes & kCanBeEvaded) &&
                             (
@@ -1032,10 +1032,10 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                                 }
                             }
                         }
-                        
+
                         anObject->directionGoal =
                             targetObject->direction;
-            
+
                         if ( theta > 0)
                         {
                             mAddAngle( anObject->directionGoal, kEvadeAngle)
@@ -1179,7 +1179,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                     dest.h = anObject->destinationLocation.h;
                     dest.v = anObject->destinationLocation.v;
                 }
-                
+
                 ThinkObjectGetCoordVector( anObject, &dest, &distance, &angle);
 
                 if ( anObject->attributes & kHasDirectionGoal)
@@ -1193,12 +1193,12 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                     theta = mAngleDifference( anObject->direction,
                             anObject->directionGoal);
                     theta = ABS( theta);
-                } else 
+                } else
                 {
                     anObject->direction = angle;
                     theta = 0;
                 }
-                
+
 /*              if ((anObject->attributes & kOnAutoPilot) &&
                     (( distance < kAutoPilotDistance) ||
                     ( distance < baseObject->arriveActionDistance)))
@@ -1209,7 +1209,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                 {
                     anObject->timeFromOrigin = 0;
                 }
-                
+
                 if ( distance > baseObject->arriveActionDistance)
                 {
                     if ( theta < kEvadeAngle)
@@ -1292,21 +1292,21 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
         ThinkObjectResolveTarget( anObject, &dest, &distance, &targetObject);
 //      if (( dest.h == 0xffffffff) || ( dest.v == 0xffffffff) || ( distance == 0xffffffff)) DebugStr("\pResolve 2");
 
-        if (( anObject->attributes & kCanEngage) && 
+        if (( anObject->attributes & kCanEngage) &&
             ( distance < anObject->engageRange) &&
             (anObject->targetObjectNumber != kNoShip))
-        {           
+        {
             // if target is in our weapon range & we hate the object
             if (( distance < anObject->longestWeaponRange) &&
                 ( targetObject->attributes & kHated))
             {
                 // find "best" weapon (how do we want to aim?)
                 // difference = closest range
-                
+
                 difference = anObject->longestWeaponRange;
-                
+
                 bestWeapon = nil;
-                
+
                 if ( anObject->beamType != kNoWeapon)
                 {
                     bestWeapon = weaponObject = anObject->beamBase;
@@ -1321,7 +1321,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                         difference = weaponObject->frame.weapon.range;
                     }
                 }
-                
+
                 if ( anObject->pulseType != kNoWeapon)
                 {
                     weaponObject = anObject->pulseBase;
@@ -1335,7 +1335,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                         difference = weaponObject->frame.weapon.range;
                     }
                 }
-                
+
                 if ( anObject->specialType != kNoWeapon)
                 {
                     weaponObject = anObject->specialBase;
@@ -1349,12 +1349,12 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                         difference = weaponObject->frame.weapon.range;
                     }
                 }
-                
+
                 // offset dest for anticipated position -- overkill?
-                
+
                 if ( bestWeapon != nil)
                 {
-                
+
                     dcalc = lsqrt( distance);
 
                     calcv = targetObject->velocity.h -
@@ -1372,7 +1372,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                     dest.v -= difference;
                 }
             } // target is not in our weapon range (or we don't hate it)
-            
+
             // this is human controlled--if it's too far away, tough nougies
             // find angle between me & dest
             #ifdef powerc
@@ -1383,13 +1383,13 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                         (int)(anObject->location.v - dest.v));
             #endif
             angle = AngleFromSlope( slope);
-            
+
             if ( dest.h < anObject->location.h)
                 mAddAngle( angle, 180)
             else if (( anObject->location.h == dest.h) &&
                     ( dest.v < anObject->location.v))
                 angle = 0;
-            
+
             if ( targetObject->cloakState > 250)
             {
                 angle -= 45;
@@ -1398,7 +1398,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
             }
             anObject->targetAngle = angle;
         }
-    } 
+    }
 
     return( keysDown);
 }
@@ -1409,7 +1409,7 @@ unsigned long ThinkObjectWarpInPresence( spaceObjectType *anObject)
     long            longscrap, difference;
     spaceObjectType *targetObject;  // just for scrap
     fixedPointType  newVel;
-    
+
     if (( !(anObject->attributes & kRemoteOrHuman)) ||
             ( anObject->attributes & kOnAutoPilot))
     {
@@ -1441,7 +1441,7 @@ unsigned long ThinkObjectWarpInPresence( spaceObjectType *anObject)
         mPlayDistanceSound( difference, longscrap, anObject, kWarpFour, kMediumPersistence, kPrioritySound, distance, dcalc, targetObject)
         anObject->presenceData |= 0x80000000;
     }
-    
+
     if ( (anObject->presenceData & 0x000000ff) > 100)
     {
         anObject->energy -= anObject->baseType->energy >> kWarpInEnergyFactor;
@@ -1477,7 +1477,7 @@ unsigned long ThinkObjectWarpingPresence( spaceObjectType *anObject)
     coordPointType  dest;
     spaceObjectType *targetObject = nil;
     short           angle, theta;
-    
+
     if ( anObject->energy <= 0)
     {
         anObject->presenceState = kWarpOutPresence;
@@ -1487,20 +1487,20 @@ unsigned long ThinkObjectWarpingPresence( spaceObjectType *anObject)
     {
         ThinkObjectResolveDestination( anObject, &dest, &targetObject);
         ThinkObjectGetCoordVector( anObject, &dest, &distance, &angle);
-            
-            
+
+
         if ( anObject->attributes & kHasDirectionGoal)
         {
             theta = mAngleDifference( angle, anObject->directionGoal);
             if ( ABS( theta) > kDirectionError)
             {
-                anObject->directionGoal = angle;                
+                anObject->directionGoal = angle;
             }
-        } else 
+        } else
         {
             anObject->direction = angle;
         }
-        
+
         if ( distance < anObject->baseType->warpOutDistance)
         {
             if ( targetObject != nil)
@@ -1524,7 +1524,7 @@ unsigned long ThinkObjectWarpOutPresence( spaceObjectType *anObject, baseObjectT
     unsigned long   keysDown = anObject->keysDown & kSpecialKeyMask;
     smallFixedType  calcv, fdist;
     fixedPointType  newVel;
-    
+
     anObject->presenceData -= mLongToFixed(kWarpAcceleration);
     if ( anObject->presenceData < anObject->maxVelocity)
     {
@@ -1534,13 +1534,13 @@ unsigned long ThinkObjectWarpOutPresence( spaceObjectType *anObject, baseObjectT
         anObject->presenceState = kNormalPresence;
         anObject->attributes |=
             baseObject->attributes & kOccupiesSpace;
-        
+
         // warp out
-        
+
         mGetRotPoint( fdist, calcv, anObject->direction);
-        
-        // multiply by max velocity 
-        
+
+        // multiply by max velocity
+
         fdist = mMultiplyFixed( anObject->maxVelocity, fdist);
         calcv = mMultiplyFixed( anObject->maxVelocity, calcv);
         anObject->velocity.h = fdist;
@@ -1566,7 +1566,7 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
 
     keysDown = 0;
 
-    // we repeat an object's normal action for having a destination 
+    // we repeat an object's normal action for having a destination
 
     if (( anObject->attributes & kIsDestination) ||
         (( anObject->destinationObject == kNoDestinationObject) &&
@@ -1657,7 +1657,7 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
             dest.h = anObject->location.h;
             dest.v = anObject->location.v;
         }
-        
+
         difference = ABS( (long)dest.h - (long)anObject->location.h);
         dcalc = difference;
         difference =  ABS( (long)dest.v - (long)anObject->location.v);
@@ -1705,12 +1705,12 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
                         (int)(anObject->location.v - dest.v));
             #endif
             angle = AngleFromSlope( slope);
-            
+
             if ( dest.h < anObject->location.h)
                 mAddAngle( angle, 180)
             else if (( anObject->location.h == dest.h) &&
                     ( dest.v < anObject->location.v))
-                angle = 0;  
+                angle = 0;
         }
 
         if ( anObject->attributes & kHasDirectionGoal)
@@ -1719,13 +1719,13 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
             if ( ABS( theta) > kDirectionError)
             {
                 anObject->directionGoal = angle;
-                
+
             }
-            
+
             theta = mAngleDifference( anObject->direction,
                     anObject->directionGoal);
             theta = ABS( theta);
-        } else 
+        } else
         {
             anObject->direction = angle;
             theta = 0;
@@ -1744,7 +1744,7 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
         keysDown |= kDownKey;
         anObject->presenceData =
             (
-                ( 
+                (
                     anObject->presenceData &
                         kPresenceDataLoWordMask
                 ) -
@@ -1752,7 +1752,7 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
                     (
                         anObject->presenceData &
                             kPresenceDataHiWordMask
-                    ) 
+                    )
                     >> kPresenceDataHiWordShift
                 )
             ) |
@@ -1760,7 +1760,7 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
                 anObject->presenceData & kPresenceDataHiWordMask
             );
     }
-    
+
     if ( (anObject->presenceData & kPresenceDataLoWordMask) <= 0)
     {
         ExecuteObjectActions( anObject->baseType->expireAction,
@@ -1768,7 +1768,7 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
                              & kDestroyActionNotMask,
                             anObject, targetObject, nil, true);
         anObject->active = kObjectToBeFreed;
-        
+
     } else if ( anObject->sprite != nil)
         anObject->sprite->scale = (anObject->presenceData &
             kPresenceDataLoWordMask);
@@ -1783,7 +1783,7 @@ void ThinkObjectGetCoordVector( spaceObjectType *anObject, coordPointType *dest,
     unsigned long   dcalc;
     short           shortx, shorty;
     Fixed           slope;
-    
+
     difference = ABS( (long)dest->h - (long)anObject->location.h);
     dcalc = difference;
     difference =  ABS( (long)dest->v - (long)anObject->location.v);
@@ -1793,7 +1793,7 @@ void ThinkObjectGetCoordVector( spaceObjectType *anObject, coordPointType *dest,
         *angle = anObject->direction;
         return;
     }
-    
+
     if (( dcalc > kMaximumAngleDistance) ||
         ( *distance > kMaximumAngleDistance))
     {
@@ -1837,12 +1837,12 @@ void ThinkObjectGetCoordVector( spaceObjectType *anObject, coordPointType *dest,
                     (int)(anObject->location.v - dest->v));
         #endif
         *angle = AngleFromSlope( slope);
-        
+
         if ( dest->h < anObject->location.h)
             mAddAngle( *angle, 180)
         else if (( anObject->location.h == dest->h) &&
                 ( dest->v < anObject->location.v))
-            *angle = 0; 
+            *angle = 0;
     }
 }
 
@@ -1850,7 +1850,7 @@ void ThinkObjectGetCoordDistance( spaceObjectType *anObject, coordPointType *des
 {
     long            difference;
     unsigned long   dcalc;
-    
+
     difference = ABS( (long)dest->h - (long)anObject->location.h);
     dcalc = difference;
     difference =  ABS( (long)dest->v - (long)anObject->location.v);
@@ -1859,7 +1859,7 @@ void ThinkObjectGetCoordDistance( spaceObjectType *anObject, coordPointType *des
     {
         return;
     }
-    
+
     if (( dcalc > kMaximumAngleDistance) ||
         ( *distance > kMaximumAngleDistance))
     {
@@ -1881,7 +1881,7 @@ void ThinkObjectGetCoordDistance( spaceObjectType *anObject, coordPointType *des
 void ThinkObjectResolveDestination( spaceObjectType *anObject, coordPointType *dest, spaceObjectType **targetObject)
 {
     *targetObject = nil;
-    
+
     if (( anObject->attributes & kIsDestination) ||
         (( anObject->destinationObject == kNoDestinationObject) &&
         ( anObject->destinationLocation.h == kNoDestinationCoord)))
@@ -1983,10 +1983,10 @@ Boolean ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *des
     unsigned long *distance, spaceObjectType **targetObject)
 {
     spaceObjectType *closestObject;
-    
+
     dest->h = dest->v = 0xffffffff;
     *distance = 0xffffffff;
-    
+
     if ( anObject->closestObject != kNoShip)
     {
         closestObject = (spaceObjectType *)*gSpaceObjectData +
@@ -2018,20 +2018,20 @@ Boolean ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *des
             return ( false);
         }
     }
-    
+
     // if we have a target of any kind (we must by now)
     if ( anObject->targetObjectNumber != kNoShip)
     {
         // make sure we're still talking about the same object
         *targetObject = (spaceObjectType *)*gSpaceObjectData +
             anObject->targetObjectNumber;
-        
+
         // if the object is wrong or smells at all funny, then
         if  (
                 (
                     !((*targetObject)->active)
-                ) 
-            || 
+                )
+            ||
                 ( (*targetObject)->id != anObject->targetObjectID)
             ||
                 (
@@ -2044,7 +2044,7 @@ Boolean ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *des
                     (
                         !((*targetObject)->attributes & kPotentialTarget)
                     )
-                && 
+                &&
                     (
                         !((*targetObject)->attributes & kHated)
                     )
@@ -2105,7 +2105,7 @@ Boolean ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *des
 
         dest->h = (*targetObject)->location.h;
         dest->v = (*targetObject)->location.v;
-        
+
         // if it's not the closest object & we have a closest object
         if ((anObject->closestObject != kNoShip) &&
             ( anObject->targetObjectNumber != anObject->closestObject)
@@ -2114,7 +2114,7 @@ Boolean ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *des
         {
             // then calculate the distance
             ThinkObjectGetCoordDistance( anObject, dest, distance);
-            
+
             if (( ( *distance >> 1L) > anObject->closestDistance) ||
                 ( ! (anObject->attributes & kCanEngage)) ||
                 ( anObject->attributes &
@@ -2162,9 +2162,9 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
     long            difference;
     short           angle, beta;
     Fixed           slope;
-    
+
     *theta = 0xffff;
-    
+
     dest.h = targetObject->location.h;
     dest.v = targetObject->location.v;
     if ( targetObject->cloakState > 250)
@@ -2176,7 +2176,7 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
         dest.v += RandomSeeded( 140, &anObject->randomSeed,
             'nps1', anObject->whichBaseObject);
     }
-    
+
     // if target is in our weapon range & we hate the object
     if (    ( distance < anObject->longestWeaponRange) &&
             ( targetObject->attributes & kCanBeEngaged) &&
@@ -2185,14 +2185,14 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
     {
         // find "best" weapon (how do we want to aim?)
         // difference = closest range
-        
+
         if ( anObject->attributes & kCanAcceptDestination)
         {
             anObject->timeFromOrigin += timePass;
         }
 
         difference = anObject->longestWeaponRange;
-        
+
         if ( anObject->beamType != kNoWeapon)
         {
             bestWeapon = weaponObject = anObject->beamBase;
@@ -2207,7 +2207,7 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
                 difference = weaponObject->frame.weapon.range;
             }
         }
-        
+
         if ( anObject->pulseType != kNoWeapon)
         {
             weaponObject = anObject->pulseBase;
@@ -2221,7 +2221,7 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
                 difference = weaponObject->frame.weapon.range;
             }
         }
-        
+
         if ( anObject->specialType != kNoWeapon)
         {
             weaponObject = anObject->specialBase;
@@ -2238,7 +2238,7 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
 //      dest.h = targetObject->location.h;
 //      dest.v = targetObject->location.v;
     } // target is not in our weapon range (or we don't hate it)
-    
+
     // We don't need to worry if it is very far away, since it must be within farthest weapon range
     // find angle between me & dest
     #ifdef powerc
@@ -2249,13 +2249,13 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
                 (int)(anObject->location.v - dest.v));
     #endif
     angle = AngleFromSlope( slope);
-    
+
     if ( dest.h < anObject->location.h)
         mAddAngle( angle, 180)
     else if (( anObject->location.h == dest.h) &&
             ( dest.v < anObject->location.v))
         angle = 0;
-    
+
     if ( targetObject->cloakState > 250)
     {
         angle -= 45;
@@ -2270,9 +2270,9 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
             ( !(anObject->attributes & kIsGuided)))
         {
             anObject->directionGoal = angle;
-        
+
         }
-        
+
         beta = targetObject->direction;
         mAddAngle( beta, ROT_180)
         *theta = mAngleDifference( beta, angle);
@@ -2289,7 +2289,7 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
         // fire away
         beta = anObject->direction;
         beta = mAngleDifference( beta, angle);
-        
+
         if ( anObject->pulseType != kNoWeapon)
         {
             weaponObject = anObject->pulseBase;
@@ -2337,7 +2337,7 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
 {
     long            count;
     Str255  s;
-    
+
 /*  DebugFileAppendString( "\pHT\t");
     DebugFileAppendLong( anObject->entryNumber);
     DebugFileAppendString( "\p\t");
@@ -2361,9 +2361,9 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
             anObject->hitState = ( anObject->health * kHitStateMax) / anObject->baseType->health;
             anObject->hitState += 16;
         }
-        
+
         if ( anObject->cloakState > 0) anObject->cloakState = 1;
-        
+
         if ( anObject->health < 0)
         {
 //          if ( anObject->attributes & (kIsPlayerShip | kRemoteOrHuman))
@@ -2383,7 +2383,7 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
                 AppendStringToMessage(( anyCharType *)s);
                 AppendStringToMessage(( anyCharType *)"\p remaining. ");
                 EndMessage();
-                
+
 //              if ( anObject->attributes & (kIsPlayerShip | kIsRemote | kIsHumanControlled))
 //              {
 //                  CreateFloatingBodyOfPlayer( anObject);
@@ -2410,15 +2410,15 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
                     */
 //              }
             }
-        }       
-    
+        }
+
         if ( sObject->active == kObjectInUse)
         {
             ExecuteObjectActions( sObject->baseType->collideAction,
                                 sObject->baseType->collideActionNum,
                                 sObject, anObject, nil, true);
         }
-    
+
         if ( anObject->owner == gAresGlobal->gPlayerAdmiralNumber)
         {
             if ((anObject->attributes & kIsHumanControlled) && ( sObject->baseType->damage > 0))
@@ -2431,7 +2431,7 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
     }
 }
 
- 
+
 /* GetManualSelectObject:
     For the human player selecting a ship.  If friend or foe = 0, will get any ship.  If it's
     positive, will get only friendly ships.  If it's negative, only unfriendly ships.
@@ -2440,7 +2440,7 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
 long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusiveAttributes,
                             unsigned long anyOneAttribute, unsigned long exclusiveAttributes,
                             const UnsignedWide *fartherThan, long currentShipNum, short friendOrFoe)
-                            
+
 {
     spaceObjectType *anObject;
     long            whichShip = 0, resultShip = -1, closestShip = -1, startShip = -1, hdif, vdif;
@@ -2470,7 +2470,7 @@ stop trying when we've made a full circle (we're back on currentShipNum)
             anObject = gRootObject;
             startShip = whichShip = gRootObjectNumber;
         }
-        
+
     } else
     {
         anObject = gRootObject;
@@ -2507,7 +2507,7 @@ stop trying when we've made a full circle (we're back on currentShipNum)
                 thisWideDistance.hi = 0;
                 thisWideDistance.lo = distance * distance + dcalc * dcalc;
             }
-            
+
             thisDistanceState = 0;
 /*          WriteDebugDivider();
             WriteDebugLong( anObject->entryNumber);
@@ -2521,14 +2521,14 @@ stop trying when we've made a full circle (we're back on currentShipNum)
 
             if ( (( mWideIsGreaterThan( thisWideDistance, *fartherThan)) &&
                 ( mWideIsGreaterThan( wideFartherDistance, thisWideDistance))) ||
-                
+
                 (( mWideIsGreaterThan( wideFartherDistance, thisWideDistance)) &&
                 ( mWideIsGreaterThanOrEqual( thisWideDistance, *fartherThan))) &&
                 ( whichShip > currentShipNum))
             {
                 thisDistanceState |= kFartherThanFarther;
             }
-            
+
             if ( thisDistanceState)
             {
 //              Debugger();
@@ -2548,15 +2548,15 @@ stop trying when we've made a full circle (we're back on currentShipNum)
                             (short)vdif);
                 #endif
                 angle = AngleFromSlope( slope);
-                
+
                 if ( hdif > 0)
                     mAddAngle( angle, 180)
                 else if (( hdif == 0) &&
                         ( vdif > 0))
-                    angle = 0;      
-                
+                    angle = 0;
+
                 angle = mAngleDifference( angle, sourceObject->direction);
-            
+
                 if ( ABS( angle) < 30)
                 {
                     if ( thisDistanceState & kCloserThanClosest)
@@ -2564,7 +2564,7 @@ stop trying when we've made a full circle (we're back on currentShipNum)
                         closestShip = whichShip;
                         wideClosestDistance = thisWideDistance;
                     }
-                    
+
                     if ( thisDistanceState & kFartherThanFarther)
                     {
                         resultShip = whichShip;
@@ -2572,14 +2572,14 @@ stop trying when we've made a full circle (we're back on currentShipNum)
                     }
                 }
             }
-            
+
 /*          difference = anObject->location.h - sourceObject->location.h;
             difference = ABS( difference);
             if ( difference < kMaximumAngleDistance)
             {
                 udif = difference;
                 udif *= udif;
-                
+
                 difference = anObject->location.v - sourceObject->location.v;
                 difference = ABS( difference);
                 if ( difference < kMaximumAngleDistance)
@@ -2587,7 +2587,7 @@ stop trying when we've made a full circle (we're back on currentShipNum)
                     distance = difference;
                     distance *= distance;
                     distance += udif;
-                    
+
                     if (( distance < closestDistance) ||
                         (( distance < fartherDistance) && ( distance > fartherThan)) ||
                         (( distance < fartherDistance) && ( distance >= fartherThan) && ( whichShip > currentShipNum)))
@@ -2600,13 +2600,13 @@ stop trying when we've made a full circle (we're back on currentShipNum)
                                     (int)(sourceObject->location.v - anObject->location.v));
                         #endif
                         angle = AngleFromSlope( slope);
-                        
+
                         if ( anObject->location.h < sourceObject->location.h)
                             mAddAngle( angle, 180)
                         else if (( anObject->location.h == sourceObject->location.h) &&
                                 ( anObject->location.v < sourceObject->location.v))
                             angle = 0;
-                        
+
 //                      hackcheck = angle;
                         angle = mAngleDifference( angle, sourceObject->direction);
                         if ( ABS( angle) < 30)
@@ -2637,23 +2637,23 @@ stop trying when we've made a full circle (we're back on currentShipNum)
         }
     } while ( whichShip != startShip);
     if ((( resultShip == -1) && ( closestShip != -1)) || ( resultShip == currentShipNum)) resultShip = closestShip;
-    
+
     return ( resultShip);
 }
 
 long GetSpritePointSelectObject( Rect *bounds, spaceObjectType *sourceObject, unsigned long inclusiveAttributes,
                             unsigned long anyOneAttribute, unsigned long exclusiveAttributes,
                             long currentShipNum, short friendOrFoe)
-                            
+
 {
     spaceObjectType *anObject;
     long            whichShip = 0, resultShip = -1, closestShip = -1;
     unsigned long   closestDistance = kMaximumRelevantDistanceSquared << 1,
                     fartherDistance = kMaximumRelevantDistanceSquared << 1,
                     myOwnerFlag = 1 << sourceObject->owner;
-    
+
     anObject = (spaceObjectType *)*gSpaceObjectData;
-    
+
     for ( whichShip = 0; whichShip < kMaxSpaceObject; whichShip++)
     {
         if (( anObject->active) && ( anObject->sprite != nil) &&
@@ -2688,6 +2688,6 @@ long GetSpritePointSelectObject( Rect *bounds, spaceObjectType *sourceObject, un
         anObject++;
     }
     if ((( resultShip == -1) && ( closestShip != -1)) || ( resultShip == currentShipNum)) resultShip = closestShip;
-    
+
     return ( resultShip);
 }

@@ -32,7 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /*
     MAX VALUE FOR SMALLFIXEDTYPE:
-    
+
     8,388,607       normal
     4,194,303       addition
     2,896           multiplication -- see below

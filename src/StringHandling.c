@@ -48,7 +48,7 @@ void CopyPString( unsigned char *to, unsigned char *from)
 
 {
     int     i, l;
-    
+
     *to = *from;
     l = *to;
     to++;
@@ -62,7 +62,7 @@ Boolean ComparePString( unsigned char *s1, unsigned char *s2)
 {
     int     len;
     unsigned char   c1, c2;
-    
+
     if ( *s1 == *s2)
     {
         len = *s1;
@@ -91,7 +91,7 @@ void ConcatenatePString( unsigned char *dString, unsigned char *sString)
 {
     unsigned char   *dc, *sc;
     int     i;
-    
+
     dc = dString + (long)*dString + 1L;
     sc = sString + 1L;
     for ( i = 0; (i < *sString) && ( *dString < 255); i++)
@@ -107,7 +107,7 @@ void PStringFromCString( unsigned char *pString, unsigned char *cString)
 
 {
     unsigned char   *len;
-    
+
     len = pString;
     pString++;
     *len = 0;
@@ -125,7 +125,7 @@ void ReplacePStringChar( StringPtr s, unsigned char to, unsigned char from)
 {
     int     l;
     unsigned char   *c;
-    
+
     c = (unsigned char *)s;
     l = *c;
     c++;
@@ -142,7 +142,7 @@ void FilterAlphaPString( StringPtr s)
 {
     int     l;
     unsigned char   *c;
-    
+
     c = (unsigned char *)s;
     l = *c;
     c++;
@@ -160,7 +160,7 @@ void ChopAlphaPString( StringPtr s)
 {
     short   len, newlen = 0;
     unsigned char   *c;
-    
+
     c = (unsigned char *)s;
     len = *c;
     c++;
@@ -178,7 +178,7 @@ void UpperCasePString( StringPtr s)
 {
     int     l;
     unsigned char   *c;
-    
+
     c = (unsigned char *)s;
     l = *c;
     c++;
@@ -196,7 +196,7 @@ void DrawCString( unsigned char *cString)
 
 {
     Str255  pString;
-    
+
     PStringFromCString( (unsigned char *)pString, cString);
     DrawString( (StringPtr)pString);
 }

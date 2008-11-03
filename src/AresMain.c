@@ -205,7 +205,7 @@ extern netStatusType            gNetworkStatus;
 extern scenarioType             *gThisScenario;
 //extern Boolean                    EMERGENCYHACKTEST;
 extern short                    gSpriteFileRefID, gInterfaceFileRefID;
-                    
+
 aresGlobalType  *gAresGlobal = nil;
 
 CWindowPtr      gTheWindow = nil;//, gAresGlobal->gBackWindow = nil;
@@ -220,7 +220,7 @@ long            gLastTick, /*gAresGlobal->gGameOver = 0,*/
                 gPlayScreenWidth = 480,
                 gPlayScreenHeight = 480;
 Boolean         hackWarn = true;
-                
+
 //#ifdef kNonPlayableDemo
 //long          gAresGlobal->gForceDemoLevel = 1;
 //#endif
@@ -263,7 +263,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 
 //  Debugger();
     ToolBoxInit();
-    
+
     gAresGlobal = (aresGlobalType *)NewPtr( sizeof( aresGlobalType));
     if ( gAresGlobal == nil) ExitToShell();
     for ( error = 0; error < kMaxPlayerNum; error++)
@@ -372,9 +372,9 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
     gAresGlobal->otherPlayerScenarioFileURL[0] = 0;
     gAresGlobal->otherPlayerScenarioFileVersion = 0;
     gAresGlobal->otherPlayerScenarioFileCheckSum = 0;
-    
+
     gAresGlobal->internetConfigPresent = false;
-    
+
     gAresGlobal->hotKeyDownTime = -1;
 /*  error = ICStart( &gAresGlobal->internetConfig, 'ar12');
     if ( error == noErr)
@@ -385,18 +385,18 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
             gAresGlobal->internetConfigPresent = true;
         }
     }
-*/  
+*/
     DebugWindowInit ( (WindowPtr)gTheWindow);
-    
+
     BringDebugToFront();
 
     if ( !EnvironmentCheck()) ExitToShell();
     if ( AAE_Init() != noErr) ExitToShell();
     AGR_Init();
-    
+
     MenuBarInit();
     gAresGlobal->gMainResRefNum = CurResFile();
-    
+
     HandleHandlerInit();
 
     gInterfaceFileRefID = ARF_OpenResFile( kInterfaceResFileName);
@@ -430,17 +430,17 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
     {
         ShowErrorAny( eExitToShellErr, kErrorStrID, nil, nil, nil, nil, kSpritesFileError, kDataFolderError, -1, -1, __FILE__, 8);
     }
-    
+
 //  AresNetworkInit();
     //error = InitPreferences();
-    
+
 //  gRandomSeed = 61769;
 //  qd.randSeed = gRandomSeed;
 
     error = InitPreferences();
     if ( error == kNoError)
     {
-    
+
 #if NETSPROCKET_AVAILABLE
         if ( InitNetworking() == kNoError)
         {
@@ -453,7 +453,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 
         GetDateTime( (unsigned long *)&qd.randSeed);
         GetDateTime( (unsigned long *)&gRandomSeed);
-    
+
 
 //          WriteDebugLine((char *)"\p>Net");
 
@@ -462,13 +462,13 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
         {
             ShowErrorOfTypeOccurred( eQuitErr, kErrorStrID, 77, error, __FILE__, 0);
         }
-        
+
         if ( OptionKey())
         {
             gAresGlobal->gOptions &= ~(kOptionScreenMedium | kOptionScreenLarge | kOptionScreenSmall);
             gAresGlobal->gOptions |= kOptionScreenSmall;//kOptionScreenLarge;
         }
-        
+
         if ( gAresGlobal->gOptions & kOptionScreenMedium)
         {
             WORLD_WIDTH = kMediumScreenWidth;
@@ -500,8 +500,8 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
             gPlayScreenWidth = kSmallScreenWidth - (kLeftPanelWidth + kRightPanelWidth);
             gPlayScreenHeight = kSmallScreenHeight;
         }
-        
-        // returns true if device of desired size available 
+
+        // returns true if device of desired size available
 //      Debugger();
 //      error = ChooseTheDevice( 8, TRUE);
 
@@ -523,8 +523,8 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
             WORLD_WIDTH = tRect.right - tRect.left;
             WORLD_HEIGHT = tRect.bottom - tRect.top;
         }
-        
-            
+
+
         freeMemory = CompactMem( maxSize) - kBaseMemorySize;
         freeMemory /= 3;
         if ( freeMemory < (WORLD_WIDTH * WORLD_HEIGHT))
@@ -564,25 +564,25 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
             CLIP_BOTTOM = WORLD_HEIGHT;
             gPlayScreenWidth = WORLD_WIDTH - (kLeftPanelWidth + kRightPanelWidth);
             gPlayScreenHeight = WORLD_HEIGHT;
-        
+
         {
             short   oldResFile = CurResFile();
-            
+
             UseResFile( gAresGlobal->gMainResRefNum);
-            
+
             theClut = GetCTable( 256);
-            
+
             UseResFile( oldResFile);
         }
-        
+
         if ( theClut == nil)
         {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, RESOURCE_ERROR, -1, -1, -1, __FILE__, 500);
         }
-        
+
         thePalette = NewPalette( 256, theClut, pmExplicit + pmTolerant, 0);
         SetPalette( (WindowPtr)-1, thePalette, false);
-        
+
 //      theDevice = GetMainDevice();
 //      error = true;
 //      SetColorDepth( theDevice, 8);
@@ -607,26 +607,26 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
             GetDeviceRect( theDevice, &tRect);
             tpoint.h = tpoint.v = 0;
             ShieldCursor( &tRect, tpoint);
-            
+
             if ( theDevice == GetMainDevice())
             {
-            
-                // FROM ADG:TOOL CHEST 2/95: HIDEMENUBAR CODE SNIPPET       
+
+                // FROM ADG:TOOL CHEST 2/95: HIDEMENUBAR CODE SNIPPET
                 /*************************************************/
                 /* Set the global MBarHeight to 0 to prevent any */
                 /*  other apps from writing to the menu bar.     */
                 /*************************************************/
-                
+
 /*              MacSetRect( &mBarRect, tRect.left, tRect.top, tRect.right, tRect.top + oldMBarHeight);
-                
+
                 #ifdef kHideMenuBar
-                grayRgn = LMGetGrayRgn();               
+                grayRgn = LMGetGrayRgn();
                 LMSetMBarHeight( 0);
-                
+
                 // from TotMGPG p 127-129
 //              oldGrayRgn = NewRgn();
 //              CopyRgn( grayRgn, oldGrayRgn);
-                
+
                 mBarRgn = NewRgn();
                 if ( mBarRgn == nil)
                         ShowErrorRecover( OFFSCREEN_GRAPHICS_ERROR, kMainError, 2);
@@ -640,7 +640,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 
             InitHideMenubar();
             SetMBarState( false, theDevice);
-            
+
             InitSpriteCursor();
             CenterRectInDevice( theDevice, &windowRect);
 
@@ -649,19 +649,19 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                         (WindowPtr)-1, false, 701);
             SetWindowColorTable( (WindowPtr)gAresGlobal->gBackWindow);
             InitTransitions();
-            
+
             initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
             MacSetPort( (WindowPtr)gAresGlobal->gBackWindow);
             RGBBackColor( &initialFadeColor);
             BackPat( &qd.black);
-            
+
             initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
 //          initialFadeColor.green = 65000;
             RGBForeColor( &initialFadeColor);
             skipFading = AutoFadeTo( 30, &initialFadeColor, true);
-            
+
             MacShowCursor();
-            
+
             do
             {
                 Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
@@ -674,18 +674,18 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                         break;
                 }
             } while ( theEvent.what != nullEvent);
-            
+
 //          WaitForAnyEvent();
 
             HideCursor();
-            
+
             MacShowWindow( (WindowPtr)gAresGlobal->gBackWindow);
-            
+
             RGBBackColor( &initialFadeColor);
 //          BackPat( &qd.black);
 
 //          WaitForAnyEvent();
-                
+
             MacSetPort( (WindowPtr)gAresGlobal->gBackWindow);
 
             PaintRect( &(gAresGlobal->gBackWindow->portRect));
@@ -698,7 +698,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 
             ActivatePalette( (WindowPtr)gAresGlobal->gBackWindow);
             SetWindowPaletteFromClut( gAresGlobal->gBackWindow, theClut);
-            
+
             ResetTransitions();
 
 //          WaitForAnyEvent();
@@ -707,32 +707,32 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 
 
             skipFading = AutoFadeTo( 1, &initialFadeColor, true);
-            
+
             gTheWindow = (CWindowPtr)NewCWindow (nil, &windowRect, "\p", TRUE, plainDBox, //documentProc,//
                         (WindowPtr)-1, true, 700);
-            
+
             SetWindowColorTable( (WindowPtr)gTheWindow);
             initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
             MacSetPort( (WindowPtr)gTheWindow);
             RGBBackColor( &initialFadeColor);
 //          BackPat( &qd.black);
-            
+
             MacShowWindow ( (WindowPtr)gTheWindow);
             RGBBackColor( &initialFadeColor);
 //          BackPat( &qd.black);
-                
+
 //          WriteDebugLine((char *)"\p>Debug Win");
-            
-            MacSetPort ( (WindowPtr)gTheWindow);        
+
+            MacSetPort ( (WindowPtr)gTheWindow);
             MacSetRect( &windowRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
             MacFillRect( &tRect, (Pattern *)&qd.black);
-            
+
             BringDebugToFront();
             skipFading = AutoFadeFrom(1, true);
             SetWindowPaletteFromClut( gTheWindow, theClut);
-            
+
             ShieldCursorInDevice();
-            
+
             do
             {
                 Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
@@ -754,9 +754,9 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                         break;
                 }
             } while ( theEvent.what != nullEvent);
-            MacSetPort ( (WindowPtr)gTheWindow);        
+            MacSetPort ( (WindowPtr)gTheWindow);
             MacShowCursor();
-            
+
             error = CreateOffscreenWorld( &(gTheWindow->portRect), theClut);
             if ( error == kNoError)
             {
@@ -769,20 +769,20 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                 WriteDebugLong( gNatePortLeft);
                 WriteDebugLine((char *)"\pPortRect");
                 WriteDebugLong( gTheWindow->portRect.left);
-                
+
                 error = MusicInit();
                     WriteDebugLine((char *)"\p>Music");
                 if ( OpenSoundFile() == kNoError)
                 {
                     mWriteDebugString("\p>Sound File");
                     InitMoviePlayer();
-            
+
                     WriteDebugLine((char *)"\p>Movie");
                     error = RotationInit();
                     if ( error == kNoError)
                     {
                         WriteDebugLine((char *)"\p>Rot");
-                        
+
                         NormalizeColors();
                         DrawInRealWorld();
 //                      AutoFadeFrom( 30);
@@ -798,7 +798,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                             {
                                 gAresGlobal->externalFileSpec =
                                     gAresGlobal->originalExternalFileSpec;
-                                
+
                                 EF_OpenExternalFile();
                             }
 
@@ -822,8 +822,8 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 
                             if ( !skipFading) PlayMovieByName("\p:Ares Data Folder:Title", (WindowPtr)gTheWindow,
                                 false, theDevice);
-                            
-//                          AutoFadeTo( 1, &initialFadeColor, FALSE);   
+
+//                          AutoFadeTo( 1, &initialFadeColor, FALSE);
 //                          DrawTitleScreen();
 //                          AutoFadeFrom( 90, FALSE);
                             MacSetPort( (WindowPtr)gTheWindow);
@@ -831,16 +831,16 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                             skipFading = StartCustomPictFade( 20, 20, 502, 2001,
                                 (WindowPtr)gTheWindow, &tPalette, &originalPalette,
                                 &tClut, skipFading);
-                            
+
 
 //                          MacShowCursor();
-                            
+
 /*                          ColorTest();
                             MacSetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
                             CopyOffWorldToRealWorld( (WindowPtr)gTheWindow, &tRect);
-                            
+
                             WaitForAnyEvent();
-*/                          
+*/
 
             do
             {
@@ -871,22 +871,22 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                             TextSize( 9);
                             TextFace( 0);
                             initialFadeColor.red = initialFadeColor.blue = initialFadeColor.green = 30000;
-                            
+
                             RGBForeColor( &initialFadeColor);
-                            
+
 /*                          MoveTo( ((WORLD_WIDTH - kSmallScreenWidth) / 2) +
                                 ( kSmallScreenWidth / 2) - (StringWidth( tempString) / 2),
                                 465 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
 */
                             MoveTo( ( WORLD_WIDTH - StringWidth( tempString) - 4),
                                 478 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
-            
+
 /*
                             MoveTo( 370 + ( WORLD_WIDTH - kSmallScreenWidth) / 2,
                                     450 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
 */
                             DrawOutlinedString( tempString, &initialFadeColor); //DrawString( tempString);
-                            
+
                             initialFadeColor.red = 65535;
                             initialFadeColor.blue = initialFadeColor.green = 0;
                             RGBForeColor( &initialFadeColor);
@@ -899,12 +899,12 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                                 DrawOutlinedString("\pPUBLIC COPY PROTECTION IS OFF. ",
                                     &initialFadeColor);
                             #endif
-                                
+
 //                          ColorTest();
                             MoveTo( 35 + ( WORLD_WIDTH - kSmallScreenWidth) / 2,
                                     50 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
                             initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 65535;
-                            
+
                             RGBForeColor( &initialFadeColor);
                             TextSize( 24);
                             TextFont( 0);
@@ -920,33 +920,33 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 //                          DrawEncodedString( "\p\x66\x46\x68\x34\x5B\x39\x17\x36\x3E\x16\x57\x59\x5E\x1C\x2F\x62\x0D"); // authorized user:
 //                          prefsData = (preferencesDataType *)*gAresGlobal->gPreferencesData;
 //                          DrawYeOldeEncodedString( (StringPtr)prefsData->serialNumber.name);
-                            
+
                             #ifdef kUsePublicCopyProtection
                                 GetIndString( tempString, 700, 3);  // "REGISTERED TO:"
                                 RT_GetLicenseeName( (unsigned char (*)[256])userName);
                                 ConcatenatePString( tempString, userName);
-                                
+
                                 ts1 = StringWidth( tempString);
 //                              ts1 += StringWidth( userName);
                                 MoveTo( (( WORLD_WIDTH) / 2) - (ts1 / 2),
                                             456 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
                                 DrawOutlinedString( tempString, &initialFadeColor);
 //                              DrawString( gAresGlobal->gUserName);
-                            #endif 
-                            
+                            #endif
+
                             if ( gAresGlobal->externalFileRefNum >= 0)
                             {
-                                ts1 = StringWidth( 
+                                ts1 = StringWidth(
                                     gAresGlobal->scenarioFileInfo.titleString);
-                                    
+
                                 MoveTo( (( WORLD_WIDTH) / 2) - (ts1 / 2),
                                             356 + ( WORLD_HEIGHT - kSmallScreenHeight)
                                                 / 2);
-                                DrawOutlinedString( 
+                                DrawOutlinedString(
                                         gAresGlobal->scenarioFileInfo.titleString,
                                         &initialFadeColor);
                             }
-                            
+
                             SetFontByString( "\pgeneva");
                             TextSize( 10);
                             TextFace( bold);
@@ -959,28 +959,28 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                             if ( error == kNoError)
                             {
                                 WriteDebugLine((char *)"\p>DText");
-                                
+
                                 error = ScreenLabelInit();
                                 if ( error == kNoError)
                                 {
                                     WriteDebugLine((char *)"\p>Label");
-                                                        
+
                                     error = InitMessageScreen();
                                     if ( error == kNoError)
                                     {
                                         WriteDebugLine((char *)"\p>Message");
-                                        
+
                                         error = InitScrollStars();
                                         if ( error == kNoError)
                                         {
                                             WriteDebugLine((char *)"\p>ScrollStar");
-                                            
+
                                             error = InstrumentInit();
                                             if ( error == kNoError)
                                             {
                                                 WriteDebugLine((char *)"\p>Instrument");
-                                                
-                                                
+
+
                                                 SpriteHandlingInit();
                                                 AresCheatInit();
                                                 error = ScenarioMakerInit();
@@ -997,7 +997,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                                                             if ( error == kNoError)
                                                             {
                                                                 WriteDebugLine((char *)"\p>Motion");
-                                                                
+
                                                                 error = AdmiralInit();
                                                                 if ( error == kNoError)
                                                                 {
@@ -1014,10 +1014,10 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                                                                             skipFading);
                                                                         MacShowCursor();    // one for the titlescreen
                                                                         MacShowCursor();    // one for the whole deal
-//                                                                      ColorTranslatorInit( theClut);          
+//                                                                      ColorTranslatorInit( theClut);
 
                                                                         gLastTick = TickCount();
-                                                                                            
+
 //          RandomInit();
                                                                         gAresGlobal->okToOpenFile = true;
                                                                         MainLoop();
@@ -1030,11 +1030,11 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                                                                     AdmiralCleanup();
                                                                     WriteDebugLine((char *)"\p<Admiral");
                                                                 }
-        
+
                                                                 MotionCleanup();
                                                                 WriteDebugLine((char *)"\p<Motion");
                                                             }
-                                                            
+
                                                             SoundFXCleanup();
                                                             WriteDebugLine((char *)"\p<Sound");
                                                         }
@@ -1083,11 +1083,11 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
             HandleHandlerCleanup();
 /*          WriteDebugLine((char *)"\p<WAITING>");
             WaitForAnyEvent();
-*/      
+*/
             CleanUpTheDevice( TRUE);
 
             DisposeCTable( theClut);
-            
+
             if ( theDevice == GetMainDevice())
             {
 /*              LMSetMBarHeight(oldMBarHeight);
@@ -1096,20 +1096,20 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 */
                 SetMBarState( true, theDevice);
             }
-            
+
             DebugWindowCleanup();
             DisposeWindow ( (WindowPtr)gTheWindow);
         } else
         {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, PIX_DEPTH_ERROR, -1, -1, -1, __FILE__, 1);
         }
-        
+
 #if NETSPROCKET_AVAILABLE
         DisposeNetworking();
 #endif NETSPROCKET_AVAILABLE
         RT_Close();
         PreferencesCleanup();
-    } 
+    }
 
     if ( gAresGlobal->internetConfigPresent)
     {
@@ -1126,7 +1126,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 //#pragma code68020 off
 void ToolBoxInit( void)
 
-{   
+{
     InitGraf(&qd.thePort);
     InitFonts();
     InitWindows();
@@ -1151,11 +1151,11 @@ void ToolBoxInit( void)
 void MenuBarInit( void)
 {
     Handle      myMenuBar;
-    
+
     myMenuBar = GetNewMBar( MENU_BAR_ID);
     SetMenuBar ( myMenuBar);
     gAppleMenu = GetMenuHandle (APPLE_MENU_ID);
-    
+
     AppendResMenu( gAppleMenu, 'DRVR');
     MacDrawMenuBar();
 }
@@ -1172,22 +1172,22 @@ void MainLoop (void)
     Str255                  resName, movieName;     // for GetResInfo, when we're jumping to a demo
     ResType                 resType;        // '' ''
     short                   resID;          // '' ''
-    
+
     if (!(gAresGlobal->gOptions & kOptionHaveSeenIntro))
     {
         DoScrollText( (WindowPtr)gTheWindow, 5600, 4, kTitleTextScrollWidth,
             kTitleFontNum, -1);
-        
+
         gAresGlobal->gOptions |= kOptionHaveSeenIntro;
         SaveOptionsPreferences();
     }
-    
+
     while ( !done)
     {
         WriteDebugLine((char *)"\p>MainScreen");
         MacSetPort( (WindowPtr)gTheWindow);
         mainResult = DoMainScreenInterface( &whichDemoLevel);
-        
+
         switch( mainResult)
         {
             case kMainQuit:
@@ -1197,7 +1197,7 @@ void MainLoop (void)
 //              DoScrollText( (WindowPtr)gTheWindow, 6501, 4, 540,
 //                  kTitleFontNum/*kComputerFontNum*/, -1);
 //              MakeAresGuide();
-                
+
                 fadeColor.red = fadeColor.green = fadeColor.blue = 0;
                 if ( gAresGlobal->gOptions & kOptionMusicIdle)
                 {
@@ -1208,37 +1208,37 @@ void MainLoop (void)
                 }
                 done = TRUE;
                 break;
-            
+
             case kMainTimeoutDemo:
-                
+
                 if ( Randomize( 4) == 2)
                 {
                     DoScrollText( (WindowPtr)gTheWindow, 5600, 4, kTitleTextScrollWidth,
                         kTitleFontNum, -1);
                 }
-        
+
                 // NO BREAK! FALL THROUGH TO case kMainDemo:
 
             case kMainDemo: // identical to main play, except we turn on autoplay bit
 //              AutoFadeTo( 60, &fadeColor, FALSE);
 //              ShowSuccessAnimation( (WindowPtr)gTheWindow);
-                
+
                 gAresGlobal->gOptions |= kOptionReplay;
 
                 // NO BREAK! FALL THROUGH TO case kMainPlay:
 
 //What you are about to do is totally unsupported. Nothing is final. This is a pre-release development build!
-                                  //This is a pre-release development build! This is not the final demo. Elements are subject to change.        
-            case kMainPlay:             
+                                  //This is a pre-release development build! This is not the final demo. Elements are subject to change.
+            case kMainPlay:
                 whichScenario = 0;
                 jumpLevel = FALSE;
-                
+
                 if ( (!Ambrosia_Is_Registered()) &&
                     (gAresGlobal->externalFileRefNum > 0))
                 {
                     ShowErrorAny( eContinueErr, kErrorStrID,  nil, nil, nil, nil,
                         79, -1, -1, -1, __FILE__, 2);
-                    
+
                     gAresGlobal->externalFileSpec.name[0] = 0;
                     EF_OpenExternalFile();
                 }
@@ -1249,18 +1249,18 @@ void MainLoop (void)
                     jumpLevel = TRUE;
                 }
 //              gAresGlobal->gOptions |= kOptionAutoPlay;
-                
+
                 if ( whichScenario >= 0)
                 {
                     #ifdef kCanRecordGame
                     if ( ControlKey())
                     {
                         unsigned long   *randomSeed = nil;
-                        
+
                         if ( gAresGlobal->gOptions & kOptionReplay)
                         {
                             short   refNum = CurResFile();
-                            
+
                             UseResFile( gAresGlobal->gMainResRefNum);
                             if ( gAresGlobal->gReplayData != nil)
                             {
@@ -1281,11 +1281,11 @@ void MainLoop (void)
                         }
                     }
                     #endif
-                    
+
                     if ( gAresGlobal->gOptions & kOptionReplay)
                     {
                         #ifdef kReplayNotAutoPlay
-                    
+
                         short   refNum = CurResFile();
                         unsigned long   *randomSeed = nil;
 
@@ -1293,9 +1293,9 @@ void MainLoop (void)
 
                         if (!(jumpLevel))
                         {
-                            
+
                             gAresGlobal->gReplayData = nil;
-                            
+
                             if ( whichDemoLevel >= 0)// get indexed demo level
                             {
                                 gAresGlobal->gReplayData =
@@ -1307,7 +1307,7 @@ void MainLoop (void)
                                     whichScenario = resID - kReplayResID;
                                 }
                             }
-                            
+
                             if ( gAresGlobal->gReplayData == nil)
                             {
                                 do
@@ -1330,18 +1330,18 @@ void MainLoop (void)
                             gRandomSeed = *randomSeed;
                         }
                         UseResFile( refNum);
-                        
+
                         #else
-                        
+
 //                      whichScenario = Randomize( kHackLevelMax);
                         whichScenario = 5;
-                        
+
                         #endif
-                    }       
+                    }
 
                     StopAndUnloadSong();
 
-                    
+
                     gameResult = kNoGame;
 
                     do
@@ -1354,7 +1354,7 @@ void MainLoop (void)
                                 PlayMovieByName( movieName, (WindowPtr)gTheWindow,
                                     true, theDevice);
                             }
-                        
+
                             if ( GetScenarioPrologueID( whichScenario) > 0)
                             {
                                 DoScrollText( (WindowPtr)gTheWindow,
@@ -1376,11 +1376,11 @@ void MainLoop (void)
 
                         RemoveAllSpaceObjects();
                         gAresGlobal->gGameOver = 0;
-                        
+
                         // mission briefing unfades screen
-                        
+
     //                  if ( gAresGlobal->gOptions & kOptionAutoPlay) whichScenario = 2;
-                        
+
                         if ( gAresGlobal->gOptions & kOptionMusicIdle)
                         {
                             LoadSong( 3000);
@@ -1392,7 +1392,7 @@ void MainLoop (void)
                         gameResult = kNoGame;
                         if ( !ConstructScenario( whichScenario))
                             gameResult = kQuitGame;
-                        
+
                         if ( gameResult != kQuitGame)
                         {
                             SetMBarState( false, theDevice);
@@ -1400,11 +1400,11 @@ void MainLoop (void)
                             {
                                 StopAndUnloadSong();
                             }
-                            
+
                             HideCursor();
                             DrawInstrumentPanel( (WindowPtr) gTheWindow);
                             MacShowCursor();
-                            
+
                             if ( gAresGlobal->gOptions & kOptionMusicPlay)
                             {
                                 LoadSong( gThisScenario->songID);
@@ -1449,7 +1449,7 @@ void MainLoop (void)
                                         gameLength, gThisScenario->parTime,
                                         GetAdmiralLoss( 0), gThisScenario->parLosses, GetAdmiralKill( 0), gThisScenario->parKills, 100);
                                 }
-                                
+
                                 fadeColor.red = fadeColor.green = fadeColor.blue = 0;
                                 if ( gAresGlobal->gOptions & kOptionMusicPlay)
                                 {
@@ -1459,13 +1459,13 @@ void MainLoop (void)
                                 {
                                     AutoFadeTo( 60, &fadeColor, FALSE);
                                 }
-                                
+
                                 if ( gameResult == kWinGame)
                                 {
 
                                     BlackTitleScreen();
                                     AutoFadeFrom( 1, FALSE);
-                                    
+
                                     t = 4002; // normal scrolltext song
                                     if (( gAresGlobal->gScenarioWinner & kScenarioWinnerNextMask) ==
                                         kScenarioWinnerNoNext)
@@ -1476,7 +1476,7 @@ void MainLoop (void)
                                     {
                                         gAresGlobal->gScenarioWinner = (gAresGlobal->gScenarioWinner
                                             & ~kScenarioWinnerNextMask) | kScenarioWinnerNoNext;
-                                        
+
                                         SaveStartingLevelPreferences( 10);
                                         DoScrollText( (WindowPtr)gTheWindow,
                                             6501,
@@ -1491,10 +1491,10 @@ void MainLoop (void)
                                     }
         /*                              DoMissionDebriefing( (WindowPtr) gTheWindow, gameLength, gThisScenario->parTime,
                                         GetAdmiralLoss( 0), gThisScenario->parLosses, GetAdmiralKill( 0), gThisScenario->parKills, 100);
-    */                              
-                                    
+    */
+
 // *********
-                                    
+
                                     PlayMovieByName("\p:Ares Data Folder:Next Level", (WindowPtr)gTheWindow,
                                         true, theDevice);
                                     if ( gAresGlobal->gOptions & kOptionMusicIdle)
@@ -1502,17 +1502,17 @@ void MainLoop (void)
                                         BlackTitleScreen();
                                         StopAndUnloadSong();
                                     }
-                                    
+
                                     if ( gAresGlobal->gOptions & kOptionReplay)
                                     {
                                         gRandomSeed = saveSeed;
                                     }
-                                    
+
                                     if ( gAresGlobal->gOptions & kOptionRecord)
                                     {
                                         Handle  tres;
                                         short   refNum = CurResFile();
-                                        
+
                                         UseResFile( gAresGlobal->gMainResRefNum);
                                         if ( gAresGlobal->gReplayData != nil)
                                         {
@@ -1536,14 +1536,14 @@ void MainLoop (void)
                                         DisposeHandle( gAresGlobal->gReplayData);
                                         gAresGlobal->gReplayData = nil;
                                     }
-                                    
+
     //                              whichScenario++;
                                     // whichScenario = GetNextScenarioChapter( whichScenario);
                                     if (( gAresGlobal->gScenarioWinner & kScenarioWinnerNextMask) ==
                                         kScenarioWinnerNoNext)
                                         whichScenario = -1;
                                     else
-                                    { 
+                                    {
                                         whichScenario = GetScenarioNumberFromChapterNumber(
                                             (gAresGlobal->gScenarioWinner &
                                             kScenarioWinnerNextMask) >>
@@ -1569,7 +1569,7 @@ void MainLoop (void)
                         if ( gAresGlobal->gOptions & kOptionMusicPlay) StopAndUnloadSong();
                     } while ( (gameResult != kQuitGame) &&
                         ( GetChapterNumberFromScenarioNumber( whichScenario) <= kHackLevelMax)
-                        && ( GetChapterNumberFromScenarioNumber( whichScenario) <= GetScenarioNumber()) 
+                        && ( GetChapterNumberFromScenarioNumber( whichScenario) <= GetScenarioNumber())
                         && ( whichScenario >= 0) &&
                         ( !( gAresGlobal->gOptions & (kOptionAutoPlay | kOptionRecord | kOptionReplay))));
                     if ( gAresGlobal->gOptions & kOptionMusicIdle)
@@ -1583,9 +1583,9 @@ void MainLoop (void)
                 if ( OptionKey()) DebugFileSave( "\p_Poopy");
                 DebugFileCleanup();
                 break;
-            
+
             case kMainNetwork:
-#if NETSPROCKET_AVAILABLE               
+#if NETSPROCKET_AVAILABLE
                 if ( gAresGlobal->gOptions & kOptionNetworkOn)
                     StopNetworking();
                 gAresGlobal->gOptions &= ~kOptionNetworkOn;
@@ -1605,13 +1605,13 @@ void MainLoop (void)
                         netResult = ClientWaitInterface();
                     }
                 }
-                
+
                 if ( netResult != kCancel)
                 {
                     do
                     {
                         ResetNetData();
-                        
+
                         //whichScenario = DoNetLevelInterface();
                         whichScenario = DoTabbedNetLevelInterface();
                         mWriteDebugString("\pLEVEL:");
@@ -1637,10 +1637,10 @@ void MainLoop (void)
                             {
                                 AutoFadeTo( 60, &fadeColor, FALSE);
                             }
-                            
+
                             RemoveAllSpaceObjects();
                             gAresGlobal->gGameOver = 0;
-                            
+
                             // mission briefing unfades screen
 
                             if ( gAresGlobal->gOptions & kOptionMusicIdle)
@@ -1656,13 +1656,13 @@ void MainLoop (void)
                             if (ConstructScenario( whichScenario))
                             {
     //                          EMERGENCYHACKTEST = true;
-                                
+
                                 SetMBarState( false, theDevice);
                                 if ( gAresGlobal->gOptions & kOptionMusicIdle)
                                 {
                                     StopAndUnloadSong();
                                 }
-                                
+
                                 HideCursor();
                                 DrawInstrumentPanel( (WindowPtr) gTheWindow);
                                 MacShowCursor();
@@ -1678,11 +1678,11 @@ void MainLoop (void)
                                 {
                                     Wrap_GRGameBegin();
                                 }
-                                
+
                                 gameResult = PlayTheGame( &gameLength);
 
                                 if ( gAresGlobal->gameRangerInProgress)
-                                {                                   
+                                {
                                     if ( (gAresGlobal->gScenarioWinner & kScenarioWinnerPlayerMask) == gAresGlobal->gPlayerAdmiralNumber)
                                     {
                                         Wrap_GRStatScore( 1);
@@ -1692,7 +1692,7 @@ void MainLoop (void)
                                         Wrap_GRStatScore( 0);
                                         Wrap_GRStatOtherScore( 1);
                                     }
-                                    
+
                                     Wrap_GRGameEnd();
                                 }
 
@@ -1734,7 +1734,7 @@ void MainLoop (void)
                 gAresGlobal->gOptions &= ~kOptionNetworkOn;
                 if ( OptionKey()) DebugFileSave( "\p_Poopy");
                 DebugFileCleanup();
-#endif NETSPROCKET_AVAILABLE                
+#endif NETSPROCKET_AVAILABLE
                 break;
             case kMainTrain:    // now replay intro
                     DoScrollText( (WindowPtr)gTheWindow, 5600, 4, kTitleTextScrollWidth,
@@ -1757,14 +1757,14 @@ void MainLoop (void)
                 {
                     AutoFadeTo( 60, &fadeColor, FALSE);
                 }
-                
+
                 do
                 {
                     RemoveAllSpaceObjects();
                     gAresGlobal->gGameOver = 0;
-                    
+
                     // mission briefing unfades screen
-                    
+
                     if ( gAresGlobal->gOptions & kOptionMusicIdle)
                     {
                         LoadSong( 3000);
@@ -1773,17 +1773,17 @@ void MainLoop (void)
                     }
 
                     ConstructScenario( whichScenario);
-                    
+
                     SetMBarState( false, theDevice);
                     if ( gAresGlobal->gOptions & kOptionMusicIdle)
                     {
                         StopAndUnloadSong();
                     }
-                    
+
                     HideCursor();
                     DrawInstrumentPanel( (WindowPtr) gTheWindow);
                     MacShowCursor();
-                    
+
                     if ( gAresGlobal->gOptions & kOptionMusicPlay)
                     {
                         LoadSong( gThisScenario->songID);
@@ -1823,7 +1823,7 @@ void MainLoop (void)
                         {
                             AutoFadeTo( 60, &fadeColor, FALSE);
                         }
-                        
+
                         if ( gameResult == kWinGame)
                         {
 
@@ -1840,7 +1840,7 @@ void MainLoop (void)
                                 BlackTitleScreen();
                                 StopAndUnloadSong();
                             }
-                            
+
                             if ( gAresGlobal->gOptions & kOptionReplay)
                             {
                                 gRandomSeed = saveSeed;
@@ -1850,7 +1850,7 @@ void MainLoop (void)
                     if ( gAresGlobal->gOptions & kOptionMusicPlay) StopAndUnloadSong();
                 } while ( (gameResult != kQuitGame) && ( gameResult != kWinGame) &&
                     ( GetChapterNumberFromScenarioNumber( whichScenario) <= kHackLevelMax)
-                    && ( GetChapterNumberFromScenarioNumber( whichScenario) <= GetScenarioNumber()) 
+                    && ( GetChapterNumberFromScenarioNumber( whichScenario) <= GetScenarioNumber())
                     && ( whichScenario >= 0) &&
                     ( !( gAresGlobal->gOptions & (kOptionAutoPlay | kOptionRecord | kOptionReplay))));
                 if ( gAresGlobal->gOptions & kOptionMusicIdle)
@@ -1860,7 +1860,7 @@ void MainLoop (void)
                     PlaySong();
                 }
 */              break;
-                
+
             case kMainAbout:
 //              if ( ShiftKey())
 //                  DoMissionDebriefing( (WindowPtr) gTheWindow, 371, 123, 456, 789, 101, 112, 131);
@@ -1868,8 +1868,8 @@ void MainLoop (void)
 
         }
     }
-    
-    
+
+
 /*  for ( hackCount = 0; hackCount < kTestNumber; hackCount++)
     {
         gAresGlobal->gGameTime = 0;
@@ -1878,15 +1878,15 @@ void MainLoop (void)
         MacSetRect( &bounds, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
         CopyOffWorldToRealWorld( (WindowPtr) gTheWindow, &bounds);
         gAresGlobal->gGameOver = -1;
-        
+
         MakeOneScenario();
-        
+
         ResetLastTime();
         HideCursor();
         PlayTheGame();
         MacShowCursor();
     }
-    
+
     done = TRUE;
 */
 }
@@ -1912,13 +1912,13 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
     short                   result = -1, pauseLevel = 0;
     EventRecord         theEvent;
 //  long                hacktc = TickCount(), hacktcsamplesize = 4, hacktcsamplecount = 0;
-    
+
     DebugFileCleanup();
     DebugFileInit();
     DebugFileAppendString("\p<START DEBUG FILE>\r\r");
 
     commandAndQ = BothCommandAndQ();
-    
+
     if ( gAresGlobal->gOptions & kOptionNetworkOn)
     {
 #if NETSPROCKET_AVAILABLE
@@ -1935,14 +1935,14 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
     ShowSpriteCursor( true);
     ResetHintLine();
     MacSetRect( &playAreaRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
-    
+
     gAresGlobal->gLastKeys = gAresGlobal->gTheseKeys = 0;
-    
+
     HideCursor();
     Microseconds( &lastTime);
-    
+
     unitsPassed = 0;
-    
+
     WriteDebugLine((char *)"\pEntr Game");
     WriteDebugLong( gRandomSeed);
     DebugFileAppendString("\p---NEW GAME---");
@@ -1954,9 +1954,9 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
         DebugFileAppendString("\p << PLAY >>");
     }
     DebugFileAppendString("\p\r");
-    
+
     DebugFileAppendString("\pTime\tFile\tLine\t#\r");
-    
+
     if (( gAresGlobal->gOptions & ( kOptionRecord | kOptionReplay)) && ( gAresGlobal->gReplayData != nil))
     {
         MoveHHi( gAresGlobal->gReplayData);
@@ -1990,7 +1990,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
 //  EMERGENCYHACKTEST = false;
 
     CheckScenarioConditions( 0);
-    
+
 /*  ExecuteCheat( 1, 0);
     ExecuteCheat( 1, 1);
 
@@ -2006,7 +2006,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
     ExecuteCheat( 2, 0);
     ExecuteCheat( 2, 1);
 */
-#if kProfiling_On   
+#if kProfiling_On
     if (ProfilerInit( collectSummary, bestTimeBase, 256, 8) != noErr)
         DebugStr("\pprofiler init error");
     ProfilerSetStatus( true);
@@ -2014,7 +2014,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
 
     while (( gAresGlobal->gGameOver <= 0 ) && ( !gAresGlobal->returnToMain))
     {
-            
+
         gAresGlobal->gFrameCount = 0;
         gLastTick = TickCount();
 
@@ -2027,7 +2027,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
             EraseSectorLines();
             PrepareToMoveScrollStars();
             EraseSite();
-            
+
             while ( unitsPassed == 0)
             {
 //              MyWideAdd( (wide *)&gAresGlobal->gLastTime, (wide *)&netTime);
@@ -2037,7 +2037,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                 WideSubtract( (wide *)&thisTime, (wide *)&gAresGlobal->gLastTime);
                 newGameTime = (thisTime.lo / kTimeUnit) + ((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
 //              newGameTime = gAresGlobal->gGameTime + Randomize( 7) + 1;//Randomize( kDecideEveryCycles);
-#ifdef kConstantRate                
+#ifdef kConstantRate
                 newGameTime = gAresGlobal->gGameTime + 1;
 #endif
 //#ifndef powerc
@@ -2084,7 +2084,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                     WideSubtract( (wide *)&gAresGlobal->gLastTime, (wide *)&thisTime);
                 }/* else
                 {
-                    newGameTime = gAresGlobal->gGameTime + Randomize( 9) + 1; 
+                    newGameTime = gAresGlobal->gGameTime + Randomize( 9) + 1;
                     l1 = newGameTime - ((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
                     l2 = kTimeUnit;
                     MyWideMul( l1, l2, (wide *)&thisTime);
@@ -2107,7 +2107,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                 if ( gAresGlobal->gGameTime <= newGameTime)
                     unitsDone = unitsPassed = newGameTime - gAresGlobal->gGameTime;
                 else
-                    unitsDone = unitsPassed = newGameTime - ( gAresGlobal->gGameTime - kMaxGameTime);               
+                    unitsDone = unitsPassed = newGameTime - ( gAresGlobal->gGameTime - kMaxGameTime);
 /*              if ( gAresGlobal->gOptions & ( kOptionReplay | kOptionRecord))
                 {
                     if ( unitsDone > kDecideEveryCycles)
@@ -2126,7 +2126,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
             }
 //          Microseconds( &lastTime);   // don't activate
 //          lastTick = thisTick;
-            
+
             if ( playerPaused)
             {
                 playerPaused = false;
@@ -2138,14 +2138,14 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                 gAresGlobal->gLastTime = scrapTime;
                 WideSubtract( (wide *)&gAresGlobal->gLastTime, (wide *)&thisTime);
             }
-            
+
             if ( gAresGlobal->gGameOver < 0)
             {
                 gAresGlobal->gGameOver += unitsPassed;
                 if ( gAresGlobal->gGameOver == 0)
                     gAresGlobal->gGameOver = 1;
             }
-            
+
             while ( unitsPassed > 0)
             {
                 unitsToDo = unitsPassed;
@@ -2156,11 +2156,11 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
 
                 if ( unitsToDo > 0) // executed arbitrarily, but at least once every kDecideEveryCycles
                 {
-                                        
+
                     MoveScrollStars( unitsToDo);
                     MoveSpaceObjects( (spaceObjectType *)*gSpaceObjectData, kMaxSpaceObject,
                                     unitsToDo);
-                                        
+
 //                  WriteDebugLine((char *)"\pMove");
 //                  WriteDebugLong( decideCycle);
 //                  WriteDebugLong( unitsToDo);
@@ -2176,11 +2176,11 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
 
                     playerPaused = FALSE;
 
-                    
+
                     NonplayerShipThink( kDecideEveryCycles);
                     AdmiralThink();
                     ExecuteActionQueue( kDecideEveryCycles);
-                    
+
                     if ( gAresGlobal->gOptions & kOptionReplay)
                     {
                         while ( turnNum == 0)
@@ -2203,7 +2203,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                         else
                             PlayerShipGetKeys( kDecideEveryCycles,
                                 *theseKeys, &enteringMessage);
-                        
+
                         turnNum--;
                     } else
                     {
@@ -2212,7 +2212,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                                 0xffffffff, &enteringMessage);
                         else PlayerShipGetKeys( kDecideEveryCycles, 0xffffffff,
                             &enteringMessage);
-                        
+
                         if ( gAresGlobal->gOptions & kOptionRecord)
                         {
                             if ( gAresGlobal->gTheseKeys == gAresGlobal->gLastKeys)
@@ -2238,7 +2238,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                             }
                         }
                     }
-                    
+
                     if ( Button())
                     {
                         if ( gAresGlobal->gOptions & kOptionReplay)
@@ -2289,7 +2289,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                             {
                                 SetHaveSeenUnregisteredTimeLimitWarning( true);
                                 StartLongMessage( 6123, 6123);
-                                
+
                             }
                         }
 }
@@ -2325,7 +2325,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                         kScenarioWinnerTextMask) == kScenarioWinnerNoText)
                                         DeclareWinner( -1, -1,  6004);
                                 }
-                                
+
                                 // *** START HANDLING NETWORK PAUSE ***
                                 if ((mRestartResumeKey( keyMap)) || ((!commandAndQ) &&
                                     ( mQuitKeys( keyMap))))
@@ -2348,7 +2348,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                                 DeclareWinner( -1, -1, 300);
                                             }
                                         }
-                                        
+
                                         MacShowCursor();
                                         RestoreOriginalColors();
                                         switch ( DoPlayAgain( true,
@@ -2362,7 +2362,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                                     gAresGlobal->gScenarioWinner = gAresGlobal->gPlayerAdmiralNumber;
                                                 gAresGlobal->gScenarioWinner |= kScenarioWinnerNoNext | kScenarioWinnerNoText;
                                                 break;
-                                                
+
                                             case 1: // restart
 //                                              ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p the user chose to restart.", nil, nil, -1, -1, -1, -1, __FILE__, 34);
                                                 result = kRestartGame;
@@ -2371,10 +2371,10 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                                     gAresGlobal->gScenarioWinner = gAresGlobal->gPlayerAdmiralNumber;
                                                 gAresGlobal->gScenarioWinner |= kScenarioWinnerNoNext | kScenarioWinnerNoText;
                                                 break;
-                                                
+
                                             case 2: // resume
                                                 break;
-                                            
+
                                             case 3: // skip
                                                 result = kWinGame;
                                                 gAresGlobal->gGameOver = 1;
@@ -2412,7 +2412,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                     l1 = TickCount();
                                 }
                                 // *** END HANDLING NETWORK PAUSE ***
-                                
+
                                 if (( pauseLevel > 0) && ( l2 < 0))
                                 {
                                     if ( blinkOn)
@@ -2437,7 +2437,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                     wasPaused = false;
                                 }
                                 */
-                                
+
                                 if ( pauseLevel > 0)
                                 {
                                     l1 = l3 = TickCount();
@@ -2458,7 +2458,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                         l2 = TickCount();
                                     }
                                 }
-                                        
+
                                 if ( (IAmHosting()) && ( GetNumberOfPlayers() < 2))
                                 {
                                     if ( gAresGlobal->gGameOver == 0)
@@ -2469,7 +2469,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                     }
                                     result = kQuitGame;
                                 }
-                                
+
                                 if ( !NetGameIsOn())
                                 {
                                     if ( gAresGlobal->gGameOver == 0)
@@ -2521,7 +2521,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                     {
                                         SendResendMessage( gAresGlobal->gGameTime);
                                         l1 = TickCount();
-            
+
                                         if ( GetRegisteredSetting() > 0)
                                             resendTime = GetResendDelay() * 20;
                                         else
@@ -2537,7 +2537,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                             mWriteDebugString("\pSEND MSG ERR");
                             DeclareWinner( -1, -1, 300);
                         }
-                        
+
                         Microseconds( &netTime);    // don't activate
                         WideSubtract( (wide *)&netTime, (wide *)&thisTime);
                         if ( netTime.lo > kTimeUnit)
@@ -2549,7 +2549,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                 netCount = 0;
                             }
                         } else netCount = 0;
-                        
+
                         if ( blinkOn)
                         {
                             StopPauseIndicator( string);
@@ -2560,7 +2560,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
 //                      UseNextLatency();
 #endif NETSPROCKET_AVAILABLE
                     }
-                    
+
                     CollideSpaceObjects( (spaceObjectType *)*gSpaceObjectData, kMaxSpaceObject);
                     decideCycle  = 0;
                     scenarioCheckTime++;
@@ -2612,7 +2612,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                 GetIndString( string, 3100, 11);
                 if ( gAresGlobal->gOptions & kOptionNetworkOn)
                 {
-#if NETSPROCKET_AVAILABLE               
+#if NETSPROCKET_AVAILABLE
                     if ( !SendInGameBasicMessage( 0, eStartPauseMessage, true,
                         false))
                     {
@@ -2622,11 +2622,11 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                     }
 #endif NETSPROCKET_AVAILABLE
                 }
-                    
+
                 PlayVolumeSound( kComputerBeep4, kMaxSoundVolume, kShortPersistence, kMustPlaySound);
                 while ( (mPauseKey( keyMap)) && (!(mReturnKey(keyMap))))
                 {
-                
+
                     l1 = TickCount();
                     StartPauseIndicator( string, Randomize( 16));
                     playerPaused = false;
@@ -2635,8 +2635,8 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                     {
                         GetKeys( keyMap);
                     }
-                    
-                    
+
+
                     l1 = TickCount();
                     StopPauseIndicator( string);
                     playerPaused = true;
@@ -2649,7 +2649,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                             Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
                         }
                     }
-                    
+
                 }
                 if ( gAresGlobal->gOptions & kOptionNetworkOn)
                 {
@@ -2665,7 +2665,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
 #endif
                 }
             }
-            
+
             if ((!( gAresGlobal->gOptions & kOptionNetworkOn)) &&
                 ( !(gAresGlobal->gOptions & kOptionReplay)) &&
                 ((mRestartResumeKey( keyMap)) || ((!commandAndQ) && ( mQuitKeys( keyMap)))))
@@ -2684,7 +2684,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                         }
 #endif NETSPROCKET_AVAILABLE
                     }
-                    
+
                     RestoreOriginalColors();
                     MacShowCursor();
                     switch ( DoPlayAgain( true,
@@ -2698,7 +2698,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                 gAresGlobal->gScenarioWinner = gAresGlobal->gPlayerAdmiralNumber;
                             gAresGlobal->gScenarioWinner |= kScenarioWinnerNoNext | kScenarioWinnerNoText;
                             break;
-                            
+
                         case 1: // restart
 //                          ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p the user chose to restart.", nil, nil, -1, -1, -1, -1, __FILE__, 36);
                             result = kRestartGame;
@@ -2707,7 +2707,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                 gAresGlobal->gScenarioWinner = gAresGlobal->gPlayerAdmiralNumber;
                             gAresGlobal->gScenarioWinner |= kScenarioWinnerNoNext | kScenarioWinnerNoText;
                             break;
-                            
+
                         case 2: // resume
                             break;
 
@@ -2715,7 +2715,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                             result = kWinGame;
                             gAresGlobal->gGameOver = 1;
                             gAresGlobal->gScenarioWinner =  gAresGlobal->gPlayerAdmiralNumber |
-                                (( GetChapterNumberFromScenarioNumber(gAresGlobal->gThisScenarioNumber)+1) 
+                                (( GetChapterNumberFromScenarioNumber(gAresGlobal->gThisScenarioNumber)+1)
                                     << kScenarioWinnerNextShift) |
                                 kScenarioWinnerNoText;
                             break;
@@ -2746,10 +2746,10 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                     gAresGlobal->gScenarioWinner |= kScenarioWinnerNoNext | kScenarioWinnerNoText;
                 }
             }
-            
+
             if ((!(gAresGlobal->gOptions & kOptionReplay)) &&
                 (((!afEntering)&&( mHelpKey( keyMap)))))
-                
+
             {
                 if ( gAresGlobal->gOptions & kOptionNetworkOn)
                 {
@@ -2763,7 +2763,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                     }
 #endif NETSPROCKET_AVAILABLE
                 }
-                RestoreOriginalColors();    
+                RestoreOriginalColors();
                 MacShowCursor();
                 DoHelpScreen();
                 HideCursor();
@@ -2771,7 +2771,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                 playerPaused = true;
                 if ( gAresGlobal->gOptions & kOptionNetworkOn)
                 {
-#if NETSPROCKET_AVAILABLE               
+#if NETSPROCKET_AVAILABLE
                     if ( !SendInGameBasicMessage( 0, eEndPauseMessage, true,
                         false))
                     {
@@ -2784,14 +2784,14 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                 }
             }
             if ((gAresGlobal->gOptions & kOptionNetworkOn) &&
-#if NETSPROCKET_AVAILABLE           
+#if NETSPROCKET_AVAILABLE
             ( IAmHosting()) &&
 #endif NETSPROCKET_AVAILABLE
                     (((!afEntering)&&( mNetSettingsKey( keyMap)))))
             {
                 if ( gAresGlobal->gOptions & kOptionNetworkOn)
                 {
-#if NETSPROCKET_AVAILABLE               
+#if NETSPROCKET_AVAILABLE
                     if ( !SendInGameBasicMessage( 0, eStartPauseMessage, true,
                         false))
                     {
@@ -2799,11 +2799,11 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                         mAbortNetworkGame
                         DeclareWinner( -1, -1, 300);
                     }
-#endif NETSPROCKET_AVAILABLE                    
+#endif NETSPROCKET_AVAILABLE
                 }
-                RestoreOriginalColors();    
+                RestoreOriginalColors();
                 MacShowCursor();
-#if NETSPROCKET_AVAILABLE               
+#if NETSPROCKET_AVAILABLE
                 DoNetSettings();
 #endif NETSPROCKET_AVAILABLE
                 HideCursor();
@@ -2833,7 +2833,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                     SetSongVolume( kMusicVolume);
                 }
             }
-            
+
             if (((!(gAresGlobal->gOptions & kOptionReplay)) &&
                 ((!afEntering) && ( mVolumeUpKey( keyMap) && !mVolumeUpKey( lastKeyMap)))))
             {
@@ -2843,7 +2843,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                     SetSongVolume( kMusicVolume);
                 }
             }
-            
+
             if ((!(gAresGlobal->gOptions & kOptionReplay)) && (!afEntering) &&
                 ( mActionMusicKey( keyMap)) && ( !mActionMusicKey( lastKeyMap)))
             {
@@ -2852,7 +2852,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                     ToggleSong();
                 }
             }
-            
+
 #if TARGET_OS_MAC
             keyMap[3] &= ~0x80; // mask out power key
             keyMap[1] &= ~0x02; // mask out caps lock key
@@ -2874,9 +2874,9 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                 gAresGlobal->gGameOver = 1;
             }
             demoKey = false;
-            
+
 //          if ( gAresGlobal->gGameTime > newGameTime) { WriteDebugLong( newGameTime); gAresGlobal->gGameTime = newGameTime;}
-            
+
             MiniComputerHandleNull( unitsDone);
 
             ClipToCurrentLongMessage();
@@ -2895,11 +2895,11 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
             SetLongRect( &clipRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
             DrawSpriteCursorSprite( &clipRect);
 //          DrawCurrentLongMessage();
-            
+
             if (( gAresGlobal->gOptions & kOptionQDOnly))
             {
                 RGBColor    hackcolor = { 32765, 32765, 32765};
-                 
+
                 DrawOutlinedString( "\pkOptionQDOnly", &hackcolor); //DrawString( tempString);
                 ShowSpriteCursorSprite();
                 DrawAllBeams();
@@ -2916,7 +2916,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                 ShowSectorLines();
                 ShowSite();
                 CopyOffWorldToRealWorld( (WindowPtr)gTheWindow, &playAreaRect);
-            
+
             }
 //          if ( hacktcsamplecount > hacktcsamplesize)
 //          {
@@ -2924,7 +2924,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
 //              WriteDebugLong( TickCount() - hacktc);
 //          }
             //PixMapTest();
-            
+
             DrawMessageScreen( unitsDone);
             UpdateRadar( unitsDone);
             UpdateBooleanColorAnimation( unitsDone);
@@ -2932,7 +2932,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
             gAresGlobal->gFrameCount++;
         }
     }
-    
+
 #if kProfiling_On
     ProfilerSetStatus( false);
     if (ProfilerDump("\pares_profile") != noErr)
@@ -2942,7 +2942,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
 
     if ( gAresGlobal->gOptions & kOptionNetworkOn)
     {
-#if NETSPROCKET_AVAILABLE   
+#if NETSPROCKET_AVAILABLE
         if ( IAmHosting())
         {
 //          StopNetworking();
@@ -2962,7 +2962,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
         }
 #endif NETSPROCKET_AVAILABLE
     }
-    
+
     if ( gAresGlobal->gOptions & kOptionRecord)
     {
                 theseKeys++;
@@ -2980,7 +2980,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
             HLock( gAresGlobal->gReplayData);
             result = kWinGame;
         }
-                
+
     }
     if (( gAresGlobal->gOptions & ( kOptionRecord | kOptionReplay)) && ( gAresGlobal->gReplayData != nil))
     {
@@ -3012,8 +3012,8 @@ Boolean HandleMouseDown( EventRecord *theEvent)
     WindowPtr   whichWindow;
     Point       where;
     Boolean     close = FALSE, done = FALSE;
-    
-    whichPart = MacFindWindow (theEvent->where,  &whichWindow); 
+
+    whichPart = MacFindWindow (theEvent->where,  &whichWindow);
     switch (whichPart)
     {
         case inMenuBar:
@@ -3048,7 +3048,7 @@ Boolean HandleMenuChoice( long menuChoice)
     int     theMenu;
     int     theItem;
     Boolean done = FALSE;
-    
+
     if (menuChoice != 0)
     {
         theMenu = HiWord( menuChoice);
@@ -3075,7 +3075,7 @@ void HandleAppleChoice ( int theItem)
 {
     Str255      accName;
     int         accNumber;
-    
+
     switch ( theItem)
     {
         case ABOUT_ITEM:
@@ -3092,7 +3092,7 @@ void HandleAppleChoice ( int theItem)
 
 Boolean HandleFileChoice( int theItem)
 
-{   
+{
     switch( theItem)
     {
         case QUIT_ITEM:
@@ -3112,7 +3112,7 @@ Boolean HandleKeyDown( EventRecord *theEvent)
 
 {
     char    whichChar;
-    
+
     whichChar = theEvent->message & charCodeMask;
     if (( theEvent->modifiers & cmdKey ) != 0)
         return( HandleMenuChoice( MenuKey( whichChar )));
@@ -3123,7 +3123,7 @@ void Pause( long time)
 
 {
     long    starttime = TickCount();
-    
+
     while (( TickCount() - starttime) < time) { /* DO NOTHING */};
 }
 
@@ -3173,9 +3173,9 @@ void DrawOutlinedString( StringPtr string, RGBColor *color)
 {
     RGBColor    backColor = {0, 0, 0};
     Point       pen;
-    
+
     GetPen( &pen);
-    
+
     RGBForeColor( &backColor);
     MoveTo( pen.h - 1, pen.v - 1);
     DrawString( string);
@@ -3193,9 +3193,9 @@ void DrawOutlinedString( StringPtr string, RGBColor *color)
     DrawString( string);
     MoveTo( pen.h + 1, pen.v + 1);
     DrawString( string);
-    
+
     MoveTo( pen.h, pen.v);
-    
+
     RGBForeColor( color);
     DrawString( string);
 }

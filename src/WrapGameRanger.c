@@ -95,9 +95,9 @@ Boolean Wrap_UseGameRanger( void)
 OSErr       Wrap_GRInstallStartupHandler(void)
 {
     OSErr   result;
-    
+
     mWriteDebugString("\p>GRInstallStartupHandler");
-    
+
     result =  GRInstallStartupHandler();
     if ( result != noErr) DebugStr("\perr GRInstallStartupHandler");
     return result;
@@ -106,9 +106,9 @@ OSErr       Wrap_GRInstallStartupHandler(void)
 OSErr       Wrap_GRInstallResumeHandler(void)
 {
     OSErr   result;
-    
+
     mWriteDebugString("\p>GRInstallResumeHandler");
-    
+
     result =  GRInstallResumeHandler();
     if ( result != noErr) DebugStr("\perr GRInstallResumeHandler");
     return result;
@@ -117,28 +117,28 @@ OSErr       Wrap_GRInstallResumeHandler(void)
 Boolean     Wrap_GRCheckAEForCmd(const AppleEvent *theEvent)
 {
     mWriteDebugString("\p>GRCheckAEForCmd");
-        
+
     return GRCheckAEForCmd( theEvent);
 }
 
 Boolean     Wrap_GRCheckFileForCmd(void)
 {
     mWriteDebugString("\p>GRCheckFileForCmd");
-    
+
     return GRCheckFileForCmd();
 }
 
 Boolean     Wrap_GRCheckForAE(void)
 {
     mWriteDebugString("\p>GRCheckForAE");
-    
+
     return GRCheckForAE();
 }
 
 Boolean     Wrap_GRIsWaitingCmd(void)
 {
 //  mWriteDebugString("\p>GRIsWaitingCmd");
-    
+
     return GRIsWaitingCmd();
 }
 
@@ -146,27 +146,27 @@ void        Wrap_GRGetWaitingCmd(void)
 {
     mWriteDebugString("\p>GRGetWaitingCmd");
 
-    GRGetWaitingCmd();  
+    GRGetWaitingCmd();
 }
 
 Boolean     Wrap_GRIsCmd(void)
 {
     mWriteDebugString("\p>GRIsCmd");
-    
+
     return GRIsCmd();
 }
 
 Boolean     Wrap_GRIsHostCmd(void)
 {
     mWriteDebugString("\p>GRIsHostCmd");
-    
+
     return GRIsHostCmd();
 }
 
 Boolean     Wrap_GRIsJoinCmd(void)
 {
     mWriteDebugString("\p>GRIsJoinCmd");
-    
+
     return GRIsJoinCmd();
 }
 
@@ -174,35 +174,35 @@ Boolean     Wrap_GRIsJoinCmd(void)
 char*       Wrap_GRGetHostGameName(void)
 {
     mWriteDebugString("\p>GRGetHostGameName");
-    
+
     return GRGetHostGameName();
 }
 
 UInt16      Wrap_GRGetHostMaxPlayers(void)
 {
     mWriteDebugString("\p>GRGetHostMaxPlayers");
-    
+
     return GRGetHostMaxPlayers();
 }
 
 UInt32      Wrap_GRGetJoinAddress(void)
 {
     mWriteDebugString("\p>GRGetJoinAddress");
-    
+
     return GRGetJoinAddress();
 }
 
 char*       Wrap_GRGetPlayerName(void)
 {
     mWriteDebugString("\p>Wrap_GRGetPlayerName");
-    
+
     return GRGetPlayerName();
 }
 
 UInt16      Wrap_GRGetPortNumber(void)
 {
     mWriteDebugString("\p>GRGetPortNumber");
-    
+
     return GRGetPortNumber();
 }
 
@@ -210,7 +210,7 @@ UInt16      Wrap_GRGetPortNumber(void)
 void        Wrap_GRReset(void)
 {
     mWriteDebugString("\p>GRReset");
-    
+
     GRReset();
 }
 
@@ -218,49 +218,49 @@ void        Wrap_GRReset(void)
 void        Wrap_GRHostReady(void)
 {
     mWriteDebugString("\p>GRHostReady");
-    
+
     GRHostReady();
 }
 
 void        Wrap_GRGameBegin(void)
 {
     mWriteDebugString("\p>GRGameBegin");
-    
+
     GRGameBegin();
 }
 
 void        Wrap_GRStatScore(SInt32 score)
 {
     mWriteDebugString("\p>GRStatScore");
-    
-    GRStatScore( score);    
+
+    GRStatScore( score);
 }
 
 void        Wrap_GRStatOtherScore(SInt32 score)
 {
     mWriteDebugString("\p>GRStatOtherScore");
-    
+
     GRStatOtherScore( score);
 }
 
 void        Wrap_GRGameEnd(void)
 {
     mWriteDebugString("\p>GRGameEnd");
-    
+
     GRGameEnd();
 }
 
 void        Wrap_GRHostClosed(void)
 {
     mWriteDebugString("\p>GRHostClosed");
-    
+
     GRHostClosed();
 }
 
 OSErr       Wrap_GROpenGameRanger(void)
 {
     mWriteDebugString("\p>GROpenGameRanger");
-    
+
     return GROpenGameRanger();
 }
 
@@ -272,7 +272,7 @@ Wrap_GRNSpDoModalHostDialog         (NSpProtocolListReference  ioProtocolList,
                                  NSpEventProcPtr        inEventProcPtr)
 {
     mWriteDebugString("\p>GRNSpDoModalHostDialog");
-    
+
     return GRNSpDoModalHostDialog( ioProtocolList, ioGameName, ioPlayerName, ioPassword,
         inEventProcPtr);
 }
@@ -285,7 +285,7 @@ Wrap_GRNSpDoModalJoinDialog         (ConstStr31Param        inGameType,
                                  NSpEventProcPtr        inEventProcPtr)
 {
     mWriteDebugString("\p>GRNSpDoModalJoinDialog");
-    
+
     return GRNSpDoModalJoinDialog( inGameType, inEntityListLabel, ioName, ioPassword,
         inEventProcPtr);
 }

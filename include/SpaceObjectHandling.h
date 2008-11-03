@@ -41,7 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
                     (counter)++;\
                 }\
                 if ( (counter) == kMaxSpaceObject) (object) = nil;
-                
+
 
 //#define   CreateAnySpaceObject( mwhichBase, mvel, mloc, mdir, mowner, mspecial, mcanbuild, mnameres, mnamestr, msprite)\
 //DebugCreateAnySpaceObject( mwhichBase, mvel, mloc, mdir, mowner, mspecial, mcanbuild, mnameres, mnamestr, msprite, __FILE__, __LINE__)

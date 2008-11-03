@@ -78,7 +78,7 @@ int CreateOffscreenWorld ( Rect *bounds, CTabHandle theClut)
     PixMapHandle    pixBase;
     Rect            tRect;
     GDHandle        originalDevice;
-    
+
     /*
         NewGWorld creates the world.  See p.21-12--13 in IM VI.  Note that
         by setting pix depth to 0, we are using bounds as global rect which
@@ -88,7 +88,7 @@ int CreateOffscreenWorld ( Rect *bounds, CTabHandle theClut)
     */
 
     GetGWorld( &gRealWorld, &originalDevice);
-    
+
     pixBase = GetGWorldPixMap( gRealWorld);
     error = NewGWorld ( &gOffWorld, 8, bounds, theClut, theDevice, 0);
     if ( error)
@@ -105,7 +105,7 @@ int CreateOffscreenWorld ( Rect *bounds, CTabHandle theClut)
         DisposeGWorld( gOffWorld);
         return( OFFSCREEN_GRAPHICS_ERROR);
     }
-    
+
     pixBase = GetGWorldPixMap( gSaveWorld);
     error = LockPixels( pixBase);
     if ( !error)
@@ -115,7 +115,7 @@ int CreateOffscreenWorld ( Rect *bounds, CTabHandle theClut)
         DisposeGWorld( gSaveWorld);
         return( OFFSCREEN_GRAPHICS_ERROR);
     }
-    
+
     pixBase = GetGWorldPixMap( gOffWorld);
     error = LockPixels( pixBase);
     if ( !error)
@@ -125,18 +125,18 @@ int CreateOffscreenWorld ( Rect *bounds, CTabHandle theClut)
         DisposeGWorld( gSaveWorld);
         return( OFFSCREEN_GRAPHICS_ERROR);
     }
-    
+
 //  SetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     tRect = *bounds;
     CenterRectInDevice( theDevice, &tRect);
     gNatePortLeft = /*(*(*theDevice)->gdPMap)->bounds.left + */tRect.left - (*theDevice)->gdRect.left;
     gNatePortLeft /= 4;
-    
+
     mWriteDebugString("\pNatePortLeft:");
     WriteDebugLong( gNatePortLeft);
-    
+
     gNatePortTop = /*(*(*theDevice)->gdPMap)->bounds.top + */tRect.top - (*theDevice)->gdRect.top;
-    
+
 //  gNatePortLeft = tRect.left / 4;
 //  gNatePortTop = tRect.top;
     EraseOffWorld();
@@ -191,7 +191,7 @@ void EraseOffWorld( void)
 {
     RGBColor    c;
     PixMapHandle pixBase;
-    
+
     DrawInOffWorld();
     pixBase = GetGWorldPixMap( gOffWorld);
     EraseRect( &((*pixBase)->bounds));
@@ -208,7 +208,7 @@ void EraseSaveWorld( void)
 {
     PixMapHandle pixBase;
     RGBColor    c;
-    
+
     DrawInSaveWorld();
     pixBase = GetGWorldPixMap( gSaveWorld);
     NormalizeColors();
@@ -224,7 +224,7 @@ void CopyOffWorldToRealWorld( WindowPtr port, Rect *bounds)
 
 {
     PixMapHandle pixBase;
-    
+
     pixBase = GetGWorldPixMap( gOffWorld);
     NormalizeColors();
     CopyBits( (BitMap *)*pixBase, &(port->portBits), bounds, bounds,
@@ -235,7 +235,7 @@ void CopyRealWorldToSaveWorld( WindowPtr port, Rect *bounds)
 
 {
     PixMapHandle pixBase;
-    
+
     pixBase = GetGWorldPixMap( gSaveWorld);
     NormalizeColors();
     CopyBits( &(port->portBits), (BitMap *)*pixBase, bounds, bounds,
@@ -246,7 +246,7 @@ void CopyRealWorldToOffWorld( WindowPtr port, Rect *bounds)
 
 {
     PixMapHandle pixBase;
-    
+
     pixBase = GetGWorldPixMap( gOffWorld);
     NormalizeColors();
     CopyBits( &(port->portBits), (BitMap *)*pixBase, bounds, bounds,
@@ -257,7 +257,7 @@ void CopySaveWorldToOffWorld( Rect *bounds)
 
 {
     PixMapHandle savePixBase, offPixBase;
-        
+
     savePixBase = GetGWorldPixMap( gSaveWorld);
     offPixBase = GetGWorldPixMap( gOffWorld);
     NormalizeColors();
@@ -269,7 +269,7 @@ void CopyOffWorldToSaveWorld( Rect *bounds)
 
 {
     PixMapHandle savePixBase, offPixBase;
-        
+
     savePixBase = GetGWorldPixMap( gSaveWorld);
     offPixBase = GetGWorldPixMap( gOffWorld);
     NormalizeColors();
@@ -282,7 +282,7 @@ void NormalizeColors( void)
 
 {
     RGBColor    c;
-    
+
     c.red = c.blue = c.green = 0;
     RGBForeColor ( &c);
     c.red = c.blue = c.green = 65535;
@@ -301,7 +301,7 @@ void GWorldExperiment( void)
     PixMapHandle    pixBase;
     int             x;
     char            *p;
-    
+
     pixBase = GetGWorldPixMap( gOffWorld);
     p = (*pixBase)->baseAddr;
     for ( x = 0; x < 200; x++)
@@ -318,7 +318,7 @@ void ChunkCopyPixMapToScreenPixMap( PixMap *sourcePix, Rect *sourceRect, PixMap 
     int     x, y, width, height;
     long    *sword, *dword, srowplus, drowplus, srowbytes, drowbytes, sright;
     Rect    fixRect;
-    
+
     if (( sourceRect->right <= sourceRect->left) || ( sourceRect->bottom <= sourceRect->top))
     {
         // rect does not really exist
@@ -385,11 +385,11 @@ void asm ChunkCopyPixMapToScreenPixMap( PixMap *sourcePix, Rect *sourceRect, Pix
 
     register long   dr3, dr4, dr5, dr6, dr7;
     register long   *ar2, *ar3, *ar4;
-    
+
     long    *sword, *dword, srowplus, drowplus, srowbytes, drowbytes, sright, x, y, width,
             height;
-    Rect    fixRect;    
-    
+    Rect    fixRect;
+
     fralloc +
 
         movea.l     sourceRect, ar3         // ra0 = sourceRect
@@ -400,13 +400,13 @@ void asm ChunkCopyPixMapToScreenPixMap( PixMap *sourcePix, Rect *sourceRect, Pix
         move.w      struct(Rect.bottom)(ar3), dr3   // if sourceRect.bottom
         cmp.w       struct(Rect.top)(ar3), dr3      // <= sourceRect.top
         ble         donotdraw                       // don't draw
-        
+
 //      moveq       #0x40, dr3              // if gAresGlobal->gOptions & kOptionsQDOnly
 //      and.l       gAresGlobal->gOptions, dr3
 //      bne         chunkquickdrawcopy      // then copybits
-        
+
         movea.l     destMap, ar4                // rar4 = destMap
-        
+
         move.l      (ar3), fixRect.top      // fixRect.left = sourceRect.left &
                                             // fixRect.top = sourceRect.top
         move.l      0x04(ar3), fixRect.bottom   // fixRect.right = source.right &
@@ -421,45 +421,45 @@ void asm ChunkCopyPixMapToScreenPixMap( PixMap *sourcePix, Rect *sourceRect, Pix
         addq.l      #0x1, dr3
         move.w      dr3, fixRect.right      // fixRect.right = dr3
         ext.l       dr3
-        
+
         move.w      struct(PixMap.rowBytes)(ar3), dr7           // dr7 = sourcePix->rowBytes
         andi.l      #0x00003fff, dr7            // dr7 &= 0x3FFFF
         lsr.l       #0x02, dr7              // dr7 /= 4 (srowbytes)
-        
+
         move.w      struct(PixMap.rowBytes)(ar4), dr4           // dr4 = destMap->rowBytes // 0x04
         andi.l      #0x00003fff, dr4            // dr4 &= 0x3FFFF
         lsr.l       #0x02, dr4              // dr4 /= 4 (drowbytes)
-        
+
         move.w      0x000c(ar3), dr5            // dr5 = sourcePix->bounds.right
         ext.l       dr5
         lsr         #2, dr5             // dr5 /= 4 (sright)
-        
+
         tst.w       fixRect.left            // if fixRect.left < 0
         bge         leftIsGreaterThan0
         clr.w       fixRect.left            // then fixRect.left = 0
-        
+
     leftIsGreaterThan0:
         cmp.l       dr5, dr3                    // if fixRect.right > sright
         ble         rightIsLessThanSRight
         move.l      dr5, dr3                    // then fixRect.right = sright
-        
+
     rightIsLessThanSRight:
         cmp.l       dr4, dr3                    // if fixRect.right > drowbytes
         ble         rightIsLessThanDRowBytes
         move.l      dr4, dr3
-        
+
     rightIsLessThanDRowBytes:
         move.w      dr3, fixRect.right
         move.w      fixRect.bottom, dr3     // dr3 = fixRect.bottom
         tst.w       fixRect.top             // if fixRect.top < 0
         bge         topIsGreaterThan0
         clr.w       fixRect.top             // then fixRect.top = 0
-        
+
     topIsGreaterThan0:
         cmp.w       struct(PixMap.bounds.bottom)(ar3), dr3  // if fixRect.bottom > sourcePix->bounds.bottom
         ble         bottomIsLessThanSourceBottom
         move.w      struct(PixMap.bounds.bottom)(ar3),dr3   // then fixRect.bottom = sourcePix->bounds.bottom
-        
+
     bottomIsLessThanSourceBottom:
         move.w      struct(PixMap.bounds.bottom)(ar4), dr6  // dr6 = destMap->bounds.bottom
         sub.w       struct(PixMap.bounds.top)(ar4), dr6     // dr6 -= destMap->bounds.top ( = height of destMap)
@@ -470,10 +470,10 @@ void asm ChunkCopyPixMapToScreenPixMap( PixMap *sourcePix, Rect *sourceRect, Pix
 /*      cmp.w       struct(PixMap.bounds.bottom)(ar4),dr3   // if fixRect.bottom > destMap->bounds.bottom
         ble         bottomIsLessThanDestBottom
         move.w      struct(PixMap.bounds.bottom)(ar4),dr3
-*/      
+*/
     bottomIsLessThanDestBottom:
         move.w      dr3, fixRect.bottom;
-        
+
         move.w      fixRect.top, dr3            // dr3 = fixRect.top
         ext.l       dr3
         mulu.w      dr7, dr3                    // dr3 *= srowbytes
@@ -484,7 +484,7 @@ void asm ChunkCopyPixMapToScreenPixMap( PixMap *sourcePix, Rect *sourceRect, Pix
         ext.l       dr3
         lsl.l       #0x02, dr3              // dr3 *= 4 because wer'e dealing with a long*
         adda.l      dr3, ar2                    // ar2 += dr3
-        
+
         movea.l     (ar4), ar3              // ar3 = destMap->baseAddr (we're done with sourcePix)
         adda.l      dr3, ar3                    // ar3 += fixRect.left * 4
         move.l      gNatePortLeft, dr3
@@ -500,7 +500,7 @@ void asm ChunkCopyPixMapToScreenPixMap( PixMap *sourcePix, Rect *sourceRect, Pix
         move.w      fixRect.right, dr3      // dr3 = fixRect.right
         cmp.w       fixRect.left, dr3
         ble         donotdraw
-        
+
         sub.w       fixRect.left, dr3       // dr3 -= fixRect.left
 
         ext.l       dr3
@@ -508,20 +508,20 @@ void asm ChunkCopyPixMapToScreenPixMap( PixMap *sourcePix, Rect *sourceRect, Pix
         move.w      fixRect.bottom, dr6     // dr6 = fixRect.bottom
         cmp.w       fixRect.top, dr6
         ble         donotdraw
-        
+
         sub.w       fixRect.top, dr6            // dr6 -= fixRect.top
         subi.w      #1, dr6
 //      tst.w       dr6
 //      ble         donotdraw
 //      move.w      fixRect.top, dr6        // testing
         ext.l       dr6
-    
+
         sub.l       dr3, dr7                    // dr7 (srowbytes) -= dr3
         sub.l       dr3, dr4                    // dr4 (drowbytes) -= dr3
         subi.l      #0x01, dr3
         tst.l       dr3
         ble         donotdraw
-        
+
         lsl.l       #2, dr7
         lsl.l       #2, dr4
 
@@ -537,7 +537,7 @@ void asm ChunkCopyPixMapToScreenPixMap( PixMap *sourcePix, Rect *sourceRect, Pix
 //      cmp.w       fixRect.bottom, dr6
 //      blt         outerloop
         jmp         donotdraw
-    
+
 /*
 00000004: 48E7 1F38          MOVEM.L   D3-D7/A2-A4,-(A7)
 00000008: 266E 0008          MOVEA.L   $0008(A6),A3
@@ -561,7 +561,7 @@ void asm ChunkCopyPixMapToScreenPixMap( PixMap *sourcePix, Rect *sourceRect, Pix
 0000003E: A8EC               _CopyBits
 00000040: 6000 017A          BRA       *+$017C        ; 000001BC
 */
-/* we know that ar3 = sourcerect    
+/* we know that ar3 = sourcerect
 */
     chunkquickdrawcopy:
         move.l      (ar3), fixRect.top      // fixRect.left = sourceRect.left &
@@ -569,7 +569,7 @@ void asm ChunkCopyPixMapToScreenPixMap( PixMap *sourcePix, Rect *sourceRect, Pix
         move.l      0x04(ar3), fixRect.bottom   // fixRect.right = source.right &
                                                 // fix.bottom = source.bottom
         move.w      fixRect.left, dr5
-        
+
         pea         fixRect
         move.l      gNatePortLeft, dr3
         lsl         #0x02, dr3
@@ -577,9 +577,9 @@ void asm ChunkCopyPixMapToScreenPixMap( PixMap *sourcePix, Rect *sourceRect, Pix
         move.l      gNatePortTop, dr3
         move.w      dr3, -(A7)
         _OffsetRect
-        
+
         move.w      fixRect.left, dr5
-        
+
         movea.l     sourcePix, ar2
         movea.l     destMap, ar4
         move.l      ar2, -(A7)
@@ -589,11 +589,11 @@ void asm ChunkCopyPixMapToScreenPixMap( PixMap *sourcePix, Rect *sourceRect, Pix
         clr.w       -(A7)
         clr.l       -(A7)
         _CopyBits
-        
-    donotdraw:  
+
+    donotdraw:
 
         frfree
-        
+
 #endif // kAllowAssem
         rts
 }
@@ -607,7 +607,7 @@ void ChunkCopyPixMapToPixMap( PixMap *sourcePix, Rect *sourceRect, PixMap *destM
     int     x, y;
     long    *sword, *dword, srowplus, drowplus, srowbytes, drowbytes, sright;
     Rect    fixRect;
-    
+
     fixRect = *sourceRect;
     fixRect.left >>= 2;
     if (( fixRect.right & 0x0003) == 0)
@@ -659,7 +659,7 @@ void ChunkErasePixMap( PixMap *destMap, Rect *sourceRect)
     int     x, y;
     long    *dword, drowplus, drowbytes, sright;
     Rect    fixRect;
-    
+
     fixRect = *sourceRect;
     fixRect.left >>= 2;
     if (( fixRect.right & 0x0003) == 0)
@@ -703,7 +703,7 @@ void SetWindowPaletteFromClut( CWindowPtr theWindow, CTabHandle theClut)
 
 {
     PaletteHandle   thePalette;
-    
+
     thePalette = GetPalette( (WindowPtr)theWindow); // get the windows current palette
     if ( thePalette == nil) // if it doesn't exist
     {
@@ -721,12 +721,12 @@ void SetWindowPaletteFromClut( CWindowPtr theWindow, CTabHandle theClut)
 void ColorTest( void)
 
 {
-    
+
     CTabHandle      offCLUT, onCLUT;
     PixMapHandle    pixMap, onPixMap;
     Rect            tRect, uRect;
     int             i, j;
-    
+
 //  DrawInOffWorld();
 //  SetPort( gTheWindow);
     pixMap = GetGWorldPixMap( gOffWorld);

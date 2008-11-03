@@ -66,7 +66,7 @@ Handle  CreateNatePixTable( void)
     Handle          newTable;
     unsigned long   *size;
     long            *shapenum;
-    
+
     newTable = NewHandle( 16L);
     if ( newTable != nil)
     {
@@ -84,7 +84,7 @@ void MoveNatePixTableData( Handle table, long fromWhere, long toWhere)
 {
     Size    oldSize, newSize, length;
     char    *from, *to;
-    
+
     oldSize = GetHandleSize( table);
     newSize = oldSize + ((Size)toWhere - (Size)fromWhere);
     if ( newSize > oldSize)
@@ -124,7 +124,7 @@ unsigned long GetNatePixTableSize( Handle table)
 
 {
     unsigned long   *tablesize;
-    
+
     tablesize = (unsigned long *)*table;
     return (*tablesize);
 }
@@ -133,7 +133,7 @@ void SetNatePixTableSize( Handle table, unsigned long newsize)
 
 {
     unsigned long   *tablesize;
-    
+
     tablesize = (unsigned long *)*table;
     *tablesize = newsize;
 }
@@ -142,7 +142,7 @@ long GetNatePixTablePixNum( Handle table)
 
 {
     long    *pixnum;
-    
+
     pixnum = (long *)*table + 1;
     return (*pixnum);
 }
@@ -151,7 +151,7 @@ void SetNatePixTablePixNum( Handle table, long newnum)
 
 {
     long    *pixnum;
-    
+
     pixnum = (long *)*table + 1;
     *pixnum = newnum;
 }
@@ -160,7 +160,7 @@ unsigned long GetNatePixTablePixOffset( Handle table, long pixnum)
 
 {
     unsigned long   *pixoffset;
-    
+
     pixoffset = (unsigned long *)*table + 2L + pixnum;
     return ( *pixoffset);
 }
@@ -169,7 +169,7 @@ void SetNatePixTablePixOffset( Handle table, long pixnum, unsigned long newoffse
 
 {
     unsigned long   *pixoffset;
-    
+
     pixoffset = (unsigned long *)*table + 2L + pixnum;
     *pixoffset = newoffset;
 }
@@ -179,7 +179,7 @@ int GetNatePixTableNatePixWidth( Handle table, long pixnum)
 {
     char        *aByte;
     short           *anInt;
-    
+
     aByte = (char *)*table + GetNatePixTablePixOffset( table, pixnum);
     anInt = (short *)aByte;
     return ( (int)*anInt);
@@ -190,7 +190,7 @@ void SetNatePixTableNatePixWidth( Handle table, long pixnum, int width)
 {
     char        *aByte;
     short           *anInt;
-    
+
     aByte = (char *)*table + GetNatePixTablePixOffset( table, pixnum);
     anInt = (short *)aByte;
     *anInt = width;
@@ -201,7 +201,7 @@ int GetNatePixTableNatePixHeight( Handle table, long pixnum)
 {
     char        *aByte;
     short           *anInt;
-    
+
     aByte = (char *)*table + GetNatePixTablePixOffset( table, pixnum) + 2L;
     anInt = (short *)aByte;
     return ( (int)*anInt);
@@ -212,7 +212,7 @@ void SetNatePixTableNatePixHeight( Handle table, long pixnum, int height)
 {
     char        *aByte;
     short           *anInt;
-    
+
     aByte = (char *)*table + GetNatePixTablePixOffset( table, pixnum) + 2L;
     anInt = (short *)aByte;
     *anInt = height;
@@ -223,7 +223,7 @@ int GetNatePixTableNatePixHRef( Handle table, long pixnum)
 {
     char        *aByte;
     short           *anInt;
-    
+
     aByte = (char *)*table + GetNatePixTablePixOffset( table, pixnum) + 4L;
     anInt = (short *)aByte;
     return ( (int)*anInt);
@@ -234,7 +234,7 @@ void SetNatePixTableNatePixHRef( Handle table, long pixnum, int href)
 {
     char        *aByte;
     short           *anInt;
-    
+
     aByte = (char *)*table + GetNatePixTablePixOffset( table, pixnum) + 4L;
     anInt = (short *)aByte;
     *anInt = href;
@@ -245,7 +245,7 @@ int GetNatePixTableNatePixVRef( Handle table, long pixnum)
 {
     char        *aByte;
     short           *anInt;
-    
+
     aByte = (char *)*table + GetNatePixTablePixOffset( table, pixnum) + 6L;
     anInt = (short *)aByte;
     return ( (int)*anInt);
@@ -256,7 +256,7 @@ void SetNatePixTableNatePixVRef( Handle table, long pixnum, int vref)
 {
     char        *aByte;
     short           *anInt;
-    
+
     aByte = (char *)*table + GetNatePixTablePixOffset( table, pixnum) + 6L;
     anInt = (short *)aByte;
     *anInt = vref;
@@ -266,7 +266,7 @@ char *GetNatePixTableNatePixData( Handle table, long pixnum)
 
 {
     char        *aByte;
-    
+
     aByte = (char *)*table + GetNatePixTablePixOffset( table, pixnum) + 8L;
     return ( aByte);
 }
@@ -275,7 +275,7 @@ unsigned char GetNatePixTableNatePixDataPixel( Handle table, long pixnum, int x,
 
 {
     unsigned char       *aByte;
-    
+
     aByte = (unsigned char *)*table + GetNatePixTablePixOffset( table, pixnum)
             + 8L + (long)y *
             (long)GetNatePixTableNatePixWidth(table, pixnum) + (long)x;
@@ -286,7 +286,7 @@ void SetNatePixTableNatePixDataPixel( Handle table, long pixnum, int x, int y, u
 
 {
     unsigned char       *aByte;
-    
+
     aByte = (unsigned char *)*table + GetNatePixTablePixOffset( table, pixnum) + 8L + (long)y *
             (long)GetNatePixTableNatePixWidth(table, pixnum) + (long)x;
     *aByte = dByte;
@@ -347,12 +347,12 @@ void GetNatePixTableNatePixDuplicate( natePix *dPix, Handle table, int pixnum)
             GetNatePixTablePixOffset( table, pixnum) + 8L) != 0)
         SysBeep (20);
     else
-    {   
+    {
         dPix->pixBase = GetNatePixTableNatePixDataCopy( table, pixnum);
     }
 }
 */
-    
+
 unsigned long GetNatePixTableNatePixDataSize( Handle table, long pixnum)
 
 {
@@ -408,7 +408,7 @@ void InsertNatePix( Handle table, Rect *sRect, int pixnum)
                 4L);
         SetNatePixTablePixOffset( table, (long)pixnum, offset);
     }
-    SetNatePixTableSize( table, GetNatePixTableSize( table) + 
+    SetNatePixTableSize( table, GetNatePixTableSize( table) +
             (unsigned long)(EMPTY_NATE_PIX_SIZE + newpixsize + 4L));
     SetNatePixTablePixNum( table, GetNatePixTablePixNum( table) + 1L);
     SetNatePixTableNatePixWidth( table, (long)pixnum, width);
@@ -417,7 +417,7 @@ void InsertNatePix( Handle table, Rect *sRect, int pixnum)
     SetNatePixTableNatePixVRef( table, (long)pixnum, 0);
 /*
     >>> It's now up to the caller to fill in the pixels!
-    
+
     CopyPixBlock( (byte *)*(pix->pixBase), (byte *)GetNatePixTableNatePixData( table,
         (long)pixnum), width, (**(pix->pix)).bounds.bottom);
 */
@@ -428,7 +428,7 @@ void DeleteNatePix( Handle table, int pixnum)
 {
     long        l;
     unsigned long   oldpixsize;
-    
+
     oldpixsize = GetNatePixTableNatePixDataSize( table, (long)pixnum);
     MoveNatePixTableData( table, (long)GetNatePixTablePixOffset( table, (long)pixnum) +
         (long)oldpixsize, (long)(long)GetNatePixTablePixOffset( table, (long)pixnum));
@@ -444,7 +444,7 @@ void DeleteNatePix( Handle table, int pixnum)
     }
     MoveNatePixTableData( table, 8L + (long)pixnum * 4L + 4L, 8L + (long)pixnum *
         4L);
-    SetNatePixTableSize( table, GetNatePixTableSize( table) - oldpixsize - 
+    SetNatePixTableSize( table, GetNatePixTableSize( table) - oldpixsize -
         (unsigned long)4);
     SetNatePixTablePixNum( table, GetNatePixTablePixNum( table) - 1L);
 }
@@ -460,7 +460,7 @@ void RemapNatePixTableColor( Handle table)
     long            l;
     unsigned char   *p;
     int             i, j, w, h;
-    
+
 //  WriteDebugLine((char *)"\pRemapSize:");
 //  WriteDebugLong( GetNatePixTablePixNum( table));
 
@@ -497,14 +497,14 @@ void ColorizeNatePixTableColor( Handle table, unsigned char color)
     long            l, whiteCount, pixelCount;
     unsigned char   pixel, *p;
     int             i, j, w, h;
-    
+
     color <<= 4;
-    
+
     for ( l = 0; l < GetNatePixTablePixNum( table); l++)
     {
         w = GetNatePixTableNatePixWidth( table, l);
         h = GetNatePixTableNatePixHeight( table, l);
-        
+
         // count the # of pixels, and # of pixels that are white
         whiteCount = pixelCount = 0;
         p = (unsigned char *)GetNatePixTableNatePixData( table, l);
@@ -521,7 +521,7 @@ void ColorizeNatePixTableColor( Handle table, unsigned char color)
                 p++;
             }
         }
-                
+
         if ( whiteCount > ( pixelCount / 3)) whiteCount = 1;
         else whiteCount = 0;
         p = (unsigned char *)GetNatePixTableNatePixData( table, l);
@@ -530,7 +530,7 @@ void ColorizeNatePixTableColor( Handle table, unsigned char color)
             for ( i = 0; i < w; i++)
             {
                 pixel = *p;//GetNatePixTableNatePixDataPixel( table, l, i, j);
-                if ((pixel != 0) && ((pixel > 15) || ( whiteCount))) 
+                if ((pixel != 0) && ((pixel > 15) || ( whiteCount)))
                 {
                     pixel &= 0x0f;
                     pixel += color;
@@ -547,10 +547,10 @@ void RetromapNatePixTableColor( Handle table)
 {
     long            l;
     int             i, j, w, h;
-    
+
 //  WriteDebugLine((char *)"\pRetroSize:");
 //  WriteDebugLong( GetNatePixTablePixNum( table));
-    
+
     for ( l = 0; l < GetNatePixTablePixNum( table); l++)
     {
 //      WriteDebugLong( l);
@@ -560,7 +560,7 @@ void RetromapNatePixTableColor( Handle table)
         {
             for ( i = 0; i < w; i++)
             {
-                SetNatePixTableNatePixDataPixel( table, l, i, j, GetRetroIndex( 
+                SetNatePixTableNatePixDataPixel( table, l, i, j, GetRetroIndex(
                     GetNatePixTableNatePixDataPixel( table, l, i, j)));
             }
         }

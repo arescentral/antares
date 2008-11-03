@@ -175,7 +175,7 @@ typedef struct
     long                        whichCheat;
     long                        whichShip;
     Boolean                     target;
-                    
+
     unsigned long               keysDown[kMaxNetPlayerNum];
     latencyQueueNodeType        latencyQueue[kLatencyQueueLen];
     packedDataType              sentMessage[kLatencyQueueLen];
@@ -198,20 +198,20 @@ typedef struct
     Boolean                     inSynch;
     unsigned long               sanityCheckTime;
     unsigned long               lastKeysSent;
-    
+
     // data to be used -- not executed until all is received
     unsigned long               theseKeys[kMaxNetPlayerNum];
     long                        thisSelectNum[kMaxNetPlayerNum];
     short                       thisMenuPage[kMaxNetPlayerNum];
     short                       thisMenuLine[kMaxNetPlayerNum];
     short                       thisCheat[kMaxNetPlayerNum];
-    
+
     anyCharType                 incomingMessage[kTextMessageLength + 1];
     anyCharType                 outgoingMessage[kTextMessageLength + 1];
     short                       incomingCharNum;
     short                       outgoingCharNum;
     short                       lastOutgoingCharNum;
-    
+
     unsigned short              minutesPlayed;
     unsigned short              netKills;
     unsigned short              netLosses;
@@ -220,7 +220,7 @@ typedef struct
     short                       netLevel;
     Boolean                     opponentIsUnregistered;
     Boolean                     haveSeenUnregisteredTimeWarning;
-    
+
     Boolean                     thisSelectIsTarget[kMaxNetPlayerNum];
     Boolean                     gotMessage[kMaxNetPlayerNum];
     Boolean                     hosting;
@@ -252,7 +252,7 @@ typedef struct
     Str255                      fileName;
     Str255                      url;
     unsigned long               version;
-    unsigned long               checkSum;                   
+    unsigned long               checkSum;
 } openScenarioPreGameMessageType;
 
 #define kMessageBufferSize      ((sizeof( messageDataType) * kMaxMessageQueueLen * kMaxNetPlayerNum) + 50000)
@@ -285,7 +285,7 @@ Boolean NetSprocketPresent(void)
 short InitNetworking(void)
 {
     OSStatus    err = noErr;
-    
+
 //  DebugStr("\pInitNetworking");
 
     if (! NetSprocketPresent())
@@ -323,7 +323,7 @@ short BeginNetworking( void)
 {
     OSStatus    status;
 
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
 //  DebugStr("\pClearNetData");
     ClearNetData();
     // *    Initialize NetSprocket
@@ -338,28 +338,28 @@ short BeginNetworking( void)
                 ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil,
                     kOpenTransportError, -1, -1, -1, __FILE__, 2);
                 break;
-            
+
             case kNSpMemAllocationErr:
                 ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil,
                     kNSpMemError, -1, -1, -1, __FILE__, 2);
                 break;
-            
+
             default:
                 ShowErrorOfTypeOccurred( eContinueOnlyErr, kErrorStrID, kInitNetSprocketError, status, __FILE__, 0);
                 break;
         }
-                
+
         return (status);
     }
 #endif
     return ( noErr);
-    
+
 }
 
 void ClearNetData( void)
 {
     short   i, shortLatency;
-    
+
     gNetData->netGame = nil;
     gNetData->hosting = false;
     gNetData->netState = kSlacking;
@@ -377,7 +377,7 @@ void ClearNetData( void)
     gNetData->outgoingCharNum = gNetData->lastOutgoingCharNum = 0;
     gNetData->outgoingMessage[0] = 0;
     gNetData->incomingMessage[0] = 0;
-    
+
 //#ifdef kBackupData
     gNetData->backupData.packedData1 = gNetData->backupData.packedData2 = 0xffffffff;
 //#endif
@@ -389,7 +389,7 @@ void ClearNetData( void)
         gNetData->latencyQueue[i].next = -1;
         gNetData->latencyQueue[i].used = false;
     }
-    
+
     for ( i = 0; i < kMaxNetPlayerNum; i++)
     {
         gNetData->gotMessage[i] = false;
@@ -404,7 +404,7 @@ void ClearNetData( void)
         gNetData->whichShip = -1;
         gNetData->target = false;
     }
-    
+
     GetNetPreferences( gNetData->playerName, gNetData->gameName,
         &gNetData->protocolFlags, &gNetData->resendDelay,
         &gNetData->registeredSetting, &gNetData->registeredFlags,
@@ -424,7 +424,7 @@ void ResetNetData( void)
     // assumes you have a netgame you want to restart, but not create
 
     short   i;
-    
+
     gNetData->gotEndGameMessage = false;
     gNetData->queueTop = -1;
     gNetData->latencySampleCount = kLatencySampleNum;
@@ -437,7 +437,7 @@ void ResetNetData( void)
     gNetData->outgoingCharNum = gNetData->lastOutgoingCharNum = 0;
     gNetData->outgoingMessage[0] = 0;
     gNetData->incomingMessage[0] = 0;
-    
+
 //#ifdef kBackupData
     gNetData->backupData.packedData1 = gNetData->backupData.packedData2 = 0xffffffff;
 //#endif
@@ -449,7 +449,7 @@ void ResetNetData( void)
         gNetData->latencyQueue[i].next = -1;
         gNetData->latencyQueue[i].used = false;
     }
-    
+
     for ( i = 0; i < kMaxNetPlayerNum; i++)
     {
         gNetData->gotMessage[i] = false;
@@ -460,17 +460,17 @@ void ResetNetData( void)
         gNetData->whichShip = -1;
         gNetData->target = false;
     }
-    
+
     ResetGotMessages( 0x7fffffff);
     ResetSentMessages();
 }
 
 void StopNetworking( void)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     OSStatus    status;
     short       shortLatency = gNetLatency;
-    
+
     if ( gNetData != nil)
     {
         if ( gAresGlobal->gameRangerInProgress)
@@ -480,10 +480,10 @@ void StopNetworking( void)
                 WriteDebugLine((char *)"\pGRHostClosed");
                 Wrap_GRHostClosed();
             }
-            
+
 //          Wrap_GRReset();
             gAresGlobal->gameRangerPending = false;
-            
+
             gAresGlobal->gameRangerInProgress = false;
         }
 
@@ -493,7 +493,7 @@ void StopNetworking( void)
 
 
         }
-        
+
         gNetData->netState = kSlacking;
         gNetData->netGame = nil;
     }
@@ -533,25 +533,25 @@ long GetRegisteredSetting( void)
 void SetRegisteredSetting( long setting)
 {
     gNetData->registeredSetting = setting;
-    
+
     gNetData->registeredFlags &= kLowerBandwidth;
-    
+
     switch( setting)
     {
         case 2: // the highest setting
             gNetData->registeredFlags |= kRegisterNoChange;
             gNetData->registeredFlags |= kRegisterStandard;
             // no break!
-        
+
             gNetData->registeredFlags |= kRegisterMenu;
             gNetData->registeredFlags |= kRegisterSelect;
             // no break!
-        
+
         case 1:
             gNetData->registeredFlags |= kRegisterResend;
             gNetData->registeredFlags |= kRegisterResendRequest;
             break;
-        
+
         case 0:
             // don't set any flags
             break;
@@ -661,13 +661,13 @@ Boolean GetAllNetPlayersCheating( void)
 {
     Boolean result = true;
     long    i;
-    
+
     if ( !NetGameIsOn()) return( true);
     for ( i = 0; i < kMaxNetPlayerNum; i++)
     {
         mWriteDebugString("\pCheck Player #");
         WriteDebugLong( i);
-        
+
         if (!( gAresGlobal->gActiveCheats[i] & kCheatActiveBit))
         {
             result = false;
@@ -677,7 +677,7 @@ Boolean GetAllNetPlayersCheating( void)
             mWriteDebugString("\pCheating.");
         }
     }
-    
+
     return( result);
 }
 
@@ -689,10 +689,10 @@ Boolean NetGameIsOn( void)
 
 void AddPlayerID( long id, long whichPlayer)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     NSpPlayerInfo   *playerInfo;
     OSStatus        status;
-    
+
     if ( whichPlayer < kMaxNetPlayerNum)
     {
         gNetData->playerID[whichPlayer].exists = true;
@@ -719,11 +719,11 @@ long GetPlayerNumFromID( long id)
 {
     long    whichPlayer = 0;
 
-    while ((( gNetData->playerID[whichPlayer].id != id) 
+    while ((( gNetData->playerID[whichPlayer].id != id)
             || ( gNetData->playerID[whichPlayer].exists == false))
             && ( whichPlayer < kMaxNetPlayerNum))
         whichPlayer++;
-    
+
     if ( whichPlayer < kMaxNetPlayerNum)
     {
         return( whichPlayer);
@@ -742,7 +742,7 @@ long GetPlayerIDFromNum( long num)
 
 long MyPlayerID( void)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     if ( gNetData->netGame != nil)
     {
         return( Glue_NSpPlayer_GetMyID( gNetData->netGame));
@@ -757,7 +757,7 @@ void RemovePlayerID( long id)
 
 {
     long    whichPlayer = GetPlayerNumFromID( id);
-    
+
     if ( whichPlayer >= 0)
     {
         gNetData->playerID[whichPlayer].exists = false;
@@ -796,8 +796,8 @@ StringPtr GetPlayerName( long whichPlayer)
 long GetOtherPlayerNum( void)
 {
     long    whichPlayer = 0;
-#ifdef kAllowNetSprocket    
-    
+#ifdef kAllowNetSprocket
+
     while (((gNetData->playerID[whichPlayer].exists == false) ||
             ( gNetData->playerID[whichPlayer].id ==
             Glue_NSpPlayer_GetMyID( gNetData->netGame))) &&
@@ -817,9 +817,9 @@ Assumes there are only two players. Returns the lag & throughput of other player
 
 void GetOtherPlayerConnectionData( unsigned long *roundTripTime, unsigned long *throughPut)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     long    whichPlayer = 0;
-    
+
     while (((gNetData->playerID[whichPlayer].exists == false) ||
             ( gNetData->playerID[whichPlayer].id ==
             Glue_NSpPlayer_GetMyID( gNetData->netGame))) &&
@@ -827,7 +827,7 @@ void GetOtherPlayerConnectionData( unsigned long *roundTripTime, unsigned long *
     {
         whichPlayer++;
     }
-    
+
     if ( whichPlayer < kMaxNetPlayerNum)
     {
         *roundTripTime = Glue_NSpPlayer_GetRoundTripTime( gNetData->netGame, gNetData->playerID[whichPlayer].id);
@@ -846,9 +846,9 @@ Assumes there are only two players. name of other player.
 
 void GetOtherPlayerName( StringPtr *s)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     long    whichPlayer = 0;
-    
+
     while (((gNetData->playerID[whichPlayer].exists == false) ||
             ( gNetData->playerID[whichPlayer].id ==
                 Glue_NSpPlayer_GetMyID( gNetData->netGame))) &&
@@ -856,7 +856,7 @@ void GetOtherPlayerName( StringPtr *s)
     {
         whichPlayer++;
     }
-    
+
     if ( whichPlayer < kMaxNetPlayerNum)
     {
         *s = gNetData->playerID[whichPlayer].name;
@@ -869,16 +869,16 @@ void GetOtherPlayerName( StringPtr *s)
 
 void SetProtocolListFromFlags( NSpProtocolListReference *theList, unsigned long flags)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     NSpProtocolReference        atRef, ipRef;
     OSStatus                    status = noErr;
-    
+
     status = Glue_NSpProtocolList_New(NULL, theList);
     if ( status != noErr)
     {
         ShowErrorOfTypeOccurred( eContinueOnlyErr, kErrorStrID, kNSpProtocolListError, status, __FILE__, 3);
     }
-    
+
     if ( flags & kProtocolAppleTalkFlag)
     {
         atRef = Glue_NSpProtocol_CreateAppleTalk( gNetData->gameName, "\par12", 0, 0);
@@ -888,7 +888,7 @@ void SetProtocolListFromFlags( NSpProtocolListReference *theList, unsigned long 
             ShowErrorOfTypeOccurred( eContinueOnlyErr, kErrorStrID, kNSpProtocolATError, status, __FILE__, 31);
         }
     }
-    
+
     if ( flags & kProtocolTCPIPFlag)
     {
         ipRef = Glue_NSpProtocol_CreateIP( 26370, 0, 0);
@@ -896,23 +896,23 @@ void SetProtocolListFromFlags( NSpProtocolListReference *theList, unsigned long 
         if ( status != noErr)
         {
             ShowErrorOfTypeOccurred( eContinueOnlyErr, kErrorStrID, kNSpProtocolTCPIPError, status, __FILE__, 32);
-        }   
+        }
     }
-#endif  
+#endif
 }
 
 void GetProtocolFlagsFromList( NSpProtocolListReference theList, unsigned long *flags)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     long                    num = Glue_NSpProtocolList_GetCount( theList), i, j;
     NSpProtocolReference    tRef;
     Ptr                     definitionString = NewPtr( kNSpMaxDefinitionStringLen);
     char                    *c;
-    
+
     *flags = 0;
-    
+
     if ( definitionString == nil) return;
-    
+
     for ( i = 0; i < num; i++)
     {
         tRef = Glue_NSpProtocolList_GetIndexedRef( theList, i);
@@ -925,12 +925,12 @@ void GetProtocolFlagsFromList( NSpProtocolListReference theList, unsigned long *
         Glue_NSpProtocol_ExtractDefinitionString( tRef, definitionString);
         if ( IsIDInDefString( definitionString, (char *)kNSpAppleTalkDefString))
             *flags |= kProtocolAppleTalkFlag;
-        
+
         if ( IsIDInDefString( definitionString, (char *)kNSpTCPIPDefString))
             *flags |= kProtocolTCPIPFlag;
     }
 
-    DisposePtr( definitionString);  
+    DisposePtr( definitionString);
 #endif
 }
 
@@ -938,7 +938,7 @@ Boolean IsIDInDefString( char *definitionString, char *idString)
 {
     char    *dc, ds[kNSpDefStringIDLen + 1], *dsc;
     long    i, j;
-    
+
     i = 0;
     dc = definitionString;
     do
@@ -959,25 +959,25 @@ Boolean IsIDInDefString( char *definitionString, char *idString)
 
 Boolean DoHostGame( void)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     OSStatus                    status = noErr;
     NSpProtocolListReference    theList = NULL;
     Boolean                     OKHit;
-    
+
     if ( Wrap_GRIsHostCmd()) WriteDebugLine((char *)"\pGR HOST");
     else WriteDebugLine((char *)"\pNO GR HOST");
 
     ClearNetData();
-    
+
     SetProtocolListFromFlags( &theList, gNetData->protocolFlags);
     //  Do the host dialog
-    
+
     OKHit = Wrap_GRNSpDoModalHostDialog(theList, gNetData->gameName, gNetData->playerName,
         gNetData->password, nil);
     InitCursor();
     if (!OKHit)
         return (false);
-    
+
     //  Now host the game
     status = Glue_NSpGame_Host( &gNetData->netGame, theList, kMaxNetPlayerNum, gNetData->gameName,
                 gNetData->password, gNetData->playerName, 0, kNSpClientServer, 0);
@@ -991,17 +991,17 @@ Boolean DoHostGame( void)
     Glue_NSpProtocolList_Dispose(theList);
     gNetData->hosting = true;
     gNetData->netState = kHosting;
-    
+
     // let all the players join
 //  OKHit = WaitForAllPlayers( kMaxNetPlayerNum);
     if (OKHit == false)
     {
-        return (false);     
+        return (false);
     } else
     {
         gNetData->netState = kStarting;
     }
-    
+
     mWriteDebugString("\pGRGetPortNumber:");
     WriteDebugLong( Wrap_GRGetPortNumber());
 
@@ -1014,22 +1014,22 @@ Boolean DoHostGame( void)
 Boolean DoJoinGameModalDialog( void)
 
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     Boolean             OKHit = true;
 
     ClearNetData();
-    
+
     gNetData->hosting = false;
-    
+
     mWriteDebugString("\pNSpDoJoinModal");
-    
+
     gNetData->address = Wrap_GRNSpDoModalJoinDialog("\par12", "\pSelect Game:",
         gNetData->playerName, gNetData->password, NULL);
     InitCursor();
     if (gNetData->address == NULL)      // The user cancelled
         return (false);
     WriteDebugHexDump( (Ptr)gNetData->address, 16);
-    
+
     return( true);
 #else
     return( false);
@@ -1038,7 +1038,7 @@ Boolean DoJoinGameModalDialog( void)
 
 Boolean DoJoinGame( void)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     OSStatus            status;
     Boolean             OKHit = true;
 
@@ -1048,7 +1048,7 @@ Boolean DoJoinGame( void)
     WriteDebugLong( status);
     mWriteDebugString("\pGRGetPortNumber:");
     WriteDebugLong( Wrap_GRGetPortNumber());
-    
+
     if ( status != noErr)
     {
         switch( status)
@@ -1060,12 +1060,12 @@ Boolean DoJoinGame( void)
             case kNSpJoinFailedErr:
                 return( false);
                 break;
-                
+
             case kNSpInvalidAddressErr:
                 ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil,
                     kNSpInvalidAddressError, -1, -1, -1, __FILE__, 2);
                 break;
-            
+
             default:
                 ShowErrorOfTypeOccurred( eContinueOnlyErr, kErrorStrID, kNSpJoinError,
                     status, __FILE__, 5);
@@ -1084,7 +1084,7 @@ Boolean DoJoinGame( void)
     }
 
     return OKHit;
-    
+
 error:
     return (false);
 #else
@@ -1096,7 +1096,7 @@ error:
 Boolean WaitForAllPlayers( short maxPlayerNum)
 {
     NSpMessageHeader    *theMessage;
-    
+
     while ( gNetData->playerNum < maxPlayerNum)
     {
         while ((theMessage = NSpMessage_Get(gNetData->netGame)) != NULL)
@@ -1106,14 +1106,14 @@ Boolean WaitForAllPlayers( short maxPlayerNum)
                 gNetData->playerNum++;
                 AddPlayerID( theMessage->from);
             }
-            else if (theMessage->what == kNSpPlayerLeft) 
+            else if (theMessage->what == kNSpPlayerLeft)
             {
                 gNetData->playerNum--;
                 RemovePlayerID( theMessage->from);
             }
             else
                 SysBeep( 20);
-                
+
             NSpMessage_Release(gNetData->netGame, theMessage);
         }
     }
@@ -1123,13 +1123,13 @@ Boolean WaitForAllPlayers( short maxPlayerNum)
 
 Boolean WaitForAllStart( void)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     NSpMessageHeader    *theMessage;
     Boolean             startYet = false;
     messageDataType     *theMessageData;
 
     gAresGlobal->gThisScenarioNumber = -1;
-    
+
     while (( gAresGlobal->gThisScenarioNumber < 0) || ( gAresGlobal->gPlayerAdmiralNumber < 0))
     {
 //      while ((theMessage = Glue_NSpMessage_Get(gNetData->netGame)) != NULL)
@@ -1145,7 +1145,7 @@ Boolean WaitForAllStart( void)
                 gAresGlobal->gThisScenarioNumber = theMessageData->data.packedData1;    //theMessageData->messageData.startMessage.whichChapter;
                 gRandomSeed = theMessageData->data.packedData2; //theMessageData->messageData.startMessage.randomSeed;
             }
-                
+
             Glue_NSpMessage_Release(gNetData->netGame, theMessage);
         }
         if ( (CommandKey()) && ( PeriodKey())) return ( false);
@@ -1158,10 +1158,10 @@ Boolean WaitForAllStart( void)
 
 void SendStartMessage(void)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     messageDataType     theMessage;
     OSStatus            status;
-    
+
     if ( gNetData->netGame != nil)
     {
         Glue_NSpClearMessageHeader(&theMessage.header);
@@ -1178,31 +1178,31 @@ void SendStartMessage(void)
 //  #ifdef kBackupData2
         theMessage.backupData2.packedData1 = theMessage.backupData2.packedData2 = 0xffffffff;
 //  #endif
-        
+
         status = Glue_NSpMessage_Send( gNetData->netGame, &theMessage.header,
             kNSpSendFlag_Registered);
         if ( status != noErr)
         {
             mWriteDebugString("\p**ERR SEND**");
         }
-        
+
     }
 #endif
 }
 
 void SendEndGame(void)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     OSStatus            status;
     NSpMessageHeader    theMessage;
-    
+
     if ( gNetData->netGame != nil)
     {
         Glue_NSpClearMessageHeader(&theMessage);
         theMessage.to = kNSpAllPlayers;
         theMessage.what = kNSpGameTerminated;
         theMessage.messageLen = sizeof(NSpMessageHeader);
-        
+
         status = Glue_NSpMessage_Send(gNetData->netGame, &theMessage, kNSpSendFlag_Registered);
     }
 #endif
@@ -1225,7 +1225,7 @@ Boolean GotAllMessages( void)
 //          WriteDebugLong( gNetData->gotMessageFlag[i]);
         }
 */  }
-    
+
     return ( result);
 }
 
@@ -1233,7 +1233,7 @@ void ResetGotMessages( long time)
 {
     short   i;
     long    minNetLatency = gNetLatency;
-    
+
     time %= kMaxNetTime;
     for ( i = 0; i < kMaxNetPlayerNum; i++)
     {
@@ -1252,7 +1252,7 @@ void ResetGotMessages( long time)
         gNetData->target = false;
 //      gNetData->theseKeys[i] = 0;
     }
-    
+
     if ( minNetLatency < 3) minNetLatency = 3;
     RemoveExpiredSentMessages( time - ( minNetLatency * 2));
 }
@@ -1281,7 +1281,7 @@ long UseNextLatency( void)
 /* SetNetPlayerData: preserves races, admiralNum, and opponent color
 */
 /*void SetNetPlayerData( long whichPlayer, short race, unsigned char color)
-    
+
 {
     gNetData->myRace = myRace;
     gNetData->opponentRace = opponentRace;
@@ -1302,7 +1302,7 @@ long ProcessPreGameMessages( Handle *text, long *data, long *data2, long *data3,
     unsigned char *value1, unsigned char *value2, unsigned char *value3, unsigned char *value4)
 {
 
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     NSpMessageHeader            *theMessage;
     shortMessageType            *shortMessage;
     verbosePreGameMessageType   *verboseMessage;
@@ -1311,7 +1311,7 @@ long ProcessPreGameMessages( Handle *text, long *data, long *data2, long *data3,
     long                        result = eNoMessage;
     short                       roundTripTime = eNoTime;
     unsigned long               textMessageChar;
-    
+
 #pragma unused ( tripTime)
     if (gNetData->netGame != nil)
     {
@@ -1340,34 +1340,34 @@ long ProcessPreGameMessages( Handle *text, long *data, long *data2, long *data3,
                     result = theMessage->what;
 //                  SysBeep(20);
                     break;
-                
+
                 case ePreGameOpenScenarioMessage:
                 {
                     openScenarioPreGameMessageType *openMessage;
-                    
+
                     openMessage = (openScenarioPreGameMessageType *)theMessage;
-                    
+
                     CopyPString( gAresGlobal->otherPlayerScenarioFileName,
                         openMessage->fileName);
-                    
+
                     CopyPString( gAresGlobal->otherPlayerScenarioFileURL,
                         openMessage->url);
-                    
+
                     gAresGlobal->otherPlayerScenarioFileVersion =
                         openMessage->version;
-                    
+
                     gAresGlobal->otherPlayerScenarioFileCheckSum =
                         openMessage->checkSum;
-                        
+
                     result = ePreGameOpenScenarioMessage;
                 }
                     break;
-                    
+
                 case eCancelMessage:
                 case kNSpGameTerminated:
                     result = eCancelMessage;
                     break;
-                
+
                 case eClientReadyMessage:
                 case eHostAcceptsMessage:
                     if (( data != nil) && ( data2 != nil) && ( data3 != nil))
@@ -1379,7 +1379,7 @@ long ProcessPreGameMessages( Handle *text, long *data, long *data2, long *data3,
                         *data3 = verboseMessage->data3;
                     }
                     break;
-                    
+
                 case eSetLevelMessage:
                     if ( data != nil)
                     {
@@ -1388,7 +1388,7 @@ long ProcessPreGameMessages( Handle *text, long *data, long *data2, long *data3,
                         *data = shortMessage->shortData;
                     }
                     break;
-                
+
                 case eClientMakeChangesMessage:
                     if ( data != nil)
                     {
@@ -1397,7 +1397,7 @@ long ProcessPreGameMessages( Handle *text, long *data, long *data2, long *data3,
                         *data = shortMessage->shortData;
                     }
                     break;
-                
+
                 case eSetRaceMessage:
                     if ( data != nil)
                     {
@@ -1406,7 +1406,7 @@ long ProcessPreGameMessages( Handle *text, long *data, long *data2, long *data3,
                         *data = shortMessage->shortData;
                     }
                     break;
-                
+
                 case eHostIsPlayer2Message:
                     if ( data != nil)
                     {
@@ -1415,7 +1415,7 @@ long ProcessPreGameMessages( Handle *text, long *data, long *data2, long *data3,
                         *data = shortMessage->shortData;
                     }
                     break;
-                
+
                 case eSetLatencyMessage:
                     if ( data != nil)
                     {
@@ -1424,7 +1424,7 @@ long ProcessPreGameMessages( Handle *text, long *data, long *data2, long *data3,
                         *data = shortMessage->shortData;
                     }
                     break;
-                
+
 /*              case eTextMessage:
                     if ( text != nil)
                     {
@@ -1439,18 +1439,18 @@ long ProcessPreGameMessages( Handle *text, long *data, long *data2, long *data3,
                         }
                     }
                     break;
-*/              
+*/
                 case eStartTextMessage:
                     SysBeep(20);
                     StartIncomingTextMessage();
                     break;
-                
+
                 case eAddTextMessage:
                     SysBeep(20);
                     theMessageData = (messageDataType *)theMessage;
                     AddIncomingTextMessageLong( theMessageData->data.packedData1, 32);
                     break;
-                
+
                 case eEndTextMessage:
                     SysBeep(20);
                     if ( text != nil)
@@ -1465,44 +1465,44 @@ long ProcessPreGameMessages( Handle *text, long *data, long *data2, long *data3,
                         }
                     }
                     break;
-                    
+
                 case kNSpPlayerJoined:
 //                  mWriteDebugString("\pJoined");
-                    
+
                     joinMessage = (NSpPlayerJoinedMessage *)theMessage;
-                    
+
                     result = kNSpPlayerJoined;
                     AddPlayerID( joinMessage->playerInfo.id, gNetData->playerNum);
                     gNetData->playerNum++;
                     break;
-                
+
                 case kNSpPlayerLeft:
 //                  mWriteDebugString("\pLeft");
                     result = kNSpPlayerLeft;
                     RemovePlayerID( theMessage->from);
                     gNetData->playerNum--;
                     break;
-                
+
                 case eAdmiralNumberMessage:
                     result = eAdmiralNumberMessage;
                     shortMessage = (shortMessageType *)theMessage;
                     AddPlayerID( theMessage->from, shortMessage->shortData);
                     break;
-                    
+
                 case eRoundTripGetReadyMessage:
                     roundTripTime = ePassiveTime;
                     break;
-                
+
                 case eRoundTripReadyMessage:
                     roundTripTime = eActiveTime;
                     break;
-                
+
                 case eStartMessage:
                     theMessageData = (messageDataType *)theMessage;
                     gAresGlobal->gThisScenarioNumber = theMessageData->data.packedData1; //theMessageData->messageData.startMessage.whichChapter;
                     gRandomSeed = theMessageData->data.packedData2; //theMessageData->messageData.startMessage.randomSeed;
                     break;
-                
+
                 case eSetResendDelayMessage:
                     shortMessage = (shortMessageType *)theMessage;
                     result = eSetResendDelayMessage;
@@ -1512,7 +1512,7 @@ long ProcessPreGameMessages( Handle *text, long *data, long *data2, long *data3,
                         *data = shortMessage->shortData;
                     }
                     break;
-                
+
                 case eSetRegisteredStateMessage:
                     shortMessage = (shortMessageType *)theMessage;
                     result = eSetRegisteredStateMessage;
@@ -1523,7 +1523,7 @@ long ProcessPreGameMessages( Handle *text, long *data, long *data2, long *data3,
                         *data = shortMessage->shortData;
                     }
                     break;
-                
+
                 case eSetBandwidthMessage:
                     shortMessage = (shortMessageType *)theMessage;
                     result = eSetBandwidthMessage;
@@ -1545,7 +1545,7 @@ long ProcessPreGameMessages( Handle *text, long *data, long *data2, long *data3,
                     if ( data4 != nil)
                         *data4 = verboseMessage->data4;
                     break;
-                    
+
                 case eDummyMessage:
                     theMessageData = (messageDataType *)theMessage;
                     result = eDummyMessage;
@@ -1582,7 +1582,7 @@ long ProcessPreGameMessages( Handle *text, long *data, long *data2, long *data3,
                         }
                     }
                     break;
-                
+
                 case ePreGameCharacterMessage:
                     theMessageData = (messageDataType *)theMessage;
                     result = ePreGameCharacterMessage;
@@ -1600,7 +1600,7 @@ long ProcessPreGameMessages( Handle *text, long *data, long *data2, long *data3,
                         textMessageChar >>= (long)8;
                         *value2 = textMessageChar;
                     }
-                    
+
                     if ( value3 != nil)
                     {
                         textMessageChar = theMessageData->data.packedData2 & 0x00ff0000;
@@ -1615,7 +1615,7 @@ long ProcessPreGameMessages( Handle *text, long *data, long *data2, long *data3,
                         *value4 = textMessageChar;
                     }
                     break;
-                
+
                 case ePreGamePortraitMessage:
                     theMessageData = (messageDataType *)theMessage;
                     result = ePreGamePortraitMessage;
@@ -1647,11 +1647,11 @@ long ProcessPreGameMessages( Handle *text, long *data, long *data2, long *data3,
                         *value4 = textMessageChar;
                     }
                     break;
-                    
+
                 default:
                     result = theMessage->what;
                     break;
-                
+
             }
             Glue_NSpMessage_Release(gNetData->netGame, theMessage);
         }
@@ -1664,10 +1664,10 @@ long ProcessPreGameMessages( Handle *text, long *data, long *data2, long *data3,
 
 void SendPreGameBasicMessage( long whatMessage)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     NSpMessageHeader    theMessage;
     OSStatus            status;
-    
+
     if ( gNetData->netGame != nil)
     {
         Glue_NSpClearMessageHeader(&theMessage);
@@ -1676,7 +1676,7 @@ void SendPreGameBasicMessage( long whatMessage)
         theMessage.messageLen = sizeof( NSpMessageHeader);
         status = Glue_NSpMessage_Send( gNetData->netGame, &theMessage,
             kNSpSendFlag_Registered);
-        
+
         if ( status != noErr)
         {
             mWriteDebugString("\p**SEND ERR**");
@@ -1688,11 +1688,11 @@ void SendPreGameBasicMessage( long whatMessage)
 void SendPreGameDummyMessage( long time, Boolean registered,
     short useLastSentChar)  // 0 = no, 1 = yes, -1 = send no char)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     messageDataType     theMessage;
     OSStatus            status;
     unsigned long       messageChar;
-    
+
     if ( gNetData->netGame != nil)
     {
         Glue_NSpClearMessageHeader(&theMessage.header);
@@ -1738,7 +1738,7 @@ void SendPreGameDummyMessage( long time, Boolean registered,
             theMessage.data.packedData2 = 0xffffffff;
         }
 
-        
+
 //  #ifdef kBackupData
         theMessage.backupData.packedData1 = theMessage.backupData.packedData2 = 0xffffffff;
 //  #endif
@@ -1747,11 +1747,11 @@ void SendPreGameDummyMessage( long time, Boolean registered,
 //  #endif
         if ( registered)
         {
-            status = Glue_NSpMessage_Send( gNetData->netGame, &theMessage.header, 
+            status = Glue_NSpMessage_Send( gNetData->netGame, &theMessage.header,
                 kNSpSendFlag_Registered);
         } else
         {
-            status = Glue_NSpMessage_Send( gNetData->netGame, &theMessage.header, 
+            status = Glue_NSpMessage_Send( gNetData->netGame, &theMessage.header,
                 kNSpSendFlag_Normal);
         }
         if ( status != noErr)
@@ -1765,11 +1765,11 @@ void SendPreGameDummyMessage( long time, Boolean registered,
 void SendPreGameAnyMessage( long time, Boolean registered, long message, unsigned char value1,
     unsigned char value2, unsigned char value3, unsigned char value4, Boolean useLastMessage)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     messageDataType     theMessage;
     OSStatus            status;
     unsigned long       messageChar;
-    
+
     if ( gNetData->netGame != nil)
     {
         Glue_NSpClearMessageHeader(&theMessage.header);
@@ -1787,17 +1787,17 @@ void SendPreGameAnyMessage( long time, Boolean registered, long message, unsigne
             messageChar <<= (unsigned long)24;
             messageChar &= 0xff000000;
             theMessage.data.packedData2 = messageChar;
-            
+
             messageChar = value3;
             messageChar <<= (unsigned long)16;
             messageChar &= 0x00ff0000;
             theMessage.data.packedData2 |= messageChar;
-            
+
             messageChar = value2;
             messageChar <<= (unsigned long)8;
             messageChar &= 0x0000ff00;
             theMessage.data.packedData2 |= messageChar;
-            
+
             messageChar = value1;
             messageChar &= 0x000000ff;
             theMessage.data.packedData2 |= messageChar;
@@ -1805,7 +1805,7 @@ void SendPreGameAnyMessage( long time, Boolean registered, long message, unsigne
             gNetData->backupData.packedData2 = theMessage.data.packedData2;
             gNetData->pregamePreviousMessage = message;
         }
-                
+
 //  #ifdef kBackupData
         theMessage.backupData.packedData1 = theMessage.backupData.packedData2 = 0xffffffff;
 //  #endif
@@ -1814,11 +1814,11 @@ void SendPreGameAnyMessage( long time, Boolean registered, long message, unsigne
 //  #endif
         if ( registered)
         {
-            status = Glue_NSpMessage_Send( gNetData->netGame, &theMessage.header, 
+            status = Glue_NSpMessage_Send( gNetData->netGame, &theMessage.header,
                 kNSpSendFlag_Registered);
         } else
         {
-            status = Glue_NSpMessage_Send( gNetData->netGame, &theMessage.header, 
+            status = Glue_NSpMessage_Send( gNetData->netGame, &theMessage.header,
                 kNSpSendFlag_Normal);
         }
         if ( status != noErr)
@@ -1831,95 +1831,95 @@ void SendPreGameAnyMessage( long time, Boolean registered, long message, unsigne
 
 void SendPreGameShortMessage( long message, long shortData)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     shortMessageType    theMessage;
     OSStatus            status;
-    
+
     if ( gNetData->netGame != nil)
     {
         Glue_NSpClearMessageHeader(&theMessage.header);
         theMessage.header.to = kNSpAllPlayers;
         theMessage.header.what = message;
         theMessage.header.messageLen = sizeof(shortMessageType);
-        
+
         theMessage.shortData = shortData;
-        
+
         status = Glue_NSpMessage_Send( gNetData->netGame, &theMessage.header,
             kNSpSendFlag_Registered);
-        
+
         if ( status != noErr)
         {
             mWriteDebugString("\p**SEND ERR**");
         }
     }
-#endif  
+#endif
 }
 
 void SendPreGameVerboseMessage( long message, long data1, long data2, long data3, long data4)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     verbosePreGameMessageType   theMessage;
     OSStatus                    status;
-    
+
     if ( gNetData->netGame != nil)
     {
         Glue_NSpClearMessageHeader(&theMessage.header);
         theMessage.header.to = kNSpAllPlayers;
         theMessage.header.what = message;
         theMessage.header.messageLen = sizeof(verbosePreGameMessageType);
-        
+
         theMessage.data1 = data1;
         theMessage.data2 = data2;
         theMessage.data3 = data3;
         theMessage.data4 = data4;
-        
+
         status = Glue_NSpMessage_Send( gNetData->netGame, &theMessage.header,
             kNSpSendFlag_Registered);
-        
+
         if ( status != noErr)
         {
             mWriteDebugString("\p**SEND ERR**");
         }
     }
-#endif  
+#endif
 }
 
 void SendPreGameOpenScenarioMessage( long message, StringPtr fileName,
     StringPtr url, unsigned long version, unsigned long checkSum)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     openScenarioPreGameMessageType  theMessage;
     OSStatus                        status;
-    
+
     if ( fileName == nil) return;
     if ( url == nil) return;
-    
+
     if ( gNetData->netGame != nil)
     {
         Glue_NSpClearMessageHeader(&theMessage.header);
         theMessage.header.to = kNSpAllPlayers;
         theMessage.header.what = message;
         theMessage.header.messageLen = sizeof(openScenarioPreGameMessageType);
-        
+
         CopyPString( theMessage.fileName, fileName);
         CopyPString( theMessage.url, url);
         theMessage.version = version;
         theMessage.checkSum = checkSum;
-        
+
         status = Glue_NSpMessage_Send( gNetData->netGame, &theMessage.header,
             kNSpSendFlag_Registered);
-        
+
         if ( status != noErr)
         {
             mWriteDebugString("\p**SEND ERR**");
         }
     }
-#endif  
+#endif
 }
 
 void SendPreGameTextMessage( Ptr sourceText, long length)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
 //  SendPreGameBasicMessage( eStartTextMessage);
     if ( length > ( kTextMessageLength)) length = kTextMessageLength;
     if ( gNetData->lastOutgoingCharNum + length >= kTextMessageLength )
@@ -1959,13 +1959,13 @@ void SendPreGameTextMessage( Ptr sourceText, long length)
 Boolean ProcessInGameMessages( long time, short *pauseLevel)
 
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     messageDataType     *theMessageData;
     NSpMessageHeader    *theMessage;
     Boolean             endGame = false;
     long                messageTime, admiralNumber;
     packedDataType      *packedData;
-    
+
     time %= kMaxNetTime;
     while ((gNetData->netGame) && ((theMessage = Glue_NSpMessage_Get(gNetData->netGame)) != nil))
     {
@@ -2027,7 +2027,7 @@ Boolean ProcessInGameMessages( long time, short *pauseLevel)
 */      }
         Glue_NSpMessage_Release(gNetData->netGame, theMessage);
     }
-    
+
     do
     {
         packedData = PeekMessageFromQueue();
@@ -2072,10 +2072,10 @@ Boolean HandleInGameMessage( long whatMessage, packedDataType *theMessageData, B
     unsigned long       admiralNumber = (theMessageData->packedData2 & kAdmiralMask) >> kAdmiralBitShift;
     Boolean             stopNetworking = false, gotTextMessageChar = false;
     unsigned long       textMessageChar = 0;
-    
+
     switch( whatMessage)
     {
-/*      case eStandardMessage:              
+/*      case eStandardMessage:
             if (( !gNetData->gotMessage[admiralNumber]) &&
                 ( rightNow))
             {
@@ -2086,7 +2086,7 @@ Boolean HandleInGameMessage( long whatMessage, packedDataType *theMessageData, B
                     theMessageData->messageData.standardMessage.keyState;
             }
             break;
-        
+
         case eShortMessage:
             if ( rightNow)
             {
@@ -2102,7 +2102,7 @@ Boolean HandleInGameMessage( long whatMessage, packedDataType *theMessageData, B
                         (theMessageData->fromAdmiralNumber & kRandomSeedSynchMask))
                     {
                         Str255  mySeed, yourSeed;
-                        
+
                         gNetData->inSynch = false;
 
                         NumToString( gNetData->preserveSeed, mySeed);
@@ -2115,7 +2115,7 @@ Boolean HandleInGameMessage( long whatMessage, packedDataType *theMessageData, B
 //                  kNoNetKeyChange;
             }
             break;
-            
+
         case eSelectMessage:
             if (( !(gNetData->gotMessageFlag[admiralNumber] &
                 kHasSelectMessageFlag)) && (rightNow))
@@ -2128,7 +2128,7 @@ Boolean HandleInGameMessage( long whatMessage, packedDataType *theMessageData, B
                     theMessageData->messageData.selectMessage.target;
             }
             break;
-        
+
         case eMenuCommandMessage:
             if (( !(gNetData->gotMessageFlag[admiralNumber] &
                 kHasMenuMessageFlag)) && ( rightNow))
@@ -2142,7 +2142,7 @@ Boolean HandleInGameMessage( long whatMessage, packedDataType *theMessageData, B
             }
             break;
 */
-        
+
         case ePackedMessage:
             if ( rightNow)
             {
@@ -2184,7 +2184,7 @@ Boolean HandleInGameMessage( long whatMessage, packedDataType *theMessageData, B
                             gotTextMessageChar = true;
                         } else
                         {
-                            textMessageChar = 
+                            textMessageChar =
                                 ( theMessageData->packedData1 & kWhichLineMask) >>
                                 kWhichLineBitShift;
                             gNetData->thisCheat[admiralNumber] = textMessageChar;
@@ -2199,7 +2199,7 @@ Boolean HandleInGameMessage( long whatMessage, packedDataType *theMessageData, B
                         if (gNetData->preserveSeed !=
                             (theMessageData->packedData1 & kRandomSeedSynchMask))
                         {
-                            
+
                             gNetData->inSynch = false;
                         }
                     }
@@ -2217,12 +2217,12 @@ Boolean HandleInGameMessage( long whatMessage, packedDataType *theMessageData, B
                 }
             }
             break;
-                    
+
         case eResendMessage:
             mWriteDebugString("\p< RESEND");
             ResendSentMessage( theMessageData->packedData1 & kGameTimeMask);
             break;
-        
+
 /*      case eSetLatencyMessage:
             if (( !(gNetData->gotMessageFlag[admiralNumber] & kHasSetLatencyMessageFlag)) &&
                 ( rightNow))
@@ -2233,7 +2233,7 @@ Boolean HandleInGameMessage( long whatMessage, packedDataType *theMessageData, B
             }
             break;
 */
-/*          
+/*
         case ePreserveSeedMessage:
             mWriteDebugString("\p< PRESERVE");
             if (( !(gNetData->gotMessageFlag[admiralNumber] & kHasPreserveSeedMessageFlag)) &&
@@ -2247,7 +2247,7 @@ Boolean HandleInGameMessage( long whatMessage, packedDataType *theMessageData, B
             }
             break;
 */
-/*          
+/*
         case eSanityCheckMessage:
             mWriteDebugString("\p< SANITY");
             if (( !(gNetData->gotMessageFlag[admiralNumber] & kHasSanityCheckMessageFlag)) &&
@@ -2262,18 +2262,18 @@ Boolean HandleInGameMessage( long whatMessage, packedDataType *theMessageData, B
                 gNetData->preserveSeed = -1;
             }
             break;
-*/          
+*/
         case eStartPauseMessage:
 //          mWriteDebugString("\p< STARTPAUSE");
             (*pauseLevel)++;
             break;
-        
+
         case eEndPauseMessage:
             (*pauseLevel)--;
             // |= kGotEndPauseMessageFlag;
 //          mWriteDebugString("\p< ENDPAUSE");
             break;
-            
+
 /*      case eTextMessage:
             textPtr = (char *)theMessageData + sizeof( sameMessageDataType);
             HandleInGameTextMessage( textPtr,
@@ -2284,50 +2284,50 @@ Boolean HandleInGameMessage( long whatMessage, packedDataType *theMessageData, B
             SysBeep(20);
             StartIncomingTextMessage();
             break;
-        
+
         case eAddTextMessage:
             SysBeep(20);
             AddIncomingTextMessageLong( theMessageData->packedData1, 32);
             break;
-        
+
         case eEndTextMessage:
             SysBeep(20);
             HandleInGameTextMessage( (char *)gNetData->incomingMessage,
                 gNetData->incomingCharNum);
             StopIncomingTextMessage( nil);
             break;
-        
+
         case eSetResendDelayMessage:
             mWriteDebugString("\p<< DELAY:");
             WriteDebugLong( theMessageData->packedData1);
             SetResendDelay( theMessageData->packedData1);
             break;
-        
+
         case eSetRegisteredStateMessage:
             mWriteDebugString("\p<< REGISTERED:");
             WriteDebugLong( theMessageData->packedData1);
             SetRegisteredSetting( theMessageData->packedData1);
             break;
-        
+
         case eSetBandwidthMessage:
             mWriteDebugString("\p<< BAND:");
             WriteDebugLong( theMessageData->packedData1);
             SetBandwidth( theMessageData->packedData1);
             break;
-            
+
         case kNSpPlayerLeft:
             stopNetworking = true;
             gNetData->playerNum--;
             break;
-        
+
         case kNSpPlayerJoined:
             gNetData->playerNum++;
             break;
-        
+
         case kNSpGameTerminated:
             stopNetworking = true;
             break;
-        
+
         case eBarfOutDebugDataMessage:
             DebugFileSave( kDebugFileName);
             DebugFileCleanup();
@@ -2336,14 +2336,14 @@ Boolean HandleInGameMessage( long whatMessage, packedDataType *theMessageData, B
     return( stopNetworking);
 }
 
-// given a ptr to 
+// given a ptr to
 void HandleInGameTextMessage( char *textPtr, long len)
 {
     Str255  s;
     char    *c;
-    
+
     mWriteDebugString("\pGOT TEXT");
-    
+
     if ( len > 250) len = 250;
     c = (char *)s;
     *c = len;
@@ -2371,7 +2371,7 @@ void ExecuteInGameData( void)
 {
     spaceObjectType *anObject;
     long            i;
-    
+
     for ( i =0; i < kMaxNetPlayerNum; i++)
     {
         if (( !gNetData->inSynch) && ( !gNetData->haveEncounteredSynchError))
@@ -2397,7 +2397,7 @@ void ExecuteInGameData( void)
                 StopNetworking();
             }
         }
-        
+
         anObject = GetAdmiralFlagship( i);
         if ( gNetData->theseKeys[i] != kNoNetKeyChange)
             anObject->keysDown = gNetData->theseKeys[i];
@@ -2406,7 +2406,7 @@ void ExecuteInGameData( void)
             ( anObject->keysDown & ( kUpKey | kDownKey | kLeftKey | kRightKey)))
         {
             anObject->keysDown |= kAutoPilotKey;
-        }               
+        }
 */
         if ( gNetData->thisSelectNum[i] >= 0)
         {
@@ -2414,30 +2414,30 @@ void ExecuteInGameData( void)
                 gNetData->thisSelectIsTarget[i],
                 i);
         }
-        
+
         if ( gNetData->thisMenuPage[i] >= 0)
         {
             MiniComputerExecute( gNetData->thisMenuPage[i],
                 gNetData->thisMenuLine[i],
                 i);
         }
-        
+
         if ( gNetData->thisCheat[i] >= 0)
         {
             ExecuteCheat( gNetData->thisCheat[i], i);
         }
     }
-    
-    
+
+
 }
 
 void SendPrefabMessage( packedDataType *theData)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     messageDataType     theMessage;
     OSStatus            status;
     spaceObjectType     *anObject = GetAdmiralFlagship( gAresGlobal->gPlayerAdmiralNumber);
-    
+
     if ( gNetData->netGame != nil)
     {
         Glue_NSpClearMessageHeader(&theMessage.header);
@@ -2474,13 +2474,13 @@ void SendPrefabMessage( packedDataType *theData)
 
 Boolean SendInGameMessage( long time)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     messageDataType     theMessage;
     OSStatus            status = noErr;
     spaceObjectType     *anObject = GetAdmiralFlagship( gAresGlobal->gPlayerAdmiralNumber);
     Boolean             charSent = false;
     unsigned long       textMessageChar;
-    
+
 //  if ( time > (gAresGlobal->gGameTime + (gNetLatency * 2))) DebugStr("\pTIME PROBLEM!");
     time %= kMaxNetTime;
     if ( gNetData->netGame != nil)
@@ -2499,7 +2499,7 @@ Boolean SendInGameMessage( long time)
             anObject->keysDown = 0;
         }
         theMessage.data.packedData1 |= time & kGameTimeMask;
-        
+
         if ( gNetData->pageNum >= 0)
         {
             theMessage.data.packedData1 |= (gNetData->pageNum << kWhichPageBitShift) & kWhichPageMask;
@@ -2522,7 +2522,7 @@ Boolean SendInGameMessage( long time)
         {
             theMessage.data.packedData1 |= kWhichPageMask | kWhichLineMask;
         }
-        
+
         if ( gNetData->whichShip >= 0)
         {
             theMessage.data.packedData2 |= gNetData->whichShip << kWhichShipBitShift;
@@ -2534,7 +2534,7 @@ Boolean SendInGameMessage( long time)
         textMessageChar = gAresGlobal->gSynchValue;
         textMessageChar <<= kSynchBitShift;
         theMessage.data.packedData1 |= textMessageChar & kRandomSeedSynchMask;//gRandomSeed & kRandomSeedSynchMask;
-        
+
 /*      DebugFileAppendString( "\pSM\t");
         DebugFileAppendLong( gAresGlobal->gGameTime);
         DebugFileAppendString( "\p\t");
@@ -2555,7 +2555,7 @@ Boolean SendInGameMessage( long time)
             gNetData->backupData2.packedData1 = gNetData->backupData.packedData1;
             gNetData->backupData2.packedData2 = gNetData->backupData.packedData2;
         }
-                
+
         if ( gNetLatency > 0)
         {
             theMessage.backupData.packedData1 = gNetData->backupData.packedData1;
@@ -2563,13 +2563,13 @@ Boolean SendInGameMessage( long time)
             gNetData->backupData.packedData1 = theMessage.data.packedData1;
             gNetData->backupData.packedData2 = theMessage.data.packedData2;
         }
-        
+
         if ( !InsertMessageInQueue( &(theMessage.data), time)) return( false);
         if ( !StoreSentMessage( &(theMessage.data))) return( false);
-    
+
         if (( gNetData->registeredFlags & kLowerBandwidth) && ( gNetLatency > kMessageLatencyUnit) &&
              ( !(time & 0x00000001))) return true;
-        
+
         if ( gNetData->registeredFlags & kRegisterStandard)
         {
 //          mWriteDebugString("\p STAND REG");
@@ -2595,12 +2595,12 @@ Boolean SendInGameMessage( long time)
 
 Boolean SendInGameBasicMessage( long time, long whatMessage, Boolean registered, Boolean toSelf)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     messageDataType     theMessage;
     OSStatus            status;
 
     time %= kMaxNetTime;
-    
+
     if ( gNetData->netGame != nil)
     {
         Glue_NSpClearMessageHeader(&theMessage.header);
@@ -2622,10 +2622,10 @@ Boolean SendInGameBasicMessage( long time, long whatMessage, Boolean registered,
         {
             status = NSpMessage_Send( gNetData->netGame, &theMessage.header, kNSpSendFlag_Registered);
         }
-            
+
 //      mWriteDebugString("\p> BASIC");
 //      WriteDebugLong( whatMessage);
-        
+
         if ( status != noErr)
         {
             mWriteDebugString("\p**SEND ERR**");
@@ -2666,7 +2666,7 @@ Boolean SendInGameBasicMessage( long time, long whatMessage, Boolean registered,
 Boolean SendInGameMiscLongMessage( long time, long whatMessage, long data,
     Boolean registered, Boolean toSelf)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     messageDataType     theMessage;
     OSStatus            status;
 
@@ -2693,10 +2693,10 @@ Boolean SendInGameMiscLongMessage( long time, long whatMessage, long data,
         {
             status = NSpMessage_Send( gNetData->netGame, &theMessage.header, kNSpSendFlag_Registered);
         }
-            
+
 //      mWriteDebugString("\p> BASIC");
 //      WriteDebugLong( whatMessage);
-        
+
         if ( status != noErr)
         {
             mWriteDebugString("\p**SEND ERR**");
@@ -2705,7 +2705,7 @@ Boolean SendInGameMiscLongMessage( long time, long whatMessage, long data,
         theMessage.data.packedData1 = data;
         theMessage.data.packedData2 = 0;
         theMessage.data.packedData2 |= gAresGlobal->gPlayerAdmiralNumber << kAdmiralBitShift;
-        
+
 //  #ifdef kBackupData
         theMessage.backupData.packedData1 = theMessage.backupData.packedData2 = 0xffffffff;
 //  #endif
@@ -2727,10 +2727,10 @@ Boolean SendInGameMiscLongMessage( long time, long whatMessage, long data,
             status = Glue_NSpMessage_Send( gNetData->netGame, &theMessage.header,
                 kNSpSendFlag_Registered);
         }
-            
+
 //      mWriteDebugString("\p> BASIC");
 //      WriteDebugLong( whatMessage);
-        
+
         if ( status != noErr)
         {
             mWriteDebugString("\p**SEND ERR**");
@@ -2744,9 +2744,9 @@ Boolean SendInGameMiscLongMessage( long time, long whatMessage, long data,
 
 Boolean SendSelectMessage( long time, long whichShip, Boolean target)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
 
-    time %= kMaxNetTime;    
+    time %= kMaxNetTime;
     if ( gNetData->netGame != nil)
     {
 /*      NSpClearMessageHeader(&theMessage.header);
@@ -2774,7 +2774,7 @@ Boolean SendSelectMessage( long time, long whichShip, Boolean target)
             status = NSpMessage_Send( gNetData->netGame, &theMessage.header,
                 kNSpSendFlag_Normal);
         }
-        
+
         if ( status != noErr)
         {
             mWriteDebugString("\p**SEND ERR**");
@@ -2793,9 +2793,9 @@ Boolean SendSelectMessage( long time, long whichShip, Boolean target)
 
 Boolean SendMenuMessage( long time, short whichPage, short whichLine)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
 
-    time %= kMaxNetTime;    
+    time %= kMaxNetTime;
     if ( gNetData->netGame != nil)
     {
 /*      NSpClearMessageHeader(&theMessage.header);
@@ -2817,7 +2817,7 @@ Boolean SendMenuMessage( long time, short whichPage, short whichLine)
             status = NSpMessage_Send( gNetData->netGame, &theMessage.header,
                 kNSpSendFlag_Normal);
         }
-        
+
         if ( status != noErr)
         {
             mWriteDebugString("\p**SEND ERR**");
@@ -2840,12 +2840,12 @@ void SendCheatMessage( short whichCheat)
 
 Boolean SendSetLatencyMessage( long time)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
 #pragma unused ( time)
 
 /*  messageDataType     theMessage;
     OSStatus            status;
-    
+
     if ( gNetData->netGame != nil)
     {
         if ( gNetData->latencySampleCount == kLatencySampleNum)
@@ -2862,7 +2862,7 @@ Boolean SendSetLatencyMessage( long time)
             if ( !InsertMessageInQueue( &theMessage)) return( false);
             if (!StoreSentMessage( &theMessage)) return( false);
             status = NSpMessage_Send( gNetData->netGame, &theMessage.header, kNSpSendFlag_Normal);
-            
+
             if ( status != noErr)
             {
                 mWriteDebugString("\p**SEND ERR**");
@@ -2879,11 +2879,11 @@ Boolean SendSetLatencyMessage( long time)
 
 Boolean SendSanityCheckMessage( long time)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
 #pragma unused ( time)
 /*  messageDataType     theMessage;
     OSStatus            status;
-    
+
     if ( gNetData->netGame != nil)
     {
         mWriteDebugString("\p> SANITY");
@@ -2898,7 +2898,7 @@ Boolean SendSanityCheckMessage( long time)
         if (!StoreSentMessage( &theMessage)) return( false);
         status = NSpMessage_Send( gNetData->netGame, &theMessage.header,
             kNSpSendFlag_Normal);
-        
+
         if ( status != noErr)
         {
             mWriteDebugString("\p**SEND ERR**");
@@ -2915,10 +2915,10 @@ Boolean SendSanityCheckMessage( long time)
 Boolean SendPreserveSeedMessage( long time)
 {
 #pragma unused ( time)
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
 /*  messageDataType     theMessage;
     OSStatus            status;
-    
+
     if ( gNetData->netGame != nil)
     {
         mWriteDebugString("\p> PRESERVE");
@@ -2931,7 +2931,7 @@ Boolean SendPreserveSeedMessage( long time)
         if ( !InsertMessageInQueue( &theMessage)) return( false);
         if (!StoreSentMessage( &theMessage)) return( false);
         status = NSpMessage_Send( gNetData->netGame, &theMessage.header, kNSpSendFlag_Normal);
-        
+
         if ( status != noErr)
         {
             mWriteDebugString("\p**SEND ERR**");
@@ -2984,10 +2984,10 @@ void SendInGameTextMessage( Ptr sourceText, long length)
 Boolean SendInGameShortMessage( long time)
 {
 #pragma unused ( time)
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
 /*  sameMessageDataType theMessage;
     OSStatus                status;
-    
+
     if ( gNetData->netGame != nil)
     {
         NSpClearMessageHeader(&theMessage.header);
@@ -2999,7 +2999,7 @@ Boolean SendInGameShortMessage( long time)
         theMessage.gameTime = time;
         if ( !InsertMessageInQueue( (messageDataType *)&theMessage))
             return( false);
-        
+
         if (!StoreSentMessage( (messageDataType *)&theMessage))
             return( false);
         if ( gNetData->registeredFlags & kRegisterNoChange)
@@ -3010,7 +3010,7 @@ Boolean SendInGameShortMessage( long time)
         {
             status = NSpMessage_Send( gNetData->netGame, &theMessage.header, kNSpSendFlag_Normal);
         }
-        
+
         if ( status != noErr)
         {
             mWriteDebugString("\p**SEND ERR**");
@@ -3041,11 +3041,11 @@ void HostAutoSanityCheck( long time)
 
 void SendResendMessage( long time)
 {
-#ifdef kAllowNetSprocket    
+#ifdef kAllowNetSprocket
     messageDataType     theMessage;
     OSStatus            status;
 
-    time %= kMaxNetTime;    
+    time %= kMaxNetTime;
     if (( gNetData->netGame != nil)/* && ( gNetData->hosting)*/)
     {
         Glue_NSpClearMessageHeader(&theMessage.header);
@@ -3056,7 +3056,7 @@ void SendResendMessage( long time)
         theMessage.data.packedData1 = time;
         theMessage.data.packedData2 = 0;
         theMessage.data.packedData2 |= gAresGlobal->gPlayerAdmiralNumber << kAdmiralBitShift;
-        
+
 //  #ifdef kBackupData
         theMessage.backupData.packedData1 = theMessage.backupData.packedData2 = 0xffffffff;
 //  #endif
@@ -3074,7 +3074,7 @@ void SendResendMessage( long time)
             status = Glue_NSpMessage_Send( gNetData->netGame, &theMessage.header,
                 kNSpSendFlag_Normal);
         }
-        
+
         mWriteDebugString("\p> RESEND >");
         if ( status != noErr)
         {
@@ -3095,22 +3095,22 @@ Boolean InsertMessageInQueue( packedDataType *theData, long time)
     short   queueNumber = 0, nextQueue = gNetData->queueTop, previousQueue = -1;
     long    relativeTime;   // "corrected" for time wrap-around
     Boolean placeFound = false;
-    
+
     while (( gNetData->latencyQueue[queueNumber].used == true) &&
         ( queueNumber < kLatencyQueueLen))
     {
         queueNumber++;
     }
-    
+
     if ( queueNumber >= kLatencyQueueLen)
     {
         DebugStr("\pMESSAGE QUEUE FULL.");
         return( false);
     }
-            
+
     gNetData->latencyQueue[queueNumber].data.packedData1 = theData->packedData1;
     gNetData->latencyQueue[queueNumber].data.packedData2 = theData->packedData2;
-    gNetData->latencyQueue[queueNumber].used = true;    
+    gNetData->latencyQueue[queueNumber].used = true;
 /*  while (( nextQueue != -1) &&
         (( gNetData->latencyQueue[nextQueue].data.packedData1 & kGameTimeMask)
             < (gNetData->latencyQueue[queueNumber].data.packedData1 & kGameTimeMask)))
@@ -3140,10 +3140,10 @@ Boolean InsertMessageInQueue( packedDataType *theData, long time)
                 gNetData->latencyQueue[queueNumber].data.packedData2))
         {
             ShowErrorAny( eContinueErr, kErrorStrID, nil, nil, nil, nil, kCorruptNetDataError,
-                -1, -1, -1, __FILE__, gNetData->latencyQueue[queueNumber].data.packedData1 & kGameTimeMask);            
+                -1, -1, -1, __FILE__, gNetData->latencyQueue[queueNumber].data.packedData1 & kGameTimeMask);
         }
     }
-    
+
     if ( previousQueue == -1)
     {
         gNetData->latencyQueue[queueNumber].next = gNetData->queueTop;
@@ -3162,12 +3162,12 @@ Boolean InsertMessageInQueue( packedDataType *theData, long time)
 packedDataType *PopMessageFromQueue( void)
 {
     long    queueNumber = gNetData->queueTop;
-    
+
     if ( gNetData->queueTop >= 0)
     {
 //      mWriteDebugString("\p- POP");
 //      WriteDebugLong( gNetData->latencyQueue[gNetData->queueTop].message.gameTime);
-        
+
         gNetData->queueTop = gNetData->latencyQueue[gNetData->queueTop].next;
         gNetData->latencyQueue[queueNumber].used = false;
         return( &(gNetData->latencyQueue[queueNumber].data));
@@ -3185,14 +3185,14 @@ packedDataType *PeekMessageFromQueue( void)
 void DebugMessageQueue( void)
 {
     long    queueNumber = gNetData->queueTop;
-    
+
     if ( gNetData != nil)
     {
         mWriteDebugString("\pMessage Queue:");
         while ( queueNumber != -1)
         {
             WriteDebugLong( gNetData->latencyQueue[queueNumber].data.packedData1 & kGameTimeMask);
-        
+
             queueNumber = gNetData->latencyQueue[queueNumber].next;
         }
     } else
@@ -3205,7 +3205,7 @@ Boolean JumpstartLatencyQueue( long fromTime, long byUnit)
 
 {
     long    i;
-    
+
     for ( i = fromTime; i < (fromTime + gNetLatency + byUnit); i += byUnit)
     {
         if ( !SendInGameMessage( i)) return( false);
@@ -3217,18 +3217,18 @@ Boolean StoreSentMessage( packedDataType *theMessageData)
 
 {
     short   i = 0;
-    
+
     while (( i < kLatencyQueueLen) && ( gNetData->sentMessage[i].packedData1 != 0xffffffff))
     {
         i++;
     }
-    
+
     if ( i >= kLatencyQueueLen)
     {
 //      DebugStr("\pSent Message Heap FULL!");
         return( false);
     }
-    
+
 //  gNetData->sentMessage[i] = *theMessageData;
     gNetData->sentMessage[i].packedData1 = theMessageData->packedData1;
     gNetData->sentMessage[i].packedData2 = theMessageData->packedData2;
@@ -3239,7 +3239,7 @@ void ResendSentMessage( long time)
 
 {
     short   i = 0;
-    
+
     for ( i = 0; i < kLatencyQueueLen; i++)
     {
         if ((( gNetData->sentMessage[i].packedData1 & kGameTimeMask) == time) &&
@@ -3249,7 +3249,7 @@ void ResendSentMessage( long time)
             SendPrefabMessage( &gNetData->sentMessage[i]);
         }
     }
-    
+
 }
 
 void RemoveExpiredSentMessages( long oldTime) // chuck all message <= old time
@@ -3257,7 +3257,7 @@ void RemoveExpiredSentMessages( long oldTime) // chuck all message <= old time
 {
     short   i;
     long    messageTime;
-    
+
     if ( oldTime < 0)
     {
         for ( i = 0; i < kLatencyQueueLen; i++)
@@ -3322,7 +3322,7 @@ void RemoveExpiredSentMessages( long oldTime) // chuck all message <= old time
 void ResetSentMessages( void)
 {
     short   i;
-    
+
     for ( i = 0; i < kLatencyQueueLen; i++)
     {
         gNetData->sentMessage[i].packedData1 = 0xffffffff;
@@ -3333,7 +3333,7 @@ unsigned char TickleOutgoingMessage( Boolean registered)
 {
     unsigned long textOut = 0, charNum = 0;
     unsigned char   result = 0;
-    
+
 #pragma unused ( registered)
 /*  if (( gNetData->outgoingMessage[gNetData->outgoingCharNum] != 0) &&
         ( gNetData->outgoingCharNum != gNetData->lastOutgoingCharNum))
@@ -3377,7 +3377,7 @@ void StartIncomingTextMessage( void)
 Boolean AddIncomingTextMessageLong( unsigned long what, unsigned long bitShift)
 {
     Boolean         endFound = false;
-    
+
     while ((  bitShift > 0) && ( gNetData->incomingCharNum < kTextMessageLength)
         && ( !endFound))
     {
@@ -3411,7 +3411,7 @@ void AddIncomingTextMessageCharacter( unsigned char what)
 void StopIncomingTextMessage( anyCharType *dest)
 {
     short   i = 0;
-    
+
     if ( dest != nil)
     {
         while ( i < gNetData->incomingCharNum)

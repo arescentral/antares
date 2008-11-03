@@ -41,7 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define kABit10                     0x00000200
 #define kABit11                     0x00000400
 #define kABit12                     0x00000800
-#define kABit13                     0x00001000  
+#define kABit13                     0x00001000
 #define kABit14                     0x00002000
 #define kABit15                     0x00004000
 #define kABit16                     0x00008000
@@ -193,7 +193,7 @@ long GetAdmiralKill( long);
 #define kABit10                     0x00000200
 #define kABit11                     0x00000400
 #define kABit12                     0x00000800
-#define kABit13                     0x00001000  
+#define kABit13                     0x00001000
 #define kABit14                     0x00002000
 #define kABit15                     0x00004000
 #define kABit16                     0x00008000

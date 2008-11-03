@@ -64,7 +64,7 @@ void DrawTitleScreen( void)
 {
     PicHandle       pict;
     Rect            tRect;
-    
+
     MacSetPort( (WindowPtr)gTheWindow);
 //  pict = GetPicture( kTitleScreenID);
     pict = (PicHandle)HHGetResource( 'PICT', kTitleScreenID);
@@ -75,7 +75,7 @@ void DrawTitleScreen( void)
     {
         DrawInRealWorld();
         tRect = (**pict).picFrame;
-        CenterRectInRect( &tRect, &(gTheWindow->portRect)); 
+        CenterRectInRect( &tRect, &(gTheWindow->portRect));
         DrawPicture( pict, &tRect);
         ReleaseResource( (Handle)pict);
     }
@@ -86,7 +86,7 @@ void DrawPublisherScreen( void)
 {
     PicHandle       pict;
     Rect            tRect;
-    
+
     MacSetPort( (WindowPtr)gTheWindow);
     pict = (PicHandle)HHGetResource( 'PICT', kPublisherScreenID);
     if ( pict == nil)
@@ -96,7 +96,7 @@ void DrawPublisherScreen( void)
     {
         DrawInRealWorld();
         tRect = (**pict).picFrame;
-        CenterRectInRect( &tRect, &(gTheWindow->portRect)); 
+        CenterRectInRect( &tRect, &(gTheWindow->portRect));
         PaintRect(  &(gTheWindow->portRect));
         DrawPicture( pict, &tRect);
         ReleaseResource( (Handle)pict);
@@ -108,7 +108,7 @@ void DrawEgoScreen( void)
 {
     PicHandle       pict;
     Rect            tRect;
-    
+
     MacSetPort( (WindowPtr)gTheWindow);
     pict = (PicHandle)HHGetResource( 'PICT', kEgoScreenID);
     if ( pict == nil)
@@ -129,13 +129,13 @@ void BlackTitleScreen( void)
 
 {
     RGBColor    black = {0, 0, 0};
-    
+
     MacSetPort( (WindowPtr)gTheWindow);
     DrawInRealWorld();
     MacSetPort( (WindowPtr)gTheWindow);
     PenPat( &qd.black);
     RGBForeColor( &black);
-    
+
     PaintRect(  &(gTheWindow->portRect));
 }
 
@@ -143,7 +143,7 @@ void CenterRectInRect( Rect *dRect, Rect *sRect)
 
 {
     short   w, h;
-    
+
     w = dRect->right - dRect->left;
     h = dRect->bottom - dRect->top;
     dRect->left =  sRect->left + ( sRect->right - sRect->left) / 2 - w / 2;

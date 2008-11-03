@@ -120,7 +120,7 @@ void GetScenarioFullScaleAndCorner( long, long, coordPointType *, long *, Rect *
 void GetInitialObjectSpriteData( long whichScenario, long whichObject, long maxSize,
         Rect *bounds, coordPointType *corner,
         long scale, long *thisScale, spritePix *aSpritePix, Point *where, longRect *spriteRect);
-void GetRealObjectSpriteData( coordPointType *, baseObjectType *, long, 
+void GetRealObjectSpriteData( coordPointType *, baseObjectType *, long,
         long, long, Rect *, coordPointType *,
         long, long *, spritePix *, Point *,
         longRect *);

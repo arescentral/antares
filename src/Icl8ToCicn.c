@@ -72,14 +72,14 @@ Boolean Ploticl8ToCICN( short resID, short resRefNum, Rect *destRect,
     short       iconRefNum;
     CIconHandle thecicn;
     SignedByte  icnState, icl8State;
-    
+
     MacSetRect( &bounds, 0, 0, 32, 32 );    /* 'icl8' are 32x32 pixels. */
     depth = 8;                          /* 8-bit deep pixel image. */
     bitmapSize = 4 * 32;                /* 4 bytesPerRow * 32 rows. */
-    
+
     /* Load and lock the 'icl8' and 'ICN#' resources used to build the 'cicn'. */
-    
-    if ( ICNnHandle == nil) 
+
+    if ( ICNnHandle == nil)
     {
         icn = GetResource( 'ICN#', resID );
         if ( icn == nil) return false;
@@ -102,33 +102,33 @@ Boolean Ploticl8ToCICN( short resID, short resRefNum, Rect *destRect,
             return false;
         }
     } else icl8 = icl8Handle;
-    
+
     icnState = HGetState( icn);
     HLock( icn );
     HNoPurge( icn );
-    
+
     icl8State = HGetState( icl8);
     HLock( icl8 );
     HNoPurge( icl8 );
-        
+
     /* Allocate memory for the 'cicn'. */
-    
+
     thecicn = (CIconHandle)NewHandleClear( (long)sizeof( CIcon ) );
-    
-    /* Fill in the cicn's bitmap fields. */ 
-    
+
+    /* Fill in the cicn's bitmap fields. */
+
     (**thecicn).iconBMap.baseAddr           = nil;
     (**thecicn).iconBMap.rowBytes           = 4;
     (**thecicn).iconBMap.bounds             = bounds;
 
     /* Fill in the cicn's mask bitmap fields. */
-    
+
     (**thecicn).iconMask.baseAddr           = nil;
     (**thecicn).iconMask.rowBytes           = 4;
     (**thecicn).iconMask.bounds             = bounds;
-    
+
     /* Fill in the cicn's pixmap fields. */
-    
+
     (**thecicn).iconPMap.baseAddr           = nil;
     (**thecicn).iconPMap.rowBytes           = (((bounds.right - bounds.left) *
                                                 depth) / 8) | 0x8000;
@@ -149,13 +149,13 @@ Boolean Ploticl8ToCICN( short resID, short resRefNum, Rect *destRect,
     (**thecicn).iconPMap.pmTable            = GetCTable( depth );
 
     /* Set the 'icl8' pixel image to the iconData field. */
-    
+
     (**thecicn).iconData = (Handle)icl8;
-    
+
     /* Resize the 'cicn' for the bitmap image and mask. */
-    
+
     SetHandleSize( (Handle)thecicn, sizeof( CIcon ) + (bitmapSize * 2) );
-    
+
     /* Copy the 'ICN#' data into the iconMaskData array. */
     /* Note1: This is an array of shorts, so divide bitmapSize by 2. */
     /* Note2: The mask comes before the image.  The is opposite of an 'ICN#' */
@@ -164,7 +164,7 @@ Boolean Ploticl8ToCICN( short resID, short resRefNum, Rect *destRect,
     BlockMove( *icn + (long)bitmapSize, (**thecicn).iconMaskData, bitmapSize ); /* The mask. */
 
     PlotCIcon( destRect, thecicn );
-    
+
     DisposeCTable( (**thecicn).iconPMap.pmTable);
     if ( icl8Handle == nil)
         ReleaseResource( icl8);
@@ -172,7 +172,7 @@ Boolean Ploticl8ToCICN( short resID, short resRefNum, Rect *destRect,
     {
         HSetState( icl8, icl8State);
     }
-    
+
     if ( ICNnHandle == nil)
         ReleaseResource( icn);
     else
@@ -180,6 +180,6 @@ Boolean Ploticl8ToCICN( short resID, short resRefNum, Rect *destRect,
         HSetState( icn, icnState);
     }
     DisposeHandle( (Handle)thecicn);
-    
+
     return( true);
 }

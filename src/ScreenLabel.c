@@ -95,7 +95,7 @@ int ScreenLabelInit( void)
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
         return( MEMORY_ERROR);
     }
-    
+
     /*
     MoveHHi( gAresGlobal->gScreenLabelData);
     HLock( gAresGlobal->gScreenLabelData);
@@ -112,12 +112,12 @@ int ScreenLabelInit( void)
 void ResetAllLabels( void)
 
 {
-#ifdef kUseLabels   
+#ifdef kUseLabels
     screenLabelType *label;
     short           i;
 
     label = (screenLabelType *)*gAresGlobal->gScreenLabelData;
-    
+
     for ( i = 0; i < kMaxLabelNum; i++)
     {
         MacSetRect( &(label->thisRect), 0, 0, -1, -1);
@@ -143,7 +143,7 @@ void ResetAllLabels( void)
 void ScreenLabelCleanup( void)
 
 {
-#ifdef kUseLabels   
+#ifdef kUseLabels
     if ( gAresGlobal->gScreenLabelData != nil) DisposeHandle( gAresGlobal->gScreenLabelData);
 #endif
 }
@@ -152,17 +152,17 @@ short AddScreenLabel( short h, short v, short hoff, short voff, anyCharType *str
                     spaceObjectType *object, Boolean objectLink, unsigned char color)
 
 {
-#ifdef kUseLabels   
+#ifdef kUseLabels
     short           whichLabel = 0;
     screenLabelType *label;
     long            strlen, lineNum, maxWidth, i;
     unsigned char   *getwidchar, *getwidwid;
     Str255          tString;
-    
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData;  
+
+    label = (screenLabelType *)*gAresGlobal->gScreenLabelData;
     while (( whichLabel < kMaxLabelNum) && ( label->active)) { label++; whichLabel++;}
     if ( whichLabel >= kMaxLabelNum) return ( -1);  // no free label
-    
+
     label->active = TRUE;
     label->killMe = FALSE;
     label->where.h = h;
@@ -184,15 +184,15 @@ short AddScreenLabel( short h, short v, short hoff, short voff, anyCharType *str
     {
         label->visibleState = 1;
     }
-    
+
     if ( string != nil)
     {
         CopyPString( (unsigned char *)label->label, (unsigned char *)string);
         RecalcScreenLabelSize( whichLabel);
-        
+
 /*      mSetDirectFont( kTacticalFontNum)
         lineNum = String_Count_Lines( label->label);
-        
+
         if ( lineNum > 1)
         {
             label->lineNum = lineNum;
@@ -229,11 +229,11 @@ short AddScreenLabel( short h, short v, short hoff, short voff, anyCharType *str
 void RemoveScreenLabel( long which)
 
 {
-#ifdef kUseLabels   
+#ifdef kUseLabels
     screenLabelType *label;
-    
+
     label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
-    
+
     MacSetRect( &(label->thisRect), 0, 0, -1, -1);
     label->lastRect = label->thisRect;
     label->label[0] = 0;
@@ -247,14 +247,14 @@ void RemoveScreenLabel( long which)
 void EraseAllLabels( void)
 
 {
-#ifdef kUseLabels   
+#ifdef kUseLabels
     short           i = 0;
     screenLabelType *label;
     PixMapHandle    savePixBase, offPixBase;
 
     savePixBase = GetGWorldPixMap( gSaveWorld);
     offPixBase = GetGWorldPixMap( gOffWorld);
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData;  
+    label = (screenLabelType *)*gAresGlobal->gScreenLabelData;
     for ( i = 0; i < kMaxLabelNum; i++)
     {
         if (( label->active) && ( label->visibleState >= 0))
@@ -276,18 +276,18 @@ void EraseAllLabels( void)
 void DrawAllLabels( void)
 
 {
-#ifdef kUseLabels   
+#ifdef kUseLabels
     short           i = 0, originalLength;
     screenLabelType *label;
-    PixMapHandle    offPixBase; 
+    PixMapHandle    offPixBase;
     longRect        clipRect, tRect;
     unsigned char   color;//, *getwidchar, *getwidwid;
     transColorType  *transColor;
 //  long            width, height, strlen;
-    
+
     mSetDirectFont( kTacticalFontNum)
-    
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData;  
+
+    label = (screenLabelType *)*gAresGlobal->gScreenLabelData;
     SetLongRect( &clipRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
     offPixBase = GetGWorldPixMap( gOffWorld);
     for ( i = 0; i < kMaxLabelNum; i++)
@@ -295,7 +295,7 @@ void DrawAllLabels( void)
         if (( label->active) && ( !label->killMe) && ( *(label->label) > 0) && ( label->visibleState > 0))
         {
 //          mGetDirectStringDimensions( label->label, width, height, strlen, getwidchar, getwidwid)
-            
+
             label->thisRect.left = label->where.h;
             label->thisRect.right = label->where.h + label->width;
             label->thisRect.top = label->where.v;
@@ -303,18 +303,18 @@ void DrawAllLabels( void)
             if ( label->thisRect.left < CLIP_LEFT) label->thisRect.left = CLIP_LEFT;
             if ( label->thisRect.right > CLIP_RIGHT) label->thisRect.right = CLIP_RIGHT;
             if ( label->thisRect.top < CLIP_TOP) label->thisRect.top = CLIP_TOP;
-            if ( label->thisRect.bottom > CLIP_BOTTOM) label->thisRect.bottom = CLIP_BOTTOM;            
+            if ( label->thisRect.bottom > CLIP_BOTTOM) label->thisRect.bottom = CLIP_BOTTOM;
             if (( label->thisRect.right > label->thisRect.left) &&
                 ( label->thisRect.bottom > label->thisRect.top))
             {
-            
+
                 RectToLongRect( &(label->thisRect), &tRect);
                 mGetTranslateColorShade( label->color, VERY_DARK, color, transColor)
-            
+
                 if ( label->keepOnScreenAnyway)
                 {
                     longRect    tc;
-                    
+
                     SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 //                  DrawNateLine( *offPixBase, &tc, label->where.h, label->where.v,
 //                      10, 10, 0, 0, 0);
@@ -337,7 +337,7 @@ void DrawAllLabels( void)
                 {
                     long    j, y;
                     Str255  s;
-                    
+
                     DrawNateRectVScan( *offPixBase, &tRect, 0, 0, color);
                     mGetTranslateColorShade( label->color, VERY_LIGHT, color, transColor)
                     y = label->where.v + gDirectText->ascent + kLabelInnerSpace;
@@ -355,7 +355,7 @@ void DrawAllLabels( void)
                             0, 0);
                         y += label->lineHeight;
                     }
-                    
+
                 } else
                 {
                     DrawNateRectVScan( *offPixBase, &tRect, 0, 0, color);
@@ -381,13 +381,13 @@ void DrawAllLabels( void)
 void ShowAllLabels( void)
 
 {
-#ifdef kUseLabels   
+#ifdef kUseLabels
     Rect            tRect;
     short           i = 0;
     screenLabelType *label;
-    PixMapHandle    pixMap; 
+    PixMapHandle    pixMap;
 
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData;  
+    label = (screenLabelType *)*gAresGlobal->gScreenLabelData;
     pixMap = GetGWorldPixMap( gOffWorld);
     for ( i = 0; i < kMaxLabelNum; i++)
     {
@@ -409,15 +409,15 @@ void ShowAllLabels( void)
                 if ( label->keepOnScreenAnyway)
                 {
                     longRect    tc;
-                    
+
                     SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 //                  CopyNateLine( *pixMap, *thePixMapHandle,
 //                      &tc, label->where.h, label->where.v,
 //                      10, 10, gNatePortLeft << 2, gNatePortTop);
                 }
             } else
-            
-            { 
+
+            {
                 BiggestRect( &tRect, &(label->lastRect));
                 ChunkCopyPixMapToScreenPixMap( *pixMap, &tRect, *thePixMapHandle);
             }
@@ -434,12 +434,12 @@ void ShowAllLabels( void)
 void SetScreenLabelPosition( long which, short h, short v)
 
 {
-#ifdef kUseLabels   
+#ifdef kUseLabels
     screenLabelType *label;
-    
+
     label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
     label->where.h = h + label->offset.h;
-    label->where.v = v + label->offset.v;   
+    label->where.v = v + label->offset.v;
 #endif
 }
 
@@ -452,8 +452,8 @@ void UpdateAllLabelPositions( long unitsDone)
     anyCharType     nilLabel = 0;
     Boolean         isOffScreen = FALSE;
     Point           source, dest;
-    
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData;  
+
+    label = (screenLabelType *)*gAresGlobal->gScreenLabelData;
     for ( i = 0; i < kMaxLabelNum; i++)
     {
         if (( label->active) && ( !label->killMe))
@@ -464,7 +464,7 @@ void UpdateAllLabelPositions( long unitsDone)
                 {
                     isOffScreen = FALSE;
                     label->where.h = label->object->sprite->where.h + label->offset.h;
-    
+
                     if ( label->where.h < ( CLIP_LEFT + kLabelBufferLeft))
                     {
                         isOffScreen = TRUE;
@@ -475,10 +475,10 @@ void UpdateAllLabelPositions( long unitsDone)
                         isOffScreen = TRUE;
                         label->where.h = CLIP_RIGHT - kLabelBufferRight - label->width;
                     }
-                    
-                    
+
+
                     label->where.v = label->object->sprite->where.v + label->offset.v;
-    
+
                     if ( label->where.v < (CLIP_TOP + kLabelBufferTop))
                     {
                         isOffScreen = TRUE;
@@ -489,12 +489,12 @@ void UpdateAllLabelPositions( long unitsDone)
                         isOffScreen = TRUE;
                         label->where.v = CLIP_BOTTOM - kLabelBufferBottom - label->height;
                     }
-                    
+
                     if ( !(label->object->seenByPlayerFlags & ( 1 << gAresGlobal->gPlayerAdmiralNumber)))
                     {
                         isOffScreen = true;
                     }
-                    
+
                     if ( !label->keepOnScreenAnyway)
                     {
                         if ( isOffScreen)
@@ -522,7 +522,7 @@ void UpdateAllLabelPositions( long unitsDone)
                         ShowHintLine(  source, dest,
                             label->color, DARK);
                     }
-                } else 
+                } else
                 {
                     SetScreenLabelString( i, &nilLabel);
                     if ( label->attachedHintLine)
@@ -530,7 +530,7 @@ void UpdateAllLabelPositions( long unitsDone)
                         HideHintLine();
                     }
                 }
-                
+
             } else if ( label->keepOnScreenAnyway)
             {
                     if ( label->where.h < ( CLIP_LEFT + kLabelBufferLeft))
@@ -541,7 +541,7 @@ void UpdateAllLabelPositions( long unitsDone)
                     {
                         label->where.h = CLIP_RIGHT - kLabelBufferRight - label->width;
                     }
-                        
+
                     if ( label->where.v < (CLIP_TOP + kLabelBufferTop))
                     {
                         label->where.v = CLIP_TOP + kLabelBufferTop;
@@ -552,9 +552,9 @@ void UpdateAllLabelPositions( long unitsDone)
                     }
                     if (( label->attachedHintLine) && ( label->label[0] != 0))
                     {
-                        
+
                         dest = label->attachedToWhere;
-        
+
                         source.v = label->where.v + (label->height / 2);
 
                         if ( label->attachedToWhere.h < label->where.h)
@@ -594,17 +594,17 @@ void UpdateAllLabelPositions( long unitsDone)
             }
         }
         label++;
-    }   
+    }
 #endif
 }
 
 void SetScreenLabelObject( long which, spaceObjectType *object)
 
 {
-#ifdef kUseLabels   
+#ifdef kUseLabels
     screenLabelType *label;
 //  smallFixedType  f;
-    
+
     label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
     label->object = object;
 
@@ -614,7 +614,7 @@ void SetScreenLabelObject( long which, spaceObjectType *object)
 //      WriteDebugSmallFixed( object->currentTargetValue);
 //      f = HackGetObjectStrength( object);
 //      WriteDebugLong( object->duty);
-        
+
         label->age = 0;
         label->visibleState = 1;
         label->whichObject = object->entryNumber;
@@ -630,9 +630,9 @@ void SetScreenLabelObject( long which, spaceObjectType *object)
 void SetScreenLabelAge( long which, long age)
 
 {
-#ifdef kUseLabels   
+#ifdef kUseLabels
     screenLabelType *label;
-    
+
     label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
     label->age = age;
         label->visibleState = 1;
@@ -643,11 +643,11 @@ void SetScreenLabelAge( long which, long age)
 void SetScreenLabelString( long which, anyCharType *string)
 
 {
-#ifdef kUseLabels   
+#ifdef kUseLabels
     screenLabelType *label;
     unsigned char   *getwidchar, *getwidwid;
     long            strlen;
-    
+
     label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
     if ( string == nil)
     {
@@ -666,9 +666,9 @@ void SetScreenLabelString( long which, anyCharType *string)
 void SetScreenLabelColor( long which, unsigned char color)
 
 {
-#ifdef kUseLabels   
+#ifdef kUseLabels
     screenLabelType *label;
-    
+
     label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
     label->color = color;
 #endif
@@ -677,9 +677,9 @@ void SetScreenLabelColor( long which, unsigned char color)
 void SetScreenLabelKeepOnScreenAnyway( long which, Boolean keepOnScreenAnyway)
 
 {
-#ifdef kUseLabels   
+#ifdef kUseLabels
     screenLabelType *label;
-    
+
     label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
     label->keepOnScreenAnyway = keepOnScreenAnyway;
     label->retroCount = 0;
@@ -689,9 +689,9 @@ void SetScreenLabelKeepOnScreenAnyway( long which, Boolean keepOnScreenAnyway)
 void SetScreenLabelAttachedHintLine( long which, Boolean attachedHintLine, Point toWhere)
 
 {
-#ifdef kUseLabels   
+#ifdef kUseLabels
     screenLabelType *label;
-    
+
     label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
     if ( label->attachedHintLine) HideHintLine();
     label->attachedHintLine = attachedHintLine;
@@ -702,33 +702,33 @@ void SetScreenLabelAttachedHintLine( long which, Boolean attachedHintLine, Point
 
 void SetScreenLabelOffset( long which, long hoff, long voff)
 {
-#ifdef kUseLabels   
+#ifdef kUseLabels
     screenLabelType *label;
-    
+
     label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
     label->offset.h = hoff;
     label->offset.v = voff;
-    
+
 #endif
 }
 
 long GetScreenLabelWidth( long which)
 {
-#ifdef kUseLabels   
+#ifdef kUseLabels
     screenLabelType *label;
-    
+
     label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
-    
+
     return ( label->width);
-    
+
 #endif
 }
 
 anyCharType *GetScreenLabelStringPtr( long which)
 {
-#ifdef kUseLabels   
+#ifdef kUseLabels
     screenLabelType *label;
-    
+
     label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
     return( label->label);
 #else
@@ -738,18 +738,18 @@ anyCharType *GetScreenLabelStringPtr( long which)
 
 void RecalcScreenLabelSize( long which) // do this if you mess with its string
 {
-#ifdef kUseLabels   
+#ifdef kUseLabels
     screenLabelType *label;
     unsigned char   *getwidchar, *getwidwid;
     long            strlen, lineNum, i, maxWidth;
     Str255          tString;
-    
+
     label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
     mSetDirectFont( kTacticalFontNum)
 //  mGetDirectStringDimensions( label->label, label->width, label->height, strlen, getwidchar, getwidwid)
 
         lineNum = String_Count_Lines( label->label);
-        
+
         if ( lineNum > 1)
         {
             label->lineNum = lineNum;
@@ -786,29 +786,29 @@ void ResolveScreenLabels( Handle labelData)
     screenLabelType *label;
 
 //  WriteDebugLine((char *)"\pLabel CB");
-    
+
     label = (screenLabelType *)*labelData;
-    
+
     for ( i = 0; i < kMaxLabelNum; i++)
     {
         if (( label->object != nil) && ( label->whichObject != kNoShip))
             label->object = (spaceObjectType *)*gSpaceObjectData + label->whichObject;
         label++;
-    }   
+    }
 }
 
 /* String_Count_Lines
     9/99
-    
+
     for emergency support of multi-line labels for on screen help
 */
 static long String_Count_Lines( StringPtr s)
 {
     long    len, i = 0, result = 1;
-    
+
     if ( s == nil) return 0;
     len = s[0];
-    
+
     while ( i < len)
     {
         i++;
@@ -820,7 +820,7 @@ static long String_Count_Lines( StringPtr s)
 static StringPtr String_Get_Nth_Line( StringPtr dest, StringPtr source, long nth)
 {
     long    len, i = 1, lineNum = 1;
-    
+
     if (( source == nil) || ( dest == nil)) return dest;
     dest[0] = 0;
     len = source[0];
@@ -848,21 +848,21 @@ static void Auto_Animate_Line( Point *source, Point *dest)
             dest->h = source->h + ((dest->h - source->h) >> 2);
             dest->v = source->v + ((dest->v - source->v) >> 2);
             break;
-        
+
         case 1:
             dest->h = source->h + ((dest->h - source->h) >> 1);
             dest->v = source->v + ((dest->v - source->v) >> 1);
 //          source->h = source->h + ((dest->h - source->h) >> 2);
 //          source->v = source->v + ((dest->v - source->v) >> 2);
             break;
-        
+
         case 2:
             dest->h = dest->h + (( source->h - dest->h) >> 2);
             dest->v = dest->v + (( source->v - dest->v) >> 2);
 //          source->h = source->h + ((dest->h - source->h) >> 1);
 //          source->v = source->v + ((dest->v - source->v) >> 1);
             break;
-        
+
         case 3:
 //          source->h = dest->h + (( source->h - dest->h) >> 2);
 //          source->v = dest->v + (( source->v - dest->v) >> 2);
