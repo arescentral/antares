@@ -18,7 +18,7 @@
 #ifndef ANTARES_SPRITE_HANDLING_HPP_
 #define ANTARES_SPRITE_HANDLING_HPP_
 
-/* SpriteHandler.h */
+// SpriteHandler.h
 
 #include "NateDraw.h"
 #include "Processor.h"

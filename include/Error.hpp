@@ -18,7 +18,7 @@
 #ifndef ANTARES_ERROR_HPP_
 #define ANTARES_ERROR_HPP_
 
-/* Error.h */
+// Error.h
 
 #pragma options align=mac68k
 

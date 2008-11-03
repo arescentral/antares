@@ -18,31 +18,7 @@
 #ifndef ANTARES_ARES_RES_FILE_HPP_
 #define ANTARES_ARES_RES_FILE_HPP_
 
-/******************************************\
-|**| Ares_ResFile.h
-\******************************************/
-
-#pragma mark **DEFINITIONS**
-/******************************************\
-|**| #defines
-\******************************************/
-
-/* - definitions
-*******************************************/
-
-#pragma mark _macros_
-/* - macros
-*******************************************/
-
-#pragma mark **TYPEDEFS**
-/******************************************\
-|**| typedefs
-\******************************************/
-
-#pragma mark **PUBLIC PROTOTYPES**
-/******************************************\
-|**| public function prototypes
-\******************************************/
+// Ares_ResFile.h
 
 short ARF_OpenResFile( StringPtr fileName);
 OSErr ARF_OpenResFile_External( StringPtr fileName, FSSpecPtr fileSpec);

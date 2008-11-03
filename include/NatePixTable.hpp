@@ -18,7 +18,7 @@
 #ifndef ANTARES_NATE_PIX_TABLE_HPP_
 #define ANTARES_NATE_PIX_TABLE_HPP_
 
-/* NatePixTable.h */
+// NatePixTable.h
 
 //#include "NatePix.h"
 #include "SpriteHandling.h"
@@ -45,10 +45,8 @@ char *GetNatePixTableNatePixData( Handle, long);
 unsigned char GetNatePixTableNatePixDataPixel( Handle, long, int, int);
 void SetNatePixTableNatePixDataPixel( Handle, long, int, int, unsigned char);
 Handle GetNatePixTableNatePixDataCopy( Handle, long);
-/*
-void GetNatePixTableNatePixPtr( natePix *, Handle, int);
-void GetNatePixTableNatePixDuplicate( natePix *, Handle, int);
-*/
+// void GetNatePixTableNatePixPtr( natePix *, Handle, int);
+// void GetNatePixTableNatePixDuplicate( natePix *, Handle, int);
 unsigned long GetNatePixTableNatePixDataSize( Handle, long);
 void InsertNatePix( Handle, Rect *, int);
 void DeleteNatePix( Handle, int);

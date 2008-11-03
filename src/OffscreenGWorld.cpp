@@ -15,7 +15,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/* Offscreen Graphics: new & clean, using GWorlds etc */
+// Offscreen Graphics: new & clean, using GWorlds etc
 
 #include "OffscreenGWorld.h"
 
@@ -55,13 +55,13 @@ int CreateOffscreenWorld ( Rect *bounds, CTabHandle theClut)
     Rect            tRect;
     GDHandle        originalDevice;
 
-    /*
-        NewGWorld creates the world.  See p.21-12--13 in IM VI.  Note that
-        by setting pix depth to 0, we are using bounds as global rect which
-        determines the depth of the GWorld by using the deepest depth of any
-        device that rect intersects.  We should use the bounding rect of our
-        device of choice, but I'm too lazy.
-    */
+    //
+    //  NewGWorld creates the world.  See p.21-12--13 in IM VI.  Note that
+    //  by setting pix depth to 0, we are using bounds as global rect which
+    //  determines the depth of the GWorld by using the deepest depth of any
+    //  device that rect intersects.  We should use the bounding rect of our
+    //  device of choice, but I'm too lazy.
+    //
 
     GetGWorld( &gRealWorld, &originalDevice);
 

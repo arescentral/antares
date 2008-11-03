@@ -15,56 +15,12 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/******************************************\
-|**| Wrap_GameRanger.c
-\******************************************/
+// Wrap_GameRanger.c
 
 #include "WrapGameRanger.h"
 
 #include "GameRanger.h"
 #include "NetSprocketGlue.h"
-
-#pragma mark **DEFINITIONS**
-/******************************************\
-|**| #defines
-\******************************************/
-
-/* - definitions
-*******************************************/
-
-#pragma mark _macros_
-/* - macros
-*******************************************/
-
-#pragma mark **TYPEDEFS**
-/******************************************\
-|**| typedefs
-\******************************************/
-
-#pragma mark **EXTERNAL GLOBALS**
-/******************************************\
-|**| external globals
-\******************************************/
-
-#pragma mark **PRIVATE GLOBALS**
-/******************************************\
-|**| private globals
-\******************************************/
-
-#pragma mark **PRIVATE PROTOTYPES**
-/******************************************\
-|**| private function prototypes
-\******************************************/
-
-#pragma mark **PRIVATE FUNCTIONS**
-/******************************************\
-|**| private functions
-\******************************************/
-
-#pragma mark **PUBLIC FUNCTIONS**
-/******************************************\
-|**| public functions
-\******************************************/
 
 Boolean Wrap_UseGameRanger( void)
 {

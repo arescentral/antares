@@ -15,21 +15,11 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/******************************************\
-|**| Old_File.c
-\******************************************/
+// Old_File.c
 
 #include "OldFile.h"
 
 #include "str_bp.h"
-
-#pragma mark **DEFINITIONS**
-/******************************************\
-|**| #defines
-\******************************************/
-
-/* - definitions
-*******************************************/
 
 #define mApple                                  128
 #define  iAbout                                 1
@@ -61,17 +51,8 @@
 #define MAXLONG                                 0x7FFFFFFF
 #define MIN(a,b)                                ((a) < (b) ? (a) : (b))
 
-#pragma mark _macros_
-/* - macros
-*******************************************/
-
 #define doCopyPString( m_sourceString, m_destString) pstrcpy( m_destString, m_sourceString)
 #define doConcatPStrings(  m_destString, m_sourceString) pstrcat( m_destString, m_sourceString)
-
-#pragma mark **TYPEDEFS**
-/******************************************\
-|**| typedefs
-\******************************************/
 
 typedef struct
 {
@@ -83,41 +64,6 @@ typedef struct
 }   docStructure, *docStructurePointer, **docStructureHandle;
 
 typedef StandardFileReply *standardFileReplyPtr;
-
-#pragma mark **EXTERNAL GLOBALS**
-/******************************************\
-|**| external globals
-\******************************************/
-
-#pragma mark **PRIVATE GLOBALS**
-/******************************************\
-|**| private globals
-\******************************************/
-
-#pragma mark **PRIVATE PROTOTYPES**
-/******************************************\
-|**| private function prototypes
-\******************************************/
-
-#pragma mark **PRIVATE FUNCTIONS**
-/******************************************\
-|**| private functions
-\******************************************/
-
-#pragma mark **PUBLIC FUNCTIONS**
-/******************************************\
-|**| public functions
-\******************************************/
-
-// **************************************************************************************
-// FiltersAndHooks.c
-// **************************************************************************************
-
-// ***************************************************************************** includes
-
-//#include "Files1.h"
-
-// ********************************************************************* global variables
 
 SInt16  gCurrentType = 1;
 Str255  gPrevSelectedName;

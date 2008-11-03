@@ -18,31 +18,7 @@
 #ifndef ANTARES_BRIEFING_RENDERER_HPP_
 #define ANTARES_BRIEFING_RENDERER_HPP_
 
-/******************************************\
-|**| Briefing_Renderer.h
-\******************************************/
-
-#pragma mark **DEFINITIONS**
-/******************************************\
-|**| #defines
-\******************************************/
-
-/* - definitions
-*******************************************/
-
-#pragma mark _macros_
-/* - macros
-*******************************************/
-
-#pragma mark **TYPEDEFS**
-/******************************************\
-|**| typedefs
-\******************************************/
-
-#pragma mark **PUBLIC PROTOTYPES**
-/******************************************\
-|**| public function prototypes
-\******************************************/
+// Briefing_Renderer.h
 
 void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
             long maxSize, Rect *bounds, long portleft, long portright,

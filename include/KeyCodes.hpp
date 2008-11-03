@@ -18,7 +18,8 @@
 #ifndef ANTARES_KEY_CODES_HPP_
 #define ANTARES_KEY_CODES_HPP_
 
-/* Key Codes */
+// Key Codes
+
 //#define   kModeKeyNum                 7
 //#define   kMapToggleKeyNum            10
 

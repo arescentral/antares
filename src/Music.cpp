@@ -29,24 +29,22 @@
 #include "Sound.h"
 #include "SoundFX.h"
 
-/********************************************************/
-/*
-    Player PRO 4.4 -- Music Driver EXAMPLE
-
-    Library Version 3.5
-
-    To use with MusicLibrary 3.5 for Think C & CodeWarrior
-
-    Antoine ROSSET
-    16 Tranchees
-    1206 GENEVA
-    SWITZERLAND
-
-    FAX: (41 22) 346 11 97
-    Compuserve: 100277,164
-    Internet: rosset@dial.eunet.ch
-*/
-/********************************************************/
+//
+//  Player PRO 4.4 -- Music Driver EXAMPLE
+//
+//  Library Version 3.5
+//
+//  To use with MusicLibrary 3.5 for Think C & CodeWarrior
+//
+//  Antoine ROSSET
+//  16 Tranchees
+//  1206 GENEVA
+//  SWITZERLAND
+//
+//  FAX: (41 22) 346 11 97
+//  Compuserve: 100277,164
+//  Internet: rosset@dial.eunet.ch
+//
 
 #define kTrackNumber    4
 
@@ -297,4 +295,4 @@ void SetSongVolume( long volume)
     }
 }
 
-/*** END PLAYERPRO LIBRARY 3.5 ***/
+// END PLAYERPRO LIBRARY 3.5

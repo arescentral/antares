@@ -18,7 +18,7 @@
 #ifndef ANTARES_GDEVICE_HANDLING_HPP_
 #define ANTARES_GDEVICE_HANDLING_HPP_
 
-/* GDevice Handling.h */
+// GDevice Handling.h
 
 #pragma options align=mac68k
 

@@ -1400,11 +1400,10 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
 
 }
 
-/* CorrectPhysicalSpace-- takes 2 objects that are colliding and moves them back 1
-    bresenham-style step at a time to their previous locations or until they don't
-    collide.  For keeping objects which occupy space from occupying the
-    same space.
-*/
+// CorrectPhysicalSpace-- takes 2 objects that are colliding and moves them back 1
+//  bresenham-style step at a time to their previous locations or until they don't
+//  collide.  For keeping objects which occupy space from occupying the
+//  same space.
 
 void CorrectPhysicalSpace( spaceObjectType *aObject, spaceObjectType *bObject)
 

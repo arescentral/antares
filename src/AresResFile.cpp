@@ -15,55 +15,11 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/******************************************\
-|**| Ares_ResFile.c
-\******************************************/
+// Ares_ResFile.c
 
 #include "AresResFile.h"
 
 #include "Assert.h"
-
-#pragma mark **DEFINITIONS**
-/******************************************\
-|**| #defines
-\******************************************/
-
-/* - definitions
-*******************************************/
-
-#pragma mark _macros_
-/* - macros
-*******************************************/
-
-#pragma mark **TYPEDEFS**
-/******************************************\
-|**| typedefs
-\******************************************/
-
-#pragma mark **EXTERNAL GLOBALS**
-/******************************************\
-|**| external globals
-\******************************************/
-
-#pragma mark **PRIVATE GLOBALS**
-/******************************************\
-|**| private globals
-\******************************************/
-
-#pragma mark **PRIVATE PROTOTYPES**
-/******************************************\
-|**| private function prototypes
-\******************************************/
-
-#pragma mark **PRIVATE FUNCTIONS**
-/******************************************\
-|**| private functions
-\******************************************/
-
-#pragma mark **PUBLIC FUNCTIONS**
-/******************************************\
-|**| public functions
-\******************************************/
 
 short ARF_OpenResFile( StringPtr fileName)
 {
@@ -88,10 +44,9 @@ short ARF_OpenResFile( StringPtr fileName)
     return( FSpOpenResFile( &fileFileSpec, fsRdPerm));
 }
 
-/* ARF_OpenResFile_External
-    makes the FSSpec of a file from a file name, relative to ares folder,
-    so you can make it *the* external data file
-*/
+// ARF_OpenResFile_External
+//  makes the FSSpec of a file from a file name, relative to ares folder,
+//  so you can make it *the* external data file
 
 OSErr ARF_OpenResFile_External( StringPtr fileName, FSSpecPtr fileSpec)
 {

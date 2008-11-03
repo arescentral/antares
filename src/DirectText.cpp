@@ -228,10 +228,9 @@ void DirectTextCleanup( void)
         DisposeHandle( gDirectTextData);
 }
 
-/* GetDirectFontNum:
-    If a direct font of resource ID resID has been loaded, this returns which font has it.
-    If not, it returns -1
-*/
+// GetDirectFontNum:
+//  If a direct font of resource ID resID has been loaded, this returns which font has it.
+//  If not, it returns -1
 
 long GetDirectFontNum( short resID)
 
@@ -250,10 +249,9 @@ long GetDirectFontNum( short resID)
     else return( count);
 }
 
-/* AddDirectFont:
-    Given a ptr to a directTextType dtext, finds the char data if it's loaded, or loads it if it's
-    not.  TRASHES THE PTR!!!
-*/
+// AddDirectFont:
+//  Given a ptr to a directTextType dtext, finds the char data if it's loaded, or loads it if it's
+//  not.  TRASHES THE PTR!!!
 
 short AddDirectFont( directTextType *dtext)
 

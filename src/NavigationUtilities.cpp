@@ -15,9 +15,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/******************************************\
-|**| Navigation_Utilities.c
-\******************************************/
+// Navigation_Utilities.c
 
 #include "NavigationUtilities.h"
 
@@ -28,24 +26,8 @@
 #include "str_bp.h"
 //#include "WindowDispatch.h"
 
-#pragma mark **DEFINITIONS**
-/******************************************\
-|**| #defines
-\******************************************/
-
-/* - definitions
-*******************************************/
 #define kMaxDocumentCount       100     // maximum number of documents allowed
 #define kSelectObjectPrefKey    7
-
-#pragma mark _macros_
-/* - macros
-*******************************************/
-
-#pragma mark **TYPEDEFS**
-/******************************************\
-|**| typedefs
-\******************************************/
 
 /*typedef struct Document
 {
@@ -75,39 +57,18 @@
 
 } Document;
 */
-#pragma mark **EXTERNAL GLOBALS**
-/******************************************\
-|**| external globals
-\******************************************/
 
 extern CWindowPtr       gTheWindow;
 extern aresGlobalType   *gAresGlobal;
 
-#pragma mark **PRIVATE GLOBALS**
-/******************************************\
-|**| private globals
-\******************************************/
 //Document* gDocumentList[kMaxDocumentCount];
 
-#pragma mark **PRIVATE PROTOTYPES**
-/******************************************\
-|**| private function prototypes
-\******************************************/
 pascal void myEventProc(const NavEventCallbackMessage callBackSelector,
                         NavCBRecPtr callBackParms,
                         NavCallBackUserData callBackUD);
 
 
 OSErr AEGetDescData(const AEDesc *desc, DescType *typeCode, void *dataBuffer, ByteCount maximumSize, ByteCount *actualSize);
-#pragma mark **PRIVATE FUNCTIONS**
-/******************************************\
-|**| private functions
-\******************************************/
-
-#pragma mark **PUBLIC FUNCTIONS**
-/******************************************\
-|**| public functions
-\******************************************/
 
 OSErr NS_SelectFileObject( FSSpecPtr destFile, short openListResID)
 {

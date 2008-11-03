@@ -159,10 +159,6 @@ extern long                     gWhichDirectText, WORLD_WIDTH, WORLD_HEIGHT;
 //extern unsigned long          gAresGlobal->gOptions;
 extern  GDHandle                theDevice;
 
-/* ******************************************** *
-    PRIVATE DATA TYPES
-/* ******************************************** */
-
 typedef struct
 {
     retroTextSpecType   retroTextSpec;
@@ -209,12 +205,6 @@ typedef struct
     Str255              whyScenarioNotLoaded;
 } netSetupType;
 
-/* ******************************************** */
-
-/* ******************************************** *
-    PRIVATE FUNCTIONS
-/* ******************************************** */
-
 #if NETSPROCKET_AVAILABLE
 
 void SetNetLevelCanMakeChanges( netSetupType *, Boolean);
@@ -250,8 +240,6 @@ void UpdatePlayerData( netSetupType *, long);
 void DrawPortraitByPlayerNum( netSetupType *, long);
 void OpenOtherScenarioFile( netSetupType *setup);
 void LaunchURL( StringPtr s);
-
-/* ******************************************** */
 
 long DoTabbedNetLevelInterface( void)
 {
@@ -2069,9 +2057,9 @@ void NetLevelShowRaces( short myRace, short opponentRace)
 
 }
 
-/* NetLevelSetColor: sets & shows admiral color; if color = 0xff, uses where
-as click.
-*/
+// NetLevelSetColor: sets & shows admiral color; if color = 0xff, uses where
+// as click.
+
 unsigned char NetLevelSetColor( netSetupType *setup,
     unsigned char color, unsigned char myApparentColor,
     Point where, Boolean allowColors, Boolean handleClick)
@@ -2840,21 +2828,22 @@ void ClearPortrait( unsigned char *data)
     }
 }
 
-/* PlotCustomIcon
-    We must create an icon-sized gworld in which to plot the icon, since the
-    PlotIconID routine seems to want to use the 4-bit version with Ares' color
-    table. Since the common photoshop preview icons only come in 8-bit versions,
-    I want to force the use of the 8-bit version if it exists. So, I'm creating
-    a temporary GWorld which uses the System palette, plotting the icon in that,
-    copying the gworlds contents to the true destination, then deleting the
-    GWorld. I am also getting the icl8 resource, and confirming that it belongs
-    to the portrait file before using it.
+//
+// PlotCustomIcon
+//  We must create an icon-sized gworld in which to plot the icon, since the
+//  PlotIconID routine seems to want to use the 4-bit version with Ares' color
+//  table. Since the common photoshop preview icons only come in 8-bit versions,
+//  I want to force the use of the 8-bit version if it exists. So, I'm creating
+//  a temporary GWorld which uses the System palette, plotting the icon in that,
+//  copying the gworlds contents to the true destination, then deleting the
+//  GWorld. I am also getting the icl8 resource, and confirming that it belongs
+//  to the portrait file before using it.
+//
+//  Added with Ambrosia release --
+//  now tries to use scriptable Finder to get icon; works better; can understand
+//  new 8.6 icons.
+//
 
-    Added with Ambrosia release --
-    now tries to use scriptable Finder to get icon; works better; can understand
-    new 8.6 icons.
-
-*/
 //-16455
 
 Boolean PlotCustomIcon( Rect *bounds)

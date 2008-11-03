@@ -15,9 +15,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/******************************************\
-|**| Key_Setup_Screen.c
-\******************************************/
+// Key_Setup_Screen.c
 
 #include "KeySetupScreen.h"
 
@@ -35,14 +33,6 @@
 #include "PlayerInterface.h"
 #include "SoundFX.h"
 #include "StringHandling.h"
-
-#pragma mark **DEFINITIONS**
-/******************************************\
-|**| #defines
-\******************************************/
-
-/* - definitions
-*******************************************/
 
 #define kKeyScreenID                5030
 #define kKeyCancelButton            0
@@ -86,16 +76,7 @@
 #define kHotKeyKeyIndexOffset       (kUtilityKeyIndexOffset + kUtilityKeyNum)
 
 
-#pragma mark _macros_
-/* - macros
-*******************************************/
-
 #define mPlayScreenSound            PlayVolumeSound( kComputerBeep3, kMediumLowVolume, kShortPersistence, kMustPlaySound)
-
-#pragma mark **TYPEDEFS**
-/******************************************\
-|**| typedefs
-\******************************************/
 
 typedef struct
 {
@@ -104,24 +85,9 @@ typedef struct
     Boolean didConflict;
 } tempKeyControlType;
 
-#pragma mark **EXTERNAL GLOBALS**
-/******************************************\
-|**| external globals
-\******************************************/
-
 extern aresGlobalType   *gAresGlobal;
 extern GDHandle         theDevice;
 extern CWindowPtr       gTheWindow;
-
-#pragma mark **PRIVATE GLOBALS**
-/******************************************\
-|**| private globals
-\******************************************/
-
-#pragma mark **PRIVATE PROTOTYPES**
-/******************************************\
-|**| private function prototypes
-\******************************************/
 
 static void ConflictText_Update( tempKeyControlType *keyControls);
 static long KeyControlIndex_GetTabNum( long whichKeyControl);
@@ -131,11 +97,6 @@ static void KeyControlButton_SetFlash( long whichKey, long currentTab,
 Boolean IsKeyReserved( KeyMap, Boolean);
 void BlackenOffscreen( void);
 void Pause( long);
-
-#pragma mark **PRIVATE FUNCTIONS**
-/******************************************\
-|**| private functions
-\******************************************/
 
 static void ConflictText_Update( tempKeyControlType *keyControls)
 {
@@ -227,11 +188,6 @@ static void KeyControlButton_SetFlash( long whichKey, long currentTab,
     }
 
 }
-
-#pragma mark **PUBLIC FUNCTIONS**
-/******************************************\
-|**| public functions
-\******************************************/
 
 Boolean Key_Setup_Screen_Do( void)
 

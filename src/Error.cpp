@@ -15,7 +15,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/* Error Handling */
+// Error Handling
 
 #include "Error.h"
 
@@ -124,9 +124,10 @@ void ShowSimpleStrResAlert( short ResID, short num1, short num2, short num3, sho
     ShowSimpleStringAlert( sp1, sp2, sp3, sp4);
 }
 
-/* template:
-ShowErrorAny( false, kErrorStrID, nil, nil, nil, nil, -1, -1, -1, -1, __FILE__, 0);
-*/
+//
+// template:
+// ShowErrorAny( false, kErrorStrID, nil, nil, nil, nil, -1, -1, -1, -1, __FILE__, 0);
+//
 
 void ShowErrorAny(  errorRecoverType recover,
                         short ResID,
@@ -240,14 +241,16 @@ void ShowErrorAny(  errorRecoverType recover,
     }
 }
 
-/* shows an alert which reads:
-[string] [error#] occured.
-where [string] is specified by an indexed string and error # is an error result
-code. Use it to show simple errors like:
-Couldn't create the monkey because an error of type -234 occured.
-template:
-ShowErrorOfTypeOccurred( false, kErrorStrID, -1, status, __FILE__, 0);
-*/
+//
+// shows an alert which reads:
+// [string] [error#] occured.
+// where [string] is specified by an indexed string and error # is an error result
+// code. Use it to show simple errors like:
+// Couldn't create the monkey because an error of type -234 occured.
+// template:
+// ShowErrorOfTypeOccurred( false, kErrorStrID, -1, status, __FILE__, 0);
+//
+
 void ShowErrorOfTypeOccurred( errorRecoverType recover, short resID, short stringNum,
     OSErr error, char *caller, long callerNum)
 {

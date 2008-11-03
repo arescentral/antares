@@ -18,7 +18,7 @@
 #ifndef ANTARES_ARES_GUIDE_MAKER_HPP_
 #define ANTARES_ARES_GUIDE_MAKER_HPP_
 
-/* Ares Guide Maker.h */
+// Ares Guide Maker.h
 
 #pragma options align=mac68k
 

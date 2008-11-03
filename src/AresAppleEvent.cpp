@@ -15,9 +15,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/******************************************\
-|**| Ares_AppleEvent.c
-\******************************************/
+// Ares_AppleEvent.c
 
 #include "AresAppleEvent.h"
 
@@ -28,39 +26,9 @@
 #include "Processor.h"
 #include "WrapGameRanger.h"
 
-#pragma mark **DEFINITIONS**
-/******************************************\
-|**| #defines
-\******************************************/
-
-/* - definitions
-*******************************************/
-
 #define kAEInitErr                  76
-#pragma mark _macros_
-/* - macros
-*******************************************/
 
-#pragma mark **TYPEDEFS**
-/******************************************\
-|**| typedefs
-\******************************************/
-
-#pragma mark **EXTERNAL GLOBALS**
-/******************************************\
-|**| external globals
-\******************************************/
 extern aresGlobalType           *gAresGlobal;
-
-#pragma mark **PRIVATE GLOBALS**
-/******************************************\
-|**| private globals
-\******************************************/
-
-#pragma mark **PRIVATE PROTOTYPES**
-/******************************************\
-|**| private function prototypes
-\******************************************/
 
 pascal OSErr HandleOApp( AppleEvent *theAppleEvent, AppleEvent *reply, long refcon);
 
@@ -74,11 +42,6 @@ pascal OSErr HandleOpenDoc( AppleEvent *theAppleEvent, AppleEvent *reply,
         long refcon);
 
 pascal OSErr GotRequiredParams( AppleEvent *theAppleEvent);
-
-#pragma mark **PRIVATE FUNCTIONS**
-/******************************************\
-|**| private functions
-\******************************************/
 
 pascal OSErr HandleOApp( AppleEvent *theAppleEvent, AppleEvent *reply, long refcon)
 
@@ -248,11 +211,6 @@ pascal OSErr GotRequiredParams( AppleEvent *theAppleEvent)
         return( error);
     }
 }
-
-#pragma mark **PUBLIC FUNCTIONS**
-/******************************************\
-|**| public functions
-\******************************************/
 
 OSErr AAE_Init( void)
 {

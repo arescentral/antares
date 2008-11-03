@@ -15,7 +15,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/* Ares Guide Maker.c */
+// Ares Guide Maker.c
 
 //#define pGenerateImages
 
@@ -691,9 +691,9 @@ void GetWeaponData( long whichWeapon, weaponDataType *data)
     {
         weaponObject = (baseObjectType *)*gBaseObjectData + whichWeapon;
 
-        /* damage; this is tricky--we have to guess by walking through activate actions,
-            and for all the createObject actions, see which creates the most damaging
-            object.  We calc this first so we can use isGuided*/
+        // damage; this is tricky--we have to guess by walking through activate actions,
+        //  and for all the createObject actions, see which creates the most damaging
+        //  object.  We calc this first so we can use isGuided
 
         mostDamage = mostSpeed = 0;
         isGuided = false;

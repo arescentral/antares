@@ -18,31 +18,7 @@
 #ifndef ANTARES_OLD_FILE_HPP_
 #define ANTARES_OLD_FILE_HPP_
 
-/******************************************\
-|**| Old_File.h
-\******************************************/
-
-#pragma mark **DEFINITIONS**
-/******************************************\
-|**| #defines
-\******************************************/
-
-/* - definitions
-*******************************************/
-
-#pragma mark _macros_
-/* - macros
-*******************************************/
-
-#pragma mark **TYPEDEFS**
-/******************************************\
-|**| typedefs
-\******************************************/
-
-#pragma mark **PUBLIC PROTOTYPES**
-/******************************************\
-|**| public function prototypes
-\******************************************/
+// Old_File.h
 
 pascal Boolean  filterFunctionOpenDialog(CInfoPBPtr pbPtr,void *dataPtr);
 pascal SInt16  hookFunctionOpenDialog(SInt16 item,DialogPtr theDialog,

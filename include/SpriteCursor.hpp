@@ -18,7 +18,7 @@
 #ifndef ANTARES_SPRITE_CURSOR_HPP_
 #define ANTARES_SPRITE_CURSOR_HPP_
 
-/* Sprite Cursor.h */
+// Sprite Cursor.h
 
 #include "SpriteHandling.h"
 

@@ -52,11 +52,13 @@
 #define mGetDirectStringDimensionsx2( string, width, height)\
     (height) = gDirectText->height << 1;\
     (width) = ((long)kCharSpace + (long)gDirectText->logicalWidth) * (long)*(string);   // width * length of string
+
 /*
 #define mGetDirectStringDimensions( string, width, height)\
     (height) = gDirectText->height;\
     (width) = ((long)kCharSpace + (long)gDirectText->logicalWidth) * (long)*(string);   // width * length of string
 */
+
 #define mGetDirectStringDimensions( mstring, mwidth, mheight, mstrlen, mcharptr, mwidptr)\
     mheight = gDirectText->height;\
     mwidth = 0;\

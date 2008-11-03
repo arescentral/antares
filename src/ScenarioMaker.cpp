@@ -64,7 +64,7 @@
 
 #define kLevelNameID                4600
 
-/* given a baseobject, a verb type, and a verb num, this sets a ptr to that action */
+// given a baseobject, a verb type, and a verb num, this sets a ptr to that action
 
 
 
@@ -278,7 +278,7 @@ Boolean ConstructScenario( long which)
 
 //  WriteDebugDivider();
 
-    /* *** BEGIN INIT ADMIRALS ***                                  */
+    // *** BEGIN INIT ADMIRALS ***
 
     mWriteDebugString("\pSCN#");
     WriteDebugLong( which);
@@ -359,7 +359,7 @@ Boolean ConstructScenario( long which)
         }
     }
 
-    /* *** END INIT ADMIRALS ***                                        */
+    // *** END INIT ADMIRALS ***
 
     ///// FIRST SELECT WHAT MEDIA WE NEED TO USE:
 
@@ -1828,10 +1828,9 @@ void DeclareWinner( long whichPlayer, long nextLevel, long textID)
     }
 }
 
-/* GetScenarioFullScaleAndCorner:
-    This is really just for the mission briefing.  It calculates the best scale
-    at which to show the entire scenario.
-*/
+// GetScenarioFullScaleAndCorner:
+//  This is really just for the mission briefing.  It calculates the best scale
+//  at which to show the entire scenario.
 
 void GetScenarioFullScaleAndCorner( long whichScenario, long rotation,
                             coordPointType *corner, long *scale, Rect *bounds)

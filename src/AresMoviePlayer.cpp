@@ -85,7 +85,7 @@ void PlayMovieByName( StringPtr filePath, WindowPtr aWindow, Boolean doubleIt, G
             err = OpenMovieFile ( &fileSpec, &movieResFile, fsRdPerm);
             if (err == noErr)
             {
-                short               movieResID = 0;                     /* want first movie */
+                short               movieResID = 0;                     // want first movie
                 Str255              movieName;
                 Boolean             wasChanged;
 
@@ -214,9 +214,8 @@ void PlayMovieByName( StringPtr filePath, WindowPtr aWindow, Boolean doubleIt, G
 #endif
 }
 
-/* the "mini movie" routines are for playing a movie within a rect without disturbing the rest of the display.
-The PlayMovieByName is for playing a movie in one step, automatically clearing the diplay and all.
-*/
+// the "mini movie" routines are for playing a movie within a rect without disturbing the rest of the display.
+// The PlayMovieByName is for playing a movie in one step, automatically clearing the diplay and all.
 
 OSErr LoadMiniMovie( StringPtr filePath, Movie *aMovie, Rect *destRect, WindowPtr aWindow, Boolean doubleIt)
 
@@ -239,7 +238,7 @@ OSErr LoadMiniMovie( StringPtr filePath, Movie *aMovie, Rect *destRect, WindowPt
             err = OpenMovieFile ( &fileSpec, &movieResFile, fsRdPerm);
             if (err == noErr)
             {
-                short               movieResID = 0;                     /* want first movie */
+                short               movieResID = 0;                     // want first movie
                 Str255              movieName;
                 Boolean             wasChanged;
 

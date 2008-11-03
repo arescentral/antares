@@ -15,13 +15,14 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/* Handle Handling.c
-If you need to allocate a handle or get a resource, do it through here.
-If there's not enough free memory, all handles are unlocked, moved hi, and any pointers
-into those handles are reset.
-
-If you need to allocate a handle and keep it locked all the time, do it through here.
-*/
+//
+// Handle Handling.c
+// If you need to allocate a handle or get a resource, do it through here.
+// If there's not enough free memory, all handles are unlocked, moved hi, and any pointers
+// into those handles are reset.
+//
+// If you need to allocate a handle and keep it locked all the time, do it through here.
+//
 
 #include "HandleHandling.h"
 
@@ -248,15 +249,15 @@ void HHMaxMem( void)
 //  HHCheckAllHandles();
 }
 
-/*
-maybe I should consider callback routines?  So, when I make a new handle, I just pass the
-handle and a call-back routine for resetting the data.  It unlocks it, calls MaxMem, calls
-my call back, if any, then locks it.  Then, all I'd have to keep track of was a list of
-handles.  A Handle of Handles.  Maybe that's the best way.  More universal, less specific.
-Hmmm.  Unless I try to remove a handle.  Stoopid IDs?  That'd be another global for every
-freakin handle!  Assume handle is locked--then, just say if handle you're passing for disposal
-== handle n in my list, then I remove it, and all's dandy.
-*/
+//
+// maybe I should consider callback routines?  So, when I make a new handle, I just pass the
+// handle and a call-back routine for resetting the data.  It unlocks it, calls MaxMem, calls
+// my call back, if any, then locks it.  Then, all I'd have to keep track of was a list of
+// handles.  A Handle of Handles.  Maybe that's the best way.  More universal, less specific.
+// Hmmm.  Unless I try to remove a handle.  Stoopid IDs?  That'd be another global for every
+// freakin handle!  Assume handle is locked--then, just say if handle you're passing for disposal
+// == handle n in my list, then I remove it, and all's dandy.
+//
 
 Handle HHNewHandle( long newSize)
 

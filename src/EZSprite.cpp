@@ -60,12 +60,11 @@ void EZDrawSpriteOffByID( short resID, long whichShape, long scale, unsigned cha
     MacSetPort( oldPort);
 }
 
-/* EZDrawSpriteOffToOnByID
-    Draws sprite from offworld to on, given res id, shape, scale, color, and
-    bounding box. Centers in and clips to bounding box.
-
-    The sprite data is released before this returns. Not for animation.
-*/
+// EZDrawSpriteOffToOnByID
+//  Draws sprite from offworld to on, given res id, shape, scale, color, and
+//  bounding box. Centers in and clips to bounding box.
+//
+//  The sprite data is released before this returns. Not for animation.
 
 void EZDrawSpriteOffToOnByID( short resID, long whichShape, long scale,
     unsigned char color, Rect *bounds)
@@ -133,11 +132,11 @@ void EZDrawSpriteCenteredInRectBySprite( spritePix *aSpritePix,
             &spriteRect, &dRect, pixBase);
 }
 
-/* EZMakeSpriteFromID
-    Given resID, loads resource into spriteTable and fills out aSpritePix.
-    spriteTable is locked and unlocking it invalidates aSpritePix->pixData.
-    Note that, unfortunately, you have to keep the pixData ptr alive.
-*/
+// EZMakeSpriteFromID
+//  Given resID, loads resource into spriteTable and fills out aSpritePix.
+//  spriteTable is locked and unlocking it invalidates aSpritePix->pixData.
+//  Note that, unfortunately, you have to keep the pixData ptr alive.
+
 void EZMakeSpriteFromID( short resID, Handle *spriteTable, spritePix *aSpritePix,
     char **pixData, long whichShape)
 {

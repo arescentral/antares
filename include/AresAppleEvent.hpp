@@ -18,31 +18,7 @@
 #ifndef ANTARES_ARES_APPLE_EVENT_HPP_
 #define ANTARES_ARES_APPLE_EVENT_HPP_
 
-/******************************************\
-|**| Ares_AppleEvent.h
-\******************************************/
-
-#pragma mark **DEFINITIONS**
-/******************************************\
-|**| #defines
-\******************************************/
-
-/* - definitions
-*******************************************/
-
-#pragma mark _macros_
-/* - macros
-*******************************************/
-
-#pragma mark **TYPEDEFS**
-/******************************************\
-|**| typedefs
-\******************************************/
-
-#pragma mark **PUBLIC PROTOTYPES**
-/******************************************\
-|**| public function prototypes
-\******************************************/
+// Ares_AppleEvent.h
 
 OSErr AAE_Init( void);
 

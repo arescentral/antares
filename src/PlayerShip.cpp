@@ -387,10 +387,9 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
         if (( mReturnKey( keyMap)) && ((!mReturnKey( gAresGlobal->gLastKeyMap)))) *enterMessage = true;
     }
 */
-    /* TERRIBLE HACK:
-        this implements the often requested feature of having a shortcut for
-        transfering control.
-    */
+    // TERRIBLE HACK:
+    //  this implements the often requested feature of having a shortcut for
+    //  transfering control.
 
     a = gAresGlobal->gZoomMode;
 
@@ -1071,10 +1070,10 @@ void SetPlayerSelectShip( long whichShip, Boolean target, long admiralNumber)
     }
 }
 
-/* ChangePlayerShipNumber()
-assumes that newShipNumber is the number of a valid (legal, living) ship and that
-gPlayerShip already points to the current, legal living ship
-*/
+// ChangePlayerShipNumber()
+// assumes that newShipNumber is the number of a valid (legal, living) ship and that
+// gPlayerShip already points to the current, legal living ship
+
 void ChangePlayerShipNumber( long whichAdmiral, long newShipNumber)
 {
     spaceObjectType *anObject = GetAdmiralFlagship( whichAdmiral);

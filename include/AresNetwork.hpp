@@ -91,18 +91,19 @@ typedef enum
 } netMessageType;
 
 
-/* legal netMessageTypes for a netSetupDataType message:
-    kYouAreInvited
-    kWhatIsYourName
-    kWeAreStarting
-    kWeAreCanceling
-    kIReceivedInvite
-    kIAcceptInvite
-    kIDeclineInvite
-    kMyNameIs
-    kYourNumberIs
-    kPlayerNumberData
-*/
+//
+// legal netMessageTypes for a netSetupDataType message:
+//  kYouAreInvited
+//  kWhatIsYourName
+//  kWeAreStarting
+//  kWeAreCanceling
+//  kIReceivedInvite
+//  kIAcceptInvite
+//  kIDeclineInvite
+//  kMyNameIs
+//  kYourNumberIs
+//  kPlayerNumberData
+//
 
 typedef struct
 {
@@ -112,10 +113,11 @@ typedef struct
     anyCharType             name[kNetNameLength];
 } netSetupDataType;
 
-/* legal netMessageTypes for a netSpaceObjectType message:
-    kNewSpaceObject
-    kRefreshThisSpaceObject
-*/
+//
+// legal netMessageTypes for a netSpaceObjectType message:
+//  kNewSpaceObject
+//  kRefreshThisSpaceObject
+//
 
 typedef struct
 {
@@ -125,11 +127,12 @@ typedef struct
     long                    spaceObjectNum;
 } netSpaceObjectType;
 
-/* legal netMessageTypes for a netSimpleMessageType message:
-    kWeAreStarting
-    kImReady
-    kStartTiming
-*/
+//
+// legal netMessageTypes for a netSimpleMessageType message:
+//  kWeAreStarting
+//  kImReady
+//  kStartTiming
+//
 
 typedef struct
 {

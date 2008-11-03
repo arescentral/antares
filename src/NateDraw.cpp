@@ -119,11 +119,11 @@
     dbyte += xAdvance;
 
 
-/* DrawNateRect: Direct-draws a rectangle
-    hoff & voff are the h & v offsets frop the left and top edges of the destination map
-    (ie the top & right edges of the destination window)
-    CLIPS to destPix->bounds, NOT counting hoff & voff
-*/
+// DrawNateRect: Direct-draws a rectangle
+// hoff & voff are the h & v offsets frop the left and top edges of the destination map
+// (ie the top & right edges of the destination window)
+// CLIPS to destPix->bounds, NOT counting hoff & voff
+
 void DrawNateRect( PixMap *destPix, longRect *destRect, long hoff, long voff, unsigned char color)
 
 {
@@ -1103,273 +1103,273 @@ void SetLongRect( longRect *dRect, long left, long top, long right, long bottom)
     dRect->bottom = bottom;
 }
 
-/*
-          Sunday, November 6, 1994 4:11:09 AM
-          mac.programmer Item
-  From:           Howard Berkey,howard@sirius.com,Internet
-  Subject:        (1 of 2) Re: Need a Fast Line Drawing Algorithm
-  To:             mac.programmer
-Enough people wrote me asking for this that I'm posting it to c.s.m.p. in
-addition to mailing it to Eric.  The specific example is for Borland C++,
-but it gets the point across rather nicely.  I found this in an archive of
-Michael Abrash's columns from DDJ.
+//
+//           Sunday, November 6, 1994 4:11:09 AM
+//           mac.programmer Item
+//   From:           Howard Berkey,howard@sirius.com,Internet
+//   Subject:        (1 of 2) Re: Need a Fast Line Drawing Algorithm
+//   To:             mac.programmer
+// Enough people wrote me asking for this that I'm posting it to c.s.m.p. in
+// addition to mailing it to Eric.  The specific example is for Borland C++,
+// but it gets the point across rather nicely.  I found this in an archive of
+// Michael Abrash's columns from DDJ.
+//
+// I'll post the article here and the source code in the next message.
+//
+//
+// // begin incl. file //
+//
+// Journal:    Dr. Dobb's Journal  Nov 1992 v17 n11 p171(6)
+// -------------------------------------------------------------------------
+// Title:     The good, the bad, and the run-sliced. (Bresenham's run-length
+//            slice algorithm) (Graphics Programming) (Column)
+// Author:    Abrash, Michael
+// Attached:  Program: GP-NOV92.ASC  Source code listing.
+//            Program: XSHARP21.ZIP  Library for 3-D animation.
+//
+// Abstract:  Programmers developing graphics applications should never
+//            believe that they have developed the fastest possible code;
+//            others often have better ideas.  Performance-intensive
+//            applications should never have code that performs the same
+//            calculation more than once. Programmers have a duty to
+//            implement the desired functions while enabling the hardware to
+//            work as efficiently as possible.  Bresenham's run-length slice
+//            algorithm is a good model for efficient programming.  The
+//            approach implemented by the algorithm steps one pixel at a
+//            time along the major axis, while an integer term indicating
+//            how close the line is to advancing halfway to the next major
+//            pixel along the minor axis is maintained.  The algorithm
+//            provides an automatic decision-making structure that allows
+//            infrequent decisions to be made as quickly as possible.
+// -------------------------------------------------------------------------
+//
+// <EDITED BY NL>
+//
+// Run-length Slice Fundamentals
+//
+// First off, I have a confession to make: I'm not sure that the algorithm
+// I'll discuss is actually, precisely Bresenham's run-length slice
+// algorithm.  It's been a long time since I read about this algorithm; in
+// the intervening years, I've misplaced Bresenham's article, and I was
+// unable to locate it in time for this column.  (Vermont libraries leave
+// something to be desired in the high-tech area.)  As a result, I had to
+// derive the algorithm from scratch, which was admittedly more fun than
+// reading about it, and also ensured that I understood it inside and out.
+// The upshot is that what I discuss may or may not be Bresenham's
+// run-length slice algorithm--but it surely is fast.
+//
+// The place to begin understanding the run-length slice algorithm is the
+// standard Bresenham's line-drawing algorithm.  (I discussed the standard
+// Bresenham's algorithm at length in the May 1989 issue of the now-defunct
+// Programmer's Journal.)  The basis of the standard approach is stepping
+// one pixel at a time along the major axis (the longer dimension of the
+// line), while maintaining an integer error term that indicates at each
+// major-axis step how close the line is to advancing halfway to the next
+// pixel along the minor axis.  Figure 1 illustrates standard Bresenham's
+// line drawing.  The key point here is that a calculation and a test are
+// performed once for each step along the major axis.
+//
+// The run-length slice algorithm rotates matters 90 degrees, with
+// salubrious results.  The basis of the run-length slice algorithm is
+// stepping one pixel at a time along the minor axis (the shorter
+// dimension), while maintaining an integer error term indicating how close
+// the line is to advancing an extra pixel along the major axis, as
+// illustrated by Figure 2.
+//
+// Consider this:  When you're called upon to draw a line with an
+// X-dimension of 35 and a Y-dimension of 10, you have a great deal of
+// information available, some of which is ignored by standard Bresenham's.
+// In particular, because the slope is between 1/3 and 1/4, you know that
+// every single run--a run being a set of pixels at the same minor-axis
+// coordinate--must be either three or four pixels long.  No other length is
+// possible, as shown in Figure 3 (apart from the first and last runs, which
+// are special cases that I'll discuss shortly).  Therefore, for this line,
+// there's no need to perform an error-term calculation and test for each
+// pixel.  Instead, we can just perform one test per run, to see whether the
+// run is three or four pixels long, thereby eliminating about 70 percent of
+// the calculations in drawing this line.
+//
+// Take a moment to let the idea behind run-length slice drawing soak in.
+// Periodic decisions must be made to control pixel placement.  The key to
+// speed is to make those decisions as infrequently and quickly as possible.
+//  Of course, it will work to make a decision at each pixel--that's
+// standard Bresenham's.  However, most of those per-pixel decisions are
+// redundant, and in fact we have enough information before we begin to know
+// which are the redundant decisions.  Run-length slice drawing is exactly
+// equivalent to standard Bresenham's, but it pares the decision-making
+// process down to a minimum.  It's some-what analogous to the difference
+// between finding the greatest common divisor of two numbers using Euclid's
+// algorithm and finding it by trying every possible divisor.  Both
+// approaches produce the desired result, but that which takes maximum
+// advantage of the available information and minimizes redundant work is
+// preferable.
+//
+// Run-length Slice Implementation
+//
+// We know that for any line, a given run will always be one of two possible
+// lengths.  How, though, do we know which length to select?  Surprisingly,
+// this is easy to determine.  For the following discussion, assume that we
+// have a slope of 1/3.5, so that X is the major axis; however, the
+// discussion also applies to Y-major lines, with X and Y reversed.
+//
+// The minimum possible length for any run in an X-major line is
+// int(XDelta/YDelta), where XDelta is the X-dimension of the line and
+// YDelta is the Y-dimension.  The maximum possible length is
+// int(XDelta/YDelta) + 1.  The trick, then, is knowing which of these two
+// lengths to select for each run.  To see how we can make this selection,
+// refer to Figure 4.  For each one-pixel step along the minor axis (Y, in
+// this case), we advance at least three pixels.  The full advance distance
+// along X (the major axis) is actually three-plus pixels, because there is
+// also a fractional portion to the advance along X for a single-pixel Y
+// step.  This fractional advance is the key to deciding when to add an
+// extra pixel to a run.  The fraction indicates what portion of an extra
+// pixel we advance along X (the major axis) during each run.  If we keep a
+// running sum of the fractional parts, we have a measure of how close we
+// are to needing an extra pixel; when the fractional sum reaches 1, it's
+// time to add an extra pixel to the current run.  Then we can subtract 1
+// from the running sum (because we just advanced one pixel), and continue
+// on.
+//
+// Practically speaking, however, we can't work with fractions because
+// floating-point arithmetic is slow and fixed-point arithmetic is
+// imprecise.  Therefore, we take a cue from standard Bresenham's and scale
+// all the error-term calculations up so that we can work with integers.
+// The fractional X (major axis) advance per one-pixel Y (minor axis)
+// advance is the fractional portion of XDelta/YDelta.  This value is
+// exactly equivalent to (XDelta % YDelta)/YDelta.  We'll scale this up by
+// multiplying it by YDelta*2, so that the amount by which we adjust the
+// error term up for each one-pixel minor-axis advance is (XDelta %
+// YDelta)*2.
+//
+// We'll similarly scale up the one pixel by which we adjust the error term
+// down after it turns over, so our downward error-term adjustment is
+// YDelta*2.  Therefore, before drawing each run, we'll add (XDelta %
+// YDelta)*2 to the error term.  If the error term turns over (reaches one
+// full pixel), then we'll lengthen the run by 1, and subtract YDelta*2 from
+// the error term.  (All values are multiplied by 2 so that the initial
+// error term, which involves a 0.5 term, can be scaled up to an integer, as
+// discussed below.)
+//
+// This is not a complicated process, involving only integer addition and
+// subtraction and a single test, and it lends itself to many and varied
+// optimizations.  For example, you could break out hardwired optimizations
+// for drawing each possible pair of run lengths.  For the aforementioned
+// line with a slope of 1/3.5, for example, you could have one routine
+// hardwired to blast in a run of three pixels as quickly as possible, and
+// another hardwired to blast in a run of four pixels.  These routines would
+// ideally have no looping, but rather just a series of instructions
+// customized to draw the desired number of pixels at maximum speed.  Each
+// routine would know that the only possibilities for the length of the next
+// run would be three and four, so they could increment the error term, then
+// jump directly to the appropriate one of the two routines depending on
+// whether the error term turned over.  Properly implemented, it should be
+// possible to reduce the average per-run overhead of line drawing to less
+// than one branch, with only two additions and two tests (the number of
+// runs must also be counted down), plus a subtraction half the time.  On a
+// 486, this amounts to something on the order of 150 nanoseconds of
+// overhead per pixel, exclusive of the time required to actually write the
+// pixel to display memory.
+//
+// That's good.
+//
+// Run-length Slice Details
+//
+// A couple of run-length slice implementation details yet remain.  First is
+// the matter of how error-term turnover is detected.  This is done in much
+// the same way as it is with standard Bresenham's: The error term is
+// initialized to a value equivalent to -1 pixel and incremented for each
+// step; when the error term reaches 0, we've advanced one full pixel along
+// the major axis, and it's time to add an extra pixel to the current run.
+// This means that we only have to test the sign of the error term after
+// advancing it to determine whether or not to add an extra pixel to each
+// run.
+//
+// The second and more difficult detail is balancing the runs so that
+// they're centered around the ideal line, and therefore draw the same
+// pixels that standard Bresenham's would draw.  If we just drew full-length
+// runs from the start, we'd end up with an unbalanced line, as shown in
+// Figure 5.  Instead, we have to split the initial pixel plus one full run
+// as evenly as possible between the first and last runs of the line, and
+// adjust the initial error term appropriately for the initial half-run.
+//
+// The initial error term is simply one-half of the normal fractional
+// advance along the major axis, because the initial step is only one-half
+// pixel along the minor axis.  This half-step gets us exactly halfway
+// between the initial pixel and the next pixel along the minor axis.  All
+// the error-term adjusts are scaled up by two times precisely so that we
+// can scale up this halved error term for the initial run by two times, and
+// thereby make it an integer.
+//
+// The other trick here is that if an odd number of pixels are allocated
+// between the first and last partial runs, we'll end up with an odd pixel,
+// since we are unable to draw a half-pixel.  This odd pixel is accounted
+// for by adding half a pixel to the error term.
+//
+// That's all there is to run-length slice line drawing; the partial first
+// and last runs are the only tricky part.  Listing One (page 190) is a
+// run-length slice implementation in C.  This is not an optimized
+// implementation, nor is it meant to be; this listing is provided so that
+// you can see how the run-length slice algorithm works.  Next month, I'll
+// move on to an optimized version, but this month's listing will make it
+// much easier to grasp the principles of run-length slice drawing, and to
+// understand next month's code.
+//
+// Notwithstanding that it's not optimized, Listing One is reasonably fast.
+// If you run Listing Two (page 191), a sample line-drawing program that you
+// can use to test-drive Listing One, you may be as surprised as I was at
+// how quickly the screen fills with vectors, considering that Listing One
+// is entirely in C and has some redundant divides.  Or perhaps you won't be
+// surprised, in which case I suggest you check back next month.
+//
+// Next Time
+//
+// Next month, I'll switch to assembly language and speed up run-length
+// slice lines considerably.  I'll also spend some time discussing the
+// limitations of run-length slice drawing, and I'll look at possible
+// further optimizations.  After that, perhaps we'll have a look at seed
+// fills, or more 3-D animation, or some new 2-D animation topics--or maybe
+// something completely different.  Your suggestions are, as always,
+// welcome.
+//
+// --
+// :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+// Howard Berkey                                       howard@sirius.com
+// "'La-Z-Boy'?  What's the next brand, 'Hopeless Slack-Ass'?" - Frazier
+//
+// --- Internet Message Header Follows ---
+// Path: uupsi!psinntp!rebecca!newserve!ub!news.kei.com!sol.ctr.columbia.edu!howland.reston.ans.net!pipex!uunet!news.cygnus.com!news.zeitgeist.net!slip228.sirius.com!user
+// From: howard@sirius.com (Howard Berkey)
+// Newsgroups: comp.sys.mac.programmer
+// Subject: (1 of 2) Re: Need a Fast Line Drawing Algorithm
+// Date: 6 Nov 1994 04:11:09 GMT
+// Organization: Weyland-Yutani Thinking Machines Division
+// Lines: 558
+// Message-ID: <howard-0511942022590001@slip228.sirius.com>
+// References: <weasel-0511940219360001@192.0.2.1>
+// NNTP-Posting-Host: slip228.sirius.com
+//
+//
+//           Sunday, November 6, 1994 4:13:22 AM
+//           mac.programmer Item
+//   From:           Howard Berkey,howard@sirius.com,Internet
+//   Subject:        (2 of 2) Re: Need a Fast Line Drawing Algorithm
+//   To:             mac.programmer
+// (Here's the source code continued from the previous message)
+//
+// // begin incl. message //
+//
+//
+//
+// _GRAPHICS PROGRAMMING COLUMN_
+// by Michael Abrash
+//
+// [LISTING ONE]
+//
+// Run-length slice line drawing implementation for mode 0x13, the VGA's
+// 320x200 256-color mode. Not optimized! Tested with Borland C++ 3.0 in
+// the small model.
 
-I'll post the article here and the source code in the next message.
-
-
-// begin incl. file //
-
-Journal:    Dr. Dobb's Journal  Nov 1992 v17 n11 p171(6)
--------------------------------------------------------------------------
-Title:     The good, the bad, and the run-sliced. (Bresenham's run-length
-           slice algorithm) (Graphics Programming) (Column)
-Author:    Abrash, Michael
-Attached:  Program: GP-NOV92.ASC  Source code listing.
-           Program: XSHARP21.ZIP  Library for 3-D animation.
-
-Abstract:  Programmers developing graphics applications should never
-           believe that they have developed the fastest possible code;
-           others often have better ideas.  Performance-intensive
-           applications should never have code that performs the same
-           calculation more than once. Programmers have a duty to
-           implement the desired functions while enabling the hardware to
-           work as efficiently as possible.  Bresenham's run-length slice
-           algorithm is a good model for efficient programming.  The
-           approach implemented by the algorithm steps one pixel at a
-           time along the major axis, while an integer term indicating
-           how close the line is to advancing halfway to the next major
-           pixel along the minor axis is maintained.  The algorithm
-           provides an automatic decision-making structure that allows
-           infrequent decisions to be made as quickly as possible.
--------------------------------------------------------------------------
-
-<EDITED BY NL>
-
-Run-length Slice Fundamentals
-
-First off, I have a confession to make: I'm not sure that the algorithm
-I'll discuss is actually, precisely Bresenham's run-length slice
-algorithm.  It's been a long time since I read about this algorithm; in
-the intervening years, I've misplaced Bresenham's article, and I was
-unable to locate it in time for this column.  (Vermont libraries leave
-something to be desired in the high-tech area.)  As a result, I had to
-derive the algorithm from scratch, which was admittedly more fun than
-reading about it, and also ensured that I understood it inside and out.
-The upshot is that what I discuss may or may not be Bresenham's
-run-length slice algorithm--but it surely is fast.
-
-The place to begin understanding the run-length slice algorithm is the
-standard Bresenham's line-drawing algorithm.  (I discussed the standard
-Bresenham's algorithm at length in the May 1989 issue of the now-defunct
-Programmer's Journal.)  The basis of the standard approach is stepping
-one pixel at a time along the major axis (the longer dimension of the
-line), while maintaining an integer error term that indicates at each
-major-axis step how close the line is to advancing halfway to the next
-pixel along the minor axis.  Figure 1 illustrates standard Bresenham's
-line drawing.  The key point here is that a calculation and a test are
-performed once for each step along the major axis.
-
-The run-length slice algorithm rotates matters 90 degrees, with
-salubrious results.  The basis of the run-length slice algorithm is
-stepping one pixel at a time along the minor axis (the shorter
-dimension), while maintaining an integer error term indicating how close
-the line is to advancing an extra pixel along the major axis, as
-illustrated by Figure 2.
-
-Consider this:  When you're called upon to draw a line with an
-X-dimension of 35 and a Y-dimension of 10, you have a great deal of
-information available, some of which is ignored by standard Bresenham's.
-In particular, because the slope is between 1/3 and 1/4, you know that
-every single run--a run being a set of pixels at the same minor-axis
-coordinate--must be either three or four pixels long.  No other length is
-possible, as shown in Figure 3 (apart from the first and last runs, which
-are special cases that I'll discuss shortly).  Therefore, for this line,
-there's no need to perform an error-term calculation and test for each
-pixel.  Instead, we can just perform one test per run, to see whether the
-run is three or four pixels long, thereby eliminating about 70 percent of
-the calculations in drawing this line.
-
-Take a moment to let the idea behind run-length slice drawing soak in.
-Periodic decisions must be made to control pixel placement.  The key to
-speed is to make those decisions as infrequently and quickly as possible.
- Of course, it will work to make a decision at each pixel--that's
-standard Bresenham's.  However, most of those per-pixel decisions are
-redundant, and in fact we have enough information before we begin to know
-which are the redundant decisions.  Run-length slice drawing is exactly
-equivalent to standard Bresenham's, but it pares the decision-making
-process down to a minimum.  It's some-what analogous to the difference
-between finding the greatest common divisor of two numbers using Euclid's
-algorithm and finding it by trying every possible divisor.  Both
-approaches produce the desired result, but that which takes maximum
-advantage of the available information and minimizes redundant work is
-preferable.
-
-Run-length Slice Implementation
-
-We know that for any line, a given run will always be one of two possible
-lengths.  How, though, do we know which length to select?  Surprisingly,
-this is easy to determine.  For the following discussion, assume that we
-have a slope of 1/3.5, so that X is the major axis; however, the
-discussion also applies to Y-major lines, with X and Y reversed.
-
-The minimum possible length for any run in an X-major line is
-int(XDelta/YDelta), where XDelta is the X-dimension of the line and
-YDelta is the Y-dimension.  The maximum possible length is
-int(XDelta/YDelta) + 1.  The trick, then, is knowing which of these two
-lengths to select for each run.  To see how we can make this selection,
-refer to Figure 4.  For each one-pixel step along the minor axis (Y, in
-this case), we advance at least three pixels.  The full advance distance
-along X (the major axis) is actually three-plus pixels, because there is
-also a fractional portion to the advance along X for a single-pixel Y
-step.  This fractional advance is the key to deciding when to add an
-extra pixel to a run.  The fraction indicates what portion of an extra
-pixel we advance along X (the major axis) during each run.  If we keep a
-running sum of the fractional parts, we have a measure of how close we
-are to needing an extra pixel; when the fractional sum reaches 1, it's
-time to add an extra pixel to the current run.  Then we can subtract 1
-from the running sum (because we just advanced one pixel), and continue
-on.
-
-Practically speaking, however, we can't work with fractions because
-floating-point arithmetic is slow and fixed-point arithmetic is
-imprecise.  Therefore, we take a cue from standard Bresenham's and scale
-all the error-term calculations up so that we can work with integers.
-The fractional X (major axis) advance per one-pixel Y (minor axis)
-advance is the fractional portion of XDelta/YDelta.  This value is
-exactly equivalent to (XDelta % YDelta)/YDelta.  We'll scale this up by
-multiplying it by YDelta*2, so that the amount by which we adjust the
-error term up for each one-pixel minor-axis advance is (XDelta %
-YDelta)*2.
-
-We'll similarly scale up the one pixel by which we adjust the error term
-down after it turns over, so our downward error-term adjustment is
-YDelta*2.  Therefore, before drawing each run, we'll add (XDelta %
-YDelta)*2 to the error term.  If the error term turns over (reaches one
-full pixel), then we'll lengthen the run by 1, and subtract YDelta*2 from
-the error term.  (All values are multiplied by 2 so that the initial
-error term, which involves a 0.5 term, can be scaled up to an integer, as
-discussed below.)
-
-This is not a complicated process, involving only integer addition and
-subtraction and a single test, and it lends itself to many and varied
-optimizations.  For example, you could break out hardwired optimizations
-for drawing each possible pair of run lengths.  For the aforementioned
-line with a slope of 1/3.5, for example, you could have one routine
-hardwired to blast in a run of three pixels as quickly as possible, and
-another hardwired to blast in a run of four pixels.  These routines would
-ideally have no looping, but rather just a series of instructions
-customized to draw the desired number of pixels at maximum speed.  Each
-routine would know that the only possibilities for the length of the next
-run would be three and four, so they could increment the error term, then
-jump directly to the appropriate one of the two routines depending on
-whether the error term turned over.  Properly implemented, it should be
-possible to reduce the average per-run overhead of line drawing to less
-than one branch, with only two additions and two tests (the number of
-runs must also be counted down), plus a subtraction half the time.  On a
-486, this amounts to something on the order of 150 nanoseconds of
-overhead per pixel, exclusive of the time required to actually write the
-pixel to display memory.
-
-That's good.
-
-Run-length Slice Details
-
-A couple of run-length slice implementation details yet remain.  First is
-the matter of how error-term turnover is detected.  This is done in much
-the same way as it is with standard Bresenham's: The error term is
-initialized to a value equivalent to -1 pixel and incremented for each
-step; when the error term reaches 0, we've advanced one full pixel along
-the major axis, and it's time to add an extra pixel to the current run.
-This means that we only have to test the sign of the error term after
-advancing it to determine whether or not to add an extra pixel to each
-run.
-
-The second and more difficult detail is balancing the runs so that
-they're centered around the ideal line, and therefore draw the same
-pixels that standard Bresenham's would draw.  If we just drew full-length
-runs from the start, we'd end up with an unbalanced line, as shown in
-Figure 5.  Instead, we have to split the initial pixel plus one full run
-as evenly as possible between the first and last runs of the line, and
-adjust the initial error term appropriately for the initial half-run.
-
-The initial error term is simply one-half of the normal fractional
-advance along the major axis, because the initial step is only one-half
-pixel along the minor axis.  This half-step gets us exactly halfway
-between the initial pixel and the next pixel along the minor axis.  All
-the error-term adjusts are scaled up by two times precisely so that we
-can scale up this halved error term for the initial run by two times, and
-thereby make it an integer.
-
-The other trick here is that if an odd number of pixels are allocated
-between the first and last partial runs, we'll end up with an odd pixel,
-since we are unable to draw a half-pixel.  This odd pixel is accounted
-for by adding half a pixel to the error term.
-
-That's all there is to run-length slice line drawing; the partial first
-and last runs are the only tricky part.  Listing One (page 190) is a
-run-length slice implementation in C.  This is not an optimized
-implementation, nor is it meant to be; this listing is provided so that
-you can see how the run-length slice algorithm works.  Next month, I'll
-move on to an optimized version, but this month's listing will make it
-much easier to grasp the principles of run-length slice drawing, and to
-understand next month's code.
-
-Notwithstanding that it's not optimized, Listing One is reasonably fast.
-If you run Listing Two (page 191), a sample line-drawing program that you
-can use to test-drive Listing One, you may be as surprised as I was at
-how quickly the screen fills with vectors, considering that Listing One
-is entirely in C and has some redundant divides.  Or perhaps you won't be
-surprised, in which case I suggest you check back next month.
-
-Next Time
-
-Next month, I'll switch to assembly language and speed up run-length
-slice lines considerably.  I'll also spend some time discussing the
-limitations of run-length slice drawing, and I'll look at possible
-further optimizations.  After that, perhaps we'll have a look at seed
-fills, or more 3-D animation, or some new 2-D animation topics--or maybe
-something completely different.  Your suggestions are, as always,
-welcome.
-
---
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-Howard Berkey                                       howard@sirius.com
-"'La-Z-Boy'?  What's the next brand, 'Hopeless Slack-Ass'?" - Frazier
-
---- Internet Message Header Follows ---
-Path: uupsi!psinntp!rebecca!newserve!ub!news.kei.com!sol.ctr.columbia.edu!howland.reston.ans.net!pipex!uunet!news.cygnus.com!news.zeitgeist.net!slip228.sirius.com!user
-From: howard@sirius.com (Howard Berkey)
-Newsgroups: comp.sys.mac.programmer
-Subject: (1 of 2) Re: Need a Fast Line Drawing Algorithm
-Date: 6 Nov 1994 04:11:09 GMT
-Organization: Weyland-Yutani Thinking Machines Division
-Lines: 558
-Message-ID: <howard-0511942022590001@slip228.sirius.com>
-References: <weasel-0511940219360001@192.0.2.1>
-NNTP-Posting-Host: slip228.sirius.com
-
-
-          Sunday, November 6, 1994 4:13:22 AM
-          mac.programmer Item
-  From:           Howard Berkey,howard@sirius.com,Internet
-  Subject:        (2 of 2) Re: Need a Fast Line Drawing Algorithm
-  To:             mac.programmer
-(Here's the source code continued from the previous message)
-
-// begin incl. message //
-
-
-
-_GRAPHICS PROGRAMMING COLUMN_
-by Michael Abrash
-
-[LISTING ONE]
-
-/* Run-length slice line drawing implementation for mode 0x13, the VGA's
-320x200 256-color mode. Not optimized! Tested with Borland C++ 3.0 in
-the small model. */
-
-/* Draws a line between the specified endpoints in color Color. */
+// Draws a line between the specified endpoints in color Color.
 
 void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart, long XEnd,
                     long YEnd, long hoff, long voff, unsigned char Color)
@@ -1433,8 +1433,8 @@ void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
         }
     }
 
-   /* We'll always draw top to bottom, to reduce the number of cases we have to
-   handle, and to make lines between the same endpoints draw the same pixels */
+    // We'll always draw top to bottom, to reduce the number of cases we have to
+    // handle, and to make lines between the same endpoints draw the same pixels
     if (YStart > YEnd)
     {
         Temp = YStart;
@@ -1446,13 +1446,13 @@ void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
     }
 
 
-    /* Point to the bitmap address first pixel to draw */
+    // Point to the bitmap address first pixel to draw
     drowPlus = destPix->rowBytes & 0x3fff;
     dbyte = (unsigned char *)destPix->baseAddr + (YStart + voff) * drowPlus +
                 XStart + hoff;
 
-    /* Figure out whether we're going left or right, and how far we're
-        going horizontally */
+    // Figure out whether we're going left or right, and how far we're
+    // going horizontally
     if ((XDelta = XEnd - XStart) < 0)
     {
         XAdvance = -1;
@@ -1462,14 +1462,14 @@ void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
     {
         XAdvance = 1;
     }
-    /* Figure out how far we're going vertically */
+    // Figure out how far we're going vertically
     YDelta = YEnd - YStart;
 
-    /* Special-case horizontal, vertical, and diagonal lines, for speed
-        and to avoid nasty boundary conditions and division by 0 */
+    // Special-case horizontal, vertical, and diagonal lines, for speed
+    // and to avoid nasty boundary conditions and division by 0
     if (XDelta == 0)
     {
-        /* Vertical line */
+        // Vertical line
         for (i=0; i<=YDelta; i++)
         {
 #ifdef kByteLevelTesting
@@ -1482,7 +1482,7 @@ void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
     }
     if (YDelta == 0)
     {
-        /* Horizontal line */
+        // Horizontal line
         for (i=0; i<=XDelta; i++)
         {
 #ifdef kByteLevelTesting
@@ -1495,7 +1495,7 @@ void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
     }
     if (XDelta == YDelta)
     {
-        /* Diagonal line */
+        // Diagonal line
         for (i=0; i<=XDelta; i++)
         {
 #ifdef kByteLevelTesting
@@ -1507,48 +1507,48 @@ void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
         return;
     }
 
-    /* Determine whether the line is X or Y major, and handle accordingly */
+    // Determine whether the line is X or Y major, and handle accordingly
     if (XDelta >= YDelta)
     {
-        /* X major line */
-        /* Minimum # of pixels in a run in this line */
+        // X major line
+        // Minimum # of pixels in a run in this line
         WholeStep = XDelta / YDelta;
 
-        /* Error term adjust each time Y steps by 1; used to tell when one
-            extra pixel should be drawn as part of a run, to account for
-            fractional steps along the X axis per 1-pixel steps along Y */
+        // Error term adjust each time Y steps by 1; used to tell when one
+        // extra pixel should be drawn as part of a run, to account for
+        // fractional steps along the X axis per 1-pixel steps along Y
         AdjUp = (XDelta % YDelta) << 1;
 
-        /* Error term adjust when the error term turns over, used to factor
-            out the X step made at that time */
+        // Error term adjust when the error term turns over, used to factor
+        // out the X step made at that time
         AdjDown = YDelta * 2;
 
-        /* Initial error term; reflects an initial step of 0.5 along the Y
-            axis */
+        // Initial error term; reflects an initial step of 0.5 along the Y
+        // axis
         ErrorTerm = (XDelta % YDelta) - (YDelta << 1);
 
-        /* The initial and last runs are partial, because Y advances only 0.5
-            for these runs, rather than 1. Divide one full run, plus the
-            initial pixel, between the initial and last runs */
+        // The initial and last runs are partial, because Y advances only 0.5
+        // for these runs, rather than 1. Divide one full run, plus the
+        // initial pixel, between the initial and last runs
         InitialPixelCount = (WholeStep >> 1) + 1;
         FinalPixelCount = InitialPixelCount;
 
-        /* If the basic run length is even and there's no fractional
-            advance, we have one pixel that could go to either the initial
-            or last partial run, which we'll arbitrarily allocate to the
-            last run */
+        // If the basic run length is even and there's no fractional
+        // advance, we have one pixel that could go to either the initial
+        // or last partial run, which we'll arbitrarily allocate to the
+        // last run
         if ((AdjUp == 0) && ((WholeStep & 0x01) == 0))
         {
             InitialPixelCount--;
         }
-      /* If there're an odd number of pixels per run, we have 1 pixel that can't
-      be allocated to either the initial or last partial run, so we'll add 0.5
-      to error term so this pixel will be handled by the normal full-run loop */
+        // If there're an odd number of pixels per run, we have 1 pixel that can't
+        // be allocated to either the initial or last partial run, so we'll add 0.5
+        // to error term so this pixel will be handled by the normal full-run loop
         if ((WholeStep & 0x01) != 0)
         {
             ErrorTerm += YDelta;
         }
-        /* Draw the first, partial run of pixels */
+        // Draw the first, partial run of pixels
 #ifdef kByteLevelTesting
         TestByte( (char *)dbyte, destPix, "\pHRUN1");
 #endif
@@ -1558,18 +1558,18 @@ void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
         TestByte( (char *)dbyte, destPix, "\pHRUN2");
 #endif
 
-        /* Draw all full runs */
+        // Draw all full runs
         for (i=0; i<(YDelta-1); i++)
         {
-            RunLength = WholeStep;  /* run is at least this long */
-            /* Advance the error term and add an extra pixel if the error
-                term so indicates */
+            RunLength = WholeStep;  // run is at least this long
+            // Advance the error term and add an extra pixel if the error
+            // term so indicates
             if ((ErrorTerm += AdjUp) > 0)
             {
                 RunLength++;
-                ErrorTerm -= AdjDown;   /* reset the error term */
+                ErrorTerm -= AdjDown;   // reset the error term
             }
-            /* Draw this scan line's run */
+            // Draw this scan line's run
 #ifdef kByteLevelTesting
             TestByte( (char *)dbyte, destPix, "\pHRUN3");
 #endif
@@ -1579,7 +1579,7 @@ void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
             TestByte( (char *)dbyte, destPix, "\pHRUN4");
 #endif
         }
-        /* Draw the final run of pixels */
+        // Draw the final run of pixels
 #ifdef kByteLevelTesting
         TestByte( (char *)dbyte, destPix, "\pHRUN5");
 #endif
@@ -1592,45 +1592,45 @@ void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
     }
     else
     {
-        /* Y major line */
+        // Y major line
 
-        /* Minimum # of pixels in a run in this line */
+        // Minimum # of pixels in a run in this line
         WholeStep = YDelta / XDelta;
 
-        /* Error term adjust each time X steps by 1; used to tell when 1 extra
-            pixel should be drawn as part of a run, to account for
-            fractional steps along the Y axis per 1-pixel steps along X */
+        // Error term adjust each time X steps by 1; used to tell when 1 extra
+        // pixel should be drawn as part of a run, to account for
+        // fractional steps along the Y axis per 1-pixel steps along X
         AdjUp = (YDelta % XDelta) << 1;
 
-        /* Error term adjust when the error term turns over, used to factor
-            out the Y step made at that time */
+        // Error term adjust when the error term turns over, used to factor
+        // out the Y step made at that time
         AdjDown = XDelta << 1;
 
-        /* Initial error term; reflects initial step of 0.5 along the X axis */
+        // Initial error term; reflects initial step of 0.5 along the X axis
         ErrorTerm = (YDelta % XDelta) - (XDelta << 1);
 
-        /* The initial and last runs are partial, because X advances only 0.5
-            for these runs, rather than 1. Divide one full run, plus the
-            initial pixel, between the initial and last runs */
+        // The initial and last runs are partial, because X advances only 0.5
+        // for these runs, rather than 1. Divide one full run, plus the
+        // initial pixel, between the initial and last runs
         InitialPixelCount = (WholeStep >> 1) + 1;
         FinalPixelCount = InitialPixelCount;
 
-        /* If the basic run length is even and there's no fractional advance, we
-            have 1 pixel that could go to either the initial or last partial run,
-            which we'll arbitrarily allocate to the last run */
+        // If the basic run length is even and there's no fractional advance, we
+        // have 1 pixel that could go to either the initial or last partial run,
+        // which we'll arbitrarily allocate to the last run
         if ((AdjUp == 0) && ((WholeStep & 0x01) == 0))
         {
             InitialPixelCount--;
         }
-        /* If there are an odd number of pixels per run, we have one pixel
-            that can't be allocated to either the initial or last partial
-            run, so we'll add 0.5 to the error term so this pixel will be
-            handled by the normal full-run loop */
+        // If there are an odd number of pixels per run, we have one pixel
+        // that can't be allocated to either the initial or last partial
+        // run, so we'll add 0.5 to the error term so this pixel will be
+        // handled by the normal full-run loop
         if ((WholeStep & 0x01) != 0)
         {
             ErrorTerm += XDelta;
         }
-        /* Draw the first, partial run of pixels */
+        // Draw the first, partial run of pixels
 #ifdef kByteLevelTesting
         TestByte( (char *)dbyte, destPix, "\pVRUN1");
 #endif
@@ -1639,18 +1639,18 @@ void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
 #ifdef kByteLevelTesting
         TestByte( (char *)dbyte, destPix, "\pVRUN2");
 #endif
-        /* Draw all full runs */
+        // Draw all full runs
         for (i=0; i<(XDelta-1); i++)
         {
-            RunLength = WholeStep;  /* run is at least this long */
-            /* Advance the error term and add an extra pixel if the error
-                term so indicates */
+            RunLength = WholeStep;  // run is at least this long
+            // Advance the error term and add an extra pixel if the error
+            // term so indicates
             if ((ErrorTerm += AdjUp) > 0)
             {
                 RunLength++;
-                ErrorTerm -= AdjDown;   /* reset the error term */
+                ErrorTerm -= AdjDown;   // reset the error term
             }
-            /* Draw this scan line's run */
+            // Draw this scan line's run
 #ifdef kByteLevelTesting
             TestByte( (char *)dbyte, destPix, "\pVRUN3");
 #endif
@@ -1660,7 +1660,7 @@ void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
             TestByte( (char *)dbyte, destPix, "\pVRUN4");
 #endif
         }
-        /* Draw the final run of pixels */
+        // Draw the final run of pixels
 #ifdef kByteLevelTesting
         TestByte( (char *)dbyte, destPix, "\pVRUN5");
 #endif
@@ -1673,8 +1673,8 @@ void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
     }
 }
 
-/* Copies a line from sourcemap to destmap between the specified endpoints.  hoff and voff are for
-    the destPix only (for copying onscreen). */
+// Copies a line from sourcemap to destmap between the specified endpoints.  hoff and voff are for
+// the destPix only (for copying onscreen).
 
 void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
                     long XStart, long YStart, long XEnd, long YEnd, long hoff,
@@ -1739,8 +1739,8 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
         }
     }
 
-   /* We'll always draw top to bottom, to reduce the number of cases we have to
-   handle, and to make lines between the same endpoints draw the same pixels */
+    // We'll always draw top to bottom, to reduce the number of cases we have to
+    // handle, and to make lines between the same endpoints draw the same pixels
     if (YStart > YEnd)
     {
         Temp = YStart;
@@ -1752,7 +1752,7 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
     }
 
 
-    /* Point to the bitmap address first pixel to draw */
+    // Point to the bitmap address first pixel to draw
     drowPlus = destPix->rowBytes & 0x3fff;
     dbyte = (unsigned char *)destPix->baseAddr + (YStart + voff) * drowPlus +
                 XStart + hoff;
@@ -1760,8 +1760,8 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
     srowPlus = sourcePix->rowBytes & 0x3fff;
     sbyte = (unsigned char *)sourcePix->baseAddr + (YStart) * srowPlus + XStart;
 
-    /* Figure out whether we're going left or right, and how far we're
-        going horizontally */
+    // Figure out whether we're going left or right, and how far we're
+    // going horizontally
     if ((XDelta = XEnd - XStart) < 0)
     {
         XAdvance = -1;
@@ -1771,14 +1771,14 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
     {
         XAdvance = 1;
     }
-    /* Figure out how far we're going vertically */
+    // Figure out how far we're going vertically
     YDelta = YEnd - YStart;
 
-    /* Special-case horizontal, vertical, and diagonal lines, for speed
-        and to avoid nasty boundary conditions and division by 0 */
+    // Special-case horizontal, vertical, and diagonal lines, for speed
+    // and to avoid nasty boundary conditions and division by 0
     if (XDelta == 0)
     {
-        /* Vertical line */
+        // Vertical line
         for (i=0; i<=YDelta; i++)
         {
 #ifdef kByteLevelTesting
@@ -1792,7 +1792,7 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
     }
     if (YDelta == 0)
     {
-        /* Horizontal line */
+        // Horizontal line
         for (i=0; i<=XDelta; i++)
         {
 #ifdef kByteLevelTesting
@@ -1806,7 +1806,7 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
     }
     if (XDelta == YDelta)
     {
-        /* Diagonal line */
+        // Diagonal line
         for (i=0; i<=XDelta; i++)
         {
 #ifdef kByteLevelTesting
@@ -1819,48 +1819,48 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
         return;
     }
 
-    /* Determine whether the line is X or Y major, and handle accordingly */
+    // Determine whether the line is X or Y major, and handle accordingly
     if (XDelta >= YDelta)
     {
-        /* X major line */
-        /* Minimum # of pixels in a run in this line */
+        // X major line
+        // Minimum # of pixels in a run in this line
         WholeStep = XDelta / YDelta;
 
-        /* Error term adjust each time Y steps by 1; used to tell when one
-            extra pixel should be drawn as part of a run, to account for
-            fractional steps along the X axis per 1-pixel steps along Y */
+        // Error term adjust each time Y steps by 1; used to tell when one
+        // extra pixel should be drawn as part of a run, to account for
+        // fractional steps along the X axis per 1-pixel steps along Y
         AdjUp = (XDelta % YDelta) << 1;
 
-        /* Error term adjust when the error term turns over, used to factor
-            out the X step made at that time */
+        // Error term adjust when the error term turns over, used to factor
+        // out the X step made at that time
         AdjDown = YDelta * 2;
 
-        /* Initial error term; reflects an initial step of 0.5 along the Y
-            axis */
+        // Initial error term; reflects an initial step of 0.5 along the Y
+        // axis
         ErrorTerm = (XDelta % YDelta) - (YDelta << 1);
 
-        /* The initial and last runs are partial, because Y advances only 0.5
-            for these runs, rather than 1. Divide one full run, plus the
-            initial pixel, between the initial and last runs */
+        // The initial and last runs are partial, because Y advances only 0.5
+        // for these runs, rather than 1. Divide one full run, plus the
+        // initial pixel, between the initial and last runs
         InitialPixelCount = (WholeStep >> 1) + 1;
         FinalPixelCount = InitialPixelCount;
 
-        /* If the basic run length is even and there's no fractional
-            advance, we have one pixel that could go to either the initial
-            or last partial run, which we'll arbitrarily allocate to the
-            last run */
+        // If the basic run length is even and there's no fractional
+        // advance, we have one pixel that could go to either the initial
+        // or last partial run, which we'll arbitrarily allocate to the
+        // last run
         if ((AdjUp == 0) && ((WholeStep & 0x01) == 0))
         {
             InitialPixelCount--;
         }
-      /* If there're an odd number of pixels per run, we have 1 pixel that can't
-      be allocated to either the initial or last partial run, so we'll add 0.5
-      to error term so this pixel will be handled by the normal full-run loop */
+        // If there're an odd number of pixels per run, we have 1 pixel that can't
+        // be allocated to either the initial or last partial run, so we'll add 0.5
+        // to error term so this pixel will be handled by the normal full-run loop
         if ((WholeStep & 0x01) != 0)
         {
             ErrorTerm += YDelta;
         }
-        /* Draw the first, partial run of pixels */
+        // Draw the first, partial run of pixels
 #ifdef kByteLevelTesting
         TestByte( (char *)dbyte, destPix, "\pHRUN1");
 #endif
@@ -1870,18 +1870,18 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
         TestByte( (char *)dbyte, destPix, "\pHRUN2");
 #endif
 
-        /* Draw all full runs */
+        // Draw all full runs
         for (i=0; i<(YDelta-1); i++)
         {
-            RunLength = WholeStep;  /* run is at least this long */
-            /* Advance the error term and add an extra pixel if the error
-                term so indicates */
+            RunLength = WholeStep;  // run is at least this long
+            // Advance the error term and add an extra pixel if the error
+            // term so indicates
             if ((ErrorTerm += AdjUp) > 0)
             {
                 RunLength++;
-                ErrorTerm -= AdjDown;   /* reset the error term */
+                ErrorTerm -= AdjDown;   // reset the error term
             }
-            /* Draw this scan line's run */
+            // Draw this scan line's run
 #ifdef kByteLevelTesting
             TestByte( (char *)dbyte, destPix, "\pHRUN3");
 #endif
@@ -1891,7 +1891,7 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
             TestByte( (char *)dbyte, destPix, "\pHRUN4");
 #endif
         }
-        /* Draw the final run of pixels */
+        // Draw the final run of pixels
 #ifdef kByteLevelTesting
         TestByte( (char *)dbyte, destPix, "\pHRUN5");
 #endif
@@ -1904,45 +1904,45 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
     }
     else
     {
-        /* Y major line */
+        // Y major line
 
-        /* Minimum # of pixels in a run in this line */
+        // Minimum # of pixels in a run in this line
         WholeStep = YDelta / XDelta;
 
-        /* Error term adjust each time X steps by 1; used to tell when 1 extra
-            pixel should be drawn as part of a run, to account for
-            fractional steps along the Y axis per 1-pixel steps along X */
+        // Error term adjust each time X steps by 1; used to tell when 1 extra
+        // pixel should be drawn as part of a run, to account for
+        // fractional steps along the Y axis per 1-pixel steps along X
         AdjUp = (YDelta % XDelta) << 1;
 
-        /* Error term adjust when the error term turns over, used to factor
-            out the Y step made at that time */
+        // Error term adjust when the error term turns over, used to factor
+        // out the Y step made at that time
         AdjDown = XDelta << 1;
 
-        /* Initial error term; reflects initial step of 0.5 along the X axis */
+        // Initial error term; reflects initial step of 0.5 along the X axis
         ErrorTerm = (YDelta % XDelta) - (XDelta << 1);
 
-        /* The initial and last runs are partial, because X advances only 0.5
-            for these runs, rather than 1. Divide one full run, plus the
-            initial pixel, between the initial and last runs */
+        // The initial and last runs are partial, because X advances only 0.5
+        // for these runs, rather than 1. Divide one full run, plus the
+        // initial pixel, between the initial and last runs
         InitialPixelCount = (WholeStep >> 1) + 1;
         FinalPixelCount = InitialPixelCount;
 
-        /* If the basic run length is even and there's no fractional advance, we
-            have 1 pixel that could go to either the initial or last partial run,
-            which we'll arbitrarily allocate to the last run */
+        // If the basic run length is even and there's no fractional advance, we
+        // have 1 pixel that could go to either the initial or last partial run,
+        // which we'll arbitrarily allocate to the last run
         if ((AdjUp == 0) && ((WholeStep & 0x01) == 0))
         {
             InitialPixelCount--;
         }
-        /* If there are an odd number of pixels per run, we have one pixel
-            that can't be allocated to either the initial or last partial
-            run, so we'll add 0.5 to the error term so this pixel will be
-            handled by the normal full-run loop */
+        // If there are an odd number of pixels per run, we have one pixel
+        // that can't be allocated to either the initial or last partial
+        // run, so we'll add 0.5 to the error term so this pixel will be
+        // handled by the normal full-run loop
         if ((WholeStep & 0x01) != 0)
         {
             ErrorTerm += XDelta;
         }
-        /* Draw the first, partial run of pixels */
+        // Draw the first, partial run of pixels
 #ifdef kByteLevelTesting
         TestByte( (char *)dbyte, destPix, "\pVRUN1");
 #endif
@@ -1951,18 +1951,18 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
 #ifdef kByteLevelTesting
         TestByte( (char *)dbyte, destPix, "\pVRUN2");
 #endif
-        /* Draw all full runs */
+        // Draw all full runs
         for (i=0; i<(XDelta-1); i++)
         {
-            RunLength = WholeStep;  /* run is at least this long */
-            /* Advance the error term and add an extra pixel if the error
-                term so indicates */
+            RunLength = WholeStep;  // run is at least this long
+            // Advance the error term and add an extra pixel if the error
+            // term so indicates
             if ((ErrorTerm += AdjUp) > 0)
             {
                 RunLength++;
-                ErrorTerm -= AdjDown;   /* reset the error term */
+                ErrorTerm -= AdjDown;   // reset the error term
             }
-            /* Draw this scan line's run */
+            // Draw this scan line's run
 #ifdef kByteLevelTesting
             TestByte( (char *)dbyte, destPix, "\pVRUN3");
 #endif
@@ -1972,7 +1972,7 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
             TestByte( (char *)dbyte, destPix, "\pVRUN4");
 #endif
         }
-        /* Draw the final run of pixels */
+        // Draw the final run of pixels
 #ifdef kByteLevelTesting
         TestByte( (char *)dbyte, destPix, "\pVRUN5");
 #endif
@@ -1985,8 +1985,8 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
     }
 }
 
-/* Draws a horizontal run of pixels, then advances the bitmap pointer to
-    the first pixel of the next run. */
+// Draws a horizontal run of pixels, then advances the bitmap pointer to
+// the first pixel of the next run.
 
 /*
 void DrawHorizontalRun( unsigned char **dbyte, long XAdvance,
@@ -2006,8 +2006,8 @@ void DrawHorizontalRun( unsigned char **dbyte, long XAdvance,
 }
 */
 
-/* Draws a vertical run of pixels, then advances the bitmap pointer to
-    the first pixel of the next run. */
+// Draws a vertical run of pixels, then advances the bitmap pointer to
+// the first pixel of the next run. */
 
 /*
 void DrawVerticalRun(char far **dbyte, int XAdvance,
@@ -2093,8 +2093,8 @@ void DashNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
         }
     }
 
-   /* We'll always draw top to bottom, to reduce the number of cases we have to
-   handle, and to make lines between the same endpoints draw the same pixels */
+   // We'll always draw top to bottom, to reduce the number of cases we have to
+   // handle, and to make lines between the same endpoints draw the same pixels
     if (YStart > YEnd)
     {
         Temp = YStart;
@@ -2106,13 +2106,13 @@ void DashNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
     }
 
 
-    /* Point to the bitmap address first pixel to draw */
+    // Point to the bitmap address first pixel to draw
     drowPlus = destPix->rowBytes & 0x3fff;
     dbyte = (unsigned char *)destPix->baseAddr + (YStart + voff) * drowPlus +
                 XStart + hoff;
 
-    /* Figure out whether we're going left or right, and how far we're
-        going horizontally */
+    // Figure out whether we're going left or right, and how far we're
+    // going horizontally
     if ((XDelta = XEnd - XStart) < 0)
     {
         XAdvance = -1;
@@ -2122,14 +2122,14 @@ void DashNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
     {
         XAdvance = 1;
     }
-    /* Figure out how far we're going vertically */
+    // Figure out how far we're going vertically
     YDelta = YEnd - YStart;
 
-    /* Special-case horizontal, vertical, and diagonal lines, for speed
-        and to avoid nasty boundary conditions and division by 0 */
+    // Special-case horizontal, vertical, and diagonal lines, for speed
+    // and to avoid nasty boundary conditions and division by 0
     if (XDelta == 0)
     {
-        /* Vertical line */
+        // Vertical line
 /*      for (i=0; i<=YDelta; i++)
         {
             *dbyte = Color;
@@ -2158,7 +2158,7 @@ void DashNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
     }
     if (YDelta == 0)
     {
-        /* Horizontal line */
+        // Horizontal line
 /*      for (i=0; i<=XDelta; i++)
         {
             *dbyte = Color;
@@ -2186,7 +2186,7 @@ void DashNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
     }
     if (XDelta == YDelta)
     {
-        /* Diagonal line */
+        // Diagonal line
 /*      for (i=0; i<=XDelta; i++)
         {
             *dbyte = Color;
@@ -2213,130 +2213,130 @@ void DashNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
         return;
     }
 
-    /* Determine whether the line is X or Y major, and handle accordingly */
+    // Determine whether the line is X or Y major, and handle accordingly
     if (XDelta >= YDelta)
     {
-        /* X major line */
-        /* Minimum # of pixels in a run in this line */
+        // X major line
+        // Minimum # of pixels in a run in this line
         WholeStep = XDelta / YDelta;
 
-        /* Error term adjust each time Y steps by 1; used to tell when one
-            extra pixel should be drawn as part of a run, to account for
-            fractional steps along the X axis per 1-pixel steps along Y */
+        // Error term adjust each time Y steps by 1; used to tell when one
+        // extra pixel should be drawn as part of a run, to account for
+        // fractional steps along the X axis per 1-pixel steps along Y
         AdjUp = (XDelta % YDelta) << 1;
 
-        /* Error term adjust when the error term turns over, used to factor
-            out the X step made at that time */
+        // Error term adjust when the error term turns over, used to factor
+        // out the X step made at that time
         AdjDown = YDelta * 2;
 
-        /* Initial error term; reflects an initial step of 0.5 along the Y
-            axis */
+        // Initial error term; reflects an initial step of 0.5 along the Y
+        // axis
         ErrorTerm = (XDelta % YDelta) - (YDelta << 1);
 
-        /* The initial and last runs are partial, because Y advances only 0.5
-            for these runs, rather than 1. Divide one full run, plus the
-            initial pixel, between the initial and last runs */
+        // The initial and last runs are partial, because Y advances only 0.5
+        // for these runs, rather than 1. Divide one full run, plus the
+        // initial pixel, between the initial and last runs
         InitialPixelCount = (WholeStep >> 1) + 1;
         FinalPixelCount = InitialPixelCount;
 
-        /* If the basic run length is even and there's no fractional
-            advance, we have one pixel that could go to either the initial
-            or last partial run, which we'll arbitrarily allocate to the
-            last run */
+        // If the basic run length is even and there's no fractional
+        // advance, we have one pixel that could go to either the initial
+        // or last partial run, which we'll arbitrarily allocate to the
+        // last run
         if ((AdjUp == 0) && ((WholeStep & 0x01) == 0))
         {
             InitialPixelCount--;
         }
-      /* If there're an odd number of pixels per run, we have 1 pixel that can't
-      be allocated to either the initial or last partial run, so we'll add 0.5
-      to error term so this pixel will be handled by the normal full-run loop */
+        // If there're an odd number of pixels per run, we have 1 pixel that can't
+        // be allocated to either the initial or last partial run, so we'll add 0.5
+        // to error term so this pixel will be handled by the normal full-run loop
         if ((WholeStep & 0x01) != 0)
         {
             ErrorTerm += YDelta;
         }
-        /* Draw the first, partial run of pixels */
+        // Draw the first, partial run of pixels
         mDashHorizontalRun( dbyte, XAdvance, InitialPixelCount, Color, drowPlus, Temp, dashon, dashoff, dashcount);
 
 
-        /* Draw all full runs */
+        // Draw all full runs
         for (i=0; i<(YDelta-1); i++)
         {
-            RunLength = WholeStep;  /* run is at least this long */
-            /* Advance the error term and add an extra pixel if the error
-                term so indicates */
+            RunLength = WholeStep;  // run is at least this long
+            // Advance the error term and add an extra pixel if the error
+            // term so indicates
             if ((ErrorTerm += AdjUp) > 0)
             {
                 RunLength++;
-                ErrorTerm -= AdjDown;   /* reset the error term */
+                ErrorTerm -= AdjDown;   // reset the error term
             }
-            /* Draw this scan line's run */
+            // Draw this scan line's run
             mDashHorizontalRun( dbyte, XAdvance, RunLength, Color, drowPlus, Temp, dashon, dashoff, dashcount);
 
         }
-        /* Draw the final run of pixels */
+        // Draw the final run of pixels
         mDashHorizontalRun( dbyte, XAdvance, FinalPixelCount, Color, drowPlus, Temp, dashon, dashoff, dashcount);
 
         return;
     }
     else
     {
-        /* Y major line */
+        // Y major line
 
-        /* Minimum # of pixels in a run in this line */
+        // Minimum # of pixels in a run in this line
         WholeStep = YDelta / XDelta;
 
-        /* Error term adjust each time X steps by 1; used to tell when 1 extra
-            pixel should be drawn as part of a run, to account for
-            fractional steps along the Y axis per 1-pixel steps along X */
+        // Error term adjust each time X steps by 1; used to tell when 1 extra
+        // pixel should be drawn as part of a run, to account for
+        // fractional steps along the Y axis per 1-pixel steps along X
         AdjUp = (YDelta % XDelta) << 1;
 
-        /* Error term adjust when the error term turns over, used to factor
-            out the Y step made at that time */
+        // Error term adjust when the error term turns over, used to factor
+        // out the Y step made at that time
         AdjDown = XDelta << 1;
 
-        /* Initial error term; reflects initial step of 0.5 along the X axis */
+        // Initial error term; reflects initial step of 0.5 along the X axis
         ErrorTerm = (YDelta % XDelta) - (XDelta << 1);
 
-        /* The initial and last runs are partial, because X advances only 0.5
-            for these runs, rather than 1. Divide one full run, plus the
-            initial pixel, between the initial and last runs */
+        // The initial and last runs are partial, because X advances only 0.5
+        // for these runs, rather than 1. Divide one full run, plus the
+        // initial pixel, between the initial and last runs
         InitialPixelCount = (WholeStep >> 1) + 1;
         FinalPixelCount = InitialPixelCount;
 
-        /* If the basic run length is even and there's no fractional advance, we
-            have 1 pixel that could go to either the initial or last partial run,
-            which we'll arbitrarily allocate to the last run */
+        // If the basic run length is even and there's no fractional advance, we
+        // have 1 pixel that could go to either the initial or last partial run,
+        // which we'll arbitrarily allocate to the last run
         if ((AdjUp == 0) && ((WholeStep & 0x01) == 0))
         {
             InitialPixelCount--;
         }
-        /* If there are an odd number of pixels per run, we have one pixel
-            that can't be allocated to either the initial or last partial
-            run, so we'll add 0.5 to the error term so this pixel will be
-            handled by the normal full-run loop */
+        // If there are an odd number of pixels per run, we have one pixel
+        // that can't be allocated to either the initial or last partial
+        // run, so we'll add 0.5 to the error term so this pixel will be
+        // handled by the normal full-run loop
         if ((WholeStep & 0x01) != 0)
         {
             ErrorTerm += XDelta;
         }
-        /* Draw the first, partial run of pixels */
+        // Draw the first, partial run of pixels
         mDashVerticalRun( dbyte, XAdvance, InitialPixelCount, Color, drowPlus, Temp, dashon, dashoff, dashcount)
 
-        /* Draw all full runs */
+        // Draw all full runs
         for (i=0; i<(XDelta-1); i++)
         {
-            RunLength = WholeStep;  /* run is at least this long */
-            /* Advance the error term and add an extra pixel if the error
-                term so indicates */
+            RunLength = WholeStep;  // run is at least this long
+            // Advance the error term and add an extra pixel if the error
+            // term so indicates
             if ((ErrorTerm += AdjUp) > 0)
             {
                 RunLength++;
-                ErrorTerm -= AdjDown;   /* reset the error term */
+                ErrorTerm -= AdjDown;   // reset the error term
             }
-            /* Draw this scan line's run */
+            // Draw this scan line's run
             mDashVerticalRun( dbyte, XAdvance, RunLength, Color, drowPlus, Temp, dashon, dashoff, dashcount);
 
         }
-        /* Draw the final run of pixels */
+        // Draw the final run of pixels
         mDashVerticalRun( dbyte, XAdvance, FinalPixelCount, Color, drowPlus, Temp, dashon, dashoff, dashcount);
 
         return;

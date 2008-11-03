@@ -18,7 +18,7 @@
 #ifndef ANTARES_ROTATION_HPP_
 #define ANTARES_ROTATION_HPP_
 
-/* ROTATION.H */
+// ROTATION.H
 
 #pragma options align=mac68k
 

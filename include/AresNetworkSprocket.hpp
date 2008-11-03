@@ -18,7 +18,7 @@
 #ifndef ANTARES_ARES_NETWORK_SPROCKET_HPP_
 #define ANTARES_ARES_NETWORK_SPROCKET_HPP_
 
-/* Ares NetworkSprocket.h */
+// Ares NetworkSprocket.h
 
 #include <NetSprocket.h>
 

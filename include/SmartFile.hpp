@@ -18,31 +18,7 @@
 #ifndef ANTARES_SMART_FILE_HPP_
 #define ANTARES_SMART_FILE_HPP_
 
-/******************************************\
-|**| Smart_File.h
-\******************************************/
-
-#pragma mark **DEFINITIONS**
-/******************************************\
-|**| #defines
-\******************************************/
-
-/* - definitions
-*******************************************/
-
-#pragma mark _macros_
-/* - macros
-*******************************************/
-
-#pragma mark **TYPEDEFS**
-/******************************************\
-|**| typedefs
-\******************************************/
-
-#pragma mark **PUBLIC PROTOTYPES**
-/******************************************\
-|**| public function prototypes
-\******************************************/
+// Smart_File.h
 
 OSErr SmartFile_SelectFolder( FSSpecPtr destFile, StringPtr windowName,
     StringPtr prompt);

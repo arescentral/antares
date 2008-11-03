@@ -15,7 +15,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/* Ares NetworkSprocket.c */
+// Ares NetworkSprocket.c
 
 //#ifdef powerc
 #define kAllowNetSprocket
@@ -804,9 +804,8 @@ long GetOtherPlayerNum( void)
     else return ( -1);
 }
 
-/* GetOtherPlayerConnectionData:
-Assumes there are only two players. Returns the lag & throughput of other player.
-*/
+// GetOtherPlayerConnectionData:
+// Assumes there are only two players. Returns the lag & throughput of other player.
 
 void GetOtherPlayerConnectionData( unsigned long *roundTripTime, unsigned long *throughPut)
 {
@@ -833,9 +832,8 @@ void GetOtherPlayerConnectionData( unsigned long *roundTripTime, unsigned long *
 #endif
 }
 
-/* GetOtherPlayerName:
-Assumes there are only two players. name of other player.
-*/
+// GetOtherPlayerName:
+// Assumes there are only two players. name of other player.
 
 void GetOtherPlayerName( StringPtr *s)
 {
@@ -1271,8 +1269,8 @@ long UseNextLatency( void)
 }
 
 
-/* SetNetPlayerData: preserves races, admiralNum, and opponent color
-*/
+// SetNetPlayerData: preserves races, admiralNum, and opponent color
+
 /*void SetNetPlayerData( long whichPlayer, short race, unsigned char color)
 
 {

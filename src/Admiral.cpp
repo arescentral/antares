@@ -68,10 +68,9 @@ int AdmiralInit( void)
         return( MEMORY_ERROR);
     }
 
-    /*
-    MoveHHi( gAresGlobal->gAdmiralData);
-    HLock( gAresGlobal->gAdmiralData);
-    */
+    // MoveHHi( gAresGlobal->gAdmiralData);
+    // HLock( gAresGlobal->gAdmiralData);
+
     mHandleLockAndRegister( gAresGlobal->gAdmiralData, nil, nil, nil, "\pgAresGlobal->gAdmiralData")
     ResetAllAdmirals();
 
@@ -897,7 +896,7 @@ void SetObjectDestination( spaceObjectType *o, spaceObjectType *overrideObject)
         DebugFileAppendString("\p-");
     DebugFileAppendString( "\p\t");
 */
-    /* MORE DEBUGFILE BELOW! */
+    // MORE DEBUGFILE BELOW!
 
     // if the object does not have an alliance, then something is wrong here--forget it
     if ( o->owner <= kNoOwner)

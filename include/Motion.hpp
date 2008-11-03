@@ -47,6 +47,7 @@
 #define kDistanceSuperExtraShift    4L      // for sake of speed = kDistanceSperUnitBitShift - kDistanceUnitBitShift
 #define kDistanceUnitExtraShift     3L      // speed from kCollisionSuperUnitBitShift to kDistanceUnitBitShift
 */
+
 #define kDistanceUnit               2048    // = smallest distance grid unit
 #define kDistanceSuperUnit          32768   // = kProximitySuperSize * kDistanceUnit
 #define kDistanceUnitBitShift       11L     // >> 14L = / 2048

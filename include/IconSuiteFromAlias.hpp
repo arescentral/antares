@@ -18,31 +18,7 @@
 #ifndef ANTARES_ICON_SUITE_FROM_ALIAS_HPP_
 #define ANTARES_ICON_SUITE_FROM_ALIAS_HPP_
 
-/******************************************\
-|**| IconSuiteFromAlias.h
-\******************************************/
-
-#pragma mark **DEFINITIONS**
-/******************************************\
-|**| #defines
-\******************************************/
-
-/* - definitions
-*******************************************/
-
-#pragma mark _macros_
-/* - macros
-*******************************************/
-
-#pragma mark **TYPEDEFS**
-/******************************************\
-|**| typedefs
-\******************************************/
-
-#pragma mark **PUBLIC PROTOTYPES**
-/******************************************\
-|**| public function prototypes
-\******************************************/
+// IconSuiteFromAlias.h
 
 void DrawAliasSmallIcon( AliasHandle alias, short left, short right);
 void DrawFSpecSmallIcon( FSSpec *fspec, short left, short top);

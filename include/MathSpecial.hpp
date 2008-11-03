@@ -18,7 +18,7 @@
 #ifndef ANTARES_MATH_SPECIAL_HPP_
 #define ANTARES_MATH_SPECIAL_HPP_
 
-/* Math Special.h */
+// Math Special.h
 
 #include "ConditionalMacros.h"
 
@@ -30,14 +30,14 @@
 #define WideSubtract    MyWideSubtract
 #endif
 
-/*
-    MAX VALUE FOR SMALLFIXEDTYPE:
-
-    8,388,607       normal
-    4,194,303       addition
-    2,896           multiplication -- see below
-    32,768          division
-*/
+//
+//  MAX VALUE FOR SMALLFIXEDTYPE:
+//
+//  8,388,607       normal
+//  4,194,303       addition
+//  2,896           multiplication -- see below
+//  32,768          division
+//
 
 #define kFixedOneQuarter            0x00000040
 #define kFixedPlusPointFive         0x00000080

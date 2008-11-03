@@ -198,10 +198,9 @@ void MakeNewSparks( long sparkNum, long sparkSpeed, smallFixedType maxVelocity,
     }
 }
 
-/* PrepareToMoveScrollStars:
-    We need to save the stars' last position since we may move them several times before they
-    are redrawn; the old positions have to be erased right after the new ones are drawn.
-*/
+// PrepareToMoveScrollStars:
+//  We need to save the stars' last position since we may move them several times before they
+//  are redrawn; the old positions have to be erased right after the new ones are drawn.
 
 void PrepareToMoveScrollStars( void)
 
@@ -779,11 +778,10 @@ void ShowScrollStars( Boolean warp)
 #endif
 }
 
-/* DontShowScrollStars:
-    does everything except actually show the stars; this is for when you want update everything
-    without copying to the screen, as is the case with QuickDraw only, when it copies the
-    whole screen by itself.
-*/
+// DontShowScrollStars:
+//  does everything except actually show the stars; this is for when you want update everything
+//  without copying to the screen, as is the case with QuickDraw only, when it copies the
+//  whole screen by itself.
 
 void DontShowScrollStars( void)
 

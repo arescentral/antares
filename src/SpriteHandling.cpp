@@ -15,7 +15,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/* SpriteHandling */
+// SpriteHandling
 
 #include "SpriteHandling.h"
 
@@ -532,11 +532,9 @@ void CreateSpritePixFromPixMap( spritePix *sprite, int type, PixMapHandle pixMap
     }
 }
 
-/* DrawSpriteInPixMap:
-    WARNING: DOES NOT CLIP.  WILL CRASH IF DESTINATION RECT IS NOT CONTAINED IN
-    DESTINATION PIX MAP.
-*/
-
+// DrawSpriteInPixMap:
+//  WARNING: DOES NOT CLIP.  WILL CRASH IF DESTINATION RECT IS NOT CONTAINED IN
+//  DESTINATION PIX MAP.
 
 void RunLengthSpritePixInPixMap( spritePix *sprite, Point where, PixMapHandle pixMap)
 
@@ -2468,8 +2466,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, lo
     } else dRect->left = dRect->right = dRect->top = dRect->bottom = 0;
 }
 
-/* a hack; not fast
-*/
+// a hack; not fast
 
 void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, longRect *dRect,
         longRect *clipRect, PixMapHandle pixMap, unsigned char colorOut,
@@ -3101,10 +3098,9 @@ void ShowSpriteTable( void)
     }
 }
 
-/* CullSprites: if you're keeping track of sprites, but not showing them, use this to remove
-dead sprites. (Implemented for Asteroid level, where game is run to populate scenario with Asteroids
-before the player actually starts.
-*/
+// CullSprites: if you're keeping track of sprites, but not showing them, use this to remove
+// dead sprites. (Implemented for Asteroid level, where game is run to populate scenario with Asteroids
+// before the player actually starts.
 
 void CullSprites( void)
 {

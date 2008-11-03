@@ -15,9 +15,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/******************************************\
-|**| Smart_File.c
-\******************************************/
+// Smart_File.c
 
 #include "SmartFile.h"
 
@@ -26,55 +24,13 @@
 #include "NavigationUtilities.h"
 #include "OldFile.h"
 
-#pragma mark **DEFINITIONS**
-/******************************************\
-|**| #defines
-\******************************************/
-
-/* - definitions
-*******************************************/
-
-#pragma mark _macros_
-/* - macros
-*******************************************/
-
 #ifdef powerc
 #define Has_Navigation_Services     NavServicesAvailable()
 #else
 #define Has_Navigation_Services     false
 #endif
 
-#pragma mark **TYPEDEFS**
-/******************************************\
-|**| typedefs
-\******************************************/
-
-#pragma mark **EXTERNAL GLOBALS**
-/******************************************\
-|**| external globals
-\******************************************/
-
 extern Boolean gDirectorySelectionFlag;
-
-#pragma mark **PRIVATE GLOBALS**
-/******************************************\
-|**| private globals
-\******************************************/
-
-#pragma mark **PRIVATE PROTOTYPES**
-/******************************************\
-|**| private function prototypes
-\******************************************/
-
-#pragma mark **PRIVATE FUNCTIONS**
-/******************************************\
-|**| private functions
-\******************************************/
-
-#pragma mark **PUBLIC FUNCTIONS**
-/******************************************\
-|**| public functions
-\******************************************/
 
 OSErr SmartFile_SelectFolder( FSSpecPtr destFile, StringPtr windowName,
     StringPtr prompt)

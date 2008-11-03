@@ -900,14 +900,15 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
         dObject->engageRange = kEngageRange;
 }
 
-/* ChangeObjectBaseType:
-This is a very RISKY procedure. You probably shouldn't change anything fundamental about the object--
-meaning, attributes that change the way the object behaves, or the way other objects treat this object--
-so don't, for instance, give something the kCanThink attribute if it couldn't before.
-This routine is similar to "InitSpaceObjectFromBaseObject" except that it doesn't change many things
-(like the velocity, direction, or randomseed) AND it handles the sprite data itself!
-Can you change the frame type? Like from a direction frame to a self-animated frame? I'm not sure...
-*/
+//
+// ChangeObjectBaseType:
+// This is a very RISKY procedure. You probably shouldn't change anything fundamental about the object--
+// meaning, attributes that change the way the object behaves, or the way other objects treat this object--
+// so don't, for instance, give something the kCanThink attribute if it couldn't before.
+// This routine is similar to "InitSpaceObjectFromBaseObject" except that it doesn't change many things
+// (like the velocity, direction, or randomseed) AND it handles the sprite data itself!
+// Can you change the frame type? Like from a direction frame to a self-animated frame? I'm not sure...
+//
 
 void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
     long spriteIDOverride, Boolean relative)
@@ -1447,10 +1448,10 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                             newObject->targetObjectID = anObject->targetObjectID;
                             newObject->closestObject = newObject->targetObjectNumber;
 
-                            /*
-                                ugly though it is, we have to fill in the rest of
-                                a new beam's fields after it's created.
-                            */
+                            //
+                            //  ugly though it is, we have to fill in the rest of
+                            //  a new beam's fields after it's created.
+                            //
 
                             if ( newObject->attributes & kIsBeam)
                             {
@@ -1694,9 +1695,8 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 //                          if ( action->reflexive) WriteDebugLine((char *)"\pREFLEX!");
                             if ( sObject != nil)
                             {
-                                /* active (non-reflexive) altering of velocity means a PUSH, just like
-                                    two objects colliding.  Negative velocity = slow down
-                                */
+                                // active (non-reflexive) altering of velocity means a PUSH, just like
+                                //  two objects colliding.  Negative velocity = slow down
                                 if ( dObject != nil)
                                 {
                                     if ( action->argument.alterObject.relative)
@@ -1806,11 +1806,10 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                         anObject->velocity.v = f2;
                                     }
                                 } else
-                                /* reflexive alter velocity means a burst of speed in the direction
-                                the object is facing, where negative speed means backwards. Object can
-                                excede its max velocity.
-                                Minimum value is absolute speed in direction.
-                                */
+                                // reflexive alter velocity means a burst of speed in the direction
+                                // the object is facing, where negative speed means backwards. Object can
+                                // excede its max velocity.
+                                // Minimum value is absolute speed in direction.
                                 {
                                     mGetRotPoint( f, f2, (long)anObject->direction);
                                     f = mMultiplyFixed( action->argument.alterObject.minimum, f);
@@ -1869,10 +1868,9 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 */
                             if ( action->argument.alterObject.relative)
                             {
-                                /*  if it's relative AND reflexive, we take the direct
-                                    object's owner, since relative & reflexive would
-                                    do nothing.
-                                */
+                                // if it's relative AND reflexive, we take the direct
+                                // object's owner, since relative & reflexive would
+                                // do nothing.
                                 if (( action->reflexive) && ( dObject != nil))
                                     AlterObjectOwner( anObject, dObject->owner, true);
                                 else

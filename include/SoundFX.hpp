@@ -18,7 +18,7 @@
 #ifndef ANTARES_SOUND_FX_HPP_
 #define ANTARES_SOUND_FX_HPP_
 
-/* SOUND FX.H */
+// SOUND FX.H
 
 #include "MathSpecial.h"
 #include "Processor.h"

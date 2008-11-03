@@ -15,7 +15,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/* DebugWindow */
+// DebugWindow
 
 #include "Debug.h"
 
@@ -26,7 +26,7 @@
 #include "StringNumerics.h"
 
 #define LINE_HEIGHT         11
-#define WINDOW_HEIGHT       50      /* Window height in lines */
+#define WINDOW_HEIGHT       50      // Window height in lines
 #define WINDOW_WIDTH        88
 
 #define kMaxDebugFileSize   4098000//1024000

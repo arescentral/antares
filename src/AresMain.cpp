@@ -183,7 +183,7 @@ aresGlobalType  *gAresGlobal = nil;
 
 CWindowPtr      gTheWindow = nil;//, gAresGlobal->gBackWindow = nil;
 MenuHandle      gAppleMenu;
-long            gLastTick, /*gAresGlobal->gGameOver = 0,*/
+long            gLastTick, // gAresGlobal->gGameOver = 0,
                 WORLD_WIDTH = 640,
                 WORLD_HEIGHT = 480,
                 CLIP_LEFT = 128,
@@ -585,10 +585,10 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
             {
 
                 // FROM ADG:TOOL CHEST 2/95: HIDEMENUBAR CODE SNIPPET
-                /*************************************************/
-                /* Set the global MBarHeight to 0 to prevent any */
-                /*  other apps from writing to the menu bar.     */
-                /*************************************************/
+                //
+                // Set the global MBarHeight to 0 to prevent any
+                //  other apps from writing to the menu bar.
+                //
 
 /*              MacSetRect( &mBarRect, tRect.left, tRect.top, tRect.right, tRect.top + oldMBarHeight);
 
@@ -3097,7 +3097,9 @@ void Pause( long time)
 {
     long    starttime = TickCount();
 
-    while (( TickCount() - starttime) < time) { /* DO NOTHING */};
+    while (( TickCount() - starttime) < time) {
+        // DO NOTHING
+    }
 }
 
 void SetWindowColorTable( WindowPtr window)

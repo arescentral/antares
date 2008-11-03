@@ -15,7 +15,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/* Transitions Color Animations.c */
+// Transitions Color Animations.c
 
 #include "Transitions.h"
 
@@ -95,11 +95,10 @@ void CleanupTransitions( void)
         DisposeHandle( (Handle)gAresGlobal->gSaveColorTable);
 }
 
-/* DitherFadePixMapToScreenPixMap
-
-    Takes in two sources, one of which is a COPY of the screen map, and fades from the first
-    to the second using B&W patterns (PAT# 500)
-*/
+// DitherFadePixMapToScreenPixMap
+//
+//  Takes in two sources, one of which is a COPY of the screen map, and fades from the first
+//  to the second using B&W patterns (PAT# 500)
 
 /*
 PROCEDURE GetIndPattern (VAR thePattern: Pattern;
@@ -489,13 +488,12 @@ Boolean AutoMusicFadeTo( long tickTime, RGBColor *goalColor, Boolean eventSkip)
     return( anyEventHappened);
 }
 
-/* CustomPictFade:
-blackens the window; sets color table to clutD; draws pict resource pictID; fades from
-black to pict; holds pict; fades to black; restores orignal palette; stops & returns true
-if any key pressed.
->>> YOU SHOULD PROBABLY CALL RESETTRANSITIONS AFTER CALLING THIS since it could screw up
-the color translation table.
-*/
+// CustomPictFade:
+// blackens the window; sets color table to clutD; draws pict resource pictID; fades from
+// black to pict; holds pict; fades to black; restores orignal palette; stops & returns true
+// if any key pressed.
+// >>> YOU SHOULD PROBABLY CALL RESETTRANSITIONS AFTER CALLING THIS since it could screw up
+// the color translation table.
 
 Boolean CustomPictFade( long fadeSpeed, long holdTime, short pictID, short clutID,
         WindowPtr aWindow)

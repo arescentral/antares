@@ -18,31 +18,7 @@
 #ifndef ANTARES_NAVIGATION_UTILITIES_HPP_
 #define ANTARES_NAVIGATION_UTILITIES_HPP_
 
-/******************************************\
-|**| Navigation_Utilities.h
-\******************************************/
-
-#pragma mark **DEFINITIONS**
-/******************************************\
-|**| #defines
-\******************************************/
-
-/* - definitions
-*******************************************/
-
-#pragma mark _macros_
-/* - macros
-*******************************************/
-
-#pragma mark **TYPEDEFS**
-/******************************************\
-|**| typedefs
-\******************************************/
-
-#pragma mark **PUBLIC PROTOTYPES**
-/******************************************\
-|**| public function prototypes
-\******************************************/
+// Navigation_Utilities.h
 
 OSErr NS_SelectFileObject( FSSpecPtr destFile, short openListResID);
 

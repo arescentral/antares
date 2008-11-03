@@ -18,38 +18,11 @@
 #ifndef ANTARES_ARES_VERSION_HPP_
 #define ANTARES_ARES_VERSION_HPP_
 
-/******************************************\
-|**| Ares_Version.h
-\******************************************/
-
-#pragma mark **DEFINITIONS**
-/******************************************\
-|**| #defines
-\******************************************/
-
-/* - definitions
-*******************************************/
-
 #define kThis_Version_Is                    0x01010100
-
-#pragma mark _macros_
-/* - macros
-*******************************************/
-
-#pragma mark **TYPEDEFS**
-/******************************************\
-|**| typedefs
-\******************************************/
 
 typedef unsigned long aresVersionType;
 
-#pragma mark **PUBLIC PROTOTYPES**
-/******************************************\
-|**| public function prototypes
-\******************************************/
-
 aresVersionType AresVersion_Get_FromString( StringPtr s);
-
 StringPtr String_Get_FromAresVersion( StringPtr s, aresVersionType t);
 
 #endif // ANTARES_ARES_VERSION_HPP_

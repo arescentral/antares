@@ -15,15 +15,15 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/*
-    Witch Doctor Tester.c
-    Written by Hiep Dam
-    From The Witches' Brew
-    (it's just a name, folks. I'm not into the occult or anything like that!)
-    12/2/95
-
-    Shows sample usage of the Witch Doctor.
-*/
+//
+//  Witch Doctor Tester.c
+//  Written by Hiep Dam
+//  From The Witches' Brew
+//  (it's just a name, folks. I'm not into the occult or anything like that!)
+//  12/2/95
+//
+//  Shows sample usage of the Witch Doctor.
+//
 
 #include "EnvironmentCheck.h"
 

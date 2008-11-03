@@ -2394,10 +2394,9 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
 }
 
 
-/* GetManualSelectObject:
-    For the human player selecting a ship.  If friend or foe = 0, will get any ship.  If it's
-    positive, will get only friendly ships.  If it's negative, only unfriendly ships.
-*/
+// GetManualSelectObject:
+//  For the human player selecting a ship.  If friend or foe = 0, will get any ship.  If it's
+//  positive, will get only friendly ships.  If it's negative, only unfriendly ships.
 
 long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusiveAttributes,
                             unsigned long anyOneAttribute, unsigned long exclusiveAttributes,
@@ -2414,12 +2413,11 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
     UnsignedWide    wideClosestDistance = {kUniversalCenter, kUniversalCenter}, wideFartherDistance = {kUniversalCenter, kUniversalCenter},
                     thisWideDistance, wideScrap;
     unsigned char   thisDistanceState;
-/*
-Here's what you've got to do next:
-start with the currentShipNum
-try to get any ship but the current ship
-stop trying when we've made a full circle (we're back on currentShipNum)
-*/
+
+    // Here's what you've got to do next:
+    // start with the currentShipNum
+    // try to get any ship but the current ship
+    // stop trying when we've made a full circle (we're back on currentShipNum)
 
     WriteDebugLine((char *)"\pSelecting");
     WriteDebugLong( currentShipNum);

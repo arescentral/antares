@@ -15,15 +15,9 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/* NATEPIXTABLE.C */
+// NATEPIXTABLE.C
 
 // ShapeMachine IV by Nathan Lamont
-
-/******************************************************/
-/*                                                    */
-/*             NatePixTable handling                  */
-/*                                                    */
-/******************************************************/
 
 #include "NatePixTable.h"
 
@@ -296,10 +290,9 @@ Handle GetNatePixTableNatePixDataCopy( Handle table, long pixnum)
     return (copy);
 }
 
-/* GetNatePixTableNatePixPtr:
-    makes a new natePix structure with a baseAddr pointing into the natePixTable, meaning
-    the original natePixTable cannot be unlocked or disposed.
-*/
+// GetNatePixTableNatePixPtr:
+//  makes a new natePix structure with a baseAddr pointing into the natePixTable, meaning
+//  the original natePixTable cannot be unlocked or disposed.
 
 /*
 void GetNatePixTableNatePixPtr( natePix *dPix, Handle table, int pixnum)
@@ -392,7 +385,7 @@ void InsertNatePix( Handle table, Rect *sRect, int pixnum)
     SetNatePixTableNatePixHRef( table, (long)pixnum, 0);
     SetNatePixTableNatePixVRef( table, (long)pixnum, 0);
 /*
-    >>> It's now up to the caller to fill in the pixels!
+    // >>> It's now up to the caller to fill in the pixels!
 
     CopyPixBlock( (byte *)*(pix->pixBase), (byte *)GetNatePixTableNatePixData( table,
         (long)pixnum), width, (**(pix->pix)).bounds.bottom);
@@ -425,10 +418,9 @@ void DeleteNatePix( Handle table, int pixnum)
     SetNatePixTablePixNum( table, GetNatePixTablePixNum( table) - 1L);
 }
 
-/* RemapNatePixTableColor:
-    given a NatePixTable, converts the raw pixel data based on custom color table, and translates
-    into device's color table, using Backbone Graphic's GetTranslateIndex().
-*/
+// RemapNatePixTableColor:
+//  given a NatePixTable, converts the raw pixel data based on custom color table, and translates
+//  into device's color table, using Backbone Graphic's GetTranslateIndex().
 
 void RemapNatePixTableColor( Handle table)
 
@@ -462,10 +454,9 @@ void RemapNatePixTableColor( Handle table)
 
 }
 
-/* ColorizeNatePixTableColor:
-    given a NatePixTable, converts the raw pixel data based on custom color table, and translates
-    into device's color table, but colorizes to color.
-*/
+// ColorizeNatePixTableColor:
+//  given a NatePixTable, converts the raw pixel data based on custom color table, and translates
+//  into device's color table, but colorizes to color.
 
 void ColorizeNatePixTableColor( Handle table, unsigned char color)
 

@@ -15,7 +15,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/* Graphics Device Interface */
+// Graphics Device Interface
 
 #include "GDeviceHandling.h"
 
@@ -231,7 +231,7 @@ void CenterRectInDevice( GDHandle device, Rect *rect)
 //  dRect = (*(*device)->gdPMap)->bounds;
     dRect =(*device)->gdRect;
 //  if ( device == GetMainDevice())
-//      dRect.top -= GetMBarHeight(); /* menu bar height? */
+//      dRect.top -= GetMBarHeight(); // menu bar height?
     w = rect->right - rect->left;
     h = rect->bottom - rect->top;
     rect->left =  dRect.left + ( dRect.right - dRect.left) / 2 - w / 2;
@@ -269,9 +269,9 @@ void SetColorDepth( GDHandle device, int depth)
         SetDepth( device, depth, 1, 1);
 }
 
-/*
-GetDeviceDepth- see MacTech December '93, p19
-*/
+//
+// GetDeviceDepth- see MacTech December '93, p19
+//
 
 int GetDeviceDepth( GDHandle device)
 

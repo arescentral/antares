@@ -54,10 +54,9 @@ void CleanupRaces( void)
     if ( gAresGlobal->gRaceData != nil) DisposeHandle( gAresGlobal->gRaceData);
 }
 
-/* GetNextLegalRace: Gets the next legal race *after* raceNum in the scenario it
-is passed. Pass -1 in raceNum to get the first legal race. Returns -1 if no legal
-races left.
-*/
+// GetNextLegalRace: Gets the next legal race *after* raceNum in the scenario it
+// is passed. Pass -1 in raceNum to get the first legal race. Returns -1 if no legal
+// races left.
 
 short GetNextLegalRace( short raceNum, short playerNum, scenarioType *scenario)
 {
@@ -75,10 +74,9 @@ short GetNextLegalRace( short raceNum, short playerNum, scenarioType *scenario)
     else return( raceNum);
 }
 
-/* GetPreviousLegalRace: gets the previous legal race *before* raceNum in the
-scenario it is passed. Pass kRaceNum in raceNum to get the first legal race.
-Returns -1 if no legal races left.
-*/
+// GetPreviousLegalRace: gets the previous legal race *before* raceNum in the
+// scenario it is passed. Pass kRaceNum in raceNum to get the first legal race.
+// Returns -1 if no legal races left.
 
 short GetPreviousLegalRace( short raceNum, short playerNum, scenarioType *scenario)
 {
@@ -104,17 +102,15 @@ Boolean IsRaceLegal( short raceNum, short playerNum, scenarioType *scenario)
     else return( false);
 }
 
-/* GetRaceString: returns requested string for specified race. Use the following
-constants for whatString: kRaceAdjective, kRacePlural, kRaceForce, kRaceWorld.
-*/
+// GetRaceString: returns requested string for specified race. Use the following
+// constants for whatString: kRaceAdjective, kRacePlural, kRaceForce, kRaceWorld.
 
 void GetRaceString( StringPtr string, short whatString, short raceNum)
 {
     GetIndString( string, kRaceStrID, (raceNum * kRaceStringNum) + 1 + whatString);
 }
 
-/* GetRaceAdvantage: returns race estimated advantage.
-*/
+// GetRaceAdvantage: returns race estimated advantage.
 
 smallFixedType GetRaceAdvantage( short raceNum)
 {
@@ -126,9 +122,9 @@ smallFixedType GetRaceAdvantage( short raceNum)
     } else return 0;
 }
 
-/* GetRaceNumFromID: the RaceID is used, for stupid historic reasons. This will
-get the race number based on an ID. Returns -1 if no race found
-*/
+// GetRaceNumFromID: the RaceID is used, for stupid historic reasons. This will
+// get the race number based on an ID. Returns -1 if no race found
+
 short GetRaceNumFromID( short raceID)
 {
     raceType    *race = (raceType *)*gAresGlobal->gRaceData;
@@ -144,8 +140,8 @@ short GetRaceNumFromID( short raceID)
     else return( raceNum);
 }
 
-/* GetRaceIDFromNum: see GetRaceNumFromID. This does the reverse.
-*/
+// GetRaceIDFromNum: see GetRaceNumFromID. This does the reverse.
+
 short GetRaceIDFromNum( short raceNum)
 {
     raceType    *race = (raceType *)*gAresGlobal->gRaceData + (long)raceNum;

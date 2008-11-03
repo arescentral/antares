@@ -18,7 +18,8 @@
 #ifndef ANTARES_RANDOMIZE_HPP_
 #define ANTARES_RANDOMIZE_HPP_
 
-/* Randomize.h */
+// Randomize.h
+
 #pragma options align=mac68k
 
 //#define RandomSeeded( mrange, mseed) DebugRandomSeeded( mrange, mseed, __FILE__, __LINE__)

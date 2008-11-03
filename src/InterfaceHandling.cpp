@@ -17,9 +17,10 @@
 
 // Interface Handling.c
 
-/*  Liaison between the application and Interface Drawing.  Takes in events ( key events, mouse
-    down events), hilights and scrolls as needed, and returns results.  Also handles editable text.
-*/
+//
+// Liaison between the application and Interface Drawing.  Takes in events ( key events, mouse
+// down events), hilights and scrolls as needed, and returns results.  Also handles editable text.
+//
 
 #include "InterfaceHandling.h"
 

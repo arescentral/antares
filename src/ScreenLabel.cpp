@@ -48,7 +48,7 @@ extern aresGlobalType   *gAresGlobal;
 extern Handle           gDirectTextData;
 extern long             gWhichDirectText, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT,
                         CLIP_BOTTOM,
-                        WORLD_WIDTH, WORLD_HEIGHT, gNatePortLeft, gNatePortTop/*temp hack?*/;
+                        WORLD_WIDTH, WORLD_HEIGHT, gNatePortLeft, gNatePortTop; //temp hack?
 extern directTextType   *gDirectText;
 extern  GWorldPtr       gOffWorld, gRealWorld, gSaveWorld;
 extern  PixMapHandle    thePixMapHandle;
@@ -774,11 +774,11 @@ void ResolveScreenLabels( Handle labelData)
     }
 }
 
-/* String_Count_Lines
-    9/99
+// String_Count_Lines
+//  9/99
+//
+//  for emergency support of multi-line labels for on screen help
 
-    for emergency support of multi-line labels for on screen help
-*/
 static long String_Count_Lines( StringPtr s)
 {
     long    len, i = 0, result = 1;

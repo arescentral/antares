@@ -15,22 +15,22 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/* This is a hack that runs *WITHIN* a development version of Ares, for making DEMO levels.
-
-The object is to remove all data not relevent to demos to discourage hacking.
-
-Running it should scan through the hand-coded levels, mark the data it wants to keep, wipe out
-the data it doesn't (where applicable) and then copy it all over to the prefs file. Developer
-(me) then takes all that data from the prefs file and copies into new data files.
-
-MAKE SURE YOU BACK UP **ALL** DATA FILES 1ST, JUST IN CASE.
-
-other things you have to change:
-remember that the chapters start at 2, and that the apparent chapter # is -1
-scn 0 = dch 2/rch 3 -> cond 000 Counter -> action 279 declare winner 0 next:3 <-> next:4
-scn 5 = dch 3/rch 4 -> cond 057 Owner -> action 289 declare winner 0 next:4 <-> next:5
-scn12 = dch 4/rch13 -> cond 63 Countr >= -> action 458 declare winner 0 next:-1 <-> next:14
-*/
+// This is a hack that runs *WITHIN* a development version of Ares, for making DEMO levels.
+//
+// The object is to remove all data not relevent to demos to discourage hacking.
+//
+// Running it should scan through the hand-coded levels, mark the data it wants to keep, wipe out
+// the data it doesn't (where applicable) and then copy it all over to the prefs file. Developer
+// (me) then takes all that data from the prefs file and copies into new data files.
+//
+// MAKE SURE YOU BACK UP **ALL** DATA FILES 1ST, JUST IN CASE.
+//
+// other things you have to change:
+// remember that the chapters start at 2, and that the apparent chapter # is -1
+// scn 0 = dch 2/rch 3 -> cond 000 Counter -> action 279 declare winner 0 next:3 <-> next:4
+// scn 5 = dch 3/rch 4 -> cond 057 Owner -> action 289 declare winner 0 next:4 <-> next:5
+// scn12 = dch 4/rch13 -> cond 63 Countr >= -> action 458 declare winner 0 next:-1 <-> next:14
+//
 
 #include "AresDemoScanner.h"
 
@@ -51,7 +51,7 @@ extern aresGlobalType *gAresGlobal;
 
 extern scenarioType                 *gThisScenario;
 //extern long                           gAresGlobal->gThisScenarioNumber;
-extern Handle                       /*gAresGlobal->gScenarioData,*/
+extern Handle                       // gAresGlobal->gScenarioData,
                                     gObjectActionData,
                                     //gAresGlobal->gScenarioInitialData,
                                     //gAresGlobal->gScenarioBriefData,
@@ -61,8 +61,7 @@ extern pixTableType                 gPixTable[];
 //extern smartSoundHandle               gAresGlobal->gSound[];
 extern GWorldPtr                    gOffWorld;
 
-/* MAKE SURE YOU COMMENT OUT THE CONTENTS OF THE CorrectAllBaseObjectColor ROUTINE
-*/
+// MAKE SURE YOU COMMENT OUT THE CONTENTS OF THE CorrectAllBaseObjectColor ROUTINE
 
 void MakeDemoDataHack( void)
 
@@ -326,8 +325,7 @@ void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
     SetAllBaseObjectsUnchecked();
 }
 
-/* Clear all unused baseobjects, and copy changed data
-*/
+// Clear all unused baseobjects, and copy changed data
 
 void ClearAndCopyAllUnusedBaseObjects( Boolean *baseObjectKeepList)
 
@@ -358,8 +356,7 @@ void ClearAndCopyAllUnusedBaseObjects( Boolean *baseObjectKeepList)
     SaveAnyResourceInPreferences( kBaseObjectResType, kBaseObjectResID, nil, gBaseObjectData, true);
 }
 
-/* Copy all loaded pix tables
-*/
+// Copy all loaded pix tables
 
 void CopyAllUsedPixTables( void)
 

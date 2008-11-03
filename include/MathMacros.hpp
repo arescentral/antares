@@ -18,7 +18,7 @@
 #ifndef ANTARES_MATH_MACROS_HPP_
 #define ANTARES_MATH_MACROS_HPP_
 
-/* Math Macros.h */
+// Math Macros.h
 
 #define ABS( x) ((( x) >= 0) ? (x):(-(x)))
 

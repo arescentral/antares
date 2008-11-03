@@ -25,7 +25,7 @@
 #define kPaletteSize            256
 #define kReferenceColorTableID  256
 
-/* EASY COLOR DEFINITIONS */
+// EASY COLOR DEFINITIONS
 
 #define RED             15
 #define ORANGE          1

@@ -952,7 +952,7 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
 {
     long            charNum = 0, height = mDirectFontHeight, x = 0, oldx = 0, oldCharNum, wordLen,
                     *lineLengthList = retroTextSpec->lineLength;
-    unsigned char   *widthPtr, charWidth, wrapState /* 0 = none, 1 = once, 2 = more than once*/;
+    unsigned char   *widthPtr, charWidth, wrapState; // 0 = none, 1 = once, 2 = more than once
     anyCharType     *thisChar = (anyCharType *)*retroTextSpec->text;
 
     *lineLengthList = 0;
@@ -1069,7 +1069,7 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
 {
     long            charNum = 0, y = bounds->top + mDirectFontAscent + retroTextSpec->topBuffer, x = bounds->left,
                     oldx = 0, oldCharNum, wordLen;
-    unsigned char   *widthPtr, charWidth, wrapState, /* 0 = none, 1 = once, 2 = more than once*/
+    unsigned char   *widthPtr, charWidth, wrapState, // 0 = none, 1 = once, 2 = more than once
                     oldColor = retroTextSpec->color, oldBackColor = retroTextSpec->backColor, tempColor;
     anyCharType     *thisChar = (anyCharType *)*retroTextSpec->text, *thisWordChar, thisWord[255];
     longRect        backRect, lineRect;
@@ -1444,18 +1444,19 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
     }
 }
 
-/* MessageLabel_Set_Special
-    for ambrosia emergency tutorial; Sets screen label given specially formatted
-    text. Text must have its own line breaks so label fits on screen.
-
-    First few chars of text must be in this format:
-
-    #tnnn...#
-
-    Where '#' is literal;
-    t = one of three characters: 'L' for left, 'R' for right, and 'O' for object
-    nnn... are digits specifying value (distance from top, or initial object #)
-*/
+//
+// MessageLabel_Set_Special
+//  for ambrosia emergency tutorial; Sets screen label given specially formatted
+//  text. Text must have its own line breaks so label fits on screen.
+//
+//  First few chars of text must be in this format:
+//
+//  #tnnn...#
+//
+//  Where '#' is literal;
+//  t = one of three characters: 'L' for left, 'R' for right, and 'O' for object
+//  nnn... are digits specifying value (distance from top, or initial object #)
+//
 void MessageLabel_Set_Special( short id, Handle text)
 {
     char    whichType, *c;

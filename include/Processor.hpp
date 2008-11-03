@@ -18,7 +18,7 @@
 #ifndef ANTARES_PROCESSOR_HPP_
 #define ANTARES_PROCESSOR_HPP_
 
-/* PROCESSOR.H */
+// PROCESSOR.H
 
 #include "ConditionalMacros.h"
 

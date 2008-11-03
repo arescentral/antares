@@ -17,8 +17,7 @@
 
 // Player Interface.c
 
-/* Tells Interface Handling what to do, and actually does the work.
-*/
+// Tells Interface Handling what to do, and actually does the work.
 
 #include "PlayerInterface.h"
 
@@ -800,7 +799,9 @@ void DoLoadingInterface( Rect *contentRect, StringPtr levelName)
                 gNatePortTop);
 
             waitTime = TickCount();
-            while (( TickCount() - waitTime) < 3) { /* DO NOTHING */ };
+            while (( TickCount() - waitTime) < 3) {
+                // DO NOTHING
+            };
         }
 
 
@@ -910,7 +911,9 @@ short DoPlayAgain( Boolean allowResume, Boolean allowSkip) // return 0 = quit, 1
         DrawAllItemsOfKind( kRadioButton, TRUE, FALSE, FALSE);
         DrawAllItemsOfKind( kPlainButton, TRUE, FALSE, FALSE);
         DrawAllItemsOfKind( kTextRect, TRUE, FALSE, FALSE);
-        while ( AnyRealKeyDown()) { /* DO NOTHING */ };
+        while ( AnyRealKeyDown()) {
+            // DO NOTHING
+        };
 
         while ( !done)
         {
@@ -1083,7 +1086,9 @@ void DoNetSettings( void)
         DrawAllItemsOfKind( kRadioButton, TRUE, FALSE, FALSE);
         DrawAllItemsOfKind( kPlainButton, TRUE, FALSE, FALSE);
         DrawAllItemsOfKind( kTextRect, TRUE, FALSE, FALSE);
-        while ( AnyRealKeyDown()) { /* DO NOTHING */ };
+        while ( AnyRealKeyDown()) {
+            // DO NOTHING
+        };
 
         while ( !done)
         {
@@ -1353,7 +1358,9 @@ void DoHelpScreen( void)
 */          DisposeHandle( retroTextSpec.text);
         }
 
-        while ( AnyRealKeyDown()) { /* DO NOTHING */ };
+        while ( AnyRealKeyDown()) {
+            // DO NOTHING
+        };
 
         while ( !done)
         {
@@ -1928,7 +1935,9 @@ Boolean DoKeyInterface( void)
                     Pause( 12);
                     SetStatusOfAnyInterfaceItem( checkKey, kIH_Hilite, TRUE);
                     Pause( 12);
-                    while ( AnyEvent()) { /* DO NOTHING */ };
+                    while ( AnyEvent()) {
+                        // DO NOTHING
+                    };
                     SetStatusOfAnyInterfaceItem( checkKey, kActive, TRUE);
                 }
 
@@ -2062,7 +2071,9 @@ Boolean DoKeyInterface( void)
                             Pause( 12);
                             SetStatusOfAnyInterfaceItem( checkKey, kIH_Hilite, TRUE);
                             Pause( 12);
-                            while ( AnyEvent()) { /* DO NOTHING */ };
+                            while ( AnyEvent()) {
+                                // DO NOTHING
+                            };
                             if ( checkKey != whichKeyButton)
                                 SetStatusOfAnyInterfaceItem( checkKey, kActive, TRUE);
                             options ^= kOptionSubstituteFKeys;
@@ -2094,11 +2105,11 @@ Boolean DoKeyInterface( void)
     return( result);
 }
 
-/*
-BothCommandAndQ:
-    returns true if both the command and q keys are set by player. If this is
-    true, then command-q for quit during a game should be disabled.
-*/
+//
+// BothCommandAndQ:
+//  returns true if both the command and q keys are set by player. If this is
+//  true, then command-q for quit during a game should be disabled.
+//
 
 Boolean BothCommandAndQ( void)
 {
@@ -3615,17 +3626,18 @@ void BlackenOffscreen( void)
     DefaultColors();
 }
 
-/*
-        Here's the set up for multiple textEdit items:
+//
+//      Here's the set up for multiple textEdit items:
+//
+//      InterfaceTextEditItemInit( 9);
+//      InterfaceTextEditSetText( 9, ( anyCharType *)"\pThis is a larger test string.");
+//      InterfaceTextEditDeactivate( 9);
+//      InterfaceTextEditItemInit( 8);
+//      InterfaceTextEditSetText( 8, ( anyCharType *)"\pThis is a test string.");
+//      InterfaceTextEditSelectAll( 8);
+//      InterfaceTextEditActivate( 8);
+//
 
-        InterfaceTextEditItemInit( 9);
-        InterfaceTextEditSetText( 9, ( anyCharType *)"\pThis is a larger test string.");
-        InterfaceTextEditDeactivate( 9);
-        InterfaceTextEditItemInit( 8);
-        InterfaceTextEditSetText( 8, ( anyCharType *)"\pThis is a test string.");
-        InterfaceTextEditSelectAll( 8);
-        InterfaceTextEditActivate( 8);
-*/
 /*
 short GetClientListLength( void)
 {
@@ -4736,14 +4748,18 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
                     gNatePortTop);
 
                 waitTime = TickCount();
-                while (( TickCount() - waitTime) < 3) { /* DO NOTHING */ };
+                while (( TickCount() - waitTime) < 3) {
+                    // DO NOTHING
+                };
             }
 
             DisposeHandle( retroTextSpec.text);
         }
 
         MacShowCursor();
-        while (( Button()) || (AnyRealKeyDown())) { /* DO NOTHING */ };
+        while (( Button()) || (AnyRealKeyDown())) {
+            // DO NOTHING
+        };
 
         CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &dataRect);
     }
@@ -4767,9 +4783,9 @@ Handle CreateWeaponDataText( long whichWeapon, StringPtr weaponName)
         {
             DetachResource( weaponText);
 
-            /* damage; this is tricky--we have to guess by walking through activate actions,
-                and for all the createObject actions, see which creates the most damaging
-                object.  We calc this first so we can use isGuided*/
+            // damage; this is tricky--we have to guess by walking through activate actions,
+            //  and for all the createObject actions, see which creates the most damaging
+            //  object.  We calc this first so we can use isGuided
 
             mostDamage = 0;
             isGuided = false;
@@ -5019,11 +5035,11 @@ void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, lo
 //  BlackenWindow();
 
     // ** CALCULATE THE SCORE
-    /*  for time you get a max of 100 points
-        50 points for par
-        0-50 for par -> 2 x par
-        50-100 for par -> 1/2 par
-    */
+    //  for time you get a max of 100 points
+    //  50 points for par
+    //  0-50 for par -> 2 x par
+    //  50-100 for par -> 1/2 par
+    //
 
     if ( yourlength < parlength)
     {
@@ -5185,7 +5201,9 @@ void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, lo
                 gNatePortTop);
 
             waitTime = TickCount();
-            while (( TickCount() - waitTime) < 3) { /* DO NOTHING */ };
+            while (( TickCount() - waitTime) < 3) {
+                // DO NOTHING
+            };
         }
         DisposeHandle( retroTextSpec.text);
     }
@@ -5265,11 +5283,15 @@ void DoMissionDebriefingText( WindowPtr thePort, long textID, long yourlength, l
                         yourkill, parkill, parScore);
         }
     }
-    while (( AnyRealKeyDown()) || ( Button())) { /* DO NOTHING */ };
+    while (( AnyRealKeyDown()) || ( Button())) {
+        // DO NOTHING
+    };
     autoTimeStart = TickCount();
     while (( !AnyRealKeyDown()) && (!(Button())) &&
         (!(( gAresGlobal->gOptions & (kOptionAutoPlay | kOptionReplay)) &&
-        (( TickCount() - autoTimeStart) < kDebriefTimeOutTime)))) { /* DO NOTHING */ };
+        (( TickCount() - autoTimeStart) < kDebriefTimeOutTime)))) {
+        // DO NOTHING
+    };
 }
 
 #define kBackground_Height  480
@@ -5357,14 +5379,14 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
         StartMiniMovie( theMovie);
 */
         DrawNateRect( *offMap, &scrollRect, 0, 0, 0xff);
-        /* Here's the behavior:
-            a section is started with a '#' followed by a '+'
-            it must be the first character, or the first character after a return
-            the first section does not need a '#'
-            if the # is followed by a number, that # is the picture header for that section
-            the number must be terminated by a return
-            if there is no number after # then it must be followed by a return
-        */
+        // Here's the behavior:
+        //  a section is started with a '#' followed by a '+'
+        //  it must be the first character, or the first character after a return
+        //  the first section does not need a '#'
+        //  if the # is followed by a number, that # is the picture header for that section
+        //  the number must be terminated by a return
+        //  if there is no number after # then it must be followed by a return
+        //
 
         // look for beginning of section
         charNum = 0;
@@ -5609,7 +5631,9 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                                         }
                                     }
 
-                                    while (( TickCount() - waitTime) < scrollSpeed) { /* DO NOTHING */ };
+                                    while (( TickCount() - waitTime) < scrollSpeed) {
+                                        // DO NOTHING
+                                    };
                                     waitTime = TickCount();
                                     if ( AnyModifierKeyDown())
                                     {
@@ -5726,7 +5750,9 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                                 }
                             }
 
-                            while (( TickCount() - waitTime) < scrollSpeed) { /* DO NOTHING */ };
+                            while (( TickCount() - waitTime) < scrollSpeed) {
+                                // DO NOTHING
+                            };
                             waitTime = TickCount();
                             if ( AnyModifierKeyDown())
                             {
@@ -5774,7 +5800,9 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                 }
             }
 
-            while (( TickCount() - waitTime) < scrollSpeed) { /* DO NOTHING */ };
+            while (( TickCount() - waitTime) < scrollSpeed) {
+                // DO NOTHING
+            };
             waitTime = TickCount();
             if ( AnyModifierKeyDown())
             {
@@ -5795,7 +5823,9 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
         if ( MemError() != noErr) return;//Debugger();
     } else SysBeep( 20);
 
-    while ( AnyRealKeyDown()) { /* DO NOTHING */ };
+    while ( AnyRealKeyDown()) {
+        // DO NOTHING
+    };
     autoTimeStart = TickCount();
 
     if ( theMovie != nil) CleanUpMiniMovie( &theMovie);
@@ -5811,7 +5841,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
     if ( clipRgn != nil) DisposeRgn( clipRgn);
 }
 
-/* HANDLING SUSPEND & RESUME */
+// HANDLING SUSPEND & RESUME
 
 void HandleOSEvent( EventRecord *event)
 {
@@ -5928,7 +5958,8 @@ void Replace_KeyCode_Strings_With_Actual_Key_Names( Handle text, short resID,
         }
         GetIndString( tempString, kHelpScreenKeyStringID, l + 1);
         while ( Munger( text, 0, (tempString + 1), *tempString,
-            numString + 1, *numString) > 0)
-         { /* DO NOTHING */ };
+            numString + 1, *numString) > 0) {
+            // DO NOTHING
+        };
     }
 }

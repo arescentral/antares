@@ -15,7 +15,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/* Sound Player.c */
+// Sound Player.c
 
 #include "SoundFX.h"
 
@@ -876,28 +876,28 @@ void SoundFXCleanup( void)
     WriteDebugLine((char *)"\p<SndHndles");
 }
 
-/*
-Listing 2-27(S) Playing a sound resource    Sound Manager
-Inside Macintosh: Sound ,  page 2-57
-This listing is documented in full on page 2-57 of Inside Macintosh: Sound.
-FUNCTION MyPlaySampledSound (chan: SndChannelPtr; sndHandle: Handle): OSErr;
-VAR
-    myOffset:               LongInt;
-    mySndCmd:               SndCommand;                         {a sound command}
-    myErr:                  OSErr;
-BEGIN
-    myErr := GetSoundHeaderOffset(sndHandle, myOffset);
-    IF myErr = noErr THEN
-    BEGIN
-        HLock(sndHandle);
-        mySndCmd.cmd := bufferCmd;                              {command is bufferCmd}
-        mySndCmd.param1 := 0;                                   {unused with bufferCmd}
-        mySndCmd.param2 := LongInt(ORD4(sndHandle^) + myOffset);
-        myErr := SndDoImmediate(chan, mySndCmd);
-    END;
-    MyPlaySampledSound := myErr;
-END;
-*/
+//
+// Listing 2-27(S) Playing a sound resource    Sound Manager
+// Inside Macintosh: Sound ,  page 2-57
+// This listing is documented in full on page 2-57 of Inside Macintosh: Sound.
+// FUNCTION MyPlaySampledSound (chan: SndChannelPtr; sndHandle: Handle): OSErr;
+// VAR
+//     myOffset:               LongInt;
+//     mySndCmd:               SndCommand;                         {a sound command}
+//     myErr:                  OSErr;
+// BEGIN
+//     myErr := GetSoundHeaderOffset(sndHandle, myOffset);
+//     IF myErr = noErr THEN
+//     BEGIN
+//         HLock(sndHandle);
+//         mySndCmd.cmd := bufferCmd;                              {command is bufferCmd}
+//         mySndCmd.param1 := 0;                                   {unused with bufferCmd}
+//         mySndCmd.param2 := LongInt(ORD4(sndHandle^) + myOffset);
+//         myErr := SndDoImmediate(chan, mySndCmd);
+//     END;
+//     MyPlaySampledSound := myErr;
+// END;
+//
 
 OSStatus MyPanSoundFromRightToLeft( Handle mySndResource)
 {

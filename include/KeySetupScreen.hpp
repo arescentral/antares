@@ -18,31 +18,7 @@
 #ifndef ANTARES_KEY_SETUP_SCREEN_HPP_
 #define ANTARES_KEY_SETUP_SCREEN_HPP_
 
-/******************************************\
-|**| Key_Setup_Screen.h
-\******************************************/
-
-#pragma mark **DEFINITIONS**
-/******************************************\
-|**| #defines
-\******************************************/
-
-/* - definitions
-*******************************************/
-
-#pragma mark _macros_
-/* - macros
-*******************************************/
-
-#pragma mark **TYPEDEFS**
-/******************************************\
-|**| typedefs
-\******************************************/
-
-#pragma mark **PUBLIC PROTOTYPES**
-/******************************************\
-|**| public function prototypes
-\******************************************/
+// Key_Setup_Screen.h
 
 Boolean Key_Setup_Screen_Do( void);
 

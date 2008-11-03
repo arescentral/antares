@@ -18,7 +18,7 @@
 #ifndef ANTARES_STRING_HANDLING_HPP_
 #define ANTARES_STRING_HANDLING_HPP_
 
-/* String Handling.h */
+// String Handling.h
 
 #pragma options align=mac68k
 

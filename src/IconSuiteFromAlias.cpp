@@ -15,9 +15,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/******************************************\
-|**| IconSuiteFromAlias.c
-\******************************************/
+// IconSuiteFromAlias.c
 
 #include "IconSuiteFromAlias.h"
 
@@ -25,17 +23,6 @@
 
 //#include "BP_Error.h"
 
-#pragma mark **DEFINITIONS**
-/******************************************\
-|**| #defines
-\******************************************/
-
-/* - definitions
-*******************************************/
-
-#pragma mark _macros_
-/* - macros
-*******************************************/
 #define require(x,y,merrtitle,merrdesc) do { if (!(x))\
     {\
 /*  BP_UserError_Literal(merrtitle, merrdesc); */ \
@@ -52,25 +39,6 @@
 
 #define require_plain( x, y) do { if (!(x)) { goto y; } } while (0)
 
-#pragma mark **TYPEDEFS**
-/******************************************\
-|**| typedefs
-\******************************************/
-
-#pragma mark **EXTERNAL GLOBALS**
-/******************************************\
-|**| external globals
-\******************************************/
-
-#pragma mark **PRIVATE GLOBALS**
-/******************************************\
-|**| private globals
-\******************************************/
-
-#pragma mark **PRIVATE PROTOTYPES**
-/******************************************\
-|**| private function prototypes
-\******************************************/
 OSErr GetIconSuiteFromFSSpec(FSSpecPtr hfsObj, Handle *iconSuite);
 Boolean HaveScriptableFinder( void);
 OSErr SendAppleEvent(AppleEvent *ae, AppleEvent *reply, AESendMode sendMode);
@@ -84,12 +52,6 @@ Boolean FinderIsRunning( void);
 static Size GetSizeFromIconType(DescType iconType);
 
 pascal Boolean IdleHandle( EventRecord *theEvent, long *sleepTime, RgnHandle *mouseRgn);
-
-#pragma mark **PRIVATE FUNCTIONS**
-/******************************************\
-|**| private functions
-\******************************************/
-
 
 pascal Boolean IdleHandle( EventRecord *theEvent, long *sleepTime, RgnHandle *mouseRgn)
 
@@ -604,12 +566,6 @@ static Size GetSizeFromIconType(DescType iconType)
     }
     return size;
 }
-
-
-#pragma mark **PUBLIC FUNCTIONS**
-/******************************************\
-|**| public functions
-\******************************************/
 
 void DrawAliasSmallIcon( AliasHandle alias, short left, short top)
 {

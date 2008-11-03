@@ -15,9 +15,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-/******************************************\
-|**| Ares_Version.c
-\******************************************/
+// Ares_Version.c
 
 #pragma mark **INCLUDES**
 
@@ -26,52 +24,10 @@
 #include "Assert.h"
 #include "str_bp.h"
 
-#pragma mark **DEFINITIONS**
-/******************************************\
-|**| #defines
-\******************************************/
-
-/* - definitions
-*******************************************/
-
-#pragma mark _macros_
-/* - macros
-*******************************************/
-
 #define mChar_is_numeric( m_c) (((m_c) >= '0') && ((m_c) <= '9'))
 #define mChar_is_whitespace( m_c) (((m_c) == ' ') || ((m_c) == '\r') || ((m_c) == '\r'))
 #define mChar_is_alpha( m_c) ((((m_c) >= 'a') && ((m_c) <= 'z')) || (((m_c) >= 'A') && ((m_c) <= 'Z')))
 #define mChar_to_upper(m_c) ((((m_c) >= 'a') && ((m_c) <= 'z')) ? ( ((m_c) - 'a') + 'A') : (m_c))
-
-#pragma mark **TYPEDEFS**
-/******************************************\
-|**| typedefs
-\******************************************/
-
-#pragma mark **EXTERNAL GLOBALS**
-/******************************************\
-|**| external globals
-\******************************************/
-
-#pragma mark **PRIVATE GLOBALS**
-/******************************************\
-|**| private globals
-\******************************************/
-
-#pragma mark **PRIVATE PROTOTYPES**
-/******************************************\
-|**| private function prototypes
-\******************************************/
-
-#pragma mark **PRIVATE FUNCTIONS**
-/******************************************\
-|**| private functions
-\******************************************/
-
-#pragma mark **PUBLIC FUNCTIONS**
-/******************************************\
-|**| public functions
-\******************************************/
 
 aresVersionType AresVersion_Get_FromString( StringPtr s)
 {

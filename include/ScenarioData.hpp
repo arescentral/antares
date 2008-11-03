@@ -18,19 +18,9 @@
 #ifndef ANTARES_SCENARIO_DATA_HPP_
 #define ANTARES_SCENARIO_DATA_HPP_
 
-/******************************************\
-|**| Scenario_Data.h
-\******************************************/
+// Scenario_Data.h
 
 #include "AresVersion.h"
-
-#pragma mark **DEFINITIONS**
-/******************************************\
-|**| #defines
-\******************************************/
-
-/* - definitions
-*******************************************/
 
 #define kScenario_Data_ResType          'nlAG'
 #define kScenario_Data_ResID            128
@@ -40,15 +30,6 @@
 #define kScenario_Data_Flag_HasCustomRaces      0x00000004
 #define kScenario_Data_Flag_HasCustomScenarios  0x00000008
 #define kScenario_Data_Flag_NotOptimized        0x00000010
-
-#pragma mark _macros_
-/* - macros
-*******************************************/
-
-#pragma mark **TYPEDEFS**
-/******************************************\
-|**| typedefs
-\******************************************/
 
 typedef struct scenarioInfoType
 {
@@ -65,10 +46,5 @@ typedef struct scenarioInfoType
     unsigned long   flags;
     unsigned long   checkSum;
 } scenarioInfoType;
-
-#pragma mark **PUBLIC PROTOTYPES**
-/******************************************\
-|**| public function prototypes
-\******************************************/
 
 #endif // ANTARES_SCENARIO_DATA_HPP_

@@ -20,7 +20,7 @@
 
 // AnyChar.h
 
-/* ONE BYTE CHARACTER SYSTEM */
+// ONE BYTE CHARACTER SYSTEM
 
 #pragma options align=mac68k
 

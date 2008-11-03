@@ -2368,13 +2368,12 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
     }
 }
 
-/* MiniComputerGetPriceOfCurrentSelection:
-    If the Build Menu is up, returns the price of the currently selected
-    ship, regardless of whether or not it is affordable.
-
-    If the selection is not legal, or the current Menu is not the Build Menu,
-    returns 0
-*/
+// MiniComputerGetPriceOfCurrentSelection:
+//  If the Build Menu is up, returns the price of the currently selected
+//  ship, regardless of whether or not it is affordable.
+//
+//  If the selection is not legal, or the current Menu is not the Build Menu,
+//  returns 0
 
 long MiniComputerGetPriceOfCurrentSelection( void)
 {
@@ -2399,10 +2398,10 @@ long MiniComputerGetPriceOfCurrentSelection( void)
 
 void MiniComputerSetStatusStrings( void)
 {
-    /* the strings must be in this format:
-        type\number\player\negativevalue\falsestring\truestring\basestring\poststring
-
-        where type = 0...5
+    // the strings must be in this format:
+    //  type\number\player\negativevalue\falsestring\truestring\basestring\poststring
+    //
+    //  where type = 0...5
 #define kNoStatusData               -1  // no status for this line
 #define kPlainTextStatus            0
 #define kTrueFalseCondition         1   // 0 = F, 1 = T, use condition not score

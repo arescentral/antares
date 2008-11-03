@@ -18,22 +18,23 @@
 #ifndef ANTARES_NET_SPROCKET_LIB_GLUE_HPP_
 #define ANTARES_NET_SPROCKET_LIB_GLUE_HPP_
 
-/* NetSprocketLibGlue.h
-The 68K version of NetSprocket is a 68K-CFM library, which normally can only
-be used with a 68K-CFM application. "Classic" 68K libraries cannot be used
-with CFM-68K applications.
-
-This is a problem for Ares for 2 reasons:
-1. the music library (PlayerPro) is a classic library, and thus can not be used
-with a CFM-68K application.
-
-2. CW11 cannot correctly compile 68K assembly for CFM-68K applications. It
-incorrectly compiles the fralloc directive, and so is almost useless.
-
-However, TechNote #1077 describes how to call CFM-68K libraries from Classic
-68K applications. To achieve this, I need to manually create this "glue"
-to the NetSprocket functions I use. For details, see TN1077.
-*/
+//
+// NetSprocketLibGlue.h
+// The 68K version of NetSprocket is a 68K-CFM library, which normally can only
+// be used with a 68K-CFM application. "Classic" 68K libraries cannot be used
+// with CFM-68K applications.
+//
+// This is a problem for Ares for 2 reasons:
+// 1. the music library (PlayerPro) is a classic library, and thus can not be used
+// with a CFM-68K application.
+//
+// 2. CW11 cannot correctly compile 68K assembly for CFM-68K applications. It
+// incorrectly compiles the fralloc directive, and so is almost useless.
+//
+// However, TechNote #1077 describes how to call CFM-68K libraries from Classic
+// 68K applications. To achieve this, I need to manually create this "glue"
+// to the NetSprocket functions I use. For details, see TN1077.
+//
 
 #include <NetSprocket.h>
 
@@ -41,11 +42,9 @@ to the NetSprocket functions I use. For details, see TN1077.
 #pragma mpwc on // NetSprocket returns pointers in D0
 #endif
 
-/*
-    the routines I'm using:
-
-
-*/
+//
+//  the routines I'm using:
+//
 
 enum {
 /*

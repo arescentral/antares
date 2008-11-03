@@ -18,7 +18,7 @@
 #ifndef ANTARES_TRANSITIONS_HPP_
 #define ANTARES_TRANSITIONS_HPP_
 
-/* Transitions.h */
+// Transitions.h
 #include <Palettes.h>
 
 #pragma options align=mac68k

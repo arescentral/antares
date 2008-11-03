@@ -18,33 +18,9 @@
 #ifndef ANTARES_WRAP_GAME_RANGER_HPP_
 #define ANTARES_WRAP_GAME_RANGER_HPP_
 
-/******************************************\
-|**| Wrap_GameRanger.h
-\******************************************/
+// Wrap_GameRanger.h
 
 #include <NetSprocket.h>
-
-#pragma mark **DEFINITIONS**
-/******************************************\
-|**| #defines
-\******************************************/
-
-/* - definitions
-*******************************************/
-
-#pragma mark _macros_
-/* - macros
-*******************************************/
-
-#pragma mark **TYPEDEFS**
-/******************************************\
-|**| typedefs
-\******************************************/
-
-#pragma mark **PUBLIC PROTOTYPES**
-/******************************************\
-|**| public function prototypes
-\******************************************/
 
 Boolean Wrap_UseGameRanger( void);
 

@@ -136,20 +136,23 @@
 #define kPotentialTarget            (kCanBeEngaged | kCanBeEvaded)
 #define kRemoteOrHuman              (kIsPlayerShip)//(kIsHumanControlled | kIsRemote)
 
-/* for baseObjectTypes only: these bits have different functions in
-baseObjectTypes than they do in normal spaceObjectTypes.  However, they
-should never be turned on permanently!
-*/
-#define kHaveCheckedMedia           0x00000008  // we've checked its sounds & sprites
-/* <END OF BASEOBJECTTYPE SPECIAL BITS> */
+//
+// for baseObjectTypes only: these bits have different functions in
+// baseObjectTypes than they do in normal spaceObjectTypes.  However, they
+// should never be turned on permanently!
+//
 
-/* for initial objects only */
+#define kHaveCheckedMedia           0x00000008  // we've checked its sounds & sprites
+
+// <END OF BASEOBJECTTYPE SPECIAL BITS>
+
+// for initial objects only
 // kInitiallyExists should NOT be carried over to real objects!
 #define kInitiallyHidden            0x00000020  // does it exist at first, or is it turned on later?
 #define kFixedRace                  0x00000010  // don't change this object even if owner's race is different
 #define kInitialAttributesMask      (kFixedRace | kInitiallyHidden)
 
-/* <END OF INITAL OBJECT SPECIAL BITS */
+// <END OF INITAL OBJECT SPECIAL BITS
 
 #define kUseForTransportation       0x00000001  // use when we're going to our destination
 #define kUseForAttacking            0x00000002  // use when we've got a target our sites
@@ -187,10 +190,12 @@ should never be turned on permanently!
 #define kLevelKeyTag2                   0x20000000
 #define kLevelKeyTag3                   0x40000000
 #define kLevelKeyTag4                   0x80000000
-/* Well, this is a hack. If a verb's exclusive filter == 0xffffffff
-then we treat the high four bits of the inclusive filter like
-a special tag, matching to the high four bits of an baseObject's
-build flag. */
+//
+// Well, this is a hack. If a verb's exclusive filter == 0xffffffff
+// then we treat the high four bits of the inclusive filter like
+// a special tag, matching to the high four bits of an baseObject's
+// build flag.
+//
 #define kLevelKeyTagMask                0xf0000000
 #define kEngageKeyTagMask               0x0f000000
 #define kEngageKeyTagShift              (unsigned long)4
@@ -358,10 +363,11 @@ typedef enum
     kWarpOutPresence = 5
 } kPresenceStateType;
 
-/* objectActionType:
-    Defines any action that an object can take.  Conditions that can cause an action to execute are:
-    destroy, expire, create, collide, activate, or message.
-*/
+//
+// objectActionType:
+//  Defines any action that an object can take.  Conditions that can cause an action to execute are:
+//  destroy, expire, create, collide, activate, or message.
+//
 
 typedef union
 {

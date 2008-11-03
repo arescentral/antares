@@ -20,12 +20,11 @@
 
 #include "AresDemoScanner.h"
 
-/* Set this to true if you want to only use one data file for sound, sprites,
-& scenarios. Used in Sound FX.c, Scenario Maker.c, and Sprite Handling.c.
-*/
+// Set this to true if you want to only use one data file for sound, sprites,
+// & scenarios. Used in Sound FX.c, Scenario Maker.c, and Sprite Handling.c.
 
 #ifndef kCreateAresDemoData
-//#define   kUseSingleDemoFile
+// #define   kUseSingleDemoFile
 #endif
 
 #endif // ANTARES_SINGLE_DATA_FILE_HPP_

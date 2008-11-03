@@ -18,32 +18,6 @@
 #ifndef ANTARES_ARES_GAME_RANGER_HPP_
 #define ANTARES_ARES_GAME_RANGER_HPP_
 
-/******************************************\
-|**| Ares_GameRanger.h
-\******************************************/
-
-#pragma mark **DEFINITIONS**
-/******************************************\
-|**| #defines
-\******************************************/
-
-/* - definitions
-*******************************************/
-
-#pragma mark _macros_
-/* - macros
-*******************************************/
-
-#pragma mark **TYPEDEFS**
-/******************************************\
-|**| typedefs
-\******************************************/
-
-#pragma mark **PUBLIC PROTOTYPES**
-/******************************************\
-|**| public function prototypes
-\******************************************/
-
 OSErr AGR_Init( void);
 
 #endif // ANTARES_ARES_GAME_RANGER_HPP_

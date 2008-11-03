@@ -744,10 +744,6 @@ void Glue_NSpMessage_Release(
 #endif
 }
 
-/*
- **     PRIVATE FUNCTIONS
-\**/
-
 static OSErr Find_Symbol(Ptr* pSymAddr,
                          Str255 pSymName,
                          ProcInfoType pProcInfo)

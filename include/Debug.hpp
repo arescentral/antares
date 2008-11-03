@@ -18,7 +18,7 @@
 #ifndef ANTARES_DEBUG_HPP_
 #define ANTARES_DEBUG_HPP_
 
-/* Debug.h */
+// Debug.h
 
 #define DEBUG_ON        TRUE
 #include "MathSpecial.h"

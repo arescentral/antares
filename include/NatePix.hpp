@@ -18,7 +18,7 @@
 #ifndef ANTARES_NATE_PIX_HPP_
 #define ANTARES_NATE_PIX_HPP_
 
-/* NATEPIX.H */
+// NATEPIX.H
 
 typedef unsigned char   colorByte;
 typedef unsigned char   byte;
