@@ -1,23 +1,23 @@
-/*
-    File:       StdPrefsLib.h
-
-    Contains:   Header file for standard preferences library routines.
-
-                Refer to develop Issue 18, "The Right Way to Implement
-                Preferences Files", for additional details on this code.
-
-    Written by: Gary Woodcock
-
-    Copyright:  (C) 1993-94 by Apple Computer, Inc.
-    Change History (most recent first):
-
-                  3/3/94    Version 1.0.
-
-    Notes:      This code uses Apple's Universal Interfaces for C.
-
-                Send bug reports to Gary Woodcock at AOL: gwoodcock
-                or Internet: gwoodcock@aol.com.
-*/
+//
+//  File:       StdPrefsLib.h
+//
+//  Contains:   Header file for standard preferences library routines.
+//
+//              Refer to develop Issue 18, "The Right Way to Implement
+//              Preferences Files", for additional details on this code.
+//
+//  Written by: Gary Woodcock
+//
+//  Copyright:  (C) 1993-94 by Apple Computer, Inc.
+//  Change History (most recent first):
+//
+//                3/3/94    Version 1.0.
+//
+//  Notes:      This code uses Apple's Universal Interfaces for C.
+//
+//              Send bug reports to Gary Woodcock at AOL: gwoodcock
+//              or Internet: gwoodcock@aol.com.
+//
 
 //-----------------------------------------------------------------------
 // Includes
