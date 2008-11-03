@@ -17,11 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_SHOTS_BEAMS_EXPLOSIONS_HPP_
+#define ANTARES_SHOTS_BEAMS_EXPLOSIONS_HPP_
+
 // Shots Beams Explosions.h
 
-#ifndef kNateDraw
 #include "NateDraw.h"
-#endif
 
 #define kDebrisRotNum       9
 #define kDebrisPieceNum     3
@@ -32,3 +33,5 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define kDebrisLifeVarience     80
 
 void InitShotsBeamsExplosions( void);
+
+#endif // ANTARES_SHOTS_BEAMS_EXPLOSIONS_HPP_

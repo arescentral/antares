@@ -17,17 +17,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_PLAYER_INTERFACE_DRAWING_HPP_
+#define ANTARES_PLAYER_INTERFACE_DRAWING_HPP_
+
 // Player Interface Drawing.h
 
-#define kPlayerInterfaceDrawing
-
-#ifndef kPlayerInterfaceItems
 #include "PlayerInterfaceItems.h"
-#endif
-
-#ifndef kAnyChar
 #include "AnyChar.h"
-#endif
 
 #pragma options align=mac68k
 
@@ -92,3 +88,5 @@ void BiggestRect( Rect  *, Rect *);
 void LongRectToRect( longRect *, Rect *);
 void RectToLongRect( Rect *, longRect *);
 void SetLongRect( longRect *, long, long, long, long);
+
+#endif // ANTARES_PLAYER_INTERFACE_DRAWING_HPP_

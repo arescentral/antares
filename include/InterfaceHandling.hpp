@@ -17,15 +17,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_INTERFACE_HANDLING_HPP_
+#define ANTARES_INTERFACE_HANDLING_HPP_
+
 // Interface Handling.h
 
-#ifndef kPlayerInterfaceItems
 #include "PlayerInterfaceItems.h"
-#endif
-
-#ifndef kAnyChar
 #include "AnyChar.h"
-#endif
 
 #pragma options align=mac68k
 
@@ -81,3 +79,5 @@ void SetButtonKeyNum( short, short);
 short GetButtonKeyNum( short);
 
 #pragma options align=reset
+
+#endif // ANTARES_INTERFACE_HANDLING_HPP_

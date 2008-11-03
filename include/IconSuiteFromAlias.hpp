@@ -17,12 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_ICON_SUITE_FROM_ALIAS_HPP_
+#define ANTARES_ICON_SUITE_FROM_ALIAS_HPP_
+
 /******************************************\
 |**| IconSuiteFromAlias.h
 \******************************************/
-
-#ifndef kIconSuiteFromAlias_h
-#define kIconSuiteFromAlias_h
 
 #pragma mark **INCLUDES**
 /******************************************\
@@ -72,4 +72,4 @@ void DrawFSpecSmallIcon( FSSpec *fspec, short left, short top);
 Handle GetIconSuiteFromAlias( AliasHandle alias);
 OSErr GetIconSuiteFromFSSpec(FSSpecPtr hfsObj, Handle *iconSuite);
 
-#endif kIconSuiteFromAlias_h
+#endif // ANTARES_ICON_SUITE_FROM_ALIAS_HPP_

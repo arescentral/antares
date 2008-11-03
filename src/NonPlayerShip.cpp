@@ -18,41 +18,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 // NonPlayer ships
-#ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
-#endif // __CONDITIONALMACROS__
 
 #if TARGET_OS_WIN32
-
-    #ifndef __QUICKTIMEVR__
     #include <QuickTimeVR.h>
-    #endif
-
-    #ifndef __QTUtilities__
     #include "QTUtilities.h"
-    #endif
-
-    #ifndef __QTVRUtilities__
     #include "QTVRUtilities.h"
-    #endif
-
     #include <TextUtils.h>
     #include <Script.h>
     #include <string.h>
 #endif // TARGET_OS_WIN32
 
 #include "Resources.h"
-
 //#include <math routines.h>
 #include "GXMath.h"
 #include "ToolUtils.h"
-
-
 #include "AresGlobalType.h"
-
 #include "Error.h"
 #include "Debug.h"
-
 #include "Rotation.h"
 #include "SpaceObjectHandling.h"
 #include "Randomize.h"
@@ -73,19 +56,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // HACK FOR TESTING
 #include "KeyMapTranslation.h"
 
-#ifndef kSoundFX
 #include "SoundFX.h"
-#endif
-
 #include "Transitions.h"
 
 #include "OffscreenGWorld.h"      // a hack
 #include "ColorTranslation.h"     // a hack
 
 #include "ShotsBeamsExplosions.h"
-
 #include "PlayerShip.h"
-
 #include "NonPlayerShip.h"
 
 #define kDirectionError         5           // how picky in degrees we are about angle

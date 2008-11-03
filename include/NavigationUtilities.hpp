@@ -17,12 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_NAVIGATION_UTILITIES_HPP_
+#define ANTARES_NAVIGATION_UTILITIES_HPP_
+
 /******************************************\
 |**| Navigation_Utilities.h
 \******************************************/
-
-#ifndef kNavigation_Utilities_h
-#define kNavigation_Utilities_h
 
 #pragma mark **INCLUDES**
 /******************************************\
@@ -74,4 +74,4 @@ OSErr NS_SelectFolderObject( FSSpecPtr destFile, StringPtr, StringPtr);
 OSErr NS_SaveAs( FSSpecPtr destFile, StringPtr fileName, StringPtr appName,
     OSType fileTypeToSave, OSType fileCreator);
 
-#endif kNavigation_Utilities_h
+#endif // ANTARES_NAVIGATION_UTILITIES_HPP_

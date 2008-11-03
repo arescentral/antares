@@ -42,12 +42,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #pragma mark _this library includes_
 /* - this project
 *******************************************/
-#include "AresGlobalType.h"
 
+#include "AresGlobalType.h"
 #include "Processor.h"
 #include "Error.h"
 #include "Debug.h"
-
 #include "AresAppleEvent.h"
 #include "AresExternalFile.h"
 

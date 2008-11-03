@@ -17,31 +17,16 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_SPACE_OBJECT_HPP_
+#define ANTARES_SPACE_OBJECT_HPP_
+
 // Space Object.h
-#ifndef kSpaceObject
 
-#define kSpaceObject
-
-#ifndef kNateDraw
 #include "NateDraw.h"
-#endif
-
-#ifndef kSpriteHandling
 #include "SpriteHandling.h"
-#endif
-
-#ifndef kMathSpecial
 #include "MathSpecial.h"
-#endif
-
-#ifndef kSoundFX
 #include "SoundFX.h"
-#endif
-
-#ifndef kScenario
 #include "Scenario.h"
-#endif
-
 
 #pragma options align=mac68k
 
@@ -928,4 +913,5 @@ typedef struct spaceObjectType
 } spaceObjectType;
 
 #pragma options align=reset
-#endif kSpaceObject
+
+#endif // ANTARES_SPACE_OBJECT_HPP_

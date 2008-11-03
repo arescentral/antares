@@ -17,6 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_KEY_CODES_HPP_
+#define ANTARES_KEY_CODES_HPP_
+
 /* Key Codes */
 //#define   kModeKeyNum                 7
 //#define   kMapToggleKeyNum            10
@@ -187,3 +190,5 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //#define   mNOFScaleHostileKey     m8Key
 //#define   mNOFScaleObjectKey      m9Key
 //#define   mNOFScaleAllKey         m0Key
+
+#endif // ANTARES_KEY_CODES_HPP_

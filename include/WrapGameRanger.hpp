@@ -17,12 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_WRAP_GAME_RANGER_HPP_
+#define ANTARES_WRAP_GAME_RANGER_HPP_
+
 /******************************************\
 |**| Wrap_GameRanger.h
 \******************************************/
-
-#ifndef kWrap_GameRanger_h
-#define kWrap_GameRanger_h
 
 #pragma mark **INCLUDES**
 /******************************************\
@@ -118,4 +118,4 @@ Wrap_GRNSpDoModalJoinDialog         (ConstStr31Param        inGameType,
 void
 Wrap_GRNSpReleaseAddressReference   (NSpAddressReference    inAddr);
 
-#endif kWrap_GameRanger_h
+#endif // ANTARES_WRAP_GAME_RANGER_HPP_

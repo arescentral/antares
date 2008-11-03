@@ -17,6 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_RANDOMIZE_HPP_
+#define ANTARES_RANDOMIZE_HPP_
+
 /* Randomize.h */
 #pragma options align=mac68k
 
@@ -36,3 +39,5 @@ short XRandomSeeded( short, long *);
 void SetMyRandomSeed( long);
 
 #pragma options align=reset
+
+#endif // ANTARES_RANDOMIZE_HPP_

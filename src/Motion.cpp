@@ -18,42 +18,25 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 // Motion.c
-#ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
-#endif // __CONDITIONALMACROS__
 
 #if TARGET_OS_WIN32
-
-    #ifndef __QUICKTIMEVR__
     #include <QuickTimeVR.h>
-    #endif
-
-    #ifndef __QTUtilities__
     #include "QTUtilities.h"
-    #endif
-
-    #ifndef __QTVRUtilities__
     #include "QTVRUtilities.h"
-    #endif
-
     #include <TextUtils.h>
     #include <Script.h>
     #include <string.h>
 #endif // TARGET_OS_WIN32
 
 #include "Resources.h"
-
 //#include <math routines.h>
 #include "GXMath.h"
 #include "ToolUtils.h"
-
-
 #include "AresGlobalType.h"
 #include <QDOffscreen.h>
 #include <Timer.h>
-
 #include "Processor.h"
-
 #include "SpaceObject.h"
 #include "SpaceObjectHandling.h"
 #include "Rotation.h"
@@ -62,7 +45,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "MathMacros.h"
 #include "Debug.h"
 #include "Error.h"
-
 #include "Randomize.h"
 #include "PlayerShip.h"
 #include "ScreenLabel.h"
@@ -70,17 +52,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "MathMacros.h"
 #include "HandleHandling.h"
 #include "UniverseUnit.h"
-
-#ifndef kSoundFX
 #include "SoundFX.h"
-#endif
-
 #include "NonPlayerShip.h"
-
-#ifndef kSpriteHandling
 #include "SpriteHandling.h"
-#endif
-
 #include "Motion.h"
 
 #define kCenterScaleSize    983040L//61440L         // = 240 * SCALE_SCALE

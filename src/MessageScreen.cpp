@@ -19,31 +19,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // Message Screen.c -- also the destination screen
 // must be initialized AFTER Screen Label.c
-#ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
-#endif // __CONDITIONALMACROS__
 
 #if TARGET_OS_WIN32
-
-    #ifndef __QUICKTIMEVR__
     #include <QuickTimeVR.h>
-    #endif
-
-    #ifndef __QTUtilities__
     #include "QTUtilities.h"
-    #endif
-
-    #ifndef __QTVRUtilities__
     #include "QTVRUtilities.h"
-    #endif
-
     #include <TextUtils.h>
     #include <Script.h>
     #include <string.h>
 #endif // TARGET_OS_WIN32
 
 #include "Resources.h"
-
 #include <QDOffscreen.h>
 #include "AresGlobalType.h"
 #include "Error.h"
@@ -53,19 +40,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Debug.h"
 #include "PlayerInterfaceDrawing.h" // for long messages
 #include "KeyMapTranslation.h"
-
-#ifndef kSpriteHandling
 #include "SpriteHandling.h"
-#endif
-
 #include "OffscreenGWorld.h"
 #include "HandleHandling.h"
 #include "ScreenLabel.h"
-
 #include "MessageScreen.h"
 #include "Options.h"
 #include "ScenarioMaker.h"
-
 #include "PlayerInterface.h"  // for Replace_KeyCode_Strings_With_Actual_Key_Names
 
 #define kMessageScreenLeft      200

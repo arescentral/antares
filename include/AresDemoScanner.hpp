@@ -17,10 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-// Ares Demo Scanner.h
+#ifndef ANTARES_ARES_DEMO_SCANNER_HPP_
+#define ANTARES_ARES_DEMO_SCANNER_HPP_
 
-#ifndef kAresDemoScannerDotH
-#define kAresDemoScannerDotH
+// Ares Demo Scanner.h
 
 //#define kCreateAresDemoData
 
@@ -34,4 +34,5 @@ void CopyAllUsedSounds( void);
 void CopyAllBriefingData( long);
 
 #pragma options align=reset
-#endif //#ifndef kAresDemoScannerDotH
+
+#endif // ANTARES_ARES_DEMO_SCANNER_HPP_

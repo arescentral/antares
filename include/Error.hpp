@@ -17,6 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_ERROR_HPP_
+#define ANTARES_ERROR_HPP_
+
 /* Error.h */
 
 #pragma options align=mac68k
@@ -109,3 +112,5 @@ void ShowErrorAny( errorRecoverType, short, StringPtr, StringPtr, StringPtr, Str
 void ShowErrorOfTypeOccurred( errorRecoverType, short, short, OSErr, char *, long);
 void MyDebugString( StringPtr);
 #pragma options align=reset
+
+#endif // ANTARES_ERROR_HPP_

@@ -17,4 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_PLANETS_BASES_STATIONS_HPP_
+#define ANTARES_PLANETS_BASES_STATIONS_HPP_
+
 spaceObjectType *HackNewPlanet( short);
+
+#endif // ANTARES_PLANETS_BASES_STATIONS_HPP_

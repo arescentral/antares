@@ -17,9 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#ifndef kCopyProtectionDotH
+#ifndef ANTARES_ARES_PREFERENCES_HPP_
+#define ANTARES_ARES_PREFERENCES_HPP_
+
 #include "CopyProtection.h"
-#endif
 
 #pragma options align=mac68k
 
@@ -144,3 +145,5 @@ OSErr SaveNetPreferences( StringPtr, StringPtr, unsigned long, long, long, unsig
     short, unsigned short, unsigned short, unsigned short, short, short, short);
 
 #pragma options align=reset
+
+#endif // ANTARES_ARES_PREFERENCES_HPP_

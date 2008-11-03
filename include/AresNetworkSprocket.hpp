@@ -17,25 +17,15 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_ARES_NETWORK_SPROCKET_HPP_
+#define ANTARES_ARES_NETWORK_SPROCKET_HPP_
+
 /* Ares NetworkSprocket.h */
-#ifndef Ares_NetworkSprocket_h
-#define Ares_NetworkSprocket_h
 
-#ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
-#endif // __CONDITIONALMACROS__
-
-#ifndef kMyProcessor
 #include "Processor.h"
-#endif
-
-#ifndef kAnyChar
 #include "AnyChar.h"
-#endif
-
-#ifndef __NETSPROCKET__
 #include <NetSprocket.h>
-#endif
 
 #pragma options align=mac68k
 
@@ -267,4 +257,5 @@ void StopIncomingTextMessage( anyCharType *);
 #endif // TARGET_OS_MAC
 
 #pragma options align=reset
-#endif Ares_NetworkSprocket_h
+
+#endif // ANTARES_ARES_NETWORK_SPROCKET_HPP_

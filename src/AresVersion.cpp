@@ -37,14 +37,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #pragma mark _bp libraries includes_
 /* - bp libraries
 *******************************************/
+
 #include "Assert.h"
 #include "str_bp.h"
 
 #pragma mark _this library includes_
 /* - this project
 *******************************************/
-#include "AresVersion.h"
 
+#include "AresVersion.h"
 
 #pragma mark **DEFINITIONS**
 /******************************************\

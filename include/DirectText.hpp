@@ -17,16 +17,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_DIRECT_TEXT_HPP_
+#define ANTARES_DIRECT_TEXT_HPP_
+
 // Direct Text.h
 
-#ifndef kAnyChar
 #include "AnyChar.h"
-#endif
-
-#ifndef kSpriteHandling
 #include "SpriteHandling.h"
-#endif
-
 #include "Processor.h"
 
 #pragma options align=mac68k
@@ -118,3 +115,5 @@ void asm DrawDirectTextStringClippedx2( anyCharType *, unsigned char, PixMap *, 
 void ResetDirectTextPtr( Handle);
 
 #pragma options align=reset
+
+#endif // ANTARES_DIRECT_TEXT_HPP_

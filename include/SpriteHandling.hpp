@@ -17,15 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_SPRITE_HANDLING_HPP_
+#define ANTARES_SPRITE_HANDLING_HPP_
+
 /* SpriteHandler.h */
 
-#ifndef kSpriteHandling
-#define kSpriteHandling
-
-#ifndef kNateDraw
 #include "NateDraw.h"
-#endif
-
 #include "Processor.h"
 
 
@@ -155,4 +152,4 @@ void TestByte( char *, PixMap *, StringPtr);
 void ResolveScaleMapData( Handle);
 int Randomize( int);
 
-#endif kSpriteHandling
+#endif // ANTARES_SPRITE_HANDLING_HPP_

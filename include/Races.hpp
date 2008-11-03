@@ -17,14 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_RACES_HPP_
+#define ANTARES_RACES_HPP_
+
 // Races.h
-#ifndef kScenario
+
 #include "Scenario.h"
-#endif
-
-#ifndef kRaces_h
-
-#define kRaces_h
 
 #pragma options align=mac68k
 
@@ -44,4 +42,4 @@ unsigned char GetApparentColorFromRace( short);
 
 #pragma options align=reset
 
-#endif kRaces_h
+#endif // ANTARES_RACES_HPP_

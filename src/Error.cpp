@@ -19,31 +19,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /* Error Handling */
 
-#ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
-#endif // __CONDITIONALMACROS__
 
 #if TARGET_OS_WIN32
-
-    #ifndef __QUICKTIMEVR__
     #include <QuickTimeVR.h>
-    #endif
-
-    #ifndef __QTUtilities__
     #include "QTUtilities.h"
-    #endif
-
-    #ifndef __QTVRUtilities__
     #include "QTVRUtilities.h"
-    #endif
-
     #include <TextUtils.h>
     #include <Script.h>
     #include <string.h>
 #endif // TARGET_OS_WIN32
 
 #include "Resources.h"
-
 #include "Error.h"
 #include <Palettes.h>
 #include "DialogFont.h"

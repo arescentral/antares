@@ -19,43 +19,25 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // Player Ship.c
 
-#ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
-#endif // __CONDITIONALMACROS__
 
 #if TARGET_OS_WIN32
-
-    #ifndef __QUICKTIMEVR__
     #include <QuickTimeVR.h>
-    #endif
-
-    #ifndef __QTUtilities__
     #include "QTUtilities.h"
-    #endif
-
-    #ifndef __QTVRUtilities__
     #include "QTVRUtilities.h"
-    #endif
-
     #include <TextUtils.h>
     #include <Script.h>
     #include <string.h>
 #endif // TARGET_OS_WIN32
 
 #include "Resources.h"
-
 //#include <math routines.h>
 #include "GXMath.h"
 #include "ToolUtils.h"
-
 #include "AresGlobalType.h"
 #include "Error.h"
 #include "Debug.h"
-
-#ifndef kSpaceObject
 #include "SpaceObject.h"
-#endif
-
 #include "KeyCodes.h"
 #include "Rotation.h"
 #include "AresPreferences.h"
@@ -69,25 +51,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Admiral.h"
 #include "StringHandling.h"
 #include "MathMacros.h"
-
 #include "ScrollStars.h"
 #include "ShotsBeamsExplosions.h"
 #include "Minicomputer.h"
 #include "Options.h"
 #include "ScenarioMaker.h"
 #include "DirectText.h"
-
 #include "KeyMapTranslation.h"        // major hack for testing
-
 #include "AresNetworkSprocket.h"
 #include "AresCheat.h"
-
-#ifndef kSoundFX
 #include "SoundFX.h"
-#endif
-
-
-
 #include "PlayerShip.h"
 
 #define kSendMessageVOffset     20

@@ -17,12 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_BRIEFING_RENDERER_HPP_
+#define ANTARES_BRIEFING_RENDERER_HPP_
+
 /******************************************\
 |**| Briefing_Renderer.h
 \******************************************/
-
-#ifndef kBriefing_Renderer_h
-#define kBriefing_Renderer_h
 
 #pragma mark **INCLUDES**
 /******************************************\
@@ -76,4 +76,4 @@ void BriefPoint_Data_Get( long whichPoint, long whichScenario, long *headerID,
                     coordPointType *corner, long scale, long minSectorSize, long maxSize,
                     Rect *bounds);
 
-#endif kBriefing_Renderer_h
+#endif // ANTARES_BRIEFING_RENDERER_HPP_

@@ -17,24 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
-#endif // __CONDITIONALMACROS__
 
 #if TARGET_OS_WIN32
-
-    #ifndef __QUICKTIMEVR__
     #include <QuickTimeVR.h>
-    #endif
-
-    #ifndef __QTUtilities__
     #include "QTUtilities.h"
-    #endif
-
-    #ifndef __QTVRUtilities__
     #include "QTVRUtilities.h"
-    #endif
-
     #include <TextUtils.h>
     #include <Script.h>
     #include <string.h>
@@ -43,10 +31,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Resources.h"
 #include "GXMath.h"
 #include "ToolUtils.h"
-
 #include "Traps.h"
 #include "Fonts.h"
-
 //#include <profiler.h>
 #include <Timer.h>
 #include <Palettes.h>
@@ -92,17 +78,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "AresGameRanger.h"
 #include "AmbrosiaSerial.h"
 #include "AresResFile.h"
-
-#ifndef kSoundFX
 #include "SoundFX.h"
-#endif
-
 #include "Randomize.h"
-
-#ifndef kMathSpecial
 #include "MathSpecial.h"
-#endif
-
 #include "AresGlobalType.h"
 #include "TimeUnit.h"
 #include "Motion.h"
@@ -126,15 +104,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Beam.h"
 #include "AresNetworkSprocket.h"
 #include "AresExternalFile.h"
-
-#ifndef kNateDraw
 #include "NateDraw.h"
-#endif
-
-#ifndef __REGISTRATION_TOOL__
 #include "RegistrationTool.h"
-#endif
-
 #include "AresMain.h"
 
 

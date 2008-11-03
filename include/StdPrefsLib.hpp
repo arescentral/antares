@@ -22,8 +22,8 @@
 //-----------------------------------------------------------------------
 // Includes
 
-#ifndef _STDPREFSLIB_
-#define _STDPREFSLIB_
+#ifndef ANTARES_STD_PREFS_LIB_HPP_
+#define ANTARES_STD_PREFS_LIB_HPP_
 
 //#include "CompileFlags.h"
 
@@ -294,6 +294,4 @@ DeletePreference (short fRefNum, ResType resourceType, short resourceID);
 
 //-----------------------------------------------------------------------
 
-#endif _STDPREFSLIB_
-
-//-----------------------------------------------------------------------
+#endif // ANTARES_STD_PREFS_LIB_HPP_

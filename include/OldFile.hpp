@@ -17,12 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_OLD_FILE_HPP_
+#define ANTARES_OLD_FILE_HPP_
+
 /******************************************\
 |**| Old_File.h
 \******************************************/
-
-#ifndef kOld_File_h
-#define kOld_File_h
 
 #pragma mark **INCLUDES**
 /******************************************\
@@ -75,5 +75,4 @@ pascal Boolean  filterFunctionDirSelect(CInfoPBPtr pbPtr,void *dataPtr);
 pascal SInt16  hookFunctionDirSelect(SInt16 item,DialogPtr theDialog,
     void *dataPtr);
 
-
-#endif kOld_File_h
+#endif // ANTARES_OLD_FILE_HPP_

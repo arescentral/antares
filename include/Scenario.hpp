@@ -17,12 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_SCENARIO_HPP_
+#define ANTARES_SCENARIO_HPP_
+
 // Scenario.h
-
-
-#ifndef kScenario
-#define kScenario
-
 
 #include "NateDraw.h"
 
@@ -143,9 +141,7 @@ typedef enum
     kBriefFreestandingKind = 3
 } briefingPointKindType;
 
-#ifndef kSpaceObject
 #include "SpaceObject.h"
-#endif
 
 /*
 We need to know:
@@ -324,4 +320,4 @@ typedef struct
 
 #pragma options align=reset
 
-#endif kScenario
+#endif // ANTARES_SCENARIO_HPP_

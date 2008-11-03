@@ -34,46 +34,26 @@ scn 5 = dch 3/rch 4 -> cond 057 Owner -> action 289 declare winner 0 next:4 <-> 
 scn12 = dch 4/rch13 -> cond 63 Countr >= -> action 458 declare winner 0 next:-1 <-> next:14
 */
 
-#ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
-#endif // __CONDITIONALMACROS__
 
 #if TARGET_OS_WIN32
-
-    #ifndef __QUICKTIMEVR__
     #include <QuickTimeVR.h>
-    #endif
-
-    #ifndef __QTUtilities__
     #include "QTUtilities.h"
-    #endif
-
-    #ifndef __QTVRUtilities__
     #include "QTVRUtilities.h"
-    #endif
-
     #include <TextUtils.h>
     #include <Script.h>
     #include <string.h>
 #endif // TARGET_OS_WIN32
 
 #include "Resources.h"
-
 #include "AresGlobalType.h"
 #include "AresDemoScanner.h"
-
 #include <QDOffscreen.h>
-
-#ifndef kSpaceObject
 #include "SpaceObjectHandling.h"
-#endif
-
 #include "ScenarioMaker.h"
 #include "AresPreferences.h"
-
 #include "OffscreenGWorld.h"
 #include "PlayerInterface.h"
-
 #include "Debug.h"
 #include "Error.h"
 

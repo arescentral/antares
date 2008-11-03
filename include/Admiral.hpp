@@ -17,15 +17,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_ADMIRAL_HPP_
+#define ANTARES_ADMIRAL_HPP_
+
 // Admiral.h
 
-#ifndef kScenario
 #include "Scenario.h"
-#endif
-
-#ifndef kAnyChar
 #include "AnyChar.h"
-#endif
 
 #pragma options align=mac68k
 
@@ -217,3 +215,5 @@ long GetAdmiralKill( long);
 
 
 #pragma options align=reset
+
+#endif // ANTARES_ADMIRAL_HPP_

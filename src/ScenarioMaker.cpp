@@ -17,34 +17,19 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
-#endif // __CONDITIONALMACROS__
 
 #if TARGET_OS_WIN32
-
-    #ifndef __QUICKTIMEVR__
     #include <QuickTimeVR.h>
-    #endif
-
-    #ifndef __QTUtilities__
     #include "QTUtilities.h"
-    #endif
-
-    #ifndef __QTVRUtilities__
     #include "QTVRUtilities.h"
-    #endif
-
     #include <TextUtils.h>
     #include <Script.h>
     #include <string.h>
 #endif // TARGET_OS_WIN32
 
 #include "Resources.h"
-
-#ifndef kSpaceObject
 #include "SpaceObjectHandling.h"
-#endif
 #include "AresGlobalType.h"
 #include "PlanetsBasesStations.h"
 #include "NonPlayerShip.h"
@@ -70,15 +55,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Minicomputer.h"
 #include "MessageScreen.h" // for checking which message we're lookg at
 #include "ColorTranslation.h"
-
 #include "AresNetworkSprocket.h"
-
 #include "SingleDataFile.h"
 #include "AresResFile.h"
-
 #include "Error.h"
 #include "Debug.h"
-
 #include "KeyMapTranslation.h"        // major hack for testing
 
 #define kScenarioError          "\pSCNR"

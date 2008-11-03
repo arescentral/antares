@@ -17,8 +17,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_HIDE_MENUBAR_HPP_
+#define ANTARES_HIDE_MENUBAR_HPP_
+
 // Hide Menubar.h
 
 void InitHideMenubar( void);
 void SetMBarState (Boolean, GDHandle);
 Boolean AutoShowHideMenubar( Point, GDHandle);
+
+#endif // ANTARES_HIDE_MENUBAR_HPP_

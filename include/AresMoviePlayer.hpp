@@ -17,6 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_ARES_MOVIE_PLAYER_HPP_
+#define ANTARES_ARES_MOVIE_PLAYER_HPP_
+
 // Ares Movie Player.h
 #include "Movies.h"
 
@@ -31,3 +34,5 @@ Boolean DoMiniMovieTask( Movie);
 OSErr CleanUpMiniMovie( Movie *);
 
 #pragma options align=reset
+
+#endif // ANTARES_ARES_MOVIE_PLAYER_HPP_

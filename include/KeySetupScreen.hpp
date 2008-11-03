@@ -17,12 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_KEY_SETUP_SCREEN_HPP_
+#define ANTARES_KEY_SETUP_SCREEN_HPP_
+
 /******************************************\
 |**| Key_Setup_Screen.h
 \******************************************/
-
-#ifndef kKey_Setup_Screen_h
-#define kKey_Setup_Screen_h
 
 #pragma mark **INCLUDES**
 /******************************************\
@@ -69,4 +69,4 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 Boolean Key_Setup_Screen_Do( void);
 
-#endif kKey_Setup_Screen_h
+#endif // ANTARES_KEY_SETUP_SCREEN_HPP_

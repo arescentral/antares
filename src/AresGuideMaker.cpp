@@ -21,54 +21,31 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 //#define pGenerateImages
 
-#ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
-#endif // __CONDITIONALMACROS__
 
 #if TARGET_OS_WIN32
-
-    #ifndef __QUICKTIMEVR__
     #include <QuickTimeVR.h>
-    #endif
-
-    #ifndef __QTUtilities__
     #include "QTUtilities.h"
-    #endif
-
-    #ifndef __QTVRUtilities__
     #include "QTVRUtilities.h"
-    #endif
-
     #include <TextUtils.h>
     #include <Script.h>
     #include <string.h>
 #endif // TARGET_OS_WIN32
 
 #include "Resources.h"
-
 #include <QDOffscreen.h>
-
 #include "Error.h"
 #include "Debug.h"
 #include "AresGlobalType.h"
-
 #include "OffscreenGWorld.h"
-
-#ifndef kSpriteHandling
 #include "SpriteHandling.h"
-#endif
 #include "NatePixTable.h"
-#ifndef kSpaceObject
 #include "SpaceObjectHandling.h"
-#endif
 #include "Races.h"
 #include "AnyChar.h"
-
 #include "AresGuideMaker.h"
-
 #include "StringNumerics.h"
 #include "StringHandling.h"
-
 #include "LoadClip2Gif.h"
 
 #define kSpriteBoundsWidth  128

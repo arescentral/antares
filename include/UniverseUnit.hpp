@@ -17,6 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_UNIVERSE_UNIT_HPP_
+#define ANTARES_UNIVERSE_UNIT_HPP_
+
 // Universe Unit.h
 
 #define kUniversalCenter                1073741823L//92680L
@@ -33,3 +36,5 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define kSuperSectorShift               15L
 
 #define kSectorDivision                 16
+
+#endif // ANTARES_UNIVERSE_UNIT_HPP_

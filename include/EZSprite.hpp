@@ -17,13 +17,16 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_EZSPRITE_HPP_
+#define ANTARES_EZSPRITE_HPP_
+
 // EZSprite.h
-#ifndef kSpriteHandling
 #include "SpriteHandling.h"
-#endif
 
 void EZDrawSpriteOffByID( short, long, long, unsigned char, Rect *);
 void EZDrawSpriteOffToOnByID( short, long, long, unsigned char, Rect *);
 void EZDrawSpriteCenteredInRectBySprite( spritePix *, PixMapHandle, long, Rect *);
 void EZMakeSpriteFromID( short, Handle *, spritePix *, char **, long);
 void DrawAnySpriteOffToOn( short, long, long, unsigned char, Rect *);
+
+#endif // ANTARES_EZSPRITE_HPP_

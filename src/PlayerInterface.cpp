@@ -21,39 +21,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /* Tells Interface Handling what to do, and actually does the work.
 */
-#ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
-#endif // __CONDITIONALMACROS__
 
 #if TARGET_OS_WIN32
-
-    #ifndef __QUICKTIMEVR__
     #include <QuickTimeVR.h>
-    #endif
-
-    #ifndef __QTUtilities__
     #include "QTUtilities.h"
-    #endif
-
-    #ifndef __QTVRUtilities__
     #include "QTVRUtilities.h"
-    #endif
-
     #include <TextUtils.h>
     #include <Script.h>
     #include <string.h>
 #endif // TARGET_OS_WIN32
 
 #include "Resources.h"
-
 #include <QDOffscreen.h>
 #include "AresGlobalType.h"
-
 #include "Debug.h"
 #include "Error.h"
-
 #include "InterfaceHandling.h"
-
 #include "StringHandling.h"
 #include "StringNumerics.h"
 #include "KeyMapTranslation.h"
@@ -64,9 +48,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "KeyCodes.h"
 #include "ScenarioMaker.h"
 #include "Instruments.h"
-#ifndef kSoundFX
 #include "SoundFX.h"               // for button on/off
-#endif
 #include "AresMain.h"
 #include "HandleHandling.h"
 #include "ScrollStars.h"
@@ -81,20 +63,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "GDeviceHandling.h"
 #include "MessageScreen.h"
 #include "TitleScreen.h"           // for CenterRectInRect
-#ifndef kAresNetwork
 #include "AresNetwork.h"
-#endif
 #include "AresMoviePlayer.h"
 #include "Races.h"
 #include "NetSetupScreen.h"
 #include "WrapGameRanger.h"
 #include "KeySetupScreen.h"
 #include "BriefingRenderer.h"
-#ifndef __REGISTRATION_TOOL__
 #include "RegistrationTool.h"
-#endif
 #include "AmbrosiaSerial.h"
-
 #include "AresExternalFile.h"
 
 #define kThisVersion    0x00000201  // last was 200; last was 104

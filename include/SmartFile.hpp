@@ -17,12 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_SMART_FILE_HPP_
+#define ANTARES_SMART_FILE_HPP_
+
 /******************************************\
 |**| Smart_File.h
 \******************************************/
-
-#ifndef kSmart_File_h
-#define kSmart_File_h
 
 #pragma mark **INCLUDES**
 /******************************************\
@@ -75,4 +75,4 @@ OSErr SmartFile_SaveAs( FSSpecPtr destFile, StringPtr fileName,
 
 OSErr SmartFile_SelectFile( FSSpecPtr destFile, short openListResID);
 
-#endif kSmart_File_h
+#endif // ANTARES_SMART_FILE_HPP_

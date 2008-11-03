@@ -17,10 +17,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_SPRITE_CURSOR_HPP_
+#define ANTARES_SPRITE_CURSOR_HPP_
+
 /* Sprite Cursor.h */
-#ifndef kSpriteHandling
 #include "SpriteHandling.h"
-#endif
 
 #pragma options align=mac68k
 
@@ -65,3 +66,5 @@ void HideHintLine( void);
 void ResetHintLine( void);
 
 #pragma options align=reset
+
+#endif // ANTARES_SPRITE_CURSOR_HPP_

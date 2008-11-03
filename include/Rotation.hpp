@@ -17,6 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_ROTATION_HPP_
+#define ANTARES_ROTATION_HPP_
+
 /* ROTATION.H */
 
 #pragma options align=mac68k
@@ -80,3 +83,5 @@ void RotatePoint( long, long, Fixed *, Fixed *, long);
 long GetAngleFromVector( long, long);
 
 #pragma options align=reset
+
+#endif // ANTARES_ROTATION_HPP_

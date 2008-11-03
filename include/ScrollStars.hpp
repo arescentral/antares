@@ -17,11 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_SCROLL_STARS_HPP_
+#define ANTARES_SCROLL_STARS_HPP_
+
 // Scroll Stars.h
 
-#ifndef kSpaceObject
 #include "SpaceObject.h"
-#endif
 
 #pragma options align=mac68k
 
@@ -58,3 +59,5 @@ void Draw3DStars( Boolean, longRect *, PixMapHandle);
 void Show3DStars( Boolean, longRect *, PixMapHandle);
 
 #pragma options align=reset
+
+#endif // ANTARES_SCROLL_STARS_HPP_

@@ -17,10 +17,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_TRANSITIONS_HPP_
+#define ANTARES_TRANSITIONS_HPP_
+
 /* Transitions.h */
-#ifndef __PALETTES__
 #include <Palettes.h>
-#endif
 
 #pragma options align=mac68k
 
@@ -42,3 +43,5 @@ Boolean StartCustomPictFade( long, long, short, short, WindowPtr, PaletteHandle 
 Boolean EndCustomPictFade( WindowPtr, PaletteHandle *, PaletteHandle *, CTabHandle *,
     Boolean);
 #pragma options align=reset
+
+#endif // ANTARES_TRANSITIONS_HPP_

@@ -17,12 +17,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_PROCESSOR_HPP_
+#define ANTARES_PROCESSOR_HPP_
+
 /* PROCESSOR.H */
 
 //#define   POWER_PC            FALSE
-#ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
-#endif // __CONDITIONALMACROS__
 
 #if TARGET_OS_WIN32
 #define kDontDoLong68KAssem
@@ -52,3 +53,5 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #endif
 
 #define kAllowAssem
+
+#endif // ANTARES_PROCESSOR_HPP_

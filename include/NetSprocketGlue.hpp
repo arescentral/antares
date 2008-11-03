@@ -17,6 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_NET_SPROCKET_LIB_GLUE_HPP_
+#define ANTARES_NET_SPROCKET_LIB_GLUE_HPP_
+
 /* NetSprocketLibGlue.h
 The 68K version of NetSprocket is a 68K-CFM library, which normally can only
 be used with a 68K-CFM application. "Classic" 68K libraries cannot be used
@@ -34,12 +37,7 @@ However, TechNote #1077 describes how to call CFM-68K libraries from Classic
 to the NetSprocket functions I use. For details, see TN1077.
 */
 
-#ifndef __NetSprocketGlue__
-#define __NetSprocketGlue__
-
-#ifndef __NETSPROCKET__
 #include <NetSprocket.h>
-#endif
 
 #ifndef powerc
 #pragma mpwc on // NetSprocket returns pointers in D0
@@ -569,4 +567,4 @@ void Glue_NSpMessage_Release(
 #pragma mpwc reset
 #endif
 
-#endif //__NetSprocketGlue__
+#endif // ANTARES_NET_SPROCKET_LIB_GLUE_HPP_

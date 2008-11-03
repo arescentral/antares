@@ -17,6 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_WIN_ARES_GLUE_HPP_
+#define ANTARES_WIN_ARES_GLUE_HPP_
+
 typedef struct screenBitsStruct
 {
     Rect    bounds;
@@ -33,3 +36,5 @@ typedef struct qdGlobalStruct
 } qdGlobalType;
 
 void RestoreDeviceClut( GDHandle);
+
+#endif // ANTARES_WIN_ARES_GLUE_HPP_

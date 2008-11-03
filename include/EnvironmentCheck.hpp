@@ -17,8 +17,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_ENVIRONMENT_CHECK_HPP_
+#define ANTARES_ENVIRONMENT_CHECK_HPP_
+
 // Environment Check.h
 Boolean EnvironmentCheck( void);
 void EnvironmentError( short);
 Boolean EnvironmentWarning( short);
 Boolean MySWRoutineAvailable( short);
+
+#endif // ANTARES_ENVIRONMENT_CHECK_HPP_

@@ -19,24 +19,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // Instruments.c
 // REQUIRES THAT ARES INTERFACES DATA FILE HAS BEEN OPENED!
-#ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
-#endif // __CONDITIONALMACROS__
 
 #if TARGET_OS_WIN32
-
-    #ifndef __QUICKTIMEVR__
     #include <QuickTimeVR.h>
-    #endif
-
-    #ifndef __QTUtilities__
     #include "QTUtilities.h"
-    #endif
-
-    #ifndef __QTVRUtilities__
     #include "QTVRUtilities.h"
-    #endif
-
     #include <TextUtils.h>
     #include <Script.h>
     #include <string.h>
@@ -66,9 +54,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Admiral.h"
 #include "PlayerShip.h" // for handling mouse clicks
 #include "SpriteCursor.h"
-
 //#include "SoundFX.h"
-
 #include "Instruments.h"
 
 #define kRadarBlipNum       50L

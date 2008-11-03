@@ -22,55 +22,32 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /*  Liaison between the application and Interface Drawing.  Takes in events ( key events, mouse
     down events), hilights and scrolls as needed, and returns results.  Also handles editable text.
 */
-#ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
-#endif // __CONDITIONALMACROS__
 
 #if TARGET_OS_WIN32
-
-    #ifndef __QUICKTIMEVR__
     #include <QuickTimeVR.h>
-    #endif
-
-    #ifndef __QTUtilities__
     #include "QTUtilities.h"
-    #endif
-
-    #ifndef __QTVRUtilities__
     #include "QTVRUtilities.h"
-    #endif
-
     #include <TextUtils.h>
     #include <Script.h>
     #include <string.h>
 #endif // TARGET_OS_WIN32
 
 #include "Resources.h"
-
 #include "MixedMode.h"
 #include <QDOffscreen.h>
-
 #include "Error.h"
 #include "Debug.h"
 #include "SetFontByString.h"
-
 #include "KeyMapTranslation.h"
-
 #include "PlayerInterfaceItems.h"
 #include "PlayerInterfaceDrawing.h"
 #include "HandleHandling.h"
-
-#ifndef kAnyChar
 #include "AnyChar.h"
-#endif
-
 #include "ColorTranslation.h"
-
 #include "SoundFX.h"              // for button on/off
-
 #include "InterfaceHandling.h"
 #include "OffscreenGWorld.h"
-
 #include "AresResFile.h"
 #include "AresGlobalType.h"
 

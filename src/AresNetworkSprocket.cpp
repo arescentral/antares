@@ -28,7 +28,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //#endif
 
 #include "WrapGameRanger.h"
-
 #include "Speech.h"
 #include "AresGlobalType.h"
 #include "Error.h"
@@ -38,19 +37,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "AresPreferences.h"
 #include "AresCheat.h"
 #include "Options.h"
-
 #include "KeyMapTranslation.h"
-
-#ifndef kSpaceObject
 #include "SpaceObject.h"
-#endif
 #include "ScenarioMaker.h"
 #include "KeyCodes.h"
 #include "Admiral.h"
 #include "Minicomputer.h"
 #include "PlayerShip.h"
 #include "MessageScreen.h"
-
 #include "NetSprocketGlue.h"
 #include "AresNetworkSprocket.h"
 #include "Processor.h"

@@ -17,19 +17,14 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_ARES_NETWORK_HPP_
+#define ANTARES_ARES_NETWORK_HPP_
+
 // Ares Network.h
-#ifndef _APPLETALK
-    #include <appletalk.h>
-    #define _APPLETALK
-#endif
 
-#ifndef kAnyChar
+#include <appletalk.h>
 #include "AnyChar.h"
-#endif
-
-#ifndef kSpaceObject
 #include "SpaceObject.h"
-#endif
 
 #define kAresNetwork
 
@@ -179,3 +174,5 @@ void AresNetworkHostBegin( void);
 void AresNetworkClientBegin( void);
 void HostSynchronizeTime( void);
 void ClientSynchronizeTime( void);
+
+#endif // ANTARES_ARES_NETWORK_HPP_

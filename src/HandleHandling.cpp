@@ -25,48 +25,25 @@ into those handles are reset.
 If you need to allocate a handle and keep it locked all the time, do it through here.
 */
 
-#ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
-#endif // __CONDITIONALMACROS__
 
 #if TARGET_OS_WIN32
-
-    #ifndef __QUICKTIMEVR__
     #include <QuickTimeVR.h>
-    #endif
-
-    #ifndef __QTUtilities__
     #include "QTUtilities.h"
-    #endif
-
-    #ifndef __QTVRUtilities__
     #include "QTVRUtilities.h"
-    #endif
-
     #include <TextUtils.h>
     #include <Script.h>
     #include <string.h>
 #endif // TARGET_OS_WIN32
 
 #include "Resources.h"
-
 #include <QDOffscreen.h>
-
 #include "DirectText.h"
 #include "StringHandling.h"
-
-#ifndef kSoundFX
 #include "SoundFX.h"
-#endif
-
-#ifndef kSpriteHandling
 #include "SpriteHandling.h"
-#endif
-
 #include "ScreenLabel.h"
-
 #include "HandleHandling.h"
-
 #include "Error.h"
 #include "Debug.h"
 #include "Randomize.h"

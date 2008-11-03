@@ -17,12 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_ARES_RES_FILE_HPP_
+#define ANTARES_ARES_RES_FILE_HPP_
+
 /******************************************\
 |**| Ares_ResFile.h
 \******************************************/
-
-#ifndef kAres_ResFile_h
-#define kAres_ResFile_h
 
 #pragma mark **INCLUDES**
 /******************************************\
@@ -70,4 +70,4 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 short ARF_OpenResFile( StringPtr fileName);
 OSErr ARF_OpenResFile_External( StringPtr fileName, FSSpecPtr fileSpec);
 
-#endif kAres_ResFile_h
+#endif // ANTARES_ARES_RES_FILE_HPP_

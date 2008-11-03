@@ -17,15 +17,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-// NonPlayer Ship.h
+#ifndef ANTARES_NON_PLAYER_SHIP_HPP_
+#define ANTARES_NON_PLAYER_SHIP_HPP_
 
-#ifndef kSpaceObject
+// NonPlayerShip.h
+
 #include "SpaceObject.h"
-#endif
-
-#ifndef kNateDraw
 #include "NateDraw.h"
-#endif
 
 #pragma options align=mac68k
 
@@ -41,3 +39,5 @@ long GetSpritePointSelectObject( Rect *, spaceObjectType *, unsigned long,
                             unsigned long, unsigned long, long, short);
 
 #pragma options align=reset
+
+#endif // ANTARES_NON_PLAYER_SHIP_HPP_

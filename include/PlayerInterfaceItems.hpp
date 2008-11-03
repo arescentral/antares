@@ -17,17 +17,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_PLAYER_INTERFACE_ITEMS_HPP_
+#define ANTARES_PLAYER_INTERFACE_ITEMS_HPP_
+
 // Player Interface Items.h
 
-#define kPlayerInterfaceItems
-
-#ifndef kNateDraw
 #include "NateDraw.h"
-#endif
-
-#ifndef kAnyChar
 #include "AnyChar.h"
-#endif
 
 #pragma options align=mac68k
 
@@ -149,3 +145,5 @@ typedef struct
 } interfaceItemType;
 
 #pragma options align=reset
+
+#endif // ANTARES_PLAYER_INTERFACE_ITEMS_HPP_

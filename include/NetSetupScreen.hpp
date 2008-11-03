@@ -17,6 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_NET_SETUP_SCREEN_HPP_
+#define ANTARES_NET_SETUP_SCREEN_HPP_
+
 long DoTabbedNetLevelInterface( void);
 void NetLevelShowLag( long, long);
 void NetLevelShowRaces( short, short);
@@ -24,3 +27,5 @@ void ConvertOffscreenRectToPortraitData( short, short, unsigned char *);
 void DisplayPortraitData( short, short, unsigned char *, unsigned char);
 void ClearPortrait( unsigned char *);
 Boolean PlotCustomIcon( Rect *);
+
+#endif // ANTARES_NET_SETUP_SCREEN_HPP_

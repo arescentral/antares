@@ -17,18 +17,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_SCREEN_LABEL_HPP_
+#define ANTARES_SCREEN_LABEL_HPP_
+
 // Screen Label.h
 
-#ifndef kScreen_Label_h
-#define kScreen_Label_h
-
-#ifndef kAnyChar
 #include "AnyChar.h"
-#endif
-
-#ifndef kSpaceObject
 #include "SpaceObject.h"
-#endif
 
 #pragma options align=mac68k
 
@@ -89,4 +84,4 @@ void ResolveScreenLabels( Handle);
 
 #pragma options align=reset
 
-#endif kScreen_Label_h
+#endif // ANTARES_SCREEN_LABEL_HPP_

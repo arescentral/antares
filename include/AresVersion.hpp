@@ -17,12 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_ARES_VERSION_HPP_
+#define ANTARES_ARES_VERSION_HPP_
+
 /******************************************\
 |**| Ares_Version.h
 \******************************************/
-
-#ifndef kAres_Version_h
-#define kAres_Version_h
 
 #pragma mark **INCLUDES**
 /******************************************\
@@ -75,4 +75,4 @@ aresVersionType AresVersion_Get_FromString( StringPtr s);
 
 StringPtr String_Get_FromAresVersion( StringPtr s, aresVersionType t);
 
-#endif kAres_Version_h
+#endif // ANTARES_ARES_VERSION_HPP_

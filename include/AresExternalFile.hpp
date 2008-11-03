@@ -17,12 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_ARES_EXTERNAL_FILE_HPP_
+#define ANTARES_ARES_EXTERNAL_FILE_HPP_
+
 /******************************************\
 |**| Ares_External_File.h
 \******************************************/
-
-#ifndef kAres_External_File_h
-#define kAres_External_File_h
 
 #pragma mark **INCLUDES**
 /******************************************\
@@ -69,4 +69,4 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 OSErr EF_OpenExternalFile( void);
 
-#endif kAres_External_File_h
+#endif // ANTARES_ARES_EXTERNAL_FILE_HPP_

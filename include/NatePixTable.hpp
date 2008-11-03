@@ -17,15 +17,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_NATE_PIX_TABLE_HPP_
+#define ANTARES_NATE_PIX_TABLE_HPP_
+
 /* NatePixTable.h */
 
-//#ifndef kNatePix
 //#include "NatePix.h"
-//#endif
-
-#ifndef kSpriteHandling
 #include "SpriteHandling.h"
-#endif
 
 #pragma options align=mac68k
 
@@ -61,3 +59,5 @@ void ColorizeNatePixTableColor( Handle, unsigned char);
 void RetromapNatePixTableColor( Handle);
 
 #pragma options align=reset
+
+#endif // ANTARES_NATE_PIX_TABLE_HPP_

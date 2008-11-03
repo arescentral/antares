@@ -17,10 +17,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_MATH_SPECIAL_HPP_
+#define ANTARES_MATH_SPECIAL_HPP_
+
 /* Math Special.h */
-#ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
-#endif // __CONDITIONALMACROS__
 
 #pragma options align=mac68k
 
@@ -99,3 +100,5 @@ asm void MyWideAdd( UnsignedWide *, const UnsignedWide *);
 #endif TARGET_OS_MAC
 
 #pragma options align=reset
+
+#endif // ANTARES_MATH_SPECIAL_HPP_

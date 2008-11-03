@@ -17,17 +17,14 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_PLAYER_INTERFACE_HPP_
+#define ANTARES_PLAYER_INTERFACE_HPP_
+
 // Player Interface.h
 
-#ifndef kAresNetwork
 #include "AresNetwork.h"
-#endif
-#ifndef kPlayerInterfaceItems
 #include "PlayerInterfaceItems.h"
-#endif
-#ifndef kPlayerInterfaceDrawing
 #include "PlayerInterfaceDrawing.h"
-#endif
 
 #pragma options align=mac68k
 
@@ -100,3 +97,5 @@ Boolean Ares_WaitNextEvent( short eventMask, EventRecord *theEvent,
 void Replace_KeyCode_Strings_With_Actual_Key_Names( Handle text, short resID, short padTo);
 
 #pragma options align=reset
+
+#endif // ANTARES_PLAYER_INTERFACE_HPP_

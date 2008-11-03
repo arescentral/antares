@@ -18,47 +18,26 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 /* Sound Player.c */
-#ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
-#endif // __CONDITIONALMACROS__
 
 #if TARGET_OS_WIN32
-
-    #ifndef __QUICKTIMEVR__
     #include <QuickTimeVR.h>
-    #endif
-
-    #ifndef __QTUtilities__
     #include "QTUtilities.h"
-    #endif
-
-    #ifndef __QTVRUtilities__
     #include "QTVRUtilities.h"
-    #endif
-
     #include <TextUtils.h>
     #include <Script.h>
     #include <string.h>
 #endif // TARGET_OS_WIN32
 
 #include "Resources.h"
-
 #include "AresGlobalType.h"
-#ifndef kMathSpecial
 #include "MathSpecial.h"
-#endif
-
 #include "Error.h"
 #include "Debug.h"
 #include "Options.h"
-
 #include "SingleDataFile.h"
-
-#ifndef kSoundFX
 #include "SoundFX.h"
-#endif
 #include "HandleHandling.h"
-
 #include "AresResFile.h"
 
 #define kSoundFXError           "\pSNDX"

@@ -41,6 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #pragma mark _this library includes_
 /* - this project
 *******************************************/
+
 #include "InterfaceHandling.h"
 #include "AresPreferences.h"
 #include "AresGlobalType.h"
@@ -55,7 +56,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Debug.h"
 #include "StringHandling.h"
 #include "ColorTranslation.h"
-
 #include "KeySetupScreen.h"
 
 #pragma mark **DEFINITIONS**

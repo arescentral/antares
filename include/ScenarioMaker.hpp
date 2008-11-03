@@ -17,7 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-pragma options align=mac68k
+#ifndef ANTARES_SCENARIO_MAKER_HPP_
+#define ANTARES_SCENARIO_MAKER_HPP_
+
+#pragma options align=mac68k
 
 #define kScenarioWinnerPlayerMask   0x000000ff
 #define kScenarioWinnerNoPlayer     0x000000ff
@@ -152,3 +155,5 @@ Boolean ThisChapterIsNetworkable( long);
 void CorrectThisScenarioPtr( Handle);
 
 #pragma options align=reset
+
+#endif // ANTARES_SCENARIO_MAKER_HPP_

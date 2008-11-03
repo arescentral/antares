@@ -17,13 +17,14 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_ANY_CHAR_HPP_
+#define ANTARES_ANY_CHAR_HPP_
+
 // AnyChar.h
 
 /* ONE BYTE CHARACTER SYSTEM */
 
 #pragma options align=mac68k
-
-#define kAnyChar
 
 #define kAnyCharSpace   ' '
 
@@ -43,3 +44,5 @@ void InsertAnyCharPStringInPString( anyCharType *, anyCharType *, long);
 void CutCharsFromAnyCharPString( anyCharType *, long, long);
 
 #pragma options align=reset
+
+#endif // ANTARES_ANY_CHAR_HPP_

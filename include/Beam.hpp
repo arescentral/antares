@@ -17,11 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_BEAM_HPP_
+#define ANTARES_BEAM_HPP_
+
 // Beam.h
 
-#ifndef kSpaceObject
 #include "SpaceObject.h"
-#endif
 
 #pragma options align=mac68k
 
@@ -37,3 +38,5 @@ void CullBeams( void);
 void ResolveBeamData( Handle);
 
 #pragma options align=reset
+
+#endif // ANTARES_BEAM_HPP_

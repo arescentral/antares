@@ -17,6 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_GDEVICE_HANDLING_HPP_
+#define ANTARES_GDEVICE_HANDLING_HPP_
+
 /* GDevice Handling.h */
 
 #pragma options align=mac68k
@@ -34,3 +37,5 @@ int GetDeviceDepth( GDHandle);
 GDHandle GetBestDevice ( int *, int, int);
 
 #pragma options align=reset
+
+#endif // ANTARES_GDEVICE_HANDLING_HPP_

@@ -17,10 +17,11 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_KEY_MAP_TRANSLATION_HPP_
+#define ANTARES_KEY_MAP_TRANSLATION_HPP_
+
 // Key Map Translation.h
-#ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
-#endif // __CONDITIONALMACROS__
 
 #pragma options align=mac68k
 
@@ -142,3 +143,5 @@ long GetAsciiFromKeyMap( KeyMap, KeyMap);
 long GetAsciiFromKeyNum( short);
 
 #pragma options align=reset
+
+#endif // ANTARES_KEY_MAP_TRANSLATION_HPP_

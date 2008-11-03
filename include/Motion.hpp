@@ -17,15 +17,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_MOTION_HPP_
+#define ANTARES_MOTION_HPP_
+
 // Motion.h
 
-#ifndef kSpaceObject
 #include "SpaceObject.h"
-#endif
-
-#ifndef kMathSpecial
 #include "MathSpecial.h"
-#endif
 
 #pragma options align=mac68k
 
@@ -74,3 +72,5 @@ void CollideSpaceObjects( spaceObjectType *, const long);
 void CorrectPhysicalSpace( spaceObjectType *, spaceObjectType *);
 
 #pragma options align=reset
+
+#endif // ANTARES_MOTION_HPP_

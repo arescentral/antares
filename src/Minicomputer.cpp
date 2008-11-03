@@ -19,54 +19,32 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // Minicomputer.c
 // shouldn't be used without initing instruments 1st
-#ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
-#endif // __CONDITIONALMACROS__
 
 #if TARGET_OS_WIN32
-
-    #ifndef __QUICKTIMEVR__
     #include <QuickTimeVR.h>
-    #endif
-
-    #ifndef __QTUtilities__
     #include "QTUtilities.h"
-    #endif
-
-    #ifndef __QTVRUtilities__
     #include "QTVRUtilities.h"
-    #endif
-
     #include <TextUtils.h>
     #include <Script.h>
     #include <string.h>
 #endif // TARGET_OS_WIN32
 
 #include "Resources.h"
-
 #include "AresGlobalType.h"
 #include <QDOffscreen.h>
-
 #include "Error.h"
 #include "Debug.h"
-
-#ifndef kSpriteHandling
 #include "SpriteHandling.h"
-#endif
 #include "NatePixTable.h"
-
 #include "OffscreenGWorld.h"
 #include "KeyCodes.h"
 #include "KeyMapTranslation.h"
-
 #include "AnyChar.h"
 #include "DirectText.h"
 #include "ColorTranslation.h"
-#ifndef kSoundFX
 #include "SoundFX.h"
-#endif
 #include "HandleHandling.h"
-
 #include "SpaceObjectHandling.h"
 #include "Admiral.h"
 #include "ScenarioMaker.h"
@@ -76,11 +54,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "PlayerShip.h"
 #include "AresNetworkSprocket.h"
 #include "Options.h"
-
 #include "StringNumerics.h"
 #include "strlist.h"
 #include "StringHandling.h"
-
 #include "Minicomputer.h"
 
 #define kMiniScreenLeft         12

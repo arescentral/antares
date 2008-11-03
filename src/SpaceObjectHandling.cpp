@@ -18,49 +18,26 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 // Space Object Handling >> MUST BE INITED _AFTER_ SCENARIOMAKER << (uses Ares Scenarios file)
-#ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
-#endif // __CONDITIONALMACROS__
 
 #if TARGET_OS_WIN32
-
-    #ifndef __QUICKTIMEVR__
     #include <QuickTimeVR.h>
-    #endif
-
-    #ifndef __QTUtilities__
     #include "QTUtilities.h"
-    #endif
-
-    #ifndef __QTVRUtilities__
     #include "QTVRUtilities.h"
-    #endif
-
     #include <TextUtils.h>
     #include <Script.h>
     #include <string.h>
 #endif // TARGET_OS_WIN32
 
 #include "Resources.h"
-
 //#include <math routines.h>
 #include "GXMath.h"
 #include "ToolUtils.h"
-
 #include "AresGlobalType.h"
-
-#ifndef kSpaceObject
 #include "SpaceObject.h"
-#endif
-
-#ifndef kSpriteHandling
 #include "SpriteHandling.h"
-#endif
-
 #include "ColorTranslation.h"
-
 #include "AresDemoScanner.h"
-
 #include "OffscreenGWorld.h"
 #include "Error.h"
 #include "Debug.h"
@@ -80,8 +57,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Options.h"
 #include "PlayerShip.h"
 #include "Minicomputer.h" // for MiniComputer_SetScreenAndLineHack
-
 #include "SpaceObjectHandling.h"
+
 #define kTestSpriteError    "\pSOHD"
 
 #define kActionQueueLength      120

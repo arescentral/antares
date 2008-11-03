@@ -41,6 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #pragma mark _this library includes_
 /* - this project
 *******************************************/
+
 #include "NateDraw.h"
 #include "SpriteHandling.h"
 #include "Scenario.h"
@@ -51,7 +52,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Error.h"
 #include "NatePixTable.h"
 #include "Debug.h"
-
 #include "BriefingRenderer.h"
 
 #pragma mark **DEFINITIONS**

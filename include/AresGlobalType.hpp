@@ -17,6 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_ARES_GLOBAL_TYPE_HPP_
+#define ANTARES_ARES_GLOBAL_TYPE_HPP_
+
 // Ares Global Type.h
 
 #pragma options align=mac68k
@@ -24,12 +27,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define kDefaultOptions             (kOptionScreenSmall | kOptionBlackground | kOptionMusicIdle)
 #define kMaxPlayerNum               4 // kMaxScenarioPlayerNum in Scenario.h
 
-#ifndef kSoundFX
 #include "SoundFX.h"
-#endif
-
 #include "ScenarioData.h"
-
 #include "ICAPI.h"
 
 #define kKeyControlNum          19
@@ -212,3 +211,5 @@ typedef struct
 } aresGlobalType;
 
 #pragma options align=reset
+
+#endif // ANTARES_ARES_GLOBAL_TYPE_HPP_

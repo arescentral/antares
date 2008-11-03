@@ -17,6 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_MATH_MACROS_HPP_
+#define ANTARES_MATH_MACROS_HPP_
+
 /* Math Macros.h */
 
 #define ABS( x) ((( x) >= 0) ? (x):(-(x)))
@@ -25,3 +28,5 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     (( (x) > ( (bounds).right - 1)) << 2) | \
     (( (y) < (bounds).top) << 1) |  \
     ( (y) > ( (bounds).bottom - 1))))
+
+#endif // ANTARES_MATH_MACROS_HPP_

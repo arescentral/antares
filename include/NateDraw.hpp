@@ -17,10 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-// Natedraw.h
-#ifndef kNateDraw
+#ifndef ANTARES_NATE_DRAW_HPP_
+#define ANTARES_NATE_DRAW_HPP_
 
-#define kNateDraw
+// Natedraw.h
 
 #pragma options align=mac68k
 
@@ -90,4 +90,4 @@ void DashNateLine( PixMap *, longRect *, long, long, long,
 
 #pragma options align=reset
 
-#endif kNateDraw
+#endif // ANTARES_NATE_DRAW_HPP_

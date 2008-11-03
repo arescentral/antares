@@ -17,12 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_SCENARIO_DATA_HPP_
+#define ANTARES_SCENARIO_DATA_HPP_
+
 /******************************************\
 |**| Scenario_Data.h
 \******************************************/
-
-#ifndef kScenario_Data_h
-#define kScenario_Data_h
 
 #pragma mark **INCLUDES**
 /******************************************\
@@ -94,5 +94,4 @@ typedef struct scenarioInfoType
 |**| public function prototypes
 \******************************************/
 
-
-#endif kScenario_Data_h
+#endif // ANTARES_SCENARIO_DATA_HPP_

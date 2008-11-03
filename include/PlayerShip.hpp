@@ -17,6 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_PLAYER_SHIP_HPP_
+#define ANTARES_PLAYER_SHIP_HPP_
+
 // Player Ship.h
 
 #pragma options align=mac68k
@@ -48,3 +51,5 @@ void PlayerShipBodyExpire( spaceObjectType *, Boolean);
 void HandleTextMessageKeys( KeyMap, KeyMap, Boolean *);
 
 #pragma options align=reset
+
+#endif // ANTARES_PLAYER_SHIP_HPP_

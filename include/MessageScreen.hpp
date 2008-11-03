@@ -17,19 +17,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_MESSAGE_SCREEN_HPP_
+#define ANTARES_MESSAGE_SCREEN_HPP_
+
 // Message Screen.h
 
-#ifndef Message_Screen_h
-
-#define Message_Screen_h
-
-#ifndef kNateDraw
 #include "NateDraw.h"
-#endif
-
-#ifndef kAnyChar
 #include "AnyChar.h"
-#endif
 
 #pragma options align=mac68k
 
@@ -128,4 +122,4 @@ void DrawRetroTextCharInRect( retroTextSpecType *, long, longRect *, longRect *,
 
 #pragma options align=reset
 
-#endif Message_Screen_h
+#endif // ANTARES_MESSAGE_SCREEN_HPP_

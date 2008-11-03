@@ -18,24 +18,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 /* Transitions Color Animations.c */
-#ifndef __CONDITIONALMACROS__
 #include "ConditionalMacros.h"
-#endif // __CONDITIONALMACROS__
 
 #if TARGET_OS_WIN32
-
-    #ifndef __QUICKTIMEVR__
     #include <QuickTimeVR.h>
-    #endif
-
-    #ifndef __QTUtilities__
     #include "QTUtilities.h"
-    #endif
-
-    #ifndef __QTVRUtilities__
     #include "QTVRUtilities.h"
-    #endif
-
     #include <TextUtils.h>
     #include <Script.h>
     #include <string.h>
@@ -43,20 +31,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "AresGlobalType.h"
 #include "Quickdraw.h"
-#ifndef __PALETTES__
 #include <Palettes.h>
-#endif
 #include "Resources.h"
-
 #include "Debug.h"
 #include "AresMain.h"
 #include "HandleHandling.h"
-
 #include "ColorTranslation.h"
 #include "KeyMapTranslation.h"
-
 #include "Music.h"
-
 #include "Transitions.h"
 #include "Error.h"
 

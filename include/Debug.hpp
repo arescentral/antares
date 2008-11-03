@@ -17,12 +17,13 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_DEBUG_HPP_
+#define ANTARES_DEBUG_HPP_
+
 /* Debug.h */
 
 #define DEBUG_ON        TRUE
-#ifndef kMathSpecial
 #include "MathSpecial.h"
-#endif
 
 #pragma options align=mac68k
 
@@ -57,3 +58,5 @@ void DebugFileAppendSmallFixed( smallFixedType);
 void DebugFileSave( StringPtr);
 
 #pragma options align=reset
+
+#endif // ANTARES_DEBUG_HPP_

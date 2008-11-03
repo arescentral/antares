@@ -17,6 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_RADAR_HPP_
+#define ANTARES_RADAR_HPP_
+
 // Radar.h
 
 #pragma options align=mac68k
@@ -48,3 +51,5 @@ void UpdateBarIndicator( short, long, long, PixMapHandle);
 void DrawBuildTimeBar( long);
 
 #pragma options align=reset
+
+#endif // ANTARES_RADAR_HPP_

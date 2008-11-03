@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #pragma mark _system includes_
 /* - system
 *******************************************/
+
 #include <Navigation.h>
 
 #pragma mark _third party includes_
@@ -38,15 +39,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #pragma mark _bp libraries includes_
 /* - bp libraries
 *******************************************/
+
 //#include "WindowDispatch.h"
 #include "str_bp.h"
 
 #pragma mark _this library includes_
 /* - this project
 *******************************************/
+
 #include "AresGlobalType.h"
 #include "OffscreenGWorld.h"
-
 #include "NavigationUtilities.h"
 
 #pragma mark **DEFINITIONS**

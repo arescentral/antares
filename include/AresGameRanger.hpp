@@ -17,12 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_ARES_GAME_RANGER_HPP_
+#define ANTARES_ARES_GAME_RANGER_HPP_
+
 /******************************************\
 |**| Ares_GameRanger.h
 \******************************************/
-
-#ifndef kAres_GameRanger_h
-#define kAres_GameRanger_h
 
 #pragma mark **INCLUDES**
 /******************************************\
@@ -69,4 +69,4 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 OSErr AGR_Init( void);
 
-#endif kAres_GameRanger_h
+#endif // ANTARES_ARES_GAME_RANGER_HPP_

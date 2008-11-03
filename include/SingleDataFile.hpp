@@ -17,6 +17,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_SINGLE_DATA_FILE_HPP_
+#define ANTARES_SINGLE_DATA_FILE_HPP_
+
 /* Set this to true if you want to only use one data file for sound, sprites,
 & scenarios. Used in Sound FX.c, Scenario Maker.c, and Sprite Handling.c.
 */
@@ -26,3 +29,5 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef kCreateAresDemoData
 //#define   kUseSingleDemoFile
 #endif
+
+#endif // ANTARES_SINGLE_DATA_FILE_HPP_

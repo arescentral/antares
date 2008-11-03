@@ -17,14 +17,12 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#ifndef ANTARES_SOUND_FX_HPP_
+#define ANTARES_SOUND_FX_HPP_
+
 /* SOUND FX.H */
 
-#ifndef kSoundFX
-#define kSoundFX
-
-#ifndef kMyProcessor
 #include "Processor.h"
-#endif
 
 //#ifdef powerc
 //#define kAllowSoundSprocket
@@ -35,9 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <SoundComponents.h>
 #endif
 
-#ifndef kMathSpecial
 #include "MathSpecial.h"
-#endif
 /* Sound defs */
 
 #include "Sound.h"
@@ -199,4 +195,4 @@ void PlayLocalizedSound( unsigned long, unsigned long, unsigned long, unsigned l
 void SoundFXCleanup( void);
 void UnlockSoundCallback( Handle);
 
-#endif kSoundFX
+#endif // ANTARES_SOUND_FX_HPP_
