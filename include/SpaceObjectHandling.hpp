@@ -42,10 +42,10 @@
                 if ( (counter) == kMaxSpaceObject) (object) = nil;
 
 
-//#define   CreateAnySpaceObject( mwhichBase, mvel, mloc, mdir, mowner, mspecial, mcanbuild, mnameres, mnamestr, msprite)\
+//#define   CreateAnySpaceObject( mwhichBase, mvel, mloc, mdir, mowner, mspecial, mcanbuild, mnameres, mnamestr, msprite)
 //DebugCreateAnySpaceObject( mwhichBase, mvel, mloc, mdir, mowner, mspecial, mcanbuild, mnameres, mnamestr, msprite, __FILE__, __LINE__)
 
-//#define ExecuteObjectActions( mwhich, mnum, msobj, mdobj, moffset)\
+//#define ExecuteObjectActions( mwhich, mnum, msobj, mdobj, moffset)
 //DebugExecuteObjectActions( mwhich, mnum, msobj, mdobj, moffset, __FILE__, __LINE__)
 int SpaceObjectHandlingInit( void);
 void CleanupSpaceObjectHandling( void);
