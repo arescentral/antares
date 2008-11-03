@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #pragma options align=mac68k
 
-#define	kMiniBuildTimeHeight	( 25)
+#define kMiniBuildTimeHeight    ( 25)
 
 int InstrumentInit( void);
 void UpdateRadar( long);
@@ -43,7 +43,7 @@ void InstrumentsHandleMouseUp( void);
 void InstrumentsHandleMouseStillDown( void);
 void DrawArbitrarySectorLines( coordPointType *, long, long, Rect *, PixMapHandle, long, long);
 void GetArbitrarySingleSectorBounds( coordPointType *, coordPointType *, long, long, Rect *,
-								Rect *);
+                                Rect *);
 void UpdateBarIndicator( short, long, long, PixMapHandle);
 void DrawBuildTimeBar( long);
 

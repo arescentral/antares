@@ -19,17 +19,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // Universe Unit.h
 
-#define	kUniversalCenter				1073741823L//92680L
-#define	kMaximumRelevantDistance		46340L
-#define	kMaximumRelevantDistanceSquared	2147395600L	// maximumrelevant ^ 2
-#define	kMaximumAngleDistance			32767L		// maximum distance we can calc angle for
+#define kUniversalCenter                1073741823L//92680L
+#define kMaximumRelevantDistance        46340L
+#define kMaximumRelevantDistanceSquared 2147395600L // maximumrelevant ^ 2
+#define kMaximumAngleDistance           32767L      // maximum distance we can calc angle for
 
-#define	kSubSectorSize					512L
-#define	kSectorSize						4096L
-#define	kSuperSectorSize				32768L
+#define kSubSectorSize                  512L
+#define kSectorSize                     4096L
+#define kSuperSectorSize                32768L
 
-#define	kSubSectorShift					9L
-#define	kSectorShift					12L
-#define	kSuperSectorShift				15L
+#define kSubSectorShift                 9L
+#define kSectorShift                    12L
+#define kSuperSectorShift               15L
 
-#define	kSectorDivision					16
+#define kSectorDivision                 16

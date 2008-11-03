@@ -61,10 +61,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /* - macros
 *******************************************/
 
-#ifdef powerc	
-#define Has_Navigation_Services		NavServicesAvailable()
+#ifdef powerc   
+#define Has_Navigation_Services     NavServicesAvailable()
 #else
-#define	Has_Navigation_Services		false
+#define Has_Navigation_Services     false
 #endif
 
 #pragma mark **TYPEDEFS**
@@ -100,103 +100,103 @@ extern Boolean gDirectorySelectionFlag;
 \******************************************/
 
 OSErr SmartFile_SelectFolder( FSSpecPtr destFile, StringPtr windowName,
-	StringPtr prompt)
+    StringPtr prompt)
 {
-	OSErr	error = noErr;
-	
-	if ( destFile == nil) return paramErr;
-	if ( !Has_Navigation_Services) 	// this is a macro that's safe to call any
-									// time
-	{
-		StandardFileReply	fileReply;
-		
-		error = doDirectorySelectionDialog( &fileReply);
-		if (( fileReply.sfGood) || ( gDirectorySelectionFlag))
-		{
-			BlockMove( &fileReply.sfFile, destFile, sizeof( FSSpec));
-			return noErr;
-		} else return userCanceledErr;
-	} else
-	{
-#ifdef powerc	
-		return NS_SelectFolderObject( destFile, windowName, prompt);
+    OSErr   error = noErr;
+    
+    if ( destFile == nil) return paramErr;
+    if ( !Has_Navigation_Services)  // this is a macro that's safe to call any
+                                    // time
+    {
+        StandardFileReply   fileReply;
+        
+        error = doDirectorySelectionDialog( &fileReply);
+        if (( fileReply.sfGood) || ( gDirectorySelectionFlag))
+        {
+            BlockMove( &fileReply.sfFile, destFile, sizeof( FSSpec));
+            return noErr;
+        } else return userCanceledErr;
+    } else
+    {
+#ifdef powerc   
+        return NS_SelectFolderObject( destFile, windowName, prompt);
 #endif
-	}
-	return noErr;	
+    }
+    return noErr;   
 }
 
 OSErr SmartFile_SaveAs( FSSpecPtr destFile, StringPtr fileName,
-	StringPtr appName, OSType fileTypeToSave, OSType fileCreator)
+    StringPtr appName, OSType fileTypeToSave, OSType fileCreator)
 {
-	OSErr				error = noErr;
-	
-	if ( destFile == nil) return paramErr;
-	
-	if ( !Has_Navigation_Services) 	// this is a macro that's safe to call any
-									// time
-	{
-		StandardFileReply	fileReply;
-		unsigned char		prompt[] = "\pSave as:";
+    OSErr               error = noErr;
+    
+    if ( destFile == nil) return paramErr;
+    
+    if ( !Has_Navigation_Services)  // this is a macro that's safe to call any
+                                    // time
+    {
+        StandardFileReply   fileReply;
+        unsigned char       prompt[] = "\pSave as:";
 
-		StandardPutFile( prompt, fileName, &fileReply);
-		if ( fileReply.sfGood)
-		{
-			BlockMove( &fileReply.sfFile, destFile, sizeof( FSSpec));
-			if ( !fileReply.sfReplacing)
-			{
-				FSpCreateResFile( destFile, fileCreator, fileTypeToSave,
-					fileReply.sfScript);
-				error = ResError();
-				if ( error != noErr) return error;
-			}
-		} else return userCanceledErr;
-	} else
-	{
-#ifdef powerc	
-		return NS_SaveAs( destFile, fileName, appName, fileTypeToSave,
-							fileCreator);
+        StandardPutFile( prompt, fileName, &fileReply);
+        if ( fileReply.sfGood)
+        {
+            BlockMove( &fileReply.sfFile, destFile, sizeof( FSSpec));
+            if ( !fileReply.sfReplacing)
+            {
+                FSpCreateResFile( destFile, fileCreator, fileTypeToSave,
+                    fileReply.sfScript);
+                error = ResError();
+                if ( error != noErr) return error;
+            }
+        } else return userCanceledErr;
+    } else
+    {
+#ifdef powerc   
+        return NS_SaveAs( destFile, fileName, appName, fileTypeToSave,
+                            fileCreator);
 #endif
-	}
-	
-	return noErr;
+    }
+    
+    return noErr;
 }
 
 OSErr SmartFile_SelectFile( FSSpecPtr destFile, short openListResID)
 {
-	OSErr				error = noErr;
-	
-	if ( !Has_Navigation_Services)
-	{
-		Handle				openFileTypeResource =
-								GetResource('open', openListResID);
-		SFTypeList			typeList;
-		OSType				*osType = nil;
-		long				typeNum, i;
-		StandardFileReply	fileReply;
-		
-		if ( openFileTypeResource == nil) return resNotFound;
-		
-		typeNum = *((long *)((*openFileTypeResource) + 4));
-		if ( typeNum > 4) typeNum = 4;
-		for ( i = 0; i < typeNum; i++)
-		{
-			osType = (OSType *)((*openFileTypeResource) + 8 + ( 4 * i));
-			typeList[i] = *osType;
-		}
-		
-		ReleaseResource( openFileTypeResource);
-		StandardGetFile( 0, typeNum, typeList, &fileReply);
-		if ( fileReply.sfGood)
-		{
-			BlockMove( &fileReply.sfFile, destFile, sizeof( FSSpec));
-			return noErr;
-		} else return userCanceledErr;
-	} else
-	{
-#ifdef powerc	
-		return NS_SelectFileObject( destFile, openListResID);
+    OSErr               error = noErr;
+    
+    if ( !Has_Navigation_Services)
+    {
+        Handle              openFileTypeResource =
+                                GetResource('open', openListResID);
+        SFTypeList          typeList;
+        OSType              *osType = nil;
+        long                typeNum, i;
+        StandardFileReply   fileReply;
+        
+        if ( openFileTypeResource == nil) return resNotFound;
+        
+        typeNum = *((long *)((*openFileTypeResource) + 4));
+        if ( typeNum > 4) typeNum = 4;
+        for ( i = 0; i < typeNum; i++)
+        {
+            osType = (OSType *)((*openFileTypeResource) + 8 + ( 4 * i));
+            typeList[i] = *osType;
+        }
+        
+        ReleaseResource( openFileTypeResource);
+        StandardGetFile( 0, typeNum, typeList, &fileReply);
+        if ( fileReply.sfGood)
+        {
+            BlockMove( &fileReply.sfFile, destFile, sizeof( FSSpec));
+            return noErr;
+        } else return userCanceledErr;
+    } else
+    {
+#ifdef powerc   
+        return NS_SelectFileObject( destFile, openListResID);
 #endif
-	}
-	
-	return noErr;
+    }
+    
+    return noErr;
 }

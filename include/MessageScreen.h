@@ -33,75 +33,75 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #pragma options align=mac68k
 
-#define	kMessageStringID		3100
-#define	kZoomStringOffset		1
-#define	kAutoPilotOnString		9
-#define	kAutoPilotOffString		10
+#define kMessageStringID        3100
+#define kZoomStringOffset       1
+#define kAutoPilotOnString      9
+#define kAutoPilotOffString     10
 
-#define	kStatusLabelColor		AQUA
-#define	kStatusWarnColor		PINK
+#define kStatusLabelColor       AQUA
+#define kStatusWarnColor        PINK
 
-#define	kMaxLineNumber			48
+#define kMaxLineNumber          48
 
 
 typedef struct
 {
-	Handle			text;
-	long			textLength;
-	long			lineLength[kMaxLineNumber];
-	long			lineNumber;
-	long			lineCount;
-	long			linePosition;
-	long			thisPosition;
-	long			tabSize;
-	long			xpos;
-	long			ypos;
-	long			autoHeight;
-	long			autoWidth;
-	long			topBuffer;
-	long			bottomBuffer;
-	unsigned char	color;
-	unsigned char	backColor;
-	unsigned char	originalColor;
-	unsigned char	originalBackColor;
-	unsigned char	nextColor;
-	unsigned char	nextBackColor;
+    Handle          text;
+    long            textLength;
+    long            lineLength[kMaxLineNumber];
+    long            lineNumber;
+    long            lineCount;
+    long            linePosition;
+    long            thisPosition;
+    long            tabSize;
+    long            xpos;
+    long            ypos;
+    long            autoHeight;
+    long            autoWidth;
+    long            topBuffer;
+    long            bottomBuffer;
+    unsigned char   color;
+    unsigned char   backColor;
+    unsigned char   originalColor;
+    unsigned char   originalBackColor;
+    unsigned char   nextColor;
+    unsigned char   nextBackColor;
 } retroTextSpecType;
 
 typedef enum
 {
-	kNoStage = 0,
-	kStartStage = 1,
-	kClipStage = 2,
-	kShowStage = 3,
-	kEndStage = 4
+    kNoStage = 0,
+    kStartStage = 1,
+    kClipStage = 2,
+    kShowStage = 3,
+    kEndStage = 4
 } longMessageStageType;
 
 typedef struct
 {
-	longMessageStageType	stage;
-	long					charDelayCount;
-	Rect					pictBounds;
-	long					pictDelayCount;
-	long					pictCurrentLeft;
-	long					pictCurrentTop;
-	long					time;
-	long					textHeight;
-	short					startResID;
-	short					endResID;
-	short					currentResID;
-	short					lastResID;
-	short					previousStartResID;
-	short					previousEndResID;
-	short					pictID;
-	unsigned char			backColor;
-	anyCharType				stringMessage[kAnyCharPStringMaxLen];
-	anyCharType				lastStringMessage[kAnyCharPStringMaxLen];
-	Boolean					newStringMessage;
-	retroTextSpecType		retroTextSpec;
-	Boolean					labelMessage;
-	Boolean					lastLabelMessage;
-	short					labelMessageID;
+    longMessageStageType    stage;
+    long                    charDelayCount;
+    Rect                    pictBounds;
+    long                    pictDelayCount;
+    long                    pictCurrentLeft;
+    long                    pictCurrentTop;
+    long                    time;
+    long                    textHeight;
+    short                   startResID;
+    short                   endResID;
+    short                   currentResID;
+    short                   lastResID;
+    short                   previousStartResID;
+    short                   previousEndResID;
+    short                   pictID;
+    unsigned char           backColor;
+    anyCharType             stringMessage[kAnyCharPStringMaxLen];
+    anyCharType             lastStringMessage[kAnyCharPStringMaxLen];
+    Boolean                 newStringMessage;
+    retroTextSpecType       retroTextSpec;
+    Boolean                 labelMessage;
+    Boolean                 lastLabelMessage;
+    short                   labelMessageID;
 } longMessageType;
 
 

@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //#define RandomSeeded( mrange, mseed, mstringy, mobjecttype) DebugRandomSeeded( mrange, mseed, __FILE__, mstringy, mobjecttype)
 #define RandomSeeded( mrange, mseed, mstringy, mobjecttype) XRandomSeeded( mrange, mseed)
 
-#define	kRandomRange		32767L
+#define kRandomRange        32767L
 
 int RandomInit( void);
 void RandomCleanup( void);

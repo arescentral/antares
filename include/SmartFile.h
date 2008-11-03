@@ -68,10 +68,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 \******************************************/
 
 OSErr SmartFile_SelectFolder( FSSpecPtr destFile, StringPtr windowName,
-	StringPtr prompt);
+    StringPtr prompt);
 
 OSErr SmartFile_SaveAs( FSSpecPtr destFile, StringPtr fileName,
-	StringPtr appName, OSType fileTypeToSave, OSType fileCreator);
+    StringPtr appName, OSType fileTypeToSave, OSType fileCreator);
 
 OSErr SmartFile_SelectFile( FSSpecPtr destFile, short openListResID);
 

@@ -21,83 +21,83 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #pragma options align=mac68k
 
-#define	kErrorStrID					800
+#define kErrorStrID                 800
 
-#define	kNoError					0
-#define	PIX_DEPTH_ERROR				1
-#define	OFFSCREEN_GRAPHICS_ERROR	2
-#define	RESOURCE_ERROR				3
-#define	SPRITE_CREATE_ERROR			4
-#define	MEMORY_ERROR				5
-#define	COLOR_TABLE_ERROR			6
-#define	PREFERENCES_ERROR			7
-#define	NETWORK_ERROR				8
-#define	SOUND_CHANNEL_ERROR			9
-#define	EXPIRED_ERROR				10
-#define	SPRITE_DATA_ERROR			11
-#define	MUSIC_ERROR					12
-#define	kToolboxError				21
-#define	kInitNetSprocketError		22
-#define	kNSpProtocolListError		23
-#define	kNSpProtocolATError			24
-#define	kNSpProtocolTCPIPError		25
-#define	kOccurredError				26
-#define	kNSpHostError				27
-#define	kNSpJoinError				28
-#define	kFactoryPrefsError			29
-#define	kNewerPrefsError			30
-#define	kWritePrefsError			31
-#define	kCharSetError				32
-#define	kNoMoreHandlesError			33
-#define	kInterfacesFileError		34
-#define	kDataFolderError			35
-#define	kAddScreenLabelError		36
-#define	kAdjacentError				37
-#define	kInitMusicLibraryError		38
-#define	kCreateMusicDriverError		39
-#define	kReadRaceDataError			40
-#define	kReadRotationDataError		41
-#define	kScenariosFileError			42
-#define	kScenarioDataError			43
-#define	kScenarioInitialDataError	44
-#define	kScenarioConditionDataError	45
-#define	kScenarioBriefDataError		46
-#define	kLoadSpriteError			47
-#define	kSoundsFileError			48
-#define	kLoadSoundError				49
-#define	kSoundDataError				50
-#define	kReadBaseObjectDataError	51
-#define	kReadObjectActionDataError	52
-#define	kIntraLevelLoadSpriteError	53
-#define	kSpritesFileError			54
-#define	kDataFileResourceError		55
-#define kNoMoreSpriteTablesError	56
-#define	kLoadPictError				57
-#define	kLoadColorTableError		58
-#define	kCreatePaletteError			59
-#define	kGetPaletteError			60
-#define	kNetworkSynchError			61
-#define	kPlaySongError				62
-#define	kLoadSongError				63
-#define	kDemoDataFileError			64
-#define	kNoMoreSoundsError			65
-#define	kCorruptedNetDataError		66
-#define	kNameIDIncorrect			67
-#define	kOpenTransportError			68
-#define	kNSpMemError				69
-#define	kNSpInvalidAddressError		70
-#define	kInvalidPublicSerial1		71
-#define	kInvalidPublicSerial2		72
-#define	kOlderVersionError			73
-#define	kNewerVersionError			74
-#define	kSameSerialNumberError		75
+#define kNoError                    0
+#define PIX_DEPTH_ERROR             1
+#define OFFSCREEN_GRAPHICS_ERROR    2
+#define RESOURCE_ERROR              3
+#define SPRITE_CREATE_ERROR         4
+#define MEMORY_ERROR                5
+#define COLOR_TABLE_ERROR           6
+#define PREFERENCES_ERROR           7
+#define NETWORK_ERROR               8
+#define SOUND_CHANNEL_ERROR         9
+#define EXPIRED_ERROR               10
+#define SPRITE_DATA_ERROR           11
+#define MUSIC_ERROR                 12
+#define kToolboxError               21
+#define kInitNetSprocketError       22
+#define kNSpProtocolListError       23
+#define kNSpProtocolATError         24
+#define kNSpProtocolTCPIPError      25
+#define kOccurredError              26
+#define kNSpHostError               27
+#define kNSpJoinError               28
+#define kFactoryPrefsError          29
+#define kNewerPrefsError            30
+#define kWritePrefsError            31
+#define kCharSetError               32
+#define kNoMoreHandlesError         33
+#define kInterfacesFileError        34
+#define kDataFolderError            35
+#define kAddScreenLabelError        36
+#define kAdjacentError              37
+#define kInitMusicLibraryError      38
+#define kCreateMusicDriverError     39
+#define kReadRaceDataError          40
+#define kReadRotationDataError      41
+#define kScenariosFileError         42
+#define kScenarioDataError          43
+#define kScenarioInitialDataError   44
+#define kScenarioConditionDataError 45
+#define kScenarioBriefDataError     46
+#define kLoadSpriteError            47
+#define kSoundsFileError            48
+#define kLoadSoundError             49
+#define kSoundDataError             50
+#define kReadBaseObjectDataError    51
+#define kReadObjectActionDataError  52
+#define kIntraLevelLoadSpriteError  53
+#define kSpritesFileError           54
+#define kDataFileResourceError      55
+#define kNoMoreSpriteTablesError    56
+#define kLoadPictError              57
+#define kLoadColorTableError        58
+#define kCreatePaletteError         59
+#define kGetPaletteError            60
+#define kNetworkSynchError          61
+#define kPlaySongError              62
+#define kLoadSongError              63
+#define kDemoDataFileError          64
+#define kNoMoreSoundsError          65
+#define kCorruptedNetDataError      66
+#define kNameIDIncorrect            67
+#define kOpenTransportError         68
+#define kNSpMemError                69
+#define kNSpInvalidAddressError     70
+#define kInvalidPublicSerial1       71
+#define kInvalidPublicSerial2       72
+#define kOlderVersionError          73
+#define kNewerVersionError          74
+#define kSameSerialNumberError      75
 
 typedef enum
 {
-	eContinueErr,
-	eQuitErr,
-	eExitToShellErr,
-	eContinueOnlyErr
+    eContinueErr,
+    eQuitErr,
+    eExitToShellErr,
+    eContinueOnlyErr
 } errorRecoverType;
 
 void ShowErrorNoRecover ( int, StringPtr, int);
@@ -105,7 +105,7 @@ void ShowErrorRecover ( int, StringPtr, int);
 void ShowSimpleStringAlert( StringPtr, StringPtr, StringPtr, StringPtr);
 void ShowSimpleStrResAlert( short, short, short, short, short);
 void ShowErrorAny( errorRecoverType, short, StringPtr, StringPtr, StringPtr, StringPtr, long, long,
-						long, long, char *, long);
+                        long, long, char *, long);
 void ShowErrorOfTypeOccurred( errorRecoverType, short, short, OSErr, char *, long);
 void MyDebugString( StringPtr);
 #pragma options align=reset

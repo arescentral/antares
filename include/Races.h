@@ -24,12 +24,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #ifndef kRaces_h
 
-#define	kRaces_h
+#define kRaces_h
 
 #pragma options align=mac68k
 
-#define	kRaceResID			500
-#define	kRaceResType		'race'
+#define kRaceResID          500
+#define kRaceResType        'race'
 
 short InitRaces( void);
 void CleanupRaces( void);

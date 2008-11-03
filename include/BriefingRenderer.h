@@ -68,12 +68,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 \******************************************/
 
 void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
-			long maxSize, Rect *bounds, long portleft, long portright,
-			coordPointType *corner, long scale);
-			
+            long maxSize, Rect *bounds, long portleft, long portright,
+            coordPointType *corner, long scale);
+            
 void BriefPoint_Data_Get( long whichPoint, long whichScenario, long *headerID,
-					long *headerNumber, long *contentID, Rect *hiliteBounds,
-					coordPointType *corner, long scale, long minSectorSize, long maxSize,
-					Rect *bounds);
+                    long *headerNumber, long *contentID, Rect *hiliteBounds,
+                    coordPointType *corner, long scale, long minSectorSize, long maxSize,
+                    Rect *bounds);
 
 #endif kBriefing_Renderer_h

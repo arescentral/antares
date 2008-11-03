@@ -87,214 +87,214 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 |**| public functions
 \******************************************/
 
-Boolean	Wrap_UseGameRanger( void)
+Boolean Wrap_UseGameRanger( void)
 {
-	return true;
+    return true;
 }
 
-OSErr		Wrap_GRInstallStartupHandler(void)
+OSErr       Wrap_GRInstallStartupHandler(void)
 {
-	OSErr	result;
-	
-	mWriteDebugString("\p>GRInstallStartupHandler");
-	
-	result =  GRInstallStartupHandler();
-	if ( result != noErr) DebugStr("\perr GRInstallStartupHandler");
-	return result;
+    OSErr   result;
+    
+    mWriteDebugString("\p>GRInstallStartupHandler");
+    
+    result =  GRInstallStartupHandler();
+    if ( result != noErr) DebugStr("\perr GRInstallStartupHandler");
+    return result;
 }
 
-OSErr		Wrap_GRInstallResumeHandler(void)
+OSErr       Wrap_GRInstallResumeHandler(void)
 {
-	OSErr	result;
-	
-	mWriteDebugString("\p>GRInstallResumeHandler");
-	
-	result =  GRInstallResumeHandler();
-	if ( result != noErr) DebugStr("\perr GRInstallResumeHandler");
-	return result;
+    OSErr   result;
+    
+    mWriteDebugString("\p>GRInstallResumeHandler");
+    
+    result =  GRInstallResumeHandler();
+    if ( result != noErr) DebugStr("\perr GRInstallResumeHandler");
+    return result;
 }
 
-Boolean		Wrap_GRCheckAEForCmd(const AppleEvent *theEvent)
+Boolean     Wrap_GRCheckAEForCmd(const AppleEvent *theEvent)
 {
-	mWriteDebugString("\p>GRCheckAEForCmd");
-		
-	return GRCheckAEForCmd( theEvent);
+    mWriteDebugString("\p>GRCheckAEForCmd");
+        
+    return GRCheckAEForCmd( theEvent);
 }
 
-Boolean		Wrap_GRCheckFileForCmd(void)
+Boolean     Wrap_GRCheckFileForCmd(void)
 {
-	mWriteDebugString("\p>GRCheckFileForCmd");
-	
-	return GRCheckFileForCmd();
+    mWriteDebugString("\p>GRCheckFileForCmd");
+    
+    return GRCheckFileForCmd();
 }
 
-Boolean		Wrap_GRCheckForAE(void)
+Boolean     Wrap_GRCheckForAE(void)
 {
-	mWriteDebugString("\p>GRCheckForAE");
-	
-	return GRCheckForAE();
+    mWriteDebugString("\p>GRCheckForAE");
+    
+    return GRCheckForAE();
 }
 
-Boolean		Wrap_GRIsWaitingCmd(void)
+Boolean     Wrap_GRIsWaitingCmd(void)
 {
-//	mWriteDebugString("\p>GRIsWaitingCmd");
-	
-	return GRIsWaitingCmd();
+//  mWriteDebugString("\p>GRIsWaitingCmd");
+    
+    return GRIsWaitingCmd();
 }
 
-void		Wrap_GRGetWaitingCmd(void)
+void        Wrap_GRGetWaitingCmd(void)
 {
-	mWriteDebugString("\p>GRGetWaitingCmd");
+    mWriteDebugString("\p>GRGetWaitingCmd");
 
-	GRGetWaitingCmd();	
+    GRGetWaitingCmd();  
 }
 
-Boolean		Wrap_GRIsCmd(void)
+Boolean     Wrap_GRIsCmd(void)
 {
-	mWriteDebugString("\p>GRIsCmd");
-	
-	return GRIsCmd();
+    mWriteDebugString("\p>GRIsCmd");
+    
+    return GRIsCmd();
 }
 
-Boolean		Wrap_GRIsHostCmd(void)
+Boolean     Wrap_GRIsHostCmd(void)
 {
-	mWriteDebugString("\p>GRIsHostCmd");
-	
-	return GRIsHostCmd();
+    mWriteDebugString("\p>GRIsHostCmd");
+    
+    return GRIsHostCmd();
 }
 
-Boolean		Wrap_GRIsJoinCmd(void)
+Boolean     Wrap_GRIsJoinCmd(void)
 {
-	mWriteDebugString("\p>GRIsJoinCmd");
-	
-	return GRIsJoinCmd();
-}
-
-
-char*		Wrap_GRGetHostGameName(void)
-{
-	mWriteDebugString("\p>GRGetHostGameName");
-	
-	return GRGetHostGameName();
-}
-
-UInt16		Wrap_GRGetHostMaxPlayers(void)
-{
-	mWriteDebugString("\p>GRGetHostMaxPlayers");
-	
-	return GRGetHostMaxPlayers();
-}
-
-UInt32		Wrap_GRGetJoinAddress(void)
-{
-	mWriteDebugString("\p>GRGetJoinAddress");
-	
-	return GRGetJoinAddress();
-}
-
-char*		Wrap_GRGetPlayerName(void)
-{
-	mWriteDebugString("\p>Wrap_GRGetPlayerName");
-	
-	return GRGetPlayerName();
-}
-
-UInt16		Wrap_GRGetPortNumber(void)
-{
-	mWriteDebugString("\p>GRGetPortNumber");
-	
-	return GRGetPortNumber();
+    mWriteDebugString("\p>GRIsJoinCmd");
+    
+    return GRIsJoinCmd();
 }
 
 
-void		Wrap_GRReset(void)
+char*       Wrap_GRGetHostGameName(void)
 {
-	mWriteDebugString("\p>GRReset");
-	
-	GRReset();
+    mWriteDebugString("\p>GRGetHostGameName");
+    
+    return GRGetHostGameName();
+}
+
+UInt16      Wrap_GRGetHostMaxPlayers(void)
+{
+    mWriteDebugString("\p>GRGetHostMaxPlayers");
+    
+    return GRGetHostMaxPlayers();
+}
+
+UInt32      Wrap_GRGetJoinAddress(void)
+{
+    mWriteDebugString("\p>GRGetJoinAddress");
+    
+    return GRGetJoinAddress();
+}
+
+char*       Wrap_GRGetPlayerName(void)
+{
+    mWriteDebugString("\p>Wrap_GRGetPlayerName");
+    
+    return GRGetPlayerName();
+}
+
+UInt16      Wrap_GRGetPortNumber(void)
+{
+    mWriteDebugString("\p>GRGetPortNumber");
+    
+    return GRGetPortNumber();
 }
 
 
-void		Wrap_GRHostReady(void)
+void        Wrap_GRReset(void)
 {
-	mWriteDebugString("\p>GRHostReady");
-	
-	GRHostReady();
+    mWriteDebugString("\p>GRReset");
+    
+    GRReset();
 }
 
-void		Wrap_GRGameBegin(void)
+
+void        Wrap_GRHostReady(void)
 {
-	mWriteDebugString("\p>GRGameBegin");
-	
-	GRGameBegin();
+    mWriteDebugString("\p>GRHostReady");
+    
+    GRHostReady();
 }
 
-void		Wrap_GRStatScore(SInt32 score)
+void        Wrap_GRGameBegin(void)
 {
-	mWriteDebugString("\p>GRStatScore");
-	
-	GRStatScore( score);	
+    mWriteDebugString("\p>GRGameBegin");
+    
+    GRGameBegin();
 }
 
-void		Wrap_GRStatOtherScore(SInt32 score)
+void        Wrap_GRStatScore(SInt32 score)
 {
-	mWriteDebugString("\p>GRStatOtherScore");
-	
-	GRStatOtherScore( score);
+    mWriteDebugString("\p>GRStatScore");
+    
+    GRStatScore( score);    
 }
 
-void		Wrap_GRGameEnd(void)
+void        Wrap_GRStatOtherScore(SInt32 score)
 {
-	mWriteDebugString("\p>GRGameEnd");
-	
-	GRGameEnd();
+    mWriteDebugString("\p>GRStatOtherScore");
+    
+    GRStatOtherScore( score);
 }
 
-void		Wrap_GRHostClosed(void)
+void        Wrap_GRGameEnd(void)
 {
-	mWriteDebugString("\p>GRHostClosed");
-	
-	GRHostClosed();
+    mWriteDebugString("\p>GRGameEnd");
+    
+    GRGameEnd();
 }
 
-OSErr		Wrap_GROpenGameRanger(void)
+void        Wrap_GRHostClosed(void)
 {
-	mWriteDebugString("\p>GROpenGameRanger");
-	
-	return GROpenGameRanger();
+    mWriteDebugString("\p>GRHostClosed");
+    
+    GRHostClosed();
+}
+
+OSErr       Wrap_GROpenGameRanger(void)
+{
+    mWriteDebugString("\p>GROpenGameRanger");
+    
+    return GROpenGameRanger();
 }
 
 Boolean
-Wrap_GRNSpDoModalHostDialog			(NSpProtocolListReference  ioProtocolList,
-								 Str31 					ioGameName,
-								 Str31 					ioPlayerName,
-								 Str31 					ioPassword,
-								 NSpEventProcPtr 		inEventProcPtr)
+Wrap_GRNSpDoModalHostDialog         (NSpProtocolListReference  ioProtocolList,
+                                 Str31                  ioGameName,
+                                 Str31                  ioPlayerName,
+                                 Str31                  ioPassword,
+                                 NSpEventProcPtr        inEventProcPtr)
 {
-	mWriteDebugString("\p>GRNSpDoModalHostDialog");
-	
-	return GRNSpDoModalHostDialog( ioProtocolList, ioGameName, ioPlayerName, ioPassword,
-		inEventProcPtr);
+    mWriteDebugString("\p>GRNSpDoModalHostDialog");
+    
+    return GRNSpDoModalHostDialog( ioProtocolList, ioGameName, ioPlayerName, ioPassword,
+        inEventProcPtr);
 }
 
 NSpAddressReference
-Wrap_GRNSpDoModalJoinDialog			(ConstStr31Param 		inGameType,
-								 ConstStr255Param 		inEntityListLabel,
-								 Str31 					ioName,
-								 Str31 					ioPassword,
-								 NSpEventProcPtr 		inEventProcPtr)
+Wrap_GRNSpDoModalJoinDialog         (ConstStr31Param        inGameType,
+                                 ConstStr255Param       inEntityListLabel,
+                                 Str31                  ioName,
+                                 Str31                  ioPassword,
+                                 NSpEventProcPtr        inEventProcPtr)
 {
-	mWriteDebugString("\p>GRNSpDoModalJoinDialog");
-	
-	return GRNSpDoModalJoinDialog( inGameType, inEntityListLabel, ioName, ioPassword,
-		inEventProcPtr);
+    mWriteDebugString("\p>GRNSpDoModalJoinDialog");
+    
+    return GRNSpDoModalJoinDialog( inGameType, inEntityListLabel, ioName, ioPassword,
+        inEventProcPtr);
 }
 
 void
-Wrap_GRNSpReleaseAddressReference	(NSpAddressReference	inAddr)
+Wrap_GRNSpReleaseAddressReference   (NSpAddressReference    inAddr)
 {
-	mWriteDebugString("\p>GRNSpReleaseAddressReference");
+    mWriteDebugString("\p>GRNSpReleaseAddressReference");
 
-	GRNSpReleaseAddressReference	(inAddr);
+    GRNSpReleaseAddressReference    (inAddr);
 }
 

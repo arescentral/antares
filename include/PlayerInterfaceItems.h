@@ -33,119 +33,119 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 typedef enum
 {
-	kPlainRect = 1,
-	kLabeledRect = 2,
-	kListRect = 3,
-	kTextRect = 4,
-	kPlainButton = 5,
-	kRadioButton = 6,
-	kCheckboxButton = 7,
-	kPictureRect = 8,
-	kTabBox = 9,
-	kTabBoxTop = 10,
-	kTabBoxButton = 11
+    kPlainRect = 1,
+    kLabeledRect = 2,
+    kListRect = 3,
+    kTextRect = 4,
+    kPlainButton = 5,
+    kRadioButton = 6,
+    kCheckboxButton = 7,
+    kPictureRect = 8,
+    kTabBox = 9,
+    kTabBoxTop = 10,
+    kTabBoxButton = 11
 } interfaceKindType;
 
 typedef enum
 {
-	kDimmed = 1,
-	kActive = 2,
-	kIH_Hilite = 3
+    kDimmed = 1,
+    kActive = 2,
+    kIH_Hilite = 3
 } interfaceItemStatusType;
 
 typedef enum
 {
-	kLarge = 1,
-	kSmall = 2
+    kLarge = 1,
+    kSmall = 2
 } interfaceStyleType;
 
 typedef struct
 {
-	short				stringID;
-	short				stringNumber;
+    short               stringID;
+    short               stringNumber;
 } interfaceLabelType;
 
 typedef struct
 {
-	interfaceLabelType	label;
-	unsigned char		color;
-	TEHandle			teData;
-	Boolean				editable;
+    interfaceLabelType  label;
+    unsigned char       color;
+    TEHandle            teData;
+    Boolean             editable;
 } interfaceLabeledRectType;
 
 typedef struct
 {
-	interfaceLabelType			label;
-	short						(*getListLength)( void);
-	void						(*getItemString)( short, anyCharType *);
-	Boolean						(*itemHilited)( short, Boolean);
-//	void						(*hiliteItem)( short);
-	short						topItem;
-	interfaceItemStatusType		lineUpStatus;
-	interfaceItemStatusType		lineDownStatus;
-	interfaceItemStatusType		pageUpStatus;
-	interfaceItemStatusType		pageDownStatus;
+    interfaceLabelType          label;
+    short                       (*getListLength)( void);
+    void                        (*getItemString)( short, anyCharType *);
+    Boolean                     (*itemHilited)( short, Boolean);
+//  void                        (*hiliteItem)( short);
+    short                       topItem;
+    interfaceItemStatusType     lineUpStatus;
+    interfaceItemStatusType     lineDownStatus;
+    interfaceItemStatusType     pageUpStatus;
+    interfaceItemStatusType     pageDownStatus;
 } interfaceListType;
 
 typedef struct
 {
-	short				textID;
-	Boolean				visibleBounds;
+    short               textID;
+    Boolean             visibleBounds;
 } interfaceTextRectType;
 
 typedef struct
 {
-	short				topRightBorderSize;
+    short               topRightBorderSize;
 } interfaceTabBoxType;
 
 typedef struct
 {
-	short				pictureID;
-	Boolean				visibleBounds;
+    short               pictureID;
+    Boolean             visibleBounds;
 } interfacePictureRectType;
  
 typedef struct
 {
-	interfaceLabelType			label;
-	short						key;
-	Boolean						defaultButton;
-	interfaceItemStatusType		status;
+    interfaceLabelType          label;
+    short                       key;
+    Boolean                     defaultButton;
+    interfaceItemStatusType     status;
 } interfaceButtonType;
 
 typedef struct
 {
-	interfaceLabelType			label;
-	short						key;
-	Boolean						on;
-	interfaceItemStatusType		status;
+    interfaceLabelType          label;
+    short                       key;
+    Boolean                     on;
+    interfaceItemStatusType     status;
 } interfaceRadioType; // also tab box button type
 
 typedef struct
 {
-	interfaceLabelType			label;
-	short						key;
-	Boolean						on;
-	interfaceItemStatusType		status;
+    interfaceLabelType          label;
+    short                       key;
+    Boolean                     on;
+    interfaceItemStatusType     status;
 } interfaceCheckboxType;
 
 typedef struct
 {
-	longRect			bounds;
-	union
-	{
-		interfaceLabeledRectType	labeledRect;
-		interfaceListType			listRect;
-		interfaceTextRectType		textRect;
-		interfaceButtonType			plainButton;
-		interfaceRadioType			radioButton;
-		interfaceCheckboxType		checkboxButton;
-		interfacePictureRectType	pictureRect;
-		interfaceTabBoxType			tabBox;
-	} item;
-	
-	unsigned char		color;
-	interfaceKindType	kind;
-	interfaceStyleType	style;
+    longRect            bounds;
+    union
+    {
+        interfaceLabeledRectType    labeledRect;
+        interfaceListType           listRect;
+        interfaceTextRectType       textRect;
+        interfaceButtonType         plainButton;
+        interfaceRadioType          radioButton;
+        interfaceCheckboxType       checkboxButton;
+        interfacePictureRectType    pictureRect;
+        interfaceTabBoxType         tabBox;
+    } item;
+    
+    unsigned char       color;
+    interfaceKindType   kind;
+    interfaceStyleType  style;
 } interfaceItemType;
 
 #pragma options align=reset

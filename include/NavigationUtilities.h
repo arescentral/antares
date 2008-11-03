@@ -72,6 +72,6 @@ OSErr NS_SelectFileObject( FSSpecPtr destFile, short openListResID);
 OSErr NS_SelectFolderObject( FSSpecPtr destFile, StringPtr, StringPtr);
 
 OSErr NS_SaveAs( FSSpecPtr destFile, StringPtr fileName, StringPtr appName,
-	OSType fileTypeToSave, OSType fileCreator);
+    OSType fileTypeToSave, OSType fileCreator);
 
 #endif kNavigation_Utilities_h

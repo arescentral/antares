@@ -24,75 +24,75 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 void CopyAnyCharPString( anyCharType *to, anyCharType *from)
 
 {
-	short		i, l;
-	
-	*to = *from;
-	l = *to;
-	to++;
-	from++;
-	for ( i = 0; i < l; i++)
-		*(to++) = *(from++);
+    short       i, l;
+    
+    *to = *from;
+    l = *to;
+    to++;
+    from++;
+    for ( i = 0; i < l; i++)
+        *(to++) = *(from++);
 }
 
 void InsertAnyCharPStringInPString( anyCharType *to, anyCharType *from, long offset)
 {
-	anyCharType	*dc, *sc;
-	long		count, flen;
-	
-	if ( offset <= *to)
-	{
-		if ( (*to + *from) > kAnyCharPStringMaxLen) flen = kAnyCharPStringMaxLen - (long)*from;
-		else flen = *from;
-		
-		count = *to - (offset);
-		dc = to + offset + 1 + flen + ( count - 1);
-		sc = to + offset + 1 + ( count - 1);
-		*to += flen;
-		
-		// move part that will be replaced
-		while ( count > 0)
-		{
-			*dc = *sc;
-			dc--;
-			sc--;
-			count--;
-		}
-		
-		dc = to + offset + 1;
-		sc = from + 1;
-		count = flen; // count = chars over max len
-		
-		while ( count > 0)
-		{
-			*dc = *sc;
-			dc++;
-			sc++;
-			count--;
-		}
-	}
+    anyCharType *dc, *sc;
+    long        count, flen;
+    
+    if ( offset <= *to)
+    {
+        if ( (*to + *from) > kAnyCharPStringMaxLen) flen = kAnyCharPStringMaxLen - (long)*from;
+        else flen = *from;
+        
+        count = *to - (offset);
+        dc = to + offset + 1 + flen + ( count - 1);
+        sc = to + offset + 1 + ( count - 1);
+        *to += flen;
+        
+        // move part that will be replaced
+        while ( count > 0)
+        {
+            *dc = *sc;
+            dc--;
+            sc--;
+            count--;
+        }
+        
+        dc = to + offset + 1;
+        sc = from + 1;
+        count = flen; // count = chars over max len
+        
+        while ( count > 0)
+        {
+            *dc = *sc;
+            dc++;
+            sc++;
+            count--;
+        }
+    }
 }
 
 void CutCharsFromAnyCharPString( anyCharType *string, long start, long length)
 {
-	anyCharType	*dc, *sc;
-	long		count;
-	
-	if ( start <= *string)
-	{
-		if (( start + length) > *string)
-		{
-			length = *string - start;
-		}
-		dc = string + start + 1;
-		sc = string + start + length + 1;
-		count = *string - length;
-		while ( count > 0)
-		{
-			*dc = *sc;
-			dc++;
-			sc++;
-			count--;
-		}
-		*string -= length;
-	}	
+    anyCharType *dc, *sc;
+    long        count;
+    
+    if ( start <= *string)
+    {
+        if (( start + length) > *string)
+        {
+            length = *string - start;
+        }
+        dc = string + start + 1;
+        sc = string + start + length + 1;
+        count = *string - length;
+        while ( count > 0)
+        {
+            *dc = *sc;
+            dc++;
+            sc++;
+            count--;
+        }
+        *string -= length;
+    }   
 }

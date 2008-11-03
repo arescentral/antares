@@ -19,9 +19,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /* Math Macros.h */
 
-#define	ABS( x)	((( x) >= 0) ? (x):(-(x)))
+#define ABS( x) ((( x) >= 0) ? (x):(-(x)))
 
 #define mClipCode( x, y, bounds) ( 0 | ((( (x) < (bounds).left) << 3) | \
-	(( (x) > ( (bounds).right - 1)) << 2) |	\
-	(( (y) < (bounds).top) << 1) |	\
-	( (y) > ( (bounds).bottom - 1))))
+    (( (x) > ( (bounds).right - 1)) << 2) | \
+    (( (y) < (bounds).top) << 1) |  \
+    ( (y) > ( (bounds).bottom - 1))))

@@ -38,7 +38,7 @@ Boolean AutoFadeFrom( long, Boolean);
 Boolean AutoMusicFadeTo( long, RGBColor *, Boolean);
 Boolean CustomPictFade( long, long, short, short, WindowPtr);
 Boolean StartCustomPictFade( long, long, short, short, WindowPtr, PaletteHandle *,
-	PaletteHandle *, CTabHandle *, Boolean);
+    PaletteHandle *, CTabHandle *, Boolean);
 Boolean EndCustomPictFade( WindowPtr, PaletteHandle *, PaletteHandle *, CTabHandle *,
-	Boolean);
+    Boolean);
 #pragma options align=reset

@@ -25,25 +25,25 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #pragma options align=mac68k
 
-#define	kBaseObjectResType		'bsob'
-#define	kBaseObjectResID		500
+#define kBaseObjectResType      'bsob'
+#define kBaseObjectResID        500
 
-#define	kObjectActionResType	'obac'
-#define	kObjectActionResID		500
+#define kObjectActionResType    'obac'
+#define kObjectActionResID      500
 
 
-#define	mFindSpaceObjectByID( object, counter, idnum)\
-				(object) = ( spaceObjectType *)*gSpaceObjectData;\
-				(counter) = 0;\
-				while (( (counter) < kMaxSpaceObject) && ( (object)->id != (idnum)))\
-				{\
-					(object)++;\
-					(counter)++;\
-				}\
-				if ( (counter) == kMaxSpaceObject) (object) = nil;
-				
+#define mFindSpaceObjectByID( object, counter, idnum)\
+                (object) = ( spaceObjectType *)*gSpaceObjectData;\
+                (counter) = 0;\
+                while (( (counter) < kMaxSpaceObject) && ( (object)->id != (idnum)))\
+                {\
+                    (object)++;\
+                    (counter)++;\
+                }\
+                if ( (counter) == kMaxSpaceObject) (object) = nil;
+                
 
-//#define	CreateAnySpaceObject( mwhichBase, mvel, mloc, mdir, mowner, mspecial, mcanbuild, mnameres, mnamestr, msprite)\
+//#define   CreateAnySpaceObject( mwhichBase, mvel, mloc, mdir, mowner, mspecial, mcanbuild, mnameres, mnamestr, msprite)\
 //DebugCreateAnySpaceObject( mwhichBase, mvel, mloc, mdir, mowner, mspecial, mcanbuild, mnameres, mnamestr, msprite, __FILE__, __LINE__)
 
 //#define ExecuteObjectActions( mwhich, mnum, msobj, mdobj, moffset)\
@@ -58,19 +58,19 @@ int AddNumberedSpaceObject( spaceObjectType *, long);
 void RemoveAllSpaceObjects( void);
 void CorrectAllBaseObjectColor( void);
 void InitSpaceObjectFromBaseObject( spaceObjectType *, long, short, long, fixedPointType *, long,
-									short);
+                                    short);
 void ChangeObjectBaseType( spaceObjectType *, long, long, Boolean);
 void AddActionToQueue( objectActionType *, long, long, long, spaceObjectType *,
-						spaceObjectType *, longPointType *);
+                        spaceObjectType *, longPointType *);
 void ExecuteActionQueue( long);
 void ExecuteObjectActions( long, long, spaceObjectType *, spaceObjectType *, longPointType *, Boolean);
 void DebugExecuteObjectActions( long, long, spaceObjectType *, spaceObjectType *, longPointType *, char *, long);
 //long CreateAnySpaceObject( long, fixedPointType *, coordPointType *, long, long, unsigned long,
-//							long *, short, short, short);
+//                          long *, short, short, short);
 long CreateAnySpaceObject( long, fixedPointType *, coordPointType *, long, long, unsigned long,
-							short);
+                            short);
 long DebugCreateAnySpaceObject( long, fixedPointType *, coordPointType *, long, long, unsigned long,
-							long *, short, short, short, char *, long);
+                            long *, short, short, short, char *, long);
 long CountObjectsOfBaseType( long, long);
 long GetNextObjectWithAttributes( long, unsigned long, Boolean);
 void ResolveSpaceObjectData( Handle);

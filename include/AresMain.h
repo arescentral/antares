@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #pragma options align=mac68k
 
-#define	kHackLevelMax	26//4//21
+#define kHackLevelMax   26//4//21
 
 void main (void);
 void ToolBoxInit( void);

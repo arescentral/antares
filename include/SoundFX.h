@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /* SOUND FX.H */
 
 #ifndef kSoundFX
-#define	kSoundFX
+#define kSoundFX
 
 #ifndef kMyProcessor
 #include "Processor.h"
@@ -43,147 +43,147 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Sound.h"
 
 
-#define	kSoundNum			48	
-#define	kMaxChannelNum		3
+#define kSoundNum           48  
+#define kMaxChannelNum      3
 
-#define	kMaxVolumePreference	8
+#define kMaxVolumePreference    8
 
-#define	kMediumLoudVolume	192
-#define	kMediumVolume		128
-#define	kMediumLowVolume	64
-#define	kMaxSoundVolume		255			// minimum = 0
+#define kMediumLoudVolume   192
+#define kMediumVolume       128
+#define kMediumLowVolume    64
+#define kMaxSoundVolume     255         // minimum = 0
 
-#define	kShortPersistence		10		// in ticks
-#define	kMediumPersistence		20
-#define	kMediumLongPersistence	40
-#define	kLongPersistence		60
+#define kShortPersistence       10      // in ticks
+#define kMediumPersistence      20
+#define kMediumLongPersistence  40
+#define kLongPersistence        60
 
-#define	kPlayerBeamSound		500
-#define	kBasicExplosionSound	501
-#define	kPlayerPulseSound		502
-#define	kSmallHitSound			503
-#define	kAlienBeamSound			504
-#define	kAlienPulseSound		505
-#define	kMorseBeepSound			506	// ship receives order
-#define	kComputerBeep1			507	// ship selected
-#define	kComputerBeep2			508	// ship built
-#define	kComputerBeep3			509	// button push
-#define	kComputerBeep4			510	// change range
-#define	kWarningTone			511	// naughty beep
-#define	kHarshBeam				512
-#define	kLandingWoosh			513
-#define	kCloakOff				522
-#define	kCloakOn				523
-#define	kKlaxon					525
-#define	kWarpOne				526
-#define	kWarpTwo				527
-#define	kWarpThree				528
-#define	kWarpFour				529
-#define	kTeletype				535
+#define kPlayerBeamSound        500
+#define kBasicExplosionSound    501
+#define kPlayerPulseSound       502
+#define kSmallHitSound          503
+#define kAlienBeamSound         504
+#define kAlienPulseSound        505
+#define kMorseBeepSound         506 // ship receives order
+#define kComputerBeep1          507 // ship selected
+#define kComputerBeep2          508 // ship built
+#define kComputerBeep3          509 // button push
+#define kComputerBeep4          510 // change range
+#define kWarningTone            511 // naughty beep
+#define kHarshBeam              512
+#define kLandingWoosh           513
+#define kCloakOff               522
+#define kCloakOn                523
+#define kKlaxon                 525
+#define kWarpOne                526
+#define kWarpTwo                527
+#define kWarpThree              528
+#define kWarpFour               529
+#define kTeletype               535
 
-#define	mPlayDistanceSound( mdistance, mvolume, mobjectptr, msoundid, msoundpersistence, msoundpriority, mul1, mul2, mplayerobjectptr)\
+#define mPlayDistanceSound( mdistance, mvolume, mobjectptr, msoundid, msoundpersistence, msoundpriority, mul1, mul2, mplayerobjectptr)\
 if ( (!(mobjectptr->distanceFromPlayer.hi)) && (mobjectptr->distanceFromPlayer.lo < kMaximumRelevantDistanceSquared))\
 {\
-	mdistance = mobjectptr->distanceFromPlayer.lo;\
-	if ( mdistance == 0)\
-	{\
-		if ( gAresGlobal->gPlayerShipNumber >= 0)\
-			mplayerobjectptr = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gPlayerShipNumber;\
-		else mplayerobjectptr = nil;\
-		if (( mplayerobjectptr != nil) && ( mplayerobjectptr->active))\
-		{\
-			mul1 = ABS( (long)mplayerobjectptr->location.h - (long)mobjectptr->location.h);\
-			mul2 = mul1;\
-			mul1 =  ABS( (long)mplayerobjectptr->location.v - (long)mobjectptr->location.v);\
-			mdistance = mul1;\
-			if (( mul2 < kMaximumRelevantDistance) && ( mdistance < kMaximumRelevantDistance))\
-				mdistance = mdistance * mdistance + mul2 * mul2;\
-			else mdistance = kMaximumRelevantDistanceSquared;\
-			mdistance = lsqrt( mdistance);\
-			if ( mdistance > 480)\
-			{\
-				mdistance -= 480;\
-				if ( mdistance > 1920) mvolume = 0;\
-				else\
-					mvolume = ( (1920 - mdistance) * mvolume) / 1920;\
-			}\
-			if ( mvolume > 0)\
-				PlayLocalizedSound( mplayerobjectptr->location.h, mplayerobjectptr->location.v, mobjectptr->location.h, mobjectptr->location.v, mplayerobjectptr->velocity.h - mobjectptr->velocity.h, mplayerobjectptr->velocity.v - mobjectptr->velocity.v, msoundid, mvolume, msoundpersistence, msoundpriority);\
-		} else\
-		{\
-			mul1 = ABS( (long)gGlobalCorner.h - (long)mobjectptr->location.h);\
-			mul2 = mul1;\
-			mul1 =  ABS( (long)gGlobalCorner.v - (long)mobjectptr->location.v);\
-			mdistance = mul1;\
-			if (( mul2 < kMaximumRelevantDistance) && ( mdistance < kMaximumRelevantDistance))\
-				mdistance = mdistance * mdistance + mul2 * mul2;\
-			else mdistance = kMaximumRelevantDistanceSquared;\
-			mdistance = lsqrt( mdistance);\
-			if ( mdistance > 480)\
-			{\
-				mdistance -= 480;\
-				if ( mdistance > 1920) mvolume = 0;\
-				else\
-					mvolume = ( (1920 - mdistance) * mvolume) / 1920;\
-			}\
-			if ( mvolume > 0)\
-				PlayLocalizedSound( gGlobalCorner.h, gGlobalCorner.v, mobjectptr->location.h, mobjectptr->location.v, mobjectptr->velocity.h, mobjectptr->velocity.v, msoundid, mvolume, msoundpersistence, msoundpriority);\
-		}\
-	} else\
-	{\
-		mdistance = lsqrt( mdistance);\
-		if ( mdistance > 480)\
-		{\
-			mdistance -= 480;\
-			if ( mdistance > 1920) mvolume = 0;\
-			else\
-				mvolume = ( (1920 - mdistance) * mvolume) / 1920;\
-		}\
-		if ( gAresGlobal->gPlayerShipNumber >= 0)\
-			mplayerobjectptr = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gPlayerShipNumber;\
-		else mplayerobjectptr = nil;\
-		if (( mplayerobjectptr != nil) && ( mplayerobjectptr->active))\
-		{\
-			if ( mvolume > 0)\
-				PlayLocalizedSound( mplayerobjectptr->location.h, mplayerobjectptr->location.v, mobjectptr->location.h, mobjectptr->location.v, mplayerobjectptr->velocity.h - mobjectptr->velocity.h, mplayerobjectptr->velocity.v - mobjectptr->velocity.v, msoundid, mvolume, msoundpersistence, msoundpriority);\
-		} else\
-		{\
-			if ( mvolume > 0)\
-				PlayLocalizedSound( gGlobalCorner.h, gGlobalCorner.v, mobjectptr->location.h, mobjectptr->location.v, mobjectptr->velocity.h, mobjectptr->velocity.v, msoundid, mvolume, msoundpersistence, msoundpriority);\
-		}\
-	}\
+    mdistance = mobjectptr->distanceFromPlayer.lo;\
+    if ( mdistance == 0)\
+    {\
+        if ( gAresGlobal->gPlayerShipNumber >= 0)\
+            mplayerobjectptr = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gPlayerShipNumber;\
+        else mplayerobjectptr = nil;\
+        if (( mplayerobjectptr != nil) && ( mplayerobjectptr->active))\
+        {\
+            mul1 = ABS( (long)mplayerobjectptr->location.h - (long)mobjectptr->location.h);\
+            mul2 = mul1;\
+            mul1 =  ABS( (long)mplayerobjectptr->location.v - (long)mobjectptr->location.v);\
+            mdistance = mul1;\
+            if (( mul2 < kMaximumRelevantDistance) && ( mdistance < kMaximumRelevantDistance))\
+                mdistance = mdistance * mdistance + mul2 * mul2;\
+            else mdistance = kMaximumRelevantDistanceSquared;\
+            mdistance = lsqrt( mdistance);\
+            if ( mdistance > 480)\
+            {\
+                mdistance -= 480;\
+                if ( mdistance > 1920) mvolume = 0;\
+                else\
+                    mvolume = ( (1920 - mdistance) * mvolume) / 1920;\
+            }\
+            if ( mvolume > 0)\
+                PlayLocalizedSound( mplayerobjectptr->location.h, mplayerobjectptr->location.v, mobjectptr->location.h, mobjectptr->location.v, mplayerobjectptr->velocity.h - mobjectptr->velocity.h, mplayerobjectptr->velocity.v - mobjectptr->velocity.v, msoundid, mvolume, msoundpersistence, msoundpriority);\
+        } else\
+        {\
+            mul1 = ABS( (long)gGlobalCorner.h - (long)mobjectptr->location.h);\
+            mul2 = mul1;\
+            mul1 =  ABS( (long)gGlobalCorner.v - (long)mobjectptr->location.v);\
+            mdistance = mul1;\
+            if (( mul2 < kMaximumRelevantDistance) && ( mdistance < kMaximumRelevantDistance))\
+                mdistance = mdistance * mdistance + mul2 * mul2;\
+            else mdistance = kMaximumRelevantDistanceSquared;\
+            mdistance = lsqrt( mdistance);\
+            if ( mdistance > 480)\
+            {\
+                mdistance -= 480;\
+                if ( mdistance > 1920) mvolume = 0;\
+                else\
+                    mvolume = ( (1920 - mdistance) * mvolume) / 1920;\
+            }\
+            if ( mvolume > 0)\
+                PlayLocalizedSound( gGlobalCorner.h, gGlobalCorner.v, mobjectptr->location.h, mobjectptr->location.v, mobjectptr->velocity.h, mobjectptr->velocity.v, msoundid, mvolume, msoundpersistence, msoundpriority);\
+        }\
+    } else\
+    {\
+        mdistance = lsqrt( mdistance);\
+        if ( mdistance > 480)\
+        {\
+            mdistance -= 480;\
+            if ( mdistance > 1920) mvolume = 0;\
+            else\
+                mvolume = ( (1920 - mdistance) * mvolume) / 1920;\
+        }\
+        if ( gAresGlobal->gPlayerShipNumber >= 0)\
+            mplayerobjectptr = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gPlayerShipNumber;\
+        else mplayerobjectptr = nil;\
+        if (( mplayerobjectptr != nil) && ( mplayerobjectptr->active))\
+        {\
+            if ( mvolume > 0)\
+                PlayLocalizedSound( mplayerobjectptr->location.h, mplayerobjectptr->location.v, mobjectptr->location.h, mobjectptr->location.v, mplayerobjectptr->velocity.h - mobjectptr->velocity.h, mplayerobjectptr->velocity.v - mobjectptr->velocity.v, msoundid, mvolume, msoundpersistence, msoundpriority);\
+        } else\
+        {\
+            if ( mvolume > 0)\
+                PlayLocalizedSound( gGlobalCorner.h, gGlobalCorner.v, mobjectptr->location.h, mobjectptr->location.v, mobjectptr->velocity.h, mobjectptr->velocity.v, msoundid, mvolume, msoundpersistence, msoundpriority);\
+        }\
+    }\
 }
 
 
 typedef enum
 {
-	kNoSound = 0,
-	kVeryLowPrioritySound = 1,
-	kLowPrioritySound = 2,
-	kPrioritySound = 3,
-	kHighPrioritySound = 4,
-	kMustPlaySound = 5
+    kNoSound = 0,
+    kVeryLowPrioritySound = 1,
+    kLowPrioritySound = 2,
+    kPrioritySound = 3,
+    kHighPrioritySound = 4,
+    kMustPlaySound = 5
 } soundPriorityType;
 
 typedef struct
 {
-	long				whichSound;
-	long				soundAge;
-	short				soundVolume;
-	soundPriorityType	soundPriority;
-	SndChannelPtr		channelPtr;
-	Boolean				useSoundSprocket;
+    long                whichSound;
+    long                soundAge;
+    short               soundVolume;
+    soundPriorityType   soundPriority;
+    SndChannelPtr       channelPtr;
+    Boolean             useSoundSprocket;
 #ifdef kAllowSoundSprocket
-	SSpSourceReference	source;
+    SSpSourceReference  source;
 #endif
 } smartSoundChannel;
 
 typedef struct
 {
-	Handle				soundHandle;
-	long				offset;
-	short				id;
-	Boolean				keepMe;
+    Handle              soundHandle;
+    long                offset;
+    short               id;
+    Boolean             keepMe;
 } smartSoundHandle;
 
 int OpenSoundFile( void);

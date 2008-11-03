@@ -69,11 +69,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 pascal Boolean  filterFunctionOpenDialog(CInfoPBPtr pbPtr,void *dataPtr);
 pascal SInt16  hookFunctionOpenDialog(SInt16 item,DialogPtr theDialog,
-	void *dataPtr);
+    void *dataPtr);
 OSErr  doDirectorySelectionDialog( StandardFileReply *);
 pascal Boolean  filterFunctionDirSelect(CInfoPBPtr pbPtr,void *dataPtr);
 pascal SInt16  hookFunctionDirSelect(SInt16 item,DialogPtr theDialog,
-	void *dataPtr);
+    void *dataPtr);
 
 
 #endif kOld_File_h

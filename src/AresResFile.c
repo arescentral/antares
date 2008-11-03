@@ -88,54 +88,54 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 short ARF_OpenResFile( StringPtr fileName)
 {
-	ProcessSerialNumber				myProcess;
-	OSErr							error;
-	ProcessInfoRec					info;
-	FSSpec							appFileSpec, fileFileSpec;
-	
-//	mAssert( fileName != nil);
-	error = GetCurrentProcess( &myProcess);
-	if ( error != noErr) return -1;
-	
-	info.processName = nil;
-	info.processAppSpec = &appFileSpec;
-	info.processInfoLength = sizeof( ProcessInfoRec);
-	error = GetProcessInformation( &myProcess, &info);
-	if ( error != noErr) return -1;
-	
-	error = FSMakeFSSpec( appFileSpec.vRefNum, appFileSpec.parID, fileName,
-		&fileFileSpec);
-	
-	return( FSpOpenResFile( &fileFileSpec, fsRdPerm));
+    ProcessSerialNumber             myProcess;
+    OSErr                           error;
+    ProcessInfoRec                  info;
+    FSSpec                          appFileSpec, fileFileSpec;
+    
+//  mAssert( fileName != nil);
+    error = GetCurrentProcess( &myProcess);
+    if ( error != noErr) return -1;
+    
+    info.processName = nil;
+    info.processAppSpec = &appFileSpec;
+    info.processInfoLength = sizeof( ProcessInfoRec);
+    error = GetProcessInformation( &myProcess, &info);
+    if ( error != noErr) return -1;
+    
+    error = FSMakeFSSpec( appFileSpec.vRefNum, appFileSpec.parID, fileName,
+        &fileFileSpec);
+    
+    return( FSpOpenResFile( &fileFileSpec, fsRdPerm));
 }
 
 /* ARF_OpenResFile_External
-	makes the FSSpec of a file from a file name, relative to ares folder,
-	so you can make it *the* external data file
+    makes the FSSpec of a file from a file name, relative to ares folder,
+    so you can make it *the* external data file
 */
 
 OSErr ARF_OpenResFile_External( StringPtr fileName, FSSpecPtr fileSpec)
 {
-	ProcessSerialNumber				myProcess;
-	OSErr							error;
-	ProcessInfoRec					info;
-	FSSpec							appFileSpec;
-	
-//	mAssert( fileName != nil);
-	if ( fileSpec == nil) return paramErr;	
+    ProcessSerialNumber             myProcess;
+    OSErr                           error;
+    ProcessInfoRec                  info;
+    FSSpec                          appFileSpec;
+    
+//  mAssert( fileName != nil);
+    if ( fileSpec == nil) return paramErr;  
 
-	error = GetCurrentProcess( &myProcess);
-	if ( error != noErr) return error;
-	info.processName = nil;
-	info.processAppSpec = &appFileSpec;
-	info.processInfoLength = sizeof( ProcessInfoRec);
-	error = GetProcessInformation( &myProcess, &info);
-	if ( error != noErr) return error;
-	
-	error = FSMakeFSSpec( appFileSpec.vRefNum, appFileSpec.parID, fileName,
-		fileSpec);
-	if ( error != noErr) return error;
-	
-	return noErr;
+    error = GetCurrentProcess( &myProcess);
+    if ( error != noErr) return error;
+    info.processName = nil;
+    info.processAppSpec = &appFileSpec;
+    info.processInfoLength = sizeof( ProcessInfoRec);
+    error = GetProcessInformation( &myProcess, &info);
+    if ( error != noErr) return error;
+    
+    error = FSMakeFSSpec( appFileSpec.vRefNum, appFileSpec.parID, fileName,
+        fileSpec);
+    if ( error != noErr) return error;
+    
+    return noErr;
 }
 

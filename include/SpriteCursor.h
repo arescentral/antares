@@ -24,26 +24,26 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #pragma options align=mac68k
 
-#define	kSpriteCursorHidden		0	// if showLevel <= this, cursor is hidden
-#define	kSpriteCursorVisible	1	// if showLevel <= this, cursor is hidden
+#define kSpriteCursorHidden     0   // if showLevel <= this, cursor is hidden
+#define kSpriteCursorVisible    1   // if showLevel <= this, cursor is hidden
 
 typedef struct
 {
-	Point		where;
-	Point		lastWhere;
-	Rect		thisRect;
-	Rect		lastRect;
-	short		showLevel;
-	short		lastShowLevel;
-	spriteType	sprite;
-	Boolean		thisShowLine;
-	Boolean		lastShowLine;
-	Point		thisLineStart;
-	Point		thisLineEnd;
-	Point		lastLineStart;
-	Point		lastLineEnd;
-	unsigned char	thisLineColor;
-	unsigned char	thisLineColorDark;
+    Point       where;
+    Point       lastWhere;
+    Rect        thisRect;
+    Rect        lastRect;
+    short       showLevel;
+    short       lastShowLevel;
+    spriteType  sprite;
+    Boolean     thisShowLine;
+    Boolean     lastShowLine;
+    Point       thisLineStart;
+    Point       thisLineEnd;
+    Point       lastLineStart;
+    Point       lastLineEnd;
+    unsigned char   thisLineColor;
+    unsigned char   thisLineColorDark;
 } spriteCursorType;
 
 short InitSpriteCursor( void);
@@ -60,7 +60,7 @@ void DrawSpriteCursorSprite( longRect *);
 void ShowSpriteCursorSprite( void);
 void MoveSpriteCursor( Point);
 void ShowHintLine( Point fromWhere, Point toWhere,
-	unsigned char color, unsigned char brightness);
+    unsigned char color, unsigned char brightness);
 void HideHintLine( void);
 void ResetHintLine( void);
 

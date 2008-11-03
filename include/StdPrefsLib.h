@@ -1,29 +1,29 @@
 /*
-	File:		StdPrefsLib.h
+    File:       StdPrefsLib.h
 
-	Contains:	Header file for standard preferences library routines.
+    Contains:   Header file for standard preferences library routines.
 
-				Refer to develop Issue 18, "The Right Way to Implement 
-				Preferences Files", for additional details on this code.
-				
-	Written by:	Gary Woodcock
+                Refer to develop Issue 18, "The Right Way to Implement 
+                Preferences Files", for additional details on this code.
+                
+    Written by: Gary Woodcock
 
-	Copyright:	(C) 1993-94 by Apple Computer, Inc.
-	Change History (most recent first):
-	
-				  3/3/94	Version 1.0.
-	
-	Notes: 		This code uses Apple's Universal Interfaces for C.
-	
-				Send bug reports to Gary Woodcock at AOL: gwoodcock
-				or Internet: gwoodcock@aol.com.
+    Copyright:  (C) 1993-94 by Apple Computer, Inc.
+    Change History (most recent first):
+    
+                  3/3/94    Version 1.0.
+    
+    Notes:      This code uses Apple's Universal Interfaces for C.
+    
+                Send bug reports to Gary Woodcock at AOL: gwoodcock
+                or Internet: gwoodcock@aol.com.
 */
 
 //-----------------------------------------------------------------------
 // Includes
 
-#ifndef	_STDPREFSLIB_
-#define	_STDPREFSLIB_
+#ifndef _STDPREFSLIB_
+#define _STDPREFSLIB_
 
 //#include "CompileFlags.h"
 
@@ -41,8 +41,8 @@
 // Valid version resource ('vers') ID's
 enum
 {
-	kVers1 = 1,
-	kVers2
+    kVers1 = 1,
+    kVers2
 };
 
 //-----------------------------------------------------------------------
@@ -68,19 +68,19 @@ extern "C" {
 //
 // Errors:
 //
-//	  paramErr    - The fileName or ownerName argument is a zero-length 
-//					string.
-//	  dupFNErr    - A preferences file with this name, creator and file
+//    paramErr    - The fileName or ownerName argument is a zero-length 
+//                  string.
+//    dupFNErr    - A preferences file with this name, creator and file
 //                  type already exists.
 //
-//	  Other ResError() or file system codes can be returned, but 
-//	  this should not normally occur.
+//    Other ResError() or file system codes can be returned, but 
+//    this should not normally occur.
 //-----------------------------------------------------------------------
 pascal OSErr
 NewPreferencesFile (OSType creator, OSType fileType, 
-	ConstStr31Param fileName, ConstStr31Param folderName, 
-	ConstStr31Param ownerName);
-	
+    ConstStr31Param fileName, ConstStr31Param folderName, 
+    ConstStr31Param ownerName);
+    
 //-----------------------------------------------------------------------
 // OpenPreferencesFile opens the preferences file with the specified
 // creator and file type.  You must have created the file with the 
@@ -88,17 +88,17 @@ NewPreferencesFile (OSType creator, OSType fileType,
 //
 // Errors:
 //
-//	  paramErr    - The fRefNum argument is nil.
+//    paramErr    - The fRefNum argument is nil.
 //    fnfErr      - There is no preferences file with the specified
 //                  creator and file type; use NewPreferencesFile to 
-//					create one.
+//                  create one.
 //
-//	  Other ResError() or file system codes can be returned, but 
-//	  this should not normally occur.
+//    Other ResError() or file system codes can be returned, but 
+//    this should not normally occur.
 //-----------------------------------------------------------------------
 pascal OSErr
 OpenPreferencesFile (OSType creator, OSType fileType, short *fRefNum);
-	
+    
 //-----------------------------------------------------------------------
 // ClosePreferencesFile closes the currently open preferences file
 // for this instance of the standard preferences component.  If there is
@@ -106,14 +106,14 @@ OpenPreferencesFile (OSType creator, OSType fileType, short *fRefNum);
 //
 // Errors:
 //
-//	  paramErr    - Bad file reference in fRefNum argument.
+//    paramErr    - Bad file reference in fRefNum argument.
 //
-//	  Other ResError() codes can be returned, but this should not 
+//    Other ResError() codes can be returned, but this should not 
 //    normally occur.
 //-----------------------------------------------------------------------
 pascal OSErr
 ClosePreferencesFile (short fRefNum);
-	
+    
 //-----------------------------------------------------------------------
 // DeletePreferencesFile deletes the preferences file with the specified
 // creator and file type.  If the preferences file is open, an error is 
@@ -122,12 +122,12 @@ ClosePreferencesFile (short fRefNum);
 //
 // Errors:
 //
-//	  fBsyErr     - The specified preferences file is currently open, 
-//					and must be closed before it can be deleted.
-//	  fnfErr	  - A preferences file with the specified creator and
-//					file type could not be found.
+//    fBsyErr     - The specified preferences file is currently open, 
+//                  and must be closed before it can be deleted.
+//    fnfErr      - A preferences file with the specified creator and
+//                  file type could not be found.
 //
-//	  Other file system codes can be returned, but this should not 
+//    Other file system codes can be returned, but this should not 
 //    normally occur.
 //-----------------------------------------------------------------------
 pascal OSErr
@@ -142,15 +142,15 @@ DeletePreferencesFile (OSType creator, OSType fileType);
 // Errors:
 //
 //    paramErr    - The folderName argument is a zero-length string.
-//	  dirNFErr	  - A folder with the specified name could not be
-//					found.
+//    dirNFErr    - A folder with the specified name could not be
+//                  found.
 //
-//	  Other file system codes can be returned, but this should not 
+//    Other file system codes can be returned, but this should not 
 //    normally occur.
 //-----------------------------------------------------------------------
 pascal OSErr
 DeletePreferencesFolder (ConstStr31Param folderName);
-	
+    
 //-----------------------------------------------------------------------
 // PreferencesFileExists determines whether a preferences file already
 // exists or not. If the file specified by the creator and file type 
@@ -159,11 +159,11 @@ DeletePreferencesFolder (ConstStr31Param folderName);
 //
 // Errors:
 //
-//	  None.
+//    None.
 //-----------------------------------------------------------------------
 pascal Boolean
 PreferencesFileExists (OSType creator, OSType fileType);
-	
+    
 //-----------------------------------------------------------------------
 // GetPreferencesFileVersion returns the contents of the specified 'vers'
 // resource of the currently open preferences file.  You can use this 
@@ -175,19 +175,19 @@ PreferencesFileExists (OSType creator, OSType fileType);
 //
 // Errors:
 //
-//	  paramErr    - A value other than kVers1 or kVers2 was passed for the 
-//					versID argument, a bad address was passed for the 
-//					numVersion argument or the regionCode argument, or the
-//					fRefNum argument contains a bad file reference.
-//		
-//	  Other file system, ResError(), or MemError() codes can be returned,
+//    paramErr    - A value other than kVers1 or kVers2 was passed for the 
+//                  versID argument, a bad address was passed for the 
+//                  numVersion argument or the regionCode argument, or the
+//                  fRefNum argument contains a bad file reference.
+//      
+//    Other file system, ResError(), or MemError() codes can be returned,
 //    but this should not normally occur.
 //-----------------------------------------------------------------------
 pascal OSErr
 GetPreferencesFileVersion (short fRefNum, short versID, 
-	NumVersion *numVersion, short *regionCode, 
-	ConstStr255Param shortVersionStr, ConstStr255Param longVersionStr);
-	
+    NumVersion *numVersion, short *regionCode, 
+    ConstStr255Param shortVersionStr, ConstStr255Param longVersionStr);
+    
 //-----------------------------------------------------------------------
 // SetPreferencesFileVersion lets you set the contents of the specified 
 // 'vers' resource of the currently open preferences file.  You must have 
@@ -196,19 +196,19 @@ GetPreferencesFileVersion (short fRefNum, short versID,
 //
 // Errors:
 //
-//	  paramErr    - A value other than kVers1 or kVers2 was passed for 
-//					the versID argument, a bad address was passed for 
-//					the numVersion argument, or the fRefNum argument
-//					contains a bad file reference.
+//    paramErr    - A value other than kVers1 or kVers2 was passed for 
+//                  the versID argument, a bad address was passed for 
+//                  the numVersion argument, or the fRefNum argument
+//                  contains a bad file reference.
 //
-//	  Other file system, ResError(), or MemError() codes can be returned,
+//    Other file system, ResError(), or MemError() codes can be returned,
 //    but this should not normally occur.
 //-----------------------------------------------------------------------
 pascal OSErr
 SetPreferencesFileVersion (short fRefNum, short versID, 
-	NumVersion *numVersion, short regionCode, 
-	ConstStr255Param shortVersionStr, ConstStr255Param longVersionStr);
-	 
+    NumVersion *numVersion, short regionCode, 
+    ConstStr255Param shortVersionStr, ConstStr255Param longVersionStr);
+     
 //-----------------------------------------------------------------------
 // ReadPreference reads the specified preference resource from the 
 // currently open preferences file.  If you pass in nil for the address 
@@ -222,9 +222,9 @@ SetPreferencesFileVersion (short fRefNum, short versID,
 //
 // Errors:
 //
-//	  paramErr    - The address of the preference argument is nil, or 
-//					the fRefNum argument contains a bad file reference.
-//	  resNotFound - No resource with the specified type and/or ID was
+//    paramErr    - The address of the preference argument is nil, or 
+//                  the fRefNum argument contains a bad file reference.
+//    resNotFound - No resource with the specified type and/or ID was
 //                  found.
 //
 //    Other ResError() codes can be returned, but this should not 
@@ -232,8 +232,8 @@ SetPreferencesFileVersion (short fRefNum, short versID,
 //-----------------------------------------------------------------------
 pascal OSErr
 ReadPreference (short fRefNum, ResType resourceType, short *resourceID, 
-	StringPtr resourceName, Handle *preference);
-	
+    StringPtr resourceName, Handle *preference);
+    
 //-----------------------------------------------------------------------
 // WritePreference writes the specified preference resource to the 
 // currently open preferences file.  If you pass in nil for the address 
@@ -255,18 +255,18 @@ ReadPreference (short fRefNum, ResType resourceType, short *resourceID,
 //
 // Errors:
 //
-//	  paramErr 	  - The preference argument is nil, or the fRefNum argument
-//					contains a bad file reference.
+//    paramErr    - The preference argument is nil, or the fRefNum argument
+//                  contains a bad file reference.
 //    dskFulErr   - The preference can't be written and still maintain a 
 //                  minimum amount of free space on the disk.
 //
-//	  Other MemError() or ResError() codes can be returned, but this should
+//    Other MemError() or ResError() codes can be returned, but this should
 //    not normally occur.
 //-----------------------------------------------------------------------
 pascal OSErr
 WritePreference (short fRefNum, ResType resourceType, short *resourceID, 
-	StringPtr resourceName, Handle preference);
-	
+    StringPtr resourceName, Handle preference);
+    
 //-----------------------------------------------------------------------
 // DeletePreference deletes the specified preference resource from the 
 // currently open preferences file.  If you pass in 0 for the resourceID 
@@ -276,16 +276,16 @@ WritePreference (short fRefNum, ResType resourceType, short *resourceID,
 //
 // Errors:
 //
-//	  paramErr    - The fRefNum argument contains a bad file reference.
-//	  resNotFound - No resource with the specified type and/or ID was
+//    paramErr    - The fRefNum argument contains a bad file reference.
+//    resNotFound - No resource with the specified type and/or ID was
 //                  found.
 //
-//	  Other MemError() or ResError() codes can be returned, but this 
+//    Other MemError() or ResError() codes can be returned, but this 
 //    should not normally occur.
 //-----------------------------------------------------------------------
 pascal OSErr
 DeletePreference (short fRefNum, ResType resourceType, short resourceID);
-	
+    
 #ifdef __cplusplus
 }
 #endif __cplusplus

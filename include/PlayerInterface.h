@@ -33,22 +33,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 typedef enum
 {
-	kMainPlay = 1,
-	kMainQuit = 2,
-	kMainAbout = 3,
-	kMainOptions = 4,
-	kMainNetwork = 5,
-	kMainDemo = 6,
-	kMainTimeoutDemo = 7,
-	kMainTrain = 8,
-	kNullResult = 0
+    kMainPlay = 1,
+    kMainQuit = 2,
+    kMainAbout = 3,
+    kMainOptions = 4,
+    kMainNetwork = 5,
+    kMainDemo = 6,
+    kMainTimeoutDemo = 7,
+    kMainTrain = 8,
+    kNullResult = 0
 } mainScreenResultType;
 
 typedef enum
 {
-	kClient = 1,
-	kHost = 2,
-	kCancel = 0
+    kClient = 1,
+    kHost = 2,
+    kCancel = 0
 } netResultType;
 
 mainScreenResultType DoMainScreenInterface( long *);
@@ -87,7 +87,7 @@ long DoSelectLevelInterface( long);
 void DrawLevelNameInBox( StringPtr, long, short, long);
 Boolean DoMissionInterface( long);
 long UpdateMissionBriefPoint( interfaceItemType *, long, long, coordPointType *, long, long,
-		Rect *, Rect *, inlinePictType *);
+        Rect *, Rect *, inlinePictType *);
 void ShowObjectData( Point, short, Rect *);
 Handle CreateWeaponDataText( long, StringPtr);
 void ShowSuccessAnimation( WindowPtr);
@@ -96,7 +96,7 @@ void DoMissionDebriefingText( WindowPtr, long, long, long, long, long, long, lon
 void DoScrollText( WindowPtr, long, long, long, long, long);
 void HandleOSEvent( EventRecord *);
 Boolean Ares_WaitNextEvent( short eventMask, EventRecord *theEvent,
-	unsigned long sleep, RgnHandle mouseRgn);
+    unsigned long sleep, RgnHandle mouseRgn);
 void Replace_KeyCode_Strings_With_Actual_Key_Names( Handle text, short resID, short padTo);
 
 #pragma options align=reset

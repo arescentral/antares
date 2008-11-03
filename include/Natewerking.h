@@ -20,41 +20,41 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // Natewerking.h
 
 #ifndef _APPLETALK
-	#include <appletalk.h>
-	#define	_APPLETALK
+    #include <appletalk.h>
+    #define _APPLETALK
 #endif
 
-#define	BUFFER_SIZE				700
+#define BUFFER_SIZE             700
 
-#define	BUFFER_QUEUE_SIZE		30
+#define BUFFER_QUEUE_SIZE       30
 
-#define	TUPLE_SIZE				104
-#define	MATCH_NUM				10
+#define TUPLE_SIZE              104
+#define MATCH_NUM               10
 
-#define	FREE_QUEUE_OFFSET		20
-#define	USED_QUEUE_OFFSET		24
-#define	WRITE_DATA_STRUCT_SIZE	14L
-#define	DATAGRAM_HEADER_SIZE	17L
+#define FREE_QUEUE_OFFSET       20
+#define USED_QUEUE_OFFSET       24
+#define WRITE_DATA_STRUCT_SIZE  14L
+#define DATAGRAM_HEADER_SIZE    17L
 
-#define	SOCKET_RES_ID			128
-#define	SOCKET_RES_TYPE			'CODE'
+#define SOCKET_RES_ID           128
+#define SOCKET_RES_TYPE         'CODE'
 
-#define	NBP_INTERVAL			0x0f
-#define	NBP_COUNT				0x03
+#define NBP_INTERVAL            0x0f
+#define NBP_COUNT               0x03
 
 
 struct nateQElement
-{	
-	Ptr					data;
-	struct nateQElement	*nextElement;
+{   
+    Ptr                 data;
+    struct nateQElement *nextElement;
 };
 
 typedef struct nateQElement nateQElement;
 
 typedef struct
 {
-	nateQElement	*firstElement;
-	nateQElement	*lastElement;
+    nateQElement    *firstElement;
+    nateQElement    *lastElement;
 } nateQueue;
 
 char NatewerkInit( void);

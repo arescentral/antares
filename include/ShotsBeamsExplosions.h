@@ -23,12 +23,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "NateDraw.h"
 #endif
 
-#define	kDebrisRotNum		9
-#define	kDebrisPieceNum		3
+#define kDebrisRotNum       9
+#define kDebrisPieceNum     3
 
-#define	kBaseDebrisSpeed		20
-#define	kDebrisSpeedVarience	10
-#define	kBaseDebrisLife			150
-#define	kDebrisLifeVarience		80
+#define kBaseDebrisSpeed        20
+#define kDebrisSpeedVarience    10
+#define kBaseDebrisLife         150
+#define kDebrisLifeVarience     80
 
 void InitShotsBeamsExplosions( void);

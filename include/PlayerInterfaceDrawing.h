@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // Player Interface Drawing.h
 
-#define	kPlayerInterfaceDrawing
+#define kPlayerInterfaceDrawing
 
 #ifndef kPlayerInterfaceItems
 #include "Player Interface Items.h"
@@ -31,53 +31,53 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #pragma options align=mac68k
 
-#define	kInterfaceTextVBuffer		2
-#define	kInterfaceTextHBuffer		3
+#define kInterfaceTextVBuffer       2
+#define kInterfaceTextHBuffer       3
 
-#define	kMaxInlinePictNum			8	// max # of inline picts it'll keep track of
+#define kMaxInlinePictNum           8   // max # of inline picts it'll keep track of
 
 // the inline pictType struct is for keeping track of picts included in my text boxes.
 typedef struct
 {
-	Rect	bounds;
-	short	id;
+    Rect    bounds;
+    short   id;
 } inlinePictType;
 
 void DrawPlayerInterfacePlainRect( longRect *, unsigned char, interfaceStyleType, PixMap *, long,
-						long);
+                        long);
 void DrawPlayerInterfaceTabBox( longRect *, unsigned char, interfaceStyleType, PixMap *, long,
-						long, short);
+                        long, short);
 void DrawPlayerInterfaceButton( interfaceItemType *, PixMap *, long,
-						long);
+                        long);
 void DrawPlayerInterfaceTabBoxButton( interfaceItemType *, PixMap *, long,
-						long);
+                        long);
 void DrawPlayerInterfaceRadioButton( interfaceItemType *, PixMap *, long,
-						long);
+                        long);
 void DrawPlayerInterfaceCheckBox( interfaceItemType *, PixMap *, long,
-						long);
+                        long);
 void DrawPlayerInterfaceLabeledBox( interfaceItemType *, PixMap *, long,
-						long);
+                        long);
 void DrawPlayerInterfaceList( interfaceItemType *, PixMap *, long,
-						long);
+                        long);
 void DrawPlayerInterfaceListEntry( interfaceItemType *, short, PixMap *, long,
-						long);
+                        long);
 void DrawPlayerListLineUp( interfaceItemType *);
 void GetPlayerListLineUpRect( interfaceItemType *, Rect *);
 void DrawPlayerListPageUp( interfaceItemType *);
-void GetPlayerListPageUpRect( interfaceItemType	*, Rect *);
+void GetPlayerListPageUpRect( interfaceItemType *, Rect *);
 void DrawPlayerListLineDown( interfaceItemType *);
 void GetPlayerListLineDownRect( interfaceItemType *, Rect *);
 void DrawPlayerListPageDown( interfaceItemType *);
 void GetPlayerListPageDownRect( interfaceItemType *, Rect *);
 void DrawInterfaceTextRect( interfaceItemType *, PixMap *, long,
-						long);
+                        long);
 void DrawInterfaceTextInRect( Rect *, anyCharType *, long, interfaceStyleType, unsigned char, PixMap *, long,
-						long, inlinePictType *);
+                        long, inlinePictType *);
 short GetInterfaceTextHeightFromWidth( anyCharType *, long, interfaceStyleType, short);
 void DrawInterfacePictureRect( interfaceItemType *, PixMap *, long,
-						long);
+                        long);
 void DrawAnyInterfaceItem( interfaceItemType *, PixMap *, long,
-						long);
+                        long);
 void GetAnyInterfaceItemGraphicBounds( interfaceItemType *, Rect *);
 void GetAnyInterfaceItemContentBounds( interfaceItemType *, Rect *);
 short GetInterfaceStringWidth( anyCharType *, interfaceStyleType);
@@ -85,10 +85,10 @@ short GetInterfaceFontHeight( interfaceStyleType);
 short GetInterfaceFontAscent( interfaceStyleType);
 short GetInterfaceFontWidth( interfaceStyleType);
 void DrawInterfaceString( anyCharType *, interfaceStyleType, PixMap *, long,
-						long, unsigned char);
+                        long, unsigned char);
 void SetInterfaceLargeUpperFont( interfaceStyleType);
 void SetInterfaceLargeLowerFont( interfaceStyleType);
-void BiggestRect( Rect	*, Rect *);
+void BiggestRect( Rect  *, Rect *);
 void LongRectToRect( longRect *, Rect *);
 void RectToLongRect( Rect *, longRect *);
 void SetLongRect( longRect *, long, long, long, long);

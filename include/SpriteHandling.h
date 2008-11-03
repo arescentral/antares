@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /* SpriteHandler.h */
 
 #ifndef kSpriteHandling
-#define	kSpriteHandling
+#define kSpriteHandling
 
 #ifndef kNateDraw
 #include "NateDraw.h"
@@ -29,114 +29,114 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Processor.h"
 
 
-#define	kNoSpriteTable	-1
+#define kNoSpriteTable  -1
 
-#define ROW_BYTES_MASK	0x8000
-#define	kPixResType				'SMIV'
+#define ROW_BYTES_MASK  0x8000
+#define kPixResType             'SMIV'
 
-#define	BLOCK_TYPE		0
-#define	MASK_TYPE		1
-#define	COMP_PIX_TYPE	2
-#define	RUN_LENGTH_TYPE	3
-#define	OLD_SCALE_TYPE	4
-#define	ASM_SCALE_TYPE	5
-#define	ASM_LENGTH_TYPE	6
-#define	EXPERIMENT_TYPE	7
+#define BLOCK_TYPE      0
+#define MASK_TYPE       1
+#define COMP_PIX_TYPE   2
+#define RUN_LENGTH_TYPE 3
+#define OLD_SCALE_TYPE  4
+#define ASM_SCALE_TYPE  5
+#define ASM_LENGTH_TYPE 6
+#define EXPERIMENT_TYPE 7
 
-#define	kSpriteTableColorShift	(short)11
-#define	kSpriteTableColorIDMask	0x7800	// bits 11-14
+#define kSpriteTableColorShift  (short)11
+#define kSpriteTableColorIDMask 0x7800  // bits 11-14
 // this makes the max legal sprite id 2047
 
-#define	SCALE_SCALE		4096//256
-#define	MIN_SCALE		256//16
-#define	MAX_SCALE		32768//2048
-#define	MAX_SCALE_PIX	32		// the maximum size a single scaled pixel can be
-								// (should be 32)
+#define SCALE_SCALE     4096//256
+#define MIN_SCALE       256//16
+#define MAX_SCALE       32768//2048
+#define MAX_SCALE_PIX   32      // the maximum size a single scaled pixel can be
+                                // (should be 32)
 
-#define	kOneSixteenthScale		256
-#define kOneEighthScale			512		
-#define	kOneQuarterScale		1024//64
-#define	kThreeQuarterScale		3072//192
-#define	kOneHalfScale			2048//128
-#define	kOneAndAQuarterScale	5120//320
-#define	kOneAndAHalfScale		6144//384
-#define	kTimesTwoScale			8192//512
+#define kOneSixteenthScale      256
+#define kOneEighthScale         512     
+#define kOneQuarterScale        1024//64
+#define kThreeQuarterScale      3072//192
+#define kOneHalfScale           2048//128
+#define kOneAndAQuarterScale    5120//320
+#define kOneAndAHalfScale       6144//384
+#define kTimesTwoScale          8192//512
 
-#define	SHIFT_SCALE				12//8
-#define	ASM_SHIFT_SCALE_1		8
-#define	ASM_SHIFT_SCALE_2		4
+#define SHIFT_SCALE             12//8
+#define ASM_SHIFT_SCALE_1       8
+#define ASM_SHIFT_SCALE_2       4
 
-#define	kNoTinyColor			0xff
+#define kNoTinyColor            0xff
 
-#define	kNoSpriteLayer			0
-#define	kFirstSpriteLayer		1
-#define	kMiddleSpriteLayer		2
-#define	kLastSpriteLayer		3
+#define kNoSpriteLayer          0
+#define kFirstSpriteLayer       1
+#define kMiddleSpriteLayer      2
+#define kLastSpriteLayer        3
 
-#define	MAX_PIX_SIZE	480
+#define MAX_PIX_SIZE    480
 
-#define	kMaxPixTableEntry	60
-#define	kNoSprite				-1
+#define kMaxPixTableEntry   60
+#define kNoSprite               -1
 
 typedef enum
 {
-	spriteNormal = 0,
-	spriteStatic = 1,
-	spriteColor = 2
+    spriteNormal = 0,
+    spriteStatic = 1,
+    spriteColor = 2
 } spriteStyleType;
 
 typedef struct spritePixStruct {
-	Point		center;
-	int			width;
-	int			height;
-	int			type;
-	Handle		data;
-	} spritePix;
+    Point       center;
+    int         width;
+    int         height;
+    int         type;
+    Handle      data;
+    } spritePix;
 
 //typedef  spritePix;
 
 typedef struct {
-	Point			where;
-	Handle			table;
-	short			resID;
-	int				whichShape;
-	long			scale;
-	spriteStyleType	style;
-	unsigned char	styleColor;
-	short			styleData;
-	long			tinySize;
-	short			whichLayer;
-	unsigned char	tinyColor;
-	Boolean			killMe;
-	
-	Rect		thisRect;
-	Rect		lastRect;
-	} spriteType;
-	
+    Point           where;
+    Handle          table;
+    short           resID;
+    int             whichShape;
+    long            scale;
+    spriteStyleType style;
+    unsigned char   styleColor;
+    short           styleData;
+    long            tinySize;
+    short           whichLayer;
+    unsigned char   tinyColor;
+    Boolean         killMe;
+    
+    Rect        thisRect;
+    Rect        lastRect;
+    } spriteType;
+    
 
 typedef struct {
-	Handle		resource;
-	int			resID;
-	Boolean		keepMe;
-	} pixTableType;
-	
+    Handle      resource;
+    int         resID;
+    Boolean     keepMe;
+    } pixTableType;
+    
 void SpriteHandlingInit( void);
 void CleanupSpriteHandling( void);
 void ResetAllSprites( void);
 void CreateSpritePixFromPixMap( spritePix *, int type, PixMapHandle, Rect *);
 void RunLengthSpritePixInPixMap( spritePix *, Point, PixMapHandle);
-#ifdef kDontDoLong68KAssem	//powercc
+#ifdef kDontDoLong68KAssem  //powercc
 void OptScaleSpritePixInPixMap( spritePix *, Point, long, longRect *, longRect *, PixMapHandle);
 #else
 void asm OptScaleSpritePixInPixMap( spritePix *, Point, long, longRect *, longRect *, PixMapHandle);
 #endif
 void StaticScaleSpritePixInPixMap( spritePix *, Point, long, longRect *, longRect *,
-	PixMapHandle, short);
+    PixMapHandle, short);
 void ColorScaleSpritePixInPixMap( spritePix *, Point, long, longRect *, longRect *,
-	PixMapHandle, short, unsigned char, unsigned char);
+    PixMapHandle, short, unsigned char, unsigned char);
 void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, longRect *dRect,
-		longRect *clipRect, PixMapHandle pixMap, unsigned char colorOut,
-		unsigned char colorIn);
+        longRect *clipRect, PixMapHandle pixMap, unsigned char colorOut,
+        unsigned char colorIn);
 void ResetAllPixTables( void);
 void SetAllPixTablesNoKeep( void);
 void KeepPixTable( short);

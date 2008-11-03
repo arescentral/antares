@@ -23,21 +23,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #if TARGET_OS_WIN32
 
-	#ifndef __QUICKTIMEVR__
-	#include <QuickTimeVR.h>
-	#endif
+    #ifndef __QUICKTIMEVR__
+    #include <QuickTimeVR.h>
+    #endif
 
-	#ifndef __QTUtilities__
-	#include "QTUtilities.h"
-	#endif
+    #ifndef __QTUtilities__
+    #include "QTUtilities.h"
+    #endif
 
-	#ifndef __QTVRUtilities__
-	#include "QTVRUtilities.h"
-	#endif
+    #ifndef __QTVRUtilities__
+    #include "QTVRUtilities.h"
+    #endif
 
-	#include <TextUtils.h>
-	#include <Script.h>
-	#include <string.h>
+    #include <TextUtils.h>
+    #include <Script.h>
+    #include <string.h>
 #endif // TARGET_OS_WIN32
 
 #include "Resources.h"
@@ -54,36 +54,36 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Math Special.h"
 #endif
 
-extern aresGlobalType	*gAresGlobal;
-//long			gAresGlobal->gGameTime = 0, gAresGlobal->gGameStartTime = 0;
-//UnsignedWide	gAresGlobal->gLastTime;
+extern aresGlobalType   *gAresGlobal;
+//long          gAresGlobal->gGameTime = 0, gAresGlobal->gGameStartTime = 0;
+//UnsignedWide  gAresGlobal->gLastTime;
 
 void ResetLastTime( long defecit)
 
 {
-	UnsignedWide defecitTime;
-	
-	defecitTime.hi = 0;
-	defecitTime.lo = defecit * kTimeUnit;
-	
-	Microseconds( &gAresGlobal->gLastTime);
-//	WideSubtract( (wide *)&gAresGlobal->gLastTime, (wide *)&defecitTime);
-	gAresGlobal->gGameStartTime = TickCount();// - defecit;
+    UnsignedWide defecitTime;
+    
+    defecitTime.hi = 0;
+    defecitTime.lo = defecit * kTimeUnit;
+    
+    Microseconds( &gAresGlobal->gLastTime);
+//  WideSubtract( (wide *)&gAresGlobal->gLastTime, (wide *)&defecitTime);
+    gAresGlobal->gGameStartTime = TickCount();// - defecit;
 }
 
 long GetTimeLapse( void)
 
 {
-	UnsignedWide			thisTime;
-	
-	Microseconds( &thisTime);
-	WideSubtract( (wide *)&thisTime, (wide *)&gAresGlobal->gLastTime);
-	return ( thisTime.lo / kTimeUnit);
+    UnsignedWide            thisTime;
+    
+    Microseconds( &thisTime);
+    WideSubtract( (wide *)&thisTime, (wide *)&gAresGlobal->gLastTime);
+    return ( thisTime.lo / kTimeUnit);
 }
 
 void UpdateGameTime( void)
 
 {
-//	gAresGlobal->gGameTime += GetTimeLapse();
-//	ResetLastTime();
+//  gAresGlobal->gGameTime += GetTimeLapse();
+//  ResetLastTime();
 }

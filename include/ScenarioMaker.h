@@ -19,31 +19,31 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 pragma options align=mac68k
 
-#define	kScenarioWinnerPlayerMask	0x000000ff
-#define	kScenarioWinnerNoPlayer		0x000000ff
-#define	kScenarioWinnerNextMask		0xff000000
-#define	kScenarioWinnerNextShift	(long)24
-#define	kScenarioWinnerTextMask		0x00ffff00
-#define	kScenarioWinnerTextShift	(long)8
+#define kScenarioWinnerPlayerMask   0x000000ff
+#define kScenarioWinnerNoPlayer     0x000000ff
+#define kScenarioWinnerNextMask     0xff000000
+#define kScenarioWinnerNextShift    (long)24
+#define kScenarioWinnerTextMask     0x00ffff00
+#define kScenarioWinnerTextShift    (long)8
 
-#define	kScenarioWinnerNoNext		0xff000000
-#define	kScenarioWinnerNoText		0x00ffff00
+#define kScenarioWinnerNoNext       0xff000000
+#define kScenarioWinnerNoText       0x00ffff00
 
-#define	kScenarioNoShipTextID		10000
+#define kScenarioNoShipTextID       10000
 
-#define	kScenarioResFileName	"\p:Ares Data Folder:Ares Scenarios"
+#define kScenarioResFileName    "\p:Ares Data Folder:Ares Scenarios"
 
-#define	kScenarioResType		'snro'
-#define	kScenarioResID			500
+#define kScenarioResType        'snro'
+#define kScenarioResID          500
 
-#define	kScenarioInitialResType	'snit'
-#define	kScenarioInitialResID	500
+#define kScenarioInitialResType 'snit'
+#define kScenarioInitialResID   500
 
-#define	kScenarioConditionResType	'sncd'
-#define	kScenarioConditionResID		500
+#define kScenarioConditionResType   'sncd'
+#define kScenarioConditionResID     500
 
-#define	kScenarioBriefResType	'snbf'
-#define	kScenarioBriefResID		500
+#define kScenarioBriefResType   'snbf'
+#define kScenarioBriefResID     500
 
 
 #define mGetRealAdmiralNum( mplayernum) gThisScenario->player[mplayernum].admiralNumber
@@ -51,54 +51,54 @@ pragma options align=mac68k
 #define mGetActionFromBaseTypeNum( mactPtr, mbaseObjPtr, mactionType, mactionNum)\
 if ( (mactionType) == kDestroyActionType)\
 {\
-	if ( mactionNum >= ((mbaseObjPtr)->destroyActionNum & kDestroyActionNotMask)) mactPtr = nil;\
-	else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->destroyAction + (long)mactionNum;\
+    if ( mactionNum >= ((mbaseObjPtr)->destroyActionNum & kDestroyActionNotMask)) mactPtr = nil;\
+    else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->destroyAction + (long)mactionNum;\
 } else if ( (mactionType) == kExpireActionType) \
 {\
-	if ( mactionNum >= ((mbaseObjPtr)->expireActionNum  & kDestroyActionNotMask)) mactPtr = nil;\
-	else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->expireAction + (long)mactionNum;\
+    if ( mactionNum >= ((mbaseObjPtr)->expireActionNum  & kDestroyActionNotMask)) mactPtr = nil;\
+    else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->expireAction + (long)mactionNum;\
 } else if ( (mactionType) == kCreateActionType)\
 {\
-	if ( mactionNum >= (mbaseObjPtr)->createActionNum) mactPtr = nil;\
-	else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->createAction + (long)mactionNum;\
+    if ( mactionNum >= (mbaseObjPtr)->createActionNum) mactPtr = nil;\
+    else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->createAction + (long)mactionNum;\
 } else if ( (mactionType) == kCollideActionType)\
 {\
-	if ( mactionNum >= (mbaseObjPtr)->collideActionNum) mactPtr = nil;\
-	else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->collideAction + (long)mactionNum;\
+    if ( mactionNum >= (mbaseObjPtr)->collideActionNum) mactPtr = nil;\
+    else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->collideAction + (long)mactionNum;\
 } else if ( (mactionType) == kActivateActionType)\
 {\
-	if ( mactionNum >= ((mbaseObjPtr)->activateActionNum & kPeriodicActionNotMask)) mactPtr = nil;\
-	else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->activateAction + (long)mactionNum;\
+    if ( mactionNum >= ((mbaseObjPtr)->activateActionNum & kPeriodicActionNotMask)) mactPtr = nil;\
+    else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->activateAction + (long)mactionNum;\
 } else if ( (mactionType) == kArriveActionType)\
 {\
-		mWriteDebugString("\pArrive Action:");\
-		WriteDebugLong( mactionNum);\
-		WriteDebugLong( (mbaseObjPtr)->arriveActionNum);\
-	if ( mactionNum >= (mbaseObjPtr)->arriveActionNum) mactPtr = nil;\
-	else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->arriveAction + (long)mactionNum;\
+        mWriteDebugString("\pArrive Action:");\
+        WriteDebugLong( mactionNum);\
+        WriteDebugLong( (mbaseObjPtr)->arriveActionNum);\
+    if ( mactionNum >= (mbaseObjPtr)->arriveActionNum) mactPtr = nil;\
+    else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->arriveAction + (long)mactionNum;\
 } else mactPtr = nil;
 
-#define	mGetScenarioInitial( mscenario, minitialnum) (scenarioInitialType *)*gAresGlobal->gScenarioInitialData + (mscenario)->initialFirst + (minitialnum)
-#define	mGetScenarioBrief( mscenario, mbriefnum) (briefPointType *)*gAresGlobal->gScenarioBriefData + ((mscenario)->briefPointFirst) + (mbriefnum)
-#define	mGetScenarioCondition( mscenario, mconditionnum) (scenarioConditionType *)*gAresGlobal->gScenarioConditionData + (mscenario)->conditionFirst + (mconditionnum)
+#define mGetScenarioInitial( mscenario, minitialnum) (scenarioInitialType *)*gAresGlobal->gScenarioInitialData + (mscenario)->initialFirst + (minitialnum)
+#define mGetScenarioBrief( mscenario, mbriefnum) (briefPointType *)*gAresGlobal->gScenarioBriefData + ((mscenario)->briefPointFirst) + (mbriefnum)
+#define mGetScenarioCondition( mscenario, mconditionnum) (scenarioConditionType *)*gAresGlobal->gScenarioConditionData + (mscenario)->conditionFirst + (mconditionnum)
 
-#define	mGetRealObjectFromInitial( mobject, minitialobject, minum)\
+#define mGetRealObjectFromInitial( mobject, minitialobject, minum)\
 if ( minum >= 0)\
 {\
-	minitialobject = mGetScenarioInitial( gThisScenario, minum);\
-	if ( minitialobject->realObjectNumber >= 0)\
-	{\
-		mobject = (spaceObjectType *)*gSpaceObjectData + (long)minitialobject->realObjectNumber;\
-		if (( mobject->id != minitialobject->realObjectID) || ( mobject->active != kObjectInUse))\
-			mobject = nil;\
-	} else mobject = nil;\
+    minitialobject = mGetScenarioInitial( gThisScenario, minum);\
+    if ( minitialobject->realObjectNumber >= 0)\
+    {\
+        mobject = (spaceObjectType *)*gSpaceObjectData + (long)minitialobject->realObjectNumber;\
+        if (( mobject->id != minitialobject->realObjectID) || ( mobject->active != kObjectInUse))\
+            mobject = nil;\
+    } else mobject = nil;\
 } else if ( minum == -2)\
 {\
-	mobject = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gPlayerShipNumber;\
-	if ((!(mobject->active)) || ( !(mobject->attributes & kCanThink)))\
-	{\
-		mobject = nil;\
-	}\
+    mobject = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gPlayerShipNumber;\
+    if ((!(mobject->active)) || ( !(mobject->attributes & kCanThink)))\
+    {\
+        mobject = nil;\
+    }\
 } else mobject = nil;
 
 short ScenarioMakerInit( void);
@@ -116,14 +116,14 @@ void UnhideInitialObject( long);
 spaceObjectType *GetObjectFromInitialNumber( long);
 void GetScenarioFullScaleAndCorner( long, long, coordPointType *, long *, Rect *);
 /*void GetScenarioBriefPointData( long, long, long *, long *, long *, Rect *, coordPointType *,
-					long, long, long, Rect *);
+                    long, long, long, Rect *);
 void GetInitialObjectSpriteData( long whichScenario, long whichObject, long maxSize,
-		Rect *bounds, coordPointType *corner,
-		long scale, long *thisScale, spritePix *aSpritePix, Point *where, longRect *spriteRect);
+        Rect *bounds, coordPointType *corner,
+        long scale, long *thisScale, spritePix *aSpritePix, Point *where, longRect *spriteRect);
 void GetRealObjectSpriteData( coordPointType *, baseObjectType *, long, 
-		long, long, Rect *, coordPointType *,
-		long, long *, spritePix *, Point *,
-		longRect *);
+        long, long, Rect *, coordPointType *,
+        long, long *, spritePix *, Point *,
+        longRect *);
 */
 long GetBriefPointNumber( long);
 long GetScenarioAngle( long whichScenario);

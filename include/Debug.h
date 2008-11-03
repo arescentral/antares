@@ -19,14 +19,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 /* Debug.h */
 
-#define	DEBUG_ON		TRUE
+#define DEBUG_ON        TRUE
 #ifndef kMathSpecial
 #include "Math Special.h"
 #endif
 
 #pragma options align=mac68k
 
-#define	mWriteDebugString( mdstring) WriteDebugLine((char *)mdstring)
+#define mWriteDebugString( mdstring) WriteDebugLine((char *)mdstring)
 
 void DebugWindowInit( WindowPtr);
 void BringDebugToFront( void);
@@ -45,7 +45,7 @@ void WriteDebugHexDump( Ptr, long);
 void WriteDebugChar( char);
 
 unsigned long powerto ( unsigned long, unsigned long);
-Boolean	CommandPeriod( void);
+Boolean CommandPeriod( void);
 
 void DebugFileInit( void);
 void DebugFileCleanup( void);

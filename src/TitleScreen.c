@@ -24,21 +24,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #if TARGET_OS_WIN32
 
-	#ifndef __QUICKTIMEVR__
-	#include <QuickTimeVR.h>
-	#endif
+    #ifndef __QUICKTIMEVR__
+    #include <QuickTimeVR.h>
+    #endif
 
-	#ifndef __QTUtilities__
-	#include "QTUtilities.h"
-	#endif
+    #ifndef __QTUtilities__
+    #include "QTUtilities.h"
+    #endif
 
-	#ifndef __QTVRUtilities__
-	#include "QTVRUtilities.h"
-	#endif
+    #ifndef __QTVRUtilities__
+    #include "QTVRUtilities.h"
+    #endif
 
-	#include <TextUtils.h>
-	#include <Script.h>
-	#include <string.h>
+    #include <TextUtils.h>
+    #include <Script.h>
+    #include <string.h>
 #endif // TARGET_OS_WIN32
 
 #include "Resources.h"
@@ -51,103 +51,103 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Error.h"
 #include "Debug.h"
 
-#define	kTitleScreenID		502
-#define	kPublisherScreenID	2000
-#define	kEgoScreenID		2001
+#define kTitleScreenID      502
+#define kPublisherScreenID  2000
+#define kEgoScreenID        2001
 
-#define	kTitleScreenError	"\pTITL"
+#define kTitleScreenError   "\pTITL"
 
-extern CWindowPtr		gTheWindow;
+extern CWindowPtr       gTheWindow;
 
 void DrawTitleScreen( void)
 
 {
-	PicHandle		pict;
-	Rect			tRect;
-	
-	MacSetPort( (WindowPtr)gTheWindow);
-//	pict = GetPicture( kTitleScreenID);
-	pict = (PicHandle)HHGetResource( 'PICT', kTitleScreenID);
-	if ( pict == nil)
-	{
-		ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 1);
-	} else
-	{
-		DrawInRealWorld();
-		tRect = (**pict).picFrame;
-		CenterRectInRect( &tRect, &(gTheWindow->portRect));	
-		DrawPicture( pict, &tRect);
-		ReleaseResource( (Handle)pict);
-	}
+    PicHandle       pict;
+    Rect            tRect;
+    
+    MacSetPort( (WindowPtr)gTheWindow);
+//  pict = GetPicture( kTitleScreenID);
+    pict = (PicHandle)HHGetResource( 'PICT', kTitleScreenID);
+    if ( pict == nil)
+    {
+        ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 1);
+    } else
+    {
+        DrawInRealWorld();
+        tRect = (**pict).picFrame;
+        CenterRectInRect( &tRect, &(gTheWindow->portRect)); 
+        DrawPicture( pict, &tRect);
+        ReleaseResource( (Handle)pict);
+    }
 }
 
 void DrawPublisherScreen( void)
 
 {
-	PicHandle		pict;
-	Rect			tRect;
-	
-	MacSetPort( (WindowPtr)gTheWindow);
-	pict = (PicHandle)HHGetResource( 'PICT', kPublisherScreenID);
-	if ( pict == nil)
-	{
-		ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 2);
-	} else
-	{
-		DrawInRealWorld();
-		tRect = (**pict).picFrame;
-		CenterRectInRect( &tRect, &(gTheWindow->portRect));	
-		PaintRect(  &(gTheWindow->portRect));
-		DrawPicture( pict, &tRect);
-		ReleaseResource( (Handle)pict);
-	}
+    PicHandle       pict;
+    Rect            tRect;
+    
+    MacSetPort( (WindowPtr)gTheWindow);
+    pict = (PicHandle)HHGetResource( 'PICT', kPublisherScreenID);
+    if ( pict == nil)
+    {
+        ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 2);
+    } else
+    {
+        DrawInRealWorld();
+        tRect = (**pict).picFrame;
+        CenterRectInRect( &tRect, &(gTheWindow->portRect)); 
+        PaintRect(  &(gTheWindow->portRect));
+        DrawPicture( pict, &tRect);
+        ReleaseResource( (Handle)pict);
+    }
 }
 
 void DrawEgoScreen( void)
 
 {
-	PicHandle		pict;
-	Rect			tRect;
-	
-	MacSetPort( (WindowPtr)gTheWindow);
-	pict = (PicHandle)HHGetResource( 'PICT', kEgoScreenID);
-	if ( pict == nil)
-	{
-		ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 3);
-	} else
-	{
-		DrawInRealWorld();
-		tRect = (**pict).picFrame;
-		CenterRectInRect( &tRect, &(gTheWindow->portRect));
-		PaintRect(  &(gTheWindow->portRect));
-		DrawPicture( pict, &tRect);
-		ReleaseResource( (Handle)pict);
-	}
+    PicHandle       pict;
+    Rect            tRect;
+    
+    MacSetPort( (WindowPtr)gTheWindow);
+    pict = (PicHandle)HHGetResource( 'PICT', kEgoScreenID);
+    if ( pict == nil)
+    {
+        ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 3);
+    } else
+    {
+        DrawInRealWorld();
+        tRect = (**pict).picFrame;
+        CenterRectInRect( &tRect, &(gTheWindow->portRect));
+        PaintRect(  &(gTheWindow->portRect));
+        DrawPicture( pict, &tRect);
+        ReleaseResource( (Handle)pict);
+    }
 }
 
 void BlackTitleScreen( void)
 
 {
-	RGBColor	black = {0, 0, 0};
-	
-	MacSetPort( (WindowPtr)gTheWindow);
-	DrawInRealWorld();
-	MacSetPort( (WindowPtr)gTheWindow);
-	PenPat( &qd.black);
-	RGBForeColor( &black);
-	
-	PaintRect(  &(gTheWindow->portRect));
+    RGBColor    black = {0, 0, 0};
+    
+    MacSetPort( (WindowPtr)gTheWindow);
+    DrawInRealWorld();
+    MacSetPort( (WindowPtr)gTheWindow);
+    PenPat( &qd.black);
+    RGBForeColor( &black);
+    
+    PaintRect(  &(gTheWindow->portRect));
 }
 
 void CenterRectInRect( Rect *dRect, Rect *sRect)
 
 {
-	short	w, h;
-	
-	w = dRect->right - dRect->left;
-	h = dRect->bottom - dRect->top;
-	dRect->left =  sRect->left + ( sRect->right - sRect->left) / 2 - w / 2;
-	dRect->top = sRect->top + ( sRect->bottom - sRect->top) / 2 - h / 2;
-	dRect->right = dRect->left + w;
-	dRect->bottom = dRect->top + h;
+    short   w, h;
+    
+    w = dRect->right - dRect->left;
+    h = dRect->bottom - dRect->top;
+    dRect->left =  sRect->left + ( sRect->right - sRect->left) / 2 - w / 2;
+    dRect->top = sRect->top + ( sRect->bottom - sRect->top) / 2 - h / 2;
+    dRect->right = dRect->left + w;
+    dRect->bottom = dRect->top + h;
 }

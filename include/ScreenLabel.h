@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 // Screen Label.h
 
 #ifndef kScreen_Label_h
-#define	kScreen_Label_h
+#define kScreen_Label_h
 
 #ifndef kAnyChar
 #include "AnyChar.h"
@@ -32,35 +32,35 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #pragma options align=mac68k
 
-#define	kNoLabel		-1
-#define	kMaxLabelLen			250
-#define	kMaxLabelNum			16
+#define kNoLabel        -1
+#define kMaxLabelLen            250
+#define kMaxLabelNum            16
 
-#define	kLabelOffVisibleTime	60
+#define kLabelOffVisibleTime    60
 
 typedef struct screenLabelType
 {
-	Point			where;
-	Point			offset;
-	Rect			thisRect;
-	Rect			lastRect;
-	long			width;
-	long			height;
-	long			age;
-	anyCharType		label[kMaxLabelLen];
-	unsigned char	color;
-	Boolean			active;
-	Boolean			killMe;
-	short			visibleState;	// < 0 = invisible 0 = turn me invisible, 1 = visible
-	long			whichObject;
-	spaceObjectType	*object;
-	Boolean			objectLink;		// true if label requires an object to be seen
-	long			lineNum;
-	long			lineHeight;
-	Boolean			keepOnScreenAnyway;	// if not attached to object, keep on screen if it's off
-	Boolean			attachedHintLine;
-	Point			attachedToWhere;
-	long			retroCount;
+    Point           where;
+    Point           offset;
+    Rect            thisRect;
+    Rect            lastRect;
+    long            width;
+    long            height;
+    long            age;
+    anyCharType     label[kMaxLabelLen];
+    unsigned char   color;
+    Boolean         active;
+    Boolean         killMe;
+    short           visibleState;   // < 0 = invisible 0 = turn me invisible, 1 = visible
+    long            whichObject;
+    spaceObjectType *object;
+    Boolean         objectLink;     // true if label requires an object to be seen
+    long            lineNum;
+    long            lineHeight;
+    Boolean         keepOnScreenAnyway; // if not attached to object, keep on screen if it's off
+    Boolean         attachedHintLine;
+    Point           attachedToWhere;
+    long            retroCount;
 } screenLabelType;
 
 
@@ -68,7 +68,7 @@ int ScreenLabelInit( void);
 void ResetAllLabels( void);
 void ScreenLabelCleanup( void);
 short AddScreenLabel( short, short, short, short, anyCharType *, spaceObjectType *,
-					Boolean, unsigned char);
+                    Boolean, unsigned char);
 void RemoveScreenLabel( long);
 void EraseAllLabels( void);
 void DrawAllLabels( void);

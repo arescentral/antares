@@ -28,21 +28,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #if TARGET_OS_WIN32
 
-	#ifndef __QUICKTIMEVR__
-	#include <QuickTimeVR.h>
-	#endif
+    #ifndef __QUICKTIMEVR__
+    #include <QuickTimeVR.h>
+    #endif
 
-	#ifndef __QTUtilities__
-	#include "QTUtilities.h"
-	#endif
+    #ifndef __QTUtilities__
+    #include "QTUtilities.h"
+    #endif
 
-	#ifndef __QTVRUtilities__
-	#include "QTVRUtilities.h"
-	#endif
+    #ifndef __QTVRUtilities__
+    #include "QTVRUtilities.h"
+    #endif
 
-	#include <TextUtils.h>
-	#include <Script.h>
-	#include <string.h>
+    #include <TextUtils.h>
+    #include <Script.h>
+    #include <string.h>
 #endif // TARGET_OS_WIN32
 
 #include "Resources.h"
@@ -51,7 +51,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Processor.h"
 
-#ifndef	kMathSpecial
+#ifndef kMathSpecial
 #include "Math Special.h"
 #endif
 
@@ -236,21 +236,21 @@ unsigned long lsqrt (unsigned long n)
     }
 
 /* WideSubtract:
-	according to Develop 18 article "Exploiting Graphics Speed on Power Macintosh," this function
-	is defined on Power Macs but not on 68Ks.  I'm using exclusively for timing using the function
-	Microseconds( wide *destWide) (defined in same article).
+    according to Develop 18 article "Exploiting Graphics Speed on Power Macintosh," this function
+    is defined on Power Macs but not on 68Ks.  I'm using exclusively for timing using the function
+    Microseconds( wide *destWide) (defined in same article).
 */
 
 #ifndef powerc
 wide * MyWideSubtract(wide *target, const wide *source)
 {
-	
-	target->hi -= source->hi;
-	if (target->lo < source->lo)
-		target->hi--;
-	target->lo -= source->lo;
-	
-	return target;
+    
+    target->hi -= source->hi;
+    if (target->lo < source->lo)
+        target->hi--;
+    target->lo -= source->lo;
+    
+    return target;
 }
 #endif
 
@@ -258,126 +258,126 @@ wide * MyWideSubtract(wide *target, const wide *source)
 Fixed MyFixRatio( short numer, short denom)
 
 {
-	long	longdenom, result;
-	unsigned long	t;
-	
-	longdenom = denom;
-	if ( !longdenom) goto label1;
-	
-	result = numer;
-	result &= 0x0000ffff;
-	if ( numer == denom) goto label3;
-	
-	result = (( result >> 16L) & 0x0000ffff) | (( result << 16L) & 0xffff0000);
-	result /= longdenom;
-	return( (Fixed)result);
-	
+    long    longdenom, result;
+    unsigned long   t;
+    
+    longdenom = denom;
+    if ( !longdenom) goto label1;
+    
+    result = numer;
+    result &= 0x0000ffff;
+    if ( numer == denom) goto label3;
+    
+    result = (( result >> 16L) & 0x0000ffff) | (( result << 16L) & 0xffff0000);
+    result /= longdenom;
+    return( (Fixed)result);
+    
 label1:
-	result = 0x7fffffff;
-	if ( numer >= 0) goto label2;
-	result = -result;
+    result = 0x7fffffff;
+    if ( numer >= 0) goto label2;
+    result = -result;
 
 label2:
-	return( (Fixed)result);
+    return( (Fixed)result);
 
 label3:
-	result = 0x00000001;
-	result = (( result >> 16L) & 0x0000ffff) | (( result << 16L) & 0xffff0000);
-	return( (Fixed)result);
+    result = 0x00000001;
+    result = (( result >> 16L) & 0x0000ffff) | (( result << 16L) & 0xffff0000);
+    return( (Fixed)result);
 }
 #endif
 
 void MyMulDoubleLong( long a, long b, wide *dest)
 
 {
-	#pragma unused( a, b, dest)
-	
-//	Debugger();
-//	LongMul( a, b, dest);
+    #pragma unused( a, b, dest)
+    
+//  Debugger();
+//  LongMul( a, b, dest);
 }
 
 void MyWideAddC( wide *target, const wide *source)
 {
-	unsigned long	ur0, ur5;
-	long			sr7, sr6, sr4, sr0;
-	
-	ur0 = target->lo;
-	ur5 = source->lo;
-	sr7 = target->hi;
-	ur0 += ur5;
-	target->lo = ur0;
-	ur5 = source->lo;
-	sr6 = source->hi;
-	sr4 = source->hi;
-	sr0 = target->hi;
-	sr4 += 1;
-	if ( ur0 > ur5) goto wa_med_1;
-	sr4 += sr7;
-	target->hi = sr4;
-	goto wa_med_2;
+    unsigned long   ur0, ur5;
+    long            sr7, sr6, sr4, sr0;
+    
+    ur0 = target->lo;
+    ur5 = source->lo;
+    sr7 = target->hi;
+    ur0 += ur5;
+    target->lo = ur0;
+    ur5 = source->lo;
+    sr6 = source->hi;
+    sr4 = source->hi;
+    sr0 = target->hi;
+    sr4 += 1;
+    if ( ur0 > ur5) goto wa_med_1;
+    sr4 += sr7;
+    target->hi = sr4;
+    goto wa_med_2;
 wa_med_1:
-	sr4 = sr0 + sr6;
-	target->hi = sr4;
+    sr4 = sr0 + sr6;
+    target->hi = sr4;
 wa_med_2:
-	return;
+    return;
 }
 
 #ifndef powerc //kDontDoLong68KAssemHACK
 asm void MyWideAdd( UnsignedWide *target, const UnsignedWide *source)
 {
-	unsigned long register	dr0, dr5;
-	long register			dr4, dr6, dr7;
-	register UnsignedWide	*ar2, *ar3;
-	
-	fralloc +
+    unsigned long register  dr0, dr5;
+    long register           dr4, dr6, dr7;
+    register UnsignedWide   *ar2, *ar3;
+    
+    fralloc +
 
-	movea.l		target,ar2;
-	movea.l		source,ar3;
-	move.l		struct(wide.lo)(ar2), dr0;				// ur0 = target->lo;
-	move.l		struct(wide.lo)(ar3), dr5;				// ur5 = source->lo;
-	move.l		struct(wide.hi)(ar2), dr7;				// sr7 = target->hi;
-	add.l		dr5, dr0;								// ur0 += ur5;
-	move.l		dr0, struct(wide.lo)(ar2);				// target->lo = ur0;
-	move.l		struct(wide.hi)(ar3), dr6;				// sr6 = source->hi;
-	move.l		dr6, dr4;								// sr4 = source->hi;
-	addi.l		#1, dr4;								// sr4 += 1;
-	CMP.L		dr5, dr0;								// if ( ur0 > ur5)
-	BHI.S     	asm_wa_med_1;							//	goto wa_med_1;
-	
-	add.l		dr7, dr4;								// sr4 += sr7;
-	move.l		dr4, struct(wide.hi)(a2);				// target->hi = sr4;
-	jmp			asm_wa_med_2;
-	
+    movea.l     target,ar2;
+    movea.l     source,ar3;
+    move.l      struct(wide.lo)(ar2), dr0;              // ur0 = target->lo;
+    move.l      struct(wide.lo)(ar3), dr5;              // ur5 = source->lo;
+    move.l      struct(wide.hi)(ar2), dr7;              // sr7 = target->hi;
+    add.l       dr5, dr0;                               // ur0 += ur5;
+    move.l      dr0, struct(wide.lo)(ar2);              // target->lo = ur0;
+    move.l      struct(wide.hi)(ar3), dr6;              // sr6 = source->hi;
+    move.l      dr6, dr4;                               // sr4 = source->hi;
+    addi.l      #1, dr4;                                // sr4 += 1;
+    CMP.L       dr5, dr0;                               // if ( ur0 > ur5)
+    BHI.S       asm_wa_med_1;                           //  goto wa_med_1;
+    
+    add.l       dr7, dr4;                               // sr4 += sr7;
+    move.l      dr4, struct(wide.hi)(a2);               // target->hi = sr4;
+    jmp         asm_wa_med_2;
+    
 asm_wa_med_1:
-	move.l		struct(wide.hi)(ar2), dr0;				// sr0 = target->hi;
-	add.l		dr6, dr0;
-	move.l		dr0, struct(wide.hi)(a2);
-		
+    move.l      struct(wide.hi)(ar2), dr0;              // sr0 = target->hi;
+    add.l       dr6, dr0;
+    move.l      dr0, struct(wide.hi)(a2);
+        
 asm_wa_med_2:
-	frfree
-//	rtd			#8;
-	rts
+    frfree
+//  rtd         #8;
+    rts
 
-/*	MOVE.L    $0004(A0),D1
-	MOVE.L    $0004(A1),D2
-	MOVE.L    (A0),D6
-	ADD.L     D2,D1
-	MOVE.L    D1,$0004(A0)
-	MOVE.L    $0004(A1),D2
-	MOVE.L    (A1),D7
-	MOVE.L    (A1),D0
-	MOVEA.L   (A0),A1
-	ADDQ.L    #$1,D0
-	CMP.L     D2,D1
-	BHI.S     *+$0008        ; 00000036
-	ADD.L     D6,D0
-	MOVE.L    D0,(A0)
-	BRA.S     *+$0008        ; 0000003C
-*	MOVE.L    A1,D0
-	ADD.L     D7,D0
-	 MOVE.L    D0,(A0)
-*	MOVEM.L   (A7)+,D6/D7
-	UNLK      A6
+/*  MOVE.L    $0004(A0),D1
+    MOVE.L    $0004(A1),D2
+    MOVE.L    (A0),D6
+    ADD.L     D2,D1
+    MOVE.L    D1,$0004(A0)
+    MOVE.L    $0004(A1),D2
+    MOVE.L    (A1),D7
+    MOVE.L    (A1),D0
+    MOVEA.L   (A0),A1
+    ADDQ.L    #$1,D0
+    CMP.L     D2,D1
+    BHI.S     *+$0008        ; 00000036
+    ADD.L     D6,D0
+    MOVE.L    D0,(A0)
+    BRA.S     *+$0008        ; 0000003C
+*   MOVE.L    A1,D0
+    ADD.L     D7,D0
+     MOVE.L    D0,(A0)
+*   MOVEM.L   (A7)+,D6/D7
+    UNLK      A6
 */
 }
 #endif

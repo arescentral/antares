@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #pragma options align=mac68k
 
-int	InterfaceHandlingInit( void);
+int InterfaceHandlingInit( void);
 void InterfaceHandlingCleanup( void);
 int OpenInterface( short);
 long AppendInterface( short, long, Boolean);
@@ -42,7 +42,7 @@ void OffsetItemRange( long, long, long, long);
 void OffsetAllItems( long, long);
 void CenterItemRangeInRect( Rect *, long, long);
 void CenterAllItemsInRect( Rect *);
-void DrawAnyInterfaceItemOffToOn( interfaceItemType	*);
+void DrawAnyInterfaceItemOffToOn( interfaceItemType *);
 void DrawAnyInterfaceItemSaveToOffToOn( interfaceItemType *);
 void InvalidateInterfaceFunctions( void);
 void InterfaceDisposeAllEditableText( void);
@@ -73,10 +73,10 @@ void UpdateAllTextEdit( void);
 void SetInterfaceTextEditColors( short);
 void CopyInterfaceTextEditContents( short, anyCharType *, long *);
 long GetInterfaceTextEditLength( short);
-void SetInterfaceListCallback(	short		whichItem,
-								short		(*getListLength)( void),
-								void		(*getItemString)( short, anyCharType *),
-								Boolean		(*itemHilited)( short, Boolean));
+void SetInterfaceListCallback(  short       whichItem,
+                                short       (*getListLength)( void),
+                                void        (*getItemString)( short, anyCharType *),
+                                Boolean     (*itemHilited)( short, Boolean));
 void SetButtonKeyNum( short, short);
 short GetButtonKeyNum( short);
 

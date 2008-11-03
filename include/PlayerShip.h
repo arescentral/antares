@@ -21,19 +21,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #pragma options align=mac68k
 
-#define	kShapeNum				24
-#define	kPixResID				501
+#define kShapeNum               24
+#define kPixResID               501
 
-#define	kZoomLevelNum			8
+#define kZoomLevelNum           8
 
-#define	kTimesTwoZoom			0
-#define	kActualSizeZoom			1
-#define	kHalfSizeZoom			2
-#define	kQuarterSizeZoom		3
-#define	kEighthSizeZoom			4
-#define	kNearestFoeZoom			5
-#define	kNearestAnythingZoom	6
-#define	kSmallestZoom			7
+#define kTimesTwoZoom           0
+#define kActualSizeZoom         1
+#define kHalfSizeZoom           2
+#define kQuarterSizeZoom        3
+#define kEighthSizeZoom         4
+#define kNearestFoeZoom         5
+#define kNearestAnythingZoom    6
+#define kSmallestZoom           7
 
 void StartPlayerShip( long, short);
 void ResetPlayerShip( long);

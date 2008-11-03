@@ -68,7 +68,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /******************************************\
 |**| external globals
 \******************************************/
-extern aresGlobalType			*gAresGlobal;
+extern aresGlobalType           *gAresGlobal;
 
 #pragma mark **PRIVATE GLOBALS**
 /******************************************\
@@ -92,20 +92,20 @@ extern aresGlobalType			*gAresGlobal;
 
 OSErr AGR_Init( void)
 {
-	OSErr result = noErr;
+    OSErr result = noErr;
 
 
-	if ( Wrap_UseGameRanger())
-	{
-		result = Wrap_GRInstallResumeHandler();
-		if ( result == noErr) gAresGlobal->useGameRanger = true;
-		else gAresGlobal->useGameRanger = false;
+    if ( Wrap_UseGameRanger())
+    {
+        result = Wrap_GRInstallResumeHandler();
+        if ( result == noErr) gAresGlobal->useGameRanger = true;
+        else gAresGlobal->useGameRanger = false;
 
-	} else
-	{
-		gAresGlobal->useGameRanger = false;
-	}
-	
-	return result;
+    } else
+    {
+        gAresGlobal->useGameRanger = false;
+    }
+    
+    return result;
 
 }

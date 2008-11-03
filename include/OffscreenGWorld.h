@@ -22,32 +22,32 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #pragma options align=mac68k
 
 /*
-#define	WORLD_WIDTH		800//640
-#define	WORLD_HEIGHT	600//480
+#define WORLD_WIDTH     800//640
+#define WORLD_HEIGHT    600//480
 */
 
 /*
-#define	CLIP_LEFT				128
-#define	CLIP_TOP				0
-#define	CLIP_RIGHT				768//608
-#define	CLIP_BOTTOM				WORLD_HEIGHT
+#define CLIP_LEFT               128
+#define CLIP_TOP                0
+#define CLIP_RIGHT              768//608
+#define CLIP_BOTTOM             WORLD_HEIGHT
 
-#define	kPlayScreenSize			WORLD_HEIGHT
-#define	kPlayScreenWidth		kPlayScreenSize
-#define	kPlayScreenHeight		kPlayScreenSize
+#define kPlayScreenSize         WORLD_HEIGHT
+#define kPlayScreenWidth        kPlayScreenSize
+#define kPlayScreenHeight       kPlayScreenSize
 */
 
 // these defs are here for historic reason:
-#define	kLeftPanelWidth			128
-#define	kRightPanelWidth		32
-#define	kPanelHeight			480
+#define kLeftPanelWidth         128
+#define kRightPanelWidth        32
+#define kPanelHeight            480
 
-#define	kSmallScreenWidth		640
-#define	kSmallScreenHeight		480
-#define	kMediumScreenWidth		800
-#define	kMediumScreenHeight		600
-#define	kLargeScreenWidth		1024
-#define	kLargeScreenHeight		768
+#define kSmallScreenWidth       640
+#define kSmallScreenHeight      480
+#define kMediumScreenWidth      800
+#define kMediumScreenHeight     600
+#define kLargeScreenWidth       1024
+#define kLargeScreenHeight      768
 
 int CreateOffscreenWorld ( Rect *, CTabHandle);
 void CleanUpOffscreenWorld( void);

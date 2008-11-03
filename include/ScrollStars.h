@@ -19,26 +19,26 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // Scroll Stars.h
 
-#ifndef	kSpaceObject
+#ifndef kSpaceObject
 #include "Space Object.h"
 #endif
 
 #pragma options align=mac68k
 
-#define	kMaxSparkAge			1023L
-#define	kSparkAgeToShadeShift	6L
+#define kMaxSparkAge            1023L
+#define kSparkAgeToShadeShift   6L
 
 
 typedef struct
 {
-	longPointType	oldOldLocation;
-	longPointType	oldLocation;
-	longPointType	location;
-	fixedPointType	motionFraction;
-	fixedPointType	velocity;
-	long			age;
-	long			speed;
-	unsigned char	color;
+    longPointType   oldOldLocation;
+    longPointType   oldLocation;
+    longPointType   location;
+    fixedPointType  motionFraction;
+    fixedPointType  velocity;
+    long            age;
+    long            speed;
+    unsigned char   color;
 } scrollStarType;
 
 

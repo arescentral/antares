@@ -33,11 +33,11 @@ spaceObjectType *HackNewNonplayerShip( long, short, longRect *);
 void NonplayerShipThink( long);
 void UpdateMyNonplayerShip( void);
 void HackShowShipID( void);
-void HitObject( spaceObjectType	*, spaceObjectType *);
+void HitObject( spaceObjectType *, spaceObjectType *);
 long GetManualSelectObject( spaceObjectType *, unsigned long,
-							unsigned long, unsigned long,
-							const UnsignedWide *, long, short);
+                            unsigned long, unsigned long,
+                            const UnsignedWide *, long, short);
 long GetSpritePointSelectObject( Rect *, spaceObjectType *, unsigned long,
-							unsigned long, unsigned long, long, short);
+                            unsigned long, unsigned long, long, short);
 
 #pragma options align=reset

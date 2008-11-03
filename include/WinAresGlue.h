@@ -19,17 +19,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 typedef struct screenBitsStruct
 {
-	Rect	bounds;
+    Rect    bounds;
 } screenBitsStruct;
 
 typedef struct qdGlobalStruct
 {
-	long				randSeed;
-	Pattern				black;
-	Pattern				gray;
-	Pattern				white;
-	Port				thePort;
-	screenBitsStruct	screenBits;
+    long                randSeed;
+    Pattern             black;
+    Pattern             gray;
+    Pattern             white;
+    Port                thePort;
+    screenBitsStruct    screenBits;
 } qdGlobalType;
 
 void RestoreDeviceClut( GDHandle);

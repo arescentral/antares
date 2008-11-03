@@ -21,10 +21,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #pragma options align=mac68k
 
-#define	kTitleSongID		4001
-#define	kPlaySongID			4000
-#define	kMusicVolume		54
-#define	kMaxMusicVolume		64
+#define kTitleSongID        4001
+#define kPlaySongID         4000
+#define kMusicVolume        54
+#define kMaxMusicVolume     64
 
 int MusicInit( void);
 void MusicCleanup( void);
@@ -41,7 +41,7 @@ void DoConversionS3M( Str255, short);
 unsigned char *pStrcat(unsigned char *, unsigned char *);
 Handle DoExp1to3( Handle, unsigned long);
 Handle DoExp1to6( Handle, unsigned long);
-void ConvertInstrument( register	Byte	*,	register long);
-Handle SndToHandle( Handle, short	*);
+void ConvertInstrument( register    Byte    *,  register long);
+Handle SndToHandle( Handle, short   *);
 
 #pragma options align=reset

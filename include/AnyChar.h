@@ -23,19 +23,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #pragma options align=mac68k
 
-#define	kAnyChar
+#define kAnyChar
 
-#define	kAnyCharSpace	' '
+#define kAnyCharSpace   ' '
 
-#define	kAnyCharPStringMaxLen	254
+#define kAnyCharPStringMaxLen   254
 
 typedef unsigned char anyCharType;
 
 #define mGetAnyCharPStringLength( mAnyCharPtr) (*mAnyCharPtr)
-#define	mGetPStringFromSingleAnyChar( mDestAnyCharPtr, mAnyChar)\
+#define mGetPStringFromSingleAnyChar( mDestAnyCharPtr, mAnyChar)\
 {\
-	*mDestAnyCharPtr = 1;\
-	*(mDestAnyCharPtr + 1) = mAnyChar;\
+    *mDestAnyCharPtr = 1;\
+    *(mDestAnyCharPtr + 1) = mAnyChar;\
 }
 
 void CopyAnyCharPString( anyCharType *, anyCharType *);

@@ -24,5 +24,5 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Ares Demo Scanner.h"
 
 #ifndef kCreateAresDemoData
-//#define	kUseSingleDemoFile
+//#define   kUseSingleDemoFile
 #endif

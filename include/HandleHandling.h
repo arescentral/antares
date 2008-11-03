@@ -21,23 +21,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #pragma options align=mac68k
 
-#define	mHandleLockAndRegister( mhandle, munlockProc, mlockPrc, mresolveProc, mhandlename)\
+#define mHandleLockAndRegister( mhandle, munlockProc, mlockPrc, mresolveProc, mhandlename)\
 MoveHHi( (mhandle));\
 HLock( (mhandle));\
 HHClearHandle( mhandle);\
 HHRegisterHandle( &(mhandle), munlockProc, mlockPrc, mresolveProc, false, mhandlename);
 
-#define	mDataHandleLockAndRegister( mhandle, munlockProc, mlockPrc, mresolveProc, mhandlename)\
+#define mDataHandleLockAndRegister( mhandle, munlockProc, mlockPrc, mresolveProc, mhandlename)\
 MoveHHi( (mhandle));\
 HLock( (mhandle));\
 HHRegisterHandle( &(mhandle), munlockProc, mlockPrc, mresolveProc, false, mhandlename);
 
-#define	mCheckDataHandleLockAndRegister( mhandle, munlockProc, mlockPrc, mresolveProc, mhandlename)\
+#define mCheckDataHandleLockAndRegister( mhandle, munlockProc, mlockPrc, mresolveProc, mhandlename)\
 MoveHHi( (mhandle));\
 HLock( (mhandle));\
 HHRegisterHandle( &(mhandle), munlockProc, mlockPrc, mresolveProc, true, mhandlename);
 
-#define	mHandleDisposeAndDeregister( mhandle)\
+#define mHandleDisposeAndDeregister( mhandle)\
 HHDeregisterHandle( &(mhandle));\
 DisposeHandle( (mhandle));
 
@@ -45,10 +45,10 @@ short HandleHandlerInit( void);
 void HandleHandlerCleanup( void);
 void ResetAllHandleData( void);
 short HHRegisterHandle( Handle *newHandle,
-			void			(*unlockData)( Handle),
-			void			(*lockData)( Handle),
-			void			(*resolveData)( Handle),
-			Boolean, StringPtr);
+            void            (*unlockData)( Handle),
+            void            (*lockData)( Handle),
+            void            (*resolveData)( Handle),
+            Boolean, StringPtr);
 void HHDeregisterHandle( Handle *);
 void HHMaxMem( void);
 Handle HHNewHandle( long);

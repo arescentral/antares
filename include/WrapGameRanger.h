@@ -68,54 +68,54 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 |**| public function prototypes
 \******************************************/
 
-Boolean	Wrap_UseGameRanger( void);
+Boolean Wrap_UseGameRanger( void);
 
-OSErr		Wrap_GRInstallStartupHandler(void);
-OSErr		Wrap_GRInstallResumeHandler(void);
+OSErr       Wrap_GRInstallStartupHandler(void);
+OSErr       Wrap_GRInstallResumeHandler(void);
 
-Boolean		Wrap_GRCheckAEForCmd(const AppleEvent *theEvent);
-Boolean		Wrap_GRCheckFileForCmd(void);
-Boolean		Wrap_GRCheckForAE(void);
+Boolean     Wrap_GRCheckAEForCmd(const AppleEvent *theEvent);
+Boolean     Wrap_GRCheckFileForCmd(void);
+Boolean     Wrap_GRCheckForAE(void);
 
-Boolean		Wrap_GRIsWaitingCmd(void);
-void		Wrap_GRGetWaitingCmd(void);
+Boolean     Wrap_GRIsWaitingCmd(void);
+void        Wrap_GRGetWaitingCmd(void);
 
-Boolean		Wrap_GRIsCmd(void);
-Boolean		Wrap_GRIsHostCmd(void);
-Boolean		Wrap_GRIsJoinCmd(void);
+Boolean     Wrap_GRIsCmd(void);
+Boolean     Wrap_GRIsHostCmd(void);
+Boolean     Wrap_GRIsJoinCmd(void);
 
-char*		Wrap_GRGetHostGameName(void);
-UInt16		Wrap_GRGetHostMaxPlayers(void);
-UInt32		Wrap_GRGetJoinAddress(void);
-char*		Wrap_GRGetPlayerName(void);
-UInt16		Wrap_GRGetPortNumber(void);
+char*       Wrap_GRGetHostGameName(void);
+UInt16      Wrap_GRGetHostMaxPlayers(void);
+UInt32      Wrap_GRGetJoinAddress(void);
+char*       Wrap_GRGetPlayerName(void);
+UInt16      Wrap_GRGetPortNumber(void);
 
-void		Wrap_GRReset(void);
+void        Wrap_GRReset(void);
 
-void		Wrap_GRHostReady(void);
-void		Wrap_GRGameBegin(void);
-void		Wrap_GRStatScore(SInt32 score);
-void		Wrap_GRStatOtherScore(SInt32 score);
-void		Wrap_GRGameEnd(void);
-void		Wrap_GRHostClosed(void);
+void        Wrap_GRHostReady(void);
+void        Wrap_GRGameBegin(void);
+void        Wrap_GRStatScore(SInt32 score);
+void        Wrap_GRStatOtherScore(SInt32 score);
+void        Wrap_GRGameEnd(void);
+void        Wrap_GRHostClosed(void);
 
-OSErr		Wrap_GROpenGameRanger(void);
+OSErr       Wrap_GROpenGameRanger(void);
 
 Boolean
-Wrap_GRNSpDoModalHostDialog			(NSpProtocolListReference  ioProtocolList,
-								 Str31 					ioGameName,
-								 Str31 					ioPlayerName,
-								 Str31 					ioPassword,
-								 NSpEventProcPtr 		inEventProcPtr);
+Wrap_GRNSpDoModalHostDialog         (NSpProtocolListReference  ioProtocolList,
+                                 Str31                  ioGameName,
+                                 Str31                  ioPlayerName,
+                                 Str31                  ioPassword,
+                                 NSpEventProcPtr        inEventProcPtr);
 
 NSpAddressReference
-Wrap_GRNSpDoModalJoinDialog			(ConstStr31Param 		inGameType,
-								 ConstStr255Param 		inEntityListLabel,
-								 Str31 					ioName,
-								 Str31 					ioPassword,
-								 NSpEventProcPtr 		inEventProcPtr);
+Wrap_GRNSpDoModalJoinDialog         (ConstStr31Param        inGameType,
+                                 ConstStr255Param       inEntityListLabel,
+                                 Str31                  ioName,
+                                 Str31                  ioPassword,
+                                 NSpEventProcPtr        inEventProcPtr);
 
 void
-Wrap_GRNSpReleaseAddressReference	(NSpAddressReference	inAddr);
+Wrap_GRNSpReleaseAddressReference   (NSpAddressReference    inAddr);
 
 #endif kWrap_GameRanger_h

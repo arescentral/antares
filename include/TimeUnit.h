@@ -19,11 +19,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 // definitions for turn cycles
 
-#define	kTimeUnit			16667	// in microseconds--essentially one tick (1/60th of second)
-#define	kMaxTimePerCycle	3		// max number of time units to move by at once
-#define	kDecideEveryCycles	3		// every time this many cycles pass, we have to process player & computer decisions
-#define	kBroadcastSelfTime	4
-#define	kMaxGameTime		65535	// the time wraps around here
+#define kTimeUnit           16667   // in microseconds--essentially one tick (1/60th of second)
+#define kMaxTimePerCycle    3       // max number of time units to move by at once
+#define kDecideEveryCycles  3       // every time this many cycles pass, we have to process player & computer decisions
+#define kBroadcastSelfTime  4
+#define kMaxGameTime        65535   // the time wraps around here
 
 void ResetLastTime( long);
 long GetTimeLapse( void);

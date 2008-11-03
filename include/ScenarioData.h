@@ -55,14 +55,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /* - definitions
 *******************************************/
 
-#define	kScenario_Data_ResType			'nlAG'
-#define	kScenario_Data_ResID			128
+#define kScenario_Data_ResType          'nlAG'
+#define kScenario_Data_ResID            128
 
-#define	kScenario_Data_Flag_IsNetworkable		0x00000001
-#define	kScenario_Data_Flag_HasCustomObjects	0x00000002
-#define	kScenario_Data_Flag_HasCustomRaces		0x00000004
-#define	kScenario_Data_Flag_HasCustomScenarios	0x00000008
-#define	kScenario_Data_Flag_NotOptimized		0x00000010
+#define kScenario_Data_Flag_IsNetworkable       0x00000001
+#define kScenario_Data_Flag_HasCustomObjects    0x00000002
+#define kScenario_Data_Flag_HasCustomRaces      0x00000004
+#define kScenario_Data_Flag_HasCustomScenarios  0x00000008
+#define kScenario_Data_Flag_NotOptimized        0x00000010
 
 #pragma mark _macros_
 /* - macros
@@ -75,18 +75,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 typedef struct scenarioInfoType
 {
-	long			warpInFlareID;
-	long			warpOutFlareID;
-	long			playerBodyID;
-	long			energyBlobID;
-	Str255			downloadURLString;
-	Str255			titleString;
-	Str255			authorNameString;
-	Str255			authorURLString;
-	aresVersionType	version;
-	aresVersionType	requiresAresVersion;
-	unsigned long	flags;
-	unsigned long	checkSum;
+    long            warpInFlareID;
+    long            warpOutFlareID;
+    long            playerBodyID;
+    long            energyBlobID;
+    Str255          downloadURLString;
+    Str255          titleString;
+    Str255          authorNameString;
+    Str255          authorURLString;
+    aresVersionType version;
+    aresVersionType requiresAresVersion;
+    unsigned long   flags;
+    unsigned long   checkSum;
 } scenarioInfoType;
 
 #pragma mark **PUBLIC PROTOTYPES**
