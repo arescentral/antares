@@ -20,8 +20,8 @@
 
 // SOUND FX.H
 
-#include "MathSpecial.h"
-#include "Processor.h"
+#include "MathSpecial.hpp"
+#include "Processor.hpp"
 #include "Sound.h"
 
 //#ifdef powerc

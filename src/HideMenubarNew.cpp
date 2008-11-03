@@ -17,15 +17,15 @@
 
 // Hide Menubar.c
 
-#include "HideMenubar.h"
+#include "HideMenubar.hpp"
 
 #include <QuickDraw.h>
 #include <LowMem.h>
 
-#include "AresGlobalType.h"
+#include "AresGlobalType.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Options.h"
+#include "Debug.hpp"
+#include "Options.hpp"
 
 // also hides desktop corners
 

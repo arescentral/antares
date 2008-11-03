@@ -20,8 +20,8 @@
 
 // SpriteHandler.h
 
-#include "NateDraw.h"
-#include "Processor.h"
+#include "NateDraw.hpp"
+#include "Processor.hpp"
 
 
 #define kNoSpriteTable  -1

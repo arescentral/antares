@@ -20,8 +20,8 @@
 
 // Screen Label.h
 
-#include "AnyChar.h"
-#include "SpaceObject.h"
+#include "AnyChar.hpp"
+#include "SpaceObject.hpp"
 
 #pragma options align=mac68k
 

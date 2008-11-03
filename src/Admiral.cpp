@@ -17,23 +17,23 @@
 
 // Admiral.c
 
-#include "Admiral.h"
+#include "Admiral.hpp"
 
-#include "AnyChar.h"
-#include "AresCheat.h"
-#include "AresGlobalType.h"
+#include "AnyChar.hpp"
+#include "AresCheat.hpp"
+#include "AresGlobalType.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
-#include "HandleHandling.h"
-#include "MathMacros.h"
-#include "Randomize.h"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "HandleHandling.hpp"
+#include "MathMacros.hpp"
+#include "Randomize.hpp"
 #include "Resources.h"
-#include "SoundFX.h"
-#include "SpaceObject.h"
-#include "SpaceObjectHandling.h"
-#include "StringHandling.h"
-#include "UniverseUnit.h"
+#include "SoundFX.hpp"
+#include "SpaceObject.hpp"
+#include "SpaceObjectHandling.hpp"
+#include "StringHandling.hpp"
+#include "UniverseUnit.hpp"
 
 #define kConvoySpeed                3
 

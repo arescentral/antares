@@ -22,8 +22,8 @@
 
 #include <appletalk.h>
 
-#include "AnyChar.h"
-#include "SpaceObject.h"
+#include "AnyChar.hpp"
+#include "SpaceObject.hpp"
 
 #define kAresNetwork
 

@@ -17,17 +17,17 @@
 
 // Ares Movie Player.c
 
-#include "AresMoviePlayer.h"
+#include "AresMoviePlayer.hpp"
 
 #include <Palettes.h>
 
-#include "AresGlobalType.h"
+#include "AresGlobalType.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
-#include "KeyMapTranslation.h"
-#include "Options.h"
-#include "Randomize.h"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "KeyMapTranslation.hpp"
+#include "Options.hpp"
+#include "Randomize.hpp"
 
 #define kSoundVolumeMultiplier  32  // = 256 (1.0) / 8 (kMaxSoundVolumePreference)
 

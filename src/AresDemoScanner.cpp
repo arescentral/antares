@@ -32,20 +32,20 @@
 // scn12 = dch 4/rch13 -> cond 63 Countr >= -> action 458 declare winner 0 next:-1 <-> next:14
 //
 
-#include "AresDemoScanner.h"
+#include "AresDemoScanner.hpp"
 
 #include <QDOffscreen.h>
 
-#include "AresGlobalType.h"
-#include "AresPreferences.h"
+#include "AresGlobalType.hpp"
+#include "AresPreferences.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
-#include "OffscreenGWorld.h"
-#include "PlayerInterface.h"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "OffscreenGWorld.hpp"
+#include "PlayerInterface.hpp"
 #include "Resources.h"
-#include "SpaceObjectHandling.h"
-#include "ScenarioMaker.h"
+#include "SpaceObjectHandling.hpp"
+#include "ScenarioMaker.hpp"
 
 extern aresGlobalType *gAresGlobal;
 

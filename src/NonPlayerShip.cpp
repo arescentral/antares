@@ -17,38 +17,38 @@
 
 // NonPlayer ships
 
-#include "NonPlayerShip.h"
+#include "NonPlayerShip.hpp"
 
 //#include <math routines.h>
 
-#include "Admiral.h"
-#include "AresGlobalType.h"
-#include "AresNetwork.h"
-#include "ColorTranslation.h"     // a hack
+#include "Admiral.hpp"
+#include "AresGlobalType.hpp"
+#include "AresNetwork.hpp"
+#include "ColorTranslation.hpp"     // a hack
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
+#include "Debug.hpp"
+#include "Error.hpp"
 #include "GXMath.h"
-#include "KeyCodes.h"
-#include "KeyMapTranslation.h"  // HACK FOR TESTING
-#include "MathMacros.h"
-#include "MessageScreen.h"
-#include "Motion.h"  // HACK FOR TESTING
-#include "OffscreenGWorld.h"      // a hack
-#include "PlayerShip.h"
-#include "Randomize.h"
+#include "KeyCodes.hpp"
+#include "KeyMapTranslation.hpp"  // HACK FOR TESTING
+#include "MathMacros.hpp"
+#include "MessageScreen.hpp"
+#include "Motion.hpp"  // HACK FOR TESTING
+#include "OffscreenGWorld.hpp"      // a hack
+#include "PlayerShip.hpp"
+#include "Randomize.hpp"
 #include "Resources.h"
-#include "Rotation.h"
-#include "ScenarioMaker.h"
-#include "ScreenLabel.h"
-#include "ScrollStars.h"  // for resetting the player ship
-#include "ShotsBeamsExplosions.h"
-#include "SoundFX.h"
-#include "SpaceObjectHandling.h"
-#include "TimeUnit.h"
+#include "Rotation.hpp"
+#include "ScenarioMaker.hpp"
+#include "ScreenLabel.hpp"
+#include "ScrollStars.hpp"  // for resetting the player ship
+#include "ShotsBeamsExplosions.hpp"
+#include "SoundFX.hpp"
+#include "SpaceObjectHandling.hpp"
+#include "TimeUnit.hpp"
 #include "ToolUtils.h"
-#include "Transitions.h"
-#include "UniverseUnit.h"
+#include "Transitions.hpp"
+#include "UniverseUnit.hpp"
 
 #define kDirectionError         5           // how picky in degrees we are about angle
 #define kShootAngle             15          // how picky we are about shooting in degrees

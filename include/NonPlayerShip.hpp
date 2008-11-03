@@ -20,8 +20,8 @@
 
 // NonPlayerShip.h
 
-#include "NateDraw.h"
-#include "SpaceObject.h"
+#include "NateDraw.hpp"
+#include "SpaceObject.hpp"
 
 #pragma options align=mac68k
 

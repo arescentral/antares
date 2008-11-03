@@ -20,11 +20,11 @@
 
 // Space Object.h
 
-#include "MathSpecial.h"
-#include "NateDraw.h"
-#include "Scenario.h"
-#include "SoundFX.h"
-#include "SpriteHandling.h"
+#include "MathSpecial.hpp"
+#include "NateDraw.hpp"
+#include "Scenario.hpp"
+#include "SoundFX.hpp"
+#include "SpriteHandling.hpp"
 
 #pragma options align=mac68k
 

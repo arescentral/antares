@@ -17,24 +17,24 @@
 
 // Ares Preferences
 
-#include "AresPreferences.h"
+#include "AresPreferences.hpp"
 
 #include "AltPreferences.h"
 #include "AmbrosiaSerial.h"
-#include "AnyChar.h"
-#include "AresGlobalType.h"
-#include "AresNetworkSprocket.h"
+#include "AnyChar.hpp"
+#include "AresGlobalType.hpp"
+#include "AresNetworkSprocket.hpp"
 #include "ConditionalMacros.h"
 #include "CopyProtection.h" // is included in prefs
-#include "Debug.h"
-#include "Error.h"
-#include "KeyMapTranslation.h"
-#include "Options.h"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "KeyMapTranslation.hpp"
+#include "Options.hpp"
 //#include "publicserial.h"
 //#include "PublicSerialDialog.h"
 #include "Resources.h"
-#include "StdPrefsLib.h"
-#include "StringHandling.h"
+#include "StdPrefsLib.hpp"
+#include "StringHandling.hpp"
 
 #define kPreferenceFileCreator      'ar12'  // normally 'ar12'
 #define kPreferenceFileType         'pref'

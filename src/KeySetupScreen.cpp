@@ -17,22 +17,22 @@
 
 // Key_Setup_Screen.c
 
-#include "KeySetupScreen.h"
+#include "KeySetupScreen.hpp"
 
-#include "AresGlobalType.h"
-#include "AresMain.h"
-#include "AresPreferences.h"
-#include "ColorTranslation.h"
-#include "Debug.h"
-#include "Error.h"
-#include "HideMenubar.h"
-#include "InterfaceHandling.h"
-#include "KeyMapTranslation.h"
-#include "OffscreenGWorld.h"
-#include "Options.h"
-#include "PlayerInterface.h"
-#include "SoundFX.h"
-#include "StringHandling.h"
+#include "AresGlobalType.hpp"
+#include "AresMain.hpp"
+#include "AresPreferences.hpp"
+#include "ColorTranslation.hpp"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "HideMenubar.hpp"
+#include "InterfaceHandling.hpp"
+#include "KeyMapTranslation.hpp"
+#include "OffscreenGWorld.hpp"
+#include "Options.hpp"
+#include "PlayerInterface.hpp"
+#include "SoundFX.hpp"
+#include "StringHandling.hpp"
 
 #define kKeyScreenID                5030
 #define kKeyCancelButton            0

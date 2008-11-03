@@ -15,19 +15,19 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "EZSprite.h"
+#include "EZSprite.hpp"
 
 #include <QDOffscreen.h>
 
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
-#include "HandleHandling.h"
-#include "NateDraw.h"
-#include "NatePixTable.h"
-#include "OffscreenGWorld.h"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "HandleHandling.hpp"
+#include "NateDraw.hpp"
+#include "NatePixTable.hpp"
+#include "OffscreenGWorld.hpp"
 #include "Resources.h"
-#include "SpriteHandling.h"
+#include "SpriteHandling.hpp"
 
 extern  WindowPtr       gTheWindow;
 extern  PixMapHandle    thePixMapHandle;

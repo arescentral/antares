@@ -18,7 +18,7 @@
 #ifndef ANTARES_OFFSCREEN_GWORLD_HPP_
 #define ANTARES_OFFSCREEN_GWORLD_HPP_
 
-#include "Processor.h"
+#include "Processor.hpp"
 
 #pragma options align=mac68k
 

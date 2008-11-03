@@ -19,24 +19,24 @@
 
 //#define pGenerateImages
 
-#include "AresGuideMaker.h"
+#include "AresGuideMaker.hpp"
 
 #include <QDOffscreen.h>
 
-#include "AnyChar.h"
-#include "AresGlobalType.h"
+#include "AnyChar.hpp"
+#include "AresGlobalType.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
+#include "Debug.hpp"
+#include "Error.hpp"
 #include "LoadClip2Gif.h"
-#include "NatePixTable.h"
-#include "OffscreenGWorld.h"
-#include "Races.h"
+#include "NatePixTable.hpp"
+#include "OffscreenGWorld.hpp"
+#include "Races.hpp"
 #include "Resources.h"
-#include "SpaceObjectHandling.h"
-#include "SpriteHandling.h"
-#include "StringHandling.h"
-#include "StringNumerics.h"
+#include "SpaceObjectHandling.hpp"
+#include "SpriteHandling.hpp"
+#include "StringHandling.hpp"
+#include "StringNumerics.hpp"
 
 #define kSpriteBoundsWidth  128
 #define kSpriteBoundsHeight 128

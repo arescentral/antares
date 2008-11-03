@@ -20,8 +20,8 @@
 
 // Admiral.h
 
-#include "AnyChar.h"
-#include "Scenario.h"
+#include "AnyChar.hpp"
+#include "Scenario.hpp"
 
 #pragma options align=mac68k
 

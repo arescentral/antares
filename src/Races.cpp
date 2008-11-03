@@ -17,13 +17,13 @@
 
 // Races.c
 
-#include "Races.h"
+#include "Races.hpp"
 
-#include "AresGlobalType.h"
+#include "AresGlobalType.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
-#include "HandleHandling.h"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "HandleHandling.hpp"
 #include "Resources.h"
 
 #define kRaceError          "\pRACE"

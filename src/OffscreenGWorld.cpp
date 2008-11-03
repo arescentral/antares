@@ -17,22 +17,22 @@
 
 // Offscreen Graphics: new & clean, using GWorlds etc
 
-#include "OffscreenGWorld.h"
+#include "OffscreenGWorld.hpp"
 
 #include <QDOffscreen.h>
 #include <Palettes.h>
 
-#include "AresGlobalType.h"
+#include "AresGlobalType.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
-#include "GDeviceHandling.h"
-#include "Options.h"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "GDeviceHandling.hpp"
+#include "Options.hpp"
 
 //#define   kByteLevelTesting
 
 #ifdef kByteLevelTesting
-#include "SpriteHandling.h"    // for testbyte debigging kludge
+#include "SpriteHandling.hpp"    // for testbyte debigging kludge
 #endif
 
 #define kOffscreenError     "\pGWLD"

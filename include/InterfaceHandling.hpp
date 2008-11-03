@@ -20,8 +20,8 @@
 
 // Interface Handling.h
 
-#include "AnyChar.h"
-#include "PlayerInterfaceItems.h"
+#include "AnyChar.hpp"
+#include "PlayerInterfaceItems.hpp"
 
 #pragma options align=mac68k
 

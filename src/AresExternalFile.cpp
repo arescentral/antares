@@ -17,18 +17,18 @@
 
 // Ares_External_File.c
 
-#include "AresExternalFile.h"
+#include "AresExternalFile.hpp"
 
 #include "AmbrosiaSerial.h"
-#include "AresGlobalType.h"
-#include "Debug.h"
-#include "Error.h"
-#include "HandleHandling.h"
-#include "Races.h"
-#include "Scenario.h"
-#include "ScenarioData.h"
-#include "ScenarioMaker.h"
-#include "SpaceObjectHandling.h"
+#include "AresGlobalType.hpp"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "HandleHandling.hpp"
+#include "Races.hpp"
+#include "Scenario.hpp"
+#include "ScenarioData.hpp"
+#include "ScenarioMaker.hpp"
+#include "SpaceObjectHandling.hpp"
 
 extern  aresGlobalType          *gAresGlobal;
 extern  Handle                  gBaseObjectData, gObjectActionData;

@@ -20,9 +20,9 @@
 
 // Direct Text.h
 
-#include "AnyChar.h"
-#include "Processor.h"
-#include "SpriteHandling.h"
+#include "AnyChar.hpp"
+#include "Processor.hpp"
+#include "SpriteHandling.hpp"
 
 #pragma options align=mac68k
 

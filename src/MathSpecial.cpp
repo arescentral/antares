@@ -19,13 +19,13 @@
 
 // Special Math Functions
 
-#include "MathSpecial.h"
+#include "MathSpecial.hpp"
 
 #include <ToolUtils.h>
 
 #include "ConditionalMacros.h"
 #include "GXMath.h"
-#include "Processor.h"
+#include "Processor.hpp"
 #include "Resources.h"
 
 //      FOR THE SQUARE ROOT CODE:

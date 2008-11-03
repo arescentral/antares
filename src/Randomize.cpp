@@ -17,15 +17,15 @@
 
 // Randomize.c
 
-#include "Randomize.h"
+#include "Randomize.hpp"
 
-#include "AresGlobalType.h"
-#include "AresPreferences.h"
+#include "AresGlobalType.hpp"
+#include "AresPreferences.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
+#include "Debug.hpp"
+#include "Error.hpp"
 #include "Resources.h"
-#include "StringHandling.h"
+#include "StringHandling.hpp"
 
 #define kRandomError    "\pRAND"
 

@@ -24,23 +24,23 @@
 // If you need to allocate a handle and keep it locked all the time, do it through here.
 //
 
-#include "HandleHandling.h"
+#include "HandleHandling.hpp"
 
 #include <QDOffscreen.h>
 
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "DirectText.h"
-#include "Error.h"
-#include "Randomize.h"
+#include "Debug.hpp"
+#include "DirectText.hpp"
+#include "Error.hpp"
+#include "Randomize.hpp"
 #include "Resources.h"
-#include "ScreenLabel.h"
-#include "SoundFX.h"
-#include "SpriteHandling.h"
-#include "StringHandling.h"
+#include "ScreenLabel.hpp"
+#include "SoundFX.hpp"
+#include "SpriteHandling.hpp"
+#include "StringHandling.hpp"
 
 // HACK FOR FINDING MOTION BUG:
-#include "Motion.h"
+#include "Motion.hpp"
 
 #define kHandleHandleError      "\pHNHN"
 #define kMaxHandleHandleNum     256L//128L

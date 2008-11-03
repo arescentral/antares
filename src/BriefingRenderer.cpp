@@ -17,18 +17,18 @@
 
 // Briefing_Renderer.c
 
-#include "BriefingRenderer.h"
+#include "BriefingRenderer.hpp"
 
-#include "Admiral.h"
-#include "AresGlobalType.h"
-#include "ColorTranslation.h"
-#include "Debug.h"
-#include "Error.h"
-#include "NateDraw.h"
-#include "NatePixTable.h"
-#include "Scenario.h"
-#include "ScenarioMaker.h"
-#include "SpriteHandling.h"
+#include "Admiral.hpp"
+#include "AresGlobalType.hpp"
+#include "ColorTranslation.hpp"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "NateDraw.hpp"
+#include "NatePixTable.hpp"
+#include "Scenario.hpp"
+#include "ScenarioMaker.hpp"
+#include "SpriteHandling.hpp"
 
 typedef struct briefingSpriteBoundsType
 {

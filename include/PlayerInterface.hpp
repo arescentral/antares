@@ -20,9 +20,9 @@
 
 // Player Interface.h
 
-#include "AresNetwork.h"
-#include "PlayerInterfaceDrawing.h"
-#include "PlayerInterfaceItems.h"
+#include "AresNetwork.hpp"
+#include "PlayerInterfaceDrawing.hpp"
+#include "PlayerInterfaceItems.hpp"
 
 #pragma options align=mac68k
 

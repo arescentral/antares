@@ -20,7 +20,7 @@
 
 // EZSprite.h
 
-#include "SpriteHandling.h"
+#include "SpriteHandling.hpp"
 
 void EZDrawSpriteOffByID( short, long, long, unsigned char, Rect *);
 void EZDrawSpriteOffToOnByID( short, long, long, unsigned char, Rect *);

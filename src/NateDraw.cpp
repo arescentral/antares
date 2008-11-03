@@ -17,17 +17,17 @@
 
 // NateDraw.c : special on- and off-screen drawing -- not to be confused with original "Arcade Proj" Natedraw
 
-#include "NateDraw.h"
+#include "NateDraw.hpp"
 
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
-#include "MathMacros.h"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "MathMacros.hpp"
 
 // #define kByteLevelTesting
 
 #ifdef kByteLevelTesting
-#include "SpriteHandling.h" // for test byte debugging kludge
+#include "SpriteHandling.hpp" // for test byte debugging kludge
 #endif
 
 #define mHBlitz( mdbyte, mrunLen, mcolor, mcount) \

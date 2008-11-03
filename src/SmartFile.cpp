@@ -17,12 +17,12 @@
 
 // Smart_File.c
 
-#include "SmartFile.h"
+#include "SmartFile.hpp"
 
 #include <Navigation.h>
 
-#include "NavigationUtilities.h"
-#include "OldFile.h"
+#include "NavigationUtilities.hpp"
+#include "OldFile.hpp"
 
 #ifdef powerc
 #define Has_Navigation_Services     NavServicesAvailable()

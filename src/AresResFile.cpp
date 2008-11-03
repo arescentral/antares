@@ -17,7 +17,7 @@
 
 // Ares_ResFile.c
 
-#include "AresResFile.h"
+#include "AresResFile.hpp"
 
 #include "Assert.h"
 

@@ -17,19 +17,19 @@
 
 // Transitions Color Animations.c
 
-#include "Transitions.h"
+#include "Transitions.hpp"
 
 #include <Palettes.h>
 
-#include "AresGlobalType.h"
-#include "AresMain.h"
-#include "ColorTranslation.h"
+#include "AresGlobalType.hpp"
+#include "AresMain.hpp"
+#include "ColorTranslation.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
-#include "HandleHandling.h"
-#include "KeyMapTranslation.h"
-#include "Music.h"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "HandleHandling.hpp"
+#include "KeyMapTranslation.hpp"
+#include "Music.hpp"
 #include "Quickdraw.h"
 #include "Resources.h"
 

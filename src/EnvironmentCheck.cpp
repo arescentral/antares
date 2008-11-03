@@ -25,15 +25,15 @@
 //  Shows sample usage of the Witch Doctor.
 //
 
-#include "EnvironmentCheck.h"
+#include "EnvironmentCheck.hpp"
 
 #include <Sound.h>
 
-#include "AresGlobalType.h"
+#include "AresGlobalType.hpp"
 #include "ConditionalMacros.h"
-#include "KeyMapTranslation.h"
-#include "Options.h"
-#include "Processor.h"
+#include "KeyMapTranslation.hpp"
+#include "Options.hpp"
+#include "Processor.hpp"
 #include "Resources.h"
 
 #define kEnvironmentErrorAlert      801

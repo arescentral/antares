@@ -17,10 +17,10 @@
 
 // Key Map Translation.c
 
-#include "KeyMapTranslation.h"
+#include "KeyMapTranslation.hpp"
 
 #include "ConditionalMacros.h"
-#include "Error.h"
+#include "Error.hpp"
 #include "Resources.h"
 
 #define kKeyMapError            "\pKEYM"

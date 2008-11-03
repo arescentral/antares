@@ -21,7 +21,7 @@
 // Debug.h
 
 #define DEBUG_ON        TRUE
-#include "MathSpecial.h"
+#include "MathSpecial.hpp"
 
 #pragma options align=mac68k
 

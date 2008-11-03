@@ -17,7 +17,7 @@
 
 // IconSuiteFromAlias.c
 
-#include "IconSuiteFromAlias.h"
+#include "IconSuiteFromAlias.hpp"
 
 #include <AEPackObject.h>
 

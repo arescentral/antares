@@ -17,7 +17,7 @@
 
 // Error Handling
 
-#include "Error.h"
+#include "Error.hpp"
 
 #include <Palettes.h>
 

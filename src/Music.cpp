@@ -15,19 +15,19 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "Music.h"
+#include "Music.hpp"
 
 #include "AIFF.h"
-#include "AresGlobalType.h"
+#include "AresGlobalType.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
+#include "Debug.hpp"
+#include "Error.hpp"
 #include "MAD.h"
-#include "Options.h"
+#include "Options.hpp"
 #include "RDriver.h"
 #include "Resources.h"
 #include "Sound.h"
-#include "SoundFX.h"
+#include "SoundFX.hpp"
 
 //
 //  Player PRO 4.4 -- Music Driver EXAMPLE

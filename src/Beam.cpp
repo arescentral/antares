@@ -17,22 +17,22 @@
 
 // Beam.c
 
-#include "Beam.h"
+#include "Beam.hpp"
 
 #include <QDOffscreen.h>
 
-#include "AresGlobalType.h"
-#include "ColorTranslation.h"
+#include "AresGlobalType.hpp"
+#include "ColorTranslation.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
-#include "HandleHandling.h"
-#include "MathMacros.h"
-#include "NateDraw.h"
-#include "Options.h"
-#include "Randomize.h"
-#include "Rotation.h"
-#include "UniverseUnit.h"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "HandleHandling.hpp"
+#include "MathMacros.hpp"
+#include "NateDraw.hpp"
+#include "Options.hpp"
+#include "Randomize.hpp"
+#include "Rotation.hpp"
+#include "UniverseUnit.hpp"
 
 #define kBeamError      "\pBEAM"
 

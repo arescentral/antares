@@ -20,7 +20,7 @@
 
 // Beam.h
 
-#include "SpaceObject.h"
+#include "SpaceObject.hpp"
 
 #pragma options align=mac68k
 

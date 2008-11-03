@@ -20,7 +20,7 @@
 
 // Sprite Cursor.h
 
-#include "SpriteHandling.h"
+#include "SpriteHandling.hpp"
 
 #pragma options align=mac68k
 

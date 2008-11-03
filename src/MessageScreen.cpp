@@ -18,27 +18,27 @@
 // Message Screen.c -- also the destination screen
 // must be initialized AFTER Screen Label.c
 
-#include "MessageScreen.h"
+#include "MessageScreen.hpp"
 
 #include <QDOffscreen.h>
 
-#include "AnyChar.h"
-#include "AresGlobalType.h"
-#include "ColorTranslation.h"
+#include "AnyChar.hpp"
+#include "AresGlobalType.hpp"
+#include "ColorTranslation.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "DirectText.h"
-#include "Error.h"
-#include "HandleHandling.h"
-#include "KeyMapTranslation.h"
-#include "OffscreenGWorld.h"
-#include "Options.h"
-#include "PlayerInterface.h"  // for Replace_KeyCode_Strings_With_Actual_Key_Names
-#include "PlayerInterfaceDrawing.h" // for long messages
+#include "Debug.hpp"
+#include "DirectText.hpp"
+#include "Error.hpp"
+#include "HandleHandling.hpp"
+#include "KeyMapTranslation.hpp"
+#include "OffscreenGWorld.hpp"
+#include "Options.hpp"
+#include "PlayerInterface.hpp"  // for Replace_KeyCode_Strings_With_Actual_Key_Names
+#include "PlayerInterfaceDrawing.hpp" // for long messages
 #include "Resources.h"
-#include "ScenarioMaker.h"
-#include "ScreenLabel.h"
-#include "SpriteHandling.h"
+#include "ScenarioMaker.hpp"
+#include "ScreenLabel.hpp"
+#include "SpriteHandling.hpp"
 
 #define kMessageScreenLeft      200
 #define kMessageScreenTop       454

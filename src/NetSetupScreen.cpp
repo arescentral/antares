@@ -15,39 +15,39 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "NetSetupScreen.h"
+#include "NetSetupScreen.hpp"
 
 #include <QDOffscreen.h>
 
 #include "AmbrosiaSerial.h"
-#include "AresExternalFile.h"
-#include "AresGlobalType.h"
-#include "AresMain.h"
-#include "AresNetworkSprocket.h"
-#include "AresResFile.h"
-#include "ColorTranslation.h"
+#include "AresExternalFile.hpp"
+#include "AresGlobalType.hpp"
+#include "AresMain.hpp"
+#include "AresNetworkSprocket.hpp"
+#include "AresResFile.hpp"
+#include "ColorTranslation.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "DirectText.h"
-#include "Error.h"
-#include "EZSprite.h"
-#include "HandleHandling.h"
-#include "HideMenubar.h"
-#include "Icl8ToCicn.h"
-#include "IconSuiteFromAlias.h"
-#include "InterfaceHandling.h"
-#include "MessageScreen.h" // for retroText drawing
-#include "OffscreenGWorld.h"
-#include "Options.h"
-#include "PlayerInterface.h"
-#include "Races.h"
+#include "Debug.hpp"
+#include "DirectText.hpp"
+#include "Error.hpp"
+#include "EZSprite.hpp"
+#include "HandleHandling.hpp"
+#include "HideMenubar.hpp"
+#include "Icl8ToCicn.hpp"
+#include "IconSuiteFromAlias.hpp"
+#include "InterfaceHandling.hpp"
+#include "MessageScreen.hpp" // for retroText drawing
+#include "OffscreenGWorld.hpp"
+#include "Options.hpp"
+#include "PlayerInterface.hpp"
+#include "Races.hpp"
 #include "Resources.h"
-#include "ScenarioMaker.h"
-#include "SingleDataFile.h" // to determine whether or not to allow changing of mission or race
-#include "SmartFile.h"
-#include "StringHandling.h"
-#include "StringNumerics.h"
-#include "TitleScreen.h" // for CenterRectInRect
+#include "ScenarioMaker.hpp"
+#include "SingleDataFile.hpp" // to determine whether or not to allow changing of mission or race
+#include "SmartFile.hpp"
+#include "StringHandling.hpp"
+#include "StringNumerics.hpp"
+#include "TitleScreen.hpp" // for CenterRectInRect
 
 #define kHasCustomIcon      0x0400
 

@@ -22,9 +22,9 @@
 
 #include <NetSprocket.h>
 
-#include "AnyChar.h"
+#include "AnyChar.hpp"
 #include "ConditionalMacros.h"
-#include "Processor.h"
+#include "Processor.hpp"
 
 #pragma options align=mac68k
 

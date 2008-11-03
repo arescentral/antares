@@ -20,7 +20,7 @@
 
 // Shots Beams Explosions.h
 
-#include "NateDraw.h"
+#include "NateDraw.hpp"
 
 #define kDebrisRotNum       9
 #define kDebrisPieceNum     3

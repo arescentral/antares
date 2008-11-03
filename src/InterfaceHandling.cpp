@@ -22,26 +22,26 @@
 // down events), hilights and scrolls as needed, and returns results.  Also handles editable text.
 //
 
-#include "InterfaceHandling.h"
+#include "InterfaceHandling.hpp"
 
 #include <QDOffscreen.h>
 
-#include "AnyChar.h"
-#include "AresResFile.h"
-#include "AresGlobalType.h"
-#include "ColorTranslation.h"
+#include "AnyChar.hpp"
+#include "AresResFile.hpp"
+#include "AresGlobalType.hpp"
+#include "ColorTranslation.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
-#include "HandleHandling.h"
-#include "KeyMapTranslation.h"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "HandleHandling.hpp"
+#include "KeyMapTranslation.hpp"
 #include "MixedMode.h"
-#include "OffscreenGWorld.h"
-#include "PlayerInterfaceDrawing.h"
-#include "PlayerInterfaceItems.h"
+#include "OffscreenGWorld.hpp"
+#include "PlayerInterfaceDrawing.hpp"
+#include "PlayerInterfaceItems.hpp"
 #include "Resources.h"
 #include "SetFontByString.h"
-#include "SoundFX.h"              // for button on/off
+#include "SoundFX.hpp"              // for button on/off
 
 #define kMakeInterfaceItem      20
 

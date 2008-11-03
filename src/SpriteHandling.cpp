@@ -17,28 +17,28 @@
 
 // SpriteHandling
 
-#include "SpriteHandling.h"
+#include "SpriteHandling.hpp"
 
 #include <QDOffscreen.h>
 
-#include "AresResFile.h"
-#include "AresGlobalType.h"
-#include "ColorTranslation.h"
+#include "AresResFile.hpp"
+#include "AresGlobalType.hpp"
+#include "ColorTranslation.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "DirectText.h"
-#include "Error.h"
-#include "HandleHandling.h"
-#include "MacroColors.h"
-#include "MathMacros.h"
-#include "NateDraw.h"
-#include "NatePixTable.h"
-#include "OffscreenGWorld.h"
-#include "Processor.h"
-#include "Randomize.h" // for static table
+#include "Debug.hpp"
+#include "DirectText.hpp"
+#include "Error.hpp"
+#include "HandleHandling.hpp"
+#include "MacroColors.hpp"
+#include "MathMacros.hpp"
+#include "NateDraw.hpp"
+#include "NatePixTable.hpp"
+#include "OffscreenGWorld.hpp"
+#include "Processor.hpp"
+#include "Randomize.hpp" // for static table
 #include "Resources.h"
-#include "Rotation.h"
-#include "SingleDataFile.h"
+#include "Rotation.hpp"
+#include "SingleDataFile.hpp"
 
 #define kMaxSpriteNum           500//300
 

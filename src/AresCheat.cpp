@@ -17,18 +17,18 @@
 
 // Ares Cheat
 
-#include "AresCheat.h"
+#include "AresCheat.hpp"
 
-#include "Admiral.h"
-#include "AresGlobalType.h"
-#include "AresNetworkSprocket.h"
+#include "Admiral.hpp"
+#include "AresGlobalType.hpp"
+#include "AresNetworkSprocket.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "HandleHandling.h"
-#include "MessageScreen.h"
-#include "PlayerShip.h"
-#include "StringHandling.h"
-#include "StringNumerics.h"
+#include "Debug.hpp"
+#include "HandleHandling.hpp"
+#include "MessageScreen.hpp"
+#include "PlayerShip.hpp"
+#include "StringHandling.hpp"
+#include "StringNumerics.hpp"
 #include "strlist.h"
 
 #define kCheatStringListID      750

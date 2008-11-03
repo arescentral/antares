@@ -19,7 +19,7 @@
 
 #pragma mark **INCLUDES**
 
-#include "AresVersion.h"
+#include "AresVersion.hpp"
 
 #include "Assert.h"
 #include "str_bp.h"

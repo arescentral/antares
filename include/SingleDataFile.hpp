@@ -18,7 +18,7 @@
 #ifndef ANTARES_SINGLE_DATA_FILE_HPP_
 #define ANTARES_SINGLE_DATA_FILE_HPP_
 
-#include "AresDemoScanner.h"
+#include "AresDemoScanner.hpp"
 
 // Set this to true if you want to only use one data file for sound, sprites,
 // & scenarios. Used in Sound FX.c, Scenario Maker.c, and Sprite Handling.c.

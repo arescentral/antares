@@ -17,16 +17,16 @@
 
 // Direct Text.c -- Ares Interfaces MUST be opened first --
 
-#include "DirectText.h"
+#include "DirectText.hpp"
 
 #include <QDOffscreen.h>
 
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
-#include "HandleHandling.h"
-#include "OffscreenGWorld.h"
-#include "Processor.h"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "HandleHandling.hpp"
+#include "OffscreenGWorld.hpp"
+#include "Processor.hpp"
 #include "Resources.h"
 
 #define kDirectTextError    "\pTEXT"

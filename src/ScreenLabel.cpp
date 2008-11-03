@@ -15,24 +15,24 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "ScreenLabel.h"
+#include "ScreenLabel.hpp"
 
 #include <QDOffscreen.h>
 
-#include "Admiral.h"            // hack for checking strength
-#include "AresGlobalType.h"
-#include "ColorTranslation.h"
+#include "Admiral.hpp"            // hack for checking strength
+#include "AresGlobalType.hpp"
+#include "ColorTranslation.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "DirectText.h"
-#include "Error.h"
-#include "HandleHandling.h"
-#include "MathMacros.h"
-//#include "MathSpecial.h"      // hack for checking strength
-#include "OffscreenGWorld.h"
+#include "Debug.hpp"
+#include "DirectText.hpp"
+#include "Error.hpp"
+#include "HandleHandling.hpp"
+#include "MathMacros.hpp"
+//#include "MathSpecial.hpp"      // hack for checking strength
+#include "OffscreenGWorld.hpp"
 #include "Resources.h"
-#include "SpriteCursor.h"  // for hint line
-#include "StringHandling.h"
+#include "SpriteCursor.hpp"  // for hint line
+#include "StringHandling.hpp"
 
 #define kScreenLabelError       "\pSCLB"
 #define kUseLabels

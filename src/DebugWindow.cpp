@@ -17,13 +17,13 @@
 
 // DebugWindow
 
-#include "Debug.h"
+#include "Debug.hpp"
 
 #include "ConditionalMacros.h"
-#include "Error.h"
+#include "Error.hpp"
 #include "SetFontByString.h"
-#include "StringHandling.h"
-#include "StringNumerics.h"
+#include "StringHandling.hpp"
+#include "StringNumerics.hpp"
 
 #define LINE_HEIGHT         11
 #define WINDOW_HEIGHT       50      // Window height in lines

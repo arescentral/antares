@@ -19,11 +19,11 @@
 
 // ShapeMachine IV by Nathan Lamont
 
-#include "NatePixTable.h"
+#include "NatePixTable.hpp"
 
-#include "ColorTranslation.h"
+#include "ColorTranslation.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
+#include "Debug.hpp"
 #include "Resources.h"
 #include "Sound.h"
 

@@ -17,18 +17,18 @@
 
 // Sound Player.c
 
-#include "SoundFX.h"
+#include "SoundFX.hpp"
 
-#include "AresGlobalType.h"
-#include "AresResFile.h"
+#include "AresGlobalType.hpp"
+#include "AresResFile.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
-#include "HandleHandling.h"
-#include "MathSpecial.h"
-#include "Options.h"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "HandleHandling.hpp"
+#include "MathSpecial.hpp"
+#include "Options.hpp"
 #include "Resources.h"
-#include "SingleDataFile.h"
+#include "SingleDataFile.hpp"
 
 #define kSoundFXError           "\pSNDX"
 #define kSoundResID             500

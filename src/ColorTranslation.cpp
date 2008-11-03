@@ -17,12 +17,12 @@
 
 // Color Translation.c
 
-#include "ColorTranslation.h"
+#include "ColorTranslation.hpp"
 
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
-#include "HandleHandling.h"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "HandleHandling.hpp"
 
 #define kColorTransError        "\pCLTR"
 

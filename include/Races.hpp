@@ -20,7 +20,7 @@
 
 // Races.h
 
-#include "Scenario.h"
+#include "Scenario.hpp"
 
 #pragma options align=mac68k
 

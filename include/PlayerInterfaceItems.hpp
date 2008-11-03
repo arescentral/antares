@@ -20,8 +20,8 @@
 
 // Player Interface Items.h
 
-#include "AnyChar.h"
-#include "NateDraw.h"
+#include "AnyChar.hpp"
+#include "NateDraw.hpp"
 
 #pragma options align=mac68k
 

@@ -17,10 +17,10 @@
 
 // Wrap_GameRanger.c
 
-#include "WrapGameRanger.h"
+#include "WrapGameRanger.hpp"
 
 #include "GameRanger.h"
-#include "NetSprocketGlue.h"
+#include "NetSprocketGlue.hpp"
 
 Boolean Wrap_UseGameRanger( void)
 {

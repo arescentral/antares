@@ -17,9 +17,9 @@
 
 // Wrap_GameRanger.c
 
-#include "WrapGameRanger.h"
+#include "WrapGameRanger.hpp"
 
-#include "Debug.h"
+#include "Debug.hpp"
 #include "GameRanger.h"
 
 #pragma mark **DEFINITIONS**

@@ -20,8 +20,8 @@
 
 // Motion.h
 
-#include "MathSpecial.h"
-#include "SpaceObject.h"
+#include "MathSpecial.hpp"
+#include "SpaceObject.hpp"
 
 #pragma options align=mac68k
 

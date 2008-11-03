@@ -17,15 +17,15 @@
 
 // Rotation.c
 
-#include "Rotation.h"
+#include "Rotation.hpp"
 
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
-#include "HandleHandling.h"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "HandleHandling.hpp"
 #include "math.h"
-#include "MathMacros.h"
-#include "MathSpecial.h"
+#include "MathMacros.hpp"
+#include "MathSpecial.hpp"
 #include "Resources.h"
 
 #define kRotationError  "\pROTN"

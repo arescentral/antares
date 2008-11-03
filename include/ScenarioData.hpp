@@ -20,7 +20,7 @@
 
 // Scenario_Data.h
 
-#include "AresVersion.h"
+#include "AresVersion.hpp"
 
 #define kScenario_Data_ResType          'nlAG'
 #define kScenario_Data_ResID            128

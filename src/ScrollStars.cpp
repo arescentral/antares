@@ -17,22 +17,22 @@
 
 // Scroll Stars.c *** also includes drawing for BEAMS, since they involve direct-screen lines
 
-#include "ScrollStars.h"
+#include "ScrollStars.hpp"
 
 #include <QDOffscreen.h>
 
-#include "AresGlobalType.h"
-#include "ColorTranslation.h"
+#include "AresGlobalType.hpp"
+#include "ColorTranslation.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
-#include "HandleHandling.h"
-#include "MathMacros.h"
-#include "Motion.h"
-#include "NateDraw.h"
-#include "OffscreenGWorld.h"
-#include "SpaceObject.h"
-#include "Randomize.h"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "HandleHandling.hpp"
+#include "MathMacros.hpp"
+#include "Motion.hpp"
+#include "NateDraw.hpp"
+#include "OffscreenGWorld.hpp"
+#include "SpaceObject.hpp"
+#include "Randomize.hpp"
 #include "Resources.h"
 
 #ifdef powerc

@@ -17,11 +17,11 @@
 
 // Ares_GameRanger.c
 
-#include "AresGameRanger.h"
+#include "AresGameRanger.hpp"
 
-#include "AresGlobalType.h"
-#include "Processor.h"
-#include "WrapGameRanger.h"
+#include "AresGlobalType.hpp"
+#include "Processor.hpp"
+#include "WrapGameRanger.hpp"
 
 extern aresGlobalType           *gAresGlobal;
 

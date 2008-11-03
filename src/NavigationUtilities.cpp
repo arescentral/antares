@@ -17,12 +17,12 @@
 
 // Navigation_Utilities.c
 
-#include "NavigationUtilities.h"
+#include "NavigationUtilities.hpp"
 
 #include <Navigation.h>
 
-#include "AresGlobalType.h"
-#include "OffscreenGWorld.h"
+#include "AresGlobalType.hpp"
+#include "OffscreenGWorld.hpp"
 #include "str_bp.h"
 //#include "WindowDispatch.h"
 

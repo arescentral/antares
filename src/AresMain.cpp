@@ -15,7 +15,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "AresMain.h"
+#include "AresMain.hpp"
 
 #include <Timer.h>
 #include <Palettes.h>
@@ -26,90 +26,90 @@
 #include <profiler.h>
 #endif
 
-#include "Admiral.h"
+#include "Admiral.hpp"
 #include "AmbrosiaSerial.h"
-#include "AresAppleEvent.h"
-#include "AresCheat.h"
-#include "AresDemoScanner.h"
-#include "AresExternalFile.h"
-#include "AresGameRanger.h"
-#include "AresGlobalType.h"
-#include "AresGuideMaker.h"
-#include "AresMoviePlayer.h"
-#include "AresNetwork.h"
-#include "AresNetworkSprocket.h"
-#include "AresPreferences.h"
-#include "AresResFile.h"
+#include "AresAppleEvent.hpp"
+#include "AresCheat.hpp"
+#include "AresDemoScanner.hpp"
+#include "AresExternalFile.hpp"
+#include "AresGameRanger.hpp"
+#include "AresGlobalType.hpp"
+#include "AresGuideMaker.hpp"
+#include "AresMoviePlayer.hpp"
+#include "AresNetwork.hpp"
+#include "AresNetworkSprocket.hpp"
+#include "AresPreferences.hpp"
+#include "AresResFile.hpp"
 
-#include "Beam.h"
+#include "Beam.hpp"
 
-#include "ColorTranslation.h"
+#include "ColorTranslation.hpp"
 #include "ConditionalMacros.h"
 //#include "CopyProtection.h"  // is included in prefs
 
-#include "Debug.h"
-#include "DirectText.h"
+#include "Debug.hpp"
+#include "DirectText.hpp"
 
-#include "EnvironmentCheck.h"
-#include "Error.h"
+#include "EnvironmentCheck.hpp"
+#include "Error.hpp"
 
 #include "Fonts.h"
 
-#include "GDeviceHandling.h"
+#include "GDeviceHandling.hpp"
 #include "GXMath.h"
 
-#include "HandleHandling.h"
-#include "HideMenubar.h"
+#include "HandleHandling.hpp"
+#include "HideMenubar.hpp"
 
-#include "Instruments.h"
-#include "InterfaceHandling.h"
+#include "Instruments.hpp"
+#include "InterfaceHandling.hpp"
 
-#include "KeyCodes.h"
-#include "KeyMapTranslation.h"
+#include "KeyCodes.hpp"
+#include "KeyMapTranslation.hpp"
 
-#include "MathSpecial.h"
-#include "MessageScreen.h"
-#include "Minicomputer.h"
-#include "Motion.h"
-#include "Music.h"
+#include "MathSpecial.hpp"
+#include "MessageScreen.hpp"
+#include "Minicomputer.hpp"
+#include "Motion.hpp"
+#include "Music.hpp"
 
-#include "NateDraw.h"
-#include "NetSetupScreen.h"
-#include "NonPlayerShip.h"
+#include "NateDraw.hpp"
+#include "NetSetupScreen.hpp"
+#include "NonPlayerShip.hpp"
 
-#include "OffscreenGWorld.h"
-#include "Options.h"
+#include "OffscreenGWorld.hpp"
+#include "Options.hpp"
 
-#include "PlayerInterface.h"
-#include "PlayerShip.h"
-#include "Processor.h"
+#include "PlayerInterface.hpp"
+#include "PlayerShip.hpp"
+#include "Processor.hpp"
 
-#include "Randomize.h"
+#include "Randomize.hpp"
 #include "RegistrationTool.h"
 #include "Resources.h"
-#include "Rotation.h"
+#include "Rotation.hpp"
 
-#include "ScenarioMaker.h"
-#include "ScreenLabel.h"
-#include "ScrollStars.h"
+#include "ScenarioMaker.hpp"
+#include "ScreenLabel.hpp"
+#include "ScrollStars.hpp"
 #include "SetFontByString.h"
-#include "ShotsBeamsExplosions.h"
-#include "SoundFX.h"
-#include "SpaceObjectHandling.h"
-#include "SpriteCursor.h"
-#include "SpriteHandling.h"
-#include "StringHandling.h"
+#include "ShotsBeamsExplosions.hpp"
+#include "SoundFX.hpp"
+#include "SpaceObjectHandling.hpp"
+#include "SpriteCursor.hpp"
+#include "SpriteHandling.hpp"
+#include "StringHandling.hpp"
 
-#include "TimeLimit.h"
-#include "TimeUnit.h"
-#include "TitleScreen.h"
+#include "TimeLimit.hpp"
+#include "TimeUnit.hpp"
+#include "TitleScreen.hpp"
 #include "ToolUtils.h"
-#include "Transitions.h"
+#include "Transitions.hpp"
 #include "Traps.h"
 
-#include "VersionString.h"
+#include "VersionString.hpp"
 
-#include "WrapGameRanger.h"
+#include "WrapGameRanger.hpp"
 
 //#define   kTempNet
 

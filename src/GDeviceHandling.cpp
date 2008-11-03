@@ -17,14 +17,14 @@
 
 // Graphics Device Interface
 
-#include "GDeviceHandling.h"
+#include "GDeviceHandling.hpp"
 
 #include <Palettes.h>
 
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
-#include "PlayerInterface.h"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "PlayerInterface.hpp"
 #include "Sound.h"
 
 #define kMaxDevice  4

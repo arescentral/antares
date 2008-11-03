@@ -17,7 +17,7 @@
 
 // Hide Menubar.c
 
-#include "HideMenubar.h"
+#include "HideMenubar.hpp"
 
 #include <QuickDraw.h>
 #include <LowMem.h>

@@ -17,35 +17,35 @@
 
 // Motion.c
 
-#include "Motion.h"
+#include "Motion.hpp"
 
 //#include <math routines.h>
 #include <QDOffscreen.h>
 #include <Timer.h>
 
-#include "AresGlobalType.h"
-#include "AresNetwork.h"
+#include "AresGlobalType.hpp"
+#include "AresNetwork.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
+#include "Debug.hpp"
+#include "Error.hpp"
 #include "GXMath.h"
-#include "HandleHandling.h"
-#include "MathMacros.h"
-#include "NatePixTable.h"
-#include "NonPlayerShip.h"
-#include "OffscreenGWorld.h"
-#include "PlayerShip.h"
-#include "Processor.h"
-#include "Randomize.h"
+#include "HandleHandling.hpp"
+#include "MathMacros.hpp"
+#include "NatePixTable.hpp"
+#include "NonPlayerShip.hpp"
+#include "OffscreenGWorld.hpp"
+#include "PlayerShip.hpp"
+#include "Processor.hpp"
+#include "Randomize.hpp"
 #include "Resources.h"
-#include "Rotation.h"
-#include "ScreenLabel.h"
-#include "SoundFX.h"
-#include "SpaceObject.h"
-#include "SpaceObjectHandling.h"
-#include "SpriteHandling.h"
+#include "Rotation.hpp"
+#include "ScreenLabel.hpp"
+#include "SoundFX.hpp"
+#include "SpaceObject.hpp"
+#include "SpaceObjectHandling.hpp"
+#include "SpriteHandling.hpp"
 #include "ToolUtils.h"
-#include "UniverseUnit.h"
+#include "UniverseUnit.hpp"
 
 #define kCenterScaleSize    983040L//61440L         // = 240 * SCALE_SCALE
 #define kMotionError        "\pMOTN"

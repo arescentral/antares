@@ -17,18 +17,18 @@
 
 // Ares Controls.c
 
-#include "PlayerInterfaceDrawing.h"
+#include "PlayerInterfaceDrawing.hpp"
 
-#include "AnyChar.h"
-#include "ColorTranslation.h"
+#include "AnyChar.hpp"
+#include "ColorTranslation.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "DirectText.h"
-#include "Error.h"
-#include "HandleHandling.h"
-#include "KeyMapTranslation.h"
-#include "NateDraw.h"
-#include "PlayerInterfaceItems.h"
+#include "Debug.hpp"
+#include "DirectText.hpp"
+#include "Error.hpp"
+#include "HandleHandling.hpp"
+#include "KeyMapTranslation.hpp"
+#include "NateDraw.hpp"
+#include "PlayerInterfaceItems.hpp"
 #include "Resources.h"
 
 #define kInterfaceLargeHBorder      13

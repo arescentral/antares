@@ -17,14 +17,14 @@
 
 // Ares_AppleEvent.c
 
-#include "AresAppleEvent.h"
+#include "AresAppleEvent.hpp"
 
-#include "AresExternalFile.h"
-#include "AresGlobalType.h"
-#include "Debug.h"
-#include "Error.h"
-#include "Processor.h"
-#include "WrapGameRanger.h"
+#include "AresExternalFile.hpp"
+#include "AresGlobalType.hpp"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "Processor.hpp"
+#include "WrapGameRanger.hpp"
 
 #define kAEInitErr                  76
 

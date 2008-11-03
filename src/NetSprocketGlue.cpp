@@ -17,10 +17,10 @@
 
 // NetSprocketGlue.h
 
-#include "NetSprocketGlue.h"
+#include "NetSprocketGlue.hpp"
 
 #include "GameRanger.h"
-#include "Processor.h"
+#include "Processor.hpp"
 
 #ifndef powerc
 #pragma mpwc on

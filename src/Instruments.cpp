@@ -18,32 +18,32 @@
 // Instruments.c
 // REQUIRES THAT ARES INTERFACES DATA FILE HAS BEEN OPENED!
 
-#include "Instruments.h"
+#include "Instruments.hpp"
 
 //#include <math routines.h>
 #include <QDOffscreen.h>
 
-#include "Admiral.h"
-#include "AresGlobalType.h"
-#include "ColorTranslation.h"
+#include "Admiral.hpp"
+#include "AresGlobalType.hpp"
+#include "ColorTranslation.hpp"
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
+#include "Debug.hpp"
+#include "Error.hpp"
 #include "GXMath.h"
-#include "HandleHandling.h"
-#include "MathMacros.h"
-#include "Minicomputer.h"
-#include "NateDraw.h"
-#include "OffscreenGWorld.h"
-#include "PlayerShip.h"
+#include "HandleHandling.hpp"
+#include "MathMacros.hpp"
+#include "Minicomputer.hpp"
+#include "NateDraw.hpp"
+#include "OffscreenGWorld.hpp"
+#include "PlayerShip.hpp"
 #include "Resources.h"
-#include "Rotation.h"
-#include "ScreenLabel.h"
-//#include "SoundFX.h"
-#include "SpaceObject.h"
-#include "SpriteCursor.h"
+#include "Rotation.hpp"
+#include "ScreenLabel.hpp"
+//#include "SoundFX.hpp"
+#include "SpaceObject.hpp"
+#include "SpriteCursor.hpp"
 #include "ToolUtils.h"
-#include "UniverseUnit.h"
+#include "UniverseUnit.hpp"
 
 #define kRadarBlipNum       50L
 #define kRadarColor         GREEN

@@ -20,8 +20,8 @@
 
 // NatePixTable.h
 
-//#include "NatePix.h"
-#include "SpriteHandling.h"
+//#include "NatePix.hpp"
+#include "SpriteHandling.hpp"
 
 #pragma options align=mac68k
 

@@ -17,7 +17,7 @@
 
 // AnyChar String Handling
 
-#include "AnyChar.h"
+#include "AnyChar.hpp"
 
 void CopyAnyCharPString( anyCharType *to, anyCharType *from)
 

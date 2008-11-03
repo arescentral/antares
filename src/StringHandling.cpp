@@ -17,7 +17,7 @@
 
 // String Handling.c
 
-#include "StringHandling.h"
+#include "StringHandling.hpp"
 
 #include "ConditionalMacros.h"
 

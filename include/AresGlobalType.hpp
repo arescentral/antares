@@ -21,8 +21,8 @@
 // Ares Global Type.h
 
 #include "ICAPI.h"
-#include "ScenarioData.h"
-#include "SoundFX.h"
+#include "ScenarioData.hpp"
+#include "SoundFX.hpp"
 
 #pragma options align=mac68k
 

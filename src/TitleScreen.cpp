@@ -17,13 +17,13 @@
 
 // Ares Title Screen
 
-#include "TitleScreen.h"
+#include "TitleScreen.hpp"
 
 #include "ConditionalMacros.h"
-#include "Debug.h"
-#include "Error.h"
-#include "HandleHandling.h"
-#include "OffscreenGWorld.h"
+#include "Debug.hpp"
+#include "Error.hpp"
+#include "HandleHandling.hpp"
+#include "OffscreenGWorld.hpp"
 #include "Resources.h"
 
 #define kTitleScreenID      502
