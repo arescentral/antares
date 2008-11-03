@@ -80,7 +80,7 @@ int CreateOffscreenWorld ( Rect *bounds, CTabHandle theClut)
 	GDHandle		originalDevice;
 	
 	/*
-		NewGWorld creates the world.  See p.21-12สัส13 in IM VI.  Note that
+		NewGWorld creates the world.  See p.21-12--13 in IM VI.  Note that
 		by setting pix depth to 0, we are using bounds as global rect which
 		determines the depth of the GWorld by using the deepest depth of any
 		device that rect intersects.  We should use the bounding rect of our

@@ -4628,7 +4628,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
 		{
 			DetachResource( retroTextSpec.text);
 			
-			//*** Replace place-holders in text with real data, using the fabulous Munger routine
+			// *** Replace place-holders in text with real data, using the fabulous Munger routine
 			// an object or a ship?
 			if ( baseObject->attributes & kCanThink)
 				GetIndString( numString, kShipDataNameID, 1);
@@ -5104,7 +5104,7 @@ void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, lo
 	{
 		DetachResource( retroTextSpec.text);
 		
-		//*** Replace place-holders in text with real data, using the fabulous Munger routine
+		// *** Replace place-holders in text with real data, using the fabulous Munger routine
 		// your minutes
 		NumToString( yourlength / 60, numString);
 		GetIndString( tempString, kSummaryKeyStringID, kYourMinStringNum);
@@ -5383,7 +5383,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
 		DrawInRealWorld();
 		MacSetPort( thePort);
 		
-/*		if ( LoadMiniMovie("\p:Ares Data Ä:Title", &theMovie, &movieRect, thePort, false) != noErr)
+/*		if ( LoadMiniMovie("\p:Ares Data Folder:Title", &theMovie, &movieRect, thePort, false) != noErr)
 			Debugger();
 
 		StartMiniMovie( theMovie);

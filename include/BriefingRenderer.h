@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef kBriefing_Renderer_h
 #define kBriefing_Renderer_h
 
-#pragma mark ¥¥INCLUDES¥¥
+#pragma mark **INCLUDES**
 /******************************************\
 |**| #includes
 \******************************************/
@@ -45,7 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /* - this project
 *******************************************/
 
-#pragma mark ¥¥DEFINITIONS¥¥
+#pragma mark **DEFINITIONS**
 /******************************************\
 |**| #defines
 \******************************************/
@@ -57,12 +57,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /* - macros
 *******************************************/
 
-#pragma mark ¥¥TYPEDEFS¥¥
+#pragma mark **TYPEDEFS**
 /******************************************\
 |**| typedefs
 \******************************************/
 
-#pragma mark ¥¥PUBLIC PROTOTYPES¥¥
+#pragma mark **PUBLIC PROTOTYPES**
 /******************************************\
 |**| public function prototypes
 \******************************************/

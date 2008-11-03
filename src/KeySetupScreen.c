@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 |**| Key_Setup_Screen.c
 \******************************************/
 
-#pragma mark ¥¥INCLUDES¥¥
+#pragma mark **INCLUDES**
 /******************************************\
 |**| #includes
 \******************************************/
@@ -58,7 +58,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Key_Setup_Screen.h"
 
-#pragma mark ¥¥DEFINITIONS¥¥
+#pragma mark **DEFINITIONS**
 /******************************************\
 |**| #defines
 \******************************************/
@@ -114,7 +114,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #define	mPlayScreenSound			PlayVolumeSound( kComputerBeep3, kMediumLowVolume, kShortPersistence, kMustPlaySound)
 
-#pragma mark ¥¥TYPEDEFS¥¥
+#pragma mark **TYPEDEFS**
 /******************************************\
 |**| typedefs
 \******************************************/
@@ -126,7 +126,7 @@ typedef struct
 	Boolean	didConflict;
 } tempKeyControlType;
 
-#pragma mark ¥¥EXTERNAL GLOBALS¥¥
+#pragma mark **EXTERNAL GLOBALS**
 /******************************************\
 |**| external globals
 \******************************************/
@@ -135,12 +135,12 @@ extern aresGlobalType	*gAresGlobal;
 extern GDHandle   		theDevice;
 extern CWindowPtr		gTheWindow;
 
-#pragma mark ¥¥PRIVATE GLOBALS¥¥
+#pragma mark **PRIVATE GLOBALS**
 /******************************************\
 |**| private globals
 \******************************************/
 
-#pragma mark ¥¥PRIVATE PROTOTYPES¥¥
+#pragma mark **PRIVATE PROTOTYPES**
 /******************************************\
 |**| private function prototypes
 \******************************************/
@@ -154,7 +154,7 @@ Boolean IsKeyReserved( KeyMap, Boolean);
 void BlackenOffscreen( void);
 void Pause( long);
 
-#pragma mark ¥¥PRIVATE FUNCTIONS¥¥
+#pragma mark **PRIVATE FUNCTIONS**
 /******************************************\
 |**| private functions
 \******************************************/
@@ -250,7 +250,7 @@ static void KeyControlButton_SetFlash( long whichKey, long currentTab,
 
 }
 
-#pragma mark ¥¥PUBLIC FUNCTIONS¥¥
+#pragma mark **PUBLIC FUNCTIONS**
 /******************************************\
 |**| public functions
 \******************************************/

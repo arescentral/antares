@@ -111,7 +111,7 @@ typedef struct
 // pregame message results
 enum
 {
-	eNilMessage					= -1,		// MUST NEVER BE USED (Apple¨ resrved)
+	eNilMessage					= -1,		// MUST NEVER BE USED (Apple(R) resrved)
 	ePreGameCharacterMessage	= 10001,	// pregame text character
 	ePreGamePortraitMessage		= 10002,	// pregame portrait runline
 	eClientMakeChangesMessage	= 10003,	// states whether or not client can make changes

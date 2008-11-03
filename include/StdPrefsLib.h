@@ -8,7 +8,7 @@
 				
 	Written by:	Gary Woodcock
 
-	Copyright:	© 1993-94 by Apple Computer, Inc.
+	Copyright:	(C) 1993-94 by Apple Computer, Inc.
 	Change History (most recent first):
 	
 				  3/3/94	Version 1.0.

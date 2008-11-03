@@ -472,7 +472,7 @@ Boolean ConstructScenario( long which)
 			if ( baseObject == nil) baseObject = mGetBaseObjectPtr( initial->type);
 		}
 		// check the media for this object
-//		WriteDebugLine((char *)"\pCheckingÉ");
+//		WriteDebugLine((char *)"\pChecking...");
 //		WriteDebugLong( initial->type);
 		if ( baseObject->attributes & kIsDestination)
 		{
@@ -497,7 +497,7 @@ Boolean ConstructScenario( long which)
 					mGetBaseObjectFromClassRace( baseObject, newShipNum, initial->canBuild[c2], GetAdmiralRace( c3))
 //		WriteDebugLine((char *)"\pMake");
 //		WriteDebugLong( newShipNum);
-//					WriteDebugLine((char *)"\pChecking ClassÉ");
+//					WriteDebugLine((char *)"\pChecking Class...");
 //					WriteDebugLong( initial->canBuild[c2]);
 					if ( baseObject != nil)
 						CheckBaseObjectMedia( baseObject, GetAdmiralColor( c3));

@@ -129,7 +129,7 @@ void CleanupTransitions( void)
 */
 
 /*
-PROCEDURE GetIndPattern (VAR thePattern:ÊPattern; 
+PROCEDURE GetIndPattern (VAR thePattern: Pattern; 
 								 patListID: Integer; index: Integer);
 
 void DitherFadePixMapToScreenPixMap( PixMap *sourcePix, Rect *sourceRect, PixMap *destMap)

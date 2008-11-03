@@ -904,7 +904,7 @@ SInt8	memState;
 
 	memState = HGetState(theHandle);
 	
-	//¥	Check the resource bit in the handle info
+	// *	Check the resource bit in the handle info
 	if (memState & 0x20)
 		return (true);
 		

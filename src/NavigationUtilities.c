@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 |**| Navigation_Utilities.c
 \******************************************/
 
-#pragma mark ••INCLUDES••
+#pragma mark **INCLUDES**
 /******************************************\
 |**| #includes
 \******************************************/
@@ -49,7 +49,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Navigation_Utilities.h"
 
-#pragma mark ••DEFINITIONS••
+#pragma mark **DEFINITIONS**
 /******************************************\
 |**| #defines
 \******************************************/
@@ -63,7 +63,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /* - macros
 *******************************************/
 
-#pragma mark ••TYPEDEFS••
+#pragma mark **TYPEDEFS**
 /******************************************\
 |**| typedefs
 \******************************************/
@@ -96,7 +96,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 } Document;
 */
-#pragma mark ••EXTERNAL GLOBALS••
+#pragma mark **EXTERNAL GLOBALS**
 /******************************************\
 |**| external globals
 \******************************************/
@@ -104,13 +104,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 extern CWindowPtr		gTheWindow;
 extern aresGlobalType	*gAresGlobal;
 
-#pragma mark ••PRIVATE GLOBALS••
+#pragma mark **PRIVATE GLOBALS**
 /******************************************\
 |**| private globals
 \******************************************/
 //Document* gDocumentList[kMaxDocumentCount];
 
-#pragma mark ••PRIVATE PROTOTYPES••
+#pragma mark **PRIVATE PROTOTYPES**
 /******************************************\
 |**| private function prototypes
 \******************************************/
@@ -120,12 +120,12 @@ pascal void myEventProc(const NavEventCallbackMessage callBackSelector,
 
 
 OSErr AEGetDescData(const AEDesc *desc, DescType *typeCode, void *dataBuffer, ByteCount maximumSize, ByteCount *actualSize);
-#pragma mark ••PRIVATE FUNCTIONS••
+#pragma mark **PRIVATE FUNCTIONS**
 /******************************************\
 |**| private functions
 \******************************************/
 
-#pragma mark ••PUBLIC FUNCTIONS••
+#pragma mark **PUBLIC FUNCTIONS**
 /******************************************\
 |**| public functions
 \******************************************/
@@ -173,7 +173,7 @@ OSErr NS_SelectFileObject( FSSpecPtr destFile, short openListResID)
 			if ((theErr = AEGetDescData ( &resultDesc, NULL, destFile,
 					sizeof ( FSSpec ), NULL )) == noErr)
 				{
-				// 'finalFSSpec' is the selected directory…
+				// 'finalFSSpec' is the selected directory...
 				
 //				theErr = NewAlias( &finalFSSpec, destFile, &alias);
 //				if ( theErr != noErr) return theErr;
@@ -229,7 +229,7 @@ OSErr NS_SelectFolderObject( FSSpecPtr destFile, StringPtr windowName,
 			if ((theErr = AEGetDescData ( &resultDesc, NULL, destFile,
 					sizeof ( FSSpec ), NULL )) == noErr)
 				{
-				// 'finalFSSpec' is the selected directory…
+				// 'finalFSSpec' is the selected directory...
 				
 //				theErr = NewAlias( &finalFSSpec, destFile, &alias);
 //				if ( theErr != noErr) return theErr;

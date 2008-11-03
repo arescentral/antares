@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 |**| Briefing_Renderer.c
 \******************************************/
 
-#pragma mark ¥¥INCLUDES¥¥
+#pragma mark **INCLUDES**
 /******************************************\
 |**| #includes
 \******************************************/
@@ -54,7 +54,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Briefing_Renderer.h"
 
-#pragma mark ¥¥DEFINITIONS¥¥
+#pragma mark **DEFINITIONS**
 /******************************************\
 |**| #defines
 \******************************************/
@@ -68,7 +68,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /* - macros
 *******************************************/
 
-#pragma mark ¥¥TYPEDEFS¥¥
+#pragma mark **TYPEDEFS**
 /******************************************\
 |**| typedefs
 \******************************************/
@@ -79,7 +79,7 @@ typedef struct briefingSpriteBoundsType
 	long	objectIndex;
 } briefingSpriteBoundsType;
 
-#pragma mark ¥¥EXTERNAL GLOBALS¥¥
+#pragma mark **EXTERNAL GLOBALS**
 /******************************************\
 |**| external globals
 \******************************************/
@@ -88,14 +88,14 @@ extern aresGlobalType	*gAresGlobal;
 extern Handle			gSpaceObjectData;
 extern scenarioType		*gThisScenario;
 
-#pragma mark ¥¥PRIVATE GLOBALS¥¥
+#pragma mark **PRIVATE GLOBALS**
 /******************************************\
 |**| private globals
 \******************************************/
 
 briefingSpriteBoundsType	*gBriefingSpriteBounds = nil;
 
-#pragma mark ¥¥PRIVATE PROTOTYPES¥¥
+#pragma mark **PRIVATE PROTOTYPES**
 /******************************************\
 |**| private function prototypes
 \******************************************/
@@ -132,7 +132,7 @@ void Briefing_Grid_Set( Boolean *grid, long x, long y, long gridWidth,
 	long gridHeight, Boolean value);
 
 
-#pragma mark ¥¥PRIVATE FUNCTIONS¥¥
+#pragma mark **PRIVATE FUNCTIONS**
 /******************************************\
 |**| private functions
 \******************************************/
@@ -444,7 +444,7 @@ void SpriteBounds_Get( spritePix *sprite, Point where, long scale,
 	bounds->bottom = tlong;
 }
 
-#pragma mark ¥¥PUBLIC FUNCTIONS¥¥
+#pragma mark **PUBLIC FUNCTIONS**
 /******************************************\
 |**| public functions
 \******************************************/

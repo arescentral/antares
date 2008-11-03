@@ -267,7 +267,7 @@ void ShowErrorAny(	errorRecoverType recover,
 [string] [error#] occured.
 where [string] is specified by an indexed string and error # is an error result
 code. Use it to show simple errors like:
-Couldn’t create the monkey because an error of type -234 occured.
+Couldn't create the monkey because an error of type -234 occured.
 template:
 ShowErrorOfTypeOccurred( false, kErrorStrID, -1, status, __FILE__, 0);
 */

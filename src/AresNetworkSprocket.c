@@ -326,7 +326,7 @@ short BeginNetworking( void)
 #ifdef kAllowNetSprocket	
 //	DebugStr("\pClearNetData");
 	ClearNetData();
-	//¥	Initialize NetSprocket
+	// *	Initialize NetSprocket
 //	DebugStr("\pInitialize NetSprocket");
 	status = Glue_NSpInitialize( sizeof( messageDataType), kMessageBufferSize,
 				kMaxMessageQueueLen, kNBPType, 0);

@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 |**| Ares_AppleEvent.c
 \******************************************/
 
-#pragma mark ¥¥INCLUDES¥¥
+#pragma mark **INCLUDES**
 /******************************************\
 |**| #includes
 \******************************************/
@@ -51,7 +51,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "Ares_AppleEvent.h"
 #include "Ares_External_File.h"
 
-#pragma mark ¥¥DEFINITIONS¥¥
+#pragma mark **DEFINITIONS**
 /******************************************\
 |**| #defines
 \******************************************/
@@ -64,23 +64,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /* - macros
 *******************************************/
 
-#pragma mark ¥¥TYPEDEFS¥¥
+#pragma mark **TYPEDEFS**
 /******************************************\
 |**| typedefs
 \******************************************/
 
-#pragma mark ¥¥EXTERNAL GLOBALS¥¥
+#pragma mark **EXTERNAL GLOBALS**
 /******************************************\
 |**| external globals
 \******************************************/
 extern aresGlobalType			*gAresGlobal;
 
-#pragma mark ¥¥PRIVATE GLOBALS¥¥
+#pragma mark **PRIVATE GLOBALS**
 /******************************************\
 |**| private globals
 \******************************************/
 
-#pragma mark ¥¥PRIVATE PROTOTYPES¥¥
+#pragma mark **PRIVATE PROTOTYPES**
 /******************************************\
 |**| private function prototypes
 \******************************************/
@@ -98,7 +98,7 @@ pascal OSErr HandleOpenDoc( AppleEvent *theAppleEvent, AppleEvent *reply,
 
 pascal OSErr GotRequiredParams( AppleEvent *theAppleEvent);
 
-#pragma mark ¥¥PRIVATE FUNCTIONS¥¥
+#pragma mark **PRIVATE FUNCTIONS**
 /******************************************\
 |**| private functions
 \******************************************/
@@ -272,7 +272,7 @@ pascal OSErr GotRequiredParams( AppleEvent *theAppleEvent)
 	}
 }
 
-#pragma mark ¥¥PUBLIC FUNCTIONS¥¥
+#pragma mark **PUBLIC FUNCTIONS**
 /******************************************\
 |**| public functions
 \******************************************/

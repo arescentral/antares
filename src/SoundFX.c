@@ -64,7 +64,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define	kSoundFXError			"\pSNDX"
 #define	kSoundResID				500
 
-#define	kSoundResFileName		"\p:Ares Data Ä:Ares Sounds"
+#define	kSoundResFileName		"\p:Ares Data Folder:Ares Sounds"
 
 #define	kMinVolatileSound		15	// sound 0-14 always used -- loaded at start; 15+ may be swapped around 
 
@@ -223,7 +223,7 @@ int InitSoundFX( void)
 	*/
 	
 	// check for sound sprocket
-	//¥	If SoundSprocket is present then create a listener and set things up
+	// *	If SoundSprocket is present then create a listener and set things up
 	/*
 	if ((Ptr) SSpConfigureSpeakerSetup == (Ptr) kUnresolvedCFragSymbolAddress)
 	{
@@ -233,34 +233,34 @@ int InitSoundFX( void)
 	{
 		OSStatus status = noErr;
 		
-		//¥	We have sound sprocket, so now we install the filters and create source and listener objects.
+		// *	We have sound sprocket, so now we install the filters and create source and listener objects.
 		gAresGlobal->gOptions |= kOptionSoundSprocketOn;
 	
-		//¥	Create the listener
+		// *	Create the listener
 		status = SSpListener_New(&gListener);
 		if (status)
 			ShowSimpleStringAlert("\pCould not create a sound sprocket listener.",
 				nil, nil, nil);
 	
-		//¥	Define our unit of distance measurement
+		// *	Define our unit of distance measurement
 		status = SSpListener_SetMetersPerUnit(gListener, 0.05);
 		if (status)
 			ShowSimpleStringAlert ("\pCould not set reference distance for listener.",
 				nil, nil, nil);
 	
-		//¥	Attach the sound localization component to each of the sound
-		//¥	channels that we'll be playing through.
+		// *	Attach the sound localization component to each of the sound
+		// *	channels that we'll be playing through.
 		for (i = 0; i < kMaxChannelNum; i++)
 		{
 			SoundComponentLink	myLink;
 			
-			//¥	Create the source
+			// *	Create the source
 			status = SSpSource_New(&gAresGlobal->gChannel[i].source);
 			if (status)
 				ShowSimpleStringAlert("\pCould not create a sound sprocket source.",
 					nil, nil, nil);
 			
-			//¥	Install the filter
+			// *	Install the filter
 			myLink.description.componentType = kSoundEffectsType;
 			myLink.description.componentSubType = kSSpLocalizationSubType;
 			myLink.description.componentManufacturer = 0;
@@ -292,12 +292,12 @@ TQ3CameraPlacement	location;
 	if (!((gAresGlobal->gOptions & kOptionSoundSprocketOn) && ( gAresGlobal->gOptions & kOptionSoundAvailable)))
 		return;
 
-	//¥	Set the listener in the bottom middle of the screen
+	// *	Set the listener in the bottom middle of the screen
 	location.cameraLocation.x = 0;
 	location.cameraLocation.y = 0;
 	location.cameraLocation.z = 0;
 
-	//¥	Focus the listener's attention on the exact middle of the screen
+	// *	Focus the listener's attention on the exact middle of the screen
 	location.pointOfInterest.x = 0;
 	location.pointOfInterest.y = 1;
 	location.pointOfInterest.z = 0;
@@ -646,12 +646,12 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
 						nil, nil, nil);
 /*
 
-				//¥	Position the sound in space.  The lower left corner of the screen is (0, 0)
+				// *	Position the sound in space.  The lower left corner of the screen is (0, 0)
 				location.cameraLocation.x = myPoint.x;
 				location.cameraLocation.y = myPoint.y;
 				location.cameraLocation.z = 0;
 				
-				//¥	Orient the sound so that it is down directed down towards the listener
+				// *	Orient the sound so that it is down directed down towards the listener
 				location.pointOfInterest.x = 320;
 				location.pointOfInterest.y = 240;
 				location.pointOfInterest.z = 0;

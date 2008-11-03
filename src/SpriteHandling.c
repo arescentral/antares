@@ -79,7 +79,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #define	kSpriteHandleError		"\pSPHD"
 
-#define	kSpriteResFileName		"\p:Ares Data Ä:Ares Sprites"
+#define	kSpriteResFileName		"\p:Ares Data Folder:Ares Sprites"
 
 #define	kSpriteBlipThreshhold	kOneQuarterScale
 //#define	kBlipSpriteID			1000				// table we need for blips
@@ -1180,12 +1180,12 @@ void asm OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
 		move.l	struct(spritePixStruct.width)(ar2), dr3;	// dr3 = ar2->width(sprite)
 		subq.l	#0x1, dr3;								// dr3 -= 1
 		subq.l	#0x1, dr6;								// dr6(mapWidth) -= 1
-		add.l	dr6, dr6;								// dr6(v) *= 2 È v = (mapWidth -1) * 2
+		add.l	dr6, dr6;								// dr6(v) *= 2 >> v = (mapWidth -1) * 2
 		move.l	dr6, dr5;								// dr5(d) = dr6(v)
-		sub.l	dr3, dr5;								// dr5(d) -= dr3(h) È d = v - h
+		sub.l	dr3, dr5;								// dr5(d) -= dr3(h) >> d = v - h
 		add.l	dr3, dr3;								// dr3 *= 2
 		move.l	dr6, h;									// h = v
-		sub.l	dr3, h;									// h -= dr3 È h = v - (h * 2)
+		sub.l	dr3, h;									// h -= dr3 >> h = v - (h * 2)
 		clr.l	dr7;									// dr7(x) = 0
 		clr.l	dr4;									// dr4(i) = 0
 		clr.l	y;										// y = 0
@@ -1244,12 +1244,12 @@ void asm OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
 		subq.l	#0x1, dr3;								// dr3 -= 1
 		move.l	mapHeight, dr6;							// dr6 = mapHeight
 		subq.l	#0x1, dr6;								// dr6(mapHeight) -= 1
-		add.l	dr6, dr6;								// dr6(v) *= 2 È v = (mapHeight -1) * 2
+		add.l	dr6, dr6;								// dr6(v) *= 2 >> v = (mapHeight -1) * 2
 		move.l	dr6, dr5;								// dr5(d) = dr6(v)
-		sub.l	dr3, dr5;								// dr5(d) -= dr3(h) È d = v - h
+		sub.l	dr3, dr5;								// dr5(d) -= dr3(h) >> d = v - h
 		add.l	dr3, dr3;								// dr3 *= 2
 		move.l	dr6, h;									// h = v
-		sub.l	dr3, h;									// h -= dr3 È h = v - (h * 2)
+		sub.l	dr3, h;									// h -= dr3 >> h = v - (h * 2)
 		clr.l	dr7;									// dr7(x) = 0
 		clr.l	dr4;									// dr4(i) = 0
 		clr.l	y;										// y = 0
@@ -2689,7 +2689,7 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
 						{
 							if ( PixelInSprite_IsOutside( sprite, sourceX, sourceY,
 								hmap, vmap))
-								*destByte = colorOut;//*shapeByte;
+								*destByte = colorOut;// *shapeByte;
 							else
 								*destByte = colorIn;
 						}

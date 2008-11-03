@@ -3214,7 +3214,7 @@ void OpenOtherScenarioFile( netSetupType *setup)
 	
 	if ( gAresGlobal->otherPlayerScenarioFileName[0] > 0)
 	{
-		CopyPString( filePath, "\p:Ares Net Scenarios Ä:");
+		CopyPString( filePath, "\p:Ares Net Scenarios Folder:");
 		ConcatenatePString( filePath, gAresGlobal->otherPlayerScenarioFileName);
 	} else
 	{

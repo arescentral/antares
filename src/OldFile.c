@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 |**| Old_File.c
 \******************************************/
 
-#pragma mark ╔╔INCLUDES╔╔
+#pragma mark **INCLUDES**
 /******************************************\
 |**| #includes
 \******************************************/
@@ -45,7 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *******************************************/
 #include "Old_File.h"
 
-#pragma mark ╔╔DEFINITIONS╔╔
+#pragma mark **DEFINITIONS**
 /******************************************\
 |**| #defines
 \******************************************/
@@ -90,7 +90,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define doCopyPString( m_sourceString, m_destString) pstrcpy( m_destString, m_sourceString)
 #define doConcatPStrings(  m_destString, m_sourceString) pstrcat( m_destString, m_sourceString)
 
-#pragma mark ╔╔TYPEDEFS╔╔
+#pragma mark **TYPEDEFS**
 /******************************************\
 |**| typedefs
 \******************************************/
@@ -106,40 +106,40 @@ typedef struct
 
 typedef StandardFileReply *standardFileReplyPtr;
 
-#pragma mark ╔╔EXTERNAL GLOBALS╔╔
+#pragma mark **EXTERNAL GLOBALS**
 /******************************************\
 |**| external globals
 \******************************************/
 
-#pragma mark ╔╔PRIVATE GLOBALS╔╔
+#pragma mark **PRIVATE GLOBALS**
 /******************************************\
 |**| private globals
 \******************************************/
 
-#pragma mark ╔╔PRIVATE PROTOTYPES╔╔
+#pragma mark **PRIVATE PROTOTYPES**
 /******************************************\
 |**| private function prototypes
 \******************************************/
 
-#pragma mark ╔╔PRIVATE FUNCTIONS╔╔
+#pragma mark **PRIVATE FUNCTIONS**
 /******************************************\
 |**| private functions
 \******************************************/
 
-#pragma mark ╔╔PUBLIC FUNCTIONS╔╔
+#pragma mark **PUBLIC FUNCTIONS**
 /******************************************\
 |**| public functions
 \******************************************/
 
-// вввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввв
+// **************************************************************************************
 // FiltersAndHooks.c
-// вввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввв
+// **************************************************************************************
 
-// иииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииии includes
+// ***************************************************************************** includes
 
 //#include "Files1.h"
 
-// иииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииииии global variables
+// ********************************************************************* global variables
 
 SInt16	gCurrentType = 1;
 Str255	gPrevSelectedName;
@@ -147,7 +147,7 @@ Boolean	gDirectorySelectionFlag;
 
 SFTypeList	gFileTypes;
 
-// ввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввв filterFunctionOpenDialog
+// ************************************************************* filterFunctionOpenDialog
 
 pascal Boolean  filterFunctionOpenDialog(CInfoPBPtr pbPtr,void *dataPtr)
 {
@@ -159,7 +159,7 @@ pascal Boolean  filterFunctionOpenDialog(CInfoPBPtr pbPtr,void *dataPtr)
 		return true;
 }
 
-// ввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввв hookFunctionOpenDialog
+// *************************************************************** hookFunctionOpenDialog
 
 pascal SInt16  hookFunctionOpenDialog(SInt16 item,DialogPtr theDialog,void *dataPtr)
 {
@@ -191,7 +191,7 @@ pascal SInt16  hookFunctionOpenDialog(SInt16 item,DialogPtr theDialog,void *data
 	return item;
 }
 
-// ввввввввввввввввввввввввввввввввввввввввввввввввввввввввввв doDirectorySelectionDialog
+// *********************************************************** doDirectorySelectionDialog
 
 OSErr  doDirectorySelectionDialog( StandardFileReply *stdFileReplyStruct)
 {
@@ -224,7 +224,7 @@ OSErr  doDirectorySelectionDialog( StandardFileReply *stdFileReplyStruct)
 	return error;
 }		
 
-// вввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввв filterFunctionDirSelect
+// ************************************************************** filterFunctionDirSelect
 
 pascal Boolean  filterFunctionDirSelect(CInfoPBPtr pbPtr,void *dataPtr)
 {
@@ -238,7 +238,7 @@ pascal Boolean  filterFunctionDirSelect(CInfoPBPtr pbPtr,void *dataPtr)
 	return result;
 }
 
-// вввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввв hookFunctionDirSelect
+// **************************************************************** hookFunctionDirSelect
 
 pascal SInt16  hookFunctionDirSelect(SInt16 item,DialogPtr theDialog,
 	void *dataPtr)
@@ -277,4 +277,4 @@ pascal SInt16  hookFunctionDirSelect(SInt16 item,DialogPtr theDialog,
 	return item;
 }
 
-// вввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввввв
+// **************************************************************************************

@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 |**| IconSuiteFromAlias.c
 \******************************************/
 
-#pragma mark ••INCLUDES••
+#pragma mark **INCLUDES**
 /******************************************\
 |**| #includes
 \******************************************/
@@ -45,7 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *******************************************/
 #include "IconSuiteFromAlias.h"
 
-#pragma mark ••DEFINITIONS••
+#pragma mark **DEFINITIONS**
 /******************************************\
 |**| #defines
 \******************************************/
@@ -72,22 +72,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #define require_plain( x, y) do { if (!(x)) { goto y; } } while (0)
 
-#pragma mark ••TYPEDEFS••
+#pragma mark **TYPEDEFS**
 /******************************************\
 |**| typedefs
 \******************************************/
 
-#pragma mark ••EXTERNAL GLOBALS••
+#pragma mark **EXTERNAL GLOBALS**
 /******************************************\
 |**| external globals
 \******************************************/
 
-#pragma mark ••PRIVATE GLOBALS••
+#pragma mark **PRIVATE GLOBALS**
 /******************************************\
 |**| private globals
 \******************************************/
 
-#pragma mark ••PRIVATE PROTOTYPES••
+#pragma mark **PRIVATE PROTOTYPES**
 /******************************************\
 |**| private function prototypes
 \******************************************/
@@ -105,7 +105,7 @@ static Size GetSizeFromIconType(DescType iconType);
 
 pascal Boolean IdleHandle( EventRecord *theEvent, long *sleepTime, RgnHandle *mouseRgn);
 
-#pragma mark ••PRIVATE FUNCTIONS••
+#pragma mark **PRIVATE FUNCTIONS**
 /******************************************\
 |**| private functions
 \******************************************/
@@ -201,7 +201,7 @@ OSErr GetIconSuiteFromFSSpec(FSSpecPtr hfsObj, Handle *iconSuite)
 	//
 	err = paramErr;
 	require(HaveScriptableFinder() == true, HaveScriptableFinder,
-		"An error occured while getting a file’s icon",
+		"An error occured while getting a file's icon",
 		"Could not confirm that the scriptable Finder was running.");
 
 	//
@@ -210,7 +210,7 @@ OSErr GetIconSuiteFromFSSpec(FSSpecPtr hfsObj, Handle *iconSuite)
 	err = MakeAppleEvent(kAECoreSuite, kAEGetData, &pFinderTarget, 
 				&finderEvent);
 	require_num(err == noErr, MakeAppleEvent,
-		"An error occured while getting a file’s icon",
+		"An error occured while getting a file's icon",
 		"Couldn't make an AppleEvent because an error of type %d occured",
 		err);
 	
@@ -219,7 +219,7 @@ OSErr GetIconSuiteFromFSSpec(FSSpecPtr hfsObj, Handle *iconSuite)
 	//
 	err = MakeSpecifierForFile(hfsObj, &fileSpecifier);
 	require_num(err == noErr, MakeSpecifierForFile,
-		"An error occured while getting a file’s icon",
+		"An error occured while getting a file's icon",
 		"Couldn't MakeSpecifierForFile because an error of type %d occured",
 		err);
 	
@@ -229,7 +229,7 @@ OSErr GetIconSuiteFromFSSpec(FSSpecPtr hfsObj, Handle *iconSuite)
 	err = MakePropertySpecifierForSpecifier(pIconBitmap, &fileSpecifier, 
 				&iconPropertySpecifier);
 	require_num(err == noErr, MakePropertySpecifierForSpecifier,
-		"An error occured while getting a file’s icon",
+		"An error occured while getting a file's icon",
 		"Couldn't MakePropertySpecifierForSpecifier because an error of type %d occured",
 		err);
 	
@@ -238,14 +238,14 @@ OSErr GetIconSuiteFromFSSpec(FSSpecPtr hfsObj, Handle *iconSuite)
 	//
 	err = AEPutParamDesc(&finderEvent, keyDirectObject, &iconPropertySpecifier);
 	require_num(err == noErr, AEPutParamDesc,
-		"An error occured while getting a file’s icon",
+		"An error occured while getting a file's icon",
 		"Couldn't AEPutParamDesc because an error of type %d occured",
 		err);
 
 	err = SendAppleEvent(&finderEvent, &replyEvent,
 				kAEWaitReply + kAENeverInteract /* + kAECanInteract + kAECanSwitchLayer*/);
 	require_num(err == noErr, SendAppleEvent,
-		"An error occured while getting a file’s icon",
+		"An error occured while getting a file's icon",
 		"Couldn't send an AppleEvent because an error of type %d occured",
 		err);
 	
@@ -263,14 +263,14 @@ OSErr GetIconSuiteFromFSSpec(FSSpecPtr hfsObj, Handle *iconSuite)
 		//
 		err = AEGetParamDesc(&replyEvent, keyDirectObject, typeWildCard, &iconFamily);	
 		require_num(err == noErr, AEGetParamDesc,
-		"An error occured while getting a file’s icon",
+		"An error occured while getting a file's icon",
 		"Couldn't AEGetParamDesc because an error of type %d occured",
 		err);
 	
 		err = BuildIconSuiteFromAEDesc(false, iconSuite, &iconFamily);
 		if ( err != noErr)
 		{
-//			BP_UserError_Literal("An error occured while getting a file’s icon",
+//			BP_UserError_Literal("An error occured while getting a file's icon",
 //			"Couldn't build the icon suite because an error of type %d occurred.",
 //			err);
 		}
@@ -482,13 +482,13 @@ OSErr BuildIconSuiteFromAEDesc(Boolean largeIcons, Handle *iconSuite, AEDesc *ic
 	err = NewIconSuite(&suite);
 	require_num(err == noErr, NewIconSuite,
 		"An error occurred while building an icon suite",
-		"Couldn’t create a new suite because an error of type %d occurred",
+		"Couldn't create a new suite because an error of type %d occurred",
 		err);
 	
 	err = AECoerceDesc(iconFam, typeAERecord, (AEDesc *) &rec);
 	require_num(err == noErr, AECoerceDesc,
 		"An error occurred while building an icon suite",
-		"Couldn’t coerce the description because an error of type %d occurred",
+		"Couldn't coerce the description because an error of type %d occurred",
 		err);
 	
 	for ( i = 0; i < 2; i++)
@@ -626,7 +626,7 @@ static Size GetSizeFromIconType(DescType iconType)
 }
 
 
-#pragma mark ••PUBLIC FUNCTIONS••
+#pragma mark **PUBLIC FUNCTIONS**
 /******************************************\
 |**| public functions
 \******************************************/

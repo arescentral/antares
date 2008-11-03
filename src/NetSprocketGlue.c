@@ -762,9 +762,9 @@ static OSErr Find_Symbol(Ptr* pSymAddr,
 	CFragSymbolClass symClass;
 	ISAType tISAType;
 
-	if (sArchType == kAnyCFragArch)				// if architecture is still undefined…
+	if (sArchType == kAnyCFragArch)				// if architecture is still undefined...
 	{
-		sCID = 0;								// …force (re)connect to library
+		sCID = 0;								// ...force (re)connect to library
 		sOSErr = GetSystemArchitecture(&sArchType);	// & determine current atchitecture.
 		if (sOSErr != noErr)
 			return sOSErr;
@@ -782,22 +782,22 @@ static OSErr Find_Symbol(Ptr* pSymAddr,
 			break;
 	}
 	
-	if (sCID == 0)								// If we haven't connected to the library yet…
+	if (sCID == 0)								// If we haven't connected to the library yet...
 	{
 		sOSErr = GetSharedLibrary("\pNetSprocketLib",sArchType,kLoadCFrag,&sCID,&mainAddr,errMessage);
 		if (sOSErr != noErr)
 			return sOSErr;
 	}
 
-	// If we haven't looked up this symbol yet…
+	// If we haven't looked up this symbol yet...
 	if ((Ptr) * pSymAddr == (Ptr) kUnresolvedCFragSymbolAddress)
 	{
-		// …look it up now
+		// ...look it up now
 		sOSErr = FindSymbol(sCID,pSymName,pSymAddr,&symClass);
-		if (sOSErr != noErr)	// in case of error…
-			*(Ptr*) &pSymAddr = (Ptr) kUnresolvedCFragSymbolAddress;	// …clear the procedure pointer
-#if !GENERATINGCFM	// if this is classic 68k code…
-		else		// …create a routine descriptor…
+		if (sOSErr != noErr)	// in case of error...
+			*(Ptr*) &pSymAddr = (Ptr) kUnresolvedCFragSymbolAddress;	// ...clear the procedure pointer
+#if !GENERATINGCFM	// if this is classic 68k code...
+		else		// ...create a routine descriptor...
 			*pSymAddr = (Ptr)NewRoutineDescriptorTrap((ProcPtr) * pSymAddr,pProcInfo,tISAType);
 #endif
 	}
@@ -811,9 +811,9 @@ static pascal OSErr GetSystemArchitecture(OSType *archType)
 
 	*archType = kAnyCFragArch;			// assume wild architecture
 
-	// If we don't know the system architecture yet…
+	// If we don't know the system architecture yet...
 	if (sSysArchitecture == 0)
-		// …Ask Gestalt what kind of machine we are running on.
+		// ...Ask Gestalt what kind of machine we are running on.
 		tOSErr = Gestalt(gestaltSysArchitecture, &sSysArchitecture);
 
 	if (tOSErr == noErr)	// if no errors

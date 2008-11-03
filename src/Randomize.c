@@ -334,7 +334,7 @@ From develop 21 p105:
 
 The Random function in QuickDraw is based on the formula
 randSeed := (randSeed * 16807) MOD 2,147,483,647
-It returns a signed 16-bit number, and updates the unsigned 32-bit low-memory global randSeed. The reference used when implementing this random number generator was Linus Schrage, ÒA More Portable FORTRAN Random Number Generator,Ó ACM Transactions on Mathematical Software Vol. 5, No. 2, June 1979, pages 132Ð138.
+It returns a signed 16-bit number, and updates the unsigned 32-bit low-memory global randSeed. The reference used when implementing this random number generator was Linus Schrage, "A More Portable FORTRAN Random Number Generator," ACM Transactions on Mathematical Software Vol. 5, No. 2, June 1979, pages 132-138.
 The RandomX function in SANE uses the iteration formula
 r = (7^5 * r) mod (2^31 - 1)
 as documented on page 67 of the Apple Numerics Manual, Second Edition.

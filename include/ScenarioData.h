@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef kScenario_Data_h
 #define kScenario_Data_h
 
-#pragma mark ¥¥INCLUDES¥¥
+#pragma mark **INCLUDES**
 /******************************************\
 |**| #includes
 \******************************************/
@@ -47,7 +47,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Ares_Version.h"
 
-#pragma mark ¥¥DEFINITIONS¥¥
+#pragma mark **DEFINITIONS**
 /******************************************\
 |**| #defines
 \******************************************/
@@ -68,7 +68,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 /* - macros
 *******************************************/
 
-#pragma mark ¥¥TYPEDEFS¥¥
+#pragma mark **TYPEDEFS**
 /******************************************\
 |**| typedefs
 \******************************************/
@@ -89,7 +89,7 @@ typedef struct scenarioInfoType
 	unsigned long	checkSum;
 } scenarioInfoType;
 
-#pragma mark ¥¥PUBLIC PROTOTYPES¥¥
+#pragma mark **PUBLIC PROTOTYPES**
 /******************************************\
 |**| public function prototypes
 \******************************************/

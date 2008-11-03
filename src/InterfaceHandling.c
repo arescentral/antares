@@ -77,7 +77,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define	kMakeInterfaceItem		20
 
 #define	kInterfaceError			"\pINTF"
-#define	kInterfaceResFileName	"\p:Ares Data Ä:Ares Interfaces"
+#define	kInterfaceResFileName	"\p:Ares Data Folder:Ares Interfaces"
 
 #define	kInterfaceResourceType	'intr'
 

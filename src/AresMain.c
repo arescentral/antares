@@ -186,9 +186,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #define kFractionalLagCorrectTolerance	8
 
-#define	kInterfaceResFileName	"\p:Ares Data Ä:Ares Interfaces"
-#define	kSpriteResFileName		"\p:Ares Data Ä:Ares Sprites"
-#define	kSoundResFileName		"\p:Ares Data Ä:Ares Sounds"
+#define	kInterfaceResFileName	"\p:Ares Data Folder:Ares Interfaces"
+#define	kSpriteResFileName		"\p:Ares Data Folder:Ares Sprites"
+#define	kSoundResFileName		"\p:Ares Data Folder:Ares Sounds"
 //#define	kConstantRate
 
 //#define	kTestNumber		50//5
@@ -820,7 +820,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 
 							BlackTitleScreen();
 
-							if ( !skipFading) PlayMovieByName("\p:Ares Data Ä:Title", (WindowPtr)gTheWindow,
+							if ( !skipFading) PlayMovieByName("\p:Ares Data Folder:Title", (WindowPtr)gTheWindow,
 								false, theDevice);
 							
 //							AutoFadeTo( 1, &initialFadeColor, FALSE);	
@@ -1495,7 +1495,7 @@ void MainLoop (void)
 									
 // *********
 									
-									PlayMovieByName("\p:Ares Data Ä:Next Level", (WindowPtr)gTheWindow,
+									PlayMovieByName("\p:Ares Data Folder:Next Level", (WindowPtr)gTheWindow,
 										true, theDevice);
 									if ( gAresGlobal->gOptions & kOptionMusicIdle)
 									{

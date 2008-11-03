@@ -31,7 +31,7 @@ pragma options align=mac68k
 
 #define	kScenarioNoShipTextID		10000
 
-#define	kScenarioResFileName	"\p:Ares Data Ä:Ares Scenarios"
+#define	kScenarioResFileName	"\p:Ares Data Folder:Ares Scenarios"
 
 #define	kScenarioResType		'snro'
 #define	kScenarioResID			500

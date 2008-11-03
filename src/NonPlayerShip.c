@@ -88,8 +88,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Non-player Ship.h"
 
-#define	kDirectionError			5			// how picky in ¡ we are about angle
-#define	kShootAngle				15			// how picky we are about shooting in ¡
+#define	kDirectionError			5			// how picky in degrees we are about angle
+#define	kShootAngle				15			// how picky we are about shooting in degrees
 #define	kParanoiaAngle			30			// angle of terror
 #define	kEvadeAngle				30			// we'd like to turn this far away
 #define	kWarpOutAngle			90			// difference from desired direction from real direction before we warp out

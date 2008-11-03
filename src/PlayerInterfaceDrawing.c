@@ -2418,7 +2418,7 @@ short GetInterfaceStringWidth( anyCharType *s, interfaceStyleType style)
 /* GetInterfaceFontWidth:		-- NOT WORLD-READY! --
 
 	We're not using fontInfo.widMax because we know we're never going to use the ultra-wide
-	characters like Î and the like, and we're not using a mono-spaced font.  Therefore, we're
+	characters like &oelig; and the like, and we're not using a mono-spaced font.  Therefore, we're
 	using the width of 'R' which is about as wide as our normal letters get.
 */
 

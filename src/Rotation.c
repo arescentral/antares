@@ -198,7 +198,7 @@ long GetAngleFromVector( long x, long y)
 		v = h + 1;
 		do
 		{
-			test = (*v * a) + (*h * b);	// we're adding b/c in my table 45¡-90¡, h < 0
+			test = (*v * a) + (*h * b);	// we're adding b/c in my table 45-90 degrees, h < 0
 			if ( test < 0) test = -test;
 			if (( whichBest < 0)  || ( test < best))
 			{
