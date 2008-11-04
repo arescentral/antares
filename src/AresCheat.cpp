@@ -19,6 +19,8 @@
 
 #include "AresCheat.hpp"
 
+#include <Resources.h>
+
 #include "Admiral.hpp"
 #include "AresGlobalType.hpp"
 #include "AresNetworkSprocket.hpp"

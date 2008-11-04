@@ -11,6 +11,7 @@ typedef struct { } NSpEventProc;
 typedef NSpEventProc* NSpEventProcPtr;
 
 typedef struct { } NSpAddressReference;
+typedef struct { } NSpMessageHeader;
 
 #ifdef __cplusplus
 }
