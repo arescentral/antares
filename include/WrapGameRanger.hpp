@@ -20,6 +20,7 @@
 
 // Wrap_GameRanger.h
 
+#include <Base.h>
 #include <NetSprocket.h>
 
 Boolean Wrap_UseGameRanger( void);

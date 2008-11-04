@@ -20,6 +20,8 @@
 
 // Scenario_Data.h
 
+#include <Base.h>
+
 #include "AresVersion.hpp"
 
 #define kScenario_Data_ResType          'nlAG'

@@ -20,6 +20,8 @@
 
 // Handle Handling.h
 
+#include <Base.h>
+
 #pragma options align=mac68k
 
 #define mHandleLockAndRegister( mhandle, munlockProc, mlockPrc, mresolveProc, mhandlename)\
@@ -49,7 +51,7 @@ short HHRegisterHandle( Handle *newHandle,
             void            (*unlockData)( Handle),
             void            (*lockData)( Handle),
             void            (*resolveData)( Handle),
-            Boolean, StringPtr);
+            Boolean, const unsigned char*);
 void HHDeregisterHandle( Handle *);
 void HHMaxMem( void);
 Handle HHNewHandle( long);

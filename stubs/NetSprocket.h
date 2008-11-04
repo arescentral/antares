@@ -5,7 +5,12 @@
 extern "C" {
 #endif // __cplusplus
 
-// Content here
+typedef struct { } NSpProtocolListReference;
+
+typedef struct { } NSpEventProc;
+typedef NSpEventProc* NSpEventProcPtr;
+
+typedef struct { } NSpAddressReference;
 
 #ifdef __cplusplus
 }

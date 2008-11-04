@@ -20,6 +20,8 @@
 
 // Ares_ResFile.h
 
+#include <Base.h>
+
 short ARF_OpenResFile( StringPtr fileName);
 OSErr ARF_OpenResFile_External( StringPtr fileName, FSSpecPtr fileSpec);
 

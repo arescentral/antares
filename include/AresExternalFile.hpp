@@ -20,6 +20,8 @@
 
 // Ares_External_File.h
 
+#include <Base.h>
+
 OSErr EF_OpenExternalFile( void);
 
 #endif // ANTARES_ARES_EXTERNAL_FILE_HPP_

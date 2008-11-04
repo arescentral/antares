@@ -5,7 +5,16 @@
 extern "C" {
 #endif // __cplusplus
 
-// Content here
+#include <Base.h>
+
+typedef SInt16 FSVolumeRefNum;
+
+typedef struct {
+    FSVolumeRefNum vRefNum;
+    SInt32 parID;
+    StrFileName name;
+} FSSpec;
+typedef FSSpec* FSSpecPtr;
 
 #ifdef __cplusplus
 }

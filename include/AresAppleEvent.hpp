@@ -20,6 +20,8 @@
 
 // Ares_AppleEvent.h
 
+#include <Base.h>
+
 OSErr AAE_Init( void);
 
 #endif // ANTARES_ARES_APPLE_EVENT_HPP_

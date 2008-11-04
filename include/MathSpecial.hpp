@@ -20,6 +20,8 @@
 
 // Math Special.h
 
+#include <Base.h>
+
 #include "ConditionalMacros.h"
 
 #pragma options align=mac68k

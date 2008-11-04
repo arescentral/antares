@@ -21,6 +21,7 @@
 // Ares Network.h
 
 #include <appletalk.h>
+#include <Base.h>
 
 #include "AnyChar.hpp"
 #include "SpaceObject.hpp"

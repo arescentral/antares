@@ -20,6 +20,8 @@
 
 // Debug.h
 
+#include <Base.h>
+
 #define DEBUG_ON        TRUE
 #include "MathSpecial.hpp"
 
@@ -48,7 +50,7 @@ Boolean CommandPeriod( void);
 
 void DebugFileInit( void);
 void DebugFileCleanup( void);
-void DebugFileAppendString( StringPtr);
+void DebugFileAppendString( const unsigned char*);
 void DebugFileAppendCString( char *);
 void DebugFileAppendLong( long);
 void DebugFileAppendLongHex( long);

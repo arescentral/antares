@@ -20,6 +20,8 @@
 
 // Error.h
 
+#include <Base.h>
+
 #pragma options align=mac68k
 
 #define kErrorStrID                 800
@@ -108,7 +110,7 @@ void ShowSimpleStrResAlert( short, short, short, short, short);
 void ShowErrorAny( errorRecoverType, short, StringPtr, StringPtr, StringPtr, StringPtr, long, long,
                         long, long, char *, long);
 void ShowErrorOfTypeOccurred( errorRecoverType, short, short, OSErr, char *, long);
-void MyDebugString( StringPtr);
+void MyDebugString( const unsigned char*);
 #pragma options align=reset
 
 #endif // ANTARES_ERROR_HPP_

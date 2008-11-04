@@ -20,6 +20,8 @@
 
 // Ares Cheat.h
 
+#include <Base.h>
+
 #pragma options align=mac68k
 
 #define kCheatActiveBit                 0x00000001

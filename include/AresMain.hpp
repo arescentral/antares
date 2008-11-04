@@ -20,13 +20,15 @@
 
 // Ares Main.h
 
+#include <Base.h>
+
 //#define kHideMenuBar
 
 #pragma options align=mac68k
 
 #define kHackLevelMax   26//4//21
 
-void main (void);
+int main (void);
 void ToolBoxInit( void);
 void MenuBarInit( void);
 void MainLoop (void);

@@ -20,6 +20,10 @@
 
 // Ares Global Type.h
 
+#include <Base.h>
+#include <Files.h>
+#include <Quickdraw.h>
+
 #include "ICAPI.h"
 #include "ScenarioData.hpp"
 #include "SoundFX.hpp"

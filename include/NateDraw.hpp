@@ -20,6 +20,9 @@
 
 // Natedraw.h
 
+#include <Base.h>
+#include <Quickdraw.h>
+
 #pragma options align=mac68k
 
 #define mGetRowBytes( rBytes, msourcePix) rBytes = (msourcePix)->rowBytes & 0x3fff;

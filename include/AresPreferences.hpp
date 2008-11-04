@@ -18,6 +18,8 @@
 #ifndef ANTARES_ARES_PREFERENCES_HPP_
 #define ANTARES_ARES_PREFERENCES_HPP_
 
+#include <Base.h>
+
 #include "CopyProtection.h"
 
 #pragma options align=mac68k

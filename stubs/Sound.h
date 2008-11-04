@@ -5,7 +5,8 @@
 extern "C" {
 #endif // __cplusplus
 
-// Content here
+typedef struct { } SndChannel;
+typedef SndChannel* SndChannelPtr;
 
 #ifdef __cplusplus
 }

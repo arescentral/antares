@@ -20,6 +20,8 @@
 
 // Ares Demo Scanner.h
 
+#include <Base.h>
+
 //#define kCreateAresDemoData
 
 #pragma options align=mac68k

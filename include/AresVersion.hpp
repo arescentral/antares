@@ -18,6 +18,8 @@
 #ifndef ANTARES_ARES_VERSION_HPP_
 #define ANTARES_ARES_VERSION_HPP_
 
+#include <Base.h>
+
 #define kThis_Version_Is                    0x01010100
 
 typedef unsigned long aresVersionType;
