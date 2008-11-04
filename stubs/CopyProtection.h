@@ -5,7 +5,7 @@
 extern "C" {
 #endif // __cplusplus
 
-// Content here
+typedef struct { } serialNumberType;
 
 #ifdef __cplusplus
 }

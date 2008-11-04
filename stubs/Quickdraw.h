@@ -17,11 +17,9 @@ typedef void* GWorldPtr;
 
 typedef struct { } RGBColor;
 
-PixMapHandle GetGWorldPixMap(int);
+PixMapHandle GetGWorldPixMap(GWorldPtr world);
 
-enum {
-    gOffWorld = 1000,
-};
+extern GWorldPtr gOffWorld;
 
 #ifdef __cplusplus
 }

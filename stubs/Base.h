@@ -33,6 +33,7 @@ void DisposeHandle(Handle handle);
 int GetHandleSize(Handle handle);
 void MoveHHi(Handle handle);
 void HLock(Handle handle);
+void HLockHi(Handle handle);
 void HUnlock(Handle handle);
 
 void BlockMove(Ptr, void*, size_t);
@@ -98,6 +99,8 @@ typedef struct { } EventRecord;
 typedef void** RgnHandle;
 
 typedef void** MenuHandle;
+
+typedef void** TEHandle;
 
 // Gets STR# from resource fork
 void GetIndString( const unsigned char*, int, int);
