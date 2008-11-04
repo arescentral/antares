@@ -20,6 +20,7 @@
 
 // Wrap_GameRanger.h
 
+#include <AppleEvent.h>
 #include <Base.h>
 #include <NetSprocket.h>
 
