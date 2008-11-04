@@ -22,6 +22,7 @@
 #include "AresGuideMaker.hpp"
 
 #include <QDOffscreen.h>
+#include <Quickdraw.h>
 
 #include "AnyChar.hpp"
 #include "AresGlobalType.hpp"
@@ -96,7 +97,7 @@ extern aresGlobalType           *gAresGlobal;
 
 void ConvertPortraitIntoGIF( long, StringPtr);
 void InsertWeaponText( short, short, Handle, weaponDataType *, fieldRangeType *);
-void AppendStringToHandle( StringPtr, Handle);
+void AppendStringToHandle( const unsigned char*, Handle);
 void AdjustRangeFromObject( baseObjectType *, fieldRangeType *);
 void AdjustRangeFromWeaponData( weaponDataType *, fieldRangeType *);
 void GetWeaponData( long, weaponDataType *);
@@ -113,7 +114,7 @@ void InsertGraphicText( long, long, Handle);
 void InsertIndexText( long, long, Handle);
 long GetPreviousIndexBaseObject( long);
 Handle NewHandleFromString( StringPtr);
-void CheckStringForNil( StringPtr);
+void CheckStringForNil( const unsigned char*);
 void CheckHandleForNil( Handle);
 
 void InitAresGuide( void)
@@ -1180,7 +1181,7 @@ Handle NewHandleFromString( StringPtr s)
     return( data);
 }
 
-void CheckStringForNil( StringPtr s)
+void CheckStringForNil( const unsigned char* s)
 {
     char    *c = (char *)s;
     short   len = *c;

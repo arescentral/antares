@@ -5,7 +5,9 @@
 extern "C" {
 #endif // __cplusplus
 
-// Content here
+#include <Base.h>
+
+OSErr LoadClip2Gif();
 
 #ifdef __cplusplus
 }

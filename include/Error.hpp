@@ -103,11 +103,11 @@ typedef enum
     eContinueOnlyErr
 } errorRecoverType;
 
-void ShowErrorNoRecover ( int, StringPtr, int);
-void ShowErrorRecover ( int, StringPtr, int);
-void ShowSimpleStringAlert( StringPtr, StringPtr, StringPtr, StringPtr);
+void ShowErrorNoRecover ( int, const unsigned char*, int);
+void ShowErrorRecover ( int, const unsigned char*, int);
+void ShowSimpleStringAlert( const unsigned char*, const unsigned char*, const unsigned char*, const unsigned char*);
 void ShowSimpleStrResAlert( short, short, short, short, short);
-void ShowErrorAny( errorRecoverType, short, StringPtr, StringPtr, StringPtr, StringPtr, long, long,
+void ShowErrorAny( errorRecoverType, short, const unsigned char*, const unsigned char*, const unsigned char*, const unsigned char*, long, long,
                         long, long, char *, long);
 void ShowErrorOfTypeOccurred( errorRecoverType, short, short, OSErr, char *, long);
 void MyDebugString( const unsigned char*);

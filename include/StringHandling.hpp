@@ -22,16 +22,16 @@
 
 #pragma options align=mac68k
 
-void CopyPString( unsigned char *, unsigned char *);
-Boolean ComparePString( unsigned char *, unsigned char *);
-int PStringLen( unsigned char *s);
-void ConcatenatePString( unsigned char *, unsigned char *);
-void PStringFromCString( unsigned char *, unsigned char *);
-void ReplacePStringChar( StringPtr, unsigned char, unsigned char);
+void CopyPString( unsigned char *, const unsigned char *);
+Boolean ComparePString( unsigned char *, const unsigned char *);
+int PStringLen( const unsigned char *s);
+void ConcatenatePString( unsigned char *, const unsigned char *);
+void PStringFromCString( unsigned char *, const unsigned char *);
+void ReplacePStringChar( StringPtr, unsigned char, const unsigned char);
 void FilterAlphaPString( StringPtr);
 void ChopAlphaPString( StringPtr);
 void UpperCasePString( StringPtr);
-void DrawCString( unsigned char *);
+void DrawCString( const unsigned char *);
 
 #pragma options align=reset
 

@@ -35,4 +35,8 @@ unsigned long StringToUnsignedLong( StringPtr);
 StringPtr LongToString( long, StringPtr);
 long StringToLong( StringPtr);
 
+inline void NumToString(unsigned long num, unsigned char* string) {
+    UnsignedLongToString(num, string);
+}
+
 #endif // ANTARES_STRING_NUMERICS_HPP_

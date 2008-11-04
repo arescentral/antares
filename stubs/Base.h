@@ -21,22 +21,24 @@ typedef struct { SInt32 hi; UInt32 lo; } wide;
 typedef struct { UInt32 hi; UInt32 lo; } UnsignedWide;
 
 typedef int32_t Fixed;
+typedef long Size;
 
 typedef char* Ptr;
 Ptr NewPtr(size_t size);
 void DisposePtr(Ptr ptr);
 
 typedef Ptr* Handle;
-typedef long Size;
 Handle NewHandle(size_t size);
 void DisposeHandle(Handle handle);
 int GetHandleSize(Handle handle);
+void SetHandleSize(Handle handle, Size size);
 void MoveHHi(Handle handle);
 void HLock(Handle handle);
 void HLockHi(Handle handle);
 void HUnlock(Handle handle);
 
 void BlockMove(Ptr, void*, size_t);
+void HandToHand(Handle* handle);
 
 typedef void* AddrBlock;
 
@@ -61,6 +63,8 @@ enum {
     paramErr = 1,
 };
 
+OSErr MemError();
+
 enum {
     TRUE = true,
     FALSE = false,
@@ -73,10 +77,12 @@ typedef struct {
 
 typedef struct {
     int top;
-    int right;
-    int bottom;
     int left;
+    int bottom;
+    int right;
 } Rect;
+
+void MacSetRect(Rect* rect, int top, int right, int bottom, int left);
 
 ////////////////////////////
 
@@ -104,6 +110,13 @@ typedef void** TEHandle;
 
 // Gets STR# from resource fork
 void GetIndString( const unsigned char*, int, int);
+
+void Debugger();
+
+void Munger(Handle, int, const unsigned char* dest, size_t dest_length,
+            const void* source, size_t source_length);
+
+void SysBeep(int);
 
 #ifdef __cplusplus
 }
