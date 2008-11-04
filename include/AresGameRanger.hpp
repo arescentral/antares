@@ -18,6 +18,8 @@
 #ifndef ANTARES_ARES_GAME_RANGER_HPP_
 #define ANTARES_ARES_GAME_RANGER_HPP_
 
+#include <Base.h>
+
 OSErr AGR_Init( void);
 
 #endif // ANTARES_ARES_GAME_RANGER_HPP_

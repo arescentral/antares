@@ -12,8 +12,8 @@ Main Antares : src/Admiral.cpp
                src/AresAppleEvent.cpp
                src/AresCheat.cpp
                src/AresDemoScanner.cpp
-               #src/AresExternalFile.cpp
-               #src/AresGameRanger.cpp
+               src/AresExternalFile.cpp
+               src/AresGameRanger.cpp
                #src/AresGuideMaker.cpp
                #src/AresMain.cpp
                #src/AresMoviePlayer.cpp
