@@ -5,7 +5,16 @@
 extern "C" {
 #endif // __cplusplus
 
-// Content here
+void InitFonts();
+void SetFontByString(const unsigned char* name);
+void TextSize(int size);
+void TextFont(int font);
+void TextFace(int face);  // bold, etc.
+int StringWidth(const unsigned char* string);
+
+enum {
+    bold = 8000,
+};
 
 #ifdef __cplusplus
 }

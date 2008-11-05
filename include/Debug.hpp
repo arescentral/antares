@@ -55,7 +55,7 @@ void DebugFileAppendCString( char *);
 void DebugFileAppendLong( long);
 void DebugFileAppendLongHex( long);
 void DebugFileAppendSmallFixed( smallFixedType);
-void DebugFileSave( StringPtr);
+void DebugFileSave( const unsigned char*);
 
 #pragma options align=reset
 

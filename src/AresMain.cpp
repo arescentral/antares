@@ -19,6 +19,7 @@
 
 #include <Timer.h>
 #include <Palettes.h>
+#include <Quickdraw.h>
 //#include <stdio.h>        // for _DATE_ & _TIME_ macros
 
 #define kProfiling_On   0
@@ -109,6 +110,7 @@
 
 #include "VersionString.hpp"
 
+#include "WinAresGlue.hpp"
 #include "WrapGameRanger.hpp"
 
 //#define   kTempNet
@@ -209,14 +211,14 @@ extern GDHandle theDevice;
 
 //#pragma code68020 off
 
-void main( void);
+int main( void);
 void SetWindowColorTable( WindowPtr);
 static pascal Boolean SetColorTableEntry (CTabHandle, short, const RGBColor *);
 void Pause( long time);
-void DrawOutlinedString( StringPtr string, RGBColor *color);
+void DrawOutlinedString( const unsigned char* string, RGBColor *color);
 
 #if TARGET_OS_MAC
-void main( void)
+int main( void)
 #else
 int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmdLine, int nCmdShow)
 #endif TARGET_OS_MAC
@@ -896,7 +898,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 
                             #ifdef kUsePublicCopyProtection
                                 GetIndString( tempString, 700, 3);  // "REGISTERED TO:"
-                                RT_GetLicenseeName( (unsigned char (*)[256])userName);
+                                RT_GetLicenseeName( userName);
                                 ConcatenatePString( tempString, userName);
 
                                 ts1 = StringWidth( tempString);
@@ -3144,7 +3146,7 @@ static pascal Boolean SetColorTableEntry (CTabHandle cth, short value, const RGB
     return false;
 }
 
-void DrawOutlinedString( StringPtr string, RGBColor *color)
+void DrawOutlinedString( const unsigned char* string, RGBColor *color)
 {
     RGBColor    backColor = {0, 0, 0};
     Point       pen;

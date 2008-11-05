@@ -8,7 +8,9 @@ extern "C" {
 #include <Files.h>
 
 // Content here
-typedef struct { } PixMap;
+typedef struct {
+    Rect bounds;
+} PixMap;
 typedef PixMap* PixMapPtr;
 typedef PixMap** PixMapHandle;
 
@@ -19,18 +21,30 @@ typedef Pic** PicHandle;
 
 typedef struct { } BitMap;
 
-typedef void** GDHandle;
+typedef struct {
+    PixMapHandle gdPMap;
+    Rect gdRect;
+} GDevice;
+typedef GDevice** GDHandle;
 
 typedef void* GWorldPtr;
 
 typedef void* GrafPtr;
 
-typedef struct { } RGBColor;
+typedef struct { } Pattern;
+
+void BackPat(Pattern* pattern);
+
+typedef void* Port;
+
+void RGBBackColor(RGBColor* color);
+void RGBForeColor(RGBColor* color);
 
 PixMapHandle GetGWorldPixMap(GWorldPtr world);
 
 extern GWorldPtr gOffWorld;
 
+void InitGraf(GrafPtr* port);
 void GetPort(GrafPtr* port);
 void MacSetPort(GrafPtr port);
 void PaintRect(Rect* rect);
@@ -45,6 +59,15 @@ void ClosePicture();
 
 OSErr ConvertPictToGIFFile(PicHandle pic, FSSpec* fsspec, int interlaced,
                            int transparencyNo, int depth, int palette);
+
+GDHandle GetMainDevice();
+
+void MacFillRect(Rect* rect, Pattern* pattern);
+
+void MoveTo(int x, int y);
+
+void GetPen(Point* pen);
+void DrawString(const unsigned char* string);
 
 enum {
     colorPaletteSystem = 1000,

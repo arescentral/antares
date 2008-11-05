@@ -20,6 +20,9 @@ typedef uint32_t UInt32;
 typedef struct { SInt32 hi; UInt32 lo; } wide;
 typedef struct { UInt32 hi; UInt32 lo; } UnsignedWide;
 
+void WideSubtract(wide* value, wide* difference);
+void WideMultiply(long a, long b, wide* c);
+
 typedef int32_t Fixed;
 typedef long Size;
 
@@ -37,6 +40,12 @@ void HLock(Handle handle);
 void HLockHi(Handle handle);
 void HUnlock(Handle handle);
 
+int HiWord(long value);
+int LoWord(long value);
+
+void Microseconds(UnsignedWide* wide);
+
+Size CompactMem(int);
 void BlockMove(Ptr, void*, size_t);
 void HandToHand(Handle* handle);
 
@@ -61,9 +70,28 @@ typedef FourCharCode ResType;
 enum {
     noErr = 0,
     paramErr = 1,
+
+    maxSize = 100,
+
+    plainDBox = 200,
+
+    everyEvent = 300,
+    updateEvt = 301,
+    nullEvent = 302,
+
+    inMenuBar = 400,
+    inSysWindow = 401,
+    inContent = 402,
+    inDrag = 403,
+    inGoAway = 404,
+
+    cmdKey = 500,
+
+    charCodeMask = 600,
 };
 
 OSErr MemError();
+OSErr ResError();
 
 enum {
     TRUE = true,
@@ -89,27 +117,95 @@ void MacSetRect(Rect* rect, int top, int right, int bottom, int left);
 typedef struct { } Window;
 typedef Window* WindowPtr;
 
-typedef struct { } CWindow;
+void BeginUpdate(WindowPtr window);
+void EndUpdate(WindowPtr window);
+void MacShowWindow(WindowPtr window);
+void DisposeWindow(WindowPtr window);
+short MacFindWindow(Point where, WindowPtr* window);
+void ShowHide(WindowPtr window, bool hide);
+void DragWindow(WindowPtr window, Point where, Rect* bounds);
+bool TrackGoAway(WindowPtr window, Point where);
+void GlobalToLocal(Point* point);
+
+typedef struct {
+    Rect portRect;
+} CWindow;
 typedef CWindow* CWindowPtr;
 
-typedef struct { } CTab;
+CWindowPtr NewCWindow(void*, Rect* size, const unsigned char*, bool, int,
+                      WindowPtr, bool, int id);
+
+typedef struct {
+    int red;
+    int green;
+    int blue;
+} RGBColor;
+
+typedef struct {
+    int value;
+    RGBColor rgb;
+} ColorSpec;
+typedef ColorSpec* ColorSpecPtr;
+
+typedef struct {
+    ColorSpecPtr ctTable;
+    int ctSize;
+} CTab;
 typedef CTab* CTabPtr;
 typedef CTab** CTabHandle;
 
+CTabHandle GetCTable(int id);
+void DisposeCTable(CTabHandle handle);
+void CTabChanged(CTabHandle handle);
+
+typedef void** WCTabHandle;
+
+typedef struct {
+    WCTabHandle awCTable;
+} AuxWin;
+typedef AuxWin** AuxWinHandle;
+
 typedef int KeyMap[4];
+
+void GetKeys(KeyMap keys);
 
 typedef struct { } ICInstance;
 
-typedef struct { } EventRecord;
+typedef struct {
+    int what;
+    int message;
+    Point where;
+    int modifiers;
+} EventRecord;
+
+void FlushEvents(int mask, int);
+void SetEventMask(int mask);
 
 typedef void** RgnHandle;
 
-typedef void** MenuHandle;
+typedef Handle MenuHandle;
+
+MenuHandle GetNewMBar(int id);
+void SetMenuBar(MenuHandle menu);
+MenuHandle GetMenuHandle(int id);
+void AppendResMenu(MenuHandle handle, FourCharCode);
+void MacDrawMenuBar();
+void HiliteMenu(int);
+long MenuSelect(Point where);
+void SystemClick(EventRecord* event, WindowPtr window);
+void GetMenuItemText(MenuHandle, int item, unsigned char* name);
+bool HandleMenuChoice(int key);
+int MenuKey(char which_char);
+int OpenDeskAcc(const unsigned char* name);
+
+void NoteAlert(int type, void*);
 
 typedef void** TEHandle;
 
 // Gets STR# from resource fork
-void GetIndString( const unsigned char*, int, int);
+void GetIndString( const unsigned char* result, int id, int index);
+
+Handle GetIndResource(FourCharCode type, int id);
 
 void Debugger();
 
@@ -117,6 +213,39 @@ void Munger(Handle, int, const unsigned char* dest, size_t dest_length,
             const void* source, size_t source_length);
 
 void SysBeep(int);
+
+void ExitToShell();
+
+void GetDateTime(unsigned long* time);
+
+void InitCursor();
+void MacShowCursor();
+void HideCursor();
+void ShieldCursor(Rect* rect, Point point);
+
+void InitWindows();
+void InitMenus();
+void TEInit();
+void InitDialogs(void*);
+void MoreMasters();
+void MaxApplZone();
+
+int TickCount();
+
+void GetResInfo(Handle resource, short* id, FourCharCode* type,
+                unsigned char* name);
+void RemoveResource(Handle resource);
+void UpdateResFile(int file);
+void AddResource(Handle resource, FourCharCode type, int id,
+                 const unsigned char* name);
+void ChangedResource(Handle resource);
+void WriteResource(Handle resource);
+
+bool Button();
+double GetDblTime();
+
+void GetAuxWin(WindowPtr window, AuxWinHandle* handle);
+void SetWinColor(WindowPtr window, WCTabHandle handle);
 
 #ifdef __cplusplus
 }

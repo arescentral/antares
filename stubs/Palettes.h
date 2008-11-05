@@ -7,6 +7,15 @@ extern "C" {
 
 typedef void** PaletteHandle;
 
+enum {
+    pmExplicit = 7000,
+    pmTolerant = 7001,
+};
+
+PaletteHandle NewPalette(int colors, CTabHandle clut, int options, int);
+void SetPalette(WindowPtr window, PaletteHandle palette, bool);
+void ActivatePalette(WindowPtr window);
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus

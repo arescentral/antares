@@ -18,6 +18,8 @@
 #ifndef ANTARES_WIN_ARES_GLUE_HPP_
 #define ANTARES_WIN_ARES_GLUE_HPP_
 
+#include <Quickdraw.h>
+
 typedef struct screenBitsStruct
 {
     Rect    bounds;
@@ -34,5 +36,7 @@ typedef struct qdGlobalStruct
 } qdGlobalType;
 
 void RestoreDeviceClut( GDHandle);
+
+extern qdGlobalStruct qd;
 
 #endif // ANTARES_WIN_ARES_GLUE_HPP_

@@ -24,7 +24,7 @@
 
 #pragma options align=mac68k
 
-void PlayMovieByName( StringPtr, WindowPtr, Boolean, GDHandle);
+void PlayMovieByName( const unsigned char*, WindowPtr, Boolean, GDHandle);
 void InitMoviePlayer( void);
 void CleanupMoviePlayer( void);
 OSErr LoadMiniMovie( StringPtr, Movie *, Rect *, WindowPtr, Boolean);

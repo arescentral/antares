@@ -5,7 +5,13 @@
 extern "C" {
 #endif // __cplusplus
 
-// Content here
+OSErr RT_Open(bool, int codes);
+void RT_GetLicenseeName(unsigned char* user_name);
+void RT_Close();
+
+enum {
+    VERSION_2_CODES = 6000,
+};
 
 #ifdef __cplusplus
 }

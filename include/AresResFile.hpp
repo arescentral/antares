@@ -22,7 +22,7 @@
 
 #include <Base.h>
 
-short ARF_OpenResFile( StringPtr fileName);
-OSErr ARF_OpenResFile_External( StringPtr fileName, FSSpecPtr fileSpec);
+short ARF_OpenResFile( const unsigned char* fileName);
+OSErr ARF_OpenResFile_External( const unsigned char* fileName, FSSpecPtr fileSpec);
 
 #endif // ANTARES_ARES_RES_FILE_HPP_

@@ -5,7 +5,7 @@
 extern "C" {
 #endif // __cplusplus
 
-// Content here
+bool Ambrosia_Is_Registered();
 
 #ifdef __cplusplus
 }
