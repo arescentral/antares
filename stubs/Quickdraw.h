@@ -30,6 +30,7 @@ typedef GDevice** GDHandle;
 typedef void* GWorldPtr;
 
 typedef void* GrafPtr;
+typedef GrafPtr CGrafPtr;
 
 typedef struct { } Pattern;
 

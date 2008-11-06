@@ -25,8 +25,7 @@ int FindStringList(Handle handle, unsigned char* result);
 int FSpOpenResFile(FSSpec* spec, int options);
 
 enum {
-    fsRdPerm = 2000,
-    resNotFound = 2001,
+    resNotFound = 2000,
 };
 
 #ifdef __cplusplus

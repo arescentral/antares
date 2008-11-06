@@ -15,8 +15,8 @@ Main Antares : src/Admiral.cpp
                src/AresExternalFile.cpp
                src/AresGameRanger.cpp
                src/AresGuideMaker.cpp
-               #src/AresMain.cpp
-               #src/AresMoviePlayer.cpp
+               src/AresMain.cpp
+               src/AresMoviePlayer.cpp
                #src/AresNetworkSprocket.cpp
                #src/AresPreferences.cpp
                #src/AresResFile.cpp

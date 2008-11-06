@@ -27,6 +27,7 @@ enum {
     smSystemScript = 4000,
 
     fsCurPerm = 4100,
+    fsRdPerm = 4101,
 
     fnfErr = 4200,  // File not found?
     dupFNErr = 4201,  // Duplicate file name?

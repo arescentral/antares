@@ -20,6 +20,9 @@
 
 // Ares Movie Player.h
 
+#include <Base.h>
+#include <Quickdraw.h>
+
 #include "Movies.h"
 
 #pragma options align=mac68k

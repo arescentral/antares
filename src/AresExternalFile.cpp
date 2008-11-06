@@ -19,6 +19,8 @@
 
 #include "AresExternalFile.hpp"
 
+#include <Resources.h>
+
 #include "AmbrosiaSerial.h"
 #include "AresGlobalType.hpp"
 #include "Debug.hpp"

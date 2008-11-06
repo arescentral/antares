@@ -5,6 +5,8 @@
 extern "C" {
 #endif // __cplusplus
 
+#include <Base.h>
+
 typedef void** PaletteHandle;
 
 enum {
@@ -13,6 +15,8 @@ enum {
 };
 
 PaletteHandle NewPalette(int colors, CTabHandle clut, int options, int);
+PaletteHandle GetPalette(WindowPtr window);
+void DisposePalette(PaletteHandle palette);
 void SetPalette(WindowPtr window, PaletteHandle palette, bool);
 void ActivatePalette(WindowPtr window);
 

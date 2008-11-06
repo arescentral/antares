@@ -111,10 +111,13 @@ typedef struct {
 } Rect;
 
 void MacSetRect(Rect* rect, int top, int right, int bottom, int left);
+void MacOffsetRect(Rect* rect, int h, int v);
 
 ////////////////////////////
 
-typedef struct { } Window;
+typedef struct {
+    Rect portRect;
+} Window;
 typedef Window* WindowPtr;
 
 void BeginUpdate(WindowPtr window);

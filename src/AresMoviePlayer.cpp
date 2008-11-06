@@ -28,6 +28,7 @@
 #include "KeyMapTranslation.hpp"
 #include "Options.hpp"
 #include "Randomize.hpp"
+#include "WinAresGlue.hpp"
 
 #define kSoundVolumeMultiplier  32  // = 256 (1.0) / 8 (kMaxSoundVolumePreference)
 
