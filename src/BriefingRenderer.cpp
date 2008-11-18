@@ -30,6 +30,8 @@
 #include "ScenarioMaker.hpp"
 #include "SpriteHandling.hpp"
 
+#define kBriefing_Grid_Size             16
+
 typedef struct briefingSpriteBoundsType
 {
     Rect    bounds;

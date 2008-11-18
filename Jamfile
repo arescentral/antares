@@ -21,8 +21,8 @@ Main Antares : src/Admiral.cpp
                src/AresPreferences.cpp
                src/AresResFile.cpp
                src/AresVersion.cpp
-               #src/Beam.cpp
-               #src/BriefingRenderer.cpp
+               src/Beam.cpp
+               src/BriefingRenderer.cpp
                #src/ColorTranslation.cpp
                #src/DebugWindow.cpp
                #src/DirectText.cpp

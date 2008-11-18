@@ -18,6 +18,10 @@
 #ifndef ANTARES_BRIEFING_RENDERER_HPP_
 #define ANTARES_BRIEFING_RENDERER_HPP_
 
+#include <Quickdraw.h>
+
+#include "NateDraw.hpp"
+
 // Briefing_Renderer.h
 
 void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
