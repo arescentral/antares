@@ -261,6 +261,8 @@ typedef struct { } NumVersion;
 bool EasyOpenPreferenceFile(const unsigned char* file_name, int creator,
                             int type, short* ref_num);
 
+void mAssert(bool condition);
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus

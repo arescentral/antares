@@ -21,6 +21,8 @@
 
 #include "AresVersion.hpp"
 
+#include "StringHandling.hpp"
+#include "StringNumerics.hpp"
 #include "Assert.h"
 #include "str_bp.h"
 

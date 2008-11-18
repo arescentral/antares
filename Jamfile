@@ -20,7 +20,7 @@ Main Antares : src/Admiral.cpp
                #src/AresNetworkSprocket.cpp
                src/AresPreferences.cpp
                src/AresResFile.cpp
-               #src/AresVersion.cpp
+               src/AresVersion.cpp
                #src/Beam.cpp
                #src/BriefingRenderer.cpp
                #src/ColorTranslation.cpp

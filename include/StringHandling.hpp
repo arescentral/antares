@@ -33,6 +33,8 @@ void ChopAlphaPString( StringPtr);
 void UpperCasePString( StringPtr);
 void DrawCString( const unsigned char *);
 
+void pstrcat(const unsigned char*, const unsigned char*);
+
 #pragma options align=reset
 
 #endif // ANTARES_STRING_HANDLING_HPP_
