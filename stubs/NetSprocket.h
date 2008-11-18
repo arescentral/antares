@@ -5,6 +5,8 @@
 extern "C" {
 #endif // __cplusplus
 
+#include <Base.h>
+
 typedef struct { } NSpProtocolListReference;
 
 typedef struct { } NSpEventProc;

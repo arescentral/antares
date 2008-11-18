@@ -12,7 +12,10 @@ extern "C" {
 
 typedef bool Boolean;
 
-typedef uint16_t Byte;
+typedef int8_t SignedByte;
+typedef uint8_t Byte;
+typedef int8_t SInt8;
+typedef uint8_t UInt8;
 typedef int16_t SInt16;
 typedef uint16_t UInt16;
 typedef int32_t SInt32;
@@ -39,6 +42,8 @@ void MoveHHi(Handle handle);
 void HLock(Handle handle);
 void HLockHi(Handle handle);
 void HUnlock(Handle handle);
+int8_t HGetState(Handle handle);
+void HSetState(Handle handle, int8_t state);
 
 int HiWord(long value);
 int LoWord(long value);
@@ -70,6 +75,7 @@ typedef FourCharCode ResType;
 enum {
     noErr = 0,
     paramErr = 1,
+    memFullErr = 2,
 
     maxSize = 100,
 
@@ -249,6 +255,11 @@ double GetDblTime();
 
 void GetAuxWin(WindowPtr window, AuxWinHandle* handle);
 void SetWinColor(WindowPtr window, WCTabHandle handle);
+
+typedef struct { } NumVersion;
+
+bool EasyOpenPreferenceFile(const unsigned char* file_name, int creator,
+                            int type, short* ref_num);
 
 #ifdef __cplusplus
 }

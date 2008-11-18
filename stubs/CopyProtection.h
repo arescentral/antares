@@ -5,7 +5,14 @@
 extern "C" {
 #endif // __cplusplus
 
-typedef struct { } serialNumberType;
+enum {
+    kDigitNumber = 8,
+};
+
+typedef struct {
+    unsigned char* name;
+    char number[kDigitNumber];
+} serialNumberType;
 
 #ifdef __cplusplus
 }
