@@ -19,7 +19,7 @@ Main Antares : src/Admiral.cpp
                src/AresMoviePlayer.cpp
                #src/AresNetworkSprocket.cpp
                src/AresPreferences.cpp
-               #src/AresResFile.cpp
+               src/AresResFile.cpp
                #src/AresVersion.cpp
                #src/Beam.cpp
                #src/BriefingRenderer.cpp

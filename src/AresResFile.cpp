@@ -19,6 +19,9 @@
 
 #include "AresResFile.hpp"
 
+#include <Process.h>
+#include <Resources.h>
+
 #include "Assert.h"
 
 short ARF_OpenResFile( StringPtr fileName)

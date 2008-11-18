@@ -21,6 +21,7 @@
 // Ares_ResFile.h
 
 #include <Base.h>
+#include <Files.h>
 
 short ARF_OpenResFile( const unsigned char* fileName);
 OSErr ARF_OpenResFile_External( const unsigned char* fileName, FSSpecPtr fileSpec);
