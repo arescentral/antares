@@ -12,6 +12,8 @@ extern "C" {
 typedef struct {
     Rect bounds;
     CTabHandle pmTable;
+    long rowBytes;
+    Handle baseAddr;
 } PixMap;
 typedef PixMap* PixMapPtr;
 typedef PixMap** PixMapHandle;
