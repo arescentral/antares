@@ -94,6 +94,8 @@ enum {
     cmdKey = 500,
 
     charCodeMask = 600,
+
+    noGrowDocProc = 700,
 };
 
 OSErr MemError();
@@ -129,6 +131,8 @@ typedef Window* WindowPtr;
 
 void BeginUpdate(WindowPtr window);
 void EndUpdate(WindowPtr window);
+WindowPtr NewWindow(void*, Rect* rect, const unsigned char* title, bool, int,
+                    WindowPtr behind, bool, int);
 void MacShowWindow(WindowPtr window);
 void DisposeWindow(WindowPtr window);
 short MacFindWindow(Point where, WindowPtr* window);

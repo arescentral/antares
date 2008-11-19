@@ -19,6 +19,8 @@
 
 #include "Debug.hpp"
 
+#include <Quickdraw.h>
+
 #include "ConditionalMacros.h"
 #include "Error.hpp"
 #include "SetFontByString.h"
@@ -380,7 +382,7 @@ void DebugFileCleanup( void)
 #endif
 }
 
-void DebugFileAppendString( StringPtr s)
+void DebugFileAppendString( const unsigned char* s)
 {
 #ifdef kDebugFileActive
     char    *c, *sc, lenCount;
