@@ -167,6 +167,7 @@ typedef CTab** CTabHandle;
 CTabHandle GetCTable(int id);
 void DisposeCTable(CTabHandle handle);
 void CTabChanged(CTabHandle handle);
+void Index2Color(long index, RGBColor* color);
 
 typedef void** WCTabHandle;
 

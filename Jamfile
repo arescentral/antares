@@ -23,7 +23,7 @@ Main Antares : src/Admiral.cpp
                src/AresVersion.cpp
                src/Beam.cpp
                src/BriefingRenderer.cpp
-               #src/ColorTranslation.cpp
+               src/ColorTranslation.cpp
                #src/DebugWindow.cpp
                #src/DirectText.cpp
                #src/EZSprite.cpp

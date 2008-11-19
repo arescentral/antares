@@ -18,6 +18,8 @@
 #ifndef ANTARES_COLOR_TRANSLATION_HPP_
 #define ANTARES_COLOR_TRANSLATION_HPP_
 
+#include <Quickdraw.h>
+
 // Color Translation.h
 
 #pragma options align=mac68k

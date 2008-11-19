@@ -5,11 +5,13 @@
 extern "C" {
 #endif // __cplusplus
 
+#include <Base.h>
 #include <Files.h>
 
 // Content here
 typedef struct {
     Rect bounds;
+    CTabHandle pmTable;
 } PixMap;
 typedef PixMap* PixMapPtr;
 typedef PixMap** PixMapHandle;
