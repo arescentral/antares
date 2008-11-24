@@ -14,6 +14,7 @@ typedef struct {
     CTabHandle pmTable;
     long rowBytes;
     Handle baseAddr;
+    int pixelSize;
 } PixMap;
 typedef PixMap* PixMapPtr;
 typedef PixMap** PixMapHandle;
@@ -66,6 +67,8 @@ OSErr ConvertPictToGIFFile(PicHandle pic, FSSpec* fsspec, int interlaced,
                            int transparencyNo, int depth, int palette);
 
 GDHandle GetMainDevice();
+GDHandle GetDeviceList();
+GDHandle GetNextDevice(GDHandle gd);
 
 void MacFillRect(Rect* rect, Pattern* pattern);
 
@@ -73,6 +76,9 @@ void MoveTo(int x, int y);
 
 void GetPen(Point* pen);
 void DrawString(const unsigned char* string);
+
+bool HasDepth(GDHandle device, int depth, int, int);
+void SetDepth(GDHandle device, int depth, int, int);
 
 enum {
     colorPaletteSystem = 1000,

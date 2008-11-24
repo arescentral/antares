@@ -20,6 +20,9 @@
 
 // GDevice Handling.h
 
+#include <Base.h>
+#include <Quickdraw.h>
+
 #pragma options align=mac68k
 
 Boolean ChooseTheDevice( int, Boolean);

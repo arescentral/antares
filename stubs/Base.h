@@ -84,6 +84,10 @@ enum {
     everyEvent = 300,
     updateEvt = 301,
     nullEvent = 302,
+    mouseDown = 303,
+    mouseUp = 304,
+    keyDown = 305,
+    autoKey = 306,
 
     inMenuBar = 400,
     inSysWindow = 401,
@@ -136,6 +140,7 @@ WindowPtr NewWindow(void*, Rect* rect, const unsigned char* title, bool, int,
 void MacShowWindow(WindowPtr window);
 void DisposeWindow(WindowPtr window);
 short MacFindWindow(Point where, WindowPtr* window);
+void MacMoveWindow(WindowPtr window, int x, int y, bool);
 void ShowHide(WindowPtr window, bool hide);
 void DragWindow(WindowPtr window, Point where, Rect* bounds);
 bool TrackGoAway(WindowPtr window, Point where);
@@ -285,6 +290,7 @@ void GetDialogItem(DialogPtr dialog, int item, short* type, Handle* handle,
                    Rect* rect);
 void ModalDialog(void*, short* item);
 void DisposeDialog(DialogPtr dialog);
+void DrawDialog(DialogPtr dialog);
 
 typedef struct { } Control;
 typedef Control* ControlPtr;

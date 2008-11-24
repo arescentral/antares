@@ -110,8 +110,8 @@ Boolean UserChooseTheDevice( int depth, Boolean setDepth, Rect *bounds)
         MacSetRect( &deviceRect, 0, 0, 200, 200);
         CenterRectInDevice( deviceWindow[i].whichDevice, &deviceRect);
         deviceWindow[i].window = GetNewDialog( 703, nil, (WindowPtr)-1);
-        MacMoveWindow( deviceWindow[i].window, deviceRect.left, deviceRect.top, true);
-        MacShowWindow( deviceWindow[i].window);
+        MacMoveWindow( (WindowPtr)deviceWindow[i].window, deviceRect.left, deviceRect.top, true);
+        MacShowWindow( (WindowPtr)deviceWindow[i].window);
     }
 
     while ( chosenWindow == -1)
@@ -140,7 +140,7 @@ Boolean UserChooseTheDevice( int depth, Boolean setDepth, Rect *bounds)
                         {
                             for ( i = 0; i < kMaxDevice; i++)
                             {
-                                if ( whichWindow == deviceWindow[i].window)
+                                if ( whichWindow == (WindowPtr)deviceWindow[i].window)
                                     chosenWindow = i;
                             }
                         }
@@ -170,10 +170,10 @@ Boolean UserChooseTheDevice( int depth, Boolean setDepth, Rect *bounds)
                 {
                     for ( i = 0; i < kMaxDevice; i++)
                     {
-                        if ( whichWindow == deviceWindow[i].window)
+                        if ( whichWindow == (WindowPtr)deviceWindow[i].window)
                         {
                             BeginUpdate( (WindowPtr)whichWindow);
-                            DrawDialog( whichWindow);
+                            DrawDialog( (DialogPtr)whichWindow);
                             EndUpdate( (WindowPtr)whichWindow);
                         }
                     }
@@ -186,7 +186,7 @@ Boolean UserChooseTheDevice( int depth, Boolean setDepth, Rect *bounds)
     {
         if ( deviceWindow[i].window != nil)
         {
-            DisposeWindow( deviceWindow[i].window);
+            DisposeWindow( (WindowPtr)deviceWindow[i].window);
         }
     }
 
