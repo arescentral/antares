@@ -269,6 +269,30 @@ bool EasyOpenPreferenceFile(const unsigned char* file_name, int creator,
 
 void mAssert(bool condition);
 
+void ParamText(const unsigned char* str1, const unsigned char* str2,
+               const unsigned char* str3, const unsigned char* str4);
+void StopAlert(int id, void*);
+
+void DebugStr(const unsigned char* str);
+
+typedef struct { } Dialog;
+typedef Dialog* DialogPtr;
+
+DialogPtr GetNewDialog(int id, void*, WindowPtr window);
+void SetDialogFontAndSize(DialogPtr dialog, int font, int size);
+void SetDialogDefaultItem(DialogPtr dialog, int item);
+void GetDialogItem(DialogPtr dialog, int item, short* type, Handle* handle,
+                   Rect* rect);
+void ModalDialog(void*, short* item);
+void DisposeDialog(DialogPtr dialog);
+
+typedef struct { } Control;
+typedef Control* ControlPtr;
+typedef Control** ControlHandle;
+void HiliteControl(ControlHandle control, int);
+
+void SetWRefCon(DialogPtr, long);
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus

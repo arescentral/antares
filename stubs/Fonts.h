@@ -11,6 +11,7 @@ void TextSize(int size);
 void TextFont(int font);
 void TextFace(int face);  // bold, etc.
 int StringWidth(const unsigned char* string);
+int GetFontNumByString(const unsigned char* string);
 
 enum {
     bold = 8000,

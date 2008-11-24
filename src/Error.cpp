@@ -19,12 +19,15 @@
 
 #include "Error.hpp"
 
+#include <Fonts.h>
 #include <Palettes.h>
+#include <Quickdraw.h>
 
 #include "ConditionalMacros.h"
 #include "DialogFont.h"
 #include "Resources.h"
 #include "SetFontByString.h"
+#include "StringNumerics.hpp"
 
 #define ERROR_STR_ID    800
 #define ERROR_ALERT_ID  800
@@ -214,7 +217,7 @@ void ShowErrorAny(  errorRecoverType recover,
         SetDialogDefaultItem( theDialog, kContinueButton);
     }
 
-    MacShowWindow( theDialog);
+    MacShowWindow( (WindowPtr)theDialog);
 
     done = false;
     while ( done == false)
@@ -297,7 +300,7 @@ void ErrConcatenatePString( StringPtr dString, StringPtr sString)
     }
 }
 
-void MyDebugString( StringPtr s)
+void MyDebugString( const unsigned char* s)
 {
 #ifdef kDebugError
     DebugStr( s);
