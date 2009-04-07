@@ -32,7 +32,7 @@ Main Antares : src/Admiral.cpp
                src/GDeviceHandling.cpp
                src/HandleHandling.cpp
                #src/HideMenubar.cpp
-               #src/HideMenubarNew.cpp
+               src/HideMenubarNew.cpp
                #src/Icl8ToCicn.cpp
                #src/IconSuiteFromAlias.cpp
                #src/Instruments.cpp

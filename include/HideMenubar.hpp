@@ -20,6 +20,9 @@
 
 // Hide Menubar.h
 
+#include <Base.h>
+#include <Quickdraw.h>
+
 void InitHideMenubar( void);
 void SetMBarState (Boolean, GDHandle);
 Boolean AutoShowHideMenubar( Point, GDHandle);

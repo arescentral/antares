@@ -134,6 +134,7 @@ typedef struct {
     Rect portRect;
 } Window;
 typedef Window* WindowPtr;
+typedef Window** WindowRef;
 
 void BeginUpdate(WindowPtr window);
 void EndUpdate(WindowPtr window);
@@ -202,8 +203,6 @@ typedef struct {
 
 void FlushEvents(int mask, int);
 void SetEventMask(int mask);
-
-typedef void** RgnHandle;
 
 typedef Handle MenuHandle;
 

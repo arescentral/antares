@@ -70,6 +70,18 @@ GDHandle GetMainDevice();
 GDHandle GetDeviceList();
 GDHandle GetNextDevice(GDHandle gd);
 
+struct Rgn { };
+typedef Rgn* RgnPtr;
+typedef Rgn** RgnHandle;
+
+Rgn** NewRgn();
+void DisposeRgn(Rgn** rgn);
+void RectRgn(Rgn** src, Rect* dst);
+void GetMBarRgn(Rgn** rgn);
+bool PtInRgn(Point p, Rgn** rgn);
+void DiffRgn(Rgn**, Rgn**, Rgn**);
+void MacUnionRgn(Rgn**, Rgn**, Rgn**);
+
 void MacFillRect(Rect* rect, Pattern* pattern);
 
 void MoveTo(int x, int y);
@@ -87,6 +99,20 @@ enum {
 
     srcCopy = 1200,
 };
+
+void SetClip(Rgn** clip);
+void PaintBehind(Window**, Rgn**);
+void CalcVisBehind(Window**, Rgn**);
+
+Rgn** LMGetGrayRgn();
+void LMSetMBarHeight(int height);
+Port* LMGetWMgrPort();
+Window** LMGetWindowList();
+int GetMBarHeight();
+
+void ShowMenuBar();
+void HideMenuBar();
+bool IsMenuBarVisible();
 
 #ifdef __cplusplus
 }

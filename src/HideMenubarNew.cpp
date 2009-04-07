@@ -26,6 +26,7 @@
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Options.hpp"
+#include "WinAresGlue.hpp"
 
 // also hides desktop corners
 
