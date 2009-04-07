@@ -20,6 +20,8 @@
 
 // ROTATION.H
 
+#include <Base.h>
+
 #pragma options align=mac68k
 
 /*
@@ -61,17 +63,43 @@
 
 #define kRotUnit    100     // must be same as kMotionResolution ( see Motion.h)
 
-#define mGetRotPoint( x, y, angle)  (x) = *((Fixed *)*gRotTable + (long)(angle) * (long)2);\
-                                    (y) = *((Fixed *)*gRotTable + (long)((angle) * (long)2) + (long)1);
+extern Handle gRotTable;
+
+template <typename T>
+inline void mGetRotPoint(T& x, T& y, long angle) {
+    x = *((Fixed *)*gRotTable + angle * 2);
+    y = *((Fixed *)*gRotTable + (angle * 2) + 1);
+}
 
 // mAngleDifference: get the smallest difference from theta to other
+inline long mAngleDifference(long theta, long other) {
+    if (theta >= other) {
+        if ((theta - other) > ROT_180) {
+            return other - theta + ROT_POS;
+        } else {
+            return other - theta;
+        }
+    } else {
+        if ((other - theta) > ROT_180) {
+            return other - theta - ROT_POS;
+        } else {
+            return other - theta;
+        }
+    }
+}
 
-#define mAngleDifference( theta, other) \
-    ( (theta) >= (other)) ? \
-    ((( (theta) - (other)) > ROT_180) ? ((other) - (theta) + ROT_POS) : ( (other) - (theta))) : \
-    ((( (other) - (theta)) > ROT_180) ? ((other) - (theta) - ROT_POS) : ( (other) - (theta)))
-
-#define mAddAngle( theta, other) theta += (other); if ( theta >= ROT_POS) theta -= ROT_POS; else if ( theta < 0) theta += ROT_POS;
+// XXX: There are places where the change from a macro to an inline function could have had a real
+// effect.  In particular, NonPlayerShip.cpp:1350, :1673, :1804, :2216, :2513 look like they would
+// have had their "else if" clauses reinterpreted as a branch of the below statement, rather than
+// the intended ones in that file.
+inline void mAddAngle(long& theta, long other) {
+    theta += (other);
+    if (theta >= ROT_POS) {
+        theta -= ROT_POS;
+    } else if (theta < 0) {
+        theta += ROT_POS;
+    }
+}
 
 int RotationInit( void);
 void RotationCleanup( void);

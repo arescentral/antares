@@ -1241,7 +1241,7 @@ void GetInitialCoord( scenarioInitialType *initial, coordPointType *coord, long 
     coord->v += lscrap;
 */
     mAddAngle( rotation, 90);
-    mGetRotPoint( lcos, lsin, rotation)
+    mGetRotPoint( lcos, lsin, rotation);
     lcos = -lcos;
     lsin = -lsin;
 

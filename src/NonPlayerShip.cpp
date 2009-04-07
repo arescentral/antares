@@ -565,7 +565,7 @@ void NonplayerShipThink( long timePass)
 
                         h = anObject->direction;
                         mAddAngle( h, -90);
-                        mGetRotPoint( fcos, fsin, (long)h)
+                        mGetRotPoint( fcos, fsin, h);
                         fcos = -fcos;
                         fsin = -fsin;
 
@@ -602,7 +602,7 @@ void NonplayerShipThink( long timePass)
 
                         h = anObject->direction;
                         mAddAngle( h, -90);
-                        mGetRotPoint( fcos, fsin, (long)h)
+                        mGetRotPoint( fcos, fsin, h);
                         fcos = -fcos;
                         fsin = -fsin;
 
@@ -649,7 +649,7 @@ void NonplayerShipThink( long timePass)
 
                         h = anObject->direction;
                         mAddAngle( h, -90);
-                        mGetRotPoint( fcos, fsin, (long)h)
+                        mGetRotPoint( fcos, fsin, h);
                         fcos = -fcos;
                         fsin = -fsin;
 
@@ -808,11 +808,11 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                     {
                         if ( theta > 0)
                         {
-                            mAddAngle( anObject->directionGoal, 90)
+                            mAddAngle( anObject->directionGoal, 90);
                         }
                         else if ( theta < 0)
                         {
-                            mAddAngle( anObject->directionGoal, -90)
+                            mAddAngle( anObject->directionGoal, -90);
                         } else
                         {
                             beta = 90;
@@ -820,7 +820,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
 //                          if ( RandomSeeded( 2,
 //                                  &anObject->randomSeed, 'nps4', anObject->whichBaseObject))
                                 beta = -90;
-                            mAddAngle( anObject->directionGoal, beta)
+                            mAddAngle( anObject->directionGoal, beta);
                         }
                         theta =
                             mAngleDifference( anObject->directionGoal,
@@ -836,11 +836,11 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                         {
                         if ( theta > 0)
                         {
-                            mAddAngle( anObject->directionGoal, kEvadeAngle)
+                            mAddAngle( anObject->directionGoal, kEvadeAngle);
                         }
                         else if ( theta < 0)
                         {
-                            mAddAngle( anObject->directionGoal, -kEvadeAngle)
+                            mAddAngle( anObject->directionGoal, -kEvadeAngle);
                         } else
                         {
                             beta = kEvadeAngle;
@@ -848,7 +848,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
 //                                  &anObject->randomSeed, 'nps5', anObject->whichBaseObject))
                             if ( anObject->location.h & 0x00000001)
                                 beta = -kEvadeAngle;
-                            mAddAngle( anObject->directionGoal, beta)
+                            mAddAngle( anObject->directionGoal, beta);
                         }
                         theta = mAngleDifference( anObject->directionGoal,
                             anObject->direction);
@@ -865,7 +865,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                     beta = kEvadeAngle;
                     if ( RandomSeeded( 2, &anObject->randomSeed,
                         'nps6', anObject->whichBaseObject)) beta = -kEvadeAngle;
-                    mAddAngle( anObject->direction, beta)
+                    mAddAngle( anObject->direction, beta);
                     keysDown |= kUpKey;
                 }
 
@@ -1000,11 +1000,11 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
 
                         if ( theta > 0)
                         {
-                            mAddAngle( anObject->directionGoal, kEvadeAngle)
+                            mAddAngle( anObject->directionGoal, kEvadeAngle);
                         }
                         else if ( theta < 0)
                         {
-                            mAddAngle( anObject->directionGoal, -kEvadeAngle)
+                            mAddAngle( anObject->directionGoal, -kEvadeAngle);
                         } else
                         {
                             beta = kEvadeAngle;
@@ -1012,7 +1012,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
 //                              &anObject->randomSeed, 'np10', anObject->whichBaseObject))
                             if ( anObject->location.h & 0x00000001)
                                 beta = -kEvadeAngle;
-                            mAddAngle( anObject->directionGoal, beta)
+                            mAddAngle( anObject->directionGoal, beta);
                         }
                         theta = mAngleDifference( anObject->directionGoal,
                             anObject->direction);
@@ -1028,7 +1028,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                         beta = kEvadeAngle;
                         if ( RandomSeeded( 2, &anObject->randomSeed,
                             'np11', anObject->whichBaseObject)) beta = -kEvadeAngle;
-                        mAddAngle( anObject->direction, beta)
+                        mAddAngle( anObject->direction, beta);
                         keysDown |= kUpKey;
                     }
                 }
@@ -1347,7 +1347,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
             angle = AngleFromSlope( slope);
 
             if ( dest.h < anObject->location.h)
-                mAddAngle( angle, 180)
+                mAddAngle( angle, 180);
             else if (( anObject->location.h == dest.h) &&
                     ( dest.v < anObject->location.v))
                 angle = 0;
@@ -1669,7 +1669,7 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
             angle = AngleFromSlope( slope);
 
             if ( dest.h < anObject->location.h)
-                mAddAngle( angle, 180)
+                mAddAngle( angle, 180);
             else if (( anObject->location.h == dest.h) &&
                     ( dest.v < anObject->location.v))
                 angle = 0;
@@ -1801,7 +1801,7 @@ void ThinkObjectGetCoordVector( spaceObjectType *anObject, coordPointType *dest,
         *angle = AngleFromSlope( slope);
 
         if ( dest->h < anObject->location.h)
-            mAddAngle( *angle, 180)
+            mAddAngle( *angle, 180);
         else if (( anObject->location.h == dest->h) &&
                 ( dest->v < anObject->location.v))
             *angle = 0;
@@ -2213,7 +2213,7 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
     angle = AngleFromSlope( slope);
 
     if ( dest.h < anObject->location.h)
-        mAddAngle( angle, 180)
+        mAddAngle( angle, 180);
     else if (( anObject->location.h == dest.h) &&
             ( dest.v < anObject->location.v))
         angle = 0;
@@ -2236,7 +2236,7 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
         }
 
         beta = targetObject->direction;
-        mAddAngle( beta, ROT_180)
+        mAddAngle( beta, ROT_180);
         *theta = mAngleDifference( beta, angle);
     } else
     {
@@ -2510,7 +2510,7 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
                 angle = AngleFromSlope( slope);
 
                 if ( hdif > 0)
-                    mAddAngle( angle, 180)
+                    mAddAngle( angle, 180);
                 else if (( hdif == 0) &&
                         ( vdif > 0))
                     angle = 0;

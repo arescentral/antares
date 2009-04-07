@@ -425,7 +425,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
         } else if ( destObject->attributes & kShapeFromDirection)
         {
             angle = destObject->direction;
-            mAddAngle( angle, destObject->baseType->frame.rotation.rotRes >> 1)
+            mAddAngle( angle, destObject->baseType->frame.rotation.rotRes >> 1);
             whichShape = angle / destObject->baseType->frame.rotation.rotRes;
         }
 
@@ -686,12 +686,12 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
     } else dObject->periodicTime = 0;
 
     r = sObject->initialDirection;
-    mAddAngle( r, direction)
+    mAddAngle( r, direction);
     if ( sObject->initialDirectionRange > 0)
     {
         i = RandomSeeded( (short)sObject->initialDirectionRange, &(dObject->randomSeed), 'soh2',
             whichBaseObject);
-        mAddAngle( r, i)
+        mAddAngle( r, i);
     }
     dObject->direction = r;
 //  DebugFileAppendLong( dObject->direction);
@@ -703,7 +703,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
         f += (smallFixedType)RandomSeeded( (short)sObject->initialVelocityRange,
                     &(dObject->randomSeed), 'soh3', whichBaseObject);
     }
-    mGetRotPoint( newVel.h, newVel.v, r)
+    mGetRotPoint( newVel.h, newVel.v, r);
     newVel.h = mMultiplyFixed( newVel.h, f);
     newVel.v = mMultiplyFixed( newVel.v, f);
 
@@ -1098,7 +1098,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
         } else if ( dObject->attributes & kShapeFromDirection)
         {
             angle = dObject->direction;
-            mAddAngle( angle, sObject->frame.rotation.rotRes >> 1)
+            mAddAngle( angle, sObject->frame.rotation.rotRes >> 1);
             dObject->sprite->whichShape = angle / sObject->frame.rotation.rotRes;
         } else
         {
@@ -1772,7 +1772,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 
                                             // get the maxthrust of new vector
 
-                                            mGetRotPoint( f, f2, (long)angle);
+                                            mGetRotPoint( f, f2, angle);
 
                                             f = mMultiplyFixed( dObject->maxVelocity, f);
                                             f2 = mMultiplyFixed( dObject->maxVelocity, f2);
@@ -1811,7 +1811,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                 // excede its max velocity.
                                 // Minimum value is absolute speed in direction.
                                 {
-                                    mGetRotPoint( f, f2, (long)anObject->direction);
+                                    mGetRotPoint( f, f2, anObject->direction);
                                     f = mMultiplyFixed( action->argument.alterObject.minimum, f);
                                     f2 = mMultiplyFixed( action->argument.alterObject.minimum, f2);
                                     if ( action->argument.alterObject.relative)
@@ -2963,7 +2963,7 @@ void ActivateObjectSpecial( spaceObjectType *anObject)
 
             h = anObject->direction;
             mAddAngle( h, -90);
-            mGetRotPoint( fcos, fsin, (long)h)
+            mGetRotPoint( fcos, fsin, h);
             fcos = -fcos;
             fsin = -fsin;
 
@@ -3034,7 +3034,7 @@ void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord
     long    lcos, lsin, lscrap, angle = gAresGlobal->gScenarioRotation;
 
     mAddAngle( angle, 90);
-    mGetRotPoint( lcos, lsin, angle)
+    mGetRotPoint( lcos, lsin, angle);
     lcos = -lcos;
     lsin = -lsin;
 

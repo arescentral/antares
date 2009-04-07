@@ -348,7 +348,7 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
 
                         // get the maxthrust of new vector
 
-                        mGetRotPoint( fh, fv, (long)angle);
+                        mGetRotPoint( fh, fv, angle);
 
                         fh = mMultiplyFixed( useThrust, fh);
                         fv = mMultiplyFixed( useThrust, fv);
@@ -688,7 +688,7 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                 } else if ( anObject->attributes & kShapeFromDirection)
                 {
                     angle = anObject->direction;
-                    mAddAngle( angle, baseObject->frame.rotation.rotRes >> 1)
+                    mAddAngle( angle, baseObject->frame.rotation.rotRes >> 1);
                     anObject->sprite->whichShape = angle / baseObject->frame.rotation.rotRes;
                 }
             } //else MyDebugString("\pUnexpected Error: a sprite seems to be missing.");

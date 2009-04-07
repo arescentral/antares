@@ -274,7 +274,7 @@ void DetermineBeamRelativeCoordFromAngle( spaceObjectType *beamObject,
         y = mLongToFixed( beamObject->frame.beam.beam->range);
 
     mAddAngle( h, -90);
-    mGetRotPoint( fcos, fsin, (long)h)
+    mGetRotPoint( fcos, fsin, h);
     fcos = -fcos;
     fsin = -fsin;
 
