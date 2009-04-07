@@ -11,6 +11,7 @@ extern "C" {
 #define pascal
 
 typedef bool Boolean;
+typedef int16_t OSErr;
 
 typedef int8_t SignedByte;
 typedef uint8_t Byte;
@@ -50,9 +51,11 @@ int LoWord(long value);
 
 void Microseconds(UnsignedWide* wide);
 
+Size MaxMem(Size*);
 Size CompactMem(int);
 void BlockMove(Ptr, void*, size_t);
-void HandToHand(Handle* handle);
+OSErr HandToHand(Handle* handle);
+void HandAndHand(Handle src, Handle dst);
 
 typedef void* AddrBlock;
 
@@ -67,7 +70,6 @@ typedef const unsigned char* ConstStr255Param;
 typedef const unsigned char* ConstStr31Param;
 typedef Str63 StrFileName;
 
-typedef int16_t OSErr;
 typedef uint32_t FourCharCode;
 typedef FourCharCode OSType;
 typedef FourCharCode ResType;

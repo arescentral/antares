@@ -30,7 +30,7 @@ Main Antares : src/Admiral.cpp
                #src/EnvironmentCheck.cpp
                src/Error.cpp
                src/GDeviceHandling.cpp
-               #src/HandleHandling.cpp
+               src/HandleHandling.cpp
                #src/HideMenubar.cpp
                #src/HideMenubarNew.cpp
                #src/Icl8ToCicn.cpp
