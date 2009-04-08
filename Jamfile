@@ -65,7 +65,7 @@ Main Antares : src/Admiral.cpp
                #src/SmartFile.cpp
                src/SoundFX.cpp
                src/SpaceObjectHandling.cpp
-               #src/SpriteCursor.cpp
+               src/SpriteCursor.cpp
                src/SpriteHandling.cpp
                src/StringHandling.cpp
                src/StringNumerics.cpp

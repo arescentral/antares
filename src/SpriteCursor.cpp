@@ -240,7 +240,7 @@ void DrawSpriteCursorSprite( longRect *clipRect)
 
         OptScaleSpritePixInPixMap( &aSpritePix, gSpriteCursor->where, SCALE_SCALE,
                 &sRect, clipRect, pixMap);
-        mCopyAnyRect( gSpriteCursor->sprite.thisRect, sRect)
+        mCopyAnyRect( gSpriteCursor->sprite.thisRect, sRect);
     } else
     {
         gSpriteCursor->sprite.thisRect.left = gSpriteCursor->sprite.thisRect.top = 0;
@@ -333,7 +333,7 @@ void ShowSpriteCursorSprite( void)
         } else
         {
             tRect = gSpriteCursor->sprite.thisRect;
-            mBiggestRect( tRect, gSpriteCursor->sprite.lastRect)
+            mBiggestRect( tRect, gSpriteCursor->sprite.lastRect);
 
             ChunkCopyPixMapToScreenPixMap( *pixMap, &tRect, *thePixMapHandle);
 
