@@ -50,7 +50,7 @@ Main Antares : src/Admiral.cpp
                #src/NetSetupScreen.cpp
                #src/NetSprocketGlue.cpp
                src/NonPlayerShip.cpp
-               #src/OffscreenGWorld.cpp
+               src/OffscreenGWorld.cpp
                #src/OldFile.cpp
                src/PlayerInterface.cpp
                src/PlayerInterfaceDrawing.cpp

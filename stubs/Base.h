@@ -144,8 +144,11 @@ void MacInsetRect(Rect* rect, int x, int y);
 
 ////////////////////////////
 
+typedef struct { } BitMap;
+
 typedef struct {
     Rect portRect;
+    BitMap portBits;
 } Window;
 typedef Window* WindowPtr;
 typedef Window** WindowRef;
