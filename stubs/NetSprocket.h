@@ -7,6 +7,11 @@
 extern "C" {
 #endif // __cplusplus
 
+enum {
+  kNSpPlayerJoined = 1,
+  kNSpPlayerLeft = 2,
+};
+
 typedef struct { } NSpProtocolListReference;
 
 typedef struct { } NSpEventProc;

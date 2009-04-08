@@ -63,6 +63,7 @@
 #include "TitleScreen.hpp"           // for CenterRectInRect
 #include "Transitions.hpp"
 #include "WrapGameRanger.hpp"
+#include "WinAresGlue.hpp"
 
 #define kThisVersion    0x00000201  // last was 200; last was 104
 
@@ -5184,7 +5185,7 @@ void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, lo
         clipRect.top = 0;
         clipRect.bottom = clipRect.top + WORLD_HEIGHT;
         RectToLongRect( destRect, &clipRect);
-        mCopyAnyRect( tlRect, boundsRect)
+        mCopyAnyRect( tlRect, boundsRect);
         tlRect.left -= 2;
         tlRect.top -= 2;
         tlRect.right += 2;

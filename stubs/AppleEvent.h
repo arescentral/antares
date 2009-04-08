@@ -46,6 +46,7 @@ OSErr AEGetAttributePtr(AppleEvent* event, int key, int type,
                         DescType* returned_type, void*, int, Size* actual_size);
 OSErr AEInstallEventHandler(int class_, int action, AEEventHandlerUPP upp,
                             int, bool);
+void AEProcessAppleEvent(EventRecord* event);
 
 AEEventHandlerUPP NewAEEventHandlerProc(AEEventHandlerProcPtr handler);
 

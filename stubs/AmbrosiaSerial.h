@@ -6,6 +6,7 @@ extern "C" {
 #endif // __cplusplus
 
 bool Ambrosia_Is_Registered();
+void Ambrosia_Update_Registered();
 
 #ifdef __cplusplus
 }

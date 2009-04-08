@@ -55,6 +55,7 @@ void InitGraf(GrafPtr* port);
 void GetPort(GrafPtr* port);
 void MacSetPort(GrafPtr port);
 void PaintRect(Rect* rect);
+void InvalRect(Rect* rect);
 
 void CopyBits(BitMap* source, BitMap* source2, Rect* source_rect,
               Rect* source_rect2, int mode, void*);
@@ -72,10 +73,6 @@ GDHandle GetMainDevice();
 GDHandle GetDeviceList();
 GDHandle GetNextDevice(GDHandle gd);
 
-struct Rgn { };
-typedef Rgn* RgnPtr;
-typedef Rgn** RgnHandle;
-
 Rgn** NewRgn();
 void DisposeRgn(Rgn** rgn);
 void RectRgn(Rgn** src, Rect* dst);
@@ -83,10 +80,16 @@ void GetMBarRgn(Rgn** rgn);
 bool PtInRgn(Point p, Rgn** rgn);
 void DiffRgn(Rgn**, Rgn**, Rgn**);
 void MacUnionRgn(Rgn**, Rgn**, Rgn**);
+void OpenRgn();
+void CloseRgn(Rgn** rgn);
+void ScrollRect(Rect* rect, int x, int y, Rgn** clip);
 
 void MacFillRect(Rect* rect, Pattern* pattern);
+void FrameRect(Rect* rect);
 void MacFrameRect(Rect* rect);
 void EraseRect(Rect* rect);
+
+void MacLineTo(int x, int y);
 
 void MoveTo(int x, int y);
 

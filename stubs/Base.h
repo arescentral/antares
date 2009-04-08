@@ -47,6 +47,7 @@ void HUnlock(Handle handle);
 int8_t HGetState(Handle handle);
 void HSetState(Handle handle, int8_t state);
 void HNoPurge(Handle handle);
+OSErr PtrToHand(void*, Handle*, int len);
 
 int HiWord(long value);
 int LoWord(long value);
@@ -55,7 +56,7 @@ void Microseconds(UnsignedWide* wide);
 
 Size MaxMem(Size*);
 Size CompactMem(int);
-void BlockMove(Ptr, void*, size_t);
+void BlockMove(void*, void*, size_t);
 OSErr HandToHand(Handle* handle);
 void HandAndHand(Handle src, Handle dst);
 
@@ -92,6 +93,8 @@ enum {
     mouseUp = 304,
     keyDown = 305,
     autoKey = 306,
+    osEvt = 307,
+    kHighLevelEvent = 308,
 
     inMenuBar = 400,
     inSysWindow = 401,
@@ -103,8 +106,13 @@ enum {
 
     charCodeMask = 600,
     keyCodeMask = 601,
+    resumeFlag = 602,
+    convertClipboardFlag = 603,
 
     noGrowDocProc = 700,
+
+    mouseMovedMessage = 800,
+    suspendResumeMessage = 801,
 };
 
 OSErr MemError();
@@ -132,6 +140,7 @@ void MacSetRect(Rect* rect, int top, int right, int bottom, int left);
 void OffsetRect(Rect* rect, int h, int v);
 void MacOffsetRect(Rect* rect, int h, int v);
 bool MacPtInRect(Point pt, Rect* rect);
+void MacInsetRect(Rect* rect, int x, int y);
 
 ////////////////////////////
 
@@ -153,6 +162,7 @@ void ShowHide(WindowPtr window, bool hide);
 void DragWindow(WindowPtr window, Point where, Rect* bounds);
 bool TrackGoAway(WindowPtr window, Point where);
 void GlobalToLocal(Point* point);
+void SelectWindow(WindowPtr window);
 
 typedef struct {
     Rect portRect;
@@ -206,8 +216,13 @@ typedef struct {
     int modifiers;
 } EventRecord;
 
+struct Rgn { };
+typedef Rgn* RgnPtr;
+typedef Rgn** RgnHandle;
+
 void FlushEvents(int mask, int);
 void SetEventMask(int mask);
+bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouseRgn);
 
 typedef Handle MenuHandle;
 
@@ -233,7 +248,7 @@ Handle GetIndResource(FourCharCode type, int id);
 
 void Debugger();
 
-void Munger(Handle, int, const unsigned char* dest, size_t dest_length,
+int Munger(Handle, int, const unsigned char* dest, size_t dest_length,
             const void* source, size_t source_length);
 
 void SysBeep(int);
