@@ -46,6 +46,7 @@ void HLockHi(Handle handle);
 void HUnlock(Handle handle);
 int8_t HGetState(Handle handle);
 void HSetState(Handle handle, int8_t state);
+void HNoPurge(Handle handle);
 
 int HiWord(long value);
 int LoWord(long value);
