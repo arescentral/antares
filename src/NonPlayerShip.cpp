@@ -45,6 +45,7 @@
 #include "ShotsBeamsExplosions.hpp"
 #include "SoundFX.hpp"
 #include "SpaceObjectHandling.hpp"
+#include "StringNumerics.hpp"
 #include "TimeUnit.hpp"
 #include "ToolUtils.h"
 #include "Transitions.hpp"
