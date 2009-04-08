@@ -1035,11 +1035,11 @@ void DrawNateVBracket( PixMap *destPix, longRect *destRect, longRect *clipRect, 
 
     mGetRowBytes( rowBytes, destPix);
 
-    mSetNatePixel( aByte, rowBytes, destRect->left, destRect->top + 1, hoff, voff, destPix, color)
-    mSetNatePixel( aByte, rowBytes, destRect->right - 1, destRect->top + 1, hoff, voff, destPix, color)
+    mSetNatePixel( aByte, rowBytes, destRect->left, destRect->top + 1, hoff, voff, destPix, color);
+    mSetNatePixel( aByte, rowBytes, destRect->right - 1, destRect->top + 1, hoff, voff, destPix, color);
 
-    mSetNatePixel( aByte, rowBytes, destRect->left, destRect->bottom - 2, hoff, voff, destPix, color)
-    mSetNatePixel( aByte, rowBytes, destRect->right - 1, destRect->bottom - 2, hoff, voff, destPix, color)
+    mSetNatePixel( aByte, rowBytes, destRect->left, destRect->bottom - 2, hoff, voff, destPix, color);
+    mSetNatePixel( aByte, rowBytes, destRect->right - 1, destRect->bottom - 2, hoff, voff, destPix, color);
 }
 
 void DrawNateShadedRect( PixMap *destPix, longRect *destRect, longRect *clipRect, long hoff, long voff,

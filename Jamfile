@@ -44,7 +44,7 @@ Main Antares : src/Admiral.cpp
                #src/Minicomputer.cpp
                #src/Motion.cpp
                #src/Music.cpp
-               #src/NateDraw.cpp
+               src/NateDraw.cpp
                #src/NatePixTable.cpp
                #src/NavigationUtilities.cpp
                #src/NetSetupScreen.cpp
