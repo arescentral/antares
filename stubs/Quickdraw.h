@@ -56,6 +56,7 @@ void GetPort(GrafPtr* port);
 void MacSetPort(GrafPtr port);
 void PaintRect(Rect* rect);
 void InvalRect(Rect* rect);
+void ClipRect(Rect* rect);
 
 void CopyBits(BitMap* source, BitMap* source2, Rect* source_rect,
               Rect* source_rect2, int mode, void*);
@@ -89,6 +90,9 @@ void FrameRect(Rect* rect);
 void MacFrameRect(Rect* rect);
 void EraseRect(Rect* rect);
 
+void FrameOval(Rect* rect);
+void PaintOval(Rect* rect);
+
 void MacLineTo(int x, int y);
 
 void MoveTo(int x, int y);
@@ -109,6 +113,7 @@ enum {
 };
 
 void SetClip(Rgn** clip);
+void GetClip(Rgn** clip);
 void PaintBehind(Window**, Rgn**);
 void CalcVisBehind(Window**, Rgn**);
 

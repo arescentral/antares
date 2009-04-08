@@ -321,6 +321,8 @@ void SetWRefCon(DialogPtr, long);
 long AngleFromSlope(Fixed slope);
 long Random();
 
+void StringToNum(unsigned char* string, long* value);
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus

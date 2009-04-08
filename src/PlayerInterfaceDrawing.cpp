@@ -19,9 +19,12 @@
 
 #include "PlayerInterfaceDrawing.hpp"
 
+#include <ConditionalMacros.h>
+#include <Quickdraw.h>
+#include <Resources.h>
+
 #include "AnyChar.hpp"
 #include "ColorTranslation.hpp"
-#include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "DirectText.hpp"
 #include "Error.hpp"
@@ -29,7 +32,7 @@
 #include "KeyMapTranslation.hpp"
 #include "NateDraw.hpp"
 #include "PlayerInterfaceItems.hpp"
-#include "Resources.h"
+#include "StringNumerics.hpp"
 
 #define kInterfaceLargeHBorder      13
 #define kInterfaceSmallHBorder      3
