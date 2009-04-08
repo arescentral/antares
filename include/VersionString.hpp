@@ -18,6 +18,8 @@
 #ifndef ANTARES_VERSION_STRING_HPP_
 #define ANTARES_VERSION_STRING_HPP_
 
+#include <Base.h>
+
 void GetVersionString(StringPtr, short);
 
 #endif // ANTARES_VERSION_STRING_HPP_
