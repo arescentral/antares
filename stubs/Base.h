@@ -24,6 +24,7 @@ typedef uint32_t UInt32;
 typedef struct { SInt32 hi; UInt32 lo; } wide;
 typedef struct { UInt32 hi; UInt32 lo; } UnsignedWide;
 
+void WideAdd(wide* value, wide* summand);
 void WideSubtract(wide* value, wide* difference);
 void WideMultiply(long a, long b, wide* c);
 
@@ -299,6 +300,8 @@ typedef Control** ControlHandle;
 void HiliteControl(ControlHandle control, int);
 
 void SetWRefCon(DialogPtr, long);
+
+long AngleFromSlope(Fixed slope);
 
 #ifdef __cplusplus
 }

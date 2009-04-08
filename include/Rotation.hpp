@@ -92,7 +92,8 @@ inline long mAngleDifference(long theta, long other) {
 // effect.  In particular, NonPlayerShip.cpp:1350, :1673, :1804, :2216, :2513 look like they would
 // have had their "else if" clauses reinterpreted as a branch of the below statement, rather than
 // the intended ones in that file.
-inline void mAddAngle(long& theta, long other) {
+template <typename T>
+inline void mAddAngle(T& theta, long other) {
     theta += (other);
     if (theta >= ROT_POS) {
         theta -= ROT_POS;
