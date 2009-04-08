@@ -1,12 +1,12 @@
 #ifndef ANTARES_STUB_BASE_H_
 #define ANTARES_STUB_BASE_H_
 
+#include <stdlib.h>
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
-
-#include <stdlib.h>
-#include <stdint.h>
 
 #define pascal
 

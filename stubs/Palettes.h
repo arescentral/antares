@@ -1,11 +1,11 @@
 #ifndef ANTARES_STUB_PALETTES_H_
 #define ANTARES_STUB_PALETTES_H_
 
+#include <Base.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
-
-#include <Base.h>
 
 typedef void** PaletteHandle;
 

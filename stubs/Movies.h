@@ -1,12 +1,12 @@
 #ifndef ANTARES_STUB_MOVIES_H_
 #define ANTARES_STUB_MOVIES_H_
 
+#include <Base.h>
+#include <Quickdraw.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
-
-#include <Base.h>
-#include <Quickdraw.h>
 
 enum {
     DoTheRightThing = 9000,

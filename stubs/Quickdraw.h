@@ -1,12 +1,12 @@
 #ifndef ANTARES_STUB_QUICKDRAW_H_
 #define ANTARES_STUB_QUICKDRAW_H_
 
+#include <Base.h>
+#include <Files.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
-
-#include <Base.h>
-#include <Files.h>
 
 // Content here
 typedef struct {

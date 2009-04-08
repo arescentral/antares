@@ -1,11 +1,11 @@
 #ifndef ANTARES_STUB_PROCESS_H_
 #define ANTARES_STUB_PROCESS_H_
 
+#include <Files.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
-
-#include <Files.h>
 
 typedef uint64_t ProcessSerialNumber;
 typedef struct {

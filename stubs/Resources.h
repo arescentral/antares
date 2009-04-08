@@ -1,12 +1,12 @@
 #ifndef ANTARES_STUB_RESOURCES_H_
 #define ANTARES_STUB_RESOURCES_H_
 
+#include <Base.h>
+#include <Files.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif // __cplusplus
-
-#include <Base.h>
-#include <Files.h>
 
 typedef void* ResFile;
 
