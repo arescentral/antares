@@ -46,7 +46,8 @@ inline void mBiggestRect(Rect& mdrect, const Rect& morect) {
     mdrect.bottom = std::max(mdrect.bottom, morect.bottom);
 }
 
-inline void mCopyAnyRect(Rect& mdrect, const Rect& msrect) {
+template <typename T0, typename T1>
+inline void mCopyAnyRect(T0& mdrect, const T1& msrect) {
     mdrect.left = msrect.left;
     mdrect.top = msrect.top;
     mdrect.right = msrect.right;

@@ -39,6 +39,7 @@
 #include "Resources.h"
 #include "Rotation.hpp"
 #include "SingleDataFile.hpp"
+#include "StringNumerics.hpp"
 
 #define kMaxSpriteNum           500//300
 
@@ -2925,7 +2926,7 @@ void DrawSpriteTableInOffWorld( longRect *clipRect)
                             break;
                     }
 //                  sRect.top = sRect.left = sRect.bottom = sRect.right = 0;
-                    mCopyAnyRect( aSprite->thisRect, sRect)
+                    mCopyAnyRect( aSprite->thisRect, sRect);
     //              LongRectToRect( &sRect, &(aSprite->thisRect));
                 #endif
                 }
@@ -2986,7 +2987,7 @@ void DrawSpriteTableInOffWorld( longRect *clipRect)
                     }
 //                  DrawNateRectClipped( *pixMap, &sRect, clipRect, 0, 0, aSprite->tinyColor);
 
-                    mCopyAnyRect( aSprite->thisRect, sRect)
+                    mCopyAnyRect( aSprite->thisRect, sRect);
                 #endif
                 }
 
@@ -3085,7 +3086,7 @@ void ShowSpriteTable( void)
             } else
             {
                 tRect = aSprite->thisRect;
-                mBiggestRect( tRect, aSprite->lastRect)
+                mBiggestRect( tRect, aSprite->lastRect);
 
                 ChunkCopyPixMapToScreenPixMap( *pixMap, &tRect, *thePixMapHandle);
 

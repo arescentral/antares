@@ -13,7 +13,7 @@ typedef struct {
     Rect bounds;
     CTabHandle pmTable;
     long rowBytes;
-    Handle baseAddr;
+    char* baseAddr;
     int pixelSize;
 } PixMap;
 typedef PixMap* PixMapPtr;
