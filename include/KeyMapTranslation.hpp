@@ -20,7 +20,8 @@
 
 // Key Map Translation.h
 
-#include "ConditionalMacros.h"
+#include <Base.h>
+#include <ConditionalMacros.h>
 
 #pragma options align=mac68k
 

@@ -103,6 +103,10 @@ enum {
     inGoAway = 404,
 
     cmdKey = 500,
+    optionKey = 501,
+    shiftKey = 502,
+    alphaLock = 503,
+    smKCHRCache = 504,
 
     charCodeMask = 600,
     keyCodeMask = 601,
@@ -325,6 +329,9 @@ long AngleFromSlope(Fixed slope);
 long Random();
 
 void StringToNum(unsigned char* string, long* value);
+
+Ptr GetScriptManagerVariable(int cache);
+long KeyTranslate(Ptr kchr, short keyCode, unsigned long* keyTranslateState);
 
 #ifdef __cplusplus
 }

@@ -37,7 +37,7 @@ Main Antares : src/Admiral.cpp
                #src/IconSuiteFromAlias.cpp
                src/Instruments.cpp
                src/InterfaceHandling.cpp
-               #src/KeyMapTranslation.cpp
+               src/KeyMapTranslation.cpp
                src/KeySetupScreen.cpp
                src/MathSpecial.cpp
                src/MessageScreen.cpp
