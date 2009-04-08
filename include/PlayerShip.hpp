@@ -20,6 +20,9 @@
 
 // Player Ship.h
 
+#include <Base.h>
+#include "SpaceObject.hpp"
+
 #pragma options align=mac68k
 
 #define kShapeNum               24

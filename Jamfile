@@ -54,7 +54,7 @@ Main Antares : src/Admiral.cpp
                #src/OldFile.cpp
                #src/PlayerInterface.cpp
                #src/PlayerInterfaceDrawing.cpp
-               #src/PlayerShip.cpp
+               src/PlayerShip.cpp
                src/Races.cpp
                src/Randomize.cpp
                src/Rotation.cpp

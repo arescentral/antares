@@ -112,7 +112,7 @@ void AdvanceCurrentLongMessage( void);
 void PreviousCurrentLongMessage( void);
 void ReplayLastLongMessage( void);
 void DrawMessageScreen( long);
-void SetStatusString( anyCharType *, Boolean, unsigned char);
+void SetStatusString(const unsigned char *, Boolean, unsigned char);
 void UpdateStatusString( void);
 long DetermineDirectTextHeightInWidth( retroTextSpecType *, long);
 void DrawDirectTextInRect( retroTextSpecType *, longRect *, longRect *, PixMap *, long, long);
