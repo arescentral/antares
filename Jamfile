@@ -41,7 +41,7 @@ Main Antares : src/Admiral.cpp
                #src/KeySetupScreen.cpp
                src/MathSpecial.cpp
                src/MessageScreen.cpp
-               #src/Minicomputer.cpp
+               src/Minicomputer.cpp
                src/Motion.cpp
                #src/Music.cpp
                src/NateDraw.cpp

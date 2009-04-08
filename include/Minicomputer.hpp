@@ -20,6 +20,10 @@
 
 // Minicomputer.h
 
+#include <Base.h>
+
+#include "SpaceObject.hpp"
+
 int MiniScreenInit( void);
 void MiniScreenCleanup( void);
 void CorrectMiniScreenGlobalPtr( Handle);

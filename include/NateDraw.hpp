@@ -39,7 +39,8 @@ inline void mGetNatePixel(uint8_t* destByte, long rowBytes, long x, long y, long
     destByte = (unsigned char *)(destPix)->baseAddr + (y + yoff) * rowBytes + x + xoff;
 }
 
-inline void mBiggestRect(Rect& mdrect, const Rect& morect) {
+template <typename T0, typename T1>
+inline void mBiggestRect(T0& mdrect, const T1& morect) {
     mdrect.left = std::max(mdrect.left, morect.left);
     mdrect.top = std::max(mdrect.top, morect.top);
     mdrect.right = std::max(mdrect.right, morect.right);

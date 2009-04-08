@@ -1519,7 +1519,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                 uRect = lRect;
             } else
             {
-                mBiggestRect( uRect, lRect)
+                mBiggestRect( uRect, lRect);
             }
         } else if ( oldObject->whichBaseObject != newObject->whichBaseObject)
         {
@@ -1547,7 +1547,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                 uRect = lRect;
             } else
             {
-                mBiggestRect( uRect, lRect)
+                mBiggestRect( uRect, lRect);
             }
         }
     }
@@ -1631,7 +1631,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         }
         else
         {
-            mBiggestRect( uRect, dRect)
+            mBiggestRect( uRect, dRect);
         }
     }
 
@@ -1678,7 +1678,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         }
         else
         {
-            mBiggestRect( uRect, dRect)
+            mBiggestRect( uRect, dRect);
         }
 
     }
@@ -1725,7 +1725,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         }
         else
         {
-            mBiggestRect( uRect, dRect)
+            mBiggestRect( uRect, dRect);
         }
     }
 
@@ -1753,7 +1753,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         }
         else
         {
-            mBiggestRect( uRect, lRect)
+            mBiggestRect( uRect, lRect);
         }
     }
 
@@ -1781,7 +1781,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         }
         else
         {
-            mBiggestRect( uRect, lRect)
+            mBiggestRect( uRect, lRect);
         }
     }
 
@@ -1809,7 +1809,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         }
         else
         {
-            mBiggestRect( uRect, lRect)
+            mBiggestRect( uRect, lRect);
         }
     }
 
@@ -1855,7 +1855,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         }
         else
         {
-            mBiggestRect( uRect, lRect)
+            mBiggestRect( uRect, lRect);
         }
     }
 
@@ -2410,28 +2410,28 @@ void MiniComputerSetStatusStrings( void)
 #define kIntegerMinusValue          4   // value - designated score
 #define kSmallFixedMinusValue       5   // small fixed - designated score
 
-        number = which score/condition #
-
-        player = which player score (if any); -1 = you, -2 = first not you
-        ( 0 if you're player 1, 1 if you're player 0)
-
-        negative value = value to use for kIntegerMinusValue or kSmallFixedMinusValue
-
-        falsestring = string to use if false
-
-        truestring = string to use if true
-
-        basestring = first part of string
-
-        for example, the string 1\0\\0\0\N\Y\SHIP DESTROYED:
-        would result in the status line SHIP DESTROYED, based on condition 0;
-        if false, line reads SHIP DESTROYED: N, and if true SHIP DESTROYED: Y
-
-        example #2, string 2\1\0\10\\\Samples Left:
-        would result in the status line "Samples Left: " + score 1 of player 0
-        so if player 0's score 1 was 3, the line would read:
-        Samples Left: 7
-    */
+    //  number = which score/condition #
+    //
+    //  player = which player score (if any); -1 = you, -2 = first not you
+    //  ( 0 if you're player 1, 1 if you're player 0)
+    //
+    //  negative value = value to use for kIntegerMinusValue or kSmallFixedMinusValue
+    //
+    //  falsestring = string to use if false
+    //
+    //  truestring = string to use if true
+    //
+    //  basestring = first part of string
+    //
+    //  for example, the string 1\0\\0\0\N\Y\SHIP DESTROYED:
+    //  would result in the status line SHIP DESTROYED, based on condition 0;
+    //  if false, line reads SHIP DESTROYED: N, and if true SHIP DESTROYED: Y
+    //
+    //  example #2, string 2\1\0\10\\\Samples Left:
+    //  would result in the status line "Samples Left: " + score 1 of player 0
+    //  so if player 0's score 1 was 3, the line would read:
+    //  Samples Left: 7
+    //
 
     short               count, charNum, value;
     Str255              sourceString;

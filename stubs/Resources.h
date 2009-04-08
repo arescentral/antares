@@ -21,6 +21,9 @@ void DetachResource(Handle handle);
 
 Handle GetStringList(int id);
 int FindStringList(Handle handle, unsigned char* result);
+void DisposeStringList(Handle handle);
+int StringListSize(Handle handle);
+void RetrieveIndString(Handle handle, int index, unsigned char* result);
 
 int FSpOpenResFile(FSSpec* spec, int options);
 
