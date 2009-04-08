@@ -33,6 +33,7 @@
 #include "PlayerInterface.hpp"
 #include "SoundFX.hpp"
 #include "StringHandling.hpp"
+#include "WinAresGlue.hpp"
 
 #define kKeyScreenID                5030
 #define kKeyCancelButton            0

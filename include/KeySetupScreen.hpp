@@ -18,6 +18,8 @@
 #ifndef ANTARES_KEY_SETUP_SCREEN_HPP_
 #define ANTARES_KEY_SETUP_SCREEN_HPP_
 
+#include <Base.h>
+
 // Key_Setup_Screen.h
 
 Boolean Key_Setup_Screen_Do( void);

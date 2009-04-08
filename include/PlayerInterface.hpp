@@ -65,7 +65,7 @@ Boolean BothCommandAndQ( void);
 netResultType StartNetworkGameSetup( void);
 netResultType HostAcceptClientInterface( void);
 netResultType ClientNetworkGameSetup( void);
-void DrawStringInInterfaceItem( long, StringPtr);
+void DrawStringInInterfaceItem( long, const unsigned char*);
 netResultType ClientWaitInterface( void);
 netResultType HostBeginGame( void);
 netResultType ClientBeginGame( void);
