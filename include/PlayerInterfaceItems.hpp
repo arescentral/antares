@@ -20,6 +20,8 @@
 
 // Player Interface Items.h
 
+#include <TextEdit.h>
+
 #include "AnyChar.hpp"
 #include "NateDraw.hpp"
 

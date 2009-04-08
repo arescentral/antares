@@ -101,6 +101,7 @@ enum {
     cmdKey = 500,
 
     charCodeMask = 600,
+    keyCodeMask = 601,
 
     noGrowDocProc = 700,
 };
@@ -129,6 +130,7 @@ void SetRect(Rect* rect, int left, int top, int right, int bottom);
 void MacSetRect(Rect* rect, int top, int right, int bottom, int left);
 void OffsetRect(Rect* rect, int h, int v);
 void MacOffsetRect(Rect* rect, int h, int v);
+bool MacPtInRect(Point pt, Rect* rect);
 
 ////////////////////////////
 
@@ -223,8 +225,6 @@ int OpenDeskAcc(const unsigned char* name);
 
 void NoteAlert(int type, void*);
 
-typedef void** TEHandle;
-
 // Gets STR# from resource fork
 void GetIndString( const unsigned char* result, int id, int index);
 
@@ -249,7 +249,6 @@ void GetMouse(Point* point);
 
 void InitWindows();
 void InitMenus();
-void TEInit();
 void InitDialogs(void*);
 void MoreMasters();
 void MaxApplZone();

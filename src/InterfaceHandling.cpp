@@ -25,6 +25,7 @@
 #include "InterfaceHandling.hpp"
 
 #include <QDOffscreen.h>
+#include <Fonts.h>
 
 #include "AnyChar.hpp"
 #include "AresResFile.hpp"

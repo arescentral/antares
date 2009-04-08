@@ -45,6 +45,7 @@ typedef void* Port;
 
 void RGBBackColor(RGBColor* color);
 void RGBForeColor(RGBColor* color);
+void HiliteColor(RGBColor* color);
 
 PixMapHandle GetGWorldPixMap(GWorldPtr world);
 
@@ -85,9 +86,11 @@ void MacUnionRgn(Rgn**, Rgn**, Rgn**);
 
 void MacFillRect(Rect* rect, Pattern* pattern);
 void MacFrameRect(Rect* rect);
+void EraseRect(Rect* rect);
 
 void MoveTo(int x, int y);
 
+void PenNormal();
 void GetPen(Point* pen);
 void DrawString(const unsigned char* string);
 
