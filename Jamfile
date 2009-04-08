@@ -70,7 +70,7 @@ Main Antares : src/Admiral.cpp
                src/StringHandling.cpp
                src/StringNumerics.cpp
                src/TimeUnit.cpp
-               #src/TitleScreen.cpp
+               src/TitleScreen.cpp
                #src/Transitions.cpp
                src/VersionString.cpp
                #src/WrapGameRanger.cpp

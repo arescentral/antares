@@ -39,6 +39,7 @@ typedef GrafPtr CGrafPtr;
 typedef struct { } Pattern;
 
 void BackPat(Pattern* pattern);
+void PenPat(Pattern* pattern);
 
 typedef void* Port;
 

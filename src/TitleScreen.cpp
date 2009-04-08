@@ -19,12 +19,14 @@
 
 #include "TitleScreen.hpp"
 
-#include "ConditionalMacros.h"
+#include <ConditionalMacros.h>
+#include <Resources.h>
+
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "HandleHandling.hpp"
 #include "OffscreenGWorld.hpp"
-#include "Resources.h"
+#include "WinAresGlue.hpp"
 
 #define kTitleScreenID      502
 #define kPublisherScreenID  2000

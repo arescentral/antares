@@ -20,6 +20,8 @@
 
 // Title Screen.h
 
+#include <Base.h>
+
 void DrawTitleScreen( void);
 void DrawPublisherScreen( void);
 void DrawEgoScreen( void);
