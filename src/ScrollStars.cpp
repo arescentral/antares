@@ -408,7 +408,7 @@ void DrawScrollStars( Boolean warp)
     mGetTranslateColorShade( kStarColor, LIGHT, mediumColor, transColor)
     mGetTranslateColorShade( kStarColor, LIGHTER, fastColor, transColor)
 
-    rowBytes = mGetRowBytes( rowBytes, *offMap)
+    mGetRowBytes( rowBytes, *offMap);
     bounds.left = lastBounds.left = CLIP_LEFT;
     bounds.top = lastBounds.top = CLIP_TOP;
     bounds.bottom = CLIP_BOTTOM;
@@ -587,8 +587,8 @@ void ShowScrollStars( Boolean warp)
     mGetTranslateColorShade( kStarColor, LIGHT, mediumColor, transColor)
     mGetTranslateColorShade( kStarColor, LIGHTER, fastColor, transColor)
 
-    srowBytes = mGetRowBytes( srowBytes, *sourceMap)
-    drowBytes = mGetRowBytes( drowBytes, *thePixMapHandle)
+    mGetRowBytes( srowBytes, *sourceMap);
+    mGetRowBytes( drowBytes, *thePixMapHandle);
 
     bounds.left = lastBounds.left = CLIP_LEFT;
     bounds.top = lastBounds.top = CLIP_TOP;
@@ -1101,7 +1101,7 @@ void Draw3DStars( Boolean warp, longRect *bounds, PixMapHandle destMap)
     long            rowBytes, clipAge;
     transColorType  *transColor;
 
-    rowBytes = mGetRowBytes( rowBytes, *destMap)
+    mGetRowBytes( rowBytes, *destMap);
     star = ( scrollStarType *)*gAresGlobal->gScrollStarData;
 
     for ( i = 0; i < kAllStarNum; i++)
@@ -1184,8 +1184,8 @@ void Show3DStars( Boolean warp, longRect *bounds, PixMapHandle sourceMap)
     unsigned char   *dByte, *sByte;
     long            srowBytes, drowBytes;
 
-    srowBytes = mGetRowBytes( srowBytes, *sourceMap)
-    drowBytes = mGetRowBytes( drowBytes, *thePixMapHandle)
+    mGetRowBytes( srowBytes, *sourceMap);
+    mGetRowBytes( drowBytes, *thePixMapHandle);
     star = ( scrollStarType *)*gAresGlobal->gScrollStarData;
 
     for ( i = 0; i < kAllStarNum; i++)

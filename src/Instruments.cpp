@@ -318,7 +318,7 @@ void UpdateRadar( long unitsDone)
         mGetTranslateColorShade( kRadarColor, (( kRadarColorSteps * gAresGlobal->gRadarCount) / gAresGlobal->gRadarSpeed) + 1, color, transColor);
     }
 
-    oCount = mGetRowBytes( oCount, *thePixMapHandle)
+    mGetRowBytes( oCount, *thePixMapHandle);
 
     if ( doDraw)
     {

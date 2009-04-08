@@ -20,31 +20,38 @@
 
 // Natedraw.h
 
+#include <algorithm>
 #include <Base.h>
 #include <Quickdraw.h>
 
 #pragma options align=mac68k
 
-#define mGetRowBytes( rBytes, msourcePix) rBytes = (msourcePix)->rowBytes & 0x3fff;
+inline void mGetRowBytes(long rBytes, PixMap* pix) {
+    rBytes = pix->rowBytes & 0x3fff;
+}
 
-#define mSetNatePixel( mdestByte, mrowBytes, mx, my, mxoff, myoff, mdestPix, mcolor) \
-mdestByte = (unsigned char *)(mdestPix)->baseAddr + (long)((my) + (myoff)) * (mrowBytes) + (long)(mx) + (long)(mxoff);\
-*mdestByte = (mcolor);
+inline void mSetNatePixel(uint8_t* mdestByte, long mrowBytes, long mx, long my, long mxoff, long myoff, PixMap* mdestPix, uint8_t mcolor) {
+    mdestByte = (unsigned char *)mdestPix->baseAddr + (my + myoff) * mrowBytes + mx + mxoff;
+    *mdestByte = mcolor;
+}
 
-#define mGetNatePixel( destByte, rowBytes, x, y, xoff, yoff, destPix) \
-destByte = (unsigned char *)(destPix)->baseAddr + (long)((y) + (yoff)) * (rowBytes) + (long)(x) + (long)(xoff);
+inline void mGetNatePixel(uint8_t* destByte, long rowBytes, long x, long y, long xoff, long yoff, PixMap* destPix) {
+    destByte = (unsigned char *)(destPix)->baseAddr + (y + yoff) * rowBytes + x + xoff;
+}
 
-#define mBiggestRect( mdrect, morect) \
-if ( (morect).left < (mdrect).left) (mdrect).left = (morect).left;\
-if ( (morect).top < (mdrect).top) (mdrect).top = (morect).top;\
-if ( (morect).right > (mdrect).right) (mdrect).right = (morect).right;\
-if ( (morect).bottom > (mdrect).bottom) (mdrect).bottom = (morect).bottom;
+inline void mBiggestRect(Rect& mdrect, const Rect& morect) {
+    mdrect.left = std::max(mdrect.left, morect.left);
+    mdrect.top = std::max(mdrect.top, morect.top);
+    mdrect.right = std::max(mdrect.right, morect.right);
+    mdrect.bottom = std::max(mdrect.bottom, morect.bottom);
+}
 
-#define mCopyAnyRect( mdrect, msrect)\
-(mdrect).left = (msrect).left;\
-(mdrect).top = (msrect).top;\
-(mdrect).right = (msrect).right;\
-(mdrect).bottom = (msrect).bottom;
+inline void mCopyAnyRect(Rect& mdrect, const Rect& msrect) {
+    mdrect.left = msrect.left;
+    mdrect.top = msrect.top;
+    mdrect.right = msrect.right;
+    mdrect.bottom = msrect.bottom;
+}
 
 typedef unsigned long   coordType;
 
