@@ -26,6 +26,7 @@
 #include "Error.hpp"
 #include "Resources.h"
 #include "StringHandling.hpp"
+#include "StringNumerics.hpp"
 
 #define kRandomError    "\pRAND"
 

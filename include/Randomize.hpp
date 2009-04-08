@@ -20,6 +20,8 @@
 
 // Randomize.h
 
+#include <Base.h>
+
 #pragma options align=mac68k
 
 //#define RandomSeeded( mrange, mseed) DebugRandomSeeded( mrange, mseed, __FILE__, __LINE__)

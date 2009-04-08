@@ -302,6 +302,7 @@ void HiliteControl(ControlHandle control, int);
 void SetWRefCon(DialogPtr, long);
 
 long AngleFromSlope(Fixed slope);
+long Random();
 
 #ifdef __cplusplus
 }
