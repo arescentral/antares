@@ -39,13 +39,13 @@ Main Antares : src/Admiral.cpp
                #src/InterfaceHandling.cpp
                #src/KeyMapTranslation.cpp
                #src/KeySetupScreen.cpp
-               #src/MathSpecial.cpp
+               src/MathSpecial.cpp
                #src/MessageScreen.cpp
                #src/Minicomputer.cpp
-               #src/Motion.cpp
+               src/Motion.cpp
                #src/Music.cpp
                src/NateDraw.cpp
-               #src/NatePixTable.cpp
+               src/NatePixTable.cpp
                #src/NavigationUtilities.cpp
                #src/NetSetupScreen.cpp
                #src/NetSprocketGlue.cpp
@@ -55,12 +55,12 @@ Main Antares : src/Admiral.cpp
                #src/PlayerInterface.cpp
                #src/PlayerInterfaceDrawing.cpp
                #src/PlayerShip.cpp
-               #src/Races.cpp
+               src/Races.cpp
                #src/Randomize.cpp
-               #src/Rotation.cpp
-               #src/ScenarioData.cpp
+               src/Rotation.cpp
+               src/ScenarioData.cpp
                #src/ScenarioMaker.cpp
-               #src/ScreenLabel.cpp
+               src/ScreenLabel.cpp
                src/ScrollStars.cpp
                #src/SmartFile.cpp
                #src/SoundFX.cpp
@@ -68,8 +68,8 @@ Main Antares : src/Admiral.cpp
                #src/SpriteCursor.cpp
                #src/SpriteHandling.cpp
                #src/StringHandling.cpp
-               #src/StringNumerics.cpp
-               #src/TimeUnit.cpp
+               src/StringNumerics.cpp
+               src/TimeUnit.cpp
                #src/TitleScreen.cpp
                #src/Transitions.cpp
                #src/VersionString.cpp
