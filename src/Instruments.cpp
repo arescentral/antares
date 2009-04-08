@@ -328,7 +328,7 @@ void UpdateRadar( long unitsDone)
             if ( lp->h >= 0)
             {
                 mSetNatePixel( dByte, oCount, lp->h, lp->v, gNatePortLeft << 2L,
-                        gNatePortTop, *thePixMapHandle, color)
+                        gNatePortTop, *thePixMapHandle, color);
             }
             lp++;
         }
@@ -911,7 +911,7 @@ void DrawSite( void)
         sy += gScrollStarObject->sprite->where.v;
 
         count = gScrollStarObject->direction;
-        count = mAddAngle( count, 30);
+        mAddAngle( count, 30);
         mGetRotPoint( fa, fb, count);
         fc = mLongToFixed( kSiteSize);
         fa = mMultiplyFixed( fc, fa);
@@ -929,7 +929,7 @@ void DrawSite( void)
         }
 
         count = gScrollStarObject->direction;
-        count = mAddAngle( count, -30);
+        mAddAngle( count, -30);
         mGetRotPoint( fa, fb, count);
         fc = mLongToFixed( kSiteSize);
         fa = mMultiplyFixed( fc, fa);

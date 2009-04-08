@@ -20,6 +20,10 @@
 
 // Radar.h
 
+#include <Base.h>
+
+#include "NateDraw.hpp"
+
 #pragma options align=mac68k
 
 #define kMiniBuildTimeHeight    ( 25)

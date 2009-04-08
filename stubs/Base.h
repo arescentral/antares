@@ -125,6 +125,7 @@ typedef struct {
     int right;
 } Rect;
 
+void SetRect(Rect* rect, int left, int top, int right, int bottom);
 void MacSetRect(Rect* rect, int top, int right, int bottom, int left);
 void OffsetRect(Rect* rect, int h, int v);
 void MacOffsetRect(Rect* rect, int h, int v);
@@ -244,6 +245,7 @@ void InitCursor();
 void MacShowCursor();
 void HideCursor();
 void ShieldCursor(Rect* rect, Point point);
+void GetMouse(Point* point);
 
 void InitWindows();
 void InitMenus();

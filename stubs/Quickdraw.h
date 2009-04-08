@@ -61,6 +61,7 @@ void CopyBits(BitMap* source, BitMap* source2, Rect* source_rect,
 PicHandle GetPicture(int id);
 PicHandle OpenPicture(Rect* source);
 void KillPicture(PicHandle pic);
+void DrawPicture(PicHandle pic, Rect*);
 void ClosePicture();
 
 OSErr ConvertPictToGIFFile(PicHandle pic, FSSpec* fsspec, int interlaced,
@@ -83,6 +84,7 @@ void DiffRgn(Rgn**, Rgn**, Rgn**);
 void MacUnionRgn(Rgn**, Rgn**, Rgn**);
 
 void MacFillRect(Rect* rect, Pattern* pattern);
+void MacFrameRect(Rect* rect);
 
 void MoveTo(int x, int y);
 
