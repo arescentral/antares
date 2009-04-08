@@ -20,6 +20,8 @@
 
 // String Handling.h
 
+#include <Base.h>
+
 #pragma options align=mac68k
 
 void CopyPString( unsigned char *, const unsigned char *);

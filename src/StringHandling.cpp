@@ -19,7 +19,8 @@
 
 #include "StringHandling.hpp"
 
-#include "ConditionalMacros.h"
+#include <ConditionalMacros.h>
+#include <Quickdraw.h>
 
 void CopyPString( unsigned char *to, unsigned char *from)
 
