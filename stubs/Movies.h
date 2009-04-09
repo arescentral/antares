@@ -14,29 +14,29 @@ typedef void* Movie;
 
 typedef double TimeValue;
 
-OSErr EnterMovies();
-void ExitMovies();
-OSErr OpenMovieFile(FSSpec* fsspec, short* res_file, int permissions);
-OSErr NewMovieFromFile(Movie* movie, short res_file, short* id,
-                       const unsigned char* name, int, bool* was_changed);
-OSErr CloseMovieFile(short res_file);
+STUB0(EnterMovies, OSErr(), noErr);
+STUB0(ExitMovies, void());
+STUB3(OpenMovieFile, OSErr(FSSpec* fsspec, short* res_file, int permissions), noErr);
+STUB6(NewMovieFromFile, OSErr(Movie* movie, short res_file, short* id,
+                       const unsigned char* name, int, bool* was_changed), noErr);
+STUB1(CloseMovieFile, OSErr(short res_file), noErr);
 
-void StartMovie(Movie movie);
-void StopMovie(Movie movie);
-void DisposeMovie(Movie movie);
-OSErr GetMoviesError();
+STUB1(StartMovie, void(Movie movie));
+STUB1(StopMovie, void(Movie movie));
+STUB1(DisposeMovie, void(Movie movie));
+STUB0(GetMoviesError, OSErr(), noErr);
 
-void GetMovieBox(Movie movie, Rect* box);
-void SetMovieBox(Movie movie, Rect* box);
+STUB2(GetMovieBox, void(Movie movie, Rect* box));
+STUB2(SetMovieBox, void(Movie movie, Rect* box));
 
-OSErr GetMovieColorTable(Movie movie, CTabHandle* clut);
-OSErr SetMovieColorTable(Movie movie, CTabHandle clut);
+STUB2(GetMovieColorTable, OSErr(Movie movie, CTabHandle* clut), noErr);
+STUB2(SetMovieColorTable, OSErr(Movie movie, CTabHandle clut), noErr);
 
-void SetMovieGWorld(Movie movie, CGrafPtr window, void*);
-void SetMovieVolume(Movie movie, double volume);
-Fixed GetMovieRate(Movie movie);
-OSErr PrerollMovie(Movie movie, TimeValue duration, Fixed rate);
-bool IsMovieDone(Movie movie);
-void MoviesTask(Movie movie, int do_the_right_thing);
+STUB3(SetMovieGWorld, void(Movie movie, CGrafPtr window, void*));
+STUB2(SetMovieVolume, void(Movie movie, double volume));
+STUB1(GetMovieRate, Fixed(Movie movie), 0);
+STUB3(PrerollMovie, OSErr(Movie movie, TimeValue duration, Fixed rate), noErr);
+STUB1(IsMovieDone, bool(Movie movie), true);
+STUB2(MoviesTask, void(Movie movie, int do_the_right_thing));
 
 #endif // ANTARES_STUB_MOVIES_H_

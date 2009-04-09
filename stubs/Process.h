@@ -9,7 +9,7 @@ typedef struct {
     FSSpec* processAppSpec;
     size_t processInfoLength;
 } ProcessInfoRec;
-OSErr GetCurrentProcess(ProcessSerialNumber* serial);
-OSErr GetProcessInformation(ProcessSerialNumber* serial, ProcessInfoRec* info);
+STUB1(GetCurrentProcess, OSErr(ProcessSerialNumber* serial), noErr);
+STUB2(GetProcessInformation, OSErr(ProcessSerialNumber* serial, ProcessInfoRec* info), noErr);
 
 #endif // ANTARES_STUB_PROCESS_H_

@@ -20,9 +20,9 @@ enum {
     initMono,
 };
 
-OSErr SndNewChannel(SndChannel** chan, long, long, void*);
-OSErr SndDisposeChannel(SndChannel* chan, bool);
-OSErr SndChannelStatus(SndChannel* chan, int status_size, SCStatus* status);
+STUB4(SndNewChannel, OSErr(SndChannel** chan, long, long, void*), noErr);
+STUB2(SndDisposeChannel, OSErr(SndChannel* chan, bool), noErr);
+STUB3(SndChannelStatus, OSErr(SndChannel* chan, int status_size, SCStatus* status), noErr);
 
 enum SndCommandEnum {
     quietCmd,
@@ -36,10 +36,10 @@ struct SndCommand {
     int param2;
 };
 
-OSErr SndDoImmediate(SndChannel* chan, SndCommand* cmd);
-OSErr SndDoCommand(SndChannel* chan, SndCommand* cmd, bool);
-OSErr SndPlay(SndChannel* channel, Handle sound, bool);
+STUB2(SndDoImmediate, OSErr(SndChannel* chan, SndCommand* cmd), noErr);
+STUB3(SndDoCommand, OSErr(SndChannel* chan, SndCommand* cmd, bool), noErr);
+STUB3(SndPlay, OSErr(SndChannel* channel, Handle sound, bool), noErr);
 
-OSErr GetSoundHeaderOffset(Handle sound, long* offset);
+STUB2(GetSoundHeaderOffset, OSErr(Handle sound, long* offset), noErr);
 
 #endif // ANTARES_STUB_SOUND_H_

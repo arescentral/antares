@@ -10,16 +10,16 @@ struct TextEdit {
 typedef TextEdit* TEPtr;
 typedef TextEdit** TEHandle;
 
-void TEInit();
-TEHandle TENew(Rect*, Rect*);
-void TEDispose(TEHandle data);
-void TEIdle(TEHandle data);
-void TEClick(Point where, bool shift, TEHandle data);
-void TEKey(char whichChar, TEHandle data);
-void TESetText(Ptr, long, TEHandle data);
-void TESetSelect(int start, int end, TEHandle data);
-void TEActivate(TEHandle data);
-void TEDeactivate(TEHandle data);
-void TEUpdate(Rect*, TEHandle data);
+STUB0(TEInit, void());
+STUB2(TENew, TEHandle(Rect*, Rect*), NULL);
+STUB1(TEDispose, void(TEHandle data));
+STUB1(TEIdle, void(TEHandle data));
+STUB3(TEClick, void(Point where, bool shift, TEHandle data));
+STUB2(TEKey, void(char whichChar, TEHandle data));
+STUB3(TESetText, void(Ptr, long, TEHandle data));
+STUB3(TESetSelect, void(int start, int end, TEHandle data));
+STUB1(TEActivate, void(TEHandle data));
+STUB1(TEDeactivate, void(TEHandle data));
+STUB2(TEUpdate, void(Rect*, TEHandle data));
 
 #endif // ANTARES_STUB_AIFF_H_

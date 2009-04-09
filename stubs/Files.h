@@ -12,12 +12,12 @@ typedef struct {
 } FSSpec;
 typedef FSSpec* FSSpecPtr;
 
-OSErr FSMakeFSSpec(int, int, const unsigned char* forceName, FSSpec* fsspec);
-OSErr FSWrite(short fileno, Size* size, void* data);
-OSErr FSClose(short fileno);
-OSErr FSpOpenDF(FSSpec* fsspec, int, short* fileno);
-OSErr FSpCreate(FSSpec* fsspec, FourCharCode, FourCharCode, int);
-OSErr FSpDelete(FSSpec* fsspec);
+STUB4(FSMakeFSSpec, OSErr(int, int, const unsigned char* forceName, FSSpec* fsspec), noErr);
+STUB3(FSWrite, OSErr(short fileno, Size* size, void* data), noErr);
+STUB1(FSClose, OSErr(short fileno), noErr);
+STUB3(FSpOpenDF, OSErr(FSSpec* fsspec, int, short* fileno), noErr);
+STUB4(FSpCreate, OSErr(FSSpec* fsspec, FourCharCode, FourCharCode, int), noErr);
+STUB1(FSpDelete, OSErr(FSSpec* fsspec), noErr);
 
 enum {
     smSystemScript = 4000,

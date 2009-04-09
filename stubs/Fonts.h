@@ -1,13 +1,13 @@
 #ifndef ANTARES_STUB_FONTS_H_
 #define ANTARES_STUB_FONTS_H_
 
-void InitFonts();
-void SetFontByString(const unsigned char* name);
-void TextSize(int size);
-void TextFont(int font);
-void TextFace(int face);  // bold, etc.
-int StringWidth(const unsigned char* string);
-int GetFontNumByString(const unsigned char* string);
+STUB0(InitFonts, void());
+STUB1(SetFontByString, void(const unsigned char* name));
+STUB1(TextSize, void(int size));
+STUB1(TextFont, void(int font));
+STUB1(TextFace, void(int face));  // bold, etc.
+STUB1(StringWidth, int(const unsigned char* string), 0);
+STUB1(GetFontNumByString, int(const unsigned char* string), 0);
 
 enum {
     bold = 8000,

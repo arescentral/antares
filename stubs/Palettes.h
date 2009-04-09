@@ -13,13 +13,13 @@ enum {
     pmAllUpdates = 7002,
 };
 
-PaletteHandle NewPalette(int colors, CTabHandle clut, int options, int);
-PaletteHandle GetPalette(WindowPtr window);
-void DisposePalette(PaletteHandle palette);
-void SetPalette(WindowPtr window, PaletteHandle palette, bool);
-void ActivatePalette(WindowPtr window);
+STUB4(NewPalette, PaletteHandle(int colors, CTabHandle clut, int options, int), NULL);
+STUB1(GetPalette, PaletteHandle(WindowPtr window), NULL);
+STUB1(DisposePalette, void(PaletteHandle palette));
+STUB3(SetPalette, void(WindowPtr window, PaletteHandle palette, bool));
+STUB1(ActivatePalette, void(WindowPtr window));
 
-void CTab2Palette(CTab** clut, Palette** palette, int options, int);
-void NSetPalette(Window* window, Palette** palette, int options);
+STUB4(CTab2Palette, void(CTab** clut, Palette** palette, int options, int));
+STUB3(NSetPalette, void(Window* window, Palette** palette, int options));
 
 #endif // ANTARES_STUB_PALETTES_H_

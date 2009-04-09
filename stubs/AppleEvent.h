@@ -32,18 +32,18 @@ enum {
     kAEOpenApplication = 3403,
 };
 
-OSErr AEGetParamDesc(AppleEvent* event, int key, int type, AEDescList* docList);
-OSErr AECountItems(AEDescList* docList, long* itemsInList);
-OSErr AEGetNthPtr(AEDescList* docList, int index, int type, AEKeyword* kwd,
+STUB4(AEGetParamDesc, OSErr(AppleEvent* event, int key, int type, AEDescList* docList), noErr);
+STUB2(AECountItems, OSErr(AEDescList* docList, long* itemsInList), noErr);
+STUB8(AEGetNthPtr, OSErr(AEDescList* docList, int index, int type, AEKeyword* kwd,
                   DescType* returned_type, FSSpec* fsspec, size_t Size,
-                  Size* actual_size);
-OSErr AEDisposeDesc(AEDescList* docList);
-OSErr AEGetAttributePtr(AppleEvent* event, int key, int type,
-                        DescType* returned_type, void*, int, Size* actual_size);
-OSErr AEInstallEventHandler(int class_, int action, AEEventHandlerUPP upp,
-                            int, bool);
-void AEProcessAppleEvent(EventRecord* event);
+                  Size* actual_size), noErr);
+STUB1(AEDisposeDesc, OSErr(AEDescList* docList), noErr);
+STUB7(AEGetAttributePtr, OSErr(AppleEvent* event, int key, int type,
+                        DescType* returned_type, void*, int, Size* actual_size), noErr);
+STUB5(AEInstallEventHandler, OSErr(int class_, int action, AEEventHandlerUPP upp,
+                            int, bool), noErr);
+STUB1(AEProcessAppleEvent, void(EventRecord* event));
 
-AEEventHandlerUPP NewAEEventHandlerProc(AEEventHandlerProcPtr handler);
+STUB1(NewAEEventHandlerProc, AEEventHandlerUPP(AEEventHandlerProcPtr handler), NULL);
 
 #endif // ANTARES_STUB_APPLE_EVENT_H_

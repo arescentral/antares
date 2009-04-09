@@ -3,6 +3,6 @@
 
 #include <Base.h>
 
-OSErr LoadClip2Gif();
+STUB0(LoadClip2Gif, OSErr(), noErr);
 
 #endif // ANTARES_STUB_LOAD_CLIP_2_GIF_H_
