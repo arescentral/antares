@@ -24,6 +24,14 @@
 #include <Base.h>
 #include <NetSprocket.h>
 
+STUB1(Wrap_GRCheckAEForCmd, bool(const AppleEvent *theEvent), false);
+STUB0(Wrap_GRCheckForAE, bool(), false);
+STUB0(Wrap_GRGetWaitingCmd, void());
+STUB0(Wrap_GRInstallResumeHandler, OSErr(), noErr);
+STUB0(Wrap_GRIsWaitingCmd, bool(), false);
+STUB0(Wrap_UseGameRanger, bool(), false);
+
+#if 0
 Boolean Wrap_UseGameRanger( void);
 
 OSErr       Wrap_GRInstallStartupHandler(void);
@@ -73,5 +81,6 @@ Wrap_GRNSpDoModalJoinDialog         (ConstStr31Param        inGameType,
 
 void
 Wrap_GRNSpReleaseAddressReference   (NSpAddressReference    inAddr);
+#endif
 
 #endif // ANTARES_WRAP_GAME_RANGER_HPP_
