@@ -18,6 +18,11 @@
 #ifndef ANTARES_SCENARIO_MAKER_HPP_
 #define ANTARES_SCENARIO_MAKER_HPP_
 
+#include <Base.h>
+
+#include "NateDraw.hpp"
+#include "Scenario.hpp"
+
 #pragma options align=mac68k
 
 #define kScenarioWinnerPlayerMask   0x000000ff

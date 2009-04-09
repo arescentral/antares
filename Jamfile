@@ -59,7 +59,7 @@ Main Antares : src/Admiral.cpp
                src/Randomize.cpp
                src/Rotation.cpp
                src/ScenarioData.cpp
-               #src/ScenarioMaker.cpp
+               src/ScenarioMaker.cpp
                src/ScreenLabel.cpp
                src/ScrollStars.cpp
                #src/SmartFile.cpp
