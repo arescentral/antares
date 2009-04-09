@@ -48,10 +48,6 @@ enum
 //-----------------------------------------------------------------------
 // Public interfaces
 
-#ifdef __cplusplus
-extern "C" {
-#endif __cplusplus
-
 //-----------------------------------------------------------------------
 // NewPreferencesFile creates a new preferences file with the specified
 // creator, file type and name in the System Folder (prior to System 7)
@@ -76,10 +72,9 @@ extern "C" {
 //    Other ResError() or file system codes can be returned, but
 //    this should not normally occur.
 //-----------------------------------------------------------------------
-pascal OSErr
-NewPreferencesFile (OSType creator, OSType fileType,
+STUB5(NewPreferencesFile, OSErr(OSType creator, OSType fileType,
     ConstStr31Param fileName, ConstStr31Param folderName,
-    ConstStr31Param ownerName);
+    ConstStr31Param ownerName), noErr);
 
 //-----------------------------------------------------------------------
 // OpenPreferencesFile opens the preferences file with the specified
@@ -96,8 +91,7 @@ NewPreferencesFile (OSType creator, OSType fileType,
 //    Other ResError() or file system codes can be returned, but
 //    this should not normally occur.
 //-----------------------------------------------------------------------
-pascal OSErr
-OpenPreferencesFile (OSType creator, OSType fileType, short *fRefNum);
+STUB3(OpenPreferencesFile, OSErr(OSType creator, OSType fileType, short *fRefNum), noErr);
 
 //-----------------------------------------------------------------------
 // ClosePreferencesFile closes the currently open preferences file
@@ -111,8 +105,7 @@ OpenPreferencesFile (OSType creator, OSType fileType, short *fRefNum);
 //    Other ResError() codes can be returned, but this should not
 //    normally occur.
 //-----------------------------------------------------------------------
-pascal OSErr
-ClosePreferencesFile (short fRefNum);
+STUB1(ClosePreferencesFile, OSErr(short fRefNum), noErr);
 
 //-----------------------------------------------------------------------
 // DeletePreferencesFile deletes the preferences file with the specified
@@ -130,8 +123,7 @@ ClosePreferencesFile (short fRefNum);
 //    Other file system codes can be returned, but this should not
 //    normally occur.
 //-----------------------------------------------------------------------
-pascal OSErr
-DeletePreferencesFile (OSType creator, OSType fileType);
+STUB2(DeletePreferencesFile, OSErr(OSType creator, OSType fileType), noErr);
 
 //-----------------------------------------------------------------------
 // DeletePreferencesFolder deletes the preferences folder specified by the
@@ -148,8 +140,7 @@ DeletePreferencesFile (OSType creator, OSType fileType);
 //    Other file system codes can be returned, but this should not
 //    normally occur.
 //-----------------------------------------------------------------------
-pascal OSErr
-DeletePreferencesFolder (ConstStr31Param folderName);
+STUB1(DeletePreferencesFolder, OSErr(ConstStr31Param folderName), noErr);
 
 //-----------------------------------------------------------------------
 // PreferencesFileExists determines whether a preferences file already
@@ -161,8 +152,7 @@ DeletePreferencesFolder (ConstStr31Param folderName);
 //
 //    None.
 //-----------------------------------------------------------------------
-pascal Boolean
-PreferencesFileExists (OSType creator, OSType fileType);
+STUB2(PreferencesFileExists, bool(OSType creator, OSType fileType), noErr);
 
 //-----------------------------------------------------------------------
 // GetPreferencesFileVersion returns the contents of the specified 'vers'
@@ -183,10 +173,9 @@ PreferencesFileExists (OSType creator, OSType fileType);
 //    Other file system, ResError(), or MemError() codes can be returned,
 //    but this should not normally occur.
 //-----------------------------------------------------------------------
-pascal OSErr
-GetPreferencesFileVersion (short fRefNum, short versID,
+STUB6(GetPreferencesFileVersion, OSErr(short fRefNum, short versID,
     NumVersion *numVersion, short *regionCode,
-    ConstStr255Param shortVersionStr, ConstStr255Param longVersionStr);
+    ConstStr255Param shortVersionStr, ConstStr255Param longVersionStr), noErr);
 
 //-----------------------------------------------------------------------
 // SetPreferencesFileVersion lets you set the contents of the specified
@@ -204,10 +193,9 @@ GetPreferencesFileVersion (short fRefNum, short versID,
 //    Other file system, ResError(), or MemError() codes can be returned,
 //    but this should not normally occur.
 //-----------------------------------------------------------------------
-pascal OSErr
-SetPreferencesFileVersion (short fRefNum, short versID,
+STUB6(SetPreferencesFileVersion, OSErr(short fRefNum, short versID,
     NumVersion *numVersion, short regionCode,
-    ConstStr255Param shortVersionStr, ConstStr255Param longVersionStr);
+    ConstStr255Param shortVersionStr, ConstStr255Param longVersionStr), noErr);
 
 //-----------------------------------------------------------------------
 // ReadPreference reads the specified preference resource from the
@@ -230,9 +218,8 @@ SetPreferencesFileVersion (short fRefNum, short versID,
 //    Other ResError() codes can be returned, but this should not
 //    normally occur.
 //-----------------------------------------------------------------------
-pascal OSErr
-ReadPreference (short fRefNum, ResType resourceType, short *resourceID,
-    StringPtr resourceName, Handle *preference);
+STUB5(ReadPreference, OSErr(short fRefNum, ResType resourceType, short *resourceID,
+    StringPtr resourceName, Handle *preference), noErr);
 
 //-----------------------------------------------------------------------
 // WritePreference writes the specified preference resource to the
@@ -263,9 +250,8 @@ ReadPreference (short fRefNum, ResType resourceType, short *resourceID,
 //    Other MemError() or ResError() codes can be returned, but this should
 //    not normally occur.
 //-----------------------------------------------------------------------
-pascal OSErr
-WritePreference (short fRefNum, ResType resourceType, short *resourceID,
-    StringPtr resourceName, Handle preference);
+STUB5(WritePreference, OSErr(short fRefNum, ResType resourceType, short *resourceID,
+    StringPtr resourceName, Handle preference), noErr);
 
 //-----------------------------------------------------------------------
 // DeletePreference deletes the specified preference resource from the
@@ -283,12 +269,7 @@ WritePreference (short fRefNum, ResType resourceType, short *resourceID,
 //    Other MemError() or ResError() codes can be returned, but this
 //    should not normally occur.
 //-----------------------------------------------------------------------
-pascal OSErr
-DeletePreference (short fRefNum, ResType resourceType, short resourceID);
-
-#ifdef __cplusplus
-}
-#endif __cplusplus
+STUB3(DeletePreference, OSErr(short fRefNum, ResType resourceType, short resourceID), noErr);
 
 #endif forRez
 
