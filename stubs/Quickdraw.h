@@ -26,8 +26,8 @@ typedef struct {
 } GDevice;
 typedef GDevice** GDHandle;
 
-GDevice** GetGDevice();
-void SetGDevice(GDevice** device);
+STUB0(GetGDevice, GDevice**(), NULL);
+STUB1(SetGDevice, void(GDevice** device));
 
 typedef struct { } GWorld;
 typedef GWorld* GWorldPtr;
@@ -37,71 +37,70 @@ typedef GrafPtr CGrafPtr;
 
 typedef struct { } Pattern;
 
-void BackPat(Pattern* pattern);
-void PenPat(Pattern* pattern);
+STUB1(BackPat, void(Pattern*));
+STUB1(PenPat, void(Pattern*));
 
 typedef void* Port;
 
-void RGBBackColor(RGBColor* color);
-void RGBForeColor(RGBColor* color);
-void HiliteColor(RGBColor* color);
+STUB1(RGBBackColor, void(RGBColor* color));
+STUB1(RGBForeColor, void(RGBColor* color));
+STUB1(HiliteColor, void(RGBColor* color));
 
-PixMapHandle GetGWorldPixMap(GWorldPtr world);
-OSErr LockPixels(PixMap** pix);
-void UnlockPixels(PixMap** pix);
+STUB1(GetGWorldPixMap, PixMapHandle(GWorldPtr world), NULL);
+STUB1(LockPixels, OSErr(PixMap** pix), noErr);
+STUB1(UnlockPixels, void(PixMap** pix));
 
-void InitGraf(GrafPtr* port);
-void GetPort(GrafPtr* port);
-void MacSetPort(GrafPtr port);
-void PaintRect(Rect* rect);
-void InvalRect(Rect* rect);
-void ClipRect(Rect* rect);
+STUB1(InitGraf, void(GrafPtr* port));
+STUB1(GetPort, void(GrafPtr* port));
+STUB1(MacSetPort, void(GrafPtr port));
+STUB1(PaintRect, void(Rect* rect));
+STUB1(InvalRect, void(Rect* rect));
+STUB1(ClipRect, void(Rect* rect));
 
-void CopyBits(BitMap* source, BitMap* source2, Rect* source_rect,
-              Rect* source_rect2, int mode, void*);
+STUB6(CopyBits, void(BitMap* source, BitMap* source2, Rect* source_rect,
+      Rect* source_rect2, int mode, void*));
 
-PicHandle GetPicture(int id);
-PicHandle OpenPicture(Rect* source);
-void KillPicture(PicHandle pic);
-void DrawPicture(PicHandle pic, Rect*);
-void ClosePicture();
+STUB1(GetPicture, PicHandle(int id), NULL);
+STUB1(OpenPicture, PicHandle(Rect* source), NULL);
+STUB1(KillPicture, void(PicHandle pic));
+STUB2(DrawPicture, void(PicHandle pic, Rect*));
+STUB0(ClosePicture, void());
 
-OSErr ConvertPictToGIFFile(PicHandle pic, FSSpec* fsspec, int interlaced,
-                           int transparencyNo, int depth, int palette);
+STUB6(ConvertPictToGIFFile, OSErr(PicHandle pic, FSSpec* fsspec, int interlaced,
+      int transparencyNo, int depth, int palette), noErr);
 
-GDHandle GetMainDevice();
-GDHandle GetDeviceList();
-GDHandle GetNextDevice(GDHandle gd);
+STUB0(GetMainDevice, GDHandle(), NULL);
+STUB0(GetDeviceList, GDHandle(), NULL);
+STUB1(GetNextDevice, GDHandle(GDHandle gd), NULL);
 
-Rgn** NewRgn();
-void DisposeRgn(Rgn** rgn);
-void RectRgn(Rgn** src, Rect* dst);
-void GetMBarRgn(Rgn** rgn);
-bool PtInRgn(Point p, Rgn** rgn);
-void DiffRgn(Rgn**, Rgn**, Rgn**);
-void MacUnionRgn(Rgn**, Rgn**, Rgn**);
-void OpenRgn();
-void CloseRgn(Rgn** rgn);
-void ScrollRect(Rect* rect, int x, int y, Rgn** clip);
+STUB0(NewRgn, Rgn**(), NULL);
+STUB1(DisposeRgn, void(Rgn** rgn));
+STUB2(RectRgn, void(Rgn** src, Rect* dst));
+STUB2(PtInRgn, bool(Point p, Rgn** rgn), false);
+STUB3(DiffRgn, void(Rgn**, Rgn**, Rgn**));
+STUB3(MacUnionRgn, void(Rgn**, Rgn**, Rgn**));
+STUB0(OpenRgn, void());
+STUB1(CloseRgn, void(Rgn** rgn));
+STUB4(ScrollRect, void(Rect* rect, int x, int y, Rgn** clip));
 
-void MacFillRect(Rect* rect, Pattern* pattern);
-void FrameRect(Rect* rect);
-void MacFrameRect(Rect* rect);
-void EraseRect(Rect* rect);
+STUB2(MacFillRect, void(Rect* rect, Pattern* pattern));
+STUB1(FrameRect, void(Rect* rect));
+STUB1(MacFrameRect, void(Rect* rect));
+STUB1(EraseRect, void(Rect* rect));
 
-void FrameOval(Rect* rect);
-void PaintOval(Rect* rect);
+STUB1(FrameOval, void(Rect* rect));
+STUB1(PaintOval, void(Rect* rect));
 
-void MacLineTo(int x, int y);
+STUB2(MacLineTo, void(int x, int y));
 
-void MoveTo(int x, int y);
+STUB2(MoveTo, void(int x, int y));
 
-void PenNormal();
-void GetPen(Point* pen);
-void DrawString(const unsigned char* string);
+STUB0(PenNormal, void());
+STUB1(GetPen, void(Point* pen));
+STUB1(DrawString, void(const unsigned char* string));
 
-bool HasDepth(GDHandle device, int depth, int, int);
-void SetDepth(GDHandle device, int depth, int, int);
+STUB4(HasDepth, bool(GDHandle device, int depth, int, int), false);
+STUB4(SetDepth, void(GDHandle device, int depth, int, int));
 
 enum {
     colorPaletteSystem = 1000,
@@ -111,22 +110,22 @@ enum {
     srcCopy = 1200,
 };
 
-void SetClip(Rgn** clip);
-void GetClip(Rgn** clip);
-void PaintBehind(Window**, Rgn**);
-void CalcVisBehind(Window**, Rgn**);
+STUB1(SetClip, void(Rgn** clip));
+STUB1(GetClip, void(Rgn** clip));
+STUB2(PaintBehind, void(Window**, Rgn**));
+STUB2(CalcVisBehind, void(Window**, Rgn**));
 
-Rgn** LMGetGrayRgn();
-void LMSetMBarHeight(int height);
-Port* LMGetWMgrPort();
-Window** LMGetWindowList();
-int GetMBarHeight();
+STUB0(LMGetGrayRgn, Rgn**(), NULL);
+STUB1(LMSetMBarHeight, void(int height));
+STUB0(LMGetWMgrPort, Port*(), NULL);
+STUB0(LMGetWindowList, Window**(), NULL);
+STUB0(GetMBarHeight, int(), 0);
 
-void ShowMenuBar();
-void HideMenuBar();
-bool IsMenuBarVisible();
+STUB0(ShowMenuBar, void());
+STUB0(HideMenuBar, void());
+STUB0(IsMenuBarVisible, bool(), false);
 
 typedef struct { } ReqListRec;
-void RestoreEntries(CTab** table, void*, ReqListRec* recList);
+STUB3(RestoreEntries, void(CTab** table, void*, ReqListRec* recList));
 
 #endif // ANTARES_STUB_QUICKDRAW_H_
