@@ -153,6 +153,111 @@ enum
 };
 
 
+STUB0(NetSprocketPresent, Boolean(), false);
+STUB0(InitNetworking, short(), 0);
+STUB0(BeginNetworking, short(), 0);
+STUB0(ClearNetData, void());
+STUB0(ResetNetData, void());
+STUB0(StopNetworking, void());
+STUB0(DisposeNetworking, void());
+STUB0(GetNumberOfPlayers, long(), 1);
+STUB0(GetAllNetPlayersCheating, Boolean(), false);
+STUB0(NetGameIsOn, Boolean(), false);
+STUB0(GetResendDelay, long(), 0);
+STUB0(SetResendDelay, void( long));
+STUB0(GetRegisteredSetting, long(), 1);
+STUB1(SetRegisteredSetting, void( long));
+STUB0(GetBandwidth, Boolean(), false);
+STUB0(SetBandwidth, void( Boolean));
+STUB0(GetNetMinutesPlayed, unsigned short(), 0);
+STUB1(SetNetMinutesPlayed, void( unsigned short));
+STUB0(GetNetKills, unsigned short(), 0);
+STUB1(SetNetKills, void( unsigned short));
+STUB0(GetNetLosses, unsigned short(), 0);
+STUB1(SetNetLosses, void( unsigned short));
+STUB0(GetNetRace, short(), 0);
+STUB1(SetNetRace, void( short));
+STUB0(GetNetEnemyColor, short(), 0);
+STUB1(SetNetEnemyColor, void( short));
+STUB0(GetNetLevel, short(), 0);
+STUB1(SetNetLevel, void( short));
+STUB0(GetOpponentIsUnregistered, Boolean(), false);
+STUB1(SetOpponentIsUnregistered, void( Boolean unregistered));
+STUB0(GetHaveSeenUnregisteredTimeLimitWarning, Boolean(), false);
+STUB1(SetHaveSeenUnregisteredTimeLimitWarning, void( Boolean));
+STUB2(AddPlayerID, void( long, long));
+STUB1(GetPlayerNumFromID, long( long), 0);
+STUB1(GetPlayerIDFromNum, long( long), 0);
+STUB0(MyPlayerID, long(), 0);
+STUB1(RemovePlayerID, void( long));
+STUB2(SetPlayerRace, void( long, short));
+STUB1(GetPlayerRace, short( long), 0);
+STUB2(SetPlayerColor, void( long, unsigned char));
+STUB1(GetPlayerColor, unsigned char( long), 0);
+STUB1(GetPlayerName, const char*( long), "Player");
+STUB2(GetOtherPlayerConnectionData, void( unsigned long *, unsigned long *));
+STUB1(GetOtherPlayerName, void( StringPtr *));
+STUB2(SetProtocolListFromFlags, void( NSpProtocolListReference *, unsigned long));
+STUB2(GetProtocolFlagsFromList, void( NSpProtocolListReference, unsigned long *));
+STUB2(IsIDInDefString, Boolean( char *, char *), false);
+STUB0(DoHostGame, Boolean(), false);
+STUB0(DoJoinGameModalDialog, Boolean(), false);
+STUB0(DoJoinGame, Boolean(), false);
+STUB0(WaitForAllStart, Boolean(), false);
+STUB0(SendStartMessage, void());
+STUB0(SendEndGame, void());
+STUB0(GotAllMessages, Boolean(), false);
+STUB1(ResetGotMessages, void( long));
+STUB0(UseNextLatency, long(), 0);
+/*
+STUB11(ProcessPreGameMessages,
+    long( Handle *, long *, long *, long *, long *, long *, long, unsigned char *, unsigned char *,
+    unsigned char *, unsigned char *),
+    0);
+*/
+STUB1(SendPreGameBasicMessage, void( long));
+STUB3(SendPreGameDummyMessage, void( long, Boolean, short));
+STUB8(SendPreGameAnyMessage,
+    void(long, Boolean, long, unsigned char, unsigned char, unsigned char, unsigned char, Boolean));
+STUB2(SendPreGameShortMessage, void( long, long));
+STUB5(SendPreGameVerboseMessage, void( long, long, long, long, long));
+STUB2(SendPreGameTextMessage, void( Ptr, long));
+STUB5(SendPreGameOpenScenarioMessage, void( long message, StringPtr fileName,
+    StringPtr url, unsigned long version, unsigned long checkSum));
+
+STUB2(ProcessInGameMessages, Boolean( long, short *), false);
+STUB4(HandleInGameMessage, Boolean( long, packedDataType *, Boolean, short *), false);
+STUB2(HandleInGameTextMessage, void( char *, long));
+STUB0(ExecuteInGameData, void());
+STUB1(SendPrefabMessage, void( packedDataType *));
+STUB1(SendInGameMessage, Boolean( long), false);
+STUB4(SendInGameBasicMessage, Boolean( long, long, Boolean, Boolean), false);
+STUB5(SendInGameMiscLongMessage, Boolean( long, long, long, Boolean, Boolean), false);
+STUB3(SendSelectMessage, Boolean( long, long, Boolean), false);
+STUB3(SendMenuMessage, Boolean( long, short, short), false);
+STUB1(SendCheatMessage, void( short));
+STUB1(SendSetLatencyMessage, Boolean( long), false);
+STUB1(SendSanityCheckMessage, Boolean( long), false);
+STUB1(SendPreserveSeedMessage, Boolean( long), false);
+STUB2(SendInGameTextMessage, void( Ptr, long));
+STUB1(SendInGameShortMessage, Boolean( long), false);
+STUB1(HostAutoSanityCheck, void( long));
+STUB1(SendResendMessage, void( long));
+STUB0(IAmHosting, Boolean(), false);
+STUB2(InsertMessageInQueue, Boolean( packedDataType *, long), false);
+STUB0(PopMessageFromQueue, packedDataType*(), NULL);
+STUB0(PeekMessageFromQueue, packedDataType*(), NULL);
+STUB0(DebugMessageQueue, void());
+STUB2(JumpstartLatencyQueue, Boolean( long, long), false);
+STUB1(StoreSentMessage, Boolean( packedDataType *), false);
+STUB1(ResendSentMessage, void( long));
+STUB1(RemoveExpiredSentMessages, void( long));
+STUB0(ResetSentMessages, void());
+STUB1(TickleOutgoingMessage, unsigned char(Boolean), '\0');
+STUB0(StartIncomingTextMessage, void());
+STUB1(StopIncomingTextMessage, void( anyCharType *));
+
+#if 0
 Boolean NetSprocketPresent(void);
 short InitNetworking(void);
 short BeginNetworking( void);
@@ -254,6 +359,7 @@ void StopIncomingTextMessage( anyCharType *);
 #else   // TARGET_OS_MAC
 #define NETSPROCKET_AVAILABLE   0
 #endif // TARGET_OS_MAC
+#endif
 
 #pragma options align=reset
 
