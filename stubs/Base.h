@@ -317,7 +317,8 @@ STUB1(DrawDialog, void(Dialog* dialog));
 typedef struct { } Control;
 typedef Control* ControlPtr;
 typedef Control** ControlHandle;
-void HiliteControl(ControlHandle control, int);
+
+STUB2(HiliteControl, void(Control**, int));
 
 STUB2(SetWRefCon, void(Dialog*, long));
 
