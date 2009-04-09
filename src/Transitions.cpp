@@ -19,19 +19,20 @@
 
 #include "Transitions.hpp"
 
+#include <ConditionalMacros.h>
 #include <Palettes.h>
+#include <Quickdraw.h>
+#include <Resources.h>
 
 #include "AresGlobalType.hpp"
 #include "AresMain.hpp"
 #include "ColorTranslation.hpp"
-#include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "HandleHandling.hpp"
 #include "KeyMapTranslation.hpp"
 #include "Music.hpp"
-#include "Quickdraw.h"
-#include "Resources.h"
+#include "WinAresGlue.hpp"
 
 //#define   kDontMessWithColors
 

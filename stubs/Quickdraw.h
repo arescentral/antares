@@ -30,6 +30,9 @@ typedef struct {
 } GDevice;
 typedef GDevice** GDHandle;
 
+GDevice** GetGDevice();
+void SetGDevice(GDevice** device);
+
 typedef struct { } GWorld;
 typedef GWorld* GWorldPtr;
 
@@ -126,6 +129,9 @@ int GetMBarHeight();
 void ShowMenuBar();
 void HideMenuBar();
 bool IsMenuBarVisible();
+
+typedef struct { } ReqListRec;
+void RestoreEntries(CTab** table, void*, ReqListRec* recList);
 
 #ifdef __cplusplus
 }
