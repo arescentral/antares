@@ -49,7 +49,7 @@ extern GDHandle                 theDevice;
 void ErrPStringFromCString( unsigned char *, unsigned char *);
 void ErrConcatenatePString( StringPtr, StringPtr);
 
-void ShowErrorNoRecover( int whichError, StringPtr sourceCode, int sourceNum)
+void ShowErrorNoRecover( int whichError, const unsigned char* sourceCode, int sourceNum)
 
 {
     Str255  s1, s3;
@@ -68,7 +68,7 @@ void ShowErrorNoRecover( int whichError, StringPtr sourceCode, int sourceNum)
     ExitToShell();
 }
 
-void ShowErrorRecover( int whichError, StringPtr sourceCode, int sourceNum)
+void ShowErrorRecover( int whichError, const unsigned char* sourceCode, int sourceNum)
 
 {
     Str255  s1, s3;
@@ -134,10 +134,10 @@ void ShowSimpleStrResAlert( short ResID, short num1, short num2, short num3, sho
 
 void ShowErrorAny(  errorRecoverType recover,
                         short ResID,
-                        StringPtr sp1,
-                        StringPtr sp2,
-                        StringPtr sp3,
-                        StringPtr sp4,
+                        const unsigned char* sp1,
+                        const unsigned char* sp2,
+                        const unsigned char* sp3,
+                        const unsigned char* sp4,
                         long num1,
                         long num2,
                         long num3,

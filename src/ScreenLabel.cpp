@@ -125,7 +125,7 @@ void ScreenLabelCleanup( void)
 #endif
 }
 
-short AddScreenLabel( short h, short v, short hoff, short voff, anyCharType *string,
+short AddScreenLabel( short h, short v, short hoff, short voff, const unsigned char *string,
                     spaceObjectType *object, Boolean objectLink, unsigned char color)
 
 {
@@ -617,7 +617,7 @@ void SetScreenLabelAge( long which, long age)
 #endif
 }
 
-void SetScreenLabelString( long which, anyCharType *string)
+void SetScreenLabelString( long which, const unsigned char *string)
 
 {
 #ifdef kUseLabels

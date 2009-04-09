@@ -575,7 +575,7 @@ void DebugFileAppendSmallFixed( smallFixedType f)
 #endif
 }
 
-void DebugFileSave( StringPtr fileName)
+void DebugFileSave(const unsigned char* fileName)
 {
 #ifdef kDebugFileActive
     OSErr   err;

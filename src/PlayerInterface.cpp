@@ -2358,7 +2358,7 @@ netResultType StartNetworkGameSetup( void)
 #endif NETSPROCKET_AVAILABLE
 }
 
-void DrawStringInInterfaceItem( long whichItem, StringPtr string)
+void DrawStringInInterfaceItem( long whichItem, const unsigned char* string)
 {
     PixMapHandle        offMap = GetGWorldPixMap( gOffWorld);
     Rect                tRect;

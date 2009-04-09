@@ -782,7 +782,7 @@ OSErr SaveBlockToFile( Ptr data, long len, StringPtr fileName)
     return( err);
 }
 
-void AppendStringToHandle( StringPtr s, Handle data)
+void AppendStringToHandle(const unsigned char* s, Handle data)
 {
     char    *c, *sc, lenCount;
     long    fileLen;

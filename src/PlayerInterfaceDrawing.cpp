@@ -1791,7 +1791,7 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
     DisposeRgn( clipRgn);
 }
 
-void DrawInterfaceTextInRect( Rect *tRect, anyCharType *textData, long length,
+void DrawInterfaceTextInRect( Rect *tRect, const unsigned char *textData, long length,
                             interfaceStyleType style, unsigned char textcolor,
                             PixMap *destMap,
                             long portLeft, long portTop, inlinePictType *inlinePict)

@@ -60,7 +60,7 @@ typedef struct screenLabelType
 int ScreenLabelInit( void);
 void ResetAllLabels( void);
 void ScreenLabelCleanup( void);
-short AddScreenLabel( short, short, short, short, anyCharType *, spaceObjectType *,
+short AddScreenLabel( short, short, short, short, const unsigned char *, spaceObjectType *,
                     Boolean, unsigned char);
 void RemoveScreenLabel( long);
 void EraseAllLabels( void);
@@ -70,7 +70,7 @@ void SetScreenLabelPosition( long, short, short);
 void UpdateAllLabelPositions( long);
 void SetScreenLabelObject( long, spaceObjectType *);
 void SetScreenLabelAge( long, long);
-void SetScreenLabelString( long, anyCharType *);
+void SetScreenLabelString( long, const unsigned char *);
 void SetScreenLabelColor( long, unsigned char);
 void SetScreenLabelOffset( long which, long hoff, long voff);
 long GetScreenLabelWidth( long which);

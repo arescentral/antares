@@ -24,7 +24,7 @@
 
 #include "Assert.h"
 
-short ARF_OpenResFile( StringPtr fileName)
+short ARF_OpenResFile(const unsigned char* fileName)
 {
     ProcessSerialNumber             myProcess;
     OSErr                           error;

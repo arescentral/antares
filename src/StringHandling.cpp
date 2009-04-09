@@ -22,7 +22,7 @@
 #include <ConditionalMacros.h>
 #include <Quickdraw.h>
 
-void CopyPString( unsigned char *to, unsigned char *from)
+void CopyPString( unsigned char *to, const unsigned char *from)
 
 {
     int     i, l;
@@ -64,10 +64,11 @@ int PStringLen( unsigned char *s)
     return ((int)*s);
 }
 
-void ConcatenatePString( unsigned char *dString, unsigned char *sString)
+void ConcatenatePString( unsigned char *dString, const unsigned char *sString)
 
 {
-    unsigned char   *dc, *sc;
+    unsigned char   *dc;
+    const unsigned char *sc;
     int     i;
 
     dc = dString + (long)*dString + 1L;

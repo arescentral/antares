@@ -108,7 +108,7 @@ short HHRegisterHandle( Handle *newHandle,
             void            (*lockData)( Handle),
             void            (*resolveData)( Handle),
             Boolean         checkMe,
-            StringPtr       name)
+            const unsigned char*       name)
 
 {
     short            i = 0;

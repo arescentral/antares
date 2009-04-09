@@ -61,7 +61,7 @@ void CleanupMoviePlayer( void)
 }
 
 
-void PlayMovieByName( StringPtr filePath, WindowPtr aWindow, Boolean doubleIt, GDHandle device)
+void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean doubleIt, GDHandle device)
 
 {
 #ifdef kUseMovies

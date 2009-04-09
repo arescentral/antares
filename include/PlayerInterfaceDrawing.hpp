@@ -65,7 +65,7 @@ void DrawPlayerListPageDown( interfaceItemType *);
 void GetPlayerListPageDownRect( interfaceItemType *, Rect *);
 void DrawInterfaceTextRect( interfaceItemType *, PixMap *, long,
                         long);
-void DrawInterfaceTextInRect( Rect *, anyCharType *, long, interfaceStyleType, unsigned char, PixMap *, long,
+void DrawInterfaceTextInRect( Rect *, const unsigned char *, long, interfaceStyleType, unsigned char, PixMap *, long,
                         long, inlinePictType *);
 short GetInterfaceTextHeightFromWidth( anyCharType *, long, interfaceStyleType, short);
 void DrawInterfacePictureRect( interfaceItemType *, PixMap *, long,

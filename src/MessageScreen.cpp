@@ -907,7 +907,7 @@ void DrawMessageScreen( long byUnits)
 
 // SetStatusString: pass nil to set to 0
 
-void SetStatusString( anyCharType *s, Boolean drawNow, unsigned char color)
+void SetStatusString(const unsigned char *s, Boolean drawNow, unsigned char color)
 
 {
 #pragma unused( drawNow)
