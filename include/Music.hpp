@@ -27,6 +27,25 @@
 #define kMusicVolume        54
 #define kMaxMusicVolume     64
 
+STUB0(MusicInit, int(), 0);
+STUB0(MusicCleanup, void());
+STUB0(PlaySong, void());
+STUB0(ToggleSong, void());
+STUB0(SongIsPlaying, Boolean(), false);
+STUB0(StopAndUnloadSong, void());
+STUB1(LoadSong, void( short));
+STUB0(GetSongVolume, long(), 0);
+STUB1(SetSongVolume, void( long));
+
+STUB2(DoConversionS3M, void( Str255, short));
+
+STUB2(pStrcat, unsigned char *(unsigned char *, unsigned char *), NULL);
+STUB2(DoExp1to3, Handle( Handle, unsigned long), NULL);
+STUB2(DoExp1to6, Handle( Handle, unsigned long), NULL);
+STUB2(ConvertInstrument, void( register    Byte    *,  register long));
+STUB2(SndToHandle, Handle( Handle, short   *), NULL);
+
+#if 0
 int MusicInit( void);
 void MusicCleanup( void);
 void PlaySong( void);
@@ -44,6 +63,7 @@ Handle DoExp1to3( Handle, unsigned long);
 Handle DoExp1to6( Handle, unsigned long);
 void ConvertInstrument( register    Byte    *,  register long);
 Handle SndToHandle( Handle, short   *);
+#endif
 
 #pragma options align=reset
 
