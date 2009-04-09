@@ -73,6 +73,7 @@ Main Antares : src/Admiral.cpp
                src/TitleScreen.cpp
                src/Transitions.cpp
                src/VersionString.cpp
+               src/WinAresGlue.cpp
                #src/WrapGameRanger.cpp
                #src/WrapGameRangerNull.cpp
                ;
