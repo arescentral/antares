@@ -86,8 +86,9 @@ void ShowErrorRecover( int whichError, const unsigned char* sourceCode, int sour
     StopAlert( ERROR_ALERT_ID, nil);
 }
 
-void ShowSimpleStringAlert( StringPtr string1, StringPtr string2, StringPtr string3, StringPtr string4)
-
+void ShowSimpleStringAlert(
+    const unsigned char* string1, const unsigned char* string2,
+    const unsigned char* string3, const unsigned char* string4)
 {
 //  if ( theDevice != nil) RestoreDeviceClut( theDevice);
 
