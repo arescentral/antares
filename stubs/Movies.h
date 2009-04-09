@@ -4,10 +4,6 @@
 #include <Base.h>
 #include <Quickdraw.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 enum {
     DoTheRightThing = 9000,
 
@@ -42,9 +38,5 @@ Fixed GetMovieRate(Movie movie);
 OSErr PrerollMovie(Movie movie, TimeValue duration, Fixed rate);
 bool IsMovieDone(Movie movie);
 void MoviesTask(Movie movie, int do_the_right_thing);
-
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 
 #endif // ANTARES_STUB_MOVIES_H_

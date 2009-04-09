@@ -3,10 +3,6 @@
 
 #include <Base.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 typedef struct { } AppleEvent;
 typedef struct { } AEDescList;
 typedef struct { } AEKeyword;
@@ -49,9 +45,5 @@ OSErr AEInstallEventHandler(int class_, int action, AEEventHandlerUPP upp,
 void AEProcessAppleEvent(EventRecord* event);
 
 AEEventHandlerUPP NewAEEventHandlerProc(AEEventHandlerProcPtr handler);
-
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 
 #endif // ANTARES_STUB_APPLE_EVENT_H_

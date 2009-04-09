@@ -3,10 +3,6 @@
 
 #include <Base.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 enum {
   kNSpPlayerJoined = 1,
   kNSpPlayerLeft = 2,
@@ -19,9 +15,5 @@ typedef NSpEventProc* NSpEventProcPtr;
 
 typedef struct { } NSpAddressReference;
 typedef struct { } NSpMessageHeader;
-
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 
 #endif // ANTARES_STUB_NET_SPROCKET_H_

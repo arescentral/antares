@@ -3,10 +3,6 @@
 
 #include <Base.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 typedef struct { } Palette;
 typedef Palette* PalettePtr;
 typedef Palette** PaletteHandle;
@@ -25,9 +21,5 @@ void ActivatePalette(WindowPtr window);
 
 void CTab2Palette(CTab** clut, Palette** palette, int options, int);
 void NSetPalette(Window* window, Palette** palette, int options);
-
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 
 #endif // ANTARES_STUB_PALETTES_H_

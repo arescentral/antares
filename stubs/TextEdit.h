@@ -3,10 +3,6 @@
 
 #include <Base.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 struct TextEdit {
     int teLength;
     Handle hText;
@@ -25,9 +21,5 @@ void TESetSelect(int start, int end, TEHandle data);
 void TEActivate(TEHandle data);
 void TEDeactivate(TEHandle data);
 void TEUpdate(Rect*, TEHandle data);
-
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 
 #endif // ANTARES_STUB_AIFF_H_

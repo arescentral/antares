@@ -3,10 +3,6 @@
 
 #include <Base.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 typedef OSErr OSStatus;
 
 typedef Handle SndListHandle;
@@ -45,9 +41,5 @@ OSErr SndDoCommand(SndChannel* chan, SndCommand* cmd, bool);
 OSErr SndPlay(SndChannel* channel, Handle sound, bool);
 
 OSErr GetSoundHeaderOffset(Handle sound, long* offset);
-
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 
 #endif // ANTARES_STUB_SOUND_H_

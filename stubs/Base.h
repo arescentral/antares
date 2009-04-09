@@ -4,10 +4,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 #define pascal
 
 typedef bool Boolean;
@@ -332,9 +328,5 @@ void StringToNum(unsigned char* string, long* value);
 
 Ptr GetScriptManagerVariable(int cache);
 long KeyTranslate(Ptr kchr, short keyCode, unsigned long* keyTranslateState);
-
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 
 #endif // ANTARES_STUB_BASE_H_

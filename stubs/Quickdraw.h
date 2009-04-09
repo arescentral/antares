@@ -4,10 +4,6 @@
 #include <Base.h>
 #include <Files.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 // Content here
 typedef struct {
     Rect bounds;
@@ -132,9 +128,5 @@ bool IsMenuBarVisible();
 
 typedef struct { } ReqListRec;
 void RestoreEntries(CTab** table, void*, ReqListRec* recList);
-
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 
 #endif // ANTARES_STUB_QUICKDRAW_H_

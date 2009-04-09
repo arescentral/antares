@@ -4,10 +4,6 @@
 #include <Base.h>
 #include <Files.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 typedef void* ResFile;
 
 int CurResFile();
@@ -30,9 +26,5 @@ int FSpOpenResFile(FSSpec* spec, int options);
 enum {
     resNotFound = 2000,
 };
-
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 
 #endif // ANTARES_STUB_RESOURCES_H_

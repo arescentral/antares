@@ -3,10 +3,6 @@
 
 #include <Base.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 typedef SInt16 FSVolumeRefNum;
 
 typedef struct {
@@ -32,9 +28,5 @@ enum {
     fnfErr = 4200,  // File not found?
     dupFNErr = 4201,  // Duplicate file name?
 };
-
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 
 #endif // ANTARES_STUB_FILES_H_
