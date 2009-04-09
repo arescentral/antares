@@ -3,75 +3,9 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <Stub.h>
 
 #define pascal
-
-typedef bool Boolean;
-typedef int16_t OSErr;
-
-typedef int8_t SignedByte;
-typedef uint8_t Byte;
-typedef int8_t SInt8;
-typedef uint8_t UInt8;
-typedef int16_t SInt16;
-typedef uint16_t UInt16;
-typedef int32_t SInt32;
-typedef uint32_t UInt32;
-typedef struct { SInt32 hi; UInt32 lo; } wide;
-typedef struct { UInt32 hi; UInt32 lo; } UnsignedWide;
-
-void WideAdd(wide* value, wide* summand);
-void WideSubtract(wide* value, wide* difference);
-void WideMultiply(long a, long b, wide* c);
-
-typedef int32_t Fixed;
-typedef long Size;
-
-typedef char* Ptr;
-Ptr NewPtr(size_t size);
-void DisposePtr(Ptr ptr);
-
-typedef Ptr* Handle;
-Handle NewHandle(size_t size);
-void DisposeHandle(Handle handle);
-int GetHandleSize(Handle handle);
-void SetHandleSize(Handle handle, Size size);
-void MoveHHi(Handle handle);
-void HLock(Handle handle);
-void HLockHi(Handle handle);
-void HUnlock(Handle handle);
-int8_t HGetState(Handle handle);
-void HSetState(Handle handle, int8_t state);
-void HNoPurge(Handle handle);
-OSErr PtrToHand(void*, Handle*, int len);
-
-int HiWord(long value);
-int LoWord(long value);
-
-void Microseconds(UnsignedWide* wide);
-
-Size MaxMem(Size*);
-Size CompactMem(int);
-void BlockMove(void*, void*, size_t);
-OSErr HandToHand(Handle* handle);
-void HandAndHand(Handle src, Handle dst);
-
-typedef void* AddrBlock;
-
-#define nil NULL
-
-typedef unsigned char Str255[256];
-typedef unsigned char Str63[64];
-typedef unsigned char Str31[32];
-typedef unsigned char* StringPtr;
-typedef const unsigned char* ConstStringPtr;
-typedef const unsigned char* ConstStr255Param;
-typedef const unsigned char* ConstStr31Param;
-typedef Str63 StrFileName;
-
-typedef uint32_t FourCharCode;
-typedef FourCharCode OSType;
-typedef FourCharCode ResType;
 
 enum {
     noErr = 0,
@@ -115,8 +49,75 @@ enum {
     suspendResumeMessage = 801,
 };
 
-OSErr MemError();
-OSErr ResError();
+typedef bool Boolean;
+typedef int16_t OSErr;
+
+typedef int8_t SignedByte;
+typedef uint8_t Byte;
+typedef int8_t SInt8;
+typedef uint8_t UInt8;
+typedef int16_t SInt16;
+typedef uint16_t UInt16;
+typedef int32_t SInt32;
+typedef uint32_t UInt32;
+typedef struct { SInt32 hi; UInt32 lo; } wide;
+typedef struct { UInt32 hi; UInt32 lo; } UnsignedWide;
+
+STUB2(WideAdd, void(wide* value, wide* summand));
+STUB2(WideSubtract, void(wide* value, wide* difference));
+STUB3(WideMultiply, void(long a, long b, wide* c));
+
+typedef int32_t Fixed;
+typedef long Size;
+
+typedef char* Ptr;
+STUB1(NewPtr, Ptr(size_t size), NULL);
+STUB1(DisposePtr, void(Ptr ptr));
+
+typedef Ptr* Handle;
+STUB1(NewHandle, Handle(size_t size), NULL);
+STUB1(DisposeHandle, void(Handle handle));
+STUB1(GetHandleSize, int(Handle handle), 0);
+STUB2(SetHandleSize, void(Handle handle, Size size));
+STUB1(MoveHHi, void(Handle handle));
+STUB1(HLock, void(Handle handle));
+STUB1(HLockHi, void(Handle handle));
+STUB1(HUnlock, void(Handle handle));
+STUB1(HGetState, int8_t(Handle handle), 0);
+STUB2(HSetState, void(Handle handle, int8_t state));
+STUB1(HNoPurge, void(Handle handle));
+STUB3(PtrToHand, OSErr(void* ptr, Handle* handle, int len), noErr);
+
+STUB1(HiWord, int(long value), 0);
+STUB1(LoWord, int(long value), 0);
+
+STUB1(Microseconds, void(UnsignedWide* wide));
+
+STUB1(MaxMem, Size(Size*), 0);
+STUB1(CompactMem, Size(int), 0);
+STUB3(BlockMove, void(void*, void*, size_t));
+STUB1(HandToHand, OSErr(Handle* handle), noErr);
+STUB2(HandAndHand, void(Handle src, Handle dst));
+
+typedef void* AddrBlock;
+
+#define nil NULL
+
+typedef unsigned char Str255[256];
+typedef unsigned char Str63[64];
+typedef unsigned char Str31[32];
+typedef unsigned char* StringPtr;
+typedef const unsigned char* ConstStringPtr;
+typedef const unsigned char* ConstStr255Param;
+typedef const unsigned char* ConstStr31Param;
+typedef Str63 StrFileName;
+
+typedef uint32_t FourCharCode;
+typedef FourCharCode OSType;
+typedef FourCharCode ResType;
+
+STUB0(MemError, OSErr(), noErr);
+STUB0(ResError, OSErr(), noErr);
 
 enum {
     TRUE = true,
@@ -135,12 +136,12 @@ typedef struct {
     int right;
 } Rect;
 
-void SetRect(Rect* rect, int left, int top, int right, int bottom);
-void MacSetRect(Rect* rect, int top, int right, int bottom, int left);
-void OffsetRect(Rect* rect, int h, int v);
-void MacOffsetRect(Rect* rect, int h, int v);
-bool MacPtInRect(Point pt, Rect* rect);
-void MacInsetRect(Rect* rect, int x, int y);
+STUB5(SetRect, void(Rect*, int, int, int, int));
+STUB5(MacSetRect, void(Rect*, int, int, int, int));
+STUB3(OffsetRect, void(Rect*, int, int));
+STUB3(MacOffsetRect, void(Rect*, int, int));
+STUB2(MacPtInRect, bool(Point, Rect*), false);
+STUB3(MacInsetRect, void(Rect*, int, int));
 
 ////////////////////////////
 
@@ -153,27 +154,29 @@ typedef struct {
 typedef Window* WindowPtr;
 typedef Window** WindowRef;
 
-void BeginUpdate(WindowPtr window);
-void EndUpdate(WindowPtr window);
-WindowPtr NewWindow(void*, Rect* rect, const unsigned char* title, bool, int,
-                    WindowPtr behind, bool, int);
-void MacShowWindow(WindowPtr window);
-void DisposeWindow(WindowPtr window);
-short MacFindWindow(Point where, WindowPtr* window);
-void MacMoveWindow(WindowPtr window, int x, int y, bool);
-void ShowHide(WindowPtr window, bool hide);
-void DragWindow(WindowPtr window, Point where, Rect* bounds);
-bool TrackGoAway(WindowPtr window, Point where);
-void GlobalToLocal(Point* point);
-void SelectWindow(WindowPtr window);
+STUB1(BeginUpdate, void(Window* window));
+STUB1(EndUpdate, void(Window* window));
+STUB8(NewWindow, Window*(void*, Rect*, const unsigned char* title, bool, int,
+      Window* behind, bool, int), NULL)
+STUB1(MacShowWindow, void(Window*));
+STUB1(DisposeWindow, void(Window*));
+STUB2(MacFindWindow, short(Point where, Window** window), 0);
+STUB4(MacMoveWindow, void(Window*, int x, int y, bool));
+STUB2(ShowHide, void(Window*, bool hide));
+STUB3(DragWindow, void(Window*, Point where, Rect* bounds));
+STUB2(TrackGoAway, bool(Window*, Point where), false);
+STUB1(GlobalToLocal, void(Point*));
+STUB1(SelectWindow, void(Window*));
 
 typedef struct {
     Rect portRect;
 } CWindow;
 typedef CWindow* CWindowPtr;
 
-CWindowPtr NewCWindow(void*, Rect* size, const unsigned char*, bool, int,
-                      WindowPtr, bool, int id);
+STUB8(NewCWindow,
+    CWindow*(void*, Rect* size, const unsigned char* title, bool, int,
+      Window* behind, bool, int id),
+    NULL);
 
 typedef struct {
     int red;
@@ -194,10 +197,10 @@ typedef struct {
 typedef CTab* CTabPtr;
 typedef CTab** CTabHandle;
 
-CTabHandle GetCTable(int id);
-void DisposeCTable(CTabHandle handle);
-void CTabChanged(CTabHandle handle);
-void Index2Color(long index, RGBColor* color);
+STUB1(GetCTable, CTab**(int id), NULL);
+STUB1(DisposeCTable, void(CTab** handle));
+STUB1(CTabChanged, void(CTab** handle));
+STUB2(Index2Color, void(long index, RGBColor* color));
 
 typedef void** WCTabHandle;
 
@@ -208,7 +211,7 @@ typedef AuxWin** AuxWinHandle;
 
 typedef int KeyMap[4];
 
-void GetKeys(KeyMap keys);
+STUB1(GetKeys, void(KeyMap keys));
 
 typedef struct { } ICInstance;
 
@@ -223,110 +226,107 @@ struct Rgn { };
 typedef Rgn* RgnPtr;
 typedef Rgn** RgnHandle;
 
-void FlushEvents(int mask, int);
-void SetEventMask(int mask);
-bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouseRgn);
+STUB2(FlushEvents, void(int mask, int));
+STUB1(SetEventMask, void(int mask));
+STUB4(WaitNextEvent, bool(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouseRgn), false);
 
 typedef Handle MenuHandle;
 
-MenuHandle GetNewMBar(int id);
-void SetMenuBar(MenuHandle menu);
-MenuHandle GetMenuHandle(int id);
-void AppendResMenu(MenuHandle handle, FourCharCode);
-void MacDrawMenuBar();
-void HiliteMenu(int);
-long MenuSelect(Point where);
-void SystemClick(EventRecord* event, WindowPtr window);
-void GetMenuItemText(MenuHandle, int item, unsigned char* name);
-bool HandleMenuChoice(int key);
-int MenuKey(char which_char);
-int OpenDeskAcc(const unsigned char* name);
+STUB1(GetNewMBar, MenuHandle(int id), NULL);
+STUB1(SetMenuBar, void(MenuHandle menu));
+STUB1(GetMenuHandle, MenuHandle(int id), NULL);
+STUB2(AppendResMenu, void(MenuHandle handle, FourCharCode));
+STUB0(MacDrawMenuBar, void());
+STUB1(HiliteMenu, void(int));
+STUB1(MenuSelect, long(Point where), 0);
+STUB2(SystemClick, void(EventRecord* event, Window* window));
+STUB3(GetMenuItemText, void(MenuHandle, int item, unsigned char* name));
+STUB1(HandleMenuChoice, bool(int), false);
+STUB1(MenuKey, int(char which_char), 0);
+STUB1(OpenDeskAcc, int(const unsigned char* name), 0);
 
-void NoteAlert(int type, void*);
+STUB2(NoteAlert, void(int type, void*));
 
 // Gets STR# from resource fork
-void GetIndString( const unsigned char* result, int id, int index);
+STUB3(GetIndString, void(const unsigned char* result, int id, int index));
 
-Handle GetIndResource(FourCharCode type, int id);
+STUB2(GetIndResource, Handle(FourCharCode type, int id), NULL);
 
-void Debugger();
+STUB0(Debugger, void());
 
-int Munger(Handle, int, const unsigned char* dest, size_t dest_length,
-            const void* source, size_t source_length);
+STUB6(Munger, int(Handle, int, const unsigned char* dest, size_t dest_length,
+      const void* source, size_t source_length), 0);
 
-void SysBeep(int);
+STUB1(SysBeep, void(int));
 
-void ExitToShell();
+STUB0(ExitToShell, void());
 
-void GetDateTime(unsigned long* time);
+STUB1(GetDateTime, void(unsigned long* time));
 
-void InitCursor();
-void MacShowCursor();
-void HideCursor();
-void ShieldCursor(Rect* rect, Point point);
-void GetMouse(Point* point);
+STUB0(InitCursor, void());
+STUB0(MacShowCursor, void());
+STUB0(HideCursor, void());
+STUB2(ShieldCursor, void(Rect* rect, Point point));
+STUB1(GetMouse, void(Point* point));
 
-void InitWindows();
-void InitMenus();
-void InitDialogs(void*);
-void MoreMasters();
-void MaxApplZone();
+STUB0(InitWindows, void());
+STUB0(InitMenus, void());
+STUB1(InitDialogs, void(void*));
+STUB0(MoreMasters, void());
+STUB0(MaxApplZone, void());
 
-int TickCount();
+STUB0(TickCount, int(), 1);
 
-void GetResInfo(Handle resource, short* id, FourCharCode* type,
-                unsigned char* name);
-void RemoveResource(Handle resource);
-void UpdateResFile(int file);
-void AddResource(Handle resource, FourCharCode type, int id,
-                 const unsigned char* name);
-void ChangedResource(Handle resource);
-void WriteResource(Handle resource);
+STUB4(GetResInfo, void(Handle resource, short* id, FourCharCode* type, unsigned char* name));
+STUB1(RemoveResource, void(Handle resource));
+STUB1(UpdateResFile, void(int file));
+STUB4(AddResource, void(Handle resource, FourCharCode type, int id, const unsigned char* name));
+STUB1(ChangedResource, void(Handle resource));
+STUB1(WriteResource, void(Handle resource));
 
-bool Button();
-double GetDblTime();
+STUB0(Button, bool(), false);
+STUB0(GetDblTime, double(), 0.0);
 
-void GetAuxWin(WindowPtr window, AuxWinHandle* handle);
-void SetWinColor(WindowPtr window, WCTabHandle handle);
+STUB2(GetAuxWin, void(Window* window, AuxWinHandle* handle));
+STUB2(SetWinColor, void(Window* window, WCTabHandle handle));
 
 typedef struct { } NumVersion;
 
-bool EasyOpenPreferenceFile(const unsigned char* file_name, int creator,
-                            int type, short* ref_num);
+STUB4(EasyOpenPreferenceFile,
+    bool(const unsigned char* file_name, int creator, int type, short* ref_num), false);
 
-void mAssert(bool condition);
+STUB1(mAssert, void(bool condition));
 
-void ParamText(const unsigned char* str1, const unsigned char* str2,
-               const unsigned char* str3, const unsigned char* str4);
-void StopAlert(int id, void*);
+STUB4(ParamText, void(const unsigned char* str1, const unsigned char* str2,
+      const unsigned char* str3, const unsigned char* str4));
+STUB2(StopAlert, void(int id, void*));
 
-void DebugStr(const unsigned char* str);
+STUB1(DebugStr, void(const unsigned char* str));
 
 typedef struct { } Dialog;
 typedef Dialog* DialogPtr;
 
-DialogPtr GetNewDialog(int id, void*, WindowPtr window);
-void SetDialogFontAndSize(DialogPtr dialog, int font, int size);
-void SetDialogDefaultItem(DialogPtr dialog, int item);
-void GetDialogItem(DialogPtr dialog, int item, short* type, Handle* handle,
-                   Rect* rect);
-void ModalDialog(void*, short* item);
-void DisposeDialog(DialogPtr dialog);
-void DrawDialog(DialogPtr dialog);
+STUB3(GetNewDialog, Dialog*(int id, void*, Window* window), NULL);
+STUB3(SetDialogFontAndSize, void(Dialog* dialog, int font, int size));
+STUB2(SetDialogDefaultItem, void(Dialog*, int item));
+STUB5(GetDialogItem, void(Dialog*, int item, short* type, Handle* handle, Rect* rect));
+STUB2(ModalDialog, void(void*, short* item));
+STUB1(DisposeDialog, void(Dialog* dialog));
+STUB1(DrawDialog, void(Dialog* dialog));
 
 typedef struct { } Control;
 typedef Control* ControlPtr;
 typedef Control** ControlHandle;
 void HiliteControl(ControlHandle control, int);
 
-void SetWRefCon(DialogPtr, long);
+STUB2(SetWRefCon, void(Dialog*, long));
 
-long AngleFromSlope(Fixed slope);
-long Random();
+STUB1(AngleFromSlope, long(Fixed slope), 0);
+STUB0(Random, long(), 0);
 
-void StringToNum(unsigned char* string, long* value);
+STUB2(StringToNum, void(unsigned char* string, long* value));
 
-Ptr GetScriptManagerVariable(int cache);
-long KeyTranslate(Ptr kchr, short keyCode, unsigned long* keyTranslateState);
+STUB1(GetScriptManagerVariable, Ptr(int cache), NULL);
+STUB3(KeyTranslate, long(Ptr kchr, short keyCode, unsigned long* keyTranslateState), 0);
 
 #endif // ANTARES_STUB_BASE_H_
