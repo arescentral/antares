@@ -27,8 +27,23 @@
 #include "PlayerInterface.hpp"
 #include "Sound.h"
 
+CTab fakeCTab = {
+    new ColorSpec[256],
+    256,
+};
+CTab* fakeCTabPtr = &fakeCTab;
+
+PixMap fakePixMap = {
+    { 0, 0, 640, 480 },
+    &fakeCTabPtr,
+    640,
+    new char[640 * 480],
+    1,
+};
+PixMap* fakePixMapPtr = &fakePixMap;
+
 GDevice fakeGDevice = {
-    new PixMap*(new PixMap),
+    &fakePixMapPtr,
     { 0, 0, 640, 480 },
 };
 
