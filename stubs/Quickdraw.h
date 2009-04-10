@@ -60,7 +60,7 @@ STUB1(ClipRect, void(Rect* rect));
 STUB6(CopyBits, void(BitMap* source, BitMap* source2, Rect* source_rect,
       Rect* source_rect2, int mode, void*));
 
-STUB1(GetPicture, PicHandle(int id), NULL);
+STUB1(GetPicture, PicHandle(int id), new Pic*(new Pic));
 STUB1(OpenPicture, PicHandle(Rect* source), NULL);
 STUB1(KillPicture, void(PicHandle pic));
 STUB2(DrawPicture, void(PicHandle pic, Rect*));
