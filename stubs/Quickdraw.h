@@ -46,8 +46,8 @@ STUB1(RGBBackColor, void(RGBColor* color));
 STUB1(RGBForeColor, void(RGBColor* color));
 STUB1(HiliteColor, void(RGBColor* color));
 
-STUB1(GetGWorldPixMap, PixMapHandle(GWorldPtr world), NULL);
-STUB1(LockPixels, OSErr(PixMap** pix), noErr);
+STUB1(GetGWorldPixMap, PixMapHandle(GWorldPtr world), new PixMap*(new PixMap));
+STUB1(LockPixels, bool(PixMap** pix), true);
 STUB1(UnlockPixels, void(PixMap** pix));
 
 STUB1(InitGraf, void(GrafPtr* port));
