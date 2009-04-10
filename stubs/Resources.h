@@ -13,6 +13,7 @@ STUB1(HomeResFile, int(Handle handle), 0);
 
 inline Handle GetResource(FourCharCode code, int id) {
   gdb();
+  return new char*(new char[1024]);
 }
 STUB1(ReleaseResource, void(Handle handle));
 STUB1(DetachResource, void(Handle handle));
