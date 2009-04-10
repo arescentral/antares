@@ -19,9 +19,6 @@
 
 #include "Rotation.hpp"
 
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <sys/mman.h>
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
@@ -35,21 +32,6 @@
 
 Handle  gRotTable = nil;
 
-
-Handle MapRotationData() {
-    int fd = open("data/rot /500.r", O_RDONLY);
-    if (fd < 0) {
-        return NULL;
-    }
-    long* data = (long*)mmap(0, 2880, PROT_READ | PROT_WRITE, MAP_FILE | MAP_PRIVATE, fd, 0);
-    if (data == (void*)-1) {
-        return NULL;
-    }
-    for (int i = 0; i < 720; ++i) {
-        data[i] = ntohl(data[i]);
-    }
-    return new Ptr((char*)data);
-}
 
 int RotationInit( void)
 
@@ -80,7 +62,7 @@ int RotationInit( void)
 
 */
 
-    gRotTable = MapRotationData();
+    gRotTable = GetResource( 'rot ', 500);
     if ( gRotTable == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kReadRotationDataError, -1, -1, -1, __FILE__, 1);
