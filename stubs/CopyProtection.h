@@ -6,7 +6,7 @@ enum {
 };
 
 typedef struct {
-    unsigned char* name;
+    unsigned char name[76];
     char number[kDigitNumber];
 } serialNumberType;
 

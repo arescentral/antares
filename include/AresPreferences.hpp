@@ -18,6 +18,7 @@
 #ifndef ANTARES_ARES_PREFERENCES_HPP_
 #define ANTARES_ARES_PREFERENCES_HPP_
 
+#include <string.h>
 #include <Base.h>
 
 #include "CopyProtection.h"
@@ -89,8 +90,11 @@ typedef struct
 } preferencesDataType;
 */
 
-typedef struct
-{
+extern short kDefaultKeyMap[kKeyControlDataNum];
+extern const char kDefaultPlayerName[];
+extern const char kDefaultGameName[];
+
+struct preferencesDataType {
     long                version;
     short               keyMap[kKeyControlDataNum];
     serialNumberType    serialNumber;
@@ -112,7 +116,16 @@ typedef struct
     short               netLevel;
     short               netLatency;
 //  long                netLatency;
-} preferencesDataType;
+
+    preferencesDataType()
+            : version(0x13), options(0x10a), startingLevel(1), volume(7), minutesPlayed(0),
+              kills(0), losses(0), race(0), enemyColor(0), resendDelay(60), registeredSetting(1),
+              registeredFlags(0xc), protocolFlags(0), netLevel(0), netLatency(6) {
+        memcpy(keyMap, kDefaultKeyMap, sizeof(kDefaultKeyMap));
+        strcpy(reinterpret_cast<char*>(playerName), kDefaultPlayerName);
+        strcpy(reinterpret_cast<char*>(gameName), kDefaultGameName);
+    }
+};
 
 typedef struct
 {
