@@ -69,8 +69,9 @@ STUB0(ClosePicture, void());
 STUB6(ConvertPictToGIFFile, OSErr(PicHandle pic, FSSpec* fsspec, int interlaced,
       int transparencyNo, int depth, int palette), noErr);
 
-STUB0(GetMainDevice, GDHandle(), new GDevice*(new GDevice));
-STUB0(GetDeviceList, GDHandle(), new GDevice*(new GDevice));
+extern GDevice fakeGDevice;
+STUB0(GetMainDevice, GDHandle(), new GDevice*(&fakeGDevice));
+STUB0(GetDeviceList, GDHandle(), new GDevice*(&fakeGDevice));
 STUB1(GetNextDevice, GDHandle(GDHandle gd), NULL);
 
 STUB0(NewRgn, Rgn**(), new Rgn*(new Rgn));

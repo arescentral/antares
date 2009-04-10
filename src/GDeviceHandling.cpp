@@ -27,6 +27,11 @@
 #include "PlayerInterface.hpp"
 #include "Sound.h"
 
+GDevice fakeGDevice = {
+    new PixMap*(new PixMap),
+    { 0, 0, 640, 480 },
+};
+
 #define kMaxDevice  4
 
 #define kGDeviceError       "\pGDEV"
