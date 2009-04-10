@@ -202,7 +202,7 @@ STUB1(DisposeCTable, void(CTab** handle));
 STUB1(CTabChanged, void(CTab** handle));
 STUB2(Index2Color, void(long index, RGBColor* color));
 
-typedef void** WCTabHandle;
+typedef CTab** WCTabHandle;
 
 typedef struct {
     WCTabHandle awCTable;
@@ -287,7 +287,11 @@ STUB1(WriteResource, void(Handle resource));
 STUB0(Button, bool(), false);
 STUB0(GetDblTime, double(), 0.0);
 
-STUB2(GetAuxWin, void(Window* window, AuxWinHandle* handle));
+inline void GetAuxWin(Window*, AuxWinHandle* handle) {
+    *handle = new AuxWin*(new AuxWin);
+    (**handle)->awCTable = new CTab*(new CTab);
+    (*(**handle)->awCTable)->ctSize = -1;
+}
 STUB2(SetWinColor, void(Window* window, WCTabHandle handle));
 
 typedef struct { } NumVersion;
