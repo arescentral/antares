@@ -197,7 +197,9 @@ typedef struct {
 typedef CTab* CTabPtr;
 typedef CTab** CTabHandle;
 
-STUB1(GetCTable, CTab**(int id), new CTab*(new CTab));
+extern CTab* fakeCTabPtr;
+
+STUB1(GetCTable, CTab**(int id), &fakeCTabPtr);
 STUB1(DisposeCTable, void(CTab** handle));
 STUB1(CTabChanged, void(CTab** handle));
 STUB2(Index2Color, void(long index, RGBColor* color));
