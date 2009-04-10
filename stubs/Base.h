@@ -71,11 +71,11 @@ typedef int32_t Fixed;
 typedef long Size;
 
 typedef char* Ptr;
-STUB1(NewPtr, Ptr(size_t size), NULL);
+STUB1(NewPtr, Ptr(size_t size), new char[a0]);
 STUB1(DisposePtr, void(Ptr ptr));
 
 typedef Ptr* Handle;
-STUB1(NewHandle, Handle(size_t size), NULL);
+STUB1(NewHandle, Handle(size_t size), new char*(new char[a0]));
 STUB1(DisposeHandle, void(Handle handle));
 STUB1(GetHandleSize, int(Handle handle), 0);
 STUB2(SetHandleSize, void(Handle handle, Size size));
@@ -157,7 +157,7 @@ typedef Window** WindowRef;
 STUB1(BeginUpdate, void(Window* window));
 STUB1(EndUpdate, void(Window* window));
 STUB8(NewWindow, Window*(void*, Rect*, const unsigned char* title, bool, int,
-      Window* behind, bool, int), NULL)
+      Window* behind, bool, int), new Window)
 STUB1(MacShowWindow, void(Window*));
 STUB1(DisposeWindow, void(Window*));
 STUB2(MacFindWindow, short(Point where, Window** window), 0);
@@ -176,7 +176,7 @@ typedef CWindow* CWindowPtr;
 STUB8(NewCWindow,
     CWindow*(void*, Rect* size, const unsigned char* title, bool, int,
       Window* behind, bool, int id),
-    NULL);
+    new CWindow);
 
 typedef struct {
     int red;
@@ -197,7 +197,7 @@ typedef struct {
 typedef CTab* CTabPtr;
 typedef CTab** CTabHandle;
 
-STUB1(GetCTable, CTab**(int id), NULL);
+STUB1(GetCTable, CTab**(int id), new CTab*(new CTab));
 STUB1(DisposeCTable, void(CTab** handle));
 STUB1(CTabChanged, void(CTab** handle));
 STUB2(Index2Color, void(long index, RGBColor* color));
@@ -293,12 +293,15 @@ STUB2(SetWinColor, void(Window* window, WCTabHandle handle));
 typedef struct { } NumVersion;
 
 STUB4(EasyOpenPreferenceFile,
-    bool(const unsigned char* file_name, int creator, int type, short* ref_num), false);
+    bool(const unsigned char* file_name, int creator, int type, short* ref_num), true);
 
 STUB1(mAssert, void(bool condition));
 
-STUB4(ParamText, void(const unsigned char* str1, const unsigned char* str2,
-      const unsigned char* str3, const unsigned char* str4));
+inline void ParamText(const unsigned char*, const unsigned char*,
+      const unsigned char*, const unsigned char*) {
+  gdb();
+}
+
 STUB2(StopAlert, void(int id, void*));
 
 STUB1(DebugStr, void(const unsigned char* str));

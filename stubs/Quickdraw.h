@@ -69,11 +69,11 @@ STUB0(ClosePicture, void());
 STUB6(ConvertPictToGIFFile, OSErr(PicHandle pic, FSSpec* fsspec, int interlaced,
       int transparencyNo, int depth, int palette), noErr);
 
-STUB0(GetMainDevice, GDHandle(), NULL);
-STUB0(GetDeviceList, GDHandle(), NULL);
+STUB0(GetMainDevice, GDHandle(), new GDevice*(new GDevice));
+STUB0(GetDeviceList, GDHandle(), new GDevice*(new GDevice));
 STUB1(GetNextDevice, GDHandle(GDHandle gd), NULL);
 
-STUB0(NewRgn, Rgn**(), NULL);
+STUB0(NewRgn, Rgn**(), new Rgn*(new Rgn));
 STUB1(DisposeRgn, void(Rgn** rgn));
 STUB2(RectRgn, void(Rgn** src, Rect* dst));
 STUB2(PtInRgn, bool(Point p, Rgn** rgn), false);
@@ -99,7 +99,7 @@ STUB0(PenNormal, void());
 STUB1(GetPen, void(Point* pen));
 STUB1(DrawString, void(const unsigned char* string));
 
-STUB4(HasDepth, bool(GDHandle device, int depth, int, int), false);
+STUB4(HasDepth, bool(GDHandle device, int depth, int, int), true);
 STUB4(SetDepth, void(GDHandle device, int depth, int, int));
 
 enum {
