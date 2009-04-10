@@ -16,9 +16,9 @@ enum {
 
     plainDBox = 200,
 
+    nullEvent = 0,
     everyEvent = 300,
     updateEvt = 301,
-    nullEvent = 302,
     mouseDown = 303,
     mouseUp = 304,
     keyDown = 305,
