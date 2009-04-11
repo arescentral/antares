@@ -4,7 +4,7 @@ C++FLAGS    = -W -Wall -g -Dpowerc -DTARGET_OS_MAC -fpascal-strings ;
 OPTIM       = -O0 ;
 HDRS        = include stubs ;
 
-Arch i386 ;
+Arch ppc ;
 C++Link ;
 
 Main Antares : src/Admiral.cpp

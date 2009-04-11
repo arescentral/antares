@@ -303,10 +303,8 @@ STUB4(EasyOpenPreferenceFile,
 
 STUB1(mAssert, void(bool condition));
 
-inline void ParamText(const unsigned char*, const unsigned char*,
-      const unsigned char*, const unsigned char*) {
-  gdb();
-}
+STUB4(ParamText, void(const unsigned char*, const unsigned char*,
+      const unsigned char*, const unsigned char*));
 
 STUB2(StopAlert, void(int id, void*));
 
