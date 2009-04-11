@@ -153,10 +153,12 @@ short AddScreenLabel( short h, short v, short hoff, short voff, const unsigned c
     label->attachedHintLine = false;
     if ( objectLink)
     {
-        label->whichObject = object->entryNumber;
-        if ( label->object == nil)
+        if ( label->object == nil) {
             label->visibleState = -1;
-        else label->visibleState = 1;
+        } else {
+            label->visibleState = 1;
+            label->whichObject = object->entryNumber;
+        }
     } else
     {
         label->visibleState = 1;

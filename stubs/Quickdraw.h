@@ -26,7 +26,8 @@ typedef struct {
 } GDevice;
 typedef GDevice** GDHandle;
 
-STUB0(GetGDevice, GDevice**(), NULL);
+extern GDevice* fakeGDevicePtr;
+STUB0(GetGDevice, GDevice**(), &fakeGDevicePtr);
 STUB1(SetGDevice, void(GDevice** device));
 
 typedef struct { } GWorld;
@@ -69,9 +70,8 @@ STUB0(ClosePicture, void());
 STUB6(ConvertPictToGIFFile, OSErr(PicHandle pic, FSSpec* fsspec, int interlaced,
       int transparencyNo, int depth, int palette), noErr);
 
-extern GDevice fakeGDevice;
-STUB0(GetMainDevice, GDHandle(), new GDevice*(&fakeGDevice));
-STUB0(GetDeviceList, GDHandle(), new GDevice*(&fakeGDevice));
+STUB0(GetMainDevice, GDHandle(), &fakeGDevicePtr);
+STUB0(GetDeviceList, GDHandle(), &fakeGDevicePtr);
 STUB1(GetNextDevice, GDHandle(GDHandle gd), NULL);
 
 STUB0(NewRgn, Rgn**(), new Rgn*(new Rgn));

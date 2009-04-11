@@ -87,7 +87,7 @@ typedef struct directTextStruct
 {
     Handle      charSet;
     short       resID;
-    Boolean     myHandle;       // different texts can have the same handles; myHandle = TRUE if this guy's in charge of disposing
+    ShortBoolean     myHandle;       // different texts can have the same handles; myHandle = TRUE if this guy's in charge of disposing
     long        logicalWidth;
     long        physicalWidth;
     long        height;

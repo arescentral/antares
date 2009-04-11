@@ -29,6 +29,7 @@ Main Antares : src/Admiral.cpp
                src/EZSprite.cpp
                #src/EnvironmentCheck.cpp
                src/Error.cpp
+               src/Fakes.cpp
                src/GDeviceHandling.cpp
                src/HandleHandling.cpp
                #src/HideMenubar.cpp

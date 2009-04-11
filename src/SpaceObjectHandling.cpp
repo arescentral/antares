@@ -2472,7 +2472,6 @@ void ResolveSpaceObjectData( Handle spaceData)
 {
     short           i;
     spaceObjectType *anObject, *bObject;
-    actionQueueType *action = (actionQueueType *)*gActionQueueData;
 
 #pragma unused( spaceData)
 //  mWriteDebugString("\pZONK!");
@@ -2530,6 +2529,7 @@ void ResolveSpaceObjectData( Handle spaceData)
 
     if ( gActionQueueData != nil)
     {
+        actionQueueType *action = (actionQueueType *)*gActionQueueData;
         for ( i = 0; i < kActionQueueLength; i++)
         {
             if ( action->subjectObjectNum >= 0)

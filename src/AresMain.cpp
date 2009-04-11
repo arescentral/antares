@@ -1287,8 +1287,9 @@ void MainLoop (void)
                             {
                                 do
                                 {
-                                    whichScenario = Randomize( gAresGlobal->levelNum);//Randomize( 30 + 1);
-                                    whichScenario = GetScenarioNumberFromChapterNumber( whichScenario);
+                                    whichScenario = 23;
+                                    // whichScenario = Randomize( gAresGlobal->levelNum);//Randomize( 30 + 1);
+                                    // whichScenario = GetScenarioNumberFromChapterNumber( whichScenario);
                                     gAresGlobal->gReplayData = GetResource( kReplayResType, kReplayResID + whichScenario);
                                     if ( ResError() != noErr) gAresGlobal->gReplayData = nil;
                                 } while ( gAresGlobal->gReplayData == nil);

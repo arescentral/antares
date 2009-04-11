@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <sys/time.h>
 #include <Stub.h>
 
 #define pascal
@@ -49,6 +50,7 @@ enum {
     suspendResumeMessage = 801,
 };
 
+typedef short ShortBoolean;
 typedef bool Boolean;
 typedef int16_t OSErr;
 
@@ -75,9 +77,9 @@ STUB1(NewPtr, Ptr(size_t size), new char[a0]);
 STUB1(DisposePtr, void(Ptr ptr));
 
 typedef Ptr* Handle;
-STUB1(NewHandle, Handle(size_t size), new char*(new char[a0]));
+Handle NewHandle(size_t size);
+int GetHandleSize(Handle handle);
 STUB1(DisposeHandle, void(Handle handle));
-STUB1(GetHandleSize, int(Handle handle), 0);
 STUB2(SetHandleSize, void(Handle handle, Size size));
 STUB1(MoveHHi, void(Handle handle));
 STUB1(HLock, void(Handle handle));
@@ -91,11 +93,11 @@ STUB3(PtrToHand, OSErr(void* ptr, Handle* handle, int len), noErr);
 STUB1(HiWord, int(long value), 0);
 STUB1(LoWord, int(long value), 0);
 
-STUB1(Microseconds, void(UnsignedWide* wide));
+void Microseconds(UnsignedWide* wide);
 
 STUB1(MaxMem, Size(Size*), 0);
 STUB1(CompactMem, Size(int), 0);
-STUB3(BlockMove, void(void*, void*, size_t));
+void BlockMove(void* src, void* dst, size_t size);
 STUB1(HandToHand, OSErr(Handle* handle), noErr);
 STUB2(HandAndHand, void(Handle src, Handle dst));
 
@@ -137,7 +139,7 @@ typedef struct {
 } Rect;
 
 STUB5(SetRect, void(Rect*, int, int, int, int));
-STUB5(MacSetRect, void(Rect*, int, int, int, int));
+void MacSetRect(Rect*, int, int, int, int);
 STUB3(OffsetRect, void(Rect*, int, int));
 STUB3(MacOffsetRect, void(Rect*, int, int));
 STUB2(MacPtInRect, bool(Point, Rect*), false);
@@ -213,7 +215,7 @@ typedef AuxWin** AuxWinHandle;
 
 typedef int KeyMap[4];
 
-STUB1(GetKeys, void(KeyMap keys));
+void GetKeys(KeyMap keys);
 
 typedef struct { } ICInstance;
 
@@ -230,7 +232,7 @@ typedef Rgn** RgnHandle;
 
 STUB2(FlushEvents, void(int mask, int));
 STUB1(SetEventMask, void(int mask));
-STUB4(WaitNextEvent, bool(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouseRgn), false);
+bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouseRgn);
 
 typedef Handle MenuHandle;
 
@@ -277,7 +279,7 @@ STUB1(InitDialogs, void(void*));
 STUB0(MoreMasters, void());
 STUB0(MaxApplZone, void());
 
-STUB0(TickCount, int(), 1);
+int TickCount();
 
 STUB4(GetResInfo, void(Handle resource, short* id, FourCharCode* type, unsigned char* name));
 STUB1(RemoveResource, void(Handle resource));
@@ -286,7 +288,7 @@ STUB4(AddResource, void(Handle resource, FourCharCode type, int id, const unsign
 STUB1(ChangedResource, void(Handle resource));
 STUB1(WriteResource, void(Handle resource));
 
-STUB0(Button, bool(), false);
+bool Button();
 STUB0(GetDblTime, double(), 0.0);
 
 inline void GetAuxWin(Window*, AuxWinHandle* handle) {
@@ -317,7 +319,7 @@ STUB3(GetNewDialog, Dialog*(int id, void*, Window* window), NULL);
 STUB3(SetDialogFontAndSize, void(Dialog* dialog, int font, int size));
 STUB2(SetDialogDefaultItem, void(Dialog*, int item));
 STUB5(GetDialogItem, void(Dialog*, int item, short* type, Handle* handle, Rect* rect));
-STUB2(ModalDialog, void(void*, short* item));
+void ModalDialog(void*, short* item);
 STUB1(DisposeDialog, void(Dialog* dialog));
 STUB1(DrawDialog, void(Dialog* dialog));
 
@@ -330,7 +332,7 @@ STUB2(HiliteControl, void(Control**, int));
 STUB2(SetWRefCon, void(Dialog*, long));
 
 STUB1(AngleFromSlope, long(Fixed slope), 0);
-STUB0(Random, long(), 0);
+long Random();
 
 STUB2(StringToNum, void(unsigned char* string, long* value));
 
