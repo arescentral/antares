@@ -1,0 +1,3 @@
+[submodule "data"]
+	path = data
+	url = ssh://git.sfiera.net/srv/git/ares-data
