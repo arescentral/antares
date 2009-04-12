@@ -61,13 +61,12 @@
 #define kBatteryToEnergyRatio   5
 #define kSpriteMaxSize          2048
 
-typedef struct actionQueueNode
-{
+struct actionQueueType {
     objectActionType            *action;
     long                            actionNum;
     long                            actionToDo;
     long                            scheduledTime;
-    struct actionQueueNode  *nextActionQueue;
+    actionQueueType         *nextActionQueue;
     long                            nextActionQueueNum;
     spaceObjectType         *subjectObject;
     long                            subjectObjectNum;
@@ -76,7 +75,7 @@ typedef struct actionQueueNode
     long                            directObjectNum;
     long                            directObjectID;
     longPointType               offset;
-} actionQueueType;
+};
 
 extern aresGlobalType   *gAresGlobal;
 extern long             /*gAresGlobal->gPlayerShipNumber,*/ gAbsoluteScale, gRandomSeed,

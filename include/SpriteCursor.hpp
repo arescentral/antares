@@ -27,8 +27,7 @@
 #define kSpriteCursorHidden     0   // if showLevel <= this, cursor is hidden
 #define kSpriteCursorVisible    1   // if showLevel <= this, cursor is hidden
 
-typedef struct
-{
+struct spriteCursorType {
     Point       where;
     Point       lastWhere;
     Rect        thisRect;
@@ -44,7 +43,7 @@ typedef struct
     Point       lastLineEnd;
     unsigned char   thisLineColor;
     unsigned char   thisLineColorDark;
-} spriteCursorType;
+};
 
 short InitSpriteCursor( void);
 void CleanupSpriteCursor( void);

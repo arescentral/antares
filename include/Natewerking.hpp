@@ -47,13 +47,10 @@ struct nateQElement
     struct nateQElement *nextElement;
 };
 
-typedef struct nateQElement nateQElement;
-
-typedef struct
-{
+struct nateQueue {
     nateQElement    *firstElement;
     nateQElement    *lastElement;
-} nateQueue;
+};
 
 char NatewerkInit( void);
 void NatewerkDispose( char);

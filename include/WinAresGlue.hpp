@@ -20,20 +20,18 @@
 
 #include <Quickdraw.h>
 
-typedef struct screenBitsStruct
-{
+struct screenBitsStruct {
     Rect    bounds;
-} screenBitsStruct;
+};
 
-typedef struct qdGlobalStruct
-{
+struct qdGlobalStruct {
     long                randSeed;
     Pattern             black;
     Pattern             gray;
     Pattern             white;
     Port                thePort;
     screenBitsStruct    screenBits;
-} qdGlobalType;
+};
 
 void RestoreDeviceClut( GDHandle);
 

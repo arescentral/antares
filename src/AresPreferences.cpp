@@ -71,8 +71,7 @@
 extern aresGlobalType   *gAresGlobal;
 //extern long       gAresGlobal->gSoundVolume;
 
-typedef struct
-{
+struct preferencesDataTypeVersion0x00000010 {
     long                version;
     short               keyMap[kKeyControlDataNum_Pre0x13];
     serialNumberType    serialNumber;
@@ -83,10 +82,9 @@ typedef struct
     long                reserved2;
     long                reserved3;
     long                reserved4;
-} preferencesDataTypeVersion0x00000010;
+};
 
-typedef struct
-{
+struct preferencesDataTypeVersion0x00000012 {
     long                version;
     short               keyMap[kKeyControlDataNum_Pre0x13];
     serialNumberType    serialNumber;
@@ -108,10 +106,9 @@ typedef struct
     short               netLevel;
     short               netLatency;
 //  long                netLatency;
-} preferencesDataTypeVersion0x00000012; // pre hotkeys
+}; // pre hotkeys
 
-typedef struct
-{
+struct publicSerialType {
     Str255              userName;
     Str255              serialString;
     unsigned long       reserved1;
@@ -119,7 +116,7 @@ typedef struct
     unsigned long       reserved3;
     unsigned long       reserved4;
     unsigned long       reserved5;
-} publicSerialType;
+};
 
 //KeyMap            gAresGlobal->gKeyControl[kKeyControlNum];
 //short         gAresGlobal->gPreferenceRefNum = 0;

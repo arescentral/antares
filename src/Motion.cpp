@@ -76,18 +76,16 @@
 #define kThinkiverseTopLeft     (kUniversalCenter - 131068) // universe for thinking or owned objects
 #define kThinkiverseBottomRight (kUniversalCenter + 131068)
 
-typedef struct
-{
+struct adjacentUnitType {
     long                    adjacentUnit;           // the normal adjacent unit
     longPointType           superOffset;            // the offset of the super unit (for wrap-around)
-} adjacentUnitType;
+};
 
-typedef struct
-{
+struct proximityUnitType {
     spaceObjectTypePtr      nearObject;                         // for collision checking
     spaceObjectTypePtr      farObject;                          // for distance checking
     adjacentUnitType        unitsToCheck[kUnitsToCheckNumber];  // adjacent units to check
-} proximityUnitType;
+};
 
 extern aresGlobalType   *gAresGlobal;
 extern GWorldPtr        gOffWorld, gRealWorld, gSaveWorld;

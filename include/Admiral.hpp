@@ -68,15 +68,13 @@
 
 #define kAdmiralScoreNum            3
 
-typedef enum
-{
+enum destinationType {
     kNoDestinationType,
     kObjectDestinationType,
     kCoordinateDestinationType
-} destinationType;
+};
 
-typedef struct
-{
+struct destBalanceType {
     long            whichObject;
     long            canBuildType[kMaxTypeBaseCanBuild];
     long            occupied[kScenarioPlayerNum];
@@ -85,17 +83,15 @@ typedef struct
     long            totalBuildTime;
     long            buildObjectBaseNum;
     anyCharType     name[kDestinationNameLen + 1];
-} destBalanceType;
+};
 
-typedef struct
-{
+struct admiralBuildType {
     baseObjectType  *base;
     long            baseNum;
     smallFixedType  chanceRange;
-} admiralBuildType;
+};
 
-typedef struct
-{
+struct admiralType {
     unsigned long       attributes;
     long                destinationObject;
     long                destinationObjectID;
@@ -123,7 +119,7 @@ typedef struct
     unsigned char       color;
     Boolean             active;
     anyCharType         name[kAdmiralNameLen + 1];
-} admiralType;
+};
 
 
 #define mGetDestObjectBalancePtr( whichObject) (destBalanceType *)*gAresGlobal->gDestBalanceData + (long)(whichObject)

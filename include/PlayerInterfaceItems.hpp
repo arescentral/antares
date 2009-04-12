@@ -27,8 +27,7 @@
 
 #pragma options align=mac68k
 
-typedef enum
-{
+enum interfaceKindType {
     kPlainRect = 1,
     kLabeledRect = 2,
     kListRect = 3,
@@ -40,37 +39,32 @@ typedef enum
     kTabBox = 9,
     kTabBoxTop = 10,
     kTabBoxButton = 11
-} interfaceKindType;
+};
 
-typedef enum
-{
+enum interfaceItemStatusType {
     kDimmed = 1,
     kActive = 2,
     kIH_Hilite = 3
-} interfaceItemStatusType;
+};
 
-typedef enum
-{
+enum interfaceStyleType {
     kLarge = 1,
     kSmall = 2
-} interfaceStyleType;
+};
 
-typedef struct
-{
+struct interfaceLabelType {
     short               stringID;
     short               stringNumber;
-} interfaceLabelType;
+};
 
-typedef struct
-{
+struct interfaceLabeledRectType {
     interfaceLabelType  label;
     unsigned char       color;
     TEHandle            teData;
     Boolean             editable;
-} interfaceLabeledRectType;
+};
 
-typedef struct
-{
+struct interfaceListType {
     interfaceLabelType          label;
     short                       (*getListLength)( void);
     void                        (*getItemString)( short, anyCharType *);
@@ -81,51 +75,44 @@ typedef struct
     interfaceItemStatusType     lineDownStatus;
     interfaceItemStatusType     pageUpStatus;
     interfaceItemStatusType     pageDownStatus;
-} interfaceListType;
+};
 
-typedef struct
-{
+struct interfaceTextRectType {
     short               textID;
     Boolean             visibleBounds;
-} interfaceTextRectType;
+};
 
-typedef struct
-{
+struct interfaceTabBoxType {
     short               topRightBorderSize;
-} interfaceTabBoxType;
+};
 
-typedef struct
-{
+struct interfacePictureRectType {
     short               pictureID;
     Boolean             visibleBounds;
-} interfacePictureRectType;
+};
 
-typedef struct
-{
+struct interfaceButtonType {
     interfaceLabelType          label;
     short                       key;
     Boolean                     defaultButton;
     interfaceItemStatusType     status;
-} interfaceButtonType;
+};
 
-typedef struct
-{
+struct interfaceRadioType {
     interfaceLabelType          label;
     short                       key;
     Boolean                     on;
     interfaceItemStatusType     status;
-} interfaceRadioType; // also tab box button type
+}; // also tab box button type
 
-typedef struct
-{
+struct interfaceCheckboxType {
     interfaceLabelType          label;
     short                       key;
     Boolean                     on;
     interfaceItemStatusType     status;
-} interfaceCheckboxType;
+};
 
-typedef struct
-{
+struct interfaceItemType {
     longRect            bounds;
     union
     {
@@ -142,7 +129,7 @@ typedef struct
     unsigned char       color;
     interfaceKindType   kind;
     interfaceStyleType  style;
-} interfaceItemType;
+};
 
 #pragma options align=reset
 

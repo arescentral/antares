@@ -83,8 +83,7 @@ gDirectText = (directTextType *)*gDirectTextData + gWhichDirectText;
 #define mDirectFontAscent (gDirectText->ascent)
 #define mDirectFontLogicalWidth (gDirectText->logicalWidth)
 
-typedef struct directTextStruct
-{
+struct directTextType {
     Handle      charSet;
     short       resID;
     ShortBoolean     myHandle;       // different texts can have the same handles; myHandle = TRUE if this guy's in charge of disposing
@@ -92,7 +91,7 @@ typedef struct directTextStruct
     long        physicalWidth;
     long        height;
     long        ascent;
-} directTextType;
+};
 
 int InitDirectText( void);
 void DirectTextCleanup( void);

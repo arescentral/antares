@@ -207,22 +207,19 @@ DrawNateRect( *mpixbase, &mbounds, 0, 0, BLACK);
 (mdestobject).escortStrength = (msourceobject).escortStrength;\
 (mdestobject).baseType = (msourceobject).baseType;
 
-typedef enum
-{
+enum lineKindType {
     plainLineKind = 0,
     buttonOffLineKind = 1,
     buttonOnLineKind = 2
-} lineKindType;
+};
 
-typedef enum
-{
+enum lineSelectType {
     cannotSelect = 0,
     selectDim = 1,
     selectable = 2
-} lineSelectType;
+};
 
-typedef struct
-{
+struct miniScreenLineType {
     anyCharType     string[kMiniScreenCharWidth + 1];
     anyCharType     statusFalse[kMiniScreenCharWidth + 1];
     anyCharType     statusTrue[kMiniScreenCharWidth + 1];
@@ -240,7 +237,7 @@ typedef struct
     long            statusPlayer;
     long            negativeValue;
     Ptr             sourceData;
-} miniScreenLineType;
+};
 
 #define mCopyBlankLineString( mline, mchar, mstring, mslen, mlinelen)\
 mchar = mstring;\

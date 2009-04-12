@@ -36,8 +36,7 @@
 #define kMaxLineNumber          48
 
 
-typedef struct
-{
+struct retroTextSpecType {
     Handle          text;
     long            textLength;
     long            lineLength[kMaxLineNumber];
@@ -58,19 +57,17 @@ typedef struct
     unsigned char   originalBackColor;
     unsigned char   nextColor;
     unsigned char   nextBackColor;
-} retroTextSpecType;
+};
 
-typedef enum
-{
+enum longMessageStageType {
     kNoStage = 0,
     kStartStage = 1,
     kClipStage = 2,
     kShowStage = 3,
     kEndStage = 4
-} longMessageStageType;
+};
 
-typedef struct
-{
+struct longMessageType {
     longMessageStageType    stage;
     long                    charDelayCount;
     Rect                    pictBounds;
@@ -94,7 +91,7 @@ typedef struct
     Boolean                 labelMessage;
     Boolean                 lastLabelMessage;
     short                   labelMessageID;
-} longMessageType;
+};
 
 
 int InitMessageScreen( void);

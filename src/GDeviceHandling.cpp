@@ -31,11 +31,10 @@
 
 #define kGDeviceError       "\pGDEV"
 
-typedef struct
-{
+struct whichDeviceType {
     GDHandle    whichDevice;
     DialogPtr   window;
-} whichDeviceType;
+};
 
 extern long             WORLD_WIDTH, WORLD_HEIGHT;
 

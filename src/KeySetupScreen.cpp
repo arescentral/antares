@@ -79,12 +79,11 @@
 
 #define mPlayScreenSound            PlayVolumeSound( kComputerBeep3, kMediumLowVolume, kShortPersistence, kMustPlaySound)
 
-typedef struct
-{
+struct tempKeyControlType {
     short   keyNum;
     Boolean conflicts;
     Boolean didConflict;
-} tempKeyControlType;
+};
 
 extern aresGlobalType   *gAresGlobal;
 extern GDHandle         theDevice;

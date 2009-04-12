@@ -25,17 +25,17 @@ typedef unsigned char   byte;
 
 #pragma options align=mac68k
 
-typedef struct {
+struct natePix {
     PixMapHandle    pix;
     Handle          pixBase;
     Point           center;
-    } natePix;
+};
 
-typedef struct {
+struct nateBit {
     BitMap          bit;
     Handle          bitBase;
     Point           center;
-    } nateBit;
+};
 
 #define kNatePix
 

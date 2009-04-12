@@ -147,18 +147,16 @@ if ( (!(mobjectptr->distanceFromPlayer.hi)) && (mobjectptr->distanceFromPlayer.l
 }
 
 
-typedef enum
-{
+enum soundPriorityType {
     kNoSound = 0,
     kVeryLowPrioritySound = 1,
     kLowPrioritySound = 2,
     kPrioritySound = 3,
     kHighPrioritySound = 4,
     kMustPlaySound = 5
-} soundPriorityType;
+};
 
-typedef struct
-{
+struct smartSoundChannel {
     long                whichSound;
     long                soundAge;
     short               soundVolume;
@@ -168,15 +166,14 @@ typedef struct
 #ifdef kAllowSoundSprocket
     SSpSourceReference  source;
 #endif
-} smartSoundChannel;
+};
 
-typedef struct
-{
+struct smartSoundHandle {
     Handle              soundHandle;
     long                offset;
     short               id;
     Boolean             keepMe;
-} smartSoundHandle;
+};
 
 int OpenSoundFile( void);
 int InitSoundFX( void);

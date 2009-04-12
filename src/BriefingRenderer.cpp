@@ -32,11 +32,10 @@
 
 #define kBriefing_Grid_Size             16
 
-typedef struct briefingSpriteBoundsType
-{
+struct briefingSpriteBoundsType {
     Rect    bounds;
     long    objectIndex;
-} briefingSpriteBoundsType;
+};
 
 extern aresGlobalType   *gAresGlobal;
 extern Handle           gSpaceObjectData;

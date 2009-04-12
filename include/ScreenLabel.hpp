@@ -31,8 +31,7 @@
 
 #define kLabelOffVisibleTime    60
 
-typedef struct screenLabelType
-{
+struct screenLabelType {
     Point           where;
     Point           offset;
     Rect            thisRect;
@@ -54,7 +53,7 @@ typedef struct screenLabelType
     Boolean         attachedHintLine;
     Point           attachedToWhere;
     long            retroCount;
-} screenLabelType;
+};
 
 
 int ScreenLabelInit( void);

@@ -48,11 +48,10 @@
 extern GDHandle                 theDevice;
 extern long                     gInterfaceFileRefID;
 
-typedef struct
-{
+struct bigReqListRec {
     short   reqLSize;
     short   reqLData[256];
-} bigReqListRec;
+};
 
 extern aresGlobalType *gAresGlobal;
 extern short gSpriteFileRefID;

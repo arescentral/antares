@@ -57,24 +57,23 @@ inline void mCopyAnyRect(T0& mdrect, const T1& msrect) {
 
 typedef unsigned long   coordType;
 
-typedef struct
+struct coordPointType
 {
     coordType   h;
     coordType   v;
-}   coordPointType;
+};
 
-typedef struct
-{
+struct longPointType {
     long        h;
     long        v;
-} longPointType;
+};
 
-typedef struct longRectStruct {
+struct longRect {
     long        left;
     long        top;
     long        right;
     long        bottom;
-    } longRect;
+};
 
 void DrawNateRect( PixMap *, longRect *, long, long, unsigned char);
 void DrawNateRectVScan( PixMap *, longRect *, long, long, unsigned char);

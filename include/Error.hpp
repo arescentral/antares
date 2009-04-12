@@ -95,13 +95,12 @@
 #define kNewerVersionError          74
 #define kSameSerialNumberError      75
 
-typedef enum
-{
+enum errorRecoverType {
     eContinueErr,
     eQuitErr,
     eExitToShellErr,
     eContinueOnlyErr
-} errorRecoverType;
+};
 
 void ShowErrorNoRecover ( int, const unsigned char*, int);
 void ShowErrorRecover ( int, const unsigned char*, int);

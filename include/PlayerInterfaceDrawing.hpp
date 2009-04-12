@@ -31,11 +31,11 @@
 #define kMaxInlinePictNum           8   // max # of inline picts it'll keep track of
 
 // the inline pictType struct is for keeping track of picts included in my text boxes.
-typedef struct
+struct inlinePictType
 {
     Rect    bounds;
     short   id;
-} inlinePictType;
+};
 
 void DrawPlayerInterfacePlainRect( longRect *, unsigned char, interfaceStyleType, PixMap *, long,
                         long);

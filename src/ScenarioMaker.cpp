@@ -68,18 +68,16 @@
 
 
 
-typedef enum
-{
+enum endgameCheckStatus {
     kUnchecked = 1,
     kPositivecheck = 2,
     kNegativecheck = 3
-} endgameCheckStatus;
+};
 
-typedef struct
-{
+struct endgameCheckType {
     endgameCheckStatus  checked;
 //  scenarioEndgameType endgame;
-} endgameCheckType;
+};
 
 extern aresGlobalType           *gAresGlobal;
 //extern unsigned long          gAresGlobal->gOptions;

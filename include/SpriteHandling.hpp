@@ -75,24 +75,23 @@
 #define kMaxPixTableEntry   60
 #define kNoSprite               -1
 
-typedef enum
-{
+enum spriteStyleType {
     spriteNormal = 0,
     spriteStatic = 1,
     spriteColor = 2
-} spriteStyleType;
+};
 
-typedef struct spritePixStruct {
+struct spritePix {
     Point       center;
     int         width;
     int         height;
     int         type;
     Handle      data;
-    } spritePix;
+    };
 
 //typedef  spritePix;
 
-typedef struct {
+struct spriteType {
     Point           where;
     Handle          table;
     short           resID;
@@ -108,14 +107,14 @@ typedef struct {
 
     Rect        thisRect;
     Rect        lastRect;
-    } spriteType;
+    };
 
 
-typedef struct {
+struct pixTableType {
     Handle      resource;
     int         resID;
     Boolean     keepMe;
-    } pixTableType;
+    };
 
 void SpriteHandlingInit( void);
 void CleanupSpriteHandling( void);

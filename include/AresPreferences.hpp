@@ -89,8 +89,7 @@ typedef struct
 } preferencesDataType;
 */
 
-typedef struct
-{
+struct preferencesDataType {
     long                version;
     short               keyMap[kKeyControlDataNum];
     serialNumberType    serialNumber;
@@ -112,10 +111,9 @@ typedef struct
     short               netLevel;
     short               netLatency;
 //  long                netLatency;
-} preferencesDataType;
+};
 
-typedef struct
-{
+struct startingLevelPreferenceType {
     long                version;
     long                startingLevel;
     unsigned long       levelDone_bit_0_31;
@@ -129,7 +127,7 @@ typedef struct
     unsigned long       unused_6;
     unsigned long       unused_7;
     unsigned long       unused_8;
-} startingLevelPreferenceType;
+};
 
 int InitPreferences( void);
 void PreferencesCleanup( void);

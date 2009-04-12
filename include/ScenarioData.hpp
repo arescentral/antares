@@ -33,8 +33,7 @@
 #define kScenario_Data_Flag_HasCustomScenarios  0x00000008
 #define kScenario_Data_Flag_NotOptimized        0x00000010
 
-typedef struct scenarioInfoType
-{
+struct scenarioInfoType {
     long            warpInFlareID;
     long            warpOutFlareID;
     long            playerBodyID;
@@ -47,6 +46,6 @@ typedef struct scenarioInfoType
     aresVersionType requiresAresVersion;
     unsigned long   flags;
     unsigned long   checkSum;
-} scenarioInfoType;
+};
 
 #endif // ANTARES_SCENARIO_DATA_HPP_

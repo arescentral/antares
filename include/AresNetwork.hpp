@@ -40,19 +40,17 @@
 #define kAresNetObjectName      "\pAres 0.0.1 Object"
 #define kAresNetTypeName        "\pAres 0.0.1 Type"
 
-typedef enum { noNetwork, hostWorking, clientWorking, noNetGame } netStatusType;
+enum netStatusType { noNetwork, hostWorking, clientWorking, noNetGame };
 
-typedef enum
-{
+enum datagramType {
     kClientAddress = 1,
     kAssignClientNumber = 2,
     kRequestPlayerShip = 3,
     kAssignPlayerShip = 4,
     kUpdateSpaceObject = 5
-} datagramType;
+};
 
-typedef struct
-{
+struct datagramHeaderType {
     datagramType    type;
     long            clientNumber;
     union
@@ -66,10 +64,9 @@ typedef struct
             long            spaceObjectNum;
         } spaceObjectData;
     } header;
-} datagramHeaderType;
+};
 
-typedef enum
-{
+enum netMessageType {
     kYouAreInvited = 1,                 // host to client invitation
     kWhatIsYourName = 2,                // host requests client name
     kWeAreStarting = 3,                 // host tells client to prepare for beginning
@@ -89,7 +86,7 @@ typedef enum
     kImReady = 13,                      // generic simple I'm Ready message
     kStartTiming = 14                   // simple message to start global timer
 
-} netMessageType;
+};
 
 
 //
@@ -106,13 +103,12 @@ typedef enum
 //  kPlayerNumberData
 //
 
-typedef struct
-{
+struct netSetupDataType {
     netMessageType          type;
     AddrBlock               address;
     short                   number;
     anyCharType             name[kNetNameLength];
-} netSetupDataType;
+};
 
 //
 // legal netMessageTypes for a netSpaceObjectType message:
@@ -120,13 +116,12 @@ typedef struct
 //  kRefreshThisSpaceObject
 //
 
-typedef struct
-{
+struct netSpaceObjectType {
     netMessageType          type;
     short                   playerNum;
     spaceObjectType         spaceObject;
     long                    spaceObjectNum;
-} netSpaceObjectType;
+};
 
 //
 // legal netMessageTypes for a netSimpleMessageType message:
@@ -135,20 +130,17 @@ typedef struct
 //  kStartTiming
 //
 
-typedef struct
-{
+struct netSimpleMessageType {
     netMessageType          type;
     short                   playerNum;
-} netSimpleMessageType;
+};
 
-typedef struct
-{
+struct netAresEntity {
     AddrBlock               address;
     anyCharType             name[kNetNameLength];
-} netAresEntity;
+};
 
-typedef enum
-{
+enum netSetupStatusType {
     kAvailable = 1,
     kNotInterested = 2,
     kInGame = 3,
@@ -156,15 +148,14 @@ typedef enum
     kInvitedNoResponse = 5,
     kHasNoName = 6,
     kDoesNotExist = 7
-} netSetupStatusType;
+};
 
-typedef struct
-{
+struct netClientEntity {
     netAresEntity           entity;
     Boolean                 stillThere;
     Boolean                 selected;
     netSetupStatusType      status;
-} netClientEntity;
+};
 
 void AresNetworkInit ( void);
 void AresNetworkClose ( void);

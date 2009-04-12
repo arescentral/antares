@@ -234,13 +234,11 @@ inline void mDrawPuffUpTBorder(Rect& mrect, Rect& mtrect, uint8_t mcolor, int ms
     MacLineTo( (mrect).left - mthisHBorder, (mrect).top + msheight + kLabelBottomHeight);
 }
 
-typedef enum
-{
+enum inlineKindType {
     kNoKind = 0,
     kVPictKind = 1,
     kVClearPictKind = 2
-
-} inlineKindType;
+};
 
 extern CWindowPtr       gTheWindow;
 extern Handle           gDirectTextData, gColorTranslateTable;

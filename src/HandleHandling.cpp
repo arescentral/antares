@@ -48,15 +48,14 @@
 #define mCheckLock( mhandle) if ( mhandle != nil) HLock( mhandle)
 #define mCheckUnlock( mhandle) if ( mhandle != nil) HUnlock( mhandle)
 
-typedef struct
-{
+struct handleDataType {
     Handle          *hand;                  // if = nil, then no handle
     void            (*unlockData)( Handle); // if = nil, then call HUnlock
     void            (*lockData)( Handle);       // if = nil, then call HLock
     void            (*resolveData)( Handle);    // if = nil, then do nothing if moved
     Handle          checkHandle;
     Str255          name;
-} handleDataType;
+};
 
 Handle      gHandleData = nil;
 //Boolean       EMERGENCYHACKTEST = false;

@@ -28,8 +28,7 @@
 #define kSparkAgeToShadeShift   6L
 
 
-typedef struct
-{
+struct scrollStarType {
     longPointType   oldOldLocation;
     longPointType   oldLocation;
     longPointType   location;
@@ -38,7 +37,7 @@ typedef struct
     long            age;
     long            speed;
     unsigned char   color;
-} scrollStarType;
+};
 
 
 int InitScrollStars( void);

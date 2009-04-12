@@ -103,8 +103,7 @@
 #define kEndgameNum30                       0x40000000
 #define kEndgameNum31                       0x80000000
 
-typedef enum
-{
+enum conditionType {
     kNoCondition = 0,
     kLocationCondition = 1,
     kCounterCondition = 2,
@@ -130,15 +129,14 @@ typedef enum
     kObjectIsBeingBuilt = 22,       // for tutorial; is base building something?
     kDirectIsSubjectTarget = 23,
     kSubjectIsPlayerCondition = 24
-} conditionType;
+};
 
-typedef enum
-{
+enum briefingPointKindType {
     kNoPointKind = 0,
     kBriefObjectKind = 1,
     kBriefAbsoluteKind = 2,
     kBriefFreestandingKind = 3
-} briefingPointKindType;
+};
 
 //
 // We need to know:
@@ -149,8 +147,7 @@ typedef enum
 // content ID, # (short, short)
 //
 
-typedef struct
-{
+struct briefPointType {
     briefingPointKindType   briefPointKind;
     union
     {
@@ -169,7 +166,7 @@ typedef struct
     short                   titleResID;
     short                   titleNum;
     short                   contentResID;
-} briefPointType;
+};
 
 /*
 typedef struct
@@ -196,8 +193,7 @@ typedef struct
 } scenarioInitialTypeOld;
 */
 
-typedef struct
-{
+struct scenarioInitialType {
     long            type;
     long            owner;
     long            realObjectNumber;
@@ -213,17 +209,15 @@ typedef struct
     long            nameResID;
     long            nameStrNum;
     unsigned long   attributes;
-} scenarioInitialType;
+};
 
-typedef struct
-{
+struct counterArgumentType {
     long            whichPlayer;
     long            whichCounter;
     long            amount;
-} counterArgumentType;
+};
 
-typedef struct
-{
+struct scenarioConditionTypeOld {
     conditionType   condition;
     union
     {
@@ -236,10 +230,9 @@ typedef struct
     long            directObject;       // initial object #
     long            startVerb;
     long            verbNum;
-} scenarioConditionTypeOld;
+};
 
-typedef struct
-{
+struct scenarioConditionType {
     conditionType   condition;
     union
     {
@@ -254,9 +247,9 @@ typedef struct
     long            verbNum;
     unsigned long   flags;
     long            direction;
-} scenarioConditionType;
+};
 
-typedef struct
+struct scenarioPlayerType
 {
     short           playerType;
     short           playerRace;
@@ -267,10 +260,9 @@ typedef struct
 //  long            reserved1;
     short           netRaceFlags;
     short           reserved1;
-} scenarioPlayerType;
+};
 
-typedef struct
-{
+struct scenarioTypeOld {
     long                    playerNum;
     scenarioPlayerType      player[kScenarioPlayerNum];
     long                    initialFirst;
@@ -279,10 +271,9 @@ typedef struct
     long                    conditionNum;
     long                    briefPointFirst;
     long                    briefPointNum;
-} scenarioTypeOld;
+};
 
-typedef struct
-{
+struct scenarioType {
     short                       netRaceFlags;
     short                       playerNum;
     scenarioPlayerType  player[kScenarioPlayerNum];
@@ -305,15 +296,14 @@ typedef struct
     smallFixedType          parKillRatio;
     short                       parLosses;
     short                       startTime;      // use kScenario_StartTimeMask
-} scenarioType;
+};
 
-typedef struct
-{
+struct raceType {
     long                        id;
     unsigned char           apparentColor;
     unsigned long           illegalColors;
     long                        advantage;
-} raceType;
+};
 
 #pragma options align=reset
 

@@ -65,11 +65,10 @@
 
 typedef long smallFixedType;    // distinct from Mac OS's Fixed type
 
-typedef struct
-{
+struct fixedPointType {
     smallFixedType      h;
     smallFixedType      v;
-} fixedPointType;
+};
 
 
 unsigned long lsqrt (unsigned long);

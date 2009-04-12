@@ -66,27 +66,23 @@
 #if TARGET_OS_MAC
 #define NETSPROCKET_AVAILABLE       1
 
-typedef struct
-{
+struct dummyDumType {
     long    banana;
     short   apple;
-} dummyDumType;
+};
 
-typedef struct
-{
+struct sameMessageDataType {
     NSpMessageHeader            header;
     long                        gameTime;
     long                        fromAdmiralNumber;
-} sameMessageDataType;
+};
 
-typedef struct
-{
+struct packedDataType {
     unsigned long               packedData1;    // sanity/page/line/time
     unsigned long               packedData2;    // from admiralNum/target/whichShip/keysdown
-} packedDataType;
+};
 
-typedef struct
-{
+struct messageDataType {
     NSpMessageHeader            header;
     packedDataType              data;
 #ifdef kBackupData
@@ -95,7 +91,7 @@ typedef struct
 #ifdef kBackupData2
     packedDataType              backupData2;
 #endif
-} messageDataType;
+};
 
 // pregame message results
 enum

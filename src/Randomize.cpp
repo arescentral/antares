@@ -40,11 +40,10 @@
 
 #define kDebugFileName  "\p_Debug Ares "
 
-typedef struct
-{
+struct debugRandomType {
     long    seed;
     OSType  sig;
-} debugRandomType;
+};
 
 extern aresGlobalType           *gAresGlobal;
 //extern long gAresGlobal->gGameTime;

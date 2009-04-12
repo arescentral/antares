@@ -287,8 +287,7 @@ struct spaceObjectType;
 typedef spaceObjectType *spaceObjectTypePtr;
 //typedef unsigned long *spaceObjectTypePtr;
 
-typedef enum
-{
+enum objectVerbIDType {
     kNoAction = 0,
     kCreateObject = 1,
     kPlaySound = 2,
@@ -313,10 +312,9 @@ typedef enum
     kSetZoom = 21,
     kComputerSelect = 22,           // selects a line & screen of the minicomputer
     kAssumeInitialObject = 23       // assumes the identity of an intial object; for tutorial
-} objectVerbIDType;
+};
 
-typedef enum
-{
+enum alterVerbIDType {
     kAlterDamage = 0,
     kAlterVelocity = 1,
     kAlterThrust = 2,
@@ -344,24 +342,22 @@ typedef enum
     kAlterOrderKeyTag = 24,
     kAlterEngageKeyTag = 25,
     kAlterAbsoluteLocation = 26
-} alterVerbIDType;
+};
 
-typedef enum
-{
+enum dieVerbIDType {
     kDieNone = 0,
     kDieExpire = 1,
     kDieDestroy = 2
-} dieVerbIDType;
+};
 
-typedef enum
-{
+enum kPresenceStateType {
     kNormalPresence = 0,
     kLandingPresence = 1,
     kTakeoffPresence = 2,
     kWarpInPresence = 3,
     kWarpingPresence = 4,
     kWarpOutPresence = 5
-} kPresenceStateType;
+};
 
 //
 // objectActionType:
@@ -369,8 +365,7 @@ typedef enum
 //  destroy, expire, create, collide, activate, or message.
 //
 
-typedef union
-{
+union argumentType {
 
     // createObject: make another type of object appear
     struct
@@ -488,10 +483,9 @@ typedef union
     {
         long                    whichInitialObject;
     } assumeInitial;
-} argumentType;
+};
 
-typedef struct
-{
+struct OLDobjectActionType {
     objectVerbIDType            verb;                   // what is this verb?
     Boolean                     reflexive;              // does it apply to object executing verb?
     unsigned long               inclusiveFilter;        // if it has ALL these attributes, OK -- for non-reflective verbs
@@ -499,10 +493,9 @@ typedef struct
     short                       owner;                  // 0 no matter, 1 same owner, -1 different owner
 
     argumentType                argument;
-} OLDobjectActionType;
+};
 
-typedef struct
-{
+struct objectActionType {
     objectVerbIDType            verb;                   // what is this verb?
     Boolean                     reflexive;              // does it apply to object executing verb?
     unsigned long               inclusiveFilter;        // if it has ALL these attributes, OK -- for non-reflective verbs
@@ -514,20 +507,18 @@ typedef struct
     short                       initialDirectOverride;
     unsigned long               reserved2;
     argumentType                argument;
-} objectActionType;
+};
 
 
-typedef enum
-{
+enum beamKindType {
     eKineticBeamKind =                  0,  // has velocity, moves
     eStaticObjectToObjectKind =         1,  // static line connects 2 objects
     eStaticObjectToRelativeCoordKind =  2,  // static line goes from object to coord
     eBoltObjectToObjectKind =           3,  // lightning bolt, connects 2 objects
     eBoltObjectToRelativeCoordKind =    4   // lightning bolt, from object to coord
-} beamKindType;
+};
 
-typedef struct beamTypeStruct
-{
+struct beamType {
     beamKindType        beamKind;
     Rect                thisLocation;
     Rect                lastLocation;
@@ -553,10 +544,9 @@ typedef struct beamTypeStruct
     long                range;
     Point               thisBoltPoint[kBoltPointNum];
     Point               lastBoltPoint[kBoltPointNum];
-} beamType;
+};
 
-typedef union objectFrameType
-    {
+union objectFrameType {
         // rotation: for objects whose shapes depend on their direction
         struct
         {
@@ -602,10 +592,9 @@ typedef union objectFrameType
             smallFixedType          inverseSpeed;       // for AI = 1/max velocity
             long                    restockCost;        // energy to make new ammo
         } weapon;
-    } objectFrameType;
+    };
 
-typedef struct
-{
+struct baseObjectType {
     unsigned long           attributes;                 // initial attributes (see flags)
     long                    baseClass;
     long                    baseRace;
@@ -748,22 +737,20 @@ typedef struct
     short               reserved2;
     long                reserved3;
     long                internalFlags;
-} baseObjectType;
+};
 
-typedef enum
-{
+enum dutyType {
     eNoDuty =           0,
     eEscortDuty =       1,
     eGuardDuty =        2,
     eAssaultDuty =      3,
     eHostileBaseDuty =  4
-} dutyType;
+};
 
 //typedef beamTypeStruct;
 
 
-typedef struct spaceObjectType
-{
+struct spaceObjectType {
     unsigned long           attributes;
     baseObjectType          *baseType;
     long                    whichBaseObject;
@@ -914,7 +901,7 @@ typedef struct spaceObjectType
 
     unsigned char           shieldColor;
     unsigned char           originalColor;
-} spaceObjectType;
+};
 
 #pragma options align=reset
 

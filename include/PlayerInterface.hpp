@@ -26,8 +26,7 @@
 
 #pragma options align=mac68k
 
-typedef enum
-{
+enum mainScreenResultType {
     kMainPlay = 1,
     kMainQuit = 2,
     kMainAbout = 3,
@@ -37,14 +36,13 @@ typedef enum
     kMainTimeoutDemo = 7,
     kMainTrain = 8,
     kNullResult = 0
-} mainScreenResultType;
+};
 
-typedef enum
-{
+enum netResultType {
     kClient = 1,
     kHost = 2,
     kCancel = 0
-} netResultType;
+};
 
 mainScreenResultType DoMainScreenInterface( long *);
 void DoAboutAresInterface( void);

@@ -44,8 +44,7 @@
 
 #define kGraphWidth         50
 
-typedef struct
-{
+struct fieldRangeType {
     long                        minmass;
     long                        maxmass;
     long                        minturn;
@@ -76,10 +75,9 @@ typedef struct
     long                        maxwdamage;
     long                        minwenergy;
     long                        maxwenergy;
-} fieldRangeType;
+};
 
-typedef struct
-{
+struct weaponDataType {
     long                        ammo;
     smallFixedType              fireTime;
     long                        velocity;
@@ -88,7 +86,7 @@ typedef struct
     Boolean                     guided;
     Boolean                     autoTarget;
     long                        energyCost;
-} weaponDataType;
+};
 
 extern long             WORLD_WIDTH, WORLD_HEIGHT;
 extern GWorldPtr        gOffWorld;

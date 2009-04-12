@@ -46,17 +46,15 @@
 
 #define kHotKeyNum              10
 
-typedef struct
-{
+struct barIndicatorType {
     short           top;
     long            thisValue;
     long            lastValue;
     unsigned char   color;
     Boolean         automatic;      // if it's automatic, it is redrawn automatically
-} barIndicatorType;
+};
 
-typedef struct
-{
+struct miniComputerDataType {
     Handle      lineData;
     Handle      objectData;
     long        selectLine;
@@ -64,16 +62,14 @@ typedef struct
     long        buildTimeBarValue;
     long        currentScreen;
     long        clickLine;
-} miniComputerDataType;
+};
 
-typedef struct hotKeyType
-{
+struct hotKeyType {
     long        objectNum;
     long        objectID;
-} hotKeyType;
+};
 
-typedef struct
-{
+struct aresGlobalType {
     unsigned long   gActiveCheats[kMaxPlayerNum];
     unsigned long   gSynchValue;
     CWindowPtr      gBackWindow;
@@ -210,7 +206,7 @@ typedef struct
     long            lastSelectedObjectID;
     Boolean         destKeyUsedForSelection;
     Boolean         hotKey_target;
-} aresGlobalType;
+};
 
 #pragma options align=reset
 

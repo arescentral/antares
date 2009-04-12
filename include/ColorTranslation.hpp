@@ -66,11 +66,11 @@
 #define kSlightlyLighterColor   1
 #define kSlightlyDarkerColor    -1
 
-typedef struct {
+struct transColorType {
     unsigned char           trueColor;
     unsigned char           retroColor;
     RGBColor                rgbcolor;
-    } transColorType;
+};
 
 #define mGetTranslateColorShade( mcolor, mshade, mresultColor, mtransColor) mtransColor = (transColorType *)*gColorTranslateTable + (long)(((long)16 -(long)(mshade)) + (long)1 + (long)(mcolor) * (long)16); mresultColor = mtransColor->trueColor;
 
