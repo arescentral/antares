@@ -22,6 +22,7 @@
 #include <Sound.h>
 
 #include <fcntl.h>
+#include <math.h>
 #include <string.h>
 #include <stdio.h>
 #include <sys/mman.h>
@@ -66,6 +67,16 @@ AuxWin fakeAuxWin = {
     &fakeCTabPtr,
 };
 AuxWin* fakeAuxWinPtr = &fakeAuxWin;
+
+extern char pixels[640 * 480];
+void Dump() {
+    for (int y = 0; y < 480; ++y) {
+        for (int x = 0; x < 640; ++x) {
+            printf("%d ", pixels[y * 640 + x] & 0xF);
+        }
+        printf("\n");
+    }
+}
 
 class RealHandle {
   public:
@@ -161,6 +172,13 @@ void BlockMove(void* src, void* dst, size_t size) {
     memcpy(dst, src, size);
 }
 
+OSErr PtrToHand(void* ptr, Handle* handle, int len) {
+    *handle = new char*;
+    **handle = new char[len];
+    BlockMove(ptr, **handle, len);
+    return noErr;
+}
+
 int64_t TickTime() {
     struct timeval tv;
     gettimeofday(&tv, NULL);
@@ -239,11 +257,38 @@ void GetKeys(KeyMap keys) {
     bzero(keys, sizeof(KeyMap));
 }
 
-void MacSetRect(Rect* rect, int left, int top, int right, int bottom) {
+void SetRect(Rect* rect, int left, int top, int right, int bottom) {
     rect->left = left;
     rect->top = top;
     rect->right = right;
     rect->bottom = bottom;
+}
+
+void MacSetRect(Rect* rect, int left, int top, int right, int bottom) {
+    SetRect(rect, left, top, right, bottom);
+}
+
+void OffsetRect(Rect* rect, int x, int y) {
+    rect->left += x;
+    rect->right += x;
+    rect->top += y;
+    rect->bottom += y;
+}
+
+void MacOffsetRect(Rect* rect, int x, int y) {
+    OffsetRect(rect, x, y);
+}
+
+bool MacPtInRect(Point p, Rect* rect) {
+    return (rect->left <= p.h && p.h <= rect->right)
+        && (rect->top <= p.v && p.v <= rect->bottom);
+}
+
+void MacInsetRect(Rect* rect, int x, int y) {
+    rect->left += x;
+    rect->right -= x;
+    rect->top += y;
+    rect->bottom -= y;
 }
 
 void GetAuxWin(Window*, AuxWinHandle* handle) {
@@ -252,4 +297,9 @@ void GetAuxWin(Window*, AuxWinHandle* handle) {
 
 PixMapHandle GetGWorldPixMap(GWorldPtr) {
     return &fakePixMapPtr;
+}
+
+long AngleFromSlope(Fixed slope) {
+    double d = slope / 256.0;
+    return atan(d) * 180.0 / M_PI;
 }

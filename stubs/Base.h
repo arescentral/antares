@@ -88,7 +88,7 @@ STUB1(HUnlock, void(Handle handle));
 STUB1(HGetState, int8_t(Handle handle), 0);
 STUB2(HSetState, void(Handle handle, int8_t state));
 STUB1(HNoPurge, void(Handle handle));
-STUB3(PtrToHand, OSErr(void* ptr, Handle* handle, int len), noErr);
+OSErr PtrToHand(void* ptr, Handle* handle, int len);
 
 STUB1(HiWord, int(long value), 0);
 STUB1(LoWord, int(long value), 0);
@@ -138,12 +138,12 @@ typedef struct {
     int right;
 } Rect;
 
-STUB5(SetRect, void(Rect*, int, int, int, int));
+void SetRect(Rect*, int, int, int, int);
 void MacSetRect(Rect*, int, int, int, int);
-STUB3(OffsetRect, void(Rect*, int, int));
-STUB3(MacOffsetRect, void(Rect*, int, int));
-STUB2(MacPtInRect, bool(Point, Rect*), false);
-STUB3(MacInsetRect, void(Rect*, int, int));
+void OffsetRect(Rect*, int, int);
+void MacOffsetRect(Rect*, int, int);
+bool MacPtInRect(Point, Rect*);
+void MacInsetRect(Rect*, int, int);
 
 ////////////////////////////
 
@@ -330,7 +330,7 @@ STUB2(HiliteControl, void(Control**, int));
 
 STUB2(SetWRefCon, void(Dialog*, long));
 
-STUB1(AngleFromSlope, long(Fixed slope), 0);
+long AngleFromSlope(Fixed slope);
 long Random();
 
 STUB2(StringToNum, void(unsigned char* string, long* value));
