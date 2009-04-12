@@ -34,7 +34,7 @@ static void* const kMmapFailed = (void*)-1;
 
 CTab fakeCTab = {
     new ColorSpec[256],
-    256,
+    255,
 };
 CTab* fakeCTabPtr = &fakeCTab;
 
@@ -70,12 +70,17 @@ AuxWin* fakeAuxWinPtr = &fakeAuxWin;
 
 extern char pixels[640 * 480];
 void Dump() {
+    FILE* f = fopen("dump.pnm", "w");
+    fprintf(f, "P2\n");
+    fprintf(f, "640 480\n");
+    fprintf(f, "15\n");
     for (int y = 0; y < 480; ++y) {
         for (int x = 0; x < 640; ++x) {
-            printf("%d ", pixels[y * 640 + x] & 0xF);
+            uint8_t i = pixels[y * 640 + x];
+            fprintf(f, "%d\n", i);
         }
-        printf("\n");
     }
+    fclose(f);
 }
 
 class RealHandle {
