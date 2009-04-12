@@ -81,7 +81,8 @@
 #define kMainAboutButton            4
 #define kMainDemoButton             5
 #define kMainTrainButton            6
-#define kMainDemoTimeOutTime        1800 // 30 secs till demo
+#define kMainDemoTimeOutTime        60 // 1 sec till demo
+//#define kMainDemoTimeOutTime        1800 // 30 secs till demo
 
 #define kStartNetworkGameID         5001
 
