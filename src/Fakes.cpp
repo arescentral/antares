@@ -22,13 +22,16 @@
 #include <Sound.h>
 
 #include <fcntl.h>
+#include <glob.h>
 #include <math.h>
+#include <png++/png.hpp>
 #include <string.h>
 #include <stdio.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <limits>
+#include <algorithm>
 
 static void* const kMmapFailed = (void*)-1;
 
@@ -307,4 +310,57 @@ PixMapHandle GetGWorldPixMap(GWorldPtr) {
 long AngleFromSlope(Fixed slope) {
     double d = slope / 256.0;
     return atan(d) * 180.0 / M_PI;
+}
+
+struct PicData {
+    png::image<png::gray_pixel> image;
+    PicData(const std::string& filename) : image(filename) { }
+};
+
+Pic** GetPicture(int id) {
+    char fileglob[64];
+    sprintf(fileglob, "data/derived/Pictures/%d*.png", id);
+    glob_t g;
+    g.gl_offs = 0;
+    glob(fileglob, 0, NULL, &g);
+    assert(g.gl_matchc == 1);
+    std::string filename = g.gl_pathv[0];
+    globfree(&g);
+
+    Pic* p = new Pic;
+    p->data = new PicData(filename);
+    SetRect(&p->picFrame, 0, 0, p->data->image.get_width(), p->data->image.get_height());
+    return new Pic*(p);
+}
+
+Pic** OpenPicture(Rect* source) {
+    assert(false);
+}
+
+void KillPicture(Pic** pic) {
+    delete *pic;
+    delete pic;
+}
+
+Rect ClipRectToRect(const Rect& src, const Rect& clip) {
+    Rect result = {
+        std::max(src.top, clip.top),
+        std::max(src.left, clip.left),
+        std::min(src.bottom, clip.bottom),
+        std::min(src.right, clip.right),
+    };
+    return result;
+}
+
+void DrawPicture(Pic** pic, Rect* rect) {
+    Rect clipped = ClipRectToRect(*rect, fakePixMap.bounds);
+    for (int y = clipped.top; y < clipped.bottom; ++y) {
+        for (int x = clipped.left; x < clipped.right; ++x) {
+            pixels[y * 640 + x] = (*pic)->data->image[y - rect->top][x - rect->left] / 16;
+        }
+    }
+}
+
+void ClosePicture() {
+    assert(false);
 }

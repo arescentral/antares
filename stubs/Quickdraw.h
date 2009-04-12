@@ -15,8 +15,10 @@ typedef struct {
 typedef PixMap* PixMapPtr;
 typedef PixMap** PixMapHandle;
 
+struct PicData;
 typedef struct {
     Rect picFrame;
+    PicData* data;
 } Pic;
 typedef Pic** PicHandle;
 
@@ -61,11 +63,11 @@ STUB1(ClipRect, void(Rect* rect));
 STUB6(CopyBits, void(BitMap* source, BitMap* source2, Rect* source_rect,
       Rect* source_rect2, int mode, void*));
 
-STUB1(GetPicture, PicHandle(int id), new Pic*(new Pic));
-STUB1(OpenPicture, PicHandle(Rect* source), NULL);
-STUB1(KillPicture, void(PicHandle pic));
-STUB2(DrawPicture, void(PicHandle pic, Rect*));
-STUB0(ClosePicture, void());
+PicHandle GetPicture(int id);
+PicHandle OpenPicture(Rect* source);
+void KillPicture(PicHandle pic);
+void DrawPicture(PicHandle pic, Rect*);
+void ClosePicture();
 
 STUB6(ConvertPictToGIFFile, OSErr(PicHandle pic, FSSpec* fsspec, int interlaced,
       int transparencyNo, int depth, int palette), noErr);

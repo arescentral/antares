@@ -720,7 +720,7 @@ void DrawInstrumentPanel( WindowPtr whatPort)
     CopySaveWorldToOffWorld( &tRect);
     DrawInRealWorld();
 
-    pict = (PicHandle)HHGetResource( 'PICT', kInstLeftPictID);
+    pict = GetPicture(kInstLeftPictID);
     if ( pict == nil)
     {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, OFFSCREEN_GRAPHICS_ERROR, -1, -1, -1, __FILE__, 2);
@@ -734,11 +734,11 @@ void DrawInstrumentPanel( WindowPtr whatPort)
         tRect.bottom = tRect.top + (**pict).picFrame.bottom - (**pict).picFrame.top;
         DrawPicture( pict, &tRect);
         CopySaveWorldToOffWorld( &tRect);
-        ReleaseResource( (Handle)pict);
+        KillPicture(pict);
         DrawInRealWorld();
     }
 
-    pict = (PicHandle)HHGetResource( 'PICT', kInstRightPictID);
+    pict = GetPicture(kInstRightPictID);
     if ( pict == nil)
     {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, OFFSCREEN_GRAPHICS_ERROR, -1, -1, -1, __FILE__, 3);
@@ -752,7 +752,7 @@ void DrawInstrumentPanel( WindowPtr whatPort)
         tRect.bottom = tRect.top + (**pict).picFrame.bottom - (**pict).picFrame.top;
         DrawPicture( pict, &tRect);
         CopySaveWorldToOffWorld( &tRect);
-        ReleaseResource( (Handle)pict);
+        KillPicture(pict);
         DrawInRealWorld();
     }
 
