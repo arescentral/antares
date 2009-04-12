@@ -157,6 +157,32 @@ int TickCount() {
     return TickTime() - kStartTime;
 }
 
+inline int64_t WideToInt64(wide w) {
+    return *reinterpret_cast<int64_t*>(&w);
+}
+
+inline wide Int64ToWide(int64_t i) {
+    return *reinterpret_cast<wide*>(&i);
+}
+
+void WideAdd(wide* value, wide* summand) {
+    int64_t value64 = WideToInt64(*value);
+    int64_t summand64 = WideToInt64(*summand);
+    *value = Int64ToWide(value64 + summand64);
+}
+
+void WideSubtract(wide* value, wide* difference) {
+    int64_t value64 = WideToInt64(*value);
+    int64_t difference64 = WideToInt64(*difference);
+    *value = Int64ToWide(value64 - difference64);
+}
+
+void WideMultiply(long a, long b, wide* c) {
+    int64_t a64 = a;
+    int64_t b64 = b;
+    *c = Int64ToWide(a64 * b64);
+}
+
 void Microseconds(UnsignedWide* wide) {
     uint64_t time;
     struct timeval tv;

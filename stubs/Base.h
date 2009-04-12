@@ -65,9 +65,9 @@ typedef uint32_t UInt32;
 typedef struct { SInt32 hi; UInt32 lo; } wide;
 typedef struct { UInt32 hi; UInt32 lo; } UnsignedWide;
 
-STUB2(WideAdd, void(wide* value, wide* summand));
-STUB2(WideSubtract, void(wide* value, wide* difference));
-STUB3(WideMultiply, void(long a, long b, wide* c));
+void WideAdd(wide* value, wide* summand);
+void WideSubtract(wide* value, wide* difference);
+void WideMultiply(long a, long b, wide* c);
 
 typedef int32_t Fixed;
 typedef long Size;
