@@ -37,11 +37,12 @@ CTab fakeCTab = {
 };
 CTab* fakeCTabPtr = &fakeCTab;
 
+char pixels[640 * 480];
 PixMap fakePixMap = {
     { 0, 0, 480, 640 },
     &fakeCTabPtr,
     640,
-    new char[640 * 480],
+    pixels,
     1,
 };
 PixMap* fakePixMapPtr = &fakePixMap;
@@ -51,6 +52,20 @@ GDevice fakeGDevice = {
     { 0, 0, 480, 640 },
 };
 GDevice* fakeGDevicePtr = &fakeGDevice;
+
+Window fakeWindow = {
+    { 0, 0, 480, 640 },
+    { },
+};
+
+CWindow fakeCWindow = {
+    { 0, 0, 480, 640 },
+};
+
+AuxWin fakeAuxWin = {
+    &fakeCTabPtr,
+};
+AuxWin* fakeAuxWinPtr = &fakeAuxWin;
 
 class RealHandle {
   public:
@@ -229,4 +244,12 @@ void MacSetRect(Rect* rect, int left, int top, int right, int bottom) {
     rect->top = top;
     rect->right = right;
     rect->bottom = bottom;
+}
+
+void GetAuxWin(Window*, AuxWinHandle* handle) {
+    *handle = &fakeAuxWinPtr;
+}
+
+PixMapHandle GetGWorldPixMap(GWorldPtr) {
+    return &fakePixMapPtr;
 }

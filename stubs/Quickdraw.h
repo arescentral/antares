@@ -47,7 +47,7 @@ STUB1(RGBBackColor, void(RGBColor* color));
 STUB1(RGBForeColor, void(RGBColor* color));
 STUB1(HiliteColor, void(RGBColor* color));
 
-STUB1(GetGWorldPixMap, PixMapHandle(GWorldPtr world), new PixMap*(new PixMap));
+PixMapHandle GetGWorldPixMap(GWorldPtr world);
 STUB1(LockPixels, bool(PixMap** pix), true);
 STUB1(UnlockPixels, void(PixMap** pix));
 

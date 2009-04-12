@@ -96,7 +96,7 @@ STUB1(LoWord, int(long value), 0);
 void Microseconds(UnsignedWide* wide);
 
 STUB1(MaxMem, Size(Size*), 0);
-STUB1(CompactMem, Size(int), 0);
+STUB1(CompactMem, Size(int), 100 * 1024 * 1024);  // 100MB
 void BlockMove(void* src, void* dst, size_t size);
 STUB1(HandToHand, OSErr(Handle* handle), noErr);
 STUB2(HandAndHand, void(Handle src, Handle dst));
@@ -156,10 +156,11 @@ typedef struct {
 typedef Window* WindowPtr;
 typedef Window** WindowRef;
 
+extern Window fakeWindow;
 STUB1(BeginUpdate, void(Window* window));
 STUB1(EndUpdate, void(Window* window));
 STUB8(NewWindow, Window*(void*, Rect*, const unsigned char* title, bool, int,
-      Window* behind, bool, int), new Window)
+      Window* behind, bool, int), &fakeWindow)
 STUB1(MacShowWindow, void(Window*));
 STUB1(DisposeWindow, void(Window*));
 STUB2(MacFindWindow, short(Point where, Window** window), 0);
@@ -175,10 +176,11 @@ typedef struct {
 } CWindow;
 typedef CWindow* CWindowPtr;
 
+extern CWindow fakeCWindow;
 STUB8(NewCWindow,
     CWindow*(void*, Rect* size, const unsigned char* title, bool, int,
       Window* behind, bool, int id),
-    new CWindow);
+    &fakeCWindow);
 
 typedef struct {
     int red;
@@ -291,11 +293,8 @@ STUB1(WriteResource, void(Handle resource));
 bool Button();
 STUB0(GetDblTime, double(), 0.0);
 
-inline void GetAuxWin(Window*, AuxWinHandle* handle) {
-    *handle = new AuxWin*(new AuxWin);
-    (**handle)->awCTable = new CTab*(new CTab);
-    (*(**handle)->awCTable)->ctSize = -1;
-}
+extern AuxWin* fakeAuxWinPtr;
+void GetAuxWin(Window*, AuxWinHandle* handle);
 STUB2(SetWinColor, void(Window* window, WCTabHandle handle));
 
 typedef struct { } NumVersion;
