@@ -254,7 +254,7 @@ STUB1(OpenDeskAcc, int(const unsigned char* name), 0);
 STUB2(NoteAlert, void(int type, void*));
 
 // Gets STR# from resource fork
-STUB3(GetIndString, void(const unsigned char* result, int id, int index));
+void GetIndString(unsigned char* result, int id, int index);
 
 STUB2(GetIndResource, Handle(FourCharCode type, int id), NULL);
 

@@ -421,6 +421,25 @@ int GetHandleSize(Handle handle) {
     return real->size;
 }
 
+void GetIndString(unsigned char* result, int id, int index) {
+    if (index <= 0) {
+        *result = '\0';
+        return;
+    }
+    Handle resource = GetResource('STR#', id);
+    assert(resource);
+    uint16_t count = *reinterpret_cast<uint16_t*>(*resource);
+    assert(index <= count);
+    char* pstr = *resource + 2;
+    uint8_t size = *pstr;
+    while (index > 1) {
+        pstr += size + 1;
+        size = *pstr;
+        --index;
+    }
+    memcpy(result, pstr, size + 1);
+}
+
 void BlockMove(void* src, void* dst, size_t size) {
     memcpy(dst, src, size);
 }
@@ -794,4 +813,15 @@ void Index2Color(long index, RGBColor* color) {
     color->red = colors[index].rgb.red;
     color->green = colors[index].rgb.green;
     color->blue = colors[index].rgb.blue;
+}
+
+Point currentPen = { 0, 0 };
+
+void MoveTo(int x, int y) {
+    currentPen.h = x;
+    currentPen.v = y;
+}
+
+void GetPen(Point* pen) {
+    *pen = currentPen;
 }
