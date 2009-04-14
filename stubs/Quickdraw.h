@@ -22,18 +22,19 @@ typedef struct {
 } Pic;
 typedef Pic** PicHandle;
 
+struct GWorld;
+typedef GWorld* GWorldPtr;
+
 typedef struct {
     PixMapHandle gdPMap;
     Rect gdRect;
+    GWorld* world;
 } GDevice;
 typedef GDevice** GDHandle;
 
 extern GDevice* fakeGDevicePtr;
 STUB0(GetGDevice, GDevice**(), &fakeGDevicePtr);
 STUB1(SetGDevice, void(GDevice** device));
-
-typedef struct { } GWorld;
-typedef GWorld* GWorldPtr;
 
 typedef void* GrafPtr;
 typedef GrafPtr CGrafPtr;
@@ -45,8 +46,8 @@ STUB1(PenPat, void(Pattern*));
 
 typedef void* Port;
 
-STUB1(RGBBackColor, void(RGBColor* color));
-STUB1(RGBForeColor, void(RGBColor* color));
+void RGBBackColor(RGBColor* color);
+void RGBForeColor(RGBColor* color);
 STUB1(HiliteColor, void(RGBColor* color));
 
 PixMapHandle GetGWorldPixMap(GWorldPtr world);
@@ -56,12 +57,11 @@ STUB1(UnlockPixels, void(PixMap** pix));
 STUB1(InitGraf, void(GrafPtr* port));
 STUB1(GetPort, void(GrafPtr* port));
 STUB1(MacSetPort, void(GrafPtr port));
-STUB1(PaintRect, void(Rect* rect));
 STUB1(InvalRect, void(Rect* rect));
 STUB1(ClipRect, void(Rect* rect));
 
-STUB6(CopyBits, void(BitMap* source, BitMap* source2, Rect* source_rect,
-      Rect* source_rect2, int mode, void*));
+void CopyBits(BitMap* source, BitMap* source2, Rect* source_rect,
+      Rect* source_rect2, int mode, void*);
 
 PicHandle GetPicture(int id);
 PicHandle OpenPicture(Rect* source);
@@ -87,9 +87,10 @@ STUB1(CloseRgn, void(Rgn** rgn));
 STUB4(ScrollRect, void(Rect* rect, int x, int y, Rgn** clip));
 
 STUB2(MacFillRect, void(Rect* rect, Pattern* pattern));
-STUB1(FrameRect, void(Rect* rect));
-STUB1(MacFrameRect, void(Rect* rect));
-STUB1(EraseRect, void(Rect* rect));
+void PaintRect(Rect* rect);
+void FrameRect(Rect* rect);
+void MacFrameRect(Rect* rect);
+void EraseRect(Rect* rect);
 
 STUB1(FrameOval, void(Rect* rect));
 STUB1(PaintOval, void(Rect* rect));

@@ -261,7 +261,8 @@ void NormalizeColors( void)
 
     c.red = c.blue = c.green = 0;
     RGBForeColor ( &c);
-    c.red = c.blue = c.green = 65535;
+    // c.red = c.blue = c.green = 65535;
+    c.red = c.blue = c.green = 255;
     RGBBackColor( &c);
 }
 

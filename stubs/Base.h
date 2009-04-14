@@ -132,10 +132,10 @@ typedef struct {
 } Point;
 
 typedef struct {
-    int top;
     int left;
-    int bottom;
+    int top;
     int right;
+    int bottom;
 } Rect;
 
 void SetRect(Rect*, int, int, int, int);
@@ -206,7 +206,7 @@ extern CTab* fakeCTabPtr;
 STUB1(GetCTable, CTab**(int id), &fakeCTabPtr);
 STUB1(DisposeCTable, void(CTab** handle));
 STUB1(CTabChanged, void(CTab** handle));
-STUB2(Index2Color, void(long index, RGBColor* color));
+void Index2Color(long index, RGBColor* color);
 
 typedef CTab** WCTabHandle;
 
