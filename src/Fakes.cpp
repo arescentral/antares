@@ -511,7 +511,7 @@ long Random() {
 }
 
 // Perform this many clicks in succession at the start of the game.
-const int kClickCount = 12;
+const int kClickCount = 2;
 
 bool Button() {
     static int current_click = 0;
