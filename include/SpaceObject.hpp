@@ -287,7 +287,7 @@ struct spaceObjectType;
 typedef spaceObjectType *spaceObjectTypePtr;
 //typedef unsigned long *spaceObjectTypePtr;
 
-enum objectVerbIDType {
+enum objectVerbIDEnum {
     kNoAction = 0,
     kCreateObject = 1,
     kPlaySound = 2,
@@ -313,6 +313,7 @@ enum objectVerbIDType {
     kComputerSelect = 22,           // selects a line & screen of the minicomputer
     kAssumeInitialObject = 23       // assumes the identity of an intial object; for tutorial
 };
+typedef uint8_t objectVerbIDType;
 
 enum alterVerbIDType {
     kAlterDamage = 0,
@@ -373,17 +374,17 @@ union argumentType {
         long                    whichBaseType;      // what type
         long                    howManyMinimum;     // # to make min
         long                    howManyRange;       // # to make range
-        Boolean                 velocityRelative;   // is velocity relative to creator?
-        Boolean                 directionRelative;  // determines initial heading
+        uint8_t                 velocityRelative;   // is velocity relative to creator?
+        uint8_t                 directionRelative;  // determines initial heading
         long                    randomDistance;     // if not 0, then object will be created in random direction from 0 to this away
     } createObject;
 
     // playSound: play a sound effect
     struct
     {
-        soundPriorityType       priority;
+        uint8_t                 priority;
         long                    persistence;
-        Boolean                 absolute;           // not distanced
+        uint8_t                 absolute;           // not distanced
         long                    volumeMinimum;
         long                    volumeRange;
         long                    idMinimum;
@@ -393,8 +394,8 @@ union argumentType {
     // alterObject: change some attribute of an object
     struct
     {
-        alterVerbIDType         alterType;
-        Boolean                 relative;
+        uint8_t                 alterType;
+        uint8_t                 relative;
         long                    minimum;
         long                    range;
     } alterObject;
@@ -487,7 +488,7 @@ union argumentType {
 
 struct OLDobjectActionType {
     objectVerbIDType            verb;                   // what is this verb?
-    Boolean                     reflexive;              // does it apply to object executing verb?
+    uint8_t                     reflexive;              // does it apply to object executing verb?
     unsigned long               inclusiveFilter;        // if it has ALL these attributes, OK -- for non-reflective verbs
     unsigned long               exclusiveFilter;        // don't execute if it has ANY of these
     short                       owner;                  // 0 no matter, 1 same owner, -1 different owner
@@ -497,7 +498,7 @@ struct OLDobjectActionType {
 
 struct objectActionType {
     objectVerbIDType            verb;                   // what is this verb?
-    Boolean                     reflexive;              // does it apply to object executing verb?
+    uint8_t                     reflexive;              // does it apply to object executing verb?
     unsigned long               inclusiveFilter;        // if it has ALL these attributes, OK -- for non-reflective verbs
     unsigned long               exclusiveFilter;        // don't execute if it has ANY of these
     short                       owner;                  // 0 no matter, 1 same owner, -1 different owner

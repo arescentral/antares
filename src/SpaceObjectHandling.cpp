@@ -1482,12 +1482,12 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     }
                     if ( !action->argument.playSound.absolute)
                     {
-                        mPlayDistanceSound( distance, l, anObject, angle, action->argument.playSound.persistence, action->argument.playSound.priority, m, ul2, playerPtr)
+                        mPlayDistanceSound( distance, l, anObject, angle, action->argument.playSound.persistence, static_cast<soundPriorityType>(action->argument.playSound.priority), m, ul2, playerPtr)
                     } else
                     {
                         PlayVolumeSound( angle, l,
                                     action->argument.playSound.persistence,
-                                    action->argument.playSound.priority);
+                                    static_cast<soundPriorityType>(action->argument.playSound.priority));
                     }
 
                     break;
