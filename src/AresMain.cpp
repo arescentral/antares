@@ -3114,6 +3114,7 @@ void SetWindowColorTable( WindowPtr window)
     GetAuxWin (window,&auxWinHandle);                                               // 2
     winCTabHandle = (WCTabHandle) ((**auxWinHandle).awCTable);                      // 2
 
+    /*
     HandToHand ((Handle *) &winCTabHandle);                                         // 3
     if (!MemError ( ))                                                              // 3
     {
@@ -3124,6 +3125,7 @@ void SetWindowColorTable( WindowPtr window)
             SetWinColor (window,winCTabHandle);                                     // 5
         }
     }
+    */
 }
 
 static pascal Boolean SetColorTableEntry (CTabHandle cth, short value, const RGBColor *rgbP)
