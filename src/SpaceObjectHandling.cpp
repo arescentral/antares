@@ -1312,7 +1312,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
         if (( action->reflexive) || ( anObject == nil)) anObject = sObject;
 
         OKtoExecute = false;
-        if ( anObject == nil)
+        if ( anObject == nil || dObject == nil)
         {
             OKtoExecute = true;
         } else if ( ( action->owner == 0) ||
