@@ -507,7 +507,12 @@ bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouse
 }
 
 long Random() {
-    return 0;
+    static bool seeded = false;
+    if (!seeded) {
+        srand(0x84744901);
+        seeded = true;
+    }
+    return rand() & 0x7FFF;
 }
 
 // Perform this many clicks in succession at the start of the game.
