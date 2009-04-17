@@ -800,10 +800,12 @@ void DoLoadingInterface( Rect *contentRect, StringPtr levelName)
             DrawRetroTextCharInRect( &retroTextSpec, 3, &boundsRect, &clipRect, *thePixMapHandle, gNatePortLeft,
                 gNatePortTop);
 
+            /*
             waitTime = TickCount();
             while (( TickCount() - waitTime) < 3) {
                 // DO NOTHING
             };
+            */
         }
 
 
