@@ -5540,7 +5540,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
 
                     if ( pictID != 0)
                     {
-                        thePict = (PicHandle)GetResource( 'PICT', pictID);
+                        thePict = GetPicture(pictID);
 //                      if ( ResError() != noErr) Debugger();
 
                         if ( thePict != nil)
