@@ -316,6 +316,7 @@ AuxWin* fakeAuxWinPtr = &fakeAuxWin;
 static uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue);
 static uint8_t GetPixel(int x, int y);
 static void SetPixel(int x, int y, uint8_t c);
+static void SetPixelRow(int x, int y, uint8_t* c, int count);
 
 void Dump() {
     FILE* f = fopen("dump.pnm", "w");
@@ -696,6 +697,11 @@ static void SetPixel(int x, int y, uint8_t c) {
     p->baseAddr[x + y * p->rowBytes] = c;
 }
 
+static void SetPixelRow(int x, int y, uint8_t* c, int count) {
+    const PixMap* p = *fakeGDevice.gdPMap;
+    memcpy(&p->baseAddr[x + y * p->rowBytes], c, count);
+}
+
 void CopyBits(BitMap* source, BitMap* dest, Rect* source_rect, Rect* dest_rect, int mode, void*) {
     PixMap* source_pix = reinterpret_cast<PixMap*>(source);
     PixMap* dest_pix = reinterpret_cast<PixMap*>(dest);
@@ -703,7 +709,29 @@ void CopyBits(BitMap* source, BitMap* dest, Rect* source_rect, Rect* dest_rect, 
 
 struct PicData {
     png::image<png::rgba_pixel> image;
-    PicData(const std::string& filename) : image(filename) { }
+    int height;
+    int width;
+    uint8_t** data;
+    PicData(const std::string& filename)
+            : image(filename), height(image.get_height()), width(image.get_width()) {
+        data = new uint8_t*[height];
+        for (int i = 0; i < height; ++i) {
+            data[i] = new uint8_t[width];
+            for (int j = 0; j < width; ++j) {
+                const png::rgba_pixel& p = image[i][j];
+                uint16_t red = p.red | (uint16_t)p.red << 8;
+                uint16_t green = p.green | (uint16_t)p.green << 8;
+                uint16_t blue = p.blue | (uint16_t)p.blue << 8;
+                data[i][j] = NearestColor(red, green, blue);
+            }
+        }
+    }
+    ~PicData() {
+        for (int i = 0; i < height; ++i) {
+            delete[] data[i];
+        }
+        delete[] data;
+    }
 };
 
 Pic** GetPicture(int id) {
@@ -744,13 +772,7 @@ Rect ClipRectToRect(const Rect& src, const Rect& clip) {
 void DrawPicture(Pic** pic, Rect* rect) {
     Rect clipped = ClipRectToRect(*rect, (*fakeGDevice.gdPMap)->bounds);
     for (int y = clipped.top; y < clipped.bottom; ++y) {
-        for (int x = clipped.left; x < clipped.right; ++x) {
-            const png::rgba_pixel& p = (*pic)->data->image[y - rect->top][x - rect->left];
-            uint16_t red = p.red | (uint16_t)p.red << 8;
-            uint16_t green = p.green | (uint16_t)p.green << 8;
-            uint16_t blue = p.blue | (uint16_t)p.blue << 8;
-            SetPixel(x, y, NearestColor(red, green, blue));
-        }
+        SetPixelRow(clipped.left, y, (*pic)->data->data[y - rect->top], clipped.right - clipped.left);
     }
 }
 
