@@ -348,7 +348,7 @@ class AllocatedHandle : public RealHandle {
     }
 
     ~AllocatedHandle() {
-        delete[] (char*)data;
+        delete[] static_cast<char*>(data);
     }
 };
 
