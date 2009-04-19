@@ -147,12 +147,7 @@ void MacInsetRect(Rect*, int, int);
 
 ////////////////////////////
 
-typedef struct { } BitMap;
-
-typedef struct {
-    Rect portRect;
-    BitMap portBits;
-} Window;
+struct Window;
 typedef Window* WindowPtr;
 typedef Window** WindowRef;
 
@@ -337,5 +332,21 @@ STUB2(StringToNum, void(unsigned char* string, long* value));
 
 STUB1(GetScriptManagerVariable, Ptr(int cache), NULL);
 STUB3(KeyTranslate, long(Ptr kchr, short keyCode, unsigned long* keyTranslateState), 0);
+
+typedef struct {
+    Rect bounds;
+    CTabHandle pmTable;
+    long rowBytes;
+    char* baseAddr;
+    int pixelSize;
+} PixMap;
+typedef PixMap* PixMapPtr;
+typedef PixMap** PixMapHandle;
+typedef PixMap BitMap;
+
+struct Window {
+    Rect portRect;
+    BitMap portBits;
+};
 
 #endif // ANTARES_STUB_BASE_H_

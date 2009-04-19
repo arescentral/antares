@@ -4,17 +4,6 @@
 #include <Base.h>
 #include <Files.h>
 
-// Content here
-typedef struct {
-    Rect bounds;
-    CTabHandle pmTable;
-    long rowBytes;
-    char* baseAddr;
-    int pixelSize;
-} PixMap;
-typedef PixMap* PixMapPtr;
-typedef PixMap** PixMapHandle;
-
 struct PicData;
 typedef struct {
     Rect picFrame;
