@@ -299,15 +299,6 @@ CTab fakeCTab = {
 };
 CTab* fakeCTabPtr = &fakeCTab;
 
-Window fakeWindow = {
-    { 0, 0, 640, 480 },
-    { },
-};
-
-CWindow fakeCWindow = {
-    { 0, 0, 640, 480 },
-};
-
 AuxWin fakeAuxWin = {
     &fakeCTabPtr,
 };
@@ -624,6 +615,11 @@ GWorld fakeSaveGWorld = {
     &fakeSaveGWorld.pixMap,
 };
 
+Window fakeWindow = {
+    { 0, 0, 640, 480 },
+    fakeRealGWorld.pixMap,
+};
+
 GDevice fakeGDevice = {
     &fakeRealGWorld.pixMapPtr,
     { 0, 0, 640, 480 },
@@ -688,7 +684,7 @@ static uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue) {
 }
 
 static uint8_t GetPixel(int x, int y) {
-    const PixMap* p = *fakeGDevice.gdPMap;
+    const PixMap* p = &fakeWindow.portBits;
     return p->baseAddr[x + y * p->rowBytes];
 }
 
@@ -703,8 +699,22 @@ static void SetPixelRow(int x, int y, uint8_t* c, int count) {
 }
 
 void CopyBits(BitMap* source, BitMap* dest, Rect* source_rect, Rect* dest_rect, int mode, void*) {
-    PixMap* source_pix = reinterpret_cast<PixMap*>(source);
-    PixMap* dest_pix = reinterpret_cast<PixMap*>(dest);
+    if (source == dest) {
+        return;
+    }
+
+    int width = source_rect->right - source_rect->left;
+    int height = source_rect->bottom - source_rect->top;
+    assert(width == dest_rect->right - dest_rect->left);
+    assert(height == dest_rect->bottom - dest_rect->top);
+
+    for (int i = 0; i < height; ++i) {
+        int source_y = source_rect->top + i;
+        int dest_y = dest_rect->top + i;
+        char* sourceBytes = source->baseAddr + source_rect->left + source_y * source->rowBytes;
+        char* destBytes = dest->baseAddr + dest_rect->left + dest_y * dest->rowBytes;
+        memcpy(destBytes, sourceBytes, width);
+    }
 }
 
 struct PicData {

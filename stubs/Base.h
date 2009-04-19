@@ -166,16 +166,13 @@ STUB2(TrackGoAway, bool(Window*, Point where), false);
 STUB1(GlobalToLocal, void(Point*));
 STUB1(SelectWindow, void(Window*));
 
-typedef struct {
-    Rect portRect;
-} CWindow;
+typedef Window CWindow;
 typedef CWindow* CWindowPtr;
 
-extern CWindow fakeCWindow;
 STUB8(NewCWindow,
     CWindow*(void*, Rect* size, const unsigned char* title, bool, int,
       Window* behind, bool, int id),
-    &fakeCWindow);
+    &fakeWindow);
 
 typedef struct {
     int red;
