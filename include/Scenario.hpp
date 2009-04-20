@@ -233,7 +233,7 @@ struct scenarioConditionTypeOld {
 };
 
 struct scenarioConditionType {
-    conditionType   condition;
+    uint8_t         condition;
     union
     {
         longPointType       location;
