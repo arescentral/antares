@@ -446,7 +446,7 @@ OSErr PtrToHand(void* ptr, Handle* handle, int len) {
 int64_t TickTime() {
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    return tv.tv_sec * 60.0 + tv.tv_usec / (60.0 * 1000000.0);
+    return 60.0 * (tv.tv_sec + tv.tv_usec / 1000000.0);
 }
 
 int TickCount() {
