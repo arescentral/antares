@@ -265,7 +265,7 @@ STUB0(InitCursor, void());
 STUB0(MacShowCursor, void());
 STUB0(HideCursor, void());
 STUB2(ShieldCursor, void(Rect* rect, Point point));
-STUB1(GetMouse, void(Point* point));
+void GetMouse(Point* point);
 
 STUB0(InitWindows, void());
 STUB0(InitMenus, void());

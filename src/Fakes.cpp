@@ -862,3 +862,8 @@ void MoveTo(int x, int y) {
 void GetPen(Point* pen) {
     *pen = currentPen;
 }
+
+void GetMouse(Point* point) {
+    point->h = 320;
+    point->v = 240;
+}
