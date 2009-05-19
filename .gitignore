@@ -3,4 +3,5 @@
 .DS_Store
 *.o
 Antares
-dump.pnm
+dump*.pnm
+gmon.out
