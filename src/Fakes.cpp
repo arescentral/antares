@@ -32,6 +32,8 @@
 #include <limits>
 #include <algorithm>
 
+#include "AresGlobalType.hpp"
+
 static void* const kMmapFailed = (void*)-1;
 
 ColorSpec colors[256] = {
@@ -309,8 +311,12 @@ static uint8_t GetPixel(int x, int y);
 static void SetPixel(int x, int y, uint8_t c);
 static void SetPixelRow(int x, int y, uint8_t* c, int count);
 
+extern aresGlobalType* gAresGlobal;
+
 void Dump() {
-    FILE* f = fopen("dump.pnm", "w");
+    char filename[64];
+    sprintf(filename, "dump-%05ld.pnm", gAresGlobal->gGameTime);
+    FILE* f = fopen(filename, "w");
     fprintf(f, "P3\n");
     fprintf(f, "640 480\n");
     fprintf(f, "255\n");

@@ -211,6 +211,7 @@ extern GDHandle theDevice;
 
 //#pragma code68020 off
 
+void Dump();
 int main( void);
 void SetWindowColorTable( WindowPtr);
 static pascal Boolean SetColorTableEntry (CTabHandle, short, const RGBColor *);
@@ -2906,6 +2907,10 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
             UpdateBooleanColorAnimation( unitsDone);
 //          CheckScenarioConditions( unitsDone);
             gAresGlobal->gFrameCount++;
+            Dump();
+            if (gAresGlobal->gGameTime > 2000) {
+                exit(0);
+            }
         }
     }
 
