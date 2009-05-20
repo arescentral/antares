@@ -571,8 +571,12 @@ void GetAuxWin(Window*, AuxWinHandle* handle) {
 }
 
 long AngleFromSlope(Fixed slope) {
-    double d = slope / 256.0;
-    return atan(d) * 180.0 / M_PI;
+    double d = slope / 65536.0;
+    if (d >= 0) {
+        return 180 - atan(d) * 180.0 / M_PI;
+    } else {
+        return -atan(d) * 180.0 / M_PI;
+    }
 }
 
 extern GWorld* gOffWorld;
