@@ -785,7 +785,7 @@ GWorld fakeOffGWorld = {
     {
         { 0, 0, 640, 480 },
         &fakeCTabPtr,
-        640,
+        640 | 0x8000,
         fakeOffGWorld.pixels,
         1,
     },
@@ -797,7 +797,7 @@ GWorld fakeRealGWorld = {
     {
         { 0, 0, 640, 480 },
         &fakeCTabPtr,
-        640,
+        640 | 0x8000,
         fakeRealGWorld.pixels,
         1,
     },
@@ -809,7 +809,7 @@ GWorld fakeSaveGWorld = {
     {
         { 0, 0, 640, 480 },
         &fakeCTabPtr,
-        640,
+        640 | 0x8000,
         fakeSaveGWorld.pixels,
         1,
     },
@@ -886,17 +886,17 @@ static uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue) {
 
 static uint8_t GetPixel(int x, int y) {
     const PixMap* p = &fakeWindow.portBits;
-    return p->baseAddr[x + y * p->rowBytes];
+    return p->baseAddr[x + y * (p->rowBytes & 0x7fff)];
 }
 
 static void SetPixel(int x, int y, uint8_t c) {
     const PixMap* p = *fakeGDevice.gdPMap;
-    p->baseAddr[x + y * p->rowBytes] = c;
+    p->baseAddr[x + y * (p->rowBytes & 0x7fff)] = c;
 }
 
 static void SetPixelRow(int x, int y, uint8_t* c, int count) {
     const PixMap* p = *fakeGDevice.gdPMap;
-    memcpy(&p->baseAddr[x + y * p->rowBytes], c, count);
+    memcpy(&p->baseAddr[x + y * (p->rowBytes & 0x7fff)], c, count);
 }
 
 void CopyBits(BitMap* source, BitMap* dest, Rect* source_rect, Rect* dest_rect, int mode, void*) {
@@ -912,8 +912,8 @@ void CopyBits(BitMap* source, BitMap* dest, Rect* source_rect, Rect* dest_rect, 
     for (int i = 0; i < height; ++i) {
         int source_y = source_rect->top + i;
         int dest_y = dest_rect->top + i;
-        char* sourceBytes = source->baseAddr + source_rect->left + source_y * source->rowBytes;
-        char* destBytes = dest->baseAddr + dest_rect->left + dest_y * dest->rowBytes;
+        char* sourceBytes = source->baseAddr + source_rect->left + source_y * (source->rowBytes & 0x7fff);
+        char* destBytes = dest->baseAddr + dest_rect->left + dest_y * (dest->rowBytes & 0x7fff);
         memcpy(destBytes, sourceBytes, width);
     }
 }
