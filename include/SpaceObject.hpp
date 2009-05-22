@@ -345,11 +345,12 @@ enum alterVerbIDType {
     kAlterAbsoluteLocation = 26
 };
 
-enum dieVerbIDType {
+enum dieVerbIDEnum {
     kDieNone = 0,
     kDieExpire = 1,
     kDieDestroy = 2
 };
+typedef uint8_t dieVerbIDType;
 
 enum kPresenceStateType {
     kNormalPresence = 0,
