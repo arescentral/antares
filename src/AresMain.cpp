@@ -2908,11 +2908,9 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
 //          CheckScenarioConditions( unitsDone);
             gAresGlobal->gFrameCount++;
             Dump();
-            if (gAresGlobal->gGameTime > 2000) {
-                exit(0);
-            }
         }
     }
+    exit(0);  // Temporary: exit after finishing demo.
 
 #if kProfiling_On
     ProfilerSetStatus( false);
