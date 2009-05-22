@@ -314,20 +314,24 @@ static void SetPixelRow(int x, int y, uint8_t* c, int count);
 extern aresGlobalType* gAresGlobal;
 
 void Dump() {
-    char filename[64];
-    sprintf(filename, "dump-%05ld.pnm", gAresGlobal->gGameTime);
-    FILE* f = fopen(filename, "w");
-    fprintf(f, "P6 640 480 255\n");
+    std::string contents = "P6 640 480 255\n";
     for (int y = 0; y < 480; ++y) {
         for (int x = 0; x < 640; ++x) {
             int color = GetPixel(x, y);
-            const uint8_t r = colors[color].rgb.red >> 8;
-            const uint8_t g = colors[color].rgb.green >> 8;
-            const uint8_t b = colors[color].rgb.blue >> 8;
-            fprintf(f, "%c%c%c", r, g, b);
+            const char pixel[3] = {
+                colors[color].rgb.red >> 8,
+                colors[color].rgb.green >> 8,
+                colors[color].rgb.blue >> 8,
+            };
+            contents.insert(contents.size(), pixel, 3);
         }
     }
-    fclose(f);
+
+    char filename[64];
+    sprintf(filename, "dump-%05ld.pnm", gAresGlobal->gGameTime);
+    int fd = open(filename, O_WRONLY | O_CREAT, 0644);
+    write(fd, contents.c_str(), contents.size());
+    close(fd);
 }
 
 class RealHandle {
