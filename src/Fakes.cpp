@@ -317,13 +317,14 @@ void Dump() {
     char filename[64];
     sprintf(filename, "dump-%05ld.pnm", gAresGlobal->gGameTime);
     FILE* f = fopen(filename, "w");
-    fprintf(f, "P3\n");
-    fprintf(f, "640 480\n");
-    fprintf(f, "255\n");
+    fprintf(f, "P6 640 480 255\n");
     for (int y = 0; y < 480; ++y) {
         for (int x = 0; x < 640; ++x) {
-            const RGBColor& c = colors[GetPixel(x, y)].rgb;
-            fprintf(f, "%d %d %d\n", c.red >> 8, c.green >> 8, c.blue >> 8);
+            int color = GetPixel(x, y);
+            const uint8_t r = colors[color].rgb.red >> 8;
+            const uint8_t g = colors[color].rgb.green >> 8;
+            const uint8_t b = colors[color].rgb.blue >> 8;
+            fprintf(f, "%c%c%c", r, g, b);
         }
     }
     fclose(f);
