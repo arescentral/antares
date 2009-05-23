@@ -315,6 +315,7 @@ extern aresGlobalType* gAresGlobal;
 
 void Dump() {
     std::string contents = "P6 640 480 255\n";
+    contents.reserve(contents.size() + 640 * 480 * 3);
     for (int y = 0; y < 480; ++y) {
         for (int x = 0; x < 640; ++x) {
             int color = GetPixel(x, y);
