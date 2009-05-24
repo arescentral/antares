@@ -212,14 +212,15 @@ extern GDHandle theDevice;
 //#pragma code68020 off
 
 void Dump();
-int main( void);
+void FakeInit(int argc, const char** argv);
+int main(int argc, const char** argv);
 void SetWindowColorTable( WindowPtr);
 static pascal Boolean SetColorTableEntry (CTabHandle, short, const RGBColor *);
 void Pause( long time);
 void DrawOutlinedString( const unsigned char* string, RGBColor *color);
 
 #if TARGET_OS_MAC
-int main( void)
+int main(int argc, const char** argv)
 #else
 int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmdLine, int nCmdShow)
 #endif TARGET_OS_MAC
@@ -236,6 +237,8 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
     Size                    freeMemory = 0;
     Str255                  tempString, userName;
     short                   ts1;
+
+    FakeInit(argc, argv);
 
 //  Debugger();
     ToolBoxInit();

@@ -313,6 +313,9 @@ static void SetPixelRow(int x, int y, uint8_t* c, int count);
 
 extern aresGlobalType* gAresGlobal;
 
+void FakeInit(int argc, const char** argv) {
+}
+
 void Dump() {
     std::string contents = "P6 640 480 255\n";
     contents.reserve(contents.size() + 640 * 480 * 3);

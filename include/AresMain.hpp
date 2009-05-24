@@ -28,7 +28,7 @@
 
 #define kHackLevelMax   26//4//21
 
-int main (void);
+int main(int argc, const char** argv);
 void ToolBoxInit( void);
 void MenuBarInit( void);
 void MainLoop (void);
