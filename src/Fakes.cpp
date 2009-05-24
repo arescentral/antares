@@ -301,10 +301,10 @@ Color24Bit colors_24_bit[256] = {
     {0, 0, 0},
 };
 
-CTab* fakeCTabPtr = NULL;
+CTabHandle fakeCTabHandle;
 
 AuxWin fakeAuxWin = {
-    &fakeCTabPtr,
+    NULL,
 };
 AuxWin* fakeAuxWinPtr = &fakeAuxWin;
 
@@ -322,9 +322,9 @@ void Dump() {
         for (int x = 0; x < 640; ++x) {
             int color = GetPixel(x, y);
             const char pixel[3] = {
-                fakeCTabPtr->ctTable[color].rgb.red >> 8,
-                fakeCTabPtr->ctTable[color].rgb.green >> 8,
-                fakeCTabPtr->ctTable[color].rgb.blue >> 8,
+                (*fakeCTabHandle)->ctTable[color].rgb.red >> 8,
+                (*fakeCTabHandle)->ctTable[color].rgb.green >> 8,
+                (*fakeCTabHandle)->ctTable[color].rgb.blue >> 8,
             };
             contents.insert(contents.size(), pixel, 3);
         }
@@ -337,40 +337,147 @@ void Dump() {
     close(fd);
 }
 
-class RealHandle {
+class HandleImpl {
   public:
-    void* data;
-    size_t size;
-
-    RealHandle() : data(NULL), size(0) { }
+    virtual ~HandleImpl() { }
+    virtual HandleImpl* Clone() const = 0;
+    virtual void* data() = 0;
+    virtual size_t size() const = 0;
 };
 
-class AllocatedHandle : public RealHandle {
+struct HandleData {
   public:
-    AllocatedHandle(size_t size_) {
-        size = size_;
-        data = new char[size];
+    explicit HandleData(HandleImpl* impl)
+        : _data(impl->data()),
+          _impl(impl) { }
+
+    ~HandleData() {
+        delete _impl;
     }
 
-    ~AllocatedHandle() {
-        delete[] static_cast<char*>(data);
+    HandleData* Clone() {
+        return new HandleData(_impl->Clone());
     }
+
+    Handle AsHandle() {
+        return reinterpret_cast<Handle>(this);
+    }
+
+    template <typename T>
+    T** AsTypedHandle() {
+        return reinterpret_cast<T**>(this);
+    }
+
+    static HandleData* FromHandle(Handle h) {
+        return reinterpret_cast<HandleData*>(h);
+    }
+
+    size_t size() const { return _impl->size(); }
+
+  private:
+    void* _data;
+    HandleImpl* _impl;
 };
 
-class ResourceHandle : public RealHandle {
+class BufferHandleImpl : public HandleImpl {
   public:
-    int fd;
-
-    ResourceHandle() : fd(-1) { }
-
-    ~ResourceHandle() {
-        if (data != NULL && data != kMmapFailed) {
-            munmap(data, size);
-        }
-        if (fd >= 0) {
-            close(fd);
+    BufferHandleImpl(size_t size, void* src = NULL)
+            : _size(size),
+              _data(new char[size]) {
+        if (src) {
+            memcpy(_data, src, _size);
         }
     }
+
+    ~BufferHandleImpl() {
+        delete[] _data;
+    }
+
+    virtual HandleImpl* Clone() const {
+        return new BufferHandleImpl(_size, _data);
+    }
+
+    virtual size_t size() const { return _size; }
+    virtual void* data() { return _data; }
+
+  private:
+    size_t _size;
+    char* _data;
+};
+
+template <typename T>
+class TypedHandleImpl : public HandleImpl {
+  public:
+    TypedHandleImpl()
+            : _storage() { }
+
+    TypedHandleImpl(const T& t)
+            : _storage(t) { }
+
+    T& storage() { return _storage; }
+    const T& storage() const { return _storage; }
+
+    virtual HandleImpl* Clone() const {
+        return new TypedHandleImpl<T>(_storage);
+    }
+
+    virtual void* data() { return &_storage; }
+    virtual size_t size() const { return sizeof(T); }
+
+  private:
+    T _storage;
+};
+
+class NoSuchResourceException : public std::exception { };
+
+class ResourceHandleImpl : public HandleImpl {
+  public:
+    ResourceHandleImpl(FourCharCode code, int id)
+            : _fd(-1),
+              _size(0),
+              _data(NULL) {
+        char filename[64];
+        sprintf(filename, "data/original/rsrc/%4s/r.%d", reinterpret_cast<char*>(&code), id);
+
+        _fd = open(filename, O_RDONLY);
+        if (_fd < 0) {
+            perror("open");
+            throw NoSuchResourceException();
+        }
+
+        struct stat st;
+        if (fstat(_fd, &st) < 0) {
+            perror("fstat");
+            throw NoSuchResourceException();
+        }
+        _size = st.st_size;
+
+        _data = mmap(NULL, _size, PROT_READ | PROT_WRITE, MAP_PRIVATE, _fd, 0);
+        if (_data == kMmapFailed) {
+            perror("mmap");
+            throw NoSuchResourceException();
+        }
+    }
+
+    ~ResourceHandleImpl() {
+        if (_data != NULL && _data != kMmapFailed) {
+            munmap(_data, _size);
+        }
+        if (_fd >= 0) {
+            close(_fd);
+        }
+    }
+
+    virtual HandleImpl* Clone() const {
+        return new BufferHandleImpl(_size, _data);
+    }
+    virtual void* data() { return _data; }
+    virtual size_t size() const { return _size; }
+
+  private:
+    int _fd;
+    size_t _size;
+    void* _data;
 };
 
 template <typename T>
@@ -392,39 +499,19 @@ class scoped_ptr {
 };
 
 Handle GetResource(FourCharCode code, int id) {
-    char filename[64];
-    sprintf(filename, "data/original/rsrc/%4s/r.%d", reinterpret_cast<char*>(&code), id);
-    scoped_ptr<ResourceHandle> result(new ResourceHandle);
-
-    result->fd = open(filename, O_RDONLY);
-    if (result->fd < 0) {
-        perror("open");
+    try {
+        return (new HandleData(new ResourceHandleImpl(code, id)))->AsHandle();
+    } catch (NoSuchResourceException& e) {
         return NULL;
     }
-
-    struct stat st;
-    if (fstat(result->fd, &st) < 0) {
-        perror("fstat");
-        return NULL;
-    }
-    result->size = st.st_size;
-
-    result->data = mmap(NULL, result->size, PROT_READ | PROT_WRITE, MAP_PRIVATE, result->fd, 0);
-    if (result->data == kMmapFailed) {
-        perror("mmap");
-        return NULL;
-    }
-
-    return reinterpret_cast<Handle>(result.release());
 }
 
 Handle NewHandle(size_t size) {
-    return reinterpret_cast<Handle>(new AllocatedHandle(size));
+    return (new HandleData(new BufferHandleImpl(size)))->AsHandle();
 }
 
 int GetHandleSize(Handle handle) {
-    RealHandle* real = reinterpret_cast<RealHandle*>(handle);
-    return real->size;
+    return HandleData::FromHandle(handle)->size();
 }
 
 void GetIndString(unsigned char* result, int id, int index) {
@@ -451,9 +538,12 @@ void BlockMove(void* src, void* dst, size_t size) {
 }
 
 OSErr PtrToHand(void* ptr, Handle* handle, int len) {
-    *handle = new char*;
-    **handle = new char[len];
-    BlockMove(ptr, **handle, len);
+    *handle = (new HandleData(new BufferHandleImpl(len, ptr)))->AsHandle();
+    return noErr;
+}
+
+OSErr HandToHand(Handle* handle) {
+    *handle = HandleData::FromHandle(*handle)->Clone()->AsHandle();
     return noErr;
 }
 
@@ -792,7 +882,7 @@ GWorld fakeOffGWorld = {
     { },
     {
         { 0, 0, 640, 480 },
-        &fakeCTabPtr,
+        NULL,
         640 | 0x8000,
         fakeOffGWorld.pixels,
         1,
@@ -804,7 +894,7 @@ GWorld fakeRealGWorld = {
     { },
     {
         { 0, 0, 640, 480 },
-        &fakeCTabPtr,
+        NULL,
         640 | 0x8000,
         fakeRealGWorld.pixels,
         1,
@@ -816,7 +906,7 @@ GWorld fakeSaveGWorld = {
     { },
     {
         { 0, 0, 640, 480 },
-        &fakeCTabPtr,
+        NULL,
         640 | 0x8000,
         fakeSaveGWorld.pixels,
         1,
@@ -879,9 +969,9 @@ static uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue) {
     uint8_t best_color = 0;
     int min_distance = std::numeric_limits<int>::max();
     for (int i = 0; i < 256; ++i) {
-        int distance = abs(fakeCTabPtr->ctTable[i].rgb.red - red)
-            + abs(fakeCTabPtr->ctTable[i].rgb.green - green)
-            + abs(fakeCTabPtr->ctTable[i].rgb.blue - blue);
+        int distance = abs((*fakeCTabHandle)->ctTable[i].rgb.red - red)
+            + abs((*fakeCTabHandle)->ctTable[i].rgb.green - green)
+            + abs((*fakeCTabHandle)->ctTable[i].rgb.blue - blue);
         if (distance == 0) {
             return i;
         } else if (distance < min_distance) {
@@ -1056,9 +1146,9 @@ void MacFrameRect(Rect* rect) {
 }
 
 void Index2Color(long index, RGBColor* color) {
-    color->red = fakeCTabPtr->ctTable[index].rgb.red;
-    color->green = fakeCTabPtr->ctTable[index].rgb.green;
-    color->blue = fakeCTabPtr->ctTable[index].rgb.blue;
+    color->red = (*fakeCTabHandle)->ctTable[index].rgb.red;
+    color->green = (*fakeCTabHandle)->ctTable[index].rgb.green;
+    color->blue = (*fakeCTabHandle)->ctTable[index].rgb.blue;
 }
 
 Point currentPen = { 0, 0 };
@@ -1084,21 +1174,30 @@ uint16_t DoubleBits(uint8_t in) {
     return result;
 }
 
-CTab* NewColorTable() {
-    CTab* ctab = new CTab;
-    ctab->ctSize = 256;
-    ctab->ctTable = new ColorSpec[256];
+CTab** NewColorTable() {
+    TypedHandleImpl<CTab>* ctab = new TypedHandleImpl<CTab>;
+    ctab->storage().ctSize = 256;
+    ctab->storage().ctTable = new ColorSpec[256];
     for (int i = 0; i < 256; ++i) {
-        ctab->ctTable[i].value = i;
-        ctab->ctTable[i].rgb.red = DoubleBits(colors_24_bit[i].red);
-        ctab->ctTable[i].rgb.green = DoubleBits(colors_24_bit[i].green);
-        ctab->ctTable[i].rgb.blue = DoubleBits(colors_24_bit[i].blue);
+        ctab->storage().ctTable[i].value = i;
+        ctab->storage().ctTable[i].rgb.red = DoubleBits(colors_24_bit[i].red);
+        ctab->storage().ctTable[i].rgb.green = DoubleBits(colors_24_bit[i].green);
+        ctab->storage().ctTable[i].rgb.blue = DoubleBits(colors_24_bit[i].blue);
     }
-    return ctab;
+    return (new HandleData(ctab))->AsTypedHandle<CTab>();
+}
+
+CTab** GetCTable(int id) {
+    assert(id == 256);
+    return NewColorTable();
 }
 
 void FakeInit(int argc, const char** argv) {
     (void)argc;
     (void)argv;
-    fakeCTabPtr = NewColorTable();
+    fakeCTabHandle = NewColorTable();
+    fakeAuxWin.awCTable = NewColorTable();
+    fakeOffGWorld.pixMap.pmTable = NewColorTable();
+    fakeRealGWorld.pixMap.pmTable = NewColorTable();
+    fakeSaveGWorld.pixMap.pmTable = NewColorTable();
 }

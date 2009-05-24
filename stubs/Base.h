@@ -98,7 +98,7 @@ void Microseconds(UnsignedWide* wide);
 STUB1(MaxMem, Size(Size*), 0);
 STUB1(CompactMem, Size(int), 100 * 1024 * 1024);  // 100MB
 void BlockMove(void* src, void* dst, size_t size);
-STUB1(HandToHand, OSErr(Handle* handle), noErr);
+OSErr HandToHand(Handle* handle);
 STUB2(HandAndHand, void(Handle src, Handle dst));
 
 typedef void* AddrBlock;
@@ -193,9 +193,7 @@ typedef struct {
 typedef CTab* CTabPtr;
 typedef CTab** CTabHandle;
 
-extern CTab* fakeCTabPtr;
-
-STUB1(GetCTable, CTab**(int id), &fakeCTabPtr);
+CTab** GetCTable(int id);
 STUB1(DisposeCTable, void(CTab** handle));
 STUB1(CTabChanged, void(CTab** handle));
 void Index2Color(long index, RGBColor* color);
