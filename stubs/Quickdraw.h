@@ -25,7 +25,7 @@ extern GDevice* fakeGDevicePtr;
 STUB0(GetGDevice, GDevice**(), &fakeGDevicePtr);
 STUB1(SetGDevice, void(GDevice** device));
 
-typedef void* GrafPtr;
+typedef Window* GrafPtr;
 typedef GrafPtr CGrafPtr;
 
 typedef struct { } Pattern;
@@ -33,7 +33,7 @@ typedef struct { } Pattern;
 STUB1(BackPat, void(Pattern*));
 STUB1(PenPat, void(Pattern*));
 
-typedef void* Port;
+typedef Window* Port;
 
 void RGBBackColor(RGBColor* color);
 void RGBForeColor(RGBColor* color);
@@ -44,8 +44,8 @@ STUB1(LockPixels, bool(PixMap** pix), true);
 STUB1(UnlockPixels, void(PixMap** pix));
 
 STUB1(InitGraf, void(GrafPtr* port));
-STUB1(GetPort, void(GrafPtr* port));
-STUB1(MacSetPort, void(GrafPtr port));
+void GetPort(GrafPtr* port);
+void MacSetPort(GrafPtr port);
 STUB1(InvalRect, void(Rect* rect));
 STUB1(ClipRect, void(Rect* rect));
 
@@ -110,7 +110,7 @@ STUB2(CalcVisBehind, void(Window**, Rgn**));
 
 STUB0(LMGetGrayRgn, Rgn**(), NULL);
 STUB1(LMSetMBarHeight, void(int height));
-STUB0(LMGetWMgrPort, Port*(), NULL);
+STUB0(LMGetWMgrPort, Port(), NULL);
 STUB0(LMGetWindowList, Window**(), NULL);
 STUB0(GetMBarHeight, int(), 0);
 

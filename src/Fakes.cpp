@@ -926,6 +926,32 @@ GDevice fakeGDevice = {
 };
 GDevice* fakeGDevicePtr = &fakeGDevice;
 
+Window* NewWindow(
+        void*, Rect* rect, const unsigned char* title, bool, int, Window* behind, bool, int id) {
+    (void)rect;
+    (void)title;
+    (void)behind;
+    (void)id;
+    return &fakeWindow;
+}
+
+CWindow* NewCWindow(
+        void*, Rect* rect, const unsigned char* title, bool, int, Window* behind, bool, int id) {
+    (void)rect;
+    (void)title;
+    (void)behind;
+    (void)id;
+    return &fakeWindow;
+}
+
+void GetPort(Window** port) {
+    *port = &fakeWindow;
+}
+
+void MacSetPort(Window* port) {
+    (void)port;
+}
+
 void GetGWorld(GWorld** world, GDevice*** device) {
     *world = fakeGDevice.world;
     *device = &fakeGDevicePtr;

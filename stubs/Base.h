@@ -151,11 +151,10 @@ struct Window;
 typedef Window* WindowPtr;
 typedef Window** WindowRef;
 
-extern Window fakeWindow;
 STUB1(BeginUpdate, void(Window* window));
 STUB1(EndUpdate, void(Window* window));
-STUB8(NewWindow, Window*(void*, Rect*, const unsigned char* title, bool, int,
-      Window* behind, bool, int), &fakeWindow)
+Window* NewWindow(void*, Rect*, const unsigned char* title, bool, int,
+      Window* behind, bool, int);
 STUB1(MacShowWindow, void(Window*));
 STUB1(DisposeWindow, void(Window*));
 STUB2(MacFindWindow, short(Point where, Window** window), 0);
@@ -169,10 +168,8 @@ STUB1(SelectWindow, void(Window*));
 typedef Window CWindow;
 typedef CWindow* CWindowPtr;
 
-STUB8(NewCWindow,
-    CWindow*(void*, Rect* size, const unsigned char* title, bool, int,
-      Window* behind, bool, int id),
-    &fakeWindow);
+CWindow* NewCWindow(void*, Rect* size, const unsigned char* title, bool, int,
+      Window* behind, bool, int id);
 
 typedef struct {
     int red;
