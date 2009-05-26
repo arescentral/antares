@@ -32,15 +32,9 @@
 #include <limits>
 #include <algorithm>
 
-#include "AresGlobalType.hpp"
+#include "Fakes.hpp"
 
 static void* const kMmapFailed = (void*)-1;
-
-struct Color24Bit {
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
-};
 
 Color24Bit colors_24_bit[256] = {
     {255, 255, 255},
@@ -308,13 +302,6 @@ AuxWin fakeAuxWin = {
 };
 AuxWin* fakeAuxWinPtr = &fakeAuxWin;
 
-static uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue);
-static uint8_t GetPixel(int x, int y);
-static void SetPixel(int x, int y, uint8_t c);
-static void SetPixelRow(int x, int y, uint8_t* c, int count);
-
-extern aresGlobalType* gAresGlobal;
-
 void Dump() {
     std::string contents = "P6 640 480 255\n";
     contents.reserve(contents.size() + 640 * 480 * 3);
@@ -478,24 +465,6 @@ class ResourceHandleImpl : public HandleImpl {
     int _fd;
     size_t _size;
     void* _data;
-};
-
-template <typename T>
-class scoped_ptr {
-  public:
-    scoped_ptr() : _t(NULL) { }
-    explicit scoped_ptr(T* t) : _t(t) { }
-
-    ~scoped_ptr() { if (_t) delete _t; }
-
-    T* operator->() { return _t; }
-    T& operator*() { return _t; }
-
-    void reset() { if (_t) { delete _t; _t = NULL; } }
-    T* release() { T* t = _t; _t = NULL; return t; }
-
-  private:
-    T* _t;
 };
 
 Handle GetResource(FourCharCode code, int id) {
@@ -867,16 +836,6 @@ long AngleFromSlope(Fixed slope) {
     }
     return 90;
 }
-
-extern GWorld* gOffWorld;
-extern GWorld* gRealWorld;
-extern GWorld* gSaveWorld;
-
-struct GWorld {
-    char pixels[640 * 480];
-    PixMap pixMap;
-    PixMap* pixMapPtr;
-};
 
 GWorld fakeOffGWorld = {
     { },
