@@ -3113,6 +3113,7 @@ void Pause( long time)
 
 void SetWindowColorTable( WindowPtr window)
 {
+    /*
 
     WCTabHandle     winCTabHandle;                                                  // 2
     AuxWinHandle    auxWinHandle;                                                   // 2
@@ -3120,7 +3121,6 @@ void SetWindowColorTable( WindowPtr window)
     GetAuxWin (window,&auxWinHandle);                                               // 2
     winCTabHandle = (WCTabHandle) ((**auxWinHandle).awCTable);                      // 2
 
-    /*
     HandToHand ((Handle *) &winCTabHandle);                                         // 3
     if (!MemError ( ))                                                              // 3
     {

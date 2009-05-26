@@ -297,11 +297,6 @@ Color24Bit colors_24_bit[256] = {
 
 CTabHandle fakeCTabHandle;
 
-AuxWin fakeAuxWin = {
-    NULL,
-};
-AuxWin* fakeAuxWinPtr = &fakeAuxWin;
-
 void Dump() {
     std::string contents = "P6 640 480 255\n";
     contents.reserve(contents.size() + 640 * 480 * 3);
@@ -631,10 +626,6 @@ void MacInsetRect(Rect* rect, int x, int y) {
     rect->right -= x;
     rect->top += y;
     rect->bottom -= y;
-}
-
-void GetAuxWin(Window*, AuxWinHandle* handle) {
-    *handle = &fakeAuxWinPtr;
 }
 
 struct AngleFromSlopeData {
@@ -1181,7 +1172,6 @@ void FakeInit(int argc, const char** argv) {
     (void)argc;
     (void)argv;
     fakeCTabHandle = NewColorTable();
-    fakeAuxWin.awCTable = NewColorTable();
     fakeOffGWorld.pixMap.pmTable = NewColorTable();
     fakeRealGWorld.pixMap.pmTable = NewColorTable();
     fakeSaveGWorld.pixMap.pmTable = NewColorTable();

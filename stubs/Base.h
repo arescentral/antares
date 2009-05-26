@@ -197,11 +197,6 @@ void Index2Color(long index, RGBColor* color);
 
 typedef CTab** WCTabHandle;
 
-typedef struct {
-    WCTabHandle awCTable;
-} AuxWin;
-typedef AuxWin** AuxWinHandle;
-
 typedef int KeyMap[4];
 
 void GetKeys(KeyMap keys);
@@ -279,10 +274,6 @@ STUB1(WriteResource, void(Handle resource));
 
 bool Button();
 STUB0(GetDblTime, double(), 0.0);
-
-extern AuxWin* fakeAuxWinPtr;
-void GetAuxWin(Window*, AuxWinHandle* handle);
-STUB2(SetWinColor, void(Window* window, WCTabHandle handle));
 
 typedef struct { } NumVersion;
 
