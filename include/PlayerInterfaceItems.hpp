@@ -27,7 +27,7 @@
 
 #pragma options align=mac68k
 
-enum interfaceKindType {
+enum interfaceKindEnum {
     kPlainRect = 1,
     kLabeledRect = 2,
     kListRect = 3,
@@ -40,17 +40,20 @@ enum interfaceKindType {
     kTabBoxTop = 10,
     kTabBoxButton = 11
 };
+typedef uint8_t interfaceKindType;
 
-enum interfaceItemStatusType {
+enum interfaceItemStatusEnum {
     kDimmed = 1,
     kActive = 2,
     kIH_Hilite = 3
 };
+typedef uint8_t interfaceItemStatusType;
 
-enum interfaceStyleType {
+enum interfaceStyleEnum {
     kLarge = 1,
     kSmall = 2
 };
+typedef uint8_t interfaceStyleType;
 
 struct interfaceLabelType {
     short               stringID;
@@ -61,7 +64,8 @@ struct interfaceLabeledRectType {
     interfaceLabelType  label;
     unsigned char       color;
     TEHandle            teData;
-    Boolean             editable;
+    uint8_t             editable;
+    // Boolean             editable;
 };
 
 struct interfaceListType {
@@ -79,7 +83,8 @@ struct interfaceListType {
 
 struct interfaceTextRectType {
     short               textID;
-    Boolean             visibleBounds;
+    uint8_t             visibleBounds;
+    // Boolean             visibleBounds;
 };
 
 struct interfaceTabBoxType {
@@ -88,27 +93,31 @@ struct interfaceTabBoxType {
 
 struct interfacePictureRectType {
     short               pictureID;
-    Boolean             visibleBounds;
+    uint8_t             visibleBounds;
+    // Boolean             visibleBounds;
 };
 
 struct interfaceButtonType {
     interfaceLabelType          label;
     short                       key;
-    Boolean                     defaultButton;
+    uint8_t                     defaultButton;
+    // Boolean                     defaultButton;
     interfaceItemStatusType     status;
 };
 
 struct interfaceRadioType {
     interfaceLabelType          label;
     short                       key;
-    Boolean                     on;
+    uint8_t                     on;
+    // Boolean                     on;
     interfaceItemStatusType     status;
 }; // also tab box button type
 
 struct interfaceCheckboxType {
     interfaceLabelType          label;
     short                       key;
-    Boolean                     on;
+    uint8_t                     on;
+    // Boolean                     on;
     interfaceItemStatusType     status;
 };
 

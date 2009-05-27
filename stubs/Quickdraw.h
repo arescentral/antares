@@ -84,7 +84,7 @@ void EraseRect(Rect* rect);
 STUB1(FrameOval, void(Rect* rect));
 STUB1(PaintOval, void(Rect* rect));
 
-STUB2(MacLineTo, void(int x, int y));
+void MacLineTo(int x, int y);
 
 void MoveTo(int x, int y);
 void GetPen(Point* pen);

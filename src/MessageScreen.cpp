@@ -109,8 +109,8 @@ inline int mHexDigitValue(char c) {
 
 template <typename T0, typename T1>
 inline void mClipAnyRect(T0& mtrect, const T1& mclip) {
-    mtrect.left = std::min(mtrect.left, mclip.left);
-    mtrect.top = std::min(mtrect.top, mclip.top);
+    mtrect.left = std::max(mtrect.left, mclip.left);
+    mtrect.top = std::max(mtrect.top, mclip.top);
     mtrect.right = std::min(mtrect.right, mclip.right);
     mtrect.bottom = std::min(mtrect.bottom, mclip.bottom);
 }

@@ -1192,6 +1192,29 @@ void MoveTo(int x, int y) {
     currentPen.v = y;
 }
 
+void MacLineTo(int h, int v) {
+    assert(h == currentPen.h || v == currentPen.v);  // no diagonal lines yet.
+    if (h == currentPen.h) {
+        int step = 1;
+        if (v < currentPen.v) {
+            step = -1;
+        }
+        for (int i = currentPen.v; i != v; i += step) {
+            SetPixel(currentPen.h, i, currentForeColor);
+        }
+        currentPen.v = v;
+    } else {
+        int step = 1;
+        if (h < currentPen.h) {
+            step = -1;
+        }
+        for (int i = currentPen.h; i != h; i += step) {
+            SetPixel(i, currentPen.v, currentForeColor);
+        }
+        currentPen.h = h;
+    }
+}
+
 void GetPen(Point* pen) {
     *pen = currentPen;
 }

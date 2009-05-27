@@ -1971,7 +1971,7 @@ void DrawInterfaceTextInRect( Rect *tRect, const unsigned char *textData, long l
                 {
                     case kVPictKind: case kVClearPictKind:
                         vline += ( fheight - GetInterfaceFontAscent( style));
-                        thePicture = (PicHandle)HHGetResource( 'PICT', inlineValue); //HHGetResource
+                        thePicture = GetPicture(inlineValue); //HHGetResource
                         xpos = hleft;
                         if ( *theLine == 0) vline -= fheight;
                         if ( thePicture != nil)
@@ -2152,7 +2152,7 @@ short GetInterfaceTextHeightFromWidth( anyCharType *textData, long length,
                 switch( inlineKind)
                 {
                     case kVPictKind: case kVClearPictKind:
-                        thePicture = (PicHandle)HHGetResource( 'PICT', inlineValue);
+                        thePicture = GetPicture(inlineValue);  // HHGetResource
                         xpos = hleft;
                         vline += ( fheight - GetInterfaceFontAscent( style));
                         if ( *theLine == 0) vline -= fheight;
@@ -2193,7 +2193,7 @@ void DrawInterfacePictureRect( interfaceItemType *dItem, PixMap *destMap, long p
     ClipRect( &tRect);
 
 //  thePicture = GetPicture( dItem->item.pictureRect.pictureID);
-    thePicture = (PicHandle)HHGetResource( 'PICT', dItem->item.pictureRect.pictureID);
+    thePicture = GetPicture(dItem->item.pictureRect.pictureID);  // HHGetResource
     if ( thePicture != nil)
     {
         uRect = (**thePicture).picFrame;
