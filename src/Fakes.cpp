@@ -909,6 +909,7 @@ void GetGWorld(GWorld** world, GDevice*** device) {
 
 void SetGWorld(GWorld* world, GDevice***) {
     fakeGDevice.world = world;
+    fakeGDevice.gdPMap = &world->pixMapPtr;
 }
 
 OSErr NewGWorld(GWorld** world, int, Rect*, CTabHandle, GDHandle device, int) {
@@ -930,15 +931,7 @@ void DisposeGWorld(GWorld*) {
 }
 
 PixMap** GetGWorldPixMap(GWorld* world) {
-    if (world == gOffWorld) {
-        return fakeGDevice.gdPMap;
-    } else if (world == gRealWorld) {
-        return fakeGDevice.gdPMap;
-    } else if (world == gSaveWorld) {
-        return fakeGDevice.gdPMap;
-    } else {
-        assert(false);
-    }
+    return &world->pixMapPtr;
 }
 
 static uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue) {
@@ -973,22 +966,87 @@ static void SetPixelRow(int x, int y, uint8_t* c, int count) {
     memcpy(&p->baseAddr[x + y * (p->rowBytes & 0x7fff)], c, count);
 }
 
+Point MakePoint(int x, int y) {
+    Point result = { x, y };
+    return result;
+}
+
+class ClippedTransfer {
+  public:
+    ClippedTransfer(const Rect& from, const Rect& to)
+            : _from(from),
+              _to(to) {
+        // Rects must be the same size.
+        assert(_from.right - _from.left == _to.right - _to.left);
+        assert(_from.bottom - _from.top == _to.bottom - _to.top);
+    }
+
+    void ClipSourceTo(const Rect& clip) {
+        ClipFirstToSecond(_from, clip);
+    }
+
+    void ClipDestTo(const Rect& clip) {
+        ClipFirstToSecond(_to, clip);
+    }
+
+    int Height() const { return _from.bottom - _from.top; }
+    int Width() const { return _from.right - _from.left; }
+
+    int SourceRow(int i) const { return _from.top + i; }
+    int SourceColumn(int i) const { return _from.left + i; }
+
+    int DestRow(int i) const { return _to.top + i; }
+    int DestColumn(int i) const { return _to.left + i; }
+
+  private:
+    inline void ClipFirstToSecond(const Rect& rect, const Rect& clip) {
+        if (clip.left > rect.left) {
+            int diff = clip.left - _from.left;
+            _to.left += diff;
+            _from.left += diff;
+        }
+        if (clip.top > rect.top) {
+            int diff = clip.top - _from.top;
+            _to.top += diff;
+            _from.top += diff;
+        }
+        if (clip.right < rect.right) {
+            int diff = clip.right - _from.right;
+            _to.right += diff;
+            _from.right += diff;
+        }
+        if (clip.bottom < rect.bottom) {
+            int diff = clip.bottom - _from.bottom;
+            _to.bottom += diff;
+            _from.bottom += diff;
+        }
+    }
+
+    Rect _from;
+    Rect _to;
+};
+
 void CopyBits(BitMap* source, BitMap* dest, Rect* source_rect, Rect* dest_rect, int mode, void*) {
     if (source == dest) {
         return;
     }
 
-    int width = source_rect->right - source_rect->left;
-    int height = source_rect->bottom - source_rect->top;
-    assert(width == dest_rect->right - dest_rect->left);
-    assert(height == dest_rect->bottom - dest_rect->top);
+    ClippedTransfer transfer(*source_rect, *dest_rect);
+    transfer.ClipSourceTo(source->bounds);
+    transfer.ClipDestTo(dest->bounds);
 
-    for (int i = 0; i < height; ++i) {
-        int source_y = source_rect->top + i;
-        int dest_y = dest_rect->top + i;
-        char* sourceBytes = source->baseAddr + source_rect->left + source_y * (source->rowBytes & 0x7fff);
-        char* destBytes = dest->baseAddr + dest_rect->left + dest_y * (dest->rowBytes & 0x7fff);
-        memcpy(destBytes, sourceBytes, width);
+    for (int i = 0; i < transfer.Height(); ++i) {
+        char* sourceBytes
+            = source->baseAddr
+            + transfer.SourceColumn(0)
+            + transfer.SourceRow(i) * (source->rowBytes & 0x7fff);
+
+        char* destBytes
+            = dest->baseAddr
+            + transfer.DestColumn(0)
+            + transfer.DestRow(i) * (dest->rowBytes & 0x7fff);
+
+        memcpy(destBytes, sourceBytes, transfer.Width());
     }
 }
 
