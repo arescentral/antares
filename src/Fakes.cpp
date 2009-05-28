@@ -463,10 +463,19 @@ class ResourceHandleImpl : public HandleImpl {
 };
 
 Handle GetResource(FourCharCode code, int id) {
-    try {
-        return (new HandleData(new ResourceHandleImpl(code, id)))->AsHandle();
-    } catch (NoSuchResourceException& e) {
-        return NULL;
+    switch (code) {
+      case 'PICT':
+        return reinterpret_cast<Handle>(GetPicture(id));
+
+      case 'snd ':
+        return GetSound(id);
+
+      default:
+        try {
+            return (new HandleData(new ResourceHandleImpl(code, id)))->AsHandle();
+        } catch (NoSuchResourceException& e) {
+            return NULL;
+        }
     }
 }
 
@@ -1249,9 +1258,40 @@ CTab** GetCTable(int id) {
     return NewColorTable();
 }
 
+struct SndChannel { };
+
+OSErr SndNewChannel(SndChannel** chan, long, long, void*) {
+    *chan = new SndChannel;
+    return noErr;
+}
+
+OSErr SndDisposeChannel(SndChannel* chan, bool) {
+    delete chan;
+    return noErr;
+}
+
+static FILE* sound_log;
+
+OSErr SndPlay(SndChannel* channel, Handle sound, bool) {
+    if (gAresGlobal->gGameTime > 0) {
+        float time = gAresGlobal->gGameTime / 60.0;
+        int sound_id = **reinterpret_cast<int**>(sound);
+        fprintf(sound_log, "%f\t%d\n", time, sound_id);
+    }
+    return noErr;
+}
+
+Handle GetSound(int id) {
+    HandleData* data = new HandleData(new TypedHandleImpl<int>(id));
+    return data->AsHandle();
+}
+
 void FakeInit(int argc, const char** argv) {
     (void)argc;
     (void)argv;
+    sound_log = fopen("sound.log", "w");
+    setbuf(sound_log, NULL);
+    assert(sound_log);
     fakeCTabHandle = NewColorTable();
     fakeOffGWorld.pixMap.pmTable = NewColorTable();
     fakeRealGWorld.pixMap.pmTable = NewColorTable();

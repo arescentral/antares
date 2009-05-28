@@ -12,7 +12,7 @@ struct SCStatus {
 };
 typedef SCStatus* SCStatusPtr;
 
-struct SndChannel { };
+struct SndChannel;
 typedef SndChannel* SndChannelPtr;
 
 enum {
@@ -20,8 +20,8 @@ enum {
     initMono,
 };
 
-STUB4(SndNewChannel, OSErr(SndChannel** chan, long, long, void*), noErr);
-STUB2(SndDisposeChannel, OSErr(SndChannel* chan, bool), noErr);
+OSErr SndNewChannel(SndChannel** chan, long, long, void*);
+OSErr SndDisposeChannel(SndChannel* chan, bool);
 STUB3(SndChannelStatus, OSErr(SndChannel* chan, int status_size, SCStatus* status), noErr);
 
 enum SndCommandEnum {
@@ -38,7 +38,7 @@ struct SndCommand {
 
 STUB2(SndDoImmediate, OSErr(SndChannel* chan, SndCommand* cmd), noErr);
 STUB3(SndDoCommand, OSErr(SndChannel* chan, SndCommand* cmd, bool), noErr);
-STUB3(SndPlay, OSErr(SndChannel* channel, Handle sound, bool), noErr);
+OSErr SndPlay(SndChannel* channel, Handle sound, bool);
 
 STUB2(GetSoundHeaderOffset, OSErr(Handle sound, long* offset), noErr);
 

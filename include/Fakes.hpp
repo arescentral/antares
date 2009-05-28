@@ -61,4 +61,7 @@ extern GWorld* gOffWorld;
 extern GWorld* gRealWorld;
 extern GWorld* gSaveWorld;
 
+Pic** GetPicture(int id);
+Handle GetSound(int id);
+
 #endif  // ANTARES_FAKES_HPP_
