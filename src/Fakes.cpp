@@ -412,52 +412,70 @@ class TypedHandleImpl : public HandleImpl {
 
 class NoSuchResourceException : public std::exception { };
 
-class ResourceHandleImpl : public HandleImpl {
+class AutoClosedFile {
   public:
-    ResourceHandleImpl(FourCharCode code, int id)
-            : _fd(-1),
-              _size(0),
+    AutoClosedFile() : _fd(-1) { }
+    AutoClosedFile(int fd) : _fd(fd) { }
+    ~AutoClosedFile() { Close(); }
+
+    bool IsValid() const { return _fd >= 0; }
+
+    int fd() const { return _fd; }
+
+    bool Open(const char* filename, int oflag, mode_t mode = 0600) {
+        Close();
+        _fd = open(filename, oflag, mode);
+        return IsValid();
+    }
+
+  private:
+    void Close() {
+        if (IsValid()) {
+            close(_fd);
+        }
+    }
+
+    int _fd;
+};
+
+class ResourceData {
+  public:
+    ResourceData(FourCharCode code, int id)
+            : _size(0),
               _data(NULL) {
         char filename[64];
         sprintf(filename, "data/original/rsrc/%4s/r.%d", reinterpret_cast<char*>(&code), id);
 
-        _fd = open(filename, O_RDONLY);
-        if (_fd < 0) {
+        if (!_file.Open(filename, O_RDONLY)) {
             perror("open");
             throw NoSuchResourceException();
         }
 
         struct stat st;
-        if (fstat(_fd, &st) < 0) {
+        if (fstat(_file.fd(), &st) < 0) {
             perror("fstat");
             throw NoSuchResourceException();
         }
         _size = st.st_size;
 
-        _data = mmap(NULL, _size, PROT_READ | PROT_WRITE, MAP_PRIVATE, _fd, 0);
+        _data = mmap(NULL, _size, PROT_READ, MAP_PRIVATE, _file.fd(), 0);
         if (_data == kMmapFailed) {
             perror("mmap");
             throw NoSuchResourceException();
         }
     }
 
-    ~ResourceHandleImpl() {
+    ~ResourceData() {
         if (_data != NULL && _data != kMmapFailed) {
             munmap(_data, _size);
         }
-        if (_fd >= 0) {
-            close(_fd);
-        }
     }
 
-    virtual HandleImpl* Clone() const {
-        return new BufferHandleImpl(_size, _data);
-    }
-    virtual void* data() { return _data; }
-    virtual size_t size() const { return _size; }
+    size_t size() const { return _size; }
+    void* data() const { return _data; }
 
   private:
-    int _fd;
+    AutoClosedFile _file;
     size_t _size;
     void* _data;
 };
@@ -472,7 +490,8 @@ Handle GetResource(FourCharCode code, int id) {
 
       default:
         try {
-            return (new HandleData(new ResourceHandleImpl(code, id)))->AsHandle();
+            ResourceData rsrc(code, id);
+            return (new HandleData(new BufferHandleImpl(rsrc.size(), rsrc.data())))->AsHandle();
         } catch (NoSuchResourceException& e) {
             return NULL;
         }
