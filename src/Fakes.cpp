@@ -319,95 +319,84 @@ void Dump() {
     close(fd);
 }
 
-class HandleImpl {
+class HandleBase {
   public:
-    virtual ~HandleImpl() { }
-    virtual HandleImpl* Clone() const = 0;
-    virtual void* data() = 0;
-    virtual size_t size() const = 0;
-};
+    virtual ~HandleBase() { }
 
-struct HandleData {
-  public:
-    explicit HandleData(HandleImpl* impl)
-        : _data(impl->data()),
-          _impl(impl) { }
-
-    ~HandleData() {
-        delete _impl;
+    Handle ToHandle() {
+        return reinterpret_cast<Handle>(this + 1);
     }
 
-    HandleData* Clone() {
-        return new HandleData(_impl->Clone());
+    static HandleBase* FromHandle(Handle h) {
+        return reinterpret_cast<HandleBase*>(h - 1);
     }
 
-    Handle AsHandle() {
-        return reinterpret_cast<Handle>(this);
-    }
-
-    template <typename T>
-    T** AsTypedHandle() {
-        return reinterpret_cast<T**>(this);
-    }
-
-    static HandleData* FromHandle(Handle h) {
-        return reinterpret_cast<HandleData*>(h);
-    }
-
-    size_t size() const { return _impl->size(); }
-
-  private:
-    void* _data;
-    HandleImpl* _impl;
-};
-
-class BufferHandleImpl : public HandleImpl {
-  public:
-    BufferHandleImpl(size_t size, void* src = NULL)
-            : _size(size),
-              _data(new char[size]) {
-        if (src) {
-            memcpy(_data, src, _size);
-        }
-    }
-
-    ~BufferHandleImpl() {
-        delete[] _data;
-    }
-
-    virtual HandleImpl* Clone() const {
-        return new BufferHandleImpl(_size, _data);
-    }
-
-    virtual size_t size() const { return _size; }
-    virtual void* data() { return _data; }
-
-  private:
-    size_t _size;
-    char* _data;
+    virtual HandleBase* Clone() = 0;
+    virtual void* Data() const = 0;
+    virtual int Size() const = 0;
 };
 
 template <typename T>
-class TypedHandleImpl : public HandleImpl {
+class HandleData : public HandleBase {
   public:
-    TypedHandleImpl()
-            : _storage() { }
+    explicit HandleData()
+        : _data(new T) { }
 
-    TypedHandleImpl(const T& t)
-            : _storage(t) { }
+    explicit HandleData(const T& t)
+        : _data(new T(t)) { }
 
-    T& storage() { return _storage; }
-    const T& storage() const { return _storage; }
-
-    virtual HandleImpl* Clone() const {
-        return new TypedHandleImpl<T>(_storage);
+    ~HandleData() {
+        delete _data;
     }
 
-    virtual void* data() { return &_storage; }
-    virtual size_t size() const { return sizeof(T); }
+    virtual HandleData* Clone() {
+        return new HandleData(*_data);
+    }
+
+    virtual void* Data() const { return _data; }
+    virtual int Size() const { return sizeof(T); }
+
+    T* TypedData() const { return _data; }
+
+    T** ToTypedHandle() {
+        return reinterpret_cast<T**>(ToHandle());
+    }
+
+    HandleData* FromTypedHandle(T** handle) {
+        return reinterpret_cast<HandleData*>(FromHandle(handle));
+    }
 
   private:
-    T _storage;
+    T* _data;
+};
+
+template <>
+class HandleData<void> : public HandleBase {
+  public:
+    explicit HandleData(int size)
+        : _data(new char[size]),
+          _size(size) { }
+
+    explicit HandleData(int size, void* src)
+        : _data(new char[size]),
+          _size(size) {
+        memcpy(_data, src, size);
+    }
+
+    ~HandleData() {
+        delete[] _data;
+    }
+
+    virtual HandleData* Clone() {
+        return new HandleData(_size, _data);
+    }
+
+    virtual void* Data() const { return _data; }
+    virtual int Size() const { return _size; }
+
+  private:
+    char* _data;
+    int _size;
 };
 
 class NoSuchResourceException : public std::exception { };
@@ -458,7 +447,7 @@ class ResourceData {
         }
         _size = st.st_size;
 
-        _data = mmap(NULL, _size, PROT_READ, MAP_PRIVATE, _file.fd(), 0);
+        _data = reinterpret_cast<char*>(mmap(NULL, _size, PROT_READ, MAP_PRIVATE, _file.fd(), 0));
         if (_data == kMmapFailed) {
             perror("mmap");
             throw NoSuchResourceException();
@@ -472,12 +461,12 @@ class ResourceData {
     }
 
     size_t size() const { return _size; }
-    void* data() const { return _data; }
+    char* data() const { return _data; }
 
   private:
     AutoClosedFile _file;
     size_t _size;
-    void* _data;
+    char* _data;
 };
 
 Handle GetResource(FourCharCode code, int id) {
@@ -491,7 +480,7 @@ Handle GetResource(FourCharCode code, int id) {
       default:
         try {
             ResourceData rsrc(code, id);
-            return (new HandleData(new BufferHandleImpl(rsrc.size(), rsrc.data())))->AsHandle();
+            return (new HandleData<void>(rsrc.size(), rsrc.data()))->ToHandle();
         } catch (NoSuchResourceException& e) {
             return NULL;
         }
@@ -499,11 +488,11 @@ Handle GetResource(FourCharCode code, int id) {
 }
 
 Handle NewHandle(size_t size) {
-    return (new HandleData(new BufferHandleImpl(size)))->AsHandle();
+    return (new HandleData<void>(size))->ToHandle();
 }
 
 int GetHandleSize(Handle handle) {
-    return HandleData::FromHandle(handle)->size();
+    return HandleBase::FromHandle(handle)->Size();
 }
 
 void GetIndString(unsigned char* result, int id, int index) {
@@ -511,11 +500,10 @@ void GetIndString(unsigned char* result, int id, int index) {
         *result = '\0';
         return;
     }
-    Handle resource = GetResource('STR#', id);
-    assert(resource);
-    uint16_t count = *reinterpret_cast<uint16_t*>(*resource);
+    ResourceData rsrc('STR#', id);
+    uint16_t count = *reinterpret_cast<uint16_t*>(rsrc.data());
     assert(index <= count);
-    char* pstr = *resource + 2;
+    char* pstr = rsrc.data() + 2;
     uint8_t size = *pstr;
     while (index > 1) {
         pstr += size + 1;
@@ -530,12 +518,12 @@ void BlockMove(void* src, void* dst, size_t size) {
 }
 
 OSErr PtrToHand(void* ptr, Handle* handle, int len) {
-    *handle = (new HandleData(new BufferHandleImpl(len, ptr)))->AsHandle();
+    *handle = (new HandleData<void>(len, ptr))->ToHandle();
     return noErr;
 }
 
 OSErr HandToHand(Handle* handle) {
-    *handle = HandleData::FromHandle(*handle)->Clone()->AsHandle();
+    *handle = HandleBase::FromHandle(*handle)->Clone()->ToHandle();
     return noErr;
 }
 
@@ -1260,16 +1248,17 @@ uint16_t DoubleBits(uint8_t in) {
 }
 
 CTab** NewColorTable() {
-    TypedHandleImpl<CTab>* ctab = new TypedHandleImpl<CTab>;
-    ctab->storage().ctSize = 256;
-    ctab->storage().ctTable = new ColorSpec[256];
+    HandleData<CTab>* handle = new HandleData<CTab>;
+    CTab* ctab = handle->TypedData();
+    ctab->ctSize = 256;
+    ctab->ctTable = new ColorSpec[256];
     for (int i = 0; i < 256; ++i) {
-        ctab->storage().ctTable[i].value = i;
-        ctab->storage().ctTable[i].rgb.red = DoubleBits(colors_24_bit[i].red);
-        ctab->storage().ctTable[i].rgb.green = DoubleBits(colors_24_bit[i].green);
-        ctab->storage().ctTable[i].rgb.blue = DoubleBits(colors_24_bit[i].blue);
+        ctab->ctTable[i].value = i;
+        ctab->ctTable[i].rgb.red = DoubleBits(colors_24_bit[i].red);
+        ctab->ctTable[i].rgb.green = DoubleBits(colors_24_bit[i].green);
+        ctab->ctTable[i].rgb.blue = DoubleBits(colors_24_bit[i].blue);
     }
-    return (new HandleData(ctab))->AsTypedHandle<CTab>();
+    return handle->ToTypedHandle();
 }
 
 CTab** GetCTable(int id) {
@@ -1326,8 +1315,7 @@ OSErr SndPlay(SndChannel* channel, Handle sound, bool) {
 }
 
 Handle GetSound(int id) {
-    HandleData* data = new HandleData(new TypedHandleImpl<int>(id));
-    return data->AsHandle();
+    return (new HandleData<int>(id))->ToHandle();
 }
 
 void FakeInit(int argc, const char** argv) {
