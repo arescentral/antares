@@ -36,8 +36,8 @@ struct SndCommand {
     int param2;
 };
 
-STUB2(SndDoImmediate, OSErr(SndChannel* chan, SndCommand* cmd), noErr);
-STUB3(SndDoCommand, OSErr(SndChannel* chan, SndCommand* cmd, bool), noErr);
+OSErr SndDoImmediate(SndChannel* chan, SndCommand* cmd);
+OSErr SndDoCommand(SndChannel* chan, SndCommand* cmd, bool);
 OSErr SndPlay(SndChannel* channel, Handle sound, bool);
 
 STUB2(GetSoundHeaderOffset, OSErr(Handle sound, long* offset), noErr);

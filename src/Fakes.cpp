@@ -1258,9 +1258,12 @@ CTab** GetCTable(int id) {
     return NewColorTable();
 }
 
-struct SndChannel { };
+struct SndChannel {
+    int volume;
+};
 
 OSErr SndNewChannel(SndChannel** chan, long, long, void*) {
+    gAresGlobal->gSoundVolume = 8;
     *chan = new SndChannel;
     return noErr;
 }
@@ -1272,11 +1275,33 @@ OSErr SndDisposeChannel(SndChannel* chan, bool) {
 
 static FILE* sound_log;
 
+OSErr SndDoImmediate(SndChannel* chan, SndCommand* cmd) {
+    switch (cmd->cmd) {
+      case quietCmd:
+        break;
+
+      case flushCmd:
+        break;
+
+      case ampCmd:
+        chan->volume = cmd->param1;
+        break;
+
+      default:
+        assert(false);
+    }
+    return noErr;
+}
+
+OSErr SndDoCommand(SndChannel* chan, SndCommand* cmd, bool) {
+    return SndDoImmediate(chan, cmd);
+}
+
 OSErr SndPlay(SndChannel* channel, Handle sound, bool) {
     if (gAresGlobal->gGameTime > 0) {
         float time = gAresGlobal->gGameTime / 60.0;
         int sound_id = **reinterpret_cast<int**>(sound);
-        fprintf(sound_log, "%f\t%d\n", time, sound_id);
+        fprintf(sound_log, "%f\t%d\t%d\n", time, sound_id, channel->volume);
     }
     return noErr;
 }
