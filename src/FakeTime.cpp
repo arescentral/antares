@@ -15,29 +15,31 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_FAKES_HPP_
-#define ANTARES_FAKES_HPP_
+#include "FakeTime.hpp"
 
-#include "AresGlobalType.hpp"
+#include <stdint.h>
+#include <sys/time.h>
+#include <Base.h>
 
-template <typename T>
-class scoped_ptr {
-  public:
-    scoped_ptr() : _t(NULL) { }
-    explicit scoped_ptr(T* t) : _t(t) { }
+int64_t TickTime() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return 60.0 * (tv.tv_sec + tv.tv_usec / 1000000.0);
+}
 
-    ~scoped_ptr() { if (_t) delete _t; }
+int TickCount() {
+    static const int kStartTime = TickTime();
+    return TickTime() - kStartTime;
+}
 
-    T* operator->() { return _t; }
-    T& operator*() { return _t; }
+void Microseconds(UnsignedWide* wide) {
+    uint64_t time;
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    time = tv.tv_sec * 1000000ull + tv.tv_usec * 1ull;
+    wide->hi = time >> 32;
+    wide->lo = time;
+}
 
-    void reset() { if (_t) { delete _t; _t = NULL; } }
-    T* release() { T* t = _t; _t = NULL; return t; }
-
-  private:
-    T* _t;
-};
-
-extern aresGlobalType* gAresGlobal;
-
-#endif  // ANTARES_FAKES_HPP_
+void FakeTimeInit() {
+}

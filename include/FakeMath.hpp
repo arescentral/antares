@@ -15,29 +15,9 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_FAKES_HPP_
-#define ANTARES_FAKES_HPP_
+#ifndef ANTARES_FAKE_MATH_HPP_
+#define ANTARES_FAKE_MATH_HPP_
 
-#include "AresGlobalType.hpp"
+void FakeMathInit();
 
-template <typename T>
-class scoped_ptr {
-  public:
-    scoped_ptr() : _t(NULL) { }
-    explicit scoped_ptr(T* t) : _t(t) { }
-
-    ~scoped_ptr() { if (_t) delete _t; }
-
-    T* operator->() { return _t; }
-    T& operator*() { return _t; }
-
-    void reset() { if (_t) { delete _t; _t = NULL; } }
-    T* release() { T* t = _t; _t = NULL; return t; }
-
-  private:
-    T* _t;
-};
-
-extern aresGlobalType* gAresGlobal;
-
-#endif  // ANTARES_FAKES_HPP_
+#endif  // ANTARES_FAKE_MATH_HPP_
