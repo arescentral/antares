@@ -63,10 +63,17 @@ class ResourceData {
             : _size(0),
               _data(NULL) {
         char filename[64];
-        sprintf(filename, "data/original/rsrc/%4s/r.%d", reinterpret_cast<char*>(&code), id);
+        char code_chars[5] = {
+            code >> 24,
+            code >> 16,
+            code >> 8,
+            code,
+            '\0',
+        };
+        sprintf(filename, "data/original/rsrc/%s/r.%d", code_chars, id);
 
         if (!_file.Open(filename, O_RDONLY)) {
-            perror("open");
+            perror(filename);
             throw NoSuchResourceException();
         }
 
