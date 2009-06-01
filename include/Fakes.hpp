@@ -21,6 +21,11 @@
 #include "AresGlobalType.hpp"
 
 template <typename T>
+#define DISALLOW_COPY_AND_ASSIGN(CLASS) \
+  private: \
+    CLASS(const CLASS&); \
+    CLASS& operator=(const CLASS&);
+
 class scoped_ptr {
   public:
     scoped_ptr() : _t(NULL) { }
@@ -36,6 +41,8 @@ class scoped_ptr {
 
   private:
     T* _t;
+
+    DISALLOW_COPY_AND_ASSIGN(scoped_ptr);
 };
 
 extern aresGlobalType* gAresGlobal;

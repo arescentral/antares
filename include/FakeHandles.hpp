@@ -21,6 +21,8 @@
 #include <string.h>
 #include <Base.h>
 
+#include "Fakes.hpp"
+
 class HandleBase {
   public:
     virtual ~HandleBase() { }
@@ -70,6 +72,8 @@ class HandleData : public HandleBase {
 
   private:
     T* _data;
+
+    DISALLOW_COPY_AND_ASSIGN(HandleData);
 };
 
 template <>
@@ -99,6 +103,8 @@ class HandleData<void> : public HandleBase {
   private:
     char* _data;
     int _size;
+
+    DISALLOW_COPY_AND_ASSIGN(HandleData);
 };
 
 void FakeHandlesInit();

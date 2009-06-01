@@ -21,6 +21,8 @@
 #include <stdint.h>
 #include <Quickdraw.h>
 
+#include "Fakes.hpp"
+
 struct Color24Bit {
     uint8_t red;
     uint8_t green;
@@ -48,6 +50,9 @@ class FakePixMap : public PixMap {
     int height() const { return bounds.bottom - bounds.top; }
 
     char& PixelAt(int x, int y) { return baseAddr[(y * rowBytes) + x]; }
+
+  private:
+    DISALLOW_COPY_AND_ASSIGN(FakePixMap);
 };
 
 uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue);
@@ -55,13 +60,17 @@ uint8_t GetPixel(int x, int y);
 void SetPixel(int x, int y, uint8_t c);
 void SetPixelRow(int x, int y, uint8_t* c, int count);
 
-struct GWorld {
-    FakePixMap pixMap;
-    PixMap* pixMapPtr;
-
+class GWorld {
+  public:
     GWorld(int width, int height)
             : pixMap(width, height),
               pixMapPtr(&pixMap) { }
+
+    FakePixMap pixMap;
+    PixMap* pixMapPtr;
+
+  private:
+    DISALLOW_COPY_AND_ASSIGN(GWorld);
 };
 
 extern GWorld* gOffWorld;
