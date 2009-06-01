@@ -345,41 +345,9 @@ void MacInsetRect(Rect* rect, int x, int y) {
     rect->bottom -= y;
 }
 
-GWorld fakeOffGWorld = {
-    { },
-    {
-        { 0, 0, 640, 480 },
-        NULL,
-        640 | 0x8000,
-        fakeOffGWorld.pixels,
-        1,
-    },
-    &fakeOffGWorld.pixMap,
-};
-
-GWorld fakeRealGWorld = {
-    { },
-    {
-        { 0, 0, 640, 480 },
-        NULL,
-        640 | 0x8000,
-        fakeRealGWorld.pixels,
-        1,
-    },
-    &fakeRealGWorld.pixMap,
-};
-
-GWorld fakeSaveGWorld = {
-    { },
-    {
-        { 0, 0, 640, 480 },
-        NULL,
-        640 | 0x8000,
-        fakeSaveGWorld.pixels,
-        1,
-    },
-    &fakeSaveGWorld.pixMap,
-};
+GWorld fakeOffGWorld(640, 480);
+GWorld fakeRealGWorld(640, 480);
+GWorld fakeSaveGWorld(640, 480);
 
 Window fakeWindow = {
     { 0, 0, 640, 480 },

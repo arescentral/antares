@@ -27,15 +27,41 @@ struct Color24Bit {
     uint8_t blue;
 };
 
+class FakePixMap : public PixMap {
+  public:
+    FakePixMap(int width, int height) {
+        bounds.left = 0;
+        bounds.top = 0;
+        bounds.right = width;
+        bounds.bottom = height;
+        pmTable = NULL;
+        rowBytes = width | 0x8000;
+        baseAddr = new char[width * height];
+        pixelSize = 1;
+    }
+
+    ~FakePixMap() {
+        delete[] baseAddr;
+    }
+
+    int width() const { return bounds.right - bounds.left; }
+    int height() const { return bounds.bottom - bounds.top; }
+
+    char& PixelAt(int x, int y) { return baseAddr[(y * rowBytes) + x]; }
+};
+
 uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue);
 uint8_t GetPixel(int x, int y);
 void SetPixel(int x, int y, uint8_t c);
 void SetPixelRow(int x, int y, uint8_t* c, int count);
 
 struct GWorld {
-    char pixels[640 * 480];
-    PixMap pixMap;
+    FakePixMap pixMap;
     PixMap* pixMapPtr;
+
+    GWorld(int width, int height)
+            : pixMap(width, height),
+              pixMapPtr(&pixMap) { }
 };
 
 extern GWorld* gOffWorld;
