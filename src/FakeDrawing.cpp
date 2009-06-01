@@ -348,17 +348,9 @@ void MacInsetRect(Rect* rect, int x, int y) {
 GWorld fakeOffGWorld(640, 480);
 GWorld fakeRealGWorld(640, 480);
 GWorld fakeSaveGWorld(640, 480);
+FakeWindow fakeWindow(640, 480, &fakeRealGWorld);
+FakeGDevice fakeGDevice(640, 480, &fakeRealGWorld);
 
-Window fakeWindow = {
-    { 0, 0, 640, 480 },
-    fakeRealGWorld.pixMap,
-};
-
-GDevice fakeGDevice = {
-    &fakeRealGWorld.pixMapPtr,
-    { 0, 0, 640, 480 },
-    &fakeRealGWorld,
-};
 GDevice* fakeGDevicePtr = &fakeGDevice;
 
 Window* NewWindow(

@@ -32,10 +32,7 @@ struct Color24Bit {
 class FakePixMap : public PixMap {
   public:
     FakePixMap(int width, int height) {
-        bounds.left = 0;
-        bounds.top = 0;
-        bounds.right = width;
-        bounds.bottom = height;
+        SetRect(&bounds, 0, 0, width, height);
         pmTable = NULL;
         rowBytes = width | 0x8000;
         baseAddr = new char[width * height];
@@ -71,6 +68,23 @@ class GWorld {
 
   private:
     DISALLOW_COPY_AND_ASSIGN(GWorld);
+};
+
+class FakeWindow : public Window {
+  public:
+    FakeWindow(int width, int height, GWorld* world) {
+        SetRect(&portRect, 0, 0, width, height);
+        portBits = world->pixMap;  // Copying here, is that right?
+    }
+};
+
+class FakeGDevice : public GDevice {
+  public:
+    FakeGDevice(int width, int height, GWorld* world_) {
+        gdPMap = &world_->pixMapPtr;
+        SetRect(&gdRect, 0, 0, width, height);
+        world = world_;
+    }
 };
 
 extern GWorld* gOffWorld;
