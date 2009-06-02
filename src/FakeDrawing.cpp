@@ -723,7 +723,6 @@ CTab** NewColorTable() {
 }
 
 CTab** GetCTable(int id) {
-    assert(id == 256);
     return NewColorTable();
 }
 
