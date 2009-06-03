@@ -708,22 +708,50 @@ uint16_t DoubleBits(uint8_t in) {
     return result;
 }
 
-CTab** NewColorTable() {
-    HandleData<CTab>* handle = new HandleData<CTab>;
-    CTab* ctab = handle->TypedData();
-    ctab->ctSize = 256;
-    ctab->ctTable = new ColorSpec[256];
-    for (int i = 0; i < 256; ++i) {
-        ctab->ctTable[i].value = i;
-        ctab->ctTable[i].rgb.red = DoubleBits(colors_24_bit[i].red);
-        ctab->ctTable[i].rgb.green = DoubleBits(colors_24_bit[i].green);
-        ctab->ctTable[i].rgb.blue = DoubleBits(colors_24_bit[i].blue);
+class FakeColorTable : public CTab {
+  public:
+    FakeColorTable() {
+        ctSize = 255;
+        ctTable = new ColorSpec[ctSize];
+        for (int i = 0; i <= ctSize; ++i) {
+            ctTable[i].value = i;
+            ctTable[i].rgb.red = DoubleBits(colors_24_bit[i].red);
+            ctTable[i].rgb.green = DoubleBits(colors_24_bit[i].green);
+            ctTable[i].rgb.blue = DoubleBits(colors_24_bit[i].blue);
+        }
     }
-    return handle->ToTypedHandle();
+
+    explicit FakeColorTable(const FakeColorTable& other) {
+        ctSize = other.ctSize;
+        ctTable = new ColorSpec[ctSize];
+        for (int i = 0; i <= ctSize; ++i) {
+            ctTable[i].value = i;
+            ctTable[i].rgb.red = other.ctTable[i].rgb.red;
+            ctTable[i].rgb.green = other.ctTable[i].rgb.green;
+            ctTable[i].rgb.blue = other.ctTable[i].rgb.blue;
+        }
+    }
+
+    ~FakeColorTable() {
+        delete[] ctTable;
+    }
+
+  private:
+    FakeColorTable& operator=(const FakeColorTable&);
+};
+
+CTab** NewColorTable() {
+    return reinterpret_cast<CTab**>((new HandleData<FakeColorTable>)->ToHandle());
 }
 
 CTab** GetCTable(int id) {
     return NewColorTable();
+}
+
+void RestoreEntries(CTab** table, void*, ReqListRec* recList) {
+    for (int i = 0; i <= (*table)->ctSize; ++i) {
+        (*fakeCTabHandle)->ctTable[i] = (*table)->ctTable[i];
+    }
 }
 
 void FakeDrawingInit() {

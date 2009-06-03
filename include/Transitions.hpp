@@ -23,23 +23,23 @@
 
 #pragma options align=mac68k
 
-STUB0(InitTransitions, void( void));
-STUB0(ResetTransitions, void( void));
-STUB0(CleanupTransitions, void( void));
-STUB3(StartColorAnimation, void( long, long, unsigned char));
-STUB1(UpdateColorAnimation, void( long));
-STUB3(StartBooleanColorAnimation, void( long, long, unsigned char));
-STUB1(UpdateBooleanColorAnimation, void( long));
-STUB0(RestoreOriginalColors, void( void));
-STUB0(InstantGoalTransition, void( void));
-STUB3(AutoFadeTo, Boolean( long, RGBColor *, Boolean), true);
-STUB2(AutoFadeFrom, Boolean( long, Boolean), true);
-STUB3(AutoMusicFadeTo, Boolean( long, RGBColor *, Boolean), true);
-STUB5(CustomPictFade, Boolean( long, long, short, short, WindowPtr), true);
-inline bool StartCustomPictFade( long, long, short, short, WindowPtr, PaletteHandle *,
-    PaletteHandle *, CTabHandle *, Boolean) { return true; }
-STUB5(EndCustomPictFade, Boolean( WindowPtr, PaletteHandle *, PaletteHandle *, CTabHandle *,
-    Boolean), true);
+void InitTransitions( void);
+void ResetTransitions( void);
+void CleanupTransitions( void);
+void StartColorAnimation( long, long, unsigned char);
+void UpdateColorAnimation( long);
+void StartBooleanColorAnimation( long, long, unsigned char);
+void UpdateBooleanColorAnimation( long);
+void RestoreOriginalColors( void);
+void InstantGoalTransition( void);
+Boolean AutoFadeTo( long, RGBColor *, Boolean);
+Boolean AutoFadeFrom( long, Boolean);
+Boolean AutoMusicFadeTo( long, RGBColor *, Boolean);
+Boolean CustomPictFade( long, long, short, short, WindowPtr);
+Boolean StartCustomPictFade( long, long, short, short, WindowPtr, PaletteHandle *,
+    PaletteHandle *, CTabHandle *, Boolean);
+Boolean EndCustomPictFade( WindowPtr, PaletteHandle *, PaletteHandle *, CTabHandle *,
+    Boolean);
 #pragma options align=reset
 
 #endif // ANTARES_TRANSITIONS_HPP_

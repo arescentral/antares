@@ -119,6 +119,6 @@ STUB0(HideMenuBar, void());
 STUB0(IsMenuBarVisible, bool(), false);
 
 typedef struct { } ReqListRec;
-STUB3(RestoreEntries, void(CTab** table, void*, ReqListRec* recList));
+void RestoreEntries(CTab** table, void*, ReqListRec* recList);
 
 #endif // ANTARES_STUB_QUICKDRAW_H_

@@ -33,7 +33,7 @@ bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouse
 }
 
 // Perform this many clicks in succession at the start of the game.
-const int kClickCount = 2;
+const int kClickCount = 11;
 
 bool Button() {
     static int current_click = 0;
