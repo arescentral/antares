@@ -32,19 +32,8 @@ bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouse
     return true;
 }
 
-// Perform this many clicks in succession at the start of the game.
-const int kClickCount = 11;
-
 bool Button() {
-    static int current_click = 0;
-    static bool clicked = false;
-    if (current_click < kClickCount) {
-        if (clicked) {
-            ++current_click;
-        }
-        clicked = !clicked;
-    }
-    return clicked;
+    return false;
 }
 
 void GetKeys(KeyMap keys) {

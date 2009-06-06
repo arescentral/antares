@@ -17,28 +17,22 @@
 
 #include "FakeTime.hpp"
 
-#include <stdint.h>
-#include <sys/time.h>
 #include <Base.h>
 
-int64_t TickTime() {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return 60.0 * (tv.tv_sec + tv.tv_usec / 1000000.0);
-}
+#include "Fakes.hpp"
 
+static int current_time = 0;
 int TickCount() {
-    static const int kStartTime = TickTime();
-    return TickTime() - kStartTime;
+    if (gAresGlobal->gGameTime > 0) {
+        return current_time + gAresGlobal->gGameTime;
+    } else {
+        return ++current_time;
+    }
 }
 
 void Microseconds(UnsignedWide* wide) {
-    uint64_t time;
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    time = tv.tv_sec * 1000000ull + tv.tv_usec * 1ull;
-    wide->hi = time >> 32;
-    wide->lo = time;
+    wide->hi = 0;
+    wide->lo = TickCount();
 }
 
 void FakeTimeInit() {
