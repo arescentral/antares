@@ -66,9 +66,8 @@ OSErr SndDoCommand(SndChannel* chan, SndCommand* cmd, bool) {
 
 OSErr SndPlay(SndChannel* channel, Handle sound, bool) {
     if (gAresGlobal->gGameTime > 0) {
-        float time = gAresGlobal->gGameTime / 60.0;
         int sound_id = **reinterpret_cast<int**>(sound);
-        fprintf(sound_log, "%f\t%d\t%d\n", time, sound_id, channel->volume);
+        fprintf(sound_log, "%ld\t%d\t%d\n", gAresGlobal->gGameTime, sound_id, channel->volume);
     }
     return noErr;
 }
