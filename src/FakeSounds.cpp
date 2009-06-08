@@ -25,8 +25,11 @@
 #include "FakeHandles.hpp"
 #include "Fakes.hpp"
 
+static int last_id = -1;
 struct SndChannel {
-    int volume;
+    SndChannel()
+        : id(++last_id) { }
+    int id;
 };
 
 OSErr SndNewChannel(SndChannel** chan, long, long, void*) {
@@ -45,13 +48,19 @@ static FILE* sound_log;
 OSErr SndDoImmediate(SndChannel* chan, SndCommand* cmd) {
     switch (cmd->cmd) {
       case quietCmd:
+        if (gAresGlobal->gGameTime > 0) {
+            fprintf(sound_log, "quiet\t%d\t%ld\n", chan->id, gAresGlobal->gGameTime);
+        }
         break;
 
       case flushCmd:
         break;
 
       case ampCmd:
-        chan->volume = cmd->param1;
+        if (gAresGlobal->gGameTime > 0) {
+            fprintf(sound_log, "amp\t%d\t%ld\t%d\n",
+                    chan->id, gAresGlobal->gGameTime, cmd->param1);
+        }
         break;
 
       default:
@@ -67,7 +76,7 @@ OSErr SndDoCommand(SndChannel* chan, SndCommand* cmd, bool) {
 OSErr SndPlay(SndChannel* channel, Handle sound, bool) {
     if (gAresGlobal->gGameTime > 0) {
         int sound_id = **reinterpret_cast<int**>(sound);
-        fprintf(sound_log, "%ld\t%d\t%d\n", gAresGlobal->gGameTime, sound_id, channel->volume);
+        fprintf(sound_log, "play\t%d\t%ld\t%d\n", channel->id, gAresGlobal->gGameTime, sound_id);
     }
     return noErr;
 }
