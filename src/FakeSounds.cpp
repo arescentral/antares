@@ -86,7 +86,8 @@ Handle GetSound(int id) {
 }
 
 void FakeSoundsInit() {
-    sound_log = fopen("sound.log", "w");
+    std::string filename = GetOutputDir() + "/sound.log";
+    sound_log = fopen(filename.c_str(), "w");
     setbuf(sound_log, NULL);
     assert(sound_log);
 }

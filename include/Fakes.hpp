@@ -18,6 +18,7 @@
 #ifndef ANTARES_FAKES_HPP_
 #define ANTARES_FAKES_HPP_
 
+#include <string>
 #include "AresGlobalType.hpp"
 
 template <typename T>
@@ -46,5 +47,7 @@ class scoped_ptr {
 };
 
 extern aresGlobalType* gAresGlobal;
+
+std::string GetOutputDir();
 
 #endif  // ANTARES_FAKES_HPP_

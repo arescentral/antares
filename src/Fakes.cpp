@@ -17,11 +17,23 @@
 
 #include "Fakes.hpp"
 
+#include <string>
+
 #include "FakeDrawing.hpp"
 #include "FakeHandles.hpp"
 #include "FakeMath.hpp"
 #include "FakeSounds.hpp"
 #include "FakeTime.hpp"
+
+int demo_scenario = 23;
+int GetDemoScenario() {
+    return demo_scenario;
+}
+
+std::string output_dir;
+std::string GetOutputDir() {
+    return output_dir;
+}
 
 void ModalDialog(void*, short* item) {
     *item = 1;
@@ -40,9 +52,30 @@ void GetKeys(KeyMap keys) {
     bzero(keys, sizeof(KeyMap));
 }
 
+void Usage() {
+    fprintf(stderr, "usage: ./Antares space-race <dump-prefix>\n"
+                    "       ./Antares the-stars-have-ears <dump-prefix>\n"
+                    "       ./Antares while-the-iron-is-hot <dump-prefix>\n");
+    exit(1);
+}
+
 void FakeInit(int argc, const char** argv) {
-    (void)argc;
-    (void)argv;
+    if (argc == 3) {
+        std::string demo = argv[1];
+        output_dir = argv[2];
+        if (demo == "space-race") {
+            demo_scenario = 23;
+        } else if (demo == "the-stars-have-ears") {
+            demo_scenario = 0;
+        } else if (demo == "while-the-iron-is-hot") {
+            demo_scenario = 5;
+        } else {
+            Usage();
+        }
+    } else {
+        Usage();
+    }
+
     FakeDrawingInit();
     FakeHandlesInit();
     FakeMathInit();

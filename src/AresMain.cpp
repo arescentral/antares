@@ -211,6 +211,7 @@ extern GDHandle theDevice;
 
 //#pragma code68020 off
 
+int GetDemoScenario();
 void Dump();
 void FakeInit(int argc, const char** argv);
 int main(int argc, const char** argv);
@@ -1291,7 +1292,7 @@ void MainLoop (void)
                             {
                                 do
                                 {
-                                    whichScenario = 23;
+                                    whichScenario = GetDemoScenario();
                                     // whichScenario = Randomize( gAresGlobal->levelNum);//Randomize( 30 + 1);
                                     // whichScenario = GetScenarioNumberFromChapterNumber( whichScenario);
                                     gAresGlobal->gReplayData = GetResource( kReplayResType, kReplayResID + whichScenario);

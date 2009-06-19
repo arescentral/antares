@@ -304,9 +304,10 @@ void Dump() {
         }
     }
 
-    char filename[64];
-    sprintf(filename, "dump-%05ld.pnm", gAresGlobal->gGameTime);
-    int fd = open(filename, O_WRONLY | O_CREAT, 0644);
+    char suffix[64];
+    sprintf(suffix, "/%05ld.pnm", gAresGlobal->gGameTime);
+    std::string filename = GetOutputDir() + suffix;
+    int fd = open(filename.c_str(), O_WRONLY | O_CREAT, 0644);
     write(fd, contents.c_str(), contents.size());
     close(fd);
 }
