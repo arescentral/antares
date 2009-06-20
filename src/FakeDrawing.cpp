@@ -24,6 +24,7 @@
 #include <limits>
 #include <string>
 #include <png++/png.hpp>
+#include <sys/stat.h>
 
 #include "FakeHandles.hpp"
 #include "Fakes.hpp"
@@ -304,10 +305,14 @@ void Dump() {
         }
     }
 
-    char suffix[64];
-    sprintf(suffix, "/%05ld.pnm", gAresGlobal->gGameTime);
-    std::string filename = GetOutputDir() + suffix;
-    int fd = open(filename.c_str(), O_WRONLY | O_CREAT, 0644);
+    char basename[64];
+    std::string path = GetOutputDir() + "/screens";
+    mkdir(path.c_str(), 0755);
+
+    int seconds = gAresGlobal->gGameTime / 60;
+    sprintf(basename, "%03dm%02d.pnm", seconds / 60, seconds % 60);
+    path = path + '/' + basename;
+    int fd = open(path.c_str(), O_WRONLY | O_CREAT, 0644);
     write(fd, contents.c_str(), contents.size());
     close(fd);
 }

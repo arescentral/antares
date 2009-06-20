@@ -2911,7 +2911,9 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
             UpdateBooleanColorAnimation( unitsDone);
 //          CheckScenarioConditions( unitsDone);
             gAresGlobal->gFrameCount++;
-            Dump();
+            if (gAresGlobal->gGameTime % 60 == 1) {
+                Dump();
+            }
         }
     }
     exit(0);  // Temporary: exit after finishing demo.
