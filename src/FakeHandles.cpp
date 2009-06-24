@@ -18,6 +18,7 @@
 #include "FakeHandles.hpp"
 
 #include <assert.h>
+#include <glob.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -41,9 +42,9 @@ class AutoClosedFile {
 
     int fd() const { return _fd; }
 
-    bool Open(const char* filename, int oflag, mode_t mode = 0600) {
+    bool Open(const std::string& filename, int oflag, mode_t mode = 0600) {
         Close();
-        _fd = open(filename, oflag, mode);
+        _fd = open(filename.c_str(), oflag, mode);
         return IsValid();
     }
 
@@ -62,7 +63,7 @@ class ResourceData {
     ResourceData(FourCharCode code, int id)
             : _size(0),
               _data(NULL) {
-        char filename[64];
+        char fileglob[64];
         char code_chars[5] = {
             code >> 24,
             code >> 16,
@@ -70,10 +71,25 @@ class ResourceData {
             code,
             '\0',
         };
-        sprintf(filename, "data/original/rsrc/%s/r.%d", code_chars, id);
+        glob_t g;
+        g.gl_offs = 0;
+
+        sprintf(fileglob, "data/original/rsrc/%s/%d.%s", code_chars, id, code_chars);
+        glob(fileglob, GLOB_DOOFFS, NULL, &g);
+
+        sprintf(fileglob, "data/original/rsrc/%s/%d *.%s", code_chars, id, code_chars);
+        glob(fileglob, GLOB_DOOFFS | GLOB_APPEND, NULL, &g);
+
+        if (g.gl_pathc != 1) {
+            perror(fileglob);
+            throw NoSuchResourceException();
+        }
+
+        std::string filename = g.gl_pathv[0];
+        globfree(&g);
 
         if (!_file.Open(filename, O_RDONLY)) {
-            perror(filename);
+            perror(filename.c_str());
             throw NoSuchResourceException();
         }
 
