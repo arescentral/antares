@@ -93,6 +93,7 @@ extern GWorld* gSaveWorld;
 
 Pic** GetPicture(int id);
 
+void Dump();
 void FakeDrawingInit();
 
 #endif  // ANTARES_FAKE_DRAWING_HPP_

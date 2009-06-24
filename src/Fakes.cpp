@@ -35,6 +35,14 @@ std::string GetOutputDir() {
     return output_dir;
 }
 
+bool main_screen_test = false;
+void MainScreenInterfaceTestHack() {
+    if (main_screen_test) {
+        Dump();
+        exit(0);
+    }
+}
+
 void ModalDialog(void*, short* item) {
     *item = 1;
 }
@@ -55,7 +63,8 @@ void GetKeys(KeyMap keys) {
 void Usage() {
     fprintf(stderr, "usage: ./Antares space-race <dump-prefix>\n"
                     "       ./Antares the-stars-have-ears <dump-prefix>\n"
-                    "       ./Antares while-the-iron-is-hot <dump-prefix>\n");
+                    "       ./Antares while-the-iron-is-hot <dump-prefix>\n"
+                    "       ./Antares main-screen <dump-prefix>\n");
     exit(1);
 }
 
@@ -69,6 +78,9 @@ void FakeInit(int argc, const char** argv) {
             demo_scenario = 0;
         } else if (demo == "while-the-iron-is-hot") {
             demo_scenario = 5;
+        } else if (demo == "main-screen") {
+            demo_scenario = 0;
+            main_screen_test = true;
         } else {
             Usage();
         }

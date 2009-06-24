@@ -18,8 +18,10 @@ ALL_LEVELS = ['space-race', 'the-stars-have-ears', 'while-the-iron-is-hot']
 SCRIPT_NAME = os.path.basename(sys.argv[0])
 
 def usage():
-    sys.__stderr__.write('usage: %s [<demo-level> ...]\n' % SCRIPT_NAME)
-    sys.__stderr__.write('       %s -a|--all\n' % SCRIPT_NAME)
+    sys.__stderr__.write('usage: %s <options> [<demo-level> ...]\n' % SCRIPT_NAME)
+    sys.__stderr__.write('       %s <options> -a|--all-levels\n' % SCRIPT_NAME)
+    sys.__stderr__.write('options:\n')
+    sys.__stderr__.write('  -m|--main-screen     also test the appearance of the main screen\n')
     sys.exit(1)
 
 def error_and_usage(description):
@@ -28,14 +30,18 @@ def error_and_usage(description):
 
 def main(argv):
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'a', [ 'all' ])
+        opts, args = getopt.getopt(sys.argv[1:], 'am', [ 'all-levels', 'main-screen' ])
     except getopt.GetoptError, e:
         error_and_usage(str(e))
 
+    test_cases = []
     test_all = False
+    test_main_screen = False
     for opt, val in opts:
-        if opt in ('-a', '--all'):
+        if opt in ('-a', '--all-levels'):
             test_all = True
+        elif opt in ('-m', '--main-screen'):
+            test_main_screen = True
         else:
             assert False, 'unhandled option'
 
@@ -44,8 +50,9 @@ def main(argv):
             usage()
         else:
             args = ALL_LEVELS
+    if test_main_screen:
+        test_cases.append(MainScreen())
 
-    test_cases = []
     for demo_level in args:
         if demo_level not in ALL_LEVELS:
             sys.__stderr__.write('unknown demo level: %r\n' % demo_level)
@@ -103,7 +110,7 @@ class DemoLevel(object):
             stdout, stderr = antares.communicate()
             self.output += stderr
             if antares.returncode != 0:
-                self.output += "Antares failed"
+                self.output += 'Antares failed'
                 return False
 
             diff = subprocess.Popen(
@@ -112,7 +119,37 @@ class DemoLevel(object):
             stdout, stderr = diff.communicate()
             self.output += stdout
             if diff.returncode != 0:
-                self.output += "diff failed"
+                self.output += 'diff failed'
+                return False
+        return True
+
+
+class MainScreen(object):
+
+    def __init__(self):
+        self.name = 'MainScreen()'
+        self.output = None
+
+    def test(self):
+        with NamedTemporaryDir() as dir:
+            self.output = ''
+
+            antares = subprocess.Popen(
+                    ['./Antares', 'main-screen', dir],
+                    stderr=subprocess.PIPE)
+            stdout, stderr = antares.communicate()
+            self.output += stderr
+            if antares.returncode != 0:
+                self.output += 'Antares failed'
+                return False
+
+            diff = subprocess.Popen(
+                    ['diff', '-u', 'test/main-screen.pnm', dir + '/screens/000m00.pnm'],
+                    stdout=subprocess.PIPE)
+            stdout, stderr = diff.communicate()
+            self.output += stdout
+            if diff.returncode != 0:
+                self.output += 'diff failed'
                 return False
         return True
 
@@ -122,9 +159,8 @@ def NamedTemporaryDir():
     dir = tempfile.mkdtemp()
     try:
         yield dir
-    except:
+    finally:
         shutil.rmtree(dir)
-        raise
 
 
 @contextlib.contextmanager
