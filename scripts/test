@@ -53,36 +53,37 @@ def main(argv):
         else:
             test_cases.append(DemoLevel(demo_level))
 
-    print('Updating binary...')
-    jam = subprocess.Popen(['jam'])
-    jam.wait()
-    if jam.returncode != 0:
-        print('...failed')
-        sys.exit(1)
-    else:
-        print('...passed')
+    with Timed():
+        with Timed():
+            print('Updating binary...')
+            jam = subprocess.Popen(['jam'])
+            jam.wait()
+            if jam.returncode != 0:
+                print('...failed')
+                sys.exit(1)
+            else:
+                print('...passed')
 
-    passed_cases = []
-    failed_cases = []
-    for case in test_cases:
-        print('-' * get_screen_width())
-        print('Testing %s...' % case.name)
-        start_time = time.time()
-        if case.test():
-            print('...passed');
-            passed_cases.append(case)
-        else:
-            print(case.output)
-            print('...failed');
-            failed_cases.append(case)
-        print('completed in %f seconds' % (time.time() - start_time))
+        passed_cases = []
+        failed_cases = []
+        for case in test_cases:
+            print('-' * get_screen_width())
+            print('Testing %s...' % case.name)
+            with Timed():
+                if case.test():
+                    print('...passed');
+                    passed_cases.append(case)
+                else:
+                    print(case.output)
+                    print('...failed');
+                    failed_cases.append(case)
 
-    print('=' * get_screen_width())
-    print '%d out of %d test cases succeeded.' % (len(passed_cases), len(test_cases))
-    if failed_cases:
-        print 'The following test cases failed:'
-        for case in failed_cases:
-            print '  %s' % case.name
+        print('=' * get_screen_width())
+        print('%d out of %d test cases succeeded.' % (len(passed_cases), len(test_cases)))
+        if failed_cases:
+            print('The following test cases failed:')
+            for case in failed_cases:
+                print('  %s' % case.name)
 
 
 class DemoLevel(object):
@@ -119,8 +120,18 @@ class DemoLevel(object):
 @contextlib.contextmanager
 def NamedTemporaryDir():
     dir = tempfile.mkdtemp()
-    yield dir
-    shutil.rmtree(dir)
+    try:
+        yield dir
+    except:
+        shutil.rmtree(dir)
+        raise
+
+
+@contextlib.contextmanager
+def Timed():
+    start_time = time.time()
+    yield
+    print('completed in %f seconds' % (time.time() - start_time))
 
 
 def get_screen_width():
