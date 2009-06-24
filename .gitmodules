@@ -1,3 +1,6 @@
 [submodule "data"]
 	path = data
 	url = git://git.sfiera.net/ares-data
+[submodule "test"]
+	path = test
+	url = git://git.sfiera.net/AntaresTestData

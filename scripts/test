@@ -1,0 +1,136 @@
+#!/usr/bin/env python
+
+from __future__ import with_statement
+import contextlib
+import fcntl
+import getopt
+import os
+import shutil
+import struct
+import subprocess
+import sys
+import tempfile
+import termios
+import time
+
+
+ALL_LEVELS = ['space-race', 'the-stars-have-ears', 'while-the-iron-is-hot']
+SCRIPT_NAME = os.path.basename(sys.argv[0])
+
+def usage():
+    sys.__stderr__.write('usage: %s [<demo-level> ...]\n' % SCRIPT_NAME)
+    sys.__stderr__.write('       %s -a|--all\n' % SCRIPT_NAME)
+    sys.exit(1)
+
+def error_and_usage(description):
+    sys.__stderr__.write('%s: %s\n' % (SCRIPT_NAME, description))
+    usage();
+
+def main(argv):
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], 'a', [ 'all' ])
+    except getopt.GetoptError, e:
+        error_and_usage(str(e))
+
+    test_all = False
+    for opt, val in opts:
+        if opt in ('-a', '--all'):
+            test_all = True
+        else:
+            assert False, 'unhandled option'
+
+    if test_all:
+        if args:
+            usage()
+        else:
+            args = ALL_LEVELS
+
+    test_cases = []
+    for demo_level in args:
+        if demo_level not in ALL_LEVELS:
+            sys.__stderr__.write('unknown demo level: %r\n' % demo_level)
+            sys.exit(1)
+        else:
+            test_cases.append(DemoLevel(demo_level))
+
+    print('Updating binary...')
+    jam = subprocess.Popen(['jam'])
+    jam.wait()
+    if jam.returncode != 0:
+        print('...failed')
+        sys.exit(1)
+    else:
+        print('...passed')
+
+    passed_cases = []
+    failed_cases = []
+    for case in test_cases:
+        print('-' * get_screen_width())
+        print('Testing %s...' % case.name)
+        start_time = time.time()
+        if case.test():
+            print('...passed');
+            passed_cases.append(case)
+        else:
+            print(case.output)
+            print('...failed');
+            failed_cases.append(case)
+        print('completed in %f seconds' % (time.time() - start_time))
+
+    print('=' * get_screen_width())
+    print '%d out of %d test cases succeeded.' % (len(passed_cases), len(test_cases))
+    if failed_cases:
+        print 'The following test cases failed:'
+        for case in failed_cases:
+            print '  %s' % case.name
+
+
+class DemoLevel(object):
+
+    def __init__(self, level):
+        self.level = level
+        self.name = 'DemoLevel(%r)' % level
+        self.output = None
+
+    def test(self):
+        with NamedTemporaryDir() as dir:
+            self.output = ''
+
+            antares = subprocess.Popen(
+                    ['./Antares', self.level, dir],
+                    stderr=subprocess.PIPE)
+            stdout, stderr = antares.communicate()
+            self.output += stderr
+            if antares.returncode != 0:
+                self.output += "Antares failed"
+                return False
+
+            diff = subprocess.Popen(
+                    ['diff', '-ru', 'test/%s' % self.level, dir],
+                    stdout=subprocess.PIPE)
+            stdout, stderr = diff.communicate()
+            self.output += stdout
+            if diff.returncode != 0:
+                self.output += "diff failed"
+                return False
+        return True
+
+
+@contextlib.contextmanager
+def NamedTemporaryDir():
+    dir = tempfile.mkdtemp()
+    yield dir
+    shutil.rmtree(dir)
+
+
+def get_screen_width():
+    s = struct.pack('HHHH', 0, 0, 0, 0)
+    try:
+        x = fcntl.ioctl(1, termios.TIOCGWINSZ, s)
+    except IOError:
+        return 80
+    return struct.unpack('HHHH', x)[1]
+
+
+if __name__ == '__main__':
+  main(sys.argv)
