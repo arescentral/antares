@@ -1885,7 +1885,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
     long                    unitsToDo = 0, unitsPassed = 0, unitsDone = 0, resendTime = 0,
                             l1, l2, l3, newGameTime, lastclicktime = 0, scratch,
                             netCount = 0, additionalSeconds = 0;
-    KeyMap              keyMap, lastKeyMap, lastMessageKeyMap;
+    KeyMap              keyMap = { }, lastKeyMap, lastMessageKeyMap;
     Boolean             playerPaused = FALSE, mouseDown = FALSE,
                             waitingForMessage = false,
                             blinkOn = false, enteringMessage = false,
