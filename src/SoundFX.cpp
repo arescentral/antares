@@ -42,7 +42,9 @@
 
 #define kHackRangeMultiplier    0.0025
 
-#define mSmallFixedToVelocity( mvel) (((.125) * (float)(mvel)) / (float)256)
+inline float mSmallFixedToVelocity(Fixed mvel) {
+    return ((.125) * (float)(mvel)) / (float)256;
+}
 
 OSStatus MyPanSoundFromRightToLeft( Handle);
 OSStatus My3DSoundInit( void);

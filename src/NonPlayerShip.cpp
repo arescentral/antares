@@ -76,11 +76,6 @@
 
 #define kDefaultTurnRate        0x00000200
 
-#define mWideLSR( mwide)\
-(mwide).lo >>= (unsigned long)1;\
-if ( (mwide).hi & 0x1) (mwide).lo |= 0x80000000;\
-(mwide).hi >>= (unsigned long)1;
-
 #define kFriendlyColor          GREEN
 #define kHostileColor           RED
 #define kNeutralColor           SKY_BLUE

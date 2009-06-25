@@ -26,10 +26,21 @@
 #include "Assert.h"
 #include "str_bp.h"
 
-#define mChar_is_numeric( m_c) (((m_c) >= '0') && ((m_c) <= '9'))
-#define mChar_is_whitespace( m_c) (((m_c) == ' ') || ((m_c) == '\r') || ((m_c) == '\r'))
-#define mChar_is_alpha( m_c) ((((m_c) >= 'a') && ((m_c) <= 'z')) || (((m_c) >= 'A') && ((m_c) <= 'Z')))
-#define mChar_to_upper(m_c) ((((m_c) >= 'a') && ((m_c) <= 'z')) ? ( ((m_c) - 'a') + 'A') : (m_c))
+inline bool mChar_is_numeric(char m_c) {
+    return (((m_c) >= '0') && ((m_c) <= '9'));
+}
+
+inline bool mChar_is_whitespace(char m_c) {
+    return (((m_c) == ' ') || ((m_c) == '\r') || ((m_c) == '\r'));
+}
+
+inline bool mChar_is_alpha(char m_c) {
+    return ((((m_c) >= 'a') && ((m_c) <= 'z')) || (((m_c) >= 'A') && ((m_c) <= 'Z')));
+}
+
+inline bool mChar_to_upper(char m_c) {
+    return ((((m_c) >= 'a') && ((m_c) <= 'z')) ? ( ((m_c) - 'a') + 'A') : (m_c));
+}
 
 aresVersionType AresVersion_Get_FromString( StringPtr s)
 {

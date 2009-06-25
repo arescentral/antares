@@ -45,8 +45,13 @@
 #define kHandleHandleError      "\pHNHN"
 #define kMaxHandleHandleNum     256L//128L
 
-#define mCheckLock( mhandle) if ( mhandle != nil) HLock( mhandle)
-#define mCheckUnlock( mhandle) if ( mhandle != nil) HUnlock( mhandle)
+inline void mCheckLock(Handle mhandle) {
+    if ( mhandle != nil) HLock( mhandle);
+}
+
+inline void mCheckUnlock(Handle mhandle) {
+    if ( mhandle != nil) HUnlock( mhandle);
+}
 
 struct handleDataType {
     Handle          *hand;                  // if = nil, then no handle

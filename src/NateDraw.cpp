@@ -30,94 +30,107 @@
 #include "SpriteHandling.hpp" // for test byte debugging kludge
 #endif
 
-#define mHBlitz( mdbyte, mrunLen, mcolor, mcount) \
-    mcount = mrunLen; \
-    while ( mcount-- > 0) \
-    { \
-        *(mdbyte++) =mcolor; \
+inline void mHBlitz(unsigned char*& mdbyte, long mrunLen, long mcolor, long mcount) {
+    mcount = mrunLen;
+    while ( mcount-- > 0)
+    {
+        *(mdbyte++) =mcolor;
     }
+}
 
-#define mDrawHorizontalRun( dbyte, xAdvance, runLen, color, drowPlus, count) \
-    count = runLen; \
-    while ( count-- > 0) \
-    { \
-        *dbyte = color; \
-        dbyte += xAdvance; \
-    } \
+inline void mDrawHorizontalRun(
+        unsigned char*& dbyte, long xAdvance, long runLen, long color, long drowPlus, long count) {
+    count = runLen;
+    while ( count-- > 0)
+    {
+        *dbyte = color;
+        dbyte += xAdvance;
+    }
     dbyte += drowPlus;
+}
 
-
-#define mDrawVerticalRun( dbyte, xAdvance, runLen, color, drowPlus, count) \
-    count = runLen; \
-    while ( count-- > 0) \
-    { \
-        *dbyte = color; \
-        dbyte += drowPlus; \
-    } \
+inline void mDrawVerticalRun(
+        unsigned char*& dbyte, long xAdvance, long runLen, long color, long drowPlus, long count) {
+    count = runLen;
+    while ( count-- > 0)
+    {
+        *dbyte = color;
+        dbyte += drowPlus;
+    }
     dbyte += xAdvance;
+}
 
-
-#define mCopyHorizontalRun( dbyte, sbyte, xAdvance, runLen, drowPlus, srowPlus, count) \
-    count = runLen; \
-    while ( count-- > 0) \
-    { \
-        *dbyte = *sbyte; \
-        dbyte += xAdvance; \
-        sbyte += xAdvance; \
-    } \
-    dbyte += drowPlus; \
+inline void mCopyHorizontalRun(
+        unsigned char*& dbyte, unsigned char*& sbyte, long xAdvance, long runLen, long drowPlus,
+        long srowPlus, long count) {
+    count = runLen;
+    while ( count-- > 0)
+    {
+        *dbyte = *sbyte;
+        dbyte += xAdvance;
+        sbyte += xAdvance;
+    }
+    dbyte += drowPlus;
     sbyte += srowPlus;
+}
 
-#define mCopyVerticalRun( dbyte, sbyte, xAdvance, runLen, drowPlus, srowPlus, count) \
-    count = runLen; \
-    while ( count-- > 0) \
-    { \
-        *dbyte = *sbyte; \
-        dbyte += drowPlus; \
-        sbyte += srowPlus; \
-    } \
-    dbyte += xAdvance; \
-    sbyte += xAdvance;
-
-#define mDashHorizontalRun( dbyte, xAdvance, runLen, color, drowPlus, count, mdashon, mdashoff, mdashcount) \
-    count = runLen; \
-    do \
-    { \
-        while (( count-- > 0) && ( mdashcount < mdashon))\
-        { \
-            *dbyte = color; \
-            dbyte += xAdvance; \
-            mdashcount++; \
-        } \
-        while (( count-- > 0) && ( mdashcount < mdashoff))\
-        { \
-            dbyte += xAdvance; \
-            mdashcount++; \
-        } \
-        if ( mdashcount == mdashoff) mdashcount = 0; \
-    } while ( count > 0);\
-    dbyte += drowPlus;
-
-
-#define mDashVerticalRun( dbyte, xAdvance, runLen, color, drowPlus, count, mdashon, mdashoff, mdashcount) \
-    count = runLen; \
-    do \
-    { \
-        while (( count-- > 0) && ( mdashcount < mdashon)) \
-        { \
-            *dbyte = color; \
-            dbyte += drowPlus; \
-            mdashcount++; \
-        } \
-        while (( count-- > 0) && ( mdashcount < mdashon)) \
-        { \
-            dbyte += drowPlus; \
-            mdashcount++; \
-        } \
-        if ( mdashcount == mdashoff) mdashcount = 0; \
-    } while ( count > 0);\
+inline void mCopyVerticalRun(
+        unsigned char*& dbyte, unsigned char*& sbyte, long xAdvance, long runLen, long drowPlus,
+        long srowPlus, long count) {
+    count = runLen;
+    while ( count-- > 0)
+    {
+        *dbyte = *sbyte;
+        dbyte += drowPlus;
+        sbyte += srowPlus;
+    }
     dbyte += xAdvance;
+    sbyte += xAdvance;
+}
 
+inline void mDashHorizontalRun(
+        unsigned char*& dbyte, long xAdvance, long runLen, long color, long drowPlus, long count,
+        long mdashon, long mdashoff, long mdashcount) {
+    count = runLen;
+    do
+    {
+        while (( count-- > 0) && ( mdashcount < mdashon))
+        {
+            *dbyte = color;
+            dbyte += xAdvance;
+            mdashcount++;
+        }
+        while (( count-- > 0) && ( mdashcount < mdashoff))
+        {
+            dbyte += xAdvance;
+            mdashcount++;
+        }
+        if ( mdashcount == mdashoff) mdashcount = 0;
+    } while ( count > 0);
+    dbyte += drowPlus;
+}
+
+inline void mDashVerticalRun(
+        unsigned char*& dbyte, long xAdvance, long runLen, long color, long drowPlus, long count,
+        long mdashon, long mdashoff, long mdashcount) {
+    count = runLen;
+    do
+    {
+        while (( count-- > 0) && ( mdashcount < mdashon))
+        {
+            *dbyte = color;
+            dbyte += drowPlus;
+            mdashcount++;
+        }
+        while (( count-- > 0) && ( mdashcount < mdashon))
+        {
+            dbyte += drowPlus;
+            mdashcount++;
+        }
+        if ( mdashcount == mdashoff) mdashcount = 0;
+    } while ( count > 0);
+    dbyte += xAdvance;
+}
 
 // DrawNateRect: Direct-draws a rectangle
 // hoff & voff are the h & v offsets frop the left and top edges of the destination map
@@ -690,7 +703,7 @@ void DrawNateTriangleUpClipped( PixMap *destPix, longRect *destRect,
         dbyte += rightPlus;
         *dbyte = color;
 */
-        mHBlitz( dbyte, rightPlus + 1, color, count)
+        mHBlitz( dbyte, rightPlus + 1, color, count);
         dbyte--;
     }
     drowPlus += 1;
@@ -704,7 +717,7 @@ void DrawNateTriangleUpClipped( PixMap *destPix, longRect *destRect,
         dbyte += rightPlus;
         *dbyte = color;
 */
-        mHBlitz( dbyte, rightPlus + 1, color, count)
+        mHBlitz( dbyte, rightPlus + 1, color, count);
         dbyte--;
 
         if ( rightPlus > 0)
@@ -714,7 +727,7 @@ void DrawNateTriangleUpClipped( PixMap *destPix, longRect *destRect,
             dbyte += rightPlus;
             *dbyte = color;
 */
-            mHBlitz( dbyte, rightPlus + 1, color, count)
+            mHBlitz( dbyte, rightPlus + 1, color, count);
             dbyte--;
         }
 
@@ -814,7 +827,7 @@ void DrawNatePlusClipped( PixMap *destPix, longRect *destRect,
         x = 2;
         while ( x < half)
         {
-            mHBlitz( dbyte, 3, color, count)
+            mHBlitz( dbyte, 3, color, count);
             dbyte += drowPlus - 3;
             x++;
         }
@@ -822,7 +835,7 @@ void DrawNatePlusClipped( PixMap *destPix, longRect *destRect,
         x = 0;
         while ( x < 3)
         {
-            mHBlitz( dbyte, trueWidth, color, count)
+            mHBlitz( dbyte, trueWidth, color, count);
             dbyte += drowPlus - trueWidth;
             x++;
         }
@@ -830,7 +843,7 @@ void DrawNatePlusClipped( PixMap *destPix, longRect *destRect,
         x = 2;
         while ( x < half)
         {
-            mHBlitz( dbyte, 3, color, count)
+            mHBlitz( dbyte, 3, color, count);
             dbyte += drowPlus - 3;
             x++;
         }
@@ -986,7 +999,7 @@ void DrawNateDiamondClipped( PixMap *destPix, longRect *destRect,
         dbyte += rightPlus;
         *dbyte = color;
 */
-        mHBlitz( dbyte, rightPlus + 1, color, count)
+        mHBlitz( dbyte, rightPlus + 1, color, count);
         dbyte--;
 
         dbyte += drowPlus;
@@ -1011,7 +1024,7 @@ void DrawNateDiamondClipped( PixMap *destPix, longRect *destRect,
         dbyte += rightPlus;
         *dbyte = color;
 */
-        mHBlitz( dbyte, rightPlus + 1, color, count)
+        mHBlitz( dbyte, rightPlus + 1, color, count);
         dbyte--;
 
         dbyte += drowPlus;
@@ -1634,7 +1647,7 @@ void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
 #ifdef kByteLevelTesting
         TestByte( (char *)dbyte, destPix, "\pVRUN1");
 #endif
-        mDrawVerticalRun( dbyte, XAdvance, InitialPixelCount, Color, drowPlus, Temp)
+        mDrawVerticalRun( dbyte, XAdvance, InitialPixelCount, Color, drowPlus, Temp);
 
 #ifdef kByteLevelTesting
         TestByte( (char *)dbyte, destPix, "\pVRUN2");
@@ -1946,7 +1959,7 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
 #ifdef kByteLevelTesting
         TestByte( (char *)dbyte, destPix, "\pVRUN1");
 #endif
-        mCopyVerticalRun( dbyte, sbyte, XAdvance, InitialPixelCount, drowPlus, srowPlus, Temp)
+        mCopyVerticalRun( dbyte, sbyte, XAdvance, InitialPixelCount, drowPlus, srowPlus, Temp);
 
 #ifdef kByteLevelTesting
         TestByte( (char *)dbyte, destPix, "\pVRUN2");
@@ -2319,7 +2332,7 @@ void DashNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
             ErrorTerm += XDelta;
         }
         // Draw the first, partial run of pixels
-        mDashVerticalRun( dbyte, XAdvance, InitialPixelCount, Color, drowPlus, Temp, dashon, dashoff, dashcount)
+        mDashVerticalRun( dbyte, XAdvance, InitialPixelCount, Color, drowPlus, Temp, dashon, dashoff, dashcount);
 
         // Draw all full runs
         for (i=0; i<(XDelta-1); i++)

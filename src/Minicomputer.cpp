@@ -172,40 +172,46 @@
 
 #define kMaxShipBuffer          40
 
-#define mBlackMiniScreenLine( mtop, mlinenum, mleft, mright, mbounds, mpixbase)\
-mbounds.left = kMiniScreenLeft + mleft;\
-mbounds.top = mtop + mlinenum * gDirectText->height;\
-mbounds.right = kMiniScreenLeft + mright;\
-mbounds.bottom = mbounds.top + gDirectText->height;\
-DrawNateRect( *mpixbase, &mbounds, 0, 0, BLACK);
+inline void mBlackMiniScreenLine(
+        long mtop, long mlinenum, long mleft, long mright, longRect& mbounds, PixMap** mpixbase) {
+    mbounds.left = kMiniScreenLeft + mleft;
+    mbounds.top = mtop + mlinenum * gDirectText->height;
+    mbounds.right = kMiniScreenLeft + mright;
+    mbounds.bottom = mbounds.top + gDirectText->height;
+    DrawNateRect( *mpixbase, &mbounds, 0, 0, BLACK);
+}
 
-#define mGetLineNumFromV( mV) (((mV) - (kMiniScreenTop + gAresGlobal->gInstrumentTop)) / gDirectText->height)
+inline long mGetLineNumFromV(long mV) {
+    return (((mV) - (kMiniScreenTop + gAresGlobal->gInstrumentTop)) / gDirectText->height);
+}
 
 // for copying the fields of a space object relevant to the miniscreens:
-#define mCopyMiniSpaceObject( mdestobject, msourceobject)\
-(mdestobject).id = (msourceobject).id;\
-(mdestobject).beamType = (msourceobject).beamType;\
-(mdestobject).pulseType = (msourceobject).pulseType;\
-(mdestobject).specialType = (msourceobject).specialType;\
-(mdestobject).destinationLocation.h = (msourceobject).destinationLocation.h;\
-(mdestobject).destinationLocation.v = (msourceobject).destinationLocation.v;\
-(mdestobject).destinationObject = (msourceobject).destinationObject;\
-(mdestobject).destObjectPtr = (msourceobject).destObjectPtr;\
-(mdestobject).health = (msourceobject).health;\
-(mdestobject).energy = (msourceobject).energy;\
-(mdestobject).whichBaseObject = (msourceobject).whichBaseObject;\
-(mdestobject).pixResID = (msourceobject).pixResID;\
-(mdestobject).attributes = (msourceobject).attributes;\
-(mdestobject).location = (msourceobject).location;\
-(mdestobject).owner = (msourceobject).owner;\
-(mdestobject).nextFarObject = (msourceobject).nextFarObject;\
-(mdestobject).distanceGrid = (msourceobject).distanceGrid;\
-(mdestobject).nextNearObject = (msourceobject).nextNearObject;\
-(mdestobject).collisionGrid = (msourceobject).collisionGrid;\
-(mdestobject).remoteFriendStrength = (msourceobject).remoteFriendStrength;\
-(mdestobject).remoteFoeStrength = (msourceobject).remoteFoeStrength;\
-(mdestobject).escortStrength = (msourceobject).escortStrength;\
-(mdestobject).baseType = (msourceobject).baseType;
+inline void mCopyMiniSpaceObject(
+        spaceObjectType& mdestobject, const spaceObjectType& msourceobject) {
+    (mdestobject).id = (msourceobject).id;
+    (mdestobject).beamType = (msourceobject).beamType;
+    (mdestobject).pulseType = (msourceobject).pulseType;
+    (mdestobject).specialType = (msourceobject).specialType;
+    (mdestobject).destinationLocation.h = (msourceobject).destinationLocation.h;
+    (mdestobject).destinationLocation.v = (msourceobject).destinationLocation.v;
+    (mdestobject).destinationObject = (msourceobject).destinationObject;
+    (mdestobject).destObjectPtr = (msourceobject).destObjectPtr;
+    (mdestobject).health = (msourceobject).health;
+    (mdestobject).energy = (msourceobject).energy;
+    (mdestobject).whichBaseObject = (msourceobject).whichBaseObject;
+    (mdestobject).pixResID = (msourceobject).pixResID;
+    (mdestobject).attributes = (msourceobject).attributes;
+    (mdestobject).location = (msourceobject).location;
+    (mdestobject).owner = (msourceobject).owner;
+    (mdestobject).nextFarObject = (msourceobject).nextFarObject;
+    (mdestobject).distanceGrid = (msourceobject).distanceGrid;
+    (mdestobject).nextNearObject = (msourceobject).nextNearObject;
+    (mdestobject).collisionGrid = (msourceobject).collisionGrid;
+    (mdestobject).remoteFriendStrength = (msourceobject).remoteFriendStrength;
+    (mdestobject).remoteFoeStrength = (msourceobject).remoteFoeStrength;
+    (mdestobject).escortStrength = (msourceobject).escortStrength;
+    (mdestobject).baseType = (msourceobject).baseType;
+}
 
 enum lineKindType {
     plainLineKind = 0,
@@ -239,25 +245,30 @@ struct miniScreenLineType {
     Ptr             sourceData;
 };
 
-#define mCopyBlankLineString( mline, mchar, mstring, mslen, mlinelen)\
-mchar = mstring;\
-mslen = *mchar;\
-mchar++;\
-mlinelen = 1;\
-while (( mslen > 0) && ( mlinelen <= kMiniScreenCharWidth))\
-{\
-    mline->string[mlinelen] = *mchar;\
-    mchar++;\
-    mlinelen++;\
-    mslen--;\
-}\
-while ( mlinelen <= kMiniScreenCharWidth)\
-{\
-    mline->string[mlinelen] = kAnyCharSpace;\
-    mlinelen++;\
+inline void mCopyBlankLineString(
+        miniScreenLineType* mline, anyCharType*& mchar, anyCharType* mstring, short& mslen,
+        short& mlinelen) {
+    mchar = mstring;
+    mslen = *mchar;
+    mchar++;
+    mlinelen = 1;
+    while (( mslen > 0) && ( mlinelen <= kMiniScreenCharWidth))
+    {
+        mline->string[mlinelen] = *mchar;
+        mchar++;
+        mlinelen++;
+        mslen--;
+    }
+    while ( mlinelen <= kMiniScreenCharWidth)
+    {
+        mline->string[mlinelen] = kAnyCharSpace;
+        mlinelen++;
+    }
 }
 
-#define mGetMiniObjectPtr( mwhich) (spaceObjectType *)*gAresGlobal->gMiniScreenData.objectData + (long)mwhich
+inline spaceObjectType* mGetMiniObjectPtr(long mwhich) {
+    return (spaceObjectType *)*gAresGlobal->gMiniScreenData.objectData + (long)mwhich;
+}
 
 extern aresGlobalType   *gAresGlobal;
 extern  GWorldPtr       gOffWorld, gRealWorld, gSaveWorld;
@@ -1127,7 +1138,7 @@ void MiniComputerHandleNull( long unitsToDo)
         if ( count >= 0)
         {
             realObject = (spaceObjectType *)*gSpaceObjectData + count;
-            mCopyMiniSpaceObject( newObject, *realObject)
+            mCopyMiniSpaceObject( newObject, *realObject);
         } else
         {
             newObject.id = -1;
@@ -1151,7 +1162,7 @@ void MiniComputerHandleNull( long unitsToDo)
         if ( count >= 0)
         {
             realObject = (spaceObjectType *)*gSpaceObjectData + count;
-            mCopyMiniSpaceObject( newObject, *realObject)
+            mCopyMiniSpaceObject( newObject, *realObject);
         } else
         {
             newObject.id = -1;
@@ -1479,7 +1490,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     if ( oldObject->id != newObject->id)
     {
 
-        mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, 0, 0, kMiniScreenWidth, lRect, offPixBase)
+        mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, 0, 0, kMiniScreenWidth, lRect, offPixBase);
         mGetTranslateColorShade( headerColor, LIGHT, color, transColor);
         mGetTranslateColorShade( headerColor, VERY_LIGHT, lightcolor, transColor);
         mGetTranslateColorShade( headerColor, MEDIUM, darkcolor, transColor);
@@ -1497,7 +1508,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         if ( newObject->attributes & kIsDestination)
         {
             // blacken the line for the object type name
-            mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth, lRect, offPixBase)
+            mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth, lRect, offPixBase);
 
             // get the color for writing the name
             mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, color, transColor);
@@ -1522,7 +1533,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         {
 
             // blacken the line for the object type name
-            mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth, lRect, offPixBase)
+            mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth, lRect, offPixBase);
 
             if ( newObject->whichBaseObject >= 0)
             {
@@ -1729,7 +1740,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     if ( oldObject->beamType != newObject->beamType)
     {
         // blacken the line for the weapon1 name
-        mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, offPixBase)
+        mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, offPixBase);
 
         // get the color for writing the name
         mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, color, transColor);
@@ -1757,7 +1768,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     if ( oldObject->pulseType != newObject->pulseType)
     {
         // blacken the line for the weapon1 name
-        mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, offPixBase)
+        mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, offPixBase);
 
         // get the color for writing the name
         mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, color, transColor);
@@ -1785,7 +1796,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     if (( oldObject->specialType != newObject->specialType) && ( ! (newObject->attributes & kIsDestination)))
     {
         // blacken the line for the weapon1 name
-        mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, offPixBase)
+        mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, offPixBase);
 
         // get the color for writing the name
         mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, color, transColor);
@@ -1813,7 +1824,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     if ( oldObject->destinationObject != newObject->destinationObject)
     {
         // blacken the line for the weapon1 name
-        mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniDestLineNum, 0, kMiniScreenWidth, lRect, offPixBase)
+        mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniDestLineNum, 0, kMiniScreenWidth, lRect, offPixBase);
 
         // move to the 1st line in the selection miniscreen
         MoveTo( lRect.left, lRect.top + gDirectText->ascent);
@@ -1867,7 +1878,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     // copy the dirty rect
     ChunkCopyPixMapToScreenPixMap( *offPixBase, &mRect, *thePixMapHandle);
 
-    mCopyMiniSpaceObject( *oldObject, *newObject)
+    mCopyMiniSpaceObject( *oldObject, *newObject);
 }
 
 void MiniComputerDoAccept( void)
@@ -2294,7 +2305,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
         if ( buildAtObjectNum >= 0)
         {
             buildAtObject = mGetDestObjectBalancePtr( buildAtObjectNum);
-            mCopyBlankLineString( line, namechar, buildAtObject->name, namelen, linelen)
+            mCopyBlankLineString( line, namechar, buildAtObject->name, namelen, linelen);
 
             line = (miniScreenLineType *)*gAresGlobal->gMiniScreenData.lineData + kBuildScreenFirstTypeLine;
             lineNum = kBuildScreenFirstTypeLine;
@@ -2308,7 +2319,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
                 {
                     GetIndString( s, kSpaceObjectNameResID, baseNum + 1);
 
-                    mCopyBlankLineString( line, namechar, s, namelen, linelen)
+                    mCopyBlankLineString( line, namechar, s, namelen, linelen);
                     if ( buildObject->price > mFixedToLong(admiral->cash))
                         line->selectable = selectDim;
                     else line->selectable = selectable;

@@ -40,26 +40,9 @@
 //#define   kDebugFileActive
 #define kDebugError         "\pDEBG"
 
-#define mFixDebugFileSize( moldsize, mplussize, muselen)\
-moldsize = GetHandleSize( gDebugData);\
-if ( (moldsize + mplussize) > kMaxDebugFileSize)\
-{\
-    muselen = kMinDebugFileSize - mplussize;\
-    BlockMove( *gDebugData + ((moldsize + mplussize) - kMinDebugFileSize), *gDebugData,\
-        muselen);\
-    SetHandleSize( gDebugData, kMinDebugFileSize);\
-} else\
-{\
-    muselen = moldsize;\
-    SetHandleSize( gDebugData, fileLen + (long)*sc);\
-}
-
 extern GDHandle     theDevice;
 
 WindowPtr   gDebugWindow = nil;
-#ifdef kDebugFileActive
-Handle      gDebugData = nil;
-#endif
 
 void GetDeviceRect( GDHandle, Rect *);
 

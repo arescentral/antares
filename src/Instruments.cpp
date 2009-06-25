@@ -125,7 +125,11 @@
 
 #define kMouseSleepTime     60
 
-#define mWideASR8( mwide) (mwide).lo >>= (unsigned long)8; (mwide).lo |= (mwide).hi << (unsigned long)24; (mwide).hi >>= (unsigned long)8;
+inline void mWideASR8(UnsignedWide& mwide) {
+    (mwide).lo >>= (unsigned long)8;
+    (mwide).lo |= (mwide).hi << (unsigned long)24;
+    (mwide).hi >>= (unsigned long)8;
+}
 
 #define kSectorLineBrightness   DARKER
 
@@ -462,7 +466,7 @@ void UpdateRadar( long unitsDone)
                     do
                     {
                         rootCorrect += 4;
-                        mWideASR8( hugeDistance)
+                        mWideASR8( hugeDistance);
                     } while ( hugeDistance.hi);
                     bestScale = lsqrt( hugeDistance.lo);
                     bestScale <<= rootCorrect;
@@ -520,7 +524,7 @@ void UpdateRadar( long unitsDone)
                     do
                     {
                         rootCorrect += 4;
-                        mWideASR8( tempWide)
+                        mWideASR8( tempWide);
                     } while ( tempWide.hi);
                     bestScale = lsqrt( tempWide.lo);
                     bestScale <<= rootCorrect;

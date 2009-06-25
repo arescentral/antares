@@ -344,7 +344,13 @@
 
 #define mPlayScreenSound            PlayVolumeSound( kComputerBeep3, kMediumLowVolume, kShortPersistence, kMustPlaySound)
 
-#define mDoubleDigitize( mstring) if ( mstring[0]==1) { mstring[0]=2; mstring[2]=mstring[1]; mstring[1]='0';}
+inline void mDoubleDigitize(unsigned char* mstring) {
+    if (mstring[0] == 1) {
+        mstring[0] = 2;
+        mstring[2] = mstring[1];
+        mstring[1] = '0';
+    }
+}
 
 extern aresGlobalType           *gAresGlobal;
 extern netStatusType            gNetworkStatus;
