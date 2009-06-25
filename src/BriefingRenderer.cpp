@@ -235,7 +235,7 @@ void GetInitialObjectSpriteData( long whichScenario, long whichObject,
     spriteRect->right = spriteRect->left = -1;
     aSpritePix->data = nil;
 
-    mGetRealObjectFromInitial( sObject, initial, whichObject)
+    mGetRealObjectFromInitial( sObject, initial, whichObject);
 
     if ( sObject != nil)
     {

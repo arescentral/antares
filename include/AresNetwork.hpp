@@ -28,9 +28,6 @@
 
 #define kAresNetwork
 
-#define mSameAddress( a1, a2) (((a1)->aNet == (a2)->aNet) && ((a1)->aNode == (a2)->aNode) &&\
-                                ((a1)->aSocket == (a2)->aSocket))
-
 #define kMaxNetPlayer           16
 #define kMaxAvailableHost       16
 #define kMaxAvailableClient     16

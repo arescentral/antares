@@ -104,7 +104,7 @@ int InitScrollStars( void)
     MoveHHi( gAresGlobal->gScrollStarData);
     HLock( gAresGlobal->gScrollStarData);
     */
-    mHandleLockAndRegister( gAresGlobal->gScrollStarData, nil, nil, CorrectScrollStarObject, "\pgAresGlobal->gScrollStarData")
+    mHandleLockAndRegister( gAresGlobal->gScrollStarData, nil, nil, CorrectScrollStarObject, "\pgAresGlobal->gScrollStarData");
 
     star = ( scrollStarType *)*gAresGlobal->gScrollStarData;
     for ( i = 0; i < kAllStarNum; i++)
@@ -404,9 +404,9 @@ void DrawScrollStars( Boolean warp)
     mediumColor = GetTranslateColorShade( kStarColor, LIGHT);   //kStarColor
     fastColor = GetTranslateColorShade( kStarColor, LIGHTER);
 */
-    mGetTranslateColorShade( kStarColor, MEDIUM, slowColor, transColor)
-    mGetTranslateColorShade( kStarColor, LIGHT, mediumColor, transColor)
-    mGetTranslateColorShade( kStarColor, LIGHTER, fastColor, transColor)
+    mGetTranslateColorShade( kStarColor, MEDIUM, slowColor, transColor);
+    mGetTranslateColorShade( kStarColor, LIGHT, mediumColor, transColor);
+    mGetTranslateColorShade( kStarColor, LIGHTER, fastColor, transColor);
 
     mGetRowBytes( rowBytes, *offMap);
     bounds.left = lastBounds.left = CLIP_LEFT;
@@ -539,7 +539,7 @@ void DrawScrollStars( Boolean warp)
                 if ( !((star->location.h < CLIP_LEFT) || ( star->location.h >= CLIP_RIGHT) ||
                     ( star->location.v < CLIP_TOP) ||  ( star->location.v >= CLIP_BOTTOM)))
                 {
-                    mGetTranslateColorShade( star->color, (star->age >> kSparkAgeToShadeShift) + 1, slowColor, transColor)
+                    mGetTranslateColorShade( star->color, (star->age >> kSparkAgeToShadeShift) + 1, slowColor, transColor);
                     mSetNatePixel( dByte, rowBytes, star->location.h, star->location.v, 0,
                         0, *offMap, slowColor);
                 }
@@ -583,9 +583,9 @@ void ShowScrollStars( Boolean warp)
     mediumColor = GetTranslateColorShade( kStarColor, LIGHT);   //kStarColor
     fastColor = GetTranslateColorShade( kStarColor, LIGHTER);
 */
-    mGetTranslateColorShade( kStarColor, MEDIUM, slowColor, transColor)
-    mGetTranslateColorShade( kStarColor, LIGHT, mediumColor, transColor)
-    mGetTranslateColorShade( kStarColor, LIGHTER, fastColor, transColor)
+    mGetTranslateColorShade( kStarColor, MEDIUM, slowColor, transColor);
+    mGetTranslateColorShade( kStarColor, LIGHT, mediumColor, transColor);
+    mGetTranslateColorShade( kStarColor, LIGHTER, fastColor, transColor);
 
     mGetRowBytes( srowBytes, *sourceMap);
     mGetRowBytes( drowBytes, *thePixMapHandle);
@@ -744,7 +744,7 @@ void ShowScrollStars( Boolean warp)
                 if ( !((star->location.h < CLIP_LEFT) || ( star->location.h >= CLIP_RIGHT) ||
                     ( star->location.v < CLIP_TOP) ||  ( star->location.v >= CLIP_BOTTOM)))
                 {
-/*                  mGetTranslateColorShade( star->color, star->age >> kSparkAgeToShadeShift, slowColor, transColor)
+/*                  mGetTranslateColorShade( star->color, star->age >> kSparkAgeToShadeShift, slowColor, transColor);
                     mSetNatePixel( dByte, rowBytes, star->location.h, star->location.v, gNatePortLeft << 2,
                         gNatePortTop, *thePixMapHandle, slowColor)
 */
@@ -1148,7 +1148,7 @@ void Draw3DStars( Boolean warp, longRect *bounds, PixMapHandle destMap)
                 else if ( shade > 15) color = 0x00;
                 else
                 {
-                    mGetTranslateColorShade( GRAY, shade, color, transColor)
+                    mGetTranslateColorShade( GRAY, shade, color, transColor);
                 }
                 if ( !warp)
                 {

@@ -390,8 +390,8 @@ void ShowHintLine( Point fromWhere, Point toWhere,
     gSpriteCursor->thisLineEnd = toWhere;
     gSpriteCursor->thisShowLine = true;
 
-    mGetTranslateColorShade( color, brightness, gSpriteCursor->thisLineColor, transColor)
-    mGetTranslateColorShade( color, VERY_DARK, gSpriteCursor->thisLineColorDark, transColor)
+    mGetTranslateColorShade( color, brightness, gSpriteCursor->thisLineColor, transColor);
+    mGetTranslateColorShade( color, VERY_DARK, gSpriteCursor->thisLineColorDark, transColor);
 
 }
 

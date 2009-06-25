@@ -153,7 +153,7 @@ OSErr EF_OpenExternalFile( void)
 
     DetachResource( gAresGlobal->gScenarioData);
 
-    mDataHandleLockAndRegister( gAresGlobal->gScenarioData, nil, nil, CorrectThisScenarioPtr, "\pgAresGlobal->gScenarioData")
+    mDataHandleLockAndRegister( gAresGlobal->gScenarioData, nil, nil, CorrectThisScenarioPtr, "\pgAresGlobal->gScenarioData");
 
     gAresGlobal->scenarioNum = GetHandleSize( gAresGlobal->gScenarioData) /
         sizeof( scenarioType);
@@ -166,7 +166,7 @@ OSErr EF_OpenExternalFile( void)
     }
     DetachResource( gAresGlobal->gScenarioInitialData);
 
-    mDataHandleLockAndRegister( gAresGlobal->gScenarioInitialData, nil, nil, nil, "\pgAresGlobal->gScenarioInitialData")
+    mDataHandleLockAndRegister( gAresGlobal->gScenarioInitialData, nil, nil, nil, "\pgAresGlobal->gScenarioInitialData");
 
     gAresGlobal->maxScenarioInitial = GetHandleSize(
         gAresGlobal->gScenarioInitialData) / sizeof( scenarioInitialType);
@@ -179,7 +179,7 @@ OSErr EF_OpenExternalFile( void)
     }
     DetachResource( gAresGlobal->gScenarioConditionData);
 
-    mDataHandleLockAndRegister( gAresGlobal->gScenarioConditionData, nil, nil, nil, "\pgAresGlobal->gScenarioConditionData")
+    mDataHandleLockAndRegister( gAresGlobal->gScenarioConditionData, nil, nil, nil, "\pgAresGlobal->gScenarioConditionData");
 
     gAresGlobal->maxScenarioCondition = GetHandleSize(
         gAresGlobal->gScenarioConditionData) / sizeof( scenarioConditionType);
@@ -192,7 +192,7 @@ OSErr EF_OpenExternalFile( void)
     }
     DetachResource( gAresGlobal->gScenarioBriefData);
 
-    mDataHandleLockAndRegister( gAresGlobal->gScenarioBriefData, nil, nil, nil, "\pgAresGlobal->gScenarioBriefData")
+    mDataHandleLockAndRegister( gAresGlobal->gScenarioBriefData, nil, nil, nil, "\pgAresGlobal->gScenarioBriefData");
 
     gAresGlobal->maxScenarioBrief = GetHandleSize(
         gAresGlobal->gScenarioBriefData) / sizeof( briefPointType);
@@ -208,7 +208,7 @@ OSErr EF_OpenExternalFile( void)
         }
         DetachResource( gAresGlobal->gRaceData);
 
-        mDataHandleLockAndRegister( gAresGlobal->gRaceData, nil, nil, nil, "\pgAresGlobal->gRaceData")
+        mDataHandleLockAndRegister( gAresGlobal->gRaceData, nil, nil, nil, "\pgAresGlobal->gRaceData");
     }
 
     // object stuff
@@ -221,7 +221,7 @@ OSErr EF_OpenExternalFile( void)
 
     DetachResource( gBaseObjectData);
 
-    mDataHandleLockAndRegister( gBaseObjectData, nil, nil, nil, "\pgBaseObjectData")
+    mDataHandleLockAndRegister( gBaseObjectData, nil, nil, nil, "\pgBaseObjectData");
 
     gAresGlobal->maxBaseObject = GetHandleSize( gBaseObjectData) /
         sizeof( baseObjectType);
@@ -233,7 +233,7 @@ OSErr EF_OpenExternalFile( void)
         return( MEMORY_ERROR);
     }
     DetachResource( gObjectActionData);
-    mDataHandleLockAndRegister( gObjectActionData, nil, nil, ResolveObjectActionData, "\pgObjectActionData")
+    mDataHandleLockAndRegister( gObjectActionData, nil, nil, ResolveObjectActionData, "\pgObjectActionData");
 
     gAresGlobal->maxObjectAction = GetHandleSize( gObjectActionData)
         / sizeof( objectActionType);

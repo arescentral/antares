@@ -74,7 +74,7 @@ int RotationInit( void)
         MoveHHi( gRotTable);
         HLock( gRotTable);
         */
-        mDataHandleLockAndRegister( gRotTable, nil, nil, nil, "\pgRotTable")
+        mDataHandleLockAndRegister( gRotTable, nil, nil, nil, "\pgRotTable");
 
     }
 

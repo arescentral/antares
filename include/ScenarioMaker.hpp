@@ -20,8 +20,11 @@
 
 #include <Base.h>
 
+#include "AresGlobalType.hpp"
+#include "Debug.hpp"
 #include "NateDraw.hpp"
 #include "Scenario.hpp"
+#include "SpaceObject.hpp"
 
 #pragma options align=mac68k
 
@@ -51,61 +54,92 @@
 #define kScenarioBriefResType   'snbf'
 #define kScenarioBriefResID     500
 
+extern scenarioType* gThisScenario;
+extern Handle gObjectActionData;
+extern Handle gSpaceObjectData;
+extern aresGlobalType* gAresGlobal;
 
-#define mGetRealAdmiralNum( mplayernum) gThisScenario->player[mplayernum].admiralNumber
+inline int mGetRealAdmiralNum(int mplayernum) {
+    return gThisScenario->player[mplayernum].admiralNumber;
+}
 
-#define mGetActionFromBaseTypeNum( mactPtr, mbaseObjPtr, mactionType, mactionNum)\
-if ( (mactionType) == kDestroyActionType)\
-{\
-    if ( mactionNum >= ((mbaseObjPtr)->destroyActionNum & kDestroyActionNotMask)) mactPtr = nil;\
-    else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->destroyAction + (long)mactionNum;\
-} else if ( (mactionType) == kExpireActionType) \
-{\
-    if ( mactionNum >= ((mbaseObjPtr)->expireActionNum  & kDestroyActionNotMask)) mactPtr = nil;\
-    else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->expireAction + (long)mactionNum;\
-} else if ( (mactionType) == kCreateActionType)\
-{\
-    if ( mactionNum >= (mbaseObjPtr)->createActionNum) mactPtr = nil;\
-    else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->createAction + (long)mactionNum;\
-} else if ( (mactionType) == kCollideActionType)\
-{\
-    if ( mactionNum >= (mbaseObjPtr)->collideActionNum) mactPtr = nil;\
-    else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->collideAction + (long)mactionNum;\
-} else if ( (mactionType) == kActivateActionType)\
-{\
-    if ( mactionNum >= ((mbaseObjPtr)->activateActionNum & kPeriodicActionNotMask)) mactPtr = nil;\
-    else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->activateAction + (long)mactionNum;\
-} else if ( (mactionType) == kArriveActionType)\
-{\
-        mWriteDebugString("\pArrive Action:");\
-        WriteDebugLong( mactionNum);\
-        WriteDebugLong( (mbaseObjPtr)->arriveActionNum);\
-    if ( mactionNum >= (mbaseObjPtr)->arriveActionNum) mactPtr = nil;\
-    else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->arriveAction + (long)mactionNum;\
-} else mactPtr = nil;
+enum {
+    kDestroyActionType = 1,
+    kExpireActionType = 2,
+    kCreateActionType = 3,
+    kCollideActionType = 4,
+    kActivateActionType = 5,
+    kArriveActionType = 6
+};
 
-#define mGetScenarioInitial( mscenario, minitialnum) (scenarioInitialType *)*gAresGlobal->gScenarioInitialData + (mscenario)->initialFirst + (minitialnum)
-#define mGetScenarioBrief( mscenario, mbriefnum) (briefPointType *)*gAresGlobal->gScenarioBriefData + ((mscenario)->briefPointFirst) + (mbriefnum)
-#define mGetScenarioCondition( mscenario, mconditionnum) (scenarioConditionType *)*gAresGlobal->gScenarioConditionData + (mscenario)->conditionFirst + (mconditionnum)
+inline void mGetActionFromBaseTypeNum(
+        objectActionType*& mactPtr, baseObjectType* mbaseObjPtr, long mactionType,
+        long mactionNum) {
+    if ( (mactionType) == kDestroyActionType)
+    {
+        if ( mactionNum >= ((mbaseObjPtr)->destroyActionNum & kDestroyActionNotMask)) mactPtr = nil;
+        else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->destroyAction + (long)mactionNum;
+    } else if ( (mactionType) == kExpireActionType) 
+    {
+        if ( mactionNum >= ((mbaseObjPtr)->expireActionNum  & kDestroyActionNotMask)) mactPtr = nil;
+        else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->expireAction + (long)mactionNum;
+    } else if ( (mactionType) == kCreateActionType)
+    {
+        if ( mactionNum >= (mbaseObjPtr)->createActionNum) mactPtr = nil;
+        else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->createAction + (long)mactionNum;
+    } else if ( (mactionType) == kCollideActionType)
+    {
+        if ( mactionNum >= (mbaseObjPtr)->collideActionNum) mactPtr = nil;
+        else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->collideAction + (long)mactionNum;
+    } else if ( (mactionType) == kActivateActionType)
+    {
+        if ( mactionNum >= ((mbaseObjPtr)->activateActionNum & kPeriodicActionNotMask)) mactPtr = nil;
+        else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->activateAction + (long)mactionNum;
+    } else if ( (mactionType) == kArriveActionType)
+    {
+        mWriteDebugString("\pArrive Action:");
+        WriteDebugLong( mactionNum);
+        WriteDebugLong( (mbaseObjPtr)->arriveActionNum);
+        if ( mactionNum >= (mbaseObjPtr)->arriveActionNum) mactPtr = nil;
+        else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->arriveAction + (long)mactionNum;
+    } else mactPtr = nil;
+}
 
-#define mGetRealObjectFromInitial( mobject, minitialobject, minum)\
-if ( minum >= 0)\
-{\
-    minitialobject = mGetScenarioInitial( gThisScenario, minum);\
-    if ( minitialobject->realObjectNumber >= 0)\
-    {\
-        mobject = (spaceObjectType *)*gSpaceObjectData + (long)minitialobject->realObjectNumber;\
-        if (( mobject->id != minitialobject->realObjectID) || ( mobject->active != kObjectInUse))\
-            mobject = nil;\
-    } else mobject = nil;\
-} else if ( minum == -2)\
-{\
-    mobject = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gPlayerShipNumber;\
-    if ((!(mobject->active)) || ( !(mobject->attributes & kCanThink)))\
-    {\
-        mobject = nil;\
-    }\
-} else mobject = nil;
+inline scenarioInitialType* mGetScenarioInitial(scenarioType* mscenario, long minitialnum) {
+    return (scenarioInitialType *)*gAresGlobal->gScenarioInitialData
+        + (mscenario)->initialFirst + (minitialnum);
+}
+
+inline briefPointType* mGetScenarioBrief(scenarioType* mscenario, long mbriefnum) {
+    return (briefPointType *)*gAresGlobal->gScenarioBriefData
+        + ((mscenario)->briefPointFirst) + (mbriefnum);
+}
+
+inline scenarioConditionType* mGetScenarioCondition(scenarioType* mscenario, long mconditionnum) {
+    return (scenarioConditionType *)*gAresGlobal->gScenarioConditionData
+        + (mscenario)->conditionFirst + (mconditionnum);
+}
+
+inline void mGetRealObjectFromInitial(
+        spaceObjectType*& mobject, scenarioInitialType*& minitialobject, long minum) {
+    if ( minum >= 0)
+    {
+        minitialobject = mGetScenarioInitial( gThisScenario, minum);
+        if ( minitialobject->realObjectNumber >= 0)
+        {
+            mobject = (spaceObjectType *)*gSpaceObjectData + (long)minitialobject->realObjectNumber;
+            if (( mobject->id != minitialobject->realObjectID) || ( mobject->active != kObjectInUse))
+                mobject = nil;
+        } else mobject = nil;
+    } else if ( minum == -2)
+    {
+        mobject = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
+        if ((!(mobject->active)) || ( !(mobject->attributes & kCanThink)))
+        {
+            mobject = nil;
+        }
+    } else mobject = nil;
+}
 
 short ScenarioMakerInit( void);
 void ScenarioMakerCleanup( void);

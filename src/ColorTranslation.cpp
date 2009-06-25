@@ -44,7 +44,7 @@ void ColorTranslatorInit( CTabHandle theClut)
         MoveHHi( gColorTranslateTable);
         HLock( gColorTranslateTable);
         */
-        mHandleLockAndRegister( gColorTranslateTable, nil, nil, nil, "\pgColorTranslateTable")
+        mHandleLockAndRegister( gColorTranslateTable, nil, nil, nil, "\pgColorTranslateTable");
     }
     MakeColorTranslatorTable( theClut);
 }

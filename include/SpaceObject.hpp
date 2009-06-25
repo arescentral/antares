@@ -20,6 +20,7 @@
 
 // Space Object.h
 
+#include "AresGlobalType.hpp"
 #include "MathSpecial.hpp"
 #include "NateDraw.hpp"
 #include "Scenario.hpp"
@@ -250,27 +251,6 @@
 #define kPresenceDataHiWordShift        (long)16
 
 #define kBoltPointNum                   10
-
-#define mGetBaseObjectPtr( whichObject) ((baseObjectType *)*gBaseObjectData + (long)(whichObject))
-
-
-#define mGetBaseObjectFromClassRace( mbaseObject, mcount, mbaseClass, mbaseRace)\
-mcount = 0;\
-if ( mbaseClass >= kLiteralClass)\
-{\
-    mcount = mbaseClass - kLiteralClass;\
-    mbaseObject = mGetBaseObjectPtr(mcount);\
-}\
-else\
-{\
-    mbaseObject = mGetBaseObjectPtr( 0);\
-    while (( mcount < kMaxBaseObject) && (( mbaseObject->baseClass != mbaseClass) || ( mbaseObject->baseRace != mbaseRace)))\
-    {\
-        mcount++;\
-        mbaseObject++;\
-    }\
-    if ( mcount >= kMaxBaseObject) mbaseObject = nil;\
-}\
 
 #define kPeriodicActionTimeMask     0xff000000
 #define kPeriodicActionTimeShift    (long)24
@@ -904,6 +884,32 @@ struct spaceObjectType {
     unsigned char           shieldColor;
     unsigned char           originalColor;
 };
+
+extern Handle gBaseObjectData;
+
+inline baseObjectType* mGetBaseObjectPtr(long whichObject) {
+    return (baseObjectType*)*gBaseObjectData + whichObject;
+}
+
+inline void mGetBaseObjectFromClassRace(
+        baseObjectType*& mbaseObject, long& mcount, int mbaseClass, int mbaseRace) {
+    mcount = 0;
+    if ( mbaseClass >= kLiteralClass)
+    {
+        mcount = mbaseClass - kLiteralClass;
+        mbaseObject = mGetBaseObjectPtr(mcount);
+    }
+    else
+    {
+        mbaseObject = mGetBaseObjectPtr( 0);
+        while (( mcount < kMaxBaseObject) && (( mbaseObject->baseClass != mbaseClass) || ( mbaseObject->baseRace != mbaseRace)))
+        {
+            mcount++;
+            mbaseObject++;
+        }
+        if ( mcount >= kMaxBaseObject) mbaseObject = nil;
+    }
+}
 
 #pragma options align=reset
 

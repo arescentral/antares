@@ -208,6 +208,8 @@ struct aresGlobalType {
     Boolean         hotKey_target;
 };
 
+extern aresGlobalType* gAresGlobal;
+
 #pragma options align=reset
 
 #endif // ANTARES_ARES_GLOBAL_TYPE_HPP_

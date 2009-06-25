@@ -49,40 +49,6 @@
 #define kTitleFontResID         5004
 #define kButtonSmallFontResID   5005
 
-#define mGetDirectStringDimensionsx2( string, width, height)\
-    (height) = gDirectText->height << 1;\
-    (width) = ((long)kCharSpace + (long)gDirectText->logicalWidth) * (long)*(string);   // width * length of string
-
-/*
-#define mGetDirectStringDimensions( string, width, height)\
-    (height) = gDirectText->height;\
-    (width) = ((long)kCharSpace + (long)gDirectText->logicalWidth) * (long)*(string);   // width * length of string
-*/
-
-#define mGetDirectStringDimensions( mstring, mwidth, mheight, mstrlen, mcharptr, mwidptr)\
-    mheight = gDirectText->height;\
-    mwidth = 0;\
-    mcharptr = (unsigned char *)(mstring);\
-    mstrlen = (long)*(mcharptr++);\
-    while( mstrlen > 0)\
-    {\
-        mwidptr = (unsigned char *)*(gDirectText->charSet) + gDirectText->height * gDirectText->physicalWidth * (long)*mcharptr + (long)*mcharptr;\
-        mwidth += (long)*mwidptr;\
-        mcharptr++;\
-        mstrlen--;\
-    }\
-
-#define mDirectCharWidth( mwidth, mchar, mwidptr)\
-mwidptr = (unsigned char *)*(gDirectText->charSet) + gDirectText->height * gDirectText->physicalWidth * (long)(mchar) + (long)(mchar);\
-mwidth = *mwidptr;
-
-#define mSetDirectFont( mwhichFont) gWhichDirectText = mwhichFont;\
-gDirectText = (directTextType *)*gDirectTextData + gWhichDirectText;
-
-#define mDirectFontHeight (gDirectText->height)
-#define mDirectFontAscent (gDirectText->ascent)
-#define mDirectFontLogicalWidth (gDirectText->logicalWidth)
-
 struct directTextType {
     Handle      charSet;
     short       resID;
@@ -92,6 +58,55 @@ struct directTextType {
     long        height;
     long        ascent;
 };
+
+extern long gWhichDirectText;
+extern directTextType* gDirectText;
+extern Handle gDirectTextData;
+
+inline void mGetDirectStringDimensions(const unsigned char* string, long& width, long& height) {
+    height = gDirectText->height << 1;
+    width = ((long)kCharSpace + (long)gDirectText->logicalWidth) * (long)*(string);   // width * length of string
+}
+
+template <typename T>
+inline void mGetDirectStringDimensions(
+        T* mstring, long& mwidth, long& mheight, long &mstrlen, unsigned char*& mcharptr,
+        unsigned char*& mwidptr) {
+    mheight = gDirectText->height;
+    mwidth = 0;
+    mcharptr = (unsigned char *)(mstring);
+    mstrlen = (long)*(mcharptr++);
+    while( mstrlen > 0)
+    {
+        mwidptr = (unsigned char *)*(gDirectText->charSet) + gDirectText->height * gDirectText->physicalWidth * (long)*mcharptr + (long)*mcharptr;
+        mwidth += (long)*mwidptr;
+        mcharptr++;
+        mstrlen--;
+    }
+}
+
+inline void mDirectCharWidth(unsigned char& mwidth, char mchar, unsigned char*& mwidptr) {
+    mwidptr = (unsigned char *)*(gDirectText->charSet)
+        + gDirectText->height * gDirectText->physicalWidth * (long)(mchar) + (long)(mchar);
+    mwidth = *mwidptr;
+}
+
+inline void mSetDirectFont(long mwhichFont) {
+    gWhichDirectText = mwhichFont;
+    gDirectText = (directTextType *)*gDirectTextData + gWhichDirectText;
+}
+
+inline int mDirectFontHeight() {
+    return gDirectText->height;
+}
+
+inline int mDirectFontAscent() {
+    return gDirectText->ascent;
+}
+
+inline int mDirectFontLogicalWidth() {
+    return gDirectText->logicalWidth;
+}
 
 int InitDirectText( void);
 void DirectTextCleanup( void);

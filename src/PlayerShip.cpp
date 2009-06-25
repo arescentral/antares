@@ -292,7 +292,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
                         }
                     }
                 }
-                mGetDirectStringDimensions( message, width, height, strlen, getwidchar, getwidwid)
+                mGetDirectStringDimensions( message, width, height, strlen, getwidchar, getwidwid);
                 strlen = CLIP_LEFT + (((CLIP_RIGHT - CLIP_LEFT) / 2) - ( width / 2));
                 if (( strlen + width) > (CLIP_RIGHT))
                 {

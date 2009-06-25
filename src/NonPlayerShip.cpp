@@ -135,24 +135,24 @@ void NonplayerShipThink( long timePass)
     sickCount &= 0x00000003;
     if ( sickCount == 0)
     {
-        mGetTranslateColorShade( kFriendlyColor, MEDIUM, friendSick, transColor)
-        mGetTranslateColorShade( kHostileColor, MEDIUM, foeSick, transColor)
-        mGetTranslateColorShade( kNeutralColor, MEDIUM, neutralSick, transColor)
+        mGetTranslateColorShade( kFriendlyColor, MEDIUM, friendSick, transColor);
+        mGetTranslateColorShade( kHostileColor, MEDIUM, foeSick, transColor);
+        mGetTranslateColorShade( kNeutralColor, MEDIUM, neutralSick, transColor);
     } else if ( sickCount == 1)
     {
-        mGetTranslateColorShade( kFriendlyColor, DARK, friendSick, transColor)
-        mGetTranslateColorShade( kHostileColor, DARK, foeSick, transColor)
-        mGetTranslateColorShade( kNeutralColor, DARK, neutralSick, transColor)
+        mGetTranslateColorShade( kFriendlyColor, DARK, friendSick, transColor);
+        mGetTranslateColorShade( kHostileColor, DARK, foeSick, transColor);
+        mGetTranslateColorShade( kNeutralColor, DARK, neutralSick, transColor);
     } else if ( sickCount == 2)
     {
-        mGetTranslateColorShade( kFriendlyColor, DARKER, friendSick, transColor)
-        mGetTranslateColorShade( kHostileColor, DARKER, foeSick, transColor)
-        mGetTranslateColorShade( kNeutralColor, DARKER, neutralSick, transColor)
+        mGetTranslateColorShade( kFriendlyColor, DARKER, friendSick, transColor);
+        mGetTranslateColorShade( kHostileColor, DARKER, foeSick, transColor);
+        mGetTranslateColorShade( kNeutralColor, DARKER, neutralSick, transColor);
     } else if ( sickCount == 3)
     {
-        mGetTranslateColorShade( kFriendlyColor, DARKEST, friendSick, transColor)
-        mGetTranslateColorShade( kHostileColor, DARKER-1, foeSick, transColor)
-        mGetTranslateColorShade( kNeutralColor, DARKEST, neutralSick, transColor)
+        mGetTranslateColorShade( kFriendlyColor, DARKEST, friendSick, transColor);
+        mGetTranslateColorShade( kHostileColor, DARKER-1, foeSick, transColor);
+        mGetTranslateColorShade( kNeutralColor, DARKEST, neutralSick, transColor);
     }
 
     anAdmiral = mGetAdmiralPtr( 0);
@@ -1383,25 +1383,25 @@ unsigned long ThinkObjectWarpInPresence( spaceObjectType *anObject)
     if ( !(anObject->presenceData & 0x10000000))
     {
         longscrap = kMaxSoundVolume;
-        mPlayDistanceSound( difference, longscrap, anObject, kWarpOne, kMediumPersistence, kPrioritySound, distance, dcalc, targetObject)
+        mPlayDistanceSound( difference, longscrap, anObject, kWarpOne, kMediumPersistence, kPrioritySound, distance, dcalc, targetObject);
         anObject->presenceData |= 0x10000000;
     } else if (( !(anObject->presenceData & 0x20000000)) &&
         (( anObject->presenceData & 0x000000ff) > 25))
     {
         longscrap = kMaxSoundVolume;
-        mPlayDistanceSound( difference, longscrap, anObject, kWarpTwo, kMediumPersistence, kPrioritySound, distance, dcalc, targetObject)
+        mPlayDistanceSound( difference, longscrap, anObject, kWarpTwo, kMediumPersistence, kPrioritySound, distance, dcalc, targetObject);
         anObject->presenceData |= 0x20000000;
     } if (( !(anObject->presenceData & 0x40000000)) &&
         (( anObject->presenceData & 0x000000ff) > 50))
     {
         longscrap = kMaxSoundVolume;
-        mPlayDistanceSound( difference, longscrap, anObject, kWarpThree, kMediumPersistence, kPrioritySound, distance, dcalc, targetObject)
+        mPlayDistanceSound( difference, longscrap, anObject, kWarpThree, kMediumPersistence, kPrioritySound, distance, dcalc, targetObject);
         anObject->presenceData |= 0x40000000;
     } if (( !(anObject->presenceData & 0x80000000)) &&
         (( anObject->presenceData & 0x000000ff) > 75))
     {
         longscrap = kMaxSoundVolume;
-        mPlayDistanceSound( difference, longscrap, anObject, kWarpFour, kMediumPersistence, kPrioritySound, distance, dcalc, targetObject)
+        mPlayDistanceSound( difference, longscrap, anObject, kWarpFour, kMediumPersistence, kPrioritySound, distance, dcalc, targetObject);
         anObject->presenceData |= 0x80000000;
     }
 

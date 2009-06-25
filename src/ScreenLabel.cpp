@@ -77,7 +77,7 @@ int ScreenLabelInit( void)
     MoveHHi( gAresGlobal->gScreenLabelData);
     HLock( gAresGlobal->gScreenLabelData);
     */
-    mHandleLockAndRegister( gAresGlobal->gScreenLabelData, nil, nil, ResolveScreenLabels, "\pgAresGlobal->gScreenLabelData")
+    mHandleLockAndRegister( gAresGlobal->gScreenLabelData, nil, nil, ResolveScreenLabels, "\pgAresGlobal->gScreenLabelData");
 
     ResetAllLabels();
     return( kNoError);
@@ -264,7 +264,7 @@ void DrawAllLabels( void)
     transColorType  *transColor;
 //  long            width, height, strlen;
 
-    mSetDirectFont( kTacticalFontNum)
+    mSetDirectFont( kTacticalFontNum);
 
     label = (screenLabelType *)*gAresGlobal->gScreenLabelData;
     SetLongRect( &clipRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
@@ -288,7 +288,7 @@ void DrawAllLabels( void)
             {
 
                 RectToLongRect( &(label->thisRect), &tRect);
-                mGetTranslateColorShade( label->color, VERY_DARK, color, transColor)
+                mGetTranslateColorShade( label->color, VERY_DARK, color, transColor);
 
                 if ( label->keepOnScreenAnyway)
                 {
@@ -318,7 +318,7 @@ void DrawAllLabels( void)
                     Str255  s;
 
                     DrawNateRectVScan( *offPixBase, &tRect, 0, 0, color);
-                    mGetTranslateColorShade( label->color, VERY_LIGHT, color, transColor)
+                    mGetTranslateColorShade( label->color, VERY_LIGHT, color, transColor);
                     y = label->where.v + gDirectText->ascent + kLabelInnerSpace;
                     for ( j = 1; j <= label->lineNum; j++)
                     {
@@ -338,7 +338,7 @@ void DrawAllLabels( void)
                 } else
                 {
                     DrawNateRectVScan( *offPixBase, &tRect, 0, 0, color);
-                    mGetTranslateColorShade( label->color, VERY_LIGHT, color, transColor)
+                    mGetTranslateColorShade( label->color, VERY_LIGHT, color, transColor);
                     MoveTo( label->where.h+1+kLabelInnerSpace, label->where.v +
                         gDirectText->ascent +1 + kLabelInnerSpace);
                     DrawDirectTextStringClipped( label->label, BLACK, *offPixBase, &clipRect,
@@ -724,7 +724,7 @@ void RecalcScreenLabelSize( long which) // do this if you mess with its string
     Str255          tString;
 
     label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
-    mSetDirectFont( kTacticalFontNum)
+    mSetDirectFont( kTacticalFontNum);
 //  mGetDirectStringDimensions( label->label, label->width, label->height, strlen, getwidchar, getwidwid)
 
         lineNum = String_Count_Lines( label->label);
@@ -736,7 +736,7 @@ void RecalcScreenLabelSize( long which) // do this if you mess with its string
             for ( i = 1; i <= lineNum; i++)
             {
                 String_Get_Nth_Line( tString, label->label, i);
-                mGetDirectStringDimensions( tString, label->width, label->height, strlen, getwidchar, getwidwid)
+                mGetDirectStringDimensions( tString, label->width, label->height, strlen, getwidchar, getwidwid);
                 label->width += kLabelTotalInnerSpace;
                 if ( label->width > maxWidth)
                     maxWidth = label->width;
@@ -748,7 +748,7 @@ void RecalcScreenLabelSize( long which) // do this if you mess with its string
         } else
         {
             label->lineNum = 1;
-            mGetDirectStringDimensions( label->label, label->width, label->height, strlen, getwidchar, getwidwid)
+            mGetDirectStringDimensions( label->label, label->width, label->height, strlen, getwidchar, getwidwid);
             label->width += kLabelTotalInnerSpace;
             label->lineHeight = label->height;
             label->height += kLabelTotalInnerSpace;

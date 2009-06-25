@@ -464,18 +464,18 @@ void DrawPlayerInterfaceButton( interfaceItemType *dItem, PixMap *destMap, long 
         if ( dItem->item.plainButton.status == kIH_Hilite)
         {
             SetTranslateColorShadeFore( dItem->color, DARKEST);
-            mGetTranslateColorShade( dItem->color, DARKEST, color, transColor)
+            mGetTranslateColorShade( dItem->color, DARKEST, color, transColor);
         }
         else if ( dItem->item.plainButton.status == kDimmed)
         {
             SetTranslateColorShadeFore( dItem->color, VERY_DARK);
-            mGetTranslateColorShade( dItem->color, VERY_DARK, color, transColor)
+            mGetTranslateColorShade( dItem->color, VERY_DARK, color, transColor);
         }
 
         else
         {
             SetTranslateColorShadeFore( dItem->color, LIGHTER);
-            mGetTranslateColorShade( dItem->color, LIGHTER, color, transColor)
+            mGetTranslateColorShade( dItem->color, LIGHTER, color, transColor);
         }
         GetIndString( s, dItem->item.plainButton.label.stringID,
                     dItem->item.plainButton.label.stringNumber);
@@ -517,13 +517,13 @@ void DrawPlayerInterfaceButton( interfaceItemType *dItem, PixMap *destMap, long 
         if ( dItem->item.plainButton.status == kDimmed)
         {
             SetTranslateColorShadeFore( dItem->color, VERY_DARK);
-            mGetTranslateColorShade( dItem->color, VERY_DARK, color, transColor)
+            mGetTranslateColorShade( dItem->color, VERY_DARK, color, transColor);
         }
 
         else
         {
             SetTranslateColorShadeFore( dItem->color, DARKEST);
-            mGetTranslateColorShade( dItem->color, DARKEST, color, transColor)
+            mGetTranslateColorShade( dItem->color, DARKEST, color, transColor);
         }
 
 
@@ -536,16 +536,16 @@ void DrawPlayerInterfaceButton( interfaceItemType *dItem, PixMap *destMap, long 
         if ( dItem->item.plainButton.status == kIH_Hilite)
         {
             SetTranslateColorShadeFore( dItem->color, DARKEST);
-            mGetTranslateColorShade( dItem->color, DARKEST, color, transColor)
+            mGetTranslateColorShade( dItem->color, DARKEST, color, transColor);
         } else if ( dItem->item.plainButton.status == kDimmed)
         {
             SetTranslateColorShadeFore( dItem->color, DARKEST + kSlightlyLighterColor);
-            mGetTranslateColorShade( dItem->color, DARKEST + kSlightlyLighterColor, color, transColor)
+            mGetTranslateColorShade( dItem->color, DARKEST + kSlightlyLighterColor, color, transColor);
         }
         else
         {
             SetTranslateColorShadeFore( dItem->color, LIGHTER);
-            mGetTranslateColorShade( dItem->color, LIGHTER, color, transColor)
+            mGetTranslateColorShade( dItem->color, LIGHTER, color, transColor);
         }
         GetIndString( s, dItem->item.plainButton.label.stringID,
                     dItem->item.plainButton.label.stringNumber);
@@ -707,21 +707,21 @@ void DrawPlayerInterfaceTabBoxButton( interfaceItemType *dItem, PixMap *destMap,
             if ( dItem->item.radioButton.status == kIH_Hilite)
             {
                 SetTranslateColorShadeFore( dItem->color, DARKEST);
-                mGetTranslateColorShade( dItem->color, DARKEST, color, transColor)
+                mGetTranslateColorShade( dItem->color, DARKEST, color, transColor);
             }
             else if ( dItem->item.radioButton.status == kDimmed)
             {
                 SetTranslateColorShadeFore( dItem->color, VERY_DARK);
-                mGetTranslateColorShade( dItem->color, VERY_DARK, color, transColor)
+                mGetTranslateColorShade( dItem->color, VERY_DARK, color, transColor);
             } else
             {
                 SetTranslateColorShadeFore( dItem->color, LIGHT);
-                mGetTranslateColorShade( dItem->color, LIGHT, color, transColor)
+                mGetTranslateColorShade( dItem->color, LIGHT, color, transColor);
             }
         } else
         {
             SetTranslateColorShadeFore( dItem->color, VERY_LIGHT);
-            mGetTranslateColorShade( dItem->color, VERY_LIGHT, color, transColor)
+            mGetTranslateColorShade( dItem->color, VERY_LIGHT, color, transColor);
         }
         GetIndString( s, dItem->item.radioButton.label.stringID,
                     dItem->item.radioButton.label.stringNumber);
@@ -775,13 +775,13 @@ void DrawPlayerInterfaceTabBoxButton( interfaceItemType *dItem, PixMap *destMap,
         if ( dItem->item.radioButton.status == kDimmed)
         {
             SetTranslateColorShadeFore( dItem->color, VERY_DARK);
-            mGetTranslateColorShade( dItem->color, VERY_DARK, color, transColor)
+            mGetTranslateColorShade( dItem->color, VERY_DARK, color, transColor);
         }
 
         else
         {
             SetTranslateColorShadeFore( dItem->color, DARKEST);
-            mGetTranslateColorShade( dItem->color, DARKEST, color, transColor)
+            mGetTranslateColorShade( dItem->color, DARKEST, color, transColor);
         }
 
 
@@ -796,21 +796,21 @@ void DrawPlayerInterfaceTabBoxButton( interfaceItemType *dItem, PixMap *destMap,
             if ( dItem->item.radioButton.status == kIH_Hilite)
             {
                 SetTranslateColorShadeFore( dItem->color, DARKEST);
-                mGetTranslateColorShade( dItem->color, DARKEST, color, transColor)
+                mGetTranslateColorShade( dItem->color, DARKEST, color, transColor);
             }
             else if ( dItem->item.radioButton.status == kDimmed)
             {
                 SetTranslateColorShadeFore( dItem->color, VERY_DARK);
-                mGetTranslateColorShade( dItem->color, VERY_DARK, color, transColor)
+                mGetTranslateColorShade( dItem->color, VERY_DARK, color, transColor);
             } else
             {
                 SetTranslateColorShadeFore( dItem->color, LIGHT);
-                mGetTranslateColorShade( dItem->color, LIGHT, color, transColor)
+                mGetTranslateColorShade( dItem->color, LIGHT, color, transColor);
             }
         } else
         {
             SetTranslateColorShadeFore( dItem->color, VERY_LIGHT);
-            mGetTranslateColorShade( dItem->color, VERY_LIGHT, color, transColor)
+            mGetTranslateColorShade( dItem->color, VERY_LIGHT, color, transColor);
         }
         GetIndString( s, dItem->item.radioButton.label.stringID,
                     dItem->item.radioButton.label.stringNumber);
@@ -937,18 +937,18 @@ void DrawPlayerInterfaceRadioButton( interfaceItemType *dItem, PixMap *destMap, 
     if ( dItem->item.radioButton.status == kIH_Hilite)
     {
         SetTranslateColorShadeFore( dItem->color, DARKEST);
-        mGetTranslateColorShade( dItem->color, DARKEST, color, transColor)
+        mGetTranslateColorShade( dItem->color, DARKEST, color, transColor);
     }
 
     else if ( dItem->item.radioButton.status == kDimmed)
     {
         SetTranslateColorShadeFore( dItem->color, DARK);
-        mGetTranslateColorShade( dItem->color, DARK, color, transColor)
+        mGetTranslateColorShade( dItem->color, DARK, color, transColor);
     }
     else
     {
         SetTranslateColorShadeFore( dItem->color, LIGHT);
-        mGetTranslateColorShade( dItem->color, LIGHT, color, transColor)
+        mGetTranslateColorShade( dItem->color, LIGHT, color, transColor);
     }
     GetIndString( s, dItem->item.radioButton.label.stringID,
                 dItem->item.radioButton.label.stringNumber);
@@ -1058,15 +1058,15 @@ void DrawPlayerInterfaceCheckBox( interfaceItemType *dItem, PixMap *destMap, lon
     if ( dItem->item.checkboxButton.status == kIH_Hilite)
     {
         SetTranslateColorShadeFore( dItem->color, DARKEST);
-        mGetTranslateColorShade( dItem->color, DARKEST, color, transColor)
+        mGetTranslateColorShade( dItem->color, DARKEST, color, transColor);
     } else if ( dItem->item.checkboxButton.status == kDimmed)
     {
         SetTranslateColorShadeFore( dItem->color, DARK);
-        mGetTranslateColorShade( dItem->color, DARK, color, transColor)
+        mGetTranslateColorShade( dItem->color, DARK, color, transColor);
     } else
     {
         SetTranslateColorShadeFore( dItem->color, LIGHT);
-        mGetTranslateColorShade( dItem->color, LIGHT, color, transColor)
+        mGetTranslateColorShade( dItem->color, LIGHT, color, transColor);
     }
     GetIndString( s, dItem->item.checkboxButton.label.stringID,
                 dItem->item.checkboxButton.label.stringNumber);
@@ -1122,7 +1122,7 @@ void DrawPlayerInterfaceLabeledBox( interfaceItemType *dItem, PixMap *destMap, l
     PaintRect( &uRect);
 
     SetTranslateColorShadeFore( dItem->color, LIGHT);
-    mGetTranslateColorShade( dItem->color, LIGHT, color, transColor)
+    mGetTranslateColorShade( dItem->color, LIGHT, color, transColor);
 
     MoveTo( tRect.left + kInterfaceTextHBuffer, tRect.top + GetInterfaceFontAscent( dItem->style) +
             kInterfaceTextVBuffer);
@@ -1260,7 +1260,7 @@ void DrawPlayerInterfaceList( interfaceItemType *dItem, PixMap *destMap, long po
     // draw the string
 
     SetTranslateColorShadeFore( dItem->color, LIGHT);
-    mGetTranslateColorShade( dItem->color, LIGHT, color, transColor)
+    mGetTranslateColorShade( dItem->color, LIGHT, color, transColor);
 
     GetIndString( s, dItem->item.listRect.label.stringID, dItem->item.listRect.label.stringNumber);
     swidth = GetInterfaceStringWidth( s, dItem->style) + kInterfaceTextHBuffer * 2;
@@ -1369,13 +1369,13 @@ void DrawPlayerInterfaceList( interfaceItemType *dItem, PixMap *destMap, long po
                 SetTranslateColorShadeFore( dItem->color, LIGHT);
                 PaintRect( &uRect);
                 SetTranslateColorShadeFore( dItem->color, VERY_DARK);
-                mGetTranslateColorShade( dItem->color, VERY_DARK, color, transColor)
+                mGetTranslateColorShade( dItem->color, VERY_DARK, color, transColor);
             } else
             {
                 DefaultColors();
                 PaintRect( &uRect);
                 SetTranslateColorShadeFore( dItem->color, LIGHT);
-                mGetTranslateColorShade( dItem->color, LIGHT, color, transColor)
+                mGetTranslateColorShade( dItem->color, LIGHT, color, transColor);
             }
             MoveTo( tRect.left, vcenter);
             (*(dItem->item.listRect.getItemString))( swidth, (anyCharType *)s);
@@ -1436,13 +1436,13 @@ void DrawPlayerInterfaceListEntry( interfaceItemType *dItem, short whichEntry, P
                 SetTranslateColorShadeFore( dItem->color, LIGHT);
                 PaintRect( &uRect);
                 SetTranslateColorShadeFore( dItem->color, VERY_DARK);
-                mGetTranslateColorShade( dItem->color, VERY_DARK, color, transColor)
+                mGetTranslateColorShade( dItem->color, VERY_DARK, color, transColor);
             } else
             {
                 DefaultColors();
                 PaintRect( &uRect);
                 SetTranslateColorShadeFore( dItem->color, LIGHT);
-                mGetTranslateColorShade( dItem->color, LIGHT, color, transColor)
+                mGetTranslateColorShade( dItem->color, LIGHT, color, transColor);
             }
             MoveTo( tRect.left, vcenter);
             (*(dItem->item.listRect.getItemString))( swidth, (anyCharType *)s);
@@ -1740,12 +1740,12 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
                         else SetInterfaceLargeLowerFont( dItem->style);
                         if (( *aheadChar >= 'a') && ( *aheadChar <= 'z'))
                         {
-                            mDirectCharWidth( charwidth, *aheadChar/* - 'a' + 'A'*/, charwidthptr)
+                            mDirectCharWidth( charwidth, *aheadChar/* - 'a' + 'A'*/, charwidthptr);
                             xpos += charwidth;
                         }
                         else
                         {
-                            mDirectCharWidth( charwidth, *aheadChar, charwidthptr)
+                            mDirectCharWidth( charwidth, *aheadChar, charwidthptr);
                             xpos += charwidth;
                         }
                         if ( *aheadChar == kReturnChar) *dChar++ = *aheadChar;
@@ -1776,7 +1776,7 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
                 MoveTo( hleft, vline);
 
                 SetTranslateColorShadeFore( dItem->color, VERY_LIGHT);
-                mGetTranslateColorShade( dItem->color, VERY_LIGHT, color, transColor)
+                mGetTranslateColorShade( dItem->color, VERY_LIGHT, color, transColor);
 
                 DrawInterfaceString( theLine, dItem->style, destMap, portLeft,
                         portTop,  color);
@@ -1916,12 +1916,12 @@ void DrawInterfaceTextInRect( Rect *tRect, const unsigned char *textData, long l
                         else SetInterfaceLargeLowerFont( style);
                         if (( *aheadChar >= 'a') && ( *aheadChar <= 'z'))
                         {
-                            mDirectCharWidth( charwidth, *aheadChar/* - 'a' + 'A'*/, charwidthptr)
+                            mDirectCharWidth( charwidth, *aheadChar/* - 'a' + 'A'*/, charwidthptr);
                             xpos += charwidth;
                         }
                         else
                         {
-                            mDirectCharWidth( charwidth, *aheadChar, charwidthptr)
+                            mDirectCharWidth( charwidth, *aheadChar, charwidthptr);
                             xpos += charwidth;
                         }
                         if ( *aheadChar == kReturnChar) *dChar++ = *aheadChar;
@@ -1964,7 +1964,7 @@ void DrawInterfaceTextInRect( Rect *tRect, const unsigned char *textData, long l
                 }
                 MoveTo( hleft, vline);
                 SetTranslateColorShadeFore( textcolor, VERY_LIGHT);
-                mGetTranslateColorShade( textcolor, VERY_LIGHT, color, transColor)
+                mGetTranslateColorShade( textcolor, VERY_LIGHT, color, transColor);
                 DrawInterfaceString( theLine, style, destMap, portLeft,
                         portTop,  color);
                 switch( inlineKind)
@@ -2104,12 +2104,12 @@ short GetInterfaceTextHeightFromWidth( anyCharType *textData, long length,
                         else SetInterfaceLargeLowerFont( style);
                         if (( *aheadChar >= 'a') && ( *aheadChar <= 'z'))
                         {
-                            mDirectCharWidth( charwidth, *aheadChar/* - 'a' + 'A'*/, charwidthptr)
+                            mDirectCharWidth( charwidth, *aheadChar/* - 'a' + 'A'*/, charwidthptr);
                             xpos += charwidth;
                         }
                         else
                         {
-                            mDirectCharWidth( charwidth, *aheadChar, charwidthptr)
+                            mDirectCharWidth( charwidth, *aheadChar, charwidthptr);
                             xpos += charwidth;
                         }
                         if ( *aheadChar == kReturnChar) *dChar++ = *aheadChar;
@@ -2388,7 +2388,7 @@ short GetInterfaceStringWidth( anyCharType *s, interfaceStyleType style)
     long            width, height, strlen;
 
     SetInterfaceLargeUpperFont( style);
-    mGetDirectStringDimensions( s, width, height, strlen, getwidchar, getwidwid)
+    mGetDirectStringDimensions( s, width, height, strlen, getwidchar, getwidwid);
 
     return ( width);
 }
@@ -2470,13 +2470,13 @@ void SetInterfaceLargeUpperFont( interfaceStyleType style)
 {
     if ( style == kSmall)
     {
-        mSetDirectFont( kButtonSmallFontNum)
+        mSetDirectFont( kButtonSmallFontNum);
 /*      TextFont( monaco);
         TextSize( 9);
         TextFace(  0);
 */  } else
     {
-        mSetDirectFont( kButtonFontNum)
+        mSetDirectFont( kButtonFontNum);
 /*      TextFont( helvetica);
         TextSize( 12);
         TextFace( bold | extend);
@@ -2488,13 +2488,13 @@ void SetInterfaceLargeLowerFont( interfaceStyleType style)
 {
     if ( style == kSmall)
     {
-        mSetDirectFont( kButtonSmallFontNum)
+        mSetDirectFont( kButtonSmallFontNum);
 /*      TextFont( monaco);
         TextSize( 9);
         TextFace(  0);
 */  } else
     {
-        mSetDirectFont( kButtonFontNum)
+        mSetDirectFont( kButtonFontNum);
 /*      SetFontByString( "\pgeneva");
         TextSize( 10);
         TextFace( bold | extend);

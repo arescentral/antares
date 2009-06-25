@@ -56,10 +56,11 @@
 #define kDistanceUnitExtraShift     0L      // speed from kCollisionSuperUnitBitShift to kDistanceUnitBitShift
 
 // for the macro mRanged, time is assumed to be a long game ticks, velocity a fixed, result long, scratch fixed
-#define mRange( result, time, velocity, scratch) \
-    scratch = mLongToFixed( time); \
-    scratch = mMultiplyFixed (scratch, velocity); \
+inline void mRange(long& result, long time, Fixed velocity, Fixed& scratch) {
+    scratch = mLongToFixed( time);
+    scratch = mMultiplyFixed (scratch, velocity);
     result = mFixedToLong( scratch);
+}
 
 int InitMotion( void);
 void ResetMotionGlobals( void);

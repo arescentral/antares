@@ -99,7 +99,7 @@ void InterfaceHandlingCleanup( void)
     if ( gInterfaceItemData != nil)
     {
 //      DisposeHandle( gInterfaceItemData);
-        mHandleDisposeAndDeregister( gInterfaceItemData)
+        mHandleDisposeAndDeregister( gInterfaceItemData);
     }
 //  CloseResFile( gInterfaceFileRefID);         // not needed-done automatically when program quits
 }
@@ -113,7 +113,7 @@ int OpenInterface( short resID)
     if ( gInterfaceItemData != nil)
     {
 //      DisposeHandle( gInterfaceItemData);
-        mHandleDisposeAndDeregister( gInterfaceItemData)
+        mHandleDisposeAndDeregister( gInterfaceItemData);
     }
     gInterfaceItemData = HHGetResource( kInterfaceResourceType, resID);
     if ( gInterfaceItemData == nil) return( RESOURCE_ERROR);
@@ -123,7 +123,7 @@ int OpenInterface( short resID)
     MoveHHi( gInterfaceItemData);
     HLock( gInterfaceItemData);
     */
-    mDataHandleLockAndRegister( gInterfaceItemData, nil, nil, nil, "\pgInterfaceItemData")
+    mDataHandleLockAndRegister( gInterfaceItemData, nil, nil, nil, "\pgInterfaceItemData");
     InvalidateInterfaceFunctions(); // if they've been set, they shouldn't be yet
 
     number = GetHandleSize( gInterfaceItemData) / sizeof( interfaceItemType);
@@ -220,7 +220,7 @@ void CloseInterface( void)
     if ( gInterfaceItemData != nil)
     {
 //      DisposeHandle( gInterfaceItemData);
-        mHandleDisposeAndDeregister( gInterfaceItemData)
+        mHandleDisposeAndDeregister( gInterfaceItemData);
     }
     gInterfaceItemData = nil;
 }

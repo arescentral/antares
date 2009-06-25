@@ -115,7 +115,7 @@ int SpaceObjectHandlingInit( void)
     MoveHHi( gSpaceObjectData);
     HLock( gSpaceObjectData);
     */
-    mHandleLockAndRegister( gSpaceObjectData, nil, nil, ResolveSpaceObjectData, "\pgSpaceObjectData")
+    mHandleLockAndRegister( gSpaceObjectData, nil, nil, ResolveSpaceObjectData, "\pgSpaceObjectData");
 
     WriteDebugLong( GetHandleSize( gSpaceObjectData));
 
@@ -129,7 +129,7 @@ int SpaceObjectHandlingInit( void)
         }
 
         DetachResource( gBaseObjectData);
-        mDataHandleLockAndRegister( gBaseObjectData, nil, nil, nil, "\pgBaseObjectData")
+        mDataHandleLockAndRegister( gBaseObjectData, nil, nil, nil, "\pgBaseObjectData");
 
         gAresGlobal->maxBaseObject = GetHandleSize( gBaseObjectData) /
             sizeof( baseObjectType);
@@ -151,7 +151,7 @@ int SpaceObjectHandlingInit( void)
             return( MEMORY_ERROR);
         }
         DetachResource( gObjectActionData);
-        mDataHandleLockAndRegister( gObjectActionData, nil, nil, ResolveObjectActionData, "\pgObjectActionData")
+        mDataHandleLockAndRegister( gObjectActionData, nil, nil, ResolveObjectActionData, "\pgObjectActionData");
 
         gAresGlobal->maxObjectAction = GetHandleSize( gObjectActionData)
             / sizeof( objectActionType);
@@ -163,7 +163,7 @@ int SpaceObjectHandlingInit( void)
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 3);
         return( MEMORY_ERROR);
     }
-    mHandleLockAndRegister( gActionQueueData, nil, nil, ResolveActionQueueData, "\pgActionQueueData")
+    mHandleLockAndRegister( gActionQueueData, nil, nil, ResolveActionQueueData, "\pgActionQueueData");
 
 #ifndef kCreateAresDemoData
     if ( correctBaseObjectColor)
@@ -409,13 +409,13 @@ int AddSpaceObject( spaceObjectType *sourceObject)
             tinyColor = kNoTinyColor;
         } else if ( destObject->owner == gAresGlobal->gPlayerAdmiralNumber)
         {
-            mGetTranslateColorShade( kFriendlyColor, tinyShade, tinyColor, transColor)
+            mGetTranslateColorShade( kFriendlyColor, tinyShade, tinyColor, transColor);
         } else if ( destObject->owner <= kNoOwner)
         {
-            mGetTranslateColorShade( kNeutralColor, tinyShade, tinyColor, transColor)
+            mGetTranslateColorShade( kNeutralColor, tinyShade, tinyColor, transColor);
         } else
         {
-            mGetTranslateColorShade( kHostileColor, tinyShade, tinyColor, transColor)
+            mGetTranslateColorShade( kHostileColor, tinyShade, tinyColor, transColor);
         }
 
         if ( destObject->attributes & kIsSelfAnimated)
@@ -610,7 +610,7 @@ void CorrectAllBaseObjectColor( void)
         if (( aBase->shieldColor != kNoTinyColor) && ( aBase->shieldColor != 0))
         {
 //          aBase->shieldColor = GetTranslateColorShade( aBase->shieldColor, VERY_LIGHT);
-            mGetTranslateColorShade( aBase->shieldColor, 15, fixColor, transColor)
+            mGetTranslateColorShade( aBase->shieldColor, 15, fixColor, transColor);
             aBase->shieldColor = fixColor;
         }
         if ( aBase->attributes & kIsBeam)
@@ -1482,7 +1482,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     }
                     if ( !action->argument.playSound.absolute)
                     {
-                        mPlayDistanceSound( distance, l, anObject, angle, action->argument.playSound.persistence, static_cast<soundPriorityType>(action->argument.playSound.priority), m, ul2, playerPtr)
+                        mPlayDistanceSound( distance, l, anObject, angle, action->argument.playSound.persistence, static_cast<soundPriorityType>(action->argument.playSound.priority), m, ul2, playerPtr);
                     } else
                     {
                         PlayVolumeSound( angle, l,
@@ -2146,7 +2146,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     break;
 
                 case kColorFlash:
-                    mGetTranslateColorShade( action->argument.colorFlash.color, action->argument.colorFlash.shade, tinyColor, transColor)
+                    mGetTranslateColorShade( action->argument.colorFlash.color, action->argument.colorFlash.shade, tinyColor, transColor);
                     StartBooleanColorAnimation( action->argument.colorFlash.length,
                         action->argument.colorFlash.length, tinyColor);//GetTranslateColorShade( AQUA, VERY_LIGHT));
                     break;
@@ -2703,13 +2703,13 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, Boolean message)
 
             if ( owner == gAresGlobal->gPlayerAdmiralNumber)
             {
-                mGetTranslateColorShade( kFriendlyColor, tinyShade, tinyColor, transColor)
+                mGetTranslateColorShade( kFriendlyColor, tinyShade, tinyColor, transColor);
             } else if ( owner <= kNoOwner)
             {
-                mGetTranslateColorShade( kNeutralColor, tinyShade, tinyColor, transColor)
+                mGetTranslateColorShade( kNeutralColor, tinyShade, tinyColor, transColor);
             } else
             {
-                mGetTranslateColorShade( kHostileColor, tinyShade, tinyColor, transColor)
+                mGetTranslateColorShade( kHostileColor, tinyShade, tinyColor, transColor);
             }
             anObject->tinyColor = anObject->sprite->tinyColor = tinyColor;
 
@@ -2831,13 +2831,13 @@ void AlterObjectCloakState( spaceObjectType *anObject, Boolean cloak)
     if ( (cloak) && ( anObject->cloakState == 0))
     {
         anObject->cloakState = 1;
-        mPlayDistanceSound( difference, longscrap, anObject, kCloakOn, kMediumPersistence, kPrioritySound, ul1, ul2, playerPtr)
+        mPlayDistanceSound( difference, longscrap, anObject, kCloakOn, kMediumPersistence, kPrioritySound, ul1, ul2, playerPtr);
 
     } else if (((!(cloak)) || ( anObject->attributes & kRemoteOrHuman)) &&
             ( anObject->cloakState >= 250))
     {
         anObject->cloakState = kCloakOffStateMax;
-        mPlayDistanceSound( difference, longscrap, anObject, kCloakOff, kMediumPersistence, kPrioritySound, ul1, ul2, playerPtr)
+        mPlayDistanceSound( difference, longscrap, anObject, kCloakOff, kMediumPersistence, kPrioritySound, ul1, ul2, playerPtr);
     }
 }
 

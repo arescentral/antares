@@ -30,11 +30,14 @@
 
 typedef unsigned char anyCharType;
 
-#define mGetAnyCharPStringLength( mAnyCharPtr) (*mAnyCharPtr)
-#define mGetPStringFromSingleAnyChar( mDestAnyCharPtr, mAnyChar)\
-{\
-    *mDestAnyCharPtr = 1;\
-    *(mDestAnyCharPtr + 1) = mAnyChar;\
+inline int mGetAnyCharPStringLength(const unsigned char* mAnyCharPtr) {
+    return *mAnyCharPtr;
+}
+
+inline void mGetPStringFromSingleAnyChar(
+        unsigned char* mDestAnyCharPtr, unsigned char mAnyChar) {
+    *mDestAnyCharPtr = 1;
+    *(mDestAnyCharPtr + 1) = mAnyChar;
 }
 
 void CopyAnyCharPString( anyCharType *, anyCharType *);

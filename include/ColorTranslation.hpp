@@ -72,7 +72,14 @@ struct transColorType {
     RGBColor                rgbcolor;
 };
 
-#define mGetTranslateColorShade( mcolor, mshade, mresultColor, mtransColor) mtransColor = (transColorType *)*gColorTranslateTable + (long)(((long)16 -(long)(mshade)) + (long)1 + (long)(mcolor) * (long)16); mresultColor = mtransColor->trueColor;
+extern Handle gColorTranslateTable;
+
+inline void mGetTranslateColorShade(
+        uint8_t mcolor, uint8_t mshade, uint8_t& mresultColor, transColorType* mtransColor) {
+    mtransColor = (transColorType *)*gColorTranslateTable
+        + (long)(((long)16 -(long)(mshade)) + (long)1 + (long)(mcolor) * (long)16);
+    mresultColor = mtransColor->trueColor;
+}
 
 void ColorTranslatorInit( CTabHandle);
 void ColorTranslatorCleanup( void);

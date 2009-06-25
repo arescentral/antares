@@ -185,7 +185,7 @@ int InitDirectText( void)
     HLock( gFourBitTable);
     */
     WriteDebugLine((char *)"\p4BITREG:");
-    mHandleLockAndRegister( gFourBitTable, nil, nil, nil, "\pgFourBitTable")
+    mHandleLockAndRegister( gFourBitTable, nil, nil, nil, "\pgFourBitTable");
 
     c = (unsigned char *)*gFourBitTable;
     for ( i = 0; i < kFourBitSize; i++)
@@ -282,7 +282,7 @@ short AddDirectFont( directTextType *dtext)
         dtext->myHandle = TRUE;
         WriteDebugLine((char *)"\pAddCharSet:");
         WriteDebugLong( dtext->resID);
-        mDataHandleLockAndRegister( dtext->charSet, nil, nil, nil, "\pdtext->charset") // this can move memory, so our ptr's no good
+        mDataHandleLockAndRegister( dtext->charSet, nil, nil, nil, "\pdtext->charset"); // this can move memory, so our ptr's no good
     }
     return( kNoError);
 }

@@ -71,7 +71,7 @@ int AdmiralInit( void)
     // MoveHHi( gAresGlobal->gAdmiralData);
     // HLock( gAresGlobal->gAdmiralData);
 
-    mHandleLockAndRegister( gAresGlobal->gAdmiralData, nil, nil, nil, "\pgAresGlobal->gAdmiralData")
+    mHandleLockAndRegister( gAresGlobal->gAdmiralData, nil, nil, nil, "\pgAresGlobal->gAdmiralData");
     ResetAllAdmirals();
 
     gAresGlobal->gDestBalanceData = NewHandle( sizeof( destBalanceType) * (long)kMaxDestObject);
@@ -81,7 +81,7 @@ int AdmiralInit( void)
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 2);
         return( MEMORY_ERROR);
     }
-    mHandleLockAndRegister( gAresGlobal->gDestBalanceData, nil, nil, nil, "\pgAresGlobal->gDestBalanceData")
+    mHandleLockAndRegister( gAresGlobal->gDestBalanceData, nil, nil, nil, "\pgAresGlobal->gDestBalanceData");
 
     ResetAllDestObjectData();
 
@@ -371,7 +371,7 @@ void RecalcAllAdmiralBuildData( void)
                         while ((a->canBuildType[j].baseNum != d->canBuildType[k]) && ( j < kMaxNumAdmiralCanBuild)) j++;
                         if ( j == kMaxNumAdmiralCanBuild)
                         {
-                            mGetBaseObjectFromClassRace( baseObject, l, d->canBuildType[k], a->race)
+                            mGetBaseObjectFromClassRace( baseObject, l, d->canBuildType[k], a->race);
                             j = 0;
                             while ((a->canBuildType[j].baseNum != -1) && ( j < kMaxNumAdmiralCanBuild)) j++;
                             if ( j == kMaxNumAdmiralCanBuild) MyDebugString("\pToo Many Types to Build!");
@@ -1565,7 +1565,7 @@ void AdmiralThink( void)
                                 }
                                 if ( a->hopeToBuild >= 0)
                                 {
-                                    mGetBaseObjectFromClassRace( baseObject, baseNum, a->hopeToBuild, a->race)
+                                    mGetBaseObjectFromClassRace( baseObject, baseNum, a->hopeToBuild, a->race);
     /*
                                     if (    (baseObject->buildFlags & kSufficientEscortsExist) &&
                                             ( baseObject->friendDefecit > a->lastFreeEscortStrength) &&
@@ -1634,7 +1634,7 @@ void AdmiralThink( void)
                         while (( destBalance->canBuildType[j] != a->hopeToBuild) && ( j < kMaxTypeBaseCanBuild)) j++;
                         if (( j < kMaxTypeBaseCanBuild) && ( a->hopeToBuild != kNoShip))
                         {
-                            mGetBaseObjectFromClassRace( baseObject, baseNum, a->hopeToBuild, a->race)
+                            mGetBaseObjectFromClassRace( baseObject, baseNum, a->hopeToBuild, a->race);
                             if ( a->cash >= mLongToFixed(baseObject->price))
                             {
 //                                              WriteDebugLine((char *)"\pBUILD:");
@@ -1725,7 +1725,7 @@ Boolean AdmiralScheduleBuild( long whichAdmiral, long buildWhichType)
     if (( buildWhichType >= 0) && ( buildWhichType < kMaxTypeBaseCanBuild) &&
             ( admiral->buildAtObject >= 0) && ( buildAtDest->buildTime <= 0))
     {
-        mGetBaseObjectFromClassRace( buildBaseObject, baseNum, buildAtDest->canBuildType[buildWhichType], admiral->race)
+        mGetBaseObjectFromClassRace( buildBaseObject, baseNum, buildAtDest->canBuildType[buildWhichType], admiral->race);
         if (( buildBaseObject != nil) && ( buildBaseObject->price <= mFixedToLong(admiral->cash)))
         {
             admiral->cash -= (mLongToFixed(buildBaseObject->price));

@@ -170,9 +170,9 @@ int InitMessageScreen( void)
         return( MEMORY_ERROR);
     }
 
-    mHandleLockAndRegister( gAresGlobal->gMessageData, nil, nil, nil, "\pgAresGlobal->gMessageData")
-    mHandleLockAndRegister( gAresGlobal->gStatusString, nil, nil, nil, "\pgAresGlobal->gStatusString")
-    mHandleLockAndRegister( gAresGlobal->gLongMessageData, nil, nil, nil, "\pgAresGlobal->gLongMessageData")
+    mHandleLockAndRegister( gAresGlobal->gMessageData, nil, nil, nil, "\pgAresGlobal->gMessageData");
+    mHandleLockAndRegister( gAresGlobal->gStatusString, nil, nil, nil, "\pgAresGlobal->gStatusString");
+    mHandleLockAndRegister( gAresGlobal->gLongMessageData, nil, nil, nil, "\pgAresGlobal->gLongMessageData");
 
     l = (long *)*gAresGlobal->gMessageData + kLongOffsetFirstChar;
     *l = kAnyCharOffsetStart;
@@ -520,7 +520,7 @@ void ClipToCurrentLongMessage( void)
             {
 //              tmessage->textHeight = GetInterfaceTextHeightFromWidth( (anyCharType *)*textData, GetHandleSize( textData),
 //                                  kLarge, CLIP_RIGHT - CLIP_LEFT);
-                mSetDirectFont( kLongMessageFontNum)
+                mSetDirectFont( kLongMessageFontNum);
                 if ( tmessage->retroTextSpec.text != nil)
                 {
                     DisposeHandle( tmessage->retroTextSpec.text);
@@ -542,11 +542,11 @@ void ClipToCurrentLongMessage( void)
                 tmessage->retroTextSpec.lineCount = 0;
                 tmessage->retroTextSpec.linePosition = 0;
                 tmessage->retroTextSpec.xpos = CLIP_LEFT + kHBuffer;
-                tmessage->retroTextSpec.ypos = CLIP_BOTTOM + mDirectFontAscent + kLongMessageVPad + tmessage->retroTextSpec.topBuffer;
+                tmessage->retroTextSpec.ypos = CLIP_BOTTOM + mDirectFontAscent() + kLongMessageVPad + tmessage->retroTextSpec.topBuffer;
                 tmessage->stage = kShowStage;
                 tmessage->retroTextSpec.tabSize = 60;
-                mGetTranslateColorShade( SKY_BLUE, VERY_LIGHT, tmessage->retroTextSpec.color, transColor)
-                mGetTranslateColorShade( SKY_BLUE, DARKEST, tmessage->retroTextSpec.backColor, transColor)
+                mGetTranslateColorShade( SKY_BLUE, VERY_LIGHT, tmessage->retroTextSpec.color, transColor);
+                mGetTranslateColorShade( SKY_BLUE, DARKEST, tmessage->retroTextSpec.backColor, transColor);
                 tmessage->retroTextSpec.nextColor = tmessage->retroTextSpec.color;
                 tmessage->retroTextSpec.nextBackColor = tmessage->retroTextSpec.backColor;
                 tmessage->retroTextSpec.originalColor = tmessage->retroTextSpec.color;
@@ -616,11 +616,11 @@ void DrawCurrentLongMessage( long timePass)
                     DrawInOffWorld();
                     SetLongRect( &lRect, CLIP_LEFT, CLIP_BOTTOM, CLIP_RIGHT,
                             gAresGlobal->gTrueClipBottom);
-                    mGetTranslateColorShade( SKY_BLUE, DARKEST, color, transColor)
+                    mGetTranslateColorShade( SKY_BLUE, DARKEST, color, transColor);
                     cRect = lRect;
                     DrawNateRect( *offPixBase, &cRect, 0, 0, color);
                     LongRectToRect( &lRect, &tRect);
-                    mGetTranslateColorShade( SKY_BLUE, VERY_LIGHT, color, transColor)
+                    mGetTranslateColorShade( SKY_BLUE, VERY_LIGHT, color, transColor);
     //              DrawDirectTextInRect( (anyCharType *)*tmessage->retroTextSpec.text, tmessage->retroTextSpec.textLength,
     //                      &lRect, *offPixBase, 0, 0, 0);
                     DrawNateLine( *offPixBase, &cRect, cRect.left, cRect.top, cRect.right - 1,
@@ -672,7 +672,7 @@ void DrawCurrentLongMessage( long timePass)
             tmessage->charDelayCount += timePass;
             if ( tmessage->charDelayCount > 0)
             {
-                mSetDirectFont( kLongMessageFontNum)
+                mSetDirectFont( kLongMessageFontNum);
                 SetLongRect( &lRect, CLIP_LEFT, CLIP_BOTTOM, CLIP_RIGHT,
                         gAresGlobal->gTrueClipBottom);
                 PlayVolumeSound(  kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
@@ -687,9 +687,9 @@ void DrawCurrentLongMessage( long timePass)
 
                         tRect.left = tmessage->retroTextSpec.xpos;
                         tRect.top = tmessage->retroTextSpec.ypos -
-                            (mDirectFontAscent  + tmessage->retroTextSpec.topBuffer);
+                            (mDirectFontAscent()  + tmessage->retroTextSpec.topBuffer);
                         tRect.right = tRect.left + gDirectText->logicalWidth;
-                        tRect.bottom = tRect.top + mDirectFontHeight +
+                        tRect.bottom = tRect.top + mDirectFontHeight() +
                             tmessage->retroTextSpec.topBuffer +
                             tmessage->retroTextSpec.bottomBuffer;
 
@@ -705,9 +705,9 @@ void DrawCurrentLongMessage( long timePass)
 
                         uRect.left = tmessage->retroTextSpec.xpos;
                         uRect.top = tmessage->retroTextSpec.ypos -
-                            (mDirectFontAscent  + tmessage->retroTextSpec.topBuffer);
+                            (mDirectFontAscent()  + tmessage->retroTextSpec.topBuffer);
                         uRect.right = uRect.left + gDirectText->logicalWidth;
-                        uRect.bottom = uRect.top + mDirectFontHeight +
+                        uRect.bottom = uRect.top + mDirectFontHeight() +
                             tmessage->retroTextSpec.topBuffer +
                                 tmessage->retroTextSpec.bottomBuffer;
                         if ( uRect.left <= tRect.left)
@@ -849,7 +849,7 @@ void DrawMessageScreen( long byUnits)
         }
     }
 
-    mSetDirectFont( kTacticalFontNum)
+    mSetDirectFont( kTacticalFontNum);
 
     // get the offset to the first current char
     firstoffset = (long *)*gAresGlobal->gMessageData + kLongOffsetFirstChar;
@@ -958,7 +958,7 @@ void UpdateStatusString( void)
 long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long inWidth)
 
 {
-    long            charNum = 0, height = mDirectFontHeight, x = 0, oldx = 0, oldCharNum, wordLen,
+    long            charNum = 0, height = mDirectFontHeight(), x = 0, oldx = 0, oldCharNum, wordLen,
                     *lineLengthList = retroTextSpec->lineLength;
     unsigned char   *widthPtr, charWidth, wrapState; // 0 = none, 1 = once, 2 = more than once
     anyCharType     *thisChar = (anyCharType *)*retroTextSpec->text;
@@ -971,7 +971,7 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
         if ( *thisChar == kReturnChar)
         {
             if ( x > retroTextSpec->autoWidth) retroTextSpec->autoWidth = x;
-            height += mDirectFontHeight + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
+            height += mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
             x = 0;
             thisChar++;
             charNum++;
@@ -981,7 +981,7 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
             retroTextSpec->lineNumber++;
         } else if ( *thisChar == ' ')
         {
-            mDirectCharWidth( charWidth, ' ', widthPtr)
+            mDirectCharWidth( charWidth, ' ', widthPtr);
             do
             {
                 x += charWidth;
@@ -1018,7 +1018,7 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
                     break;
 
                 case kCodeChar:
-                    mDirectCharWidth( charWidth, *thisChar, widthPtr)
+                    mDirectCharWidth( charWidth, *thisChar, widthPtr);
                     x += charWidth;
                     wordLen++;
                     break;
@@ -1034,7 +1034,7 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
             wrapState = 0;
             do
             {
-                mDirectCharWidth( charWidth, *thisChar, widthPtr)
+                mDirectCharWidth( charWidth, *thisChar, widthPtr);
                 x += charWidth;
                 wordLen++;
                 if ( x >= (inWidth - gDirectText->logicalWidth))
@@ -1045,7 +1045,7 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
                         if ( oldx > retroTextSpec->autoWidth) retroTextSpec->autoWidth = oldx;
                         x = x - oldx;
                         oldx = 0;
-                        height += mDirectFontHeight + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
+                        height += mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
                     } else
                     {
                         wrapState = 2;
@@ -1075,7 +1075,7 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
 void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, longRect *clipRect, PixMap *destMap,
                         long portLeft, long portTop)
 {
-    long            charNum = 0, y = bounds->top + mDirectFontAscent + retroTextSpec->topBuffer, x = bounds->left,
+    long            charNum = 0, y = bounds->top + mDirectFontAscent() + retroTextSpec->topBuffer, x = bounds->left,
                     oldx = 0, oldCharNum, wordLen;
     unsigned char   *widthPtr, charWidth, wrapState, // 0 = none, 1 = once, 2 = more than once
                     oldColor = retroTextSpec->color, oldBackColor = retroTextSpec->backColor, tempColor;
@@ -1090,21 +1090,21 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
         {
             lineRect.left = x;
             lineRect.right = bounds->right;
-            lineRect.top = y - (mDirectFontAscent + retroTextSpec->topBuffer);
-            lineRect.bottom = lineRect.top + mDirectFontHeight + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
+            lineRect.top = y - (mDirectFontAscent() + retroTextSpec->topBuffer);
+            lineRect.bottom = lineRect.top + mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
             DrawNateRectClipped( destMap, &lineRect, clipRect, (portLeft << (long)2),
                 portTop, retroTextSpec->backColor);
 
-            y += mDirectFontHeight + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
+            y += mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
             x = bounds->left;
             thisChar++;
             charNum++;
         } else if ( *thisChar == ' ')
         {
             backRect.left = x;
-            backRect.top = y - (mDirectFontAscent + retroTextSpec->topBuffer);
-            backRect.bottom = backRect.top + mDirectFontHeight + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
-            mDirectCharWidth( charWidth, ' ', widthPtr)
+            backRect.top = y - (mDirectFontAscent() + retroTextSpec->topBuffer);
+            backRect.bottom = backRect.top + mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
+            mDirectCharWidth( charWidth, ' ', widthPtr);
             do
             {
                 x += charWidth;
@@ -1124,8 +1124,8 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
                     wordLen = 0;
                     oldx = bounds->left;
                     backRect.left = x;
-                    backRect.top = y - (mDirectFontAscent + retroTextSpec->topBuffer);
-                    backRect.bottom = backRect.top + mDirectFontHeight + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
+                    backRect.top = y - (mDirectFontAscent() + retroTextSpec->topBuffer);
+                    backRect.bottom = backRect.top + mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
                     while ( oldx <= x)
                     {
                         oldx += retroTextSpec->tabSize;
@@ -1139,9 +1139,9 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
 
                 case kCodeChar:
                     oldx = backRect.left = x;
-                    backRect.top = y - (mDirectFontAscent + retroTextSpec->topBuffer);
-                    backRect.bottom = backRect.top + mDirectFontHeight + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
-                    mDirectCharWidth( charWidth, *thisChar, widthPtr)
+                    backRect.top = y - (mDirectFontAscent() + retroTextSpec->topBuffer);
+                    backRect.bottom = backRect.top + mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
+                    mDirectCharWidth( charWidth, *thisChar, widthPtr);
                     x += charWidth;
                     DrawNateRectClipped( destMap, &backRect, clipRect, (portLeft << (long)2),
                         portTop, retroTextSpec->backColor);
@@ -1170,7 +1170,7 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
                     (retroTextSpec->thisPosition)++;
                     (retroTextSpec->linePosition)++;
                     calcShade = mHexDigitValue(*thisChar);
-                    mGetTranslateColorShade( calcColor, calcShade, retroTextSpec->color, transColor)
+                    mGetTranslateColorShade( calcColor, calcShade, retroTextSpec->color, transColor);
                     break;
 
                 case kCodeBackColorChar:
@@ -1183,7 +1183,7 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
                     if (( calcColor == 0) && (calcShade == 0)) retroTextSpec->backColor = 0xff;
                     else
                     {
-                        mGetTranslateColorShade( calcColor, calcShade, retroTextSpec->backColor, transColor)
+                        mGetTranslateColorShade( calcColor, calcShade, retroTextSpec->backColor, transColor);
                     }
                     break;
 
@@ -1197,8 +1197,8 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
         } else
         {
             backRect.left = x;
-            backRect.top = y - (mDirectFontAscent + retroTextSpec->topBuffer);
-            backRect.bottom = backRect.top + mDirectFontHeight + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
+            backRect.top = y - (mDirectFontAscent() + retroTextSpec->topBuffer);
+            backRect.bottom = backRect.top + mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
             oldx = x;
             oldCharNum = charNum;
             wordLen = 0;
@@ -1207,7 +1207,7 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
             wrapState = 0;
             do
             {
-                mDirectCharWidth( charWidth, *thisChar, widthPtr)
+                mDirectCharWidth( charWidth, *thisChar, widthPtr);
                 x += charWidth;
                 wordLen++;
                 *thisWordChar = *thisChar;
@@ -1218,18 +1218,18 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
                     {
                         lineRect.left = oldx;
                         lineRect.right = bounds->right;
-                        lineRect.top = y - (mDirectFontAscent + retroTextSpec->topBuffer);
-                        lineRect.bottom = lineRect.top + mDirectFontHeight + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
+                        lineRect.top = y - (mDirectFontAscent() + retroTextSpec->topBuffer);
+                        lineRect.bottom = lineRect.top + mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
                         DrawNateRectClipped( destMap, &lineRect, clipRect, (portLeft << (long)2),
                             portTop, retroTextSpec->backColor);
 
                         wrapState = 1;
                         x = bounds->left + (x - oldx);
                         oldx = bounds->left;
-                        y += mDirectFontHeight + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
+                        y += mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
                         backRect.left = x;
-                        backRect.top = y - (mDirectFontAscent + retroTextSpec->topBuffer);
-                        backRect.bottom = backRect.top + mDirectFontHeight + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
+                        backRect.top = y - (mDirectFontAscent() + retroTextSpec->topBuffer);
+                        backRect.bottom = backRect.top + mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
                     } else
                     {
                         wrapState = 2;
@@ -1264,9 +1264,9 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
 
     cursorRect.left = retroTextSpec->xpos;
     cursorRect.top = retroTextSpec->ypos -
-        (mDirectFontAscent  + retroTextSpec->topBuffer);
+        (mDirectFontAscent()  + retroTextSpec->topBuffer);
     cursorRect.right = cursorRect.left + gDirectText->logicalWidth;
-    cursorRect.bottom = cursorRect.top + mDirectFontHeight +
+    cursorRect.bottom = cursorRect.top + mDirectFontHeight() +
         retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
     mCopyAnyRect( tlRect, cursorRect);
     mClipAnyRect( tlRect, *bounds);
@@ -1310,9 +1310,9 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
 
                 case kCodeChar:
                     oldx = cursorRect.left = retroTextSpec->xpos;
-                    cursorRect.top = retroTextSpec->ypos - (mDirectFontAscent + retroTextSpec->topBuffer);
-                    cursorRect.bottom = cursorRect.top + mDirectFontHeight + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
-                    mDirectCharWidth( charWidth, *thisChar, widthPtr)
+                    cursorRect.top = retroTextSpec->ypos - (mDirectFontAscent() + retroTextSpec->topBuffer);
+                    cursorRect.bottom = cursorRect.top + mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
+                    mDirectCharWidth( charWidth, *thisChar, widthPtr);
                     retroTextSpec->xpos += charWidth;
                     mCopyAnyRect( tlRect, cursorRect);
                     mClipAnyRect( tlRect, *bounds);
@@ -1347,7 +1347,7 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
                     (retroTextSpec->thisPosition)++;
                     (retroTextSpec->linePosition)++;
                     calcShade = mHexDigitValue(*thisChar);
-                    mGetTranslateColorShade( calcColor, calcShade, retroTextSpec->nextColor, transColor)
+                    mGetTranslateColorShade( calcColor, calcShade, retroTextSpec->nextColor, transColor);
                     break;
 
                 case kCodeBackColorChar:
@@ -1366,7 +1366,7 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
                         retroTextSpec->nextBackColor = 0xff;
                     } else
                     {
-                        mGetTranslateColorShade( calcColor, calcShade, retroTextSpec->nextBackColor, transColor)
+                        mGetTranslateColorShade( calcColor, calcShade, retroTextSpec->nextBackColor, transColor);
                     }
                     break;
 
@@ -1398,7 +1398,7 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
             retroTextSpec->backColor = retroTextSpec->nextBackColor;
             cursorRect.left = retroTextSpec->xpos;
             MoveTo( retroTextSpec->xpos, retroTextSpec->ypos);
-            mDirectCharWidth( charWidth, *thisChar, widthPtr)
+            mDirectCharWidth( charWidth, *thisChar, widthPtr);
             retroTextSpec->xpos += charWidth;
             cursorRect.right = retroTextSpec->xpos;
             mCopyAnyRect( tlRect, cursorRect);
@@ -1426,12 +1426,12 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
                     retroTextSpec->backColor);
 
             retroTextSpec->linePosition = 0;
-            retroTextSpec->ypos += mDirectFontHeight + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
+            retroTextSpec->ypos += mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
             retroTextSpec->xpos = bounds->left;
             (retroTextSpec->lineCount)++;
             lineLength++;
-            cursorRect.top = retroTextSpec->ypos - (mDirectFontAscent + retroTextSpec->topBuffer);
-            cursorRect.bottom = cursorRect.top + mDirectFontHeight + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
+            cursorRect.top = retroTextSpec->ypos - (mDirectFontAscent() + retroTextSpec->topBuffer);
+            cursorRect.bottom = cursorRect.top + mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
         } else
         {
         }
@@ -1568,7 +1568,7 @@ void MessageLabel_Set_Special( short id, Handle text)
                 spaceObjectType         *o;
                 scenarioInitialType     *initial;
 
-                mGetRealObjectFromInitial( o, initial, value)
+                mGetRealObjectFromInitial( o, initial, value);
 
                 SetScreenLabelOffset( id, -(GetScreenLabelWidth( id)/2), 64);
 

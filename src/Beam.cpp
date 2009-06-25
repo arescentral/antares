@@ -65,7 +65,7 @@ short InitBeams( void)
         return( MEMORY_ERROR);
     }
 
-    mHandleLockAndRegister( gAresGlobal->gBeamData, nil, nil, ResolveBeamData, "\pgAresGlobal->gBeamData")
+    mHandleLockAndRegister( gAresGlobal->gBeamData, nil, nil, ResolveBeamData, "\pgAresGlobal->gBeamData");
 
     beam = ( beamType *)*gAresGlobal->gBeamData;
     for ( i = 0; i < kBeamNum; i++)

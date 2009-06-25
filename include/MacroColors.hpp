@@ -18,13 +18,13 @@
 #ifndef ANTARES_MACRO_COLORS_HPP_
 #define ANTARES_MACRO_COLORS_HPP_
 
-#define BLACK_COLOR(color)  { (color)->red = (color)->blue = (color)->green = 0; }
-#define WHITE_COLOR(color)  { (color)->red = (color)->blue = (color)->green = 65535; }
-#define GRAY_13(color)      { (color)->red = (color)->blue = (color)->green = 85120; }
-#define GRAY_33(color)      { (color)->red = (color)->blue = (color)->green = 21627; }
-#define GRAY_53(color)      { (color)->red = (color)->blue = (color)->green = 34724; }
-#define GRAY_73(color)      { (color)->red = (color)->blue = (color)->green = 47841; }
-#define GRAY_86(color)      { (color)->red = (color)->blue = (color)->green = 56360; }
-#define HILITE_COLOR(color) { (color)->red = 65535; (color)->blue = 0; (color)->green = 52429; }
+inline void BLACK_COLOR(RGBColor* color)  { (color)->red = (color)->blue = (color)->green = 0; }
+inline void WHITE_COLOR(RGBColor* color)  { (color)->red = (color)->blue = (color)->green = 65535; }
+inline void GRAY_13(RGBColor* color)      { (color)->red = (color)->blue = (color)->green = 85120; }
+inline void GRAY_33(RGBColor* color)      { (color)->red = (color)->blue = (color)->green = 21627; }
+inline void GRAY_53(RGBColor* color)      { (color)->red = (color)->blue = (color)->green = 34724; }
+inline void GRAY_73(RGBColor* color)      { (color)->red = (color)->blue = (color)->green = 47841; }
+inline void GRAY_86(RGBColor* color)      { (color)->red = (color)->blue = (color)->green = 56360; }
+inline void HILITE_COLOR(RGBColor* color) { (color)->red = 65535; (color)->blue = 0; (color)->green = 52429; }
 
 #endif // ANTARES_MACRO_COLORS_HPP_

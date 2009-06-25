@@ -30,23 +30,9 @@
 #define kObjectActionResType    'obac'
 #define kObjectActionResID      500
 
-
-#define mFindSpaceObjectByID( object, counter, idnum)\
-                (object) = ( spaceObjectType *)*gSpaceObjectData;\
-                (counter) = 0;\
-                while (( (counter) < kMaxSpaceObject) && ( (object)->id != (idnum)))\
-                {\
-                    (object)++;\
-                    (counter)++;\
-                }\
-                if ( (counter) == kMaxSpaceObject) (object) = nil;
+extern Handle gSpaceObjectData;
 
 
-//#define   CreateAnySpaceObject( mwhichBase, mvel, mloc, mdir, mowner, mspecial, mcanbuild, mnameres, mnamestr, msprite)
-//DebugCreateAnySpaceObject( mwhichBase, mvel, mloc, mdir, mowner, mspecial, mcanbuild, mnameres, mnamestr, msprite, __FILE__, __LINE__)
-
-//#define ExecuteObjectActions( mwhich, mnum, msobj, mdobj, moffset)
-//DebugExecuteObjectActions( mwhich, mnum, msobj, mdobj, moffset, __FILE__, __LINE__)
 int SpaceObjectHandlingInit( void);
 void CleanupSpaceObjectHandling( void);
 void ResetAllSpaceObjects( void);

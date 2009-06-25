@@ -58,7 +58,7 @@ void AresCheatInit( void)
     gAresGlobal->gAresCheatStrings = GetStringList( kCheatStringListID);
     if ( gAresGlobal->gAresCheatStrings == nil) return;
 
-    mDataHandleLockAndRegister( gAresGlobal->gAresCheatStrings, nil, nil, nil, "\pgAresCheatStrings")
+    mDataHandleLockAndRegister( gAresGlobal->gAresCheatStrings, nil, nil, nil, "\pgAresCheatStrings");
 
 }
 

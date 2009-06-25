@@ -43,7 +43,7 @@ short InitRaces( void)
         }
         DetachResource( gAresGlobal->gRaceData);
 
-        mDataHandleLockAndRegister( gAresGlobal->gRaceData, nil, nil, nil, "\pgAresGlobal->gRaceData")
+        mDataHandleLockAndRegister( gAresGlobal->gRaceData, nil, nil, nil, "\pgAresGlobal->gRaceData");
     }
 
     return( kNoError);

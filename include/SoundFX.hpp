@@ -73,79 +73,6 @@
 #define kWarpFour               529
 #define kTeletype               535
 
-#define mPlayDistanceSound( mdistance, mvolume, mobjectptr, msoundid, msoundpersistence, msoundpriority, mul1, mul2, mplayerobjectptr)\
-if ( (!(mobjectptr->distanceFromPlayer.hi)) && (mobjectptr->distanceFromPlayer.lo < kMaximumRelevantDistanceSquared))\
-{\
-    mdistance = mobjectptr->distanceFromPlayer.lo;\
-    if ( mdistance == 0)\
-    {\
-        if ( gAresGlobal->gPlayerShipNumber >= 0)\
-            mplayerobjectptr = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gPlayerShipNumber;\
-        else mplayerobjectptr = nil;\
-        if (( mplayerobjectptr != nil) && ( mplayerobjectptr->active))\
-        {\
-            mul1 = ABS( (long)mplayerobjectptr->location.h - (long)mobjectptr->location.h);\
-            mul2 = mul1;\
-            mul1 =  ABS( (long)mplayerobjectptr->location.v - (long)mobjectptr->location.v);\
-            mdistance = mul1;\
-            if (( mul2 < kMaximumRelevantDistance) && ( mdistance < kMaximumRelevantDistance))\
-                mdistance = mdistance * mdistance + mul2 * mul2;\
-            else mdistance = kMaximumRelevantDistanceSquared;\
-            mdistance = lsqrt( mdistance);\
-            if ( mdistance > 480)\
-            {\
-                mdistance -= 480;\
-                if ( mdistance > 1920) mvolume = 0;\
-                else\
-                    mvolume = ( (1920 - mdistance) * mvolume) / 1920;\
-            }\
-            if ( mvolume > 0)\
-                PlayLocalizedSound( mplayerobjectptr->location.h, mplayerobjectptr->location.v, mobjectptr->location.h, mobjectptr->location.v, mplayerobjectptr->velocity.h - mobjectptr->velocity.h, mplayerobjectptr->velocity.v - mobjectptr->velocity.v, msoundid, mvolume, msoundpersistence, msoundpriority);\
-        } else\
-        {\
-            mul1 = ABS( (long)gGlobalCorner.h - (long)mobjectptr->location.h);\
-            mul2 = mul1;\
-            mul1 =  ABS( (long)gGlobalCorner.v - (long)mobjectptr->location.v);\
-            mdistance = mul1;\
-            if (( mul2 < kMaximumRelevantDistance) && ( mdistance < kMaximumRelevantDistance))\
-                mdistance = mdistance * mdistance + mul2 * mul2;\
-            else mdistance = kMaximumRelevantDistanceSquared;\
-            mdistance = lsqrt( mdistance);\
-            if ( mdistance > 480)\
-            {\
-                mdistance -= 480;\
-                if ( mdistance > 1920) mvolume = 0;\
-                else\
-                    mvolume = ( (1920 - mdistance) * mvolume) / 1920;\
-            }\
-            if ( mvolume > 0)\
-                PlayLocalizedSound( gGlobalCorner.h, gGlobalCorner.v, mobjectptr->location.h, mobjectptr->location.v, mobjectptr->velocity.h, mobjectptr->velocity.v, msoundid, mvolume, msoundpersistence, msoundpriority);\
-        }\
-    } else\
-    {\
-        mdistance = lsqrt( mdistance);\
-        if ( mdistance > 480)\
-        {\
-            mdistance -= 480;\
-            if ( mdistance > 1920) mvolume = 0;\
-            else\
-                mvolume = ( (1920 - mdistance) * mvolume) / 1920;\
-        }\
-        if ( gAresGlobal->gPlayerShipNumber >= 0)\
-            mplayerobjectptr = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gPlayerShipNumber;\
-        else mplayerobjectptr = nil;\
-        if (( mplayerobjectptr != nil) && ( mplayerobjectptr->active))\
-        {\
-            if ( mvolume > 0)\
-                PlayLocalizedSound( mplayerobjectptr->location.h, mplayerobjectptr->location.v, mobjectptr->location.h, mobjectptr->location.v, mplayerobjectptr->velocity.h - mobjectptr->velocity.h, mplayerobjectptr->velocity.v - mobjectptr->velocity.v, msoundid, mvolume, msoundpersistence, msoundpriority);\
-        } else\
-        {\
-            if ( mvolume > 0)\
-                PlayLocalizedSound( gGlobalCorner.h, gGlobalCorner.v, mobjectptr->location.h, mobjectptr->location.v, mobjectptr->velocity.h, mobjectptr->velocity.v, msoundid, mvolume, msoundpersistence, msoundpriority);\
-        }\
-    }\
-}
-
 
 enum soundPriorityType {
     kNoSound = 0,
@@ -187,5 +114,11 @@ void PlayVolumeSound( short, short, short, soundPriorityType);
 void PlayLocalizedSound( unsigned long, unsigned long, unsigned long, unsigned long, smallFixedType, smallFixedType, short, short, short, soundPriorityType);
 void SoundFXCleanup( void);
 void UnlockSoundCallback( Handle);
+
+struct spaceObjectType;
+void mPlayDistanceSound(
+        long mdistance, long mvolume, spaceObjectType* mobjectptr, long msoundid,
+        long msoundpersistence, soundPriorityType msoundpriority, unsigned long mul1,
+        unsigned long mul2, spaceObjectType* mplayerobjectptr);
 
 #endif // ANTARES_SOUND_FX_HPP_

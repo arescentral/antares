@@ -27,8 +27,6 @@
 
 #pragma options align=mac68k
 
-#define mWriteDebugString( mdstring) WriteDebugLine((char *)mdstring)
-
 void DebugWindowInit( WindowPtr);
 void BringDebugToFront( void);
 void DebugWindowCleanup ( void);
@@ -44,6 +42,10 @@ void MoveDebugToFront ( void);
 void WriteDebugDivider( void);
 void WriteDebugHexDump( Ptr, long);
 void WriteDebugChar( char);
+
+inline void mWriteDebugString(const unsigned char* mdstring) {
+    WriteDebugLine((char*)mdstring);
+}
 
 unsigned long powerto ( unsigned long, unsigned long);
 Boolean CommandPeriod( void);

@@ -21,6 +21,7 @@
 // Admiral.h
 
 #include "AnyChar.hpp"
+#include "AresGlobalType.hpp"
 #include "Scenario.hpp"
 
 #pragma options align=mac68k
@@ -122,8 +123,12 @@ struct admiralType {
 };
 
 
-#define mGetDestObjectBalancePtr( whichObject) (destBalanceType *)*gAresGlobal->gDestBalanceData + (long)(whichObject)
-#define mGetAdmiralPtr( mwhichAdmiral) (admiralType *)*gAresGlobal->gAdmiralData + (long)(mwhichAdmiral)
+inline destBalanceType* mGetDestObjectBalancePtr(long whichObject) {
+    return (destBalanceType *)*gAresGlobal->gDestBalanceData + whichObject;
+}
+inline admiralType* mGetAdmiralPtr(long mwhichAdmiral) {
+    return (admiralType *)*gAresGlobal->gAdmiralData + mwhichAdmiral;
+}
 
 int AdmiralInit( void);
 void AdmiralCleanup( void);

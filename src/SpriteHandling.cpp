@@ -113,7 +113,7 @@ void SpriteHandlingInit ( void)
     MoveHHi( gBothScaleMaps);
     HLock( gBothScaleMaps);
     */
-    mHandleLockAndRegister( gBothScaleMaps, nil, nil, ResolveScaleMapData, "\pgBothScaleMaps")
+    mHandleLockAndRegister( gBothScaleMaps, nil, nil, ResolveScaleMapData, "\pgBothScaleMaps");
 
     gScaleHMap = (long *)*gBothScaleMaps;
     gScaleVMap = (long *)*gBothScaleMaps + MAX_PIX_SIZE;
@@ -147,7 +147,7 @@ void SpriteHandlingInit ( void)
     MoveHHi( gSpriteTable);
     HLock( gSpriteTable);
     */
-    mDataHandleLockAndRegister( gSpriteTable, nil, ResolveSpriteData, nil, "\pgSpriteTable")
+    mDataHandleLockAndRegister( gSpriteTable, nil, ResolveSpriteData, nil, "\pgSpriteTable");
 
 /*
     SetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
@@ -166,7 +166,7 @@ void SpriteHandlingInit ( void)
     {
     }
 
-    mHandleLockAndRegister( gStaticTable, nil, nil, nil, "\pgStaticTable")
+    mHandleLockAndRegister( gStaticTable, nil, nil, nil, "\pgStaticTable");
 
     staticValue = (unsigned char *)*gStaticTable;
     for ( i = 0; i < (kStaticTableSize * 2); i++)
@@ -210,7 +210,7 @@ void ResetAllPixTables( void)
     {
         if ( gPixTable[i].resource != nil)
         {
-            mHandleDisposeAndDeregister( gPixTable[i].resource)
+            mHandleDisposeAndDeregister( gPixTable[i].resource);
             gPixTable[i].resource = nil;
         }
         gPixTable[i].keepMe = FALSE;
@@ -230,7 +230,7 @@ void CleanupSpriteHandling( void)
     {
         if ( gPixTable[i].resource != nil)
         {
-//          mHandleDisposeAndDeregister( gPixTable[i].resource)
+//          mHandleDisposeAndDeregister( gPixTable[i].resource);
             DisposeHandle( gPixTable[i].resource);
         }
     }
@@ -265,7 +265,7 @@ void RemoveAllUnusedPixTables( void)
     {
         if (( gPixTable[i].keepMe == FALSE) && ( gPixTable[i].resource != nil))
         {
-            mHandleDisposeAndDeregister( gPixTable[i].resource)
+            mHandleDisposeAndDeregister( gPixTable[i].resource);
             gPixTable[i].resource = nil;
             gPixTable[i].keepMe = FALSE;
             gPixTable[i].resID = -1;
@@ -316,7 +316,7 @@ Handle AddPixTable( short resID)
         MoveHHi( gPixTable[i].resource);
         HLock( gPixTable[i].resource);
         */
-        mDataHandleLockAndRegister( gPixTable[i].resource, nil, nil, nil, "\pgPixTable[i].resource")
+        mDataHandleLockAndRegister( gPixTable[i].resource, nil, nil, nil, "\pgPixTable[i].resource");
 
 //      WriteDebugLine((char *)"\pADDPIX");
 //      WriteDebugLong( resID);

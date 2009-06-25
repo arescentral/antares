@@ -757,8 +757,8 @@ void DoLoadingInterface( Rect *contentRect, StringPtr levelName)
         AutoFadeFrom( 10, FALSE);
 
         DrawInRealWorld();
-        mSetDirectFont( kTitleFontNum)
-        mGetTranslateColorShade( PALE_GREEN, LIGHT, color, transColor)
+        mSetDirectFont( kTitleFontNum);
+        mGetTranslateColorShade( PALE_GREEN, LIGHT, color, transColor);
         lRect.left = 0;
         lRect.top = 0;
         lRect.right = WORLD_WIDTH;
@@ -772,8 +772,8 @@ void DoLoadingInterface( Rect *contentRect, StringPtr levelName)
 
         retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
         retroTextSpec.tabSize =220;
-        mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, retroTextSpec.color, transColor)
-        mGetTranslateColorShade( SKY_BLUE, DARKEST, retroTextSpec.backColor, transColor)
+        mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, retroTextSpec.color, transColor);
+        mGetTranslateColorShade( SKY_BLUE, DARKEST, retroTextSpec.backColor, transColor);
         retroTextSpec.backColor = 0xff;
         retroTextSpec.originalColor = retroTextSpec.nextColor = retroTextSpec.color;
         retroTextSpec.originalBackColor = retroTextSpec.nextBackColor = retroTextSpec.backColor;
@@ -787,7 +787,7 @@ void DoLoadingInterface( Rect *contentRect, StringPtr levelName)
         boundsRect.top = (contentRect->top / 2) - ( retroTextSpec.autoHeight / 2);
         boundsRect.bottom = boundsRect.top + retroTextSpec.autoHeight;
         retroTextSpec.xpos = boundsRect.left;
-        retroTextSpec.ypos = boundsRect.top + mDirectFontAscent;
+        retroTextSpec.ypos = boundsRect.top + mDirectFontAscent();
 
         clipRect.left = 0;
         clipRect.right = clipRect.left + WORLD_WIDTH;
@@ -835,14 +835,14 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
         GetIndString( string, 2004, 33);
 
         mSetDirectFont( kButtonFontNum);
-        mGetDirectStringDimensions( string, width, height, strlen, getwidchar, getwidwid)
+        mGetDirectStringDimensions( string, width, height, strlen, getwidchar, getwidwid);
 
         mCopyAnyRect( clipRect, *contentRect);
         MacSetRect( &tRect, 0, 0, width, height);
         CenterRectInRect( &tRect, contentRect);
 
-        mGetTranslateColorShade( kLoadingScreenColor, LIGHTER, color, transColor)
-        MoveTo( tRect.left, tRect.top + mDirectFontAscent);
+        mGetTranslateColorShade( kLoadingScreenColor, LIGHTER, color, transColor);
+        MoveTo( tRect.left, tRect.top + mDirectFontAscent());
         DrawDirectTextStringClipped( string, color, *offMap, &clipRect, 0, 0);
 
 
@@ -1318,11 +1318,11 @@ void DoHelpScreen( void)
 
             retroTextSpec.textLength = GetHandleSize( retroTextSpec.text);
 
-            mSetDirectFont( kComputerFontNum)
+            mSetDirectFont( kComputerFontNum);
             retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
             retroTextSpec.tabSize = 220;
-            mGetTranslateColorShade( RED, VERY_LIGHT, retroTextSpec.color, transColor)
-            mGetTranslateColorShade( RED, VERY_DARK, retroTextSpec.backColor, transColor)
+            mGetTranslateColorShade( RED, VERY_LIGHT, retroTextSpec.color, transColor);
+            mGetTranslateColorShade( RED, VERY_DARK, retroTextSpec.backColor, transColor);
             retroTextSpec.originalColor = retroTextSpec.nextColor = retroTextSpec.color;
             retroTextSpec.originalBackColor = retroTextSpec.nextBackColor = retroTextSpec.backColor;
 
@@ -1338,7 +1338,7 @@ void DoHelpScreen( void)
                                 ( retroTextSpec.autoHeight / 2));
             boundsRect.bottom = boundsRect.top + retroTextSpec.autoHeight;
             retroTextSpec.xpos = boundsRect.left;
-            retroTextSpec.ypos = boundsRect.top + mDirectFontAscent;
+            retroTextSpec.ypos = boundsRect.top + mDirectFontAscent();
 
             clipRect.left = 0;
             clipRect.right = clipRect.left + WORLD_WIDTH;
@@ -1464,7 +1464,7 @@ void StartPauseIndicator(StringPtr pauseString, unsigned char hue)
 
 #pragma unused( hue)
     mSetDirectFont( kTitleFontNum);
-    mGetDirectStringDimensions( pauseString, width, height, strlen, getwidchar, getwidwid)
+    mGetDirectStringDimensions( pauseString, width, height, strlen, getwidchar, getwidwid);
     MacSetRect( &tRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, gAresGlobal->gTrueClipBottom);
 
     MacSetRect( &stringRect, 0, 0, width, height);
@@ -1485,7 +1485,7 @@ void StartPauseIndicator(StringPtr pauseString, unsigned char hue)
 
     mCopyAnyRect( clipRect, tRect);
 
-    mGetTranslateColorShade( GREEN, DARKER, color, transColor)
+    mGetTranslateColorShade( GREEN, DARKER, color, transColor);
 //  DrawNateRectClipped( *offMap, &clipRect, &clipRect, 0, 0,color);
     for ( count = clipRect.top + 2; count < clipRect.bottom; count += 2)
     {
@@ -1493,9 +1493,9 @@ void StartPauseIndicator(StringPtr pauseString, unsigned char hue)
                     count, 0, 0, color);
     }
 
-    mGetTranslateColorShade( GREEN, LIGHTER, color, transColor)
+    mGetTranslateColorShade( GREEN, LIGHTER, color, transColor);
     DrawNateVBracket( *offMap, &clipRect, &clipRect, 0, 0,color);
-    MoveTo( stringRect.left, stringRect.top + mDirectFontAscent);
+    MoveTo( stringRect.left, stringRect.top + mDirectFontAscent());
     DrawDirectTextStringClipped( pauseString, color, *offMap, &clipRect, 0, 0);
 
     DrawInRealWorld();
@@ -1512,7 +1512,7 @@ void StopPauseIndicator( StringPtr pauseString)
     PixMapHandle    offMap = GetGWorldPixMap( gOffWorld), saveMap = GetGWorldPixMap( gSaveWorld);
 
     mSetDirectFont( kTitleFontNum);
-    mGetDirectStringDimensions( pauseString, width, height, strlen, getwidchar, getwidwid)
+    mGetDirectStringDimensions( pauseString, width, height, strlen, getwidchar, getwidwid);
     MacSetRect( &tRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, gAresGlobal->gTrueClipBottom);
 
     MacSetRect( &stringRect, 0, 0, width, height);
@@ -4054,19 +4054,19 @@ void DrawLevelNameInBox( StringPtr name, long fontNum, short descriptionTextID,
 
     retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
     retroTextSpec.tabSize =220;
-    mGetTranslateColorShade( AQUA, VERY_LIGHT, retroTextSpec.color, transColor)
-    mGetTranslateColorShade( AQUA, DARKEST, retroTextSpec.backColor, transColor)
+    mGetTranslateColorShade( AQUA, VERY_LIGHT, retroTextSpec.color, transColor);
+    mGetTranslateColorShade( AQUA, DARKEST, retroTextSpec.backColor, transColor);
     retroTextSpec.backColor = 0xff;
     retroTextSpec.originalColor = retroTextSpec.nextColor = retroTextSpec.color;
     retroTextSpec.originalBackColor = retroTextSpec.nextBackColor = retroTextSpec.backColor;
     retroTextSpec.topBuffer = 2;
     retroTextSpec.bottomBuffer = 0;
 
-    mSetDirectFont( fontNum)
+    mSetDirectFont( fontNum);
     height = DetermineDirectTextHeightInWidth( &retroTextSpec, anItem->bounds.right - anItem->bounds.left);
 
     retroTextSpec.xpos = anItem->bounds.left;
-    retroTextSpec.ypos = anItem->bounds.left + mDirectFontAscent;
+    retroTextSpec.ypos = anItem->bounds.left + mDirectFontAscent();
 
 //  clipRect.left = 0;
 //  clipRect.right = clipRect.left + WORLD_WIDTH;
@@ -4532,7 +4532,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
                 starPoint.h += bounds->left;
                 starPoint.v += bounds->top;
 
-                mGetTranslateColorShade( GOLD, VERY_LIGHT, color, transColor)
+                mGetTranslateColorShade( GOLD, VERY_LIGHT, color, transColor);
                 RectToLongRect( bounds, &longClipRect);
                 starRect.left = starPoint.h - kMissionStarPointWidth;
                 starRect.top = starPoint.v - kMissionStarPointHeight;
@@ -4694,11 +4694,11 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
 
             retroTextSpec.textLength = GetHandleSize( retroTextSpec.text);
 
-            mSetDirectFont( kButtonFontNum)
+            mSetDirectFont( kButtonFontNum);
             retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
             retroTextSpec.tabSize = 100;
-            mGetTranslateColorShade( GREEN, VERY_LIGHT, retroTextSpec.color, transColor)
-            mGetTranslateColorShade( GREEN, DARKEST, retroTextSpec.backColor, transColor)
+            mGetTranslateColorShade( GREEN, VERY_LIGHT, retroTextSpec.color, transColor);
+            mGetTranslateColorShade( GREEN, DARKEST, retroTextSpec.backColor, transColor);
             retroTextSpec.originalColor = retroTextSpec.nextColor = retroTextSpec.color;
             retroTextSpec.originalBackColor = retroTextSpec.nextBackColor = retroTextSpec.backColor;
             retroTextSpec.topBuffer = 1;
@@ -4727,7 +4727,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
                 MacOffsetRect( &dataRect, 0, clipRect->bottom - dataRect.bottom - 1);
             }
             retroTextSpec.xpos = dataRect.left;
-            retroTextSpec.ypos = dataRect.top + mDirectFontAscent;
+            retroTextSpec.ypos = dataRect.top + mDirectFontAscent();
 
     //      clipRect.left = dataRect.left;
     //      clipRect.right = dataRect.right;
@@ -4993,7 +4993,7 @@ void ShowSuccessAnimation( WindowPtr thePort)
 
         while (( !AnyRealKeyDown()) && (( TickCount() - autoTimeStart) < kDebriefTimeOutTime))
         {
-            mSetDirectFont( kTitleFontNum)
+            mSetDirectFont( kTitleFontNum);
 
             PrepareToMoveScrollStars();
             do
@@ -5004,8 +5004,8 @@ void ShowSuccessAnimation( WindowPtr thePort)
             Move3DStars( vanishingPoint, unitsToDo * startimes, &starBounds);
             Draw3DStars( warp, &starBounds, pixMap);
 
-            mGetDirectStringDimensions( hackString, hpos, zpoint, ztimes, getwidchar, getwidwid)
-            mGetTranslateColorShade( RED, VERY_LIGHT, color, transColor)
+            mGetDirectStringDimensions( hackString, hpos, zpoint, ztimes, getwidchar, getwidwid);
+            mGetTranslateColorShade( RED, VERY_LIGHT, color, transColor);
             tRect.left = (WORLD_WIDTH / 2) - (hpos / 2);
             tRect.top = (WORLD_HEIGHT / 2) - gDirectText->ascent / 2;
             tRect.right = tRect.left + hpos;
@@ -5161,11 +5161,11 @@ void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, lo
 
         retroTextSpec.textLength = GetHandleSize( retroTextSpec.text);
 
-        mSetDirectFont( kButtonFontNum)
+        mSetDirectFont( kButtonFontNum);
         retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
         retroTextSpec.tabSize = 60;
-        mGetTranslateColorShade( GOLD, VERY_LIGHT, retroTextSpec.color, transColor)
-        mGetTranslateColorShade( GOLD, DARKEST, retroTextSpec.backColor, transColor)
+        mGetTranslateColorShade( GOLD, VERY_LIGHT, retroTextSpec.color, transColor);
+        mGetTranslateColorShade( GOLD, DARKEST, retroTextSpec.backColor, transColor);
         retroTextSpec.originalColor = retroTextSpec.nextColor = retroTextSpec.color;
         retroTextSpec.originalBackColor = retroTextSpec.nextBackColor = retroTextSpec.backColor;
 
@@ -5181,7 +5181,7 @@ void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, lo
                             ( retroTextSpec.autoHeight / 2));
         boundsRect.bottom = boundsRect.top + retroTextSpec.autoHeight;
         retroTextSpec.xpos = boundsRect.left;
-        retroTextSpec.ypos = boundsRect.top + mDirectFontAscent;
+        retroTextSpec.ypos = boundsRect.top + mDirectFontAscent();
 
         clipRect.left = 0;
         clipRect.right = clipRect.left + WORLD_WIDTH;
@@ -5345,7 +5345,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
         HLockHi( textHandle);
         if ( MemError() != noErr) return;//Debugger();
 
-        mSetDirectFont( textFontNum)
+        mSetDirectFont( textFontNum);
 
         boundsRect.left = (WORLD_WIDTH / 2) - ( scrollWidth / 2);
         boundsRect.right = boundsRect.left + scrollWidth;
@@ -5355,7 +5355,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
         textRect.left = boundsRect.left;
         textRect.right = boundsRect.right;
         textRect.top = boundsRect.bottom;
-        textRect.bottom = textRect.top + mDirectFontHeight + kScrollTextLineBuffer + 1;
+        textRect.bottom = textRect.top + mDirectFontHeight() + kScrollTextLineBuffer + 1;
 
         scrollRect.left = boundsRect.left;
         scrollRect.right = boundsRect.right;
@@ -5524,8 +5524,8 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                     retroTextSpec.thisPosition = retroTextSpec.linePosition =
                         retroTextSpec.lineCount = 0;
                     retroTextSpec.tabSize = scrollWidth / 2;
-                    mGetTranslateColorShade( RED, VERY_LIGHT, retroTextSpec.color, transColor)
-            //      mGetTranslateColorShade( RED, DARKEST, retroTextSpec.backColor, transColor)
+                    mGetTranslateColorShade( RED, VERY_LIGHT, retroTextSpec.color, transColor);
+            //      mGetTranslateColorShade( RED, DARKEST, retroTextSpec.backColor, transColor);
                     retroTextSpec.backColor = WHITE;//0xff;
                     retroTextSpec.originalColor = retroTextSpec.nextColor = retroTextSpec.color;
                     retroTextSpec.originalBackColor = retroTextSpec.nextBackColor = retroTextSpec.backColor;
@@ -5555,7 +5555,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                             pictRect.right = pictRect.left + (((**thePict).picFrame.right - (**thePict).picFrame.left));
                             pictRect.top = boundsRect.bottom;
 //                          pictRect.bottom = pictRect.top + ((**thePict).picFrame.bottom - (**thePict).picFrame.top);
-                            pictRect.bottom = pictRect.top + mDirectFontHeight + kScrollTextLineBuffer;
+                            pictRect.bottom = pictRect.top + mDirectFontHeight() + kScrollTextLineBuffer;
 
                             pictSourceRect = (**thePict).picFrame;
                             pictSourceRect.left = ( scrollWidth / 2) -
@@ -5585,7 +5585,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                                 pictRect.left = pictSourceRect.left = scrollRect.left;
                                 pictRect.right = pictSourceRect.right = scrollRect.right;
                             }
-                            pictSourceRect.bottom = pictSourceRect.top + mDirectFontHeight + kScrollTextLineBuffer;
+                            pictSourceRect.bottom = pictSourceRect.top + mDirectFontHeight() + kScrollTextLineBuffer;
 
                             while (( pictSourceRect.top < (**thePict).picFrame.bottom) && (!abort))
                             {
@@ -5605,7 +5605,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
 
 
                                 for (   l = 0;
-                                        ((l < (mDirectFontHeight + kScrollTextLineBuffer)) &&
+                                        ((l < (mDirectFontHeight() + kScrollTextLineBuffer)) &&
                                             (!abort) &&
                                             ((pictSourceRect.top+l)<
                                                 (**thePict).picFrame.bottom));
@@ -5653,7 +5653,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                                     if ( AnyEvent()) abort = true;
                                 }
 
-                                MacOffsetRect( &pictSourceRect, 0, (mDirectFontHeight + kScrollTextLineBuffer));
+                                MacOffsetRect( &pictSourceRect, 0, (mDirectFontHeight() + kScrollTextLineBuffer));
                             }
                             HUnlock( (Handle)thePict);
                             ReleaseResource( (Handle)thePict);
@@ -5686,7 +5686,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                         Rect    bgRect, stRect;
 
                         retroTextSpec.xpos = textRect.left + 6;
-                        retroTextSpec.ypos = textRect.top + mDirectFontAscent + kScrollTextLineBuffer;
+                        retroTextSpec.ypos = textRect.top + mDirectFontAscent() + kScrollTextLineBuffer;
 
                         DrawInOffWorld();
                         mCopyAnyRect( bgRect, textRect);
@@ -5729,7 +5729,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
 
                         LongRectToRect( &boundsRect, &vRect);
                         for (   l = 0;
-                                ((l < (mDirectFontHeight + kScrollTextLineBuffer)) &&
+                                ((l < (mDirectFontHeight() + kScrollTextLineBuffer)) &&
                                     (!abort));
                                 l++)
                         {

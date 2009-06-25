@@ -24,25 +24,9 @@
 
 #pragma options align=mac68k
 
-#define mHandleLockAndRegister( mhandle, munlockProc, mlockPrc, mresolveProc, mhandlename)\
-MoveHHi( (mhandle));\
-HLock( (mhandle));\
-HHClearHandle( mhandle);\
-HHRegisterHandle( &(mhandle), munlockProc, mlockPrc, mresolveProc, false, mhandlename);
-
-#define mDataHandleLockAndRegister( mhandle, munlockProc, mlockPrc, mresolveProc, mhandlename)\
-MoveHHi( (mhandle));\
-HLock( (mhandle));\
-HHRegisterHandle( &(mhandle), munlockProc, mlockPrc, mresolveProc, false, mhandlename);
-
-#define mCheckDataHandleLockAndRegister( mhandle, munlockProc, mlockPrc, mresolveProc, mhandlename)\
-MoveHHi( (mhandle));\
-HLock( (mhandle));\
-HHRegisterHandle( &(mhandle), munlockProc, mlockPrc, mresolveProc, true, mhandlename);
-
-#define mHandleDisposeAndDeregister( mhandle)\
-HHDeregisterHandle( &(mhandle));\
-DisposeHandle( (mhandle));
+typedef void (UnlockFunction)(Handle);
+typedef void (LockFunction)(Handle);
+typedef void (ResolveFunction)(Handle);
 
 short HandleHandlerInit( void);
 void HandleHandlerCleanup( void);
@@ -60,6 +44,36 @@ void HHConcatenateHandle( Handle, Handle);
 void HHClearHandle( Handle);
 void HHCheckHandle( Handle, Handle);
 void HHCheckAllHandles( void);
+
+inline void mHandleLockAndRegister(
+        Handle& mhandle, UnlockFunction munlockProc, LockFunction mlockPrc,
+        ResolveFunction mresolveProc, const unsigned char* mhandlename) {
+    MoveHHi( (mhandle));
+    HLock( (mhandle));
+    HHClearHandle( mhandle);
+    HHRegisterHandle( &(mhandle), munlockProc, mlockPrc, mresolveProc, false, mhandlename);
+}
+
+inline void mDataHandleLockAndRegister(
+        Handle& mhandle, UnlockFunction munlockProc, LockFunction mlockPrc,
+        ResolveFunction mresolveProc, const unsigned char* mhandlename) {
+    MoveHHi( (mhandle));
+    HLock( (mhandle));
+    HHRegisterHandle( &(mhandle), munlockProc, mlockPrc, mresolveProc, false, mhandlename);
+}
+
+inline void mCheckDataHandleLockAndRegister(
+        Handle& mhandle, UnlockFunction munlockProc, LockFunction mlockPrc,
+        ResolveFunction mresolveProc, const unsigned char* mhandlename) {
+    MoveHHi( (mhandle));
+    HLock( (mhandle));
+    HHRegisterHandle( &(mhandle), munlockProc, mlockPrc, mresolveProc, true, mhandlename);
+}
+
+inline void mHandleDisposeAndDeregister(Handle mhandle) {
+    HHDeregisterHandle( &(mhandle));
+    DisposeHandle( (mhandle));
+}
 
 #pragma options align=reset
 

@@ -213,7 +213,7 @@ void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
                 // check for each player
                 for ( c3 = 0; c3 < gThisScenario->playerNum; c3++)
                 {
-                    mGetBaseObjectFromClassRace( baseObject, newShipNum, initial->canBuild[c2], gThisScenario->player[c3].playerRace)
+                    mGetBaseObjectFromClassRace( baseObject, newShipNum, initial->canBuild[c2], gThisScenario->player[c3].playerRace);
 
                     if ( baseObject != nil)
                         CheckBaseObjectMedia( baseObject, 0);
@@ -299,7 +299,7 @@ void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
                 {
                     initial = mGetScenarioInitial( gThisScenario, count);
                     baseObject = mGetBaseObjectPtr( initial->type);
-                    mGetBaseObjectFromClassRace( baseObject, newShipNum, initial->canBuild[c2], gThisScenario->player[c3].playerRace)
+                    mGetBaseObjectFromClassRace( baseObject, newShipNum, initial->canBuild[c2], gThisScenario->player[c3].playerRace);
                     if ( baseObject != nil)
                     {
                         AddBaseObjectMedia( newShipNum, 0);

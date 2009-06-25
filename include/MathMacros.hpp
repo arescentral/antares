@@ -20,11 +20,21 @@
 
 // Math Macros.h
 
-#define ABS( x) ((( x) >= 0) ? (x):(-(x)))
+template <typename T>
+inline T ABS(T x) {
+    if (x >= 0) {
+        return x;
+    } else {
+        return -x;
+    }
+}
 
-#define mClipCode( x, y, bounds) ( 0 | ((( (x) < (bounds).left) << 3) | \
-    (( (x) > ( (bounds).right - 1)) << 2) | \
-    (( (y) < (bounds).top) << 1) |  \
-    ( (y) > ( (bounds).bottom - 1))))
+template <typename T>
+inline int mClipCode(int x, int y, T bounds) {
+    return ((x < bounds.left) << 3)
+        | ((x > (bounds.right - 1)) << 2)
+        | ((y < bounds.top) << 1)
+        | (y > ( bounds.bottom - 1));
+}
 
 #endif // ANTARES_MATH_MACROS_HPP_

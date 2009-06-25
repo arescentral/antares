@@ -52,16 +52,25 @@
 #define kFixedWholeMultiplier       256
 #define kFixedBitShiftNumber        (long)8
 
-#define mLongToFixed( m_l)          ((m_l) << kFixedBitShiftNumber)
-#define mFloatToFixed( m_r)         (m_r) * (float)(kFixedWholeMultiplier)
-#define mFixedToFloat( m_f)         ((float)(m_f) / (float)kFixedWholeMultiplier)
-#define mFixedToLong( m_f)          (( (m_f) < 0) ? (( (m_f) >> kFixedBitShiftNumber) + 1):( (m_f) >> kFixedBitShiftNumber))
+inline Fixed mLongToFixed(long m_l)     { return m_l << kFixedBitShiftNumber; }
+inline Fixed mFloatToFixed(float m_r)   { return m_r * kFixedBitShiftNumber; }
+inline float mFixedToFloat(Fixed m_f)   { return static_cast<float>(m_f) / kFixedWholeMultiplier; }
+inline long mFixedToLong(Fixed m_f) {
+    if (m_f < 0) {
+        return (m_f >> kFixedBitShiftNumber) + 1;
+    } else {
+        return m_f >> kFixedBitShiftNumber;
+    }
+}
 
 // the max safe # we can do is 181 for signed multiply if we don't know other value
 // if -1 <= other value <= 1 then we can do 32767
-#define mMultiplyFixed( m_f1, m_f2)     (( (m_f1) * (m_f2)) >> kFixedBitShiftNumber)
-//#define   mDivideFixed( f1, f2)       ( (f1) / ((f2) >> kFixedBitShiftNumber))
-#define mDivideFixed( m_f1, m_f2)       ( ((m_f1) << kFixedBitShiftNumber) / (m_f2))
+inline Fixed mMultiplyFixed(Fixed m_f1, Fixed m_f2) {
+    return (m_f1 * m_f2) >> kFixedBitShiftNumber;
+}
+inline Fixed mDivideFixed(Fixed m_f1, Fixed m_f2) {
+    return (m_f1 << kFixedBitShiftNumber) / m_f2;
+}
 
 typedef long smallFixedType;    // distinct from Mac OS's Fixed type
 
@@ -82,22 +91,34 @@ Fixed MyFixRatio( short, short);
 void MyMulDoubleLong( long, long, wide *);
 void MyWideAddC( wide *, const wide *);
 #ifdef powerc
-#define MyWideAdd( mtarget, msource)    WideAdd( (wide *)mtarget, (wide *)msource)
+template <typename T>
+inline void MyWideAdd(T* mtarget, T* msource) {
+    WideAdd((wide*)mtarget, (wide*)msource);
+}
 #else
 asm void MyWideAdd( UnsignedWide *, const UnsignedWide *);
 #endif
-#define mWideIsGreaterThan( mleft, mright) (((mleft).hi==(mright).hi)?((mleft).lo>(mright).lo):((mleft).hi>(mright).hi))
-#define mWideIsGreaterThanOrEqual( mleft, mright) (((mleft).hi==(mright).hi)?((mleft).lo>=(mright).lo):((mleft).hi>(mright).hi))
+template <typename T>
+inline bool mWideIsGreaterThan(const T& mleft, const T& mright) {
+    if (mleft.hi == mright.hi) {
+        return mleft.lo > mright.lo;
+    } else {
+        return mleft.hi > mright.hi;
+    }
+}
+template <typename T>
+inline bool mWideIsGreaterThanOrEqual(const T& mleft, const T& mright) {
+    if (mleft.hi == mright.hi) {
+        return mleft.lo >= mright.lo;
+    } else {
+        return mleft.hi > mright.hi;
+    }
+}
 
-#if TARGET_OS_MAC
-    #ifdef powerc
-    #define MyWideMul( mlong1, mlong2, mwide) WideMultiply( mlong1, mlong2, (wide *)mwide)
-    #else
-    #define MyWideMul( mlong1, mlong2, mwide) LongMul( mlong1, mlong2, (Int64Bit *)mwide)
-    #endif powerc
-#else
-    #define MyWideMul( mlong1, mlong2, mwide) WideMultiply( mlong1, mlong2, (wide *)mwide)
-#endif TARGET_OS_MAC
+template <typename T>
+inline void MyWideMul(long mlong1, long mlong2, T* mwide) {
+    WideMultiply(mlong1, mlong2, (wide*)mwide);
+}
 
 #pragma options align=reset
 

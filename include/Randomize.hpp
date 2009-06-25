@@ -24,10 +24,6 @@
 
 #pragma options align=mac68k
 
-//#define RandomSeeded( mrange, mseed) DebugRandomSeeded( mrange, mseed, __FILE__, __LINE__)
-//#define RandomSeeded( mrange, mseed, mstringy, mobjecttype) DebugRandomSeeded( mrange, mseed, __FILE__, mstringy, mobjecttype)
-#define RandomSeeded( mrange, mseed, mstringy, mobjecttype) XRandomSeeded( mrange, mseed)
-
 #define kRandomRange        32767L
 
 int RandomInit( void);
@@ -38,6 +34,10 @@ void DebugRandomReset( void);
 short DebugRandomSeeded( short, long *, char *, OSType, long);
 short XRandomSeeded( short, long *);
 void SetMyRandomSeed( long);
+
+inline short RandomSeeded(short mrange, long* mseed, long, long) {
+    return XRandomSeeded(mrange, mseed);
+}
 
 #pragma options align=reset
 
