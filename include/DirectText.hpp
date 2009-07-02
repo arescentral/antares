@@ -21,6 +21,7 @@
 // Direct Text.h
 
 #include "AnyChar.hpp"
+#include "Casts.hpp"
 #include "Processor.hpp"
 #include "SpriteHandling.hpp"
 
@@ -65,7 +66,7 @@ extern Handle gDirectTextData;
 
 inline void mGetDirectStringDimensions(const unsigned char* string, long& width, long& height) {
     height = gDirectText->height << 1;
-    width = ((long)kCharSpace + (long)gDirectText->logicalWidth) * (long)*(string);   // width * length of string
+    width = (implicit_cast<long>(kCharSpace) + implicit_cast<long>(gDirectText->logicalWidth)) * implicit_cast<long>(*(string));   // width * length of string
 }
 
 template <typename T>
@@ -74,26 +75,29 @@ inline void mGetDirectStringDimensions(
         unsigned char*& mwidptr) {
     mheight = gDirectText->height;
     mwidth = 0;
-    mcharptr = (unsigned char *)(mstring);
-    mstrlen = (long)*(mcharptr++);
+    mcharptr = reinterpret_cast<unsigned char*>(mstring);
+    mstrlen = implicit_cast<long>(*(mcharptr++));
     while( mstrlen > 0)
     {
-        mwidptr = (unsigned char *)*(gDirectText->charSet) + gDirectText->height * gDirectText->physicalWidth * (long)*mcharptr + (long)*mcharptr;
-        mwidth += (long)*mwidptr;
+        mwidptr = reinterpret_cast<unsigned char *>(*(gDirectText->charSet))
+            + gDirectText->height * gDirectText->physicalWidth * implicit_cast<long>(*mcharptr)
+            + implicit_cast<long>(*mcharptr);
+        mwidth += implicit_cast<long>(*mwidptr);
         mcharptr++;
         mstrlen--;
     }
 }
 
 inline void mDirectCharWidth(unsigned char& mwidth, char mchar, unsigned char*& mwidptr) {
-    mwidptr = (unsigned char *)*(gDirectText->charSet)
-        + gDirectText->height * gDirectText->physicalWidth * (long)(mchar) + (long)(mchar);
+    mwidptr = reinterpret_cast<unsigned char *>(*(gDirectText->charSet))
+        + gDirectText->height * gDirectText->physicalWidth * implicit_cast<long>(mchar)
+        + implicit_cast<long>(mchar);
     mwidth = *mwidptr;
 }
 
 inline void mSetDirectFont(long mwhichFont) {
     gWhichDirectText = mwhichFont;
-    gDirectText = (directTextType *)*gDirectTextData + gWhichDirectText;
+    gDirectText = reinterpret_cast<directTextType *>(*gDirectTextData) + gWhichDirectText;
 }
 
 inline int mDirectFontHeight() {

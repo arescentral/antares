@@ -40,7 +40,7 @@
 #define ASM_LENGTH_TYPE 6
 #define EXPERIMENT_TYPE 7
 
-#define kSpriteTableColorShift  (short)11
+#define kSpriteTableColorShift  implicit_cast<short>(11)
 #define kSpriteTableColorIDMask 0x7800  // bits 11-14
 // this makes the max legal sprite id 2047
 

@@ -248,14 +248,14 @@
 
 #define kPresenceDataHiWordMask         0xffff0000
 #define kPresenceDataLoWordMask         0x0000ffff
-#define kPresenceDataHiWordShift        (long)16
+#define kPresenceDataHiWordShift        implicit_cast<long>(16)
 
 #define kBoltPointNum                   10
 
 #define kPeriodicActionTimeMask     0xff000000
-#define kPeriodicActionTimeShift    (long)24
+#define kPeriodicActionTimeShift    implicit_cast<long>(24)
 #define kPeriodicActionRangeMask    0x00ff0000
-#define kPeriodicActionRangeShift   (long)16
+#define kPeriodicActionRangeShift   implicit_cast<long>(16)
 #define kPeriodicActionNotMask      0x0000ffff
 
 #define kDestroyActionNotMask       0x7fffffff
@@ -888,7 +888,7 @@ struct spaceObjectType {
 extern Handle gBaseObjectData;
 
 inline baseObjectType* mGetBaseObjectPtr(long whichObject) {
-    return (baseObjectType*)*gBaseObjectData + whichObject;
+    return reinterpret_cast<baseObjectType*>(*gBaseObjectData) + whichObject;
 }
 
 inline void mGetBaseObjectFromClassRace(

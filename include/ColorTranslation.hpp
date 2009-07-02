@@ -20,6 +20,8 @@
 
 #include <Quickdraw.h>
 
+#include "Casts.hpp"
+
 // Color Translation.h
 
 #pragma options align=mac68k
@@ -76,8 +78,8 @@ extern Handle gColorTranslateTable;
 
 inline void mGetTranslateColorShade(
         uint8_t mcolor, uint8_t mshade, uint8_t& mresultColor, transColorType* mtransColor) {
-    mtransColor = (transColorType *)*gColorTranslateTable
-        + (long)(((long)16 -(long)(mshade)) + (long)1 + (long)(mcolor) * (long)16);
+    mtransColor = reinterpret_cast<transColorType *>(*gColorTranslateTable)
+        + implicit_cast<long>((16 - implicit_cast<long>(mshade)) + 1 + implicit_cast<long>(mcolor) * 16);
     mresultColor = mtransColor->trueColor;
 }
 

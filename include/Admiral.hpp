@@ -22,6 +22,7 @@
 
 #include "AnyChar.hpp"
 #include "AresGlobalType.hpp"
+#include "Casts.hpp"
 #include "Scenario.hpp"
 
 #pragma options align=mac68k
@@ -124,10 +125,10 @@ struct admiralType {
 
 
 inline destBalanceType* mGetDestObjectBalancePtr(long whichObject) {
-    return (destBalanceType *)*gAresGlobal->gDestBalanceData + whichObject;
+    return reinterpret_cast<destBalanceType*>(*gAresGlobal->gDestBalanceData) + whichObject;
 }
 inline admiralType* mGetAdmiralPtr(long mwhichAdmiral) {
-    return (admiralType *)*gAresGlobal->gAdmiralData + mwhichAdmiral;
+    return reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + mwhichAdmiral;
 }
 
 int AdmiralInit( void);

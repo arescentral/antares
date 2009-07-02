@@ -44,7 +44,7 @@ void WriteDebugHexDump( Ptr, long);
 void WriteDebugChar( char);
 
 inline void mWriteDebugString(const unsigned char* mdstring) {
-    WriteDebugLine((char*)mdstring);
+    WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>(mdstring)));
 }
 
 unsigned long powerto ( unsigned long, unsigned long);

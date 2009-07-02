@@ -21,8 +21,9 @@
 // Math Special.h
 
 #include <Base.h>
+#include <ConditionalMacros.h>
 
-#include "ConditionalMacros.h"
+#include "Casts.hpp"
 
 #pragma options align=mac68k
 
@@ -50,11 +51,11 @@
 #define kFixedNegativeTwo           0xfffff200
 
 #define kFixedWholeMultiplier       256
-#define kFixedBitShiftNumber        (long)8
+#define kFixedBitShiftNumber        implicit_cast<long>(8)
 
 inline Fixed mLongToFixed(long m_l)     { return m_l << kFixedBitShiftNumber; }
 inline Fixed mFloatToFixed(float m_r)   { return m_r * kFixedBitShiftNumber; }
-inline float mFixedToFloat(Fixed m_f)   { return static_cast<float>(m_f) / kFixedWholeMultiplier; }
+inline float mFixedToFloat(Fixed m_f)   { return implicit_cast<float>(m_f) / kFixedWholeMultiplier; }
 inline long mFixedToLong(Fixed m_f) {
     if (m_f < 0) {
         return (m_f >> kFixedBitShiftNumber) + 1;
@@ -93,7 +94,7 @@ void MyWideAddC( wide *, const wide *);
 #ifdef powerc
 template <typename T>
 inline void MyWideAdd(T* mtarget, T* msource) {
-    WideAdd((wide*)mtarget, (wide*)msource);
+    WideAdd(reinterpret_cast<wide*>(mtarget), reinterpret_cast<wide*>(msource));
 }
 #else
 asm void MyWideAdd( UnsignedWide *, const UnsignedWide *);
@@ -117,7 +118,7 @@ inline bool mWideIsGreaterThanOrEqual(const T& mleft, const T& mright) {
 
 template <typename T>
 inline void MyWideMul(long mlong1, long mlong2, T* mwide) {
-    WideMultiply(mlong1, mlong2, (wide*)mwide);
+    WideMultiply(mlong1, mlong2, reinterpret_cast<wide*>(mwide));
 }
 
 #pragma options align=reset

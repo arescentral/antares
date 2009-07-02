@@ -31,9 +31,9 @@
 #define kScenarioWinnerPlayerMask   0x000000ff
 #define kScenarioWinnerNoPlayer     0x000000ff
 #define kScenarioWinnerNextMask     0xff000000
-#define kScenarioWinnerNextShift    (long)24
+#define kScenarioWinnerNextShift    implicit_cast<long>(24)
 #define kScenarioWinnerTextMask     0x00ffff00
-#define kScenarioWinnerTextShift    (long)8
+#define kScenarioWinnerTextShift    implicit_cast<long>(8)
 
 #define kScenarioWinnerNoNext       0xff000000
 #define kScenarioWinnerNoText       0x00ffff00
@@ -78,45 +78,45 @@ inline void mGetActionFromBaseTypeNum(
     if ( (mactionType) == kDestroyActionType)
     {
         if ( mactionNum >= ((mbaseObjPtr)->destroyActionNum & kDestroyActionNotMask)) mactPtr = nil;
-        else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->destroyAction + (long)mactionNum;
+        else mactPtr = reinterpret_cast<objectActionType *>(*gObjectActionData) + (mbaseObjPtr)->destroyAction + implicit_cast<long>(mactionNum);
     } else if ( (mactionType) == kExpireActionType) 
     {
         if ( mactionNum >= ((mbaseObjPtr)->expireActionNum  & kDestroyActionNotMask)) mactPtr = nil;
-        else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->expireAction + (long)mactionNum;
+        else mactPtr = reinterpret_cast<objectActionType *>(*gObjectActionData) + (mbaseObjPtr)->expireAction + implicit_cast<long>(mactionNum);
     } else if ( (mactionType) == kCreateActionType)
     {
         if ( mactionNum >= (mbaseObjPtr)->createActionNum) mactPtr = nil;
-        else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->createAction + (long)mactionNum;
+        else mactPtr = reinterpret_cast<objectActionType *>(*gObjectActionData) + (mbaseObjPtr)->createAction + implicit_cast<long>(mactionNum);
     } else if ( (mactionType) == kCollideActionType)
     {
         if ( mactionNum >= (mbaseObjPtr)->collideActionNum) mactPtr = nil;
-        else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->collideAction + (long)mactionNum;
+        else mactPtr = reinterpret_cast<objectActionType *>(*gObjectActionData) + (mbaseObjPtr)->collideAction + implicit_cast<long>(mactionNum);
     } else if ( (mactionType) == kActivateActionType)
     {
         if ( mactionNum >= ((mbaseObjPtr)->activateActionNum & kPeriodicActionNotMask)) mactPtr = nil;
-        else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->activateAction + (long)mactionNum;
+        else mactPtr = reinterpret_cast<objectActionType *>(*gObjectActionData) + (mbaseObjPtr)->activateAction + implicit_cast<long>(mactionNum);
     } else if ( (mactionType) == kArriveActionType)
     {
         mWriteDebugString("\pArrive Action:");
         WriteDebugLong( mactionNum);
         WriteDebugLong( (mbaseObjPtr)->arriveActionNum);
         if ( mactionNum >= (mbaseObjPtr)->arriveActionNum) mactPtr = nil;
-        else mactPtr = (objectActionType *)*gObjectActionData + (mbaseObjPtr)->arriveAction + (long)mactionNum;
+        else mactPtr = reinterpret_cast<objectActionType *>(*gObjectActionData) + (mbaseObjPtr)->arriveAction + implicit_cast<long>(mactionNum);
     } else mactPtr = nil;
 }
 
 inline scenarioInitialType* mGetScenarioInitial(scenarioType* mscenario, long minitialnum) {
-    return (scenarioInitialType *)*gAresGlobal->gScenarioInitialData
+    return reinterpret_cast<scenarioInitialType *>(*gAresGlobal->gScenarioInitialData)
         + (mscenario)->initialFirst + (minitialnum);
 }
 
 inline briefPointType* mGetScenarioBrief(scenarioType* mscenario, long mbriefnum) {
-    return (briefPointType *)*gAresGlobal->gScenarioBriefData
+    return reinterpret_cast<briefPointType *>(*gAresGlobal->gScenarioBriefData)
         + ((mscenario)->briefPointFirst) + (mbriefnum);
 }
 
 inline scenarioConditionType* mGetScenarioCondition(scenarioType* mscenario, long mconditionnum) {
-    return (scenarioConditionType *)*gAresGlobal->gScenarioConditionData
+    return reinterpret_cast<scenarioConditionType *>(*gAresGlobal->gScenarioConditionData)
         + (mscenario)->conditionFirst + (mconditionnum);
 }
 
@@ -127,13 +127,14 @@ inline void mGetRealObjectFromInitial(
         minitialobject = mGetScenarioInitial( gThisScenario, minum);
         if ( minitialobject->realObjectNumber >= 0)
         {
-            mobject = (spaceObjectType *)*gSpaceObjectData + (long)minitialobject->realObjectNumber;
+            mobject = reinterpret_cast<spaceObjectType *>(*gSpaceObjectData)
+                + implicit_cast<long>(minitialobject->realObjectNumber);
             if (( mobject->id != minitialobject->realObjectID) || ( mobject->active != kObjectInUse))
                 mobject = nil;
         } else mobject = nil;
     } else if ( minum == -2)
     {
-        mobject = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
+        mobject = reinterpret_cast<spaceObjectType *>(*gSpaceObjectData) + gAresGlobal->gPlayerShipNumber;
         if ((!(mobject->active)) || ( !(mobject->attributes & kCanThink)))
         {
             mobject = nil;
