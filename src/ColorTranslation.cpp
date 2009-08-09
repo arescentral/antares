@@ -33,7 +33,7 @@ Handle                  gColorTranslateTable = nil;
 void ColorTranslatorInit( CTabHandle theClut)
 
 {
-    gColorTranslateTable = NewHandle( sizeof( transColorType) * (long)kPaletteSize);
+    gColorTranslateTable = NewHandle( sizeof( transColorType) * implicit_cast<long>(kPaletteSize));
     if ( gColorTranslateTable == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
@@ -67,7 +67,7 @@ void MakeColorTranslatorTable( CTabHandle referenceTable)
 
     devicePixMap = (*theDevice)->gdPMap;
     deviceTable = (**devicePixMap).pmTable;
-    entry = (transColorType *)*gColorTranslateTable;
+    entry = reinterpret_cast<transColorType *>(*gColorTranslateTable);
 //  referenceTable = GetCTable( kReferenceColorTableID);
     if ( referenceTable == nil)
     {
@@ -85,9 +85,9 @@ void MakeColorTranslatorTable( CTabHandle referenceTable)
                     (deviceColor.green == paletteColor.green) &&
                     (deviceColor.blue == paletteColor.blue))
             {
-                entry->trueColor = (unsigned char)j;
-                retroEntry = (transColorType *)*gColorTranslateTable + (long)j;
-                retroEntry->retroColor = (unsigned char)i;
+                entry->trueColor = j;
+                retroEntry = reinterpret_cast<transColorType *>(*gColorTranslateTable) + implicit_cast<long>(j);
+                retroEntry->retroColor = i;
             }
         }
         entry++;
@@ -100,7 +100,7 @@ unsigned char GetRetroIndex( unsigned char which)
 {
     transColorType  *entry;
 
-    entry = (transColorType *)*gColorTranslateTable + (long)which;
+    entry = reinterpret_cast<transColorType *>(*gColorTranslateTable) + implicit_cast<long>(which);
     return( entry->retroColor);
 }
 
@@ -109,7 +109,7 @@ unsigned char GetTranslateIndex( unsigned char which)
 {
     transColorType  *entry;
 
-    entry = (transColorType *)*gColorTranslateTable + (long)which;
+    entry = reinterpret_cast<transColorType *>(*gColorTranslateTable) + implicit_cast<long>(which);
     return( entry->trueColor);
 }
 
@@ -118,7 +118,7 @@ unsigned char GetTranslateColorShade( unsigned char color, unsigned char shade)
 {
     transColorType  *entry;
 
-    entry = (transColorType *)*gColorTranslateTable + (long)((16 - shade) + 1 +
+    entry = reinterpret_cast<transColorType *>(*gColorTranslateTable) + implicit_cast<long>((16 - shade) + 1 +
             color * 16);
     return( entry->trueColor);
 }
@@ -129,9 +129,9 @@ void SetTranslateColorShadeFore( unsigned char color, unsigned char shade)
     RGBColor        c;
     transColorType  *entry;
 
-    entry = (transColorType *)*gColorTranslateTable + (long)((16 - shade) + 1L +
-            (long)color * 16L);
-    Index2Color( (long)entry->trueColor, &c);
+    entry = reinterpret_cast<transColorType *>(*gColorTranslateTable) + implicit_cast<long>((16 - shade) + 1L +
+            implicit_cast<long>(color) * 16L);
+    Index2Color(entry->trueColor, &c);
     RGBForeColor( &c);
 }
 
@@ -140,9 +140,9 @@ void GetRGBTranslateColorShade( RGBColor *c, unsigned char color, unsigned char 
 {
     transColorType  *entry;
 
-    entry = (transColorType *)*gColorTranslateTable + (long)((16 - shade) + 1L +
-            (long)color * 16L);
-    Index2Color( (long)entry->trueColor, c);
+    entry = reinterpret_cast<transColorType *>(*gColorTranslateTable) + implicit_cast<long>((16 - shade) + 1L +
+            implicit_cast<long>(color) * 16L);
+    Index2Color( implicit_cast<long>(entry->trueColor), c);
 }
 
 void SetTranslateColorFore( unsigned char color)
@@ -151,8 +151,8 @@ void SetTranslateColorFore( unsigned char color)
     RGBColor        c;
     transColorType  *entry;
 
-    entry = (transColorType *)*gColorTranslateTable + (long)color;
-    Index2Color( (long)entry->trueColor, &c);
+    entry = reinterpret_cast<transColorType *>(*gColorTranslateTable) + implicit_cast<long>(color);
+    Index2Color(entry->trueColor, &c);
     RGBForeColor( &c);
 }
 
@@ -161,8 +161,8 @@ void GetRGBTranslateColor( RGBColor *c, unsigned char color)
 {
     transColorType  *entry;
 
-    entry = (transColorType *)*gColorTranslateTable + (long)color;
-    Index2Color( (long)entry->trueColor, c);
+    entry = reinterpret_cast<transColorType *>(*gColorTranslateTable) + implicit_cast<long>(color);
+    Index2Color(entry->trueColor, c);
 }
 
 void DefaultColors( void)

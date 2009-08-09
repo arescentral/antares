@@ -104,7 +104,7 @@ int SpaceObjectHandlingInit( void)
 {
     Boolean correctBaseObjectColor = false;
 
-    gSpaceObjectData = NewHandle( sizeof( spaceObjectType) * (long)kMaxSpaceObject);
+    gSpaceObjectData = NewHandle( sizeof( spaceObjectType) * kMaxSpaceObject);
     if ( gSpaceObjectData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
@@ -157,7 +157,7 @@ int SpaceObjectHandlingInit( void)
             / sizeof( objectActionType);
     }
 
-    gActionQueueData = NewHandle( sizeof( actionQueueType) * (long)kActionQueueLength);
+    gActionQueueData = NewHandle( sizeof( actionQueueType) * kActionQueueLength);
     if ( gActionQueueData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 3);
@@ -191,7 +191,7 @@ void ResetAllSpaceObjects( void)
 
     gRootObject = nil;
     gRootObjectNumber = -1;
-    anObject = (spaceObjectType *)*gSpaceObjectData;
+    anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
     HHClearHandle( gSpaceObjectData);
     for ( i = 0; i < kMaxSpaceObject; i++)
     {
@@ -200,7 +200,7 @@ void ResetAllSpaceObjects( void)
         anObject->sprite = nil;
 /*      anObject->whichSprite = kNoSprite;
         anObject->whichLabel = kNoLabel;
-        anObject->entryNumber = (long)i;
+        anObject->entryNumber = i;
         anObject->baseType = nil;
         anObject->keysDown = 0;
         anObject->tinySize = 0;
@@ -286,10 +286,10 @@ void ResetAllSpaceObjects( void)
 
 void ResetActionQueueData( void)
 {
-    actionQueueType *action = (actionQueueType *)*gActionQueueData;
+    actionQueueType *action = reinterpret_cast<actionQueueType*>(*gActionQueueData);
     long            i;
 
-    WriteDebugLine((char *)"\p>RESETACT");
+    WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\p>RESETACT")));
     gFirstActionQueueNumber = -1;
     gFirstActionQueue = nil;
 
@@ -310,7 +310,7 @@ void ResetActionQueueData( void)
         action->offset.h = action->offset.v = 0;
         action++;
     }
-    WriteDebugLine((char *)"\p<RESETACT");
+    WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\p<RESETACT")));
 }
 
 /* AddSpaceObject:
@@ -333,7 +333,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
     transColorType  *transColor;
     short           whichShape = 0, angle;
 
-    destObject = (spaceObjectType *)*gSpaceObjectData;
+    destObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
 
     while (( destObject->active) && ( whichObject < kMaxSpaceObject))
     {
@@ -443,17 +443,17 @@ int AddSpaceObject( spaceObjectType *sourceObject)
         }
         GetOldSpritePixData( destObject->sprite, &oldStyleSprite);
 
-        scaleCalc = ((long)oldStyleSprite.width * destObject->naturalScale);
+        scaleCalc = (oldStyleSprite.width * destObject->naturalScale);
         scaleCalc >>= SHIFT_SCALE;
         destObject->scaledSize.h = scaleCalc;
-        scaleCalc = ((long)oldStyleSprite.height * destObject->naturalScale);
+        scaleCalc = (oldStyleSprite.height * destObject->naturalScale);
         scaleCalc >>= SHIFT_SCALE;
         destObject->scaledSize.v = scaleCalc;
 
-        scaleCalc = (long)oldStyleSprite.center.h * destObject->naturalScale;
+        scaleCalc = oldStyleSprite.center.h * destObject->naturalScale;
         scaleCalc >>= SHIFT_SCALE;
         destObject->scaledCornerOffset.h = -scaleCalc;
-        scaleCalc = (long)oldStyleSprite.center.v * destObject->naturalScale;
+        scaleCalc = oldStyleSprite.center.v * destObject->naturalScale;
         scaleCalc >>= SHIFT_SCALE;
         destObject->scaledCornerOffset.v = -scaleCalc;
 
@@ -476,13 +476,13 @@ int AddSpaceObject( spaceObjectType *sourceObject)
 //      if ( destObject->frame.beam.beam == nil) DebugStr("\pAddObj:nil beam");
     }
 
-    destObject->nextObject = (spaceObjectTypePtr)gRootObject;
+    destObject->nextObject = gRootObject;
     destObject->nextObjectNumber = gRootObjectNumber;
     destObject->previousObject = nil;
     destObject->previousObjectNumber = -1;
     if ( gRootObject != nil)
     {
-        gRootObject->previousObject = (spaceObjectTypePtr)destObject;
+        gRootObject->previousObject = destObject;
         gRootObject->previousObjectNumber = whichObject;
     }
     gRootObject = destObject;
@@ -520,7 +520,7 @@ int AddNumberedSpaceObject( spaceObjectType *sourceObject, long whichObject)
     spritePix       oldStyleSprite;
     long            scaleCalc;
 
-    destObject = (spaceObjectType *)*gSpaceObjectData + whichObject;
+    destObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + whichObject;
 
     if ( whichObject == kMaxSpaceObject) return( -1);
 
@@ -554,17 +554,17 @@ int AddNumberedSpaceObject( spaceObjectType *sourceObject, long whichObject)
 
         GetOldSpritePixData( destObject->sprite, &oldStyleSprite);
 
-        scaleCalc = ((long)oldStyleSprite.width * destObject->naturalScale);
+        scaleCalc = (oldStyleSprite.width * destObject->naturalScale);
         scaleCalc >>= SHIFT_SCALE;
         destObject->scaledSize.h = scaleCalc;
-        scaleCalc = ((long)oldStyleSprite.height * destObject->naturalScale);
+        scaleCalc = (oldStyleSprite.height * destObject->naturalScale);
         scaleCalc >>= SHIFT_SCALE;
         destObject->scaledSize.v = scaleCalc;
 
-        scaleCalc = (long)oldStyleSprite.center.h * destObject->naturalScale;
+        scaleCalc = oldStyleSprite.center.h * destObject->naturalScale;
         scaleCalc >>= SHIFT_SCALE;
         destObject->scaledCornerOffset.h = -scaleCalc;
-        scaleCalc = (long)oldStyleSprite.center.v * destObject->naturalScale;
+        scaleCalc = oldStyleSprite.center.v * destObject->naturalScale;
         scaleCalc >>= SHIFT_SCALE;
         destObject->scaledCornerOffset.v = -scaleCalc;
     } else destObject->sprite = nil;
@@ -581,7 +581,7 @@ void RemoveAllSpaceObjects( void)
     spaceObjectType *anObject;
     int             i;
 
-    anObject = (spaceObjectType *)*gSpaceObjectData;
+    anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
     for ( i = 0; i < kMaxSpaceObject; i++)
     {
         if ( anObject->sprite != nil)
@@ -600,7 +600,7 @@ void RemoveAllSpaceObjects( void)
 void CorrectAllBaseObjectColor( void)
 
 {
-    baseObjectType  *aBase = (baseObjectType *)*gBaseObjectData;
+    baseObjectType  *aBase = reinterpret_cast<baseObjectType*>(*gBaseObjectData);
     short           i;
     transColorType  *transColor;
     unsigned char   fixColor;
@@ -653,7 +653,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
 
     dObject->offlineTime = 0;
 
-    dObject->randomSeed = (long)seed;
+    dObject->randomSeed = seed;
 //  DebugFileAppendLong( dObject->randomSeed);
 //  DebugFileAppendString( "\p\t");
     dObject->attributes = sObject->attributes;
@@ -663,7 +663,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
     dObject->timeFromOrigin = 0;
     dObject->runTimeFlags = 0;
     if ( owner >= 0)
-        dObject->myPlayerFlag = (unsigned long)1 << (unsigned long)owner;
+        dObject->myPlayerFlag = 1 << owner;
     else dObject->myPlayerFlag = 0x80000000;
     dObject->seenByPlayerFlags = 0xffffffff;
     dObject->hostileTowardsFlags = 0;
@@ -680,7 +680,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
     if ( sObject->activateActionNum & kPeriodicActionTimeMask)
     {
         dObject->periodicTime = ((sObject->activateActionNum & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift) +
-            RandomSeeded( (short)((sObject->activateActionNum & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift),
+            RandomSeeded( ((sObject->activateActionNum & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift),
             &(dObject->randomSeed), 'soh1', whichBaseObject);
     } else dObject->periodicTime = 0;
 
@@ -688,7 +688,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
     mAddAngle( r, direction);
     if ( sObject->initialDirectionRange > 0)
     {
-        i = RandomSeeded( (short)sObject->initialDirectionRange, &(dObject->randomSeed), 'soh2',
+        i = RandomSeeded( sObject->initialDirectionRange, &(dObject->randomSeed), 'soh2',
             whichBaseObject);
         mAddAngle( r, i);
     }
@@ -699,7 +699,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
     f = sObject->initialVelocity;
     if ( sObject->initialVelocityRange > 0)
     {
-        f += (smallFixedType)RandomSeeded( (short)sObject->initialVelocityRange,
+        f += RandomSeeded( sObject->initialVelocityRange,
                     &(dObject->randomSeed), 'soh3', whichBaseObject);
     }
     mGetRotPoint( newVel.h, newVel.v, r);
@@ -772,7 +772,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
         dObject->frame.animation.thisShape = sObject->frame.animation.frameShape;
         if ( sObject->frame.animation.frameShapeRange > 0)
         {
-            l = RandomSeeded( (short)sObject->frame.animation.frameShapeRange,
+            l = RandomSeeded( sObject->frame.animation.frameShapeRange,
                 &(dObject->randomSeed), 'soh5', whichBaseObject);
             dObject->frame.animation.thisShape += l;
         }
@@ -788,7 +788,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
         } else if ( sObject->frame.animation.frameDirectionRange > 0)
         {
             dObject->frame.animation.frameDirection += RandomSeeded(
-                (short)sObject->frame.animation.frameDirectionRange,
+                sObject->frame.animation.frameDirectionRange,
                 &(dObject->randomSeed), 'so52', whichBaseObject);
         }
         dObject->frame.animation.frameFraction = 0;
@@ -806,7 +806,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
     // not setting owner
 
     if ( sObject->initialAge >= 0)
-        dObject->age = sObject->initialAge + RandomSeeded( (short)sObject->initialAgeRange, &(dObject->randomSeed), 'soh6',
+        dObject->age = sObject->initialAge + RandomSeeded( sObject->initialAgeRange, &(dObject->randomSeed), 'soh6',
             whichBaseObject);
     else dObject->age = -1;
 //  DebugFileAppendLong( dObject->age);
@@ -834,7 +834,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
 
     if ( sObject->attributes & kCanThink)
     {
-        dObject->pixResID += ((short)GetAdmiralColor( owner) << kSpriteTableColorShift);
+        dObject->pixResID += (GetAdmiralColor( owner) << kSpriteTableColorShift);
     }
 
     dObject->pulseType = sObject->pulse;
@@ -936,7 +936,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
         dObject->frame.animation.thisShape = sObject->frame.animation.frameShape;
         if ( sObject->frame.animation.frameShapeRange > 0)
         {
-            r = RandomSeeded( (short)sObject->frame.animation.frameShapeRange,
+            r = RandomSeeded( sObject->frame.animation.frameShapeRange,
                 &(dObject->randomSeed), 'soh6', whichBaseObject);
             dObject->frame.animation.thisShape += r;
         }
@@ -952,7 +952,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
         } else if ( sObject->frame.animation.frameDirectionRange > 0)
         {
             dObject->frame.animation.frameDirection += RandomSeeded(
-                (short)sObject->frame.animation.frameDirectionRange,
+                sObject->frame.animation.frameDirectionRange,
                 &(dObject->randomSeed), 'so52', whichBaseObject);
         }
         dObject->frame.animation.frameFraction = 0;
@@ -964,7 +964,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
 
     dObject->maxVelocity = sObject->maxVelocity;
 
-    dObject->age = sObject->initialAge + RandomSeeded( (short)sObject->initialAgeRange,
+    dObject->age = sObject->initialAge + RandomSeeded( sObject->initialAgeRange,
         &(dObject->randomSeed), 'soh7', whichBaseObject);
 
     dObject->naturalScale = sObject->naturalScale;
@@ -981,7 +981,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
 
     if ( sObject->attributes & kCanThink)
     {
-        dObject->pixResID += ((short)GetAdmiralColor( dObject->owner) << kSpriteTableColorShift);
+        dObject->pixResID += (GetAdmiralColor( dObject->owner) << kSpriteTableColorShift);
     }
 
     dObject->pulseType = sObject->pulse;
@@ -1003,7 +1003,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
     if ( sObject->activateActionNum & kPeriodicActionTimeMask)
     {
         dObject->periodicTime = ((sObject->activateActionNum & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift) +
-            RandomSeeded( (short)((sObject->activateActionNum & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift),
+            RandomSeeded( ((sObject->activateActionNum & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift),
             &(dObject->randomSeed), 'soh8', whichBaseObject);
     } else dObject->periodicTime = 0;
 
@@ -1115,7 +1115,7 @@ void AddActionToQueue( objectActionType *action, long actionNumber, long actionT
                         spaceObjectType *directObject, longPointType *offset)
 {
     long                queueNumber = 0;
-    actionQueueType     *actionQueue = (actionQueueType *)*gActionQueueData,
+    actionQueueType     *actionQueue = reinterpret_cast<actionQueueType*>(*gActionQueueData),
                         *nextQueue = gFirstActionQueue, *previousQueue = nil;
 
     while (( actionQueue->action != nil) && ( queueNumber < kActionQueueLength))
@@ -1189,7 +1189,7 @@ void ExecuteActionQueue( long unitsToDo)
 
 {
 //  actionQueueType     *actionQueue = gFirstActionQueue;
-    actionQueueType     *actionQueue = (actionQueueType *)*gActionQueueData;
+    actionQueueType     *actionQueue = reinterpret_cast<actionQueueType*>(*gActionQueueData);
     long                        subjectid, directid, i;
 
     for ( i = 0; i < kActionQueueLength; i++)
@@ -1266,7 +1266,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
     spaceObjectType *anObject, *playerPtr, *originalSObject = sObject,
                     *originalDObject = dObject;
     baseObjectType  *baseObject;
-    objectActionType    *action = (objectActionType *)*gObjectActionData + whichAction;
+    objectActionType    *action = reinterpret_cast<objectActionType*>(*gObjectActionData) + whichAction;
     short           end, angle;
     fixedPointType  fpoint, newVel;
     long            l, m;
@@ -1368,7 +1368,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     baseObject = mGetBaseObjectPtr( action->argument.createObject.whichBaseType);
                     end = action->argument.createObject.howManyMinimum;
                     if ( action->argument.createObject.howManyRange > 0)
-                        end += RandomSeeded( (short)action->argument.createObject.howManyRange,
+                        end += RandomSeeded( action->argument.createObject.howManyRange,
                                 &(anObject->randomSeed), 'soh9', action->argument.createObject.whichBaseType);
                     while ( end > 0)
                     {
@@ -1385,7 +1385,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                         /*
                         l += baseObject->initialDirection;
                         if ( baseObject->initialDirectionRange > 0)
-                            l += RandomSeeded( (short)baseObject->initialDirectionRange,
+                            l += RandomSeeded( baseObject->initialDirectionRange,
                                         &(anObject->randomSeed));
                         */
                         newLocation = anObject->location;
@@ -1397,11 +1397,11 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 
                         if ( action->argument.createObject.randomDistance > 0)
                         {
-                            newLocation.h += RandomSeeded( (short)action->argument.createObject.randomDistance << (short)1,
+                            newLocation.h += RandomSeeded( action->argument.createObject.randomDistance << 1,
                                 &(anObject->randomSeed), 'so10',
                                     action->argument.createObject.whichBaseType)
                                     - action->argument.createObject.randomDistance;
-                            newLocation.v += RandomSeeded( (short)action->argument.createObject.randomDistance << (short)1,
+                            newLocation.v += RandomSeeded( action->argument.createObject.randomDistance << 1,
                                 &(anObject->randomSeed), 'so11',
                                     action->argument.createObject.whichBaseType)
                                     - action->argument.createObject.randomDistance;
@@ -1414,7 +1414,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 
                         if ( l >= 0)
                         {
-                            spaceObjectType *newObject = (spaceObjectType *)*gSpaceObjectData + l;
+                            spaceObjectType *newObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + l;
                             if ( newObject->attributes & kCanAcceptDestination)
                             {
                                 ul1 = newObject->attributes;
@@ -1427,12 +1427,12 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                             SetObjectDestination( newObject, anObject);
                                         else if ( anObject->destObjectPtr != nil)
                                         {
-                                            SetObjectDestination( newObject, (spaceObjectType *)anObject->destObjectPtr);
+                                            SetObjectDestination( newObject, anObject->destObjectPtr);
                                         }
                                     }
                                 } else if ( action->reflexive)
                                 {
-                                    newObject->destObjectPtr = (spaceObjectTypePtr)anObject;
+                                    newObject->destObjectPtr = anObject;
                                     newObject->timeFromOrigin = kTimeToCheckHome;
                                     newObject->runTimeFlags &= ~kHasArrived;
                                     newObject->destinationObject = anObject->entryNumber; //a->destinationObject;
@@ -1605,7 +1605,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 
                             if ( action->argument.alterObject.minimum > 10000)
                             {
-                                WriteDebugLine((char *)"\pNRG");
+                                WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pNRG")));
                                 WriteDebugLong( anObject->whichBaseObject);
                                 WriteDebugLong( anObject->owner);
                                 WriteDebugFixed( action->argument.alterObject.minimum);
@@ -1725,9 +1725,9 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                                 } else
                                                 {
                                                     #ifdef powerc
-                                                    aFixed = MyFixRatio( (int)dObject->velocity.h, (int)dObject->velocity.v);
+                                                    aFixed = MyFixRatio( dObject->velocity.h, dObject->velocity.v);
                                                     #else
-                                                    aFixed = FixRatio( (int)dObject->velocity.h, (int)dObject->velocity.v);
+                                                    aFixed = FixRatio( dObject->velocity.h, dObject->velocity.v);
                                                     #endif
 
                                                     angle = AngleFromSlope( aFixed);
@@ -1758,9 +1758,9 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                                 } else
                                                 {
                                                     #ifdef powerc
-                                                    aFixed = MyFixRatio( (int)dObject->velocity.h, (int)dObject->velocity.v);
+                                                    aFixed = MyFixRatio( dObject->velocity.h, dObject->velocity.v);
                                                     #else
-                                                    aFixed = FixRatio( (int)dObject->velocity.h, (int)dObject->velocity.v);
+                                                    aFixed = FixRatio( dObject->velocity.h, dObject->velocity.v);
                                                     #endif
 
                                                     angle = AngleFromSlope( aFixed);
@@ -1854,7 +1854,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                             break;
 
                         case kAlterBaseType:
-                            WriteDebugLine((char *)"\pAlterBase!");
+                            WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pAlterBase!")));
                             if ( (action->reflexive) || ( dObject != nil))
                             ChangeObjectBaseType( anObject, action->argument.alterObject.minimum, -1,
                                 action->argument.alterObject.relative);
@@ -1963,13 +1963,13 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                 newLocation.h = newLocation.v = 0;
                             }
                             newLocation.h += RandomSeeded(
-                                (short)action->argument.alterObject.minimum <<
-                                (short)1,
+                                action->argument.alterObject.minimum <<
+                                1,
                                 &(anObject->randomSeed), 'so40', 0) -
                                 action->argument.alterObject.minimum;
                             newLocation.v += RandomSeeded(
-                                (short)action->argument.alterObject.minimum <<
-                                (short)1,
+                                action->argument.alterObject.minimum <<
+                                1,
                                 &(anObject->randomSeed), 'so41', 0) -
                                 action->argument.alterObject.minimum;
                             anObject->location.h = newLocation.h;
@@ -2141,7 +2141,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     break;
 
                 case kActivateSpecial:
-                    WriteDebugLine((char *)"\pActivate Special!");
+                    WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pActivate Special!")));
                     ActivateObjectSpecial( sObject);
                     break;
 
@@ -2254,19 +2254,19 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
                                     direction, velocity, owner, spriteIDOverride);
     newObject.location = *location;
     if ( gAresGlobal->gPlayerShipNumber >= 0)
-        player = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
+        player = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + gAresGlobal->gPlayerShipNumber;
     else player = nil;
     if (( player != nil) && ( player->active))
     {
-        difference = ABS( (long)player->location.h - (long)newObject.location.h);
+        difference = ABS<int>( player->location.h - newObject.location.h);
         dcalc = difference;
-        difference =  ABS( (long)player->location.v - (long)newObject.location.v);
+        difference =  ABS<int>( player->location.v - newObject.location.v);
         distance = difference;
     } else
     {
-        difference = ABS( (long)gGlobalCorner.h - (long)newObject.location.h);
+        difference = ABS<int>( gGlobalCorner.h - newObject.location.h);
         dcalc = difference;
-        difference =  ABS( (long)gGlobalCorner.v - (long)newObject.location.v);
+        difference =  ABS<int>( gGlobalCorner.v - newObject.location.v);
         distance = difference;
     }
     /*
@@ -2315,7 +2315,7 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
 //  WriteDebugLong( owner);
 
     newObject.sprite = nil;
-    newObject.id = (long)RandomSeeded( 16384, &gRandomSeed, 'so19', whichBase);
+    newObject.id = RandomSeeded( 16384, &gRandomSeed, 'so19', whichBase);
 
     if ( newObject.attributes & kCanTurn)
     {
@@ -2351,7 +2351,7 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
 //      DebugStr("\pCouldn't create an object!");
     } else
     {
-        madeObject = (spaceObjectType *)*gSpaceObjectData + newObjectNumber;
+        madeObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + newObjectNumber;
         madeObject->attributes |= specialAttributes;
 /*      if ( madeObject->sprite != nil)
         {
@@ -2414,7 +2414,7 @@ long CountObjectsOfBaseType( long whichType, long owner)
 
     spaceObjectType *anObject;
 
-    anObject = (spaceObjectType *)*gSpaceObjectData;
+    anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
     for ( count = 0; count < kMaxSpaceObject; count++)
     {
         if (( anObject->active) &&
@@ -2431,14 +2431,14 @@ long GetNextObjectWithAttributes( long startWith, unsigned long attributes, Bool
     long    original = startWith, result = 0;
     spaceObjectType *anObject;
 
-    anObject = (spaceObjectType *)*gSpaceObjectData + startWith;
+    anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + startWith;
 
     if ( exclude)
     {
         do
         {
             startWith = anObject->nextObjectNumber;
-            anObject = (spaceObjectType *)anObject->nextObject;
+            anObject = anObject->nextObject;
 
             if ( anObject == nil)
             {
@@ -2453,7 +2453,7 @@ long GetNextObjectWithAttributes( long startWith, unsigned long attributes, Bool
         do
         {
             startWith = anObject->nextObjectNumber;
-            anObject = (spaceObjectType *)anObject->nextObject;
+            anObject = anObject->nextObject;
 
             if ( anObject == nil)
             {
@@ -2474,10 +2474,10 @@ void ResolveSpaceObjectData( Handle spaceData)
 
 #pragma unused( spaceData)
 //  mWriteDebugString("\pZONK!");
-    anObject = (spaceObjectType *)*gSpaceObjectData;
+    anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
     if ( gRootObjectNumber >= 0)
     {
-        gRootObject = (spaceObjectType *)*gSpaceObjectData + gRootObjectNumber;
+        gRootObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + gRootObjectNumber;
     } else
     {
         gRootObject = nil;
@@ -2485,20 +2485,20 @@ void ResolveSpaceObjectData( Handle spaceData)
 
     if ( gAresGlobal->gScrollStarNumber >= 0)
     {
-        gScrollStarObject = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gScrollStarNumber;
+        gScrollStarObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + gAresGlobal->gScrollStarNumber;
     }
 
     for ( i = 0; i < kMaxSpaceObject; i++)
     {
-        anObject->baseType = (baseObjectType *)*gBaseObjectData + anObject->whichBaseObject;
+        anObject->baseType = reinterpret_cast<baseObjectType*>(*gBaseObjectData) + anObject->whichBaseObject;
         anObject->nextNearObject = anObject->nextFarObject = nil;
 
         if (( anObject->destObjectPtr != nil) && ( anObject->destinationObject != kNoDestinationObject))
-            anObject->destObjectPtr = (spaceObjectTypePtr)((spaceObjectType *)*gSpaceObjectData
+            anObject->destObjectPtr = (reinterpret_cast<spaceObjectType*>(*gSpaceObjectData)
                          + anObject->destinationObject);
 
         if (( anObject->sprite != nil) && ( anObject->whichSprite != kNoSprite))
-            anObject->sprite = (spriteType *)*gSpriteTable + anObject->whichSprite;
+            anObject->sprite = reinterpret_cast<spriteType*>(*gSpriteTable) + anObject->whichSprite;
 
         if (( anObject->beamBase != nil) && ( anObject->beamType != kNoWeapon))
             anObject->beamBase = mGetBaseObjectPtr( anObject->beamType);
@@ -2509,16 +2509,16 @@ void ResolveSpaceObjectData( Handle spaceData)
 
         if ( anObject->nextObjectNumber >= 0)
         {
-            bObject = (spaceObjectType *)*gSpaceObjectData + anObject->nextObjectNumber;
-            anObject->nextObject = (spaceObjectTypePtr)bObject;
+            bObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + anObject->nextObjectNumber;
+            anObject->nextObject = bObject;
         } else
         {
             anObject->nextObject = nil;
         }
         if ( anObject->previousObjectNumber >= 0)
         {
-            bObject = (spaceObjectType *)*gSpaceObjectData + anObject->previousObjectNumber;
-            anObject->previousObject = (spaceObjectTypePtr)bObject;
+            bObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + anObject->previousObjectNumber;
+            anObject->previousObject = bObject;
         } else
         {
             anObject->previousObject = nil;
@@ -2528,14 +2528,14 @@ void ResolveSpaceObjectData( Handle spaceData)
 
     if ( gActionQueueData != nil)
     {
-        actionQueueType *action = (actionQueueType *)*gActionQueueData;
+        actionQueueType *action = reinterpret_cast<actionQueueType*>(*gActionQueueData);
         for ( i = 0; i < kActionQueueLength; i++)
         {
             if ( action->subjectObjectNum >= 0)
-                action->subjectObject = (spaceObjectType *)*gSpaceObjectData + action->subjectObjectNum;
+                action->subjectObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + action->subjectObjectNum;
             else action->subjectObject = nil;
             if ( action->directObjectNum >= 0)
-                action->directObject = (spaceObjectType *)*gSpaceObjectData + action->directObjectNum;
+                action->directObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + action->directObjectNum;
             else action->directObject = nil;
             action++;
         }
@@ -2544,7 +2544,7 @@ void ResolveSpaceObjectData( Handle spaceData)
 
 void ResolveObjectActionData( Handle actionData)
 {
-    actionQueueType *action = (actionQueueType *)*gActionQueueData;
+    actionQueueType *action = reinterpret_cast<actionQueueType*>(*gActionQueueData);
     long            i;
 
 #pragma unused( actionData)
@@ -2554,7 +2554,7 @@ void ResolveObjectActionData( Handle actionData)
         for ( i = 0; i < kActionQueueLength; i++)
         {
             if ( action->actionNum >= 0)
-                action->action = (objectActionType *)*gObjectActionData + action->actionNum;
+                action->action = reinterpret_cast<objectActionType*>(*gObjectActionData) + action->actionNum;
             else action->action = nil;
             action++;
         }
@@ -2563,7 +2563,7 @@ void ResolveObjectActionData( Handle actionData)
 
 void ResolveActionQueueData( Handle queueData)
 {
-    actionQueueType *action = (actionQueueType *)*gActionQueueData;
+    actionQueueType *action = reinterpret_cast<actionQueueType*>(*gActionQueueData);
     long            i;
 
 #pragma unused( queueData)
@@ -2571,14 +2571,14 @@ void ResolveActionQueueData( Handle queueData)
     if ( gActionQueueData != nil)
     {
         if  (gFirstActionQueueNumber >= 0)
-            gFirstActionQueue = (actionQueueType *)*gActionQueueData + gFirstActionQueueNumber;
+            gFirstActionQueue = reinterpret_cast<actionQueueType*>(*gActionQueueData) + gFirstActionQueueNumber;
         else gFirstActionQueue = nil;
 
         for ( i = 0; i < kActionQueueLength; i++)
         {
             if ( action->nextActionQueueNum >= 0)
             {
-                action->nextActionQueue = (actionQueueType *)*gActionQueueData + action->nextActionQueueNum;
+                action->nextActionQueue = reinterpret_cast<actionQueueType*>(*gActionQueueData) + action->nextActionQueueNum;
             } else
             {
                 action->nextActionQueue = nil;
@@ -2719,12 +2719,12 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, Boolean message)
 
                 if (( anObject->pixResID == anObject->baseType->pixResID) ||
                     ( anObject->pixResID == (anObject->baseType->pixResID |
-                    ((short)GetAdmiralColor( originalOwner)
+                    (GetAdmiralColor( originalOwner)
                     << kSpriteTableColorShift))))
                 {
 
                     anObject->pixResID =
-                        anObject->baseType->pixResID | ((short)GetAdmiralColor( owner)
+                        anObject->baseType->pixResID | (GetAdmiralColor( owner)
                         << kSpriteTableColorShift);
 
                     pixTable = GetPixTable( anObject->pixResID);
@@ -2741,7 +2741,7 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, Boolean message)
         anObject->bestConsideredTargetValue = anObject->currentTargetValue = 0xffffffff;
         anObject->bestConsideredTargetNumber = -1;
 
-        fixObject = (spaceObjectType *)*gSpaceObjectData;
+        fixObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
         for ( i = 0; i < kMaxSpaceObject; i++)
         {
             if (( fixObject->destinationObject == anObject->entryNumber) && ( fixObject->active !=
@@ -2773,14 +2773,14 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, Boolean message)
                 AppendStringToMessage(GetDestBalanceName( anObject->destinationObject));
                 if ( owner >= 0)
                 {
-                    AppendStringToMessage((anyCharType *)"\p captured by ");
+                    AppendStringToMessage(const_cast<anyCharType*>("\p captured by "));
                     AppendStringToMessage(GetAdmiralName( anObject->owner));
-                    AppendStringToMessage((anyCharType *)"\p.");
+                    AppendStringToMessage(const_cast<anyCharType*>("\p."));
                 } else if ( originalOwner >= 0) // must be since can't both be -1
                 {
-                    AppendStringToMessage((anyCharType *)"\p lost by ");
+                    AppendStringToMessage(const_cast<anyCharType*>("\p lost by "));
                     AppendStringToMessage(GetAdmiralName( originalOwner));
-                    AppendStringToMessage((anyCharType *)"\p.");
+                    AppendStringToMessage(const_cast<anyCharType*>("\p."));
                 }
                 EndMessage();
             }
@@ -2793,14 +2793,14 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, Boolean message)
                 AppendStringToMessage( s);
                 if ( owner >= 0)
                 {
-                    AppendStringToMessage((anyCharType *)"\p captured by ");
+                    AppendStringToMessage(const_cast<anyCharType*>("\p captured by "));
                     AppendStringToMessage(GetAdmiralName( anObject->owner));
-                    AppendStringToMessage((anyCharType *)"\p.");
+                    AppendStringToMessage(const_cast<anyCharType*>("\p."));
                 } else if ( originalOwner >= 0) // must be since can't both be -1
                 {
-                    AppendStringToMessage((anyCharType *)"\p lost by ");
+                    AppendStringToMessage(const_cast<anyCharType*>("\p lost by "));
                     AppendStringToMessage(GetAdmiralName( originalOwner));
-                    AppendStringToMessage((anyCharType *)"\p.");
+                    AppendStringToMessage(const_cast<anyCharType*>("\p."));
                 }
                 EndMessage();
             }
@@ -2862,7 +2862,7 @@ void DestroyObject( spaceObjectType *anObject)
         {
             anObject->health = anObject->baseType->health;
             // if anyone is targeting it, they should stop
-            fixObject = (spaceObjectType *)*gSpaceObjectData;
+            fixObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
             for ( i = 0; i < kMaxSpaceObject; i++)
             {
                 if (( fixObject->attributes & kCanAcceptDestination) && ( fixObject->active !=
@@ -2906,7 +2906,7 @@ void DestroyObject( spaceObjectType *anObject)
 //              mWriteDebugString( "\pKillDest");
 
                 RemoveDestination( anObject->destinationObject);
-                fixObject = (spaceObjectType *)*gSpaceObjectData;
+                fixObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
                 for ( i = 0; i < kMaxSpaceObject; i++)
                 {
                     if (( fixObject->attributes & kCanAcceptDestination) && ( fixObject->active !=
@@ -3003,14 +3003,14 @@ void CreateFloatingBodyOfPlayer( spaceObjectType *anObject)
             anObject->attributes &= (~kIsHumanControlled) & (~kIsPlayerShip);
             gAresGlobal->gPlayerShipNumber = count;
             ResetScrollStars( gAresGlobal->gPlayerShipNumber);
-            anObject = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
+            anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + gAresGlobal->gPlayerShipNumber;
             anObject->attributes |= attributes;
         } else
         {
             mWriteDebugString("\pREMOTE BODY");
             attributes = anObject->attributes & kIsRemote;
             anObject->attributes &= ~kIsRemote;
-            anObject = (spaceObjectType *)*gSpaceObjectData + count;
+            anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + count;
             anObject->attributes |= attributes;
         }
         SetAdmiralFlagship( anObject->owner, count);

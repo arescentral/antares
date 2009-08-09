@@ -196,17 +196,17 @@ pascal OSErr GotRequiredParams( AppleEvent *theAppleEvent)
             0, &theSize);
     if (error == errAEDescNotFound) // all required params gotten
     {
-        WriteDebugLine((char *)"\pOK:errAEDescNotFound");
+        WriteDebugLine(const_cast<char*>(reinterpret_cast<const char *>("\pOK:errAEDescNotFound")));
         return( noErr);
     }
     else if ( error == noErr) // missed param, because missed keyword exists
     {
-        WriteDebugLine((char *)"\pBAD:miised keyword");
+        WriteDebugLine(const_cast<char*>(reinterpret_cast<const char *>("\pBAD:miised keyword")));
         return( errAEEventNotHandled);
     }
     else
     {
-        WriteDebugLine((char *)"\pBAD:error");
+        WriteDebugLine(const_cast<char*>(reinterpret_cast<const char *>("\pBAD:error")));
         WriteDebugLong( error);
         return( error);
     }
@@ -217,7 +217,7 @@ OSErr AAE_Init( void)
     AEEventHandlerUPP       upp = nil;
     OSErr                   err;
 
-    upp = NewAEEventHandlerProc( (AEEventHandlerProcPtr)HandleOApp);
+    upp = NewAEEventHandlerProc( HandleOApp);
     err = AEInstallEventHandler( kCoreEventClass, kAEOpenApplication,
             upp, 0, false);
     if ( err != noErr)
@@ -225,7 +225,7 @@ OSErr AAE_Init( void)
         ShowErrorOfTypeOccurred( eQuitErr, kErrorStrID, kAEInitErr, err, __FILE__, 0);
         return err;
     }
-    upp = NewAEEventHandlerProc( (AEEventHandlerProcPtr)HandleQuit);
+    upp = NewAEEventHandlerProc( HandleQuit);
     err = AEInstallEventHandler( kCoreEventClass, kAEQuitApplication,
             upp, 0, false);
     if ( err != noErr)
@@ -234,7 +234,7 @@ OSErr AAE_Init( void)
         return err;
     }
 
-    upp = NewAEEventHandlerProc( (AEEventHandlerProcPtr)HandlePrint);
+    upp = NewAEEventHandlerProc( HandlePrint);
     err = AEInstallEventHandler( kCoreEventClass, kAEPrint,
             upp, 0, false);
     if ( err != noErr)
@@ -243,7 +243,7 @@ OSErr AAE_Init( void)
         return err;
     }
 
-    upp = NewAEEventHandlerProc( (AEEventHandlerProcPtr)HandleOpenDoc);
+    upp = NewAEEventHandlerProc( HandleOpenDoc);
     err = AEInstallEventHandler( kCoreEventClass, kAEOpenDocuments,
             upp, 0, false);
         if ( err != noErr)

@@ -28,7 +28,7 @@
 #include "FakeSounds.hpp"
 #include "Fakes.hpp"
 
-static void* const kMmapFailed = (void*)-1;
+static void* const kMmapFailed = reinterpret_cast<void*>(-1);
 
 class NoSuchResourceException : public std::exception { };
 

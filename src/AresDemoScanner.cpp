@@ -66,7 +66,7 @@ extern GWorldPtr                    gOffWorld;
 void MakeDemoDataHack( void)
 
 {
-    Boolean *baseObjectKeepList = (Boolean *)NewPtr( sizeof( baseObjectType) * (long)kMaxBaseObject),
+    Boolean *baseObjectKeepList = reinterpret_cast<Boolean*>(NewPtr( sizeof( baseObjectType) * implicit_cast<long>(kMaxBaseObject))),
             *boolPtr = nil;
     long    count = 0, c2;
     scenarioType    *aScenario;
@@ -105,9 +105,9 @@ void MakeDemoDataHack( void)
     CopyAllUsedPixTables();
     CopyAllUsedSounds();
 
-    DisposePtr( (Ptr)baseObjectKeepList);
+    DisposePtr( reinterpret_cast<Ptr>(baseObjectKeepList));
 
-    aScenario = (scenarioType *)*gAresGlobal->gScenarioData;
+    aScenario = reinterpret_cast<scenarioType *>(*gAresGlobal->gScenarioData);
     for ( count = 0; count < GetScenarioNumber(); count++)
     {
         if ( ( count !=
@@ -163,7 +163,7 @@ void MakeDemoDataHack( void)
 void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
 
 {
-    scenarioType            *scenario = (scenarioType *)*gAresGlobal->gScenarioData + whatLevel;
+    scenarioType            *scenario = reinterpret_cast<scenarioType *>(*gAresGlobal->gScenarioData) + whatLevel;
     long                    count, c2, c3, newShipNum;
     baseObjectType          *baseObject;
     scenarioConditionType   *condition;
@@ -173,12 +173,12 @@ void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
     SetAllBaseObjectsUnchecked();
 
     gAresGlobal->gThisScenarioNumber = whatLevel;
-    gThisScenario = (scenarioType *)*gAresGlobal->gScenarioData + whatLevel;
+    gThisScenario = reinterpret_cast<scenarioType *>(*gAresGlobal->gScenarioData) + whatLevel;
     ///// FIRST SELECT WHAT MEDIA WE NEED TO USE:
     // uncheck all base objects
     // uncheck all sounds
 
-    WriteDebugLine((char *)"\p- C H E C K -");
+    WriteDebugLine(const_cast<char*>(reinterpret_cast<const char *>("\p- C H E C K -")));
 
     // for each initial object
 
@@ -231,7 +231,7 @@ void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
         condition = mGetScenarioCondition( gThisScenario, count);
     }
 
-    baseObject = (baseObjectType *)*gBaseObjectData;
+    baseObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData);
 
     for ( count = 0; count < kMaxBaseObject; count++)
     {
@@ -314,11 +314,11 @@ void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
     for ( count = 0; count < gThisScenario->conditionNum; count++)
     {
         condition = mGetScenarioCondition( gThisScenario, count);
-        action = (objectActionType *)*gObjectActionData + condition->startVerb;
+        action = reinterpret_cast<objectActionType *>(*gObjectActionData) + condition->startVerb;
         for ( c2 = 0; c2 < condition->verbNum; c2++)
         {
             condition = mGetScenarioCondition( gThisScenario, count);
-            action = (objectActionType *)*gObjectActionData + condition->startVerb + c2;
+            action = reinterpret_cast<objectActionType *>(*gObjectActionData) + condition->startVerb + c2;
             AddActionMedia( action, 0);
         }
     }
@@ -332,7 +332,7 @@ void ClearAndCopyAllUnusedBaseObjects( Boolean *baseObjectKeepList)
 {
     long            count;
     baseObjectType  *anObject;
-    unsigned char   *nilObject = (unsigned char *)NewPtr( sizeof( baseObjectType)), *c = nil;
+    unsigned char   *nilObject = reinterpret_cast<unsigned char *>(NewPtr( sizeof( baseObjectType))), *c = nil;
 
     c = nilObject;
     for ( count = 0; count < sizeof( baseObjectType); count++)
@@ -346,12 +346,12 @@ void ClearAndCopyAllUnusedBaseObjects( Boolean *baseObjectKeepList)
         anObject = mGetBaseObjectPtr( count);
         if ( *baseObjectKeepList != true)
         {
-            BlockMove( (Ptr)nilObject, (Ptr)anObject, sizeof( baseObjectType));
+            BlockMove( reinterpret_cast<Ptr>(nilObject), reinterpret_cast<Ptr>(anObject), sizeof( baseObjectType));
         }
         baseObjectKeepList++;
     }
 
-    DisposePtr( (Ptr)nilObject);
+    DisposePtr( reinterpret_cast<Ptr>(nilObject));
 
     SaveAnyResourceInPreferences( kBaseObjectResType, kBaseObjectResID, nil, gBaseObjectData, true);
 }
@@ -367,7 +367,7 @@ void CopyAllUsedPixTables( void)
     {
         if ( gPixTable[count].resource != nil)
         {
-            WriteDebugLine((char *)"\pSavePIX:");
+            WriteDebugLine(const_cast<char*>(reinterpret_cast<const char *>("\pSavePIX:")));
             WriteDebugLong( gPixTable[count].resID);
             SaveAnyResourceInPreferences( kPixResType, gPixTable[count].resID, nil,
                 gPixTable[count].resource, true);
@@ -384,7 +384,7 @@ void CopyAllUsedSounds( void)
     {
         if ( gAresGlobal->gSound[count].soundHandle != nil)
         {
-            WriteDebugLine((char *)"\pSaveSND:");
+            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char *>("\pSaveSND:")));
             WriteDebugLong( gAresGlobal->gSound[count].id);
             SaveAnyResourceInPreferences( 'snd ', gAresGlobal->gSound[count].id, nil,
                 gAresGlobal->gSound[count].soundHandle, true);
@@ -394,7 +394,7 @@ void CopyAllUsedSounds( void)
 
 void CopyAllBriefingData( long whatLevel)
 {
-    scenarioType            *scenario = (scenarioType *)*gAresGlobal->gScenarioData + whatLevel;
+    scenarioType            *scenario = reinterpret_cast<scenarioType *>(*gAresGlobal->gScenarioData) + whatLevel;
     Handle                  textData = nil;
     PixMapHandle            offMap = GetGWorldPixMap( gOffWorld);
     Rect                    tRect = {0, 0, 480, 480};
@@ -422,10 +422,10 @@ void CopyAllBriefingData( long whatLevel)
 
             length = GetHandleSize( textData);
 
-            DrawInterfaceTextInRect( &tRect, (anyCharType *)*textData, length,
+            DrawInterfaceTextInRect( &tRect, reinterpret_cast<anyCharType *>(*textData), length,
                             kLarge, 3, *offMap, 0, 0, inlinePictList);
 
-            scenario = (scenarioType *)*gAresGlobal->gScenarioData + whatLevel;
+            scenario = reinterpret_cast<scenarioType *>(*gAresGlobal->gScenarioData) + whatLevel;
             brief = mGetScenarioBrief( scenario, whichBriefNum);
             HUnlock( textData);
             DisposeHandle( textData);

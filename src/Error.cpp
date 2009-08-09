@@ -61,7 +61,7 @@ void ShowErrorNoRecover( int whichError, const unsigned char* sourceCode, int so
         ParamText( s1, nil, nil, nil);
      else
      {
-        NumToString( (long)sourceNum, s3);
+        NumToString(sourceNum, s3);
         ParamText( s1, sourceCode, s3, nil);
      }
     StopAlert( ERROR_ALERT_ID, nil);
@@ -80,7 +80,7 @@ void ShowErrorRecover( int whichError, const unsigned char* sourceCode, int sour
         ParamText( s1, nil, nil, nil);
      else
      {
-        NumToString( (long)sourceNum, s3);
+        NumToString(sourceNum, s3);
         ParamText( s1, sourceCode, s3, nil);
      }
     StopAlert( ERROR_ALERT_ID, nil);
@@ -196,29 +196,29 @@ void ShowErrorAny(  errorRecoverType recover,
     ParamText( sp1, sp2, sp3, sp4);
 //  StopAlert( kAnyAlertID, nil);
     GetPort( &oldPort);
-    theDialog = GetNewDialog( kAnyErrorDialogID, nil, (WindowPtr)-1L);
+    theDialog = GetNewDialog( kAnyErrorDialogID, nil, reinterpret_cast<WindowPtr>(-1L));
 
     if ( theDialog == nil) DebugStr("\pNo Error Dialog!");
-    SetWRefCon( theDialog, (long)kAnyErrorDialogID);
-    MacSetPort( (GrafPtr)theDialog);
+    SetWRefCon( theDialog, kAnyErrorDialogID);
+    MacSetPort(reinterpret_cast<Window*>(theDialog));
     SetDialogFontAndSize( theDialog, GetFontNumByString("\pgeneva"), 10);
     if (( recover != eContinueErr) && ( recover != eContinueOnlyErr))
     {
         SetDialogDefaultItem( theDialog, kQuitButton);
         GetDialogItem( theDialog, kContinueButton, &itemType, &itemHandle, &itemRect);
 //      SetControlTitle( (ControlHandle)itemHandle, "\pDebugger");
-        HiliteControl( (ControlHandle)itemHandle, 255);
+        HiliteControl( reinterpret_cast<ControlHandle>(itemHandle), 255);
     } else
     {
         if ( recover == eContinueOnlyErr)
         {
             GetDialogItem( theDialog, kQuitButton, &itemType, &itemHandle, &itemRect);
-            HiliteControl( (ControlHandle)itemHandle, 255);
+            HiliteControl( reinterpret_cast<ControlHandle>(itemHandle), 255);
         }
         SetDialogDefaultItem( theDialog, kContinueButton);
     }
 
-    MacShowWindow( (WindowPtr)theDialog);
+    MacShowWindow(reinterpret_cast<Window*>(theDialog));
 
     done = false;
     while ( done == false)
@@ -290,7 +290,7 @@ void ErrConcatenatePString( StringPtr dString, StringPtr sString)
     unsigned char   *dc, *sc;
     int     i;
 
-    dc = dString + (long)*dString + 1L;
+    dc = dString + implicit_cast<long>(*dString) + 1L;
     sc = sString + 1L;
     for ( i = 0; i < *sString; i++)
     {

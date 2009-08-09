@@ -58,7 +58,7 @@ short InitBeams( void)
     beamType    *beam;
     short           i;
 
-    gAresGlobal->gBeamData = NewHandle( sizeof( beamType) * (long)kBeamNum);
+    gAresGlobal->gBeamData = NewHandle( sizeof( beamType) * implicit_cast<long>(kBeamNum));
     if ( gAresGlobal->gBeamData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
@@ -67,7 +67,7 @@ short InitBeams( void)
 
     mHandleLockAndRegister( gAresGlobal->gBeamData, nil, nil, ResolveBeamData, "\pgAresGlobal->gBeamData");
 
-    beam = ( beamType *)*gAresGlobal->gBeamData;
+    beam = reinterpret_cast<beamType *>(*gAresGlobal->gBeamData);
     for ( i = 0; i < kBeamNum; i++)
     {
         beam->active = false;
@@ -84,7 +84,7 @@ void CleanupBeams( void)
 
 void ResetBeams( void)
 {
-    beamType    *aBeam = ( beamType *)*gAresGlobal->gBeamData;
+    beamType    *aBeam = reinterpret_cast<beamType *>(*gAresGlobal->gBeamData);
     short       i;
 
     for ( i = 0; i < kBeamNum; i++)
@@ -106,7 +106,7 @@ void ResetBeams( void)
 beamType *AddBeam(coordPointType *location, unsigned char color,
     beamKindType kind, long accuracy, long range, long *whichBeam)
 {
-    beamType    *aBeam = ( beamType *)*gAresGlobal->gBeamData;
+    beamType    *aBeam = reinterpret_cast<beamType *>(*gAresGlobal->gBeamData);
     long        h;
 
     *whichBeam = 0;
@@ -161,11 +161,11 @@ void SetSpecialBeamAttributes( spaceObjectType *beamObject, spaceObjectType *sou
 
     beamObject->frame.beam.beam->fromObjectNumber = sourceObject->entryNumber;
     beamObject->frame.beam.beam->fromObjectID = sourceObject->id;
-    beamObject->frame.beam.beam->fromObject = ( spaceObjectTypePtr) sourceObject;
+    beamObject->frame.beam.beam->fromObject = reinterpret_cast<spaceObjectTypePtr>(sourceObject);
 
     if ( sourceObject->targetObjectNumber >= 0)
     {
-        target = (spaceObjectType *)*gSpaceObjectData +
+        target = reinterpret_cast<spaceObjectType *>(*gSpaceObjectData) +
             sourceObject->targetObjectNumber;
 
         if ( ( target->active) && ( target->id == sourceObject->targetObjectID))
@@ -213,11 +213,11 @@ void SetSpecialBeamAttributes( spaceObjectType *beamObject, spaceObjectType *sou
                         target->location.v - sourceObject->location.v;
                     beamObject->frame.beam.beam->toRelativeCoord.h +=
                         - beamObject->frame.beam.beam->accuracy +
-                        RandomSeeded( (short)(beamObject->frame.beam.beam->accuracy << (long)1),
+                        RandomSeeded(beamObject->frame.beam.beam->accuracy << 1,
                                     &(beamObject->randomSeed), 'beam', 1);
                     beamObject->frame.beam.beam->toRelativeCoord.v +=
                         - beamObject->frame.beam.beam->accuracy +
-                        RandomSeeded( (short)(beamObject->frame.beam.beam->accuracy << (long)1),
+                        RandomSeeded(beamObject->frame.beam.beam->accuracy << 1,
                                     &(beamObject->randomSeed), 'beam', 1);
 
                 } else
@@ -226,7 +226,7 @@ void SetSpecialBeamAttributes( spaceObjectType *beamObject, spaceObjectType *sou
                         target->entryNumber;
                     beamObject->frame.beam.beam->toObjectID = target->id;
                     beamObject->frame.beam.beam->toObject =
-                        ( spaceObjectTypePtr)target;
+                        reinterpret_cast<spaceObjectTypePtr>(target);
                 }
             }
         } else // target not valid
@@ -367,7 +367,7 @@ void DrawAllBeams( void)
 void DrawAllBeams( void)
 
 {
-    beamType        *aBeam = ( beamType *)*gAresGlobal->gBeamData;
+    beamType        *aBeam = reinterpret_cast<beamType *>(*gAresGlobal->gBeamData);
     short           i, j;
     longRect        bounds;
     long            h, v;
@@ -414,18 +414,18 @@ void DrawAllBeams( void)
                     for ( j = 1; j < kBoltPointNum; j++)
                     {
                         DrawNateLine( *whatWorld, &bounds,
-                                    (long)aBeam->lastBoltPoint[j-1].h,
-                                    (long)aBeam->lastBoltPoint[j-1].v,
-                                    (long)aBeam->lastBoltPoint[j].h,
-                                    (long)aBeam->lastBoltPoint[j].v,
+                                    aBeam->lastBoltPoint[j-1].h,
+                                    aBeam->lastBoltPoint[j-1].v,
+                                    aBeam->lastBoltPoint[j].h,
+                                    aBeam->lastBoltPoint[j].v,
                                     0, 0, BLACK);
                     }
                 } else
                 {
-                    DrawNateLine( *whatWorld, &bounds, (long)aBeam->lastLocation.left,
-                                (long)aBeam->lastLocation.top,
-                                (long)aBeam->lastLocation.right,
-                                (long)aBeam->lastLocation.bottom,
+                    DrawNateLine( *whatWorld, &bounds, aBeam->lastLocation.left,
+                                aBeam->lastLocation.top,
+                                aBeam->lastLocation.right,
+                                aBeam->lastLocation.bottom,
                                 0, 0, BLACK);
                 }
             }
@@ -498,18 +498,18 @@ void DrawAllBeams( void)
                         for ( j = 1; j < kBoltPointNum; j++)
                         {
                             DrawNateLine( *whatWorld, &bounds,
-                                        (long)aBeam->thisBoltPoint[j-1].h,
-                                        (long)aBeam->thisBoltPoint[j-1].v,
-                                        (long)aBeam->thisBoltPoint[j].h,
-                                        (long)aBeam->thisBoltPoint[j].v,
+                                        aBeam->thisBoltPoint[j-1].h,
+                                        aBeam->thisBoltPoint[j-1].v,
+                                        aBeam->thisBoltPoint[j].h,
+                                        aBeam->thisBoltPoint[j].v,
                                         0, 0, aBeam->color);
                         }
                     } else
                     {
-                        DrawNateLine( *whatWorld, &bounds, (long)aBeam->thisLocation.left,
-                                (long)aBeam->thisLocation.top,
-                                (long)aBeam->thisLocation.right,
-                                (long)aBeam->thisLocation.bottom,
+                        DrawNateLine( *whatWorld, &bounds, aBeam->thisLocation.left,
+                                aBeam->thisLocation.top,
+                                aBeam->thisLocation.right,
+                                aBeam->thisLocation.bottom,
                                 0, 0, aBeam->color);
                     }
                 }
@@ -528,7 +528,7 @@ void EraseAllBeams( void)
 
 void ShowAllBeams( void)
 {
-    beamType        *aBeam = ( beamType *)*gAresGlobal->gBeamData;
+    beamType        *aBeam = reinterpret_cast<beamType *>(*gAresGlobal->gBeamData);
     short           i, j;
     longRect        bounds;
     PixMapHandle    offWorld = GetGWorldPixMap( gOffWorld),
@@ -555,19 +555,19 @@ void ShowAllBeams( void)
                         for ( j = 1; j < kBoltPointNum; j++)
                         {
                             CopyNateLine( *offWorld, *onWorld, &bounds,
-                                        (long)aBeam->thisBoltPoint[j-1].h,
-                                        (long)aBeam->thisBoltPoint[j-1].v,
-                                        (long)aBeam->thisBoltPoint[j].h,
-                                        (long)aBeam->thisBoltPoint[j].v,
+                                        aBeam->thisBoltPoint[j-1].h,
+                                        aBeam->thisBoltPoint[j-1].v,
+                                        aBeam->thisBoltPoint[j].h,
+                                        aBeam->thisBoltPoint[j].v,
                                         gNatePortLeft << 2, gNatePortTop);
                         }
                     } else
                     {
                         CopyNateLine( *offWorld, *onWorld, &bounds,
-                                (long)aBeam->thisLocation.left,
-                                (long)aBeam->thisLocation.top,
-                                (long)aBeam->thisLocation.right,
-                                (long)aBeam->thisLocation.bottom,
+                                aBeam->thisLocation.left,
+                                aBeam->thisLocation.top,
+                                aBeam->thisLocation.right,
+                                aBeam->thisLocation.bottom,
                                 gNatePortLeft << 2, gNatePortTop);
                     }
                 }
@@ -583,10 +583,10 @@ void ShowAllBeams( void)
                     for ( j = 1; j < kBoltPointNum; j++)
                     {
                         CopyNateLine( *offWorld, *onWorld, &bounds,
-                                    (long)aBeam->lastBoltPoint[j-1].h,
-                                    (long)aBeam->lastBoltPoint[j-1].v,
-                                    (long)aBeam->lastBoltPoint[j].h,
-                                    (long)aBeam->lastBoltPoint[j].v,
+                                    aBeam->lastBoltPoint[j-1].h,
+                                    aBeam->lastBoltPoint[j-1].v,
+                                    aBeam->lastBoltPoint[j].h,
+                                    aBeam->lastBoltPoint[j].v,
                                     gNatePortLeft << 2, gNatePortTop);
                     }
                     for ( j = 0; j < kBoltPointNum; j++)
@@ -600,10 +600,10 @@ void ShowAllBeams( void)
                 } else
                 {
                     CopyNateLine( *offWorld, *onWorld, &bounds,
-                            (long)aBeam->lastLocation.left,
-                            (long)aBeam->lastLocation.top,
-                            (long)aBeam->lastLocation.right,
-                            (long)aBeam->lastLocation.bottom,
+                            aBeam->lastLocation.left,
+                            aBeam->lastLocation.top,
+                            aBeam->lastLocation.right,
+                            aBeam->lastLocation.bottom,
                             gNatePortLeft << 2, gNatePortTop);
                 }
             }
@@ -617,7 +617,7 @@ void ShowAllBeams( void)
 
 void CullBeams( void)
 {
-    beamType        *aBeam = ( beamType *)*gAresGlobal->gBeamData;
+    beamType        *aBeam = reinterpret_cast<beamType *>(*gAresGlobal->gBeamData);
     short           i;
 
     for ( i = 0; i < kBeamNum; i++)
@@ -636,7 +636,7 @@ void CullBeams( void)
 
 void ResolveBeamData( Handle beamData)
 {
-    beamType        *aBeam = ( beamType *)*gAresGlobal->gBeamData;
+    beamType        *aBeam = reinterpret_cast<beamType *>(*gAresGlobal->gBeamData);
     short           i;
     spaceObjectType *anObject;
 
@@ -645,15 +645,15 @@ void ResolveBeamData( Handle beamData)
     {
         if ( aBeam->fromObjectNumber >= 0)
         {
-            anObject = (spaceObjectType *)*gSpaceObjectData +
+            anObject = reinterpret_cast<spaceObjectType *>(*gSpaceObjectData) +
                 aBeam->fromObjectNumber;
-            aBeam->fromObject = ( spaceObjectTypePtr)anObject;
+            aBeam->fromObject = reinterpret_cast<spaceObjectTypePtr>(anObject);
         }
         if ( aBeam->toObjectNumber >= 0)
         {
-            anObject = (spaceObjectType *)*gSpaceObjectData +
+            anObject = reinterpret_cast<spaceObjectType *>(*gSpaceObjectData) +
                 aBeam->toObjectNumber;
-            aBeam->toObject = ( spaceObjectTypePtr)anObject;
+            aBeam->toObject = reinterpret_cast<spaceObjectTypePtr>(anObject);
         }
         aBeam++;
     }

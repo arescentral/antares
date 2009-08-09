@@ -33,7 +33,7 @@ void GetVersionString(StringPtr dest, short useResFile)
     UseResFile( refNum);
     if ( versRes != nil)
     {
-        source = (StringPtr)*versRes + 6;
+        source = reinterpret_cast<StringPtr>(*versRes) + 6;
         CopyPString( dest, source);
         ReleaseResource( versRes);
     }

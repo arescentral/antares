@@ -532,28 +532,28 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
 
                 case updateEvt:
                     startDemoTime = TickCount();
-                    whichWindow = ( CWindowPtr)theEvent.message;
+                    whichWindow = reinterpret_cast<CWindowPtr>(theEvent.message);
 
                     if ( whichWindow == gTheWindow)
                     {
-                        BeginUpdate( (WindowPtr)whichWindow);
-                            MacSetPort( (WindowPtr)gTheWindow);
-                            CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &(gTheWindow->portRect));
-                        EndUpdate( (WindowPtr)whichWindow);
+                        BeginUpdate( whichWindow);
+                            MacSetPort( gTheWindow);
+                            CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
+                        EndUpdate( whichWindow);
                         break;
-                        EndUpdate( (WindowPtr)whichWindow);
+                        EndUpdate( whichWindow);
                     } else if ( whichWindow == gAresGlobal->gBackWindow)
                     {
-                        BeginUpdate( (WindowPtr)whichWindow);
-                            MacSetPort( (WindowPtr)gAresGlobal->gBackWindow);
-                            MacFillRect(  &(gAresGlobal->gBackWindow->portRect), (Pattern *)&qd.black);
-                        EndUpdate( (WindowPtr)whichWindow);
+                        BeginUpdate( whichWindow);
+                            MacSetPort( gAresGlobal->gBackWindow);
+                            MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
+                        EndUpdate( whichWindow);
                     } else
                     {
-                        BeginUpdate( (WindowPtr)whichWindow);
-                        EndUpdate( (WindowPtr)whichWindow);
+                        BeginUpdate( whichWindow);
+                        EndUpdate( whichWindow);
                     }
-                    MacSetPort( (WindowPtr)gTheWindow);
+                    MacSetPort( gTheWindow);
                     break;
 
             }
@@ -593,7 +593,7 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
 
                     CloseInterface();
 //                  DoAboutAresInterface();
-                    DoScrollText( (WindowPtr)gTheWindow, 6500, 2/*kScrollTextSpeed*/,
+                    DoScrollText( gTheWindow, 6500, 2/*kScrollTextSpeed*/,
                         540, kTitleFontNum/*kComputerFontNum*/, -1);
                     OpenInterface( kMainScreenResID);
                     if ( !(gAresGlobal->gOptions & kOptionNetworkAvailable))// NetSprocketPresent())
@@ -684,28 +684,28 @@ void DoAboutAresInterface( void)
 //                      HandleOSEvent( &theEvent);
                         break;
                     case updateEvt:
-                        whichWindow = ( CWindowPtr)theEvent.message;
+                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
 
                         if ( whichWindow == gTheWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gTheWindow);
-                                CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &(gTheWindow->portRect));
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                                MacSetPort( gTheWindow);
+                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
+                            EndUpdate( whichWindow);
                             break;
-                            EndUpdate( (WindowPtr)whichWindow);
+                            EndUpdate( whichWindow);
                         } else if ( whichWindow == gAresGlobal->gBackWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gAresGlobal->gBackWindow);
-                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), (Pattern *)&qd.black);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                                MacSetPort( gAresGlobal->gBackWindow);
+                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
+                            EndUpdate( whichWindow);
                         } else
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                            EndUpdate( whichWindow);
                         }
-                        MacSetPort( (WindowPtr)gTheWindow);
+                        MacSetPort( gTheWindow);
 
                         break;
 
@@ -774,7 +774,7 @@ void DoLoadingInterface( Rect *contentRect, StringPtr levelName)
 
         strPtr = levelName + 1;
         retroTextSpec.textLength = *levelName;
-        retroTextSpec.text = (char **)&strPtr;
+        retroTextSpec.text = reinterpret_cast<char**>(&strPtr);
 
         retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
         retroTextSpec.tabSize =220;
@@ -817,7 +817,7 @@ void DoLoadingInterface( Rect *contentRect, StringPtr levelName)
 
 //      DrawDirectTextStringClipped( levelName, color, *offMap, &lRect, 0, 0);
         LongRectToRect( &boundsRect, &tRect);
-//      CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &tRect);
+//      CopyOffWorldToRealWorld(gTheWindow, &tRect);
     }
 }
 
@@ -854,7 +854,7 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
 
         DrawInRealWorld();
         DefaultColors();
-        CopyOffWorldToRealWorld((WindowPtr)gTheWindow, contentRect);
+        CopyOffWorldToRealWorld(gTheWindow, contentRect);
     } else
     {
         width = contentRect->right - contentRect->left;
@@ -874,7 +874,7 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
         DrawInRealWorld();
         NormalizeColors();
         MacSetRect( &tRect, contentRect->left, contentRect->top, contentRect->right, contentRect->bottom);
-        CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &tRect);
+        CopyOffWorldToRealWorld(gTheWindow, &tRect);
         if ( tRect.left >= tRect.right - 2) AutoFadeTo( 10, &fadeColor, FALSE);
     }
 }
@@ -951,28 +951,28 @@ short DoPlayAgain( Boolean allowResume, Boolean allowSkip) // return 0 = quit, 1
 //                      HandleOSEvent( &theEvent);
                         break;
                     case updateEvt:
-                        whichWindow = ( CWindowPtr)theEvent.message;
+                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
 
                         if ( whichWindow == gTheWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gTheWindow);
-                                CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &(gTheWindow->portRect));
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                                MacSetPort( gTheWindow);
+                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
+                            EndUpdate( whichWindow);
                             break;
-                            EndUpdate( (WindowPtr)whichWindow);
+                            EndUpdate( whichWindow);
                         } else if ( whichWindow == gAresGlobal->gBackWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gAresGlobal->gBackWindow);
-                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), (Pattern *)&qd.black);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                                MacSetPort( gAresGlobal->gBackWindow);
+                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
+                            EndUpdate( whichWindow);
                         } else
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                            EndUpdate( whichWindow);
                         }
-                        MacSetPort( (WindowPtr)gTheWindow);
+                        MacSetPort( gTheWindow);
 
                         break;
 
@@ -1127,28 +1127,28 @@ void DoNetSettings( void)
 //                      HandleOSEvent( &theEvent);
                         break;
                     case updateEvt:
-                        whichWindow = ( CWindowPtr)theEvent.message;
+                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
 
                         if ( whichWindow == gTheWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gTheWindow);
-                                CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &(gTheWindow->portRect));
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                                MacSetPort( gTheWindow);
+                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
+                            EndUpdate( whichWindow);
                             break;
-                            EndUpdate( (WindowPtr)whichWindow);
+                            EndUpdate( whichWindow);
                         } else if ( whichWindow == gAresGlobal->gBackWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gAresGlobal->gBackWindow);
-                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), (Pattern *)&qd.black);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                                MacSetPort( gAresGlobal->gBackWindow);
+                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
+                            EndUpdate( whichWindow);
                         } else
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                            EndUpdate( whichWindow);
                         }
-                        MacSetPort( (WindowPtr)gTheWindow);
+                        MacSetPort( gTheWindow);
 
                         break;
 
@@ -1354,7 +1354,7 @@ void DoHelpScreen( void)
 
             offMap = GetGWorldPixMap( gOffWorld);
             DrawDirectTextInRect( &retroTextSpec, &clipRect, &clipRect, *offMap, 0, 0);
-            CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &tRect);
+            CopyOffWorldToRealWorld(gTheWindow, &tRect);
 
 /*          while ( retroTextSpec.thisPosition < retroTextSpec.textLength)
             {
@@ -1398,28 +1398,28 @@ void DoHelpScreen( void)
 //                      HandleOSEvent( &theEvent);
                         break;
                     case updateEvt:
-                        whichWindow = ( CWindowPtr)theEvent.message;
+                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
 
                         if ( whichWindow == gTheWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gTheWindow);
-                                CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &(gTheWindow->portRect));
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                                MacSetPort( gTheWindow);
+                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
+                            EndUpdate( whichWindow);
                             break;
-                            EndUpdate( (WindowPtr)whichWindow);
+                            EndUpdate( whichWindow);
                         } else if ( whichWindow == gAresGlobal->gBackWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gAresGlobal->gBackWindow);
-                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), (Pattern *)&qd.black);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                                MacSetPort( gAresGlobal->gBackWindow);
+                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
+                            EndUpdate( whichWindow);
                         } else
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                            EndUpdate( whichWindow);
                         }
-                        MacSetPort( (WindowPtr)gTheWindow);
+                        MacSetPort( gTheWindow);
 
                         break;
 
@@ -1483,7 +1483,7 @@ void StartPauseIndicator(StringPtr pauseString, unsigned char hue)
 
     DrawInSaveWorld();
     DefaultColors();
-    CopyRealWorldToSaveWorld( (WindowPtr)gTheWindow, &tRect);
+    CopyRealWorldToSaveWorld( gTheWindow, &tRect);
     DrawInOffWorld();
     DefaultColors();
     CopySaveWorldToOffWorld( &tRect);
@@ -1507,7 +1507,7 @@ void StartPauseIndicator(StringPtr pauseString, unsigned char hue)
     DrawInRealWorld();
     DefaultColors();
     mCopyAnyRect( tRect, clipRect);
-    CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &tRect);
+    CopyOffWorldToRealWorld(gTheWindow, &tRect);
 }
 
 void StopPauseIndicator( StringPtr pauseString)
@@ -1532,7 +1532,7 @@ void StopPauseIndicator( StringPtr pauseString)
     DefaultColors();
     CopySaveWorldToOffWorld( &stringRect);
     DrawInRealWorld();
-    CopyOffWorldToRealWorld( (WindowPtr)gTheWindow, &stringRect);
+    CopyOffWorldToRealWorld( gTheWindow, &stringRect);
     DrawInOffWorld();
     DefaultColors();
     PaintRect( &stringRect);
@@ -1582,7 +1582,7 @@ void DoOptionsInterface( void)
 
     MoveHHi( tempPrefs);
     HLock( tempPrefs);
-    prefsData = (preferencesDataType *)*gAresGlobal->gPreferencesData;
+    prefsData = reinterpret_cast<preferencesDataType*>(*gAresGlobal->gPreferencesData);
 
     error = OpenInterface( kOptionsScreenID);
     SetOptionCheckboxes( prefsData->options);
@@ -1625,28 +1625,28 @@ void DoOptionsInterface( void)
 //                      HandleOSEvent( &theEvent);
                         break;
                     case updateEvt:
-                        whichWindow = ( CWindowPtr)theEvent.message;
+                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
 
                         if ( whichWindow == gTheWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gTheWindow);
-                                CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &(gTheWindow->portRect));
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                                MacSetPort( gTheWindow);
+                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
+                            EndUpdate( whichWindow);
                             break;
-                            EndUpdate( (WindowPtr)whichWindow);
+                            EndUpdate( whichWindow);
                         } else if ( whichWindow == gAresGlobal->gBackWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gAresGlobal->gBackWindow);
-                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), (Pattern *)&qd.black);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                                MacSetPort( gAresGlobal->gBackWindow);
+                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
+                            EndUpdate( whichWindow);
                         } else
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                            EndUpdate( whichWindow);
                         }
-                        MacSetPort( (WindowPtr)gTheWindow);
+                        MacSetPort( gTheWindow);
 
                         break;
 
@@ -1705,7 +1705,7 @@ void DoOptionsInterface( void)
                             {
                                 SetStatusOfAnyInterfaceItem( kOptionSoundUpButton, kDimmed, true);
                             }
-                            DrawOptionVolumeLevel( &volumeRect, (long)prefsData->volume);
+                            DrawOptionVolumeLevel( &volumeRect, prefsData->volume);
                             gAresGlobal->gSoundVolume = prefsData->volume;
                             if ( prefsData->options & kOptionMusicIdle)
                             {
@@ -1727,7 +1727,7 @@ void DoOptionsInterface( void)
                             {
                                 SetStatusOfAnyInterfaceItem( kOptionSoundDownButton, kDimmed, true);
                             }
-                            DrawOptionVolumeLevel( &volumeRect, (long)prefsData->volume);
+                            DrawOptionVolumeLevel( &volumeRect, prefsData->volume);
                             gAresGlobal->gSoundVolume = prefsData->volume;
                             if ( prefsData->options & kOptionMusicIdle)
                             {
@@ -1856,7 +1856,7 @@ void DrawOptionVolumeLevel( Rect *bounds, long level)
     shade = 2;
     for ( count = 0; count < level; count++)
     {
-        SetTranslateColorShadeFore( kOptionVolumeColor, (unsigned char)shade);
+        SetTranslateColorShadeFore( kOptionVolumeColor, shade);
         graphicRect = tRect;
         MacInsetRect( &graphicRect, 2, 6);
         CenterRectInRect( &graphicRect, &tRect);
@@ -1879,7 +1879,7 @@ void DrawOptionVolumeLevel( Rect *bounds, long level)
 
     DrawInRealWorld();
     NormalizeColors();
-    CopyOffWorldToRealWorld((WindowPtr)gTheWindow, bounds);
+    CopyOffWorldToRealWorld(gTheWindow, bounds);
 }
 
 Boolean DoKeyInterface( void)
@@ -1907,7 +1907,7 @@ Boolean DoKeyInterface( void)
                 GetKeyNumFromKeyMap( gAresGlobal->gKeyControl[i]));
         }
 
-        prefsData = (preferencesDataType *)*gAresGlobal->gPreferencesData;
+        prefsData = reinterpret_cast<preferencesDataType*>(*gAresGlobal->gPreferencesData);
 
         SwitchAnyRadioOrCheckbox( kKeySubstituteCheckbox,
             ((options & kOptionSubstituteFKeys) ? (true):(false)));
@@ -1992,28 +1992,28 @@ Boolean DoKeyInterface( void)
 //                      HandleOSEvent( &theEvent);
                         break;
                     case updateEvt:
-                        whichWindow = ( CWindowPtr)theEvent.message;
+                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
 
                         if ( whichWindow == gTheWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gTheWindow);
-                                CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &(gTheWindow->portRect));
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                                MacSetPort( gTheWindow);
+                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
+                            EndUpdate( whichWindow);
                             break;
-                            EndUpdate( (WindowPtr)whichWindow);
+                            EndUpdate( whichWindow);
                         } else if ( whichWindow == gAresGlobal->gBackWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gAresGlobal->gBackWindow);
-                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), (Pattern *)&qd.black);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                                MacSetPort( gAresGlobal->gBackWindow);
+                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
+                            EndUpdate( whichWindow);
                         } else
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                            EndUpdate( whichWindow);
                         }
-                        MacSetPort( (WindowPtr)gTheWindow);
+                        MacSetPort( gTheWindow);
 
                         break;
 
@@ -2110,7 +2110,7 @@ Boolean DoKeyInterface( void)
         }
         CloseInterface();
     }
-    WriteDebugLine((char *)"\pRESULT:");
+    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pRESULT:")));
     WriteDebugLong( result);
     return( result);
 }
@@ -2191,14 +2191,14 @@ void DrawKeyControlPicture( long whichKey)
 
     DrawInOffWorld();
 
-    thePict = (PicHandle)HHGetResource( 'PICT', kKeyIllustrationPictID);
+    thePict = reinterpret_cast<PicHandle>(HHGetResource( 'PICT', kKeyIllustrationPictID));
     if ( thePict != nil)
     {
-        HLockHi( (Handle)thePict);
+        HLockHi( reinterpret_cast<Handle>(thePict));
         newRect = (**thePict).picFrame;
         CenterRectInRect( &newRect, &tRect);
         DrawPicture( thePict, &newRect);
-        ReleaseResource( (Handle)thePict);
+        ReleaseResource( reinterpret_cast<Handle>(thePict));
         thePict = nil;
     }
     if ( whichKey >= kSelectFriendKeyNum)
@@ -2211,17 +2211,17 @@ void DrawKeyControlPicture( long whichKey)
             whichKey = kSelectFriendKeyNum + 1;
         }
     }
-    thePict = (PicHandle)HHGetResource( 'PICT', kKeyIllustrationPictID + 1 + whichKey);
+    thePict = reinterpret_cast<PicHandle>(HHGetResource( 'PICT', kKeyIllustrationPictID + 1 + whichKey));
     if ( thePict != nil)
     {
-        HLockHi( (Handle)thePict);
+        HLockHi( reinterpret_cast<Handle>(thePict));
         newRect = (**thePict).picFrame;
         CenterRectInRect( &newRect, &tRect);
         DrawPicture( thePict, &newRect);
-        ReleaseResource( (Handle)thePict);
+        ReleaseResource( reinterpret_cast<Handle>(thePict));
     }
     DrawInRealWorld();
-    CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &tRect);
+    CopyOffWorldToRealWorld(gTheWindow, &tRect);
 
 }
 
@@ -2257,7 +2257,7 @@ netResultType StartNetworkGameSetup( void)
         if ( error == kNoError)
         {
             DrawInterfaceOneAtATime();
-            MacSetPort( (WindowPtr)gTheWindow);
+            MacSetPort( gTheWindow);
             InvalRect( &(gTheWindow->portRect));
             while ( !done)
             {
@@ -2285,28 +2285,28 @@ netResultType StartNetworkGameSetup( void)
 //                          HandleOSEvent( &theEvent);
                             break;
                         case updateEvt:
-                            whichWindow = ( CWindowPtr)theEvent.message;
+                            whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
 
                             if ( whichWindow == gTheWindow)
                             {
-                                BeginUpdate( (WindowPtr)whichWindow);
-                                    MacSetPort( (WindowPtr)gTheWindow);
-                                    CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &(gTheWindow->portRect));
-                                EndUpdate( (WindowPtr)whichWindow);
+                                BeginUpdate( whichWindow);
+                                    MacSetPort( gTheWindow);
+                                    CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
+                                EndUpdate( whichWindow);
                                 break;
-                                EndUpdate( (WindowPtr)whichWindow);
+                                EndUpdate( whichWindow);
                             } else if ( whichWindow == gAresGlobal->gBackWindow)
                             {
-                                BeginUpdate( (WindowPtr)whichWindow);
-                                    MacSetPort( (WindowPtr)gAresGlobal->gBackWindow);
-                                    MacFillRect(  &(gAresGlobal->gBackWindow->portRect), (Pattern *)&qd.black);
-                                EndUpdate( (WindowPtr)whichWindow);
+                                BeginUpdate( whichWindow);
+                                    MacSetPort( gAresGlobal->gBackWindow);
+                                    MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
+                                EndUpdate( whichWindow);
                             } else
                             {
-                                BeginUpdate( (WindowPtr)whichWindow);
-                                EndUpdate( (WindowPtr)whichWindow);
+                                BeginUpdate( whichWindow);
+                                EndUpdate( whichWindow);
                             }
-                            MacSetPort( (WindowPtr)gTheWindow);
+                            MacSetPort( gTheWindow);
                             break;
                         case mouseDown:
                             where = theEvent.where;
@@ -2386,7 +2386,7 @@ void DrawStringInInterfaceItem( long whichItem, const unsigned char* string)
                                 0, 0, nil);
     }
     DrawInRealWorld();
-    CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &tRect);
+    CopyOffWorldToRealWorld(gTheWindow, &tRect);
 }
 
 netResultType ClientWaitInterface( void)
@@ -2458,28 +2458,28 @@ netResultType ClientWaitInterface( void)
 //                      HandleOSEvent( &theEvent);
                         break;
                     case updateEvt:
-                        whichWindow = ( CWindowPtr)theEvent.message;
+                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
 
                         if ( whichWindow == gTheWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gTheWindow);
-                                CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &(gTheWindow->portRect));
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                                MacSetPort( gTheWindow);
+                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
+                            EndUpdate( whichWindow);
                             break;
-                            EndUpdate( (WindowPtr)whichWindow);
+                            EndUpdate( whichWindow);
                         } else if ( whichWindow == gAresGlobal->gBackWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gAresGlobal->gBackWindow);
-                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), (Pattern *)&qd.black);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                                MacSetPort( gAresGlobal->gBackWindow);
+                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
+                            EndUpdate( whichWindow);
                         } else
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                            EndUpdate( whichWindow);
                         }
-                        MacSetPort( (WindowPtr)gTheWindow);
+                        MacSetPort( gTheWindow);
                         break;
 
                     case mouseDown:
@@ -2661,28 +2661,28 @@ netResultType HostAcceptClientInterface( void)
                         break;
 
                     case updateEvt:
-                        whichWindow = ( CWindowPtr)theEvent.message;
+                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
 
                         if ( whichWindow == gTheWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gTheWindow);
-                                CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &(gTheWindow->portRect));
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                                MacSetPort( gTheWindow);
+                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
+                            EndUpdate( whichWindow);
                             break;
-                            EndUpdate( (WindowPtr)whichWindow);
+                            EndUpdate( whichWindow);
                         } else if ( whichWindow == gAresGlobal->gBackWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gAresGlobal->gBackWindow);
-                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), (Pattern *)&qd.black);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                                MacSetPort( gAresGlobal->gBackWindow);
+                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
+                            EndUpdate( whichWindow);
                         } else
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                            EndUpdate( whichWindow);
                         }
-                        MacSetPort( (WindowPtr)gTheWindow);
+                        MacSetPort( gTheWindow);
                         break;
                 }
 
@@ -2808,7 +2808,7 @@ netResultType HostNetworkGameSetup( void)
 
     // create & clear the list of incoming address from name binding search
 
-    addressList = NewHandle( sizeof( AddrBlock) * (long)kMaxAvailableClient);
+    addressList = NewHandle( sizeof( AddrBlock) * kMaxAvailableClient);
     if ( addressList == nil)
         error = MEMORY_ERROR;
     else
@@ -3660,7 +3660,7 @@ short GetClientListLength( void)
         if ( aClient->status == kAvailable) result++;
         aClient++;
     }
-    WriteDebugLong( (long)result);
+    WriteDebugLong( result);
     return ( result);
 }
 */
@@ -3671,7 +3671,7 @@ void GetClientListName( short which, anyCharType *s)
     netClientEntity     *aClient;
     short               availCount = 0, count = 0;
 
-    aClient = ( netClientEntity *)*gClientEntity + (long)which;
+    aClient = ( netClientEntity *)*gClientEntity + which;
     while (( count < kMaxAvailableClient) && ( availCount < which))
     {
         if ( aClient->status == kAvailable) availCount++;
@@ -3692,7 +3692,7 @@ Boolean IsThisClientHilited( short which, Boolean set)
 
     if ( !set)
     {
-        aClient = ( netClientEntity *)*gClientEntity + (long)which;
+        aClient = ( netClientEntity *)*gClientEntity + which;
         return ( aClient->selected);
     } else
     {
@@ -3742,7 +3742,7 @@ short GetInGameListLength( void)
         if ( aClient->status == kInGame) result++;
         aClient++;
     }
-    WriteDebugLong( (long)result);
+    WriteDebugLong( result);
     return ( result);
 }
 */
@@ -3754,7 +3754,7 @@ void GetInGameListName( short which, anyCharType *s)
     netClientEntity     *aClient;
     short               availCount = 0, count = 0;
 
-    aClient = ( netClientEntity *)*gClientEntity + (long)which;
+    aClient = ( netClientEntity *)*gClientEntity + which;
     while (( count < kMaxAvailableClient) && ( availCount < which))
     {
         if ( aClient->status == kInGame) availCount++;
@@ -3846,28 +3846,28 @@ long DoSelectLevelInterface( long startChapter)
                 switch ( theEvent.what )
                 {
                     case updateEvt:
-                        whichWindow = ( CWindowPtr)theEvent.message;
+                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
 
                         if ( whichWindow == gTheWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gTheWindow);
-                                CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &(gTheWindow->portRect));
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                                MacSetPort( gTheWindow);
+                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
+                            EndUpdate( whichWindow);
                             break;
-                            EndUpdate( (WindowPtr)whichWindow);
+                            EndUpdate( whichWindow);
                         } else if ( whichWindow == gAresGlobal->gBackWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gAresGlobal->gBackWindow);
-                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), (Pattern *)&qd.black);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                                MacSetPort( gAresGlobal->gBackWindow);
+                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
+                            EndUpdate( whichWindow);
                         } else
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                            EndUpdate( whichWindow);
                         }
-                        MacSetPort( (WindowPtr)gTheWindow);
+                        MacSetPort( gTheWindow);
 
                         break;
 
@@ -4040,7 +4040,7 @@ void DrawLevelNameInBox( StringPtr name, long fontNum, short descriptionTextID,
         }
     }
 
-    descriptionLength += (long)name[0];
+    descriptionLength += name[0];
     retroTextSpec.textLength = descriptionLength;
     retroTextSpec.text = NewHandle( descriptionLength);
     if ( retroTextSpec.text == nil)
@@ -4051,10 +4051,10 @@ void DrawLevelNameInBox( StringPtr name, long fontNum, short descriptionTextID,
 
     MoveHHi( retroTextSpec.text);
     HLock( retroTextSpec.text);
-    BlockMove( name + 1, *retroTextSpec.text, (long)name[0]);
+    BlockMove( name + 1, *retroTextSpec.text, name[0]);
     if ( textData != nil)
     {
-        BlockMove( *textData, *retroTextSpec.text + (long)name[0], GetHandleSize( textData));
+        BlockMove( *textData, *retroTextSpec.text + name[0], GetHandleSize( textData));
         DisposeHandle( textData);
     }
 
@@ -4085,7 +4085,7 @@ void DrawLevelNameInBox( StringPtr name, long fontNum, short descriptionTextID,
     PaintRect( &tRect);
     DrawInRealWorld();
     DrawDirectTextInRect( &retroTextSpec, &anItem->bounds, &clipRect, *offMap, 0,0);
-    CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &tRect);
+    CopyOffWorldToRealWorld(gTheWindow, &tRect);
     DisposeHandle( retroTextSpec.text);
 }
 
@@ -4144,7 +4144,7 @@ Boolean DoMissionInterface( long whichScenario)
         DrawInRealWorld();
 
         CopySaveWorldToOffWorld( &totalRect);
-        CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &totalRect);
+        CopyOffWorldToRealWorld(gTheWindow, &totalRect);
 
         GetScenarioFullScaleAndCorner( whichScenario, 0, &corner, &scale, &mapRect);
         DrawArbitrarySectorLines( &corner, scale, 16, &mapRect, saveMap,  0, 0);
@@ -4199,13 +4199,13 @@ Boolean DoMissionInterface( long whichScenario)
                 switch ( theEvent.what )
                 {
                     case updateEvt:
-                        whichWindow = ( CWindowPtr)theEvent.message;
+                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
 
                         if ( whichWindow == gTheWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gTheWindow);
-                                CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &(gTheWindow->portRect));
+                            BeginUpdate( whichWindow);
+                                MacSetPort( gTheWindow);
+                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
 /////////////////////////////////////
 // Display free memory
 /*      DrawInRealWorld();
@@ -4217,21 +4217,21 @@ Boolean DoMissionInterface( long whichScenario)
 */
 //
 /////////////////////////////////////
-                            EndUpdate( (WindowPtr)whichWindow);
+                            EndUpdate( whichWindow);
                             break;
-                            EndUpdate( (WindowPtr)whichWindow);
+                            EndUpdate( whichWindow);
                         } else if ( whichWindow == gAresGlobal->gBackWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gAresGlobal->gBackWindow);
-                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), (Pattern *)&qd.black);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                                MacSetPort( gAresGlobal->gBackWindow);
+                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
+                            EndUpdate( whichWindow);
                         } else
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( whichWindow);
+                            EndUpdate( whichWindow);
                         }
-                        MacSetPort( (WindowPtr)gTheWindow);
+                        MacSetPort( gTheWindow);
 
                         break;
 
@@ -4409,7 +4409,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
             HLockHi( textData);
 
             textlength = length = GetHandleSize( textData);
-            textHeight = GetInterfaceTextHeightFromWidth( (anyCharType *)*textData, length,
+            textHeight = GetInterfaceTextHeightFromWidth( reinterpret_cast<anyCharType *>(*textData), length,
                             dataItem->style, kMissionDataWidth);
         }
         if ( hiliteBounds.left == hiliteBounds.right)
@@ -4496,7 +4496,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
         if ( textData != nil)
         {
             LongRectToRect( &(dataItem->bounds), &newRect);
-            DrawInterfaceTextInRect( &newRect, (anyCharType *)*textData, length,
+            DrawInterfaceTextInRect( &newRect, reinterpret_cast<anyCharType *>(*textData), length,
                             dataItem->style, dataItem->color, *offMap, 0, 0, inlinePict);
             ReleaseResource( textData);
         }
@@ -4509,7 +4509,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
         BiggestRect( &newRect, &hiliteBounds);
         oldRect = *usedRect;
         BiggestRect( &oldRect, &newRect);
-        CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &oldRect);
+        CopyOffWorldToRealWorld(gTheWindow, &oldRect);
         *usedRect = newRect;
     } else // it's a special briefpoint!
     {
@@ -4526,14 +4526,14 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
 
         if ( whichBriefPoint == kMissionStarMapBriefNum)
         {
-            thePict = (PicHandle)HHGetResource( 'PICT', kMissionStarMapPictID);
+            thePict = reinterpret_cast<PicHandle>(HHGetResource( 'PICT', kMissionStarMapPictID));
             if ( thePict != nil)
             {
-                HLockHi( (Handle)thePict);
+                HLockHi( reinterpret_cast<Handle>(thePict));
                 newRect = (**thePict).picFrame;
                 CenterRectInRect( &newRect, bounds);
                 DrawPicture( thePict, &newRect);
-                ReleaseResource( (Handle)thePict);
+                ReleaseResource( reinterpret_cast<Handle>(thePict));
                 GetScenarioStarMapPoint( whichScenario, &starPoint);
                 starPoint.h += bounds->left;
                 starPoint.v += bounds->top;
@@ -4567,7 +4567,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
                 BiggestRect( &oldRect, &newRect);
                 DrawInRealWorld();
                 NormalizeColors();
-                CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &oldRect);
+                CopyOffWorldToRealWorld(gTheWindow, &oldRect);
                 *usedRect = newRect;
                 textlength = 100;
             }
@@ -4576,7 +4576,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
             oldRect = *bounds;
             DrawInRealWorld();
             NormalizeColors();
-            CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &oldRect);
+            CopyOffWorldToRealWorld(gTheWindow, &oldRect);
             *usedRect = oldRect;
             textlength = 50;
         }
@@ -4593,7 +4593,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
     PixMapHandle    offPixMap = GetGWorldPixMap( gOffWorld);
     transColorType  *transColor;
     longRect        lRect, longClipRect;
-    baseObjectType  *baseObject = (baseObjectType *)*gBaseObjectData;// + ((long)pictID - kFirstShipDataPictID);
+    baseObjectType  *baseObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData);// + (pictID - kFirstShipDataPictID);
     Str255          tempString, numString;
     retroTextSpecType   retroTextSpec;
     long            height, waitTime, i;
@@ -4771,7 +4771,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
             // DO NOTHING
         };
 
-        CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &dataRect);
+        CopyOffWorldToRealWorld(gTheWindow, &dataRect);
     }
 }
 
@@ -4786,7 +4786,7 @@ Handle CreateWeaponDataText( long whichWeapon, StringPtr weaponName)
 
     if ( whichWeapon != kNoShip)
     {
-        weaponObject = (baseObjectType *)*gBaseObjectData + whichWeapon;
+        weaponObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData) + whichWeapon;
 
         weaponText = GetResource( 'TEXT', kWeaponDataTextID);
         if ( weaponText != nil)
@@ -4801,12 +4801,12 @@ Handle CreateWeaponDataText( long whichWeapon, StringPtr weaponName)
             isGuided = false;
             if ( weaponObject->activateActionNum > 0)
             {
-                action = (objectActionType *)*gObjectActionData + weaponObject->activateAction;
+                action = reinterpret_cast<objectActionType *>(*gObjectActionData) + weaponObject->activateAction;
                 for ( actionNum = 0; actionNum < weaponObject->activateActionNum; actionNum++)
                 {
                     if (( action->verb == kCreateObject) || ( action->verb == kCreateObjectSetDest))
                     {
-                        missileObject = (baseObjectType *)*gBaseObjectData +
+                        missileObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData) +
                             action->argument.createObject.whichBaseType;
                         if ( missileObject->attributes & kIsGuided) isGuided = true;
                         if ( missileObject->damage > mostDamage) mostDamage = missileObject->damage;
@@ -5018,7 +5018,7 @@ void ShowSuccessAnimation( WindowPtr thePort)
             tRect.bottom = tRect.top + zpoint;
 
             MoveTo( tRect.left, tRect.top + gDirectText->ascent);
-            DrawDirectTextStringClipped( (anyCharType *)hackString, color, *pixMap, &starBounds,
+            DrawDirectTextStringClipped( reinterpret_cast<anyCharType *>(hackString), color, *pixMap, &starBounds,
                 0, 0);
 
             ChunkCopyPixMapToScreenPixMap( *pixMap, &tRect, *thePixMapHandle);
@@ -5201,7 +5201,7 @@ void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, lo
         tlRect.bottom += 2;
         DrawNateVBracket( *offMap, &tlRect, &clipRect, 0, 0, retroTextSpec.color);
         mCopyAnyRect( tRect, tlRect);
-        CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &tRect);
+        CopyOffWorldToRealWorld(gTheWindow, &tRect);
 //  DrawDirectTextInRect( &retroTextSpec, &clipRect, *thePixMapHandle, gNatePortLeft, gNatePortTop);
 
         while ( retroTextSpec.thisPosition < retroTextSpec.textLength)
@@ -5248,7 +5248,7 @@ void DoMissionDebriefingText( WindowPtr thePort, long textID, long yourlength, l
         HLockHi( textData);
 
         textlength = length = GetHandleSize( textData);
-        textHeight = GetInterfaceTextHeightFromWidth( (anyCharType *)*textData, length,
+        textHeight = GetInterfaceTextHeightFromWidth( reinterpret_cast<anyCharType *>(*textData), length,
                         dataItem.style, kDebriefTextWidth);
         if ( doScore) textHeight += kScoreTableHeight;
 
@@ -5271,7 +5271,7 @@ void DoMissionDebriefingText( WindowPtr thePort, long textID, long yourlength, l
         DrawAnyInterfaceItem( &dataItem, *offMap, 0, 0);
 
         LongRectToRect( &(dataItem.bounds), &tRect);
-        DrawInterfaceTextInRect( &tRect, (anyCharType *)*textData, length,
+        DrawInterfaceTextInRect( &tRect, reinterpret_cast<anyCharType *>(*textData), length,
                             dataItem.style, dataItem.color, *offMap, 0, 0, nil);
 
         ReleaseResource( textData);
@@ -5401,7 +5401,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
         // look for beginning of section
         charNum = 0;
         textLength = GetHandleSize( textHandle);
-        sectionStart = (anyCharType *)*textHandle;
+        sectionStart = reinterpret_cast<anyCharType *>(*textHandle);
 
         // while we still have text to do
         while (( charNum < textLength) && ( !abort))
@@ -5430,7 +5430,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                                 while (( *sectionStart != kReturnChar) && ( charNum < textLength))
                                 {
                                     pictID *= 10;
-                                    pictID += (long)*sectionStart - (long)'0';
+                                    pictID += *sectionStart - '0';
                                     sectionStart++;
                                     charNum++;
                                 }
@@ -5448,14 +5448,14 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                                             ( charNum < textLength))
                                         {
                                             bgPictID *= 10;
-                                            bgPictID += (long)*sectionStart - (long)'0';
+                                            bgPictID += *sectionStart - '0';
                                             sectionStart++;
                                             charNum++;
                                         }
                                         if ( bgPictID > 0)
                                         {
                                             if ( bgPict != nil)
-                                                ReleaseResource( (Handle)bgPict);
+                                                ReleaseResource( reinterpret_cast<Handle>(bgPict));
                                             bgPict = GetPicture( bgPictID);
                                         }
                                     }
@@ -5553,7 +5553,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
 
                         if ( thePict != nil)
                         {
-                            HLockHi( (Handle)thePict);
+                            HLockHi( reinterpret_cast<Handle>(thePict));
                             wasPicture = true;
                             pictRect.left = ( scrollWidth / 2) -
                                 ((((**thePict).picFrame.right - (**thePict).picFrame.left)) / 2) +
@@ -5600,7 +5600,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                                     pictRect.bottom -= pictSourceRect.bottom - (**thePict).picFrame.bottom;
                                     pictSourceRect.bottom = (**thePict).picFrame.bottom;
                                 }
-                                CopyBits( (BitMap *)*saveMap, (BitMap *)*offMap,
+                                CopyBits( *saveMap, *offMap,
                                     &pictSourceRect, &pictRect,
                                     srcCopy, nil);
 
@@ -5661,8 +5661,8 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
 
                                 MacOffsetRect( &pictSourceRect, 0, (mDirectFontHeight() + kScrollTextLineBuffer));
                             }
-                            HUnlock( (Handle)thePict);
-                            ReleaseResource( (Handle)thePict);
+                            HUnlock( reinterpret_cast<Handle>(thePict));
+                            ReleaseResource( reinterpret_cast<Handle>(thePict));
 //                          if ( ResError() != noErr) Debugger();
                         }// else DebugStr("\pNo PICT!");
                     }
@@ -5704,7 +5704,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                         {
                             stRect.bottom -= bgRect.bottom - (**saveMap).bounds.bottom;
                             bgRect.bottom = (**saveMap).bounds.bottom;
-                            CopyBits( (BitMap *)*saveMap, (BitMap *)*offMap,
+                            CopyBits( *saveMap, *offMap,
                                 &bgRect, &stRect,
                                 srcCopy, nil);
                             stRect.top = stRect.bottom;
@@ -5712,12 +5712,12 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                                             ( bgRect.bottom - bgRect.top));
                             bgRect.top = 0;
                             bgRect.bottom = bgRect.top + (stRect.bottom - stRect.top);
-                            CopyBits( (BitMap *)*saveMap, (BitMap *)*offMap,
+                            CopyBits( *saveMap, *offMap,
                                 &bgRect, &stRect,
                                 srcCopy, nil);
                         } else // just copy appropriate segment
                         {
-                            CopyBits( (BitMap *)*saveMap, (BitMap *)*offMap,
+                            CopyBits( *saveMap, *offMap,
                                 &bgRect, &stRect,
                                 srcCopy, nil);
                         }
@@ -5847,7 +5847,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
         StopAndUnloadSong();
     }
     if ( bgPict != nil)
-        ReleaseResource( (Handle)bgPict);
+        ReleaseResource( reinterpret_cast<Handle>(bgPict));
     if ( clipRgn != nil) DisposeRgn( clipRgn);
 }
 
@@ -5879,8 +5879,8 @@ void HandleOSEvent( EventRecord *event)
                     SetColorDepth( theDevice, 8);
                 SetMBarState( false, theDevice);
                 gAresGlobal->gOptions &= ~kOptionInBackground;
-                SelectWindow( (WindowPtr)gTheWindow);
-                MacSetPort( (WindowPtr)gTheWindow);
+                SelectWindow( gTheWindow);
+                MacSetPort( gTheWindow);
                 ResumeActiveTextEdit();
 
                 if ( gAresGlobal->useGameRanger)
@@ -5893,7 +5893,7 @@ void HandleOSEvent( EventRecord *event)
                     }
                 }
 
-                WriteDebugLine((char *)"\pRESUME");
+                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pRESUME")));
                 Ambrosia_Update_Registered();
             } else
             {
@@ -5901,7 +5901,7 @@ void HandleOSEvent( EventRecord *event)
                 SetMBarState( true, theDevice);
                 gAresGlobal->gOptions |= kOptionInBackground;
                 SuspendActiveTextEdit();
-                WriteDebugLine((char *)"\pSUSPEND");
+                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pSUSPEND")));
             }
             break;
     }
@@ -5935,7 +5935,7 @@ Boolean Ares_WaitNextEvent( short eventMask, EventRecord *theEvent,
 {
     if (( Wrap_GRIsWaitingCmd())/* && ( !gAresGlobal->gameRangerPending)*/)
     {
-        WriteDebugLine((char *)"\pGRIsWaiting!");
+        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pGRIsWaiting!")));
         if ( !gAresGlobal->gameRangerPending)
         {
             gAresGlobal->gameRangerPending = true;

@@ -483,7 +483,7 @@ void DrawPlayerInterfaceButton( interfaceItemType *dItem, PixMap *destMap, long 
         swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
         sheight = GetInterfaceFontAscent(dItem->style) + kInterfaceTextVBuffer + tRect.top;
         MoveTo( swidth, sheight);
-        DrawInterfaceString( (anyCharType *)s, dItem->style, destMap, portLeft,
+        DrawInterfaceString( reinterpret_cast<anyCharType *>(s), dItem->style, destMap, portLeft,
                         portTop,  color);
     } else
     {
@@ -527,7 +527,7 @@ void DrawPlayerInterfaceButton( interfaceItemType *dItem, PixMap *destMap, long 
         }
 
 
-        DrawInterfaceString( (anyCharType *)s, dItem->style, destMap, portLeft,
+        DrawInterfaceString( reinterpret_cast<anyCharType *>(s), dItem->style, destMap, portLeft,
                         portTop,  color);
 
 
@@ -553,7 +553,7 @@ void DrawPlayerInterfaceButton( interfaceItemType *dItem, PixMap *destMap, long 
         swidth = uRect.right + ( tRect.right - uRect.right) / 2 - swidth / 2;
         sheight = GetInterfaceFontAscent(dItem->style) + kInterfaceTextVBuffer + tRect.top;
         MoveTo( swidth, sheight);
-        DrawInterfaceString( (anyCharType *)s, dItem->style, destMap, portLeft,
+        DrawInterfaceString( reinterpret_cast<anyCharType *>(s), dItem->style, destMap, portLeft,
                         portTop,  color);
     }
 
@@ -729,7 +729,7 @@ void DrawPlayerInterfaceTabBoxButton( interfaceItemType *dItem, PixMap *destMap,
         swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
         sheight = GetInterfaceFontAscent(dItem->style) + kInterfaceTextVBuffer + tRect.top;
         MoveTo( swidth, sheight);
-        DrawInterfaceString( (anyCharType *)s, dItem->style, destMap, portLeft,
+        DrawInterfaceString( reinterpret_cast<anyCharType *>(s), dItem->style, destMap, portLeft,
                         portTop,  color);
     } else
     {
@@ -785,7 +785,7 @@ void DrawPlayerInterfaceTabBoxButton( interfaceItemType *dItem, PixMap *destMap,
         }
 
 
-        DrawInterfaceString( (anyCharType *)s, dItem->style, destMap, portLeft,
+        DrawInterfaceString( reinterpret_cast<anyCharType *>(s), dItem->style, destMap, portLeft,
                         portTop,  color);
 
 
@@ -818,7 +818,7 @@ void DrawPlayerInterfaceTabBoxButton( interfaceItemType *dItem, PixMap *destMap,
         swidth = uRect.right + ( tRect.right - uRect.right) / 2 - swidth / 2;
         sheight = GetInterfaceFontAscent(dItem->style) + kInterfaceTextVBuffer + tRect.top;
         MoveTo( swidth, sheight);
-        DrawInterfaceString( (anyCharType *)s, dItem->style, destMap, portLeft,
+        DrawInterfaceString( reinterpret_cast<anyCharType *>(s), dItem->style, destMap, portLeft,
                         portTop,  color);
     }
 
@@ -956,7 +956,7 @@ void DrawPlayerInterfaceRadioButton( interfaceItemType *dItem, PixMap *destMap, 
     swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
     sheight = GetInterfaceFontAscent(dItem->style) + kInterfaceTextVBuffer + tRect.top;
     MoveTo( swidth, sheight);
-    DrawInterfaceString( (anyCharType *)s, dItem->style, destMap, portLeft,
+    DrawInterfaceString( reinterpret_cast<anyCharType*>(s), dItem->style, destMap, portLeft,
                         portTop,  color);
 
     SetTranslateColorFore( BLACK);
@@ -1074,7 +1074,7 @@ void DrawPlayerInterfaceCheckBox( interfaceItemType *dItem, PixMap *destMap, lon
     swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
     sheight = GetInterfaceFontAscent(dItem->style) + kInterfaceTextVBuffer + tRect.top;
     MoveTo( swidth, sheight);
-    DrawInterfaceString( (anyCharType *)s, dItem->style, destMap, portLeft,
+    DrawInterfaceString( reinterpret_cast<anyCharType*>(s), dItem->style, destMap, portLeft,
                         portTop,  color);
 
     SetTranslateColorFore( BLACK);
@@ -1126,7 +1126,7 @@ void DrawPlayerInterfaceLabeledBox( interfaceItemType *dItem, PixMap *destMap, l
 
     MoveTo( tRect.left + kInterfaceTextHBuffer, tRect.top + GetInterfaceFontAscent( dItem->style) +
             kInterfaceTextVBuffer);
-    DrawInterfaceString( (anyCharType *)s, dItem->style, destMap, portLeft,
+    DrawInterfaceString( reinterpret_cast<anyCharType*>(s), dItem->style, destMap, portLeft,
                         portTop,  color);
 
     // string left border
@@ -1266,7 +1266,7 @@ void DrawPlayerInterfaceList( interfaceItemType *dItem, PixMap *destMap, long po
     swidth = GetInterfaceStringWidth( s, dItem->style) + kInterfaceTextHBuffer * 2;
     sheight = GetInterfaceFontAscent(dItem->style) + kInterfaceTextVBuffer * 2;
     MoveTo( tRect.left + kInterfaceTextHBuffer, tRect.top + sheight - kInterfaceTextVBuffer);
-    DrawInterfaceString( (anyCharType *)s, dItem->style, destMap, portLeft,
+    DrawInterfaceString( reinterpret_cast<anyCharType*>(s), dItem->style, destMap, portLeft,
                         portTop,  color);
 
     // string left border
@@ -1378,8 +1378,8 @@ void DrawPlayerInterfaceList( interfaceItemType *dItem, PixMap *destMap, long po
                 mGetTranslateColorShade( dItem->color, LIGHT, color, transColor);
             }
             MoveTo( tRect.left, vcenter);
-            (*(dItem->item.listRect.getItemString))( swidth, (anyCharType *)s);
-            DrawInterfaceString( (anyCharType *)s, dItem->style, destMap, portLeft,
+            (*(dItem->item.listRect.getItemString))( swidth, reinterpret_cast<anyCharType*>(s));
+            DrawInterfaceString( reinterpret_cast<anyCharType*>(s), dItem->style, destMap, portLeft,
                         portTop,  color);
             swidth++;
         }
@@ -1445,8 +1445,8 @@ void DrawPlayerInterfaceListEntry( interfaceItemType *dItem, short whichEntry, P
                 mGetTranslateColorShade( dItem->color, LIGHT, color, transColor);
             }
             MoveTo( tRect.left, vcenter);
-            (*(dItem->item.listRect.getItemString))( swidth, (anyCharType *)s);
-            DrawInterfaceString( (anyCharType *)s, dItem->style, destMap, portLeft,
+            (*(dItem->item.listRect.getItemString))( swidth, reinterpret_cast<anyCharType*>(s));
+            DrawInterfaceString( reinterpret_cast<anyCharType*>(s), dItem->style, destMap, portLeft,
                         portTop,  color);
             swidth++;
         }
@@ -1701,7 +1701,7 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
     fheight = GetInterfaceFontHeight( dItem->style) + kInterfaceTextVBuffer;
     vline = tRect.top - ( fheight - GetInterfaceFontAscent( dItem->style));
 
-    theLine = ( anyCharType *)NewPtr( sizeof( anyCharType) * kMaxLineLength);
+    theLine = reinterpret_cast<anyCharType *>(NewPtr( sizeof( anyCharType) * kMaxLineLength));
     if ( theLine != nil)
     {
         wordlen = theLine;
@@ -1712,7 +1712,7 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
             HLockHi( textData);
 
             length = GetHandleSize( textData);
-            sChar = ( anyCharType *)*textData;
+            sChar = reinterpret_cast<anyCharType *>(*textData);
 
             SetTranslateColorShadeFore( dItem->color, VERY_LIGHT);
 
@@ -1728,7 +1728,7 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
 
                 while (( xpos < tRect.right - kInterfaceTextHBuffer) && ( length > 0))
                 {
-                    *wordlen += (anyCharType)thisLen;
+                    *wordlen += thisLen;
                     sChar = aheadChar;
                     length -= thisLen;
                     thisLen = 0;
@@ -1783,7 +1783,7 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
             }
             ReleaseResource( textData);
         }
-        DisposePtr( (Ptr)theLine);
+        DisposePtr( reinterpret_cast<Ptr>(theLine));
     }
     SetClip( clipRgn);
     DisposeRgn( clipRgn);
@@ -1830,14 +1830,14 @@ void DrawInterfaceTextInRect( Rect *tRect, const unsigned char *textData, long l
         thisInlinePict = inlinePict;
     }
 
-    theLine = ( anyCharType *)NewPtr( sizeof( anyCharType) * kMaxLineLength);
+    theLine = reinterpret_cast<anyCharType *>(NewPtr( sizeof( anyCharType) * kMaxLineLength));
     if ( theLine != nil)
     {
         wordlen = theLine;
 
         if ( textData != nil)
         {
-            sChar = ( anyCharType *)textData;
+            sChar = const_cast<anyCharType*>(textData);
 
             SetTranslateColorShadeFore( textcolor, VERY_LIGHT);
 
@@ -1858,7 +1858,7 @@ void DrawInterfaceTextInRect( Rect *tRect, const unsigned char *textData, long l
 
                 while (( xpos < tRect->right - kInterfaceTextHBuffer) && ( length > 0))
                 {
-                    *wordlen += (anyCharType)thisLen;
+                    *wordlen += thisLen;
                     sChar = aheadChar;
                     length -= thisLen;
                     thisLen = 0;
@@ -1982,7 +1982,7 @@ void DrawInterfaceTextInRect( Rect *tRect, const unsigned char *textData, long l
                                         uRect.left) / 2,
                                         -uRect.top + vline);
                             DrawPicture( thePicture, &uRect);
-                            ReleaseResource( (Handle)thePicture);
+                            ReleaseResource( reinterpret_cast<Handle>(thePicture));
                             vline += uRect.bottom - uRect.top;
                             xpos = hleft;
                             if (( inlinePict != nil) && ( inlinePictNum < kMaxInlinePictNum))
@@ -1998,7 +1998,7 @@ void DrawInterfaceTextInRect( Rect *tRect, const unsigned char *textData, long l
                 }
             }
         }
-        DisposePtr( (Ptr)theLine);
+        DisposePtr( reinterpret_cast<Ptr>(theLine));
     }
     SetClip( clipRgn);
     DisposeRgn( clipRgn);
@@ -2021,14 +2021,14 @@ short GetInterfaceTextHeightFromWidth( anyCharType *textData, long length,
     fheight = GetInterfaceFontHeight( style) + kInterfaceTextVBuffer;
     vline = 0 - ( fheight - GetInterfaceFontAscent( style));
 
-    theLine = ( anyCharType *)NewPtr( sizeof( anyCharType) * kMaxLineLength);
+    theLine = reinterpret_cast<anyCharType *>(NewPtr( sizeof( anyCharType) * kMaxLineLength));
     if ( theLine != nil)
     {
         wordlen = theLine;
 
         if ( textData != nil)
         {
-            sChar = ( anyCharType *)textData;
+            sChar = reinterpret_cast<anyCharType *>(textData);
 
             while ( length > 0)
             {
@@ -2046,7 +2046,7 @@ short GetInterfaceTextHeightFromWidth( anyCharType *textData, long length,
 
                 while (( xpos < boundsWidth - kInterfaceTextHBuffer) && ( length > 0))
                 {
-                    *wordlen += (anyCharType)thisLen;
+                    *wordlen += thisLen;
                     sChar = aheadChar;
                     length -= thisLen;
                     thisLen = 0;
@@ -2161,7 +2161,7 @@ short GetInterfaceTextHeightFromWidth( anyCharType *textData, long length,
                             uRect = (**thePicture).picFrame;
                             MacOffsetRect( &uRect, -uRect.left + xpos, -uRect.top + vline);
 //                          DrawPicture( thePicture, &uRect);
-                            ReleaseResource( (Handle)thePicture);
+                            ReleaseResource( reinterpret_cast<Handle>(thePicture));
                             vline += uRect.bottom - uRect.top;
                             xpos = hleft;
                         }
@@ -2170,7 +2170,7 @@ short GetInterfaceTextHeightFromWidth( anyCharType *textData, long length,
                 }
             }
         }
-        DisposePtr( (Ptr)theLine);
+        DisposePtr( reinterpret_cast<Ptr>(theLine));
     }
     return( vline + ( fheight - GetInterfaceFontAscent( style)) );
 }
@@ -2199,7 +2199,7 @@ void DrawInterfacePictureRect( interfaceItemType *dItem, PixMap *destMap, long p
         uRect = (**thePicture).picFrame;
         MacOffsetRect( &uRect, -uRect.left + tRect.left, -uRect.top + tRect.top);
         DrawPicture( thePicture, &uRect);
-        ReleaseResource( (Handle)thePicture);
+        ReleaseResource( reinterpret_cast<Handle>(thePicture));
     }
 
     SetClip( clipRgn);
@@ -2255,7 +2255,7 @@ void DrawAnyInterfaceItem( interfaceItemType *anItem, PixMap *destMap, long port
                 destMap, portLeft, portTop);
             break;
         default:
-            WriteDebugLine( (char *)"\pHuh?");
+            WriteDebugLine( const_cast<char *>(reinterpret_cast<const char*>("\pHuh?")));
             break;
     }
 }
@@ -2354,7 +2354,7 @@ void GetAnyInterfaceItemGraphicBounds( interfaceItemType *anItem, Rect *bounds)
             break;
 
         default:
-            WriteDebugLine( (char *)"\pHuh?");
+            WriteDebugLine( const_cast<char *>(reinterpret_cast<const char*>("\pHuh?")));
             break;
     }
 }

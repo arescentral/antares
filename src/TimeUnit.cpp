@@ -50,7 +50,7 @@ long GetTimeLapse( void)
     UnsignedWide            thisTime;
 
     Microseconds( &thisTime);
-    WideSubtract( (wide *)&thisTime, (wide *)&gAresGlobal->gLastTime);
+    WideSubtract( reinterpret_cast<wide *>(&thisTime), reinterpret_cast<wide *>(&gAresGlobal->gLastTime));
     return ( thisTime.lo / kTimeUnit);
 }
 

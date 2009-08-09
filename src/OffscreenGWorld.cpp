@@ -133,7 +133,7 @@ void CleanUpOffscreenWorld( void)
         UnlockPixels( pixBase);
         DisposeGWorld( gOffWorld);
     }
-    WriteDebugLine((char *)"\p<OffWorld");
+    WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\p<OffWorld")));
 
     if ( gSaveWorld != nil)
     {
@@ -141,7 +141,7 @@ void CleanUpOffscreenWorld( void)
         UnlockPixels( pixBase);
         DisposeGWorld( gSaveWorld);
     }
-    WriteDebugLine((char *)"\p<SaveWorld");
+    WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\p<SaveWorld")));
 }
 
 void DrawInRealWorld( void)
@@ -203,7 +203,7 @@ void CopyOffWorldToRealWorld( WindowPtr port, Rect *bounds)
 
     pixBase = GetGWorldPixMap( gOffWorld);
     NormalizeColors();
-    CopyBits( (BitMap *)*pixBase, &(port->portBits), bounds, bounds,
+    CopyBits( *pixBase, &(port->portBits), bounds, bounds,
         srcCopy, nil);
 }
 
@@ -214,7 +214,7 @@ void CopyRealWorldToSaveWorld( WindowPtr port, Rect *bounds)
 
     pixBase = GetGWorldPixMap( gSaveWorld);
     NormalizeColors();
-    CopyBits( &(port->portBits), (BitMap *)*pixBase, bounds, bounds,
+    CopyBits( &(port->portBits), *pixBase, bounds, bounds,
         srcCopy, nil);
 }
 
@@ -225,7 +225,7 @@ void CopyRealWorldToOffWorld( WindowPtr port, Rect *bounds)
 
     pixBase = GetGWorldPixMap( gOffWorld);
     NormalizeColors();
-    CopyBits( &(port->portBits), (BitMap *)*pixBase, bounds, bounds,
+    CopyBits( &(port->portBits), *pixBase, bounds, bounds,
         srcCopy, nil);
 }
 
@@ -237,7 +237,7 @@ void CopySaveWorldToOffWorld( Rect *bounds)
     savePixBase = GetGWorldPixMap( gSaveWorld);
     offPixBase = GetGWorldPixMap( gOffWorld);
     NormalizeColors();
-    CopyBits( (BitMap *)*savePixBase, (BitMap *)*offPixBase, bounds, bounds,
+    CopyBits( *savePixBase, *offPixBase, bounds, bounds,
         srcCopy, nil);
 }
 
@@ -249,7 +249,7 @@ void CopyOffWorldToSaveWorld( Rect *bounds)
     savePixBase = GetGWorldPixMap( gSaveWorld);
     offPixBase = GetGWorldPixMap( gOffWorld);
     NormalizeColors();
-    CopyBits( (BitMap *)*offPixBase, (BitMap *)*savePixBase, bounds, bounds,
+    CopyBits( *offPixBase, *savePixBase, bounds, bounds,
         srcCopy, nil);
 }
 
@@ -304,8 +304,8 @@ void ChunkCopyPixMapToScreenPixMap( PixMap *sourcePix, Rect *sourceRect, PixMap 
         if (( gAresGlobal->gOptions & kOptionQDOnly) || ( 1))
         {
             fixRect = *sourceRect;
-            MacOffsetRect( &fixRect, gNatePortLeft << (long)2, gNatePortTop);
-            CopyBits( (BitMap *)sourcePix,(BitMap *)destMap, sourceRect, &fixRect,
+            MacOffsetRect( &fixRect, gNatePortLeft << 2, gNatePortTop);
+            CopyBits( sourcePix, destMap, sourceRect, &fixRect,
                 srcCopy, nil);
         } else
         {
@@ -333,16 +333,16 @@ void ChunkCopyPixMapToScreenPixMap( PixMap *sourcePix, Rect *sourceRect, PixMap 
                 fixRect.bottom = ( destMap->bounds.bottom - destMap->bounds.top);
             srowplus = srowbytes - (fixRect.right - fixRect.left);
             drowplus = drowbytes - (fixRect.right - fixRect.left);
-            sword = (long *)sourcePix->baseAddr + (long)fixRect.top * srowbytes +
-                    (long)fixRect.left;
-            dword = (long *)destMap->baseAddr + (long)(fixRect.top + gNatePortTop) * drowbytes +
-                    (long)(fixRect.left + gNatePortLeft);
+            sword = reinterpret_cast<long *>(sourcePix->baseAddr) + fixRect.top * srowbytes +
+                    fixRect.left;
+            dword = reinterpret_cast<long *>(destMap->baseAddr) + (fixRect.top + gNatePortTop) * drowbytes +
+                    (fixRect.left + gNatePortLeft);
             for ( y = fixRect.top; y < fixRect.bottom; y++)
             {
                 for ( x = fixRect.left; x < fixRect.right; x++)
                 {
         #ifdef kByteLevelTesting
-                    TestByte( (char *)dword, destMap, "\pPIX2SCRN");
+                    TestByte( reinterpret_cast<char*>(dword), destMap, "\pPIX2SCRN");
         #endif
                     *dword++ = *sword++;
                 }
@@ -610,18 +610,18 @@ void ChunkCopyPixMapToPixMap( PixMap *sourcePix, Rect *sourceRect, PixMap *destM
         fixRect.bottom = sourcePix->bounds.bottom;
     if ( fixRect.bottom > destMap->bounds.bottom)
         fixRect.bottom = destMap->bounds.bottom;
-    srowplus = srowbytes - (long)(fixRect.right - fixRect.left);
-    drowplus = drowbytes - (long)(fixRect.right - fixRect.left);
-    sword = (long *)sourcePix->baseAddr + (long)fixRect.top * srowbytes +
-            (long)fixRect.left;
-    dword = (long *)destMap->baseAddr + (long)(fixRect.top) * drowbytes +
-            (long)(fixRect.left);
+    srowplus = srowbytes - (fixRect.right - fixRect.left);
+    drowplus = drowbytes - (fixRect.right - fixRect.left);
+    sword = reinterpret_cast<long *>(sourcePix->baseAddr) + fixRect.top * srowbytes +
+            fixRect.left;
+    dword = reinterpret_cast<long *>(destMap->baseAddr) + (fixRect.top) * drowbytes +
+            (fixRect.left);
     for ( y = fixRect.top; y < fixRect.bottom; y++)
     {
         for ( x = fixRect.left; x < fixRect.right; x++)
         {
 #ifdef kByteLevelTesting
-            TestByte( (char *)dword, destMap, "\pPIX2PIX");
+            TestByte( reinterpret_cast<char*>(dword), destMap, "\pPIX2PIX");
 #endif
             *dword++ = *sword++;
         }
@@ -659,15 +659,15 @@ void ChunkErasePixMap( PixMap *destMap, Rect *sourceRect)
         fixRect.bottom = destMap->bounds.bottom;
     if ( fixRect.bottom > destMap->bounds.bottom)
         fixRect.bottom = destMap->bounds.bottom;
-    drowplus = drowbytes - (long)(fixRect.right - fixRect.left);
-    dword = (long *)destMap->baseAddr + (long)(fixRect.top) * drowbytes +
-            (long)(fixRect.left);
+    drowplus = drowbytes - (fixRect.right - fixRect.left);
+    dword = reinterpret_cast<long *>(destMap->baseAddr) + (fixRect.top) * drowbytes +
+            (fixRect.left);
     for ( y = fixRect.top; y < fixRect.bottom; y++)
     {
         for ( x = fixRect.left; x < fixRect.right; x++)
         {
 #ifdef kByteLevelTesting
-            TestByte( (char *)dword, destMap, "\pPIXERSE");
+            TestByte( reinterpret_cast<char*>(dword), destMap, "\pPIXERSE");
 #endif
             *dword++ = 0xffffffff;
         }
@@ -681,7 +681,7 @@ void SetWindowPaletteFromClut( CWindowPtr theWindow, CTabHandle theClut)
 {
     PaletteHandle   thePalette;
 
-    thePalette = GetPalette( (WindowPtr)theWindow); // get the windows current palette
+    thePalette = GetPalette( theWindow); // get the windows current palette
     if ( thePalette == nil) // if it doesn't exist
     {
         thePalette = NewPalette( (**theClut).ctSize + 1, theClut, pmTolerant + pmExplicit, 0x000); // make new palette
@@ -691,8 +691,8 @@ void SetWindowPaletteFromClut( CWindowPtr theWindow, CTabHandle theClut)
         // change window's palette to match clut
         CTab2Palette( theClut, thePalette, pmTolerant + pmExplicit, 0x0000);
     }
-    NSetPalette( (WindowPtr)theWindow, thePalette, pmAllUpdates);
-    ActivatePalette( (WindowPtr)theWindow);
+    NSetPalette( theWindow, thePalette, pmAllUpdates);
+    ActivatePalette( theWindow);
 }
 
 void ColorTest( void)
@@ -722,14 +722,14 @@ void ColorTest( void)
                 {
                     MacSetRect( &uRect, tRect.left, tRect.top, tRect.left + WORLD_WIDTH / 32,
                             tRect.bottom);
-//                  Index2Color( (long)(j * 16 + i), &color);
+//                  Index2Color( (j * 16 + i), &color);
 //                  RGBForeColor( &color);
                     RGBForeColor( &((**offCLUT).ctTable[j * 16 + i].rgb));
                     PaintRect( &uRect);
                     MacSetRect( &uRect, uRect.right, uRect.top, tRect.right, tRect.bottom);
 
                     RGBForeColor( &((**onCLUT).ctTable[j * 16 + i].rgb));
-//                  Index2Color( (long)(j * 16 + i), &color);
+//                  Index2Color( (j * 16 + i), &color);
 //                  RGBForeColor( &color);
                     PaintRect( &uRect);
                     MacOffsetRect( &tRect, WORLD_WIDTH / 16, 0);

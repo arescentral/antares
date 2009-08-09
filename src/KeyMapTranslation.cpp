@@ -44,7 +44,7 @@ void GetKeyMapFromKeyNum( short keyNum, KeyMap keyMap)
     fixbit = wbit;
     wbit = 32 - ((fixbit / 8) * 8 + (8 - (fixbit % 8)));
 #if TARGET_OS_MAC
-    keyMap[wmap] = (unsigned long)0x00000001 << (unsigned long)wbit;
+    keyMap[wmap] = 0x00000001ul << wbit;
 #else
     keyMap[wmap].bigEndianValue = EndianU32_NtoB((unsigned long)0x00000001 << (unsigned long)wbit);
 #endif TARGET_OS_MAC
@@ -60,7 +60,7 @@ short GetKeyNumFromKeyMap( KeyMap keyMap)
         for ( j = 0; j < 32; j++)
         {
 #if TARGET_OS_MAC
-            if ((keyMap[i] >> (unsigned long)j) & (unsigned long)0x00000001)
+            if ((keyMap[i] >> j) & 0x00000001ul)
 #else
             if ((EndianU32_BtoN(keyMap[i].bigEndianValue) >> (unsigned long)j) & (unsigned long)0x00000001)
 #endif TARGET_OS_MAC
@@ -386,7 +386,7 @@ long GetAsciiFromKeyMap( KeyMap sourceKeyMap, KeyMap previousKeyMap)
 
 #endif TARGET_OS_MAC
     whichKeyCode = (GetKeyNumFromKeyMap( keyMap) - 1) | modifiers;
-    KCHRPtr = (Ptr)GetScriptManagerVariable( smKCHRCache);
+    KCHRPtr = reinterpret_cast<Ptr>(GetScriptManagerVariable( smKCHRCache));
     result = KeyTranslate( KCHRPtr, whichKeyCode, &gKeyTranslateState);
 
     return( result);
@@ -396,6 +396,6 @@ long GetAsciiFromKeyNum( short keyNum)
 {
     Ptr             KCHRPtr;
 
-    KCHRPtr = (Ptr)GetScriptManagerVariable( smKCHRCache);
+    KCHRPtr = reinterpret_cast<Ptr>(GetScriptManagerVariable( smKCHRCache));
     return ( KeyTranslate( KCHRPtr, keyNum - 1, &gKeyTranslateState));
 }

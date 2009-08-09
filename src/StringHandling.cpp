@@ -61,7 +61,7 @@ Boolean ComparePString( unsigned char *s1, unsigned char *s2)
 int PStringLen( unsigned char *s)
 
 {
-    return ((int)*s);
+    return *s;
 }
 
 void ConcatenatePString( unsigned char *dString, const unsigned char *sString)
@@ -71,7 +71,7 @@ void ConcatenatePString( unsigned char *dString, const unsigned char *sString)
     const unsigned char *sc;
     int     i;
 
-    dc = dString + (long)*dString + 1L;
+    dc = dString + *dString + 1L;
     sc = sString + 1L;
     for ( i = 0; (i < *sString) && ( *dString < 255); i++)
     {
@@ -105,7 +105,7 @@ void ReplacePStringChar( StringPtr s, unsigned char to, unsigned char from)
     int     l;
     unsigned char   *c;
 
-    c = (unsigned char *)s;
+    c = reinterpret_cast<unsigned char*>(s);
     l = *c;
     c++;
     while ( l > 0)
@@ -122,7 +122,7 @@ void FilterAlphaPString( StringPtr s)
     int     l;
     unsigned char   *c;
 
-    c = (unsigned char *)s;
+    c = reinterpret_cast<unsigned char*>(s);
     l = *c;
     c++;
     while ( l > 0)
@@ -140,7 +140,7 @@ void ChopAlphaPString( StringPtr s)
     short   len, newlen = 0;
     unsigned char   *c;
 
-    c = (unsigned char *)s;
+    c = reinterpret_cast<unsigned char*>(s);
     len = *c;
     c++;
     while (( len > 0) && ( (*c >= '0') && ( *c <= '9')))
@@ -149,7 +149,7 @@ void ChopAlphaPString( StringPtr s)
         c++;
         len--;
     }
-    c = (unsigned char *)s;
+    c = reinterpret_cast<unsigned char*>(s);
     *c = newlen;
 }
 
@@ -158,7 +158,7 @@ void UpperCasePString( StringPtr s)
     int     l;
     unsigned char   *c;
 
-    c = (unsigned char *)s;
+    c = reinterpret_cast<unsigned char*>(s);
     l = *c;
     c++;
     while ( l > 0)
@@ -176,6 +176,6 @@ void DrawCString( unsigned char *cString)
 {
     Str255  pString;
 
-    PStringFromCString( (unsigned char *)pString, cString);
-    DrawString( (StringPtr)pString);
+    PStringFromCString(pString, cString);
+    DrawString(reinterpret_cast<StringPtr>(pString));
 }

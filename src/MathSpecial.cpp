@@ -240,7 +240,7 @@ Fixed MyFixRatio( short numer, short denom)
 
     result = (( result >> 16L) & 0x0000ffff) | (( result << 16L) & 0xffff0000);
     result /= longdenom;
-    return( (Fixed)result);
+    return result;
 
 label1:
     result = 0x7fffffff;
@@ -248,12 +248,12 @@ label1:
     result = -result;
 
 label2:
-    return( (Fixed)result);
+    return result;
 
 label3:
     result = 0x00000001;
     result = (( result >> 16L) & 0x0000ffff) | (( result << 16L) & 0xffff0000);
-    return( (Fixed)result);
+    return result;
 }
 #endif
 

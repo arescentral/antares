@@ -56,8 +56,8 @@
 #define kRadarCenter        55
 #define kRadarColorSteps    14
 
-#define kScaleListNum       (long)64
-#define kScaleListShift     (long)6
+#define kScaleListNum       64L
+#define kScaleListShift     6L
 #define kInstLeftPictID     501
 #define kInstRightPictID    512
 #define kSiteDistance       200
@@ -126,9 +126,9 @@
 #define kMouseSleepTime     60
 
 inline void mWideASR8(UnsignedWide& mwide) {
-    (mwide).lo >>= (unsigned long)8;
-    (mwide).lo |= (mwide).hi << (unsigned long)24;
-    (mwide).hi >>= (unsigned long)8;
+    (mwide).lo >>= 8;
+    (mwide).lo |= (mwide).hi << 24;
+    (mwide).hi >>= 8;
 }
 
 #define kSectorLineBrightness   DARKER
@@ -194,7 +194,7 @@ int InstrumentInit( void)
     mHandleLockAndRegister( gAresGlobal->gScaleList, nil, nil, nil, "\pgAresGlobal->gScaleList");
 
     gAresGlobal->gSectorLineData = NewHandle( sizeof( long) * kMaxSectorLine * 4L + sizeof( long) *
-                    (long)kSiteCoordNum * 2L + sizeof( long) * (long)kCursorCoordNum * 2L);
+                    kSiteCoordNum * 2L + sizeof( long) * kCursorCoordNum * 2L);
     if ( gAresGlobal->gSectorLineData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 3);
@@ -231,7 +231,7 @@ void ResetInstruments( void)
     gAresGlobal->gWhichScaleNum = 0;
     gLastGlobalCorner.h = gLastGlobalCorner.v = 0;
     gAresGlobal->gMouseActive = kMouseOff;
-    l = (long *)*gAresGlobal->gScaleList;
+    l = reinterpret_cast<long *>(*gAresGlobal->gScaleList);
     for ( i = 0; i < kScaleListNum; i++)
     {
         *l = SCALE_SCALE;
@@ -252,7 +252,7 @@ void ResetInstruments( void)
     gAresGlobal->gBarIndicator[kBatteryBar].top = 103 + gAresGlobal->gInstrumentTop;
     gAresGlobal->gBarIndicator[kBatteryBar].color = SALMON;
 
-    lp = (longPointType *)*gAresGlobal->gRadarBlipData;
+    lp = reinterpret_cast<longPointType *>(*gAresGlobal->gRadarBlipData);
     for ( i = 0; i < kRadarBlipNum; i++)
     {
         lp->h = -1;
@@ -266,7 +266,7 @@ void ResetSectorLines( void)
 {
     long    *l, count;
 
-    l = (long *)*gAresGlobal->gSectorLineData;
+    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData);
 
     for ( count = 0; count < kMaxSectorLine; count++)
     {
@@ -326,7 +326,7 @@ void UpdateRadar( long unitsDone)
 
     if ( doDraw)
     {
-        lp = (longPointType *)*gAresGlobal->gRadarBlipData;
+        lp = reinterpret_cast<longPointType*>(*gAresGlobal->gRadarBlipData);
         for ( rcount = 0; rcount < kRadarBlipNum; rcount++)
         {
             if ( lp->h >= 0)
@@ -371,7 +371,7 @@ void UpdateRadar( long unitsDone)
             DrawInRealWorld();
             ChunkCopyPixMapToScreenPixMap( *offPixBase, &tRect, *thePixMapHandle);
 
-            lp = (longPointType *)*gAresGlobal->gRadarBlipData;
+            lp = reinterpret_cast<longPointType*>(*gAresGlobal->gRadarBlipData);
             for ( rcount = 0; rcount < kRadarBlipNum; rcount++)
             {
                 lp->h = -1;
@@ -379,9 +379,9 @@ void UpdateRadar( long unitsDone)
             }
             rcount = 0;
 
-            lp = (longPointType *)*gAresGlobal->gRadarBlipData;
+            lp = reinterpret_cast<longPointType*>(*gAresGlobal->gRadarBlipData);
             gAresGlobal->gRadarCount = gAresGlobal->gRadarSpeed;
-            anObject = (spaceObjectType *)*gSpaceObjectData;
+            anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
 
             for ( oCount = 0; oCount < kMaxSpaceObject; oCount++)
             {
@@ -421,7 +421,7 @@ void UpdateRadar( long unitsDone)
         {
             case kNearestFoeZoom:
             case kNearestAnythingZoom:
-                anObject = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gClosestObject;
+                anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + gAresGlobal->gClosestObject;
                 bestScale = MIN_SCALE;
                 /*
                 dx = ( (long)anObject->location.h - (long)gScrollStarObject->location.h);
@@ -439,9 +439,9 @@ void UpdateRadar( long unitsDone)
                 hugeDistance = anObject->distanceFromPlayer;
                 if ( hugeDistance.lo == 0) // if this is true, then we haven't calced its distance
                 {
-                    difference = ABS( (long)gScrollStarObject->location.h - (long)anObject->location.h);
+                    difference = ABS( implicit_cast<long>(gScrollStarObject->location.h) - implicit_cast<long>(anObject->location.h));
                     dcalc = difference;
-                    difference =  ABS( (long)gScrollStarObject->location.v - (long)anObject->location.v);
+                    difference =  ABS( implicit_cast<long>(gScrollStarObject->location.v) - implicit_cast<long>(anObject->location.v));
                     distance = difference;
 
                     if (( dcalc > kMaximumRelevantDistance) ||
@@ -501,7 +501,7 @@ void UpdateRadar( long unitsDone)
 
             case kSmallestZoom:
 //              bestScale = kSuperSmallScale;
-                anObject = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gFarthestObject;
+                anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + gAresGlobal->gFarthestObject;
                 bestScale = MIN_SCALE;
                 /*
                 dx = ( (long)anObject->location.h - (long)gScrollStarObject->location.h);
@@ -539,13 +539,13 @@ void UpdateRadar( long unitsDone)
 
         for ( x = 0; x < unitsDone; x++)
         {
-            scaleval = (long *)*gAresGlobal->gScaleList + gAresGlobal->gWhichScaleNum;
+            scaleval = reinterpret_cast<long *>(*gAresGlobal->gScaleList) + gAresGlobal->gWhichScaleNum;
             *scaleval = bestScale;
             gAresGlobal->gWhichScaleNum++;
             if ( gAresGlobal->gWhichScaleNum == kScaleListNum) gAresGlobal->gWhichScaleNum = 0;
         }
 
-        scaleval = (long *)*gAresGlobal->gScaleList;
+        scaleval = reinterpret_cast<long *>(*gAresGlobal->gScaleList);
         rcount = 0;
         for ( oCount = 0; oCount < kScaleListNum; oCount++)
         {
@@ -787,45 +787,45 @@ void EraseSite( void)
     clipRect.top = CLIP_TOP;
     clipRect.bottom = CLIP_BOTTOM;
 
-    l = (long *)*gAresGlobal->gSectorLineData + (long)kSiteCoordOffset;
-    olp = l + (long)kSiteCoordNum;
+    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + kSiteCoordOffset;
+    olp = l + kSiteCoordNum;
     sx = *(olp++) = *(l++);
     sy = *(olp++) = *(l++);
     sa = *(olp++) = *(l++);
     sb = *(olp++) = *(l++);
     sc = *(olp++) = *(l++);
     sd = *(olp++) = *(l++);
-    DrawNateLine( *offPixBase, &clipRect, (long)sa,
-                (long)sb, (long)sx, (long)sy, 0,
+    DrawNateLine( *offPixBase, &clipRect, sa,
+                sb, sx, sy, 0,
                 0, BLACK);
 
-    DrawNateLine( *offPixBase, &clipRect, (long)sc,
-                (long)sd, (long)sx, (long)sy, 0,
+    DrawNateLine( *offPixBase, &clipRect, sc,
+                sd, sx, sy, 0,
                 0, BLACK);
-    DrawNateLine( *offPixBase, &clipRect, (long)sc,
-                (long)sd, (long)sa, (long)sb, 0,
+    DrawNateLine( *offPixBase, &clipRect, sc,
+                sd, sa, sb, 0,
                 0, BLACK);
 
     // do the cursor, too
 
-    l = (long *)*gAresGlobal->gSectorLineData + (long)kCursorCoordOffset;
-    olp = l + (long)kCursorCoordNum;
+    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + kCursorCoordOffset;
+    olp = l + kCursorCoordNum;
     sx = *(olp++) = *(l++);
     sy = *(olp++) = *(l++);
 
     if ( gAresGlobal->gMouseActive)
     {
-        DrawNateLine( *offPixBase, &clipRect, (long)sx,
-                    (long)clipRect.top, (long)sx, (long)(sy - kCursorBoundsSize), 0,
+        DrawNateLine( *offPixBase, &clipRect, sx,
+                    clipRect.top, sx, (sy - kCursorBoundsSize), 0,
                     0, BLACK);
-        DrawNateLine( *offPixBase, &clipRect, (long)sx,
-                    (long)(sy + kCursorBoundsSize), (long)sx, (long)clipRect.bottom - 1, 0,
+        DrawNateLine( *offPixBase, &clipRect, sx,
+                    (sy + kCursorBoundsSize), sx, clipRect.bottom - 1, 0,
                     0, BLACK);
-        DrawNateLine( *offPixBase, &clipRect, (long)clipRect.left,
-                    (long)sy, (long)(sx - kCursorBoundsSize), (long)sy, 0,
+        DrawNateLine( *offPixBase, &clipRect, clipRect.left,
+                    sy, (sx - kCursorBoundsSize), sy, 0,
                     0, BLACK);
-        DrawNateLine( *offPixBase, &clipRect, (long)(sx + kCursorBoundsSize),
-                    (long)sy, (long)clipRect.right - 1, (long)sy, 0,
+        DrawNateLine( *offPixBase, &clipRect, (sx + kCursorBoundsSize),
+                    sy, clipRect.right - 1, sy, 0,
                     0, BLACK);
     }
 }
@@ -843,7 +843,7 @@ void EraseSectorLines( void)
     clipRect.top = CLIP_TOP;
     clipRect.bottom = CLIP_BOTTOM;
 
-    l = (long *)*gAresGlobal->gSectorLineData;
+    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData);
     count = 0;
 
     while (( *l != -1) && ( count < kMaxSectorLine))
@@ -857,7 +857,7 @@ void EraseSectorLines( void)
         count++;
     }
 
-    l = (long *)*gAresGlobal->gSectorLineData + ((long)kMaxSectorLine << 1L);
+    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + (kMaxSectorLine << 1L);
     count = 0;
 
     while (( *l != -1) && ( count < kMaxSectorLine))
@@ -927,8 +927,8 @@ void DrawSite( void)
         mGetTranslateColorShade( PALE_GREEN, MEDIUM, color, transColor);
         if ( doDraw)
         {
-            DrawNateLine( *offPixBase, &clipRect, (long)(sx + sa),
-                    (long)(sy + sb), (long)sx, (long)sy, 0,
+            DrawNateLine( *offPixBase, &clipRect, (sx + sa),
+                    (sy + sb), sx, sy, 0,
                     0, color);
         }
 
@@ -944,22 +944,22 @@ void DrawSite( void)
 
         if ( doDraw)
         {
-            DrawNateLine( *offPixBase, &clipRect, (long)(sx + sc),
-                    (long)(sy + sd), (long)sx, (long)sy, 0,
+            DrawNateLine( *offPixBase, &clipRect, (sx + sc),
+                    (sy + sd), sx, sy, 0,
                     0, color);
             mGetTranslateColorShade( PALE_GREEN, DARKER+kSlightlyDarkerColor, color, transColor);
-            DrawNateLine( *offPixBase, &clipRect, (long)(sx + sc),
-                    (long)(sy + sd), (long)(sx + sa), (long)(sy + sb), 0,
+            DrawNateLine( *offPixBase, &clipRect, (sx + sc),
+                    (sy + sd), (sx + sa), (sy + sb), 0,
                     0, color);
         }
 
-        l = (long *)*gAresGlobal->gSectorLineData + (long)kSiteCoordOffset;
-        *(l++) = (long)sx;
-        *(l++) = (long)sy;
-        *(l++) = (long)(sx + sa);
-        *(l++) = (long)(sy + sb);
-        *(l++) = (long)(sx + sc);
-        *(l++) = (long)(sy + sd);
+        l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + kSiteCoordOffset;
+        *(l++) = sx;
+        *(l++) = sy;
+        *(l++) = (sx + sa);
+        *(l++) = (sy + sb);
+        *(l++) = (sx + sc);
+        *(l++) = (sy + sd);
     }
 
     // do the cursor, too
@@ -985,7 +985,7 @@ void DrawSite( void)
 //      ShowSpriteCursor( true);
     }
 
-    l = (long *)*gAresGlobal->gSectorLineData + (long)kCursorCoordOffset;
+    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + kCursorCoordOffset;
     sx = *(l++) = cursorCoord.h;
     sy = *(l++) = cursorCoord.v;
 
@@ -998,17 +998,17 @@ void DrawSite( void)
     if ( gAresGlobal->gMouseActive > kMouseTurningOff)
     {
         mGetTranslateColorShade( SKY_BLUE, MEDIUM, color, transColor);
-        DrawNateLine( *offPixBase, &clipRect, (long)sx,
-                    (long)clipRect.top, (long)sx, (long)(sy - kCursorBoundsSize), 0,
+        DrawNateLine( *offPixBase, &clipRect, sx,
+                    clipRect.top, sx, (sy - kCursorBoundsSize), 0,
                     0, color);
-        DrawNateLine( *offPixBase, &clipRect, (long)sx,
-                    (long)(sy + kCursorBoundsSize), (long)sx, (long)clipRect.bottom - 1, 0,
+        DrawNateLine( *offPixBase, &clipRect, sx,
+                    (sy + kCursorBoundsSize), sx, clipRect.bottom - 1, 0,
                     0, color);
-        DrawNateLine( *offPixBase, &clipRect, (long)clipRect.left,
-                    (long)sy, (long)(sx - kCursorBoundsSize), (long)sy, 0,
+        DrawNateLine( *offPixBase, &clipRect, clipRect.left,
+                    sy, (sx - kCursorBoundsSize), sy, 0,
                     0, color);
-        DrawNateLine( *offPixBase, &clipRect, (long)(sx + kCursorBoundsSize),
-                    (long)sy, (long)clipRect.right - 1, (long)sy, 0,
+        DrawNateLine( *offPixBase, &clipRect, (sx + kCursorBoundsSize),
+                    sy, clipRect.right - 1, sy, 0,
                     0, color);
     }
 }
@@ -1058,14 +1058,14 @@ void DrawSectorLines( void)
     x = size - x;
 
     division = gGlobalCorner.h + x;
-    division >>= (unsigned long)kSubSectorShift;
+    division >>= kSubSectorShift;
     division &= 0x0000000f;
 
     x *= gAbsoluteScale;
     x >>= SHIFT_SCALE;
     x += CLIP_LEFT;
 
-    l = (long *)*gAresGlobal->gSectorLineData;
+    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData);
     if ( doDraw)
     {
         while (( x < CLIP_RIGHT) && ( h > 0))
@@ -1136,14 +1136,14 @@ void DrawSectorLines( void)
     x = size - x;
 
     division = gGlobalCorner.v + x;
-    division >>= (unsigned long)kSubSectorShift;
+    division >>= kSubSectorShift;
     division &= 0x0000000f;
 
     x *= gAbsoluteScale;
     x >>= SHIFT_SCALE;
     x += CLIP_TOP;
 
-    l = (long *)*gAresGlobal->gSectorLineData + ((long)kMaxSectorLine << 1L);
+    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + (kMaxSectorLine << 1L);
 
     if ( doDraw)
     {
@@ -1236,7 +1236,7 @@ void ShowSite( void)
     clipRect.top = CLIP_TOP;
     clipRect.bottom = CLIP_BOTTOM;
 
-    l = (long *)*gAresGlobal->gSectorLineData + (long)kSiteCoordOffset;
+    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + kSiteCoordOffset;
     sx = *(l++);
     sy = *(l++);
     sa = *(l++);
@@ -1244,14 +1244,14 @@ void ShowSite( void)
     sc = *(l++);
     sd = *(l++);
 
-    CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, (long)sa,
-                (long)sb, (long)sx, (long)sy,
+    CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, sa,
+                sb, sx, sy,
                 gNatePortLeft << 2L, gNatePortTop);
-    CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, (long)sc,
-                (long)sd, (long)sx, (long)sy,
+    CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, sc,
+                sd, sx, sy,
                 gNatePortLeft << 2L, gNatePortTop);
-    CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, (long)sc,
-                (long)sd, (long)sa, (long)sb,
+    CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, sc,
+                sd, sa, sb,
                 gNatePortLeft << 2L, gNatePortTop);
 
     sx = *(l++);
@@ -1260,27 +1260,27 @@ void ShowSite( void)
     sb = *(l++);
     sc = *(l++);
     sd = *(l++);
-    CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, (long)sa,
-                (long)sb, (long)sx, (long)sy,
+    CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, sa,
+                sb, sx, sy,
                 gNatePortLeft << 2L, gNatePortTop);
-    CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, (long)sc,
-                (long)sd, (long)sx, (long)sy,
+    CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, sc,
+                sd, sx, sy,
                 gNatePortLeft << 2L, gNatePortTop);
-    CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, (long)sc,
-                (long)sd, (long)sa, (long)sb,
+    CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, sc,
+                sd, sa, sb,
                 gNatePortLeft << 2L, gNatePortTop);
 
-    l = (long *)*gAresGlobal->gSectorLineData + (long)kCursorCoordOffset;
+    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + kCursorCoordOffset;
     sx = *(l++);
     sy = *(l++);
 
     if ( gAresGlobal->gMouseActive > kMouseTurningOff)
     {
-        CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, (long)sx,
-                    (long)clipRect.top, (long)sx, (long)clipRect.bottom - 1,
+        CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, sx,
+                    clipRect.top, sx, clipRect.bottom - 1,
                     gNatePortLeft << 2L, gNatePortTop);
-        CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, (long)clipRect.left,
-                    (long)sy, (long)clipRect.right - 1, (long)sy,
+        CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, clipRect.left,
+                    sy, clipRect.right - 1, sy,
                     gNatePortLeft << 2L, gNatePortTop);
     }
 
@@ -1289,17 +1289,17 @@ void ShowSite( void)
 
     if ( gAresGlobal->gMouseActive)
     {
-        CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, (long)sx,
-                    (long)clipRect.top, (long)sx, (long)(sy - kCursorBoundsSize),
+        CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, sx,
+                    clipRect.top, sx, (sy - kCursorBoundsSize),
                     gNatePortLeft << 2L, gNatePortTop);
-        CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, (long)sx,
-                    (long)(sy + kCursorBoundsSize), (long)sx, (long)clipRect.bottom - 1,
+        CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, sx,
+                    (sy + kCursorBoundsSize), sx, clipRect.bottom - 1,
                     gNatePortLeft << 2L, gNatePortTop);
-        CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, (long)clipRect.left,
-                    (long)sy, (long)(sx - kCursorBoundsSize), (long)sy,
+        CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, clipRect.left,
+                    sy, (sx - kCursorBoundsSize), sy,
                     gNatePortLeft << 2L, gNatePortTop);
-        CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, (long)(sx + kCursorBoundsSize),
-                    (long)sy, (long)clipRect.right - 1, (long)sy,
+        CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, (sx + kCursorBoundsSize),
+                    sy, clipRect.right - 1, sy,
                     gNatePortLeft << 2L, gNatePortTop);
         if ( gAresGlobal->gMouseActive == kMouseTurningOff) gAresGlobal->gMouseActive = kMouseOff;
     }
@@ -1318,7 +1318,7 @@ void ShowSectorLines( void)
     clipRect.top = CLIP_TOP;
     clipRect.bottom = CLIP_BOTTOM;
 
-    l = (long *)*gAresGlobal->gSectorLineData;
+    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData);
     count = 0;
 
     while ( count < kMaxSectorLine)
@@ -1334,7 +1334,7 @@ void ShowSectorLines( void)
         count++;
     }
 
-    l = (long *)*gAresGlobal->gSectorLineData + ((long)kMaxSectorLine << 1L);
+    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + (kMaxSectorLine << 1L);
     count = 0;
 
     while ( count < kMaxSectorLine)
@@ -1359,7 +1359,7 @@ void InstrumentsHandleClick( void)
     Point   where;
     long    *l;
 
-    l = (long *)*gAresGlobal->gSectorLineData + (long)kCursorCoordOffset;
+    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + kCursorCoordOffset;
     where.h = *(l++);
     where.v = *(l++);
 
@@ -1374,7 +1374,7 @@ void InstrumentsHandleDoubleClick( void)
     Point   where;
     long    *l;
 
-    l = (long *)*gAresGlobal->gSectorLineData + (long)kCursorCoordOffset;
+    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + kCursorCoordOffset;
     where.h = *(l++);
     where.v = *(l++);
 
@@ -1389,7 +1389,7 @@ void InstrumentsHandleMouseUp( void)
     Point   where;
     long    *l;
 
-    l = (long *)*gAresGlobal->gSectorLineData + (long)kCursorCoordOffset;
+    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + kCursorCoordOffset;
     where.h = *(l++);
     where.v = *(l++);
 
@@ -1402,7 +1402,7 @@ void InstrumentsHandleMouseStillDown( void)
     Point   where;
     long    *l;
 
-    l = (long *)*gAresGlobal->gSectorLineData + (long)kCursorCoordOffset;
+    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + kCursorCoordOffset;
     where.h = *(l++);
     where.v = *(l++);
 
@@ -1441,7 +1441,7 @@ void DrawArbitrarySectorLines( coordPointType *corner, long scale, long minSecto
     x = size - x;
 
     division = corner->h + x;
-    division >>= (unsigned long)kSubSectorShift;
+    division >>= kSubSectorShift;
     division &= 0x0000000f;
 
     x *= scale;
@@ -1473,7 +1473,7 @@ void DrawArbitrarySectorLines( coordPointType *corner, long scale, long minSecto
     x = size - x;
 
     division = corner->v + x;
-    division >>= (unsigned long)kSubSectorShift;
+    division >>= kSubSectorShift;
     division &= 0x0000000f;
 
     x *= scale;
@@ -1538,7 +1538,7 @@ void GetArbitrarySingleSectorBounds( coordPointType *corner, coordPointType *loc
     x = size - x;
 
     division = corner->h + x;
-    division >>= (unsigned long)kSubSectorShift;
+    division >>= kSubSectorShift;
     division &= 0x0000000f;
 
     x *= scale;
@@ -1566,7 +1566,7 @@ void GetArbitrarySingleSectorBounds( coordPointType *corner, coordPointType *loc
     x = size - x;
 
     division = corner->v + x;
-    division >>= (unsigned long)kSubSectorShift;
+    division >>= kSubSectorShift;
     division &= 0x0000000f;
 
     x *= scale;
@@ -1607,7 +1607,7 @@ void UpdateBarIndicator( short which, long value, long max, PixMapHandle pixMap)
         gAresGlobal->gBarIndicator[ which].lastValue = gAresGlobal->gBarIndicator[ which].thisValue;
         if ( max > 0)
         {
-            graphicValue = (long)kBarIndicatorHeight * value;
+            graphicValue = kBarIndicatorHeight * value;
             graphicValue /= max;
             if ( graphicValue < 0) graphicValue = 0;
             if ( graphicValue > kBarIndicatorHeight) graphicValue = kBarIndicatorHeight;
@@ -1641,7 +1641,7 @@ void UpdateBarIndicator( short which, long value, long max, PixMapHandle pixMap)
         }
         SetRect( &rrect, tRect.left, gAresGlobal->gBarIndicator[ which].top,
             tRect.right, gAresGlobal->gBarIndicator[ which].top + kBarIndicatorHeight);
-        CopyRealWorldToOffWorld( (WindowPtr)gTheWindow, &rrect);
+        CopyRealWorldToOffWorld( gTheWindow, &rrect);
 
         gAresGlobal->gBarIndicator[ which].thisValue = value;
     }

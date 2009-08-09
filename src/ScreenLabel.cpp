@@ -66,7 +66,7 @@ int ScreenLabelInit( void)
 
 {
 #ifdef kUseLabels
-    gAresGlobal->gScreenLabelData = NewHandle( sizeof( screenLabelType) * (long)kMaxLabelNum);
+    gAresGlobal->gScreenLabelData = NewHandle( sizeof( screenLabelType) * kMaxLabelNum);
     if ( gAresGlobal->gScreenLabelData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
@@ -93,7 +93,7 @@ void ResetAllLabels( void)
     screenLabelType *label;
     short           i;
 
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData;
+    label = reinterpret_cast<screenLabelType*>(*gAresGlobal->gScreenLabelData);
 
     for ( i = 0; i < kMaxLabelNum; i++)
     {
@@ -136,7 +136,7 @@ short AddScreenLabel( short h, short v, short hoff, short voff, const unsigned c
     unsigned char   *getwidchar, *getwidwid;
     Str255          tString;
 
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData;
+    label = reinterpret_cast<screenLabelType*>(*gAresGlobal->gScreenLabelData);
     while (( whichLabel < kMaxLabelNum) && ( label->active)) { label++; whichLabel++;}
     if ( whichLabel >= kMaxLabelNum) return ( -1);  // no free label
 
@@ -166,7 +166,7 @@ short AddScreenLabel( short h, short v, short hoff, short voff, const unsigned c
 
     if ( string != nil)
     {
-        CopyPString( (unsigned char *)label->label, (unsigned char *)string);
+        CopyPString(label->label, string);
         RecalcScreenLabelSize( whichLabel);
 
 /*      mSetDirectFont( kTacticalFontNum)
@@ -211,7 +211,7 @@ void RemoveScreenLabel( long which)
 #ifdef kUseLabels
     screenLabelType *label;
 
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
+    label = reinterpret_cast<screenLabelType*>(*gAresGlobal->gScreenLabelData) + which;
 
     MacSetRect( &(label->thisRect), 0, 0, -1, -1);
     label->lastRect = label->thisRect;
@@ -233,7 +233,7 @@ void EraseAllLabels( void)
 
     savePixBase = GetGWorldPixMap( gSaveWorld);
     offPixBase = GetGWorldPixMap( gOffWorld);
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData;
+    label = reinterpret_cast<screenLabelType*>(*gAresGlobal->gScreenLabelData);
     for ( i = 0; i < kMaxLabelNum; i++)
     {
         if (( label->active) && ( label->visibleState >= 0))
@@ -266,7 +266,7 @@ void DrawAllLabels( void)
 
     mSetDirectFont( kTacticalFontNum);
 
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData;
+    label = reinterpret_cast<screenLabelType*>(*gAresGlobal->gScreenLabelData);
     SetLongRect( &clipRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
     offPixBase = GetGWorldPixMap( gOffWorld);
     for ( i = 0; i < kMaxLabelNum; i++)
@@ -366,7 +366,7 @@ void ShowAllLabels( void)
     screenLabelType *label;
     PixMapHandle    pixMap;
 
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData;
+    label = reinterpret_cast<screenLabelType*>(*gAresGlobal->gScreenLabelData);
     pixMap = GetGWorldPixMap( gOffWorld);
     for ( i = 0; i < kMaxLabelNum; i++)
     {
@@ -416,7 +416,7 @@ void SetScreenLabelPosition( long which, short h, short v)
 #ifdef kUseLabels
     screenLabelType *label;
 
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
+    label = reinterpret_cast<screenLabelType*>(*gAresGlobal->gScreenLabelData) + which;
     label->where.h = h + label->offset.h;
     label->where.v = v + label->offset.v;
 #endif
@@ -432,7 +432,7 @@ void UpdateAllLabelPositions( long unitsDone)
     Boolean         isOffScreen = FALSE;
     Point           source, dest;
 
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData;
+    label = reinterpret_cast<screenLabelType*>(*gAresGlobal->gScreenLabelData);
     for ( i = 0; i < kMaxLabelNum; i++)
     {
         if (( label->active) && ( !label->killMe))
@@ -584,7 +584,7 @@ void SetScreenLabelObject( long which, spaceObjectType *object)
     screenLabelType *label;
 //  smallFixedType  f;
 
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
+    label = reinterpret_cast<screenLabelType*>(*gAresGlobal->gScreenLabelData) + which;
     label->object = object;
 
     if ( label->object != nil)
@@ -612,7 +612,7 @@ void SetScreenLabelAge( long which, long age)
 #ifdef kUseLabels
     screenLabelType *label;
 
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
+    label = reinterpret_cast<screenLabelType*>(*gAresGlobal->gScreenLabelData) + which;
     label->age = age;
         label->visibleState = 1;
 //  else label->visibleState = 0;
@@ -627,14 +627,14 @@ void SetScreenLabelString( long which, const unsigned char *string)
     unsigned char   *getwidchar, *getwidwid;
     long            strlen;
 
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
+    label = reinterpret_cast<screenLabelType*>(*gAresGlobal->gScreenLabelData) + which;
     if ( string == nil)
     {
         *(label->label) = 0;
         label->width = label->height = 0;
     } else
     {
-        CopyPString( (unsigned char *)label->label, (unsigned char *)string);
+        CopyPString(label->label, string);
 //      mSetDirectFont( kTacticalFontNum)
 //      mGetDirectStringDimensions( label->label, label->width, label->height, strlen, getwidchar, getwidwid)
         RecalcScreenLabelSize( which);
@@ -648,7 +648,7 @@ void SetScreenLabelColor( long which, unsigned char color)
 #ifdef kUseLabels
     screenLabelType *label;
 
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
+    label = reinterpret_cast<screenLabelType*>(*gAresGlobal->gScreenLabelData) + which;
     label->color = color;
 #endif
 }
@@ -659,7 +659,7 @@ void SetScreenLabelKeepOnScreenAnyway( long which, Boolean keepOnScreenAnyway)
 #ifdef kUseLabels
     screenLabelType *label;
 
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
+    label = reinterpret_cast<screenLabelType*>(*gAresGlobal->gScreenLabelData) + which;
     label->keepOnScreenAnyway = keepOnScreenAnyway;
     label->retroCount = 0;
 #endif
@@ -671,7 +671,7 @@ void SetScreenLabelAttachedHintLine( long which, Boolean attachedHintLine, Point
 #ifdef kUseLabels
     screenLabelType *label;
 
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
+    label = reinterpret_cast<screenLabelType*>(*gAresGlobal->gScreenLabelData) + which;
     if ( label->attachedHintLine) HideHintLine();
     label->attachedHintLine = attachedHintLine;
     label->attachedToWhere = toWhere;
@@ -684,7 +684,7 @@ void SetScreenLabelOffset( long which, long hoff, long voff)
 #ifdef kUseLabels
     screenLabelType *label;
 
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
+    label = reinterpret_cast<screenLabelType*>(*gAresGlobal->gScreenLabelData) + which;
     label->offset.h = hoff;
     label->offset.v = voff;
 
@@ -696,7 +696,7 @@ long GetScreenLabelWidth( long which)
 #ifdef kUseLabels
     screenLabelType *label;
 
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
+    label = reinterpret_cast<screenLabelType*>(*gAresGlobal->gScreenLabelData) + which;
 
     return ( label->width);
 
@@ -708,7 +708,7 @@ anyCharType *GetScreenLabelStringPtr( long which)
 #ifdef kUseLabels
     screenLabelType *label;
 
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
+    label = reinterpret_cast<screenLabelType*>(*gAresGlobal->gScreenLabelData) + which;
     return( label->label);
 #else
     return( nil);
@@ -723,7 +723,7 @@ void RecalcScreenLabelSize( long which) // do this if you mess with its string
     long            strlen, lineNum, i, maxWidth;
     Str255          tString;
 
-    label = (screenLabelType *)*gAresGlobal->gScreenLabelData + which;
+    label = reinterpret_cast<screenLabelType*>(*gAresGlobal->gScreenLabelData) + which;
     mSetDirectFont( kTacticalFontNum);
 //  mGetDirectStringDimensions( label->label, label->width, label->height, strlen, getwidchar, getwidwid)
 
@@ -766,12 +766,12 @@ void ResolveScreenLabels( Handle labelData)
 
 //  WriteDebugLine((char *)"\pLabel CB");
 
-    label = (screenLabelType *)*labelData;
+    label = reinterpret_cast<screenLabelType*>(*labelData);
 
     for ( i = 0; i < kMaxLabelNum; i++)
     {
         if (( label->object != nil) && ( label->whichObject != kNoShip))
-            label->object = (spaceObjectType *)*gSpaceObjectData + label->whichObject;
+            label->object = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + label->whichObject;
         label++;
     }
 }

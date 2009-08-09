@@ -191,7 +191,7 @@ void DrawNateRect( PixMap *destPix, longRect *destRect, long hoff, long voff, un
         if ( rightBytes < destRect->right) rightBytes = destRect->right - rightBytes;
         else rightBytes = 0;
 
-        dbyte = (unsigned char *)destPix->baseAddr + (destRect->top + voff) * drowPlus +
+        dbyte = reinterpret_cast<unsigned char *>(destPix->baseAddr) + (destRect->top + voff) * drowPlus +
                     destRect->left + hoff;
 
         drowPlus = drowPlus - (destRect->right - destRect->left);
@@ -212,7 +212,7 @@ void DrawNateRect( PixMap *destPix, longRect *destRect, long hoff, long voff, un
                 *dbyte++ = color;
             }
 
-            dlong = (long *)dbyte;
+            dlong = reinterpret_cast<long *>(dbyte);
             x = right;
             while ( x-- > 0)
             {
@@ -222,7 +222,7 @@ void DrawNateRect( PixMap *destPix, longRect *destRect, long hoff, long voff, un
                 *dlong++ = colorlong;
             }
 
-            dbyte = (unsigned char *)dlong;
+            dbyte = reinterpret_cast<unsigned char *>(dlong);
             x = rightBytes;
             while ( x-- > 0)
             {
@@ -236,7 +236,7 @@ void DrawNateRect( PixMap *destPix, longRect *destRect, long hoff, long voff, un
         }
     } else
     {
-        dbyte = (unsigned char *)destPix->baseAddr + (destRect->top + voff) * drowPlus +
+        dbyte = reinterpret_cast<unsigned char *>(destPix->baseAddr) + (destRect->top + voff) * drowPlus +
                     destRect->left + hoff;
 
         drowPlus = drowPlus - leftBytes;
@@ -326,7 +326,7 @@ void DrawNateRectVScan( PixMap *destPix, longRect *destRect, long hoff, long vof
         if ( rightBytes < destRect->right) rightBytes = destRect->right - rightBytes;
         else rightBytes = 0;
 
-        dbyte = (unsigned char *)destPix->baseAddr + (destRect->top + voff) * drowPlus +
+        dbyte = reinterpret_cast<unsigned char *>(destPix->baseAddr) + (destRect->top + voff) * drowPlus +
                     destRect->left + hoff;
 
         drowPlus = drowPlus - (destRect->right - destRect->left);
@@ -350,7 +350,7 @@ void DrawNateRectVScan( PixMap *destPix, longRect *destRect, long hoff, long vof
             }
             leftMask ^= leftMaskReset;
 
-            dlong = (long *)dbyte;
+            dlong = reinterpret_cast<long *>(dbyte);
             x = right;
             while ( x-- > 0)
             {
@@ -363,7 +363,7 @@ void DrawNateRectVScan( PixMap *destPix, longRect *destRect, long hoff, long vof
             longMask ^= 0xffffffff;
             rightMask = longMask & 0x000000ff;
 
-            dbyte = (unsigned char *)dlong;
+            dbyte = reinterpret_cast<unsigned char *>(dlong);
             x = rightBytes;
             while ( x-- > 0)
             {
@@ -379,7 +379,7 @@ void DrawNateRectVScan( PixMap *destPix, longRect *destRect, long hoff, long vof
         }
     } else
     {
-        dbyte = (unsigned char *)destPix->baseAddr + (destRect->top + voff) * drowPlus +
+        dbyte = reinterpret_cast<unsigned char *>(destPix->baseAddr) + (destRect->top + voff) * drowPlus +
                     destRect->left + hoff;
 
         drowPlus = drowPlus - leftBytes;
@@ -451,7 +451,7 @@ void DrawNateRectClipped( PixMap *destPix, longRect *destRect, longRect *clipRec
         if ( rightBytes < destRect->right) rightBytes = destRect->right - rightBytes;
         else rightBytes = 0;
 
-        dbyte = (unsigned char *)destPix->baseAddr + (destRect->top + voff) * drowPlus +
+        dbyte = reinterpret_cast<unsigned char *>(destPix->baseAddr) + (destRect->top + voff) * drowPlus +
                     destRect->left + hoff;
 
         drowPlus = drowPlus - (destRect->right - destRect->left);
@@ -472,7 +472,7 @@ void DrawNateRectClipped( PixMap *destPix, longRect *destRect, longRect *clipRec
                 *dbyte++ = color;
             }
 
-            dlong = (long *)dbyte;
+            dlong = reinterpret_cast<long *>(dbyte);
             x = right;
             while ( x-- > 0)
             {
@@ -482,7 +482,7 @@ void DrawNateRectClipped( PixMap *destPix, longRect *destRect, longRect *clipRec
                 *dlong++ = colorlong;
             }
 
-            dbyte = (unsigned char *)dlong;
+            dbyte = reinterpret_cast<unsigned char *>(dlong);
             x = rightBytes;
             while ( x-- > 0)
             {
@@ -496,7 +496,7 @@ void DrawNateRectClipped( PixMap *destPix, longRect *destRect, longRect *clipRec
         }
     } else
     {
-        dbyte = (unsigned char *)destPix->baseAddr + (destRect->top + voff) * drowPlus +
+        dbyte = reinterpret_cast<unsigned char *>(destPix->baseAddr) + (destRect->top + voff) * drowPlus +
                     destRect->left + hoff;
 
         drowPlus = drowPlus - leftBytes;
@@ -568,7 +568,7 @@ void DrawNateRectVScanClipped( PixMap *destPix, longRect *destRect, longRect *cl
         if ( rightBytes < destRect->right) rightBytes = destRect->right - rightBytes;
         else rightBytes = 0;
 
-        dbyte = (unsigned char *)destPix->baseAddr + (destRect->top + voff) * drowPlus +
+        dbyte = reinterpret_cast<unsigned char *>(destPix->baseAddr) + (destRect->top + voff) * drowPlus +
                     destRect->left + hoff;
 
         drowPlus = drowPlus - (destRect->right - destRect->left);
@@ -590,7 +590,7 @@ void DrawNateRectVScanClipped( PixMap *destPix, longRect *destRect, longRect *cl
                 *dbyte++ = color;
             }
 
-            dlong = (long *)dbyte;
+            dlong = reinterpret_cast<long *>(dbyte);
             x = right;
             while ( x-- > 0)
             {
@@ -600,7 +600,7 @@ void DrawNateRectVScanClipped( PixMap *destPix, longRect *destRect, longRect *cl
                 *dlong++ = colorlong;
             }
 
-            dbyte = (unsigned char *)dlong;
+            dbyte = reinterpret_cast<unsigned char *>(dlong);
             x = rightBytes;
             while ( x-- > 0)
             {
@@ -614,7 +614,7 @@ void DrawNateRectVScanClipped( PixMap *destPix, longRect *destRect, longRect *cl
         }
     } else
     {
-        dbyte = (unsigned char *)destPix->baseAddr + (destRect->top + voff) * drowPlus +
+        dbyte = reinterpret_cast<unsigned char *>(destPix->baseAddr) + (destRect->top + voff) * drowPlus +
                     destRect->left + hoff;
 
         drowPlus = drowPlus - leftBytes;
@@ -679,7 +679,7 @@ void DrawNateTriangleUpClipped( PixMap *destPix, longRect *destRect,
 
     if ( trueWidth == 0)
     {
-        dbyte = (unsigned char *)destPix->baseAddr + ((destRect->top + voff) *
+        dbyte = reinterpret_cast<unsigned char *>(destPix->baseAddr) + ((destRect->top + voff) *
             drowPlus) + destRect->left + hoff;
         *dbyte = color;
         return;
@@ -687,7 +687,7 @@ void DrawNateTriangleUpClipped( PixMap *destPix, longRect *destRect,
 
     leftEdge = 0;
     x = rightPlus = trueWidth - 1;
-    dbyte = (unsigned char *)destPix->baseAddr + ((destRect->top + voff) *
+    dbyte = reinterpret_cast<unsigned char *>(destPix->baseAddr) + ((destRect->top + voff) *
         drowPlus) + destRect->left + hoff;
     drowPlus -= rightPlus;
     while ( x >= 0)
@@ -781,7 +781,7 @@ void DrawNatePlusClipped( PixMap *destPix, longRect *destRect,
 
     if ( trueWidth == 0)
     {
-        dbyte = (unsigned char *)destPix->baseAddr + ((destRect->top + voff) *
+        dbyte = reinterpret_cast<unsigned char *>(destPix->baseAddr) + ((destRect->top + voff) *
             drowPlus) + destRect->left + hoff;
         *dbyte = color;
         return;
@@ -790,9 +790,9 @@ void DrawNatePlusClipped( PixMap *destPix, longRect *destRect,
     if ( !(trueWidth & 0x00000001)) trueWidth--;
     if ( trueWidth < 3)
     {
-        half = (trueWidth >> (long)1) + 1;
+        half = (trueWidth >> 1) + 1;
 
-        dbyte = (unsigned char *)destPix->baseAddr + ((destRect->top + voff) *
+        dbyte = reinterpret_cast<unsigned char *>(destPix->baseAddr) + ((destRect->top + voff) *
             drowPlus) + destRect->left + hoff + half;
 
         x = 1;
@@ -819,9 +819,9 @@ void DrawNatePlusClipped( PixMap *destPix, longRect *destRect,
         }
     } else
     {
-        half = (trueWidth >> (long)1) + 1;
+        half = (trueWidth >> 1) + 1;
 
-        dbyte = (unsigned char *)destPix->baseAddr + ((destRect->top + voff) *
+        dbyte = reinterpret_cast<unsigned char *>(destPix->baseAddr) + ((destRect->top + voff) *
             drowPlus) + destRect->left + hoff + half - 1;
 
         x = 2;
@@ -894,13 +894,13 @@ void DrawNateSquareClipped( PixMap *destPix, longRect *destRect,
 
     if ( trueWidth == 0)
     {
-        dbyte = (unsigned char *)destPix->baseAddr + ((destRect->top + voff) *
+        dbyte = reinterpret_cast<unsigned char *>(destPix->baseAddr) + ((destRect->top + voff) *
             drowPlus) + destRect->left + hoff;
         *dbyte = color;
         return;
     }
 
-    dbyte = (unsigned char *)destPix->baseAddr + ((destRect->top + voff) *
+    dbyte = reinterpret_cast<unsigned char *>(destPix->baseAddr) + ((destRect->top + voff) *
         drowPlus) + destRect->left + hoff;
 
     rightPlus = trueWidth;
@@ -981,16 +981,16 @@ void DrawNateDiamondClipped( PixMap *destPix, longRect *destRect,
 
     if ( trueWidth == 0)
     {
-        dbyte = (unsigned char *)destPix->baseAddr + ((destRect->top + voff) *
+        dbyte = reinterpret_cast<unsigned char *>(destPix->baseAddr) + ((destRect->top + voff) *
             drowPlus) + destRect->left + hoff;
         *dbyte = color;
         return;
     }
 
-    leftEdge = (trueWidth >> (long)1) + (trueWidth & 1);
-    rightPlus = ((trueWidth >> (long)1) + 1) - leftEdge;
+    leftEdge = (trueWidth >> 1) + (trueWidth & 1);
+    rightPlus = ((trueWidth >> 1) + 1) - leftEdge;
 
-    dbyte = (unsigned char *)destPix->baseAddr + ((destRect->top + voff) *
+    dbyte = reinterpret_cast<unsigned char *>(destPix->baseAddr) + ((destRect->top + voff) *
         drowPlus) + destRect->left + hoff + leftEdge;
     drowPlus -= rightPlus + 1;
     while ( leftEdge > 0)
@@ -1008,7 +1008,7 @@ void DrawNateDiamondClipped( PixMap *destPix, longRect *destRect,
         leftEdge--;
     }
     dbyte++;
-    leftEdge = (trueWidth >> (long)1) + (trueWidth & 1);
+    leftEdge = (trueWidth >> 1) + (trueWidth & 1);
     drowPlus += 4;
     rightPlus -= 2;
     if ( trueWidth & 0x1)
@@ -1461,7 +1461,7 @@ void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
 
     // Point to the bitmap address first pixel to draw
     drowPlus = destPix->rowBytes & 0x3fff;
-    dbyte = (unsigned char *)destPix->baseAddr + (YStart + voff) * drowPlus +
+    dbyte = reinterpret_cast<unsigned char *>(destPix->baseAddr) + (YStart + voff) * drowPlus +
                 XStart + hoff;
 
     // Figure out whether we're going left or right, and how far we're
@@ -1767,11 +1767,11 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
 
     // Point to the bitmap address first pixel to draw
     drowPlus = destPix->rowBytes & 0x3fff;
-    dbyte = (unsigned char *)destPix->baseAddr + (YStart + voff) * drowPlus +
+    dbyte = reinterpret_cast<unsigned char *>(destPix->baseAddr) + (YStart + voff) * drowPlus +
                 XStart + hoff;
 
     srowPlus = sourcePix->rowBytes & 0x3fff;
-    sbyte = (unsigned char *)sourcePix->baseAddr + (YStart) * srowPlus + XStart;
+    sbyte = reinterpret_cast<unsigned char *>(sourcePix->baseAddr) + (YStart) * srowPlus + XStart;
 
     // Figure out whether we're going left or right, and how far we're
     // going horizontally
@@ -2121,7 +2121,7 @@ void DashNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
 
     // Point to the bitmap address first pixel to draw
     drowPlus = destPix->rowBytes & 0x3fff;
-    dbyte = (unsigned char *)destPix->baseAddr + (YStart + voff) * drowPlus +
+    dbyte = reinterpret_cast<unsigned char *>(destPix->baseAddr) + (YStart + voff) * drowPlus +
                 XStart + hoff;
 
     // Figure out whether we're going left or right, and how far we're

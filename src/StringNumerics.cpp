@@ -41,15 +41,15 @@ void SmallFixedToString( smallFixedType f, Str255 s)
     }
     l = mFixedToLong( f);
     LongToString( l, tstring);
-    ConcatenatePString( (unsigned char *)s, (unsigned char *)tstring);
+    ConcatenatePString(s, tstring);
     charnum = s[0] + 1;
     s[0] = charnum;
     s[charnum] = '.';
     
     tf = mLongToFixed( l);
     tf = f - tf;
-    tfloat = (float)tf;
-    tfloat /= (float)256;
+    tfloat = tf;
+    tfloat /= 256;
 //  tfloat += .0019531;
     
 /*  tfloat *= 100;
@@ -117,15 +117,15 @@ smallFixedType StringToSmallFixed( Str255 s)
         {
             if ( !seenDecimal)
             {
-                value *= (float)10;
-                value += (float)(s[charnum] - '0');
+                value *= 10;
+                value += (s[charnum] - '0');
             } else
             {
                 tfloat = s[charnum] - '0';
                 tfloat /= divider;
                 value += tfloat;
 //              value += (float)(s[charnum] - '0') / divider;
-                divider *= (float)10;
+                divider *= 10;
             }
         }
         charnum++;
@@ -199,7 +199,7 @@ double StringToDouble( StringPtr s)
     
     while ( c <= s[0])
     {
-        result = result + (double)(s[c] - '0') / decimalPlace;
+        result = result + (s[c] - '0') / decimalPlace;
         decimalPlace *= 10;
         c++;
     }
@@ -253,7 +253,7 @@ void HexStringToNum( Str255 s, unsigned long *l)
         }
         strlen--;
         c++;
-        if ( strlen > 0) *l <<= (long)4;
+        if ( strlen > 0) *l <<= 4;
     }
 }
 

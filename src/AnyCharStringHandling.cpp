@@ -18,6 +18,7 @@
 // AnyChar String Handling
 
 #include "AnyChar.hpp"
+#include "Casts.hpp"
 
 void CopyAnyCharPString( anyCharType *to, anyCharType *from)
 
@@ -39,7 +40,7 @@ void InsertAnyCharPStringInPString( anyCharType *to, anyCharType *from, long off
 
     if ( offset <= *to)
     {
-        if ( (*to + *from) > kAnyCharPStringMaxLen) flen = kAnyCharPStringMaxLen - (long)*from;
+        if ( (*to + *from) > kAnyCharPStringMaxLen) flen = kAnyCharPStringMaxLen - implicit_cast<long>(*from);
         else flen = *from;
 
         count = *to - (offset);

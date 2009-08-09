@@ -127,7 +127,7 @@ int OpenInterface( short resID)
     InvalidateInterfaceFunctions(); // if they've been set, they shouldn't be yet
 
     number = GetHandleSize( gInterfaceItemData) / sizeof( interfaceItemType);
-    item = ( interfaceItemType *)*gInterfaceItemData;
+    item = reinterpret_cast<interfaceItemType *>(*gInterfaceItemData);
     for ( count = 0; count < number; count++)
     {
         item->bounds.left += gInterfaceScreenHBuffer;
@@ -155,7 +155,7 @@ long AppendInterface( short resID, long relativeNumber, Boolean center)
         HHConcatenateHandle( gInterfaceItemData, appendData);
 
         number = GetHandleSize( gInterfaceItemData) / sizeof( interfaceItemType);
-        item = ( interfaceItemType *)*gInterfaceItemData + originalNumber;
+        item = reinterpret_cast<interfaceItemType *>(*gInterfaceItemData) + originalNumber;
 
         if ( relativeNumber < 0)
         {
@@ -170,7 +170,7 @@ long AppendInterface( short resID, long relativeNumber, Boolean center)
             }
         } else if ( !center)
         {
-            relativeItem = ( interfaceItemType *)*gInterfaceItemData + relativeNumber;
+            relativeItem = reinterpret_cast<interfaceItemType *>(*gInterfaceItemData) + relativeNumber;
 
             for ( count = originalNumber; count < number; count++)
             {
@@ -188,7 +188,7 @@ long AppendInterface( short resID, long relativeNumber, Boolean center)
     {
         Rect    tRect;
 
-        relativeItem = ( interfaceItemType *)*gInterfaceItemData + relativeNumber;
+        relativeItem = reinterpret_cast<interfaceItemType *>(*gInterfaceItemData) + relativeNumber;
         mCopyAnyRect( tRect, relativeItem->bounds);
         CenterItemRangeInRect( &tRect, originalNumber, number);
     }
@@ -239,7 +239,7 @@ void DrawEntireInterface( void)
     PaintRect( &tRect);
 
     number = GetHandleSize( gInterfaceItemData) / sizeof( interfaceItemType);
-    item = ( interfaceItemType *)*gInterfaceItemData;
+    item = reinterpret_cast<interfaceItemType *>(*gInterfaceItemData);
 
     for ( count = 0; count < number; count++)
     {
@@ -247,7 +247,7 @@ void DrawEntireInterface( void)
         item++;
     }
     DrawInRealWorld();
-    CopyOffWorldToRealWorld( (WindowPtr) gTheWindow, &tRect);
+    CopyOffWorldToRealWorld( gTheWindow, &tRect);
 }
 
 void DrawInterfaceRange( long from, long to, long withinItem)
@@ -270,7 +270,7 @@ void DrawInterfaceRange( long from, long to, long withinItem)
     if ( from < number)
     {
         if ( to > number) to = number;
-        item = ( interfaceItemType *)*gInterfaceItemData + from;
+        item = reinterpret_cast< interfaceItemType *>(*gInterfaceItemData) + from;
 
         for ( count = from; count < to; count++)
         {
@@ -279,7 +279,7 @@ void DrawInterfaceRange( long from, long to, long withinItem)
         }
         DrawInRealWorld();
         if ( withinItem >= 0)
-            CopyOffWorldToRealWorld( (WindowPtr) gTheWindow, &tRect);
+            CopyOffWorldToRealWorld( gTheWindow, &tRect);
     }
 }
 
@@ -299,7 +299,7 @@ void DrawAllItemsOfKind( interfaceKindType kind, Boolean sound, Boolean clearFir
         PaintRect( &tRect);
 
     number = GetHandleSize( gInterfaceItemData) / sizeof( interfaceItemType);
-    item = ( interfaceItemType *)*gInterfaceItemData;
+    item = reinterpret_cast<interfaceItemType *>(*gInterfaceItemData);
 
     for ( count = 0; count < number; count++)
     {
@@ -316,7 +316,7 @@ void DrawAllItemsOfKind( interfaceKindType kind, Boolean sound, Boolean clearFir
     }
     DrawInRealWorld();
     if ( showAtEnd)
-        CopyOffWorldToRealWorld( (WindowPtr) gTheWindow, &tRect);
+        CopyOffWorldToRealWorld( gTheWindow, &tRect);
 }
 
 void DrawAnyInterfaceItemOffToOn( interfaceItemType *item)
@@ -329,7 +329,7 @@ void DrawAnyInterfaceItemOffToOn( interfaceItemType *item)
     DrawInOffWorld();
     DrawAnyInterfaceItem( item, *offMap, 0, 0);
     DrawInRealWorld();
-    CopyOffWorldToRealWorld( (WindowPtr) gTheWindow, &bounds);
+    CopyOffWorldToRealWorld( gTheWindow, &bounds);
 }
 
 void DrawAnyInterfaceItemSaveToOffToOn( interfaceItemType   *item)
@@ -344,7 +344,7 @@ void DrawAnyInterfaceItemSaveToOffToOn( interfaceItemType   *item)
     DrawInOffWorld();
     CopySaveWorldToOffWorld( &bounds);
     DrawInRealWorld();
-    CopyOffWorldToRealWorld( (WindowPtr) gTheWindow, &bounds);
+    CopyOffWorldToRealWorld( gTheWindow, &bounds);
 }
 
 void OffsetAllItems( long hoffset, long voffset)
@@ -359,7 +359,7 @@ void OffsetItemRange( long hoffset, long voffset, long from, long to)
     interfaceItemType   *item;
 
     number = to - from;//GetHandleSize( gInterfaceItemData) / sizeof( interfaceItemType);
-    item = ( interfaceItemType *)*gInterfaceItemData + from;
+    item = reinterpret_cast<interfaceItemType *>(*gInterfaceItemData) + from;
 
     for ( count = 0; count < number; count++)
     {
@@ -384,7 +384,7 @@ void CenterItemRangeInRect( Rect *destRect, long from, long to)
     longRect            itemsBounds = { 0x7fffffff, 0x7fffffff, 0, 0};
 
     number = to - from;//GetHandleSize( gInterfaceItemData) / sizeof( interfaceItemType);
-    item = ( interfaceItemType *)*gInterfaceItemData + from;
+    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + from;
 
     // first calc the rect that encloses all the interface items
     for ( count = 0; count < number; count++)
@@ -401,35 +401,35 @@ void CenterItemRangeInRect( Rect *destRect, long from, long to)
     hoffset =   (
                     (
                         (
-                            (long)(
+                            (
                                 destRect->right - destRect->left
                             )
-                            / (long)2
+                            / 2
                         )
-                        + (long)destRect->left
+                        + destRect->left
                     ) -
                     (
                         (
                             itemsBounds.right - itemsBounds.left
                         )
-                        / (long)2
+                        / 2
                     )
                 ) - itemsBounds.left;
     voffset =   (
                     (
                         (
-                            (long)(
+                            (
                                 destRect->bottom - destRect->top
                             )
-                            / (long)2
+                            / 2
                         )
-                        + (long)destRect->top
+                        + destRect->top
                     ) -
                     (
                         (
                             itemsBounds.bottom - itemsBounds.top
                         )
-                        / (long)2
+                        / 2
                     )
                 ) - itemsBounds.top;
 //  OffsetAllItems( hoffset, voffset);
@@ -443,7 +443,7 @@ void InvalidateInterfaceFunctions( void)
     interfaceItemType   *item;
 
     number = GetHandleSize( gInterfaceItemData) / sizeof( interfaceItemType);
-    item = ( interfaceItemType *)*gInterfaceItemData;
+    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData);
 
     for ( count = 0; count < number; count++)
     {
@@ -466,7 +466,7 @@ void InterfaceDisposeAllEditableText( void)
     if ( gInterfaceItemData != nil)
     {
         number = GetHandleSize( gInterfaceItemData) / sizeof( interfaceItemType);
-        item = ( interfaceItemType *)*gInterfaceItemData;
+        item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData);
 
         for ( count = 0; count < number; count++)
         {
@@ -487,7 +487,7 @@ void InterfaceIdle( void)
 
     if ( gCurrentTEItem != -1)
     {
-        item = ( interfaceItemType *)*gInterfaceItemData + (long)gCurrentTEItem;
+        item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + gCurrentTEItem;
         TEIdle( item->item.labeledRect.teData);
     }
 }
@@ -500,7 +500,7 @@ short PtInInterfaceItem( Point where)
     Rect                tRect;
 
     number = GetHandleSize( gInterfaceItemData) / sizeof( interfaceItemType);
-    item = ( interfaceItemType *)*gInterfaceItemData;
+    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData);
 
     for ( count = 0; count < number; count++)
     {
@@ -528,7 +528,7 @@ short InterfaceMouseDown( Point where)
     short               result = -1;
 
     number = GetHandleSize( gInterfaceItemData) / sizeof( interfaceItemType);
-    item = ( interfaceItemType *)*gInterfaceItemData;
+    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData);
 
     for ( count = 0; count < number; count++)
     {
@@ -565,7 +565,7 @@ short InterfaceMouseDown( Point where)
                     {
                         if ( count != gCurrentTEItem)
                         {
-                            InterfaceTextEditDeactivate( (short)gCurrentTEItem);
+                            InterfaceTextEditDeactivate( gCurrentTEItem);
                             gCurrentTEItem = count;
                             InterfaceTextEditActivate( gCurrentTEItem);
                         }
@@ -608,7 +608,7 @@ short InterfaceKeyDown( long message)
     if ( keyCode > 0)
     {
         number = GetHandleSize( gInterfaceItemData) / sizeof( interfaceItemType);
-        item = ( interfaceItemType *)*gInterfaceItemData;
+        item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData);
 
 /*      while ( !(( item->kind == kPlainButton) &&
                 ( item->item.plainButton.key == keyNum)) && ( count < number))
@@ -677,7 +677,7 @@ short InterfaceKeyDown( long message)
             }
 
             DrawAnyInterfaceItemOffToOn( item);
-            return( (short)count);
+            return( count);
         }
 
     }
@@ -688,7 +688,7 @@ short InterfaceKeyDown( long message)
         {
             number = GetHandleSize( gInterfaceItemData) / sizeof( interfaceItemType);
             count = gCurrentTEItem + 1;
-            item = ( interfaceItemType *)*gInterfaceItemData + (long)count;
+            item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + count;
 
             while ( !(( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
                     ( item->item.labeledRect.teData != nil)))
@@ -696,7 +696,7 @@ short InterfaceKeyDown( long message)
                 if ( count >= number)
                 {
                     count = 0;
-                    item = ( interfaceItemType *)*gInterfaceItemData;
+                    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData);
                 }
                 item++;
                 count++;
@@ -712,7 +712,7 @@ short InterfaceKeyDown( long message)
         } else
         {
             SetInterfaceTextEditColors( gCurrentTEItem);
-            item = ( interfaceItemType *)*gInterfaceItemData + (long)gCurrentTEItem;
+            item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + gCurrentTEItem;
             TEKey( whichChar, item->item.labeledRect.teData);
             DefaultColors();
         }
@@ -921,7 +921,7 @@ void DrawStringInInterfaceContent( short whichItem, anyCharType *s)
     interfaceItemType   *item;
     Rect                tRect;
 
-    item = ( interfaceItemType *)*gInterfaceItemData + (long)whichItem;
+    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + (long)whichItem;
 
     LongRectToRect( &(item->bounds), &tRect);
     DefaultColors();
@@ -936,7 +936,7 @@ void DrawStringInInterfaceContent( short whichItem, anyCharType *s)
 interfaceItemType *GetAnyInterfaceItemPtr( long whichItem)
 
 {
-    return ( ( interfaceItemType *)*gInterfaceItemData + (long)whichItem);
+    return ( reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + whichItem);
 }
 
 void SetStatusOfAnyInterfaceItem( short whichItem, interfaceItemStatusType status, Boolean drawNow)
@@ -944,7 +944,7 @@ void SetStatusOfAnyInterfaceItem( short whichItem, interfaceItemStatusType statu
 {
     interfaceItemType       *item;
 
-    item = ( interfaceItemType *)*gInterfaceItemData + (long)whichItem;
+    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + whichItem;
 
     switch ( item->kind)
     {
@@ -975,7 +975,7 @@ void SwitchAnyRadioOrCheckbox( short whichItem, Boolean turnOn)
 {
     interfaceItemType       *item;
 
-    item = ( interfaceItemType *)*gInterfaceItemData + (long)whichItem;
+    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + whichItem;
 
 
 
@@ -991,7 +991,7 @@ Boolean GetAnyRadioOrCheckboxOn( short whichItem)
 {
     interfaceItemType       *item;
 
-    item = ( interfaceItemType *)*gInterfaceItemData + (long)whichItem;
+    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + whichItem;
 
     if ( item->kind == kCheckboxButton)
         return( item->item.checkboxButton.on);
@@ -1009,7 +1009,7 @@ void RefreshInterfaceItem( short whichItem)
     interfaceItemType   *item;
     Rect                tRect;
 
-    item = ( interfaceItemType *)*gInterfaceItemData + (long)whichItem;
+    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + whichItem;
     GetAnyInterfaceItemGraphicBounds( item, &tRect);
     DrawInOffWorld();
     DefaultColors();
@@ -1023,7 +1023,7 @@ void RefreshInterfaceListEntry( short whichItem, short whichEntry)
 {
     interfaceItemType   *item;
 
-    item = ( interfaceItemType *)*gInterfaceItemData + (long)whichItem;
+    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + (long)whichItem;
 
     DrawPlayerInterfaceListEntry( item, whichEntry);
 }
@@ -1035,7 +1035,7 @@ void InterfaceTextEditItemInit( short whichItem)
     interfaceItemType   *item;
     Rect                tRect;
 
-    item = ( interfaceItemType *)*gInterfaceItemData + (long)whichItem;
+    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + whichItem;
 
     if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable))
     {
@@ -1056,12 +1056,12 @@ void InterfaceTextEditSetText( short whichItem, anyCharType *s)
 {
     interfaceItemType   *item;
 
-    item = ( interfaceItemType *)*gInterfaceItemData + (long)whichItem;
+    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + whichItem;
 
     if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
             ( item->item.labeledRect.teData != nil))
     {
-        TESetText( (Ptr)( s + 1), (long)*s, item->item.labeledRect.teData);
+        TESetText( reinterpret_cast<Ptr>( s + 1), *s, item->item.labeledRect.teData);
     }
 }
 
@@ -1070,7 +1070,7 @@ void InterfaceTextEditSelectAll( short whichItem)
 {
     interfaceItemType   *item;
 
-    item = ( interfaceItemType *)*gInterfaceItemData + (long)whichItem;
+    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + whichItem;
 
     if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
             ( item->item.labeledRect.teData != nil))
@@ -1087,7 +1087,7 @@ void InterfaceTextEditActivate( short whichItem)
     interfaceItemType   *item;
     Rect                tRect;
 
-    item = ( interfaceItemType *)*gInterfaceItemData + (long)whichItem;
+    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + whichItem;
 
     if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
             ( item->item.labeledRect.teData != nil))
@@ -1109,7 +1109,7 @@ void InterfaceTextEditDeactivate( short whichItem)
     interfaceItemType   *item;
     Rect                tRect;
 
-    item = ( interfaceItemType *)*gInterfaceItemData + (long)whichItem;
+    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + whichItem;
 
     if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
             ( item->item.labeledRect.teData != nil))
@@ -1136,7 +1136,7 @@ void SuspendActiveTextEdit( void)
     {
         if ( gCurrentTEItem != -1)
         {
-            item = ( interfaceItemType *)*gInterfaceItemData + (long)gCurrentTEItem;
+            item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + gCurrentTEItem;
 
             if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
                     ( item->item.labeledRect.teData != nil))
@@ -1161,7 +1161,7 @@ void ResumeActiveTextEdit( void)
     {
         if ( gCurrentTEItem != -1)
         {
-            item = ( interfaceItemType *)*gInterfaceItemData + (long)gCurrentTEItem;
+            item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + gCurrentTEItem;
 
             if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
                     ( item->item.labeledRect.teData != nil))
@@ -1187,7 +1187,7 @@ void UpdateAllTextEdit( void)
     {
 
         number = GetHandleSize( gInterfaceItemData) / sizeof( interfaceItemType);
-        item = ( interfaceItemType *)*gInterfaceItemData;
+        item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData);
 
         for ( count = 0; count < number; count++)
         {
@@ -1212,9 +1212,9 @@ void SetInterfaceTextEditColors( short whichItem)
     interfaceItemType   *item;
     RGBColor            color;
 
-    item = ( interfaceItemType *)*gInterfaceItemData + (long)whichItem;
+    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + whichItem;
     DrawInRealWorld();
-    MacSetPort( (WindowPtr)gTheWindow);
+    MacSetPort( gTheWindow);
     PenNormal();
     DefaultColors();
     if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable))
@@ -1232,7 +1232,7 @@ void SetInterfaceTextEditColors( short whichItem)
         SetFontByString( "\pmonaco");
         TextSize( 9);
         TextFace(  0);
-    } else WriteDebugLong( (long)whichItem);
+    } else WriteDebugLong( whichItem);
 }
 
 void CopyInterfaceTextEditContents( short whichItem, anyCharType *d, long *maxlen)
@@ -1241,7 +1241,7 @@ void CopyInterfaceTextEditContents( short whichItem, anyCharType *d, long *maxle
     interfaceItemType   *item;
     long                slen;
 
-    item = ( interfaceItemType *)*gInterfaceItemData + (long)whichItem;
+    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + whichItem;
 
     if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
             ( item->item.labeledRect.teData != nil))
@@ -1250,12 +1250,12 @@ void CopyInterfaceTextEditContents( short whichItem, anyCharType *d, long *maxle
         if ( slen <= *maxlen)
         {
             BlockMove( *((*(item->item.labeledRect.teData))->hText),
-                        (Ptr)d, slen);
+                        reinterpret_cast<Ptr>(d), slen);
             *maxlen = slen;
         } else
         {
             BlockMove( *((*(item->item.labeledRect.teData))->hText),
-                        (Ptr)d, *maxlen);
+                        reinterpret_cast<Ptr>(d), *maxlen);
         }
     }
 }
@@ -1265,7 +1265,7 @@ long GetInterfaceTextEditLength( short whichItem)
 
     interfaceItemType   *item;
 
-    item = ( interfaceItemType *)*gInterfaceItemData + (long)whichItem;
+    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + whichItem;
 
     if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
             ( item->item.labeledRect.teData != nil))
@@ -1281,7 +1281,7 @@ void SetInterfaceListCallback(  short       whichItem,
 {
     interfaceItemType   *item;
 
-    item = ( interfaceItemType *)*gInterfaceItemData + (long)whichItem;
+    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + whichItem;
 
     if ( item->kind == kListRect)
     {
@@ -1299,7 +1299,7 @@ void SetButtonKeyNum( short whichItem, short whichKey)
 {
     interfaceItemType   *item;
 
-    item = ( interfaceItemType *)*gInterfaceItemData + (long)whichItem;
+    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + whichItem;
 
     if ( item->kind == kPlainButton)
     {
@@ -1312,7 +1312,7 @@ short GetButtonKeyNum( short whichItem)
 {
     interfaceItemType   *item;
 
-    item = ( interfaceItemType *)*gInterfaceItemData + (long)whichItem;
+    item = reinterpret_cast<interfaceItemType*>(*gInterfaceItemData) + whichItem;
 
     if ( item->kind == kPlainButton)
         return ( item->item.plainButton.key);

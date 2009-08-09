@@ -209,7 +209,7 @@ void GetInitialObjectSpriteData( long whichScenario, long whichObject,
 {
     spaceObjectType         *sObject = nil;
     scenarioInitialType     *initial;
-    scenarioType            *scenario = (scenarioType *)*gAresGlobal->gScenarioData + whichScenario;
+    scenarioType            *scenario = reinterpret_cast<scenarioType *>(*gAresGlobal->gScenarioData) + whichScenario;
     briefingSpriteBoundsType    *sBounds = gBriefingSpriteBounds;
 
     initial = mGetScenarioInitial( scenario, whichObject);
@@ -279,7 +279,7 @@ void GetRealObjectSpriteData( coordPointType *realCoord,
         if ( baseObject->attributes & kCanThink)
         {
             pixTable = GetPixTable( tlong +
-                ((short)GetAdmiralColor( owner) << kSpriteTableColorShift));
+                (implicit_cast<short>(GetAdmiralColor( owner)) << kSpriteTableColorShift));
         } else
         {
             pixTable = GetPixTable( tlong);
@@ -305,13 +305,13 @@ void GetRealObjectSpriteData( coordPointType *realCoord,
     //  but we only have a ptr.  Thus we pass back a ptr in the ->data field.  It must be altered to be a ptr to a ptr
     //  before it is used in any sprite drawing routines.
 
-    aSpritePix->data = (char **)GetNatePixTableNatePixData( pixTable, whichShape);
+    aSpritePix->data = reinterpret_cast<char **>(GetNatePixTableNatePixData( pixTable, whichShape));
     aSpritePix->center.h = GetNatePixTableNatePixHRef( pixTable, whichShape);
     aSpritePix->center.v = GetNatePixTableNatePixVRef( pixTable, whichShape);
     aSpritePix->width = GetNatePixTableNatePixWidth( pixTable, whichShape);
     aSpritePix->height = GetNatePixTableNatePixHeight( pixTable, whichShape);
 
-    tlong = *thisScale = (long)maxSize * SCALE_SCALE;
+    tlong = *thisScale = implicit_cast<long>(maxSize) * SCALE_SCALE;
     *thisScale /= aSpritePix->width;
     tlong /= aSpritePix->height;
 
@@ -392,10 +392,10 @@ void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
     Point       where;
     spritePix   aSpritePix;
     longRect    spriteRect, clipRect;
-    scenarioType    *scenario = (scenarioType *)*gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *scenario = reinterpret_cast<scenarioType *>(*gAresGlobal->gScenarioData) + whichScenario;
     baseObjectType  *baseObject = nil;
     char            *pixData;
-    spaceObjectType *anObject = (spaceObjectType *)*gSpaceObjectData;
+    spaceObjectType *anObject = reinterpret_cast<spaceObjectType *>(*gSpaceObjectData);
     Boolean         *gridCells = nil;
     briefingSpriteBoundsType    *sBounds = nil;
 
@@ -404,7 +404,7 @@ void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
     gridWidth = (bounds->right - bounds->left) / kBriefing_Grid_Size;
     gridHeight = (bounds->bottom - bounds->top) / kBriefing_Grid_Size;
 
-    gridCells = (Boolean *)NewPtr( sizeof( Boolean) * gridWidth * gridHeight);
+    gridCells = reinterpret_cast<Boolean *>(NewPtr( sizeof( Boolean) * gridWidth * gridHeight));
 
     if ( gridCells == nil) return;
     for ( j = 0; j < gridHeight; j++)
@@ -417,7 +417,7 @@ void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
 
     if ( gBriefingSpriteBounds != nil)
     {
-        DisposePtr( (Ptr)gBriefingSpriteBounds);
+        DisposePtr( reinterpret_cast<Ptr>(gBriefingSpriteBounds));
     }
 
     objectNum = 1;  // extra 1 for last null briefingSpriteBounds
@@ -430,8 +430,8 @@ void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
         }
     }
 
-    gBriefingSpriteBounds = (briefingSpriteBoundsType *)NewPtr(
-        sizeof( briefingSpriteBoundsType) * objectNum);
+    gBriefingSpriteBounds = reinterpret_cast<briefingSpriteBoundsType *>(NewPtr(
+        sizeof( briefingSpriteBoundsType) * objectNum));
 
     if ( gBriefingSpriteBounds == nil) return;
     sBounds = gBriefingSpriteBounds;
@@ -454,7 +454,7 @@ void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
                                 >> SHIFT_SCALE,
                     RectToLongRect( bounds, &clipRect);
 
-                    pixData = (char *)aSpritePix.data;
+                    pixData = reinterpret_cast<char *>(aSpritePix.data);
                     aSpritePix.data = &pixData;
                     clipRect.left = clipRect.top = 0;
                     clipRect.right -= 1;
@@ -498,7 +498,7 @@ void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
 
                     RectToLongRect( bounds, &clipRect);
 
-                    pixData = (char *)aSpritePix.data;
+                    pixData = reinterpret_cast<char *>(aSpritePix.data);
                     aSpritePix.data = &pixData;
                     clipRect.left = clipRect.top = 0;
                     clipRect.right -= 1;
@@ -533,7 +533,7 @@ void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
         anObject++;
     }
     sBounds->objectIndex = -1;
-    if ( gridCells != nil) DisposePtr( (Ptr)gridCells);
+    if ( gridCells != nil) DisposePtr( reinterpret_cast<Ptr>(gridCells));
 }
 
 void BriefPoint_Data_Get( long whichPoint, long whichScenario, long *headerID,
@@ -542,7 +542,7 @@ void BriefPoint_Data_Get( long whichPoint, long whichScenario, long *headerID,
                     Rect *bounds)
 
 {
-    scenarioType    *scenario = (scenarioType *)*gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *scenario = reinterpret_cast<scenarioType *>(*gAresGlobal->gScenarioData) + whichScenario;
     Point           where;
     spritePix       aSpritePix;
     longRect        spriteRect;

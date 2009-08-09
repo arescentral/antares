@@ -172,7 +172,7 @@ void MakeAresGuide( void)
     InitAresGuide();
 
     // 1st pass guage mins & maxs
-    baseObject = (baseObjectType *)*gBaseObjectData;
+    baseObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData);
 
     for ( count = 0; count < kMaxBaseObject; count++)
     {
@@ -206,7 +206,7 @@ void MakeAresGuide( void)
     }
 
 
-    baseObject = (baseObjectType *)*gBaseObjectData;
+    baseObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData);
 
 #ifdef pGenerateImages
     for ( count = 0; count < kMaxBaseObject; count++) // kMaxBaseObject
@@ -238,11 +238,11 @@ void MakeAresGuide( void)
     if ( sourceText == nil) MyDebugString("\pcouldn't get source text.");
     DetachResource( sourceText);
 
-    baseObject = (baseObjectType *)*gBaseObjectData;
+    baseObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData);
 
     for ( count = 0; count < kMaxBaseObject; count++) // kMaxBaseObject
     {
-        baseObject = (baseObjectType *)*gBaseObjectData + count;
+        baseObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData) + count;
         if (baseObject->internalFlags & 0x40000000)
         {
             newText = sourceText;
@@ -271,7 +271,7 @@ void MakeAresGuide( void)
             whichShape = GetPreviousIndexBaseObject( count);
             if ( whichShape >= 0)
             {
-                weaponObject = (baseObjectType *)*gBaseObjectData + whichShape;
+                weaponObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData) + whichShape;
                 if ( weaponObject->baseRace != baseObject->baseRace)
                 {
                     ReplaceIndStringWithStringInHandle( 6453, 79, ss2, newText);
@@ -588,7 +588,7 @@ void ConvertPortraitIntoGIF( long whichObject, StringPtr fileName)
         transparencyNo,     //transparency,
         8,                  //depth,
         colorPaletteSystem);//colors);
-    ReleaseResource( (Handle)newPic);
+    ReleaseResource( reinterpret_cast<Handle>(newPic));
 }
 
 PicHandle MakePicHandleFromScreen( PixMapHandle sourceMap, Rect *sourceRect)
@@ -598,8 +598,8 @@ PicHandle MakePicHandleFromScreen( PixMapHandle sourceMap, Rect *sourceRect)
     newPic = OpenPicture( sourceRect);
     if ( newPic != nil)
     {
-        CopyBits( (BitMap *)*sourceMap, (BitMap *)*sourceMap, sourceRect, sourceRect,
-            srcCopy, nil);
+        CopyBits( reinterpret_cast<BitMap *>(*sourceMap), reinterpret_cast<BitMap *>(*sourceMap),
+                sourceRect, sourceRect, srcCopy, nil);
         ClosePicture();
     }
     return( newPic);
@@ -688,7 +688,7 @@ void GetWeaponData( long whichWeapon, weaponDataType *data)
 
     if ( whichWeapon != kNoShip)
     {
-        weaponObject = (baseObjectType *)*gBaseObjectData + whichWeapon;
+        weaponObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData) + whichWeapon;
 
         // damage; this is tricky--we have to guess by walking through activate actions,
         //  and for all the createObject actions, see which creates the most damaging
@@ -698,12 +698,12 @@ void GetWeaponData( long whichWeapon, weaponDataType *data)
         isGuided = false;
         if ( weaponObject->activateActionNum > 0)
         {
-            action = (objectActionType *)*gObjectActionData + weaponObject->activateAction;
+            action = reinterpret_cast<objectActionType *>(*gObjectActionData) + weaponObject->activateAction;
             for ( actionNum = 0; actionNum < weaponObject->activateActionNum; actionNum++)
             {
                 if (( action->verb == kCreateObject) || ( action->verb == kCreateObjectSetDest))
                 {
-                    missileObject = (baseObjectType *)*gBaseObjectData +
+                    missileObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData) +
                         action->argument.createObject.whichBaseType;
                     if ( missileObject->attributes & kIsGuided) isGuided = true;
                     if ( missileObject->damage > mostDamage) mostDamage = missileObject->damage;
@@ -789,13 +789,13 @@ void AppendStringToHandle(const unsigned char* s, Handle data)
     if ( data != nil)
     {
         fileLen = GetHandleSize( data);
-        sc = (char *)s;
+        sc = const_cast<char *>(reinterpret_cast<const char*>(s));
         if ( *sc == 0) return;
-        SetHandleSize( data, fileLen + (long)*sc);
+        SetHandleSize( data, fileLen + implicit_cast<long>(*sc));
         if ( MemError() == noErr)
         {
             HLock( data);
-            c = ( char *)*data + (fileLen);
+            c = *data + (fileLen);
             lenCount = *sc;
             sc++;
             while( lenCount > 0)
@@ -900,7 +900,7 @@ void NumToNDigitString( long num, StringPtr s, long digits)
     {
         while ( mGetAnyCharPStringLength( s) < digits)
         {
-            InsertAnyCharPStringInPString( (anyCharType *)s, (anyCharType *)"\p0", 0);
+            InsertAnyCharPStringInPString( reinterpret_cast<anyCharType *>(s), const_cast<anyCharType*>(reinterpret_cast<const anyCharType *>("\p0")), 0);
         }
     }
     CheckStringForNil( s);
@@ -994,7 +994,7 @@ void InsertGraphicText( long whichObject, long whichSprite, Handle text)
 
         ReplaceIndStringWithHandleInHandle( 6453, 74, newData, text);
         DisposeHandle( newData);
-        ReleaseResource( (Handle)pic);
+        ReleaseResource( reinterpret_cast<Handle>(pic));
     }
 }
 
@@ -1033,7 +1033,7 @@ void InsertIndexText( long whichObject, long myRace, Handle text)
 
         if ( raceID == myRace)
         {
-            o = (baseObjectType *)*gBaseObjectData;
+            o = reinterpret_cast<baseObjectType *>(*gBaseObjectData);
 
             lowestClass = 0x7fffffff;
             highestClass = 0;
@@ -1053,7 +1053,7 @@ void InsertIndexText( long whichObject, long myRace, Handle text)
             {
                 thisClass = nextClass;
                 nextClass = highestClass;
-                o = (baseObjectType *)*gBaseObjectData;
+                o = reinterpret_cast<baseObjectType *>(*gBaseObjectData);
                 for ( count = 0; count < kMaxBaseObject; count++)
                 {
                     if (( o->internalFlags & 0x40000000) && ( o->baseRace == myRace))
@@ -1112,7 +1112,7 @@ long GetPreviousIndexBaseObject( long whichObject)
     // 1st, look for the object of same race with the largest class _below_ our class
     source = mGetBaseObjectPtr( whichObject);
 
-    o = (baseObjectType *)*gBaseObjectData;
+    o = reinterpret_cast<baseObjectType *>(*gBaseObjectData);
     for ( count = 0; count < kMaxBaseObject; count++)
     {
         if (( count != whichObject) && ( o->baseRace == source->baseRace))
@@ -1139,7 +1139,7 @@ long GetPreviousIndexBaseObject( long whichObject)
         previousRace = GetRaceIDFromNum( previousRace);
         highestClass = -1;
 
-        o = (baseObjectType *)*gBaseObjectData;
+        o = reinterpret_cast<baseObjectType *>(*gBaseObjectData);
         for ( count = 0; count < kMaxBaseObject; count++)
         {
             if (( o->baseRace == previousRace) && ( o->baseClass >= highestClass))
@@ -1159,12 +1159,12 @@ Handle NewHandleFromString( StringPtr s)
     Handle  data = nil;
 
     CheckStringForNil( s);
-    sc = ( char *)s;
-    data = NewHandle( ((long)*sc));
+    sc = reinterpret_cast<char *>(s);
+    data = NewHandle( implicit_cast<long>(*sc));
     if ( data != nil)
     {
         HLock( data);
-        c = ( char *)*data;
+        c = reinterpret_cast<char *>(*data);
         lenCount = *sc;
         sc++;
         while( lenCount > 0)
@@ -1181,7 +1181,7 @@ Handle NewHandleFromString( StringPtr s)
 
 void CheckStringForNil( const unsigned char* s)
 {
-    char    *c = (char *)s;
+    char    *c = const_cast<char *>(reinterpret_cast<const char*>(s));
     short   len = *c;
 
     c++;

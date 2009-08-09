@@ -245,11 +245,11 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 //  Debugger();
     ToolBoxInit();
 
-    gAresGlobal = (aresGlobalType *)NewPtr( sizeof( aresGlobalType));
+    gAresGlobal = reinterpret_cast<aresGlobalType *>(NewPtr( sizeof( aresGlobalType)));
     if ( gAresGlobal == nil) ExitToShell();
     for ( error = 0; error < kMaxPlayerNum; error++)
         gAresGlobal->gActiveCheats[error] = 0;
-    gAresGlobal->gKeyMapBuffer = NewPtr( sizeof(KeyMap) * (long)kKeyMapBufferNum);
+    gAresGlobal->gKeyMapBuffer = NewPtr( sizeof(KeyMap) * implicit_cast<long>(kKeyMapBufferNum));
     if ( gAresGlobal->gKeyMapBuffer == nil) ExitToShell();
     gAresGlobal->gKeyMapBufferTop = 0;
     gAresGlobal->gKeyMapBufferBottom = 0;
@@ -367,7 +367,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
         }
     }
 */
-    DebugWindowInit ( (WindowPtr)gTheWindow);
+    DebugWindowInit ( gTheWindow);
 
     BringDebugToFront();
 
@@ -432,11 +432,11 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
             gAresGlobal->gOptions &= ~kOptionNetworkAvailable;
         }
 
-        GetDateTime( (unsigned long *)&qd.randSeed);
-        GetDateTime( (unsigned long *)&gRandomSeed);
+        GetDateTime( reinterpret_cast<unsigned long *>(&qd.randSeed));
+        GetDateTime( reinterpret_cast<unsigned long *>(&gRandomSeed));
 
 
-//          WriteDebugLine((char *)"\p>Net");
+//          WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>Net")));
 
         error  = RT_Open( true, VERSION_2_CODES);
         if ( error != noErr)
@@ -562,7 +562,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
         }
 
         thePalette = NewPalette( 256, theClut, pmExplicit + pmTolerant, 0);
-        SetPalette( (WindowPtr)-1, thePalette, false);
+        SetPalette( reinterpret_cast<WindowPtr>(-1), thePalette, false);
 
 //      theDevice = GetMainDevice();
 //      error = true;
@@ -626,13 +626,13 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
             CenterRectInDevice( theDevice, &windowRect);
 
             gAresGlobal->gBackWindow = nil;
-            gAresGlobal->gBackWindow = (CWindowPtr)NewCWindow (nil, &tRect, "\p", false, plainDBox,
-                        (WindowPtr)-1, false, 701);
-            SetWindowColorTable( (WindowPtr)gAresGlobal->gBackWindow);
+            gAresGlobal->gBackWindow = NewCWindow (nil, &tRect, "\p", false, plainDBox,
+                        reinterpret_cast<WindowPtr>(-1), false, 701);
+            SetWindowColorTable( gAresGlobal->gBackWindow);
             InitTransitions();
 
             initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
-            MacSetPort( (WindowPtr)gAresGlobal->gBackWindow);
+            MacSetPort( gAresGlobal->gBackWindow);
             RGBBackColor( &initialFadeColor);
             BackPat( &qd.black);
 
@@ -649,9 +649,9 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                 switch ( theEvent.what)
                 {
                     case updateEvt:
-                        whichWindow = ( CWindowPtr)theEvent.message;
-                        BeginUpdate( (WindowPtr)whichWindow);
-                        EndUpdate( (WindowPtr)whichWindow);
+                        whichWindow = reinterpret_cast<CWindowPtr>(theEvent.message);
+                        BeginUpdate( whichWindow);
+                        EndUpdate( whichWindow);
                         break;
                 }
             } while ( theEvent.what != nullEvent);
@@ -660,14 +660,14 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 
             HideCursor();
 
-            MacShowWindow( (WindowPtr)gAresGlobal->gBackWindow);
+            MacShowWindow( gAresGlobal->gBackWindow);
 
             RGBBackColor( &initialFadeColor);
 //          BackPat( &qd.black);
 
 //          WaitForAnyEvent();
 
-            MacSetPort( (WindowPtr)gAresGlobal->gBackWindow);
+            MacSetPort( gAresGlobal->gBackWindow);
 
             PaintRect( &(gAresGlobal->gBackWindow->portRect));
 
@@ -677,7 +677,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 
 //          WaitForAnyEvent();
 
-            ActivatePalette( (WindowPtr)gAresGlobal->gBackWindow);
+            ActivatePalette( gAresGlobal->gBackWindow);
             SetWindowPaletteFromClut( gAresGlobal->gBackWindow, theClut);
 
             ResetTransitions();
@@ -689,24 +689,24 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 
             skipFading = AutoFadeTo( 1, &initialFadeColor, true);
 
-            gTheWindow = (CWindowPtr)NewCWindow (nil, &windowRect, "\p", TRUE, plainDBox, //documentProc,//
-                        (WindowPtr)-1, true, 700);
+            gTheWindow = NewCWindow (nil, &windowRect, "\p", TRUE, plainDBox, //documentProc,//
+                        reinterpret_cast<WindowPtr>(-1), true, 700);
 
-            SetWindowColorTable( (WindowPtr)gTheWindow);
+            SetWindowColorTable( gTheWindow);
             initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
-            MacSetPort( (WindowPtr)gTheWindow);
+            MacSetPort( gTheWindow);
             RGBBackColor( &initialFadeColor);
 //          BackPat( &qd.black);
 
-            MacShowWindow ( (WindowPtr)gTheWindow);
+            MacShowWindow ( gTheWindow);
             RGBBackColor( &initialFadeColor);
 //          BackPat( &qd.black);
 
-//          WriteDebugLine((char *)"\p>Debug Win");
+//          WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>Debug Win")));
 
-            MacSetPort ( (WindowPtr)gTheWindow);
+            MacSetPort ( gTheWindow);
             MacSetRect( &windowRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-            MacFillRect( &tRect, (Pattern *)&qd.black);
+            MacFillRect( &tRect, &qd.black);
 
             BringDebugToFront();
             skipFading = AutoFadeFrom(1, true);
@@ -720,49 +720,49 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                 switch ( theEvent.what)
                 {
                     case updateEvt:
-                        whichWindow = ( CWindowPtr)theEvent.message;
-                        BeginUpdate( (WindowPtr)whichWindow);
+                        whichWindow = reinterpret_cast<CWindowPtr>(theEvent.message);
+                        BeginUpdate( whichWindow);
                         if ( whichWindow == gAresGlobal->gBackWindow)
                         {
-                            MacSetPort( (WindowPtr)gAresGlobal->gBackWindow);
-                            MacFillRect(  &(gAresGlobal->gBackWindow->portRect), (Pattern *)&qd.black);
+                            MacSetPort( gAresGlobal->gBackWindow);
+                            MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
                         } else if ( whichWindow == gTheWindow)
                         {
-                            MacSetPort( (WindowPtr)gTheWindow);
-                            MacFillRect(  &(gTheWindow->portRect), (Pattern *)&qd.black);
+                            MacSetPort( gTheWindow);
+                            MacFillRect(  &(gTheWindow->portRect), &qd.black);
                         }
-                        EndUpdate( (WindowPtr)whichWindow);
+                        EndUpdate( whichWindow);
                         break;
                 }
             } while ( theEvent.what != nullEvent);
-            MacSetPort ( (WindowPtr)gTheWindow);
+            MacSetPort ( gTheWindow);
             MacShowCursor();
 
             error = CreateOffscreenWorld( &(gTheWindow->portRect), theClut);
             if ( error == kNoError)
             {
-                WriteDebugLine((char *)"\p>Offworld");
-                WriteDebugLine((char *)"\pGDPMapBounds");
+                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>Offworld")));
+                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pGDPMapBounds")));
                 WriteDebugLong( (*(*theDevice)->gdPMap)->bounds.left);
-                WriteDebugLine((char *)"\pGDRect");
+                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pGDRect")));
                 WriteDebugLong( (*theDevice)->gdRect.left);
-                WriteDebugLine((char *)"\pgNatePortLeft");
+                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pgNatePortLeft")));
                 WriteDebugLong( gNatePortLeft);
-                WriteDebugLine((char *)"\pPortRect");
+                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pPortRect")));
                 WriteDebugLong( gTheWindow->portRect.left);
 
                 error = MusicInit();
-                    WriteDebugLine((char *)"\p>Music");
+                    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>Music")));
                 if ( OpenSoundFile() == kNoError)
                 {
                     mWriteDebugString("\p>Sound File");
                     InitMoviePlayer();
 
-                    WriteDebugLine((char *)"\p>Movie");
+                    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>Movie")));
                     error = RotationInit();
                     if ( error == kNoError)
                     {
-                        WriteDebugLine((char *)"\p>Rot");
+                        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char *>("\p>Rot")));
 
                         NormalizeColors();
                         DrawInRealWorld();
@@ -773,7 +773,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                         error = InterfaceHandlingInit();
                         if ( error == kNoError)
                         {
-                            WriteDebugLine((char *)"\p>Interface");
+                            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>Interface")));
 
                             if ( gAresGlobal->originalExternalFileSpec.name[0] > 0)
                             {
@@ -789,28 +789,28 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                                 SetSongVolume( kMaxMusicVolume);
                                 PlaySong();
                             }
-                            MacSetPort( (WindowPtr)gTheWindow);
+                            MacSetPort( gTheWindow);
                             if ( !skipFading)
                             {
-                                skipFading = CustomPictFade( 20, 20, 2000, 2000, (WindowPtr)gTheWindow);
+                                skipFading = CustomPictFade( 20, 20, 2000, 2000, gTheWindow);
                                 if ( !skipFading)
                                 {
-                                    skipFading = CustomPictFade( 20, 20, 2001, 2000, (WindowPtr)gTheWindow);
+                                    skipFading = CustomPictFade( 20, 20, 2001, 2000, gTheWindow);
                                 }
                             }
 
                             BlackTitleScreen();
 
-                            if ( !skipFading) PlayMovieByName("\p:Ares Data Folder:Title", (WindowPtr)gTheWindow,
+                            if ( !skipFading) PlayMovieByName("\p:Ares Data Folder:Title", gTheWindow,
                                 false, theDevice);
 
 //                          AutoFadeTo( 1, &initialFadeColor, FALSE);
 //                          DrawTitleScreen();
 //                          AutoFadeFrom( 90, FALSE);
-                            MacSetPort( (WindowPtr)gTheWindow);
+                            MacSetPort( gTheWindow);
 
                             skipFading = StartCustomPictFade( 20, 20, 502, 2001,
-                                (WindowPtr)gTheWindow, &tPalette, &originalPalette,
+                                gTheWindow, &tPalette, &originalPalette,
                                 &tClut, skipFading);
 
 
@@ -830,23 +830,23 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                 switch ( theEvent.what)
                 {
                     case updateEvt:
-                        whichWindow = ( CWindowPtr)theEvent.message;
-                        BeginUpdate( (WindowPtr)whichWindow);
+                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
+                        BeginUpdate( whichWindow);
                         if ( whichWindow == gAresGlobal->gBackWindow)
                         {
-                            MacSetPort( (WindowPtr)gAresGlobal->gBackWindow);
-                            MacFillRect(  &(gAresGlobal->gBackWindow->portRect), (Pattern *)&qd.black);
+                            MacSetPort( gAresGlobal->gBackWindow);
+                            MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
                         } else if ( whichWindow == gTheWindow)
                         {
-                            MacSetPort( (WindowPtr)gTheWindow);
+                            MacSetPort( gTheWindow);
                             DrawTitleScreen();
                         }
-                        EndUpdate( (WindowPtr)whichWindow);
+                        EndUpdate( whichWindow);
                         break;
                 }
             } while ( theEvent.what != nullEvent);
 
-                            MacSetPort( (WindowPtr)gTheWindow);
+                            MacSetPort( gTheWindow);
                             GetVersionString( tempString, gAresGlobal->gMainResRefNum);
                             SetFontByString( "\pgeneva");
                             TextSize( 9);
@@ -939,27 +939,27 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                             error = InitDirectText();
                             if ( error == kNoError)
                             {
-                                WriteDebugLine((char *)"\p>DText");
+                                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>DText")));
 
                                 error = ScreenLabelInit();
                                 if ( error == kNoError)
                                 {
-                                    WriteDebugLine((char *)"\p>Label");
+                                    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>Label")));
 
                                     error = InitMessageScreen();
                                     if ( error == kNoError)
                                     {
-                                        WriteDebugLine((char *)"\p>Message");
+                                        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>Message")));
 
                                         error = InitScrollStars();
                                         if ( error == kNoError)
                                         {
-                                            WriteDebugLine((char *)"\p>ScrollStar");
+                                            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>ScrollStar")));
 
                                             error = InstrumentInit();
                                             if ( error == kNoError)
                                             {
-                                                WriteDebugLine((char *)"\p>Instrument");
+                                                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>Instrument")));
 
 
                                                 SpriteHandlingInit();
@@ -969,15 +969,15 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                                                     error = SpaceObjectHandlingInit();  // MUST be after ScenarioMakerInit()
                                                     if ( error == kNoError)
                                                     {
-                                                        WriteDebugLine((char *)"\p>SpaceObj");
+                                                        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>SpaceObj")));
                                                         error = InitSoundFX();
 //                                                      if ( error == kNoError)
                                                         {
-                                                            WriteDebugLine((char *)"\p>SoundFX");
+                                                            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>SoundFX")));
                                                             error =InitMotion();
                                                             if ( error == kNoError)
                                                             {
-                                                                WriteDebugLine((char *)"\p>Motion");
+                                                                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>Motion")));
 
                                                                 error = AdmiralInit();
                                                                 if ( error == kNoError)
@@ -989,7 +989,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                                                                         TimedWaitForAnyEvent(
                                                                             skipFading?1:1400);
                                                                         EndCustomPictFade(
-                                                                            (WindowPtr)gTheWindow,
+                                                                            gTheWindow,
                                                                             &tPalette, &originalPalette,
                                                                             &tClut,
                                                                             skipFading);
@@ -1006,63 +1006,63 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
             CleanupMoviePlayer();
 //          DisposeNetworking();
                                                                         CleanupBeams();
-                                                                        WriteDebugLine((char *)"\p<Beams");
+                                                                        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Beams")));
                                                                     }
                                                                     AdmiralCleanup();
-                                                                    WriteDebugLine((char *)"\p<Admiral");
+                                                                    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Admiral")));
                                                                 }
 
                                                                 MotionCleanup();
-                                                                WriteDebugLine((char *)"\p<Motion");
+                                                                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Motion")));
                                                             }
 
                                                             SoundFXCleanup();
-                                                            WriteDebugLine((char *)"\p<Sound");
+                                                            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Sound")));
                                                         }
                                                         CleanupSpaceObjectHandling();
-                                                        WriteDebugLine((char *)"\p<Obj Handle");
+                                                        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Obj Handle")));
                                                         CleanupSpriteHandling();
                                                         CleanupAresCheat();
-                                                        WriteDebugLine((char *)"\p<Sprite");
+                                                        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Sprite")));
                                                     }
                                                     ScenarioMakerCleanup();
                                                 }
                                                 InstrumentCleanup();
-                                                WriteDebugLine((char *)"\p<Instrument");
+                                                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Instrument")));
                                             }
                                             CleanupScrollStars();
-                                            WriteDebugLine((char *)"\p<Stars");
+                                            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Stars")));
                                         }
                                         MessageScreenCleanup();
-                                        WriteDebugLine((char *)"\p<Message");
+                                        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Message")));
                                     }
                                     ScreenLabelCleanup();
-                                    WriteDebugLine((char *)"\p<Label");
+                                    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Label")));
                                 }
                                 DirectTextCleanup();
-                                WriteDebugLine((char *)"\p<DText");
+                                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<DText")));
                             }
                             InterfaceHandlingCleanup();
-                            WriteDebugLine((char *)"\p<Interface");
+                            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Interface")));
                         }
                         ColorTranslatorCleanup();
-                        WriteDebugLine((char *)"\p<Color");
+                        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Color")));
                         RotationCleanup();
-                        WriteDebugLine((char *)"\p<Rotation");
+                        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Rotation")));
                         CleanupTransitions();
                         CleanupSpriteCursor();
-                        WriteDebugLine((char *)"\p<Transition");
+                        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Transition")));
                         CleanupMoviePlayer();
                     }
                     MusicCleanup();
-                    WriteDebugLine((char *)"\p<Music");
+                    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Music")));
                 }
                 CleanUpOffscreenWorld();
-                WriteDebugLine((char *)"\p<GWorld");
+                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<GWorld")));
             }
-            WriteDebugLine((char *)"\p<Network");
+            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Network")));
             HandleHandlerCleanup();
-/*          WriteDebugLine((char *)"\p<WAITING>");
+/*          WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<WAITING>")));
             WaitForAnyEvent();
 */
             CleanUpTheDevice( TRUE);
@@ -1079,7 +1079,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
             }
 
             DebugWindowCleanup();
-            DisposeWindow ( (WindowPtr)gTheWindow);
+            DisposeWindow ( gTheWindow);
         } else
         {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, PIX_DEPTH_ERROR, -1, -1, -1, __FILE__, 1);
@@ -1098,7 +1098,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
     }
 
     FlushEvents(everyEvent, 0);
-    DisposePtr( (Ptr)gAresGlobal);
+    DisposePtr( reinterpret_cast<Ptr>(gAresGlobal));
     InitCursor();
 
 }
@@ -1156,7 +1156,7 @@ void MainLoop (void)
 
     if (!(gAresGlobal->gOptions & kOptionHaveSeenIntro))
     {
-        DoScrollText( (WindowPtr)gTheWindow, 5600, 4, kTitleTextScrollWidth,
+        DoScrollText( gTheWindow, 5600, 4, kTitleTextScrollWidth,
             kTitleFontNum, -1);
 
         gAresGlobal->gOptions |= kOptionHaveSeenIntro;
@@ -1165,8 +1165,8 @@ void MainLoop (void)
 
     while ( !done)
     {
-        WriteDebugLine((char *)"\p>MainScreen");
-        MacSetPort( (WindowPtr)gTheWindow);
+        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>MainScreen")));
+        MacSetPort( gTheWindow);
         mainResult = DoMainScreenInterface( &whichDemoLevel);
 
         MainScreenInterfaceTestHack();
@@ -1196,7 +1196,7 @@ void MainLoop (void)
 
                 if ( Randomize( 4) == 2)
                 {
-                    DoScrollText( (WindowPtr)gTheWindow, 5600, 4, kTitleTextScrollWidth,
+                    DoScrollText( gTheWindow, 5600, 4, kTitleTextScrollWidth,
                         kTitleFontNum, -1);
                 }
 
@@ -1309,7 +1309,7 @@ void MainLoop (void)
                         if ( gAresGlobal->gReplayData != nil)
                         {
                             DetachResource( gAresGlobal->gReplayData);
-                            randomSeed = (unsigned long *)*gAresGlobal->gReplayData;
+                            randomSeed = reinterpret_cast<unsigned long *>(*gAresGlobal->gReplayData);
                             saveSeed = gRandomSeed;
                             gRandomSeed = *randomSeed;
                         }
@@ -1335,13 +1335,13 @@ void MainLoop (void)
                             GetScenarioMovieName( whichScenario, movieName);
                             if ( movieName[0] != 0)
                             {
-                                PlayMovieByName( movieName, (WindowPtr)gTheWindow,
+                                PlayMovieByName( movieName, gTheWindow,
                                     true, theDevice);
                             }
 
                             if ( GetScenarioPrologueID( whichScenario) > 0)
                             {
-                                DoScrollText( (WindowPtr)gTheWindow,
+                                DoScrollText( gTheWindow,
                                     GetScenarioPrologueID( whichScenario),
                                     4, kTitleTextScrollWidth, kTitleFontNum, 4002);
                             }
@@ -1386,7 +1386,7 @@ void MainLoop (void)
                             }
 
                             HideCursor();
-                            DrawInstrumentPanel( (WindowPtr) gTheWindow);
+                            DrawInstrumentPanel(  gTheWindow);
                             MacShowCursor();
 
                             if ( gAresGlobal->gOptions & kOptionMusicPlay)
@@ -1409,18 +1409,18 @@ void MainLoop (void)
                             {
                                 if ( (gAresGlobal->gScenarioWinner & kScenarioWinnerTextMask) != kScenarioWinnerNoText)
                                 {
-                                    DoMissionDebriefingText( (WindowPtr) gTheWindow,
+                                    DoMissionDebriefingText(  gTheWindow,
                                         (gAresGlobal->gScenarioWinner & kScenarioWinnerTextMask) >> kScenarioWinnerTextShift,
                                             -1, -1, -1, -1, -1, -1, -1);
                                 }
                                 if ( DoPlayAgain( false, false))
                                 {
                                     gameResult = kRestartGame;
-                                    WriteDebugLine((char *)"\pAGAIN!");
+                                    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pAGAIN!")));
                                 }  else
                                 {
                                     gameResult = kQuitGame;
-                                    WriteDebugLine((char *)"\pNOT AGAIN!");
+                                    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pNOT AGAIN!")));
                                     BlackTitleScreen();
                                     AutoFadeFrom( 1, false);
                                 }
@@ -1428,7 +1428,7 @@ void MainLoop (void)
                             {
                                 if ( (gAresGlobal->gScenarioWinner & kScenarioWinnerTextMask) != kScenarioWinnerNoText)
                                 {
-                                    DoMissionDebriefingText( (WindowPtr) gTheWindow,
+                                    DoMissionDebriefingText(  gTheWindow,
                                         (gAresGlobal->gScenarioWinner & kScenarioWinnerTextMask) >> kScenarioWinnerTextShift,
                                         gameLength, gThisScenario->parTime,
                                         GetAdmiralLoss( 0), gThisScenario->parLosses, GetAdmiralKill( 0), gThisScenario->parKills, 100);
@@ -1462,14 +1462,14 @@ void MainLoop (void)
                                             & ~kScenarioWinnerNextMask) | kScenarioWinnerNoNext;
 
                                         SaveStartingLevelPreferences( 10);
-                                        DoScrollText( (WindowPtr)gTheWindow,
+                                        DoScrollText( gTheWindow,
                                             6501,
                                             4, kTitleTextScrollWidth, kTitleFontNum, t);
                                     } else
                                     {
 
                                         if ( GetScenarioEpilogueID( whichScenario) > 0)
-                                            DoScrollText( (WindowPtr)gTheWindow,
+                                            DoScrollText( gTheWindow,
                                                 GetScenarioEpilogueID( whichScenario),
                                                 4, kTitleTextScrollWidth, kTitleFontNum, t);
                                     }
@@ -1479,7 +1479,7 @@ void MainLoop (void)
 
 // *********
 
-                                    PlayMovieByName("\p:Ares Data Folder:Next Level", (WindowPtr)gTheWindow,
+                                    PlayMovieByName("\p:Ares Data Folder:Next Level", gTheWindow,
                                         true, theDevice);
                                     if ( gAresGlobal->gOptions & kOptionMusicIdle)
                                     {
@@ -1648,7 +1648,7 @@ void MainLoop (void)
                                 }
 
                                 HideCursor();
-                                DrawInstrumentPanel( (WindowPtr) gTheWindow);
+                                DrawInstrumentPanel(  gTheWindow);
                                 MacShowCursor();
                                 if ( gAresGlobal->gOptions & kOptionMusicPlay)
                                 {
@@ -1689,7 +1689,7 @@ void MainLoop (void)
 //                                  DoMissionDebriefingText( (WindowPtr) gTheWindow,
 //                                      (gAresGlobal->gScenarioWinner & kScenarioWinnerTextMask) >> kScenarioWinnerTextShift,
 //                                      -1, -1, -1, -1, -1, -1, -1);
-                                    DoMissionDebriefingText( (WindowPtr) gTheWindow,
+                                    DoMissionDebriefingText(  gTheWindow,
                                         (gAresGlobal->gScenarioWinner & kScenarioWinnerTextMask)
                                         >> kScenarioWinnerTextShift,
                                         gameLength, gThisScenario->parTime,
@@ -1721,7 +1721,7 @@ void MainLoop (void)
 #endif NETSPROCKET_AVAILABLE
                 break;
             case kMainTrain:    // now replay intro
-                    DoScrollText( (WindowPtr)gTheWindow, 5600, 4, kTitleTextScrollWidth,
+                    DoScrollText( gTheWindow, 5600, 4, kTitleTextScrollWidth,
                         kTitleFontNum, -1);
             /*
                 whichScenario = GetScenarioNumberFromChapterNumber( 1);
@@ -1788,11 +1788,11 @@ void MainLoop (void)
                         if ( DoPlayAgain( false, false))
                         {
                             gameResult = kRestartGame;
-                            WriteDebugLine((char *)"\pAGAIN!");
+                            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pAGAIN!")));
                         }  else
                         {
                             gameResult = kQuitGame;
-                            WriteDebugLine((char *)"\pNOT AGAIN!");
+                            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pNOT AGAIN!")));
                             BlackTitleScreen();
                             AutoFadeFrom( 1, false);
                         }
@@ -1927,7 +1927,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
 
     unitsPassed = 0;
 
-    WriteDebugLine((char *)"\pEntr Game");
+    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pEntr Game")));
     WriteDebugLong( gRandomSeed);
     DebugFileAppendString("\p---NEW GAME---");
     if ( gAresGlobal->gOptions & kOptionRecord)
@@ -1945,8 +1945,8 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
     {
         MoveHHi( gAresGlobal->gReplayData);
         HLock( gAresGlobal->gReplayData);
-        replayDataSize = (GetHandleSize( gAresGlobal->gReplayData) - (long)3) >> (long)2;
-        theseKeys = (unsigned long *)*gAresGlobal->gReplayData;
+        replayDataSize = (GetHandleSize( gAresGlobal->gReplayData) - 3) >> 2;
+        theseKeys = reinterpret_cast<unsigned long *>(*gAresGlobal->gReplayData);
         theseKeys++;
         if ( gAresGlobal->gOptions & kOptionRecord)
         {
@@ -2018,7 +2018,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                 netTime.hi = netTime.lo = 0;
                 Microseconds( &thisTime);
                 scrapTime = thisTime;
-                WideSubtract( (wide *)&thisTime, (wide *)&gAresGlobal->gLastTime);
+                WideSubtract( reinterpret_cast<wide *>(&thisTime), reinterpret_cast<wide *>(&gAresGlobal->gLastTime));
                 newGameTime = (thisTime.lo / kTimeUnit) + ((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
 //              newGameTime = gAresGlobal->gGameTime + Randomize( 7) + 1;//Randomize( kDecideEveryCycles);
 #ifdef kConstantRate
@@ -2034,9 +2034,9 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                         newGameTime = gAresGlobal->gGameTime + k68KMaxFrameSkip;
                         l1 = newGameTime - ((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
                         l2 = kTimeUnit;
-                        MyWideMul( l1, l2, (wide *)&thisTime);
+                        MyWideMul( l1, l2, reinterpret_cast<wide *>(&thisTime));
                         gAresGlobal->gLastTime = scrapTime;
-                        WideSubtract( (wide *)&gAresGlobal->gLastTime, (wide *)&thisTime);
+                        WideSubtract( reinterpret_cast<wide *>(&gAresGlobal->gLastTime), reinterpret_cast<wide *>(&thisTime));
                     }
 #ifdef powercxx
                 }
@@ -2063,9 +2063,9 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                     newGameTime = gAresGlobal->gGameTime + 12;
                     l1 = newGameTime - ((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
                     l2 = kTimeUnit;
-                    MyWideMul( l1, l2, (wide *)&thisTime);
+                    MyWideMul( l1, l2, reinterpret_cast<wide *>(&thisTime));
                     gAresGlobal->gLastTime = scrapTime;
-                    WideSubtract( (wide *)&gAresGlobal->gLastTime, (wide *)&thisTime);
+                    WideSubtract( reinterpret_cast<wide *>(&gAresGlobal->gLastTime), reinterpret_cast<wide *>(&thisTime));
                 }/* else
                 {
                     newGameTime = gAresGlobal->gGameTime + Randomize( 9) + 1;
@@ -2081,9 +2081,9 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                 {
                     l1 = kTimeUnit;
                     l2 = newGameTime - kMaxGameTime;
-                    MyWideMul( l1, l2, (wide *)&thisTime);
+                    MyWideMul( l1, l2, reinterpret_cast<wide *>(&thisTime));
                     gAresGlobal->gLastTime = scrapTime;
-                    WideSubtract( (wide *)&gAresGlobal->gLastTime, (wide *)&thisTime);
+                    WideSubtract( reinterpret_cast<wide *>(&gAresGlobal->gLastTime), reinterpret_cast<wide *>(&thisTime));
                     additionalSeconds += ( newGameTime / 60);
                     newGameTime -= kMaxGameTime;
 //                  gAresGlobal->gGameTime -= kMaxGameTime;
@@ -2118,9 +2118,9 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                 newGameTime = gAresGlobal->gGameTime;
                 l1 = newGameTime - ((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
                 l2 = kTimeUnit;
-                MyWideMul( l1, l2, (wide *)&thisTime);
+                MyWideMul( l1, l2, reinterpret_cast<wide *>(&thisTime));
                 gAresGlobal->gLastTime = scrapTime;
-                WideSubtract( (wide *)&gAresGlobal->gLastTime, (wide *)&thisTime);
+                WideSubtract( reinterpret_cast<wide *>(&gAresGlobal->gLastTime), reinterpret_cast<wide *>(&thisTime));
             }
 
             if ( gAresGlobal->gGameOver < 0)
@@ -2142,10 +2142,10 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                 {
 
                     MoveScrollStars( unitsToDo);
-                    MoveSpaceObjects( (spaceObjectType *)*gSpaceObjectData, kMaxSpaceObject,
+                    MoveSpaceObjects( reinterpret_cast<spaceObjectType *>(*gSpaceObjectData), kMaxSpaceObject,
                                     unitsToDo);
 
-//                  WriteDebugLine((char *)"\pMove");
+//                  WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pMove")));
 //                  WriteDebugLong( decideCycle);
 //                  WriteDebugLong( unitsToDo);
                 }
@@ -2369,7 +2369,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                                     kScenarioWinnerNoText;
                                                 break;
                                         }
-                                        CopyOffWorldToRealWorld( (WindowPtr)gTheWindow, &playAreaRect);
+                                        CopyOffWorldToRealWorld( gTheWindow, &playAreaRect);
                                         HideCursor();
                                         playerPaused = true;
                                         if ( gAresGlobal->gOptions & kOptionNetworkOn)
@@ -2545,7 +2545,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
 #endif NETSPROCKET_AVAILABLE
                     }
 
-                    CollideSpaceObjects( (spaceObjectType *)*gSpaceObjectData, kMaxSpaceObject);
+                    CollideSpaceObjects( reinterpret_cast<spaceObjectType *>(*gSpaceObjectData), kMaxSpaceObject);
                     decideCycle  = 0;
                     scenarioCheckTime++;
                     if ( scenarioCheckTime == 30)
@@ -2553,7 +2553,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                         scenarioCheckTime = 0;
                         CheckScenarioConditions( 0);
                     }
-//                  WriteDebugLine((char *)"\pDecide");
+//                  WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pDecide")));
                 }
                 unitsPassed -= unitsToDo;
             }
@@ -2704,7 +2704,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                 kScenarioWinnerNoText;
                             break;
                     }
-                    CopyOffWorldToRealWorld( (WindowPtr)gTheWindow, &playAreaRect);
+                    CopyOffWorldToRealWorld( gTheWindow, &playAreaRect);
                     HideCursor();
                     playerPaused = true;
                     if ( gAresGlobal->gOptions & kOptionNetworkOn)
@@ -2751,7 +2751,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                 MacShowCursor();
                 DoHelpScreen();
                 HideCursor();
-                CopyOffWorldToRealWorld( (WindowPtr)gTheWindow, &playAreaRect);
+                CopyOffWorldToRealWorld( gTheWindow, &playAreaRect);
                 playerPaused = true;
                 if ( gAresGlobal->gOptions & kOptionNetworkOn)
                 {
@@ -2791,7 +2791,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                 DoNetSettings();
 #endif NETSPROCKET_AVAILABLE
                 HideCursor();
-                CopyOffWorldToRealWorld( (WindowPtr)gTheWindow, &playAreaRect);
+                CopyOffWorldToRealWorld( gTheWindow, &playAreaRect);
                 playerPaused = true;
                 if ( gAresGlobal->gOptions & kOptionNetworkOn)
                 {
@@ -2888,7 +2888,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                 ShowSpriteCursorSprite();
                 DrawAllBeams();
                 DontShowScrollStars();
-                CopyOffWorldToRealWorld( (WindowPtr)gTheWindow, &playAreaRect);
+                CopyOffWorldToRealWorld( gTheWindow, &playAreaRect);
             } else
             {
                 ShowSpriteCursorSprite();
@@ -2899,7 +2899,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                 ShowScrollStars( TRUE);
                 ShowSectorLines();
                 ShowSite();
-                CopyOffWorldToRealWorld( (WindowPtr)gTheWindow, &playAreaRect);
+                CopyOffWorldToRealWorld( gTheWindow, &playAreaRect);
 
             }
 //          if ( hacktcsamplecount > hacktcsamplesize)
@@ -2974,12 +2974,12 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
     {
             HUnlock( gAresGlobal->gReplayData);
     }
-    WriteDebugLine((char *)"\p<GameOver");
+    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<GameOver")));
     WriteDebugLong( keyDataSize);
     MacShowCursor();
 
     Microseconds( &thisTime);
-    WideSubtract( (wide *)&thisTime, (wide *)&gAresGlobal->gLastTime);
+    WideSubtract( reinterpret_cast<wide *>(&thisTime), reinterpret_cast<wide *>(&gAresGlobal->gLastTime));
     newGameTime = thisTime.lo / 1000000; // divide by a million to get seconds
 //  *seconds = newGameTime + additionalSeconds;
     *seconds = newGameTime + additionalSeconds;
@@ -3022,7 +3022,7 @@ Boolean HandleMouseDown( EventRecord *theEvent)
             if ( TrackGoAway (whichWindow, theEvent->where))
             {
                 ShowHide ( whichWindow, FALSE);
-                if ( whichWindow == (WindowPtr)gTheWindow)
+                if ( whichWindow == gTheWindow)
                     done = TRUE;
             }
             break;

@@ -108,9 +108,9 @@ Boolean UserChooseTheDevice( int depth, Boolean setDepth, Rect *bounds)
     {
         MacSetRect( &deviceRect, 0, 0, 200, 200);
         CenterRectInDevice( deviceWindow[i].whichDevice, &deviceRect);
-        deviceWindow[i].window = GetNewDialog( 703, nil, (WindowPtr)-1);
-        MacMoveWindow( (WindowPtr)deviceWindow[i].window, deviceRect.left, deviceRect.top, true);
-        MacShowWindow( (WindowPtr)deviceWindow[i].window);
+        deviceWindow[i].window = GetNewDialog( 703, nil, reinterpret_cast<WindowPtr>(-1));
+        MacMoveWindow(reinterpret_cast<WindowPtr>(deviceWindow[i].window), deviceRect.left, deviceRect.top, true);
+        MacShowWindow(reinterpret_cast<WindowPtr>(deviceWindow[i].window));
     }
 
     while ( chosenWindow == -1)
@@ -139,7 +139,7 @@ Boolean UserChooseTheDevice( int depth, Boolean setDepth, Rect *bounds)
                         {
                             for ( i = 0; i < kMaxDevice; i++)
                             {
-                                if ( whichWindow == (WindowPtr)deviceWindow[i].window)
+                                if ( whichWindow == reinterpret_cast<WindowPtr>(deviceWindow[i].window))
                                     chosenWindow = i;
                             }
                         }
@@ -164,16 +164,16 @@ Boolean UserChooseTheDevice( int depth, Boolean setDepth, Rect *bounds)
                 break;
 
             case updateEvt:
-                whichWindow = (WindowPtr)theEvent.message;
+                whichWindow = reinterpret_cast<WindowPtr>(theEvent.message);
                 if ( whichWindow != nil)
                 {
                     for ( i = 0; i < kMaxDevice; i++)
                     {
-                        if ( whichWindow == (WindowPtr)deviceWindow[i].window)
+                        if ( whichWindow == reinterpret_cast<WindowPtr>(deviceWindow[i].window))
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                            DrawDialog( (DialogPtr)whichWindow);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate(whichWindow);
+                            DrawDialog(reinterpret_cast<DialogPtr>(whichWindow));
+                            EndUpdate(reinterpret_cast<WindowPtr>(whichWindow));
                         }
                     }
                 }
@@ -185,7 +185,7 @@ Boolean UserChooseTheDevice( int depth, Boolean setDepth, Rect *bounds)
     {
         if ( deviceWindow[i].window != nil)
         {
-            DisposeWindow( (WindowPtr)deviceWindow[i].window);
+            DisposeWindow(reinterpret_cast<WindowPtr>(deviceWindow[i].window));
         }
     }
 
@@ -306,8 +306,8 @@ GDHandle GetBestDevice( int *trueDepth, int width, int height)
                 if (( (deviceRect.right - deviceRect.left) >= width) &&
                     ( (deviceRect.bottom - deviceRect.top) >= height))
                 {
-                    area = (long)(deviceRect.right - deviceRect.left) *
-                        (long)( deviceRect.bottom - deviceRect.top);
+                    area = implicit_cast<long>(deviceRect.right - deviceRect.left) *
+                        implicit_cast<long>(deviceRect.bottom - deviceRect.top);
                     if (( area > biggestArea) && (( GetDeviceDepth( resultDevice) ==
                         depth) || ( !bestAtRightDepth)))
                     {

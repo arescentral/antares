@@ -545,9 +545,9 @@ struct PicData {
             data[i] = new uint8_t[width];
             for (int j = 0; j < width; ++j) {
                 const png::rgba_pixel& p = image[i][j];
-                uint16_t red = p.red | (uint16_t)p.red << 8;
-                uint16_t green = p.green | (uint16_t)p.green << 8;
-                uint16_t blue = p.blue | (uint16_t)p.blue << 8;
+                uint16_t red = p.red | implicit_cast<uint16_t>(p.red) << 8;
+                uint16_t green = p.green | implicit_cast<uint16_t>(p.green) << 8;
+                uint16_t blue = p.blue | implicit_cast<uint16_t>(p.blue) << 8;
                 data[i][j] = NearestColor(red, green, blue);
             }
         }

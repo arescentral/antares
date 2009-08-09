@@ -211,8 +211,8 @@ Boolean Key_Setup_Screen_Do( void)
     BlackenOffscreen();
 
     FlushEvents(everyEvent, 0);
-    tempKeyControls = (tempKeyControlType *)NewPtr( sizeof( long) *
-        kKeyExtendedControlNum);
+    tempKeyControls = reinterpret_cast<tempKeyControlType *>(NewPtr( sizeof( long) *
+        kKeyExtendedControlNum));
     if ( tempKeyControls == nil)
     {
         SysBeep(20);
@@ -228,7 +228,7 @@ Boolean Key_Setup_Screen_Do( void)
     error = OpenInterface( kKeyScreenID);
     if ( error == kNoError)
     {
-        prefsData = (preferencesDataType *)*gAresGlobal->gPreferencesData;
+        prefsData = reinterpret_cast<preferencesDataType *>(*gAresGlobal->gPreferencesData);
 
 //      SwitchAnyRadioOrCheckbox( kKeySubstituteCheckbox,
 //          ((options & kOptionSubstituteFKeys) ? (true):(false)));
@@ -352,28 +352,28 @@ Boolean Key_Setup_Screen_Do( void)
 //                      HandleOSEvent( &theEvent);
                         break;
                     case updateEvt:
-                        whichWindow = ( CWindowPtr)theEvent.message;
+                        whichWindow = reinterpret_cast< CWindowPtr>(theEvent.message);
 
                         if ( whichWindow == gTheWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gTheWindow);
-                                CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &(gTheWindow->portRect));
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate( reinterpret_cast<WindowPtr>(whichWindow));
+                                MacSetPort(gTheWindow);
+                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
+                            EndUpdate(whichWindow);
                             break;
-                            EndUpdate( (WindowPtr)whichWindow);
+                            EndUpdate(whichWindow);
                         } else if ( whichWindow == gAresGlobal->gBackWindow)
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                                MacSetPort( (WindowPtr)gAresGlobal->gBackWindow);
-                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), (Pattern *)&qd.black);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate(whichWindow);
+                                MacSetPort(gAresGlobal->gBackWindow);
+                                MacFillRect(&(gAresGlobal->gBackWindow->portRect), &qd.black);
+                            EndUpdate(whichWindow);
                         } else
                         {
-                            BeginUpdate( (WindowPtr)whichWindow);
-                            EndUpdate( (WindowPtr)whichWindow);
+                            BeginUpdate(whichWindow);
+                            EndUpdate(whichWindow);
                         }
-                        MacSetPort( (WindowPtr)gTheWindow);
+                        MacSetPort(gTheWindow);
 
                         break;
 
@@ -509,9 +509,9 @@ Boolean Key_Setup_Screen_Do( void)
         }
         CloseInterface();
     }
-    WriteDebugLine((char *)"\pRESULT:");
+    WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pRESULT:")));
     WriteDebugLong( result);
-    DisposePtr( (Ptr)tempKeyControls);
+    DisposePtr(reinterpret_cast<Ptr>(tempKeyControls));
     return( result);
 }
 

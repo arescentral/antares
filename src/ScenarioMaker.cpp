@@ -194,7 +194,7 @@ void ScenarioMakerCleanup( void)
 Boolean ConstructScenario( long which)
 
 {
-    scenarioType        *scenario = (scenarioType *)*gAresGlobal->gScenarioData + which;
+    scenarioType        *scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + which;
     long                count, owner, type, admiralType, specialAttributes,
                         newShipNum, c2, c3, baseClass, race;
     coordPointType      coord;
@@ -210,7 +210,7 @@ Boolean ConstructScenario( long which)
 
     v.h = 0; v.v = 0;
 
-    WriteDebugLine((char *)"\pSIZE:");
+    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pSIZE:")));
     WriteDebugLong( sizeof( scenarioInitialType));
 
     ResetAllSpaceObjects();
@@ -261,7 +261,7 @@ Boolean ConstructScenario( long which)
     else
         gAresGlobal->gScenarioRotation = count;
 
-    gThisScenario = (scenarioType *)*gAresGlobal->gScenarioData + which;
+    gThisScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + which;
 
     gAresGlobal->gScenarioWinner = kScenarioWinnerNoPlayer | kScenarioWinnerNoNext | kScenarioWinnerNoText;
 
@@ -365,7 +365,7 @@ Boolean ConstructScenario( long which)
     DoLoadingInterface( &loadingRect, s);
     UpdateLoadingInterface( currentStep, stepNumber, &loadingRect);
 
-    WriteDebugLine((char *)"\p- C H E C K -");
+    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p- C H E C K -")));
 
     // for each initial object
 
@@ -492,7 +492,7 @@ Boolean ConstructScenario( long which)
 
     SetAllBaseObjectsUnchecked();
 
-    WriteDebugLine((char *)"\p- A D D -");
+    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p- A D D -")));
     RemoveAllUnusedSounds();
     RemoveAllUnusedPixTables();
 
@@ -502,25 +502,25 @@ Boolean ConstructScenario( long which)
         if ( baseObject != nil)
         {
             AddBaseObjectMedia( gAresGlobal->scenarioFileInfo.energyBlobID, 0); // special case; always neutral
-    //      scenario = (scenarioType *)*gAresGlobal->gScenarioData + which;
+    //      scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + which;
         }
         baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.warpInFlareID);
         if ( baseObject != nil)
         {
             AddBaseObjectMedia( gAresGlobal->scenarioFileInfo.warpInFlareID, 0); // special case; always neutral
-    //      scenario = (scenarioType *)*gAresGlobal->gScenarioData + which;
+    //      scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + which;
         }
         baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.warpOutFlareID);
         if ( baseObject != nil)
         {
             AddBaseObjectMedia( gAresGlobal->scenarioFileInfo.warpOutFlareID, 0); // special case; always neutral
-    //      scenario = (scenarioType *)*gAresGlobal->gScenarioData + which;
+    //      scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + which;
         }
         baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.playerBodyID);
         if ( baseObject != nil)
         {
             AddBaseObjectMedia( gAresGlobal->scenarioFileInfo.playerBodyID, GetAdmiralColor( count));
-    //      scenario = (scenarioType *)*gAresGlobal->gScenarioData + which;
+    //      scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + which;
         }
     }
 
@@ -559,7 +559,7 @@ Boolean ConstructScenario( long which)
         }
 
         // we may have just moved memory, so let's make sure our ptrs are correct
-//      scenario = (scenarioType *)*gAresGlobal->gScenarioData + which;
+//      scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + which;
         initial = mGetScenarioInitial( gThisScenario, count);
         baseObject = mGetBaseObjectPtr( type);
 
@@ -569,12 +569,12 @@ Boolean ConstructScenario( long which)
             if ( baseObject->attributes & kCanThink)
             {
                 AddPixTable( initial->spriteIDOverride +
-                    ((short)GetAdmiralColor( initial->owner) << kSpriteTableColorShift));
+                    (GetAdmiralColor( initial->owner) << kSpriteTableColorShift));
             } else
             {
                 AddPixTable( initial->spriteIDOverride);
             }
-//          scenario = (scenarioType *)*gAresGlobal->gScenarioData + which;
+//          scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + which;
         }
 
         // check any objects this object can build
@@ -593,7 +593,7 @@ Boolean ConstructScenario( long which)
                     if ( baseObject != nil)
                     {
                         AddBaseObjectMedia( newShipNum, GetAdmiralColor( c3));
-//                      scenario = (scenarioType *)*gAresGlobal->gScenarioData + which;
+//                      scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + which;
                     }
                 }
             }
@@ -605,11 +605,11 @@ Boolean ConstructScenario( long which)
     for ( count = 0; count < gThisScenario->conditionNum; count++)
     {
         condition = mGetScenarioCondition( gThisScenario, count);
-        action = (objectActionType *)*gObjectActionData + condition->startVerb;
+        action = reinterpret_cast<objectActionType*>(*gObjectActionData) + condition->startVerb;
         for ( c2 = 0; c2 < condition->verbNum; c2++)
         {
             condition = mGetScenarioCondition( gThisScenario, count);
-            action = (objectActionType *)*gObjectActionData + condition->startVerb + c2;
+            action = reinterpret_cast<objectActionType*>(*gObjectActionData) + condition->startVerb + c2;
             AddActionMedia( action, 0);
 //          action++;
         }
@@ -725,7 +725,7 @@ Boolean ConstructScenario( long which)
                                                 specialAttributes,
                                                 initial->spriteIDOverride);
 
-            anObject = (spaceObjectType *)*gSpaceObjectData + (long)newShipNum;
+            anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + newShipNum;
             if ( anObject->attributes & kIsDestination)
             {
                 anObject->destinationObject = MakeNewDestination( newShipNum, initial->canBuild,
@@ -798,7 +798,7 @@ Boolean ConstructScenario( long which)
                 // now give the mapped initial object the admiral's destination
 
                 initial = mGetScenarioInitial( gThisScenario, count);
-                anObject = (spaceObjectType *)*gSpaceObjectData + (long)initial->realObjectNumber;
+                anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + initial->realObjectNumber;
                 specialAttributes = anObject->attributes; // preserve the attributes
                 anObject->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
                 SetObjectDestination( anObject, nil);
@@ -821,7 +821,7 @@ Boolean ConstructScenario( long which)
             if ( GetAdmiralFlagship( c2) == nil)
             {
                 mWriteDebugString("\pAdmiral Needs Flagship!");
-                anObject = (spaceObjectType *)*gSpaceObjectData;
+                anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
                 count = 0;
                 while ((((anObject->attributes & kCanThink) != kCanThink) ||
                     (anObject->owner != c2)) && ( count < kMaxSpaceObject))
@@ -871,12 +871,12 @@ Boolean ConstructScenario( long which)
     for ( count = 0; count < ((gThisScenario->startTime & kScenario_StartTimeMask) * 20); count++)
     {
         gAresGlobal->gGameTime = count;
-        MoveSpaceObjects( (spaceObjectType *)*gSpaceObjectData, kMaxSpaceObject,
+        MoveSpaceObjects( reinterpret_cast<spaceObjectType*>(*gSpaceObjectData), kMaxSpaceObject,
                     kDecideEveryCycles);
         NonplayerShipThink( kDecideEveryCycles);
         AdmiralThink();
         ExecuteActionQueue( kDecideEveryCycles);
-        CollideSpaceObjects( (spaceObjectType *)*gSpaceObjectData, kMaxSpaceObject);
+        CollideSpaceObjects( reinterpret_cast<spaceObjectType*>(*gSpaceObjectData), kMaxSpaceObject);
         c2++;
         if ( c2 == 30)
         {
@@ -924,7 +924,7 @@ Boolean ConstructScenario( long which)
 void SetAllBaseObjectsUnchecked( void)
 
 {
-    baseObjectType  *aBase = (baseObjectType *)*gBaseObjectData;
+    baseObjectType  *aBase = reinterpret_cast<baseObjectType *>(*gBaseObjectData);
     long            count;
 
     for ( count = 0; count < kMaxBaseObject; count++)
@@ -940,14 +940,14 @@ void CheckBaseObjectMedia( baseObjectType *aBase, unsigned char color)
 {
     baseObjectType  *weapon;
 
-    if ( !(aBase->internalFlags & (0x00000001 <<(long)color)))
+    if ( !(aBase->internalFlags & (0x00000001 << color)))
     {
-        aBase->internalFlags |= (0x00000001 <<(long)color);
+        aBase->internalFlags |= (0x00000001 << color);
         if ( aBase->attributes & kCanThink)
         {
             if ( aBase->pixResID != kNoSpriteTable)
                 KeepPixTable( aBase->pixResID +
-                    ((short)color << kSpriteTableColorShift));
+                    (color << kSpriteTableColorShift));
         } else
         {
             if ( aBase->pixResID != kNoSpriteTable)
@@ -983,7 +983,7 @@ void CheckActionMedia( long whichAction, long actionNum, unsigned char color)
 
 {
     baseObjectType      *baseObject;
-    objectActionType    *action = (objectActionType *)*gObjectActionData + whichAction;
+    objectActionType    *action = reinterpret_cast<objectActionType*>(*gObjectActionData) + whichAction;
     Boolean             OKtoExecute;
     long                count;
 
@@ -1016,7 +1016,7 @@ void CheckActionMedia( long whichAction, long actionNum, unsigned char color)
                         break;
 
                     case kAlterOwner:
-                        baseObject = (baseObjectType *)*gBaseObjectData;
+                        baseObject = reinterpret_cast<baseObjectType*>(*gBaseObjectData);
                         for ( count = 0; count < kMaxBaseObject; count++)
                         {
                             OKtoExecute = false;
@@ -1064,15 +1064,15 @@ void AddBaseObjectMedia( long whichBase, unsigned char color)
 
     mWriteDebugString("\pADDBASE:");
     WriteDebugLong( whichBase);
-    if ( !(aBase->internalFlags & (0x00000001 <<(long)color)))
+    if ( !(aBase->internalFlags & (0x00000001 << color)))
     {
-        aBase->internalFlags |= (0x00000001 <<(long)color);
+        aBase->internalFlags |= (0x00000001 << color);
         if ( aBase->pixResID != kNoSpriteTable)
         {
             if ( aBase->attributes & kCanThink)
             {
                 AddPixTable( aBase->pixResID +
-                    ((short)color << kSpriteTableColorShift));
+                    (color << kSpriteTableColorShift));
             } else
             {
                 AddPixTable( aBase->pixResID);      // moves mem
@@ -1164,7 +1164,7 @@ void AddActionMedia( objectActionType *action, unsigned char color)
                         break;
 
                     case kAlterOwner:
-                        baseObject = (baseObjectType *)*gBaseObjectData;
+                        baseObject = reinterpret_cast<baseObjectType*>(*gBaseObjectData);
                         for ( count = 0; count < kMaxBaseObject; count++)
                         {
                             OKtoExecute = false;
@@ -1253,12 +1253,12 @@ void HackWinLoseMessage( Boolean win)
     if ( win)
     {
         StartMessage();
-        AppendStringToMessage(( anyCharType *)"\pYOU WIN");
+        AppendStringToMessage(const_cast<anyCharType *>("\pYOU WIN"));
         EndMessage();
     } else
     {
         StartMessage();
-        AppendStringToMessage(( anyCharType *)"\pYou lose");
+        AppendStringToMessage(const_cast<anyCharType *>("\pYou lose"));
         EndMessage();
     }
 }
@@ -1351,9 +1351,9 @@ void CheckScenarioConditions( long timePass)
                             mGetRealObjectFromInitial( dObject, initial, condition->directObject);
                             if ( dObject != nil)
                             {
-                                difference = ABS( (long)sObject->location.h - (long)dObject->location.h);
+                                difference = ABS<int>( sObject->location.h - dObject->location.h);
                                 dcalc = difference;
-                                difference =  ABS( (long)sObject->location.v - (long)dObject->location.v);
+                                difference =  ABS<int>( sObject->location.v - dObject->location.v);
                                 distance = difference;
 
                                 if (( dcalc < kMaximumRelevantDistance) && ( distance < kMaximumRelevantDistance))
@@ -1379,9 +1379,9 @@ void CheckScenarioConditions( long timePass)
                             mGetRealObjectFromInitial( dObject, initial, condition->directObject);
                             if ( dObject != nil)
                             {
-                                difference = ABS( (long)sObject->location.h - (long)dObject->location.h);
+                                difference = ABS<int>( sObject->location.h - dObject->location.h);
                                 dcalc = difference;
-                                difference =  ABS( (long)sObject->location.v - (long)dObject->location.v);
+                                difference =  ABS<int>( sObject->location.v - dObject->location.v);
                                 distance = difference;
 
                                 if (( dcalc < kMaximumRelevantDistance) && ( distance < kMaximumRelevantDistance))
@@ -1404,10 +1404,10 @@ void CheckScenarioConditions( long timePass)
                         if ( sObject == nil)
                         {
                             conditionTrue = TRUE;
-                        } else if ( sObject->health <= ( sObject->baseType->health >> (long)1))
+                        } else if ( sObject->health <= ( sObject->baseType->health >> 1))
                         {
                             conditionTrue = true;
-                            WriteDebugLine((char *)"\pHALFNESS!");
+                            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pHALFNESS!")));
                             WriteDebugLong( condition->directObject);
                         } else
                         {
@@ -1423,7 +1423,7 @@ void CheckScenarioConditions( long timePass)
                             l = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
                             if ( l >= 0)
                             {
-                                dObject = (spaceObjectType *)*gSpaceObjectData + l;
+                                dObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + l;
                                 if ( dObject == sObject)
                                 {
                                     conditionTrue = true;
@@ -1440,7 +1440,7 @@ void CheckScenarioConditions( long timePass)
                             l = GetAdmiralDestinationObject( gAresGlobal->gPlayerAdmiralNumber);
                             if ( l >= 0)
                             {
-                                dObject = (spaceObjectType *)*gSpaceObjectData + l;
+                                dObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + l;
                                 if ( dObject == sObject)
                                 {
                                     conditionTrue = true;
@@ -1473,7 +1473,7 @@ void CheckScenarioConditions( long timePass)
                         {
                             longMessageType *tmessage;
 
-                            tmessage = (longMessageType *)*gAresGlobal->gLongMessageData;
+                            tmessage = reinterpret_cast<longMessageType *>(*gAresGlobal->gLongMessageData);
                             if ( tmessage->currentResID == (condition->conditionArgument.location.h +
                                 condition->conditionArgument.location.v - 1))
                             {
@@ -1694,7 +1694,7 @@ void UnhideInitialObject( long whichInitial)
                                                 specialAttributes,
                                                 initial->spriteIDOverride);
 
-            anObject = (spaceObjectType *)*gSpaceObjectData + (long)newShipNum;
+            anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + newShipNum;
             initial = mGetScenarioInitial( gThisScenario, whichInitial);
 
             if ( anObject->attributes & kIsDestination)
@@ -1754,7 +1754,7 @@ void UnhideInitialObject( long whichInitial)
                         // now give the mapped initial object the admiral's destination
 
                         initial = mGetScenarioInitial( gThisScenario, whichInitial);
-                        anObject = (spaceObjectType *)*gSpaceObjectData + (long)initial->realObjectNumber;
+                        anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + initial->realObjectNumber;
                         specialAttributes = anObject->attributes; // preserve the attributes
                         anObject->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
                         SetObjectDestination( anObject, nil);
@@ -1829,7 +1829,7 @@ void GetScenarioFullScaleAndCorner( long whichScenario, long rotation,
 {
     long            biggest, count, otherCount, mustFit;
     longPointType   coord, otherCoord, tempCoord;
-    scenarioType    *scenario = (scenarioType *)*gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario;
     scenarioInitialType     *initial;
 
 
@@ -1843,12 +1843,12 @@ void GetScenarioFullScaleAndCorner( long whichScenario, long rotation,
         initial = mGetScenarioInitial( scenario, count);
         if ( !(initial->attributes & kInitiallyHidden))
         {
-            GetInitialCoord( initial, (coordPointType *)&coord, gAresGlobal->gScenarioRotation);
+            GetInitialCoord( initial, reinterpret_cast<coordPointType *>(&coord), gAresGlobal->gScenarioRotation);
 
             for ( otherCount = 0; otherCount < scenario->initialNum; otherCount++)
             {
                 initial = mGetScenarioInitial( scenario, otherCount);
-                GetInitialCoord( initial, (coordPointType *)&otherCoord, gAresGlobal->gScenarioRotation);
+                GetInitialCoord( initial, reinterpret_cast<coordPointType *>(&otherCoord), gAresGlobal->gScenarioRotation);
 
                 if ( ABS( otherCoord.h - coord.h) > biggest)
                     biggest = ABS( otherCoord.h - coord.h);
@@ -1872,7 +1872,7 @@ void GetScenarioFullScaleAndCorner( long whichScenario, long rotation,
     {
         if ( !(initial->attributes & kInitiallyHidden))
         {
-            GetInitialCoord( initial, (coordPointType *)&tempCoord, gAresGlobal->gScenarioRotation);
+            GetInitialCoord( initial, reinterpret_cast<coordPointType *>(&tempCoord), gAresGlobal->gScenarioRotation);
 
             if ( (tempCoord.h) < coord.h)
                 coord.h = tempCoord.h;
@@ -1904,14 +1904,14 @@ void GetScenarioFullScaleAndCorner( long whichScenario, long rotation,
 long GetBriefPointNumber( long whichScenario)
 
 {
-    scenarioType    *scenario = (scenarioType *)*gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario;
 
     return ( scenario->briefPointNum & kScenarioBriefMask);
 }
 
 long GetScenarioAngle( long whichScenario)
 {
-    scenarioType    *scenario = (scenarioType *)*gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario;
 
     if ( scenario->briefPointNum & kScenarioAngleMask)
         return (( (scenario->briefPointNum & kScenarioAngleMask) >> kScenarioAngleShift) - 1) * 2;
@@ -1921,7 +1921,7 @@ long GetScenarioAngle( long whichScenario)
 
 long GetScenarioNumberFromChapterNumber( long whichChapter)
 {
-    scenarioType    *aScenario = (scenarioType *)*gAresGlobal->gScenarioData;
+    scenarioType    *aScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData);
     long            whichScenario = 0;
 
     while (( whichScenario < kScenarioNum) && ( aScenario->levelNameStrNum != whichChapter))
@@ -1937,7 +1937,7 @@ long GetScenarioNumberFromChapterNumber( long whichChapter)
 void GetScenarioStarMapPoint( long whichScenario, Point *starPoint)
 
 {
-    scenarioType    *scenario = (scenarioType *)*gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario;
 
     starPoint->h = scenario->starMapH;
     starPoint->v = scenario->starMapV;
@@ -1945,7 +1945,7 @@ void GetScenarioStarMapPoint( long whichScenario, Point *starPoint)
 
 long GetChapterNumberFromScenarioNumber( long whichScenario)
 {
-    scenarioType    *aScenario = (scenarioType *)*gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *aScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario;
 
     if ( whichScenario < 0) return ( -1);
     return( aScenario->levelNameStrNum);
@@ -1954,7 +1954,7 @@ long GetChapterNumberFromScenarioNumber( long whichScenario)
 scenarioType *GetScenarioPtrFromChapter( long whichChapter)
 {
     scenarioType    *aScenario =
-                        (scenarioType *)*gAresGlobal->gScenarioData +
+                        reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) +
                         GetScenarioNumberFromChapterNumber( whichChapter);
 
     if ( whichChapter < 0) return ( nil);
@@ -1964,7 +1964,7 @@ scenarioType *GetScenarioPtrFromChapter( long whichChapter)
 
 void GetScenarioName( long whichScenario, StringPtr scenarioName)
 {
-    scenarioType    *aScenario = (scenarioType *)*gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *aScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario;
     GetIndString( scenarioName, kLevelNameID, aScenario->levelNameStrNum);
 }
 
@@ -1975,25 +1975,25 @@ long GetScenarioNumber( void)
 
 long GetScenarioPlayerNum( long whichScenario)
 {
-    scenarioType    *aScenario = (scenarioType *)*gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *aScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario;
     return ( aScenario->playerNum);
 }
 
 long GetScenarioPrologueID( long whichScenario)
 {
-    scenarioType    *aScenario = (scenarioType *)*gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *aScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario;
     return ( aScenario->prologueID);
 }
 
 long GetScenarioEpilogueID( long whichScenario)
 {
-    scenarioType    *aScenario = (scenarioType *)*gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *aScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario;
     return ( aScenario->epilogueID);
 }
 
 void GetScenarioMovieName( long whichScenario, StringPtr movieName)
 {
-    scenarioType    *aScenario = (scenarioType *)*gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *aScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario;
 
     movieName[0] = 0;
     GetIndString( movieName, 4500, aScenario->movieNameStrNum);
@@ -2001,20 +2001,20 @@ void GetScenarioMovieName( long whichScenario, StringPtr movieName)
 
 long GetNextScenarioChapter( long whichScenario)
 {
-    scenarioType    *aScenario = (scenarioType *)*gAresGlobal->gScenarioData + whichScenario, *newScenario = nil;
+    scenarioType    *aScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario, *newScenario = nil;
     long            newScenarioNum, newChapterNum = aScenario->levelNameStrNum + 1;
 
     newScenarioNum = GetScenarioNumberFromChapterNumber( newChapterNum);
     if ( newScenarioNum >= 0)
     {
-        newScenario = (scenarioType *)*gAresGlobal->gScenarioData + newScenarioNum;
+        newScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + newScenarioNum;
         while ( ( newScenario->playerNum <= 0) && ( newChapterNum < GetScenarioNumber()) && ( newScenario != nil))
         {
             newChapterNum++;
             newScenarioNum = GetScenarioNumberFromChapterNumber( newChapterNum);
             if ( newScenarioNum >= 0)
             {
-                newScenario = (scenarioType *)*gAresGlobal->gScenarioData + newScenarioNum;
+                newScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + newScenarioNum;
             } else newScenario = nil;
         }
     }
@@ -2073,7 +2073,7 @@ long GetPreviousNetworkScenario( long thisChapter)
 Boolean ThisChapterIsNetworkable( long whichChapter)
 
 {
-    scenarioType    *aScenario = (scenarioType *)*gAresGlobal->gScenarioData + GetScenarioNumberFromChapterNumber( whichChapter);
+    scenarioType    *aScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + GetScenarioNumberFromChapterNumber( whichChapter);
     long            i;
 
     if (( whichChapter < 0) || ( whichChapter > GetScenarioNumber()))
@@ -2089,6 +2089,6 @@ Boolean ThisChapterIsNetworkable( long whichChapter)
 void CorrectThisScenarioPtr( Handle scenarioData)
 {
 #pragma unused( scenarioData)
-    gThisScenario = (scenarioType *)*gAresGlobal->gScenarioData + gAresGlobal->gThisScenarioNumber;
+    gThisScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + gAresGlobal->gThisScenarioNumber;
 //  WriteDebugLine((char *)"\pCorrect Scenario");
 }

@@ -38,7 +38,7 @@ long    gFlashingLineColor = 3;
 short InitSpriteCursor( void)
 
 {
-    gSpriteCursor = (spriteCursorType *)NewPtr( sizeof( spriteCursorType));
+    gSpriteCursor = reinterpret_cast<spriteCursorType*>(NewPtr( sizeof( spriteCursorType)));
     if ( gSpriteCursor == nil)
     {
         return( MEMORY_ERROR);
@@ -51,7 +51,7 @@ short InitSpriteCursor( void)
 void CleanupSpriteCursor( void)
 
 {
-    if ( gSpriteCursor != nil) DisposePtr( (Ptr)gSpriteCursor);
+    if ( gSpriteCursor != nil) DisposePtr( reinterpret_cast<Ptr>(gSpriteCursor));
 }
 
 void ResetSpriteCursor( void)

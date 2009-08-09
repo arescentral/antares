@@ -95,7 +95,7 @@ void ResetAllHandleData( void)
 
 {
     short           i = 0;
-    handleDataType  *h = (handleDataType *)*gHandleData;
+    handleDataType  *h = reinterpret_cast<handleDataType *>(*gHandleData);
 
     for ( i = 0; i < kMaxHandleHandleNum; i++)
     {
@@ -116,14 +116,14 @@ short HHRegisterHandle( Handle *newHandle,
 
 {
     short            i = 0;
-    handleDataType  *h = (handleDataType *)*gHandleData;
+    handleDataType  *h = reinterpret_cast<handleDataType *>(*gHandleData);
     OSErr           err;
     SignedByte      hstate;
 
     hstate = HGetState( *newHandle);
     if ( hstate & 0x40) ShowErrorAny( eContinueErr, -1, "\pPurgable Handle: ", name, nil, nil, -1, -1, -1, -1, __FILE__, 0);
     HHMaxMem();
-    h = (handleDataType *)*gHandleData;
+    h = reinterpret_cast<handleDataType *>(*gHandleData);
     while (( h->hand != nil) && ( i < kMaxHandleHandleNum)) { h++; i++;}
     if ( i == kMaxHandleHandleNum)
     {
@@ -143,7 +143,7 @@ short HHRegisterHandle( Handle *newHandle,
     else h->name[0] = 0;
     if ( checkMe)
     {
-        h->checkHandle = (Handle)*newHandle;
+        h->checkHandle = reinterpret_cast<Handle>(*newHandle);
         err = HandToHand( &h->checkHandle);
         if ( err != noErr) MyDebugString("\pError Making Check Copy of Handle");
         MoveHHi( h->checkHandle);
@@ -160,7 +160,7 @@ void HHDeregisterHandle( Handle *killHandle)
 
 {
     short            i = 0;
-    handleDataType  *h = (handleDataType *)*gHandleData;
+    handleDataType  *h = reinterpret_cast<handleDataType *>(*gHandleData);
 
     while (( h->hand != killHandle) && ( i < kMaxHandleHandleNum)) { h++; i++;}
     if ( i < kMaxHandleHandleNum)
@@ -178,7 +178,7 @@ void HHMaxMem( void)
 {
     Size            grow = 0, free = 0;
     short           i = 0;
-    handleDataType  *h = (handleDataType *)*gHandleData;
+    handleDataType  *h = reinterpret_cast<handleDataType *>(*gHandleData);
     Str255          debug;
 
 //  WriteDebugLine((char *)"\p<MAXMEM");
@@ -219,7 +219,7 @@ void HHMaxMem( void)
 
     HLock( gHandleData);
 
-    h = (handleDataType *)*gHandleData;
+    h = reinterpret_cast<handleDataType *>(*gHandleData);
     for ( i = 0; i < kMaxHandleHandleNum; i++)
     {
         if ( h->hand != nil)
@@ -238,7 +238,7 @@ void HHMaxMem( void)
         h++;
     }
 
-    h = (handleDataType *)*gHandleData;
+    h = reinterpret_cast<handleDataType *>(*gHandleData);
     for ( i = 0; i < kMaxHandleHandleNum; i++)
     {
         if ( h->hand != nil)
@@ -287,7 +287,7 @@ Handle HHGetResource( ResType resourceType, short resID)
     aNewHandle = GetResource( resourceType, resID);
     if ( aNewHandle == nil)
     {
-        WriteDebugLine((char *)"\pNILRES!");
+        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pNILRES!")));
         HHMaxMem();
         aNewHandle = GetResource( resourceType, resID);
     }
@@ -319,7 +319,7 @@ void HHConcatenateHandle( Handle destHandle, Handle sourceHandle)
 
 void HHClearHandle( Handle aHandle)
 {
-    unsigned char   *c = (unsigned char *)*aHandle, value = 0;
+    unsigned char   *c = reinterpret_cast<unsigned char *>(*aHandle), value = 0;
     long            handleSize = GetHandleSize( aHandle);
 
     while ( handleSize > 0)
@@ -333,7 +333,7 @@ void HHClearHandle( Handle aHandle)
 
 void HHCheckHandle( Handle oneHandle, Handle twoHandle)
 {
-    unsigned char   *onec = (unsigned char *)*oneHandle, *twoc  = (unsigned char *)*twoHandle;
+    unsigned char   *onec = reinterpret_cast<unsigned char *>(*oneHandle), *twoc  = reinterpret_cast<unsigned char *>(*twoHandle);
     long            oneHandleSize = GetHandleSize( oneHandle), twoHandleSize = GetHandleSize( twoHandle);
 
     if ( oneHandleSize != twoHandleSize) MyDebugString("\pNot Even CLOSE!");
@@ -355,7 +355,7 @@ void HHCheckHandle( Handle oneHandle, Handle twoHandle)
 
 void HHBetterCheckHandle( Handle oneHandle, Handle twoHandle, StringPtr s)
 {
-    unsigned char   *onec = (unsigned char *)*oneHandle, *twoc  = (unsigned char *)*twoHandle;
+    unsigned char   *onec = reinterpret_cast<unsigned char *>(*oneHandle), *twoc  = reinterpret_cast<unsigned char *>(*twoHandle);
     long            oneHandleSize = GetHandleSize( oneHandle), twoHandleSize = GetHandleSize( twoHandle);
     Str255          debugstr;
     Boolean         equal = true;
@@ -394,7 +394,7 @@ void HHBetterCheckHandle( Handle oneHandle, Handle twoHandle, StringPtr s)
 
 void HHCheckAllHandles( void)
 {
-    handleDataType  *h = (handleDataType *)*gHandleData;
+    handleDataType  *h = reinterpret_cast<handleDataType *>(*gHandleData);
     long            i;
 
     for ( i = 0; i < kMaxHandleHandleNum; i++)

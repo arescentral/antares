@@ -32,7 +32,7 @@
 
 #define kRandomTableSize    512L
 
-#define kRandomDebugTableSize   (long)100000
+#define kRandomDebugTableSize   100000
 
 //#define   kRandomRecord
 //#define   kRandomReplay
@@ -97,7 +97,7 @@ void RandomCleanup( void)
     if ( gDebugRandomSave != nil)
     {
 #ifdef kRandomRecord
-        SetHandleSize( gDebugRandomSave, (gDebugWhichRandom + (long)8) * sizeof( debugRandomType));
+        SetHandleSize( gDebugRandomSave, (gDebugWhichRandom + 8) * sizeof( debugRandomType));
         if ( SaveAnyResourceInPreferences( 'Rand', 500, gDebugRandomSave, true) == noErr)
         {
         } else SysBeep( 20);
@@ -135,13 +135,13 @@ void DebugRandomReset( void)
 short DebugRandomSeeded( short range, long *seed, char *file, OSType sig, long objectType)
 {
     short           result = 0;
-    debugRandomType *dr = (debugRandomType *)*gDebugRandomSave + gDebugWhichRandom;
+    debugRandomType *dr = reinterpret_cast<debugRandomType*>(*gDebugRandomSave) + gDebugWhichRandom;
     Str255          s21;
     char            *hackchar2;
 
 #pragma unused( file)
 
-        hackchar2 = (char *)&sig;
+        hackchar2 = reinterpret_cast<char *>(&sig);
         s21[0] = 4;
         s21[1] = *hackchar2++;
         s21[2] = *hackchar2++;
@@ -211,14 +211,14 @@ short DebugRandomSeeded( short range, long *seed, char *file, OSType sig, long o
             Str255  s1, s2;
             char    *hackchar;
 
-            hackchar = (char *)&sig;
+            hackchar = reinterpret_cast<char *>(&sig);
             s2[0] = 4;
             s2[1] = *hackchar++;
             s2[2] = *hackchar++;
             s2[3] = *hackchar++;
             s2[4] = *hackchar++;
 
-            hackchar = (char *)&dr->sig;
+            hackchar = reinterpret_cast<char *>(&dr->sig);
             s1[0] = 4;
             s1[1] = *hackchar++;
             s1[2] = *hackchar++;
@@ -243,7 +243,7 @@ short DebugRandomSeeded( short range, long *seed, char *file, OSType sig, long o
             Str255  s1, s2, s3;
             char    *hackchar;
 
-            hackchar = (char *)&dr->sig;
+            hackchar = reinterpret_cast<char *>(&dr->sig);
             s1[0] = 4;
             s1[1] = *hackchar++;
             s1[2] = *hackchar++;
@@ -289,7 +289,7 @@ short XRandomSeeded( short range, long *seed)
 //  *seed = (*seed * 16807L) & 0x7fffffff;// % 2147483647L;
     *seed = 1664525 * *seed + 1013904223;
     l = *seed & 0x00007fff;
-    l *= (long)range;
+    l *= range;
 
     l >>= 15L;
     r = l;

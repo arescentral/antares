@@ -199,7 +199,7 @@
 //
 #define kLevelKeyTagMask                0xf0000000
 #define kEngageKeyTagMask               0x0f000000
-#define kEngageKeyTagShift              (unsigned long)4
+#define kEngageKeyTagShift              4ul
 
 #define kStrongerThanTarget             0x00000001
 #define kTargetIsBase                   0x00000002
@@ -248,14 +248,14 @@
 
 #define kPresenceDataHiWordMask         0xffff0000
 #define kPresenceDataLoWordMask         0x0000ffff
-#define kPresenceDataHiWordShift        implicit_cast<long>(16)
+#define kPresenceDataHiWordShift        16l
 
 #define kBoltPointNum                   10
 
 #define kPeriodicActionTimeMask     0xff000000
-#define kPeriodicActionTimeShift    implicit_cast<long>(24)
+#define kPeriodicActionTimeShift    24l
 #define kPeriodicActionRangeMask    0x00ff0000
-#define kPeriodicActionRangeShift   implicit_cast<long>(16)
+#define kPeriodicActionRangeShift   16l
 #define kPeriodicActionNotMask      0x0000ffff
 
 #define kDestroyActionNotMask       0x7fffffff

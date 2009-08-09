@@ -43,7 +43,7 @@
 #define kHackRangeMultiplier    0.0025
 
 inline float mSmallFixedToVelocity(Fixed mvel) {
-    return ((.125) * (float)(mvel)) / (float)256;
+    return ((.125) * implicit_cast<float>(mvel)) / 256;
 }
 
 OSStatus MyPanSoundFromRightToLeft( Handle);
@@ -388,7 +388,7 @@ void PlayVolumeSound( short whichSoundID, short amplitude, short persistence, so
 
         if ( whichChannel >= 0)
         {
-    //      WriteDebugLong( (long)whichChannel);
+    //      WriteDebugLong(whichChannel);
 
             gAresGlobal->gChannel[whichChannel].whichSound = whichSoundID;
             gAresGlobal->gChannel[whichChannel].soundAge = -persistence;
@@ -402,8 +402,8 @@ void PlayVolumeSound( short whichSoundID, short amplitude, short persistence, so
             err = SndDoImmediate( gAresGlobal->gChannel[whichChannel].channelPtr, &cmd);
             if ( err != noErr)
             {
-                WriteDebugLine((char *)"\pSnd Err:");
-                WriteDebugLong( (long)err);
+                WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pSnd Err:")));
+                WriteDebugLong(err);
             }
 
             cmd.param1 = 0;
@@ -412,13 +412,13 @@ void PlayVolumeSound( short whichSoundID, short amplitude, short persistence, so
             err = SndDoImmediate( gAresGlobal->gChannel[whichChannel].channelPtr, &cmd);
             if ( err != noErr)
             {
-                WriteDebugLine((char *)"\pSnd Err:");
-                WriteDebugLong( (long)err);
+                WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pSnd Err:")));
+                WriteDebugLong(err);
             }
 
             newvol = amplitude;
             newvol *= gAresGlobal->gSoundVolume;
-            newvol >>= (long)3;
+            newvol >>= 3;
 
             cmd.param1 = newvol;
             cmd.param2 = 0;
@@ -428,8 +428,8 @@ void PlayVolumeSound( short whichSoundID, short amplitude, short persistence, so
     //      err = SndDoImmediate( gAresGlobal->gChannel[whichChannel].channelPtr, &cmd);
             if ( err != noErr)
             {
-                WriteDebugLine((char *)"\pSnd Err:");
-                WriteDebugLong( (long)err);
+                WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pSnd Err:")));
+                WriteDebugLong(err);
             }
 
 /*          cmd.param1 = 0;
@@ -439,10 +439,10 @@ void PlayVolumeSound( short whichSoundID, short amplitude, short persistence, so
             if ( err != noErr)
             {
                 WriteDebugLine((char *)"\pSnd Err:");
-                WriteDebugLong( (long)err);
+                WriteDebugLong(err);
             }
 */
-            err = SndPlay( gAresGlobal->gChannel[whichChannel].channelPtr, (SndListHandle)gAresGlobal->gSound[whichSound].soundHandle, true);
+            err = SndPlay( gAresGlobal->gChannel[whichChannel].channelPtr, reinterpret_cast<SndListHandle>(gAresGlobal->gSound[whichSound].soundHandle), true);
 
         }
     }
@@ -545,8 +545,8 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
             err = SndDoImmediate( gAresGlobal->gChannel[whichChannel].channelPtr, &cmd);
             if ( err != noErr)
             {
-                WriteDebugLine((char *)"\pSnd Err:");
-                WriteDebugLong( (long)err);
+                WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pSnd Err:")));
+                WriteDebugLong(err);
             }
 
             cmd.param1 = 0;
@@ -555,8 +555,8 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
             err = SndDoImmediate( gAresGlobal->gChannel[whichChannel].channelPtr, &cmd);
             if ( err != noErr)
             {
-                WriteDebugLine((char *)"\pSnd Err:");
-                WriteDebugLong( (long)err);
+                WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pSnd Err:")));
+                WriteDebugLong(err);
             }
 
 
@@ -666,7 +666,7 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
 
                 newvol = amplitude;
                 newvol *= gAresGlobal->gSoundVolume;
-                newvol >>= (long)3;
+                newvol >>= 3;
 
                 cmd.param1 = newvol;
                 cmd.param2 = 0;
@@ -675,14 +675,14 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
                 err = SndDoCommand( gAresGlobal->gChannel[whichChannel].channelPtr, &cmd, false);
                 if ( err != noErr)
                 {
-                    WriteDebugLine((char *)"\pSnd Err:");
-                    WriteDebugLong( (long)err);
+                    WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pSnd Err:")));
+                    WriteDebugLong(err);
                 }
 
             }
 #endif
             err = SndPlay( gAresGlobal->gChannel[whichChannel].channelPtr,
-                (SndListHandle)gAresGlobal->gSound[whichSound].soundHandle, true);
+                reinterpret_cast<SndListHandle>(gAresGlobal->gSound[whichSound].soundHandle), true);
 
         }
     }
@@ -770,7 +770,7 @@ short AddSound( short soundID)
             return( -1);
         } else
         {
-            WriteDebugLine( (char *)"\pADDSND>");
+            WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pADDSND>")));
             WriteDebugLong( soundID);
 
             gAresGlobal->gSound[whichSound].soundHandle = HHGetResource( 'snd ', soundID);
@@ -788,7 +788,7 @@ short AddSound( short soundID)
             HLock( gAresGlobal->gSound[whichSound].soundHandle);
 
             err = GetSoundHeaderOffset(
-                (SndListHandle)gAresGlobal->gSound[whichSound].soundHandle,
+                reinterpret_cast<SndListHandle>(gAresGlobal->gSound[whichSound].soundHandle),
                 &(gAresGlobal->gSound[whichSound].offset));
             if ( err != noErr)
             {
@@ -823,8 +823,8 @@ void UnlockSoundCallback( Handle soundHand)
     {
         if (  gAresGlobal->gChannel[i].channelPtr != nil)
         {
-            err = SndChannelStatus( gAresGlobal->gChannel[i].channelPtr, (short)sizeof( SCStatus),
-                    (SCStatusPtr)&status);
+            err = SndChannelStatus( gAresGlobal->gChannel[i].channelPtr, sizeof(SCStatus),
+                    reinterpret_cast<SCStatusPtr>(&status));
             if ( status.scChannelBusy)
             {
 
@@ -834,8 +834,8 @@ void UnlockSoundCallback( Handle soundHand)
                 err = SndDoImmediate( gAresGlobal->gChannel[i].channelPtr, &cmd);
                 if ( err != noErr)
                 {
-                    WriteDebugLine((char *)"\pSnd Err:");
-                    WriteDebugLong( (long)err);
+                    WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pSnd Err:")));
+                    WriteDebugLong(err);
                 }
                 cmd.param1 = 0;
                 cmd.param2 = 0;
@@ -843,8 +843,8 @@ void UnlockSoundCallback( Handle soundHand)
                 err = SndDoImmediate( gAresGlobal->gChannel[i].channelPtr, &cmd);
                 if ( err != noErr)
                 {
-                    WriteDebugLine((char *)"\pSnd Err:");
-                    WriteDebugLong( (long)err);
+                    WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pSnd Err:")));
+                    WriteDebugLong(err);
                 }
             }
         }
@@ -868,19 +868,19 @@ void SoundFXCleanup( void)
             err = SndDisposeChannel( gAresGlobal->gChannel[i].channelPtr, TRUE);
             if ( err != noErr)
             {
-                WriteDebugLine((char *)"\pSnd Err:");
-                WriteDebugLong( (long)err);
+                WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pSnd Err:")));
+                WriteDebugLong(err);
             }
         }
     }
 
-    WriteDebugLine((char *)"\p<SndChannels");
+    WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\p<SndChannels")));
     for ( i = 0; i < kSoundNum; i++)
     {
         if ( gAresGlobal->gSound[i].soundHandle != nil)
             DisposeHandle( gAresGlobal->gSound[i].soundHandle);
     }
-    WriteDebugLine((char *)"\p<SndHndles");
+    WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\p<SndHndles")));
 }
 
 //
@@ -1040,13 +1040,13 @@ void mPlayDistanceSound(
         if ( mdistance == 0)
         {
             if ( gAresGlobal->gPlayerShipNumber >= 0)
-                mplayerobjectptr = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
+                mplayerobjectptr = reinterpret_cast<spaceObjectType *>(*gSpaceObjectData) + gAresGlobal->gPlayerShipNumber;
             else mplayerobjectptr = nil;
             if (( mplayerobjectptr != nil) && ( mplayerobjectptr->active))
             {
-                mul1 = ABS( (long)mplayerobjectptr->location.h - (long)mobjectptr->location.h);
+                mul1 = ABS<int>(mplayerobjectptr->location.h - mobjectptr->location.h);
                 mul2 = mul1;
-                mul1 =  ABS( (long)mplayerobjectptr->location.v - (long)mobjectptr->location.v);
+                mul1 =  ABS<int>(mplayerobjectptr->location.v - mobjectptr->location.v);
                 mdistance = mul1;
                 if (( mul2 < kMaximumRelevantDistance) && ( mdistance < kMaximumRelevantDistance))
                     mdistance = mdistance * mdistance + mul2 * mul2;
@@ -1063,9 +1063,9 @@ void mPlayDistanceSound(
                     PlayLocalizedSound( mplayerobjectptr->location.h, mplayerobjectptr->location.v, mobjectptr->location.h, mobjectptr->location.v, mplayerobjectptr->velocity.h - mobjectptr->velocity.h, mplayerobjectptr->velocity.v - mobjectptr->velocity.v, msoundid, mvolume, msoundpersistence, msoundpriority);
             } else
             {
-                mul1 = ABS( (long)gGlobalCorner.h - (long)mobjectptr->location.h);
+                mul1 = ABS<int>(gGlobalCorner.h - mobjectptr->location.h);
                 mul2 = mul1;
-                mul1 =  ABS( (long)gGlobalCorner.v - (long)mobjectptr->location.v);
+                mul1 =  ABS<int>(gGlobalCorner.v - mobjectptr->location.v);
                 mdistance = mul1;
                 if (( mul2 < kMaximumRelevantDistance) && ( mdistance < kMaximumRelevantDistance))
                     mdistance = mdistance * mdistance + mul2 * mul2;
@@ -1092,7 +1092,7 @@ void mPlayDistanceSound(
                     mvolume = ( (1920 - mdistance) * mvolume) / 1920;
             }
             if ( gAresGlobal->gPlayerShipNumber >= 0)
-                mplayerobjectptr = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
+                mplayerobjectptr = reinterpret_cast<spaceObjectType *>(*gSpaceObjectData) + gAresGlobal->gPlayerShipNumber;
             else mplayerobjectptr = nil;
             if (( mplayerobjectptr != nil) && ( mplayerobjectptr->active))
             {

@@ -114,7 +114,7 @@ void GetRaceString( StringPtr string, short whatString, short raceNum)
 
 smallFixedType GetRaceAdvantage( short raceNum)
 {
-    raceType    *race = (raceType *)*gAresGlobal->gRaceData + (long)raceNum;
+    raceType    *race = reinterpret_cast<raceType*>(*gAresGlobal->gRaceData) + raceNum;
 
     if ( raceNum >= 0)
     {
@@ -127,7 +127,7 @@ smallFixedType GetRaceAdvantage( short raceNum)
 
 short GetRaceNumFromID( short raceID)
 {
-    raceType    *race = (raceType *)*gAresGlobal->gRaceData;
+    raceType    *race = reinterpret_cast<raceType*>(*gAresGlobal->gRaceData);
     short       raceNum = 0;
 
     while ( (race->id != raceID) && ( raceNum < kRaceNum))
@@ -144,7 +144,7 @@ short GetRaceNumFromID( short raceID)
 
 short GetRaceIDFromNum( short raceNum)
 {
-    raceType    *race = (raceType *)*gAresGlobal->gRaceData + (long)raceNum;
+    raceType    *race = reinterpret_cast<raceType*>(*gAresGlobal->gRaceData) + raceNum;
 
     if (( raceNum >= 0) && ( raceNum < kRaceNum))
     {
@@ -157,7 +157,7 @@ short GetRaceIDFromNum( short raceNum)
 
 unsigned char GetApparentColorFromRace( short raceNum)
 {
-    raceType    *race = (raceType *)*gAresGlobal->gRaceData + (long)raceNum;
+    raceType    *race = reinterpret_cast<raceType*>(*gAresGlobal->gRaceData) + raceNum;
 
 
     if (( raceNum >= 0) && ( raceNum < kRaceNum))

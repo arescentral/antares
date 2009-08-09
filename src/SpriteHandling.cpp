@@ -104,7 +104,7 @@ void SpriteHandlingInit ( void)
     unsigned char   *staticValue = nil;
     short           error;
 
-    gBothScaleMaps = NewHandle( sizeof( long) * (long)MAX_PIX_SIZE * 2);
+    gBothScaleMaps = NewHandle( sizeof( long) * MAX_PIX_SIZE * 2);
     if ( gBothScaleMaps == nil)
     {
         ShowErrorAny( eExitToShellErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
@@ -115,8 +115,8 @@ void SpriteHandlingInit ( void)
     */
     mHandleLockAndRegister( gBothScaleMaps, nil, nil, ResolveScaleMapData, "\pgBothScaleMaps");
 
-    gScaleHMap = (long *)*gBothScaleMaps;
-    gScaleVMap = (long *)*gBothScaleMaps + MAX_PIX_SIZE;
+    gScaleHMap = reinterpret_cast<long*>(*gBothScaleMaps);
+    gScaleVMap = reinterpret_cast<long*>(*gBothScaleMaps) + MAX_PIX_SIZE;
 
 /*
     gSpriteFileRefID = ARF_OpenResFile( kSpriteResFileName);
@@ -137,7 +137,7 @@ void SpriteHandlingInit ( void)
 
     ResetAllPixTables();
 
-    gSpriteTable = NewHandle( sizeof( spriteType) * (long)kMaxSpriteNum);
+    gSpriteTable = NewHandle( sizeof( spriteType) * kMaxSpriteNum);
     if ( gSpriteTable == nil)
     {
         ShowErrorAny( eExitToShellErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 2);
@@ -168,7 +168,7 @@ void SpriteHandlingInit ( void)
 
     mHandleLockAndRegister( gStaticTable, nil, nil, nil, "\pgStaticTable");
 
-    staticValue = (unsigned char *)*gStaticTable;
+    staticValue = reinterpret_cast<unsigned char*>(*gStaticTable);
     for ( i = 0; i < (kStaticTableSize * 2); i++)
     {
         j = Randomize( 256);
@@ -183,7 +183,7 @@ void ResetAllSprites( void)
     spriteType  *aSprite;
     short       i;
 
-    aSprite = ( spriteType *)*gSpriteTable;
+    aSprite = reinterpret_cast<spriteType*>(*gSpriteTable);
     for ( i = 0; i < kMaxSpriteNum; i++)
     {
         aSprite->table = nil;
@@ -352,7 +352,7 @@ spriteType *AddSprite( Point where, Handle table, short resID, short whichShape,
     int         i = 0;
     spriteType  *aSprite;
 
-    aSprite = ( spriteType *)*gSpriteTable;
+    aSprite = reinterpret_cast<spriteType*>(*gSpriteTable);
     while (( aSprite->table != nil) && ( i < kMaxSpriteNum)) { i++; aSprite++;}
     if ( i == kMaxSpriteNum)
     {
@@ -402,12 +402,12 @@ void CreateSpritePixFromPixMap( spritePix *sprite, int type, PixMapHandle pixMap
     sprite->height = fixBounds.bottom - fixBounds.top + 1;
     sprite->center.h = sprite->width / 2;
     sprite->center.v = sprite->height / 2;
-    rowBytes = 0x0000ffff & (long)((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
-    source = (*pixMap)->baseAddr + (long)fixBounds.top * rowBytes + (long)fixBounds.left;
+    rowBytes = 0x0000ffff & ((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
+    source = (*pixMap)->baseAddr + fixBounds.top * rowBytes + fixBounds.left;
     switch ( type)
     {
         case BLOCK_TYPE:
-            sprite->data = NewHandle( (long)sprite->width * (long)sprite->height);
+            sprite->data = NewHandle( sprite->width * sprite->height);
             if ( sprite->data == nil)
                 ShowErrorNoRecover( SPRITE_CREATE_ERROR, kSpriteHandleError, 3);
             HLock( sprite->data);
@@ -416,16 +416,16 @@ void CreateSpritePixFromPixMap( spritePix *sprite, int type, PixMapHandle pixMap
             {
                 for ( i = 0 ; i < sprite->width; i++)
                     *(dest++) = *(source++);
-                source += rowBytes - (long)sprite->width;
+                source += rowBytes - sprite->width;
             }
             break;
         case MASK_TYPE:
-            sprite->data = NewHandle( (long)sprite->width * (long)sprite->height * 2L);
+            sprite->data = NewHandle( sprite->width * sprite->height * 2L);
             if ( sprite->data == nil)
                 ShowErrorNoRecover( SPRITE_CREATE_ERROR, kSpriteHandleError, 4);
             HLock( sprite->data);
             dest = *(sprite->data);
-            mask = dest + (long)sprite->width * (long)sprite->height;
+            mask = dest + sprite->width * sprite->height;
             for ( j = 0; j < sprite->height; j++)
             {
                 for ( i = 0 ; i < sprite->width; i++)
@@ -435,11 +435,11 @@ void CreateSpritePixFromPixMap( spritePix *sprite, int type, PixMapHandle pixMap
                     else *mask++ = 0x00;
                     *(dest++) = *(source++);
                 }
-                source += rowBytes - (long)sprite->width;
+                source += rowBytes - sprite->width;
             }
             break;
         case COMP_PIX_TYPE:
-            sprite->data = NewHandle( (long)sprite->width * (long)sprite->height);
+            sprite->data = NewHandle( sprite->width * sprite->height);
             if ( sprite->data == nil)
                 ShowErrorNoRecover( SPRITE_CREATE_ERROR, kSpriteHandleError, 5);
             HLock( sprite->data);
@@ -448,26 +448,26 @@ void CreateSpritePixFromPixMap( spritePix *sprite, int type, PixMapHandle pixMap
             {
                 for ( i = 0 ; i < sprite->width; i++)
                     *(dest++) = *(source++);
-                source += rowBytes - (long)sprite->width;
+                source += rowBytes - sprite->width;
             }
             break;
         case RUN_LENGTH_TYPE:
         case ASM_LENGTH_TYPE:
             i = sizeof( int);
-            sprite->data = NewHandle( (long)sprite->width * (long)sprite->height * 4L + (long)i);
+            sprite->data = NewHandle( sprite->width * sprite->height * 4L + i);
             if ( sprite->data == nil)
                 ShowErrorNoRecover( SPRITE_CREATE_ERROR, kSpriteHandleError, 6);
             HLock( sprite->data);
             dest = *(sprite->data);
             for ( j = 0; j < sprite->height; j++)
             {
-                rowlength = (int *)dest;
+                rowlength = reinterpret_cast<int*>(dest);
                 dest += sizeof(int);
                 *rowlength = sizeof(int);
                 width = 0;
                 while ( width < sprite->width)
                 {
-                    count = (int *)dest;
+                    count = reinterpret_cast<int*>(dest);
                     dest += sizeof(int);
                     *rowlength += sizeof(int);
                     *count = 0;
@@ -477,7 +477,7 @@ void CreateSpritePixFromPixMap( spritePix *sprite, int type, PixMapHandle pixMap
                         (*count)++;
                         width++;
                     }
-                    count = (int *)dest;
+                    count = reinterpret_cast<int*>(dest);
                     dest += sizeof(int);
                     *rowlength += sizeof(int);
                     *count = 0;
@@ -490,34 +490,34 @@ void CreateSpritePixFromPixMap( spritePix *sprite, int type, PixMapHandle pixMap
                     }
                     if (( *count > 0) && (width == sprite->width))
                     {
-                        count = (int *)dest;
+                        count = reinterpret_cast<int*>(dest);
                         dest += sizeof(int);
                         *rowlength += sizeof(int);
                         *count = 0;
-                        count = (int *)dest;
+                        count = reinterpret_cast<int*>(dest);
                         dest += sizeof(int);
                         *rowlength += sizeof(int);
                         *count = 0;
                     }
                     WriteDebugInt( width);
                 }
-                source += rowBytes - (long)sprite->width;
+                source += rowBytes - sprite->width;
             }
             dest = *(sprite->data);
             for ( j = 0; j < 2; j++)
             {
-                rowlength = ( int *)dest;
+                rowlength = reinterpret_cast<int*>(dest);
                 dest += sizeof(int);
                 for ( i = 0; i < *rowlength - sizeof(int); i++)
                 {
-                    WriteDebug2Int( i, (int)*(dest++));
+                    WriteDebug2Int( i, *(dest++));
                 }
             }
             break;
         case OLD_SCALE_TYPE:
         case ASM_SCALE_TYPE:
         case EXPERIMENT_TYPE:
-            sprite->data = NewHandle( (long)sprite->width * (long)sprite->height);
+            sprite->data = NewHandle( sprite->width * sprite->height);
             if ( sprite->data == nil)
                 ShowErrorNoRecover( SPRITE_CREATE_ERROR, kSpriteHandleError, 7);
             HLock( sprite->data);
@@ -526,7 +526,7 @@ void CreateSpritePixFromPixMap( spritePix *sprite, int type, PixMapHandle pixMap
             {
                 for ( i = 0 ; i < sprite->width; i++)
                     *(dest++) = *(source++);
-                source += rowBytes - (long)sprite->width;
+                source += rowBytes - sprite->width;
             }
             break;
 
@@ -544,18 +544,18 @@ void RunLengthSpritePixInPixMap( spritePix *sprite, Point where, PixMapHandle pi
     char    *source, *dest;
     long    rowBytes, sRowPlus, dRowPlus, *slong, *dlong;
 
-    rowBytes = 0x0000ffff & (long)((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
-    dest = (*pixMap)->baseAddr + (long)where.v * rowBytes + (long)where.h;
-    sword = (int *)*(sprite->data);
+    rowBytes = 0x0000ffff & ((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
+    dest = (*pixMap)->baseAddr + where.v * rowBytes + where.h;
+    sword = reinterpret_cast<int*>(*(sprite->data));
     sRowPlus = 0;
-    dRowPlus = rowBytes - (long)sprite->width;
+    dRowPlus = rowBytes - sprite->width;
     width = sprite->width;
     height = sprite->height - 1;
 
     startrow:
         sword++;
     addnil:
-        dest += (long)*sword;
+        dest += *sword;
         sword++;
         if ( *sword == 0)
             goto endrow;
@@ -566,25 +566,25 @@ void RunLengthSpritePixInPixMap( spritePix *sprite, Point where, PixMapHandle pi
         pixlen = runlen >> 2;
         runlen %= 4;
         pixlen--;
-        dlong = (long *)dest;
-        slong = (long *)sword;
+        dlong = reinterpret_cast<long*>(dest);
+        slong = reinterpret_cast<long*>(sword);
     longloop:
         *dlong++ = *slong++;
         if ( --pixlen >= 0)
             goto longloop;
-        dest = (char *)dlong;
-        sword = (int *)slong;
+        dest = reinterpret_cast<char*>(dlong);
+        sword = reinterpret_cast<int*>(slong);
         if ( runlen == 0)
             goto addnil;
 
     pixbyte:
         runlen--;
-        source = (char *)sword;
+        source = reinterpret_cast<char*>(sword);
     byteloop:
         *dest++ = *source++;
         if ( --runlen >= 0)
             goto byteloop;
-        sword = (int *)source;
+        sword = reinterpret_cast<int*>(source);
         goto addnil;
 
     endrow:
@@ -607,23 +607,23 @@ void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, long
     longRect    mapRect, sourceRect;
     Boolean     clipped = FALSE;
 
-    scaleCalc = ((long)sprite->width * scale);
+    scaleCalc = (sprite->width * scale);
     scaleCalc >>= SHIFT_SCALE;
     mapWidth = scaleCalc;
-    scaleCalc = ((long)sprite->height * scale);
+    scaleCalc = (sprite->height * scale);
     scaleCalc >>= SHIFT_SCALE;
     mapHeight = scaleCalc;
 
-    if ((( where.h + (int)mapWidth) > clipRect->left) && (( where.h -(int) mapWidth) <
-            clipRect->right) && (( where.v + (int)mapHeight) > clipRect->top) &&
-            (( where.v - (int)mapHeight < clipRect->bottom)) && ( mapHeight > 0) && ( mapWidth > 0))
+    if ((( where.h + mapWidth) > clipRect->left) && (( where.h - mapWidth) <
+            clipRect->right) && (( where.v + mapHeight) > clipRect->top) &&
+            (( where.v - mapHeight < clipRect->bottom)) && ( mapHeight > 0) && ( mapWidth > 0))
     {
-        scaleCalc = (long)sprite->center.h * scale;
+        scaleCalc = sprite->center.h * scale;
         scaleCalc >>= SHIFT_SCALE;
-        dRect->left = where.h - (int)scaleCalc;
-        scaleCalc = (long)sprite->center.v * scale;
+        dRect->left = where.h - scaleCalc;
+        scaleCalc = sprite->center.v * scale;
         scaleCalc >>= SHIFT_SCALE;
-        dRect->top = where.v - (int)scaleCalc;
+        dRect->top = where.v - scaleCalc;
 
         mapRect.left = mapRect.top = 0;
         mapRect.right = mapWidth;
@@ -739,15 +739,15 @@ void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, long
                 } // otherwise sourceRect is set
 
                 scaleCalc = (dRect->right - dRect->left);
-//              rowbytes = 0x0000ffff & (long)((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
+//              rowbytes = 0x0000ffff & ((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
 
-                rowbytes = (long)(*pixMap)->rowBytes;
+                rowbytes = (*pixMap)->rowBytes;
                 rowbytes &= 0x0000ffff;
                 rowbytes |= 0x00008000;
                 rowbytes ^= 0x00008000;
 
                 destRowPlus = rowbytes - scaleCalc;
-                shapeRowPlus = (long)sprite->width - (sourceRect.right - sourceRect.left);                                              //KLUDGE ALERT
+                shapeRowPlus = sprite->width - (sourceRect.right - sourceRect.left);                                              //KLUDGE ALERT
                 destByte = (*pixMap)->baseAddr + dRect->top * rowbytes + dRect->left;
                 shapeByte = *(sprite->data) + sourceRect.top * sprite->width + sourceRect.left;
 
@@ -757,8 +757,8 @@ void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, long
                 y = dRect->bottom - dRect->top;
 
                 shapeRowPlus += *(hmapoffset + scaleCalc);
-                mapWidth = (long)sprite->width;
-                chunkByte = (*pixMap)->baseAddr + (long)((*pixMap)->bounds.bottom) * rowbytes;
+                mapWidth = sprite->width;
+                chunkByte = (*pixMap)->baseAddr + ((*pixMap)->bounds.bottom) * rowbytes;
 
                 // for debugging
 //              x = dRect->left;
@@ -883,16 +883,16 @@ void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, long
                 } // otherwise sourceRect is already set
 
                 scaleCalc = (dRect->right - dRect->left);
-                rowbytes = 0x0000ffff & (long)((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
+                rowbytes = 0x0000ffff & ((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
                 destRowPlus = rowbytes - scaleCalc;
                 destByte = (*pixMap)->baseAddr + dRect->top * rowbytes + dRect->left;
-                shapeByte = *(sprite->data) + sourceRect.top * (long)sprite->width + sourceRect.left;
+                shapeByte = *(sprite->data) + sourceRect.top * sprite->width + sourceRect.left;
 
                 vmap = gScaleVMap + sourceRect.top;
                 hmapoffset = gScaleHMap + sourceRect.left;
                 shapeRowPlus = sprite->width;
-                mapWidth = (long)sprite->width;
-                vend = *(sprite->data) + sourceRect.bottom * (long)sprite->width + sourceRect.left;
+                mapWidth = sprite->width;
+                vend = *(sprite->data) + sourceRect.bottom * sprite->width + sourceRect.left;
                 lhend = gScaleHMap + sourceRect.right;
 
                 while ( shapeByte < vend)
@@ -1806,23 +1806,23 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, l
     longRect    mapRect, sourceRect;
     Boolean     clipped = FALSE;
 
-    scaleCalc = ((long)sprite->width * scale);
+    scaleCalc = (sprite->width * scale);
     scaleCalc >>= SHIFT_SCALE;
     mapWidth = scaleCalc;
-    scaleCalc = ((long)sprite->height * scale);
+    scaleCalc = (sprite->height * scale);
     scaleCalc >>= SHIFT_SCALE;
     mapHeight = scaleCalc;
 
-    if ((( where.h + (int)mapWidth) > clipRect->left) && (( where.h -(int) mapWidth) <
-            clipRect->right) && (( where.v + (int)mapHeight) > clipRect->top) &&
-            (( where.v - (int)mapHeight < clipRect->bottom)) && ( mapHeight > 0) && ( mapWidth > 0))
+    if ((( where.h + mapWidth) > clipRect->left) && (( where.h - mapWidth) <
+            clipRect->right) && (( where.v + mapHeight) > clipRect->top) &&
+            (( where.v - mapHeight < clipRect->bottom)) && ( mapHeight > 0) && ( mapWidth > 0))
     {
-        scaleCalc = (long)sprite->center.h * scale;
+        scaleCalc = sprite->center.h * scale;
         scaleCalc >>= SHIFT_SCALE;
-        dRect->left = where.h - (int)scaleCalc;
-        scaleCalc = (long)sprite->center.v * scale;
+        dRect->left = where.h - scaleCalc;
+        scaleCalc = sprite->center.v * scale;
         scaleCalc >>= SHIFT_SCALE;
-        dRect->top = where.v - (int)scaleCalc;
+        dRect->top = where.v - scaleCalc;
 
         mapRect.left = mapRect.top = 0;
         mapRect.right = mapWidth;
@@ -1862,7 +1862,7 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, l
         if (( (dRect->left + 1) < clipRect->right) && ( dRect->right > clipRect->left) &&
                 ( dRect->top < clipRect->bottom) && ( dRect->bottom > clipRect->top))
         {
-            staticByte = (unsigned char *)*gStaticTable + (long)staticValue;
+            staticByte = reinterpret_cast<unsigned char *>(*gStaticTable) + staticValue;
             if ( scale <= SCALE_SCALE)
             {
 
@@ -1940,13 +1940,13 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, l
 
                 scaleCalc = (dRect->right - dRect->left);
 
-                rowbytes = (long)(*pixMap)->rowBytes;
+                rowbytes = (*pixMap)->rowBytes;
                 rowbytes &= 0x0000ffff;
                 rowbytes |= 0x00008000;
                 rowbytes ^= 0x00008000;
 
                 destRowPlus = rowbytes - scaleCalc;
-                shapeRowPlus = (long)sprite->width - (sourceRect.right - sourceRect.left);                                              //KLUDGE ALERT
+                shapeRowPlus = sprite->width - (sourceRect.right - sourceRect.left);                                              //KLUDGE ALERT
                 destByte = (*pixMap)->baseAddr + dRect->top * rowbytes + dRect->left;
                 shapeByte = *(sprite->data) + sourceRect.top * sprite->width + sourceRect.left;
 
@@ -1956,8 +1956,8 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, l
                 y = dRect->bottom - dRect->top;
 
                 shapeRowPlus += *(hmapoffset + scaleCalc);
-                mapWidth = (long)sprite->width;
-                chunkByte = (*pixMap)->baseAddr + (long)((*pixMap)->bounds.bottom) * rowbytes;
+                mapWidth = sprite->width;
+                chunkByte = (*pixMap)->baseAddr + ((*pixMap)->bounds.bottom) * rowbytes;
 
                 do
                 {
@@ -1966,7 +1966,7 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, l
                     if ( (staticValue + scaleCalc) > ( kStaticTableSize))
                     {
                         staticValue += scaleCalc - kStaticTableSize;
-                        staticByte = (unsigned char *)*gStaticTable + (long)staticValue;
+                        staticByte = reinterpret_cast<unsigned char*>(*gStaticTable) + staticValue;
                     } else staticValue += scaleCalc;
 
                     do
@@ -2063,16 +2063,16 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, l
                 } // otherwise sourceRect is already set
 
                 scaleCalc = (dRect->right - dRect->left);
-                rowbytes = 0x0000ffff & (long)((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
+                rowbytes = 0x0000ffff & ((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
                 destRowPlus = rowbytes - scaleCalc;
                 destByte = (*pixMap)->baseAddr + dRect->top * rowbytes + dRect->left;
-                shapeByte = *(sprite->data) + sourceRect.top * (long)sprite->width + sourceRect.left;
+                shapeByte = *(sprite->data) + sourceRect.top * sprite->width + sourceRect.left;
 
                 vmap = gScaleVMap + sourceRect.top;
                 hmapoffset = gScaleHMap + sourceRect.left;
                 shapeRowPlus = sprite->width;
-                mapWidth = (long)sprite->width;
-                vend = *(sprite->data) + sourceRect.bottom * (long)sprite->width + sourceRect.left;
+                mapWidth = sprite->width;
+                vend = *(sprite->data) + sourceRect.bottom * sprite->width + sourceRect.left;
                 lhend = gScaleHMap + sourceRect.right;
 
                 while ( shapeByte < vend)
@@ -2085,7 +2085,7 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, l
                         if ( (staticValue + mapWidth) > ( kStaticTableSize))
                         {
                             staticValue += mapWidth - kStaticTableSize;
-                            staticByte = (unsigned char *)*gStaticTable + (long)staticValue;
+                            staticByte = reinterpret_cast<unsigned char*>(*gStaticTable) + staticValue;
                         } else staticValue += mapWidth;
                         while ( hmap < lhend)
                         {
@@ -2122,23 +2122,23 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, lo
     longRect    mapRect, sourceRect;
     Boolean     clipped = FALSE;
 
-    scaleCalc = ((long)sprite->width * scale);
+    scaleCalc = (sprite->width * scale);
     scaleCalc >>= SHIFT_SCALE;
     mapWidth = scaleCalc;
-    scaleCalc = ((long)sprite->height * scale);
+    scaleCalc = (sprite->height * scale);
     scaleCalc >>= SHIFT_SCALE;
     mapHeight = scaleCalc;
 
-    if ((( where.h + (int)mapWidth) > clipRect->left) && (( where.h -(int) mapWidth) <
-            clipRect->right) && (( where.v + (int)mapHeight) > clipRect->top) &&
-            (( where.v - (int)mapHeight < clipRect->bottom)) && ( mapHeight > 0) && ( mapWidth > 0))
+    if ((( where.h + mapWidth) > clipRect->left) && (( where.h - mapWidth) <
+            clipRect->right) && (( where.v + mapHeight) > clipRect->top) &&
+            (( where.v - mapHeight < clipRect->bottom)) && ( mapHeight > 0) && ( mapWidth > 0))
     {
-        scaleCalc = (long)sprite->center.h * scale;
+        scaleCalc = sprite->center.h * scale;
         scaleCalc >>= SHIFT_SCALE;
-        dRect->left = where.h - (int)scaleCalc;
-        scaleCalc = (long)sprite->center.v * scale;
+        dRect->left = where.h - scaleCalc;
+        scaleCalc = sprite->center.v * scale;
         scaleCalc >>= SHIFT_SCALE;
-        dRect->top = where.v - (int)scaleCalc;
+        dRect->top = where.v - scaleCalc;
 
         mapRect.left = mapRect.top = 0;
         mapRect.right = mapWidth;
@@ -2178,7 +2178,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, lo
         if (( (dRect->left + 1) < clipRect->right) && ( dRect->right > clipRect->left) &&
                 ( dRect->top < clipRect->bottom) && ( dRect->bottom > clipRect->top))
         {
-            staticByte = (unsigned char *)*gStaticTable + (long)staticValue;
+            staticByte = reinterpret_cast<unsigned char*>(*gStaticTable) + staticValue;
             if ( scale <= SCALE_SCALE)
             {
 
@@ -2256,13 +2256,13 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, lo
 
                 scaleCalc = (dRect->right - dRect->left);
 
-                rowbytes = (long)(*pixMap)->rowBytes;
+                rowbytes = (*pixMap)->rowBytes;
                 rowbytes &= 0x0000ffff;
                 rowbytes |= 0x00008000;
                 rowbytes ^= 0x00008000;
 
                 destRowPlus = rowbytes - scaleCalc;
-                shapeRowPlus = (long)sprite->width - (sourceRect.right - sourceRect.left);                                              //KLUDGE ALERT
+                shapeRowPlus = sprite->width - (sourceRect.right - sourceRect.left);                                              //KLUDGE ALERT
                 destByte = (*pixMap)->baseAddr + dRect->top * rowbytes + dRect->left;
                 shapeByte = *(sprite->data) + sourceRect.top * sprite->width + sourceRect.left;
 
@@ -2272,8 +2272,8 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, lo
                 y = dRect->bottom - dRect->top;
 
                 shapeRowPlus += *(hmapoffset + scaleCalc);
-                mapWidth = (long)sprite->width;
-                chunkByte = (*pixMap)->baseAddr + (long)((*pixMap)->bounds.bottom) * rowbytes;
+                mapWidth = sprite->width;
+                chunkByte = (*pixMap)->baseAddr + ((*pixMap)->bounds.bottom) * rowbytes;
 
                 if ( color != 0xff)
                 {
@@ -2284,7 +2284,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, lo
                         if ( (staticValue + scaleCalc) > ( kStaticTableSize))
                         {
                             staticValue += scaleCalc - kStaticTableSize;
-                            staticByte = (unsigned char *)*gStaticTable + (long)staticValue;
+                            staticByte = reinterpret_cast<unsigned char*>(*gStaticTable) + staticValue;
                         } else staticValue += scaleCalc;
 
                         do
@@ -2316,7 +2316,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, lo
                         if ( (staticValue + scaleCalc) > ( kStaticTableSize))
                         {
                             staticValue += scaleCalc - kStaticTableSize;
-                            staticByte = (unsigned char *)*gStaticTable + (long)staticValue;
+                            staticByte = reinterpret_cast<unsigned char*>(*gStaticTable) + staticValue;
                         } else staticValue += scaleCalc;
 
                         do
@@ -2413,16 +2413,16 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, lo
                 } // otherwise sourceRect is already set
 
                 scaleCalc = (dRect->right - dRect->left);
-                rowbytes = 0x0000ffff & (long)((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
+                rowbytes = 0x0000ffff & ((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
                 destRowPlus = rowbytes - scaleCalc;
                 destByte = (*pixMap)->baseAddr + dRect->top * rowbytes + dRect->left;
-                shapeByte = *(sprite->data) + sourceRect.top * (long)sprite->width + sourceRect.left;
+                shapeByte = *(sprite->data) + sourceRect.top * sprite->width + sourceRect.left;
 
                 vmap = gScaleVMap + sourceRect.top;
                 hmapoffset = gScaleHMap + sourceRect.left;
                 shapeRowPlus = sprite->width;
-                mapWidth = (long)sprite->width;
-                vend = *(sprite->data) + sourceRect.bottom * (long)sprite->width + sourceRect.left;
+                mapWidth = sprite->width;
+                vend = *(sprite->data) + sourceRect.bottom * sprite->width + sourceRect.left;
                 lhend = gScaleHMap + sourceRect.right;
 
                 while ( shapeByte < vend)
@@ -2435,7 +2435,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, lo
                         if ( (staticValue + mapWidth) > ( kStaticTableSize))
                         {
                             staticValue += mapWidth - kStaticTableSize;
-                            staticByte = (unsigned char *)*gStaticTable + (long)staticValue;
+                            staticByte = reinterpret_cast<unsigned char*>(*gStaticTable) + staticValue;
                         } else staticValue += mapWidth;
                         while ( hmap < lhend)
                         {
@@ -2480,23 +2480,23 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
     longRect    mapRect, sourceRect;
     Boolean     clipped = FALSE;
 
-    scaleCalc = ((long)sprite->width * scale);
+    scaleCalc = (sprite->width * scale);
     scaleCalc >>= SHIFT_SCALE;
     mapWidth = scaleCalc;
-    scaleCalc = ((long)sprite->height * scale);
+    scaleCalc = (sprite->height * scale);
     scaleCalc >>= SHIFT_SCALE;
     mapHeight = scaleCalc;
 
-    if ((( where.h + (int)mapWidth) > clipRect->left) && (( where.h -(int) mapWidth) <
-            clipRect->right) && (( where.v + (int)mapHeight) > clipRect->top) &&
-            (( where.v - (int)mapHeight < clipRect->bottom)) && ( mapHeight > 0) && ( mapWidth > 0))
+    if ((( where.h + mapWidth) > clipRect->left) && (( where.h - mapWidth) <
+            clipRect->right) && (( where.v + mapHeight) > clipRect->top) &&
+            (( where.v - mapHeight < clipRect->bottom)) && ( mapHeight > 0) && ( mapWidth > 0))
     {
-        scaleCalc = (long)sprite->center.h * scale;
+        scaleCalc = sprite->center.h * scale;
         scaleCalc >>= SHIFT_SCALE;
-        dRect->left = where.h - (int)scaleCalc;
-        scaleCalc = (long)sprite->center.v * scale;
+        dRect->left = where.h - scaleCalc;
+        scaleCalc = sprite->center.v * scale;
         scaleCalc >>= SHIFT_SCALE;
-        dRect->top = where.v - (int)scaleCalc;
+        dRect->top = where.v - scaleCalc;
 
         mapRect.left = mapRect.top = 0;
         mapRect.right = mapWidth;
@@ -2612,15 +2612,15 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
                 } // otherwise sourceRect is set
 
                 scaleCalc = (dRect->right - dRect->left);
-//              rowbytes = 0x0000ffff & (long)((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
+//              rowbytes = 0x0000ffff & ((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
 
-                rowbytes = (long)(*pixMap)->rowBytes;
+                rowbytes = (*pixMap)->rowBytes;
                 rowbytes &= 0x0000ffff;
                 rowbytes |= 0x00008000;
                 rowbytes ^= 0x00008000;
 
                 destRowPlus = rowbytes - scaleCalc;
-                shapeRowPlus = (long)sprite->width - (sourceRect.right - sourceRect.left);                                              //KLUDGE ALERT
+                shapeRowPlus = sprite->width - (sourceRect.right - sourceRect.left);                                              //KLUDGE ALERT
                 destByte = (*pixMap)->baseAddr + dRect->top * rowbytes + dRect->left;
                 shapeByte = *(sprite->data) + sourceRect.top * sprite->width + sourceRect.left;
 
@@ -2630,8 +2630,8 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
                 y = dRect->bottom - dRect->top;
 
                 shapeRowPlus += *(hmapoffset + scaleCalc);
-                mapWidth = (long)sprite->width;
-                chunkByte = (*pixMap)->baseAddr + (long)((*pixMap)->bounds.bottom) * rowbytes;
+                mapWidth = sprite->width;
+                chunkByte = (*pixMap)->baseAddr + ((*pixMap)->bounds.bottom) * rowbytes;
 
                 // for debugging
 //              x = dRect->left;
@@ -2764,16 +2764,16 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
                 } // otherwise sourceRect is already set
 
                 scaleCalc = (dRect->right - dRect->left);
-                rowbytes = 0x0000ffff & (long)((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
+                rowbytes = 0x0000ffff & ((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
                 destRowPlus = rowbytes - scaleCalc;
                 destByte = (*pixMap)->baseAddr + dRect->top * rowbytes + dRect->left;
-                shapeByte = *(sprite->data) + sourceRect.top * (long)sprite->width + sourceRect.left;
+                shapeByte = *(sprite->data) + sourceRect.top * sprite->width + sourceRect.left;
 
                 vmap = gScaleVMap + sourceRect.top;
                 hmapoffset = gScaleHMap + sourceRect.left;
                 shapeRowPlus = sprite->width;
-                mapWidth = (long)sprite->width;
-                vend = *(sprite->data) + sourceRect.bottom * (long)sprite->width + sourceRect.left;
+                mapWidth = sprite->width;
+                vend = *(sprite->data) + sourceRect.bottom * sprite->width + sourceRect.left;
                 lhend = gScaleHMap + sourceRect.right;
 
                 while ( shapeByte < vend)
@@ -2819,7 +2819,7 @@ Boolean PixelInSprite_IsOutside( spritePix *sprite, long x, long y,
     vmap--;
     hmapStart--;
     rowPlus -= ( *hmapStart + ( *(hmapStart + 1)) + ( *(hmapStart + 2)));
-    pixel = *(sprite->data) + ((y - *vmap) * ((long)sprite->width)) +
+    pixel = *(sprite->data) + ((y - *vmap) * (sprite->width)) +
                 (x - *hmapStart);
     for ( j = y - 1; j <= ( y + 1); j++)
     {
@@ -2829,7 +2829,7 @@ Boolean PixelInSprite_IsOutside( spritePix *sprite, long x, long y,
             if ((( j != y) || ( x != i)) && ( !(*pixel))) return true;
             pixel += *hmap++;
         }
-        pixel += ((*vmap++ - 1) * (long)sprite->width) + rowPlus;
+        pixel += ((*vmap++ - 1) * sprite->width) + rowPlus;
     }
     return false;
 }
@@ -2843,7 +2843,7 @@ void EraseSpriteTable( void)
 
     savePixBase = GetGWorldPixMap( gSaveWorld);
     offPixBase = GetGWorldPixMap( gOffWorld);
-    aSprite = (spriteType *)*gSpriteTable;
+    aSprite = reinterpret_cast<spriteType*>(*gSpriteTable);
     for ( i = 0; i < kMaxSpriteNum; i++)
     {
         if ( aSprite->table != nil)
@@ -2877,14 +2877,14 @@ void DrawSpriteTableInOffWorld( longRect *clipRect)
     spriteType      *aSprite;
 
     pixMap = GetGWorldPixMap( gOffWorld);
-    aSprite = (spriteType *)*gSpriteTable;
+    aSprite = reinterpret_cast<spriteType*>(*gSpriteTable);
 
 //  WriteDebugLong( gAbsoluteScale);
     if ( gAbsoluteScale >= kSpriteBlipThreshhold)
     {
         for ( layer = kFirstSpriteLayer; layer <= kLastSpriteLayer; layer++)
         {
-            aSprite = (spriteType *)*gSpriteTable;
+            aSprite = reinterpret_cast<spriteType*>(*gSpriteTable);
             for ( i = 0; i < kMaxSpriteNum; i++)
             {
                 if (( aSprite->table != nil) && ( !aSprite->killMe) && ( aSprite->whichLayer == layer))
@@ -2895,7 +2895,7 @@ void DrawSpriteTableInOffWorld( longRect *clipRect)
                     pixData = GetNatePixTableNatePixData( pixTable, aSprite->whichShape);
 
     //      if (( whichShape < 0) || ( whichShape >= GetNatePixTablePixNum( pixTable)))
-    //          WriteDebugLong( (long)whichShape);
+    //          WriteDebugLong( whichShape);
 
                     aSpritePix.data = &pixData;
                     aSpritePix.center.h = GetNatePixTableNatePixHRef( pixTable, whichShape);
@@ -2903,8 +2903,8 @@ void DrawSpriteTableInOffWorld( longRect *clipRect)
                     aSpritePix.width = GetNatePixTableNatePixWidth( pixTable, whichShape);
                     aSpritePix.height = GetNatePixTableNatePixHeight( pixTable, whichShape);
 
-                    trueScale = (long)aSprite->scale * gAbsoluteScale;
-                    trueScale >>= (long)SHIFT_SCALE;
+                    trueScale = aSprite->scale * gAbsoluteScale;
+                    trueScale >>= SHIFT_SCALE;
 
                 #ifndef kDrawOverride
                     switch( aSprite->style)
@@ -2937,7 +2937,7 @@ void DrawSpriteTableInOffWorld( longRect *clipRect)
     {
         for ( layer = kFirstSpriteLayer; layer <= kLastSpriteLayer; layer++)
         {
-            aSprite = (spriteType *)*gSpriteTable;
+            aSprite = reinterpret_cast<spriteType*>(*gSpriteTable);
             for ( i = 0; i < kMaxSpriteNum; i++)
             {
                 tinySize = aSprite->tinySize & kBlipSizeMask;
@@ -3009,7 +3009,7 @@ void GetOldSpritePixData( spriteType *sourceSprite, spritePix *oldData)
         pixTable = sourceSprite->table;
         whichShape = sourceSprite->whichShape;
 
-//      WriteDebugLong( (long)pixTable);
+//      WriteDebugLong( pixTable);
         if ( whichShape >= GetNatePixTablePixNum( pixTable))
         {
             Str255  resIDString, shapeNumString;
@@ -3039,7 +3039,7 @@ void ShowSpriteTable( void)
     long            i;
     spriteType      *aSprite;
 
-    aSprite = (spriteType *)*gSpriteTable;
+    aSprite = reinterpret_cast<spriteType*>(*gSpriteTable);
     pixMap = GetGWorldPixMap( gOffWorld);
     for ( i = 0; i < kMaxSpriteNum; i++)
     {
@@ -3108,7 +3108,7 @@ void CullSprites( void)
     long            i;
     spriteType      *aSprite;
 
-    aSprite = (spriteType *)*gSpriteTable;
+    aSprite = reinterpret_cast<spriteType*>(*gSpriteTable);
     for ( i = 0; i < kMaxSpriteNum; i++)
     {
         if ( aSprite->table != nil)
@@ -3148,22 +3148,22 @@ void TestByte( char *dbyte, PixMap *pixMap, StringPtr name)
     long            rowbytes, rowplus;
     char            *lbyte;
 
-    rowbytes = 0x0000ffff & (long)((pixMap->rowBytes | ROW_BYTES_MASK) ^ ROW_BYTES_MASK);
-    rowplus = (long)(pixMap->bounds.bottom - pixMap->bounds.top + 1) * rowbytes;
+    rowbytes = 0x0000ffff & ((pixMap->rowBytes | ROW_BYTES_MASK) ^ ROW_BYTES_MASK);
+    rowplus = (pixMap->bounds.bottom - pixMap->bounds.top + 1) * rowbytes;
     lbyte = pixMap->baseAddr + rowplus;
     if (( dbyte < pixMap->baseAddr) || ( dbyte >= lbyte))
     {
         DebugStr( name);
-        WriteDebugLine( (char *)name);
-        WriteDebugLine((char *)"\p<<BAD>>");
+        WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>(name)));
+        WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\p<<BAD>>")));
     }
 }
 
 void ResolveScaleMapData( Handle scaleData)
 {
 #pragma unused( scaleData)
-    gScaleHMap = (long *)*gBothScaleMaps;
-    gScaleVMap = (long *)*gBothScaleMaps + (long)MAX_PIX_SIZE;
+    gScaleHMap = reinterpret_cast<long*>(*gBothScaleMaps);
+    gScaleVMap = reinterpret_cast<long*>(*gBothScaleMaps) + MAX_PIX_SIZE;
 }
 
 void ResolveSpriteData( Handle dummy)
@@ -3174,7 +3174,7 @@ void ResolveSpriteData( Handle dummy)
 #pragma unused( dummy)
     mWriteDebugString("\pResolving Sprite");
     HLock( gSpriteTable);
-    aSprite = ( spriteType *)*gSpriteTable;
+    aSprite = reinterpret_cast<spriteType*>(*gSpriteTable);
     for ( i = 0; i < kMaxSpriteNum; i++)
     {
         if ( aSprite->resID != -1)

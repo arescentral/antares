@@ -39,7 +39,7 @@ int RotationInit( void)
     long        i = 0;
 
 /*
-    gRotTable = NewHandle( sizeof( smallFixedType) * 2L * (long)ROT_POS);
+    gRotTable = NewHandle( sizeof( smallFixedType) * 2L * ROT_POS);
     if ( gRotTable == 0L)
     {
         ShowErrorRecover( MEMORY_ERROR, kRotationError, 1);
@@ -52,7 +52,7 @@ int RotationInit( void)
         {
             sx = 0;
             sy = 1; // kRotUnit
-            RotatePoint( sx, sy, &x, &y, (long)(d + .5));
+            RotatePoint( sx, sy, &x, &y, (d + .5));
             SetRotPoint( x, y, i);
             i++;
         }
@@ -94,7 +94,7 @@ void SetRotPoint( smallFixedType x, smallFixedType y, long rotpos)
 {
     smallFixedType      *i;
 
-    i = (smallFixedType *)*gRotTable + (long)rotpos * 2L;
+    i = reinterpret_cast<smallFixedType *>(*gRotTable) + rotpos * 2L;
     *i = x;
     i++;
     *i = y;
@@ -105,7 +105,7 @@ void GetRotPoint( smallFixedType *x, smallFixedType *y, long rotpos)
 {
     smallFixedType      *i;
 
-    i = (smallFixedType *)*gRotTable + (long)rotpos * 2L;
+    i = reinterpret_cast<smallFixedType *>(*gRotTable) + rotpos * 2L;
     *x = *i;
     i++;
     *y = *i;
@@ -164,7 +164,7 @@ long GetAngleFromVector( long x, long y)
     if ( b < 0) b = -b;
     if ( b < a)
     {
-        h = (long *)*gRotTable + (long)ROT_45 * 2L;
+        h = reinterpret_cast<long *>(*gRotTable) + ROT_45 * 2L;
         whichAngle = ROT_45;
         v = h + 1;
         do
@@ -182,7 +182,7 @@ long GetAngleFromVector( long x, long y)
         } while ( ( test == best) && ( whichAngle <= ROT_90));
     } else
     {
-        h = (long *)*gRotTable + (long)ROT_0 * 2L;
+        h = reinterpret_cast<long *>(*gRotTable) + ROT_0 * 2L;
         whichAngle = ROT_0;
         v = h + 1;
         do

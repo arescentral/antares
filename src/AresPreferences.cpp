@@ -159,7 +159,7 @@ int InitPreferences( void)
     {
         long    keyConflict = -1, lastKeyConflict = -1;
 
-        if (((preferencesDataType *)(*gAresGlobal->gPreferencesData))->version
+        if ((reinterpret_cast<preferencesDataType *>(*gAresGlobal->gPreferencesData))->version
                     > kCurrentPreferencesVersion)
         {
             ShowErrorAny( eQuitErr, kErrorStrID, "\pCould use the current preferences file "
@@ -169,22 +169,22 @@ int InitPreferences( void)
             return ( PREFERENCES_ERROR);
         }
 
-        if (((preferencesDataType *)(*gAresGlobal->gPreferencesData))->version
+        if ((reinterpret_cast<preferencesDataType *>(*gAresGlobal->gPreferencesData))->version
                     < kHotKeyPreferencesVersion)
         {
             PrefsUpdate_PreHotKeys( gAresGlobal->gPreferencesData);
         }
 
-//      if (((preferencesDataType *)(*gAresGlobal->gPreferencesData))->version <= 0x00000011)
+//      if ((reinterpret_cast<preferencesDataType *>(*gAresGlobal->gPreferencesData))->version <= 0x00000011)
         {
-            ((preferencesDataType *)(*gAresGlobal->gPreferencesData))->version =
+            (reinterpret_cast<preferencesDataType *>(*gAresGlobal->gPreferencesData))->version =
                                  kCurrentPreferencesVersion;
             do
             {
                 lastKeyConflict = keyConflict;
 
                 keyConflict = GetFirstKeyConflict(
-                    (preferencesDataType *)(*gAresGlobal->gPreferencesData));
+                    reinterpret_cast<preferencesDataType *>(*gAresGlobal->gPreferencesData));
 
                 if ( keyConflict >= 0)
                 {
@@ -194,16 +194,16 @@ int InitPreferences( void)
                     // check to see if we got factory prefs
                     if (( tempData != nil) && ( oserr == noErr))
                     {
-                        i = ((preferencesDataType *)(*tempData))->keyMap[keyConflict];
-                        ((preferencesDataType *)(*gAresGlobal->gPreferencesData))->keyMap[keyConflict] =
+                        i = (reinterpret_cast<preferencesDataType *>(*tempData))->keyMap[keyConflict];
+                        (reinterpret_cast<preferencesDataType *>(*gAresGlobal->gPreferencesData))->keyMap[keyConflict] =
                             i;
 
                         while (( GetFirstKeyConflict(
-                            (preferencesDataType *)(*gAresGlobal->gPreferencesData)) == keyConflict) &&
+                            reinterpret_cast<preferencesDataType *>(*gAresGlobal->gPreferencesData)) == keyConflict) &&
                             ( i < 128))
                         {
                             i++;
-                            ((preferencesDataType *)(*gAresGlobal->gPreferencesData))->keyMap[keyConflict] =
+                            (reinterpret_cast<preferencesDataType *>(*gAresGlobal->gPreferencesData))->keyMap[keyConflict] =
                                 i;
                         }
                         ReleaseResource( tempData);
@@ -268,7 +268,7 @@ int InitPreferences( void)
         MoveHHi( gAresGlobal->gPreferencesData);
         HLock( gAresGlobal->gPreferencesData);
 
-        prefsData = (preferencesDataType *)*gAresGlobal->gPreferencesData;
+        prefsData = reinterpret_cast<preferencesDataType *>(*gAresGlobal->gPreferencesData);
         // if the version is newer than the what we think is current, freak out
         if ( prefsData->version > kCurrentPreferencesVersion)
         {
@@ -318,7 +318,7 @@ int InitPreferences( void)
     }
     // we must have existing prefs by now
     // translate key data to be more readable
-    prefsData = (preferencesDataType *)*gAresGlobal->gPreferencesData;
+    prefsData = reinterpret_cast<preferencesDataType *>(*gAresGlobal->gPreferencesData);
     for ( i = 0; i < kKeyExtendedControlNum; i++)
     {
         GetKeyMapFromKeyNum( prefsData->keyMap[i], gAresGlobal->gKeyControl[i]);
@@ -441,7 +441,7 @@ OSErr HardWireNewPrefsdata( void)
     if ( gAresGlobal->gPreferencesData == nil) return( -1);
     MoveHHi( gAresGlobal->gPreferencesData);
     HLock( gAresGlobal->gPreferencesData);
-    prefsData = (preferencesDataType *)*gAresGlobal->gPreferencesData;
+    prefsData = reinterpret_cast<preferencesDataType *>(*gAresGlobal->gPreferencesData);
     prefsData->version = kCurrentPreferencesVersion;
     for ( i = 0; i < kKeyControlDataNum; i++)
     {
@@ -491,7 +491,7 @@ OSErr PrefsUpdate_PreHotKeys( Handle prefsData)
     error = MemError();
     if ( error != noErr) return error;
 
-    newPrefs = (preferencesDataType *)*prefsData;
+    newPrefs = reinterpret_cast<preferencesDataType *>(*prefsData);
     newPrefs->version = kHotKeyPreferencesVersion;
     for ( i = 0; i < kOldKeyNum; i++)
     {
@@ -505,14 +505,14 @@ OSErr PrefsUpdate_PreHotKeys( Handle prefsData)
         {
             for ( i = kOldKeyNum; i < kKeyControlDataNum; i++)
             {
-                ((preferencesDataType *)(*prefsData))->keyMap[i] =
-                    ((preferencesDataType *)(*tempData))->keyMap[i];;
+                (reinterpret_cast<preferencesDataType *>(*prefsData))->keyMap[i] =
+                    (reinterpret_cast<preferencesDataType *>(*tempData))->keyMap[i];;
             }
             ReleaseResource( tempData);
         }
 
     }
-    newPrefs = (preferencesDataType *)*prefsData;
+    newPrefs = reinterpret_cast<preferencesDataType *>(*prefsData);
 
     newPrefs->serialNumber = oldPrefs.serialNumber;
     newPrefs->options = oldPrefs.options;
@@ -541,7 +541,7 @@ int SaveKeyControlPreferences( void)
 {
     OSErr           oserr;
     short           i, resID = kPreferencesResID;
-    preferencesDataType *prefsData = (preferencesDataType *)*gAresGlobal->gPreferencesData;
+    preferencesDataType *prefsData = reinterpret_cast<preferencesDataType *>(*gAresGlobal->gPreferencesData);
 
     if (!EasyOpenPreferenceFile( kAresPreferencesFileName, kPreferenceFileCreator,
                             kPreferenceFileType, &gAresGlobal->gPreferenceRefNum))
@@ -573,7 +573,7 @@ short SaveOptionsPreferences( void)
 {
     OSErr               oserr;
     short               resID = kPreferencesResID;
-    preferencesDataType *prefsData = (preferencesDataType *)*gAresGlobal->gPreferencesData;
+    preferencesDataType *prefsData = reinterpret_cast<preferencesDataType *>(*gAresGlobal->gPreferencesData);
 
     if (!EasyOpenPreferenceFile( kAresPreferencesFileName, kPreferenceFileCreator,
                             kPreferenceFileType, &gAresGlobal->gPreferenceRefNum))
@@ -601,7 +601,7 @@ short SaveStartingLevelPreferences( short whatLevel)
 {
     OSErr               oserr;
     short               resID = kPreferencesResID;
-    preferencesDataType *prefsData = (preferencesDataType *)*gAresGlobal->gPreferencesData;
+    preferencesDataType *prefsData = reinterpret_cast<preferencesDataType *>(*gAresGlobal->gPreferencesData);
 
     if ( whatLevel <= 0)
     {
@@ -643,9 +643,9 @@ short SaveStartingLevelPreferences( short whatLevel)
         data = NewHandle( sizeof( startingLevelPreferenceType));
         if ( data != nil)
         {
-            ((startingLevelPreferenceType *)*data)->version = kCurrentPreferencesVersion;
-            ((startingLevelPreferenceType *)*data)->startingLevel = whatLevel;
-            ((startingLevelPreferenceType *)*data)->scenarioVersion = gAresGlobal->scenarioFileInfo.version;
+            (reinterpret_cast<startingLevelPreferenceType *>(*data))->version = kCurrentPreferencesVersion;
+            (reinterpret_cast<startingLevelPreferenceType *>(*data))->startingLevel = whatLevel;
+            (reinterpret_cast<startingLevelPreferenceType *>(*data))->scenarioVersion = gAresGlobal->scenarioFileInfo.version;
             oserr = SaveAnyResourceInPreferences( 'aefL', 0, gAresGlobal->externalFileSpec.name, data,
                 true);
             DisposeHandle( data);
@@ -657,7 +657,7 @@ short SaveStartingLevelPreferences( short whatLevel)
 short GetStartingLevelPreference( void)
 {
     preferencesDataType *prefsData =
-                    (preferencesDataType *)*gAresGlobal->gPreferencesData;
+                    reinterpret_cast<preferencesDataType *>(*gAresGlobal->gPreferencesData);
 
     if ( !Ambrosia_Is_Registered())
     {
@@ -682,7 +682,7 @@ short GetStartingLevelPreference( void)
 
         if (( error == noErr) && ( data != nil))
         {
-            result = ((startingLevelPreferenceType *)*data)->startingLevel;
+            result = (reinterpret_cast<startingLevelPreferenceType *>(*data))->startingLevel;
             DisposeHandle( data);
             return result;
         }
@@ -701,7 +701,7 @@ short SaveAllPreferences( void)
 {
     OSErr               oserr;
     short               resID = kPreferencesResID;
-    preferencesDataType *prefsData = (preferencesDataType *)*gAresGlobal->gPreferencesData;
+    preferencesDataType *prefsData = reinterpret_cast<preferencesDataType *>(*gAresGlobal->gPreferencesData);
 
     if (!EasyOpenPreferenceFile( kAresPreferencesFileName, kPreferenceFileCreator,
                             kPreferenceFileType, &gAresGlobal->gPreferenceRefNum))
@@ -807,10 +807,10 @@ void GetNetPreferences( StringPtr playerName, StringPtr gameName,
     short *race, short *enemyColor, short *netLevel)
 
 {
-    preferencesDataType *prefsData = (preferencesDataType *)*gAresGlobal->gPreferencesData;
+    preferencesDataType *prefsData = reinterpret_cast<preferencesDataType *>(*gAresGlobal->gPreferencesData);
 
-    CopyAnyCharPString( (anyCharType *)playerName, (anyCharType *)prefsData->playerName);
-    CopyAnyCharPString( (anyCharType *)gameName, (anyCharType *)prefsData->gameName);
+    CopyAnyCharPString( reinterpret_cast<anyCharType *>(playerName), reinterpret_cast<anyCharType *>(prefsData->playerName));
+    CopyAnyCharPString( reinterpret_cast<anyCharType *>(gameName), reinterpret_cast<anyCharType *>(prefsData->gameName));
     *protocolFlags = prefsData->protocolFlags;
     *registeredSetting = prefsData->registeredSetting;
     *registeredFlags = prefsData->registeredFlags;
@@ -833,7 +833,7 @@ OSErr SaveNetPreferences( StringPtr playerName, StringPtr gameName,
 {
     OSErr               oserr;
     short               resID = kPreferencesResID;
-    preferencesDataType *prefsData = (preferencesDataType *)*gAresGlobal->gPreferencesData;
+    preferencesDataType *prefsData = reinterpret_cast<preferencesDataType *>(*gAresGlobal->gPreferencesData);
 
     if (!EasyOpenPreferenceFile( kAresPreferencesFileName, kPreferenceFileCreator,
                             kPreferenceFileType, &gAresGlobal->gPreferenceRefNum))
@@ -842,8 +842,8 @@ OSErr SaveNetPreferences( StringPtr playerName, StringPtr gameName,
         return ( PREFERENCES_ERROR);
     }
 
-    CopyAnyCharPString( (anyCharType *)prefsData->playerName, (anyCharType *)playerName);
-    CopyAnyCharPString( (anyCharType *)prefsData->gameName, (anyCharType *)gameName);
+    CopyAnyCharPString( reinterpret_cast<anyCharType *>(prefsData->playerName), reinterpret_cast<anyCharType *>(playerName));
+    CopyAnyCharPString( reinterpret_cast<anyCharType *>(prefsData->gameName), reinterpret_cast<anyCharType *>(gameName));
     prefsData->protocolFlags = protocolFlags;
     prefsData->registeredSetting = registeredSetting;
     prefsData->registeredFlags = registeredFlags;

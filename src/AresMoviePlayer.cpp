@@ -95,10 +95,10 @@ void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean d
                 CloseMovieFile (movieResFile);
             } else
             {
-                WriteDebugLine((char *)"\pCouldn't Open Movie");
-                WriteDebugLine( (char *)filePath);
+                WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pCouldn't Open Movie")));
+                WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>(filePath)));
             }
-        } else WriteDebugLine( (char *)"\pCouldn't Find Movie");
+        } else WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pCouldn't Find Movie")));
         if ( aMovie != nil)
         {
 /*          if ( HasDepth( device, 16, 1, 1))
@@ -131,7 +131,7 @@ void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean d
 
             if ( theClut == nil)
             {
-                WriteDebugLine((char *)"\pNo CLUT!");
+                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pNo CLUT!")));
             }
 
 //          TRY TO SCREW AROUND WITH THE TABLE
@@ -162,8 +162,8 @@ void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean d
             originalPalette = GetPalette( aWindow);
             if ( originalPalette != nil)
             {
-                SetPalette( (WindowPtr)aWindow, thePalette, false);
-                ActivatePalette( (WindowPtr)aWindow);
+                SetPalette(aWindow, thePalette, false);
+                ActivatePalette(aWindow);
             }
 
             if ( (( movieBox.right - movieBox.left) <= (( aWindow->portRect.right -
@@ -179,7 +179,7 @@ void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean d
                 ((aWindow->portRect.bottom - aWindow->portRect.top) / 2) -
                 ((movieBox.bottom - movieBox.top) / 2));
             SetMovieBox( aMovie, &movieBox);
-            SetMovieGWorld( aMovie, (CGrafPtr)aWindow, nil);
+            SetMovieGWorld( aMovie, aWindow, nil);
             SetMovieVolume( aMovie, kSoundVolumeMultiplier * gAresGlobal->gSoundVolume);
 
             HideCursor();
@@ -201,8 +201,8 @@ void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean d
             if ( theClut != nil) DisposeCTable( theClut);
             if ( originalPalette != nil)
             {
-                SetPalette( (WindowPtr)aWindow, originalPalette, false);
-                ActivatePalette( (WindowPtr)aWindow);
+                SetPalette(aWindow, originalPalette, false);
+                ActivatePalette(aWindow);
             }
             if ( thePalette != nil) DisposePalette( thePalette);
 
@@ -248,13 +248,13 @@ OSErr LoadMiniMovie( StringPtr filePath, Movie *aMovie, Rect *destRect, WindowPt
                 CloseMovieFile (movieResFile);
             } else
             {
-                WriteDebugLine((char *)"\pCouldn't Open Movie");
-                WriteDebugLine( (char *)filePath);
+                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pCouldn't Open Movie")));
+                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>(filePath)));
                 return( err);
             }
         } else
         {
-            WriteDebugLine( (char *)"\pCouldn't Find Movie");
+            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pCouldn't Find Movie")));
             return( err);
         }
         if ( *aMovie != nil)
@@ -279,7 +279,7 @@ OSErr LoadMiniMovie( StringPtr filePath, Movie *aMovie, Rect *destRect, WindowPt
 
             MacFillRect( &movieBox, &(qd.black));
 
-            SetMovieGWorld (*aMovie, (CGrafPtr)aWindow, nil);
+            SetMovieGWorld (*aMovie, aWindow, nil);
             SetMovieVolume( *aMovie, kSoundVolumeMultiplier * gAresGlobal->gSoundVolume);
             SetMovieBox (*aMovie, &movieBox);
 
@@ -290,7 +290,7 @@ OSErr LoadMiniMovie( StringPtr filePath, Movie *aMovie, Rect *destRect, WindowPt
             if ( err != noErr) return( err);
         } else
         {
-            WriteDebugLine((char *)"\pMovie = nil");
+            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pMovie = nil")));
             return ( -1);
         }
     } else

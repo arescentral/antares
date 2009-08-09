@@ -199,7 +199,7 @@ void NonplayerShipThink( long timePass)
             // strobe its symbol if it's not feeling well
             if ( anObject->sprite != nil)
             {
-                if ((anObject->health > 0) && ( anObject->health <= ( anObject->baseType->health >> (long)2)))
+                if ((anObject->health > 0) && ( anObject->health <= ( anObject->baseType->health >> 2)))
                 {
                     if ( anObject->owner == gAresGlobal->gPlayerAdmiralNumber)
                         anObject->sprite->tinyColor = friendSick;
@@ -270,13 +270,13 @@ void NonplayerShipThink( long timePass)
 
                             offset.h = mAngleDifference( anObject->directionGoal,
                                         anObject->direction);
-                            offset.v = mFixedToLong( baseObject->frame.rotation.maxTurnRate << (smallFixedType)1);
+                            offset.v = mFixedToLong( baseObject->frame.rotation.maxTurnRate << 1);
                             difference = ABS( offset.h);
                         } else
                         {
                             offset.h = mAngleDifference( anObject->directionGoal,
                                         anObject->direction);
-                            offset.v = mFixedToLong( kDefaultTurnRate << (smallFixedType)1);
+                            offset.v = mFixedToLong( kDefaultTurnRate << 1);
                             difference = ABS( offset.h);
                         }
                         if ( difference > offset.v)
@@ -457,7 +457,7 @@ void NonplayerShipThink( long timePass)
                             anObject->energy += kEnergyChunk;
                         }
 
-                        if (( anObject->health < ( baseObject->health >> (long)1)) &&
+                        if (( anObject->health < ( baseObject->health >> 1)) &&
                             ( anObject->energy > kHealthRatio))
                         {
                             anObject->health++;
@@ -467,7 +467,7 @@ void NonplayerShipThink( long timePass)
                         if ( anObject->pulseType != kNoWeapon)
                         {
                             if (( anObject->pulseAmmo <
-                                (anObject->pulseBase->frame.weapon.ammo >> (long)1)) &&
+                                (anObject->pulseBase->frame.weapon.ammo >> 1)) &&
                                 ( anObject->energy >= kWeaponRatio))
                             {
                                 anObject->pulseCharge++;
@@ -487,7 +487,7 @@ void NonplayerShipThink( long timePass)
                         if ( anObject->beamType != kNoWeapon)
                         {
                             if (( anObject->beamAmmo <
-                                (anObject->beamBase->frame.weapon.ammo >> (long)1)) &&
+                                (anObject->beamBase->frame.weapon.ammo >> 1)) &&
                                 ( anObject->energy >= kWeaponRatio))
                             {
                                 anObject->beamCharge++;
@@ -507,7 +507,7 @@ void NonplayerShipThink( long timePass)
                         if ( anObject->specialType != kNoWeapon)
                         {
                             if (( anObject->specialAmmo <
-                                (anObject->specialBase->frame.weapon.ammo >> (long)1)) &&
+                                (anObject->specialBase->frame.weapon.ammo >> 1)) &&
                                 ( anObject->energy >= kWeaponRatio))
                             {
                                 anObject->specialCharge++;
@@ -529,7 +529,7 @@ void NonplayerShipThink( long timePass)
                 // targetObject is set for all three weapons -- do not change
                 if ( anObject->targetObjectNumber >= 0)
                 {
-                    targetObject = (spaceObjectType *)*gSpaceObjectData +
+                    targetObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
                         anObject->targetObjectNumber;
                 } else targetObject = nil;
 
@@ -662,7 +662,7 @@ void NonplayerShipThink( long timePass)
                         /*
                         if ( anObject->targetObjectNumber >= 0)
                         {
-                            targetObject = (spaceObjectType *)*gSpaceObjectData +
+                            targetObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
                                 anObject->targetObjectNumber;
                         } else targetObject = nil;
                         */
@@ -704,7 +704,7 @@ void NonplayerShipThink( long timePass)
             }
         }
 
-        anObject = (spaceObjectType *)anObject->nextObject;
+        anObject = anObject->nextObject;
     }
 }
 #endif  // kUseOldThinking
@@ -908,7 +908,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                                 baseObject->arriveAction,
                                 baseObject->arriveActionNum,
                                 anObject,
-                                (spaceObjectType *)anObject->destObjectPtr,
+                                anObject->destObjectPtr,
                                 &offset, true);
                             anObject->runTimeFlags |= kHasArrived;
                         }
@@ -1047,7 +1047,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                     kNoDestinationObject)
                 {
                     targetObject =
-                        (spaceObjectType *)anObject->destObjectPtr;
+                        anObject->destObjectPtr;
                     if (( targetObject != nil) &&
                         ( targetObject->active) &&
                         ( targetObject->id == anObject->destObjectID))
@@ -1095,14 +1095,14 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                                 kNoDestinationObject)
                             {
                                 targetObject =
-                                    (spaceObjectType *)*gSpaceObjectData +
+                                    reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
                                     anObject->destinationObject;
                                 if ( targetObject->id != anObject->destObjectDestID) targetObject = nil;
                             } else targetObject = nil;
                             if ( targetObject != nil)
                             {
                                 anObject->destObjectPtr =
-                                    (spaceObjectTypePtr)targetObject;
+                                    targetObject;
                                 anObject->destObjectID =
                                     targetObject->id;
                                 anObject->destObjectDest =
@@ -1220,7 +1220,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                                     baseObject->arriveAction,
                                     baseObject->arriveActionNum,
                                         anObject,
-                                        (spaceObjectType *)anObject->destObjectPtr,
+                                        anObject->destObjectPtr,
                                         &offset, true);
                                 anObject->runTimeFlags |= kHasArrived;
                             }
@@ -1334,11 +1334,11 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
             // this is human controlled--if it's too far away, tough nougies
             // find angle between me & dest
             #ifdef powerc
-            slope = MyFixRatio( (int)(anObject->location.h - dest.h),
-                        (int)(anObject->location.v - dest.v));
+            slope = MyFixRatio(anObject->location.h - dest.h,
+                        anObject->location.v - dest.v);
             #else
-            slope = FixRatio( (int)(anObject->location.h - dest.h),
-                        (int)(anObject->location.v - dest.v));
+            slope = FixRatio(anObject->location.h - dest.h,
+                        anObject->location.v - dest.v);
             #endif
             angle = AngleFromSlope( slope);
 
@@ -1540,7 +1540,7 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
     {
         if ( anObject->destinationObject != kNoDestinationObject)
         {
-            targetObject = (spaceObjectType *)anObject->destObjectPtr;
+            targetObject = anObject->destObjectPtr;
             if (( targetObject != nil) && ( targetObject->active) &&
                 ( targetObject->id == anObject->destObjectID))
             {
@@ -1563,7 +1563,7 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
             {
                 anObject->duty = eNoDuty;
                 anObject->attributes &= ~kStaticDestination;
-                WriteDebugLine((char *)"\pOddness");
+                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pOddness")));
                 if ( targetObject == nil)
                 {
                     keysDown |= kDownKey;
@@ -1579,14 +1579,13 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
                         kNoDestinationObject)
                     {
                         targetObject =
-                            (spaceObjectType *)*gSpaceObjectData +
+                            reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
                             anObject->destinationObject;
                         if ( targetObject->id != anObject->destObjectDestID) targetObject = nil;
                     } else targetObject = nil;
                     if ( targetObject != nil)
                     {
-                        anObject->destObjectPtr =
-                            (spaceObjectTypePtr)targetObject;
+                        anObject->destObjectPtr = targetObject;
                         anObject->destObjectID = targetObject->id;
                         anObject->destObjectDest =
                             targetObject->destinationObject;
@@ -1616,9 +1615,9 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
             dest.v = anObject->location.v;
         }
 
-        difference = ABS( (long)dest.h - (long)anObject->location.h);
+        difference = ABS<int>( dest.h - anObject->location.h);
         dcalc = difference;
-        difference =  ABS( (long)dest.v - (long)anObject->location.v);
+        difference =  ABS<int>( dest.v - anObject->location.v);
         distance = difference;
         if (( dcalc > kMaximumAngleDistance) ||
             ( distance > kMaximumAngleDistance))
@@ -1631,10 +1630,8 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
             {
                 distance = distance * distance + dcalc * dcalc;
             }
-            shortx = ((long)anObject->location.h - (long)dest.h) >>
-                (long)4;
-            shorty = ((long)anObject->location.v - (long)dest.v) >>
-                (long)4;
+            shortx = (anObject->location.h - dest.h) >> 4;
+            shorty = (anObject->location.v - dest.v) >> 4;
             // find angle between me & dest
             #ifdef powerc
             slope = MyFixRatio( shortx, shorty);
@@ -1656,11 +1653,11 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
 
             // find angle between me & dest
             #ifdef powerc
-            slope = MyFixRatio( (int)(anObject->location.h - dest.h),
-                        (int)(anObject->location.v - dest.v));
+            slope = MyFixRatio(anObject->location.h - dest.h,
+                        anObject->location.v - dest.v);
             #else
-            slope = FixRatio( (int)(anObject->location.h - dest.h),
-                        (int)(anObject->location.v - dest.v));
+            slope = FixRatio(anObject->location.h - dest.h,
+                        anObject->location.v - dest.v);
             #endif
             angle = AngleFromSlope( slope);
 
@@ -1742,9 +1739,9 @@ void ThinkObjectGetCoordVector( spaceObjectType *anObject, coordPointType *dest,
     short           shortx, shorty;
     Fixed           slope;
 
-    difference = ABS( (long)dest->h - (long)anObject->location.h);
+    difference = ABS<int>( dest->h - anObject->location.h);
     dcalc = difference;
-    difference =  ABS( (long)dest->v - (long)anObject->location.v);
+    difference =  ABS<int>( dest->v - anObject->location.v);
     *distance = difference;
     if (( *distance == 0) && ( dcalc == 0))
     {
@@ -1763,10 +1760,8 @@ void ThinkObjectGetCoordVector( spaceObjectType *anObject, coordPointType *dest,
         {
             *distance = *distance * *distance + dcalc * dcalc;
         }
-        shortx = ((long)anObject->location.h -
-            (long)dest->h) >> (long)4;
-        shorty = ((long)anObject->location.v -
-            (long)dest->v) >> (long)4;
+        shortx = (anObject->location.h - dest->h) >> 4;
+        shorty = (anObject->location.v - dest->v) >> 4;
         // find angle between me & dest
         #ifdef powerc
         slope = MyFixRatio( shortx, shorty);
@@ -1788,11 +1783,11 @@ void ThinkObjectGetCoordVector( spaceObjectType *anObject, coordPointType *dest,
 
         // find angle between me & dest
         #ifdef powerc
-        slope = MyFixRatio( (int)(anObject->location.h - dest->h),
-                    (int)(anObject->location.v - dest->v));
+        slope = MyFixRatio(anObject->location.h - dest->h,
+                    anObject->location.v - dest->v);
         #else
-        slope = FixRatio( (int)(anObject->location.h - dest->h),
-                    (int)(anObject->location.v - dest->v));
+        slope = FixRatio(anObject->location.h - dest->h,
+                    anObject->location.v - dest->v);
         #endif
         *angle = AngleFromSlope( slope);
 
@@ -1809,9 +1804,9 @@ void ThinkObjectGetCoordDistance( spaceObjectType *anObject, coordPointType *des
     long            difference;
     unsigned long   dcalc;
 
-    difference = ABS( (long)dest->h - (long)anObject->location.h);
+    difference = ABS<int>( dest->h - anObject->location.h);
     dcalc = difference;
-    difference =  ABS( (long)dest->v - (long)anObject->location.v);
+    difference =  ABS<int>( dest->v - anObject->location.v);
     *distance = difference;
     if (( *distance == 0) && ( dcalc == 0))
     {
@@ -1854,7 +1849,7 @@ void ThinkObjectResolveDestination( spaceObjectType *anObject, coordPointType *d
     {
         if ( anObject->destinationObject != kNoDestinationObject)
         {
-            *targetObject = (spaceObjectType *)anObject->destObjectPtr;
+            *targetObject = anObject->destObjectPtr;
             if (( *targetObject != nil) && ( (*targetObject)->active) &&
                 ( (*targetObject)->id == anObject->destObjectID))
             {
@@ -1891,14 +1886,13 @@ void ThinkObjectResolveDestination( spaceObjectType *anObject, coordPointType *d
                         kNoDestinationObject)
                     {
                         (*targetObject) =
-                            (spaceObjectType *)*gSpaceObjectData +
+                            reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
                             anObject->destinationObject;
                         if ( (*targetObject)->id != anObject->destObjectDestID) *targetObject = nil;
                     } else *targetObject = nil;
                     if ( *targetObject != nil)
                     {
-                        anObject->destObjectPtr =
-                            (spaceObjectTypePtr)(*targetObject);
+                        anObject->destObjectPtr = (*targetObject);
                         anObject->destObjectID = (*targetObject)->id;
                         anObject->destObjectDest =
                             (*targetObject)->destinationObject;
@@ -1947,7 +1941,7 @@ Boolean ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *des
 
     if ( anObject->closestObject != kNoShip)
     {
-        closestObject = (spaceObjectType *)*gSpaceObjectData +
+        closestObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
             anObject->closestObject;
     } else closestObject = nil;
 
@@ -1981,7 +1975,7 @@ Boolean ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *des
     if ( anObject->targetObjectNumber != kNoShip)
     {
         // make sure we're still talking about the same object
-        *targetObject = (spaceObjectType *)*gSpaceObjectData +
+        *targetObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
             anObject->targetObjectNumber;
 
         // if the object is wrong or smells at all funny, then
@@ -2016,7 +2010,7 @@ Boolean ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *des
                 anObject->targetObjectNumber =
                     anObject->closestObject;
                 closestObject = *targetObject =
-                    (spaceObjectType *)*gSpaceObjectData +
+                    reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
                     anObject->targetObjectNumber;
                 anObject->targetObjectID = closestObject->id;
                 if ( !((*targetObject)->attributes & kPotentialTarget))
@@ -2048,7 +2042,7 @@ Boolean ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *des
                     ( anObject->closestObject != kNoShip))
                 {
                     closestObject =
-                        (spaceObjectType *)*gSpaceObjectData +
+                        reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
                         anObject->closestObject;
                     if ( ( closestObject->attributes & kHated))
                     {
@@ -2079,7 +2073,7 @@ Boolean ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *des
                 kRemoteOrHuman))
             {
                 anObject->targetObjectNumber = anObject->closestObject;
-                *targetObject = (spaceObjectType *)*gSpaceObjectData +
+                *targetObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
                     anObject->targetObjectNumber;
                 anObject->targetObjectID = (*targetObject)->id;
                 dest->h = (*targetObject)->location.h;
@@ -2200,11 +2194,11 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
     // We don't need to worry if it is very far away, since it must be within farthest weapon range
     // find angle between me & dest
     #ifdef powerc
-    slope = MyFixRatio( (int)(anObject->location.h - dest.h),
-                (int)(anObject->location.v - dest.v));
+    slope = MyFixRatio(anObject->location.h - dest.h,
+                anObject->location.v - dest.v);
     #else
-    slope = FixRatio( (int)(anObject->location.h - dest.h),
-                (int)(anObject->location.v - dest.v));
+    slope = FixRatio(anObject->location.h - dest.h,
+                anObject->location.v - dest.v);
     #endif
     angle = AngleFromSlope( slope);
 
@@ -2332,14 +2326,14 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
                 ( anObject->attributes & kCanAcceptDestination))
             {
                 StartMessage();
-                AppendStringToMessage(( anyCharType *)"\p ");
+                AppendStringToMessage(const_cast<anyCharType *>("\p "));
                 GetIndString( s, 5000, anObject->whichBaseObject + 1);
-                AppendStringToMessage(( anyCharType *)s);
-                AppendStringToMessage(( anyCharType *)"\p destroyed.  ");
+                AppendStringToMessage(const_cast<anyCharType *>(s));
+                AppendStringToMessage(const_cast<anyCharType *>("\p destroyed.  "));
                 count = CountObjectsOfBaseType( anObject->whichBaseObject, anObject->owner) - 1;
                 NumToString( count, s);
-                AppendStringToMessage(( anyCharType *)s);
-                AppendStringToMessage(( anyCharType *)"\p remaining. ");
+                AppendStringToMessage(const_cast<anyCharType *>(s));
+                AppendStringToMessage(const_cast<anyCharType *>("\p remaining. "));
                 EndMessage();
 
 //              if ( anObject->attributes & (kIsPlayerShip | kIsRemote | kIsHumanControlled))
@@ -2355,7 +2349,7 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
                         anObject->attributes &= (~kIsHumanControlled) & (~kIsPlayerShip);
                         gAresGlobal->gPlayerShipNumber = count;
                         ResetScrollStars( gAresGlobal->gPlayerShipNumber);
-                        anObject = (spaceObjectType *)*gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
+                        anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + gAresGlobal->gPlayerShipNumber;
                         anObject->attributes |= attributes;
                     } else
                     {
@@ -2415,12 +2409,12 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
     // try to get any ship but the current ship
     // stop trying when we've made a full circle (we're back on currentShipNum)
 
-    WriteDebugLine((char *)"\pSelecting");
+    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pSelecting")));
     WriteDebugLong( currentShipNum);
     whichShip = startShip = currentShipNum;
     if ( whichShip >= 0)
     {
-        anObject = (spaceObjectType *)*gSpaceObjectData + startShip;
+        anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + startShip;
         if ( anObject->active != kObjectInUse) // if it's not in the loop
         {
             anObject = gRootObject;
@@ -2444,9 +2438,9 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
             ( anObject->owner != sourceObject->owner)) || (( friendOrFoe > 0) &&
             ( anObject->owner == sourceObject->owner)) || ( friendOrFoe == 0)))
         {
-            difference = ABS( (long)sourceObject->location.h - (long)anObject->location.h);
+            difference = ABS<int>( sourceObject->location.h - anObject->location.h);
             dcalc = difference;
-            difference =  ABS( (long)sourceObject->location.v - (long)anObject->location.v);
+            difference =  ABS<int>( sourceObject->location.v - anObject->location.v);
             distance = difference;
 
             if (( dcalc > kMaximumRelevantDistance) ||
@@ -2488,20 +2482,18 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
             if ( thisDistanceState)
             {
 //              Debugger();
-                hdif = (long)sourceObject->location.h - (long)anObject->location.h;
-                vdif = (long)sourceObject->location.v - (long)anObject->location.v;
+                hdif = sourceObject->location.h - anObject->location.h;
+                vdif = sourceObject->location.v - anObject->location.v;
                 while (((ABS(hdif)) > kMaximumAngleDistance) || ( (ABS(vdif)) > kMaximumAngleDistance))
                 {
-                    hdif >>= (long)1;
-                    vdif >>= (long)1;
+                    hdif >>= 1;
+                    vdif >>= 1;
                 }
 
                 #ifdef powerc
-                slope = MyFixRatio( (short)hdif,
-                            (short)vdif);
+                slope = MyFixRatio(hdif, vdif);
                 #else
-                slope = FixRatio( (short)hdif,
-                            (short)vdif);
+                slope = FixRatio(hdif, vdif);
                 #endif
                 angle = AngleFromSlope( slope);
 
@@ -2585,7 +2577,7 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
 */
         }
         whichShip = anObject->nextObjectNumber;
-        anObject = (spaceObjectType *)anObject->nextObject;
+        anObject = anObject->nextObject;
         if ( anObject == nil)
         {
             whichShip = gRootObjectNumber;
@@ -2608,7 +2600,7 @@ long GetSpritePointSelectObject( Rect *bounds, spaceObjectType *sourceObject, un
                     fartherDistance = kMaximumRelevantDistanceSquared << 1,
                     myOwnerFlag = 1 << sourceObject->owner;
 
-    anObject = (spaceObjectType *)*gSpaceObjectData;
+    anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
 
     for ( whichShip = 0; whichShip < kMaxSpaceObject; whichShip++)
     {

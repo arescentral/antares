@@ -108,7 +108,7 @@ aresVersionType AresVersion_Get_FromString( StringPtr s)
 
 StringPtr String_Get_FromAresVersion( StringPtr s, aresVersionType t)
 {
-    unsigned char   *c = (unsigned char *)&t;
+    unsigned char   *c = reinterpret_cast<unsigned char*>(&t);
     Str255          numString;
 
     mAssert( s != nil);

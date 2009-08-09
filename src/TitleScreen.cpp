@@ -42,9 +42,9 @@ void DrawTitleScreen( void)
     PicHandle       pict;
     Rect            tRect;
 
-    MacSetPort( (WindowPtr)gTheWindow);
+    MacSetPort( gTheWindow);
 //  pict = GetPicture( kTitleScreenID);
-    pict = (PicHandle)HHGetResource( 'PICT', kTitleScreenID);
+    pict = reinterpret_cast<PicHandle>(HHGetResource( 'PICT', kTitleScreenID));
     if ( pict == nil)
     {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 1);
@@ -54,7 +54,7 @@ void DrawTitleScreen( void)
         tRect = (**pict).picFrame;
         CenterRectInRect( &tRect, &(gTheWindow->portRect));
         DrawPicture( pict, &tRect);
-        ReleaseResource( (Handle)pict);
+        ReleaseResource( reinterpret_cast<Handle>(pict));
     }
 }
 
@@ -64,8 +64,8 @@ void DrawPublisherScreen( void)
     PicHandle       pict;
     Rect            tRect;
 
-    MacSetPort( (WindowPtr)gTheWindow);
-    pict = (PicHandle)HHGetResource( 'PICT', kPublisherScreenID);
+    MacSetPort( gTheWindow);
+    pict = reinterpret_cast<PicHandle>(HHGetResource( 'PICT', kPublisherScreenID));
     if ( pict == nil)
     {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 2);
@@ -76,7 +76,7 @@ void DrawPublisherScreen( void)
         CenterRectInRect( &tRect, &(gTheWindow->portRect));
         PaintRect(  &(gTheWindow->portRect));
         DrawPicture( pict, &tRect);
-        ReleaseResource( (Handle)pict);
+        ReleaseResource( reinterpret_cast<Handle>(pict));
     }
 }
 
@@ -86,8 +86,8 @@ void DrawEgoScreen( void)
     PicHandle       pict;
     Rect            tRect;
 
-    MacSetPort( (WindowPtr)gTheWindow);
-    pict = (PicHandle)HHGetResource( 'PICT', kEgoScreenID);
+    MacSetPort( reinterpret_cast<WindowPtr>(gTheWindow));
+    pict = reinterpret_cast<PicHandle>(HHGetResource( 'PICT', kEgoScreenID));
     if ( pict == nil)
     {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 3);
@@ -98,7 +98,7 @@ void DrawEgoScreen( void)
         CenterRectInRect( &tRect, &(gTheWindow->portRect));
         PaintRect(  &(gTheWindow->portRect));
         DrawPicture( pict, &tRect);
-        ReleaseResource( (Handle)pict);
+        ReleaseResource( reinterpret_cast<Handle>(pict));
     }
 }
 
@@ -107,9 +107,9 @@ void BlackTitleScreen( void)
 {
     RGBColor    black = {0, 0, 0};
 
-    MacSetPort( (WindowPtr)gTheWindow);
+    MacSetPort( gTheWindow);
     DrawInRealWorld();
-    MacSetPort( (WindowPtr)gTheWindow);
+    MacSetPort( gTheWindow);
     PenPat( &qd.black);
     RGBForeColor( &black);
 
