@@ -2110,7 +2110,7 @@ Boolean DoKeyInterface( void)
         }
         CloseInterface();
     }
-    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pRESULT:")));
+    WriteDebugLine(reinterpret_cast<const char*>("\pRESULT:"));
     WriteDebugLong( result);
     return( result);
 }
@@ -5893,7 +5893,7 @@ void HandleOSEvent( EventRecord *event)
                     }
                 }
 
-                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pRESUME")));
+                WriteDebugLine(reinterpret_cast<const char*>("\pRESUME"));
                 Ambrosia_Update_Registered();
             } else
             {
@@ -5901,7 +5901,7 @@ void HandleOSEvent( EventRecord *event)
                 SetMBarState( true, theDevice);
                 gAresGlobal->gOptions |= kOptionInBackground;
                 SuspendActiveTextEdit();
-                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pSUSPEND")));
+                WriteDebugLine(reinterpret_cast<const char*>("\pSUSPEND"));
             }
             break;
     }
@@ -5935,7 +5935,7 @@ Boolean Ares_WaitNextEvent( short eventMask, EventRecord *theEvent,
 {
     if (( Wrap_GRIsWaitingCmd())/* && ( !gAresGlobal->gameRangerPending)*/)
     {
-        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pGRIsWaiting!")));
+        WriteDebugLine(reinterpret_cast<const char*>("\pGRIsWaiting!"));
         if ( !gAresGlobal->gameRangerPending)
         {
             gAresGlobal->gameRangerPending = true;

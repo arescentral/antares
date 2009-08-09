@@ -40,8 +40,8 @@ inline void mGetPStringFromSingleAnyChar(
     *(mDestAnyCharPtr + 1) = mAnyChar;
 }
 
-void CopyAnyCharPString( anyCharType *, anyCharType *);
-void InsertAnyCharPStringInPString( anyCharType *, anyCharType *, long);
+void CopyAnyCharPString( anyCharType *, const anyCharType *);
+void InsertAnyCharPStringInPString( anyCharType *, const anyCharType *, long);
 void CutCharsFromAnyCharPString( anyCharType *, long, long);
 
 #pragma options align=reset

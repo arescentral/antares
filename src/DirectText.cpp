@@ -184,7 +184,7 @@ int InitDirectText( void)
     MoveHHi( gFourBitTable);
     HLock( gFourBitTable);
     */
-    WriteDebugLine(const_cast<char*>(reinterpret_cast<const char *>("\p4BITREG:")));
+    WriteDebugLine(reinterpret_cast<const char *>("\p4BITREG:"));
     mHandleLockAndRegister( gFourBitTable, nil, nil, nil, "\pgFourBitTable");
 
     c = reinterpret_cast<unsigned char *>(*gFourBitTable);
@@ -280,7 +280,7 @@ short AddDirectFont( directTextType *dtext)
         }
         DetachResource( dtext->charSet);
         dtext->myHandle = TRUE;
-        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pAddCharSet:")));
+        WriteDebugLine(reinterpret_cast<const char*>("\pAddCharSet:"));
         WriteDebugLong( dtext->resID);
         mDataHandleLockAndRegister( dtext->charSet, nil, nil, nil, "\pdtext->charset"); // this can move memory, so our ptr's no good
     }
@@ -1452,6 +1452,6 @@ void ResetDirectTextPtr( Handle directText)
 
 {
 #pragma unused( directText)
-    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pDText Callback")));
+    WriteDebugLine(reinterpret_cast<const char*>("\pDText Callback"));
     gDirectText = reinterpret_cast<directTextType *>(*gDirectTextData) + gWhichDirectText;
 }

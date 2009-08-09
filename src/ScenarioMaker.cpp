@@ -210,7 +210,7 @@ Boolean ConstructScenario( long which)
 
     v.h = 0; v.v = 0;
 
-    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pSIZE:")));
+    WriteDebugLine(reinterpret_cast<const char*>("\pSIZE:"));
     WriteDebugLong( sizeof( scenarioInitialType));
 
     ResetAllSpaceObjects();
@@ -365,7 +365,7 @@ Boolean ConstructScenario( long which)
     DoLoadingInterface( &loadingRect, s);
     UpdateLoadingInterface( currentStep, stepNumber, &loadingRect);
 
-    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p- C H E C K -")));
+    WriteDebugLine(reinterpret_cast<const char*>("\p- C H E C K -"));
 
     // for each initial object
 
@@ -492,7 +492,7 @@ Boolean ConstructScenario( long which)
 
     SetAllBaseObjectsUnchecked();
 
-    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p- A D D -")));
+    WriteDebugLine(reinterpret_cast<const char*>("\p- A D D -"));
     RemoveAllUnusedSounds();
     RemoveAllUnusedPixTables();
 
@@ -1253,12 +1253,12 @@ void HackWinLoseMessage( Boolean win)
     if ( win)
     {
         StartMessage();
-        AppendStringToMessage(const_cast<anyCharType *>("\pYOU WIN"));
+        AppendStringToMessage("\pYOU WIN");
         EndMessage();
     } else
     {
         StartMessage();
-        AppendStringToMessage(const_cast<anyCharType *>("\pYou lose"));
+        AppendStringToMessage("\pYou lose");
         EndMessage();
     }
 }
@@ -1407,7 +1407,7 @@ void CheckScenarioConditions( long timePass)
                         } else if ( sObject->health <= ( sObject->baseType->health >> 1))
                         {
                             conditionTrue = true;
-                            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pHALFNESS!")));
+                            WriteDebugLine(reinterpret_cast<const char*>("\pHALFNESS!"));
                             WriteDebugLong( condition->directObject);
                         } else
                         {

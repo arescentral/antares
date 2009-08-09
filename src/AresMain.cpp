@@ -436,7 +436,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
         GetDateTime( reinterpret_cast<unsigned long *>(&gRandomSeed));
 
 
-//          WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>Net")));
+//          WriteDebugLine(reinterpret_cast<const char*>("\p>Net"));
 
         error  = RT_Open( true, VERSION_2_CODES);
         if ( error != noErr)
@@ -702,7 +702,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
             RGBBackColor( &initialFadeColor);
 //          BackPat( &qd.black);
 
-//          WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>Debug Win")));
+//          WriteDebugLine(reinterpret_cast<const char*>("\p>Debug Win"));
 
             MacSetPort ( gTheWindow);
             MacSetRect( &windowRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
@@ -741,28 +741,28 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
             error = CreateOffscreenWorld( &(gTheWindow->portRect), theClut);
             if ( error == kNoError)
             {
-                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>Offworld")));
-                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pGDPMapBounds")));
+                WriteDebugLine(reinterpret_cast<const char*>("\p>Offworld"));
+                WriteDebugLine(reinterpret_cast<const char*>("\pGDPMapBounds"));
                 WriteDebugLong( (*(*theDevice)->gdPMap)->bounds.left);
-                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pGDRect")));
+                WriteDebugLine(reinterpret_cast<const char*>("\pGDRect"));
                 WriteDebugLong( (*theDevice)->gdRect.left);
-                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pgNatePortLeft")));
+                WriteDebugLine(reinterpret_cast<const char*>("\pgNatePortLeft"));
                 WriteDebugLong( gNatePortLeft);
-                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pPortRect")));
+                WriteDebugLine(reinterpret_cast<const char*>("\pPortRect"));
                 WriteDebugLong( gTheWindow->portRect.left);
 
                 error = MusicInit();
-                    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>Music")));
+                    WriteDebugLine(reinterpret_cast<const char*>("\p>Music"));
                 if ( OpenSoundFile() == kNoError)
                 {
                     mWriteDebugString("\p>Sound File");
                     InitMoviePlayer();
 
-                    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>Movie")));
+                    WriteDebugLine(reinterpret_cast<const char*>("\p>Movie"));
                     error = RotationInit();
                     if ( error == kNoError)
                     {
-                        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char *>("\p>Rot")));
+                        WriteDebugLine(reinterpret_cast<const char *>("\p>Rot"));
 
                         NormalizeColors();
                         DrawInRealWorld();
@@ -773,7 +773,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                         error = InterfaceHandlingInit();
                         if ( error == kNoError)
                         {
-                            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>Interface")));
+                            WriteDebugLine(reinterpret_cast<const char*>("\p>Interface"));
 
                             if ( gAresGlobal->originalExternalFileSpec.name[0] > 0)
                             {
@@ -939,27 +939,27 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                             error = InitDirectText();
                             if ( error == kNoError)
                             {
-                                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>DText")));
+                                WriteDebugLine(reinterpret_cast<const char*>("\p>DText"));
 
                                 error = ScreenLabelInit();
                                 if ( error == kNoError)
                                 {
-                                    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>Label")));
+                                    WriteDebugLine(reinterpret_cast<const char*>("\p>Label"));
 
                                     error = InitMessageScreen();
                                     if ( error == kNoError)
                                     {
-                                        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>Message")));
+                                        WriteDebugLine(reinterpret_cast<const char*>("\p>Message"));
 
                                         error = InitScrollStars();
                                         if ( error == kNoError)
                                         {
-                                            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>ScrollStar")));
+                                            WriteDebugLine(reinterpret_cast<const char*>("\p>ScrollStar"));
 
                                             error = InstrumentInit();
                                             if ( error == kNoError)
                                             {
-                                                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>Instrument")));
+                                                WriteDebugLine(reinterpret_cast<const char*>("\p>Instrument"));
 
 
                                                 SpriteHandlingInit();
@@ -969,15 +969,15 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                                                     error = SpaceObjectHandlingInit();  // MUST be after ScenarioMakerInit()
                                                     if ( error == kNoError)
                                                     {
-                                                        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>SpaceObj")));
+                                                        WriteDebugLine(reinterpret_cast<const char*>("\p>SpaceObj"));
                                                         error = InitSoundFX();
 //                                                      if ( error == kNoError)
                                                         {
-                                                            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>SoundFX")));
+                                                            WriteDebugLine(reinterpret_cast<const char*>("\p>SoundFX"));
                                                             error =InitMotion();
                                                             if ( error == kNoError)
                                                             {
-                                                                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>Motion")));
+                                                                WriteDebugLine(reinterpret_cast<const char*>("\p>Motion"));
 
                                                                 error = AdmiralInit();
                                                                 if ( error == kNoError)
@@ -1006,63 +1006,63 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
             CleanupMoviePlayer();
 //          DisposeNetworking();
                                                                         CleanupBeams();
-                                                                        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Beams")));
+                                                                        WriteDebugLine(reinterpret_cast<const char*>("\p<Beams"));
                                                                     }
                                                                     AdmiralCleanup();
-                                                                    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Admiral")));
+                                                                    WriteDebugLine(reinterpret_cast<const char*>("\p<Admiral"));
                                                                 }
 
                                                                 MotionCleanup();
-                                                                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Motion")));
+                                                                WriteDebugLine(reinterpret_cast<const char*>("\p<Motion"));
                                                             }
 
                                                             SoundFXCleanup();
-                                                            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Sound")));
+                                                            WriteDebugLine(reinterpret_cast<const char*>("\p<Sound"));
                                                         }
                                                         CleanupSpaceObjectHandling();
-                                                        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Obj Handle")));
+                                                        WriteDebugLine(reinterpret_cast<const char*>("\p<Obj Handle"));
                                                         CleanupSpriteHandling();
                                                         CleanupAresCheat();
-                                                        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Sprite")));
+                                                        WriteDebugLine(reinterpret_cast<const char*>("\p<Sprite"));
                                                     }
                                                     ScenarioMakerCleanup();
                                                 }
                                                 InstrumentCleanup();
-                                                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Instrument")));
+                                                WriteDebugLine(reinterpret_cast<const char*>("\p<Instrument"));
                                             }
                                             CleanupScrollStars();
-                                            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Stars")));
+                                            WriteDebugLine(reinterpret_cast<const char*>("\p<Stars"));
                                         }
                                         MessageScreenCleanup();
-                                        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Message")));
+                                        WriteDebugLine(reinterpret_cast<const char*>("\p<Message"));
                                     }
                                     ScreenLabelCleanup();
-                                    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Label")));
+                                    WriteDebugLine(reinterpret_cast<const char*>("\p<Label"));
                                 }
                                 DirectTextCleanup();
-                                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<DText")));
+                                WriteDebugLine(reinterpret_cast<const char*>("\p<DText"));
                             }
                             InterfaceHandlingCleanup();
-                            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Interface")));
+                            WriteDebugLine(reinterpret_cast<const char*>("\p<Interface"));
                         }
                         ColorTranslatorCleanup();
-                        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Color")));
+                        WriteDebugLine(reinterpret_cast<const char*>("\p<Color"));
                         RotationCleanup();
-                        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Rotation")));
+                        WriteDebugLine(reinterpret_cast<const char*>("\p<Rotation"));
                         CleanupTransitions();
                         CleanupSpriteCursor();
-                        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Transition")));
+                        WriteDebugLine(reinterpret_cast<const char*>("\p<Transition"));
                         CleanupMoviePlayer();
                     }
                     MusicCleanup();
-                    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Music")));
+                    WriteDebugLine(reinterpret_cast<const char*>("\p<Music"));
                 }
                 CleanUpOffscreenWorld();
-                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<GWorld")));
+                WriteDebugLine(reinterpret_cast<const char*>("\p<GWorld"));
             }
-            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<Network")));
+            WriteDebugLine(reinterpret_cast<const char*>("\p<Network"));
             HandleHandlerCleanup();
-/*          WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<WAITING>")));
+/*          WriteDebugLine(reinterpret_cast<const char*>("\p<WAITING>"));
             WaitForAnyEvent();
 */
             CleanUpTheDevice( TRUE);
@@ -1165,7 +1165,7 @@ void MainLoop (void)
 
     while ( !done)
     {
-        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p>MainScreen")));
+        WriteDebugLine(reinterpret_cast<const char*>("\p>MainScreen"));
         MacSetPort( gTheWindow);
         mainResult = DoMainScreenInterface( &whichDemoLevel);
 
@@ -1416,11 +1416,11 @@ void MainLoop (void)
                                 if ( DoPlayAgain( false, false))
                                 {
                                     gameResult = kRestartGame;
-                                    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pAGAIN!")));
+                                    WriteDebugLine(reinterpret_cast<const char*>("\pAGAIN!"));
                                 }  else
                                 {
                                     gameResult = kQuitGame;
-                                    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pNOT AGAIN!")));
+                                    WriteDebugLine(reinterpret_cast<const char*>("\pNOT AGAIN!"));
                                     BlackTitleScreen();
                                     AutoFadeFrom( 1, false);
                                 }
@@ -1788,11 +1788,11 @@ void MainLoop (void)
                         if ( DoPlayAgain( false, false))
                         {
                             gameResult = kRestartGame;
-                            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pAGAIN!")));
+                            WriteDebugLine(reinterpret_cast<const char*>("\pAGAIN!"));
                         }  else
                         {
                             gameResult = kQuitGame;
-                            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pNOT AGAIN!")));
+                            WriteDebugLine(reinterpret_cast<const char*>("\pNOT AGAIN!"));
                             BlackTitleScreen();
                             AutoFadeFrom( 1, false);
                         }
@@ -1927,7 +1927,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
 
     unitsPassed = 0;
 
-    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pEntr Game")));
+    WriteDebugLine(reinterpret_cast<const char*>("\pEntr Game"));
     WriteDebugLong( gRandomSeed);
     DebugFileAppendString("\p---NEW GAME---");
     if ( gAresGlobal->gOptions & kOptionRecord)
@@ -2145,7 +2145,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                     MoveSpaceObjects( reinterpret_cast<spaceObjectType *>(*gSpaceObjectData), kMaxSpaceObject,
                                     unitsToDo);
 
-//                  WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pMove")));
+//                  WriteDebugLine(reinterpret_cast<const char*>("\pMove"));
 //                  WriteDebugLong( decideCycle);
 //                  WriteDebugLong( unitsToDo);
                 }
@@ -2553,7 +2553,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                         scenarioCheckTime = 0;
                         CheckScenarioConditions( 0);
                     }
-//                  WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pDecide")));
+//                  WriteDebugLine(reinterpret_cast<const char*>("\pDecide"));
                 }
                 unitsPassed -= unitsToDo;
             }
@@ -2974,7 +2974,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
     {
             HUnlock( gAresGlobal->gReplayData);
     }
-    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\p<GameOver")));
+    WriteDebugLine(reinterpret_cast<const char*>("\p<GameOver"));
     WriteDebugLong( keyDataSize);
     MacShowCursor();
 

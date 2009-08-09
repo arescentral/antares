@@ -133,7 +133,7 @@ void CleanUpOffscreenWorld( void)
         UnlockPixels( pixBase);
         DisposeGWorld( gOffWorld);
     }
-    WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\p<OffWorld")));
+    WriteDebugLine(reinterpret_cast<const char*>("\p<OffWorld"));
 
     if ( gSaveWorld != nil)
     {
@@ -141,7 +141,7 @@ void CleanUpOffscreenWorld( void)
         UnlockPixels( pixBase);
         DisposeGWorld( gSaveWorld);
     }
-    WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\p<SaveWorld")));
+    WriteDebugLine(reinterpret_cast<const char*>("\p<SaveWorld"));
 }
 
 void DrawInRealWorld( void)

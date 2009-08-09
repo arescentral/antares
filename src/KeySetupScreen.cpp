@@ -509,7 +509,7 @@ Boolean Key_Setup_Screen_Do( void)
         }
         CloseInterface();
     }
-    WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pRESULT:")));
+    WriteDebugLine(reinterpret_cast<const char*>("\pRESULT:"));
     WriteDebugLong( result);
     DisposePtr(reinterpret_cast<Ptr>(tempKeyControls));
     return( result);

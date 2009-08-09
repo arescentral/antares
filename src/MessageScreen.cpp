@@ -290,7 +290,7 @@ void ClearMessage( void)
 #endif
 }
 
-void AppendStringToMessage( anyCharType *string)
+void AppendStringToMessage(const  anyCharType* string)
 
 {
 #ifdef kUseMessage
@@ -416,7 +416,7 @@ void StartLongMessage( short startResID, short endResID)
         tmessage->pictCurrentLeft = 0;
         tmessage->pictCurrentTop = 0;
         tmessage->pictID = -1;
-        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pSTART MESSAGE")));
+        WriteDebugLine(reinterpret_cast<const char*>("\pSTART MESSAGE"));
     }
 }
 
@@ -461,7 +461,7 @@ void StartStringMessage( anyCharType *string)
         tmessage->pictCurrentTop = 0;
         tmessage->pictID = -1;
         CopyAnyCharPString( tmessage->stringMessage, string);
-        WriteDebugLine( const_cast<char *>(reinterpret_cast<const char*>("\pSTART MESSAGE")));
+        WriteDebugLine( reinterpret_cast<const char*>("\pSTART MESSAGE"));
     }
 }
 

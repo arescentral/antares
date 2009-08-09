@@ -97,7 +97,7 @@ struct longMessageType {
 int InitMessageScreen( void);
 void MessageScreenCleanup( void);
 void ClearMessage( void);
-void AppendStringToMessage( anyCharType *);
+void AppendStringToMessage(const anyCharType*);
 void StartMessage( void);
 void EndMessage( void);
 void StartLongMessage( short, short);

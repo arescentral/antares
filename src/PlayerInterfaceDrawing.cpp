@@ -1796,7 +1796,9 @@ void DrawInterfaceTextInRect( Rect *tRect, const unsigned char *textData, long l
 
 {
     RgnHandle       clipRgn = nil;
-    anyCharType     *sChar, *dChar, *aheadChar, *wordlen, *theLine, thisLen;
+    const unsigned char* sChar;
+    const unsigned char* aheadChar;
+    anyCharType     *dChar, *wordlen, *theLine, thisLen;
     short           vline = 0, hleft = 0, fheight = 0, xpos = 0, inlinePictNum = 0, i;
     Boolean         processInline = false;
     Str255          inlineString;
@@ -1837,7 +1839,7 @@ void DrawInterfaceTextInRect( Rect *tRect, const unsigned char *textData, long l
 
         if ( textData != nil)
         {
-            sChar = const_cast<anyCharType*>(textData);
+            sChar = textData;
 
             SetTranslateColorShadeFore( textcolor, VERY_LIGHT);
 
@@ -2255,7 +2257,7 @@ void DrawAnyInterfaceItem( interfaceItemType *anItem, PixMap *destMap, long port
                 destMap, portLeft, portTop);
             break;
         default:
-            WriteDebugLine( const_cast<char *>(reinterpret_cast<const char*>("\pHuh?")));
+            WriteDebugLine( reinterpret_cast<const char*>("\pHuh?"));
             break;
     }
 }
@@ -2354,7 +2356,7 @@ void GetAnyInterfaceItemGraphicBounds( interfaceItemType *anItem, Rect *bounds)
             break;
 
         default:
-            WriteDebugLine( const_cast<char *>(reinterpret_cast<const char*>("\pHuh?")));
+            WriteDebugLine( reinterpret_cast<const char*>("\pHuh?"));
             break;
     }
 }

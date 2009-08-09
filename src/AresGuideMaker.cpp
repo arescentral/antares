@@ -782,14 +782,16 @@ OSErr SaveBlockToFile( Ptr data, long len, StringPtr fileName)
 
 void AppendStringToHandle(const unsigned char* s, Handle data)
 {
-    char    *c, *sc, lenCount;
+    char lenCount;
+    char* c;
+    const unsigned char* sc;
     long    fileLen;
 
     CheckStringForNil( s);
     if ( data != nil)
     {
         fileLen = GetHandleSize( data);
-        sc = const_cast<char *>(reinterpret_cast<const char*>(s));
+        sc = s;
         if ( *sc == 0) return;
         SetHandleSize( data, fileLen + implicit_cast<long>(*sc));
         if ( MemError() == noErr)
@@ -900,7 +902,7 @@ void NumToNDigitString( long num, StringPtr s, long digits)
     {
         while ( mGetAnyCharPStringLength( s) < digits)
         {
-            InsertAnyCharPStringInPString( reinterpret_cast<anyCharType *>(s), const_cast<anyCharType*>(reinterpret_cast<const anyCharType *>("\p0")), 0);
+            InsertAnyCharPStringInPString( reinterpret_cast<anyCharType *>(s), reinterpret_cast<const anyCharType *>("\p0"), 0);
         }
     }
     CheckStringForNil( s);
@@ -1181,8 +1183,8 @@ Handle NewHandleFromString( StringPtr s)
 
 void CheckStringForNil( const unsigned char* s)
 {
-    char    *c = const_cast<char *>(reinterpret_cast<const char*>(s));
-    short   len = *c;
+    const char* c = reinterpret_cast<const char*>(s);
+    short len = *c;
 
     c++;
     while ( len > 0)

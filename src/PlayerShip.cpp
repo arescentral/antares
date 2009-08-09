@@ -98,7 +98,7 @@ void ResetPlayerShip( long which)
     anyCharType     nilLabel = 0;
     long            h;
 
-    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pPLAYER:")));
+    WriteDebugLine(reinterpret_cast<const char*>("\pPLAYER:"));
     WriteDebugLong( which);
     gAresGlobal->gPlayerShipNumber = which;
     gAresGlobal->gSelectionLabel = AddScreenLabel( 0, 0, 0, 10, &nilLabel, nil, TRUE, YELLOW);
@@ -226,7 +226,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
             message = GetScreenLabelStringPtr( gAresGlobal->gSendMessageLabel);
             if ( mGetAnyCharPStringLength( message) == 0)
             {
-                CopyAnyCharPString( message, const_cast<anyCharType *>("\p<>"));
+                CopyAnyCharPString( message, "\p<>");
             }
 //          gAresGlobal->gTheseKeys = 0;
             if (( mReturnKey( *bufMap)) && (!AnyKeyButThisOne( *bufMap, 1, 28)))
@@ -1000,7 +1000,7 @@ void SetPlayerSelectShip( long whichShip, Boolean target, long admiralNumber)
         gAresGlobal->lastSelectedObject = whichShip;
         gAresGlobal->lastSelectedObjectID = selectShip->id;
         gAresGlobal->destKeyUsedForSelection = true;
-        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\plast sel")));
+        WriteDebugLine(reinterpret_cast<const char*>("\plast sel"));
     }
     if ( target)
     {

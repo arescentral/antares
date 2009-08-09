@@ -79,9 +79,9 @@ void SetMBarState (Boolean vis, GDHandle theDevice)
     GrafPtr         savePort;
 
     if ( vis)
-        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pSHOW MENU")));
+        WriteDebugLine(reinterpret_cast<const char*>("\pSHOW MENU"));
     else
-        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pHIDE MENU")));
+        WriteDebugLine(reinterpret_cast<const char*>("\pHIDE MENU"));
 
     if ( gAresGlobal->gOptions & kOptionUseSystemHideMenuBar)
     {

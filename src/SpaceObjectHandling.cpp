@@ -289,7 +289,7 @@ void ResetActionQueueData( void)
     actionQueueType *action = reinterpret_cast<actionQueueType*>(*gActionQueueData);
     long            i;
 
-    WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\p>RESETACT")));
+    WriteDebugLine(reinterpret_cast<const char*>("\p>RESETACT"));
     gFirstActionQueueNumber = -1;
     gFirstActionQueue = nil;
 
@@ -310,7 +310,7 @@ void ResetActionQueueData( void)
         action->offset.h = action->offset.v = 0;
         action++;
     }
-    WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\p<RESETACT")));
+    WriteDebugLine(reinterpret_cast<const char*>("\p<RESETACT"));
 }
 
 /* AddSpaceObject:
@@ -1605,7 +1605,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 
                             if ( action->argument.alterObject.minimum > 10000)
                             {
-                                WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pNRG")));
+                                WriteDebugLine(reinterpret_cast<const char*>("\pNRG"));
                                 WriteDebugLong( anObject->whichBaseObject);
                                 WriteDebugLong( anObject->owner);
                                 WriteDebugFixed( action->argument.alterObject.minimum);
@@ -1854,7 +1854,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                             break;
 
                         case kAlterBaseType:
-                            WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pAlterBase!")));
+                            WriteDebugLine(reinterpret_cast<const char*>("\pAlterBase!"));
                             if ( (action->reflexive) || ( dObject != nil))
                             ChangeObjectBaseType( anObject, action->argument.alterObject.minimum, -1,
                                 action->argument.alterObject.relative);
@@ -2141,7 +2141,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     break;
 
                 case kActivateSpecial:
-                    WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pActivate Special!")));
+                    WriteDebugLine(reinterpret_cast<const char*>("\pActivate Special!"));
                     ActivateObjectSpecial( sObject);
                     break;
 
@@ -2773,14 +2773,14 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, Boolean message)
                 AppendStringToMessage(GetDestBalanceName( anObject->destinationObject));
                 if ( owner >= 0)
                 {
-                    AppendStringToMessage(const_cast<anyCharType*>("\p captured by "));
+                    AppendStringToMessage("\p captured by ");
                     AppendStringToMessage(GetAdmiralName( anObject->owner));
-                    AppendStringToMessage(const_cast<anyCharType*>("\p."));
+                    AppendStringToMessage("\p.");
                 } else if ( originalOwner >= 0) // must be since can't both be -1
                 {
-                    AppendStringToMessage(const_cast<anyCharType*>("\p lost by "));
+                    AppendStringToMessage("\p lost by ");
                     AppendStringToMessage(GetAdmiralName( originalOwner));
-                    AppendStringToMessage(const_cast<anyCharType*>("\p."));
+                    AppendStringToMessage("\p.");
                 }
                 EndMessage();
             }
@@ -2793,14 +2793,14 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, Boolean message)
                 AppendStringToMessage( s);
                 if ( owner >= 0)
                 {
-                    AppendStringToMessage(const_cast<anyCharType*>("\p captured by "));
+                    AppendStringToMessage("\p captured by ");
                     AppendStringToMessage(GetAdmiralName( anObject->owner));
-                    AppendStringToMessage(const_cast<anyCharType*>("\p."));
+                    AppendStringToMessage("\p.");
                 } else if ( originalOwner >= 0) // must be since can't both be -1
                 {
-                    AppendStringToMessage(const_cast<anyCharType*>("\p lost by "));
+                    AppendStringToMessage("\p lost by ");
                     AppendStringToMessage(GetAdmiralName( originalOwner));
-                    AppendStringToMessage(const_cast<anyCharType*>("\p."));
+                    AppendStringToMessage("\p.");
                 }
                 EndMessage();
             }

@@ -95,10 +95,10 @@ void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean d
                 CloseMovieFile (movieResFile);
             } else
             {
-                WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pCouldn't Open Movie")));
-                WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>(filePath)));
+                WriteDebugLine(reinterpret_cast<const char*>("\pCouldn't Open Movie"));
+                WriteDebugLine(reinterpret_cast<const char*>(filePath));
             }
-        } else WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>("\pCouldn't Find Movie")));
+        } else WriteDebugLine(reinterpret_cast<const char*>("\pCouldn't Find Movie"));
         if ( aMovie != nil)
         {
 /*          if ( HasDepth( device, 16, 1, 1))
@@ -131,7 +131,7 @@ void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean d
 
             if ( theClut == nil)
             {
-                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pNo CLUT!")));
+                WriteDebugLine(reinterpret_cast<const char*>("\pNo CLUT!"));
             }
 
 //          TRY TO SCREW AROUND WITH THE TABLE
@@ -248,13 +248,13 @@ OSErr LoadMiniMovie( StringPtr filePath, Movie *aMovie, Rect *destRect, WindowPt
                 CloseMovieFile (movieResFile);
             } else
             {
-                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pCouldn't Open Movie")));
-                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>(filePath)));
+                WriteDebugLine(reinterpret_cast<const char*>("\pCouldn't Open Movie"));
+                WriteDebugLine(reinterpret_cast<const char*>(filePath));
                 return( err);
             }
         } else
         {
-            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pCouldn't Find Movie")));
+            WriteDebugLine(reinterpret_cast<const char*>("\pCouldn't Find Movie"));
             return( err);
         }
         if ( *aMovie != nil)
@@ -290,7 +290,7 @@ OSErr LoadMiniMovie( StringPtr filePath, Movie *aMovie, Rect *destRect, WindowPt
             if ( err != noErr) return( err);
         } else
         {
-            WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pMovie = nil")));
+            WriteDebugLine(reinterpret_cast<const char*>("\pMovie = nil"));
             return ( -1);
         }
     } else

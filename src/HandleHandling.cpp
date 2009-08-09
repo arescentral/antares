@@ -287,7 +287,7 @@ Handle HHGetResource( ResType resourceType, short resID)
     aNewHandle = GetResource( resourceType, resID);
     if ( aNewHandle == nil)
     {
-        WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pNILRES!")));
+        WriteDebugLine(reinterpret_cast<const char*>("\pNILRES!"));
         HHMaxMem();
         aNewHandle = GetResource( resourceType, resID);
     }

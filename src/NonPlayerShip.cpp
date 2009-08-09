@@ -1563,7 +1563,7 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
             {
                 anObject->duty = eNoDuty;
                 anObject->attributes &= ~kStaticDestination;
-                WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pOddness")));
+                WriteDebugLine(reinterpret_cast<const char*>("\pOddness"));
                 if ( targetObject == nil)
                 {
                     keysDown |= kDownKey;
@@ -2326,14 +2326,14 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
                 ( anObject->attributes & kCanAcceptDestination))
             {
                 StartMessage();
-                AppendStringToMessage(const_cast<anyCharType *>("\p "));
+                AppendStringToMessage("\p ");
                 GetIndString( s, 5000, anObject->whichBaseObject + 1);
-                AppendStringToMessage(const_cast<anyCharType *>(s));
-                AppendStringToMessage(const_cast<anyCharType *>("\p destroyed.  "));
+                AppendStringToMessage(s);
+                AppendStringToMessage("\p destroyed.  ");
                 count = CountObjectsOfBaseType( anObject->whichBaseObject, anObject->owner) - 1;
                 NumToString( count, s);
-                AppendStringToMessage(const_cast<anyCharType *>(s));
-                AppendStringToMessage(const_cast<anyCharType *>("\p remaining. "));
+                AppendStringToMessage(s);
+                AppendStringToMessage("\p remaining. ");
                 EndMessage();
 
 //              if ( anObject->attributes & (kIsPlayerShip | kIsRemote | kIsHumanControlled))
@@ -2409,7 +2409,7 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
     // try to get any ship but the current ship
     // stop trying when we've made a full circle (we're back on currentShipNum)
 
-    WriteDebugLine(const_cast<char *>(reinterpret_cast<const char*>("\pSelecting")));
+    WriteDebugLine(reinterpret_cast<const char*>("\pSelecting"));
     WriteDebugLong( currentShipNum);
     whichShip = startShip = currentShipNum;
     if ( whichShip >= 0)

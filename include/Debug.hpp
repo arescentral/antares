@@ -31,7 +31,7 @@ void DebugWindowInit( WindowPtr);
 void BringDebugToFront( void);
 void DebugWindowCleanup ( void);
 void ScrollDebugWindowUp ( void);
-void WriteDebugLine( char *);
+void WriteDebugLine( const char *);
 void WriteDebugHex( unsigned long, unsigned long);
 void WriteDebugFixed( Fixed);
 void WriteDebugSmallFixed( smallFixedType);
@@ -44,7 +44,7 @@ void WriteDebugHexDump( Ptr, long);
 void WriteDebugChar( char);
 
 inline void mWriteDebugString(const unsigned char* mdstring) {
-    WriteDebugLine(const_cast<char*>(reinterpret_cast<const char*>(mdstring)));
+    WriteDebugLine(reinterpret_cast<const char*>(mdstring));
 }
 
 unsigned long powerto ( unsigned long, unsigned long);

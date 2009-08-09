@@ -196,17 +196,17 @@ pascal OSErr GotRequiredParams( AppleEvent *theAppleEvent)
             0, &theSize);
     if (error == errAEDescNotFound) // all required params gotten
     {
-        WriteDebugLine(const_cast<char*>(reinterpret_cast<const char *>("\pOK:errAEDescNotFound")));
+        WriteDebugLine(reinterpret_cast<const char *>("\pOK:errAEDescNotFound"));
         return( noErr);
     }
     else if ( error == noErr) // missed param, because missed keyword exists
     {
-        WriteDebugLine(const_cast<char*>(reinterpret_cast<const char *>("\pBAD:miised keyword")));
+        WriteDebugLine(reinterpret_cast<const char *>("\pBAD:miised keyword"));
         return( errAEEventNotHandled);
     }
     else
     {
-        WriteDebugLine(const_cast<char*>(reinterpret_cast<const char *>("\pBAD:error")));
+        WriteDebugLine(reinterpret_cast<const char *>("\pBAD:error"));
         WriteDebugLong( error);
         return( error);
     }
