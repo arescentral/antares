@@ -60,7 +60,7 @@ extern spaceObjectType  *gRootObject;
 int AdmiralInit( void)
 
 {
-    gAresGlobal->gAdmiralData = NewHandle( sizeof( admiralType) * kScenarioPlayerNum);
+    gAresGlobal->gAdmiralData = reinterpret_cast<admiralType**>(NewHandle( sizeof( admiralType) * kScenarioPlayerNum));
 
     if ( gAresGlobal->gAdmiralData == nil)
     {
@@ -71,7 +71,7 @@ int AdmiralInit( void)
     // MoveHHi( gAresGlobal->gAdmiralData);
     // HLock( gAresGlobal->gAdmiralData);
 
-    mHandleLockAndRegister( gAresGlobal->gAdmiralData, nil, nil, nil, "\pgAresGlobal->gAdmiralData");
+    mHandleLockAndRegister(reinterpret_cast<Handle&>(gAresGlobal->gAdmiralData), nil, nil, nil, "\pgAresGlobal->gAdmiralData");
     ResetAllAdmirals();
 
     gAresGlobal->gDestBalanceData = NewHandle( sizeof( destBalanceType) * kMaxDestObject);
@@ -91,7 +91,7 @@ int AdmiralInit( void)
 void AdmiralCleanup( void)
 
 {
-    if ( gAresGlobal->gAdmiralData != nil) DisposeHandle( gAresGlobal->gAdmiralData);
+    if ( gAresGlobal->gAdmiralData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gAdmiralData));
     if ( gAresGlobal->gDestBalanceData != nil) DisposeHandle( gAresGlobal->gDestBalanceData);
 }
 
@@ -101,7 +101,7 @@ void ResetAllAdmirals( void)
     short       i, j;
     admiralType *a;
 
-    a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData);
+    a = *gAresGlobal->gAdmiralData;
 
     for ( i = 0; i < kScenarioPlayerNum; i++)
     {
@@ -166,7 +166,7 @@ long MakeNewAdmiral( long flagship, long destinationObject, destinationType dTyp
     Str255          s;
     spaceObjectType *destObject;
 
-    a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData);
+    a = *gAresGlobal->gAdmiralData;
 
     while (( a->active) && ( n < kScenarioPlayerNum)) { a++; n++; }
 
@@ -281,7 +281,7 @@ void RemoveDestination( long whichDestination)
 
     if (( whichDestination >= 0) && ( whichDestination < kMaxDestObject))
     {
-        a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData);
+        a = *gAresGlobal->gAdmiralData;
 
         for ( i = 0; i < kScenarioPlayerNum; i++)
         {
@@ -335,7 +335,7 @@ void RemoveDestination( long whichDestination)
 void RecalcAllAdmiralBuildData( void)
 {
     short           i, j, k;
-    admiralType     *a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData);
+    admiralType     *a = *gAresGlobal->gAdmiralData;
     spaceObjectType *anObject= nil;
     baseObjectType  *baseObject = nil;
     destBalanceType *d = mGetDestObjectBalancePtr( 0);
@@ -362,7 +362,7 @@ void RecalcAllAdmiralBuildData( void)
             anObject = reinterpret_cast<spaceObjectType *>(*gSpaceObjectData) + d->whichObject;
             if ( anObject->owner >= 0)
             {
-                a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + anObject->owner;
+                a = *gAresGlobal->gAdmiralData + anObject->owner;
                 for ( k = 0; k < kMaxTypeBaseCanBuild; k++)
                 {
                     if ( d->canBuildType[k] >= 0)
@@ -392,7 +392,7 @@ void SetAdmiralAttributes( long whichAdmiral, unsigned long attributes)
 {
     admiralType     *a;
 
-    a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    a = *gAresGlobal->gAdmiralData + whichAdmiral;
     a->attributes = attributes;
 }
 
@@ -401,7 +401,7 @@ void SetAdmiralColor( long whichAdmiral, unsigned char color)
 {
     admiralType     *a;
 
-    a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    a = *gAresGlobal->gAdmiralData + whichAdmiral;
     a->color = color;
 }
 
@@ -410,7 +410,7 @@ unsigned char GetAdmiralColor( long whichAdmiral)
     admiralType     *a;
 
     if ( whichAdmiral < 0) return( 0);
-    a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    a = *gAresGlobal->gAdmiralData + whichAdmiral;
     return( a->color);
 }
 
@@ -419,7 +419,7 @@ long GetAdmiralRace( long whichAdmiral)
     admiralType     *a;
 
     if ( whichAdmiral < 0) return( -1);
-    a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    a = *gAresGlobal->gAdmiralData + whichAdmiral;
     return( a->race);
 }
 
@@ -434,7 +434,7 @@ void SetAdmiralFlagship( long whichAdmiral, long whichShip)
         MyDebugString("\pCan't set flagship of -1 admiral.");
     }
 
-    a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    a = *gAresGlobal->gAdmiralData + whichAdmiral;
     if ( whichShip >= 0)
     {
         a->flagship = whichShip;
@@ -453,7 +453,7 @@ spaceObjectType *GetAdmiralFlagship( long whichAdmiral)
     spaceObjectType *anObject;
 
     if ( whichAdmiral < 0) return( nil);
-    a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    a = *gAresGlobal->gAdmiralData + whichAdmiral;
     if ( a->flagship == kNoShip) return( nil);
     anObject = reinterpret_cast<spaceObjectType *>(*gSpaceObjectData) + a->flagship;
     if ( anObject->id == a->flagshipID)
@@ -466,7 +466,7 @@ void SetAdmiralEarningPower( long whichAdmiral, smallFixedType power)
     admiralType     *a;
     if ( whichAdmiral >= 0)
     {
-        a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+        a = *gAresGlobal->gAdmiralData + whichAdmiral;
         a->earningPower = power;
     }
 }
@@ -477,7 +477,7 @@ smallFixedType GetAdmiralEarningPower( long whichAdmiral)
 
     if ( whichAdmiral >= 0)
     {
-        a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+        a = *gAresGlobal->gAdmiralData + whichAdmiral;
         return ( a->earningPower);
     } else return( 0);
 }
@@ -488,7 +488,7 @@ void SetAdmiralDestinationObject( long whichAdmiral, long whichObject, destinati
     admiralType     *a;
     spaceObjectType *destObject;
 
-    a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    a = *gAresGlobal->gAdmiralData + whichAdmiral;
     a->destinationObject = whichObject;
     if ( whichObject >= 0)
     {
@@ -504,7 +504,7 @@ long GetAdmiralDestinationObject( long whichAdmiral)
     admiralType     *a;
     spaceObjectType *destObject;
 
-    a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    a = *gAresGlobal->gAdmiralData + whichAdmiral;
 
     if ( a->destinationObject < 0)
         return ( a->destinationObject);
@@ -529,7 +529,7 @@ void SetAdmiralConsiderObject( long whichAdmiral, long whichObject)
     long            buildAtNum, l;
 
     if ( whichAdmiral < 0) MyDebugString("\pCan't set consider ship for -1 admiral.");
-    a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    a = *gAresGlobal->gAdmiralData + whichAdmiral;
     a->considerShip = whichObject;
     if ( whichObject >= 0)
     {
@@ -586,7 +586,7 @@ long GetAdmiralConsiderObject( long whichAdmiral)
 {
     admiralType     *a;
     spaceObjectType *anObject;
-    a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    a = *gAresGlobal->gAdmiralData + whichAdmiral;
 
     if ( whichAdmiral < 0) return( -1);
     if ( a->considerShip >= 0)
@@ -617,7 +617,7 @@ long GetAdmiralBuildAtObject( long whichAdmiral)
     destBalanceType *destBalance;
     spaceObjectType *anObject;
 
-    a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    a = *gAresGlobal->gAdmiralData + whichAdmiral;
     if ( a->buildAtObject >= 0)
     {
         destBalance = mGetDestObjectBalancePtr( a->buildAtObject);
@@ -640,7 +640,7 @@ void SetAdmiralBuildAtObject( long whichAdmiral, long whichObject)
     long            buildAtNum, l;
 
     if ( whichAdmiral < 0) MyDebugString("\pCan't set consider ship for -1 admiral.");
-    a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    a = *gAresGlobal->gAdmiralData + whichAdmiral;
     if ( whichObject >= 0)
     {
         if ( anObject->attributes & kCanAcceptBuild)
@@ -669,7 +669,7 @@ anyCharType *GetAdmiralBuildAtName( long whichAdmiral)
     admiralType     *a;
     destBalanceType *destObject;
 
-    a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    a = *gAresGlobal->gAdmiralData + whichAdmiral;
     destObject = mGetDestObjectBalancePtr( a->buildAtObject);
     return ( destObject->name);
 }
@@ -679,7 +679,7 @@ void SetAdmiralBuildAtName( long whichAdmiral, StringPtr name)
     admiralType     *a;
     destBalanceType *destObject;
 
-    a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    a = *gAresGlobal->gAdmiralData + whichAdmiral;
     destObject = mGetDestObjectBalancePtr( a->buildAtObject);
     if ( name[0] > kDestinationNameLen) name[0] = kDestinationNameLen;
     CopyPString( destObject->name, name);
@@ -701,7 +701,7 @@ anyCharType *GetAdmiralName( long whichAdmiral)
 
     if (( whichAdmiral >= 0) && ( whichAdmiral < kScenarioPlayerNum))
     {
-        a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+        a = *gAresGlobal->gAdmiralData + whichAdmiral;
         return ( a->name);
     } else return ( nil);
 }
@@ -713,7 +713,7 @@ void SetAdmiralName( long whichAdmiral, anyCharType *name)
 
     if (( whichAdmiral >= 0) && ( whichAdmiral < kScenarioPlayerNum))
     {
-        a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+        a = *gAresGlobal->gAdmiralData + whichAdmiral;
         if ( *name > kAdmiralNameLen) *name = kAdmiralNameLen;
         CopyPString( reinterpret_cast<unsigned char *>(a->name), reinterpret_cast<unsigned char *>(name));
 
@@ -744,7 +744,7 @@ void SetObjectDestination( spaceObjectType *o)
     }
 
     if (( o->owner < 0) || ( o->owner >= kScenarioPlayerNum)) { WriteDebugLong( o->owner); return;}
-    a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + o->owner;
+    a = *gAresGlobal->gAdmiralData + o->owner;
 
     if (( !a->active) || ( a->destType == kNoDestinationType) ||
         ( a->destinationObject == kNoDestinationObject))
@@ -846,7 +846,7 @@ void SetObjectLocationDestination( spaceObjectType *o, coordPointType *where)
     if (( o->owner < 0) || ( o->owner >= kScenarioPlayerNum)) { WriteDebugLong( o->owner); return;}
 
     // get the admiral
-    a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + o->owner;
+    a = *gAresGlobal->gAdmiralData + o->owner;
 
     // if the admiral is not legal, or the admiral has no destination, then forget about it
     if ( !a->active)
@@ -939,7 +939,7 @@ void SetObjectDestination( spaceObjectType *o, spaceObjectType *overrideObject)
     }
 
     // get the admiral
-    a = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + o->owner;
+    a = *gAresGlobal->gAdmiralData + o->owner;
 
     // if the admiral is not legal, or the admiral has no destination, then forget about it
     if (( dObject == nil) && (( !a->active) ||
@@ -1120,7 +1120,7 @@ void AdmiralThink( void)
 
 {
     short           i, j, k;
-    admiralType     *a =reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData);
+    admiralType     *a =*gAresGlobal->gAdmiralData;
     spaceObjectType *anObject, *destObject, *otherDestObject, *stepObject;
     destBalanceType *destBalance;
     long            origObject, origDest, baseNum,
@@ -1684,7 +1684,7 @@ smallFixedType HackGetObjectStrength( spaceObjectType *anObject)
 void AdmiralBuildAtObject( long whichAdmiral, long baseTypeNum, long whichDestObject)
 
 {
-    admiralType     *admiral = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    admiralType     *admiral = *gAresGlobal->gAdmiralData + whichAdmiral;
     destBalanceType *buildAtDest = mGetDestObjectBalancePtr( whichDestObject);
     baseObjectType  *buildBaseObject = nil;
     spaceObjectType *buildAtObject = nil;
@@ -1716,7 +1716,7 @@ void AdmiralBuildAtObject( long whichAdmiral, long baseTypeNum, long whichDestOb
 Boolean AdmiralScheduleBuild( long whichAdmiral, long buildWhichType)
 
 {
-    admiralType     *admiral = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    admiralType     *admiral = *gAresGlobal->gAdmiralData + whichAdmiral;
     destBalanceType *buildAtDest = mGetDestObjectBalancePtr( admiral->buildAtObject);
     baseObjectType  *buildBaseObject = nil;
     long            baseNum;
@@ -1756,7 +1756,7 @@ void StopBuilding( long whichDestObject)
 void PayAdmiral( long whichAdmiral, smallFixedType howMuch)
 
 {
-    admiralType     *admiral = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    admiralType     *admiral = *gAresGlobal->gAdmiralData + whichAdmiral;
 
     if (( whichAdmiral >= 0) && ( whichAdmiral < kScenarioPlayerNum))
     {
@@ -1768,7 +1768,7 @@ void PayAdmiral( long whichAdmiral, smallFixedType howMuch)
 void PayAdmiralAbsolute( long whichAdmiral, smallFixedType howMuch)
 
 {
-    admiralType     *admiral = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    admiralType     *admiral = *gAresGlobal->gAdmiralData + whichAdmiral;
 
     if (( whichAdmiral >= 0) && ( whichAdmiral < kScenarioPlayerNum))
     {
@@ -1779,7 +1779,7 @@ void PayAdmiralAbsolute( long whichAdmiral, smallFixedType howMuch)
 
 void AlterAdmiralScore( long whichAdmiral, long whichScore, long amount)
 {
-    admiralType     *admiral = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    admiralType     *admiral = *gAresGlobal->gAdmiralData + whichAdmiral;
 
     if (( whichAdmiral >= 0) && ( whichAdmiral < kScenarioPlayerNum) &&
         ( whichScore >= 0) && ( whichScore < kAdmiralScoreNum))
@@ -1791,7 +1791,7 @@ void AlterAdmiralScore( long whichAdmiral, long whichScore, long amount)
 
 long GetAdmiralScore( long whichAdmiral, long whichScore)
 {
-    admiralType     *admiral = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    admiralType     *admiral = *gAresGlobal->gAdmiralData + whichAdmiral;
 
     if (( whichAdmiral >= 0) && ( whichAdmiral < kScenarioPlayerNum) &&
         ( whichScore >= 0) && ( whichScore < kAdmiralScoreNum))
@@ -1801,7 +1801,7 @@ long GetAdmiralScore( long whichAdmiral, long whichScore)
 
 long GetAdmiralShipsLeft( long whichAdmiral)
 {
-    admiralType     *admiral = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    admiralType     *admiral = *gAresGlobal->gAdmiralData + whichAdmiral;
 
     if (( whichAdmiral >= 0) && ( whichAdmiral < kScenarioPlayerNum))
         return( admiral->shipsLeft);
@@ -1836,7 +1836,7 @@ void ClearAllOccupants( long whichDestination, long whichAdmiral, long fullAmoun
 
 void AddKillToAdmiral( spaceObjectType *anObject)
 {
-    admiralType     *admiral = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) +
+    admiralType     *admiral = *gAresGlobal->gAdmiralData +
         gAresGlobal->gPlayerAdmiralNumber; // only for player
 
     if ( anObject->attributes & kCanAcceptDestination)
@@ -1853,7 +1853,7 @@ void AddKillToAdmiral( spaceObjectType *anObject)
 
 long GetAdmiralLoss( long whichAdmiral)
 {
-    admiralType     *admiral = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    admiralType     *admiral = *gAresGlobal->gAdmiralData + whichAdmiral;
 
     if (( whichAdmiral >= 0) && ( whichAdmiral < kScenarioPlayerNum))
         return( admiral->losses);
@@ -1862,7 +1862,7 @@ long GetAdmiralLoss( long whichAdmiral)
 
 long GetAdmiralKill( long whichAdmiral)
 {
-    admiralType     *admiral = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + whichAdmiral;
+    admiralType     *admiral = *gAresGlobal->gAdmiralData + whichAdmiral;
 
     if (( whichAdmiral >= 0) && ( whichAdmiral < kScenarioPlayerNum))
         return( admiral->kills);

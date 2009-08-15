@@ -128,7 +128,7 @@ inline destBalanceType* mGetDestObjectBalancePtr(long whichObject) {
     return reinterpret_cast<destBalanceType*>(*gAresGlobal->gDestBalanceData) + whichObject;
 }
 inline admiralType* mGetAdmiralPtr(long mwhichAdmiral) {
-    return reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) + mwhichAdmiral;
+    return *gAresGlobal->gAdmiralData + mwhichAdmiral;
 }
 
 int AdmiralInit( void);

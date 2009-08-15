@@ -69,6 +69,8 @@ struct hotKeyType {
     long        objectID;
 };
 
+struct admiralType;
+
 struct aresGlobalType {
     unsigned long   gActiveCheats[kMaxPlayerNum];
     unsigned long   gSynchValue;
@@ -79,7 +81,7 @@ struct aresGlobalType {
     unsigned long   gFrameCount;
     Handle          gPreferencesData;
     long            gGameOver;
-    Handle          gAdmiralData;
+    admiralType**   gAdmiralData;
     Handle          gDestBalanceData;
     KeyMap          gKeyControl[kKeyExtendedControlNum];
     short           gPreferenceRefNum;

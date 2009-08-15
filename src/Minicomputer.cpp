@@ -1236,8 +1236,7 @@ void UpdateMiniScreenLines( void)
     switch( gAresGlobal->gMiniScreenData.currentScreen)
     {
         case kBuildMiniScreen:
-            admiral = reinterpret_cast<admiralType*>(*gAresGlobal->gAdmiralData) +
-                gAresGlobal->gPlayerAdmiralNumber;
+            admiral = *gAresGlobal->gAdmiralData + gAresGlobal->gPlayerAdmiralNumber;
             line = reinterpret_cast<miniScreenLineType*>(*gAresGlobal->gMiniScreenData.lineData) +
                 kBuildScreenWhereNameLine;
             if ( line->value !=
@@ -2294,8 +2293,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
     gAresGlobal->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
     if ( gAresGlobal->gMiniScreenData.currentScreen == kBuildMiniScreen)
     {
-        admiral = reinterpret_cast<admiralType *>(*gAresGlobal->gAdmiralData) +
-            gAresGlobal->gPlayerAdmiralNumber;
+        admiral = *gAresGlobal->gAdmiralData + gAresGlobal->gPlayerAdmiralNumber;
         line = reinterpret_cast<miniScreenLineType*>(*gAresGlobal->gMiniScreenData.lineData) +
             kBuildScreenWhereNameLine;
         buildAtObjectNum =
