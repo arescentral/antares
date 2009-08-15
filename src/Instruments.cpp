@@ -135,7 +135,8 @@ inline void mWideASR8(UnsignedWide& mwide) {
 
 extern  CWindowPtr      gTheWindow; // hack to copy bar indicators to offworld
 extern aresGlobalType   *gAresGlobal;
-extern Handle           *gSpaceObjectData, gColorTranslateTable, gRotTable;//, gAresGlobal->gAdmiralData;
+extern spaceObjectType**    gSpaceObjectData;
+extern Handle           gColorTranslateTable, gRotTable;//, gAresGlobal->gAdmiralData;
 extern spaceObjectType  *gScrollStarObject;
 extern PixMapHandle     thePixMapHandle;
 extern long             gNatePortLeft, gNatePortTop,
@@ -381,7 +382,7 @@ void UpdateRadar( long unitsDone)
 
             lp = reinterpret_cast<longPointType*>(*gAresGlobal->gRadarBlipData);
             gAresGlobal->gRadarCount = gAresGlobal->gRadarSpeed;
-            anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
+            anObject = *gSpaceObjectData;
 
             for ( oCount = 0; oCount < kMaxSpaceObject; oCount++)
             {
@@ -421,7 +422,7 @@ void UpdateRadar( long unitsDone)
         {
             case kNearestFoeZoom:
             case kNearestAnythingZoom:
-                anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + gAresGlobal->gClosestObject;
+                anObject = *gSpaceObjectData + gAresGlobal->gClosestObject;
                 bestScale = MIN_SCALE;
                 /*
                 dx = ( (long)anObject->location.h - (long)gScrollStarObject->location.h);
@@ -501,7 +502,7 @@ void UpdateRadar( long unitsDone)
 
             case kSmallestZoom:
 //              bestScale = kSuperSmallScale;
-                anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + gAresGlobal->gFarthestObject;
+                anObject = *gSpaceObjectData + gAresGlobal->gFarthestObject;
                 bestScale = MIN_SCALE;
                 /*
                 dx = ( (long)anObject->location.h - (long)gScrollStarObject->location.h);

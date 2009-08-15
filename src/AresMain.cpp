@@ -170,7 +170,7 @@
 
 //#define   kUseSmallPlayWindow // for debugging
 
-extern Handle                   gSpaceObjectData;
+extern spaceObjectType**        gSpaceObjectData;
 extern long                     /*gAresGlobal->gPlayerShipNumber, gAresGlobal->gGameTime, gAresGlobal->gGameStartTime,*/ gRandomSeed;
 //                              gAresGlobal->gScenarioWinner, gAresGlobal->gPlayerAdmiralNumber;
 extern long                     gNatePortLeft, gNatePortTop, /*gAresGlobal->gSoundVolume,*/ gNetLatency;
@@ -2142,8 +2142,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                 {
 
                     MoveScrollStars( unitsToDo);
-                    MoveSpaceObjects( reinterpret_cast<spaceObjectType *>(*gSpaceObjectData), kMaxSpaceObject,
-                                    unitsToDo);
+                    MoveSpaceObjects(*gSpaceObjectData, kMaxSpaceObject, unitsToDo);
 
 //                  WriteDebugLine(reinterpret_cast<const char*>("\pMove"));
 //                  WriteDebugLong( decideCycle);
@@ -2545,7 +2544,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
 #endif NETSPROCKET_AVAILABLE
                     }
 
-                    CollideSpaceObjects( reinterpret_cast<spaceObjectType *>(*gSpaceObjectData), kMaxSpaceObject);
+                    CollideSpaceObjects(*gSpaceObjectData, kMaxSpaceObject);
                     decideCycle  = 0;
                     scenarioCheckTime++;
                     if ( scenarioCheckTime == 30)

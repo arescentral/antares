@@ -45,7 +45,8 @@ extern long             gNatePortLeft, gNatePortTop, gAbsoluteScale,
                         CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM;
 extern coordPointType   gGlobalCorner;
 extern  GWorldPtr       gOffWorld;
-extern Handle           gSpaceObjectData, gRotTable;
+extern spaceObjectType**    gSpaceObjectData;
+extern Handle           gRotTable;
 
 //extern unsigned long  gAresGlobal->gOptions;
 
@@ -161,12 +162,11 @@ void SetSpecialBeamAttributes( spaceObjectType *beamObject, spaceObjectType *sou
 
     beamObject->frame.beam.beam->fromObjectNumber = sourceObject->entryNumber;
     beamObject->frame.beam.beam->fromObjectID = sourceObject->id;
-    beamObject->frame.beam.beam->fromObject = reinterpret_cast<spaceObjectTypePtr>(sourceObject);
+    beamObject->frame.beam.beam->fromObject = sourceObject;
 
     if ( sourceObject->targetObjectNumber >= 0)
     {
-        target = reinterpret_cast<spaceObjectType *>(*gSpaceObjectData) +
-            sourceObject->targetObjectNumber;
+        target = *gSpaceObjectData + sourceObject->targetObjectNumber;
 
         if ( ( target->active) && ( target->id == sourceObject->targetObjectID))
         {
@@ -225,8 +225,7 @@ void SetSpecialBeamAttributes( spaceObjectType *beamObject, spaceObjectType *sou
                     beamObject->frame.beam.beam->toObjectNumber =
                         target->entryNumber;
                     beamObject->frame.beam.beam->toObjectID = target->id;
-                    beamObject->frame.beam.beam->toObject =
-                        reinterpret_cast<spaceObjectTypePtr>(target);
+                    beamObject->frame.beam.beam->toObject = target;
                 }
             }
         } else // target not valid
@@ -645,15 +644,13 @@ void ResolveBeamData( Handle beamData)
     {
         if ( aBeam->fromObjectNumber >= 0)
         {
-            anObject = reinterpret_cast<spaceObjectType *>(*gSpaceObjectData) +
-                aBeam->fromObjectNumber;
-            aBeam->fromObject = reinterpret_cast<spaceObjectTypePtr>(anObject);
+            anObject = *gSpaceObjectData + aBeam->fromObjectNumber;
+            aBeam->fromObject = anObject;
         }
         if ( aBeam->toObjectNumber >= 0)
         {
-            anObject = reinterpret_cast<spaceObjectType *>(*gSpaceObjectData) +
-                aBeam->toObjectNumber;
-            aBeam->toObject = reinterpret_cast<spaceObjectTypePtr>(anObject);
+            anObject = *gSpaceObjectData + aBeam->toObjectNumber;
+            aBeam->toObject = anObject;
         }
         aBeam++;
     }

@@ -56,7 +56,7 @@ struct barIndicatorType {
 
 struct miniComputerDataType {
     Handle      lineData;
-    Handle      objectData;
+    spaceObjectType**   objectData;
     long        selectLine;
     long        pollTime;
     long        buildTimeBarValue;

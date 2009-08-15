@@ -83,7 +83,8 @@
 //#define   kUseOldThinking
 
 extern aresGlobalType           *gAresGlobal;
-extern Handle                   gSpaceObjectData, gBaseObjectData;//, gAresGlobal->gAdmiralData;
+extern spaceObjectType**        gSpaceObjectData;
+extern Handle                   gBaseObjectData;//, gAresGlobal->gAdmiralData;
 extern Handle                   gRotTable, gColorTranslateTable;    // for getting weapon position
 //extern long                       gAresGlobal->gPlayerAdmiralNumber;
 extern netStatusType            gNetworkStatus;
@@ -529,8 +530,7 @@ void NonplayerShipThink( long timePass)
                 // targetObject is set for all three weapons -- do not change
                 if ( anObject->targetObjectNumber >= 0)
                 {
-                    targetObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
-                        anObject->targetObjectNumber;
+                    targetObject = *gSpaceObjectData + anObject->targetObjectNumber;
                 } else targetObject = nil;
 
                 if ( anObject->pulseTime > 0) anObject->pulseTime -= timePass;
@@ -662,8 +662,7 @@ void NonplayerShipThink( long timePass)
                         /*
                         if ( anObject->targetObjectNumber >= 0)
                         {
-                            targetObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
-                                anObject->targetObjectNumber;
+                            targetObject = *gSpaceObjectData + anObject->targetObjectNumber;
                         } else targetObject = nil;
                         */
                         ExecuteObjectActions( weaponObject->activateAction,
@@ -1094,9 +1093,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                             if ( anObject->destinationObject !=
                                 kNoDestinationObject)
                             {
-                                targetObject =
-                                    reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
-                                    anObject->destinationObject;
+                                targetObject = *gSpaceObjectData + anObject->destinationObject;
                                 if ( targetObject->id != anObject->destObjectDestID) targetObject = nil;
                             } else targetObject = nil;
                             if ( targetObject != nil)
@@ -1578,9 +1575,7 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
                     if ( anObject->destinationObject !=
                         kNoDestinationObject)
                     {
-                        targetObject =
-                            reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
-                            anObject->destinationObject;
+                        targetObject = *gSpaceObjectData + anObject->destinationObject;
                         if ( targetObject->id != anObject->destObjectDestID) targetObject = nil;
                     } else targetObject = nil;
                     if ( targetObject != nil)
@@ -1885,9 +1880,7 @@ void ThinkObjectResolveDestination( spaceObjectType *anObject, coordPointType *d
                     if ( anObject->destinationObject !=
                         kNoDestinationObject)
                     {
-                        (*targetObject) =
-                            reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
-                            anObject->destinationObject;
+                        (*targetObject) = *gSpaceObjectData + anObject->destinationObject;
                         if ( (*targetObject)->id != anObject->destObjectDestID) *targetObject = nil;
                     } else *targetObject = nil;
                     if ( *targetObject != nil)
@@ -1941,8 +1934,7 @@ Boolean ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *des
 
     if ( anObject->closestObject != kNoShip)
     {
-        closestObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
-            anObject->closestObject;
+        closestObject = *gSpaceObjectData + anObject->closestObject;
     } else closestObject = nil;
 
     // if we have no target  then
@@ -1975,8 +1967,7 @@ Boolean ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *des
     if ( anObject->targetObjectNumber != kNoShip)
     {
         // make sure we're still talking about the same object
-        *targetObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
-            anObject->targetObjectNumber;
+        *targetObject = *gSpaceObjectData + anObject->targetObjectNumber;
 
         // if the object is wrong or smells at all funny, then
         if  (
@@ -2007,11 +1998,8 @@ Boolean ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *des
             if ( anObject->closestObject != kNoShip)
             {
                 // make it our target
-                anObject->targetObjectNumber =
-                    anObject->closestObject;
-                closestObject = *targetObject =
-                    reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
-                    anObject->targetObjectNumber;
+                anObject->targetObjectNumber = anObject->closestObject;
+                closestObject = *targetObject = *gSpaceObjectData + anObject->targetObjectNumber;
                 anObject->targetObjectID = closestObject->id;
                 if ( !((*targetObject)->attributes & kPotentialTarget))
                 {   // cancel
@@ -2041,9 +2029,7 @@ Boolean ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *des
                     ( !(targetObject->active))) &&
                     ( anObject->closestObject != kNoShip))
                 {
-                    closestObject =
-                        reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
-                        anObject->closestObject;
+                    closestObject = *gSpaceObjectData + anObject->closestObject;
                     if ( ( closestObject->attributes & kHated))
                     {
                         targetObject = closestObject;
@@ -2073,8 +2059,7 @@ Boolean ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *des
                 kRemoteOrHuman))
             {
                 anObject->targetObjectNumber = anObject->closestObject;
-                *targetObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
-                    anObject->targetObjectNumber;
+                *targetObject = *gSpaceObjectData + anObject->targetObjectNumber;
                 anObject->targetObjectID = (*targetObject)->id;
                 dest->h = (*targetObject)->location.h;
                 dest->v = (*targetObject)->location.v;
@@ -2349,7 +2334,7 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
                         anObject->attributes &= (~kIsHumanControlled) & (~kIsPlayerShip);
                         gAresGlobal->gPlayerShipNumber = count;
                         ResetScrollStars( gAresGlobal->gPlayerShipNumber);
-                        anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + gAresGlobal->gPlayerShipNumber;
+                        anObject = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
                         anObject->attributes |= attributes;
                     } else
                     {
@@ -2414,7 +2399,7 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
     whichShip = startShip = currentShipNum;
     if ( whichShip >= 0)
     {
-        anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + startShip;
+        anObject = *gSpaceObjectData + startShip;
         if ( anObject->active != kObjectInUse) // if it's not in the loop
         {
             anObject = gRootObject;
@@ -2600,7 +2585,7 @@ long GetSpritePointSelectObject( Rect *bounds, spaceObjectType *sourceObject, un
                     fartherDistance = kMaximumRelevantDistanceSquared << 1,
                     myOwnerFlag = 1 << sourceObject->owner;
 
-    anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
+    anObject = *gSpaceObjectData;
 
     for ( whichShip = 0; whichShip < kMaxSpaceObject; whichShip++)
     {

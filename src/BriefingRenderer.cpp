@@ -37,9 +37,9 @@ struct briefingSpriteBoundsType {
     long    objectIndex;
 };
 
-extern aresGlobalType   *gAresGlobal;
-extern Handle           gSpaceObjectData;
-extern scenarioType     *gThisScenario;
+extern aresGlobalType*      gAresGlobal;
+extern spaceObjectType**    gSpaceObjectData;
+extern scenarioType*        gThisScenario;
 
 briefingSpriteBoundsType    *gBriefingSpriteBounds = nil;
 
@@ -395,7 +395,7 @@ void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
     scenarioType    *scenario = reinterpret_cast<scenarioType *>(*gAresGlobal->gScenarioData) + whichScenario;
     baseObjectType  *baseObject = nil;
     char            *pixData;
-    spaceObjectType *anObject = reinterpret_cast<spaceObjectType *>(*gSpaceObjectData);
+    spaceObjectType *anObject = *gSpaceObjectData;
     Boolean         *gridCells = nil;
     briefingSpriteBoundsType    *sBounds = nil;
 

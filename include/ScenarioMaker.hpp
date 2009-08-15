@@ -56,7 +56,7 @@
 
 extern scenarioType* gThisScenario;
 extern Handle gObjectActionData;
-extern Handle gSpaceObjectData;
+extern spaceObjectType** gSpaceObjectData;
 extern aresGlobalType* gAresGlobal;
 
 inline int mGetRealAdmiralNum(int mplayernum) {
@@ -127,14 +127,13 @@ inline void mGetRealObjectFromInitial(
         minitialobject = mGetScenarioInitial( gThisScenario, minum);
         if ( minitialobject->realObjectNumber >= 0)
         {
-            mobject = reinterpret_cast<spaceObjectType *>(*gSpaceObjectData)
-                + implicit_cast<long>(minitialobject->realObjectNumber);
+            mobject = *gSpaceObjectData + minitialobject->realObjectNumber;
             if (( mobject->id != minitialobject->realObjectID) || ( mobject->active != kObjectInUse))
                 mobject = nil;
         } else mobject = nil;
     } else if ( minum == -2)
     {
-        mobject = reinterpret_cast<spaceObjectType *>(*gSpaceObjectData) + gAresGlobal->gPlayerShipNumber;
+        mobject = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
         if ((!(mobject->active)) || ( !(mobject->attributes & kCanThink)))
         {
             mobject = nil;

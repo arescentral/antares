@@ -54,7 +54,7 @@ SSpSourceReference MyCreateSource( void);
 SndChannelPtr MyCreateLocalizedChannel( void);
 
 extern aresGlobalType   *gAresGlobal;
-extern Handle           gSpaceObjectData;
+extern spaceObjectType**    gSpaceObjectData;
 extern coordPointType   gGlobalCorner;
 //extern unsigned long  gAresGlobal->gOptions;
 
@@ -1040,7 +1040,7 @@ void mPlayDistanceSound(
         if ( mdistance == 0)
         {
             if ( gAresGlobal->gPlayerShipNumber >= 0)
-                mplayerobjectptr = reinterpret_cast<spaceObjectType *>(*gSpaceObjectData) + gAresGlobal->gPlayerShipNumber;
+                mplayerobjectptr = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
             else mplayerobjectptr = nil;
             if (( mplayerobjectptr != nil) && ( mplayerobjectptr->active))
             {
@@ -1092,7 +1092,7 @@ void mPlayDistanceSound(
                     mvolume = ( (1920 - mdistance) * mvolume) / 1920;
             }
             if ( gAresGlobal->gPlayerShipNumber >= 0)
-                mplayerobjectptr = reinterpret_cast<spaceObjectType *>(*gSpaceObjectData) + gAresGlobal->gPlayerShipNumber;
+                mplayerobjectptr = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
             else mplayerobjectptr = nil;
             if (( mplayerobjectptr != nil) && ( mplayerobjectptr->active))
             {

@@ -95,7 +95,8 @@ long            gRootObjectNumber = -1;
 actionQueueType *gFirstActionQueue = nil;
 long            gFirstActionQueueNumber = -1;
 
-Handle  gSpaceObjectData = nil, gBaseObjectData = nil, gObjectActionData = nil, gActionQueueData = nil;
+spaceObjectType** gSpaceObjectData = NULL;
+Handle  gBaseObjectData = nil, gObjectActionData = nil, gActionQueueData = nil;
 
 void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord);
 
@@ -104,7 +105,8 @@ int SpaceObjectHandlingInit( void)
 {
     Boolean correctBaseObjectColor = false;
 
-    gSpaceObjectData = NewHandle( sizeof( spaceObjectType) * kMaxSpaceObject);
+    gSpaceObjectData = reinterpret_cast<spaceObjectType**>(
+            NewHandle( sizeof( spaceObjectType) * kMaxSpaceObject));
     if ( gSpaceObjectData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
@@ -115,9 +117,9 @@ int SpaceObjectHandlingInit( void)
     MoveHHi( gSpaceObjectData);
     HLock( gSpaceObjectData);
     */
-    mHandleLockAndRegister( gSpaceObjectData, nil, nil, ResolveSpaceObjectData, "\pgSpaceObjectData");
+    mHandleLockAndRegister( reinterpret_cast<Handle&>(gSpaceObjectData), nil, nil, ResolveSpaceObjectData, "\pgSpaceObjectData");
 
-    WriteDebugLong( GetHandleSize( gSpaceObjectData));
+    WriteDebugLong( GetHandleSize( reinterpret_cast<Handle>(gSpaceObjectData)));
 
     if ( gBaseObjectData == nil)
     {
@@ -178,7 +180,7 @@ void CleanupSpaceObjectHandling( void)
 
 {
     if ( gBaseObjectData != nil) DisposeHandle( gBaseObjectData);
-    if ( gSpaceObjectData != nil) DisposeHandle( gSpaceObjectData);
+    if ( gSpaceObjectData != nil) DisposeHandle( reinterpret_cast<Handle>(gSpaceObjectData));
     if ( gObjectActionData != nil) DisposeHandle( gObjectActionData);
     if ( gActionQueueData != nil) DisposeHandle( gActionQueueData);
 }
@@ -191,8 +193,8 @@ void ResetAllSpaceObjects( void)
 
     gRootObject = nil;
     gRootObjectNumber = -1;
-    anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
-    HHClearHandle( gSpaceObjectData);
+    anObject = *gSpaceObjectData;
+    HHClearHandle( reinterpret_cast<Handle>(gSpaceObjectData));
     for ( i = 0; i < kMaxSpaceObject; i++)
     {
 //      anObject->attributes = 0;
@@ -333,7 +335,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
     transColorType  *transColor;
     short           whichShape = 0, angle;
 
-    destObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
+    destObject = *gSpaceObjectData;
 
     while (( destObject->active) && ( whichObject < kMaxSpaceObject))
     {
@@ -520,7 +522,7 @@ int AddNumberedSpaceObject( spaceObjectType *sourceObject, long whichObject)
     spritePix       oldStyleSprite;
     long            scaleCalc;
 
-    destObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + whichObject;
+    destObject = *gSpaceObjectData + whichObject;
 
     if ( whichObject == kMaxSpaceObject) return( -1);
 
@@ -581,7 +583,7 @@ void RemoveAllSpaceObjects( void)
     spaceObjectType *anObject;
     int             i;
 
-    anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
+    anObject = *gSpaceObjectData;
     for ( i = 0; i < kMaxSpaceObject; i++)
     {
         if ( anObject->sprite != nil)
@@ -1414,7 +1416,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 
                         if ( l >= 0)
                         {
-                            spaceObjectType *newObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + l;
+                            spaceObjectType *newObject = *gSpaceObjectData + l;
                             if ( newObject->attributes & kCanAcceptDestination)
                             {
                                 ul1 = newObject->attributes;
@@ -2254,7 +2256,7 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
                                     direction, velocity, owner, spriteIDOverride);
     newObject.location = *location;
     if ( gAresGlobal->gPlayerShipNumber >= 0)
-        player = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + gAresGlobal->gPlayerShipNumber;
+        player = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
     else player = nil;
     if (( player != nil) && ( player->active))
     {
@@ -2351,7 +2353,7 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
 //      DebugStr("\pCouldn't create an object!");
     } else
     {
-        madeObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + newObjectNumber;
+        madeObject = *gSpaceObjectData + newObjectNumber;
         madeObject->attributes |= specialAttributes;
 /*      if ( madeObject->sprite != nil)
         {
@@ -2414,7 +2416,7 @@ long CountObjectsOfBaseType( long whichType, long owner)
 
     spaceObjectType *anObject;
 
-    anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
+    anObject = *gSpaceObjectData;
     for ( count = 0; count < kMaxSpaceObject; count++)
     {
         if (( anObject->active) &&
@@ -2431,7 +2433,7 @@ long GetNextObjectWithAttributes( long startWith, unsigned long attributes, Bool
     long    original = startWith, result = 0;
     spaceObjectType *anObject;
 
-    anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + startWith;
+    anObject = *gSpaceObjectData + startWith;
 
     if ( exclude)
     {
@@ -2474,10 +2476,10 @@ void ResolveSpaceObjectData( Handle spaceData)
 
 #pragma unused( spaceData)
 //  mWriteDebugString("\pZONK!");
-    anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
+    anObject = *gSpaceObjectData;
     if ( gRootObjectNumber >= 0)
     {
-        gRootObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + gRootObjectNumber;
+        gRootObject = *gSpaceObjectData + gRootObjectNumber;
     } else
     {
         gRootObject = nil;
@@ -2485,7 +2487,7 @@ void ResolveSpaceObjectData( Handle spaceData)
 
     if ( gAresGlobal->gScrollStarNumber >= 0)
     {
-        gScrollStarObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + gAresGlobal->gScrollStarNumber;
+        gScrollStarObject = *gSpaceObjectData + gAresGlobal->gScrollStarNumber;
     }
 
     for ( i = 0; i < kMaxSpaceObject; i++)
@@ -2494,8 +2496,7 @@ void ResolveSpaceObjectData( Handle spaceData)
         anObject->nextNearObject = anObject->nextFarObject = nil;
 
         if (( anObject->destObjectPtr != nil) && ( anObject->destinationObject != kNoDestinationObject))
-            anObject->destObjectPtr = (reinterpret_cast<spaceObjectType*>(*gSpaceObjectData)
-                         + anObject->destinationObject);
+            anObject->destObjectPtr = *gSpaceObjectData + anObject->destinationObject;
 
         if (( anObject->sprite != nil) && ( anObject->whichSprite != kNoSprite))
             anObject->sprite = reinterpret_cast<spriteType*>(*gSpriteTable) + anObject->whichSprite;
@@ -2509,7 +2510,7 @@ void ResolveSpaceObjectData( Handle spaceData)
 
         if ( anObject->nextObjectNumber >= 0)
         {
-            bObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + anObject->nextObjectNumber;
+            bObject = *gSpaceObjectData + anObject->nextObjectNumber;
             anObject->nextObject = bObject;
         } else
         {
@@ -2517,7 +2518,7 @@ void ResolveSpaceObjectData( Handle spaceData)
         }
         if ( anObject->previousObjectNumber >= 0)
         {
-            bObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + anObject->previousObjectNumber;
+            bObject = *gSpaceObjectData + anObject->previousObjectNumber;
             anObject->previousObject = bObject;
         } else
         {
@@ -2532,10 +2533,10 @@ void ResolveSpaceObjectData( Handle spaceData)
         for ( i = 0; i < kActionQueueLength; i++)
         {
             if ( action->subjectObjectNum >= 0)
-                action->subjectObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + action->subjectObjectNum;
+                action->subjectObject = *gSpaceObjectData + action->subjectObjectNum;
             else action->subjectObject = nil;
             if ( action->directObjectNum >= 0)
-                action->directObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + action->directObjectNum;
+                action->directObject = *gSpaceObjectData + action->directObjectNum;
             else action->directObject = nil;
             action++;
         }
@@ -2741,7 +2742,7 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, Boolean message)
         anObject->bestConsideredTargetValue = anObject->currentTargetValue = 0xffffffff;
         anObject->bestConsideredTargetNumber = -1;
 
-        fixObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
+        fixObject = *gSpaceObjectData;
         for ( i = 0; i < kMaxSpaceObject; i++)
         {
             if (( fixObject->destinationObject == anObject->entryNumber) && ( fixObject->active !=
@@ -2862,7 +2863,7 @@ void DestroyObject( spaceObjectType *anObject)
         {
             anObject->health = anObject->baseType->health;
             // if anyone is targeting it, they should stop
-            fixObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
+            fixObject = *gSpaceObjectData;
             for ( i = 0; i < kMaxSpaceObject; i++)
             {
                 if (( fixObject->attributes & kCanAcceptDestination) && ( fixObject->active !=
@@ -2906,7 +2907,7 @@ void DestroyObject( spaceObjectType *anObject)
 //              mWriteDebugString( "\pKillDest");
 
                 RemoveDestination( anObject->destinationObject);
-                fixObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
+                fixObject = *gSpaceObjectData;
                 for ( i = 0; i < kMaxSpaceObject; i++)
                 {
                     if (( fixObject->attributes & kCanAcceptDestination) && ( fixObject->active !=
@@ -3003,14 +3004,14 @@ void CreateFloatingBodyOfPlayer( spaceObjectType *anObject)
             anObject->attributes &= (~kIsHumanControlled) & (~kIsPlayerShip);
             gAresGlobal->gPlayerShipNumber = count;
             ResetScrollStars( gAresGlobal->gPlayerShipNumber);
-            anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + gAresGlobal->gPlayerShipNumber;
+            anObject = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
             anObject->attributes |= attributes;
         } else
         {
             mWriteDebugString("\pREMOTE BODY");
             attributes = anObject->attributes & kIsRemote;
             anObject->attributes &= ~kIsRemote;
-            anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + count;
+            anObject = *gSpaceObjectData + count;
             anObject->attributes |= attributes;
         }
         SetAdmiralFlagship( anObject->owner, count);

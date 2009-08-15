@@ -76,7 +76,8 @@ extern aresGlobalType           *gAresGlobal;
 //extern unsigned long          gAresGlobal->gOptions;
 extern long                     /*gAresGlobal->gPlayerShipNumber,*/ gAbsoluteScale, /*gAresGlobal->gGameOver,
                                 gAresGlobal->gGameTime,*/ gRandomSeed;
-extern Handle                   gSpaceObjectData, gBaseObjectData, gObjectActionData, gRotTable;
+extern spaceObjectType**        gSpaceObjectData;
+extern Handle                   gBaseObjectData, gObjectActionData, gRotTable;
 
 //long                          gAresGlobal->gPlayerAdmiralNumber, gAresGlobal->gScenarioWinner, // -1 = no-one, 0 = player loses
 //                              gAresGlobal->gScenarioRotation = 0, gAresGlobal->gThisScenarioNumber = -1;
@@ -725,7 +726,7 @@ Boolean ConstructScenario( long which)
                                                 specialAttributes,
                                                 initial->spriteIDOverride);
 
-            anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + newShipNum;
+            anObject = *gSpaceObjectData + newShipNum;
             if ( anObject->attributes & kIsDestination)
             {
                 anObject->destinationObject = MakeNewDestination( newShipNum, initial->canBuild,
@@ -798,7 +799,7 @@ Boolean ConstructScenario( long which)
                 // now give the mapped initial object the admiral's destination
 
                 initial = mGetScenarioInitial( gThisScenario, count);
-                anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + initial->realObjectNumber;
+                anObject = *gSpaceObjectData + initial->realObjectNumber;
                 specialAttributes = anObject->attributes; // preserve the attributes
                 anObject->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
                 SetObjectDestination( anObject, nil);
@@ -821,7 +822,7 @@ Boolean ConstructScenario( long which)
             if ( GetAdmiralFlagship( c2) == nil)
             {
                 mWriteDebugString("\pAdmiral Needs Flagship!");
-                anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
+                anObject = *gSpaceObjectData;
                 count = 0;
                 while ((((anObject->attributes & kCanThink) != kCanThink) ||
                     (anObject->owner != c2)) && ( count < kMaxSpaceObject))
@@ -871,12 +872,12 @@ Boolean ConstructScenario( long which)
     for ( count = 0; count < ((gThisScenario->startTime & kScenario_StartTimeMask) * 20); count++)
     {
         gAresGlobal->gGameTime = count;
-        MoveSpaceObjects( reinterpret_cast<spaceObjectType*>(*gSpaceObjectData), kMaxSpaceObject,
+        MoveSpaceObjects( *gSpaceObjectData, kMaxSpaceObject,
                     kDecideEveryCycles);
         NonplayerShipThink( kDecideEveryCycles);
         AdmiralThink();
         ExecuteActionQueue( kDecideEveryCycles);
-        CollideSpaceObjects( reinterpret_cast<spaceObjectType*>(*gSpaceObjectData), kMaxSpaceObject);
+        CollideSpaceObjects( *gSpaceObjectData, kMaxSpaceObject);
         c2++;
         if ( c2 == 30)
         {
@@ -1423,7 +1424,7 @@ void CheckScenarioConditions( long timePass)
                             l = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
                             if ( l >= 0)
                             {
-                                dObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + l;
+                                dObject = *gSpaceObjectData + l;
                                 if ( dObject == sObject)
                                 {
                                     conditionTrue = true;
@@ -1440,7 +1441,7 @@ void CheckScenarioConditions( long timePass)
                             l = GetAdmiralDestinationObject( gAresGlobal->gPlayerAdmiralNumber);
                             if ( l >= 0)
                             {
-                                dObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + l;
+                                dObject = *gSpaceObjectData + l;
                                 if ( dObject == sObject)
                                 {
                                     conditionTrue = true;
@@ -1694,7 +1695,7 @@ void UnhideInitialObject( long whichInitial)
                                                 specialAttributes,
                                                 initial->spriteIDOverride);
 
-            anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + newShipNum;
+            anObject = *gSpaceObjectData + newShipNum;
             initial = mGetScenarioInitial( gThisScenario, whichInitial);
 
             if ( anObject->attributes & kIsDestination)
@@ -1754,7 +1755,7 @@ void UnhideInitialObject( long whichInitial)
                         // now give the mapped initial object the admiral's destination
 
                         initial = mGetScenarioInitial( gThisScenario, whichInitial);
-                        anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + initial->realObjectNumber;
+                        anObject = *gSpaceObjectData + initial->realObjectNumber;
                         specialAttributes = anObject->attributes; // preserve the attributes
                         anObject->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
                         SetObjectDestination( anObject, nil);

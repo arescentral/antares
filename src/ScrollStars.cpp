@@ -76,7 +76,8 @@ extern long             gNatePortLeft, gNatePortTop, gAbsoluteScale,
                         CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM,
                         /*gAresGlobal->gTrueClipBottom,*/ gPlayScreenWidth,
                         gPlayScreenHeight, gRootObjectNumber;
-extern Handle           gSpaceObjectData, gColorTranslateTable;
+extern spaceObjectType**    gSpaceObjectData;
+extern Handle               gColorTranslateTable;
 extern coordPointType   gGlobalCorner;
 extern GWorldPtr        gOffWorld;
 extern spaceObjectType  *gRootObject;
@@ -134,7 +135,7 @@ void ResetScrollStars ( long which)
 {
     short           i;
     scrollStarType  *star;
-    spaceObjectType *centerObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + which;
+    spaceObjectType *centerObject = *gSpaceObjectData + which;
 
     gScrollStarObject = centerObject;
     gAresGlobal->gScrollStarNumber = which;
@@ -908,7 +909,7 @@ void DrawAllBeams( void)
     bounds.top = CLIP_TOP;
     bounds.bottom = CLIP_BOTTOM;
 
-    anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
+    anObject = *gSpaceObjectData;
 
     for ( i = 0; i < kMaxSpaceObject; i++)
     {
@@ -1252,7 +1253,7 @@ void CorrectScrollStarObject( Handle data)
 #pragma unused( data)
 
     if ( gAresGlobal->gScrollStarNumber >= 0)
-        gScrollStarObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
+        gScrollStarObject = *gSpaceObjectData +
             gAresGlobal->gScrollStarNumber;
     else
         gScrollStarObject = nil;

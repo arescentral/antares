@@ -30,7 +30,7 @@
 #define kObjectActionResType    'obac'
 #define kObjectActionResID      500
 
-extern Handle gSpaceObjectData;
+extern spaceObjectType** gSpaceObjectData;
 
 
 int SpaceObjectHandlingInit( void);

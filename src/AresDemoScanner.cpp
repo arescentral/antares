@@ -50,13 +50,14 @@
 extern aresGlobalType *gAresGlobal;
 
 extern scenarioType                 *gThisScenario;
+extern spaceObjectType**            gSpaceObjectData;
 //extern long                           gAresGlobal->gThisScenarioNumber;
 extern Handle                       // gAresGlobal->gScenarioData,
                                     gObjectActionData,
                                     //gAresGlobal->gScenarioInitialData,
                                     //gAresGlobal->gScenarioBriefData,
                                     //gAresGlobal->gScenarioConditionData,
-                                    gSpaceObjectData, gBaseObjectData;
+                                    gBaseObjectData;
 extern pixTableType                 gPixTable[];
 //extern smartSoundHandle               gAresGlobal->gSound[];
 extern GWorldPtr                    gOffWorld;

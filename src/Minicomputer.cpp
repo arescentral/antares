@@ -267,7 +267,7 @@ inline void mCopyBlankLineString(
 }
 
 inline spaceObjectType* mGetMiniObjectPtr(long mwhich) {
-    return reinterpret_cast<spaceObjectType*>(*gAresGlobal->gMiniScreenData.objectData) + mwhich;
+    return *gAresGlobal->gMiniScreenData.objectData + mwhich;
 }
 
 extern aresGlobalType   *gAresGlobal;
@@ -281,8 +281,9 @@ extern Handle           gDirectTextData;
 extern long             gWhichDirectText;//, gAresGlobal->gInstrumentTop;
 //extern    KeyMap          gAresGlobal->gKeyControl[];
 extern  Handle          //gAresGlobal->gAdmiralData, gAresGlobal->gDestBalanceData,
-                        gSpaceObjectData, gBaseObjectData,
+                        gBaseObjectData,
                         gColorTranslateTable;
+extern spaceObjectType**    gSpaceObjectData;
 //extern    unsigned long   gAresGlobal->gOptions;
 
 /*Handle    gMiniScreenLine = nil, gMiniObjectData = nil;
@@ -331,13 +332,14 @@ int MiniScreenInit( void)
     */
     mHandleLockAndRegister( gAresGlobal->gMiniScreenData.lineData, nil, nil, nil, "\pgAresGlobal->gMiniScreenData.lineData");
 
-    gAresGlobal->gMiniScreenData.objectData = NewHandle( sizeof( spaceObjectType) * kMiniObjectDataNum);
+    gAresGlobal->gMiniScreenData.objectData = reinterpret_cast<spaceObjectType**>(
+            NewHandle( sizeof( spaceObjectType) * kMiniObjectDataNum));
     if ( gAresGlobal->gMiniScreenData.lineData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 2);
         return ( MEMORY_ERROR);
     }
-    mHandleLockAndRegister( gAresGlobal->gMiniScreenData.objectData, nil, nil, nil, "\pgAresGlobal->gMiniScreenData.objectData");
+    mHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gMiniScreenData.objectData), nil, nil, nil, "\pgAresGlobal->gMiniScreenData.objectData");
 
     ClearMiniScreenLines();
     ClearMiniObjectData();
@@ -349,7 +351,7 @@ void MiniScreenCleanup( void)
 
 {
     if ( gAresGlobal->gMiniScreenData.lineData != nil) DisposeHandle( gAresGlobal->gMiniScreenData.lineData);
-    if ( gAresGlobal->gMiniScreenData.objectData != nil) DisposeHandle( gAresGlobal->gMiniScreenData.objectData);
+    if ( gAresGlobal->gMiniScreenData.objectData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gMiniScreenData.objectData));
 //  if ( gAresGlobal->gMiniScreenHandle != nil) DisposeHandle( gAresGlobal->gMiniScreenHandle);
 }
 
@@ -1137,7 +1139,7 @@ void MiniComputerHandleNull( long unitsToDo)
         count = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
         if ( count >= 0)
         {
-            realObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + count;
+            realObject = *gSpaceObjectData + count;
             mCopyMiniSpaceObject( newObject, *realObject);
         } else
         {
@@ -1161,7 +1163,7 @@ void MiniComputerHandleNull( long unitsToDo)
         count = GetAdmiralDestinationObject( gAresGlobal->gPlayerAdmiralNumber);
         if ( count >= 0)
         {
-            realObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + count;
+            realObject = *gSpaceObjectData + count;
             mCopyMiniSpaceObject( newObject, *realObject);
         } else
         {
@@ -1199,7 +1201,7 @@ void MiniComputerHandleNull( long unitsToDo)
     }
     if ( gAresGlobal->gPlayerShipNumber >= 0)
     {
-        myObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + gAresGlobal->gPlayerShipNumber;
+        myObject = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
         if ( myObject->active)
         {
             UpdatePlayerAmmo(
@@ -1833,7 +1835,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         {
             if ( newObject->destObjectPtr != nil)
             {
-                dObject = reinterpret_cast<spaceObjectType*>(newObject->destObjectPtr);
+                dObject = newObject->destObjectPtr;
 
                 // get the color for writing the name
                 if ( dObject->owner == gAresGlobal->gPlayerAdmiralNumber)
@@ -1944,8 +1946,8 @@ void MiniComputerDoAccept( void)
                     l = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
                     if (( gAresGlobal->gPlayerShipNumber != kNoShip) && ( l != kNoShip) && ( l != gAresGlobal->gPlayerShipNumber))
                     {
-                        anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + gAresGlobal->gPlayerShipNumber;
-                        anotherObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + l;
+                        anObject = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
+                        anotherObject = *gSpaceObjectData + l;
                         if (( anObject->active) && (anObject->attributes & kIsHumanControlled) &&
                             (anotherObject->attributes & ( kCanAcceptDestination)))
                         {
@@ -1959,7 +1961,7 @@ void MiniComputerDoAccept( void)
                     l = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
                     if (( l != kNoShip) && ( l != gAresGlobal->gPlayerShipNumber))
                     {
-                        anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + l;
+                        anObject = *gSpaceObjectData + l;
                         if (( anObject->active) &&
                             (anObject->attributes & ( kCanAcceptDestination)))
                         {
@@ -1972,7 +1974,7 @@ void MiniComputerDoAccept( void)
                     l = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
                     if (( l != kNoShip) && ( l != gAresGlobal->gPlayerShipNumber))
                     {
-                        anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + l;
+                        anObject = *gSpaceObjectData + l;
                         if (( anObject->active) &&
                             (anObject->attributes & ( kCanAcceptDestination)))
                         {
@@ -1985,7 +1987,7 @@ void MiniComputerDoAccept( void)
                     l = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
                     if (( l != kNoShip) && ( l != gAresGlobal->gPlayerShipNumber))
                     {
-                        anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + l;
+                        anObject = *gSpaceObjectData + l;
                         if (( anObject->active) &&
                             (anObject->attributes & ( kCanAcceptDestination)))
                         {
@@ -1998,7 +2000,7 @@ void MiniComputerDoAccept( void)
                     l = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
                     if (( l != kNoShip) && ( l != gAresGlobal->gPlayerShipNumber))
                     {
-                        anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + l;
+                        anObject = *gSpaceObjectData + l;
                         SetObjectLocationDestination( anObject, &(anObject->location));
                     }
                     break;
@@ -2007,8 +2009,8 @@ void MiniComputerDoAccept( void)
                     l = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
                     if (( l != kNoShip) && ( l != gAresGlobal->gPlayerShipNumber) && ( gAresGlobal->gPlayerShipNumber != kNoShip))
                     {
-                        anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + l;
-                        anotherObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + gAresGlobal->gPlayerShipNumber;
+                        anObject = *gSpaceObjectData + l;
+                        anotherObject = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
                         SetObjectLocationDestination( anObject, &(anotherObject->location));
                     }
                     break;
@@ -2124,7 +2126,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                     {
                         if ( l != kNoShip)
                         {
-                            anotherObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + l;
+                            anotherObject = *gSpaceObjectData + l;
                             if (( anotherObject->active != kObjectInUse) ||
                                 ( !(anotherObject->attributes & kCanThink)) ||
                                 ( anotherObject->attributes & kStaticDestination)
@@ -2165,7 +2167,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                     l = GetAdmiralConsiderObject( whichAdmiral);
                     if (( l != kNoShip))
                     {
-                        anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + l;
+                        anObject = *gSpaceObjectData + l;
                         if (( anObject->active) &&
                             (anObject->attributes & ( kCanAcceptDestination)))
                         {
@@ -2178,7 +2180,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                     l = GetAdmiralConsiderObject( whichAdmiral);
                     if (( l != kNoShip))
                     {
-                        anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + l;
+                        anObject = *gSpaceObjectData + l;
                         if (( anObject->active) &&
                             (anObject->attributes & ( kCanAcceptDestination)))
                         {
@@ -2191,7 +2193,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                     l = GetAdmiralConsiderObject( whichAdmiral);
                     if (( l != kNoShip))
                     {
-                        anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + l;
+                        anObject = *gSpaceObjectData + l;
                         if (( anObject->active) &&
                             (anObject->attributes & ( kCanAcceptDestination)))
                         {
@@ -2204,7 +2206,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                     l = GetAdmiralConsiderObject( whichAdmiral);
                     if (( l != kNoShip))
                     {
-                        anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + l;
+                        anObject = *gSpaceObjectData + l;
                         SetObjectLocationDestination( anObject, &(anObject->location));
                     }
                     break;
@@ -2213,7 +2215,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                     l = GetAdmiralConsiderObject( whichAdmiral);
                     if (( l != kNoShip))
                     {
-                        anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + l;
+                        anObject = *gSpaceObjectData + l;
                         anotherObject = GetAdmiralFlagship( whichAdmiral);
                         SetObjectLocationDestination( anObject, &(anotherObject->location));
                     }

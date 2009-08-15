@@ -60,7 +60,8 @@
 
 extern aresGlobalType   *gAresGlobal;
 //extern KeyMap     gAresGlobal->gKeyControl[];
-extern Handle       gSpaceObjectData, gBaseObjectData/*, gAresGlobal->gDestBalanceData*/;
+extern spaceObjectType**    gSpaceObjectData;
+extern Handle       gBaseObjectData/*, gAresGlobal->gDestBalanceData*/;
 extern long         /*gAresGlobal->gGameTime,*/ gRandomSeed,
                     //gAresGlobal->gPlayerAdmiralNumber, gAresGlobal->gScenarioWinner,
                     gNetLatency, gRootObjectNumber;
@@ -94,7 +95,7 @@ void StartPlayerShip( long owner, short type)
 void ResetPlayerShip( long which)
 
 {
-    spaceObjectType *theShip = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + which;
+    spaceObjectType *theShip = *gSpaceObjectData + which;
     anyCharType     nilLabel = 0;
     long            h;
 
@@ -505,7 +506,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
         SetStatusString( s, TRUE, kStatusLabelColor);
     }
 
-    theShip = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + gAresGlobal->gPlayerShipNumber;
+    theShip = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
 //  theShip->attributes &= ~kIsHumanControlled;
     if ( !theShip->active) return ( everPaused);
 
@@ -606,8 +607,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
         {
             if ( gAresGlobal->lastSelectedObject >= 0)
             {
-                selectShip = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
-                                gAresGlobal->lastSelectedObject;
+                selectShip = *gSpaceObjectData + gAresGlobal->lastSelectedObject;
 
                 if ( selectShip->active)
                 {
@@ -626,8 +626,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
             gAresGlobal->destKeyUsedForSelection = true;
             if ( gAresGlobal->hotKey[b].objectNum >= 0)
             {
-                selectShip = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) +
-                                gAresGlobal->hotKey[b].objectNum;
+                selectShip = *gSpaceObjectData + gAresGlobal->hotKey[b].objectNum;
                 if ( (selectShip->active) && ( selectShip->id ==
                         gAresGlobal->hotKey[b].objectID))
                 {
@@ -710,7 +709,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
         }
         if ( selectShipNum >= 0)
         {
-            selectShip = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + selectShipNum;
+            selectShip = *gSpaceObjectData + selectShipNum;
 /*          if (( selectShip->attributes & kCanThink) || ( selectShip->attributes & kIsHumanControlled))
             {
                 distance = selectShip->distanceFromPlayer;
@@ -763,7 +762,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
             {
                 /*
                 // set new destination object
-                selectShip = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + selectShipNum;
+                selectShip = *gSpaceObjectData + selectShipNum;
                 SetScreenLabelObject( gAresGlobal->gDestinationLabel, selectShip);
                 if ( selectShipNum == gAresGlobal->gPlayerShipNumber)
                 {
@@ -799,7 +798,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
             {
                 /*
 //              ResetScrollStars( selectShipNum);
-                selectShip = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + selectShipNum;
+                selectShip = *gSpaceObjectData + selectShipNum;
                 SetScreenLabelObject( gAresGlobal->gSelectionLabel, selectShip);
                 if ( selectShipNum == gAresGlobal->gPlayerShipNumber)
                 {
@@ -860,7 +859,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
         selectShipNum = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
         if ( selectShipNum >= 0)
         {
-            selectShip = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + selectShipNum;
+            selectShip = *gSpaceObjectData + selectShipNum;
             SetObjectDestination( selectShip, nil);
             PlayVolumeSound(  kMorseBeepSound, kMediumVolume, kMediumPersistence, kLowPrioritySound);
         }
@@ -897,7 +896,7 @@ void PlayerShipHandleClick( Point where)
     gAresGlobal->gDestKeyTime = -1;
     if ( gAresGlobal->gPlayerShipNumber >= 0)
     {
-        theShip = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + gAresGlobal->gPlayerShipNumber;
+        theShip = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
         if (( theShip->active) && ( theShip->attributes & kIsHumanControlled))
         {
             bounds.left = where.h - kCursorBoundsSize;
@@ -915,7 +914,7 @@ void PlayerShipHandleClick( Point where)
                 if ( selectShipNum >= 0)
                 {
                     /*
-                    selectShip = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + selectShipNum;
+                    selectShip = *gSpaceObjectData + selectShipNum;
                     SetScreenLabelObject( gAresGlobal->gDestinationLabel, selectShip);
                     if ( selectShipNum == gAresGlobal->gPlayerShipNumber)
                     {
@@ -956,7 +955,7 @@ void PlayerShipHandleClick( Point where)
                 if ( selectShipNum >= 0)
                 {
                     /*
-                    selectShip = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + selectShipNum;
+                    selectShip = *gSpaceObjectData + selectShipNum;
                     SetScreenLabelObject( gAresGlobal->gSelectionLabel, selectShip);
                     if ( selectShipNum == gAresGlobal->gPlayerShipNumber)
                     {
@@ -991,7 +990,7 @@ void PlayerShipHandleClick( Point where)
 
 void SetPlayerSelectShip( long whichShip, Boolean target, long admiralNumber)
 {
-    spaceObjectType *selectShip = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + whichShip,
+    spaceObjectType *selectShip = *gSpaceObjectData + whichShip,
                     *theShip = GetAdmiralFlagship( admiralNumber);
     Str255          s;
 
@@ -1090,7 +1089,7 @@ void ChangePlayerShipNumber( long whichAdmiral, long newShipNumber)
         }
 
 
-        anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + gAresGlobal->gPlayerShipNumber;
+        anObject = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
 
 //      if ( !(gAresGlobal->gActiveCheats[whichAdmiral] & kAutoPlayBit))
             anObject->attributes |= (kIsHumanControlled) | (kIsPlayerShip);
@@ -1108,7 +1107,7 @@ void ChangePlayerShipNumber( long whichAdmiral, long newShipNumber)
     } else
     {
         anObject->attributes &= ~(kIsRemote | kIsPlayerShip);
-        anObject = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + newShipNumber;
+        anObject = *gSpaceObjectData + newShipNumber;
         anObject->attributes |= (kIsRemote | kIsPlayerShip);
     }
     SetAdmiralFlagship( whichAdmiral, newShipNumber);
@@ -1145,7 +1144,7 @@ Boolean IsPlayerShipOnAutoPilot( void)
     spaceObjectType *theShip;
 
     if ( gAresGlobal->gPlayerShipNumber < 0) return false;
-    theShip = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + gAresGlobal->gPlayerShipNumber;
+    theShip = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
     if ( theShip->attributes & kOnAutoPilot) return true;
     else return false;
 }
@@ -1163,7 +1162,7 @@ void PlayerShipGiveCommand( long whichAdmiral)
                     DebugFileAppendLong( whichAdmiral);
                     DebugFileAppendString( "\p\r");
 
-        selectShip = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + selectShipNum;
+        selectShip = *gSpaceObjectData + selectShipNum;
         SetObjectDestination( selectShip, nil);
         if ( whichAdmiral == gAresGlobal->gPlayerAdmiralNumber)
             PlayVolumeSound(  kMorseBeepSound, kMediumVolume, kMediumPersistence, kLowPrioritySound);
@@ -1181,7 +1180,7 @@ void PlayerShipBodyExpire( spaceObjectType *theShip, Boolean sourceIsBody)
 
     if ( selectShipNum >= 0)
     {
-        selectShip = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + selectShipNum;
+        selectShip = *gSpaceObjectData + selectShipNum;
         if (( selectShip->active != kObjectInUse) ||
             ( !(selectShip->attributes & kCanThink)) ||
             ( selectShip->attributes & kStaticDestination)
@@ -1192,7 +1191,7 @@ void PlayerShipBodyExpire( spaceObjectType *theShip, Boolean sourceIsBody)
     }
     if ( selectShip == nil)
     {
-//      selectShip = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData);
+//      selectShip = *gSpaceObjectData;
 //      selectShipNum = 0;
         selectShip = gRootObject;
         selectShipNum = gRootObjectNumber;
@@ -1325,7 +1324,7 @@ void Update_LabelStrings_ForHotKeyChange( void)
     if ( whichShip >= 0)
 
     {
-        selectShip = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + whichShip;
+        selectShip = *gSpaceObjectData + whichShip;
 
 //      if ( admiralNumber == gAresGlobal->gPlayerAdmiralNumber)
         {
@@ -1360,7 +1359,7 @@ void Update_LabelStrings_ForHotKeyChange( void)
     whichShip = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
     if ( whichShip >= 0)
     {
-        selectShip = reinterpret_cast<spaceObjectType*>(*gSpaceObjectData) + whichShip;
+        selectShip = *gSpaceObjectData + whichShip;
 //      if ( admiralNumber == gAresGlobal->gPlayerAdmiralNumber)
         {
             SetScreenLabelObject( gAresGlobal->gSelectionLabel, selectShip);
