@@ -108,7 +108,7 @@ void MakeDemoDataHack( void)
 
     DisposePtr( reinterpret_cast<Ptr>(baseObjectKeepList));
 
-    aScenario = reinterpret_cast<scenarioType *>(*gAresGlobal->gScenarioData);
+    aScenario = *gAresGlobal->gScenarioData;
     for ( count = 0; count < GetScenarioNumber(); count++)
     {
         if ( ( count !=
@@ -158,13 +158,13 @@ void MakeDemoDataHack( void)
         }
         aScenario++;
     }
-    SaveAnyResourceInPreferences( 'snro', 500, nil, gAresGlobal->gScenarioData, true);
+    SaveAnyResourceInPreferences( 'snro', 500, nil, reinterpret_cast<Handle>(gAresGlobal->gScenarioData), true);
 }
 
 void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
 
 {
-    scenarioType            *scenario = reinterpret_cast<scenarioType *>(*gAresGlobal->gScenarioData) + whatLevel;
+    scenarioType            *scenario = *gAresGlobal->gScenarioData + whatLevel;
     long                    count, c2, c3, newShipNum;
     baseObjectType          *baseObject;
     scenarioConditionType   *condition;
@@ -174,7 +174,7 @@ void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
     SetAllBaseObjectsUnchecked();
 
     gAresGlobal->gThisScenarioNumber = whatLevel;
-    gThisScenario = reinterpret_cast<scenarioType *>(*gAresGlobal->gScenarioData) + whatLevel;
+    gThisScenario = *gAresGlobal->gScenarioData + whatLevel;
     ///// FIRST SELECT WHAT MEDIA WE NEED TO USE:
     // uncheck all base objects
     // uncheck all sounds
@@ -395,7 +395,7 @@ void CopyAllUsedSounds( void)
 
 void CopyAllBriefingData( long whatLevel)
 {
-    scenarioType            *scenario = reinterpret_cast<scenarioType *>(*gAresGlobal->gScenarioData) + whatLevel;
+    scenarioType            *scenario = *gAresGlobal->gScenarioData + whatLevel;
     Handle                  textData = nil;
     PixMapHandle            offMap = GetGWorldPixMap( gOffWorld);
     Rect                    tRect = {0, 0, 480, 480};
@@ -426,7 +426,7 @@ void CopyAllBriefingData( long whatLevel)
             DrawInterfaceTextInRect( &tRect, reinterpret_cast<anyCharType *>(*textData), length,
                             kLarge, 3, *offMap, 0, 0, inlinePictList);
 
-            scenario = reinterpret_cast<scenarioType *>(*gAresGlobal->gScenarioData) + whatLevel;
+            scenario = *gAresGlobal->gScenarioData + whatLevel;
             brief = mGetScenarioBrief( scenario, whichBriefNum);
             HUnlock( textData);
             DisposeHandle( textData);

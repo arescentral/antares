@@ -89,8 +89,8 @@ OSErr EF_OpenExternalFile( void)
     // scenario stuff
     if ( gAresGlobal->gScenarioData != nil)
     {
-        HHDeregisterHandle( &gAresGlobal->gScenarioData);
-        DisposeHandle( gAresGlobal->gScenarioData);
+        HHDeregisterHandle( reinterpret_cast<Handle*>(&gAresGlobal->gScenarioData));
+        DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioData));
         gAresGlobal->gScenarioData = nil;
     }
     if ( gAresGlobal->gScenarioInitialData != nil)
@@ -138,24 +138,24 @@ OSErr EF_OpenExternalFile( void)
     // load all the new stuff
 
     // scenario stuff
-    gAresGlobal->gScenarioData = GetResource( kScenarioResType, kScenarioResID);
+    gAresGlobal->gScenarioData = reinterpret_cast<scenarioType**>(GetResource( kScenarioResType, kScenarioResID));
     if ( gAresGlobal->gScenarioData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioDataError, -1, -1, -1, __FILE__, 2);
         return( RESOURCE_ERROR);
     }
 
-    if ( GetHandleSize( gAresGlobal->gScenarioData) <= 0)
+    if ( GetHandleSize( reinterpret_cast<Handle>(gAresGlobal->gScenarioData)) <= 0)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioDataError, -1, -1, -1, __FILE__, 2);
         return( RESOURCE_ERROR);
     }
 
-    DetachResource( gAresGlobal->gScenarioData);
+    DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioData));
 
-    mDataHandleLockAndRegister( gAresGlobal->gScenarioData, nil, nil, CorrectThisScenarioPtr, "\pgAresGlobal->gScenarioData");
+    mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gScenarioData), nil, nil, CorrectThisScenarioPtr, "\pgAresGlobal->gScenarioData");
 
-    gAresGlobal->scenarioNum = GetHandleSize( gAresGlobal->gScenarioData) /
+    gAresGlobal->scenarioNum = GetHandleSize( reinterpret_cast<Handle>(gAresGlobal->gScenarioData)) /
         sizeof( scenarioType);
 
     gAresGlobal->gScenarioInitialData = GetResource( kScenarioInitialResType, kScenarioInitialResID);

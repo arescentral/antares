@@ -209,7 +209,7 @@ void GetInitialObjectSpriteData( long whichScenario, long whichObject,
 {
     spaceObjectType         *sObject = nil;
     scenarioInitialType     *initial;
-    scenarioType            *scenario = reinterpret_cast<scenarioType *>(*gAresGlobal->gScenarioData) + whichScenario;
+    scenarioType            *scenario = *gAresGlobal->gScenarioData + whichScenario;
     briefingSpriteBoundsType    *sBounds = gBriefingSpriteBounds;
 
     initial = mGetScenarioInitial( scenario, whichObject);
@@ -392,7 +392,7 @@ void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
     Point       where;
     spritePix   aSpritePix;
     longRect    spriteRect, clipRect;
-    scenarioType    *scenario = reinterpret_cast<scenarioType *>(*gAresGlobal->gScenarioData) + whichScenario;
+    scenarioType    *scenario = *gAresGlobal->gScenarioData + whichScenario;
     baseObjectType  *baseObject = nil;
     char            *pixData;
     spaceObjectType *anObject = *gSpaceObjectData;
@@ -542,7 +542,7 @@ void BriefPoint_Data_Get( long whichPoint, long whichScenario, long *headerID,
                     Rect *bounds)
 
 {
-    scenarioType    *scenario = reinterpret_cast<scenarioType *>(*gAresGlobal->gScenarioData) + whichScenario;
+    scenarioType    *scenario = *gAresGlobal->gScenarioData + whichScenario;
     Point           where;
     spritePix       aSpritePix;
     longRect        spriteRect;

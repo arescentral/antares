@@ -112,17 +112,17 @@ short ScenarioMakerInit( void)
 
     if ( gAresGlobal->gScenarioData == nil)
     {
-        gAresGlobal->gScenarioData = GetResource( kScenarioResType, kScenarioResID);
+        gAresGlobal->gScenarioData = reinterpret_cast<scenarioType**>(GetResource( kScenarioResType, kScenarioResID));
         if ( gAresGlobal->gScenarioData == nil)
         {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioDataError, -1, -1, -1, __FILE__, 2);
             return( RESOURCE_ERROR);
         }
-        DetachResource( gAresGlobal->gScenarioData);
+        DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioData));
 
-        mDataHandleLockAndRegister( gAresGlobal->gScenarioData, nil, nil, CorrectThisScenarioPtr, "\pgAresGlobal->gScenarioData");
+        mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gScenarioData), nil, nil, CorrectThisScenarioPtr, "\pgAresGlobal->gScenarioData");
 
-        gAresGlobal->scenarioNum = GetHandleSize( gAresGlobal->gScenarioData) /
+        gAresGlobal->scenarioNum = GetHandleSize( reinterpret_cast<Handle>(gAresGlobal->gScenarioData)) /
             sizeof( scenarioType);
 
     }
@@ -184,7 +184,7 @@ short ScenarioMakerInit( void)
 void ScenarioMakerCleanup( void)
 
 {
-    if ( gAresGlobal->gScenarioData != nil) DisposeHandle( gAresGlobal->gScenarioData);
+    if ( gAresGlobal->gScenarioData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioData));
     if ( gAresGlobal->gScenarioBriefData != nil) DisposeHandle( gAresGlobal->gScenarioBriefData);
     if ( gAresGlobal->gScenarioInitialData != nil) DisposeHandle( gAresGlobal->gScenarioInitialData);
     if ( gAresGlobal->gScenarioConditionData != nil) DisposeHandle( gAresGlobal->gScenarioConditionData);
@@ -195,7 +195,7 @@ void ScenarioMakerCleanup( void)
 Boolean ConstructScenario( long which)
 
 {
-    scenarioType        *scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + which;
+    scenarioType        *scenario = *gAresGlobal->gScenarioData + which;
     long                count, owner, type, admiralType, specialAttributes,
                         newShipNum, c2, c3, baseClass, race;
     coordPointType      coord;
@@ -262,7 +262,7 @@ Boolean ConstructScenario( long which)
     else
         gAresGlobal->gScenarioRotation = count;
 
-    gThisScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + which;
+    gThisScenario = *gAresGlobal->gScenarioData + which;
 
     gAresGlobal->gScenarioWinner = kScenarioWinnerNoPlayer | kScenarioWinnerNoNext | kScenarioWinnerNoText;
 
@@ -503,25 +503,25 @@ Boolean ConstructScenario( long which)
         if ( baseObject != nil)
         {
             AddBaseObjectMedia( gAresGlobal->scenarioFileInfo.energyBlobID, 0); // special case; always neutral
-    //      scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + which;
+    //      scenario = *gAresGlobal->gScenarioData + which;
         }
         baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.warpInFlareID);
         if ( baseObject != nil)
         {
             AddBaseObjectMedia( gAresGlobal->scenarioFileInfo.warpInFlareID, 0); // special case; always neutral
-    //      scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + which;
+    //      scenario = *gAresGlobal->gScenarioData + which;
         }
         baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.warpOutFlareID);
         if ( baseObject != nil)
         {
             AddBaseObjectMedia( gAresGlobal->scenarioFileInfo.warpOutFlareID, 0); // special case; always neutral
-    //      scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + which;
+    //      scenario = *gAresGlobal->gScenarioData + which;
         }
         baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.playerBodyID);
         if ( baseObject != nil)
         {
             AddBaseObjectMedia( gAresGlobal->scenarioFileInfo.playerBodyID, GetAdmiralColor( count));
-    //      scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + which;
+    //      scenario = *gAresGlobal->gScenarioData + which;
         }
     }
 
@@ -560,7 +560,7 @@ Boolean ConstructScenario( long which)
         }
 
         // we may have just moved memory, so let's make sure our ptrs are correct
-//      scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + which;
+//      scenario = *gAresGlobal->gScenarioData + which;
         initial = mGetScenarioInitial( gThisScenario, count);
         baseObject = mGetBaseObjectPtr( type);
 
@@ -575,7 +575,7 @@ Boolean ConstructScenario( long which)
             {
                 AddPixTable( initial->spriteIDOverride);
             }
-//          scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + which;
+//          scenario = *gAresGlobal->gScenarioData + which;
         }
 
         // check any objects this object can build
@@ -594,7 +594,7 @@ Boolean ConstructScenario( long which)
                     if ( baseObject != nil)
                     {
                         AddBaseObjectMedia( newShipNum, GetAdmiralColor( c3));
-//                      scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + which;
+//                      scenario = *gAresGlobal->gScenarioData + which;
                     }
                 }
             }
@@ -1830,7 +1830,7 @@ void GetScenarioFullScaleAndCorner( long whichScenario, long rotation,
 {
     long            biggest, count, otherCount, mustFit;
     longPointType   coord, otherCoord, tempCoord;
-    scenarioType    *scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario;
+    scenarioType    *scenario = *gAresGlobal->gScenarioData + whichScenario;
     scenarioInitialType     *initial;
 
 
@@ -1905,14 +1905,14 @@ void GetScenarioFullScaleAndCorner( long whichScenario, long rotation,
 long GetBriefPointNumber( long whichScenario)
 
 {
-    scenarioType    *scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario;
+    scenarioType    *scenario = *gAresGlobal->gScenarioData + whichScenario;
 
     return ( scenario->briefPointNum & kScenarioBriefMask);
 }
 
 long GetScenarioAngle( long whichScenario)
 {
-    scenarioType    *scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario;
+    scenarioType    *scenario = *gAresGlobal->gScenarioData + whichScenario;
 
     if ( scenario->briefPointNum & kScenarioAngleMask)
         return (( (scenario->briefPointNum & kScenarioAngleMask) >> kScenarioAngleShift) - 1) * 2;
@@ -1922,7 +1922,7 @@ long GetScenarioAngle( long whichScenario)
 
 long GetScenarioNumberFromChapterNumber( long whichChapter)
 {
-    scenarioType    *aScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData);
+    scenarioType    *aScenario = *gAresGlobal->gScenarioData;
     long            whichScenario = 0;
 
     while (( whichScenario < kScenarioNum) && ( aScenario->levelNameStrNum != whichChapter))
@@ -1938,7 +1938,7 @@ long GetScenarioNumberFromChapterNumber( long whichChapter)
 void GetScenarioStarMapPoint( long whichScenario, Point *starPoint)
 
 {
-    scenarioType    *scenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario;
+    scenarioType    *scenario = *gAresGlobal->gScenarioData + whichScenario;
 
     starPoint->h = scenario->starMapH;
     starPoint->v = scenario->starMapV;
@@ -1946,7 +1946,7 @@ void GetScenarioStarMapPoint( long whichScenario, Point *starPoint)
 
 long GetChapterNumberFromScenarioNumber( long whichScenario)
 {
-    scenarioType    *aScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario;
+    scenarioType    *aScenario = *gAresGlobal->gScenarioData + whichScenario;
 
     if ( whichScenario < 0) return ( -1);
     return( aScenario->levelNameStrNum);
@@ -1955,7 +1955,7 @@ long GetChapterNumberFromScenarioNumber( long whichScenario)
 scenarioType *GetScenarioPtrFromChapter( long whichChapter)
 {
     scenarioType    *aScenario =
-                        reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) +
+                        *gAresGlobal->gScenarioData +
                         GetScenarioNumberFromChapterNumber( whichChapter);
 
     if ( whichChapter < 0) return ( nil);
@@ -1965,36 +1965,36 @@ scenarioType *GetScenarioPtrFromChapter( long whichChapter)
 
 void GetScenarioName( long whichScenario, StringPtr scenarioName)
 {
-    scenarioType    *aScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario;
+    scenarioType    *aScenario = *gAresGlobal->gScenarioData + whichScenario;
     GetIndString( scenarioName, kLevelNameID, aScenario->levelNameStrNum);
 }
 
 long GetScenarioNumber( void)
 {
-    return( GetHandleSize( gAresGlobal->gScenarioData) / sizeof( scenarioType));
+    return( GetHandleSize( reinterpret_cast<Handle>(gAresGlobal->gScenarioData)) / sizeof( scenarioType));
 }
 
 long GetScenarioPlayerNum( long whichScenario)
 {
-    scenarioType    *aScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario;
+    scenarioType    *aScenario = *gAresGlobal->gScenarioData + whichScenario;
     return ( aScenario->playerNum);
 }
 
 long GetScenarioPrologueID( long whichScenario)
 {
-    scenarioType    *aScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario;
+    scenarioType    *aScenario = *gAresGlobal->gScenarioData + whichScenario;
     return ( aScenario->prologueID);
 }
 
 long GetScenarioEpilogueID( long whichScenario)
 {
-    scenarioType    *aScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario;
+    scenarioType    *aScenario = *gAresGlobal->gScenarioData + whichScenario;
     return ( aScenario->epilogueID);
 }
 
 void GetScenarioMovieName( long whichScenario, StringPtr movieName)
 {
-    scenarioType    *aScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario;
+    scenarioType    *aScenario = *gAresGlobal->gScenarioData + whichScenario;
 
     movieName[0] = 0;
     GetIndString( movieName, 4500, aScenario->movieNameStrNum);
@@ -2002,20 +2002,20 @@ void GetScenarioMovieName( long whichScenario, StringPtr movieName)
 
 long GetNextScenarioChapter( long whichScenario)
 {
-    scenarioType    *aScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + whichScenario, *newScenario = nil;
+    scenarioType    *aScenario = *gAresGlobal->gScenarioData + whichScenario, *newScenario = nil;
     long            newScenarioNum, newChapterNum = aScenario->levelNameStrNum + 1;
 
     newScenarioNum = GetScenarioNumberFromChapterNumber( newChapterNum);
     if ( newScenarioNum >= 0)
     {
-        newScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + newScenarioNum;
+        newScenario = *gAresGlobal->gScenarioData + newScenarioNum;
         while ( ( newScenario->playerNum <= 0) && ( newChapterNum < GetScenarioNumber()) && ( newScenario != nil))
         {
             newChapterNum++;
             newScenarioNum = GetScenarioNumberFromChapterNumber( newChapterNum);
             if ( newScenarioNum >= 0)
             {
-                newScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + newScenarioNum;
+                newScenario = *gAresGlobal->gScenarioData + newScenarioNum;
             } else newScenario = nil;
         }
     }
@@ -2074,7 +2074,7 @@ long GetPreviousNetworkScenario( long thisChapter)
 Boolean ThisChapterIsNetworkable( long whichChapter)
 
 {
-    scenarioType    *aScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + GetScenarioNumberFromChapterNumber( whichChapter);
+    scenarioType    *aScenario = *gAresGlobal->gScenarioData + GetScenarioNumberFromChapterNumber( whichChapter);
     long            i;
 
     if (( whichChapter < 0) || ( whichChapter > GetScenarioNumber()))
@@ -2090,6 +2090,6 @@ Boolean ThisChapterIsNetworkable( long whichChapter)
 void CorrectThisScenarioPtr( Handle scenarioData)
 {
 #pragma unused( scenarioData)
-    gThisScenario = reinterpret_cast<scenarioType*>(*gAresGlobal->gScenarioData) + gAresGlobal->gThisScenarioNumber;
+    gThisScenario = *gAresGlobal->gScenarioData + gAresGlobal->gThisScenarioNumber;
 //  WriteDebugLine((char *)"\pCorrect Scenario");
 }
