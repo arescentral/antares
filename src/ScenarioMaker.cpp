@@ -148,18 +148,18 @@ short ScenarioMakerInit( void)
 
     if ( gAresGlobal->gScenarioConditionData == nil)
     {
-        gAresGlobal->gScenarioConditionData = GetResource( kScenarioConditionResType, kScenarioConditionResID);
+        gAresGlobal->gScenarioConditionData = reinterpret_cast<scenarioConditionType**>(GetResource( kScenarioConditionResType, kScenarioConditionResID));
         if ( gAresGlobal->gScenarioConditionData == nil)
         {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioConditionDataError, -1, -1, -1, __FILE__, 4);
             return( RESOURCE_ERROR);
         }
-        DetachResource( gAresGlobal->gScenarioConditionData);
+        DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioConditionData));
 
-        mDataHandleLockAndRegister( gAresGlobal->gScenarioConditionData, nil, nil, nil, "\pgAresGlobal->gScenarioConditionData");
+        mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gScenarioConditionData), nil, nil, nil, "\pgAresGlobal->gScenarioConditionData");
 
         gAresGlobal->maxScenarioCondition = GetHandleSize(
-            gAresGlobal->gScenarioConditionData) / sizeof( scenarioConditionType);
+            reinterpret_cast<Handle>(gAresGlobal->gScenarioConditionData)) / sizeof( scenarioConditionType);
 
     }
 
@@ -189,7 +189,7 @@ void ScenarioMakerCleanup( void)
     if ( gAresGlobal->gScenarioData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioData));
     if ( gAresGlobal->gScenarioBriefData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioBriefData));
     if ( gAresGlobal->gScenarioInitialData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioInitialData));
-    if ( gAresGlobal->gScenarioConditionData != nil) DisposeHandle( gAresGlobal->gScenarioConditionData);
+    if ( gAresGlobal->gScenarioConditionData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioConditionData));
     CleanupRaces();
 }
 

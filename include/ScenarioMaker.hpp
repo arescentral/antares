@@ -116,7 +116,7 @@ inline briefPointType* mGetScenarioBrief(scenarioType* mscenario, long mbriefnum
 }
 
 inline scenarioConditionType* mGetScenarioCondition(scenarioType* mscenario, long mconditionnum) {
-    return reinterpret_cast<scenarioConditionType *>(*gAresGlobal->gScenarioConditionData)
+    return *gAresGlobal->gScenarioConditionData
         + (mscenario)->conditionFirst + (mconditionnum);
 }
 

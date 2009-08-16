@@ -102,8 +102,8 @@ OSErr EF_OpenExternalFile( void)
     }
     if ( gAresGlobal->gScenarioConditionData != nil)
     {
-        HHDeregisterHandle( &gAresGlobal->gScenarioConditionData);
-        DisposeHandle( gAresGlobal->gScenarioConditionData);
+        HHDeregisterHandle( reinterpret_cast<Handle*>(&gAresGlobal->gScenarioConditionData));
+        DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioConditionData));
         gAresGlobal->gScenarioConditionData = nil;
     }
     if ( gAresGlobal->gScenarioBriefData != nil)
@@ -172,18 +172,18 @@ OSErr EF_OpenExternalFile( void)
     gAresGlobal->maxScenarioInitial = GetHandleSize(
         reinterpret_cast<Handle>(gAresGlobal->gScenarioInitialData)) / sizeof( scenarioInitialType);
 
-    gAresGlobal->gScenarioConditionData = GetResource( kScenarioConditionResType, kScenarioConditionResID);
+    gAresGlobal->gScenarioConditionData = reinterpret_cast<scenarioConditionType**>(GetResource( kScenarioConditionResType, kScenarioConditionResID));
     if ( gAresGlobal->gScenarioConditionData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioConditionDataError, -1, -1, -1, __FILE__, 4);
         return( RESOURCE_ERROR);
     }
-    DetachResource( gAresGlobal->gScenarioConditionData);
+    DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioConditionData));
 
-    mDataHandleLockAndRegister( gAresGlobal->gScenarioConditionData, nil, nil, nil, "\pgAresGlobal->gScenarioConditionData");
+    mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gScenarioConditionData), nil, nil, nil, "\pgAresGlobal->gScenarioConditionData");
 
     gAresGlobal->maxScenarioCondition = GetHandleSize(
-        gAresGlobal->gScenarioConditionData) / sizeof( scenarioConditionType);
+        reinterpret_cast<Handle>(gAresGlobal->gScenarioConditionData)) / sizeof( scenarioConditionType);
 
     gAresGlobal->gScenarioBriefData = reinterpret_cast<briefPointType**>(GetResource( kScenarioBriefResType, kScenarioBriefResID));
     if ( gAresGlobal->gScenarioBriefData == nil)

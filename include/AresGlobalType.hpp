@@ -74,6 +74,7 @@ struct beamType;
 struct briefPointType;
 struct raceType;
 struct scenarioType;
+struct scenarioConditionType;
 struct scenarioInitialType;
 
 struct aresGlobalType {
@@ -122,7 +123,7 @@ struct aresGlobalType {
     short           gScenarioRefID;     // = 0;
     scenarioType**  gScenarioData;      // = nil;
     scenarioInitialType**   gScenarioInitialData;   // = nil;
-    Handle          gScenarioConditionData; // = nil;
+    scenarioConditionType** gScenarioConditionData; // = nil;
     briefPointType**        gScenarioBriefData;     // = nil;
     Handle          gRadarBlipData;         // = nil;
     Handle          gScaleList;             // = nil;
