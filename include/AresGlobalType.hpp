@@ -79,6 +79,7 @@ struct scenarioType;
 struct scenarioConditionType;
 struct scenarioInitialType;
 struct screenLabelType;
+struct scrollStarType;
 
 struct aresGlobalType {
     unsigned long   gActiveCheats[kMaxPlayerNum];
@@ -96,7 +97,7 @@ struct aresGlobalType {
     short           gPreferenceRefNum;
     unsigned long   gOptions;
     raceType**      gRaceData;
-    Handle          gScrollStarData;
+    scrollStarType**        gScrollStarData;
     Boolean         gWarpStars;
     long            gLastClipBottom;
     long            gScrollStarNumber;

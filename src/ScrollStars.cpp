@@ -95,7 +95,7 @@ int InitScrollStars( void)
     scrollStarType  *star;
     short           i;
 
-    gAresGlobal->gScrollStarData = NewHandle( sizeof( scrollStarType) * kAllStarNum);
+    gAresGlobal->gScrollStarData = reinterpret_cast<scrollStarType**>(NewHandle( sizeof( scrollStarType) * kAllStarNum));
     if ( gAresGlobal->gScrollStarData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
@@ -105,9 +105,9 @@ int InitScrollStars( void)
     MoveHHi( gAresGlobal->gScrollStarData);
     HLock( gAresGlobal->gScrollStarData);
     */
-    mHandleLockAndRegister( gAresGlobal->gScrollStarData, nil, nil, CorrectScrollStarObject, "\pgAresGlobal->gScrollStarData");
+    mHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gScrollStarData), nil, nil, CorrectScrollStarObject, "\pgAresGlobal->gScrollStarData");
 
-    star = reinterpret_cast<scrollStarType*>(*gAresGlobal->gScrollStarData);
+    star = *gAresGlobal->gScrollStarData;
     for ( i = 0; i < kAllStarNum; i++)
     {
         star->speed = kNoStar;
@@ -126,7 +126,7 @@ void CleanupScrollStars( void)
 
 {
 #ifdef kUseScrollStar
-    if ( gAresGlobal->gScrollStarData != nil) DisposeHandle( gAresGlobal->gScrollStarData);
+    if ( gAresGlobal->gScrollStarData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScrollStarData));
 #endif
 }
 
@@ -143,7 +143,7 @@ void ResetScrollStars ( long which)
 #ifdef kUseScrollStar
     if ( gScrollStarObject != nil)
     {
-        star = reinterpret_cast<scrollStarType*>(*gAresGlobal->gScrollStarData);
+        star = *gAresGlobal->gScrollStarData;
         for ( i = 0; i < kScrollStarNum; i++)
         {
             star->location.h = Randomize( gPlayScreenWidth) + CLIP_LEFT;
@@ -170,7 +170,7 @@ void MakeNewSparks( long sparkNum, long sparkSpeed, smallFixedType maxVelocity,
 
 {
     long            i, whichSpark = kSparkStarOffset;
-    scrollStarType  *spark = reinterpret_cast<scrollStarType*>(*gAresGlobal->gScrollStarData) + kSparkStarOffset;
+    scrollStarType  *spark = *gAresGlobal->gScrollStarData + kSparkStarOffset;
 
     maxVelocity *= gAbsoluteScale;
     maxVelocity >>= SHIFT_SCALE;
@@ -210,7 +210,7 @@ void PrepareToMoveScrollStars( void)
     short           i;
     scrollStarType  *star;
 
-    star = reinterpret_cast<scrollStarType*>(*gAresGlobal->gScrollStarData);
+    star = *gAresGlobal->gScrollStarData;
     for ( i = 0; i < kAllStarNum; i++)
     {
         star->oldOldLocation.h = star->oldLocation.h;
@@ -263,7 +263,7 @@ void MoveScrollStars( const long byUnits)
     fastVelocity.v *= gAbsoluteScale;
     fastVelocity.v /= SCALE_SCALE;
 
-    star = reinterpret_cast<scrollStarType*>(*gAresGlobal->gScrollStarData);
+    star = *gAresGlobal->gScrollStarData;
     for ( i = 0; i < kScrollStarNum; i++)
     {
         if ( star->speed != kNoStar)
@@ -416,7 +416,7 @@ void DrawScrollStars( Boolean warp)
     bounds.right = lastBounds.right = CLIP_RIGHT;
     lastBounds.bottom = gAresGlobal->gLastClipBottom;
 
-    star = reinterpret_cast<scrollStarType*>(*gAresGlobal->gScrollStarData);
+    star = *gAresGlobal->gScrollStarData;
 
     if (( gScrollStarObject->presenceState != kWarpInPresence) &&
         ( gScrollStarObject->presenceState != kWarpOutPresence) &&
@@ -597,7 +597,7 @@ void ShowScrollStars( Boolean warp)
     bounds.right = lastBounds.right = CLIP_RIGHT;
     lastBounds.bottom = gAresGlobal->gLastClipBottom;
 
-    star = reinterpret_cast<scrollStarType*>(*gAresGlobal->gScrollStarData);
+    star = *gAresGlobal->gScrollStarData;
 
     if (( gScrollStarObject->presenceState != kWarpInPresence) &&
         ( gScrollStarObject->presenceState != kWarpOutPresence) &&
@@ -799,7 +799,7 @@ void DontShowScrollStars( void)
     bounds.right = lastBounds.right = CLIP_RIGHT;
     lastBounds.bottom = gAresGlobal->gLastClipBottom;
 
-    star = reinterpret_cast<scrollStarType*>(*gAresGlobal->gScrollStarData);
+    star = *gAresGlobal->gScrollStarData;
 
     if (( gScrollStarObject->presenceState != kWarpInPresence) &&
         ( gScrollStarObject->presenceState != kWarpOutPresence) &&
@@ -999,7 +999,7 @@ void Reset3DStars( Point center, longRect *bounds)
     scrollStarType  *star;
     smallFixedType  f;
 
-    star = reinterpret_cast<scrollStarType*>(*gAresGlobal->gScrollStarData);
+    star = *gAresGlobal->gScrollStarData;
     for ( i = 0; i < kAllStarNum; i++)
     {
         star->oldOldLocation.h = star->oldLocation.h = star->location.h =
@@ -1032,7 +1032,7 @@ void Move3DStars( Point center, long byUnits, longRect *bounds)
     smallFixedType  f;
     long            h, v, l = byUnits * 32;
 
-    star = reinterpret_cast<scrollStarType*>(*gAresGlobal->gScrollStarData);
+    star = *gAresGlobal->gScrollStarData;
     for ( i = 0; i < kAllStarNum; i++)
     {
         if ( star->speed != kNoStar)
@@ -1103,7 +1103,7 @@ void Draw3DStars( Boolean warp, longRect *bounds, PixMapHandle destMap)
     transColorType  *transColor;
 
     mGetRowBytes( rowBytes, *destMap);
-    star = reinterpret_cast<scrollStarType*>(*gAresGlobal->gScrollStarData);
+    star = *gAresGlobal->gScrollStarData;
 
     for ( i = 0; i < kAllStarNum; i++)
     {
@@ -1133,7 +1133,7 @@ void Draw3DStars( Boolean warp, longRect *bounds, PixMapHandle destMap)
         star++;
     }
 
-    star = reinterpret_cast<scrollStarType*>(*gAresGlobal->gScrollStarData);
+    star = *gAresGlobal->gScrollStarData;
 
     for ( i = 0; i < kAllStarNum; i++)
     {
@@ -1187,7 +1187,7 @@ void Show3DStars( Boolean warp, longRect *bounds, PixMapHandle sourceMap)
 
     mGetRowBytes( srowBytes, *sourceMap);
     mGetRowBytes( drowBytes, *thePixMapHandle);
-    star = reinterpret_cast<scrollStarType*>(*gAresGlobal->gScrollStarData);
+    star = *gAresGlobal->gScrollStarData;
 
     for ( i = 0; i < kAllStarNum; i++)
     {
