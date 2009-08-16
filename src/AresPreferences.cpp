@@ -628,19 +628,19 @@ short SaveStartingLevelPreferences( short whatLevel)
         return ( kNoError );
     } else
     {
-        Handle  data = nil;
+        startingLevelPreferenceType** data = nil;
         short   currentLevel = GetStartingLevelPreference();
 
         if ( whatLevel <= currentLevel) return kNoError;
-        data = NewHandle( sizeof( startingLevelPreferenceType));
+        data = reinterpret_cast<startingLevelPreferenceType**>(NewHandle( sizeof( startingLevelPreferenceType)));
         if ( data != nil)
         {
-            (reinterpret_cast<startingLevelPreferenceType *>(*data))->version = kCurrentPreferencesVersion;
-            (reinterpret_cast<startingLevelPreferenceType *>(*data))->startingLevel = whatLevel;
-            (reinterpret_cast<startingLevelPreferenceType *>(*data))->scenarioVersion = gAresGlobal->scenarioFileInfo.version;
-            oserr = SaveAnyResourceInPreferences( 'aefL', 0, gAresGlobal->externalFileSpec.name, data,
-                true);
-            DisposeHandle( data);
+            (*data)->version = kCurrentPreferencesVersion;
+            (*data)->startingLevel = whatLevel;
+            (*data)->scenarioVersion = gAresGlobal->scenarioFileInfo.version;
+            oserr = SaveAnyResourceInPreferences( 'aefL', 0, gAresGlobal->externalFileSpec.name,
+                    reinterpret_cast<Handle>(data), true);
+            DisposeHandle(reinterpret_cast<Handle>(data));
             return kNoError;
         } else return memFullErr;
     }
@@ -664,21 +664,21 @@ short GetStartingLevelPreference( void)
     if (( gAresGlobal->externalFileSpec.name[0] != 0) &&
         (gAresGlobal->externalFileRefNum != -1))
     {
-        Handle  data = nil;
+        startingLevelPreferenceType** data = NULL;
         OSErr   error;
         long    result;
 
         error = GetAnyResourceFromPreferences( 'aefL', 0,
-            gAresGlobal->externalFileSpec.name, &data, true);
+            gAresGlobal->externalFileSpec.name, reinterpret_cast<Handle*>(&data), true);
 
         if (( error == noErr) && ( data != nil))
         {
-            result = (reinterpret_cast<startingLevelPreferenceType *>(*data))->startingLevel;
-            DisposeHandle( data);
+            result = (*data)->startingLevel;
+            DisposeHandle(reinterpret_cast<Handle>(data));
             return result;
         }
 
-        if ( data != nil) DisposeHandle( data);
+        if ( data != nil) DisposeHandle(reinterpret_cast<Handle>(data));
 
         return 1;
     }
