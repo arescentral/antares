@@ -97,7 +97,8 @@ long            gFirstActionQueueNumber = -1;
 
 spaceObjectType** gSpaceObjectData = NULL;
 baseObjectType** gBaseObjectData = NULL;
-Handle gObjectActionData = nil, gActionQueueData = nil;
+objectActionType** gObjectActionData = NULL;
+Handle gActionQueueData = nil;
 
 void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord);
 
@@ -147,16 +148,16 @@ int SpaceObjectHandlingInit( void)
 
     if ( gObjectActionData == nil)
     {
-        gObjectActionData = GetResource( kObjectActionResType, kObjectActionResID);
+        gObjectActionData = reinterpret_cast<objectActionType**>(GetResource( kObjectActionResType, kObjectActionResID));
         if ( gObjectActionData == nil)
         {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kReadObjectActionDataError, -1, -1, -1, __FILE__, 2);
             return( MEMORY_ERROR);
         }
-        DetachResource( gObjectActionData);
-        mDataHandleLockAndRegister( gObjectActionData, nil, nil, ResolveObjectActionData, "\pgObjectActionData");
+        DetachResource( reinterpret_cast<Handle>(gObjectActionData));
+        mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gObjectActionData), nil, nil, ResolveObjectActionData, "\pgObjectActionData");
 
-        gAresGlobal->maxObjectAction = GetHandleSize( gObjectActionData)
+        gAresGlobal->maxObjectAction = GetHandleSize( reinterpret_cast<Handle>(gObjectActionData))
             / sizeof( objectActionType);
     }
 
@@ -182,7 +183,7 @@ void CleanupSpaceObjectHandling( void)
 {
     if ( gBaseObjectData != nil) DisposeHandle( reinterpret_cast<Handle>(gBaseObjectData));
     if ( gSpaceObjectData != nil) DisposeHandle( reinterpret_cast<Handle>(gSpaceObjectData));
-    if ( gObjectActionData != nil) DisposeHandle( gObjectActionData);
+    if ( gObjectActionData != nil) DisposeHandle( reinterpret_cast<Handle>(gObjectActionData));
     if ( gActionQueueData != nil) DisposeHandle( gActionQueueData);
 }
 
@@ -1269,7 +1270,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
     spaceObjectType *anObject, *playerPtr, *originalSObject = sObject,
                     *originalDObject = dObject;
     baseObjectType  *baseObject;
-    objectActionType    *action = reinterpret_cast<objectActionType*>(*gObjectActionData) + whichAction;
+    objectActionType    *action = *gObjectActionData + whichAction;
     short           end, angle;
     fixedPointType  fpoint, newVel;
     long            l, m;
@@ -2556,7 +2557,7 @@ void ResolveObjectActionData( Handle actionData)
         for ( i = 0; i < kActionQueueLength; i++)
         {
             if ( action->actionNum >= 0)
-                action->action = reinterpret_cast<objectActionType*>(*gObjectActionData) + action->actionNum;
+                action->action = *gObjectActionData + action->actionNum;
             else action->action = nil;
             action++;
         }

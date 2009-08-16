@@ -34,7 +34,7 @@
 
 extern aresGlobalType*          gAresGlobal;
 extern baseObjectType**         gBaseObjectData;
-extern Handle                   gObjectActionData;
+extern objectActionType**       gObjectActionData;
 
 OSErr EF_OpenExternalFile( void)
 {
@@ -131,8 +131,8 @@ OSErr EF_OpenExternalFile( void)
 
     if ( gObjectActionData != nil)
     {
-        HHDeregisterHandle( &gObjectActionData);
-        DisposeHandle( gObjectActionData);
+        HHDeregisterHandle( reinterpret_cast<Handle*>(&gObjectActionData));
+        DisposeHandle( reinterpret_cast<Handle>(gObjectActionData));
         gObjectActionData = nil;
     }
 
@@ -227,16 +227,16 @@ OSErr EF_OpenExternalFile( void)
     gAresGlobal->maxBaseObject = GetHandleSize( reinterpret_cast<Handle>(gBaseObjectData)) /
         sizeof( baseObjectType);
 
-    gObjectActionData = GetResource( kObjectActionResType, kObjectActionResID);
+    gObjectActionData = reinterpret_cast<objectActionType**>(GetResource( kObjectActionResType, kObjectActionResID));
     if ( gObjectActionData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kReadObjectActionDataError, -1, -1, -1, __FILE__, 2);
         return( MEMORY_ERROR);
     }
-    DetachResource( gObjectActionData);
-    mDataHandleLockAndRegister( gObjectActionData, nil, nil, ResolveObjectActionData, "\pgObjectActionData");
+    DetachResource( reinterpret_cast<Handle>(gObjectActionData));
+    mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gObjectActionData), nil, nil, ResolveObjectActionData, "\pgObjectActionData");
 
-    gAresGlobal->maxObjectAction = GetHandleSize( gObjectActionData)
+    gAresGlobal->maxObjectAction = GetHandleSize( reinterpret_cast<Handle>(gObjectActionData))
         / sizeof( objectActionType);
 
     gAresGlobal->okToOpenFile = false;

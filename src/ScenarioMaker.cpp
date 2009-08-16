@@ -78,7 +78,8 @@ extern long                     /*gAresGlobal->gPlayerShipNumber,*/ gAbsoluteSca
                                 gAresGlobal->gGameTime,*/ gRandomSeed;
 extern spaceObjectType**        gSpaceObjectData;
 extern baseObjectType**         gBaseObjectData;
-extern Handle                   gObjectActionData, gRotTable;
+extern objectActionType**       gObjectActionData;
+extern Handle gRotTable;
 
 //long                          gAresGlobal->gPlayerAdmiralNumber, gAresGlobal->gScenarioWinner, // -1 = no-one, 0 = player loses
 //                              gAresGlobal->gScenarioRotation = 0, gAresGlobal->gThisScenarioNumber = -1;
@@ -607,11 +608,11 @@ Boolean ConstructScenario( long which)
     for ( count = 0; count < gThisScenario->conditionNum; count++)
     {
         condition = mGetScenarioCondition( gThisScenario, count);
-        action = reinterpret_cast<objectActionType*>(*gObjectActionData) + condition->startVerb;
+        action = *gObjectActionData + condition->startVerb;
         for ( c2 = 0; c2 < condition->verbNum; c2++)
         {
             condition = mGetScenarioCondition( gThisScenario, count);
-            action = reinterpret_cast<objectActionType*>(*gObjectActionData) + condition->startVerb + c2;
+            action = *gObjectActionData + condition->startVerb + c2;
             AddActionMedia( action, 0);
 //          action++;
         }
@@ -985,7 +986,7 @@ void CheckActionMedia( long whichAction, long actionNum, unsigned char color)
 
 {
     baseObjectType      *baseObject;
-    objectActionType    *action = reinterpret_cast<objectActionType*>(*gObjectActionData) + whichAction;
+    objectActionType    *action = *gObjectActionData + whichAction;
     Boolean             OKtoExecute;
     long                count;
 

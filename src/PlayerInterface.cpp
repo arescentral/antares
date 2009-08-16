@@ -369,7 +369,8 @@ extern Handle                   gDirectTextData;
 extern long                     gWhichDirectText, WORLD_WIDTH, WORLD_HEIGHT;
 //                              gAresGlobal->gPlayerAdmiralNumber;
 extern baseObjectType**         gBaseObjectData;
-extern  Handle                  gColorTranslateTable, gObjectActionData/*, gAresGlobal->gPreferencesData*/;
+extern objectActionType**       gObjectActionData;
+extern  Handle                  gColorTranslateTable;
 extern  GDHandle                theDevice;
 
 Boolean IsKeyReserved( KeyMap, Boolean);
@@ -4802,7 +4803,7 @@ Handle CreateWeaponDataText( long whichWeapon, StringPtr weaponName)
             isGuided = false;
             if ( weaponObject->activateActionNum > 0)
             {
-                action = reinterpret_cast<objectActionType *>(*gObjectActionData) + weaponObject->activateAction;
+                action = *gObjectActionData + weaponObject->activateAction;
                 for ( actionNum = 0; actionNum < weaponObject->activateActionNum; actionNum++)
                 {
                     if (( action->verb == kCreateObject) || ( action->verb == kCreateObjectSetDest))

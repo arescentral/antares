@@ -91,7 +91,7 @@ struct weaponDataType {
 extern long             WORLD_WIDTH, WORLD_HEIGHT;
 extern GWorldPtr        gOffWorld;
 extern baseObjectType**         gBaseObjectData;
-extern Handle                   gObjectActionData;
+extern objectActionType**       gObjectActionData;
 extern aresGlobalType*          gAresGlobal;
 
 void ConvertPortraitIntoGIF( long, StringPtr);
@@ -699,7 +699,7 @@ void GetWeaponData( long whichWeapon, weaponDataType *data)
         isGuided = false;
         if ( weaponObject->activateActionNum > 0)
         {
-            action = reinterpret_cast<objectActionType *>(*gObjectActionData) + weaponObject->activateAction;
+            action = *gObjectActionData + weaponObject->activateAction;
             for ( actionNum = 0; actionNum < weaponObject->activateActionNum; actionNum++)
             {
                 if (( action->verb == kCreateObject) || ( action->verb == kCreateObjectSetDest))
