@@ -1476,7 +1476,7 @@ void CheckScenarioConditions( long timePass)
                         {
                             longMessageType *tmessage;
 
-                            tmessage = reinterpret_cast<longMessageType *>(*gAresGlobal->gLongMessageData);
+                            tmessage = *gAresGlobal->gLongMessageData;
                             if ( tmessage->currentResID == (condition->conditionArgument.location.h +
                                 condition->conditionArgument.location.v - 1))
                             {

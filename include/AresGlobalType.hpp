@@ -73,6 +73,7 @@ struct hotKeyType {
 struct admiralType;
 struct beamType;
 struct briefPointType;
+struct longMessageType;
 struct preferencesDataType;
 struct proximityUnitType;
 struct raceType;
@@ -144,7 +145,7 @@ struct aresGlobalType {
     short           gMouseActive;           // = kMouseOff;
     Handle          gMessageData;           // = nil
     Handle          gStatusString;          // = nil
-    Handle          gLongMessageData;       // = nil
+    longMessageType**       gLongMessageData;       // = nil
     long            gMessageTimeCount;      // = 0;
     long            gMessageLabelNum;       // = -1;
     long            gStatusLabelNum;        // = -1;

@@ -165,7 +165,7 @@ int InitMessageScreen( void)
         return( MEMORY_ERROR);
     }
 
-    gAresGlobal->gLongMessageData = NewHandle( sizeof( longMessageType));
+    gAresGlobal->gLongMessageData = reinterpret_cast<longMessageType**>(NewHandle( sizeof( longMessageType)));
     if ( gAresGlobal->gLongMessageData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 5);
@@ -174,7 +174,7 @@ int InitMessageScreen( void)
 
     mHandleLockAndRegister( gAresGlobal->gMessageData, nil, nil, nil, "\pgAresGlobal->gMessageData");
     mHandleLockAndRegister( gAresGlobal->gStatusString, nil, nil, nil, "\pgAresGlobal->gStatusString");
-    mHandleLockAndRegister( gAresGlobal->gLongMessageData, nil, nil, nil, "\pgAresGlobal->gLongMessageData");
+    mHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gLongMessageData), nil, nil, nil, "\pgAresGlobal->gLongMessageData");
 
     l = reinterpret_cast<long *>(*gAresGlobal->gMessageData) + kLongOffsetFirstChar;
     *l = kAnyCharOffsetStart;
@@ -207,7 +207,7 @@ int InitMessageScreen( void)
         return( MEMORY_ERROR);
     }
 
-    tmessage = reinterpret_cast<longMessageType *>(*gAresGlobal->gLongMessageData);
+    tmessage = *gAresGlobal->gLongMessageData;
     tmessage->startResID =  tmessage->endResID = tmessage->lastResID = tmessage->currentResID =
         -1;
     tmessage->time = 0;
@@ -266,14 +266,14 @@ void ClearMessage( void)
     gAresGlobal->gStatusLabelNum = AddScreenLabel( kStatusLabelLeft, kStatusLabelTop, 0, 0,
                         &nilLabel, nil, FALSE, kStatusLabelColor);
 
-    tmessage = reinterpret_cast<longMessageType *>(*gAresGlobal->gLongMessageData);
+    tmessage = *gAresGlobal->gLongMessageData;
     tmessage->startResID = -1;
     tmessage->endResID = -1;
     tmessage->currentResID = -1;
     tmessage->lastResID = -1;
     tmessage->textHeight = 0;
     tmessage->previousStartResID = tmessage->previousEndResID = -1;
-    tmessage = reinterpret_cast<longMessageType *>(*gAresGlobal->gLongMessageData);
+    tmessage = *gAresGlobal->gLongMessageData;
     tmessage->stringMessage[0] = 0;
     tmessage->lastStringMessage[0] = 0;
     tmessage->newStringMessage = false;
@@ -385,7 +385,7 @@ void StartLongMessage( short startResID, short endResID)
 {
     longMessageType *tmessage;
 
-    tmessage = reinterpret_cast<longMessageType *>(*gAresGlobal->gLongMessageData);
+    tmessage = *gAresGlobal->gLongMessageData;
 
     if ( tmessage->currentResID != -1)
     {
@@ -427,7 +427,7 @@ void StartStringMessage( anyCharType *string)
 {
     longMessageType *tmessage;
 
-    tmessage = reinterpret_cast<longMessageType *>(*gAresGlobal->gLongMessageData);
+    tmessage = *gAresGlobal->gLongMessageData;
 
     tmessage->newStringMessage = true;
     if ( tmessage->currentResID != -1)
@@ -477,7 +477,7 @@ void ClipToCurrentLongMessage( void)
     anyCharType     *ac;
     long            count;
 
-    tmessage = reinterpret_cast<longMessageType *>(*gAresGlobal->gLongMessageData);
+    tmessage = *gAresGlobal->gLongMessageData;
     if (( tmessage->currentResID != tmessage->lastResID) || ( tmessage->newStringMessage))
     {
 
@@ -573,7 +573,7 @@ void DrawCurrentLongMessage( long timePass)
     longMessageType *tmessage;
     unsigned char   color;
 
-    tmessage = reinterpret_cast<longMessageType *>(*gAresGlobal->gLongMessageData);
+    tmessage = *gAresGlobal->gLongMessageData;
     if (( tmessage->currentResID != tmessage->lastResID) ||
         ( tmessage->newStringMessage))
     {
@@ -739,7 +739,7 @@ void EndLongMessage( void)
 {
     longMessageType *tmessage;
 
-    tmessage = reinterpret_cast<longMessageType *>(*gAresGlobal->gLongMessageData);
+    tmessage = *gAresGlobal->gLongMessageData;
     tmessage->previousStartResID = tmessage->startResID;
     tmessage->previousEndResID = tmessage->endResID;
     tmessage->startResID = -1;
@@ -758,7 +758,7 @@ void AdvanceCurrentLongMessage( void)
 {
     longMessageType *tmessage;
 
-    tmessage = reinterpret_cast<longMessageType *>(*gAresGlobal->gLongMessageData);
+    tmessage = *gAresGlobal->gLongMessageData;
     if ( tmessage->currentResID != -1)
     {
         if ( tmessage->currentResID < tmessage->endResID)
@@ -777,7 +777,7 @@ void PreviousCurrentLongMessage( void)
 {
     longMessageType *tmessage;
 
-    tmessage = reinterpret_cast<longMessageType *>(*gAresGlobal->gLongMessageData);
+    tmessage = *gAresGlobal->gLongMessageData;
     if ( tmessage->currentResID != -1)
     {
         if ( tmessage->currentResID > tmessage->startResID)
@@ -795,7 +795,7 @@ void ReplayLastLongMessage( void)
 {
     longMessageType *tmessage;
 
-    tmessage = reinterpret_cast<longMessageType *>(*gAresGlobal->gLongMessageData);
+    tmessage = *gAresGlobal->gLongMessageData;
     if (( tmessage->previousStartResID >= 0) && ( tmessage->currentResID < 0))
     {
         CopyAnyCharPString( tmessage->stringMessage, tmessage->lastStringMessage);
