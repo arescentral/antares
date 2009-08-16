@@ -30,7 +30,7 @@
 
 #define kRotationError  "\pROTN"
 
-Handle  gRotTable = nil;
+smallFixedType** gRotTable = nil;
 
 
 int RotationInit( void)
@@ -62,19 +62,19 @@ int RotationInit( void)
 
 */
 
-    gRotTable = GetResource( 'rot ', 500);
+    gRotTable = reinterpret_cast<smallFixedType**>(GetResource( 'rot ', 500));
     if ( gRotTable == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kReadRotationDataError, -1, -1, -1, __FILE__, 1);
         return( MEMORY_ERROR);
     } else
     {
-        DetachResource( gRotTable);
+        DetachResource(reinterpret_cast<Handle>(gRotTable));
         /*
         MoveHHi( gRotTable);
         HLock( gRotTable);
         */
-        mDataHandleLockAndRegister( gRotTable, nil, nil, nil, "\pgRotTable");
+        mDataHandleLockAndRegister(reinterpret_cast<Handle&>(gRotTable), nil, nil, nil, "\pgRotTable");
 
     }
 
@@ -86,7 +86,7 @@ void RotationCleanup( void)
 {
 //  WriteResource( gRotTable);
 //  DisposeHandle( gRotTable);
-    ReleaseResource( gRotTable);
+    ReleaseResource(reinterpret_cast<Handle>(gRotTable));
 }
 
 void SetRotPoint( smallFixedType x, smallFixedType y, long rotpos)
@@ -94,7 +94,7 @@ void SetRotPoint( smallFixedType x, smallFixedType y, long rotpos)
 {
     smallFixedType      *i;
 
-    i = reinterpret_cast<smallFixedType *>(*gRotTable) + rotpos * 2L;
+    i = *gRotTable + rotpos * 2L;
     *i = x;
     i++;
     *i = y;
@@ -105,7 +105,7 @@ void GetRotPoint( smallFixedType *x, smallFixedType *y, long rotpos)
 {
     smallFixedType      *i;
 
-    i = reinterpret_cast<smallFixedType *>(*gRotTable) + rotpos * 2L;
+    i = *gRotTable + rotpos * 2L;
     *x = *i;
     i++;
     *y = *i;

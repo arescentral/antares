@@ -89,7 +89,8 @@ struct proximityUnitType {
 
 extern aresGlobalType   *gAresGlobal;
 extern GWorldPtr        gOffWorld, gRealWorld, gSaveWorld;
-extern Handle           gRotTable, gPixTable[];
+extern smallFixedType** gRotTable;
+extern Handle           gPixTable[];
 extern PixMapHandle     thePixMapHandle;
 extern long             /*gAresGlobal->gPlayerShipNumber, gAresGlobal->gGameTime,*/
                         gAbsoluteScale, CLIP_LEFT, CLIP_TOP,

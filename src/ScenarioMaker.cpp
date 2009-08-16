@@ -79,7 +79,7 @@ extern long                     /*gAresGlobal->gPlayerShipNumber,*/ gAbsoluteSca
 extern spaceObjectType**        gSpaceObjectData;
 extern baseObjectType**         gBaseObjectData;
 extern objectActionType**       gObjectActionData;
-extern Handle gRotTable;
+extern smallFixedType**         gRotTable;
 
 //long                          gAresGlobal->gPlayerAdmiralNumber, gAresGlobal->gScenarioWinner, // -1 = no-one, 0 = player loses
 //                              gAresGlobal->gScenarioRotation = 0, gAresGlobal->gThisScenarioNumber = -1;

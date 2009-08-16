@@ -66,7 +66,7 @@ extern long         /*gAresGlobal->gGameTime,*/ gRandomSeed,
                     //gAresGlobal->gPlayerAdmiralNumber, gAresGlobal->gScenarioWinner,
                     gNetLatency, gRootObjectNumber;
 //extern unsigned long gAresGlobal->gGameOver, gAresGlobal->gOptions;
-extern Handle       gRotTable;  // for getting weapon position
+extern smallFixedType** gRotTable;  // for getting weapon position
 //extern short      gAresGlobal->gMouseActive;
 extern scenarioType *gThisScenario; // for setting debrief message when we run out of ships
 extern coordPointType           gGlobalCorner;
