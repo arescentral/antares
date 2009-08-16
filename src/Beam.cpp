@@ -59,16 +59,16 @@ short InitBeams( void)
     beamType    *beam;
     short           i;
 
-    gAresGlobal->gBeamData = NewHandle( sizeof( beamType) * implicit_cast<long>(kBeamNum));
+    gAresGlobal->gBeamData = reinterpret_cast<beamType**>(NewHandle( sizeof( beamType) * implicit_cast<long>(kBeamNum)));
     if ( gAresGlobal->gBeamData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
         return( MEMORY_ERROR);
     }
 
-    mHandleLockAndRegister( gAresGlobal->gBeamData, nil, nil, ResolveBeamData, "\pgAresGlobal->gBeamData");
+    mHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gBeamData), nil, nil, ResolveBeamData, "\pgAresGlobal->gBeamData");
 
-    beam = reinterpret_cast<beamType *>(*gAresGlobal->gBeamData);
+    beam = *gAresGlobal->gBeamData;
     for ( i = 0; i < kBeamNum; i++)
     {
         beam->active = false;
@@ -80,12 +80,12 @@ short InitBeams( void)
 
 void CleanupBeams( void)
 {
-    if ( gAresGlobal->gBeamData != nil) DisposeHandle( gAresGlobal->gBeamData);
+    if ( gAresGlobal->gBeamData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gBeamData));
 }
 
 void ResetBeams( void)
 {
-    beamType    *aBeam = reinterpret_cast<beamType *>(*gAresGlobal->gBeamData);
+    beamType    *aBeam = *gAresGlobal->gBeamData;
     short       i;
 
     for ( i = 0; i < kBeamNum; i++)
@@ -107,7 +107,7 @@ void ResetBeams( void)
 beamType *AddBeam(coordPointType *location, unsigned char color,
     beamKindType kind, long accuracy, long range, long *whichBeam)
 {
-    beamType    *aBeam = reinterpret_cast<beamType *>(*gAresGlobal->gBeamData);
+    beamType    *aBeam = *gAresGlobal->gBeamData;
     long        h;
 
     *whichBeam = 0;
@@ -366,7 +366,7 @@ void DrawAllBeams( void)
 void DrawAllBeams( void)
 
 {
-    beamType        *aBeam = reinterpret_cast<beamType *>(*gAresGlobal->gBeamData);
+    beamType        *aBeam = *gAresGlobal->gBeamData;
     short           i, j;
     longRect        bounds;
     long            h, v;
@@ -527,7 +527,7 @@ void EraseAllBeams( void)
 
 void ShowAllBeams( void)
 {
-    beamType        *aBeam = reinterpret_cast<beamType *>(*gAresGlobal->gBeamData);
+    beamType        *aBeam = *gAresGlobal->gBeamData;
     short           i, j;
     longRect        bounds;
     PixMapHandle    offWorld = GetGWorldPixMap( gOffWorld),
@@ -616,7 +616,7 @@ void ShowAllBeams( void)
 
 void CullBeams( void)
 {
-    beamType        *aBeam = reinterpret_cast<beamType *>(*gAresGlobal->gBeamData);
+    beamType        *aBeam = *gAresGlobal->gBeamData;
     short           i;
 
     for ( i = 0; i < kBeamNum; i++)
@@ -635,7 +635,7 @@ void CullBeams( void)
 
 void ResolveBeamData( Handle beamData)
 {
-    beamType        *aBeam = reinterpret_cast<beamType *>(*gAresGlobal->gBeamData);
+    beamType        *aBeam = *gAresGlobal->gBeamData;
     short           i;
     spaceObjectType *anObject;
 

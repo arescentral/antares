@@ -70,6 +70,7 @@ struct hotKeyType {
 };
 
 struct admiralType;
+struct beamType;
 struct raceType;
 struct scenarioType;
 struct scenarioInitialType;
@@ -145,7 +146,7 @@ struct aresGlobalType {
     miniComputerDataType    gMiniScreenData;
     Handle          gMissionStatusStrList;
     Handle          gScreenLabelData;       // = nil;
-    Handle          gBeamData;              // = nil;
+    beamType**      gBeamData;              // = nil;
     long            gColorAnimationStep;    // = 0;
     long            gColorAnimationInSpeed; // = -1;
     long            gColorAnimationOutSpeed;// = -1;
