@@ -136,7 +136,8 @@ inline void mWideASR8(UnsignedWide& mwide) {
 extern  CWindowPtr      gTheWindow; // hack to copy bar indicators to offworld
 extern aresGlobalType   *gAresGlobal;
 extern spaceObjectType**    gSpaceObjectData;
-extern Handle           gColorTranslateTable, gRotTable;//, gAresGlobal->gAdmiralData;
+extern transColorType** gColorTranslateTable;
+extern Handle           gRotTable;//, gAresGlobal->gAdmiralData;
 extern spaceObjectType  *gScrollStarObject;
 extern PixMapHandle     thePixMapHandle;
 extern long             gNatePortLeft, gNatePortTop,

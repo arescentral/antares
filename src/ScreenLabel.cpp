@@ -52,7 +52,7 @@ extern long             gWhichDirectText, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT,
 extern directTextType   *gDirectText;
 extern  GWorldPtr       gOffWorld, gRealWorld, gSaveWorld;
 extern  PixMapHandle    thePixMapHandle;
-extern  Handle          gColorTranslateTable;
+extern transColorType** gColorTranslateTable;
 extern spaceObjectType**    gSpaceObjectData;
 
 //Handle    gAresGlobal->gScreenLabelData = nil;

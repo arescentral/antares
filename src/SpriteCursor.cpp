@@ -29,7 +29,7 @@
 extern  GWorldPtr       gOffWorld, gRealWorld, gSaveWorld;
 extern  PixMapHandle    thePixMapHandle;
 extern  long            WORLD_WIDTH, WORLD_HEIGHT, gNatePortLeft, gNatePortTop;
-extern  Handle          gColorTranslateTable;
+extern transColorType** gColorTranslateTable;
 
 spriteCursorType    *gSpriteCursor = nil;
 

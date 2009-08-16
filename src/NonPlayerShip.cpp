@@ -85,7 +85,8 @@
 extern aresGlobalType           *gAresGlobal;
 extern spaceObjectType**        gSpaceObjectData;
 extern baseObjectType**         gBaseObjectData;
-extern Handle                   gRotTable, gColorTranslateTable;    // for getting weapon position
+extern transColorType**         gColorTranslateTable;
+extern Handle                   gRotTable;    // for getting weapon position
 //extern long                       gAresGlobal->gPlayerAdmiralNumber;
 extern netStatusType            gNetworkStatus;
 extern long                     /*gAresGlobal->gGameTime, gAresGlobal->gPlayerShipNumber,*/ gRandomSeed,

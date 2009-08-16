@@ -122,7 +122,7 @@ extern aresGlobalType   *gAresGlobal;
 extern directTextType   *gDirectText;
 extern spaceObjectType**    gSpaceObjectData;
 extern directTextType**     gDirectTextData;
-extern Handle               gColorTranslateTable;
+extern transColorType**     gColorTranslateTable;
 extern long             gWhichDirectText, CLIP_LEFT, CLIP_RIGHT, CLIP_BOTTOM;
 //                      gAresGlobal->gTrueClipBottom;
 

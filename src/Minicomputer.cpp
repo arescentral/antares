@@ -280,7 +280,7 @@ extern directTextType*  gDirectText;
 extern directTextType** gDirectTextData;
 extern long             gWhichDirectText;//, gAresGlobal->gInstrumentTop;
 extern baseObjectType**     gBaseObjectData;
-extern Handle               gColorTranslateTable;
+extern transColorType**     gColorTranslateTable;
 extern spaceObjectType**    gSpaceObjectData;
 //extern    unsigned long   gAresGlobal->gOptions;
 

@@ -28,12 +28,12 @@
 
 extern  GDHandle        theDevice;
 
-Handle                  gColorTranslateTable = nil;
+transColorType**        gColorTranslateTable = nil;
 
 void ColorTranslatorInit( CTabHandle theClut)
 
 {
-    gColorTranslateTable = NewHandle( sizeof( transColorType) * implicit_cast<long>(kPaletteSize));
+    gColorTranslateTable = reinterpret_cast<transColorType**>(NewHandle( sizeof( transColorType) * implicit_cast<long>(kPaletteSize)));
     if ( gColorTranslateTable == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
@@ -44,7 +44,7 @@ void ColorTranslatorInit( CTabHandle theClut)
         MoveHHi( gColorTranslateTable);
         HLock( gColorTranslateTable);
         */
-        mHandleLockAndRegister( gColorTranslateTable, nil, nil, nil, "\pgColorTranslateTable");
+        mHandleLockAndRegister(reinterpret_cast<Handle&>(gColorTranslateTable), nil, nil, nil, "\pgColorTranslateTable");
     }
     MakeColorTranslatorTable( theClut);
 }
@@ -53,7 +53,7 @@ void ColorTranslatorCleanup( void)
 
 {
     if ( gColorTranslateTable != nil)
-        DisposeHandle( gColorTranslateTable);
+        DisposeHandle(reinterpret_cast<Handle>(gColorTranslateTable));
 }
 
 void MakeColorTranslatorTable( CTabHandle referenceTable)
@@ -67,7 +67,7 @@ void MakeColorTranslatorTable( CTabHandle referenceTable)
 
     devicePixMap = (*theDevice)->gdPMap;
     deviceTable = (**devicePixMap).pmTable;
-    entry = reinterpret_cast<transColorType *>(*gColorTranslateTable);
+    entry = *gColorTranslateTable;
 //  referenceTable = GetCTable( kReferenceColorTableID);
     if ( referenceTable == nil)
     {
@@ -86,7 +86,7 @@ void MakeColorTranslatorTable( CTabHandle referenceTable)
                     (deviceColor.blue == paletteColor.blue))
             {
                 entry->trueColor = j;
-                retroEntry = reinterpret_cast<transColorType *>(*gColorTranslateTable) + implicit_cast<long>(j);
+                retroEntry = *gColorTranslateTable + implicit_cast<long>(j);
                 retroEntry->retroColor = i;
             }
         }
@@ -100,7 +100,7 @@ unsigned char GetRetroIndex( unsigned char which)
 {
     transColorType  *entry;
 
-    entry = reinterpret_cast<transColorType *>(*gColorTranslateTable) + implicit_cast<long>(which);
+    entry = *gColorTranslateTable + implicit_cast<long>(which);
     return( entry->retroColor);
 }
 
@@ -109,7 +109,7 @@ unsigned char GetTranslateIndex( unsigned char which)
 {
     transColorType  *entry;
 
-    entry = reinterpret_cast<transColorType *>(*gColorTranslateTable) + implicit_cast<long>(which);
+    entry = *gColorTranslateTable + implicit_cast<long>(which);
     return( entry->trueColor);
 }
 
@@ -118,7 +118,7 @@ unsigned char GetTranslateColorShade( unsigned char color, unsigned char shade)
 {
     transColorType  *entry;
 
-    entry = reinterpret_cast<transColorType *>(*gColorTranslateTable) + implicit_cast<long>((16 - shade) + 1 +
+    entry = *gColorTranslateTable + implicit_cast<long>((16 - shade) + 1 +
             color * 16);
     return( entry->trueColor);
 }
@@ -129,7 +129,7 @@ void SetTranslateColorShadeFore( unsigned char color, unsigned char shade)
     RGBColor        c;
     transColorType  *entry;
 
-    entry = reinterpret_cast<transColorType *>(*gColorTranslateTable) + implicit_cast<long>((16 - shade) + 1L +
+    entry = *gColorTranslateTable + implicit_cast<long>((16 - shade) + 1L +
             implicit_cast<long>(color) * 16L);
     Index2Color(entry->trueColor, &c);
     RGBForeColor( &c);
@@ -140,7 +140,7 @@ void GetRGBTranslateColorShade( RGBColor *c, unsigned char color, unsigned char 
 {
     transColorType  *entry;
 
-    entry = reinterpret_cast<transColorType *>(*gColorTranslateTable) + implicit_cast<long>((16 - shade) + 1L +
+    entry = *gColorTranslateTable + implicit_cast<long>((16 - shade) + 1L +
             implicit_cast<long>(color) * 16L);
     Index2Color( implicit_cast<long>(entry->trueColor), c);
 }
@@ -151,7 +151,7 @@ void SetTranslateColorFore( unsigned char color)
     RGBColor        c;
     transColorType  *entry;
 
-    entry = reinterpret_cast<transColorType *>(*gColorTranslateTable) + implicit_cast<long>(color);
+    entry = *gColorTranslateTable + implicit_cast<long>(color);
     Index2Color(entry->trueColor, &c);
     RGBForeColor( &c);
 }
@@ -161,7 +161,7 @@ void GetRGBTranslateColor( RGBColor *c, unsigned char color)
 {
     transColorType  *entry;
 
-    entry = reinterpret_cast<transColorType *>(*gColorTranslateTable) + implicit_cast<long>(color);
+    entry = *gColorTranslateTable + implicit_cast<long>(color);
     Index2Color(entry->trueColor, c);
 }
 

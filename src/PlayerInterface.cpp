@@ -370,7 +370,7 @@ extern long                     gWhichDirectText, WORLD_WIDTH, WORLD_HEIGHT;
 //                              gAresGlobal->gPlayerAdmiralNumber;
 extern baseObjectType**         gBaseObjectData;
 extern objectActionType**       gObjectActionData;
-extern  Handle                  gColorTranslateTable;
+extern transColorType**         gColorTranslateTable;
 extern  GDHandle                theDevice;
 
 Boolean IsKeyReserved( KeyMap, Boolean);

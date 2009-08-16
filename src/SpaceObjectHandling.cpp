@@ -83,7 +83,8 @@ extern long             /*gAresGlobal->gPlayerShipNumber,*/ gAbsoluteScale, gRan
                         CLIP_BOTTOM/*, gAresGlobal->gScrollStarNumber, gAresGlobal->gGameOver*/;
 extern coordPointType   gGlobalCorner;
 extern spriteType**     gSpriteTable;
-extern Handle           gRotTable, gColorTranslateTable;
+extern transColorType** gColorTranslateTable;
+extern Handle           gRotTable;
 extern scenarioType     *gThisScenario;
 extern spaceObjectType  *gScrollStarObject;
 //extern unsigned long  gAresGlobal->gOptions;

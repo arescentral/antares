@@ -77,7 +77,7 @@ extern long             gNatePortLeft, gNatePortTop, gAbsoluteScale,
                         /*gAresGlobal->gTrueClipBottom,*/ gPlayScreenWidth,
                         gPlayScreenHeight, gRootObjectNumber;
 extern spaceObjectType**    gSpaceObjectData;
-extern Handle               gColorTranslateTable;
+extern transColorType**     gColorTranslateTable;
 extern coordPointType   gGlobalCorner;
 extern GWorldPtr        gOffWorld;
 extern spaceObjectType  *gRootObject;
