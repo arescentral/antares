@@ -121,7 +121,8 @@ inline void mClipAnyRect(T0& mtrect, const T1& mclip) {
 extern aresGlobalType   *gAresGlobal;
 extern directTextType   *gDirectText;
 extern spaceObjectType**    gSpaceObjectData;
-extern Handle           gDirectTextData, gColorTranslateTable;
+extern directTextType**     gDirectTextData;
+extern Handle               gColorTranslateTable;
 extern long             gWhichDirectText, CLIP_LEFT, CLIP_RIGHT, CLIP_BOTTOM;
 //                      gAresGlobal->gTrueClipBottom;
 

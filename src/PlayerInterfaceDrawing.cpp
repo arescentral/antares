@@ -241,9 +241,10 @@ enum inlineKindType {
 };
 
 extern CWindowPtr       gTheWindow;
-extern Handle           gDirectTextData, gColorTranslateTable;
+extern directTextType** gDirectTextData;
+extern Handle           gColorTranslateTable;
 extern long             gWhichDirectText;
-extern directTextType   *gDirectText;
+extern directTextType*  gDirectText;
 
 void DrawPlayerInterfacePlainRect( longRect *dRect, unsigned char color,
                 interfaceStyleType style, PixMap *destMap, long portLeft,

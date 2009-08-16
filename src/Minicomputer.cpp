@@ -276,8 +276,8 @@ extern  WindowPtr       gTheWindow;
 extern  PixMapHandle    thePixMapHandle;
 extern  long            gNatePortLeft, gNatePortTop/*, gAresGlobal->gPlayerAdmiralNumber,
                         gAresGlobal->gPlayerShipNumber, gAresGlobal->gGameTime*/, gNetLatency;
-extern  directTextType  *gDirectText;
-extern Handle           gDirectTextData;
+extern directTextType*  gDirectText;
+extern directTextType** gDirectTextData;
 extern long             gWhichDirectText;//, gAresGlobal->gInstrumentTop;
 extern baseObjectType**     gBaseObjectData;
 extern Handle               gColorTranslateTable;

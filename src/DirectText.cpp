@@ -41,7 +41,7 @@ extern  GWorldPtr       gSaveWorld;
 directTextType      *gDirectText = nil;
 long                gWhichDirectText = 0;
 Handle              gFourBitTable = nil;        // for turning 4-bit masks into 8-bit masks on the fly
-Handle              gDirectTextData = nil;
+directTextType**    gDirectTextData = nil;
 
 int InitDirectText( void)
 
@@ -52,17 +52,17 @@ int InitDirectText( void)
     directTextType  *dtext = nil;
 
     HHMaxMem();
-    gDirectTextData = NewHandle( sizeof( directTextType) * kDirectFontNum);
+    gDirectTextData = reinterpret_cast<directTextType**>(NewHandle( sizeof( directTextType) * kDirectFontNum));
     if ( gDirectTextData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 101);
         return( MEMORY_ERROR);
     }
     // we can't move this handle since we want to keep ptrs to the character set handles
-    MoveHHi( gDirectTextData);
-    HLock( gDirectTextData);
+    MoveHHi( reinterpret_cast<Handle>(gDirectTextData));
+    HLock( reinterpret_cast<Handle>(gDirectTextData));
 
-    dtext = reinterpret_cast<directTextType *>(*gDirectTextData);
+    dtext = *gDirectTextData;
     for  ( count = 0; count < kDirectFontNum; count++)
     {
         dtext->charSet = nil;
@@ -76,7 +76,7 @@ int InitDirectText( void)
     }
 
     // add # 0, kTacticalFontNum
-    dtext = reinterpret_cast<directTextType *>(*gDirectTextData) + kTacticalFontNum;
+    dtext = *gDirectTextData + kTacticalFontNum;
     tData = HHGetResource( kDTextDescriptResType, kTacticalFontResID);
     if ( tData == nil)
     {
@@ -94,7 +94,7 @@ int InitDirectText( void)
     AddDirectFont( dtext); // trashes this ptr
 
     // add # 1, kComputerFontNum
-    dtext = reinterpret_cast<directTextType *>(*gDirectTextData) + kComputerFontNum;
+    dtext = *gDirectTextData + kComputerFontNum;
     tData = HHGetResource( kDTextDescriptResType, kComputerFontResID);
     if ( tData == nil)
     {
@@ -110,7 +110,7 @@ int InitDirectText( void)
     AddDirectFont( dtext);
 
     // add # 2, kButtonFontNum
-    dtext = reinterpret_cast<directTextType *>(*gDirectTextData) + kButtonFontNum;
+    dtext = *gDirectTextData + kButtonFontNum;
     tData = HHGetResource( kDTextDescriptResType, kButtonFontResID);
     if ( tData == nil)
     {
@@ -126,7 +126,7 @@ int InitDirectText( void)
     AddDirectFont( dtext);
 
     // add # 3, kMessageFontNum
-    dtext = reinterpret_cast<directTextType *>(*gDirectTextData) + kMessageFontNum;
+    dtext = *gDirectTextData + kMessageFontNum;
     tData = HHGetResource( kDTextDescriptResType, kMessageFontResID);
     if ( tData == nil)
     {
@@ -142,7 +142,7 @@ int InitDirectText( void)
     AddDirectFont( dtext);
 
     // add # 4, kTitleFontNum
-    dtext = reinterpret_cast<directTextType *>(*gDirectTextData) + kTitleFontNum;
+    dtext = *gDirectTextData + kTitleFontNum;
     tData = HHGetResource( kDTextDescriptResType, kTitleFontResID);
     if ( tData == nil)
     {
@@ -158,7 +158,7 @@ int InitDirectText( void)
     AddDirectFont( dtext);
 
     // add # 5, kButtonSmallFontNum
-    dtext = reinterpret_cast<directTextType *>(*gDirectTextData) + kButtonSmallFontNum;
+    dtext = *gDirectTextData + kButtonSmallFontNum;
     tData = HHGetResource( kDTextDescriptResType, kButtonSmallFontResID);
     if ( tData == nil)
     {
@@ -215,7 +215,7 @@ void DirectTextCleanup( void)
     directTextType  *dtext;
     long            count;
 
-    dtext = reinterpret_cast<directTextType *>(*gDirectTextData);
+    dtext = *gDirectTextData;
     for  ( count = 0; count < kDirectFontNum; count++)
     {
         if (( dtext->myHandle) && ( dtext->charSet != nil))
@@ -225,7 +225,7 @@ void DirectTextCleanup( void)
     if ( gFourBitTable != nil)
         DisposeHandle( gFourBitTable);
     if ( gDirectTextData != nil)
-        DisposeHandle( gDirectTextData);
+        DisposeHandle( reinterpret_cast<Handle>(gDirectTextData));
 }
 
 // GetDirectFontNum:
@@ -238,7 +238,7 @@ long GetDirectFontNum( short resID)
     long            count = 0;
     directTextType  *dtext = nil;
 
-    dtext = reinterpret_cast<directTextType *>(*gDirectTextData);
+    dtext = *gDirectTextData;
     while (( count < kDirectFontNum) && ( dtext->resID != resID))
     {
         count++;
@@ -267,7 +267,7 @@ short AddDirectFont( directTextType *dtext)
 
     if ( whichTable >= 0)
     {
-        dtextWithTable = reinterpret_cast<directTextType *>(*gDirectTextData) + whichTable;
+        dtextWithTable = *gDirectTextData + whichTable;
         dtext->charSet = dtextWithTable->charSet;
         dtext->myHandle = FALSE;
     } else
@@ -1453,5 +1453,5 @@ void ResetDirectTextPtr( Handle directText)
 {
 #pragma unused( directText)
     WriteDebugLine(reinterpret_cast<const char*>("\pDText Callback"));
-    gDirectText = reinterpret_cast<directTextType *>(*gDirectTextData) + gWhichDirectText;
+    gDirectText = *gDirectTextData + gWhichDirectText;
 }

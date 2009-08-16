@@ -62,7 +62,7 @@ struct directTextType {
 
 extern long gWhichDirectText;
 extern directTextType* gDirectText;
-extern Handle gDirectTextData;
+extern directTextType** gDirectTextData;
 
 inline void mGetDirectStringDimensions(const unsigned char* string, long& width, long& height) {
     height = gDirectText->height << 1;
@@ -97,7 +97,7 @@ inline void mDirectCharWidth(unsigned char& mwidth, char mchar, unsigned char*& 
 
 inline void mSetDirectFont(long mwhichFont) {
     gWhichDirectText = mwhichFont;
-    gDirectText = reinterpret_cast<directTextType *>(*gDirectTextData) + gWhichDirectText;
+    gDirectText = *gDirectTextData + gWhichDirectText;
 }
 
 inline int mDirectFontHeight() {

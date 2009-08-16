@@ -45,7 +45,7 @@
 #define kLabelTotalInnerSpace   (kLabelInnerSpace<<1)
 
 extern aresGlobalType   *gAresGlobal;
-extern Handle           gDirectTextData;
+extern directTextType** gDirectTextData;
 extern long             gWhichDirectText, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT,
                         CLIP_BOTTOM,
                         WORLD_WIDTH, WORLD_HEIGHT, gNatePortLeft, gNatePortTop; //temp hack?
