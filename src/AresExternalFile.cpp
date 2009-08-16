@@ -116,8 +116,8 @@ OSErr EF_OpenExternalFile( void)
     // races
     if ( gAresGlobal->gRaceData != nil)
     {
-        HHDeregisterHandle( &gAresGlobal->gRaceData);
-        DisposeHandle( gAresGlobal->gRaceData);
+        HHDeregisterHandle( reinterpret_cast<Handle*>(&gAresGlobal->gRaceData));
+        DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gRaceData));
         gAresGlobal->gRaceData = nil;
     }
 
@@ -201,15 +201,15 @@ OSErr EF_OpenExternalFile( void)
     // races
     if ( gAresGlobal->gRaceData == nil)
     {
-        gAresGlobal->gRaceData = GetResource( kRaceResType, kRaceResID);
+        gAresGlobal->gRaceData = reinterpret_cast<raceType**>(GetResource( kRaceResType, kRaceResID));
         if ( gAresGlobal->gRaceData == nil)
         {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kReadRaceDataError, -1, -1, -1, __FILE__, 1);
             return( RESOURCE_ERROR);
         }
-        DetachResource( gAresGlobal->gRaceData);
+        DetachResource( reinterpret_cast<Handle>(gAresGlobal->gRaceData));
 
-        mDataHandleLockAndRegister( gAresGlobal->gRaceData, nil, nil, nil, "\pgAresGlobal->gRaceData");
+        mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gRaceData), nil, nil, nil, "\pgAresGlobal->gRaceData");
     }
 
     // object stuff

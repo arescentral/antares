@@ -70,6 +70,7 @@ struct hotKeyType {
 };
 
 struct admiralType;
+struct raceType;
 struct scenarioType;
 
 struct aresGlobalType {
@@ -87,7 +88,7 @@ struct aresGlobalType {
     KeyMap          gKeyControl[kKeyExtendedControlNum];
     short           gPreferenceRefNum;
     unsigned long   gOptions;
-    Handle          gRaceData;
+    raceType**      gRaceData;
     Handle          gScrollStarData;
     Boolean         gWarpStars;
     long            gLastClipBottom;

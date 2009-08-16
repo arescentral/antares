@@ -35,15 +35,15 @@ short InitRaces( void)
 {
     if ( gAresGlobal->gRaceData == nil)
     {
-        gAresGlobal->gRaceData = GetResource( kRaceResType, kRaceResID);
+        gAresGlobal->gRaceData = reinterpret_cast<raceType**>(GetResource( kRaceResType, kRaceResID));
         if ( gAresGlobal->gRaceData == nil)
         {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kReadRaceDataError, -1, -1, -1, __FILE__, 1);
             return( RESOURCE_ERROR);
         }
-        DetachResource( gAresGlobal->gRaceData);
+        DetachResource( reinterpret_cast<Handle>(gAresGlobal->gRaceData));
 
-        mDataHandleLockAndRegister( gAresGlobal->gRaceData, nil, nil, nil, "\pgAresGlobal->gRaceData");
+        mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gRaceData), nil, nil, nil, "\pgAresGlobal->gRaceData");
     }
 
     return( kNoError);
@@ -51,7 +51,7 @@ short InitRaces( void)
 
 void CleanupRaces( void)
 {
-    if ( gAresGlobal->gRaceData != nil) DisposeHandle( gAresGlobal->gRaceData);
+    if ( gAresGlobal->gRaceData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gRaceData));
 }
 
 // GetNextLegalRace: Gets the next legal race *after* raceNum in the scenario it
@@ -114,7 +114,7 @@ void GetRaceString( StringPtr string, short whatString, short raceNum)
 
 smallFixedType GetRaceAdvantage( short raceNum)
 {
-    raceType    *race = reinterpret_cast<raceType*>(*gAresGlobal->gRaceData) + raceNum;
+    raceType    *race = *gAresGlobal->gRaceData + raceNum;
 
     if ( raceNum >= 0)
     {
@@ -127,7 +127,7 @@ smallFixedType GetRaceAdvantage( short raceNum)
 
 short GetRaceNumFromID( short raceID)
 {
-    raceType    *race = reinterpret_cast<raceType*>(*gAresGlobal->gRaceData);
+    raceType    *race = *gAresGlobal->gRaceData;
     short       raceNum = 0;
 
     while ( (race->id != raceID) && ( raceNum < kRaceNum))
@@ -144,7 +144,7 @@ short GetRaceNumFromID( short raceID)
 
 short GetRaceIDFromNum( short raceNum)
 {
-    raceType    *race = reinterpret_cast<raceType*>(*gAresGlobal->gRaceData) + raceNum;
+    raceType    *race = *gAresGlobal->gRaceData + raceNum;
 
     if (( raceNum >= 0) && ( raceNum < kRaceNum))
     {
@@ -157,7 +157,7 @@ short GetRaceIDFromNum( short raceNum)
 
 unsigned char GetApparentColorFromRace( short raceNum)
 {
-    raceType    *race = reinterpret_cast<raceType*>(*gAresGlobal->gRaceData) + raceNum;
+    raceType    *race = *gAresGlobal->gRaceData + raceNum;
 
 
     if (( raceNum >= 0) && ( raceNum < kRaceNum))
