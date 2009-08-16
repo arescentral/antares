@@ -72,6 +72,7 @@ struct hotKeyType {
 struct admiralType;
 struct raceType;
 struct scenarioType;
+struct scenarioInitialType;
 
 struct aresGlobalType {
     unsigned long   gActiveCheats[kMaxPlayerNum];
@@ -118,7 +119,7 @@ struct aresGlobalType {
     long            gThisScenarioNumber;// = -1;
     short           gScenarioRefID;     // = 0;
     scenarioType**  gScenarioData;      // = nil;
-    Handle          gScenarioInitialData;   // = nil;
+    scenarioInitialType**   gScenarioInitialData;   // = nil;
     Handle          gScenarioConditionData; // = nil;
     Handle          gScenarioBriefData;     // = nil;
     Handle          gRadarBlipData;         // = nil;

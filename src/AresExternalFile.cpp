@@ -96,8 +96,8 @@ OSErr EF_OpenExternalFile( void)
     }
     if ( gAresGlobal->gScenarioInitialData != nil)
     {
-        HHDeregisterHandle( &gAresGlobal->gScenarioInitialData);
-        DisposeHandle( gAresGlobal->gScenarioInitialData);
+        HHDeregisterHandle( reinterpret_cast<Handle*>(&gAresGlobal->gScenarioInitialData));
+        DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioInitialData));
         gAresGlobal->gScenarioInitialData = nil;
     }
     if ( gAresGlobal->gScenarioConditionData != nil)
@@ -159,18 +159,18 @@ OSErr EF_OpenExternalFile( void)
     gAresGlobal->scenarioNum = GetHandleSize( reinterpret_cast<Handle>(gAresGlobal->gScenarioData)) /
         sizeof( scenarioType);
 
-    gAresGlobal->gScenarioInitialData = GetResource( kScenarioInitialResType, kScenarioInitialResID);
+    gAresGlobal->gScenarioInitialData = reinterpret_cast<scenarioInitialType**>(GetResource( kScenarioInitialResType, kScenarioInitialResID));
     if ( gAresGlobal->gScenarioInitialData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioInitialDataError, -1, -1, -1, __FILE__, 3);
         return( RESOURCE_ERROR);
     }
-    DetachResource( gAresGlobal->gScenarioInitialData);
+    DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioInitialData));
 
-    mDataHandleLockAndRegister( gAresGlobal->gScenarioInitialData, nil, nil, nil, "\pgAresGlobal->gScenarioInitialData");
+    mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gScenarioInitialData), nil, nil, nil, "\pgAresGlobal->gScenarioInitialData");
 
     gAresGlobal->maxScenarioInitial = GetHandleSize(
-        gAresGlobal->gScenarioInitialData) / sizeof( scenarioInitialType);
+        reinterpret_cast<Handle>(gAresGlobal->gScenarioInitialData)) / sizeof( scenarioInitialType);
 
     gAresGlobal->gScenarioConditionData = GetResource( kScenarioConditionResType, kScenarioConditionResID);
     if ( gAresGlobal->gScenarioConditionData == nil)

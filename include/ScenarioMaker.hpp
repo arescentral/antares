@@ -106,7 +106,7 @@ inline void mGetActionFromBaseTypeNum(
 }
 
 inline scenarioInitialType* mGetScenarioInitial(scenarioType* mscenario, long minitialnum) {
-    return reinterpret_cast<scenarioInitialType *>(*gAresGlobal->gScenarioInitialData)
+    return *gAresGlobal->gScenarioInitialData
         + (mscenario)->initialFirst + (minitialnum);
 }
 

@@ -131,18 +131,18 @@ short ScenarioMakerInit( void)
 
     if ( gAresGlobal->gScenarioInitialData == nil)
     {
-        gAresGlobal->gScenarioInitialData = GetResource( kScenarioInitialResType, kScenarioInitialResID);
+        gAresGlobal->gScenarioInitialData = reinterpret_cast<scenarioInitialType**>(GetResource( kScenarioInitialResType, kScenarioInitialResID));
         if ( gAresGlobal->gScenarioInitialData == nil)
         {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioInitialDataError, -1, -1, -1, __FILE__, 3);
             return( RESOURCE_ERROR);
         }
-        DetachResource( gAresGlobal->gScenarioInitialData);
+        DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioInitialData));
 
-        mDataHandleLockAndRegister( gAresGlobal->gScenarioInitialData, nil, nil, nil, "\pgAresGlobal->gScenarioInitialData");
+        mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gScenarioInitialData), nil, nil, nil, "\pgAresGlobal->gScenarioInitialData");
 
         gAresGlobal->maxScenarioInitial = GetHandleSize(
-            gAresGlobal->gScenarioInitialData) / sizeof( scenarioInitialType);
+            reinterpret_cast<Handle>(gAresGlobal->gScenarioInitialData)) / sizeof( scenarioInitialType);
 
     }
 
@@ -188,7 +188,7 @@ void ScenarioMakerCleanup( void)
 {
     if ( gAresGlobal->gScenarioData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioData));
     if ( gAresGlobal->gScenarioBriefData != nil) DisposeHandle( gAresGlobal->gScenarioBriefData);
-    if ( gAresGlobal->gScenarioInitialData != nil) DisposeHandle( gAresGlobal->gScenarioInitialData);
+    if ( gAresGlobal->gScenarioInitialData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioInitialData));
     if ( gAresGlobal->gScenarioConditionData != nil) DisposeHandle( gAresGlobal->gScenarioConditionData);
     CleanupRaces();
 }
