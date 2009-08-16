@@ -903,7 +903,7 @@ void NumToNDigitString( long num, StringPtr s, long digits)
     {
         while ( mGetAnyCharPStringLength( s) < digits)
         {
-            InsertAnyCharPStringInPString( reinterpret_cast<anyCharType *>(s), reinterpret_cast<const anyCharType *>("\p0"), 0);
+            InsertAnyCharPStringInPString( reinterpret_cast<anyCharType *>(s), "\p0", 0);
         }
     }
     CheckStringForNil( s);
