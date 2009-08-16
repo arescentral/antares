@@ -54,14 +54,15 @@ struct barIndicatorType {
     Boolean         automatic;      // if it's automatic, it is redrawn automatically
 };
 
+struct miniScreenLineType;
 struct miniComputerDataType {
-    Handle      lineData;
-    spaceObjectType**   objectData;
-    long        selectLine;
-    long        pollTime;
-    long        buildTimeBarValue;
-    long        currentScreen;
-    long        clickLine;
+    miniScreenLineType**    lineData;
+    spaceObjectType**       objectData;
+    long                    selectLine;
+    long                    pollTime;
+    long                    buildTimeBarValue;
+    long                    currentScreen;
+    long                    clickLine;
 };
 
 struct hotKeyType {

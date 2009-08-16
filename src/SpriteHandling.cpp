@@ -89,7 +89,8 @@ extern aresGlobalType   *gAresGlobal;
 
 long                    *gScaleHMap = nil, *gScaleVMap = nil, gAbsoluteScale = MIN_SCALE;
 pixTableType            gPixTable[ kMaxPixTableEntry];
-Handle                  gSpriteTable = nil, gBothScaleMaps = nil/*, gBlipTable = nil*/, gStaticTable = nil;
+spriteType**            gSpriteTable = NULL;
+Handle                  gBothScaleMaps = nil/*, gBlipTable = nil*/, gStaticTable = nil;
 short                   gSpriteFileRefID = 0;
 
 Boolean PixelInSprite_IsOutside( spritePix *sprite, long x, long y, long *hmap,
@@ -137,7 +138,7 @@ void SpriteHandlingInit ( void)
 
     ResetAllPixTables();
 
-    gSpriteTable = NewHandle( sizeof( spriteType) * kMaxSpriteNum);
+    gSpriteTable = reinterpret_cast<spriteType**>(NewHandle( sizeof( spriteType) * kMaxSpriteNum));
     if ( gSpriteTable == nil)
     {
         ShowErrorAny( eExitToShellErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 2);
@@ -147,7 +148,7 @@ void SpriteHandlingInit ( void)
     MoveHHi( gSpriteTable);
     HLock( gSpriteTable);
     */
-    mDataHandleLockAndRegister( gSpriteTable, nil, ResolveSpriteData, nil, "\pgSpriteTable");
+    mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gSpriteTable), nil, ResolveSpriteData, nil, "\pgSpriteTable");
 
 /*
     SetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
@@ -183,7 +184,7 @@ void ResetAllSprites( void)
     spriteType  *aSprite;
     short       i;
 
-    aSprite = reinterpret_cast<spriteType*>(*gSpriteTable);
+    aSprite = *gSpriteTable;
     for ( i = 0; i < kMaxSpriteNum; i++)
     {
         aSprite->table = nil;
@@ -235,7 +236,7 @@ void CleanupSpriteHandling( void)
         }
     }
     if ( gSpriteTable != nil)
-        DisposeHandle( gSpriteTable);
+        DisposeHandle( reinterpret_cast<Handle>(gSpriteTable));
 }
 
 void SetAllPixTablesNoKeep( void)
@@ -352,7 +353,7 @@ spriteType *AddSprite( Point where, Handle table, short resID, short whichShape,
     int         i = 0;
     spriteType  *aSprite;
 
-    aSprite = reinterpret_cast<spriteType*>(*gSpriteTable);
+    aSprite = *gSpriteTable;
     while (( aSprite->table != nil) && ( i < kMaxSpriteNum)) { i++; aSprite++;}
     if ( i == kMaxSpriteNum)
     {
@@ -2843,7 +2844,7 @@ void EraseSpriteTable( void)
 
     savePixBase = GetGWorldPixMap( gSaveWorld);
     offPixBase = GetGWorldPixMap( gOffWorld);
-    aSprite = reinterpret_cast<spriteType*>(*gSpriteTable);
+    aSprite = *gSpriteTable;
     for ( i = 0; i < kMaxSpriteNum; i++)
     {
         if ( aSprite->table != nil)
@@ -2877,14 +2878,14 @@ void DrawSpriteTableInOffWorld( longRect *clipRect)
     spriteType      *aSprite;
 
     pixMap = GetGWorldPixMap( gOffWorld);
-    aSprite = reinterpret_cast<spriteType*>(*gSpriteTable);
+    aSprite = *gSpriteTable;
 
 //  WriteDebugLong( gAbsoluteScale);
     if ( gAbsoluteScale >= kSpriteBlipThreshhold)
     {
         for ( layer = kFirstSpriteLayer; layer <= kLastSpriteLayer; layer++)
         {
-            aSprite = reinterpret_cast<spriteType*>(*gSpriteTable);
+            aSprite = *gSpriteTable;
             for ( i = 0; i < kMaxSpriteNum; i++)
             {
                 if (( aSprite->table != nil) && ( !aSprite->killMe) && ( aSprite->whichLayer == layer))
@@ -2937,7 +2938,7 @@ void DrawSpriteTableInOffWorld( longRect *clipRect)
     {
         for ( layer = kFirstSpriteLayer; layer <= kLastSpriteLayer; layer++)
         {
-            aSprite = reinterpret_cast<spriteType*>(*gSpriteTable);
+            aSprite = *gSpriteTable;
             for ( i = 0; i < kMaxSpriteNum; i++)
             {
                 tinySize = aSprite->tinySize & kBlipSizeMask;
@@ -3039,7 +3040,7 @@ void ShowSpriteTable( void)
     long            i;
     spriteType      *aSprite;
 
-    aSprite = reinterpret_cast<spriteType*>(*gSpriteTable);
+    aSprite = *gSpriteTable;
     pixMap = GetGWorldPixMap( gOffWorld);
     for ( i = 0; i < kMaxSpriteNum; i++)
     {
@@ -3108,7 +3109,7 @@ void CullSprites( void)
     long            i;
     spriteType      *aSprite;
 
-    aSprite = reinterpret_cast<spriteType*>(*gSpriteTable);
+    aSprite = *gSpriteTable;
     for ( i = 0; i < kMaxSpriteNum; i++)
     {
         if ( aSprite->table != nil)
@@ -3173,8 +3174,8 @@ void ResolveSpriteData( Handle dummy)
 
 #pragma unused( dummy)
     mWriteDebugString("\pResolving Sprite");
-    HLock( gSpriteTable);
-    aSprite = reinterpret_cast<spriteType*>(*gSpriteTable);
+    HLock( reinterpret_cast<Handle>(gSpriteTable));
+    aSprite = *gSpriteTable;
     for ( i = 0; i < kMaxSpriteNum; i++)
     {
         if ( aSprite->resID != -1)

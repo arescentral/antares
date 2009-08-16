@@ -82,7 +82,8 @@ extern long             /*gAresGlobal->gPlayerShipNumber,*/ gAbsoluteScale, gRan
                         /*gAresGlobal->gPlayerAdmiralNumber,*/ CLIP_LEFT, CLIP_TOP, CLIP_RIGHT,
                         CLIP_BOTTOM/*, gAresGlobal->gScrollStarNumber, gAresGlobal->gGameOver*/;
 extern coordPointType   gGlobalCorner;
-extern Handle           gRotTable, gSpriteTable, gColorTranslateTable;
+extern spriteType**     gSpriteTable;
+extern Handle           gRotTable, gColorTranslateTable;
 extern scenarioType     *gThisScenario;
 extern spaceObjectType  *gScrollStarObject;
 //extern unsigned long  gAresGlobal->gOptions;
@@ -2501,7 +2502,7 @@ void ResolveSpaceObjectData( Handle spaceData)
             anObject->destObjectPtr = *gSpaceObjectData + anObject->destinationObject;
 
         if (( anObject->sprite != nil) && ( anObject->whichSprite != kNoSprite))
-            anObject->sprite = reinterpret_cast<spriteType*>(*gSpriteTable) + anObject->whichSprite;
+            anObject->sprite = *gSpriteTable + anObject->whichSprite;
 
         if (( anObject->beamBase != nil) && ( anObject->beamType != kNoWeapon))
             anObject->beamBase = mGetBaseObjectPtr( anObject->beamType);
