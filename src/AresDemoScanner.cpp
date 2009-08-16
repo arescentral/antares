@@ -152,7 +152,7 @@ void MakeDemoDataHack( void)
         }
         aScenario++;
     }
-    SaveAnyResourceInPreferences( 'snro', 500, nil, reinterpret_cast<Handle>(gAresGlobal->gScenarioData), true);
+    SaveAnyResourceInPreferences('snro', 500, nil, reinterpret_cast<Handle>(gAresGlobal->gScenarioData), true);
 }
 
 void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)

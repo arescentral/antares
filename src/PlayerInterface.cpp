@@ -1568,23 +1568,23 @@ void DoOptionsInterface( void)
     EventRecord             theEvent;
     char                    whichChar;
     CWindowPtr              whichWindow;
-    Handle                  tempPrefs = gAresGlobal->gPreferencesData;
+    preferencesDataType**   tempPrefs = gAresGlobal->gPreferencesData;
     OSErr                   err;
-    preferencesDataType     *prefsData = nil;
+    preferencesDataType*    prefsData = nil;
     Rect                    volumeRect;
 
     BlackenWindow();
 
     FlushEvents(everyEvent, 0);
-    err = HandToHand( &tempPrefs);
+    err = HandToHand( reinterpret_cast<Handle*>(&tempPrefs));
     if (( tempPrefs == nil) || ( err != noErr))
     {
         return;
     }
 
-    MoveHHi( tempPrefs);
-    HLock( tempPrefs);
-    prefsData = reinterpret_cast<preferencesDataType*>(*gAresGlobal->gPreferencesData);
+    MoveHHi( reinterpret_cast<Handle>(tempPrefs));
+    HLock( reinterpret_cast<Handle>(tempPrefs));
+    prefsData = *gAresGlobal->gPreferencesData;
 
     error = OpenInterface( kOptionsScreenID);
     SetOptionCheckboxes( prefsData->options);
@@ -1792,7 +1792,7 @@ void DoOptionsInterface( void)
             SaveAllPreferences(); // sets gAresGlobal->gOptions
         } else
         {
-            BlockMove( *tempPrefs, *gAresGlobal->gPreferencesData, sizeof( preferencesDataType));
+            BlockMove( reinterpret_cast<Ptr>(*tempPrefs), *gAresGlobal->gPreferencesData, sizeof( preferencesDataType));
             if ( gAresGlobal->gSoundVolume != prefsData->volume)
             {
                 gAresGlobal->gSoundVolume = prefsData->volume;
@@ -1817,8 +1817,8 @@ void DoOptionsInterface( void)
         }
         CloseInterface();
     }
-    HUnlock( tempPrefs);
-    DisposeHandle( tempPrefs);
+    HUnlock( reinterpret_cast<Handle>(tempPrefs));
+    DisposeHandle( reinterpret_cast<Handle>(tempPrefs));
 }
 
 void SetOptionCheckboxes( unsigned long options)
@@ -1909,7 +1909,7 @@ Boolean DoKeyInterface( void)
                 GetKeyNumFromKeyMap( gAresGlobal->gKeyControl[i]));
         }
 
-        prefsData = reinterpret_cast<preferencesDataType*>(*gAresGlobal->gPreferencesData);
+        prefsData = *gAresGlobal->gPreferencesData;
 
         SwitchAnyRadioOrCheckbox( kKeySubstituteCheckbox,
             ((options & kOptionSubstituteFKeys) ? (true):(false)));

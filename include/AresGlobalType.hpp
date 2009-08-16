@@ -73,6 +73,7 @@ struct hotKeyType {
 struct admiralType;
 struct beamType;
 struct briefPointType;
+struct preferencesDataType;
 struct raceType;
 struct scenarioType;
 struct scenarioConditionType;
@@ -86,7 +87,7 @@ struct aresGlobalType {
     Handle          gReplayData;
     short           gMainResRefNum;
     unsigned long   gFrameCount;
-    Handle          gPreferencesData;
+    preferencesDataType**   gPreferencesData;
     long            gGameOver;
     admiralType**   gAdmiralData;
     Handle          gDestBalanceData;

@@ -228,7 +228,7 @@ Boolean Key_Setup_Screen_Do( void)
     error = OpenInterface( kKeyScreenID);
     if ( error == kNoError)
     {
-        prefsData = reinterpret_cast<preferencesDataType *>(*gAresGlobal->gPreferencesData);
+        prefsData = *gAresGlobal->gPreferencesData;
 
 //      SwitchAnyRadioOrCheckbox( kKeySubstituteCheckbox,
 //          ((options & kOptionSubstituteFKeys) ? (true):(false)));
