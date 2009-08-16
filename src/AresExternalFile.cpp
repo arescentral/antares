@@ -32,8 +32,9 @@
 #include "ScenarioMaker.hpp"
 #include "SpaceObjectHandling.hpp"
 
-extern  aresGlobalType          *gAresGlobal;
-extern  Handle                  gBaseObjectData, gObjectActionData;
+extern aresGlobalType*          gAresGlobal;
+extern baseObjectType**         gBaseObjectData;
+extern Handle                   gObjectActionData;
 
 OSErr EF_OpenExternalFile( void)
 {
@@ -123,8 +124,8 @@ OSErr EF_OpenExternalFile( void)
     // object stuff
     if ( gBaseObjectData != nil)
     {
-        HHDeregisterHandle( &gBaseObjectData);
-        DisposeHandle( gBaseObjectData);
+        HHDeregisterHandle( reinterpret_cast<Handle*>(&gBaseObjectData));
+        DisposeHandle( reinterpret_cast<Handle>(gBaseObjectData));
         gBaseObjectData = nil;
     }
 
@@ -212,18 +213,18 @@ OSErr EF_OpenExternalFile( void)
     }
 
     // object stuff
-    gBaseObjectData = GetResource( kBaseObjectResType, kBaseObjectResID);
+    gBaseObjectData = reinterpret_cast<baseObjectType**>(GetResource( kBaseObjectResType, kBaseObjectResID));
     if ( gBaseObjectData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kReadBaseObjectDataError, -1, -1, -1, __FILE__, 2);
         return( MEMORY_ERROR);
     }
 
-    DetachResource( gBaseObjectData);
+    DetachResource( reinterpret_cast<Handle>(gBaseObjectData));
 
-    mDataHandleLockAndRegister( gBaseObjectData, nil, nil, nil, "\pgBaseObjectData");
+    mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gBaseObjectData), nil, nil, nil, "\pgBaseObjectData");
 
-    gAresGlobal->maxBaseObject = GetHandleSize( gBaseObjectData) /
+    gAresGlobal->maxBaseObject = GetHandleSize( reinterpret_cast<Handle>(gBaseObjectData)) /
         sizeof( baseObjectType);
 
     gObjectActionData = GetResource( kObjectActionResType, kObjectActionResID);

@@ -885,10 +885,10 @@ struct spaceObjectType {
     unsigned char           originalColor;
 };
 
-extern Handle gBaseObjectData;
+extern baseObjectType** gBaseObjectData;
 
 inline baseObjectType* mGetBaseObjectPtr(long whichObject) {
-    return reinterpret_cast<baseObjectType*>(*gBaseObjectData) + whichObject;
+    return *gBaseObjectData + whichObject;
 }
 
 inline void mGetBaseObjectFromClassRace(

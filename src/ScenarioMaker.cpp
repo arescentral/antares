@@ -77,7 +77,8 @@ extern aresGlobalType           *gAresGlobal;
 extern long                     /*gAresGlobal->gPlayerShipNumber,*/ gAbsoluteScale, /*gAresGlobal->gGameOver,
                                 gAresGlobal->gGameTime,*/ gRandomSeed;
 extern spaceObjectType**        gSpaceObjectData;
-extern Handle                   gBaseObjectData, gObjectActionData, gRotTable;
+extern baseObjectType**         gBaseObjectData;
+extern Handle                   gObjectActionData, gRotTable;
 
 //long                          gAresGlobal->gPlayerAdmiralNumber, gAresGlobal->gScenarioWinner, // -1 = no-one, 0 = player loses
 //                              gAresGlobal->gScenarioRotation = 0, gAresGlobal->gThisScenarioNumber = -1;
@@ -925,7 +926,7 @@ Boolean ConstructScenario( long which)
 void SetAllBaseObjectsUnchecked( void)
 
 {
-    baseObjectType  *aBase = reinterpret_cast<baseObjectType *>(*gBaseObjectData);
+    baseObjectType  *aBase = *gBaseObjectData;
     long            count;
 
     for ( count = 0; count < kMaxBaseObject; count++)
@@ -1017,7 +1018,7 @@ void CheckActionMedia( long whichAction, long actionNum, unsigned char color)
                         break;
 
                     case kAlterOwner:
-                        baseObject = reinterpret_cast<baseObjectType*>(*gBaseObjectData);
+                        baseObject = *gBaseObjectData;
                         for ( count = 0; count < kMaxBaseObject; count++)
                         {
                             OKtoExecute = false;
@@ -1165,7 +1166,7 @@ void AddActionMedia( objectActionType *action, unsigned char color)
                         break;
 
                     case kAlterOwner:
-                        baseObject = reinterpret_cast<baseObjectType*>(*gBaseObjectData);
+                        baseObject = *gBaseObjectData;
                         for ( count = 0; count < kMaxBaseObject; count++)
                         {
                             OKtoExecute = false;

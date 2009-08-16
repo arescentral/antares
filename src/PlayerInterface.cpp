@@ -368,7 +368,8 @@ extern directTextType           *gDirectText;
 extern Handle                   gDirectTextData;
 extern long                     gWhichDirectText, WORLD_WIDTH, WORLD_HEIGHT;
 //                              gAresGlobal->gPlayerAdmiralNumber;
-extern  Handle                  gColorTranslateTable, gBaseObjectData, gObjectActionData/*, gAresGlobal->gPreferencesData*/;
+extern baseObjectType**         gBaseObjectData;
+extern  Handle                  gColorTranslateTable, gObjectActionData/*, gAresGlobal->gPreferencesData*/;
 extern  GDHandle                theDevice;
 
 Boolean IsKeyReserved( KeyMap, Boolean);
@@ -4593,7 +4594,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
     PixMapHandle    offPixMap = GetGWorldPixMap( gOffWorld);
     transColorType  *transColor;
     longRect        lRect, longClipRect;
-    baseObjectType  *baseObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData);// + (pictID - kFirstShipDataPictID);
+    baseObjectType  *baseObject = *gBaseObjectData;// + (pictID - kFirstShipDataPictID);
     Str255          tempString, numString;
     retroTextSpecType   retroTextSpec;
     long            height, waitTime, i;
@@ -4786,7 +4787,7 @@ Handle CreateWeaponDataText( long whichWeapon, StringPtr weaponName)
 
     if ( whichWeapon != kNoShip)
     {
-        weaponObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData) + whichWeapon;
+        weaponObject = *gBaseObjectData + whichWeapon;
 
         weaponText = GetResource( 'TEXT', kWeaponDataTextID);
         if ( weaponText != nil)
@@ -4806,7 +4807,7 @@ Handle CreateWeaponDataText( long whichWeapon, StringPtr weaponName)
                 {
                     if (( action->verb == kCreateObject) || ( action->verb == kCreateObjectSetDest))
                     {
-                        missileObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData) +
+                        missileObject = *gBaseObjectData +
                             action->argument.createObject.whichBaseType;
                         if ( missileObject->attributes & kIsGuided) isGuided = true;
                         if ( missileObject->damage > mostDamage) mostDamage = missileObject->damage;

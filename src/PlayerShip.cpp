@@ -61,7 +61,7 @@
 extern aresGlobalType   *gAresGlobal;
 //extern KeyMap     gAresGlobal->gKeyControl[];
 extern spaceObjectType**    gSpaceObjectData;
-extern Handle       gBaseObjectData/*, gAresGlobal->gDestBalanceData*/;
+extern baseObjectType**     gBaseObjectData;
 extern long         /*gAresGlobal->gGameTime,*/ gRandomSeed,
                     //gAresGlobal->gPlayerAdmiralNumber, gAresGlobal->gScenarioWinner,
                     gNetLatency, gRootObjectNumber;

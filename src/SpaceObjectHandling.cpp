@@ -96,7 +96,8 @@ actionQueueType *gFirstActionQueue = nil;
 long            gFirstActionQueueNumber = -1;
 
 spaceObjectType** gSpaceObjectData = NULL;
-Handle  gBaseObjectData = nil, gObjectActionData = nil, gActionQueueData = nil;
+baseObjectType** gBaseObjectData = NULL;
+Handle gObjectActionData = nil, gActionQueueData = nil;
 
 void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord);
 
@@ -123,17 +124,17 @@ int SpaceObjectHandlingInit( void)
 
     if ( gBaseObjectData == nil)
     {
-        gBaseObjectData = GetResource( kBaseObjectResType, kBaseObjectResID);
+        gBaseObjectData = reinterpret_cast<baseObjectType**>(GetResource( kBaseObjectResType, kBaseObjectResID));
         if ( gBaseObjectData == nil)
         {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kReadBaseObjectDataError, -1, -1, -1, __FILE__, 2);
             return( MEMORY_ERROR);
         }
 
-        DetachResource( gBaseObjectData);
-        mDataHandleLockAndRegister( gBaseObjectData, nil, nil, nil, "\pgBaseObjectData");
+        DetachResource( reinterpret_cast<Handle>(gBaseObjectData));
+        mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gBaseObjectData), nil, nil, nil, "\pgBaseObjectData");
 
-        gAresGlobal->maxBaseObject = GetHandleSize( gBaseObjectData) /
+        gAresGlobal->maxBaseObject = GetHandleSize( reinterpret_cast<Handle>(gBaseObjectData)) /
             sizeof( baseObjectType);
 
         correctBaseObjectColor = true;
@@ -179,7 +180,7 @@ int SpaceObjectHandlingInit( void)
 void CleanupSpaceObjectHandling( void)
 
 {
-    if ( gBaseObjectData != nil) DisposeHandle( gBaseObjectData);
+    if ( gBaseObjectData != nil) DisposeHandle( reinterpret_cast<Handle>(gBaseObjectData));
     if ( gSpaceObjectData != nil) DisposeHandle( reinterpret_cast<Handle>(gSpaceObjectData));
     if ( gObjectActionData != nil) DisposeHandle( gObjectActionData);
     if ( gActionQueueData != nil) DisposeHandle( gActionQueueData);
@@ -602,7 +603,7 @@ void RemoveAllSpaceObjects( void)
 void CorrectAllBaseObjectColor( void)
 
 {
-    baseObjectType  *aBase = reinterpret_cast<baseObjectType*>(*gBaseObjectData);
+    baseObjectType  *aBase = *gBaseObjectData;
     short           i;
     transColorType  *transColor;
     unsigned char   fixColor;
@@ -2492,7 +2493,7 @@ void ResolveSpaceObjectData( Handle spaceData)
 
     for ( i = 0; i < kMaxSpaceObject; i++)
     {
-        anObject->baseType = reinterpret_cast<baseObjectType*>(*gBaseObjectData) + anObject->whichBaseObject;
+        anObject->baseType = *gBaseObjectData + anObject->whichBaseObject;
         anObject->nextNearObject = anObject->nextFarObject = nil;
 
         if (( anObject->destObjectPtr != nil) && ( anObject->destinationObject != kNoDestinationObject))

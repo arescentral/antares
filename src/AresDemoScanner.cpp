@@ -51,15 +51,9 @@ extern aresGlobalType *gAresGlobal;
 
 extern scenarioType                 *gThisScenario;
 extern spaceObjectType**            gSpaceObjectData;
-//extern long                           gAresGlobal->gThisScenarioNumber;
-extern Handle                       // gAresGlobal->gScenarioData,
-                                    gObjectActionData,
-                                    //gAresGlobal->gScenarioInitialData,
-                                    //gAresGlobal->gScenarioBriefData,
-                                    //gAresGlobal->gScenarioConditionData,
-                                    gBaseObjectData;
+extern Handle                       gObjectActionData;
+extern baseObjectType**             gBaseObjectData;
 extern pixTableType                 gPixTable[];
-//extern smartSoundHandle               gAresGlobal->gSound[];
 extern GWorldPtr                    gOffWorld;
 
 // MAKE SURE YOU COMMENT OUT THE CONTENTS OF THE CorrectAllBaseObjectColor ROUTINE
@@ -232,7 +226,7 @@ void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
         condition = mGetScenarioCondition( gThisScenario, count);
     }
 
-    baseObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData);
+    baseObject = *gBaseObjectData;
 
     for ( count = 0; count < kMaxBaseObject; count++)
     {
@@ -354,7 +348,7 @@ void ClearAndCopyAllUnusedBaseObjects( Boolean *baseObjectKeepList)
 
     DisposePtr( reinterpret_cast<Ptr>(nilObject));
 
-    SaveAnyResourceInPreferences( kBaseObjectResType, kBaseObjectResID, nil, gBaseObjectData, true);
+    SaveAnyResourceInPreferences( kBaseObjectResType, kBaseObjectResID, nil, reinterpret_cast<Handle>(gBaseObjectData), true);
 }
 
 // Copy all loaded pix tables

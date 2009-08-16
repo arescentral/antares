@@ -90,8 +90,9 @@ struct weaponDataType {
 
 extern long             WORLD_WIDTH, WORLD_HEIGHT;
 extern GWorldPtr        gOffWorld;
-extern Handle           gBaseObjectData, gObjectActionData;
-extern aresGlobalType           *gAresGlobal;
+extern baseObjectType**         gBaseObjectData;
+extern Handle                   gObjectActionData;
+extern aresGlobalType*          gAresGlobal;
 
 void ConvertPortraitIntoGIF( long, StringPtr);
 void InsertWeaponText( short, short, Handle, weaponDataType *, fieldRangeType *);
@@ -172,7 +173,7 @@ void MakeAresGuide( void)
     InitAresGuide();
 
     // 1st pass guage mins & maxs
-    baseObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData);
+    baseObject = *gBaseObjectData;
 
     for ( count = 0; count < kMaxBaseObject; count++)
     {
@@ -206,7 +207,7 @@ void MakeAresGuide( void)
     }
 
 
-    baseObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData);
+    baseObject = *gBaseObjectData;
 
 #ifdef pGenerateImages
     for ( count = 0; count < kMaxBaseObject; count++) // kMaxBaseObject
@@ -238,11 +239,11 @@ void MakeAresGuide( void)
     if ( sourceText == nil) MyDebugString("\pcouldn't get source text.");
     DetachResource( sourceText);
 
-    baseObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData);
+    baseObject = *gBaseObjectData;
 
     for ( count = 0; count < kMaxBaseObject; count++) // kMaxBaseObject
     {
-        baseObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData) + count;
+        baseObject = *gBaseObjectData + count;
         if (baseObject->internalFlags & 0x40000000)
         {
             newText = sourceText;
@@ -271,7 +272,7 @@ void MakeAresGuide( void)
             whichShape = GetPreviousIndexBaseObject( count);
             if ( whichShape >= 0)
             {
-                weaponObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData) + whichShape;
+                weaponObject = *gBaseObjectData + whichShape;
                 if ( weaponObject->baseRace != baseObject->baseRace)
                 {
                     ReplaceIndStringWithStringInHandle( 6453, 79, ss2, newText);
@@ -688,7 +689,7 @@ void GetWeaponData( long whichWeapon, weaponDataType *data)
 
     if ( whichWeapon != kNoShip)
     {
-        weaponObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData) + whichWeapon;
+        weaponObject = *gBaseObjectData + whichWeapon;
 
         // damage; this is tricky--we have to guess by walking through activate actions,
         //  and for all the createObject actions, see which creates the most damaging
@@ -703,7 +704,7 @@ void GetWeaponData( long whichWeapon, weaponDataType *data)
             {
                 if (( action->verb == kCreateObject) || ( action->verb == kCreateObjectSetDest))
                 {
-                    missileObject = reinterpret_cast<baseObjectType *>(*gBaseObjectData) +
+                    missileObject = *gBaseObjectData +
                         action->argument.createObject.whichBaseType;
                     if ( missileObject->attributes & kIsGuided) isGuided = true;
                     if ( missileObject->damage > mostDamage) mostDamage = missileObject->damage;
@@ -1035,7 +1036,7 @@ void InsertIndexText( long whichObject, long myRace, Handle text)
 
         if ( raceID == myRace)
         {
-            o = reinterpret_cast<baseObjectType *>(*gBaseObjectData);
+            o = *gBaseObjectData;
 
             lowestClass = 0x7fffffff;
             highestClass = 0;
@@ -1055,7 +1056,7 @@ void InsertIndexText( long whichObject, long myRace, Handle text)
             {
                 thisClass = nextClass;
                 nextClass = highestClass;
-                o = reinterpret_cast<baseObjectType *>(*gBaseObjectData);
+                o = *gBaseObjectData;
                 for ( count = 0; count < kMaxBaseObject; count++)
                 {
                     if (( o->internalFlags & 0x40000000) && ( o->baseRace == myRace))
@@ -1114,7 +1115,7 @@ long GetPreviousIndexBaseObject( long whichObject)
     // 1st, look for the object of same race with the largest class _below_ our class
     source = mGetBaseObjectPtr( whichObject);
 
-    o = reinterpret_cast<baseObjectType *>(*gBaseObjectData);
+    o = *gBaseObjectData;
     for ( count = 0; count < kMaxBaseObject; count++)
     {
         if (( count != whichObject) && ( o->baseRace == source->baseRace))
@@ -1141,7 +1142,7 @@ long GetPreviousIndexBaseObject( long whichObject)
         previousRace = GetRaceIDFromNum( previousRace);
         highestClass = -1;
 
-        o = reinterpret_cast<baseObjectType *>(*gBaseObjectData);
+        o = *gBaseObjectData;
         for ( count = 0; count < kMaxBaseObject; count++)
         {
             if (( o->baseRace == previousRace) && ( o->baseClass >= highestClass))

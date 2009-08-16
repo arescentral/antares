@@ -242,7 +242,7 @@ struct miniScreenLineType {
     long            whichStatus;
     long            statusPlayer;
     long            negativeValue;
-    Ptr             sourceData;
+    baseObjectType* sourceData;
 };
 
 inline void mCopyBlankLineString(
@@ -279,10 +279,8 @@ extern  long            gNatePortLeft, gNatePortTop/*, gAresGlobal->gPlayerAdmir
 extern  directTextType  *gDirectText;
 extern Handle           gDirectTextData;
 extern long             gWhichDirectText;//, gAresGlobal->gInstrumentTop;
-//extern    KeyMap          gAresGlobal->gKeyControl[];
-extern  Handle          //gAresGlobal->gAdmiralData, gAresGlobal->gDestBalanceData,
-                        gBaseObjectData,
-                        gColorTranslateTable;
+extern baseObjectType**     gBaseObjectData;
+extern Handle               gColorTranslateTable;
 extern spaceObjectType**    gSpaceObjectData;
 //extern    unsigned long   gAresGlobal->gOptions;
 
@@ -1264,7 +1262,7 @@ void UpdateMiniScreenLines( void)
 
                 for ( count = 0; count < kMaxShipCanBuild; count++)
                 {
-                    buildObject = reinterpret_cast<baseObjectType*>(line->sourceData);
+                    buildObject = line->sourceData;
                     if ( buildObject != nil)
                     {
                         if ( buildObject->price > mFixedToLong(admiral->cash))
@@ -2314,7 +2312,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
             {
                 mGetBaseObjectFromClassRace( buildObject, baseNum, buildAtObject->canBuildType[count], admiral->race);
                 line->value = baseNum;
-                line->sourceData = reinterpret_cast<Ptr>(buildObject);
+                line->sourceData = buildObject;
                 if ( buildObject != nil)
                 {
                     GetIndString( s, kSpaceObjectNameResID, baseNum + 1);
