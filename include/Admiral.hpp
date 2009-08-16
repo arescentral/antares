@@ -125,7 +125,7 @@ struct admiralType {
 
 
 inline destBalanceType* mGetDestObjectBalancePtr(long whichObject) {
-    return reinterpret_cast<destBalanceType*>(*gAresGlobal->gDestBalanceData) + whichObject;
+    return *gAresGlobal->gDestBalanceData + whichObject;
 }
 inline admiralType* mGetAdmiralPtr(long mwhichAdmiral) {
     return *gAresGlobal->gAdmiralData + mwhichAdmiral;

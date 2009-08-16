@@ -73,6 +73,7 @@ struct hotKeyType {
 struct admiralType;
 struct beamType;
 struct briefPointType;
+struct destBalanceType;
 struct longMessageType;
 struct preferencesDataType;
 struct proximityUnitType;
@@ -94,7 +95,7 @@ struct aresGlobalType {
     preferencesDataType**   gPreferencesData;
     long            gGameOver;
     admiralType**   gAdmiralData;
-    Handle          gDestBalanceData;
+    destBalanceType**       gDestBalanceData;
     KeyMap          gKeyControl[kKeyExtendedControlNum];
     short           gPreferenceRefNum;
     unsigned long   gOptions;

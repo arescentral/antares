@@ -75,14 +75,14 @@ int AdmiralInit( void)
     mHandleLockAndRegister(reinterpret_cast<Handle&>(gAresGlobal->gAdmiralData), nil, nil, nil, "\pgAresGlobal->gAdmiralData");
     ResetAllAdmirals();
 
-    gAresGlobal->gDestBalanceData = NewHandle( sizeof( destBalanceType) * kMaxDestObject);
+    gAresGlobal->gDestBalanceData = reinterpret_cast<destBalanceType**>(NewHandle( sizeof( destBalanceType) * kMaxDestObject));
 
     if ( gAresGlobal->gDestBalanceData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 2);
         return( MEMORY_ERROR);
     }
-    mHandleLockAndRegister( gAresGlobal->gDestBalanceData, nil, nil, nil, "\pgAresGlobal->gDestBalanceData");
+    mHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gDestBalanceData), nil, nil, nil, "\pgAresGlobal->gDestBalanceData");
 
     ResetAllDestObjectData();
 
@@ -93,7 +93,7 @@ void AdmiralCleanup( void)
 
 {
     if ( gAresGlobal->gAdmiralData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gAdmiralData));
-    if ( gAresGlobal->gDestBalanceData != nil) DisposeHandle( gAresGlobal->gDestBalanceData);
+    if ( gAresGlobal->gDestBalanceData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gDestBalanceData));
 }
 
 void ResetAllAdmirals( void)
