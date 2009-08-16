@@ -78,6 +78,7 @@ struct raceType;
 struct scenarioType;
 struct scenarioConditionType;
 struct scenarioInitialType;
+struct screenLabelType;
 
 struct aresGlobalType {
     unsigned long   gActiveCheats[kMaxPlayerNum];
@@ -149,7 +150,7 @@ struct aresGlobalType {
 //  Handle          gMiniScreenHandle;      // = nil;
     miniComputerDataType    gMiniScreenData;
     Handle          gMissionStatusStrList;
-    Handle          gScreenLabelData;       // = nil;
+    screenLabelType**   gScreenLabelData;       // = nil;
     beamType**      gBeamData;              // = nil;
     long            gColorAnimationStep;    // = 0;
     long            gColorAnimationInSpeed; // = -1;
