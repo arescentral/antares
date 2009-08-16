@@ -62,7 +62,7 @@ struct handleDataType {
     Str255          name;
 };
 
-Handle      gHandleData = nil;
+handleDataType**    gHandleData = nil;
 //Boolean       EMERGENCYHACKTEST = false;
 
 void HHBetterCheckHandle( Handle, Handle, StringPtr);
@@ -70,7 +70,7 @@ void HHBetterCheckHandle( Handle, Handle, StringPtr);
 short HandleHandlerInit( void)
 
 {
-    gHandleData = NewHandle( sizeof( handleDataType) * kMaxHandleHandleNum);
+    gHandleData = reinterpret_cast<handleDataType**>(NewHandle( sizeof( handleDataType) * kMaxHandleHandleNum));
     if ( gHandleData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
@@ -78,8 +78,8 @@ short HandleHandlerInit( void)
     }
 
 //  mHandleLockAndRegister( gHandleData, nil, nil, nil)
-    MoveHHi( gHandleData);
-    HLock( gHandleData);
+    MoveHHi(reinterpret_cast<Handle>(gHandleData));
+    HLock(reinterpret_cast<Handle>(gHandleData));
     ResetAllHandleData();
 
     return( kNoError);
@@ -88,14 +88,14 @@ short HandleHandlerInit( void)
 void HandleHandlerCleanup( void)
 
 {
-    if ( gHandleData != nil) DisposeHandle( gHandleData);
+    if ( gHandleData != nil) DisposeHandle( reinterpret_cast<Handle>(gHandleData));
 }
 
 void ResetAllHandleData( void)
 
 {
     short           i = 0;
-    handleDataType  *h = reinterpret_cast<handleDataType *>(*gHandleData);
+    handleDataType  *h = *gHandleData;
 
     for ( i = 0; i < kMaxHandleHandleNum; i++)
     {
@@ -116,14 +116,14 @@ short HHRegisterHandle( Handle *newHandle,
 
 {
     short            i = 0;
-    handleDataType  *h = reinterpret_cast<handleDataType *>(*gHandleData);
+    handleDataType  *h = *gHandleData;
     OSErr           err;
     SignedByte      hstate;
 
     hstate = HGetState( *newHandle);
     if ( hstate & 0x40) ShowErrorAny( eContinueErr, -1, "\pPurgable Handle: ", name, nil, nil, -1, -1, -1, -1, __FILE__, 0);
     HHMaxMem();
-    h = reinterpret_cast<handleDataType *>(*gHandleData);
+    h = *gHandleData;
     while (( h->hand != nil) && ( i < kMaxHandleHandleNum)) { h++; i++;}
     if ( i == kMaxHandleHandleNum)
     {
@@ -160,7 +160,7 @@ void HHDeregisterHandle( Handle *killHandle)
 
 {
     short            i = 0;
-    handleDataType  *h = reinterpret_cast<handleDataType *>(*gHandleData);
+    handleDataType  *h = *gHandleData;
 
     while (( h->hand != killHandle) && ( i < kMaxHandleHandleNum)) { h++; i++;}
     if ( i < kMaxHandleHandleNum)
@@ -178,7 +178,7 @@ void HHMaxMem( void)
 {
     Size            grow = 0, free = 0;
     short           i = 0;
-    handleDataType  *h = reinterpret_cast<handleDataType *>(*gHandleData);
+    handleDataType  *h = *gHandleData;
     Str255          debug;
 
 //  WriteDebugLine((char *)"\p<MAXMEM");
@@ -213,13 +213,13 @@ void HHMaxMem( void)
         h++;
     }
 
-    HUnlock( gHandleData);
+    HUnlock(reinterpret_cast<Handle>(gHandleData));
 
     free = MaxMem( &grow);
 
-    HLock( gHandleData);
+    HLock(reinterpret_cast<Handle>(gHandleData));
 
-    h = reinterpret_cast<handleDataType *>(*gHandleData);
+    h = *gHandleData;
     for ( i = 0; i < kMaxHandleHandleNum; i++)
     {
         if ( h->hand != nil)
@@ -238,7 +238,7 @@ void HHMaxMem( void)
         h++;
     }
 
-    h = reinterpret_cast<handleDataType *>(*gHandleData);
+    h = *gHandleData;
     for ( i = 0; i < kMaxHandleHandleNum; i++)
     {
         if ( h->hand != nil)
@@ -394,7 +394,7 @@ void HHBetterCheckHandle( Handle oneHandle, Handle twoHandle, StringPtr s)
 
 void HHCheckAllHandles( void)
 {
-    handleDataType  *h = reinterpret_cast<handleDataType *>(*gHandleData);
+    handleDataType  *h = *gHandleData;
     long            i;
 
     for ( i = 0; i < kMaxHandleHandleNum; i++)
