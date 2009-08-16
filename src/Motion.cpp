@@ -126,20 +126,20 @@ int InitMotion( void)
     gAresGlobal->gCenterScaleH = (gPlayScreenWidth / 2) * SCALE_SCALE;
     gAresGlobal->gCenterScaleV = (gPlayScreenHeight / 2) * SCALE_SCALE;
 
-    gAresGlobal->gProximityGrid = NewHandle( sizeof( proximityUnitType) * kProximityGridDataLength);
+    gAresGlobal->gProximityGrid = reinterpret_cast<proximityUnitType**>(NewHandle( sizeof( proximityUnitType) * kProximityGridDataLength));
     if ( gAresGlobal->gProximityGrid == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
         return( MEMORY_ERROR);
     }
 
-    MoveHHi( gAresGlobal->gProximityGrid);
-    HLock( gAresGlobal->gProximityGrid);
+    MoveHHi(reinterpret_cast<Handle>(gAresGlobal->gProximityGrid));
+    HLock(reinterpret_cast<Handle>(gAresGlobal->gProximityGrid));
 
 //  mHandleLockAndRegister( gAresGlobal->gProximityGrid, nil, nil, nil)
 
     // initialize the proximityGrid & set up the needed lookups (see Notebook 2 p.34)
-    p = reinterpret_cast<proximityUnitType*>(*gAresGlobal->gProximityGrid);
+    p = *gAresGlobal->gProximityGrid;
     for ( y = 0; y < kProximitySuperSize; y++)
     {
         for ( x = 0; x < kProximitySuperSize; x++)
@@ -202,7 +202,7 @@ void ResetMotionGlobals( void)
     gAresGlobal->gClosestObject = 0;
     gAresGlobal->gFarthestObject = 0;
 
-    proximityObject = reinterpret_cast<proximityUnitType*>(*gAresGlobal->gProximityGrid);
+    proximityObject = *gAresGlobal->gProximityGrid;
     for ( i = 0; i < kProximityGridDataLength; i++)
     {
         proximityObject->nearObject = proximityObject->farObject = nil;
@@ -216,7 +216,7 @@ void HackCheckProxGrid( long sayswho)
     if ( gHackMoitionInitedYet)
     {
 
-    proximityUnitType       *p = reinterpret_cast<proximityUnitType*>(*gAresGlobal->gProximityGrid);
+    proximityUnitType       *p = *gAresGlobal->gProximityGrid;
     long                    count, c2;
 
 
@@ -240,7 +240,7 @@ void MotionCleanup( void)
 
 {
     if ( gAresGlobal->gProximityGrid != nil)
-        DisposeHandle( gAresGlobal->gProximityGrid);
+        DisposeHandle(reinterpret_cast<Handle>(gAresGlobal->gProximityGrid));
 }
 
 void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const long unitsToDo)
@@ -723,7 +723,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
     gAresGlobal->gFarthestObject = 0;
 
     // reset the collision grid
-    proximityObject = reinterpret_cast<proximityUnitType*>(*gAresGlobal->gProximityGrid);
+    proximityObject = *gAresGlobal->gProximityGrid;
     for ( i = 0; i < kProximityGridDataLength; i++)
     {
         proximityObject->nearObject = proximityObject->farObject = nil;
@@ -852,8 +852,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
             ye = ys >> kCollisionSuperExtraShift;
             ys &= kProximityUnitAndModulo;
 
-            proximityObject = reinterpret_cast<proximityUnitType*>(*gAresGlobal->gProximityGrid) +
-                                (ys << kProximityWidthMultiply) + xs;
+            proximityObject = *gAresGlobal->gProximityGrid + (ys << kProximityWidthMultiply) + xs;
             aObject->nextNearObject = proximityObject->nearObject;
             proximityObject->nearObject = aObject;
             aObject->collisionGrid.h = xe;
@@ -867,8 +866,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
             ys = ye >> kDistanceSuperExtraShift;
             ye &= kProximityUnitAndModulo;
 
-            proximityObject = reinterpret_cast<proximityUnitType*>(*gAresGlobal->gProximityGrid) +
-                                (ye << kProximityWidthMultiply) + xe;
+            proximityObject = *gAresGlobal->gProximityGrid + (ye << kProximityWidthMultiply) + xe;
             aObject->nextFarObject = proximityObject->farObject;
             proximityObject->farObject = aObject;
             aObject->distanceGrid.h = xs;
@@ -901,7 +899,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
         aObject = aObject->nextObject;
     }
 
-    proximityObject = reinterpret_cast<proximityUnitType*>(*gAresGlobal->gProximityGrid);
+    proximityObject = *gAresGlobal->gProximityGrid;
     for ( j = 0; j < kProximitySuperSize; j++)
     {
         for ( i = 0; i < kProximitySuperSize; i++)
@@ -1158,7 +1156,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
         }
     }
 
-    proximityObject = reinterpret_cast<proximityUnitType*>(*gAresGlobal->gProximityGrid);
+    proximityObject = *gAresGlobal->gProximityGrid;
     for ( j = 0; j < kProximitySuperSize; j++)
     {
         for ( i = 0; i < kProximitySuperSize; i++)

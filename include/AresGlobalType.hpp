@@ -74,6 +74,7 @@ struct admiralType;
 struct beamType;
 struct briefPointType;
 struct preferencesDataType;
+struct proximityUnitType;
 struct raceType;
 struct scenarioType;
 struct scenarioConditionType;
@@ -108,7 +109,7 @@ struct aresGlobalType {
     long            gFarthestObject;
     long            gCenterScaleH;
     long            gCenterScaleV;
-    Handle          gProximityGrid;
+    proximityUnitType**     gProximityGrid;
     KeyMap          gLastKeyMap;
     unsigned long   gLastKeys;
     unsigned long   gTheseKeys;
