@@ -99,7 +99,7 @@ void ScrollDebugWindowUp( void)
 #endif
 }
 
-void WriteDebugLine( const char *text)
+void WriteDebugLine(const unsigned char *text)
 
 {
 #ifdef kDebugWindowActive

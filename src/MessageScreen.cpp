@@ -418,7 +418,7 @@ void StartLongMessage( short startResID, short endResID)
         tmessage->pictCurrentLeft = 0;
         tmessage->pictCurrentTop = 0;
         tmessage->pictID = -1;
-        WriteDebugLine(reinterpret_cast<const char*>("\pSTART MESSAGE"));
+        WriteDebugLine("\pSTART MESSAGE");
     }
 }
 
@@ -463,7 +463,7 @@ void StartStringMessage( anyCharType *string)
         tmessage->pictCurrentTop = 0;
         tmessage->pictID = -1;
         CopyAnyCharPString( tmessage->stringMessage, string);
-        WriteDebugLine( reinterpret_cast<const char*>("\pSTART MESSAGE"));
+        WriteDebugLine( "\pSTART MESSAGE");
     }
 }
 

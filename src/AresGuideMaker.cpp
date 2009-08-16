@@ -1184,7 +1184,7 @@ Handle NewHandleFromString( StringPtr s)
 
 void CheckStringForNil( const unsigned char* s)
 {
-    const char* c = reinterpret_cast<const char*>(s);
+    const unsigned char* c = s;
     short len = *c;
 
     c++;

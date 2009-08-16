@@ -295,7 +295,7 @@ void ResetActionQueueData( void)
     actionQueueType *action = *gActionQueueData;
     long            i;
 
-    WriteDebugLine(reinterpret_cast<const char*>("\p>RESETACT"));
+    WriteDebugLine("\p>RESETACT");
     gFirstActionQueueNumber = -1;
     gFirstActionQueue = nil;
 
@@ -316,7 +316,7 @@ void ResetActionQueueData( void)
         action->offset.h = action->offset.v = 0;
         action++;
     }
-    WriteDebugLine(reinterpret_cast<const char*>("\p<RESETACT"));
+    WriteDebugLine("\p<RESETACT");
 }
 
 /* AddSpaceObject:
@@ -1611,7 +1611,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 
                             if ( action->argument.alterObject.minimum > 10000)
                             {
-                                WriteDebugLine(reinterpret_cast<const char*>("\pNRG"));
+                                WriteDebugLine("\pNRG");
                                 WriteDebugLong( anObject->whichBaseObject);
                                 WriteDebugLong( anObject->owner);
                                 WriteDebugFixed( action->argument.alterObject.minimum);
@@ -1860,7 +1860,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                             break;
 
                         case kAlterBaseType:
-                            WriteDebugLine(reinterpret_cast<const char*>("\pAlterBase!"));
+                            WriteDebugLine("\pAlterBase!");
                             if ( (action->reflexive) || ( dObject != nil))
                             ChangeObjectBaseType( anObject, action->argument.alterObject.minimum, -1,
                                 action->argument.alterObject.relative);
@@ -2147,7 +2147,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     break;
 
                 case kActivateSpecial:
-                    WriteDebugLine(reinterpret_cast<const char*>("\pActivate Special!"));
+                    WriteDebugLine("\pActivate Special!");
                     ActivateObjectSpecial( sObject);
                     break;
 

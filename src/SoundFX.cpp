@@ -402,7 +402,7 @@ void PlayVolumeSound( short whichSoundID, short amplitude, short persistence, so
             err = SndDoImmediate( gAresGlobal->gChannel[whichChannel].channelPtr, &cmd);
             if ( err != noErr)
             {
-                WriteDebugLine(reinterpret_cast<const char*>("\pSnd Err:"));
+                WriteDebugLine("\pSnd Err:");
                 WriteDebugLong(err);
             }
 
@@ -412,7 +412,7 @@ void PlayVolumeSound( short whichSoundID, short amplitude, short persistence, so
             err = SndDoImmediate( gAresGlobal->gChannel[whichChannel].channelPtr, &cmd);
             if ( err != noErr)
             {
-                WriteDebugLine(reinterpret_cast<const char*>("\pSnd Err:"));
+                WriteDebugLine("\pSnd Err:");
                 WriteDebugLong(err);
             }
 
@@ -428,7 +428,7 @@ void PlayVolumeSound( short whichSoundID, short amplitude, short persistence, so
     //      err = SndDoImmediate( gAresGlobal->gChannel[whichChannel].channelPtr, &cmd);
             if ( err != noErr)
             {
-                WriteDebugLine(reinterpret_cast<const char*>("\pSnd Err:"));
+                WriteDebugLine("\pSnd Err:");
                 WriteDebugLong(err);
             }
 
@@ -545,7 +545,7 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
             err = SndDoImmediate( gAresGlobal->gChannel[whichChannel].channelPtr, &cmd);
             if ( err != noErr)
             {
-                WriteDebugLine(reinterpret_cast<const char*>("\pSnd Err:"));
+                WriteDebugLine("\pSnd Err:");
                 WriteDebugLong(err);
             }
 
@@ -555,7 +555,7 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
             err = SndDoImmediate( gAresGlobal->gChannel[whichChannel].channelPtr, &cmd);
             if ( err != noErr)
             {
-                WriteDebugLine(reinterpret_cast<const char*>("\pSnd Err:"));
+                WriteDebugLine("\pSnd Err:");
                 WriteDebugLong(err);
             }
 
@@ -675,7 +675,7 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
                 err = SndDoCommand( gAresGlobal->gChannel[whichChannel].channelPtr, &cmd, false);
                 if ( err != noErr)
                 {
-                    WriteDebugLine(reinterpret_cast<const char*>("\pSnd Err:"));
+                    WriteDebugLine("\pSnd Err:");
                     WriteDebugLong(err);
                 }
 
@@ -770,7 +770,7 @@ short AddSound( short soundID)
             return( -1);
         } else
         {
-            WriteDebugLine(reinterpret_cast<const char*>("\pADDSND>"));
+            WriteDebugLine("\pADDSND>");
             WriteDebugLong( soundID);
 
             gAresGlobal->gSound[whichSound].soundHandle = HHGetResource( 'snd ', soundID);
@@ -834,7 +834,7 @@ void UnlockSoundCallback( Handle soundHand)
                 err = SndDoImmediate( gAresGlobal->gChannel[i].channelPtr, &cmd);
                 if ( err != noErr)
                 {
-                    WriteDebugLine(reinterpret_cast<const char*>("\pSnd Err:"));
+                    WriteDebugLine("\pSnd Err:");
                     WriteDebugLong(err);
                 }
                 cmd.param1 = 0;
@@ -843,7 +843,7 @@ void UnlockSoundCallback( Handle soundHand)
                 err = SndDoImmediate( gAresGlobal->gChannel[i].channelPtr, &cmd);
                 if ( err != noErr)
                 {
-                    WriteDebugLine(reinterpret_cast<const char*>("\pSnd Err:"));
+                    WriteDebugLine("\pSnd Err:");
                     WriteDebugLong(err);
                 }
             }
@@ -868,19 +868,19 @@ void SoundFXCleanup( void)
             err = SndDisposeChannel( gAresGlobal->gChannel[i].channelPtr, TRUE);
             if ( err != noErr)
             {
-                WriteDebugLine(reinterpret_cast<const char*>("\pSnd Err:"));
+                WriteDebugLine("\pSnd Err:");
                 WriteDebugLong(err);
             }
         }
     }
 
-    WriteDebugLine(reinterpret_cast<const char*>("\p<SndChannels"));
+    WriteDebugLine("\p<SndChannels");
     for ( i = 0; i < kSoundNum; i++)
     {
         if ( gAresGlobal->gSound[i].soundHandle != nil)
             DisposeHandle( gAresGlobal->gSound[i].soundHandle);
     }
-    WriteDebugLine(reinterpret_cast<const char*>("\p<SndHndles"));
+    WriteDebugLine("\p<SndHndles");
 }
 
 //

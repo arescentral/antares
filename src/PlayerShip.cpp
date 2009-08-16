@@ -99,7 +99,7 @@ void ResetPlayerShip( long which)
     anyCharType     nilLabel = 0;
     long            h;
 
-    WriteDebugLine(reinterpret_cast<const char*>("\pPLAYER:"));
+    WriteDebugLine("\pPLAYER:");
     WriteDebugLong( which);
     gAresGlobal->gPlayerShipNumber = which;
     gAresGlobal->gSelectionLabel = AddScreenLabel( 0, 0, 0, 10, &nilLabel, nil, TRUE, YELLOW);
@@ -999,7 +999,7 @@ void SetPlayerSelectShip( long whichShip, Boolean target, long admiralNumber)
         gAresGlobal->lastSelectedObject = whichShip;
         gAresGlobal->lastSelectedObjectID = selectShip->id;
         gAresGlobal->destKeyUsedForSelection = true;
-        WriteDebugLine(reinterpret_cast<const char*>("\plast sel"));
+        WriteDebugLine("\plast sel");
     }
     if ( target)
     {

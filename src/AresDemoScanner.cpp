@@ -173,7 +173,7 @@ void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
     // uncheck all base objects
     // uncheck all sounds
 
-    WriteDebugLine(reinterpret_cast<const char *>("\p- C H E C K -"));
+    WriteDebugLine("\p- C H E C K -");
 
     // for each initial object
 
@@ -362,7 +362,7 @@ void CopyAllUsedPixTables( void)
     {
         if ( gPixTable[count].resource != nil)
         {
-            WriteDebugLine(reinterpret_cast<const char *>("\pSavePIX:"));
+            WriteDebugLine("\pSavePIX:");
             WriteDebugLong( gPixTable[count].resID);
             SaveAnyResourceInPreferences( kPixResType, gPixTable[count].resID, nil,
                 gPixTable[count].resource, true);
@@ -379,7 +379,7 @@ void CopyAllUsedSounds( void)
     {
         if ( gAresGlobal->gSound[count].soundHandle != nil)
         {
-            WriteDebugLine(reinterpret_cast<const char *>("\pSaveSND:"));
+            WriteDebugLine("\pSaveSND:");
             WriteDebugLong( gAresGlobal->gSound[count].id);
             SaveAnyResourceInPreferences( 'snd ', gAresGlobal->gSound[count].id, nil,
                 gAresGlobal->gSound[count].soundHandle, true);

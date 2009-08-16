@@ -2258,7 +2258,7 @@ void DrawAnyInterfaceItem( interfaceItemType *anItem, PixMap *destMap, long port
                 destMap, portLeft, portTop);
             break;
         default:
-            WriteDebugLine( reinterpret_cast<const char*>("\pHuh?"));
+            WriteDebugLine( "\pHuh?");
             break;
     }
 }
@@ -2357,7 +2357,7 @@ void GetAnyInterfaceItemGraphicBounds( interfaceItemType *anItem, Rect *bounds)
             break;
 
         default:
-            WriteDebugLine( reinterpret_cast<const char*>("\pHuh?"));
+            WriteDebugLine( "\pHuh?");
             break;
     }
 }

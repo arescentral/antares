@@ -1561,7 +1561,7 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
             {
                 anObject->duty = eNoDuty;
                 anObject->attributes &= ~kStaticDestination;
-                WriteDebugLine(reinterpret_cast<const char*>("\pOddness"));
+                WriteDebugLine("\pOddness");
                 if ( targetObject == nil)
                 {
                     keysDown |= kDownKey;
@@ -2395,7 +2395,7 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
     // try to get any ship but the current ship
     // stop trying when we've made a full circle (we're back on currentShipNum)
 
-    WriteDebugLine(reinterpret_cast<const char*>("\pSelecting"));
+    WriteDebugLine("\pSelecting");
     WriteDebugLong( currentShipNum);
     whichShip = startShip = currentShipNum;
     if ( whichShip >= 0)

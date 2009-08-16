@@ -213,7 +213,7 @@ Boolean ConstructScenario( long which)
 
     v.h = 0; v.v = 0;
 
-    WriteDebugLine(reinterpret_cast<const char*>("\pSIZE:"));
+    WriteDebugLine("\pSIZE:");
     WriteDebugLong( sizeof( scenarioInitialType));
 
     ResetAllSpaceObjects();
@@ -368,7 +368,7 @@ Boolean ConstructScenario( long which)
     DoLoadingInterface( &loadingRect, s);
     UpdateLoadingInterface( currentStep, stepNumber, &loadingRect);
 
-    WriteDebugLine(reinterpret_cast<const char*>("\p- C H E C K -"));
+    WriteDebugLine("\p- C H E C K -");
 
     // for each initial object
 
@@ -495,7 +495,7 @@ Boolean ConstructScenario( long which)
 
     SetAllBaseObjectsUnchecked();
 
-    WriteDebugLine(reinterpret_cast<const char*>("\p- A D D -"));
+    WriteDebugLine("\p- A D D -");
     RemoveAllUnusedSounds();
     RemoveAllUnusedPixTables();
 
@@ -1410,7 +1410,7 @@ void CheckScenarioConditions( long timePass)
                         } else if ( sObject->health <= ( sObject->baseType->health >> 1))
                         {
                             conditionTrue = true;
-                            WriteDebugLine(reinterpret_cast<const char*>("\pHALFNESS!"));
+                            WriteDebugLine("\pHALFNESS!");
                             WriteDebugLong( condition->directObject);
                         } else
                         {

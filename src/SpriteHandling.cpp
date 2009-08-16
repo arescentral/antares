@@ -3155,8 +3155,8 @@ void TestByte( char *dbyte, PixMap *pixMap, StringPtr name)
     if (( dbyte < pixMap->baseAddr) || ( dbyte >= lbyte))
     {
         DebugStr( name);
-        WriteDebugLine(reinterpret_cast<const char*>(name));
-        WriteDebugLine(reinterpret_cast<const char*>("\p<<BAD>>"));
+        WriteDebugLine(name);
+        WriteDebugLine("\p<<BAD>>");
     }
 }
 
