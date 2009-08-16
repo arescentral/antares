@@ -100,7 +100,7 @@ long            gFirstActionQueueNumber = -1;
 spaceObjectType** gSpaceObjectData = NULL;
 baseObjectType** gBaseObjectData = NULL;
 objectActionType** gObjectActionData = NULL;
-Handle gActionQueueData = nil;
+actionQueueType** gActionQueueData = nil;
 
 void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord);
 
@@ -163,13 +163,13 @@ int SpaceObjectHandlingInit( void)
             / sizeof( objectActionType);
     }
 
-    gActionQueueData = NewHandle( sizeof( actionQueueType) * kActionQueueLength);
+    gActionQueueData = reinterpret_cast<actionQueueType**>(NewHandle( sizeof( actionQueueType) * kActionQueueLength));
     if ( gActionQueueData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 3);
         return( MEMORY_ERROR);
     }
-    mHandleLockAndRegister( gActionQueueData, nil, nil, ResolveActionQueueData, "\pgActionQueueData");
+    mHandleLockAndRegister(reinterpret_cast<Handle&>(gActionQueueData), nil, nil, ResolveActionQueueData, "\pgActionQueueData");
 
 #ifndef kCreateAresDemoData
     if ( correctBaseObjectColor)
@@ -186,7 +186,7 @@ void CleanupSpaceObjectHandling( void)
     if ( gBaseObjectData != nil) DisposeHandle( reinterpret_cast<Handle>(gBaseObjectData));
     if ( gSpaceObjectData != nil) DisposeHandle( reinterpret_cast<Handle>(gSpaceObjectData));
     if ( gObjectActionData != nil) DisposeHandle( reinterpret_cast<Handle>(gObjectActionData));
-    if ( gActionQueueData != nil) DisposeHandle( gActionQueueData);
+    if ( gActionQueueData != nil) DisposeHandle( reinterpret_cast<Handle>(gActionQueueData));
 }
 
 void ResetAllSpaceObjects( void)
@@ -292,7 +292,7 @@ void ResetAllSpaceObjects( void)
 
 void ResetActionQueueData( void)
 {
-    actionQueueType *action = reinterpret_cast<actionQueueType*>(*gActionQueueData);
+    actionQueueType *action = *gActionQueueData;
     long            i;
 
     WriteDebugLine(reinterpret_cast<const char*>("\p>RESETACT"));
@@ -1121,7 +1121,7 @@ void AddActionToQueue( objectActionType *action, long actionNumber, long actionT
                         spaceObjectType *directObject, longPointType *offset)
 {
     long                queueNumber = 0;
-    actionQueueType     *actionQueue = reinterpret_cast<actionQueueType*>(*gActionQueueData),
+    actionQueueType     *actionQueue = *gActionQueueData,
                         *nextQueue = gFirstActionQueue, *previousQueue = nil;
 
     while (( actionQueue->action != nil) && ( queueNumber < kActionQueueLength))
@@ -1195,7 +1195,7 @@ void ExecuteActionQueue( long unitsToDo)
 
 {
 //  actionQueueType     *actionQueue = gFirstActionQueue;
-    actionQueueType     *actionQueue = reinterpret_cast<actionQueueType*>(*gActionQueueData);
+    actionQueueType     *actionQueue = *gActionQueueData;
     long                        subjectid, directid, i;
 
     for ( i = 0; i < kActionQueueLength; i++)
@@ -2533,7 +2533,7 @@ void ResolveSpaceObjectData( Handle spaceData)
 
     if ( gActionQueueData != nil)
     {
-        actionQueueType *action = reinterpret_cast<actionQueueType*>(*gActionQueueData);
+        actionQueueType *action = *gActionQueueData;
         for ( i = 0; i < kActionQueueLength; i++)
         {
             if ( action->subjectObjectNum >= 0)
@@ -2549,7 +2549,7 @@ void ResolveSpaceObjectData( Handle spaceData)
 
 void ResolveObjectActionData( Handle actionData)
 {
-    actionQueueType *action = reinterpret_cast<actionQueueType*>(*gActionQueueData);
+    actionQueueType *action = *gActionQueueData;
     long            i;
 
 #pragma unused( actionData)
@@ -2568,7 +2568,7 @@ void ResolveObjectActionData( Handle actionData)
 
 void ResolveActionQueueData( Handle queueData)
 {
-    actionQueueType *action = reinterpret_cast<actionQueueType*>(*gActionQueueData);
+    actionQueueType *action = *gActionQueueData;
     long            i;
 
 #pragma unused( queueData)
@@ -2576,14 +2576,14 @@ void ResolveActionQueueData( Handle queueData)
     if ( gActionQueueData != nil)
     {
         if  (gFirstActionQueueNumber >= 0)
-            gFirstActionQueue = reinterpret_cast<actionQueueType*>(*gActionQueueData) + gFirstActionQueueNumber;
+            gFirstActionQueue = *gActionQueueData + gFirstActionQueueNumber;
         else gFirstActionQueue = nil;
 
         for ( i = 0; i < kActionQueueLength; i++)
         {
             if ( action->nextActionQueueNum >= 0)
             {
-                action->nextActionQueue = reinterpret_cast<actionQueueType*>(*gActionQueueData) + action->nextActionQueueNum;
+                action->nextActionQueue = *gActionQueueData + action->nextActionQueueNum;
             } else
             {
                 action->nextActionQueue = nil;
