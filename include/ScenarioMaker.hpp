@@ -111,7 +111,7 @@ inline scenarioInitialType* mGetScenarioInitial(scenarioType* mscenario, long mi
 }
 
 inline briefPointType* mGetScenarioBrief(scenarioType* mscenario, long mbriefnum) {
-    return reinterpret_cast<briefPointType *>(*gAresGlobal->gScenarioBriefData)
+    return *gAresGlobal->gScenarioBriefData
         + ((mscenario)->briefPointFirst) + (mbriefnum);
 }
 

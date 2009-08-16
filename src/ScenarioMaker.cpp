@@ -165,18 +165,18 @@ short ScenarioMakerInit( void)
 
     if ( gAresGlobal->gScenarioBriefData == nil)
     {
-        gAresGlobal->gScenarioBriefData = GetResource( kScenarioBriefResType, kScenarioBriefResID);
+        gAresGlobal->gScenarioBriefData = reinterpret_cast<briefPointType**>(GetResource( kScenarioBriefResType, kScenarioBriefResID));
         if ( gAresGlobal->gScenarioBriefData == nil)
         {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioBriefDataError, -1, -1, -1, __FILE__, 5);
             return( RESOURCE_ERROR);
         }
-        DetachResource( gAresGlobal->gScenarioBriefData);
+        DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioBriefData));
 
-        mDataHandleLockAndRegister( gAresGlobal->gScenarioBriefData, nil, nil, nil, "\pgAresGlobal->gScenarioBriefData");
+        mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gScenarioBriefData), nil, nil, nil, "\pgAresGlobal->gScenarioBriefData");
 
         gAresGlobal->maxScenarioBrief = GetHandleSize(
-            gAresGlobal->gScenarioBriefData) / sizeof( briefPointType);
+            reinterpret_cast<Handle>(gAresGlobal->gScenarioBriefData)) / sizeof( briefPointType);
 
     }
 
@@ -187,7 +187,7 @@ void ScenarioMakerCleanup( void)
 
 {
     if ( gAresGlobal->gScenarioData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioData));
-    if ( gAresGlobal->gScenarioBriefData != nil) DisposeHandle( gAresGlobal->gScenarioBriefData);
+    if ( gAresGlobal->gScenarioBriefData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioBriefData));
     if ( gAresGlobal->gScenarioInitialData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioInitialData));
     if ( gAresGlobal->gScenarioConditionData != nil) DisposeHandle( gAresGlobal->gScenarioConditionData);
     CleanupRaces();

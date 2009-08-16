@@ -108,8 +108,8 @@ OSErr EF_OpenExternalFile( void)
     }
     if ( gAresGlobal->gScenarioBriefData != nil)
     {
-        HHDeregisterHandle( &gAresGlobal->gScenarioBriefData);
-        DisposeHandle( gAresGlobal->gScenarioBriefData);
+        HHDeregisterHandle( reinterpret_cast<Handle*>(&gAresGlobal->gScenarioBriefData));
+        DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioBriefData));
         gAresGlobal->gScenarioBriefData = nil;
     }
 
@@ -185,18 +185,18 @@ OSErr EF_OpenExternalFile( void)
     gAresGlobal->maxScenarioCondition = GetHandleSize(
         gAresGlobal->gScenarioConditionData) / sizeof( scenarioConditionType);
 
-    gAresGlobal->gScenarioBriefData = GetResource( kScenarioBriefResType, kScenarioBriefResID);
+    gAresGlobal->gScenarioBriefData = reinterpret_cast<briefPointType**>(GetResource( kScenarioBriefResType, kScenarioBriefResID));
     if ( gAresGlobal->gScenarioBriefData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioBriefDataError, -1, -1, -1, __FILE__, 5);
         return( RESOURCE_ERROR);
     }
-    DetachResource( gAresGlobal->gScenarioBriefData);
+    DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioBriefData));
 
-    mDataHandleLockAndRegister( gAresGlobal->gScenarioBriefData, nil, nil, nil, "\pgAresGlobal->gScenarioBriefData");
+    mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gScenarioBriefData), nil, nil, nil, "\pgAresGlobal->gScenarioBriefData");
 
     gAresGlobal->maxScenarioBrief = GetHandleSize(
-        gAresGlobal->gScenarioBriefData) / sizeof( briefPointType);
+        reinterpret_cast<Handle>(gAresGlobal->gScenarioBriefData)) / sizeof( briefPointType);
 
     // races
     if ( gAresGlobal->gRaceData == nil)

@@ -71,6 +71,7 @@ struct hotKeyType {
 
 struct admiralType;
 struct beamType;
+struct briefPointType;
 struct raceType;
 struct scenarioType;
 struct scenarioInitialType;
@@ -122,7 +123,7 @@ struct aresGlobalType {
     scenarioType**  gScenarioData;      // = nil;
     scenarioInitialType**   gScenarioInitialData;   // = nil;
     Handle          gScenarioConditionData; // = nil;
-    Handle          gScenarioBriefData;     // = nil;
+    briefPointType**        gScenarioBriefData;     // = nil;
     Handle          gRadarBlipData;         // = nil;
     Handle          gScaleList;             // = nil;
     Handle          gSectorLineData;        // = nil;
