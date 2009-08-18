@@ -1247,8 +1247,8 @@ void MainLoop (void)
                             UseResFile( gAresGlobal->gMainResRefNum);
                             if ( gAresGlobal->gReplayData != nil)
                             {
-                                DetachResource( gAresGlobal->gReplayData);
-                                randomSeed = (unsigned long *)*gAresGlobal->gReplayData;
+                                DetachResource(reinterpret_cast<Handle>(gAresGlobal->gReplayData));
+                                randomSeed = *gAresGlobal->gReplayData;
                                 gRandomSeed = *randomSeed;
                             }
                             UseResFile( refNum);
@@ -1257,9 +1257,9 @@ void MainLoop (void)
                             SysBeep(20);
                             gAresGlobal->gOptions |= kOptionRecord;
                             if ( gAresGlobal->gReplayData != nil)
-                                DisposeHandle( gAresGlobal->gReplayData);
-                            gAresGlobal->gReplayData = NewHandle( sizeof( unsigned long) * (long)kReplayDataSize);
-                            randomSeed = (unsigned long *)*gAresGlobal->gReplayData;
+                                DisposeHandle(reinterpret_cast<Handle>(gAresGlobal->gReplayData));
+                            gAresGlobal->gReplayData = reinterpret_cast<unsigned long**>(NewHandle(sizeof( unsigned long) * kReplayDataSize));
+                            randomSeed = *gAresGlobal->gReplayData;
                             *randomSeed = gRandomSeed;
                         }
                     }
@@ -1281,12 +1281,13 @@ void MainLoop (void)
 
                             if ( whichDemoLevel >= 0)// get indexed demo level
                             {
-                                gAresGlobal->gReplayData =
-                                    GetIndResource( kReplayResType, whichDemoLevel + 1);
+                                gAresGlobal->gReplayData = reinterpret_cast<unsigned long**>(
+                                            GetIndResource(kReplayResType, whichDemoLevel + 1));
                                 if ( ResError() != noErr) gAresGlobal->gReplayData = nil;
                                 if ( gAresGlobal->gReplayData != nil)
                                 {
-                                    GetResInfo( gAresGlobal->gReplayData, &resID, &resType, resName);
+                                    GetResInfo(reinterpret_cast<Handle>(gAresGlobal->gReplayData),
+                                            &resID, &resType, resName);
                                     whichScenario = resID - kReplayResID;
                                 }
                             }
@@ -1298,18 +1299,20 @@ void MainLoop (void)
                                     whichScenario = GetDemoScenario();
                                     // whichScenario = Randomize( gAresGlobal->levelNum);//Randomize( 30 + 1);
                                     // whichScenario = GetScenarioNumberFromChapterNumber( whichScenario);
-                                    gAresGlobal->gReplayData = GetResource( kReplayResType, kReplayResID + whichScenario);
+                                    gAresGlobal->gReplayData = reinterpret_cast<unsigned long**>(
+                                            GetResource(kReplayResType, kReplayResID + whichScenario));
                                     if ( ResError() != noErr) gAresGlobal->gReplayData = nil;
                                 } while ( gAresGlobal->gReplayData == nil);
                             }                       } else
                         {
-                                gAresGlobal->gReplayData = GetResource( kReplayResType, kReplayResID + whichScenario);
+                                gAresGlobal->gReplayData = reinterpret_cast<unsigned long**>(
+                                        GetResource(kReplayResType, kReplayResID + whichScenario));
                         }
 
                         if ( gAresGlobal->gReplayData != nil)
                         {
-                            DetachResource( gAresGlobal->gReplayData);
-                            randomSeed = reinterpret_cast<unsigned long *>(*gAresGlobal->gReplayData);
+                            DetachResource( reinterpret_cast<Handle>(gAresGlobal->gReplayData));
+                            randomSeed = *gAresGlobal->gReplayData;
                             saveSeed = gRandomSeed;
                             gRandomSeed = *randomSeed;
                         }
@@ -1507,17 +1510,17 @@ void MainLoop (void)
                                                 UpdateResFile( gAresGlobal->gMainResRefNum);
                                                 DisposeHandle( tres);
                                             }
-                                            AddResource( gAresGlobal->gReplayData, kReplayResType, kReplayResID + whichScenario, "\pReplay Data");
-                                            ChangedResource( gAresGlobal->gReplayData);
-                                            WriteResource( gAresGlobal->gReplayData);
-                                            DetachResource( gAresGlobal->gReplayData);
-                                            DisposeHandle( gAresGlobal->gReplayData);
+                                            AddResource(reinterpret_cast<Handle>(gAresGlobal->gReplayData), kReplayResType, kReplayResID + whichScenario, "\pReplay Data");
+                                            ChangedResource(reinterpret_cast<Handle>(gAresGlobal->gReplayData));
+                                            WriteResource(reinterpret_cast<Handle>(gAresGlobal->gReplayData));
+                                            DetachResource(reinterpret_cast<Handle>(gAresGlobal->gReplayData));
+                                            DisposeHandle(reinterpret_cast<Handle>(gAresGlobal->gReplayData));
                                             gAresGlobal->gReplayData = nil;
                                         }
                                         UseResFile( refNum);
                                     } else if ( gAresGlobal->gOptions & kOptionReplay)
                                     {
-                                        DisposeHandle( gAresGlobal->gReplayData);
+                                        DisposeHandle(reinterpret_cast<Handle>(gAresGlobal->gReplayData));
                                         gAresGlobal->gReplayData = nil;
                                     }
 
@@ -1943,10 +1946,10 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
 
     if (( gAresGlobal->gOptions & ( kOptionRecord | kOptionReplay)) && ( gAresGlobal->gReplayData != nil))
     {
-        MoveHHi( gAresGlobal->gReplayData);
-        HLock( gAresGlobal->gReplayData);
-        replayDataSize = (GetHandleSize( gAresGlobal->gReplayData) - 3) >> 2;
-        theseKeys = reinterpret_cast<unsigned long *>(*gAresGlobal->gReplayData);
+        MoveHHi(reinterpret_cast<Handle>(gAresGlobal->gReplayData));
+        HLock(reinterpret_cast<Handle>(gAresGlobal->gReplayData));
+        replayDataSize = (GetHandleSize(reinterpret_cast<Handle>(gAresGlobal->gReplayData)) - 3) >> 2;
+        theseKeys = *gAresGlobal->gReplayData;
         theseKeys++;
         if ( gAresGlobal->gOptions & kOptionRecord)
         {
@@ -2956,22 +2959,22 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                 *theseKeys = gAresGlobal->gLastKeys;
         if ( gAresGlobal->gReplayData != nil)
         {
-            HUnlock( gAresGlobal->gReplayData);
-            SetHandleSize( gAresGlobal->gReplayData, (keyDataSize + 1L) * sizeof( long));
+            HUnlock(reinterpret_cast<Handle>(gAresGlobal->gReplayData));
+            SetHandleSize(reinterpret_cast<Handle>(gAresGlobal->gReplayData), (keyDataSize + 1L) * sizeof( long));
             if ( MemError() != noErr)
             {
 //              ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p I didn't have enough memory to record any more keystrokes.", nil, nil, -1, -1, -1, -1, __FILE__, 38);
                 SysBeep(20);
                 gAresGlobal->gGameOver = 1;
             }
-            HLock( gAresGlobal->gReplayData);
+            HLock(reinterpret_cast<Handle>(gAresGlobal->gReplayData));
             result = kWinGame;
         }
 
     }
     if (( gAresGlobal->gOptions & ( kOptionRecord | kOptionReplay)) && ( gAresGlobal->gReplayData != nil))
     {
-            HUnlock( gAresGlobal->gReplayData);
+            HUnlock(reinterpret_cast<Handle>(gAresGlobal->gReplayData));
     }
     WriteDebugLine("\p<GameOver");
     WriteDebugLong( keyDataSize);

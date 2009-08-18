@@ -89,7 +89,7 @@ struct aresGlobalType {
     unsigned long   gSynchValue;
     CWindowPtr      gBackWindow;
     long            gForceDemoLevel;
-    Handle          gReplayData;
+    unsigned long** gReplayData;
     short           gMainResRefNum;
     unsigned long   gFrameCount;
     preferencesDataType**   gPreferencesData;
