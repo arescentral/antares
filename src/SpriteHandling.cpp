@@ -90,7 +90,8 @@ extern aresGlobalType   *gAresGlobal;
 long                    *gScaleHMap = nil, *gScaleVMap = nil, gAbsoluteScale = MIN_SCALE;
 pixTableType            gPixTable[ kMaxPixTableEntry];
 spriteType**            gSpriteTable = NULL;
-Handle                  gBothScaleMaps = nil/*, gBlipTable = nil*/, gStaticTable = nil;
+long**                  gBothScaleMaps = NULL;
+unsigned char**         gStaticTable = NULL;
 short                   gSpriteFileRefID = 0;
 
 Boolean PixelInSprite_IsOutside( spritePix *sprite, long x, long y, long *hmap,
@@ -105,7 +106,7 @@ void SpriteHandlingInit ( void)
     unsigned char   *staticValue = nil;
     short           error;
 
-    gBothScaleMaps = NewHandle( sizeof( long) * MAX_PIX_SIZE * 2);
+    gBothScaleMaps = reinterpret_cast<long**>(NewHandle(sizeof(long) * MAX_PIX_SIZE * 2));
     if ( gBothScaleMaps == nil)
     {
         ShowErrorAny( eExitToShellErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
@@ -114,10 +115,10 @@ void SpriteHandlingInit ( void)
     MoveHHi( gBothScaleMaps);
     HLock( gBothScaleMaps);
     */
-    mHandleLockAndRegister( gBothScaleMaps, nil, nil, ResolveScaleMapData, "\pgBothScaleMaps");
+    mHandleLockAndRegister(reinterpret_cast<Handle&>(gBothScaleMaps), nil, nil, ResolveScaleMapData, "\pgBothScaleMaps");
 
-    gScaleHMap = reinterpret_cast<long*>(*gBothScaleMaps);
-    gScaleVMap = reinterpret_cast<long*>(*gBothScaleMaps) + MAX_PIX_SIZE;
+    gScaleHMap = *gBothScaleMaps;
+    gScaleVMap = *gBothScaleMaps + MAX_PIX_SIZE;
 
 /*
     gSpriteFileRefID = ARF_OpenResFile( kSpriteResFileName);
@@ -162,14 +163,14 @@ void SpriteHandlingInit ( void)
     if ( gBlipTable == nil)
         ShowErrorNoRecover( SPRITE_CREATE_ERROR, kSpriteHandleError, 18);
 */
-    gStaticTable = NewHandle( sizeof( unsigned char) * (kStaticTableSize * 2));
+    gStaticTable = reinterpret_cast<unsigned char**>(NewHandle(sizeof(unsigned char) * (kStaticTableSize * 2)));
     if ( gStaticTable == nil)
     {
     }
 
-    mHandleLockAndRegister( gStaticTable, nil, nil, nil, "\pgStaticTable");
+    mHandleLockAndRegister(reinterpret_cast<Handle&>(gStaticTable), nil, nil, nil, "\pgStaticTable");
 
-    staticValue = reinterpret_cast<unsigned char*>(*gStaticTable);
+    staticValue = *gStaticTable;
     for ( i = 0; i < (kStaticTableSize * 2); i++)
     {
         j = Randomize( 256);
@@ -225,7 +226,7 @@ void CleanupSpriteHandling( void)
     int i;
 
     if ( gBothScaleMaps != nil)
-        DisposeHandle( gBothScaleMaps);
+        DisposeHandle(reinterpret_cast<Handle>(gBothScaleMaps));
 //  CloseResFile( gSpriteFileRefID);
     for ( i = 0; i < kMaxPixTableEntry; i++)
     {
@@ -1861,7 +1862,7 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, l
         if (( (dRect->left + 1) < clipRect->right) && ( dRect->right > clipRect->left) &&
                 ( dRect->top < clipRect->bottom) && ( dRect->bottom > clipRect->top))
         {
-            staticByte = reinterpret_cast<unsigned char *>(*gStaticTable) + staticValue;
+            staticByte = *gStaticTable + staticValue;
             if ( scale <= SCALE_SCALE)
             {
 
@@ -1965,7 +1966,7 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, l
                     if ( (staticValue + scaleCalc) > ( kStaticTableSize))
                     {
                         staticValue += scaleCalc - kStaticTableSize;
-                        staticByte = reinterpret_cast<unsigned char*>(*gStaticTable) + staticValue;
+                        staticByte = *gStaticTable + staticValue;
                     } else staticValue += scaleCalc;
 
                     do
@@ -2084,7 +2085,7 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, l
                         if ( (staticValue + mapWidth) > ( kStaticTableSize))
                         {
                             staticValue += mapWidth - kStaticTableSize;
-                            staticByte = reinterpret_cast<unsigned char*>(*gStaticTable) + staticValue;
+                            staticByte = *gStaticTable + staticValue;
                         } else staticValue += mapWidth;
                         while ( hmap < lhend)
                         {
@@ -2177,7 +2178,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, lo
         if (( (dRect->left + 1) < clipRect->right) && ( dRect->right > clipRect->left) &&
                 ( dRect->top < clipRect->bottom) && ( dRect->bottom > clipRect->top))
         {
-            staticByte = reinterpret_cast<unsigned char*>(*gStaticTable) + staticValue;
+            staticByte = *gStaticTable + staticValue;
             if ( scale <= SCALE_SCALE)
             {
 
@@ -2283,7 +2284,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, lo
                         if ( (staticValue + scaleCalc) > ( kStaticTableSize))
                         {
                             staticValue += scaleCalc - kStaticTableSize;
-                            staticByte = reinterpret_cast<unsigned char*>(*gStaticTable) + staticValue;
+                            staticByte = *gStaticTable + staticValue;
                         } else staticValue += scaleCalc;
 
                         do
@@ -2315,7 +2316,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, lo
                         if ( (staticValue + scaleCalc) > ( kStaticTableSize))
                         {
                             staticValue += scaleCalc - kStaticTableSize;
-                            staticByte = reinterpret_cast<unsigned char*>(*gStaticTable) + staticValue;
+                            staticByte = *gStaticTable + staticValue;
                         } else staticValue += scaleCalc;
 
                         do
@@ -2434,7 +2435,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, lo
                         if ( (staticValue + mapWidth) > ( kStaticTableSize))
                         {
                             staticValue += mapWidth - kStaticTableSize;
-                            staticByte = reinterpret_cast<unsigned char*>(*gStaticTable) + staticValue;
+                            staticByte = *gStaticTable + staticValue;
                         } else staticValue += mapWidth;
                         while ( hmap < lhend)
                         {
@@ -3161,8 +3162,8 @@ void TestByte( char *dbyte, PixMap *pixMap, StringPtr name)
 void ResolveScaleMapData( Handle scaleData)
 {
 #pragma unused( scaleData)
-    gScaleHMap = reinterpret_cast<long*>(*gBothScaleMaps);
-    gScaleVMap = reinterpret_cast<long*>(*gBothScaleMaps) + MAX_PIX_SIZE;
+    gScaleHMap = *gBothScaleMaps;
+    gScaleVMap = *gBothScaleMaps + MAX_PIX_SIZE;
 }
 
 void ResolveSpriteData( Handle dummy)
