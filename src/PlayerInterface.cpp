@@ -4878,7 +4878,7 @@ void ShowSuccessAnimation( WindowPtr thePort)
     PixMapHandle    pixMap = GetGWorldPixMap( gOffWorld),
                     saveMap = GetGWorldPixMap( gSaveWorld);
     Boolean         warp;
-    char            hackString[] = "\pMISSION COMPLETE";
+    unsigned char   hackString[] = "\pMISSION COMPLETE";
     transColorType  *transColor;
 
     SetLongRect( &starBounds, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);

@@ -219,7 +219,7 @@ void DirectTextCleanup( void)
     for  ( count = 0; count < kDirectFontNum; count++)
     {
         if (( dtext->myHandle) && ( dtext->charSet != nil))
-            DisposeHandle( dtext->charSet);
+            DisposeHandle(reinterpret_cast<Handle>(dtext->charSet));
         dtext++;
     }
     if ( gFourBitTable != nil)
@@ -272,17 +272,17 @@ short AddDirectFont( directTextType *dtext)
         dtext->myHandle = FALSE;
     } else
     {
-        dtext->charSet = HHGetResource( kDTextFontMapResType, dtext->resID);
+        dtext->charSet = reinterpret_cast<unsigned char**>(HHGetResource(kDTextFontMapResType, dtext->resID));
         if ( dtext->charSet == nil)
         {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, dtext->resID);
             return( RESOURCE_ERROR);
         }
-        DetachResource( dtext->charSet);
+        DetachResource(reinterpret_cast<Handle>(dtext->charSet));
         dtext->myHandle = TRUE;
         WriteDebugLine("\pAddCharSet:");
         WriteDebugLong( dtext->resID);
-        mDataHandleLockAndRegister( dtext->charSet, nil, nil, nil, "\pdtext->charset"); // this can move memory, so our ptr's no good
+        mDataHandleLockAndRegister(reinterpret_cast<Handle&>(dtext->charSet), nil, nil, nil, "\pdtext->charset"); // this can move memory, so our ptr's no good
     }
     return( kNoError);
 }
@@ -398,7 +398,7 @@ void DrawDirectTextStringClipped( anyCharType *string, unsigned char color, PixM
                     bytesToDo -= hpos + (width) - clip->right;
 
                 // sbyte = source byte
-                sbyte = reinterpret_cast<unsigned char *>(*(gDirectText->charSet)) + gDirectText->height *
+                sbyte = *(gDirectText->charSet) + gDirectText->height *
                         gDirectText->physicalWidth * implicit_cast<long>(*string) + implicit_cast<long>(*string);
                 string++;
 
@@ -461,7 +461,7 @@ void DrawDirectTextStringClipped( anyCharType *string, unsigned char color, PixM
         } else // not clipped, draw in long words
         {
             // get source byte
-            sbyte = reinterpret_cast<unsigned char *>(*(gDirectText->charSet)) + implicit_cast<long>(gDirectText->height) *
+            sbyte = *(gDirectText->charSet) + implicit_cast<long>(gDirectText->height) *
                     implicit_cast<long>(gDirectText->physicalWidth) * implicit_cast<long>(*string) + implicit_cast<long>(*string);
             string++;
 
@@ -944,7 +944,7 @@ void DrawDirectTextHeightx2( anyCharType *string, unsigned char color, PixMap *d
     rowPlus -= implicit_cast<long>(width);
     while ( slen > 0)
     {
-        slong = reinterpret_cast<unsigned long *>(*(gDirectText->charSet)) + implicit_cast<long>(gDirectText->height) *
+        slong = reinterpret_cast<unsigned long*>(*(gDirectText->charSet)) + implicit_cast<long>(gDirectText->height) *
                 implicit_cast<long>(width) * implicit_cast<long>(*string++);
         dlong = reinterpret_cast<unsigned long *>(dchar);
         for ( j = 0; j < gDirectText->height; j++)

@@ -51,7 +51,7 @@
 #define kButtonSmallFontResID   5005
 
 struct directTextType {
-    Handle      charSet;
+    unsigned char**     charSet;
     short       resID;
     ShortBoolean     myHandle;       // different texts can have the same handles; myHandle = TRUE if this guy's in charge of disposing
     long        logicalWidth;
@@ -69,17 +69,16 @@ inline void mGetDirectStringDimensions(const unsigned char* string, long& width,
     width = (implicit_cast<long>(kCharSpace) + implicit_cast<long>(gDirectText->logicalWidth)) * implicit_cast<long>(*(string));   // width * length of string
 }
 
-template <typename T>
 inline void mGetDirectStringDimensions(
-        T* mstring, long& mwidth, long& mheight, long &mstrlen, unsigned char*& mcharptr,
+        unsigned char* mstring, long& mwidth, long& mheight, long &mstrlen, unsigned char*& mcharptr,
         unsigned char*& mwidptr) {
     mheight = gDirectText->height;
     mwidth = 0;
-    mcharptr = reinterpret_cast<unsigned char*>(mstring);
+    mcharptr = mstring;
     mstrlen = implicit_cast<long>(*(mcharptr++));
     while( mstrlen > 0)
     {
-        mwidptr = reinterpret_cast<unsigned char *>(*(gDirectText->charSet))
+        mwidptr = *(gDirectText->charSet)
             + gDirectText->height * gDirectText->physicalWidth * implicit_cast<long>(*mcharptr)
             + implicit_cast<long>(*mcharptr);
         mwidth += implicit_cast<long>(*mwidptr);
@@ -89,7 +88,7 @@ inline void mGetDirectStringDimensions(
 }
 
 inline void mDirectCharWidth(unsigned char& mwidth, char mchar, unsigned char*& mwidptr) {
-    mwidptr = reinterpret_cast<unsigned char *>(*(gDirectText->charSet))
+    mwidptr = *(gDirectText->charSet)
         + gDirectText->height * gDirectText->physicalWidth * implicit_cast<long>(mchar)
         + implicit_cast<long>(mchar);
     mwidth = *mwidptr;
