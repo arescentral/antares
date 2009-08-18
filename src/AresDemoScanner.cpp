@@ -365,7 +365,7 @@ void CopyAllUsedPixTables( void)
             WriteDebugLine("\pSavePIX:");
             WriteDebugLong( gPixTable[count].resID);
             SaveAnyResourceInPreferences( kPixResType, gPixTable[count].resID, nil,
-                gPixTable[count].resource, true);
+                reinterpret_cast<Handle>(gPixTable[count].resource), true);
         }
     }
 }

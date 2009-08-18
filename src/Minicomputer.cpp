@@ -1466,7 +1466,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     char                *pixData = nil;
     coordPointType      coord;
     Point               where;
-    Handle              pixTable = nil;
+    natePixType**       pixTable = nil;
     short               whichShape;
     spaceObjectType     *dObject = nil;
     long                tlong, thisScale;

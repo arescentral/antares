@@ -192,7 +192,7 @@ void DrawSpriteCursorSprite( longRect *clipRect)
     longRect        sRect, tc;
     spritePix       aSpritePix;
     char            *pixData;
-    Handle          pixTable;
+    natePixType**   pixTable;
     int             whichShape;
     Rect            tRect;
 

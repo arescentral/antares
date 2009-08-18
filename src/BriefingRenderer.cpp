@@ -267,7 +267,7 @@ void GetRealObjectSpriteData( coordPointType *realCoord,
         long scale, long *thisScale, spritePix *aSpritePix, Point *where,
         longRect *spriteRect)
 {
-    Handle          pixTable;
+    natePixType**   pixTable;
     int             whichShape;
     long            tlong;
     coordPointType  coord = *realCoord;

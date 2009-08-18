@@ -211,7 +211,7 @@ void ResetAllPixTables( void)
     {
         if ( gPixTable[i].resource != nil)
         {
-            mHandleDisposeAndDeregister( gPixTable[i].resource);
+            mHandleDisposeAndDeregister(reinterpret_cast<Handle>(gPixTable[i].resource));
             gPixTable[i].resource = nil;
         }
         gPixTable[i].keepMe = FALSE;
@@ -232,7 +232,7 @@ void CleanupSpriteHandling( void)
         if ( gPixTable[i].resource != nil)
         {
 //          mHandleDisposeAndDeregister( gPixTable[i].resource);
-            DisposeHandle( gPixTable[i].resource);
+            DisposeHandle(reinterpret_cast<Handle>(gPixTable[i].resource));
         }
     }
     if ( gSpriteTable != nil)
@@ -266,7 +266,7 @@ void RemoveAllUnusedPixTables( void)
     {
         if (( gPixTable[i].keepMe == FALSE) && ( gPixTable[i].resource != nil))
         {
-            mHandleDisposeAndDeregister( gPixTable[i].resource);
+            mHandleDisposeAndDeregister(reinterpret_cast<Handle>(gPixTable[i].resource));
             gPixTable[i].resource = nil;
             gPixTable[i].keepMe = FALSE;
             gPixTable[i].resID = -1;
@@ -275,8 +275,7 @@ void RemoveAllUnusedPixTables( void)
 
 }
 
-Handle AddPixTable( short resID)
-
+natePixType** AddPixTable( short resID)
 {
     short           i = 0, realResID = resID;
     short           color = 0;
@@ -303,7 +302,7 @@ Handle AddPixTable( short resID)
             WriteDebugLong( color);
         }
 
-        gPixTable[i].resource = HHGetResource( kPixResType, realResID);
+        gPixTable[i].resource = reinterpret_cast<natePixType**>(HHGetResource( kPixResType, realResID));
 
         if ( gPixTable[i].resource == nil)
         {
@@ -312,12 +311,12 @@ Handle AddPixTable( short resID)
             return( nil);
         }
 
-        DetachResource( gPixTable[i].resource);
+        DetachResource(reinterpret_cast<Handle>(gPixTable[i].resource));
         /*
         MoveHHi( gPixTable[i].resource);
         HLock( gPixTable[i].resource);
         */
-        mDataHandleLockAndRegister( gPixTable[i].resource, nil, nil, nil, "\pgPixTable[i].resource");
+        mDataHandleLockAndRegister(reinterpret_cast<Handle&>(gPixTable[i].resource), nil, nil, nil, "\pgPixTable[i].resource");
 
 //      WriteDebugLine((char *)"\pADDPIX");
 //      WriteDebugLong( resID);
@@ -335,8 +334,7 @@ Handle AddPixTable( short resID)
     } return( GetPixTable( resID));
 }
 
-Handle GetPixTable( short resID)
-
+natePixType** GetPixTable( short resID)
 {
     short       i = 0;
 
@@ -346,7 +344,7 @@ Handle GetPixTable( short resID)
     return ( gPixTable[i].resource);
 }
 
-spriteType *AddSprite( Point where, Handle table, short resID, short whichShape, long scale, long size,
+spriteType *AddSprite( Point where, natePixType** table, short resID, short whichShape, long scale, long size,
                     short layer, unsigned char color, long *whichSprite)
 
 {
@@ -2873,7 +2871,7 @@ void DrawSpriteTableInOffWorld( longRect *clipRect)
     longRect        sRect;
     spritePix       aSpritePix;
     char            *pixData;
-    Handle          pixTable;
+    natePixType**   pixTable;
     int             whichShape;
     spriteType      *aSprite;
 
@@ -3003,7 +3001,7 @@ void GetOldSpritePixData( spriteType *sourceSprite, spritePix *oldData)
 {
     short               whichShape;
     char                *pixData;
-    Handle              pixTable;
+    natePixType**       pixTable;
 
     if ( sourceSprite->table != nil)
     {

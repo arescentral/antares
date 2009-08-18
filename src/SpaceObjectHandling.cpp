@@ -331,7 +331,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
 {
     spaceObjectType *destObject = nil;
     int             whichObject = 0;
-    Handle          spriteTable = nil;
+    natePixType**   spriteTable = nil;
     Point           where;
     spritePix       oldStyleSprite;
     long            scaleCalc;
@@ -922,7 +922,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
     baseObjectType  *sObject = mGetBaseObjectPtr( whichBaseObject), *weaponBase = nil;
     short           angle;
     long            r;
-    Handle          spriteTable;
+    natePixType**   spriteTable;
 
     dObject->attributes = sObject->attributes | (dObject->attributes &
         (kIsHumanControlled | kIsRemote | kIsPlayerShip | kStaticDestination));
@@ -2720,7 +2720,7 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, Boolean message)
 
             if ( anObject->attributes & kCanThink)
             {
-                Handle          pixTable;
+                natePixType**   pixTable;
 
                 if (( anObject->pixResID == anObject->baseType->pixResID) ||
                     ( anObject->pixResID == (anObject->baseType->pixResID |

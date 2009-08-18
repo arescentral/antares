@@ -91,9 +91,10 @@ struct spritePix {
 
 //typedef  spritePix;
 
+struct natePixType;
 struct spriteType {
     Point           where;
-    Handle          table;
+    natePixType**   table;
     short           resID;
     int             whichShape;
     long            scale;
@@ -111,10 +112,12 @@ struct spriteType {
 
 
 struct pixTableType {
-    Handle      resource;
+    natePixType**   resource;
     int         resID;
     Boolean     keepMe;
     };
+
+struct natePixType;
 
 void SpriteHandlingInit( void);
 void CleanupSpriteHandling( void);
@@ -137,9 +140,9 @@ void ResetAllPixTables( void);
 void SetAllPixTablesNoKeep( void);
 void KeepPixTable( short);
 void RemoveAllUnusedPixTables( void);
-Handle AddPixTable( short);
-Handle GetPixTable( short);
-spriteType *AddSprite( Point, Handle, short, short, long, long, short, unsigned char, long *);
+natePixType** AddPixTable( short);
+natePixType** GetPixTable( short);
+spriteType *AddSprite( Point, natePixType**, short, short, long, long, short, unsigned char, long *);
 void RemoveSprite( spriteType *);
 void EraseSpriteTable( void);
 void DrawSpriteTableInOffWorld( longRect *);
