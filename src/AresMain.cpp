@@ -1973,7 +1973,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
             ExitToShell();
         }
     }
-    netTime.hi = netTime.lo = 0;
+    netTime.as_struct.hi = netTime.as_struct.lo = 0;
 //  EMERGENCYHACKTEST = false;
 
     CheckScenarioConditions( 0);
@@ -2018,11 +2018,11 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
             while ( unitsPassed == 0)
             {
 //              MyWideAdd( (wide *)&gAresGlobal->gLastTime, (wide *)&netTime);
-                netTime.hi = netTime.lo = 0;
+                netTime.as_struct.hi = netTime.as_struct.lo = 0;
                 Microseconds( &thisTime);
                 scrapTime = thisTime;
                 WideSubtract( reinterpret_cast<wide *>(&thisTime), reinterpret_cast<wide *>(&gAresGlobal->gLastTime));
-                newGameTime = (thisTime.lo / kTimeUnit) + ((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
+                newGameTime = (thisTime.as_struct.lo / kTimeUnit) + ((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
 //              newGameTime = gAresGlobal->gGameTime + Randomize( 7) + 1;//Randomize( kDecideEveryCycles);
 #ifdef kConstantRate
                 newGameTime = gAresGlobal->gGameTime + 1;
@@ -2526,7 +2526,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
 
                         Microseconds( &netTime);    // don't activate
                         WideSubtract( (wide *)&netTime, (wide *)&thisTime);
-                        if ( netTime.lo > kTimeUnit)
+                        if ( netTime.as_struct.lo > kTimeUnit)
                         {
                             netCount++;
                             if ( netCount > kFractionalLagCorrectTolerance)
@@ -2982,7 +2982,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
 
     Microseconds( &thisTime);
     WideSubtract( reinterpret_cast<wide *>(&thisTime), reinterpret_cast<wide *>(&gAresGlobal->gLastTime));
-    newGameTime = thisTime.lo / 1000000; // divide by a million to get seconds
+    newGameTime = thisTime.as_struct.lo / 1000000; // divide by a million to get seconds
 //  *seconds = newGameTime + additionalSeconds;
     *seconds = newGameTime + additionalSeconds;
 //  HHCheckAllHandles();

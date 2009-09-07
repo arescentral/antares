@@ -711,7 +711,9 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
 
     spritePix               oldStyleSprite; // a temporary hack
     long                    magicHack1 = 0, magicHack2 = 0, magicHack3 = 0;
-    UnsignedWide                    farthestDist = {0, 0}, hugeDistance, wideScrap, closestDist = {0x7fffffff,0xffffffff};
+    UnsignedWide            farthestDist, hugeDistance, wideScrap, closestDist;
+    farthestDist.as_int = 0;
+    closestDist.as_int = 0x7fffffffffffffffull;
 
     Microseconds( &hackTimeStart);
 
@@ -786,19 +788,19 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
                 if (( dcalc > kMaximumRelevantDistance) ||
                     ( distance > kMaximumRelevantDistance))
                 {
-                    wideScrap.hi = 0;
-                    wideScrap.lo = dcalc;   // must be positive
-                    MyWideMul( wideScrap.lo, wideScrap.lo, &hugeDistance);  // ppc automatically generates WideMultiply
-                    wideScrap.lo = distance;
-                    MyWideMul( wideScrap.lo, wideScrap.lo, &wideScrap);
+                    wideScrap.as_struct.hi = 0;
+                    wideScrap.as_struct.lo = dcalc;   // must be positive
+                    MyWideMul( wideScrap.as_struct.lo, wideScrap.as_struct.lo, &hugeDistance);  // ppc automatically generates WideMultiply
+                    wideScrap.as_struct.lo = distance;
+                    MyWideMul( wideScrap.as_struct.lo, wideScrap.as_struct.lo, &wideScrap);
                     MyWideAdd( &hugeDistance, &wideScrap);
                     aObject->distanceFromPlayer = hugeDistance;
                 } else
                 {
-                    hugeDistance.hi = 0;
-                    hugeDistance.lo = distance * distance + dcalc * dcalc;
-                    aObject->distanceFromPlayer.lo = hugeDistance.lo;
-                    aObject->distanceFromPlayer.hi = 0;
+                    hugeDistance.as_struct.hi = 0;
+                    hugeDistance.as_struct.lo = distance * distance + dcalc * dcalc;
+                    aObject->distanceFromPlayer.as_struct.lo = hugeDistance.as_struct.lo;
+                    aObject->distanceFromPlayer.as_struct.hi = 0;
                     /*
                     if ( distance < closestDist)
                     {
@@ -829,8 +831,8 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
             }
         } else
         {
-            aObject->distanceFromPlayer.hi = 0x7fffffff;
-            aObject->distanceFromPlayer.lo = 0xffffffff;
+            aObject->distanceFromPlayer.as_struct.hi = 0x7fffffff;
+            aObject->distanceFromPlayer.as_struct.lo = 0xffffffff;
         }
 
         if (( aObject->active) && ( aObject->attributes & kConsiderDistanceAttributes))
@@ -1296,7 +1298,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
 
     Microseconds( &hackTimePassed);
     WideSubtract( reinterpret_cast<wide *>(&hackTimePassed), reinterpret_cast<wide *>(&hackTimeStart));
-//  WriteDebugLong( hackTimePassed.lo);
+//  WriteDebugLong( hackTimePassed.as_struct.lo);
 
 // here, it doesn't matter in what order we step through the table
     aObject = table;

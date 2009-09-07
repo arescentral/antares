@@ -271,23 +271,23 @@ void MyWideAddC( wide *target, const wide *source)
     unsigned long   ur0, ur5;
     long            sr7, sr6, sr4, sr0;
 
-    ur0 = target->lo;
-    ur5 = source->lo;
-    sr7 = target->hi;
+    ur0 = target->as_struct.lo;
+    ur5 = source->as_struct.lo;
+    sr7 = target->as_struct.hi;
     ur0 += ur5;
-    target->lo = ur0;
-    ur5 = source->lo;
-    sr6 = source->hi;
-    sr4 = source->hi;
-    sr0 = target->hi;
+    target->as_struct.lo = ur0;
+    ur5 = source->as_struct.lo;
+    sr6 = source->as_struct.hi;
+    sr4 = source->as_struct.hi;
+    sr0 = target->as_struct.hi;
     sr4 += 1;
     if ( ur0 > ur5) goto wa_med_1;
     sr4 += sr7;
-    target->hi = sr4;
+    target->as_struct.hi = sr4;
     goto wa_med_2;
 wa_med_1:
     sr4 = sr0 + sr6;
-    target->hi = sr4;
+    target->as_struct.hi = sr4;
 wa_med_2:
     return;
 }

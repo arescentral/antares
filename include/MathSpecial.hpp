@@ -94,31 +94,31 @@ void MyWideAddC( wide *, const wide *);
 #ifdef powerc
 template <typename T>
 inline void MyWideAdd(T* mtarget, T* msource) {
-    WideAdd(reinterpret_cast<wide*>(mtarget), reinterpret_cast<wide*>(msource));
+    mtarget->as_int += msource->as_int;
 }
 #else
 asm void MyWideAdd( UnsignedWide *, const UnsignedWide *);
 #endif
 template <typename T>
 inline bool mWideIsGreaterThan(const T& mleft, const T& mright) {
-    if (mleft.hi == mright.hi) {
-        return mleft.lo > mright.lo;
+    if (mleft.as_struct.hi == mright.as_struct.hi) {
+        return mleft.as_struct.lo > mright.as_struct.lo;
     } else {
-        return mleft.hi > mright.hi;
+        return mleft.as_struct.hi > mright.as_struct.hi;
     }
 }
 template <typename T>
 inline bool mWideIsGreaterThanOrEqual(const T& mleft, const T& mright) {
-    if (mleft.hi == mright.hi) {
-        return mleft.lo >= mright.lo;
+    if (mleft.as_struct.hi == mright.as_struct.hi) {
+        return mleft.as_struct.lo >= mright.as_struct.lo;
     } else {
-        return mleft.hi > mright.hi;
+        return mleft.as_struct.hi > mright.as_struct.hi;
     }
 }
 
 template <typename T>
-inline void MyWideMul(long mlong1, long mlong2, T* mwide) {
-    WideMultiply(mlong1, mlong2, reinterpret_cast<wide*>(mwide));
+inline void MyWideMul(int32_t mlong1, int32_t mlong2, T* mwide) {
+    mwide->as_int = implicit_cast<int64_t>(mlong1) * implicit_cast<int64_t>(mlong2);
 }
 
 #pragma options align=reset

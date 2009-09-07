@@ -62,8 +62,22 @@ typedef int16_t SInt16;
 typedef uint16_t UInt16;
 typedef int32_t SInt32;
 typedef uint32_t UInt32;
-typedef struct { SInt32 hi; UInt32 lo; } wide;
-typedef struct { UInt32 hi; UInt32 lo; } UnsignedWide;
+
+union wide {
+    int64_t as_int;
+    struct {
+        int32_t hi;
+        uint32_t lo;
+    } as_struct;
+};
+
+union UnsignedWide {
+    uint64_t as_int;
+    struct {
+        uint32_t hi;
+        uint32_t lo;
+    } as_struct;
+};
 
 void WideAdd(wide* value, wide* summand);
 void WideSubtract(wide* value, wide* difference);

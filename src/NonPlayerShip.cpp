@@ -2386,9 +2386,13 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
     Fixed           slope;
     short           angle;
 //  const wide      kMaxAngleDistance = {0, 1073676289}; // kMaximumAngleDistance ^ 2
-    UnsignedWide    wideClosestDistance = {kUniversalCenter, kUniversalCenter}, wideFartherDistance = {kUniversalCenter, kUniversalCenter},
-                    thisWideDistance, wideScrap;
+    UnsignedWide    wideClosestDistance, wideFartherDistance, thisWideDistance, wideScrap;
     unsigned char   thisDistanceState;
+
+    wideClosestDistance.as_struct.hi = kUniversalCenter;
+    wideClosestDistance.as_struct.lo = kUniversalCenter;
+    wideFartherDistance.as_struct.hi = kUniversalCenter;
+    wideFartherDistance.as_struct.lo = kUniversalCenter;
 
     // Here's what you've got to do next:
     // start with the currentShipNum
@@ -2432,16 +2436,16 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
             if (( dcalc > kMaximumRelevantDistance) ||
                 ( distance > kMaximumRelevantDistance))
             {
-                wideScrap.hi = 0;
-                wideScrap.lo = dcalc;   // must be positive
-                MyWideMul( wideScrap.lo, wideScrap.lo, &thisWideDistance);  // ppc automatically generates WideMultiply
-                wideScrap.lo = distance;
-                MyWideMul( wideScrap.lo, wideScrap.lo, &wideScrap);
+                wideScrap.as_struct.hi = 0;
+                wideScrap.as_struct.lo = dcalc;   // must be positive
+                MyWideMul( wideScrap.as_struct.lo, wideScrap.as_struct.lo, &thisWideDistance);  // ppc automatically generates WideMultiply
+                wideScrap.as_struct.lo = distance;
+                MyWideMul( wideScrap.as_struct.lo, wideScrap.as_struct.lo, &wideScrap);
                 MyWideAdd( &thisWideDistance, &wideScrap);
             } else
             {
-                thisWideDistance.hi = 0;
-                thisWideDistance.lo = distance * distance + dcalc * dcalc;
+                thisWideDistance.as_struct.hi = 0;
+                thisWideDistance.as_struct.lo = distance * distance + dcalc * dcalc;
             }
 
             thisDistanceState = 0;

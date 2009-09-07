@@ -2293,22 +2293,22 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
         if (( dcalc > kMaximumRelevantDistance) ||
             ( distance > kMaximumRelevantDistance))
         {
-            hugeDistance.hi = 0;
-            hugeDistance.lo = dcalc;    // must be positive
-            MyWideMul( hugeDistance.lo, hugeDistance.lo, &hugeDistance);    // ppc automatically generates WideMultiply
-            newObject.distanceFromPlayer.hi = 0;
-            newObject.distanceFromPlayer.lo = distance;
-            MyWideMul( newObject.distanceFromPlayer.lo, newObject.distanceFromPlayer.lo, &newObject.distanceFromPlayer);
+            hugeDistance.as_struct.hi = 0;
+            hugeDistance.as_struct.lo = dcalc;    // must be positive
+            MyWideMul( hugeDistance.as_struct.lo, hugeDistance.as_struct.lo, &hugeDistance);    // ppc automatically generates WideMultiply
+            newObject.distanceFromPlayer.as_struct.hi = 0;
+            newObject.distanceFromPlayer.as_struct.lo = distance;
+            MyWideMul( newObject.distanceFromPlayer.as_struct.lo, newObject.distanceFromPlayer.as_struct.lo, &newObject.distanceFromPlayer);
             MyWideAdd( &newObject.distanceFromPlayer, &hugeDistance);
         }
         else
         {
-            newObject.distanceFromPlayer.lo = distance * distance + dcalc * dcalc;
-            newObject.distanceFromPlayer.hi = 0;
+            newObject.distanceFromPlayer.as_struct.lo = distance * distance + dcalc * dcalc;
+            newObject.distanceFromPlayer.as_struct.hi = 0;
         }
     } else
     {
-        newObject.distanceFromPlayer.hi = newObject.distanceFromPlayer.lo = 0;
+        newObject.distanceFromPlayer.as_struct.hi = newObject.distanceFromPlayer.as_struct.lo = 0;
         /*
         if (( dcalc > kMaximumRelevantDistance) || ( distance > kMaximumRelevantDistance))
             distance = kMaximumRelevantDistanceSquared;

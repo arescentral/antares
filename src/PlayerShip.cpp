@@ -723,18 +723,18 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
                 if (( dcalc > kMaximumRelevantDistance) ||
                     ( distance > kMaximumRelevantDistance))
                 {
-                    hugeDistance.hi = 0;
-                    hugeDistance.lo = dcalc;    // must be positive
-                    MyWideMul( hugeDistance.lo, hugeDistance.lo, &hugeDistance);    // ppc automatically generates WideMultiply
-                    selectShip->distanceFromPlayer.hi = 0;
-                    selectShip->distanceFromPlayer.lo = distance;
-                    MyWideMul( selectShip->distanceFromPlayer.lo, selectShip->distanceFromPlayer.lo, &selectShip->distanceFromPlayer);
+                    hugeDistance.as_struct.hi = 0;
+                    hugeDistance.as_struct.lo = dcalc;    // must be positive
+                    MyWideMul( hugeDistance.as_struct.lo, hugeDistance.as_struct.lo, &hugeDistance);    // ppc automatically generates WideMultiply
+                    selectShip->distanceFromPlayer.as_struct.hi = 0;
+                    selectShip->distanceFromPlayer.as_struct.lo = distance;
+                    MyWideMul( selectShip->distanceFromPlayer.as_struct.lo, selectShip->distanceFromPlayer.as_struct.lo, &selectShip->distanceFromPlayer);
                     MyWideAdd( &selectShip->distanceFromPlayer, &hugeDistance);
                 }
                 else
                 {
-                    selectShip->distanceFromPlayer.lo = distance * distance + dcalc * dcalc;
-                    selectShip->distanceFromPlayer.hi = 0;
+                    selectShip->distanceFromPlayer.as_struct.lo = distance * distance + dcalc * dcalc;
+                    selectShip->distanceFromPlayer.as_struct.hi = 0;
                 }
                 /*
                 selectShip->distanceFromPlayer = (double long)distance * (double long)distance +
@@ -744,7 +744,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
             }
         } else
         {
-            hugeDistance.hi = hugeDistance.lo = 0;
+            hugeDistance.as_struct.hi = hugeDistance.as_struct.lo = 0;
         }
 
 /*      WriteDebugDivider();

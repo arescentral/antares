@@ -22,30 +22,18 @@
 
 #include <Base.h>
 
-inline int64_t WideToInt64(wide w) {
-    return *reinterpret_cast<int64_t*>(&w);
-}
-
-inline wide Int64ToWide(int64_t i) {
-    return *reinterpret_cast<wide*>(&i);
-}
+#include "Casts.hpp"
 
 void WideAdd(wide* value, wide* summand) {
-    int64_t value64 = WideToInt64(*value);
-    int64_t summand64 = WideToInt64(*summand);
-    *value = Int64ToWide(value64 + summand64);
+    value->as_int += summand->as_int;
 }
 
 void WideSubtract(wide* value, wide* difference) {
-    int64_t value64 = WideToInt64(*value);
-    int64_t difference64 = WideToInt64(*difference);
-    *value = Int64ToWide(value64 - difference64);
+    value->as_int -= difference->as_int;
 }
 
 void WideMultiply(long a, long b, wide* c) {
-    int64_t a64 = a;
-    int64_t b64 = b;
-    *c = Int64ToWide(a64 * b64);
+    c->as_int = implicit_cast<int64_t>(a) * implicit_cast<int64_t>(b);
 }
 
 long Random() {
