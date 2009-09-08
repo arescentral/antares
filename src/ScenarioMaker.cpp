@@ -990,7 +990,7 @@ void CheckActionMedia( long whichAction, long actionNum, unsigned char color)
     Boolean             OKtoExecute;
     long                count;
 
-    while (( action->verb != kNoAction) && ( actionNum > 0))
+    while ((actionNum > 0) && (action->verb != kNoAction))
     {
         switch ( action->verb)
         {
