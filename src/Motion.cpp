@@ -793,7 +793,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
                     MyWideMul( wideScrap.as_struct.lo, wideScrap.as_struct.lo, &hugeDistance);  // ppc automatically generates WideMultiply
                     wideScrap.as_struct.lo = distance;
                     MyWideMul( wideScrap.as_struct.lo, wideScrap.as_struct.lo, &wideScrap);
-                    MyWideAdd( &hugeDistance, &wideScrap);
+                    hugeDistance.as_int += wideScrap.as_int;
                     aObject->distanceFromPlayer = hugeDistance;
                 } else
                 {
@@ -814,8 +814,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
                     }
                     */
                 }
-                if ( mWideIsGreaterThan( closestDist, hugeDistance))
-                {
+                if (closestDist.as_int > hugeDistance.as_int) {
                     if (( aObject != gScrollStarObject) && (( gAresGlobal->gZoomMode != kNearestFoeZoom)
                         || ( aObject->owner != player->owner)))
                     {
@@ -823,8 +822,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
                         gAresGlobal->gClosestObject = aObject->entryNumber;
                     }
                 }
-                if ( mWideIsGreaterThan( hugeDistance, farthestDist)) //hugeDistance > farthestDist)
-                {
+                if (hugeDistance.as_int > farthestDist.as_int) {
                     farthestDist = hugeDistance;
                     gAresGlobal->gFarthestObject = aObject->entryNumber;
                 }
@@ -1297,7 +1295,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
     }
 
     Microseconds( &hackTimePassed);
-    WideSubtract( reinterpret_cast<wide *>(&hackTimePassed), reinterpret_cast<wide *>(&hackTimeStart));
+    hackTimePassed.as_int -= hackTimeStart.as_int;
 //  WriteDebugLong( hackTimePassed.as_struct.lo);
 
 // here, it doesn't matter in what order we step through the table

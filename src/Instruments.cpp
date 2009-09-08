@@ -454,7 +454,7 @@ void UpdateRadar( long unitsDone)
                         MyWideMul( tempWide.as_struct.lo, tempWide.as_struct.lo, &hugeDistance);
                         tempWide.as_struct.lo = distance;
                         MyWideMul( tempWide.as_struct.lo, tempWide.as_struct.lo, &tempWide);
-                        MyWideAdd( &hugeDistance, &tempWide);
+                        hugeDistance.as_int += tempWide.as_int;
                     } else
                     {
                         hugeDistance.as_struct.hi = 0;

@@ -2299,7 +2299,7 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
             newObject.distanceFromPlayer.as_struct.hi = 0;
             newObject.distanceFromPlayer.as_struct.lo = distance;
             MyWideMul( newObject.distanceFromPlayer.as_struct.lo, newObject.distanceFromPlayer.as_struct.lo, &newObject.distanceFromPlayer);
-            MyWideAdd( &newObject.distanceFromPlayer, &hugeDistance);
+            newObject.distanceFromPlayer.as_int += hugeDistance.as_int;
         }
         else
         {

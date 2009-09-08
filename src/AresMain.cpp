@@ -2021,7 +2021,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                 netTime.as_struct.hi = netTime.as_struct.lo = 0;
                 Microseconds( &thisTime);
                 scrapTime = thisTime;
-                WideSubtract( reinterpret_cast<wide *>(&thisTime), reinterpret_cast<wide *>(&gAresGlobal->gLastTime));
+                thisTime.as_int -= gAresGlobal->gLastTime.as_int;
                 newGameTime = (thisTime.as_struct.lo / kTimeUnit) + ((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
 //              newGameTime = gAresGlobal->gGameTime + Randomize( 7) + 1;//Randomize( kDecideEveryCycles);
 #ifdef kConstantRate
@@ -2039,7 +2039,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                         l2 = kTimeUnit;
                         MyWideMul( l1, l2, reinterpret_cast<wide *>(&thisTime));
                         gAresGlobal->gLastTime = scrapTime;
-                        WideSubtract( reinterpret_cast<wide *>(&gAresGlobal->gLastTime), reinterpret_cast<wide *>(&thisTime));
+                        gAresGlobal->gLastTime.as_int -= thisTime.as_int;
                     }
 #ifdef powercxx
                 }
@@ -2068,7 +2068,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                     l2 = kTimeUnit;
                     MyWideMul( l1, l2, reinterpret_cast<wide *>(&thisTime));
                     gAresGlobal->gLastTime = scrapTime;
-                    WideSubtract( reinterpret_cast<wide *>(&gAresGlobal->gLastTime), reinterpret_cast<wide *>(&thisTime));
+                    gAresGlobal->gLastTime.as_int -= thisTime.as_int;
                 }/* else
                 {
                     newGameTime = gAresGlobal->gGameTime + Randomize( 9) + 1;
@@ -2086,7 +2086,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                     l2 = newGameTime - kMaxGameTime;
                     MyWideMul( l1, l2, reinterpret_cast<wide *>(&thisTime));
                     gAresGlobal->gLastTime = scrapTime;
-                    WideSubtract( reinterpret_cast<wide *>(&gAresGlobal->gLastTime), reinterpret_cast<wide *>(&thisTime));
+                    gAresGlobal->gLastTime.as_int -= thisTime.as_int;
                     additionalSeconds += ( newGameTime / 60);
                     newGameTime -= kMaxGameTime;
 //                  gAresGlobal->gGameTime -= kMaxGameTime;
@@ -2123,7 +2123,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                 l2 = kTimeUnit;
                 MyWideMul( l1, l2, reinterpret_cast<wide *>(&thisTime));
                 gAresGlobal->gLastTime = scrapTime;
-                WideSubtract( reinterpret_cast<wide *>(&gAresGlobal->gLastTime), reinterpret_cast<wide *>(&thisTime));
+                gAresGlobal->gLastTime.as_int -= thisTime.as_int;
             }
 
             if ( gAresGlobal->gGameOver < 0)
@@ -2525,7 +2525,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                         }
 
                         Microseconds( &netTime);    // don't activate
-                        WideSubtract( (wide *)&netTime, (wide *)&thisTime);
+                        netTime.as_int -= thisTime.as_int;
                         if ( netTime.as_struct.lo > kTimeUnit)
                         {
                             netCount++;
@@ -2981,7 +2981,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
     MacShowCursor();
 
     Microseconds( &thisTime);
-    WideSubtract( reinterpret_cast<wide *>(&thisTime), reinterpret_cast<wide *>(&gAresGlobal->gLastTime));
+    thisTime.as_int -= gAresGlobal->gLastTime.as_int;
     newGameTime = thisTime.as_struct.lo / 1000000; // divide by a million to get seconds
 //  *seconds = newGameTime + additionalSeconds;
     *seconds = newGameTime + additionalSeconds;

@@ -729,7 +729,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
                     selectShip->distanceFromPlayer.as_struct.hi = 0;
                     selectShip->distanceFromPlayer.as_struct.lo = distance;
                     MyWideMul( selectShip->distanceFromPlayer.as_struct.lo, selectShip->distanceFromPlayer.as_struct.lo, &selectShip->distanceFromPlayer);
-                    MyWideAdd( &selectShip->distanceFromPlayer, &hugeDistance);
+                    selectShip->distanceFromPlayer.as_int += hugeDistance.as_int;
                 }
                 else
                 {

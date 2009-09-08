@@ -24,14 +24,6 @@
 
 #include "Casts.hpp"
 
-void WideAdd(wide* value, wide* summand) {
-    value->as_int += summand->as_int;
-}
-
-void WideSubtract(wide* value, wide* difference) {
-    value->as_int -= difference->as_int;
-}
-
 void WideMultiply(long a, long b, wide* c) {
     c->as_int = implicit_cast<int64_t>(a) * implicit_cast<int64_t>(b);
 }

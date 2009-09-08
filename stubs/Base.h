@@ -79,8 +79,6 @@ union UnsignedWide {
     } as_struct;
 };
 
-void WideAdd(wide* value, wide* summand);
-void WideSubtract(wide* value, wide* difference);
 void WideMultiply(long a, long b, wide* c);
 
 typedef int32_t Fixed;

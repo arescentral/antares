@@ -83,38 +83,8 @@ struct fixedPointType {
 
 unsigned long lsqrt (unsigned long);
 
-#ifndef powerc
-wide *MyWideSubtract( wide *, const wide *);
-#endif
-#ifdef powerc
 Fixed MyFixRatio( short, short);
-#endif
 void MyMulDoubleLong( long, long, wide *);
-void MyWideAddC( wide *, const wide *);
-#ifdef powerc
-template <typename T>
-inline void MyWideAdd(T* mtarget, T* msource) {
-    mtarget->as_int += msource->as_int;
-}
-#else
-asm void MyWideAdd( UnsignedWide *, const UnsignedWide *);
-#endif
-template <typename T>
-inline bool mWideIsGreaterThan(const T& mleft, const T& mright) {
-    if (mleft.as_struct.hi == mright.as_struct.hi) {
-        return mleft.as_struct.lo > mright.as_struct.lo;
-    } else {
-        return mleft.as_struct.hi > mright.as_struct.hi;
-    }
-}
-template <typename T>
-inline bool mWideIsGreaterThanOrEqual(const T& mleft, const T& mright) {
-    if (mleft.as_struct.hi == mright.as_struct.hi) {
-        return mleft.as_struct.lo >= mright.as_struct.lo;
-    } else {
-        return mleft.as_struct.hi > mright.as_struct.hi;
-    }
-}
 
 template <typename T>
 inline void MyWideMul(int32_t mlong1, int32_t mlong2, T* mwide) {

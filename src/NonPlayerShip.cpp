@@ -2441,7 +2441,7 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
                 MyWideMul( wideScrap.as_struct.lo, wideScrap.as_struct.lo, &thisWideDistance);  // ppc automatically generates WideMultiply
                 wideScrap.as_struct.lo = distance;
                 MyWideMul( wideScrap.as_struct.lo, wideScrap.as_struct.lo, &wideScrap);
-                MyWideAdd( &thisWideDistance, &wideScrap);
+                thisWideDistance.as_int += wideScrap.as_int;
             } else
             {
                 thisWideDistance.as_struct.hi = 0;
@@ -2453,18 +2453,16 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
             WriteDebugLong( anObject->entryNumber);
             WriteDebugLong( anObject->distanceFromPlayer.hi);
             WriteDebugLong( anObject->distanceFromPlayer.lo);
-*/          if ( mWideIsGreaterThan( wideClosestDistance, thisWideDistance))
-            {
+*/
+            if (wideClosestDistance.as_int > thisWideDistance.as_int) {
                 thisDistanceState |= kCloserThanClosest;
             }
 
-
-            if ( (( mWideIsGreaterThan( thisWideDistance, *fartherThan)) &&
-                ( mWideIsGreaterThan( wideFartherDistance, thisWideDistance))) ||
-
-                (( mWideIsGreaterThan( wideFartherDistance, thisWideDistance)) &&
-                ( mWideIsGreaterThanOrEqual( thisWideDistance, *fartherThan))) &&
-                ( whichShip > currentShipNum))
+            if ((thisWideDistance.as_int > fartherThan->as_int
+                        && wideFartherDistance.as_int > thisWideDistance.as_int)
+                    || (wideFartherDistance.as_int > thisWideDistance.as_int
+                        && thisWideDistance.as_int >= fartherThan->as_int
+                        && whichShip > currentShipNum))
             {
                 thisDistanceState |= kFartherThanFarther;
             }
