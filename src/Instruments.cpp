@@ -1070,7 +1070,7 @@ void DrawSectorLines( void)
     l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData);
     if ( doDraw)
     {
-        while (( x < CLIP_RIGHT) && ( h > 0))
+        while (( x < static_cast<uint32_t>(CLIP_RIGHT)) && ( h > 0))
         {
             if ( !division)
             {
@@ -1112,7 +1112,7 @@ void DrawSectorLines( void)
         }
     } else
     {
-        while (( x < CLIP_RIGHT) && ( h > 0))
+        while (( x < static_cast<uint32_t>(CLIP_RIGHT)) && ( h > 0))
         {
             if ( !division)
             {
@@ -1149,7 +1149,7 @@ void DrawSectorLines( void)
 
     if ( doDraw)
     {
-        while (( x < CLIP_BOTTOM) && ( h > 0))
+        while (( x < static_cast<uint32_t>(CLIP_BOTTOM)) && ( h > 0))
         {
             if ( !division)
             {
@@ -1192,7 +1192,7 @@ void DrawSectorLines( void)
         }
     } else
     {
-        while (( x < CLIP_BOTTOM) && ( h > 0))
+        while (( x < static_cast<uint32_t>(CLIP_BOTTOM)) && ( h > 0))
         {
             if ( !division)
             {
@@ -1434,7 +1434,7 @@ void DrawArbitrarySectorLines( coordPointType *corner, long scale, long minSecto
         h = size;
         h *= scale;
         h >>= SHIFT_SCALE;
-    } while ( h < minSectorSize);
+    } while ( h < static_cast<uint32_t>(minSectorSize));
     level >>= 1L;
     level *= level;
 
@@ -1450,7 +1450,7 @@ void DrawArbitrarySectorLines( coordPointType *corner, long scale, long minSecto
     x >>= SHIFT_SCALE;
     x += bounds->left;
 
-    while (( x < bounds->right) && ( h > 0))
+    while (( x < static_cast<uint32_t>(bounds->right)) && ( h > 0))
     {
         if ( !division)
         {
@@ -1482,7 +1482,7 @@ void DrawArbitrarySectorLines( coordPointType *corner, long scale, long minSecto
     x >>= SHIFT_SCALE;
     x += bounds->top;
 
-    while (( x < bounds->bottom) && ( h > 0))
+    while (( x < static_cast<uint32_t>(bounds->bottom)) && ( h > 0))
     {
         if ( !division)
         {
@@ -1531,7 +1531,7 @@ void GetArbitrarySingleSectorBounds( coordPointType *corner, coordPointType *loc
         h = size;
         h *= scale;
         h >>= SHIFT_SCALE;
-    } while ( h < minSectorSize);
+    } while ( h < static_cast<uint32_t>(minSectorSize));
     level >>= 1L;
     level *= level;
 
@@ -1552,13 +1552,13 @@ void GetArbitrarySingleSectorBounds( coordPointType *corner, coordPointType *loc
     scaledLoc >>= SHIFT_SCALE;
     scaledLoc += bounds->left;
 
-    while (( x < bounds->right) && ( h > 0))
+    while (( x < static_cast<uint32_t>(bounds->right)) && ( h > 0))
     {
         division += level;
         division &= 0x0000000f;
 
-        if (( x < scaledLoc) && ( x > destRect->left)) destRect->left = x;
-        if (( x > scaledLoc) && ( x < destRect->right)) destRect->right = x;
+        if (( x < scaledLoc) && ( x > static_cast<uint32_t>(destRect->left))) destRect->left = x;
+        if (( x > scaledLoc) && ( x < static_cast<uint32_t>(destRect->right))) destRect->right = x;
 
         x += h;
     }
@@ -1580,13 +1580,13 @@ void GetArbitrarySingleSectorBounds( coordPointType *corner, coordPointType *loc
     scaledLoc >>= SHIFT_SCALE;
     scaledLoc += bounds->top;
 
-    while (( x < bounds->bottom) && ( h > 0))
+    while (( x < static_cast<uint32_t>(bounds->bottom)) && ( h > 0))
     {
         division += level;
         division &= 0x0000000f;
 
-        if (( x < scaledLoc) && ( x > destRect->top)) destRect->top = x;
-        if (( x > scaledLoc) && ( x < destRect->bottom)) destRect->bottom = x;
+        if (( x < scaledLoc) && ( x > static_cast<uint32_t>(destRect->top))) destRect->top = x;
+        if (( x > scaledLoc) && ( x < static_cast<uint32_t>(destRect->bottom))) destRect->bottom = x;
 
         x += h;
     }

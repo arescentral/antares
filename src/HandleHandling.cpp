@@ -319,7 +319,7 @@ void HHConcatenateHandle( Handle destHandle, Handle sourceHandle)
 
 void HHClearHandle( Handle aHandle)
 {
-    unsigned char   *c = reinterpret_cast<unsigned char *>(*aHandle), value = 0;
+    unsigned char   *c = reinterpret_cast<unsigned char *>(*aHandle);
     long            handleSize = GetHandleSize( aHandle);
 
     while ( handleSize > 0)

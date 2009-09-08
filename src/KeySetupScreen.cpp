@@ -198,7 +198,7 @@ Boolean Key_Setup_Screen_Do( void)
                             currentKey = 0, checkKey, currentKeyOffset = -1,
                             currentMaxKey = -1, tabItemNum, whichTab;
     Boolean                 done = FALSE, result = TRUE, cancel = FALSE,
-                            keyUse = false, flashOn = false;
+                            flashOn = false;
     EventRecord             theEvent;
     KeyMap                  keyMap;
     CWindowPtr              whichWindow;

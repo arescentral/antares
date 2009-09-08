@@ -95,7 +95,6 @@ void StartPlayerShip( long owner, short type)
 void ResetPlayerShip( long which)
 
 {
-    spaceObjectType *theShip = *gSpaceObjectData + which;
     anyCharType     nilLabel = 0;
     long            h;
 
@@ -141,14 +140,14 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
     KeyMap          keyMap, *bufMap;
     short           a, b, h, friendOrFoe;
     spaceObjectType *theShip = nil, *selectShip = nil;
-    baseObjectType  *baseObject = nil, *weaponObject = nil;
+    baseObjectType  *baseObject = nil;
     long            selectShipNum;
     unsigned long   distance, difference, dcalc, attributes, nonattributes;
     Boolean         everPaused = FALSE, newKeys = false;
     UnsignedWide    hugeDistance;
     anyCharType     *message;
     unsigned char   *getwidchar, *getwidwid;
-    long            width, height, strlen, shortcutKey = -1;
+    long            width, height, strlen;
     Str255          s;
 
     if ( gAresGlobal->gPlayerShipNumber < 0) return ( everPaused);
@@ -887,7 +886,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
 void PlayerShipHandleClick( Point where)
 
 {
-    spaceObjectType *theShip = nil, *selectShip = nil;
+    spaceObjectType *theShip = nil;
     long            selectShipNum;
     Rect            bounds;
 

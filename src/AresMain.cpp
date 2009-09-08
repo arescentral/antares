@@ -217,7 +217,6 @@ void MainScreenInterfaceTestHack();
 void FakeInit(int argc, const char** argv);
 int main(int argc, const char** argv);
 void SetWindowColorTable( WindowPtr);
-static pascal Boolean SetColorTableEntry (CTabHandle, short, const RGBColor *);
 void Pause( long time);
 void DrawOutlinedString( const unsigned char* string, RGBColor *color);
 
@@ -286,7 +285,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
     gAresGlobal->gAlarmCount = -1;
     gAresGlobal->gSendMessageLabel = -1;
     gAresGlobal->gDemoZoomOverride = false;
-    gAresGlobal->gPlayerAdmiralNumber;
+    // gAresGlobal->gPlayerAdmiralNumber;
     gAresGlobal->gScenarioRotation = 0;
     gAresGlobal->gThisScenarioNumber = -1;
     gAresGlobal->gScenarioRefID = 0;
@@ -1147,7 +1146,6 @@ void MainLoop (void)
     long                    whichScenario = 0, saveSeed = 0, gameLength, whichDemoLevel, t;
     Boolean                 done = FALSE, jumpLevel = false;
     mainScreenResultType    mainResult;
-    netResultType           netResult;
     RGBColor                fadeColor;
     short                   gameResult;
     Str255                  resName, movieName;     // for GetResInfo, when we're jumping to a demo
@@ -1853,6 +1851,9 @@ void MainLoop (void)
 //                  DoMissionDebriefing( (WindowPtr) gTheWindow, 371, 123, 456, 789, 101, 112, 131);
                 break;
 
+            case kMainOptions:
+            case kNullResult:
+                break;
         }
     }
 
@@ -1885,18 +1886,17 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
     Str255              string;
     UnsignedWide        lastTime, thisTime, scrapTime, netTime;
     longRect                clipRect;
-    long                    unitsToDo = 0, unitsPassed = 0, unitsDone = 0, resendTime = 0,
-                            l1, l2, l3, newGameTime, lastclicktime = 0, scratch,
-                            netCount = 0, additionalSeconds = 0;
-    KeyMap              keyMap = { }, lastKeyMap, lastMessageKeyMap;
+    long                    unitsToDo = 0, unitsPassed = 0, unitsDone = 0,
+                            l1, l2, newGameTime, lastclicktime = 0,
+                            additionalSeconds = 0;
+    KeyMap              keyMap = { }, lastKeyMap;
     Boolean             playerPaused = FALSE, mouseDown = FALSE,
-                            waitingForMessage = false,
-                            blinkOn = false, enteringMessage = false,
+                            enteringMessage = false,
                             afEntering = false, demoKey = false, newKeyMap = false, commandAndQ = false;
     unsigned long       *theseKeys, turnNum = 0, keyDataSize = 0,
                             scenarioCheckTime = 0, replayDataSize = 0;
     Rect                    playAreaRect;
-    short                   result = -1, pauseLevel = 0;
+    short                   result = -1;
     EventRecord         theEvent;
 //  long                hacktc = TickCount(), hacktcsamplesize = 4, hacktcsamplecount = 0;
 
@@ -3001,7 +3001,7 @@ Boolean HandleMouseDown( EventRecord *theEvent)
     short       whichPart;
     WindowPtr   whichWindow;
     Point       where;
-    Boolean     close = FALSE, done = FALSE;
+    Boolean     done = FALSE;
 
     whichPart = MacFindWindow (theEvent->where,  &whichWindow);
     switch (whichPart)
@@ -3119,7 +3119,7 @@ void Pause( long time)
     }
 }
 
-void SetWindowColorTable( WindowPtr window)
+void SetWindowColorTable( WindowPtr)
 {
     /*
 
@@ -3142,6 +3142,7 @@ void SetWindowColorTable( WindowPtr window)
     */
 }
 
+/*
 static pascal Boolean SetColorTableEntry (CTabHandle cth, short value, const RGBColor *rgbP)
 {
     ColorSpecPtr    ctTable     = (**cth).ctTable;
@@ -3162,6 +3163,7 @@ static pascal Boolean SetColorTableEntry (CTabHandle cth, short value, const RGB
 
     return false;
 }
+*/
 
 void DrawOutlinedString( const unsigned char* string, RGBColor *color)
 {

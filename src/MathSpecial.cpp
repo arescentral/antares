@@ -215,7 +215,6 @@ Fixed MyFixRatio( short numer, short denom)
 
 {
     long    longdenom, result;
-    unsigned long   t;
 
     longdenom = denom;
     if ( !longdenom) goto label1;

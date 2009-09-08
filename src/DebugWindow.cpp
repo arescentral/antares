@@ -100,8 +100,8 @@ void ScrollDebugWindowUp( void)
 }
 
 void WriteDebugLine(const unsigned char *text)
-
 {
+    static_cast<void>(text);
 #ifdef kDebugWindowActive
     GrafPtr     oldPort;
 
@@ -116,9 +116,9 @@ void WriteDebugLine(const unsigned char *text)
 #endif
 }
 
-void WriteDebugChar( char c)
-
+void WriteDebugChar(char c)
 {
+    static_cast<void>(c);
 #ifdef kDebugWindowActive
     GrafPtr     oldPort;
 
@@ -133,9 +133,10 @@ void WriteDebugChar( char c)
 #endif
 }
 
-void WriteDebugHex( unsigned long val, unsigned long places)
-
+void WriteDebugHex(unsigned long val, unsigned long places)
 {
+    static_cast<void>(val);
+    static_cast<void>(places);
 #ifdef kDebugWindowActive
     GrafPtr         oldPort;
     unsigned long   count, digit;
@@ -162,8 +163,9 @@ void WriteDebugHex( unsigned long val, unsigned long places)
 }
 
 
-void WriteDebugFixed( Fixed f)
+void WriteDebugFixed(Fixed f)
 {
+    static_cast<void>(f);
 #ifdef kDebugWindowActive
     Str255  s;
     GrafPtr         oldPort;
@@ -193,8 +195,9 @@ void WriteDebugFixed( Fixed f)
 }
 
 
-void WriteDebugSmallFixed( smallFixedType f)
+void WriteDebugSmallFixed(smallFixedType f)
 {
+    static_cast<void>(f);
 #ifdef kDebugWindowActive
     Str255  s;
     GrafPtr         oldPort;
@@ -212,9 +215,9 @@ void WriteDebugSmallFixed( smallFixedType f)
 }
 
 
-void WriteDebugInt( int i)
-
+void WriteDebugInt(int i)
 {
+    static_cast<void>(i);
 #ifdef kDebugWindowActive
     Str255  s;
     RGBColor    c;
@@ -229,9 +232,10 @@ void WriteDebugInt( int i)
 }
 
 
-void WriteDebug2Int( int i, int j)
-
+void WriteDebug2Int(int i, int j)
 {
+    static_cast<void>(i);
+    static_cast<void>(j);
 #ifdef kDebugWindowActive
     Str255  s;
     GrafPtr     oldPort;
@@ -252,8 +256,9 @@ void WriteDebug2Int( int i, int j)
 }
 
 
-void WriteDebugLong( long l)
+void WriteDebugLong(long l)
 {
+    static_cast<void>(l);
 #ifdef kDebugWindowActive
     Str255  s;
 
@@ -295,8 +300,9 @@ void WriteDebugDivider( void)
 
 
 void WriteDebugHexDump( Ptr data, long len)
-
 {
+    static_cast<void>(data);
+    static_cast<void>(len);
 #ifdef kDebugWindowActive
     unsigned long   *dp;
 

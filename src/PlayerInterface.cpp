@@ -746,10 +746,9 @@ void DoLoadingInterface( Rect *contentRect, StringPtr levelName)
     unsigned char           color, *strPtr;
     transColorType          *transColor;
     longRect                lRect, clipRect, boundsRect;
-    PixMapHandle            offMap = GetGWorldPixMap( gOffWorld);
     Rect                    tRect;
     retroTextSpecType       retroTextSpec;
-    long                    height, waitTime;
+    long                    height;
 
     BlackenWindow();
 
@@ -1267,7 +1266,7 @@ void DoHelpScreen( void)
     char                    whichChar;
     CWindowPtr              whichWindow;
     longRect                clipRect, boundsRect;
-    long                    height, score = 0;
+    long                    height;
     retroTextSpecType       retroTextSpec;
     transColorType          *transColor;
     PixMapHandle            offMap;
@@ -1466,7 +1465,7 @@ void StartPauseIndicator(StringPtr pauseString, unsigned char hue)
     unsigned char   *getwidchar, *getwidwid, color;
     long            width, height, strlen, count;
     Rect            tRect, stringRect;
-    PixMapHandle    offMap = GetGWorldPixMap( gOffWorld), saveMap = GetGWorldPixMap( gSaveWorld);
+    PixMapHandle    offMap = GetGWorldPixMap( gOffWorld);
     transColorType  *transColor;
     longRect        clipRect;
 
@@ -1517,7 +1516,6 @@ void StopPauseIndicator( StringPtr pauseString)
     unsigned char   *getwidchar, *getwidwid;
     long            width, height, strlen;
     Rect            tRect, stringRect;
-    PixMapHandle    offMap = GetGWorldPixMap( gOffWorld), saveMap = GetGWorldPixMap( gSaveWorld);
 
     mSetDirectFont( kTitleFontNum);
     mGetDirectStringDimensions( pauseString, width, height, strlen, getwidchar, getwidwid);
@@ -1890,7 +1888,7 @@ Boolean DoKeyInterface( void)
     Point                   where;
     int                     error;
     short                   whichItem, i, whichKeyButton = -1, keyNum = 0, currentKey = 0, checkKey;
-    Boolean                 done = FALSE, result = TRUE, cancel = FALSE, keyUse = false;
+    Boolean                 done = FALSE, result = TRUE, cancel = FALSE;
     EventRecord             theEvent;
     KeyMap                  keyMap;
     CWindowPtr              whichWindow;
@@ -3786,7 +3784,6 @@ long DoSelectLevelInterface( long startChapter)
     EventRecord             theEvent;
     char                    whichChar;
     interfaceItemType       *anItem;
-    Handle                  textData = nil;
     Rect                        totalRect;
     PixMapHandle            saveMap, offMap;
     CWindowPtr              whichWindow;
@@ -4101,7 +4098,6 @@ Boolean DoMissionInterface( long whichScenario)
     EventRecord             theEvent;
     char                    whichChar;
     interfaceItemType       dataItem;
-    Handle                  textData = nil;
     long                    length, scale, mustFit = 0, whichBriefPoint = 0, nextStartTime = TickCount(),
                             thisMissionWaitTime = 0;
     Rect                    tRect, mapRect, totalRect;
@@ -4380,7 +4376,6 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
     long            length, headerID, headerNumber, contentID, textlength = 0,
                     i;
     short           textHeight = 0;
-    Boolean         bailOut = false;
     PixMapHandle    offMap = GetGWorldPixMap( gOffWorld);
     PicHandle       thePict = nil;
     Point           starPoint;
@@ -4592,7 +4587,6 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
 void ShowObjectData( Point where, short pictID, Rect *clipRect)
 {
     Rect            dataRect;
-    PixMapHandle    offPixMap = GetGWorldPixMap( gOffWorld);
     transColorType  *transColor;
     longRect        lRect, longClipRect;
     baseObjectType  *baseObject = *gBaseObjectData;// + (pictID - kFirstShipDataPictID);
@@ -5236,7 +5230,7 @@ void DoMissionDebriefingText( WindowPtr thePort, long textID, long yourlength, l
     Handle              textData;
     long                length, autoTimeStart, textlength = 0;
     short               textHeight = 0;
-    Boolean             bailOut = false, doScore = (parScore >= 0);
+    Boolean             doScore = (parScore >= 0);
     PixMapHandle        offMap = GetGWorldPixMap( gOffWorld);
     interfaceItemType       dataItem;
 

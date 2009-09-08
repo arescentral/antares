@@ -36,8 +36,6 @@ smallFixedType** gRotTable = nil;
 int RotationInit( void)
 
 {
-    long        i = 0;
-
 /*
     gRotTable = NewHandle( sizeof( smallFixedType) * 2L * ROT_POS);
     if ( gRotTable == 0L)

@@ -64,7 +64,7 @@
 #define kNoNetKeyChange             0xffffffff
 
 #if TARGET_OS_MAC
-#define NETSPROCKET_AVAILABLE       1
+#define NETSPROCKET_AVAILABLE       0
 
 struct dummyDumType {
     long    banana;
@@ -352,10 +352,10 @@ void ResetSentMessages( void);
 unsigned char TickleOutgoingMessage(Boolean);
 void StartIncomingTextMessage( void);
 void StopIncomingTextMessage( anyCharType *);
+#endif
 #else   // TARGET_OS_MAC
 #define NETSPROCKET_AVAILABLE   0
 #endif // TARGET_OS_MAC
-#endif
 
 #pragma options align=reset
 

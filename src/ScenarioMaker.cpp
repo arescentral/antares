@@ -197,8 +197,7 @@ void ScenarioMakerCleanup( void)
 Boolean ConstructScenario( long which)
 
 {
-    scenarioType        *scenario = *gAresGlobal->gScenarioData + which;
-    long                count, owner, type, admiralType, specialAttributes,
+    long                count, owner, type, specialAttributes,
                         newShipNum, c2, c3, baseClass, race;
     coordPointType      coord;
     fixedPointType      v = {0, 0};

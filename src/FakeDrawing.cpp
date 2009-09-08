@@ -510,6 +510,7 @@ class ClippedTransfer {
 };
 
 void CopyBits(BitMap* source, BitMap* dest, Rect* source_rect, Rect* dest_rect, int mode, void*) {
+    static_cast<void>(mode);
     if (source == dest) {
         return;
     }
@@ -577,6 +578,7 @@ Pic** GetPicture(int id) {
 }
 
 Pic** OpenPicture(Rect* source) {
+    static_cast<void>(source);
     assert(false);
 }
 
@@ -751,10 +753,12 @@ CTab** NewColorTable() {
 }
 
 CTab** GetCTable(int id) {
+    static_cast<void>(id);
     return NewColorTable();
 }
 
 void RestoreEntries(CTab** table, void*, ReqListRec* recList) {
+    static_cast<void>(recList);
     for (int i = 0; i <= (*table)->ctSize; ++i) {
         (*fakeCTabHandle)->ctTable[i] = (*table)->ctTable[i];
     }

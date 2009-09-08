@@ -249,6 +249,9 @@ void NonplayerShipThink( long timePass)
                     case kLandingPresence:
                         keysDown = ThinkObjectLandingPresence( anObject);
                         break;
+
+                    case kTakeoffPresence:
+                        break;
                 }
 
                 if (( !(anObject->attributes & kRemoteOrHuman)) ||
@@ -739,7 +742,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                         ( anObject->attributes & kCanEngage) &&
                         ( !(anObject->attributes &
                             kRemoteOrHuman)) &&
-                        ( distance < anObject->engageRange) &&
+                        ( distance < static_cast<uint32_t>(anObject->engageRange)) &&
                         ( anObject->timeFromOrigin < kTimeToCheckHome) &&
                         ( targetObject->attributes & kCanBeEngaged)
                     )
@@ -755,7 +758,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
             // than 1/2 its -- or I can't engage it
             if (    ( anObject->attributes & kCanEvade) &&
                     ( targetObject->attributes & kCanBeEvaded) &&
-                    ( distance < targetObject->longestWeaponRange) &&
+                    ( distance < static_cast<uint32_t>(targetObject->longestWeaponRange)) &&
                     (targetObject->attributes & kHated) &&
                     ( ABS( theta ) < kParanoiaAngle) &&
                     (
@@ -870,7 +873,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
             {
                 // if we are not within our closest weapon range then
 
-                if (( distance > anObject->shortestWeaponRange) ||
+                if (( distance > static_cast<uint32_t>(anObject->shortestWeaponRange)) ||
                         ( anObject->attributes & kIsGuided))
                     keysDown |= kUpKey;
 
@@ -880,13 +883,13 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                     // if we're getting closer
                     if (( distance < kMotionMargin) ||
                         ((distance + kMotionMargin) <
-                        anObject->lastTargetDistance))
+                        static_cast<uint32_t>(anObject->lastTargetDistance)))
                     {
                         keysDown |= kDownKey;
                         anObject->lastTargetDistance = distance;
                     // if we're not getting closer, then if we're getting farther
                     } else if ( ( distance - kMotionMargin) >
-                        anObject->lastTargetDistance)
+                        static_cast<uint32_t>(anObject->lastTargetDistance))
                     {
                         keysDown |= kUpKey;
                         anObject->lastTargetDistance = distance;
@@ -897,7 +900,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
             if ( anObject->targetObjectNumber ==
                     anObject->destinationObject)
             {
-                if ( distance < baseObject->arriveActionDistance)
+                if ( distance < static_cast<uint32_t>(baseObject->arriveActionDistance))
                 {
                     if ( baseObject->arriveAction >= 0)
                     {
@@ -926,7 +929,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                         (
                             (!(anObject->attributes &
                                 kRemoteOrHuman)) &&
-                            ( distance < anObject->engageRange)
+                            ( distance < static_cast<uint32_t>(anObject->engageRange))
                         ) ||
                         ( anObject->attributes & kIsGuided)
                     )
@@ -937,7 +940,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
 
                 if (( targetObject->attributes & kCanBeEngaged) &&
                     ( anObject->attributes & kCanEngage) &&
-                    ( distance < anObject->longestWeaponRange) &&
+                    ( distance < static_cast<uint32_t>(anObject->longestWeaponRange)) &&
                     ( targetObject->attributes & kHated))
                 {
                 } else if ( ( anObject->attributes & kCanEvade) &&
@@ -946,7 +949,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                             (
                                 (
                                     ( distance <
-                                        targetObject->longestWeaponRange)
+                                        static_cast<uint32_t>(targetObject->longestWeaponRange))
                                     &&
                                     ( ABS( theta ) < kParanoiaAngle)
                                 ) ||
@@ -958,7 +961,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                     // try to evade, flee, run away
                     if ( anObject->attributes & kHasDirectionGoal)
                     {
-                        if ( distance < anObject->longestWeaponRange)
+                        if ( distance < static_cast<uint32_t>(anObject->longestWeaponRange))
                         {
                             if ( anObject->beamType != kNoWeapon)
                             {
@@ -1166,7 +1169,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                     anObject->timeFromOrigin = 0;
                 }
 
-                if ( distance > baseObject->arriveActionDistance)
+                if ( distance > static_cast<uint32_t>(baseObject->arriveActionDistance))
                 {
                     if ( theta < kEvadeAngle)
                         keysDown |= kUpKey;
@@ -1206,7 +1209,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                         }
                     }
 
-                    if ( distance < baseObject->arriveActionDistance)
+                    if ( distance < static_cast<uint32_t>(baseObject->arriveActionDistance))
                     {
                         if ( baseObject->arriveAction >= 0)
                         {
@@ -1227,13 +1230,13 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
 
                     // if we're getting closer
                     if ((distance + kMotionMargin) <
-                            anObject->lastTargetDistance )
+                            static_cast<uint32_t>(anObject->lastTargetDistance) )
                     {
                         keysDown |= kDownKey;
                         anObject->lastTargetDistance = distance;
                     // if we're not getting closer, then if we're getting farther
                     } else if ( ( distance - kMotionMargin) >
-                        anObject->lastTargetDistance)
+                        static_cast<uint32_t>(anObject->lastTargetDistance))
                     {
                         if ( theta < kEvadeAngle)
                             keysDown |= kUpKey;
@@ -1249,11 +1252,11 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
 //      if (( dest.h == 0xffffffff) || ( dest.v == 0xffffffff) || ( distance == 0xffffffff)) DebugStr("\pResolve 2");
 
         if (( anObject->attributes & kCanEngage) &&
-            ( distance < anObject->engageRange) &&
+            ( distance < static_cast<uint32_t>(anObject->engageRange)) &&
             (anObject->targetObjectNumber != kNoShip))
         {
             // if target is in our weapon range & we hate the object
-            if (( distance < anObject->longestWeaponRange) &&
+            if (( distance < static_cast<uint32_t>(anObject->longestWeaponRange)) &&
                 ( targetObject->attributes & kHated))
             {
                 // find "best" weapon (how do we want to aim?)
@@ -1268,7 +1271,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                     bestWeapon = weaponObject = anObject->beamBase;
                     if ( ( weaponObject->frame.weapon.usage &
                         kUseForAttacking) &&
-                        ( weaponObject->frame.weapon.range >=
+                        ( static_cast<uint32_t>(weaponObject->frame.weapon.range) >=
                             distance) &&
                         ( weaponObject->frame.weapon.range <
                             difference))
@@ -1283,7 +1286,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                     weaponObject = anObject->pulseBase;
                     if ( ( weaponObject->frame.weapon.usage &
                         kUseForAttacking) &&
-                        ( weaponObject->frame.weapon.range >= distance)
+                        ( static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
                         && ( weaponObject->frame.weapon.range <
                         difference))
                     {
@@ -1297,7 +1300,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                     weaponObject = anObject->specialBase;
                     if ( ( weaponObject->frame.weapon.usage &
                         kUseForAttacking) &&
-                        ( weaponObject->frame.weapon.range >= distance)
+                        ( static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
                         && ( weaponObject->frame.weapon.range <
                         difference))
                     {
@@ -2116,7 +2119,7 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
     }
 
     // if target is in our weapon range & we hate the object
-    if (    ( distance < anObject->longestWeaponRange) &&
+    if (    ( distance < static_cast<uint32_t>(anObject->longestWeaponRange)) &&
             ( targetObject->attributes & kCanBeEngaged) &&
             ( targetObject->attributes & kHated)
         )
@@ -2136,7 +2139,7 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
             bestWeapon = weaponObject = anObject->beamBase;
             if ( ( weaponObject->frame.weapon.usage &
                 kUseForAttacking) &&
-                ( weaponObject->frame.weapon.range >= distance)
+                ( static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
                 &&
                 ( weaponObject->frame.weapon.range <
                 difference))
@@ -2151,7 +2154,7 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
             weaponObject = anObject->pulseBase;
             if ( ( weaponObject->frame.weapon.usage &
                 kUseForAttacking) &&
-                ( weaponObject->frame.weapon.range >= distance)
+                ( static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
                 && ( weaponObject->frame.weapon.range <
                 difference))
             {
@@ -2165,7 +2168,7 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
             weaponObject = anObject->specialBase;
             if ( ( weaponObject->frame.weapon.usage &
                 kUseForAttacking) &&
-                ( weaponObject->frame.weapon.range >= distance)
+                ( static_cast<uint32_t>(weaponObject->frame.weapon.range) >= distance)
                 && ( weaponObject->frame.weapon.range <
                 difference))
             {
@@ -2221,7 +2224,7 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
     }
 
     // if target object is in range
-    if (( distance < anObject->longestWeaponRange) &&
+    if (( distance < static_cast<uint32_t>(anObject->longestWeaponRange)) &&
         ( targetObject->attributes & kHated))
     {
         // fire away
@@ -2235,7 +2238,7 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
                 kUseForAttacking) &&
                 (( ABS( beta) <= kShootAngle) ||
                 ( weaponObject->attributes & kAutoTarget)) &&
-                ( distance < weaponObject->frame.weapon.range))
+                ( distance < static_cast<uint32_t>(weaponObject->frame.weapon.range)))
             {
                 keysDown |= kOneKey;
             }
@@ -2248,7 +2251,7 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
                 kUseForAttacking) &&
                 (( ABS( beta) <= kShootAngle) ||
                 ( weaponObject->attributes & kAutoTarget)) &&
-                ( distance < weaponObject->frame.weapon.range))
+                ( distance < static_cast<uint32_t>(weaponObject->frame.weapon.range)))
             {
                 keysDown |= kTwoKey;
             }
@@ -2261,7 +2264,7 @@ unsigned long ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectTyp
                 kUseForAttacking) &&
                 (( ABS( beta) <= kShootAngle) ||
                 ( weaponObject->attributes & kAutoTarget)) &&
-                ( distance < weaponObject->frame.weapon.range))
+                ( distance < static_cast<uint32_t>(weaponObject->frame.weapon.range)))
             {
                 keysDown |= kEnterKey;
             }
@@ -2584,9 +2587,7 @@ long GetSpritePointSelectObject( Rect *bounds, spaceObjectType *sourceObject, un
 {
     spaceObjectType *anObject;
     long            whichShip = 0, resultShip = -1, closestShip = -1;
-    unsigned long   closestDistance = kMaximumRelevantDistanceSquared << 1,
-                    fartherDistance = kMaximumRelevantDistanceSquared << 1,
-                    myOwnerFlag = 1 << sourceObject->owner;
+    unsigned long   myOwnerFlag = 1 << sourceObject->owner;
 
     anObject = *gSpaceObjectData;
 

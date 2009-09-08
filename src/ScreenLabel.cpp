@@ -133,9 +133,6 @@ short AddScreenLabel( short h, short v, short hoff, short voff, const unsigned c
 #ifdef kUseLabels
     short           whichLabel = 0;
     screenLabelType *label;
-    long            strlen, lineNum, maxWidth, i;
-    unsigned char   *getwidchar, *getwidwid;
-    Str255          tString;
 
     label = *gAresGlobal->gScreenLabelData;
     while (( whichLabel < kMaxLabelNum) && ( label->active)) { label++; whichLabel++;}
@@ -625,8 +622,6 @@ void SetScreenLabelString( long which, const unsigned char *string)
 {
 #ifdef kUseLabels
     screenLabelType *label;
-    unsigned char   *getwidchar, *getwidwid;
-    long            strlen;
 
     label = *gAresGlobal->gScreenLabelData + which;
     if ( string == nil)

@@ -494,7 +494,6 @@ void InterfaceIdle( void)
 
 short PtInInterfaceItem( Point where)
 {
-    short   result = -1;
     long                number, count;
     interfaceItemType   *item;
     Rect                tRect;
@@ -595,7 +594,7 @@ short InterfaceKeyDown( long message)
 {
     long                number = 0, count = 0;
     interfaceItemType   *item;
-    short               result = -1, buttonKey;
+    short               buttonKey;
     KeyMap              keyMap;
     Boolean             caughtKey = false;
     char                whichChar;
@@ -1319,7 +1318,7 @@ short GetButtonKeyNum( short whichItem)
     else return( 0);
 }
 
-void SetInterfaceTextBoxText( short resID);
 void SetInterfaceTextBoxText( short resID)
 {
+    static_cast<void>(resID);
 }

@@ -394,7 +394,6 @@ void DrawScrollStars( Boolean warp)
     long            rowBytes;
     transColorType  *transColor;
     longRect        bounds, lastBounds;
-    static long     lastBottom;
     PixMapHandle    offMap;
 
 #pragma unused( warp)
@@ -573,7 +572,6 @@ void ShowScrollStars( Boolean warp)
     long            srowBytes, drowBytes;
     transColorType  *transColor;
     longRect        bounds, lastBounds;
-    static long     lastBottom;
     PixMapHandle    sourceMap;
 
 #pragma unused( warp)
@@ -791,7 +789,6 @@ void DontShowScrollStars( void)
     short           i;
     scrollStarType  *star;
     longRect        bounds, lastBounds;
-    static long     lastBottom;
 
     bounds.left = lastBounds.left = CLIP_LEFT;
     bounds.top = lastBounds.top = CLIP_TOP;

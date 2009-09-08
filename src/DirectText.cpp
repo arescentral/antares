@@ -555,6 +555,12 @@ void DrawDirectTextHeightx2( anyCharType *string, unsigned char color, PixMap *d
 void DrawDirectTextStringClippedx2( anyCharType *string, unsigned char color, PixMap *destMap,
                 longRect *clip, long portLeft, long portTop)
 {
+    static_cast<void>(string);
+    static_cast<void>(color);
+    static_cast<void>(destMap);
+    static_cast<void>(clip);
+    static_cast<void>(portLeft);
+    static_cast<void>(portTop);
 /*  unsigned char   *hchar, *dbyte, *sbyte;
     anyCharType     slen;
     long            rowPlus, charPlus, hpos, leftSkip, bytesToDo, width, rowBytes, topEdge,

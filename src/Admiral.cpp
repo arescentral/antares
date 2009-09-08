@@ -443,7 +443,7 @@ void SetAdmiralFlagship( long whichAdmiral, long whichShip)
         a->flagshipID = anObject->id;
     } else
     {
-        a->flagship - 1;
+        // a->flagship - 1;
         a->flagshipID = -1;
     }
 }
@@ -1687,7 +1687,6 @@ void AdmiralBuildAtObject( long whichAdmiral, long baseTypeNum, long whichDestOb
 {
     admiralType     *admiral = *gAresGlobal->gAdmiralData + whichAdmiral;
     destBalanceType *buildAtDest = mGetDestObjectBalancePtr( whichDestObject);
-    baseObjectType  *buildBaseObject = nil;
     spaceObjectType *buildAtObject = nil;
     long            newObject;
     coordPointType  coord;

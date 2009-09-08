@@ -387,12 +387,13 @@ void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
             coordPointType *corner, long scale)
 
 {
+    static_cast<void>(whichScenario);
+
     long        count, thisScale, gridWidth, gridHeight, i, j, color,
                 objectNum;
     Point       where;
     spritePix   aSpritePix;
     longRect    spriteRect, clipRect;
-    scenarioType    *scenario = *gAresGlobal->gScenarioData + whichScenario;
     baseObjectType  *baseObject = nil;
     char            *pixData;
     spaceObjectType *anObject = *gSpaceObjectData;

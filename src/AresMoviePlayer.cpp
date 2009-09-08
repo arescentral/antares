@@ -70,7 +70,7 @@ void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean d
     Movie                       aMovie = nil;
     short                       movieResFile, count;
     Rect                        movieBox;
-    Boolean                     done = false, depthSet = false;
+    Boolean                     done = false;
     CTabHandle                  theClut = nil;
     PaletteHandle               thePalette = nil, originalPalette = nil;
     Fixed                       movieRate;
@@ -226,7 +226,6 @@ OSErr LoadMiniMovie( StringPtr filePath, Movie *aMovie, Rect *destRect, WindowPt
     FSSpec                      fileSpec;
     short                       movieResFile, offH, offV;
     Rect                        movieBox;
-    Boolean                     done = false;
     Fixed                       movieRate;
     TimeValue                   movieTime;
 

@@ -158,7 +158,6 @@ void MakeDemoDataHack( void)
 void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
 
 {
-    scenarioType            *scenario = *gAresGlobal->gScenarioData + whatLevel;
     long                    count, c2, c3, newShipNum;
     baseObjectType          *baseObject;
     scenarioConditionType   *condition;
@@ -330,7 +329,7 @@ void ClearAndCopyAllUnusedBaseObjects( Boolean *baseObjectKeepList)
     unsigned char   *nilObject = reinterpret_cast<unsigned char *>(NewPtr( sizeof( baseObjectType))), *c = nil;
 
     c = nilObject;
-    for ( count = 0; count < sizeof( baseObjectType); count++)
+    for ( count = 0; static_cast<uint32_t>(count) < sizeof( baseObjectType); count++)
     {
         *c = 0;
         c++;

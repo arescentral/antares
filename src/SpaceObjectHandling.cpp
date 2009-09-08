@@ -2434,7 +2434,7 @@ long CountObjectsOfBaseType( long whichType, long owner)
 long GetNextObjectWithAttributes( long startWith, unsigned long attributes, Boolean exclude)
 
 {
-    long    original = startWith, result = 0;
+    long    original = startWith;
     spaceObjectType *anObject;
 
     anObject = *gSpaceObjectData + startWith;
@@ -2829,7 +2829,7 @@ void AlterObjectOccupation( spaceObjectType *anObject, long owner, long howMuch,
 
 void AlterObjectCloakState( spaceObjectType *anObject, Boolean cloak)
 {
-    long            l = kMaxSoundVolume, longscrap = kMaxSoundVolume;
+    long            longscrap = kMaxSoundVolume;
     unsigned long   difference, ul1, ul2;
     spaceObjectType *playerPtr;
 

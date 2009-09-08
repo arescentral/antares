@@ -1556,8 +1556,6 @@ void DrawPlayerListPageUp( interfaceItemType *dItem)
 void GetPlayerListPageUpRect( interfaceItemType *dItem, Rect *dRect)
 
 {
-    short       thisHBorder = kInterfaceSmallHBorder;
-
     GetPlayerListLineUpRect( dItem, dRect);
     dRect->top = dRect->bottom + kInterfaceVLipHeight;
     dRect->bottom = dRect->top + kScrollArrowVBuffer * 2 + kLargeArrowPointHeight +
@@ -1961,6 +1959,10 @@ void DrawInterfaceTextInRect( Rect *tRect, const unsigned char *textData, long l
                                 length -= thisLen;
                                 sChar = aheadChar - 1;
                                 break;
+
+                            case kNoKind:
+                            case kVPictKind:
+                                break;
                         }
                     }
 
@@ -1972,7 +1974,8 @@ void DrawInterfaceTextInRect( Rect *tRect, const unsigned char *textData, long l
                         portTop,  color);
                 switch( inlineKind)
                 {
-                    case kVPictKind: case kVClearPictKind:
+                    case kVPictKind:
+                    case kVClearPictKind:
                         vline += ( fheight - GetInterfaceFontAscent( style));
                         thePicture = GetPicture(inlineValue); //HHGetResource
                         xpos = hleft;
@@ -1997,6 +2000,9 @@ void DrawInterfaceTextInRect( Rect *tRect, const unsigned char *textData, long l
                             }
                         }
                         inlineKind = kNoKind;
+                        break;
+
+                    case kNoKind:
                         break;
                 }
             }
@@ -2148,13 +2154,19 @@ short GetInterfaceTextHeightFromWidth( anyCharType *textData, long length,
                                 length -= thisLen;
                                 sChar = aheadChar - 1;
                                 break;
+
+                            case kNoKind:
+                            case kVPictKind:
+                                break;
                         }
                     }
 
                 }
+
                 switch( inlineKind)
                 {
-                    case kVPictKind: case kVClearPictKind:
+                    case kVPictKind:
+                    case kVClearPictKind:
                         thePicture = GetPicture(inlineValue);  // HHGetResource
                         xpos = hleft;
                         vline += ( fheight - GetInterfaceFontAscent( style));
@@ -2169,6 +2181,9 @@ short GetInterfaceTextHeightFromWidth( anyCharType *textData, long length,
                             xpos = hleft;
                         }
                         inlineKind = kNoKind;
+                        break;
+
+                    case kNoKind:
                         break;
                 }
             }

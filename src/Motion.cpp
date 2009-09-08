@@ -595,7 +595,7 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
 // nothing below can effect any object actions (expire actions get executed)
 // (but they can effect objects thinking)
 // !!!!!!!!
-    shortDist = thisDist = kMaximumRelevantDistanceSquared + kMaximumRelevantDistanceSquared;
+    shortDist = thisDist = static_cast<uint32_t>(kMaximumRelevantDistanceSquared) * 2;
 //  gAresGlobal->gClosestObject = 0;
 //  gAresGlobal->gFarthestObject = 0;
     longDist = 0;

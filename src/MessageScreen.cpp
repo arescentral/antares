@@ -218,7 +218,7 @@ int InitMessageScreen( void)
     tmessage->retroTextSpec.thisPosition = 0;
     tmessage->charDelayCount = 0;
     tmessage->pictBounds.left = tmessage->pictBounds.right= 0;
-    tmessage->pictDelayCount;
+    // tmessage->pictDelayCount;
     tmessage->pictCurrentLeft = 0;
     tmessage->pictCurrentTop = 0;
     tmessage->pictID = -1;
@@ -319,7 +319,7 @@ void AppendStringToMessage(const  anyCharType* string)
         (*freeoffset)++;
 
         // if the first free characrer offset == the length of our data (in chars) then wrap around
-        if ( *freeoffset >= kAnyCharLastChar)
+        if (static_cast<uint32_t>(*freeoffset) >= kAnyCharLastChar)
         {
             // reset offset to first char data (after the two longs of offsets)
             *freeoffset = kAnyCharOffsetStart;
@@ -353,7 +353,7 @@ void StartMessage( void)
     (*freeoffset)++;
 
     // if the first free characrer offset == the length of our data (in chars) then wrap around
-    if ( *freeoffset >= kAnyCharLastChar)
+    if (static_cast<uint32_t>(*freeoffset) >= kAnyCharLastChar)
     {
         // reset offset to first char data (after the two longs of offsets)
         *freeoffset = kAnyCharOffsetStart;
@@ -414,7 +414,7 @@ void StartLongMessage( short startResID, short endResID)
         tmessage->retroTextSpec.bottomBuffer = kMessageCharBottomBuffer;
         tmessage->charDelayCount = 0;
         tmessage->pictBounds.left = tmessage->pictBounds.right= 0;
-        tmessage->pictDelayCount;
+        // tmessage->pictDelayCount;
         tmessage->pictCurrentLeft = 0;
         tmessage->pictCurrentTop = 0;
         tmessage->pictID = -1;
@@ -458,7 +458,7 @@ void StartStringMessage( anyCharType *string)
         tmessage->retroTextSpec.bottomBuffer = kMessageCharBottomBuffer;
         tmessage->charDelayCount = 0;
         tmessage->pictBounds.left = tmessage->pictBounds.right= 0;
-        tmessage->pictDelayCount;
+        // tmessage->pictDelayCount;
         tmessage->pictCurrentLeft = 0;
         tmessage->pictCurrentTop = 0;
         tmessage->pictID = -1;
@@ -470,7 +470,6 @@ void StartStringMessage( anyCharType *string)
 void ClipToCurrentLongMessage( void)
 
 {
-    short           textHeight = 0;
     longMessageType *tmessage;
     Handle          textData = nil;
     transColorType  *transColor;
@@ -569,7 +568,7 @@ void DrawCurrentLongMessage( long timePass)
     Rect            tRect, uRect;
     longRect        lRect, cRect;
     transColorType  *transColor;
-    short           textHeight = 0, i;
+    short           i;
     longMessageType *tmessage;
     unsigned char   color;
 
@@ -811,9 +810,7 @@ void DrawMessageScreen( long byUnits)
 #ifdef kUseMessage
     Str255          tString;
     anyCharType     *anyChar, *dChar, *tLen;
-    static anyCharType  nilLabel = 0;
     long            *firstoffset, offset;
-    Boolean         allSpaces = TRUE;
 
     // increase the amount of time current message has been shown
     gAresGlobal->gMessageTimeCount += byUnits;
@@ -838,7 +835,7 @@ void DrawMessageScreen( long byUnits)
                 offset++;
 
                 // if the offset == the length of our data (in chars) then wrap around
-                if ( offset >= kAnyCharLastChar)
+                if (static_cast<uint32_t>(offset) >= kAnyCharLastChar)
                 {
                     // reset offset to first char data (after the two longs of offsets)
                     offset = kAnyCharOffsetStart;
@@ -872,7 +869,7 @@ void DrawMessageScreen( long byUnits)
             offset++;
 
             // if the offset == the length of our data (in chars) then wrap around
-            if ( offset >= kAnyCharLastChar)
+            if (static_cast<uint32_t>(offset) >= kAnyCharLastChar)
             {
                 // reset offset to first char data (after the two longs of offsets)
                 offset = kAnyCharOffsetStart;
@@ -1080,7 +1077,7 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
     long            charNum = 0, y = bounds->top + mDirectFontAscent() + retroTextSpec->topBuffer, x = bounds->left,
                     oldx = 0, oldCharNum, wordLen;
     unsigned char   *widthPtr, charWidth, wrapState, // 0 = none, 1 = once, 2 = more than once
-                    oldColor = retroTextSpec->color, oldBackColor = retroTextSpec->backColor, tempColor;
+                    tempColor;
     anyCharType     *thisChar = reinterpret_cast<anyCharType *>(*retroTextSpec->text), *thisWordChar, thisWord[255];
     longRect        backRect, lineRect;
     unsigned char   calcColor, calcShade;

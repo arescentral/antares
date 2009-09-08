@@ -48,6 +48,9 @@ void ModalDialog(void*, short* item) {
 }
 
 bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouseRgn) {
+    static_cast<void>(mask);
+    static_cast<void>(sleep);
+    static_cast<void>(mouseRgn);
     evt->what = 0;
     return true;
 }

@@ -104,7 +104,6 @@ void SpriteHandlingInit ( void)
 {
     int             i, j;
     unsigned char   *staticValue = nil;
-    short           error;
 
     gBothScaleMaps = reinterpret_cast<long**>(NewHandle(sizeof(long) * MAX_PIX_SIZE * 2));
     if ( gBothScaleMaps == nil)
@@ -508,7 +507,7 @@ void CreateSpritePixFromPixMap( spritePix *sprite, int type, PixMapHandle pixMap
             {
                 rowlength = reinterpret_cast<int*>(dest);
                 dest += sizeof(int);
-                for ( i = 0; i < *rowlength - sizeof(int); i++)
+                for ( i = 0; static_cast<uint32_t>(i) < *rowlength - sizeof(int); i++)
                 {
                     WriteDebug2Int( i, *(dest++));
                 }
@@ -600,7 +599,7 @@ void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, long
 {
     long        mapWidth, mapHeight, x, y, i, h, v, d, last;
     long        shapeRowPlus, destRowPlus, rowbytes, *hmap, *vmap, *hmapoffset, *lhend, scaleCalc;
-    char        *destByte, *shapeByte, *hend, *vend, *chunkByte, *chunkend;
+    char        *destByte, *shapeByte, *hend, *vend, *chunkByte;
     longRect    mapRect, sourceRect;
     Boolean     clipped = FALSE;
 
@@ -1602,7 +1601,7 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
 {
     long        mapWidth, mapHeight, x, y, i, h, v, d, last, sourceX, sourceY;
     long        shapeRowPlus, destRowPlus, rowbytes, *hmap, *vmap, *hmapoffset, *lhend, scaleCalc;
-    char        *destByte, *shapeByte, *hend, *vend, *chunkByte, *chunkend;
+    char        *destByte, *shapeByte, *hend, *vend, *chunkByte;
     longRect    mapRect, sourceRect;
     Boolean     clipped = FALSE;
 

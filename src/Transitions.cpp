@@ -499,7 +499,6 @@ Boolean CustomPictFade( long fadeSpeed, long holdTime, short pictID, short clutI
         WindowPtr aWindow)
 
 {
-    Boolean                     done = false;
     CTabHandle                  theClut = nil;
     PaletteHandle               thePalette = nil, originalPalette = nil;
     PicHandle                   thePict = nil;
@@ -589,12 +588,10 @@ Boolean StartCustomPictFade( long fadeSpeed, long holdTime, short pictID, short 
         Boolean fast)
 
 {
-    Boolean                     done = false;
     PicHandle                   thePict = nil;
     Rect                        pictRect;
     RGBColor                    fadeColor = {0, 0, 0};
     Boolean                     gotAnyEvent = false;
-    short                       oldResFile = CurResFile();
 
 #pragma unused( fadeSpeed, holdTime)
 

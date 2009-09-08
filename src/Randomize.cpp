@@ -56,7 +56,7 @@ Handle  gDebugRandomSave = nil;
 int RandomInit( void)
 {
 
-    short   refNum = CurResFile();
+    // short   refNum = CurResFile();
 
 #ifdef kSaveToDebugFile
     DebugFileInit();

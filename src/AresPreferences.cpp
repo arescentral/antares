@@ -132,13 +132,9 @@ int InitPreferences( void)
 
 {
     OSErr               oserr;
-    short               i, j, resID = kPreferencesResID;
-    long                netType = -1;
-    unsigned long       carryoverOptions = gAresGlobal->gOptions & kCarryOverOptionMask;
+    short               i, resID = kPreferencesResID;
     preferencesDataType *prefsData;
-    Str255              userName, serialString;
     preferencesDataType**   tempData;
-    publicSerialType    *publicSerial;
 
     // first open preferences file
     if (!EasyOpenPreferenceFile( kAresPreferencesFileName, kPreferenceFileCreator,

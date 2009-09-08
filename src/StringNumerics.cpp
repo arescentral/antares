@@ -148,7 +148,7 @@ void DoubleToString( double d, StringPtr s, long places)
     }
     
     l = d;
-    while ((tenFactor > l) && ( tenFactor > 0)) tenFactor /= 10;
+    while ((tenFactor > static_cast<uint32_t>(l)) && ( tenFactor > 0)) tenFactor /= 10;
 
     if ( tenFactor == 0)
     {
@@ -312,7 +312,7 @@ StringPtr LongToString( long l, StringPtr s)
         s[0] = 0;
     }
 
-    while ((tenFactor > l) && ( tenFactor > 0)) tenFactor /= 10;
+    while ((tenFactor > static_cast<uint32_t>(l)) && ( tenFactor > 0)) tenFactor /= 10;
 
     if ( tenFactor == 0)
     {

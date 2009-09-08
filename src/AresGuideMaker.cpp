@@ -636,8 +636,8 @@ void AdjustRangeFromObject( baseObjectType *o, fieldRangeType *range)
         if ( o->price < range->mincost) range->mincost = o->price;
         if ( o->price > range->maxcost) range->maxcost = o->price;
 
-        if ( o->buildTime < range->minbuild) range->minbuild = o->buildTime;
-        if ( o->buildTime > range->maxbuild) range->maxbuild = o->buildTime;
+        if ( o->buildTime < static_cast<uint32_t>(range->minbuild)) range->minbuild = o->buildTime;
+        if ( o->buildTime > static_cast<uint32_t>(range->maxbuild)) range->maxbuild = o->buildTime;
 
         if ( o->energy < range->minenergy) range->minenergy = o->energy;
         if ( o->energy > range->maxenergy) range->maxenergy = o->energy;
@@ -888,8 +888,6 @@ void GetFileNameFromPortrait( long whichObject, StringPtr name)
 
 void NumToNDigitString( long num, StringPtr s, long digits)
 {
-    unsigned char   *c = s;
-
 /*  *c = 3;
     c++;
     *c = '0' + ( num / 100);

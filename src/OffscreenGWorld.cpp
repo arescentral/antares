@@ -289,7 +289,7 @@ void GWorldExperiment( void)
 
 void ChunkCopyPixMapToScreenPixMap( PixMap *sourcePix, Rect *sourceRect, PixMap *destMap)
 {
-    int     x, y, width, height;
+    int     x, y;
     long    *sword, *dword, srowplus, drowplus, srowbytes, drowbytes, sright;
     Rect    fixRect;
 

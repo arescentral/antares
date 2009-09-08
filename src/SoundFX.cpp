@@ -296,7 +296,6 @@ void PlayVolumeSound( short whichSoundID, short amplitude, short persistence, so
 {
     SndCommand      cmd;
     OSErr           err;
-    int             channelVolume = 0;
     short           count, oldestSoundTime = -kLongPersistence, whichChannel = -1, whichSound;
     long            timeDif, newvol;
 
@@ -456,7 +455,6 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
 {
     SndCommand      cmd;
     OSErr           err;
-    int             channelVolume = 0;
     short           count, oldestSoundTime = -kLongPersistence, whichChannel = -1, whichSound;
     long            timeDif;
 
