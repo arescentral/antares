@@ -30,67 +30,70 @@ def error_and_usage(description):
 
 def main(argv):
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'am', [ 'all-levels', 'main-screen' ])
-    except getopt.GetoptError, e:
-        error_and_usage(str(e))
+        try:
+            opts, args = getopt.getopt(sys.argv[1:], 'am', [ 'all-levels', 'main-screen' ])
+        except getopt.GetoptError, e:
+            error_and_usage(str(e))
 
-    test_cases = []
-    test_all = False
-    test_main_screen = False
-    for opt, val in opts:
-        if opt in ('-a', '--all-levels'):
-            test_all = True
-        elif opt in ('-m', '--main-screen'):
-            test_main_screen = True
-        else:
-            assert False, 'unhandled option'
+        test_cases = []
+        test_all = False
+        test_main_screen = False
+        for opt, val in opts:
+            if opt in ('-a', '--all-levels'):
+                test_all = True
+            elif opt in ('-m', '--main-screen'):
+                test_main_screen = True
+            else:
+                assert False, 'unhandled option'
 
-    if test_all:
-        if args:
-            usage()
-        else:
-            args = ALL_LEVELS
-    if test_main_screen:
-        test_cases.append(MainScreen())
+        if test_all:
+            if args:
+                usage()
+            else:
+                args = ALL_LEVELS
+        if test_main_screen:
+            test_cases.append(MainScreen())
 
-    for demo_level in args:
-        if demo_level not in ALL_LEVELS:
-            sys.__stderr__.write('unknown demo level: %r\n' % demo_level)
-            sys.exit(1)
-        else:
-            test_cases.append(DemoLevel(demo_level))
-
-    with Timed():
-        with Timed():
-            print('Updating binary...')
-            jam = subprocess.Popen(['jam'])
-            jam.wait()
-            if jam.returncode != 0:
-                print('...failed')
+        for demo_level in args:
+            if demo_level not in ALL_LEVELS:
+                sys.__stderr__.write('unknown demo level: %r\n' % demo_level)
                 sys.exit(1)
             else:
-                print('...passed')
+                test_cases.append(DemoLevel(demo_level))
 
-        passed_cases = []
-        failed_cases = []
-        for case in test_cases:
-            print('-' * get_screen_width())
-            print('Testing %s...' % case.name)
+        with Timed():
             with Timed():
-                if case.test():
-                    print('...passed');
-                    passed_cases.append(case)
+                print('Updating binary...')
+                jam = subprocess.Popen(['jam'])
+                jam.wait()
+                if jam.returncode != 0:
+                    print('...failed')
+                    sys.exit(1)
                 else:
-                    print(case.output)
-                    print('...failed');
-                    failed_cases.append(case)
+                    print('...passed')
 
-        print('=' * get_screen_width())
-        print('%d out of %d test cases succeeded.' % (len(passed_cases), len(test_cases)))
-        if failed_cases:
-            print('The following test cases failed:')
-            for case in failed_cases:
-                print('  %s' % case.name)
+            passed_cases = []
+            failed_cases = []
+            for case in test_cases:
+                print('-' * get_screen_width())
+                print('Testing %s...' % case.name)
+                with Timed():
+                    if case.test():
+                        print('...passed');
+                        passed_cases.append(case)
+                    else:
+                        print(case.output)
+                        print('...failed');
+                        failed_cases.append(case)
+
+            print('=' * get_screen_width())
+            print('%d out of %d test cases succeeded.' % (len(passed_cases), len(test_cases)))
+            if failed_cases:
+                print('The following test cases failed:')
+                for case in failed_cases:
+                    print('  %s' % case.name)
+    except KeyboardInterrupt:
+        pass
 
 
 class DemoLevel(object):
