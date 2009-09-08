@@ -27,6 +27,12 @@
 #define kMaxSparkAge            1023L
 #define kSparkAgeToShadeShift   6L
 
+enum StarSpeed {
+    kNoStar = -1,
+    kSlowStarSpeed = 1,
+    kMediumStarSpeed = 2,
+    kFastStarSpeed = 3,
+};
 
 struct scrollStarType {
     longPointType   oldOldLocation;
@@ -35,7 +41,7 @@ struct scrollStarType {
     fixedPointType  motionFraction;
     fixedPointType  velocity;
     long            age;
-    long            speed;
+    StarSpeed       speed;
     unsigned char   color;
 };
 

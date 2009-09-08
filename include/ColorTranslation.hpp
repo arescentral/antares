@@ -77,7 +77,7 @@ struct transColorType {
 extern transColorType** gColorTranslateTable;
 
 inline void mGetTranslateColorShade(
-        uint8_t mcolor, uint8_t mshade, uint8_t& mresultColor, transColorType* mtransColor) {
+        uint8_t mcolor, uint8_t mshade, uint8_t& mresultColor, transColorType*& mtransColor) {
     mtransColor = *gColorTranslateTable
         + implicit_cast<long>((16 - implicit_cast<long>(mshade)) + 1 + implicit_cast<long>(mcolor) * 16);
     mresultColor = mtransColor->trueColor;

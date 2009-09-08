@@ -46,6 +46,17 @@
 
 #define kHotKeyNum              10
 
+enum ZoomType {
+    kTimesTwoZoom           = 0,
+    kActualSizeZoom         = 1,
+    kHalfSizeZoom           = 2,
+    kQuarterSizeZoom        = 3,
+    kEighthSizeZoom         = 4,
+    kNearestFoeZoom         = 5,
+    kNearestAnythingZoom    = 6,
+    kSmallestZoom           = 7,
+};
+
 struct barIndicatorType {
     short           top;
     long            thisValue;
@@ -118,7 +129,7 @@ struct aresGlobalType {
     long            gPlayerShipNumber;
     long            gSelectionLabel;
     long            gDestKeyTime;
-    long            gZoomMode;
+    ZoomType        gZoomMode;
     long            gDestinationLabel;
     long            gAlarmCount;
     long            gSendMessageLabel;

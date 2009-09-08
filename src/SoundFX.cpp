@@ -815,7 +815,7 @@ void UnlockSoundCallback( Handle soundHand)
     short   i;
     SndCommand      cmd;
     OSErr           err;
-    SCStatus        status;
+    SCStatus        status = { false };
 
     for ( i = 0; i < kMaxChannelNum; i++)
     {
@@ -1029,9 +1029,9 @@ SndChannelPtr MyCreateLocalizedChannel( void)
 }
 
 void mPlayDistanceSound(
-        long mdistance, long mvolume, spaceObjectType* mobjectptr, long msoundid,
-        long msoundpersistence, soundPriorityType msoundpriority, unsigned long mul1,
-        unsigned long mul2, spaceObjectType* mplayerobjectptr) {
+        long& mdistance, long mvolume, spaceObjectType* mobjectptr, long msoundid,
+        long msoundpersistence, soundPriorityType msoundpriority, unsigned long& mul1,
+        unsigned long& mul2, spaceObjectType*& mplayerobjectptr) {
     if ( (!(mobjectptr->distanceFromPlayer.as_struct.hi)) && (mobjectptr->distanceFromPlayer.as_struct.lo < kMaximumRelevantDistanceSquared))
     {
         mdistance = mobjectptr->distanceFromPlayer.as_struct.lo;

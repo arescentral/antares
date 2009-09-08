@@ -1275,8 +1275,8 @@ void ExecuteObjectActions( long whichAction, long actionNum,
     objectActionType    *action = *gObjectActionData + whichAction;
     short           end, angle;
     fixedPointType  fpoint, newVel;
-    long            l, m;
-    unsigned long   ul1, ul2, distance;
+    long            l, distance;
+    unsigned long   m, ul1, ul2;
     smallFixedType  f, f2;
     coordPointType  newLocation;
     longPointType   location;
@@ -2170,7 +2170,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                 case kSetZoom:
                     if (action->argument.zoom.zoomLevel != gAresGlobal->gZoomMode)
                     {
-                        gAresGlobal->gZoomMode = action->argument.zoom.zoomLevel;
+                        gAresGlobal->gZoomMode = static_cast<ZoomType>(action->argument.zoom.zoomLevel);
                         PlayVolumeSound(  kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
                         GetIndString( s, kMessageStringID, gAresGlobal->gZoomMode + kZoomStringOffset);
                         SetStatusString( s, TRUE, kStatusLabelColor);
@@ -2830,7 +2830,8 @@ void AlterObjectOccupation( spaceObjectType *anObject, long owner, long howMuch,
 void AlterObjectCloakState( spaceObjectType *anObject, Boolean cloak)
 {
     long            longscrap = kMaxSoundVolume;
-    unsigned long   difference, ul1, ul2;
+    long            difference;
+    unsigned long   ul1, ul2;
     spaceObjectType *playerPtr;
 
     if ( (cloak) && ( anObject->cloakState == 0))

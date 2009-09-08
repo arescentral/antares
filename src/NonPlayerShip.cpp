@@ -150,6 +150,8 @@ void NonplayerShipThink( long timePass)
         mGetTranslateColorShade( kFriendlyColor, DARKEST, friendSick, transColor);
         mGetTranslateColorShade( kHostileColor, DARKER-1, foeSick, transColor);
         mGetTranslateColorShade( kNeutralColor, DARKEST, neutralSick, transColor);
+    } else {
+        exit(1);
     }
 
     anAdmiral = mGetAdmiralPtr( 0);
@@ -1517,7 +1519,7 @@ unsigned long ThinkObjectWarpOutPresence( spaceObjectType *anObject, baseObjectT
 unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
 {
     unsigned long   keysDown = anObject->keysDown & kSpecialKeyMask, distance, dcalc;
-    spaceObjectType *targetObject;
+    spaceObjectType *targetObject = NULL;
     coordPointType  dest;
     long            difference;
     Fixed           slope;

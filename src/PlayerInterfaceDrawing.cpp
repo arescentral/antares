@@ -1807,7 +1807,7 @@ void DrawInterfaceTextInRect( Rect *tRect, const unsigned char *textData, long l
     Rect            uRect;
     unsigned char   color, *charwidthptr, charwidth;
     transColorType  *transColor;
-    inlinePictType  *thisInlinePict;
+    inlinePictType  *thisInlinePict = NULL;
 
     clipRgn = NewRgn();
     if ( clipRgn == nil) return;

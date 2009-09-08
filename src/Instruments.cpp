@@ -293,7 +293,7 @@ void UpdateRadar( long unitsDone)
     const long      rrange = gAresGlobal->gRadarRange >> 1L;
     longPointType   *lp;
     unsigned char   color, color2, *dByte;
-    unsigned long   bestScale, rootCorrect, distance, difference, dcalc;
+    unsigned long   bestScale = MIN_SCALE, rootCorrect, distance, difference, dcalc;
     transColorType  *transColor;
     PixMapHandle    offPixBase;
     admiralType     *admiral;

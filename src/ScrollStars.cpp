@@ -46,18 +46,12 @@
 #endif
 #define kSparkStarOffset        kScrollStarNum
 
-#define kNoStar                 -1
 #define kMinimumStarSpeed       1
 #define kMaximumStarSpeed       3
 #define kStarSpeedSpread        ( kMaximumStarSpeed - kMinimumStarSpeed + 1)
 
-#define kSlowStarSpeed          1
 #define kSlowStarFraction       0x00000080  // this is 1/2 so could be made to asr 1 ( >> 1)
-
-#define kMediumStarSpeed        2
 #define kMediumStarFraction     0x000000c0  // this is .75 could be made to 1 - asr 2 ( 1 - ( >> 2))
-
-#define kFastStarSpeed          3
 #define kFastStarFraction       0x00000100  // this is 1 so could be ignored
 
 #define kStarColor              GRAY
@@ -88,6 +82,10 @@ spaceObjectType *gScrollStarObject = nil;   // this object is also used for the 
 //long          gAresGlobal->gLastClipBottom = 0, gAresGlobal->gScrollStarNumber = -1;
 
 void CorrectScrollStarObject( Handle);
+
+inline StarSpeed RandomStarSpeed() {
+    return static_cast<StarSpeed>(Randomize(kStarSpeedSpread) + kMinimumStarSpeed);
+}
 
 int InitScrollStars( void)
 {
@@ -150,7 +148,7 @@ void ResetScrollStars ( long which)
             star->location.v = Randomize( gPlayScreenHeight) + CLIP_TOP;
             star->motionFraction.h = star->motionFraction.v = 0;
 
-            star->speed = Randomize( kStarSpeedSpread) + kMinimumStarSpeed;
+            star->speed = RandomStarSpeed();
             star->age = 0;
 
             star++;
@@ -193,7 +191,7 @@ void MakeNewSparks( long sparkNum, long sparkSpeed, smallFixedType maxVelocity,
             spark->oldLocation.v = spark->location.v = location->v;
             spark->motionFraction.h = spark->motionFraction.v = 0;
             spark->age = kMaxSparkAge;
-            spark->speed = sparkSpeed;
+            spark->speed = static_cast<StarSpeed>(sparkSpeed);
             spark->color = color;
         }
     }
@@ -229,7 +227,7 @@ void MoveScrollStars( const long byUnits)
 #ifdef kUseScrollStar
     short           i;
     scrollStarType  *star;
-    fixedPointType  slowVelocity, mediumVelocity, fastVelocity, *velocity;
+    fixedPointType  slowVelocity, mediumVelocity, fastVelocity, *velocity = NULL;
     long            h, v;
 
     if ( gScrollStarObject == nil) return;
@@ -279,6 +277,9 @@ void MoveScrollStars( const long byUnits)
                 case kFastStarSpeed:
                     velocity = &fastVelocity;
                     break;
+                case kNoStar:
+                    exit(1);
+                    break;
             }
 
             star->motionFraction.h += velocity->h;
@@ -303,28 +304,28 @@ void MoveScrollStars( const long byUnits)
                 star->location.h += gPlayScreenWidth - 1;
                 star->location.v = Randomize( gPlayScreenHeight) + CLIP_TOP;
                 star->motionFraction.h = star->motionFraction.v = 0;
-                star->speed = Randomize( kStarSpeedSpread) + kMinimumStarSpeed;
+                star->speed = RandomStarSpeed();
                 star->age = 0;
             } else if (( star->location.h >= CLIP_RIGHT) && ( star->oldLocation.h >= CLIP_RIGHT))
             {
                 star->location.h -= gPlayScreenWidth;
                 star->location.v = Randomize( gPlayScreenHeight) + CLIP_TOP;
                 star->motionFraction.h = star->motionFraction.v = 0;
-                star->speed = Randomize( kStarSpeedSpread) + kMinimumStarSpeed;
+                star->speed = RandomStarSpeed();
                 star->age = 0;
             } else if (( star->location.v < CLIP_TOP) && ( star->oldLocation.v < CLIP_TOP))
             {
                 star->location.h = Randomize( gPlayScreenWidth) + CLIP_LEFT;
                 star->location.v += gPlayScreenHeight - 1;
                 star->motionFraction.h = star->motionFraction.v = 0;
-                star->speed = Randomize( kStarSpeedSpread) + kMinimumStarSpeed;
+                star->speed = RandomStarSpeed();
                 star->age = 0;
             } else if (( star->location.v >= gAresGlobal->gTrueClipBottom) && ( star->oldLocation.v >= gAresGlobal->gTrueClipBottom))
             {
                 star->location.h = Randomize( gPlayScreenWidth) + CLIP_LEFT;
                 star->location.v -= gPlayScreenHeight;
                 star->motionFraction.h = star->motionFraction.v = 0;
-                star->speed = Randomize( kStarSpeedSpread) + kMinimumStarSpeed;
+                star->speed = RandomStarSpeed();
                 star->age = 0;
             }
 
@@ -340,6 +341,9 @@ void MoveScrollStars( const long byUnits)
                         break;
                     case kFastStarSpeed:
                         velocity = &fastVelocity;
+                        break;
+                    case kNoStar:
+                        exit(1);
                         break;
                 }
                 if ( velocity->h >= 0)
@@ -1005,7 +1009,7 @@ void Reset3DStars( Point center, longRect *bounds)
             Randomize( bounds->bottom - bounds->top) + bounds->top;
         star->motionFraction.h = star->motionFraction.v = 0;
 
-        star->speed = 2;
+        star->speed = kMediumStarSpeed;
 
         f = mFloatToFixed( k3DStarInitialCo);
         star->velocity.h = mLongToFixed( star->location.h - center.h);
@@ -1074,7 +1078,7 @@ void Move3DStars( Point center, long byUnits, longRect *bounds)
                 star->location.v = Randomize( bounds->bottom - bounds->top) + bounds->top;
                 star->motionFraction.h = star->motionFraction.v = 0;
 
-                star->speed = 2;
+                star->speed = kMediumStarSpeed;
                 star->velocity.h = mLongToFixed( star->location.h - center.h);
                 f = mFloatToFixed( k3DStarInitialCo);
                 star->velocity.h = mMultiplyFixed( f, star->velocity.h);
@@ -1221,7 +1225,7 @@ void Show3DStars( Boolean warp, longRect *bounds, PixMapHandle sourceMap)
                         0, *sourceMap);
                     mSetNatePixel( sByte, drowBytes, star->oldLocation.h, star->oldLocation.v, gNatePortLeft << 2,
                             gNatePortTop, *thePixMapHandle, *dByte);
-                    star->speed = 0;
+                    star->speed = kNoStar;
                 }
             } else
             {
@@ -1233,10 +1237,10 @@ void Show3DStars( Boolean warp, longRect *bounds, PixMapHandle sourceMap)
                 }
                 if ( star->speed == 2)
                 {
-                    star->speed = 1;
+                    star->speed = kSlowStarSpeed;
                 } else if ( star->speed == 1)
                 {
-                    star->speed = 0;
+                    star->speed = kNoStar;
                 }
             }
 

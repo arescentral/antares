@@ -30,7 +30,7 @@
 #include "SpriteHandling.hpp" // for test byte debugging kludge
 #endif
 
-inline void mHBlitz(unsigned char*& mdbyte, long mrunLen, long mcolor, long mcount) {
+inline void mHBlitz(unsigned char*& mdbyte, long mrunLen, long mcolor, long& mcount) {
     mcount = mrunLen;
     while ( mcount-- > 0)
     {

@@ -122,7 +122,7 @@ pascal OSErr HandleOpenDoc( AppleEvent *theAppleEvent, AppleEvent *reply,
     OSErr       error, ignoreError;
     FSSpec      myFSS;
     AEDescList  docList;
-    long        index, itemsInList;
+    long        index, itemsInList = 0;
     Size        actualSize;
     AEKeyword   keywd;
     DescType    returnedType;

@@ -4373,7 +4373,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
 {
     Rect            oldRect, newRect, hiliteBounds;
     Handle          textData;
-    long            length, headerID, headerNumber, contentID, textlength = 0,
+    long            length = 0, headerID, headerNumber, contentID, textlength = 0,
                     i;
     short           textHeight = 0;
     PixMapHandle    offMap = GetGWorldPixMap( gOffWorld);
@@ -5308,7 +5308,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
 {
     longRect            clipRect, boundsRect, scrollRect, textRect;
     long                height, waitTime = TickCount(), l, autoTimeStart, sectionLength, textLength,
-                        charNum, pictID, bgVOffset = 0, bgPictID = -1;
+                        charNum, pictID = 0, bgVOffset = 0, bgPictID = -1;
     retroTextSpecType   retroTextSpec;
     transColorType      *transColor;
     Str255              movieName;

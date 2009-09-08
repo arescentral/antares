@@ -30,15 +30,6 @@
 
 #define kZoomLevelNum           8
 
-#define kTimesTwoZoom           0
-#define kActualSizeZoom         1
-#define kHalfSizeZoom           2
-#define kQuarterSizeZoom        3
-#define kEighthSizeZoom         4
-#define kNearestFoeZoom         5
-#define kNearestAnythingZoom    6
-#define kSmallestZoom           7
-
 void StartPlayerShip( long, short);
 void ResetPlayerShip( long);
 Boolean PlayerShipGetKeys( long, unsigned long, Boolean *);

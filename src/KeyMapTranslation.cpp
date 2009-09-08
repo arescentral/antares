@@ -53,7 +53,7 @@ void GetKeyMapFromKeyNum( short keyNum, KeyMap keyMap)
 short GetKeyNumFromKeyMap( KeyMap keyMap)
 
 {
-    int         i, j, wmap, wbit, fixbit, keyispressed = 0;
+    int         i, j, wmap = 0, wbit = 0, fixbit, keyispressed = 0;
 
     for ( i = 0; i < 4; i++)
     {

@@ -395,18 +395,18 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
 
     if (( gAresGlobal->gTheseKeys & kZoomOutKey) && ( !(gAresGlobal->gLastKeys & kZoomOutKey)))
     {
-        gAresGlobal->gZoomMode++;
-        if ( gAresGlobal->gZoomMode == kZoomLevelNum)
+        reinterpret_cast<int&>(gAresGlobal->gZoomMode)++;
+        if ( gAresGlobal->gZoomMode > kSmallestZoom)
         {
-             gAresGlobal->gZoomMode = kZoomLevelNum - 1;
+             gAresGlobal->gZoomMode = kSmallestZoom;
         }
     }
     if (( gAresGlobal->gTheseKeys & kZoomInKey) && ( !(gAresGlobal->gLastKeys & kZoomInKey)))
     {
-        gAresGlobal->gZoomMode--;
-        if ( gAresGlobal->gZoomMode < 0)
+        reinterpret_cast<int&>(gAresGlobal->gZoomMode)--;
+        if ( gAresGlobal->gZoomMode < kTimesTwoZoom)
         {
-            gAresGlobal->gZoomMode = 0;
+            gAresGlobal->gZoomMode = kTimesTwoZoom;
         }
     }
 
@@ -464,37 +464,37 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
         }
         if (( ( mScale121Key( keyMap))))
         {
-            gAresGlobal->gZoomMode = 1;
+            gAresGlobal->gZoomMode = kActualSizeZoom;
         }
 
         if ((  ( mScale122Key( keyMap))))
         {
-            gAresGlobal->gZoomMode = 2;
+            gAresGlobal->gZoomMode = kHalfSizeZoom;
         }
 
         if ((  ( mScale124Key( keyMap))))
         {
-            gAresGlobal->gZoomMode = 3;
+            gAresGlobal->gZoomMode = kQuarterSizeZoom;
         }
 
         if ((  ( mScale1216Key( keyMap))))
         {
-            gAresGlobal->gZoomMode = 4;
+            gAresGlobal->gZoomMode = kEighthSizeZoom;
         }
 
         if ((  ( mScaleHostileKey( keyMap))))
         {
-            gAresGlobal->gZoomMode = 5;
+            gAresGlobal->gZoomMode = kNearestFoeZoom;
         }
 
         if ((  ( mScaleObjectKey( keyMap))))
         {
-            gAresGlobal->gZoomMode = 6;
+            gAresGlobal->gZoomMode = kNearestAnythingZoom;
         }
 
         if ((  ( mScaleAllKey( keyMap))))
         {
-            gAresGlobal->gZoomMode = 7;
+            gAresGlobal->gZoomMode = kSmallestZoom;
         }
     }
 

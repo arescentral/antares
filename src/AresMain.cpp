@@ -280,7 +280,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
     gAresGlobal->gPlayerShipNumber = 0;
     gAresGlobal->gSelectionLabel = -1;
     gAresGlobal->gDestKeyTime = 0;
-    gAresGlobal->gZoomMode = 0;
+    gAresGlobal->gZoomMode = kTimesTwoZoom;
     gAresGlobal->gDestinationLabel = -1;
     gAresGlobal->gAlarmCount = -1;
     gAresGlobal->gSendMessageLabel = -1;
@@ -1150,7 +1150,7 @@ void MainLoop (void)
     short                   gameResult;
     Str255                  resName, movieName;     // for GetResInfo, when we're jumping to a demo
     ResType                 resType;        // '' ''
-    short                   resID;          // '' ''
+    short                   resID = 0;          // '' ''
 
     if (!(gAresGlobal->gOptions & kOptionHaveSeenIntro))
     {
@@ -1887,13 +1887,13 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
     UnsignedWide        lastTime, thisTime, scrapTime, netTime;
     longRect                clipRect;
     long                    unitsToDo = 0, unitsPassed = 0, unitsDone = 0,
-                            l1, l2, newGameTime, lastclicktime = 0,
+                            l1, l2, newGameTime = 0, lastclicktime = 0,
                             additionalSeconds = 0;
     KeyMap              keyMap = { }, lastKeyMap;
     Boolean             playerPaused = FALSE, mouseDown = FALSE,
                             enteringMessage = false,
                             afEntering = false, demoKey = false, newKeyMap = false, commandAndQ = false;
-    unsigned long       *theseKeys, turnNum = 0, keyDataSize = 0,
+    unsigned long       *theseKeys = 0, turnNum = 0, keyDataSize = 0,
                             scenarioCheckTime = 0, replayDataSize = 0;
     Rect                    playAreaRect;
     short                   result = -1;

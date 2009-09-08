@@ -339,7 +339,7 @@ void DrawDirectTextStringClipped( anyCharType *string, unsigned char color, PixM
 {
     unsigned char   *hchar, *dbyte, *sbyte, *tbyte;
     anyCharType     slen;
-    long            rowPlus, charPlus, hpos, leftSkip, bytesToDo, width, rowBytes, topEdge,
+    long            rowPlus, charPlus = 0, hpos, leftSkip, bytesToDo, width, rowBytes, topEdge,
                     bottomEdge;
     int             i, j, k;
     Point           pen;
