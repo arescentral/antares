@@ -66,13 +66,7 @@ void CopyOffWorldToSaveWorld( Rect *);
 void NormalizeColors( void);
 void SetBlackBack( void);
 void GWorldExperiment ( void);
-
-#ifdef kDontDoLong68KAssem
 void ChunkCopyPixMapToScreenPixMap( PixMap *, Rect *, PixMap *);
-#else
-void asm ChunkCopyPixMapToScreenPixMap( PixMap *, Rect *, PixMap *);
-#endif
-
 void ChunkCopyPixMapToPixMap( PixMap *, Rect *, PixMap *);
 void AsmChunkCopyPixMapToPixMap( PixMap *, Rect *, PixMap *);
 void SetWindowPaletteFromClut( CWindowPtr, CTabHandle);

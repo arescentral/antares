@@ -118,16 +118,9 @@ short AddDirectFont( directTextType *);
 
 void DrawDirectTextString( char *, unsigned char, PixMap *, long, long);
 void DrawDirectTextStringClipped( anyCharType *, unsigned char, PixMap *, longRect *, long, long);
-#ifdef zaka
-void asm DrawDirectTextStringClipped( anyCharType *, unsigned char, PixMap *, longRect *, long, long);
-#endif
 
 void DrawDirectTextHeightx2( anyCharType *, unsigned char, PixMap *, long, long);
-#ifdef powercc
 void DrawDirectTextStringClippedx2( anyCharType *, unsigned char, PixMap *, longRect *, long, long);
-#else
-void asm DrawDirectTextStringClippedx2( anyCharType *, unsigned char, PixMap *, longRect *, long, long);
-#endif
 
 void ResetDirectTextPtr( Handle);
 

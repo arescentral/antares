@@ -124,11 +124,7 @@ void CleanupSpriteHandling( void);
 void ResetAllSprites( void);
 void CreateSpritePixFromPixMap( spritePix *, int type, PixMapHandle, Rect *);
 void RunLengthSpritePixInPixMap( spritePix *, Point, PixMapHandle);
-#ifdef kDontDoLong68KAssem  //powercc
 void OptScaleSpritePixInPixMap( spritePix *, Point, long, longRect *, longRect *, PixMapHandle);
-#else
-void asm OptScaleSpritePixInPixMap( spritePix *, Point, long, longRect *, longRect *, PixMapHandle);
-#endif
 void StaticScaleSpritePixInPixMap( spritePix *, Point, long, longRect *, longRect *,
     PixMapHandle, short);
 void ColorScaleSpritePixInPixMap( spritePix *, Point, long, longRect *, longRect *,
