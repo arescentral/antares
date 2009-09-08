@@ -20,7 +20,6 @@
 #include "AresGameRanger.hpp"
 
 #include "AresGlobalType.hpp"
-#include "Processor.hpp"
 #include "WrapGameRanger.hpp"
 
 extern aresGlobalType           *gAresGlobal;

@@ -34,7 +34,6 @@
 #include "NateDraw.hpp"
 #include "NatePixTable.hpp"
 #include "OffscreenGWorld.hpp"
-#include "Processor.hpp"
 #include "Randomize.hpp" // for static table
 #include "Resources.h"
 #include "Rotation.hpp"

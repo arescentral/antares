@@ -40,7 +40,6 @@
 #include "NetSprocketGlue.hpp"
 #include "Options.hpp"
 #include "PlayerShip.hpp"
-#include "Processor.hpp"
 #include "Randomize.hpp"
 #include "ScenarioMaker.hpp"
 #include "SpaceObject.hpp"

@@ -22,7 +22,6 @@
 
 #include "AnyChar.hpp"
 #include "Casts.hpp"
-#include "Processor.hpp"
 #include "SpriteHandling.hpp"
 
 #pragma options align=mac68k

@@ -26,7 +26,6 @@
 #include "Error.hpp"
 #include "HandleHandling.hpp"
 #include "OffscreenGWorld.hpp"
-#include "Processor.hpp"
 #include "Resources.h"
 
 #define kDirectTextError    "\pTEXT"

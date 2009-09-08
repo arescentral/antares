@@ -23,7 +23,6 @@
 #include "AresGlobalType.hpp"
 #include "Debug.hpp"
 #include "Error.hpp"
-#include "Processor.hpp"
 #include "WrapGameRanger.hpp"
 
 #define kAEInitErr                  76

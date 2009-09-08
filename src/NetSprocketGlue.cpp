@@ -20,7 +20,6 @@
 #include "NetSprocketGlue.hpp"
 
 #include "GameRanger.h"
-#include "Processor.hpp"
 
 #ifndef powerc
 #pragma mpwc on

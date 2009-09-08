@@ -25,7 +25,6 @@
 
 #include "ConditionalMacros.h"
 #include "GXMath.h"
-#include "Processor.hpp"
 #include "Resources.h"
 
 //      FOR THE SQUARE ROOT CODE:

@@ -23,8 +23,6 @@
 #include <Base.h>
 
 #include "NateDraw.hpp"
-#include "Processor.hpp"
-
 
 #define kNoSpriteTable  -1
 

@@ -83,7 +83,6 @@
 
 #include "PlayerInterface.hpp"
 #include "PlayerShip.hpp"
-#include "Processor.hpp"
 
 #include "Randomize.hpp"
 #include "RegistrationTool.h"

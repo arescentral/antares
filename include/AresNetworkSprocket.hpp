@@ -24,7 +24,6 @@
 
 #include "AnyChar.hpp"
 #include "ConditionalMacros.h"
-#include "Processor.hpp"
 
 #pragma options align=mac68k
 

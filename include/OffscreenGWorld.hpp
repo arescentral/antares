@@ -21,8 +21,6 @@
 #include <Base.h>
 #include <Quickdraw.h>
 
-#include "Processor.hpp"
-
 #pragma options align=mac68k
 
 // #define WORLD_WIDTH     800//640

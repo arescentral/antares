@@ -33,7 +33,6 @@
 #include "ConditionalMacros.h"
 #include "KeyMapTranslation.hpp"
 #include "Options.hpp"
-#include "Processor.hpp"
 #include "Resources.h"
 
 #define kEnvironmentErrorAlert      801
@@ -141,7 +140,7 @@ Boolean EnvironmentCheck( void)
 
 // make sure QuickTime is native, too
 
-#ifdef powercc
+#ifdef powerc
     if ( Gestalt(gestaltQuickTimeFeatures, &gestaltInfo) != noErr)
     {
         if (EnvironmentWarning( 20)) return( false);
@@ -185,7 +184,7 @@ Boolean EnvironmentCheck( void)
     } else if (((*(NumVersion*)&soundVersion).majorRev == 3) &&
                 ((*(NumVersion*)&soundVersion).minorAndBugRev < 0x10))
     {
-        #ifdef powercc
+        #ifdef powerc
         if ( EnvironmentWarning( 18)) return( false);
         #endif
     }
