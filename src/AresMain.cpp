@@ -37,7 +37,6 @@
 #include "AresGlobalType.hpp"
 #include "AresGuideMaker.hpp"
 #include "AresMoviePlayer.hpp"
-#include "AresNetwork.hpp"
 #include "AresNetworkSprocket.hpp"
 #include "AresPreferences.hpp"
 #include "AresResFile.hpp"
@@ -173,7 +172,6 @@ extern spaceObjectType**        gSpaceObjectData;
 extern long                     /*gAresGlobal->gPlayerShipNumber, gAresGlobal->gGameTime, gAresGlobal->gGameStartTime,*/ gRandomSeed;
 //                              gAresGlobal->gScenarioWinner, gAresGlobal->gPlayerAdmiralNumber;
 extern long                     gNatePortLeft, gNatePortTop, /*gAresGlobal->gSoundVolume,*/ gNetLatency;
-extern netStatusType            gNetworkStatus;
 //extern UnsignedWide               gAresGlobal->gLastTime;
 //extern unsigned long          gAresGlobal->gOptions, gAresGlobal->gTheseKeys, gAresGlobal->gLastKeys;
 extern scenarioType             *gThisScenario;

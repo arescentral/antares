@@ -23,7 +23,6 @@
 
 #include "Admiral.hpp"
 #include "AresGlobalType.hpp"
-#include "AresNetwork.hpp"
 #include "ColorTranslation.hpp"     // a hack
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
@@ -88,7 +87,6 @@ extern baseObjectType**         gBaseObjectData;
 extern transColorType**         gColorTranslateTable;
 extern smallFixedType**         gRotTable;    // for getting weapon position
 //extern long                       gAresGlobal->gPlayerAdmiralNumber;
-extern netStatusType            gNetworkStatus;
 extern long                     /*gAresGlobal->gGameTime, gAresGlobal->gPlayerShipNumber,*/ gRandomSeed,
                                 /*gAresGlobal->gGameOver,*/ gRootObjectNumber/*, gAresGlobal->gScrollStarNumber*/;
 extern spaceObjectType          *gScrollStarObject, *gRootObject;

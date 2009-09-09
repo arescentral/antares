@@ -20,7 +20,6 @@
 
 // Player Interface.h
 
-#include "AresNetwork.hpp"
 #include "PlayerInterfaceDrawing.hpp"
 #include "PlayerInterfaceItems.hpp"
 
@@ -71,7 +70,6 @@ void BlackenWindow( void);
 short GetClientListLength( void);
 void GetClientListName( short, anyCharType *);
 Boolean IsThisClientHilited( short, Boolean);
-netClientEntity *GetSelectClient( void);
 short GetInGameListLength( void);
 void GetInGameListName( short, anyCharType *);
 Boolean IsThisInGameHilited( short, Boolean);

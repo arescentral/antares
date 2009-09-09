@@ -28,7 +28,6 @@
 #include "AresGlobalType.hpp"
 #include "AresMain.hpp"
 #include "AresMoviePlayer.hpp"
-#include "AresNetwork.hpp"
 #include "AresNetworkSprocket.hpp"
 #include "AresPreferences.hpp"
 #include "BriefingRenderer.hpp"
@@ -353,9 +352,7 @@ inline void mDoubleDigitize(unsigned char* mstring) {
 }
 
 extern aresGlobalType           *gAresGlobal;
-extern netStatusType            gNetworkStatus;
 extern Handle                   gHostEntity, gClientEntity;
-extern netAresEntity            gMyNetEntity;
 //extern unsigned long          gAresGlobal->gOptions;
 //extern KeyMap                 gAresGlobal->gKeyControl[];
 extern PixMapHandle             thePixMapHandle;

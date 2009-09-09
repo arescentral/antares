@@ -24,7 +24,6 @@
 #include <Timer.h>
 
 #include "AresGlobalType.hpp"
-#include "AresNetwork.hpp"
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
@@ -96,7 +95,6 @@ extern long             /*gAresGlobal->gPlayerShipNumber, gAresGlobal->gGameTime
                         CLIP_RIGHT, CLIP_BOTTOM, gPlayScreenWidth, gPlayScreenHeight,
                         /*gAresGlobal->gZoomMode,*/
                         gRootObjectNumber;
-extern netStatusType    gNetworkStatus;
 //extern long               gAresGlobal->gPlayerAdmiralNumber;
 extern spaceObjectType  *gScrollStarObject, *gRootObject;
 
