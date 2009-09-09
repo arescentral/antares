@@ -290,27 +290,33 @@ Color24Bit colors_24_bit[256] = {
 
 CTabHandle fakeCTabHandle;
 
+GWorld fakeOffGWorld(640, 480);
+GWorld fakeRealGWorld(640, 480);
+GWorld fakeSaveGWorld(640, 480);
+FakeWindow fakeWindow(640, 480, &fakeRealGWorld);
+FakeGDevice fakeGDevice(640, 480, &fakeRealGWorld);
+
+GDevice* fakeGDevicePtr = &fakeGDevice;
+
 void Dump() {
-    std::string contents = "P6 640 480 255\n";
-    contents.reserve(contents.size() + 640 * 480 * 3);
-    for (int y = 0; y < 480; ++y) {
-        for (int x = 0; x < 640; ++x) {
-            int color = GetPixel(x, y);
-            const char pixel[3] = {
-                (*fakeCTabHandle)->ctTable[color].rgb.red >> 8,
-                (*fakeCTabHandle)->ctTable[color].rgb.green >> 8,
-                (*fakeCTabHandle)->ctTable[color].rgb.blue >> 8,
-            };
-            contents.insert(contents.size(), pixel, 3);
-        }
-    }
+    std::string contents;
+
+    const uint32_t size[2] = { 640, 480 };
+    ColorSpec* colors = (*fakeCTabHandle)->ctTable;
+    const PixMap* p = &fakeWindow.portBits;
+
+    contents.reserve(sizeof(size) + 256 * sizeof(*colors) + 640 * 480);
+
+    contents.insert(contents.size(), reinterpret_cast<const char*>(size), sizeof(size));
+    contents.insert(contents.size(), reinterpret_cast<char*>(colors), 256 * sizeof(*colors));
+    contents.insert(contents.size(), p->baseAddr, 640 * 480);
 
     char basename[64];
     std::string path = GetOutputDir() + "/screens";
     mkdir(path.c_str(), 0755);
 
     int seconds = gAresGlobal->gGameTime / 60;
-    sprintf(basename, "%03dm%02d.pnm", seconds / 60, seconds % 60);
+    sprintf(basename, "%03dm%02d.bin", seconds / 60, seconds % 60);
     path = path + '/' + basename;
     int fd = open(path.c_str(), O_WRONLY | O_CREAT, 0644);
     write(fd, contents.c_str(), contents.size());
@@ -350,14 +356,6 @@ void MacInsetRect(Rect* rect, int x, int y) {
     rect->top += y;
     rect->bottom -= y;
 }
-
-GWorld fakeOffGWorld(640, 480);
-GWorld fakeRealGWorld(640, 480);
-GWorld fakeSaveGWorld(640, 480);
-FakeWindow fakeWindow(640, 480, &fakeRealGWorld);
-FakeGDevice fakeGDevice(640, 480, &fakeRealGWorld);
-
-GDevice* fakeGDevicePtr = &fakeGDevice;
 
 Window* NewWindow(
         void*, Rect* rect, const unsigned char* title, bool, int, Window* behind, bool, int id) {
