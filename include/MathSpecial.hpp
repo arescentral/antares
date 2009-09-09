@@ -50,11 +50,11 @@
 #define kFixedTwo                   0x00000200
 #define kFixedNegativeTwo           0xfffff200
 
-#define kFixedWholeMultiplier       256
+#define kFixedWholeMultiplier       256.0
 #define kFixedBitShiftNumber        implicit_cast<long>(8)
 
 inline Fixed mLongToFixed(long m_l)     { return m_l << kFixedBitShiftNumber; }
-inline Fixed mFloatToFixed(float m_r)   { return m_r * kFixedBitShiftNumber; }
+inline Fixed mFloatToFixed(float m_r)   { return m_r * kFixedWholeMultiplier; }
 inline float mFixedToFloat(Fixed m_f)   { return implicit_cast<float>(m_f) / kFixedWholeMultiplier; }
 inline long mFixedToLong(Fixed m_f) {
     if (m_f < 0) {
