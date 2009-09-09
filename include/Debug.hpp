@@ -18,47 +18,35 @@
 #ifndef ANTARES_DEBUG_HPP_
 #define ANTARES_DEBUG_HPP_
 
-// Debug.h
-
-#include <Base.h>
-
-#define DEBUG_ON        TRUE
 #include "MathSpecial.hpp"
 
-#pragma options align=mac68k
-
-void DebugWindowInit( WindowPtr);
-void BringDebugToFront( void);
-void DebugWindowCleanup ( void);
-void ScrollDebugWindowUp ( void);
-void WriteDebugLine( const unsigned char *);
-void WriteDebugHex( unsigned long, unsigned long);
-void WriteDebugFixed( Fixed);
-void WriteDebugSmallFixed( smallFixedType);
-void WriteDebugInt( int);
-void WriteDebug2Int ( int, int);
-void WriteDebugLong ( long);
-void MoveDebugToFront ( void);
-void WriteDebugDivider( void);
-void WriteDebugHexDump( Ptr, long);
-void WriteDebugChar( char);
+inline void DebugWindowInit(WindowPtr) { }
+inline void BringDebugToFront() { }
+inline void DebugWindowCleanup() { }
+inline void ScrollDebugWindowUp() { }
+inline void WriteDebugLine(const unsigned char*) { }
+inline void WriteDebugHex(unsigned long, unsigned long) { }
+inline void WriteDebugFixed(Fixed) { }
+inline void WriteDebugSmallFixed(smallFixedType) { }
+inline void WriteDebugInt(int) { }
+inline void WriteDebug2Int(int, int) { }
+inline void WriteDebugLong(long) { }
+inline void MoveDebugToFront() { }
+inline void WriteDebugDivider() { }
+inline void WriteDebugHexDump(Ptr, long) { }
+inline void WriteDebugChar(char) { }
 
 inline void mWriteDebugString(const unsigned char* mdstring) {
     WriteDebugLine(mdstring);
 }
 
-unsigned long powerto ( unsigned long, unsigned long);
-Boolean CommandPeriod( void);
-
-void DebugFileInit( void);
-void DebugFileCleanup( void);
-void DebugFileAppendString( const unsigned char*);
-void DebugFileAppendCString( char *);
-void DebugFileAppendLong( long);
-void DebugFileAppendLongHex( long);
-void DebugFileAppendSmallFixed( smallFixedType);
-void DebugFileSave( const unsigned char*);
-
-#pragma options align=reset
+inline void DebugFileInit() { }
+inline void DebugFileCleanup() { }
+inline void DebugFileAppendString(const unsigned char*) { }
+inline void DebugFileAppendCString(char*) { }
+inline void DebugFileAppendLong(long) { }
+inline void DebugFileAppendLongHex(long) { }
+inline void DebugFileAppendSmallFixed(smallFixedType) { }
+inline void DebugFileSave(const unsigned char*) { }
 
 #endif // ANTARES_DEBUG_HPP_
