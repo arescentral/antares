@@ -96,25 +96,6 @@ def main(argv):
         pass
 
 
-def _bin_to_pnm(screen):
-    assert screen[-4:] == '.bin'
-    base = screen[:-4]
-    with open('%s.bin' % base) as input:
-        size = struct.unpack('ll', input.read(8))
-        assert size == (640, 480)
-
-        colors = {}
-        for i in range(256):
-            index, r, g, b = struct.unpack('llll', input.read(16))
-            colors[chr(index)] = ''.join([chr(r >> 8), chr(g >> 8), chr(b >> 8)])
-
-        with open('%s.pnm' % base, 'w') as output:
-            output.write('P6 640 480 255\n')
-            for pixel in input.read():
-                output.write(colors[pixel])
-        os.unlink(screen)
-
-
 class DemoLevel(object):
 
     def __init__(self, level):
@@ -137,11 +118,6 @@ class DemoLevel(object):
                 if antares.returncode != 0:
                     self.output += 'Antares failed'
                     return False
-
-            print('Converting *.bin to *.pnm')
-            with Timed():
-                for screen in os.listdir(os.path.join(dir, 'screens')):
-                    _bin_to_pnm(os.path.join(dir, 'screens', screen))
 
             print('Diffing results...')
             with Timed():
@@ -176,14 +152,10 @@ class MainScreen(object):
                     self.output += 'Antares failed'
                     return False
 
-            print('Converting *.bin to *.pnm')
-            with Timed():
-                _bin_to_pnm(os.path.join(dir, 'screens', '000m00.bin'))
-
             print('Diffing results...')
             with Timed():
                 diff = subprocess.Popen(
-                        ['diff', '-u', 'test/main-screen.pnm', dir + '/screens/000m00.pnm'],
+                        ['diff', '-u', 'test/main-screen.bin', dir + '/screens/000m00.bin'],
                         stdout=subprocess.PIPE)
                 stdout, stderr = diff.communicate()
                 self.output += stdout
