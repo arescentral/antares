@@ -107,25 +107,29 @@ class DemoLevel(object):
         with NamedTemporaryDir() as dir:
             self.output = ''
 
-            antares = subprocess.Popen(
-                    ['./Antares', self.level, dir],
-                    stderr=subprocess.PIPE)
-            stdout, stderr = antares.communicate()
-            self.output += stderr
-            if antares.returncode != 0:
-                self.output += 'Antares failed'
-                return False
+            print('Running Antares...')
+            with Timed():
+                antares = subprocess.Popen(
+                        ['./Antares', self.level, dir],
+                        stderr=subprocess.PIPE)
+                stdout, stderr = antares.communicate()
 
-            diff = subprocess.Popen(
-                    ['diff', '-ru', 'test/%s' % self.level, dir],
-                    stdout=subprocess.PIPE)
-            stdout, stderr = diff.communicate()
-            self.output += stdout
-            if diff.returncode != 0:
-                self.output += 'diff failed'
-                return False
+                self.output += stderr
+                if antares.returncode != 0:
+                    self.output += 'Antares failed'
+                    return False
+
+            print('Diffing results...')
+            with Timed():
+                diff = subprocess.Popen(
+                        ['diff', '-ru', 'test/%s' % self.level, dir],
+                        stdout=subprocess.PIPE)
+                stdout, stderr = diff.communicate()
+                self.output += stdout
+                if diff.returncode != 0:
+                    self.output += 'diff failed'
+                    return False
         return True
-
 
 class MainScreen(object):
 
@@ -137,23 +141,27 @@ class MainScreen(object):
         with NamedTemporaryDir() as dir:
             self.output = ''
 
-            antares = subprocess.Popen(
-                    ['./Antares', 'main-screen', dir],
-                    stderr=subprocess.PIPE)
-            stdout, stderr = antares.communicate()
-            self.output += stderr
-            if antares.returncode != 0:
-                self.output += 'Antares failed'
-                return False
+            print('Running Antares...')
+            with Timed():
+                antares = subprocess.Popen(
+                        ['./Antares', 'main-screen', dir],
+                        stderr=subprocess.PIPE)
+                stdout, stderr = antares.communicate()
+                self.output += stderr
+                if antares.returncode != 0:
+                    self.output += 'Antares failed'
+                    return False
 
-            diff = subprocess.Popen(
-                    ['diff', '-u', 'test/main-screen.pnm', dir + '/screens/000m00.pnm'],
-                    stdout=subprocess.PIPE)
-            stdout, stderr = diff.communicate()
-            self.output += stdout
-            if diff.returncode != 0:
-                self.output += 'diff failed'
-                return False
+            print('Diffing results...')
+            with Timed():
+                diff = subprocess.Popen(
+                        ['diff', '-u', 'test/main-screen.pnm', dir + '/screens/000m00.pnm'],
+                        stdout=subprocess.PIPE)
+                stdout, stderr = diff.communicate()
+                self.output += stdout
+                if diff.returncode != 0:
+                    self.output += 'diff failed'
+                    return False
         return True
 
 
