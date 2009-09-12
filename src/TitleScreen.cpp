@@ -42,8 +42,7 @@ void DrawTitleScreen( void)
     Rect            tRect;
 
     MacSetPort( gTheWindow);
-//  pict = GetPicture( kTitleScreenID);
-    pict = reinterpret_cast<PicHandle>(GetResource( 'PICT', kTitleScreenID));
+    pict = GetPicture(kTitleScreenID);
     if ( pict == nil)
     {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 1);
@@ -64,7 +63,7 @@ void DrawPublisherScreen( void)
     Rect            tRect;
 
     MacSetPort( gTheWindow);
-    pict = reinterpret_cast<PicHandle>(GetResource( 'PICT', kPublisherScreenID));
+    pict = GetPicture(kPublisherScreenID);
     if ( pict == nil)
     {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 2);
@@ -86,7 +85,7 @@ void DrawEgoScreen( void)
     Rect            tRect;
 
     MacSetPort( reinterpret_cast<WindowPtr>(gTheWindow));
-    pict = reinterpret_cast<PicHandle>(GetResource( 'PICT', kEgoScreenID));
+    pict = GetPicture(kEgoScreenID);
     if ( pict == nil)
     {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 3);

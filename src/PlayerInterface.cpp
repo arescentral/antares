@@ -2185,7 +2185,7 @@ void DrawKeyControlPicture( long whichKey)
 
     DrawInOffWorld();
 
-    thePict = reinterpret_cast<PicHandle>(GetResource( 'PICT', kKeyIllustrationPictID));
+    thePict = GetPicture(kKeyIllustrationPictID);
     if ( thePict != nil)
     {
         HLockHi( reinterpret_cast<Handle>(thePict));
@@ -2205,7 +2205,7 @@ void DrawKeyControlPicture( long whichKey)
             whichKey = kSelectFriendKeyNum + 1;
         }
     }
-    thePict = reinterpret_cast<PicHandle>(GetResource( 'PICT', kKeyIllustrationPictID + 1 + whichKey));
+    thePict = GetPicture(kKeyIllustrationPictID + 1 + whichKey);
     if ( thePict != nil)
     {
         HLockHi( reinterpret_cast<Handle>(thePict));
@@ -4517,7 +4517,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
 
         if ( whichBriefPoint == kMissionStarMapBriefNum)
         {
-            thePict = reinterpret_cast<PicHandle>(GetResource( 'PICT', kMissionStarMapPictID));
+            thePict = GetPicture(kMissionStarMapPictID);
             if ( thePict != nil)
             {
                 HLockHi( reinterpret_cast<Handle>(thePict));

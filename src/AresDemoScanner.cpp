@@ -428,7 +428,7 @@ void CopyAllBriefingData( long whatLevel)
             {
                 if ( inlinePictList[length].id > 0)
                 {
-                    textData = GetResource( 'PICT', inlinePictList[length].id);
+                    textData = GetPicture(inlinePictList[length].id);
                     if ( textData != nil)
                     {
                         DetachResource( textData);
