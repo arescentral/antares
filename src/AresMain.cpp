@@ -193,6 +193,8 @@ long            gLastTick, // gAresGlobal->gGameOver = 0,
                 gPlayScreenHeight = 480;
 Boolean         hackWarn = true;
 
+unsigned long kNoKeys = 0;
+
 //#ifdef kNonPlayableDemo
 //long          gAresGlobal->gForceDemoLevel = 1;
 //#endif
@@ -2177,6 +2179,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                             {
 //                              ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p there aren't anymore keystrokes.", nil, nil, -1, -1, -1, -1, __FILE__, 31);
                                 gAresGlobal->gGameOver = 1;
+                                theseKeys = &kNoKeys;
                             }
                         }
 
