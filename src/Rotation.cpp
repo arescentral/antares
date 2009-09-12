@@ -22,7 +22,6 @@
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
-#include "HandleHandling.hpp"
 #include "math.h"
 #include "MathMacros.hpp"
 #include "MathSpecial.hpp"
@@ -72,8 +71,6 @@ int RotationInit( void)
         MoveHHi( gRotTable);
         HLock( gRotTable);
         */
-        mDataHandleLockAndRegister(reinterpret_cast<Handle&>(gRotTable), nil, nil, nil, "\pgRotTable");
-
     }
 
     return( kNoError);

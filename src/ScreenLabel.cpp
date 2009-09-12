@@ -26,7 +26,6 @@
 #include "Debug.hpp"
 #include "DirectText.hpp"
 #include "Error.hpp"
-#include "HandleHandling.hpp"
 #include "MathMacros.hpp"
 //#include "MathSpecial.hpp"      // hack for checking strength
 #include "OffscreenGWorld.hpp"

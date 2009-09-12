@@ -31,7 +31,6 @@ Main Antares : src/Admiral.cpp
                src/FakeTime.cpp
                src/Fakes.cpp
                src/GDeviceHandling.cpp
-               src/HandleHandling.cpp
                #src/HideMenubar.cpp
                src/HideMenubarNew.cpp
                #src/Icl8ToCicn.cpp

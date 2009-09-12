@@ -38,7 +38,6 @@
 #include "DirectText.hpp"
 #include "Error.hpp"
 #include "GDeviceHandling.hpp"
-#include "HandleHandling.hpp"
 #include "HideMenubar.hpp"
 #include "Instruments.hpp"
 #include "InterfaceHandling.hpp"
@@ -2186,7 +2185,7 @@ void DrawKeyControlPicture( long whichKey)
 
     DrawInOffWorld();
 
-    thePict = reinterpret_cast<PicHandle>(HHGetResource( 'PICT', kKeyIllustrationPictID));
+    thePict = reinterpret_cast<PicHandle>(GetResource( 'PICT', kKeyIllustrationPictID));
     if ( thePict != nil)
     {
         HLockHi( reinterpret_cast<Handle>(thePict));
@@ -2206,7 +2205,7 @@ void DrawKeyControlPicture( long whichKey)
             whichKey = kSelectFriendKeyNum + 1;
         }
     }
-    thePict = reinterpret_cast<PicHandle>(HHGetResource( 'PICT', kKeyIllustrationPictID + 1 + whichKey));
+    thePict = reinterpret_cast<PicHandle>(GetResource( 'PICT', kKeyIllustrationPictID + 1 + whichKey));
     if ( thePict != nil)
     {
         HLockHi( reinterpret_cast<Handle>(thePict));
@@ -4395,7 +4394,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
         BriefPoint_Data_Get( whichBriefPoint, whichScenario, &headerID, &headerNumber, &contentID,
                                  &hiliteBounds, corner, scale, 16, 32, bounds);
 
-        textData = HHGetResource( 'TEXT', contentID);
+        textData = GetResource( 'TEXT', contentID);
         if ( textData != nil)
         {
             HLockHi( textData);
@@ -4518,7 +4517,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
 
         if ( whichBriefPoint == kMissionStarMapBriefNum)
         {
-            thePict = reinterpret_cast<PicHandle>(HHGetResource( 'PICT', kMissionStarMapPictID));
+            thePict = reinterpret_cast<PicHandle>(GetResource( 'PICT', kMissionStarMapPictID));
             if ( thePict != nil)
             {
                 HLockHi( reinterpret_cast<Handle>(thePict));
@@ -4885,7 +4884,7 @@ void ShowSuccessAnimation( WindowPtr thePort)
 
     SetAllSoundsNoKeep();
     RemoveAllUnusedSounds();
-    shipSprite = reinterpret_cast<natePixType**>(HHGetResource(kPixResType, kDebriefShipResID));
+    shipSprite = reinterpret_cast<natePixType**>(GetResource(kPixResType, kDebriefShipResID));
     if ( shipSprite != nil)
     {
         DetachResource(reinterpret_cast<Handle>(shipSprite));
@@ -5233,7 +5232,7 @@ void DoMissionDebriefingText( WindowPtr thePort, long textID, long yourlength, l
     MacSetRect( &iRect, 0, 0, kDebriefTextWidth, 1);
 
     dataItem.style = kLarge;
-    textData = HHGetResource( 'TEXT', textID);
+    textData = GetResource( 'TEXT', textID);
     if ( textData != nil)
     {
         HLockHi( textData);

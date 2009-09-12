@@ -27,7 +27,6 @@
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "Instruments.hpp"
-#include "HandleHandling.hpp"
 #include "KeyMapTranslation.hpp"        // major hack for testing
 #include "MathMacros.hpp"
 #include "MessageScreen.hpp" // for checking which message we're lookg at
@@ -122,8 +121,6 @@ short ScenarioMakerInit( void)
         }
         DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioData));
 
-        mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gScenarioData), nil, nil, CorrectThisScenarioPtr, "\pgAresGlobal->gScenarioData");
-
         gAresGlobal->scenarioNum = GetHandleSize( reinterpret_cast<Handle>(gAresGlobal->gScenarioData)) /
             sizeof( scenarioType);
 
@@ -138,8 +135,6 @@ short ScenarioMakerInit( void)
             return( RESOURCE_ERROR);
         }
         DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioInitialData));
-
-        mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gScenarioInitialData), nil, nil, nil, "\pgAresGlobal->gScenarioInitialData");
 
         gAresGlobal->maxScenarioInitial = GetHandleSize(
             reinterpret_cast<Handle>(gAresGlobal->gScenarioInitialData)) / sizeof( scenarioInitialType);
@@ -156,8 +151,6 @@ short ScenarioMakerInit( void)
         }
         DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioConditionData));
 
-        mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gScenarioConditionData), nil, nil, nil, "\pgAresGlobal->gScenarioConditionData");
-
         gAresGlobal->maxScenarioCondition = GetHandleSize(
             reinterpret_cast<Handle>(gAresGlobal->gScenarioConditionData)) / sizeof( scenarioConditionType);
 
@@ -172,8 +165,6 @@ short ScenarioMakerInit( void)
             return( RESOURCE_ERROR);
         }
         DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioBriefData));
-
-        mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gScenarioBriefData), nil, nil, nil, "\pgAresGlobal->gScenarioBriefData");
 
         gAresGlobal->maxScenarioBrief = GetHandleSize(
             reinterpret_cast<Handle>(gAresGlobal->gScenarioBriefData)) / sizeof( briefPointType);

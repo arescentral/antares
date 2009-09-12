@@ -22,7 +22,6 @@
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
-#include "HandleHandling.hpp"
 #include "NateDraw.hpp"
 #include "NatePixTable.hpp"
 #include "OffscreenGWorld.hpp"

@@ -25,7 +25,6 @@
 #include "AresGlobalType.hpp"
 #include "Debug.hpp"
 #include "Error.hpp"
-#include "HandleHandling.hpp"
 #include "Races.hpp"
 #include "Scenario.hpp"
 #include "ScenarioData.hpp"
@@ -90,25 +89,21 @@ OSErr EF_OpenExternalFile( void)
     // scenario stuff
     if ( gAresGlobal->gScenarioData != nil)
     {
-        HHDeregisterHandle( reinterpret_cast<Handle*>(&gAresGlobal->gScenarioData));
         DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioData));
         gAresGlobal->gScenarioData = nil;
     }
     if ( gAresGlobal->gScenarioInitialData != nil)
     {
-        HHDeregisterHandle( reinterpret_cast<Handle*>(&gAresGlobal->gScenarioInitialData));
         DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioInitialData));
         gAresGlobal->gScenarioInitialData = nil;
     }
     if ( gAresGlobal->gScenarioConditionData != nil)
     {
-        HHDeregisterHandle( reinterpret_cast<Handle*>(&gAresGlobal->gScenarioConditionData));
         DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioConditionData));
         gAresGlobal->gScenarioConditionData = nil;
     }
     if ( gAresGlobal->gScenarioBriefData != nil)
     {
-        HHDeregisterHandle( reinterpret_cast<Handle*>(&gAresGlobal->gScenarioBriefData));
         DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioBriefData));
         gAresGlobal->gScenarioBriefData = nil;
     }
@@ -116,7 +111,6 @@ OSErr EF_OpenExternalFile( void)
     // races
     if ( gAresGlobal->gRaceData != nil)
     {
-        HHDeregisterHandle( reinterpret_cast<Handle*>(&gAresGlobal->gRaceData));
         DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gRaceData));
         gAresGlobal->gRaceData = nil;
     }
@@ -124,14 +118,12 @@ OSErr EF_OpenExternalFile( void)
     // object stuff
     if ( gBaseObjectData != nil)
     {
-        HHDeregisterHandle( reinterpret_cast<Handle*>(&gBaseObjectData));
         DisposeHandle( reinterpret_cast<Handle>(gBaseObjectData));
         gBaseObjectData = nil;
     }
 
     if ( gObjectActionData != nil)
     {
-        HHDeregisterHandle( reinterpret_cast<Handle*>(&gObjectActionData));
         DisposeHandle( reinterpret_cast<Handle>(gObjectActionData));
         gObjectActionData = nil;
     }
@@ -154,8 +146,6 @@ OSErr EF_OpenExternalFile( void)
 
     DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioData));
 
-    mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gScenarioData), nil, nil, CorrectThisScenarioPtr, "\pgAresGlobal->gScenarioData");
-
     gAresGlobal->scenarioNum = GetHandleSize( reinterpret_cast<Handle>(gAresGlobal->gScenarioData)) /
         sizeof( scenarioType);
 
@@ -166,8 +156,6 @@ OSErr EF_OpenExternalFile( void)
         return( RESOURCE_ERROR);
     }
     DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioInitialData));
-
-    mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gScenarioInitialData), nil, nil, nil, "\pgAresGlobal->gScenarioInitialData");
 
     gAresGlobal->maxScenarioInitial = GetHandleSize(
         reinterpret_cast<Handle>(gAresGlobal->gScenarioInitialData)) / sizeof( scenarioInitialType);
@@ -180,8 +168,6 @@ OSErr EF_OpenExternalFile( void)
     }
     DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioConditionData));
 
-    mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gScenarioConditionData), nil, nil, nil, "\pgAresGlobal->gScenarioConditionData");
-
     gAresGlobal->maxScenarioCondition = GetHandleSize(
         reinterpret_cast<Handle>(gAresGlobal->gScenarioConditionData)) / sizeof( scenarioConditionType);
 
@@ -192,8 +178,6 @@ OSErr EF_OpenExternalFile( void)
         return( RESOURCE_ERROR);
     }
     DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioBriefData));
-
-    mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gScenarioBriefData), nil, nil, nil, "\pgAresGlobal->gScenarioBriefData");
 
     gAresGlobal->maxScenarioBrief = GetHandleSize(
         reinterpret_cast<Handle>(gAresGlobal->gScenarioBriefData)) / sizeof( briefPointType);
@@ -208,8 +192,6 @@ OSErr EF_OpenExternalFile( void)
             return( RESOURCE_ERROR);
         }
         DetachResource( reinterpret_cast<Handle>(gAresGlobal->gRaceData));
-
-        mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gRaceData), nil, nil, nil, "\pgAresGlobal->gRaceData");
     }
 
     // object stuff
@@ -222,8 +204,6 @@ OSErr EF_OpenExternalFile( void)
 
     DetachResource( reinterpret_cast<Handle>(gBaseObjectData));
 
-    mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gBaseObjectData), nil, nil, nil, "\pgBaseObjectData");
-
     gAresGlobal->maxBaseObject = GetHandleSize( reinterpret_cast<Handle>(gBaseObjectData)) /
         sizeof( baseObjectType);
 
@@ -234,7 +214,6 @@ OSErr EF_OpenExternalFile( void)
         return( MEMORY_ERROR);
     }
     DetachResource( reinterpret_cast<Handle>(gObjectActionData));
-    mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gObjectActionData), nil, nil, ResolveObjectActionData, "\pgObjectActionData");
 
     gAresGlobal->maxObjectAction = GetHandleSize( reinterpret_cast<Handle>(gObjectActionData))
         / sizeof( objectActionType);

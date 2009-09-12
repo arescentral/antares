@@ -31,7 +31,6 @@
 #include "DirectText.hpp"
 #include "Error.hpp"
 #include "EZSprite.hpp"
-#include "HandleHandling.hpp"
 #include "HideMenubar.hpp"
 #include "Icl8ToCicn.hpp"
 #include "IconSuiteFromAlias.hpp"

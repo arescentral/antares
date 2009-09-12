@@ -23,7 +23,6 @@
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
-#include "HandleHandling.hpp"
 #include "Resources.h"
 
 #define kRaceError          "\pRACE"
@@ -42,8 +41,6 @@ short InitRaces( void)
             return( RESOURCE_ERROR);
         }
         DetachResource( reinterpret_cast<Handle>(gAresGlobal->gRaceData));
-
-        mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gRaceData), nil, nil, nil, "\pgAresGlobal->gRaceData");
     }
 
     return( kNoError);

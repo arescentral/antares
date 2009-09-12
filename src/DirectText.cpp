@@ -24,7 +24,6 @@
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
-#include "HandleHandling.hpp"
 #include "OffscreenGWorld.hpp"
 #include "Resources.h"
 
@@ -50,7 +49,6 @@ int InitDirectText( void)
     short           count;
     directTextType  *dtext = nil;
 
-    HHMaxMem();
     gDirectTextData.create(kDirectFontNum);
     if (gDirectTextData.get() == nil)
     {
@@ -73,7 +71,7 @@ int InitDirectText( void)
 
     // add # 0, kTacticalFontNum
     dtext = *gDirectTextData + kTacticalFontNum;
-    tData = HHGetResource( kDTextDescriptResType, kTacticalFontResID);
+    tData = GetResource( kDTextDescriptResType, kTacticalFontResID);
     if ( tData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, kTacticalFontResID);
@@ -91,7 +89,7 @@ int InitDirectText( void)
 
     // add # 1, kComputerFontNum
     dtext = *gDirectTextData + kComputerFontNum;
-    tData = HHGetResource( kDTextDescriptResType, kComputerFontResID);
+    tData = GetResource( kDTextDescriptResType, kComputerFontResID);
     if ( tData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, kComputerFontResID);
@@ -107,7 +105,7 @@ int InitDirectText( void)
 
     // add # 2, kButtonFontNum
     dtext = *gDirectTextData + kButtonFontNum;
-    tData = HHGetResource( kDTextDescriptResType, kButtonFontResID);
+    tData = GetResource( kDTextDescriptResType, kButtonFontResID);
     if ( tData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, kButtonFontResID);
@@ -123,7 +121,7 @@ int InitDirectText( void)
 
     // add # 3, kMessageFontNum
     dtext = *gDirectTextData + kMessageFontNum;
-    tData = HHGetResource( kDTextDescriptResType, kMessageFontResID);
+    tData = GetResource( kDTextDescriptResType, kMessageFontResID);
     if ( tData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, kMessageFontResID);
@@ -139,7 +137,7 @@ int InitDirectText( void)
 
     // add # 4, kTitleFontNum
     dtext = *gDirectTextData + kTitleFontNum;
-    tData = HHGetResource( kDTextDescriptResType, kTitleFontResID);
+    tData = GetResource( kDTextDescriptResType, kTitleFontResID);
     if ( tData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, kTitleFontResID);
@@ -155,7 +153,7 @@ int InitDirectText( void)
 
     // add # 5, kButtonSmallFontNum
     dtext = *gDirectTextData + kButtonSmallFontNum;
-    tData = HHGetResource( kDTextDescriptResType, kButtonSmallFontResID);
+    tData = GetResource( kDTextDescriptResType, kButtonSmallFontResID);
     if ( tData == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, kButtonSmallFontResID);
@@ -270,7 +268,7 @@ short AddDirectFont( directTextType *dtext)
         dtext->myHandle = FALSE;
     } else
     {
-        dtext->charSet = reinterpret_cast<unsigned char**>(HHGetResource(kDTextFontMapResType, dtext->resID));
+        dtext->charSet = reinterpret_cast<unsigned char**>(GetResource(kDTextFontMapResType, dtext->resID));
         if ( dtext->charSet == nil)
         {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, dtext->resID);
@@ -280,7 +278,6 @@ short AddDirectFont( directTextType *dtext)
         dtext->myHandle = TRUE;
         WriteDebugLine("\pAddCharSet:");
         WriteDebugLong( dtext->resID);
-        mDataHandleLockAndRegister(reinterpret_cast<Handle&>(dtext->charSet), nil, nil, nil, "\pdtext->charset"); // this can move memory, so our ptr's no good
     }
     return( kNoError);
 }

@@ -24,7 +24,6 @@
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
-#include "HandleHandling.hpp"
 #include "MathMacros.hpp"
 #include "MathSpecial.hpp"
 #include "Options.hpp"
@@ -706,7 +705,7 @@ void RemoveAllUnusedSounds( void)
     {
         if ( (!gAresGlobal->gSound[count].keepMe) && ( gAresGlobal->gSound[count].soundHandle != nil))
         {
-            mHandleDisposeAndDeregister( gAresGlobal->gSound[count].soundHandle);
+            DisposeHandle( gAresGlobal->gSound[count].soundHandle);
             gAresGlobal->gSound[count].soundHandle = nil;
             gAresGlobal->gSound[count].id = -1;
             gAresGlobal->gSound[count].offset = 0;
@@ -771,7 +770,7 @@ short AddSound( short soundID)
             WriteDebugLine("\pADDSND>");
             WriteDebugLong( soundID);
 
-            gAresGlobal->gSound[whichSound].soundHandle = HHGetResource( 'snd ', soundID);
+            gAresGlobal->gSound[whichSound].soundHandle = GetResource( 'snd ', soundID);
             if ( gAresGlobal->gSound[whichSound].soundHandle == nil)
             {
                 ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadSoundError, -1, -1, -1, __FILE__, soundID);
@@ -799,7 +798,6 @@ short AddSound( short soundID)
 //          mDataHandleLockAndRegister( gAresGlobal->gSound[whichSound].soundHandle, UnlockSoundCallback, nil, nil, debugstr)
 MoveHHi( (gAresGlobal->gSound[whichSound].soundHandle));
 HLock( (gAresGlobal->gSound[whichSound].soundHandle));
-HHRegisterHandle( &(gAresGlobal->gSound[whichSound].soundHandle), UnlockSoundCallback, nil, nil, false, debugstr);
 //          HHCheckAllHandles();
             gAresGlobal->gSound[whichSound].id = soundID;
             return( whichSound);

@@ -28,7 +28,6 @@
 #include "Debug.hpp"
 #include "DirectText.hpp"
 #include "Error.hpp"
-#include "HandleHandling.hpp"
 #include "KeyMapTranslation.hpp"
 #include "NateDraw.hpp"
 #include "PlayerInterfaceItems.hpp"
@@ -1703,7 +1702,7 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
     {
         wordlen = theLine;
 
-        textData = HHGetResource( 'TEXT', dItem->item.textRect.textID);
+        textData = GetResource( 'TEXT', dItem->item.textRect.textID);
         if ( textData != nil)
         {
             HLockHi( textData);

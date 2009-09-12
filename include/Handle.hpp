@@ -86,4 +86,16 @@ TypedHandle<T> NewTypedHandle(int count) {
     return result;
 }
 
+long Random();
+// TypedHandle<>s can no longer be registered using mHandleLockAndRegister, but simply deleting the
+// call thereto would prevent HHClearHandle() from being called.  HHClearHandle() makes a call to
+// Random() for each byte contained in the handle, so this function ensures that the stream of
+// random values is unaltered by the removal of the call to HHClearHandle().
+template <typename T>
+inline void TypedHandleClearHack(TypedHandle<T> handle) {
+    for (size_t i = 0; i < handle.size(); ++i) {
+        Random();
+    }
+}
+
 #endif  // ANTARES_HANDLE_HPP_

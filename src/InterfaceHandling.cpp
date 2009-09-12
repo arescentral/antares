@@ -34,7 +34,6 @@
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
-#include "HandleHandling.hpp"
 #include "KeyMapTranslation.hpp"
 #include "MixedMode.h"
 #include "OffscreenGWorld.hpp"
@@ -98,8 +97,7 @@ void InterfaceHandlingCleanup( void)
 {
     if ( gInterfaceItemData != nil)
     {
-//      DisposeHandle( gInterfaceItemData);
-        mHandleDisposeAndDeregister( reinterpret_cast<Handle>(gInterfaceItemData));
+        DisposeHandle(reinterpret_cast<Handle>(gInterfaceItemData));
     }
 //  CloseResFile( gInterfaceFileRefID);         // not needed-done automatically when program quits
 }
@@ -112,10 +110,9 @@ int OpenInterface( short resID)
 
     if ( gInterfaceItemData != nil)
     {
-//      DisposeHandle( gInterfaceItemData);
-        mHandleDisposeAndDeregister( reinterpret_cast<Handle&>(gInterfaceItemData));
+        DisposeHandle(reinterpret_cast<Handle>(gInterfaceItemData));
     }
-    gInterfaceItemData = reinterpret_cast<interfaceItemType**>(HHGetResource( kInterfaceResourceType, resID));
+    gInterfaceItemData = reinterpret_cast<interfaceItemType**>(GetResource( kInterfaceResourceType, resID));
     if ( gInterfaceItemData == nil) return( RESOURCE_ERROR);
 
     DetachResource( reinterpret_cast<Handle>(gInterfaceItemData));
@@ -123,7 +120,6 @@ int OpenInterface( short resID)
     MoveHHi( gInterfaceItemData);
     HLock( gInterfaceItemData);
     */
-    mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gInterfaceItemData), nil, nil, nil, "\pgInterfaceItemData");
     InvalidateInterfaceFunctions(); // if they've been set, they shouldn't be yet
 
     number = GetHandleSize( reinterpret_cast<Handle>(gInterfaceItemData)) / sizeof( interfaceItemType);
@@ -148,11 +144,11 @@ long AppendInterface( short resID, long relativeNumber, Boolean center)
     interfaceItemType   *item, *relativeItem;
 
 //#pragma unused( center)
-    appendData = HHGetResource( kInterfaceResourceType, resID);
+    appendData = GetResource( kInterfaceResourceType, resID);
     if (( appendData != nil) && ( gInterfaceItemData != nil))
     {
         originalNumber = GetHandleSize( reinterpret_cast<Handle>(gInterfaceItemData)) / sizeof( interfaceItemType);
-        HHConcatenateHandle( reinterpret_cast<Handle>(gInterfaceItemData), appendData);
+        HandAndHand( reinterpret_cast<Handle>(gInterfaceItemData), appendData);
 
         number = GetHandleSize( reinterpret_cast<Handle>(gInterfaceItemData)) / sizeof( interfaceItemType);
         item = *gInterfaceItemData + originalNumber;
@@ -219,8 +215,7 @@ void CloseInterface( void)
 
     if ( gInterfaceItemData != nil)
     {
-//      DisposeHandle( gInterfaceItemData);
-        mHandleDisposeAndDeregister( reinterpret_cast<Handle>(gInterfaceItemData));
+        DisposeHandle(reinterpret_cast<Handle>(gInterfaceItemData));
     }
     gInterfaceItemData = nil;
 }

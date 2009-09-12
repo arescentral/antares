@@ -26,7 +26,6 @@
 #include "AresNetworkSprocket.hpp"
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
-#include "HandleHandling.hpp"
 #include "MessageScreen.hpp"
 #include "PlayerShip.hpp"
 #include "StringHandling.hpp"
@@ -57,9 +56,6 @@ void AresCheatInit( void)
 {
     gAresGlobal->gAresCheatStrings = GetStringList( kCheatStringListID);
     if ( gAresGlobal->gAresCheatStrings == nil) return;
-
-    mDataHandleLockAndRegister( gAresGlobal->gAresCheatStrings, nil, nil, nil, "\pgAresCheatStrings");
-
 }
 
 void CleanupAresCheat( void)

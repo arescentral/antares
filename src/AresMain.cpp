@@ -58,7 +58,6 @@
 #include "GDeviceHandling.hpp"
 #include "GXMath.h"
 
-#include "HandleHandling.hpp"
 #include "HideMenubar.hpp"
 
 #include "Instruments.hpp"
@@ -361,8 +360,6 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 
     MenuBarInit();
     gAresGlobal->gMainResRefNum = CurResFile();
-
-    HandleHandlerInit();
 
     gInterfaceFileRefID = ARF_OpenResFile( kInterfaceResFileName);
     if ( gInterfaceFileRefID < 0)
@@ -1045,7 +1042,6 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                 WriteDebugLine("\p<GWorld");
             }
             WriteDebugLine("\p<Network");
-            HandleHandlerCleanup();
 /*          WriteDebugLine("\p<WAITING>");
             WaitForAnyEvent();
 */

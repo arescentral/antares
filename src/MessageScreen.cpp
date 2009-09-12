@@ -29,7 +29,6 @@
 #include "Debug.hpp"
 #include "DirectText.hpp"
 #include "Error.hpp"
-#include "HandleHandling.hpp"
 #include "KeyMapTranslation.hpp"
 #include "OffscreenGWorld.hpp"
 #include "Options.hpp"

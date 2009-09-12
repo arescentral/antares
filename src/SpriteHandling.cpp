@@ -28,7 +28,6 @@
 #include "Debug.hpp"
 #include "DirectText.hpp"
 #include "Error.hpp"
-#include "HandleHandling.hpp"
 #include "MacroColors.hpp"
 #include "MathMacros.hpp"
 #include "NateDraw.hpp"
@@ -209,7 +208,7 @@ void ResetAllPixTables( void)
     {
         if ( gPixTable[i].resource != nil)
         {
-            mHandleDisposeAndDeregister(reinterpret_cast<Handle>(gPixTable[i].resource));
+            DisposeHandle(reinterpret_cast<Handle>(gPixTable[i].resource));
             gPixTable[i].resource = nil;
         }
         gPixTable[i].keepMe = FALSE;
@@ -266,7 +265,7 @@ void RemoveAllUnusedPixTables( void)
     {
         if (( gPixTable[i].keepMe == FALSE) && ( gPixTable[i].resource != nil))
         {
-            mHandleDisposeAndDeregister(reinterpret_cast<Handle>(gPixTable[i].resource));
+            DisposeHandle(reinterpret_cast<Handle>(gPixTable[i].resource));
             gPixTable[i].resource = nil;
             gPixTable[i].keepMe = FALSE;
             gPixTable[i].resID = -1;
@@ -302,7 +301,7 @@ natePixType** AddPixTable( short resID)
             WriteDebugLong( color);
         }
 
-        gPixTable[i].resource = reinterpret_cast<natePixType**>(HHGetResource( kPixResType, realResID));
+        gPixTable[i].resource = reinterpret_cast<natePixType**>(GetResource( kPixResType, realResID));
 
         if ( gPixTable[i].resource == nil)
         {
@@ -316,7 +315,6 @@ natePixType** AddPixTable( short resID)
         MoveHHi( gPixTable[i].resource);
         HLock( gPixTable[i].resource);
         */
-        mDataHandleLockAndRegister(reinterpret_cast<Handle&>(gPixTable[i].resource), nil, nil, nil, "\pgPixTable[i].resource");
 
 //      WriteDebugLine((char *)"\pADDPIX");
 //      WriteDebugLong( resID);

@@ -31,7 +31,6 @@
 #include "Debug.hpp"
 #include "DirectText.hpp"
 #include "Error.hpp"
-#include "HandleHandling.hpp"
 #include "Instruments.hpp"
 #include "KeyCodes.hpp"
 #include "KeyMapTranslation.hpp"

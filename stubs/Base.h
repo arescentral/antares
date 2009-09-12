@@ -107,7 +107,6 @@ STUB1(LoWord, int(long value), 0);
 
 void Microseconds(UnsignedWide* wide);
 
-STUB1(MaxMem, Size(Size*), 0);
 STUB1(CompactMem, Size(int), 100 * 1024 * 1024);  // 100MB
 void BlockMove(void* src, void* dst, size_t size);
 OSErr HandToHand(Handle* handle);

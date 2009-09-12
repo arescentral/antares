@@ -24,7 +24,6 @@
 
 #include "Debug.hpp"
 #include "Error.hpp"
-#include "HandleHandling.hpp"
 #include "OffscreenGWorld.hpp"
 #include "WinAresGlue.hpp"
 
@@ -44,7 +43,7 @@ void DrawTitleScreen( void)
 
     MacSetPort( gTheWindow);
 //  pict = GetPicture( kTitleScreenID);
-    pict = reinterpret_cast<PicHandle>(HHGetResource( 'PICT', kTitleScreenID));
+    pict = reinterpret_cast<PicHandle>(GetResource( 'PICT', kTitleScreenID));
     if ( pict == nil)
     {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 1);
@@ -65,7 +64,7 @@ void DrawPublisherScreen( void)
     Rect            tRect;
 
     MacSetPort( gTheWindow);
-    pict = reinterpret_cast<PicHandle>(HHGetResource( 'PICT', kPublisherScreenID));
+    pict = reinterpret_cast<PicHandle>(GetResource( 'PICT', kPublisherScreenID));
     if ( pict == nil)
     {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 2);
@@ -87,7 +86,7 @@ void DrawEgoScreen( void)
     Rect            tRect;
 
     MacSetPort( reinterpret_cast<WindowPtr>(gTheWindow));
-    pict = reinterpret_cast<PicHandle>(HHGetResource( 'PICT', kEgoScreenID));
+    pict = reinterpret_cast<PicHandle>(GetResource( 'PICT', kEgoScreenID));
     if ( pict == nil)
     {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 3);

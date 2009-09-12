@@ -26,7 +26,6 @@
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
-#include "HandleHandling.hpp"
 #include "MathMacros.hpp"
 #include "Motion.hpp"
 #include "NateDraw.hpp"

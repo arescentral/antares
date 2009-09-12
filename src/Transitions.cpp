@@ -29,7 +29,6 @@
 #include "ColorTranslation.hpp"
 #include "Debug.hpp"
 #include "Error.hpp"
-#include "HandleHandling.hpp"
 #include "KeyMapTranslation.hpp"
 #include "Music.hpp"
 #include "WinAresGlue.hpp"

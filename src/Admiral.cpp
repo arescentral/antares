@@ -25,7 +25,6 @@
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
-#include "HandleHandling.hpp"
 #include "MathMacros.hpp"
 #include "Randomize.hpp"
 #include "Resources.h"

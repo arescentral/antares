@@ -30,7 +30,6 @@
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "GXMath.h"
-#include "HandleHandling.hpp"
 #include "MathMacros.hpp"
 #include "MessageScreen.hpp"
 #include "Minicomputer.hpp" // for MiniComputer_SetScreenAndLineHack
@@ -133,7 +132,6 @@ int SpaceObjectHandlingInit( void)
         }
 
         DetachResource( reinterpret_cast<Handle>(gBaseObjectData));
-        mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gBaseObjectData), nil, nil, nil, "\pgBaseObjectData");
 
         gAresGlobal->maxBaseObject = GetHandleSize( reinterpret_cast<Handle>(gBaseObjectData)) /
             sizeof( baseObjectType);
@@ -155,7 +153,6 @@ int SpaceObjectHandlingInit( void)
             return( MEMORY_ERROR);
         }
         DetachResource( reinterpret_cast<Handle>(gObjectActionData));
-        mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gObjectActionData), nil, nil, ResolveObjectActionData, "\pgObjectActionData");
 
         gAresGlobal->maxObjectAction = GetHandleSize( reinterpret_cast<Handle>(gObjectActionData))
             / sizeof( objectActionType);
