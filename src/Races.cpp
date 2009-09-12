@@ -23,6 +23,7 @@
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
+#include "Resource.hpp"
 #include "Resources.h"
 
 #define kRaceError          "\pRACE"
@@ -32,15 +33,14 @@ extern aresGlobalType   *gAresGlobal;
 
 short InitRaces( void)
 {
-    if ( gAresGlobal->gRaceData == nil)
+    if (gAresGlobal->gRaceData.get() == nil)
     {
-        gAresGlobal->gRaceData = reinterpret_cast<raceType**>(GetResource( kRaceResType, kRaceResID));
-        if ( gAresGlobal->gRaceData == nil)
+        gAresGlobal->gRaceData.load_resource('race', kRaceResID);
+        if (gAresGlobal->gRaceData.get() == nil)
         {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kReadRaceDataError, -1, -1, -1, __FILE__, 1);
             return( RESOURCE_ERROR);
         }
-        DetachResource( reinterpret_cast<Handle>(gAresGlobal->gRaceData));
     }
 
     return( kNoError);
@@ -48,7 +48,9 @@ short InitRaces( void)
 
 void CleanupRaces( void)
 {
-    if ( gAresGlobal->gRaceData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gRaceData));
+    if (gAresGlobal->gRaceData.get() != nil) {
+        gAresGlobal->gRaceData.destroy();
+    }
 }
 
 // GetNextLegalRace: Gets the next legal race *after* raceNum in the scenario it

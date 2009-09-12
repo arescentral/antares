@@ -83,8 +83,6 @@
 
 extern aresGlobalType           *gAresGlobal;
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
-extern baseObjectType**         gBaseObjectData;
-extern smallFixedType**         gRotTable;    // for getting weapon position
 //extern long                       gAresGlobal->gPlayerAdmiralNumber;
 extern long                     /*gAresGlobal->gGameTime, gAresGlobal->gPlayerShipNumber,*/ gRandomSeed,
                                 /*gAresGlobal->gGameOver,*/ gRootObjectNumber/*, gAresGlobal->gScrollStarNumber*/;

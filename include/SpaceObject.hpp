@@ -885,7 +885,7 @@ struct spaceObjectType {
     unsigned char           originalColor;
 };
 
-extern baseObjectType** gBaseObjectData;
+extern TypedHandle<baseObjectType> gBaseObjectData;
 
 inline baseObjectType* mGetBaseObjectPtr(long whichObject) {
     return *gBaseObjectData + whichObject;

@@ -19,6 +19,9 @@
 #define ANTARES_HANDLE_HPP_
 
 #include <assert.h>
+#include <stdint.h>
+
+#include "Resource.hpp"
 
 #define DISALLOW_COPY_AND_ASSIGN(CLASS) \
   private: \
@@ -43,6 +46,14 @@ class TypedHandle {
 
     void destroy() {
         delete _data;
+        _data = NULL;
+    }
+
+    void load_resource(uint32_t code, int id) {
+        Resource rsrc(code, id);
+        int count = 1 + (rsrc.size() - 1) / sizeof(T);
+        _data = new Data(count);
+        memcpy(_data->_ptr, rsrc.data(), rsrc.size());
     }
 
     T* operator*() const {

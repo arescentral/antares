@@ -50,7 +50,6 @@
 
 extern aresGlobalType*      gAresGlobal;
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
-extern baseObjectType**     gBaseObjectData;
 extern long         gRandomSeed, gRootObjectNumber;//, gAresGlobal->gPlayerAdmiralNumber;
 //extern long           gAresGlobal->gGameTime; // for debugging only
 extern spaceObjectType  *gRootObject;

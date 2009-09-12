@@ -29,7 +29,7 @@
 
 #define kRotationError  "\pROTN"
 
-smallFixedType** gRotTable = nil;
+TypedHandle<smallFixedType> gRotTable;
 
 
 int RotationInit( void)
@@ -59,29 +59,17 @@ int RotationInit( void)
 
 */
 
-    gRotTable = reinterpret_cast<smallFixedType**>(GetResource( 'rot ', 500));
-    if ( gRotTable == nil)
-    {
+    gRotTable.load_resource('rot ', 500);
+    if (gRotTable.get() == nil) {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kReadRotationDataError, -1, -1, -1, __FILE__, 1);
         return( MEMORY_ERROR);
-    } else
-    {
-        DetachResource(reinterpret_cast<Handle>(gRotTable));
-        /*
-        MoveHHi( gRotTable);
-        HLock( gRotTable);
-        */
     }
-
     return( kNoError);
 }
 
-void RotationCleanup( void)
-
-{
+void RotationCleanup( void) {
 //  WriteResource( gRotTable);
 //  DisposeHandle( gRotTable);
-    ReleaseResource(reinterpret_cast<Handle>(gRotTable));
 }
 
 void SetRotPoint( smallFixedType x, smallFixedType y, long rotpos)

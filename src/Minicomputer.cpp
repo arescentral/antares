@@ -277,7 +277,6 @@ extern  long            gNatePortLeft, gNatePortTop/*, gAresGlobal->gPlayerAdmir
                         gAresGlobal->gPlayerShipNumber, gAresGlobal->gGameTime*/, gNetLatency;
 extern directTextType*  gDirectText;
 extern long             gWhichDirectText;//, gAresGlobal->gInstrumentTop;
-extern baseObjectType**     gBaseObjectData;
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
 //extern    unsigned long   gAresGlobal->gOptions;
 

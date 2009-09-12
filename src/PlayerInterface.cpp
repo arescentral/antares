@@ -363,8 +363,8 @@ extern CWindowPtr               gTheWindow/*, gAresGlobal->gBackWindow*/;       
 extern directTextType*          gDirectText;
 extern long                     gWhichDirectText, WORLD_WIDTH, WORLD_HEIGHT;
 //                              gAresGlobal->gPlayerAdmiralNumber;
-extern baseObjectType**         gBaseObjectData;
-extern objectActionType**       gObjectActionData;
+extern TypedHandle<baseObjectType>  gBaseObjectData;
+extern TypedHandle<objectActionType>    gObjectActionData;
 extern  GDHandle                theDevice;
 
 Boolean IsKeyReserved( KeyMap, Boolean);

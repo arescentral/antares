@@ -32,8 +32,8 @@
 #include "SpaceObjectHandling.hpp"
 
 extern aresGlobalType*          gAresGlobal;
-extern baseObjectType**         gBaseObjectData;
-extern objectActionType**       gObjectActionData;
+extern TypedHandle<baseObjectType>  gBaseObjectData;
+extern TypedHandle<objectActionType>    gObjectActionData;
 
 OSErr EF_OpenExternalFile( void)
 {
@@ -87,136 +87,103 @@ OSErr EF_OpenExternalFile( void)
     }
 
     // scenario stuff
-    if ( gAresGlobal->gScenarioData != nil)
-    {
-        DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioData));
-        gAresGlobal->gScenarioData = nil;
+    if (gAresGlobal->gScenarioData.get() != nil) {
+        gAresGlobal->gScenarioData.destroy();
     }
-    if ( gAresGlobal->gScenarioInitialData != nil)
-    {
-        DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioInitialData));
-        gAresGlobal->gScenarioInitialData = nil;
+    if (gAresGlobal->gScenarioInitialData.get() != nil) {
+        gAresGlobal->gScenarioInitialData.destroy();
     }
-    if ( gAresGlobal->gScenarioConditionData != nil)
-    {
-        DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioConditionData));
-        gAresGlobal->gScenarioConditionData = nil;
+    if (gAresGlobal->gScenarioConditionData.get() != nil) {
+        gAresGlobal->gScenarioConditionData.destroy();
     }
-    if ( gAresGlobal->gScenarioBriefData != nil)
-    {
-        DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioBriefData));
-        gAresGlobal->gScenarioBriefData = nil;
+    if (gAresGlobal->gScenarioBriefData.get() != nil) {
+        gAresGlobal->gScenarioBriefData.destroy();
     }
 
     // races
-    if ( gAresGlobal->gRaceData != nil)
+    if (gAresGlobal->gRaceData.get() != nil)
     {
-        DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gRaceData));
-        gAresGlobal->gRaceData = nil;
+        gAresGlobal->gRaceData.destroy();
     }
 
     // object stuff
-    if ( gBaseObjectData != nil)
+    if (gBaseObjectData.get() != nil)
     {
-        DisposeHandle( reinterpret_cast<Handle>(gBaseObjectData));
-        gBaseObjectData = nil;
+        gBaseObjectData.destroy();
     }
 
-    if ( gObjectActionData != nil)
-    {
-        DisposeHandle( reinterpret_cast<Handle>(gObjectActionData));
-        gObjectActionData = nil;
+    if (gObjectActionData.get() != nil) {
+        gObjectActionData.destroy();
     }
 
     // load all the new stuff
 
     // scenario stuff
-    gAresGlobal->gScenarioData = reinterpret_cast<scenarioType**>(GetResource( kScenarioResType, kScenarioResID));
-    if ( gAresGlobal->gScenarioData == nil)
-    {
+    gAresGlobal->gScenarioData.load_resource('snro', kScenarioResID);
+    if (gAresGlobal->gScenarioData.get() == nil) {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioDataError, -1, -1, -1, __FILE__, 2);
         return( RESOURCE_ERROR);
     }
 
-    if ( GetHandleSize( reinterpret_cast<Handle>(gAresGlobal->gScenarioData)) <= 0)
-    {
+    if (gAresGlobal->gScenarioData.size() <= 0) {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioDataError, -1, -1, -1, __FILE__, 2);
         return( RESOURCE_ERROR);
     }
 
-    DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioData));
+    gAresGlobal->scenarioNum = gAresGlobal->gScenarioData.count();
 
-    gAresGlobal->scenarioNum = GetHandleSize( reinterpret_cast<Handle>(gAresGlobal->gScenarioData)) /
-        sizeof( scenarioType);
-
-    gAresGlobal->gScenarioInitialData = reinterpret_cast<scenarioInitialType**>(GetResource( kScenarioInitialResType, kScenarioInitialResID));
-    if ( gAresGlobal->gScenarioInitialData == nil)
-    {
+    gAresGlobal->gScenarioInitialData.load_resource('snit', kScenarioInitialResID);
+    if (gAresGlobal->gScenarioInitialData.get() == nil) {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioInitialDataError, -1, -1, -1, __FILE__, 3);
         return( RESOURCE_ERROR);
     }
-    DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioInitialData));
 
-    gAresGlobal->maxScenarioInitial = GetHandleSize(
-        reinterpret_cast<Handle>(gAresGlobal->gScenarioInitialData)) / sizeof( scenarioInitialType);
+    gAresGlobal->maxScenarioInitial = gAresGlobal->gScenarioInitialData.size();
 
-    gAresGlobal->gScenarioConditionData = reinterpret_cast<scenarioConditionType**>(GetResource( kScenarioConditionResType, kScenarioConditionResID));
-    if ( gAresGlobal->gScenarioConditionData == nil)
-    {
+    gAresGlobal->gScenarioConditionData.load_resource('sncd', kScenarioConditionResID);
+    if (gAresGlobal->gScenarioConditionData.get() == nil) {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioConditionDataError, -1, -1, -1, __FILE__, 4);
         return( RESOURCE_ERROR);
     }
-    DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioConditionData));
 
-    gAresGlobal->maxScenarioCondition = GetHandleSize(
-        reinterpret_cast<Handle>(gAresGlobal->gScenarioConditionData)) / sizeof( scenarioConditionType);
+    gAresGlobal->maxScenarioCondition = gAresGlobal->gScenarioConditionData.size();
 
-    gAresGlobal->gScenarioBriefData = reinterpret_cast<briefPointType**>(GetResource( kScenarioBriefResType, kScenarioBriefResID));
-    if ( gAresGlobal->gScenarioBriefData == nil)
-    {
+    gAresGlobal->gScenarioBriefData.load_resource('snbf', kScenarioBriefResID);
+    if (gAresGlobal->gScenarioBriefData.get() == nil) {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioBriefDataError, -1, -1, -1, __FILE__, 5);
         return( RESOURCE_ERROR);
     }
-    DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioBriefData));
 
-    gAresGlobal->maxScenarioBrief = GetHandleSize(
-        reinterpret_cast<Handle>(gAresGlobal->gScenarioBriefData)) / sizeof( briefPointType);
+    gAresGlobal->maxScenarioBrief = gAresGlobal->gScenarioBriefData.count();
 
     // races
-    if ( gAresGlobal->gRaceData == nil)
+    if (gAresGlobal->gRaceData.get() == nil)
     {
-        gAresGlobal->gRaceData = reinterpret_cast<raceType**>(GetResource( kRaceResType, kRaceResID));
-        if ( gAresGlobal->gRaceData == nil)
+        gAresGlobal->gRaceData.load_resource('race', kRaceResID);
+        if (gAresGlobal->gRaceData.get() == nil)
         {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kReadRaceDataError, -1, -1, -1, __FILE__, 1);
             return( RESOURCE_ERROR);
         }
-        DetachResource( reinterpret_cast<Handle>(gAresGlobal->gRaceData));
     }
 
     // object stuff
-    gBaseObjectData = reinterpret_cast<baseObjectType**>(GetResource( kBaseObjectResType, kBaseObjectResID));
-    if ( gBaseObjectData == nil)
+    gBaseObjectData.load_resource('bsob', kBaseObjectResID);
+    if (gBaseObjectData.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kReadBaseObjectDataError, -1, -1, -1, __FILE__, 2);
         return( MEMORY_ERROR);
     }
 
-    DetachResource( reinterpret_cast<Handle>(gBaseObjectData));
+    gAresGlobal->maxBaseObject = gBaseObjectData.count();
 
-    gAresGlobal->maxBaseObject = GetHandleSize( reinterpret_cast<Handle>(gBaseObjectData)) /
-        sizeof( baseObjectType);
-
-    gObjectActionData = reinterpret_cast<objectActionType**>(GetResource( kObjectActionResType, kObjectActionResID));
-    if ( gObjectActionData == nil)
-    {
+    gObjectActionData.load_resource('obac', kObjectActionResID);
+    if (gObjectActionData.get() == nil) {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kReadObjectActionDataError, -1, -1, -1, __FILE__, 2);
         return( MEMORY_ERROR);
     }
-    DetachResource( reinterpret_cast<Handle>(gObjectActionData));
 
-    gAresGlobal->maxObjectAction = GetHandleSize( reinterpret_cast<Handle>(gObjectActionData))
-        / sizeof( objectActionType);
+    gAresGlobal->maxObjectAction = gObjectActionData.count();
 
     gAresGlobal->okToOpenFile = false;
 

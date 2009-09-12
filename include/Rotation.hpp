@@ -21,6 +21,7 @@
 // ROTATION.H
 
 #include <Base.h>
+#include "Handle.hpp"
 #include "MathSpecial.hpp"
 
 #pragma options align=mac68k
@@ -64,7 +65,7 @@
 
 #define kRotUnit    100     // must be same as kMotionResolution ( see Motion.h)
 
-extern smallFixedType** gRotTable;
+extern TypedHandle<smallFixedType> gRotTable;
 
 template <typename T>
 inline void mGetRotPoint(T& x, T& y, long angle) {

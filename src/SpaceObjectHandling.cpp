@@ -82,7 +82,6 @@ extern long             /*gAresGlobal->gPlayerShipNumber,*/ gAbsoluteScale, gRan
                         CLIP_BOTTOM/*, gAresGlobal->gScrollStarNumber, gAresGlobal->gGameOver*/;
 extern coordPointType   gGlobalCorner;
 extern spriteType**     gSpriteTable;
-extern smallFixedType** gRotTable;
 extern scenarioType     *gThisScenario;
 extern spaceObjectType  *gScrollStarObject;
 //extern unsigned long  gAresGlobal->gOptions;
@@ -96,8 +95,8 @@ actionQueueType *gFirstActionQueue = nil;
 long            gFirstActionQueueNumber = -1;
 
 TypedHandle<spaceObjectType> gSpaceObjectData;
-baseObjectType** gBaseObjectData = NULL;
-objectActionType** gObjectActionData = NULL;
+TypedHandle<baseObjectType>  gBaseObjectData;
+TypedHandle<objectActionType>   gObjectActionData;
 TypedHandle<actionQueueType> gActionQueueData;
 
 void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord);
@@ -122,19 +121,16 @@ int SpaceObjectHandlingInit( void)
 
     WriteDebugLong(gSpaceObjectData.size());
 
-    if ( gBaseObjectData == nil)
+    if (gBaseObjectData.get() == nil)
     {
-        gBaseObjectData = reinterpret_cast<baseObjectType**>(GetResource( kBaseObjectResType, kBaseObjectResID));
-        if ( gBaseObjectData == nil)
+        gBaseObjectData.load_resource('bsob', kBaseObjectResID);
+        if (gBaseObjectData.get() == nil)
         {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kReadBaseObjectDataError, -1, -1, -1, __FILE__, 2);
             return( MEMORY_ERROR);
         }
 
-        DetachResource( reinterpret_cast<Handle>(gBaseObjectData));
-
-        gAresGlobal->maxBaseObject = GetHandleSize( reinterpret_cast<Handle>(gBaseObjectData)) /
-            sizeof( baseObjectType);
+        gAresGlobal->maxBaseObject = gBaseObjectData.count();
 
         correctBaseObjectColor = true;
     }
@@ -144,18 +140,14 @@ int SpaceObjectHandlingInit( void)
     HLock( gBaseObjectData);
     */
 
-    if ( gObjectActionData == nil)
-    {
-        gObjectActionData = reinterpret_cast<objectActionType**>(GetResource( kObjectActionResType, kObjectActionResID));
-        if ( gObjectActionData == nil)
-        {
+    if (gObjectActionData.get() == nil) {
+        gObjectActionData.load_resource('obac', kObjectActionResID);
+        if (gObjectActionData.get() == nil) {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kReadObjectActionDataError, -1, -1, -1, __FILE__, 2);
             return( MEMORY_ERROR);
         }
-        DetachResource( reinterpret_cast<Handle>(gObjectActionData));
 
-        gAresGlobal->maxObjectAction = GetHandleSize( reinterpret_cast<Handle>(gObjectActionData))
-            / sizeof( objectActionType);
+        gAresGlobal->maxObjectAction = gObjectActionData.count();
     }
 
     gActionQueueData.create(kActionQueueLength);
@@ -178,11 +170,15 @@ int SpaceObjectHandlingInit( void)
 void CleanupSpaceObjectHandling( void)
 
 {
-    if (gBaseObjectData != nil) DisposeHandle( reinterpret_cast<Handle>(gBaseObjectData));
+    if (gBaseObjectData.get() != nil) {
+        gBaseObjectData.destroy();
+    }
     if (gSpaceObjectData.get() != nil) {
         gSpaceObjectData.destroy();
     }
-    if (gObjectActionData != nil) DisposeHandle( reinterpret_cast<Handle>(gObjectActionData));
+    if (gObjectActionData.get() != nil) {
+        gObjectActionData.destroy();
+    }
     if (gActionQueueData.get() != nil) {
         gActionQueueData.destroy();
     }

@@ -259,7 +259,6 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
     gAresGlobal->gPreferenceRefNum = 0;
     gAresGlobal->gPreferencesData = nil;
     gAresGlobal->gOptions = kDefaultOptions;
-    gAresGlobal->gRaceData = nil;
     gAresGlobal->gWarpStars = false;
     gAresGlobal->gLastClipBottom = 0;
     gAresGlobal->gScrollStarNumber = -1;
@@ -283,10 +282,6 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
     gAresGlobal->gScenarioRotation = 0;
     gAresGlobal->gThisScenarioNumber = -1;
     gAresGlobal->gScenarioRefID = 0;
-    gAresGlobal->gScenarioData = nil;
-    gAresGlobal->gScenarioInitialData = nil;
-    gAresGlobal->gScenarioConditionData = nil;
-    gAresGlobal->gScenarioBriefData = nil;
     gAresGlobal->gRadarCount = 0;
     gAresGlobal->gRadarSpeed = 30;
     gAresGlobal->gRadarRange = kRadarSize * 50;

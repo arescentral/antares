@@ -113,7 +113,7 @@ struct aresGlobalType {
     KeyMap          gKeyControl[kKeyExtendedControlNum];
     short           gPreferenceRefNum;
     unsigned long   gOptions;
-    raceType**      gRaceData;
+    TypedHandle<raceType>           gRaceData;
     TypedHandle<scrollStarType>     gScrollStarData;
     Boolean         gWarpStars;
     long            gLastClipBottom;
@@ -142,10 +142,10 @@ struct aresGlobalType {
     long            gScenarioRotation;  // = 0;
     long            gThisScenarioNumber;// = -1;
     short           gScenarioRefID;     // = 0;
-    scenarioType**  gScenarioData;      // = nil;
-    scenarioInitialType**   gScenarioInitialData;   // = nil;
-    scenarioConditionType** gScenarioConditionData; // = nil;
-    briefPointType**        gScenarioBriefData;     // = nil;
+    TypedHandle<scenarioType>       gScenarioData;      // = nil;
+    TypedHandle<scenarioInitialType>    gScenarioInitialData;   // = nil;
+    TypedHandle<scenarioConditionType>  gScenarioConditionData; // = nil;
+    TypedHandle<briefPointType>     gScenarioBriefData;     // = nil;
     TypedHandle<longPointType>      gRadarBlipData;         // = nil;
     TypedHandle<long>               gScaleList;             // = nil;
     TypedHandle<long>               gSectorLineData;        // = nil;

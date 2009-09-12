@@ -76,9 +76,8 @@ extern aresGlobalType           *gAresGlobal;
 extern long                     /*gAresGlobal->gPlayerShipNumber,*/ gAbsoluteScale, /*gAresGlobal->gGameOver,
                                 gAresGlobal->gGameTime,*/ gRandomSeed;
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
-extern baseObjectType**         gBaseObjectData;
-extern objectActionType**       gObjectActionData;
-extern smallFixedType**         gRotTable;
+extern TypedHandle<baseObjectType>  gBaseObjectData;
+extern TypedHandle<objectActionType>    gObjectActionData;
 
 //long                          gAresGlobal->gPlayerAdmiralNumber, gAresGlobal->gScenarioWinner, // -1 = no-one, 0 = player loses
 //                              gAresGlobal->gScenarioRotation = 0, gAresGlobal->gThisScenarioNumber = -1;
@@ -111,64 +110,44 @@ short ScenarioMakerInit( void)
         }
     }
 
-    if ( gAresGlobal->gScenarioData == nil)
-    {
-        gAresGlobal->gScenarioData = reinterpret_cast<scenarioType**>(GetResource( kScenarioResType, kScenarioResID));
-        if ( gAresGlobal->gScenarioData == nil)
-        {
+    if (gAresGlobal->gScenarioData.get() == nil) {
+        gAresGlobal->gScenarioData.load_resource('snro', kScenarioResID);
+        if (gAresGlobal->gScenarioData.get() == nil) {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioDataError, -1, -1, -1, __FILE__, 2);
             return( RESOURCE_ERROR);
         }
-        DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioData));
 
-        gAresGlobal->scenarioNum = GetHandleSize( reinterpret_cast<Handle>(gAresGlobal->gScenarioData)) /
-            sizeof( scenarioType);
-
+        gAresGlobal->scenarioNum = gAresGlobal->gScenarioData.count();
     }
 
-    if ( gAresGlobal->gScenarioInitialData == nil)
-    {
-        gAresGlobal->gScenarioInitialData = reinterpret_cast<scenarioInitialType**>(GetResource( kScenarioInitialResType, kScenarioInitialResID));
-        if ( gAresGlobal->gScenarioInitialData == nil)
-        {
+    if (gAresGlobal->gScenarioInitialData.get() == nil) {
+        gAresGlobal->gScenarioInitialData.load_resource('snit', kScenarioInitialResID);
+        if (gAresGlobal->gScenarioInitialData.get() == nil) {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioInitialDataError, -1, -1, -1, __FILE__, 3);
             return( RESOURCE_ERROR);
         }
-        DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioInitialData));
 
-        gAresGlobal->maxScenarioInitial = GetHandleSize(
-            reinterpret_cast<Handle>(gAresGlobal->gScenarioInitialData)) / sizeof( scenarioInitialType);
-
+        gAresGlobal->maxScenarioInitial = gAresGlobal->gScenarioInitialData.count();
     }
 
-    if ( gAresGlobal->gScenarioConditionData == nil)
-    {
-        gAresGlobal->gScenarioConditionData = reinterpret_cast<scenarioConditionType**>(GetResource( kScenarioConditionResType, kScenarioConditionResID));
-        if ( gAresGlobal->gScenarioConditionData == nil)
-        {
+    if (gAresGlobal->gScenarioConditionData.get() == nil) {
+        gAresGlobal->gScenarioConditionData.load_resource('sncd', kScenarioConditionResID);
+        if (gAresGlobal->gScenarioConditionData.get() == nil) {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioConditionDataError, -1, -1, -1, __FILE__, 4);
             return( RESOURCE_ERROR);
         }
-        DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioConditionData));
 
-        gAresGlobal->maxScenarioCondition = GetHandleSize(
-            reinterpret_cast<Handle>(gAresGlobal->gScenarioConditionData)) / sizeof( scenarioConditionType);
-
+        gAresGlobal->maxScenarioCondition = gAresGlobal->gScenarioConditionData.count();
     }
 
-    if ( gAresGlobal->gScenarioBriefData == nil)
-    {
-        gAresGlobal->gScenarioBriefData = reinterpret_cast<briefPointType**>(GetResource( kScenarioBriefResType, kScenarioBriefResID));
-        if ( gAresGlobal->gScenarioBriefData == nil)
-        {
+    if (gAresGlobal->gScenarioBriefData.get() == nil) {
+        gAresGlobal->gScenarioBriefData.load_resource('snbf', kScenarioBriefResID);
+        if (gAresGlobal->gScenarioBriefData.get() == nil) {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioBriefDataError, -1, -1, -1, __FILE__, 5);
             return( RESOURCE_ERROR);
         }
-        DetachResource( reinterpret_cast<Handle>(gAresGlobal->gScenarioBriefData));
 
-        gAresGlobal->maxScenarioBrief = GetHandleSize(
-            reinterpret_cast<Handle>(gAresGlobal->gScenarioBriefData)) / sizeof( briefPointType);
-
+        gAresGlobal->maxScenarioBrief = gAresGlobal->gScenarioBriefData.count();
     }
 
     return ( InitRaces());
@@ -177,10 +156,18 @@ short ScenarioMakerInit( void)
 void ScenarioMakerCleanup( void)
 
 {
-    if ( gAresGlobal->gScenarioData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioData));
-    if ( gAresGlobal->gScenarioBriefData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioBriefData));
-    if ( gAresGlobal->gScenarioInitialData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioInitialData));
-    if ( gAresGlobal->gScenarioConditionData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScenarioConditionData));
+    if ( gAresGlobal->gScenarioData.get() != nil) {
+        gAresGlobal->gScenarioData.destroy();
+    }
+    if (gAresGlobal->gScenarioBriefData.get() != nil) {
+        gAresGlobal->gScenarioBriefData.destroy();
+    }
+    if (gAresGlobal->gScenarioInitialData.get() != nil) {
+        gAresGlobal->gScenarioInitialData.destroy();
+    }
+    if (gAresGlobal->gScenarioConditionData.get() != nil) {
+        gAresGlobal->gScenarioConditionData.destroy();
+    }
     CleanupRaces();
 }
 
@@ -1961,9 +1948,8 @@ void GetScenarioName( long whichScenario, StringPtr scenarioName)
     GetIndString( scenarioName, kLevelNameID, aScenario->levelNameStrNum);
 }
 
-long GetScenarioNumber( void)
-{
-    return( GetHandleSize( reinterpret_cast<Handle>(gAresGlobal->gScenarioData)) / sizeof( scenarioType));
+long GetScenarioNumber() {
+    return gAresGlobal->gScenarioData.count();
 }
 
 long GetScenarioPlayerNum( long whichScenario)

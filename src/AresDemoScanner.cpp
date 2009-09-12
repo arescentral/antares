@@ -50,13 +50,14 @@
 extern aresGlobalType *gAresGlobal;
 
 extern scenarioType                 *gThisScenario;
-extern objectActionType**           gObjectActionData;
-extern baseObjectType**             gBaseObjectData;
+extern TypedHandle<objectActionType>    gObjectActionData;
+extern TypedHandle<baseObjectType>  gBaseObjectData;
 extern pixTableType                 gPixTable[];
 extern GWorldPtr                    gOffWorld;
 
 // MAKE SURE YOU COMMENT OUT THE CONTENTS OF THE CorrectAllBaseObjectColor ROUTINE
 
+#ifdef kCreateAresDemoData
 void MakeDemoDataHack( void)
 
 {
@@ -442,3 +443,4 @@ void CopyAllBriefingData( long whatLevel)
         }
     }
 }
+#endif

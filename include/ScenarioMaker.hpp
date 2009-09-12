@@ -55,7 +55,7 @@
 #define kScenarioBriefResID     500
 
 extern scenarioType* gThisScenario;
-extern objectActionType** gObjectActionData;
+extern TypedHandle<objectActionType>    gObjectActionData;
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
 extern aresGlobalType* gAresGlobal;
 

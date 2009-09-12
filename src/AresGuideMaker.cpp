@@ -90,7 +90,7 @@ struct weaponDataType {
 
 extern long             WORLD_WIDTH, WORLD_HEIGHT;
 extern GWorldPtr        gOffWorld;
-extern baseObjectType**         gBaseObjectData;
+extern TypedHandle<baseObjectType>  gBaseObjectData;
 extern objectActionType**       gObjectActionData;
 extern aresGlobalType*          gAresGlobal;
 

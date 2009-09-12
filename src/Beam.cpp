@@ -45,7 +45,6 @@ extern long             gNatePortLeft, gNatePortTop, gAbsoluteScale,
 extern coordPointType   gGlobalCorner;
 extern  GWorldPtr       gOffWorld;
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
-extern smallFixedType** gRotTable;
 
 //extern unsigned long  gAresGlobal->gOptions;
 
