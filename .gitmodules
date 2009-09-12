@@ -4,3 +4,6 @@
 [submodule "test"]
 	path = test
 	url = git://git.sfiera.net/AntaresTestData
+[submodule "pictures"]
+	path = pictures
+	url = git://git.sfiera.net/AntaresPictures

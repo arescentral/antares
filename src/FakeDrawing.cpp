@@ -23,7 +23,6 @@
 #include <algorithm>
 #include <limits>
 #include <string>
-#include <png++/png.hpp>
 #include <sys/stat.h>
 
 #include "FakeHandles.hpp"
@@ -533,35 +532,27 @@ void CopyBits(BitMap* source, BitMap* dest, Rect* source_rect, Rect* dest_rect, 
 }
 
 struct PicData {
-    png::image<png::rgba_pixel> image;
-    int height;
-    int width;
-    uint8_t** data;
-    PicData(const std::string& filename)
-            : image(filename), height(image.get_height()), width(image.get_width()) {
-        data = new uint8_t*[height];
-        for (int i = 0; i < height; ++i) {
-            data[i] = new uint8_t[width];
-            for (int j = 0; j < width; ++j) {
-                const png::rgba_pixel& p = image[i][j];
-                uint16_t red = p.red | implicit_cast<uint16_t>(p.red) << 8;
-                uint16_t green = p.green | implicit_cast<uint16_t>(p.green) << 8;
-                uint16_t blue = p.blue | implicit_cast<uint16_t>(p.blue) << 8;
-                data[i][j] = NearestColor(red, green, blue);
-            }
-        }
+    int32_t width;
+    int32_t height;
+    uint8_t* pixels;
+    PicData(const std::string& filename) {
+        int fd = open(filename.c_str(), O_RDONLY);
+        assert(read(fd, &width, sizeof(width)) == sizeof(width));
+        assert(read(fd, &height, sizeof(height)) == sizeof(height));
+        pixels = new uint8_t[width * height];
+        assert(lseek(fd, 0x1008, SEEK_SET) > 0);
+        assert(read(fd, pixels, width * height) == width * height);
+        char c;
+        assert(read(fd, &c, 1) == 0);
     }
     ~PicData() {
-        for (int i = 0; i < height; ++i) {
-            delete[] data[i];
-        }
-        delete[] data;
+        delete[] pixels;
     }
 };
 
 Pic** GetPicture(int id) {
     char fileglob[64];
-    sprintf(fileglob, "data/derived/Pictures/%d*.png", id);
+    sprintf(fileglob, "pictures/%d*.bin", id);
     glob_t g;
     g.gl_offs = 0;
     glob(fileglob, 0, NULL, &g);
@@ -571,7 +562,7 @@ Pic** GetPicture(int id) {
 
     Pic* p = new Pic;
     p->data = new PicData(filename);
-    SetRect(&p->picFrame, 0, 0, p->data->image.get_width(), p->data->image.get_height());
+    SetRect(&p->picFrame, 0, 0, p->data->width, p->data->height);
     return new Pic*(p);
 }
 
@@ -598,7 +589,8 @@ Rect ClipRectToRect(const Rect& src, const Rect& clip) {
 void DrawPicture(Pic** pic, Rect* rect) {
     Rect clipped = ClipRectToRect(*rect, (*fakeGDevice.gdPMap)->bounds);
     for (int y = clipped.top; y < clipped.bottom; ++y) {
-        SetPixelRow(clipped.left, y, (*pic)->data->data[y - rect->top], clipped.right - clipped.left);
+        PicData* data = (*pic)->data;
+        SetPixelRow(clipped.left, y, data->pixels + ((y - rect->top) * data->width), clipped.right - clipped.left);
     }
 }
 

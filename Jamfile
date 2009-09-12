@@ -1,7 +1,6 @@
 C++FLAGS    = -W -Wall -Dpowerc -DTARGET_OS_MAC -DkConstantRate -fpascal-strings ;
 OPTIM       = -O2 ;
-HDRS        = /opt/local/include include stubs ;
-LINKLIBS    = -L/opt/local/lib -lpng ;
+HDRS        = include stubs ;
 LINK        = $(C++) ;
 
 Main Antares : src/Admiral.cpp

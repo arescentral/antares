@@ -5,17 +5,16 @@ import subprocess
 import struct
 import sys
 
-size = struct.unpack('ll', sys.__stdin__.read(8))
-assert size == (640, 480)
+size = struct.unpack('>ll', sys.__stdin__.read(8))
 
 colors = {}
 for i in range(256):
-    index, r, g, b = struct.unpack('llll', sys.__stdin__.read(16))
+    index, r, g, b = struct.unpack('>llll', sys.__stdin__.read(16))
     colors[chr(index)] = ''.join([chr(r >> 8), chr(g >> 8), chr(b >> 8)])
 
 pnmtopng = subprocess.Popen(['pnmtopng'], stdin=subprocess.PIPE)
 with pnmtopng.stdin as output:
-    output.write('P6 640 480 255\n')
+    output.write('P6 %s %s 255\n' % size)
     for pixel in sys.__stdin__.read():
         output.write(colors[pixel])
 
