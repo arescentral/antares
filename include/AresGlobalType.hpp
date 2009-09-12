@@ -24,6 +24,7 @@
 #include <Files.h>
 #include <Quickdraw.h>
 
+#include "Handle.hpp"
 #include "ICAPI.h"
 #include "ScenarioData.hpp"
 #include "SoundFX.hpp"
@@ -105,8 +106,8 @@ struct aresGlobalType {
     unsigned long   gFrameCount;
     preferencesDataType**   gPreferencesData;
     long            gGameOver;
-    admiralType**   gAdmiralData;
-    destBalanceType**       gDestBalanceData;
+    TypedHandle<admiralType>        gAdmiralData;
+    TypedHandle<destBalanceType>    gDestBalanceData;
     KeyMap          gKeyControl[kKeyExtendedControlNum];
     short           gPreferenceRefNum;
     unsigned long   gOptions;

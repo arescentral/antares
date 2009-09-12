@@ -61,9 +61,9 @@ extern spaceObjectType  *gRootObject;
 int AdmiralInit( void)
 
 {
-    gAresGlobal->gAdmiralData = reinterpret_cast<admiralType**>(NewHandle( sizeof( admiralType) * kScenarioPlayerNum));
+    gAresGlobal->gAdmiralData.create(kScenarioPlayerNum);
 
-    if ( gAresGlobal->gAdmiralData == nil)
+    if (gAresGlobal->gAdmiralData.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
         return( MEMORY_ERROR);
@@ -72,17 +72,17 @@ int AdmiralInit( void)
     // MoveHHi( gAresGlobal->gAdmiralData);
     // HLock( gAresGlobal->gAdmiralData);
 
-    mHandleLockAndRegister(reinterpret_cast<Handle&>(gAresGlobal->gAdmiralData), nil, nil, nil, "\pgAresGlobal->gAdmiralData");
+    TypedHandleClearHack(gAresGlobal->gAdmiralData);
     ResetAllAdmirals();
 
-    gAresGlobal->gDestBalanceData = reinterpret_cast<destBalanceType**>(NewHandle( sizeof( destBalanceType) * kMaxDestObject));
+    gAresGlobal->gDestBalanceData.create(kMaxDestObject);
 
-    if ( gAresGlobal->gDestBalanceData == nil)
+    if (gAresGlobal->gDestBalanceData.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 2);
         return( MEMORY_ERROR);
     }
-    mHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gDestBalanceData), nil, nil, nil, "\pgAresGlobal->gDestBalanceData");
+    TypedHandleClearHack(gAresGlobal->gDestBalanceData);
 
     ResetAllDestObjectData();
 
@@ -92,8 +92,8 @@ int AdmiralInit( void)
 void AdmiralCleanup( void)
 
 {
-    if ( gAresGlobal->gAdmiralData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gAdmiralData));
-    if ( gAresGlobal->gDestBalanceData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gDestBalanceData));
+    if ( gAresGlobal->gAdmiralData.get() != nil) gAresGlobal->gAdmiralData.destroy();
+    if ( gAresGlobal->gDestBalanceData.get() != nil) gAresGlobal->gDestBalanceData.destroy();
 }
 
 void ResetAllAdmirals( void)

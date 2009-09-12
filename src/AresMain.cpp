@@ -257,8 +257,6 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
     gAresGlobal->gFrameCount = 0;
     gAresGlobal->gPreferencesData = nil;
     gAresGlobal->gGameOver = 1;
-    gAresGlobal->gAdmiralData = nil;
-    gAresGlobal->gDestBalanceData = nil;
     gAresGlobal->gPreferenceRefNum = 0;
     gAresGlobal->gPreferencesData = nil;
     gAresGlobal->gOptions = kDefaultOptions;

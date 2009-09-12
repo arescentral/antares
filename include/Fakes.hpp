@@ -20,13 +20,9 @@
 
 #include <string>
 #include "AresGlobalType.hpp"
+#include "Handle.hpp"
 
 template <typename T>
-#define DISALLOW_COPY_AND_ASSIGN(CLASS) \
-  private: \
-    CLASS(const CLASS&); \
-    CLASS& operator=(const CLASS&);
-
 class scoped_ptr {
   public:
     scoped_ptr() : _t(NULL) { }
