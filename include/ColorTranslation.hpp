@@ -21,6 +21,7 @@
 #include <Quickdraw.h>
 
 #include "Casts.hpp"
+#include "Handle.hpp"
 
 // Color Translation.h
 
@@ -74,7 +75,7 @@ struct transColorType {
     RGBColor                rgbcolor;
 };
 
-extern transColorType** gColorTranslateTable;
+extern TypedHandle<transColorType> gColorTranslateTable;
 
 inline void mGetTranslateColorShade(
         uint8_t mcolor, uint8_t mshade, uint8_t& mresultColor, transColorType*& mtransColor) {

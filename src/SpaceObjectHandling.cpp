@@ -83,7 +83,6 @@ extern long             /*gAresGlobal->gPlayerShipNumber,*/ gAbsoluteScale, gRan
                         CLIP_BOTTOM/*, gAresGlobal->gScrollStarNumber, gAresGlobal->gGameOver*/;
 extern coordPointType   gGlobalCorner;
 extern spriteType**     gSpriteTable;
-extern transColorType** gColorTranslateTable;
 extern smallFixedType** gRotTable;
 extern scenarioType     *gThisScenario;
 extern spaceObjectType  *gScrollStarObject;
@@ -97,10 +96,10 @@ long            gRootObjectNumber = -1;
 actionQueueType *gFirstActionQueue = nil;
 long            gFirstActionQueueNumber = -1;
 
-spaceObjectType** gSpaceObjectData = NULL;
+TypedHandle<spaceObjectType> gSpaceObjectData;
 baseObjectType** gBaseObjectData = NULL;
 objectActionType** gObjectActionData = NULL;
-actionQueueType** gActionQueueData = nil;
+TypedHandle<actionQueueType> gActionQueueData;
 
 void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord);
 
@@ -109,9 +108,8 @@ int SpaceObjectHandlingInit( void)
 {
     Boolean correctBaseObjectColor = false;
 
-    gSpaceObjectData = reinterpret_cast<spaceObjectType**>(
-            NewHandle( sizeof( spaceObjectType) * kMaxSpaceObject));
-    if ( gSpaceObjectData == nil)
+    gSpaceObjectData.create(kMaxSpaceObject);
+    if (gSpaceObjectData.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
         return( MEMORY_ERROR);
@@ -121,9 +119,9 @@ int SpaceObjectHandlingInit( void)
     MoveHHi( gSpaceObjectData);
     HLock( gSpaceObjectData);
     */
-    mHandleLockAndRegister( reinterpret_cast<Handle&>(gSpaceObjectData), nil, nil, ResolveSpaceObjectData, "\pgSpaceObjectData");
+    TypedHandleClearHack(gSpaceObjectData);
 
-    WriteDebugLong( GetHandleSize( reinterpret_cast<Handle>(gSpaceObjectData)));
+    WriteDebugLong(gSpaceObjectData.size());
 
     if ( gBaseObjectData == nil)
     {
@@ -163,13 +161,13 @@ int SpaceObjectHandlingInit( void)
             / sizeof( objectActionType);
     }
 
-    gActionQueueData = reinterpret_cast<actionQueueType**>(NewHandle( sizeof( actionQueueType) * kActionQueueLength));
-    if ( gActionQueueData == nil)
+    gActionQueueData.create(kActionQueueLength);
+    if (gActionQueueData.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 3);
         return( MEMORY_ERROR);
     }
-    mHandleLockAndRegister(reinterpret_cast<Handle&>(gActionQueueData), nil, nil, ResolveActionQueueData, "\pgActionQueueData");
+    TypedHandleClearHack(gActionQueueData);
 
 #ifndef kCreateAresDemoData
     if ( correctBaseObjectColor)
@@ -183,10 +181,14 @@ int SpaceObjectHandlingInit( void)
 void CleanupSpaceObjectHandling( void)
 
 {
-    if ( gBaseObjectData != nil) DisposeHandle( reinterpret_cast<Handle>(gBaseObjectData));
-    if ( gSpaceObjectData != nil) DisposeHandle( reinterpret_cast<Handle>(gSpaceObjectData));
-    if ( gObjectActionData != nil) DisposeHandle( reinterpret_cast<Handle>(gObjectActionData));
-    if ( gActionQueueData != nil) DisposeHandle( reinterpret_cast<Handle>(gActionQueueData));
+    if (gBaseObjectData != nil) DisposeHandle( reinterpret_cast<Handle>(gBaseObjectData));
+    if (gSpaceObjectData.get() != nil) {
+        gSpaceObjectData.destroy();
+    }
+    if (gObjectActionData != nil) DisposeHandle( reinterpret_cast<Handle>(gObjectActionData));
+    if (gActionQueueData.get() != nil) {
+        gActionQueueData.destroy();
+    }
 }
 
 void ResetAllSpaceObjects( void)
@@ -198,7 +200,7 @@ void ResetAllSpaceObjects( void)
     gRootObject = nil;
     gRootObjectNumber = -1;
     anObject = *gSpaceObjectData;
-    HHClearHandle( reinterpret_cast<Handle>(gSpaceObjectData));
+    TypedHandleClearHack(gSpaceObjectData);
     for ( i = 0; i < kMaxSpaceObject; i++)
     {
 //      anObject->attributes = 0;
@@ -2531,7 +2533,7 @@ void ResolveSpaceObjectData( Handle spaceData)
         anObject++;
     }
 
-    if ( gActionQueueData != nil)
+    if (gActionQueueData.get() != nil)
     {
         actionQueueType *action = *gActionQueueData;
         for ( i = 0; i < kActionQueueLength; i++)
@@ -2554,7 +2556,7 @@ void ResolveObjectActionData( Handle actionData)
 
 #pragma unused( actionData)
 //  mWriteDebugString("\pResolve ACTION");
-    if ( gActionQueueData != nil)
+    if (gActionQueueData.get() != nil)
     {
         for ( i = 0; i < kActionQueueLength; i++)
         {
@@ -2573,7 +2575,7 @@ void ResolveActionQueueData( Handle queueData)
 
 #pragma unused( queueData)
 //  mWriteDebugString("\pResolve Action QUEUE");
-    if ( gActionQueueData != nil)
+    if (gActionQueueData.get() != nil)
     {
         if  (gFirstActionQueueNumber >= 0)
             gFirstActionQueue = *gActionQueueData + gFirstActionQueueNumber;

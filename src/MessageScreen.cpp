@@ -120,9 +120,6 @@ inline void mClipAnyRect(T0& mtrect, const T1& mclip) {
 
 extern aresGlobalType   *gAresGlobal;
 extern directTextType   *gDirectText;
-extern spaceObjectType**    gSpaceObjectData;
-extern directTextType**     gDirectTextData;
-extern transColorType**     gColorTranslateTable;
 extern long             gWhichDirectText, CLIP_LEFT, CLIP_RIGHT, CLIP_BOTTOM;
 //                      gAresGlobal->gTrueClipBottom;
 
@@ -149,39 +146,37 @@ int InitMessageScreen( void)
 
     gAresGlobal->gTrueClipBottom = CLIP_BOTTOM;
     propersize = (sizeof( anyCharType) * kMaxMessageLength) + kAnyCharOffsetStart;
-    gAresGlobal->gMessageData = NewHandle( (sizeof( anyCharType) *
-        kMaxMessageLength) + kAnyCharOffsetStart);
-    if ( gAresGlobal->gMessageData == nil)
+    gAresGlobal->gMessageData.create(kMaxMessageLength + kAnyCharOffsetStart);
+    if (gAresGlobal->gMessageData.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
         return( MEMORY_ERROR);
     }
 
-    gAresGlobal->gStatusString = NewHandle( sizeof( anyCharType) *
-        kDestinationLength);
-    if ( gAresGlobal->gStatusString == nil)
+    gAresGlobal->gStatusString.create(kDestinationLength);
+    if (gAresGlobal->gStatusString.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 2);
         return( MEMORY_ERROR);
     }
 
-    gAresGlobal->gLongMessageData = reinterpret_cast<longMessageType**>(NewHandle( sizeof( longMessageType)));
-    if ( gAresGlobal->gLongMessageData == nil)
+    gAresGlobal->gLongMessageData.create(1);
+    if (gAresGlobal->gLongMessageData.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 5);
         return( MEMORY_ERROR);
     }
 
-    mHandleLockAndRegister( gAresGlobal->gMessageData, nil, nil, nil, "\pgAresGlobal->gMessageData");
-    mHandleLockAndRegister( gAresGlobal->gStatusString, nil, nil, nil, "\pgAresGlobal->gStatusString");
-    mHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gLongMessageData), nil, nil, nil, "\pgAresGlobal->gLongMessageData");
+    TypedHandleClearHack(gAresGlobal->gMessageData);
+    TypedHandleClearHack(gAresGlobal->gStatusString);
+    TypedHandleClearHack(gAresGlobal->gLongMessageData);
 
     l = reinterpret_cast<long *>(*gAresGlobal->gMessageData) + kLongOffsetFirstChar;
     *l = kAnyCharOffsetStart;
     l = reinterpret_cast<long *>(*gAresGlobal->gMessageData) + kLongOffsetFirstFree;
     *l = kAnyCharOffsetStart;
 
-    anyChar = reinterpret_cast<anyCharType *>(*gAresGlobal->gMessageData);
+    anyChar = *gAresGlobal->gMessageData;
     anyChar += kAnyCharOffsetStart;
 
     for ( i = 0; i < kMaxMessageLength; i++) // kMaxMessageLength
@@ -240,8 +235,12 @@ void MessageScreenCleanup( void)
 
 {
 #ifdef kUseMessage
-    if ( gAresGlobal->gMessageData != nil) DisposeHandle( gAresGlobal->gMessageData);
-    if ( gAresGlobal->gStatusString != nil) DisposeHandle( gAresGlobal->gStatusString);
+    if (gAresGlobal->gMessageData.get() != nil) {
+        gAresGlobal->gMessageData.destroy();
+    }
+    if (gAresGlobal->gStatusString.get() != nil) {
+        gAresGlobal->gStatusString.destroy();
+    }
 #endif
 }
 
@@ -257,7 +256,7 @@ void ClearMessage( void)
     *l = kAnyCharOffsetStart;
     l = reinterpret_cast<long *>(*gAresGlobal->gMessageData) + kLongOffsetFirstFree;
     *l = kAnyCharOffsetStart;
-    anyChar = reinterpret_cast<anyCharType *>(*gAresGlobal->gMessageData) + kAnyCharOffsetStart;
+    anyChar = *gAresGlobal->gMessageData + kAnyCharOffsetStart;
     for ( i = 0; i < kMaxMessageLength; i++)
         *anyChar++ = kMessageEndChar;
     gAresGlobal->gMessageTimeCount = 0;
@@ -304,7 +303,7 @@ void AppendStringToMessage(const  anyCharType* string)
     freeoffset = reinterpret_cast<long *>(*gAresGlobal->gMessageData) + kLongOffsetFirstFree;
 
     // set the destination char (message) to the first free character
-    message = reinterpret_cast<anyCharType *>(*gAresGlobal->gMessageData) + *freeoffset;
+    message = *gAresGlobal->gMessageData + *freeoffset;
 
     // get the length of the source string
     strLen = *string++;
@@ -325,7 +324,7 @@ void AppendStringToMessage(const  anyCharType* string)
             *freeoffset = kAnyCharOffsetStart;
 
             // reset the destination char to the first free char
-            message = reinterpret_cast<anyCharType *>(*gAresGlobal->gMessageData) + *freeoffset;
+            message = *gAresGlobal->gMessageData + *freeoffset;
         }
 
         strLen--;
@@ -344,7 +343,7 @@ void StartMessage( void)
     freeoffset = reinterpret_cast<long *>(*gAresGlobal->gMessageData) + kLongOffsetFirstFree;
 
     // set the destination char (message) to the first free character
-    message = reinterpret_cast<anyCharType *>(*gAresGlobal->gMessageData) + *freeoffset;
+    message = *gAresGlobal->gMessageData + *freeoffset;
 
     // we should be on the special end char, which we turn into a separator char
     *message++ = kMessageSeparateChar;
@@ -359,7 +358,7 @@ void StartMessage( void)
         *freeoffset = kAnyCharOffsetStart;
 
         // reset the destination char to the first free char
-        message = reinterpret_cast<anyCharType *>(*gAresGlobal->gMessageData) + *freeoffset;
+        message = *gAresGlobal->gMessageData + *freeoffset;
     }
 }
 
@@ -374,7 +373,7 @@ void EndMessage( void)
     freeoffset = reinterpret_cast<long *>(*gAresGlobal->gMessageData) + kLongOffsetFirstFree;
 
     // set the destination char (message) to the first free character
-    message = reinterpret_cast<anyCharType *>(*gAresGlobal->gMessageData) + *freeoffset;
+    message = *gAresGlobal->gMessageData + *freeoffset;
 
     // the last char we're resting on gets turned into an end char, since this should be the last message
     *message = kMessageEndChar;
@@ -491,10 +490,10 @@ void ClipToCurrentLongMessage( void)
             if ( tmessage->currentResID == kStringMessageID)
             {
                 textData = NewHandle( tmessage->stringMessage[0]);
-                if ( textData   != nil)
+                if (textData != nil)
                 {
                     count = 1;
-                    ac = reinterpret_cast<anyCharType *>(*textData);
+                    ac = reinterpret_cast<anyCharType*>(*textData);
                     while ( count <= tmessage->stringMessage[0])
                     {
                         *ac = tmessage->stringMessage[count];
@@ -505,9 +504,9 @@ void ClipToCurrentLongMessage( void)
                 tmessage->labelMessage = false;
             } else
             {
-                textData = GetResource( 'TEXT', tmessage->currentResID);
-                if ( textData != nil)
-                    DetachResource( textData);
+                textData = GetResource('TEXT', tmessage->currentResID);
+                if (textData != nil)
+                    DetachResource(textData);
                 Replace_KeyCode_Strings_With_Actual_Key_Names( textData,
                     kKeyMapNameLongID, 0);
                 if ( **textData == '#')
@@ -821,7 +820,7 @@ void DrawMessageScreen( long byUnits)
         gAresGlobal->gMessageTimeCount = 0;
         // get the offset to the first current char
         firstoffset = reinterpret_cast<long *>(*gAresGlobal->gMessageData) + kLongOffsetFirstChar;
-        anyChar = reinterpret_cast<anyCharType *>(*gAresGlobal->gMessageData) + *firstoffset;
+        anyChar = *gAresGlobal->gMessageData + *firstoffset;
         if ( *anyChar != kMessageEndChar)
         {
             offset = *firstoffset;
@@ -841,7 +840,7 @@ void DrawMessageScreen( long byUnits)
                     offset = kAnyCharOffsetStart;
 
                     // reset the destination char to the first free char
-                    anyChar = reinterpret_cast<anyCharType *>(*gAresGlobal->gMessageData) + offset;
+                    anyChar = *gAresGlobal->gMessageData + offset;
                 }
             } while (( *anyChar != kMessageSeparateChar) && ( *anyChar != kMessageEndChar));
             *firstoffset = offset;
@@ -852,10 +851,10 @@ void DrawMessageScreen( long byUnits)
 
     // get the offset to the first current char
     firstoffset = reinterpret_cast<long *>(*gAresGlobal->gMessageData) + kLongOffsetFirstChar;
-    anyChar = reinterpret_cast<anyCharType *>(*gAresGlobal->gMessageData) + *firstoffset;
+    anyChar = *gAresGlobal->gMessageData + *firstoffset;
     if ( *anyChar != kMessageEndChar)
     {
-        tLen = dChar = reinterpret_cast<anyCharType *>(tString);
+        tLen = dChar = tString;
         *tLen = 0;
         dChar++;
         offset = *firstoffset;
@@ -875,7 +874,7 @@ void DrawMessageScreen( long byUnits)
                 offset = kAnyCharOffsetStart;
 
                 // reset the destination char to the first free char
-                anyChar = reinterpret_cast<anyCharType *>(*gAresGlobal->gMessageData) + offset;
+                anyChar = *gAresGlobal->gMessageData + offset;
             }
             *dChar = *anyChar;
             dChar++;
@@ -960,7 +959,7 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
     long            charNum = 0, height = mDirectFontHeight(), x = 0, oldx = 0, oldCharNum, wordLen,
                     *lineLengthList = retroTextSpec->lineLength;
     unsigned char   *widthPtr, charWidth, wrapState; // 0 = none, 1 = once, 2 = more than once
-    anyCharType     *thisChar = reinterpret_cast<anyCharType *>(*retroTextSpec->text);
+    anyCharType     *thisChar = reinterpret_cast<anyCharType*>(*retroTextSpec->text);
 
     *lineLengthList = 0;
     retroTextSpec->autoWidth = 0;
@@ -1078,7 +1077,7 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
                     oldx = 0, oldCharNum, wordLen;
     unsigned char   *widthPtr, charWidth, wrapState, // 0 = none, 1 = once, 2 = more than once
                     tempColor;
-    anyCharType     *thisChar = reinterpret_cast<anyCharType *>(*retroTextSpec->text), *thisWordChar, thisWord[255];
+    anyCharType     *thisChar = reinterpret_cast<anyCharType*>(*retroTextSpec->text), *thisWordChar, thisWord[255];
     longRect        backRect, lineRect;
     unsigned char   calcColor, calcShade;
     transColorType  *transColor;
@@ -1254,7 +1253,7 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
 void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
     longRect *bounds, longRect *clipRect, PixMap *destMap, long portLeft, long portTop)
 {
-    anyCharType     *thisChar = reinterpret_cast<anyCharType *>(*(retroTextSpec->text)), thisWord[kMaxRetroSize], charWidth, *widthPtr;
+    anyCharType     *thisChar = reinterpret_cast<anyCharType*>(*(retroTextSpec->text)), thisWord[kMaxRetroSize], charWidth, *widthPtr;
     longRect        cursorRect, lineRect, tlRect;
     long            oldx, wordLen, *lineLength = &(retroTextSpec->lineLength[retroTextSpec->lineCount]);
     unsigned char   tempColor, calcColor, calcShade;
@@ -1278,7 +1277,7 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
     while (( charsToDo > 0) && ( retroTextSpec->thisPosition <
         retroTextSpec->textLength))
     {
-        thisChar = reinterpret_cast<anyCharType *>(*(retroTextSpec->text)) +
+        thisChar = reinterpret_cast<anyCharType*>(*(retroTextSpec->text)) +
             retroTextSpec->thisPosition;
         if ( *thisChar == kCodeChar)
         {

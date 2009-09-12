@@ -45,15 +45,13 @@
 #define kLabelTotalInnerSpace   (kLabelInnerSpace<<1)
 
 extern aresGlobalType   *gAresGlobal;
-extern directTextType** gDirectTextData;
 extern long             gWhichDirectText, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT,
                         CLIP_BOTTOM,
                         WORLD_WIDTH, WORLD_HEIGHT, gNatePortLeft, gNatePortTop; //temp hack?
 extern directTextType   *gDirectText;
 extern  GWorldPtr       gOffWorld, gRealWorld, gSaveWorld;
 extern  PixMapHandle    thePixMapHandle;
-extern transColorType** gColorTranslateTable;
-extern spaceObjectType**    gSpaceObjectData;
+extern TypedHandle<spaceObjectType> gSpaceObjectData;
 
 //Handle    gAresGlobal->gScreenLabelData = nil;
 
@@ -67,8 +65,8 @@ int ScreenLabelInit( void)
 
 {
 #ifdef kUseLabels
-    gAresGlobal->gScreenLabelData = reinterpret_cast<screenLabelType**>(NewHandle( sizeof( screenLabelType) * kMaxLabelNum));
-    if ( gAresGlobal->gScreenLabelData == nil)
+    gAresGlobal->gScreenLabelData.create(kMaxLabelNum);
+    if (gAresGlobal->gScreenLabelData.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
         return( MEMORY_ERROR);
@@ -78,7 +76,7 @@ int ScreenLabelInit( void)
     MoveHHi( gAresGlobal->gScreenLabelData);
     HLock( gAresGlobal->gScreenLabelData);
     */
-    mHandleLockAndRegister(reinterpret_cast<Handle&>(gAresGlobal->gScreenLabelData), nil, nil, reinterpret_cast<void(*)(Handle)>(ResolveScreenLabels), "\pgAresGlobal->gScreenLabelData");
+    TypedHandleClearHack(gAresGlobal->gScreenLabelData);
 
     ResetAllLabels();
     return( kNoError);
@@ -122,7 +120,9 @@ void ScreenLabelCleanup( void)
 
 {
 #ifdef kUseLabels
-    if ( gAresGlobal->gScreenLabelData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScreenLabelData));
+    if (gAresGlobal->gScreenLabelData.get() != nil) {
+        gAresGlobal->gScreenLabelData.destroy();
+    }
 #endif
 }
 

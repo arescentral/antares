@@ -60,7 +60,7 @@
 
 extern aresGlobalType   *gAresGlobal;
 //extern KeyMap     gAresGlobal->gKeyControl[];
-extern spaceObjectType**    gSpaceObjectData;
+extern TypedHandle<spaceObjectType> gSpaceObjectData;
 extern baseObjectType**     gBaseObjectData;
 extern long         /*gAresGlobal->gGameTime,*/ gRandomSeed,
                     //gAresGlobal->gPlayerAdmiralNumber, gAresGlobal->gScenarioWinner,

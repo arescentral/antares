@@ -28,13 +28,12 @@
 
 extern  GDHandle        theDevice;
 
-transColorType**        gColorTranslateTable = nil;
+TypedHandle<transColorType> gColorTranslateTable;
 
 void ColorTranslatorInit( CTabHandle theClut)
-
 {
-    gColorTranslateTable = reinterpret_cast<transColorType**>(NewHandle( sizeof( transColorType) * implicit_cast<long>(kPaletteSize)));
-    if ( gColorTranslateTable == nil)
+    gColorTranslateTable.create(kPaletteSize);
+    if (gColorTranslateTable.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
     }
@@ -44,7 +43,7 @@ void ColorTranslatorInit( CTabHandle theClut)
         MoveHHi( gColorTranslateTable);
         HLock( gColorTranslateTable);
         */
-        mHandleLockAndRegister(reinterpret_cast<Handle&>(gColorTranslateTable), nil, nil, nil, "\pgColorTranslateTable");
+        TypedHandleClearHack(gColorTranslateTable);
     }
     MakeColorTranslatorTable( theClut);
 }
@@ -52,8 +51,9 @@ void ColorTranslatorInit( CTabHandle theClut)
 void ColorTranslatorCleanup( void)
 
 {
-    if ( gColorTranslateTable != nil)
-        DisposeHandle(reinterpret_cast<Handle>(gColorTranslateTable));
+    if (gColorTranslateTable.get() != nil) {
+        gColorTranslateTable.destroy();
+    }
 }
 
 void MakeColorTranslatorTable( CTabHandle referenceTable)

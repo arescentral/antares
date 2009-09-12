@@ -70,8 +70,7 @@ extern long             gNatePortLeft, gNatePortTop, gAbsoluteScale,
                         CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM,
                         /*gAresGlobal->gTrueClipBottom,*/ gPlayScreenWidth,
                         gPlayScreenHeight, gRootObjectNumber;
-extern spaceObjectType**    gSpaceObjectData;
-extern transColorType**     gColorTranslateTable;
+extern TypedHandle<spaceObjectType> gSpaceObjectData;
 extern coordPointType   gGlobalCorner;
 extern GWorldPtr        gOffWorld;
 extern spaceObjectType  *gRootObject;
@@ -93,8 +92,8 @@ int InitScrollStars( void)
     scrollStarType  *star;
     short           i;
 
-    gAresGlobal->gScrollStarData = reinterpret_cast<scrollStarType**>(NewHandle( sizeof( scrollStarType) * kAllStarNum));
-    if ( gAresGlobal->gScrollStarData == nil)
+    gAresGlobal->gScrollStarData.create(kAllStarNum);
+    if (gAresGlobal->gScrollStarData.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
         return( MEMORY_ERROR);
@@ -103,7 +102,7 @@ int InitScrollStars( void)
     MoveHHi( gAresGlobal->gScrollStarData);
     HLock( gAresGlobal->gScrollStarData);
     */
-    mHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gScrollStarData), nil, nil, CorrectScrollStarObject, "\pgAresGlobal->gScrollStarData");
+    TypedHandleClearHack(gAresGlobal->gScrollStarData);
 
     star = *gAresGlobal->gScrollStarData;
     for ( i = 0; i < kAllStarNum; i++)
@@ -124,7 +123,9 @@ void CleanupScrollStars( void)
 
 {
 #ifdef kUseScrollStar
-    if ( gAresGlobal->gScrollStarData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gScrollStarData));
+    if (gAresGlobal->gScrollStarData.get() != nil) {
+        gAresGlobal->gScrollStarData.destroy();
+    }
 #endif
 }
 

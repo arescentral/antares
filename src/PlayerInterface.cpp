@@ -362,12 +362,10 @@ extern long                     gNatePortLeft, gNatePortTop, CLIP_LEFT, CLIP_RIG
 extern  GWorldPtr               gOffWorld, gRealWorld, gSaveWorld;
 extern CWindowPtr               gTheWindow/*, gAresGlobal->gBackWindow*/;       // we need the window for copying to the real world, a hack
 extern directTextType*          gDirectText;
-extern directTextType**         gDirectTextData;
 extern long                     gWhichDirectText, WORLD_WIDTH, WORLD_HEIGHT;
 //                              gAresGlobal->gPlayerAdmiralNumber;
 extern baseObjectType**         gBaseObjectData;
 extern objectActionType**       gObjectActionData;
-extern transColorType**         gColorTranslateTable;
 extern  GDHandle                theDevice;
 
 Boolean IsKeyReserved( KeyMap, Boolean);

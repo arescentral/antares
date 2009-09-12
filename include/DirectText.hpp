@@ -22,6 +22,7 @@
 
 #include "AnyChar.hpp"
 #include "Casts.hpp"
+#include "Handle.hpp"
 #include "SpriteHandling.hpp"
 
 #pragma options align=mac68k
@@ -61,7 +62,7 @@ struct directTextType {
 
 extern long gWhichDirectText;
 extern directTextType* gDirectText;
-extern directTextType** gDirectTextData;
+extern TypedHandle<directTextType> gDirectTextData;
 
 inline void mGetDirectStringDimensions(const unsigned char* string, long& width, long& height) {
     height = gDirectText->height << 1;

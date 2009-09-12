@@ -24,8 +24,10 @@
 #include <Files.h>
 #include <Quickdraw.h>
 
+#include "AnyChar.hpp"
 #include "Handle.hpp"
 #include "ICAPI.h"
+#include "NateDraw.hpp"
 #include "ScenarioData.hpp"
 #include "SoundFX.hpp"
 
@@ -68,8 +70,8 @@ struct barIndicatorType {
 
 struct miniScreenLineType;
 struct miniComputerDataType {
-    miniScreenLineType**    lineData;
-    spaceObjectType**       objectData;
+    TypedHandle<miniScreenLineType> lineData;
+    TypedHandle<spaceObjectType> objectData;
     long                    selectLine;
     long                    pollTime;
     long                    buildTimeBarValue;
@@ -112,7 +114,7 @@ struct aresGlobalType {
     short           gPreferenceRefNum;
     unsigned long   gOptions;
     raceType**      gRaceData;
-    scrollStarType**        gScrollStarData;
+    TypedHandle<scrollStarType>     gScrollStarData;
     Boolean         gWarpStars;
     long            gLastClipBottom;
     long            gScrollStarNumber;
@@ -123,7 +125,7 @@ struct aresGlobalType {
     long            gFarthestObject;
     long            gCenterScaleH;
     long            gCenterScaleV;
-    proximityUnitType**     gProximityGrid;
+    TypedHandle<proximityUnitType>  gProximityGrid;
     KeyMap          gLastKeyMap;
     unsigned long   gLastKeys;
     unsigned long   gTheseKeys;
@@ -144,9 +146,9 @@ struct aresGlobalType {
     scenarioInitialType**   gScenarioInitialData;   // = nil;
     scenarioConditionType** gScenarioConditionData; // = nil;
     briefPointType**        gScenarioBriefData;     // = nil;
-    Handle          gRadarBlipData;         // = nil;
-    Handle          gScaleList;             // = nil;
-    Handle          gSectorLineData;        // = nil;
+    TypedHandle<longPointType>      gRadarBlipData;         // = nil;
+    TypedHandle<long>               gScaleList;             // = nil;
+    TypedHandle<long>               gSectorLineData;        // = nil;
     long            gRadarCount;            // = 0;
     long            gRadarSpeed;            // = 30;
     long            gRadarRange;            // kRadarSize * 50;
@@ -156,9 +158,9 @@ struct aresGlobalType {
     long            gRightPanelLeftEdge;    // = 608
     barIndicatorType    gBarIndicator[ kBarIndicatorNum];
     short           gMouseActive;           // = kMouseOff;
-    Handle          gMessageData;           // = nil
-    Handle          gStatusString;          // = nil
-    longMessageType**       gLongMessageData;       // = nil
+    TypedHandle<anyCharType>        gMessageData;           // = nil
+    TypedHandle<anyCharType>        gStatusString;          // = nil
+    TypedHandle<longMessageType>    gLongMessageData;       // = nil
     long            gMessageTimeCount;      // = 0;
     long            gMessageLabelNum;       // = -1;
     long            gStatusLabelNum;        // = -1;
@@ -166,8 +168,8 @@ struct aresGlobalType {
 //  Handle          gMiniScreenHandle;      // = nil;
     miniComputerDataType    gMiniScreenData;
     Handle          gMissionStatusStrList;
-    screenLabelType**   gScreenLabelData;       // = nil;
-    beamType**      gBeamData;              // = nil;
+    TypedHandle<screenLabelType>    gScreenLabelData;       // = nil;
+    TypedHandle<beamType>           gBeamData;              // = nil;
     long            gColorAnimationStep;    // = 0;
     long            gColorAnimationInSpeed; // = -1;
     long            gColorAnimationOutSpeed;// = -1;

@@ -39,8 +39,8 @@ extern  GWorldPtr       gSaveWorld;
 
 directTextType      *gDirectText = nil;
 long                gWhichDirectText = 0;
-Handle              gFourBitTable = nil;        // for turning 4-bit masks into 8-bit masks on the fly
-directTextType**    gDirectTextData = nil;
+TypedHandle<unsigned long> gFourBitTable;  // for turning 4-bit masks into 8-bit masks on the fly
+TypedHandle<directTextType> gDirectTextData;
 
 int InitDirectText( void)
 
@@ -51,15 +51,12 @@ int InitDirectText( void)
     directTextType  *dtext = nil;
 
     HHMaxMem();
-    gDirectTextData = reinterpret_cast<directTextType**>(NewHandle( sizeof( directTextType) * kDirectFontNum));
-    if ( gDirectTextData == nil)
+    gDirectTextData.create(kDirectFontNum);
+    if (gDirectTextData.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 101);
         return( MEMORY_ERROR);
     }
-    // we can't move this handle since we want to keep ptrs to the character set handles
-    MoveHHi( reinterpret_cast<Handle>(gDirectTextData));
-    HLock( reinterpret_cast<Handle>(gDirectTextData));
 
     dtext = *gDirectTextData;
     for  ( count = 0; count < kDirectFontNum; count++)
@@ -172,8 +169,8 @@ int InitDirectText( void)
 
     AddDirectFont( dtext);
 
-    gFourBitTable = NewHandle( sizeof( unsigned char) * 4L * kFourBitSize);
-    if ( gFourBitTable == nil)
+    gFourBitTable.create(kFourBitSize);
+    if (gFourBitTable.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 2);
         return( MEMORY_ERROR);
@@ -184,9 +181,9 @@ int InitDirectText( void)
     HLock( gFourBitTable);
     */
     WriteDebugLine("\p4BITREG:");
-    mHandleLockAndRegister( gFourBitTable, nil, nil, nil, "\pgFourBitTable");
+    TypedHandleClearHack(gFourBitTable);
 
-    c = reinterpret_cast<unsigned char *>(*gFourBitTable);
+    c = reinterpret_cast<unsigned char*>(*gFourBitTable);
     for ( i = 0; i < kFourBitSize; i++)
     {
 
@@ -221,10 +218,12 @@ void DirectTextCleanup( void)
             DisposeHandle(reinterpret_cast<Handle>(dtext->charSet));
         dtext++;
     }
-    if ( gFourBitTable != nil)
-        DisposeHandle( gFourBitTable);
-    if ( gDirectTextData != nil)
-        DisposeHandle( reinterpret_cast<Handle>(gDirectTextData));
+    if (gFourBitTable.get() != nil) {
+        gFourBitTable.destroy();
+    }
+    if (gDirectTextData.get() != nil) {
+        gDirectTextData.destroy();
+    }
 }
 
 // GetDirectFontNum:
@@ -420,7 +419,7 @@ void DrawDirectTextStringClipped( anyCharType *string, unsigned char color, PixM
                     for ( i = 0; i < gDirectText->physicalWidth; i++)
                     {
                         // really table + ((*sbyte >> 4) << 2) -- look up byte value for bit mask
-                        tbyte = reinterpret_cast<unsigned char *>(*gFourBitTable) + implicit_cast<long>(( (*sbyte) >> 2L) & 0x3c);
+                        tbyte = reinterpret_cast<unsigned char*>(*gFourBitTable) + implicit_cast<long>(( (*sbyte) >> 2L) & 0x3c);
 
                         // for each of four bytes for this half of the source byte:
                         // make sure exists & is within left & right bounds
@@ -438,7 +437,7 @@ void DrawDirectTextStringClipped( anyCharType *string, unsigned char color, PixM
                         dbyte++;
                         k++;
 
-                        tbyte = reinterpret_cast<unsigned char *>(*gFourBitTable) + implicit_cast<long>(( (*(sbyte++)) & 0x0f) << 2L);
+                        tbyte = reinterpret_cast<unsigned char*>(*gFourBitTable) + implicit_cast<long>(( (*(sbyte++)) & 0x0f) << 2L);
                         if ( (*(tbyte++)) && ( k >= leftSkip) && ( k < bytesToDo)) *dbyte = color;
                         dbyte++;
                         k++;
@@ -477,12 +476,12 @@ void DrawDirectTextStringClipped( anyCharType *string, unsigned char color, PixM
                 for ( i = 0; i < gDirectText->physicalWidth; i++)
                 {
                     // get ptr in bit>byte table
-                    slong = reinterpret_cast<unsigned long *>(*gFourBitTable) + implicit_cast<long>( (*sbyte) >> 4L);
+                    slong = *gFourBitTable + implicit_cast<long>( (*sbyte) >> 4L);
                     *dlong = (( *dlong | *slong) ^ *slong) | ( colorlong & *slong);
                     dlong++;
 
                     // for snd half of word
-                    slong = reinterpret_cast<unsigned long *>(*gFourBitTable) + implicit_cast<long>( (*(sbyte++)) & 0x0f);
+                    slong = *gFourBitTable + implicit_cast<long>( (*(sbyte++)) & 0x0f);
                     *dlong = (( *dlong | *slong) ^ *slong) | ( colorlong & *slong);
                     dlong++;
                 }

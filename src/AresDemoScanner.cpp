@@ -50,7 +50,6 @@
 extern aresGlobalType *gAresGlobal;
 
 extern scenarioType                 *gThisScenario;
-extern spaceObjectType**            gSpaceObjectData;
 extern objectActionType**           gObjectActionData;
 extern baseObjectType**             gBaseObjectData;
 extern pixTableType                 gPixTable[];

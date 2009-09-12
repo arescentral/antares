@@ -277,11 +277,9 @@ extern  PixMapHandle    thePixMapHandle;
 extern  long            gNatePortLeft, gNatePortTop/*, gAresGlobal->gPlayerAdmiralNumber,
                         gAresGlobal->gPlayerShipNumber, gAresGlobal->gGameTime*/, gNetLatency;
 extern directTextType*  gDirectText;
-extern directTextType** gDirectTextData;
 extern long             gWhichDirectText;//, gAresGlobal->gInstrumentTop;
 extern baseObjectType**     gBaseObjectData;
-extern transColorType**     gColorTranslateTable;
-extern spaceObjectType**    gSpaceObjectData;
+extern TypedHandle<spaceObjectType> gSpaceObjectData;
 //extern    unsigned long   gAresGlobal->gOptions;
 
 /*Handle    gMiniScreenLine = nil, gMiniObjectData = nil;
@@ -315,10 +313,9 @@ int MiniScreenInit( void)
     gAresGlobal->gMiniScreenData.buildTimeBarValue = 0;
     gAresGlobal->gMiniScreenData.clickLine = kMiniScreenNoLineSelected;
 
-    gAresGlobal->gMiniScreenData.lineData = reinterpret_cast<miniScreenLineType**>(NewHandle( sizeof( miniScreenLineType)
-         * kMiniScreenTrueLineNum));
+    gAresGlobal->gMiniScreenData.lineData.create(kMiniScreenTrueLineNum);
 
-    if ( gAresGlobal->gMiniScreenData.lineData == nil)
+    if (gAresGlobal->gMiniScreenData.lineData.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
         return ( MEMORY_ERROR);
@@ -328,16 +325,15 @@ int MiniScreenInit( void)
     MoveHHi( gMiniScreenData->lineData);
     HLock( gMiniScreenData->lineData);
     */
-    mHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gMiniScreenData.lineData), nil, nil, nil, "\pgAresGlobal->gMiniScreenData.lineData");
+    TypedHandleClearHack(gAresGlobal->gMiniScreenData.lineData);
 
-    gAresGlobal->gMiniScreenData.objectData = reinterpret_cast<spaceObjectType**>(
-            NewHandle( sizeof( spaceObjectType) * kMiniObjectDataNum));
-    if ( gAresGlobal->gMiniScreenData.lineData == nil)
+    gAresGlobal->gMiniScreenData.objectData.create(kMiniObjectDataNum);
+    if (gAresGlobal->gMiniScreenData.lineData.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 2);
         return ( MEMORY_ERROR);
     }
-    mHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gMiniScreenData.objectData), nil, nil, nil, "\pgAresGlobal->gMiniScreenData.objectData");
+    TypedHandleClearHack(gAresGlobal->gMiniScreenData.objectData);
 
     ClearMiniScreenLines();
     ClearMiniObjectData();
@@ -346,10 +342,13 @@ int MiniScreenInit( void)
 }
 
 void MiniScreenCleanup( void)
-
 {
-    if ( gAresGlobal->gMiniScreenData.lineData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gMiniScreenData.lineData));
-    if ( gAresGlobal->gMiniScreenData.objectData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gMiniScreenData.objectData));
+    if (gAresGlobal->gMiniScreenData.lineData.get() != nil) {
+        gAresGlobal->gMiniScreenData.lineData.destroy();
+    }
+    if (gAresGlobal->gMiniScreenData.objectData.get() != nil) {
+        gAresGlobal->gMiniScreenData.objectData.destroy();
+    }
 //  if ( gAresGlobal->gMiniScreenHandle != nil) DisposeHandle( gAresGlobal->gMiniScreenHandle);
 }
 

@@ -50,7 +50,7 @@
 #define kAbsolutelyEssential        0x00008000
 
 extern aresGlobalType*      gAresGlobal;
-extern spaceObjectType**    gSpaceObjectData;
+extern TypedHandle<spaceObjectType> gSpaceObjectData;
 extern baseObjectType**     gBaseObjectData;
 extern long         gRandomSeed, gRootObjectNumber;//, gAresGlobal->gPlayerAdmiralNumber;
 //extern long           gAresGlobal->gGameTime; // for debugging only

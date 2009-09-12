@@ -123,15 +123,12 @@ int InitMotion( void)
     gAresGlobal->gCenterScaleH = (gPlayScreenWidth / 2) * SCALE_SCALE;
     gAresGlobal->gCenterScaleV = (gPlayScreenHeight / 2) * SCALE_SCALE;
 
-    gAresGlobal->gProximityGrid = reinterpret_cast<proximityUnitType**>(NewHandle( sizeof( proximityUnitType) * kProximityGridDataLength));
-    if ( gAresGlobal->gProximityGrid == nil)
+    gAresGlobal->gProximityGrid.create(kProximityGridDataLength);
+    if (gAresGlobal->gProximityGrid.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
         return( MEMORY_ERROR);
     }
-
-    MoveHHi(reinterpret_cast<Handle>(gAresGlobal->gProximityGrid));
-    HLock(reinterpret_cast<Handle>(gAresGlobal->gProximityGrid));
 
 //  mHandleLockAndRegister( gAresGlobal->gProximityGrid, nil, nil, nil)
 
@@ -236,8 +233,9 @@ void HackCheckProxGrid( long sayswho)
 void MotionCleanup( void)
 
 {
-    if ( gAresGlobal->gProximityGrid != nil)
-        DisposeHandle(reinterpret_cast<Handle>(gAresGlobal->gProximityGrid));
+    if ( gAresGlobal->gProximityGrid.get() != nil) {
+        gAresGlobal->gProximityGrid.destroy();
+    }
 }
 
 void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const long unitsToDo)

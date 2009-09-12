@@ -241,8 +241,6 @@ enum inlineKindType {
 };
 
 extern CWindowPtr       gTheWindow;
-extern directTextType** gDirectTextData;
-extern transColorType** gColorTranslateTable;
 extern long             gWhichDirectText;
 extern directTextType*  gDirectText;
 

@@ -45,7 +45,7 @@ extern long             gNatePortLeft, gNatePortTop, gAbsoluteScale,
                         CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM;
 extern coordPointType   gGlobalCorner;
 extern  GWorldPtr       gOffWorld;
-extern spaceObjectType**    gSpaceObjectData;
+extern TypedHandle<spaceObjectType> gSpaceObjectData;
 extern smallFixedType** gRotTable;
 
 //extern unsigned long  gAresGlobal->gOptions;
@@ -59,14 +59,14 @@ short InitBeams( void)
     beamType    *beam;
     short           i;
 
-    gAresGlobal->gBeamData = reinterpret_cast<beamType**>(NewHandle( sizeof( beamType) * implicit_cast<long>(kBeamNum)));
-    if ( gAresGlobal->gBeamData == nil)
+    gAresGlobal->gBeamData.create(kBeamNum);
+    if (gAresGlobal->gBeamData.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
         return( MEMORY_ERROR);
     }
 
-    mHandleLockAndRegister( reinterpret_cast<Handle&>(gAresGlobal->gBeamData), nil, nil, ResolveBeamData, "\pgAresGlobal->gBeamData");
+    TypedHandleClearHack(gAresGlobal->gBeamData);
 
     beam = *gAresGlobal->gBeamData;
     for ( i = 0; i < kBeamNum; i++)
@@ -80,7 +80,7 @@ short InitBeams( void)
 
 void CleanupBeams( void)
 {
-    if ( gAresGlobal->gBeamData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gBeamData));
+    if (gAresGlobal->gBeamData.get() != nil) gAresGlobal->gBeamData.destroy();
 }
 
 void ResetBeams( void)

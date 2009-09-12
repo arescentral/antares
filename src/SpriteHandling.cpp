@@ -88,9 +88,9 @@ extern aresGlobalType   *gAresGlobal;
 
 long                    *gScaleHMap = nil, *gScaleVMap = nil, gAbsoluteScale = MIN_SCALE;
 pixTableType            gPixTable[ kMaxPixTableEntry];
-spriteType**            gSpriteTable = NULL;
-long**                  gBothScaleMaps = NULL;
-unsigned char**         gStaticTable = NULL;
+TypedHandle<spriteType>             gSpriteTable;
+TypedHandle<long>                   gBothScaleMaps;
+TypedHandle<unsigned char>          gStaticTable;
 short                   gSpriteFileRefID = 0;
 
 Boolean PixelInSprite_IsOutside( spritePix *sprite, long x, long y, long *hmap,
@@ -104,8 +104,8 @@ void SpriteHandlingInit ( void)
     int             i, j;
     unsigned char   *staticValue = nil;
 
-    gBothScaleMaps = reinterpret_cast<long**>(NewHandle(sizeof(long) * MAX_PIX_SIZE * 2));
-    if ( gBothScaleMaps == nil)
+    gBothScaleMaps.create(MAX_PIX_SIZE * 2);
+    if (gBothScaleMaps.get() == nil)
     {
         ShowErrorAny( eExitToShellErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
     }
@@ -113,7 +113,7 @@ void SpriteHandlingInit ( void)
     MoveHHi( gBothScaleMaps);
     HLock( gBothScaleMaps);
     */
-    mHandleLockAndRegister(reinterpret_cast<Handle&>(gBothScaleMaps), nil, nil, ResolveScaleMapData, "\pgBothScaleMaps");
+    TypedHandleClearHack(gBothScaleMaps);
 
     gScaleHMap = *gBothScaleMaps;
     gScaleVMap = *gBothScaleMaps + MAX_PIX_SIZE;
@@ -137,8 +137,8 @@ void SpriteHandlingInit ( void)
 
     ResetAllPixTables();
 
-    gSpriteTable = reinterpret_cast<spriteType**>(NewHandle( sizeof( spriteType) * kMaxSpriteNum));
-    if ( gSpriteTable == nil)
+    gSpriteTable.create(kMaxSpriteNum);
+    if (gSpriteTable.get() == nil)
     {
         ShowErrorAny( eExitToShellErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 2);
     }
@@ -147,7 +147,6 @@ void SpriteHandlingInit ( void)
     MoveHHi( gSpriteTable);
     HLock( gSpriteTable);
     */
-    mDataHandleLockAndRegister( reinterpret_cast<Handle&>(gSpriteTable), nil, ResolveSpriteData, nil, "\pgSpriteTable");
 
 /*
     SetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
@@ -161,12 +160,12 @@ void SpriteHandlingInit ( void)
     if ( gBlipTable == nil)
         ShowErrorNoRecover( SPRITE_CREATE_ERROR, kSpriteHandleError, 18);
 */
-    gStaticTable = reinterpret_cast<unsigned char**>(NewHandle(sizeof(unsigned char) * (kStaticTableSize * 2)));
-    if ( gStaticTable == nil)
+    gStaticTable.create(kStaticTableSize * 2);
+    if (gStaticTable.get() == nil)
     {
     }
 
-    mHandleLockAndRegister(reinterpret_cast<Handle&>(gStaticTable), nil, nil, nil, "\pgStaticTable");
+    TypedHandleClearHack(gStaticTable);
 
     staticValue = *gStaticTable;
     for ( i = 0; i < (kStaticTableSize * 2); i++)
@@ -223,8 +222,9 @@ void CleanupSpriteHandling( void)
 {
     int i;
 
-    if ( gBothScaleMaps != nil)
-        DisposeHandle(reinterpret_cast<Handle>(gBothScaleMaps));
+    if (gBothScaleMaps.get() != nil) {
+        gBothScaleMaps.destroy();
+    }
 //  CloseResFile( gSpriteFileRefID);
     for ( i = 0; i < kMaxPixTableEntry; i++)
     {
@@ -234,8 +234,9 @@ void CleanupSpriteHandling( void)
             DisposeHandle(reinterpret_cast<Handle>(gPixTable[i].resource));
         }
     }
-    if ( gSpriteTable != nil)
-        DisposeHandle( reinterpret_cast<Handle>(gSpriteTable));
+    if (gSpriteTable.get() != nil) {
+        gSpriteTable.destroy();
+    }
 }
 
 void SetAllPixTablesNoKeep( void)
@@ -2276,7 +2277,6 @@ void ResolveSpriteData( Handle dummy)
 
 #pragma unused( dummy)
     mWriteDebugString("\pResolving Sprite");
-    HLock( reinterpret_cast<Handle>(gSpriteTable));
     aSprite = *gSpriteTable;
     for ( i = 0; i < kMaxSpriteNum; i++)
     {

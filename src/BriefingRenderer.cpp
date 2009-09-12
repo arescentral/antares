@@ -38,7 +38,7 @@ struct briefingSpriteBoundsType {
 };
 
 extern aresGlobalType*      gAresGlobal;
-extern spaceObjectType**    gSpaceObjectData;
+extern TypedHandle<spaceObjectType> gSpaceObjectData;
 extern scenarioType*        gThisScenario;
 
 briefingSpriteBoundsType    *gBriefingSpriteBounds = nil;

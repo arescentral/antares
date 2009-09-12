@@ -30,9 +30,6 @@
 #define kObjectActionResType    'obac'
 #define kObjectActionResID      500
 
-extern spaceObjectType** gSpaceObjectData;
-
-
 int SpaceObjectHandlingInit( void);
 void CleanupSpaceObjectHandling( void);
 void ResetAllSpaceObjects( void);

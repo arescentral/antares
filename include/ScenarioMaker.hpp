@@ -56,7 +56,7 @@
 
 extern scenarioType* gThisScenario;
 extern objectActionType** gObjectActionData;
-extern spaceObjectType** gSpaceObjectData;
+extern TypedHandle<spaceObjectType> gSpaceObjectData;
 extern aresGlobalType* gAresGlobal;
 
 inline int mGetRealAdmiralNum(int mplayernum) {

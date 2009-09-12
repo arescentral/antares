@@ -76,7 +76,7 @@ extern aresGlobalType           *gAresGlobal;
 //extern unsigned long          gAresGlobal->gOptions;
 extern long                     /*gAresGlobal->gPlayerShipNumber,*/ gAbsoluteScale, /*gAresGlobal->gGameOver,
                                 gAresGlobal->gGameTime,*/ gRandomSeed;
-extern spaceObjectType**        gSpaceObjectData;
+extern TypedHandle<spaceObjectType> gSpaceObjectData;
 extern baseObjectType**         gBaseObjectData;
 extern objectActionType**       gObjectActionData;
 extern smallFixedType**         gRotTable;

@@ -62,7 +62,7 @@ struct handleDataType {
     Str255          name;
 };
 
-handleDataType**    gHandleData = nil;
+TypedHandle<handleDataType> gHandleData;
 //Boolean       EMERGENCYHACKTEST = false;
 
 void HHBetterCheckHandle( Handle, Handle, StringPtr);
@@ -70,16 +70,14 @@ void HHBetterCheckHandle( Handle, Handle, StringPtr);
 short HandleHandlerInit( void)
 
 {
-    gHandleData = reinterpret_cast<handleDataType**>(NewHandle( sizeof( handleDataType) * kMaxHandleHandleNum));
-    if ( gHandleData == nil)
+    gHandleData.create(kMaxHandleHandleNum);
+    if (gHandleData.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
         return( MEMORY_ERROR);
     }
 
 //  mHandleLockAndRegister( gHandleData, nil, nil, nil)
-    MoveHHi(reinterpret_cast<Handle>(gHandleData));
-    HLock(reinterpret_cast<Handle>(gHandleData));
     ResetAllHandleData();
 
     return( kNoError);
@@ -88,7 +86,9 @@ short HandleHandlerInit( void)
 void HandleHandlerCleanup( void)
 
 {
-    if ( gHandleData != nil) DisposeHandle( reinterpret_cast<Handle>(gHandleData));
+    if (gHandleData.get() != nil) {
+        gHandleData.destroy();
+    }
 }
 
 void ResetAllHandleData( void)
@@ -213,11 +213,7 @@ void HHMaxMem( void)
         h++;
     }
 
-    HUnlock(reinterpret_cast<Handle>(gHandleData));
-
     free = MaxMem( &grow);
-
-    HLock(reinterpret_cast<Handle>(gHandleData));
 
     h = *gHandleData;
     for ( i = 0; i < kMaxHandleHandleNum; i++)

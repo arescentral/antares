@@ -54,7 +54,7 @@ SSpSourceReference MyCreateSource( void);
 SndChannelPtr MyCreateLocalizedChannel( void);
 
 extern aresGlobalType   *gAresGlobal;
-extern spaceObjectType**    gSpaceObjectData;
+extern TypedHandle<spaceObjectType> gSpaceObjectData;
 extern coordPointType   gGlobalCorner;
 //extern unsigned long  gAresGlobal->gOptions;
 

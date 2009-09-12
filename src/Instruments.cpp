@@ -135,8 +135,7 @@ inline void mWideASR8(UnsignedWide& mwide) {
 
 extern  CWindowPtr      gTheWindow; // hack to copy bar indicators to offworld
 extern aresGlobalType   *gAresGlobal;
-extern spaceObjectType**    gSpaceObjectData;
-extern transColorType** gColorTranslateTable;
+extern TypedHandle<spaceObjectType> gSpaceObjectData;
 extern smallFixedType** gRotTable;//, gAresGlobal->gAdmiralData;
 extern spaceObjectType  *gScrollStarObject;
 extern PixMapHandle     thePixMapHandle;
@@ -171,8 +170,8 @@ int InstrumentInit( void)
     gAresGlobal->gInstrumentTop = (WORLD_HEIGHT / 2) - ( kPanelHeight / 2);
     gAresGlobal->gRightPanelLeftEdge = WORLD_WIDTH - kRightPanelWidth;
 
-    gAresGlobal->gRadarBlipData = NewHandle( sizeof( longPointType) * kRadarBlipNum);
-    if ( gAresGlobal->gRadarBlipData == nil)
+    gAresGlobal->gRadarBlipData.create(kRadarBlipNum);
+    if (gAresGlobal->gRadarBlipData.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
         return ( MEMORY_ERROR);
@@ -181,10 +180,10 @@ int InstrumentInit( void)
     MoveHHi( gAresGlobal->gRadarBlipData);
     HLock( gAresGlobal->gRadarBlipData);
     */
-    mHandleLockAndRegister( gAresGlobal->gRadarBlipData, nil, nil, nil, "\pgAresGlobal->gRadarBlipData");
+    TypedHandleClearHack(gAresGlobal->gRadarBlipData);
 
-    gAresGlobal->gScaleList = NewHandle( sizeof( long) * kScaleListNum);
-    if ( gAresGlobal->gScaleList == nil)
+    gAresGlobal->gScaleList.create(kScaleListNum);
+    if (gAresGlobal->gScaleList.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 2);
         return ( MEMORY_ERROR);
@@ -193,11 +192,10 @@ int InstrumentInit( void)
     MoveHHi( gAresGlobal->gScaleList);
     HLock( gAresGlobal->gScaleList);
     */
-    mHandleLockAndRegister( gAresGlobal->gScaleList, nil, nil, nil, "\pgAresGlobal->gScaleList");
+    TypedHandleClearHack(gAresGlobal->gScaleList);
 
-    gAresGlobal->gSectorLineData = NewHandle( sizeof( long) * kMaxSectorLine * 4L + sizeof( long) *
-                    kSiteCoordNum * 2L + sizeof( long) * kCursorCoordNum * 2L);
-    if ( gAresGlobal->gSectorLineData == nil)
+    gAresGlobal->gSectorLineData.create(kMaxSectorLine * 4 + kSiteCoordNum * 2 + kCursorCoordNum * 2);
+    if (gAresGlobal->gSectorLineData.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 3);
         return ( MEMORY_ERROR);
@@ -206,7 +204,7 @@ int InstrumentInit( void)
     MoveHHi( gAresGlobal->gSectorLineData);
     HLock( gAresGlobal->gSectorLineData);
     */
-    mHandleLockAndRegister( gAresGlobal->gSectorLineData, nil, nil, nil, "\pgAresGlobal->gSectorLineData");
+    TypedHandleClearHack(gAresGlobal->gSectorLineData);
 
     ResetInstruments();
 
@@ -216,7 +214,9 @@ int InstrumentInit( void)
 void InstrumentCleanup( void)
 
 {
-    if ( gAresGlobal->gRadarBlipData != nil) DisposeHandle( gAresGlobal->gRadarBlipData);
+    if (gAresGlobal->gRadarBlipData.get() != nil) {
+        gAresGlobal->gRadarBlipData.destroy();
+    }
     MiniScreenCleanup();
 }
 
@@ -233,7 +233,7 @@ void ResetInstruments( void)
     gAresGlobal->gWhichScaleNum = 0;
     gLastGlobalCorner.h = gLastGlobalCorner.v = 0;
     gAresGlobal->gMouseActive = kMouseOff;
-    l = reinterpret_cast<long *>(*gAresGlobal->gScaleList);
+    l = *gAresGlobal->gScaleList;
     for ( i = 0; i < kScaleListNum; i++)
     {
         *l = SCALE_SCALE;
@@ -254,7 +254,7 @@ void ResetInstruments( void)
     gAresGlobal->gBarIndicator[kBatteryBar].top = 103 + gAresGlobal->gInstrumentTop;
     gAresGlobal->gBarIndicator[kBatteryBar].color = SALMON;
 
-    lp = reinterpret_cast<longPointType *>(*gAresGlobal->gRadarBlipData);
+    lp = *gAresGlobal->gRadarBlipData;
     for ( i = 0; i < kRadarBlipNum; i++)
     {
         lp->h = -1;
@@ -268,7 +268,7 @@ void ResetSectorLines( void)
 {
     long    *l, count;
 
-    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData);
+    l = *gAresGlobal->gSectorLineData;
 
     for ( count = 0; count < kMaxSectorLine; count++)
     {
@@ -328,7 +328,7 @@ void UpdateRadar( long unitsDone)
 
     if ( doDraw)
     {
-        lp = reinterpret_cast<longPointType*>(*gAresGlobal->gRadarBlipData);
+        lp = *gAresGlobal->gRadarBlipData;
         for ( rcount = 0; rcount < kRadarBlipNum; rcount++)
         {
             if ( lp->h >= 0)
@@ -373,7 +373,7 @@ void UpdateRadar( long unitsDone)
             DrawInRealWorld();
             ChunkCopyPixMapToScreenPixMap( *offPixBase, &tRect, *thePixMapHandle);
 
-            lp = reinterpret_cast<longPointType*>(*gAresGlobal->gRadarBlipData);
+            lp = *gAresGlobal->gRadarBlipData;
             for ( rcount = 0; rcount < kRadarBlipNum; rcount++)
             {
                 lp->h = -1;
@@ -381,7 +381,7 @@ void UpdateRadar( long unitsDone)
             }
             rcount = 0;
 
-            lp = reinterpret_cast<longPointType*>(*gAresGlobal->gRadarBlipData);
+            lp = *gAresGlobal->gRadarBlipData;
             gAresGlobal->gRadarCount = gAresGlobal->gRadarSpeed;
             anObject = *gSpaceObjectData;
 
@@ -541,13 +541,13 @@ void UpdateRadar( long unitsDone)
 
         for ( x = 0; x < unitsDone; x++)
         {
-            scaleval = reinterpret_cast<long *>(*gAresGlobal->gScaleList) + gAresGlobal->gWhichScaleNum;
+            scaleval = *gAresGlobal->gScaleList + gAresGlobal->gWhichScaleNum;
             *scaleval = bestScale;
             gAresGlobal->gWhichScaleNum++;
             if ( gAresGlobal->gWhichScaleNum == kScaleListNum) gAresGlobal->gWhichScaleNum = 0;
         }
 
-        scaleval = reinterpret_cast<long *>(*gAresGlobal->gScaleList);
+        scaleval = *gAresGlobal->gScaleList;
         rcount = 0;
         for ( oCount = 0; oCount < kScaleListNum; oCount++)
         {
@@ -789,7 +789,7 @@ void EraseSite( void)
     clipRect.top = CLIP_TOP;
     clipRect.bottom = CLIP_BOTTOM;
 
-    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + kSiteCoordOffset;
+    l = *gAresGlobal->gSectorLineData + kSiteCoordOffset;
     olp = l + kSiteCoordNum;
     sx = *(olp++) = *(l++);
     sy = *(olp++) = *(l++);
@@ -810,7 +810,7 @@ void EraseSite( void)
 
     // do the cursor, too
 
-    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + kCursorCoordOffset;
+    l = *gAresGlobal->gSectorLineData + kCursorCoordOffset;
     olp = l + kCursorCoordNum;
     sx = *(olp++) = *(l++);
     sy = *(olp++) = *(l++);
@@ -845,7 +845,7 @@ void EraseSectorLines( void)
     clipRect.top = CLIP_TOP;
     clipRect.bottom = CLIP_BOTTOM;
 
-    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData);
+    l = *gAresGlobal->gSectorLineData;
     count = 0;
 
     while (( *l != -1) && ( count < kMaxSectorLine))
@@ -859,7 +859,7 @@ void EraseSectorLines( void)
         count++;
     }
 
-    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + (kMaxSectorLine << 1L);
+    l = *gAresGlobal->gSectorLineData + (kMaxSectorLine << 1L);
     count = 0;
 
     while (( *l != -1) && ( count < kMaxSectorLine))
@@ -955,7 +955,7 @@ void DrawSite( void)
                     0, color);
         }
 
-        l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + kSiteCoordOffset;
+        l = *gAresGlobal->gSectorLineData + kSiteCoordOffset;
         *(l++) = sx;
         *(l++) = sy;
         *(l++) = (sx + sa);
@@ -987,7 +987,7 @@ void DrawSite( void)
 //      ShowSpriteCursor( true);
     }
 
-    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + kCursorCoordOffset;
+    l = *gAresGlobal->gSectorLineData + kCursorCoordOffset;
     sx = *(l++) = cursorCoord.h;
     sy = *(l++) = cursorCoord.v;
 
@@ -1067,7 +1067,7 @@ void DrawSectorLines( void)
     x >>= SHIFT_SCALE;
     x += CLIP_LEFT;
 
-    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData);
+    l = *gAresGlobal->gSectorLineData;
     if ( doDraw)
     {
         while (( x < static_cast<uint32_t>(CLIP_RIGHT)) && ( h > 0))
@@ -1145,7 +1145,7 @@ void DrawSectorLines( void)
     x >>= SHIFT_SCALE;
     x += CLIP_TOP;
 
-    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + (kMaxSectorLine << 1L);
+    l = *gAresGlobal->gSectorLineData + (kMaxSectorLine << 1L);
 
     if ( doDraw)
     {
@@ -1238,7 +1238,7 @@ void ShowSite( void)
     clipRect.top = CLIP_TOP;
     clipRect.bottom = CLIP_BOTTOM;
 
-    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + kSiteCoordOffset;
+    l = *gAresGlobal->gSectorLineData + kSiteCoordOffset;
     sx = *(l++);
     sy = *(l++);
     sa = *(l++);
@@ -1272,7 +1272,7 @@ void ShowSite( void)
                 sd, sa, sb,
                 gNatePortLeft << 2L, gNatePortTop);
 
-    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + kCursorCoordOffset;
+    l = *gAresGlobal->gSectorLineData + kCursorCoordOffset;
     sx = *(l++);
     sy = *(l++);
 
@@ -1320,7 +1320,7 @@ void ShowSectorLines( void)
     clipRect.top = CLIP_TOP;
     clipRect.bottom = CLIP_BOTTOM;
 
-    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData);
+    l = *gAresGlobal->gSectorLineData;
     count = 0;
 
     while ( count < kMaxSectorLine)
@@ -1336,7 +1336,7 @@ void ShowSectorLines( void)
         count++;
     }
 
-    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + (kMaxSectorLine << 1L);
+    l = *gAresGlobal->gSectorLineData + (kMaxSectorLine << 1L);
     count = 0;
 
     while ( count < kMaxSectorLine)
@@ -1361,7 +1361,7 @@ void InstrumentsHandleClick( void)
     Point   where;
     long    *l;
 
-    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + kCursorCoordOffset;
+    l = *gAresGlobal->gSectorLineData + kCursorCoordOffset;
     where.h = *(l++);
     where.v = *(l++);
 
@@ -1376,7 +1376,7 @@ void InstrumentsHandleDoubleClick( void)
     Point   where;
     long    *l;
 
-    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + kCursorCoordOffset;
+    l = *gAresGlobal->gSectorLineData + kCursorCoordOffset;
     where.h = *(l++);
     where.v = *(l++);
 
@@ -1391,7 +1391,7 @@ void InstrumentsHandleMouseUp( void)
     Point   where;
     long    *l;
 
-    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + kCursorCoordOffset;
+    l = *gAresGlobal->gSectorLineData + kCursorCoordOffset;
     where.h = *(l++);
     where.v = *(l++);
 
@@ -1404,7 +1404,7 @@ void InstrumentsHandleMouseStillDown( void)
     Point   where;
     long    *l;
 
-    l = reinterpret_cast<long*>(*gAresGlobal->gSectorLineData) + kCursorCoordOffset;
+    l = *gAresGlobal->gSectorLineData + kCursorCoordOffset;
     where.h = *(l++);
     where.v = *(l++);
 

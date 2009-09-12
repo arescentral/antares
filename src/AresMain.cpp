@@ -168,7 +168,7 @@
 
 //#define   kUseSmallPlayWindow // for debugging
 
-extern spaceObjectType**        gSpaceObjectData;
+extern TypedHandle<spaceObjectType> gSpaceObjectData;
 extern long                     /*gAresGlobal->gPlayerShipNumber, gAresGlobal->gGameTime, gAresGlobal->gGameStartTime,*/ gRandomSeed;
 //                              gAresGlobal->gScenarioWinner, gAresGlobal->gPlayerAdmiralNumber;
 extern long                     gNatePortLeft, gNatePortTop, /*gAresGlobal->gSoundVolume,*/ gNetLatency;
@@ -261,7 +261,6 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
     gAresGlobal->gPreferencesData = nil;
     gAresGlobal->gOptions = kDefaultOptions;
     gAresGlobal->gRaceData = nil;
-    gAresGlobal->gScrollStarData = nil;
     gAresGlobal->gWarpStars = false;
     gAresGlobal->gLastClipBottom = 0;
     gAresGlobal->gScrollStarNumber = -1;
@@ -271,7 +270,6 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
     gAresGlobal->gFarthestObject = 0;
     gAresGlobal->gCenterScaleH = 0;
     gAresGlobal->gCenterScaleV = 0;
-    gAresGlobal->gProximityGrid = nil;
     gAresGlobal->gLastKeys = 0;
     gAresGlobal->gTheseKeys = 0;
     gAresGlobal->gPlayerShipNumber = 0;
@@ -290,9 +288,6 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
     gAresGlobal->gScenarioInitialData = nil;
     gAresGlobal->gScenarioConditionData = nil;
     gAresGlobal->gScenarioBriefData = nil;
-    gAresGlobal->gRadarBlipData = nil;
-    gAresGlobal->gScaleList = nil;
-    gAresGlobal->gSectorLineData = nil;
     gAresGlobal->gRadarCount = 0;
     gAresGlobal->gRadarSpeed = 30;
     gAresGlobal->gRadarRange = kRadarSize * 50;
@@ -301,19 +296,12 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
     gAresGlobal->gInstrumentTop = 0;
     gAresGlobal->gRightPanelLeftEdge = 608;
     gAresGlobal->gMouseActive = kMouseOff;
-    gAresGlobal->gMessageData = nil;
-    gAresGlobal->gStatusString = nil;
-    gAresGlobal->gMessageData = nil;
     gAresGlobal->gMessageTimeCount = 0;
     gAresGlobal->gMessageLabelNum = -1;
     gAresGlobal->gStatusLabelNum = -1;
     gAresGlobal->gTrueClipBottom = 0;
 //  gAresGlobal->gMiniScreenHandle = nil;
-    gAresGlobal->gMiniScreenData.lineData = nil;
-    gAresGlobal->gMiniScreenData.objectData = nil;
     gAresGlobal->gMissionStatusStrList = nil;
-    gAresGlobal->gScreenLabelData = nil;
-    gAresGlobal->gBeamData = nil;
     gAresGlobal->gColorAnimationStep = 0;
     gAresGlobal->gColorAnimationInSpeed = -1;
     gAresGlobal->gColorAnimationOutSpeed = -1;
