@@ -83,17 +83,17 @@ bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouse
         {
             evt->what = autoKey;
             evt->message = 0x2400;  // RTRN
-            DumpTo(GetOutputDir() + "/screens/select-level.bin");
+            DumpTo(GetOutputDir() + "/select-level.bin");
         }
         break;
     case MISSION_INTERFACE:
         {
             char path[64];
-            sprintf(path, "/screens/mission-%u.bin", briefing_num);
+            sprintf(path, "/mission-%u.bin", briefing_num);
             DumpTo(GetOutputDir() + path);
             ++briefing_num;
             if (briefing_num >= 9) {
-                exit(1);
+                exit(0);
             } else {
                 evt->what = autoKey;
                 evt->message = 0x7C00;  // RGHT

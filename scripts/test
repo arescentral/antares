@@ -16,6 +16,7 @@ import time
 
 ALL_TEST_CASES = [
     'main-screen',
+    'mission-briefing',
     'space-race',
     'the-stars-have-ears',
     'while-the-iron-is-hot',
