@@ -18,6 +18,7 @@
 #include "FakeDrawing.hpp"
 
 #include <assert.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <glob.h>
 #include <algorithm>
@@ -27,6 +28,7 @@
 
 #include "FakeHandles.hpp"
 #include "Fakes.hpp"
+#include "File.hpp"
 
 Color24Bit colors_24_bit[256] = {
     {255, 255, 255},
@@ -297,7 +299,7 @@ FakeGDevice fakeGDevice(640, 480, &fakeRealGWorld);
 
 GDevice* fakeGDevicePtr = &fakeGDevice;
 
-void Dump() {
+void DumpTo(const std::string& path) {
     std::string contents;
 
     const uint32_t size[2] = { 640, 480 };
@@ -310,13 +312,7 @@ void Dump() {
     contents.insert(contents.size(), reinterpret_cast<char*>(colors), 256 * sizeof(*colors));
     contents.insert(contents.size(), p->baseAddr, 640 * 480);
 
-    char basename[64];
-    std::string path = GetOutputDir() + "/screens";
-    mkdir(path.c_str(), 0755);
-
-    int seconds = gAresGlobal->gGameTime / 60;
-    sprintf(basename, "%03dm%02d.bin", seconds / 60, seconds % 60);
-    path = path + '/' + basename;
+    MakeDirs(DirName(path), 0755);
     int fd = open(path.c_str(), O_WRONLY | O_CREAT, 0644);
     write(fd, contents.c_str(), contents.size());
     close(fd);

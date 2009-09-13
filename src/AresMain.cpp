@@ -53,6 +53,7 @@
 #include "EnvironmentCheck.hpp"
 #include "Error.hpp"
 
+#include "Fakes.hpp"
 #include "Fonts.h"
 
 #include "GDeviceHandling.hpp"
@@ -210,7 +211,6 @@ extern GDHandle theDevice;
 //#pragma code68020 off
 
 int GetDemoScenario();
-void Dump();
 void FakeInit(int argc, const char** argv);
 int main(int argc, const char** argv);
 void SetWindowColorTable( WindowPtr);
@@ -2890,9 +2890,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
             UpdateBooleanColorAnimation( unitsDone);
 //          CheckScenarioConditions( unitsDone);
             gAresGlobal->gFrameCount++;
-            if (gAresGlobal->gGameTime % 60 == 1) {
-                Dump();
-            }
+            MainLoopIterationComplete(gAresGlobal->gGameTime);
         }
     }
     exit(0);  // Temporary: exit after finishing demo.

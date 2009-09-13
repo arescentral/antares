@@ -25,10 +25,12 @@
 #include "FakeMath.hpp"
 #include "FakeSounds.hpp"
 #include "FakeTime.hpp"
+#include "File.hpp"
 #include "VncServer.hpp"
 
 bool mission_briefing_test = false;
 bool main_screen_test = false;
+int briefing_num = 0;
 
 int demo_scenario = 23;
 int GetDemoScenario() {
@@ -49,35 +51,59 @@ void SetGameState(GameState state) {
     game_state = state;
 }
 
+void MainLoopIterationComplete(uint32_t game_time) {
+    if (game_time % 60 == 1) {
+        char path[64];
+        uint32_t seconds = game_time / 60;
+        sprintf(path, "/screens/%03um%02u.bin", seconds / 60, seconds % 60);
+        DumpTo(GetOutputDir() + path);
+    }
+}
+
 bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouseRgn) {
     static_cast<void>(mask);
     static_cast<void>(sleep);
     static_cast<void>(mouseRgn);
     switch (game_state) {
     case MAIN_SCREEN_INTERFACE:
-        if (mission_briefing_test) {
-            evt->what = autoKey;
-            evt->message = 0x0100;  // S
-            (*gAresGlobal->gPreferencesData)->startingLevel = 22;
-        } else if (main_screen_test) {
-            Dump();
-            exit(0);
-        } else {
-            evt->what = 0;
+        {
+            if (mission_briefing_test) {
+                evt->what = autoKey;
+                evt->message = 0x0100;  // S
+                (*gAresGlobal->gPreferencesData)->startingLevel = 22;
+            } else if (main_screen_test) {
+                DumpTo(GetOutputDir() + "/screens/000m00.bin");
+                exit(0);
+            } else {
+                evt->what = 0;
+            }
         }
         break;
     case SELECT_LEVEL_INTERFACE:
-        evt->what = autoKey;
-        evt->message = 0x2400;  // RTRN
-        Dump();
+        {
+            evt->what = autoKey;
+            evt->message = 0x2400;  // RTRN
+            DumpTo(GetOutputDir() + "/screens/select-level.bin");
+        }
         break;
     case MISSION_INTERFACE:
-        evt->what = autoKey;
-        evt->message = 0x7C00;  // RGHT
-        Dump();
+        {
+            char path[64];
+            sprintf(path, "/screens/mission-%u.bin", briefing_num);
+            DumpTo(GetOutputDir() + path);
+            ++briefing_num;
+            if (briefing_num >= 9) {
+                exit(1);
+            } else {
+                evt->what = autoKey;
+                evt->message = 0x7C00;  // RGHT
+            }
+        }
         break;
     default:
-        evt->what = 0;
+        {
+            evt->what = 0;
+        }
         break;
     }
     return true;
@@ -132,6 +158,8 @@ void FakeInit(int argc, const char** argv) {
     } else {
         Usage();
     }
+
+    MakeDirs(output_dir, 0755);
 
     FakeDrawingInit();
     FakeHandlesInit();

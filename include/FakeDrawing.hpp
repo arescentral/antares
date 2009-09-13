@@ -93,7 +93,7 @@ extern GWorld* gSaveWorld;
 
 Pic** GetPicture(int id);
 
-void Dump();
+void DumpTo(const std::string& path);
 void FakeDrawingInit();
 
 #endif  // ANTARES_FAKE_DRAWING_HPP_

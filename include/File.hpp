@@ -15,45 +15,26 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_FAKES_HPP_
-#define ANTARES_FAKES_HPP_
+#ifndef ANTARES_FILE_HPP_
+#define ANTARES_FILE_HPP_
 
+#include <sys/stat.h>
+#include <exception>
 #include <string>
-#include "AresGlobalType.hpp"
-#include "Handle.hpp"
 
-template <typename T>
-class scoped_ptr {
+bool IsDir(const std::string& path);
+void Mkdir(const std::string& path, mode_t mode);
+void MakeDirs(const std::string& path, mode_t mode);
+std::string BaseName(const std::string& path);
+std::string DirName(const std::string& path);
+
+class PosixException : public std::exception {
   public:
-    scoped_ptr() : _t(NULL) { }
-    explicit scoped_ptr(T* t) : _t(t) { }
-
-    ~scoped_ptr() { if (_t) delete _t; }
-
-    T* operator->() { return _t; }
-    T& operator*() { return _t; }
-
-    void reset() { if (_t) { delete _t; _t = NULL; } }
-    T* release() { T* t = _t; _t = NULL; return t; }
+    PosixException();
+    std::string description() const;
 
   private:
-    T* _t;
-
-    DISALLOW_COPY_AND_ASSIGN(scoped_ptr);
+    int _errno;
 };
 
-enum GameState {
-    UNKNOWN,
-    MAIN_SCREEN_INTERFACE,
-    SELECT_LEVEL_INTERFACE,
-    MISSION_INTERFACE,
-};
-
-void SetGameState(GameState state);
-void MainLoopIterationComplete(uint32_t game_time);
-
-extern aresGlobalType* gAresGlobal;
-
-std::string GetOutputDir();
-
-#endif  // ANTARES_FAKES_HPP_
+#endif  // ANTARES_FILE_HPP_
