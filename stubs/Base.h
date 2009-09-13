@@ -322,7 +322,7 @@ STUB2(SetWRefCon, void(Dialog*, long));
 long AngleFromSlope(Fixed slope);
 long Random();
 
-STUB2(StringToNum, void(unsigned char* string, long* value));
+void StringToNum(unsigned char* string, long* value);
 
 STUB1(GetScriptManagerVariable, Ptr(int cache), NULL);
 STUB3(KeyTranslate, long(Ptr kchr, short keyCode, unsigned long* keyTranslateState), 0);

@@ -64,6 +64,17 @@ void GetKeys(KeyMap keys) {
     bzero(keys, sizeof(KeyMap));
 }
 
+void StringToNum(unsigned char* p_str, long* value) {
+    size_t len = *p_str;
+    char c_str[256];
+    strncpy(c_str, reinterpret_cast<char*>(p_str + 1), len);
+    c_str[len] = '\0';
+
+    char* end;
+    *value = strtol(c_str, &end, 10);
+    assert(end == c_str + len);
+}
+
 void Usage() {
     fprintf(stderr, "usage: ./Antares space-race <dump-prefix>\n"
                     "       ./Antares the-stars-have-ears <dump-prefix>\n"
