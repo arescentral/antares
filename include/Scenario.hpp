@@ -131,7 +131,8 @@ enum conditionType {
     kSubjectIsPlayerCondition = 24
 };
 
-enum briefingPointKindType {
+typedef uint8_t briefingPointKindType;
+enum briefingPointKindEnum {
     kNoPointKind = 0,
     kBriefObjectKind = 1,
     kBriefAbsoluteKind = 2,
