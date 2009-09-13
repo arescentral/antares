@@ -348,9 +348,9 @@ void* vnc_server(void*) {
                 ColorSpec* colors = (*fakeCTabHandle)->ctTable;
                 for (int i = 0; i < 640 * 480; ++i) {
                     uint8_t color = fakeWindow.portBits.baseAddr[i];
-                    results[i].red = colors[color].rgb.red;
-                    results[i].green = colors[color].rgb.green;
-                    results[i].blue = colors[color].rgb.blue;
+                    results[i].red = colors[color].rgb.red >> 8;
+                    results[i].green = colors[color].rgb.green >> 8;
+                    results[i].blue = colors[color].rgb.blue >> 8;
                 }
 
                 send_to(stream.fd(), response);
