@@ -72,7 +72,7 @@ bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouse
                 evt->message = 0x0100;  // S
                 (*gAresGlobal->gPreferencesData)->startingLevel = 22;
             } else if (main_screen_test) {
-                DumpTo(GetOutputDir() + "/screens/000m00.bin");
+                DumpTo(GetOutputDir() + "/main-screen.bin");
                 exit(0);
             } else {
                 evt->what = 0;
@@ -143,12 +143,14 @@ void FakeInit(int argc, const char** argv) {
         output_dir = argv[2];
         if (demo == "space-race") {
             demo_scenario = 23;
+            SetDoSounds(true);
         } else if (demo == "the-stars-have-ears") {
             demo_scenario = 0;
+            SetDoSounds(true);
         } else if (demo == "while-the-iron-is-hot") {
             demo_scenario = 5;
+            SetDoSounds(true);
         } else if (demo == "main-screen") {
-            demo_scenario = 0;
             main_screen_test = true;
         } else if (demo == "mission-briefing") {
             mission_briefing_test = true;

@@ -20,6 +20,7 @@
 
 #include <Base.h>
 
+void SetDoSounds(bool flag);
 Handle GetSound(int id);
 
 void FakeSoundsInit();

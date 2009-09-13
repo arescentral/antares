@@ -14,14 +14,24 @@ import termios
 import time
 
 
-ALL_LEVELS = ['space-race', 'the-stars-have-ears', 'while-the-iron-is-hot']
+ALL_TEST_CASES = [
+    'main-screen',
+    'space-race',
+    'the-stars-have-ears',
+    'while-the-iron-is-hot',
+]
 SCRIPT_NAME = os.path.basename(sys.argv[0])
 
 def usage():
-    sys.__stderr__.write('usage: %s <options> [<demo-level> ...]\n' % SCRIPT_NAME)
-    sys.__stderr__.write('       %s <options> -a|--all-levels\n' % SCRIPT_NAME)
-    sys.__stderr__.write('options:\n')
-    sys.__stderr__.write('  -m|--main-screen     also test the appearance of the main screen\n')
+    sys.stderr.write(
+            'usage: %(script_name)s [<test-case> ...]\n'
+            '       %(script_name)s -a|--all\n'
+            'test cases:\n'
+            '       %(test_cases)s\n'
+            % {
+                'script_name': SCRIPT_NAME,
+                'test_cases': '\n       '.join(ALL_TEST_CASES),
+            })
     sys.exit(1)
 
 def error_and_usage(description):
@@ -31,18 +41,15 @@ def error_and_usage(description):
 def main(argv):
     try:
         try:
-            opts, args = getopt.getopt(sys.argv[1:], 'am', [ 'all-levels', 'main-screen' ])
+            opts, args = getopt.getopt(sys.argv[1:], 'a', [ 'all' ])
         except getopt.GetoptError, e:
             error_and_usage(str(e))
 
         test_cases = []
         test_all = False
-        test_main_screen = False
         for opt, val in opts:
-            if opt in ('-a', '--all-levels'):
+            if opt in ('-a', '--all'):
                 test_all = True
-            elif opt in ('-m', '--main-screen'):
-                test_main_screen = True
             else:
                 assert False, 'unhandled option'
 
@@ -50,16 +57,14 @@ def main(argv):
             if args:
                 usage()
             else:
-                args = ALL_LEVELS
-        if test_main_screen:
-            test_cases.append(MainScreen())
+                args = ALL_TEST_CASES
 
-        for demo_level in args:
-            if demo_level not in ALL_LEVELS:
-                sys.__stderr__.write('unknown demo level: %r\n' % demo_level)
+        for case in args:
+            if case not in ALL_TEST_CASES:
+                sys.__stderr__.write('unknown test case: %r\n' % case)
                 sys.exit(1)
             else:
-                test_cases.append(DemoLevel(demo_level))
+                test_cases.append(TestCase(case))
 
         with Timed():
             with Timed():
@@ -96,11 +101,10 @@ def main(argv):
         pass
 
 
-class DemoLevel(object):
+class TestCase(object):
 
-    def __init__(self, level):
-        self.level = level
-        self.name = 'DemoLevel(%r)' % level
+    def __init__(self, name):
+        self.name = name
         self.output = None
 
     def test(self):
@@ -110,7 +114,7 @@ class DemoLevel(object):
             print('Running Antares...')
             with Timed():
                 antares = subprocess.Popen(
-                        ['./Antares', self.level, dir],
+                        ['./Antares', self.name, dir],
                         stderr=subprocess.PIPE)
                 stdout, stderr = antares.communicate()
 
@@ -122,40 +126,7 @@ class DemoLevel(object):
             print('Diffing results...')
             with Timed():
                 diff = subprocess.Popen(
-                        ['diff', '-ru', 'test/%s' % self.level, dir],
-                        stdout=subprocess.PIPE)
-                stdout, stderr = diff.communicate()
-                self.output += stdout
-                if diff.returncode != 0:
-                    self.output += 'diff failed'
-                    return False
-        return True
-
-class MainScreen(object):
-
-    def __init__(self):
-        self.name = 'MainScreen()'
-        self.output = None
-
-    def test(self):
-        with NamedTemporaryDir() as dir:
-            self.output = ''
-
-            print('Running Antares...')
-            with Timed():
-                antares = subprocess.Popen(
-                        ['./Antares', 'main-screen', dir],
-                        stderr=subprocess.PIPE)
-                stdout, stderr = antares.communicate()
-                self.output += stderr
-                if antares.returncode != 0:
-                    self.output += 'Antares failed'
-                    return False
-
-            print('Diffing results...')
-            with Timed():
-                diff = subprocess.Popen(
-                        ['diff', '-u', 'test/main-screen.bin', dir + '/screens/000m00.bin'],
+                        ['diff', '-ru', 'test/%s' % self.name, dir],
                         stdout=subprocess.PIPE)
                 stdout, stderr = diff.communicate()
                 self.output += stdout

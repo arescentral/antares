@@ -25,6 +25,11 @@
 #include "FakeHandles.hpp"
 #include "Fakes.hpp"
 
+bool do_sounds = false;
+void SetDoSounds(bool flag) {
+    do_sounds = flag;
+}
+
 static int last_id = -1;
 struct SndChannel {
     SndChannel()
@@ -46,25 +51,27 @@ OSErr SndDisposeChannel(SndChannel* chan, bool) {
 static FILE* sound_log;
 
 OSErr SndDoImmediate(SndChannel* chan, SndCommand* cmd) {
-    switch (cmd->cmd) {
-      case quietCmd:
-        if (gAresGlobal->gGameTime > 0) {
-            fprintf(sound_log, "quiet\t%d\t%ld\n", chan->id, gAresGlobal->gGameTime);
+    if (do_sounds) {
+        switch (cmd->cmd) {
+        case quietCmd:
+            if (gAresGlobal->gGameTime > 0) {
+                fprintf(sound_log, "quiet\t%d\t%ld\n", chan->id, gAresGlobal->gGameTime);
+            }
+            break;
+
+        case flushCmd:
+            break;
+
+        case ampCmd:
+            if (gAresGlobal->gGameTime > 0) {
+                fprintf(sound_log, "amp\t%d\t%ld\t%d\n",
+                        chan->id, gAresGlobal->gGameTime, cmd->param1);
+            }
+            break;
+
+        default:
+            assert(false);
         }
-        break;
-
-      case flushCmd:
-        break;
-
-      case ampCmd:
-        if (gAresGlobal->gGameTime > 0) {
-            fprintf(sound_log, "amp\t%d\t%ld\t%d\n",
-                    chan->id, gAresGlobal->gGameTime, cmd->param1);
-        }
-        break;
-
-      default:
-        assert(false);
     }
     return noErr;
 }
@@ -74,7 +81,7 @@ OSErr SndDoCommand(SndChannel* chan, SndCommand* cmd, bool) {
 }
 
 OSErr SndPlay(SndChannel* channel, Handle sound, bool) {
-    if (gAresGlobal->gGameTime > 0) {
+    if (do_sounds && gAresGlobal->gGameTime > 0) {
         int sound_id = **reinterpret_cast<int**>(sound);
         fprintf(sound_log, "play\t%d\t%ld\t%d\n", channel->id, gAresGlobal->gGameTime, sound_id);
     }
@@ -86,8 +93,10 @@ Handle GetSound(int id) {
 }
 
 void FakeSoundsInit() {
-    std::string filename = GetOutputDir() + "/sound.log";
-    sound_log = fopen(filename.c_str(), "w");
-    setbuf(sound_log, NULL);
-    assert(sound_log);
+    if (do_sounds) {
+        std::string filename = GetOutputDir() + "/sound.log";
+        sound_log = fopen(filename.c_str(), "w");
+        setbuf(sound_log, NULL);
+        assert(sound_log);
+    }
 }
