@@ -552,18 +552,28 @@ struct PicData {
 
 Pic** GetPicture(int id) {
     char fileglob[64];
-    sprintf(fileglob, "pictures/%d*.bin", id);
     glob_t g;
     g.gl_offs = 0;
+    sprintf(fileglob, "pictures/%d.bin", id);
     glob(fileglob, 0, NULL, &g);
-    assert(g.gl_matchc == 1);
-    std::string filename = g.gl_pathv[0];
-    globfree(&g);
+    sprintf(fileglob, "pictures/%d *.bin", id);
+    glob(fileglob, GLOB_APPEND, NULL, &g);
 
-    Pic* p = new Pic;
-    p->data = new PicData(filename);
-    SetRect(&p->picFrame, 0, 0, p->data->width, p->data->height);
-    return new Pic*(p);
+    if (g.gl_pathc == 0) {
+        return NULL;
+    } else if (g.gl_pathc == 1) {
+        assert(g.gl_pathc <= 1);
+        std::string filename = g.gl_pathv[0];
+        globfree(&g);
+
+        Pic* p = new Pic;
+        p->data = new PicData(filename);
+        SetRect(&p->picFrame, 0, 0, p->data->width, p->data->height);
+        return new Pic*(p);
+    } else {
+        fprintf(stderr, "Found %lu matches for %d\n", g.gl_pathc, id);
+        exit(1);
+    }
 }
 
 Pic** OpenPicture(Rect* source) {
