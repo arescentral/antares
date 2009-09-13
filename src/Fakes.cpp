@@ -19,12 +19,15 @@
 
 #include <string>
 
+#include "AresPreferences.hpp"
 #include "FakeDrawing.hpp"
 #include "FakeHandles.hpp"
 #include "FakeMath.hpp"
 #include "FakeSounds.hpp"
 #include "FakeTime.hpp"
 #include "VncServer.hpp"
+
+bool mission_briefing_test = false;
 
 int demo_scenario = 23;
 int GetDemoScenario() {
@@ -48,11 +51,39 @@ void ModalDialog(void*, short* item) {
     *item = 1;
 }
 
+GameState game_state = UNKNOWN;
+void SetGameState(GameState state) {
+    game_state = state;
+}
+
 bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouseRgn) {
     static_cast<void>(mask);
     static_cast<void>(sleep);
     static_cast<void>(mouseRgn);
-    evt->what = 0;
+    switch (game_state) {
+    case MAIN_SCREEN_INTERFACE:
+        if (mission_briefing_test) {
+            evt->what = autoKey;
+            evt->message = 0x0100;  // S
+            (*gAresGlobal->gPreferencesData)->startingLevel = 22;
+        } else {
+            evt->what = 0;
+        }
+        break;
+    case SELECT_LEVEL_INTERFACE:
+        evt->what = autoKey;
+        evt->message = 0x2400;  // RTRN
+        Dump();
+        break;
+    case MISSION_INTERFACE:
+        evt->what = autoKey;
+        evt->message = 0x7C00;  // RGHT
+        Dump();
+        break;
+    default:
+        evt->what = 0;
+        break;
+    }
     return true;
 }
 
@@ -79,7 +110,8 @@ void Usage() {
     fprintf(stderr, "usage: ./Antares space-race <dump-prefix>\n"
                     "       ./Antares the-stars-have-ears <dump-prefix>\n"
                     "       ./Antares while-the-iron-is-hot <dump-prefix>\n"
-                    "       ./Antares main-screen <dump-prefix>\n");
+                    "       ./Antares main-screen <dump-prefix>\n"
+                    "       ./Antares mission-briefing <dump-prefix>\n");
     exit(1);
 }
 
@@ -96,6 +128,8 @@ void FakeInit(int argc, const char** argv) {
         } else if (demo == "main-screen") {
             demo_scenario = 0;
             main_screen_test = true;
+        } else if (demo == "mission-briefing") {
+            mission_briefing_test = true;
         } else {
             Usage();
         }

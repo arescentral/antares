@@ -39,8 +39,8 @@ enum {
     alphaLock = 503,
     smKCHRCache = 504,
 
-    charCodeMask = 600,
-    keyCodeMask = 601,
+    charCodeMask = 0x00FF,
+    keyCodeMask = 0xFF00,
     resumeFlag = 602,
     convertClipboardFlag = 603,
 

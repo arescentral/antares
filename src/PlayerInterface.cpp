@@ -37,6 +37,7 @@
 #include "Debug.hpp"
 #include "DirectText.hpp"
 #include "Error.hpp"
+#include "Fakes.hpp"
 #include "GDeviceHandling.hpp"
 #include "HideMenubar.hpp"
 #include "Instruments.hpp"
@@ -435,6 +436,7 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
             }
 
             InterfaceIdle();
+            SetGameState(MAIN_SCREEN_INTERFACE);
             Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
             gAresGlobal->returnToMain = false;
 
@@ -3833,6 +3835,7 @@ long DoSelectLevelInterface( long startChapter)
         {
             InterfaceIdle();
 
+            SetGameState(SELECT_LEVEL_INTERFACE);
             Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
@@ -4185,6 +4188,7 @@ Boolean DoMissionInterface( long whichScenario)
         {
             InterfaceIdle();
 //          if (Ares_WaitNextEvent (everyEvent, &theEvent, 0, nil))
+            SetGameState(MISSION_INTERFACE);
             Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;

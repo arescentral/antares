@@ -42,6 +42,15 @@ class scoped_ptr {
     DISALLOW_COPY_AND_ASSIGN(scoped_ptr);
 };
 
+enum GameState {
+    UNKNOWN,
+    MAIN_SCREEN_INTERFACE,
+    SELECT_LEVEL_INTERFACE,
+    MISSION_INTERFACE,
+};
+
+void SetGameState(GameState state);
+
 extern aresGlobalType* gAresGlobal;
 
 std::string GetOutputDir();
