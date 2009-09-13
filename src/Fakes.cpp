@@ -24,6 +24,7 @@
 #include "FakeMath.hpp"
 #include "FakeSounds.hpp"
 #include "FakeTime.hpp"
+#include "VncServer.hpp"
 
 int demo_scenario = 23;
 int GetDemoScenario() {
@@ -96,4 +97,5 @@ void FakeInit(int argc, const char** argv) {
     FakeMathInit();
     FakeSoundsInit();
     FakeTimeInit();
+    VncServerInit();
 }
