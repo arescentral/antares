@@ -677,6 +677,11 @@ void MoveTo(int x, int y) {
     currentPen.v = y;
 }
 
+bool IsOnScreen(int x, int y) {
+    return 0 <= x && x < 640
+        && 0 <= y && y < 480;
+}
+
 void MacLineTo(int h, int v) {
     assert(h == currentPen.h || v == currentPen.v);  // no diagonal lines yet.
     if (h == currentPen.h) {
@@ -685,7 +690,9 @@ void MacLineTo(int h, int v) {
             step = -1;
         }
         for (int i = currentPen.v; i != v; i += step) {
-            SetPixel(currentPen.h, i, currentForeColor);
+            if (IsOnScreen(currentPen.h, i)) {
+                SetPixel(currentPen.h, i, currentForeColor);
+            }
         }
         currentPen.v = v;
     } else {
@@ -694,7 +701,9 @@ void MacLineTo(int h, int v) {
             step = -1;
         }
         for (int i = currentPen.h; i != h; i += step) {
-            SetPixel(i, currentPen.v, currentForeColor);
+            if (IsOnScreen(i, currentPen.v)) {
+                SetPixel(i, currentPen.v, currentForeColor);
+            }
         }
         currentPen.h = h;
     }
