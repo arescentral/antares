@@ -211,7 +211,6 @@ extern GDHandle theDevice;
 
 int GetDemoScenario();
 void Dump();
-void MainScreenInterfaceTestHack();
 void FakeInit(int argc, const char** argv);
 int main(int argc, const char** argv);
 void SetWindowColorTable( WindowPtr);
@@ -1142,8 +1141,6 @@ void MainLoop (void)
         WriteDebugLine("\p>MainScreen");
         MacSetPort( gTheWindow);
         mainResult = DoMainScreenInterface( &whichDemoLevel);
-
-        MainScreenInterfaceTestHack();
 
         switch( mainResult)
         {

@@ -28,6 +28,7 @@
 #include "VncServer.hpp"
 
 bool mission_briefing_test = false;
+bool main_screen_test = false;
 
 int demo_scenario = 23;
 int GetDemoScenario() {
@@ -37,14 +38,6 @@ int GetDemoScenario() {
 std::string output_dir;
 std::string GetOutputDir() {
     return output_dir;
-}
-
-bool main_screen_test = false;
-void MainScreenInterfaceTestHack() {
-    if (main_screen_test) {
-        Dump();
-        exit(0);
-    }
 }
 
 void ModalDialog(void*, short* item) {
@@ -66,6 +59,9 @@ bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouse
             evt->what = autoKey;
             evt->message = 0x0100;  // S
             (*gAresGlobal->gPreferencesData)->startingLevel = 22;
+        } else if (main_screen_test) {
+            Dump();
+            exit(0);
         } else {
             evt->what = 0;
         }
