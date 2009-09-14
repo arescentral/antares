@@ -67,18 +67,18 @@ void DrawInterfaceTextRect( interfaceItemType *, PixMap *, long,
                         long);
 void DrawInterfaceTextInRect( Rect *, const unsigned char *, long, interfaceStyleType, unsigned char, PixMap *, long,
                         long, inlinePictType *);
-short GetInterfaceTextHeightFromWidth( anyCharType *, long, interfaceStyleType, short);
+short GetInterfaceTextHeightFromWidth(unsigned char*, long, interfaceStyleType, short);
 void DrawInterfacePictureRect( interfaceItemType *, PixMap *, long,
                         long);
 void DrawAnyInterfaceItem( interfaceItemType *, PixMap *, long,
                         long);
 void GetAnyInterfaceItemGraphicBounds( interfaceItemType *, Rect *);
 void GetAnyInterfaceItemContentBounds( interfaceItemType *, Rect *);
-short GetInterfaceStringWidth( anyCharType *, interfaceStyleType);
+short GetInterfaceStringWidth(unsigned char*, interfaceStyleType);
 short GetInterfaceFontHeight( interfaceStyleType);
 short GetInterfaceFontAscent( interfaceStyleType);
 short GetInterfaceFontWidth( interfaceStyleType);
-void DrawInterfaceString( anyCharType *, interfaceStyleType, PixMap *, long,
+void DrawInterfaceString(unsigned char*, interfaceStyleType, PixMap *, long,
                         long, unsigned char);
 void SetInterfaceLargeUpperFont( interfaceStyleType);
 void SetInterfaceLargeLowerFont( interfaceStyleType);

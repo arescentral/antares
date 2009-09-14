@@ -51,7 +51,7 @@ Boolean InterfaceCheckboxHit( interfaceItemType *);
 Boolean InterfaceRadioButtonHit( interfaceItemType *);
 Boolean InterfaceTabBoxButtonHit( interfaceItemType *);
 void InterfaceListRectHit( interfaceItemType *, Point);
-void DrawStringInInterfaceContent( short, anyCharType *);
+void DrawStringInInterfaceContent(short, unsigned char*);
 interfaceItemType *GetAnyInterfaceItemPtr( long);
 void SetStatusOfAnyInterfaceItem( short, interfaceItemStatusType, Boolean);
 void SwitchAnyRadioOrCheckbox( short, Boolean);
@@ -59,7 +59,7 @@ Boolean GetAnyRadioOrCheckboxOn( short);
 void RefreshInterfaceItem( short);
 void RefreshInterfaceListEntry( short, short);
 void InterfaceTextEditItemInit( short);
-void InterfaceTextEditSetText( short, anyCharType *);
+void InterfaceTextEditSetText(short, unsigned char*);
 void InterfaceTextEditSelectAll( short);
 void InterfaceTextEditActivate( short);
 void InterfaceTextEditDeactivate( short);
@@ -67,11 +67,11 @@ void SuspendActiveTextEdit( void);
 void ResumeActiveTextEdit( void);
 void UpdateAllTextEdit( void);
 void SetInterfaceTextEditColors( short);
-void CopyInterfaceTextEditContents( short, anyCharType *, long *);
+void CopyInterfaceTextEditContents(short, unsigned char*, long*);
 long GetInterfaceTextEditLength( short);
 void SetInterfaceListCallback(  short       whichItem,
                                 short       (*getListLength)( void),
-                                void        (*getItemString)( short, anyCharType *),
+                                void        (*getItemString)(short, unsigned char*),
                                 Boolean     (*itemHilited)( short, Boolean));
 void SetButtonKeyNum( short, short);
 short GetButtonKeyNum( short);

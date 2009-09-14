@@ -31,12 +31,12 @@ inline void mGetRowBytes(long& rBytes, PixMap* pix) {
 }
 
 inline void mSetNatePixel(uint8_t*& mdestByte, long mrowBytes, long mx, long my, long mxoff, long myoff, PixMap* mdestPix, uint8_t mcolor) {
-    mdestByte = reinterpret_cast<unsigned char *>(mdestPix->baseAddr) + (my + myoff) * mrowBytes + mx + mxoff;
+    mdestByte = mdestPix->baseAddr + (my + myoff) * mrowBytes + mx + mxoff;
     *mdestByte = mcolor;
 }
 
 inline void mGetNatePixel(uint8_t*& destByte, long rowBytes, long x, long y, long xoff, long yoff, PixMap* destPix) {
-    destByte = reinterpret_cast<unsigned char *>((destPix)->baseAddr) + (y + yoff) * rowBytes + x + xoff;
+    destByte = destPix->baseAddr + (y + yoff) * rowBytes + x + xoff;
 }
 
 template <typename T0, typename T1>

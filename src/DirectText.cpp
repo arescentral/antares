@@ -268,7 +268,7 @@ short AddDirectFont( directTextType *dtext)
         dtext->myHandle = FALSE;
     } else
     {
-        dtext->charSet = reinterpret_cast<unsigned char**>(GetResource(kDTextFontMapResType, dtext->resID));
+        dtext->charSet = GetResource(kDTextFontMapResType, dtext->resID);
         if ( dtext->charSet == nil)
         {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, dtext->resID);
@@ -286,8 +286,8 @@ void DrawDirectTextString( char *string, unsigned char color, PixMap *destMap, l
                             long portTop)
 
 {
-    char            *dchar;
-    anyCharType     slen;
+    unsigned char   *dchar;
+    unsigned char   slen;
     long            rowPlus, charPlus;
     int             i, j, width;
     Point           pen;
@@ -303,7 +303,7 @@ void DrawDirectTextString( char *string, unsigned char color, PixMap *destMap, l
     pen.v -= gDirectText->ascent;
     rowPlus = (*destMap).rowBytes & 0x3fff;
     charPlus = implicit_cast<long>(kCharSpace) + implicit_cast<long>(gDirectText->logicalWidth);
-    dchar = reinterpret_cast<char *>((*destMap).baseAddr) + implicit_cast<long>(pen.v + portTop) * rowPlus + implicit_cast<long>(pen.h) +
+    dchar = (*destMap).baseAddr + implicit_cast<long>(pen.v + portTop) * rowPlus + implicit_cast<long>(pen.h) +
             implicit_cast<long>(portLeft << 2);
     width = gDirectText->physicalWidth >> 2;
     rowPlus >>= 2;
@@ -328,12 +328,12 @@ void DrawDirectTextString( char *string, unsigned char color, PixMap *destMap, l
     }
 }
 
-void DrawDirectTextStringClipped( anyCharType *string, unsigned char color, PixMap *destMap,
+void DrawDirectTextStringClipped(unsigned char* string, unsigned char color, PixMap *destMap,
                 longRect *clip, long portLeft, long portTop)
 
 {
     unsigned char   *hchar, *dbyte, *sbyte, *tbyte;
-    anyCharType     slen;
+    unsigned char   slen;
     long            rowPlus, charPlus = 0, hpos, leftSkip, bytesToDo, width, rowBytes, topEdge,
                     bottomEdge;
     int             i, j, k;
@@ -368,7 +368,7 @@ void DrawDirectTextStringClipped( anyCharType *string, unsigned char color, PixM
     rowPlus -= implicit_cast<long>(gDirectText->physicalWidth << 1L);
 
     // set hchar = place holder for start of each char we draw
-    hchar = reinterpret_cast<unsigned char *>((*destMap).baseAddr) + implicit_cast<long>(pen.v + portTop + topEdge) * rowBytes +
+    hchar = (*destMap).baseAddr + implicit_cast<long>(pen.v + portTop + topEdge) * rowBytes +
             hpos + implicit_cast<long>(portLeft << 2L);
 
     // width = character width in pixels
@@ -500,12 +500,12 @@ void DrawDirectTextStringClipped( anyCharType *string, unsigned char color, PixM
     MoveTo( hpos, pen.v + gDirectText->ascent);
 }
 
-void DrawDirectTextHeightx2( anyCharType *string, unsigned char color, PixMap *destMap, long portLeft,
+void DrawDirectTextHeightx2(unsigned char* string, unsigned char color, PixMap *destMap, long portLeft,
                             long portTop)
 
 {
-    char            *dchar;
-    anyCharType     slen;
+    unsigned char   *dchar;
+    unsigned char   slen;
     long            rowPlus, charPlus, rowBytes;
     int             i, j, width;
     Point           pen;
@@ -521,7 +521,7 @@ void DrawDirectTextHeightx2( anyCharType *string, unsigned char color, PixMap *d
     pen.v -= gDirectText->ascent << 1;
     rowPlus = rowBytes = (*destMap).rowBytes & 0x3fff;
     charPlus = implicit_cast<long>(kCharSpace) + implicit_cast<long>(gDirectText->logicalWidth);
-    dchar = reinterpret_cast<char *>((*destMap).baseAddr) + implicit_cast<long>(pen.v + portTop) * rowPlus + implicit_cast<long>(pen.h) +
+    dchar = (*destMap).baseAddr + implicit_cast<long>(pen.v + portTop) * rowPlus + implicit_cast<long>(pen.h) +
             implicit_cast<long>(portLeft << 2);
     width = gDirectText->physicalWidth >> 2;
     rowPlus >>= 2;
@@ -547,7 +547,7 @@ void DrawDirectTextHeightx2( anyCharType *string, unsigned char color, PixMap *d
     }
 }
 
-void DrawDirectTextStringClippedx2( anyCharType *string, unsigned char color, PixMap *destMap,
+void DrawDirectTextStringClippedx2(unsigned char* string, unsigned char color, PixMap *destMap,
                 longRect *clip, long portLeft, long portTop)
 {
     static_cast<void>(string);

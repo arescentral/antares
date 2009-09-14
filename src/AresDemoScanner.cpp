@@ -416,7 +416,7 @@ void CopyAllBriefingData( long whatLevel)
 
             length = GetHandleSize( textData);
 
-            DrawInterfaceTextInRect( &tRect, reinterpret_cast<anyCharType *>(*textData), length,
+            DrawInterfaceTextInRect(&tRect, *textData, length,
                             kLarge, 3, *offMap, 0, 0, inlinePictList);
 
             scenario = *gAresGlobal->gScenarioData + whatLevel;

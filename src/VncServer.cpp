@@ -42,7 +42,7 @@ int listen_on(int port) {
     if (sock < 0) {
         throw VncServerException();
     }
-    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char*>(&one), sizeof(one));
+    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
 
     if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
         throw VncServerException();
@@ -63,7 +63,7 @@ int accept_on(int sock) {
         throw VncServerException();
     }
 
-    setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, reinterpret_cast<const char*>(&one), sizeof(one));
+    setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
     return fd;
 }
 

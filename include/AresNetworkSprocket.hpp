@@ -191,7 +191,7 @@ STUB2(SetPlayerColor, void( long, unsigned char));
 STUB1(GetPlayerColor, unsigned char( long), 0);
 STUB1(GetPlayerName, const char*( long), "Player");
 STUB2(GetOtherPlayerConnectionData, void( unsigned long *, unsigned long *));
-STUB1(GetOtherPlayerName, void( StringPtr *));
+STUB1(GetOtherPlayerName, void(unsigned char*));
 STUB2(SetProtocolListFromFlags, void( NSpProtocolListReference *, unsigned long));
 STUB2(GetProtocolFlagsFromList, void( NSpProtocolListReference, unsigned long *));
 STUB2(IsIDInDefString, Boolean( char *, char *), false);
@@ -217,8 +217,8 @@ STUB8(SendPreGameAnyMessage,
 STUB2(SendPreGameShortMessage, void( long, long));
 STUB5(SendPreGameVerboseMessage, void( long, long, long, long, long));
 STUB2(SendPreGameTextMessage, void( Ptr, long));
-STUB5(SendPreGameOpenScenarioMessage, void( long message, StringPtr fileName,
-    StringPtr url, unsigned long version, unsigned long checkSum));
+STUB5(SendPreGameOpenScenarioMessage, void( long message, unsigned char* fileName,
+    unsigned char* url, unsigned long version, unsigned long checkSum));
 
 STUB2(ProcessInGameMessages, Boolean( long, short *), false);
 STUB4(HandleInGameMessage, Boolean( long, packedDataType *, Boolean, short *), false);
@@ -250,7 +250,7 @@ STUB1(RemoveExpiredSentMessages, void( long));
 STUB0(ResetSentMessages, void());
 STUB1(TickleOutgoingMessage, unsigned char(Boolean), '\0');
 STUB0(StartIncomingTextMessage, void());
-STUB1(StopIncomingTextMessage, void( anyCharType *));
+STUB1(StopIncomingTextMessage, void(unsigned char *));
 
 #if 0
 Boolean NetSprocketPresent(void);

@@ -218,7 +218,7 @@ void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean d
 // the "mini movie" routines are for playing a movie within a rect without disturbing the rest of the display.
 // The PlayMovieByName is for playing a movie in one step, automatically clearing the diplay and all.
 
-OSErr LoadMiniMovie( StringPtr filePath, Movie *aMovie, Rect *destRect, WindowPtr aWindow, Boolean doubleIt)
+OSErr LoadMiniMovie(unsigned char* filePath, Movie *aMovie, Rect *destRect, WindowPtr aWindow, Boolean doubleIt)
 
 {
 #ifdef kUseMovies

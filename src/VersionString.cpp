@@ -21,10 +21,10 @@
 #include "Resources.h"
 #include "StringHandling.hpp"
 
-void GetVersionString(StringPtr dest, short useResFile)
+void GetVersionString(unsigned char* dest, short useResFile)
 {
     Handle      versRes = nil;
-    StringPtr   source = nil;
+    unsigned char* source = nil;
     short       refNum = CurResFile();
 
     dest[0] = 0;
@@ -33,7 +33,7 @@ void GetVersionString(StringPtr dest, short useResFile)
     UseResFile( refNum);
     if ( versRes != nil)
     {
-        source = reinterpret_cast<StringPtr>(*versRes) + 6;
+        source = *versRes + 6;
         CopyPString( dest, source);
         ReleaseResource( versRes);
     }

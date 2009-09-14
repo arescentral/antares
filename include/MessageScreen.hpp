@@ -84,8 +84,8 @@ struct longMessageType {
     short                   previousEndResID;
     short                   pictID;
     unsigned char           backColor;
-    anyCharType             stringMessage[kAnyCharPStringMaxLen];
-    anyCharType             lastStringMessage[kAnyCharPStringMaxLen];
+    unsigned char           stringMessage[kAnyCharPStringMaxLen];
+    unsigned char           lastStringMessage[kAnyCharPStringMaxLen];
     Boolean                 newStringMessage;
     retroTextSpecType       retroTextSpec;
     Boolean                 labelMessage;
@@ -97,11 +97,11 @@ struct longMessageType {
 int InitMessageScreen( void);
 void MessageScreenCleanup( void);
 void ClearMessage( void);
-void AppendStringToMessage(const anyCharType*);
+void AppendStringToMessage(const unsigned char*);
 void StartMessage( void);
 void EndMessage( void);
 void StartLongMessage( short, short);
-void StartStringMessage( anyCharType *);
+void StartStringMessage(unsigned char*);
 void ClipToCurrentLongMessage( void);
 void DrawCurrentLongMessage( long);
 void EndLongMessage( void);

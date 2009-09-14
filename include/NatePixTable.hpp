@@ -43,7 +43,7 @@ int GetNatePixTableNatePixHRef(natePixType**, long);
 void SetNatePixTableNatePixHRef(natePixType**, long, int);
 int GetNatePixTableNatePixVRef(natePixType**, long);
 void SetNatePixTableNatePixVRef(natePixType**, long, int);
-char *GetNatePixTableNatePixData(natePixType**, long);
+unsigned char *GetNatePixTableNatePixData(natePixType**, long);
 unsigned char GetNatePixTableNatePixDataPixel(natePixType**, long, int, int);
 void SetNatePixTableNatePixDataPixel(natePixType**, long, int, int, unsigned char);
 Handle GetNatePixTableNatePixDataCopy(natePixType**, long);

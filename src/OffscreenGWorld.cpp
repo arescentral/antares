@@ -277,7 +277,7 @@ void GWorldExperiment( void)
 {
     PixMapHandle    pixBase;
     int             x;
-    char            *p;
+    unsigned char   *p;
 
     pixBase = GetGWorldPixMap( gOffWorld);
     p = (*pixBase)->baseAddr;

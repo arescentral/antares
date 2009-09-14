@@ -59,7 +59,7 @@
 
 void AresCheatInit( void);
 void CleanupAresCheat( void);
-short GetCheatNumFromString( StringPtr);
+short GetCheatNumFromString(unsigned char*);
 void ExecuteCheat( short, long);
 
 #pragma options align=reset

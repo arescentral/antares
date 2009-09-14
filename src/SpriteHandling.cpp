@@ -388,7 +388,7 @@ void CreateSpritePixFromPixMap( spritePix *sprite, int type, PixMapHandle pixMap
 {
     Rect    fixBounds;
     long    rowBytes;
-    char    *source, *dest, *mask;
+    unsigned char *source, *dest, *mask;
     int     i, j, *rowlength, *count, width;
 
     fixBounds = *bounds;
@@ -538,7 +538,7 @@ void RunLengthSpritePixInPixMap( spritePix *sprite, Point where, PixMapHandle pi
 
 {
     int     width, height, runlen, pixlen, *sword;
-    char    *source, *dest;
+    unsigned char *source, *dest;
     long    rowBytes, sRowPlus, dRowPlus, *slong, *dlong;
 
     rowBytes = 0x0000ffff & ((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
@@ -569,14 +569,14 @@ void RunLengthSpritePixInPixMap( spritePix *sprite, Point where, PixMapHandle pi
         *dlong++ = *slong++;
         if ( --pixlen >= 0)
             goto longloop;
-        dest = reinterpret_cast<char*>(dlong);
+        dest = reinterpret_cast<unsigned char*>(dlong);
         sword = reinterpret_cast<int*>(slong);
         if ( runlen == 0)
             goto addnil;
 
     pixbyte:
         runlen--;
-        source = reinterpret_cast<char*>(sword);
+        source = reinterpret_cast<unsigned char*>(sword);
     byteloop:
         *dest++ = *source++;
         if ( --runlen >= 0)
@@ -597,7 +597,7 @@ void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, long
 {
     long        mapWidth, mapHeight, x, y, i, h, v, d, last;
     long        shapeRowPlus, destRowPlus, rowbytes, *hmap, *vmap, *hmapoffset, *lhend, scaleCalc;
-    char        *destByte, *shapeByte, *hend, *vend, *chunkByte;
+    unsigned char *destByte, *shapeByte, *hend, *vend, *chunkByte;
     longRect    mapRect, sourceRect;
     Boolean     clipped = FALSE;
 
@@ -924,7 +924,7 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, l
 {
     long        mapWidth, mapHeight, x, y, i, h, v, d, last;
     long        shapeRowPlus, destRowPlus, rowbytes, *hmap, *vmap, *hmapoffset, *lhend, scaleCalc;
-    char        *destByte, *shapeByte, *hend, *vend, *chunkByte;
+    unsigned char *destByte, *shapeByte, *hend, *vend, *chunkByte;
     unsigned char   *staticByte;
     longRect    mapRect, sourceRect;
     Boolean     clipped = FALSE;
@@ -1240,7 +1240,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, lo
 {
     long        mapWidth, mapHeight, x, y, i, h, v, d, last;
     long        shapeRowPlus, destRowPlus, rowbytes, *hmap, *vmap, *hmapoffset, *lhend, scaleCalc;
-    char        *destByte, *shapeByte, *hend, *vend, *chunkByte;
+    unsigned char *destByte, *shapeByte, *hend, *vend, *chunkByte;
     unsigned char   *staticByte;
     longRect    mapRect, sourceRect;
     Boolean     clipped = FALSE;
@@ -1599,7 +1599,7 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
 {
     long        mapWidth, mapHeight, x, y, i, h, v, d, last, sourceX, sourceY;
     long        shapeRowPlus, destRowPlus, rowbytes, *hmap, *vmap, *hmapoffset, *lhend, scaleCalc;
-    char        *destByte, *shapeByte, *hend, *vend, *chunkByte;
+    unsigned char *destByte, *shapeByte, *hend, *vend, *chunkByte;
     longRect    mapRect, sourceRect;
     Boolean     clipped = FALSE;
 
@@ -1931,7 +1931,7 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
 Boolean PixelInSprite_IsOutside( spritePix *sprite, long x, long y,
     long *hmap, long *vmap)
 {
-    char    *pixel;
+    unsigned char* pixel;
     long    rowPlus = sprite->width, i, j, *hmapStart = hmap;
 
     if ( x == 0) return true;
@@ -1994,7 +1994,7 @@ void DrawSpriteTableInOffWorld( longRect *clipRect)
     long            i, trueScale, layer, tinySize;
     longRect        sRect;
     spritePix       aSpritePix;
-    char            *pixData;
+    unsigned char     *pixData;
     natePixType**   pixTable;
     int             whichShape;
     spriteType      *aSprite;
@@ -2124,7 +2124,7 @@ void GetOldSpritePixData( spriteType *sourceSprite, spritePix *oldData)
 
 {
     short               whichShape;
-    char                *pixData;
+    unsigned char *pixData;
     natePixType**       pixTable;
 
     if ( sourceSprite->table != nil)
@@ -2244,11 +2244,9 @@ void CullSprites( void)
     }
 }
 
-void TestByte( char *dbyte, PixMap *pixMap, StringPtr name)
-
-{
+void TestByte(unsigned char *dbyte, PixMap *pixMap, unsigned char* name) {
     long            rowbytes, rowplus;
-    char            *lbyte;
+    unsigned char* lbyte;
 
     rowbytes = 0x0000ffff & ((pixMap->rowBytes | ROW_BYTES_MASK) ^ ROW_BYTES_MASK);
     rowplus = (pixMap->bounds.bottom - pixMap->bounds.top + 1) * rowbytes;

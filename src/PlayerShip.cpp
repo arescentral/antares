@@ -81,7 +81,7 @@ extern spaceObjectType  *gRootObject;
 //Boolean               gAresGlobal->gDemoZoomOverride = false;
 
 long HotKey_GetFromObject( spaceObjectType *object);
-StringPtr HotKey_AppendString( spaceObjectType *object, StringPtr s);
+unsigned char* HotKey_AppendString(spaceObjectType *object, unsigned char* s);
 void Update_LabelStrings_ForHotKeyChange( void);
 
 void StartPlayerShip( long owner, short type)
@@ -93,7 +93,7 @@ void StartPlayerShip( long owner, short type)
 void ResetPlayerShip( long which)
 
 {
-    anyCharType     nilLabel = 0;
+    unsigned char   nilLabel = 0;
     long            h;
 
     WriteDebugLine("\pPLAYER:");
@@ -143,7 +143,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
     unsigned long   distance, difference, dcalc, attributes, nonattributes;
     Boolean         everPaused = FALSE, newKeys = false;
     UnsignedWide    hugeDistance;
-    anyCharType     *message;
+    unsigned char   *message;
     unsigned char   *getwidchar, *getwidwid;
     long            width, height, strlen;
     Str255          s;
@@ -1294,8 +1294,7 @@ long HotKey_GetFromObject( spaceObjectType *object)
     return -1;
 }
 
-StringPtr HotKey_AppendString( spaceObjectType *object, StringPtr s)
-{
+unsigned char* HotKey_AppendString(spaceObjectType *object, unsigned char* s) {
     long    h = HotKey_GetFromObject( object), keyNum;
     Str255  keyName;
 

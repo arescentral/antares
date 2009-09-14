@@ -29,10 +29,10 @@ Boolean ComparePString( unsigned char *, const unsigned char *);
 int PStringLen( const unsigned char *s);
 void ConcatenatePString( unsigned char *, const unsigned char *);
 void PStringFromCString( unsigned char *, const unsigned char *);
-void ReplacePStringChar( StringPtr, unsigned char, const unsigned char);
-void FilterAlphaPString( StringPtr);
-void ChopAlphaPString( StringPtr);
-void UpperCasePString( StringPtr);
+void ReplacePStringChar(unsigned char*, unsigned char, const unsigned char);
+void FilterAlphaPString(unsigned char*);
+void ChopAlphaPString(unsigned char*);
+void UpperCasePString(unsigned char*);
 void DrawCString( const unsigned char *);
 
 STUB2(pstrcat, void(const unsigned char*, const unsigned char*));

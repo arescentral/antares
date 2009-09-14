@@ -51,9 +51,9 @@
 #define kMaxMessageLength       2048
 #define kLongOffsetFirstChar    0L      // offset in longwords to long word which is first char offset
 #define kLongOffsetFirstFree    1L      // offset in longwords to long word which is first free char
-#define kAnyCharOffsetStart     (( sizeof( long) * 2L) / sizeof( anyCharType))
-                                        // offset in anyCharType to first data char
-#define kAnyCharLastChar        ( kAnyCharOffsetStart + kMaxMessageLength * sizeof( anyCharType))
+#define kAnyCharOffsetStart     (( sizeof( long) * 2L) / sizeof(unsigned char))
+                                        // offset in unsigned char to first data char
+#define kAnyCharLastChar        ( kAnyCharOffsetStart + kMaxMessageLength * sizeof(unsigned char))
 #define kMessageCharWidth       18      // width of message screen in characters (16?)
 
 #define kMessageScreenError     "\pMSSG"
@@ -139,12 +139,12 @@ int InitMessageScreen( void)
 
 {
 #ifdef kUseMessage
-    anyCharType     *anyChar, nilLabel = 0;
+    unsigned char *anyChar, nilLabel = 0;
     long            i, *l, propersize;
     longMessageType *tmessage = nil;
 
     gAresGlobal->gTrueClipBottom = CLIP_BOTTOM;
-    propersize = (sizeof( anyCharType) * kMaxMessageLength) + kAnyCharOffsetStart;
+    propersize = (sizeof(unsigned char) * kMaxMessageLength) + kAnyCharOffsetStart;
     gAresGlobal->gMessageData.create(kMaxMessageLength + kAnyCharOffsetStart);
     if (gAresGlobal->gMessageData.get() == nil)
     {
@@ -248,7 +248,7 @@ void ClearMessage( void)
 {
 #ifdef kUseMessage
     long    i, *l;
-    anyCharType     *anyChar, nilLabel = 0;
+    unsigned char *anyChar, nilLabel = 0;
     longMessageType *tmessage;
 
     l = reinterpret_cast<long *>(*gAresGlobal->gMessageData) + kLongOffsetFirstChar;
@@ -290,11 +290,11 @@ void ClearMessage( void)
 #endif
 }
 
-void AppendStringToMessage(const  anyCharType* string)
+void AppendStringToMessage(const unsigned char* string)
 
 {
 #ifdef kUseMessage
-    anyCharType     strLen, *message;
+    unsigned char strLen, *message;
     long            *freeoffset;
 
 
@@ -334,7 +334,7 @@ void AppendStringToMessage(const  anyCharType* string)
 void StartMessage( void)
 
 {
-    anyCharType     *message;
+    unsigned char* message;
     long            *freeoffset;
 
 
@@ -364,7 +364,7 @@ void StartMessage( void)
 void EndMessage( void)
 
 {
-    anyCharType     *message;
+    unsigned char* message;
     long            *freeoffset;
 
 
@@ -420,7 +420,7 @@ void StartLongMessage( short startResID, short endResID)
     }
 }
 
-void StartStringMessage( anyCharType *string)
+void StartStringMessage(unsigned char* string)
 
 {
     longMessageType *tmessage;
@@ -471,7 +471,7 @@ void ClipToCurrentLongMessage( void)
     longMessageType *tmessage;
     Handle          textData = nil;
     transColorType  *transColor;
-    anyCharType     *ac;
+    unsigned char* ac;
     long            count;
 
     tmessage = *gAresGlobal->gLongMessageData;
@@ -492,7 +492,7 @@ void ClipToCurrentLongMessage( void)
                 if (textData != nil)
                 {
                     count = 1;
-                    ac = reinterpret_cast<anyCharType*>(*textData);
+                    ac = *textData;
                     while ( count <= tmessage->stringMessage[0])
                     {
                         *ac = tmessage->stringMessage[count];
@@ -807,7 +807,7 @@ void DrawMessageScreen( long byUnits)
 {
 #ifdef kUseMessage
     Str255          tString;
-    anyCharType     *anyChar, *dChar, *tLen;
+    unsigned char   *anyChar, *dChar, *tLen;
     long            *firstoffset, offset;
 
     // increase the amount of time current message has been shown
@@ -958,7 +958,7 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
     long            charNum = 0, height = mDirectFontHeight(), x = 0, oldx = 0, oldCharNum, wordLen,
                     *lineLengthList = retroTextSpec->lineLength;
     unsigned char   *widthPtr, charWidth, wrapState; // 0 = none, 1 = once, 2 = more than once
-    anyCharType     *thisChar = reinterpret_cast<anyCharType*>(*retroTextSpec->text);
+    unsigned char   *thisChar = *retroTextSpec->text;
 
     *lineLengthList = 0;
     retroTextSpec->autoWidth = 0;
@@ -1076,7 +1076,7 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
                     oldx = 0, oldCharNum, wordLen;
     unsigned char   *widthPtr, charWidth, wrapState, // 0 = none, 1 = once, 2 = more than once
                     tempColor;
-    anyCharType     *thisChar = reinterpret_cast<anyCharType*>(*retroTextSpec->text), *thisWordChar, thisWord[255];
+    unsigned char   *thisChar = *retroTextSpec->text, *thisWordChar, thisWord[255];
     longRect        backRect, lineRect;
     unsigned char   calcColor, calcShade;
     transColorType  *transColor;
@@ -1252,7 +1252,7 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
 void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
     longRect *bounds, longRect *clipRect, PixMap *destMap, long portLeft, long portTop)
 {
-    anyCharType     *thisChar = reinterpret_cast<anyCharType*>(*(retroTextSpec->text)), thisWord[kMaxRetroSize], charWidth, *widthPtr;
+    unsigned char   *thisChar = *(retroTextSpec->text), thisWord[kMaxRetroSize], charWidth, *widthPtr;
     longRect        cursorRect, lineRect, tlRect;
     long            oldx, wordLen, *lineLength = &(retroTextSpec->lineLength[retroTextSpec->lineCount]);
     unsigned char   tempColor, calcColor, calcShade;
@@ -1276,8 +1276,7 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
     while (( charsToDo > 0) && ( retroTextSpec->thisPosition <
         retroTextSpec->textLength))
     {
-        thisChar = reinterpret_cast<anyCharType*>(*(retroTextSpec->text)) +
-            retroTextSpec->thisPosition;
+        thisChar = *(retroTextSpec->text) + retroTextSpec->thisPosition;
         if ( *thisChar == kCodeChar)
         {
             thisChar++;
@@ -1464,7 +1463,7 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
 //
 void MessageLabel_Set_Special( short id, Handle text)
 {
-    char    whichType, *c;
+    unsigned char    whichType, *c;
     long    value = 0, charNum = 0, textLength, safetyCount;
     Str255  s;
     Point   attachPoint = {0, 0};

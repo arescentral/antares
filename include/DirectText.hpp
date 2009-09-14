@@ -116,11 +116,11 @@ void DirectTextCleanup( void);
 long GetDirectFontNum( short);
 short AddDirectFont( directTextType *);
 
-void DrawDirectTextString( char *, unsigned char, PixMap *, long, long);
-void DrawDirectTextStringClipped( anyCharType *, unsigned char, PixMap *, longRect *, long, long);
+void DrawDirectTextString(unsigned char*, unsigned char, PixMap *, long, long);
+void DrawDirectTextStringClipped(unsigned char*, unsigned char, PixMap *, longRect *, long, long);
 
-void DrawDirectTextHeightx2( anyCharType *, unsigned char, PixMap *, long, long);
-void DrawDirectTextStringClippedx2( anyCharType *, unsigned char, PixMap *, longRect *, long, long);
+void DrawDirectTextHeightx2(unsigned char*, unsigned char, PixMap *, long, long);
+void DrawDirectTextStringClippedx2(unsigned char*, unsigned char, PixMap *, longRect *, long, long);
 
 void ResetDirectTextPtr( Handle);
 

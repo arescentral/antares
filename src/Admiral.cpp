@@ -213,7 +213,7 @@ long MakeNewAdmiral( long flagship, long destinationObject, destinationType dTyp
     {
         GetIndString( s, nameResID, nameStrNum);
         if ( *s > kAdmiralNameLen) *s = kAdmiralNameLen;
-        CopyPString( reinterpret_cast<unsigned char *>(a->name), reinterpret_cast<unsigned char *>(s));
+        CopyPString(a->name, s);
     }
     // for now set strategy balance to 0 -- we may want to calc this if player added on the fly?
     return( n);
@@ -255,7 +255,7 @@ long MakeNewDestination( long whichObject, long *canBuildType, smallFixedType ea
         {
             GetIndString( s, nameResID, nameStrNum);
             if ( *s > kDestinationNameLen) *s = kDestinationNameLen;
-            CopyPString( reinterpret_cast<unsigned char *>(d->name), reinterpret_cast<unsigned char *>(s));
+            CopyPString(d->name, s);
         }
 
         if ( object->attributes & kNeutralDeath)
@@ -662,9 +662,7 @@ void SetAdmiralBuildAtObject( long whichAdmiral, long whichObject)
     }
 }
 
-anyCharType *GetAdmiralBuildAtName( long whichAdmiral)
-
-{
+unsigned char* GetAdmiralBuildAtName(long whichAdmiral) {
     admiralType     *a;
     destBalanceType *destObject;
 
@@ -673,8 +671,7 @@ anyCharType *GetAdmiralBuildAtName( long whichAdmiral)
     return ( destObject->name);
 }
 
-void SetAdmiralBuildAtName( long whichAdmiral, StringPtr name)
-{
+void SetAdmiralBuildAtName(long whichAdmiral, unsigned char* name) {
     admiralType     *a;
     destBalanceType *destObject;
 
@@ -684,18 +681,14 @@ void SetAdmiralBuildAtName( long whichAdmiral, StringPtr name)
     CopyPString( destObject->name, name);
 }
 
-anyCharType *GetDestBalanceName( long whichDestObject)
-
-{
+unsigned char* GetDestBalanceName(long whichDestObject) {
     destBalanceType *destObject;
 
     destObject = mGetDestObjectBalancePtr( whichDestObject);
     return ( destObject->name);
 }
 
-anyCharType *GetAdmiralName( long whichAdmiral)
-
-{
+unsigned char* GetAdmiralName(long whichAdmiral) {
     admiralType     *a;
 
     if (( whichAdmiral >= 0) && ( whichAdmiral < kScenarioPlayerNum))
@@ -705,16 +698,14 @@ anyCharType *GetAdmiralName( long whichAdmiral)
     } else return ( nil);
 }
 
-void SetAdmiralName( long whichAdmiral, anyCharType *name)
-
-{
+void SetAdmiralName(long whichAdmiral, unsigned char* name) {
     admiralType     *a;
 
     if (( whichAdmiral >= 0) && ( whichAdmiral < kScenarioPlayerNum))
     {
         a = *gAresGlobal->gAdmiralData + whichAdmiral;
         if ( *name > kAdmiralNameLen) *name = kAdmiralNameLen;
-        CopyPString( reinterpret_cast<unsigned char *>(a->name), reinterpret_cast<unsigned char *>(name));
+        CopyPString(a->name, name);
 
     }
 }

@@ -26,14 +26,14 @@
 
 void SmallFixedToString( smallFixedType, Str255);
 smallFixedType StringToSmallFixed( Str255);
-void DoubleToString( double, StringPtr, long);
-double StringToDouble( StringPtr s);
+void DoubleToString(double, unsigned char*, long);
+double StringToDouble(unsigned char* s);
 void NumToHexString( unsigned long, Str255, long);
 void HexStringToNum( Str255, unsigned long *);
-void UnsignedLongToString( unsigned long, StringPtr);
-unsigned long StringToUnsignedLong( StringPtr);
-StringPtr LongToString( long, StringPtr);
-long StringToLong( StringPtr);
+void UnsignedLongToString(unsigned long, unsigned char*);
+unsigned long StringToUnsignedLong(unsigned char*);
+unsigned char* LongToString(long, unsigned char*);
+long StringToLong(unsigned char*);
 
 inline void NumToString(unsigned long num, unsigned char* string) {
     UnsignedLongToString(num, string);

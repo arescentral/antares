@@ -20,11 +20,11 @@
 
 // Smart_File.h
 
-OSErr SmartFile_SelectFolder( FSSpecPtr destFile, StringPtr windowName,
-    StringPtr prompt);
+OSErr SmartFile_SelectFolder(FSSpecPtr destFile, unsigned char* windowName,
+    unsigned char* prompt);
 
-OSErr SmartFile_SaveAs( FSSpecPtr destFile, StringPtr fileName,
-    StringPtr appName, OSType fileTypeToSave, OSType fileCreator);
+OSErr SmartFile_SaveAs(FSSpecPtr destFile, unsigned char* fileName,
+    unsigned char* appName, OSType fileTypeToSave, OSType fileCreator);
 
 OSErr SmartFile_SelectFile( FSSpecPtr destFile, short openListResID);
 

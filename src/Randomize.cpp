@@ -132,6 +132,7 @@ void DebugRandomReset( void)
     gDebugWhichRandom = 0;
 }
 
+#if 0
 short DebugRandomSeeded( short range, long *seed, char *file, OSType sig, long objectType)
 {
     short           result = 0;
@@ -271,6 +272,7 @@ short DebugRandomSeeded( short range, long *seed, char *file, OSType sig, long o
     result = XRandomSeeded( range, seed);
     return ( result);
 }
+#endif
 
 short XRandomSeeded( short range, long *seed)
 

@@ -27,9 +27,9 @@
 
 void InitAresGuide( void);
 void MakeAresGuide( void);
-OSErr ConvertSpriteIntoGIF( short, long, StringPtr);
+OSErr ConvertSpriteIntoGIF(short, long, unsigned char*);
 PicHandle MakePicHandleFromScreen( PixMapHandle, Rect *);
-OSErr SaveBlockToFile( Ptr, long, StringPtr);
+OSErr SaveBlockToFile(Ptr, long, unsigned char*);
 
 #pragma options align=reset
 

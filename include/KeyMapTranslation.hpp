@@ -87,7 +87,7 @@ Boolean EscapeKey( void);
 Boolean PeriodKey( void);
 Boolean QKey( void);
 Boolean AnyCancelKeys( void);
-void GetKeyNumName( StringPtr, short);
+void GetKeyNumName(unsigned char*, short);
 Boolean AnyRealKeyDown( void);
 Boolean AnyModifierKeyDown( void);
 Boolean AnyKeyButThisOne( KeyMap, long, long);

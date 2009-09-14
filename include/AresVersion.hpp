@@ -24,7 +24,7 @@
 
 typedef unsigned long aresVersionType;
 
-aresVersionType AresVersion_Get_FromString( StringPtr s);
-StringPtr String_Get_FromAresVersion( StringPtr s, aresVersionType t);
+aresVersionType AresVersion_Get_FromString(unsigned char* s);
+unsigned char* String_Get_FromAresVersion(unsigned char* s, aresVersionType t);
 
 #endif // ANTARES_ARES_VERSION_HPP_

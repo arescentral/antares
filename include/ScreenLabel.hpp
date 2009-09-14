@@ -39,7 +39,7 @@ struct screenLabelType {
     long            width;
     long            height;
     long            age;
-    anyCharType     label[kMaxLabelLen];
+    unsigned char   label[kMaxLabelLen];
     unsigned char   color;
     Boolean         active;
     Boolean         killMe;
@@ -75,7 +75,7 @@ void SetScreenLabelOffset( long which, long hoff, long voff);
 long GetScreenLabelWidth( long which);
 void SetScreenLabelKeepOnScreenAnyway( long which, Boolean keepOnScreenAnyWay);
 void SetScreenLabelAttachedHintLine( long which, Boolean attachedHintLine, Point toWhere);
-anyCharType *GetScreenLabelStringPtr( long);
+unsigned char* GetScreenLabelStringPtr(long);
 void RecalcScreenLabelSize( long);
 void ResolveScreenLabels(screenLabelType**);
 

@@ -20,6 +20,6 @@
 
 #include <Base.h>
 
-void GetVersionString(StringPtr, short);
+void GetVersionString(unsigned char*, short);
 
 #endif // ANTARES_VERSION_STRING_HPP_

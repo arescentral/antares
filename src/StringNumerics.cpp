@@ -134,8 +134,7 @@ smallFixedType StringToSmallFixed( Str255 s)
     return( mFloatToFixed( value + (.0019531 * sign)));
 }
 
-void DoubleToString( double d, StringPtr s, long places)
-{
+void DoubleToString(double d, unsigned char* s, long places) {
     long                l;
     unsigned long   tenFactor = 1000000000, t;  // 2 147 483 647 is max signed long
     
@@ -184,8 +183,7 @@ void DoubleToString( double d, StringPtr s, long places)
     }
 }
 
-double StringToDouble( StringPtr s)
-{
+double StringToDouble(unsigned char* s) {
     double  decimalPlace = 10, result = 0;
     long    c = 1;
     
@@ -257,8 +255,7 @@ void HexStringToNum( Str255 s, unsigned long *l)
     }
 }
 
-void UnsignedLongToString( unsigned long l, StringPtr s)
-{
+void UnsignedLongToString(unsigned long l, unsigned char* s) {
     unsigned long   tenFactor = 1000000000, t;  // 4 294 967 295 is max unsigned long
     
 //  while ((( l % tenFactor) == 0) && ( tenFactor > 0)) tenFactor /= 10;
@@ -281,8 +278,7 @@ void UnsignedLongToString( unsigned long l, StringPtr s)
     } while ( tenFactor > 0);
 }
 
-unsigned long StringToUnsignedLong( StringPtr s)
-{
+unsigned long StringToUnsignedLong(unsigned char* s) {
     unsigned long   result = 0;
     long                charNum = 1, strLen = s[0];
     
@@ -298,8 +294,7 @@ unsigned long StringToUnsignedLong( StringPtr s)
     return( result);
 }
 
-StringPtr LongToString( long l, StringPtr s)
-{
+unsigned char* LongToString(long l, unsigned char* s) {
     unsigned long   tenFactor = 1000000000, t;  // 2 147 483 647 is max signed long
     
     if ( l < 0)
@@ -332,8 +327,7 @@ StringPtr LongToString( long l, StringPtr s)
     return s;
 }
 
-long StringToLong( StringPtr s)
-{
+long StringToLong(unsigned char* s) {
     long                result = 0, charNum = 1, strLen = s[0], sign = 1;
     Boolean             seenSign = false;
     

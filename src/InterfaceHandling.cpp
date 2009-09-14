@@ -1045,7 +1045,7 @@ void InterfaceTextEditItemInit( short whichItem)
     }
 }
 
-void InterfaceTextEditSetText( short whichItem, anyCharType *s)
+void InterfaceTextEditSetText(short whichItem, unsigned char* s)
 
 {
     interfaceItemType   *item;
@@ -1229,7 +1229,7 @@ void SetInterfaceTextEditColors( short whichItem)
     } else WriteDebugLong( whichItem);
 }
 
-void CopyInterfaceTextEditContents( short whichItem, anyCharType *d, long *maxlen)
+void CopyInterfaceTextEditContents(short whichItem, unsigned char* d, long *maxlen)
 
 {
     interfaceItemType   *item;
@@ -1270,7 +1270,7 @@ long GetInterfaceTextEditLength( short whichItem)
 
 void SetInterfaceListCallback(  short       whichItem,
                                 short       (*getListLength)( void),
-                                void        (*getItemString)( short, anyCharType *),
+                                void        (*getItemString)(short, unsigned char*),
                                 Boolean     (*itemHilited)( short, Boolean))
 {
     interfaceItemType   *item;

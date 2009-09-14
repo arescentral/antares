@@ -28,8 +28,6 @@
 
 #define kAnyCharPStringMaxLen   254
 
-typedef unsigned char anyCharType;
-
 inline int mGetAnyCharPStringLength(const unsigned char* mAnyCharPtr) {
     return *mAnyCharPtr;
 }
@@ -40,9 +38,9 @@ inline void mGetPStringFromSingleAnyChar(
     *(mDestAnyCharPtr + 1) = mAnyChar;
 }
 
-void CopyAnyCharPString( anyCharType *, const anyCharType *);
-void InsertAnyCharPStringInPString( anyCharType *, const anyCharType *, long);
-void CutCharsFromAnyCharPString( anyCharType *, long, long);
+void CopyAnyCharPString(unsigned char *, const unsigned char*);
+void InsertAnyCharPStringInPString(unsigned char*, const unsigned char*, long);
+void CutCharsFromAnyCharPString(unsigned char*, long, long);
 
 #pragma options align=reset
 

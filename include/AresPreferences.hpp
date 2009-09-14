@@ -136,11 +136,11 @@ short SaveOptionsPreferences( void);
 short SaveStartingLevelPreferences( short);
 short GetStartingLevelPreference( void);
 short SaveAllPreferences( void);
-short SaveAnyResourceInPreferences( ResType, short, StringPtr, Handle, Boolean);
-short GetAnyResourceFromPreferences( ResType, short, StringPtr, Handle*, Boolean);
-void GetNetPreferences( StringPtr, StringPtr, unsigned long *, long *, long *, unsigned long *,
+short SaveAnyResourceInPreferences(ResType, short, unsigned char*, Handle, Boolean);
+short GetAnyResourceFromPreferences(ResType, short, unsigned char*, Handle*, Boolean);
+void GetNetPreferences(unsigned char*, unsigned char*, unsigned long *, long *, long *, unsigned long *,
     short *, unsigned short *, unsigned short *, unsigned short *, short *, short *, short *);
-OSErr SaveNetPreferences( StringPtr, StringPtr, unsigned long, long, long, unsigned long,
+OSErr SaveNetPreferences(unsigned char*, unsigned char*, unsigned long, long, long, unsigned long,
     short, unsigned short, unsigned short, unsigned short, short, short, short);
 
 #pragma options align=reset

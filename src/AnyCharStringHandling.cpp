@@ -20,7 +20,7 @@
 #include "AnyChar.hpp"
 #include "Casts.hpp"
 
-void CopyAnyCharPString( anyCharType *to, const anyCharType *from)
+void CopyAnyCharPString(unsigned char* to, const unsigned char* from)
 
 {
     short       i, l;
@@ -33,10 +33,10 @@ void CopyAnyCharPString( anyCharType *to, const anyCharType *from)
         *(to++) = *(from++);
 }
 
-void InsertAnyCharPStringInPString( anyCharType *to, const anyCharType *from, long offset)
+void InsertAnyCharPStringInPString(unsigned char* to, const unsigned char* from, long offset)
 {
-    anyCharType* dc;
-    const anyCharType* sc;
+    unsigned char* dc;
+    const unsigned char* sc;
     long count, flen;
 
     if ( offset <= *to)
@@ -72,9 +72,10 @@ void InsertAnyCharPStringInPString( anyCharType *to, const anyCharType *from, lo
     }
 }
 
-void CutCharsFromAnyCharPString( anyCharType *string, long start, long length)
+void CutCharsFromAnyCharPString(unsigned char*string, long start, long length)
 {
-    anyCharType *dc, *sc;
+    unsigned char* dc;
+    unsigned char* sc;
     long        count;
 
     if ( start <= *string)

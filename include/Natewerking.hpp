@@ -54,9 +54,9 @@ struct nateQueue {
 
 char NatewerkInit( void);
 void NatewerkDispose( char);
-void NatewerkRemoveName( StringPtr, StringPtr);
-Boolean NatewerkPostName( char, StringPtr, StringPtr);
-int NatewerkGetName( AddrBlock *, StringPtr, StringPtr, short);
+void NatewerkRemoveName(unsigned char*, unsigned char*);
+Boolean NatewerkPostName(char, unsigned char*, unsigned char*);
+int NatewerkGetName(AddrBlock *, unsigned char*, unsigned char*, short);
 OSErr NatewerkLookupName( EntityName *, int *, Ptr);
 int NatewerkSendData( AddrBlock, char, Ptr, short);
 void PopTopUsedQueue( void);

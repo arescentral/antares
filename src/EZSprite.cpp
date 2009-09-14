@@ -41,7 +41,7 @@ void EZDrawSpriteOffByID( short resID, long whichShape, long scale, unsigned cha
     natePixType**       spriteTable = nil;
     spritePix           aSpritePix;
     PixMapHandle        offPixBase = GetGWorldPixMap( gOffWorld);
-    char                *pixData;
+    unsigned char       *pixData;
 
     GetPort( &oldPort);
     EZMakeSpriteFromID( resID, &spriteTable, &aSpritePix, &pixData, whichShape);
@@ -72,7 +72,7 @@ void EZDrawSpriteOffToOnByID( short resID, long whichShape, long scale,
     natePixType**       spriteTable = nil;
     spritePix           aSpritePix;
     PixMapHandle        offPixBase = GetGWorldPixMap( gOffWorld);
-    char                *pixData;
+    unsigned char       *pixData;
 
     GetPort( &oldPort);
     EZMakeSpriteFromID( resID, &spriteTable, &aSpritePix, &pixData, whichShape);
@@ -137,7 +137,7 @@ void EZDrawSpriteCenteredInRectBySprite( spritePix *aSpritePix,
 //  Note that, unfortunately, you have to keep the pixData ptr alive.
 
 void EZMakeSpriteFromID( short resID, natePixType*** spriteTable, spritePix *aSpritePix,
-    char **pixData, long whichShape)
+    unsigned char **pixData, long whichShape)
 {
     *spriteTable = reinterpret_cast<natePixType**>(GetResource( kPixResType, resID));
     if ( *spriteTable == nil) return;
@@ -158,7 +158,7 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
     natePixType**       spriteTable = nil;
     PixMapHandle        offPixBase = GetGWorldPixMap( gOffWorld);
     spritePix           aSpritePix;
-    char                *pixData;
+    unsigned char       *pixData;
     Point               where;
     long                tlong, thisScale;
     longRect            dRect, spriteRect;

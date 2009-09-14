@@ -735,9 +735,7 @@ void DoAboutAresInterface( void)
     }
 }
 
-void DoLoadingInterface( Rect *contentRect, StringPtr levelName)
-
-{
+void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
     int                     error;
     unsigned char           color, *strPtr;
     transColorType          *transColor;
@@ -771,7 +769,7 @@ void DoLoadingInterface( Rect *contentRect, StringPtr levelName)
 
         strPtr = levelName + 1;
         retroTextSpec.textLength = *levelName;
-        retroTextSpec.text = reinterpret_cast<char**>(&strPtr);
+        retroTextSpec.text = &strPtr;
 
         retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
         retroTextSpec.tabSize =220;
@@ -1456,8 +1454,7 @@ void DoHelpScreen( void)
     }
 }
 
-void StartPauseIndicator(StringPtr pauseString, unsigned char hue)
-{
+void StartPauseIndicator(unsigned char* pauseString, unsigned char hue) {
     unsigned char   *getwidchar, *getwidwid, color;
     long            width, height, strlen, count;
     Rect            tRect, stringRect;
@@ -1507,8 +1504,7 @@ void StartPauseIndicator(StringPtr pauseString, unsigned char hue)
     CopyOffWorldToRealWorld(gTheWindow, &tRect);
 }
 
-void StopPauseIndicator( StringPtr pauseString)
-{
+void StopPauseIndicator(unsigned char* pauseString) {
     unsigned char   *getwidchar, *getwidwid;
     long            width, height, strlen;
     Rect            tRect, stringRect;
@@ -2593,7 +2589,7 @@ netResultType HostAcceptClientInterface( void)
     long                    theMessage, roundTripTime, version, serialNumerator,
                             serialDenominator;
     Str31                   s;
-    StringPtr               name;
+    unsigned char*          name;
     CWindowPtr              whichWindow;
 
     if ( gAresGlobal->gameRangerPending)
@@ -4007,9 +4003,8 @@ long DoSelectLevelInterface( long startChapter)
     return ( thisLevel);
 }
 
-void DrawLevelNameInBox( StringPtr name, long fontNum, short descriptionTextID,
-    long itemNum)
-{
+void DrawLevelNameInBox(unsigned char* name, long fontNum, short descriptionTextID,
+    long itemNum) {
     longRect                clipRect;
     Rect                    tRect;
     unsigned char           *strPtr;
@@ -4404,7 +4399,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
             HLockHi( textData);
 
             textlength = length = GetHandleSize( textData);
-            textHeight = GetInterfaceTextHeightFromWidth( reinterpret_cast<anyCharType *>(*textData), length,
+            textHeight = GetInterfaceTextHeightFromWidth(*textData, length,
                             dataItem->style, kMissionDataWidth);
         }
         if ( hiliteBounds.left == hiliteBounds.right)
@@ -4491,7 +4486,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
         if ( textData != nil)
         {
             LongRectToRect( &(dataItem->bounds), &newRect);
-            DrawInterfaceTextInRect( &newRect, reinterpret_cast<anyCharType *>(*textData), length,
+            DrawInterfaceTextInRect(&newRect, *textData, length,
                             dataItem->style, dataItem->color, *offMap, 0, 0, inlinePict);
             ReleaseResource( textData);
         }
@@ -4769,8 +4764,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
     }
 }
 
-Handle CreateWeaponDataText( long whichWeapon, StringPtr weaponName)
-{
+Handle CreateWeaponDataText(long whichWeapon, unsigned char* weaponName) {
     baseObjectType      *weaponObject, *missileObject;
     Handle              weaponText = nil;
     Str255              numString, tempString;
@@ -4865,7 +4859,7 @@ void ShowSuccessAnimation( WindowPtr thePort)
     Rect            tRect, lastBounds, theseBounds;
     natePixType**   shipSprite = nil;
     spritePix       aSpritePix;
-    char            *pixData;
+    unsigned char   *pixData;
     unsigned char   color, *getwidchar, *getwidwid; // for getting string width
     PixMapHandle    pixMap = GetGWorldPixMap( gOffWorld),
                     saveMap = GetGWorldPixMap( gSaveWorld);
@@ -5012,7 +5006,7 @@ void ShowSuccessAnimation( WindowPtr thePort)
             tRect.bottom = tRect.top + zpoint;
 
             MoveTo( tRect.left, tRect.top + gDirectText->ascent);
-            DrawDirectTextStringClipped( reinterpret_cast<anyCharType *>(hackString), color, *pixMap, &starBounds,
+            DrawDirectTextStringClipped(hackString, color, *pixMap, &starBounds,
                 0, 0);
 
             ChunkCopyPixMapToScreenPixMap( *pixMap, &tRect, *thePixMapHandle);
@@ -5242,7 +5236,7 @@ void DoMissionDebriefingText( WindowPtr thePort, long textID, long yourlength, l
         HLockHi( textData);
 
         textlength = length = GetHandleSize( textData);
-        textHeight = GetInterfaceTextHeightFromWidth( reinterpret_cast<anyCharType *>(*textData), length,
+        textHeight = GetInterfaceTextHeightFromWidth(*textData, length,
                         dataItem.style, kDebriefTextWidth);
         if ( doScore) textHeight += kScoreTableHeight;
 
@@ -5265,7 +5259,7 @@ void DoMissionDebriefingText( WindowPtr thePort, long textID, long yourlength, l
         DrawAnyInterfaceItem( &dataItem, *offMap, 0, 0);
 
         LongRectToRect( &(dataItem.bounds), &tRect);
-        DrawInterfaceTextInRect( &tRect, reinterpret_cast<anyCharType *>(*textData), length,
+        DrawInterfaceTextInRect(&tRect, *textData, length,
                             dataItem.style, dataItem.color, *offMap, 0, 0, nil);
 
         ReleaseResource( textData);
@@ -5313,7 +5307,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
     Rect                tRect, uRect, vRect, pictRect, pictSourceRect, movieRect;
     PixMapHandle        offMap = GetGWorldPixMap( gOffWorld), saveMap = GetGWorldPixMap( gSaveWorld);
     Handle              textHandle;
-    anyCharType         *thisChar = nil, *sectionStart = nil, *nextChar;
+    unsigned char       *thisChar = nil, *sectionStart = nil, *nextChar;
     PicHandle           thePict = nil, bgPict = nil;
     Boolean             sectionOver, abort = false, wasPicture = true;
     Movie               theMovie = nil;
@@ -5395,7 +5389,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
         // look for beginning of section
         charNum = 0;
         textLength = GetHandleSize( textHandle);
-        sectionStart = reinterpret_cast<anyCharType *>(*textHandle);
+        sectionStart = *textHandle;
 
         // while we still have text to do
         while (( charNum < textLength) && ( !abort))

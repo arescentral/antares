@@ -225,11 +225,11 @@ enum lineSelectType {
 };
 
 struct miniScreenLineType {
-    anyCharType     string[kMiniScreenCharWidth + 1];
-    anyCharType     statusFalse[kMiniScreenCharWidth + 1];
-    anyCharType     statusTrue[kMiniScreenCharWidth + 1];
-    anyCharType     statusString[kMiniScreenCharWidth + 1];
-    anyCharType     postString[kMiniScreenCharWidth + 1];
+    unsigned char   string[kMiniScreenCharWidth + 1];
+    unsigned char   statusFalse[kMiniScreenCharWidth + 1];
+    unsigned char   statusTrue[kMiniScreenCharWidth + 1];
+    unsigned char   statusString[kMiniScreenCharWidth + 1];
+    unsigned char   postString[kMiniScreenCharWidth + 1];
     long            hiliteLeft;
     long            hiliteRight;
     long            whichButton;
@@ -245,7 +245,7 @@ struct miniScreenLineType {
 };
 
 inline void mCopyBlankLineString(
-        miniScreenLineType* mline, anyCharType*& mchar, anyCharType* mstring, short& mslen,
+        miniScreenLineType* mline, unsigned char*& mchar, unsigned char* mstring, short& mslen,
         short& mlinelen) {
     mchar = mstring;
     mslen = *mchar;
@@ -290,7 +290,7 @@ miniComputerDataType    *gMiniScreenData = nil;
 
 void MiniComputerSetStatusStrings( void);
 long MiniComputerGetStatusValue( long);
-void MiniComputerMakeStatusString( long, StringPtr);
+void MiniComputerMakeStatusString(long, unsigned char*);
 
 int MiniScreenInit( void)
 
@@ -701,7 +701,7 @@ void MakeMiniScreenFromIndString( short whichString)
 
 {
     Str255              s, keyname;
-    anyCharType         *c, *keyc, len, keyName[kKeyNameLength], keyNameLen;
+    unsigned char       *c, *keyc, len, keyName[kKeyNameLength], keyNameLen;
     miniScreenLineType  *line;
     short               lineNum = 0, charNum, count;
     Rect                mRect;
@@ -714,7 +714,7 @@ void MakeMiniScreenFromIndString( short whichString)
     gAresGlobal->gMiniScreenData.currentScreen = whichString;
 
     GetIndString( s, kMiniScreenStringID, whichString);
-    c = reinterpret_cast<anyCharType *>(s);
+    c = s;
     len = *c;
     c++;
     charNum = 1;
@@ -779,7 +779,7 @@ void MakeMiniScreenFromIndString( short whichString)
                     line->hiliteLeft = mRect.left + kMiniScreenLeftBuffer + gDirectText->logicalWidth * (charNum - 1);
 
                     GetKeyNumName( keyname, GetKeyNumFromKeyMap( gAresGlobal->gKeyControl[kCompAcceptKeyNum]));
-                    keyc = reinterpret_cast<anyCharType *>(keyname);
+                    keyc = keyname;
                     keyNameLen = *keyc;
                     keyc++;
 
@@ -827,7 +827,7 @@ void MakeMiniScreenFromIndString( short whichString)
                     line->hiliteLeft = mRect.left + kMiniScreenLeftBuffer + gDirectText->logicalWidth * (charNum - 1);
 
                     GetKeyNumName( keyname, GetKeyNumFromKeyMap( gAresGlobal->gKeyControl[kCompCancelKeyNum]));
-                    keyc = reinterpret_cast<anyCharType *>(keyname);
+                    keyc = keyname;
                     keyNameLen = *keyc;
                     keyc++;
 
@@ -1323,7 +1323,7 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
     transColorType      *transColor;
     Rect                mRect;
     Boolean             update = FALSE;
-    anyCharType         digit[3], *digitp;
+    unsigned char       digit[3], *digitp;
     long                scratch;
 
     offPixBase = GetGWorldPixMap( gOffWorld);
@@ -1460,7 +1460,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     unsigned char       color, lightcolor, darkcolor;
     Str255              s;
     spritePix           aSpritePix;
-    char                *pixData = nil;
+    unsigned char       *pixData = nil;
     coordPointType      coord;
     Point               where;
     natePixType**       pixTable = nil;
@@ -2280,7 +2280,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
     miniScreenLineType  *line = nil;
     Str255              s;
     long                count, baseNum, lineNum, buildAtObjectNum;
-    anyCharType         *namechar;
+    unsigned char       *namechar;
     short               namelen, linelen;
     Rect                mRect;
 
@@ -2596,8 +2596,7 @@ void MiniComputerSetStatusStrings( void)
     }
 }
 
-void MiniComputerMakeStatusString( long whichLine, StringPtr destString)
-{
+void MiniComputerMakeStatusString(long whichLine, unsigned char* destString) {
     miniScreenLineType  *line;
     Str255              tempString;
 

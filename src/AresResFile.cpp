@@ -51,8 +51,7 @@ short ARF_OpenResFile(const unsigned char* fileName)
 //  makes the FSSpec of a file from a file name, relative to ares folder,
 //  so you can make it *the* external data file
 
-OSErr ARF_OpenResFile_External( StringPtr fileName, FSSpecPtr fileSpec)
-{
+OSErr ARF_OpenResFile_External(unsigned char* fileName, FSSpecPtr fileSpec) {
     ProcessSerialNumber             myProcess;
     OSErr                           error;
     ProcessInfoRec                  info;

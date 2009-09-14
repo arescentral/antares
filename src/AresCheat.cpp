@@ -50,7 +50,7 @@
 extern aresGlobalType *gAresGlobal;
 
 void CheatFeedback( short, Boolean, long);
-void CheatFeedbackPlus( short, Boolean, long, StringPtr);
+void CheatFeedbackPlus(short, Boolean, long, unsigned char*);
 
 void AresCheatInit( void)
 {
@@ -63,7 +63,7 @@ void CleanupAresCheat( void)
     if ( gAresGlobal->gAresCheatStrings != nil) DisposeHandle( gAresGlobal->gAresCheatStrings);
 }
 
-short GetCheatNumFromString( StringPtr s)
+short GetCheatNumFromString(unsigned char* s)
 {
 //  return( -1);
     Str255  codeString;
@@ -203,7 +203,7 @@ void ExecuteCheat( short whichCheat, long whichPlayer)
 void CheatFeedback( short whichCheat, Boolean activate, long whichPlayer)
 {
     Str255          s, feedback;
-    anyCharType     *name;
+    unsigned char* name;
 
     if ( activate) GetIndString( feedback, kCheatFeedbackOnID, whichCheat);
     else GetIndString( feedback, kCheatFeedbackOffID, whichCheat);
@@ -216,10 +216,10 @@ void CheatFeedback( short whichCheat, Boolean activate, long whichPlayer)
 }
 
 void CheatFeedbackPlus( short whichCheat, Boolean activate, long whichPlayer,
-    StringPtr infoString)
+    unsigned char* infoString)
 {
     Str255          s, feedback;
-    anyCharType     *name;
+    unsigned char* name;
 
     if ( activate) GetIndString( feedback, kCheatFeedbackOnID, whichCheat);
     else GetIndString( feedback, kCheatFeedbackOffID, whichCheat);

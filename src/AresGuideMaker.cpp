@@ -94,25 +94,25 @@ extern TypedHandle<baseObjectType>  gBaseObjectData;
 extern objectActionType**       gObjectActionData;
 extern aresGlobalType*          gAresGlobal;
 
-void ConvertPortraitIntoGIF( long, StringPtr);
+void ConvertPortraitIntoGIF(long, unsigned char*);
 void InsertWeaponText( short, short, Handle, weaponDataType *, fieldRangeType *);
 void AppendStringToHandle( const unsigned char*, Handle);
 void AdjustRangeFromObject( baseObjectType *, fieldRangeType *);
 void AdjustRangeFromWeaponData( weaponDataType *, fieldRangeType *);
 void GetWeaponData( long, weaponDataType *);
 void ReplaceIndStringWithIndStringInHandle( long, long, long, long, Handle);
-void ReplaceIndStringWithStringInHandle( long, long, StringPtr, Handle);
+void ReplaceIndStringWithStringInHandle(long, long, unsigned char*, Handle);
 void ReplaceIndStringWithHandleInHandle( long, long, Handle, Handle);
-void GetFileNameFromObject( long, StringPtr);
-void GetFileNameFromSprite( long, StringPtr);
-void GetFileNameFromPortrait( long, StringPtr);
-void NumToNDigitString( long, StringPtr, long);
+void GetFileNameFromObject(long, unsigned char*);
+void GetFileNameFromSprite(long, unsigned char*);
+void GetFileNameFromPortrait(long, unsigned char*);
+void NumToNDigitString(long, unsigned char*, long);
 void InsertGraphText( long, long, long, short, short, Handle);
 Handle GetGraphText( long);
 void InsertGraphicText( long, long, Handle);
 void InsertIndexText( long, long, Handle);
 long GetPreviousIndexBaseObject( long);
-Handle NewHandleFromString( StringPtr);
+Handle NewHandleFromString(unsigned char*);
 void CheckStringForNil( const unsigned char*);
 void CheckHandleForNil( Handle);
 
@@ -449,14 +449,14 @@ void InsertWeaponText( short resID, short startNum, Handle newText, weaponDataTy
     InsertGraphText( data->energyCost, range->minwenergy, range->maxwenergy, resID, startNum + 15, newText);
 }
 
-OSErr ConvertSpriteIntoGIF( short resID, long whichShape, StringPtr forceName)
+OSErr ConvertSpriteIntoGIF(short resID, long whichShape, unsigned char* forceName)
 {
     Boolean             tableExisted = true;
     natePixType**       spriteTable = nil;
     Rect                r;
     PixMapHandle        offPixBase = GetGWorldPixMap( gOffWorld);
     spritePix           aSpritePix;
-    char                *pixData;
+    unsigned char       *pixData;
     Point               where;
     long                tlong, thisScale;
     longRect            dRect, spriteRect;
@@ -567,8 +567,7 @@ OSErr ConvertSpriteIntoGIF( short resID, long whichShape, StringPtr forceName)
     return( err);
 }
 
-void ConvertPortraitIntoGIF( long whichObject, StringPtr fileName)
-{
+void ConvertPortraitIntoGIF(long whichObject, unsigned char* fileName) {
     PicHandle           newPic;
     OSErr               err = noErr;
     FSSpec              newFile;
@@ -744,8 +743,7 @@ void GetWeaponData( long whichWeapon, weaponDataType *data)
     }
 }
 
-OSErr SaveBlockToFile( Ptr data, long len, StringPtr fileName)
-{
+OSErr SaveBlockToFile(Ptr data, long len, unsigned char* fileName) {
     OSErr   err = noErr;
     FSSpec  newFile;
     short   newRefNum;
@@ -784,7 +782,7 @@ OSErr SaveBlockToFile( Ptr data, long len, StringPtr fileName)
 void AppendStringToHandle(const unsigned char* s, Handle data)
 {
     char lenCount;
-    char* c;
+    unsigned char* c;
     const unsigned char* sc;
     long    fileLen;
 
@@ -823,8 +821,8 @@ void ReplaceIndStringWithIndStringInHandle( long destID, long destNum, long sour
     Munger( data, 0, (destString + 1), *destString, sourceString + 1, *sourceString);
 }
 
-void ReplaceIndStringWithStringInHandle( long destID, long destNum, StringPtr sourceString, Handle data)
-{
+void ReplaceIndStringWithStringInHandle(long destID, long destNum, unsigned char* sourceString,
+        Handle data) {
     Str255      destString;
 
     GetIndString( destString, destID, destNum);
@@ -843,8 +841,7 @@ void ReplaceIndStringWithHandleInHandle( long destID, long destNum, Handle inser
     HUnlock( insertData);
 }
 
-void GetFileNameFromObject( long whichObject, StringPtr name)
-{
+void GetFileNameFromObject(long whichObject, unsigned char* name) {
     baseObjectType  *o;
     short           raceNum;
     Str255          shipName;
@@ -865,8 +862,7 @@ void GetFileNameFromObject( long whichObject, StringPtr name)
     CheckStringForNil( name);
 }
 
-void GetFileNameFromSprite( long whichSprite, StringPtr name)
-{
+void GetFileNameFromSprite(long whichSprite, unsigned char* name) {
     Str255  tString;
 
     CopyPString(name, "\psprite");
@@ -875,8 +871,7 @@ void GetFileNameFromSprite( long whichSprite, StringPtr name)
     ConcatenatePString( name, "\p.gif");
 }
 
-void GetFileNameFromPortrait( long whichObject, StringPtr name)
-{
+void GetFileNameFromPortrait(long whichObject, unsigned char* name) {
     Str255  tString;
 
     whichObject += 1001;
@@ -886,8 +881,7 @@ void GetFileNameFromPortrait( long whichObject, StringPtr name)
     ConcatenatePString( name, "\p.gif");
 }
 
-void NumToNDigitString( long num, StringPtr s, long digits)
-{
+void NumToNDigitString(long num, unsigned char* s, long digits) {
 /*  *c = 3;
     c++;
     *c = '0' + ( num / 100);
@@ -901,7 +895,7 @@ void NumToNDigitString( long num, StringPtr s, long digits)
     {
         while ( mGetAnyCharPStringLength( s) < digits)
         {
-            InsertAnyCharPStringInPString( reinterpret_cast<anyCharType *>(s), "\p0", 0);
+            InsertAnyCharPStringInPString(s, "\p0", 0);
         }
     }
     CheckStringForNil( s);
@@ -1154,18 +1148,17 @@ long GetPreviousIndexBaseObject( long whichObject)
     return( resultObject);
 }
 
-Handle NewHandleFromString( StringPtr s)
-{
-    char    *c, *sc, lenCount;
+Handle NewHandleFromString(unsigned char* s) {
+    unsigned char *c, *sc, lenCount;
     Handle  data = nil;
 
     CheckStringForNil( s);
-    sc = reinterpret_cast<char *>(s);
+    sc = s;
     data = NewHandle( implicit_cast<long>(*sc));
     if ( data != nil)
     {
         HLock( data);
-        c = reinterpret_cast<char *>(*data);
+        c = *data;
         lenCount = *sc;
         sc++;
         while( lenCount > 0)
@@ -1196,7 +1189,7 @@ void CheckStringForNil( const unsigned char* s)
 
 void CheckHandleForNil( Handle data)
 {
-    char    *c;
+    unsigned char* c;
     short   len;
 
     if ( data == nil)

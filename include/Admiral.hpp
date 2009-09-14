@@ -84,7 +84,7 @@ struct destBalanceType {
     long            buildTime;
     long            totalBuildTime;
     long            buildObjectBaseNum;
-    anyCharType     name[kDestinationNameLen + 1];
+    unsigned char   name[kDestinationNameLen + 1];
 };
 
 struct admiralBuildType {
@@ -120,7 +120,7 @@ struct admiralType {
     long                hopeToBuild;
     unsigned char       color;
     Boolean             active;
-    anyCharType         name[kAdmiralNameLen + 1];
+    unsigned char       name[kAdmiralNameLen + 1];
 };
 
 
@@ -154,11 +154,11 @@ long GetAdmiralConsiderObject( long);
 long GetAdmiralBuildAtObject( long);
 void SetAdmiralBuildAtObject( long, long);
 Boolean BaseHasSomethingToBuild( long);
-anyCharType *GetAdmiralBuildAtName( long);
-void SetAdmiralBuildAtName( long, StringPtr);
-anyCharType *GetDestBalanceName( long);
-anyCharType *GetAdmiralName( long);
-void SetAdmiralName( long, anyCharType *);
+unsigned char* GetAdmiralBuildAtName(long);
+void SetAdmiralBuildAtName(long, unsigned char*);
+unsigned char* GetDestBalanceName(long);
+unsigned char* GetAdmiralName(long);
+void SetAdmiralName(long, unsigned char*);
 void SetObjectLocationDestination( spaceObjectType *, coordPointType *);
 void SetObjectDestination( spaceObjectType *, spaceObjectType *);
 void RemoveObjectFromDestination( spaceObjectType *);

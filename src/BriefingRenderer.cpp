@@ -305,7 +305,7 @@ void GetRealObjectSpriteData( coordPointType *realCoord,
     //  but we only have a ptr.  Thus we pass back a ptr in the ->data field.  It must be altered to be a ptr to a ptr
     //  before it is used in any sprite drawing routines.
 
-    aSpritePix->data = reinterpret_cast<char **>(GetNatePixTableNatePixData( pixTable, whichShape));
+    aSpritePix->data = reinterpret_cast<unsigned char **>(GetNatePixTableNatePixData( pixTable, whichShape));
     aSpritePix->center.h = GetNatePixTableNatePixHRef( pixTable, whichShape);
     aSpritePix->center.v = GetNatePixTableNatePixVRef( pixTable, whichShape);
     aSpritePix->width = GetNatePixTableNatePixWidth( pixTable, whichShape);
@@ -395,7 +395,7 @@ void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
     spritePix   aSpritePix;
     longRect    spriteRect, clipRect;
     baseObjectType  *baseObject = nil;
-    char            *pixData;
+    unsigned char* pixData;
     spaceObjectType *anObject = *gSpaceObjectData;
     Boolean         *gridCells = nil;
     briefingSpriteBoundsType    *sBounds = nil;
@@ -455,7 +455,7 @@ void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
                                 >> SHIFT_SCALE,
                     RectToLongRect( bounds, &clipRect);
 
-                    pixData = reinterpret_cast<char *>(aSpritePix.data);
+                    pixData = reinterpret_cast<unsigned char *>(aSpritePix.data);
                     aSpritePix.data = &pixData;
                     clipRect.left = clipRect.top = 0;
                     clipRect.right -= 1;
@@ -499,7 +499,7 @@ void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
 
                     RectToLongRect( bounds, &clipRect);
 
-                    pixData = reinterpret_cast<char *>(aSpritePix.data);
+                    pixData = reinterpret_cast<unsigned char *>(aSpritePix.data);
                     aSpritePix.data = &pixData;
                     clipRect.left = clipRect.top = 0;
                     clipRect.right -= 1;

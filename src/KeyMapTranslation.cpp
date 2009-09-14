@@ -229,9 +229,7 @@ Boolean AnyCancelKeys( void)
     return( EscapeKey() || (CommandKey() && ( PeriodKey() || QKey())));
 }
 
-void GetKeyNumName( StringPtr s, short keyNum)
-
-{
+void GetKeyNumName(unsigned char* s, short keyNum) {
     GetIndString( s, kKeyMapNameID, keyNum);
 }
 

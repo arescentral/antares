@@ -34,7 +34,7 @@ struct natePixEntryType {
     short height;
     short hOffset;
     short vOffset;
-    char data[];
+    unsigned char data[];
 };
 
 struct natePixType {
@@ -172,7 +172,7 @@ void SetNatePixTableNatePixVRef(natePixType** table, long pixnum, int vref)
     (*table)->entryAt(pixnum)->vOffset = vref;
 }
 
-char *GetNatePixTableNatePixData(natePixType** table, long pixnum)
+unsigned char *GetNatePixTableNatePixData(natePixType** table, long pixnum)
 {
     return (*table)->entryAt(pixnum)->data;
 }
@@ -196,8 +196,8 @@ Handle GetNatePixTableNatePixDataCopy(natePixType** table, long pixnum)
 {
     long                size, l;
     Handle              copy;
-    char                *sByte;
-    char                *dByte;
+    unsigned char*      sByte;
+    unsigned char*      dByte;
 
     size = GetNatePixTableNatePixWidth( table, pixnum) *
             GetNatePixTableNatePixHeight( table, pixnum);
@@ -356,7 +356,7 @@ void RemapNatePixTableColor(natePixType** table)
 
 {
     long            l;
-    char*           p;
+    unsigned char*  p;
     int             i, j, w, h;
 
 //  WriteDebugLine((char *)"\pRemapSize:");
@@ -392,7 +392,7 @@ void ColorizeNatePixTableColor(natePixType** table, unsigned char color)
 
 {
     long            l, whiteCount, pixelCount;
-    char            pixel, *p;
+    unsigned char   pixel, *p;
     int             i, j, w, h;
 
     color <<= 4;

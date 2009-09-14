@@ -158,8 +158,8 @@ struct aresGlobalType {
     long            gRightPanelLeftEdge;    // = 608
     barIndicatorType    gBarIndicator[ kBarIndicatorNum];
     short           gMouseActive;           // = kMouseOff;
-    TypedHandle<anyCharType>        gMessageData;           // = nil
-    TypedHandle<anyCharType>        gStatusString;          // = nil
+    TypedHandle<unsigned char>      gMessageData;           // = nil
+    TypedHandle<unsigned char>      gStatusString;          // = nil
     TypedHandle<longMessageType>    gLongMessageData;       // = nil
     long            gMessageTimeCount;      // = 0;
     long            gMessageLabelNum;       // = -1;

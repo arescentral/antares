@@ -55,9 +55,9 @@ extern TypedHandle<spaceObjectType> gSpaceObjectData;
 //Handle    gAresGlobal->gScreenLabelData = nil;
 
 // local function prototypes
-static long String_Count_Lines( StringPtr s);
+static long String_Count_Lines(unsigned char* s);
 
-static StringPtr String_Get_Nth_Line( StringPtr dest, StringPtr source, long nth);
+static unsigned char* String_Get_Nth_Line(unsigned char* dest, unsigned char* source, long nth);
 static void Auto_Animate_Line( Point *source, Point *dest);
 
 int ScreenLabelInit( void)
@@ -425,7 +425,7 @@ void UpdateAllLabelPositions( long unitsDone)
 #ifdef kUseLabels
     short           i = 0;
     screenLabelType *label;
-    anyCharType     nilLabel = 0;
+    unsigned char   nilLabel = 0;
     Boolean         isOffScreen = FALSE;
     Point           source, dest;
 
@@ -698,7 +698,7 @@ long GetScreenLabelWidth( long which)
 #endif
 }
 
-anyCharType *GetScreenLabelStringPtr( long which)
+unsigned char* GetScreenLabelStringPtr( long which)
 {
 #ifdef kUseLabels
     screenLabelType *label;
@@ -776,8 +776,7 @@ void ResolveScreenLabels(screenLabelType** labelData)
 //
 //  for emergency support of multi-line labels for on screen help
 
-static long String_Count_Lines( StringPtr s)
-{
+static long String_Count_Lines(unsigned char* s) {
     long    len, i = 0, result = 1;
 
     if ( s == nil) return 0;
@@ -791,8 +790,7 @@ static long String_Count_Lines( StringPtr s)
     return result;
 }
 
-static StringPtr String_Get_Nth_Line( StringPtr dest, StringPtr source, long nth)
-{
+static unsigned char* String_Get_Nth_Line(unsigned char* dest, unsigned char* source, long nth) {
     long    len, i = 1, lineNum = 1;
 
     if (( source == nil) || ( dest == nil)) return dest;

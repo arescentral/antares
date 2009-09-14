@@ -144,7 +144,7 @@ void GetOldSpritePixData( spriteType *, spritePix *);
 void ShowSpriteTable( void);
 void CullSprites( void);
 void  PixMapTest( spritePix *, Point, long, longRect *, longRect *, PixMapHandle);
-void TestByte( char *, PixMap *, StringPtr);
+void TestByte(unsigned char*, PixMap*, unsigned char*);
 void ResolveScaleMapData( Handle);
 int Randomize( int);
 

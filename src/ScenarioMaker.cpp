@@ -1942,8 +1942,7 @@ scenarioType *GetScenarioPtrFromChapter( long whichChapter)
 
 }
 
-void GetScenarioName( long whichScenario, StringPtr scenarioName)
-{
+void GetScenarioName(long whichScenario, unsigned char* scenarioName) {
     scenarioType    *aScenario = *gAresGlobal->gScenarioData + whichScenario;
     GetIndString( scenarioName, kLevelNameID, aScenario->levelNameStrNum);
 }
@@ -1970,8 +1969,7 @@ long GetScenarioEpilogueID( long whichScenario)
     return ( aScenario->epilogueID);
 }
 
-void GetScenarioMovieName( long whichScenario, StringPtr movieName)
-{
+void GetScenarioMovieName(long whichScenario, unsigned char* movieName) {
     scenarioType    *aScenario = *gAresGlobal->gScenarioData + whichScenario;
 
     movieName[0] = 0;

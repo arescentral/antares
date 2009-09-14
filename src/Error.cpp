@@ -47,7 +47,7 @@ extern GDHandle                 theDevice;
 #define kQuitButton         2
 
 void ErrPStringFromCString( unsigned char *, unsigned char *);
-void ErrConcatenatePString( StringPtr, StringPtr);
+void ErrConcatenatePString(unsigned char*, unsigned char*);
 
 void ShowErrorNoRecover( int whichError, const unsigned char* sourceCode, int sourceNum)
 
@@ -100,7 +100,10 @@ void ShowSimpleStrResAlert( short ResID, short num1, short num2, short num3, sho
 
 {
     Str255      s1, s2, s3, s4;
-    StringPtr   sp1 = nil, sp2 = nil, sp3 = nil, sp4 = nil;
+    unsigned char* sp1 = nil;
+    unsigned char* sp2 = nil;
+    unsigned char* sp3 = nil;
+    unsigned char* sp4 = nil;
 
     if ( ResID >= 0)
     {
@@ -284,9 +287,7 @@ void ErrPStringFromCString( unsigned char *pString, unsigned char *cString)
     }
 }
 
-void ErrConcatenatePString( StringPtr dString, StringPtr sString)
-
-{
+void ErrConcatenatePString(unsigned char* dString, unsigned char* sString) {
     unsigned char   *dc, *sc;
     int     i;
 

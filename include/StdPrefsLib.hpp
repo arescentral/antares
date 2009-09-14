@@ -219,7 +219,7 @@ STUB6(SetPreferencesFileVersion, OSErr(short fRefNum, short versID,
 //    normally occur.
 //-----------------------------------------------------------------------
 STUB5(ReadPreference, OSErr(short fRefNum, ResType resourceType, short *resourceID,
-    StringPtr resourceName, Handle *preference), noErr);
+    unsigned char* resourceName, Handle *preference), noErr);
 
 //-----------------------------------------------------------------------
 // WritePreference writes the specified preference resource to the
@@ -251,7 +251,7 @@ STUB5(ReadPreference, OSErr(short fRefNum, ResType resourceType, short *resource
 //    not normally occur.
 //-----------------------------------------------------------------------
 STUB5(WritePreference, OSErr(short fRefNum, ResType resourceType, short *resourceID,
-    StringPtr resourceName, Handle preference), noErr);
+    unsigned char* resourceName, Handle preference), noErr);
 
 //-----------------------------------------------------------------------
 // DeletePreference deletes the specified preference resource from the

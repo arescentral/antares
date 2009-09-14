@@ -310,7 +310,7 @@ void DumpTo(const std::string& path) {
 
     contents.insert(contents.size(), reinterpret_cast<const char*>(size), sizeof(size));
     contents.insert(contents.size(), reinterpret_cast<char*>(colors), 256 * sizeof(*colors));
-    contents.insert(contents.size(), p->baseAddr, 640 * 480);
+    contents.insert(contents.size(), reinterpret_cast<char*>(p->baseAddr), 640 * 480);
 
     MakeDirs(DirName(path), 0755);
     int fd = open(path.c_str(), O_WRONLY | O_CREAT, 0644);
@@ -513,12 +513,12 @@ void CopyBits(BitMap* source, BitMap* dest, Rect* source_rect, Rect* dest_rect, 
     transfer.ClipDestTo(dest->bounds);
 
     for (int i = 0; i < transfer.Height(); ++i) {
-        char* sourceBytes
+        unsigned char* sourceBytes
             = source->baseAddr
             + transfer.SourceColumn(0)
             + transfer.SourceRow(i) * (source->rowBytes & 0x7fff);
 
-        char* destBytes
+        unsigned char* destBytes
             = dest->baseAddr
             + transfer.DestColumn(0)
             + transfer.DestRow(i) * (dest->rowBytes & 0x7fff);

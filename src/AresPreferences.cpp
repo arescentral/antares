@@ -713,7 +713,7 @@ short SaveAllPreferences( void)
     return ( kNoError );
 }
 
-short SaveAnyResourceInPreferences( ResType resType, short resID, StringPtr name, Handle data,
+short SaveAnyResourceInPreferences(ResType resType, short resID, unsigned char* name, Handle data,
         Boolean openAndClose)
 {
     OSErr           oserr;
@@ -748,7 +748,7 @@ short SaveAnyResourceInPreferences( ResType resType, short resID, StringPtr name
     return ( kNoError );
 }
 
-short GetAnyResourceFromPreferences( ResType resType, short resID, StringPtr name, Handle* data,
+short GetAnyResourceFromPreferences(ResType resType, short resID, unsigned char* name, Handle* data,
         Boolean openAndClose)
 {
     OSErr           oserr;
@@ -785,7 +785,7 @@ short GetAnyResourceFromPreferences( ResType resType, short resID, StringPtr nam
     return ( kNoError );
 }
 
-void GetNetPreferences( StringPtr playerName, StringPtr gameName,
+void GetNetPreferences(unsigned char* playerName, unsigned char* gameName,
     unsigned long *protocolFlags, long *resendDelay, long *registeredSetting,
     unsigned long *registeredFlags, short *netLatency,
     unsigned short *minutesPlayed, unsigned short *kills, unsigned short *losses,
@@ -794,8 +794,8 @@ void GetNetPreferences( StringPtr playerName, StringPtr gameName,
 {
     preferencesDataType *prefsData = *gAresGlobal->gPreferencesData;
 
-    CopyAnyCharPString( reinterpret_cast<anyCharType *>(playerName), reinterpret_cast<anyCharType *>(prefsData->playerName));
-    CopyAnyCharPString( reinterpret_cast<anyCharType *>(gameName), reinterpret_cast<anyCharType *>(prefsData->gameName));
+    CopyAnyCharPString(playerName, prefsData->playerName);
+    CopyAnyCharPString(gameName, prefsData->gameName);
     *protocolFlags = prefsData->protocolFlags;
     *registeredSetting = prefsData->registeredSetting;
     *registeredFlags = prefsData->registeredFlags;
@@ -809,7 +809,7 @@ void GetNetPreferences( StringPtr playerName, StringPtr gameName,
     *netLevel = prefsData->netLevel;
 }
 
-OSErr SaveNetPreferences( StringPtr playerName, StringPtr gameName,
+OSErr SaveNetPreferences(unsigned char* playerName, unsigned char* gameName,
     unsigned long protocolFlags, long resendDelay, long registeredSetting,
     unsigned long registeredFlags, short netLatency, unsigned short minutesPlayed,
     unsigned short kills, unsigned short losses, short netRace, short enemyColor,
@@ -827,8 +827,8 @@ OSErr SaveNetPreferences( StringPtr playerName, StringPtr gameName,
         return ( PREFERENCES_ERROR);
     }
 
-    CopyAnyCharPString( reinterpret_cast<anyCharType *>(prefsData->playerName), reinterpret_cast<anyCharType *>(playerName));
-    CopyAnyCharPString( reinterpret_cast<anyCharType *>(prefsData->gameName), reinterpret_cast<anyCharType *>(gameName));
+    CopyAnyCharPString(prefsData->playerName, playerName);
+    CopyAnyCharPString(prefsData->gameName, gameName);
     prefsData->protocolFlags = protocolFlags;
     prefsData->registeredSetting = registeredSetting;
     prefsData->registeredFlags = registeredFlags;

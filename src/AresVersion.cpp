@@ -42,8 +42,7 @@ inline bool mChar_to_upper(char m_c) {
     return ((((m_c) >= 'a') && ((m_c) <= 'z')) ? ( ((m_c) - 'a') + 'A') : (m_c));
 }
 
-aresVersionType AresVersion_Get_FromString( StringPtr s)
-{
+aresVersionType AresVersion_Get_FromString(unsigned char* s) {
     aresVersionType     result = 0;
     long                i = 1, v = 0;
 
@@ -106,8 +105,7 @@ aresVersionType AresVersion_Get_FromString( StringPtr s)
     return result;
 }
 
-StringPtr String_Get_FromAresVersion( StringPtr s, aresVersionType t)
-{
+unsigned char* String_Get_FromAresVersion(unsigned char* s, aresVersionType t) {
     unsigned char   *c = reinterpret_cast<unsigned char*>(&t);
     Str255          numString;
 

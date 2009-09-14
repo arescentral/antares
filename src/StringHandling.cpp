@@ -99,13 +99,11 @@ void PStringFromCString( unsigned char *pString, unsigned char *cString)
     }
 }
 
-void ReplacePStringChar( StringPtr s, unsigned char to, unsigned char from)
-
-{
+void ReplacePStringChar(unsigned char* s, unsigned char to, unsigned char from) {
     int     l;
     unsigned char   *c;
 
-    c = reinterpret_cast<unsigned char*>(s);
+    c = s;
     l = *c;
     c++;
     while ( l > 0)
@@ -117,12 +115,11 @@ void ReplacePStringChar( StringPtr s, unsigned char to, unsigned char from)
 }
 
 // FilterAlphaPString -- replaces any non-numeric chars with ' '
-void FilterAlphaPString( StringPtr s)
-{
+void FilterAlphaPString(unsigned char* s) {
     int     l;
     unsigned char   *c;
 
-    c = reinterpret_cast<unsigned char*>(s);
+    c = s;
     l = *c;
     c++;
     while ( l > 0)
@@ -135,12 +132,11 @@ void FilterAlphaPString( StringPtr s)
 
 // ChopAlphaPString -- scans a string until it encounters non-numeric char, then sets length to
 // that char i.e. "1234Buckle My Shoe" truncates to "1234"
-void ChopAlphaPString( StringPtr s)
-{
+void ChopAlphaPString(unsigned char* s) {
     short   len, newlen = 0;
     unsigned char   *c;
 
-    c = reinterpret_cast<unsigned char*>(s);
+    c = s;
     len = *c;
     c++;
     while (( len > 0) && ( (*c >= '0') && ( *c <= '9')))
@@ -149,16 +145,15 @@ void ChopAlphaPString( StringPtr s)
         c++;
         len--;
     }
-    c = reinterpret_cast<unsigned char*>(s);
+    c = s;
     *c = newlen;
 }
 
-void UpperCasePString( StringPtr s)
-{
+void UpperCasePString(unsigned char* s) {
     int     l;
     unsigned char   *c;
 
-    c = reinterpret_cast<unsigned char*>(s);
+    c = s;
     l = *c;
     c++;
     while ( l > 0)
@@ -171,11 +166,9 @@ void UpperCasePString( StringPtr s)
 
 
 
-void DrawCString( unsigned char *cString)
-
-{
+void DrawCString(unsigned char *cString) {
     Str255  pString;
 
     PStringFromCString(pString, cString);
-    DrawString(reinterpret_cast<StringPtr>(pString));
+    DrawString(pString);
 }

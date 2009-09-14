@@ -84,8 +84,8 @@ void WideMultiply(long a, long b, wide* c);
 typedef int32_t Fixed;
 typedef long Size;
 
-typedef char* Ptr;
-STUB1(NewPtr, Ptr(size_t size), new char[a0]);
+typedef unsigned char* Ptr;
+STUB1(NewPtr, Ptr(size_t size), new unsigned char[a0]);
 STUB1(DisposePtr, void(Ptr ptr));
 
 typedef Ptr* Handle;
@@ -119,8 +119,6 @@ typedef void* AddrBlock;
 typedef unsigned char Str255[256];
 typedef unsigned char Str63[64];
 typedef unsigned char Str31[32];
-typedef unsigned char* StringPtr;
-typedef const unsigned char* ConstStringPtr;
 typedef const unsigned char* ConstStr255Param;
 typedef const unsigned char* ConstStr31Param;
 typedef Str63 StrFileName;
@@ -331,7 +329,7 @@ typedef struct {
     Rect bounds;
     CTabHandle pmTable;
     long rowBytes;
-    char* baseAddr;
+    unsigned char* baseAddr;
     int pixelSize;
 } PixMap;
 typedef PixMap* PixMapPtr;

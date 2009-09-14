@@ -35,7 +35,7 @@ class FakePixMap : public PixMap {
         SetRect(&bounds, 0, 0, width, height);
         pmTable = NULL;
         rowBytes = width | 0x8000;
-        baseAddr = new char[width * height];
+        baseAddr = new unsigned char[width * height];
         pixelSize = 1;
     }
 
@@ -46,7 +46,7 @@ class FakePixMap : public PixMap {
     int width() const { return bounds.right - bounds.left; }
     int height() const { return bounds.bottom - bounds.top; }
 
-    char& PixelAt(int x, int y) { return baseAddr[(y * rowBytes) + x]; }
+    unsigned char& PixelAt(int x, int y) { return baseAddr[(y * rowBytes) + x]; }
 
   private:
     DISALLOW_COPY_AND_ASSIGN(FakePixMap);

@@ -104,8 +104,7 @@ Boolean IsRaceLegal( short raceNum, short playerNum, scenarioType *scenario)
 // GetRaceString: returns requested string for specified race. Use the following
 // constants for whatString: kRaceAdjective, kRacePlural, kRaceForce, kRaceWorld.
 
-void GetRaceString( StringPtr string, short whatString, short raceNum)
-{
+void GetRaceString(unsigned char* string, short whatString, short raceNum) {
     GetIndString( string, kRaceStrID, (raceNum * kRaceStringNum) + 1 + whatString);
 }
 

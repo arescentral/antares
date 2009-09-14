@@ -22,9 +22,9 @@
 
 OSErr NS_SelectFileObject( FSSpecPtr destFile, short openListResID);
 
-OSErr NS_SelectFolderObject( FSSpecPtr destFile, StringPtr, StringPtr);
+OSErr NS_SelectFolderObject(FSSpecPtr destFile, unsigned char*, unsigned char*);
 
-OSErr NS_SaveAs( FSSpecPtr destFile, StringPtr fileName, StringPtr appName,
+OSErr NS_SaveAs(FSSpecPtr destFile, unsigned char* fileName, unsigned char* appName,
     OSType fileTypeToSave, OSType fileCreator);
 
 #endif // ANTARES_NAVIGATION_UTILITIES_HPP_

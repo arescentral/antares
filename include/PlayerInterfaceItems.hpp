@@ -71,7 +71,7 @@ struct interfaceLabeledRectType {
 struct interfaceListType {
     interfaceLabelType          label;
     short                       (*getListLength)( void);
-    void                        (*getItemString)( short, anyCharType *);
+    void                        (*getItemString)(short, unsigned char*);
     Boolean                     (*itemHilited)( short, Boolean);
 //  void                        (*hiliteItem)( short);
     short                       topItem;
