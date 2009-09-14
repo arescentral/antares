@@ -477,22 +477,22 @@ class ClippedTransfer {
   private:
     inline void ClipFirstToSecond(const Rect& rect, const Rect& clip) {
         if (clip.left > rect.left) {
-            int diff = clip.left - _from.left;
+            int diff = clip.left - rect.left;
             _to.left += diff;
             _from.left += diff;
         }
         if (clip.top > rect.top) {
-            int diff = clip.top - _from.top;
+            int diff = clip.top - rect.top;
             _to.top += diff;
             _from.top += diff;
         }
         if (clip.right < rect.right) {
-            int diff = clip.right - _from.right;
+            int diff = clip.right - rect.right;
             _to.right += diff;
             _from.right += diff;
         }
         if (clip.bottom < rect.bottom) {
-            int diff = clip.bottom - _from.bottom;
+            int diff = clip.bottom - rect.bottom;
             _to.bottom += diff;
             _from.bottom += diff;
         }
@@ -592,11 +592,20 @@ Rect ClipRectToRect(const Rect& src, const Rect& clip) {
     return result;
 }
 
-void DrawPicture(Pic** pic, Rect* rect) {
-    Rect clipped = ClipRectToRect(*rect, (*fakeGDevice.gdPMap)->bounds);
-    for (int y = clipped.top; y < clipped.bottom; ++y) {
-        PicData* data = (*pic)->data;
-        SetPixelRow(clipped.left, y, data->pixels + ((y - rect->top) * data->width), clipped.right - clipped.left);
+void DrawPicture(Pic** pic, Rect* dst) {
+    PicData* data = (*pic)->data;
+
+    Rect src = { 0, 0, data->width, data->height };
+    ClippedTransfer transfer(src, *dst);
+    transfer.ClipDestTo((*fakeGDevice.gdPMap)->bounds);
+
+    for (int i = 0; i < transfer.Height(); ++i) {
+        uint8_t* source_bytes
+            = data->pixels
+            + transfer.SourceColumn(0)
+            + transfer.SourceRow(i) * data->width;
+
+        SetPixelRow(transfer.DestColumn(0), transfer.DestRow(i), source_bytes, transfer.Width());
     }
 }
 
@@ -620,6 +629,16 @@ void PaintRect(Rect* rect) {
     for (int y = clipped.top; y < clipped.bottom; ++y) {
         for (int x = clipped.left; x < clipped.right; ++x) {
             SetPixel(x, y, currentForeColor);
+        }
+    }
+}
+
+void MacFillRect(Rect* rect, Pattern* pattern) {
+    static_cast<void>(pattern);
+    Rect clipped = ClipRectToRect(*rect, (*fakeGDevice.gdPMap)->bounds);
+    for (int y = clipped.top; y < clipped.bottom; ++y) {
+        for (int x = clipped.left; x < clipped.right; ++x) {
+            SetPixel(x, y, 255);
         }
     }
 }

@@ -75,7 +75,7 @@ STUB0(OpenRgn, void());
 STUB1(CloseRgn, void(Rgn** rgn));
 STUB4(ScrollRect, void(Rect* rect, int x, int y, Rgn** clip));
 
-STUB2(MacFillRect, void(Rect* rect, Pattern* pattern));
+void MacFillRect(Rect* rect, Pattern* pattern);
 void PaintRect(Rect* rect);
 void FrameRect(Rect* rect);
 void MacFrameRect(Rect* rect);
