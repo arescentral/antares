@@ -85,9 +85,6 @@ typedef int32_t Fixed;
 typedef long Size;
 
 typedef unsigned char* Ptr;
-STUB1(NewPtr, Ptr(size_t size), new unsigned char[a0]);
-STUB1(DisposePtr, void(Ptr ptr));
-
 typedef Ptr* Handle;
 Handle NewHandle(size_t size);
 int GetHandleSize(Handle handle);

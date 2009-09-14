@@ -211,8 +211,7 @@ Boolean Key_Setup_Screen_Do( void)
     BlackenOffscreen();
 
     FlushEvents(everyEvent, 0);
-    tempKeyControls = reinterpret_cast<tempKeyControlType *>(NewPtr( sizeof( long) *
-        kKeyExtendedControlNum));
+    tempKeyControls = new tempKeyControlType[kKeyExtendedControlNum];
     if ( tempKeyControls == nil)
     {
         SysBeep(20);
@@ -511,7 +510,7 @@ Boolean Key_Setup_Screen_Do( void)
     }
     WriteDebugLine("\pRESULT:");
     WriteDebugLong( result);
-    DisposePtr(reinterpret_cast<Ptr>(tempKeyControls));
+    delete[] tempKeyControls;
     return( result);
 }
 

@@ -214,8 +214,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
     while (( gAresGlobal->gKeyMapBufferBottom != gAresGlobal->gKeyMapBufferTop))
         // && ( gAresGlobal->gOptions & kOptionNetworkOn))
     {
-        bufMap = reinterpret_cast<KeyMap*>(gAresGlobal->gKeyMapBuffer) +
-            gAresGlobal->gKeyMapBufferBottom;
+        bufMap = gAresGlobal->gKeyMapBuffer + gAresGlobal->gKeyMapBufferBottom;
         gAresGlobal->gKeyMapBufferBottom++;
         if ( gAresGlobal->gKeyMapBufferBottom >= kKeyMapBufferNum)
             gAresGlobal->gKeyMapBufferBottom = 0;
@@ -1259,8 +1258,7 @@ void HandleTextMessageKeys( KeyMap keyMap, KeyMap lastKeyMap,
     {
         if (( *enterMessage) && anyKeys)
             PlayVolumeSound(  kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
-        bufferMap = reinterpret_cast<KeyMap*>(gAresGlobal->gKeyMapBuffer) +
-            gAresGlobal->gKeyMapBufferTop;
+        bufferMap = gAresGlobal->gKeyMapBuffer + gAresGlobal->gKeyMapBufferTop;
         for ( h = 0; h < 4; h++)
             (*bufferMap)[h] = keyMap[h];
         if ( mReturnKey( keyMap))

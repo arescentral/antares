@@ -61,8 +61,8 @@ extern GWorldPtr                    gOffWorld;
 void MakeDemoDataHack( void)
 
 {
-    Boolean *baseObjectKeepList = reinterpret_cast<Boolean*>(NewPtr( sizeof( baseObjectType) * implicit_cast<long>(kMaxBaseObject))),
-            *boolPtr = nil;
+    bool* baseObjectKeepList = new bool[kMaxBaseObject];
+    bool* boolPtr = nil;
     long    count = 0, c2;
     scenarioType    *aScenario;
 
@@ -100,7 +100,7 @@ void MakeDemoDataHack( void)
     CopyAllUsedPixTables();
     CopyAllUsedSounds();
 
-    DisposePtr( reinterpret_cast<Ptr>(baseObjectKeepList));
+    delete[] baseObjectKeepList.
 
     aScenario = *gAresGlobal->gScenarioData;
     for ( count = 0; count < GetScenarioNumber(); count++)
@@ -326,14 +326,9 @@ void ClearAndCopyAllUnusedBaseObjects( Boolean *baseObjectKeepList)
 {
     long            count;
     baseObjectType  *anObject;
-    unsigned char   *nilObject = reinterpret_cast<unsigned char *>(NewPtr( sizeof( baseObjectType))), *c = nil;
+    baseObjectType* nilObject = new baseObjectType;
 
-    c = nilObject;
-    for ( count = 0; static_cast<uint32_t>(count) < sizeof( baseObjectType); count++)
-    {
-        *c = 0;
-        c++;
-    }
+    bzero(nilObject, sizeof(baseObjectType));
 
     for ( count = 0; count < kMaxBaseObject; count++)
     {
@@ -345,7 +340,7 @@ void ClearAndCopyAllUnusedBaseObjects( Boolean *baseObjectKeepList)
         baseObjectKeepList++;
     }
 
-    DisposePtr( reinterpret_cast<Ptr>(nilObject));
+    delete nilObject;
 
     SaveAnyResourceInPreferences( kBaseObjectResType, kBaseObjectResID, nil, reinterpret_cast<Handle>(gBaseObjectData), true);
 }

@@ -405,7 +405,7 @@ void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
     gridWidth = (bounds->right - bounds->left) / kBriefing_Grid_Size;
     gridHeight = (bounds->bottom - bounds->top) / kBriefing_Grid_Size;
 
-    gridCells = reinterpret_cast<Boolean *>(NewPtr( sizeof( Boolean) * gridWidth * gridHeight));
+    gridCells = new bool[gridWidth * gridHeight];
 
     if ( gridCells == nil) return;
     for ( j = 0; j < gridHeight; j++)
@@ -416,9 +416,8 @@ void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
         }
     }
 
-    if ( gBriefingSpriteBounds != nil)
-    {
-        DisposePtr( reinterpret_cast<Ptr>(gBriefingSpriteBounds));
+    if ( gBriefingSpriteBounds != nil) {
+        delete[] gBriefingSpriteBounds;
     }
 
     objectNum = 1;  // extra 1 for last null briefingSpriteBounds
@@ -431,8 +430,7 @@ void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
         }
     }
 
-    gBriefingSpriteBounds = reinterpret_cast<briefingSpriteBoundsType *>(NewPtr(
-        sizeof( briefingSpriteBoundsType) * objectNum));
+    gBriefingSpriteBounds = new briefingSpriteBoundsType[objectNum];
 
     if ( gBriefingSpriteBounds == nil) return;
     sBounds = gBriefingSpriteBounds;
@@ -534,7 +532,9 @@ void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
         anObject++;
     }
     sBounds->objectIndex = -1;
-    if ( gridCells != nil) DisposePtr( reinterpret_cast<Ptr>(gridCells));
+    if (gridCells != nil) {
+        delete[] gridCells;
+    }
 }
 
 void BriefPoint_Data_Get( long whichPoint, long whichScenario, long *headerID,

@@ -182,7 +182,7 @@ struct aresGlobalType {
     long            gSoundVolume;           // = 0;
     short           gSoundFileRefID;        // = 0;
     Handle          gAresCheatStrings;
-    Ptr             gKeyMapBuffer;          // = NewPtr( sizeof (KeyMap) * (long)kKeyMapBufferNum;
+    KeyMap*         gKeyMapBuffer;          // = NewPtr( sizeof (KeyMap) * (long)kKeyMapBufferNum;
     long            gKeyMapBufferTop;       // = 0;
     long            gKeyMapBufferBottom;    // = 0;
     KeyMap          gLastMessageKeyMap;

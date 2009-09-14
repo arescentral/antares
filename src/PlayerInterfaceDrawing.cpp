@@ -1697,7 +1697,7 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
     fheight = GetInterfaceFontHeight( dItem->style) + kInterfaceTextVBuffer;
     vline = tRect.top - ( fheight - GetInterfaceFontAscent( dItem->style));
 
-    theLine = NewPtr(sizeof(unsigned char) * kMaxLineLength);
+    theLine = new unsigned char[kMaxLineLength];
     if ( theLine != nil)
     {
         wordlen = theLine;
@@ -1779,7 +1779,7 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
             }
             ReleaseResource( textData);
         }
-        DisposePtr( reinterpret_cast<Ptr>(theLine));
+        delete[] theLine;
     }
     SetClip( clipRgn);
     DisposeRgn( clipRgn);
@@ -1828,7 +1828,7 @@ void DrawInterfaceTextInRect( Rect *tRect, const unsigned char *textData, long l
         thisInlinePict = inlinePict;
     }
 
-    theLine = NewPtr(sizeof(unsigned char) * kMaxLineLength);
+    theLine = new unsigned char[kMaxLineLength];
     if ( theLine != nil)
     {
         wordlen = theLine;
@@ -2004,7 +2004,7 @@ void DrawInterfaceTextInRect( Rect *tRect, const unsigned char *textData, long l
                 }
             }
         }
-        DisposePtr( reinterpret_cast<Ptr>(theLine));
+        delete[] theLine;
     }
     SetClip( clipRgn);
     DisposeRgn( clipRgn);
@@ -2027,7 +2027,7 @@ short GetInterfaceTextHeightFromWidth(unsigned char* textData, long length,
     fheight = GetInterfaceFontHeight( style) + kInterfaceTextVBuffer;
     vline = 0 - ( fheight - GetInterfaceFontAscent( style));
 
-    theLine = NewPtr(sizeof(unsigned char) * kMaxLineLength);
+    theLine = new unsigned char[kMaxLineLength];
     if ( theLine != nil)
     {
         wordlen = theLine;
@@ -2185,7 +2185,7 @@ short GetInterfaceTextHeightFromWidth(unsigned char* textData, long length,
                 }
             }
         }
-        DisposePtr( reinterpret_cast<Ptr>(theLine));
+        delete[] theLine;
     }
     return( vline + ( fheight - GetInterfaceFontAscent( style)) );
 }

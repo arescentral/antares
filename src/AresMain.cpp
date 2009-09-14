@@ -241,11 +241,11 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 //  Debugger();
     ToolBoxInit();
 
-    gAresGlobal = reinterpret_cast<aresGlobalType *>(NewPtr( sizeof( aresGlobalType)));
+    gAresGlobal = new aresGlobalType;
     if ( gAresGlobal == nil) ExitToShell();
     for ( error = 0; error < kMaxPlayerNum; error++)
         gAresGlobal->gActiveCheats[error] = 0;
-    gAresGlobal->gKeyMapBuffer = NewPtr( sizeof(KeyMap) * implicit_cast<long>(kKeyMapBufferNum));
+    gAresGlobal->gKeyMapBuffer = new KeyMap[kKeyMapBufferNum];
     if ( gAresGlobal->gKeyMapBuffer == nil) ExitToShell();
     gAresGlobal->gKeyMapBufferTop = 0;
     gAresGlobal->gKeyMapBufferBottom = 0;
@@ -1072,7 +1072,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
     }
 
     FlushEvents(everyEvent, 0);
-    DisposePtr( reinterpret_cast<Ptr>(gAresGlobal));
+    delete gAresGlobal;
     InitCursor();
 
 }
