@@ -55,9 +55,6 @@ long DebugCreateAnySpaceObject( long, fixedPointType *, coordPointType *, long, 
                             long *, short, short, short, char *, long);
 long CountObjectsOfBaseType( long, long);
 long GetNextObjectWithAttributes( long, unsigned long, Boolean);
-void ResolveSpaceObjectData( Handle);
-void ResolveObjectActionData( Handle);
-void ResolveActionQueueData( Handle);
 void AlterObjectHealth( spaceObjectType *, long);
 void AlterObjectEnergy( spaceObjectType *, long);
 void AlterObjectBattery( spaceObjectType *, long);

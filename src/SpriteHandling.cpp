@@ -95,8 +95,6 @@ short                   gSpriteFileRefID = 0;
 Boolean PixelInSprite_IsOutside( spritePix *sprite, long x, long y, long *hmap,
 long *vamp);
 
-void ResolveSpriteData( Handle);
-
 void SpriteHandlingInit ( void)
 
 {
@@ -2257,36 +2255,4 @@ void TestByte(unsigned char *dbyte, PixMap *pixMap, unsigned char* name) {
         WriteDebugLine(name);
         WriteDebugLine("\p<<BAD>>");
     }
-}
-
-void ResolveScaleMapData( Handle scaleData)
-{
-#pragma unused( scaleData)
-    gScaleHMap = *gBothScaleMaps;
-    gScaleVMap = *gBothScaleMaps + MAX_PIX_SIZE;
-}
-
-void ResolveSpriteData( Handle dummy)
-{
-    spriteType  *aSprite;
-    short       i;
-
-#pragma unused( dummy)
-    mWriteDebugString("\pResolving Sprite");
-    aSprite = *gSpriteTable;
-    for ( i = 0; i < kMaxSpriteNum; i++)
-    {
-        if ( aSprite->resID != -1)
-        {
-            aSprite->table = GetPixTable( aSprite->resID);
-            WriteDebugLong( aSprite->resID);
-            if ( aSprite->table == nil)
-            {
-                aSprite->resID = -1;
-                mWriteDebugString("\pNO TABLE");
-            }
-        }
-        aSprite++;
-    }
-
 }

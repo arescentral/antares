@@ -33,7 +33,6 @@ void DrawAllBeams( void);
 void EraseAllBeams( void);
 void ShowAllBeams( void);
 void CullBeams( void);
-void ResolveBeamData( Handle);
 
 #pragma options align=reset
 

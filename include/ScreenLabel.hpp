@@ -77,7 +77,6 @@ void SetScreenLabelKeepOnScreenAnyway( long which, Boolean keepOnScreenAnyWay);
 void SetScreenLabelAttachedHintLine( long which, Boolean attachedHintLine, Point toWhere);
 unsigned char* GetScreenLabelStringPtr(long);
 void RecalcScreenLabelSize( long);
-void ResolveScreenLabels(screenLabelType**);
 
 #pragma options align=reset
 

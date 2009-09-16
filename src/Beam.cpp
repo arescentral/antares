@@ -630,27 +630,3 @@ void CullBeams( void)
         aBeam++;
     }
 }
-
-void ResolveBeamData( Handle beamData)
-{
-    beamType        *aBeam = *gAresGlobal->gBeamData;
-    short           i;
-    spaceObjectType *anObject;
-
-#pragma unused ( beamData)
-    for ( i = 0; i < kBeamNum; i++)
-    {
-        if ( aBeam->fromObjectNumber >= 0)
-        {
-            anObject = *gSpaceObjectData + aBeam->fromObjectNumber;
-            aBeam->fromObject = anObject;
-        }
-        if ( aBeam->toObjectNumber >= 0)
-        {
-            anObject = *gSpaceObjectData + aBeam->toObjectNumber;
-            aBeam->toObject = anObject;
-        }
-        aBeam++;
-    }
-
-}

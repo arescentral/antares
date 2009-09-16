@@ -752,25 +752,6 @@ void RecalcScreenLabelSize( long which) // do this if you mess with its string
 #endif
 }
 
-// for handle handling callback
-void ResolveScreenLabels(screenLabelType** labelData)
-
-{
-    short   i;
-    screenLabelType *label;
-
-//  WriteDebugLine((char *)"\pLabel CB");
-
-    label = *labelData;
-
-    for ( i = 0; i < kMaxLabelNum; i++)
-    {
-        if (( label->object != nil) && ( label->whichObject != kNoShip))
-            label->object = *gSpaceObjectData + label->whichObject;
-        label++;
-    }
-}
-
 // String_Count_Lines
 //  9/99
 //

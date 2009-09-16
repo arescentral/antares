@@ -145,7 +145,6 @@ void ShowSpriteTable( void);
 void CullSprites( void);
 void  PixMapTest( spritePix *, Point, long, longRect *, longRect *, PixMapHandle);
 void TestByte(unsigned char*, PixMap*, unsigned char*);
-void ResolveScaleMapData( Handle);
 int Randomize( int);
 
 #endif // ANTARES_SPRITE_HANDLING_HPP_
