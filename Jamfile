@@ -58,6 +58,7 @@ Main Antares : src/Admiral.cpp
                src/PlayerShip.cpp
                src/Races.cpp
                src/Randomize.cpp
+               src/Resource.cpp
                src/Rotation.cpp
                src/ScenarioData.cpp
                src/ScenarioMaker.cpp
