@@ -25,16 +25,30 @@
 
 Handle GetResource(FourCharCode code, int id) {
     switch (code) {
-      case 'PICT':
-        return reinterpret_cast<Handle>(GetPicture(id));
-
-      default:
+      case 'NLRP':
+      case 'SMIV':
+      case 'TEXT':
+      case 'intr':
+      case 'nlAG':
+      case 'nlFD':
+      case 'nlFM':
         try {
             Resource rsrc(code, id);
             return (new HandleData<void>(rsrc.size(), rsrc.data()))->ToHandle();
         } catch (NoSuchResourceException& e) {
             return NULL;
         }
+        break;
+
+      case 'vers':
+        return NULL;
+
+      default:
+        const char code_string[5] = {
+            code >> 24, code >> 16, code >> 8, code, '\0',
+        };
+        fprintf(stderr, "GetResource() no longer handles code '%s'\n", code_string);
+        exit(1);
     }
 }
 
