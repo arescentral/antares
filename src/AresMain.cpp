@@ -253,10 +253,8 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
     gAresGlobal->gForceDemoLevel = 1;
     gAresGlobal->gReplayData = nil;
     gAresGlobal->gFrameCount = 0;
-    gAresGlobal->gPreferencesData = nil;
     gAresGlobal->gGameOver = 1;
     gAresGlobal->gPreferenceRefNum = 0;
-    gAresGlobal->gPreferencesData = nil;
     gAresGlobal->gOptions = kDefaultOptions;
     gAresGlobal->gWarpStars = false;
     gAresGlobal->gLastClipBottom = 0;

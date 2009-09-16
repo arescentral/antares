@@ -218,8 +218,16 @@ STUB6(SetPreferencesFileVersion, OSErr(short fRefNum, short versID,
 //    Other ResError() codes can be returned, but this should not
 //    normally occur.
 //-----------------------------------------------------------------------
-STUB5(ReadPreference, OSErr(short fRefNum, ResType resourceType, short *resourceID,
-    unsigned char* resourceName, Handle *preference), noErr);
+template <typename T>
+OSErr ReadPreference(short fRefNum, ResType resourceType, short *resourceID,
+        unsigned char* resourceName, TypedHandle<T> *preference) {
+    static_cast<void>(fRefNum);
+    static_cast<void>(resourceType);
+    static_cast<void>(resourceID);
+    static_cast<void>(resourceName);
+    static_cast<void>(preference);
+    return noErr;
+}
 
 //-----------------------------------------------------------------------
 // WritePreference writes the specified preference resource to the
@@ -250,8 +258,16 @@ STUB5(ReadPreference, OSErr(short fRefNum, ResType resourceType, short *resource
 //    Other MemError() or ResError() codes can be returned, but this should
 //    not normally occur.
 //-----------------------------------------------------------------------
-STUB5(WritePreference, OSErr(short fRefNum, ResType resourceType, short *resourceID,
-    unsigned char* resourceName, Handle preference), noErr);
+template <typename T>
+OSErr WritePreference(short fRefNum, ResType resourceType, short *resourceID,
+        unsigned char* resourceName, TypedHandle<T> preference) {
+    static_cast<void>(fRefNum);
+    static_cast<void>(resourceType);
+    static_cast<void>(resourceID);
+    static_cast<void>(resourceName);
+    static_cast<void>(preference);
+    return noErr;
+}
 
 //-----------------------------------------------------------------------
 // DeletePreference deletes the specified preference resource from the

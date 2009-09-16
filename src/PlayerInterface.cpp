@@ -1558,22 +1558,18 @@ void DoOptionsInterface( void)
     EventRecord             theEvent;
     char                    whichChar;
     CWindowPtr              whichWindow;
-    preferencesDataType**   tempPrefs = gAresGlobal->gPreferencesData;
-    OSErr                   err;
+    TypedHandle<preferencesDataType> tempPrefs = gAresGlobal->gPreferencesData;
     preferencesDataType*    prefsData = nil;
     Rect                    volumeRect;
 
     BlackenWindow();
 
     FlushEvents(everyEvent, 0);
-    err = HandToHand( reinterpret_cast<Handle*>(&tempPrefs));
-    if (( tempPrefs == nil) || ( err != noErr))
-    {
+    tempPrefs = tempPrefs.clone();
+    if (tempPrefs.get() == nil) {
         return;
     }
 
-    MoveHHi( reinterpret_cast<Handle>(tempPrefs));
-    HLock( reinterpret_cast<Handle>(tempPrefs));
     prefsData = *gAresGlobal->gPreferencesData;
 
     error = OpenInterface( kOptionsScreenID);
@@ -1807,8 +1803,7 @@ void DoOptionsInterface( void)
         }
         CloseInterface();
     }
-    HUnlock( reinterpret_cast<Handle>(tempPrefs));
-    DisposeHandle( reinterpret_cast<Handle>(tempPrefs));
+    tempPrefs.destroy();
 }
 
 void SetOptionCheckboxes( unsigned long options)

@@ -34,10 +34,11 @@ class TypedHandle {
     TypedHandle()
             : _data(NULL) { }
 
-    TypedHandle* clone() const {
+    TypedHandle clone() const {
         TypedHandle cloned;
         cloned.create(count());
-        memcpy(_data->_ptr, size());
+        memcpy(cloned._data->_ptr, _data->_ptr, size());
+        return cloned;
     }
 
     void create(int count) {

@@ -106,7 +106,7 @@ struct aresGlobalType {
     unsigned long** gReplayData;
     short           gMainResRefNum;
     unsigned long   gFrameCount;
-    preferencesDataType**   gPreferencesData;
+    TypedHandle<preferencesDataType>    gPreferencesData;
     long            gGameOver;
     TypedHandle<admiralType>        gAdmiralData;
     TypedHandle<destBalanceType>    gDestBalanceData;

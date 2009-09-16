@@ -124,9 +124,13 @@ struct publicSerialType {
 //unsigned long gAresGlobal->gOptions = kDefaultOptions;
 
 OSErr HardWireNewPrefsdata( void);
-OSErr PrefsUpdate_PreHotKeys(preferencesDataType** prefsData);
+OSErr PrefsUpdate_PreHotKeys(TypedHandle<preferencesDataType> prefsData);
 Boolean IsResourceHandle(preferencesDataType** theHandle);
 long GetFirstKeyConflict(preferencesDataType *prefs);
+short SaveAnyResourceInPreferences(
+        ResType, short, unsigned char*, TypedHandle<startingLevelPreferenceType>, Boolean);
+short GetAnyResourceFromPreferences(
+        ResType, short, unsigned char*, TypedHandle<startingLevelPreferenceType>*, Boolean);
 
 int InitPreferences( void)
 
@@ -147,11 +151,11 @@ int InitPreferences( void)
     // try to get existing prefs
     resID = kPreferencesResID;
     oserr = ReadPreference( gAresGlobal->gPreferenceRefNum, kPreferenceDataType, &resID, nil,
-        reinterpret_cast<Handle*>(&gAresGlobal->gPreferencesData));
+        &gAresGlobal->gPreferencesData);
 
     // if we have an old version and there's a key conflict (since we added new keys
     // but forgot to change pref version) then get factory keys
-    if (( oserr == noErr) && ( gAresGlobal->gPreferencesData != nil))
+    if ((oserr == noErr) && (gAresGlobal->gPreferencesData.get() != nil))
     {
         long    keyConflict = -1, lastKeyConflict = -1;
 
@@ -204,25 +208,21 @@ int InitPreferences( void)
     }
 
     // check to make sure we got existing prefs
-    if (( oserr != noErr) || ( gAresGlobal->gPreferencesData == nil))
+    if ((oserr != noErr) || (gAresGlobal->gPreferencesData.get() == nil))
     {
         // if we got an error, scrap the prefs and try anew
-        if ( gAresGlobal->gPreferencesData != nil)
+        if (gAresGlobal->gPreferencesData.get() != nil)
         {
-            if ( IsResourceHandle( gAresGlobal->gPreferencesData))
-                ReleaseResource( reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
-            else
-                DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
-            gAresGlobal->gPreferencesData = nil;
+            gAresGlobal->gPreferencesData.destroy();
             DeletePreference( gAresGlobal->gPreferenceRefNum, kPreferenceDataType, kPreferencesResID);
         }
 
         // try to get factory prefs
-        gAresGlobal->gPreferencesData = reinterpret_cast<preferencesDataType**>(GetResource( kPreferenceDataType, kFactoryPreferenceResID));
+        gAresGlobal->gPreferencesData.load_resource(kPreferenceDataType, kFactoryPreferenceResID);
         oserr = ResError();
 
         // check to see if we got factory prefs
-        if (( gAresGlobal->gPreferencesData == nil) || ( oserr != noErr))
+        if ((gAresGlobal->gPreferencesData.get() == nil) || (oserr != noErr))
         {
             // if we didn't, make 'em from scratch
             ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kFactoryPrefsError, -1, -1, -1, __FILE__, 11);
@@ -232,18 +232,12 @@ int InitPreferences( void)
                 return( -1);
             }
 
-        } else // we got factory prefs
-        {
-            if ( IsResourceHandle( gAresGlobal->gPreferencesData))
-                DetachResource( reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
-            MoveHHi( reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
-            HLock( reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
         }
 
         // write the new/factory prefs to the prefs file
         resID = kPreferencesResID;
         oserr = WritePreference( gAresGlobal->gPreferenceRefNum, kPreferenceDataType, &resID, nil,
-            reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
+            gAresGlobal->gPreferencesData);
         if ( oserr != noErr)
         {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, PREFERENCES_ERROR, -1, -1, -1, __FILE__, 12);
@@ -252,11 +246,6 @@ int InitPreferences( void)
 
     } else // we loaded existing prefs just fine
     {
-        if ( IsResourceHandle( gAresGlobal->gPreferencesData))
-            DetachResource( reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
-        MoveHHi( reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
-        HLock( reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
-
         prefsData = *gAresGlobal->gPreferencesData;
         // if the version is newer than the what we think is current, freak out
         if ( prefsData->version > kCurrentPreferencesVersion)
@@ -266,18 +255,14 @@ int InitPreferences( void)
         } else if ( prefsData->version < kCurrentPreferencesVersion)
         {
             // if we have an older prefs, delete it and start from scratch
-            if ( IsResourceHandle( gAresGlobal->gPreferencesData))
-                ReleaseResource( reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
-            else
-                DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
-            gAresGlobal->gPreferencesData = nil;
+            gAresGlobal->gPreferencesData.destroy();
             DeletePreference( gAresGlobal->gPreferenceRefNum, kPreferenceDataType, kPreferencesResID);
 
-            gAresGlobal->gPreferencesData = reinterpret_cast<preferencesDataType**>(GetResource( kPreferenceDataType, kFactoryPreferenceResID));
+            gAresGlobal->gPreferencesData.load_resource(kPreferenceDataType, kFactoryPreferenceResID);
             oserr = ResError();
 
             // check to see if we got factory prefs
-            if (( gAresGlobal->gPreferencesData == nil) || ( oserr != noErr))
+            if ((gAresGlobal->gPreferencesData.get() == nil) || (oserr != noErr))
             {
                 ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kFactoryPrefsError, -1, -1, -1, __FILE__, 16);
                 if ( HardWireNewPrefsdata() != noErr)
@@ -286,17 +271,11 @@ int InitPreferences( void)
                     return( -1);
                 }
 
-            } else // we got factory prefs
-            {
-                if ( IsResourceHandle( gAresGlobal->gPreferencesData))
-                    DetachResource( reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
-                MoveHHi( reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
-                HLock( reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
             }
             // write the new/factory prefs to the prefs file
             resID = kPreferencesResID;
-            oserr = WritePreference( gAresGlobal->gPreferenceRefNum, kPreferenceDataType, &resID,
-                    nil, reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
+            oserr = WritePreference(gAresGlobal->gPreferenceRefNum, kPreferenceDataType, &resID,
+                    nil, gAresGlobal->gPreferencesData);
             if ( oserr != noErr)
             {
 
@@ -418,7 +397,9 @@ int InitPreferences( void)
 void PreferencesCleanup( void)
 
 {
-    if ( gAresGlobal->gPreferencesData != nil) DisposeHandle( reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
+    if (gAresGlobal->gPreferencesData.get() != nil) {
+        gAresGlobal->gPreferencesData.destroy();
+    }
 }
 
 OSErr HardWireNewPrefsdata( void)
@@ -426,10 +407,10 @@ OSErr HardWireNewPrefsdata( void)
     preferencesDataType *prefsData;
     short               i;
 
-    gAresGlobal->gPreferencesData = reinterpret_cast<preferencesDataType**>(NewHandle( sizeof( preferencesDataType)));
-    if ( gAresGlobal->gPreferencesData == nil) return( -1);
-    MoveHHi( reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
-    HLock( reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
+    gAresGlobal->gPreferencesData.create(1);
+    if (gAresGlobal->gPreferencesData.get() == nil) {
+        return -1;
+    }
     prefsData = *gAresGlobal->gPreferencesData;
     prefsData->version = kCurrentPreferencesVersion;
     for ( i = 0; i < kKeyControlDataNum; i++)
@@ -461,22 +442,22 @@ OSErr HardWireNewPrefsdata( void)
     return( noErr);
 }
 
-OSErr PrefsUpdate_PreHotKeys( preferencesDataType** prefsData)
-{
+OSErr PrefsUpdate_PreHotKeys(TypedHandle<preferencesDataType> prefsData) {
     OSErr                                   error;
     long                                    i;
     preferencesDataType*                    newPrefs;
     preferencesDataTypeVersion0x00000012    oldPrefs;
-    preferencesDataType**                   tempData;
+    TypedHandle<preferencesDataType>        tempData;
 
-    if ( prefsData == nil) return paramErr;
+    if (prefsData.get() == nil) {
+        return paramErr;
+    }
     BlockMove( *prefsData, &oldPrefs, sizeof( preferencesDataTypeVersion0x00000012));
-    if ( IsResourceHandle( prefsData))
-        ReleaseResource( reinterpret_cast<Handle>(prefsData));
-    else
-        DisposeHandle( reinterpret_cast<Handle>(prefsData));
-    prefsData = reinterpret_cast<preferencesDataType**>(NewHandle( sizeof( preferencesDataType)));
-    if ( prefsData == nil) return memFullErr;
+    prefsData.destroy();
+    prefsData.create(1);
+    if (prefsData.get() == nil) {
+        return memFullErr;
+    }
     error = MemError();
     if ( error != noErr) return error;
 
@@ -487,16 +468,15 @@ OSErr PrefsUpdate_PreHotKeys( preferencesDataType** prefsData)
         newPrefs->keyMap[i] = oldPrefs.keyMap[i];
     }
     {
-        tempData = reinterpret_cast<preferencesDataType**>(GetResource( kPreferenceDataType, kFactoryPreferenceResID));
+        tempData.load_resource(kPreferenceDataType, kFactoryPreferenceResID);
         error = ResError();
 
-        if (( tempData != nil) && ( error == noErr))
-        {
+        if ((tempData.get() != nil) && (error == noErr)) {
             for ( i = kOldKeyNum; i < kKeyControlDataNum; i++)
             {
                 (*prefsData)->keyMap[i] = (*tempData)->keyMap[i];;
             }
-            ReleaseResource( reinterpret_cast<Handle>(tempData));
+            tempData.destroy();
         }
 
     }
@@ -544,7 +524,7 @@ int SaveKeyControlPreferences( void)
     }
 
     oserr = WritePreference( gAresGlobal->gPreferenceRefNum, kPreferenceDataType, &resID, nil,
-        reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
+        gAresGlobal->gPreferencesData);
     if ( oserr != noErr)
     {
         ShowErrorOfTypeOccurred( eContinueOnlyErr, kErrorStrID, kWritePrefsError, oserr, __FILE__, 15);
@@ -573,7 +553,7 @@ short SaveOptionsPreferences( void)
     prefsData->options = gAresGlobal->gOptions;
 
     oserr = WritePreference( gAresGlobal->gPreferenceRefNum, kPreferenceDataType, &resID, nil,
-        reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
+        gAresGlobal->gPreferencesData);
     if ( oserr != noErr)
     {
         ShowErrorOfTypeOccurred( eContinueOnlyErr, kErrorStrID, kWritePrefsError, oserr, __FILE__, 19);
@@ -612,7 +592,7 @@ short SaveStartingLevelPreferences( short whatLevel)
             prefsData->startingLevel = whatLevel;
 
             oserr = WritePreference( gAresGlobal->gPreferenceRefNum, kPreferenceDataType, &resID,
-                nil, reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
+                nil, gAresGlobal->gPreferencesData);
             if ( oserr != noErr)
             {
                 ShowErrorOfTypeOccurred( eContinueOnlyErr, kErrorStrID, kWritePrefsError, oserr, __FILE__, 33);
@@ -624,19 +604,18 @@ short SaveStartingLevelPreferences( short whatLevel)
         return ( kNoError );
     } else
     {
-        startingLevelPreferenceType** data = nil;
+        TypedHandle<startingLevelPreferenceType> data;
         short   currentLevel = GetStartingLevelPreference();
 
         if ( whatLevel <= currentLevel) return kNoError;
-        data = reinterpret_cast<startingLevelPreferenceType**>(NewHandle( sizeof( startingLevelPreferenceType)));
-        if ( data != nil)
-        {
+        data.create(1);
+        if (data.get() != nil) {
             (*data)->version = kCurrentPreferencesVersion;
             (*data)->startingLevel = whatLevel;
             (*data)->scenarioVersion = gAresGlobal->scenarioFileInfo.version;
             oserr = SaveAnyResourceInPreferences( 'aefL', 0, gAresGlobal->externalFileSpec.name,
-                    reinterpret_cast<Handle>(data), true);
-            DisposeHandle(reinterpret_cast<Handle>(data));
+                    data, true);
+            data.destroy();
             return kNoError;
         } else return memFullErr;
     }
@@ -660,21 +639,22 @@ short GetStartingLevelPreference( void)
     if (( gAresGlobal->externalFileSpec.name[0] != 0) &&
         (gAresGlobal->externalFileRefNum != -1))
     {
-        startingLevelPreferenceType** data = NULL;
+        TypedHandle<startingLevelPreferenceType> data;
         OSErr   error;
         long    result;
 
         error = GetAnyResourceFromPreferences( 'aefL', 0,
-            gAresGlobal->externalFileSpec.name, reinterpret_cast<Handle*>(&data), true);
+            gAresGlobal->externalFileSpec.name, &data, true);
 
-        if (( error == noErr) && ( data != nil))
-        {
+        if ((error == noErr) && (data.get() != nil)) {
             result = (*data)->startingLevel;
-            DisposeHandle(reinterpret_cast<Handle>(data));
+            data.destroy();
             return result;
         }
 
-        if ( data != nil) DisposeHandle(reinterpret_cast<Handle>(data));
+        if (data.get() != nil) {
+            data.destroy();
+        }
 
         return 1;
     }
@@ -698,7 +678,7 @@ short SaveAllPreferences( void)
     }
 
     oserr = WritePreference( gAresGlobal->gPreferenceRefNum, kPreferenceDataType, &resID,
-        nil, reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
+        nil, gAresGlobal->gPreferencesData);
     if ( oserr != noErr)
     {
         ShowErrorOfTypeOccurred( eContinueOnlyErr, kErrorStrID, kWritePrefsError, oserr, __FILE__, 34);
@@ -713,13 +693,11 @@ short SaveAllPreferences( void)
     return ( kNoError );
 }
 
-short SaveAnyResourceInPreferences(ResType resType, short resID, unsigned char* name, Handle data,
-        Boolean openAndClose)
+short SaveAnyResourceInPreferences(
+        ResType resType, short resID, unsigned char* name,
+        TypedHandle<startingLevelPreferenceType> data, Boolean openAndClose)
 {
     OSErr           oserr;
-    SignedByte      handleState = HGetState(data);
-
-    HLock(data);
 
     if ( openAndClose)
     {
@@ -744,19 +722,17 @@ short SaveAnyResourceInPreferences(ResType resType, short resID, unsigned char* 
         ClosePreferencesFile( gAresGlobal->gPreferenceRefNum);
     }
 
-    HSetState(data, handleState);
     return ( kNoError );
 }
 
-short GetAnyResourceFromPreferences(ResType resType, short resID, unsigned char* name, Handle* data,
-        Boolean openAndClose)
+short GetAnyResourceFromPreferences(
+        ResType resType, short resID, unsigned char* name,
+        TypedHandle<startingLevelPreferenceType>* data, Boolean openAndClose)
 {
     OSErr           oserr;
 
-    if ( *data != nil)
-    {
-        HUnlock(*data);
-        DisposeHandle(*data);
+    if (data->get() != nil) {
+        data->destroy();
     }
 
     if ( openAndClose)
@@ -841,7 +817,7 @@ OSErr SaveNetPreferences(unsigned char* playerName, unsigned char* gameName,
     prefsData->enemyColor = enemyColor;
     prefsData->netLevel = netLevel;
     oserr = WritePreference( gAresGlobal->gPreferenceRefNum, kPreferenceDataType, &resID, nil,
-        reinterpret_cast<Handle>(gAresGlobal->gPreferencesData));
+        gAresGlobal->gPreferencesData);
     if ( oserr != noErr)
     {
         ShowErrorOfTypeOccurred( eContinueOnlyErr, kErrorStrID, kWritePrefsError, oserr, __FILE__, 37);
