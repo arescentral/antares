@@ -62,10 +62,15 @@
 #define ROT_15      15
 #define ROT_0       0
 
-
 #define kRotUnit    100     // must be same as kMotionResolution ( see Motion.h)
 
-extern TypedHandle<smallFixedType> gRotTable;
+struct RotTableEntry {
+    smallFixedType value;
+
+    void load_data(const char* data, size_t len);
+};
+
+extern TypedHandle<RotTableEntry> gRotTable;
 
 template <typename T>
 inline void mGetRotPoint(T& x, T& y, long angle) {

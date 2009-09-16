@@ -29,8 +29,11 @@
 
 #define kRotationError  "\pROTN"
 
-TypedHandle<smallFixedType> gRotTable;
+TypedHandle<RotTableEntry> gRotTable;
 
+void RotTableEntry::load_data(const char* data, size_t len) {
+    memcpy(this, data, len);
+}
 
 int RotationInit( void)
 
@@ -75,23 +78,23 @@ void RotationCleanup( void) {
 void SetRotPoint( smallFixedType x, smallFixedType y, long rotpos)
 
 {
-    smallFixedType      *i;
+    RotTableEntry* i;
 
     i = *gRotTable + rotpos * 2L;
-    *i = x;
+    i->value = x;
     i++;
-    *i = y;
+    i->value = y;
 }
 
 void GetRotPoint( smallFixedType *x, smallFixedType *y, long rotpos)
 
 {
-    smallFixedType      *i;
+    RotTableEntry* i;
 
     i = *gRotTable + rotpos * 2L;
-    *x = *i;
+    *x = i->value;
     i++;
-    *y = *i;
+    *y = i->value;
 }
 
 

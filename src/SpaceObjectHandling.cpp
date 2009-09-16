@@ -2927,3 +2927,11 @@ void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord
     coord->v = kUniversalCenter;
     coord->v += lscrap;
 }
+
+void objectActionType::load_data(const char* data, size_t len) {
+    memcpy(this, data, len);
+}
+
+void baseObjectType::load_data(const char* data, size_t len) {
+    memcpy(this, data, len);
+}

@@ -859,3 +859,7 @@ long GetFirstKeyConflict( preferencesDataType *prefs)
     }
     return -1;
 }
+
+void preferencesDataType::load_data(const char* data, size_t len) {
+    memcpy(this, data, len);
+}

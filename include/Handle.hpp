@@ -37,7 +37,9 @@ class TypedHandle {
     TypedHandle clone() const {
         TypedHandle cloned;
         cloned.create(count());
-        memcpy(cloned._data->_ptr, _data->_ptr, size());
+        for (size_t i = 0; i < count(); ++i) {
+            (*cloned)[i] = (**this)[i];
+        }
         return cloned;
     }
 
@@ -56,9 +58,12 @@ class TypedHandle {
 
     void load_resource(uint32_t code, int id) {
         Resource rsrc(code, id);
-        int count = 1 + (rsrc.size() - 1) / sizeof(T);
+        assert(rsrc.size() % sizeof(T) == 0);
+        size_t count = rsrc.size() / sizeof(T);
         _data = new Data(count);
-        memcpy(_data->_ptr, rsrc.data(), rsrc.size());
+        for (size_t i = 0; i < count; ++i) {
+            _data->_ptr[i].load_data(rsrc.data() + (i * sizeof(T)), sizeof(T));
+        }
     }
 
     T* operator*() const {

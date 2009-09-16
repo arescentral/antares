@@ -489,6 +489,8 @@ struct objectActionType {
     short                       initialDirectOverride;
     unsigned long               reserved2;
     argumentType                argument;
+
+    void load_data(const char* data, size_t len);
 };
 
 
@@ -719,6 +721,8 @@ struct baseObjectType {
     short               reserved2;
     long                reserved3;
     long                internalFlags;
+
+    void load_data(const char* data, size_t len);
 };
 
 enum dutyType {

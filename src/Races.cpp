@@ -166,3 +166,7 @@ unsigned char GetApparentColorFromRace( short raceNum)
         return( 0);
     }
 }
+
+void raceType::load_data(const char* data, size_t len) {
+    memcpy(this, data, len);
+}

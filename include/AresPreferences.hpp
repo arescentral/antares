@@ -111,6 +111,8 @@ struct preferencesDataType {
     short               netLevel;
     short               netLatency;
 //  long                netLatency;
+
+    void load_data(const char* data, size_t len);
 };
 
 struct startingLevelPreferenceType {
