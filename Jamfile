@@ -70,6 +70,7 @@ Main Antares : src/Admiral.cpp
                src/SpriteCursor.cpp
                src/SpriteHandling.cpp
                src/StringHandling.cpp
+               src/StringList.cpp
                src/StringNumerics.cpp
                src/TimeUnit.cpp
                src/TitleScreen.cpp

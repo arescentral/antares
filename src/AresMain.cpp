@@ -292,7 +292,6 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
     gAresGlobal->gStatusLabelNum = -1;
     gAresGlobal->gTrueClipBottom = 0;
 //  gAresGlobal->gMiniScreenHandle = nil;
-    gAresGlobal->gMissionStatusStrList = nil;
     gAresGlobal->gColorAnimationStep = 0;
     gAresGlobal->gColorAnimationInSpeed = -1;
     gAresGlobal->gColorAnimationOutSpeed = -1;

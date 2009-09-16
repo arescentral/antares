@@ -45,6 +45,10 @@ class TypedHandle {
         _data = new Data(count);
     }
 
+    void adopt(T* t, int count) {
+        _data = new Data(t, count);
+    }
+
     void destroy() {
         delete _data;
         _data = NULL;
@@ -79,6 +83,14 @@ class TypedHandle {
         Data(int count)
                 : _ptr(new T[count]),
                   _count(count) { }
+
+        Data(T* t, int count)
+                : _ptr(t),
+                  _count(count) { }
+
+        ~Data() {
+            delete[] _ptr;
+        }
 
       private:
         friend class TypedHandle;

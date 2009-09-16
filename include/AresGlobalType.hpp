@@ -23,6 +23,7 @@
 #include <Base.h>
 #include <Files.h>
 #include <Quickdraw.h>
+#include <Resources.h>
 
 #include "AnyChar.hpp"
 #include "Handle.hpp"
@@ -97,6 +98,7 @@ struct scenarioConditionType;
 struct scenarioInitialType;
 struct screenLabelType;
 struct scrollStarType;
+class StringList;
 
 struct aresGlobalType {
     unsigned long   gActiveCheats[kMaxPlayerNum];
@@ -167,7 +169,7 @@ struct aresGlobalType {
     long            gTrueClipBottom;        // = 0;
 //  Handle          gMiniScreenHandle;      // = nil;
     miniComputerDataType    gMiniScreenData;
-    Handle          gMissionStatusStrList;
+    TypedHandle<StringList>         gMissionStatusStrList;
     TypedHandle<screenLabelType>    gScreenLabelData;       // = nil;
     TypedHandle<beamType>           gBeamData;              // = nil;
     long            gColorAnimationStep;    // = 0;
@@ -181,7 +183,7 @@ struct aresGlobalType {
     long            gLastSoundTime;         // = 0
     long            gSoundVolume;           // = 0;
     short           gSoundFileRefID;        // = 0;
-    Handle          gAresCheatStrings;
+    TypedHandle<StringList>         gAresCheatStrings;
     KeyMap*         gKeyMapBuffer;          // = NewPtr( sizeof (KeyMap) * (long)kKeyMapBufferNum;
     long            gKeyMapBufferTop;       // = 0;
     long            gKeyMapBufferBottom;    // = 0;

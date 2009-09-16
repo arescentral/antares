@@ -46,6 +46,7 @@
 #include "SpaceObjectHandling.hpp"
 #include "SpriteHandling.hpp"
 #include "StringHandling.hpp"
+#include "StringList.hpp"
 #include "StringNumerics.hpp"
 #include "strlist.h"
 
@@ -361,18 +362,19 @@ void CorrectMiniScreenGlobalPtr( Handle dummy)
 
 void SetMiniScreenStatusStrList( short strID)
 {
-    if ( gAresGlobal->gMissionStatusStrList != nil)
+    if (gAresGlobal->gMissionStatusStrList.get() != nil) {
         DisposeMiniScreenStatusStrList();
-    if ( strID > 0)
-        gAresGlobal->gMissionStatusStrList = GetStringList( strID);
+    }
+    if (strID > 0) {
+        gAresGlobal->gMissionStatusStrList.create(1);
+        (*gAresGlobal->gMissionStatusStrList)->load(strID);
+    }
 }
 
 void DisposeMiniScreenStatusStrList( void)
 {
-    if ( gAresGlobal->gMissionStatusStrList != nil)
-    {
-        DisposeStringList( gAresGlobal->gMissionStatusStrList);
-        gAresGlobal->gMissionStatusStrList = nil;
+    if (gAresGlobal->gMissionStatusStrList.get() != nil) {
+        gAresGlobal->gMissionStatusStrList.destroy();
     }
 }
 
@@ -2440,8 +2442,7 @@ void MiniComputerSetStatusStrings( void)
     Str255              sourceString;
     miniScreenLineType  *line;
 
-    if ( gAresGlobal->gMissionStatusStrList == nil)
-    {
+    if (gAresGlobal->gMissionStatusStrList.get() == nil) {
         for ( count = kStatusMiniScreenFirstLine; count < kMiniScreenCharHeight;
             count++)
         {
@@ -2460,13 +2461,13 @@ void MiniComputerSetStatusStrings( void)
         line = *gAresGlobal->gMiniScreenData.lineData +
             count;
 
-        if ( ( count - kStatusMiniScreenFirstLine) <
-            StringListSize( gAresGlobal->gMissionStatusStrList))
+        if (implicit_cast<size_t>(count - kStatusMiniScreenFirstLine) <
+            (*gAresGlobal->gMissionStatusStrList)->size())
         {
             // we have some data for this line to interpret
 
-            RetrieveIndString( gAresGlobal->gMissionStatusStrList, (count -
-                kStatusMiniScreenFirstLine) + 1, sourceString);
+            string_to_pstring((*gAresGlobal->gMissionStatusStrList)->at((count -
+                kStatusMiniScreenFirstLine) + 1), sourceString);
 
             charNum = 1;
             if ( sourceString[charNum] == '_')

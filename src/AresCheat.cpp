@@ -29,6 +29,7 @@
 #include "MessageScreen.hpp"
 #include "PlayerShip.hpp"
 #include "StringHandling.hpp"
+#include "StringList.hpp"
 #include "StringNumerics.hpp"
 #include "strlist.h"
 
@@ -54,13 +55,18 @@ void CheatFeedbackPlus(short, Boolean, long, unsigned char*);
 
 void AresCheatInit( void)
 {
-    gAresGlobal->gAresCheatStrings = GetStringList( kCheatStringListID);
-    if ( gAresGlobal->gAresCheatStrings == nil) return;
+    gAresGlobal->gAresCheatStrings.create(1);
+    if (gAresGlobal->gAresCheatStrings.get() == nil) {
+        return;
+    }
+    (*gAresGlobal->gAresCheatStrings)->load(kCheatStringListID);
 }
 
 void CleanupAresCheat( void)
 {
-    if ( gAresGlobal->gAresCheatStrings != nil) DisposeHandle( gAresGlobal->gAresCheatStrings);
+    if (gAresGlobal->gAresCheatStrings.get() != nil) {
+        gAresGlobal->gAresCheatStrings.destroy();
+    }
 }
 
 short GetCheatNumFromString(unsigned char* s)
@@ -76,7 +82,8 @@ short GetCheatNumFromString(unsigned char* s)
         codeString[strLen] = s[strLen] + kCheatCodeValue;
         strLen--;
     }
-    return (FindStringList( gAresGlobal->gAresCheatStrings, codeString));
+    std::string cpp_string(reinterpret_cast<char*>(codeString + 1), *codeString);
+    return (*gAresGlobal->gAresCheatStrings)->index_of(cpp_string) + 1;
 }
 
 void ExecuteCheat( short whichCheat, long whichPlayer)
