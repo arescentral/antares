@@ -38,7 +38,6 @@ struct SndCommand {
 
 OSErr SndDoImmediate(SndChannel* chan, SndCommand* cmd);
 OSErr SndDoCommand(SndChannel* chan, SndCommand* cmd, bool);
-OSErr SndPlay(SndChannel* channel, Handle sound, bool);
 
 STUB2(GetSoundHeaderOffset, OSErr(Handle sound, long* offset), noErr);
 

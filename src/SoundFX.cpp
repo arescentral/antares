@@ -24,6 +24,7 @@
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
+#include "FakeSounds.hpp"
 #include "MathMacros.hpp"
 #include "MathSpecial.hpp"
 #include "Options.hpp"
@@ -90,11 +91,6 @@ int InitSoundFX( void)
     aresGlobalType  *glob = gAresGlobal;
 
 //  glob->gOptions |= kOptionSoundAvailable;
-
-    for ( i = 0; i < kSoundNum; i++)
-    {
-        glob->gSound[i].soundHandle = nil;
-    }
 
     for ( i = 0; i < kMaxChannelNum; i++)
     {
@@ -440,7 +436,7 @@ void PlayVolumeSound( short whichSoundID, short amplitude, short persistence, so
                 WriteDebugLong(err);
             }
 */
-            err = SndPlay( gAresGlobal->gChannel[whichChannel].channelPtr, reinterpret_cast<SndListHandle>(gAresGlobal->gSound[whichSound].soundHandle), true);
+            err = SndPlay( gAresGlobal->gChannel[whichChannel].channelPtr, gAresGlobal->gSound[whichSound].soundHandle, true);
 
         }
     }
@@ -679,7 +675,7 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
             }
 #endif
             err = SndPlay( gAresGlobal->gChannel[whichChannel].channelPtr,
-                reinterpret_cast<SndListHandle>(gAresGlobal->gSound[whichSound].soundHandle), true);
+                gAresGlobal->gSound[whichSound].soundHandle, true);
 
         }
     }
@@ -703,12 +699,10 @@ void RemoveAllUnusedSounds( void)
 
     for ( count = kMinVolatileSound; count < kSoundNum; count++)
     {
-        if ( (!gAresGlobal->gSound[count].keepMe) && ( gAresGlobal->gSound[count].soundHandle != nil))
-        {
-            DisposeHandle( gAresGlobal->gSound[count].soundHandle);
-            gAresGlobal->gSound[count].soundHandle = nil;
+        if ((!gAresGlobal->gSound[count].keepMe) &&
+                (gAresGlobal->gSound[count].soundHandle.get() != nil)) {
+            gAresGlobal->gSound[count].soundHandle.destroy();
             gAresGlobal->gSound[count].id = -1;
-            gAresGlobal->gSound[count].offset = 0;
         }
     }
 }
@@ -721,9 +715,7 @@ void ResetAllSounds( void)
     for ( count = 0; count < kSoundNum; count++)
     {
         gAresGlobal->gSound[count].keepMe = FALSE;
-        gAresGlobal->gSound[count].soundHandle = nil;
         gAresGlobal->gSound[count].id = -1;
-        gAresGlobal->gSound[count].offset = 0;
     }
 }
 
@@ -744,7 +736,6 @@ short AddSound( short soundID)
 
 {
     short       whichSound;
-    OSErr           err;
     Str255      debugstr = "\pgAresGlobal->gSound[XX].soundHandle";
 
     whichSound = 0;
@@ -755,7 +746,7 @@ short AddSound( short soundID)
     if ( whichSound == kSoundNum)
     {
         whichSound = 0;
-        while ((gAresGlobal->gSound[whichSound].soundHandle != nil) &&
+        while ((gAresGlobal->gSound[whichSound].soundHandle.get() != nil) &&
             ( whichSound < kSoundNum))
         {
             whichSound++;
@@ -770,34 +761,17 @@ short AddSound( short soundID)
             WriteDebugLine("\pADDSND>");
             WriteDebugLong( soundID);
 
-            gAresGlobal->gSound[whichSound].soundHandle = GetResource( 'snd ', soundID);
-            if ( gAresGlobal->gSound[whichSound].soundHandle == nil)
-            {
+            gAresGlobal->gSound[whichSound].soundHandle = GetSound(soundID);
+            if (gAresGlobal->gSound[whichSound].soundHandle.get() == nil) {
                 ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadSoundError, -1, -1, -1, __FILE__, soundID);
 //              Debugger();
                 return ( -1);
             }
 //          HLockHi( gAresGlobal->gSound[whichSound].soundHandle);
 
-            DetachResource( gAresGlobal->gSound[whichSound].soundHandle);
-            HNoPurge( gAresGlobal->gSound[whichSound].soundHandle);
-            MoveHHi( gAresGlobal->gSound[whichSound].soundHandle);
-            HLock( gAresGlobal->gSound[whichSound].soundHandle);
-
-            err = GetSoundHeaderOffset(
-                reinterpret_cast<SndListHandle>(gAresGlobal->gSound[whichSound].soundHandle),
-                &(gAresGlobal->gSound[whichSound].offset));
-            if ( err != noErr)
-            {
-                ShowErrorOfTypeOccurred( eContinueOnlyErr, kErrorStrID, kSoundDataError, err, __FILE__, 23);
-                return ( -1);
-            }
-
             debugstr[8] = '0' + (whichSound / 10);
             debugstr[9] = '0' + (whichSound % 10);
 //          mDataHandleLockAndRegister( gAresGlobal->gSound[whichSound].soundHandle, UnlockSoundCallback, nil, nil, debugstr)
-MoveHHi( (gAresGlobal->gSound[whichSound].soundHandle));
-HLock( (gAresGlobal->gSound[whichSound].soundHandle));
 //          HHCheckAllHandles();
             gAresGlobal->gSound[whichSound].id = soundID;
             return( whichSound);
@@ -831,8 +805,9 @@ void SoundFXCleanup( void)
     WriteDebugLine("\p<SndChannels");
     for ( i = 0; i < kSoundNum; i++)
     {
-        if ( gAresGlobal->gSound[i].soundHandle != nil)
-            DisposeHandle( gAresGlobal->gSound[i].soundHandle);
+        if (gAresGlobal->gSound[i].soundHandle.get() != nil) {
+            gAresGlobal->gSound[i].soundHandle.destroy();
+        }
     }
     WriteDebugLine("\p<SndHndles");
 }

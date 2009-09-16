@@ -21,9 +21,10 @@
 // SOUND FX.H
 
 #include <Base.h>
+#include <Sound.h>
 
 #include "MathSpecial.hpp"
-#include "Sound.h"
+#include "FakeSounds.hpp"
 
 //#ifdef powerc
 //#define kAllowSoundSprocket
@@ -95,8 +96,7 @@ struct smartSoundChannel {
 };
 
 struct smartSoundHandle {
-    Handle              soundHandle;
-    long                offset;
+    TypedHandle<Sound>  soundHandle;
     short               id;
     Boolean             keepMe;
 };

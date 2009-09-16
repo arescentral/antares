@@ -28,9 +28,6 @@ Handle GetResource(FourCharCode code, int id) {
       case 'PICT':
         return reinterpret_cast<Handle>(GetPicture(id));
 
-      case 'snd ':
-        return GetSound(id);
-
       default:
         try {
             Resource rsrc(code, id);

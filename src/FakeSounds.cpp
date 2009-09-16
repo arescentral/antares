@@ -22,7 +22,6 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "FakeHandles.hpp"
 #include "Fakes.hpp"
 
 bool do_sounds = false;
@@ -80,16 +79,19 @@ OSErr SndDoCommand(SndChannel* chan, SndCommand* cmd, bool) {
     return SndDoImmediate(chan, cmd);
 }
 
-OSErr SndPlay(SndChannel* channel, Handle sound, bool) {
+OSErr SndPlay(SndChannel* channel, TypedHandle<Sound> sound, bool) {
     if (do_sounds && gAresGlobal->gGameTime > 0) {
-        int sound_id = **reinterpret_cast<int**>(sound);
+        int sound_id = (*sound)->id;
         fprintf(sound_log, "play\t%d\t%ld\t%d\n", channel->id, gAresGlobal->gGameTime, sound_id);
     }
     return noErr;
 }
 
-Handle GetSound(int id) {
-    return (new HandleData<int>(id))->ToHandle();
+TypedHandle<Sound> GetSound(int id) {
+    TypedHandle<Sound> result;
+    result.create(1);
+    (*result)->id = id;
+    return result;
 }
 
 void FakeSoundsInit() {

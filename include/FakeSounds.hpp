@@ -19,9 +19,17 @@
 #define ANTARES_FAKE_SOUNDS_HPP_
 
 #include <Base.h>
+#include "Handle.hpp"
+
+struct Sound {
+    int id;
+};
+
+struct SndChannel;
 
 void SetDoSounds(bool flag);
-Handle GetSound(int id);
+TypedHandle<Sound> GetSound(int id);
+OSErr SndPlay(SndChannel* channel, TypedHandle<Sound> sound, bool);
 
 void FakeSoundsInit();
 
