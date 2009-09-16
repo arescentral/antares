@@ -122,8 +122,6 @@ void DrawDirectTextStringClipped(unsigned char*, unsigned char, PixMap *, longRe
 void DrawDirectTextHeightx2(unsigned char*, unsigned char, PixMap *, long, long);
 void DrawDirectTextStringClippedx2(unsigned char*, unsigned char, PixMap *, longRect *, long, long);
 
-void ResetDirectTextPtr( Handle);
-
 #pragma options align=reset
 
 #endif // ANTARES_DIRECT_TEXT_HPP_

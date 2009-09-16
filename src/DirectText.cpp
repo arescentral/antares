@@ -644,11 +644,3 @@ void DrawDirectTextStringClippedx2(unsigned char* string, unsigned char color, P
         slen--;
     }
 */}
-
-void ResetDirectTextPtr( Handle directText)
-
-{
-#pragma unused( directText)
-    WriteDebugLine("\pDText Callback");
-    gDirectText = *gDirectTextData + gWhichDirectText;
-}

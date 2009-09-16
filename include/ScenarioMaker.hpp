@@ -189,7 +189,6 @@ long GetFirstNetworkScenario( void);
 long GetNextNetworkScenario( long);
 long GetPreviousNetworkScenario( long);
 Boolean ThisChapterIsNetworkable( long);
-void CorrectThisScenarioPtr( Handle);
 
 #pragma options align=reset
 

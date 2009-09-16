@@ -112,7 +112,6 @@ short AddSound( short);
 void PlayVolumeSound( short, short, short, soundPriorityType);
 void PlayLocalizedSound( unsigned long, unsigned long, unsigned long, unsigned long, smallFixedType, smallFixedType, short, short, short, soundPriorityType);
 void SoundFXCleanup( void);
-void UnlockSoundCallback( Handle);
 
 struct spaceObjectType;
 void mPlayDistanceSound(

@@ -351,13 +351,6 @@ void MiniScreenCleanup( void)
 //  if ( gAresGlobal->gMiniScreenHandle != nil) DisposeHandle( gAresGlobal->gMiniScreenHandle);
 }
 
-void CorrectMiniScreenGlobalPtr( Handle dummy)
-
-{
-#pragma unused( dummy)
-//  gMiniScreenData = (miniComputerDataType *)*gAresGlobal->gMiniScreenHandle;
-}
-
 #pragma mark -
 
 void SetMiniScreenStatusStrList( short strID)

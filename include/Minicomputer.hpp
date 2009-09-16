@@ -26,7 +26,6 @@
 
 int MiniScreenInit( void);
 void MiniScreenCleanup( void);
-void CorrectMiniScreenGlobalPtr( Handle);
 void SetMiniScreenStatusStrList( short);
 void DisposeMiniScreenStatusStrList( void);
 void ClearMiniScreenLines( void);

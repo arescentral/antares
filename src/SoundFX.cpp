@@ -807,48 +807,6 @@ HLock( (gAresGlobal->gSound[whichSound].soundHandle));
 
 
 
-void UnlockSoundCallback( Handle soundHand)
-
-{
-    short   i;
-    SndCommand      cmd;
-    OSErr           err;
-    SCStatus        status = { false };
-
-    for ( i = 0; i < kMaxChannelNum; i++)
-    {
-        if (  gAresGlobal->gChannel[i].channelPtr != nil)
-        {
-            err = SndChannelStatus( gAresGlobal->gChannel[i].channelPtr, sizeof(SCStatus),
-                    reinterpret_cast<SCStatusPtr>(&status));
-            if ( status.scChannelBusy)
-            {
-
-                cmd.param1 = 0;
-                cmd.param2 = 0;
-                cmd.cmd = quietCmd;
-                err = SndDoImmediate( gAresGlobal->gChannel[i].channelPtr, &cmd);
-                if ( err != noErr)
-                {
-                    WriteDebugLine("\pSnd Err:");
-                    WriteDebugLong(err);
-                }
-                cmd.param1 = 0;
-                cmd.param2 = 0;
-                cmd.cmd = flushCmd;
-                err = SndDoImmediate( gAresGlobal->gChannel[i].channelPtr, &cmd);
-                if ( err != noErr)
-                {
-                    WriteDebugLine("\pSnd Err:");
-                    WriteDebugLong(err);
-                }
-            }
-        }
-    }
-    if ( soundHand != nil)
-        HUnlock( soundHand);
-}
-
 void SoundFXCleanup( void)
 
 {

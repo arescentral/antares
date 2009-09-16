@@ -2062,10 +2062,3 @@ Boolean ThisChapterIsNetworkable( long whichChapter)
     }
     return( false);
 }
-
-void CorrectThisScenarioPtr( Handle scenarioData)
-{
-#pragma unused( scenarioData)
-    gThisScenario = *gAresGlobal->gScenarioData + gAresGlobal->gThisScenarioNumber;
-//  WriteDebugLine((char *)"\pCorrect Scenario");
-}
