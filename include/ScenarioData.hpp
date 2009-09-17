@@ -46,6 +46,8 @@ struct scenarioInfoType {
     aresVersionType requiresAresVersion;
     unsigned long   flags;
     unsigned long   checkSum;
+
+    void load_data(const char* data, size_t len);
 };
 
 #endif // ANTARES_SCENARIO_DATA_HPP_

@@ -15,7 +15,13 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+#include "ScenarioData.hpp"
+
 #include "Scenario.hpp"
+
+void scenarioInfoType::load_data(const char* data, size_t len) {
+    memcpy(this, data, len);
+}
 
 void scenarioType::load_data(const char* data, size_t len) {
     memcpy(this, data, len);

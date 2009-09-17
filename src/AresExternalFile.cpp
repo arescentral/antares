@@ -37,8 +37,8 @@ extern TypedHandle<objectActionType>    gObjectActionData;
 
 OSErr EF_OpenExternalFile( void)
 {
-    Handle  tempScenarioInfo = nil;
-    short   oldResFile = CurResFile(), homeResFile;
+    TypedHandle<scenarioInfoType> tempScenarioInfo;
+    short oldResFile = CurResFile();
 
     if ( gAresGlobal->externalFileRefNum != -1)
         CloseResFile( gAresGlobal->externalFileRefNum);
@@ -63,22 +63,10 @@ OSErr EF_OpenExternalFile( void)
 
 
     // scenario info
-    tempScenarioInfo = GetResource( 'nlAG', 128);
-    if ( tempScenarioInfo != nil)
-    {
-        homeResFile = HomeResFile( tempScenarioInfo);
-        if (( homeResFile == gAresGlobal->externalFileRefNum) ||
-            ( gAresGlobal->externalFileSpec.name[0] == 0))
-        {
-            BlockMove( *tempScenarioInfo, &gAresGlobal->scenarioFileInfo,
-                sizeof( scenarioInfoType));
-        } else
-        {
-            UseResFile( oldResFile);
-            gAresGlobal->externalFileRefNum = -1;
-            return resNotFound;
-        }
-        ReleaseResource( tempScenarioInfo);
+    tempScenarioInfo.load_resource('nlAG', 128);
+    if (tempScenarioInfo.get() != nil) {
+        gAresGlobal->scenarioFileInfo = **tempScenarioInfo;
+        tempScenarioInfo.destroy();
     } else
     {
         UseResFile( oldResFile);

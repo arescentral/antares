@@ -101,12 +101,11 @@ short ScenarioMakerInit( void)
 //      UseResFile( gAresGlobal->externalFileRefNum);
 
     {
-        Handle tempScenarioInfo = GetResource( 'nlAG', 128);
-        if ( tempScenarioInfo != nil)
-        {
-            BlockMove( *tempScenarioInfo, &gAresGlobal->scenarioFileInfo,
-                sizeof( scenarioInfoType));
-            ReleaseResource( tempScenarioInfo);
+        TypedHandle<scenarioInfoType> tempScenarioInfo;
+        tempScenarioInfo.load_resource('nlAG', 128);
+        if (tempScenarioInfo.get() != nil) {
+            gAresGlobal->scenarioFileInfo = **tempScenarioInfo;
+            tempScenarioInfo.destroy();
         }
     }
 
