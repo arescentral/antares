@@ -28,33 +28,19 @@
 struct natePixType;
 
 natePixType** CreateNatePixTable( void);
-void MoveNatePixTableData(natePixType**, long, long);
 unsigned long GetNatePixTableSize(natePixType**);
-void SetNatePixTableSize(natePixType**, unsigned long);
 long GetNatePixTablePixNum(natePixType**);
-void SetNatePixTablePixNum(natePixType**, long);
-unsigned long GetNatePixTablePixOffset(natePixType**, long);
-void SetNatePixTablePixOffset(natePixType**, long, unsigned long);
 int GetNatePixTableNatePixWidth(natePixType**, long);
-void SetNatePixTableNatePixWidth(natePixType**, long, int);
 int GetNatePixTableNatePixHeight(natePixType**, long);
-void SetNatePixTableNatePixHeight(natePixType**, long, int);
 int GetNatePixTableNatePixHRef(natePixType**, long);
-void SetNatePixTableNatePixHRef(natePixType**, long, int);
 int GetNatePixTableNatePixVRef(natePixType**, long);
-void SetNatePixTableNatePixVRef(natePixType**, long, int);
 unsigned char *GetNatePixTableNatePixData(natePixType**, long);
 unsigned char GetNatePixTableNatePixDataPixel(natePixType**, long, int, int);
-void SetNatePixTableNatePixDataPixel(natePixType**, long, int, int, unsigned char);
 Handle GetNatePixTableNatePixDataCopy(natePixType**, long);
 // void GetNatePixTableNatePixPtr( natePix *, Handle, int);
 // void GetNatePixTableNatePixDuplicate( natePix *, Handle, int);
-unsigned long GetNatePixTableNatePixDataSize(natePixType**, long);
-void InsertNatePix(natePixType**, Rect *, int);
-void DeleteNatePix(natePixType**, int);
 void RemapNatePixTableColor(natePixType**);
 void ColorizeNatePixTableColor(natePixType**, unsigned char);
-void RetromapNatePixTableColor(natePixType**);
 
 #pragma options align=reset
 
