@@ -2928,10 +2928,14 @@ void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord
     coord->v += lscrap;
 }
 
-void objectActionType::load_data(const char* data, size_t len) {
-    memcpy(this, data, len);
+size_t objectActionType::load_data(const char* data, size_t len) {
+    assert(len >= sizeof(objectActionType));
+    memcpy(this, data, sizeof(objectActionType));
+    return sizeof(objectActionType);
 }
 
-void baseObjectType::load_data(const char* data, size_t len) {
-    memcpy(this, data, len);
+size_t baseObjectType::load_data(const char* data, size_t len) {
+    assert(len >= sizeof(baseObjectType));
+    memcpy(this, data, sizeof(baseObjectType));
+    return sizeof(baseObjectType);
 }

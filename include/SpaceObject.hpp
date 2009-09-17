@@ -490,7 +490,7 @@ struct objectActionType {
     unsigned long               reserved2;
     argumentType                argument;
 
-    void load_data(const char* data, size_t len);
+    size_t load_data(const char* data, size_t len);
 };
 
 
@@ -722,7 +722,7 @@ struct baseObjectType {
     long                reserved3;
     long                internalFlags;
 
-    void load_data(const char* data, size_t len);
+    size_t load_data(const char* data, size_t len);
 };
 
 enum dutyType {

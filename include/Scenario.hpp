@@ -168,7 +168,7 @@ struct briefPointType {
     short                   titleNum;
     short                   contentResID;
 
-    void load_data(const char* data, size_t len);
+    size_t load_data(const char* data, size_t len);
 };
 
 /*
@@ -213,7 +213,7 @@ struct scenarioInitialType {
     long            nameStrNum;
     unsigned long   attributes;
 
-    void load_data(const char* data, size_t len);
+    size_t load_data(const char* data, size_t len);
 };
 
 struct counterArgumentType {
@@ -253,7 +253,7 @@ struct scenarioConditionType {
     unsigned long   flags;
     long            direction;
 
-    void load_data(const char* data, size_t len);
+    size_t load_data(const char* data, size_t len);
 };
 
 struct scenarioPlayerType
@@ -304,7 +304,7 @@ struct scenarioType {
     short                       parLosses;
     short                       startTime;      // use kScenario_StartTimeMask
 
-    void load_data(const char* data, size_t len);
+    size_t load_data(const char* data, size_t len);
 };
 
 struct raceType {
@@ -313,7 +313,7 @@ struct raceType {
     unsigned long           illegalColors;
     long                        advantage;
 
-    void load_data(const char* data, size_t len);
+    size_t load_data(const char* data, size_t len);
 };
 
 #pragma options align=reset

@@ -19,22 +19,32 @@
 
 #include "Scenario.hpp"
 
-void scenarioInfoType::load_data(const char* data, size_t len) {
-    memcpy(this, data, len);
+size_t scenarioInfoType::load_data(const char* data, size_t len) {
+    assert(len >= sizeof(scenarioInfoType));
+    memcpy(this, data, sizeof(scenarioInfoType));
+    return sizeof(scenarioInfoType);
 }
 
-void scenarioType::load_data(const char* data, size_t len) {
-    memcpy(this, data, len);
+size_t scenarioType::load_data(const char* data, size_t len) {
+    assert(len >= sizeof(scenarioType));
+    memcpy(this, data, sizeof(scenarioType));
+    return sizeof(scenarioType);
 }
 
-void scenarioConditionType::load_data(const char* data, size_t len) {
-    memcpy(this, data, len);
+size_t scenarioConditionType::load_data(const char* data, size_t len) {
+    assert(len >= sizeof(scenarioConditionType));
+    memcpy(this, data, sizeof(scenarioConditionType));
+    return sizeof(scenarioConditionType);
 }
 
-void briefPointType::load_data(const char* data, size_t len) {
-    memcpy(this, data, len);
+size_t briefPointType::load_data(const char* data, size_t len) {
+    assert(len >= sizeof(briefPointType));
+    memcpy(this, data, sizeof(briefPointType));
+    return sizeof(briefPointType);
 }
 
-void scenarioInitialType::load_data(const char* data, size_t len) {
-    memcpy(this, data, len);
+size_t scenarioInitialType::load_data(const char* data, size_t len) {
+    assert(len >= sizeof(scenarioInitialType));
+    memcpy(this, data, sizeof(scenarioInitialType));
+    return sizeof(scenarioInitialType);
 }

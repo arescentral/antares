@@ -67,7 +67,7 @@
 struct RotTableEntry {
     smallFixedType value;
 
-    void load_data(const char* data, size_t len);
+    size_t load_data(const char* data, size_t len);
 };
 
 extern TypedHandle<RotTableEntry> gRotTable;

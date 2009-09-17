@@ -20,6 +20,7 @@
 
 #include <assert.h>
 #include <stdint.h>
+#include <vector>
 
 #include "Resource.hpp"
 
@@ -59,10 +60,19 @@ class TypedHandle {
     void load_resource(uint32_t code, int id) {
         Resource rsrc(code, id);
         assert(rsrc.size() % sizeof(T) == 0);
-        size_t count = rsrc.size() / sizeof(T);
-        _data = new Data(count);
-        for (size_t i = 0; i < count; ++i) {
-            _data->_ptr[i].load_data(rsrc.data() + (i * sizeof(T)), sizeof(T));
+        std::vector<T> loaded;
+        const char* data = rsrc.data();
+        size_t remainder = rsrc.size();
+        while (remainder > 0) {
+            loaded.push_back(T());
+            size_t consumed = loaded.back().load_data(data, remainder);
+            assert(consumed <= remainder);
+            data += consumed;
+            remainder -= consumed;
+        }
+        create(loaded.size());
+        for (size_t i = 0; i < loaded.size(); ++i) {
+            (**this)[i] = loaded[i];
         }
     }
 

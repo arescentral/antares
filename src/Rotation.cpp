@@ -31,8 +31,10 @@
 
 TypedHandle<RotTableEntry> gRotTable;
 
-void RotTableEntry::load_data(const char* data, size_t len) {
-    memcpy(this, data, len);
+size_t RotTableEntry::load_data(const char* data, size_t len) {
+    assert(len >= sizeof(RotTableEntry));
+    memcpy(this, data, sizeof(RotTableEntry));
+    return sizeof(RotTableEntry);
 }
 
 int RotationInit( void)

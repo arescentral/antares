@@ -860,6 +860,8 @@ long GetFirstKeyConflict( preferencesDataType *prefs)
     return -1;
 }
 
-void preferencesDataType::load_data(const char* data, size_t len) {
-    memcpy(this, data, len);
+size_t preferencesDataType::load_data(const char* data, size_t len) {
+    assert(len >= sizeof(preferencesDataType));
+    memcpy(this, data, sizeof(preferencesDataType));
+    return sizeof(preferencesDataType);
 }
