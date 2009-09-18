@@ -1933,9 +1933,9 @@ Boolean PixelInSprite_IsOutside( spritePix *sprite, long x, long y,
     long    rowPlus = sprite->width, i, j, *hmapStart = hmap;
 
     if ( x == 0) return true;
-    if ( x >= ( sprite->width - 1)) return true;
+    if ( x >= ( sprite->width - *hmap)) return true;
     if ( y == 0) return true;
-    if ( y >= ( sprite->height - 1)) return true;
+    if ( y >= ( sprite->height - *vmap)) return true;
 
     vmap--;
     hmapStart--;
