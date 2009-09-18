@@ -59,7 +59,6 @@ class TypedHandle {
 
     void load_resource(uint32_t code, int id) {
         Resource rsrc(code, id);
-        assert(rsrc.size() % sizeof(T) == 0);
         std::vector<T> loaded;
         const char* data = rsrc.data();
         size_t remainder = rsrc.size();

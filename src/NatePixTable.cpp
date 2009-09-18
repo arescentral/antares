@@ -29,7 +29,7 @@
 
 #define EMPTY_NATE_PIX_SIZE         8L
 
-struct natePixEntryType {
+struct natePixEntryBinaryType {
     short width;
     short height;
     short hOffset;
@@ -37,67 +37,169 @@ struct natePixEntryType {
     unsigned char data[];
 };
 
-struct natePixType {
+class natePixEntryType {
+  public:
+    natePixEntryType()
+            : _width(0),
+              _height(0),
+              _h_offset(0),
+              _v_offset(0),
+              _data(NULL) { }
+
+    natePixEntryType(const natePixEntryType& other)
+            : _data(NULL) {
+        copy_from(other);
+    }
+
+    natePixEntryType& operator=(const natePixEntryType& other) {
+        copy_from(other);
+        return *this;
+    }
+
+    ~natePixEntryType() {
+        clear();
+    }
+
+    uint32_t width() const { return _width; }
+    uint32_t height() const { return _height; }
+    uint32_t h_offset() const { return _h_offset; }
+    uint32_t v_offset() const { return _v_offset; }
+    char* data() const { return _data; }
+
+    size_t load_data(const char* data, size_t len) {
+        const natePixEntryBinaryType* bin = reinterpret_cast<const natePixEntryBinaryType*>(data);
+        _width = bin->width;
+        _height = bin->height;
+        _h_offset = bin->hOffset;
+        _v_offset = bin->vOffset;
+        _data = new char[_width * _height];
+        memcpy(_data, bin->data, _width * _height);
+        assert(len >= sizeof(natePixEntryBinaryType) + _width * _height);
+        return len;
+    }
+
+    void copy_from(const natePixEntryType& other) {
+        clear();
+        _width = other._width;
+        _height = other._height;
+        _h_offset = other._h_offset;
+        _v_offset = other._v_offset;
+        _data = new char[_width * _height];
+        memcpy(_data, other._data, _width * _height);
+    }
+
+    void clear() {
+        delete[] _data;
+        _data = NULL;
+    }
+
+  private:
+    uint32_t _width;
+    uint32_t _height;
+    uint32_t _h_offset;
+    uint32_t _v_offset;
+    char* _data;
+};
+
+struct natePixBinaryType {
     unsigned long size;
     long pixnum;
     long offsets[];
-
-    natePixEntryType* entryAt(int pixnum) {
-        int thisInt = reinterpret_cast<int>(this);
-        return reinterpret_cast<natePixEntryType*>(thisInt + offsets[pixnum]);
-    }
 };
 
-natePixType** CreateNatePixTable( void)
-{
-    natePixType**   newTable;
+natePixType::natePixType() { }
 
-    newTable = reinterpret_cast<natePixType**>(NewHandle(16L));
-    if ( newTable != nil)
-    {
-        HLock(reinterpret_cast<Handle>(newTable));
-        (*newTable)->size = 8;
-        (*newTable)->pixnum = 0;
-        return ( newTable);
-    } else return ( nil);
+natePixType::natePixType(const natePixType& other) {
+    copy_from(other);
 }
 
-long GetNatePixTablePixNum(natePixType** table)
-{
-    return (*table)->pixnum;
+natePixType& natePixType::operator=(const natePixType& other) {
+    copy_from(other);
+    return *this;
 }
 
-int GetNatePixTableNatePixWidth(natePixType** table, long pixnum)
-{
-    return (*table)->entryAt(pixnum)->width;
+natePixType::~natePixType() {
+    clear();
 }
 
-int GetNatePixTableNatePixHeight(natePixType** table, long pixnum)
-{
-    return (*table)->entryAt(pixnum)->height;
+TypedHandle<natePixType> CreateNatePixTable() {
+    TypedHandle<natePixType> newTable;
+    newTable.create(1);
+    return newTable;
 }
 
-int GetNatePixTableNatePixHRef(natePixType** table, long pixnum)
-{
-    return (*table)->entryAt(pixnum)->hOffset;
+natePixEntryType* natePixType::at(size_t index) const {
+    return _entries.at(index);
 }
 
-int GetNatePixTableNatePixVRef(natePixType** table, long pixnum)
-{
-    return (*table)->entryAt(pixnum)->vOffset;
+size_t natePixType::size() const {
+    return _entries.size();
 }
 
-unsigned char *GetNatePixTableNatePixData(natePixType** table, long pixnum)
-{
-    return (*table)->entryAt(pixnum)->data;
+size_t natePixType::load_data(const char* data, size_t len) {
+    _entries.clear();
+    const natePixBinaryType* bin = reinterpret_cast<const natePixBinaryType*>(data);
+    std::vector<const char*> positions;
+    for (int i = 0; i < bin->pixnum; ++i) {
+        positions.push_back(data + bin->offsets[i]);
+    }
+    positions.push_back(data + len);
+    for (int i = 0; i < bin->pixnum; ++i) {
+        natePixEntryType* entry = new natePixEntryType;
+        const char* entry_data = positions[i];
+        size_t entry_len = positions[i + 1] - positions[i];
+        size_t consumed = entry->load_data(entry_data, entry_len);
+        assert(consumed <= entry_len);
+        _entries.push_back(entry);
+    }
+    return len;
 }
 
-unsigned char GetNatePixTableNatePixDataPixel(natePixType** table, long pixnum, int x, int y)
-{
-    natePixEntryType* entry = (*table)->entryAt(pixnum);
-    int width = entry->width;
+void natePixType::copy_from(const natePixType& other) {
+    clear();
+    for (size_t i = 0; i < other.size(); ++i) {
+        _entries.push_back(new natePixEntryType(*other.at(i)));
+    }
+}
 
-    return entry->data[y * width + x];
+void natePixType::clear() {
+    for (std::vector<natePixEntryType*>::iterator it = _entries.begin();
+            it != _entries.end(); ++it) {
+        delete *it;
+    }
+    _entries.clear();
+}
+
+long GetNatePixTablePixNum(TypedHandle<natePixType> table) {
+    return (*table)->size();
+}
+
+int GetNatePixTableNatePixWidth(TypedHandle<natePixType> table, long pixnum) {
+    return (*table)->at(pixnum)->width();
+}
+
+int GetNatePixTableNatePixHeight(TypedHandle<natePixType> table, long pixnum) {
+    return (*table)->at(pixnum)->height();
+}
+
+int GetNatePixTableNatePixHRef(TypedHandle<natePixType> table, long pixnum) {
+    return (*table)->at(pixnum)->h_offset();
+}
+
+int GetNatePixTableNatePixVRef(TypedHandle<natePixType> table, long pixnum) {
+    return (*table)->at(pixnum)->v_offset();
+}
+
+unsigned char *GetNatePixTableNatePixData(TypedHandle<natePixType> table, long pixnum) {
+    return reinterpret_cast<unsigned char*>((*table)->at(pixnum)->data());
+}
+
+unsigned char GetNatePixTableNatePixDataPixel(TypedHandle<natePixType> table, long pixnum, int x,
+        int y) {
+    natePixEntryType* entry = (*table)->at(pixnum);
+    int width = entry->width();
+
+    return entry->data()[y * width + x];
 }
 
 // GetNatePixTableNatePixPtr:
@@ -136,9 +238,7 @@ void GetNatePixTableNatePixDuplicate( natePix *dPix, Handle table, int pixnum)
 //  given a NatePixTable, converts the raw pixel data based on custom color table, and translates
 //  into device's color table, using Backbone Graphic's GetTranslateIndex().
 
-void RemapNatePixTableColor(natePixType** table)
-
-{
+void RemapNatePixTableColor(TypedHandle<natePixType> table) {
     long            l;
     unsigned char*  p;
     int             i, j, w, h;
@@ -172,9 +272,7 @@ void RemapNatePixTableColor(natePixType** table)
 //  given a NatePixTable, converts the raw pixel data based on custom color table, and translates
 //  into device's color table, but colorizes to color.
 
-void ColorizeNatePixTableColor(natePixType** table, unsigned char color)
-
-{
+void ColorizeNatePixTableColor(TypedHandle<natePixType> table, unsigned char color) {
     long            l, whiteCount, pixelCount;
     unsigned char   pixel, *p;
     int             i, j, w, h;

@@ -21,26 +21,44 @@
 // NatePixTable.h
 
 //#include "NatePix.hpp"
+#include <vector>
 #include "SpriteHandling.hpp"
 
 #pragma options align=mac68k
 
-struct natePixType;
+class natePixEntryType;
+class natePixType {
+  public:
+    natePixType();
+    natePixType(const natePixType& other);
+    natePixType& operator=(const natePixType& other);
+    ~natePixType();
 
-natePixType** CreateNatePixTable( void);
-unsigned long GetNatePixTableSize(natePixType**);
-long GetNatePixTablePixNum(natePixType**);
-int GetNatePixTableNatePixWidth(natePixType**, long);
-int GetNatePixTableNatePixHeight(natePixType**, long);
-int GetNatePixTableNatePixHRef(natePixType**, long);
-int GetNatePixTableNatePixVRef(natePixType**, long);
-unsigned char *GetNatePixTableNatePixData(natePixType**, long);
-unsigned char GetNatePixTableNatePixDataPixel(natePixType**, long, int, int);
-Handle GetNatePixTableNatePixDataCopy(natePixType**, long);
+    natePixEntryType* at(size_t index) const;
+    size_t size() const;
+
+    size_t load_data(const char* data, size_t len);
+    void copy_from(const natePixType& other);
+    void clear();
+
+  private:
+    std::vector<natePixEntryType*> _entries;
+};
+
+TypedHandle<natePixType> CreateNatePixTable();
+unsigned long GetNatePixTableSize(TypedHandle<natePixType>);
+long GetNatePixTablePixNum(TypedHandle<natePixType>);
+int GetNatePixTableNatePixWidth(TypedHandle<natePixType>, long);
+int GetNatePixTableNatePixHeight(TypedHandle<natePixType>, long);
+int GetNatePixTableNatePixHRef(TypedHandle<natePixType>, long);
+int GetNatePixTableNatePixVRef(TypedHandle<natePixType>, long);
+unsigned char *GetNatePixTableNatePixData(TypedHandle<natePixType>, long);
+unsigned char GetNatePixTableNatePixDataPixel(TypedHandle<natePixType>, long, int, int);
+Handle GetNatePixTableNatePixDataCopy(TypedHandle<natePixType>, long);
 // void GetNatePixTableNatePixPtr( natePix *, Handle, int);
 // void GetNatePixTableNatePixDuplicate( natePix *, Handle, int);
-void RemapNatePixTableColor(natePixType**);
-void ColorizeNatePixTableColor(natePixType**, unsigned char);
+void RemapNatePixTableColor(TypedHandle<natePixType>);
+void ColorizeNatePixTableColor(TypedHandle<natePixType>, unsigned char);
 
 #pragma options align=reset
 

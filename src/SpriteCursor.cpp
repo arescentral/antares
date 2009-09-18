@@ -65,7 +65,6 @@ void ResetSpriteCursor( void)
     gSpriteCursor->sprite.lastRect.left = gSpriteCursor->sprite.lastRect.top = 0;
     gSpriteCursor->sprite.lastRect.right = gSpriteCursor->sprite.lastRect.bottom = -1;
     gSpriteCursor->sprite.where = gSpriteCursor->where;
-    gSpriteCursor->sprite.table = nil;
     gSpriteCursor->sprite.whichShape = 0;
     gSpriteCursor->sprite.scale = SCALE_SCALE;
     gSpriteCursor->sprite.style = spriteNormal;
@@ -116,11 +115,12 @@ Boolean SetSpriteCursorTable( short resID)
 
 {
     gSpriteCursor->sprite.table = GetPixTable( resID);
-    if ( gSpriteCursor->sprite.table == nil)
-    {
+    if (gSpriteCursor->sprite.table.get() == nil) {
         gSpriteCursor->sprite.table = AddPixTable( resID);
 
-        if ( gSpriteCursor->sprite.table == nil) return( false);
+        if (gSpriteCursor->sprite.table.get() == nil) {
+            return false;
+        }
         else return( true);
     } else return( true);
 }
@@ -137,8 +137,7 @@ void EraseSpriteCursorSprite( void)
 
     savePixBase = GetGWorldPixMap( gSaveWorld);
     offPixBase = GetGWorldPixMap( gOffWorld);
-    if ( gSpriteCursor->sprite.table != nil)
-    {
+    if (gSpriteCursor->sprite.table.get() != nil) {
         if ( gSpriteCursor->sprite.thisRect.left < gSpriteCursor->sprite.thisRect.right)
         {
             ChunkCopyPixMapToPixMap( *savePixBase,
@@ -193,13 +192,13 @@ void DrawSpriteCursorSprite( longRect *clipRect)
     longRect        sRect, tc;
     spritePix       aSpritePix;
     unsigned char   *pixData;
-    natePixType**   pixTable;
+    TypedHandle<natePixType> pixTable;
     int             whichShape;
     Rect            tRect;
 
     pixMap = GetGWorldPixMap( gOffWorld);
     savePixBase = GetGWorldPixMap( gSaveWorld);
-    if (( gSpriteCursor->sprite.table != nil) &&
+    if ((gSpriteCursor->sprite.table.get() != nil) &&
         ( gSpriteCursor->showLevel >= kSpriteCursorVisible))
     {
         MacSetRect( &tRect, gSpriteCursor->where.h - 16, gSpriteCursor->where.v - 16,
@@ -226,7 +225,7 @@ void DrawSpriteCursorSprite( longRect *clipRect)
             0, 0);
     }
 
-    if (( gSpriteCursor->sprite.table != nil) &&
+    if ((gSpriteCursor->sprite.table.get() != nil) &&
         ( gSpriteCursor->showLevel >= kSpriteCursorVisible))
     {
         pixTable = gSpriteCursor->sprite.table;
@@ -285,8 +284,7 @@ void ShowSpriteCursorSprite( void)
     SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
     pixMap = GetGWorldPixMap( gOffWorld);
-    if ( gSpriteCursor->sprite.table != nil)
-    {
+    if (gSpriteCursor->sprite.table.get() != nil) {
         // if thisRect is null
         if (( gSpriteCursor->sprite.thisRect.right <=
                 gSpriteCursor->sprite.thisRect.left) ||

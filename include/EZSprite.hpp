@@ -25,7 +25,7 @@
 void EZDrawSpriteOffByID( short, long, long, unsigned char, Rect *);
 void EZDrawSpriteOffToOnByID( short, long, long, unsigned char, Rect *);
 void EZDrawSpriteCenteredInRectBySprite( spritePix *, PixMapHandle, long, Rect *);
-void EZMakeSpriteFromID( short, natePixType***, spritePix *, unsigned char **, long);
+void EZMakeSpriteFromID( short, TypedHandle<natePixType>*, spritePix *, unsigned char **, long);
 void DrawAnySpriteOffToOn( short, long, long, unsigned char, Rect *);
 
 #endif // ANTARES_EZSPRITE_HPP_

@@ -452,7 +452,7 @@ void InsertWeaponText( short resID, short startNum, Handle newText, weaponDataTy
 OSErr ConvertSpriteIntoGIF(short resID, long whichShape, unsigned char* forceName)
 {
     Boolean             tableExisted = true;
-    natePixType**       spriteTable = nil;
+    TypedHandle<natePixType> spriteTable;
     Rect                r;
     PixMapHandle        offPixBase = GetGWorldPixMap( gOffWorld);
     spritePix           aSpritePix;
@@ -469,13 +469,14 @@ OSErr ConvertSpriteIntoGIF(short resID, long whichShape, unsigned char* forceNam
     GetPort( &oldPort);
     mWriteDebugString("\pOpening:");
     WriteDebugLong( resID);
-    spriteTable = reinterpret_cast<natePixType**>(GetPixTable( resID));
-    if ( spriteTable == nil)
-    {
+    spriteTable = GetPixTable(resID);
+    if (spriteTable.get() == nil) {
         mWriteDebugString("\pNot Exist--adding.");
         tableExisted = false;
         spriteTable = AddPixTable( resID);
-        if ( spriteTable == nil) return ( -1);
+        if (spriteTable.get() == nil) {
+            return -1;
+        }
         mWriteDebugString("\padded.");
     }
 

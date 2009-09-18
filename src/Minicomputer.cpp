@@ -1458,7 +1458,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     unsigned char       *pixData = nil;
     coordPointType      coord;
     Point               where;
-    natePixType**       pixTable = nil;
+    TypedHandle<natePixType> pixTable;
     short               whichShape;
     spaceObjectType     *dObject = nil;
     long                tlong, thisScale;
@@ -1567,8 +1567,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         {
             pixTable =  GetPixTable( newObject->pixResID);
 
-            if ( pixTable != nil)
-            {
+            if (pixTable.get() != nil) {
                 if ( newObject->attributes & kIsSelfAnimated)
                     whichShape = newObject->baseType->frame.animation.firstShape >> kFixedBitShiftNumber;
                 else

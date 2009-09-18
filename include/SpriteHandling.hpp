@@ -22,6 +22,7 @@
 
 #include <Base.h>
 
+#include "Handle.hpp"
 #include "NateDraw.hpp"
 
 #define kNoSpriteTable  -1
@@ -92,7 +93,7 @@ struct spritePix {
 struct natePixType;
 struct spriteType {
     Point           where;
-    natePixType**   table;
+    TypedHandle<natePixType> table;
     short           resID;
     int             whichShape;
     long            scale;
@@ -110,7 +111,7 @@ struct spriteType {
 
 
 struct pixTableType {
-    natePixType**   resource;
+    TypedHandle<natePixType> resource;
     int         resID;
     Boolean     keepMe;
     };
@@ -134,9 +135,9 @@ void ResetAllPixTables( void);
 void SetAllPixTablesNoKeep( void);
 void KeepPixTable( short);
 void RemoveAllUnusedPixTables( void);
-natePixType** AddPixTable( short);
-natePixType** GetPixTable( short);
-spriteType *AddSprite( Point, natePixType**, short, short, long, long, short, unsigned char, long *);
+TypedHandle<natePixType> AddPixTable( short);
+TypedHandle<natePixType> GetPixTable( short);
+spriteType *AddSprite( Point, TypedHandle<natePixType>, short, short, long, long, short, unsigned char, long *);
 void RemoveSprite( spriteType *);
 void EraseSpriteTable( void);
 void DrawSpriteTableInOffWorld( longRect *);

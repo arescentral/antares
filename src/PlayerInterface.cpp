@@ -4852,7 +4852,7 @@ void ShowSuccessAnimation( WindowPtr thePort)
     Point           vanishingPoint, shipPoint;
     longRect        starBounds, spriteBounds;
     Rect            tRect, lastBounds, theseBounds;
-    natePixType**   shipSprite = nil;
+    TypedHandle<natePixType> shipSprite;
     spritePix       aSpritePix;
     unsigned char   *pixData;
     unsigned char   color, *getwidchar, *getwidwid; // for getting string width
@@ -4877,12 +4877,8 @@ void ShowSuccessAnimation( WindowPtr thePort)
 
     SetAllSoundsNoKeep();
     RemoveAllUnusedSounds();
-    shipSprite = reinterpret_cast<natePixType**>(GetResource(kPixResType, kDebriefShipResID));
-    if ( shipSprite != nil)
-    {
-        DetachResource(reinterpret_cast<Handle>(shipSprite));
-        MoveHHi(reinterpret_cast<Handle>(shipSprite));
-        HLock(reinterpret_cast<Handle>(shipSprite));
+    shipSprite.load_resource(kPixResType, kDebriefShipResID);
+    if (shipSprite.get() != nil) {
         RemapNatePixTableColor(shipSprite);
 
         AddSound( 516);
@@ -5008,7 +5004,7 @@ void ShowSuccessAnimation( WindowPtr thePort)
             Show3DStars( TRUE, &starBounds, pixMap);
         }
         MacShowCursor();
-        DisposeHandle(reinterpret_cast<Handle>(shipSprite));
+        shipSprite.destroy();
     }
 }
 

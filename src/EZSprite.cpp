@@ -38,14 +38,16 @@ void EZDrawSpriteOffByID( short resID, long whichShape, long scale, unsigned cha
     Rect *bounds)
 {
     GrafPtr             oldPort;
-    natePixType**       spriteTable = nil;
+    TypedHandle<natePixType> spriteTable;
     spritePix           aSpritePix;
     PixMapHandle        offPixBase = GetGWorldPixMap( gOffWorld);
     unsigned char       *pixData;
 
     GetPort( &oldPort);
     EZMakeSpriteFromID( resID, &spriteTable, &aSpritePix, &pixData, whichShape);
-    if ( spriteTable == nil) return;
+    if (spriteTable.get() == nil) {
+        return;
+    }
 
     if ( color != 0) ColorizeNatePixTableColor( spriteTable, color);
     else RemapNatePixTableColor( spriteTable);
@@ -54,7 +56,7 @@ void EZDrawSpriteOffByID( short resID, long whichShape, long scale, unsigned cha
     NormalizeColors();
     EZDrawSpriteCenteredInRectBySprite( &aSpritePix, offPixBase, scale, bounds);
 
-    ReleaseResource(reinterpret_cast<Handle>(spriteTable));
+    spriteTable.destroy();
 
     MacSetPort( oldPort);
 }
@@ -69,14 +71,16 @@ void EZDrawSpriteOffToOnByID( short resID, long whichShape, long scale,
     unsigned char color, Rect *bounds)
 {
     GrafPtr             oldPort;
-    natePixType**       spriteTable = nil;
+    TypedHandle<natePixType> spriteTable;
     spritePix           aSpritePix;
     PixMapHandle        offPixBase = GetGWorldPixMap( gOffWorld);
     unsigned char       *pixData;
 
     GetPort( &oldPort);
     EZMakeSpriteFromID( resID, &spriteTable, &aSpritePix, &pixData, whichShape);
-    if ( spriteTable == nil) return;
+    if (spriteTable.get() == nil) {
+        return;
+    }
 
     if ( color != 0) ColorizeNatePixTableColor( spriteTable, color);
     else RemapNatePixTableColor( spriteTable);
@@ -85,7 +89,7 @@ void EZDrawSpriteOffToOnByID( short resID, long whichShape, long scale,
     NormalizeColors();
     EZDrawSpriteCenteredInRectBySprite( &aSpritePix, offPixBase, scale, bounds);
 
-    ReleaseResource(reinterpret_cast<Handle>(spriteTable));
+    spriteTable.destroy();
 
     DrawInRealWorld();
     CopyOffWorldToRealWorld( gTheWindow, bounds);
@@ -136,12 +140,13 @@ void EZDrawSpriteCenteredInRectBySprite( spritePix *aSpritePix,
 //  spriteTable is locked and unlocking it invalidates aSpritePix->pixData.
 //  Note that, unfortunately, you have to keep the pixData ptr alive.
 
-void EZMakeSpriteFromID( short resID, natePixType*** spriteTable, spritePix *aSpritePix,
+void EZMakeSpriteFromID( short resID, TypedHandle<natePixType>* spriteTable, spritePix *aSpritePix,
     unsigned char **pixData, long whichShape)
 {
-    *spriteTable = reinterpret_cast<natePixType**>(GetResource( kPixResType, resID));
-    if ( *spriteTable == nil) return;
-    HLock( reinterpret_cast<Handle>(*spriteTable));
+    spriteTable->load_resource(kPixResType, resID);
+    if (spriteTable->get() == nil) {
+        return;
+    }
 
     *pixData = GetNatePixTableNatePixData( *spriteTable, whichShape);
 
@@ -155,7 +160,7 @@ void EZMakeSpriteFromID( short resID, natePixType*** spriteTable, spritePix *aSp
 void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned char color,
     Rect *bounds)
 {
-    natePixType**       spriteTable = nil;
+    TypedHandle<natePixType> spriteTable;
     PixMapHandle        offPixBase = GetGWorldPixMap( gOffWorld);
     spritePix           aSpritePix;
     unsigned char       *pixData;
@@ -168,9 +173,10 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
     GetPort( &oldPort);
     mWriteDebugString("\pOpening:");
     WriteDebugLong( resID);
-    spriteTable = reinterpret_cast<natePixType**>(GetResource(kPixResType, resID));
-    if ( spriteTable == nil) return;
-    HLock(reinterpret_cast<Handle>(spriteTable));
+    spriteTable.load_resource(kPixResType, resID);
+    if (spriteTable.get() == nil) {
+        return;
+    }
 
     if ( color != 0) ColorizeNatePixTableColor( spriteTable, color);
     else RemapNatePixTableColor( spriteTable);
@@ -222,7 +228,7 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
 
     // clean up the sprite
 
-    ReleaseResource(reinterpret_cast<Handle>(spriteTable));
+    spriteTable.destroy();
 
     DrawInRealWorld();
     CopyOffWorldToRealWorld( gTheWindow, bounds);
