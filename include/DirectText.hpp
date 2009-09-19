@@ -58,6 +58,8 @@ struct directTextType {
     long        physicalWidth;
     long        height;
     long        ascent;
+
+    size_t load_data(const char* data, size_t len);
 };
 
 extern long gWhichDirectText;

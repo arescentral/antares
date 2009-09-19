@@ -41,10 +41,16 @@ long                gWhichDirectText = 0;
 TypedHandle<unsigned long> gFourBitTable;  // for turning 4-bit masks into 8-bit masks on the fly
 TypedHandle<directTextType> gDirectTextData;
 
+size_t directTextType::load_data(const char* data, size_t len) {
+    assert(len >= sizeof(directTextType));
+    memcpy(this, data, sizeof(directTextType));
+    return sizeof(directTextType);
+}
+
 int InitDirectText( void)
 
 {
-    Handle          tData = nil;
+    TypedHandle<directTextType> tData;
     unsigned char   i, *c;
     short           count;
     directTextType  *dtext = nil;
@@ -71,17 +77,13 @@ int InitDirectText( void)
 
     // add # 0, kTacticalFontNum
     dtext = *gDirectTextData + kTacticalFontNum;
-    tData = GetResource( kDTextDescriptResType, kTacticalFontResID);
-    if ( tData == nil)
-    {
+    tData.load_resource(kDTextDescriptResType, kTacticalFontResID);
+    if (tData.get() == nil) {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, kTacticalFontResID);
         return( RESOURCE_ERROR);
     }
-    DetachResource( tData);
-    MoveHHi( tData);
-    HLock( tData);
     BlockMove( *tData, dtext, sizeof( directTextType));
-    DisposeHandle( tData);
+    tData.destroy();
 
     gDirectText = dtext;
     gWhichDirectText = 0;
@@ -89,81 +91,61 @@ int InitDirectText( void)
 
     // add # 1, kComputerFontNum
     dtext = *gDirectTextData + kComputerFontNum;
-    tData = GetResource( kDTextDescriptResType, kComputerFontResID);
-    if ( tData == nil)
-    {
+    tData.load_resource(kDTextDescriptResType, kComputerFontResID);
+    if (tData.get() == nil) {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, kComputerFontResID);
         return( RESOURCE_ERROR);
     }
-    DetachResource( tData);
-    MoveHHi( tData);
-    HLock( tData);
     BlockMove( *tData, dtext, sizeof( directTextType));
-    DisposeHandle( tData);
+    tData.destroy();
 
     AddDirectFont( dtext);
 
     // add # 2, kButtonFontNum
     dtext = *gDirectTextData + kButtonFontNum;
-    tData = GetResource( kDTextDescriptResType, kButtonFontResID);
-    if ( tData == nil)
-    {
+    tData.load_resource(kDTextDescriptResType, kButtonFontResID);
+    if (tData.get() == nil) {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, kButtonFontResID);
         return( RESOURCE_ERROR);
     }
-    DetachResource( tData);
-    MoveHHi( tData);
-    HLock( tData);
     BlockMove( *tData, dtext, sizeof( directTextType));
-    DisposeHandle( tData);
+    tData.destroy();
 
     AddDirectFont( dtext);
 
     // add # 3, kMessageFontNum
     dtext = *gDirectTextData + kMessageFontNum;
-    tData = GetResource( kDTextDescriptResType, kMessageFontResID);
-    if ( tData == nil)
-    {
+    tData.load_resource(kDTextDescriptResType, kMessageFontResID);
+    if (tData.get() == nil) {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, kMessageFontResID);
         return( RESOURCE_ERROR);
     }
-    DetachResource( tData);
-    MoveHHi( tData);
-    HLock( tData);
     BlockMove( *tData, dtext, sizeof( directTextType));
-    DisposeHandle( tData);
+    tData.destroy();
 
     AddDirectFont( dtext);
 
     // add # 4, kTitleFontNum
     dtext = *gDirectTextData + kTitleFontNum;
-    tData = GetResource( kDTextDescriptResType, kTitleFontResID);
-    if ( tData == nil)
-    {
+    tData.load_resource(kDTextDescriptResType, kTitleFontResID);
+    if (tData.get() == nil) {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, kTitleFontResID);
         return( RESOURCE_ERROR);
     }
-    DetachResource( tData);
-    MoveHHi( tData);
-    HLock( tData);
     BlockMove( *tData, dtext, sizeof( directTextType));
-    DisposeHandle( tData);
+    tData.destroy();
 
     AddDirectFont( dtext);
 
     // add # 5, kButtonSmallFontNum
     dtext = *gDirectTextData + kButtonSmallFontNum;
-    tData = GetResource( kDTextDescriptResType, kButtonSmallFontResID);
-    if ( tData == nil)
-    {
+    tData.load_resource(kDTextDescriptResType, kButtonSmallFontResID);
+    if (tData.get() == nil) {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, kButtonSmallFontResID);
         return( RESOURCE_ERROR);
     }
-    DetachResource( tData);
-    MoveHHi( tData);
-    HLock( tData);
     BlockMove( *tData, dtext, sizeof( directTextType));
-    DisposeHandle( tData);
+    tData.destroy();
 
     AddDirectFont( dtext);
 

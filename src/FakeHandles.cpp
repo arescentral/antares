@@ -28,7 +28,6 @@ Handle GetResource(FourCharCode code, int id) {
       case 'NLRP':
       case 'TEXT':
       case 'intr':
-      case 'nlFD':
       case 'nlFM':
         try {
             Resource rsrc(code, id);
