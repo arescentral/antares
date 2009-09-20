@@ -4543,7 +4543,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
                             starPoint.v, 0, 0, color);
 
                 oldRect = *usedRect;
-                BiggestRect( &oldRect, &newRect);
+                BiggestRect(&oldRect, bounds);
                 DrawInRealWorld();
                 NormalizeColors();
                 CopyOffWorldToRealWorld(gTheWindow, &oldRect);
