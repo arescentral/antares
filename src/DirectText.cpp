@@ -65,7 +65,6 @@ int InitDirectText( void)
     dtext = *gDirectTextData;
     for  ( count = 0; count < kDirectFontNum; count++)
     {
-        dtext->charSet = nil;
         dtext->resID = 0;
         dtext->myHandle = FALSE;
         dtext->logicalWidth = 0;
@@ -194,8 +193,9 @@ void DirectTextCleanup( void)
     dtext = *gDirectTextData;
     for  ( count = 0; count < kDirectFontNum; count++)
     {
-        if (( dtext->myHandle) && ( dtext->charSet != nil))
-            DisposeHandle(reinterpret_cast<Handle>(dtext->charSet));
+        if ((dtext->myHandle) && (dtext->charSet.get() != nil)) {
+            dtext->charSet.destroy();
+        }
         dtext++;
     }
     if (gFourBitTable.get() != nil) {
@@ -250,13 +250,11 @@ short AddDirectFont( directTextType *dtext)
         dtext->myHandle = FALSE;
     } else
     {
-        dtext->charSet = GetResource(kDTextFontMapResType, dtext->resID);
-        if ( dtext->charSet == nil)
-        {
+        dtext->charSet.load_resource(kDTextFontMapResType, dtext->resID);
+        if (dtext->charSet.get() == nil) {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, dtext->resID);
             return( RESOURCE_ERROR);
         }
-        DetachResource(reinterpret_cast<Handle>(dtext->charSet));
         dtext->myHandle = TRUE;
         WriteDebugLine("\pAddCharSet:");
         WriteDebugLong( dtext->resID);

@@ -51,7 +51,7 @@
 #define kButtonSmallFontResID   5005
 
 struct directTextType {
-    unsigned char**     charSet;
+    TypedHandle<unsigned char> charSet;
     short       resID;
     ShortBoolean     myHandle;       // different texts can have the same handles; myHandle = TRUE if this guy's in charge of disposing
     long        logicalWidth;

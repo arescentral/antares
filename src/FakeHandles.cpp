@@ -26,7 +26,6 @@
 Handle GetResource(FourCharCode code, int id) {
     switch (code) {
       case 'NLRP':
-      case 'nlFM':
         try {
             Resource rsrc(code, id);
             return (new HandleData<void>(rsrc.size(), rsrc.data()))->ToHandle();
