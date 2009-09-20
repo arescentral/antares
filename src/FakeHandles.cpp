@@ -26,7 +26,6 @@
 Handle GetResource(FourCharCode code, int id) {
     switch (code) {
       case 'NLRP':
-      case 'TEXT':
       case 'intr':
       case 'nlFM':
         try {
@@ -87,6 +86,22 @@ OSErr PtrToHand(void* ptr, Handle* handle, int len) {
 OSErr HandToHand(Handle* handle) {
     *handle = HandleBase::FromHandle(*handle)->Clone()->ToHandle();
     return noErr;
+}
+
+int Munger(TypedHandle<unsigned char> data, int pos, const unsigned char* search, size_t search_len,
+        const unsigned char* replace, size_t replace_len) {
+    std::string s(reinterpret_cast<const char*>(search), search_len);
+    std::string r(reinterpret_cast<const char*>(replace), replace_len);
+    std::string d(reinterpret_cast<const char*>(*data), data.count());
+    std::string::size_type at = d.find(s, pos);
+    if (at != std::string::npos) {
+        if (replace_len > search_len) {
+            data.resize(data.count() + replace_len - search_len);
+        }
+        memcpy(*data + at, r.c_str(), r.size());
+        memcpy(*data + at + r.size(), d.c_str() + at + s.size(), d.size() - at - s.size());
+    }
+    return at;
 }
 
 void FakeHandlesInit() {

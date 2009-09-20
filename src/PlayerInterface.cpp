@@ -769,7 +769,10 @@ void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
 
         strPtr = levelName + 1;
         retroTextSpec.textLength = *levelName;
-        retroTextSpec.text = &strPtr;
+        retroTextSpec.text.create(retroTextSpec.textLength);
+        for (int i = 0; i < retroTextSpec.textLength; ++i) {
+            (*retroTextSpec.text)[i] = strPtr[i];
+        }
 
         retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
         retroTextSpec.tabSize =220;
@@ -809,6 +812,7 @@ void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
             */
         }
 
+        retroTextSpec.text.destroy();
 
 //      DrawDirectTextStringClipped( levelName, color, *offMap, &lRect, 0, 0);
         LongRectToRect( &boundsRect, &tRect);
@@ -1291,14 +1295,13 @@ void DoHelpScreen( void)
         DrawAllItemsOfKind( kPlainButton, TRUE, FALSE, FALSE);
         DrawAllItemsOfKind( kTextRect, TRUE, FALSE, FALSE);
 
-        if ( gAresGlobal->gOptions & kOptionSubstituteFKeys)
-            retroTextSpec.text = GetResource( 'TEXT', kNOFHelpScreenTextID);
-        else
-            retroTextSpec.text = GetResource( 'TEXT', kHelpScreenTextID);
-        if ( retroTextSpec.text != nil)
-        {
-            DetachResource( retroTextSpec.text);
+        if ( gAresGlobal->gOptions & kOptionSubstituteFKeys) {
+            retroTextSpec.text.load_resource('TEXT', kNOFHelpScreenTextID);
+        } else {
+            retroTextSpec.text.load_resource('TEXT', kHelpScreenTextID);
+        }
 
+        if (retroTextSpec.text.get() != nil) {
 /*          for ( l = 0; l < kKeyControlNum; l++)
             {
                 GetKeyNumName( numString, GetKeyNumFromKeyMap( gAresGlobal->gKeyControl[l]));
@@ -1317,7 +1320,7 @@ void DoHelpScreen( void)
             Replace_KeyCode_Strings_With_Actual_Key_Names( retroTextSpec.text, kKeyMapNameID,
                 4);
 
-            retroTextSpec.textLength = GetHandleSize( retroTextSpec.text);
+            retroTextSpec.textLength = retroTextSpec.text.count();
 
             mSetDirectFont( kComputerFontNum);
             retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
@@ -1360,7 +1363,8 @@ void DoHelpScreen( void)
                 waitTime = TickCount();
                 while (( TickCount() - waitTime) < 3);
             }
-*/          DisposeHandle( retroTextSpec.text);
+*/
+            retroTextSpec.text.destroy();
         }
 
         while ( AnyRealKeyDown()) {
@@ -4008,7 +4012,7 @@ void DrawLevelNameInBox(unsigned char* name, long fontNum, short descriptionText
     transColorType          *transColor;
     interfaceItemType       *anItem;
     long                    height, descriptionLength = 0;
-    Handle                  textData = nil;
+    TypedHandle<unsigned char> textData;
 
     offMap = GetGWorldPixMap( gOffWorld);
     anItem = GetAnyInterfaceItemPtr( itemNum);
@@ -4016,32 +4020,26 @@ void DrawLevelNameInBox(unsigned char* name, long fontNum, short descriptionText
 
     if ( descriptionTextID > 0)
     {
-        textData = GetResource( 'TEXT', descriptionTextID);
-        if ( textData != nil)
-        {
-            DetachResource( textData);
-            MoveHHi( textData);
-            HLock( textData);
-            descriptionLength = GetHandleSize( textData);
+        textData.load_resource('TEXT', descriptionTextID);
+        if (textData.get() != nil) {
+            descriptionLength = textData.count();
         }
     }
 
     descriptionLength += name[0];
     retroTextSpec.textLength = descriptionLength;
-    retroTextSpec.text = NewHandle( descriptionLength);
-    if ( retroTextSpec.text == nil)
-    {
-        if ( textData != nil) DisposeHandle( textData);
+    retroTextSpec.text.create(descriptionLength);
+    if (retroTextSpec.text.get() == nil) {
+        if (textData.get() != nil) {
+            textData.destroy();
+        }
         return;
     }
 
-    MoveHHi( retroTextSpec.text);
-    HLock( retroTextSpec.text);
     BlockMove( name + 1, *retroTextSpec.text, name[0]);
-    if ( textData != nil)
-    {
-        BlockMove( *textData, *retroTextSpec.text + name[0], GetHandleSize( textData));
-        DisposeHandle( textData);
+    if (textData.get() != nil) {
+        BlockMove( *textData, *retroTextSpec.text + name[0], textData.count());
+        textData.destroy();
     }
 
     retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
@@ -4072,7 +4070,7 @@ void DrawLevelNameInBox(unsigned char* name, long fontNum, short descriptionText
     DrawInRealWorld();
     DrawDirectTextInRect( &retroTextSpec, &anItem->bounds, &clipRect, *offMap, 0,0);
     CopyOffWorldToRealWorld(gTheWindow, &tRect);
-    DisposeHandle( retroTextSpec.text);
+    retroTextSpec.text.destroy();
 }
 
 Boolean DoMissionInterface( long whichScenario)
@@ -4360,7 +4358,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
 
 {
     Rect            oldRect, newRect, hiliteBounds;
-    Handle          textData;
+    TypedHandle<unsigned char> textData;
     long            length = 0, headerID, headerNumber, contentID, textlength = 0,
                     i;
     short           textHeight = 0;
@@ -4388,12 +4386,9 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
         BriefPoint_Data_Get( whichBriefPoint, whichScenario, &headerID, &headerNumber, &contentID,
                                  &hiliteBounds, corner, scale, 16, 32, bounds);
 
-        textData = GetResource( 'TEXT', contentID);
-        if ( textData != nil)
-        {
-            HLockHi( textData);
-
-            textlength = length = GetHandleSize( textData);
+        textData.load_resource('TEXT', contentID);
+        if (textData.get() != nil) {
+            textlength = length = textData.count();
             textHeight = GetInterfaceTextHeightFromWidth(*textData, length,
                             dataItem->style, kMissionDataWidth);
         }
@@ -4478,12 +4473,11 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
         DrawAnyInterfaceItem( dataItem, *offMap, 0, 0);
 
         DrawInOffWorld();
-        if ( textData != nil)
-        {
+        if (textData.get() != nil) {
             LongRectToRect( &(dataItem->bounds), &newRect);
             DrawInterfaceTextInRect(&newRect, *textData, length,
                             dataItem->style, dataItem->color, *offMap, 0, 0, inlinePict);
-            ReleaseResource( textData);
+            textData.destroy();
         }
 
         DrawInRealWorld();
@@ -4581,7 +4575,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
     Str255          tempString, numString;
     retroTextSpecType   retroTextSpec;
     long            height, waitTime, i;
-    Handle          weaponText;
+    TypedHandle<unsigned char> weaponText;
 
     // find object who belongs to this pict id
     i = 0;
@@ -4597,11 +4591,8 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
     {
         HideCursor();
 
-        retroTextSpec.text = GetResource( 'TEXT', kShipDataTextID);
-        if ( retroTextSpec.text != nil)
-        {
-            DetachResource( retroTextSpec.text);
-
+        retroTextSpec.text.load_resource('TEXT', kShipDataTextID);
+        if ( retroTextSpec.text.get() != nil) {
             // *** Replace place-holders in text with real data, using the fabulous Munger routine
             // an object or a ship?
             if ( baseObject->attributes & kCanThink)
@@ -4653,36 +4644,27 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
 
             GetIndString( numString, kShipDataNameID, kShipDataPulseStringNum);
             weaponText = CreateWeaponDataText( baseObject->pulse, numString);
-            if ( weaponText != nil)
-            {
-                HLock( weaponText);
-                HandAndHand( weaponText, retroTextSpec.text);
-                HUnlock( weaponText);
-                DisposeHandle( weaponText);
+            if (weaponText.get() != nil) {
+                retroTextSpec.text.extend(weaponText);
+                weaponText.destroy();
             }
 
             GetIndString( numString, kShipDataNameID, kShipDataBeamStringNum);
             weaponText = CreateWeaponDataText( baseObject->beam, numString);
-            if ( weaponText != nil)
-            {
-                HLock( weaponText);
-                HandAndHand( weaponText, retroTextSpec.text);
-                HUnlock( weaponText);
-                DisposeHandle( weaponText);
+            if (weaponText.get() != nil) {
+                retroTextSpec.text.extend(weaponText);
+                weaponText.destroy();
             }
 
             GetIndString( numString, kShipDataNameID, kShipDataSpecialStringNum);
             weaponText = CreateWeaponDataText( baseObject->special, numString);
-            if ( weaponText != nil)
-            {
-                HLock( weaponText);
-                HandAndHand( weaponText, retroTextSpec.text);
-                HUnlock( weaponText);
-                DisposeHandle( weaponText);
+            if (weaponText.get() != nil) {
+                retroTextSpec.text.extend(weaponText);
+                weaponText.destroy();
             }
 
 
-            retroTextSpec.textLength = GetHandleSize( retroTextSpec.text);
+            retroTextSpec.textLength = retroTextSpec.text.count();
 
             mSetDirectFont( kButtonFontNum);
             retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
@@ -4747,7 +4729,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
                 };
             }
 
-            DisposeHandle( retroTextSpec.text);
+            retroTextSpec.text.destroy();
         }
 
         MacShowCursor();
@@ -4759,9 +4741,9 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
     }
 }
 
-Handle CreateWeaponDataText(long whichWeapon, unsigned char* weaponName) {
+TypedHandle<unsigned char> CreateWeaponDataText(long whichWeapon, unsigned char* weaponName) {
     baseObjectType      *weaponObject, *missileObject;
-    Handle              weaponText = nil;
+    TypedHandle<unsigned char> weaponText;
     Str255              numString, tempString;
     long                mostDamage, actionNum;
     objectActionType    *action;
@@ -4771,11 +4753,8 @@ Handle CreateWeaponDataText(long whichWeapon, unsigned char* weaponName) {
     {
         weaponObject = *gBaseObjectData + whichWeapon;
 
-        weaponText = GetResource( 'TEXT', kWeaponDataTextID);
-        if ( weaponText != nil)
-        {
-            DetachResource( weaponText);
-
+        weaponText.load_resource('TEXT', kWeaponDataTextID);
+        if (weaponText.get() != nil) {
             // damage; this is tricky--we have to guess by walking through activate actions,
             //  and for all the createObject actions, see which creates the most damaging
             //  object.  We calc this first so we can use isGuided
@@ -5072,11 +5051,8 @@ void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, lo
         } else score += kKillsPoints * 2;
     } else score += kKillsPoints;
 
-    retroTextSpec.text = GetResource( 'TEXT', kSummaryTextID);
-    if ( retroTextSpec.text != nil)
-    {
-        DetachResource( retroTextSpec.text);
-
+    retroTextSpec.text.load_resource('TEXT', kSummaryTextID);
+    if (retroTextSpec.text.get() != nil) {
         // *** Replace place-holders in text with real data, using the fabulous Munger routine
         // your minutes
         NumToString( yourlength / 60, numString);
@@ -5144,7 +5120,7 @@ void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, lo
         GetIndString( tempString, kSummaryKeyStringID, kParScoreStringNum);
         Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
 
-        retroTextSpec.textLength = GetHandleSize( retroTextSpec.text);
+        retroTextSpec.textLength = retroTextSpec.text.count();
 
         mSetDirectFont( kButtonFontNum);
         retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
@@ -5194,7 +5170,7 @@ void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, lo
                 // DO NOTHING
             };
         }
-        DisposeHandle( retroTextSpec.text);
+        retroTextSpec.text.destroy();
     }
 
 //  WriteDebugLine((char *)"\plength:");
@@ -5210,7 +5186,7 @@ void DoMissionDebriefingText( WindowPtr thePort, long textID, long yourlength, l
             long yourloss, long parloss, long yourkill, long parkill, long parScore)
 {
     Rect                tRect, iRect, scoreRect;
-    Handle              textData;
+    TypedHandle<unsigned char> textData;
     long                length, autoTimeStart, textlength = 0;
     short               textHeight = 0;
     Boolean             doScore = (parScore >= 0);
@@ -5221,12 +5197,9 @@ void DoMissionDebriefingText( WindowPtr thePort, long textID, long yourlength, l
     MacSetRect( &iRect, 0, 0, kDebriefTextWidth, 1);
 
     dataItem.style = kLarge;
-    textData = GetResource( 'TEXT', textID);
-    if ( textData != nil)
-    {
-        HLockHi( textData);
-
-        textlength = length = GetHandleSize( textData);
+    textData.load_resource('TEXT', textID);
+    if (textData.get() != nil) {
+        textlength = length = textData.count();
         textHeight = GetInterfaceTextHeightFromWidth(*textData, length,
                         dataItem.style, kDebriefTextWidth);
         if ( doScore) textHeight += kScoreTableHeight;
@@ -5253,7 +5226,7 @@ void DoMissionDebriefingText( WindowPtr thePort, long textID, long yourlength, l
         DrawInterfaceTextInRect(&tRect, *textData, length,
                             dataItem.style, dataItem.color, *offMap, 0, 0, nil);
 
-        ReleaseResource( textData);
+        textData.destroy();
 
         DrawInRealWorld();
         NormalizeColors();
@@ -5297,7 +5270,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
     Str255              movieName;
     Rect                tRect, uRect, vRect, pictRect, pictSourceRect, movieRect;
     PixMapHandle        offMap = GetGWorldPixMap( gOffWorld), saveMap = GetGWorldPixMap( gSaveWorld);
-    Handle              textHandle;
+    TypedHandle<unsigned char> textHandle;
     unsigned char       *thisChar = nil, *sectionStart = nil, *nextChar;
     PicHandle           thePict = nil, bgPict = nil;
     Boolean             sectionOver, abort = false, wasPicture = true;
@@ -5321,15 +5294,9 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
     BlackenWindow();
 
 
-    textHandle = GetResource( 'TEXT', textID);
+    textHandle.load_resource('TEXT', textID);
     if ( ResError() != noErr) return;//Debugger();
-    if ( textHandle != nil)
-    {
-        DetachResource( textHandle);
-        if ( MemError() != noErr) return;//Debugger();
-        HLockHi( textHandle);
-        if ( MemError() != noErr) return;//Debugger();
-
+    if (textHandle.get() != nil) {
         mSetDirectFont( textFontNum);
 
         boundsRect.left = (WORLD_WIDTH / 2) - ( scrollWidth / 2);
@@ -5379,7 +5346,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
 
         // look for beginning of section
         charNum = 0;
-        textLength = GetHandleSize( textHandle);
+        textLength = textHandle.count();
         sectionStart = *textHandle;
 
         // while we still have text to do
@@ -5496,15 +5463,15 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                 }
             }
 //          retroTextSpec.text = NewHandle( 1);
-            retroTextSpec.text = nil;
-            if ( PtrToHand( sectionStart, &(retroTextSpec.text), sectionLength) == noErr)
-            {
-                if ( retroTextSpec.text != nil)
-                {
+            retroTextSpec.text.create(sectionLength);
+            for (int i = 0; i < sectionLength; ++i) {
+                (*retroTextSpec.text)[i] = sectionStart[i];
+            }
+            if (true) {
+                if (retroTextSpec.text.get() != nil) {
                     sectionStart = thisChar;
-                    HLockHi( retroTextSpec.text);
 
-                    retroTextSpec.textLength = GetHandleSize( retroTextSpec.text);
+                    retroTextSpec.textLength = retroTextSpec.text.count();
 
                     retroTextSpec.thisPosition = retroTextSpec.linePosition =
                         retroTextSpec.lineCount = 0;
@@ -5757,11 +5724,9 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                             if ( AnyEvent()) abort = true;
                         }
                     }
-                    HUnlock( retroTextSpec.text);
                     if ( MemError() != noErr) return;//Debugger();
-                    DisposeHandle( retroTextSpec.text);
+                    retroTextSpec.text.destroy();
                     if ( MemError() != noErr) return;//Debugger();
-                    retroTextSpec.text = nil;
                 }// else DebugStr("\pNil Handle");
             }// else DebugStr("\pError");
         }
@@ -5806,10 +5771,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
             }
             if ( AnyEvent()) abort = true;
         }
-        HUnlock( textHandle);
-        if ( MemError() != noErr) return//Debugger();
-        DisposeHandle( textHandle);
-        if ( MemError() != noErr) return;//Debugger();
+        textHandle.destroy();
     } else SysBeep( 20);
 
     while ( AnyRealKeyDown()) {
@@ -5930,7 +5892,7 @@ Boolean Ares_WaitNextEvent( short eventMask, EventRecord *theEvent,
     return result;
 }
 
-void Replace_KeyCode_Strings_With_Actual_Key_Names( Handle text, short resID,
+void Replace_KeyCode_Strings_With_Actual_Key_Names(TypedHandle<unsigned char> text, short resID,
     short padTo)
 {
     long    l;

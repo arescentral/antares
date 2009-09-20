@@ -133,7 +133,7 @@ extern  scenarioType    *gThisScenario; // for special message labels
 
 //Handle    gAresGlobal->gMessageData = nil, gAresGlobal->gStatusString = nil, gLongAresGlobal->gMessageData = nil;
 
-void MessageLabel_Set_Special( short id, Handle text);
+void MessageLabel_Set_Special(short id, TypedHandle<unsigned char> text);
 
 int InitMessageScreen( void)
 
@@ -207,7 +207,7 @@ int InitMessageScreen( void)
     tmessage->time = 0;
     tmessage->stage = kNoStage;
     tmessage->textHeight = 0;
-    tmessage->retroTextSpec.text = nil;
+    tmessage->retroTextSpec.text = TypedHandle<unsigned char>();
     tmessage->retroTextSpec.textLength = 0;
     tmessage->retroTextSpec.thisPosition = 0;
     tmessage->charDelayCount = 0;
@@ -277,10 +277,8 @@ void ClearMessage( void)
     tmessage->newStringMessage = false;
     tmessage->labelMessage = false;
     tmessage->lastLabelMessage = false;
-    if ( tmessage->retroTextSpec.text != nil)
-    {
-        DisposeHandle( tmessage->retroTextSpec.text);
-        tmessage->retroTextSpec.text = nil;
+    if (tmessage->retroTextSpec.text.get() != nil) {
+        tmessage->retroTextSpec.text.destroy();
     }
     CLIP_BOTTOM = gAresGlobal->gTrueClipBottom;
     tmessage->labelMessageID = AddScreenLabel( 0, 0, 0, 0, &nilLabel, nil,
@@ -401,11 +399,9 @@ void StartLongMessage( short startResID, short endResID)
         tmessage->time = 0;
         tmessage->stage = kStartStage;
         tmessage->textHeight = 0;
-        if ( tmessage->retroTextSpec.text != nil)
-        {
-            DisposeHandle( tmessage->retroTextSpec.text);
+        if ( tmessage->retroTextSpec.text.get() != nil) {
+            tmessage->retroTextSpec.text.destroy();
         }
-        tmessage->retroTextSpec.text = nil;
         tmessage->retroTextSpec.textLength = 0;
         tmessage->retroTextSpec.thisPosition = 0;
         tmessage->retroTextSpec.topBuffer = kMessageCharTopBuffer;
@@ -445,11 +441,9 @@ void StartStringMessage(unsigned char* string)
         tmessage->time = 0;
         tmessage->stage = kStartStage;
         tmessage->textHeight = 0;
-        if ( tmessage->retroTextSpec.text != nil)
-        {
-            DisposeHandle( tmessage->retroTextSpec.text);
+        if (tmessage->retroTextSpec.text.get() != nil) {
+            tmessage->retroTextSpec.text.destroy();
         }
-        tmessage->retroTextSpec.text = nil;
         tmessage->retroTextSpec.textLength = 0;
         tmessage->retroTextSpec.thisPosition = 0;
         tmessage->retroTextSpec.topBuffer = kMessageCharTopBuffer;
@@ -469,7 +463,7 @@ void ClipToCurrentLongMessage( void)
 
 {
     longMessageType *tmessage;
-    Handle          textData = nil;
+    TypedHandle<unsigned char> textData;
     transColorType  *transColor;
     unsigned char* ac;
     long            count;
@@ -488,9 +482,8 @@ void ClipToCurrentLongMessage( void)
         {
             if ( tmessage->currentResID == kStringMessageID)
             {
-                textData = NewHandle( tmessage->stringMessage[0]);
-                if (textData != nil)
-                {
+                textData.create(tmessage->stringMessage[0]);
+                if (textData.get() != nil) {
                     count = 1;
                     ac = *textData;
                     while ( count <= tmessage->stringMessage[0])
@@ -503,9 +496,7 @@ void ClipToCurrentLongMessage( void)
                 tmessage->labelMessage = false;
             } else
             {
-                textData = GetResource('TEXT', tmessage->currentResID);
-                if (textData != nil)
-                    DetachResource(textData);
+                textData.load_resource('TEXT', tmessage->currentResID);
                 Replace_KeyCode_Strings_With_Actual_Key_Names( textData,
                     kKeyMapNameLongID, 0);
                 if ( **textData == '#')
@@ -515,17 +506,16 @@ void ClipToCurrentLongMessage( void)
                 else tmessage->labelMessage = false;
 
             }
-            if ( textData != nil)
+            if (textData.get() != nil)
             {
 //              tmessage->textHeight = GetInterfaceTextHeightFromWidth( (anyCharType *)*textData, GetHandleSize( textData),
 //                                  kLarge, CLIP_RIGHT - CLIP_LEFT);
                 mSetDirectFont( kLongMessageFontNum);
-                if ( tmessage->retroTextSpec.text != nil)
-                {
-                    DisposeHandle( tmessage->retroTextSpec.text);
+                if (tmessage->retroTextSpec.text.get() != nil) {
+                    tmessage->retroTextSpec.text.destroy();
                 }
                 tmessage->retroTextSpec.text = textData;
-                tmessage->retroTextSpec.textLength = GetHandleSize( tmessage->retroTextSpec.text);
+                tmessage->retroTextSpec.textLength = tmessage->retroTextSpec.text.count();
                 tmessage->textHeight = DetermineDirectTextHeightInWidth( &tmessage->retroTextSpec,
                 (CLIP_RIGHT - CLIP_LEFT) - kHBufferTotal);
                 tmessage->textHeight += kLongMessageVPadDouble;
@@ -607,8 +597,7 @@ void DrawCurrentLongMessage( long timePass)
         // draw in offscreen world
         if (( tmessage->currentResID >= 0) && ( tmessage->stage == kShowStage))
         {
-            if ( tmessage->retroTextSpec.text != nil)
-            {
+            if (tmessage->retroTextSpec.text.get() != nil) {
                 if ( !tmessage->labelMessage)
                 {
                     offPixBase = GetGWorldPixMap( gOffWorld);
@@ -661,11 +650,9 @@ void DrawCurrentLongMessage( long timePass)
         }
     } else
     {
-        if (( tmessage->labelMessage) && ( tmessage->retroTextSpec.text != nil))
-        {
-            DisposeHandle( tmessage->retroTextSpec.text);
-            tmessage->retroTextSpec.text = nil;
-        } else if (( tmessage->currentResID >= 0) && ( tmessage->retroTextSpec.text != nil) &&
+        if ((tmessage->labelMessage) && (tmessage->retroTextSpec.text.get() != nil)) {
+            tmessage->retroTextSpec.text.destroy();
+        } else if ((tmessage->currentResID >= 0) && (tmessage->retroTextSpec.text.get() != nil) &&
             ( tmessage->retroTextSpec.thisPosition < tmessage->retroTextSpec.textLength) && ( tmessage->stage == kShowStage))
         {
             tmessage->charDelayCount += timePass;
@@ -680,7 +667,7 @@ void DrawCurrentLongMessage( long timePass)
                 {
                     i = 3;
 
-                    if (( tmessage->retroTextSpec.text != nil) &&
+                    if ((tmessage->retroTextSpec.text.get() != nil) &&
                         ( tmessage->retroTextSpec.thisPosition < tmessage->retroTextSpec.textLength))
                     {
 
@@ -720,8 +707,7 @@ void DrawCurrentLongMessage( long timePass)
                         if ( tmessage->retroTextSpec.thisPosition >
                             tmessage->retroTextSpec.textLength)
                         {
-                            DisposeHandle( tmessage->retroTextSpec.text);
-                            tmessage->retroTextSpec.text = nil;
+                            tmessage->retroTextSpec.text.destroy();
                         }
                     }
                     tmessage->charDelayCount -= 3;
@@ -743,10 +729,8 @@ void EndLongMessage( void)
     tmessage->endResID = -1;
     tmessage->currentResID = -1;
     tmessage->stage = kStartStage;
-    if ( tmessage->retroTextSpec.text != nil)
-    {
-        DisposeHandle( tmessage->retroTextSpec.text);
-        tmessage->retroTextSpec.text = nil;
+    if (tmessage->retroTextSpec.text.get() != nil) {
+        tmessage->retroTextSpec.text.destroy();
     }
     CopyAnyCharPString( tmessage->lastStringMessage, tmessage->stringMessage);
 }
@@ -1461,8 +1445,7 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
 //  t = one of three characters: 'L' for left, 'R' for right, and 'O' for object
 //  nnn... are digits specifying value (distance from top, or initial object #)
 //
-void MessageLabel_Set_Special( short id, Handle text)
-{
+void MessageLabel_Set_Special(short id, TypedHandle<unsigned char> text) {
     unsigned char    whichType, *c;
     long    value = 0, charNum = 0, textLength, safetyCount;
     Str255  s;
@@ -1470,8 +1453,10 @@ void MessageLabel_Set_Special( short id, Handle text)
     Boolean hintLine = false;
 
     s[0] = 0;
-    if ( text == nil) return;
-    textLength = GetHandleSize( text);
+    if (text.get() == nil) {
+        return;
+    }
+    textLength = text.count();
     c = *text;
 
     // if not legal, bail

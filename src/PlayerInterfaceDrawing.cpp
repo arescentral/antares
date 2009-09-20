@@ -1676,7 +1676,7 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
                         long portTop)
 
 {
-    Handle          textData = nil;
+    TypedHandle<unsigned char> textData;
     long            length;
     RgnHandle       clipRgn = nil;
     Rect            tRect;
@@ -1702,12 +1702,9 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
     {
         wordlen = theLine;
 
-        textData = GetResource( 'TEXT', dItem->item.textRect.textID);
-        if ( textData != nil)
-        {
-            HLockHi( textData);
-
-            length = GetHandleSize( textData);
+        textData.load_resource('TEXT', dItem->item.textRect.textID);
+        if (textData.get() != nil) {
+            length = textData.size();
             sChar = *textData;
 
             SetTranslateColorShadeFore( dItem->color, VERY_LIGHT);
@@ -1777,7 +1774,7 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
                 DrawInterfaceString( theLine, dItem->style, destMap, portLeft,
                         portTop,  color);
             }
-            ReleaseResource( textData);
+            textData.destroy();
         }
         delete[] theLine;
     }

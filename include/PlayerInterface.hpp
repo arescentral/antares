@@ -20,6 +20,7 @@
 
 // Player Interface.h
 
+#include "Handle.hpp"
 #include "PlayerInterfaceDrawing.hpp"
 #include "PlayerInterfaceItems.hpp"
 
@@ -80,7 +81,7 @@ Boolean DoMissionInterface( long);
 long UpdateMissionBriefPoint( interfaceItemType *, long, long, coordPointType *, long, long,
         Rect *, Rect *, inlinePictType *);
 void ShowObjectData( Point, short, Rect *);
-Handle CreateWeaponDataText(long, unsigned char*);
+TypedHandle<unsigned char> CreateWeaponDataText(long, unsigned char*);
 void ShowSuccessAnimation( WindowPtr);
 void DoMissionDebriefing( WindowPtr, Rect *, long, long, long, long, long, long, long);
 void DoMissionDebriefingText( WindowPtr, long, long, long, long, long, long, long, long);
@@ -88,7 +89,7 @@ void DoScrollText( WindowPtr, long, long, long, long, long);
 void HandleOSEvent( EventRecord *);
 Boolean Ares_WaitNextEvent( short eventMask, EventRecord *theEvent,
     unsigned long sleep, RgnHandle mouseRgn);
-void Replace_KeyCode_Strings_With_Actual_Key_Names( Handle text, short resID, short padTo);
+void Replace_KeyCode_Strings_With_Actual_Key_Names(TypedHandle<unsigned char> text, short resID, short padTo);
 
 #pragma options align=reset
 

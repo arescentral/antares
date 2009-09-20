@@ -20,6 +20,7 @@
 
 #include <assert.h>
 #include <stdint.h>
+#include <algorithm>
 #include <vector>
 
 #include "Resource.hpp"
@@ -29,51 +30,29 @@
     CLASS(const CLASS&); \
     CLASS& operator=(const CLASS&);
 
+template <typename T> class TypedHandle;
+
 template <typename T>
-class TypedHandle {
+class TypedHandleBase {
   public:
-    TypedHandle()
+    TypedHandleBase()
             : _data(NULL) { }
 
-    TypedHandle clone() const {
-        TypedHandle cloned;
-        cloned.create(count());
-        for (size_t i = 0; i < count(); ++i) {
-            (*cloned)[i] = (**this)[i];
-        }
-        return cloned;
-    }
+    TypedHandle<T> clone() const;
 
     void create(int count) {
         _data = new Data(count);
     }
 
-    void adopt(T* t, int count) {
-        _data = new Data(t, count);
-    }
+    void resize(size_t new_count);
+    void extend(TypedHandle<T> other);
 
     void destroy() {
         delete _data;
         _data = NULL;
     }
 
-    void load_resource(uint32_t code, int id) {
-        Resource rsrc(code, id);
-        std::vector<T> loaded;
-        const char* data = rsrc.data();
-        size_t remainder = rsrc.size();
-        while (remainder > 0) {
-            loaded.push_back(T());
-            size_t consumed = loaded.back().load_data(data, remainder);
-            assert(consumed <= remainder);
-            data += consumed;
-            remainder -= consumed;
-        }
-        create(loaded.size());
-        for (size_t i = 0; i < loaded.size(); ++i) {
-            (**this)[i] = loaded[i];
-        }
-    }
+    void load_resource(uint32_t code, int id);
 
     T* operator*() const {
         return _data->_ptr;
@@ -98,16 +77,12 @@ class TypedHandle {
                 : _ptr(new T[count]),
                   _count(count) { }
 
-        Data(T* t, int count)
-                : _ptr(t),
-                  _count(count) { }
-
         ~Data() {
             delete[] _ptr;
         }
 
       private:
-        friend class TypedHandle;
+        friend class TypedHandleBase;
 
         T* _ptr;
         size_t _count;
@@ -118,10 +93,69 @@ class TypedHandle {
 };
 
 template <typename T>
-TypedHandle<T> NewTypedHandle(int count) {
-    TypedHandle<T> result;
-    result.create(count);
-    return result;
+class TypedHandle : public TypedHandleBase<T> {
+};
+
+template <>
+class TypedHandle<unsigned char> : public TypedHandleBase<unsigned char> {
+  public:
+    void load_resource(uint32_t code, int id) {
+        Resource rsrc(code, id);
+        create(rsrc.size());
+        memcpy(**this, rsrc.data(), rsrc.size());
+    }
+};
+
+template <typename T>
+TypedHandle<T> TypedHandleBase<T>::clone() const {
+    TypedHandle<T> cloned;
+    cloned.create(count());
+    for (size_t i = 0; i < count(); ++i) {
+        (*cloned)[i] = (**this)[i];
+    }
+    return cloned;
+}
+
+template <typename T>
+void TypedHandleBase<T>::resize(size_t new_count) {
+    T* old_ptr = _data->_ptr;
+    size_t old_count = _data->_count;
+    _data->_ptr = new T[new_count];
+    _data->_count = new_count;
+    for (size_t i = 0; i < std::min(old_count, new_count); ++i) {
+        _data->_ptr[i] = old_ptr[i];
+    }
+    delete[] old_ptr;
+}
+
+template <typename T>
+void TypedHandleBase<T>::extend(TypedHandle<T> other) {
+    if (other.count() > 0) {
+        size_t old_count = count();
+        resize(old_count + other.count());
+        for (size_t i = 0; i < other.count(); ++i) {
+            _data->_ptr[i + old_count] = other._data->_ptr[i];
+        }
+    }
+}
+
+template <typename T>
+void TypedHandleBase<T>::load_resource(uint32_t code, int id) {
+    Resource rsrc(code, id);
+    std::vector<T> loaded;
+    const char* data = rsrc.data();
+    size_t remainder = rsrc.size();
+    while (remainder > 0) {
+        loaded.push_back(T());
+        size_t consumed = loaded.back().load_data(data, remainder);
+        assert(consumed <= remainder);
+        data += consumed;
+        remainder -= consumed;
+    }
+    create(loaded.size());
+    for (size_t i = 0; i < loaded.size(); ++i) {
+        (**this)[i] = loaded[i];
+    }
 }
 
 long Random();
@@ -135,5 +169,8 @@ inline void TypedHandleClearHack(TypedHandle<T> handle) {
         Random();
     }
 }
+
+int Munger(TypedHandle<unsigned char> data, int pos, const unsigned char* search, size_t search_len,
+        const unsigned char* replace, size_t replace_len);
 
 #endif  // ANTARES_HANDLE_HPP_

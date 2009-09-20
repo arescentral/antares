@@ -21,6 +21,7 @@
 // Message Screen.h
 
 #include "AnyChar.hpp"
+#include "Handle.hpp"
 #include "NateDraw.hpp"
 
 #pragma options align=mac68k
@@ -37,7 +38,7 @@
 
 
 struct retroTextSpecType {
-    Handle          text;
+    TypedHandle<unsigned char> text;
     long            textLength;
     long            lineLength[kMaxLineNumber];
     long            lineNumber;
