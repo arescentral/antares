@@ -26,7 +26,6 @@
 Handle GetResource(FourCharCode code, int id) {
     switch (code) {
       case 'NLRP':
-      case 'intr':
       case 'nlFM':
         try {
             Resource rsrc(code, id);

@@ -138,6 +138,8 @@ struct interfaceItemType {
     unsigned char       color;
     interfaceKindType   kind;
     interfaceStyleType  style;
+
+    size_t load_data(const char* data, size_t len);
 };
 
 #pragma options align=reset
