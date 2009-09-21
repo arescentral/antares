@@ -138,7 +138,7 @@ int InitPreferences( void)
     OSErr               oserr;
     short               i, resID = kPreferencesResID;
     preferencesDataType *prefsData;
-    preferencesDataType**   tempData;
+    TypedHandle<preferencesDataType> tempData;
 
     // first open preferences file
     if (!EasyOpenPreferenceFile( kAresPreferencesFileName, kPreferenceFileCreator,
@@ -184,12 +184,11 @@ int InitPreferences( void)
 
                 if ( keyConflict >= 0)
                 {
-                    tempData = reinterpret_cast<preferencesDataType**>(GetResource( kPreferenceDataType, kFactoryPreferenceResID));
+                    tempData.load_resource(kPreferenceDataType, kFactoryPreferenceResID);
                     oserr = ResError();
 
                     // check to see if we got factory prefs
-                    if (( tempData != nil) && ( oserr == noErr))
-                    {
+                    if ((tempData.get() != nil) && (oserr == noErr)) {
                         i = (*tempData)->keyMap[keyConflict];
                         (*gAresGlobal->gPreferencesData)->keyMap[keyConflict] = i;
 
@@ -199,7 +198,7 @@ int InitPreferences( void)
                             i++;
                             (*gAresGlobal->gPreferencesData)->keyMap[keyConflict] = i;
                         }
-                        ReleaseResource( reinterpret_cast<Handle>(tempData));
+                        tempData.destroy();
                     }
 
                 }
