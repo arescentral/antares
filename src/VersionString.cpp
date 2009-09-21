@@ -29,7 +29,8 @@ void GetVersionString(unsigned char* dest, short useResFile)
 
     dest[0] = 0;
     UseResFile( useResFile);
-    versRes = GetResource('vers', 1);
+    versRes = NULL;
+    // versRes = GetResource('vers', 1);
     UseResFile( refNum);
     if ( versRes != nil)
     {

@@ -34,9 +34,6 @@ Handle GetResource(FourCharCode code, int id) {
         }
         break;
 
-      case 'vers':
-        return NULL;
-
       default:
         const char code_string[5] = {
             code >> 24, code >> 16, code >> 8, code, '\0',
