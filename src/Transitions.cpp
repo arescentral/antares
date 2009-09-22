@@ -152,20 +152,15 @@ void StartColorAnimation( long inSpeed, long outSpeed, unsigned char goalColor)
 void UpdateColorAnimation( long timePassed)
 
 {
-    bigReqListRec       recList;
     GDHandle            originalDevice = GetGDevice();
 
-    #ifndef kDontMessWithColors
     SetGDevice( theDevice);
-    #endif
     if ( gAresGlobal->gColorAnimationInSpeed != kNoColorGoal)
     {
 
         if ( gAresGlobal->gColorAnimationStep < 0)
         {
-            recList.reqLSize = gAresGlobal->gColorAnimationTable->size() - 1;
-
-            for (size_t i = 0; i <= gAresGlobal->gColorAnimationTable->size() - 1; ++i) {
+            for (size_t i = 0; i < gAresGlobal->gColorAnimationTable->size(); ++i) {
                 RGBColor color = {
                     gAresGlobal->gColorAnimationGoal.red
                         - ((gAresGlobal->gColorAnimationGoal.red
@@ -186,17 +181,12 @@ void UpdateColorAnimation( long timePassed)
                         -gAresGlobal->gColorAnimationStep,
                 };
                 gAresGlobal->gColorAnimationTable->set_color(i, color);
-                recList.reqLData[i] = i;
             }
-            #ifndef kDontMessWithColors
-            RestoreEntries(*gAresGlobal->gColorAnimationTable, nil, reinterpret_cast<ReqListRec*>(&recList));
-            #endif
+            RestoreEntries(*gAresGlobal->gColorAnimationTable);
             gAresGlobal->gColorAnimationStep += gAresGlobal->gColorAnimationInSpeed * timePassed;
         } else if (( gAresGlobal->gColorAnimationStep + gAresGlobal->gColorAnimationOutSpeed * timePassed) < kAnimationSteps)
         {
-            recList.reqLSize = gAresGlobal->gColorAnimationTable->size() - 1;
-
-            for (size_t i = 0; i <= gAresGlobal->gColorAnimationTable->size() - 1; ++i) {
+            for (size_t i = 0; i < gAresGlobal->gColorAnimationTable->size(); ++i) {
                 RGBColor color = {
                     gAresGlobal->gColorAnimationGoal.red - (( gAresGlobal->gColorAnimationGoal.red -
                     gAresGlobal->gSaveColorTable->color(i).red) / kAnimationSteps) *
@@ -212,36 +202,21 @@ void UpdateColorAnimation( long timePassed)
                 };
 
                 gAresGlobal->gColorAnimationTable->set_color(i, color);
-                recList.reqLData[i] = i;
             }
-            #ifndef kDontMessWithColors
-            RestoreEntries(*gAresGlobal->gColorAnimationTable, nil, reinterpret_cast<ReqListRec*>(&recList));
-            #endif
+            RestoreEntries(*gAresGlobal->gColorAnimationTable);
             gAresGlobal->gColorAnimationStep += gAresGlobal->gColorAnimationOutSpeed * timePassed;
         } else
         {
-            recList.reqLSize = gAresGlobal->gSaveColorTable->size() - 1;
-
-            for (size_t i = 0; i <= gAresGlobal->gSaveColorTable->size() - 1; ++i)
-            {
-                recList.reqLData[i] = i;
-
-            }
-            #ifndef kDontMessWithColors
-            RestoreEntries(*gAresGlobal->gSaveColorTable, nil, reinterpret_cast<ReqListRec*>(&recList));
-            #endif
+            RestoreEntries(*gAresGlobal->gSaveColorTable);
             gAresGlobal->gColorAnimationInSpeed = kNoColorGoal;
         }
     }
-    #ifndef kDontMessWithColors
     SetGDevice( originalDevice);
-    #endif
 }
 
 void StartBooleanColorAnimation( long inSpeed, long outSpeed, unsigned char goalColor)
 
 {
-    bigReqListRec       recList;
     GDHandle            originalDevice = GetGDevice();
 
     if ( gAresGlobal->gColorAnimationInSpeed == kNoColorGoal)
@@ -251,12 +226,9 @@ void StartBooleanColorAnimation( long inSpeed, long outSpeed, unsigned char goal
         gAresGlobal->gColorAnimationOutSpeed = outSpeed;
         GetRGBTranslateColor( &gAresGlobal->gColorAnimationGoal,  GetRetroIndex( goalColor));
 
-        #ifndef kDontMessWithColors
         SetGDevice( theDevice);
-        #endif
 
-        recList.reqLSize = gAresGlobal->gColorAnimationTable->size();
-        for (size_t i = 0; i <= gAresGlobal->gColorAnimationTable->size(); ++i) {
+        for (size_t i = 0; i < gAresGlobal->gColorAnimationTable->size(); ++i) {
             RGBColor color = {
                 (gAresGlobal->gColorAnimationGoal.red >> 1L) +
                     (gAresGlobal->gSaveColorTable->color(i).red >> 1L),
@@ -266,12 +238,9 @@ void StartBooleanColorAnimation( long inSpeed, long outSpeed, unsigned char goal
                     (gAresGlobal->gSaveColorTable->color(i).blue >> 1L),
             };
             gAresGlobal->gColorAnimationTable->set_color(i, color);
-            recList.reqLData[i] = i;
         }
-        #ifndef kDontMessWithColors
-        RestoreEntries(*gAresGlobal->gColorAnimationTable, nil, reinterpret_cast<ReqListRec*>(&recList));
+        RestoreEntries(*gAresGlobal->gColorAnimationTable);
         SetGDevice( originalDevice);
-        #endif
     } else
     {
         gAresGlobal->gColorAnimationStep = kStartAnimation;
@@ -284,12 +253,9 @@ void StartBooleanColorAnimation( long inSpeed, long outSpeed, unsigned char goal
 void UpdateBooleanColorAnimation( long timePassed)
 
 {
-    bigReqListRec       recList;
     GDHandle            originalDevice = GetGDevice();
 
-    #ifndef kDontMessWithColors
     SetGDevice( theDevice);
-    #endif
     if ( gAresGlobal->gColorAnimationInSpeed != kNoColorGoal)
     {
         if ( gAresGlobal->gColorAnimationStep < 0)
@@ -300,66 +266,38 @@ void UpdateBooleanColorAnimation( long timePassed)
             gAresGlobal->gColorAnimationStep += gAresGlobal->gColorAnimationOutSpeed * timePassed;
         } else
         {
-            recList.reqLSize = gAresGlobal->gSaveColorTable->size();
-
-            for (size_t i = 0; i <= gAresGlobal->gSaveColorTable->size(); ++i) {
-                recList.reqLData[i] = i;
-            }
-            #ifndef kDontMessWithColors
-            RestoreEntries(*gAresGlobal->gSaveColorTable, nil, reinterpret_cast<ReqListRec *>(&recList));
-            #endif
+            RestoreEntries(*gAresGlobal->gSaveColorTable);
             gAresGlobal->gColorAnimationInSpeed = kNoColorGoal;
         }
     }
-    #ifndef kDontMessWithColors
     SetGDevice( originalDevice);
-    #endif
 }
 
 void RestoreOriginalColors( void)
 {
     GDHandle            originalDevice = GetGDevice();
-    bigReqListRec       recList;
 
-    #ifndef kDontMessWithColors
     SetGDevice( theDevice);
-    #endif
     if ( gAresGlobal->gColorAnimationInSpeed != kNoColorGoal)
     {
-        #ifndef kDontMessWithColors
-        recList.reqLSize = gAresGlobal->gSaveColorTable->size();
-
-        for (size_t i = 0; i <= gAresGlobal->gSaveColorTable->size(); ++i) {
-            recList.reqLData[i] = i;
-        }
-        RestoreEntries(*gAresGlobal->gSaveColorTable, nil, reinterpret_cast<ReqListRec *>(&recList));
-        #endif
+        RestoreEntries(*gAresGlobal->gSaveColorTable);
         gAresGlobal->gColorAnimationInSpeed = kNoColorGoal;
     }
-    #ifndef kDontMessWithColors
     SetGDevice( originalDevice);
-    #endif
 }
 
 void InstantGoalTransition( void)   // instantly goes to total goal color
 
 {
-    bigReqListRec       recList;
     GDHandle            originalDevice = GetGDevice();
 
-    #ifndef kDontMessWithColors
     SetGDevice( theDevice);
-    #endif
 
-    recList.reqLSize = gAresGlobal->gColorAnimationTable->size();
-    for (size_t i = 0; i <= gAresGlobal->gColorAnimationTable->size(); ++i) {
+    for (size_t i = 0; i < gAresGlobal->gColorAnimationTable->size(); ++i) {
         gAresGlobal->gColorAnimationTable->set_color(i, gAresGlobal->gColorAnimationGoal);
-        recList.reqLData[i] = i;
     }
-    #ifndef kDontMessWithColors
-    RestoreEntries(*gAresGlobal->gColorAnimationTable, nil, reinterpret_cast<ReqListRec*>(&recList));
+    RestoreEntries(*gAresGlobal->gColorAnimationTable);
     SetGDevice( originalDevice);
-    #endif
 }
 
 Boolean AutoFadeTo( long tickTime, RGBColor *goalColor, Boolean eventSkip)

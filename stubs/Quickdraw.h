@@ -105,6 +105,6 @@ STUB0(IsMenuBarVisible, bool(), false);
 typedef struct { } ReqListRec;
 
 class ColorTable;
-void RestoreEntries(const ColorTable& table, void*, ReqListRec* recList);
+void RestoreEntries(const ColorTable& table);
 
 #endif // ANTARES_STUB_QUICKDRAW_H_

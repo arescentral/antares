@@ -353,8 +353,7 @@ uint16_t DoubleBits(uint8_t in) {
     return result;
 }
 
-void RestoreEntries(const ColorTable& table, void*, ReqListRec* recList) {
-    static_cast<void>(recList);
+void RestoreEntries(const ColorTable& table) {
     for (size_t i = 0; i <= table.size(); ++i) {
         fake_colors->set_color(i, table.color(i));
     }

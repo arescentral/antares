@@ -303,7 +303,7 @@ ColorTable* ColorTable::clone() const {
 }
 
 size_t ColorTable::size() const {
-    return _colors.size() - 1;
+    return _colors.size();
 }
 
 const RGBColor& ColorTable::color(size_t index) const {
