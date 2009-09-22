@@ -21,10 +21,11 @@
 #include <exception>
 
 #include "Casts.hpp"
+#include "ColorTable.hpp"
 #include "FakeDrawing.hpp"
 #include "Resource.hpp"
 
-extern CTabHandle fakeCTabHandle;
+extern scoped_ptr<ColorTable> fake_colors;
 extern FakeWindow fakeWindow;
 
 class VncServerException : public std::exception { };
@@ -345,12 +346,11 @@ void* vnc_server(void*) {
                 rect.height = 480;
                 rect.encoding_type = RAW;
 
-                ColorSpec* colors = (*fakeCTabHandle)->ctTable;
                 for (int i = 0; i < 640 * 480; ++i) {
                     uint8_t color = fakeWindow.portBits.baseAddr[i];
-                    results[i].red = colors[color].rgb.red >> 8;
-                    results[i].green = colors[color].rgb.green >> 8;
-                    results[i].blue = colors[color].rgb.blue >> 8;
+                    results[i].red = fake_colors->color(color).red >> 8;
+                    results[i].green = fake_colors->color(color).green >> 8;
+                    results[i].blue = fake_colors->color(color).blue >> 8;
                 }
 
                 send_to(stream.fd(), response);

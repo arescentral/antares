@@ -18,7 +18,6 @@
 #include "AresMain.hpp"
 
 #include <Timer.h>
-#include <Palettes.h>
 #include <Quickdraw.h>
 //#include <stdio.h>        // for _DATE_ & _TIME_ macros
 
@@ -43,6 +42,7 @@
 
 #include "Beam.hpp"
 
+#include "ColorTable.hpp"
 #include "ColorTranslation.hpp"
 #include "ConditionalMacros.h"
 //#include "CopyProtection.h"  // is included in prefs
@@ -230,8 +230,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
     Point                   tpoint;
     EventRecord             theEvent;
     CWindowPtr              whichWindow;
-    CTabHandle              theClut = nil, tClut = nil;
-    PaletteHandle           thePalette = nil, tPalette, originalPalette;
+    scoped_ptr<ColorTable>  theClut;
     Size                    freeMemory = 0;
     Str255                  tempString, userName;
     short                   ts1;
@@ -294,8 +293,6 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
     gAresGlobal->gColorAnimationStep = 0;
     gAresGlobal->gColorAnimationInSpeed = -1;
     gAresGlobal->gColorAnimationOutSpeed = -1;
-    gAresGlobal->gColorAnimationTable = nil;
-    gAresGlobal->gSaveColorTable = nil;
     gAresGlobal->gLastSoundTime = 0;
     gAresGlobal->gSoundVolume = 0;
     gAresGlobal->gSoundFileRefID = 0;
@@ -522,18 +519,14 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 
             UseResFile( gAresGlobal->gMainResRefNum);
 
-            theClut = GetCTable( 256);
+            theClut.reset(new ColorTable(256));
 
             UseResFile( oldResFile);
         }
 
-        if ( theClut == nil)
-        {
+        if (theClut.get() == nil) {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, RESOURCE_ERROR, -1, -1, -1, __FILE__, 500);
         }
-
-        thePalette = NewPalette( 256, theClut, pmExplicit + pmTolerant, 0);
-        SetPalette( reinterpret_cast<WindowPtr>(-1), thePalette, false);
 
 //      theDevice = GetMainDevice();
 //      error = true;
@@ -648,9 +641,6 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 
 //          WaitForAnyEvent();
 
-            ActivatePalette( gAresGlobal->gBackWindow);
-            SetWindowPaletteFromClut( gAresGlobal->gBackWindow, theClut);
-
             ResetTransitions();
 
 //          WaitForAnyEvent();
@@ -681,7 +671,6 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 
             BringDebugToFront();
             skipFading = AutoFadeFrom(1, true);
-            SetWindowPaletteFromClut( gTheWindow, theClut);
 
             ShieldCursorInDevice();
 
@@ -709,7 +698,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
             MacSetPort ( gTheWindow);
             MacShowCursor();
 
-            error = CreateOffscreenWorld( &(gTheWindow->portRect), theClut);
+            error = CreateOffscreenWorld(gTheWindow->portRect, *theClut);
             if ( error == kNoError)
             {
                 WriteDebugLine("\p>Offworld");
@@ -738,7 +727,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                         NormalizeColors();
                         DrawInRealWorld();
 //                      AutoFadeFrom( 30);
-                        ColorTranslatorInit( theClut);
+                        ColorTranslatorInit(*theClut);
 //                      InitTransitions();
 //                      ResetTransitions();
                         error = InterfaceHandlingInit();
@@ -781,8 +770,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                             MacSetPort( gTheWindow);
 
                             skipFading = StartCustomPictFade( 20, 20, 502, 2001,
-                                gTheWindow, &tPalette, &originalPalette,
-                                &tClut, skipFading);
+                                gTheWindow, skipFading);
 
 
 //                          MacShowCursor();
@@ -961,8 +949,6 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
                                                                             skipFading?1:1400);
                                                                         EndCustomPictFade(
                                                                             gTheWindow,
-                                                                            &tPalette, &originalPalette,
-                                                                            &tClut,
                                                                             skipFading);
                                                                         MacShowCursor();    // one for the titlescreen
                                                                         MacShowCursor();    // one for the whole deal
@@ -1037,7 +1023,7 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 */
             CleanUpTheDevice( TRUE);
 
-            DisposeCTable( theClut);
+            theClut.reset();
 
             if ( theDevice == GetMainDevice())
             {

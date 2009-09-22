@@ -84,9 +84,9 @@ inline void mGetTranslateColorShade(
     mresultColor = mtransColor->trueColor;
 }
 
-void ColorTranslatorInit( CTabHandle);
+void ColorTranslatorInit(const ColorTable& colors);
 void ColorTranslatorCleanup( void);
-void MakeColorTranslatorTable( CTabHandle);
+void MakeColorTranslatorTable(const ColorTable& colors);
 unsigned char GetRetroIndex( unsigned char);
 unsigned char GetTranslateIndex( unsigned char);
 unsigned char GetTranslateColorShade( unsigned char, unsigned char);

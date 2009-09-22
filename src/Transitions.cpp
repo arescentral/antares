@@ -20,12 +20,12 @@
 #include "Transitions.hpp"
 
 #include <ConditionalMacros.h>
-#include <Palettes.h>
 #include <Quickdraw.h>
 #include <Resources.h>
 
 #include "AresGlobalType.hpp"
 #include "AresMain.hpp"
+#include "ColorTable.hpp"
 #include "ColorTranslation.hpp"
 #include "Debug.hpp"
 #include "Error.hpp"
@@ -62,21 +62,12 @@ extern short gSpriteFileRefID;
 //CTabHandle    gAresGlobal->gColorAnimationTable = nil, gAresGlobal->gSaveColorTable = nil;
 //RGBColor  gAresGlobal->gColorAnimationGoal;
 
-void InitTransitions( void)
-
-{
+void InitTransitions() {
     PixMapHandle        onScreenPixMap;
 
     onScreenPixMap = (**theDevice).gdPMap;
-    gAresGlobal->gColorAnimationTable = (**onScreenPixMap).pmTable;
-    HandToHand(reinterpret_cast<Handle*>(&gAresGlobal->gColorAnimationTable));
-    MoveHHi(reinterpret_cast<Handle>(gAresGlobal->gColorAnimationTable));
-    gAresGlobal->gSaveColorTable = gAresGlobal->gColorAnimationTable;
-    HandToHand(reinterpret_cast<Handle*>(&gAresGlobal->gSaveColorTable));
-    HLock(reinterpret_cast<Handle>(gAresGlobal->gColorAnimationTable));
-    MoveHHi(reinterpret_cast<Handle>(gAresGlobal->gSaveColorTable));
-    HLock(reinterpret_cast<Handle>(gAresGlobal->gSaveColorTable));
-
+    gAresGlobal->gColorAnimationTable.reset((**onScreenPixMap).colors->clone());
+    gAresGlobal->gSaveColorTable.reset((**onScreenPixMap).colors->clone());
 }
 
 void ResetTransitions( void) // for resetting the color map
@@ -86,13 +77,9 @@ void ResetTransitions( void) // for resetting the color map
     InitTransitions();
 }
 
-void CleanupTransitions( void)
-
-{
-    if ( gAresGlobal->gColorAnimationTable != nil)
-        DisposeHandle(reinterpret_cast<Handle>(gAresGlobal->gColorAnimationTable));
-    if ( gAresGlobal->gSaveColorTable != nil)
-        DisposeHandle(reinterpret_cast<Handle>(gAresGlobal->gSaveColorTable));
+void CleanupTransitions() {
+    gAresGlobal->gColorAnimationTable.reset();
+    gAresGlobal->gSaveColorTable.reset();
 }
 
 // DitherFadePixMapToScreenPixMap
@@ -165,8 +152,6 @@ void StartColorAnimation( long inSpeed, long outSpeed, unsigned char goalColor)
 void UpdateColorAnimation( long timePassed)
 
 {
-
-    int                 entryCount;
     bigReqListRec       recList;
     GDHandle            originalDevice = GetGDevice();
 
@@ -178,71 +163,72 @@ void UpdateColorAnimation( long timePassed)
 
         if ( gAresGlobal->gColorAnimationStep < 0)
         {
-            recList.reqLSize = (**gAresGlobal->gColorAnimationTable).ctSize - 1;
+            recList.reqLSize = gAresGlobal->gColorAnimationTable->size() - 1;
 
-            for (entryCount = 0; entryCount <= (**gAresGlobal->gColorAnimationTable).ctSize - 1; entryCount++)
-            {
-                (**gAresGlobal->gColorAnimationTable).ctTable[entryCount].rgb.red =
-                    gAresGlobal->gColorAnimationGoal.red - (( gAresGlobal->gColorAnimationGoal.red -
-                    (**gAresGlobal->gSaveColorTable).ctTable[entryCount].rgb.red) / kAnimationSteps) *
-                    -gAresGlobal->gColorAnimationStep;
+            for (size_t i = 0; i <= gAresGlobal->gColorAnimationTable->size() - 1; ++i) {
+                RGBColor color = {
+                    gAresGlobal->gColorAnimationGoal.red
+                        - ((gAresGlobal->gColorAnimationGoal.red
+                                    - gAresGlobal->gSaveColorTable->color(i).red)
+                                / kAnimationSteps) *
+                        -gAresGlobal->gColorAnimationStep,
 
-                (**gAresGlobal->gColorAnimationTable).ctTable[entryCount].rgb.green =
-                    gAresGlobal->gColorAnimationGoal.green - (( gAresGlobal->gColorAnimationGoal.green -
-                    (**gAresGlobal->gSaveColorTable).ctTable[entryCount].rgb.green) / kAnimationSteps) *
-                    -gAresGlobal->gColorAnimationStep;
+                    gAresGlobal->gColorAnimationGoal.green
+                        - ((gAresGlobal->gColorAnimationGoal.green
+                                    - gAresGlobal->gSaveColorTable->color(i).green)
+                            / kAnimationSteps) *
+                        -gAresGlobal->gColorAnimationStep,
 
-                (**gAresGlobal->gColorAnimationTable).ctTable[entryCount].rgb.blue =
-                    gAresGlobal->gColorAnimationGoal.blue - (( gAresGlobal->gColorAnimationGoal.blue -
-                    (**gAresGlobal->gSaveColorTable).ctTable[entryCount].rgb.blue) / kAnimationSteps) *
-                    -gAresGlobal->gColorAnimationStep;
-
-                recList.reqLData[entryCount] = entryCount;
-
+                    gAresGlobal->gColorAnimationGoal.blue
+                        - ((gAresGlobal->gColorAnimationGoal.blue
+                                    - gAresGlobal->gSaveColorTable->color(i).blue)
+                            / kAnimationSteps) *
+                        -gAresGlobal->gColorAnimationStep,
+                };
+                gAresGlobal->gColorAnimationTable->set_color(i, color);
+                recList.reqLData[i] = i;
             }
             #ifndef kDontMessWithColors
-            RestoreEntries( gAresGlobal->gColorAnimationTable, nil, reinterpret_cast<ReqListRec*>(&recList));
+            RestoreEntries(*gAresGlobal->gColorAnimationTable, nil, reinterpret_cast<ReqListRec*>(&recList));
             #endif
             gAresGlobal->gColorAnimationStep += gAresGlobal->gColorAnimationInSpeed * timePassed;
         } else if (( gAresGlobal->gColorAnimationStep + gAresGlobal->gColorAnimationOutSpeed * timePassed) < kAnimationSteps)
         {
-            recList.reqLSize = (**gAresGlobal->gColorAnimationTable).ctSize - 1;
+            recList.reqLSize = gAresGlobal->gColorAnimationTable->size() - 1;
 
-            for (entryCount = 0; entryCount <= (**gAresGlobal->gColorAnimationTable).ctSize - 1; entryCount++)
-            {
-                (**gAresGlobal->gColorAnimationTable).ctTable[entryCount].rgb.red =
+            for (size_t i = 0; i <= gAresGlobal->gColorAnimationTable->size() - 1; ++i) {
+                RGBColor color = {
                     gAresGlobal->gColorAnimationGoal.red - (( gAresGlobal->gColorAnimationGoal.red -
-                    (**gAresGlobal->gSaveColorTable).ctTable[entryCount].rgb.red) / kAnimationSteps) *
-                    gAresGlobal->gColorAnimationStep;
+                    gAresGlobal->gSaveColorTable->color(i).red) / kAnimationSteps) *
+                    gAresGlobal->gColorAnimationStep,
 
-                (**gAresGlobal->gColorAnimationTable).ctTable[entryCount].rgb.green =
                     gAresGlobal->gColorAnimationGoal.green - (( gAresGlobal->gColorAnimationGoal.green -
-                    (**gAresGlobal->gSaveColorTable).ctTable[entryCount].rgb.green) / kAnimationSteps) *
-                    gAresGlobal->gColorAnimationStep;
+                    gAresGlobal->gSaveColorTable->color(i).green) / kAnimationSteps) *
+                    gAresGlobal->gColorAnimationStep,
 
-                (**gAresGlobal->gColorAnimationTable).ctTable[entryCount].rgb.blue =
                     gAresGlobal->gColorAnimationGoal.blue - (( gAresGlobal->gColorAnimationGoal.blue -
-                    (**gAresGlobal->gSaveColorTable).ctTable[entryCount].rgb.blue) / kAnimationSteps) *
-                    gAresGlobal->gColorAnimationStep;
+                    gAresGlobal->gSaveColorTable->color(i).blue) / kAnimationSteps) *
+                    gAresGlobal->gColorAnimationStep,
+                };
 
-                recList.reqLData[entryCount] = entryCount;
-
+                gAresGlobal->gColorAnimationTable->set_color(i, color);
+                recList.reqLData[i] = i;
             }
             #ifndef kDontMessWithColors
-            RestoreEntries( gAresGlobal->gColorAnimationTable, nil, reinterpret_cast<ReqListRec*>(&recList));
+            RestoreEntries(*gAresGlobal->gColorAnimationTable, nil, reinterpret_cast<ReqListRec*>(&recList));
             #endif
             gAresGlobal->gColorAnimationStep += gAresGlobal->gColorAnimationOutSpeed * timePassed;
         } else
         {
-            recList.reqLSize = (**gAresGlobal->gSaveColorTable).ctSize - 1;
+            recList.reqLSize = gAresGlobal->gSaveColorTable->size() - 1;
 
-            for (entryCount = 0; entryCount <= (**gAresGlobal->gSaveColorTable).ctSize - 1; entryCount++)
+            for (size_t i = 0; i <= gAresGlobal->gSaveColorTable->size() - 1; ++i)
             {
-                recList.reqLData[entryCount] = entryCount;
+                recList.reqLData[i] = i;
 
             }
             #ifndef kDontMessWithColors
-            RestoreEntries( gAresGlobal->gSaveColorTable, nil, reinterpret_cast<ReqListRec*>(&recList));
+            RestoreEntries(*gAresGlobal->gSaveColorTable, nil, reinterpret_cast<ReqListRec*>(&recList));
             #endif
             gAresGlobal->gColorAnimationInSpeed = kNoColorGoal;
         }
@@ -256,7 +242,6 @@ void StartBooleanColorAnimation( long inSpeed, long outSpeed, unsigned char goal
 
 {
     bigReqListRec       recList;
-    int                 entryCount;
     GDHandle            originalDevice = GetGDevice();
 
     if ( gAresGlobal->gColorAnimationInSpeed == kNoColorGoal)
@@ -270,23 +255,21 @@ void StartBooleanColorAnimation( long inSpeed, long outSpeed, unsigned char goal
         SetGDevice( theDevice);
         #endif
 
-        recList.reqLSize = (**gAresGlobal->gColorAnimationTable).ctSize;
-        for (entryCount = 0; entryCount <= (**gAresGlobal->gColorAnimationTable).ctSize; entryCount++)
-        {
-            (**gAresGlobal->gColorAnimationTable).ctTable[entryCount].rgb.red = (gAresGlobal->gColorAnimationGoal.red >> 1L) +
-                    ((**gAresGlobal->gSaveColorTable).ctTable[entryCount].rgb.red >> 1L);
-
-            (**gAresGlobal->gColorAnimationTable).ctTable[entryCount].rgb.green = (gAresGlobal->gColorAnimationGoal.green >> 1L) +
-                    ((**gAresGlobal->gSaveColorTable).ctTable[entryCount].rgb.green >> 1L);
-
-            (**gAresGlobal->gColorAnimationTable).ctTable[entryCount].rgb.blue = (gAresGlobal->gColorAnimationGoal.blue >> 1L) +
-                    ((**gAresGlobal->gSaveColorTable).ctTable[entryCount].rgb.blue >> 1L);
-
-            recList.reqLData[entryCount] = entryCount;
-
+        recList.reqLSize = gAresGlobal->gColorAnimationTable->size();
+        for (size_t i = 0; i <= gAresGlobal->gColorAnimationTable->size(); ++i) {
+            RGBColor color = {
+                (gAresGlobal->gColorAnimationGoal.red >> 1L) +
+                    (gAresGlobal->gSaveColorTable->color(i).red >> 1L),
+                (gAresGlobal->gColorAnimationGoal.green >> 1L) +
+                    (gAresGlobal->gSaveColorTable->color(i).green >> 1L),
+                (gAresGlobal->gColorAnimationGoal.blue >> 1L) +
+                    (gAresGlobal->gSaveColorTable->color(i).blue >> 1L),
+            };
+            gAresGlobal->gColorAnimationTable->set_color(i, color);
+            recList.reqLData[i] = i;
         }
         #ifndef kDontMessWithColors
-        RestoreEntries( gAresGlobal->gColorAnimationTable, nil, reinterpret_cast<ReqListRec*>(&recList));
+        RestoreEntries(*gAresGlobal->gColorAnimationTable, nil, reinterpret_cast<ReqListRec*>(&recList));
         SetGDevice( originalDevice);
         #endif
     } else
@@ -301,8 +284,6 @@ void StartBooleanColorAnimation( long inSpeed, long outSpeed, unsigned char goal
 void UpdateBooleanColorAnimation( long timePassed)
 
 {
-
-    int                 entryCount;
     bigReqListRec       recList;
     GDHandle            originalDevice = GetGDevice();
 
@@ -319,15 +300,13 @@ void UpdateBooleanColorAnimation( long timePassed)
             gAresGlobal->gColorAnimationStep += gAresGlobal->gColorAnimationOutSpeed * timePassed;
         } else
         {
-            recList.reqLSize = (**gAresGlobal->gSaveColorTable).ctSize;
+            recList.reqLSize = gAresGlobal->gSaveColorTable->size();
 
-            for (entryCount = 0; entryCount <= (**gAresGlobal->gSaveColorTable).ctSize; entryCount++)
-            {
-                recList.reqLData[entryCount] = entryCount;
-
+            for (size_t i = 0; i <= gAresGlobal->gSaveColorTable->size(); ++i) {
+                recList.reqLData[i] = i;
             }
             #ifndef kDontMessWithColors
-            RestoreEntries( gAresGlobal->gSaveColorTable, nil, reinterpret_cast<ReqListRec *>(&recList));
+            RestoreEntries(*gAresGlobal->gSaveColorTable, nil, reinterpret_cast<ReqListRec *>(&recList));
             #endif
             gAresGlobal->gColorAnimationInSpeed = kNoColorGoal;
         }
@@ -341,7 +320,6 @@ void RestoreOriginalColors( void)
 {
     GDHandle            originalDevice = GetGDevice();
     bigReqListRec       recList;
-    int                 entryCount;
 
     #ifndef kDontMessWithColors
     SetGDevice( theDevice);
@@ -349,14 +327,12 @@ void RestoreOriginalColors( void)
     if ( gAresGlobal->gColorAnimationInSpeed != kNoColorGoal)
     {
         #ifndef kDontMessWithColors
-        recList.reqLSize = (**gAresGlobal->gSaveColorTable).ctSize;
+        recList.reqLSize = gAresGlobal->gSaveColorTable->size();
 
-        for (entryCount = 0; entryCount <= (**gAresGlobal->gSaveColorTable).ctSize; entryCount++)
-        {
-            recList.reqLData[entryCount] = entryCount;
-
+        for (size_t i = 0; i <= gAresGlobal->gSaveColorTable->size(); ++i) {
+            recList.reqLData[i] = i;
         }
-        RestoreEntries( gAresGlobal->gSaveColorTable, nil, reinterpret_cast<ReqListRec *>(&recList));
+        RestoreEntries(*gAresGlobal->gSaveColorTable, nil, reinterpret_cast<ReqListRec *>(&recList));
         #endif
         gAresGlobal->gColorAnimationInSpeed = kNoColorGoal;
     }
@@ -369,27 +345,19 @@ void InstantGoalTransition( void)   // instantly goes to total goal color
 
 {
     bigReqListRec       recList;
-    int                 entryCount;
     GDHandle            originalDevice = GetGDevice();
 
     #ifndef kDontMessWithColors
     SetGDevice( theDevice);
     #endif
 
-    recList.reqLSize = (**gAresGlobal->gColorAnimationTable).ctSize;
-    for (entryCount = 0; entryCount <= (**gAresGlobal->gColorAnimationTable).ctSize; entryCount++)
-    {
-        (**gAresGlobal->gColorAnimationTable).ctTable[entryCount].rgb.red = gAresGlobal->gColorAnimationGoal.red;
-
-        (**gAresGlobal->gColorAnimationTable).ctTable[entryCount].rgb.green = gAresGlobal->gColorAnimationGoal.green;
-
-        (**gAresGlobal->gColorAnimationTable).ctTable[entryCount].rgb.blue = gAresGlobal->gColorAnimationGoal.blue;
-
-        recList.reqLData[entryCount] = entryCount;
-
+    recList.reqLSize = gAresGlobal->gColorAnimationTable->size();
+    for (size_t i = 0; i <= gAresGlobal->gColorAnimationTable->size(); ++i) {
+        gAresGlobal->gColorAnimationTable->set_color(i, gAresGlobal->gColorAnimationGoal);
+        recList.reqLData[i] = i;
     }
     #ifndef kDontMessWithColors
-    RestoreEntries( gAresGlobal->gColorAnimationTable, nil, reinterpret_cast<ReqListRec*>(&recList));
+    RestoreEntries(*gAresGlobal->gColorAnimationTable, nil, reinterpret_cast<ReqListRec*>(&recList));
     SetGDevice( originalDevice);
     #endif
 }
@@ -499,8 +467,7 @@ Boolean CustomPictFade( long fadeSpeed, long holdTime, short pictID, short clutI
         WindowPtr aWindow)
 
 {
-    CTabHandle                  theClut = nil;
-    PaletteHandle               thePalette = nil, originalPalette = nil;
+    scoped_ptr<ColorTable> theClut;
     scoped_ptr<Picture> thePict;
     Rect                        pictRect;
     RGBColor                    fadeColor = {0, 0, 0};
@@ -512,30 +479,9 @@ Boolean CustomPictFade( long fadeSpeed, long holdTime, short pictID, short clutI
     UseResFile( gSpriteFileRefID);
 
     MacFillRect( &(aWindow->portRect), &(qd.black));
-    theClut = GetCTable( clutID);
-    if ( theClut == nil)
-    {
+    theClut.reset(new ColorTable(clutID));
+    if (theClut.get() == nil) {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadColorTableError, -1, -1, -1, __FILE__, 1);
-        UseResFile( oldResFile);
-        return( true);
-    }
-
-    thePalette = NewPalette( (**theClut).ctSize, theClut, pmExplicit + pmTolerant, 0);
-    if ( thePalette == nil)
-    {
-        ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kCreatePaletteError, -1, -1, -1, __FILE__, 2);
-        UseResFile( oldResFile);
-        return( true);
-    }
-
-    originalPalette = GetPalette( aWindow);
-    if ( originalPalette != nil)
-    {
-        SetPalette(aWindow, thePalette, false);
-        ActivatePalette(aWindow);
-    } else
-    {
-        ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kGetPaletteError, -1, -1, -1, __FILE__, 3);
         UseResFile( oldResFile);
         return( true);
     }
@@ -569,26 +515,15 @@ Boolean CustomPictFade( long fadeSpeed, long holdTime, short pictID, short clutI
     AutoFadeFrom( 1, TRUE);
 
     MacShowCursor();
-    if ( theClut != nil) DisposeCTable( theClut);
-    if ( originalPalette != nil)
-    {
-        SetPalette(aWindow, originalPalette, false);
-        ActivatePalette(aWindow);
-    }
-    if ( thePalette != nil) DisposePalette( thePalette);
     ResetTransitions();
 
     return (gotAnyEvent);
 }
 
-Boolean StartCustomPictFade( long fadeSpeed, long holdTime, short pictID, short clutID,
-        WindowPtr aWindow, PaletteHandle *thePalette,
-        PaletteHandle *originalPalette,
-        CTabHandle *theClut,
-        Boolean fast)
-
-{
+bool StartCustomPictFade(long fadeSpeed, long holdTime, short pictID, short clutID,
+        Window* aWindow, bool fast) {
     scoped_ptr<Picture> thePict;
+    scoped_ptr<ColorTable> theClut;
     Rect                        pictRect;
     RGBColor                    fadeColor = {0, 0, 0};
     Boolean                     gotAnyEvent = false;
@@ -596,33 +531,7 @@ Boolean StartCustomPictFade( long fadeSpeed, long holdTime, short pictID, short 
 #pragma unused( fadeSpeed, holdTime)
 
     MacFillRect( &(aWindow->portRect), &(qd.black));
-    *theClut = GetCTable( clutID);
-
-    if ( *theClut == nil)
-    {
-        ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadColorTableError, -1, -1, -1, __FILE__, 1);
-        return( true);
-    }
-
-    *thePalette = NewPalette( (***theClut).ctSize, *theClut,
-        pmExplicit + pmTolerant, 0);
-    if ( thePalette == nil)
-    {
-        ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kCreatePaletteError, -1, -1, -1, __FILE__, 2);
-        return( true);
-    }
-
-    *originalPalette = GetPalette( aWindow);
-    if ( *originalPalette != nil)
-    {
-        SetPalette(aWindow, *thePalette, false);
-        ActivatePalette(aWindow);
-    } else
-    {
-        ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil,
-            kGetPaletteError, -1, -1, -1, __FILE__, 3);
-        return( true);
-    }
+    theClut.reset(new ColorTable(clutID));
 
     thePict.reset(new Picture(pictID));
     if (thePict.get() == nil) {
@@ -640,8 +549,6 @@ Boolean StartCustomPictFade( long fadeSpeed, long holdTime, short pictID, short 
     HideCursor();
     ResetTransitions();
     AutoFadeTo( 1, &fadeColor, TRUE);
-    SetPalette(aWindow, *thePalette, false);
-    ActivatePalette(aWindow);
     thePict->draw(pictRect);
     thePict.reset();
 
@@ -650,10 +557,7 @@ Boolean StartCustomPictFade( long fadeSpeed, long holdTime, short pictID, short 
     return( gotAnyEvent);
 }
 
-Boolean EndCustomPictFade( WindowPtr aWindow, PaletteHandle *thePalette,
-    PaletteHandle *originalPalette, CTabHandle *theClut, Boolean fast)
-
-{
+bool EndCustomPictFade(Window* aWindow, bool fast) {
     Boolean     gotAnyEvent;
     RGBColor    fadeColor = {0, 0, 0};
 
@@ -664,13 +568,6 @@ Boolean EndCustomPictFade( WindowPtr aWindow, PaletteHandle *thePalette,
     PaintRect( &(aWindow->portRect));
     AutoFadeFrom( 1, TRUE);
 
-    if ( *theClut != nil) DisposeCTable( *theClut);
-    if ( *originalPalette != nil)
-    {
-        SetPalette(aWindow, *originalPalette, false);
-        ActivatePalette(aWindow);
-    }
-    if ( *thePalette != nil) DisposePalette( *thePalette);
     ResetTransitions();
     if ( fast) return true;
     return (gotAnyEvent);

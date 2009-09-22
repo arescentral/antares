@@ -19,8 +19,6 @@
 
 #include "GDeviceHandling.hpp"
 
-#include <Palettes.h>
-
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"

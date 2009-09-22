@@ -23,270 +23,12 @@
 #include <limits>
 #include <string>
 
+#include "ColorTable.hpp"
 #include "FakeHandles.hpp"
 #include "Fakes.hpp"
 #include "File.hpp"
 
-Color24Bit colors_24_bit[256] = {
-    {255, 255, 255},
-    {32, 0, 0},
-    {224, 224, 224},
-    {208, 208, 208},
-    {192, 192, 192},
-    {176, 176, 176},
-    {160, 160, 160},
-    {144, 144, 144},
-    {128, 128, 128},
-    {112, 112, 112},
-    {96, 96, 96},
-    {80, 80, 80},
-    {64, 64, 64},
-    {48, 48, 48},
-    {32, 32, 32},
-    {16, 16, 16},
-    {8, 8, 8},
-    {255, 127, 0},
-    {240, 120, 0},
-    {224, 112, 0},
-    {208, 104, 0},
-    {192, 96, 0},
-    {176, 88, 0},
-    {160, 80, 0},
-    {144, 72, 0},
-    {128, 64, 0},
-    {112, 56, 0},
-    {96, 48, 0},
-    {80, 40, 0},
-    {64, 32, 0},
-    {48, 24, 0},
-    {32, 16, 0},
-    {16, 8, 0},
-    {255, 255, 0},
-    {240, 240, 0},
-    {224, 224, 0},
-    {208, 208, 0},
-    {192, 192, 0},
-    {176, 176, 0},
-    {160, 160, 0},
-    {144, 144, 0},
-    {128, 128, 0},
-    {112, 112, 0},
-    {96, 96, 0},
-    {80, 80, 0},
-    {64, 64, 0},
-    {48, 48, 0},
-    {32, 32, 0},
-    {16, 16, 0},
-    {0, 0, 255},
-    {0, 0, 240},
-    {0, 0, 224},
-    {0, 0, 208},
-    {0, 0, 192},
-    {0, 0, 176},
-    {0, 0, 160},
-    {0, 0, 144},
-    {0, 0, 128},
-    {0, 0, 112},
-    {0, 0, 96},
-    {0, 0, 80},
-    {0, 0, 64},
-    {0, 0, 48},
-    {0, 0, 32},
-    {0, 0, 16},
-    {0, 255, 0},
-    {0, 240, 0},
-    {0, 224, 0},
-    {0, 208, 0},
-    {0, 192, 0},
-    {0, 176, 0},
-    {0, 160, 0},
-    {0, 144, 0},
-    {0, 128, 0},
-    {0, 112, 0},
-    {0, 96, 0},
-    {0, 80, 0},
-    {0, 64, 0},
-    {0, 48, 0},
-    {0, 32, 0},
-    {0, 16, 0},
-    {127, 0, 255},
-    {120, 0, 240},
-    {112, 0, 224},
-    {104, 0, 208},
-    {96, 0, 192},
-    {88, 0, 176},
-    {80, 0, 160},
-    {72, 0, 144},
-    {64, 0, 128},
-    {56, 0, 112},
-    {48, 0, 96},
-    {40, 0, 80},
-    {32, 0, 64},
-    {24, 0, 48},
-    {16, 0, 32},
-    {8, 0, 16},
-    {127, 127, 255},
-    {120, 120, 240},
-    {112, 112, 224},
-    {104, 104, 208},
-    {96, 96, 192},
-    {88, 88, 176},
-    {80, 80, 160},
-    {72, 72, 144},
-    {64, 64, 128},
-    {56, 56, 112},
-    {48, 48, 96},
-    {40, 40, 80},
-    {32, 32, 64},
-    {24, 24, 48},
-    {16, 16, 32},
-    {8, 8, 16},
-    {255, 127, 127},
-    {240, 120, 120},
-    {224, 112, 112},
-    {208, 104, 104},
-    {192, 96, 96},
-    {176, 88, 88},
-    {160, 80, 80},
-    {144, 72, 72},
-    {128, 64, 64},
-    {112, 56, 56},
-    {96, 48, 48},
-    {80, 40, 40},
-    {64, 32, 32},
-    {48, 24, 24},
-    {32, 16, 16},
-    {16, 8, 8},
-    {255, 255, 127},
-    {240, 240, 120},
-    {224, 224, 112},
-    {208, 208, 104},
-    {192, 192, 96},
-    {176, 176, 88},
-    {160, 160, 80},
-    {144, 144, 72},
-    {128, 128, 64},
-    {112, 112, 56},
-    {96, 96, 48},
-    {80, 80, 40},
-    {64, 64, 32},
-    {48, 48, 24},
-    {32, 32, 16},
-    {16, 16, 8},
-    {0, 255, 255},
-    {0, 240, 240},
-    {0, 224, 224},
-    {0, 208, 208},
-    {0, 192, 192},
-    {0, 176, 176},
-    {0, 160, 160},
-    {0, 144, 144},
-    {0, 128, 128},
-    {0, 112, 112},
-    {0, 96, 96},
-    {0, 80, 80},
-    {0, 64, 64},
-    {0, 48, 48},
-    {0, 32, 32},
-    {0, 16, 16},
-    {255, 0, 127},
-    {240, 0, 120},
-    {224, 0, 112},
-    {208, 0, 104},
-    {192, 0, 96},
-    {176, 0, 88},
-    {160, 0, 80},
-    {144, 0, 72},
-    {128, 0, 64},
-    {112, 0, 56},
-    {96, 0, 48},
-    {80, 0, 40},
-    {64, 0, 32},
-    {48, 0, 24},
-    {32, 0, 16},
-    {16, 0, 8},
-    {127, 255, 127},
-    {120, 240, 120},
-    {112, 224, 112},
-    {104, 208, 104},
-    {96, 192, 96},
-    {88, 176, 88},
-    {80, 160, 80},
-    {72, 144, 72},
-    {64, 128, 64},
-    {56, 112, 56},
-    {48, 96, 48},
-    {40, 80, 40},
-    {32, 64, 32},
-    {24, 48, 24},
-    {16, 32, 16},
-    {8, 16, 8},
-    {255, 127, 255},
-    {240, 120, 240},
-    {224, 112, 224},
-    {208, 104, 208},
-    {192, 96, 192},
-    {176, 88, 176},
-    {160, 80, 160},
-    {144, 72, 143},
-    {128, 64, 128},
-    {112, 56, 112},
-    {96, 48, 96},
-    {80, 40, 80},
-    {64, 32, 64},
-    {48, 24, 48},
-    {32, 16, 32},
-    {16, 8, 16},
-    {0, 127, 255},
-    {0, 120, 240},
-    {0, 112, 224},
-    {0, 104, 208},
-    {0, 96, 192},
-    {0, 88, 176},
-    {0, 80, 160},
-    {0, 72, 143},
-    {0, 64, 128},
-    {0, 56, 112},
-    {0, 48, 96},
-    {0, 40, 80},
-    {0, 32, 64},
-    {0, 24, 48},
-    {0, 16, 32},
-    {0, 8, 16},
-    {255, 249, 207},
-    {240, 234, 195},
-    {225, 220, 183},
-    {210, 205, 171},
-    {195, 190, 159},
-    {180, 176, 146},
-    {165, 161, 134},
-    {150, 146, 122},
-    {135, 132, 110},
-    {120, 117, 97},
-    {105, 102, 85},
-    {90, 88, 73},
-    {75, 73, 61},
-    {60, 58, 48},
-    {45, 44, 36},
-    {30, 29, 24},
-    {255, 0, 0},
-    {240, 0, 0},
-    {225, 0, 0},
-    {208, 0, 0},
-    {192, 0, 0},
-    {176, 0, 0},
-    {160, 0, 0},
-    {144, 0, 0},
-    {128, 0, 0},
-    {112, 0, 0},
-    {96, 0, 0},
-    {80, 0, 0},
-    {64, 0, 0},
-    {48, 0, 0},
-    {0, 0, 0},
-};
-
-CTabHandle fakeCTabHandle;
+scoped_ptr<ColorTable> fake_colors;
 
 GWorld fakeOffGWorld(640, 480);
 GWorld fakeRealGWorld(640, 480);
@@ -300,13 +42,18 @@ void DumpTo(const std::string& path) {
     std::string contents;
 
     const uint32_t size[2] = { 640, 480 };
-    ColorSpec* colors = (*fakeCTabHandle)->ctTable;
     const PixMap* p = &fakeWindow.portBits;
 
-    contents.reserve(sizeof(size) + 256 * sizeof(*colors) + 640 * 480);
-
     contents.insert(contents.size(), reinterpret_cast<const char*>(size), sizeof(size));
-    contents.insert(contents.size(), reinterpret_cast<char*>(colors), 256 * sizeof(*colors));
+
+    for (size_t i = 0; i < 256; ++i) {
+        RGBColor color = fake_colors->color(i);
+        contents.insert(contents.size(), reinterpret_cast<char*>(&i), sizeof(size_t));
+        contents.insert(contents.size(), reinterpret_cast<char*>(&color.red), sizeof(uint32_t));
+        contents.insert(contents.size(), reinterpret_cast<char*>(&color.green), sizeof(uint32_t));
+        contents.insert(contents.size(), reinterpret_cast<char*>(&color.blue), sizeof(uint32_t));
+    }
+
     contents.insert(contents.size(), reinterpret_cast<char*>(p->baseAddr), 640 * 480);
 
     MakeDirs(DirName(path), 0755);
@@ -385,7 +132,7 @@ void SetGWorld(GWorld* world, GDevice***) {
     fakeGDevice.gdPMap = &world->pixMapPtr;
 }
 
-OSErr NewGWorld(GWorld** world, int, Rect*, CTabHandle, GDHandle device, int) {
+OSErr NewGWorld(GWorld** world, int, const Rect&, const ColorTable&, GDHandle device, int) {
     assert(device == &fakeGDevicePtr);
     if (world == &gOffWorld) {
         *world = &fakeOffGWorld;
@@ -411,9 +158,9 @@ uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue) {
     uint8_t best_color = 0;
     int min_distance = std::numeric_limits<int>::max();
     for (int i = 0; i < 256; ++i) {
-        int distance = abs((*fakeCTabHandle)->ctTable[i].rgb.red - red)
-            + abs((*fakeCTabHandle)->ctTable[i].rgb.green - green)
-            + abs((*fakeCTabHandle)->ctTable[i].rgb.blue - blue);
+        int distance = abs(fake_colors->color(i).red - red)
+            + abs(fake_colors->color(i).green - green)
+            + abs(fake_colors->color(i).blue - blue);
         if (distance == 0) {
             return i;
         } else if (distance < min_distance) {
@@ -546,9 +293,9 @@ void MacFrameRect(Rect* rect) {
 }
 
 void Index2Color(long index, RGBColor* color) {
-    color->red = (*fakeCTabHandle)->ctTable[index].rgb.red;
-    color->green = (*fakeCTabHandle)->ctTable[index].rgb.green;
-    color->blue = (*fakeCTabHandle)->ctTable[index].rgb.blue;
+    color->red = fake_colors->color(index).red;
+    color->green = fake_colors->color(index).green;
+    color->blue = fake_colors->color(index).blue;
 }
 
 Point currentPen = { 0, 0 };
@@ -606,57 +353,16 @@ uint16_t DoubleBits(uint8_t in) {
     return result;
 }
 
-class FakeColorTable : public CTab {
-  public:
-    FakeColorTable() {
-        ctSize = 255;
-        ctTable = new ColorSpec[ctSize];
-        for (int i = 0; i <= ctSize; ++i) {
-            ctTable[i].value = i;
-            ctTable[i].rgb.red = DoubleBits(colors_24_bit[i].red);
-            ctTable[i].rgb.green = DoubleBits(colors_24_bit[i].green);
-            ctTable[i].rgb.blue = DoubleBits(colors_24_bit[i].blue);
-        }
-    }
-
-    explicit FakeColorTable(const FakeColorTable& other) {
-        ctSize = other.ctSize;
-        ctTable = new ColorSpec[ctSize];
-        for (int i = 0; i <= ctSize; ++i) {
-            ctTable[i].value = i;
-            ctTable[i].rgb.red = other.ctTable[i].rgb.red;
-            ctTable[i].rgb.green = other.ctTable[i].rgb.green;
-            ctTable[i].rgb.blue = other.ctTable[i].rgb.blue;
-        }
-    }
-
-    ~FakeColorTable() {
-        delete[] ctTable;
-    }
-
-  private:
-    FakeColorTable& operator=(const FakeColorTable&);
-};
-
-CTab** NewColorTable() {
-    return reinterpret_cast<CTab**>((new HandleData<FakeColorTable>)->ToHandle());
-}
-
-CTab** GetCTable(int id) {
-    static_cast<void>(id);
-    return NewColorTable();
-}
-
-void RestoreEntries(CTab** table, void*, ReqListRec* recList) {
+void RestoreEntries(const ColorTable& table, void*, ReqListRec* recList) {
     static_cast<void>(recList);
-    for (int i = 0; i <= (*table)->ctSize; ++i) {
-        (*fakeCTabHandle)->ctTable[i] = (*table)->ctTable[i];
+    for (size_t i = 0; i <= table.size(); ++i) {
+        fake_colors->set_color(i, table.color(i));
     }
 }
 
 void FakeDrawingInit() {
-    fakeCTabHandle = NewColorTable();
-    fakeOffGWorld.pixMap.pmTable = NewColorTable();
-    fakeRealGWorld.pixMap.pmTable = NewColorTable();
-    fakeSaveGWorld.pixMap.pmTable = NewColorTable();
+    fake_colors.reset(new ColorTable(256));
+    fakeOffGWorld.pixMap.colors = new ColorTable(256);
+    fakeRealGWorld.pixMap.colors = new ColorTable(256);
+    fakeSaveGWorld.pixMap.colors = new ColorTable(256);
 }

@@ -29,8 +29,8 @@ STUB0(GetMoviesError, OSErr(), noErr);
 STUB2(GetMovieBox, void(Movie movie, Rect* box));
 STUB2(SetMovieBox, void(Movie movie, Rect* box));
 
-STUB2(GetMovieColorTable, OSErr(Movie movie, CTabHandle* clut), noErr);
-STUB2(SetMovieColorTable, OSErr(Movie movie, CTabHandle clut), noErr);
+STUB1(GetMovieColorTable, ColorTable*(Movie movie), NULL);
+STUB2(SetMovieColorTable, void(Movie movie, const ColorTable& clut));
 
 STUB3(SetMovieGWorld, void(Movie movie, CGrafPtr window, void*));
 STUB2(SetMovieVolume, void(Movie movie, double volume));

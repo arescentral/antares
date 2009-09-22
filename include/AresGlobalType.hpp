@@ -175,8 +175,8 @@ struct aresGlobalType {
     long            gColorAnimationStep;    // = 0;
     long            gColorAnimationInSpeed; // = -1;
     long            gColorAnimationOutSpeed;// = -1;
-    CTabHandle      gColorAnimationTable;   // = nil;
-    CTabHandle      gSaveColorTable;        // = nil;
+    scoped_ptr<ColorTable>          gColorAnimationTable;   // = nil;
+    scoped_ptr<ColorTable>          gSaveColorTable;        // = nil;
     RGBColor        gColorAnimationGoal;
     smartSoundHandle    gSound[kSoundNum];
     smartSoundChannel   gChannel[kMaxChannelNum];

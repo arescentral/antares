@@ -20,7 +20,6 @@
 #include "Error.hpp"
 
 #include <Fonts.h>
-#include <Palettes.h>
 #include <Quickdraw.h>
 
 #include "ConditionalMacros.h"

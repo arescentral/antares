@@ -15,28 +15,29 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_TRANSITIONS_HPP_
-#define ANTARES_TRANSITIONS_HPP_
+#ifndef ANTARES_COLOR_TABLE_HPP_
+#define ANTARES_COLOR_TABLE_HPP_
 
+#include <stdint.h>
+#include <vector>
 #include <Base.h>
+#include "SmartPtr.hpp"
 
-#pragma options align=mac68k
+class ColorTable {
+  public:
+    explicit ColorTable(int32_t id);
 
-void InitTransitions( void);
-void ResetTransitions( void);
-void CleanupTransitions( void);
-void StartColorAnimation( long, long, unsigned char);
-void UpdateColorAnimation( long);
-void StartBooleanColorAnimation( long, long, unsigned char);
-void UpdateBooleanColorAnimation( long);
-void RestoreOriginalColors( void);
-void InstantGoalTransition( void);
-Boolean AutoFadeTo( long, RGBColor *, Boolean);
-Boolean AutoFadeFrom( long, Boolean);
-Boolean AutoMusicFadeTo( long, RGBColor *, Boolean);
-Boolean CustomPictFade( long, long, short, short, WindowPtr);
-bool StartCustomPictFade(long, long, short, short, WindowPtr, bool);
-bool EndCustomPictFade(WindowPtr, bool);
-#pragma options align=reset
+    ColorTable* clone() const;
 
-#endif // ANTARES_TRANSITIONS_HPP_
+    size_t size() const;
+
+    const RGBColor& color(size_t index) const;
+    void set_color(size_t index, const RGBColor& color);
+
+  private:
+    std::vector<RGBColor> _colors;
+
+    DISALLOW_COPY_AND_ASSIGN(ColorTable);
+};
+
+#endif  // ANTARES_COLOR_TABLE_HPP_

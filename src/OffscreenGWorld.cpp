@@ -20,7 +20,6 @@
 #include "OffscreenGWorld.hpp"
 
 #include <QDOffscreen.h>
-#include <Palettes.h>
 
 #include "AresGlobalType.hpp"
 #include "ConditionalMacros.h"
@@ -47,9 +46,7 @@ long            gNatePortLeft, gNatePortTop;
 //PixPatHandle  gWhitePattern = nil, gBlackPattern = nil;
 
 
-int CreateOffscreenWorld ( Rect *bounds, CTabHandle theClut)
-
-{
+int CreateOffscreenWorld(const Rect& bounds, const ColorTable& theClut) {
     QDErr           error;
     PixMapHandle    pixBase;
     Rect            tRect;
@@ -66,14 +63,14 @@ int CreateOffscreenWorld ( Rect *bounds, CTabHandle theClut)
     GetGWorld( &gRealWorld, &originalDevice);
 
     pixBase = GetGWorldPixMap( gRealWorld);
-    error = NewGWorld ( &gOffWorld, 8, bounds, theClut, theDevice, 0);
+    error = NewGWorld(&gOffWorld, 8, bounds, theClut, theDevice, 0);
     if ( error)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, OFFSCREEN_GRAPHICS_ERROR, -1, -1, -1, __FILE__, 1);
         return( OFFSCREEN_GRAPHICS_ERROR);
     }
 
-    error = NewGWorld ( &gSaveWorld, 8, bounds, theClut, theDevice, 0);
+    error = NewGWorld(&gSaveWorld, 8, bounds, theClut, theDevice, 0);
     if ( error)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, OFFSCREEN_GRAPHICS_ERROR, -1, -1, -1, __FILE__, 2);
@@ -103,7 +100,7 @@ int CreateOffscreenWorld ( Rect *bounds, CTabHandle theClut)
     }
 
 //  SetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-    tRect = *bounds;
+    tRect = bounds;
     CenterRectInDevice( theDevice, &tRect);
     gNatePortLeft = /*(*(*theDevice)->gdPMap)->bounds.left + */tRect.left - (*theDevice)->gdRect.left;
     gNatePortLeft /= 4;
@@ -446,70 +443,3 @@ void ChunkErasePixMap( PixMap *destMap, Rect *sourceRect)
         dword += drowplus;
     }
 }
-
-// from p104 of Tricks of the Mac Game Programming Gurus
-void SetWindowPaletteFromClut( CWindowPtr theWindow, CTabHandle theClut)
-
-{
-    PaletteHandle   thePalette;
-
-    thePalette = GetPalette( theWindow); // get the windows current palette
-    if ( thePalette == nil) // if it doesn't exist
-    {
-        thePalette = NewPalette( (**theClut).ctSize + 1, theClut, pmTolerant + pmExplicit, 0x000); // make new palette
-        // note that ctSize is zero-based
-    } else
-    {
-        // change window's palette to match clut
-        CTab2Palette( theClut, thePalette, pmTolerant + pmExplicit, 0x0000);
-    }
-    NSetPalette( theWindow, thePalette, pmAllUpdates);
-    ActivatePalette( theWindow);
-}
-
-void ColorTest( void)
-
-{
-
-    CTabHandle      offCLUT, onCLUT;
-    PixMapHandle    pixMap, onPixMap;
-    Rect            tRect, uRect;
-    int             i, j;
-
-//  DrawInOffWorld();
-//  SetPort( gTheWindow);
-    pixMap = GetGWorldPixMap( gOffWorld);
-    onPixMap = (*theDevice)->gdPMap;
-//  onPixMap = GetGWorldPixMap( gRealWorld);
-    if ( pixMap != nil)
-    {
-        offCLUT = (**pixMap).pmTable;
-        onCLUT = (**onPixMap).pmTable;
-        if ( offCLUT != nil)
-        {
-            MacSetRect( &tRect, 0, 0, WORLD_WIDTH / 16, WORLD_HEIGHT / 16);
-            for ( j = 0; j < 16; j++)
-            {
-                for ( i = 0; i < 16; i++)
-                {
-                    MacSetRect( &uRect, tRect.left, tRect.top, tRect.left + WORLD_WIDTH / 32,
-                            tRect.bottom);
-//                  Index2Color( (j * 16 + i), &color);
-//                  RGBForeColor( &color);
-                    RGBForeColor( &((**offCLUT).ctTable[j * 16 + i].rgb));
-                    PaintRect( &uRect);
-                    MacSetRect( &uRect, uRect.right, uRect.top, tRect.right, tRect.bottom);
-
-                    RGBForeColor( &((**onCLUT).ctTable[j * 16 + i].rgb));
-//                  Index2Color( (j * 16 + i), &color);
-//                  RGBForeColor( &color);
-                    PaintRect( &uRect);
-                    MacOffsetRect( &tRect, WORLD_WIDTH / 16, 0);
-                }
-                MacOffsetRect( &tRect, -((WORLD_WIDTH / 16) * 16), WORLD_HEIGHT / 16);
-            }
-        }
-    }
-    NormalizeColors();
-}
-

@@ -23,17 +23,10 @@
 
 #include "Fakes.hpp"
 
-struct Color24Bit {
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
-};
-
 class FakePixMap : public PixMap {
   public:
     FakePixMap(int width, int height) {
         SetRect(&bounds, 0, 0, width, height);
-        pmTable = NULL;
         rowBytes = width | 0x8000;
         baseAddr = new unsigned char[width * height];
         pixelSize = 1;

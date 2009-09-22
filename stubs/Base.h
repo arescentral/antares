@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <sys/time.h>
 #include <Stub.h>
+#include "SmartPtr.hpp"
 
 #define pascal
 
@@ -189,19 +190,7 @@ typedef struct {
 } ColorSpec;
 typedef ColorSpec* ColorSpecPtr;
 
-typedef struct {
-    ColorSpecPtr ctTable;
-    int ctSize;
-} CTab;
-typedef CTab* CTabPtr;
-typedef CTab** CTabHandle;
-
-CTab** GetCTable(int id);
-STUB1(DisposeCTable, void(CTab** handle));
-STUB1(CTabChanged, void(CTab** handle));
 void Index2Color(long index, RGBColor* color);
-
-typedef CTab** WCTabHandle;
 
 typedef int KeyMap[4];
 
@@ -322,13 +311,14 @@ void StringToNum(unsigned char* string, long* value);
 STUB1(GetScriptManagerVariable, Ptr(int cache), NULL);
 STUB3(KeyTranslate, long(Ptr kchr, short keyCode, unsigned long* keyTranslateState), 0);
 
-typedef struct {
+class ColorTable;
+struct PixMap {
     Rect bounds;
-    CTabHandle pmTable;
+    ColorTable* colors;
     long rowBytes;
     unsigned char* baseAddr;
     int pixelSize;
-} PixMap;
+};
 typedef PixMap* PixMapPtr;
 typedef PixMap** PixMapHandle;
 typedef PixMap BitMap;

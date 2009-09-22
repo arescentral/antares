@@ -19,8 +19,6 @@
 
 #include "AresMoviePlayer.hpp"
 
-#include <Palettes.h>
-
 #include "AresGlobalType.hpp"
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
@@ -68,11 +66,9 @@ void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean d
     OSErr                       err;
     FSSpec                      fileSpec;
     Movie                       aMovie = nil;
-    short                       movieResFile, count;
+    short                       movieResFile;
     Rect                        movieBox;
     Boolean                     done = false;
-    CTabHandle                  theClut = nil;
-    PaletteHandle               thePalette = nil, originalPalette = nil;
     Fixed                       movieRate;
     TimeValue               movieTime;
 
@@ -124,47 +120,6 @@ void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean d
 
             // if we have a custom color table for this movie
             MacFillRect( &(aWindow->portRect), &(qd.black));
-            if ( GetMovieColorTable( aMovie, &theClut) != noErr)
-            {
-                MyDebugString("\pCan't GetMovieColorTable");
-            }
-
-            if ( theClut == nil)
-            {
-                WriteDebugLine("\pNo CLUT!");
-            }
-
-//          TRY TO SCREW AROUND WITH THE TABLE
-            if ( ShiftKey())
-            {
-                for (count = 0; count <= (**theClut).ctSize; count++)
-                {
-                    if ((((**theClut).ctTable[count].rgb.red >> 12L) +
-                        ((**theClut).ctTable[count].rgb.green >> 12L) +
-                        ((**theClut).ctTable[count].rgb.blue >> 12L)) == 0)
-                    {
-        //              Debugger();
-                        (**theClut).ctTable[count].rgb.red =
-                            (**theClut).ctTable[count].rgb.green =
-                            (**theClut).ctTable[count].rgb.blue = 0;//Randomize( 32768);
-                    }
-                }
-
-                if ( SetMovieColorTable( aMovie, theClut) != noErr)
-                {
-                    MyDebugString("\pCan't SetMovieColorTable");
-                }
-            }
-
-            thePalette = NewPalette( (**theClut).ctSize, theClut, pmExplicit + pmTolerant, 0);
-
-
-            originalPalette = GetPalette( aWindow);
-            if ( originalPalette != nil)
-            {
-                SetPalette(aWindow, thePalette, false);
-                ActivatePalette(aWindow);
-            }
 
             if ( (( movieBox.right - movieBox.left) <= (( aWindow->portRect.right -
                 aWindow->portRect.left) / 2)) && (( movieBox.bottom - movieBox.top) <= (( aWindow->portRect.bottom -
@@ -198,13 +153,6 @@ void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean d
             MacFillRect( &(aWindow->portRect), &(qd.black));
 
     //      DisposeWindow( (WindowPtr)movieWindow);
-            if ( theClut != nil) DisposeCTable( theClut);
-            if ( originalPalette != nil)
-            {
-                SetPalette(aWindow, originalPalette, false);
-                ActivatePalette(aWindow);
-            }
-            if ( thePalette != nil) DisposePalette( thePalette);
 
 /*          if ( depthSet)
             {

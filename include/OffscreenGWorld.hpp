@@ -49,7 +49,7 @@
 #define kLargeScreenWidth       1024
 #define kLargeScreenHeight      768
 
-int CreateOffscreenWorld ( Rect *, CTabHandle);
+int CreateOffscreenWorld(const Rect& bounds, const ColorTable& colors);
 void CleanUpOffscreenWorld( void);
 void DrawInRealWorld( void);
 void DrawInOffWorld ( void);
@@ -67,7 +67,7 @@ void GWorldExperiment ( void);
 void ChunkCopyPixMapToScreenPixMap( PixMap *, Rect *, PixMap *);
 void ChunkCopyPixMapToPixMap( PixMap *, Rect *, PixMap *);
 void AsmChunkCopyPixMapToPixMap( PixMap *, Rect *, PixMap *);
-void SetWindowPaletteFromClut( CWindowPtr, CTabHandle);
+void SetWindowPaletteFromClut(Window* window, const ColorTable& colors);
 void ColorTest( void);
 void ChunkErasePixMap( PixMap *, Rect *);
 

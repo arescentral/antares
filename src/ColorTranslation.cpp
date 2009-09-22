@@ -19,6 +19,7 @@
 
 #include "ColorTranslation.hpp"
 
+#include "ColorTable.hpp"
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
@@ -29,8 +30,7 @@ extern  GDHandle        theDevice;
 
 TypedHandle<transColorType> gColorTranslateTable;
 
-void ColorTranslatorInit( CTabHandle theClut)
-{
+void ColorTranslatorInit(const ColorTable& theClut) {
     gColorTranslateTable.create(kPaletteSize);
     if (gColorTranslateTable.get() == nil)
     {
@@ -44,7 +44,7 @@ void ColorTranslatorInit( CTabHandle theClut)
         */
         TypedHandleClearHack(gColorTranslateTable);
     }
-    MakeColorTranslatorTable( theClut);
+    MakeColorTranslatorTable(theClut);
 }
 
 void ColorTranslatorCleanup( void)
@@ -55,31 +55,25 @@ void ColorTranslatorCleanup( void)
     }
 }
 
-void MakeColorTranslatorTable( CTabHandle referenceTable)
-
-{
+void MakeColorTranslatorTable(const ColorTable& referenceTable) {
     transColorType      *entry, *retroEntry;
     int                 i, j;
-    CTabHandle          deviceTable = nil;
     PixMapHandle        devicePixMap;
     RGBColor            paletteColor, deviceColor;
 
     devicePixMap = (*theDevice)->gdPMap;
-    deviceTable = (**devicePixMap).pmTable;
+    const ColorTable& deviceTable = *(**devicePixMap).colors;
     entry = *gColorTranslateTable;
 //  referenceTable = GetCTable( kReferenceColorTableID);
-    if ( referenceTable == nil)
-    {
-        ShowErrorAny( eExitToShellErr, kErrorStrID, nil, nil, nil, nil, COLOR_TABLE_ERROR, -1, -1, -1, __FILE__, 2);
-    }
+
     for ( i = 0; i < kPaletteSize; i++)
     {
         entry->trueColor = 0;
-        paletteColor = (**referenceTable).ctTable[i].rgb;
+        paletteColor = referenceTable.color(i);
         for ( j = 0; j < kPaletteSize; j++)
         {
 //          Index2Color( (long)j, &deviceColor);
-            deviceColor = (**deviceTable).ctTable[j].rgb;
+            deviceColor = deviceTable.color(j);
             if (( deviceColor.red == paletteColor.red) &&
                     (deviceColor.green == paletteColor.green) &&
                     (deviceColor.blue == paletteColor.blue))
