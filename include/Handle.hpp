@@ -24,11 +24,7 @@
 #include <vector>
 
 #include "Resource.hpp"
-
-#define DISALLOW_COPY_AND_ASSIGN(CLASS) \
-  private: \
-    CLASS(const CLASS&); \
-    CLASS& operator=(const CLASS&);
+#include "SmartPtr.hpp"
 
 template <typename T> class TypedHandle;
 
@@ -55,11 +51,11 @@ class TypedHandleBase {
     void load_resource(uint32_t code, int id);
 
     T* operator*() const {
-        return _data->_ptr;
+        return _data->_ptr.get();
     }
 
-    T** get() const {
-        return &_data->_ptr;
+    T* const* get() const {
+        return &_data->_ptr.get();
     }
 
     size_t count() const {
@@ -77,14 +73,10 @@ class TypedHandleBase {
                 : _ptr(new T[count]),
                   _count(count) { }
 
-        ~Data() {
-            delete[] _ptr;
-        }
-
       private:
         friend class TypedHandleBase;
 
-        T* _ptr;
+        scoped_array<T> _ptr;
         size_t _count;
 
         DISALLOW_COPY_AND_ASSIGN(Data);
@@ -128,14 +120,13 @@ TypedHandle<T> TypedHandleBase<T>::clone() const {
 
 template <typename T>
 void TypedHandleBase<T>::resize(size_t new_count) {
-    T* old_ptr = _data->_ptr;
+    scoped_array<T> old_ptr(_data->_ptr.release());
     size_t old_count = _data->_count;
-    _data->_ptr = new T[new_count];
+    _data->_ptr.reset(new T[new_count]);
     _data->_count = new_count;
     for (size_t i = 0; i < std::min(old_count, new_count); ++i) {
-        _data->_ptr[i] = old_ptr[i];
+        _data->_ptr.get()[i] = old_ptr.get()[i];
     }
-    delete[] old_ptr;
 }
 
 template <typename T>
@@ -144,7 +135,7 @@ void TypedHandleBase<T>::extend(TypedHandle<T> other) {
         size_t old_count = count();
         resize(old_count + other.count());
         for (size_t i = 0; i < other.count(); ++i) {
-            _data->_ptr[i + old_count] = other._data->_ptr[i];
+            _data->_ptr.get()[i + old_count] = other._data->_ptr.get()[i];
         }
     }
 }

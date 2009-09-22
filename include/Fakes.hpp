@@ -20,27 +20,6 @@
 
 #include <string>
 #include "AresGlobalType.hpp"
-#include "Handle.hpp"
-
-template <typename T>
-class scoped_ptr {
-  public:
-    scoped_ptr() : _t(NULL) { }
-    explicit scoped_ptr(T* t) : _t(t) { }
-
-    ~scoped_ptr() { if (_t) delete _t; }
-
-    T* operator->() { return _t; }
-    T& operator*() { return _t; }
-
-    void reset() { if (_t) { delete _t; _t = NULL; } }
-    T* release() { T* t = _t; _t = NULL; return t; }
-
-  private:
-    T* _t;
-
-    DISALLOW_COPY_AND_ASSIGN(scoped_ptr);
-};
 
 enum GameState {
     UNKNOWN,
