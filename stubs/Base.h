@@ -87,18 +87,6 @@ typedef long Size;
 
 typedef unsigned char* Ptr;
 typedef Ptr* Handle;
-Handle NewHandle(size_t size);
-int GetHandleSize(Handle handle);
-STUB1(DisposeHandle, void(Handle handle));
-STUB2(SetHandleSize, void(Handle handle, Size size));
-STUB1(MoveHHi, void(Handle handle));
-STUB1(HLock, void(Handle handle));
-STUB1(HLockHi, void(Handle handle));
-STUB1(HUnlock, void(Handle handle));
-STUB1(HGetState, int8_t(Handle handle), 0);
-STUB2(HSetState, void(Handle handle, int8_t state));
-STUB1(HNoPurge, void(Handle handle));
-OSErr PtrToHand(void* ptr, Handle* handle, int len);
 
 STUB1(HiWord, int(long value), 0);
 STUB1(LoWord, int(long value), 0);
@@ -107,8 +95,6 @@ void Microseconds(UnsignedWide* wide);
 
 STUB1(CompactMem, Size(int), 100 * 1024 * 1024);  // 100MB
 void BlockMove(void* src, void* dst, size_t size);
-OSErr HandToHand(Handle* handle);
-STUB2(HandAndHand, void(Handle src, Handle dst));
 
 typedef void* AddrBlock;
 

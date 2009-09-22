@@ -125,7 +125,6 @@ struct publicSerialType {
 
 OSErr HardWireNewPrefsdata( void);
 OSErr PrefsUpdate_PreHotKeys(TypedHandle<preferencesDataType> prefsData);
-Boolean IsResourceHandle(preferencesDataType** theHandle);
 long GetFirstKeyConflict(preferencesDataType *prefs);
 short SaveAnyResourceInPreferences(
         ResType, short, unsigned char*, TypedHandle<startingLevelPreferenceType>, Boolean);
@@ -826,20 +825,6 @@ OSErr SaveNetPreferences(unsigned char* playerName, unsigned char* gameName,
     ClosePreferencesFile( gAresGlobal->gPreferenceRefNum);
     return ( noErr );
 
-}
-
-Boolean
-IsResourceHandle(preferencesDataType** theHandle)
-{
-SInt8   memState;
-
-    memState = HGetState(reinterpret_cast<Handle>(theHandle));
-
-    // *    Check the resource bit in the handle info
-    if (memState & 0x20)
-        return (true);
-
-    return (false);
 }
 
 long GetFirstKeyConflict( preferencesDataType *prefs)

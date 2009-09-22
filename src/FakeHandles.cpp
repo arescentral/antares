@@ -23,14 +23,6 @@
 #include "Fakes.hpp"
 #include "Resource.hpp"
 
-Handle NewHandle(size_t size) {
-    return (new HandleData<void>(size))->ToHandle();
-}
-
-int GetHandleSize(Handle handle) {
-    return HandleBase::FromHandle(handle)->Size();
-}
-
 void GetIndString(unsigned char* result, int id, int index) {
     if (index <= 0) {
         *result = '\0';
@@ -51,16 +43,6 @@ void GetIndString(unsigned char* result, int id, int index) {
 
 void BlockMove(void* src, void* dst, size_t size) {
     memcpy(dst, src, size);
-}
-
-OSErr PtrToHand(void* ptr, Handle* handle, int len) {
-    *handle = (new HandleData<void>(len, ptr))->ToHandle();
-    return noErr;
-}
-
-OSErr HandToHand(Handle* handle) {
-    *handle = HandleBase::FromHandle(*handle)->Clone()->ToHandle();
-    return noErr;
 }
 
 int Munger(TypedHandle<unsigned char> data, int pos, const unsigned char* search, size_t search_len,

@@ -102,8 +102,6 @@ void RandomCleanup( void)
         {
         } else SysBeep( 20);
 #endif
-        HUnlock( gDebugRandomSave);
-        DisposeHandle( gDebugRandomSave);
         gDebugRandomSave = nil;
     }
 #ifdef kSaveToDebugFile
