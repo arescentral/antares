@@ -34,6 +34,7 @@
 #include "Minicomputer.hpp"
 #include "NateDraw.hpp"
 #include "OffscreenGWorld.hpp"
+#include "Picture.hpp"
 #include "PlayerShip.hpp"
 #include "Resources.h"
 #include "Rotation.hpp"
@@ -712,7 +713,7 @@ void UpdateRadar( long unitsDone)
 void DrawInstrumentPanel( WindowPtr whatPort)
 
 {
-    PicHandle       pict;
+    scoped_ptr<Picture> pict;
     Rect            tRect;
 
 //  pict = GetPicture( kBackgroundPictID);
@@ -724,41 +725,36 @@ void DrawInstrumentPanel( WindowPtr whatPort)
     CopySaveWorldToOffWorld( &tRect);
     DrawInRealWorld();
 
-    pict = GetPicture(kInstLeftPictID);
-    if ( pict == nil)
-    {
+    pict.reset(new Picture(kInstLeftPictID));
+    if (pict.get() == nil) {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, OFFSCREEN_GRAPHICS_ERROR, -1, -1, -1, __FILE__, 2);
-    } else
-    {
+    } else {
         DrawInSaveWorld();
-        tRect = (**pict).picFrame;
+        tRect = pict->frame();
         tRect.left = 0;
-        tRect.right = (**pict).picFrame.right - (**pict).picFrame.left;
-        tRect.top = (WORLD_HEIGHT / 2) - ( (**pict).picFrame.bottom - (**pict).picFrame.top) / 2;
-        tRect.bottom = tRect.top + (**pict).picFrame.bottom - (**pict).picFrame.top;
-        DrawPicture( pict, &tRect);
+        tRect.right = pict->frame().right - pict->frame().left;
+        tRect.top = (WORLD_HEIGHT / 2) - (pict->frame().bottom - pict->frame().top) / 2;
+        tRect.bottom = tRect.top + pict->frame().bottom - pict->frame().top;
+        pict->draw(tRect);
         CopySaveWorldToOffWorld( &tRect);
-        KillPicture(pict);
         DrawInRealWorld();
     }
 
-    pict = GetPicture(kInstRightPictID);
-    if ( pict == nil)
-    {
+    pict.reset(new Picture(kInstRightPictID));
+    if (pict.get() == nil) {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, OFFSCREEN_GRAPHICS_ERROR, -1, -1, -1, __FILE__, 3);
-    } else
-    {
+    } else {
         DrawInSaveWorld();
-        tRect = (**pict).picFrame;
-        tRect.left = WORLD_WIDTH - ((**pict).picFrame.right - (**pict).picFrame.left);
-        tRect.right = tRect.left + (**pict).picFrame.right - (**pict).picFrame.left;
-        tRect.top = (WORLD_HEIGHT / 2) - ( (**pict).picFrame.bottom - (**pict).picFrame.top) / 2;
-        tRect.bottom = tRect.top + (**pict).picFrame.bottom - (**pict).picFrame.top;
-        DrawPicture( pict, &tRect);
+        tRect = pict->frame();
+        tRect.left = WORLD_WIDTH - (pict->frame().right - pict->frame().left);
+        tRect.right = tRect.left + pict->frame().right - pict->frame().left;
+        tRect.top = (WORLD_HEIGHT / 2) - (pict->frame().bottom - pict->frame().top) / 2;
+        tRect.bottom = tRect.top + pict->frame().bottom - pict->frame().top;
+        pict->draw(tRect);
         CopySaveWorldToOffWorld( &tRect);
-        KillPicture(pict);
         DrawInRealWorld();
     }
+    pict.reset();
 
     MacSetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     CopyOffWorldToRealWorld( whatPort, &tRect);

@@ -4,13 +4,6 @@
 #include <Base.h>
 #include <Files.h>
 
-struct PicData;
-typedef struct {
-    Rect picFrame;
-    PicData* data;
-} Pic;
-typedef Pic** PicHandle;
-
 struct GWorld;
 typedef GWorld* GWorldPtr;
 
@@ -51,15 +44,6 @@ STUB1(ClipRect, void(Rect* rect));
 
 void CopyBits(BitMap* source, BitMap* source2, Rect* source_rect,
       Rect* source_rect2, int mode, void*);
-
-PicHandle GetPicture(int id);
-PicHandle OpenPicture(Rect* source);
-void KillPicture(PicHandle pic);
-void DrawPicture(PicHandle pic, Rect*);
-void ClosePicture();
-
-STUB6(ConvertPictToGIFFile, OSErr(PicHandle pic, FSSpec* fsspec, int interlaced,
-      int transparencyNo, int depth, int palette), noErr);
 
 STUB0(GetMainDevice, GDHandle(), &fakeGDevicePtr);
 STUB0(GetDeviceList, GDHandle(), &fakeGDevicePtr);

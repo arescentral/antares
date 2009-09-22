@@ -15,24 +15,29 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_ARES_GUIDE_MAKER_HPP_
-#define ANTARES_ARES_GUIDE_MAKER_HPP_
+#ifndef ANTARES_PICTURE_HPP_
+#define ANTARES_PICTURE_HPP_
 
-// Ares Guide Maker.h
-
+#include <stdint.h>
+#include <exception>
 #include <Base.h>
-#include <Quickdraw.h>
+#include "SmartPtr.hpp"
 
-#pragma options align=mac68k
+class PictureNotFoundException : public std::exception { };
 
-class Picture;
+class Picture {
+  public:
+    Picture(int32_t id);
 
-void InitAresGuide( void);
-void MakeAresGuide( void);
-OSErr ConvertSpriteIntoGIF(short, long, unsigned char*);
-Picture* MakePicHandleFromScreen( PixMapHandle, Rect *);
-OSErr SaveBlockToFile(Ptr, long, unsigned char*);
+    const Rect& frame() { return _frame; }
 
-#pragma options align=reset
+    void draw(const Rect& dest);
 
-#endif // ANTARES_ARES_GUIDE_MAKER_HPP_
+  private:
+    Rect _frame;
+    scoped_array<uint8_t> _pixels;
+
+    DISALLOW_COPY_AND_ASSIGN(Picture);
+};
+
+#endif  // ANTARES_PICTURE_HPP_

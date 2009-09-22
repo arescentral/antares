@@ -52,6 +52,61 @@ class FakePixMap : public PixMap {
     DISALLOW_COPY_AND_ASSIGN(FakePixMap);
 };
 
+class ClippedTransfer {
+  public:
+    ClippedTransfer(const Rect& from, const Rect& to)
+            : _from(from),
+              _to(to) {
+        // Rects must be the same size.
+        assert(_from.right - _from.left == _to.right - _to.left);
+        assert(_from.bottom - _from.top == _to.bottom - _to.top);
+    }
+
+    void ClipSourceTo(const Rect& clip) {
+        ClipFirstToSecond(_from, clip);
+    }
+
+    void ClipDestTo(const Rect& clip) {
+        ClipFirstToSecond(_to, clip);
+    }
+
+    int Height() const { return _from.bottom - _from.top; }
+    int Width() const { return _from.right - _from.left; }
+
+    int SourceRow(int i) const { return _from.top + i; }
+    int SourceColumn(int i) const { return _from.left + i; }
+
+    int DestRow(int i) const { return _to.top + i; }
+    int DestColumn(int i) const { return _to.left + i; }
+
+  private:
+    inline void ClipFirstToSecond(const Rect& rect, const Rect& clip) {
+        if (clip.left > rect.left) {
+            int diff = clip.left - rect.left;
+            _to.left += diff;
+            _from.left += diff;
+        }
+        if (clip.top > rect.top) {
+            int diff = clip.top - rect.top;
+            _to.top += diff;
+            _from.top += diff;
+        }
+        if (clip.right < rect.right) {
+            int diff = clip.right - rect.right;
+            _to.right += diff;
+            _from.right += diff;
+        }
+        if (clip.bottom < rect.bottom) {
+            int diff = clip.bottom - rect.bottom;
+            _to.bottom += diff;
+            _from.bottom += diff;
+        }
+    }
+
+    Rect _from;
+    Rect _to;
+};
+
 uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue);
 uint8_t GetPixel(int x, int y);
 void SetPixel(int x, int y, uint8_t c);
@@ -90,8 +145,6 @@ class FakeGDevice : public GDevice {
 extern GWorld* gOffWorld;
 extern GWorld* gRealWorld;
 extern GWorld* gSaveWorld;
-
-Pic** GetPicture(int id);
 
 void DumpTo(const std::string& path);
 void FakeDrawingInit();

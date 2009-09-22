@@ -18,13 +18,10 @@
 #include "FakeDrawing.hpp"
 
 #include <assert.h>
-#include <errno.h>
 #include <fcntl.h>
-#include <glob.h>
 #include <algorithm>
 #include <limits>
 #include <string>
-#include <sys/stat.h>
 
 #include "FakeHandles.hpp"
 #include "Fakes.hpp"
@@ -447,61 +444,6 @@ Point MakePoint(int x, int y) {
     return result;
 }
 
-class ClippedTransfer {
-  public:
-    ClippedTransfer(const Rect& from, const Rect& to)
-            : _from(from),
-              _to(to) {
-        // Rects must be the same size.
-        assert(_from.right - _from.left == _to.right - _to.left);
-        assert(_from.bottom - _from.top == _to.bottom - _to.top);
-    }
-
-    void ClipSourceTo(const Rect& clip) {
-        ClipFirstToSecond(_from, clip);
-    }
-
-    void ClipDestTo(const Rect& clip) {
-        ClipFirstToSecond(_to, clip);
-    }
-
-    int Height() const { return _from.bottom - _from.top; }
-    int Width() const { return _from.right - _from.left; }
-
-    int SourceRow(int i) const { return _from.top + i; }
-    int SourceColumn(int i) const { return _from.left + i; }
-
-    int DestRow(int i) const { return _to.top + i; }
-    int DestColumn(int i) const { return _to.left + i; }
-
-  private:
-    inline void ClipFirstToSecond(const Rect& rect, const Rect& clip) {
-        if (clip.left > rect.left) {
-            int diff = clip.left - rect.left;
-            _to.left += diff;
-            _from.left += diff;
-        }
-        if (clip.top > rect.top) {
-            int diff = clip.top - rect.top;
-            _to.top += diff;
-            _from.top += diff;
-        }
-        if (clip.right < rect.right) {
-            int diff = clip.right - rect.right;
-            _to.right += diff;
-            _from.right += diff;
-        }
-        if (clip.bottom < rect.bottom) {
-            int diff = clip.bottom - rect.bottom;
-            _to.bottom += diff;
-            _from.bottom += diff;
-        }
-    }
-
-    Rect _from;
-    Rect _to;
-};
-
 void CopyBits(BitMap* source, BitMap* dest, Rect* source_rect, Rect* dest_rect, int mode, void*) {
     static_cast<void>(mode);
     if (source == dest) {
@@ -527,61 +469,6 @@ void CopyBits(BitMap* source, BitMap* dest, Rect* source_rect, Rect* dest_rect, 
     }
 }
 
-struct PicData {
-    int32_t width;
-    int32_t height;
-    uint8_t* pixels;
-    PicData(const std::string& filename) {
-        int fd = open(filename.c_str(), O_RDONLY);
-        assert(read(fd, &width, sizeof(width)) == sizeof(width));
-        assert(read(fd, &height, sizeof(height)) == sizeof(height));
-        pixels = new uint8_t[width * height];
-        assert(lseek(fd, 0x1008, SEEK_SET) > 0);
-        assert(read(fd, pixels, width * height) == width * height);
-        char c;
-        assert(read(fd, &c, 1) == 0);
-    }
-    ~PicData() {
-        delete[] pixels;
-    }
-};
-
-Pic** GetPicture(int id) {
-    char fileglob[64];
-    glob_t g;
-    g.gl_offs = 0;
-    sprintf(fileglob, "pictures/%d.bin", id);
-    glob(fileglob, 0, NULL, &g);
-    sprintf(fileglob, "pictures/%d *.bin", id);
-    glob(fileglob, GLOB_APPEND, NULL, &g);
-
-    if (g.gl_pathc == 0) {
-        return NULL;
-    } else if (g.gl_pathc == 1) {
-        assert(g.gl_pathc <= 1);
-        std::string filename = g.gl_pathv[0];
-        globfree(&g);
-
-        Pic* p = new Pic;
-        p->data = new PicData(filename);
-        SetRect(&p->picFrame, 0, 0, p->data->width, p->data->height);
-        return new Pic*(p);
-    } else {
-        fprintf(stderr, "Found %lu matches for %d\n", g.gl_pathc, id);
-        exit(1);
-    }
-}
-
-Pic** OpenPicture(Rect* source) {
-    static_cast<void>(source);
-    assert(false);
-}
-
-void KillPicture(Pic** pic) {
-    delete *pic;
-    delete pic;
-}
-
 Rect ClipRectToRect(const Rect& src, const Rect& clip) {
     Rect result = {
         std::max(src.left, clip.left),
@@ -590,27 +477,6 @@ Rect ClipRectToRect(const Rect& src, const Rect& clip) {
         std::min(src.bottom, clip.bottom),
     };
     return result;
-}
-
-void DrawPicture(Pic** pic, Rect* dst) {
-    PicData* data = (*pic)->data;
-
-    Rect src = { 0, 0, data->width, data->height };
-    ClippedTransfer transfer(src, *dst);
-    transfer.ClipDestTo((*fakeGDevice.gdPMap)->bounds);
-
-    for (int i = 0; i < transfer.Height(); ++i) {
-        uint8_t* source_bytes
-            = data->pixels
-            + transfer.SourceColumn(0)
-            + transfer.SourceRow(i) * data->width;
-
-        SetPixelRow(transfer.DestColumn(0), transfer.DestRow(i), source_bytes, transfer.Width());
-    }
-}
-
-void ClosePicture() {
-    assert(false);
 }
 
 int currentForeColor;

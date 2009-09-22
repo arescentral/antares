@@ -53,6 +53,7 @@ Main Antares : src/Admiral.cpp
                src/NonPlayerShip.cpp
                src/OffscreenGWorld.cpp
                #src/OldFile.cpp
+               src/Picture.cpp
                src/PlayerInterface.cpp
                src/PlayerInterfaceDrawing.cpp
                src/PlayerShip.cpp

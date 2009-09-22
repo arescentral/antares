@@ -25,6 +25,7 @@
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "OffscreenGWorld.hpp"
+#include "Picture.hpp"
 #include "WinAresGlue.hpp"
 
 #define kTitleScreenID      502
@@ -38,65 +39,57 @@ extern CWindowPtr       gTheWindow;
 void DrawTitleScreen( void)
 
 {
-    PicHandle       pict;
+    scoped_ptr<Picture> pict;
     Rect            tRect;
 
     MacSetPort( gTheWindow);
-    pict = GetPicture(kTitleScreenID);
-    if ( pict == nil)
-    {
+    pict.reset(new Picture(kTitleScreenID));
+    if (pict.get() == nil) {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 1);
-    } else
-    {
+    } else {
         DrawInRealWorld();
-        tRect = (**pict).picFrame;
+        tRect = pict->frame();
         CenterRectInRect( &tRect, &(gTheWindow->portRect));
-        DrawPicture( pict, &tRect);
-        ReleaseResource( reinterpret_cast<Handle>(pict));
+        pict->draw(tRect);
     }
 }
 
 void DrawPublisherScreen( void)
 
 {
-    PicHandle       pict;
+    scoped_ptr<Picture> pict;
     Rect            tRect;
 
     MacSetPort( gTheWindow);
-    pict = GetPicture(kPublisherScreenID);
-    if ( pict == nil)
+    pict.reset(new Picture(kPublisherScreenID));
+    if (pict.get() == nil)
     {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 2);
-    } else
-    {
+    } else {
         DrawInRealWorld();
-        tRect = (**pict).picFrame;
+        tRect = pict->frame();
         CenterRectInRect( &tRect, &(gTheWindow->portRect));
         PaintRect(  &(gTheWindow->portRect));
-        DrawPicture( pict, &tRect);
-        ReleaseResource( reinterpret_cast<Handle>(pict));
+        pict->draw(tRect);
     }
 }
 
 void DrawEgoScreen( void)
 
 {
-    PicHandle       pict;
+    scoped_ptr<Picture> pict;
     Rect            tRect;
 
     MacSetPort( reinterpret_cast<WindowPtr>(gTheWindow));
-    pict = GetPicture(kEgoScreenID);
-    if ( pict == nil)
-    {
+    pict.reset(new Picture(kEgoScreenID));
+    if (pict.get() == nil) {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 3);
-    } else
-    {
+    } else {
         DrawInRealWorld();
-        tRect = (**pict).picFrame;
+        tRect = pict->frame();
         CenterRectInRect( &tRect, &(gTheWindow->portRect));
         PaintRect(  &(gTheWindow->portRect));
-        DrawPicture( pict, &tRect);
-        ReleaseResource( reinterpret_cast<Handle>(pict));
+        pict->draw(tRect);
     }
 }
 

@@ -31,6 +31,7 @@
 #include "Error.hpp"
 #include "KeyMapTranslation.hpp"
 #include "Music.hpp"
+#include "Picture.hpp"
 #include "WinAresGlue.hpp"
 
 //#define   kDontMessWithColors
@@ -500,7 +501,7 @@ Boolean CustomPictFade( long fadeSpeed, long holdTime, short pictID, short clutI
 {
     CTabHandle                  theClut = nil;
     PaletteHandle               thePalette = nil, originalPalette = nil;
-    PicHandle                   thePict = nil;
+    scoped_ptr<Picture> thePict;
     Rect                        pictRect;
     RGBColor                    fadeColor = {0, 0, 0};
     Boolean                     gotAnyEvent = false;
@@ -539,16 +540,15 @@ Boolean CustomPictFade( long fadeSpeed, long holdTime, short pictID, short clutI
         return( true);
     }
 
-    thePict = GetPicture( pictID);
-    if ( thePict == nil)
-    {
+    thePict.reset(new Picture(pictID));
+    if (thePict.get() == nil) {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 4);
         UseResFile( oldResFile);
         return( true);
     }
     UseResFile( oldResFile);
 
-    pictRect = (**thePict).picFrame;
+    pictRect = thePict->frame();
 
     MacOffsetRect (&pictRect, ((aWindow->portRect.right - aWindow->portRect.left) / 2) -
         ((pictRect.right - pictRect.left) / 2),
@@ -558,8 +558,9 @@ Boolean CustomPictFade( long fadeSpeed, long holdTime, short pictID, short clutI
     HideCursor();
     ResetTransitions();
     AutoFadeTo( 1, &fadeColor, TRUE);
-    DrawPicture( thePict, &pictRect);
-    if ( thePict != nil) ReleaseResource(reinterpret_cast<Handle>(thePict));
+    thePict->draw(pictRect);
+    thePict.reset();
+
     gotAnyEvent = AutoFadeFrom( 100, TRUE);
     if ( !gotAnyEvent) gotAnyEvent = TimedWaitForAnyEvent(80);
     if ( !gotAnyEvent) gotAnyEvent = AutoFadeTo( 100, &fadeColor, true);
@@ -587,7 +588,7 @@ Boolean StartCustomPictFade( long fadeSpeed, long holdTime, short pictID, short 
         Boolean fast)
 
 {
-    PicHandle                   thePict = nil;
+    scoped_ptr<Picture> thePict;
     Rect                        pictRect;
     RGBColor                    fadeColor = {0, 0, 0};
     Boolean                     gotAnyEvent = false;
@@ -623,14 +624,13 @@ Boolean StartCustomPictFade( long fadeSpeed, long holdTime, short pictID, short 
         return( true);
     }
 
-    thePict = GetPicture( pictID);
-    if ( thePict == nil)
-    {
+    thePict.reset(new Picture(pictID));
+    if (thePict.get() == nil) {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 4);
         return( true);
     }
 
-    pictRect = (**thePict).picFrame;
+    pictRect = thePict->frame();
 
     MacOffsetRect (&pictRect, ((aWindow->portRect.right - aWindow->portRect.left) / 2) -
         ((pictRect.right - pictRect.left) / 2),
@@ -642,8 +642,9 @@ Boolean StartCustomPictFade( long fadeSpeed, long holdTime, short pictID, short 
     AutoFadeTo( 1, &fadeColor, TRUE);
     SetPalette(aWindow, *thePalette, false);
     ActivatePalette(aWindow);
-    DrawPicture( thePict, &pictRect);
-    if ( thePict != nil) ReleaseResource(reinterpret_cast<Handle>(thePict));
+    thePict->draw(pictRect);
+    thePict.reset();
+
     gotAnyEvent = AutoFadeFrom( fast?20:100, TRUE);
     if ( fast) return true;
     return( gotAnyEvent);

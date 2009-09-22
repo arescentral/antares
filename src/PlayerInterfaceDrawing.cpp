@@ -30,6 +30,7 @@
 #include "Error.hpp"
 #include "KeyMapTranslation.hpp"
 #include "NateDraw.hpp"
+#include "Picture.hpp"
 #include "PlayerInterfaceItems.hpp"
 #include "StringNumerics.hpp"
 
@@ -1797,7 +1798,7 @@ void DrawInterfaceTextInRect( Rect *tRect, const unsigned char *textData, long l
     Str255          inlineString;
     inlineKindType  inlineKind = kNoKind;
     long            inlineValue = 0;
-    PicHandle       thePicture = nil;
+    scoped_ptr<Picture> thePicture;
     Rect            uRect;
     unsigned char   color, *charwidthptr, charwidth;
     transColorType  *transColor;
@@ -1971,18 +1972,17 @@ void DrawInterfaceTextInRect( Rect *tRect, const unsigned char *textData, long l
                     case kVPictKind:
                     case kVClearPictKind:
                         vline += ( fheight - GetInterfaceFontAscent( style));
-                        thePicture = GetPicture(inlineValue); //HHGetResource
+                        thePicture.reset(new Picture(inlineValue));
                         xpos = hleft;
                         if ( *theLine == 0) vline -= fheight;
-                        if ( thePicture != nil)
-                        {
-                            uRect = (**thePicture).picFrame;
+                        if (thePicture.get() != nil) {
+                            uRect = thePicture->frame();
                             MacOffsetRect( &uRect, -uRect.left + xpos - kInterfaceTextHBuffer +
                                         ( tRect->right - tRect->left) / 2 - ( uRect.right -
                                         uRect.left) / 2,
                                         -uRect.top + vline);
-                            DrawPicture( thePicture, &uRect);
-                            ReleaseResource( reinterpret_cast<Handle>(thePicture));
+                            thePicture->draw(uRect);
+                            thePicture.reset();
                             vline += uRect.bottom - uRect.top;
                             xpos = hleft;
                             if (( inlinePict != nil) && ( inlinePictNum < kMaxInlinePictNum))
@@ -2016,7 +2016,7 @@ short GetInterfaceTextHeightFromWidth(unsigned char* textData, long length,
     Str255          inlineString;
     inlineKindType  inlineKind = kNoKind;
     long            inlineValue = 0;
-    PicHandle       thePicture = nil;
+    scoped_ptr<Picture> thePicture;
     Rect            uRect;
     unsigned char   *charwidthptr, charwidth;
 
@@ -2161,16 +2161,15 @@ short GetInterfaceTextHeightFromWidth(unsigned char* textData, long length,
                 {
                     case kVPictKind:
                     case kVClearPictKind:
-                        thePicture = GetPicture(inlineValue);  // HHGetResource
+                        thePicture.reset(new Picture(inlineValue));
                         xpos = hleft;
                         vline += ( fheight - GetInterfaceFontAscent( style));
                         if ( *theLine == 0) vline -= fheight;
-                        if ( thePicture != nil)
-                        {
-                            uRect = (**thePicture).picFrame;
+                        if (thePicture.get() != nil) {
+                            uRect = thePicture->frame();
                             MacOffsetRect( &uRect, -uRect.left + xpos, -uRect.top + vline);
 //                          DrawPicture( thePicture, &uRect);
-                            ReleaseResource( reinterpret_cast<Handle>(thePicture));
+                            thePicture.reset();
                             vline += uRect.bottom - uRect.top;
                             xpos = hleft;
                         }
@@ -2191,7 +2190,7 @@ void DrawInterfacePictureRect( interfaceItemType *dItem, PixMap *destMap, long p
                         long portTop)
 
 {
-    PicHandle       thePicture = nil;
+    scoped_ptr<Picture> thePicture;
     RgnHandle       clipRgn = nil;
     Rect            tRect, uRect;
 
@@ -2205,13 +2204,11 @@ void DrawInterfacePictureRect( interfaceItemType *dItem, PixMap *destMap, long p
     ClipRect( &tRect);
 
 //  thePicture = GetPicture( dItem->item.pictureRect.pictureID);
-    thePicture = GetPicture(dItem->item.pictureRect.pictureID);  // HHGetResource
-    if ( thePicture != nil)
-    {
-        uRect = (**thePicture).picFrame;
+    thePicture.reset(new Picture(dItem->item.pictureRect.pictureID));  // HHGetResource
+    if (thePicture.get() != nil) {
+        uRect = thePicture->frame();
         MacOffsetRect( &uRect, -uRect.left + tRect.left, -uRect.top + tRect.top);
-        DrawPicture( thePicture, &uRect);
-        ReleaseResource( reinterpret_cast<Handle>(thePicture));
+        thePicture->draw(uRect);
     }
 
     SetClip( clipRgn);

@@ -51,6 +51,7 @@
 #include "NetSetupScreen.hpp"
 #include "OffscreenGWorld.hpp"
 #include "Options.hpp"
+#include "Picture.hpp"
 #include "Races.hpp"
 #include "RegistrationTool.h"
 #include "Resources.h"
@@ -2176,21 +2177,17 @@ Boolean IsKeyReserved( KeyMap keyMap, Boolean alternateFKey)
 void DrawKeyControlPicture( long whichKey)
 {
     Rect    tRect, newRect;
-    PicHandle       thePict = nil;
+    scoped_ptr<Picture> thePict;
 
     GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kKeyIllustrationBox), &tRect);
 
     DrawInOffWorld();
 
-    thePict = GetPicture(kKeyIllustrationPictID);
-    if ( thePict != nil)
-    {
-        HLockHi( reinterpret_cast<Handle>(thePict));
-        newRect = (**thePict).picFrame;
+    thePict.reset(new Picture(kKeyIllustrationPictID));
+    if (thePict.get() != nil) {
+        newRect = thePict->frame();
         CenterRectInRect( &newRect, &tRect);
-        DrawPicture( thePict, &newRect);
-        ReleaseResource( reinterpret_cast<Handle>(thePict));
-        thePict = nil;
+        thePict->draw(newRect);
     }
     if ( whichKey >= kSelectFriendKeyNum)
     {
@@ -2202,15 +2199,15 @@ void DrawKeyControlPicture( long whichKey)
             whichKey = kSelectFriendKeyNum + 1;
         }
     }
-    thePict = GetPicture(kKeyIllustrationPictID + 1 + whichKey);
-    if ( thePict != nil)
-    {
-        HLockHi( reinterpret_cast<Handle>(thePict));
-        newRect = (**thePict).picFrame;
+
+    thePict.reset(new Picture(kKeyIllustrationPictID + 1 + whichKey));
+    if (thePict.get() != nil) {
+        newRect = thePict->frame();
         CenterRectInRect( &newRect, &tRect);
-        DrawPicture( thePict, &newRect);
-        ReleaseResource( reinterpret_cast<Handle>(thePict));
+        thePict->draw(newRect);
     }
+    thePict.reset();
+
     DrawInRealWorld();
     CopyOffWorldToRealWorld(gTheWindow, &tRect);
 
@@ -4363,7 +4360,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
                     i;
     short           textHeight = 0;
     PixMapHandle    offMap = GetGWorldPixMap( gOffWorld);
-    PicHandle       thePict = nil;
+    scoped_ptr<Picture> thePict;
     Point           starPoint;
     transColorType  *transColor;
     unsigned char   color;
@@ -4505,14 +4502,12 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
 
         if ( whichBriefPoint == kMissionStarMapBriefNum)
         {
-            thePict = GetPicture(kMissionStarMapPictID);
-            if ( thePict != nil)
-            {
-                HLockHi( reinterpret_cast<Handle>(thePict));
-                newRect = (**thePict).picFrame;
+            thePict.reset(new Picture(kMissionStarMapPictID));
+            if (thePict.get() != nil) {
+                newRect = thePict->frame();
                 CenterRectInRect( &newRect, bounds);
-                DrawPicture( thePict, &newRect);
-                ReleaseResource( reinterpret_cast<Handle>(thePict));
+                thePict->draw(newRect);
+                thePict.reset();
                 GetScenarioStarMapPoint( whichScenario, &starPoint);
                 starPoint.h += bounds->left;
                 starPoint.v += bounds->top;
@@ -5272,7 +5267,8 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
     PixMapHandle        offMap = GetGWorldPixMap( gOffWorld), saveMap = GetGWorldPixMap( gSaveWorld);
     TypedHandle<unsigned char> textHandle;
     unsigned char       *thisChar = nil, *sectionStart = nil, *nextChar;
-    PicHandle           thePict = nil, bgPict = nil;
+    scoped_ptr<Picture> thePict;
+    scoped_ptr<Picture> bgPict;
     Boolean             sectionOver, abort = false, wasPicture = true;
     Movie               theMovie = nil;
     RgnHandle           clipRgn = nil;
@@ -5400,9 +5396,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                                         }
                                         if ( bgPictID > 0)
                                         {
-                                            if ( bgPict != nil)
-                                                ReleaseResource( reinterpret_cast<Handle>(bgPict));
-                                            bgPict = GetPicture( bgPictID);
+                                            bgPict.reset(new Picture(bgPictID));
                                         }
                                     }
                                 }
@@ -5494,57 +5488,51 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
 
                     if ( pictID != 0)
                     {
-                        thePict = GetPicture(pictID);
+                        thePict.reset(new Picture(pictID));
 //                      if ( ResError() != noErr) Debugger();
 
-                        if ( thePict != nil)
-                        {
-                            HLockHi( reinterpret_cast<Handle>(thePict));
+                        if (thePict.get() != nil) {
                             wasPicture = true;
                             pictRect.left = ( scrollWidth / 2) -
-                                ((((**thePict).picFrame.right - (**thePict).picFrame.left)) / 2) +
+                                (((thePict->frame().right - thePict->frame().left)) / 2) +
                                 boundsRect.left;
-                            pictRect.right = pictRect.left + (((**thePict).picFrame.right - (**thePict).picFrame.left));
+                            pictRect.right = pictRect.left + ((thePict->frame().right - thePict->frame().left));
                             pictRect.top = boundsRect.bottom;
 //                          pictRect.bottom = pictRect.top + ((**thePict).picFrame.bottom - (**thePict).picFrame.top);
                             pictRect.bottom = pictRect.top + mDirectFontHeight() + kScrollTextLineBuffer;
 
-                            pictSourceRect = (**thePict).picFrame;
+                            pictSourceRect = thePict->frame();
                             pictSourceRect.left = ( scrollWidth / 2) -
-                                ((((**thePict).picFrame.right - (**thePict).picFrame.left)) / 2) +
+                                (((thePict->frame().right - thePict->frame().left)) / 2) +
                                 boundsRect.left;
-                            pictSourceRect.right = pictRect.left + (((**thePict).picFrame.right - (**thePict).picFrame.left));
+                            pictSourceRect.right = pictRect.left + ((thePict->frame().right - thePict->frame().left));
 
                             DrawInSaveWorld();
-                                if ( bgPict != nil)
-                                {
-                                    Rect    bgRect = (**bgPict).picFrame;
+                                if (bgPict.get() != nil) {
+                                    Rect bgRect = bgPict->frame();
 
                                     OffsetRect( &bgRect, -bgRect.left, -bgRect.top);
                                     OffsetRect( &bgRect, scrollRect.left,
                                         pictSourceRect.top - bgVOffset);
                                     do
                                     {
-                                        DrawPicture( bgPict, &bgRect);
+                                        bgPict->draw(bgRect);
                                         MacOffsetRect( &bgRect, 0, kBackground_Height);
                                     } while ( bgRect.top < (**saveMap).bounds.bottom);
                                 }
-                            DrawPicture( thePict, &pictSourceRect);
+                            thePict->draw(pictSourceRect);
                             DrawInRealWorld();
 
-                            if ( bgPict != nil)
-                            {
+                            if (bgPict.get() != nil) {
                                 pictRect.left = pictSourceRect.left = scrollRect.left;
                                 pictRect.right = pictSourceRect.right = scrollRect.right;
                             }
                             pictSourceRect.bottom = pictSourceRect.top + mDirectFontHeight() + kScrollTextLineBuffer;
 
-                            while (( pictSourceRect.top < (**thePict).picFrame.bottom) && (!abort))
-                            {
-                                if ( pictSourceRect.bottom > (**thePict).picFrame.bottom)
-                                {
-                                    pictRect.bottom -= pictSourceRect.bottom - (**thePict).picFrame.bottom;
-                                    pictSourceRect.bottom = (**thePict).picFrame.bottom;
+                            while ((pictSourceRect.top < thePict->frame().bottom) && (!abort)) {
+                                if (pictSourceRect.bottom > thePict->frame().bottom) {
+                                    pictRect.bottom -= pictSourceRect.bottom - thePict->frame().bottom;
+                                    pictSourceRect.bottom = thePict->frame().bottom;
                                 }
                                 CopyBits( *saveMap, *offMap,
                                     &pictSourceRect, &pictRect,
@@ -5560,7 +5548,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                                         ((l < (mDirectFontHeight() + kScrollTextLineBuffer)) &&
                                             (!abort) &&
                                             ((pictSourceRect.top+l)<
-                                                (**thePict).picFrame.bottom));
+                                                thePict->frame().bottom));
                                         l++)
                                 {
                                     DrawInOffWorld();
@@ -5607,24 +5595,22 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
 
                                 MacOffsetRect( &pictSourceRect, 0, (mDirectFontHeight() + kScrollTextLineBuffer));
                             }
-                            HUnlock( reinterpret_cast<Handle>(thePict));
-                            ReleaseResource( reinterpret_cast<Handle>(thePict));
+                            thePict.reset();
 //                          if ( ResError() != noErr) Debugger();
                         }// else DebugStr("\pNo PICT!");
                     }
                     if  ( wasPicture)
                     {
-                        Rect    bgRect = (**bgPict).picFrame;
+                        Rect bgRect = bgPict->frame();
 
                         wasPicture = false;
                         DrawInSaveWorld();
-                        if ( bgPict != nil)
-                        {
+                        if (bgPict.get() != nil) {
                             OffsetRect( &bgRect, -bgRect.left, -bgRect.top);
                             OffsetRect( &bgRect, scrollRect.left, 0);
                             do
                             {
-                                DrawPicture( bgPict, &bgRect);
+                                bgPict->draw(bgRect);
                                 MacOffsetRect( &bgRect, 0, kBackground_Height);
                             }  while ( bgRect.top < (**saveMap).bounds.bottom);
                         } else
@@ -5787,8 +5773,6 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
     {
         StopAndUnloadSong();
     }
-    if ( bgPict != nil)
-        ReleaseResource( reinterpret_cast<Handle>(bgPict));
     if ( clipRgn != nil) DisposeRgn( clipRgn);
 }
 
