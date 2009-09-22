@@ -37,6 +37,7 @@ Main Antares : src/Admiral.cpp
                src/HideMenubarNew.cpp
                #src/Icl8ToCicn.cpp
                #src/IconSuiteFromAlias.cpp
+               src/InputSource.cpp
                src/Instruments.cpp
                src/InterfaceHandling.cpp
                src/KeyMapTranslation.cpp

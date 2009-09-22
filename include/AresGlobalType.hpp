@@ -30,6 +30,7 @@
 #include "ICAPI.h"
 #include "NateDraw.hpp"
 #include "ScenarioData.hpp"
+#include "SmartPtr.hpp"
 #include "SoundFX.hpp"
 
 #pragma options align=mac68k
@@ -98,6 +99,7 @@ struct scenarioConditionType;
 struct scenarioInitialType;
 struct screenLabelType;
 struct scrollStarType;
+class InputSource;
 class StringList;
 
 struct aresGlobalType {
@@ -105,7 +107,7 @@ struct aresGlobalType {
     unsigned long   gSynchValue;
     CWindowPtr      gBackWindow;
     long            gForceDemoLevel;
-    TypedHandle<unsigned long> gReplayData;
+    scoped_ptr<InputSource> gInputSource;
     short           gMainResRefNum;
     unsigned long   gFrameCount;
     TypedHandle<preferencesDataType>    gPreferencesData;

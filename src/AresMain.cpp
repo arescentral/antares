@@ -61,6 +61,7 @@
 
 #include "HideMenubar.hpp"
 
+#include "InputSource.hpp"
 #include "Instruments.hpp"
 #include "InterfaceHandling.hpp"
 
@@ -1187,41 +1188,11 @@ void MainLoop (void)
 
                 if ( whichScenario >= 0)
                 {
-                    #ifdef kCanRecordGame
-                    if ( ControlKey())
-                    {
-                        unsigned long   *randomSeed = nil;
-
-                        if ( gAresGlobal->gOptions & kOptionReplay)
-                        {
-                            short   refNum = CurResFile();
-
-                            UseResFile( gAresGlobal->gMainResRefNum);
-                            if (gAresGlobal->gReplayData.get() != nil) {
-                                randomSeed = *gAresGlobal->gReplayData;
-                                gRandomSeed = *randomSeed;
-                            }
-                            UseResFile( refNum);
-                        } else
-                        {
-                            SysBeep(20);
-                            gAresGlobal->gOptions |= kOptionRecord;
-                            if (gAresGlobal->gReplayData.get() != nil) {
-                                gAresGlobal->gReplayData.destroy();
-                            }
-                            gAresGlobal->gReplayData.create(kReplayDataSize);
-                            randomSeed = *gAresGlobal->gReplayData;
-                            *randomSeed = gRandomSeed;
-                        }
-                    }
-                    #endif
-
                     if ( gAresGlobal->gOptions & kOptionReplay)
                     {
                         #ifdef kReplayNotAutoPlay
 
                         short   refNum = CurResFile();
-                        unsigned long   *randomSeed = nil;
 
                         UseResFile( gAresGlobal->gMainResRefNum);
 
@@ -1229,37 +1200,33 @@ void MainLoop (void)
                         {
                             if ( whichDemoLevel >= 0)// get indexed demo level
                             {
-                                gAresGlobal->gReplayData.load_resource(kReplayResType, whichDemoLevel + 1);
-                                if (ResError() != noErr) {
-                                    gAresGlobal->gReplayData = TypedHandle<unsigned long>();
-                                }
-                                if (gAresGlobal->gReplayData.get() != nil) {
+                                gAresGlobal->gInputSource.reset(
+                                        new ReplayInputSource(whichDemoLevel + 1));
+                                if (gAresGlobal->gInputSource.get() != nil) {
                                     //GetResInfo(reinterpret_cast<Handle>(gAresGlobal->gReplayData),
                                     //        &resID, &resType, resName);
                                     whichScenario = resID - kReplayResID;
                                 }
                             }
 
-                            if (gAresGlobal->gReplayData.get() == nil) {
+                            if (gAresGlobal->gInputSource.get() == nil) {
                                 do
                                 {
                                     whichScenario = GetDemoScenario();
                                     // whichScenario = Randomize( gAresGlobal->levelNum);//Randomize( 30 + 1);
                                     // whichScenario = GetScenarioNumberFromChapterNumber( whichScenario);
-                                    gAresGlobal->gReplayData.load_resource(kReplayResType, kReplayResID + whichScenario);
-                                    if (ResError() != noErr) {
-                                        gAresGlobal->gReplayData = TypedHandle<unsigned long>();
-                                    }
-                                } while (gAresGlobal->gReplayData.get() == nil);
-                            }                       } else
-                        {
-                                gAresGlobal->gReplayData.load_resource(kReplayResType, kReplayResID + whichScenario);
+                                    gAresGlobal->gInputSource.reset(
+                                            new ReplayInputSource(kReplayResID + whichScenario));
+                                } while (gAresGlobal->gInputSource.get() == nil);
+                            }
+                        } else {
+                                gAresGlobal->gInputSource.reset(
+                                        new ReplayInputSource(kReplayResID + whichScenario));
                         }
 
-                        if (gAresGlobal->gReplayData.get() != nil) {
-                            randomSeed = *gAresGlobal->gReplayData;
+                        if (gAresGlobal->gInputSource.get() != nil) {
                             saveSeed = gRandomSeed;
-                            gRandomSeed = *randomSeed;
+                            gRandomSeed = gAresGlobal->gInputSource->random_seed();
                         }
                         UseResFile( refNum);
 
@@ -1353,7 +1320,7 @@ void MainLoop (void)
 //              DebugFileCleanup();
 
 
-                            if (( !( gAresGlobal->gOptions & (kOptionAutoPlay | kOptionRecord | kOptionReplay))) && ( gameResult == kLoseGame))
+                            if (( !( gAresGlobal->gOptions & (kOptionAutoPlay | kOptionReplay))) && ( gameResult == kLoseGame))
                             {
                                 if ( (gAresGlobal->gScenarioWinner & kScenarioWinnerTextMask) != kScenarioWinnerNoText)
                                 {
@@ -1440,33 +1407,7 @@ void MainLoop (void)
                                         gRandomSeed = saveSeed;
                                     }
 
-                                    if ( gAresGlobal->gOptions & kOptionRecord)
-                                    {
-                                        short   refNum = CurResFile();
-
-                                        UseResFile( gAresGlobal->gMainResRefNum);
-                                        if (gAresGlobal->gReplayData.get() != nil) {
-                                            /*
-                                            Handle  tres;
-                                            tres = GetResource( kReplayResType, kReplayResID + whichScenario);
-                                            if ( tres != nil)
-                                            {
-                                                RemoveResource( tres);
-                                                UpdateResFile( gAresGlobal->gMainResRefNum);
-                                                DisposeHandle( tres);
-                                            }
-                                            AddResource(reinterpret_cast<Handle>(gAresGlobal->gReplayData), kReplayResType, kReplayResID + whichScenario, "\pReplay Data");
-                                            ChangedResource(reinterpret_cast<Handle>(gAresGlobal->gReplayData));
-                                            WriteResource(reinterpret_cast<Handle>(gAresGlobal->gReplayData));
-                                            DetachResource(reinterpret_cast<Handle>(gAresGlobal->gReplayData));
-                                            */
-                                            gAresGlobal->gReplayData.destroy();
-                                        }
-                                        UseResFile( refNum);
-                                    } else if ( gAresGlobal->gOptions & kOptionReplay)
-                                    {
-                                        gAresGlobal->gReplayData.destroy();
-                                    }
+                                    gAresGlobal->gInputSource.reset();
 
     //                              whichScenario++;
                                     // whichScenario = GetNextScenarioChapter( whichScenario);
@@ -1480,7 +1421,7 @@ void MainLoop (void)
                                             kScenarioWinnerNextMask) >>
                                             kScenarioWinnerNextShift);
                                     }
-                                    if (( !( gAresGlobal->gOptions & (kOptionAutoPlay | kOptionRecord | kOptionReplay))) && ( whichScenario <= GetScenarioNumber()) &&
+                                    if (( !( gAresGlobal->gOptions & (kOptionAutoPlay | kOptionReplay))) && ( whichScenario <= GetScenarioNumber()) &&
                                         ( whichScenario >= 0))
                                     {
                                         if (( GetChapterNumberFromScenarioNumber( whichScenario) >= 0) &&
@@ -1502,7 +1443,7 @@ void MainLoop (void)
                         ( GetChapterNumberFromScenarioNumber( whichScenario) <= kHackLevelMax)
                         && ( GetChapterNumberFromScenarioNumber( whichScenario) <= GetScenarioNumber())
                         && ( whichScenario >= 0) &&
-                        ( !( gAresGlobal->gOptions & (kOptionAutoPlay | kOptionRecord | kOptionReplay))));
+                        ( !( gAresGlobal->gOptions & (kOptionAutoPlay | kOptionReplay))));
                     if ( gAresGlobal->gOptions & kOptionMusicIdle)
                     {
                         LoadSong( kTitleSongID);
@@ -1510,7 +1451,7 @@ void MainLoop (void)
                         PlaySong();
                     }
                 }
-                gAresGlobal->gOptions &= ~(kOptionAutoPlay | kOptionRecord | kOptionReplay);
+                gAresGlobal->gOptions &= ~(kOptionAutoPlay | kOptionReplay);
                 if ( OptionKey()) DebugFileSave( "\p_Poopy");
                 DebugFileCleanup();
                 break;
@@ -1839,8 +1780,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
     Boolean             playerPaused = FALSE, mouseDown = FALSE,
                             enteringMessage = false,
                             afEntering = false, demoKey = false, newKeyMap = false, commandAndQ = false;
-    unsigned long       *theseKeys = 0, turnNum = 0, keyDataSize = 0,
-                            scenarioCheckTime = 0, replayDataSize = 0;
+    unsigned long       keyDataSize = 0, scenarioCheckTime = 0;
     Rect                    playAreaRect;
     short                   result = -1;
     EventRecord         theEvent;
@@ -1879,34 +1819,12 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
     WriteDebugLine("\pEntr Game");
     WriteDebugLong( gRandomSeed);
     DebugFileAppendString("\p---NEW GAME---");
-    if ( gAresGlobal->gOptions & kOptionRecord)
-    {
-        DebugFileAppendString("\p << RECORD >>");
-    } else if ( gAresGlobal->gOptions & kOptionReplay)
-    {
-        DebugFileAppendString("\p << PLAY >>");
-    }
-    DebugFileAppendString("\p\r");
 
     DebugFileAppendString("\pTime\tFile\tLine\t#\r");
 
-    if ((gAresGlobal->gOptions & (kOptionRecord | kOptionReplay))
-            && (gAresGlobal->gReplayData.get() != nil)) {
-        replayDataSize = gAresGlobal->gReplayData.count() - 1;
-        theseKeys = *gAresGlobal->gReplayData;
-        theseKeys++;
-        if ( gAresGlobal->gOptions & kOptionRecord)
-        {
-            *theseKeys = 0;
-            gAresGlobal->gLastKeys = gAresGlobal->gTheseKeys = 0;
-            theseKeys++;
-            *theseKeys = 0;
-            theseKeys--;
-        } else
-        {
-            turnNum = *theseKeys;
-            theseKeys++;
-        }
+    if ((gAresGlobal->gOptions & kOptionReplay)
+            && (gAresGlobal->gInputSource.get() != nil)) {
+        // pass
     } else
     {
         if ( gAresGlobal->user_is_scum)
@@ -2113,29 +2031,17 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
 
                     if ( gAresGlobal->gOptions & kOptionReplay)
                     {
-                        while ( turnNum == 0)
-                        {
-                            theseKeys++;
-                            turnNum = *theseKeys;
-                            turnNum++;
-                            theseKeys++;
-                            keyDataSize += 2;
-                            if ( keyDataSize >= replayDataSize)
-                            {
-//                              ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p there aren't anymore keystrokes.", nil, nil, -1, -1, -1, -1, __FILE__, 31);
-                                gAresGlobal->gGameOver = 1;
-                                theseKeys = &kNoKeys;
-                            }
+                        uint32_t keys;
+                        if (!gAresGlobal->gInputSource->next(&keys)) {
+                            gAresGlobal->gGameOver = 1;
                         }
 
-                        if ( !playerPaused) playerPaused =
-                            PlayerShipGetKeys( kDecideEveryCycles,
-                                *theseKeys, &enteringMessage);
-                        else
-                            PlayerShipGetKeys( kDecideEveryCycles,
-                                *theseKeys, &enteringMessage);
-
-                        turnNum--;
+                        if ( !playerPaused) {
+                            playerPaused = PlayerShipGetKeys(
+                                    kDecideEveryCycles, keys, &enteringMessage);
+                        } else {
+                            PlayerShipGetKeys( kDecideEveryCycles, keys, &enteringMessage);
+                        }
                     } else
                     {
                         if ( !playerPaused) playerPaused =
@@ -2143,31 +2049,6 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                                 0xffffffff, &enteringMessage);
                         else PlayerShipGetKeys( kDecideEveryCycles, 0xffffffff,
                             &enteringMessage);
-
-                        if ( gAresGlobal->gOptions & kOptionRecord)
-                        {
-                            if ( gAresGlobal->gTheseKeys == gAresGlobal->gLastKeys)
-                            {
-                                (*theseKeys)++;
-                            } else
-                            {
-                                if ( keyDataSize < kReplayBufferSize)
-                                {
-//                                  WriteDebugDivider();
-//                                  WriteDebugLong( *theseKeys);
-//                                  WriteDebugLong( keyDataSize);
-                                    theseKeys++;
-                                    *theseKeys = gAresGlobal->gLastKeys;
-                                    theseKeys++;
-                                    *theseKeys = 0;
-                                    keyDataSize += 2;
-                                } else
-                                {
-//                                  ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p I can't record any more keystrokes.", nil, nil, -1, -1, -1, -1, __FILE__, 32);
-                                    gAresGlobal->gGameOver = 1;
-                                }
-                            }
-                        }
                     }
 
                     if ( Button())
@@ -2180,7 +2061,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                         {
                             if ( !mouseDown)
                             {
-                                if ( !(gAresGlobal->gOptions & ( kOptionAutoPlay | kOptionReplay | kOptionRecord)))
+                                if ( !(gAresGlobal->gOptions & ( kOptionAutoPlay | kOptionReplay)))
                                 {
                                     if ((( gAresGlobal->gGameTime - lastclicktime)) <= GetDblTime())
                                     {
@@ -2266,7 +2147,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                         StopPauseIndicator( string);
                                         blinkOn = false;
                                     }
-                                    if ( !( gAresGlobal->gOptions & (kOptionAutoPlay | kOptionRecord | kOptionReplay)))
+                                    if ( !( gAresGlobal->gOptions & (kOptionAutoPlay | kOptionReplay)))
                                     {
                                         if ( gAresGlobal->gOptions & kOptionNetworkOn)
                                         {
@@ -2601,7 +2482,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                 ( !(gAresGlobal->gOptions & kOptionReplay)) &&
                 ((mRestartResumeKey( keyMap)) || ((!commandAndQ) && ( mQuitKeys( keyMap)))))
             {
-                if ( !( gAresGlobal->gOptions & (kOptionAutoPlay | kOptionRecord | kOptionReplay)))
+                if ( !( gAresGlobal->gOptions & (kOptionAutoPlay | kOptionReplay)))
                 {
                     if ( gAresGlobal->gOptions & kOptionNetworkOn)
                     {
@@ -2896,22 +2777,6 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
 #endif NETSPROCKET_AVAILABLE
     }
 
-    if ( gAresGlobal->gOptions & kOptionRecord)
-    {
-                theseKeys++;
-                *theseKeys = gAresGlobal->gLastKeys;
-        if (gAresGlobal->gReplayData.get() != nil) {
-            gAresGlobal->gReplayData.resize(keyDataSize + 1);
-            if ( MemError() != noErr)
-            {
-//              ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p I didn't have enough memory to record any more keystrokes.", nil, nil, -1, -1, -1, -1, __FILE__, 38);
-                SysBeep(20);
-                gAresGlobal->gGameOver = 1;
-            }
-            result = kWinGame;
-        }
-
-    }
     WriteDebugLine("\p<GameOver");
     WriteDebugLong( keyDataSize);
     MacShowCursor();
