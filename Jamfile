@@ -18,6 +18,7 @@ Main Antares : src/Admiral.cpp
                src/AresResFile.cpp
                src/AresVersion.cpp
                src/Beam.cpp
+               src/BinaryStream.cpp
                src/BriefingRenderer.cpp
                src/ColorTable.cpp
                src/ColorTranslation.cpp
