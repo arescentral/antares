@@ -191,3 +191,10 @@ template <> void BinaryWriter::write<int64_t>(const int64_t* i64, size_t count) 
 template <> void BinaryWriter::write<uint64_t>(const uint64_t* u64, size_t count) {
     write_primitive(u64, count);
 }
+
+void BinaryWriter::pad(size_t bytes) {
+    char c = '\0';
+    for (size_t i = 0; i < bytes; ++i) {
+        write_bytes(&c, 1);
+    }
+}

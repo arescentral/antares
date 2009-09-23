@@ -20,6 +20,7 @@
 #include <sys/socket.h>
 #include <exception>
 
+#include "BinaryStream.hpp"
 #include "Casts.hpp"
 #include "ColorTable.hpp"
 #include "FakeDrawing.hpp"
@@ -29,6 +30,35 @@ extern scoped_ptr<ColorTable> fake_colors;
 extern FakeWindow fakeWindow;
 
 class VncServerException : public std::exception { };
+
+namespace {
+
+class SocketBinaryWriter : public BinaryWriter {
+  public:
+    SocketBinaryWriter(int fd)
+        : _fd(fd) { }
+
+    void flush() {
+        if (!_buffer.empty()) {
+            size_t sent = send(_fd, _buffer.c_str(), _buffer.size(), 0);
+            if (sent != _buffer.size()) {
+                throw VncServerException();
+            }
+            _buffer.clear();
+        }
+    }
+
+  protected:
+    virtual void write_bytes(const char* bytes, size_t len) {
+        _buffer.append(bytes, len);
+    }
+
+  private:
+    int _fd;
+    std::string _buffer;
+};
+
+}  // namespace
 
 int listen_on(int port) {
     int one = 1;
@@ -82,20 +112,6 @@ void recv_from(int fd, T* t) {
     }
 }
 
-template <typename T>
-void send_to(int fd, const T& t) {
-    const char* data = reinterpret_cast<const char*>(&t);
-    int len = sizeof(T);
-    while (len > 0) {
-        int n = send(fd, data, len, 0);
-        if (n <= 0) {
-            throw VncServerException();
-        }
-        data += n;
-        len -= n;
-    }
-}
-
 // Common Messages.
 
 struct PixelFormat {
@@ -110,26 +126,56 @@ struct PixelFormat {
     uint8_t green_shift;
     uint8_t blue_shift;
     uint8_t unused[3];
+
+    void write(BinaryWriter* bin) const {
+        bin->write(bits_per_pixel);
+        bin->write(depth);
+        bin->write(big_endian);
+        bin->write(true_color);
+        bin->write(red_max);
+        bin->write(green_max);
+        bin->write(blue_max);
+        bin->write(red_shift);
+        bin->write(green_shift);
+        bin->write(blue_shift);
+        bin->pad(3);
+    }
 };
 
 // 6.1. Handshaking Messages.
 
 struct ProtocolVersion {
     char version[12];
+
+    void write(BinaryWriter* bin) const {
+        bin->write(version, 12);
+    }
 };
 
 struct SecurityMessage {
     uint8_t number_of_security_types;
+
+    void write(BinaryWriter* bin) const {
+        bin->write(number_of_security_types);
+    }
 };
 
 struct SecurityResultMessage {
     uint32_t status;
+
+    void write(BinaryWriter* bin) const {
+        bin->write(status);
+    }
 };
 
 // 6.3. Initialization Messages.
 
 struct ClientInitMessage {
     uint8_t shared_flag;
+
+    void write(BinaryWriter* bin) const {
+        bin->write(shared_flag);
+    }
 };
 
 struct ServerInitMessage {
@@ -137,6 +183,13 @@ struct ServerInitMessage {
     uint16_t height;
     PixelFormat format;
     uint32_t name_length;
+
+    void write(BinaryWriter* bin) const {
+        bin->write(width);
+        bin->write(height);
+        bin->write(format);
+        bin->write(name_length);
+    }
 };
 
 // 6.4. Client-to-Server Messages.
@@ -154,12 +207,24 @@ struct SetPixelFormatMessage {
     uint8_t message_type;
     uint8_t unused[3];
     PixelFormat format;
+
+    void write(BinaryWriter* bin) const {
+        bin->write(message_type);
+        bin->pad(3);
+        bin->write(format);
+    }
 };
 
 struct SetEncodingsMessage {
     uint8_t message_type;
     uint8_t unused;
     uint16_t number_of_encodings;
+
+    void write(BinaryWriter* bin) const {
+        bin->write(message_type);
+        bin->pad(1);
+        bin->write(number_of_encodings);
+    }
 };
 
 struct FramebufferUpdateRequestMessage {
@@ -169,6 +234,15 @@ struct FramebufferUpdateRequestMessage {
     uint16_t y;
     uint16_t w;
     uint16_t h;
+
+    void write(BinaryWriter* bin) const {
+        bin->write(message_type);
+        bin->write(incremental);
+        bin->write(x);
+        bin->write(y);
+        bin->write(w);
+        bin->write(h);
+    }
 };
 
 struct KeyEventMessage {
@@ -176,6 +250,13 @@ struct KeyEventMessage {
     uint8_t down_flag;
     uint8_t unused[2];
     uint32_t key;
+
+    void write(BinaryWriter* bin) const {
+        bin->write(message_type);
+        bin->write(down_flag);
+        bin->pad(2);
+        bin->write(key);
+    }
 };
 
 struct PointerEventMessage {
@@ -183,12 +264,25 @@ struct PointerEventMessage {
     uint8_t button_mask;
     uint16_t x_position;
     uint16_t y_position;
+
+    void write(BinaryWriter* bin) const {
+        bin->write(message_type);
+        bin->write(button_mask);
+        bin->write(x_position);
+        bin->write(y_position);
+    }
 };
 
 struct ClientCutTextMessage {
     uint8_t message_type;
     uint8_t unused[3];
     uint32_t length;
+
+    void write(BinaryWriter* bin) const {
+        bin->write(message_type);
+        bin->pad(3);
+        bin->write(length);
+    }
 };
 
 // 6.5. Server-to-Client Messages.
@@ -204,6 +298,12 @@ struct FramebufferUpdateMessage {
     uint8_t message_type;
     uint8_t padding;
     uint16_t number_of_rectangles;
+
+    void write(BinaryWriter* bin) const {
+        bin->write(message_type);
+        bin->pad(1);
+        bin->write(number_of_rectangles);
+    }
 };
 
 struct FramebufferUpdateRectangle {
@@ -212,6 +312,14 @@ struct FramebufferUpdateRectangle {
     uint16_t width;
     uint16_t height;
     int32_t encoding_type;
+
+    void write(BinaryWriter* bin) const {
+        bin->write(x_position);
+        bin->write(y_position);
+        bin->write(width);
+        bin->write(height);
+        bin->write(encoding_type);
+    }
 };
 
 struct SetColorMapEntriesMessage {
@@ -219,18 +327,37 @@ struct SetColorMapEntriesMessage {
     uint8_t padding;
     uint16_t first_color;
     uint16_t number_of_colors;
+
+    void write(BinaryWriter* bin) const {
+        bin->write(message_type);
+        bin->pad(1);
+        bin->write(first_color);
+        bin->write(number_of_colors);
+    }
 };
 
 struct SetColorMapEntriesColor {
     uint16_t red;
     uint16_t green;
     uint16_t blue;
+
+    void write(BinaryWriter* bin) const {
+        bin->write(red);
+        bin->write(green);
+        bin->write(blue);
+    }
 };
 
 struct ServerCutTextMessage {
     uint8_t message_type;
     uint8_t unused[3];
     uint32_t length;
+
+    void write(BinaryWriter* bin) const {
+        bin->write(message_type);
+        bin->pad(3);
+        bin->write(length);
+    }
 };
 
 // 6.6 Encodings.
@@ -244,6 +371,13 @@ struct FramebufferPixel {
     uint8_t red;
     uint8_t green;
     uint8_t blue;
+
+    void write(BinaryWriter* bin) const {
+        bin->pad(1);
+        bin->write(red);
+        bin->write(green);
+        bin->write(blue);
+    }
 };
 
 FramebufferPixel results[640 * 480];
@@ -252,11 +386,14 @@ void* vnc_server(void*) {
     AutoClosedFd sock(listen_on(5901));
     AutoClosedFd stream(accept_on(sock.fd()));
 
+    SocketBinaryWriter out(stream.fd());
+
     {
         // Negotiate version of RFB protocol.  Only 3.8 is offered or accepted.
         ProtocolVersion version;
         strncpy(version.version, "RFB 003.008\n", sizeof(ProtocolVersion));
-        send_to(stream.fd(), version);
+        out.write(version);
+        out.flush();
         recv_from(stream.fd(), &version);
         if (strncmp(version.version, "RFB 003.008\n", sizeof(ProtocolVersion)) != 0) {
             throw VncServerException();
@@ -268,8 +405,9 @@ void* vnc_server(void*) {
         SecurityMessage security;
         security.number_of_security_types = 1;
         uint8_t security_types[1] = { '\1' };  // None.
-        send_to(stream.fd(), security);
-        send_to(stream.fd(), security_types);
+        out.write(security);
+        out.write(security_types, security.number_of_security_types);
+        out.flush();
 
         uint8_t selected_security;
         recv_from(stream.fd(), &selected_security);
@@ -279,7 +417,8 @@ void* vnc_server(void*) {
 
         SecurityResultMessage result;
         result.status = 0;  // OK.
-        send_to(stream.fd(), result);
+        out.write(result);
+        out.flush();
     }
 
     {
@@ -304,10 +443,9 @@ void* vnc_server(void*) {
         server_init.format.blue_shift = 0;
         server_init.name_length = strlen(name);
 
-        send_to(stream.fd(), server_init);
-        if (send(stream.fd(), name, strlen(name), 0) != implicit_cast<ssize_t>(strlen(name))) {
-            throw VncServerException();
-        }
+        out.write(server_init);
+        out.write(name, strlen(name));
+        out.flush();
     }
 
     while (true) {
@@ -353,9 +491,9 @@ void* vnc_server(void*) {
                     results[i].blue = fake_colors->color(color).blue >> 8;
                 }
 
-                send_to(stream.fd(), response);
-                send_to(stream.fd(), rect);
-                send_to(stream.fd(), results);
+                out.write(response);
+                out.write(rect);
+                out.write(reinterpret_cast<char*>(results), 4 * 640 * 480);
             }
             break;
         case KEY_EVENT:
@@ -374,7 +512,6 @@ void* vnc_server(void*) {
             {
                 ClientCutTextMessage msg;
                 recv_from(stream.fd(), &msg);
-                printf("%d bytes\n", msg.length);
                 for (size_t i = 0; i < msg.length; ++i) {
                     char c;
                     recv_from(stream.fd(), &c);
@@ -387,6 +524,7 @@ void* vnc_server(void*) {
                 exit(1);
             }
         }
+        out.flush();
     }
     return NULL;
 }
