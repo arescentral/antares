@@ -62,4 +62,51 @@ void BinaryStream::read(T* t, size_t count) {
     }
 }
 
+class BinaryWriter {
+  public:
+    virtual ~BinaryWriter();
+
+    template <typename T>
+    void write(const T& t);
+
+    template <typename T>
+    void write(const T* t, size_t count);
+
+    void pad(size_t bytes);
+
+    size_t bytes_written() const;
+
+  protected:
+    virtual void write_bytes(const char* bytes, size_t count) = 0;
+
+    size_t _bytes_written;
+
+  private:
+    template <typename T>
+    void write_primitive(T* t, size_t count);
+};
+
+template <> void BinaryWriter::write<bool>(const bool* b, size_t count);
+template <> void BinaryWriter::write<char>(const char* c, size_t count);
+template <> void BinaryWriter::write<unsigned char>(const unsigned char* uc, size_t count);
+template <> void BinaryWriter::write<int8_t>(const int8_t* i8, size_t count);
+template <> void BinaryWriter::write<int16_t>(const int16_t* i16, size_t count);
+template <> void BinaryWriter::write<uint16_t>(const uint16_t* u16, size_t count);
+template <> void BinaryWriter::write<int32_t>(const int32_t* i32, size_t count);
+template <> void BinaryWriter::write<uint32_t>(const uint32_t* u32, size_t count);
+template <> void BinaryWriter::write<int64_t>(const int64_t* i64, size_t count);
+template <> void BinaryWriter::write<uint64_t>(const uint64_t* u64, size_t count);
+
+template <typename T>
+void BinaryWriter::write(const T& t) {
+    write(&t, 1);
+}
+
+template <typename T>
+void BinaryWriter::write(const T* t, size_t count) {
+    for (size_t i = 0; i < count; ++i) {
+        t[i].write(this);
+    }
+}
+
 #endif  // ANTARES_BINARY_STREAM_HPP_

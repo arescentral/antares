@@ -19,10 +19,12 @@
 
 #include <assert.h>
 #include <fcntl.h>
+#include <libkern/OSByteOrder.h>
 #include <algorithm>
 #include <limits>
 #include <string>
 
+#include "BinaryStream.hpp"
 #include "ColorTable.hpp"
 #include "FakeHandles.hpp"
 #include "Fakes.hpp"
@@ -38,23 +40,41 @@ FakeGDevice fakeGDevice(640, 480, &fakeRealGWorld);
 
 GDevice* fakeGDevicePtr = &fakeGDevice;
 
+namespace {
+
+class StringBinaryWriter : public BinaryWriter {
+public:
+    StringBinaryWriter(std::string* out)
+        : _out(out) { }
+
+  protected:
+    virtual void write_bytes(const char* bytes, size_t count) {
+        _out->append(bytes, count);
+    }
+
+  private:
+    std::string* _out;
+};
+
+}  // namespace
+
 void DumpTo(const std::string& path) {
     std::string contents;
+    StringBinaryWriter bin(&contents);
 
-    const uint32_t size[2] = { 640, 480 };
-    const PixMap* p = &fakeWindow.portBits;
-
-    contents.insert(contents.size(), reinterpret_cast<const char*>(size), sizeof(size));
+    bin.write<uint32_t>(640);
+    bin.write<uint32_t>(480);
 
     for (size_t i = 0; i < 256; ++i) {
         RGBColor color = fake_colors->color(i);
-        contents.insert(contents.size(), reinterpret_cast<char*>(&i), sizeof(size_t));
-        contents.insert(contents.size(), reinterpret_cast<char*>(&color.red), sizeof(uint32_t));
-        contents.insert(contents.size(), reinterpret_cast<char*>(&color.green), sizeof(uint32_t));
-        contents.insert(contents.size(), reinterpret_cast<char*>(&color.blue), sizeof(uint32_t));
+        bin.write<uint32_t>(i);
+        bin.write(color.red);
+        bin.write(color.green);
+        bin.write(color.blue);
     }
 
-    contents.insert(contents.size(), reinterpret_cast<char*>(p->baseAddr), 640 * 480);
+    const PixMap* p = &fakeWindow.portBits;
+    bin.write(p->baseAddr, 640 * 480);
 
     MakeDirs(DirName(path), 0755);
     int fd = open(path.c_str(), O_WRONLY | O_CREAT, 0644);
