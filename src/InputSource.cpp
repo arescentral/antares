@@ -17,6 +17,8 @@
 
 #include "InputSource.hpp"
 
+#include <assert.h>
+
 InputSource::~InputSource() { }
 
 ReplayInputSource::ReplayInputSource(int32_t id)

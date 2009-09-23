@@ -17,6 +17,7 @@
 
 #include "StringList.hpp"
 
+#include <assert.h>
 #include "Casts.hpp"
 #include "Resource.hpp"
 
