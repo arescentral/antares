@@ -219,10 +219,9 @@ long MakeNewAdmiral( long flagship, long destinationObject, destinationType dTyp
     return( n);
 }
 
-long MakeNewDestination( long whichObject, long *canBuildType, smallFixedType earn, short nameResID,
-                        short nameStrNum)
-
-{
+long MakeNewDestination(
+        long whichObject, int32_t* canBuildType, smallFixedType earn, short nameResID,
+        short nameStrNum) {
     long            i = 0, j;
     destBalanceType *d = mGetDestObjectBalancePtr( 0);
     Str255          s;

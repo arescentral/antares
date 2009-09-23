@@ -25,6 +25,8 @@
 
 #pragma options align=mac68k
 
+class BinaryStream;
+
 #define kScenarioInitialNum             12
 #define kScenarioSpontaneousNum         2
 #define kScenarioEndgameNum             12
@@ -149,92 +151,57 @@ enum briefingPointKindEnum {
 //
 
 struct briefPointType {
-    briefingPointKindType   briefPointKind;
-    union
-    {
-        struct
-        {
-            long            objectNum;
-            Boolean         objectVisible;
-        } objectBriefType;
+    struct ObjectBrief {
+        int32_t         objectNum;
+        uint8_t         objectVisible;  // bool
 
-        struct
-        {
-            longPointType   location;
-        } absoluteBriefType;
+        void read(BinaryStream* bin);
+    };
+    struct AbsoluteBrief {
+        longPointType   location;
+
+        void read(BinaryStream* bin);
+    };
+
+    briefingPointKindType   briefPointKind;
+    union {
+        ObjectBrief objectBriefType;
+        AbsoluteBrief absoluteBriefType;
     } briefPointData;
     longPointType           range;
-    short                   titleResID;
-    short                   titleNum;
-    short                   contentResID;
+    int16_t                 titleResID;
+    int16_t                 titleNum;
+    int16_t                 contentResID;
 
     size_t load_data(const char* data, size_t len);
 };
 
-/*
-typedef struct
-{
-    long            type;
-    long            owner;
-    long            realObjectNumber;
-    union
-    {
-        long            realObjectID;
-        unsigned long   attributes;
-    } realData;
-    longPointType   location;
-    long            distanceMinimum;
-    long            distanceRange;
-    long            rotationMinimum;
-    long            rotationRange;
-    long            spriteIDOverride;               // <- ADDED 9/30
-    long            canBuild[kMaxTypeBaseCanBuildOld];
-    long            initialDestination;             // <- ADDED 9/27
-    long            nameResID;
-    long            nameStrNum;
-    Boolean         isFlagShip;
-} scenarioInitialTypeOld;
-*/
-
 struct scenarioInitialType {
-    long            type;
-    long            owner;
-    long            realObjectNumber;
-    long            realObjectID;
+    int32_t         type;
+    int32_t         owner;
+    int32_t         realObjectNumber;
+    int32_t         realObjectID;
     longPointType   location;
     smallFixedType  earning;
-    long            distanceRange;
-    long            rotationMinimum;
-    long            rotationRange;
-    long            spriteIDOverride;               // <- ADDED 9/30
-    long            canBuild[kMaxTypeBaseCanBuild];
-    long            initialDestination;             // <- ADDED 9/27
-    long            nameResID;
-    long            nameStrNum;
-    unsigned long   attributes;
+    int32_t         distanceRange;
+    int32_t         rotationMinimum;
+    int32_t         rotationRange;
+    int32_t         spriteIDOverride;               // <- ADDED 9/30
+    int32_t         canBuild[kMaxTypeBaseCanBuild];
+    int32_t         initialDestination;             // <- ADDED 9/27
+    int32_t         nameResID;
+    int32_t         nameStrNum;
+    uint32_t        attributes;
 
     size_t load_data(const char* data, size_t len);
 };
 
 struct counterArgumentType {
-    long            whichPlayer;
-    long            whichCounter;
-    long            amount;
-};
+    int32_t         whichPlayer;
+    int32_t         whichCounter;
+    int32_t         amount;
 
-struct scenarioConditionTypeOld {
-    conditionType   condition;
-    union
-    {
-        longPointType       location;
-        counterArgumentType counter;
-        long                longValue;
-        unsigned long       unsignedLongValue;
-    } conditionArgument;
-    long            subjectObject;      // initial object #
-    long            directObject;       // initial object #
-    long            startVerb;
-    long            verbNum;
+    void read(BinaryStream* bin);
 };
 
 struct scenarioConditionType {
@@ -243,75 +210,66 @@ struct scenarioConditionType {
     {
         longPointType       location;
         counterArgumentType counter;
-        long                longValue;
-        unsigned long       unsignedLongValue;
+        int32_t             longValue;
+        uint32_t            unsignedLongValue;
     } conditionArgument;
-    long            subjectObject;      // initial object #
-    long            directObject;       // initial object #
-    long            startVerb;
-    long            verbNum;
-    unsigned long   flags;
-    long            direction;
+    int32_t         subjectObject;      // initial object #
+    int32_t         directObject;       // initial object #
+    int32_t         startVerb;
+    int32_t         verbNum;
+    uint32_t        flags;
+    int32_t         direction;
 
     size_t load_data(const char* data, size_t len);
 };
 
 struct scenarioPlayerType
 {
-    short           playerType;
-    short           playerRace;
-    short           nameResID;
-    short           nameStrNum;
-    long            admiralNumber;
+    int16_t         playerType;
+    int16_t         playerRace;
+    int16_t         nameResID;
+    int16_t         nameStrNum;
+    int32_t         admiralNumber;
     smallFixedType  earningPower;
 //  long            reserved1;
-    short           netRaceFlags;
-    short           reserved1;
-};
+    int16_t         netRaceFlags;
+    int16_t         reserved1;
 
-struct scenarioTypeOld {
-    long                    playerNum;
-    scenarioPlayerType      player[kScenarioPlayerNum];
-    long                    initialFirst;
-    long                    initialNum;
-    long                    conditionFirst;
-    long                    conditionNum;
-    long                    briefPointFirst;
-    long                    briefPointNum;
+    void read(BinaryStream* bin);
 };
 
 struct scenarioType {
-    short                       netRaceFlags;
-    short                       playerNum;
+    int16_t                     netRaceFlags;
+    int16_t                     playerNum;
     scenarioPlayerType  player[kScenarioPlayerNum];
-    short                       scoreStringResID;
-    short                       initialFirst;
-    short                       prologueID;
-    short                       initialNum;
-    short                       songID;
-    short                       conditionFirst;
-    short                       epilogueID;
-    short                       conditionNum;
-    short                       starMapH;
-    short                       briefPointFirst;
-    short                       starMapV;
-    short                       briefPointNum;  // use kScenarioBriefMask
-    short                       parTime;
-    short                       movieNameStrNum;
-    short                       parKills;
-    short                       levelNameStrNum;
-    smallFixedType          parKillRatio;
-    short                       parLosses;
-    short                       startTime;      // use kScenario_StartTimeMask
+    int16_t                     scoreStringResID;
+    int16_t                     initialFirst;
+    int16_t                     prologueID;
+    int16_t                     initialNum;
+    int16_t                     songID;
+    int16_t                     conditionFirst;
+    int16_t                     epilogueID;
+    int16_t                     conditionNum;
+    int16_t                     starMapH;
+    int16_t                     briefPointFirst;
+    int16_t                     starMapV;
+    int16_t                     briefPointNum;  // use kScenarioBriefMask
+    int16_t                     parTime;
+    int16_t                     movieNameStrNum;
+    int16_t                     parKills;
+    int16_t                     levelNameStrNum;
+    smallFixedType              parKillRatio;
+    int16_t                     parLosses;
+    int16_t                     startTime;      // use kScenario_StartTimeMask
 
     size_t load_data(const char* data, size_t len);
 };
 
 struct raceType {
-    long                        id;
-    unsigned char           apparentColor;
-    unsigned long           illegalColors;
-    long                        advantage;
+    int32_t id;
+    uint8_t apparentColor;
+    uint32_t illegalColors;
+    int32_t advantage;
 
     size_t load_data(const char* data, size_t len);
 };

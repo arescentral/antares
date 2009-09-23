@@ -23,6 +23,7 @@
 
 #include <ToolUtils.h>
 
+#include "BinaryStream.hpp"
 #include "ConditionalMacros.h"
 #include "GXMath.h"
 #include "Resources.h"
@@ -247,4 +248,9 @@ void MyMulDoubleLong( long a, long b, wide *dest)
 
 //  Debugger();
 //  LongMul( a, b, dest);
+}
+
+void fixedPointType::read(BinaryStream* bin) {
+    bin->read(&h);
+    bin->read(&v);
 }

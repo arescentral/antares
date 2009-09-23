@@ -30,6 +30,7 @@
 #include "AnyChar.hpp"
 #include "AresResFile.hpp"
 #include "AresGlobalType.hpp"
+#include "BinaryStream.hpp"
 #include "ColorTranslation.hpp"
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
@@ -1309,7 +1310,118 @@ void SetInterfaceTextBoxText( short resID)
 }
 
 size_t interfaceItemType::load_data(const char* data, size_t len) {
-    assert(len >= sizeof(interfaceItemType));
-    memcpy(this, data, sizeof(interfaceItemType));
-    return sizeof(interfaceItemType);
+    BinaryStream bin(data, len);
+    char section[22];
+
+    bin.read(&bounds);
+    bin.read(section, 22);
+    bin.read(&color);
+    bin.read(&kind);
+    bin.read(&style);
+    bin.discard(1);
+
+    BinaryStream sub(section, 22);
+    switch (kind) {
+      case kPlainRect:
+      case kPictureRect:
+        sub.read(&item.pictureRect);
+        break;
+
+      case kLabeledRect:
+        sub.read(&item.labeledRect);
+        break;
+
+      case kListRect:
+        sub.read(&item.listRect);
+        break;
+
+      case kTextRect:
+        sub.read(&item.textRect);
+        break;
+
+      case kPlainButton:
+        sub.read(&item.plainButton);
+        break;
+
+      case kRadioButton:
+      case kTabBoxButton:
+        sub.read(&item.radioButton);
+        break;
+
+      case kCheckboxButton:
+        sub.read(&item.checkboxButton);
+        break;
+
+      case kTabBox:
+        sub.read(&item.tabBox);
+        break;
+
+      case kTabBoxTop:
+        break;
+    }
+
+    return bin.bytes_read();
+}
+
+void interfaceLabelType::read(BinaryStream* bin) {
+    bin->read(&stringID);
+    bin->read(&stringNumber);
+}
+
+void interfaceLabeledRectType::read(BinaryStream* bin) {
+    bin->read(&label);
+    bin->read(&color);
+    bin->discard(5);
+    bin->read(&editable);
+
+    teData = NULL;
+}
+
+void interfaceListType::read(BinaryStream* bin) {
+    bin->read(&label);
+    bin->discard(12);
+    bin->read(&topItem);
+    bin->read(&lineUpStatus);
+    bin->read(&lineDownStatus);
+    bin->read(&pageUpStatus);
+    bin->read(&pageDownStatus);
+
+    getListLength = NULL;
+    getItemString = NULL;
+    itemHilited = NULL;
+}
+
+void interfaceTextRectType::read(BinaryStream* bin) {
+    bin->read(&textID);
+    bin->read(&visibleBounds);
+}
+
+void interfaceButtonType::read(BinaryStream* bin) {
+    bin->read(&label);
+    bin->read(&key);
+    bin->read(&defaultButton);
+    bin->read(&status);
+}
+
+void interfaceRadioType::read(BinaryStream* bin) {
+    bin->read(&label);
+    bin->read(&key);
+    bin->read(&on);
+    bin->read(&status);
+}
+
+void interfaceCheckboxType::read(BinaryStream* bin) {
+    bin->read(&label);
+    bin->read(&key);
+    bin->read(&on);
+    bin->read(&status);
+}
+
+void interfacePictureRectType::read(BinaryStream* bin) {
+    bin->read(&pictureID);
+    bin->read(&visibleBounds);
+}
+
+void interfaceTabBoxType::read(BinaryStream* bin) {
+    bin->read(&topRightBorderSize);
 }

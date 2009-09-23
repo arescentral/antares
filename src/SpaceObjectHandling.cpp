@@ -25,6 +25,7 @@
 #include "AresDemoScanner.hpp"
 #include "AresGlobalType.hpp"
 #include "Beam.hpp"
+#include "BinaryStream.hpp"
 #include "ColorTranslation.hpp"
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
@@ -2920,13 +2921,321 @@ void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord
 }
 
 size_t objectActionType::load_data(const char* data, size_t len) {
-    assert(len >= sizeof(objectActionType));
-    memcpy(this, data, sizeof(objectActionType));
-    return sizeof(objectActionType);
+    BinaryStream bin(data, len);
+    char section[24];
+
+    bin.read(&verb);
+    bin.read(&reflexive);
+    bin.read(&inclusiveFilter);
+    bin.read(&exclusiveFilter);
+    bin.read(&owner);
+    bin.read(&delay);
+    bin.read(&initialSubjectOverride);
+    bin.read(&initialDirectOverride);
+    bin.discard(4);
+    bin.read(section, 24);
+
+    BinaryStream sub(section, 24);
+    switch (verb) {
+      case kNoAction:
+      case kSetDestination:
+      case kActivateSpecial:
+      case kActivatePulse:
+      case kActivateBeam:
+      case kNilTarget:
+        break;
+
+      case kCreateObject:
+      case kCreateObjectSetDest:
+        sub.read(&argument.createObject);
+        break;
+
+      case kPlaySound:
+        sub.read(&argument.playSound);
+        break;
+
+      case kAlter:
+        sub.read(&argument.alterObject);
+        break;
+
+      case kMakeSparks:
+        sub.read(&argument.makeSparks);
+        break;
+
+      case kReleaseEnergy:
+        sub.read(&argument.releaseEnergy);
+        break;
+
+      case kLandAt:
+        sub.read(&argument.landAt);
+        break;
+
+      case kEnterWarp:
+        sub.read(&argument.enterWarp);
+        break;
+
+      case kDisplayMessage:
+        sub.read(&argument.displayMessage);
+        break;
+
+      case kChangeScore:
+        sub.read(&argument.changeScore);
+        break;
+
+      case kDeclareWinner:
+        sub.read(&argument.declareWinner);
+        break;
+
+      case kDie:
+        sub.read(&argument.killObject);
+        break;
+
+      case kColorFlash:
+        sub.read(&argument.colorFlash);
+        break;
+
+      case kDisableKeys:
+      case kEnableKeys:
+        sub.read(&argument.keys);
+        break;
+
+      case kSetZoom:
+        sub.read(&argument.zoom);
+        break;
+
+      case kComputerSelect:
+        sub.read(&argument.computerSelect);
+        break;
+
+      case kAssumeInitialObject:
+        sub.read(&argument.assumeInitial);
+        break;
+    }
+
+    return bin.bytes_read();
+}
+
+void argumentType::CreateObject::read(BinaryStream* bin) {
+    bin->read(&whichBaseType);
+    bin->read(&howManyMinimum);
+    bin->read(&howManyRange);
+    bin->read(&velocityRelative);
+    bin->read(&directionRelative);
+    bin->read(&randomDistance);
+}
+
+void argumentType::PlaySound::read(BinaryStream* bin) {
+    bin->read(&priority);
+    bin->discard(1);
+    bin->read(&persistence);
+    bin->read(&absolute);
+    bin->discard(1);
+    bin->read(&volumeMinimum);
+    bin->read(&volumeRange);
+    bin->read(&idMinimum);
+    bin->read(&idRange);
+}
+
+void argumentType::AlterObject::read(BinaryStream* bin) {
+    bin->read(&alterType);
+    bin->read(&relative);
+    bin->read(&minimum);
+    bin->read(&range);
+}
+
+void argumentType::MakeSparks::read(BinaryStream* bin) {
+    bin->read(&howMany);
+    bin->read(&speed);
+    bin->read(&velocityRange);
+    bin->read(&color);
+}
+
+void argumentType::ReleaseEnergy::read(BinaryStream* bin) {
+    bin->read(&percent);
+}
+
+void argumentType::LandAt::read(BinaryStream* bin) {
+    bin->read(&landingSpeed);
+}
+
+void argumentType::EnterWarp::read(BinaryStream* bin) {
+    bin->read(&warpSpeed);
+}
+
+void argumentType::DisplayMessage::read(BinaryStream* bin) {
+    bin->read(&resID);
+    bin->read(&pageNum);
+}
+
+void argumentType::ChangeScore::read(BinaryStream* bin) {
+    bin->read(&whichPlayer);
+    bin->read(&whichScore);
+    bin->read(&amount);
+}
+
+void argumentType::DeclareWinner::read(BinaryStream* bin) {
+    bin->read(&whichPlayer);
+    bin->read(&nextLevel);
+    bin->read(&textID);
+}
+
+void argumentType::KillObject::read(BinaryStream* bin) {
+    bin->read(&dieType);
+}
+
+void argumentType::ColorFlash::read(BinaryStream* bin) {
+    bin->read(&length);
+    bin->read(&color);
+    bin->read(&shade);
+}
+
+void argumentType::Keys::read(BinaryStream* bin) {
+    bin->read(&keyMask);
+}
+
+void argumentType::Zoom::read(BinaryStream* bin) {
+    bin->read(&zoomLevel);
+}
+
+void argumentType::ComputerSelect::read(BinaryStream* bin) {
+    bin->read(&screenNumber);
+    bin->read(&lineNumber);
+}
+
+void argumentType::AssumeInitial::read(BinaryStream* bin) {
+    bin->read(&whichInitialObject);
 }
 
 size_t baseObjectType::load_data(const char* data, size_t len) {
-    assert(len >= sizeof(baseObjectType));
-    memcpy(this, data, sizeof(baseObjectType));
-    return sizeof(baseObjectType);
+    BinaryStream bin(data, len);
+    char section[32];
+
+    bin.read(&attributes);
+    bin.read(&baseClass);
+    bin.read(&baseRace);
+    bin.read(&price);
+
+    bin.read(&offenseValue);
+    bin.read(&destinationClass);
+
+    bin.read(&maxVelocity);
+    bin.read(&warpSpeed);
+    bin.read(&warpOutDistance);
+
+    bin.read(&initialVelocity);
+    bin.read(&initialVelocityRange);
+
+    bin.read(&mass);
+    bin.read(&maxThrust);
+
+    bin.read(&health);
+    bin.read(&damage);
+    bin.read(&energy);
+
+    bin.read(&initialAge);
+    bin.read(&initialAgeRange);
+
+    bin.read(&naturalScale);
+
+    bin.read(&pixLayer);
+    bin.read(&pixResID);
+    bin.read(&tinySize);
+    bin.read(&shieldColor);
+    bin.discard(1);
+
+    bin.read(&initialDirection);
+    bin.read(&initialDirectionRange);
+
+    bin.read(&pulse);
+    bin.read(&beam);
+    bin.read(&special);
+
+    bin.read(&pulsePositionNum);
+    bin.read(&beamPositionNum);
+    bin.read(&specialPositionNum);
+
+    bin.read(pulsePosition, kMaxWeaponPosition);
+    bin.read(beamPosition, kMaxWeaponPosition);
+    bin.read(specialPosition, kMaxWeaponPosition);
+
+    bin.read(&friendDefecit);
+    bin.read(&dangerThreshold);
+    bin.read(&specialDirection);
+
+    bin.read(&arriveActionDistance);
+
+    bin.read(&destroyAction);
+    bin.read(&destroyActionNum);
+    bin.read(&expireAction);
+    bin.read(&expireActionNum);
+    bin.read(&createAction);
+    bin.read(&createActionNum);
+    bin.read(&collideAction);
+    bin.read(&collideActionNum);
+    bin.read(&activateAction);
+    bin.read(&activateActionNum);
+    bin.read(&arriveAction);
+    bin.read(&arriveActionNum);
+
+    bin.read(section, 32);
+
+    bin.read(&buildFlags);
+    bin.read(&orderFlags);
+    bin.read(&buildRatio);
+    bin.read(&buildTime);
+    bin.read(&skillNum);
+    bin.read(&skillDen);
+    bin.read(&skillNumAdj);
+    bin.read(&skillDenAdj);
+    bin.read(&pictPortraitResID);
+    bin.discard(6);
+    bin.read(&internalFlags);
+
+    BinaryStream sub(section, 32);
+    if (attributes & kShapeFromDirection) {
+        sub.read(&frame.rotation);
+    } else if (attributes & kIsSelfAnimated) {
+        sub.read(&frame.animation);
+    } else if (attributes & kIsBeam) {
+        sub.read(&frame.beam);
+    } else {
+        sub.read(&frame.weapon);
+    }
+
+    return bin.bytes_read();
+}
+
+void objectFrameType::Rotation::read(BinaryStream* bin) {
+    bin->read(&shapeOffset);
+    bin->read(&rotRes);
+    bin->read(&maxTurnRate);
+    bin->read(&turnAcceleration);
+}
+
+void objectFrameType::Animation::read(BinaryStream* bin) {
+    bin->read(&firstShape);
+    bin->read(&lastShape);
+    bin->read(&frameDirection);
+    bin->read(&frameDirectionRange);
+    bin->read(&frameSpeed);
+    bin->read(&frameSpeedRange);
+    bin->read(&frameShape);
+    bin->read(&frameShapeRange);
+}
+
+void objectFrameType::Beam::read(BinaryStream* bin) {
+    bin->read(&color);
+    bin->read(&kind);
+    bin->read(&accuracy);
+    bin->read(&range);
+}
+
+void objectFrameType::Weapon::read(BinaryStream* bin) {
+    bin->read(&usage);
+    bin->read(&energyCost);
+    bin->read(&fireTime);
+    bin->read(&ammo);
+    bin->read(&range);
+    bin->read(&inverseSpeed);
+    bin->read(&restockCost);
 }

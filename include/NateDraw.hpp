@@ -26,6 +26,8 @@
 
 #pragma options align=mac68k
 
+class BinaryStream;
+
 inline void mGetRowBytes(long& rBytes, PixMap* pix) {
     rBytes = pix->rowBytes & 0x3fff;
 }
@@ -64,15 +66,19 @@ struct coordPointType
 };
 
 struct longPointType {
-    long        h;
-    long        v;
+    int32_t     h;
+    int32_t     v;
+
+    void read(BinaryStream* bin);
 };
 
 struct longRect {
-    long        left;
-    long        top;
-    long        right;
-    long        bottom;
+    int32_t     left;
+    int32_t     top;
+    int32_t     right;
+    int32_t     bottom;
+
+    void read(BinaryStream* bin);
 };
 
 void DrawNateRect( PixMap *, longRect *, long, long, unsigned char);

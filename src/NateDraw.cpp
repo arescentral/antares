@@ -19,6 +19,7 @@
 
 #include "NateDraw.hpp"
 
+#include "BinaryStream.hpp"
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
@@ -29,6 +30,18 @@
 #ifdef kByteLevelTesting
 #include "SpriteHandling.hpp" // for test byte debugging kludge
 #endif
+
+void longPointType::read(BinaryStream* bin) {
+    bin->read(&h);
+    bin->read(&v);
+}
+
+void longRect::read(BinaryStream* bin) {
+    bin->read(&left);
+    bin->read(&top);
+    bin->read(&right);
+    bin->read(&bottom);
+}
 
 inline void mHBlitz(unsigned char*& mdbyte, long mrunLen, long mcolor, long& mcount) {
     mcount = mrunLen;

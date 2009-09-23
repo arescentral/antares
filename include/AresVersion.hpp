@@ -22,7 +22,7 @@
 
 #define kThis_Version_Is                    0x01010100
 
-typedef unsigned long aresVersionType;
+typedef uint32_t aresVersionType;
 
 aresVersionType AresVersion_Get_FromString(unsigned char* s);
 unsigned char* String_Get_FromAresVersion(unsigned char* s, aresVersionType t);

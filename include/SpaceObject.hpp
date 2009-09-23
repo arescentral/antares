@@ -27,6 +27,8 @@
 #include "SoundFX.hpp"
 #include "SpriteHandling.hpp"
 
+class BinaryStream;
+
 #pragma options align=mac68k
 
 #define kMaxSpaceObject     250
@@ -350,149 +352,172 @@ enum kPresenceStateType {
 union argumentType {
 
     // createObject: make another type of object appear
-    struct
-    {
-        long                    whichBaseType;      // what type
-        long                    howManyMinimum;     // # to make min
-        long                    howManyRange;       // # to make range
+    struct CreateObject {
+        int32_t                 whichBaseType;      // what type
+        int32_t                 howManyMinimum;     // # to make min
+        int32_t                 howManyRange;       // # to make range
         uint8_t                 velocityRelative;   // is velocity relative to creator?
         uint8_t                 directionRelative;  // determines initial heading
-        long                    randomDistance;     // if not 0, then object will be created in random direction from 0 to this away
-    } createObject;
+        int32_t                 randomDistance;     // if not 0, then object will be created in random direction from 0 to this away
+
+        void read(BinaryStream* bin);
+    };
+    CreateObject createObject;
 
     // playSound: play a sound effect
-    struct
-    {
+    struct PlaySound {
         uint8_t                 priority;
-        long                    persistence;
+        int32_t                 persistence;
         uint8_t                 absolute;           // not distanced
-        long                    volumeMinimum;
-        long                    volumeRange;
-        long                    idMinimum;
-        long                    idRange;
-    } playSound;
+        int32_t                 volumeMinimum;
+        int32_t                 volumeRange;
+        int32_t                 idMinimum;
+        int32_t                 idRange;
+
+        void read(BinaryStream* bin);
+    };
+    PlaySound playSound;
 
     // alterObject: change some attribute of an object
-    struct
-    {
+    struct AlterObject {
         uint8_t                 alterType;
         uint8_t                 relative;
-        long                    minimum;
-        long                    range;
-    } alterObject;
+        int32_t                 minimum;
+        int32_t                 range;
+
+        void read(BinaryStream* bin);
+    };
+    AlterObject alterObject;
 
     // makeSpark
-    struct
-    {
-        long                    howMany;
-        long                    speed;
+    struct MakeSparks {
+        int32_t                 howMany;
+        int32_t                 speed;
         smallFixedType          velocityRange;
-        unsigned char           color;
-    } makeSparks;
+        uint8_t                 color;
+
+        void read(BinaryStream* bin);
+    };
+    MakeSparks makeSparks;
 
     // release energy
-    struct
-    {
+    struct ReleaseEnergy {
         smallFixedType          percent;
-    } releaseEnergy;
+
+        void read(BinaryStream* bin);
+    };
+    ReleaseEnergy releaseEnergy;
 
     // land at
-    struct
-    {
-        long                    landingSpeed;
-    } landAt;
+    struct LandAt {
+        int32_t                 landingSpeed;
+
+        void read(BinaryStream* bin);
+    };
+    LandAt landAt;
 
     // enter warp
-    struct
-    {
+    struct EnterWarp {
         smallFixedType          warpSpeed;
-    } enterWarp;
+
+        void read(BinaryStream* bin);
+    };
+    EnterWarp enterWarp;
 
     // Display message
-    struct
-    {
-        short                   resID;
-        short                   pageNum;
-    } displayMessage;
+    struct DisplayMessage {
+        int16_t                 resID;
+        int16_t                 pageNum;
+
+        void read(BinaryStream* bin);
+    };
+    DisplayMessage displayMessage;
 
     // Change score
-    struct
-    {
-        long                    whichPlayer;    // in scenario's terms; -1 = owner of executor of action
-        long                    whichScore;     // each player can have many "scores"
-        long                    amount;
-    } changeScore;
+    struct ChangeScore {
+        int32_t                 whichPlayer;    // in scenario's terms; -1 = owner of executor of action
+        int32_t                 whichScore;     // each player can have many "scores"
+        int32_t                 amount;
+
+        void read(BinaryStream* bin);
+    };
+    ChangeScore changeScore;
 
     // Declare winner
-    struct
-    {
-        long                    whichPlayer;    // in scenario's terms; -1 = owner of executor of action
-        long                    nextLevel;      // -1 = none
-        long                    textID;         // id of "debriefing" text
-    } declareWinner;
+    struct DeclareWinner {
+        int32_t                 whichPlayer;    // in scenario's terms; -1 = owner of executor of action
+        int32_t                 nextLevel;      // -1 = none
+        int32_t                 textID;         // id of "debriefing" text
+
+        void read(BinaryStream* bin);
+    };
+    DeclareWinner declareWinner;
 
     // killObject: cause object to expire
-    struct
-    {
+    struct KillObject {
         dieVerbIDType           dieType;
-    } killObject;
+
+        void read(BinaryStream* bin);
+    };
+    KillObject killObject;
 
     // colorFlash: flash whole screen to a color
-    struct
-    {
-        long                    length;         // length of color flash
-        unsigned char           color;          // color of flash
-        unsigned char           shade;          // brightness of flash
-    } colorFlash;
+    struct ColorFlash {
+        int32_t                 length;         // length of color flash
+        uint8_t                 color;          // color of flash
+        uint8_t                 shade;          // brightness of flash
+
+        void read(BinaryStream* bin);
+    };
+    ColorFlash colorFlash;
 
     // keys: disable or enable keys/ for tutorial
-    struct
-    {
-        unsigned long           keyMask;
-    } keys;
+    struct Keys {
+        uint32_t                keyMask;
+
+        void read(BinaryStream* bin);
+    };
+    Keys keys;
 
     // zoomLevel; manually set zoom level
-    struct
-    {
-        long                    zoomLevel;
-    } zoom;
-    struct
-    {
-        long                    screenNumber;
-        long                    lineNumber;
-    } computerSelect;
-    struct
-    {
-        long                    whichInitialObject;
-    } assumeInitial;
-};
+    struct Zoom {
+        int32_t                 zoomLevel;
 
-struct OLDobjectActionType {
-    objectVerbIDType            verb;                   // what is this verb?
-    uint8_t                     reflexive;              // does it apply to object executing verb?
-    unsigned long               inclusiveFilter;        // if it has ALL these attributes, OK -- for non-reflective verbs
-    unsigned long               exclusiveFilter;        // don't execute if it has ANY of these
-    short                       owner;                  // 0 no matter, 1 same owner, -1 different owner
+        void read(BinaryStream* bin);
+    };
+    Zoom zoom;
 
-    argumentType                argument;
+    struct ComputerSelect {
+        int32_t                 screenNumber;
+        int32_t                 lineNumber;
+
+        void read(BinaryStream* bin);
+    };
+    ComputerSelect computerSelect;
+
+    struct AssumeInitial {
+        int32_t                 whichInitialObject;
+
+        void read(BinaryStream* bin);
+    };
+    AssumeInitial assumeInitial;
 };
 
 struct objectActionType {
     objectVerbIDType            verb;                   // what is this verb?
     uint8_t                     reflexive;              // does it apply to object executing verb?
-    unsigned long               inclusiveFilter;        // if it has ALL these attributes, OK -- for non-reflective verbs
-    unsigned long               exclusiveFilter;        // don't execute if it has ANY of these
-    short                       owner;                  // 0 no matter, 1 same owner, -1 different owner
-    long                        delay;
+    uint32_t                    inclusiveFilter;        // if it has ALL these attributes, OK -- for non-reflective verbs
+    uint32_t                    exclusiveFilter;        // don't execute if it has ANY of these
+    int16_t                     owner;                  // 0 no matter, 1 same owner, -1 different owner
+    uint32_t                    delay;
 //  unsigned long               reserved1;
-    short                       initialSubjectOverride;
-    short                       initialDirectOverride;
-    unsigned long               reserved2;
+    int16_t                     initialSubjectOverride;
+    int16_t                     initialDirectOverride;
+    uint32_t                    reserved2;
     argumentType                argument;
 
     size_t load_data(const char* data, size_t len);
 };
-
 
 typedef uint8_t beamKindType;
 enum beamKindEnum {
@@ -533,66 +558,74 @@ struct beamType {
 };
 
 union objectFrameType {
-        // rotation: for objects whose shapes depend on their direction
-        struct
-        {
-            long                    shapeOffset;        // offset for 1st shape
-            long                    rotRes;             // ROT_POS / rotRes = # of discrete shapes
-            smallFixedType          maxTurnRate;        // max rate at which object can turn
-            smallFixedType          turnAcceleration;   // rate at which object reaches maxTurnRate
-        } rotation;
+    // rotation: for objects whose shapes depend on their direction
+    struct Rotation {
+        int32_t                 shapeOffset;        // offset for 1st shape
+        int32_t                 rotRes;             // ROT_POS / rotRes = # of discrete shapes
+        smallFixedType          maxTurnRate;        // max rate at which object can turn
+        smallFixedType          turnAcceleration;   // rate at which object reaches maxTurnRate
 
-        // animation: objects whose appearence does not depend on direction
-        struct
-        {
-            long                    firstShape;         // first shape in range
-            long                    lastShape;          // last shape (inclusive)
-
-            long                    frameDirection;     // direction (either -1, 0, or 1)
-            long                    frameDirectionRange;    // either 0, 1, or 2
-
-            long                    frameSpeed;         // speed at which object animates
-            long                    frameSpeedRange;    // random addition to speed
-
-            long                    frameShape;         // starting shape #
-            long                    frameShapeRange;    // random addition to starting shape #
-        } animation;
-
-        // beam: have no associated sprite
-        struct
-        {
-            unsigned char           color;              // color of beam
-            beamKindType            kind;
-            long                    accuracy;           // for non-normal beams, how accurate
-            long                    range;
-        } beam;
-
-        // weapon: weapon objects have no physical form, and can only be activated
-        struct
-        {
-            unsigned long           usage;              // when is this used?
-            long                    energyCost;         // cost to fire
-            long                    fireTime;           // time between shots
-            long                    ammo;               // initial ammo
-            long                    range;              // range (= age * max velocity)
-            smallFixedType          inverseSpeed;       // for AI = 1/max velocity
-            long                    restockCost;        // energy to make new ammo
-        } weapon;
+        void read(BinaryStream* bin);
     };
+    Rotation rotation;
+
+    // animation: objects whose appearence does not depend on direction
+    struct Animation {
+        int32_t                 firstShape;         // first shape in range
+        int32_t                 lastShape;          // last shape (inclusive)
+
+        int32_t                 frameDirection;     // direction (either -1, 0, or 1)
+        int32_t                 frameDirectionRange;    // either 0, 1, or 2
+
+        int32_t                 frameSpeed;         // speed at which object animates
+        int32_t                 frameSpeedRange;    // random addition to speed
+
+        int32_t                 frameShape;         // starting shape #
+        int32_t                 frameShapeRange;    // random addition to starting shape #
+
+        void read(BinaryStream* bin);
+    };
+    Animation animation;
+
+    // beam: have no associated sprite
+    struct Beam {
+        uint8_t                 color;              // color of beam
+        beamKindType            kind;
+        int32_t                 accuracy;           // for non-normal beams, how accurate
+        int32_t                 range;
+
+        void read(BinaryStream* bin);
+    };
+    Beam beam;
+
+    // weapon: weapon objects have no physical form, and can only be activated
+    struct Weapon {
+        uint32_t                usage;              // when is this used?
+        int32_t                 energyCost;         // cost to fire
+        int32_t                 fireTime;           // time between shots
+        int32_t                 ammo;               // initial ammo
+        int32_t                 range;              // range (= age * max velocity)
+        int32_t                 inverseSpeed;       // for AI = 1/max velocity
+        int32_t                 restockCost;        // energy to make new ammo
+
+        void read(BinaryStream* bin);
+    };
+    Weapon weapon;
+};
 
 struct baseObjectType {
-    unsigned long           attributes;                 // initial attributes (see flags)
-    long                    baseClass;
-    long                    baseRace;
-    long                    price;
+    uint32_t                attributes;                 // initial attributes (see flags)
+    int32_t                 baseClass;
+    int32_t                 baseRace;
+    int32_t                 price;
 
     smallFixedType          offenseValue;
 //  smallFixedType          defenseValue;
-    long                    destinationClass;           // for computer
+    int32_t                 destinationClass;           // for computer
 
     smallFixedType          maxVelocity;                // maximum speed
     smallFixedType          warpSpeed;                  // multiplier of speed at warp (0 if cannot)
-    unsigned long           warpOutDistance;                // distance at which to come out of warp
+    uint32_t                warpOutDistance;                // distance at which to come out of warp
 
     smallFixedType          initialVelocity;            // initial minimum velocity (usually relative)
     smallFixedType          initialVelocityRange;       // random addition to initial velocity
@@ -600,32 +633,32 @@ struct baseObjectType {
     smallFixedType          mass;                       // how quickly thrust acheives max
     smallFixedType          maxThrust;                  // maximum amount of thrust
 
-    long                    health;                     // starting health
-    long                    damage;                     // damage caused by impact
-    long                    energy;                     // starting energy for material objects
+    int32_t                 health;                     // starting health
+    int32_t                 damage;                     // damage caused by impact
+    int32_t                 energy;                     // starting energy for material objects
 
-    long                    initialAge;                 // starting minimum age
-    long                    initialAgeRange;            // random addition to starting age --
+    int32_t                 initialAge;                 // starting minimum age
+    int32_t                 initialAgeRange;            // random addition to starting age --
                                                         // for neutral death objects =
                                                         // size of occupying force (HACK)
 
-    long                    naturalScale;               // natural scale relative to %100
+    int32_t                 naturalScale;               // natural scale relative to %100
 
-    short                   pixLayer;                   // 0 = no layer 1->3 = back to front
-    short                   pixResID;                   // resID of SMIV
-    long                    tinySize;                   // size of representation on radar (0 = 1 pixel)
-    unsigned char           shieldColor;                // color on radar (0 = don't put on radar)
+    int16_t                 pixLayer;                   // 0 = no layer 1->3 = back to front
+    int16_t                 pixResID;                   // resID of SMIV
+    int32_t                 tinySize;                   // size of representation on radar (0 = 1 pixel)
+    uint8_t                 shieldColor;                // color on radar (0 = don't put on radar)
 
-    long                    initialDirection;           // initial direction (usually relative)
-    long                    initialDirectionRange;      // random addition to initial direction
+    int32_t                 initialDirection;           // initial direction (usually relative)
+    int32_t                 initialDirectionRange;      // random addition to initial direction
 
-    long                    pulse;                      // pulse weapon baseObject #(kNoWeapon = none)
-    long                    beam;                       // beam weapon baseObject #
-    long                    special;                    // special weapon baseObject #
+    int32_t                 pulse;                      // pulse weapon baseObject #(kNoWeapon = none)
+    int32_t                 beam;                       // beam weapon baseObject #
+    int32_t                 special;                    // special weapon baseObject #
 
-    long                    pulsePositionNum;           // # of places from which pulse can fire
-    long                    beamPositionNum;            // # of places from which beam can fire
-    long                    specialPositionNum;         // # of places from which special can fire
+    int32_t                 pulsePositionNum;           // # of places from which pulse can fire
+    int32_t                 beamPositionNum;            // # of places from which beam can fire
+    int32_t                 specialPositionNum;         // # of places from which special can fire
 
     fixedPointType          pulsePosition[kMaxWeaponPosition];  // relative positions (unrotated) of fire points
     fixedPointType          beamPosition[kMaxWeaponPosition];
@@ -635,94 +668,38 @@ struct baseObjectType {
     smallFixedType          dangerThreshold;
 //  long                    pulseDirection;             // direction relative to shooter
 //  long                    beamDirection;              // direction relative to shooter
-    long                    specialDirection;           // direction relative to shooter
+    int32_t                 specialDirection;           // direction relative to shooter
 
-    long                    arriveActionDistance;               // distance^2 at which arrive action is triggered on dest
+    int32_t                 arriveActionDistance;               // distance^2 at which arrive action is triggered on dest
 
-/*  objectActionType        destroyAction[kMaxDestroyAction];   // what happens when object is destroyed
-    objectActionType        expireAction[kMaxExpireAction];     // what happens when object expires
-    objectActionType        createAction[kMaxCreateAction];     // what happens when object is 1st made
-    objectActionType        collideAction[kMaxCollideAction];   // what happens when object collides
-    objectActionType        activateAction[kMaxActivateAction]; // what happens when object is activated
-    objectActionType        arriveAction[kMaxArriveAction]; // what happens when object arrives at destination
-*/
-    long                    destroyAction;  // what happens when object is destroyed
-    long                    destroyActionNum;
-    long                    expireAction;       // what happens when object expires
-    long                    expireActionNum;
-    long                    createAction;       // what happens when object is 1st made
-    long                    createActionNum;
-    long                    collideAction;  // what happens when object collides
-    long                    collideActionNum;
-    long                    activateAction; // what happens when object is activated
-    long                    activateActionNum;
-    long                    arriveAction;   // what happens when object arrives at destination
-    long                    arriveActionNum;
+    int32_t                 destroyAction;  // what happens when object is destroyed
+    int32_t                 destroyActionNum;
+    int32_t                 expireAction;       // what happens when object expires
+    int32_t                 expireActionNum;
+    int32_t                 createAction;       // what happens when object is 1st made
+    int32_t                 createActionNum;
+    int32_t                 collideAction;  // what happens when object collides
+    int32_t                 collideActionNum;
+    int32_t                 activateAction; // what happens when object is activated
+    int32_t                 activateActionNum;
+    int32_t                 arriveAction;   // what happens when object arrives at destination
+    int32_t                 arriveActionNum;
 
     objectFrameType         frame;
-/*
-    union
-    {
-        // rotation: for objects whose shapes depend on their direction
-        struct
-        {
-            long                    shapeOffset;        // offset for 1st shape
-            long                    rotRes;             // ROT_POS / rotRes = # of discrete shapes
-            smallFixedType          maxTurnRate;        // max rate at which object can turn
-            smallFixedType          turnAcceleration;   // rate at which object reaches maxTurnRate
-        } rotation;
 
-        // animation: objects whose appearence does not depend on direction
-        struct
-        {
-            long                    firstShape;         // first shape in range
-            long                    lastShape;          // last shape (inclusive)
-
-            long                    frameDirection;     // direction (either -1, 0, or 1)
-            long                    frameDirectionRange;    // either 0, 1, or 2
-
-            long                    frameSpeed;         // speed at which object animates
-            long                    frameSpeedRange;    // random addition to speed
-
-            long                    frameShape;         // starting shape #
-            long                    frameShapeRange;    // random addition to starting shape #
-        } animation;
-
-        // beam: have no associated sprite
-        struct
-        {
-            unsigned char           color;              // color of beam
-            beamKindType            kind;
-            long                    accuracy;           // for non-normal beams, how accurate
-            long                    range;
-        } beam;
-
-        // weapon: weapon objects have no physical form, and can only be activated
-        struct
-        {
-            unsigned long           usage;              // when is this used?
-            long                    energyCost;         // cost to fire
-            long                    fireTime;           // time between shots
-            long                    ammo;               // initial ammo
-            long                    range;              // range (= age * max velocity)
-            smallFixedType          inverseSpeed;       // for AI = 1/max velocity
-            long                    restockCost;        // energy to make new ammo
-        } weapon;
-    } frame;
-*/
-    unsigned long       buildFlags;
-    unsigned long       orderFlags;
+    uint32_t            buildFlags;
+    uint32_t            orderFlags;
     smallFixedType      buildRatio;
-    unsigned long       buildTime;
+    uint32_t            buildTime;
 //  long                reserved1;
-    unsigned char       skillNum;
-    unsigned char       skillDen;
-    unsigned char       skillNumAdj;
-    unsigned char       skillDenAdj;
-    short               pictPortraitResID;
-    short               reserved2;
-    long                reserved3;
-    long                internalFlags;
+    uint8_t             skillNum;
+    uint8_t             skillDen;
+    uint8_t             skillNumAdj;
+    uint8_t             skillDenAdj;
+    int16_t             pictPortraitResID;
+    int16_t             reserved2;
+    int32_t             reserved3;
+    int32_t             internalFlags;
 
     size_t load_data(const char* data, size_t len);
 };

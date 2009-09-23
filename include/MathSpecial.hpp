@@ -25,6 +25,8 @@
 
 #include "Casts.hpp"
 
+class BinaryStream;
+
 #pragma options align=mac68k
 
 #define kMathSpecial
@@ -73,11 +75,13 @@ inline Fixed mDivideFixed(Fixed m_f1, Fixed m_f2) {
     return (m_f1 << kFixedBitShiftNumber) / m_f2;
 }
 
-typedef long smallFixedType;    // distinct from Mac OS's Fixed type
+typedef int32_t smallFixedType;    // distinct from Mac OS's Fixed type
 
 struct fixedPointType {
     smallFixedType      h;
     smallFixedType      v;
+
+    void read(BinaryStream* bin);
 };
 
 

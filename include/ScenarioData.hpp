@@ -34,18 +34,18 @@
 #define kScenario_Data_Flag_NotOptimized        0x00000010
 
 struct scenarioInfoType {
-    long            warpInFlareID;
-    long            warpOutFlareID;
-    long            playerBodyID;
-    long            energyBlobID;
+    int32_t         warpInFlareID;
+    int32_t         warpOutFlareID;
+    int32_t         playerBodyID;
+    int32_t         energyBlobID;
     Str255          downloadURLString;
     Str255          titleString;
     Str255          authorNameString;
     Str255          authorURLString;
     aresVersionType version;
     aresVersionType requiresAresVersion;
-    unsigned long   flags;
-    unsigned long   checkSum;
+    uint32_t        flags;
+    uint32_t        checkSum;
 
     size_t load_data(const char* data, size_t len);
 };

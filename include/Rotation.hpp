@@ -65,7 +65,7 @@
 #define kRotUnit    100     // must be same as kMotionResolution ( see Motion.h)
 
 struct RotTableEntry {
-    smallFixedType value;
+    int32_t value;
 
     size_t load_data(const char* data, size_t len);
 };

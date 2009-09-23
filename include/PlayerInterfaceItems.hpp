@@ -27,6 +27,8 @@
 
 #pragma options align=mac68k
 
+class BinaryStream;
+
 enum interfaceKindEnum {
     kPlainRect = 1,
     kLabeledRect = 2,
@@ -58,14 +60,18 @@ typedef uint8_t interfaceStyleType;
 struct interfaceLabelType {
     short               stringID;
     short               stringNumber;
+
+    void read(BinaryStream* bin);
 };
 
 struct interfaceLabeledRectType {
     interfaceLabelType  label;
     unsigned char       color;
     TEHandle            teData;
-    uint8_t             editable;
+    bool                editable;
     // Boolean             editable;
+
+    void read(BinaryStream* bin);
 };
 
 struct interfaceListType {
@@ -79,22 +85,30 @@ struct interfaceListType {
     interfaceItemStatusType     lineDownStatus;
     interfaceItemStatusType     pageUpStatus;
     interfaceItemStatusType     pageDownStatus;
+
+    void read(BinaryStream* bin);
 };
 
 struct interfaceTextRectType {
     short               textID;
     uint8_t             visibleBounds;
     // Boolean             visibleBounds;
+
+    void read(BinaryStream* bin);
 };
 
 struct interfaceTabBoxType {
     short               topRightBorderSize;
+
+    void read(BinaryStream* bin);
 };
 
 struct interfacePictureRectType {
     short               pictureID;
     uint8_t             visibleBounds;
     // Boolean             visibleBounds;
+
+    void read(BinaryStream* bin);
 };
 
 struct interfaceButtonType {
@@ -103,6 +117,8 @@ struct interfaceButtonType {
     uint8_t                     defaultButton;
     // Boolean                     defaultButton;
     interfaceItemStatusType     status;
+
+    void read(BinaryStream* bin);
 };
 
 struct interfaceRadioType {
@@ -111,6 +127,8 @@ struct interfaceRadioType {
     uint8_t                     on;
     // Boolean                     on;
     interfaceItemStatusType     status;
+
+    void read(BinaryStream* bin);
 }; // also tab box button type
 
 struct interfaceCheckboxType {
@@ -119,6 +137,8 @@ struct interfaceCheckboxType {
     uint8_t                     on;
     // Boolean                     on;
     interfaceItemStatusType     status;
+
+    void read(BinaryStream* bin);
 };
 
 struct interfaceItemType {
@@ -135,7 +155,7 @@ struct interfaceItemType {
         interfaceTabBoxType         tabBox;
     } item;
 
-    unsigned char       color;
+    uint8_t             color;
     interfaceKindType   kind;
     interfaceStyleType  style;
 

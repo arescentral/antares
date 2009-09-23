@@ -19,6 +19,7 @@
 
 #include "Rotation.hpp"
 
+#include "BinaryStream.hpp"
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
@@ -32,9 +33,9 @@
 TypedHandle<RotTableEntry> gRotTable;
 
 size_t RotTableEntry::load_data(const char* data, size_t len) {
-    assert(len >= sizeof(RotTableEntry));
-    memcpy(this, data, sizeof(RotTableEntry));
-    return sizeof(RotTableEntry);
+    BinaryStream bin(data, len);
+    bin.read(&value);
+    return bin.bytes_read();
 }
 
 int RotationInit( void)

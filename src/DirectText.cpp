@@ -21,6 +21,7 @@
 
 #include <QDOffscreen.h>
 
+#include "BinaryStream.hpp"
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
@@ -42,9 +43,20 @@ TypedHandle<unsigned long> gFourBitTable;  // for turning 4-bit masks into 8-bit
 TypedHandle<directTextType> gDirectTextData;
 
 size_t directTextType::load_data(const char* data, size_t len) {
-    assert(len >= sizeof(directTextType));
-    memcpy(this, data, sizeof(directTextType));
-    return sizeof(directTextType);
+    BinaryStream bin(data, len);
+
+    bin.discard(4);
+    bin.read(&resID);
+    bin.discard(2);
+    bin.read(&logicalWidth);
+    bin.read(&physicalWidth);
+    bin.read(&height);
+    bin.read(&ascent);
+
+    charSet = TypedHandle<unsigned char>();
+    myHandle = false;
+
+    return bin.bytes_read();
 }
 
 int InitDirectText( void)

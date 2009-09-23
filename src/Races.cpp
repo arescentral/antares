@@ -20,6 +20,7 @@
 #include "Races.hpp"
 
 #include "AresGlobalType.hpp"
+#include "BinaryStream.hpp"
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
@@ -168,7 +169,13 @@ unsigned char GetApparentColorFromRace( short raceNum)
 }
 
 size_t raceType::load_data(const char* data, size_t len) {
-    assert(len >= sizeof(raceType));
-    memcpy(this, data, sizeof(raceType));
-    return sizeof(raceType);
+    BinaryStream bin(data, len);
+
+    bin.read(&id);
+    bin.read(&apparentColor);
+    bin.discard(1);
+    bin.read(&illegalColors);
+    bin.read(&advantage);
+
+    return bin.bytes_read();
 }

@@ -25,6 +25,11 @@ BinaryStream::BinaryStream(const char* data, size_t len)
       _len(len),
       _pos(0) { }
 
+void BinaryStream::discard(size_t bytes) {
+    assert(_pos + bytes <= _len);
+    _pos += bytes;
+}
+
 namespace {
 
 template <typename T, size_t bytes = sizeof(T)>

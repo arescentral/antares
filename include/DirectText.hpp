@@ -52,12 +52,12 @@
 
 struct directTextType {
     TypedHandle<unsigned char> charSet;
-    short       resID;
+    int16_t     resID;
     ShortBoolean     myHandle;       // different texts can have the same handles; myHandle = TRUE if this guy's in charge of disposing
-    long        logicalWidth;
-    long        physicalWidth;
-    long        height;
-    long        ascent;
+    int32_t     logicalWidth;
+    int32_t     physicalWidth;
+    int32_t     height;
+    int32_t     ascent;
 
     size_t load_data(const char* data, size_t len);
 };

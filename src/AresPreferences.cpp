@@ -24,8 +24,8 @@
 #include "AnyChar.hpp"
 #include "AresGlobalType.hpp"
 #include "AresNetworkSprocket.hpp"
+#include "BinaryStream.hpp"
 #include "ConditionalMacros.h"
-#include "CopyProtection.h" // is included in prefs
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "KeyMapTranslation.hpp"
@@ -845,7 +845,33 @@ long GetFirstKeyConflict( preferencesDataType *prefs)
 }
 
 size_t preferencesDataType::load_data(const char* data, size_t len) {
-    assert(len >= sizeof(preferencesDataType));
-    memcpy(this, data, sizeof(preferencesDataType));
-    return sizeof(preferencesDataType);
+    BinaryStream bin(data, len);
+
+    bin.read(&version);
+    bin.read(keyMap, kKeyControlDataNum);
+    bin.read(&serialNumber);
+    bin.read(&options);
+    bin.read(&startingLevel);
+    bin.read(&volume);
+    bin.read(&minutesPlayed);
+    bin.read(&kills);
+    bin.read(&losses);
+    bin.read(&race);
+    bin.read(&enemyColor);
+    bin.discard(4);
+    bin.read(playerName, 32);
+    bin.read(gameName, 32);
+    bin.read(&resendDelay);
+    bin.read(&registeredSetting);
+    bin.read(&registeredFlags);
+    bin.read(&protocolFlags);
+    bin.read(&netLevel);
+    bin.read(&netLatency);
+
+    return bin.bytes_read();
+}
+
+void serialNumberType::read(BinaryStream* bin) {
+    bin->read(name, 76);
+    bin->read(number, kDigitNumber);
 }

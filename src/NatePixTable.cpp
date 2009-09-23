@@ -21,6 +21,7 @@
 
 #include "NatePixTable.hpp"
 
+#include "BinaryStream.hpp"
 #include "ColorTranslation.hpp"
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
@@ -28,14 +29,6 @@
 #include "Sound.h"
 
 #define EMPTY_NATE_PIX_SIZE         8L
-
-struct natePixEntryBinaryType {
-    short width;
-    short height;
-    short hOffset;
-    short vOffset;
-    unsigned char data[];
-};
 
 class natePixEntryType {
   public:
@@ -60,22 +53,19 @@ class natePixEntryType {
         clear();
     }
 
-    uint32_t width() const { return _width; }
-    uint32_t height() const { return _height; }
-    uint32_t h_offset() const { return _h_offset; }
-    uint32_t v_offset() const { return _v_offset; }
+    uint16_t width() const { return _width; }
+    uint16_t height() const { return _height; }
+    int16_t h_offset() const { return _h_offset; }
+    int16_t v_offset() const { return _v_offset; }
     char* data() const { return _data; }
 
-    size_t load_data(const char* data, size_t len) {
-        const natePixEntryBinaryType* bin = reinterpret_cast<const natePixEntryBinaryType*>(data);
-        _width = bin->width;
-        _height = bin->height;
-        _h_offset = bin->hOffset;
-        _v_offset = bin->vOffset;
+    void read(BinaryStream* bin) {
+        bin->read(&_width);
+        bin->read(&_height);
+        bin->read(&_h_offset);
+        bin->read(&_v_offset);
         _data = new char[_width * _height];
-        memcpy(_data, bin->data, _width * _height);
-        assert(len >= sizeof(natePixEntryBinaryType) + _width * _height);
-        return len;
+        bin->read(_data, _width * _height);
     }
 
     void copy_from(const natePixEntryType& other) {
@@ -94,17 +84,11 @@ class natePixEntryType {
     }
 
   private:
-    uint32_t _width;
-    uint32_t _height;
-    uint32_t _h_offset;
-    uint32_t _v_offset;
+    uint16_t _width;
+    uint16_t _height;
+    int16_t _h_offset;
+    int16_t _v_offset;
     char* _data;
-};
-
-struct natePixBinaryType {
-    unsigned long size;
-    long pixnum;
-    long offsets[];
 };
 
 natePixType::natePixType() { }
@@ -137,22 +121,30 @@ size_t natePixType::size() const {
 }
 
 size_t natePixType::load_data(const char* data, size_t len) {
-    _entries.clear();
-    const natePixBinaryType* bin = reinterpret_cast<const natePixBinaryType*>(data);
-    std::vector<const char*> positions;
-    for (int i = 0; i < bin->pixnum; ++i) {
-        positions.push_back(data + bin->offsets[i]);
+    clear();
+
+    BinaryStream bin(data, len);
+
+    uint32_t size;
+    int32_t pixnum;
+    bin.read(&size);
+    bin.read(&pixnum);
+
+    std::vector<uint32_t> offsets;
+    for (int i = 0; i < pixnum; ++i) {
+        uint32_t offset;
+        bin.read(&offset);
+        offsets.push_back(offset);
     }
-    positions.push_back(data + len);
-    for (int i = 0; i < bin->pixnum; ++i) {
-        natePixEntryType* entry = new natePixEntryType;
-        const char* entry_data = positions[i];
-        size_t entry_len = positions[i + 1] - positions[i];
-        size_t consumed = entry->load_data(entry_data, entry_len);
-        assert(consumed <= entry_len);
-        _entries.push_back(entry);
+
+    for (int i = 0; i < pixnum; ++i) {
+        bin.discard(offsets[i] - bin.bytes_read());
+        _entries.push_back(new natePixEntryType);
+        bin.read(_entries.back());
     }
-    return len;
+    bin.discard(len - bin.bytes_read());
+
+    return bin.bytes_read();
 }
 
 void natePixType::copy_from(const natePixType& other) {

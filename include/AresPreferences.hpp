@@ -20,8 +20,6 @@
 
 #include <Base.h>
 
-#include "CopyProtection.h"
-
 #pragma options align=mac68k
 
 //#define   kUseAlphaCopyProtection
@@ -89,27 +87,37 @@ typedef struct
 } preferencesDataType;
 */
 
+class BinaryStream;
+
+static const int kDigitNumber = 8;
+struct serialNumberType {
+    unsigned char name[76];
+    char number[kDigitNumber];
+
+    void read(BinaryStream* bin);
+};
+
 struct preferencesDataType {
-    long                version;
-    short               keyMap[kKeyControlDataNum];
+    int32_t             version;
+    int16_t             keyMap[kKeyControlDataNum];
     serialNumberType    serialNumber;
-    unsigned long       options;
-    long                startingLevel;
-    short               volume;
-    unsigned short      minutesPlayed;
-    unsigned short      kills;
-    unsigned short      losses;
-    short               race;
-    short               enemyColor;
-    long                reserved4;
+    uint32_t            options;
+    int32_t             startingLevel;
+    int16_t             volume;
+    uint16_t            minutesPlayed;
+    uint16_t            kills;
+    uint16_t            losses;
+    int16_t             race;
+    int16_t             enemyColor;
+    int32_t             reserved4;
     Str31               playerName;
     Str31               gameName;
-    long                resendDelay;
-    long                registeredSetting;
-    unsigned long       registeredFlags;
-    unsigned long       protocolFlags;
-    short               netLevel;
-    short               netLatency;
+    int32_t             resendDelay;
+    int32_t             registeredSetting;
+    uint32_t            registeredFlags;
+    uint32_t            protocolFlags;
+    int16_t             netLevel;
+    int16_t             netLatency;
 //  long                netLatency;
 
     size_t load_data(const char* data, size_t len);

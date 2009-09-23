@@ -29,6 +29,10 @@ class BinaryStream {
     template <typename T>
     void read(T* t, size_t count = 1);
 
+    void discard(size_t bytes);
+
+    size_t bytes_read() const { return _pos; }
+
   private:
     template <typename T>
     void read_primitive(T* t, size_t count = 1);

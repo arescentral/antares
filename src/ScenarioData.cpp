@@ -17,34 +17,177 @@
 
 #include "ScenarioData.hpp"
 
+#include "BinaryStream.hpp"
 #include "Scenario.hpp"
 
 size_t scenarioInfoType::load_data(const char* data, size_t len) {
-    assert(len >= sizeof(scenarioInfoType));
-    memcpy(this, data, sizeof(scenarioInfoType));
-    return sizeof(scenarioInfoType);
+    BinaryStream bin(data, len);
+
+    bin.read(&warpInFlareID);
+    bin.read(&warpOutFlareID);
+    bin.read(&playerBodyID);
+    bin.read(&energyBlobID);
+    bin.read(downloadURLString, 256);
+    bin.read(titleString, 256);
+    bin.read(authorNameString, 256);
+    bin.read(authorURLString, 256);
+    bin.read(&version);
+    bin.read(&requiresAresVersion);
+    bin.read(&flags);
+    bin.read(&checkSum);
+
+    return bin.bytes_read();
 }
 
 size_t scenarioType::load_data(const char* data, size_t len) {
-    assert(len >= sizeof(scenarioType));
-    memcpy(this, data, sizeof(scenarioType));
-    return sizeof(scenarioType);
+    BinaryStream bin(data, len);
+
+    bin.read(&netRaceFlags);
+    bin.read(&playerNum);
+    bin.read(player, kScenarioPlayerNum);
+    bin.read(&scoreStringResID);
+    bin.read(&initialFirst);
+    bin.read(&prologueID);
+    bin.read(&initialNum);
+    bin.read(&songID);
+    bin.read(&conditionFirst);
+    bin.read(&epilogueID);
+    bin.read(&conditionNum);
+    bin.read(&starMapH);
+    bin.read(&briefPointFirst);
+    bin.read(&starMapV);
+    bin.read(&briefPointNum);
+    bin.read(&parTime);
+    bin.read(&movieNameStrNum);
+    bin.read(&parKills);
+    bin.read(&levelNameStrNum);
+    bin.read(&parKillRatio);
+    bin.read(&parLosses);
+    bin.read(&startTime);
+
+    return bin.bytes_read();
+}
+
+void scenarioPlayerType::read(BinaryStream* bin) {
+    bin->read(&playerType);
+    bin->read(&playerRace);
+    bin->read(&nameResID);
+    bin->read(&nameStrNum);
+    bin->read(&admiralNumber);
+    bin->read(&earningPower);
+    bin->read(&netRaceFlags);
+    bin->discard(2);
 }
 
 size_t scenarioConditionType::load_data(const char* data, size_t len) {
-    assert(len >= sizeof(scenarioConditionType));
-    memcpy(this, data, sizeof(scenarioConditionType));
-    return sizeof(scenarioConditionType);
+    BinaryStream bin(data, len);
+    char section[12];
+
+    bin.read(&condition);
+    bin.discard(1);
+    bin.read(section, 12);
+    bin.read(&subjectObject);
+    bin.read(&directObject);
+    bin.read(&startVerb);
+    bin.read(&verbNum);
+    bin.read(&flags);
+    bin.read(&direction);
+
+    BinaryStream sub(section, 12);
+    switch (condition) {
+      case kCounterCondition:
+      case kCounterGreaterCondition:
+      case kCounterNotCondition:
+        sub.read(&conditionArgument.counter);
+        break;
+
+      case kDestructionCondition:
+      case kOwnerCondition:
+      case kTimeCondition:
+      case kVelocityLessThanEqualToCondition:
+      case kNoShipsLeftCondition:
+      case kZoomLevelCondition:
+        sub.read(&conditionArgument.longValue);
+        break;
+
+      case kProximityCondition:
+      case kDistanceGreaterCondition:
+        sub.read(&conditionArgument.unsignedLongValue);
+        break;
+
+      case kCurrentMessageCondition:
+      case kCurrentComputerCondition:
+        sub.read(&conditionArgument.location);
+        break;
+    }
+
+    return bin.bytes_read();
+}
+
+void counterArgumentType::read(BinaryStream* bin) {
+    bin->read(&whichPlayer);
+    bin->read(&whichCounter);
+    bin->read(&amount);
 }
 
 size_t briefPointType::load_data(const char* data, size_t len) {
-    assert(len >= sizeof(briefPointType));
-    memcpy(this, data, sizeof(briefPointType));
-    return sizeof(briefPointType);
+    BinaryStream bin(data, len);
+
+    char section[8];
+
+    bin.read(&briefPointKind);
+    bin.discard(1);
+    bin.read(section, 8);
+    bin.read(&range);
+    bin.read(&titleResID);
+    bin.read(&titleNum);
+    bin.read(&contentResID);
+
+    BinaryStream sub(section, 8);
+    switch (briefPointKind) {
+      case kNoPointKind:
+      case kBriefFreestandingKind:
+        break;
+
+      case kBriefObjectKind:
+        sub.read(&briefPointData.objectBriefType);
+        break;
+
+      case kBriefAbsoluteKind:
+        sub.read(&briefPointData.absoluteBriefType);
+        break;
+    }
+
+    return bin.bytes_read();
+}
+
+void briefPointType::ObjectBrief::read(BinaryStream* bin) {
+    bin->read(&objectNum);
+    bin->read(&objectVisible);
+}
+
+void briefPointType::AbsoluteBrief::read(BinaryStream* bin) {
+    bin->read(&location);
 }
 
 size_t scenarioInitialType::load_data(const char* data, size_t len) {
-    assert(len >= sizeof(scenarioInitialType));
-    memcpy(this, data, sizeof(scenarioInitialType));
-    return sizeof(scenarioInitialType);
+    BinaryStream bin(data, len);
+
+    bin.read(&type);
+    bin.read(&owner);
+    bin.read(&realObjectNumber);
+    bin.read(&realObjectID);
+    bin.read(&location);
+    bin.read(&earning);
+    bin.read(&distanceRange);
+    bin.read(&rotationMinimum);
+    bin.read(&rotationRange);
+    bin.read(&spriteIDOverride);
+    bin.read(canBuild, kMaxTypeBaseCanBuild);
+    bin.read(&initialDestination);
+    bin.read(&nameResID);
+    bin.read(&nameStrNum);
+    bin.read(&attributes);
+
+    return bin.bytes_read();
 }
