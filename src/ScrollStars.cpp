@@ -85,37 +85,19 @@ inline StarSpeed RandomStarSpeed() {
     return static_cast<StarSpeed>(Randomize(kStarSpeedSpread) + kMinimumStarSpeed);
 }
 
-int InitScrollStars( void)
-{
-#ifdef kUseScrollStar
+int InitScrollStars() {
     scrollStarType  *star;
     short           i;
 
     gAresGlobal->gScrollStarData.create(kAllStarNum);
-    if (gAresGlobal->gScrollStarData.get() == nil)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
-        return( MEMORY_ERROR);
-    }
-    /*
-    MoveHHi( gAresGlobal->gScrollStarData);
-    HLock( gAresGlobal->gScrollStarData);
-    */
-    TypedHandleClearHack(gAresGlobal->gScrollStarData);
-
     star = *gAresGlobal->gScrollStarData;
-    for ( i = 0; i < kAllStarNum; i++)
-    {
+    for (i = 0; i < kAllStarNum; i++) {
         star->speed = kNoStar;
-
         star++;
     }
     gAresGlobal->gLastClipBottom = CLIP_BOTTOM;
 
-    return( kNoError);
-#else
-    return( kNoError);
-#endif
+    return kNoError;
 }
 
 void CleanupScrollStars( void)

@@ -102,26 +102,10 @@ TypedHandle<actionQueueType> gActionQueueData;
 
 void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord);
 
-int SpaceObjectHandlingInit( void)
-
-{
+int SpaceObjectHandlingInit() {
     Boolean correctBaseObjectColor = false;
 
     gSpaceObjectData.create(kMaxSpaceObject);
-    if (gSpaceObjectData.get() == nil)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
-        return( MEMORY_ERROR);
-    }
-
-    /*
-    MoveHHi( gSpaceObjectData);
-    HLock( gSpaceObjectData);
-    */
-    TypedHandleClearHack(gSpaceObjectData);
-
-    WriteDebugLong(gSpaceObjectData.size());
-
     if (gBaseObjectData.get() == nil)
     {
         gBaseObjectData.load_resource('bsob', kBaseObjectResID);
@@ -136,11 +120,6 @@ int SpaceObjectHandlingInit( void)
         correctBaseObjectColor = true;
     }
 
-    /*
-    MoveHHi( gBaseObjectData);
-    HLock( gBaseObjectData);
-    */
-
     if (gObjectActionData.get() == nil) {
         gObjectActionData.load_resource('obac', kObjectActionResID);
         if (gObjectActionData.get() == nil) {
@@ -152,17 +131,9 @@ int SpaceObjectHandlingInit( void)
     }
 
     gActionQueueData.create(kActionQueueLength);
-    if (gActionQueueData.get() == nil)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 3);
-        return( MEMORY_ERROR);
-    }
-    TypedHandleClearHack(gActionQueueData);
-
-#ifndef kCreateAresDemoData
-    if ( correctBaseObjectColor)
+    if (correctBaseObjectColor) {
         CorrectAllBaseObjectColor();
-#endif
+    }
     ResetAllSpaceObjects();
     ResetActionQueueData();
     return ( kNoError);
@@ -185,18 +156,14 @@ void CleanupSpaceObjectHandling( void)
     }
 }
 
-void ResetAllSpaceObjects( void)
-
-{
+void ResetAllSpaceObjects() {
     spaceObjectType *anObject = nil;
     short           i;
 
     gRootObject = nil;
     gRootObjectNumber = -1;
     anObject = *gSpaceObjectData;
-    TypedHandleClearHack(gSpaceObjectData);
-    for ( i = 0; i < kMaxSpaceObject; i++)
-    {
+    for (i = 0; i < kMaxSpaceObject; i++) {
 //      anObject->attributes = 0;
         anObject->active = kObjectAvailable;
         anObject->sprite = nil;

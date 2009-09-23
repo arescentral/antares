@@ -32,18 +32,6 @@ TypedHandle<transColorType> gColorTranslateTable;
 
 void ColorTranslatorInit(const ColorTable& theClut) {
     gColorTranslateTable.create(kPaletteSize);
-    if (gColorTranslateTable.get() == nil)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
-    }
-    else
-    {
-        /*
-        MoveHHi( gColorTranslateTable);
-        HLock( gColorTranslateTable);
-        */
-        TypedHandleClearHack(gColorTranslateTable);
-    }
     MakeColorTranslatorTable(theClut);
 }
 

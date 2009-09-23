@@ -293,19 +293,7 @@ void MiniComputerSetStatusStrings( void);
 long MiniComputerGetStatusValue( long);
 void MiniComputerMakeStatusString(long, unsigned char*);
 
-int MiniScreenInit( void)
-
-{
-/*  gAresGlobal->gMiniScreenHandle = NewHandle( sizeof( miniComputerDataType));
-    if ( gAresGlobal->gMiniScreenHandle == nil)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, -1, MEMORY_ERROR, -1, -1, __FILE__, 11);
-        return( MEMORY_ERROR);
-    }
-    mHandleLockAndRegister( gAresGlobal->gMiniScreenHandle, nil, nil, CorrectMiniScreenGlobalPtr, "\pgAresGlobal->gMiniScreenHandle")
-
-    gMiniScreenData = (miniComputerDataType *)*gAresGlobal->gMiniScreenHandle;
-*/
+int MiniScreenInit() {
     gAresGlobal->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
     gAresGlobal->gMiniScreenData.currentScreen = kMainMiniScreen;
     gAresGlobal->gMiniScreenData.pollTime = 0;
@@ -313,31 +301,12 @@ int MiniScreenInit( void)
     gAresGlobal->gMiniScreenData.clickLine = kMiniScreenNoLineSelected;
 
     gAresGlobal->gMiniScreenData.lineData.create(kMiniScreenTrueLineNum);
-
-    if (gAresGlobal->gMiniScreenData.lineData.get() == nil)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
-        return ( MEMORY_ERROR);
-    }
-
-    /*
-    MoveHHi( gMiniScreenData->lineData);
-    HLock( gMiniScreenData->lineData);
-    */
-    TypedHandleClearHack(gAresGlobal->gMiniScreenData.lineData);
-
     gAresGlobal->gMiniScreenData.objectData.create(kMiniObjectDataNum);
-    if (gAresGlobal->gMiniScreenData.lineData.get() == nil)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 2);
-        return ( MEMORY_ERROR);
-    }
-    TypedHandleClearHack(gAresGlobal->gMiniScreenData.objectData);
 
     ClearMiniScreenLines();
     ClearMiniObjectData();
 
-    return( kNoError);
+    return kNoError;
 }
 
 void MiniScreenCleanup( void)

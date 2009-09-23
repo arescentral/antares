@@ -135,40 +135,15 @@ extern  scenarioType    *gThisScenario; // for special message labels
 
 void MessageLabel_Set_Special(short id, TypedHandle<unsigned char> text);
 
-int InitMessageScreen( void)
-
-{
-#ifdef kUseMessage
+int InitMessageScreen() {
     unsigned char *anyChar, nilLabel = 0;
-    long            i, *l, propersize;
+    long            i, *l;
     longMessageType *tmessage = nil;
 
     gAresGlobal->gTrueClipBottom = CLIP_BOTTOM;
-    propersize = (sizeof(unsigned char) * kMaxMessageLength) + kAnyCharOffsetStart;
     gAresGlobal->gMessageData.create(kMaxMessageLength + kAnyCharOffsetStart);
-    if (gAresGlobal->gMessageData.get() == nil)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
-        return( MEMORY_ERROR);
-    }
-
     gAresGlobal->gStatusString.create(kDestinationLength);
-    if (gAresGlobal->gStatusString.get() == nil)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 2);
-        return( MEMORY_ERROR);
-    }
-
     gAresGlobal->gLongMessageData.create(1);
-    if (gAresGlobal->gLongMessageData.get() == nil)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 5);
-        return( MEMORY_ERROR);
-    }
-
-    TypedHandleClearHack(gAresGlobal->gMessageData);
-    TypedHandleClearHack(gAresGlobal->gStatusString);
-    TypedHandleClearHack(gAresGlobal->gLongMessageData);
 
     l = reinterpret_cast<long *>(*gAresGlobal->gMessageData) + kLongOffsetFirstChar;
     *l = kAnyCharOffsetStart;
@@ -178,8 +153,7 @@ int InitMessageScreen( void)
     anyChar = *gAresGlobal->gMessageData;
     anyChar += kAnyCharOffsetStart;
 
-    for ( i = 0; i < kMaxMessageLength; i++) // kMaxMessageLength
-    {
+    for (i = 0; i < kMaxMessageLength; i++) {
         *anyChar = kMessageEndChar;
         anyChar++;
     }
@@ -212,7 +186,6 @@ int InitMessageScreen( void)
     tmessage->retroTextSpec.thisPosition = 0;
     tmessage->charDelayCount = 0;
     tmessage->pictBounds.left = tmessage->pictBounds.right= 0;
-    // tmessage->pictDelayCount;
     tmessage->pictCurrentLeft = 0;
     tmessage->pictCurrentTop = 0;
     tmessage->pictID = -1;
@@ -224,10 +197,8 @@ int InitMessageScreen( void)
     tmessage->labelMessage = false;
     tmessage->lastLabelMessage = false;
     tmessage->labelMessageID = -1;
-    return( kNoError);
-#else
-    return( kNoError);
-#endif
+
+    return kNoError;
 }
 
 void MessageScreenCleanup( void)

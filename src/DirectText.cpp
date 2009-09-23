@@ -59,21 +59,13 @@ size_t directTextType::load_data(const char* data, size_t len) {
     return bin.bytes_read();
 }
 
-int InitDirectText( void)
-
-{
+int InitDirectText() {
     TypedHandle<directTextType> tData;
     unsigned char   i, *c;
     short           count;
     directTextType  *dtext = nil;
 
     gDirectTextData.create(kDirectFontNum);
-    if (gDirectTextData.get() == nil)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 101);
-        return( MEMORY_ERROR);
-    }
-
     dtext = *gDirectTextData;
     for  ( count = 0; count < kDirectFontNum; count++)
     {
@@ -167,17 +159,8 @@ int InitDirectText( void)
         return( MEMORY_ERROR);
     }
 
-    /*
-    MoveHHi( gFourBitTable);
-    HLock( gFourBitTable);
-    */
-    WriteDebugLine("\p4BITREG:");
-    TypedHandleClearHack(gFourBitTable);
-
     c = reinterpret_cast<unsigned char*>(*gFourBitTable);
-    for ( i = 0; i < kFourBitSize; i++)
-    {
-
+    for (i = 0; i < kFourBitSize; i++) {
         if ( i & 0x08) *(c++) = 0xff;
         else *(c++) = 0x00;
 
@@ -189,11 +172,9 @@ int InitDirectText( void)
 
         if ( i & 0x01) *(c++) = 0xff;
         else *(c++) = 0x00;
-
-    //  *(c++) = 0xff; *(c++) = 0xff; *(c++) = 0xff; *(c++) = 0xff;
     }
 
-    return( kNoError);
+    return kNoError;
 }
 
 void DirectTextCleanup( void)

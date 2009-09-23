@@ -60,28 +60,10 @@ static long String_Count_Lines(unsigned char* s);
 static unsigned char* String_Get_Nth_Line(unsigned char* dest, unsigned char* source, long nth);
 static void Auto_Animate_Line( Point *source, Point *dest);
 
-int ScreenLabelInit( void)
-
-{
-#ifdef kUseLabels
+int ScreenLabelInit() {
     gAresGlobal->gScreenLabelData.create(kMaxLabelNum);
-    if (gAresGlobal->gScreenLabelData.get() == nil)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
-        return( MEMORY_ERROR);
-    }
-
-    /*
-    MoveHHi( gAresGlobal->gScreenLabelData);
-    HLock( gAresGlobal->gScreenLabelData);
-    */
-    TypedHandleClearHack(gAresGlobal->gScreenLabelData);
-
     ResetAllLabels();
-    return( kNoError);
-#else
-    return( kNoError);
-#endif
+    return kNoError;
 }
 
 void ResetAllLabels( void)

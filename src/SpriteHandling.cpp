@@ -95,78 +95,22 @@ short                   gSpriteFileRefID = 0;
 Boolean PixelInSprite_IsOutside( spritePix *sprite, long x, long y, long *hmap,
 long *vamp);
 
-void SpriteHandlingInit ( void)
-
-{
+void SpriteHandlingInit() {
     int             i, j;
     unsigned char   *staticValue = nil;
 
     gBothScaleMaps.create(MAX_PIX_SIZE * 2);
-    if (gBothScaleMaps.get() == nil)
-    {
-        ShowErrorAny( eExitToShellErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
-    }
-    /*
-    MoveHHi( gBothScaleMaps);
-    HLock( gBothScaleMaps);
-    */
-    TypedHandleClearHack(gBothScaleMaps);
-
     gScaleHMap = *gBothScaleMaps;
     gScaleVMap = *gBothScaleMaps + MAX_PIX_SIZE;
-
-/*
-    gSpriteFileRefID = ARF_OpenResFile( kSpriteResFileName);
-    error = ResError();
-
-    if ( error != noErr)
-    {
-        ShowErrorOfTypeOccurred( eContinueOnlyErr, kErrorStrID, kDataFileResourceError, error, __FILE__, 1);
-    }
-    if ( gSpriteFileRefID == -1)
-    {
-        ShowErrorAny( eExitToShellErr, kErrorStrID, nil, nil, nil, nil, kSpritesFileError, kDataFolderError, -1, -1, __FILE__, 8);
-    }
-*/
-
-//  if ( gAresGlobal->externalFileRefNum > 0)
-//      UseResFile( gAresGlobal->externalFileRefNum);
 
     ResetAllPixTables();
 
     gSpriteTable.create(kMaxSpriteNum);
-    if (gSpriteTable.get() == nil)
-    {
-        ShowErrorAny( eExitToShellErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 2);
-    }
     ResetAllSprites();
-    /*
-    MoveHHi( gSpriteTable);
-    HLock( gSpriteTable);
-    */
 
-/*
-    SetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-    DrawInOffWorld();
-    CopySaveWorldToOffWorld( &tRect);
-    DrawInRealWorld();
-*/
-
-/*  AddPixTable( kBlipSpriteID);
-    gBlipTable = GetPixTable( kBlipSpriteID);
-    if ( gBlipTable == nil)
-        ShowErrorNoRecover( SPRITE_CREATE_ERROR, kSpriteHandleError, 18);
-*/
     gStaticTable.create(kStaticTableSize * 2);
-    if (gStaticTable.get() == nil)
-    {
-    }
-
-    TypedHandleClearHack(gStaticTable);
-
     staticValue = *gStaticTable;
-    for ( i = 0; i < (kStaticTableSize * 2); i++)
-    {
+    for (i = 0; i < (kStaticTableSize * 2); i++) {
         j = Randomize( 256);
         *staticValue = j;
         staticValue++;

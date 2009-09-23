@@ -162,52 +162,16 @@ coordPointType          gLastGlobalCorner;
 //barIndicatorType      gAresGlobal->gBarIndicator[ kBarIndicatorNum];
 //short                 gAresGlobal->gMouseActive = kMouseOff; // 0 = off now, 1 = turning off, 2 = on
 
-int InstrumentInit( void)
-
-{
-
+int InstrumentInit() {
     gAresGlobal->gInstrumentTop = (WORLD_HEIGHT / 2) - ( kPanelHeight / 2);
     gAresGlobal->gRightPanelLeftEdge = WORLD_WIDTH - kRightPanelWidth;
 
     gAresGlobal->gRadarBlipData.create(kRadarBlipNum);
-    if (gAresGlobal->gRadarBlipData.get() == nil)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
-        return ( MEMORY_ERROR);
-    }
-    /*
-    MoveHHi( gAresGlobal->gRadarBlipData);
-    HLock( gAresGlobal->gRadarBlipData);
-    */
-    TypedHandleClearHack(gAresGlobal->gRadarBlipData);
-
     gAresGlobal->gScaleList.create(kScaleListNum);
-    if (gAresGlobal->gScaleList.get() == nil)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 2);
-        return ( MEMORY_ERROR);
-    }
-    /*
-    MoveHHi( gAresGlobal->gScaleList);
-    HLock( gAresGlobal->gScaleList);
-    */
-    TypedHandleClearHack(gAresGlobal->gScaleList);
-
     gAresGlobal->gSectorLineData.create(kMaxSectorLine * 4 + kSiteCoordNum * 2 + kCursorCoordNum * 2);
-    if (gAresGlobal->gSectorLineData.get() == nil)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 3);
-        return ( MEMORY_ERROR);
-    }
-    /*
-    MoveHHi( gAresGlobal->gSectorLineData);
-    HLock( gAresGlobal->gSectorLineData);
-    */
-    TypedHandleClearHack(gAresGlobal->gSectorLineData);
-
     ResetInstruments();
 
-    return( MiniScreenInit());
+    return MiniScreenInit();
 }
 
 void InstrumentCleanup( void)

@@ -159,18 +159,6 @@ void TypedHandleBase<T>::load_resource(uint32_t code, int id) {
     }
 }
 
-long Random();
-// TypedHandle<>s can no longer be registered using mHandleLockAndRegister, but simply deleting the
-// call thereto would prevent HHClearHandle() from being called.  HHClearHandle() makes a call to
-// Random() for each byte contained in the handle, so this function ensures that the stream of
-// random values is unaltered by the removal of the call to HHClearHandle().
-template <typename T>
-inline void TypedHandleClearHack(TypedHandle<T> handle) {
-    for (size_t i = 0; i < handle.size(); ++i) {
-        Random();
-    }
-}
-
 int Munger(TypedHandle<unsigned char> data, int pos, const unsigned char* search, size_t search_len,
         const unsigned char* replace, size_t replace_len);
 

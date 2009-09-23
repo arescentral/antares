@@ -530,7 +530,6 @@ enum beamKindEnum {
 
 struct beamType {
     beamKindType        beamKind;
-    char hack[3];  // For TypedHandleClearHack().
     Rect                thisLocation;
     Rect                lastLocation;
     coordPointType      lastGlobalLocation;

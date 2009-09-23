@@ -52,28 +52,17 @@ extern TypedHandle<spaceObjectType> gSpaceObjectData;
 
 void DetermineBeamRelativeCoordFromAngle( spaceObjectType *, short);
 
-short InitBeams( void)
-{
+short InitBeams() {
     beamType    *beam;
     short           i;
 
     gAresGlobal->gBeamData.create(kBeamNum);
-    if (gAresGlobal->gBeamData.get() == nil)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
-        return( MEMORY_ERROR);
-    }
-
-    TypedHandleClearHack(gAresGlobal->gBeamData);
-
     beam = *gAresGlobal->gBeamData;
-    for ( i = 0; i < kBeamNum; i++)
-    {
+    for (i = 0; i < kBeamNum; i++) {
         beam->active = false;
-
         beam++;
     }
-    return( kNoError);
+    return kNoError;
 }
 
 void CleanupBeams( void)

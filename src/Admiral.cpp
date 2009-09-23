@@ -56,35 +56,12 @@ extern spaceObjectType  *gRootObject;
 
 //Handle                gAresGlobal->gAdmiralData = nil, gAresGlobal->gDestBalanceData = nil;
 
-int AdmiralInit( void)
-
-{
+int AdmiralInit() {
     gAresGlobal->gAdmiralData.create(kScenarioPlayerNum);
-
-    if (gAresGlobal->gAdmiralData.get() == nil)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
-        return( MEMORY_ERROR);
-    }
-
-    // MoveHHi( gAresGlobal->gAdmiralData);
-    // HLock( gAresGlobal->gAdmiralData);
-
-    TypedHandleClearHack(gAresGlobal->gAdmiralData);
     ResetAllAdmirals();
-
     gAresGlobal->gDestBalanceData.create(kMaxDestObject);
-
-    if (gAresGlobal->gDestBalanceData.get() == nil)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 2);
-        return( MEMORY_ERROR);
-    }
-    TypedHandleClearHack(gAresGlobal->gDestBalanceData);
-
     ResetAllDestObjectData();
-
-    return ( kNoError);
+    return kNoError;
 }
 
 void AdmiralCleanup( void)
