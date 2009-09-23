@@ -494,7 +494,8 @@ struct objectActionType {
 };
 
 
-enum beamKindType {
+typedef uint8_t beamKindType;
+enum beamKindEnum {
     eKineticBeamKind =                  0,  // has velocity, moves
     eStaticObjectToObjectKind =         1,  // static line connects 2 objects
     eStaticObjectToRelativeCoordKind =  2,  // static line goes from object to coord
@@ -504,6 +505,7 @@ enum beamKindType {
 
 struct beamType {
     beamKindType        beamKind;
+    char hack[3];  // For TypedHandleClearHack().
     Rect                thisLocation;
     Rect                lastLocation;
     coordPointType      lastGlobalLocation;
