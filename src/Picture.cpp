@@ -21,7 +21,7 @@
 #include <glob.h>
 #include <fcntl.h>
 #include <unistd.h>
-
+#include "BinaryStream.hpp"
 #include "FakeDrawing.hpp"
 
 Picture::Picture(int32_t id) {
@@ -37,22 +37,20 @@ Picture::Picture(int32_t id) {
     if (g.gl_pathc == 0) {
         throw PictureNotFoundException();
     } else if (g.gl_pathc == 1) {
-        assert(g.gl_pathc <= 1);
+        MappedFile file(g.gl_pathv[0]);
+        BinaryStream bin(file.data(), file.size());
 
         _frame.left = 0;
         _frame.top = 0;
+        bin.read(&_frame.right);
+        bin.read(&_frame.bottom);
 
-        int fd = open(g.gl_pathv[0], O_RDONLY);
-        assert(read(fd, &_frame.right, sizeof(int32_t)) == sizeof(int32_t));
-        assert(read(fd, &_frame.bottom, sizeof(int32_t)) == sizeof(int32_t));
         int pixel_size = _frame.right * _frame.bottom;
         _pixels.reset(new uint8_t[pixel_size]);
-        assert(lseek(fd, 0x1000, SEEK_CUR) > 0);
-        assert(read(fd, _pixels.get(), pixel_size) == pixel_size);
+        bin.discard(0x1000);
+        bin.read(_pixels.get(), pixel_size);
 
-        // Now we should be at EOF
-        uint8_t end;
-        assert(read(fd, &end, 1) == 0);
+        assert(bin.bytes_read() == file.size());
     } else {
         fprintf(stderr, "Found %lu matches for %d\n", g.gl_pathc, id);
         exit(1);
