@@ -29,8 +29,6 @@
 
 class BinaryStream;
 
-#pragma options align=mac68k
-
 #define kMaxSpaceObject     250
 #define kMaxBaseObject      (gAresGlobal->maxBaseObject)//300
 #define kMaxObjectAction    (gAresGlobal->maxObjectAction)//700//500//360
@@ -892,7 +890,5 @@ inline void mGetBaseObjectFromClassRace(
         if ( mcount >= kMaxBaseObject) mbaseObject = nil;
     }
 }
-
-#pragma options align=reset
 
 #endif // ANTARES_SPACE_OBJECT_HPP_

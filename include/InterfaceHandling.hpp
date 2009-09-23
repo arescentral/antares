@@ -23,8 +23,6 @@
 #include "AnyChar.hpp"
 #include "PlayerInterfaceItems.hpp"
 
-#pragma options align=mac68k
-
 int InterfaceHandlingInit( void);
 void InterfaceHandlingCleanup( void);
 int OpenInterface( short);
@@ -75,7 +73,5 @@ void SetInterfaceListCallback(  short       whichItem,
                                 Boolean     (*itemHilited)( short, Boolean));
 void SetButtonKeyNum( short, short);
 short GetButtonKeyNum( short);
-
-#pragma options align=reset
 
 #endif // ANTARES_INTERFACE_HANDLING_HPP_

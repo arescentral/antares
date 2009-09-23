@@ -26,8 +26,6 @@
 #include "Scenario.hpp"
 #include "SpaceObject.hpp"
 
-#pragma options align=mac68k
-
 #define kScenarioWinnerPlayerMask   0x000000ff
 #define kScenarioWinnerNoPlayer     0x000000ff
 #define kScenarioWinnerNextMask     0xff000000
@@ -189,7 +187,5 @@ long GetFirstNetworkScenario( void);
 long GetNextNetworkScenario( long);
 long GetPreviousNetworkScenario( long);
 Boolean ThisChapterIsNetworkable( long);
-
-#pragma options align=reset
 
 #endif // ANTARES_SCENARIO_MAKER_HPP_

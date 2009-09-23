@@ -24,8 +24,6 @@
 #include "Handle.hpp"
 #include "MathSpecial.hpp"
 
-#pragma options align=mac68k
-
 /*
 #define ROT_RES     5
 #define ROT_POS     72
@@ -115,7 +113,5 @@ void SetRotPoint( long, long, long);
 void GetRotPoint( long *x, long *y, long rotpos);
 void RotatePoint( long, long, Fixed *, Fixed *, long);
 long GetAngleFromVector( long, long);
-
-#pragma options align=reset
 
 #endif // ANTARES_ROTATION_HPP_

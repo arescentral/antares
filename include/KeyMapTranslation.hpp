@@ -23,8 +23,6 @@
 #include <Base.h>
 #include <ConditionalMacros.h>
 
-#pragma options align=mac68k
-
 #define kKeyMapNameID           1000
 #define kKeyMapNameLongID       1002
 
@@ -93,7 +91,5 @@ Boolean AnyModifierKeyDown( void);
 Boolean AnyKeyButThisOne( KeyMap, long, long);
 long GetAsciiFromKeyMap( KeyMap, KeyMap);
 long GetAsciiFromKeyNum( short);
-
-#pragma options align=reset
 
 #endif // ANTARES_KEY_MAP_TRANSLATION_HPP_

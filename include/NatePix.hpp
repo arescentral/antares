@@ -23,8 +23,6 @@
 typedef unsigned char   colorByte;
 typedef unsigned char   byte;
 
-#pragma options align=mac68k
-
 struct natePix {
     PixMapHandle    pix;
     Handle          pixBase;
@@ -72,7 +70,5 @@ typedef struct {
 
 */
 
-
-#pragma options align=reset
 
 #endif // ANTARES_NATE_PIX_HPP_

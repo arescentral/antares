@@ -22,8 +22,6 @@
 
 #include "SpaceObject.hpp"
 
-#pragma options align=mac68k
-
 #define kBaseObjectResType      'bsob'
 #define kBaseObjectResID        500
 
@@ -64,7 +62,5 @@ void AlterObjectCloakState( spaceObjectType *, Boolean);
 void DestroyObject( spaceObjectType *);
 void ActivateObjectSpecial( spaceObjectType *);
 void CreateFloatingBodyOfPlayer( spaceObjectType *);
-
-#pragma options align=reset
 
 #endif // ANTARES_SPACE_OBJECT_HANDLING_HPP_

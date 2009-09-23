@@ -22,8 +22,6 @@
 
 #include <Base.h>
 
-#pragma options align=mac68k
-
 #define kRandomRange        32767L
 
 int RandomInit( void);
@@ -38,7 +36,5 @@ void SetMyRandomSeed( long);
 inline short RandomSeeded(short mrange, long* mseed, long, long) {
     return XRandomSeeded(mrange, mseed);
 }
-
-#pragma options align=reset
 
 #endif // ANTARES_RANDOMIZE_HPP_

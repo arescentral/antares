@@ -22,8 +22,6 @@
 
 #include <Base.h>
 
-#pragma options align=mac68k
-
 #define kErrorStrID                 800
 
 #define kNoError                    0
@@ -110,6 +108,5 @@ void ShowErrorAny( errorRecoverType, short, const unsigned char*, const unsigned
                         long, long, char *, long);
 void ShowErrorOfTypeOccurred( errorRecoverType, short, short, OSErr, char *, long);
 void MyDebugString( const unsigned char*);
-#pragma options align=reset
 
 #endif // ANTARES_ERROR_HPP_

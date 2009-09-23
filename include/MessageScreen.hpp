@@ -24,8 +24,6 @@
 #include "Handle.hpp"
 #include "NateDraw.hpp"
 
-#pragma options align=mac68k
-
 #define kMessageStringID        3100
 #define kZoomStringOffset       1
 #define kAutoPilotOnString      9
@@ -115,7 +113,5 @@ void UpdateStatusString( void);
 long DetermineDirectTextHeightInWidth( retroTextSpecType *, long);
 void DrawDirectTextInRect( retroTextSpecType *, longRect *, longRect *, PixMap *, long, long);
 void DrawRetroTextCharInRect( retroTextSpecType *, long, longRect *, longRect *, PixMap *, long, long);
-
-#pragma options align=reset
 
 #endif // ANTARES_MESSAGE_SCREEN_HPP_

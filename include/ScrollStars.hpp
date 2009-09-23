@@ -22,8 +22,6 @@
 
 #include "SpaceObject.hpp"
 
-#pragma options align=mac68k
-
 #define kMaxSparkAge            1023L
 #define kSparkAgeToShadeShift   6L
 
@@ -60,7 +58,5 @@ void Reset3DStars( Point, longRect *);
 void Move3DStars( Point, long, longRect *);
 void Draw3DStars( Boolean, longRect *, PixMapHandle);
 void Show3DStars( Boolean, longRect *, PixMapHandle);
-
-#pragma options align=reset
 
 #endif // ANTARES_SCROLL_STARS_HPP_

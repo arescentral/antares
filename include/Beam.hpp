@@ -22,8 +22,6 @@
 
 #include "SpaceObject.hpp"
 
-#pragma options align=mac68k
-
 short InitBeams( void);
 void CleanupBeams( void);
 void ResetBeams( void);
@@ -33,7 +31,5 @@ void DrawAllBeams( void);
 void EraseAllBeams( void);
 void ShowAllBeams( void);
 void CullBeams( void);
-
-#pragma options align=reset
 
 #endif // ANTARES_BEAM_HPP_

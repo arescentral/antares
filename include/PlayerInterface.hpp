@@ -24,8 +24,6 @@
 #include "PlayerInterfaceDrawing.hpp"
 #include "PlayerInterfaceItems.hpp"
 
-#pragma options align=mac68k
-
 enum mainScreenResultType {
     kMainPlay = 1,
     kMainQuit = 2,
@@ -90,7 +88,5 @@ void HandleOSEvent( EventRecord *);
 Boolean Ares_WaitNextEvent( short eventMask, EventRecord *theEvent,
     unsigned long sleep, RgnHandle mouseRgn);
 void Replace_KeyCode_Strings_With_Actual_Key_Names(TypedHandle<unsigned char> text, short resID, short padTo);
-
-#pragma options align=reset
 
 #endif // ANTARES_PLAYER_INTERFACE_HPP_

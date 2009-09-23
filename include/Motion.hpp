@@ -23,8 +23,6 @@
 #include "MathSpecial.hpp"
 #include "SpaceObject.hpp"
 
-#pragma options align=mac68k
-
 #define kMotionResolution           100     // must be same as kRotUnit ( see Rotation.h)
 
 #define kProximitySuperSize         16      // number of cUnits in cSuperUnits
@@ -70,7 +68,5 @@ void MotionCleanup( void);
 void MoveSpaceObjects( spaceObjectType *, const long, const long);
 void CollideSpaceObjects( spaceObjectType *, const long);
 void CorrectPhysicalSpace( spaceObjectType *, spaceObjectType *);
-
-#pragma options align=reset
 
 #endif // ANTARES_MOTION_HPP_

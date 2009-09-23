@@ -33,8 +33,6 @@
 #include "SmartPtr.hpp"
 #include "SoundFX.hpp"
 
-#pragma options align=mac68k
-
 #define kDefaultOptions             (kOptionScreenSmall | kOptionBlackground | kOptionMusicIdle)
 #define kMaxPlayerNum               4 // kMaxScenarioPlayerNum in Scenario.h
 
@@ -242,7 +240,5 @@ struct aresGlobalType {
 };
 
 extern aresGlobalType* gAresGlobal;
-
-#pragma options align=reset
 
 #endif // ANTARES_ARES_GLOBAL_TYPE_HPP_

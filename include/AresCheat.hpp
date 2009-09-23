@@ -22,8 +22,6 @@
 
 #include <Base.h>
 
-#pragma options align=mac68k
-
 #define kCheatActiveBit                 0x00000001
 #define kAutoPlayBit                    0x00000002
 #define kNameObjectBit                  0x00000004
@@ -61,7 +59,5 @@ void AresCheatInit( void);
 void CleanupAresCheat( void);
 short GetCheatNumFromString(unsigned char*);
 void ExecuteCheat( short, long);
-
-#pragma options align=reset
 
 #endif // ANTARES_ARES_CHEAT_HPP_

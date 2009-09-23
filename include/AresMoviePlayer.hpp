@@ -25,8 +25,6 @@
 
 #include "Movies.h"
 
-#pragma options align=mac68k
-
 void PlayMovieByName( const unsigned char*, WindowPtr, Boolean, GDHandle);
 void InitMoviePlayer( void);
 void CleanupMoviePlayer( void);
@@ -34,7 +32,5 @@ OSErr LoadMiniMovie(unsigned char*, Movie *, Rect *, WindowPtr, Boolean);
 OSErr StartMiniMovie( Movie);
 Boolean DoMiniMovieTask( Movie);
 OSErr CleanUpMiniMovie( Movie *);
-
-#pragma options align=reset
 
 #endif // ANTARES_ARES_MOVIE_PLAYER_HPP_

@@ -23,8 +23,6 @@
 #include <Base.h>
 #include "SpaceObject.hpp"
 
-#pragma options align=mac68k
-
 #define kShapeNum               24
 #define kPixResID               501
 
@@ -41,7 +39,5 @@ Boolean IsPlayerShipOnAutoPilot( void);
 void PlayerShipGiveCommand( long);
 void PlayerShipBodyExpire( spaceObjectType *, Boolean);
 void HandleTextMessageKeys( KeyMap, KeyMap, Boolean *);
-
-#pragma options align=reset
 
 #endif // ANTARES_PLAYER_SHIP_HPP_

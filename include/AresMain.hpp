@@ -24,8 +24,6 @@
 
 //#define kHideMenuBar
 
-#pragma options align=mac68k
-
 #define kHackLevelMax   26//4//21
 
 int main(int argc, const char** argv);
@@ -40,7 +38,5 @@ void HandleEditChoice ( int);
 Boolean HandleKeyDown( EventRecord *);
 short PlayTheGame( long *);
 void Pause();
-
-#pragma options align=reset
 
 #endif // ANTARES_ARES_MAIN_HPP_

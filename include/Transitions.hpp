@@ -20,8 +20,6 @@
 
 #include <Base.h>
 
-#pragma options align=mac68k
-
 void InitTransitions( void);
 void ResetTransitions( void);
 void CleanupTransitions( void);
@@ -37,6 +35,5 @@ Boolean AutoMusicFadeTo( long, RGBColor *, Boolean);
 Boolean CustomPictFade( long, long, short, short, WindowPtr);
 bool StartCustomPictFade(long, long, short, short, WindowPtr, bool);
 bool EndCustomPictFade(WindowPtr, bool);
-#pragma options align=reset
 
 #endif // ANTARES_TRANSITIONS_HPP_

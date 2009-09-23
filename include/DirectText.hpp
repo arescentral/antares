@@ -25,8 +25,6 @@
 #include "Handle.hpp"
 #include "SpriteHandling.hpp"
 
-#pragma options align=mac68k
-
 #define kCharSpace              0
 #define kFirstCharacter         0
 #define kLastCharacter          255
@@ -123,7 +121,5 @@ void DrawDirectTextStringClipped(unsigned char*, unsigned char, PixMap *, longRe
 
 void DrawDirectTextHeightx2(unsigned char*, unsigned char, PixMap *, long, long);
 void DrawDirectTextStringClippedx2(unsigned char*, unsigned char, PixMap *, longRect *, long, long);
-
-#pragma options align=reset
 
 #endif // ANTARES_DIRECT_TEXT_HPP_

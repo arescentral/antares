@@ -24,8 +24,6 @@
 #include <Base.h>
 #include <Quickdraw.h>
 
-#pragma options align=mac68k
-
 class BinaryStream;
 
 inline void mGetRowBytes(long& rBytes, PixMap* pix) {
@@ -102,7 +100,5 @@ void DrawNateLine( PixMap *, longRect *, long, long, long,
 void CopyNateLine( PixMap *, PixMap *, longRect *, long, long, long, long , long, long);
 void DashNateLine( PixMap *, longRect *, long, long, long,
                     long, long, long, unsigned char, unsigned char, unsigned char, unsigned char);
-
-#pragma options align=reset
 
 #endif // ANTARES_NATE_DRAW_HPP_

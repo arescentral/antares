@@ -20,8 +20,6 @@
 
 #include <Base.h>
 
-#pragma options align=mac68k
-
 //#define   kUseAlphaCopyProtection
 #define kUsePublicCopyProtection
 
@@ -150,7 +148,5 @@ void GetNetPreferences(unsigned char*, unsigned char*, unsigned long *, long *, 
     short *, unsigned short *, unsigned short *, unsigned short *, short *, short *, short *);
 OSErr SaveNetPreferences(unsigned char*, unsigned char*, unsigned long, long, long, unsigned long,
     short, unsigned short, unsigned short, unsigned short, short, short, short);
-
-#pragma options align=reset
 
 #endif // ANTARES_ARES_PREFERENCES_HPP_

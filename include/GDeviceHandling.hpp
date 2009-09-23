@@ -23,8 +23,6 @@
 #include <Base.h>
 #include <Quickdraw.h>
 
-#pragma options align=mac68k
-
 Boolean ChooseTheDevice( int, Boolean);
 Boolean UserChooseTheDevice( int, Boolean, Rect *);
 void CleanUpTheDevice( Boolean);
@@ -36,7 +34,5 @@ void ShieldCursorInDevice( void);
 void SetColorDepth (GDHandle, int);
 int GetDeviceDepth( GDHandle);
 GDHandle GetBestDevice ( int *, int, int);
-
-#pragma options align=reset
 
 #endif // ANTARES_GDEVICE_HANDLING_HPP_

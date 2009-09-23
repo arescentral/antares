@@ -22,8 +22,6 @@
 
 #include "SpriteHandling.hpp"
 
-#pragma options align=mac68k
-
 #define kSpriteCursorHidden     0   // if showLevel <= this, cursor is hidden
 #define kSpriteCursorVisible    1   // if showLevel <= this, cursor is hidden
 
@@ -62,7 +60,5 @@ void ShowHintLine( Point fromWhere, Point toWhere,
     unsigned char color, unsigned char brightness);
 void HideHintLine( void);
 void ResetHintLine( void);
-
-#pragma options align=reset
 
 #endif // ANTARES_SPRITE_CURSOR_HPP_

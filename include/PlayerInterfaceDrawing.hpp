@@ -23,8 +23,6 @@
 #include "AnyChar.hpp"
 #include "PlayerInterfaceItems.hpp"
 
-#pragma options align=mac68k
-
 #define kInterfaceTextVBuffer       2
 #define kInterfaceTextHBuffer       3
 

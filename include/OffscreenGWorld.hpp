@@ -21,8 +21,6 @@
 #include <Base.h>
 #include <Quickdraw.h>
 
-#pragma options align=mac68k
-
 // #define WORLD_WIDTH     800//640
 // #define WORLD_HEIGHT    600//480
 
@@ -70,7 +68,5 @@ void AsmChunkCopyPixMapToPixMap( PixMap *, Rect *, PixMap *);
 void SetWindowPaletteFromClut(Window* window, const ColorTable& colors);
 void ColorTest( void);
 void ChunkErasePixMap( PixMap *, Rect *);
-
-#pragma options align=reset
 
 #endif // ANTARES_OFFSCREEN_GWORLD_HPP_

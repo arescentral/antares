@@ -20,8 +20,6 @@
 
 // Music.h
 
-#pragma options align=mac68k
-
 #define kTitleSongID        4001
 #define kPlaySongID         4000
 #define kMusicVolume        54
@@ -64,7 +62,5 @@ Handle DoExp1to6( Handle, unsigned long);
 void ConvertInstrument( register    Byte    *,  register long);
 Handle SndToHandle( Handle, short   *);
 #endif
-
-#pragma options align=reset
 
 #endif // ANTARES_MUSIC_HPP_

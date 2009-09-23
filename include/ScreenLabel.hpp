@@ -23,8 +23,6 @@
 #include "AnyChar.hpp"
 #include "SpaceObject.hpp"
 
-#pragma options align=mac68k
-
 #define kNoLabel        -1
 #define kMaxLabelLen            250
 #define kMaxLabelNum            16
@@ -77,7 +75,5 @@ void SetScreenLabelKeepOnScreenAnyway( long which, Boolean keepOnScreenAnyWay);
 void SetScreenLabelAttachedHintLine( long which, Boolean attachedHintLine, Point toWhere);
 unsigned char* GetScreenLabelStringPtr(long);
 void RecalcScreenLabelSize( long);
-
-#pragma options align=reset
 
 #endif // ANTARES_SCREEN_LABEL_HPP_

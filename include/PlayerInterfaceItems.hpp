@@ -25,8 +25,6 @@
 #include "AnyChar.hpp"
 #include "NateDraw.hpp"
 
-#pragma options align=mac68k
-
 class BinaryStream;
 
 enum interfaceKindEnum {
@@ -161,7 +159,5 @@ struct interfaceItemType {
 
     size_t load_data(const char* data, size_t len);
 };
-
-#pragma options align=reset
 
 #endif // ANTARES_PLAYER_INTERFACE_ITEMS_HPP_

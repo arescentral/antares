@@ -23,8 +23,6 @@
 #include <Base.h>
 #include <Quickdraw.h>
 
-#pragma options align=mac68k
-
 class Picture;
 
 void InitAresGuide( void);
@@ -32,7 +30,5 @@ void MakeAresGuide( void);
 OSErr ConvertSpriteIntoGIF(short, long, unsigned char*);
 Picture* MakePicHandleFromScreen( PixMapHandle, Rect *);
 OSErr SaveBlockToFile(Ptr, long, unsigned char*);
-
-#pragma options align=reset
 
 #endif // ANTARES_ARES_GUIDE_MAKER_HPP_

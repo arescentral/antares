@@ -25,8 +25,6 @@
 
 // Color Translation.h
 
-#pragma options align=mac68k
-
 #define kPaletteSize            256
 #define kReferenceColorTableID  256
 
@@ -95,7 +93,5 @@ void GetRGBTranslateColorShade( RGBColor *, unsigned char, unsigned char);
 void SetTranslateColorFore( unsigned char);
 void GetRGBTranslateColor( RGBColor *, unsigned char);
 void DefaultColors( void);
-
-#pragma options align=reset
 
 #endif // ANTARES_COLOR_TRANSLATION_HPP_

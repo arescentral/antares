@@ -25,8 +25,6 @@
 #include "Casts.hpp"
 #include "Scenario.hpp"
 
-#pragma options align=mac68k
-
 #define kAIsHuman                   0x00000001
 #define kAIsRemote                  0x00000002
 #define kAIsComputer                0x00000004
@@ -212,8 +210,5 @@ long GetAdmiralKill( long);
 #define kABit31                     0x40000000
 #define kABit32                     0x80000000
 */
-
-
-#pragma options align=reset
 
 #endif // ANTARES_ADMIRAL_HPP_

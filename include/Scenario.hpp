@@ -23,8 +23,6 @@
 #include "NateDraw.hpp"
 #include "SpaceObject.hpp"
 
-#pragma options align=mac68k
-
 class BinaryStream;
 
 #define kScenarioInitialNum             12
@@ -273,7 +271,5 @@ struct raceType {
 
     size_t load_data(const char* data, size_t len);
 };
-
-#pragma options align=reset
 
 #endif // ANTARES_SCENARIO_HPP_

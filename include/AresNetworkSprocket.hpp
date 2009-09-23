@@ -25,8 +25,6 @@
 #include "AnyChar.hpp"
 #include "ConditionalMacros.h"
 
-#pragma options align=mac68k
-
 #define kBackupData
 #define kBackupData2
 
@@ -355,7 +353,5 @@ void StopIncomingTextMessage( anyCharType *);
 #else   // TARGET_OS_MAC
 #define NETSPROCKET_AVAILABLE   0
 #endif // TARGET_OS_MAC
-
-#pragma options align=reset
 
 #endif // ANTARES_ARES_NETWORK_SPROCKET_HPP_

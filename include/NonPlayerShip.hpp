@@ -23,8 +23,6 @@
 #include "NateDraw.hpp"
 #include "SpaceObject.hpp"
 
-#pragma options align=mac68k
-
 spaceObjectType *HackNewNonplayerShip( long, short, longRect *);
 void NonplayerShipThink( long);
 void UpdateMyNonplayerShip( void);
@@ -35,7 +33,5 @@ long GetManualSelectObject( spaceObjectType *, unsigned long,
                             const UnsignedWide *, long, short);
 long GetSpritePointSelectObject( Rect *, spaceObjectType *, unsigned long,
                             unsigned long, unsigned long, long, short);
-
-#pragma options align=reset
 
 #endif // ANTARES_NON_PLAYER_SHIP_HPP_

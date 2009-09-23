@@ -24,15 +24,11 @@
 
 //#define kCreateAresDemoData
 
-#pragma options align=mac68k
-
 void MakeDemoDataHack( void);
 void ScanLevel( long, Boolean *);
 void ClearAndCopyAllUnusedBaseObjects( Boolean *);
 void CopyAllUsedPixTables( void);
 void CopyAllUsedSounds( void);
 void CopyAllBriefingData( long);
-
-#pragma options align=reset
 
 #endif // ANTARES_ARES_DEMO_SCANNER_HPP_

@@ -24,8 +24,6 @@
 
 #include "NateDraw.hpp"
 
-#pragma options align=mac68k
-
 #define kMiniBuildTimeHeight    ( 25)
 
 int InstrumentInit( void);
@@ -51,7 +49,5 @@ void GetArbitrarySingleSectorBounds( coordPointType *, coordPointType *, long, l
                                 Rect *);
 void UpdateBarIndicator( short, long, long, PixMapHandle);
 void DrawBuildTimeBar( long);
-
-#pragma options align=reset
 
 #endif // ANTARES_RADAR_HPP_

@@ -22,8 +22,6 @@
 
 #include <Base.h>
 
-#pragma options align=mac68k
-
 void CopyPString( unsigned char *, const unsigned char *);
 Boolean ComparePString( unsigned char *, const unsigned char *);
 int PStringLen( const unsigned char *s);
@@ -36,7 +34,5 @@ void UpperCasePString(unsigned char*);
 void DrawCString( const unsigned char *);
 
 STUB2(pstrcat, void(const unsigned char*, const unsigned char*));
-
-#pragma options align=reset
 
 #endif // ANTARES_STRING_HANDLING_HPP_

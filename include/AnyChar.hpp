@@ -22,8 +22,6 @@
 
 // ONE BYTE CHARACTER SYSTEM
 
-#pragma options align=mac68k
-
 #define kAnyCharSpace   ' '
 
 #define kAnyCharPStringMaxLen   254
@@ -41,7 +39,5 @@ inline void mGetPStringFromSingleAnyChar(
 void CopyAnyCharPString(unsigned char *, const unsigned char*);
 void InsertAnyCharPStringInPString(unsigned char*, const unsigned char*, long);
 void CutCharsFromAnyCharPString(unsigned char*, long, long);
-
-#pragma options align=reset
 
 #endif // ANTARES_ANY_CHAR_HPP_

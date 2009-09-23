@@ -22,8 +22,6 @@
 
 #include "Scenario.hpp"
 
-#pragma options align=mac68k
-
 #define kRaceResID          500
 #define kRaceResType        'race'
 
@@ -37,7 +35,5 @@ smallFixedType GetRaceAdvantage( short raceNum);
 short GetRaceNumFromID( short);
 short GetRaceIDFromNum( short);
 unsigned char GetApparentColorFromRace( short);
-
-#pragma options align=reset
 
 #endif // ANTARES_RACES_HPP_
