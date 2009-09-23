@@ -15,17 +15,21 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_RESOURCE_HPP_
-#define ANTARES_RESOURCE_HPP_
+#ifndef ANTARES_POSIX_EXCEPTION_HPP_
+#define ANTARES_POSIX_EXCEPTION_HPP_
 
 #include <exception>
-#include "MappedFile.hpp"
 
-class NoSuchResourceException : public std::exception { };
-
-class Resource : public MappedFile {
+class PosixException : public std::exception {
   public:
-    Resource(uint32_t code, int id);
+    PosixException() throw();
+    virtual const char* what() const throw();
+
+  private:
+    static const int _what_size = 256;
+
+    int _errno;
+    char _what[_what_size];
 };
 
-#endif // ANTARES_RESOURCE_HPP_
+#endif // ANTARES_POSIX_EXCEPTION_HPP_

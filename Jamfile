@@ -43,6 +43,7 @@ Main Antares : src/Admiral.cpp
                src/InterfaceHandling.cpp
                src/KeyMapTranslation.cpp
                src/KeySetupScreen.cpp
+               src/MappedFile.cpp
                src/MathSpecial.cpp
                src/MessageScreen.cpp
                src/Minicomputer.cpp
@@ -60,6 +61,7 @@ Main Antares : src/Admiral.cpp
                src/PlayerInterface.cpp
                src/PlayerInterfaceDrawing.cpp
                src/PlayerShip.cpp
+               src/PosixException.cpp
                src/Races.cpp
                src/Randomize.cpp
                src/Resource.cpp

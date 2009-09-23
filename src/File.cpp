@@ -17,7 +17,7 @@
 
 #include "File.hpp"
 
-#include <errno.h>
+#include "PosixException.hpp"
 
 std::string BaseName(const std::string& path) {
     if (path == "/") {
@@ -50,13 +50,6 @@ bool IsDir(const std::string& path) {
     struct stat st;
     return stat(path.c_str(), &st) == 0
         && (st.st_mode & S_IFDIR);
-}
-
-PosixException::PosixException()
-        : _errno(errno) { }
-
-std::string PosixException::description() const {
-    return strerror(_errno);
 }
 
 void Mkdir(const std::string& path, mode_t mode) {

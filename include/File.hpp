@@ -28,13 +28,4 @@ void MakeDirs(const std::string& path, mode_t mode);
 std::string BaseName(const std::string& path);
 std::string DirName(const std::string& path);
 
-class PosixException : public std::exception {
-  public:
-    PosixException();
-    std::string description() const;
-
-  private:
-    int _errno;
-};
-
 #endif  // ANTARES_FILE_HPP_

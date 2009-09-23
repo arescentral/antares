@@ -23,7 +23,7 @@
 #include "Casts.hpp"
 #include "ColorTable.hpp"
 #include "FakeDrawing.hpp"
-#include "Resource.hpp"
+#include "MappedFile.hpp"
 
 extern scoped_ptr<ColorTable> fake_colors;
 extern FakeWindow fakeWindow;
@@ -249,8 +249,8 @@ struct FramebufferPixel {
 FramebufferPixel results[640 * 480];
 
 void* vnc_server(void*) {
-    AutoClosedFile sock(listen_on(5901));
-    AutoClosedFile stream(accept_on(sock.fd()));
+    AutoClosedFd sock(listen_on(5901));
+    AutoClosedFd stream(accept_on(sock.fd()));
 
     {
         // Negotiate version of RFB protocol.  Only 3.8 is offered or accepted.

@@ -29,9 +29,9 @@ void GetIndString(unsigned char* result, int id, int index) {
         return;
     }
     Resource rsrc('STR#', id);
-    uint16_t count = *reinterpret_cast<uint16_t*>(rsrc.data());
+    const uint16_t count = *reinterpret_cast<const uint16_t*>(rsrc.data());
     assert(index <= count);
-    char* pstr = rsrc.data() + 2;
+    const char* pstr = rsrc.data() + 2;
     uint8_t size = *pstr;
     while (index > 1) {
         pstr += size + 1;
