@@ -72,8 +72,8 @@ extern TypedHandle<RotTableEntry> gRotTable;
 
 template <typename T>
 inline void mGetRotPoint(T& x, T& y, long angle) {
-    x = *(reinterpret_cast<Fixed *>(*gRotTable) + angle * 2);
-    y = *(reinterpret_cast<Fixed *>(*gRotTable) + (angle * 2) + 1);
+    x = (*gRotTable)[angle * 2].value;
+    y = (*gRotTable)[(angle * 2) + 1].value;
 }
 
 // mAngleDifference: get the smallest difference from theta to other

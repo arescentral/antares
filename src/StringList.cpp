@@ -18,6 +18,7 @@
 #include "StringList.hpp"
 
 #include <assert.h>
+#include "BinaryStream.hpp"
 #include "Casts.hpp"
 #include "Resource.hpp"
 
@@ -25,7 +26,9 @@ void StringList::load(int id) {
     _strings.clear();
 
     Resource rsrc('STR#', id);
-    uint16_t size = (implicit_cast<uint16_t>(rsrc.data()[0]) << 8) + rsrc.data()[1];
+    BufferBinaryReader bin(rsrc.data(), rsrc.size());
+    uint16_t size;
+    bin.read(&size);
     const char* data = rsrc.data() + 2;
     for (size_t i = 0; i < size; ++i) {
         uint8_t len = *data;

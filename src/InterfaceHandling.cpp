@@ -1234,13 +1234,11 @@ void CopyInterfaceTextEditContents(short whichItem, unsigned char* d, long *maxl
         slen = (*(item->item.labeledRect.teData))->teLength;
         if ( slen <= *maxlen)
         {
-            BlockMove( *((*(item->item.labeledRect.teData))->hText),
-                        reinterpret_cast<Ptr>(d), slen);
+            BlockMove( *((*(item->item.labeledRect.teData))->hText), d, slen);
             *maxlen = slen;
         } else
         {
-            BlockMove( *((*(item->item.labeledRect.teData))->hText),
-                        reinterpret_cast<Ptr>(d), *maxlen);
+            BlockMove( *((*(item->item.labeledRect.teData))->hText), d, *maxlen);
         }
     }
 }

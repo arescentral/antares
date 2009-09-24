@@ -82,7 +82,7 @@ short GetCheatNumFromString(unsigned char* s)
         codeString[strLen] = s[strLen] + kCheatCodeValue;
         strLen--;
     }
-    std::string cpp_string(reinterpret_cast<char*>(codeString + 1), *codeString);
+    std::string cpp_string(reinterpret_cast<const char*>(codeString + 1), *codeString);
     return (*gAresGlobal->gAresCheatStrings)->index_of(cpp_string) + 1;
 }
 

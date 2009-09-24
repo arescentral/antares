@@ -335,9 +335,6 @@ void ChunkCopyPixMapToScreenPixMap( PixMap *sourcePix, Rect *sourceRect, PixMap 
             {
                 for ( x = fixRect.left; x < fixRect.right; x++)
                 {
-        #ifdef kByteLevelTesting
-                    TestByte( reinterpret_cast<char*>(dword), destMap, "\pPIX2SCRN");
-        #endif
                     *dword++ = *sword++;
                 }
                 dword += drowplus;
@@ -389,9 +386,6 @@ void ChunkCopyPixMapToPixMap( PixMap *sourcePix, Rect *sourceRect, PixMap *destM
     {
         for ( x = fixRect.left; x < fixRect.right; x++)
         {
-#ifdef kByteLevelTesting
-            TestByte( reinterpret_cast<char*>(dword), destMap, "\pPIX2PIX");
-#endif
             *dword++ = *sword++;
         }
         dword += drowplus;
@@ -435,9 +429,6 @@ void ChunkErasePixMap( PixMap *destMap, Rect *sourceRect)
     {
         for ( x = fixRect.left; x < fixRect.right; x++)
         {
-#ifdef kByteLevelTesting
-            TestByte( reinterpret_cast<char*>(dword), destMap, "\pPIXERSE");
-#endif
             *dword++ = 0xffffffff;
         }
         dword += drowplus;

@@ -23,8 +23,6 @@
 #include "sys/stat.h"
 #include "PosixException.hpp"
 
-void* const kMmapFailed = reinterpret_cast<void*>(-1);
-
 AutoClosedFd::~AutoClosedFd() {
     Close();
 }
@@ -58,7 +56,7 @@ MappedFile::MappedFile(const std::string& path)
     _size = st.st_size;
 
     _data = reinterpret_cast<char*>(mmap(NULL, _size, PROT_READ, MAP_PRIVATE, _file.fd(), 0));
-    if (_data == kMmapFailed) {
+    if (_data == MAP_FAILED) {
         perror("mmap");
         throw PosixException();
     }

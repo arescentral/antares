@@ -120,7 +120,7 @@ void GetKeys(KeyMap keys) {
 void StringToNum(unsigned char* p_str, long* value) {
     size_t len = *p_str;
     char c_str[256];
-    strncpy(c_str, reinterpret_cast<char*>(p_str + 1), len);
+    memcpy(c_str, p_str + 1, len);
     c_str[len] = '\0';
 
     char* end;

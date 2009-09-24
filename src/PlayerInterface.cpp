@@ -1783,7 +1783,7 @@ void DoOptionsInterface( void)
             SaveAllPreferences(); // sets gAresGlobal->gOptions
         } else
         {
-            BlockMove( reinterpret_cast<Ptr>(*tempPrefs), *gAresGlobal->gPreferencesData, sizeof( preferencesDataType));
+            **gAresGlobal->gPreferencesData = **tempPrefs;
             if ( gAresGlobal->gSoundVolume != prefsData->volume)
             {
                 gAresGlobal->gSoundVolume = prefsData->volume;

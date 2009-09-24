@@ -19,9 +19,11 @@
 
 #include <assert.h>
 
+#include "BinaryStream.hpp"
 #include "FakeSounds.hpp"
 #include "Fakes.hpp"
 #include "Resource.hpp"
+#include "String.hpp"
 
 void GetIndString(unsigned char* result, int id, int index) {
     if (index <= 0) {
@@ -29,16 +31,19 @@ void GetIndString(unsigned char* result, int id, int index) {
         return;
     }
     Resource rsrc('STR#', id);
-    const uint16_t count = *reinterpret_cast<const uint16_t*>(rsrc.data());
+    BufferBinaryReader bin(rsrc.data(), rsrc.size());
+    uint16_t count;
+    bin.read(&count);
     assert(index <= count);
-    const char* pstr = rsrc.data() + 2;
-    uint8_t size = *pstr;
+
     while (index > 1) {
-        pstr += size + 1;
-        size = *pstr;
+        uint8_t size;
+        bin.read(&size);
+        bin.discard(size);
         --index;
     }
-    memcpy(result, pstr, size + 1);
+    bin.read(result);
+    bin.read(result + 1, result[0]);
 }
 
 void BlockMove(void* src, void* dst, size_t size) {
@@ -47,10 +52,10 @@ void BlockMove(void* src, void* dst, size_t size) {
 
 int Munger(TypedHandle<unsigned char> data, int pos, const unsigned char* search, size_t search_len,
         const unsigned char* replace, size_t replace_len) {
-    std::string s(reinterpret_cast<const char*>(search), search_len);
-    std::string r(reinterpret_cast<const char*>(replace), replace_len);
-    std::string d(reinterpret_cast<const char*>(*data), data.count());
-    std::string::size_type at = d.find(s, pos);
+    ustring s(search, search_len);
+    ustring r(replace, replace_len);
+    ustring d(*data, data.count());
+    ustring::size_type at = d.find(s, pos);
     if (at != std::string::npos) {
         if (replace_len > search_len) {
             data.resize(data.count() + replace_len - search_len);

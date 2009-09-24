@@ -19,6 +19,7 @@
 #define ANTARES_INPUT_SOURCE_HPP_
 
 #include <stdint.h>
+#include "BinaryStream.hpp"
 #include "Resource.hpp"
 #include "SmartPtr.hpp"
 
@@ -39,8 +40,7 @@ class ReplayInputSource : public InputSource {
 
   private:
     Resource _resource;
-    const uint32_t* _position;
-    const uint32_t* const _end;
+    BufferBinaryReader _bin;
 
     uint32_t _random_seed;
     uint32_t _turn_num;

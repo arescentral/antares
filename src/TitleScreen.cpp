@@ -80,7 +80,7 @@ void DrawEgoScreen( void)
     scoped_ptr<Picture> pict;
     Rect            tRect;
 
-    MacSetPort( reinterpret_cast<WindowPtr>(gTheWindow));
+    MacSetPort(gTheWindow);
     pict.reset(new Picture(kEgoScreenID));
     if (pict.get() == nil) {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 3);

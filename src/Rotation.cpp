@@ -144,7 +144,9 @@ void RotatePoint( long sx, long sy, smallFixedType *x, smallFixedType *y, long t
 long GetAngleFromVector( long x, long y)
 
 {
-    long        *h, *v, a, b, test = 0, best = 0, whichBest = -1, whichAngle;
+    RotTableEntry* h;
+    RotTableEntry* v;
+    int32_t a, b, test = 0, best = 0, whichBest = -1, whichAngle;
 
     a = x;
     b = y;
@@ -153,12 +155,12 @@ long GetAngleFromVector( long x, long y)
     if ( b < 0) b = -b;
     if ( b < a)
     {
-        h = reinterpret_cast<long *>(*gRotTable) + ROT_45 * 2L;
+        h = (*gRotTable) + ROT_45 * 2;
         whichAngle = ROT_45;
         v = h + 1;
         do
         {
-            test = (*v * a) + (*h * b); // we're adding b/c in my table 45-90 degrees, h < 0
+            test = (v->value * a) + (h->value * b); // we're adding b/c in my table 45-90 degrees, h < 0
             if ( test < 0) test = -test;
             if (( whichBest < 0)  || ( test < best))
             {
@@ -171,12 +173,12 @@ long GetAngleFromVector( long x, long y)
         } while ( ( test == best) && ( whichAngle <= ROT_90));
     } else
     {
-        h = reinterpret_cast<long *>(*gRotTable) + ROT_0 * 2L;
+        h = (*gRotTable) + ROT_0 * 2;
         whichAngle = ROT_0;
         v = h + 1;
         do
         {
-            test = (*v * a) + (*h * b);
+            test = (v->value * a) + (h->value * b);
             if ( test < 0) test = -test;
             if (( whichBest < 0)  || ( test < best))
             {

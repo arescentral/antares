@@ -623,7 +623,7 @@ void* vnc_server(void*) {
 
                 out.write(response);
                 out.write(rect);
-                out.write(reinterpret_cast<char*>(results), 4 * 640 * 480);
+                out.write(results, 640 * 480);
             }
             break;
         case KEY_EVENT:
