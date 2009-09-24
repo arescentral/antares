@@ -34,7 +34,6 @@
 
 #define kMaxLineNumber          48
 
-
 struct retroTextSpecType {
     TypedHandle<unsigned char> text;
     long            textLength;
@@ -92,6 +91,17 @@ struct longMessageType {
     short                   labelMessageID;
 };
 
+class MessageData {
+  public:
+    MessageData(size_t size)
+            : _first_char(0),
+              _first_free(0),
+              _data(new unsigned char[size]) { }
+
+    int32_t _first_char;
+    int32_t _first_free;
+    scoped_array<unsigned char> _data;
+};
 
 int InitMessageScreen( void);
 void MessageScreenCleanup( void);

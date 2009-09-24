@@ -98,6 +98,7 @@ struct scenarioInitialType;
 struct screenLabelType;
 struct scrollStarType;
 class InputSource;
+class MessageData;
 class StringList;
 
 struct aresGlobalType {
@@ -160,7 +161,7 @@ struct aresGlobalType {
     long            gRightPanelLeftEdge;    // = 608
     barIndicatorType    gBarIndicator[ kBarIndicatorNum];
     short           gMouseActive;           // = kMouseOff;
-    TypedHandle<unsigned char>      gMessageData;           // = nil
+    scoped_ptr<MessageData>         gMessageData;
     TypedHandle<unsigned char>      gStatusString;          // = nil
     TypedHandle<longMessageType>    gLongMessageData;       // = nil
     long            gMessageTimeCount;      // = 0;

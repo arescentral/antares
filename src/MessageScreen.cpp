@@ -137,21 +137,18 @@ void MessageLabel_Set_Special(short id, TypedHandle<unsigned char> text);
 
 int InitMessageScreen() {
     unsigned char *anyChar, nilLabel = 0;
-    long            i, *l;
+    long            i;
     longMessageType *tmessage = nil;
 
     gAresGlobal->gTrueClipBottom = CLIP_BOTTOM;
-    gAresGlobal->gMessageData.create(kMaxMessageLength + kAnyCharOffsetStart);
+    gAresGlobal->gMessageData.reset(new MessageData(kMaxMessageLength));
     gAresGlobal->gStatusString.create(kDestinationLength);
     gAresGlobal->gLongMessageData.create(1);
 
-    l = reinterpret_cast<long *>(*gAresGlobal->gMessageData) + kLongOffsetFirstChar;
-    *l = kAnyCharOffsetStart;
-    l = reinterpret_cast<long *>(*gAresGlobal->gMessageData) + kLongOffsetFirstFree;
-    *l = kAnyCharOffsetStart;
+    gAresGlobal->gMessageData->_first_char = 0;
+    gAresGlobal->gMessageData->_first_free = 0;
 
-    anyChar = *gAresGlobal->gMessageData;
-    anyChar += kAnyCharOffsetStart;
+    anyChar = gAresGlobal->gMessageData->_data.get();
 
     for (i = 0; i < kMaxMessageLength; i++) {
         *anyChar = kMessageEndChar;
@@ -205,9 +202,7 @@ void MessageScreenCleanup( void)
 
 {
 #ifdef kUseMessage
-    if (gAresGlobal->gMessageData.get() != nil) {
-        gAresGlobal->gMessageData.destroy();
-    }
+    gAresGlobal->gMessageData.reset();
     if (gAresGlobal->gStatusString.get() != nil) {
         gAresGlobal->gStatusString.destroy();
     }
@@ -218,15 +213,13 @@ void ClearMessage( void)
 
 {
 #ifdef kUseMessage
-    long    i, *l;
+    long    i;
     unsigned char *anyChar, nilLabel = 0;
     longMessageType *tmessage;
 
-    l = reinterpret_cast<long *>(*gAresGlobal->gMessageData) + kLongOffsetFirstChar;
-    *l = kAnyCharOffsetStart;
-    l = reinterpret_cast<long *>(*gAresGlobal->gMessageData) + kLongOffsetFirstFree;
-    *l = kAnyCharOffsetStart;
-    anyChar = *gAresGlobal->gMessageData + kAnyCharOffsetStart;
+    gAresGlobal->gMessageData->_first_char = 0;
+    gAresGlobal->gMessageData->_first_free = 0;
+    anyChar = gAresGlobal->gMessageData->_data.get();
     for ( i = 0; i < kMaxMessageLength; i++)
         *anyChar++ = kMessageEndChar;
     gAresGlobal->gMessageTimeCount = 0;
@@ -259,19 +252,17 @@ void ClearMessage( void)
 #endif
 }
 
-void AppendStringToMessage(const unsigned char* string)
-
-{
+void AppendStringToMessage(const unsigned char* string) {
 #ifdef kUseMessage
     unsigned char strLen, *message;
-    long            *freeoffset;
+    int32_t *freeoffset;
 
 
     // get the offset to the first free character
-    freeoffset = reinterpret_cast<long *>(*gAresGlobal->gMessageData) + kLongOffsetFirstFree;
+    freeoffset = &gAresGlobal->gMessageData->_first_free;
 
     // set the destination char (message) to the first free character
-    message = *gAresGlobal->gMessageData + *freeoffset;
+    message = gAresGlobal->gMessageData->_data.get() + *freeoffset;
 
     // get the length of the source string
     strLen = *string++;
@@ -286,13 +277,13 @@ void AppendStringToMessage(const unsigned char* string)
         (*freeoffset)++;
 
         // if the first free characrer offset == the length of our data (in chars) then wrap around
-        if (static_cast<uint32_t>(*freeoffset) >= kAnyCharLastChar)
+        if (*freeoffset >= kMaxMessageLength)
         {
             // reset offset to first char data (after the two longs of offsets)
             *freeoffset = kAnyCharOffsetStart;
 
             // reset the destination char to the first free char
-            message = *gAresGlobal->gMessageData + *freeoffset;
+            message = gAresGlobal->gMessageData->_data.get() + *freeoffset;
         }
 
         strLen--;
@@ -300,18 +291,15 @@ void AppendStringToMessage(const unsigned char* string)
 #endif
 }
 
-void StartMessage( void)
-
-{
+void StartMessage( void) {
     unsigned char* message;
-    long            *freeoffset;
-
+    int32_t *freeoffset;
 
     // get the offset to the first free character
-    freeoffset = reinterpret_cast<long *>(*gAresGlobal->gMessageData) + kLongOffsetFirstFree;
+    freeoffset = &gAresGlobal->gMessageData->_first_free;
 
     // set the destination char (message) to the first free character
-    message = *gAresGlobal->gMessageData + *freeoffset;
+    message = gAresGlobal->gMessageData->_data.get() + *freeoffset;
 
     // we should be on the special end char, which we turn into a separator char
     *message++ = kMessageSeparateChar;
@@ -320,28 +308,24 @@ void StartMessage( void)
     (*freeoffset)++;
 
     // if the first free characrer offset == the length of our data (in chars) then wrap around
-    if (static_cast<uint32_t>(*freeoffset) >= kAnyCharLastChar)
-    {
+    if (implicit_cast<uint32_t>(*freeoffset) >= kMaxMessageLength) {
         // reset offset to first char data (after the two longs of offsets)
-        *freeoffset = kAnyCharOffsetStart;
+        *freeoffset = 0;
 
         // reset the destination char to the first free char
-        message = *gAresGlobal->gMessageData + *freeoffset;
+        message = gAresGlobal->gMessageData->_data.get() + *freeoffset;
     }
 }
 
-void EndMessage( void)
-
-{
+void EndMessage( void) {
     unsigned char* message;
-    long            *freeoffset;
-
+    int32_t *freeoffset;
 
     // get the offset to the first free character
-    freeoffset = reinterpret_cast<long *>(*gAresGlobal->gMessageData) + kLongOffsetFirstFree;
+    freeoffset = &gAresGlobal->gMessageData->_first_free;
 
     // set the destination char (message) to the first free character
-    message = *gAresGlobal->gMessageData + *freeoffset;
+    message = gAresGlobal->gMessageData->_data.get() + *freeoffset;
 
     // the last char we're resting on gets turned into an end char, since this should be the last message
     *message = kMessageEndChar;
@@ -763,7 +747,8 @@ void DrawMessageScreen( long byUnits)
 #ifdef kUseMessage
     Str255          tString;
     unsigned char   *anyChar, *dChar, *tLen;
-    long            *firstoffset, offset;
+    int32_t* firstoffset;
+    int32_t offset;
 
     // increase the amount of time current message has been shown
     gAresGlobal->gMessageTimeCount += byUnits;
@@ -773,8 +758,8 @@ void DrawMessageScreen( long byUnits)
     {
         gAresGlobal->gMessageTimeCount = 0;
         // get the offset to the first current char
-        firstoffset = reinterpret_cast<long *>(*gAresGlobal->gMessageData) + kLongOffsetFirstChar;
-        anyChar = *gAresGlobal->gMessageData + *firstoffset;
+        firstoffset = &gAresGlobal->gMessageData->_first_char;
+        anyChar = gAresGlobal->gMessageData->_data.get() + *firstoffset;
         if ( *anyChar != kMessageEndChar)
         {
             offset = *firstoffset;
@@ -788,13 +773,12 @@ void DrawMessageScreen( long byUnits)
                 offset++;
 
                 // if the offset == the length of our data (in chars) then wrap around
-                if (static_cast<uint32_t>(offset) >= kAnyCharLastChar)
-                {
+                if (implicit_cast<uint32_t>(offset) >= kMaxMessageLength) {
                     // reset offset to first char data (after the two longs of offsets)
                     offset = kAnyCharOffsetStart;
 
                     // reset the destination char to the first free char
-                    anyChar = *gAresGlobal->gMessageData + offset;
+                    anyChar = gAresGlobal->gMessageData->_data.get() + offset;
                 }
             } while (( *anyChar != kMessageSeparateChar) && ( *anyChar != kMessageEndChar));
             *firstoffset = offset;
@@ -804,8 +788,8 @@ void DrawMessageScreen( long byUnits)
     mSetDirectFont( kTacticalFontNum);
 
     // get the offset to the first current char
-    firstoffset = reinterpret_cast<long *>(*gAresGlobal->gMessageData) + kLongOffsetFirstChar;
-    anyChar = *gAresGlobal->gMessageData + *firstoffset;
+    firstoffset = &gAresGlobal->gMessageData->_first_char;
+    anyChar = gAresGlobal->gMessageData->_data.get() + *firstoffset;
     if ( *anyChar != kMessageEndChar)
     {
         tLen = dChar = tString;
@@ -822,13 +806,13 @@ void DrawMessageScreen( long byUnits)
             offset++;
 
             // if the offset == the length of our data (in chars) then wrap around
-            if (static_cast<uint32_t>(offset) >= kAnyCharLastChar)
+            if (offset >= kMaxMessageLength)
             {
                 // reset offset to first char data (after the two longs of offsets)
                 offset = kAnyCharOffsetStart;
 
                 // reset the destination char to the first free char
-                anyChar = *gAresGlobal->gMessageData + offset;
+                anyChar = gAresGlobal->gMessageData->_data.get() + offset;
             }
             *dChar = *anyChar;
             dChar++;
