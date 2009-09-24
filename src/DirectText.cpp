@@ -159,17 +159,18 @@ int InitDirectText() {
 
     for (int i = 0; i < kFourBitSize; i++) {
         (*gFourBitTable)[i] = 0;
+        char* bytes = reinterpret_cast<char*>(*gFourBitTable + i);
         if (i & 0x08) {
-            (*gFourBitTable)[i] |= 0xFF000000;
+            bytes[0] = 0xFF;
         }
         if (i & 0x04) {
-            (*gFourBitTable)[i] |= 0x00FF0000;
+            bytes[1] = 0xFF;
         }
         if (i & 0x02) {
-            (*gFourBitTable)[i] |= 0x0000FF00;
+            bytes[2] = 0xFF;
         }
         if (i & 0x01) {
-            (*gFourBitTable)[i] |= 0x000000FF;
+            bytes[3] = 0xFF;
         }
     }
 
