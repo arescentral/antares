@@ -33,6 +33,30 @@ class VncServerException : public std::exception { };
 
 namespace {
 
+class SocketBinaryReader : public BinaryReader {
+  public:
+    SocketBinaryReader(int fd)
+        : _fd(fd) { }
+
+  protected:
+    virtual void read_bytes(char* bytes, size_t len) {
+        while (_buffer.size() < len) {
+            char more[1024];
+            ssize_t recd = recv(_fd, more, 1024, 0);
+            if (recd <= 0) {
+                throw VncServerException();
+            }
+            _buffer.append(more, recd);
+        }
+        memcpy(bytes, _buffer.c_str(), len);
+        _buffer = _buffer.substr(len);
+    }
+
+  private:
+    int _fd;
+    std::string _buffer;
+};
+
 class SocketBinaryWriter : public BinaryWriter {
   public:
     SocketBinaryWriter(int fd)
@@ -98,20 +122,6 @@ int accept_on(int sock) {
     return fd;
 }
 
-template <typename T>
-void recv_from(int fd, T* t) {
-    char* data = reinterpret_cast<char*>(t);
-    int len = sizeof(T);
-    while (len > 0) {
-        int n = recv(fd, data, len, 0);
-        if (n <= 0) {
-            throw VncServerException();
-        }
-        data += n;
-        len -= n;
-    }
-}
-
 // Common Messages.
 
 struct PixelFormat {
@@ -126,6 +136,20 @@ struct PixelFormat {
     uint8_t green_shift;
     uint8_t blue_shift;
     uint8_t unused[3];
+
+    void read(BinaryReader* bin) {
+        bin->read(&bits_per_pixel);
+        bin->read(&depth);
+        bin->read(&big_endian);
+        bin->read(&true_color);
+        bin->read(&red_max);
+        bin->read(&green_max);
+        bin->read(&blue_max);
+        bin->read(&red_shift);
+        bin->read(&green_shift);
+        bin->read(&blue_shift);
+        bin->discard(3);
+    }
 
     void write(BinaryWriter* bin) const {
         bin->write(bits_per_pixel);
@@ -147,6 +171,10 @@ struct PixelFormat {
 struct ProtocolVersion {
     char version[12];
 
+    void read(BinaryReader* bin) {
+        bin->read(version, 12);
+    }
+
     void write(BinaryWriter* bin) const {
         bin->write(version, 12);
     }
@@ -155,6 +183,10 @@ struct ProtocolVersion {
 struct SecurityMessage {
     uint8_t number_of_security_types;
 
+    void read(BinaryReader* bin) {
+        bin->read(&number_of_security_types);
+    }
+
     void write(BinaryWriter* bin) const {
         bin->write(number_of_security_types);
     }
@@ -162,6 +194,10 @@ struct SecurityMessage {
 
 struct SecurityResultMessage {
     uint32_t status;
+
+    void read(BinaryReader* bin) {
+        bin->read(&status);
+    }
 
     void write(BinaryWriter* bin) const {
         bin->write(status);
@@ -173,6 +209,10 @@ struct SecurityResultMessage {
 struct ClientInitMessage {
     uint8_t shared_flag;
 
+    void read(BinaryReader* bin) {
+        bin->read(&shared_flag);
+    }
+
     void write(BinaryWriter* bin) const {
         bin->write(shared_flag);
     }
@@ -183,6 +223,13 @@ struct ServerInitMessage {
     uint16_t height;
     PixelFormat format;
     uint32_t name_length;
+
+    void read(BinaryReader* bin) {
+        bin->read(&width);
+        bin->read(&height);
+        bin->read(&format);
+        bin->read(&name_length);
+    }
 
     void write(BinaryWriter* bin) const {
         bin->write(width);
@@ -204,39 +251,60 @@ enum ClientToServerMessageType {
 };
 
 struct SetPixelFormatMessage {
-    uint8_t message_type;
+    // uint8_t message_type;
     uint8_t unused[3];
     PixelFormat format;
 
+    void read(BinaryReader* bin) {
+        // bin->read(&message_type);
+        bin->discard(3);
+        bin->read(&format);
+    }
+
     void write(BinaryWriter* bin) const {
-        bin->write(message_type);
+        // bin->write(message_type);
         bin->pad(3);
         bin->write(format);
     }
 };
 
 struct SetEncodingsMessage {
-    uint8_t message_type;
+    // uint8_t message_type;
     uint8_t unused;
     uint16_t number_of_encodings;
 
+    void read(BinaryReader* bin) {
+        // bin->read(&message_type);
+        bin->discard(1);
+        bin->read(&number_of_encodings);
+    }
+
     void write(BinaryWriter* bin) const {
-        bin->write(message_type);
+        // bin->write(message_type);
         bin->pad(1);
         bin->write(number_of_encodings);
     }
 };
 
 struct FramebufferUpdateRequestMessage {
-    uint8_t message_type;
+    // uint8_t message_type;
     uint8_t incremental;
     uint16_t x;
     uint16_t y;
     uint16_t w;
     uint16_t h;
 
+    void read(BinaryReader* bin) {
+        // bin->read(&message_type);
+        bin->read(&incremental);
+        bin->read(&x);
+        bin->read(&y);
+        bin->read(&w);
+        bin->read(&h);
+    }
+
     void write(BinaryWriter* bin) const {
-        bin->write(message_type);
+        // bin->write(message_type);
         bin->write(incremental);
         bin->write(x);
         bin->write(y);
@@ -246,13 +314,20 @@ struct FramebufferUpdateRequestMessage {
 };
 
 struct KeyEventMessage {
-    uint8_t message_type;
+    // uint8_t message_type;
     uint8_t down_flag;
     uint8_t unused[2];
     uint32_t key;
 
+    void read(BinaryReader* bin) {
+        // bin->read(&message_type);
+        bin->read(&down_flag);
+        bin->discard(2);
+        bin->read(&key);
+    }
+
     void write(BinaryWriter* bin) const {
-        bin->write(message_type);
+        // bin->write(message_type);
         bin->write(down_flag);
         bin->pad(2);
         bin->write(key);
@@ -260,13 +335,20 @@ struct KeyEventMessage {
 };
 
 struct PointerEventMessage {
-    uint8_t message_type;
+    // uint8_t message_type;
     uint8_t button_mask;
     uint16_t x_position;
     uint16_t y_position;
 
+    void read(BinaryReader* bin) {
+        // bin->read(&message_type);
+        bin->read(&button_mask);
+        bin->read(&x_position);
+        bin->read(&y_position);
+    }
+
     void write(BinaryWriter* bin) const {
-        bin->write(message_type);
+        // bin->write(message_type);
         bin->write(button_mask);
         bin->write(x_position);
         bin->write(y_position);
@@ -274,12 +356,18 @@ struct PointerEventMessage {
 };
 
 struct ClientCutTextMessage {
-    uint8_t message_type;
+    // uint8_t message_type;
     uint8_t unused[3];
     uint32_t length;
 
+    void read(BinaryReader* bin) {
+        // bin->read(&message_type);
+        bin->discard(3);
+        bin->read(&length);
+    }
+
     void write(BinaryWriter* bin) const {
-        bin->write(message_type);
+        // bin->write(message_type);
         bin->pad(3);
         bin->write(length);
     }
@@ -295,12 +383,18 @@ enum ServerToClientMessageType {
 };
 
 struct FramebufferUpdateMessage {
-    uint8_t message_type;
+    // uint8_t message_type;
     uint8_t padding;
     uint16_t number_of_rectangles;
 
+    void read(BinaryReader* bin) {
+        // bin->read(&message_type);
+        bin->discard(1);
+        bin->read(&number_of_rectangles);
+    }
+
     void write(BinaryWriter* bin) const {
-        bin->write(message_type);
+        // bin->write(message_type);
         bin->pad(1);
         bin->write(number_of_rectangles);
     }
@@ -313,6 +407,14 @@ struct FramebufferUpdateRectangle {
     uint16_t height;
     int32_t encoding_type;
 
+    void read(BinaryReader* bin) {
+        bin->read(&x_position);
+        bin->read(&y_position);
+        bin->read(&width);
+        bin->read(&height);
+        bin->read(&encoding_type);
+    }
+
     void write(BinaryWriter* bin) const {
         bin->write(x_position);
         bin->write(y_position);
@@ -323,13 +425,20 @@ struct FramebufferUpdateRectangle {
 };
 
 struct SetColorMapEntriesMessage {
-    uint8_t message_type;
+    // uint8_t message_type;
     uint8_t padding;
     uint16_t first_color;
     uint16_t number_of_colors;
 
+    void read(BinaryReader* bin) {
+        // bin->read(&message_type);
+        bin->discard(1);
+        bin->read(&first_color);
+        bin->read(&number_of_colors);
+    }
+
     void write(BinaryWriter* bin) const {
-        bin->write(message_type);
+        // bin->write(message_type);
         bin->pad(1);
         bin->write(first_color);
         bin->write(number_of_colors);
@@ -341,6 +450,12 @@ struct SetColorMapEntriesColor {
     uint16_t green;
     uint16_t blue;
 
+    void read(BinaryReader* bin) {
+        bin->read(&red);
+        bin->read(&green);
+        bin->read(&blue);
+    }
+
     void write(BinaryWriter* bin) const {
         bin->write(red);
         bin->write(green);
@@ -349,12 +464,18 @@ struct SetColorMapEntriesColor {
 };
 
 struct ServerCutTextMessage {
-    uint8_t message_type;
+    // uint8_t message_type;
     uint8_t unused[3];
     uint32_t length;
 
+    void read(BinaryReader* bin) {
+        // bin->read(&message_type);
+        bin->discard(3);
+        bin->read(&length);
+    }
+
     void write(BinaryWriter* bin) const {
-        bin->write(message_type);
+        // bin->write(message_type);
         bin->pad(3);
         bin->write(length);
     }
@@ -372,6 +493,13 @@ struct FramebufferPixel {
     uint8_t green;
     uint8_t blue;
 
+    void read(BinaryReader* bin) {
+        bin->discard(1);
+        bin->read(&red);
+        bin->read(&green);
+        bin->read(&blue);
+    }
+
     void write(BinaryWriter* bin) const {
         bin->pad(1);
         bin->write(red);
@@ -386,6 +514,7 @@ void* vnc_server(void*) {
     AutoClosedFd sock(listen_on(5901));
     AutoClosedFd stream(accept_on(sock.fd()));
 
+    SocketBinaryReader in(stream.fd());
     SocketBinaryWriter out(stream.fd());
 
     {
@@ -394,7 +523,7 @@ void* vnc_server(void*) {
         strncpy(version.version, "RFB 003.008\n", sizeof(ProtocolVersion));
         out.write(version);
         out.flush();
-        recv_from(stream.fd(), &version);
+        in.read(&version);
         if (strncmp(version.version, "RFB 003.008\n", sizeof(ProtocolVersion)) != 0) {
             throw VncServerException();
         }
@@ -410,7 +539,7 @@ void* vnc_server(void*) {
         out.flush();
 
         uint8_t selected_security;
-        recv_from(stream.fd(), &selected_security);
+        in.read(&selected_security);
         if (selected_security != '\1') {
             throw VncServerException();
         }
@@ -424,7 +553,7 @@ void* vnc_server(void*) {
     {
         // Initialize connection.
         ClientInitMessage client_init;
-        recv_from(stream.fd(), &client_init);  // Ignored.
+        in.read(&client_init);
 
         const char* const name = "Antares";
 
@@ -450,31 +579,32 @@ void* vnc_server(void*) {
 
     while (true) {
         uint8_t client_message_type;
-        recv(stream.fd(), &client_message_type, 1, MSG_PEEK);
+        in.read(&client_message_type);
         switch (client_message_type) {
         case SET_PIXEL_FORMAT:
             {
                 SetPixelFormatMessage msg;
-                recv_from(stream.fd(), &msg);
+                in.read(&msg);
             }
             break;
         case SET_ENCODINGS:
             {
                 SetEncodingsMessage msg;
-                recv_from(stream.fd(), &msg);
+                in.read(&msg);
                 for (int i = 0; i < msg.number_of_encodings; ++i) {
                     int32_t encoding_type;
-                    recv_from(stream.fd(), &encoding_type);
+                    in.read(&encoding_type);
                 }
             }
             break;
         case FRAMEBUFFER_UPDATE_REQUEST:
             {
                 FramebufferUpdateRequestMessage request;
-                recv_from(stream.fd(), &request);
+                in.read(&request);
 
                 FramebufferUpdateMessage response;
-                response.message_type = FRAMEBUFFER_UPDATE;
+                uint8_t server_message_type = FRAMEBUFFER_UPDATE;
+                out.write(server_message_type);
                 response.number_of_rectangles = 1;
 
                 FramebufferUpdateRectangle rect;
@@ -499,22 +629,22 @@ void* vnc_server(void*) {
         case KEY_EVENT:
             {
                 KeyEventMessage msg;
-                recv_from(stream.fd(), &msg);
+                in.read(&msg);
             }
             break;
         case POINTER_EVENT:
             {
                 PointerEventMessage msg;
-                recv_from(stream.fd(), &msg);
+                in.read(&msg);
             }
             break;
         case CLIENT_CUT_TEXT:
             {
                 ClientCutTextMessage msg;
-                recv_from(stream.fd(), &msg);
+                in.read(&msg);
                 for (size_t i = 0; i < msg.length; ++i) {
                     char c;
-                    recv_from(stream.fd(), &c);
+                    in.read(&c, 1);
                 }
             }
             break;
