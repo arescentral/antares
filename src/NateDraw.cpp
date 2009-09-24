@@ -19,6 +19,8 @@
 
 #include "NateDraw.hpp"
 
+#include <algorithm>
+
 #include "BinaryStream.hpp"
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
@@ -145,507 +147,98 @@ inline void mDashVerticalRun(
     dbyte += xAdvance;
 }
 
+namespace {
+
+Rect from_origin(const Rect& r) {
+    Rect result = {
+        0,
+        0,
+        r.right - r.left,
+        r.bottom - r.top,
+    };
+    return result;
+}
+
+bool intersects(const Rect& contained, const Rect& container) {
+    return ((contained.right > container.left)
+            && (contained.left < container.right)
+            && (contained.bottom > container.top)
+            && (contained.top < container.bottom));
+}
+
+void clip_rect(Rect* contained, const Rect& container) {
+    contained->left = std::max(contained->left, container.left);
+    contained->top = std::max(contained->top, container.top);
+    contained->right = std::min(contained->right, container.right);
+    contained->bottom = std::min(contained->bottom, container.bottom);
+}
+
+}  // namespace
+
 // DrawNateRect: Direct-draws a rectangle
 // hoff & voff are the h & v offsets frop the left and top edges of the destination map
 // (ie the top & right edges of the destination window)
 // CLIPS to destPix->bounds, NOT counting hoff & voff
 
-void DrawNateRect( PixMap *destPix, Rect *destRect, long hoff, long voff, unsigned char color)
+void DrawNateRect(PixMap* destPix, Rect* destRect, long hoff, long voff, unsigned char color) {
+    assert(hoff == 0);
+    assert(voff == 0);
 
-{
-    long            *dlong, drowPlus, x, y, colorlong, leftBytes, rightBytes, right;
-    unsigned char   *dbyte;
-
-    colorlong = color;
-    colorlong |= colorlong << 8;
-    colorlong |= colorlong << 8;
-    colorlong |= colorlong << 8;
-
-/*
-// our destRect is always assuming an origin of 0,0 right?  So we have to fix this:
-    if (( destRect->right <= destPix->bounds.left) || ( destRect->left >= destPix->bounds.right)
-        || ( destRect->bottom <= destPix->bounds.top) || ( destRect->top >= destPix->bounds.bottom))
-    {
+    if (!intersects(*destRect, from_origin(destPix->bounds))) {
         destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
         return;
     }
+    clip_rect(destRect, from_origin(destPix->bounds));
 
-*/
-    if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds.right - destPix->bounds.left))
-        || ( destRect->bottom <= 0) || ( destRect->top >= (destPix->bounds.bottom - destPix->bounds.top)))
-    {
-        destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
+    int32_t width = destRect->right - destRect->left;
+    if (width < 0) {
         return;
     }
 
-    drowPlus = destPix->rowBytes & 0x3fff;
-
-    if ( destRect->left < 0)
-        destRect->left = 0;
-    if ( destRect->right > ( destPix->bounds.right - destPix->bounds.left))
-        destRect->right =( destPix->bounds.right - destPix->bounds.left);
-    if ( destRect->top < 0)
-        destRect->top = 0;
-    if ( destRect->bottom > (destPix->bounds.bottom - destPix->bounds.top))
-        destRect->bottom = (destPix->bounds.bottom - destPix->bounds.top);
-
-    leftBytes = destRect->right - destRect->left;
-    if ( leftBytes > 4)
-    {
-        leftBytes = destRect->left + 4;
-        leftBytes -= leftBytes & 0x00000003;
-
-        if ( leftBytes == destRect->left) leftBytes = 0;
-        else leftBytes = leftBytes - destRect->left;
-
-        rightBytes = destRect->right;
-        rightBytes -= rightBytes & 0x00000003;
-
-        if ( rightBytes < destRect->right) rightBytes = destRect->right - rightBytes;
-        else rightBytes = 0;
-
-        dbyte = destPix->baseAddr + (destRect->top + voff) * drowPlus +
-                    destRect->left + hoff;
-
-        drowPlus = drowPlus - (destRect->right - destRect->left);
-
-        y = destRect->bottom - destRect->top;
-        right = destRect->right;
-        right -= destRect->left + leftBytes + rightBytes;
-        right >>= 2;
-
-        while ( y-- > 0)
-        {
-            x = leftBytes;
-            while ( x-- > 0)
-            {
-#ifdef kByteLevelTesting
-                TestByte( (char *)dbyte, destPix, "\pRECTBYTE");
-#endif
-                *dbyte++ = color;
-            }
-
-            dlong = reinterpret_cast<long *>(dbyte);
-            x = right;
-            while ( x-- > 0)
-            {
-#ifdef kByteLevelTesting
-                TestByte( (char *)dlong, destPix, "\pRECTLONG");
-#endif
-                *dlong++ = colorlong;
-            }
-
-            dbyte = reinterpret_cast<unsigned char *>(dlong);
-            x = rightBytes;
-            while ( x-- > 0)
-            {
-#ifdef kByteLevelTesting
-                TestByte( (char *)dbyte, destPix, "\pRECTBYTE2");
-#endif
-                *dbyte++ = color;
-            }
-
-            dbyte += drowPlus;
-        }
-    } else
-    {
-        dbyte = destPix->baseAddr + (destRect->top + voff) * drowPlus +
-                    destRect->left + hoff;
-
-        drowPlus = drowPlus - leftBytes;
-        y = destRect->bottom - destRect->top;
-        while ( y-- > 0)
-        {
-            x = leftBytes;
-            while ( x-- > 0)
-            {
-#ifdef kByteLevelTesting
-                TestByte( (char *)dbyte, destPix, "\pRECTBYTE3");
-#endif
-                *dbyte++ = color;
-            }
-            dbyte += drowPlus;
-        }
+    int32_t drowPlus = destPix->rowBytes & 0x3fff;
+    unsigned char* bytes = destPix->baseAddr + destRect->top * drowPlus + destRect->left;
+    for (int i = destRect->top; i < destRect->bottom; ++i) {
+        memset(bytes, color, width);
+        bytes += drowPlus;
     }
 }
 
-void DrawNateRectVScan( PixMap *destPix, Rect *destRect, long hoff, long voff, unsigned char color)
+void DrawNateRectVScan( PixMap *destPix, Rect *destRect, long hoff, long voff,
+        unsigned char color) {
+    assert(hoff == 0);
+    assert(voff == 0);
 
-{
-    long            *dlong, drowPlus, x, y, colorlong, leftBytes, rightBytes, right,
-                    longMask = 0xff00ff00;
-    unsigned char   *dbyte, leftMask = 0xff, rightMask = 0xff, leftMaskReset = 0xff;
-
-    colorlong = color;
-    colorlong |= colorlong << 8;
-    colorlong |= colorlong << 8;
-    colorlong |= colorlong << 8;
-
-/*
-// our destRect is always assuming an origin of 0,0 right?  So we have to fix this:
-    if (( destRect->right <= destPix->bounds.left) || ( destRect->left >= destPix->bounds.right)
-        || ( destRect->bottom <= destPix->bounds.top) || ( destRect->top >= destPix->bounds.bottom))
-    {
+    if (!intersects(*destRect, from_origin(destPix->bounds))) {
         destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
         return;
     }
+    clip_rect(destRect, from_origin(destPix->bounds));
 
-*/
-    if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds.right - destPix->bounds.left))
-        || ( destRect->bottom <= 0) || ( destRect->top >= (destPix->bounds.bottom - destPix->bounds.top)))
-    {
-        destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
+    if (destRect->right <= destRect->left) {
         return;
     }
 
-    drowPlus = destPix->rowBytes & 0x3fff;
-
-    if ( destRect->left < 0)
-        destRect->left = 0;
-    if ( destRect->right > ( destPix->bounds.right - destPix->bounds.left))
-        destRect->right =( destPix->bounds.right - destPix->bounds.left);
-    if ( destRect->top < 0)
-        destRect->top = 0;
-    if ( destRect->bottom > (destPix->bounds.bottom - destPix->bounds.top))
-        destRect->bottom = (destPix->bounds.bottom - destPix->bounds.top);
-
-    if (( (destRect->left & destRect->top) & 0x01) ||
-        (!((destRect->left & 0x01) | destRect->top &0x01)))
-    {
-        leftMask ^= 0xff;
-        longMask ^= 0xffffffff;
-        rightMask ^= 0xff;
-    }
-
-    leftBytes = destRect->right - destRect->left;
-    if ( leftBytes > 4)
-    {
-        leftBytes = destRect->left + 4;
-        leftBytes -= leftBytes & 0x00000003;
-
-        if ( leftBytes == destRect->left) leftBytes = 0;
-        else leftBytes = leftBytes - destRect->left;
-
-        if ( leftBytes & 0x01)
-        {
-            longMask ^= 0xffffffff;
-            rightMask ^= 0xff;
-            leftMaskReset = 0x00;
+    int32_t drowPlus = destPix->rowBytes & 0x3fff;
+    unsigned char* bytes = destPix->baseAddr + destRect->top * drowPlus;
+    for (int i = destRect->top; i < destRect->bottom; ++i) {
+        for (int j = destRect->left; j < destRect->right; ++j) {
+            if ((i ^ j) & 0x1) {
+                bytes[j] = color;
+            }
         }
-
-        rightBytes = destRect->right;
-        rightBytes -= rightBytes & 0x00000003;
-
-        if ( rightBytes < destRect->right) rightBytes = destRect->right - rightBytes;
-        else rightBytes = 0;
-
-        dbyte = destPix->baseAddr + (destRect->top + voff) * drowPlus +
-                    destRect->left + hoff;
-
-        drowPlus = drowPlus - (destRect->right - destRect->left);
-
-        y = destRect->bottom - destRect->top;
-        right = destRect->right;
-        right -= destRect->left + leftBytes + rightBytes;
-        right >>= 2;
-
-        while ( y-- > 0)
-        {
-            x = leftBytes;
-            while ( x-- > 0)
-            {
-#ifdef kByteLevelTesting
-                TestByte( (char *)dbyte, destPix, "\pRECTBYTE");
-#endif
-                *dbyte = (color & leftMask) | ( *dbyte & ~leftMask);
-                leftMask ^= 0xff;
-                dbyte++;
-            }
-            leftMask ^= leftMaskReset;
-
-            dlong = reinterpret_cast<long *>(dbyte);
-            x = right;
-            while ( x-- > 0)
-            {
-#ifdef kByteLevelTesting
-                TestByte( (char *)dlong, destPix, "\pRECTLONG");
-#endif
-                *dlong = (colorlong & longMask) | (*dlong & ~longMask);
-                dlong++;
-            }
-            longMask ^= 0xffffffff;
-            rightMask = longMask & 0x000000ff;
-
-            dbyte = reinterpret_cast<unsigned char *>(dlong);
-            x = rightBytes;
-            while ( x-- > 0)
-            {
-#ifdef kByteLevelTesting
-                TestByte( (char *)dbyte, destPix, "\pRECTBYTE2");
-#endif
-                *dbyte = (color & rightMask) | (*dbyte & ~rightMask);
-                dbyte++;
-                rightMask ^= 0xff;
-            }
-
-            dbyte += drowPlus;
-        }
-    } else
-    {
-        dbyte = destPix->baseAddr + (destRect->top + voff) * drowPlus +
-                    destRect->left + hoff;
-
-        drowPlus = drowPlus - leftBytes;
-        y = destRect->bottom - destRect->top;
-        while ( y-- > 0)
-        {
-            x = leftBytes;
-            while ( x-- > 0)
-            {
-#ifdef kByteLevelTesting
-                TestByte( (char *)dbyte, destPix, "\pRECTBYTE3");
-#endif
-                *dbyte++ = color;
-            }
-            dbyte += drowPlus;
-        }
+        bytes += drowPlus;
     }
 }
 
-void DrawNateRectClipped( PixMap *destPix, Rect *destRect, Rect *clipRect, long hoff, long voff,
-                        unsigned char color)
-
-{
-    long            *dlong, drowPlus, x, y, colorlong, leftBytes, rightBytes, right;
-    unsigned char   *dbyte;
-
-    colorlong = color;
-    colorlong |= colorlong << 8;
-    colorlong |= colorlong << 8;
-    colorlong |= colorlong << 8;
-
-/*  if (( destRect->right <= destPix->bounds.left) || ( destRect->left >= destPix->bounds.right)
-        || ( destRect->bottom <= destPix->bounds.top) || ( destRect->top >= destPix->bounds.bottom))
-    {
+void DrawNateRectClipped(PixMap* destPix, Rect* destRect, Rect* clipRect, long hoff, long voff,
+        unsigned char color) {
+    if (!intersects(*destRect, from_origin(destPix->bounds))) {
         destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
         return;
     }
-*/
-    if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds.right - destPix->bounds.left))
-        || ( destRect->bottom <= 0) || ( destRect->top >= (destPix->bounds.bottom - destPix->bounds.top)))
-    {
-        destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
-        return;
-    }
+    clip_rect(destRect, *clipRect);
 
-    drowPlus = destPix->rowBytes & 0x3fff;
-
-    if ( destRect->left < clipRect->left)
-        destRect->left = clipRect->left;
-    if ( destRect->right > clipRect->right)
-        destRect->right = clipRect->right;
-    if ( destRect->top < clipRect->top)
-        destRect->top = clipRect->top;
-    if ( destRect->bottom > clipRect->bottom)
-        destRect->bottom = clipRect->bottom;
-
-    leftBytes = destRect->right - destRect->left;
-    if ( leftBytes > 4)
-    {
-        leftBytes = destRect->left + 4;
-        leftBytes -= leftBytes & 0x00000003;
-
-        if ( leftBytes == destRect->left) leftBytes = 0;
-        else leftBytes = leftBytes - destRect->left;
-
-        rightBytes = destRect->right;
-        rightBytes -= rightBytes & 0x00000003;
-
-        if ( rightBytes < destRect->right) rightBytes = destRect->right - rightBytes;
-        else rightBytes = 0;
-
-        dbyte = destPix->baseAddr + (destRect->top + voff) * drowPlus +
-                    destRect->left + hoff;
-
-        drowPlus = drowPlus - (destRect->right - destRect->left);
-
-        y = destRect->bottom - destRect->top;
-        right = destRect->right;
-        right -= destRect->left + leftBytes + rightBytes;
-        right >>= 2;
-
-        while ( y-- > 0)
-        {
-            x = leftBytes;
-            while ( x-- > 0)
-            {
-#ifdef kByteLevelTesting
-                TestByte( (char *)dbyte, destPix, "\pRECTBYTE");
-#endif
-                *dbyte++ = color;
-            }
-
-            dlong = reinterpret_cast<long *>(dbyte);
-            x = right;
-            while ( x-- > 0)
-            {
-#ifdef kByteLevelTesting
-                TestByte( (char *)dlong, destPix, "\pRECTLONG");
-#endif
-                *dlong++ = colorlong;
-            }
-
-            dbyte = reinterpret_cast<unsigned char *>(dlong);
-            x = rightBytes;
-            while ( x-- > 0)
-            {
-#ifdef kByteLevelTesting
-                TestByte( (char *)dbyte, destPix, "\pRECTBYTE2");
-#endif
-                *dbyte++ = color;
-            }
-
-            dbyte += drowPlus;
-        }
-    } else
-    {
-        dbyte = destPix->baseAddr + (destRect->top + voff) * drowPlus +
-                    destRect->left + hoff;
-
-        drowPlus = drowPlus - leftBytes;
-        y = destRect->bottom - destRect->top;
-        while ( y-- > 0)
-        {
-            x = leftBytes;
-            while ( x-- > 0)
-            {
-#ifdef kByteLevelTesting
-                TestByte( (char *)dbyte, destPix, "\pRECTBYTE3");
-#endif
-                *dbyte++ = color;
-            }
-            dbyte += drowPlus;
-        }
-    }
-}
-
-void DrawNateRectVScanClipped( PixMap *destPix, Rect *destRect, Rect *clipRect, long hoff, long voff,
-                        unsigned char color)
-
-{
-    long            *dlong, drowPlus, x, y, colorlong, leftBytes, rightBytes, right;
-    unsigned char   *dbyte;
-
-    colorlong = color;
-    colorlong |= colorlong << 8;
-    colorlong |= colorlong << 8;
-    colorlong |= colorlong << 8;
-
-/*  if (( destRect->right <= destPix->bounds.left) || ( destRect->left >= destPix->bounds.right)
-        || ( destRect->bottom <= destPix->bounds.top) || ( destRect->top >= destPix->bounds.bottom))
-    {
-        destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
-        return;
-    }
-*/
-    if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds.right - destPix->bounds.left))
-        || ( destRect->bottom <= 0) || ( destRect->top >= (destPix->bounds.bottom - destPix->bounds.top)))
-    {
-        destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
-        return;
-    }
-
-    drowPlus = destPix->rowBytes & 0x3fff;
-
-    if ( destRect->left < clipRect->left)
-        destRect->left = clipRect->left;
-    if ( destRect->right > clipRect->right)
-        destRect->right = clipRect->right;
-    if ( destRect->top < clipRect->top)
-        destRect->top = clipRect->top;
-    if ( destRect->bottom > clipRect->bottom)
-        destRect->bottom = clipRect->bottom;
-
-    leftBytes = destRect->right - destRect->left;
-    if ( leftBytes > 4)
-    {
-        leftBytes = destRect->left + 4;
-        leftBytes -= leftBytes & 0x00000003;
-
-        if ( leftBytes == destRect->left) leftBytes = 0;
-        else leftBytes = leftBytes - destRect->left;
-
-        rightBytes = destRect->right;
-        rightBytes -= rightBytes & 0x00000003;
-
-        if ( rightBytes < destRect->right) rightBytes = destRect->right - rightBytes;
-        else rightBytes = 0;
-
-        dbyte = destPix->baseAddr + (destRect->top + voff) * drowPlus +
-                    destRect->left + hoff;
-
-        drowPlus = drowPlus - (destRect->right - destRect->left);
-
-        y = destRect->bottom - destRect->top;
-        right = destRect->right;
-        right -= destRect->left + leftBytes + rightBytes;
-        right >>= 2;
-
-        while ( y-- > 0)
-        {
-            y--;
-            x = leftBytes;
-            while ( x-- > 0)
-            {
-#ifdef kByteLevelTesting
-                TestByte( (char *)dbyte, destPix, "\pRECTBYTE");
-#endif
-                *dbyte++ = color;
-            }
-
-            dlong = reinterpret_cast<long *>(dbyte);
-            x = right;
-            while ( x-- > 0)
-            {
-#ifdef kByteLevelTesting
-                TestByte( (char *)dlong, destPix, "\pRECTLONG");
-#endif
-                *dlong++ = colorlong;
-            }
-
-            dbyte = reinterpret_cast<unsigned char *>(dlong);
-            x = rightBytes;
-            while ( x-- > 0)
-            {
-#ifdef kByteLevelTesting
-                TestByte( (char *)dbyte, destPix, "\pRECTBYTE2");
-#endif
-                *dbyte++ = color;
-            }
-
-            dbyte += drowPlus + (destPix->rowBytes & 0x3fff);
-        }
-    } else
-    {
-        dbyte = destPix->baseAddr + (destRect->top + voff) * drowPlus +
-                    destRect->left + hoff;
-
-        drowPlus = drowPlus - leftBytes;
-        y = destRect->bottom - destRect->top;
-        while ( y-- > 0)
-        {
-            y--;
-            x = leftBytes;
-            while ( x-- > 0)
-            {
-#ifdef kByteLevelTesting
-                TestByte( (char *)dbyte, destPix, "\pRECTBYTE3");
-#endif
-                *dbyte++ = color;
-            }
-            dbyte += drowPlus + (destPix->rowBytes & 0x3fff);
-        }
-    }
+    DrawNateRect(destPix, destRect, hoff, voff, color);
 }
 
 // must be square

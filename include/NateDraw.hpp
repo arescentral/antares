@@ -71,7 +71,6 @@ struct longPointType {
 void DrawNateRect( PixMap *, Rect *, long, long, unsigned char);
 void DrawNateRectVScan( PixMap *, Rect *, long, long, unsigned char);
 void DrawNateRectClipped( PixMap *, Rect *, Rect *, long, long, unsigned char);
-void DrawNateRectVScanClipped( PixMap *, Rect *, Rect *, long, long, unsigned char);
 
 void DrawNateTriangleUpClipped( PixMap *, Rect *, Rect *, long, long, unsigned char);
 void DrawNatePlusClipped( PixMap *, Rect *, Rect *, long, long, unsigned char);
