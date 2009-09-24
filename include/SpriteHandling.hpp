@@ -85,8 +85,8 @@ struct spritePix {
     int         width;
     int         height;
     int         type;
-    Handle      data;
-    };
+    unsigned char* data;
+};
 
 //typedef  spritePix;
 

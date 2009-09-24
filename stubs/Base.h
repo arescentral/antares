@@ -20,7 +20,6 @@ enum {
 
     nullEvent = 0,
     everyEvent = 300,
-    updateEvt = 301,
     mouseDown = 303,
     mouseUp = 304,
     keyDown = 305,

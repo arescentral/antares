@@ -191,7 +191,6 @@ void DrawSpriteCursorSprite( longRect *clipRect)
     PixMapHandle    pixMap, savePixBase;
     longRect        sRect, tc;
     spritePix       aSpritePix;
-    unsigned char   *pixData;
     TypedHandle<natePixType> pixTable;
     int             whichShape;
     Rect            tRect;
@@ -230,9 +229,7 @@ void DrawSpriteCursorSprite( longRect *clipRect)
     {
         pixTable = gSpriteCursor->sprite.table;
         whichShape = gSpriteCursor->sprite.whichShape;
-        pixData = GetNatePixTableNatePixData( pixTable, whichShape);
-
-        aSpritePix.data = &pixData;
+        aSpritePix.data = GetNatePixTableNatePixData( pixTable, whichShape);
         aSpritePix.center.h = GetNatePixTableNatePixHRef( pixTable, whichShape);
         aSpritePix.center.v = GetNatePixTableNatePixVRef( pixTable, whichShape);
         aSpritePix.width = GetNatePixTableNatePixWidth( pixTable, whichShape);

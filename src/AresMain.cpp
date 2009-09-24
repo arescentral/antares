@@ -230,7 +230,6 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
     Boolean                 skipFading = false;
     Point                   tpoint;
     EventRecord             theEvent;
-    CWindowPtr              whichWindow;
     scoped_ptr<ColorTable>  theClut;
     Size                    freeMemory = 0;
     Str255                  tempString, userName;
@@ -611,14 +610,6 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
             do
             {
                 Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
-                switch ( theEvent.what)
-                {
-                    case updateEvt:
-                        whichWindow = reinterpret_cast<CWindowPtr>(theEvent.message);
-                        BeginUpdate( whichWindow);
-                        EndUpdate( whichWindow);
-                        break;
-                }
             } while ( theEvent.what != nullEvent);
 
 //          WaitForAnyEvent();
@@ -678,23 +669,6 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
             do
             {
                 Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
-                switch ( theEvent.what)
-                {
-                    case updateEvt:
-                        whichWindow = reinterpret_cast<CWindowPtr>(theEvent.message);
-                        BeginUpdate( whichWindow);
-                        if ( whichWindow == gAresGlobal->gBackWindow)
-                        {
-                            MacSetPort( gAresGlobal->gBackWindow);
-                            MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
-                        } else if ( whichWindow == gTheWindow)
-                        {
-                            MacSetPort( gTheWindow);
-                            MacFillRect(  &(gTheWindow->portRect), &qd.black);
-                        }
-                        EndUpdate( whichWindow);
-                        break;
-                }
             } while ( theEvent.what != nullEvent);
             MacSetPort ( gTheWindow);
             MacShowCursor();
@@ -786,24 +760,6 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
             do
             {
                 Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
-
-                switch ( theEvent.what)
-                {
-                    case updateEvt:
-                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
-                        BeginUpdate( whichWindow);
-                        if ( whichWindow == gAresGlobal->gBackWindow)
-                        {
-                            MacSetPort( gAresGlobal->gBackWindow);
-                            MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
-                        } else if ( whichWindow == gTheWindow)
-                        {
-                            MacSetPort( gTheWindow);
-                            DrawTitleScreen();
-                        }
-                        EndUpdate( whichWindow);
-                        break;
-                }
             } while ( theEvent.what != nullEvent);
 
                             MacSetPort( gTheWindow);

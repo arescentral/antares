@@ -201,7 +201,6 @@ Boolean Key_Setup_Screen_Do( void)
                             flashOn = false;
     EventRecord             theEvent;
     KeyMap                  keyMap;
-    CWindowPtr              whichWindow;
     preferencesDataType     *prefsData = nil;
     unsigned long           options = gAresGlobal->gOptions;
     tempKeyControlType      *tempKeyControls;
@@ -349,31 +348,6 @@ Boolean Key_Setup_Screen_Do( void)
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
-                        break;
-                    case updateEvt:
-                        whichWindow = reinterpret_cast< CWindowPtr>(theEvent.message);
-
-                        if ( whichWindow == gTheWindow)
-                        {
-                            BeginUpdate( reinterpret_cast<WindowPtr>(whichWindow));
-                                MacSetPort(gTheWindow);
-                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
-                            EndUpdate(whichWindow);
-                            break;
-                            EndUpdate(whichWindow);
-                        } else if ( whichWindow == gAresGlobal->gBackWindow)
-                        {
-                            BeginUpdate(whichWindow);
-                                MacSetPort(gAresGlobal->gBackWindow);
-                                MacFillRect(&(gAresGlobal->gBackWindow->portRect), &qd.black);
-                            EndUpdate(whichWindow);
-                        } else
-                        {
-                            BeginUpdate(whichWindow);
-                            EndUpdate(whichWindow);
-                        }
-                        MacSetPort(gTheWindow);
-
                         break;
 
                     case mouseDown:

@@ -386,8 +386,6 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
     char                    whichChar;
     mainScreenResultType    result = kNullResult;
     long                    startDemoTime = TickCount();
-    CWindowPtr              whichWindow;
-
 
     *demoLevel = -1;
     FlushEvents(everyEvent, 0);
@@ -528,33 +526,6 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
 
                     whichItem = InterfaceKeyDown( theEvent.message);
                     break;
-
-                case updateEvt:
-                    startDemoTime = TickCount();
-                    whichWindow = reinterpret_cast<CWindowPtr>(theEvent.message);
-
-                    if ( whichWindow == gTheWindow)
-                    {
-                        BeginUpdate( whichWindow);
-                            MacSetPort( gTheWindow);
-                            CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
-                        EndUpdate( whichWindow);
-                        break;
-                        EndUpdate( whichWindow);
-                    } else if ( whichWindow == gAresGlobal->gBackWindow)
-                    {
-                        BeginUpdate( whichWindow);
-                            MacSetPort( gAresGlobal->gBackWindow);
-                            MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
-                        EndUpdate( whichWindow);
-                    } else
-                    {
-                        BeginUpdate( whichWindow);
-                        EndUpdate( whichWindow);
-                    }
-                    MacSetPort( gTheWindow);
-                    break;
-
             }
             switch ( whichItem)
             {
@@ -646,7 +617,6 @@ void DoAboutAresInterface( void)
     Boolean                 done = FALSE;
     EventRecord             theEvent;
     char                    whichChar;
-    CWindowPtr              whichWindow;
 
     FlushEvents(everyEvent, 0);
     BlackenWindow();
@@ -682,32 +652,6 @@ void DoAboutAresInterface( void)
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
                         break;
-                    case updateEvt:
-                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
-
-                        if ( whichWindow == gTheWindow)
-                        {
-                            BeginUpdate( whichWindow);
-                                MacSetPort( gTheWindow);
-                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
-                            EndUpdate( whichWindow);
-                            break;
-                            EndUpdate( whichWindow);
-                        } else if ( whichWindow == gAresGlobal->gBackWindow)
-                        {
-                            BeginUpdate( whichWindow);
-                                MacSetPort( gAresGlobal->gBackWindow);
-                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
-                            EndUpdate( whichWindow);
-                        } else
-                        {
-                            BeginUpdate( whichWindow);
-                            EndUpdate( whichWindow);
-                        }
-                        MacSetPort( gTheWindow);
-
-                        break;
-
 
                     case mouseDown:
                         where = theEvent.where;
@@ -890,7 +834,6 @@ short DoPlayAgain( Boolean allowResume, Boolean allowSkip) // return 0 = quit, 1
     short                   whichItem, result = 0;
     EventRecord             theEvent;
     char                    whichChar;
-    CWindowPtr              whichWindow;
 
 //  BlackenWindow();
 
@@ -950,32 +893,6 @@ short DoPlayAgain( Boolean allowResume, Boolean allowSkip) // return 0 = quit, 1
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
                         break;
-                    case updateEvt:
-                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
-
-                        if ( whichWindow == gTheWindow)
-                        {
-                            BeginUpdate( whichWindow);
-                                MacSetPort( gTheWindow);
-                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
-                            EndUpdate( whichWindow);
-                            break;
-                            EndUpdate( whichWindow);
-                        } else if ( whichWindow == gAresGlobal->gBackWindow)
-                        {
-                            BeginUpdate( whichWindow);
-                                MacSetPort( gAresGlobal->gBackWindow);
-                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
-                            EndUpdate( whichWindow);
-                        } else
-                        {
-                            BeginUpdate( whichWindow);
-                            EndUpdate( whichWindow);
-                        }
-                        MacSetPort( gTheWindow);
-
-                        break;
-
 
                     case mouseDown:
                         where = theEvent.where;
@@ -1040,7 +957,6 @@ void DoNetSettings( void)
                             currentDelay = 0, i;
     EventRecord             theEvent;
     char                    whichChar;
-    CWindowPtr              whichWindow;
 
 //  BlackenWindow();
 
@@ -1126,32 +1042,6 @@ void DoNetSettings( void)
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
                         break;
-                    case updateEvt:
-                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
-
-                        if ( whichWindow == gTheWindow)
-                        {
-                            BeginUpdate( whichWindow);
-                                MacSetPort( gTheWindow);
-                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
-                            EndUpdate( whichWindow);
-                            break;
-                            EndUpdate( whichWindow);
-                        } else if ( whichWindow == gAresGlobal->gBackWindow)
-                        {
-                            BeginUpdate( whichWindow);
-                                MacSetPort( gAresGlobal->gBackWindow);
-                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
-                            EndUpdate( whichWindow);
-                        } else
-                        {
-                            BeginUpdate( whichWindow);
-                            EndUpdate( whichWindow);
-                        }
-                        MacSetPort( gTheWindow);
-
-                        break;
-
 
                     case mouseDown:
                         where = theEvent.where;
@@ -1263,7 +1153,6 @@ void DoHelpScreen( void)
     short                   whichItem;
     EventRecord             theEvent;
     char                    whichChar;
-    CWindowPtr              whichWindow;
     longRect                clipRect, boundsRect;
     long                    height;
     retroTextSpecType       retroTextSpec;
@@ -1397,32 +1286,6 @@ void DoHelpScreen( void)
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
                         break;
-                    case updateEvt:
-                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
-
-                        if ( whichWindow == gTheWindow)
-                        {
-                            BeginUpdate( whichWindow);
-                                MacSetPort( gTheWindow);
-                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
-                            EndUpdate( whichWindow);
-                            break;
-                            EndUpdate( whichWindow);
-                        } else if ( whichWindow == gAresGlobal->gBackWindow)
-                        {
-                            BeginUpdate( whichWindow);
-                                MacSetPort( gAresGlobal->gBackWindow);
-                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
-                            EndUpdate( whichWindow);
-                        } else
-                        {
-                            BeginUpdate( whichWindow);
-                            EndUpdate( whichWindow);
-                        }
-                        MacSetPort( gTheWindow);
-
-                        break;
-
 
                     case mouseDown:
                         where = theEvent.where;
@@ -1562,7 +1425,6 @@ void DoOptionsInterface( void)
     Boolean                 done = FALSE, cancel = FALSE;
     EventRecord             theEvent;
     char                    whichChar;
-    CWindowPtr              whichWindow;
     TypedHandle<preferencesDataType> tempPrefs = gAresGlobal->gPreferencesData;
     preferencesDataType*    prefsData = nil;
     Rect                    volumeRect;
@@ -1616,31 +1478,6 @@ void DoOptionsInterface( void)
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
-                        break;
-                    case updateEvt:
-                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
-
-                        if ( whichWindow == gTheWindow)
-                        {
-                            BeginUpdate( whichWindow);
-                                MacSetPort( gTheWindow);
-                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
-                            EndUpdate( whichWindow);
-                            break;
-                            EndUpdate( whichWindow);
-                        } else if ( whichWindow == gAresGlobal->gBackWindow)
-                        {
-                            BeginUpdate( whichWindow);
-                                MacSetPort( gAresGlobal->gBackWindow);
-                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
-                            EndUpdate( whichWindow);
-                        } else
-                        {
-                            BeginUpdate( whichWindow);
-                            EndUpdate( whichWindow);
-                        }
-                        MacSetPort( gTheWindow);
-
                         break;
 
                     case mouseDown:
@@ -1883,7 +1720,6 @@ Boolean DoKeyInterface( void)
     Boolean                 done = FALSE, result = TRUE, cancel = FALSE;
     EventRecord             theEvent;
     KeyMap                  keyMap;
-    CWindowPtr              whichWindow;
     preferencesDataType     *prefsData = nil;
     unsigned long           options = gAresGlobal->gOptions;
 
@@ -1982,31 +1818,6 @@ Boolean DoKeyInterface( void)
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
-                        break;
-                    case updateEvt:
-                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
-
-                        if ( whichWindow == gTheWindow)
-                        {
-                            BeginUpdate( whichWindow);
-                                MacSetPort( gTheWindow);
-                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
-                            EndUpdate( whichWindow);
-                            break;
-                            EndUpdate( whichWindow);
-                        } else if ( whichWindow == gAresGlobal->gBackWindow)
-                        {
-                            BeginUpdate( whichWindow);
-                                MacSetPort( gAresGlobal->gBackWindow);
-                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
-                            EndUpdate( whichWindow);
-                        } else
-                        {
-                            BeginUpdate( whichWindow);
-                            EndUpdate( whichWindow);
-                        }
-                        MacSetPort( gTheWindow);
-
                         break;
 
                     case mouseDown:
@@ -2225,7 +2036,6 @@ netResultType StartNetworkGameSetup( void)
     EventRecord             theEvent;
     char                    whichChar;
     netResultType           result = kCancel;
-    CWindowPtr              whichWindow;
 
     if ( gAresGlobal->gameRangerPending)
     {
@@ -2272,30 +2082,7 @@ netResultType StartNetworkGameSetup( void)
                         case osEvt:
 //                          HandleOSEvent( &theEvent);
                             break;
-                        case updateEvt:
-                            whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
 
-                            if ( whichWindow == gTheWindow)
-                            {
-                                BeginUpdate( whichWindow);
-                                    MacSetPort( gTheWindow);
-                                    CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
-                                EndUpdate( whichWindow);
-                                break;
-                                EndUpdate( whichWindow);
-                            } else if ( whichWindow == gAresGlobal->gBackWindow)
-                            {
-                                BeginUpdate( whichWindow);
-                                    MacSetPort( gAresGlobal->gBackWindow);
-                                    MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
-                                EndUpdate( whichWindow);
-                            } else
-                            {
-                                BeginUpdate( whichWindow);
-                                EndUpdate( whichWindow);
-                            }
-                            MacSetPort( gTheWindow);
-                            break;
                         case mouseDown:
                             where = theEvent.where;
                             GlobalToLocal( &where);
@@ -2391,7 +2178,6 @@ netResultType ClientWaitInterface( void)
     long                    theMessage, roundTripTime, version, serialNumerator,
                             serialDenominator;
     Str255                  s;
-    CWindowPtr              whichWindow;
 
     if ( gAresGlobal->gameRangerPending)
     {
@@ -2444,30 +2230,6 @@ netResultType ClientWaitInterface( void)
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
-                        break;
-                    case updateEvt:
-                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
-
-                        if ( whichWindow == gTheWindow)
-                        {
-                            BeginUpdate( whichWindow);
-                                MacSetPort( gTheWindow);
-                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
-                            EndUpdate( whichWindow);
-                            break;
-                            EndUpdate( whichWindow);
-                        } else if ( whichWindow == gAresGlobal->gBackWindow)
-                        {
-                            BeginUpdate( whichWindow);
-                                MacSetPort( gAresGlobal->gBackWindow);
-                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
-                            EndUpdate( whichWindow);
-                        } else
-                        {
-                            BeginUpdate( whichWindow);
-                            EndUpdate( whichWindow);
-                        }
-                        MacSetPort( gTheWindow);
                         break;
 
                     case mouseDown:
@@ -2586,7 +2348,6 @@ netResultType HostAcceptClientInterface( void)
                             serialDenominator;
     Str31                   s;
     unsigned char*          name;
-    CWindowPtr              whichWindow;
 
     if ( gAresGlobal->gameRangerPending)
     {
@@ -2646,31 +2407,6 @@ netResultType HostAcceptClientInterface( void)
                     case autoKey:
                         whichChar = theEvent.message & charCodeMask;
                         whichItem = InterfaceKeyDown( theEvent.message);
-                        break;
-
-                    case updateEvt:
-                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
-
-                        if ( whichWindow == gTheWindow)
-                        {
-                            BeginUpdate( whichWindow);
-                                MacSetPort( gTheWindow);
-                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
-                            EndUpdate( whichWindow);
-                            break;
-                            EndUpdate( whichWindow);
-                        } else if ( whichWindow == gAresGlobal->gBackWindow)
-                        {
-                            BeginUpdate( whichWindow);
-                                MacSetPort( gAresGlobal->gBackWindow);
-                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
-                            EndUpdate( whichWindow);
-                        } else
-                        {
-                            BeginUpdate( whichWindow);
-                            EndUpdate( whichWindow);
-                        }
-                        MacSetPort( gTheWindow);
                         break;
                 }
 
@@ -3774,7 +3510,6 @@ long DoSelectLevelInterface( long startChapter)
     interfaceItemType       *anItem;
     Rect                        totalRect;
     PixMapHandle            saveMap, offMap;
-    CWindowPtr              whichWindow;
     Str255                  chapterName, cheatString;
     long                    thisLevel = GetScenarioNumberFromChapterNumber(
                                         startChapter),
@@ -3833,32 +3568,6 @@ long DoSelectLevelInterface( long startChapter)
                 whichItem = -1;
                 switch ( theEvent.what )
                 {
-                    case updateEvt:
-                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
-
-                        if ( whichWindow == gTheWindow)
-                        {
-                            BeginUpdate( whichWindow);
-                                MacSetPort( gTheWindow);
-                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
-                            EndUpdate( whichWindow);
-                            break;
-                            EndUpdate( whichWindow);
-                        } else if ( whichWindow == gAresGlobal->gBackWindow)
-                        {
-                            BeginUpdate( whichWindow);
-                                MacSetPort( gAresGlobal->gBackWindow);
-                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
-                            EndUpdate( whichWindow);
-                        } else
-                        {
-                            BeginUpdate( whichWindow);
-                            EndUpdate( whichWindow);
-                        }
-                        MacSetPort( gTheWindow);
-
-                        break;
-
                     case nullEvent:
                         InterfaceIdle();
                         if ( gAresGlobal->gOptions & kOptionInBackground)
@@ -4085,7 +3794,6 @@ Boolean DoMissionInterface( long whichScenario)
     Rect                    tRect, mapRect, totalRect;
     coordPointType          corner;
     PixMapHandle            saveMap, offMap;
-    CWindowPtr              whichWindow;
     inlinePictType          inlinePict[kMaxInlinePictNum];
 
     FlushEvents(everyEvent, 0);
@@ -4179,43 +3887,6 @@ Boolean DoMissionInterface( long whichScenario)
                 whichItem = -1;
                 switch ( theEvent.what )
                 {
-                    case updateEvt:
-                        whichWindow = reinterpret_cast<CWindow*>(theEvent.message);
-
-                        if ( whichWindow == gTheWindow)
-                        {
-                            BeginUpdate( whichWindow);
-                                MacSetPort( gTheWindow);
-                                CopyOffWorldToRealWorld(gTheWindow, &(gTheWindow->portRect));
-/////////////////////////////////////
-// Display free memory
-/*      DrawInRealWorld();
-        NumToString( CompactMem( maxSize), s);
-        MoveTo( 10, 50);
-        SetTranslateColorFore( WHITE);
-        DrawString( s);
-        SetTranslateColorFore( BLACK);
-*/
-//
-/////////////////////////////////////
-                            EndUpdate( whichWindow);
-                            break;
-                            EndUpdate( whichWindow);
-                        } else if ( whichWindow == gAresGlobal->gBackWindow)
-                        {
-                            BeginUpdate( whichWindow);
-                                MacSetPort( gAresGlobal->gBackWindow);
-                                MacFillRect(  &(gAresGlobal->gBackWindow->portRect), &qd.black);
-                            EndUpdate( whichWindow);
-                        } else
-                        {
-                            BeginUpdate( whichWindow);
-                            EndUpdate( whichWindow);
-                        }
-                        MacSetPort( gTheWindow);
-
-                        break;
-
                     case nullEvent:
                         InterfaceIdle();
                         if ( gAresGlobal->gOptions & kOptionInBackground)
@@ -4828,7 +4499,6 @@ void ShowSuccessAnimation( WindowPtr thePort)
     Rect            tRect, lastBounds, theseBounds;
     TypedHandle<natePixType> shipSprite;
     spritePix       aSpritePix;
-    unsigned char   *pixData;
     unsigned char   color, *getwidchar, *getwidwid; // for getting string width
     PixMapHandle    pixMap = GetGWorldPixMap( gOffWorld),
                     saveMap = GetGWorldPixMap( gSaveWorld);
@@ -4856,9 +4526,7 @@ void ShowSuccessAnimation( WindowPtr thePort)
         RemapNatePixTableColor(shipSprite);
 
         AddSound( 516);
-        pixData = GetNatePixTableNatePixData( shipSprite, kDebriefShipShapeNum);
-
-        aSpritePix.data = &pixData;
+        aSpritePix.data = GetNatePixTableNatePixData( shipSprite, kDebriefShipShapeNum);
         aSpritePix.center.h = GetNatePixTableNatePixHRef( shipSprite, kDebriefShipShapeNum);
         aSpritePix.center.v = GetNatePixTableNatePixVRef( shipSprite, kDebriefShipShapeNum);
         aSpritePix.width = GetNatePixTableNatePixWidth( shipSprite, kDebriefShipShapeNum);

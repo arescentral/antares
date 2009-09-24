@@ -160,22 +160,6 @@ Boolean UserChooseTheDevice( int depth, Boolean setDepth, Rect *bounds)
             case keyDown:
             case autoKey:
                 break;
-
-            case updateEvt:
-                whichWindow = reinterpret_cast<WindowPtr>(theEvent.message);
-                if ( whichWindow != nil)
-                {
-                    for ( i = 0; i < kMaxDevice; i++)
-                    {
-                        if ( whichWindow == reinterpret_cast<WindowPtr>(deviceWindow[i].window))
-                        {
-                            BeginUpdate(whichWindow);
-                            DrawDialog(reinterpret_cast<DialogPtr>(whichWindow));
-                            EndUpdate(reinterpret_cast<WindowPtr>(whichWindow));
-                        }
-                    }
-                }
-                break;
         }
     }
 

@@ -1424,7 +1424,6 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     unsigned char       color, lightcolor, darkcolor;
     Str255              s;
     spritePix           aSpritePix;
-    unsigned char       *pixData = nil;
     coordPointType      coord;
     Point               where;
     TypedHandle<natePixType> pixTable;
@@ -1543,9 +1542,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                     whichShape = 0;
 
                 // get the picture data
-                pixData = GetNatePixTableNatePixData( pixTable, whichShape);
-
-                aSpritePix.data = &pixData;
+                aSpritePix.data = GetNatePixTableNatePixData( pixTable, whichShape);
                 aSpritePix.center.h = GetNatePixTableNatePixHRef( pixTable, whichShape);
                 aSpritePix.center.v = GetNatePixTableNatePixVRef( pixTable, whichShape);
                 aSpritePix.width = GetNatePixTableNatePixWidth( pixTable, whichShape);

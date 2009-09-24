@@ -41,10 +41,9 @@ void EZDrawSpriteOffByID( short resID, long whichShape, long scale, unsigned cha
     TypedHandle<natePixType> spriteTable;
     spritePix           aSpritePix;
     PixMapHandle        offPixBase = GetGWorldPixMap( gOffWorld);
-    unsigned char       *pixData;
 
     GetPort( &oldPort);
-    EZMakeSpriteFromID( resID, &spriteTable, &aSpritePix, &pixData, whichShape);
+    EZMakeSpriteFromID( resID, &spriteTable, &aSpritePix, whichShape);
     if (spriteTable.get() == nil) {
         return;
     }
@@ -74,10 +73,9 @@ void EZDrawSpriteOffToOnByID( short resID, long whichShape, long scale,
     TypedHandle<natePixType> spriteTable;
     spritePix           aSpritePix;
     PixMapHandle        offPixBase = GetGWorldPixMap( gOffWorld);
-    unsigned char       *pixData;
 
     GetPort( &oldPort);
-    EZMakeSpriteFromID( resID, &spriteTable, &aSpritePix, &pixData, whichShape);
+    EZMakeSpriteFromID( resID, &spriteTable, &aSpritePix, whichShape);
     if (spriteTable.get() == nil) {
         return;
     }
@@ -138,19 +136,16 @@ void EZDrawSpriteCenteredInRectBySprite( spritePix *aSpritePix,
 // EZMakeSpriteFromID
 //  Given resID, loads resource into spriteTable and fills out aSpritePix.
 //  spriteTable is locked and unlocking it invalidates aSpritePix->pixData.
-//  Note that, unfortunately, you have to keep the pixData ptr alive.
 
 void EZMakeSpriteFromID( short resID, TypedHandle<natePixType>* spriteTable, spritePix *aSpritePix,
-    unsigned char **pixData, long whichShape)
+    long whichShape)
 {
     spriteTable->load_resource(kPixResType, resID);
     if (spriteTable->get() == nil) {
         return;
     }
 
-    *pixData = GetNatePixTableNatePixData( *spriteTable, whichShape);
-
-    aSpritePix->data = pixData;
+    aSpritePix->data = GetNatePixTableNatePixData( *spriteTable, whichShape);
     aSpritePix->center.h = GetNatePixTableNatePixHRef( *spriteTable, whichShape);
     aSpritePix->center.v = GetNatePixTableNatePixVRef( *spriteTable, whichShape);
     aSpritePix->width = GetNatePixTableNatePixWidth( *spriteTable, whichShape);
@@ -163,7 +158,6 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
     TypedHandle<natePixType> spriteTable;
     PixMapHandle        offPixBase = GetGWorldPixMap( gOffWorld);
     spritePix           aSpritePix;
-    unsigned char       *pixData;
     Point               where;
     long                tlong, thisScale;
     longRect            dRect, spriteRect;
@@ -191,9 +185,7 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
     dRect.top = bounds->top;
     dRect.bottom = bounds->bottom;
 
-    pixData = GetNatePixTableNatePixData( spriteTable, whichShape);
-
-    aSpritePix.data = &pixData;
+    aSpritePix.data = GetNatePixTableNatePixData( spriteTable, whichShape);
     aSpritePix.center.h = GetNatePixTableNatePixHRef( spriteTable, whichShape);
     aSpritePix.center.v = GetNatePixTableNatePixVRef( spriteTable, whichShape);
     aSpritePix.width = GetNatePixTableNatePixWidth( spriteTable, whichShape);
