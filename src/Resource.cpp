@@ -21,8 +21,6 @@
 #include <stdio.h>
 #include <string>
 
-void* const kMmapFailed = reinterpret_cast<void*>(-1);
-
 namespace {
 
 struct FreedGlob : public glob_t {
