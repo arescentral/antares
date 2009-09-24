@@ -1310,7 +1310,7 @@ void SetInterfaceTextBoxText( short resID)
 }
 
 size_t interfaceItemType::load_data(const char* data, size_t len) {
-    BinaryStream bin(data, len);
+    BufferBinaryReader bin(data, len);
     char section[22];
 
     bin.read(&bounds);
@@ -1320,7 +1320,7 @@ size_t interfaceItemType::load_data(const char* data, size_t len) {
     bin.read(&style);
     bin.discard(1);
 
-    BinaryStream sub(section, 22);
+    BufferBinaryReader sub(section, 22);
     switch (kind) {
       case kPlainRect:
       case kPictureRect:
@@ -1363,12 +1363,12 @@ size_t interfaceItemType::load_data(const char* data, size_t len) {
     return bin.bytes_read();
 }
 
-void interfaceLabelType::read(BinaryStream* bin) {
+void interfaceLabelType::read(BinaryReader* bin) {
     bin->read(&stringID);
     bin->read(&stringNumber);
 }
 
-void interfaceLabeledRectType::read(BinaryStream* bin) {
+void interfaceLabeledRectType::read(BinaryReader* bin) {
     bin->read(&label);
     bin->read(&color);
     bin->discard(5);
@@ -1377,7 +1377,7 @@ void interfaceLabeledRectType::read(BinaryStream* bin) {
     teData = NULL;
 }
 
-void interfaceListType::read(BinaryStream* bin) {
+void interfaceListType::read(BinaryReader* bin) {
     bin->read(&label);
     bin->discard(12);
     bin->read(&topItem);
@@ -1391,37 +1391,37 @@ void interfaceListType::read(BinaryStream* bin) {
     itemHilited = NULL;
 }
 
-void interfaceTextRectType::read(BinaryStream* bin) {
+void interfaceTextRectType::read(BinaryReader* bin) {
     bin->read(&textID);
     bin->read(&visibleBounds);
 }
 
-void interfaceButtonType::read(BinaryStream* bin) {
+void interfaceButtonType::read(BinaryReader* bin) {
     bin->read(&label);
     bin->read(&key);
     bin->read(&defaultButton);
     bin->read(&status);
 }
 
-void interfaceRadioType::read(BinaryStream* bin) {
+void interfaceRadioType::read(BinaryReader* bin) {
     bin->read(&label);
     bin->read(&key);
     bin->read(&on);
     bin->read(&status);
 }
 
-void interfaceCheckboxType::read(BinaryStream* bin) {
+void interfaceCheckboxType::read(BinaryReader* bin) {
     bin->read(&label);
     bin->read(&key);
     bin->read(&on);
     bin->read(&status);
 }
 
-void interfacePictureRectType::read(BinaryStream* bin) {
+void interfacePictureRectType::read(BinaryReader* bin) {
     bin->read(&pictureID);
     bin->read(&visibleBounds);
 }
 
-void interfaceTabBoxType::read(BinaryStream* bin) {
+void interfaceTabBoxType::read(BinaryReader* bin) {
     bin->read(&topRightBorderSize);
 }

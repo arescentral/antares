@@ -21,7 +21,7 @@
 #include "Scenario.hpp"
 
 size_t scenarioInfoType::load_data(const char* data, size_t len) {
-    BinaryStream bin(data, len);
+    BufferBinaryReader bin(data, len);
 
     bin.read(&warpInFlareID);
     bin.read(&warpOutFlareID);
@@ -40,7 +40,7 @@ size_t scenarioInfoType::load_data(const char* data, size_t len) {
 }
 
 size_t scenarioType::load_data(const char* data, size_t len) {
-    BinaryStream bin(data, len);
+    BufferBinaryReader bin(data, len);
 
     bin.read(&netRaceFlags);
     bin.read(&playerNum);
@@ -68,7 +68,7 @@ size_t scenarioType::load_data(const char* data, size_t len) {
     return bin.bytes_read();
 }
 
-void scenarioPlayerType::read(BinaryStream* bin) {
+void scenarioPlayerType::read(BinaryReader* bin) {
     bin->read(&playerType);
     bin->read(&playerRace);
     bin->read(&nameResID);
@@ -80,7 +80,7 @@ void scenarioPlayerType::read(BinaryStream* bin) {
 }
 
 size_t scenarioConditionType::load_data(const char* data, size_t len) {
-    BinaryStream bin(data, len);
+    BufferBinaryReader bin(data, len);
     char section[12];
 
     bin.read(&condition);
@@ -93,7 +93,7 @@ size_t scenarioConditionType::load_data(const char* data, size_t len) {
     bin.read(&flags);
     bin.read(&direction);
 
-    BinaryStream sub(section, 12);
+    BufferBinaryReader sub(section, 12);
     switch (condition) {
       case kCounterCondition:
       case kCounterGreaterCondition:
@@ -124,14 +124,14 @@ size_t scenarioConditionType::load_data(const char* data, size_t len) {
     return bin.bytes_read();
 }
 
-void counterArgumentType::read(BinaryStream* bin) {
+void counterArgumentType::read(BinaryReader* bin) {
     bin->read(&whichPlayer);
     bin->read(&whichCounter);
     bin->read(&amount);
 }
 
 size_t briefPointType::load_data(const char* data, size_t len) {
-    BinaryStream bin(data, len);
+    BufferBinaryReader bin(data, len);
 
     char section[8];
 
@@ -143,7 +143,7 @@ size_t briefPointType::load_data(const char* data, size_t len) {
     bin.read(&titleNum);
     bin.read(&contentResID);
 
-    BinaryStream sub(section, 8);
+    BufferBinaryReader sub(section, 8);
     switch (briefPointKind) {
       case kNoPointKind:
       case kBriefFreestandingKind:
@@ -161,17 +161,17 @@ size_t briefPointType::load_data(const char* data, size_t len) {
     return bin.bytes_read();
 }
 
-void briefPointType::ObjectBrief::read(BinaryStream* bin) {
+void briefPointType::ObjectBrief::read(BinaryReader* bin) {
     bin->read(&objectNum);
     bin->read(&objectVisible);
 }
 
-void briefPointType::AbsoluteBrief::read(BinaryStream* bin) {
+void briefPointType::AbsoluteBrief::read(BinaryReader* bin) {
     bin->read(&location);
 }
 
 size_t scenarioInitialType::load_data(const char* data, size_t len) {
-    BinaryStream bin(data, len);
+    BufferBinaryReader bin(data, len);
 
     bin.read(&type);
     bin.read(&owner);

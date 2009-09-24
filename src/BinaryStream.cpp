@@ -21,20 +21,11 @@
 #include <string.h>
 #include <libkern/OSByteOrder.h>
 
-BinaryStream::BinaryStream(const char* data, size_t len)
-    : _data(data),
-      _len(len),
-      _pos(0) { }
-
-void BinaryStream::discard(size_t bytes) {
-    assert(_pos + bytes <= _len);
-    _pos += bytes;
-}
-
 namespace {
 
 template <typename T>
 struct Bytes {
+    Bytes() { }
     explicit Bytes(const T& t) { memcpy(value, &t, sizeof(T)); }
     char value[sizeof(T)];
 };
@@ -43,19 +34,9 @@ template <typename T, size_t bytes = sizeof(T)>
 struct EndiannessConverter;
 
 template <typename T>
-struct EndiannessConverter<T, 1> {
-    inline static T big_to_host(const void* ptr) {
-        return *reinterpret_cast<const T*>(ptr);
-    }
-    inline static Bytes<T> host_to_big(const T& t) {
-        return Bytes<T>(t);
-    }
-};
-
-template <typename T>
 struct EndiannessConverter<T, 2> {
-    inline static T big_to_host(const void* ptr) {
-        return OSSwapBigToHostInt16(*reinterpret_cast<const T*>(ptr));
+    inline static T big_to_host(const Bytes<T> bytes) {
+        return OSSwapBigToHostInt16(*reinterpret_cast<const T*>(bytes.value));
     }
     inline static Bytes<T> host_to_big(const T& t) {
         return Bytes<T>(OSSwapHostToBigInt16(t));
@@ -64,8 +45,8 @@ struct EndiannessConverter<T, 2> {
 
 template <typename T>
 struct EndiannessConverter<T, 4> {
-    inline static T big_to_host(const void* ptr) {
-        return OSSwapBigToHostInt32(*reinterpret_cast<const T*>(ptr));
+    inline static T big_to_host(const Bytes<T> bytes) {
+        return OSSwapBigToHostInt32(*reinterpret_cast<const T*>(bytes.value));
     }
     inline static Bytes<T> host_to_big(const T& t) {
         return Bytes<T>(OSSwapHostToBigInt32(t));
@@ -74,8 +55,8 @@ struct EndiannessConverter<T, 4> {
 
 template <typename T>
 struct EndiannessConverter<T, 8> {
-    inline static T big_to_host(const void* ptr) {
-        return OSSwapBigToHostInt64(*reinterpret_cast<const T*>(ptr));
+    inline static T big_to_host(const Bytes<T> bytes) {
+        return OSSwapBigToHostInt64(*reinterpret_cast<const T*>(bytes.value));
     }
     inline static Bytes<T> host_to_big(const T& t) {
         return Bytes<T>(OSSwapHostToBigInt64(t));
@@ -84,64 +65,95 @@ struct EndiannessConverter<T, 8> {
 
 }  // namespace
 
+BinaryReader::BinaryReader()
+        : _bytes_read(0) { }
+
+BinaryReader::~BinaryReader() { }
+
 template <typename T>
-void BinaryStream::read_primitive(T* t, size_t count) {
+void BinaryReader::read_primitive(T* t, size_t count) {
     for (size_t i = 0; i < count; ++i) {
-        assert(_pos + sizeof(T) <= _len);
-        t[i] = EndiannessConverter<T>::big_to_host(_data + _pos);
-        _pos += sizeof(T);
+        Bytes<T> bytes;
+        read_bytes(bytes.value, sizeof(T));
+        t[i] = EndiannessConverter<T>::big_to_host(bytes);
+        _bytes_read += sizeof(T);
     }
 }
 
 template <>
-void BinaryStream::read<bool>(bool* b, size_t count) {
+void BinaryReader::read<bool>(bool* b, size_t count) {
     read_primitive(b, count);
 }
 
 template <>
-void BinaryStream::read<char>(char* c, size_t count) {
-    read_primitive(c, count);
+void BinaryReader::read<char>(char* c, size_t count) {
+    read_bytes(c, count);
+    _bytes_read += count;
 }
 
 template <>
-void BinaryStream::read<int8_t>(int8_t* i8, size_t count) {
-    read_primitive(i8, count);
+void BinaryReader::read<int8_t>(int8_t* i8, size_t count) {
+    read_bytes(reinterpret_cast<char*>(i8), count);
+    _bytes_read += count;
 }
 
 template <>
-void BinaryStream::read<uint8_t>(uint8_t* u8, size_t count) {
-    read_primitive(u8, count);
+void BinaryReader::read<uint8_t>(uint8_t* u8, size_t count) {
+    read_bytes(reinterpret_cast<char*>(u8), count);
+    _bytes_read += count;
 }
 
 template <>
-void BinaryStream::read<int16_t>(int16_t* i16, size_t count) {
+void BinaryReader::read<int16_t>(int16_t* i16, size_t count) {
     read_primitive(i16, count);
 }
 
 template <>
-void BinaryStream::read<uint16_t>(uint16_t* u16, size_t count) {
+void BinaryReader::read<uint16_t>(uint16_t* u16, size_t count) {
     read_primitive(u16, count);
 }
 
 template <>
-void BinaryStream::read<int32_t>(int32_t* i32, size_t count) {
+void BinaryReader::read<int32_t>(int32_t* i32, size_t count) {
     read_primitive(i32, count);
 }
 
 template <>
-void BinaryStream::read<uint32_t>(uint32_t* u32, size_t count) {
+void BinaryReader::read<uint32_t>(uint32_t* u32, size_t count) {
     read_primitive(u32, count);
 }
 
 template <>
-void BinaryStream::read<int64_t>(int64_t* i64, size_t count) {
+void BinaryReader::read<int64_t>(int64_t* i64, size_t count) {
     read_primitive(i64, count);
 }
 
 template <>
-void BinaryStream::read<uint64_t>(uint64_t* u64, size_t count) {
+void BinaryReader::read<uint64_t>(uint64_t* u64, size_t count) {
     read_primitive(u64, count);
 }
+
+void BinaryReader::discard(size_t bytes) {
+    for (size_t i = 0; i < bytes; ++i) {
+        char c;
+        read_bytes(&c, 1);
+    }
+    _bytes_read += bytes;
+}
+
+BufferBinaryReader::BufferBinaryReader(const char* data, size_t len)
+    : _data(data),
+      _len(len) { }
+
+#include <stdio.h>
+
+void BufferBinaryReader::read_bytes(char* bytes, size_t count) {
+    assert(bytes_read() + count <= _len);
+    memcpy(bytes, _data + bytes_read(), count);
+}
+
+BinaryWriter::BinaryWriter()
+        : _bytes_written(0) { }
 
 BinaryWriter::~BinaryWriter() { }
 
@@ -149,6 +161,7 @@ template <typename T>
 void BinaryWriter::write_primitive(T* t, size_t count) {
     for (size_t i = 0; i < count; ++i) {
         write_bytes(EndiannessConverter<T>::host_to_big(t[i]).value, sizeof(T));
+        _bytes_written += sizeof(T);
     }
 }
 
@@ -158,14 +171,17 @@ template <> void BinaryWriter::write<bool>(const bool* b, size_t count) {
 
 template <> void BinaryWriter::write<char>(const char* c, size_t count) {
     write_bytes(c, count);
+    _bytes_written += count;
 }
 
 template <> void BinaryWriter::write<unsigned char>(const unsigned char* uc, size_t count) {
-    write_primitive(uc, count);
+    write_bytes(reinterpret_cast<const char*>(uc), count);
+    _bytes_written += count;
 }
 
 template <> void BinaryWriter::write<int8_t>(const int8_t* i8, size_t count) {
-    write_primitive(i8, count);
+    write_bytes(reinterpret_cast<const char*>(i8), count);
+    _bytes_written += count;
 }
 
 template <> void BinaryWriter::write<int16_t>(const int16_t* i16, size_t count) {
@@ -197,4 +213,5 @@ void BinaryWriter::pad(size_t bytes) {
     for (size_t i = 0; i < bytes; ++i) {
         write_bytes(&c, 1);
     }
+    _bytes_written += bytes;
 }

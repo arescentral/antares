@@ -250,7 +250,7 @@ void MyMulDoubleLong( long a, long b, wide *dest)
 //  LongMul( a, b, dest);
 }
 
-void fixedPointType::read(BinaryStream* bin) {
+void fixedPointType::read(BinaryReader* bin) {
     bin->read(&h);
     bin->read(&v);
 }

@@ -24,7 +24,7 @@
 #include <Base.h>
 #include <Quickdraw.h>
 
-class BinaryStream;
+class BinaryReader;
 
 inline void mGetRowBytes(long& rBytes, PixMap* pix) {
     rBytes = pix->rowBytes & 0x3fff;
@@ -67,7 +67,7 @@ struct longPointType {
     int32_t     h;
     int32_t     v;
 
-    void read(BinaryStream* bin);
+    void read(BinaryReader* bin);
 };
 
 struct longRect {
@@ -76,7 +76,7 @@ struct longRect {
     int32_t     right;
     int32_t     bottom;
 
-    void read(BinaryStream* bin);
+    void read(BinaryReader* bin);
 };
 
 void DrawNateRect( PixMap *, longRect *, long, long, unsigned char);

@@ -38,7 +38,7 @@ Picture::Picture(int32_t id) {
         throw PictureNotFoundException();
     } else if (g.gl_pathc == 1) {
         MappedFile file(g.gl_pathv[0]);
-        BinaryStream bin(file.data(), file.size());
+        BufferBinaryReader bin(file.data(), file.size());
 
         _frame.left = 0;
         _frame.top = 0;

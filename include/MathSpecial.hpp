@@ -25,7 +25,7 @@
 
 #include "Casts.hpp"
 
-class BinaryStream;
+class BinaryReader;
 
 #define kMathSpecial
 
@@ -79,7 +79,7 @@ struct fixedPointType {
     smallFixedType      h;
     smallFixedType      v;
 
-    void read(BinaryStream* bin);
+    void read(BinaryReader* bin);
 };
 
 

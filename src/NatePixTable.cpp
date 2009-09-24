@@ -59,7 +59,7 @@ class natePixEntryType {
     int16_t v_offset() const { return _v_offset; }
     char* data() const { return _data; }
 
-    void read(BinaryStream* bin) {
+    void read(BinaryReader* bin) {
         bin->read(&_width);
         bin->read(&_height);
         bin->read(&_h_offset);
@@ -123,7 +123,7 @@ size_t natePixType::size() const {
 size_t natePixType::load_data(const char* data, size_t len) {
     clear();
 
-    BinaryStream bin(data, len);
+    BufferBinaryReader bin(data, len);
 
     uint32_t size;
     int32_t pixnum;

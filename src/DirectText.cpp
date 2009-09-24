@@ -43,7 +43,7 @@ TypedHandle<unsigned long> gFourBitTable;  // for turning 4-bit masks into 8-bit
 TypedHandle<directTextType> gDirectTextData;
 
 size_t directTextType::load_data(const char* data, size_t len) {
-    BinaryStream bin(data, len);
+    BufferBinaryReader bin(data, len);
 
     bin.discard(4);
     bin.read(&resID);

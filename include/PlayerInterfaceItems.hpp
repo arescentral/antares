@@ -25,7 +25,7 @@
 #include "AnyChar.hpp"
 #include "NateDraw.hpp"
 
-class BinaryStream;
+class BinaryReader;
 
 enum interfaceKindEnum {
     kPlainRect = 1,
@@ -59,7 +59,7 @@ struct interfaceLabelType {
     short               stringID;
     short               stringNumber;
 
-    void read(BinaryStream* bin);
+    void read(BinaryReader* bin);
 };
 
 struct interfaceLabeledRectType {
@@ -69,7 +69,7 @@ struct interfaceLabeledRectType {
     bool                editable;
     // Boolean             editable;
 
-    void read(BinaryStream* bin);
+    void read(BinaryReader* bin);
 };
 
 struct interfaceListType {
@@ -84,7 +84,7 @@ struct interfaceListType {
     interfaceItemStatusType     pageUpStatus;
     interfaceItemStatusType     pageDownStatus;
 
-    void read(BinaryStream* bin);
+    void read(BinaryReader* bin);
 };
 
 struct interfaceTextRectType {
@@ -92,13 +92,13 @@ struct interfaceTextRectType {
     uint8_t             visibleBounds;
     // Boolean             visibleBounds;
 
-    void read(BinaryStream* bin);
+    void read(BinaryReader* bin);
 };
 
 struct interfaceTabBoxType {
     short               topRightBorderSize;
 
-    void read(BinaryStream* bin);
+    void read(BinaryReader* bin);
 };
 
 struct interfacePictureRectType {
@@ -106,7 +106,7 @@ struct interfacePictureRectType {
     uint8_t             visibleBounds;
     // Boolean             visibleBounds;
 
-    void read(BinaryStream* bin);
+    void read(BinaryReader* bin);
 };
 
 struct interfaceButtonType {
@@ -116,7 +116,7 @@ struct interfaceButtonType {
     // Boolean                     defaultButton;
     interfaceItemStatusType     status;
 
-    void read(BinaryStream* bin);
+    void read(BinaryReader* bin);
 };
 
 struct interfaceRadioType {
@@ -126,7 +126,7 @@ struct interfaceRadioType {
     // Boolean                     on;
     interfaceItemStatusType     status;
 
-    void read(BinaryStream* bin);
+    void read(BinaryReader* bin);
 }; // also tab box button type
 
 struct interfaceCheckboxType {
@@ -136,7 +136,7 @@ struct interfaceCheckboxType {
     // Boolean                     on;
     interfaceItemStatusType     status;
 
-    void read(BinaryStream* bin);
+    void read(BinaryReader* bin);
 };
 
 struct interfaceItemType {

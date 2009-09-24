@@ -169,7 +169,7 @@ unsigned char GetApparentColorFromRace( short raceNum)
 }
 
 size_t raceType::load_data(const char* data, size_t len) {
-    BinaryStream bin(data, len);
+    BufferBinaryReader bin(data, len);
 
     bin.read(&id);
     bin.read(&apparentColor);

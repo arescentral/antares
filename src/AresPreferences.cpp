@@ -845,7 +845,7 @@ long GetFirstKeyConflict( preferencesDataType *prefs)
 }
 
 size_t preferencesDataType::load_data(const char* data, size_t len) {
-    BinaryStream bin(data, len);
+    BufferBinaryReader bin(data, len);
 
     bin.read(&version);
     bin.read(keyMap, kKeyControlDataNum);
@@ -871,7 +871,7 @@ size_t preferencesDataType::load_data(const char* data, size_t len) {
     return bin.bytes_read();
 }
 
-void serialNumberType::read(BinaryStream* bin) {
+void serialNumberType::read(BinaryReader* bin) {
     bin->read(name, 76);
     bin->read(number, kDigitNumber);
 }

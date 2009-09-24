@@ -31,12 +31,12 @@
 #include "SpriteHandling.hpp" // for test byte debugging kludge
 #endif
 
-void longPointType::read(BinaryStream* bin) {
+void longPointType::read(BinaryReader* bin) {
     bin->read(&h);
     bin->read(&v);
 }
 
-void longRect::read(BinaryStream* bin) {
+void longRect::read(BinaryReader* bin) {
     bin->read(&left);
     bin->read(&top);
     bin->read(&right);

@@ -85,14 +85,14 @@ typedef struct
 } preferencesDataType;
 */
 
-class BinaryStream;
+class BinaryReader;
 
 static const int kDigitNumber = 8;
 struct serialNumberType {
     unsigned char name[76];
     char number[kDigitNumber];
 
-    void read(BinaryStream* bin);
+    void read(BinaryReader* bin);
 };
 
 struct preferencesDataType {

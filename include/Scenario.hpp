@@ -23,7 +23,7 @@
 #include "NateDraw.hpp"
 #include "SpaceObject.hpp"
 
-class BinaryStream;
+class BinaryReader;
 
 #define kScenarioInitialNum             12
 #define kScenarioSpontaneousNum         2
@@ -153,12 +153,12 @@ struct briefPointType {
         int32_t         objectNum;
         uint8_t         objectVisible;  // bool
 
-        void read(BinaryStream* bin);
+        void read(BinaryReader* bin);
     };
     struct AbsoluteBrief {
         longPointType   location;
 
-        void read(BinaryStream* bin);
+        void read(BinaryReader* bin);
     };
 
     briefingPointKindType   briefPointKind;
@@ -199,7 +199,7 @@ struct counterArgumentType {
     int32_t         whichCounter;
     int32_t         amount;
 
-    void read(BinaryStream* bin);
+    void read(BinaryReader* bin);
 };
 
 struct scenarioConditionType {
@@ -233,7 +233,7 @@ struct scenarioPlayerType
     int16_t         netRaceFlags;
     int16_t         reserved1;
 
-    void read(BinaryStream* bin);
+    void read(BinaryReader* bin);
 };
 
 struct scenarioType {

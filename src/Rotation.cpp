@@ -33,7 +33,7 @@
 TypedHandle<RotTableEntry> gRotTable;
 
 size_t RotTableEntry::load_data(const char* data, size_t len) {
-    BinaryStream bin(data, len);
+    BufferBinaryReader bin(data, len);
     bin.read(&value);
     return bin.bytes_read();
 }

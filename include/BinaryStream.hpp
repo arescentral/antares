@@ -22,45 +22,59 @@
 #include <stdlib.h>
 #include "SmartPtr.hpp"
 
-class BinaryStream {
+class BinaryReader {
   public:
-    BinaryStream(const char* data, size_t len);
+    virtual ~BinaryReader();
 
     template <typename T>
     void read(T* t, size_t count = 1);
 
     void discard(size_t bytes);
 
-    size_t bytes_read() const { return _pos; }
+    size_t bytes_read() const { return _bytes_read; }
+
+  protected:
+    BinaryReader();
+    virtual void read_bytes(char* bytes, size_t count) = 0;
 
   private:
     template <typename T>
     void read_primitive(T* t, size_t count = 1);
 
-    const char* _data;
-    size_t _len;
-    size_t _pos;
-
-    DISALLOW_COPY_AND_ASSIGN(BinaryStream);
+    size_t _bytes_read;
 };
 
-template <> void BinaryStream::read<bool>(bool* b, size_t count);
-template <> void BinaryStream::read<char>(char* c, size_t count);
-template <> void BinaryStream::read<unsigned char>(unsigned char* uc, size_t count);
-template <> void BinaryStream::read<int8_t>(int8_t* i8, size_t count);
-template <> void BinaryStream::read<int16_t>(int16_t* i16, size_t count);
-template <> void BinaryStream::read<uint16_t>(uint16_t* u16, size_t count);
-template <> void BinaryStream::read<int32_t>(int32_t* i32, size_t count);
-template <> void BinaryStream::read<uint32_t>(uint32_t* u32, size_t count);
-template <> void BinaryStream::read<int64_t>(int64_t* i64, size_t count);
-template <> void BinaryStream::read<uint64_t>(uint64_t* u64, size_t count);
+template <> void BinaryReader::read<bool>(bool* b, size_t count);
+template <> void BinaryReader::read<char>(char* c, size_t count);
+template <> void BinaryReader::read<unsigned char>(unsigned char* uc, size_t count);
+template <> void BinaryReader::read<int8_t>(int8_t* i8, size_t count);
+template <> void BinaryReader::read<int16_t>(int16_t* i16, size_t count);
+template <> void BinaryReader::read<uint16_t>(uint16_t* u16, size_t count);
+template <> void BinaryReader::read<int32_t>(int32_t* i32, size_t count);
+template <> void BinaryReader::read<uint32_t>(uint32_t* u32, size_t count);
+template <> void BinaryReader::read<int64_t>(int64_t* i64, size_t count);
+template <> void BinaryReader::read<uint64_t>(uint64_t* u64, size_t count);
 
 template <typename T>
-void BinaryStream::read(T* t, size_t count) {
+void BinaryReader::read(T* t, size_t count) {
     for (size_t i = 0; i < count; ++i) {
         t[i].read(this);
     }
 }
+
+class BufferBinaryReader : public BinaryReader {
+  public:
+    BufferBinaryReader(const char* data, size_t len);
+
+  protected:
+    virtual void read_bytes(char* bytes, size_t count);
+
+  private:
+    const char* _data;
+    const size_t _len;
+
+    DISALLOW_COPY_AND_ASSIGN(BufferBinaryReader);
+};
 
 class BinaryWriter {
   public:
@@ -77,6 +91,7 @@ class BinaryWriter {
     size_t bytes_written() const;
 
   protected:
+    BinaryWriter();
     virtual void write_bytes(const char* bytes, size_t count) = 0;
 
     size_t _bytes_written;

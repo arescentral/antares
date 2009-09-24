@@ -2888,7 +2888,7 @@ void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord
 }
 
 size_t objectActionType::load_data(const char* data, size_t len) {
-    BinaryStream bin(data, len);
+    BufferBinaryReader bin(data, len);
     char section[24];
 
     bin.read(&verb);
@@ -2902,7 +2902,7 @@ size_t objectActionType::load_data(const char* data, size_t len) {
     bin.discard(4);
     bin.read(section, 24);
 
-    BinaryStream sub(section, 24);
+    BufferBinaryReader sub(section, 24);
     switch (verb) {
       case kNoAction:
       case kSetDestination:
@@ -2982,7 +2982,7 @@ size_t objectActionType::load_data(const char* data, size_t len) {
     return bin.bytes_read();
 }
 
-void argumentType::CreateObject::read(BinaryStream* bin) {
+void argumentType::CreateObject::read(BinaryReader* bin) {
     bin->read(&whichBaseType);
     bin->read(&howManyMinimum);
     bin->read(&howManyRange);
@@ -2991,7 +2991,7 @@ void argumentType::CreateObject::read(BinaryStream* bin) {
     bin->read(&randomDistance);
 }
 
-void argumentType::PlaySound::read(BinaryStream* bin) {
+void argumentType::PlaySound::read(BinaryReader* bin) {
     bin->read(&priority);
     bin->discard(1);
     bin->read(&persistence);
@@ -3003,78 +3003,78 @@ void argumentType::PlaySound::read(BinaryStream* bin) {
     bin->read(&idRange);
 }
 
-void argumentType::AlterObject::read(BinaryStream* bin) {
+void argumentType::AlterObject::read(BinaryReader* bin) {
     bin->read(&alterType);
     bin->read(&relative);
     bin->read(&minimum);
     bin->read(&range);
 }
 
-void argumentType::MakeSparks::read(BinaryStream* bin) {
+void argumentType::MakeSparks::read(BinaryReader* bin) {
     bin->read(&howMany);
     bin->read(&speed);
     bin->read(&velocityRange);
     bin->read(&color);
 }
 
-void argumentType::ReleaseEnergy::read(BinaryStream* bin) {
+void argumentType::ReleaseEnergy::read(BinaryReader* bin) {
     bin->read(&percent);
 }
 
-void argumentType::LandAt::read(BinaryStream* bin) {
+void argumentType::LandAt::read(BinaryReader* bin) {
     bin->read(&landingSpeed);
 }
 
-void argumentType::EnterWarp::read(BinaryStream* bin) {
+void argumentType::EnterWarp::read(BinaryReader* bin) {
     bin->read(&warpSpeed);
 }
 
-void argumentType::DisplayMessage::read(BinaryStream* bin) {
+void argumentType::DisplayMessage::read(BinaryReader* bin) {
     bin->read(&resID);
     bin->read(&pageNum);
 }
 
-void argumentType::ChangeScore::read(BinaryStream* bin) {
+void argumentType::ChangeScore::read(BinaryReader* bin) {
     bin->read(&whichPlayer);
     bin->read(&whichScore);
     bin->read(&amount);
 }
 
-void argumentType::DeclareWinner::read(BinaryStream* bin) {
+void argumentType::DeclareWinner::read(BinaryReader* bin) {
     bin->read(&whichPlayer);
     bin->read(&nextLevel);
     bin->read(&textID);
 }
 
-void argumentType::KillObject::read(BinaryStream* bin) {
+void argumentType::KillObject::read(BinaryReader* bin) {
     bin->read(&dieType);
 }
 
-void argumentType::ColorFlash::read(BinaryStream* bin) {
+void argumentType::ColorFlash::read(BinaryReader* bin) {
     bin->read(&length);
     bin->read(&color);
     bin->read(&shade);
 }
 
-void argumentType::Keys::read(BinaryStream* bin) {
+void argumentType::Keys::read(BinaryReader* bin) {
     bin->read(&keyMask);
 }
 
-void argumentType::Zoom::read(BinaryStream* bin) {
+void argumentType::Zoom::read(BinaryReader* bin) {
     bin->read(&zoomLevel);
 }
 
-void argumentType::ComputerSelect::read(BinaryStream* bin) {
+void argumentType::ComputerSelect::read(BinaryReader* bin) {
     bin->read(&screenNumber);
     bin->read(&lineNumber);
 }
 
-void argumentType::AssumeInitial::read(BinaryStream* bin) {
+void argumentType::AssumeInitial::read(BinaryReader* bin) {
     bin->read(&whichInitialObject);
 }
 
 size_t baseObjectType::load_data(const char* data, size_t len) {
-    BinaryStream bin(data, len);
+    BufferBinaryReader bin(data, len);
     char section[32];
 
     bin.read(&attributes);
@@ -3158,7 +3158,7 @@ size_t baseObjectType::load_data(const char* data, size_t len) {
     bin.discard(6);
     bin.read(&internalFlags);
 
-    BinaryStream sub(section, 32);
+    BufferBinaryReader sub(section, 32);
     if (attributes & kShapeFromDirection) {
         sub.read(&frame.rotation);
     } else if (attributes & kIsSelfAnimated) {
@@ -3172,14 +3172,14 @@ size_t baseObjectType::load_data(const char* data, size_t len) {
     return bin.bytes_read();
 }
 
-void objectFrameType::Rotation::read(BinaryStream* bin) {
+void objectFrameType::Rotation::read(BinaryReader* bin) {
     bin->read(&shapeOffset);
     bin->read(&rotRes);
     bin->read(&maxTurnRate);
     bin->read(&turnAcceleration);
 }
 
-void objectFrameType::Animation::read(BinaryStream* bin) {
+void objectFrameType::Animation::read(BinaryReader* bin) {
     bin->read(&firstShape);
     bin->read(&lastShape);
     bin->read(&frameDirection);
@@ -3190,14 +3190,14 @@ void objectFrameType::Animation::read(BinaryStream* bin) {
     bin->read(&frameShapeRange);
 }
 
-void objectFrameType::Beam::read(BinaryStream* bin) {
+void objectFrameType::Beam::read(BinaryReader* bin) {
     bin->read(&color);
     bin->read(&kind);
     bin->read(&accuracy);
     bin->read(&range);
 }
 
-void objectFrameType::Weapon::read(BinaryStream* bin) {
+void objectFrameType::Weapon::read(BinaryReader* bin) {
     bin->read(&usage);
     bin->read(&energyCost);
     bin->read(&fireTime);
