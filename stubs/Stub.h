@@ -94,7 +94,6 @@ struct function_traits<R(A0, A1, A2, A3, A4, A5, A6, A7)> {
 #define STUB0(NAME, TYPE, ...) \
   inline function_traits<TYPE>::return_type \
   NAME() { \
-    fprintf(stderr, "%s\n", #NAME); \
     return __VA_ARGS__; \
   }
 
@@ -103,7 +102,6 @@ struct function_traits<R(A0, A1, A2, A3, A4, A5, A6, A7)> {
   NAME( \
       function_traits<TYPE>::arg0_type a0) { \
     (void)a0; \
-    fprintf(stderr, "%s\n", #NAME); \
     return __VA_ARGS__; \
   }
 
@@ -114,7 +112,6 @@ struct function_traits<R(A0, A1, A2, A3, A4, A5, A6, A7)> {
       function_traits<TYPE>::arg1_type a1) { \
     (void)a0; \
     (void)a1; \
-    fprintf(stderr, "%s\n", #NAME); \
     return __VA_ARGS__; \
   }
 
@@ -127,7 +124,6 @@ struct function_traits<R(A0, A1, A2, A3, A4, A5, A6, A7)> {
     (void)a0; \
     (void)a1; \
     (void)a2; \
-    fprintf(stderr, "%s\n", #NAME); \
     return __VA_ARGS__; \
   }
 
@@ -142,7 +138,6 @@ struct function_traits<R(A0, A1, A2, A3, A4, A5, A6, A7)> {
     (void)a1; \
     (void)a2; \
     (void)a3; \
-    fprintf(stderr, "%s\n", #NAME); \
     return __VA_ARGS__; \
   }
 
@@ -159,7 +154,6 @@ struct function_traits<R(A0, A1, A2, A3, A4, A5, A6, A7)> {
     (void)a2; \
     (void)a3; \
     (void)a4; \
-    fprintf(stderr, "%s\n", #NAME); \
     return __VA_ARGS__; \
   }
 
@@ -178,7 +172,6 @@ struct function_traits<R(A0, A1, A2, A3, A4, A5, A6, A7)> {
     (void)a3; \
     (void)a4; \
     (void)a5; \
-    fprintf(stderr, "%s\n", #NAME); \
     return __VA_ARGS__; \
   }
 
@@ -199,7 +192,6 @@ struct function_traits<R(A0, A1, A2, A3, A4, A5, A6, A7)> {
     (void)a4; \
     (void)a5; \
     (void)a6; \
-    fprintf(stderr, "%s\n", #NAME); \
     return __VA_ARGS__; \
   }
 
@@ -222,7 +214,6 @@ struct function_traits<R(A0, A1, A2, A3, A4, A5, A6, A7)> {
     (void)a5; \
     (void)a6; \
     (void)a7; \
-    fprintf(stderr, "%s\n", #NAME); \
     return __VA_ARGS__; \
   }
 
