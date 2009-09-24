@@ -36,10 +36,9 @@
 
 extern  GWorldPtr       gSaveWorld;
 
-
 directTextType      *gDirectText = nil;
 long                gWhichDirectText = 0;
-TypedHandle<unsigned long> gFourBitTable;  // for turning 4-bit masks into 8-bit masks on the fly
+TypedHandle<uint32_t> gFourBitTable;  // for turning 4-bit masks into 8-bit masks on the fly
 TypedHandle<directTextType> gDirectTextData;
 
 size_t directTextType::load_data(const char* data, size_t len) {
@@ -61,7 +60,6 @@ size_t directTextType::load_data(const char* data, size_t len) {
 
 int InitDirectText() {
     TypedHandle<directTextType> tData;
-    unsigned char   i, *c;
     short           count;
     directTextType  *dtext = nil;
 
@@ -159,19 +157,20 @@ int InitDirectText() {
         return( MEMORY_ERROR);
     }
 
-    c = reinterpret_cast<unsigned char*>(*gFourBitTable);
-    for (i = 0; i < kFourBitSize; i++) {
-        if ( i & 0x08) *(c++) = 0xff;
-        else *(c++) = 0x00;
-
-        if ( i & 0x04) *(c++) = 0xff;
-        else *(c++) = 0x00;
-
-        if ( i & 0x02) *(c++) = 0xff;
-        else *(c++) = 0x00;
-
-        if ( i & 0x01) *(c++) = 0xff;
-        else *(c++) = 0x00;
+    for (int i = 0; i < kFourBitSize; i++) {
+        (*gFourBitTable)[i] = 0;
+        if (i & 0x08) {
+            (*gFourBitTable)[i] |= 0xFF000000;
+        }
+        if (i & 0x04) {
+            (*gFourBitTable)[i] |= 0x00FF0000;
+        }
+        if (i & 0x02) {
+            (*gFourBitTable)[i] |= 0x0000FF00;
+        }
+        if (i & 0x01) {
+            (*gFourBitTable)[i] |= 0x000000FF;
+        }
     }
 
     return kNoError;
@@ -305,13 +304,13 @@ void DrawDirectTextStringClipped(unsigned char* string, unsigned char color, Pix
                 longRect *clip, long portLeft, long portTop)
 
 {
-    unsigned char   *hchar, *dbyte, *sbyte, *tbyte;
+    unsigned char   *hchar, *dbyte, *sbyte;
     unsigned char   slen;
     long            rowPlus, charPlus = 0, hpos, leftSkip, bytesToDo, width, rowBytes, topEdge,
                     bottomEdge;
     int             i, j, k;
     Point           pen;
-    unsigned long   *slong, *dlong, colorlong = 0;
+    uint32_t        *slong, *dlong, colorlong = 0;
 
 //  DebugStr( string);
 //  *string = 4;
@@ -389,37 +388,54 @@ void DrawDirectTextStringClipped(unsigned char* string, unsigned char color, Pix
                     for ( i = 0; i < gDirectText->physicalWidth; i++)
                     {
                         // really table + ((*sbyte >> 4) << 2) -- look up byte value for bit mask
-                        tbyte = reinterpret_cast<unsigned char*>(*gFourBitTable) + implicit_cast<long>(( (*sbyte) >> 2L) & 0x3c);
+                        uint32_t t = (*gFourBitTable)[((*sbyte) >> 4L) & 0xF];
 
                         // for each of four bytes for this half of the source byte:
                         // make sure exists & is within left & right bounds
                         // increase h counter (k) and destByte
-                        if ( (*(tbyte++)) && ( k >= leftSkip) && ( k < bytesToDo)) *dbyte = color;
-                        dbyte++;
-                        k++;
-                        if ( (*(tbyte++)) && ( k >= leftSkip) && ( k < bytesToDo)) *dbyte = color;
-                        dbyte++;
-                        k++;
-                        if ( (*(tbyte++)) && ( k > leftSkip) && ( k < bytesToDo)) *dbyte = color;
-                        dbyte++;
-                        k++;
-                        if ( (*(tbyte++)) && ( k > leftSkip) && ( k < bytesToDo)) *dbyte = color;
-                        dbyte++;
-                        k++;
+                        if ((t & 0xFF000000) && (k >= leftSkip) && (k < bytesToDo)) {
+                            *dbyte = color;
+                        }
+                        ++dbyte;
+                        ++k;
+                        if ((t & 0x00FF0000) && (k >= leftSkip) && (k < bytesToDo)) {
+                            *dbyte = color;
+                        }
+                        ++dbyte;
+                        ++k;
+                        if ((t & 0x0000FF00) && (k > leftSkip) && (k < bytesToDo)) {
+                            *dbyte = color;
+                        }
+                        ++dbyte;
+                        ++k;
+                        if ((t & 0x000000FF) && (k > leftSkip) && (k < bytesToDo)) {
+                            *dbyte = color;
+                        }
+                        ++dbyte;
+                        ++k;
 
-                        tbyte = reinterpret_cast<unsigned char*>(*gFourBitTable) + implicit_cast<long>(( (*(sbyte++)) & 0x0f) << 2L);
-                        if ( (*(tbyte++)) && ( k >= leftSkip) && ( k < bytesToDo)) *dbyte = color;
-                        dbyte++;
-                        k++;
-                        if ( (*(tbyte++)) && ( k >= leftSkip) && ( k < bytesToDo)) *dbyte = color;
-                        dbyte++;
-                        k++;
-                        if ( (*(tbyte++)) && ( k >= leftSkip) && ( k < bytesToDo)) *dbyte = color;
-                        dbyte++;
-                        k++;
-                        if ( (*(tbyte++)) && ( k >= leftSkip) && ( k < bytesToDo)) *dbyte = color;
-                        dbyte++;
-                        k++;
+                        t = (*gFourBitTable)[(*sbyte++) & 0xF];
+
+                        if ((t & 0xFF000000) && (k >= leftSkip) && (k < bytesToDo)) {
+                            *dbyte = color;
+                        }
+                        ++dbyte;
+                        ++k;
+                        if ((t & 0x00FF0000) && (k >= leftSkip) && (k < bytesToDo)) {
+                            *dbyte = color;
+                        }
+                        ++dbyte;
+                        ++k;
+                        if ((t & 0x0000FF00) && (k >= leftSkip) && (k < bytesToDo)) {
+                            *dbyte = color;
+                        }
+                        ++dbyte;
+                        ++k;
+                        if ((t & 0x000000FF) && (k >= leftSkip) && (k < bytesToDo)) {
+                            *dbyte = color;
+                        }
+                        ++dbyte;
+                        ++k;
                     }
                     // add row to dest byte
                     dbyte += rowBytes - (width);;
@@ -440,18 +456,18 @@ void DrawDirectTextStringClipped(unsigned char* string, unsigned char color, Pix
             sbyte += topEdge * gDirectText->physicalWidth;
 
             // dlong = destination byte
-            dlong = reinterpret_cast<unsigned long *>(hchar);
+            dlong = reinterpret_cast<uint32_t*>(hchar);
             for ( j = topEdge; j < bottomEdge; j++)
             {
                 for ( i = 0; i < gDirectText->physicalWidth; i++)
                 {
                     // get ptr in bit>byte table
-                    slong = *gFourBitTable + implicit_cast<long>( (*sbyte) >> 4L);
+                    slong = (*gFourBitTable) + implicit_cast<long>( (*sbyte) >> 4L);
                     *dlong = (( *dlong | *slong) ^ *slong) | ( colorlong & *slong);
                     dlong++;
 
                     // for snd half of word
-                    slong = *gFourBitTable + implicit_cast<long>( (*(sbyte++)) & 0x0f);
+                    slong = (*gFourBitTable) + implicit_cast<long>( (*(sbyte++)) & 0x0f);
                     *dlong = (( *dlong | *slong) ^ *slong) | ( colorlong & *slong);
                     dlong++;
                 }

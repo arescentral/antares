@@ -98,16 +98,6 @@ class TypedHandle<unsigned char> : public TypedHandleBase<unsigned char> {
     }
 };
 
-template <>
-class TypedHandle<unsigned long> : public TypedHandleBase<unsigned long> {
-  public:
-    void load_resource(uint32_t code, int id) {
-        Resource rsrc(code, id);
-        create(rsrc.size() / sizeof(unsigned long));
-        memcpy(**this, rsrc.data(), rsrc.size());
-    }
-};
-
 template <typename T>
 TypedHandle<T> TypedHandleBase<T>::clone() const {
     TypedHandle<T> cloned;
