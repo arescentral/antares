@@ -389,13 +389,13 @@ void RunLengthSpritePixInPixMap( spritePix *sprite, Point where, PixMapHandle pi
 }
 
 
-void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, longRect *dRect,
-        longRect *clipRect, PixMapHandle pixMap)
+void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect *dRect,
+        Rect *clipRect, PixMapHandle pixMap)
 {
     long        mapWidth, mapHeight, x, y, i, h, v, d, last;
     long        shapeRowPlus, destRowPlus, rowbytes, *hmap, *vmap, *hmapoffset, *lhend, scaleCalc;
     unsigned char *destByte, *shapeByte, *hend, *vend, *chunkByte;
-    longRect    mapRect, sourceRect;
+    Rect    mapRect, sourceRect;
     Boolean     clipped = FALSE;
 
     scaleCalc = (sprite->width * scale);
@@ -715,15 +715,15 @@ void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, long
     } else dRect->left = dRect->right = dRect->top = dRect->bottom = 0;
 }
 
-void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, longRect *dRect,
-        longRect *clipRect, PixMapHandle pixMap, short staticValue)
+void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect *dRect,
+        Rect *clipRect, PixMapHandle pixMap, short staticValue)
 
 {
     long        mapWidth, mapHeight, x, y, i, h, v, d, last;
     long        shapeRowPlus, destRowPlus, rowbytes, *hmap, *vmap, *hmapoffset, *lhend, scaleCalc;
     unsigned char *destByte, *shapeByte, *hend, *vend, *chunkByte;
     unsigned char   *staticByte;
-    longRect    mapRect, sourceRect;
+    Rect    mapRect, sourceRect;
     Boolean     clipped = FALSE;
 
     scaleCalc = (sprite->width * scale);
@@ -1030,8 +1030,8 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, l
     } else dRect->left = dRect->right = dRect->top = dRect->bottom = 0;
 }
 
-void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, longRect *dRect,
-        longRect *clipRect, PixMapHandle pixMap, short staticValue, unsigned char color,
+void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect *dRect,
+        Rect *clipRect, PixMapHandle pixMap, short staticValue, unsigned char color,
         unsigned char colorAmount)
 
 {
@@ -1039,7 +1039,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, lo
     long        shapeRowPlus, destRowPlus, rowbytes, *hmap, *vmap, *hmapoffset, *lhend, scaleCalc;
     unsigned char *destByte, *shapeByte, *hend, *vend, *chunkByte;
     unsigned char   *staticByte;
-    longRect    mapRect, sourceRect;
+    Rect    mapRect, sourceRect;
     Boolean     clipped = FALSE;
 
     scaleCalc = (sprite->width * scale);
@@ -1389,15 +1389,15 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, lo
 
 // a hack; not fast
 
-void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, longRect *dRect,
-        longRect *clipRect, PixMapHandle pixMap, unsigned char colorOut,
+void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect *dRect,
+        Rect *clipRect, PixMapHandle pixMap, unsigned char colorOut,
         unsigned char colorIn)
 
 {
     long        mapWidth, mapHeight, x, y, i, h, v, d, last, sourceX, sourceY;
     long        shapeRowPlus, destRowPlus, rowbytes, *hmap, *vmap, *hmapoffset, *lhend, scaleCalc;
     unsigned char *destByte, *shapeByte, *hend, *vend, *chunkByte;
-    longRect    mapRect, sourceRect;
+    Rect    mapRect, sourceRect;
     Boolean     clipped = FALSE;
 
     scaleCalc = (sprite->width * scale);
@@ -1783,12 +1783,12 @@ void EraseSpriteTable( void)
 }
 
 
-void DrawSpriteTableInOffWorld( longRect *clipRect)
+void DrawSpriteTableInOffWorld( Rect *clipRect)
 
 {
     PixMapHandle    pixMap;
     long            i, trueScale, layer, tinySize;
-    longRect        sRect;
+    Rect        sRect;
     spritePix       aSpritePix;
     TypedHandle<natePixType> pixTable;
     int             whichShape;

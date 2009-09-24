@@ -1952,7 +1952,7 @@ void NetLevelShowLag( long lag, long recommended)
     Rect            tRect, stringRect, bottomRect;
     PixMapHandle    offMap = GetGWorldPixMap( gOffWorld);
     transColorType  *transColor;
-    longRect        clipRect;
+    Rect        clipRect;
     Str255          string, numString;
 
     GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kNetLevelLagBox), &tRect);
@@ -2008,7 +2008,7 @@ void NetLevelShowRaces( short myRace, short opponentRace)
     Rect            tRect, stringRect, bottomRect;
     PixMapHandle    offMap = GetGWorldPixMap( gOffWorld);
     transColorType  *transColor;
-    longRect        clipRect;
+    Rect        clipRect;
     Str255          string, raceString;
 
     GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kNetLevelRaceBox), &tRect);
@@ -2241,7 +2241,7 @@ unsigned char NetLevelSetColor( netSetupType *setup,
 void NetLevelDrawLagGraph( netSetupType *setup)
 {
     Rect            graphBounds, lagRect, recRect, tRect;
-    longRect        clipRect;
+    Rect        clipRect;
     long            i, x, y, whichSample, mean, sd, width, height, strlen;
     Str255          s;
     transColorType  *transColor;
@@ -2565,7 +2565,7 @@ void AddCharToVisibleString( netSetupType *setup, long whichPlayer,
 {
     PixMapHandle    offMap = GetGWorldPixMap( gOffWorld);
     transColorType  *transColor;
-    longRect        clipRect;
+    Rect        clipRect;
     Rect            tRect;
     unsigned char   *getwidchar, *getwidwid, color, textColor, shade;
     long            width, height, strlen, count, count2,
@@ -3016,7 +3016,7 @@ void UpdatePlayerData( netSetupType *setup, long whichPlayer)
     transColorType      *transColor;
     PixMapHandle        offPixMap = GetGWorldPixMap( gOffWorld);
     Rect                bounds, inRect;
-    longRect            clipRect, lRect;
+    Rect            clipRect, lRect;
     long                height, l;
     short               race, minutesPlayed, kills, losses;
     unsigned char       color;

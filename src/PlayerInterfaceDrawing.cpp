@@ -244,7 +244,7 @@ extern CWindowPtr       gTheWindow;
 extern long             gWhichDirectText;
 extern directTextType*  gDirectText;
 
-void DrawPlayerInterfacePlainRect( longRect *dRect, unsigned char color,
+void DrawPlayerInterfacePlainRect( Rect *dRect, unsigned char color,
                 interfaceStyleType style, PixMap *destMap, long portLeft,
                         long portTop)
 
@@ -299,7 +299,7 @@ void DrawPlayerInterfacePlainRect( longRect *dRect, unsigned char color,
     SetTranslateColorFore( BLACK);
 }
 
-void DrawPlayerInterfaceTabBox( longRect    *dRect, unsigned char color,
+void DrawPlayerInterfaceTabBox( Rect    *dRect, unsigned char color,
                 interfaceStyleType style, PixMap *destMap, long portLeft,
                         long portTop, short topRightBorderSize)
 
@@ -2450,7 +2450,7 @@ void DrawInterfaceString(unsigned char* s, interfaceStyleType style, PixMap *des
                         long portTop, unsigned char color)
 
 {
-    longRect    clipRect;
+    Rect    clipRect;
 
     RectToLongRect( &(destMap->bounds), &clipRect);
 //  mSetDirectFont( kButtonFontNum)

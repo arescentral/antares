@@ -50,12 +50,12 @@ Point BriefingSprite_GetBestLocation( spritePix *sprite, long scale,
 void GetInitialObjectSpriteData( long whichScenario, long whichObject,
         long maxSize, Rect *bounds, coordPointType *corner,
         long scale, long *thisScale, spritePix *aSpritePix, Point *where,
-        longRect *spriteRect);
+        Rect *spriteRect);
 
 void GetRealObjectSpriteData( coordPointType *realCoord, baseObjectType *baseObject,
         long owner, long spriteOverride, long maxSize, Rect *bounds, coordPointType *corner,
         long scale, long *thisScale, spritePix *aSpritePix, Point *where,
-        longRect *spriteRect);
+        Rect *spriteRect);
 
 void SpriteBounds_Get( spritePix *sprite, Point where, long scale,
     Rect *bounds);
@@ -204,7 +204,7 @@ void Briefing_Grid_Set( Boolean *grid, long x, long y, long gridWidth,
 void GetInitialObjectSpriteData( long whichScenario, long whichObject,
         long maxSize, Rect *bounds, coordPointType *corner,
         long scale, long *thisScale, spritePix *aSpritePix, Point *where,
-        longRect *spriteRect)
+        Rect *spriteRect)
 
 {
     spaceObjectType         *sObject = nil;
@@ -265,7 +265,7 @@ void GetRealObjectSpriteData( coordPointType *realCoord,
         long owner, long spriteOverride, long maxSize, Rect *bounds,
         coordPointType *corner,
         long scale, long *thisScale, spritePix *aSpritePix, Point *where,
-        longRect *spriteRect)
+        Rect *spriteRect)
 {
     TypedHandle<natePixType> pixTable;
     int             whichShape;
@@ -392,7 +392,7 @@ void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
                 objectNum;
     Point       where;
     spritePix   aSpritePix;
-    longRect    spriteRect, clipRect;
+    Rect    spriteRect, clipRect;
     baseObjectType  *baseObject = nil;
     spaceObjectType *anObject = *gSpaceObjectData;
     Boolean         *gridCells = nil;
@@ -540,7 +540,7 @@ void BriefPoint_Data_Get( long whichPoint, long whichScenario, long *headerID,
     scenarioType    *scenario = *gAresGlobal->gScenarioData + whichScenario;
     Point           where;
     spritePix       aSpritePix;
-    longRect        spriteRect;
+    Rect        spriteRect;
     long            thisScale;
     briefPointType  *brief = mGetScenarioBrief( scenario, whichPoint);
 

@@ -249,7 +249,7 @@ void ResetSectorLines( void)
 void UpdateRadar( long unitsDone)
 
 {
-    longRect        lRect;
+    Rect        lRect;
     spaceObjectType *anObject;
     baseObjectType  *baseObject;
     long            dx, oCount, rcount, x, y, *scaleval;
@@ -739,7 +739,7 @@ void EraseSite( void)
     long            *l, *olp;
     short           sx, sy, sa, sb, sc, sd;
     PixMapHandle    offPixBase;
-    longRect        clipRect;
+    Rect        clipRect;
 
     offPixBase = GetGWorldPixMap( gOffWorld);
     clipRect.left = CLIP_LEFT;
@@ -795,7 +795,7 @@ void EraseSectorLines( void)
 {
     long            *l, count, ol;
     PixMapHandle    offPixBase;
-    longRect        clipRect;
+    Rect        clipRect;
 
     offPixBase = GetGWorldPixMap( gOffWorld);
     clipRect.left = CLIP_LEFT;
@@ -841,7 +841,7 @@ void DrawSite( void)
     transColorType  *transColor;
     unsigned char   color;
     PixMapHandle    offPixBase;
-    longRect        clipRect;
+    Rect        clipRect;
     Point           cursorCoord;
     Boolean         doDraw;
 
@@ -979,7 +979,7 @@ void DrawSectorLines( void)
     long            *l, dashon, dashoff, dashcount;
     unsigned long   size, level, x, h, division;
     PixMapHandle    offPixBase;
-    longRect        clipRect;
+    Rect        clipRect;
     unsigned char   color;
     transColorType  *transColor;
     Boolean         doDraw;
@@ -1187,7 +1187,7 @@ void ShowSite( void)
 {
     short           sx, sy, sa, sb, sc, sd;
     PixMapHandle    offPixBase;
-    longRect        clipRect;
+    Rect        clipRect;
     long            *l;
 
     offPixBase = GetGWorldPixMap( gOffWorld);
@@ -1270,7 +1270,7 @@ void ShowSectorLines( void)
 {
     long            *l, count;
     PixMapHandle    offPixBase;
-    longRect        clipRect;
+    Rect        clipRect;
 
     offPixBase = GetGWorldPixMap( gOffWorld);
     clipRect.left = CLIP_LEFT;
@@ -1374,7 +1374,7 @@ void DrawArbitrarySectorLines( coordPointType *corner, long scale, long minSecto
 
 {
     unsigned long   size, level, x, h, division;
-    longRect        clipRect;
+    Rect        clipRect;
     unsigned char   color;
     transColorType  *transColor;
 
@@ -1468,7 +1468,7 @@ void GetArbitrarySingleSectorBounds( coordPointType *corner, coordPointType *loc
 
 {
     unsigned long   size, level, x, h, division, scaledLoc;
-    longRect        clipRect;
+    Rect        clipRect;
 
     clipRect.left = bounds->left;
     clipRect.right = bounds->right;
@@ -1555,7 +1555,7 @@ void UpdateBarIndicator( short which, long value, long max, PixMapHandle pixMap)
 
 {
     long            graphicValue;
-    longRect        tRect, clipRect;
+    Rect        tRect, clipRect;
     transColorType  *transColor;
     unsigned char   color, lightColor, darkColor;
     Rect            rrect;
@@ -1610,7 +1610,7 @@ void UpdateBarIndicator( short which, long value, long max, PixMapHandle pixMap)
 void DrawBuildTimeBar( long value)
 
 {
-    longRect        tRect, clipRect;
+    Rect        tRect, clipRect;
     transColorType  *transColor;
     unsigned char   color;
 

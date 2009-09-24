@@ -148,7 +148,7 @@ void EraseSpriteCursorSprite( void)
     }
     if ( gSpriteCursor->thisShowLine)
     {
-        longRect    tc;
+        Rect    tc;
 
         SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
@@ -166,7 +166,7 @@ void EraseSpriteCursorSprite( void)
             0, 0);
     } else if ( gSpriteCursor->lastShowLine)
     {
-        longRect    tc;
+        Rect    tc;
 
         SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
@@ -185,11 +185,11 @@ void EraseSpriteCursorSprite( void)
     }
 }
 
-void DrawSpriteCursorSprite( longRect *clipRect)
+void DrawSpriteCursorSprite( Rect *clipRect)
 
 {
     PixMapHandle    pixMap, savePixBase;
-    longRect        sRect, tc;
+    Rect        sRect, tc;
     spritePix       aSpritePix;
     TypedHandle<natePixType> pixTable;
     int             whichShape;
@@ -276,7 +276,7 @@ void ShowSpriteCursorSprite( void)
 {
     Rect            tRect;
     PixMapHandle    pixMap;
-    longRect        tc;
+    Rect        tc;
 
     SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 

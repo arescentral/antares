@@ -117,9 +117,9 @@ long GetDirectFontNum( short);
 short AddDirectFont( directTextType *);
 
 void DrawDirectTextString(unsigned char*, unsigned char, PixMap *, long, long);
-void DrawDirectTextStringClipped(unsigned char*, unsigned char, PixMap *, longRect *, long, long);
+void DrawDirectTextStringClipped(unsigned char*, unsigned char, PixMap *, Rect *, long, long);
 
 void DrawDirectTextHeightx2(unsigned char*, unsigned char, PixMap *, long, long);
-void DrawDirectTextStringClippedx2(unsigned char*, unsigned char, PixMap *, longRect *, long, long);
+void DrawDirectTextStringClippedx2(unsigned char*, unsigned char, PixMap *, Rect *, long, long);
 
 #endif // ANTARES_DIRECT_TEXT_HPP_

@@ -23,7 +23,7 @@
 #include "NateDraw.hpp"
 #include "SpaceObject.hpp"
 
-spaceObjectType *HackNewNonplayerShip( long, short, longRect *);
+spaceObjectType *HackNewNonplayerShip( long, short, Rect *);
 void NonplayerShipThink( long);
 void UpdateMyNonplayerShip( void);
 void HackShowShipID( void);

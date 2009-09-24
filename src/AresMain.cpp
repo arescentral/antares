@@ -1728,7 +1728,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
     unsigned long       decideCycle = 0;
     Str255              string;
     UnsignedWide        lastTime, thisTime, scrapTime, netTime;
-    longRect                clipRect;
+    Rect                clipRect;
     long                    unitsToDo = 0, unitsPassed = 0, unitsDone = 0,
                             l1, l2, newGameTime = 0, lastclicktime = 0,
                             additionalSeconds = 0;

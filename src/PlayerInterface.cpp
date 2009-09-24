@@ -684,7 +684,7 @@ void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
     int                     error;
     unsigned char           color, *strPtr;
     transColorType          *transColor;
-    longRect                lRect, clipRect, boundsRect;
+    Rect                lRect, clipRect, boundsRect;
     Rect                    tRect;
     retroTextSpecType       retroTextSpec;
     long                    height;
@@ -771,7 +771,7 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
     unsigned char   *getwidchar, *getwidwid, color;
     long            width, height, strlen, temp;
     transColorType  *transColor;
-    longRect        clipRect;
+    Rect        clipRect;
     Rect            tRect;
     RGBColor        fadeColor = {0, 0, 0};
     PixMapHandle    offMap = GetGWorldPixMap( gOffWorld);
@@ -1153,7 +1153,7 @@ void DoHelpScreen( void)
     short                   whichItem;
     EventRecord             theEvent;
     char                    whichChar;
-    longRect                clipRect, boundsRect;
+    Rect                clipRect, boundsRect;
     long                    height;
     retroTextSpecType       retroTextSpec;
     transColorType          *transColor;
@@ -1328,7 +1328,7 @@ void StartPauseIndicator(unsigned char* pauseString, unsigned char hue) {
     Rect            tRect, stringRect;
     PixMapHandle    offMap = GetGWorldPixMap( gOffWorld);
     transColorType  *transColor;
-    longRect        clipRect;
+    Rect        clipRect;
 
 #pragma unused( hue)
     mSetDirectFont( kTitleFontNum);
@@ -3710,7 +3710,7 @@ long DoSelectLevelInterface( long startChapter)
 
 void DrawLevelNameInBox(unsigned char* name, long fontNum, short descriptionTextID,
     long itemNum) {
-    longRect                clipRect;
+    Rect                clipRect;
     Rect                    tRect;
     unsigned char           *strPtr;
     PixMapHandle            offMap;
@@ -4035,7 +4035,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
     Point           starPoint;
     transColorType  *transColor;
     unsigned char   color;
-    longRect        longClipRect, starRect;
+    Rect        longClipRect, starRect;
     inlinePictType  *thisInlinePict;
 
 #pragma unused( mustFit)
@@ -4236,7 +4236,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
 {
     Rect            dataRect;
     transColorType  *transColor;
-    longRect        lRect, longClipRect;
+    Rect        lRect, longClipRect;
     baseObjectType  *baseObject = *gBaseObjectData;// + (pictID - kFirstShipDataPictID);
     Str255          tempString, numString;
     retroTextSpecType   retroTextSpec;
@@ -4495,7 +4495,7 @@ void ShowSuccessAnimation( WindowPtr thePort)
     long            lastTime, shipScale, zpoint, hpos, unitsToDo, ztimes, startimes, warpcount,
                     autoTimeStart;
     Point           vanishingPoint, shipPoint;
-    longRect        starBounds, spriteBounds;
+    Rect        starBounds, spriteBounds;
     Rect            tRect, lastBounds, theseBounds;
     TypedHandle<natePixType> shipSprite;
     spritePix       aSpritePix;
@@ -4653,7 +4653,7 @@ void ShowSuccessAnimation( WindowPtr thePort)
 void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, long parlength, long yourloss, long parloss,
     long yourkill, long parkill, long parScore)
 {
-    longRect            clipRect, boundsRect, tlRect;
+    Rect            clipRect, boundsRect, tlRect;
     Rect                tRect;
     long                height, waitTime, score = 0;
     retroTextSpecType   retroTextSpec;
@@ -4925,7 +4925,7 @@ void DoMissionDebriefingText( WindowPtr thePort, long textID, long yourlength, l
 void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scrollWidth,
     long textFontNum, long songID)
 {
-    longRect            clipRect, boundsRect, scrollRect, textRect;
+    Rect            clipRect, boundsRect, scrollRect, textRect;
     long                height, waitTime = TickCount(), l, autoTimeStart, sectionLength, textLength,
                         charNum, pictID = 0, bgVOffset = 0, bgPictID = -1;
     retroTextSpecType   retroTextSpec;

@@ -302,7 +302,7 @@ void DrawDirectTextString( char *string, unsigned char color, PixMap *destMap, l
 }
 
 void DrawDirectTextStringClipped(unsigned char* string, unsigned char color, PixMap *destMap,
-                longRect *clip, long portLeft, long portTop)
+                Rect *clip, long portLeft, long portTop)
 
 {
     unsigned char   *hchar, *dbyte, *sbyte;
@@ -538,7 +538,7 @@ void DrawDirectTextHeightx2(unsigned char* string, unsigned char color, PixMap *
 }
 
 void DrawDirectTextStringClippedx2(unsigned char* string, unsigned char color, PixMap *destMap,
-                longRect *clip, long portLeft, long portTop)
+                Rect *clip, long portLeft, long portTop)
 {
     static_cast<void>(string);
     static_cast<void>(color);

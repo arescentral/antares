@@ -100,7 +100,7 @@ void ThinkObjectResolveDestination( spaceObjectType *, coordPointType *, spaceOb
 Boolean ThinkObjectResolveTarget( spaceObjectType *, coordPointType *, unsigned long *, spaceObjectType **);
 unsigned long ThinkObjectEngageTarget( spaceObjectType *, spaceObjectType *, unsigned long, short *, long);
 
-spaceObjectType *HackNewNonplayerShip( long owner, short type, longRect *bounds)
+spaceObjectType *HackNewNonplayerShip( long owner, short type, Rect *bounds)
 
 {
 #pragma unused( owner, type, bounds)

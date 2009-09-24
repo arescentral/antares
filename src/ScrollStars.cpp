@@ -379,7 +379,7 @@ void DrawScrollStars( Boolean warp)
     unsigned char   slowColor, mediumColor, fastColor, *color, *dByte;
     long            rowBytes;
     transColorType  *transColor;
-    longRect        bounds, lastBounds;
+    Rect        bounds, lastBounds;
     PixMapHandle    offMap;
 
 #pragma unused( warp)
@@ -557,7 +557,7 @@ void ShowScrollStars( Boolean warp)
     unsigned char   slowColor, mediumColor, fastColor, *color, *dByte, *sByte;
     long            srowBytes, drowBytes;
     transColorType  *transColor;
-    longRect        bounds, lastBounds;
+    Rect        bounds, lastBounds;
     PixMapHandle    sourceMap;
 
 #pragma unused( warp)
@@ -774,7 +774,7 @@ void DontShowScrollStars( void)
 #ifdef kUseScrollStar
     short           i;
     scrollStarType  *star;
-    longRect        bounds, lastBounds;
+    Rect        bounds, lastBounds;
 
     bounds.left = lastBounds.left = CLIP_LEFT;
     bounds.top = lastBounds.top = CLIP_TOP;
@@ -884,7 +884,7 @@ void DrawAllBeams( void)
     spaceObjectType *anObject, *bObject;
     baseObjectType  *baseObject;
     short           i;
-    longRect        bounds;
+    Rect        bounds;
     long            h;
 
     bounds.left = CLIP_LEFT;
@@ -975,7 +975,7 @@ void DrawAllBeams( void)
 }
 #endif
 
-void Reset3DStars( Point center, longRect *bounds)
+void Reset3DStars( Point center, Rect *bounds)
 
 {
     short           i;
@@ -1007,7 +1007,7 @@ void Reset3DStars( Point center, longRect *bounds)
     }
 }
 
-void Move3DStars( Point center, long byUnits, longRect *bounds)
+void Move3DStars( Point center, long byUnits, Rect *bounds)
 
 {
     short           i;
@@ -1076,7 +1076,7 @@ void Move3DStars( Point center, long byUnits, longRect *bounds)
     }
 }
 
-void Draw3DStars( Boolean warp, longRect *bounds, PixMapHandle destMap)
+void Draw3DStars( Boolean warp, Rect *bounds, PixMapHandle destMap)
 
 {
     short           i;
@@ -1160,7 +1160,7 @@ void Draw3DStars( Boolean warp, longRect *bounds, PixMapHandle destMap)
     }
 }
 
-void Show3DStars( Boolean warp, longRect *bounds, PixMapHandle sourceMap)
+void Show3DStars( Boolean warp, Rect *bounds, PixMapHandle sourceMap)
 
 {
     short           i;

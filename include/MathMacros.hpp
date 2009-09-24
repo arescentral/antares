@@ -29,8 +29,7 @@ inline T ABS(T x) {
     }
 }
 
-template <typename T>
-inline int mClipCode(int x, int y, T bounds) {
+inline int mClipCode(int x, int y, const Rect& bounds) {
     return ((x < bounds.left) << 3)
         | ((x > (bounds.right - 1)) << 2)
         | ((y < bounds.top) << 1)

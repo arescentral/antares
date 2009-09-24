@@ -238,7 +238,7 @@ void DrawAllLabels( void)
     short           i = 0, originalLength;
     screenLabelType *label;
     PixMapHandle    offPixBase;
-    longRect        clipRect, tRect;
+    Rect        clipRect, tRect;
     unsigned char   color;//, *getwidchar, *getwidwid;
     transColorType  *transColor;
 //  long            width, height, strlen;
@@ -271,7 +271,7 @@ void DrawAllLabels( void)
 
                 if ( label->keepOnScreenAnyway)
                 {
-                    longRect    tc;
+                    Rect    tc;
 
                     SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 //                  DrawNateLine( *offPixBase, &tc, label->where.h, label->where.v,
@@ -366,7 +366,7 @@ void ShowAllLabels( void)
 
                 if ( label->keepOnScreenAnyway)
                 {
-                    longRect    tc;
+                    Rect    tc;
 
                     SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 //                  CopyNateLine( *pixMap, *thePixMapHandle,

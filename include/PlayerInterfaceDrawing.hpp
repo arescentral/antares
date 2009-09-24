@@ -35,9 +35,9 @@ struct inlinePictType
     short   id;
 };
 
-void DrawPlayerInterfacePlainRect( longRect *, unsigned char, interfaceStyleType, PixMap *, long,
+void DrawPlayerInterfacePlainRect( Rect *, unsigned char, interfaceStyleType, PixMap *, long,
                         long);
-void DrawPlayerInterfaceTabBox( longRect *, unsigned char, interfaceStyleType, PixMap *, long,
+void DrawPlayerInterfaceTabBox( Rect *, unsigned char, interfaceStyleType, PixMap *, long,
                         long, short);
 void DrawPlayerInterfaceButton( interfaceItemType *, PixMap *, long,
                         long);
@@ -81,8 +81,8 @@ void DrawInterfaceString(unsigned char*, interfaceStyleType, PixMap *, long,
 void SetInterfaceLargeUpperFont( interfaceStyleType);
 void SetInterfaceLargeLowerFont( interfaceStyleType);
 void BiggestRect( Rect  *, Rect *);
-void LongRectToRect( longRect *, Rect *);
-void RectToLongRect( Rect *, longRect *);
-void SetLongRect( longRect *, long, long, long, long);
+void LongRectToRect( Rect *, Rect *);
+void RectToLongRect( Rect *, Rect *);
+void SetLongRect( Rect *, long, long, long, long);
 
 #endif // ANTARES_PLAYER_INTERFACE_DRAWING_HPP_

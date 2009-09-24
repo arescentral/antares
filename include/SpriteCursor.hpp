@@ -53,7 +53,7 @@ Boolean SpriteCursorVisible( void);
 Boolean SetSpriteCursorTable( short);
 void SetSpriteCursorShape( short);
 void EraseSpriteCursorSprite( void);
-void DrawSpriteCursorSprite( longRect *);
+void DrawSpriteCursorSprite( Rect *);
 void ShowSpriteCursorSprite( void);
 void MoveSpriteCursor( Point);
 void ShowHintLine( Point fromWhere, Point toWhere,

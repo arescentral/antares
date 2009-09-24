@@ -101,7 +101,7 @@ void EZDrawSpriteCenteredInRectBySprite( spritePix *aSpritePix,
     coordPointType      coord;
     long                tlong;
     Point               where;
-    longRect            dRect, spriteRect;
+    Rect            dRect, spriteRect;
 
     dRect.left = bounds->left;
     dRect.right = bounds->right;
@@ -160,7 +160,7 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
     spritePix           aSpritePix;
     Point               where;
     long                tlong, thisScale;
-    longRect            dRect, spriteRect;
+    Rect            dRect, spriteRect;
     coordPointType      coord;
     GrafPtr             oldPort;
 

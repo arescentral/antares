@@ -525,7 +525,7 @@ void DrawCurrentLongMessage( long timePass)
 {
     PixMapHandle    offPixBase;
     Rect            tRect, uRect;
-    longRect        lRect, cRect;
+    Rect        lRect, cRect;
     transColorType  *transColor;
     short           i;
     longMessageType *tmessage;
@@ -1024,7 +1024,7 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
     return ( height);
 }
 
-void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, longRect *clipRect, PixMap *destMap,
+void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, Rect *bounds, Rect *clipRect, PixMap *destMap,
                         long portLeft, long portTop)
 {
     long            charNum = 0, y = bounds->top + mDirectFontAscent() + retroTextSpec->topBuffer, x = bounds->left,
@@ -1032,7 +1032,7 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
     unsigned char   *widthPtr, charWidth, wrapState, // 0 = none, 1 = once, 2 = more than once
                     tempColor;
     unsigned char   *thisChar = *retroTextSpec->text, *thisWordChar, thisWord[255];
-    longRect        backRect, lineRect;
+    Rect        backRect, lineRect;
     unsigned char   calcColor, calcShade;
     transColorType  *transColor;
 
@@ -1205,10 +1205,10 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, longRect *bounds, l
 }
 
 void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
-    longRect *bounds, longRect *clipRect, PixMap *destMap, long portLeft, long portTop)
+    Rect *bounds, Rect *clipRect, PixMap *destMap, long portLeft, long portTop)
 {
     unsigned char   *thisChar = *(retroTextSpec->text), thisWord[kMaxRetroSize], charWidth, *widthPtr;
-    longRect        cursorRect, lineRect, tlRect;
+    Rect        cursorRect, lineRect, tlRect;
     long            oldx, wordLen, *lineLength = &(retroTextSpec->lineLength[retroTextSpec->lineCount]);
     unsigned char   tempColor, calcColor, calcShade;
     transColorType  *transColor;

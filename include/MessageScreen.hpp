@@ -111,7 +111,7 @@ void DrawMessageScreen( long);
 void SetStatusString(const unsigned char *, Boolean, unsigned char);
 void UpdateStatusString( void);
 long DetermineDirectTextHeightInWidth( retroTextSpecType *, long);
-void DrawDirectTextInRect( retroTextSpecType *, longRect *, longRect *, PixMap *, long, long);
-void DrawRetroTextCharInRect( retroTextSpecType *, long, longRect *, longRect *, PixMap *, long, long);
+void DrawDirectTextInRect( retroTextSpecType *, Rect *, Rect *, PixMap *, long, long);
+void DrawRetroTextCharInRect( retroTextSpecType *, long, Rect *, Rect *, PixMap *, long, long);
 
 #endif // ANTARES_MESSAGE_SCREEN_HPP_

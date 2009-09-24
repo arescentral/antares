@@ -36,7 +36,7 @@ void longPointType::read(BinaryReader* bin) {
     bin->read(&v);
 }
 
-void longRect::read(BinaryReader* bin) {
+void Rect::read(BinaryReader* bin) {
     bin->read(&left);
     bin->read(&top);
     bin->read(&right);
@@ -150,7 +150,7 @@ inline void mDashVerticalRun(
 // (ie the top & right edges of the destination window)
 // CLIPS to destPix->bounds, NOT counting hoff & voff
 
-void DrawNateRect( PixMap *destPix, longRect *destRect, long hoff, long voff, unsigned char color)
+void DrawNateRect( PixMap *destPix, Rect *destRect, long hoff, long voff, unsigned char color)
 
 {
     long            *dlong, drowPlus, x, y, colorlong, leftBytes, rightBytes, right;
@@ -269,7 +269,7 @@ void DrawNateRect( PixMap *destPix, longRect *destRect, long hoff, long voff, un
     }
 }
 
-void DrawNateRectVScan( PixMap *destPix, longRect *destRect, long hoff, long voff, unsigned char color)
+void DrawNateRectVScan( PixMap *destPix, Rect *destRect, long hoff, long voff, unsigned char color)
 
 {
     long            *dlong, drowPlus, x, y, colorlong, leftBytes, rightBytes, right,
@@ -412,7 +412,7 @@ void DrawNateRectVScan( PixMap *destPix, longRect *destRect, long hoff, long vof
     }
 }
 
-void DrawNateRectClipped( PixMap *destPix, longRect *destRect, longRect *clipRect, long hoff, long voff,
+void DrawNateRectClipped( PixMap *destPix, Rect *destRect, Rect *clipRect, long hoff, long voff,
                         unsigned char color)
 
 {
@@ -529,7 +529,7 @@ void DrawNateRectClipped( PixMap *destPix, longRect *destRect, longRect *clipRec
     }
 }
 
-void DrawNateRectVScanClipped( PixMap *destPix, longRect *destRect, longRect *clipRect, long hoff, long voff,
+void DrawNateRectVScanClipped( PixMap *destPix, Rect *destRect, Rect *clipRect, long hoff, long voff,
                         unsigned char color)
 
 {
@@ -649,8 +649,8 @@ void DrawNateRectVScanClipped( PixMap *destPix, longRect *destRect, longRect *cl
 }
 
 // must be square
-void DrawNateTriangleUpClipped( PixMap *destPix, longRect *destRect,
-    longRect *clipRect, long hoff, long voff, unsigned char color)
+void DrawNateTriangleUpClipped( PixMap *destPix, Rect *destRect,
+    Rect *clipRect, long hoff, long voff, unsigned char color)
 
 {
     long            drowPlus, x, leftEdge, rightPlus, trueWidth, count;
@@ -751,8 +751,8 @@ void DrawNateTriangleUpClipped( PixMap *destPix, longRect *destRect,
     }
 }
 
-void DrawNatePlusClipped( PixMap *destPix, longRect *destRect,
-    longRect *clipRect, long hoff, long voff, unsigned char color)
+void DrawNatePlusClipped( PixMap *destPix, Rect *destRect,
+    Rect *clipRect, long hoff, long voff, unsigned char color)
 
 {
     long            drowPlus, x, half, trueWidth, count;
@@ -864,8 +864,8 @@ void DrawNatePlusClipped( PixMap *destPix, longRect *destRect,
 
 }
 
-void DrawNateSquareClipped( PixMap *destPix, longRect *destRect,
-    longRect *clipRect, long hoff, long voff, unsigned char color)
+void DrawNateSquareClipped( PixMap *destPix, Rect *destRect,
+    Rect *clipRect, long hoff, long voff, unsigned char color)
 
 {
     long            drowPlus, x, rightPlus, trueWidth;
@@ -951,8 +951,8 @@ void DrawNateSquareClipped( PixMap *destPix, longRect *destRect,
     }
 }
 
-void DrawNateDiamondClipped( PixMap *destPix, longRect *destRect,
-    longRect *clipRect, long hoff, long voff, unsigned char color)
+void DrawNateDiamondClipped( PixMap *destPix, Rect *destRect,
+    Rect *clipRect, long hoff, long voff, unsigned char color)
 
 {
     long            drowPlus, leftEdge, rightPlus, trueWidth, count;
@@ -1047,7 +1047,7 @@ void DrawNateDiamondClipped( PixMap *destPix, longRect *destRect,
     }
 }
 
-void DrawNateVBracket( PixMap *destPix, longRect *destRect, longRect *clipRect, long hoff, long voff,
+void DrawNateVBracket( PixMap *destPix, Rect *destRect, Rect *clipRect, long hoff, long voff,
                         unsigned char color)
 
 {
@@ -1068,11 +1068,11 @@ void DrawNateVBracket( PixMap *destPix, longRect *destRect, longRect *clipRect, 
     mSetNatePixel( aByte, rowBytes, destRect->right - 1, destRect->bottom - 2, hoff, voff, destPix, color);
 }
 
-void DrawNateShadedRect( PixMap *destPix, longRect *destRect, longRect *clipRect, long hoff, long voff,
+void DrawNateShadedRect( PixMap *destPix, Rect *destRect, Rect *clipRect, long hoff, long voff,
                         unsigned char fillcolor, unsigned char lightcolor, unsigned char darkcolor)
 
 {
-    longRect    tRect = *destRect;
+    Rect    tRect = *destRect;
 
     tRect.right--;
     tRect.bottom--;
@@ -1102,7 +1102,7 @@ void BiggestRect( Rect  *dRect, Rect *sRect)
     if ( sRect->bottom > dRect->bottom) dRect->bottom = sRect->bottom;
 }
 
-void LongRectToRect( longRect *sRect, Rect *dRect)
+void LongRectToRect( Rect *sRect, Rect *dRect)
 
 {
     dRect->left = sRect->left;
@@ -1111,7 +1111,7 @@ void LongRectToRect( longRect *sRect, Rect *dRect)
     dRect->bottom = sRect->bottom;
 }
 
-void RectToLongRect( Rect *sRect, longRect *dRect)
+void RectToLongRect( Rect *sRect, Rect *dRect)
 
 {
     dRect->left = sRect->left;
@@ -1120,7 +1120,7 @@ void RectToLongRect( Rect *sRect, longRect *dRect)
     dRect->bottom = sRect->bottom;
 }
 
-void SetLongRect( longRect *dRect, long left, long top, long right, long bottom)
+void SetLongRect( Rect *dRect, long left, long top, long right, long bottom)
 
 {
     dRect->left = left;
@@ -1397,7 +1397,7 @@ void SetLongRect( longRect *dRect, long left, long top, long right, long bottom)
 
 // Draws a line between the specified endpoints in color Color.
 
-void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart, long XEnd,
+void DrawNateLine( PixMap *destPix, Rect *clipRect, long XStart, long YStart, long XEnd,
                     long YEnd, long hoff, long voff, unsigned char Color)
 {
     long            Temp, AdjUp, AdjDown, ErrorTerm, XAdvance, XDelta, YDelta, drowPlus;
@@ -1702,7 +1702,7 @@ void DrawNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart
 // Copies a line from sourcemap to destmap between the specified endpoints.  hoff and voff are for
 // the destPix only (for copying onscreen).
 
-void CopyNateLine( PixMap *sourcePix, PixMap *destPix, longRect *clipRect,
+void CopyNateLine( PixMap *sourcePix, PixMap *destPix, Rect *clipRect,
                     long XStart, long YStart, long XEnd, long YEnd, long hoff,
                     long voff)
 {
@@ -2053,7 +2053,7 @@ void DrawVerticalRun(char far **dbyte, int XAdvance,
 }
 */
 
-void DashNateLine( PixMap *destPix, longRect *clipRect, long XStart, long YStart, long XEnd,
+void DashNateLine( PixMap *destPix, Rect *clipRect, long XStart, long YStart, long XEnd,
                     long YEnd, long hoff, long voff, unsigned char Color, unsigned char dashon,
                     unsigned char dashoff, unsigned char dashcount)
 {

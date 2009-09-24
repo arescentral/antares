@@ -122,13 +122,13 @@ void SpriteHandlingInit( void);
 void CleanupSpriteHandling( void);
 void ResetAllSprites( void);
 void RunLengthSpritePixInPixMap( spritePix *, Point, PixMapHandle);
-void OptScaleSpritePixInPixMap( spritePix *, Point, long, longRect *, longRect *, PixMapHandle);
-void StaticScaleSpritePixInPixMap( spritePix *, Point, long, longRect *, longRect *,
+void OptScaleSpritePixInPixMap( spritePix *, Point, long, Rect *, Rect *, PixMapHandle);
+void StaticScaleSpritePixInPixMap( spritePix *, Point, long, Rect *, Rect *,
     PixMapHandle, short);
-void ColorScaleSpritePixInPixMap( spritePix *, Point, long, longRect *, longRect *,
+void ColorScaleSpritePixInPixMap( spritePix *, Point, long, Rect *, Rect *,
     PixMapHandle, short, unsigned char, unsigned char);
-void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, longRect *dRect,
-        longRect *clipRect, PixMapHandle pixMap, unsigned char colorOut,
+void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect *dRect,
+        Rect *clipRect, PixMapHandle pixMap, unsigned char colorOut,
         unsigned char colorIn);
 void ResetAllPixTables( void);
 void SetAllPixTablesNoKeep( void);
@@ -139,11 +139,11 @@ TypedHandle<natePixType> GetPixTable( short);
 spriteType *AddSprite( Point, TypedHandle<natePixType>, short, short, long, long, short, unsigned char, long *);
 void RemoveSprite( spriteType *);
 void EraseSpriteTable( void);
-void DrawSpriteTableInOffWorld( longRect *);
+void DrawSpriteTableInOffWorld( Rect *);
 void GetOldSpritePixData( spriteType *, spritePix *);
 void ShowSpriteTable( void);
 void CullSprites( void);
-void  PixMapTest( spritePix *, Point, long, longRect *, longRect *, PixMapHandle);
+void  PixMapTest( spritePix *, Point, long, Rect *, Rect *, PixMapHandle);
 void TestByte(unsigned char*, PixMap*, unsigned char*);
 int Randomize( int);
 

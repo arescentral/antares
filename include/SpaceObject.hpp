@@ -772,7 +772,7 @@ struct spaceObjectType {
     smallFixedType          maxVelocity;
     longPointType           scaledCornerOffset;
     longPointType           scaledSize;
-    longRect                absoluteBounds;
+    Rect                absoluteBounds;
     long                    randomSeed;
 
     union

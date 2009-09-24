@@ -140,7 +140,7 @@ struct interfaceCheckboxType {
 };
 
 struct interfaceItemType {
-    longRect            bounds;
+    Rect            bounds;
     union
     {
         interfaceLabeledRectType    labeledRect;

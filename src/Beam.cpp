@@ -281,7 +281,7 @@ void DrawAllBeams( void)
     beamType        *aBeam = ( beamType *)*gAresGlobal->gBeamData;
     baseObjectType  *baseObject;
     short           i;
-    longRect        bounds;
+    Rect        bounds;
     long            h;
     PixMapHandle    whatWorld = thePixMapHandle;
 
@@ -355,7 +355,7 @@ void DrawAllBeams( void)
 {
     beamType        *aBeam = *gAresGlobal->gBeamData;
     short           i, j;
-    longRect        bounds;
+    Rect        bounds;
     long            h, v;
     PixMapHandle    whatWorld = GetGWorldPixMap( gOffWorld);
     unsigned char   currentColor;
@@ -516,7 +516,7 @@ void ShowAllBeams( void)
 {
     beamType        *aBeam = *gAresGlobal->gBeamData;
     short           i, j;
-    longRect        bounds;
+    Rect        bounds;
     PixMapHandle    offWorld = GetGWorldPixMap( gOffWorld),
                     onWorld = thePixMapHandle;
 

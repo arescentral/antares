@@ -371,7 +371,7 @@ void CenterItemRangeInRect( Rect *destRect, long from, long to)
 {
     long                number, count, hoffset, voffset;
     interfaceItemType   *item;
-    longRect            itemsBounds = { 0x7fffffff, 0x7fffffff, 0, 0};
+    Rect            itemsBounds = { 0x7fffffff, 0x7fffffff, 0, 0};
 
     number = to - from;//GetHandleSize( gInterfaceItemData) / sizeof( interfaceItemType);
     item = *gInterfaceItemData + from;

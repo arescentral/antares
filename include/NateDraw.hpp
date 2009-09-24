@@ -39,16 +39,14 @@ inline void mGetNatePixel(uint8_t*& destByte, long rowBytes, long x, long y, lon
     destByte = destPix->baseAddr + (y + yoff) * rowBytes + x + xoff;
 }
 
-template <typename T0, typename T1>
-inline void mBiggestRect(T0& mdrect, const T1& morect) {
+inline void mBiggestRect(Rect& mdrect, const Rect& morect) {
     mdrect.left = std::min(mdrect.left, morect.left);
     mdrect.top = std::min(mdrect.top, morect.top);
     mdrect.right = std::max(mdrect.right, morect.right);
     mdrect.bottom = std::max(mdrect.bottom, morect.bottom);
 }
 
-template <typename T0, typename T1>
-inline void mCopyAnyRect(T0& mdrect, const T1& msrect) {
+inline void mCopyAnyRect(Rect& mdrect, const Rect& msrect) {
     mdrect.left = msrect.left;
     mdrect.top = msrect.top;
     mdrect.right = msrect.right;
@@ -70,35 +68,26 @@ struct longPointType {
     void read(BinaryReader* bin);
 };
 
-struct longRect {
-    int32_t     left;
-    int32_t     top;
-    int32_t     right;
-    int32_t     bottom;
+void DrawNateRect( PixMap *, Rect *, long, long, unsigned char);
+void DrawNateRectVScan( PixMap *, Rect *, long, long, unsigned char);
+void DrawNateRectClipped( PixMap *, Rect *, Rect *, long, long, unsigned char);
+void DrawNateRectVScanClipped( PixMap *, Rect *, Rect *, long, long, unsigned char);
 
-    void read(BinaryReader* bin);
-};
-
-void DrawNateRect( PixMap *, longRect *, long, long, unsigned char);
-void DrawNateRectVScan( PixMap *, longRect *, long, long, unsigned char);
-void DrawNateRectClipped( PixMap *, longRect *, longRect *, long, long, unsigned char);
-void DrawNateRectVScanClipped( PixMap *, longRect *, longRect *, long, long, unsigned char);
-
-void DrawNateTriangleUpClipped( PixMap *, longRect *, longRect *, long, long, unsigned char);
-void DrawNatePlusClipped( PixMap *, longRect *, longRect *, long, long, unsigned char);
-void DrawNateSquareClipped( PixMap *, longRect *, longRect *, long, long, unsigned char);
-void DrawNateDiamondClipped( PixMap *, longRect *, longRect *, long, long, unsigned char);
-void DrawNateVBracket( PixMap *, longRect *, longRect *, long, long, unsigned char);
-void DrawNateShadedRect( PixMap *, longRect *, longRect *, long, long, unsigned char, unsigned char,
+void DrawNateTriangleUpClipped( PixMap *, Rect *, Rect *, long, long, unsigned char);
+void DrawNatePlusClipped( PixMap *, Rect *, Rect *, long, long, unsigned char);
+void DrawNateSquareClipped( PixMap *, Rect *, Rect *, long, long, unsigned char);
+void DrawNateDiamondClipped( PixMap *, Rect *, Rect *, long, long, unsigned char);
+void DrawNateVBracket( PixMap *, Rect *, Rect *, long, long, unsigned char);
+void DrawNateShadedRect( PixMap *, Rect *, Rect *, long, long, unsigned char, unsigned char,
                     unsigned char);
 void BiggestRect( Rect  *, Rect *);
-void LongRectToRect( longRect *, Rect *);
-void RectToLongRect( Rect *, longRect *);
-void SetLongRect( longRect *, long, long, long, long);
-void DrawNateLine( PixMap *, longRect *, long, long, long,
+void LongRectToRect( Rect *, Rect *);
+void RectToLongRect( Rect *, Rect *);
+void SetLongRect( Rect *, long, long, long, long);
+void DrawNateLine( PixMap *, Rect *, long, long, long,
                     long, long, long, unsigned char);
-void CopyNateLine( PixMap *, PixMap *, longRect *, long, long, long, long , long, long);
-void DashNateLine( PixMap *, longRect *, long, long, long,
+void CopyNateLine( PixMap *, PixMap *, Rect *, long, long, long, long , long, long);
+void DashNateLine( PixMap *, Rect *, long, long, long,
                     long, long, long, unsigned char, unsigned char, unsigned char, unsigned char);
 
 #endif // ANTARES_NATE_DRAW_HPP_

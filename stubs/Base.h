@@ -123,12 +123,15 @@ typedef struct {
     int h;
 } Point;
 
-typedef struct {
-    int left;
-    int top;
-    int right;
-    int bottom;
-} Rect;
+class BinaryReader;
+struct Rect {
+    int32_t left;
+    int32_t top;
+    int32_t right;
+    int32_t bottom;
+
+    void read(BinaryReader* bin);
+};
 
 void SetRect(Rect*, int, int, int, int);
 void MacSetRect(Rect*, int, int, int, int);

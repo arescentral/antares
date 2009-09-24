@@ -173,7 +173,7 @@
 #define kMaxShipBuffer          40
 
 inline void mBlackMiniScreenLine(
-        long mtop, long mlinenum, long mleft, long mright, longRect& mbounds, PixMap** mpixbase) {
+        long mtop, long mlinenum, long mleft, long mright, Rect& mbounds, PixMap** mpixbase) {
     mbounds.left = kMiniScreenLeft + mleft;
     mbounds.top = mtop + mlinenum * gDirectText->height;
     mbounds.right = kMiniScreenLeft + mright;
@@ -408,7 +408,7 @@ void DrawMiniScreen( void)
 
 {
     Rect                mRect;
-    longRect            lRect, cRect;
+    Rect            lRect, cRect;
     PixMapHandle        offPixBase;
     miniScreenLineType  *c;
     unsigned char       color, lightcolor, darkcolor, textcolor, lineColor = kMiniScreenColor;
@@ -528,7 +528,7 @@ void DrawAndShowMiniScreenLine( long whichLine)
 
 {
     Rect                tRect;
-    longRect            lRect, cRect;
+    Rect            lRect, cRect;
     PixMapHandle        offPixBase;
     miniScreenLineType  *c;
     unsigned char       color, textcolor, lineColor = kMiniScreenColor, lightcolor, darkcolor;
@@ -1283,7 +1283,7 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
     static long         lastOne = -1, lastTwo = -1, lastSpecial = -1;
     unsigned char       lightcolor;
     PixMapHandle        offPixBase;
-    longRect            lRect, clipRect;
+    Rect            lRect, clipRect;
     transColorType      *transColor;
     Rect                mRect;
     Boolean             update = FALSE;
@@ -1431,7 +1431,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     spaceObjectType     *dObject = nil;
     long                tlong, thisScale;
     Rect                mRect;
-    longRect            lRect, dRect, spriteRect, uRect, clipRect;
+    Rect            lRect, dRect, spriteRect, uRect, clipRect;
 
     // get ready to draw in offworld
     offPixBase = GetGWorldPixMap( gOffWorld);

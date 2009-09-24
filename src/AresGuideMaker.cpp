@@ -459,7 +459,7 @@ OSErr ConvertSpriteIntoGIF(short resID, long whichShape, unsigned char* forceNam
     unsigned char       *pixData;
     Point               where;
     long                tlong, thisScale;
-    longRect            dRect, spriteRect;
+    Rect            dRect, spriteRect;
     coordPointType      coord;
     PicHandle           newPic;
     OSErr               err = noErr;
