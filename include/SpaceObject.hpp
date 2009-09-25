@@ -816,7 +816,7 @@ struct spaceObjectType {
     spriteType              *sprite;
     long                    whichSprite;
 
-    UnsignedWide            distanceFromPlayer;
+    uint64_t                distanceFromPlayer;
     unsigned long           closestDistance;
     long                    closestObject;
     long                    targetObjectNumber;

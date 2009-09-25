@@ -142,7 +142,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
     long            selectShipNum;
     unsigned long   distance, difference, dcalc, attributes, nonattributes;
     Boolean         everPaused = FALSE, newKeys = false;
-    UnsignedWide    hugeDistance;
+    uint64_t        hugeDistance;
     unsigned char   *message;
     unsigned char   *getwidchar, *getwidwid;
     long            width, height, strlen;
@@ -719,15 +719,15 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
                 if (( dcalc > kMaximumRelevantDistance) ||
                     ( distance > kMaximumRelevantDistance))
                 {
-                    hugeDistance.value = dcalc;    // must be positive
-                    MyWideMul(hugeDistance.value, hugeDistance.value, &hugeDistance);    // ppc automatically generates WideMultiply
-                    selectShip->distanceFromPlayer.value = distance;
-                    MyWideMul(selectShip->distanceFromPlayer.value, selectShip->distanceFromPlayer.value, &selectShip->distanceFromPlayer);
-                    selectShip->distanceFromPlayer.value += hugeDistance.value;
+                    hugeDistance = dcalc;    // must be positive
+                    MyWideMul(hugeDistance, hugeDistance, &hugeDistance);    // ppc automatically generates WideMultiply
+                    selectShip->distanceFromPlayer = distance;
+                    MyWideMul(selectShip->distanceFromPlayer, selectShip->distanceFromPlayer, &selectShip->distanceFromPlayer);
+                    selectShip->distanceFromPlayer += hugeDistance;
                 }
                 else
                 {
-                    selectShip->distanceFromPlayer.value = distance * distance + dcalc * dcalc;
+                    selectShip->distanceFromPlayer = distance * distance + dcalc * dcalc;
                 }
                 /*
                 selectShip->distanceFromPlayer = (double long)distance * (double long)distance +
@@ -735,9 +735,8 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
                 */
                 hugeDistance = selectShip->distanceFromPlayer;
             }
-        } else
-        {
-            hugeDistance.value = 0;
+        } else {
+            hugeDistance = 0;
         }
 
 /*      WriteDebugDivider();

@@ -86,11 +86,11 @@ struct fixedPointType {
 unsigned long lsqrt (unsigned long);
 
 Fixed MyFixRatio( short, short);
-void MyMulDoubleLong( long, long, wide *);
+void MyMulDoubleLong(long, long, int64_t*);
 
 template <typename T>
 inline void MyWideMul(int32_t mlong1, int32_t mlong2, T* mwide) {
-    mwide->value = implicit_cast<int64_t>(mlong1) * implicit_cast<int64_t>(mlong2);
+    *mwide = implicit_cast<int64_t>(mlong1) * implicit_cast<int64_t>(mlong2);
 }
 
 #endif // ANTARES_MATH_SPECIAL_HPP_

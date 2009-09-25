@@ -123,7 +123,7 @@ struct aresGlobalType {
     long            gScrollStarNumber;
     long            gGameTime;
     long            gGameStartTime;
-    UnsignedWide    gLastTime;
+    uint64_t        gLastTime;
     long            gClosestObject;
     long            gFarthestObject;
     long            gCenterScaleH;

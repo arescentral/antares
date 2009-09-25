@@ -34,9 +34,9 @@ extern aresGlobalType   *gAresGlobal;
 void ResetLastTime( long defecit)
 
 {
-    UnsignedWide defecitTime;
+    uint64_t defecitTime;
 
-    defecitTime.value = defecit * kTimeUnit;
+    defecitTime = defecit * kTimeUnit;
 
     Microseconds( &gAresGlobal->gLastTime);
 //  WideSubtract( (wide *)&gAresGlobal->gLastTime, (wide *)&defecitTime);
@@ -46,11 +46,11 @@ void ResetLastTime( long defecit)
 long GetTimeLapse( void)
 
 {
-    UnsignedWide            thisTime;
+    uint64_t thisTime;
 
     Microseconds( &thisTime);
-    thisTime.value -= gAresGlobal->gLastTime.value;
-    return ( thisTime.value / kTimeUnit);
+    thisTime -= gAresGlobal->gLastTime;
+    return (thisTime / kTimeUnit);
 }
 
 void UpdateGameTime( void)

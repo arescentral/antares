@@ -241,15 +241,6 @@ label3:
     return result;
 }
 
-void MyMulDoubleLong( long a, long b, wide *dest)
-
-{
-    #pragma unused( a, b, dest)
-
-//  Debugger();
-//  LongMul( a, b, dest);
-}
-
 void fixedPointType::read(BinaryReader* bin) {
     bin->read(&h);
     bin->read(&v);

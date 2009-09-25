@@ -963,8 +963,8 @@ void mPlayDistanceSound(
         long& mdistance, long mvolume, spaceObjectType* mobjectptr, long msoundid,
         long msoundpersistence, soundPriorityType msoundpriority, unsigned long& mul1,
         unsigned long& mul2, spaceObjectType*& mplayerobjectptr) {
-    if (mobjectptr->distanceFromPlayer.value < kMaximumRelevantDistanceSquared) {
-        mdistance = mobjectptr->distanceFromPlayer.value;
+    if (mobjectptr->distanceFromPlayer < kMaximumRelevantDistanceSquared) {
+        mdistance = mobjectptr->distanceFromPlayer;
         if ( mdistance == 0)
         {
             if ( gAresGlobal->gPlayerShipNumber >= 0)

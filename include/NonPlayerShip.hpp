@@ -30,7 +30,7 @@ void HackShowShipID( void);
 void HitObject( spaceObjectType *, spaceObjectType *);
 long GetManualSelectObject( spaceObjectType *, unsigned long,
                             unsigned long, unsigned long,
-                            const UnsignedWide *, long, short);
+                            const uint64_t*, long, short);
 long GetSpritePointSelectObject( Rect *, spaceObjectType *, unsigned long,
                             unsigned long, unsigned long, long, short);
 

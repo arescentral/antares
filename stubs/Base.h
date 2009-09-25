@@ -63,15 +63,7 @@ typedef uint16_t UInt16;
 typedef int32_t SInt32;
 typedef uint32_t UInt32;
 
-struct wide {
-    int64_t value;
-};
-
-struct UnsignedWide {
-    uint64_t value;
-};
-
-void WideMultiply(long a, long b, wide* c);
+void WideMultiply(long a, long b, int64_t* c);
 
 typedef int32_t Fixed;
 typedef long Size;
@@ -82,7 +74,7 @@ typedef Ptr* Handle;
 STUB1(HiWord, int(long value), 0);
 STUB1(LoWord, int(long value), 0);
 
-void Microseconds(UnsignedWide* wide);
+void Microseconds(uint64_t* wide);
 
 STUB1(CompactMem, Size(int), 100 * 1024 * 1024);  // 100MB
 void BlockMove(void* src, void* dst, size_t size);

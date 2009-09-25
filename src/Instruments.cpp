@@ -125,10 +125,6 @@
 
 #define kMouseSleepTime     60
 
-inline void mWideASR8(UnsignedWide& mwide) {
-    mwide.value >>= 8;
-}
-
 #define kSectorLineBrightness   DARKER
 
 extern  CWindowPtr      gTheWindow; // hack to copy bar indicators to offworld
@@ -260,7 +256,7 @@ void UpdateRadar( long unitsDone)
     admiralType     *admiral;
     Rect            tRect;
     Boolean         doDraw;
-    UnsignedWide    tempWide, hugeDistance;
+    uint64_t        tempWide, hugeDistance;
 
     if ( gScrollStarObject != nil)
     {
@@ -400,7 +396,7 @@ void UpdateRadar( long unitsDone)
                     if ( bestScale < kMinimumAutoScale) bestScale = kMinimumAutoScale;
                 }*/
                 hugeDistance = anObject->distanceFromPlayer;
-                if (hugeDistance.value == 0) // if this is true, then we haven't calced its distance
+                if (hugeDistance == 0) // if this is true, then we haven't calced its distance
                 {
                     difference = ABS( implicit_cast<long>(gScrollStarObject->location.h) - implicit_cast<long>(anObject->location.h));
                     dcalc = difference;
@@ -410,25 +406,25 @@ void UpdateRadar( long unitsDone)
                     if (( dcalc > kMaximumRelevantDistance) ||
                         ( distance > kMaximumRelevantDistance))
                     {
-                        tempWide.value = dcalc;    // must be positive
-                        MyWideMul( tempWide.value, tempWide.value, &hugeDistance);
-                        tempWide.value = distance;
-                        MyWideMul( tempWide.value, tempWide.value, &tempWide);
-                        hugeDistance.value += tempWide.value;
+                        tempWide = dcalc;    // must be positive
+                        MyWideMul( tempWide, tempWide, &hugeDistance);
+                        tempWide = distance;
+                        MyWideMul( tempWide, tempWide, &tempWide);
+                        hugeDistance += tempWide;
                     } else
                     {
-                        hugeDistance.value = distance * distance + dcalc * dcalc;
+                        hugeDistance = distance * distance + dcalc * dcalc;
                     }
                 }
-                if ((hugeDistance.value & 0xFFFFFFFF00000000ull) == 0) {
-                    bestScale = lsqrt(hugeDistance.value);
+                if ((hugeDistance & 0xFFFFFFFF00000000ull) == 0) {
+                    bestScale = lsqrt(hugeDistance);
                 } else {
                     rootCorrect = 0;
                     do {
                         rootCorrect += 4;
-                        mWideASR8( hugeDistance);
-                    } while (hugeDistance.value & 0xFFFFFFFF00000000ull);
-                    bestScale = lsqrt(hugeDistance.value);
+                        hugeDistance >>= 8;
+                    } while (hugeDistance & 0xFFFFFFFF00000000ull);
+                    bestScale = lsqrt(hugeDistance);
                     bestScale <<= rootCorrect;
                 }
                 if ( bestScale == 0) bestScale = 1;
@@ -477,15 +473,15 @@ void UpdateRadar( long unitsDone)
                     if ( bestScale < kMinimumAutoScale) bestScale = kMinimumAutoScale;
                 }*/
                 tempWide = anObject->distanceFromPlayer;
-                if ((tempWide.value & 0xFFFFFFFF00000000ull) == 0) {
-                    bestScale = lsqrt(tempWide.value);
+                if ((tempWide & 0xFFFFFFFF00000000ull) == 0) {
+                    bestScale = lsqrt(tempWide);
                 } else {
                     rootCorrect = 0;
                     do {
                         rootCorrect += 4;
-                        mWideASR8( tempWide);
-                    } while (tempWide.value & 0xFFFFFFFF00000000ull);
-                    bestScale = lsqrt(tempWide.value);
+                        tempWide >>= 8;
+                    } while (tempWide & 0xFFFFFFFF00000000ull);
+                    bestScale = lsqrt(tempWide);
                     bestScale <<= rootCorrect;
                 }
                 if ( bestScale == 0) bestScale = 1;

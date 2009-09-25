@@ -2202,7 +2202,7 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
     spaceObjectType *madeObject = nil, newObject, *player = nil;
     long            newObjectNumber;
     unsigned long   distance, dcalc, difference;
-    UnsignedWide    hugeDistance;
+    uint64_t        hugeDistance;
 
 /*  DebugFileAppendString( "\pCR\t");
     DebugFileAppendLong( gAresGlobal->gGameTime);
@@ -2248,19 +2248,19 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
         if (( dcalc > kMaximumRelevantDistance) ||
             ( distance > kMaximumRelevantDistance))
         {
-            hugeDistance.value = dcalc;    // must be positive
-            MyWideMul(hugeDistance.value, hugeDistance.value, &hugeDistance);    // ppc automatically generates WideMultiply
-            newObject.distanceFromPlayer.value = distance;
-            MyWideMul(newObject.distanceFromPlayer.value, newObject.distanceFromPlayer.value, &newObject.distanceFromPlayer);
-            newObject.distanceFromPlayer.value += hugeDistance.value;
+            hugeDistance = dcalc;    // must be positive
+            MyWideMul(hugeDistance, hugeDistance, &hugeDistance);    // ppc automatically generates WideMultiply
+            newObject.distanceFromPlayer = distance;
+            MyWideMul(newObject.distanceFromPlayer, newObject.distanceFromPlayer, &newObject.distanceFromPlayer);
+            newObject.distanceFromPlayer += hugeDistance;
         }
         else
         {
-            newObject.distanceFromPlayer.value = distance * distance + dcalc * dcalc;
+            newObject.distanceFromPlayer = distance * distance + dcalc * dcalc;
         }
     } else
     {
-        newObject.distanceFromPlayer.value = 0;
+        newObject.distanceFromPlayer = 0;
         /*
         if (( dcalc > kMaximumRelevantDistance) || ( distance > kMaximumRelevantDistance))
             distance = kMaximumRelevantDistanceSquared;

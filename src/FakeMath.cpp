@@ -24,8 +24,8 @@
 
 #include "Casts.hpp"
 
-void WideMultiply(long a, long b, wide* c) {
-    c->value = implicit_cast<int64_t>(a) * implicit_cast<int64_t>(b);
+void WideMultiply(long a, long b, int64_t* c) {
+    *c = implicit_cast<int64_t>(a) * implicit_cast<int64_t>(b);
 }
 
 long Random() {

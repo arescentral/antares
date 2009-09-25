@@ -2376,7 +2376,7 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
 
 long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusiveAttributes,
                             unsigned long anyOneAttribute, unsigned long exclusiveAttributes,
-                            const UnsignedWide *fartherThan, long currentShipNum, short friendOrFoe)
+                            const uint64_t* fartherThan, long currentShipNum, short friendOrFoe)
 
 {
     spaceObjectType *anObject;
@@ -2386,11 +2386,11 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
     Fixed           slope;
     short           angle;
 //  const wide      kMaxAngleDistance = {0, 1073676289}; // kMaximumAngleDistance ^ 2
-    UnsignedWide    wideClosestDistance, wideFartherDistance, thisWideDistance, wideScrap;
+    uint64_t        wideClosestDistance, wideFartherDistance, thisWideDistance, wideScrap;
     unsigned char   thisDistanceState;
 
-    wideClosestDistance.value = 0x3fffffff3fffffffull;
-    wideFartherDistance.value = 0x3fffffff3fffffffull;
+    wideClosestDistance = 0x3fffffff3fffffffull;
+    wideFartherDistance = 0x3fffffff3fffffffull;
 
     // Here's what you've got to do next:
     // start with the currentShipNum
@@ -2434,14 +2434,14 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
             if (( dcalc > kMaximumRelevantDistance) ||
                 ( distance > kMaximumRelevantDistance))
             {
-                wideScrap.value = dcalc;   // must be positive
-                MyWideMul( wideScrap.value, wideScrap.value, &thisWideDistance);  // ppc automatically generates WideMultiply
-                wideScrap.value = distance;
-                MyWideMul( wideScrap.value, wideScrap.value, &wideScrap);
-                thisWideDistance.value += wideScrap.value;
+                wideScrap = dcalc;   // must be positive
+                MyWideMul( wideScrap, wideScrap, &thisWideDistance);  // ppc automatically generates WideMultiply
+                wideScrap = distance;
+                MyWideMul( wideScrap, wideScrap, &wideScrap);
+                thisWideDistance += wideScrap;
             } else
             {
-                thisWideDistance.value = distance * distance + dcalc * dcalc;
+                thisWideDistance = distance * distance + dcalc * dcalc;
             }
 
             thisDistanceState = 0;
@@ -2450,14 +2450,14 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
             WriteDebugLong( anObject->distanceFromPlayer.hi);
             WriteDebugLong( anObject->distanceFromPlayer.lo);
 */
-            if (wideClosestDistance.value > thisWideDistance.value) {
+            if (wideClosestDistance > thisWideDistance) {
                 thisDistanceState |= kCloserThanClosest;
             }
 
-            if ((thisWideDistance.value > fartherThan->value
-                        && wideFartherDistance.value > thisWideDistance.value)
-                    || (wideFartherDistance.value > thisWideDistance.value
-                        && thisWideDistance.value >= fartherThan->value
+            if ((thisWideDistance > *fartherThan
+                        && wideFartherDistance > thisWideDistance)
+                    || (wideFartherDistance > thisWideDistance
+                        && thisWideDistance >= *fartherThan
                         && whichShip > currentShipNum))
             {
                 thisDistanceState |= kFartherThanFarther;

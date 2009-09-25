@@ -700,13 +700,13 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
     unsigned long           distance, dcalc/*,
                             closestDist = kMaximumRelevantDistanceSquared + kMaximumRelevantDistanceSquared*/;
     proximityUnitType       *proximityObject, *currentProximity;
-    UnsignedWide            hackTimeStart, hackTimePassed;
+    uint64_t                hackTimeStart, hackTimePassed;
 
     spritePix               oldStyleSprite; // a temporary hack
     long                    magicHack1 = 0, magicHack2 = 0, magicHack3 = 0;
-    UnsignedWide            farthestDist, hugeDistance, wideScrap, closestDist;
-    farthestDist.value = 0;
-    closestDist.value = 0x7fffffffffffffffull;
+    uint64_t                farthestDist, hugeDistance, wideScrap, closestDist;
+    farthestDist = 0;
+    closestDist = 0x7fffffffffffffffull;
 
     Microseconds( &hackTimeStart);
 
@@ -781,16 +781,16 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
                 if (( dcalc > kMaximumRelevantDistance) ||
                     ( distance > kMaximumRelevantDistance))
                 {
-                    wideScrap.value = dcalc;   // must be positive
-                    MyWideMul( wideScrap.value, wideScrap.value, &hugeDistance);  // ppc automatically generates WideMultiply
-                    wideScrap.value = distance;
-                    MyWideMul( wideScrap.value, wideScrap.value, &wideScrap);
-                    hugeDistance.value += wideScrap.value;
+                    wideScrap = dcalc;   // must be positive
+                    MyWideMul( wideScrap, wideScrap, &hugeDistance);  // ppc automatically generates WideMultiply
+                    wideScrap = distance;
+                    MyWideMul( wideScrap, wideScrap, &wideScrap);
+                    hugeDistance += wideScrap;
                     aObject->distanceFromPlayer = hugeDistance;
                 } else
                 {
-                    hugeDistance.value = distance * distance + dcalc * dcalc;
-                    aObject->distanceFromPlayer.value = hugeDistance.value;
+                    hugeDistance = distance * distance + dcalc * dcalc;
+                    aObject->distanceFromPlayer = hugeDistance;
                     /*
                     if ( distance < closestDist)
                     {
@@ -804,7 +804,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
                     }
                     */
                 }
-                if (closestDist.value > hugeDistance.value) {
+                if (closestDist > hugeDistance) {
                     if (( aObject != gScrollStarObject) && (( gAresGlobal->gZoomMode != kNearestFoeZoom)
                         || ( aObject->owner != player->owner)))
                     {
@@ -812,14 +812,14 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
                         gAresGlobal->gClosestObject = aObject->entryNumber;
                     }
                 }
-                if (hugeDistance.value > farthestDist.value) {
+                if (hugeDistance > farthestDist) {
                     farthestDist = hugeDistance;
                     gAresGlobal->gFarthestObject = aObject->entryNumber;
                 }
             }
         } else
         {
-            aObject->distanceFromPlayer.value = 0x7fffffffffffffffull;
+            aObject->distanceFromPlayer = 0x7fffffffffffffffull;
         }
 
         if (( aObject->active) && ( aObject->attributes & kConsiderDistanceAttributes))
@@ -1284,7 +1284,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
     }
 
     Microseconds( &hackTimePassed);
-    hackTimePassed.value -= hackTimeStart.value;
+    hackTimePassed -= hackTimeStart;
 //  WriteDebugLong( hackTimePassed.as_struct.lo);
 
 // here, it doesn't matter in what order we step through the table
