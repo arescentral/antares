@@ -53,12 +53,9 @@ inline void mCopyAnyRect(Rect& mdrect, const Rect& msrect) {
     mdrect.bottom = msrect.bottom;
 }
 
-typedef unsigned long   coordType;
-
-struct coordPointType
-{
-    coordType   h;
-    coordType   v;
+struct coordPointType {
+    uint32_t    h;
+    uint32_t    v;
 };
 
 struct longPointType {
