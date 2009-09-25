@@ -36,8 +36,7 @@ void ResetLastTime( long defecit)
 {
     UnsignedWide defecitTime;
 
-    defecitTime.as_struct.hi = 0;
-    defecitTime.as_struct.lo = defecit * kTimeUnit;
+    defecitTime.value = defecit * kTimeUnit;
 
     Microseconds( &gAresGlobal->gLastTime);
 //  WideSubtract( (wide *)&gAresGlobal->gLastTime, (wide *)&defecitTime);
@@ -50,8 +49,8 @@ long GetTimeLapse( void)
     UnsignedWide            thisTime;
 
     Microseconds( &thisTime);
-    thisTime.as_int -= gAresGlobal->gLastTime.as_int;
-    return ( thisTime.as_struct.lo / kTimeUnit);
+    thisTime.value -= gAresGlobal->gLastTime.value;
+    return ( thisTime.value / kTimeUnit);
 }
 
 void UpdateGameTime( void)

@@ -63,20 +63,12 @@ typedef uint16_t UInt16;
 typedef int32_t SInt32;
 typedef uint32_t UInt32;
 
-union wide {
-    int64_t as_int;
-    struct {
-        int32_t hi;
-        uint32_t lo;
-    } as_struct;
+struct wide {
+    int64_t value;
 };
 
-union UnsignedWide {
-    uint64_t as_int;
-    struct {
-        uint32_t hi;
-        uint32_t lo;
-    } as_struct;
+struct UnsignedWide {
+    uint64_t value;
 };
 
 void WideMultiply(long a, long b, wide* c);

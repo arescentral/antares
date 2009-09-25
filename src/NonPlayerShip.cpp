@@ -2389,10 +2389,8 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
     UnsignedWide    wideClosestDistance, wideFartherDistance, thisWideDistance, wideScrap;
     unsigned char   thisDistanceState;
 
-    wideClosestDistance.as_struct.hi = kUniversalCenter;
-    wideClosestDistance.as_struct.lo = kUniversalCenter;
-    wideFartherDistance.as_struct.hi = kUniversalCenter;
-    wideFartherDistance.as_struct.lo = kUniversalCenter;
+    wideClosestDistance.value = 0x3fffffff3fffffffull;
+    wideFartherDistance.value = 0x3fffffff3fffffffull;
 
     // Here's what you've got to do next:
     // start with the currentShipNum
@@ -2436,16 +2434,14 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
             if (( dcalc > kMaximumRelevantDistance) ||
                 ( distance > kMaximumRelevantDistance))
             {
-                wideScrap.as_struct.hi = 0;
-                wideScrap.as_struct.lo = dcalc;   // must be positive
-                MyWideMul( wideScrap.as_struct.lo, wideScrap.as_struct.lo, &thisWideDistance);  // ppc automatically generates WideMultiply
-                wideScrap.as_struct.lo = distance;
-                MyWideMul( wideScrap.as_struct.lo, wideScrap.as_struct.lo, &wideScrap);
-                thisWideDistance.as_int += wideScrap.as_int;
+                wideScrap.value = dcalc;   // must be positive
+                MyWideMul( wideScrap.value, wideScrap.value, &thisWideDistance);  // ppc automatically generates WideMultiply
+                wideScrap.value = distance;
+                MyWideMul( wideScrap.value, wideScrap.value, &wideScrap);
+                thisWideDistance.value += wideScrap.value;
             } else
             {
-                thisWideDistance.as_struct.hi = 0;
-                thisWideDistance.as_struct.lo = distance * distance + dcalc * dcalc;
+                thisWideDistance.value = distance * distance + dcalc * dcalc;
             }
 
             thisDistanceState = 0;
@@ -2454,14 +2450,14 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
             WriteDebugLong( anObject->distanceFromPlayer.hi);
             WriteDebugLong( anObject->distanceFromPlayer.lo);
 */
-            if (wideClosestDistance.as_int > thisWideDistance.as_int) {
+            if (wideClosestDistance.value > thisWideDistance.value) {
                 thisDistanceState |= kCloserThanClosest;
             }
 
-            if ((thisWideDistance.as_int > fartherThan->as_int
-                        && wideFartherDistance.as_int > thisWideDistance.as_int)
-                    || (wideFartherDistance.as_int > thisWideDistance.as_int
-                        && thisWideDistance.as_int >= fartherThan->as_int
+            if ((thisWideDistance.value > fartherThan->value
+                        && wideFartherDistance.value > thisWideDistance.value)
+                    || (wideFartherDistance.value > thisWideDistance.value
+                        && thisWideDistance.value >= fartherThan->value
                         && whichShip > currentShipNum))
             {
                 thisDistanceState |= kFartherThanFarther;

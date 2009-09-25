@@ -126,9 +126,7 @@
 #define kMouseSleepTime     60
 
 inline void mWideASR8(UnsignedWide& mwide) {
-    (mwide).as_struct.lo >>= 8;
-    (mwide).as_struct.lo |= (mwide).as_struct.hi << 24;
-    (mwide).as_struct.hi >>= 8;
+    mwide.value >>= 8;
 }
 
 #define kSectorLineBrightness   DARKER
@@ -402,7 +400,7 @@ void UpdateRadar( long unitsDone)
                     if ( bestScale < kMinimumAutoScale) bestScale = kMinimumAutoScale;
                 }*/
                 hugeDistance = anObject->distanceFromPlayer;
-                if ( hugeDistance.as_struct.lo == 0) // if this is true, then we haven't calced its distance
+                if (hugeDistance.value == 0) // if this is true, then we haven't calced its distance
                 {
                     difference = ABS( implicit_cast<long>(gScrollStarObject->location.h) - implicit_cast<long>(anObject->location.h));
                     dcalc = difference;
@@ -412,28 +410,25 @@ void UpdateRadar( long unitsDone)
                     if (( dcalc > kMaximumRelevantDistance) ||
                         ( distance > kMaximumRelevantDistance))
                     {
-                        tempWide.as_struct.hi = 0;
-                        tempWide.as_struct.lo = dcalc;    // must be positive
-                        MyWideMul( tempWide.as_struct.lo, tempWide.as_struct.lo, &hugeDistance);
-                        tempWide.as_struct.lo = distance;
-                        MyWideMul( tempWide.as_struct.lo, tempWide.as_struct.lo, &tempWide);
-                        hugeDistance.as_int += tempWide.as_int;
+                        tempWide.value = dcalc;    // must be positive
+                        MyWideMul( tempWide.value, tempWide.value, &hugeDistance);
+                        tempWide.value = distance;
+                        MyWideMul( tempWide.value, tempWide.value, &tempWide);
+                        hugeDistance.value += tempWide.value;
                     } else
                     {
-                        hugeDistance.as_struct.hi = 0;
-                        hugeDistance.as_struct.lo = distance * distance + dcalc * dcalc;
+                        hugeDistance.value = distance * distance + dcalc * dcalc;
                     }
                 }
-                if ( hugeDistance.as_struct.hi == 0) bestScale = lsqrt( hugeDistance.as_struct.lo);
-                else
-                {
+                if ((hugeDistance.value & 0xFFFFFFFF00000000ull) == 0) {
+                    bestScale = lsqrt(hugeDistance.value);
+                } else {
                     rootCorrect = 0;
-                    do
-                    {
+                    do {
                         rootCorrect += 4;
                         mWideASR8( hugeDistance);
-                    } while ( hugeDistance.as_struct.hi);
-                    bestScale = lsqrt( hugeDistance.as_struct.lo);
+                    } while (hugeDistance.value & 0xFFFFFFFF00000000ull);
+                    bestScale = lsqrt(hugeDistance.value);
                     bestScale <<= rootCorrect;
                 }
                 if ( bestScale == 0) bestScale = 1;
@@ -482,16 +477,15 @@ void UpdateRadar( long unitsDone)
                     if ( bestScale < kMinimumAutoScale) bestScale = kMinimumAutoScale;
                 }*/
                 tempWide = anObject->distanceFromPlayer;
-                if ( tempWide.as_struct.hi == 0) bestScale = lsqrt( tempWide.as_struct.lo);
-                else
-                {
+                if ((tempWide.value & 0xFFFFFFFF00000000ull) == 0) {
+                    bestScale = lsqrt(tempWide.value);
+                } else {
                     rootCorrect = 0;
-                    do
-                    {
+                    do {
                         rootCorrect += 4;
                         mWideASR8( tempWide);
-                    } while ( tempWide.as_struct.hi);
-                    bestScale = lsqrt( tempWide.as_struct.lo);
+                    } while (tempWide.value & 0xFFFFFFFF00000000ull);
+                    bestScale = lsqrt(tempWide.value);
                     bestScale <<= rootCorrect;
                 }
                 if ( bestScale == 0) bestScale = 1;

@@ -31,7 +31,7 @@ int TickCount() {
 }
 
 void Microseconds(UnsignedWide* wide) {
-    wide->as_int = TickCount();
+    wide->value = TickCount();
 }
 
 void FakeTimeInit() {

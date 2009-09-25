@@ -1727,7 +1727,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
 {
     unsigned long       decideCycle = 0;
     Str255              string;
-    UnsignedWide        lastTime, thisTime, scrapTime, netTime;
+    UnsignedWide        lastTime, thisTime, scrapTime = { 0 }, netTime;
     Rect                clipRect;
     long                    unitsToDo = 0, unitsPassed = 0, unitsDone = 0,
                             l1, l2, newGameTime = 0, lastclicktime = 0,
@@ -1791,7 +1791,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
             ExitToShell();
         }
     }
-    netTime.as_struct.hi = netTime.as_struct.lo = 0;
+    netTime.value = 0;
 //  EMERGENCYHACKTEST = false;
 
     CheckScenarioConditions( 0);
@@ -1836,11 +1836,11 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
             while ( unitsPassed == 0)
             {
 //              MyWideAdd( (wide *)&gAresGlobal->gLastTime, (wide *)&netTime);
-                netTime.as_struct.hi = netTime.as_struct.lo = 0;
+                netTime.value = 0;
                 Microseconds( &thisTime);
                 scrapTime = thisTime;
-                thisTime.as_int -= gAresGlobal->gLastTime.as_int;
-                newGameTime = (thisTime.as_struct.lo / kTimeUnit) + ((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
+                thisTime.value -= gAresGlobal->gLastTime.value;
+                newGameTime = (thisTime.value / kTimeUnit) + ((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
 //              newGameTime = gAresGlobal->gGameTime + Randomize( 7) + 1;//Randomize( kDecideEveryCycles);
 #ifdef kConstantRate
                 newGameTime = gAresGlobal->gGameTime + 1;
@@ -1857,7 +1857,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                         l2 = kTimeUnit;
                         MyWideMul( l1, l2, reinterpret_cast<wide *>(&thisTime));
                         gAresGlobal->gLastTime = scrapTime;
-                        gAresGlobal->gLastTime.as_int -= thisTime.as_int;
+                        gAresGlobal->gLastTime.value -= thisTime.value;
                     }
 #ifdef powercxx
                 }
@@ -1886,7 +1886,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                     l2 = kTimeUnit;
                     MyWideMul( l1, l2, reinterpret_cast<wide *>(&thisTime));
                     gAresGlobal->gLastTime = scrapTime;
-                    gAresGlobal->gLastTime.as_int -= thisTime.as_int;
+                    gAresGlobal->gLastTime.value -= thisTime.value;
                 }/* else
                 {
                     newGameTime = gAresGlobal->gGameTime + Randomize( 9) + 1;
@@ -1904,7 +1904,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                     l2 = newGameTime - kMaxGameTime;
                     MyWideMul( l1, l2, reinterpret_cast<wide *>(&thisTime));
                     gAresGlobal->gLastTime = scrapTime;
-                    gAresGlobal->gLastTime.as_int -= thisTime.as_int;
+                    gAresGlobal->gLastTime.value -= thisTime.value;
                     additionalSeconds += ( newGameTime / 60);
                     newGameTime -= kMaxGameTime;
 //                  gAresGlobal->gGameTime -= kMaxGameTime;
@@ -1941,7 +1941,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                 l2 = kTimeUnit;
                 MyWideMul( l1, l2, reinterpret_cast<wide *>(&thisTime));
                 gAresGlobal->gLastTime = scrapTime;
-                gAresGlobal->gLastTime.as_int -= thisTime.as_int;
+                gAresGlobal->gLastTime.value -= thisTime.value;
             }
 
             if ( gAresGlobal->gGameOver < 0)
@@ -2307,8 +2307,8 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                         }
 
                         Microseconds( &netTime);    // don't activate
-                        netTime.as_int -= thisTime.as_int;
-                        if ( netTime.as_struct.lo > kTimeUnit)
+                        netTime.value -= thisTime.value;
+                        if ( netTime.value > kTimeUnit)
                         {
                             netCount++;
                             if ( netCount > kFractionalLagCorrectTolerance)
@@ -2738,8 +2738,8 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
     MacShowCursor();
 
     Microseconds( &thisTime);
-    thisTime.as_int -= gAresGlobal->gLastTime.as_int;
-    newGameTime = thisTime.as_struct.lo / 1000000; // divide by a million to get seconds
+    thisTime.value -= gAresGlobal->gLastTime.value;
+    newGameTime = thisTime.value / 1000000; // divide by a million to get seconds
 //  *seconds = newGameTime + additionalSeconds;
     *seconds = newGameTime + additionalSeconds;
 //  HHCheckAllHandles();
