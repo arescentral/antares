@@ -67,8 +67,6 @@ extern GWorldPtr        gOffWorld, gSaveWorld;
 TypedHandle<interfaceItemType> gInterfaceItemData;
 short               gInterfaceFileRefID = -1, gCurrentTEItem = -1;
 long                gInterfaceScreenHBuffer = 0, gInterfaceScreenVBuffer = 0;
-extern aresGlobalType   *gAresGlobal;
-//UniversalProcPtr  gCallBackTest = nil;
 
 int InterfaceHandlingInit( void)
 
@@ -84,8 +82,8 @@ int InterfaceHandlingInit( void)
         UseResFile ( gInterfaceFileRefID);
 */
 
-//  if ( gAresGlobal->externalFileRefNum > 0)
-//      UseResFile( gAresGlobal->externalFileRefNum);
+//  if ( globals()->externalFileRefNum > 0)
+//      UseResFile( globals()->externalFileRefNum);
 
     gInterfaceScreenHBuffer = ( WORLD_WIDTH / 2) - ( kTargetScreenWidth / 2);
     gInterfaceScreenVBuffer = ( WORLD_HEIGHT / 2) - ( kTargetScreenHeight / 2);

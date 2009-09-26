@@ -30,8 +30,8 @@
 class BinaryReader;
 
 #define kMaxSpaceObject     250
-#define kMaxBaseObject      (gAresGlobal->maxBaseObject)//300
-#define kMaxObjectAction    (gAresGlobal->maxObjectAction)//700//500//360
+#define kMaxBaseObject      (globals()->maxBaseObject)//300
+#define kMaxObjectAction    (globals()->maxObjectAction)//700//500//360
 
 #define kTimeToCheckHome        900
 

@@ -37,9 +37,8 @@ struct briefingSpriteBoundsType {
     long    objectIndex;
 };
 
-extern aresGlobalType*      gAresGlobal;
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
-extern scenarioType*        gThisScenario;
+extern scenarioType* gThisScenario;
 
 briefingSpriteBoundsType    *gBriefingSpriteBounds = nil;
 
@@ -209,7 +208,7 @@ void GetInitialObjectSpriteData( long whichScenario, long whichObject,
 {
     spaceObjectType         *sObject = nil;
     scenarioInitialType     *initial;
-    scenarioType            *scenario = *gAresGlobal->gScenarioData + whichScenario;
+    scenarioType            *scenario = *globals()->gScenarioData + whichScenario;
     briefingSpriteBoundsType    *sBounds = gBriefingSpriteBounds;
 
     initial = mGetScenarioInitial( scenario, whichObject);
@@ -537,7 +536,7 @@ void BriefPoint_Data_Get( long whichPoint, long whichScenario, long *headerID,
                     Rect *bounds)
 
 {
-    scenarioType    *scenario = *gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *scenario = *globals()->gScenarioData + whichScenario;
     Point           where;
     spritePix       aSpritePix;
     Rect        spriteRect;

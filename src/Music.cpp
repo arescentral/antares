@@ -56,9 +56,9 @@
 #endif
 #endif
 
-extern aresGlobalType *gAresGlobal;
-//extern unsigned long  gAresGlobal->gOptions;
-//extern long               gAresGlobal->gSoundVolume;
+extern aresGlobalType *globals();
+//extern unsigned long  globals()->gOptions;
+//extern long               globals()->gSoundVolume;
 
 int MusicInit( void)
 
@@ -66,7 +66,7 @@ int MusicInit( void)
     MADDriverSettings   init;
     OSErr               error;
 
-    if ( gAresGlobal->gOptions & kOptionMusicDriver)
+    if ( globals()->gOptions & kOptionMusicDriver)
     {
     #ifdef kUseMusic
 #ifndef powerc
@@ -142,7 +142,7 @@ init.sysMemory          = false;
         if( error != noErr)
         {
             mWriteDebugString("\pMusic Init Err");
-            gAresGlobal->gOptions &= ~kOptionMusicDriver;
+            globals()->gOptions &= ~kOptionMusicDriver;
             ShowErrorOfTypeOccurred( eQuitErr, kErrorStrID, kInitMusicLibraryError, error, __FILE__, 1);
             return( MEMORY_ERROR);
         }
@@ -156,7 +156,7 @@ init.sysMemory          = false;
         if( error != noErr)
         {
             mWriteDebugString("\pCreate Driver Err");
-            gAresGlobal->gOptions &= ~kOptionMusicDriver;
+            globals()->gOptions &= ~kOptionMusicDriver;
             ShowErrorOfTypeOccurred( eQuitErr, kErrorStrID, kCreateMusicDriverError, error, __FILE__, 2);
             return( MEMORY_ERROR);
         }
@@ -168,7 +168,7 @@ init.sysMemory          = false;
 void MusicCleanup( void)
 
 {
-    if ( gAresGlobal->gOptions & kOptionMusicDriver)
+    if ( globals()->gOptions & kOptionMusicDriver)
     {
 #ifdef kUseMusic
     MADDriver->Reading = false;
@@ -185,7 +185,7 @@ void PlaySong( void)
 {
     OSErr   err;
 
-    if ( gAresGlobal->gOptions & kOptionMusicDriver)
+    if ( globals()->gOptions & kOptionMusicDriver)
     {
     #ifdef kUseMusic
         err = MADPlay();
@@ -203,7 +203,7 @@ void PlaySong( void)
 
 Boolean SongIsPlaying( void)
 {
-    if ( gAresGlobal->gOptions & kOptionMusicDriver)
+    if ( globals()->gOptions & kOptionMusicDriver)
     {
     #ifdef kUseMusic
         return ( MADDriver->Reading);
@@ -215,7 +215,7 @@ Boolean SongIsPlaying( void)
 
 void ToggleSong( void)
 {
-    if ( gAresGlobal->gOptions & kOptionMusicDriver)
+    if ( globals()->gOptions & kOptionMusicDriver)
     {
     #ifdef kUseMusic
 //      MADDriver->Reading = !MADDriver->Reading; // toggles playing of music
@@ -235,7 +235,7 @@ void ToggleSong( void)
 void StopAndUnloadSong( void)
 
 {
-    if (( gAresGlobal->gOptions & kOptionMusicDriver) && ( SongIsPlaying()))
+    if (( globals()->gOptions & kOptionMusicDriver) && ( SongIsPlaying()))
     {
     #ifdef kUseMusic
         MADDriver->Reading = false;
@@ -252,7 +252,7 @@ void LoadSong( short resID)
 
     if ( resID <= 0) return;
 
-    if ( gAresGlobal->gOptions & kOptionMusicDriver)
+    if ( globals()->gOptions & kOptionMusicDriver)
     {
     #ifdef kUseMusic
         err = MADLoadMusicRsrc( 'MADH', resID);
@@ -268,7 +268,7 @@ long GetSongVolume( void)
 
 {
 #ifdef kUseMusic
-    if ( gAresGlobal->gOptions & kOptionMusicDriver)
+    if ( globals()->gOptions & kOptionMusicDriver)
     {
         return( (long)MADDriver->VolExt[0]);
     } else return( 0);
@@ -280,9 +280,9 @@ long GetSongVolume( void)
 void SetSongVolume( long volume)
 
 {
-    volume = gAresGlobal->gSoundVolume * kMaxMusicVolume;
+    volume = globals()->gSoundVolume * kMaxMusicVolume;
     volume /= kMaxVolumePreference;
-    if ( gAresGlobal->gOptions & kOptionMusicDriver)
+    if ( globals()->gOptions & kOptionMusicDriver)
     {
     #ifdef kUseMusic
         short   i;

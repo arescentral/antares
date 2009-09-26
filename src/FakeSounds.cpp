@@ -37,7 +37,7 @@ struct SndChannel {
 };
 
 OSErr SndNewChannel(SndChannel** chan, long, long, void*) {
-    gAresGlobal->gSoundVolume = 8;
+    globals()->gSoundVolume = 8;
     *chan = new SndChannel;
     return noErr;
 }
@@ -53,8 +53,8 @@ OSErr SndDoImmediate(SndChannel* chan, SndCommand* cmd) {
     if (do_sounds) {
         switch (cmd->cmd) {
         case quietCmd:
-            if (gAresGlobal->gGameTime > 0) {
-                fprintf(sound_log, "quiet\t%d\t%ld\n", chan->id, gAresGlobal->gGameTime);
+            if (globals()->gGameTime > 0) {
+                fprintf(sound_log, "quiet\t%d\t%ld\n", chan->id, globals()->gGameTime);
             }
             break;
 
@@ -62,9 +62,9 @@ OSErr SndDoImmediate(SndChannel* chan, SndCommand* cmd) {
             break;
 
         case ampCmd:
-            if (gAresGlobal->gGameTime > 0) {
+            if (globals()->gGameTime > 0) {
                 fprintf(sound_log, "amp\t%d\t%ld\t%d\n",
-                        chan->id, gAresGlobal->gGameTime, cmd->param1);
+                        chan->id, globals()->gGameTime, cmd->param1);
             }
             break;
 
@@ -80,9 +80,9 @@ OSErr SndDoCommand(SndChannel* chan, SndCommand* cmd, bool) {
 }
 
 OSErr SndPlay(SndChannel* channel, TypedHandle<Sound> sound, bool) {
-    if (do_sounds && gAresGlobal->gGameTime > 0) {
+    if (do_sounds && globals()->gGameTime > 0) {
         int sound_id = (*sound)->id;
-        fprintf(sound_log, "play\t%d\t%ld\t%d\n", channel->id, gAresGlobal->gGameTime, sound_id);
+        fprintf(sound_log, "play\t%d\t%ld\t%d\n", channel->id, globals()->gGameTime, sound_id);
     }
     return noErr;
 }

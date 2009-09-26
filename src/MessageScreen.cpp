@@ -117,21 +117,14 @@ inline void mClipAnyRect(T0& mtrect, const T1& mclip) {
 #define kHBuffer        4
 #define kHBufferTotal   (kHBuffer)
 
-extern aresGlobalType   *gAresGlobal;
 extern directTextType   *gDirectText;
 extern long             gWhichDirectText, CLIP_LEFT, CLIP_RIGHT, CLIP_BOTTOM;
-//                      gAresGlobal->gTrueClipBottom;
 
-extern  GWorldPtr       gOffWorld, gRealWorld, gSaveWorld;
-extern  WindowPtr       gTheWindow;
-extern  PixMapHandle    thePixMapHandle;
-extern  long                gNatePortLeft, gNatePortTop, WORLD_HEIGHT, WORLD_WIDTH;
-extern  scenarioType    *gThisScenario; // for special message labels
-
-//long                  gAresGlobal->gMessageTimeCount = 0, gAresGlobal->gMessageLabelNum = -1, gAresGlobal->gStatusLabelNum = -1,
-//                      gAresGlobal->gTrueClipBottom = 0;
-
-//Handle    gAresGlobal->gMessageData = nil, gAresGlobal->gStatusString = nil, gLongAresGlobal->gMessageData = nil;
+extern GWorldPtr        gOffWorld, gRealWorld, gSaveWorld;
+extern WindowPtr        gTheWindow;
+extern PixMapHandle     thePixMapHandle;
+extern long             gNatePortLeft, gNatePortTop, WORLD_HEIGHT, WORLD_WIDTH;
+extern scenarioType     *gThisScenario; // for special message labels
 
 void MessageLabel_Set_Special(short id, TypedHandle<unsigned char> text);
 
@@ -140,39 +133,39 @@ int InitMessageScreen() {
     long            i;
     longMessageType *tmessage = nil;
 
-    gAresGlobal->gTrueClipBottom = CLIP_BOTTOM;
-    gAresGlobal->gMessageData.reset(new MessageData(kMaxMessageLength));
-    gAresGlobal->gStatusString.create(kDestinationLength);
-    gAresGlobal->gLongMessageData.create(1);
+    globals()->gTrueClipBottom = CLIP_BOTTOM;
+    globals()->gMessageData.reset(new MessageData(kMaxMessageLength));
+    globals()->gStatusString.create(kDestinationLength);
+    globals()->gLongMessageData.create(1);
 
-    gAresGlobal->gMessageData->_first_char = 0;
-    gAresGlobal->gMessageData->_first_free = 0;
+    globals()->gMessageData->_first_char = 0;
+    globals()->gMessageData->_first_free = 0;
 
-    anyChar = gAresGlobal->gMessageData->_data.get();
+    anyChar = globals()->gMessageData->_data.get();
 
     for (i = 0; i < kMaxMessageLength; i++) {
         *anyChar = kMessageEndChar;
         anyChar++;
     }
 
-    gAresGlobal->gMessageLabelNum = AddScreenLabel( kMessageScreenLeft,
+    globals()->gMessageLabelNum = AddScreenLabel( kMessageScreenLeft,
                         kMessageScreenTop, 0, 0,
                         &nilLabel, nil, FALSE, kMessageColor);
 
-    if ( gAresGlobal->gMessageLabelNum < 0)
+    if ( globals()->gMessageLabelNum < 0)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kAddScreenLabelError, -1, -1, -1, __FILE__, 3);
         return( MEMORY_ERROR);
     }
-    gAresGlobal->gStatusLabelNum = AddScreenLabel( kStatusLabelLeft, kStatusLabelTop, 0, 0,
+    globals()->gStatusLabelNum = AddScreenLabel( kStatusLabelLeft, kStatusLabelTop, 0, 0,
                         &nilLabel, nil, FALSE, kStatusLabelColor);
-    if ( gAresGlobal->gStatusLabelNum < 0)
+    if ( globals()->gStatusLabelNum < 0)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kAddScreenLabelError, -1, -1, -1, __FILE__, 4);
         return( MEMORY_ERROR);
     }
 
-    tmessage = *gAresGlobal->gLongMessageData;
+    tmessage = *globals()->gLongMessageData;
     tmessage->startResID =  tmessage->endResID = tmessage->lastResID = tmessage->currentResID =
         -1;
     tmessage->time = 0;
@@ -202,9 +195,9 @@ void MessageScreenCleanup( void)
 
 {
 #ifdef kUseMessage
-    gAresGlobal->gMessageData.reset();
-    if (gAresGlobal->gStatusString.get() != nil) {
-        gAresGlobal->gStatusString.destroy();
+    globals()->gMessageData.reset();
+    if (globals()->gStatusString.get() != nil) {
+        globals()->gStatusString.destroy();
     }
 #endif
 }
@@ -217,25 +210,25 @@ void ClearMessage( void)
     unsigned char *anyChar, nilLabel = 0;
     longMessageType *tmessage;
 
-    gAresGlobal->gMessageData->_first_char = 0;
-    gAresGlobal->gMessageData->_first_free = 0;
-    anyChar = gAresGlobal->gMessageData->_data.get();
+    globals()->gMessageData->_first_char = 0;
+    globals()->gMessageData->_first_free = 0;
+    anyChar = globals()->gMessageData->_data.get();
     for ( i = 0; i < kMaxMessageLength; i++)
         *anyChar++ = kMessageEndChar;
-    gAresGlobal->gMessageTimeCount = 0;
-    gAresGlobal->gMessageLabelNum = AddScreenLabel( kMessageScreenLeft, kMessageScreenTop, 0, 0,
+    globals()->gMessageTimeCount = 0;
+    globals()->gMessageLabelNum = AddScreenLabel( kMessageScreenLeft, kMessageScreenTop, 0, 0,
                         &nilLabel, nil, FALSE, kMessageColor);
-    gAresGlobal->gStatusLabelNum = AddScreenLabel( kStatusLabelLeft, kStatusLabelTop, 0, 0,
+    globals()->gStatusLabelNum = AddScreenLabel( kStatusLabelLeft, kStatusLabelTop, 0, 0,
                         &nilLabel, nil, FALSE, kStatusLabelColor);
 
-    tmessage = *gAresGlobal->gLongMessageData;
+    tmessage = *globals()->gLongMessageData;
     tmessage->startResID = -1;
     tmessage->endResID = -1;
     tmessage->currentResID = -1;
     tmessage->lastResID = -1;
     tmessage->textHeight = 0;
     tmessage->previousStartResID = tmessage->previousEndResID = -1;
-    tmessage = *gAresGlobal->gLongMessageData;
+    tmessage = *globals()->gLongMessageData;
     tmessage->stringMessage[0] = 0;
     tmessage->lastStringMessage[0] = 0;
     tmessage->newStringMessage = false;
@@ -244,7 +237,7 @@ void ClearMessage( void)
     if (tmessage->retroTextSpec.text.get() != nil) {
         tmessage->retroTextSpec.text.destroy();
     }
-    CLIP_BOTTOM = gAresGlobal->gTrueClipBottom;
+    CLIP_BOTTOM = globals()->gTrueClipBottom;
     tmessage->labelMessageID = AddScreenLabel( 0, 0, 0, 0, &nilLabel, nil,
         false, SKY_BLUE);
     SetScreenLabelKeepOnScreenAnyway( tmessage->labelMessageID, true);
@@ -259,10 +252,10 @@ void AppendStringToMessage(const unsigned char* string) {
 
 
     // get the offset to the first free character
-    freeoffset = &gAresGlobal->gMessageData->_first_free;
+    freeoffset = &globals()->gMessageData->_first_free;
 
     // set the destination char (message) to the first free character
-    message = gAresGlobal->gMessageData->_data.get() + *freeoffset;
+    message = globals()->gMessageData->_data.get() + *freeoffset;
 
     // get the length of the source string
     strLen = *string++;
@@ -283,7 +276,7 @@ void AppendStringToMessage(const unsigned char* string) {
             *freeoffset = kAnyCharOffsetStart;
 
             // reset the destination char to the first free char
-            message = gAresGlobal->gMessageData->_data.get() + *freeoffset;
+            message = globals()->gMessageData->_data.get() + *freeoffset;
         }
 
         strLen--;
@@ -296,10 +289,10 @@ void StartMessage( void) {
     int32_t *freeoffset;
 
     // get the offset to the first free character
-    freeoffset = &gAresGlobal->gMessageData->_first_free;
+    freeoffset = &globals()->gMessageData->_first_free;
 
     // set the destination char (message) to the first free character
-    message = gAresGlobal->gMessageData->_data.get() + *freeoffset;
+    message = globals()->gMessageData->_data.get() + *freeoffset;
 
     // we should be on the special end char, which we turn into a separator char
     *message++ = kMessageSeparateChar;
@@ -313,7 +306,7 @@ void StartMessage( void) {
         *freeoffset = 0;
 
         // reset the destination char to the first free char
-        message = gAresGlobal->gMessageData->_data.get() + *freeoffset;
+        message = globals()->gMessageData->_data.get() + *freeoffset;
     }
 }
 
@@ -322,10 +315,10 @@ void EndMessage( void) {
     int32_t *freeoffset;
 
     // get the offset to the first free character
-    freeoffset = &gAresGlobal->gMessageData->_first_free;
+    freeoffset = &globals()->gMessageData->_first_free;
 
     // set the destination char (message) to the first free character
-    message = gAresGlobal->gMessageData->_data.get() + *freeoffset;
+    message = globals()->gMessageData->_data.get() + *freeoffset;
 
     // the last char we're resting on gets turned into an end char, since this should be the last message
     *message = kMessageEndChar;
@@ -336,7 +329,7 @@ void StartLongMessage( short startResID, short endResID)
 {
     longMessageType *tmessage;
 
-    tmessage = *gAresGlobal->gLongMessageData;
+    tmessage = *globals()->gLongMessageData;
 
     if ( tmessage->currentResID != -1)
     {
@@ -376,7 +369,7 @@ void StartStringMessage(unsigned char* string)
 {
     longMessageType *tmessage;
 
-    tmessage = *gAresGlobal->gLongMessageData;
+    tmessage = *globals()->gLongMessageData;
 
     tmessage->newStringMessage = true;
     if ( tmessage->currentResID != -1)
@@ -423,13 +416,13 @@ void ClipToCurrentLongMessage( void)
     unsigned char* ac;
     long            count;
 
-    tmessage = *gAresGlobal->gLongMessageData;
+    tmessage = *globals()->gLongMessageData;
     if (( tmessage->currentResID != tmessage->lastResID) || ( tmessage->newStringMessage))
     {
 
         if ( tmessage->lastResID >= 0)
         {
-            CLIP_BOTTOM = gAresGlobal->gTrueClipBottom;
+            CLIP_BOTTOM = globals()->gTrueClipBottom;
         }
 
         // draw in offscreen world
@@ -476,9 +469,9 @@ void ClipToCurrentLongMessage( void)
                 tmessage->textHeight += kLongMessageVPadDouble;
 
                 if ( tmessage->labelMessage == false)
-                    CLIP_BOTTOM = gAresGlobal->gTrueClipBottom - tmessage->textHeight;
+                    CLIP_BOTTOM = globals()->gTrueClipBottom - tmessage->textHeight;
                 else
-                    CLIP_BOTTOM = gAresGlobal->gTrueClipBottom;
+                    CLIP_BOTTOM = globals()->gTrueClipBottom;
 
                 tmessage->retroTextSpec.topBuffer = kMessageCharTopBuffer;
                 tmessage->retroTextSpec.bottomBuffer = kMessageCharBottomBuffer;
@@ -498,7 +491,7 @@ void ClipToCurrentLongMessage( void)
             }
         } else
         {
-            CLIP_BOTTOM = gAresGlobal->gTrueClipBottom;
+            CLIP_BOTTOM = globals()->gTrueClipBottom;
             tmessage->stage = kClipStage;
         }
     }
@@ -515,14 +508,14 @@ void DrawCurrentLongMessage( long timePass)
     longMessageType *tmessage;
     unsigned char   color;
 
-    tmessage = *gAresGlobal->gLongMessageData;
+    tmessage = *globals()->gLongMessageData;
     if (( tmessage->currentResID != tmessage->lastResID) ||
         ( tmessage->newStringMessage))
     {
         // we check scenario conditions here for ambrosia tutorial
         // but not during net game -- other players wouldn't care what message
         // we were looking at
-        if ( !(gAresGlobal->gOptions & kOptionNetworkOn))
+        if ( !(globals()->gOptions & kOptionNetworkOn))
         {
             CheckScenarioConditions( 0);
         }
@@ -536,15 +529,15 @@ void DrawCurrentLongMessage( long timePass)
             {
                 offPixBase = GetGWorldPixMap( gOffWorld);
                 DrawInOffWorld();
-                SetLongRect( &lRect, CLIP_LEFT, gAresGlobal->gTrueClipBottom - tmessage->textHeight, CLIP_RIGHT,
-                        gAresGlobal->gTrueClipBottom);
+                SetLongRect( &lRect, CLIP_LEFT, globals()->gTrueClipBottom - tmessage->textHeight, CLIP_RIGHT,
+                        globals()->gTrueClipBottom);
                 cRect = lRect;
                 DrawNateRect( *offPixBase, &cRect, 0, 0, 0xff);
                 LongRectToRect( &lRect, &tRect);
                 ChunkCopyPixMapToScreenPixMap( *offPixBase, &tRect, *thePixMapHandle);
                 NormalizeColors();
                 DrawInRealWorld();
-    //          CLIP_BOTTOM = gAresGlobal->gTrueClipBottom;
+    //          CLIP_BOTTOM = globals()->gTrueClipBottom;
                 NormalizeColors();
             }
         }
@@ -558,7 +551,7 @@ void DrawCurrentLongMessage( long timePass)
                     offPixBase = GetGWorldPixMap( gOffWorld);
                     DrawInOffWorld();
                     SetLongRect( &lRect, CLIP_LEFT, CLIP_BOTTOM, CLIP_RIGHT,
-                            gAresGlobal->gTrueClipBottom);
+                            globals()->gTrueClipBottom);
                     mGetTranslateColorShade( SKY_BLUE, DARKEST, color, transColor);
                     cRect = lRect;
                     DrawNateRect( *offPixBase, &cRect, 0, 0, color);
@@ -586,15 +579,15 @@ void DrawCurrentLongMessage( long timePass)
         {
             offPixBase = GetGWorldPixMap( gOffWorld);
             DrawInOffWorld();
-            SetLongRect( &lRect, CLIP_LEFT, gAresGlobal->gTrueClipBottom - tmessage->textHeight, CLIP_RIGHT,
-                    gAresGlobal->gTrueClipBottom);
+            SetLongRect( &lRect, CLIP_LEFT, globals()->gTrueClipBottom - tmessage->textHeight, CLIP_RIGHT,
+                    globals()->gTrueClipBottom);
             cRect = lRect;
             DrawNateRect( *offPixBase, &cRect, 0, 0, 0xff);
             LongRectToRect( &lRect, &tRect);
             ChunkCopyPixMapToScreenPixMap( *offPixBase, &tRect, *thePixMapHandle);
             NormalizeColors();
             DrawInRealWorld();
-//          CLIP_BOTTOM = gAresGlobal->gTrueClipBottom;
+//          CLIP_BOTTOM = globals()->gTrueClipBottom;
             NormalizeColors();
         }
         if (( tmessage->stage == kShowStage) || (  tmessage->currentResID < 0))
@@ -615,7 +608,7 @@ void DrawCurrentLongMessage( long timePass)
             {
                 mSetDirectFont( kLongMessageFontNum);
                 SetLongRect( &lRect, CLIP_LEFT, CLIP_BOTTOM, CLIP_RIGHT,
-                        gAresGlobal->gTrueClipBottom);
+                        globals()->gTrueClipBottom);
                 PlayVolumeSound(  kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
                 offPixBase = GetGWorldPixMap( gOffWorld);
                 while ( tmessage->charDelayCount > 0)
@@ -677,7 +670,7 @@ void EndLongMessage( void)
 {
     longMessageType *tmessage;
 
-    tmessage = *gAresGlobal->gLongMessageData;
+    tmessage = *globals()->gLongMessageData;
     tmessage->previousStartResID = tmessage->startResID;
     tmessage->previousEndResID = tmessage->endResID;
     tmessage->startResID = -1;
@@ -694,7 +687,7 @@ void AdvanceCurrentLongMessage( void)
 {
     longMessageType *tmessage;
 
-    tmessage = *gAresGlobal->gLongMessageData;
+    tmessage = *globals()->gLongMessageData;
     if ( tmessage->currentResID != -1)
     {
         if ( tmessage->currentResID < tmessage->endResID)
@@ -713,7 +706,7 @@ void PreviousCurrentLongMessage( void)
 {
     longMessageType *tmessage;
 
-    tmessage = *gAresGlobal->gLongMessageData;
+    tmessage = *globals()->gLongMessageData;
     if ( tmessage->currentResID != -1)
     {
         if ( tmessage->currentResID > tmessage->startResID)
@@ -731,7 +724,7 @@ void ReplayLastLongMessage( void)
 {
     longMessageType *tmessage;
 
-    tmessage = *gAresGlobal->gLongMessageData;
+    tmessage = *globals()->gLongMessageData;
     if (( tmessage->previousStartResID >= 0) && ( tmessage->currentResID < 0))
     {
         CopyAnyCharPString( tmessage->stringMessage, tmessage->lastStringMessage);
@@ -751,15 +744,15 @@ void DrawMessageScreen( long byUnits)
     int32_t offset;
 
     // increase the amount of time current message has been shown
-    gAresGlobal->gMessageTimeCount += byUnits;
+    globals()->gMessageTimeCount += byUnits;
 
     // if it's been shown for too long, then get the next message
-    if ( gAresGlobal->gMessageTimeCount > kMessageDisplayTime)
+    if ( globals()->gMessageTimeCount > kMessageDisplayTime)
     {
-        gAresGlobal->gMessageTimeCount = 0;
+        globals()->gMessageTimeCount = 0;
         // get the offset to the first current char
-        firstoffset = &gAresGlobal->gMessageData->_first_char;
-        anyChar = gAresGlobal->gMessageData->_data.get() + *firstoffset;
+        firstoffset = &globals()->gMessageData->_first_char;
+        anyChar = globals()->gMessageData->_data.get() + *firstoffset;
         if ( *anyChar != kMessageEndChar)
         {
             offset = *firstoffset;
@@ -778,7 +771,7 @@ void DrawMessageScreen( long byUnits)
                     offset = kAnyCharOffsetStart;
 
                     // reset the destination char to the first free char
-                    anyChar = gAresGlobal->gMessageData->_data.get() + offset;
+                    anyChar = globals()->gMessageData->_data.get() + offset;
                 }
             } while (( *anyChar != kMessageSeparateChar) && ( *anyChar != kMessageEndChar));
             *firstoffset = offset;
@@ -788,8 +781,8 @@ void DrawMessageScreen( long byUnits)
     mSetDirectFont( kTacticalFontNum);
 
     // get the offset to the first current char
-    firstoffset = &gAresGlobal->gMessageData->_first_char;
-    anyChar = gAresGlobal->gMessageData->_data.get() + *firstoffset;
+    firstoffset = &globals()->gMessageData->_first_char;
+    anyChar = globals()->gMessageData->_data.get() + *firstoffset;
     if ( *anyChar != kMessageEndChar)
     {
         tLen = dChar = tString;
@@ -812,7 +805,7 @@ void DrawMessageScreen( long byUnits)
                 offset = kAnyCharOffsetStart;
 
                 // reset the destination char to the first free char
-                anyChar = gAresGlobal->gMessageData->_data.get() + offset;
+                anyChar = globals()->gMessageData->_data.get() + offset;
             }
             *dChar = *anyChar;
             dChar++;
@@ -820,21 +813,21 @@ void DrawMessageScreen( long byUnits)
         } while (( *anyChar != kMessageSeparateChar) && ( *anyChar != kMessageEndChar));
         *tLen -= 1;
 
-        if ( gAresGlobal->gMessageTimeCount < kRaiseTime)
+        if ( globals()->gMessageTimeCount < kRaiseTime)
         {
-            SetScreenLabelPosition( gAresGlobal->gMessageLabelNum, kMessageScreenLeft,
-                    CLIP_BOTTOM - gAresGlobal->gMessageTimeCount);
-        } else if ( gAresGlobal->gMessageTimeCount > kLowerTime)
+            SetScreenLabelPosition( globals()->gMessageLabelNum, kMessageScreenLeft,
+                    CLIP_BOTTOM - globals()->gMessageTimeCount);
+        } else if ( globals()->gMessageTimeCount > kLowerTime)
         {
-            SetScreenLabelPosition( gAresGlobal->gMessageLabelNum, kMessageScreenLeft,
-                    CLIP_BOTTOM - ( kMessageDisplayTime - gAresGlobal->gMessageTimeCount));
+            SetScreenLabelPosition( globals()->gMessageLabelNum, kMessageScreenLeft,
+                    CLIP_BOTTOM - ( kMessageDisplayTime - globals()->gMessageTimeCount));
         }
 
-        SetScreenLabelString( gAresGlobal->gMessageLabelNum, tString);
+        SetScreenLabelString( globals()->gMessageLabelNum, tString);
     } else
     {
-        SetScreenLabelString( gAresGlobal->gMessageLabelNum, nil);
-        gAresGlobal->gMessageTimeCount = 0;
+        SetScreenLabelString( globals()->gMessageLabelNum, nil);
+        globals()->gMessageTimeCount = 0;
     }
 
 #endif
@@ -850,17 +843,17 @@ void SetStatusString(const unsigned char *s, Boolean drawNow, unsigned char colo
 /*
     if (( s != nil) && ( *s != 0))
     {
-        CopyAnyCharPString( (anyCharType *)*gAresGlobal->gStatusString, s);
+        CopyAnyCharPString( (anyCharType *)*globals()->gStatusString, s);
     } else
     {
-        **gAresGlobal->gStatusString = 0;
+        **globals()->gStatusString = 0;
     }
 
     if ( drawNow) UpdateStatusString();
 */
-    SetScreenLabelColor( gAresGlobal->gStatusLabelNum, color);
-    SetScreenLabelString( gAresGlobal->gStatusLabelNum, s);
-    SetScreenLabelAge( gAresGlobal->gStatusLabelNum, kStatusLabelAge);
+    SetScreenLabelColor( globals()->gStatusLabelNum, color);
+    SetScreenLabelString( globals()->gStatusLabelNum, s);
+    SetScreenLabelAge( globals()->gStatusLabelNum, kStatusLabelAge);
 
 }
 
@@ -879,8 +872,8 @@ void UpdateStatusString( void)
     cRect = lRect;
     DrawNateRect( *offPixBase, &cRect, 0, 0, color);
     MoveTo( kDestinationLeft, kDestinationVCenter - gDirectText->height + gDirectText->ascent * 2);
-    if ( **gAresGlobal->gStatusString != 0)
-        DrawDirectTextStringClippedx2(  (anyCharType *)*gAresGlobal->gStatusString,
+    if ( **globals()->gStatusString != 0)
+        DrawDirectTextStringClippedx2(  (anyCharType *)*globals()->gStatusString,
                                     GetTranslateColorShade( kDestinationColor, VERY_LIGHT),
                                     *offPixBase, &lRect, 0, 0);
     LongRectToRect( &lRect, &tRect);
@@ -1463,11 +1456,11 @@ void MessageLabel_Set_Special(short id, TypedHandle<unsigned char> text) {
             charNum++;
             safetyCount++;
         }
-        attachPoint.v += gAresGlobal->gInstrumentTop;
+        attachPoint.v += globals()->gInstrumentTop;
         if ( attachPoint.h >= (kSmallScreenWidth - kRightPanelWidth))
         {
             attachPoint.h = (attachPoint.h - (kSmallScreenWidth - kRightPanelWidth)) +
-                gAresGlobal->gRightPanelLeftEdge;
+                globals()->gRightPanelLeftEdge;
         }
         c++;
         charNum++;
@@ -1487,15 +1480,15 @@ void MessageLabel_Set_Special(short id, TypedHandle<unsigned char> text) {
         case 'R':
             SetScreenLabelOffset( id, 0, 0);
 
-            SetScreenLabelPosition( id, gAresGlobal->gRightPanelLeftEdge -
-                (GetScreenLabelWidth( id)+10), gAresGlobal->gInstrumentTop +
+            SetScreenLabelPosition( id, globals()->gRightPanelLeftEdge -
+                (GetScreenLabelWidth( id)+10), globals()->gInstrumentTop +
                 value);
             break;
 
         case 'L':
             SetScreenLabelOffset( id, 0, 0);
 
-            SetScreenLabelPosition( id, 138, gAresGlobal->gInstrumentTop +
+            SetScreenLabelPosition( id, 138, globals()->gInstrumentTop +
                 value);
             break;
 

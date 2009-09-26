@@ -40,7 +40,7 @@ class BinaryReader;
 #define kMaxTypeBaseCanBuild                12
 #define kMaxShipCanBuild                    6
 
-#define kScenarioNum                        (gAresGlobal->scenarioNum)//31
+#define kScenarioNum                        (globals()->scenarioNum)//31
 
 #define kSingleHumanPlayer              0
 #define kNetworkHumanPlayer             1

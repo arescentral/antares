@@ -85,7 +85,6 @@ struct tempKeyControlType {
     Boolean didConflict;
 };
 
-extern aresGlobalType   *gAresGlobal;
 extern GDHandle         theDevice;
 extern CWindowPtr       gTheWindow;
 
@@ -202,7 +201,7 @@ Boolean Key_Setup_Screen_Do( void)
     EventRecord             theEvent;
     KeyMap                  keyMap;
     preferencesDataType     *prefsData = nil;
-    unsigned long           options = gAresGlobal->gOptions;
+    unsigned long           options = globals()->gOptions;
     tempKeyControlType      *tempKeyControls;
     long                    lastFlashTime = 0;
     interfaceItemType       *anItem;
@@ -219,14 +218,14 @@ Boolean Key_Setup_Screen_Do( void)
 
     for ( i = 0; i < kKeyExtendedControlNum; i++)
     {
-        tempKeyControls[i].keyNum = GetKeyNumFromKeyMap( gAresGlobal->gKeyControl[i]);
+        tempKeyControls[i].keyNum = GetKeyNumFromKeyMap( globals()->gKeyControl[i]);
         tempKeyControls[i].conflicts = false;
     }
 
     error = OpenInterface( kKeyScreenID);
     if ( error == kNoError)
     {
-        prefsData = *gAresGlobal->gPreferencesData;
+        prefsData = *globals()->gPreferencesData;
 
 //      SwitchAnyRadioOrCheckbox( kKeySubstituteCheckbox,
 //          ((options & kOptionSubstituteFKeys) ? (true):(false)));
@@ -250,7 +249,7 @@ Boolean Key_Setup_Screen_Do( void)
         while ( !done)
         {
             InterfaceIdle();
-            if (( AnyEvent()) && ( !( gAresGlobal->gOptions & kOptionInBackground)))
+            if (( AnyEvent()) && ( !( globals()->gOptions & kOptionInBackground)))
             {
                 GetKeys( keyMap);
                 keyNum = GetKeyNumFromKeyMap( keyMap);
@@ -335,12 +334,12 @@ Boolean Key_Setup_Screen_Do( void)
                             lastFlashTime = TickCount();
                         }
                         InterfaceIdle();
-                        if ( gAresGlobal->gOptions & kOptionInBackground)
+                        if ( globals()->gOptions & kOptionInBackground)
                         {
                         } else if (AutoShowHideMenubar( theEvent.where, theDevice))
                         {
                         }
-                        if ( gAresGlobal->returnToMain)
+                        if ( globals()->returnToMain)
                         {
                             done = true;
                             result = false;
@@ -473,7 +472,7 @@ Boolean Key_Setup_Screen_Do( void)
             for ( i = 0; i < kKeyExtendedControlNum; i++)
             {
                 GetKeyMapFromKeyNum( tempKeyControls[i].keyNum,
-                    gAresGlobal->gKeyControl[i]);
+                    globals()->gKeyControl[i]);
             }
             prefsData->options = ( prefsData->options & ~kOptionSubstituteFKeys) |
                                 ( options & kOptionSubstituteFKeys);

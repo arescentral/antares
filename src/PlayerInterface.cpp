@@ -352,22 +352,17 @@ inline void mDoubleDigitize(unsigned char* mstring) {
     }
 }
 
-extern aresGlobalType           *gAresGlobal;
 extern Handle                   gHostEntity, gClientEntity;
-//extern unsigned long          gAresGlobal->gOptions;
-//extern KeyMap                 gAresGlobal->gKeyControl[];
 extern PixMapHandle             thePixMapHandle;
-extern long                     gNatePortLeft, gNatePortTop, CLIP_LEFT, CLIP_RIGHT, CLIP_TOP,
-                                CLIP_BOTTOM, /*gAresGlobal->gTrueClipBottom, gAresGlobal->gSoundVolume,*/
-                                gNetLatency, /*gAresGlobal->gThisScenarioNumber,*/ gRandomSeed;
-extern  GWorldPtr               gOffWorld, gRealWorld, gSaveWorld;
-extern CWindowPtr               gTheWindow/*, gAresGlobal->gBackWindow*/;       // we need the window for copying to the real world, a hack
+extern long                     gNatePortLeft, gNatePortTop, gNetLatency, gRandomSeed,
+                                CLIP_LEFT, CLIP_RIGHT, CLIP_TOP, CLIP_BOTTOM;
+extern GWorldPtr                gOffWorld, gRealWorld, gSaveWorld;
+extern CWindowPtr               gTheWindow;       // we need the window for copying to the real world, a hack
 extern directTextType*          gDirectText;
 extern long                     gWhichDirectText, WORLD_WIDTH, WORLD_HEIGHT;
-//                              gAresGlobal->gPlayerAdmiralNumber;
-extern TypedHandle<baseObjectType>  gBaseObjectData;
-extern TypedHandle<objectActionType>    gObjectActionData;
-extern  GDHandle                theDevice;
+extern TypedHandle<baseObjectType> gBaseObjectData;
+extern TypedHandle<objectActionType> gObjectActionData;
+extern GDHandle                 theDevice;
 
 Boolean IsKeyReserved( KeyMap, Boolean);
 void BlackenOffscreen( void);
@@ -389,13 +384,13 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
 
     *demoLevel = -1;
     FlushEvents(everyEvent, 0);
-/*  if ( gAresGlobal->gameRangerPending)
+/*  if ( globals()->gameRangerPending)
     {
                         result = kMainNetwork;
                         done = true;
                         Wrap_GRGetWaitingCmd();
                         return result;
-    } else if ( gAresGlobal->isQuitting)
+    } else if ( globals()->isQuitting)
     {
                         result = kMainQuit;
                         done = true;
@@ -406,12 +401,12 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
     error = OpenInterface( kMainScreenResID);
     if ( error == kNoError)
     {
-        if ( !(gAresGlobal->gOptions & kOptionNetworkAvailable))// NetSprocketPresent())
+        if ( !(globals()->gOptions & kOptionNetworkAvailable))// NetSprocketPresent())
         {
             SetStatusOfAnyInterfaceItem( kMainNetworkButton, kDimmed, FALSE);
         }
 
-        if ( gAresGlobal->gOptions & kOptionNoSinglePlayer)
+        if ( globals()->gOptions & kOptionNoSinglePlayer)
         {
             SetStatusOfAnyInterfaceItem( kMainPlayButton, kDimmed, false);
         }
@@ -421,7 +416,7 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
         while ( !done)
         {
 
-            if ( !gAresGlobal->haveSeenRTNotice)
+            if ( !globals()->haveSeenRTNotice)
             {
                 Ambrosia_Update_Registered();
 
@@ -431,20 +426,20 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
                     RT_DisplayNotice( false);
                     SetMBarState( false, theDevice);
                 }
-                gAresGlobal->haveSeenRTNotice = true;
+                globals()->haveSeenRTNotice = true;
             }
 
             InterfaceIdle();
             SetGameState(MAIN_SCREEN_INTERFACE);
             Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
-            gAresGlobal->returnToMain = false;
+            globals()->returnToMain = false;
 
             whichItem = -1;
             switch ( theEvent.what )
             {
                 case nullEvent:
                     InterfaceIdle();
-                    if ( gAresGlobal->gOptions & kOptionInBackground)
+                    if ( globals()->gOptions & kOptionInBackground)
                     {
                         startDemoTime = TickCount();
                     } else if (AutoShowHideMenubar( theEvent.where, theDevice))
@@ -457,12 +452,12 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
                         whichItem = kMainDemoButton;
                         timeout = true;
                     }
-                    if ( gAresGlobal->isQuitting)
+                    if ( globals()->isQuitting)
                     {
                         result = kMainQuit;
                         done = true;
                     }
-                    if ( gAresGlobal->gameRangerPending)
+                    if ( globals()->gameRangerPending)
                     {
                         result = kMainNetwork;
                         done = true;
@@ -566,11 +561,11 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
                     DoScrollText( gTheWindow, 6500, 2/*kScrollTextSpeed*/,
                         540, kTitleFontNum/*kComputerFontNum*/, -1);
                     OpenInterface( kMainScreenResID);
-                    if ( !(gAresGlobal->gOptions & kOptionNetworkAvailable))// NetSprocketPresent())
+                    if ( !(globals()->gOptions & kOptionNetworkAvailable))// NetSprocketPresent())
                     {
                         SetStatusOfAnyInterfaceItem( kMainNetworkButton, kDimmed, FALSE);
                     }
-                    if ( gAresGlobal->gOptions & kOptionNoSinglePlayer)
+                    if ( globals()->gOptions & kOptionNoSinglePlayer)
                     {
                         SetStatusOfAnyInterfaceItem( kMainPlayButton, kDimmed, false);
                     }
@@ -585,11 +580,11 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
                     DoOptionsInterface();
 
                     OpenInterface( kMainScreenResID);
-                    if ( !(gAresGlobal->gOptions & kOptionNetworkAvailable))// NetSprocketPresent())
+                    if ( !(globals()->gOptions & kOptionNetworkAvailable))// NetSprocketPresent())
                     {
                         SetStatusOfAnyInterfaceItem( kMainNetworkButton, kDimmed, FALSE);
                     }
-                    if ( gAresGlobal->gOptions & kOptionNoSinglePlayer)
+                    if ( globals()->gOptions & kOptionNoSinglePlayer)
                     {
                         SetStatusOfAnyInterfaceItem( kMainPlayButton, kDimmed, false);
                     }
@@ -638,12 +633,12 @@ void DoAboutAresInterface( void)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( gAresGlobal->gOptions & kOptionInBackground)
+                        if ( globals()->gOptions & kOptionInBackground)
                         {
                         } else if (AutoShowHideMenubar( theEvent.where, theDevice))
                         {
                         }
-                        if ( gAresGlobal->returnToMain)
+                        if ( globals()->returnToMain)
                         {
                             done = true;
                         }
@@ -853,7 +848,7 @@ short DoPlayAgain( Boolean allowResume, Boolean allowSkip) // return 0 = quit, 1
         PaintRect( &tRect);
         DrawInRealWorld();
 
-        if ( gAresGlobal->gOptions & kOptionNetworkOn)
+        if ( globals()->gOptions & kOptionNetworkOn)
         {
             SetStatusOfAnyInterfaceItem( kPlayAgainOKButton, kDimmed, false);
         }
@@ -880,12 +875,12 @@ short DoPlayAgain( Boolean allowResume, Boolean allowSkip) // return 0 = quit, 1
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( gAresGlobal->gOptions & kOptionInBackground)
+                        if ( globals()->gOptions & kOptionInBackground)
                         {
                         } else if (AutoShowHideMenubar( theEvent.where, theDevice))
                         {
                         }
-                        if ( gAresGlobal->returnToMain)
+                        if ( globals()->returnToMain)
                         {
                             done = true;
                         }
@@ -1028,12 +1023,12 @@ void DoNetSettings( void)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( gAresGlobal->gOptions & kOptionInBackground)
+                        if ( globals()->gOptions & kOptionInBackground)
                         {
                         } else if (AutoShowHideMenubar( theEvent.where, theDevice))
                         {
                         }
-                        if ( gAresGlobal->returnToMain)
+                        if ( globals()->returnToMain)
                         {
                             cancel = true;
                             done = true;
@@ -1160,13 +1155,13 @@ void DoHelpScreen( void)
     PixMapHandle            offMap;
 
     FlushEvents(everyEvent, 0);
-    if ( gAresGlobal->gOptions & kOptionSubstituteFKeys)
+    if ( globals()->gOptions & kOptionSubstituteFKeys)
         error = OpenInterface( kNOFHelpScreenID);
     else
         error = OpenInterface( kHelpScreenID);
     if ( error == kNoError)
     {
-        MacSetRect( &tRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, gAresGlobal->gTrueClipBottom);
+        MacSetRect( &tRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, globals()->gTrueClipBottom);
         CenterAllItemsInRect( &tRect);
         item = GetAnyInterfaceItemPtr( kHelpScreenBox);
         DrawInOffWorld();
@@ -1185,7 +1180,7 @@ void DoHelpScreen( void)
         DrawAllItemsOfKind( kPlainButton, TRUE, FALSE, FALSE);
         DrawAllItemsOfKind( kTextRect, TRUE, FALSE, FALSE);
 
-        if ( gAresGlobal->gOptions & kOptionSubstituteFKeys) {
+        if ( globals()->gOptions & kOptionSubstituteFKeys) {
             retroTextSpec.text.load_resource('TEXT', kNOFHelpScreenTextID);
         } else {
             retroTextSpec.text.load_resource('TEXT', kHelpScreenTextID);
@@ -1194,7 +1189,7 @@ void DoHelpScreen( void)
         if (retroTextSpec.text.get() != nil) {
 /*          for ( l = 0; l < kKeyControlNum; l++)
             {
-                GetKeyNumName( numString, GetKeyNumFromKeyMap( gAresGlobal->gKeyControl[l]));
+                GetKeyNumName( numString, GetKeyNumFromKeyMap( globals()->gKeyControl[l]));
                 while ( numString[0] < 4)
                 {
                     numString[0]++;
@@ -1273,13 +1268,13 @@ void DoHelpScreen( void)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( gAresGlobal->gOptions & kOptionInBackground)
+                        if ( globals()->gOptions & kOptionInBackground)
                         {
                         } else if (AutoShowHideMenubar( theEvent.where, theDevice))
                         {
                         }
                         break;
-                        if ( gAresGlobal->returnToMain)
+                        if ( globals()->returnToMain)
                         {
                             done = true;
                         }
@@ -1333,7 +1328,7 @@ void StartPauseIndicator(unsigned char* pauseString, unsigned char hue) {
 #pragma unused( hue)
     mSetDirectFont( kTitleFontNum);
     mGetDirectStringDimensions( pauseString, width, height, strlen, getwidchar, getwidwid);
-    MacSetRect( &tRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, gAresGlobal->gTrueClipBottom);
+    MacSetRect( &tRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, globals()->gTrueClipBottom);
 
     MacSetRect( &stringRect, 0, 0, width, height);
     CenterRectInRect( &stringRect, &tRect);
@@ -1379,7 +1374,7 @@ void StopPauseIndicator(unsigned char* pauseString) {
 
     mSetDirectFont( kTitleFontNum);
     mGetDirectStringDimensions( pauseString, width, height, strlen, getwidchar, getwidwid);
-    MacSetRect( &tRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, gAresGlobal->gTrueClipBottom);
+    MacSetRect( &tRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, globals()->gTrueClipBottom);
 
     MacSetRect( &stringRect, 0, 0, width, height);
     CenterRectInRect( &stringRect, &tRect);
@@ -1425,7 +1420,7 @@ void DoOptionsInterface( void)
     Boolean                 done = FALSE, cancel = FALSE;
     EventRecord             theEvent;
     char                    whichChar;
-    TypedHandle<preferencesDataType> tempPrefs = gAresGlobal->gPreferencesData;
+    TypedHandle<preferencesDataType> tempPrefs = globals()->gPreferencesData;
     preferencesDataType*    prefsData = nil;
     Rect                    volumeRect;
 
@@ -1437,11 +1432,11 @@ void DoOptionsInterface( void)
         return;
     }
 
-    prefsData = *gAresGlobal->gPreferencesData;
+    prefsData = *globals()->gPreferencesData;
 
     error = OpenInterface( kOptionsScreenID);
     SetOptionCheckboxes( prefsData->options);
-    if ( !(gAresGlobal->gOptions & kOptionSpeechAvailable)) SetStatusOfAnyInterfaceItem( kOptionSpeechOnButton, kDimmed, false);
+    if ( !(globals()->gOptions & kOptionSpeechAvailable)) SetStatusOfAnyInterfaceItem( kOptionSpeechOnButton, kDimmed, false);
     GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kOptionVolumeBox), &volumeRect);
     if ( prefsData->volume == 0)
     {
@@ -1466,12 +1461,12 @@ void DoOptionsInterface( void)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( gAresGlobal->gOptions & kOptionInBackground)
+                        if ( globals()->gOptions & kOptionInBackground)
                         {
                         } else if (AutoShowHideMenubar( theEvent.where, theDevice))
                         {
                         }
-                        if ( gAresGlobal->returnToMain)
+                        if ( globals()->returnToMain)
                         {
                             done = true;
                         }
@@ -1506,7 +1501,7 @@ void DoOptionsInterface( void)
 
                         // if we've changed screen size
 /*                      if ( (prefsData->options & ( kOptionScreenSmall | kOptionScreenMedium |
-                                kOptionScreenLarge)) != ( gAresGlobal->gOptions & ( kOptionScreenSmall | kOptionScreenMedium |
+                                kOptionScreenLarge)) != ( globals()->gOptions & ( kOptionScreenSmall | kOptionScreenMedium |
                                 kOptionScreenLarge)))
                         {
                             whichItem = ResizeWindowDialog( 2500);
@@ -1516,7 +1511,7 @@ void DoOptionsInterface( void)
                             {
                                 prefsData->options &= ~( kOptionScreenSmall | kOptionScreenMedium |
                                                 kOptionScreenLarge);
-                                prefsData->options |= gAresGlobal->gOptions & ( kOptionScreenSmall | kOptionScreenMedium |
+                                prefsData->options |= globals()->gOptions & ( kOptionScreenSmall | kOptionScreenMedium |
                                                 kOptionScreenLarge);
                             }
                         }
@@ -1536,7 +1531,7 @@ void DoOptionsInterface( void)
                                 SetStatusOfAnyInterfaceItem( kOptionSoundUpButton, kDimmed, true);
                             }
                             DrawOptionVolumeLevel( &volumeRect, prefsData->volume);
-                            gAresGlobal->gSoundVolume = prefsData->volume;
+                            globals()->gSoundVolume = prefsData->volume;
                             if ( prefsData->options & kOptionMusicIdle)
                             {
                                 SetSongVolume( kMaxMusicVolume);
@@ -1558,7 +1553,7 @@ void DoOptionsInterface( void)
                                 SetStatusOfAnyInterfaceItem( kOptionSoundDownButton, kDimmed, true);
                             }
                             DrawOptionVolumeLevel( &volumeRect, prefsData->volume);
-                            gAresGlobal->gSoundVolume = prefsData->volume;
+                            globals()->gSoundVolume = prefsData->volume;
                             if ( prefsData->options & kOptionMusicIdle)
                             {
                                 SetSongVolume( kMaxMusicVolume);
@@ -1617,13 +1612,13 @@ void DoOptionsInterface( void)
         }
         if ( !cancel)
         {
-            SaveAllPreferences(); // sets gAresGlobal->gOptions
+            SaveAllPreferences(); // sets globals()->gOptions
         } else
         {
-            **gAresGlobal->gPreferencesData = **tempPrefs;
-            if ( gAresGlobal->gSoundVolume != prefsData->volume)
+            **globals()->gPreferencesData = **tempPrefs;
+            if ( globals()->gSoundVolume != prefsData->volume)
             {
-                gAresGlobal->gSoundVolume = prefsData->volume;
+                globals()->gSoundVolume = prefsData->volume;
                 if ( prefsData->options & kOptionMusicIdle)
                 {
                     SetSongVolume( kMaxMusicVolume);
@@ -1721,7 +1716,7 @@ Boolean DoKeyInterface( void)
     EventRecord             theEvent;
     KeyMap                  keyMap;
     preferencesDataType     *prefsData = nil;
-    unsigned long           options = gAresGlobal->gOptions;
+    unsigned long           options = globals()->gOptions;
 
     BlackenOffscreen();
 
@@ -1732,10 +1727,10 @@ Boolean DoKeyInterface( void)
         for ( i = 0; i < kKeyControlNum; i++)
         {
             SetButtonKeyNum( i,
-                GetKeyNumFromKeyMap( gAresGlobal->gKeyControl[i]));
+                GetKeyNumFromKeyMap( globals()->gKeyControl[i]));
         }
 
-        prefsData = *gAresGlobal->gPreferencesData;
+        prefsData = *globals()->gPreferencesData;
 
         SwitchAnyRadioOrCheckbox( kKeySubstituteCheckbox,
             ((options & kOptionSubstituteFKeys) ? (true):(false)));
@@ -1744,7 +1739,7 @@ Boolean DoKeyInterface( void)
         while ( !done)
         {
             InterfaceIdle();
-            if (( AnyEvent()) && ( !( gAresGlobal->gOptions & kOptionInBackground)))
+            if (( AnyEvent()) && ( !( globals()->gOptions & kOptionInBackground)))
             {
                 GetKeys( keyMap);
                 keyNum = GetKeyNumFromKeyMap( keyMap);
@@ -1805,12 +1800,12 @@ Boolean DoKeyInterface( void)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( gAresGlobal->gOptions & kOptionInBackground)
+                        if ( globals()->gOptions & kOptionInBackground)
                         {
                         } else if (AutoShowHideMenubar( theEvent.where, theDevice))
                         {
                         }
-                        if ( gAresGlobal->returnToMain)
+                        if ( globals()->returnToMain)
                         {
                             done = true;
                             result = false;
@@ -1904,7 +1899,7 @@ Boolean DoKeyInterface( void)
         {
             for ( i = 0; i < kKeyControlNum; i++)
             {
-                GetKeyMapFromKeyNum( GetButtonKeyNum( i), gAresGlobal->gKeyControl[i]);
+                GetKeyMapFromKeyNum( GetButtonKeyNum( i), globals()->gKeyControl[i]);
             }
             prefsData->options = ( prefsData->options & ~kOptionSubstituteFKeys) |
                                 ( options & kOptionSubstituteFKeys);
@@ -1931,8 +1926,8 @@ Boolean BothCommandAndQ( void)
 
     for ( b = 0; b < kKeyExtendedControlNum; b++)
     {
-        if ( mQKey( gAresGlobal->gKeyControl[b])) q = true;
-        if ( mCommandKey( gAresGlobal->gKeyControl[b])) command = true;
+        if ( mQKey( globals()->gKeyControl[b])) q = true;
+        if ( mCommandKey( globals()->gKeyControl[b])) command = true;
     }
 
     if (( q) && ( command)) return ( true);
@@ -2037,7 +2032,7 @@ netResultType StartNetworkGameSetup( void)
     char                    whichChar;
     netResultType           result = kCancel;
 
-    if ( gAresGlobal->gameRangerPending)
+    if ( globals()->gameRangerPending)
     {
         if ( Wrap_GRIsHostCmd())
         {
@@ -2067,13 +2062,13 @@ netResultType StartNetworkGameSetup( void)
                     {
                         case nullEvent:
                             InterfaceIdle();
-                            if ( gAresGlobal->gOptions & kOptionInBackground)
+                            if ( globals()->gOptions & kOptionInBackground)
                             {
                             } else if (AutoShowHideMenubar( theEvent.where, theDevice))
                             {
 
                             }
-                            if ( gAresGlobal->returnToMain)
+                            if ( globals()->returnToMain)
                             {
                                 done = true;
                                 result = kCancel;
@@ -2179,10 +2174,10 @@ netResultType ClientWaitInterface( void)
                             serialDenominator;
     Str255                  s;
 
-    if ( gAresGlobal->gameRangerPending)
+    if ( globals()->gameRangerPending)
     {
-        gAresGlobal->gameRangerPending = false;
-        gAresGlobal->gameRangerInProgress = true;
+        globals()->gameRangerPending = false;
+        globals()->gameRangerInProgress = true;
 
     }
 
@@ -2218,12 +2213,12 @@ netResultType ClientWaitInterface( void)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( gAresGlobal->gOptions & kOptionInBackground)
+                        if ( globals()->gOptions & kOptionInBackground)
                         {
                         } else if (AutoShowHideMenubar( theEvent.where, theDevice))
                         {
                         }
-                        if ( gAresGlobal->returnToMain)
+                        if ( globals()->returnToMain)
                         {
                             whichItem = kClientWaitCancelButton;
                         }
@@ -2268,10 +2263,10 @@ netResultType ClientWaitInterface( void)
 #ifdef kUsePublicCopyProtection
                                 && (
                                     (
-                                        ( serialNumerator != gAresGlobal->gSerialNumerator)
+                                        ( serialNumerator != globals()->gSerialNumerator)
                                         ||
                                         ( serialDenominator !=
-                                            gAresGlobal->gSerialDenominator)
+                                            globals()->gSerialDenominator)
                                         )
                                         ||
                                         (
@@ -2288,8 +2283,8 @@ netResultType ClientWaitInterface( void)
                                 done = true;
                                 result = kClient;
                                 SendPreGameVerboseMessage( eClientReadyMessage,
-                                    kThisVersion, gAresGlobal->gSerialNumerator,
-                                    gAresGlobal->gSerialDenominator, 0);
+                                    kThisVersion, globals()->gSerialNumerator,
+                                    globals()->gSerialDenominator, 0);
                                 if ( ( serialNumerator == 0) &&
                                             ( serialDenominator == 0))
                                     SetOpponentIsUnregistered( true);
@@ -2298,8 +2293,8 @@ netResultType ClientWaitInterface( void)
                             } else
                             {
                                 SendPreGameVerboseMessage( eClientReadyMessage,
-                                    kThisVersion, gAresGlobal->gSerialNumerator,
-                                    gAresGlobal->gSerialDenominator, 0);
+                                    kThisVersion, globals()->gSerialNumerator,
+                                    globals()->gSerialDenominator, 0);
 
                                 if ( version < kThisVersion)
                                     ShowErrorAny( eContinueOnlyErr, kErrorStrID,
@@ -2349,10 +2344,10 @@ netResultType HostAcceptClientInterface( void)
     Str31                   s;
     unsigned char*          name;
 
-    if ( gAresGlobal->gameRangerPending)
+    if ( globals()->gameRangerPending)
     {
-        gAresGlobal->gameRangerPending = false;
-        gAresGlobal->gameRangerInProgress = true;
+        globals()->gameRangerPending = false;
+        globals()->gameRangerInProgress = true;
 
         Wrap_GRHostReady();
     }
@@ -2382,12 +2377,12 @@ netResultType HostAcceptClientInterface( void)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( gAresGlobal->gOptions & kOptionInBackground)
+                        if ( globals()->gOptions & kOptionInBackground)
                         {
                         } else if (AutoShowHideMenubar( theEvent.where, theDevice))
                         {
                         }
-                        if ( gAresGlobal->returnToMain)
+                        if ( globals()->returnToMain)
                         {
                             whichItem = kHostCancelButton;
                         }
@@ -2420,8 +2415,8 @@ netResultType HostAcceptClientInterface( void)
 
                     case kHostAcceptButton:
                         SendPreGameVerboseMessage( eHostAcceptsMessage, kThisVersion,
-                            gAresGlobal->gSerialNumerator,
-                            gAresGlobal->gSerialDenominator,
+                            globals()->gSerialNumerator,
+                            globals()->gSerialDenominator,
                             0);
                         break;
 
@@ -2472,8 +2467,8 @@ netResultType HostAcceptClientInterface( void)
                         {
                             ShowErrorAny( eContinueOnlyErr, kErrorStrID,
                                 nil, nil, nil, nil, kNewerVersionError, -1, -1, -1, __FILE__, 0);
-                        } else if (( serialNumerator == gAresGlobal->gSerialNumerator)
-                            && ( serialDenominator == gAresGlobal->gSerialDenominator)
+                        } else if (( serialNumerator == globals()->gSerialNumerator)
+                            && ( serialDenominator == globals()->gSerialDenominator)
                             && (( serialNumerator != 0) || ( serialDenominator != 0)))
                         {
                             ShowErrorAny( eContinueOnlyErr, kErrorStrID,
@@ -3521,7 +3516,7 @@ long DoSelectLevelInterface( long startChapter)
     if ( ThisChapterIsNetworkable( thisChapter)) thisChapter = 1;
     if ( ThisChapterIsNetworkable( thisChapter))
     {
-        gAresGlobal->externalFileSpec.name[0] = 0;
+        globals()->externalFileSpec.name[0] = 0;
         EF_OpenExternalFile();
         ShowErrorAny( eContinueOnlyErr, kErrorStrID,
             nil, nil, nil, nil, 80, -1, -1, -1, __FILE__, 0);
@@ -3570,12 +3565,12 @@ long DoSelectLevelInterface( long startChapter)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( gAresGlobal->gOptions & kOptionInBackground)
+                        if ( globals()->gOptions & kOptionInBackground)
                         {
                         } else if (AutoShowHideMenubar( theEvent.where, theDevice))
                         {
                         }
-                        if ( gAresGlobal->returnToMain)
+                        if ( globals()->returnToMain)
                         {
                             whichItem = kSelectLevelCancelButton;
                         }
@@ -3599,7 +3594,7 @@ long DoSelectLevelInterface( long startChapter)
                         whichItem = InterfaceKeyDown( theEvent.message);
 /*                      if ( whichChar == '|')
                         {
-                            x = gAresGlobal->levelNum;
+                            x = globals()->levelNum;
                             if ( x > GetScenarioNumber())
                                 x = GetScenarioNumber();
                             SaveStartingLevelPreferences( x);
@@ -3889,12 +3884,12 @@ Boolean DoMissionInterface( long whichScenario)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( gAresGlobal->gOptions & kOptionInBackground)
+                        if ( globals()->gOptions & kOptionInBackground)
                         {
                         } else if (AutoShowHideMenubar( theEvent.where, theDevice))
                         {
                         }
-                        if (( gAresGlobal->gOptions & (kOptionAutoPlay | kOptionReplay)) && (!( gAresGlobal->gOptions & kOptionInBackground))
+                        if (( globals()->gOptions & (kOptionAutoPlay | kOptionReplay)) && (!( globals()->gOptions & kOptionInBackground))
                             && ( (TickCount() - nextStartTime) > thisMissionWaitTime))
                         {
                             if ( whichBriefPoint < ( GetBriefPointNumber( whichScenario) - 1))
@@ -3907,7 +3902,7 @@ Boolean DoMissionInterface( long whichScenario)
                             nextStartTime = TickCount();
                         }
 
-                        if ( gAresGlobal->returnToMain)
+                        if ( globals()->returnToMain)
                         {
                             done = true;
                             cancel = true;
@@ -4841,7 +4836,7 @@ void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, lo
 /*  while ( AnyRealKeyDown());
     autoTimeStart = TickCount();
 
-    while (( !AnyRealKeyDown()) && (!(( gAresGlobal->gOptions & (kOptionAutoPlay | kOptionReplay)) && (( TickCount() - autoTimeStart) < kDebriefTimeOutTime))));
+    while (( !AnyRealKeyDown()) && (!(( globals()->gOptions & (kOptionAutoPlay | kOptionReplay)) && (( TickCount() - autoTimeStart) < kDebriefTimeOutTime))));
 */
 }
 
@@ -4913,7 +4908,7 @@ void DoMissionDebriefingText( WindowPtr thePort, long textID, long yourlength, l
     };
     autoTimeStart = TickCount();
     while (( !AnyRealKeyDown()) && (!(Button())) &&
-        (!(( gAresGlobal->gOptions & (kOptionAutoPlay | kOptionReplay)) &&
+        (!(( globals()->gOptions & (kOptionAutoPlay | kOptionReplay)) &&
         (( TickCount() - autoTimeStart) < kDebriefTimeOutTime)))) {
         // DO NOTHING
     };
@@ -4941,7 +4936,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
     Movie               theMovie = nil;
     RgnHandle           clipRgn = nil;
 
-    if (( gAresGlobal->gOptions & kOptionMusicIdle) && ( songID >= 0))
+    if (( globals()->gOptions & kOptionMusicIdle) && ( songID >= 0))
     {
         if ( SongIsPlaying())
         {
@@ -5434,7 +5429,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
     autoTimeStart = TickCount();
 
     if ( theMovie != nil) CleanUpMiniMovie( &theMovie);
-//  while (( !AnyRealKeyDown()) && (!abort) && (!(( gAresGlobal->gOptions & (kOptionAutoPlay | kOptionReplay)) && (( TickCount() - autoTimeStart) < kDebriefTimeOutTime))));
+//  while (( !AnyRealKeyDown()) && (!abort) && (!(( globals()->gOptions & (kOptionAutoPlay | kOptionReplay)) && (( TickCount() - autoTimeStart) < kDebriefTimeOutTime))));
     MacShowCursor();
 
     if (( SongIsPlaying()) && ( songID >= 0))
@@ -5471,17 +5466,17 @@ void HandleOSEvent( EventRecord *event)
                 if ( GetDeviceDepth( theDevice) != 8)
                     SetColorDepth( theDevice, 8);
                 SetMBarState( false, theDevice);
-                gAresGlobal->gOptions &= ~kOptionInBackground;
+                globals()->gOptions &= ~kOptionInBackground;
                 SelectWindow( gTheWindow);
                 MacSetPort( gTheWindow);
                 ResumeActiveTextEdit();
 
-                if ( gAresGlobal->useGameRanger)
+                if ( globals()->useGameRanger)
                 {
-                    if (( Wrap_GRCheckForAE())/* && (!gAresGlobal->gameRangerPending)*/)
+                    if (( Wrap_GRCheckForAE())/* && (!globals()->gameRangerPending)*/)
                     {
-                        gAresGlobal->gameRangerPending = true;
-                        gAresGlobal->returnToMain = true;
+                        globals()->gameRangerPending = true;
+                        globals()->returnToMain = true;
                         SysBeep(20);
                     }
                 }
@@ -5492,7 +5487,7 @@ void HandleOSEvent( EventRecord *event)
             {
                 ToggleSong();
                 SetMBarState( true, theDevice);
-                gAresGlobal->gOptions |= kOptionInBackground;
+                globals()->gOptions |= kOptionInBackground;
                 SuspendActiveTextEdit();
                 WriteDebugLine("\pSUSPEND");
             }
@@ -5505,12 +5500,12 @@ Boolean Ares_WaitNextEvent( short eventMask, EventRecord *theEvent,
 {
     Boolean result = WaitNextEvent( eventMask, theEvent, sleep, mouseRgn);
 
-    if ( gAresGlobal != nil)
+    if ( globals() != nil)
     {
         switch( theEvent->what)
         {
             case kHighLevelEvent:
-                if ( gAresGlobal->aeInited)
+                if ( globals()->aeInited)
                 {
                     AEProcessAppleEvent( theEvent);
                 }
@@ -5523,16 +5518,16 @@ Boolean Ares_WaitNextEvent( short eventMask, EventRecord *theEvent,
         }
     }
 
-        if ((!(gAresGlobal->gOptions & kOptionInBackground)) &&
-            (!gAresGlobal->gameRangerPending))
+        if ((!(globals()->gOptions & kOptionInBackground)) &&
+            (!globals()->gameRangerPending))
 {
-    if (( Wrap_GRIsWaitingCmd())/* && ( !gAresGlobal->gameRangerPending)*/)
+    if (( Wrap_GRIsWaitingCmd())/* && ( !globals()->gameRangerPending)*/)
     {
         WriteDebugLine("\pGRIsWaiting!");
-        if ( !gAresGlobal->gameRangerPending)
+        if ( !globals()->gameRangerPending)
         {
-            gAresGlobal->gameRangerPending = true;
-            gAresGlobal->returnToMain = true;
+            globals()->gameRangerPending = true;
+            globals()->returnToMain = true;
         }
     }
 }
@@ -5552,8 +5547,8 @@ void Replace_KeyCode_Strings_With_Actual_Key_Names(TypedHandle<unsigned char> te
 
     for ( l = 0; l < kKeyExtendedControlNum; l++)
     {
-//      GetKeyNumName( numString, GetKeyNumFromKeyMap( gAresGlobal->gKeyControl[l]));
-        GetIndString( numString, resID, GetKeyNumFromKeyMap( gAresGlobal->gKeyControl[l]));
+//      GetKeyNumName( numString, GetKeyNumFromKeyMap( globals()->gKeyControl[l]));
+        GetIndString( numString, resID, GetKeyNumFromKeyMap( globals()->gKeyControl[l]));
         while ( numString[0] < padTo)
         {
             numString[0]++;

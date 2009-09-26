@@ -43,16 +43,12 @@
 #define kLabelInnerSpace        3
 #define kLabelTotalInnerSpace   (kLabelInnerSpace<<1)
 
-extern aresGlobalType   *gAresGlobal;
-extern long             gWhichDirectText, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT,
-                        CLIP_BOTTOM,
+extern long             gWhichDirectText, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM,
                         WORLD_WIDTH, WORLD_HEIGHT, gNatePortLeft, gNatePortTop; //temp hack?
-extern directTextType   *gDirectText;
-extern  GWorldPtr       gOffWorld, gRealWorld, gSaveWorld;
-extern  PixMapHandle    thePixMapHandle;
+extern directTextType*  gDirectText;
+extern GWorldPtr        gOffWorld, gRealWorld, gSaveWorld;
+extern PixMapHandle     thePixMapHandle;
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
-
-//Handle    gAresGlobal->gScreenLabelData = nil;
 
 // local function prototypes
 static long String_Count_Lines(unsigned char* s);
@@ -61,7 +57,7 @@ static unsigned char* String_Get_Nth_Line(unsigned char* dest, unsigned char* so
 static void Auto_Animate_Line( Point *source, Point *dest);
 
 int ScreenLabelInit() {
-    gAresGlobal->gScreenLabelData.create(kMaxLabelNum);
+    globals()->gScreenLabelData.create(kMaxLabelNum);
     ResetAllLabels();
     return kNoError;
 }
@@ -73,7 +69,7 @@ void ResetAllLabels( void)
     screenLabelType *label;
     short           i;
 
-    label = *gAresGlobal->gScreenLabelData;
+    label = *globals()->gScreenLabelData;
 
     for ( i = 0; i < kMaxLabelNum; i++)
     {
@@ -101,8 +97,8 @@ void ScreenLabelCleanup( void)
 
 {
 #ifdef kUseLabels
-    if (gAresGlobal->gScreenLabelData.get() != nil) {
-        gAresGlobal->gScreenLabelData.destroy();
+    if (globals()->gScreenLabelData.get() != nil) {
+        globals()->gScreenLabelData.destroy();
     }
 #endif
 }
@@ -115,7 +111,7 @@ short AddScreenLabel( short h, short v, short hoff, short voff, const unsigned c
     short           whichLabel = 0;
     screenLabelType *label;
 
-    label = *gAresGlobal->gScreenLabelData;
+    label = *globals()->gScreenLabelData;
     while (( whichLabel < kMaxLabelNum) && ( label->active)) { label++; whichLabel++;}
     if ( whichLabel >= kMaxLabelNum) return ( -1);  // no free label
 
@@ -190,7 +186,7 @@ void RemoveScreenLabel( long which)
 #ifdef kUseLabels
     screenLabelType *label;
 
-    label = *gAresGlobal->gScreenLabelData + which;
+    label = *globals()->gScreenLabelData + which;
 
     MacSetRect( &(label->thisRect), 0, 0, -1, -1);
     label->lastRect = label->thisRect;
@@ -212,7 +208,7 @@ void EraseAllLabels( void)
 
     savePixBase = GetGWorldPixMap( gSaveWorld);
     offPixBase = GetGWorldPixMap( gOffWorld);
-    label = *gAresGlobal->gScreenLabelData;
+    label = *globals()->gScreenLabelData;
     for ( i = 0; i < kMaxLabelNum; i++)
     {
         if (( label->active) && ( label->visibleState >= 0))
@@ -245,7 +241,7 @@ void DrawAllLabels( void)
 
     mSetDirectFont( kTacticalFontNum);
 
-    label = *gAresGlobal->gScreenLabelData;
+    label = *globals()->gScreenLabelData;
     SetLongRect( &clipRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
     offPixBase = GetGWorldPixMap( gOffWorld);
     for ( i = 0; i < kMaxLabelNum; i++)
@@ -345,7 +341,7 @@ void ShowAllLabels( void)
     screenLabelType *label;
     PixMapHandle    pixMap;
 
-    label = *gAresGlobal->gScreenLabelData;
+    label = *globals()->gScreenLabelData;
     pixMap = GetGWorldPixMap( gOffWorld);
     for ( i = 0; i < kMaxLabelNum; i++)
     {
@@ -395,7 +391,7 @@ void SetScreenLabelPosition( long which, short h, short v)
 #ifdef kUseLabels
     screenLabelType *label;
 
-    label = *gAresGlobal->gScreenLabelData + which;
+    label = *globals()->gScreenLabelData + which;
     label->where.h = h + label->offset.h;
     label->where.v = v + label->offset.v;
 #endif
@@ -411,7 +407,7 @@ void UpdateAllLabelPositions( long unitsDone)
     Boolean         isOffScreen = FALSE;
     Point           source, dest;
 
-    label = *gAresGlobal->gScreenLabelData;
+    label = *globals()->gScreenLabelData;
     for ( i = 0; i < kMaxLabelNum; i++)
     {
         if (( label->active) && ( !label->killMe))
@@ -448,7 +444,7 @@ void UpdateAllLabelPositions( long unitsDone)
                         label->where.v = CLIP_BOTTOM - kLabelBufferBottom - label->height;
                     }
 
-                    if ( !(label->object->seenByPlayerFlags & ( 1 << gAresGlobal->gPlayerAdmiralNumber)))
+                    if ( !(label->object->seenByPlayerFlags & ( 1 << globals()->gPlayerAdmiralNumber)))
                     {
                         isOffScreen = true;
                     }
@@ -563,7 +559,7 @@ void SetScreenLabelObject( long which, spaceObjectType *object)
     screenLabelType *label;
 //  smallFixedType  f;
 
-    label = *gAresGlobal->gScreenLabelData + which;
+    label = *globals()->gScreenLabelData + which;
     label->object = object;
 
     if ( label->object != nil)
@@ -591,7 +587,7 @@ void SetScreenLabelAge( long which, long age)
 #ifdef kUseLabels
     screenLabelType *label;
 
-    label = *gAresGlobal->gScreenLabelData + which;
+    label = *globals()->gScreenLabelData + which;
     label->age = age;
         label->visibleState = 1;
 //  else label->visibleState = 0;
@@ -604,7 +600,7 @@ void SetScreenLabelString( long which, const unsigned char *string)
 #ifdef kUseLabels
     screenLabelType *label;
 
-    label = *gAresGlobal->gScreenLabelData + which;
+    label = *globals()->gScreenLabelData + which;
     if ( string == nil)
     {
         *(label->label) = 0;
@@ -625,7 +621,7 @@ void SetScreenLabelColor( long which, unsigned char color)
 #ifdef kUseLabels
     screenLabelType *label;
 
-    label = *gAresGlobal->gScreenLabelData + which;
+    label = *globals()->gScreenLabelData + which;
     label->color = color;
 #endif
 }
@@ -636,7 +632,7 @@ void SetScreenLabelKeepOnScreenAnyway( long which, Boolean keepOnScreenAnyway)
 #ifdef kUseLabels
     screenLabelType *label;
 
-    label = *gAresGlobal->gScreenLabelData + which;
+    label = *globals()->gScreenLabelData + which;
     label->keepOnScreenAnyway = keepOnScreenAnyway;
     label->retroCount = 0;
 #endif
@@ -648,7 +644,7 @@ void SetScreenLabelAttachedHintLine( long which, Boolean attachedHintLine, Point
 #ifdef kUseLabels
     screenLabelType *label;
 
-    label = *gAresGlobal->gScreenLabelData + which;
+    label = *globals()->gScreenLabelData + which;
     if ( label->attachedHintLine) HideHintLine();
     label->attachedHintLine = attachedHintLine;
     label->attachedToWhere = toWhere;
@@ -661,7 +657,7 @@ void SetScreenLabelOffset( long which, long hoff, long voff)
 #ifdef kUseLabels
     screenLabelType *label;
 
-    label = *gAresGlobal->gScreenLabelData + which;
+    label = *globals()->gScreenLabelData + which;
     label->offset.h = hoff;
     label->offset.v = voff;
 
@@ -673,7 +669,7 @@ long GetScreenLabelWidth( long which)
 #ifdef kUseLabels
     screenLabelType *label;
 
-    label = *gAresGlobal->gScreenLabelData + which;
+    label = *globals()->gScreenLabelData + which;
 
     return ( label->width);
 
@@ -685,7 +681,7 @@ unsigned char* GetScreenLabelStringPtr( long which)
 #ifdef kUseLabels
     screenLabelType *label;
 
-    label = *gAresGlobal->gScreenLabelData + which;
+    label = *globals()->gScreenLabelData + which;
     return( label->label);
 #else
     return( nil);
@@ -700,7 +696,7 @@ void RecalcScreenLabelSize( long which) // do this if you mess with its string
     long            strlen, lineNum, i, maxWidth;
     Str255          tString;
 
-    label = *gAresGlobal->gScreenLabelData + which;
+    label = *globals()->gScreenLabelData + which;
     mSetDirectFont( kTacticalFontNum);
 //  mGetDirectStringDimensions( label->label, label->width, label->height, strlen, getwidchar, getwidwid)
 
@@ -777,7 +773,7 @@ static unsigned char* String_Get_Nth_Line(unsigned char* dest, unsigned char* so
 
 static void Auto_Animate_Line( Point *source, Point *dest)
 {
-    switch( (gAresGlobal->gGameTime>>3) & 0x03)
+    switch( (globals()->gGameTime>>3) & 0x03)
     {
         case 0:
             dest->h = source->h + ((dest->h - source->h) >> 2);

@@ -77,27 +77,20 @@ struct actionQueueType {
     longPointType               offset;
 };
 
-extern aresGlobalType   *gAresGlobal;
-extern long             /*gAresGlobal->gPlayerShipNumber,*/ gAbsoluteScale, gRandomSeed,
-                        /*gAresGlobal->gPlayerAdmiralNumber,*/ CLIP_LEFT, CLIP_TOP, CLIP_RIGHT,
-                        CLIP_BOTTOM/*, gAresGlobal->gScrollStarNumber, gAresGlobal->gGameOver*/;
+extern long             gAbsoluteScale, gRandomSeed, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM;
 extern coordPointType   gGlobalCorner;
 extern spriteType**     gSpriteTable;
-extern scenarioType     *gThisScenario;
-extern spaceObjectType  *gScrollStarObject;
-//extern unsigned long  gAresGlobal->gOptions;
+extern scenarioType*    gThisScenario;
+extern spaceObjectType* gScrollStarObject;
 
-// for debugging
-//extern long               gAresGlobal->gGameTime, gAresGlobal->gTheseKeys;
-
-spaceObjectType *gRootObject = nil;
-long            gRootObjectNumber = -1;
-actionQueueType *gFirstActionQueue = nil;
-long            gFirstActionQueueNumber = -1;
+spaceObjectType* gRootObject = nil;
+long gRootObjectNumber = -1;
+actionQueueType* gFirstActionQueue = nil;
+long gFirstActionQueueNumber = -1;
 
 TypedHandle<spaceObjectType> gSpaceObjectData;
-TypedHandle<baseObjectType>  gBaseObjectData;
-TypedHandle<objectActionType>   gObjectActionData;
+TypedHandle<baseObjectType> gBaseObjectData;
+TypedHandle<objectActionType> gObjectActionData;
 TypedHandle<actionQueueType> gActionQueueData;
 
 void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord);
@@ -115,7 +108,7 @@ int SpaceObjectHandlingInit() {
             return( MEMORY_ERROR);
         }
 
-        gAresGlobal->maxBaseObject = gBaseObjectData.count();
+        globals()->maxBaseObject = gBaseObjectData.count();
 
         correctBaseObjectColor = true;
     }
@@ -127,7 +120,7 @@ int SpaceObjectHandlingInit() {
             return( MEMORY_ERROR);
         }
 
-        gAresGlobal->maxObjectAction = gObjectActionData.count();
+        globals()->maxObjectAction = gObjectActionData.count();
     }
 
     gActionQueueData.create(kActionQueueLength);
@@ -372,7 +365,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
         if ( destObject->tinySize == 0)
         {
             tinyColor = kNoTinyColor;
-        } else if ( destObject->owner == gAresGlobal->gPlayerAdmiralNumber)
+        } else if ( destObject->owner == globals()->gPlayerAdmiralNumber)
         {
             mGetTranslateColorShade( kFriendlyColor, tinyShade, tinyColor, transColor);
         } else if ( destObject->owner <= kNoOwner)
@@ -401,7 +394,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
         if ( destObject->sprite == nil)
         {
 //          DebugStr("\pNo Sprites!");
-            gAresGlobal->gGameOver = -1;
+            globals()->gGameOver = -1;
             destObject->active = kObjectAvailable;
 //          ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p we have a spriteless object.", nil, nil, -1, -1, -1, -1, __FILE__, 1);
             return( -1);
@@ -1086,7 +1079,7 @@ void AddActionToQueue( objectActionType *action, long actionNumber, long actionT
     }
 
     if ( queueNumber == kActionQueueLength) return; //DebugStr("\pActionQueue FULL!");
-//  delayTime += gAresGlobal->gGameTime;
+//  delayTime += globals()->gGameTime;
     actionQueue->action = action;
     actionQueue->actionNum = actionNumber;
     actionQueue->scheduledTime = delayTime;
@@ -1142,7 +1135,7 @@ void AddActionToQueue( objectActionType *action, long actionNumber, long actionT
         previousQueue->nextActionQueueNum = queueNumber;
     }
 //  if ( gFirstActionQueue != nil) WriteDebugLong( gFirstActionQueue->scheduledTime);
-//  WriteDebugLong( gAresGlobal->gGameTime);
+//  WriteDebugLong( globals()->gGameTime);
 //  WriteDebugLine((char *)"\p<ADDACT");
 }
 
@@ -1166,7 +1159,7 @@ void ExecuteActionQueue( long unitsToDo)
     while (( gFirstActionQueue != nil) &&
         ( gFirstActionQueue->action != nil) &&
         ( gFirstActionQueue->scheduledTime <= 0))
-//      ( gFirstActionQueue->scheduledTime <= gAresGlobal->gGameTime))
+//      ( gFirstActionQueue->scheduledTime <= globals()->gGameTime))
     {
         subjectid = -1;
         directid = -1;
@@ -1183,7 +1176,7 @@ void ExecuteActionQueue( long unitsToDo)
         }
 //      WriteDebugLine((char *)"\pSched");
 //      WriteDebugLong( gFirstActionQueue->scheduledTime);
-//      WriteDebugLong( gAresGlobal->gGameTime);
+//      WriteDebugLong( globals()->gGameTime);
         if (( subjectid == gFirstActionQueue->subjectObjectID) &&
             ( directid == gFirstActionQueue->directObjectID))
         {
@@ -1242,7 +1235,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
     Str255          s;
 
 //  WriteDebugLine( (char *)"\pEX\t");
-//  WriteDebugLine( gAresGlobal->gGameTime);
+//  WriteDebugLine( globals()->gGameTime);
 //  WriteDebugLine( "\p\t");
 //  WriteDebugLong( whichAction);
 //  WriteDebugLine( "\p\r");
@@ -2047,9 +2040,9 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     sObject->presenceData = sObject->baseType->warpSpeed;
                     sObject->attributes &= ~kOccupiesSpace;
                     newVel.h = newVel.v = 0;
-//                  CreateAnySpaceObject( gAresGlobal->scenarioFileInfo.warpInFlareID, &(newVel),
+//                  CreateAnySpaceObject( globals()->scenarioFileInfo.warpInFlareID, &(newVel),
 //                      &(sObject->location), sObject->direction, kNoOwner, 0, nil, -1, -1, -1);
-                    CreateAnySpaceObject( gAresGlobal->scenarioFileInfo.warpInFlareID, &(newVel),
+                    CreateAnySpaceObject( globals()->scenarioFileInfo.warpInFlareID, &(newVel),
                         &(sObject->location), sObject->direction, kNoOwner, 0, -1);
                     break;
 
@@ -2081,7 +2074,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     break;
 
                 case kDisplayMessage:
-                    if ( !(gAresGlobal->gOptions & kOptionAutoPlay))
+                    if ( !(globals()->gOptions & kOptionAutoPlay))
                     {
                         StartLongMessage( action->argument.displayMessage.resID, action->argument.displayMessage.resID +
                             action->argument.displayMessage.pageNum - 1);
@@ -2113,21 +2106,21 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     break;
 
                 case kEnableKeys:
-                    gAresGlobal->keyMask = gAresGlobal->keyMask &
+                    globals()->keyMask = globals()->keyMask &
                                                     ~action->argument.keys.keyMask;
                     break;
 
                 case kDisableKeys:
-                    gAresGlobal->keyMask = gAresGlobal->keyMask |
+                    globals()->keyMask = globals()->keyMask |
                                                     action->argument.keys.keyMask;
                     break;
 
                 case kSetZoom:
-                    if (action->argument.zoom.zoomLevel != gAresGlobal->gZoomMode)
+                    if (action->argument.zoom.zoomLevel != globals()->gZoomMode)
                     {
-                        gAresGlobal->gZoomMode = static_cast<ZoomType>(action->argument.zoom.zoomLevel);
+                        globals()->gZoomMode = static_cast<ZoomType>(action->argument.zoom.zoomLevel);
                         PlayVolumeSound(  kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
-                        GetIndString( s, kMessageStringID, gAresGlobal->gZoomMode + kZoomStringOffset);
+                        GetIndString( s, kMessageStringID, globals()->gZoomMode + kZoomStringOffset);
                         SetStatusString( s, TRUE, kStatusLabelColor);
                     }
                     break;
@@ -2168,7 +2161,7 @@ void DebugExecuteObjectActions( long whichAction, long actionNum,
 {
 #pragma unused( whichAction, actionNum, sObject, dObject, offset, file, line)
 //  DebugFileAppendString( "\pEX\t");
-//  DebugFileAppendLong( gAresGlobal->gGameTime);
+//  DebugFileAppendLong( globals()->gGameTime);
 //  DebugFileAppendString( "\p\t");
 //  DebugFileAppendCString( file);
 //  DebugFileAppendString( "\p\t");
@@ -2205,7 +2198,7 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
     uint64_t        hugeDistance;
 
 /*  DebugFileAppendString( "\pCR\t");
-    DebugFileAppendLong( gAresGlobal->gGameTime);
+    DebugFileAppendLong( globals()->gGameTime);
     DebugFileAppendString( "\p\t");
     DebugFileAppendLong( whichBase);
     DebugFileAppendString( "\p\r");
@@ -2214,8 +2207,8 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
     InitSpaceObjectFromBaseObject( &newObject, whichBase, RandomSeeded( 32766, &gRandomSeed, 'so18', whichBase),
                                     direction, velocity, owner, spriteIDOverride);
     newObject.location = *location;
-    if ( gAresGlobal->gPlayerShipNumber >= 0)
-        player = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
+    if ( globals()->gPlayerShipNumber >= 0)
+        player = *gSpaceObjectData + globals()->gPlayerShipNumber;
     else player = nil;
     if (( player != nil) && ( player->active))
     {
@@ -2314,7 +2307,7 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
 /*      if ( madeObject->sprite != nil)
         {
             DebugFileAppendString( "\pCS\t");
-            DebugFileAppendLong( gAresGlobal->gGameTime);
+            DebugFileAppendLong( globals()->gGameTime);
             DebugFileAppendString( "\p\t\t");
             DebugFileAppendLong( madeObject->sprite->whichShape);
             DebugFileAppendString( "\p\r");
@@ -2324,9 +2317,9 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
     }
 /*  if ( newObject.attributes & kCanThink)
     {
-        DebugFileAppendLong( gAresGlobal->gGameTime);
+        DebugFileAppendLong( globals()->gGameTime);
         DebugFileAppendString("\p\t");
-        DebugFileAppendLong( gAresGlobal->gTheseKeys);
+        DebugFileAppendLong( globals()->gTheseKeys);
         DebugFileAppendString("\p\t");
         DebugFileAppendLong( gRandomSeed);
         DebugFileAppendString("\p\r");
@@ -2341,7 +2334,7 @@ long DebugCreateAnySpaceObject( long whichBase, fixedPointType *velocity,
 {
 #pragma unused( whichBase, velocity, location, direction, owner, specialAttributes, canBuildType, nameResID, nameStrNum, spriteIDOverride, file, line)
 /*  DebugFileAppendString( "\pCR\t");
-    DebugFileAppendLong( gAresGlobal->gGameTime);
+    DebugFileAppendLong( globals()->gGameTime);
     DebugFileAppendString( "\p\t");
     DebugFileAppendCString( file);
     DebugFileAppendString( "\p\t");
@@ -2537,7 +2530,7 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, Boolean message)
                     break;
             }
 
-            if ( owner == gAresGlobal->gPlayerAdmiralNumber)
+            if ( owner == globals()->gPlayerAdmiralNumber)
             {
                 mGetTranslateColorShade( kFriendlyColor, tinyShade, tinyColor, transColor);
             } else if ( owner <= kNoOwner)
@@ -2684,7 +2677,7 @@ void DestroyObject( spaceObjectType *anObject)
     spaceObjectType *fixObject;
 
 /*  DebugFileAppendString( "\pDO\t");
-    DebugFileAppendLong( gAresGlobal->gGameTime);
+    DebugFileAppendLong( globals()->gGameTime);
     DebugFileAppendString( "\p\t");
     DebugFileAppendLong( gRandomSeed);
     DebugFileAppendString( "\p\t");
@@ -2726,9 +2719,9 @@ void DestroyObject( spaceObjectType *anObject)
                 while ( energyNum > 0)
                 {
 
-//                  CreateAnySpaceObject( gAresGlobal->scenarioFileInfo.energyBlobID, &(anObject->velocity),
+//                  CreateAnySpaceObject( globals()->scenarioFileInfo.energyBlobID, &(anObject->velocity),
 //                      &(anObject->location), anObject->direction, kNoOwner, 0, nil, -1, -1, -1);
-                    CreateAnySpaceObject( gAresGlobal->scenarioFileInfo.energyBlobID, &(anObject->velocity),
+                    CreateAnySpaceObject( globals()->scenarioFileInfo.energyBlobID, &(anObject->velocity),
                         &(anObject->location), anObject->direction, kNoOwner, 0, -1);
                     energyNum--;
                 }
@@ -2822,24 +2815,24 @@ void CreateFloatingBodyOfPlayer( spaceObjectType *anObject)
 {
     long        count;
 
-//  count = CreateAnySpaceObject( gAresGlobal->scenarioFileInfo.playerBodyID, &(anObject->velocity),
+//  count = CreateAnySpaceObject( globals()->scenarioFileInfo.playerBodyID, &(anObject->velocity),
 //      &(anObject->location), anObject->direction, anObject->owner, 0, nil, -1, -1, -1);
 
     // if we're already in a body, don't create a body from it
     // a body expiring is handled elsewhere
-    if ( anObject->whichBaseObject == gAresGlobal->scenarioFileInfo.playerBodyID) return;
+    if ( anObject->whichBaseObject == globals()->scenarioFileInfo.playerBodyID) return;
 
-    count = CreateAnySpaceObject( gAresGlobal->scenarioFileInfo.playerBodyID, &(anObject->velocity),
+    count = CreateAnySpaceObject( globals()->scenarioFileInfo.playerBodyID, &(anObject->velocity),
         &(anObject->location), anObject->direction, anObject->owner, 0, -1);
     if ( count >= 0)
     {
-/*      if (( anObject->owner == gAresGlobal->gPlayerAdmiralNumber) && ( anObject->attributes & kIsHumanControlled))
+/*      if (( anObject->owner == globals()->gPlayerAdmiralNumber) && ( anObject->attributes & kIsHumanControlled))
         {
             attributes = anObject->attributes & ( kIsHumanControlled | kIsPlayerShip);
             anObject->attributes &= (~kIsHumanControlled) & (~kIsPlayerShip);
-            gAresGlobal->gPlayerShipNumber = count;
-            ResetScrollStars( gAresGlobal->gPlayerShipNumber);
-            anObject = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
+            globals()->gPlayerShipNumber = count;
+            ResetScrollStars( globals()->gPlayerShipNumber);
+            anObject = *gSpaceObjectData + globals()->gPlayerShipNumber;
             anObject->attributes |= attributes;
         } else
         {
@@ -2858,7 +2851,7 @@ void CreateFloatingBodyOfPlayer( spaceObjectType *anObject)
         PlayerShipBodyExpire( anObject, true);
 /*      DebugStr("\pCouldn't Create Floating Body");
         anObject->health = 1000;
-        gAresGlobal->gGameOver = -360;
+        globals()->gGameOver = -360;
 */
     }
 }
@@ -2866,7 +2859,7 @@ void CreateFloatingBodyOfPlayer( spaceObjectType *anObject)
 void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord)
 
 {
-    long    lcos, lsin, lscrap, angle = gAresGlobal->gScenarioRotation;
+    long    lcos, lsin, lscrap, angle = globals()->gScenarioRotation;
 
     mAddAngle( angle, 90);
     mGetRotPoint( lcos, lsin, angle);

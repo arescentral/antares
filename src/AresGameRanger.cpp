@@ -22,8 +22,6 @@
 #include "AresGlobalType.hpp"
 #include "WrapGameRanger.hpp"
 
-extern aresGlobalType           *gAresGlobal;
-
 OSErr AGR_Init( void)
 {
     OSErr result = noErr;
@@ -32,12 +30,12 @@ OSErr AGR_Init( void)
     if ( Wrap_UseGameRanger())
     {
         result = Wrap_GRInstallResumeHandler();
-        if ( result == noErr) gAresGlobal->useGameRanger = true;
-        else gAresGlobal->useGameRanger = false;
+        if ( result == noErr) globals()->useGameRanger = true;
+        else globals()->useGameRanger = false;
 
     } else
     {
-        gAresGlobal->useGameRanger = false;
+        globals()->useGameRanger = false;
     }
 
     return result;

@@ -41,9 +41,6 @@
 
 //#pragma code68020 off
 
-extern aresGlobalType *gAresGlobal;
-//extern unsigned long  gAresGlobal->gOptions;
-
 Boolean EnvironmentCheck( void)
 
 {
@@ -51,8 +48,8 @@ Boolean EnvironmentCheck( void)
     long        gestaltInfo;
     NumVersion  *aVersion;
 
-    gAresGlobal->gOptions |= kOptionMusicDriver | kOptionQuicktime | kOptionSpeechAvailable;
-    if ( ShiftKey()) gAresGlobal->gOptions &= ~kOptionMusicDriver;
+    globals()->gOptions |= kOptionMusicDriver | kOptionQuicktime | kOptionSpeechAvailable;
+    if ( ShiftKey()) globals()->gOptions &= ~kOptionMusicDriver;
 
 //  Debugger();
 // check System 7 or later
@@ -82,7 +79,7 @@ Boolean EnvironmentCheck( void)
     {
         if ( gestaltInfo & gestaltMenuMgrPresent)
         {
-            gAresGlobal->gOptions |= kOptionUseSystemHideMenuBar;
+            globals()->gOptions |= kOptionUseSystemHideMenuBar;
         }
     }
 
@@ -126,7 +123,7 @@ Boolean EnvironmentCheck( void)
     if ( Gestalt( gestaltQuickTimeVersion, &gestaltInfo) != noErr)
     {
         if (EnvironmentWarning( 19)) return( false);
-        else gAresGlobal->gOptions &= ~kOptionQuicktime;
+        else globals()->gOptions &= ~kOptionQuicktime;
     } else
     {
         aVersion = (NumVersion *)&gestaltInfo;
@@ -134,7 +131,7 @@ Boolean EnvironmentCheck( void)
             ( aVersion->minorAndBugRev < 1)))
         {
             if (EnvironmentWarning(19)) return( false);
-            else gAresGlobal->gOptions &= ~kOptionQuicktime;
+            else globals()->gOptions &= ~kOptionQuicktime;
         }
     }
 
@@ -144,28 +141,28 @@ Boolean EnvironmentCheck( void)
     if ( Gestalt(gestaltQuickTimeFeatures, &gestaltInfo) != noErr)
     {
         if (EnvironmentWarning( 20)) return( false);
-        else gAresGlobal->gOptions &= ~kOptionQuicktime;
+        else globals()->gOptions &= ~kOptionQuicktime;
     } else
     {
         if (!BitTst(&gestaltInfo, 31-gestaltPPCQuickTimeLibPresent))
         {
             if (EnvironmentWarning( 20)) return( false);
-            else gAresGlobal->gOptions &= ~kOptionQuicktime;
+            else globals()->gOptions &= ~kOptionQuicktime;
         }
     }
 #endif
 
     if ( Gestalt( gestaltSpeechAttr, &gestaltInfo) != noErr)
     {
-        gAresGlobal->gOptions &= ~kOptionSpeechAvailable;
+        globals()->gOptions &= ~kOptionSpeechAvailable;
     } else
     {
         if (!( gestaltInfo & ( 1 << gestaltSpeechMgrPresent)))
         {
-            gAresGlobal->gOptions &= ~kOptionSpeechAvailable;
+            globals()->gOptions &= ~kOptionSpeechAvailable;
         } else
         {
-            gAresGlobal->gOptions |= kOptionSpeechAvailable;
+            globals()->gOptions |= kOptionSpeechAvailable;
         }
     }
 

@@ -38,7 +38,6 @@
 #define kBeamNum        256
 #define kBoltChangeTime 0
 
-extern  aresGlobalType  *gAresGlobal;
 extern  PixMapHandle    thePixMapHandle;
 extern long             gNatePortLeft, gNatePortTop, gAbsoluteScale,
                         CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM;
@@ -46,18 +45,14 @@ extern coordPointType   gGlobalCorner;
 extern  GWorldPtr       gOffWorld;
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
 
-//extern unsigned long  gAresGlobal->gOptions;
-
-//Handle    gAresGlobal->gBeamData = nil;
-
 void DetermineBeamRelativeCoordFromAngle( spaceObjectType *, short);
 
 short InitBeams() {
     beamType    *beam;
     short           i;
 
-    gAresGlobal->gBeamData.create(kBeamNum);
-    beam = *gAresGlobal->gBeamData;
+    globals()->gBeamData.create(kBeamNum);
+    beam = *globals()->gBeamData;
     for (i = 0; i < kBeamNum; i++) {
         beam->active = false;
         beam++;
@@ -67,12 +62,12 @@ short InitBeams() {
 
 void CleanupBeams( void)
 {
-    if (gAresGlobal->gBeamData.get() != nil) gAresGlobal->gBeamData.destroy();
+    if (globals()->gBeamData.get() != nil) globals()->gBeamData.destroy();
 }
 
 void ResetBeams( void)
 {
-    beamType    *aBeam = *gAresGlobal->gBeamData;
+    beamType    *aBeam = *globals()->gBeamData;
     short       i;
 
     for ( i = 0; i < kBeamNum; i++)
@@ -94,7 +89,7 @@ void ResetBeams( void)
 beamType *AddBeam(coordPointType *location, unsigned char color,
     beamKindType kind, long accuracy, long range, long *whichBeam)
 {
-    beamType    *aBeam = *gAresGlobal->gBeamData;
+    beamType    *aBeam = *globals()->gBeamData;
     long        h;
 
     *whichBeam = 0;
@@ -278,14 +273,14 @@ void DetermineBeamRelativeCoordFromAngle( spaceObjectType *beamObject,
 void DrawAllBeams( void)
 
 {
-    beamType        *aBeam = ( beamType *)*gAresGlobal->gBeamData;
+    beamType        *aBeam = ( beamType *)*globals()->gBeamData;
     baseObjectType  *baseObject;
     short           i;
     Rect        bounds;
     long            h;
     PixMapHandle    whatWorld = thePixMapHandle;
 
-    if (( gAresGlobal->gOptions & kOptionQDOnly)) whatWorld = GetGWorldPixMap( gOffWorld);
+    if (( globals()->gOptions & kOptionQDOnly)) whatWorld = GetGWorldPixMap( gOffWorld);
 
     bounds.left = CLIP_LEFT;
     bounds.right = CLIP_RIGHT;
@@ -353,14 +348,14 @@ void DrawAllBeams( void)
 void DrawAllBeams( void)
 
 {
-    beamType        *aBeam = *gAresGlobal->gBeamData;
+    beamType        *aBeam = *globals()->gBeamData;
     short           i, j;
     Rect        bounds;
     long            h, v;
     PixMapHandle    whatWorld = GetGWorldPixMap( gOffWorld);
     unsigned char   currentColor;
 
-    if (( gAresGlobal->gOptions & kOptionQDOnly)) whatWorld = GetGWorldPixMap( gOffWorld);
+    if (( globals()->gOptions & kOptionQDOnly)) whatWorld = GetGWorldPixMap( gOffWorld);
 
     bounds.left = CLIP_LEFT;
     bounds.right = CLIP_RIGHT;
@@ -514,13 +509,13 @@ void EraseAllBeams( void)
 
 void ShowAllBeams( void)
 {
-    beamType        *aBeam = *gAresGlobal->gBeamData;
+    beamType        *aBeam = *globals()->gBeamData;
     short           i, j;
     Rect        bounds;
     PixMapHandle    offWorld = GetGWorldPixMap( gOffWorld),
                     onWorld = thePixMapHandle;
 
-    if (( gAresGlobal->gOptions & kOptionQDOnly)) onWorld = GetGWorldPixMap( gOffWorld);
+    if (( globals()->gOptions & kOptionQDOnly)) onWorld = GetGWorldPixMap( gOffWorld);
 
     bounds.left = CLIP_LEFT;
     bounds.right = CLIP_RIGHT;
@@ -603,7 +598,7 @@ void ShowAllBeams( void)
 
 void CullBeams( void)
 {
-    beamType        *aBeam = *gAresGlobal->gBeamData;
+    beamType        *aBeam = *globals()->gBeamData;
     short           i;
 
     for ( i = 0; i < kBeamNum; i++)

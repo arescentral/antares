@@ -182,7 +182,7 @@ inline void mBlackMiniScreenLine(
 }
 
 inline long mGetLineNumFromV(long mV) {
-    return (((mV) - (kMiniScreenTop + gAresGlobal->gInstrumentTop)) / gDirectText->height);
+    return (((mV) - (kMiniScreenTop + globals()->gInstrumentTop)) / gDirectText->height);
 }
 
 // for copying the fields of a space object relevant to the miniscreens:
@@ -267,26 +267,17 @@ inline void mCopyBlankLineString(
 }
 
 inline spaceObjectType* mGetMiniObjectPtr(long mwhich) {
-    return *gAresGlobal->gMiniScreenData.objectData + mwhich;
+    return *globals()->gMiniScreenData.objectData + mwhich;
 }
 
-extern aresGlobalType   *gAresGlobal;
-extern  GWorldPtr       gOffWorld, gRealWorld, gSaveWorld;
-extern  WindowPtr       gTheWindow;
-extern  PixMapHandle    thePixMapHandle;
-extern  long            gNatePortLeft, gNatePortTop/*, gAresGlobal->gPlayerAdmiralNumber,
-                        gAresGlobal->gPlayerShipNumber, gAresGlobal->gGameTime*/, gNetLatency;
+extern GWorldPtr        gOffWorld, gRealWorld, gSaveWorld;
+extern WindowPtr        gTheWindow;
+extern PixMapHandle     thePixMapHandle;
+extern long             gNatePortLeft, gNatePortTop, gNetLatency;
 extern directTextType*  gDirectText;
-extern long             gWhichDirectText;//, gAresGlobal->gInstrumentTop;
+extern long             gWhichDirectText;
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
-//extern    unsigned long   gAresGlobal->gOptions;
 
-/*Handle    gMiniScreenLine = nil, gMiniObjectData = nil;
-long    gMiniScreenData->selectLine = kMiniScreenNoLineSelected, gCurrentMiniScreen = kMainMiniScreen,
-        gMiniScreenPollTime = 0, gBuildTimeBarValue = 0;
-*/
-
-//Handle                    gAresGlobal->gMiniScreenHandle = nil;
 miniComputerDataType    *gMiniScreenData = nil;
 
 void MiniComputerSetStatusStrings( void);
@@ -294,14 +285,14 @@ long MiniComputerGetStatusValue( long);
 void MiniComputerMakeStatusString(long, unsigned char*);
 
 int MiniScreenInit() {
-    gAresGlobal->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
-    gAresGlobal->gMiniScreenData.currentScreen = kMainMiniScreen;
-    gAresGlobal->gMiniScreenData.pollTime = 0;
-    gAresGlobal->gMiniScreenData.buildTimeBarValue = 0;
-    gAresGlobal->gMiniScreenData.clickLine = kMiniScreenNoLineSelected;
+    globals()->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
+    globals()->gMiniScreenData.currentScreen = kMainMiniScreen;
+    globals()->gMiniScreenData.pollTime = 0;
+    globals()->gMiniScreenData.buildTimeBarValue = 0;
+    globals()->gMiniScreenData.clickLine = kMiniScreenNoLineSelected;
 
-    gAresGlobal->gMiniScreenData.lineData.create(kMiniScreenTrueLineNum);
-    gAresGlobal->gMiniScreenData.objectData.create(kMiniObjectDataNum);
+    globals()->gMiniScreenData.lineData.create(kMiniScreenTrueLineNum);
+    globals()->gMiniScreenData.objectData.create(kMiniObjectDataNum);
 
     ClearMiniScreenLines();
     ClearMiniObjectData();
@@ -311,32 +302,32 @@ int MiniScreenInit() {
 
 void MiniScreenCleanup( void)
 {
-    if (gAresGlobal->gMiniScreenData.lineData.get() != nil) {
-        gAresGlobal->gMiniScreenData.lineData.destroy();
+    if (globals()->gMiniScreenData.lineData.get() != nil) {
+        globals()->gMiniScreenData.lineData.destroy();
     }
-    if (gAresGlobal->gMiniScreenData.objectData.get() != nil) {
-        gAresGlobal->gMiniScreenData.objectData.destroy();
+    if (globals()->gMiniScreenData.objectData.get() != nil) {
+        globals()->gMiniScreenData.objectData.destroy();
     }
-//  if ( gAresGlobal->gMiniScreenHandle != nil) DisposeHandle( gAresGlobal->gMiniScreenHandle);
+//  if ( globals()->gMiniScreenHandle != nil) DisposeHandle( globals()->gMiniScreenHandle);
 }
 
 #pragma mark -
 
 void SetMiniScreenStatusStrList( short strID)
 {
-    if (gAresGlobal->gMissionStatusStrList.get() != nil) {
+    if (globals()->gMissionStatusStrList.get() != nil) {
         DisposeMiniScreenStatusStrList();
     }
     if (strID > 0) {
-        gAresGlobal->gMissionStatusStrList.create(1);
-        (*gAresGlobal->gMissionStatusStrList)->load(strID);
+        globals()->gMissionStatusStrList.create(1);
+        (*globals()->gMissionStatusStrList)->load(strID);
     }
 }
 
 void DisposeMiniScreenStatusStrList( void)
 {
-    if (gAresGlobal->gMissionStatusStrList.get() != nil) {
-        gAresGlobal->gMissionStatusStrList.destroy();
+    if (globals()->gMissionStatusStrList.get() != nil) {
+        globals()->gMissionStatusStrList.destroy();
     }
 }
 
@@ -346,7 +337,7 @@ void ClearMiniScreenLines( void)
     long                a, b;
     miniScreenLineType  *c;
 
-    c = *gAresGlobal->gMiniScreenData.lineData;
+    c = *globals()->gMiniScreenData.lineData;
 
     for ( b = 0; b < kMiniScreenTrueLineNum; b++)
     {
@@ -400,8 +391,8 @@ void ClearMiniObjectData( void)
     o->attributes = 0;
     o->baseType = nil;
 
-    gAresGlobal->gMiniScreenData.buildTimeBarValue = 0;
-    gAresGlobal->gMiniScreenData.pollTime = 0;
+    globals()->gMiniScreenData.buildTimeBarValue = 0;
+    globals()->gMiniScreenData.pollTime = 0;
 }
 
 void DrawMiniScreen( void)
@@ -419,27 +410,27 @@ void DrawMiniScreen( void)
 
     offPixBase = GetGWorldPixMap( gOffWorld);
     DrawInOffWorld();
-    SetLongRect( &lRect, kMiniScreenLeft, kMiniScreenTop + gAresGlobal->gInstrumentTop, kMiniScreenRight,
-                kMiniScreenBottom + gAresGlobal->gInstrumentTop);
+    SetLongRect( &lRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+                kMiniScreenBottom + globals()->gInstrumentTop);
     color = GetTranslateColorShade( kMiniScreenColor, DARKEST);
     cRect = lRect;
     DrawNateRect( *offPixBase, &cRect, 0, 0, color);
 
     mRect.left = kMiniScreenLeft;
-    mRect.top = kMiniScreenTop + gAresGlobal->gInstrumentTop;
+    mRect.top = kMiniScreenTop + globals()->gInstrumentTop;
     mRect.right = kMiniScreenRight;
-    mRect.bottom = kMiniScreenBottom + gAresGlobal->gInstrumentTop;
+    mRect.bottom = kMiniScreenBottom + globals()->gInstrumentTop;
 
-    c = *gAresGlobal->gMiniScreenData.lineData;
+    c = *globals()->gMiniScreenData.lineData;
 
     for ( count = 0; count < kMiniScreenTrueLineNum; count++)
     {
         if ( count == kMiniScreenCharHeight)
         {
             lRect.left = mRect.left = kButBoxLeft;
-            lRect.top = mRect.top = kButBoxTop + gAresGlobal->gInstrumentTop;
+            lRect.top = mRect.top = kButBoxTop + globals()->gInstrumentTop;
             lRect.right = mRect.right = kButBoxRight;
-            lRect.bottom = mRect.bottom = kButBoxBottom + gAresGlobal->gInstrumentTop;
+            lRect.bottom = mRect.bottom = kButBoxBottom + globals()->gInstrumentTop;
             color = GetTranslateColorShade( kMiniScreenColor, DARKEST);
             cRect = lRect;
             DrawNateRect( *offPixBase, &cRect, 0, 0, color);
@@ -543,15 +534,15 @@ void DrawAndShowMiniScreenLine( long whichLine)
     DrawInOffWorld();
     if ( whichLine < kMiniScreenCharHeight)
     {
-        SetLongRect( &lRect, kMiniScreenLeft, kMiniScreenTop + gAresGlobal->gInstrumentTop, kMiniScreenRight,
-                    kMiniScreenBottom + gAresGlobal->gInstrumentTop);
+        SetLongRect( &lRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+                    kMiniScreenBottom + globals()->gInstrumentTop);
         cRect = lRect;
         cRect.top = lRect.top + whichLine * gDirectText->height;
         cRect.bottom = cRect.top + gDirectText->height;
     } else
     {
-        SetLongRect( &lRect, kButBoxLeft, kButBoxTop + gAresGlobal->gInstrumentTop, kButBoxRight,
-                    kButBoxBottom + gAresGlobal->gInstrumentTop);
+        SetLongRect( &lRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+                    kButBoxBottom + globals()->gInstrumentTop);
         lineCorrect = -kMiniScreenCharHeight;
         lineColor = kMiniButColor;
         cRect = lRect;
@@ -562,7 +553,7 @@ void DrawAndShowMiniScreenLine( long whichLine)
     color = GetTranslateColorShade( lineColor, DARKEST);
     DrawNateRect( *offPixBase, &cRect, 0, 0, color);
 
-    c = *gAresGlobal->gMiniScreenData.lineData + whichLine;
+    c = *globals()->gMiniScreenData.lineData + whichLine;
 
     if ( c->underline)
     {
@@ -653,11 +644,11 @@ void ShowWholeMiniScreen( void)
 
     offPixBase = GetGWorldPixMap( gOffWorld);
 
-    MacSetRect( &tRect, kMiniScreenLeft, kMiniScreenTop + gAresGlobal->gInstrumentTop, kMiniScreenRight,
-                kMiniScreenBottom + gAresGlobal->gInstrumentTop);
+    MacSetRect( &tRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+                kMiniScreenBottom + globals()->gInstrumentTop);
     ChunkCopyPixMapToScreenPixMap( *offPixBase, &tRect, *thePixMapHandle);
-    MacSetRect( &tRect, kButBoxLeft, kButBoxTop + gAresGlobal->gInstrumentTop, kButBoxRight,
-                kButBoxBottom + gAresGlobal->gInstrumentTop);
+    MacSetRect( &tRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+                kButBoxBottom + globals()->gInstrumentTop);
     ChunkCopyPixMapToScreenPixMap( *offPixBase, &tRect, *thePixMapHandle);
 }
 
@@ -672,18 +663,18 @@ void MakeMiniScreenFromIndString( short whichString)
 
     mSetDirectFont( kComputerFontNum);
 
-    MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + gAresGlobal->gInstrumentTop, kMiniScreenRight,
-                kMiniScreenBottom + gAresGlobal->gInstrumentTop);
+    MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+                kMiniScreenBottom + globals()->gInstrumentTop);
     ClearMiniScreenLines();
-    gAresGlobal->gMiniScreenData.currentScreen = whichString;
+    globals()->gMiniScreenData.currentScreen = whichString;
 
     GetIndString( s, kMiniScreenStringID, whichString);
     c = s;
     len = *c;
     c++;
     charNum = 1;
-    line = *gAresGlobal->gMiniScreenData.lineData;
-    gAresGlobal->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
+    line = *globals()->gMiniScreenData.lineData;
+    globals()->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
 
     while (( len > 0) && ( lineNum < kMiniScreenTrueLineNum))
     {
@@ -704,8 +695,8 @@ void MakeMiniScreenFromIndString( short whichString)
                     lineNum++;
                     if ( lineNum == kMiniScreenCharHeight)
                     {
-                        MacSetRect( &mRect, kButBoxLeft, kButBoxTop + gAresGlobal->gInstrumentTop, kButBoxRight,
-                                    kButBoxBottom + gAresGlobal->gInstrumentTop);
+                        MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+                                    kButBoxBottom + globals()->gInstrumentTop);
                     }
 
                     line++;
@@ -715,9 +706,9 @@ void MakeMiniScreenFromIndString( short whichString)
 
                 case kSelectableLineChar:
                     line->selectable = selectable;
-                    if ( gAresGlobal->gMiniScreenData.selectLine == kMiniScreenNoLineSelected)
+                    if ( globals()->gMiniScreenData.selectLine == kMiniScreenNoLineSelected)
                     {
-                        gAresGlobal->gMiniScreenData.selectLine = lineNum;
+                        globals()->gMiniScreenData.selectLine = lineNum;
                         line->hiliteLeft = mRect.left;
                         line->hiliteRight = mRect.right;
                     }
@@ -742,7 +733,7 @@ void MakeMiniScreenFromIndString( short whichString)
                     line->whichButton = kInLineButton;
                     line->hiliteLeft = mRect.left + kMiniScreenLeftBuffer + gDirectText->logicalWidth * (charNum - 1);
 
-                    GetKeyNumName( keyname, GetKeyNumFromKeyMap( gAresGlobal->gKeyControl[kCompAcceptKeyNum]));
+                    GetKeyNumName( keyname, GetKeyNumFromKeyMap( globals()->gKeyControl[kCompAcceptKeyNum]));
                     keyc = keyname;
                     keyNameLen = *keyc;
                     keyc++;
@@ -768,9 +759,9 @@ void MakeMiniScreenFromIndString( short whichString)
                             if ( lineNum == kMiniScreenCharHeight)
                             {
                                 MacSetRect( &mRect, kButBoxLeft,
-                                    kButBoxTop + gAresGlobal->gInstrumentTop,
+                                    kButBoxTop + globals()->gInstrumentTop,
                                     kButBoxRight,
-                                    kButBoxBottom + gAresGlobal->gInstrumentTop);
+                                    kButBoxBottom + globals()->gInstrumentTop);
                             }
 
                             line++;
@@ -790,7 +781,7 @@ void MakeMiniScreenFromIndString( short whichString)
                     line->whichButton = kOutLineButton;
                     line->hiliteLeft = mRect.left + kMiniScreenLeftBuffer + gDirectText->logicalWidth * (charNum - 1);
 
-                    GetKeyNumName( keyname, GetKeyNumFromKeyMap( gAresGlobal->gKeyControl[kCompCancelKeyNum]));
+                    GetKeyNumName( keyname, GetKeyNumFromKeyMap( globals()->gKeyControl[kCompCancelKeyNum]));
                     keyc = keyname;
                     keyNameLen = *keyc;
                     keyc++;
@@ -815,8 +806,8 @@ void MakeMiniScreenFromIndString( short whichString)
                             lineNum++;
                             if ( lineNum == kMiniScreenCharHeight)
                             {
-                                MacSetRect( &mRect, kButBoxLeft, kButBoxTop + gAresGlobal->gInstrumentTop, kButBoxRight,
-                                            kButBoxBottom + gAresGlobal->gInstrumentTop);
+                                MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+                                            kButBoxBottom + globals()->gInstrumentTop);
                             }
 
                             line++;
@@ -838,8 +829,8 @@ void MakeMiniScreenFromIndString( short whichString)
                         lineNum++;
                         if ( lineNum == kMiniScreenCharHeight)
                         {
-                            MacSetRect( &mRect, kButBoxLeft, kButBoxTop + gAresGlobal->gInstrumentTop, kButBoxRight,
-                                        kButBoxBottom + gAresGlobal->gInstrumentTop);
+                            MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+                                        kButBoxBottom + globals()->gInstrumentTop);
                         }
 
                         line++;
@@ -863,8 +854,8 @@ void MakeMiniScreenFromIndString( short whichString)
                 lineNum++;
                 if ( lineNum == kMiniScreenCharHeight)
                 {
-                    MacSetRect( &mRect, kButBoxLeft, kButBoxTop + gAresGlobal->gInstrumentTop, kButBoxRight,
-                                kButBoxBottom + gAresGlobal->gInstrumentTop);
+                    MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+                                kButBoxBottom + globals()->gInstrumentTop);
                 }
 
                 line++;
@@ -888,7 +879,7 @@ void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)
     if (( theseKeys | lastKeys) & kCompAcceptKey)
     {
         // find out which line, if any, contains this button
-        line = *gAresGlobal->gMiniScreenData.lineData;
+        line = *globals()->gMiniScreenData.lineData;
         count = 0;
         while (( line->whichButton !=kInLineButton) && ( count < kMiniScreenTrueLineNum))
         {
@@ -917,7 +908,7 @@ void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)
     if (( theseKeys | lastKeys) & kCompCancelKey)
     {
         // find out which line, if any, contains this button
-        line = *gAresGlobal->gMiniScreenData.lineData;
+        line = *globals()->gMiniScreenData.lineData;
         count = 0;
         while (( line->whichButton !=kOutLineButton) && ( count < kMiniScreenTrueLineNum))
         {
@@ -927,12 +918,12 @@ void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)
 
         if ( count < kMiniScreenCharHeight)
         {
-            MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + gAresGlobal->gInstrumentTop, kMiniScreenRight,
-                        kMiniScreenBottom + gAresGlobal->gInstrumentTop);
+            MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+                        kMiniScreenBottom + globals()->gInstrumentTop);
         } else
         {
-            MacSetRect( &mRect, kButBoxLeft, kButBoxTop + gAresGlobal->gInstrumentTop, kButBoxRight,
-                        kButBoxBottom + gAresGlobal->gInstrumentTop);
+            MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+                        kButBoxBottom + globals()->gInstrumentTop);
         }
 
         // hilite/unhilite this button
@@ -952,74 +943,74 @@ void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)
             }
         }
     }
-    if (( theseKeys & kCompUpKey) && ( !(lastKeys & kCompUpKey)) && ( gAresGlobal->gMiniScreenData.selectLine !=
+    if (( theseKeys & kCompUpKey) && ( !(lastKeys & kCompUpKey)) && ( globals()->gMiniScreenData.selectLine !=
             kMiniScreenNoLineSelected))
     {
-        scrap = gAresGlobal->gMiniScreenData.selectLine;
-        line = *gAresGlobal->gMiniScreenData.lineData + gAresGlobal->gMiniScreenData.selectLine;
+        scrap = globals()->gMiniScreenData.selectLine;
+        line = *globals()->gMiniScreenData.lineData + globals()->gMiniScreenData.selectLine;
         line->hiliteLeft = line->hiliteRight = 0;
         do
         {
             line--;
-            gAresGlobal->gMiniScreenData.selectLine--;
-            if ( gAresGlobal->gMiniScreenData.selectLine < 0)
+            globals()->gMiniScreenData.selectLine--;
+            if ( globals()->gMiniScreenData.selectLine < 0)
             {
-                gAresGlobal->gMiniScreenData.selectLine = kMiniScreenTrueLineNum - 1;
-                line = *gAresGlobal->gMiniScreenData.lineData + kMiniScreenTrueLineNum - 1L;
+                globals()->gMiniScreenData.selectLine = kMiniScreenTrueLineNum - 1;
+                line = *globals()->gMiniScreenData.lineData + kMiniScreenTrueLineNum - 1L;
             }
         } while ( line->selectable == cannotSelect);
 
-        if ( gAresGlobal->gMiniScreenData.selectLine < kMiniScreenCharHeight)
+        if ( globals()->gMiniScreenData.selectLine < kMiniScreenCharHeight)
         {
-            MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + gAresGlobal->gInstrumentTop, kMiniScreenRight,
-                        kMiniScreenBottom + gAresGlobal->gInstrumentTop);
+            MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+                        kMiniScreenBottom + globals()->gInstrumentTop);
         } else
         {
-            MacSetRect( &mRect, kButBoxLeft, kButBoxTop + gAresGlobal->gInstrumentTop, kButBoxRight,
-                        kButBoxBottom + gAresGlobal->gInstrumentTop);
+            MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+                        kButBoxBottom + globals()->gInstrumentTop);
         }
 
         line->hiliteLeft = mRect.left;
         line->hiliteRight = mRect.right;
-        if ( scrap != gAresGlobal->gMiniScreenData.selectLine)
+        if ( scrap != globals()->gMiniScreenData.selectLine)
         {
-            DrawAndShowMiniScreenLine( gAresGlobal->gMiniScreenData.selectLine);
+            DrawAndShowMiniScreenLine( globals()->gMiniScreenData.selectLine);
             DrawAndShowMiniScreenLine( scrap);
         }
     }
 
-    if (( theseKeys & kCompDownKey) && ( !(lastKeys & kCompDownKey)) && ( gAresGlobal->gMiniScreenData.selectLine !=
+    if (( theseKeys & kCompDownKey) && ( !(lastKeys & kCompDownKey)) && ( globals()->gMiniScreenData.selectLine !=
             kMiniScreenNoLineSelected))
     {
-        scrap = gAresGlobal->gMiniScreenData.selectLine;
-        line = *gAresGlobal->gMiniScreenData.lineData + gAresGlobal->gMiniScreenData.selectLine;
+        scrap = globals()->gMiniScreenData.selectLine;
+        line = *globals()->gMiniScreenData.lineData + globals()->gMiniScreenData.selectLine;
         line->hiliteLeft = line->hiliteRight = 0;
         do
         {
             line++;
-            gAresGlobal->gMiniScreenData.selectLine++;
-            if ( gAresGlobal->gMiniScreenData.selectLine >= kMiniScreenTrueLineNum)
+            globals()->gMiniScreenData.selectLine++;
+            if ( globals()->gMiniScreenData.selectLine >= kMiniScreenTrueLineNum)
             {
-                gAresGlobal->gMiniScreenData.selectLine = 0;
-                line = *gAresGlobal->gMiniScreenData.lineData;
+                globals()->gMiniScreenData.selectLine = 0;
+                line = *globals()->gMiniScreenData.lineData;
             }
         } while ( line->selectable == cannotSelect);
 
-        if ( gAresGlobal->gMiniScreenData.selectLine < kMiniScreenCharHeight)
+        if ( globals()->gMiniScreenData.selectLine < kMiniScreenCharHeight)
         {
-            MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + gAresGlobal->gInstrumentTop, kMiniScreenRight,
-                        kMiniScreenBottom + gAresGlobal->gInstrumentTop);
+            MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+                        kMiniScreenBottom + globals()->gInstrumentTop);
         } else
         {
-            MacSetRect( &mRect, kButBoxLeft, kButBoxTop + gAresGlobal->gInstrumentTop, kButBoxRight,
-                        kButBoxBottom + gAresGlobal->gInstrumentTop);
+            MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+                        kButBoxBottom + globals()->gInstrumentTop);
         }
 
         line->hiliteLeft = mRect.left;
         line->hiliteRight = mRect.right;
-        if ( scrap != gAresGlobal->gMiniScreenData.selectLine)
+        if ( scrap != globals()->gMiniScreenData.selectLine)
         {
-            DrawAndShowMiniScreenLine( gAresGlobal->gMiniScreenData.selectLine);
+            DrawAndShowMiniScreenLine( globals()->gMiniScreenData.selectLine);
             DrawAndShowMiniScreenLine( scrap);
         }
     }
@@ -1034,17 +1025,17 @@ void MiniComputerHandleNull( long unitsToDo)
     long                count;
     spaceObjectType     *realObject = nil, *myObject = nil, newObject;
 
-    gAresGlobal->gMiniScreenData.pollTime += unitsToDo;
-    if ( gAresGlobal->gMiniScreenData.pollTime > kMiniComputerPollTime)
+    globals()->gMiniScreenData.pollTime += unitsToDo;
+    if ( globals()->gMiniScreenData.pollTime > kMiniComputerPollTime)
     {
-        gAresGlobal->gMiniScreenData.pollTime = 0;
+        globals()->gMiniScreenData.pollTime = 0;
         UpdateMiniScreenLines();
         /*
-        switch( gAresGlobal->gMiniScreenData.currentScreen)
+        switch( globals()->gMiniScreenData.currentScreen)
         {
             case kBuildMiniScreen:
-                admiral = ( admiralType *)*gAresGlobal->gAdmiralData + gAresGlobal->gPlayerAdmiralNumber;
-                line = *gAresGlobal->gMiniScreenData.lineData + kBuildScreenWhereNameLine;
+                admiral = ( admiralType *)*globals()->gAdmiralData + globals()->gPlayerAdmiralNumber;
+                line = *globals()->gMiniScreenData.lineData + kBuildScreenWhereNameLine;
                 if ( line->value != admiral->buildAtObject)
                 {
                     MiniComputerSetBuildStrings();
@@ -1052,7 +1043,7 @@ void MiniComputerHandleNull( long unitsToDo)
                     ShowWholeMiniScreen();
                 } else
                 {
-                    line = *gAresGlobal->gMiniScreenData.lineData + kBuildScreenFirstTypeLine;
+                    line = *globals()->gMiniScreenData.lineData + kBuildScreenFirstTypeLine;
                     lineNum = kBuildScreenFirstTypeLine;
 
                     for ( count = 0; count < kMaxShipCanBuild; count++)
@@ -1071,9 +1062,9 @@ void MiniComputerHandleNull( long unitsToDo)
                             {
                                 if (line->selectable != selectable)
                                 {
-                                    if ( gAresGlobal->gMiniScreenData.selectLine == kMiniScreenNoLineSelected)
+                                    if ( globals()->gMiniScreenData.selectLine == kMiniScreenNoLineSelected)
                                     {
-                                        gAresGlobal->gMiniScreenData.selectLine = lineNum;
+                                        globals()->gMiniScreenData.selectLine = lineNum;
                                         line->hiliteLeft = mRect.left;
                                         line->hiliteRight = mRect.right;
                                     }
@@ -1095,7 +1086,7 @@ void MiniComputerHandleNull( long unitsToDo)
         // handle control/command/selected object
 
         myObject = mGetMiniObjectPtr( kMiniSelectObjectNum);
-        count = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
+        count = GetAdmiralConsiderObject( globals()->gPlayerAdmiralNumber);
         if ( count >= 0)
         {
             realObject = *gSpaceObjectData + count;
@@ -1119,7 +1110,7 @@ void MiniComputerHandleNull( long unitsToDo)
         UpdateMiniShipData( myObject, &newObject, YELLOW, kMiniSelectTop, kMiniSelectObjectNum + 1);
 
         myObject = mGetMiniObjectPtr( kMiniTargetObjectNum);
-        count = GetAdmiralDestinationObject( gAresGlobal->gPlayerAdmiralNumber);
+        count = GetAdmiralDestinationObject( globals()->gPlayerAdmiralNumber);
         if ( count >= 0)
         {
             realObject = *gSpaceObjectData + count;
@@ -1142,25 +1133,25 @@ void MiniComputerHandleNull( long unitsToDo)
         }
         UpdateMiniShipData( myObject, &newObject, SKY_BLUE, kMiniTargetTop, kMiniTargetObjectNum + 1);
 
-        count = GetAdmiralBuildAtObject( gAresGlobal->gPlayerAdmiralNumber);
+        count = GetAdmiralBuildAtObject( globals()->gPlayerAdmiralNumber);
         if ( count >= 0)
         {
-            buildAtObject = mGetDestObjectBalancePtr( GetAdmiralBuildAtObject( gAresGlobal->gPlayerAdmiralNumber));
+            buildAtObject = mGetDestObjectBalancePtr( GetAdmiralBuildAtObject( globals()->gPlayerAdmiralNumber));
             count = buildAtObject->buildTime * kMiniBuildTimeHeight;
             if ( buildAtObject->totalBuildTime > 0)
             {
                 count /= buildAtObject->totalBuildTime;
             } else count = 0;
         } else count = 0;
-        if ( count != gAresGlobal->gMiniScreenData.buildTimeBarValue)
+        if ( count != globals()->gMiniScreenData.buildTimeBarValue)
         {
-            gAresGlobal->gMiniScreenData.buildTimeBarValue = count;
-            DrawBuildTimeBar( gAresGlobal->gMiniScreenData.buildTimeBarValue);
+            globals()->gMiniScreenData.buildTimeBarValue = count;
+            DrawBuildTimeBar( globals()->gMiniScreenData.buildTimeBarValue);
         }
     }
-    if ( gAresGlobal->gPlayerShipNumber >= 0)
+    if ( globals()->gPlayerShipNumber >= 0)
     {
-        myObject = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
+        myObject = *gSpaceObjectData + globals()->gPlayerShipNumber;
         if ( myObject->active)
         {
             UpdatePlayerAmmo(
@@ -1192,33 +1183,33 @@ void UpdateMiniScreenLines( void)
     long                lineNum, count;
     Rect                mRect;
 
-    MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + gAresGlobal->gInstrumentTop, kMiniScreenRight,
-                        kMiniScreenBottom + gAresGlobal->gInstrumentTop);
-    switch( gAresGlobal->gMiniScreenData.currentScreen)
+    MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+                        kMiniScreenBottom + globals()->gInstrumentTop);
+    switch( globals()->gMiniScreenData.currentScreen)
     {
         case kBuildMiniScreen:
-            admiral = *gAresGlobal->gAdmiralData + gAresGlobal->gPlayerAdmiralNumber;
-            line = *gAresGlobal->gMiniScreenData.lineData +
+            admiral = *globals()->gAdmiralData + globals()->gPlayerAdmiralNumber;
+            line = *globals()->gMiniScreenData.lineData +
                 kBuildScreenWhereNameLine;
             if ( line->value !=
-                GetAdmiralBuildAtObject( gAresGlobal->gPlayerAdmiralNumber))
+                GetAdmiralBuildAtObject( globals()->gPlayerAdmiralNumber))
             {
-                if ( gAresGlobal->gMiniScreenData.selectLine !=
+                if ( globals()->gMiniScreenData.selectLine !=
                         kMiniScreenNoLineSelected)
                 {
-                    line = *gAresGlobal->gMiniScreenData.lineData
-                        + gAresGlobal->gMiniScreenData.selectLine;
+                    line = *globals()->gMiniScreenData.lineData
+                        + globals()->gMiniScreenData.selectLine;
                     line->hiliteLeft = line->hiliteRight = 0;
-                    gAresGlobal->gMiniScreenData.selectLine =
+                    globals()->gMiniScreenData.selectLine =
                         kMiniScreenNoLineSelected;
                 }
                 MiniComputerSetBuildStrings();
                 DrawMiniScreen();
                 ShowWholeMiniScreen();
-            } else if ( GetAdmiralBuildAtObject( gAresGlobal->gPlayerAdmiralNumber)
+            } else if ( GetAdmiralBuildAtObject( globals()->gPlayerAdmiralNumber)
                 >= 0)
             {
-                line = *gAresGlobal->gMiniScreenData.lineData + kBuildScreenFirstTypeLine;
+                line = *globals()->gMiniScreenData.lineData + kBuildScreenFirstTypeLine;
                 lineNum = kBuildScreenFirstTypeLine;
 
                 for ( count = 0; count < kMaxShipCanBuild; count++)
@@ -1237,10 +1228,10 @@ void UpdateMiniScreenLines( void)
                         {
                             if (line->selectable != selectable)
                             {
-                                if ( gAresGlobal->gMiniScreenData.selectLine ==
+                                if ( globals()->gMiniScreenData.selectLine ==
                                     kMiniScreenNoLineSelected)
                                 {
-                                    gAresGlobal->gMiniScreenData.selectLine =
+                                    globals()->gMiniScreenData.selectLine =
                                         lineNum;
                                     line->hiliteLeft = mRect.left;
                                     line->hiliteRight = mRect.right;
@@ -1262,7 +1253,7 @@ void UpdateMiniScreenLines( void)
                 kMiniScreenCharHeight; count++)
             {
                 line =
-                    *gAresGlobal->gMiniScreenData.lineData +
+                    *globals()->gMiniScreenData.lineData +
                         count;
                 lineNum = MiniComputerGetStatusValue( count);
                 if ( line->value != lineNum)
@@ -1294,9 +1285,9 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
     mSetDirectFont( kComputerFontNum);
 
     clipRect.left = kMiniScreenLeft;
-    lRect.top = clipRect.top = kMiniAmmoTop + gAresGlobal->gInstrumentTop;
+    lRect.top = clipRect.top = kMiniAmmoTop + globals()->gInstrumentTop;
     clipRect.right = kMiniScreenRight;
-    lRect.bottom = clipRect.bottom = kMiniAmmoBottom + gAresGlobal->gInstrumentTop;
+    lRect.bottom = clipRect.bottom = kMiniAmmoBottom + globals()->gInstrumentTop;
 
     if ( thisOne != lastOne)
     {
@@ -1438,7 +1429,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     DrawInOffWorld();
 
     clipRect.left = kMiniScreenLeft;
-    clipRect.top = screenTop + gAresGlobal->gInstrumentTop;
+    clipRect.top = screenTop + globals()->gInstrumentTop;
     clipRect.right = kMiniScreenRight;
     clipRect.bottom = clipRect.top + 64;
 
@@ -1449,7 +1440,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     if ( oldObject->id != newObject->id)
     {
 
-        mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, 0, 0, kMiniScreenWidth, lRect, offPixBase);
+        mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, 0, 0, kMiniScreenWidth, lRect, offPixBase);
         mGetTranslateColorShade( headerColor, LIGHT, color, transColor);
         mGetTranslateColorShade( headerColor, VERY_LIGHT, lightcolor, transColor);
         mGetTranslateColorShade( headerColor, MEDIUM, darkcolor, transColor);
@@ -1467,7 +1458,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         if ( newObject->attributes & kIsDestination)
         {
             // blacken the line for the object type name
-            mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth, lRect, offPixBase);
+            mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth, lRect, offPixBase);
 
             // get the color for writing the name
             mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, color, transColor);
@@ -1492,7 +1483,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         {
 
             // blacken the line for the object type name
-            mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth, lRect, offPixBase);
+            mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth, lRect, offPixBase);
 
             if ( newObject->whichBaseObject >= 0)
             {
@@ -1523,7 +1514,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     if ( oldObject->pixResID != newObject->pixResID)
     {
         dRect.left = kMiniIconLeft;
-        dRect.top = screenTop + gAresGlobal->gInstrumentTop + kMiniIconMacLineTop;
+        dRect.top = screenTop + globals()->gInstrumentTop + kMiniIconMacLineTop;
         dRect.right = kMiniScreenLeft + kMiniIconWidth;
         dRect.bottom = dRect.top + kMiniIconHeight;
 
@@ -1602,7 +1593,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     if ( oldObject->health != newObject->health)
     {
         dRect.left = kMiniHealthLeft;
-        dRect.top = screenTop + gAresGlobal->gInstrumentTop + kMiniIconMacLineTop;
+        dRect.top = screenTop + globals()->gInstrumentTop + kMiniIconMacLineTop;
         dRect.right = dRect.left + kMiniBarWidth;
         dRect.bottom = dRect.top + kMiniIconHeight;
 
@@ -1650,7 +1641,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     if (oldObject->energy != newObject->energy)
     {
         dRect.left = kMiniEnergyLeft;
-        dRect.top = screenTop + gAresGlobal->gInstrumentTop + kMiniIconMacLineTop;
+        dRect.top = screenTop + globals()->gInstrumentTop + kMiniIconMacLineTop;
         dRect.right = dRect.left + kMiniBarWidth;
         dRect.bottom = dRect.top + kMiniIconHeight;
 
@@ -1696,7 +1687,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     if ( oldObject->beamType != newObject->beamType)
     {
         // blacken the line for the weapon1 name
-        mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, offPixBase);
+        mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, offPixBase);
 
         // get the color for writing the name
         mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, color, transColor);
@@ -1724,7 +1715,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     if ( oldObject->pulseType != newObject->pulseType)
     {
         // blacken the line for the weapon1 name
-        mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, offPixBase);
+        mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, offPixBase);
 
         // get the color for writing the name
         mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, color, transColor);
@@ -1752,7 +1743,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     if (( oldObject->specialType != newObject->specialType) && ( ! (newObject->attributes & kIsDestination)))
     {
         // blacken the line for the weapon1 name
-        mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, offPixBase);
+        mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, offPixBase);
 
         // get the color for writing the name
         mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, color, transColor);
@@ -1780,7 +1771,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     if ( oldObject->destinationObject != newObject->destinationObject)
     {
         // blacken the line for the weapon1 name
-        mBlackMiniScreenLine( screenTop + gAresGlobal->gInstrumentTop, kMiniDestLineNum, 0, kMiniScreenWidth, lRect, offPixBase);
+        mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniDestLineNum, 0, kMiniScreenWidth, lRect, offPixBase);
 
         // move to the 1st line in the selection miniscreen
         MoveTo( lRect.left, lRect.top + gDirectText->ascent);
@@ -1793,7 +1784,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                 dObject = newObject->destObjectPtr;
 
                 // get the color for writing the name
-                if ( dObject->owner == gAresGlobal->gPlayerAdmiralNumber)
+                if ( dObject->owner == globals()->gPlayerAdmiralNumber)
                 {
                     mGetTranslateColorShade( GREEN, VERY_LIGHT, color, transColor);
                 } else
@@ -1840,25 +1831,25 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
 void MiniComputerDoAccept( void)
 
 {
-    if (!(gAresGlobal->gOptions & kOptionNetworkOn))
+    if (!(globals()->gOptions & kOptionNetworkOn))
     {
-        MiniComputerExecute( gAresGlobal->gMiniScreenData.currentScreen,
-            gAresGlobal->gMiniScreenData.selectLine, gAresGlobal->gPlayerAdmiralNumber);
+        MiniComputerExecute( globals()->gMiniScreenData.currentScreen,
+            globals()->gMiniScreenData.selectLine, globals()->gPlayerAdmiralNumber);
     } else
     {
 #if NETSPROCKET_AVAILABLE
-        if ( !SendMenuMessage( gAresGlobal->gGameTime + gNetLatency, gAresGlobal->gMiniScreenData.currentScreen,
-            gAresGlobal->gMiniScreenData.selectLine))
+        if ( !SendMenuMessage( globals()->gGameTime + gNetLatency, globals()->gMiniScreenData.currentScreen,
+            globals()->gMiniScreenData.selectLine))
             StopNetworking();
 #endif NETSPROCKET_AVAILABLE
     }
 /*  spaceObjectType *anObject, *anotherObject;
     long            l;
 
-    switch ( gAresGlobal->gMiniScreenData.currentScreen)
+    switch ( globals()->gMiniScreenData.currentScreen)
     {
         case kMainMiniScreen:
-            switch ( gAresGlobal->gMiniScreenData.selectLine)
+            switch ( globals()->gMiniScreenData.selectLine)
             {
                 case kMainMiniBuild:
                     MakeMiniScreenFromIndString( kBuildMiniScreen);
@@ -1886,22 +1877,22 @@ void MiniComputerDoAccept( void)
             break;
 
         case kBuildMiniScreen:
-            if ( gAresGlobal->gMiniScreenData.selectLine != kMiniScreenNoLineSelected)
-                if (AdmiralScheduleBuild( gAresGlobal->gPlayerAdmiralNumber,
-                    gAresGlobal->gMiniScreenData.selectLine - kBuildScreenFirstTypeLine) == FALSE)
+            if ( globals()->gMiniScreenData.selectLine != kMiniScreenNoLineSelected)
+                if (AdmiralScheduleBuild( globals()->gPlayerAdmiralNumber,
+                    globals()->gMiniScreenData.selectLine - kBuildScreenFirstTypeLine) == FALSE)
                 {
                     mPlayBeepBad;
                 }
             break;
 
         case kSpecialMiniScreen:
-            switch ( gAresGlobal->gMiniScreenData.selectLine)
+            switch ( globals()->gMiniScreenData.selectLine)
             {
                 case kSpecialMiniTransfer:
-                    l = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
-                    if (( gAresGlobal->gPlayerShipNumber != kNoShip) && ( l != kNoShip) && ( l != gAresGlobal->gPlayerShipNumber))
+                    l = GetAdmiralConsiderObject( globals()->gPlayerAdmiralNumber);
+                    if (( globals()->gPlayerShipNumber != kNoShip) && ( l != kNoShip) && ( l != globals()->gPlayerShipNumber))
                     {
-                        anObject = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
+                        anObject = *gSpaceObjectData + globals()->gPlayerShipNumber;
                         anotherObject = *gSpaceObjectData + l;
                         if (( anObject->active) && (anObject->attributes & kIsHumanControlled) &&
                             (anotherObject->attributes & ( kCanAcceptDestination)))
@@ -1913,8 +1904,8 @@ void MiniComputerDoAccept( void)
                     break;
 
                 case kSpecialMiniFire1:
-                    l = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
-                    if (( l != kNoShip) && ( l != gAresGlobal->gPlayerShipNumber))
+                    l = GetAdmiralConsiderObject( globals()->gPlayerAdmiralNumber);
+                    if (( l != kNoShip) && ( l != globals()->gPlayerShipNumber))
                     {
                         anObject = *gSpaceObjectData + l;
                         if (( anObject->active) &&
@@ -1926,8 +1917,8 @@ void MiniComputerDoAccept( void)
                     break;
 
                 case kSpecialMiniFire2:
-                    l = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
-                    if (( l != kNoShip) && ( l != gAresGlobal->gPlayerShipNumber))
+                    l = GetAdmiralConsiderObject( globals()->gPlayerAdmiralNumber);
+                    if (( l != kNoShip) && ( l != globals()->gPlayerShipNumber))
                     {
                         anObject = *gSpaceObjectData + l;
                         if (( anObject->active) &&
@@ -1939,8 +1930,8 @@ void MiniComputerDoAccept( void)
                     break;
 
                 case kSpecialMiniFireSpecial:
-                    l = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
-                    if (( l != kNoShip) && ( l != gAresGlobal->gPlayerShipNumber))
+                    l = GetAdmiralConsiderObject( globals()->gPlayerAdmiralNumber);
+                    if (( l != kNoShip) && ( l != globals()->gPlayerShipNumber))
                     {
                         anObject = *gSpaceObjectData + l;
                         if (( anObject->active) &&
@@ -1952,8 +1943,8 @@ void MiniComputerDoAccept( void)
                     break;
 
                 case kSpecialMiniHold:
-                    l = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
-                    if (( l != kNoShip) && ( l != gAresGlobal->gPlayerShipNumber))
+                    l = GetAdmiralConsiderObject( globals()->gPlayerAdmiralNumber);
+                    if (( l != kNoShip) && ( l != globals()->gPlayerShipNumber))
                     {
                         anObject = *gSpaceObjectData + l;
                         SetObjectLocationDestination( anObject, &(anObject->location));
@@ -1961,11 +1952,11 @@ void MiniComputerDoAccept( void)
                     break;
 
                 case kSpecialMiniGoToMe:
-                    l = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
-                    if (( l != kNoShip) && ( l != gAresGlobal->gPlayerShipNumber) && ( gAresGlobal->gPlayerShipNumber != kNoShip))
+                    l = GetAdmiralConsiderObject( globals()->gPlayerAdmiralNumber);
+                    if (( l != kNoShip) && ( l != globals()->gPlayerShipNumber) && ( globals()->gPlayerShipNumber != kNoShip))
                     {
                         anObject = *gSpaceObjectData + l;
-                        anotherObject = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
+                        anotherObject = *gSpaceObjectData + globals()->gPlayerShipNumber;
                         SetObjectLocationDestination( anObject, &(anotherObject->location));
                     }
                     break;
@@ -1976,7 +1967,7 @@ void MiniComputerDoAccept( void)
             break;
 
         case kMessageMiniScreen:
-            switch ( gAresGlobal->gMiniScreenData.selectLine)
+            switch ( globals()->gMiniScreenData.selectLine)
             {
                 case kMessageMiniNext:
                     AdvanceCurrentLongMessage();
@@ -2009,7 +2000,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
     switch ( whichPage)
     {
         case kMainMiniScreen:
-            if ( whichAdmiral == gAresGlobal->gPlayerAdmiralNumber)
+            if ( whichAdmiral == globals()->gPlayerAdmiralNumber)
             {
                 switch ( whichLine)
                 {
@@ -2047,7 +2038,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
             break;
 
         case kBuildMiniScreen:
-            if ( gAresGlobal->keyMask & kComputerBuildMenu) return;
+            if ( globals()->keyMask & kComputerBuildMenu) return;
             if ( whichLine != kMiniScreenNoLineSelected)
             {
                 if ( CountObjectsOfBaseType( -1, -1) <
@@ -2056,12 +2047,12 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                     if (AdmiralScheduleBuild( whichAdmiral,
                         whichLine - kBuildScreenFirstTypeLine) == FALSE)
                     {
-                        if ( whichAdmiral == gAresGlobal->gPlayerAdmiralNumber)
+                        if ( whichAdmiral == globals()->gPlayerAdmiralNumber)
                             mPlayBeepBad;
                     }
                 } else
                 {
-                    if ( whichAdmiral == gAresGlobal->gPlayerAdmiralNumber)
+                    if ( whichAdmiral == globals()->gPlayerAdmiralNumber)
                     {
                         SetStatusString( "\pMaximum number of ships built", TRUE,
                             ORANGE);
@@ -2071,7 +2062,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
             break;
 
         case kSpecialMiniScreen:
-            if ( gAresGlobal->keyMask & kComputerSpecialMenu) return;
+            if ( globals()->keyMask & kComputerSpecialMenu) return;
             switch ( whichLine)
             {
                 case kSpecialMiniTransfer:
@@ -2090,7 +2081,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                                 || ( !(anotherObject->attributes & kCanBeDestination))
                                 || ( anObject->active != kObjectInUse))
                             {
-                                if ( whichAdmiral == gAresGlobal->gPlayerAdmiralNumber)
+                                if ( whichAdmiral == globals()->gPlayerAdmiralNumber)
                                     mPlayBeepBad;
                             } else
                             {
@@ -2107,7 +2098,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                                 ChangePlayerShipNumber( whichAdmiral, l);
                             } else
                             {
-                                if ( whichAdmiral == gAresGlobal->gPlayerAdmiralNumber)
+                                if ( whichAdmiral == globals()->gPlayerAdmiralNumber)
                                     mPlayBeepBad;
                             }
 */
@@ -2182,8 +2173,8 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
             break;
 
         case kMessageMiniScreen:
-            if ( gAresGlobal->keyMask & kComputerMessageMenu) return;
-            if ( whichAdmiral == gAresGlobal->gPlayerAdmiralNumber)
+            if ( globals()->keyMask & kComputerMessageMenu) return;
+            if ( whichAdmiral == globals()->gPlayerAdmiralNumber)
             {
                 switch ( whichLine)
                 {
@@ -2213,7 +2204,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
 void MiniComputerDoCancel( void)
 
 {
-    switch ( gAresGlobal->gMiniScreenData.currentScreen)
+    switch ( globals()->gMiniScreenData.currentScreen)
     {
         case kBuildMiniScreen:
         case kSpecialMiniScreen:
@@ -2244,17 +2235,17 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
     short               namelen, linelen;
     Rect                mRect;
 
-    MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + gAresGlobal->gInstrumentTop, kMiniScreenRight,
-                kMiniScreenBottom + gAresGlobal->gInstrumentTop);
+    MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+                kMiniScreenBottom + globals()->gInstrumentTop);
 
-    gAresGlobal->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
-    if ( gAresGlobal->gMiniScreenData.currentScreen == kBuildMiniScreen)
+    globals()->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
+    if ( globals()->gMiniScreenData.currentScreen == kBuildMiniScreen)
     {
-        admiral = *gAresGlobal->gAdmiralData + gAresGlobal->gPlayerAdmiralNumber;
-        line = *gAresGlobal->gMiniScreenData.lineData +
+        admiral = *globals()->gAdmiralData + globals()->gPlayerAdmiralNumber;
+        line = *globals()->gMiniScreenData.lineData +
             kBuildScreenWhereNameLine;
         buildAtObjectNum =
-            GetAdmiralBuildAtObject( gAresGlobal->gPlayerAdmiralNumber);
+            GetAdmiralBuildAtObject( globals()->gPlayerAdmiralNumber);
         line->value = buildAtObjectNum;
 
         if ( buildAtObjectNum >= 0)
@@ -2262,7 +2253,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
             buildAtObject = mGetDestObjectBalancePtr( buildAtObjectNum);
             mCopyBlankLineString( line, namechar, buildAtObject->name, namelen, linelen);
 
-            line = *gAresGlobal->gMiniScreenData.lineData + kBuildScreenFirstTypeLine;
+            line = *globals()->gMiniScreenData.lineData + kBuildScreenFirstTypeLine;
             lineNum = kBuildScreenFirstTypeLine;
 
             for ( count = 0; count < kMaxShipCanBuild; count++)
@@ -2278,9 +2269,9 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
                     if ( buildObject->price > mFixedToLong(admiral->cash))
                         line->selectable = selectDim;
                     else line->selectable = selectable;
-                    if ( gAresGlobal->gMiniScreenData.selectLine == kMiniScreenNoLineSelected)
+                    if ( globals()->gMiniScreenData.selectLine == kMiniScreenNoLineSelected)
                     {
-                        gAresGlobal->gMiniScreenData.selectLine = lineNum;
+                        globals()->gMiniScreenData.selectLine = lineNum;
                         line->hiliteLeft = mRect.left;
                         line->hiliteRight = mRect.right;
                     }
@@ -2294,26 +2285,26 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
                         linelen++;
                     }
                     line->selectable = cannotSelect;
-                    if ( gAresGlobal->gMiniScreenData.selectLine == (count + kBuildScreenFirstTypeLine))
+                    if ( globals()->gMiniScreenData.selectLine == (count + kBuildScreenFirstTypeLine))
                     {
                         line->hiliteLeft = line->hiliteRight = 0;
-                        gAresGlobal->gMiniScreenData.selectLine++;
+                        globals()->gMiniScreenData.selectLine++;
                     }
                     line->value = -1;
                 }
                 lineNum++;
                 line++;
             }
-            line = *gAresGlobal->gMiniScreenData.lineData + gAresGlobal->gMiniScreenData.selectLine;
+            line = *globals()->gMiniScreenData.lineData + globals()->gMiniScreenData.selectLine;
             if ( line->selectable == cannotSelect)
-                gAresGlobal->gMiniScreenData.selectLine =
+                globals()->gMiniScreenData.selectLine =
                 kMiniScreenNoLineSelected;
         } else
         {
-            gAresGlobal->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
+            globals()->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
 
             line =
-                *gAresGlobal->gMiniScreenData.lineData +
+                *globals()->gMiniScreenData.lineData +
                 kBuildScreenFirstTypeLine;
             for ( count = 0; count < kMaxShipCanBuild; count++)
             {
@@ -2343,12 +2334,12 @@ long MiniComputerGetPriceOfCurrentSelection( void)
     miniScreenLineType  *line = nil;
     baseObjectType      *buildObject = nil;
 
-    if (( gAresGlobal->gMiniScreenData.currentScreen != kBuildMiniScreen) ||
-            ( gAresGlobal->gMiniScreenData.selectLine == kMiniScreenNoLineSelected))
+    if (( globals()->gMiniScreenData.currentScreen != kBuildMiniScreen) ||
+            ( globals()->gMiniScreenData.selectLine == kMiniScreenNoLineSelected))
         return (0);
 
-        line = *gAresGlobal->gMiniScreenData.lineData +
-            gAresGlobal->gMiniScreenData.selectLine;
+        line = *globals()->gMiniScreenData.lineData +
+            globals()->gMiniScreenData.selectLine;
 
         if ( line->value < 0) return( 0);
 
@@ -2400,11 +2391,11 @@ void MiniComputerSetStatusStrings( void)
     Str255              sourceString;
     miniScreenLineType  *line;
 
-    if (gAresGlobal->gMissionStatusStrList.get() == nil) {
+    if (globals()->gMissionStatusStrList.get() == nil) {
         for ( count = kStatusMiniScreenFirstLine; count < kMiniScreenCharHeight;
             count++)
         {
-            line = *gAresGlobal->gMiniScreenData.lineData +
+            line = *globals()->gMiniScreenData.lineData +
                 count;
             line->statusType = kNoStatusData;
             line->value = -1;
@@ -2416,15 +2407,15 @@ void MiniComputerSetStatusStrings( void)
     for ( count = kStatusMiniScreenFirstLine; count < kMiniScreenCharHeight;
         count++)
     {
-        line = *gAresGlobal->gMiniScreenData.lineData +
+        line = *globals()->gMiniScreenData.lineData +
             count;
 
         if (implicit_cast<size_t>(count - kStatusMiniScreenFirstLine) <
-            (*gAresGlobal->gMissionStatusStrList)->size())
+            (*globals()->gMissionStatusStrList)->size())
         {
             // we have some data for this line to interpret
 
-            string_to_pstring((*gAresGlobal->gMissionStatusStrList)->at((count -
+            string_to_pstring((*globals()->gMissionStatusStrList)->at((count -
                 kStatusMiniScreenFirstLine) + 1), sourceString);
 
             charNum = 1;
@@ -2559,7 +2550,7 @@ void MiniComputerMakeStatusString(long whichLine, unsigned char* destString) {
     miniScreenLineType  *line;
     Str255              tempString;
 
-    line = *gAresGlobal->gMiniScreenData.lineData +
+    line = *globals()->gMiniScreenData.lineData +
         whichLine;
 
     destString[0] = 0;
@@ -2604,7 +2595,7 @@ long MiniComputerGetStatusValue( long whichLine)
 {
     miniScreenLineType  *line;
 
-    line = *gAresGlobal->gMiniScreenData.lineData +
+    line = *globals()->gMiniScreenData.lineData +
         whichLine;
 
     if ( line->statusType == kNoStatusData)
@@ -2652,7 +2643,7 @@ void MiniComputerHandleClick( Point where)
     miniScreenLineType  *line;
 
     mSetDirectFont( kComputerFontNum);
-    line = *gAresGlobal->gMiniScreenData.lineData;
+    line = *globals()->gMiniScreenData.lineData;
     scrap = 0;
     while ( scrap < kMiniScreenTrueLineNum)
     {
@@ -2662,15 +2653,15 @@ void MiniComputerHandleClick( Point where)
         line++;
     }
 
-    MacSetRect( &mRect, kButBoxLeft, kButBoxTop + gAresGlobal->gInstrumentTop, kButBoxRight,
-                kButBoxBottom + gAresGlobal->gInstrumentTop);
+    MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+                kButBoxBottom + globals()->gInstrumentTop);
 
     // if click is in button screen
     if ( MacPtInRect( where, &mRect))
     {
-        lineNum = (( where.v - ( kButBoxTop + gAresGlobal->gInstrumentTop)) / gDirectText->height) + kMiniScreenCharHeight;
-        gAresGlobal->gMiniScreenData.clickLine = lineNum;
-        line = *gAresGlobal->gMiniScreenData.lineData + lineNum;
+        lineNum = (( where.v - ( kButBoxTop + globals()->gInstrumentTop)) / gDirectText->height) + kMiniScreenCharHeight;
+        globals()->gMiniScreenData.clickLine = lineNum;
+        line = *globals()->gMiniScreenData.lineData + lineNum;
         if ( line->whichButton == kInLineButton)
         {
             if ( line->lineKind != buttonOnLineKind)
@@ -2681,7 +2672,7 @@ void MiniComputerHandleClick( Point where)
             }
             if ( outLineButtonLine >= 0)
             {
-                line = *gAresGlobal->gMiniScreenData.lineData +
+                line = *globals()->gMiniScreenData.lineData +
                     outLineButtonLine;
                 if ( line->lineKind != buttonOffLineKind)
                 {
@@ -2699,7 +2690,7 @@ void MiniComputerHandleClick( Point where)
             }
             if ( inLineButtonLine >= 0)
             {
-                line = *gAresGlobal->gMiniScreenData.lineData + inLineButtonLine;
+                line = *globals()->gMiniScreenData.lineData + inLineButtonLine;
                 if ( line->lineKind != buttonOffLineKind)
                 {
                     line->lineKind = buttonOffLineKind;
@@ -2713,7 +2704,7 @@ void MiniComputerHandleClick( Point where)
         // make sure both buttons are off
         if ( inLineButtonLine >= 0)
         {
-            line = *gAresGlobal->gMiniScreenData.lineData + inLineButtonLine;
+            line = *globals()->gMiniScreenData.lineData + inLineButtonLine;
             if ( line->lineKind != buttonOffLineKind)
             {
                 line->lineKind = buttonOffLineKind;
@@ -2722,7 +2713,7 @@ void MiniComputerHandleClick( Point where)
         }
         if ( outLineButtonLine >= 0)
         {
-            line = *gAresGlobal->gMiniScreenData.lineData + outLineButtonLine;
+            line = *globals()->gMiniScreenData.lineData + outLineButtonLine;
             if ( line->lineKind != buttonOffLineKind)
             {
                 line->lineKind = buttonOffLineKind;
@@ -2730,35 +2721,35 @@ void MiniComputerHandleClick( Point where)
             }
         }
 
-        MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + gAresGlobal->gInstrumentTop, kMiniScreenRight,
-                kMiniScreenBottom + gAresGlobal->gInstrumentTop);
+        MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+                kMiniScreenBottom + globals()->gInstrumentTop);
 
         // if click is in main menu screen
         if ( MacPtInRect( where, &mRect))
         {
-            if ( gAresGlobal->gMiniScreenData.selectLine !=
+            if ( globals()->gMiniScreenData.selectLine !=
                 kMiniScreenNoLineSelected)
             {
-                line = *gAresGlobal->gMiniScreenData.lineData +
-                    gAresGlobal->gMiniScreenData.selectLine;
+                line = *globals()->gMiniScreenData.lineData +
+                    globals()->gMiniScreenData.selectLine;
                 line->hiliteLeft = line->hiliteRight = 0;
-                DrawAndShowMiniScreenLine( gAresGlobal->gMiniScreenData.selectLine);
+                DrawAndShowMiniScreenLine( globals()->gMiniScreenData.selectLine);
             }
 
             lineNum = mGetLineNumFromV( where.v);
-            gAresGlobal->gMiniScreenData.clickLine = lineNum;
-            line = *gAresGlobal->gMiniScreenData.lineData + lineNum;
+            globals()->gMiniScreenData.clickLine = lineNum;
+            line = *globals()->gMiniScreenData.lineData + lineNum;
             if (( line->selectable == selectable) || (line->selectable == selectDim))
             {
-                gAresGlobal->gMiniScreenData.selectLine = lineNum;
+                globals()->gMiniScreenData.selectLine = lineNum;
 
-                line = *gAresGlobal->gMiniScreenData.lineData +
-                    gAresGlobal->gMiniScreenData.selectLine;
+                line = *globals()->gMiniScreenData.lineData +
+                    globals()->gMiniScreenData.selectLine;
                 line->hiliteLeft = mRect.left;
                 line->hiliteRight = mRect.right;
-                DrawAndShowMiniScreenLine( gAresGlobal->gMiniScreenData.selectLine);
+                DrawAndShowMiniScreenLine( globals()->gMiniScreenData.selectLine);
             }
-        } else gAresGlobal->gMiniScreenData.clickLine = kMiniScreenNoLineSelected;
+        } else globals()->gMiniScreenData.clickLine = kMiniScreenNoLineSelected;
     }
 }
 
@@ -2770,7 +2761,7 @@ void MiniComputerHandleDoubleClick( Point where)
     miniScreenLineType  *line;
 
     mSetDirectFont( kComputerFontNum);
-    line = *gAresGlobal->gMiniScreenData.lineData;
+    line = *globals()->gMiniScreenData.lineData;
     scrap = 0;
     while ( scrap < kMiniScreenTrueLineNum)
     {
@@ -2780,14 +2771,14 @@ void MiniComputerHandleDoubleClick( Point where)
         line++;
     }
 
-    MacSetRect( &mRect, kButBoxLeft, kButBoxTop + gAresGlobal->gInstrumentTop, kButBoxRight,
-                kButBoxBottom + gAresGlobal->gInstrumentTop);
+    MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+                kButBoxBottom + globals()->gInstrumentTop);
 
     // if click is in button screen
     if ( MacPtInRect( where, &mRect))
     {
-        lineNum = (( where.v - ( kButBoxTop + gAresGlobal->gInstrumentTop)) / gDirectText->height) + kMiniScreenCharHeight;
-        line = *gAresGlobal->gMiniScreenData.lineData + lineNum;
+        lineNum = (( where.v - ( kButBoxTop + globals()->gInstrumentTop)) / gDirectText->height) + kMiniScreenCharHeight;
+        line = *globals()->gMiniScreenData.lineData + lineNum;
         if ( line->whichButton == kInLineButton)
         {
             if ( line->lineKind != buttonOnLineKind)
@@ -2798,7 +2789,7 @@ void MiniComputerHandleDoubleClick( Point where)
             }
             if ( outLineButtonLine >= 0)
             {
-                line = *gAresGlobal->gMiniScreenData.lineData + outLineButtonLine;
+                line = *globals()->gMiniScreenData.lineData + outLineButtonLine;
                 if ( line->lineKind != buttonOffLineKind)
                 {
                     line->lineKind = buttonOffLineKind;
@@ -2815,7 +2806,7 @@ void MiniComputerHandleDoubleClick( Point where)
             }
             if ( inLineButtonLine >= 0)
             {
-                line = *gAresGlobal->gMiniScreenData.lineData + inLineButtonLine;
+                line = *globals()->gMiniScreenData.lineData + inLineButtonLine;
                 if ( line->lineKind != buttonOffLineKind)
                 {
                     line->lineKind = buttonOffLineKind;
@@ -2829,7 +2820,7 @@ void MiniComputerHandleDoubleClick( Point where)
         // make sure both buttons are off
         if ( inLineButtonLine >= 0)
         {
-            line = *gAresGlobal->gMiniScreenData.lineData + inLineButtonLine;
+            line = *globals()->gMiniScreenData.lineData + inLineButtonLine;
             if ( line->lineKind != buttonOffLineKind)
             {
                 line->lineKind = buttonOffLineKind;
@@ -2838,7 +2829,7 @@ void MiniComputerHandleDoubleClick( Point where)
         }
         if ( outLineButtonLine >= 0)
         {
-            line = *gAresGlobal->gMiniScreenData.lineData + outLineButtonLine;
+            line = *globals()->gMiniScreenData.lineData + outLineButtonLine;
             if ( line->lineKind != buttonOffLineKind)
             {
                 line->lineKind = buttonOffLineKind;
@@ -2846,37 +2837,37 @@ void MiniComputerHandleDoubleClick( Point where)
             }
         }
 
-        MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + gAresGlobal->gInstrumentTop, kMiniScreenRight,
-                kMiniScreenBottom + gAresGlobal->gInstrumentTop);
+        MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+                kMiniScreenBottom + globals()->gInstrumentTop);
 
         // if click is in main menu screen
         if ( MacPtInRect( where, &mRect))
         {
             lineNum = mGetLineNumFromV( where.v);
-            if ( lineNum == gAresGlobal->gMiniScreenData.selectLine)
+            if ( lineNum == globals()->gMiniScreenData.selectLine)
             {
                 mPlayBeep3;
                 MiniComputerDoAccept();
             } else
             {
-                if ( gAresGlobal->gMiniScreenData.selectLine !=
+                if ( globals()->gMiniScreenData.selectLine !=
                     kMiniScreenNoLineSelected)
                 {
-                    line = *gAresGlobal->gMiniScreenData.lineData + gAresGlobal->gMiniScreenData.selectLine;
+                    line = *globals()->gMiniScreenData.lineData + globals()->gMiniScreenData.selectLine;
                     line->hiliteLeft = line->hiliteRight = 0;
-                    DrawAndShowMiniScreenLine( gAresGlobal->gMiniScreenData.selectLine);
+                    DrawAndShowMiniScreenLine( globals()->gMiniScreenData.selectLine);
                 }
 
                 lineNum = mGetLineNumFromV( where.v);
-                line = *gAresGlobal->gMiniScreenData.lineData + lineNum;
+                line = *globals()->gMiniScreenData.lineData + lineNum;
                 if (( line->selectable == selectable) || (line->selectable == selectDim))
                 {
-                    gAresGlobal->gMiniScreenData.selectLine = lineNum;
+                    globals()->gMiniScreenData.selectLine = lineNum;
 
-                    line = *gAresGlobal->gMiniScreenData.lineData + gAresGlobal->gMiniScreenData.selectLine;
+                    line = *globals()->gMiniScreenData.lineData + globals()->gMiniScreenData.selectLine;
                     line->hiliteLeft = mRect.left;
                     line->hiliteRight = mRect.right;
-                    DrawAndShowMiniScreenLine( gAresGlobal->gMiniScreenData.selectLine);
+                    DrawAndShowMiniScreenLine( globals()->gMiniScreenData.selectLine);
                 }
             }
         }
@@ -2891,7 +2882,7 @@ void MiniComputerHandleMouseUp( Point where)
     miniScreenLineType  *line;
 
     mSetDirectFont( kComputerFontNum);
-    line = *gAresGlobal->gMiniScreenData.lineData;
+    line = *globals()->gMiniScreenData.lineData;
     scrap = 0;
     while ( scrap < kMiniScreenTrueLineNum)
     {
@@ -2901,14 +2892,14 @@ void MiniComputerHandleMouseUp( Point where)
         line++;
     }
 
-    MacSetRect( &mRect, kButBoxLeft, kButBoxTop + gAresGlobal->gInstrumentTop, kButBoxRight,
-                kButBoxBottom + gAresGlobal->gInstrumentTop);
+    MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+                kButBoxBottom + globals()->gInstrumentTop);
 
     // if click is in button screen
     if ( MacPtInRect( where, &mRect))
     {
-        lineNum = (( where.v - ( kButBoxTop + gAresGlobal->gInstrumentTop)) / gDirectText->height) + kMiniScreenCharHeight;
-        line = *gAresGlobal->gMiniScreenData.lineData + lineNum;
+        lineNum = (( where.v - ( kButBoxTop + globals()->gInstrumentTop)) / gDirectText->height) + kMiniScreenCharHeight;
+        line = *globals()->gMiniScreenData.lineData + lineNum;
         if ( line->whichButton == kInLineButton)
         {
             if ( line->lineKind == buttonOnLineKind)
@@ -2937,7 +2928,7 @@ void MiniComputerHandleMouseStillDown( Point where)
     miniScreenLineType  *line;
 
     mSetDirectFont( kComputerFontNum);
-    line = *gAresGlobal->gMiniScreenData.lineData;
+    line = *globals()->gMiniScreenData.lineData;
     scrap = 0;
     while ( scrap < kMiniScreenTrueLineNum)
     {
@@ -2947,16 +2938,16 @@ void MiniComputerHandleMouseStillDown( Point where)
         line++;
     }
 
-    MacSetRect( &mRect, kButBoxLeft, kButBoxTop + gAresGlobal->gInstrumentTop, kButBoxRight,
-                kButBoxBottom + gAresGlobal->gInstrumentTop);
+    MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+                kButBoxBottom + globals()->gInstrumentTop);
 
     // if click is in button screen
     if ( MacPtInRect( where, &mRect))
     {
-        lineNum = (( where.v - ( kButBoxTop + gAresGlobal->gInstrumentTop)) / gDirectText->height) + kMiniScreenCharHeight;
-        line = *gAresGlobal->gMiniScreenData.lineData + lineNum;
+        lineNum = (( where.v - ( kButBoxTop + globals()->gInstrumentTop)) / gDirectText->height) + kMiniScreenCharHeight;
+        line = *globals()->gMiniScreenData.lineData + lineNum;
         if (( line->whichButton == kInLineButton) &&
-            ( lineNum == gAresGlobal->gMiniScreenData.clickLine))
+            ( lineNum == globals()->gMiniScreenData.clickLine))
         {
             if ( line->lineKind != buttonOnLineKind)
             {
@@ -2964,7 +2955,7 @@ void MiniComputerHandleMouseStillDown( Point where)
                 DrawAndShowMiniScreenLine( lineNum);
             }
         } else if (( line->whichButton == kOutLineButton) &&
-            ( lineNum == gAresGlobal->gMiniScreenData.clickLine))
+            ( lineNum == globals()->gMiniScreenData.clickLine))
         {
             if ( line->lineKind != buttonOnLineKind)
             {
@@ -2976,13 +2967,13 @@ void MiniComputerHandleMouseStillDown( Point where)
 
     if ( lineNum == -1)
     {
-        line = *gAresGlobal->gMiniScreenData.lineData + inLineButtonLine;
+        line = *globals()->gMiniScreenData.lineData + inLineButtonLine;
         if ( line->lineKind == buttonOnLineKind)
         {
             line->lineKind = buttonOffLineKind;
             DrawAndShowMiniScreenLine( inLineButtonLine);
         }
-        line = *gAresGlobal->gMiniScreenData.lineData + outLineButtonLine;
+        line = *globals()->gMiniScreenData.lineData + outLineButtonLine;
         if ( line->lineKind == buttonOnLineKind)
         {
             line->lineKind = buttonOffLineKind;
@@ -3033,7 +3024,7 @@ void MiniComputer_SetScreenAndLineHack( long whichScreen, long whichLine)
 
     mSetDirectFont( kComputerFontNum);
     w.v = (whichLine * gDirectText->height) + ( kMiniScreenTop +
-                    gAresGlobal->gInstrumentTop);
+                    globals()->gInstrumentTop);
     w.h = kMiniScreenLeft + 5;
     MiniComputerHandleClick( w);    // what an atrocious hack! oh well
 }

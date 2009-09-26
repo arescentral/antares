@@ -123,10 +123,10 @@ struct admiralType {
 
 
 inline destBalanceType* mGetDestObjectBalancePtr(long whichObject) {
-    return *gAresGlobal->gDestBalanceData + whichObject;
+    return *globals()->gDestBalanceData + whichObject;
 }
 inline admiralType* mGetAdmiralPtr(long mwhichAdmiral) {
-    return *gAresGlobal->gAdmiralData + mwhichAdmiral;
+    return *globals()->gAdmiralData + mwhichAdmiral;
 }
 
 int AdmiralInit( void);

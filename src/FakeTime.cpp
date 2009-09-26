@@ -23,8 +23,8 @@
 
 static int current_time = 0;
 int TickCount() {
-    if (gAresGlobal->gGameTime > 0) {
-        return current_time + gAresGlobal->gGameTime;
+    if (globals()->gGameTime > 0) {
+        return current_time + globals()->gGameTime;
     } else {
         return ++current_time;
     }

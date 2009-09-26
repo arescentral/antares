@@ -63,21 +63,16 @@
 
 #define kUseScrollStar
 
-extern aresGlobalType   *gAresGlobal;
-extern  PixMapHandle    thePixMapHandle;
+extern PixMapHandle     thePixMapHandle;
 extern long             gNatePortLeft, gNatePortTop, gAbsoluteScale,
                         CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM,
-                        /*gAresGlobal->gTrueClipBottom,*/ gPlayScreenWidth,
-                        gPlayScreenHeight, gRootObjectNumber;
+                        gPlayScreenWidth, gPlayScreenHeight, gRootObjectNumber;
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
 extern coordPointType   gGlobalCorner;
 extern GWorldPtr        gOffWorld;
-extern spaceObjectType  *gRootObject;
+extern spaceObjectType* gRootObject;
 
-//Handle            gAresGlobal->gScrollStarData = nil;
 spaceObjectType *gScrollStarObject = nil;   // this object is also used for the radar center
-//Boolean           gAresGlobal->gWarpStars = FALSE;
-//long          gAresGlobal->gLastClipBottom = 0, gAresGlobal->gScrollStarNumber = -1;
 
 void CorrectScrollStarObject( Handle);
 
@@ -89,13 +84,13 @@ int InitScrollStars() {
     scrollStarType  *star;
     short           i;
 
-    gAresGlobal->gScrollStarData.create(kAllStarNum);
-    star = *gAresGlobal->gScrollStarData;
+    globals()->gScrollStarData.create(kAllStarNum);
+    star = *globals()->gScrollStarData;
     for (i = 0; i < kAllStarNum; i++) {
         star->speed = kNoStar;
         star++;
     }
-    gAresGlobal->gLastClipBottom = CLIP_BOTTOM;
+    globals()->gLastClipBottom = CLIP_BOTTOM;
 
     return kNoError;
 }
@@ -104,8 +99,8 @@ void CleanupScrollStars( void)
 
 {
 #ifdef kUseScrollStar
-    if (gAresGlobal->gScrollStarData.get() != nil) {
-        gAresGlobal->gScrollStarData.destroy();
+    if (globals()->gScrollStarData.get() != nil) {
+        globals()->gScrollStarData.destroy();
     }
 #endif
 }
@@ -118,12 +113,12 @@ void ResetScrollStars ( long which)
     spaceObjectType *centerObject = *gSpaceObjectData + which;
 
     gScrollStarObject = centerObject;
-    gAresGlobal->gScrollStarNumber = which;
+    globals()->gScrollStarNumber = which;
 
 #ifdef kUseScrollStar
     if ( gScrollStarObject != nil)
     {
-        star = *gAresGlobal->gScrollStarData;
+        star = *globals()->gScrollStarData;
         for ( i = 0; i < kScrollStarNum; i++)
         {
             star->location.h = Randomize( gPlayScreenWidth) + CLIP_LEFT;
@@ -150,7 +145,7 @@ void MakeNewSparks( long sparkNum, long sparkSpeed, smallFixedType maxVelocity,
 
 {
     long            i, whichSpark = kSparkStarOffset;
-    scrollStarType  *spark = *gAresGlobal->gScrollStarData + kSparkStarOffset;
+    scrollStarType  *spark = *globals()->gScrollStarData + kSparkStarOffset;
 
     maxVelocity *= gAbsoluteScale;
     maxVelocity >>= SHIFT_SCALE;
@@ -190,7 +185,7 @@ void PrepareToMoveScrollStars( void)
     short           i;
     scrollStarType  *star;
 
-    star = *gAresGlobal->gScrollStarData;
+    star = *globals()->gScrollStarData;
     for ( i = 0; i < kAllStarNum; i++)
     {
         star->oldOldLocation.h = star->oldLocation.h;
@@ -243,7 +238,7 @@ void MoveScrollStars( const long byUnits)
     fastVelocity.v *= gAbsoluteScale;
     fastVelocity.v /= SCALE_SCALE;
 
-    star = *gAresGlobal->gScrollStarData;
+    star = *globals()->gScrollStarData;
     for ( i = 0; i < kScrollStarNum; i++)
     {
         if ( star->speed != kNoStar)
@@ -302,7 +297,7 @@ void MoveScrollStars( const long byUnits)
                 star->motionFraction.h = star->motionFraction.v = 0;
                 star->speed = RandomStarSpeed();
                 star->age = 0;
-            } else if (( star->location.v >= gAresGlobal->gTrueClipBottom) && ( star->oldLocation.v >= gAresGlobal->gTrueClipBottom))
+            } else if (( star->location.v >= globals()->gTrueClipBottom) && ( star->oldLocation.v >= globals()->gTrueClipBottom))
             {
                 star->location.h = Randomize( gPlayScreenWidth) + CLIP_LEFT;
                 star->location.v -= gPlayScreenHeight;
@@ -311,7 +306,7 @@ void MoveScrollStars( const long byUnits)
                 star->age = 0;
             }
 
-            if ( (gAresGlobal->gWarpStars) && ( star->age == 0))
+            if ( (globals()->gWarpStars) && ( star->age == 0))
             {
                 switch ( star->speed)
                 {
@@ -399,15 +394,15 @@ void DrawScrollStars( Boolean warp)
     bounds.top = lastBounds.top = CLIP_TOP;
     bounds.bottom = CLIP_BOTTOM;
     bounds.right = lastBounds.right = CLIP_RIGHT;
-    lastBounds.bottom = gAresGlobal->gLastClipBottom;
+    lastBounds.bottom = globals()->gLastClipBottom;
 
-    star = *gAresGlobal->gScrollStarData;
+    star = *globals()->gScrollStarData;
 
     if (( gScrollStarObject->presenceState != kWarpInPresence) &&
         ( gScrollStarObject->presenceState != kWarpOutPresence) &&
         ( gScrollStarObject->presenceState != kWarpingPresence))
     {
-        if ( !gAresGlobal->gWarpStars) // we're not warping in any way
+        if ( !globals()->gWarpStars) // we're not warping in any way
         {
             for ( i = 0; i < kScrollStarNum; i++)
             {
@@ -443,7 +438,7 @@ void DrawScrollStars( Boolean warp)
             }
         } else // we were warping but now are not; erase warped stars
         {
-//          gAresGlobal->gWarpStars = FALSE;
+//          globals()->gWarpStars = FALSE;
             for ( i = 0; i < kScrollStarNum; i++)
             {
                 if ( star->speed != kNoStar)
@@ -475,7 +470,7 @@ void DrawScrollStars( Boolean warp)
         }
     } else // we're warping now
     {
-//      gAresGlobal->gWarpStars = TRUE;
+//      globals()->gWarpStars = TRUE;
 
         for ( i = 0; i < kScrollStarNum; i++)
         {
@@ -579,15 +574,15 @@ void ShowScrollStars( Boolean warp)
     bounds.top = lastBounds.top = CLIP_TOP;
     bounds.bottom = CLIP_BOTTOM;
     bounds.right = lastBounds.right = CLIP_RIGHT;
-    lastBounds.bottom = gAresGlobal->gLastClipBottom;
+    lastBounds.bottom = globals()->gLastClipBottom;
 
-    star = *gAresGlobal->gScrollStarData;
+    star = *globals()->gScrollStarData;
 
     if (( gScrollStarObject->presenceState != kWarpInPresence) &&
         ( gScrollStarObject->presenceState != kWarpOutPresence) &&
         ( gScrollStarObject->presenceState != kWarpingPresence))
     {
-        if ( !gAresGlobal->gWarpStars) // we're not warping in any way
+        if ( !globals()->gWarpStars) // we're not warping in any way
         {
             for ( i = 0; i < kScrollStarNum; i++)
             {
@@ -627,7 +622,7 @@ void ShowScrollStars( Boolean warp)
             }
         } else // we were warping but now are not; erase warped stars
         {
-            gAresGlobal->gWarpStars = FALSE;
+            globals()->gWarpStars = FALSE;
             for ( i = 0; i < kScrollStarNum; i++)
             {
                 if ( star->speed != kNoStar)
@@ -667,7 +662,7 @@ void ShowScrollStars( Boolean warp)
         }
     } else // we're warping now
     {
-        gAresGlobal->gWarpStars = TRUE;
+        globals()->gWarpStars = TRUE;
 
         for ( i = 0; i < kScrollStarNum; i++)
         {
@@ -759,7 +754,7 @@ void ShowScrollStars( Boolean warp)
         star++;
     }
 
-    gAresGlobal->gLastClipBottom = CLIP_BOTTOM;
+    globals()->gLastClipBottom = CLIP_BOTTOM;
 #endif
 }
 
@@ -780,15 +775,15 @@ void DontShowScrollStars( void)
     bounds.top = lastBounds.top = CLIP_TOP;
     bounds.bottom = CLIP_BOTTOM;
     bounds.right = lastBounds.right = CLIP_RIGHT;
-    lastBounds.bottom = gAresGlobal->gLastClipBottom;
+    lastBounds.bottom = globals()->gLastClipBottom;
 
-    star = *gAresGlobal->gScrollStarData;
+    star = *globals()->gScrollStarData;
 
     if (( gScrollStarObject->presenceState != kWarpInPresence) &&
         ( gScrollStarObject->presenceState != kWarpOutPresence) &&
         ( gScrollStarObject->presenceState != kWarpingPresence))
     {
-        if ( !gAresGlobal->gWarpStars) // we're not warping in any way
+        if ( !globals()->gWarpStars) // we're not warping in any way
         {
             for ( i = 0; i < kScrollStarNum; i++)
             {
@@ -809,7 +804,7 @@ void DontShowScrollStars( void)
             }
         } else // we were warping but now are not; erase warped stars
         {
-            gAresGlobal->gWarpStars = FALSE;
+            globals()->gWarpStars = FALSE;
             for ( i = 0; i < kScrollStarNum; i++)
             {
                 if ( star->speed != kNoStar)
@@ -829,7 +824,7 @@ void DontShowScrollStars( void)
         }
     } else // we're warping now
     {
-        gAresGlobal->gWarpStars = TRUE;
+        globals()->gWarpStars = TRUE;
 
         for ( i = 0; i < kScrollStarNum; i++)
         {
@@ -873,7 +868,7 @@ void DontShowScrollStars( void)
         star++;
     }
 
-    gAresGlobal->gLastClipBottom = CLIP_BOTTOM;
+    globals()->gLastClipBottom = CLIP_BOTTOM;
 #endif
 }
 
@@ -982,7 +977,7 @@ void Reset3DStars( Point center, Rect *bounds)
     scrollStarType  *star;
     smallFixedType  f;
 
-    star = *gAresGlobal->gScrollStarData;
+    star = *globals()->gScrollStarData;
     for ( i = 0; i < kAllStarNum; i++)
     {
         star->oldOldLocation.h = star->oldLocation.h = star->location.h =
@@ -1015,7 +1010,7 @@ void Move3DStars( Point center, long byUnits, Rect *bounds)
     smallFixedType  f;
     long            h, v, l = byUnits * 32;
 
-    star = *gAresGlobal->gScrollStarData;
+    star = *globals()->gScrollStarData;
     for ( i = 0; i < kAllStarNum; i++)
     {
         if ( star->speed != kNoStar)
@@ -1086,7 +1081,7 @@ void Draw3DStars( Boolean warp, Rect *bounds, PixMapHandle destMap)
     transColorType  *transColor;
 
     mGetRowBytes( rowBytes, *destMap);
-    star = *gAresGlobal->gScrollStarData;
+    star = *globals()->gScrollStarData;
 
     for ( i = 0; i < kAllStarNum; i++)
     {
@@ -1116,7 +1111,7 @@ void Draw3DStars( Boolean warp, Rect *bounds, PixMapHandle destMap)
         star++;
     }
 
-    star = *gAresGlobal->gScrollStarData;
+    star = *globals()->gScrollStarData;
 
     for ( i = 0; i < kAllStarNum; i++)
     {
@@ -1170,7 +1165,7 @@ void Show3DStars( Boolean warp, Rect *bounds, PixMapHandle sourceMap)
 
     mGetRowBytes( srowBytes, *sourceMap);
     mGetRowBytes( drowBytes, *thePixMapHandle);
-    star = *gAresGlobal->gScrollStarData;
+    star = *globals()->gScrollStarData;
 
     for ( i = 0; i < kAllStarNum; i++)
     {
@@ -1235,9 +1230,9 @@ void CorrectScrollStarObject( Handle data)
 {
 #pragma unused( data)
 
-    if ( gAresGlobal->gScrollStarNumber >= 0)
+    if ( globals()->gScrollStarNumber >= 0)
         gScrollStarObject = *gSpaceObjectData +
-            gAresGlobal->gScrollStarNumber;
+            globals()->gScrollStarNumber;
     else
         gScrollStarObject = nil;
 }

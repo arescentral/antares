@@ -113,8 +113,8 @@
 
 #define kMaxMoneyValue          35840000 // = kGrossMoneyBarValue * 7
 
-#define kMiniBuildTimeLeft      ( gAresGlobal->gRightPanelLeftEdge + 10)
-#define kMiniBuildTimeRight     ( gAresGlobal->gRightPanelLeftEdge + 22)
+#define kMiniBuildTimeLeft      ( globals()->gRightPanelLeftEdge + 10)
+#define kMiniBuildTimeRight     ( globals()->gRightPanelLeftEdge + 22)
 
 #define kMiniBuildTimeTop       8
 #define kMiniBuildTimeBottom    37
@@ -127,42 +127,25 @@
 
 #define kSectorLineBrightness   DARKER
 
-extern  CWindowPtr      gTheWindow; // hack to copy bar indicators to offworld
-extern aresGlobalType   *gAresGlobal;
+extern CWindowPtr       gTheWindow; // hack to copy bar indicators to offworld
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
 extern spaceObjectType  *gScrollStarObject;
 extern PixMapHandle     thePixMapHandle;
-extern long             gNatePortLeft, gNatePortTop,
-                        /*gAresGlobal->gGameTime, gAresGlobal->gGameStartTime,
-                        gAresGlobal->gClosestObject,
-                        gAresGlobal->gFarthestObject,*/
-                        gAbsoluteScale, /*gAresGlobal->gZoomMode,
-                        gAresGlobal->gPlayerAdmiralNumber,*/
-                        WORLD_WIDTH, WORLD_HEIGHT, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT,
-                        CLIP_BOTTOM/*, gAresGlobal->gCenterScaleV*/;
+extern long             gNatePortLeft, gNatePortTop, gAbsoluteScale,
+                        WORLD_WIDTH, WORLD_HEIGHT, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM;
 extern coordPointType   gGlobalCorner;
 
 extern GWorldPtr        gOffWorld, gRealWorld, gSaveWorld;
 
-//Handle                    gAresGlobal->gRadarBlipData = nil, gAresGlobal->gScaleList = nil,
-//                      gAresGlobal->gSectorLineData = nil;
-/*long                  gAresGlobal->gRadarCount = 0, gAresGlobal->gRadarSpeed = 30,
-                        gAresGlobal->gRadarRange = kRadarSize * 50,
-                        gAresGlobal->gWhichScaleNum = 0,
-                        gAresGlobal->gLastScale = SCALE_SCALE,
-                        gAresGlobal->gInstrumentTop = 0,
-                        gAresGlobal->gRightPanelLeftEdge = 608;*/
 coordPointType          gLastGlobalCorner;
-//barIndicatorType      gAresGlobal->gBarIndicator[ kBarIndicatorNum];
-//short                 gAresGlobal->gMouseActive = kMouseOff; // 0 = off now, 1 = turning off, 2 = on
 
 int InstrumentInit() {
-    gAresGlobal->gInstrumentTop = (WORLD_HEIGHT / 2) - ( kPanelHeight / 2);
-    gAresGlobal->gRightPanelLeftEdge = WORLD_WIDTH - kRightPanelWidth;
+    globals()->gInstrumentTop = (WORLD_HEIGHT / 2) - ( kPanelHeight / 2);
+    globals()->gRightPanelLeftEdge = WORLD_WIDTH - kRightPanelWidth;
 
-    gAresGlobal->gRadarBlipData.create(kRadarBlipNum);
-    gAresGlobal->gScaleList.create(kScaleListNum);
-    gAresGlobal->gSectorLineData.create(kMaxSectorLine * 4 + kSiteCoordNum * 2 + kCursorCoordNum * 2);
+    globals()->gRadarBlipData.create(kRadarBlipNum);
+    globals()->gScaleList.create(kScaleListNum);
+    globals()->gSectorLineData.create(kMaxSectorLine * 4 + kSiteCoordNum * 2 + kCursorCoordNum * 2);
     ResetInstruments();
 
     return MiniScreenInit();
@@ -171,8 +154,8 @@ int InstrumentInit() {
 void InstrumentCleanup( void)
 
 {
-    if (gAresGlobal->gRadarBlipData.get() != nil) {
-        gAresGlobal->gRadarBlipData.destroy();
+    if (globals()->gRadarBlipData.get() != nil) {
+        globals()->gRadarBlipData.destroy();
     }
     MiniScreenCleanup();
 }
@@ -183,14 +166,14 @@ void ResetInstruments( void)
     long            *l, i;
     longPointType   *lp;
 
-    gAresGlobal->gRadarCount = 0;
-    gAresGlobal->gRadarSpeed = 30;
-    gAresGlobal->gRadarRange = kRadarSize * 50;
-    gAresGlobal->gLastScale = gAbsoluteScale = SCALE_SCALE;
-    gAresGlobal->gWhichScaleNum = 0;
+    globals()->gRadarCount = 0;
+    globals()->gRadarSpeed = 30;
+    globals()->gRadarRange = kRadarSize * 50;
+    globals()->gLastScale = gAbsoluteScale = SCALE_SCALE;
+    globals()->gWhichScaleNum = 0;
     gLastGlobalCorner.h = gLastGlobalCorner.v = 0;
-    gAresGlobal->gMouseActive = kMouseOff;
-    l = *gAresGlobal->gScaleList;
+    globals()->gMouseActive = kMouseOff;
+    l = *globals()->gScaleList;
     for ( i = 0; i < kScaleListNum; i++)
     {
         *l = SCALE_SCALE;
@@ -199,19 +182,19 @@ void ResetInstruments( void)
 
     for ( i = 0; i < kBarIndicatorNum; i++)
     {
-        gAresGlobal->gBarIndicator[i].lastValue = gAresGlobal->gBarIndicator[i].thisValue = -1;
+        globals()->gBarIndicator[i].lastValue = globals()->gBarIndicator[i].thisValue = -1;
     }
     // the shield bar
-    gAresGlobal->gBarIndicator[kShieldBar].top = 359 + gAresGlobal->gInstrumentTop;
-    gAresGlobal->gBarIndicator[kShieldBar].color = SKY_BLUE;
+    globals()->gBarIndicator[kShieldBar].top = 359 + globals()->gInstrumentTop;
+    globals()->gBarIndicator[kShieldBar].color = SKY_BLUE;
 
-    gAresGlobal->gBarIndicator[kEnergyBar].top = 231 + gAresGlobal->gInstrumentTop;
-    gAresGlobal->gBarIndicator[kEnergyBar].color = GOLD;
+    globals()->gBarIndicator[kEnergyBar].top = 231 + globals()->gInstrumentTop;
+    globals()->gBarIndicator[kEnergyBar].color = GOLD;
 
-    gAresGlobal->gBarIndicator[kBatteryBar].top = 103 + gAresGlobal->gInstrumentTop;
-    gAresGlobal->gBarIndicator[kBatteryBar].color = SALMON;
+    globals()->gBarIndicator[kBatteryBar].top = 103 + globals()->gInstrumentTop;
+    globals()->gBarIndicator[kBatteryBar].color = SALMON;
 
-    lp = *gAresGlobal->gRadarBlipData;
+    lp = *globals()->gRadarBlipData;
     for ( i = 0; i < kRadarBlipNum; i++)
     {
         lp->h = -1;
@@ -225,7 +208,7 @@ void ResetSectorLines( void)
 {
     long    *l, count;
 
-    l = *gAresGlobal->gSectorLineData;
+    l = *globals()->gSectorLineData;
 
     for ( count = 0; count < kMaxSectorLine; count++)
     {
@@ -247,7 +230,7 @@ void UpdateRadar( long unitsDone)
     spaceObjectType *anObject;
     baseObjectType  *baseObject;
     long            dx, oCount, rcount, x, y, *scaleval;
-    const long      rrange = gAresGlobal->gRadarRange >> 1L;
+    const long      rrange = globals()->gRadarRange >> 1L;
     longPointType   *lp;
     unsigned char   color, color2, *dByte;
     unsigned long   bestScale = MIN_SCALE, rootCorrect, distance, difference, dcalc;
@@ -269,23 +252,23 @@ void UpdateRadar( long unitsDone)
     } else doDraw = false;
 
     if ( unitsDone < 0) unitsDone = 0;
-    gAresGlobal->gRadarCount -= unitsDone;
-    if ( gAresGlobal->gMouseActive > kMouseTurningOff)
-        gAresGlobal->gMouseActive += unitsDone;
+    globals()->gRadarCount -= unitsDone;
+    if ( globals()->gMouseActive > kMouseTurningOff)
+        globals()->gMouseActive += unitsDone;
 
-    if ( gAresGlobal->gRadarCount <= 0)
+    if ( globals()->gRadarCount <= 0)
     {
         mGetTranslateColorShade( kRadarColor, VERY_DARK, color, transColor);
     } else
     {
-        mGetTranslateColorShade( kRadarColor, (( kRadarColorSteps * gAresGlobal->gRadarCount) / gAresGlobal->gRadarSpeed) + 1, color, transColor);
+        mGetTranslateColorShade( kRadarColor, (( kRadarColorSteps * globals()->gRadarCount) / globals()->gRadarSpeed) + 1, color, transColor);
     }
 
     mGetRowBytes( oCount, *thePixMapHandle);
 
     if ( doDraw)
     {
-        lp = *gAresGlobal->gRadarBlipData;
+        lp = *globals()->gRadarBlipData;
         for ( rcount = 0; rcount < kRadarBlipNum; rcount++)
         {
             if ( lp->h >= 0)
@@ -299,13 +282,13 @@ void UpdateRadar( long unitsDone)
 
     if (( gScrollStarObject != nil) && ( gScrollStarObject->active) )
     {
-        if (( gAresGlobal->gRadarCount <= 0) && ( doDraw))
+        if (( globals()->gRadarCount <= 0) && ( doDraw))
         {
             offPixBase = GetGWorldPixMap( gOffWorld);
             DrawInOffWorld();
 
-            MacSetRect( &tRect, kRadarLeft + 1, kRadarTop + 1 + gAresGlobal->gInstrumentTop, kRadarRight - 1,
-                    kRadarBottom - 1 + gAresGlobal->gInstrumentTop);
+            MacSetRect( &tRect, kRadarLeft + 1, kRadarTop + 1 + globals()->gInstrumentTop, kRadarRight - 1,
+                    kRadarBottom - 1 + globals()->gInstrumentTop);
             RectToLongRect( &tRect, &lRect);
             mGetTranslateColorShade( kRadarColor, DARKEST, color, transColor);
             DrawNateRect( *offPixBase, &lRect, 0, 0, color);
@@ -314,15 +297,15 @@ void UpdateRadar( long unitsDone)
 
             dx = gScrollStarObject->location.h - gGlobalCorner.h;
             dx = dx * kRadarSize;
-            dx /= gAresGlobal->gRadarRange;
+            dx /= globals()->gRadarRange;
 
             lRect.left = kRadarLeft + kRadarCenter - dx;
             if ( lRect.left <= tRect.left) lRect.left = tRect.left + 1;
             lRect.right = kRadarLeft + kRadarCenter + dx;
             if ( lRect.right >= tRect.right) lRect.right = tRect.right - 1;
-            lRect.top = kRadarTop + kRadarCenter - dx + gAresGlobal->gInstrumentTop;
+            lRect.top = kRadarTop + kRadarCenter - dx + globals()->gInstrumentTop;
             if ( lRect.top <= tRect.top) lRect.top = tRect.top + 1;
-            lRect.bottom = kRadarTop + kRadarCenter + dx + gAresGlobal->gInstrumentTop;
+            lRect.bottom = kRadarTop + kRadarCenter + dx + globals()->gInstrumentTop;
             if ( lRect.bottom >= tRect.bottom) lRect.bottom = tRect.bottom - 1;
             mGetTranslateColorShade( kRadarColor, VERY_DARK, color, transColor);
             DrawNateRect( *offPixBase, &lRect, 0, 0, color);
@@ -330,7 +313,7 @@ void UpdateRadar( long unitsDone)
             DrawInRealWorld();
             ChunkCopyPixMapToScreenPixMap( *offPixBase, &tRect, *thePixMapHandle);
 
-            lp = *gAresGlobal->gRadarBlipData;
+            lp = *globals()->gRadarBlipData;
             for ( rcount = 0; rcount < kRadarBlipNum; rcount++)
             {
                 lp->h = -1;
@@ -338,8 +321,8 @@ void UpdateRadar( long unitsDone)
             }
             rcount = 0;
 
-            lp = *gAresGlobal->gRadarBlipData;
-            gAresGlobal->gRadarCount = gAresGlobal->gRadarSpeed;
+            lp = *globals()->gRadarBlipData;
+            globals()->gRadarCount = globals()->gRadarSpeed;
             anObject = *gSpaceObjectData;
 
             for ( oCount = 0; oCount < kMaxSpaceObject; oCount++)
@@ -354,9 +337,9 @@ void UpdateRadar( long unitsDone)
                         {
                             if (( y >= -( rrange)) && ( y < ( rrange)))
                             {
-                                x = ( x * kRadarSize) / gAresGlobal->gRadarRange + kRadarCenter + kRadarLeft;
-                                y = ( y * kRadarSize) / gAresGlobal->gRadarRange + kRadarCenter + kRadarTop
-                                        + gAresGlobal->gInstrumentTop;
+                                x = ( x * kRadarSize) / globals()->gRadarRange + kRadarCenter + kRadarLeft;
+                                y = ( y * kRadarSize) / globals()->gRadarRange + kRadarCenter + kRadarTop
+                                        + globals()->gInstrumentTop;
                                 lp->h = x;
                                 lp->v = y;
                                 rcount++;
@@ -369,18 +352,18 @@ void UpdateRadar( long unitsDone)
             }
         } else if (!doDraw)
         {
-            MacSetRect( &tRect, kRadarLeft + 1, kRadarTop + 1 + gAresGlobal->gInstrumentTop, kRadarRight - 1,
-                    kRadarBottom - 1 + gAresGlobal->gInstrumentTop);
+            MacSetRect( &tRect, kRadarLeft + 1, kRadarTop + 1 + globals()->gInstrumentTop, kRadarRight - 1,
+                    kRadarBottom - 1 + globals()->gInstrumentTop);
             RectToLongRect( &tRect, &lRect);
             mGetTranslateColorShade( kRadarColor, DARKEST, color, transColor);
             DrawNateRect( *thePixMapHandle, &lRect, gNatePortLeft << 2L, gNatePortTop, color);
         }
 
-        switch ( gAresGlobal->gZoomMode)
+        switch ( globals()->gZoomMode)
         {
             case kNearestFoeZoom:
             case kNearestAnythingZoom:
-                anObject = *gSpaceObjectData + gAresGlobal->gClosestObject;
+                anObject = *gSpaceObjectData + globals()->gClosestObject;
                 bestScale = MIN_SCALE;
                 /*
                 dx = ( (long)anObject->location.h - (long)gScrollStarObject->location.h);
@@ -390,7 +373,7 @@ void UpdateRadar( long unitsDone)
                     bestScale = dx * dx + dy * dy;
                     bestScale = lsqrt( bestScale);
                     if ( bestScale == 0) bestScale = 1;
-                    bestScale = gAresGlobal->gCenterScaleV / bestScale;
+                    bestScale = globals()->gCenterScaleV / bestScale;
                     if ( bestScale < SCALE_SCALE) bestScale = ( bestScale >> 2L) + ( bestScale >> 1L);
                     if ( bestScale > SCALE_SCALE) bestScale = SCALE_SCALE;
                     if ( bestScale < kMinimumAutoScale) bestScale = kMinimumAutoScale;
@@ -428,7 +411,7 @@ void UpdateRadar( long unitsDone)
                     bestScale <<= rootCorrect;
                 }
                 if ( bestScale == 0) bestScale = 1;
-                bestScale = gAresGlobal->gCenterScaleV / bestScale;
+                bestScale = globals()->gCenterScaleV / bestScale;
                 if ( bestScale < SCALE_SCALE) bestScale = ( bestScale >> 2L) + ( bestScale >> 1L);
                 if ( bestScale > SCALE_SCALE) bestScale = SCALE_SCALE;
                 if ( bestScale < kMinimumAutoScale) bestScale = kMinimumAutoScale;
@@ -457,7 +440,7 @@ void UpdateRadar( long unitsDone)
 
             case kSmallestZoom:
 //              bestScale = kSuperSmallScale;
-                anObject = *gSpaceObjectData + gAresGlobal->gFarthestObject;
+                anObject = *gSpaceObjectData + globals()->gFarthestObject;
                 bestScale = MIN_SCALE;
                 /*
                 dx = ( (long)anObject->location.h - (long)gScrollStarObject->location.h);
@@ -467,7 +450,7 @@ void UpdateRadar( long unitsDone)
                     bestScale = dx * dx + dy * dy;
                     bestScale = lsqrt( bestScale);
                     if ( bestScale == 0) bestScale = 1;
-                    bestScale = gAresGlobal->gCenterScaleV / bestScale;
+                    bestScale = globals()->gCenterScaleV / bestScale;
                     if ( bestScale < SCALE_SCALE) bestScale = ( bestScale >> 2L) + ( bestScale >> 1L);
                     if ( bestScale > SCALE_SCALE) bestScale = SCALE_SCALE;
                     if ( bestScale < kMinimumAutoScale) bestScale = kMinimumAutoScale;
@@ -485,7 +468,7 @@ void UpdateRadar( long unitsDone)
                     bestScale <<= rootCorrect;
                 }
                 if ( bestScale == 0) bestScale = 1;
-                bestScale = gAresGlobal->gCenterScaleV / bestScale;
+                bestScale = globals()->gCenterScaleV / bestScale;
                 if ( bestScale < SCALE_SCALE) bestScale = ( bestScale >> 2L) + ( bestScale >> 1L);
                 if ( bestScale > SCALE_SCALE) bestScale = SCALE_SCALE;
                 if ( bestScale < kMinimumAutoScale) bestScale = kMinimumAutoScale;
@@ -494,13 +477,13 @@ void UpdateRadar( long unitsDone)
 
         for ( x = 0; x < unitsDone; x++)
         {
-            scaleval = *gAresGlobal->gScaleList + gAresGlobal->gWhichScaleNum;
+            scaleval = *globals()->gScaleList + globals()->gWhichScaleNum;
             *scaleval = bestScale;
-            gAresGlobal->gWhichScaleNum++;
-            if ( gAresGlobal->gWhichScaleNum == kScaleListNum) gAresGlobal->gWhichScaleNum = 0;
+            globals()->gWhichScaleNum++;
+            if ( globals()->gWhichScaleNum == kScaleListNum) globals()->gWhichScaleNum = 0;
         }
 
-        scaleval = *gAresGlobal->gScaleList;
+        scaleval = *globals()->gScaleList;
         rcount = 0;
         for ( oCount = 0; oCount < kScaleListNum; oCount++)
         {
@@ -517,34 +500,34 @@ void UpdateRadar( long unitsDone)
         UpdateBarIndicator( kBatteryBar, gScrollStarObject->battery, baseObject->energy * 5, thePixMapHandle);
 
         // SHOW ME THE MONEY
-        admiral = mGetAdmiralPtr( gAresGlobal->gPlayerAdmiralNumber);
+        admiral = mGetAdmiralPtr( globals()->gPlayerAdmiralNumber);
         y = x = admiral->cash;
         if ( x < 0) x = 0;
         if ( x >= kMaxMoneyValue) x = kMaxMoneyValue - 1;
-        gAresGlobal->gBarIndicator[kFineMoneyBar].thisValue = x % kFineMoneyBarMod;
-        gAresGlobal->gBarIndicator[kFineMoneyBar].thisValue /= kFineMoneyBarValue;
+        globals()->gBarIndicator[kFineMoneyBar].thisValue = x % kFineMoneyBarMod;
+        globals()->gBarIndicator[kFineMoneyBar].thisValue /= kFineMoneyBarValue;
         x = MiniComputerGetPriceOfCurrentSelection();
         x /= kFineMoneyBarValue;
 
-        if (( gAresGlobal->gBarIndicator[kFineMoneyBar].thisValue !=
-            gAresGlobal->gBarIndicator[kFineMoneyBar].lastValue) ||
-            ( x != gAresGlobal->gLastSelectedBuildPrice))
+        if (( globals()->gBarIndicator[kFineMoneyBar].thisValue !=
+            globals()->gBarIndicator[kFineMoneyBar].lastValue) ||
+            ( x != globals()->gLastSelectedBuildPrice))
         {
-            lRect.left = kFineMoneyLeft + kFineMoneyHBuffer + gAresGlobal->gRightPanelLeftEdge;
+            lRect.left = kFineMoneyLeft + kFineMoneyHBuffer + globals()->gRightPanelLeftEdge;
             lRect.right = lRect.left + kFineMoneyBarWidth;
 
             // if selected build price is greater than the money we have
-                if ( gAresGlobal->gBarIndicator[kFineMoneyBar].thisValue < x)
+                if ( globals()->gBarIndicator[kFineMoneyBar].thisValue < x)
                 {
                     // draw the money we have
                     mGetTranslateColorShade( kFineMoneyColor, VERY_LIGHT, color, transColor);
                     mGetTranslateColorShade( kFineMoneyColor, LIGHT, color2, transColor);
 
                     for ( rcount = 0;
-                        rcount < gAresGlobal->gBarIndicator[kFineMoneyBar].thisValue;
+                        rcount < globals()->gBarIndicator[kFineMoneyBar].thisValue;
                         rcount++)
                     {
-                        lRect.top = kFineMoneyTop + gAresGlobal->gInstrumentTop +
+                        lRect.top = kFineMoneyTop + globals()->gInstrumentTop +
                                 kFineMoneyVBuffer + rcount * kFineMoneyBarHeight;
                         lRect.bottom = lRect.top + kFineMoneyBarHeight - 1;
                         if ( rcount % 5)
@@ -560,11 +543,11 @@ void UpdateRadar( long unitsDone)
                     mGetTranslateColorShade( kFineMoneyNeedColor, MEDIUM, color, transColor);
                     mGetTranslateColorShade( kFineMoneyNeedColor, DARK, color2, transColor);
 
-                    for ( rcount = gAresGlobal->gBarIndicator[kFineMoneyBar].thisValue;
+                    for ( rcount = globals()->gBarIndicator[kFineMoneyBar].thisValue;
                         rcount < x;
                         rcount++)
                     {
-                        lRect.top = kFineMoneyTop + gAresGlobal->gInstrumentTop +
+                        lRect.top = kFineMoneyTop + globals()->gInstrumentTop +
                                 kFineMoneyVBuffer + rcount * kFineMoneyBarHeight;
                         lRect.bottom = lRect.top + kFineMoneyBarHeight - 1;
                         if ( rcount % 5)
@@ -576,7 +559,7 @@ void UpdateRadar( long unitsDone)
 
                     }
 
-                    gAresGlobal->gBarIndicator[kFineMoneyBar].thisValue = x;
+                    globals()->gBarIndicator[kFineMoneyBar].thisValue = x;
                 } else
                 {
                     // draw the money we'll have left
@@ -584,10 +567,10 @@ void UpdateRadar( long unitsDone)
                     mGetTranslateColorShade( kFineMoneyColor, LIGHT, color2, transColor);
 
                     for ( rcount = 0;
-                        rcount < ( gAresGlobal->gBarIndicator[kFineMoneyBar].thisValue - x);
+                        rcount < ( globals()->gBarIndicator[kFineMoneyBar].thisValue - x);
                         rcount++)
                     {
-                        lRect.top = kFineMoneyTop + gAresGlobal->gInstrumentTop +
+                        lRect.top = kFineMoneyTop + globals()->gInstrumentTop +
                                 kFineMoneyVBuffer + rcount * kFineMoneyBarHeight;
                         lRect.bottom = lRect.top + kFineMoneyBarHeight - 1;
                         if ( rcount % 5)
@@ -603,11 +586,11 @@ void UpdateRadar( long unitsDone)
                     mGetTranslateColorShade( kFineMoneyUseColor, VERY_LIGHT, color, transColor);
                     mGetTranslateColorShade( kFineMoneyUseColor, LIGHT, color2, transColor);
 
-                    for ( rcount = (gAresGlobal->gBarIndicator[kFineMoneyBar].thisValue -x);
-                        rcount < gAresGlobal->gBarIndicator[kFineMoneyBar].thisValue;
+                    for ( rcount = (globals()->gBarIndicator[kFineMoneyBar].thisValue -x);
+                        rcount < globals()->gBarIndicator[kFineMoneyBar].thisValue;
                         rcount++)
                     {
-                        lRect.top = kFineMoneyTop + gAresGlobal->gInstrumentTop +
+                        lRect.top = kFineMoneyTop + globals()->gInstrumentTop +
                                 kFineMoneyVBuffer + rcount * kFineMoneyBarHeight;
                         lRect.bottom = lRect.top + kFineMoneyBarHeight - 1;
                         if ( rcount % 5)
@@ -623,10 +606,10 @@ void UpdateRadar( long unitsDone)
 
                 mGetTranslateColorShade( kFineMoneyColor, VERY_DARK, color, transColor);
 
-                for ( rcount = gAresGlobal->gBarIndicator[kFineMoneyBar].thisValue;
+                for ( rcount = globals()->gBarIndicator[kFineMoneyBar].thisValue;
                     rcount < kFineMoneyBarNum; rcount++)
                 {
-                    lRect.top = kFineMoneyTop + gAresGlobal->gInstrumentTop +
+                    lRect.top = kFineMoneyTop + globals()->gInstrumentTop +
                         kFineMoneyVBuffer + rcount * kFineMoneyBarHeight;
                     lRect.bottom = lRect.top + kFineMoneyBarHeight - 1;
                     DrawNateRect( *thePixMapHandle, &lRect, gNatePortLeft << 2L,
@@ -634,28 +617,28 @@ void UpdateRadar( long unitsDone)
                 }
         }
 
-        gAresGlobal->gLastSelectedBuildPrice = x;
+        globals()->gLastSelectedBuildPrice = x;
 
-        gAresGlobal->gBarIndicator[kGrossMoneyBar].thisValue = y;
-        gAresGlobal->gBarIndicator[kGrossMoneyBar].thisValue /= kGrossMoneyBarValue;
-        if ( gAresGlobal->gBarIndicator[kGrossMoneyBar].thisValue != gAresGlobal->gBarIndicator[kGrossMoneyBar].lastValue)
+        globals()->gBarIndicator[kGrossMoneyBar].thisValue = y;
+        globals()->gBarIndicator[kGrossMoneyBar].thisValue /= kGrossMoneyBarValue;
+        if ( globals()->gBarIndicator[kGrossMoneyBar].thisValue != globals()->gBarIndicator[kGrossMoneyBar].lastValue)
         {
-            lRect.left = kGrossMoneyLeft + kGrossMoneyHBuffer + gAresGlobal->gRightPanelLeftEdge;
+            lRect.left = kGrossMoneyLeft + kGrossMoneyHBuffer + globals()->gRightPanelLeftEdge;
             lRect.right = lRect.left + kGrossMoneyBarWidth;
             mGetTranslateColorShade( kGrossMoneyColor, VERY_LIGHT, color, transColor);
 
-            for ( rcount = 0; rcount < gAresGlobal->gBarIndicator[kGrossMoneyBar].thisValue; rcount++)
+            for ( rcount = 0; rcount < globals()->gBarIndicator[kGrossMoneyBar].thisValue; rcount++)
             {
-                lRect.top = kGrossMoneyTop + gAresGlobal->gInstrumentTop + kGrossMoneyVBuffer + rcount *
+                lRect.top = kGrossMoneyTop + globals()->gInstrumentTop + kGrossMoneyVBuffer + rcount *
                             kGrossMoneyBarHeight;
                 lRect.bottom = lRect.top + kGrossMoneyBarHeight - 1;
                 DrawNateRect( *thePixMapHandle, &lRect, gNatePortLeft << 2L, gNatePortTop, color);
             }
             mGetTranslateColorShade( kGrossMoneyColor, VERY_DARK, color, transColor);
 
-            for ( rcount = gAresGlobal->gBarIndicator[kGrossMoneyBar].thisValue; rcount < kGrossMoneyBarNum; rcount++)
+            for ( rcount = globals()->gBarIndicator[kGrossMoneyBar].thisValue; rcount < kGrossMoneyBarNum; rcount++)
             {
-                lRect.top = kGrossMoneyTop + gAresGlobal->gInstrumentTop + kGrossMoneyVBuffer + rcount *
+                lRect.top = kGrossMoneyTop + globals()->gInstrumentTop + kGrossMoneyVBuffer + rcount *
                             kGrossMoneyBarHeight;
                 lRect.bottom = lRect.top + kGrossMoneyBarHeight - 1;
                 DrawNateRect( *thePixMapHandle, &lRect, gNatePortLeft << 2L, gNatePortTop, color);
@@ -671,7 +654,7 @@ void DrawInstrumentPanel( WindowPtr whatPort)
     Rect            tRect;
 
 //  pict = GetPicture( kBackgroundPictID);
-    gAresGlobal->gZoomMode = kNearestFoeZoom;
+    globals()->gZoomMode = kNearestFoeZoom;
     DrawInSaveWorld();
     MacSetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     SetTranslateColorFore( BLACK);
@@ -737,7 +720,7 @@ void EraseSite( void)
     clipRect.top = CLIP_TOP;
     clipRect.bottom = CLIP_BOTTOM;
 
-    l = *gAresGlobal->gSectorLineData + kSiteCoordOffset;
+    l = *globals()->gSectorLineData + kSiteCoordOffset;
     olp = l + kSiteCoordNum;
     sx = *(olp++) = *(l++);
     sy = *(olp++) = *(l++);
@@ -758,12 +741,12 @@ void EraseSite( void)
 
     // do the cursor, too
 
-    l = *gAresGlobal->gSectorLineData + kCursorCoordOffset;
+    l = *globals()->gSectorLineData + kCursorCoordOffset;
     olp = l + kCursorCoordNum;
     sx = *(olp++) = *(l++);
     sy = *(olp++) = *(l++);
 
-    if ( gAresGlobal->gMouseActive)
+    if ( globals()->gMouseActive)
     {
         DrawNateLine( *offPixBase, &clipRect, sx,
                     clipRect.top, sx, (sy - kCursorBoundsSize), 0,
@@ -793,7 +776,7 @@ void EraseSectorLines( void)
     clipRect.top = CLIP_TOP;
     clipRect.bottom = CLIP_BOTTOM;
 
-    l = *gAresGlobal->gSectorLineData;
+    l = *globals()->gSectorLineData;
     count = 0;
 
     while (( *l != -1) && ( count < kMaxSectorLine))
@@ -807,7 +790,7 @@ void EraseSectorLines( void)
         count++;
     }
 
-    l = *gAresGlobal->gSectorLineData + (kMaxSectorLine << 1L);
+    l = *globals()->gSectorLineData + (kMaxSectorLine << 1L);
     count = 0;
 
     while (( *l != -1) && ( count < kMaxSectorLine))
@@ -903,7 +886,7 @@ void DrawSite( void)
                     0, color);
         }
 
-        l = *gAresGlobal->gSectorLineData + kSiteCoordOffset;
+        l = *globals()->gSectorLineData + kSiteCoordOffset;
         *(l++) = sx;
         *(l++) = sy;
         *(l++) = (sx + sa);
@@ -929,23 +912,23 @@ void DrawSite( void)
     {
         cursorCoord.v = CLIP_TOP + kCursorBoundsSize;
 //      ShowSpriteCursor( true);
-    } else if ( cursorCoord.v > ( /*CLIP_BOTTOM*/gAresGlobal->gTrueClipBottom - kCursorBoundsSize - 1))
+    } else if ( cursorCoord.v > ( /*CLIP_BOTTOM*/globals()->gTrueClipBottom - kCursorBoundsSize - 1))
     {
-        cursorCoord.v = /*CLIP_BOTTOM*/gAresGlobal->gTrueClipBottom - kCursorBoundsSize - 1;
+        cursorCoord.v = /*CLIP_BOTTOM*/globals()->gTrueClipBottom - kCursorBoundsSize - 1;
 //      ShowSpriteCursor( true);
     }
 
-    l = *gAresGlobal->gSectorLineData + kCursorCoordOffset;
+    l = *globals()->gSectorLineData + kCursorCoordOffset;
     sx = *(l++) = cursorCoord.h;
     sy = *(l++) = cursorCoord.v;
 
     sa = *(l++);
     sb = *(l++);
 
-    if ((( sa != sx) || ( sb != sy)) && ( !SpriteCursorVisible())) gAresGlobal->gMouseActive = kMouseActive;
-    else if ( gAresGlobal->gMouseActive > kMouseSleepTime) gAresGlobal->gMouseActive = kMouseTurningOff;
+    if ((( sa != sx) || ( sb != sy)) && ( !SpriteCursorVisible())) globals()->gMouseActive = kMouseActive;
+    else if ( globals()->gMouseActive > kMouseSleepTime) globals()->gMouseActive = kMouseTurningOff;
 
-    if ( gAresGlobal->gMouseActive > kMouseTurningOff)
+    if ( globals()->gMouseActive > kMouseTurningOff)
     {
         mGetTranslateColorShade( SKY_BLUE, MEDIUM, color, transColor);
         DrawNateLine( *offPixBase, &clipRect, sx,
@@ -1015,7 +998,7 @@ void DrawSectorLines( void)
     x >>= SHIFT_SCALE;
     x += CLIP_LEFT;
 
-    l = *gAresGlobal->gSectorLineData;
+    l = *globals()->gSectorLineData;
     if ( doDraw)
     {
         while (( x < static_cast<uint32_t>(CLIP_RIGHT)) && ( h > 0))
@@ -1093,7 +1076,7 @@ void DrawSectorLines( void)
     x >>= SHIFT_SCALE;
     x += CLIP_TOP;
 
-    l = *gAresGlobal->gSectorLineData + (kMaxSectorLine << 1L);
+    l = *globals()->gSectorLineData + (kMaxSectorLine << 1L);
 
     if ( doDraw)
     {
@@ -1163,11 +1146,11 @@ void DrawSectorLines( void)
         }
     }
 
-    if ((( gAresGlobal->gLastScale < kBlipThreshhold) && ( gAbsoluteScale >= kBlipThreshhold)) ||
-        (( gAresGlobal->gLastScale >= kBlipThreshhold) && ( gAbsoluteScale < kBlipThreshhold)))
+    if ((( globals()->gLastScale < kBlipThreshhold) && ( gAbsoluteScale >= kBlipThreshhold)) ||
+        (( globals()->gLastScale >= kBlipThreshhold) && ( gAbsoluteScale < kBlipThreshhold)))
         PlayVolumeSound(  kComputerBeep4, kMediumVolume, kMediumPersistence, kLowPrioritySound);
 
-    gAresGlobal->gLastScale = gAbsoluteScale;
+    globals()->gLastScale = gAbsoluteScale;
     gLastGlobalCorner = gGlobalCorner;
 }
 
@@ -1186,7 +1169,7 @@ void ShowSite( void)
     clipRect.top = CLIP_TOP;
     clipRect.bottom = CLIP_BOTTOM;
 
-    l = *gAresGlobal->gSectorLineData + kSiteCoordOffset;
+    l = *globals()->gSectorLineData + kSiteCoordOffset;
     sx = *(l++);
     sy = *(l++);
     sa = *(l++);
@@ -1220,11 +1203,11 @@ void ShowSite( void)
                 sd, sa, sb,
                 gNatePortLeft << 2L, gNatePortTop);
 
-    l = *gAresGlobal->gSectorLineData + kCursorCoordOffset;
+    l = *globals()->gSectorLineData + kCursorCoordOffset;
     sx = *(l++);
     sy = *(l++);
 
-    if ( gAresGlobal->gMouseActive > kMouseTurningOff)
+    if ( globals()->gMouseActive > kMouseTurningOff)
     {
         CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, sx,
                     clipRect.top, sx, clipRect.bottom - 1,
@@ -1237,7 +1220,7 @@ void ShowSite( void)
     sx = *(l++);
     sy = *(l++);
 
-    if ( gAresGlobal->gMouseActive)
+    if ( globals()->gMouseActive)
     {
         CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, sx,
                     clipRect.top, sx, (sy - kCursorBoundsSize),
@@ -1251,7 +1234,7 @@ void ShowSite( void)
         CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, (sx + kCursorBoundsSize),
                     sy, clipRect.right - 1, sy,
                     gNatePortLeft << 2L, gNatePortTop);
-        if ( gAresGlobal->gMouseActive == kMouseTurningOff) gAresGlobal->gMouseActive = kMouseOff;
+        if ( globals()->gMouseActive == kMouseTurningOff) globals()->gMouseActive = kMouseOff;
     }
 }
 
@@ -1268,7 +1251,7 @@ void ShowSectorLines( void)
     clipRect.top = CLIP_TOP;
     clipRect.bottom = CLIP_BOTTOM;
 
-    l = *gAresGlobal->gSectorLineData;
+    l = *globals()->gSectorLineData;
     count = 0;
 
     while ( count < kMaxSectorLine)
@@ -1284,7 +1267,7 @@ void ShowSectorLines( void)
         count++;
     }
 
-    l = *gAresGlobal->gSectorLineData + (kMaxSectorLine << 1L);
+    l = *globals()->gSectorLineData + (kMaxSectorLine << 1L);
     count = 0;
 
     while ( count < kMaxSectorLine)
@@ -1309,13 +1292,13 @@ void InstrumentsHandleClick( void)
     Point   where;
     long    *l;
 
-    l = *gAresGlobal->gSectorLineData + kCursorCoordOffset;
+    l = *globals()->gSectorLineData + kCursorCoordOffset;
     where.h = *(l++);
     where.v = *(l++);
 
     PlayerShipHandleClick( where);
     MiniComputerHandleClick( where);
-    if (!SpriteCursorVisible()) gAresGlobal->gMouseActive = kMouseActive;
+    if (!SpriteCursorVisible()) globals()->gMouseActive = kMouseActive;
 }
 
 void InstrumentsHandleDoubleClick( void)
@@ -1324,13 +1307,13 @@ void InstrumentsHandleDoubleClick( void)
     Point   where;
     long    *l;
 
-    l = *gAresGlobal->gSectorLineData + kCursorCoordOffset;
+    l = *globals()->gSectorLineData + kCursorCoordOffset;
     where.h = *(l++);
     where.v = *(l++);
 
     PlayerShipHandleClick( where);
     MiniComputerHandleDoubleClick( where);
-    if (!SpriteCursorVisible()) gAresGlobal->gMouseActive = kMouseActive;
+    if (!SpriteCursorVisible()) globals()->gMouseActive = kMouseActive;
 }
 
 void InstrumentsHandleMouseUp( void)
@@ -1339,7 +1322,7 @@ void InstrumentsHandleMouseUp( void)
     Point   where;
     long    *l;
 
-    l = *gAresGlobal->gSectorLineData + kCursorCoordOffset;
+    l = *globals()->gSectorLineData + kCursorCoordOffset;
     where.h = *(l++);
     where.v = *(l++);
 
@@ -1352,7 +1335,7 @@ void InstrumentsHandleMouseStillDown( void)
     Point   where;
     long    *l;
 
-    l = *gAresGlobal->gSectorLineData + kCursorCoordOffset;
+    l = *globals()->gSectorLineData + kCursorCoordOffset;
     where.h = *(l++);
     where.v = *(l++);
 
@@ -1552,9 +1535,9 @@ void UpdateBarIndicator( short which, long value, long max, PixMapHandle pixMap)
 
     if ( value > max) value = max;
 
-    if ( value != gAresGlobal->gBarIndicator[ which].thisValue)
+    if ( value != globals()->gBarIndicator[ which].thisValue)
     {
-        gAresGlobal->gBarIndicator[ which].lastValue = gAresGlobal->gBarIndicator[ which].thisValue;
+        globals()->gBarIndicator[ which].lastValue = globals()->gBarIndicator[ which].thisValue;
         if ( max > 0)
         {
             graphicValue = kBarIndicatorHeight * value;
@@ -1564,36 +1547,36 @@ void UpdateBarIndicator( short which, long value, long max, PixMapHandle pixMap)
         } else graphicValue = 0;
 
 
-        tRect.left = kBarIndicatorLeft + gAresGlobal->gRightPanelLeftEdge;
+        tRect.left = kBarIndicatorLeft + globals()->gRightPanelLeftEdge;
         tRect.right =  tRect.left + kBarIndicatorWidth;
-        tRect.top = gAresGlobal->gBarIndicator[ which].top,
+        tRect.top = globals()->gBarIndicator[ which].top,
         tRect.bottom = tRect.top + kBarIndicatorHeight - graphicValue;
-        clipRect.left = gAresGlobal->gRightPanelLeftEdge;
-        clipRect.top = gAresGlobal->gInstrumentTop;
+        clipRect.left = globals()->gRightPanelLeftEdge;
+        clipRect.top = globals()->gInstrumentTop;
         clipRect.right = clipRect.left + kRightPanelWidth;
         clipRect.bottom = clipRect.top + kPanelHeight;
 
-        mGetTranslateColorShade( gAresGlobal->gBarIndicator[which].color, DARK, color, transColor);
-        mGetTranslateColorShade( gAresGlobal->gBarIndicator[which].color, MEDIUM, lightColor, transColor);
-        mGetTranslateColorShade( gAresGlobal->gBarIndicator[which].color, DARKER, darkColor, transColor);
+        mGetTranslateColorShade( globals()->gBarIndicator[which].color, DARK, color, transColor);
+        mGetTranslateColorShade( globals()->gBarIndicator[which].color, MEDIUM, lightColor, transColor);
+        mGetTranslateColorShade( globals()->gBarIndicator[which].color, DARKER, darkColor, transColor);
 //      DrawNateRect( *pixMap, &tRect, gNatePortLeft << 2, gNatePortTop, color);
         DrawNateShadedRect( *pixMap, &tRect, &clipRect, gNatePortLeft << 2L, gNatePortTop, color, lightColor, darkColor);
 
         if ( graphicValue > 0)
         {
             tRect.top = tRect.bottom;//tRect.bottom - graphicValue;
-            tRect.bottom = gAresGlobal->gBarIndicator[which].top + kBarIndicatorHeight;
-            mGetTranslateColorShade( gAresGlobal->gBarIndicator[which].color, LIGHTER, color, transColor);
-            mGetTranslateColorShade( gAresGlobal->gBarIndicator[which].color, VERY_LIGHT, lightColor, transColor);
-            mGetTranslateColorShade( gAresGlobal->gBarIndicator[which].color, MEDIUM, darkColor, transColor);
+            tRect.bottom = globals()->gBarIndicator[which].top + kBarIndicatorHeight;
+            mGetTranslateColorShade( globals()->gBarIndicator[which].color, LIGHTER, color, transColor);
+            mGetTranslateColorShade( globals()->gBarIndicator[which].color, VERY_LIGHT, lightColor, transColor);
+            mGetTranslateColorShade( globals()->gBarIndicator[which].color, MEDIUM, darkColor, transColor);
     //      DrawNateRect( *pixMap, &tRect, gNatePortLeft << 2, gNatePortTop, color);
             DrawNateShadedRect( *pixMap, &tRect, &clipRect, gNatePortLeft << 2L, gNatePortTop, color, lightColor, darkColor);
         }
-        SetRect( &rrect, tRect.left, gAresGlobal->gBarIndicator[ which].top,
-            tRect.right, gAresGlobal->gBarIndicator[ which].top + kBarIndicatorHeight);
+        SetRect( &rrect, tRect.left, globals()->gBarIndicator[ which].top,
+            tRect.right, globals()->gBarIndicator[ which].top + kBarIndicatorHeight);
         CopyRealWorldToOffWorld( gTheWindow, &rrect);
 
-        gAresGlobal->gBarIndicator[ which].thisValue = value;
+        globals()->gBarIndicator[ which].thisValue = value;
     }
 }
 
@@ -1608,8 +1591,8 @@ void DrawBuildTimeBar( long value)
     value = kMiniBuildTimeHeight - value;
 
     tRect.left = clipRect.left = kMiniBuildTimeLeft;
-    tRect.top = clipRect.top = kMiniBuildTimeTop + gAresGlobal->gInstrumentTop;
-    tRect.bottom = clipRect.bottom = kMiniBuildTimeBottom + gAresGlobal->gInstrumentTop;
+    tRect.top = clipRect.top = kMiniBuildTimeTop + globals()->gInstrumentTop;
+    tRect.bottom = clipRect.bottom = kMiniBuildTimeBottom + globals()->gInstrumentTop;
     tRect.right = clipRect.right = kMiniBuildTimeRight;
 
     mGetTranslateColorShade( PALE_PURPLE, MEDIUM, color, transColor);
@@ -1617,8 +1600,8 @@ void DrawBuildTimeBar( long value)
                      color);
 
     tRect.left = kMiniBuildTimeLeft + 2;
-    tRect.top = kMiniBuildTimeTop + 2 + value + gAresGlobal->gInstrumentTop;
-    tRect.bottom = kMiniBuildTimeBottom - 2 + gAresGlobal->gInstrumentTop;
+    tRect.top = kMiniBuildTimeTop + 2 + value + globals()->gInstrumentTop;
+    tRect.bottom = kMiniBuildTimeBottom - 2 + globals()->gInstrumentTop;
     tRect.right = kMiniBuildTimeRight - 2;
 
     if ( value > 0)
@@ -1627,10 +1610,10 @@ void DrawBuildTimeBar( long value)
 
         DrawNateRect( *thePixMapHandle, &tRect, gNatePortLeft << 2L, gNatePortTop, color);
 
-        tRect.top = kMiniBuildTimeTop + 2 + gAresGlobal->gInstrumentTop;
+        tRect.top = kMiniBuildTimeTop + 2 + globals()->gInstrumentTop;
     } else value = 0;
 
-    tRect.bottom = kMiniBuildTimeTop + 2 + value + gAresGlobal->gInstrumentTop;
+    tRect.bottom = kMiniBuildTimeTop + 2 + value + globals()->gInstrumentTop;
 
     mGetTranslateColorShade( PALE_PURPLE, DARK, color, transColor);
 

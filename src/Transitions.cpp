@@ -45,29 +45,21 @@
 
 #define kTransitionError    "\pTRAN"
 
-extern GDHandle                 theDevice;
-extern long                     gInterfaceFileRefID;
+extern GDHandle theDevice;
+extern long gInterfaceFileRefID;
+extern short gSpriteFileRefID;
 
 struct bigReqListRec {
     short   reqLSize;
     short   reqLData[256];
 };
 
-extern aresGlobalType *gAresGlobal;
-extern short gSpriteFileRefID;
-
-//long  gAresGlobal->gColorAnimationStep = 0, gAresGlobal->gColorAnimationInSpeed = -1,
-//      gAresGlobal->gColorAnimationOutSpeed = -1;
-
-//CTabHandle    gAresGlobal->gColorAnimationTable = nil, gAresGlobal->gSaveColorTable = nil;
-//RGBColor  gAresGlobal->gColorAnimationGoal;
-
 void InitTransitions() {
     PixMapHandle        onScreenPixMap;
 
     onScreenPixMap = (**theDevice).gdPMap;
-    gAresGlobal->gColorAnimationTable.reset((**onScreenPixMap).colors->clone());
-    gAresGlobal->gSaveColorTable.reset((**onScreenPixMap).colors->clone());
+    globals()->gColorAnimationTable.reset((**onScreenPixMap).colors->clone());
+    globals()->gSaveColorTable.reset((**onScreenPixMap).colors->clone());
 }
 
 void ResetTransitions( void) // for resetting the color map
@@ -78,8 +70,8 @@ void ResetTransitions( void) // for resetting the color map
 }
 
 void CleanupTransitions() {
-    gAresGlobal->gColorAnimationTable.reset();
-    gAresGlobal->gSaveColorTable.reset();
+    globals()->gColorAnimationTable.reset();
+    globals()->gSaveColorTable.reset();
 }
 
 // DitherFadePixMapToScreenPixMap
@@ -142,10 +134,10 @@ void StartColorAnimation( long inSpeed, long outSpeed, unsigned char goalColor)
 
 {
 
-    gAresGlobal->gColorAnimationStep = kStartAnimation;
-    gAresGlobal->gColorAnimationInSpeed = inSpeed;
-    gAresGlobal->gColorAnimationOutSpeed = outSpeed;
-    GetRGBTranslateColor( &gAresGlobal->gColorAnimationGoal,  GetRetroIndex( goalColor));
+    globals()->gColorAnimationStep = kStartAnimation;
+    globals()->gColorAnimationInSpeed = inSpeed;
+    globals()->gColorAnimationOutSpeed = outSpeed;
+    GetRGBTranslateColor( &globals()->gColorAnimationGoal,  GetRetroIndex( goalColor));
 
 }
 
@@ -155,60 +147,60 @@ void UpdateColorAnimation( long timePassed)
     GDHandle            originalDevice = GetGDevice();
 
     SetGDevice( theDevice);
-    if ( gAresGlobal->gColorAnimationInSpeed != kNoColorGoal)
+    if ( globals()->gColorAnimationInSpeed != kNoColorGoal)
     {
 
-        if ( gAresGlobal->gColorAnimationStep < 0)
+        if ( globals()->gColorAnimationStep < 0)
         {
-            for (size_t i = 0; i < gAresGlobal->gColorAnimationTable->size(); ++i) {
+            for (size_t i = 0; i < globals()->gColorAnimationTable->size(); ++i) {
                 RGBColor color = {
-                    gAresGlobal->gColorAnimationGoal.red
-                        - ((gAresGlobal->gColorAnimationGoal.red
-                                    - gAresGlobal->gSaveColorTable->color(i).red)
+                    globals()->gColorAnimationGoal.red
+                        - ((globals()->gColorAnimationGoal.red
+                                    - globals()->gSaveColorTable->color(i).red)
                                 / kAnimationSteps) *
-                        -gAresGlobal->gColorAnimationStep,
+                        -globals()->gColorAnimationStep,
 
-                    gAresGlobal->gColorAnimationGoal.green
-                        - ((gAresGlobal->gColorAnimationGoal.green
-                                    - gAresGlobal->gSaveColorTable->color(i).green)
+                    globals()->gColorAnimationGoal.green
+                        - ((globals()->gColorAnimationGoal.green
+                                    - globals()->gSaveColorTable->color(i).green)
                             / kAnimationSteps) *
-                        -gAresGlobal->gColorAnimationStep,
+                        -globals()->gColorAnimationStep,
 
-                    gAresGlobal->gColorAnimationGoal.blue
-                        - ((gAresGlobal->gColorAnimationGoal.blue
-                                    - gAresGlobal->gSaveColorTable->color(i).blue)
+                    globals()->gColorAnimationGoal.blue
+                        - ((globals()->gColorAnimationGoal.blue
+                                    - globals()->gSaveColorTable->color(i).blue)
                             / kAnimationSteps) *
-                        -gAresGlobal->gColorAnimationStep,
+                        -globals()->gColorAnimationStep,
                 };
-                gAresGlobal->gColorAnimationTable->set_color(i, color);
+                globals()->gColorAnimationTable->set_color(i, color);
             }
-            RestoreEntries(*gAresGlobal->gColorAnimationTable);
-            gAresGlobal->gColorAnimationStep += gAresGlobal->gColorAnimationInSpeed * timePassed;
-        } else if (( gAresGlobal->gColorAnimationStep + gAresGlobal->gColorAnimationOutSpeed * timePassed) < kAnimationSteps)
+            RestoreEntries(*globals()->gColorAnimationTable);
+            globals()->gColorAnimationStep += globals()->gColorAnimationInSpeed * timePassed;
+        } else if (( globals()->gColorAnimationStep + globals()->gColorAnimationOutSpeed * timePassed) < kAnimationSteps)
         {
-            for (size_t i = 0; i < gAresGlobal->gColorAnimationTable->size(); ++i) {
+            for (size_t i = 0; i < globals()->gColorAnimationTable->size(); ++i) {
                 RGBColor color = {
-                    gAresGlobal->gColorAnimationGoal.red - (( gAresGlobal->gColorAnimationGoal.red -
-                    gAresGlobal->gSaveColorTable->color(i).red) / kAnimationSteps) *
-                    gAresGlobal->gColorAnimationStep,
+                    globals()->gColorAnimationGoal.red - (( globals()->gColorAnimationGoal.red -
+                    globals()->gSaveColorTable->color(i).red) / kAnimationSteps) *
+                    globals()->gColorAnimationStep,
 
-                    gAresGlobal->gColorAnimationGoal.green - (( gAresGlobal->gColorAnimationGoal.green -
-                    gAresGlobal->gSaveColorTable->color(i).green) / kAnimationSteps) *
-                    gAresGlobal->gColorAnimationStep,
+                    globals()->gColorAnimationGoal.green - (( globals()->gColorAnimationGoal.green -
+                    globals()->gSaveColorTable->color(i).green) / kAnimationSteps) *
+                    globals()->gColorAnimationStep,
 
-                    gAresGlobal->gColorAnimationGoal.blue - (( gAresGlobal->gColorAnimationGoal.blue -
-                    gAresGlobal->gSaveColorTable->color(i).blue) / kAnimationSteps) *
-                    gAresGlobal->gColorAnimationStep,
+                    globals()->gColorAnimationGoal.blue - (( globals()->gColorAnimationGoal.blue -
+                    globals()->gSaveColorTable->color(i).blue) / kAnimationSteps) *
+                    globals()->gColorAnimationStep,
                 };
 
-                gAresGlobal->gColorAnimationTable->set_color(i, color);
+                globals()->gColorAnimationTable->set_color(i, color);
             }
-            RestoreEntries(*gAresGlobal->gColorAnimationTable);
-            gAresGlobal->gColorAnimationStep += gAresGlobal->gColorAnimationOutSpeed * timePassed;
+            RestoreEntries(*globals()->gColorAnimationTable);
+            globals()->gColorAnimationStep += globals()->gColorAnimationOutSpeed * timePassed;
         } else
         {
-            RestoreEntries(*gAresGlobal->gSaveColorTable);
-            gAresGlobal->gColorAnimationInSpeed = kNoColorGoal;
+            RestoreEntries(*globals()->gSaveColorTable);
+            globals()->gColorAnimationInSpeed = kNoColorGoal;
         }
     }
     SetGDevice( originalDevice);
@@ -219,34 +211,34 @@ void StartBooleanColorAnimation( long inSpeed, long outSpeed, unsigned char goal
 {
     GDHandle            originalDevice = GetGDevice();
 
-    if ( gAresGlobal->gColorAnimationInSpeed == kNoColorGoal)
+    if ( globals()->gColorAnimationInSpeed == kNoColorGoal)
     {
-        gAresGlobal->gColorAnimationStep = kStartAnimation;
-        gAresGlobal->gColorAnimationInSpeed = inSpeed;
-        gAresGlobal->gColorAnimationOutSpeed = outSpeed;
-        GetRGBTranslateColor( &gAresGlobal->gColorAnimationGoal,  GetRetroIndex( goalColor));
+        globals()->gColorAnimationStep = kStartAnimation;
+        globals()->gColorAnimationInSpeed = inSpeed;
+        globals()->gColorAnimationOutSpeed = outSpeed;
+        GetRGBTranslateColor( &globals()->gColorAnimationGoal,  GetRetroIndex( goalColor));
 
         SetGDevice( theDevice);
 
-        for (size_t i = 0; i < gAresGlobal->gColorAnimationTable->size(); ++i) {
+        for (size_t i = 0; i < globals()->gColorAnimationTable->size(); ++i) {
             RGBColor color = {
-                (gAresGlobal->gColorAnimationGoal.red >> 1L) +
-                    (gAresGlobal->gSaveColorTable->color(i).red >> 1L),
-                (gAresGlobal->gColorAnimationGoal.green >> 1L) +
-                    (gAresGlobal->gSaveColorTable->color(i).green >> 1L),
-                (gAresGlobal->gColorAnimationGoal.blue >> 1L) +
-                    (gAresGlobal->gSaveColorTable->color(i).blue >> 1L),
+                (globals()->gColorAnimationGoal.red >> 1L) +
+                    (globals()->gSaveColorTable->color(i).red >> 1L),
+                (globals()->gColorAnimationGoal.green >> 1L) +
+                    (globals()->gSaveColorTable->color(i).green >> 1L),
+                (globals()->gColorAnimationGoal.blue >> 1L) +
+                    (globals()->gSaveColorTable->color(i).blue >> 1L),
             };
-            gAresGlobal->gColorAnimationTable->set_color(i, color);
+            globals()->gColorAnimationTable->set_color(i, color);
         }
-        RestoreEntries(*gAresGlobal->gColorAnimationTable);
+        RestoreEntries(*globals()->gColorAnimationTable);
         SetGDevice( originalDevice);
     } else
     {
-        gAresGlobal->gColorAnimationStep = kStartAnimation;
-        gAresGlobal->gColorAnimationInSpeed = inSpeed;
-        gAresGlobal->gColorAnimationOutSpeed = outSpeed;
-        GetRGBTranslateColor( &gAresGlobal->gColorAnimationGoal,  GetRetroIndex( goalColor));
+        globals()->gColorAnimationStep = kStartAnimation;
+        globals()->gColorAnimationInSpeed = inSpeed;
+        globals()->gColorAnimationOutSpeed = outSpeed;
+        GetRGBTranslateColor( &globals()->gColorAnimationGoal,  GetRetroIndex( goalColor));
     }
 }
 
@@ -256,18 +248,18 @@ void UpdateBooleanColorAnimation( long timePassed)
     GDHandle            originalDevice = GetGDevice();
 
     SetGDevice( theDevice);
-    if ( gAresGlobal->gColorAnimationInSpeed != kNoColorGoal)
+    if ( globals()->gColorAnimationInSpeed != kNoColorGoal)
     {
-        if ( gAresGlobal->gColorAnimationStep < 0)
+        if ( globals()->gColorAnimationStep < 0)
         {
-            gAresGlobal->gColorAnimationStep += gAresGlobal->gColorAnimationInSpeed * timePassed;
-        } else if (( gAresGlobal->gColorAnimationStep + gAresGlobal->gColorAnimationOutSpeed * timePassed) < kAnimationSteps)
+            globals()->gColorAnimationStep += globals()->gColorAnimationInSpeed * timePassed;
+        } else if (( globals()->gColorAnimationStep + globals()->gColorAnimationOutSpeed * timePassed) < kAnimationSteps)
         {
-            gAresGlobal->gColorAnimationStep += gAresGlobal->gColorAnimationOutSpeed * timePassed;
+            globals()->gColorAnimationStep += globals()->gColorAnimationOutSpeed * timePassed;
         } else
         {
-            RestoreEntries(*gAresGlobal->gSaveColorTable);
-            gAresGlobal->gColorAnimationInSpeed = kNoColorGoal;
+            RestoreEntries(*globals()->gSaveColorTable);
+            globals()->gColorAnimationInSpeed = kNoColorGoal;
         }
     }
     SetGDevice( originalDevice);
@@ -278,10 +270,10 @@ void RestoreOriginalColors( void)
     GDHandle            originalDevice = GetGDevice();
 
     SetGDevice( theDevice);
-    if ( gAresGlobal->gColorAnimationInSpeed != kNoColorGoal)
+    if ( globals()->gColorAnimationInSpeed != kNoColorGoal)
     {
-        RestoreEntries(*gAresGlobal->gSaveColorTable);
-        gAresGlobal->gColorAnimationInSpeed = kNoColorGoal;
+        RestoreEntries(*globals()->gSaveColorTable);
+        globals()->gColorAnimationInSpeed = kNoColorGoal;
     }
     SetGDevice( originalDevice);
 }
@@ -293,10 +285,10 @@ void InstantGoalTransition( void)   // instantly goes to total goal color
 
     SetGDevice( theDevice);
 
-    for (size_t i = 0; i < gAresGlobal->gColorAnimationTable->size(); ++i) {
-        gAresGlobal->gColorAnimationTable->set_color(i, gAresGlobal->gColorAnimationGoal);
+    for (size_t i = 0; i < globals()->gColorAnimationTable->size(); ++i) {
+        globals()->gColorAnimationTable->set_color(i, globals()->gColorAnimationGoal);
     }
-    RestoreEntries(*gAresGlobal->gColorAnimationTable);
+    RestoreEntries(*globals()->gColorAnimationTable);
     SetGDevice( originalDevice);
 }
 
@@ -304,14 +296,14 @@ Boolean AutoFadeTo( long tickTime, RGBColor *goalColor, Boolean eventSkip)
 
 {
     long        startTime, thisTime = 0, lastStep = 0, thisStep = 0;
-    Boolean     anyEventHappened = gAresGlobal->returnToMain;
+    Boolean     anyEventHappened = globals()->returnToMain;
 
-    gAresGlobal->gColorAnimationStep = kStartAnimation;
-    gAresGlobal->gColorAnimationInSpeed = 1;
-    gAresGlobal->gColorAnimationOutSpeed = gAresGlobal->gColorAnimationInSpeed;
-    gAresGlobal->gColorAnimationGoal = *goalColor;
+    globals()->gColorAnimationStep = kStartAnimation;
+    globals()->gColorAnimationInSpeed = 1;
+    globals()->gColorAnimationOutSpeed = globals()->gColorAnimationInSpeed;
+    globals()->gColorAnimationGoal = *goalColor;
     startTime = TickCount();
-    while (( gAresGlobal->gColorAnimationStep < 0) && ( !anyEventHappened))
+    while (( globals()->gColorAnimationStep < 0) && ( !anyEventHappened))
     {
         thisTime = TickCount() - startTime;
         thisStep = kAnimationSteps * thisTime;
@@ -324,7 +316,7 @@ Boolean AutoFadeTo( long tickTime, RGBColor *goalColor, Boolean eventSkip)
             anyEventHappened = AnyEvent();
     }
     InstantGoalTransition();
-    gAresGlobal->gColorAnimationStep = 0;
+    globals()->gColorAnimationStep = 0;
     return( anyEventHappened);
 }
 
@@ -332,12 +324,12 @@ Boolean AutoFadeFrom( long tickTime, Boolean eventSkip) // assumes you've set up
 
 {
     long        startTime, thisTime = 0, lastStep = 0, thisStep = 0;
-    Boolean         anyEventHappened = gAresGlobal->returnToMain;
+    Boolean         anyEventHappened = globals()->returnToMain;
 
-    gAresGlobal->gColorAnimationOutSpeed = 1;
+    globals()->gColorAnimationOutSpeed = 1;
     startTime = TickCount();
 
-    while ( gAresGlobal->gColorAnimationInSpeed != kNoColorGoal && ( !anyEventHappened))
+    while ( globals()->gColorAnimationInSpeed != kNoColorGoal && ( !anyEventHappened))
     {
         thisTime = TickCount() - startTime;
         thisStep = kAnimationSteps * thisTime;
@@ -349,7 +341,7 @@ Boolean AutoFadeFrom( long tickTime, Boolean eventSkip) // assumes you've set up
         if ( eventSkip)
             anyEventHappened = AnyEvent();
     }
-    gAresGlobal->gColorAnimationStep = kEndAnimation;
+    globals()->gColorAnimationStep = kEndAnimation;
     UpdateColorAnimation( 1);
 
     return( anyEventHappened);
@@ -359,12 +351,12 @@ Boolean AutoMusicFadeTo( long tickTime, RGBColor *goalColor, Boolean eventSkip)
 
 {
     long        startTime, thisTime = 0, lastStep = 0, thisStep = 0, musicVol, musicStep;
-    Boolean     anyEventHappened = gAresGlobal->returnToMain;
+    Boolean     anyEventHappened = globals()->returnToMain;
 
-    gAresGlobal->gColorAnimationStep = kStartAnimation;
-    gAresGlobal->gColorAnimationInSpeed = 1;
-    gAresGlobal->gColorAnimationOutSpeed = gAresGlobal->gColorAnimationInSpeed;
-    gAresGlobal->gColorAnimationGoal = *goalColor;
+    globals()->gColorAnimationStep = kStartAnimation;
+    globals()->gColorAnimationInSpeed = 1;
+    globals()->gColorAnimationOutSpeed = globals()->gColorAnimationInSpeed;
+    globals()->gColorAnimationGoal = *goalColor;
     musicVol = GetSongVolume();
     if ( musicVol > 0)
         musicStep = kAnimationSteps / musicVol + 1;
@@ -372,13 +364,13 @@ Boolean AutoMusicFadeTo( long tickTime, RGBColor *goalColor, Boolean eventSkip)
 
     startTime = TickCount();
 
-    while (( gAresGlobal->gColorAnimationStep < 0) && ( !anyEventHappened))
+    while (( globals()->gColorAnimationStep < 0) && ( !anyEventHappened))
     {
         thisTime = TickCount() - startTime;
         thisStep = kAnimationSteps * thisTime;
         thisStep /= tickTime;
         UpdateColorAnimation( thisStep - lastStep);
-        musicVol = (-gAresGlobal->gColorAnimationStep) / musicStep;
+        musicVol = (-globals()->gColorAnimationStep) / musicStep;
         if ( musicVol > kMaxMusicVolume) musicVol = kMaxMusicVolume;
         else if ( musicVol < 0) musicVol = 0;
         SetSongVolume( musicVol);
@@ -389,7 +381,7 @@ Boolean AutoMusicFadeTo( long tickTime, RGBColor *goalColor, Boolean eventSkip)
             anyEventHappened = AnyEvent();
     }
     InstantGoalTransition();
-    gAresGlobal->gColorAnimationStep = 0;
+    globals()->gColorAnimationStep = 0;
     StopAndUnloadSong();
     return( anyEventHappened);
 }

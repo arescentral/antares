@@ -102,6 +102,9 @@ class MessageData;
 class StringList;
 
 struct aresGlobalType {
+    aresGlobalType();
+    ~aresGlobalType();
+
     unsigned long   gActiveCheats[kMaxPlayerNum];
     unsigned long   gSynchValue;
     CWindowPtr      gBackWindow;
@@ -240,6 +243,7 @@ struct aresGlobalType {
     Boolean         hotKey_target;
 };
 
-extern aresGlobalType* gAresGlobal;
+aresGlobalType* globals();
+void init_globals();
 
 #endif // ANTARES_ARES_GLOBAL_TYPE_HPP_

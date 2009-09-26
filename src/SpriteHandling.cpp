@@ -78,18 +78,17 @@
 
 #define kStaticTableSize        2000
 
-extern  WindowPtr       gTheWindow;
-extern  PixMapHandle    thePixMapHandle;
-extern  GDHandle        theDevice;
-extern  GWorldPtr       gOffWorld, gRealWorld, gSaveWorld;
-extern  long            gNatePortLeft, gNatePortTop;
-extern aresGlobalType   *gAresGlobal;
+extern WindowPtr        gTheWindow;
+extern PixMapHandle     thePixMapHandle;
+extern GDHandle         theDevice;
+extern GWorldPtr        gOffWorld, gRealWorld, gSaveWorld;
+extern long             gNatePortLeft, gNatePortTop;
 
 long                    *gScaleHMap = nil, *gScaleVMap = nil, gAbsoluteScale = MIN_SCALE;
 pixTableType            gPixTable[ kMaxPixTableEntry];
-TypedHandle<spriteType>             gSpriteTable;
-TypedHandle<long>                   gBothScaleMaps;
-TypedHandle<unsigned char>          gStaticTable;
+TypedHandle<spriteType> gSpriteTable;
+TypedHandle<long>       gBothScaleMaps;
+TypedHandle<unsigned char> gStaticTable;
 short                   gSpriteFileRefID = 0;
 
 Boolean PixelInSprite_IsOutside( spritePix *sprite, long x, long y, long *hmap,

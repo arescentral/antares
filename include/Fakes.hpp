@@ -31,8 +31,6 @@ enum GameState {
 void SetGameState(GameState state);
 void MainLoopIterationComplete(uint32_t game_time);
 
-extern aresGlobalType* gAresGlobal;
-
 std::string GetOutputDir();
 
 #endif  // ANTARES_FAKES_HPP_

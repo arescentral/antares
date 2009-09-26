@@ -30,10 +30,6 @@
 
 #define kSoundVolumeMultiplier  32  // = 256 (1.0) / 8 (kMaxSoundVolumePreference)
 
-extern aresGlobalType   *gAresGlobal;
-//extern unsigned long  gAresGlobal->gOptions;
-//extern long               gAresGlobal->gSoundVolume;
-
 #define kUseMovies
 
 void InitMoviePlayer( void)
@@ -41,7 +37,7 @@ void InitMoviePlayer( void)
 #ifdef kUseMovies
     OSErr                       err;
 
-    if ( gAresGlobal->gOptions & kOptionQuicktime)
+    if ( globals()->gOptions & kOptionQuicktime)
     {
         err = EnterMovies();
     }
@@ -51,7 +47,7 @@ void InitMoviePlayer( void)
 void CleanupMoviePlayer( void)
 {
 #ifdef kUseMovies
-    if ( gAresGlobal->gOptions & kOptionQuicktime)
+    if ( globals()->gOptions & kOptionQuicktime)
     {
         ExitMovies();
     }
@@ -73,7 +69,7 @@ void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean d
     TimeValue               movieTime;
 
 #pragma unused ( device)
-    if ( gAresGlobal->gOptions & kOptionQuicktime)
+    if ( globals()->gOptions & kOptionQuicktime)
     {
 
         err = FSMakeFSSpec( 0, 0L, filePath, &fileSpec);
@@ -135,7 +131,7 @@ void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean d
                 ((movieBox.bottom - movieBox.top) / 2));
             SetMovieBox( aMovie, &movieBox);
             SetMovieGWorld( aMovie, aWindow, nil);
-            SetMovieVolume( aMovie, kSoundVolumeMultiplier * gAresGlobal->gSoundVolume);
+            SetMovieVolume( aMovie, kSoundVolumeMultiplier * globals()->gSoundVolume);
 
             HideCursor();
             movieRate = GetMovieRate( aMovie);
@@ -177,7 +173,7 @@ OSErr LoadMiniMovie(unsigned char* filePath, Movie *aMovie, Rect *destRect, Wind
     Fixed                       movieRate;
     TimeValue                   movieTime;
 
-    if ( gAresGlobal->gOptions & kOptionQuicktime)
+    if ( globals()->gOptions & kOptionQuicktime)
     {
 
         err = FSMakeFSSpec( 0, 0L, filePath, &fileSpec);
@@ -227,7 +223,7 @@ OSErr LoadMiniMovie(unsigned char* filePath, Movie *aMovie, Rect *destRect, Wind
             MacFillRect( &movieBox, &(qd.black));
 
             SetMovieGWorld (*aMovie, aWindow, nil);
-            SetMovieVolume( *aMovie, kSoundVolumeMultiplier * gAresGlobal->gSoundVolume);
+            SetMovieVolume( *aMovie, kSoundVolumeMultiplier * globals()->gSoundVolume);
             SetMovieBox (*aMovie, &movieBox);
 
             movieRate = GetMovieRate( *aMovie);

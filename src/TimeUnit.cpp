@@ -27,10 +27,6 @@
 #include "Resources.h"
 #include "ToolUtils.h"
 
-extern aresGlobalType   *gAresGlobal;
-//long          gAresGlobal->gGameTime = 0, gAresGlobal->gGameStartTime = 0;
-//UnsignedWide  gAresGlobal->gLastTime;
-
 void ResetLastTime( long defecit)
 
 {
@@ -38,9 +34,9 @@ void ResetLastTime( long defecit)
 
     defecitTime = defecit * kTimeUnit;
 
-    Microseconds( &gAresGlobal->gLastTime);
-//  WideSubtract( (wide *)&gAresGlobal->gLastTime, (wide *)&defecitTime);
-    gAresGlobal->gGameStartTime = TickCount();// - defecit;
+    Microseconds( &globals()->gLastTime);
+//  WideSubtract( (wide *)&globals()->gLastTime, (wide *)&defecitTime);
+    globals()->gGameStartTime = TickCount();// - defecit;
 }
 
 long GetTimeLapse( void)
@@ -49,13 +45,13 @@ long GetTimeLapse( void)
     uint64_t thisTime;
 
     Microseconds( &thisTime);
-    thisTime -= gAresGlobal->gLastTime;
+    thisTime -= globals()->gLastTime;
     return (thisTime / kTimeUnit);
 }
 
 void UpdateGameTime( void)
 
 {
-//  gAresGlobal->gGameTime += GetTimeLapse();
+//  globals()->gGameTime += GetTimeLapse();
 //  ResetLastTime();
 }

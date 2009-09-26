@@ -81,12 +81,10 @@
 
 //#define   kUseOldThinking
 
-extern aresGlobalType           *gAresGlobal;
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
-//extern long                       gAresGlobal->gPlayerAdmiralNumber;
-extern long                     /*gAresGlobal->gGameTime, gAresGlobal->gPlayerShipNumber,*/ gRandomSeed,
-                                /*gAresGlobal->gGameOver,*/ gRootObjectNumber/*, gAresGlobal->gScrollStarNumber*/;
-extern spaceObjectType          *gScrollStarObject, *gRootObject;
+extern long                     gRandomSeed, gRootObjectNumber;
+extern spaceObjectType*         gScrollStarObject;
+extern spaceObjectType*         gRootObject;
 extern coordPointType           gGlobalCorner; // for playing distance sound when no player object
 
 unsigned long ThinkObjectNormalPresence( spaceObjectType *, baseObjectType *, long);
@@ -121,9 +119,9 @@ void NonplayerShipThink( long timePass)
     smallFixedType  fcos, fsin;
     unsigned char   friendSick, foeSick, neutralSick;
     transColorType  *transColor;
-    unsigned long   sickCount = gAresGlobal->gGameTime / 9;
+    unsigned long   sickCount = globals()->gGameTime / 9;
 
-    gAresGlobal->gSynchValue = gRandomSeed;
+    globals()->gSynchValue = gRandomSeed;
     sickCount &= 0x00000003;
     if ( sickCount == 0)
     {
@@ -164,8 +162,8 @@ void NonplayerShipThink( long timePass)
     {
         if (anObject->active)
         {
-            gAresGlobal->gSynchValue += anObject->location.h;
-            gAresGlobal->gSynchValue += anObject->location.v;
+            globals()->gSynchValue += anObject->location.h;
+            globals()->gSynchValue += anObject->location.v;
 
 /*          DebugFileAppendLong( anObject->whichBaseObject);
             DebugFileAppendString( "\p\t");
@@ -200,7 +198,7 @@ void NonplayerShipThink( long timePass)
             {
                 if ((anObject->health > 0) && ( anObject->health <= ( anObject->baseType->health >> 2)))
                 {
-                    if ( anObject->owner == gAresGlobal->gPlayerAdmiralNumber)
+                    if ( anObject->owner == globals()->gPlayerAdmiralNumber)
                         anObject->sprite->tinyColor = friendSick;
                     else if ( anObject->owner < 0)
                         anObject->sprite->tinyColor = neutralSick;
@@ -331,7 +329,7 @@ void NonplayerShipThink( long timePass)
 /*              if ( ( anObject->attributes & ( kIsRemote | kIsHumanControlled)))
                 {
                     DebugFileAppendString( "\pKY\t");
-                    DebugFileAppendLong( gAresGlobal->gGameTime);
+                    DebugFileAppendLong( globals()->gGameTime);
                     DebugFileAppendString( "\p\t");
                     DebugFileAppendLong( anObject->directionGoal);
                     DebugFileAppendString( "\p\t");
@@ -1414,11 +1412,11 @@ unsigned long ThinkObjectWarpInPresence( spaceObjectType *anObject)
             anObject->attributes &= ~kOccupiesSpace;
             newVel.h = newVel.v = 0;
     /*
-            CreateAnySpaceObject( gAresGlobal->scenarioFileInfo.warpInFlareID, &(newVel),
+            CreateAnySpaceObject( globals()->scenarioFileInfo.warpInFlareID, &(newVel),
                 &(anObject->location), anObject->direction, kNoOwner,
                 0, nil, -1, -1, -1);
     */
-            CreateAnySpaceObject( gAresGlobal->scenarioFileInfo.warpInFlareID, &(newVel),
+            CreateAnySpaceObject( globals()->scenarioFileInfo.warpInFlareID, &(newVel),
                 &(anObject->location), anObject->direction, kNoOwner,
                 0, -1);
         }
@@ -1504,7 +1502,7 @@ unsigned long ThinkObjectWarpOutPresence( spaceObjectType *anObject, baseObjectT
         newVel.h = newVel.v = 0;
 
 
-        CreateAnySpaceObject( gAresGlobal->scenarioFileInfo.warpOutFlareID, &(newVel),
+        CreateAnySpaceObject( globals()->scenarioFileInfo.warpOutFlareID, &(newVel),
             &(anObject->location), anObject->direction, kNoOwner, 0,
             -1);
     }
@@ -2308,7 +2306,7 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
 //          {
 //              CreateFloatingBodyOfPlayer( anObject);
 //          }
-            if (( anObject->owner == gAresGlobal->gPlayerAdmiralNumber) &&
+            if (( anObject->owner == globals()->gPlayerAdmiralNumber) &&
                 ( anObject->attributes & kCanAcceptDestination))
             {
                 StartMessage();
@@ -2327,23 +2325,23 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
 //                  CreateFloatingBodyOfPlayer( anObject);
                     /*
                     // turn the player into a body
-                    count = CreateAnySpaceObject( gAresGlobal->scenarioFileInfo.playerBodyID, &(anObject->velocity),
+                    count = CreateAnySpaceObject( globals()->scenarioFileInfo.playerBodyID, &(anObject->velocity),
                         &(anObject->location), anObject->direction, anObject->owner, 0, nil, -1, -1, -1);
                     if ( count >= 0)
                     {
                         attributes = anObject->attributes & ( kIsHumanControlled | kIsPlayerShip);
                         anObject->attributes &= (~kIsHumanControlled) & (~kIsPlayerShip);
-                        gAresGlobal->gPlayerShipNumber = count;
-                        ResetScrollStars( gAresGlobal->gPlayerShipNumber);
-                        anObject = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
+                        globals()->gPlayerShipNumber = count;
+                        ResetScrollStars( globals()->gPlayerShipNumber);
+                        anObject = *gSpaceObjectData + globals()->gPlayerShipNumber;
                         anObject->attributes |= attributes;
                     } else
                     {
                         gScrollStarObject = nil;
-                        gAresGlobal->gScrollStarNumber = -1;
-                        gAresGlobal->gPlayerShipNumber = -1;
+                        globals()->gScrollStarNumber = -1;
+                        globals()->gPlayerShipNumber = -1;
                         anObject->health = 1000;
-                        gAresGlobal->gGameOver = -360;
+                        globals()->gGameOver = -360;
                     }
                     */
 //              }
@@ -2357,7 +2355,7 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
                                 sObject, anObject, nil, true);
         }
 
-        if ( anObject->owner == gAresGlobal->gPlayerAdmiralNumber)
+        if ( anObject->owner == globals()->gPlayerAdmiralNumber)
         {
             if ((anObject->attributes & kIsHumanControlled) && ( sObject->baseType->damage > 0))
             {

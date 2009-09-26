@@ -59,7 +59,7 @@
 */
 
 extern CWindowPtr       gTheWindow;
-extern aresGlobalType   *gAresGlobal;
+extern aresGlobalType   *globals();
 
 //Document* gDocumentList[kMaxDocumentCount];
 
@@ -314,11 +314,11 @@ pascal void myEventProc(const NavEventCallbackMessage   callBackSelector,
                         EndUpdate( (WindowPtr)whichWindow);
                         break;
                         EndUpdate( (WindowPtr)whichWindow);
-                    } else if ( whichWindow == gAresGlobal->gBackWindow)
+                    } else if ( whichWindow == globals()->gBackWindow)
                     {
                         BeginUpdate( (WindowPtr)whichWindow);
-                            MacSetPort( (WindowPtr)gAresGlobal->gBackWindow);
-                            MacFillRect(  &(gAresGlobal->gBackWindow->portRect), (Pattern *)&qd.black);
+                            MacSetPort( (WindowPtr)globals()->gBackWindow);
+                            MacFillRect(  &(globals()->gBackWindow->portRect), (Pattern *)&qd.black);
                         EndUpdate( (WindowPtr)whichWindow);
                     } else
                     {

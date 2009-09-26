@@ -124,10 +124,10 @@
 #define kMiscKeyMask                (~(kMotionKeyMask | kWeaponKeyMask | kSpecialKeyMask))
 
 inline bool mCheckKeyMap(KeyMap mKeyMap, int mki) {
-    return (gAresGlobal->gKeyControl[mki][0] & (mKeyMap[0]))
-        || (gAresGlobal->gKeyControl[mki][1] & (mKeyMap[1]))
-        || (gAresGlobal->gKeyControl[mki][2] & (mKeyMap[2]))
-        || (gAresGlobal->gKeyControl[mki][3] & (mKeyMap[3]));
+    return (globals()->gKeyControl[mki][0] & (mKeyMap[0]))
+        || (globals()->gKeyControl[mki][1] & (mKeyMap[1]))
+        || (globals()->gKeyControl[mki][2] & (mKeyMap[2]))
+        || (globals()->gKeyControl[mki][3] & (mKeyMap[3]));
 }
 
 //#define   mHelpKey                mF1Key

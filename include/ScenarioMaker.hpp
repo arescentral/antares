@@ -55,7 +55,6 @@
 extern scenarioType* gThisScenario;
 extern TypedHandle<objectActionType>    gObjectActionData;
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
-extern aresGlobalType* gAresGlobal;
 
 inline int mGetRealAdmiralNum(int mplayernum) {
     return gThisScenario->player[mplayernum].admiralNumber;
@@ -104,17 +103,17 @@ inline void mGetActionFromBaseTypeNum(
 }
 
 inline scenarioInitialType* mGetScenarioInitial(scenarioType* mscenario, long minitialnum) {
-    return *gAresGlobal->gScenarioInitialData
+    return *globals()->gScenarioInitialData
         + (mscenario)->initialFirst + (minitialnum);
 }
 
 inline briefPointType* mGetScenarioBrief(scenarioType* mscenario, long mbriefnum) {
-    return *gAresGlobal->gScenarioBriefData
+    return *globals()->gScenarioBriefData
         + ((mscenario)->briefPointFirst) + (mbriefnum);
 }
 
 inline scenarioConditionType* mGetScenarioCondition(scenarioType* mscenario, long mconditionnum) {
-    return *gAresGlobal->gScenarioConditionData
+    return *globals()->gScenarioConditionData
         + (mscenario)->conditionFirst + (mconditionnum);
 }
 
@@ -131,7 +130,7 @@ inline void mGetRealObjectFromInitial(
         } else mobject = nil;
     } else if ( minum == -2)
     {
-        mobject = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
+        mobject = *gSpaceObjectData + globals()->gPlayerShipNumber;
         if ((!(mobject->active)) || ( !(mobject->attributes & kCanThink)))
         {
             mobject = nil;

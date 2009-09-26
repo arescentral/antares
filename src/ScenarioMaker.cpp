@@ -71,82 +71,74 @@ struct endgameCheckType {
 //  scenarioEndgameType endgame;
 };
 
-extern aresGlobalType           *gAresGlobal;
-//extern unsigned long          gAresGlobal->gOptions;
-extern long                     /*gAresGlobal->gPlayerShipNumber,*/ gAbsoluteScale, /*gAresGlobal->gGameOver,
-                                gAresGlobal->gGameTime,*/ gRandomSeed;
+extern long gAbsoluteScale, gRandomSeed;
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
-extern TypedHandle<baseObjectType>  gBaseObjectData;
-extern TypedHandle<objectActionType>    gObjectActionData;
+extern TypedHandle<baseObjectType> gBaseObjectData;
+extern TypedHandle<objectActionType> gObjectActionData;
 
-//long                          gAresGlobal->gPlayerAdmiralNumber, gAresGlobal->gScenarioWinner, // -1 = no-one, 0 = player loses
-//                              gAresGlobal->gScenarioRotation = 0, gAresGlobal->gThisScenarioNumber = -1;
-//short                         gAresGlobal->gScenarioRefID = 0;
-//Handle                            gAresGlobal->gScenarioData = nil, gAresGlobal->gScenarioInitialData = nil, gAresGlobal->gScenarioConditionData = nil,
-//                               gAresGlobal->gScenarioBriefData = nil;
-scenarioType                    *gThisScenario = nil;
+scenarioType* gThisScenario = nil;
 
 short ScenarioMakerInit( void)
 
 {
 /*
-    gAresGlobal->gScenarioRefID = ARF_OpenResFile( kScenarioResFileName);
-    if ( gAresGlobal->gScenarioRefID == -1)
+    globals()->gScenarioRefID = ARF_OpenResFile( kScenarioResFileName);
+    if ( globals()->gScenarioRefID == -1)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenariosFileError, kDataFolderError, -1, -1, __FILE__, 1);
         return( RESOURCE_ERROR);
     }
 */
-//  if ( gAresGlobal->externalFileRefNum > 0)
-//      UseResFile( gAresGlobal->externalFileRefNum);
+//  if ( globals()->externalFileRefNum > 0)
+//      UseResFile( globals()->externalFileRefNum);
 
     {
         TypedHandle<scenarioInfoType> tempScenarioInfo;
         tempScenarioInfo.load_resource('nlAG', 128);
         if (tempScenarioInfo.get() != nil) {
-            gAresGlobal->scenarioFileInfo = **tempScenarioInfo;
+            globals()->scenarioFileInfo = **tempScenarioInfo;
             tempScenarioInfo.destroy();
         }
     }
 
-    if (gAresGlobal->gScenarioData.get() == nil) {
-        gAresGlobal->gScenarioData.load_resource('snro', kScenarioResID);
-        if (gAresGlobal->gScenarioData.get() == nil) {
+    if (globals()->gScenarioData.get() == nil) {
+        globals()->gScenarioData.load_resource('snro', kScenarioResID);
+        if (globals()->gScenarioData.get() == nil) {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioDataError, -1, -1, -1, __FILE__, 2);
             return( RESOURCE_ERROR);
         }
 
-        gAresGlobal->scenarioNum = gAresGlobal->gScenarioData.count();
+        globals()->scenarioNum = globals()->gScenarioData.count();
     }
 
-    if (gAresGlobal->gScenarioInitialData.get() == nil) {
-        gAresGlobal->gScenarioInitialData.load_resource('snit', kScenarioInitialResID);
-        if (gAresGlobal->gScenarioInitialData.get() == nil) {
+    if (globals()->gScenarioInitialData.get() == nil) {
+        globals()->gScenarioInitialData.load_resource('snit', kScenarioInitialResID);
+        if (globals()->gScenarioInitialData.get() == nil) {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioInitialDataError, -1, -1, -1, __FILE__, 3);
             return( RESOURCE_ERROR);
         }
 
-        gAresGlobal->maxScenarioInitial = gAresGlobal->gScenarioInitialData.count();
+        globals()->maxScenarioInitial = globals()->gScenarioInitialData.count();
     }
 
-    if (gAresGlobal->gScenarioConditionData.get() == nil) {
-        gAresGlobal->gScenarioConditionData.load_resource('sncd', kScenarioConditionResID);
-        if (gAresGlobal->gScenarioConditionData.get() == nil) {
+    if (globals()->gScenarioConditionData.get() == nil) {
+        globals()->gScenarioConditionData.load_resource('sncd', kScenarioConditionResID);
+        if (globals()->gScenarioConditionData.get() == nil) {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioConditionDataError, -1, -1, -1, __FILE__, 4);
             return( RESOURCE_ERROR);
         }
 
-        gAresGlobal->maxScenarioCondition = gAresGlobal->gScenarioConditionData.count();
+        globals()->maxScenarioCondition = globals()->gScenarioConditionData.count();
     }
 
-    if (gAresGlobal->gScenarioBriefData.get() == nil) {
-        gAresGlobal->gScenarioBriefData.load_resource('snbf', kScenarioBriefResID);
-        if (gAresGlobal->gScenarioBriefData.get() == nil) {
+    if (globals()->gScenarioBriefData.get() == nil) {
+        globals()->gScenarioBriefData.load_resource('snbf', kScenarioBriefResID);
+        if (globals()->gScenarioBriefData.get() == nil) {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioBriefDataError, -1, -1, -1, __FILE__, 5);
             return( RESOURCE_ERROR);
         }
 
-        gAresGlobal->maxScenarioBrief = gAresGlobal->gScenarioBriefData.count();
+        globals()->maxScenarioBrief = globals()->gScenarioBriefData.count();
     }
 
     return ( InitRaces());
@@ -155,17 +147,17 @@ short ScenarioMakerInit( void)
 void ScenarioMakerCleanup( void)
 
 {
-    if ( gAresGlobal->gScenarioData.get() != nil) {
-        gAresGlobal->gScenarioData.destroy();
+    if ( globals()->gScenarioData.get() != nil) {
+        globals()->gScenarioData.destroy();
     }
-    if (gAresGlobal->gScenarioBriefData.get() != nil) {
-        gAresGlobal->gScenarioBriefData.destroy();
+    if (globals()->gScenarioBriefData.get() != nil) {
+        globals()->gScenarioBriefData.destroy();
     }
-    if (gAresGlobal->gScenarioInitialData.get() != nil) {
-        gAresGlobal->gScenarioInitialData.destroy();
+    if (globals()->gScenarioInitialData.get() != nil) {
+        globals()->gScenarioInitialData.destroy();
     }
-    if (gAresGlobal->gScenarioConditionData.get() != nil) {
-        gAresGlobal->gScenarioConditionData.destroy();
+    if (globals()->gScenarioConditionData.get() != nil) {
+        globals()->gScenarioConditionData.destroy();
     }
     CleanupRaces();
 }
@@ -203,21 +195,21 @@ Boolean ConstructScenario( long which)
 //  ClearMessage();             // moved so tutorial labels aren't convered by ship labels
     ResetMotionGlobals();
     gAbsoluteScale = kTimesTwoScale; //SCALE_SCALE;
-    gAresGlobal->gSynchValue = 0;
+    globals()->gSynchValue = 0;
 
-    if ( gAresGlobal->gOptions & kOptionNetworkOn)
+    if ( globals()->gOptions & kOptionNetworkOn)
     {
 #if NETSPROCKET_AVAILABLE
         if ( IAmHosting())
         {
-            gAresGlobal->gThisScenarioNumber = which;
+            globals()->gThisScenarioNumber = which;
             gRandomSeed = Randomize( 32760);
             SendStartMessage();
         } else
         {
-            gAresGlobal->gThisScenarioNumber = -1;
+            globals()->gThisScenarioNumber = -1;
             gRandomSeed = -1;
-            if (( gAresGlobal->gThisScenarioNumber == -1) && ( gRandomSeed == -1))
+            if (( globals()->gThisScenarioNumber == -1) && ( gRandomSeed == -1))
             {
                 if ( WaitForAllStart() == false)
                 {
@@ -225,24 +217,24 @@ Boolean ConstructScenario( long which)
                     return( false);
                 }
             }
-            which = gAresGlobal->gThisScenarioNumber;
+            which = globals()->gThisScenarioNumber;
         }
 #endif
     } else
     {
-        gAresGlobal->gThisScenarioNumber = which;
+        globals()->gThisScenarioNumber = which;
     }
 
 
-    count = GetScenarioAngle( gAresGlobal->gThisScenarioNumber);
+    count = GetScenarioAngle( globals()->gThisScenarioNumber);
     if ( count < 0)
-        gAresGlobal->gScenarioRotation = RandomSeeded( ROT_POS, &gRandomSeed, 'scm0', -1);
+        globals()->gScenarioRotation = RandomSeeded( ROT_POS, &gRandomSeed, 'scm0', -1);
     else
-        gAresGlobal->gScenarioRotation = count;
+        globals()->gScenarioRotation = count;
 
-    gThisScenario = *gAresGlobal->gScenarioData + which;
+    gThisScenario = *globals()->gScenarioData + which;
 
-    gAresGlobal->gScenarioWinner = kScenarioWinnerNoPlayer | kScenarioWinnerNoNext | kScenarioWinnerNoText;
+    globals()->gScenarioWinner = kScenarioWinnerNoPlayer | kScenarioWinnerNoNext | kScenarioWinnerNoText;
 
     SetMiniScreenStatusStrList( gThisScenario->scoreStringResID);
 
@@ -260,7 +252,7 @@ Boolean ConstructScenario( long which)
 
     for ( count = 0; count < gThisScenario->playerNum; count++)
     {
-        if ( gAresGlobal->gOptions & kOptionNetworkOn)
+        if ( globals()->gOptions & kOptionNetworkOn)
         {
 #if NETSPROCKET_AVAILABLE
             if ( gThisScenario->player[count].playerType == kComputerPlayer)
@@ -274,7 +266,7 @@ Boolean ConstructScenario( long which)
                 PayAdmiral( gThisScenario->player[count].admiralNumber, mLongToFixed( 5000));
             } else if ( GetPlayerRace( count) >= 0)
             {
-                if ( count == gAresGlobal->gPlayerAdmiralNumber)
+                if ( count == globals()->gPlayerAdmiralNumber)
                 {
                     admiralType = 0;
                 } else
@@ -300,7 +292,7 @@ Boolean ConstructScenario( long which)
         {
             if ( gThisScenario->player[count].playerType == kSingleHumanPlayer)
             {
-                if ( gAresGlobal->gOptions & kOptionAutoPlay)
+                if ( globals()->gOptions & kOptionAutoPlay)
                 {
                     gThisScenario->player[count].admiralNumber = MakeNewAdmiral( kNoShip, kNoDestinationObject, kNoDestinationType,
                                                 kAIsComputer, gThisScenario->player[count].playerRace,
@@ -315,9 +307,9 @@ Boolean ConstructScenario( long which)
                                                 gThisScenario->player[count].nameStrNum, gThisScenario->player[count].earningPower);
                     PayAdmiral( gThisScenario->player[count].admiralNumber, mLongToFixed( 5000));
                 }
-                gAresGlobal->gPlayerAdmiralNumber = gThisScenario->player[count].admiralNumber;
+                globals()->gPlayerAdmiralNumber = gThisScenario->player[count].admiralNumber;
                 mWriteDebugString("\pSETADM#:");
-                WriteDebugLong( gAresGlobal->gPlayerAdmiralNumber);
+                WriteDebugLong( globals()->gPlayerAdmiralNumber);
             } else
             {
                 gThisScenario->player[count].admiralNumber = MakeNewAdmiral( kNoShip, kNoDestinationObject, kNoDestinationType,
@@ -348,28 +340,28 @@ Boolean ConstructScenario( long which)
 
     // for each initial object
 
-    if ( gAresGlobal->scenarioFileInfo.energyBlobID < 0)
+    if ( globals()->scenarioFileInfo.energyBlobID < 0)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, "\pNo energy blob defined",
             nil, nil, nil, -1, -1, -1, -1, __FILE__, 1);
         ExitToShell();
     }
 
-    if ( gAresGlobal->scenarioFileInfo.warpInFlareID < 0)
+    if ( globals()->scenarioFileInfo.warpInFlareID < 0)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, "\pNo warp in flare defined",
             nil, nil, nil, -1, -1, -1, -1, __FILE__, 1);
         ExitToShell();
     }
 
-    if ( gAresGlobal->scenarioFileInfo.warpOutFlareID < 0)
+    if ( globals()->scenarioFileInfo.warpOutFlareID < 0)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, "\pNo warp out flare defined",
             nil, nil, nil, -1, -1, -1, -1, __FILE__, 1);
         ExitToShell();
     }
 
-    if ( gAresGlobal->scenarioFileInfo.playerBodyID < 0)
+    if ( globals()->scenarioFileInfo.playerBodyID < 0)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, "\pNo player body defined",
             nil, nil, nil, -1, -1, -1, -1, __FILE__, 1);
@@ -378,19 +370,19 @@ Boolean ConstructScenario( long which)
 
     for ( count = 0; count < gThisScenario->playerNum; count++)
     {
-        if ( gAresGlobal->scenarioFileInfo.energyBlobID < 0)
+        if ( globals()->scenarioFileInfo.energyBlobID < 0)
             ShowErrorAny( eQuitErr, kErrorStrID, "\pNo energy blob defined",
                 nil, nil, nil, -1, -1, -1, -1, __FILE__, 1);
-        baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.energyBlobID);
+        baseObject = mGetBaseObjectPtr( globals()->scenarioFileInfo.energyBlobID);
         if ( baseObject != nil)
             CheckBaseObjectMedia( baseObject, 0);   // special case; always neutral
-        baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.warpInFlareID);
+        baseObject = mGetBaseObjectPtr( globals()->scenarioFileInfo.warpInFlareID);
         if ( baseObject != nil)
             CheckBaseObjectMedia( baseObject, 0); // special case; always neutral
-        baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.warpOutFlareID);
+        baseObject = mGetBaseObjectPtr( globals()->scenarioFileInfo.warpOutFlareID);
         if ( baseObject != nil)
             CheckBaseObjectMedia( baseObject, 0); // special case; always neutral
-        baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.playerBodyID);
+        baseObject = mGetBaseObjectPtr( globals()->scenarioFileInfo.playerBodyID);
         if ( baseObject != nil)
             CheckBaseObjectMedia( baseObject, GetAdmiralColor( count));
     }
@@ -402,7 +394,7 @@ Boolean ConstructScenario( long which)
         UpdateLoadingInterface( currentStep, stepNumber, &loadingRect);
         // get the base object equiv
         baseObject = mGetBaseObjectPtr( initial->type);
-        if ((gAresGlobal->gOptions & kOptionNetworkOn) && (GetAdmiralRace( initial->owner) >= 0) &&
+        if ((globals()->gOptions & kOptionNetworkOn) && (GetAdmiralRace( initial->owner) >= 0) &&
             ( !(initial->attributes & kFixedRace)))
         {
             baseClass = baseObject->baseClass;
@@ -477,29 +469,29 @@ Boolean ConstructScenario( long which)
 
     for ( count = 0; count < gThisScenario->playerNum; count++)
     {
-        baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.energyBlobID);
+        baseObject = mGetBaseObjectPtr( globals()->scenarioFileInfo.energyBlobID);
         if ( baseObject != nil)
         {
-            AddBaseObjectMedia( gAresGlobal->scenarioFileInfo.energyBlobID, 0); // special case; always neutral
-    //      scenario = *gAresGlobal->gScenarioData + which;
+            AddBaseObjectMedia( globals()->scenarioFileInfo.energyBlobID, 0); // special case; always neutral
+    //      scenario = *globals()->gScenarioData + which;
         }
-        baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.warpInFlareID);
+        baseObject = mGetBaseObjectPtr( globals()->scenarioFileInfo.warpInFlareID);
         if ( baseObject != nil)
         {
-            AddBaseObjectMedia( gAresGlobal->scenarioFileInfo.warpInFlareID, 0); // special case; always neutral
-    //      scenario = *gAresGlobal->gScenarioData + which;
+            AddBaseObjectMedia( globals()->scenarioFileInfo.warpInFlareID, 0); // special case; always neutral
+    //      scenario = *globals()->gScenarioData + which;
         }
-        baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.warpOutFlareID);
+        baseObject = mGetBaseObjectPtr( globals()->scenarioFileInfo.warpOutFlareID);
         if ( baseObject != nil)
         {
-            AddBaseObjectMedia( gAresGlobal->scenarioFileInfo.warpOutFlareID, 0); // special case; always neutral
-    //      scenario = *gAresGlobal->gScenarioData + which;
+            AddBaseObjectMedia( globals()->scenarioFileInfo.warpOutFlareID, 0); // special case; always neutral
+    //      scenario = *globals()->gScenarioData + which;
         }
-        baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.playerBodyID);
+        baseObject = mGetBaseObjectPtr( globals()->scenarioFileInfo.playerBodyID);
         if ( baseObject != nil)
         {
-            AddBaseObjectMedia( gAresGlobal->scenarioFileInfo.playerBodyID, GetAdmiralColor( count));
-    //      scenario = *gAresGlobal->gScenarioData + which;
+            AddBaseObjectMedia( globals()->scenarioFileInfo.playerBodyID, GetAdmiralColor( count));
+    //      scenario = *globals()->gScenarioData + which;
         }
     }
 
@@ -513,7 +505,7 @@ Boolean ConstructScenario( long which)
         // get the base object equiv
         type = initial->type;
         baseObject = mGetBaseObjectPtr( type);
-        if ((gAresGlobal->gOptions & kOptionNetworkOn) && (GetAdmiralRace( initial->owner) >= 0) &&
+        if ((globals()->gOptions & kOptionNetworkOn) && (GetAdmiralRace( initial->owner) >= 0) &&
             ( !(initial->attributes & kFixedRace)))
         {
             baseClass = baseObject->baseClass;
@@ -538,7 +530,7 @@ Boolean ConstructScenario( long which)
         }
 
         // we may have just moved memory, so let's make sure our ptrs are correct
-//      scenario = *gAresGlobal->gScenarioData + which;
+//      scenario = *globals()->gScenarioData + which;
         initial = mGetScenarioInitial( gThisScenario, count);
         baseObject = mGetBaseObjectPtr( type);
 
@@ -553,7 +545,7 @@ Boolean ConstructScenario( long which)
             {
                 AddPixTable( initial->spriteIDOverride);
             }
-//          scenario = *gAresGlobal->gScenarioData + which;
+//          scenario = *globals()->gScenarioData + which;
         }
 
         // check any objects this object can build
@@ -572,7 +564,7 @@ Boolean ConstructScenario( long which)
                     if ( baseObject != nil)
                     {
                         AddBaseObjectMedia( newShipNum, GetAdmiralColor( c3));
-//                      scenario = *gAresGlobal->gScenarioData + which;
+//                      scenario = *globals()->gScenarioData + which;
                     }
                 }
             }
@@ -636,7 +628,7 @@ Boolean ConstructScenario( long which)
 
         if ( !(initial->attributes & kInitiallyHidden))
         {
-            GetInitialCoord( initial, &coord, gAresGlobal->gScenarioRotation);
+            GetInitialCoord( initial, &coord, globals()->gScenarioRotation);
 
             if ( initial->owner > kScenarioNoOwner)
                 owner = gThisScenario->player[initial->owner].admiralNumber;
@@ -647,10 +639,10 @@ Boolean ConstructScenario( long which)
             {
                 if ( GetAdmiralFlagship( owner) == nil)
                 {
-                    if ( owner == gAresGlobal->gPlayerAdmiralNumber)
+                    if ( owner == globals()->gPlayerAdmiralNumber)
                     {
                         //specialAttributes &= (~( kCanThink | kCanEngage | kCanEvade | kHasDirectionGoal));
-                        if ( gAresGlobal->gOptions & kOptionAutoPlay)
+                        if ( globals()->gOptions & kOptionAutoPlay)
                         {
         //                  specialAttributes |= kIsPlayerShip;
                         } else
@@ -660,7 +652,7 @@ Boolean ConstructScenario( long which)
                     } else
                     {
     //                  specialAttributes &= ~kIsPlayerShip;
-                        if ( gAresGlobal->gOptions & kOptionNetworkOn)
+                        if ( globals()->gOptions & kOptionNetworkOn)
                         {
                             specialAttributes |= kIsRemote;
                         } else
@@ -676,7 +668,7 @@ Boolean ConstructScenario( long which)
 
 
             type = initial->type;
-            if ((gAresGlobal->gOptions & kOptionNetworkOn) && (GetAdmiralRace( initial->owner) >= 0) &&
+            if ((globals()->gOptions & kOptionNetworkOn) && (GetAdmiralRace( initial->owner) >= 0) &&
                 ( !(initial->attributes & kFixedRace)))
             {
                 baseObject = mGetBaseObjectPtr( type);
@@ -690,7 +682,7 @@ Boolean ConstructScenario( long which)
                 }
             }
 /*          initial->realObjectNumber = newShipNum = CreateAnySpaceObject( type, &v, &coord,
-                                                gAresGlobal->gScenarioRotation,
+                                                globals()->gScenarioRotation,
                                                 owner,
                                                 specialAttributes,
                                                 initial->canBuild,
@@ -699,7 +691,7 @@ Boolean ConstructScenario( long which)
                                                 initial->spriteIDOverride);
 */
             initial->realObjectNumber = newShipNum = CreateAnySpaceObject( type, &v, &coord,
-                                                gAresGlobal->gScenarioRotation,
+                                                globals()->gScenarioRotation,
                                                 owner,
                                                 specialAttributes,
                                                 initial->spriteIDOverride);
@@ -711,19 +703,19 @@ Boolean ConstructScenario( long which)
                     initial->earning, initial->nameResID, initial->nameStrNum);
             }
 //          WriteDebugLine((char *)"\pROTATION");
-//          WriteDebugLong( gAresGlobal->gScenarioRotation);
+//          WriteDebugLong( globals()->gScenarioRotation);
 //          WriteDebugLong( anObject->direction);
             initial->realObjectID = anObject->id;
             if (( initial->attributes & kIsPlayerShip) && ( GetAdmiralFlagship( owner)
                 == nil))
             {
                 SetAdmiralFlagship( owner, newShipNum);
-                if ( owner == gAresGlobal->gPlayerAdmiralNumber)
+                if ( owner == globals()->gPlayerAdmiralNumber)
                 {
                     ResetPlayerShip( newShipNum);
                 } else
                 {
-                    if ( gAresGlobal->gOptions & kOptionNetworkOn)
+                    if ( globals()->gOptions & kOptionNetworkOn)
                     {
                         anObject->attributes |= kIsRemote;
                     }
@@ -790,8 +782,8 @@ Boolean ConstructScenario( long which)
     RecalcAllAdmiralBuildData();
 
     mWriteDebugString("\pPlayerAdmiral");
-    WriteDebugLong( gAresGlobal->gPlayerAdmiralNumber);
-    if ( gAresGlobal->gOptions & kOptionNetworkOn)
+    WriteDebugLong( globals()->gPlayerAdmiralNumber);
+    if ( globals()->gOptions & kOptionNetworkOn)
     {
         for ( c2 = 0; c2 < gThisScenario->playerNum; c2++)
         {
@@ -817,7 +809,7 @@ Boolean ConstructScenario( long which)
                     WriteDebugLong( c2);
                     SetAdmiralFlagship( c2, count);
                     anObject->attributes |= kIsPlayerShip;
-                    if ( c2 != gAresGlobal->gPlayerAdmiralNumber)
+                    if ( c2 != globals()->gPlayerAdmiralNumber)
                     {
                         mWriteDebugString("\pREMOTE");
                         anObject->attributes |= kIsRemote;
@@ -836,9 +828,9 @@ Boolean ConstructScenario( long which)
         if ( anObject->active);
         {
             DebugFileAppendString("\p-\t");
-            DebugFileAppendLong( gAresGlobal->gGameTime);
+            DebugFileAppendLong( globals()->gGameTime);
             DebugFileAppendString("\p\t");
-//          DebugFileAppendLongHex( gAresGlobal->gTheseKeys);
+//          DebugFileAppendLongHex( globals()->gTheseKeys);
             DebugFileAppendString("\p\r");
         }
         anObject++;
@@ -849,7 +841,7 @@ Boolean ConstructScenario( long which)
     c2 = 0;
     for ( count = 0; count < ((gThisScenario->startTime & kScenario_StartTimeMask) * 20); count++)
     {
-        gAresGlobal->gGameTime = count;
+        globals()->gGameTime = count;
         MoveSpaceObjects( *gSpaceObjectData, kMaxSpaceObject,
                     kDecideEveryCycles);
         NonplayerShipThink( kDecideEveryCycles);
@@ -870,13 +862,13 @@ Boolean ConstructScenario( long which)
             UpdateLoadingInterface( currentStep, stepNumber, &loadingRect);
         }
     }
-    gAresGlobal->gGameTime = (gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple;
-    if ( !(gAresGlobal->gOptions & ( kOptionAutoPlay | kOptionReplay | kOptionNetworkOn)))
+    globals()->gGameTime = (gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple;
+    if ( !(globals()->gOptions & ( kOptionAutoPlay | kOptionReplay | kOptionNetworkOn)))
     {
         if ( !DoMissionInterface( which)) return( false);
     }
 
-    if ( gAresGlobal->gOptions & kOptionNetworkOn)
+    if ( globals()->gOptions & kOptionNetworkOn)
     {
 #if NETSPROCKET_AVAILABLE
         UpdateLoadingInterface( -1, -1, &loadingRect);
@@ -1314,10 +1306,10 @@ void CheckScenarioConditions( long timePass)
                         break;
 
                     case kTimeCondition:
-                        if ( gAresGlobal->gGameTime >= condition->conditionArgument.longValue)
+                        if ( globals()->gGameTime >= condition->conditionArgument.longValue)
                         {
                             conditionTrue = true;
-                        }// else WriteDebugLong( gAresGlobal->gGameTime);
+                        }// else WriteDebugLong( globals()->gGameTime);
                         break;
 
                     case kProximityCondition:
@@ -1399,7 +1391,7 @@ void CheckScenarioConditions( long timePass)
                         mGetRealObjectFromInitial( sObject, initial, condition->subjectObject);
                         if ( sObject != nil)
                         {
-                            l = GetAdmiralConsiderObject( gAresGlobal->gPlayerAdmiralNumber);
+                            l = GetAdmiralConsiderObject( globals()->gPlayerAdmiralNumber);
                             if ( l >= 0)
                             {
                                 dObject = *gSpaceObjectData + l;
@@ -1416,7 +1408,7 @@ void CheckScenarioConditions( long timePass)
                         mGetRealObjectFromInitial( sObject, initial, condition->subjectObject);
                         if ( sObject != nil)
                         {
-                            l = GetAdmiralDestinationObject( gAresGlobal->gPlayerAdmiralNumber);
+                            l = GetAdmiralDestinationObject( globals()->gPlayerAdmiralNumber);
                             if ( l >= 0)
                             {
                                 dObject = *gSpaceObjectData + l;
@@ -1452,7 +1444,7 @@ void CheckScenarioConditions( long timePass)
                         {
                             longMessageType *tmessage;
 
-                            tmessage = *gAresGlobal->gLongMessageData;
+                            tmessage = *globals()->gLongMessageData;
                             if ( tmessage->currentResID == (condition->conditionArgument.location.h +
                                 condition->conditionArgument.location.v - 1))
                             {
@@ -1463,10 +1455,10 @@ void CheckScenarioConditions( long timePass)
                         break;
 
                     case kCurrentComputerCondition:
-                        if (( gAresGlobal->gMiniScreenData.currentScreen ==
+                        if (( globals()->gMiniScreenData.currentScreen ==
                             condition->conditionArgument.location.h) &&
                             ((condition->conditionArgument.location.v < 0) ||
-                                (gAresGlobal->gMiniScreenData.selectLine ==
+                                (globals()->gMiniScreenData.selectLine ==
                                     condition->conditionArgument.location.v)))
                         {
                             conditionTrue = true;
@@ -1474,7 +1466,7 @@ void CheckScenarioConditions( long timePass)
                         break;
 
                     case kZoomLevelCondition:
-                        if ( gAresGlobal->gZoomMode ==
+                        if ( globals()->gZoomMode ==
                             condition->conditionArgument.longValue)
                         {
                             conditionTrue = true;
@@ -1497,7 +1489,7 @@ void CheckScenarioConditions( long timePass)
 
 //                          if ( sObject != nil)
                             {
-                                buildAtObject = mGetDestObjectBalancePtr( GetAdmiralBuildAtObject( gAresGlobal->gPlayerAdmiralNumber));
+                                buildAtObject = mGetDestObjectBalancePtr( GetAdmiralBuildAtObject( globals()->gPlayerAdmiralNumber));
                                 if ( buildAtObject != nil)
                                 {
                                     if ( buildAtObject->totalBuildTime > 0)
@@ -1524,7 +1516,7 @@ void CheckScenarioConditions( long timePass)
                         mGetRealObjectFromInitial( sObject, initial, condition->subjectObject);
                         if ( sObject != nil)
                         {
-                            if ( sObject->entryNumber == gAresGlobal->gPlayerShipNumber)
+                            if ( sObject->entryNumber == globals()->gPlayerShipNumber)
                                 conditionTrue = true;
                         }
                         break;
@@ -1616,7 +1608,7 @@ void UnhideInitialObject( long whichInitial)
     {
 //      if (initial->attributes & kInitiallyHidden)
         {
-            GetInitialCoord( initial, &coord, gAresGlobal->gScenarioRotation);
+            GetInitialCoord( initial, &coord, globals()->gScenarioRotation);
 
             if ( initial->owner > kScenarioNoOwner)
                 owner = gThisScenario->player[initial->owner].admiralNumber;
@@ -1627,10 +1619,10 @@ void UnhideInitialObject( long whichInitial)
             {
                 if ( GetAdmiralFlagship( owner) == nil)
                 {
-                    if ( owner == gAresGlobal->gPlayerAdmiralNumber)
+                    if ( owner == globals()->gPlayerAdmiralNumber)
                     {
     //                  specialAttributes &= (~( kCanThink | kCanEngage | kCanEvade | kHasDirectionGoal));
-                        if ( gAresGlobal->gOptions & kOptionAutoPlay)
+                        if ( globals()->gOptions & kOptionAutoPlay)
                         {
         //                  specialAttributes |= kIsPlayerShip;
                         } else
@@ -1639,7 +1631,7 @@ void UnhideInitialObject( long whichInitial)
                         }
                     } else
                     {
-                        if ( gAresGlobal->gOptions & kOptionNetworkOn)
+                        if ( globals()->gOptions & kOptionNetworkOn)
                             specialAttributes |= kIsRemote;
                         else
                             specialAttributes &= ~kIsPlayerShip;
@@ -1652,7 +1644,7 @@ void UnhideInitialObject( long whichInitial)
 
 
             type = initial->type;
-            if ((gAresGlobal->gOptions & kOptionNetworkOn) && (GetAdmiralRace( initial->owner) >= 0) &&
+            if ((globals()->gOptions & kOptionNetworkOn) && (GetAdmiralRace( initial->owner) >= 0) &&
                 ( !(initial->attributes & kFixedRace)))
             {
                 baseObject = mGetBaseObjectPtr( type);
@@ -1704,7 +1696,7 @@ void UnhideInitialObject( long whichInitial)
                 ( GetAdmiralFlagship( owner) == nil))
             {
                 SetAdmiralFlagship( owner, newShipNum);
-                if ( owner == gAresGlobal->gPlayerAdmiralNumber)
+                if ( owner == globals()->gPlayerAdmiralNumber)
                 {
                     ResetPlayerShip( newShipNum);
                 }
@@ -1768,30 +1760,30 @@ void DeclareWinner( long whichPlayer, long nextLevel, long textID)
     {
         if ( nextLevel >= 0)
         {
-            gAresGlobal->gScenarioWinner = ( nextLevel << kScenarioWinnerNextShift);
-        } else gAresGlobal->gScenarioWinner = kScenarioWinnerNoNext;
+            globals()->gScenarioWinner = ( nextLevel << kScenarioWinnerNextShift);
+        } else globals()->gScenarioWinner = kScenarioWinnerNoNext;
         if ( textID >= 0)
         {
-            gAresGlobal->gScenarioWinner |= ( textID << kScenarioWinnerTextShift);
+            globals()->gScenarioWinner |= ( textID << kScenarioWinnerTextShift);
         }
 //      ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p no-one won.", nil, nil, -1, -1, -1, -1, __FILE__, 1);
-        gAresGlobal->gGameOver = 1;
+        globals()->gGameOver = 1;
     } else
     {
-        if ( (gAresGlobal->gScenarioWinner & kScenarioWinnerPlayerMask) == kScenarioWinnerNoPlayer)
+        if ( (globals()->gScenarioWinner & kScenarioWinnerPlayerMask) == kScenarioWinnerNoPlayer)
         {
             if ( nextLevel >= 0)
             {
-                gAresGlobal->gScenarioWinner =  whichPlayer | ( nextLevel << kScenarioWinnerNextShift) |
+                globals()->gScenarioWinner =  whichPlayer | ( nextLevel << kScenarioWinnerNextShift) |
                                 ( textID << kScenarioWinnerTextShift);
             } else
             {
-                gAresGlobal->gScenarioWinner =  whichPlayer | ( kScenarioWinnerNoNext) |
+                globals()->gScenarioWinner =  whichPlayer | ( kScenarioWinnerNoNext) |
                                 ( textID << kScenarioWinnerTextShift);
             }
-            if ( gAresGlobal->gGameOver >= 0)
+            if ( globals()->gGameOver >= 0)
             {
-                gAresGlobal->gGameOver = -180;
+                globals()->gGameOver = -180;
 //              ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p we have a winner.", nil, nil, -1, -1, -1, -1, __FILE__, 1);
             }
         }
@@ -1808,7 +1800,7 @@ void GetScenarioFullScaleAndCorner( long whichScenario, long rotation,
 {
     long            biggest, count, otherCount, mustFit;
     longPointType   coord, otherCoord, tempCoord;
-    scenarioType    *scenario = *gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *scenario = *globals()->gScenarioData + whichScenario;
     scenarioInitialType     *initial;
 
 
@@ -1822,12 +1814,12 @@ void GetScenarioFullScaleAndCorner( long whichScenario, long rotation,
         initial = mGetScenarioInitial( scenario, count);
         if ( !(initial->attributes & kInitiallyHidden))
         {
-            GetInitialCoord( initial, reinterpret_cast<coordPointType *>(&coord), gAresGlobal->gScenarioRotation);
+            GetInitialCoord( initial, reinterpret_cast<coordPointType *>(&coord), globals()->gScenarioRotation);
 
             for ( otherCount = 0; otherCount < scenario->initialNum; otherCount++)
             {
                 initial = mGetScenarioInitial( scenario, otherCount);
-                GetInitialCoord( initial, reinterpret_cast<coordPointType *>(&otherCoord), gAresGlobal->gScenarioRotation);
+                GetInitialCoord( initial, reinterpret_cast<coordPointType *>(&otherCoord), globals()->gScenarioRotation);
 
                 if ( ABS( otherCoord.h - coord.h) > biggest)
                     biggest = ABS( otherCoord.h - coord.h);
@@ -1851,7 +1843,7 @@ void GetScenarioFullScaleAndCorner( long whichScenario, long rotation,
     {
         if ( !(initial->attributes & kInitiallyHidden))
         {
-            GetInitialCoord( initial, reinterpret_cast<coordPointType *>(&tempCoord), gAresGlobal->gScenarioRotation);
+            GetInitialCoord( initial, reinterpret_cast<coordPointType *>(&tempCoord), globals()->gScenarioRotation);
 
             if ( (tempCoord.h) < coord.h)
                 coord.h = tempCoord.h;
@@ -1883,14 +1875,14 @@ void GetScenarioFullScaleAndCorner( long whichScenario, long rotation,
 long GetBriefPointNumber( long whichScenario)
 
 {
-    scenarioType    *scenario = *gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *scenario = *globals()->gScenarioData + whichScenario;
 
     return ( scenario->briefPointNum & kScenarioBriefMask);
 }
 
 long GetScenarioAngle( long whichScenario)
 {
-    scenarioType    *scenario = *gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *scenario = *globals()->gScenarioData + whichScenario;
 
     if ( scenario->briefPointNum & kScenarioAngleMask)
         return (( (scenario->briefPointNum & kScenarioAngleMask) >> kScenarioAngleShift) - 1) * 2;
@@ -1900,7 +1892,7 @@ long GetScenarioAngle( long whichScenario)
 
 long GetScenarioNumberFromChapterNumber( long whichChapter)
 {
-    scenarioType    *aScenario = *gAresGlobal->gScenarioData;
+    scenarioType    *aScenario = *globals()->gScenarioData;
     long            whichScenario = 0;
 
     while (( whichScenario < kScenarioNum) && ( aScenario->levelNameStrNum != whichChapter))
@@ -1916,7 +1908,7 @@ long GetScenarioNumberFromChapterNumber( long whichChapter)
 void GetScenarioStarMapPoint( long whichScenario, Point *starPoint)
 
 {
-    scenarioType    *scenario = *gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *scenario = *globals()->gScenarioData + whichScenario;
 
     starPoint->h = scenario->starMapH;
     starPoint->v = scenario->starMapV;
@@ -1924,7 +1916,7 @@ void GetScenarioStarMapPoint( long whichScenario, Point *starPoint)
 
 long GetChapterNumberFromScenarioNumber( long whichScenario)
 {
-    scenarioType    *aScenario = *gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *aScenario = *globals()->gScenarioData + whichScenario;
 
     if ( whichScenario < 0) return ( -1);
     return( aScenario->levelNameStrNum);
@@ -1933,7 +1925,7 @@ long GetChapterNumberFromScenarioNumber( long whichScenario)
 scenarioType *GetScenarioPtrFromChapter( long whichChapter)
 {
     scenarioType    *aScenario =
-                        *gAresGlobal->gScenarioData +
+                        *globals()->gScenarioData +
                         GetScenarioNumberFromChapterNumber( whichChapter);
 
     if ( whichChapter < 0) return ( nil);
@@ -1942,34 +1934,34 @@ scenarioType *GetScenarioPtrFromChapter( long whichChapter)
 }
 
 void GetScenarioName(long whichScenario, unsigned char* scenarioName) {
-    scenarioType    *aScenario = *gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *aScenario = *globals()->gScenarioData + whichScenario;
     GetIndString( scenarioName, kLevelNameID, aScenario->levelNameStrNum);
 }
 
 long GetScenarioNumber() {
-    return gAresGlobal->gScenarioData.count();
+    return globals()->gScenarioData.count();
 }
 
 long GetScenarioPlayerNum( long whichScenario)
 {
-    scenarioType    *aScenario = *gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *aScenario = *globals()->gScenarioData + whichScenario;
     return ( aScenario->playerNum);
 }
 
 long GetScenarioPrologueID( long whichScenario)
 {
-    scenarioType    *aScenario = *gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *aScenario = *globals()->gScenarioData + whichScenario;
     return ( aScenario->prologueID);
 }
 
 long GetScenarioEpilogueID( long whichScenario)
 {
-    scenarioType    *aScenario = *gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *aScenario = *globals()->gScenarioData + whichScenario;
     return ( aScenario->epilogueID);
 }
 
 void GetScenarioMovieName(long whichScenario, unsigned char* movieName) {
-    scenarioType    *aScenario = *gAresGlobal->gScenarioData + whichScenario;
+    scenarioType    *aScenario = *globals()->gScenarioData + whichScenario;
 
     movieName[0] = 0;
     GetIndString( movieName, 4500, aScenario->movieNameStrNum);
@@ -1977,20 +1969,20 @@ void GetScenarioMovieName(long whichScenario, unsigned char* movieName) {
 
 long GetNextScenarioChapter( long whichScenario)
 {
-    scenarioType    *aScenario = *gAresGlobal->gScenarioData + whichScenario, *newScenario = nil;
+    scenarioType    *aScenario = *globals()->gScenarioData + whichScenario, *newScenario = nil;
     long            newScenarioNum, newChapterNum = aScenario->levelNameStrNum + 1;
 
     newScenarioNum = GetScenarioNumberFromChapterNumber( newChapterNum);
     if ( newScenarioNum >= 0)
     {
-        newScenario = *gAresGlobal->gScenarioData + newScenarioNum;
+        newScenario = *globals()->gScenarioData + newScenarioNum;
         while ( ( newScenario->playerNum <= 0) && ( newChapterNum < GetScenarioNumber()) && ( newScenario != nil))
         {
             newChapterNum++;
             newScenarioNum = GetScenarioNumberFromChapterNumber( newChapterNum);
             if ( newScenarioNum >= 0)
             {
-                newScenario = *gAresGlobal->gScenarioData + newScenarioNum;
+                newScenario = *globals()->gScenarioData + newScenarioNum;
             } else newScenario = nil;
         }
     }
@@ -2049,7 +2041,7 @@ long GetPreviousNetworkScenario( long thisChapter)
 Boolean ThisChapterIsNetworkable( long whichChapter)
 
 {
-    scenarioType    *aScenario = *gAresGlobal->gScenarioData + GetScenarioNumberFromChapterNumber( whichChapter);
+    scenarioType    *aScenario = *globals()->gScenarioData + GetScenarioNumberFromChapterNumber( whichChapter);
     long            i;
 
     if (( whichChapter < 0) || ( whichChapter > GetScenarioNumber()))

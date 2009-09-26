@@ -47,8 +47,6 @@
 #include "SpaceObjectHandling.hpp"
 #include "ScenarioMaker.hpp"
 
-extern aresGlobalType *gAresGlobal;
-
 extern scenarioType                 *gThisScenario;
 extern TypedHandle<objectActionType>    gObjectActionData;
 extern TypedHandle<baseObjectType>  gBaseObjectData;
@@ -102,7 +100,7 @@ void MakeDemoDataHack( void)
 
     delete[] baseObjectKeepList.
 
-    aScenario = *gAresGlobal->gScenarioData;
+    aScenario = *globals()->gScenarioData;
     for ( count = 0; count < GetScenarioNumber(); count++)
     {
         if ( ( count !=
@@ -152,7 +150,7 @@ void MakeDemoDataHack( void)
         }
         aScenario++;
     }
-    SaveAnyResourceInPreferences('snro', 500, nil, reinterpret_cast<Handle>(gAresGlobal->gScenarioData), true);
+    SaveAnyResourceInPreferences('snro', 500, nil, reinterpret_cast<Handle>(globals()->gScenarioData), true);
 }
 
 void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
@@ -166,8 +164,8 @@ void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
 
     SetAllBaseObjectsUnchecked();
 
-    gAresGlobal->gThisScenarioNumber = whatLevel;
-    gThisScenario = *gAresGlobal->gScenarioData + whatLevel;
+    globals()->gThisScenarioNumber = whatLevel;
+    gThisScenario = *globals()->gScenarioData + whatLevel;
     ///// FIRST SELECT WHAT MEDIA WE NEED TO USE:
     // uncheck all base objects
     // uncheck all sounds
@@ -176,16 +174,16 @@ void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
 
     // for each initial object
 
-    baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.energyBlobID);
+    baseObject = mGetBaseObjectPtr( globals()->scenarioFileInfo.energyBlobID);
     if ( baseObject != nil)
         CheckBaseObjectMedia( baseObject, 0);
-    baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.warpInFlareID);
+    baseObject = mGetBaseObjectPtr( globals()->scenarioFileInfo.warpInFlareID);
     if ( baseObject != nil)
         CheckBaseObjectMedia( baseObject, 0);
-    baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.warpOutFlareID);
+    baseObject = mGetBaseObjectPtr( globals()->scenarioFileInfo.warpOutFlareID);
     if ( baseObject != nil)
         CheckBaseObjectMedia( baseObject, 0);
-    baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.playerBodyID);
+    baseObject = mGetBaseObjectPtr( globals()->scenarioFileInfo.playerBodyID);
     if ( baseObject != nil)
         CheckBaseObjectMedia( baseObject, 0);
 
@@ -243,25 +241,25 @@ void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
     // *** add media          ***
     // **************************
 
-    baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.energyBlobID);
+    baseObject = mGetBaseObjectPtr( globals()->scenarioFileInfo.energyBlobID);
     if ( baseObject != nil)
     {
-        AddBaseObjectMedia( gAresGlobal->scenarioFileInfo.energyBlobID, 0);
+        AddBaseObjectMedia( globals()->scenarioFileInfo.energyBlobID, 0);
     }
-    baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.warpInFlareID);
+    baseObject = mGetBaseObjectPtr( globals()->scenarioFileInfo.warpInFlareID);
     if ( baseObject != nil)
     {
-        AddBaseObjectMedia( gAresGlobal->scenarioFileInfo.warpInFlareID, 0);
+        AddBaseObjectMedia( globals()->scenarioFileInfo.warpInFlareID, 0);
     }
-    baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.warpOutFlareID);
+    baseObject = mGetBaseObjectPtr( globals()->scenarioFileInfo.warpOutFlareID);
     if ( baseObject != nil)
     {
-        AddBaseObjectMedia( gAresGlobal->scenarioFileInfo.warpOutFlareID, 0);
+        AddBaseObjectMedia( globals()->scenarioFileInfo.warpOutFlareID, 0);
     }
-    baseObject = mGetBaseObjectPtr( gAresGlobal->scenarioFileInfo.playerBodyID);
+    baseObject = mGetBaseObjectPtr( globals()->scenarioFileInfo.playerBodyID);
     if ( baseObject != nil)
     {
-        AddBaseObjectMedia( gAresGlobal->scenarioFileInfo.playerBodyID, 0);
+        AddBaseObjectMedia( globals()->scenarioFileInfo.playerBodyID, 0);
     }
 
     for ( count = 0; count < gThisScenario->initialNum; count++)
@@ -371,19 +369,19 @@ void CopyAllUsedSounds( void)
 
     for ( count = 0; count < kSoundNum; count++)
     {
-        if ( gAresGlobal->gSound[count].soundHandle != nil)
+        if ( globals()->gSound[count].soundHandle != nil)
         {
             WriteDebugLine("\pSaveSND:");
-            WriteDebugLong( gAresGlobal->gSound[count].id);
-            SaveAnyResourceInPreferences( 'snd ', gAresGlobal->gSound[count].id, nil,
-                gAresGlobal->gSound[count].soundHandle, true);
+            WriteDebugLong( globals()->gSound[count].id);
+            SaveAnyResourceInPreferences( 'snd ', globals()->gSound[count].id, nil,
+                globals()->gSound[count].soundHandle, true);
         }
     }
 }
 
 void CopyAllBriefingData( long whatLevel)
 {
-    scenarioType            *scenario = *gAresGlobal->gScenarioData + whatLevel;
+    scenarioType            *scenario = *globals()->gScenarioData + whatLevel;
     Handle                  textData = nil;
     PixMapHandle            offMap = GetGWorldPixMap( gOffWorld);
     Rect                    tRect = {0, 0, 480, 480};
@@ -414,7 +412,7 @@ void CopyAllBriefingData( long whatLevel)
             DrawInterfaceTextInRect(&tRect, *textData, length,
                             kLarge, 3, *offMap, 0, 0, inlinePictList);
 
-            scenario = *gAresGlobal->gScenarioData + whatLevel;
+            scenario = *globals()->gScenarioData + whatLevel;
             brief = mGetScenarioBrief( scenario, whichBriefNum);
             HUnlock( textData);
             DisposeHandle( textData);

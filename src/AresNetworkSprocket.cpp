@@ -249,9 +249,8 @@ typedef struct
 
 #define kMessageBufferSize      ((sizeof( messageDataType) * kMaxMessageQueueLen * kMaxNetPlayerNum) + 50000)
 
-extern aresGlobalType *gAresGlobal;
-extern long     /*gAresGlobal->gThisScenarioNumber, gAresGlobal->gPlayerAdmiralNumber,*/
-                gRandomSeed/*, gAresGlobal->gGameTime*/;
+extern long     /*globals()->gThisScenarioNumber, globals()->gPlayerAdmiralNumber,*/
+                gRandomSeed/*, globals()->gGameTime*/;
 
 netDataType     *gNetData = nil;
 long            gNetLatency;
@@ -465,7 +464,7 @@ void StopNetworking( void)
 
     if ( gNetData != nil)
     {
-        if ( gAresGlobal->gameRangerInProgress)
+        if ( globals()->gameRangerInProgress)
         {
             if ( IAmHosting())
             {
@@ -474,9 +473,9 @@ void StopNetworking( void)
             }
 
 //          Wrap_GRReset();
-            gAresGlobal->gameRangerPending = false;
+            globals()->gameRangerPending = false;
 
-            gAresGlobal->gameRangerInProgress = false;
+            globals()->gameRangerInProgress = false;
         }
 
         if (gNetData->netGame)
@@ -660,7 +659,7 @@ Boolean GetAllNetPlayersCheating( void)
         mWriteDebugString("\pCheck Player #");
         WriteDebugLong( i);
 
-        if (!( gAresGlobal->gActiveCheats[i] & kCheatActiveBit))
+        if (!( globals()->gActiveCheats[i] & kCheatActiveBit))
         {
             result = false;
             mWriteDebugString("\pNOT CHEATING");
@@ -1118,9 +1117,9 @@ Boolean WaitForAllStart( void)
     Boolean             startYet = false;
     messageDataType     *theMessageData;
 
-    gAresGlobal->gThisScenarioNumber = -1;
+    globals()->gThisScenarioNumber = -1;
 
-    while (( gAresGlobal->gThisScenarioNumber < 0) || ( gAresGlobal->gPlayerAdmiralNumber < 0))
+    while (( globals()->gThisScenarioNumber < 0) || ( globals()->gPlayerAdmiralNumber < 0))
     {
 //      while ((theMessage = Glue_NSpMessage_Get(gNetData->netGame)) != NULL)
         theMessage = Glue_NSpMessage_Get(gNetData->netGame);
@@ -1132,7 +1131,7 @@ Boolean WaitForAllStart( void)
                 mWriteDebugString("\pGot Start:");
                 WriteDebugHex( theMessageData->data.packedData1, 8);
                 WriteDebugHex( theMessageData->data.packedData2, 8);
-                gAresGlobal->gThisScenarioNumber = theMessageData->data.packedData1;    //theMessageData->messageData.startMessage.whichChapter;
+                globals()->gThisScenarioNumber = theMessageData->data.packedData1;    //theMessageData->messageData.startMessage.whichChapter;
                 gRandomSeed = theMessageData->data.packedData2; //theMessageData->messageData.startMessage.randomSeed;
             }
 
@@ -1159,8 +1158,8 @@ void SendStartMessage(void)
         theMessage.header.what = eStartMessage;
         theMessage.header.messageLen = sizeof(messageDataType);
 //      theMessage.messageData.startMessage.randomSeed = gRandomSeed;
-//      theMessage.messageData.startMessage.whichChapter = gAresGlobal->gThisScenarioNumber;
-        theMessage.data.packedData1 = gAresGlobal->gThisScenarioNumber;
+//      theMessage.messageData.startMessage.whichChapter = globals()->gThisScenarioNumber;
+        theMessage.data.packedData1 = globals()->gThisScenarioNumber;
         theMessage.data.packedData2 = gRandomSeed;
 //  #ifdef kBackupData
         theMessage.backupData.packedData1 = theMessage.backupData.packedData2 = 0xffffffff;
@@ -1275,7 +1274,7 @@ long UseNextLatency( void)
 {
     gNetData->myRace = myRace;
     gNetData->opponentRace = opponentRace;
-    gAresGlobal->gPlayerAdmiralNumber = myAdmiralNumber;
+    globals()->gPlayerAdmiralNumber = myAdmiralNumber;
     gNetData->opponentColor = opponentColor;
 }
 
@@ -1337,16 +1336,16 @@ long ProcessPreGameMessages( Handle *text, long *data, long *data2, long *data3,
 
                     openMessage = (openScenarioPreGameMessageType *)theMessage;
 
-                    CopyPString( gAresGlobal->otherPlayerScenarioFileName,
+                    CopyPString( globals()->otherPlayerScenarioFileName,
                         openMessage->fileName);
 
-                    CopyPString( gAresGlobal->otherPlayerScenarioFileURL,
+                    CopyPString( globals()->otherPlayerScenarioFileURL,
                         openMessage->url);
 
-                    gAresGlobal->otherPlayerScenarioFileVersion =
+                    globals()->otherPlayerScenarioFileVersion =
                         openMessage->version;
 
-                    gAresGlobal->otherPlayerScenarioFileCheckSum =
+                    globals()->otherPlayerScenarioFileCheckSum =
                         openMessage->checkSum;
 
                     result = ePreGameOpenScenarioMessage;
@@ -1489,7 +1488,7 @@ long ProcessPreGameMessages( Handle *text, long *data, long *data2, long *data3,
 
                 case eStartMessage:
                     theMessageData = (messageDataType *)theMessage;
-                    gAresGlobal->gThisScenarioNumber = theMessageData->data.packedData1; //theMessageData->messageData.startMessage.whichChapter;
+                    globals()->gThisScenarioNumber = theMessageData->data.packedData1; //theMessageData->messageData.startMessage.whichChapter;
                     gRandomSeed = theMessageData->data.packedData2; //theMessageData->messageData.startMessage.randomSeed;
                     break;
 
@@ -1963,10 +1962,10 @@ Boolean ProcessInGameMessages( long time, short *pauseLevel)
 
         if ( theMessage->what == eStopPlayingMessage)
         {
-            if ( (gAresGlobal->gScenarioWinner &
+            if ( (globals()->gScenarioWinner &
                 kScenarioWinnerTextMask) == kScenarioWinnerNoText)
             {
-                gAresGlobal->gScenarioWinner = theMessageData->data.packedData1;
+                globals()->gScenarioWinner = theMessageData->data.packedData1;
             }
             return( false);
         }
@@ -2157,7 +2156,7 @@ Boolean HandleInGameMessage( long whatMessage, packedDataType *theMessageData, B
                         if (( theMessageData->packedData1 & kWhichLineMask) ==
                             kTextMessageCharacterBits)
                         {
-                            if ( admiralNumber != gAresGlobal->gPlayerAdmiralNumber)
+                            if ( admiralNumber != globals()->gPlayerAdmiralNumber)
                             {
                                 textMessageChar = ( theMessageData->packedData2 &
                                     kWhichShipMask) >> kWhichShipBitShift;
@@ -2230,7 +2229,7 @@ Boolean HandleInGameMessage( long whatMessage, packedDataType *theMessageData, B
                 ( rightNow))
             {
                 gNetData->gotMessageFlag[admiralNumber] |= kHasPreserveSeedMessageFlag;
-                if ( admiralNumber != gAresGlobal->gPlayerAdmiralNumber)
+                if ( admiralNumber != globals()->gPlayerAdmiralNumber)
                 {
                     gNetData->preserveSeed = gRandomSeed;
                 }
@@ -2244,7 +2243,7 @@ Boolean HandleInGameMessage( long whatMessage, packedDataType *theMessageData, B
                 ( rightNow))
             {
                 gNetData->gotMessageFlag[admiralNumber] |= kHasSanityCheckMessageFlag;
-                if ( admiralNumber != gAresGlobal->gPlayerAdmiralNumber)
+                if ( admiralNumber != globals()->gPlayerAdmiralNumber)
                 {
                     if ( gNetData->preserveSeed != theMessageData->messageData.sanityCheckMessage.randomSeed)
                         SysBeep(20);
@@ -2340,14 +2339,14 @@ void HandleInGameTextMessage( char *textPtr, long len)
     c++;
     while (len > 0) {*c = *textPtr; c++; textPtr++; len--;}
 //  mWriteDebugString( s);
-    if ( gAresGlobal->gActiveCheats[GetOtherPlayerNum()] & kNameObjectBit)
+    if ( globals()->gActiveCheats[GetOtherPlayerNum()] & kNameObjectBit)
     {
         SetAdmiralBuildAtName( GetOtherPlayerNum(), s);
-        gAresGlobal->gActiveCheats[GetOtherPlayerNum()] &= ~kNameObjectBit;
+        globals()->gActiveCheats[GetOtherPlayerNum()] &= ~kNameObjectBit;
     } else
     {
-        if (( gAresGlobal->gOptions & kOptionSpeechAvailable) &&
-            ( gAresGlobal->gOptions & kOptionSpeechOn))
+        if (( globals()->gOptions & kOptionSpeechAvailable) &&
+            ( globals()->gOptions & kOptionSpeechOn))
             SpeakString( s);
         StartStringMessage( (anyCharType *)s);
     }
@@ -2426,7 +2425,7 @@ void SendPrefabMessage( packedDataType *theData)
 #ifdef kAllowNetSprocket
     messageDataType     theMessage;
     OSStatus            status;
-    spaceObjectType     *anObject = GetAdmiralFlagship( gAresGlobal->gPlayerAdmiralNumber);
+    spaceObjectType     *anObject = GetAdmiralFlagship( globals()->gPlayerAdmiralNumber);
 
     if ( gNetData->netGame != nil)
     {
@@ -2467,11 +2466,11 @@ Boolean SendInGameMessage( long time)
 #ifdef kAllowNetSprocket
     messageDataType     theMessage;
     OSStatus            status = noErr;
-    spaceObjectType     *anObject = GetAdmiralFlagship( gAresGlobal->gPlayerAdmiralNumber);
+    spaceObjectType     *anObject = GetAdmiralFlagship( globals()->gPlayerAdmiralNumber);
     Boolean             charSent = false;
     unsigned long       textMessageChar;
 
-//  if ( time > (gAresGlobal->gGameTime + (gNetLatency * 2))) DebugStr("\pTIME PROBLEM!");
+//  if ( time > (globals()->gGameTime + (gNetLatency * 2))) DebugStr("\pTIME PROBLEM!");
     time %= kMaxNetTime;
     if ( gNetData->netGame != nil)
     {
@@ -2481,7 +2480,7 @@ Boolean SendInGameMessage( long time)
         theMessage.header.what = ePackedMessage;
         theMessage.header.messageLen = sizeof(messageDataType);
         theMessage.data.packedData2 = theMessage.data.packedData1 = 0;
-        theMessage.data.packedData2 |= gAresGlobal->gPlayerAdmiralNumber << kAdmiralBitShift;
+        theMessage.data.packedData2 |= globals()->gPlayerAdmiralNumber << kAdmiralBitShift;
         if ( anObject != nil)
         {
             theMessage.data.packedData2 |= anObject->keysDown & kKeyStateMask;
@@ -2521,12 +2520,12 @@ Boolean SendInGameMessage( long time)
         {
             theMessage.data.packedData2 |= kWhichShipMask;
         }
-        textMessageChar = gAresGlobal->gSynchValue;
+        textMessageChar = globals()->gSynchValue;
         textMessageChar <<= kSynchBitShift;
         theMessage.data.packedData1 |= textMessageChar & kRandomSeedSynchMask;//gRandomSeed & kRandomSeedSynchMask;
 
 /*      DebugFileAppendString( "\pSM\t");
-        DebugFileAppendLong( gAresGlobal->gGameTime);
+        DebugFileAppendLong( globals()->gGameTime);
         DebugFileAppendString( "\p\t");
         DebugFileAppendLong( gRandomSeed);
         DebugFileAppendString( "\p\t");
@@ -2598,7 +2597,7 @@ Boolean SendInGameBasicMessage( long time, long whatMessage, Boolean registered,
         theMessage.header.what = whatMessage;
         theMessage.header.messageLen = sizeof(messageDataType);
         /*
-        theMessage.fromAdmiralNumber = gAresGlobal->gPlayerAdmiralNumber;
+        theMessage.fromAdmiralNumber = globals()->gPlayerAdmiralNumber;
         theMessage.gameTime = time;
         if ( toSelf)
         {
@@ -2623,7 +2622,7 @@ Boolean SendInGameBasicMessage( long time, long whatMessage, Boolean registered,
         */
         theMessage.data.packedData1 = 0;
         theMessage.data.packedData2 = 0;
-        theMessage.data.packedData2 |= gAresGlobal->gPlayerAdmiralNumber << kAdmiralBitShift;
+        theMessage.data.packedData2 |= globals()->gPlayerAdmiralNumber << kAdmiralBitShift;
 
 //  #ifdef kBackupData
         theMessage.backupData.packedData1 = theMessage.backupData.packedData2 = 0xffffffff;
@@ -2668,7 +2667,7 @@ Boolean SendInGameMiscLongMessage( long time, long whatMessage, long data,
         theMessage.header.what = whatMessage;
         theMessage.header.messageLen = sizeof(messageDataType);
         /*
-        theMessage.fromAdmiralNumber = gAresGlobal->gPlayerAdmiralNumber;
+        theMessage.fromAdmiralNumber = globals()->gPlayerAdmiralNumber;
         theMessage.gameTime = time;
         theMessage.messageData.miscLongDataMessage.longData1 = data;
         if ( toSelf)
@@ -2694,7 +2693,7 @@ Boolean SendInGameMiscLongMessage( long time, long whatMessage, long data,
         */
         theMessage.data.packedData1 = data;
         theMessage.data.packedData2 = 0;
-        theMessage.data.packedData2 |= gAresGlobal->gPlayerAdmiralNumber << kAdmiralBitShift;
+        theMessage.data.packedData2 |= globals()->gPlayerAdmiralNumber << kAdmiralBitShift;
 
 //  #ifdef kBackupData
         theMessage.backupData.packedData1 = theMessage.backupData.packedData2 = 0xffffffff;
@@ -2743,7 +2742,7 @@ Boolean SendSelectMessage( long time, long whichShip, Boolean target)
         theMessage.header.to = kNSpAllPlayers;
         theMessage.header.what = eSelectMessage;
         theMessage.header.messageLen = sizeof(messageDataType);
-        theMessage.fromAdmiralNumber = gAresGlobal->gPlayerAdmiralNumber;
+        theMessage.fromAdmiralNumber = globals()->gPlayerAdmiralNumber;
         theMessage.gameTime = time;
         theMessage.messageData.selectMessage.whichShip = whichShip;
         theMessage.messageData.selectMessage.target = target;
@@ -2769,7 +2768,7 @@ Boolean SendSelectMessage( long time, long whichShip, Boolean target)
         {
             mWriteDebugString("\p**SEND ERR**");
         }
-        gNetData->hasMessageFlag[gAresGlobal->gPlayerAdmiralNumber] |= kHasSelectMessageFlag;
+        gNetData->hasMessageFlag[globals()->gPlayerAdmiralNumber] |= kHasSelectMessageFlag;
 */
         gNetData->whichShip = whichShip;
         gNetData->target = target;
@@ -2792,7 +2791,7 @@ Boolean SendMenuMessage( long time, short whichPage, short whichLine)
         theMessage.header.to = kNSpAllPlayers;
         theMessage.header.what = eMenuCommandMessage;
         theMessage.header.messageLen = sizeof(messageDataType);
-        theMessage.fromAdmiralNumber = gAresGlobal->gPlayerAdmiralNumber;
+        theMessage.fromAdmiralNumber = globals()->gPlayerAdmiralNumber;
         theMessage.gameTime = time;
         theMessage.messageData.menuCommandMessage.whichPage = whichPage;
         theMessage.messageData.menuCommandMessage.whichLine = whichLine;
@@ -2812,7 +2811,7 @@ Boolean SendMenuMessage( long time, short whichPage, short whichLine)
         {
             mWriteDebugString("\p**SEND ERR**");
         }
-        gNetData->hasMessageFlag[gAresGlobal->gPlayerAdmiralNumber] |= kHasMenuMessageFlag;
+        gNetData->hasMessageFlag[globals()->gPlayerAdmiralNumber] |= kHasMenuMessageFlag;
 */
         gNetData->pageNum = whichPage;
         gNetData->lineNum = whichLine;
@@ -2845,7 +2844,7 @@ Boolean SendSetLatencyMessage( long time)
             theMessage.header.to = kNSpAllPlayers;
             theMessage.header.what = eSetLatencyMessage;
             theMessage.header.messageLen = sizeof(messageDataType);
-            theMessage.fromAdmiralNumber = gAresGlobal->gPlayerAdmiralNumber;
+            theMessage.fromAdmiralNumber = globals()->gPlayerAdmiralNumber;
             theMessage.gameTime = time;
             theMessage.messageData.setLatencyMessage.latency = gNetData->calcLatency;
 //          WriteDebugLong( theMessage.messageData.setLatencyMessage.latency);
@@ -2857,7 +2856,7 @@ Boolean SendSetLatencyMessage( long time)
             {
                 mWriteDebugString("\p**SEND ERR**");
             }
-            gNetData->hasMessageFlag[gAresGlobal->gPlayerAdmiralNumber] |= kHasSetLatencyMessageFlag;
+            gNetData->hasMessageFlag[globals()->gPlayerAdmiralNumber] |= kHasSetLatencyMessageFlag;
         }
     }
 */
@@ -2881,7 +2880,7 @@ Boolean SendSanityCheckMessage( long time)
         theMessage.header.to = kNSpAllPlayers;
         theMessage.header.what = eSanityCheckMessage;
         theMessage.header.messageLen = sizeof(messageDataType);
-        theMessage.fromAdmiralNumber = gAresGlobal->gPlayerAdmiralNumber;
+        theMessage.fromAdmiralNumber = globals()->gPlayerAdmiralNumber;
         theMessage.gameTime = time;
         theMessage.messageData.sanityCheckMessage.randomSeed = gRandomSeed;
         if ( !InsertMessageInQueue( &theMessage)) return( false);
@@ -2893,7 +2892,7 @@ Boolean SendSanityCheckMessage( long time)
         {
             mWriteDebugString("\p**SEND ERR**");
         }
-        gNetData->hasMessageFlag[gAresGlobal->gPlayerAdmiralNumber] |= kHasSanityCheckMessageFlag;
+        gNetData->hasMessageFlag[globals()->gPlayerAdmiralNumber] |= kHasSanityCheckMessageFlag;
     }
 */
     return( true);
@@ -2916,7 +2915,7 @@ Boolean SendPreserveSeedMessage( long time)
         theMessage.header.to = kNSpAllPlayers;
         theMessage.header.what = ePreserveSeedMessage;
         theMessage.header.messageLen = sizeof(messageDataType);
-        theMessage.fromAdmiralNumber = gAresGlobal->gPlayerAdmiralNumber;
+        theMessage.fromAdmiralNumber = globals()->gPlayerAdmiralNumber;
         theMessage.gameTime = time;
         if ( !InsertMessageInQueue( &theMessage)) return( false);
         if (!StoreSentMessage( &theMessage)) return( false);
@@ -2926,7 +2925,7 @@ Boolean SendPreserveSeedMessage( long time)
         {
             mWriteDebugString("\p**SEND ERR**");
         }
-        gNetData->hasMessageFlag[gAresGlobal->gPlayerAdmiralNumber] |= kHasPreserveSeedMessageFlag;
+        gNetData->hasMessageFlag[globals()->gPlayerAdmiralNumber] |= kHasPreserveSeedMessageFlag;
     }
     gNetData->sanityCheckTime = time;
 */  return( true);
@@ -2984,7 +2983,7 @@ Boolean SendInGameShortMessage( long time)
         theMessage.header.to = kNSpAllPlayers;
         theMessage.header.what = eShortMessage;
         theMessage.header.messageLen = sizeof(sameMessageDataType);
-        theMessage.fromAdmiralNumber = gAresGlobal->gPlayerAdmiralNumber;
+        theMessage.fromAdmiralNumber = globals()->gPlayerAdmiralNumber;
         theMessage.fromAdmiralNumber |= gRandomSeed & kRandomSeedSynchMask;
         theMessage.gameTime = time;
         if ( !InsertMessageInQueue( (messageDataType *)&theMessage))
@@ -3045,7 +3044,7 @@ void SendResendMessage( long time)
 
         theMessage.data.packedData1 = time;
         theMessage.data.packedData2 = 0;
-        theMessage.data.packedData2 |= gAresGlobal->gPlayerAdmiralNumber << kAdmiralBitShift;
+        theMessage.data.packedData2 |= globals()->gPlayerAdmiralNumber << kAdmiralBitShift;
 
 //  #ifdef kBackupData
         theMessage.backupData.packedData1 = theMessage.backupData.packedData2 = 0xffffffff;

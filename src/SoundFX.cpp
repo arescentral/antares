@@ -53,15 +53,9 @@ SSpSourceReference MyCreateSource( void);
 #endif
 SndChannelPtr MyCreateLocalizedChannel( void);
 
-extern aresGlobalType   *gAresGlobal;
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
-extern coordPointType   gGlobalCorner;
-//extern unsigned long  gAresGlobal->gOptions;
+extern coordPointType gGlobalCorner;
 
-//smartSoundHandle      gAresGlobal->gSound[kSoundNum];
-//smartSoundChannel     gAresGlobal->gChannel[kMaxChannelNum];
-//long                  gAresGlobal->gLastSoundTime = 0, gAresGlobal->gSoundVolume = 0;//0;
-//short                 gAresGlobal->gSoundFileRefID = 0;
 #ifdef kAllowSoundSprocket
 SSpListenerReference    gListener;
 #endif
@@ -69,16 +63,16 @@ SSpListenerReference    gListener;
 int OpenSoundFile( void)
 {
 /*
-    gAresGlobal->gSoundFileRefID = ARF_OpenResFile( kSoundResFileName);
-    if ( gAresGlobal->gSoundFileRefID == -1)
+    globals()->gSoundFileRefID = ARF_OpenResFile( kSoundResFileName);
+    if ( globals()->gSoundFileRefID == -1)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kSoundsFileError, kDataFolderError, -1, -1, __FILE__, 3);
         return( RESOURCE_ERROR);
     }
-    UseResFile( gAresGlobal->gSoundFileRefID);
+    UseResFile( globals()->gSoundFileRefID);
 */
-//  if ( gAresGlobal->externalFileRefNum > 0)
-//      UseResFile( gAresGlobal->externalFileRefNum);
+//  if ( globals()->externalFileRefNum > 0)
+//      UseResFile( globals()->externalFileRefNum);
 
     return ( kNoError);
 }
@@ -88,7 +82,7 @@ int InitSoundFX( void)
 {
     OSErr           err;
     int             i;
-    aresGlobalType  *glob = gAresGlobal;
+    aresGlobalType  *glob = globals();
 
 //  glob->gOptions |= kOptionSoundAvailable;
 
@@ -132,23 +126,23 @@ int InitSoundFX( void)
         SysBeep(20);
         // we have SoundSprocket; set it up!
         mWriteDebugString("\pInitializing SoundSprocket!");
-        gAresGlobal->gOptions |= kOptionSoundSprocketOn;
+        globals()->gOptions |= kOptionSoundSprocketOn;
 
         My3DSoundInit(); // sets up gListener
 
         for ( i = 0; i < kMaxChannelNum; i++)
         {
-            gAresGlobal->gChannel[i].source = MyCreateSource();
-            gAresGlobal->gChannel[i].channelPtr = MyCreateLocalizedChannel();
-            if ( gAresGlobal->gChannel[i].channelPtr == nil)
+            globals()->gChannel[i].source = MyCreateSource();
+            globals()->gChannel[i].channelPtr = MyCreateLocalizedChannel();
+            if ( globals()->gChannel[i].channelPtr == nil)
             {
                 ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, SOUND_CHANNEL_ERROR, -1, -1, -1, __FILE__, 91);
             }
 
-            gAresGlobal->gChannel[i].soundAge = 0;
-            gAresGlobal->gChannel[i].soundPriority = kNoSound;
-            gAresGlobal->gChannel[i].whichSound = -1;
-            gAresGlobal->gChannel[i].useSoundSprocket = true;
+            globals()->gChannel[i].soundAge = 0;
+            globals()->gChannel[i].soundPriority = kNoSound;
+            globals()->gChannel[i].whichSound = -1;
+            globals()->gChannel[i].useSoundSprocket = true;
         }
 //      SetListenerLocation( 0, 0);
     }
@@ -173,22 +167,22 @@ int InitSoundFX( void)
     /*
     for ( i = 0; i < kSoundNum; i++)
     {
-        gAresGlobal->gSound[i].soundHandle = GetResource( 'snd ', kSoundResID + i);
-        if ( gAresGlobal->gSound[i].soundHandle == nil)
+        globals()->gSound[i].soundHandle = GetResource( 'snd ', kSoundResID + i);
+        if ( globals()->gSound[i].soundHandle == nil)
         {
             ShowErrorRecover( RESOURCE_ERROR, kSoundFXError, 2);
             SoundFXCleanup();
             return ( RESOURCE_ERROR);
         }
-        GetSoundHeaderOffset( (SndListHandle)gAresGlobal->gSound[i].soundHandle, &(gAresGlobal->gSound[i].offset));
+        GetSoundHeaderOffset( (SndListHandle)globals()->gSound[i].soundHandle, &(globals()->gSound[i].offset));
         if ( err != noErr)
         {
             ShowErrorRecover( SOUND_CHANNEL_ERROR, kSoundFXError, 3);
             SoundFXCleanup();
             return ( SOUND_CHANNEL_ERROR);
         }
-        DetachResource( gAresGlobal->gSound[i].soundHandle);
-        mHandleLockAndRegister( gAresGlobal->gSound[i].soundHandle, UnlockSoundCallback, nil, nil)
+        DetachResource( globals()->gSound[i].soundHandle);
+        mHandleLockAndRegister( globals()->gSound[i].soundHandle, UnlockSoundCallback, nil, nil)
 
     }
     */
@@ -198,14 +192,14 @@ int InitSoundFX( void)
     /*
     if ((Ptr) SSpConfigureSpeakerSetup == (Ptr) kUnresolvedCFragSymbolAddress)
     {
-        gAresGlobal->gOptions &= ~kOptionSoundSprocketOn;
+        globals()->gOptions &= ~kOptionSoundSprocketOn;
         return( -1);  // no sound sprocket
     } else
     {
         OSStatus status = noErr;
 
         // *    We have sound sprocket, so now we install the filters and create source and listener objects.
-        gAresGlobal->gOptions |= kOptionSoundSprocketOn;
+        globals()->gOptions |= kOptionSoundSprocketOn;
 
         // *    Create the listener
         status = SSpListener_New(&gListener);
@@ -226,7 +220,7 @@ int InitSoundFX( void)
             SoundComponentLink  myLink;
 
             // *    Create the source
-            status = SSpSource_New(&gAresGlobal->gChannel[i].source);
+            status = SSpSource_New(&globals()->gChannel[i].source);
             if (status)
                 ShowSimpleStringAlert("\pCould not create a sound sprocket source.",
                     nil, nil, nil);
@@ -240,7 +234,7 @@ int InitSoundFX( void)
             myLink.mixerID = nil;
             myLink.linkID = nil;
 
-            status = SndSetInfo(gAresGlobal->gChannel[i].channelPtr, siPreMixerSoundComponent, &myLink);
+            status = SndSetInfo(globals()->gChannel[i].channelPtr, siPreMixerSoundComponent, &myLink);
             if (status)
                 ShowSimpleStringAlert("\pCould not install the sound sprocket filter into the channel.",
                     nil, nil, nil);
@@ -248,8 +242,8 @@ int InitSoundFX( void)
         SetListenerLocation( 0, 0);
     }
     */
-//  MyPanSoundFromRightToLeft( gAresGlobal->gSound[6].soundHandle);
-//  MyPanSoundFromRightToLeft( gAresGlobal->gSound[4].soundHandle);
+//  MyPanSoundFromRightToLeft( globals()->gSound[6].soundHandle);
+//  MyPanSoundFromRightToLeft( globals()->gSound[4].soundHandle);
     return ( kNoError);
 }
 
@@ -260,7 +254,7 @@ void SetListenerLocation( long x, long y)
 OSStatus            theErr = noErr;
 TQ3CameraPlacement  location;
 
-    if (!((gAresGlobal->gOptions & kOptionSoundSprocketOn) && ( gAresGlobal->gOptions & kOptionSoundAvailable)))
+    if (!((globals()->gOptions & kOptionSoundSprocketOn) && ( globals()->gOptions & kOptionSoundAvailable)))
         return;
 
     // *    Set the listener in the bottom middle of the screen
@@ -294,13 +288,13 @@ void PlayVolumeSound( short whichSoundID, short amplitude, short persistence, so
     short           count, oldestSoundTime = -kLongPersistence, whichChannel = -1, whichSound;
     long            timeDif, newvol;
 
-    if ((gAresGlobal->gOptions & kOptionSoundSprocketOn) || ( gAresGlobal->gOptions & kOptionSoundAvailable))
+    if ((globals()->gOptions & kOptionSoundSprocketOn) || ( globals()->gOptions & kOptionSoundAvailable))
         return;
-    if (( gAresGlobal->gSoundVolume > 0) && ( amplitude > 0))
+    if (( globals()->gSoundVolume > 0) && ( amplitude > 0))
     {
-        timeDif = TickCount() - gAresGlobal->gLastSoundTime;
+        timeDif = TickCount() - globals()->gLastSoundTime;
         for ( count = 0; count < kMaxChannelNum; count++)
-            gAresGlobal->gChannel[count].soundAge += timeDif;
+            globals()->gChannel[count].soundAge += timeDif;
 
         // if not see if there's another channel with the same sound at same or lower volume
 
@@ -309,8 +303,8 @@ void PlayVolumeSound( short whichSoundID, short amplitude, short persistence, so
         {
             while (( count < kMaxChannelNum) && ( whichChannel == -1))
             {
-                if (( gAresGlobal->gChannel[count].whichSound == whichSoundID) &&
-                    ( gAresGlobal->gChannel[count].soundVolume <= amplitude))
+                if (( globals()->gChannel[count].whichSound == whichSoundID) &&
+                    ( globals()->gChannel[count].soundVolume <= amplitude))
                     whichChannel = count;
                 count++;
             }
@@ -323,7 +317,7 @@ void PlayVolumeSound( short whichSoundID, short amplitude, short persistence, so
             count = 0;
             while (( count < kMaxChannelNum) && ( whichChannel == -1))
             {
-                err = SndChannelStatus( gAresGlobal->gChannel[count].channelPtr, (short)sizeof( SCStatus),
+                err = SndChannelStatus( globals()->gChannel[count].channelPtr, (short)sizeof( SCStatus),
                         (SCStatusPtr)&status);
                 if ( !status.scChannelBusy)
                     whichChannel = count;
@@ -338,7 +332,7 @@ void PlayVolumeSound( short whichSoundID, short amplitude, short persistence, so
             count = 0;
             while (( count < kMaxChannelNum) && ( whichChannel == -1))
             {
-                if ( gAresGlobal->gChannel[count].soundVolume < amplitude)
+                if ( globals()->gChannel[count].soundVolume < amplitude)
                     whichChannel = count;
                 count++;
             }
@@ -351,7 +345,7 @@ void PlayVolumeSound( short whichSoundID, short amplitude, short persistence, so
             count = 0;
             while (( count < kMaxChannelNum) && ( whichChannel == -1))
             {
-                if ( gAresGlobal->gChannel[count].soundPriority < priority)
+                if ( globals()->gChannel[count].soundPriority < priority)
                     whichChannel = count;
                 count++;
             }
@@ -363,9 +357,9 @@ void PlayVolumeSound( short whichSoundID, short amplitude, short persistence, so
             count = 0;
             while ( count < kMaxChannelNum)
             {
-                if (( gAresGlobal->gChannel[count].soundAge > 0) && ( gAresGlobal->gChannel[count].soundAge > oldestSoundTime))
+                if (( globals()->gChannel[count].soundAge > 0) && ( globals()->gChannel[count].soundAge > oldestSoundTime))
                 {
-                    oldestSoundTime = gAresGlobal->gChannel[count].soundAge;
+                    oldestSoundTime = globals()->gChannel[count].soundAge;
                     whichChannel = count;
                 }
                 count++;
@@ -374,26 +368,26 @@ void PlayVolumeSound( short whichSoundID, short amplitude, short persistence, so
 
         // we're not checking for importance
 
-        gAresGlobal->gLastSoundTime = TickCount();
+        globals()->gLastSoundTime = TickCount();
 
         whichSound = 0;
-        while ((gAresGlobal->gSound[whichSound].id != whichSoundID) && ( whichSound < kSoundNum)) { whichSound++;}
+        while ((globals()->gSound[whichSound].id != whichSoundID) && ( whichSound < kSoundNum)) { whichSound++;}
         if ( whichSound == kSoundNum) whichChannel = -1;
 
         if ( whichChannel >= 0)
         {
     //      WriteDebugLong(whichChannel);
 
-            gAresGlobal->gChannel[whichChannel].whichSound = whichSoundID;
-            gAresGlobal->gChannel[whichChannel].soundAge = -persistence;
-            gAresGlobal->gChannel[whichChannel].soundPriority = priority;
-            gAresGlobal->gChannel[whichChannel].soundVolume = amplitude;
+            globals()->gChannel[whichChannel].whichSound = whichSoundID;
+            globals()->gChannel[whichChannel].soundAge = -persistence;
+            globals()->gChannel[whichChannel].soundPriority = priority;
+            globals()->gChannel[whichChannel].soundVolume = amplitude;
 
 
             cmd.param1 = 0;
             cmd.param2 = 0;
             cmd.cmd = quietCmd;
-            err = SndDoImmediate( gAresGlobal->gChannel[whichChannel].channelPtr, &cmd);
+            err = SndDoImmediate( globals()->gChannel[whichChannel].channelPtr, &cmd);
             if ( err != noErr)
             {
                 WriteDebugLine("\pSnd Err:");
@@ -403,7 +397,7 @@ void PlayVolumeSound( short whichSoundID, short amplitude, short persistence, so
             cmd.param1 = 0;
             cmd.param2 = 0;
             cmd.cmd = flushCmd;
-            err = SndDoImmediate( gAresGlobal->gChannel[whichChannel].channelPtr, &cmd);
+            err = SndDoImmediate( globals()->gChannel[whichChannel].channelPtr, &cmd);
             if ( err != noErr)
             {
                 WriteDebugLine("\pSnd Err:");
@@ -411,15 +405,15 @@ void PlayVolumeSound( short whichSoundID, short amplitude, short persistence, so
             }
 
             newvol = amplitude;
-            newvol *= gAresGlobal->gSoundVolume;
+            newvol *= globals()->gSoundVolume;
             newvol >>= 3;
 
             cmd.param1 = newvol;
             cmd.param2 = 0;
             cmd.cmd = ampCmd;
 
-            err = SndDoCommand( gAresGlobal->gChannel[whichChannel].channelPtr, &cmd, false);
-    //      err = SndDoImmediate( gAresGlobal->gChannel[whichChannel].channelPtr, &cmd);
+            err = SndDoCommand( globals()->gChannel[whichChannel].channelPtr, &cmd, false);
+    //      err = SndDoImmediate( globals()->gChannel[whichChannel].channelPtr, &cmd);
             if ( err != noErr)
             {
                 WriteDebugLine("\pSnd Err:");
@@ -427,16 +421,16 @@ void PlayVolumeSound( short whichSoundID, short amplitude, short persistence, so
             }
 
 /*          cmd.param1 = 0;
-            cmd.param2 = (unsigned long)( *(gAresGlobal->gSound[whichSound].soundHandle) + gAresGlobal->gSound[whichSound].offset);
+            cmd.param2 = (unsigned long)( *(globals()->gSound[whichSound].soundHandle) + globals()->gSound[whichSound].offset);
             cmd.cmd = bufferCmd;
-            err = SndDoCommand( gAresGlobal->gChannel[whichChannel].channelPtr, &cmd, true);
+            err = SndDoCommand( globals()->gChannel[whichChannel].channelPtr, &cmd, true);
             if ( err != noErr)
             {
                 WriteDebugLine((char *)"\pSnd Err:");
                 WriteDebugLong(err);
             }
 */
-            err = SndPlay( gAresGlobal->gChannel[whichChannel].channelPtr, gAresGlobal->gSound[whichSound].soundHandle, true);
+            err = SndPlay( globals()->gChannel[whichChannel].channelPtr, globals()->gSound[whichSound].soundHandle, true);
 
         }
     }
@@ -458,19 +452,19 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
     return;
 
 
-    if (( gAresGlobal->gSoundVolume > 0) && ( amplitude > 0))
+    if (( globals()->gSoundVolume > 0) && ( amplitude > 0))
     {
-        timeDif = TickCount() - gAresGlobal->gLastSoundTime;
+        timeDif = TickCount() - globals()->gLastSoundTime;
         for ( count = 0; count < kMaxChannelNum; count++)
-            gAresGlobal->gChannel[count].soundAge += timeDif;
+            globals()->gChannel[count].soundAge += timeDif;
 
         // if not see if there's another channel with the same sound at same or lower volume
 
         count = 0;
         while (( count < kMaxChannelNum) && ( whichChannel == -1))
         {
-            if (( gAresGlobal->gChannel[count].whichSound == whichSoundID) &&
-                ( gAresGlobal->gChannel[count].soundVolume <= amplitude))
+            if (( globals()->gChannel[count].whichSound == whichSoundID) &&
+                ( globals()->gChannel[count].soundVolume <= amplitude))
                 whichChannel = count;
             count++;
         }
@@ -482,7 +476,7 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
             count = 0;
             while (( count < kMaxChannelNum) && ( whichChannel == -1))
             {
-                if ( gAresGlobal->gChannel[count].soundVolume < amplitude)
+                if ( globals()->gChannel[count].soundVolume < amplitude)
                     whichChannel = count;
                 count++;
             }
@@ -495,7 +489,7 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
             count = 0;
             while (( count < kMaxChannelNum) && ( whichChannel == -1))
             {
-                if ( gAresGlobal->gChannel[count].soundPriority < priority)
+                if ( globals()->gChannel[count].soundPriority < priority)
                     whichChannel = count;
                 count++;
             }
@@ -507,9 +501,9 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
             count = 0;
             while ( count < kMaxChannelNum)
             {
-                if (( gAresGlobal->gChannel[count].soundAge > 0) && ( gAresGlobal->gChannel[count].soundAge > oldestSoundTime))
+                if (( globals()->gChannel[count].soundAge > 0) && ( globals()->gChannel[count].soundAge > oldestSoundTime))
                 {
-                    oldestSoundTime = gAresGlobal->gChannel[count].soundAge;
+                    oldestSoundTime = globals()->gChannel[count].soundAge;
                     whichChannel = count;
                 }
                 count++;
@@ -518,24 +512,24 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
 
         // we're not checking for importance
 
-        gAresGlobal->gLastSoundTime = TickCount();
+        globals()->gLastSoundTime = TickCount();
 
         whichSound = 0;
-        while ((gAresGlobal->gSound[whichSound].id != whichSoundID) && ( whichSound < kSoundNum)) { whichSound++;}
+        while ((globals()->gSound[whichSound].id != whichSoundID) && ( whichSound < kSoundNum)) { whichSound++;}
         if ( whichSound == kSoundNum) whichChannel = -1;
 
         if ( whichChannel >= 0)
         {
-            gAresGlobal->gChannel[whichChannel].whichSound = whichSoundID;
-            gAresGlobal->gChannel[whichChannel].soundAge = -persistence;
-            gAresGlobal->gChannel[whichChannel].soundPriority = priority;
-            gAresGlobal->gChannel[whichChannel].soundVolume = amplitude;
+            globals()->gChannel[whichChannel].whichSound = whichSoundID;
+            globals()->gChannel[whichChannel].soundAge = -persistence;
+            globals()->gChannel[whichChannel].soundPriority = priority;
+            globals()->gChannel[whichChannel].soundVolume = amplitude;
 
 
             cmd.param1 = 0;
             cmd.param2 = 0;
             cmd.cmd = quietCmd;
-            err = SndDoImmediate( gAresGlobal->gChannel[whichChannel].channelPtr, &cmd);
+            err = SndDoImmediate( globals()->gChannel[whichChannel].channelPtr, &cmd);
             if ( err != noErr)
             {
                 WriteDebugLine("\pSnd Err:");
@@ -545,7 +539,7 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
             cmd.param1 = 0;
             cmd.param2 = 0;
             cmd.cmd = flushCmd;
-            err = SndDoImmediate( gAresGlobal->gChannel[whichChannel].channelPtr, &cmd);
+            err = SndDoImmediate( globals()->gChannel[whichChannel].channelPtr, &cmd);
             if ( err != noErr)
             {
                 WriteDebugLine("\pSnd Err:");
@@ -554,7 +548,7 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
 
 
 #ifdef kAllowSoundSprocket
-            if (gAresGlobal->gOptions & kOptionSoundSprocketOn)
+            if (globals()->gOptions & kOptionSoundSprocketOn)
             {
                 TQ3Point3D          myPoint;
                 TQ3Vector3D         myVector;
@@ -591,24 +585,24 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
                 myVector.z = 0;//mSmallFixedToVelocity( hvel);
 
                 // retrieve update info - send it to localization component
-                theErr = SSpSource_SetPosition( gAresGlobal->gChannel[whichChannel].source, &myPoint);
+                theErr = SSpSource_SetPosition( globals()->gChannel[whichChannel].source, &myPoint);
                 if (theErr)
                     ShowSimpleStringAlert ("\pFailed to set the source position",
                         nil, nil, nil);
 
-                theErr = SSpSource_SetVelocity( gAresGlobal->gChannel[whichChannel].source,
+                theErr = SSpSource_SetVelocity( globals()->gChannel[whichChannel].source,
                     &myVector);
                 if (theErr)
                     ShowSimpleStringAlert ("\pFailed to set the velocity.",
                         nil, nil, nil);
 
-                theErr = SSpSource_CalcLocalization( gAresGlobal->gChannel[whichChannel].source, gListener,
+                theErr = SSpSource_CalcLocalization( globals()->gChannel[whichChannel].source, gListener,
                     &myLocalization);
                 if (theErr)
                     ShowSimpleStringAlert ("\pFailed to calculate the localization",
                         nil, nil, nil);
 
-                theErr = SndSetInfo( gAresGlobal->gChannel[whichChannel].channelPtr, siSSpLocalization,
+                theErr = SndSetInfo( globals()->gChannel[whichChannel].channelPtr, siSSpLocalization,
                     &myLocalization);
                 if (theErr)
                     ShowSimpleStringAlert("\pFailed to localize the channel",
@@ -629,12 +623,12 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
                 location.upVector.y = 0;
                 location.upVector.z = -1;
 
-                theErr = SSpSource_SetCameraPlacement (gAresGlobal->gChannel[whichChannel].source, &location);
+                theErr = SSpSource_SetCameraPlacement (globals()->gChannel[whichChannel].source, &location);
                 if (theErr)
                     ShowSimpleStringAlert ("\pFailed to set the source position",
                         nil, nil, nil);
 
-                theErr = SSpSource_CalcLocalization (gAresGlobal->gChannel[whichChannel].source, gListener, &localization);
+                theErr = SSpSource_CalcLocalization (globals()->gChannel[whichChannel].source, gListener, &localization);
                 if (theErr)
                     ShowSimpleStringAlert ("\pFailed to calculate the localization",
                         nil, nil, nil);
@@ -649,7 +643,7 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
                 if (localization.currentLocation.distance < 5.0)
                     localization.currentLocation.distance = 5.0;
 
-                theErr = SndSetInfo (gAresGlobal->gChannel[whichChannel].channelPtr, siSSpLocalization, &localization);
+                theErr = SndSetInfo (globals()->gChannel[whichChannel].channelPtr, siSSpLocalization, &localization);
                 if (theErr)
                     ShowSimpleStringAlert("\pFailed to localize the channel",
                         nil, nil, nil);
@@ -658,14 +652,14 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
             {
 
                 newvol = amplitude;
-                newvol *= gAresGlobal->gSoundVolume;
+                newvol *= globals()->gSoundVolume;
                 newvol >>= 3;
 
                 cmd.param1 = newvol;
                 cmd.param2 = 0;
                 cmd.cmd = ampCmd;
 
-                err = SndDoCommand( gAresGlobal->gChannel[whichChannel].channelPtr, &cmd, false);
+                err = SndDoCommand( globals()->gChannel[whichChannel].channelPtr, &cmd, false);
                 if ( err != noErr)
                 {
                     WriteDebugLine("\pSnd Err:");
@@ -674,8 +668,8 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
 
             }
 #endif
-            err = SndPlay( gAresGlobal->gChannel[whichChannel].channelPtr,
-                gAresGlobal->gSound[whichSound].soundHandle, true);
+            err = SndPlay( globals()->gChannel[whichChannel].channelPtr,
+                globals()->gSound[whichSound].soundHandle, true);
 
         }
     }
@@ -688,7 +682,7 @@ void SetAllSoundsNoKeep( void)
 
     for ( count = kMinVolatileSound; count < kSoundNum; count++)
     {
-        gAresGlobal->gSound[count].keepMe = FALSE;
+        globals()->gSound[count].keepMe = FALSE;
     }
 
 }
@@ -699,10 +693,10 @@ void RemoveAllUnusedSounds( void)
 
     for ( count = kMinVolatileSound; count < kSoundNum; count++)
     {
-        if ((!gAresGlobal->gSound[count].keepMe) &&
-                (gAresGlobal->gSound[count].soundHandle.get() != nil)) {
-            gAresGlobal->gSound[count].soundHandle.destroy();
-            gAresGlobal->gSound[count].id = -1;
+        if ((!globals()->gSound[count].keepMe) &&
+                (globals()->gSound[count].soundHandle.get() != nil)) {
+            globals()->gSound[count].soundHandle.destroy();
+            globals()->gSound[count].id = -1;
         }
     }
 }
@@ -714,8 +708,8 @@ void ResetAllSounds( void)
 
     for ( count = 0; count < kSoundNum; count++)
     {
-        gAresGlobal->gSound[count].keepMe = FALSE;
-        gAresGlobal->gSound[count].id = -1;
+        globals()->gSound[count].keepMe = FALSE;
+        globals()->gSound[count].id = -1;
     }
 }
 
@@ -725,10 +719,10 @@ void KeepSound( short soundID)
     short       whichSound;
 
     whichSound = 0;
-    while ((gAresGlobal->gSound[whichSound].id != soundID) && ( whichSound < kSoundNum)) { whichSound++;}
+    while ((globals()->gSound[whichSound].id != soundID) && ( whichSound < kSoundNum)) { whichSound++;}
     if ( whichSound < kSoundNum)
     {
-        gAresGlobal->gSound[whichSound].keepMe = TRUE;
+        globals()->gSound[whichSound].keepMe = TRUE;
     }
 }
 
@@ -736,17 +730,17 @@ short AddSound( short soundID)
 
 {
     short       whichSound;
-    Str255      debugstr = "\pgAresGlobal->gSound[XX].soundHandle";
+    Str255      debugstr = "\pglobals()->gSound[XX].soundHandle";
 
     whichSound = 0;
-    while ((gAresGlobal->gSound[whichSound].id != soundID) && ( whichSound < kSoundNum))
+    while ((globals()->gSound[whichSound].id != soundID) && ( whichSound < kSoundNum))
     {
         whichSound++;
     }
     if ( whichSound == kSoundNum)
     {
         whichSound = 0;
-        while ((gAresGlobal->gSound[whichSound].soundHandle.get() != nil) &&
+        while ((globals()->gSound[whichSound].soundHandle.get() != nil) &&
             ( whichSound < kSoundNum))
         {
             whichSound++;
@@ -761,19 +755,19 @@ short AddSound( short soundID)
             WriteDebugLine("\pADDSND>");
             WriteDebugLong( soundID);
 
-            gAresGlobal->gSound[whichSound].soundHandle = GetSound(soundID);
-            if (gAresGlobal->gSound[whichSound].soundHandle.get() == nil) {
+            globals()->gSound[whichSound].soundHandle = GetSound(soundID);
+            if (globals()->gSound[whichSound].soundHandle.get() == nil) {
                 ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadSoundError, -1, -1, -1, __FILE__, soundID);
 //              Debugger();
                 return ( -1);
             }
-//          HLockHi( gAresGlobal->gSound[whichSound].soundHandle);
+//          HLockHi( globals()->gSound[whichSound].soundHandle);
 
             debugstr[8] = '0' + (whichSound / 10);
             debugstr[9] = '0' + (whichSound % 10);
-//          mDataHandleLockAndRegister( gAresGlobal->gSound[whichSound].soundHandle, UnlockSoundCallback, nil, nil, debugstr)
+//          mDataHandleLockAndRegister( globals()->gSound[whichSound].soundHandle, UnlockSoundCallback, nil, nil, debugstr)
 //          HHCheckAllHandles();
-            gAresGlobal->gSound[whichSound].id = soundID;
+            globals()->gSound[whichSound].id = soundID;
             return( whichSound);
         }
     } else return( whichSound);
@@ -787,13 +781,13 @@ void SoundFXCleanup( void)
     int     i;
     OSErr   err;
 
-//  CloseResFile( gAresGlobal->gSoundFileRefID);
+//  CloseResFile( globals()->gSoundFileRefID);
 
     for ( i = 0; i < kMaxChannelNum; i++)
     {
-        if (  gAresGlobal->gChannel[i].channelPtr != nil)
+        if (  globals()->gChannel[i].channelPtr != nil)
         {
-            err = SndDisposeChannel( gAresGlobal->gChannel[i].channelPtr, TRUE);
+            err = SndDisposeChannel( globals()->gChannel[i].channelPtr, TRUE);
             if ( err != noErr)
             {
                 WriteDebugLine("\pSnd Err:");
@@ -805,8 +799,8 @@ void SoundFXCleanup( void)
     WriteDebugLine("\p<SndChannels");
     for ( i = 0; i < kSoundNum; i++)
     {
-        if (gAresGlobal->gSound[i].soundHandle.get() != nil) {
-            gAresGlobal->gSound[i].soundHandle.destroy();
+        if (globals()->gSound[i].soundHandle.get() != nil) {
+            globals()->gSound[i].soundHandle.destroy();
         }
     }
     WriteDebugLine("\p<SndHndles");
@@ -847,7 +841,7 @@ OSStatus MyPanSoundFromRightToLeft( Handle mySndResource)
     mWriteDebugString("\pBEGIN PANNING");
     // start playing sound
 
-    myStatus = SndPlay(gAresGlobal->gChannel[0].channelPtr, (SndListHandle)mySndResource, true);
+    myStatus = SndPlay(globals()->gChannel[0].channelPtr, (SndListHandle)mySndResource, true);
     if ( myStatus != noErr)
     {
         mWriteDebugString("\pPLAY ERR");
@@ -864,12 +858,12 @@ OSStatus MyPanSoundFromRightToLeft( Handle mySndResource)
         myPoint.x = 1;
         myPoint.y = 0;
         myPoint.z = myZPos;
-        SSpSource_SetPosition( gAresGlobal->gChannel[0].source, &myPoint);
+        SSpSource_SetPosition( globals()->gChannel[0].source, &myPoint);
 
         // retrieve update info - send it to localization component
-        SSpSource_CalcLocalization( gAresGlobal->gChannel[0].source, gListener,
+        SSpSource_CalcLocalization( globals()->gChannel[0].source, gListener,
             &myLocalization);
-        SndSetInfo( gAresGlobal->gChannel[0].channelPtr, siSSpLocalization,
+        SndSetInfo( globals()->gChannel[0].channelPtr, siSSpLocalization,
             &myLocalization);
         Delay( 15, &myTicks);
     }
@@ -967,8 +961,8 @@ void mPlayDistanceSound(
         mdistance = mobjectptr->distanceFromPlayer;
         if ( mdistance == 0)
         {
-            if ( gAresGlobal->gPlayerShipNumber >= 0)
-                mplayerobjectptr = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
+            if ( globals()->gPlayerShipNumber >= 0)
+                mplayerobjectptr = *gSpaceObjectData + globals()->gPlayerShipNumber;
             else mplayerobjectptr = nil;
             if (( mplayerobjectptr != nil) && ( mplayerobjectptr->active))
             {
@@ -1019,8 +1013,8 @@ void mPlayDistanceSound(
                 else
                     mvolume = ( (1920 - mdistance) * mvolume) / 1920;
             }
-            if ( gAresGlobal->gPlayerShipNumber >= 0)
-                mplayerobjectptr = *gSpaceObjectData + gAresGlobal->gPlayerShipNumber;
+            if ( globals()->gPlayerShipNumber >= 0)
+                mplayerobjectptr = *gSpaceObjectData + globals()->gPlayerShipNumber;
             else mplayerobjectptr = nil;
             if (( mplayerobjectptr != nil) && ( mplayerobjectptr->active))
             {

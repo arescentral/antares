@@ -27,8 +27,6 @@
 
 #define kAEInitErr                  76
 
-extern aresGlobalType           *gAresGlobal;
-
 pascal OSErr HandleOApp( AppleEvent *theAppleEvent, AppleEvent *reply, long refcon);
 
 pascal OSErr HandleQuit( AppleEvent *theAppleEvent, AppleEvent *reply, long refcon);
@@ -51,12 +49,12 @@ pascal OSErr HandleOApp( AppleEvent *theAppleEvent, AppleEvent *reply, long refc
 //  error = GotRequiredParams( theAppleEvent);
 //  if ( error != noErr) return ( error);
 
-    if ( gAresGlobal->useGameRanger)
+    if ( globals()->useGameRanger)
     {
         if ( Wrap_GRCheckAEForCmd( theAppleEvent))
         {
-            gAresGlobal->gameRangerPending = true;
-            gAresGlobal->returnToMain = true;
+            globals()->gameRangerPending = true;
+            globals()->returnToMain = true;
         }
     }
 
@@ -78,8 +76,8 @@ pascal OSErr HandleQuit( AppleEvent *theAppleEvent, AppleEvent *reply, long refc
     if ( error != noErr) return ( error);
 
 //  DoQuit( true);
-    gAresGlobal->returnToMain = true;
-    gAresGlobal->isQuitting = true;
+    globals()->returnToMain = true;
+    globals()->isQuitting = true;
 
     return( noErr);
 }
@@ -150,9 +148,9 @@ pascal OSErr HandleOpenDoc( AppleEvent *theAppleEvent, AppleEvent *reply,
                                            sizeof(myFSS), &actualSize);
                     if ( error == noErr)
                     {
-                        if ( gAresGlobal->okToOpenFile)
+                        if ( globals()->okToOpenFile)
                         {
-                            gAresGlobal->originalExternalFileSpec = myFSS;
+                            globals()->originalExternalFileSpec = myFSS;
 //                          SysBeep(20);
 //                          EF_OpenExternalFile( );
                         }
@@ -259,7 +257,7 @@ OSErr AAE_Init( void)
 //      return err;
 //  }
 
-    gAresGlobal->aeInited = true;
+    globals()->aeInited = true;
     return noErr;
 }
 

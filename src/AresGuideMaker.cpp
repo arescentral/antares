@@ -92,7 +92,6 @@ extern long             WORLD_WIDTH, WORLD_HEIGHT;
 extern GWorldPtr        gOffWorld;
 extern TypedHandle<baseObjectType>  gBaseObjectData;
 extern objectActionType**       gObjectActionData;
-extern aresGlobalType*          gAresGlobal;
 
 void ConvertPortraitIntoGIF(long, unsigned char*);
 void InsertWeaponText( short, short, Handle, weaponDataType *, fieldRangeType *);

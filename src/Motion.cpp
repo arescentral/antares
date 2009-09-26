@@ -84,16 +84,11 @@ struct proximityUnitType {
     adjacentUnitType        unitsToCheck[kUnitsToCheckNumber];  // adjacent units to check
 };
 
-extern aresGlobalType   *gAresGlobal;
 extern GWorldPtr        gOffWorld, gRealWorld, gSaveWorld;
 extern Handle           gPixTable[];
 extern PixMapHandle     thePixMapHandle;
-extern long             /*gAresGlobal->gPlayerShipNumber, gAresGlobal->gGameTime,*/
-                        gAbsoluteScale, CLIP_LEFT, CLIP_TOP,
-                        CLIP_RIGHT, CLIP_BOTTOM, gPlayScreenWidth, gPlayScreenHeight,
-                        /*gAresGlobal->gZoomMode,*/
-                        gRootObjectNumber;
-//extern long               gAresGlobal->gPlayerAdmiralNumber;
+extern long             gAbsoluteScale, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM,
+                        gPlayScreenWidth, gPlayScreenHeight, gRootObjectNumber;
 extern spaceObjectType  *gScrollStarObject, *gRootObject;
 
 static longPointType    cAdjacentUnits[] = {
@@ -105,8 +100,6 @@ static longPointType    cAdjacentUnits[] = {
                                             };
 
 coordPointType          gGlobalCorner;
-//long                  gAresGlobal->gClosestObject = 0, gAresGlobal->gFarthestObject = 0, gAresGlobal->gCenterScaleH = 0, gAresGlobal->gCenterScaleV = 0;
-//Handle                    gAresGlobal->gProximityGrid = nil;
 
 // HACK TO FIND BUG:
 Boolean gHackMoitionInitedYet = FALSE;
@@ -118,20 +111,20 @@ int InitMotion( void)
     proximityUnitType       *p;
     long                    adjacentAdd = 0, ux, uy, sx, sy;
 
-    gAresGlobal->gCenterScaleH = (gPlayScreenWidth / 2) * SCALE_SCALE;
-    gAresGlobal->gCenterScaleV = (gPlayScreenHeight / 2) * SCALE_SCALE;
+    globals()->gCenterScaleH = (gPlayScreenWidth / 2) * SCALE_SCALE;
+    globals()->gCenterScaleV = (gPlayScreenHeight / 2) * SCALE_SCALE;
 
-    gAresGlobal->gProximityGrid.create(kProximityGridDataLength);
-    if (gAresGlobal->gProximityGrid.get() == nil)
+    globals()->gProximityGrid.create(kProximityGridDataLength);
+    if (globals()->gProximityGrid.get() == nil)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
         return( MEMORY_ERROR);
     }
 
-//  mHandleLockAndRegister( gAresGlobal->gProximityGrid, nil, nil, nil)
+//  mHandleLockAndRegister( globals()->gProximityGrid, nil, nil, nil)
 
     // initialize the proximityGrid & set up the needed lookups (see Notebook 2 p.34)
-    p = *gAresGlobal->gProximityGrid;
+    p = *globals()->gProximityGrid;
     for ( y = 0; y < kProximitySuperSize; y++)
     {
         for ( x = 0; x < kProximitySuperSize; x++)
@@ -191,10 +184,10 @@ void ResetMotionGlobals( void)
     long                i;
 
     gGlobalCorner.h = gGlobalCorner.v = 0;
-    gAresGlobal->gClosestObject = 0;
-    gAresGlobal->gFarthestObject = 0;
+    globals()->gClosestObject = 0;
+    globals()->gFarthestObject = 0;
 
-    proximityObject = *gAresGlobal->gProximityGrid;
+    proximityObject = *globals()->gProximityGrid;
     for ( i = 0; i < kProximityGridDataLength; i++)
     {
         proximityObject->nearObject = proximityObject->farObject = nil;
@@ -208,7 +201,7 @@ void HackCheckProxGrid( long sayswho)
     if ( gHackMoitionInitedYet)
     {
 
-    proximityUnitType       *p = *gAresGlobal->gProximityGrid;
+    proximityUnitType       *p = *globals()->gProximityGrid;
     long                    count, c2;
 
 
@@ -231,8 +224,8 @@ void HackCheckProxGrid( long sayswho)
 void MotionCleanup( void)
 
 {
-    if ( gAresGlobal->gProximityGrid.get() != nil) {
-        gAresGlobal->gProximityGrid.destroy();
+    if ( globals()->gProximityGrid.get() != nil) {
+        globals()->gProximityGrid.destroy();
     }
 }
 
@@ -395,8 +388,8 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                 if ( anObject == gScrollStarObject)
                 {
     //              h = kCenterScaleSize / gAbsoluteScale;
-                    gGlobalCorner.h = anObject->location.h - (gAresGlobal->gCenterScaleH / gAbsoluteScale);
-                    gGlobalCorner.v = anObject->location.v - (gAresGlobal->gCenterScaleV / gAbsoluteScale);
+                    gGlobalCorner.h = anObject->location.h - (globals()->gCenterScaleH / gAbsoluteScale);
+                    gGlobalCorner.v = anObject->location.v - (globals()->gCenterScaleV / gAbsoluteScale);
                 }
 
                 // check to see if it's out of bounds
@@ -589,8 +582,8 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
 // (but they can effect objects thinking)
 // !!!!!!!!
     shortDist = thisDist = static_cast<uint32_t>(kMaximumRelevantDistanceSquared) * 2;
-//  gAresGlobal->gClosestObject = 0;
-//  gAresGlobal->gFarthestObject = 0;
+//  globals()->gClosestObject = 0;
+//  globals()->gFarthestObject = 0;
     longDist = 0;
     anObject = gRootObject;
 
@@ -646,7 +639,7 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                         anObject->sprite->style = spriteColor;
                         anObject->sprite->styleColor = 0xff;
                         anObject->sprite->styleData = anObject->cloakState;
-                        if ( anObject->owner == gAresGlobal->gPlayerAdmiralNumber)
+                        if ( anObject->owner == globals()->gPlayerAdmiralNumber)
                             anObject->sprite->styleData -=
                                 anObject->sprite->styleData >> 2;
                     } else if ( anObject->cloakState < 0)
@@ -662,7 +655,7 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                             anObject->sprite->style = spriteColor;
                             anObject->sprite->styleColor = 0xff;
                             anObject->sprite->styleData = -anObject->cloakState;
-                            if ( anObject->owner == gAresGlobal->gPlayerAdmiralNumber)
+                            if ( anObject->owner == globals()->gPlayerAdmiralNumber)
                                 anObject->sprite->styleData -=
                                     anObject->sprite->styleData >> 2;
                         }
@@ -711,14 +704,14 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
     Microseconds( &hackTimeStart);
 
     // set up player info so we can find closest ship (for scaling)
-    if ( gAresGlobal->gPlayerShipNumber >= 0)
-        player = table + gAresGlobal->gPlayerShipNumber;
+    if ( globals()->gPlayerShipNumber >= 0)
+        player = table + globals()->gPlayerShipNumber;
     else player = nil;
-    gAresGlobal->gClosestObject = 0;
-    gAresGlobal->gFarthestObject = 0;
+    globals()->gClosestObject = 0;
+    globals()->gFarthestObject = 0;
 
     // reset the collision grid
-    proximityObject = *gAresGlobal->gProximityGrid;
+    proximityObject = *globals()->gProximityGrid;
     for ( i = 0; i < kProximityGridDataLength; i++)
     {
         proximityObject->nearObject = proximityObject->farObject = nil;
@@ -794,27 +787,27 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
                     /*
                     if ( distance < closestDist)
                     {
-                        if (( aObject != gScrollStarObject) && (( gAresGlobal->gZoomMode != kNearestFoeZoom)
+                        if (( aObject != gScrollStarObject) && (( globals()->gZoomMode != kNearestFoeZoom)
                             || ( aObject->owner != player->owner)))
                         {
                             closestDist = distance;
-                            gAresGlobal->gClosestObject = aObject->entryNumber;
+                            globals()->gClosestObject = aObject->entryNumber;
 //                              player->targetObjectNumber = aObject->entryNumber;
                         }
                     }
                     */
                 }
                 if (closestDist > hugeDistance) {
-                    if (( aObject != gScrollStarObject) && (( gAresGlobal->gZoomMode != kNearestFoeZoom)
+                    if (( aObject != gScrollStarObject) && (( globals()->gZoomMode != kNearestFoeZoom)
                         || ( aObject->owner != player->owner)))
                     {
                         closestDist = hugeDistance;
-                        gAresGlobal->gClosestObject = aObject->entryNumber;
+                        globals()->gClosestObject = aObject->entryNumber;
                     }
                 }
                 if (hugeDistance > farthestDist) {
                     farthestDist = hugeDistance;
-                    gAresGlobal->gFarthestObject = aObject->entryNumber;
+                    globals()->gFarthestObject = aObject->entryNumber;
                 }
             }
         } else
@@ -841,7 +834,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
             ye = ys >> kCollisionSuperExtraShift;
             ys &= kProximityUnitAndModulo;
 
-            proximityObject = *gAresGlobal->gProximityGrid + (ys << kProximityWidthMultiply) + xs;
+            proximityObject = *globals()->gProximityGrid + (ys << kProximityWidthMultiply) + xs;
             aObject->nextNearObject = proximityObject->nearObject;
             proximityObject->nearObject = aObject;
             aObject->collisionGrid.h = xe;
@@ -855,7 +848,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
             ys = ye >> kDistanceSuperExtraShift;
             ye &= kProximityUnitAndModulo;
 
-            proximityObject = *gAresGlobal->gProximityGrid + (ye << kProximityWidthMultiply) + xe;
+            proximityObject = *globals()->gProximityGrid + (ye << kProximityWidthMultiply) + xe;
             aObject->nextFarObject = proximityObject->farObject;
             proximityObject->farObject = aObject;
             aObject->distanceGrid.h = xs;
@@ -888,7 +881,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
         aObject = aObject->nextObject;
     }
 
-    proximityObject = *gAresGlobal->gProximityGrid;
+    proximityObject = *globals()->gProximityGrid;
     for ( j = 0; j < kProximitySuperSize; j++)
     {
         for ( i = 0; i < kProximitySuperSize; i++)
@@ -1145,7 +1138,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
         }
     }
 
-    proximityObject = *gAresGlobal->gProximityGrid;
+    proximityObject = *globals()->gProximityGrid;
     for ( j = 0; j < kProximitySuperSize; j++)
     {
         for ( i = 0; i < kProximitySuperSize; i++)
@@ -1289,7 +1282,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
 
 // here, it doesn't matter in what order we step through the table
     aObject = table;
-    dcalc = 1ul << gAresGlobal->gPlayerAdmiralNumber;
+    dcalc = 1ul << globals()->gPlayerAdmiralNumber;
 
     for ( i = 0; i < tableLength; i++)
     {

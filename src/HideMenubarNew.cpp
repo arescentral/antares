@@ -43,8 +43,6 @@
 //
 // 12/10/93 david   first cut
 
-extern aresGlobalType   *gAresGlobal;
-
 short           gOldBarHgt = 20;
 RgnHandle       gMenuBarRegion = nil, gCornerRegion = nil;
 Boolean         gMenubarIsVisible = true;
@@ -83,7 +81,7 @@ void SetMBarState (Boolean vis, GDHandle theDevice)
     else
         WriteDebugLine("\pHIDE MENU");
 
-    if ( gAresGlobal->gOptions & kOptionUseSystemHideMenuBar)
+    if ( globals()->gOptions & kOptionUseSystemHideMenuBar)
     {
         if ( vis)
         {
@@ -107,7 +105,7 @@ void SetMBarState (Boolean vis, GDHandle theDevice)
             gMenuBarRegion = NewRgn();
             GetMBarRgn(gMenuBarRegion);             // make a region for the mbar
 
-            if ( gAresGlobal->gOptions & kOptionUseSystemHideMenuBar)
+            if ( globals()->gOptions & kOptionUseSystemHideMenuBar)
                 HideMenuBar();
             else
             {
@@ -128,7 +126,7 @@ void SetMBarState (Boolean vis, GDHandle theDevice)
     {
         if ( theDevice == GetMainDevice())
         {
-            if ( gAresGlobal->gOptions & kOptionUseSystemHideMenuBar)
+            if ( globals()->gOptions & kOptionUseSystemHideMenuBar)
                 ShowMenuBar();
 
             else

@@ -48,24 +48,22 @@
 #define kRaisePayRateCheat      7   // determines your payscale
 #define kLowerPayRateCheat      8
 
-extern aresGlobalType *gAresGlobal;
-
 void CheatFeedback( short, Boolean, long);
 void CheatFeedbackPlus(short, Boolean, long, unsigned char*);
 
 void AresCheatInit( void)
 {
-    gAresGlobal->gAresCheatStrings.create(1);
-    if (gAresGlobal->gAresCheatStrings.get() == nil) {
+    globals()->gAresCheatStrings.create(1);
+    if (globals()->gAresCheatStrings.get() == nil) {
         return;
     }
-    (*gAresGlobal->gAresCheatStrings)->load(kCheatStringListID);
+    (*globals()->gAresCheatStrings)->load(kCheatStringListID);
 }
 
 void CleanupAresCheat( void)
 {
-    if (gAresGlobal->gAresCheatStrings.get() != nil) {
-        gAresGlobal->gAresCheatStrings.destroy();
+    if (globals()->gAresCheatStrings.get() != nil) {
+        globals()->gAresCheatStrings.destroy();
     }
 }
 
@@ -83,7 +81,7 @@ short GetCheatNumFromString(unsigned char* s)
         strLen--;
     }
     std::string cpp_string(reinterpret_cast<const char*>(codeString + 1), *codeString);
-    return (*gAresGlobal->gAresCheatStrings)->index_of(cpp_string) + 1;
+    return (*globals()->gAresCheatStrings)->index_of(cpp_string) + 1;
 }
 
 void ExecuteCheat( short whichCheat, long whichPlayer)
@@ -96,11 +94,11 @@ void ExecuteCheat( short whichCheat, long whichPlayer)
     WriteDebugLong( whichCheat);
     mWriteDebugString("\pWhich Player:");
     WriteDebugLong( whichPlayer);
-    WriteDebugHex( gAresGlobal->gActiveCheats[whichPlayer], 8);
+    WriteDebugHex( globals()->gActiveCheats[whichPlayer], 8);
 
     if ( whichCheat == kNameObjectCheat)
     {
-        gAresGlobal->gActiveCheats[whichPlayer] |= kNameObjectBit;
+        globals()->gActiveCheats[whichPlayer] |= kNameObjectBit;
         CheatFeedback( whichCheat, true, whichPlayer);
         return;
     }
@@ -116,7 +114,7 @@ void ExecuteCheat( short whichCheat, long whichPlayer)
             case kActivateCheatCheat:
                 for ( i = 0; i < kMaxPlayerNum; i++)
                 {
-                    gAresGlobal->gActiveCheats[i] = 0;
+                    globals()->gActiveCheats[i] = 0;
                 }
                 CheatFeedback( whichCheat, false, whichPlayer);
                 break;
@@ -129,35 +127,35 @@ void ExecuteCheat( short whichCheat, long whichPlayer)
                 break;
 
             case kAutoPlayCheat:
-                if ( gAresGlobal->gActiveCheats[whichPlayer] & kAutoPlayBit)
+                if ( globals()->gActiveCheats[whichPlayer] & kAutoPlayBit)
                 {
-                    gAresGlobal->gActiveCheats[whichPlayer] &= ~kAutoPlayBit;
+                    globals()->gActiveCheats[whichPlayer] &= ~kAutoPlayBit;
                     CheatFeedback( whichCheat, false, whichPlayer);
-                    if ( whichPlayer == gAresGlobal->gPlayerAdmiralNumber)
+                    if ( whichPlayer == globals()->gPlayerAdmiralNumber)
                     {
-//                      ChangePlayerShipNumber( whichPlayer, gAresGlobal->gPlayerShipNumber);
+//                      ChangePlayerShipNumber( whichPlayer, globals()->gPlayerShipNumber);
                     }
 //                  SetAdmiralAttributes( whichPlayer, kAIsHuman);
                 } else
                 {
-                    gAresGlobal->gActiveCheats[whichPlayer] |= kAutoPlayBit;
+                    globals()->gActiveCheats[whichPlayer] |= kAutoPlayBit;
                     CheatFeedback( whichCheat, true, whichPlayer);
-                    if ( whichPlayer == gAresGlobal->gPlayerAdmiralNumber)
+                    if ( whichPlayer == globals()->gPlayerAdmiralNumber)
                     {
-//                      ChangePlayerShipNumber( whichPlayer, gAresGlobal->gPlayerShipNumber);
+//                      ChangePlayerShipNumber( whichPlayer, globals()->gPlayerShipNumber);
                     }
 //                  SetAdmiralAttributes( whichPlayer, kAIsComputer);
                 }
                 break;
 
             case kBuildFastCheat:
-                if ( gAresGlobal->gActiveCheats[whichPlayer] & kBuildFastBit)
+                if ( globals()->gActiveCheats[whichPlayer] & kBuildFastBit)
                 {
-                    gAresGlobal->gActiveCheats[whichPlayer] &= ~kBuildFastBit;
+                    globals()->gActiveCheats[whichPlayer] &= ~kBuildFastBit;
                     CheatFeedback( whichCheat, false, whichPlayer);
                 } else
                 {
-                    gAresGlobal->gActiveCheats[whichPlayer] |= kBuildFastBit;
+                    globals()->gActiveCheats[whichPlayer] |= kBuildFastBit;
                     CheatFeedback( whichCheat, true, whichPlayer);
                 }
                 break;
@@ -190,17 +188,17 @@ void ExecuteCheat( short whichCheat, long whichPlayer)
     {
         if ( whichCheat == kActivateCheatCheat)
         {
-            if ( gAresGlobal->gActiveCheats[whichPlayer] & kCheatActiveBit)
+            if ( globals()->gActiveCheats[whichPlayer] & kCheatActiveBit)
             {
                 for ( i = 0; i < kMaxPlayerNum; i++)
                 {
-                    gAresGlobal->gActiveCheats[i] = 0;
+                    globals()->gActiveCheats[i] = 0;
                 }
 
                 CheatFeedback( whichCheat, false, whichPlayer);
             } else
             {
-                gAresGlobal->gActiveCheats[whichPlayer] |= kCheatActiveBit;
+                globals()->gActiveCheats[whichPlayer] |= kCheatActiveBit;
                 CheatFeedback( whichCheat, true, whichPlayer);
             }
         }

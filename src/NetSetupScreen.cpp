@@ -145,17 +145,17 @@
 
 #define mIncreaseBufferCounter( mbuf) (mbuf)++; if ( mbuf >= kCharBufferSize) mbuf = 0
 
-extern aresGlobalType           *gAresGlobal;
+extern aresGlobalType           *globals();
 extern long                     gNatePortLeft, gNatePortTop, CLIP_LEFT, CLIP_RIGHT, CLIP_TOP,
-                                CLIP_BOTTOM, /*gAresGlobal->gTrueClipBottom,*/
-                                gNetLatency, /*gAresGlobal->gThisScenarioNumber,*/ gRandomSeed;
+                                CLIP_BOTTOM, /*globals()->gTrueClipBottom,*/
+                                gNetLatency, /*globals()->gThisScenarioNumber,*/ gRandomSeed;
 extern GWorldPtr                gOffWorld, gRealWorld, gSaveWorld;
-extern CWindowPtr               gTheWindow/*, gAresGlobal->gBackWindow*/;       // we need the window for copying to the real world, a hack
+extern CWindowPtr               gTheWindow/*, globals()->gBackWindow*/;       // we need the window for copying to the real world, a hack
 extern directTextType           *gDirectText;
 extern Handle                   gBaseObjectData;
 extern long                     gWhichDirectText, WORLD_WIDTH, WORLD_HEIGHT;
-                                /*gAresGlobal->gPlayerAdmiralNumber;*/
-//extern unsigned long          gAresGlobal->gOptions;
+                                /*globals()->gPlayerAdmiralNumber;*/
+//extern unsigned long          globals()->gOptions;
 extern  GDHandle                theDevice;
 
 typedef struct
@@ -264,7 +264,7 @@ long DoTabbedNetLevelInterface( void)
     mWriteDebugString("\pEnter NetSetup");
     EraseOffWorld();
     EraseSaveWorld();
-    gAresGlobal->gThisScenarioNumber = gRandomSeed = -1;
+    globals()->gThisScenarioNumber = gRandomSeed = -1;
 
 
     if ( !Ambrosia_Is_Registered())
@@ -476,12 +476,12 @@ long DoTabbedNetLevelInterface( void)
                 switch ( theEvent.what )
                 {
                     case nullEvent:
-                        if ( gAresGlobal->returnToMain)
+                        if ( globals()->returnToMain)
                         {
                             whichItem = kNetLevelCancelButton;
                             break;
                         }
-                        if ( gAresGlobal->gOptions & kOptionInBackground)
+                        if ( globals()->gOptions & kOptionInBackground)
                             whichItem = -1;
                         else
                         {
@@ -600,50 +600,50 @@ long DoTabbedNetLevelInterface( void)
 
                                 case ePreGameNoScenarioMessage:
                                     GetIndString( whyDisabledString, 2010, 2);
-                                    CopyPString( gAresGlobal->otherPlayerScenarioFileName,
-                                        gAresGlobal->externalFileSpec.name);
+                                    CopyPString( globals()->otherPlayerScenarioFileName,
+                                        globals()->externalFileSpec.name);
                                     ShowWhyNetLevelNotLoaded( &setup,
                                         whyDisabledString);
                                     break;
 
                                 case ePreGameOldVersionScenarioMessage:
                                     GetIndString( whyDisabledString, 2010, 3);
-                                    CopyPString( gAresGlobal->otherPlayerScenarioFileName,
-                                        gAresGlobal->externalFileSpec.name);
+                                    CopyPString( globals()->otherPlayerScenarioFileName,
+                                        globals()->externalFileSpec.name);
                                     ShowWhyNetLevelNotLoaded( &setup,
                                         whyDisabledString);
                                     break;
 
                                 case ePreGameNewVersionScenarioMessage:
-                                    if ( gAresGlobal->internetConfigPresent)
+                                    if ( globals()->internetConfigPresent)
                                     {
                                         GetIndString( whyDisabledString, 2010, 7);
                                     } else
                                     {
                                         GetIndString( whyDisabledString, 2010, 4);
                                         ConcatenatePString( whyDisabledString,
-                                            gAresGlobal->scenarioFileInfo.downloadURLString);
+                                            globals()->scenarioFileInfo.downloadURLString);
                                         ConcatenatePString( whyDisabledString, "\p.");
                                     }
-                                    CopyPString( gAresGlobal->otherPlayerScenarioFileName,
-                                        gAresGlobal->externalFileSpec.name);
+                                    CopyPString( globals()->otherPlayerScenarioFileName,
+                                        globals()->externalFileSpec.name);
                                     ShowWhyNetLevelNotLoaded( &setup,
                                         whyDisabledString);
                                     break;
 
                                 case ePreGameWrongCheckSumScenarioMessage:
-                                    if ( gAresGlobal->internetConfigPresent)
+                                    if ( globals()->internetConfigPresent)
                                     {
                                         GetIndString( whyDisabledString, 2010, 8);
                                     } else
                                     {
                                         GetIndString( whyDisabledString, 2010, 5);
                                         ConcatenatePString( whyDisabledString,
-                                            gAresGlobal->scenarioFileInfo.downloadURLString);
+                                            globals()->scenarioFileInfo.downloadURLString);
                                         ConcatenatePString( whyDisabledString, "\p.");
                                     }
-                                    CopyPString( gAresGlobal->otherPlayerScenarioFileName,
-                                        gAresGlobal->externalFileSpec.name);
+                                    CopyPString( globals()->otherPlayerScenarioFileName,
+                                        globals()->externalFileSpec.name);
                                     ShowWhyNetLevelNotLoaded( &setup,
                                         whyDisabledString);
                                     break;
@@ -962,7 +962,7 @@ long DoTabbedNetLevelInterface( void)
                             }
                         }
 
-                        if ( gAresGlobal->gOptions & kOptionInBackground)
+                        if ( globals()->gOptions & kOptionInBackground)
                         {
                         } else
                         {
@@ -985,11 +985,11 @@ long DoTabbedNetLevelInterface( void)
                             EndUpdate( (WindowPtr)whichWindow);
                             break;
                             EndUpdate( (WindowPtr)whichWindow);
-                        } else if ( whichWindow == gAresGlobal->gBackWindow)
+                        } else if ( whichWindow == globals()->gBackWindow)
                         {
                             BeginUpdate( (WindowPtr)whichWindow);
-                                SetPort( (WindowPtr)gAresGlobal->gBackWindow);
-                                FillRect(  &(gAresGlobal->gBackWindow->portRect), (Pattern *)&qd.black);
+                                SetPort( (WindowPtr)globals()->gBackWindow);
+                                FillRect(  &(globals()->gBackWindow->portRect), (Pattern *)&qd.black);
                             EndUpdate( (WindowPtr)whichWindow);
                         } else
                         {
@@ -1165,14 +1165,14 @@ long DoTabbedNetLevelInterface( void)
             SetPlayerColor( setup.myNum, 0);
             SetPlayerRace( setup.opponentNum, setup.opponentRace);
             SetPlayerColor( setup.opponentNum, setup.opponentColor);
-            gAresGlobal->gPlayerAdmiralNumber = setup.myNum;
+            globals()->gPlayerAdmiralNumber = setup.myNum;
             gNetLatency = setup.currentLatency;
             SetHaveSeenUnregisteredTimeLimitWarning( false);
 
         } else
         {
             setup.thisChapter = -1;
-            gAresGlobal->externalFileSpec.name[0] = 0;
+            globals()->externalFileSpec.name[0] = 0;
             EF_OpenExternalFile();
         }
         CloseInterface();
@@ -1283,9 +1283,9 @@ void HandleLevelTabHit( short whichItem, Point where, netSetupType *setup)
 
     if ( MacPtInRect( where, &tRect))
     {
-        if (( gAresGlobal->otherPlayerScenarioFileURL[0] > 0) &&
+        if (( globals()->otherPlayerScenarioFileURL[0] > 0) &&
             ( !setup->scenarioLoaded))
-            LaunchURL( gAresGlobal->otherPlayerScenarioFileURL);
+            LaunchURL( globals()->otherPlayerScenarioFileURL);
 
     } else switch( whichItem)
     {
@@ -1317,7 +1317,7 @@ void HandleLevelTabHit( short whichItem, Point where, netSetupType *setup)
 
             if ( SmartFile_SelectFile( &destFile, 301) == noErr)
             {
-                BlockMove( &destFile, &gAresGlobal->externalFileSpec,
+                BlockMove( &destFile, &globals()->externalFileSpec,
                     sizeof( FSSpec));
 
                 if ( EF_OpenExternalFile() == noErr)
@@ -1331,7 +1331,7 @@ void HandleLevelTabHit( short whichItem, Point where, netSetupType *setup)
                                 "\pThat scenario file contains no networkable",
                                 "\p scenarios. Reverting to built-in scenarios.",
                                 nil, nil, -1, -1, -1, -1, __FILE__, 1);
-                            gAresGlobal->externalFileSpec.name[0] = 0;
+                            globals()->externalFileSpec.name[0] = 0;
                             EF_OpenExternalFile();
                             setup->thisChapter = GetFirstNetworkScenario();
                         }
@@ -1343,10 +1343,10 @@ void HandleLevelTabHit( short whichItem, Point where, netSetupType *setup)
                         kDimmed, true);
                     SendPreGameOpenScenarioMessage(
                         ePreGameOpenScenarioMessage,
-                        gAresGlobal->externalFileSpec.name,
-                        gAresGlobal->scenarioFileInfo.downloadURLString,
-                        gAresGlobal->scenarioFileInfo.version,
-                        gAresGlobal->scenarioFileInfo.checkSum);
+                        globals()->externalFileSpec.name,
+                        globals()->scenarioFileInfo.downloadURLString,
+                        globals()->scenarioFileInfo.version,
+                        globals()->scenarioFileInfo.checkSum);
 
 
 /*                  if ( !IsRaceLegal( setup->myRace, setup->myNum, scenario))
@@ -1933,7 +1933,7 @@ void ShowWhyNetLevelNotLoaded( netSetupType *setup, StringPtr why)
     if ( why != nil)
     {
         CopyPString( s, "\p-- ");
-        ConcatenatePString( s, gAresGlobal->otherPlayerScenarioFileName);
+        ConcatenatePString( s, globals()->otherPlayerScenarioFileName);
         ConcatenatePString( s, "\p --\r\r");
         ConcatenatePString( s, why);
         CopyPString( setup->whyScenarioNotLoaded, s);
@@ -3171,10 +3171,10 @@ void OpenOtherScenarioFile( netSetupType *setup)
     FSSpec  destFile;
     Str255  whyDisabledString, filePath;
 
-    if ( gAresGlobal->otherPlayerScenarioFileName[0] > 0)
+    if ( globals()->otherPlayerScenarioFileName[0] > 0)
     {
         CopyPString( filePath, "\p:Ares Net Scenarios Folder:");
-        ConcatenatePString( filePath, gAresGlobal->otherPlayerScenarioFileName);
+        ConcatenatePString( filePath, globals()->otherPlayerScenarioFileName);
     } else
     {
         filePath[0] = 0;
@@ -3185,17 +3185,17 @@ void OpenOtherScenarioFile( netSetupType *setup)
     {
         if ( filePath[0] > 0)
         {
-            BlockMove( &destFile, &gAresGlobal->externalFileSpec,
+            BlockMove( &destFile, &globals()->externalFileSpec,
                 sizeof( FSSpec));
         } else
         {
-            gAresGlobal->externalFileSpec.name[0] = 0;
+            globals()->externalFileSpec.name[0] = 0;
         }
 
         if ( EF_OpenExternalFile() == noErr)
         {
-            if ( gAresGlobal->scenarioFileInfo.version <
-                gAresGlobal->otherPlayerScenarioFileVersion)
+            if ( globals()->scenarioFileInfo.version <
+                globals()->otherPlayerScenarioFileVersion)
             {
                 SetStatusOfAnyInterfaceItem( kNetLevelOKButton,
                     kDimmed, true);
@@ -3205,20 +3205,20 @@ void OpenOtherScenarioFile( netSetupType *setup)
                     whyDisabledString);
                 setup->scenarioLoaded = false;
                 return;
-            } else if ( gAresGlobal->scenarioFileInfo.version >
-                gAresGlobal->otherPlayerScenarioFileVersion)
+            } else if ( globals()->scenarioFileInfo.version >
+                globals()->otherPlayerScenarioFileVersion)
             {
                 SetStatusOfAnyInterfaceItem( kNetLevelOKButton,
                     kDimmed, true);
                 SendPreGameBasicMessage( ePreGameNewVersionScenarioMessage);
-                if ( gAresGlobal->internetConfigPresent)
+                if ( globals()->internetConfigPresent)
                 {
                     GetIndString( whyDisabledString, 2010, 7);
                 } else
                 {
                     GetIndString( whyDisabledString, 2010, 4);
                     ConcatenatePString( whyDisabledString,
-                        gAresGlobal->otherPlayerScenarioFileURL);
+                        globals()->otherPlayerScenarioFileURL);
                     ConcatenatePString( whyDisabledString, "\p.");
                 }
                 ShowWhyNetLevelNotLoaded( setup,
@@ -3226,20 +3226,20 @@ void OpenOtherScenarioFile( netSetupType *setup)
                 setup->scenarioLoaded = false;
                 return;
 
-            } else if ( gAresGlobal->scenarioFileInfo.checkSum !=
-                gAresGlobal->otherPlayerScenarioFileCheckSum)
+            } else if ( globals()->scenarioFileInfo.checkSum !=
+                globals()->otherPlayerScenarioFileCheckSum)
             {
                 SetStatusOfAnyInterfaceItem( kNetLevelOKButton,
                     kDimmed, true);
                 SendPreGameBasicMessage( ePreGameWrongCheckSumScenarioMessage);
-                if ( gAresGlobal->internetConfigPresent)
+                if ( globals()->internetConfigPresent)
                 {
                     GetIndString( whyDisabledString, 2010, 8);
                 } else
                 {
                     GetIndString( whyDisabledString, 2010, 5);
                     ConcatenatePString( whyDisabledString,
-                        gAresGlobal->otherPlayerScenarioFileURL);
+                        globals()->otherPlayerScenarioFileURL);
                     ConcatenatePString( whyDisabledString, "\p.");
                 }
                 ShowWhyNetLevelNotLoaded( setup,
@@ -3260,14 +3260,14 @@ void OpenOtherScenarioFile( netSetupType *setup)
     SetStatusOfAnyInterfaceItem( kNetLevelOKButton,
         kDimmed, true);
     SendPreGameBasicMessage( ePreGameNoScenarioMessage);
-    if ( gAresGlobal->internetConfigPresent)
+    if ( globals()->internetConfigPresent)
     {
         GetIndString( whyDisabledString, 2010, 9);
     } else
     {
         GetIndString( whyDisabledString, 2010, 6);
         ConcatenatePString( whyDisabledString,
-            gAresGlobal->otherPlayerScenarioFileURL);
+            globals()->otherPlayerScenarioFileURL);
         ConcatenatePString( whyDisabledString, "\p.");
     }
     ShowWhyNetLevelNotLoaded( setup,
@@ -3281,11 +3281,11 @@ void LaunchURL( StringPtr s)
     long startSel;
     long endSel;
 
-    if ( gAresGlobal->internetConfigPresent)
+    if ( globals()->internetConfigPresent)
     {
         startSel = 0;
         endSel = s[0];
-//      err = ICLaunchURL( gAresGlobal->internetConfig, "\p", (char *) &s[1], s[0],
+//      err = ICLaunchURL( globals()->internetConfig, "\p", (char *) &s[1], s[0],
 //          &startSel, &endSel);
     }
 }

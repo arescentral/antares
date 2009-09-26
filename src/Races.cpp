@@ -29,15 +29,12 @@
 
 #define kRaceError          "\pRACE"
 
-extern aresGlobalType   *gAresGlobal;
-//Handle    gAresGlobal->gRaceData = nil;
-
 short InitRaces( void)
 {
-    if (gAresGlobal->gRaceData.get() == nil)
+    if (globals()->gRaceData.get() == nil)
     {
-        gAresGlobal->gRaceData.load_resource('race', kRaceResID);
-        if (gAresGlobal->gRaceData.get() == nil)
+        globals()->gRaceData.load_resource('race', kRaceResID);
+        if (globals()->gRaceData.get() == nil)
         {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kReadRaceDataError, -1, -1, -1, __FILE__, 1);
             return( RESOURCE_ERROR);
@@ -49,8 +46,8 @@ short InitRaces( void)
 
 void CleanupRaces( void)
 {
-    if (gAresGlobal->gRaceData.get() != nil) {
-        gAresGlobal->gRaceData.destroy();
+    if (globals()->gRaceData.get() != nil) {
+        globals()->gRaceData.destroy();
     }
 }
 
@@ -113,7 +110,7 @@ void GetRaceString(unsigned char* string, short whatString, short raceNum) {
 
 smallFixedType GetRaceAdvantage( short raceNum)
 {
-    raceType    *race = *gAresGlobal->gRaceData + raceNum;
+    raceType    *race = *globals()->gRaceData + raceNum;
 
     if ( raceNum >= 0)
     {
@@ -126,7 +123,7 @@ smallFixedType GetRaceAdvantage( short raceNum)
 
 short GetRaceNumFromID( short raceID)
 {
-    raceType    *race = *gAresGlobal->gRaceData;
+    raceType    *race = *globals()->gRaceData;
     short       raceNum = 0;
 
     while ( (race->id != raceID) && ( raceNum < kRaceNum))
@@ -143,7 +140,7 @@ short GetRaceNumFromID( short raceID)
 
 short GetRaceIDFromNum( short raceNum)
 {
-    raceType    *race = *gAresGlobal->gRaceData + raceNum;
+    raceType    *race = *globals()->gRaceData + raceNum;
 
     if (( raceNum >= 0) && ( raceNum < kRaceNum))
     {
@@ -156,7 +153,7 @@ short GetRaceIDFromNum( short raceNum)
 
 unsigned char GetApparentColorFromRace( short raceNum)
 {
-    raceType    *race = *gAresGlobal->gRaceData + raceNum;
+    raceType    *race = *globals()->gRaceData + raceNum;
 
 
     if (( raceNum >= 0) && ( raceNum < kRaceNum))

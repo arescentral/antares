@@ -45,13 +45,9 @@ struct debugRandomType {
     OSType  sig;
 };
 
-extern aresGlobalType           *gAresGlobal;
-//extern long gAresGlobal->gGameTime;
-//extern short  gAresGlobal->gMainResRefNum;
+long gRandomSeed = 14586, gDebugWhichRandom = 0;
 
-long    gRandomSeed = 14586, gDebugWhichRandom = 0;
-
-Handle  gDebugRandomSave = nil;
+Handle gDebugRandomSave = nil;
 
 int RandomInit( void)
 {
@@ -75,7 +71,7 @@ int RandomInit( void)
     }
 #endif
 #ifdef kRandomReplay
-    UseResFile( gAresGlobal->gMainResRefNum);
+    UseResFile( globals()->gMainResRefNum);
     gDebugRandomSave = GetResource( 'Rand', 500);
     UseResFile( refNum);
     if ( gDebugRandomSave != nil)

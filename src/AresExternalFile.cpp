@@ -31,7 +31,6 @@
 #include "ScenarioMaker.hpp"
 #include "SpaceObjectHandling.hpp"
 
-extern aresGlobalType*          gAresGlobal;
 extern TypedHandle<baseObjectType>  gBaseObjectData;
 extern TypedHandle<objectActionType>    gObjectActionData;
 
@@ -40,58 +39,58 @@ OSErr EF_OpenExternalFile( void)
     TypedHandle<scenarioInfoType> tempScenarioInfo;
     short oldResFile = CurResFile();
 
-    if ( gAresGlobal->externalFileRefNum != -1)
-        CloseResFile( gAresGlobal->externalFileRefNum);
+    if ( globals()->externalFileRefNum != -1)
+        CloseResFile( globals()->externalFileRefNum);
 
-    if ( gAresGlobal->externalFileSpec.name[0] > 0)
+    if ( globals()->externalFileSpec.name[0] > 0)
     {
-        gAresGlobal->externalFileRefNum =
-            FSpOpenResFile( &gAresGlobal->externalFileSpec, fsRdPerm);
+        globals()->externalFileRefNum =
+            FSpOpenResFile( &globals()->externalFileSpec, fsRdPerm);
 
-        if ( gAresGlobal->externalFileRefNum > 0)
-            UseResFile( gAresGlobal->externalFileRefNum);
+        if ( globals()->externalFileRefNum > 0)
+            UseResFile( globals()->externalFileRefNum);
         else
         {
             UseResFile( oldResFile);
-            gAresGlobal->externalFileRefNum = -1;
+            globals()->externalFileRefNum = -1;
             return paramErr;
         }
     } else
     {
-        gAresGlobal->externalFileRefNum = -1;
+        globals()->externalFileRefNum = -1;
     }
 
 
     // scenario info
     tempScenarioInfo.load_resource('nlAG', 128);
     if (tempScenarioInfo.get() != nil) {
-        gAresGlobal->scenarioFileInfo = **tempScenarioInfo;
+        globals()->scenarioFileInfo = **tempScenarioInfo;
         tempScenarioInfo.destroy();
     } else
     {
         UseResFile( oldResFile);
-        gAresGlobal->externalFileRefNum = -1;
+        globals()->externalFileRefNum = -1;
         return resNotFound;
     }
 
     // scenario stuff
-    if (gAresGlobal->gScenarioData.get() != nil) {
-        gAresGlobal->gScenarioData.destroy();
+    if (globals()->gScenarioData.get() != nil) {
+        globals()->gScenarioData.destroy();
     }
-    if (gAresGlobal->gScenarioInitialData.get() != nil) {
-        gAresGlobal->gScenarioInitialData.destroy();
+    if (globals()->gScenarioInitialData.get() != nil) {
+        globals()->gScenarioInitialData.destroy();
     }
-    if (gAresGlobal->gScenarioConditionData.get() != nil) {
-        gAresGlobal->gScenarioConditionData.destroy();
+    if (globals()->gScenarioConditionData.get() != nil) {
+        globals()->gScenarioConditionData.destroy();
     }
-    if (gAresGlobal->gScenarioBriefData.get() != nil) {
-        gAresGlobal->gScenarioBriefData.destroy();
+    if (globals()->gScenarioBriefData.get() != nil) {
+        globals()->gScenarioBriefData.destroy();
     }
 
     // races
-    if (gAresGlobal->gRaceData.get() != nil)
+    if (globals()->gRaceData.get() != nil)
     {
-        gAresGlobal->gRaceData.destroy();
+        globals()->gRaceData.destroy();
     }
 
     // object stuff
@@ -107,48 +106,48 @@ OSErr EF_OpenExternalFile( void)
     // load all the new stuff
 
     // scenario stuff
-    gAresGlobal->gScenarioData.load_resource('snro', kScenarioResID);
-    if (gAresGlobal->gScenarioData.get() == nil) {
+    globals()->gScenarioData.load_resource('snro', kScenarioResID);
+    if (globals()->gScenarioData.get() == nil) {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioDataError, -1, -1, -1, __FILE__, 2);
         return( RESOURCE_ERROR);
     }
 
-    if (gAresGlobal->gScenarioData.size() <= 0) {
+    if (globals()->gScenarioData.size() <= 0) {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioDataError, -1, -1, -1, __FILE__, 2);
         return( RESOURCE_ERROR);
     }
 
-    gAresGlobal->scenarioNum = gAresGlobal->gScenarioData.count();
+    globals()->scenarioNum = globals()->gScenarioData.count();
 
-    gAresGlobal->gScenarioInitialData.load_resource('snit', kScenarioInitialResID);
-    if (gAresGlobal->gScenarioInitialData.get() == nil) {
+    globals()->gScenarioInitialData.load_resource('snit', kScenarioInitialResID);
+    if (globals()->gScenarioInitialData.get() == nil) {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioInitialDataError, -1, -1, -1, __FILE__, 3);
         return( RESOURCE_ERROR);
     }
 
-    gAresGlobal->maxScenarioInitial = gAresGlobal->gScenarioInitialData.size();
+    globals()->maxScenarioInitial = globals()->gScenarioInitialData.size();
 
-    gAresGlobal->gScenarioConditionData.load_resource('sncd', kScenarioConditionResID);
-    if (gAresGlobal->gScenarioConditionData.get() == nil) {
+    globals()->gScenarioConditionData.load_resource('sncd', kScenarioConditionResID);
+    if (globals()->gScenarioConditionData.get() == nil) {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioConditionDataError, -1, -1, -1, __FILE__, 4);
         return( RESOURCE_ERROR);
     }
 
-    gAresGlobal->maxScenarioCondition = gAresGlobal->gScenarioConditionData.size();
+    globals()->maxScenarioCondition = globals()->gScenarioConditionData.size();
 
-    gAresGlobal->gScenarioBriefData.load_resource('snbf', kScenarioBriefResID);
-    if (gAresGlobal->gScenarioBriefData.get() == nil) {
+    globals()->gScenarioBriefData.load_resource('snbf', kScenarioBriefResID);
+    if (globals()->gScenarioBriefData.get() == nil) {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioBriefDataError, -1, -1, -1, __FILE__, 5);
         return( RESOURCE_ERROR);
     }
 
-    gAresGlobal->maxScenarioBrief = gAresGlobal->gScenarioBriefData.count();
+    globals()->maxScenarioBrief = globals()->gScenarioBriefData.count();
 
     // races
-    if (gAresGlobal->gRaceData.get() == nil)
+    if (globals()->gRaceData.get() == nil)
     {
-        gAresGlobal->gRaceData.load_resource('race', kRaceResID);
-        if (gAresGlobal->gRaceData.get() == nil)
+        globals()->gRaceData.load_resource('race', kRaceResID);
+        if (globals()->gRaceData.get() == nil)
         {
             ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kReadRaceDataError, -1, -1, -1, __FILE__, 1);
             return( RESOURCE_ERROR);
@@ -163,7 +162,7 @@ OSErr EF_OpenExternalFile( void)
         return( MEMORY_ERROR);
     }
 
-    gAresGlobal->maxBaseObject = gBaseObjectData.count();
+    globals()->maxBaseObject = gBaseObjectData.count();
 
     gObjectActionData.load_resource('obac', kObjectActionResID);
     if (gObjectActionData.get() == nil) {
@@ -171,9 +170,9 @@ OSErr EF_OpenExternalFile( void)
         return( MEMORY_ERROR);
     }
 
-    gAresGlobal->maxObjectAction = gObjectActionData.count();
+    globals()->maxObjectAction = gObjectActionData.count();
 
-    gAresGlobal->okToOpenFile = false;
+    globals()->okToOpenFile = false;
 
     CorrectAllBaseObjectColor();
     ResetAllSpaceObjects();
