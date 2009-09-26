@@ -170,7 +170,7 @@
 //#define   kUseSmallPlayWindow // for debugging
 
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
-extern long gRandomSeed;
+extern int32_t gRandomSeed;
 extern long gNatePortLeft, gNatePortTop, gNetLatency;
 extern scenarioType *gThisScenario;
 extern short gSpriteFileRefID, gInterfaceFileRefID;

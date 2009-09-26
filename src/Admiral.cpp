@@ -49,7 +49,8 @@
 #define kAbsolutelyEssential        0x00008000
 
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
-extern long gRandomSeed, gRootObjectNumber;
+extern int32_t gRandomSeed;
+extern long gRootObjectNumber;
 extern spaceObjectType  *gRootObject;
 
 int AdmiralInit() {

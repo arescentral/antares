@@ -18,23 +18,15 @@
 #ifndef ANTARES_RANDOMIZE_HPP_
 #define ANTARES_RANDOMIZE_HPP_
 
-// Randomize.h
+#include <stdint.h>
 
-#include <Base.h>
+int RandomInit();
+void RandomCleanup();
+int Randomize(int range);
+int16_t XRandomSeeded(int16_t range, int32_t* seed);
 
-#define kRandomRange        32767L
-
-int RandomInit( void);
-void RandomCleanup( void);
-int Randomize( int);
-void RandomTableCleanup( void);
-void DebugRandomReset( void);
-short DebugRandomSeeded( short, long *, char *, OSType, long);
-short XRandomSeeded( short, long *);
-void SetMyRandomSeed( long);
-
-inline short RandomSeeded(short mrange, long* mseed, long, long) {
-    return XRandomSeeded(mrange, mseed);
+inline int16_t RandomSeeded(int16_t range, int32_t* seed, int32_t, int32_t) {
+    return XRandomSeeded(range, seed);
 }
 
 #endif // ANTARES_RANDOMIZE_HPP_

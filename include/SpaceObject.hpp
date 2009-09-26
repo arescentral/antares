@@ -773,7 +773,7 @@ struct spaceObjectType {
     longPointType           scaledCornerOffset;
     longPointType           scaledSize;
     Rect                absoluteBounds;
-    long                    randomSeed;
+    int32_t                 randomSeed;
 
     union
     {

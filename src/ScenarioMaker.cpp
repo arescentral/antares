@@ -71,7 +71,8 @@ struct endgameCheckType {
 //  scenarioEndgameType endgame;
 };
 
-extern long gAbsoluteScale, gRandomSeed;
+extern int32_t gRandomSeed;
+extern long gAbsoluteScale;
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
 extern TypedHandle<baseObjectType> gBaseObjectData;
 extern TypedHandle<objectActionType> gObjectActionData;

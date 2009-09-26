@@ -77,7 +77,8 @@ struct actionQueueType {
     longPointType               offset;
 };
 
-extern long             gAbsoluteScale, gRandomSeed, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM;
+extern int32_t gRandomSeed;
+extern long             gAbsoluteScale, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM;
 extern coordPointType   gGlobalCorner;
 extern spriteType**     gSpriteTable;
 extern scenarioType*    gThisScenario;
