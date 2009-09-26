@@ -191,8 +191,6 @@ Boolean         hackWarn = true;
 
 unsigned long kNoKeys = 0;
 
-//#pragma code68020 off
-
 int GetDemoScenario();
 void FakeInit(int argc, const char** argv);
 int main(int argc, const char** argv);
@@ -200,12 +198,7 @@ void SetWindowColorTable( WindowPtr);
 void Pause( long time);
 void DrawOutlinedString( const unsigned char* string, RGBColor *color);
 
-#if TARGET_OS_MAC
-int main(int argc, const char** argv)
-#else
-int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmdLine, int nCmdShow)
-#endif TARGET_OS_MAC
-{
+int main(int argc, const char** argv) {
     Rect                    windowRect, tRect;
     OSErr                   error;
     RGBColor                initialFadeColor;
@@ -219,62 +212,10 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 
     FakeInit(argc, argv);
 
-    ToolBoxInit();
-
     init_globals();
 
-    DebugWindowInit ( gTheWindow);
-
-    BringDebugToFront();
-
-    if ( !EnvironmentCheck()) ExitToShell();
-    if ( AAE_Init() != noErr) ExitToShell();
-    AGR_Init();
-
-    MenuBarInit();
-    globals()->gMainResRefNum = CurResFile();
-
-    gInterfaceFileRefID = ARF_OpenResFile( kInterfaceResFileName);
-    if ( gInterfaceFileRefID < 0)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kInterfacesFileError, kDataFolderError, -1, -1, __FILE__, 1);
-    } else
-        UseResFile ( gInterfaceFileRefID);
-
-    globals()->gScenarioRefID = ARF_OpenResFile( kScenarioResFileName);
-    if ( globals()->gScenarioRefID == -1)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenariosFileError, kDataFolderError, -1, -1, __FILE__, 1);
-    }
-
-    globals()->gSoundFileRefID = ARF_OpenResFile( kSoundResFileName);
-    if ( globals()->gSoundFileRefID == -1)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kSoundsFileError, kDataFolderError, -1, -1, __FILE__, 3);
-    }
-    UseResFile( globals()->gSoundFileRefID);
-
-    gSpriteFileRefID = ARF_OpenResFile( kSpriteResFileName);
-    error = ResError();
-
-    if ( error != noErr)
-    {
-        ShowErrorOfTypeOccurred( eContinueOnlyErr, kErrorStrID, kDataFileResourceError, error, __FILE__, 1);
-    }
-    if ( gSpriteFileRefID == -1)
-    {
-        ShowErrorAny( eExitToShellErr, kErrorStrID, nil, nil, nil, nil, kSpritesFileError, kDataFolderError, -1, -1, __FILE__, 8);
-    }
-
-//  AresNetworkInit();
-    //error = InitPreferences();
-
-//  gRandomSeed = 61769;
-//  qd.randSeed = gRandomSeed;
-
     error = InitPreferences();
-    if ( error == kNoError)
-    {
+    if (error == kNoError) {
 
 #if NETSPROCKET_AVAILABLE
         if ( InitNetworking() == kNoError)
@@ -288,9 +229,6 @@ int CALLBACK WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR theCmd
 
         GetDateTime( reinterpret_cast<unsigned long *>(&qd.randSeed));
         GetDateTime( reinterpret_cast<unsigned long *>(&gRandomSeed));
-
-
-//          WriteDebugLine("\p>Net");
 
         error  = RT_Open( true, VERSION_2_CODES);
         if ( error != noErr)
