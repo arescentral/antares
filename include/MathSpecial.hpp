@@ -53,10 +53,10 @@ class BinaryReader;
 #define kFixedWholeMultiplier       256.0
 #define kFixedBitShiftNumber        implicit_cast<long>(8)
 
-inline Fixed mLongToFixed(long m_l)     { return m_l << kFixedBitShiftNumber; }
+inline Fixed mLongToFixed(int32_t m_l)  { return m_l << kFixedBitShiftNumber; }
 inline Fixed mFloatToFixed(float m_r)   { return m_r * kFixedWholeMultiplier; }
 inline float mFixedToFloat(Fixed m_f)   { return implicit_cast<float>(m_f) / kFixedWholeMultiplier; }
-inline long mFixedToLong(Fixed m_f) {
+inline int32_t mFixedToLong(Fixed m_f) {
     if (m_f < 0) {
         return (m_f >> kFixedBitShiftNumber) + 1;
     } else {
@@ -83,10 +83,10 @@ struct fixedPointType {
 };
 
 
-unsigned long lsqrt (unsigned long);
+uint32_t lsqrt(uint32_t);
 
 Fixed MyFixRatio(int16_t, int16_t);
-void MyMulDoubleLong(long, long, int64_t*);
+void MyMulDoubleLong(int32_t, int32_t, int64_t*);
 
 template <typename T>
 inline void MyWideMul(int32_t mlong1, int32_t mlong2, T* mwide) {

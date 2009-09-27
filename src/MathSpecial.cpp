@@ -141,9 +141,7 @@
 // lsqrt_max4pow is the (machine-specific) largest power of 4 that can
 // be represented in an unsigned long.
 
-unsigned long lsqrt (unsigned long n)
-
-{
+uint32_t lsqrt(uint32_t n) {
     // Compute the integer square root of the integer argument n
     // Method is to divide n by x computing the quotient x and remainder r
     // Notice that the divisor x is changing as the quotient x changes
@@ -161,9 +159,9 @@ unsigned long lsqrt (unsigned long n)
     //   n - (x + 1/2)^2 == (n - x^2) - (x + 1/4)
     // Thus, we can increase x by 1/2 if we decrease (n-x^2) by (x+1/4)
 
-    unsigned long residue;      // n - x^2
-    unsigned long root;         // x + 1/4
-    unsigned long half;         // 1/2
+    uint32_t residue;           // n - x^2
+    uint32_t root;              // x + 1/4
+    uint32_t half;              // 1/2
 
     residue = n;                // n - (x = 0)^2, with suitable alignment
 
@@ -193,23 +191,19 @@ unsigned long lsqrt (unsigned long n)
     do {
         if (root <= residue) {  // Whenever we can,
             residue -= root;        // decrease (n-x^2) by (x+1/4)
-            root += half; }         // increase x by 1/2
+            root += half;           // increase x by 1/2
+        }
         half >>= 2;             // Shift binary point 2 places right
         root -= half;           // x{+1/2}+1/4 - 1/8 == x{+1/2}+1/8
         root >>= 1;             // 2x{+1}+1/4, shifted right 2 places
-        } while (half);         // When 1/2 == 0, bin. point is at far right
+    } while (half);         // When 1/2 == 0, bin. point is at far right
 
 #ifndef lsqrt_truncate
     if (root < residue) ++root;  // round up if (x+1/2)^2 < n
 #endif
 
     return root;        // Guaranteed to be correctly rounded (or truncated)
-    }
-
-// WideSubtract:
-//  according to Develop 18 article "Exploiting Graphics Speed on Power Macintosh," this function
-//  is defined on Power Macs but not on 68Ks.  I'm using exclusively for timing using the function
-//  Microseconds( wide *destWide) (defined in same article).
+}
 
 Fixed MyFixRatio(int16_t numer, int16_t denom) {
     int32_t longdenom, result;
