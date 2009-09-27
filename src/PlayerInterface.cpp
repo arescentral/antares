@@ -359,7 +359,7 @@ extern long                     gNatePortLeft, gNatePortTop, gNetLatency, gRando
 extern GWorldPtr                gOffWorld, gRealWorld, gSaveWorld;
 extern CWindowPtr               gTheWindow;       // we need the window for copying to the real world, a hack
 extern directTextType*          gDirectText;
-extern long                     gWhichDirectText, WORLD_WIDTH, WORLD_HEIGHT;
+extern long                     WORLD_WIDTH, WORLD_HEIGHT;
 extern TypedHandle<baseObjectType> gBaseObjectData;
 extern TypedHandle<objectActionType> gObjectActionData;
 extern GDHandle                 theDevice;
@@ -763,8 +763,8 @@ void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
 void UpdateLoadingInterface( long value, long total, Rect *contentRect)
 
 {
-    unsigned char   *getwidchar, *getwidwid, color;
-    long            width, height, strlen, temp;
+    unsigned char   color;
+    long            width, height, temp;
     transColorType  *transColor;
     Rect        clipRect;
     Rect            tRect;
@@ -780,7 +780,7 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
         GetIndString( string, 2004, 33);
 
         mSetDirectFont( kButtonFontNum);
-        mGetDirectStringDimensions( string, width, height, strlen, getwidchar, getwidwid);
+        mGetDirectStringDimensions(string, width, height);
 
         mCopyAnyRect( clipRect, *contentRect);
         MacSetRect( &tRect, 0, 0, width, height);
@@ -1318,8 +1318,8 @@ void DoHelpScreen( void)
 }
 
 void StartPauseIndicator(unsigned char* pauseString, unsigned char hue) {
-    unsigned char   *getwidchar, *getwidwid, color;
-    long            width, height, strlen, count;
+    unsigned char   color;
+    long            width, height, count;
     Rect            tRect, stringRect;
     PixMapHandle    offMap = GetGWorldPixMap( gOffWorld);
     transColorType  *transColor;
@@ -1327,7 +1327,7 @@ void StartPauseIndicator(unsigned char* pauseString, unsigned char hue) {
 
 #pragma unused( hue)
     mSetDirectFont( kTitleFontNum);
-    mGetDirectStringDimensions( pauseString, width, height, strlen, getwidchar, getwidwid);
+    mGetDirectStringDimensions(pauseString, width, height);
     MacSetRect( &tRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, globals()->gTrueClipBottom);
 
     MacSetRect( &stringRect, 0, 0, width, height);
@@ -1368,12 +1368,11 @@ void StartPauseIndicator(unsigned char* pauseString, unsigned char hue) {
 }
 
 void StopPauseIndicator(unsigned char* pauseString) {
-    unsigned char   *getwidchar, *getwidwid;
-    long            width, height, strlen;
+    long            width, height;
     Rect            tRect, stringRect;
 
     mSetDirectFont( kTitleFontNum);
-    mGetDirectStringDimensions( pauseString, width, height, strlen, getwidchar, getwidwid);
+    mGetDirectStringDimensions(pauseString, width, height);
     MacSetRect( &tRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, globals()->gTrueClipBottom);
 
     MacSetRect( &stringRect, 0, 0, width, height);
@@ -4494,7 +4493,7 @@ void ShowSuccessAnimation( WindowPtr thePort)
     Rect            tRect, lastBounds, theseBounds;
     TypedHandle<natePixType> shipSprite;
     spritePix       aSpritePix;
-    unsigned char   color, *getwidchar, *getwidwid; // for getting string width
+    unsigned char   color;
     PixMapHandle    pixMap = GetGWorldPixMap( gOffWorld),
                     saveMap = GetGWorldPixMap( gSaveWorld);
     Boolean         warp;
@@ -4626,7 +4625,7 @@ void ShowSuccessAnimation( WindowPtr thePort)
             Move3DStars( vanishingPoint, unitsToDo * startimes, &starBounds);
             Draw3DStars( warp, &starBounds, pixMap);
 
-            mGetDirectStringDimensions( hackString, hpos, zpoint, ztimes, getwidchar, getwidwid);
+            mGetDirectStringDimensions(hackString, hpos, zpoint);
             mGetTranslateColorShade( RED, VERY_LIGHT, color, transColor);
             tRect.left = (WORLD_WIDTH / 2) - (hpos / 2);
             tRect.top = (WORLD_HEIGHT / 2) - gDirectText->ascent / 2;

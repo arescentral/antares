@@ -49,77 +49,25 @@
 #define kButtonSmallFontResID   5005
 
 struct directTextType {
-    TypedHandle<unsigned char> charSet;
-    int16_t     resID;
-    ShortBoolean     myHandle;       // different texts can have the same handles; myHandle = TRUE if this guy's in charge of disposing
-    int32_t     logicalWidth;
-    int32_t     physicalWidth;
-    int32_t     height;
-    int32_t     ascent;
+    directTextType(int32_t id);
+    ~directTextType();
 
-    size_t load_data(const char* data, size_t len);
+    scoped_array<unsigned char> charSet;
+    int16_t resID;
+    int32_t logicalWidth;
+    int32_t physicalWidth;
+    int32_t height;
+    int32_t ascent;
 };
 
-extern long gWhichDirectText;
-extern directTextType* gDirectText;
-extern TypedHandle<directTextType> gDirectTextData;
+int InitDirectText();
+void DirectTextCleanup();
 
-inline void mGetDirectStringDimensions(const unsigned char* string, long& width, long& height) {
-    height = gDirectText->height << 1;
-    width = (implicit_cast<long>(kCharSpace) + implicit_cast<long>(gDirectText->logicalWidth)) * implicit_cast<long>(*(string));   // width * length of string
-}
-
-inline void mGetDirectStringDimensions(
-        unsigned char* mstring, long& mwidth, long& mheight, long &mstrlen, unsigned char*& mcharptr,
-        unsigned char*& mwidptr) {
-    mheight = gDirectText->height;
-    mwidth = 0;
-    mcharptr = mstring;
-    mstrlen = implicit_cast<long>(*(mcharptr++));
-    while( mstrlen > 0)
-    {
-        mwidptr = *(gDirectText->charSet)
-            + gDirectText->height * gDirectText->physicalWidth * implicit_cast<long>(*mcharptr)
-            + implicit_cast<long>(*mcharptr);
-        mwidth += implicit_cast<long>(*mwidptr);
-        mcharptr++;
-        mstrlen--;
-    }
-}
-
-inline void mDirectCharWidth(unsigned char& mwidth, char mchar, unsigned char*& mwidptr) {
-    mwidptr = *(gDirectText->charSet)
-        + gDirectText->height * gDirectText->physicalWidth * implicit_cast<long>(mchar)
-        + implicit_cast<long>(mchar);
-    mwidth = *mwidptr;
-}
-
-inline void mSetDirectFont(long mwhichFont) {
-    gWhichDirectText = mwhichFont;
-    gDirectText = *gDirectTextData + gWhichDirectText;
-}
-
-inline int mDirectFontHeight() {
-    return gDirectText->height;
-}
-
-inline int mDirectFontAscent() {
-    return gDirectText->ascent;
-}
-
-inline int mDirectFontLogicalWidth() {
-    return gDirectText->logicalWidth;
-}
-
-int InitDirectText( void);
-void DirectTextCleanup( void);
-long GetDirectFontNum( short);
-short AddDirectFont( directTextType *);
-
-void DrawDirectTextString(unsigned char*, unsigned char, PixMap *, long, long);
+void mDirectCharWidth(unsigned char& mwidth, char mchar, unsigned char*& mwidptr);
+void mSetDirectFont(long mwhichFont);
+int mDirectFontHeight();
+int mDirectFontAscent();
+void mGetDirectStringDimensions(unsigned char* string, long& width, long& height);
 void DrawDirectTextStringClipped(unsigned char*, unsigned char, PixMap *, Rect *, long, long);
-
-void DrawDirectTextHeightx2(unsigned char*, unsigned char, PixMap *, long, long);
-void DrawDirectTextStringClippedx2(unsigned char*, unsigned char, PixMap *, Rect *, long, long);
 
 #endif // ANTARES_DIRECT_TEXT_HPP_

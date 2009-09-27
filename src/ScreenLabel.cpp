@@ -43,7 +43,7 @@
 #define kLabelInnerSpace        3
 #define kLabelTotalInnerSpace   (kLabelInnerSpace<<1)
 
-extern long             gWhichDirectText, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM,
+extern long             CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM,
                         WORLD_WIDTH, WORLD_HEIGHT, gNatePortLeft, gNatePortTop; //temp hack?
 extern directTextType*  gDirectText;
 extern GWorldPtr        gOffWorld, gRealWorld, gSaveWorld;
@@ -692,8 +692,7 @@ void RecalcScreenLabelSize( long which) // do this if you mess with its string
 {
 #ifdef kUseLabels
     screenLabelType *label;
-    unsigned char   *getwidchar, *getwidwid;
-    long            strlen, lineNum, i, maxWidth;
+    long            lineNum, i, maxWidth;
     Str255          tString;
 
     label = *globals()->gScreenLabelData + which;
@@ -709,7 +708,7 @@ void RecalcScreenLabelSize( long which) // do this if you mess with its string
             for ( i = 1; i <= lineNum; i++)
             {
                 String_Get_Nth_Line( tString, label->label, i);
-                mGetDirectStringDimensions( tString, label->width, label->height, strlen, getwidchar, getwidwid);
+                mGetDirectStringDimensions(tString, label->width, label->height);
                 label->width += kLabelTotalInnerSpace;
                 if ( label->width > maxWidth)
                     maxWidth = label->width;
@@ -721,7 +720,7 @@ void RecalcScreenLabelSize( long which) // do this if you mess with its string
         } else
         {
             label->lineNum = 1;
-            mGetDirectStringDimensions( label->label, label->width, label->height, strlen, getwidchar, getwidwid);
+            mGetDirectStringDimensions(label->label, label->width, label->height);
             label->width += kLabelTotalInnerSpace;
             label->lineHeight = label->height;
             label->height += kLabelTotalInnerSpace;

@@ -241,7 +241,6 @@ enum inlineKindType {
 };
 
 extern CWindowPtr       gTheWindow;
-extern long             gWhichDirectText;
 extern directTextType*  gDirectText;
 
 void DrawPlayerInterfacePlainRect( Rect *dRect, unsigned char color,
@@ -2393,11 +2392,10 @@ short GetInterfaceStringWidth(unsigned char* s, interfaceStyleType style)
         len--;
     }
 */
-    unsigned char   *getwidchar, *getwidwid;
-    long            width, height, strlen;
+    long            width, height;
 
     SetInterfaceLargeUpperFont( style);
-    mGetDirectStringDimensions( s, width, height, strlen, getwidchar, getwidwid);
+    mGetDirectStringDimensions(s, width, height);
 
     return ( width);
 }

@@ -15,34 +15,22 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-// Direct Text.c -- Ares Interfaces MUST be opened first --
-
 #include "DirectText.hpp"
 
-#include <QDOffscreen.h>
+#include <algorithm>
+#include <Base.h>
 
 #include "BinaryStream.hpp"
-#include "ConditionalMacros.h"
-#include "Debug.hpp"
 #include "Error.hpp"
-#include "OffscreenGWorld.hpp"
-#include "Resources.h"
+#include "Resource.hpp"
 
-#define kDirectTextError    "\pTEXT"
+directTextType* gDirectText = nil;
+long gWhichDirectText = 0;
+scoped_ptr<directTextType>* gDirectTextData;
 
-#define kRowBytesMask       0x8000
-
-#define kFourBitSize        16
-
-extern  GWorldPtr       gSaveWorld;
-
-directTextType      *gDirectText = nil;
-long                gWhichDirectText = 0;
-TypedHandle<uint32_t> gFourBitTable;  // for turning 4-bit masks into 8-bit masks on the fly
-TypedHandle<directTextType> gDirectTextData;
-
-size_t directTextType::load_data(const char* data, size_t len) {
-    BufferBinaryReader bin(data, len);
+directTextType::directTextType(int32_t id) {
+    Resource defn_rsrc(kDTextDescriptResType, id);
+    BufferBinaryReader bin(defn_rsrc.data(), defn_rsrc.size());
 
     bin.discard(4);
     bin.read(&resID);
@@ -52,585 +40,125 @@ size_t directTextType::load_data(const char* data, size_t len) {
     bin.read(&height);
     bin.read(&ascent);
 
-    charSet = TypedHandle<unsigned char>();
-    myHandle = false;
-
-    return bin.bytes_read();
+    Resource data_rsrc(kDTextFontMapResType, resID);
+    charSet.reset(new unsigned char[data_rsrc.size()]);
+    memcpy(charSet.get(), data_rsrc.data(), data_rsrc.size());
 }
 
+directTextType::~directTextType() { }
+
 int InitDirectText() {
-    TypedHandle<directTextType> tData;
-    short           count;
-    directTextType  *dtext = nil;
+    gDirectTextData = new scoped_ptr<directTextType>[kDirectFontNum];
+    gDirectTextData[0].reset(new directTextType(kTacticalFontResID));
+    gDirectTextData[1].reset(new directTextType(kComputerFontResID));
+    gDirectTextData[2].reset(new directTextType(kButtonFontResID));
+    gDirectTextData[3].reset(new directTextType(kMessageFontResID));
+    gDirectTextData[4].reset(new directTextType(kTitleFontResID));
+    gDirectTextData[5].reset(new directTextType(kButtonSmallFontResID));
 
-    gDirectTextData.create(kDirectFontNum);
-    dtext = *gDirectTextData;
-    for  ( count = 0; count < kDirectFontNum; count++)
-    {
-        dtext->resID = 0;
-        dtext->myHandle = FALSE;
-        dtext->logicalWidth = 0;
-        dtext->physicalWidth = 0;
-        dtext->height = 0;
-        dtext->ascent = 0;
-        dtext++;
-    }
-
-    // add # 0, kTacticalFontNum
-    dtext = *gDirectTextData + kTacticalFontNum;
-    tData.load_resource(kDTextDescriptResType, kTacticalFontResID);
-    if (tData.get() == nil) {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, kTacticalFontResID);
-        return( RESOURCE_ERROR);
-    }
-    BlockMove( *tData, dtext, sizeof( directTextType));
-    tData.destroy();
-
-    gDirectText = dtext;
+    gDirectText = gDirectTextData[0].get();
     gWhichDirectText = 0;
-    AddDirectFont( dtext); // trashes this ptr
-
-    // add # 1, kComputerFontNum
-    dtext = *gDirectTextData + kComputerFontNum;
-    tData.load_resource(kDTextDescriptResType, kComputerFontResID);
-    if (tData.get() == nil) {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, kComputerFontResID);
-        return( RESOURCE_ERROR);
-    }
-    BlockMove( *tData, dtext, sizeof( directTextType));
-    tData.destroy();
-
-    AddDirectFont( dtext);
-
-    // add # 2, kButtonFontNum
-    dtext = *gDirectTextData + kButtonFontNum;
-    tData.load_resource(kDTextDescriptResType, kButtonFontResID);
-    if (tData.get() == nil) {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, kButtonFontResID);
-        return( RESOURCE_ERROR);
-    }
-    BlockMove( *tData, dtext, sizeof( directTextType));
-    tData.destroy();
-
-    AddDirectFont( dtext);
-
-    // add # 3, kMessageFontNum
-    dtext = *gDirectTextData + kMessageFontNum;
-    tData.load_resource(kDTextDescriptResType, kMessageFontResID);
-    if (tData.get() == nil) {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, kMessageFontResID);
-        return( RESOURCE_ERROR);
-    }
-    BlockMove( *tData, dtext, sizeof( directTextType));
-    tData.destroy();
-
-    AddDirectFont( dtext);
-
-    // add # 4, kTitleFontNum
-    dtext = *gDirectTextData + kTitleFontNum;
-    tData.load_resource(kDTextDescriptResType, kTitleFontResID);
-    if (tData.get() == nil) {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, kTitleFontResID);
-        return( RESOURCE_ERROR);
-    }
-    BlockMove( *tData, dtext, sizeof( directTextType));
-    tData.destroy();
-
-    AddDirectFont( dtext);
-
-    // add # 5, kButtonSmallFontNum
-    dtext = *gDirectTextData + kButtonSmallFontNum;
-    tData.load_resource(kDTextDescriptResType, kButtonSmallFontResID);
-    if (tData.get() == nil) {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, kButtonSmallFontResID);
-        return( RESOURCE_ERROR);
-    }
-    BlockMove( *tData, dtext, sizeof( directTextType));
-    tData.destroy();
-
-    AddDirectFont( dtext);
-
-    gFourBitTable.create(kFourBitSize);
-    if (gFourBitTable.get() == nil)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 2);
-        return( MEMORY_ERROR);
-    }
-
-    for (int i = 0; i < kFourBitSize; i++) {
-        (*gFourBitTable)[i] = 0;
-        char* bytes = reinterpret_cast<char*>(*gFourBitTable + i);
-        if (i & 0x08) {
-            bytes[0] = 0xFF;
-        }
-        if (i & 0x04) {
-            bytes[1] = 0xFF;
-        }
-        if (i & 0x02) {
-            bytes[2] = 0xFF;
-        }
-        if (i & 0x01) {
-            bytes[3] = 0xFF;
-        }
-    }
 
     return kNoError;
 }
 
-void DirectTextCleanup( void)
-
-{
-    directTextType  *dtext;
-    long            count;
-
-    dtext = *gDirectTextData;
-    for  ( count = 0; count < kDirectFontNum; count++)
-    {
-        if ((dtext->myHandle) && (dtext->charSet.get() != nil)) {
-            dtext->charSet.destroy();
-        }
-        dtext++;
-    }
-    if (gFourBitTable.get() != nil) {
-        gFourBitTable.destroy();
-    }
-    if (gDirectTextData.get() != nil) {
-        gDirectTextData.destroy();
-    }
+void DirectTextCleanup() {
+    delete[] gDirectTextData;
 }
 
-// GetDirectFontNum:
-//  If a direct font of resource ID resID has been loaded, this returns which font has it.
-//  If not, it returns -1
-
-long GetDirectFontNum( short resID)
-
-{
-    long            count = 0;
-    directTextType  *dtext = nil;
-
-    dtext = *gDirectTextData;
-    while (( count < kDirectFontNum) && ( dtext->resID != resID))
-    {
-        count++;
-        dtext++;
-    }
-
-    if ( count >= kDirectFontNum) return ( -1);
-    else return( count);
+void mDirectCharWidth(unsigned char& width, char mchar, unsigned char*& widptr) {
+    widptr = gDirectText->charSet.get()
+        + gDirectText->height * gDirectText->physicalWidth * mchar + mchar;
+    width = *widptr;
 }
 
-// AddDirectFont:
-//  Given a ptr to a directTextType dtext, finds the char data if it's loaded, or loads it if it's
-//  not.  TRASHES THE PTR!!!
-
-short AddDirectFont( directTextType *dtext)
-
-{
-    directTextType  *dtextWithTable = nil;
-    long            whichTable, keepMyID;
-
-    // we remove our ID when we check for other IDs so we don't find our own ID!
-    keepMyID = dtext->resID;
-    dtext->resID = 0;
-    whichTable = GetDirectFontNum( keepMyID);
-    dtext->resID = keepMyID;
-
-    if ( whichTable >= 0)
-    {
-        dtextWithTable = *gDirectTextData + whichTable;
-        dtext->charSet = dtextWithTable->charSet;
-        dtext->myHandle = FALSE;
-    } else
-    {
-        dtext->charSet.load_resource(kDTextFontMapResType, dtext->resID);
-        if (dtext->charSet.get() == nil) {
-            ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kCharSetError, -1, -1, -1, __FILE__, dtext->resID);
-            return( RESOURCE_ERROR);
-        }
-        dtext->myHandle = TRUE;
-        WriteDebugLine("\pAddCharSet:");
-        WriteDebugLong( dtext->resID);
-    }
-    return( kNoError);
+void mSetDirectFont(long whichFont) {
+    gWhichDirectText = whichFont;
+    gDirectText = gDirectTextData[gWhichDirectText].get();
 }
 
-void DrawDirectTextString( char *string, unsigned char color, PixMap *destMap, long portLeft,
-                            long portTop)
+int mDirectFontHeight() {
+    return gDirectText->height;
+}
 
-{
-    unsigned char   *dchar;
-    unsigned char   slen;
-    long            rowPlus, charPlus;
-    int             i, j, width;
-    Point           pen;
-    unsigned long   *slong, *dlong, colorlong = 0;
+int mDirectFontAscent() {
+    return gDirectText->ascent;
+}
 
-    colorlong = color;
-    colorlong |= colorlong << 8;
-    colorlong |= colorlong << 8;
-    colorlong |= colorlong << 8;
-    GetPen( &pen);
-    slen  = *string++;
-    MoveTo( pen.h + implicit_cast<int>(slen) * (gDirectText->logicalWidth + kCharSpace), pen.v);
-    pen.v -= gDirectText->ascent;
-    rowPlus = (*destMap).rowBytes & 0x3fff;
-    charPlus = implicit_cast<long>(kCharSpace) + implicit_cast<long>(gDirectText->logicalWidth);
-    dchar = (*destMap).baseAddr + implicit_cast<long>(pen.v + portTop) * rowPlus + implicit_cast<long>(pen.h) +
-            implicit_cast<long>(portLeft << 2);
-    width = gDirectText->physicalWidth >> 2;
-    rowPlus >>= 2;
-    rowPlus -= implicit_cast<long>(width);
-    while ( slen > 0)
-    {
-        slong = reinterpret_cast<unsigned long *>(*(gDirectText->charSet)) + implicit_cast<long>(gDirectText->height) *
-                implicit_cast<long>(width) * implicit_cast<long>(*string++);
-        dlong = reinterpret_cast<unsigned long *>(dchar);
-        for ( j = 0; j < gDirectText->height; j++)
-        {
-            for ( i = 0; i < width; i++)
-            {
-                *dlong = (( *dlong | *slong) ^ *slong) | ( colorlong & *slong);
-                dlong++;
-                slong++;
-            }
-            dlong += rowPlus;
-        }
-        dchar += charPlus;
-        slen--;
+void mGetDirectStringDimensions(unsigned char* string, long& width, long& height) {
+    height = gDirectText->height;
+    width = 0;
+    const unsigned char* charptr = string;
+    int strlen = *(charptr++);
+    while (strlen > 0) {
+        const unsigned char* widptr = gDirectText->charSet.get()
+            + gDirectText->height * gDirectText->physicalWidth * (*charptr) + (*charptr);
+        width += *widptr;
+        charptr++;
+        strlen--;
     }
 }
 
 void DrawDirectTextStringClipped(unsigned char* string, unsigned char color, PixMap *destMap,
-                Rect *clip, long portLeft, long portTop)
-
-{
-    unsigned char   *hchar, *dbyte, *sbyte;
-    unsigned char   slen;
-    long            rowPlus, charPlus = 0, hpos, leftSkip, bytesToDo, width, rowBytes, topEdge,
-                    bottomEdge;
-    int             i, j, k;
-    Point           pen;
-    uint32_t        *slong, *dlong, colorlong = 0;
-
-//  DebugStr( string);
-//  *string = 4;
-    // set up the long color value
-    colorlong = color;
-    colorlong |= colorlong << 8;
-    colorlong |= colorlong << 8;
-    colorlong |= colorlong << 8;
-
+                Rect *clip, long portLeft, long portTop) {
     // move the pen to the resulting location
-    GetPen( &pen);
-    slen  = *string++;
+    Point pen;
+    GetPen(&pen);
     pen.v -= gDirectText->ascent;
-    hpos = pen.h;
 
-    // set the top edge ie the number of rows to skip
-    topEdge = 0;
-    if ( pen.v < clip->top) topEdge = clip->top - pen.v;
+    // Top and bottom boundaries of where we draw.
+    int topEdge = std::max(0, clip->top - pen.v);
+    int bottomEdge = gDirectText->height - std::max(
+            0, pen.v + gDirectText->height - clip->bottom + 1);
 
-    // set the bottom edge
-    bottomEdge = gDirectText->height;
-    if (( pen.v + bottomEdge) >= clip->bottom) bottomEdge -= ( pen.v + bottomEdge) - clip->bottom + 1;
-
-    //set up the initial row values
-    rowBytes = rowPlus = (*destMap).rowBytes & 0x3fff;
-    rowPlus >>= 2L;
-    rowPlus -= implicit_cast<long>(gDirectText->physicalWidth << 1L);
+    int rowBytes = destMap->rowBytes & 0x3FFF;
 
     // set hchar = place holder for start of each char we draw
-    hchar = (*destMap).baseAddr + implicit_cast<long>(pen.v + portTop + topEdge) * rowBytes +
-            hpos + implicit_cast<long>(portLeft << 2L);
+    unsigned char* hchar = destMap->baseAddr + (pen.v + portTop + topEdge) * rowBytes
+        + pen.h + (portLeft << 2);
 
-    // width = character width in pixels
-    width = gDirectText->physicalWidth << 3L;
+    int size = *string;
+    ++string;
+    for (int i = 0; i < size; ++i) {
+        unsigned char* sbyte = gDirectText->charSet.get() + gDirectText->height *
+                gDirectText->physicalWidth * (string[i]) + (string[i]);
 
-    // while we still have characters to process
-    while ( slen > 0)
-    {
-        // if this character is visible
-        if (( hpos < clip->left) || (( hpos + ( width)) >= clip->right))
-        {
-            // if this character is clipped
-            if ((( hpos + (width)) >= clip->left) || ( hpos < clip->right))
-            {
-                // leftSkip = # of pixels to skip on left edge
-                leftSkip = 0;
-                if ( hpos < clip->left) leftSkip = clip->left - hpos;
+        int width = *sbyte;
+        ++sbyte;
 
-                // bytesToDo = right edge clip (from 0)
-                bytesToDo = width;
-                if (( hpos + (width)) >= clip->right)
-                    bytesToDo -= hpos + (width) - clip->right;
+        if ((pen.h + width >= clip->left) || (pen.h < clip->right)) {
+            // Left and right boundaries of where we draw.
+            int leftEdge = std::max(0, clip->left - pen.h);
+            int rightEdge = width - std::max(0, pen.h + width - clip->right);
 
-                // sbyte = source byte
-                sbyte = *(gDirectText->charSet) + gDirectText->height *
-                        gDirectText->physicalWidth * implicit_cast<long>(*string) + implicit_cast<long>(*string);
-                string++;
-
-                // charPlus = width of this character
-                charPlus = implicit_cast<long>(*(sbyte++));
-
-                // skip over the clipped top rows
-                sbyte += topEdge * gDirectText->physicalWidth;
-
-                // dbyte = destination pixel
-                dbyte = hchar;
-
-                // repeat for every unclipped row
-                for ( j = topEdge; j < bottomEdge; j++)
-                {
-                    // k = this h position
-                    k = 0;
-
-                    // repeat for every byte of data
-                    for ( i = 0; i < gDirectText->physicalWidth; i++)
-                    {
-                        // really table + ((*sbyte >> 4) << 2) -- look up byte value for bit mask
-                        uint32_t t = (*gFourBitTable)[((*sbyte) >> 4L) & 0xF];
-
-                        // for each of four bytes for this half of the source byte:
-                        // make sure exists & is within left & right bounds
-                        // increase h counter (k) and destByte
-                        if ((t & 0xFF000000) && (k >= leftSkip) && (k < bytesToDo)) {
-                            *dbyte = color;
-                        }
-                        ++dbyte;
-                        ++k;
-                        if ((t & 0x00FF0000) && (k >= leftSkip) && (k < bytesToDo)) {
-                            *dbyte = color;
-                        }
-                        ++dbyte;
-                        ++k;
-                        if ((t & 0x0000FF00) && (k > leftSkip) && (k < bytesToDo)) {
-                            *dbyte = color;
-                        }
-                        ++dbyte;
-                        ++k;
-                        if ((t & 0x000000FF) && (k > leftSkip) && (k < bytesToDo)) {
-                            *dbyte = color;
-                        }
-                        ++dbyte;
-                        ++k;
-
-                        t = (*gFourBitTable)[(*sbyte++) & 0xF];
-
-                        if ((t & 0xFF000000) && (k >= leftSkip) && (k < bytesToDo)) {
-                            *dbyte = color;
-                        }
-                        ++dbyte;
-                        ++k;
-                        if ((t & 0x00FF0000) && (k >= leftSkip) && (k < bytesToDo)) {
-                            *dbyte = color;
-                        }
-                        ++dbyte;
-                        ++k;
-                        if ((t & 0x0000FF00) && (k >= leftSkip) && (k < bytesToDo)) {
-                            *dbyte = color;
-                        }
-                        ++dbyte;
-                        ++k;
-                        if ((t & 0x000000FF) && (k >= leftSkip) && (k < bytesToDo)) {
-                            *dbyte = color;
-                        }
-                        ++dbyte;
-                        ++k;
-                    }
-                    // add row to dest byte
-                    dbyte += rowBytes - (width);;
-                }
-            // else (not on screen) just increase the current character
-            } else string++;
-        } else // not clipped, draw in long words
-        {
-            // get source byte
-            sbyte = *(gDirectText->charSet) + implicit_cast<long>(gDirectText->height) *
-                    implicit_cast<long>(gDirectText->physicalWidth) * implicit_cast<long>(*string) + implicit_cast<long>(*string);
-            string++;
-
-            // width of this char in pixels
-            charPlus = *(sbyte++);
-
-            // skip clipped rows
+            // skip over the clipped top rows
             sbyte += topEdge * gDirectText->physicalWidth;
 
-            // dlong = destination byte
-            dlong = reinterpret_cast<uint32_t*>(hchar);
-            for ( j = topEdge; j < bottomEdge; j++)
-            {
-                for ( i = 0; i < gDirectText->physicalWidth; i++)
-                {
-                    // get ptr in bit>byte table
-                    slong = (*gFourBitTable) + implicit_cast<long>( (*sbyte) >> 4L);
-                    *dlong = (( *dlong | *slong) ^ *slong) | ( colorlong & *slong);
-                    dlong++;
+            // dbyte = destination pixel
+            unsigned char* dbyte = hchar;
 
-                    // for snd half of word
-                    slong = (*gFourBitTable) + implicit_cast<long>( (*(sbyte++)) & 0x0f);
-                    *dlong = (( *dlong | *slong) ^ *slong) | ( colorlong & *slong);
-                    dlong++;
+            // repeat for every unclipped row
+            for (int y = topEdge; y < bottomEdge; ++y) {
+                // repeat for every byte of data
+                for (int x = leftEdge; x < rightEdge; ++x) {
+                    int byte = x / 8;
+                    int bit = 0x80 >> (x & 0x7);
+                    if (sbyte[byte] & bit) {
+                        dbyte[x] = color;
+                    }
                 }
-
-                // destByte += rowPlus
-                dlong += rowPlus;
+                sbyte += gDirectText->physicalWidth;
+                dbyte += rowBytes;
             }
         }
+        // else (not on screen) just increase the current character
+
         // for every char clipped or no:
         // increase our character pixel starting point by width of this character
-        hchar += charPlus;
+        hchar += width;
 
         // increase our hposition (our position in pixels)
-        hpos += charPlus;
-
-        // decrease our length counter
-        slen--;
+        pen.h += width;
     }
-    MoveTo( hpos, pen.v + gDirectText->ascent);
+    MoveTo(pen.h, pen.v + gDirectText->ascent);
 }
-
-void DrawDirectTextHeightx2(unsigned char* string, unsigned char color, PixMap *destMap, long portLeft,
-                            long portTop)
-
-{
-    unsigned char   *dchar;
-    unsigned char   slen;
-    long            rowPlus, charPlus, rowBytes;
-    int             i, j, width;
-    Point           pen;
-    unsigned long   *slong, *dlong, colorlong = 0;
-
-    colorlong = color;
-    colorlong |= colorlong << 8;
-    colorlong |= colorlong << 8;
-    colorlong |= colorlong << 8;
-    GetPen( &pen);
-    slen  = *string++;
-    MoveTo( pen.h + implicit_cast<int>(slen) * (gDirectText->logicalWidth + kCharSpace), pen.v);
-    pen.v -= gDirectText->ascent << 1;
-    rowPlus = rowBytes = (*destMap).rowBytes & 0x3fff;
-    charPlus = implicit_cast<long>(kCharSpace) + implicit_cast<long>(gDirectText->logicalWidth);
-    dchar = (*destMap).baseAddr + implicit_cast<long>(pen.v + portTop) * rowPlus + implicit_cast<long>(pen.h) +
-            implicit_cast<long>(portLeft << 2);
-    width = gDirectText->physicalWidth >> 2;
-    rowPlus >>= 2;
-    rowBytes >>= 2;
-    rowPlus -= implicit_cast<long>(width);
-    while ( slen > 0)
-    {
-        slong = reinterpret_cast<unsigned long*>(*(gDirectText->charSet)) + implicit_cast<long>(gDirectText->height) *
-                implicit_cast<long>(width) * implicit_cast<long>(*string++);
-        dlong = reinterpret_cast<unsigned long *>(dchar);
-        for ( j = 0; j < gDirectText->height; j++)
-        {
-            for ( i = 0; i < width; i++)
-            {
-                *dlong = (( *dlong | *slong) ^ *slong) | ( colorlong & *slong);
-                dlong++;
-                slong++;
-            }
-            dlong += rowPlus + rowBytes;
-        }
-        dchar += charPlus;
-        slen--;
-    }
-}
-
-void DrawDirectTextStringClippedx2(unsigned char* string, unsigned char color, PixMap *destMap,
-                Rect *clip, long portLeft, long portTop)
-{
-    static_cast<void>(string);
-    static_cast<void>(color);
-    static_cast<void>(destMap);
-    static_cast<void>(clip);
-    static_cast<void>(portLeft);
-    static_cast<void>(portTop);
-/*  unsigned char   *hchar, *dbyte, *sbyte;
-    anyCharType     slen;
-    long            rowPlus, charPlus, hpos, leftSkip, bytesToDo, width, rowBytes, topEdge,
-                    bottomEdge;
-    int             i, j;
-    Point           pen;
-    unsigned long   *slong, *dlong, colorlong = 0, dvalue;
-
-    colorlong = color;
-    colorlong |= colorlong << 8;
-    colorlong |= colorlong << 8;
-    colorlong |= colorlong << 8;
-    GetPen( &pen);
-    slen  = *string++;
-    MoveTo( pen.h + (int)slen * (gDirectText->logicalWidth + kCharSpace), pen.v);
-    pen.v -= gDirectText->ascent << 1;
-    hpos = pen.h;
-
-    topEdge = 0;
-    if ( pen.v < clip->top) topEdge = clip->top - pen.v;
-    bottomEdge = gDirectText->height << 1;
-    if (( pen.v + bottomEdge) >= clip->bottom) bottomEdge -= ( pen.v + bottomEdge) - clip->bottom + 1;
-
-    rowBytes = rowPlus = (*destMap).rowBytes & 0x3fff;
-    charPlus = (long)(kCharSpace) + (long)(gDirectText->logicalWidth);
-    hchar = (unsigned char *)(*destMap).baseAddr + (long)(pen.v + portTop + topEdge) * rowPlus +
-            hpos + (long)(portLeft << 2);
-    width = gDirectText->physicalWidth >> 2;
-    rowPlus >>= 2;
-    rowPlus -= (long)width;
-
-    while ( slen > 0)
-    {
-        if (( hpos < clip->left) || (( hpos + gDirectText->physicalWidth) >= clip->right))
-        {
-            if ((( hpos + gDirectText->physicalWidth - 1) >= clip->left) || ( hpos < clip->right))
-            {
-                leftSkip = 0;
-                if ( hpos < clip->left) leftSkip = clip->left - hpos;
-                bytesToDo = 0;
-                if (( hpos + gDirectText->physicalWidth) >= clip->right)
-                    bytesToDo = hpos + gDirectText->physicalWidth - clip->right + 1;
-                bytesToDo = gDirectText->physicalWidth - ( leftSkip + bytesToDo);
-                sbyte = (unsigned char *)*(gDirectText->charSet) + gDirectText->height *
-                        gDirectText->physicalWidth * (long)*string + (long)*string++;
-                charPlus = (long)*(sbyte++);
-
-                sbyte += topEdge * gDirectText->physicalWidth + leftSkip;
-
-                dbyte = hchar + leftSkip;
-
-                for ( j = topEdge; j < bottomEdge; j += 2)
-                {
-                    for ( i = 0; i < bytesToDo; i++)
-                    {
-                        if ( *sbyte) *dbyte = color;
-                        sbyte++;
-                        dbyte++;
-                    }
-                    dbyte += rowBytes - bytesToDo + rowBytes;
-                    sbyte += gDirectText->physicalWidth - bytesToDo;
-                }
-            } else string++;
-        } else
-        {
-            sbyte = (unsigned char *)*(gDirectText->charSet) + (long)gDirectText->height *
-                    (long)gDirectText->physicalWidth * (long)*string + (long)*string++;
-            charPlus = (long)*(sbyte++);
-
-            slong = (unsigned long *)sbyte + topEdge * width;
-
-            dlong = (unsigned long *)hchar;
-            for ( j = topEdge; j < bottomEdge; j += 2)
-            {
-                for ( i = 0; i < width; i++)
-                {
-                    *dlong = (( *dlong | *slong) ^ *slong) | ( colorlong & *slong);
-                    dlong++;
-                    slong++;
-                }
-                dlong += rowPlus + (rowBytes >> 2);
-            }
-        }
-        hchar += charPlus;
-        hpos += charPlus;
-        slen--;
-    }
-*/}

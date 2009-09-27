@@ -175,14 +175,14 @@
 inline void mBlackMiniScreenLine(
         long mtop, long mlinenum, long mleft, long mright, Rect& mbounds, PixMap** mpixbase) {
     mbounds.left = kMiniScreenLeft + mleft;
-    mbounds.top = mtop + mlinenum * gDirectText->height;
+    mbounds.top = mtop + mlinenum * mDirectFontHeight();
     mbounds.right = kMiniScreenLeft + mright;
-    mbounds.bottom = mbounds.top + gDirectText->height;
+    mbounds.bottom = mbounds.top + mDirectFontHeight();
     DrawNateRect( *mpixbase, &mbounds, 0, 0, BLACK);
 }
 
 inline long mGetLineNumFromV(long mV) {
-    return (((mV) - (kMiniScreenTop + globals()->gInstrumentTop)) / gDirectText->height);
+    return (((mV) - (kMiniScreenTop + globals()->gInstrumentTop)) / mDirectFontHeight());
 }
 
 // for copying the fields of a space object relevant to the miniscreens:
@@ -275,7 +275,6 @@ extern WindowPtr        gTheWindow;
 extern PixMapHandle     thePixMapHandle;
 extern long             gNatePortLeft, gNatePortTop, gNetLatency;
 extern directTextType*  gDirectText;
-extern long             gWhichDirectText;
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
 
 miniComputerDataType    *gMiniScreenData = nil;

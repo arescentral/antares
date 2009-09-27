@@ -153,7 +153,7 @@ extern GWorldPtr                gOffWorld, gRealWorld, gSaveWorld;
 extern CWindowPtr               gTheWindow/*, globals()->gBackWindow*/;       // we need the window for copying to the real world, a hack
 extern directTextType           *gDirectText;
 extern Handle                   gBaseObjectData;
-extern long                     gWhichDirectText, WORLD_WIDTH, WORLD_HEIGHT;
+extern long                     WORLD_WIDTH, WORLD_HEIGHT;
                                 /*globals()->gPlayerAdmiralNumber;*/
 //extern unsigned long          globals()->gOptions;
 extern  GDHandle                theDevice;
@@ -1947,8 +1947,8 @@ void ShowWhyNetLevelNotLoaded( netSetupType *setup, StringPtr why)
 
 void NetLevelShowLag( long lag, long recommended)
 {
-    unsigned char   *getwidchar, *getwidwid, color;
-    long            width, height, strlen;
+    unsigned char   color;
+    long            width, height;
     Rect            tRect, stringRect, bottomRect;
     PixMapHandle    offMap = GetGWorldPixMap( gOffWorld);
     transColorType  *transColor;
@@ -1967,7 +1967,7 @@ void NetLevelShowLag( long lag, long recommended)
         NumToString( recommended, numString);
         ConcatenatePString( (unsigned char *)string, (unsigned char *)numString);
         mSetDirectFont( kButtonSmallFontNum);
-        mGetDirectStringDimensions( string, width, height, strlen, getwidchar, getwidwid)
+        mGetDirectStringDimensions(string, width, height)
         SetRect( &stringRect, 0, 0, width, height);
         CenterRectInRect( &stringRect, &tRect);
         stringRect.top = tRect.top;
@@ -1985,7 +1985,7 @@ void NetLevelShowLag( long lag, long recommended)
 
     NumToString( lag, string);
     mSetDirectFont( kTitleFontNum);
-    mGetDirectStringDimensions( string, width, height, strlen, getwidchar, getwidwid)
+    mGetDirectStringDimensions(string, width, height)
 
     SetRect( &stringRect, 0, 0, width, height);
     CenterRectInRect( &stringRect, &bottomRect);
@@ -2003,8 +2003,8 @@ void NetLevelShowLag( long lag, long recommended)
 
 void NetLevelShowRaces( short myRace, short opponentRace)
 {
-    unsigned char   *getwidchar, *getwidwid, color;
-    long            width, height, strlen, spacingHeight;
+    unsigned char   color;
+    long            width, height, spacingHeight;
     Rect            tRect, stringRect, bottomRect;
     PixMapHandle    offMap = GetGWorldPixMap( gOffWorld);
     transColorType  *transColor;
@@ -2022,7 +2022,7 @@ void NetLevelShowRaces( short myRace, short opponentRace)
     ConcatenatePString( (unsigned char *)string, (unsigned char *)raceString);
 
     mSetDirectFont( kButtonSmallFontNum);
-    mGetDirectStringDimensions( string, width, height, strlen, getwidchar, getwidwid)
+    mGetDirectStringDimensions(string, width, height)
     SetRect( &stringRect, 0, 0, width, height);
     CenterRectInRect( &stringRect, &tRect);
     spacingHeight = ((tRect.bottom - tRect.top) - (height * 2)) / 3;
@@ -2040,7 +2040,7 @@ void NetLevelShowRaces( short myRace, short opponentRace)
     ConcatenatePString( (unsigned char *)string, (unsigned char *)raceString);
 
     mSetDirectFont( kButtonSmallFontNum);
-    mGetDirectStringDimensions( string, width, height, strlen, getwidchar, getwidwid)
+    mGetDirectStringDimensions(string, width, height)
 
     SetRect( &stringRect, 0, 0, width, height);
     CenterRectInRect( &stringRect, &bottomRect);
@@ -2242,10 +2242,10 @@ void NetLevelDrawLagGraph( netSetupType *setup)
 {
     Rect            graphBounds, lagRect, recRect, tRect;
     Rect        clipRect;
-    long            i, x, y, whichSample, mean, sd, width, height, strlen;
+    long            i, x, y, whichSample, mean, sd, width, height;
     Str255          s;
     transColorType  *transColor;
-    unsigned char   color, *getwidchar, *getwidwid;
+    unsigned char   color;
     PixMapHandle    offMap = GetGWorldPixMap( gOffWorld);
 
     if ( setup->whichTab == kNetLevelSettingTabNum)
@@ -2298,7 +2298,7 @@ void NetLevelDrawLagGraph( netSetupType *setup)
 
         NumToString(  setup->currentLatency / 3, s);
 
-        mGetDirectStringDimensions( s, width, height, strlen, getwidchar, getwidwid)
+        mGetDirectStringDimensions(s, width, height)
         lagRect.left = graphBounds.left + 2;
         lagRect.right = lagRect.left + width + 3;
         lagRect.top = y - height - 2,
@@ -2334,7 +2334,7 @@ void NetLevelDrawLagGraph( netSetupType *setup)
 
         NumToString( (sd) / 6, s);
 
-        mGetDirectStringDimensions( s, width, height, strlen, getwidchar, getwidwid)
+        mGetDirectStringDimensions(s, width, height)
         recRect.left = graphBounds.left + 2;
         recRect.right = recRect.left + width + 3;
         recRect.top = y + 1,
@@ -2567,8 +2567,8 @@ void AddCharToVisibleString( netSetupType *setup, long whichPlayer,
     transColorType  *transColor;
     Rect        clipRect;
     Rect            tRect;
-    unsigned char   *getwidchar, *getwidwid, color, textColor, shade;
-    long            width, height, strlen, count, count2,
+    unsigned char   color, textColor, shade;
+    long            width, height, count, count2,
                     whichItem = kFirstPlayerItemGroup + kPlayerGroupTextNum +
                         (whichPlayer * kPlayerItemGroupSize),
                     leftOffset = 0;
@@ -2637,7 +2637,7 @@ void AddCharToVisibleString( netSetupType *setup, long whichPlayer,
     tRect.right -= 2;
     mCopyAnyRect( clipRect, tRect);
     mSetDirectFont( kButtonSmallFontNum);
-    mGetDirectStringDimensions( totalString, width, height, strlen, getwidchar, getwidwid)
+    mGetDirectStringDimensions(totalString, width, height)
     if ( width > (tRect.right - tRect.left))
     {
         leftOffset = width - (tRect.right - tRect.left);

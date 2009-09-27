@@ -118,7 +118,7 @@ inline void mClipAnyRect(T0& mtrect, const T1& mclip) {
 #define kHBufferTotal   (kHBuffer)
 
 extern directTextType   *gDirectText;
-extern long             gWhichDirectText, CLIP_LEFT, CLIP_RIGHT, CLIP_BOTTOM;
+extern long             CLIP_LEFT, CLIP_RIGHT, CLIP_BOTTOM;
 
 extern GWorldPtr        gOffWorld, gRealWorld, gSaveWorld;
 extern WindowPtr        gTheWindow;

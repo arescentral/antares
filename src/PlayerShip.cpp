@@ -131,7 +131,6 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
     Boolean         everPaused = FALSE, newKeys = false;
     uint64_t        hugeDistance;
     unsigned char   *message;
-    unsigned char   *getwidchar, *getwidwid;
     long            width, height, strlen;
     Str255          s;
 
@@ -276,7 +275,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
                         }
                     }
                 }
-                mGetDirectStringDimensions( message, width, height, strlen, getwidchar, getwidwid);
+                mGetDirectStringDimensions( message, width, height);
                 strlen = CLIP_LEFT + (((CLIP_RIGHT - CLIP_LEFT) / 2) - ( width / 2));
                 if (( strlen + width) > (CLIP_RIGHT))
                 {
