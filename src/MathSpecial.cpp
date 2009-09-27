@@ -211,25 +211,29 @@ unsigned long lsqrt (unsigned long n)
 //  is defined on Power Macs but not on 68Ks.  I'm using exclusively for timing using the function
 //  Microseconds( wide *destWide) (defined in same article).
 
-Fixed MyFixRatio( short numer, short denom)
-
-{
-    long    longdenom, result;
+Fixed MyFixRatio(int16_t numer, int16_t denom) {
+    int32_t longdenom, result;
 
     longdenom = denom;
-    if ( !longdenom) goto label1;
+    if (!longdenom) {
+        goto label1;
+    }
 
     result = numer;
     result &= 0x0000ffff;
-    if ( numer == denom) goto label3;
+    if (numer == denom) {
+        goto label3;
+    }
 
-    result = (( result >> 16L) & 0x0000ffff) | (( result << 16L) & 0xffff0000);
+    result = ((result >> 16L) & 0x0000ffff) | ((result << 16L) & 0xffff0000);
     result /= longdenom;
     return result;
 
 label1:
     result = 0x7fffffff;
-    if ( numer >= 0) goto label2;
+    if (numer >= 0) {
+        goto label2;
+    }
     result = -result;
 
 label2:

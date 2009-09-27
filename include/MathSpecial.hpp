@@ -85,7 +85,7 @@ struct fixedPointType {
 
 unsigned long lsqrt (unsigned long);
 
-Fixed MyFixRatio( short, short);
+Fixed MyFixRatio(int16_t, int16_t);
 void MyMulDoubleLong(long, long, int64_t*);
 
 template <typename T>
