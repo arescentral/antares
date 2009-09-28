@@ -44,8 +44,6 @@
 
 #include "ColorTable.hpp"
 #include "ColorTranslation.hpp"
-#include "ConditionalMacros.h"
-//#include "CopyProtection.h"  // is included in prefs
 
 #include "Debug.hpp"
 #include "DirectText.hpp"
@@ -207,7 +205,7 @@ int main(int argc, const char** argv) {
     Point                   tpoint;
     EventRecord             theEvent;
     scoped_ptr<ColorTable>  theClut;
-    Str255                  tempString, userName;
+    Str255                  tempString;
     short                   ts1;
 
     FakeInit(argc, argv);
@@ -243,39 +241,6 @@ int main(int argc, const char** argv) {
     tpoint.h = tpoint.v = 0;
     ShieldCursor( &tRect, tpoint);
 
-    if ( theDevice == GetMainDevice())
-    {
-
-        // FROM ADG:TOOL CHEST 2/95: HIDEMENUBAR CODE SNIPPET
-        //
-        // Set the global MBarHeight to 0 to prevent any
-        //  other apps from writing to the menu bar.
-        //
-
-        /*              MacSetRect( &mBarRect, tRect.left, tRect.top, tRect.right, tRect.top + oldMBarHeight);
-
-#ifdef kHideMenuBar
-grayRgn = LMGetGrayRgn();
-LMSetMBarHeight( 0);
-
-        // from TotMGPG p 127-129
-        //              oldGrayRgn = NewRgn();
-        //              CopyRgn( grayRgn, oldGrayRgn);
-
-        mBarRgn = NewRgn();
-        if ( mBarRgn == nil)
-        ShowErrorRecover( OFFSCREEN_GRAPHICS_ERROR, kMainError, 2);
-        RectRgn( mBarRgn, &mBarRect);
-        UnionRgn( grayRgn, mBarRgn, grayRgn);
-#endif
-*/
-        //              InitHideMenubar();
-        //              SetMBarState( false);
-    }
-
-    InitHideMenubar();
-    SetMBarState( false, theDevice);
-
     InitSpriteCursor();
     CenterRectInDevice( theDevice, &windowRect);
 
@@ -291,61 +256,37 @@ LMSetMBarHeight( 0);
     BackPat( &qd.black);
 
     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
-    //          initialFadeColor.green = 65000;
     RGBForeColor( &initialFadeColor);
     skipFading = AutoFadeTo( 30, &initialFadeColor, true);
 
     MacShowCursor();
 
-    do
-    {
-        Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
-    } while ( theEvent.what != nullEvent);
-
-    //          WaitForAnyEvent();
+    do {
+        Ares_WaitNextEvent(everyEvent, &theEvent, 3, nil);
+    } while (theEvent.what != nullEvent);
 
     HideCursor();
 
     MacShowWindow( globals()->gBackWindow);
 
     RGBBackColor( &initialFadeColor);
-    //          BackPat( &qd.black);
-
-    //          WaitForAnyEvent();
-
     MacSetPort( globals()->gBackWindow);
-
     PaintRect( &(globals()->gBackWindow->portRect));
-
-    //          WaitForAnyEvent();
-
     RestoreDeviceClut( theDevice);
-
-    //          WaitForAnyEvent();
-
     ResetTransitions();
 
-    //          WaitForAnyEvent();
-
     skipFading = AutoFadeFrom( 1, true);
-
-
     skipFading = AutoFadeTo( 1, &initialFadeColor, true);
-
-    gTheWindow = NewCWindow (nil, &windowRect, "\p", TRUE, plainDBox, //documentProc,//
+    gTheWindow = NewCWindow (nil, &windowRect, "\p", TRUE, plainDBox,
             reinterpret_cast<WindowPtr>(-1), true, 700);
 
     SetWindowColorTable( gTheWindow);
     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
     MacSetPort( gTheWindow);
     RGBBackColor( &initialFadeColor);
-    //          BackPat( &qd.black);
 
     MacShowWindow ( gTheWindow);
     RGBBackColor( &initialFadeColor);
-    //          BackPat( &qd.black);
-
-    //          WriteDebugLine("\p>Debug Win");
 
     MacSetPort ( gTheWindow);
     MacSetRect( &windowRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
@@ -356,10 +297,9 @@ LMSetMBarHeight( 0);
 
     ShieldCursorInDevice();
 
-    do
-    {
-        Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
-    } while ( theEvent.what != nullEvent);
+    do {
+        Ares_WaitNextEvent(everyEvent, &theEvent, 3, nil);
+    } while (theEvent.what != nullEvent);
     MacSetPort ( gTheWindow);
     MacShowCursor();
 
@@ -429,23 +369,10 @@ LMSetMBarHeight( 0);
                     if ( !skipFading) PlayMovieByName("\p:Ares Data Folder:Title", gTheWindow,
                             false, theDevice);
 
-                    //                          AutoFadeTo( 1, &initialFadeColor, FALSE);
-                    //                          DrawTitleScreen();
-                    //                          AutoFadeFrom( 90, FALSE);
                     MacSetPort( gTheWindow);
 
                     skipFading = StartCustomPictFade( 20, 20, 502, 2001,
                             gTheWindow, skipFading);
-
-
-                    //                          MacShowCursor();
-
-                    /*                          ColorTest();
-                                                MacSetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-                                                CopyOffWorldToRealWorld( (WindowPtr)gTheWindow, &tRect);
-
-                                                WaitForAnyEvent();
-                                                */
 
                     do
                     {
@@ -461,33 +388,16 @@ LMSetMBarHeight( 0);
 
                     RGBForeColor( &initialFadeColor);
 
-                    /*                          MoveTo( ((WORLD_WIDTH - kSmallScreenWidth) / 2) +
-                                                ( kSmallScreenWidth / 2) - (StringWidth( tempString) / 2),
-                                                465 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
-                                                */
                     MoveTo( ( WORLD_WIDTH - StringWidth( tempString) - 4),
                             478 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
 
-                    /*
-                       MoveTo( 370 + ( WORLD_WIDTH - kSmallScreenWidth) / 2,
-                       450 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
-                       */
-                    DrawOutlinedString( tempString, &initialFadeColor); //DrawString( tempString);
+                    DrawOutlinedString( tempString, &initialFadeColor);
 
                     initialFadeColor.red = 65535;
                     initialFadeColor.blue = initialFadeColor.green = 0;
                     RGBForeColor( &initialFadeColor);
                     MoveTo( 4, 12 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
-#ifdef kUseAlphaCopyProtection
-                    DrawOutlinedString("\pALPHA COPY PROTECTION IS ON. ",
-                            &initialFadeColor);
-#endif
-#ifndef kUsePublicCopyProtection
-                    DrawOutlinedString("\pPUBLIC COPY PROTECTION IS OFF. ",
-                            &initialFadeColor);
-#endif
 
-                    //                          ColorTest();
                     MoveTo( 35 + ( WORLD_WIDTH - kSmallScreenWidth) / 2,
                             50 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
                     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 65535;
@@ -496,30 +406,11 @@ LMSetMBarHeight( 0);
                     TextSize( 24);
                     TextFont( 0);
                     TextFace( 0);
-                    //                          DrawEncodedString( "\p\x67\x36\x68\x2D\x0C\x0B\x13\x29\x48\x51\x64\x11\x0B\x27\x29\x0E\x4E\x4D\x46\x12\x57\x3D\x12\x3B\x75\x24\x14\x65\x31\x10\x5B\x30\x4D\x5F\x44\x16\x66\x4C\x4E\x6E"); // Beta Demo -- please do NOT redistribute!
-                    //                          DrawEncodedString( "\p\x75\x43\x59\x42\x55\x2C\x25\x5B\x1D\x17\x25\x53\x0B\x63\x5C\x78\x59\x3F\x42\x65\x58\x6D\x36\x5C\x46\x1E\x63\x67\x6B\x7D\x57\x21\x42\x60\x4F\x26\x5A\x3A\x5E\x42\x35"); // Preview Demo - Please Do Not Redistribute
                     MoveTo( 35 + ( WORLD_WIDTH - kSmallScreenWidth) / 2,
                             385 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
                     TextSize( 12);
                     TextFont( 0);
                     TextFace( 0);
-                    //                          DrawEncodedString( "\p\x7B\x36\x66\x3F\x55\x36\x1C\x5B\x0A\x5F\x67\x12\x1B\x77\x6E"); // version 1.0.0A2
-                    //                          DrawEncodedString( "\p\x66\x46\x68\x34\x5B\x39\x17\x36\x3E\x16\x57\x59\x5E\x1C\x2F\x62\x0D"); // authorized user:
-                    //                          prefsData = (Preferences *)*globals()->gPreferencesData;
-                    //                          DrawYeOldeEncodedString( (StringPtr)prefsData->serialNumber.name);
-
-#ifdef kUsePublicCopyProtection
-                    GetIndString( tempString, 700, 3);  // "REGISTERED TO:"
-                    RT_GetLicenseeName( userName);
-                    ConcatenatePString( tempString, userName);
-
-                    ts1 = StringWidth( tempString);
-                    //                              ts1 += StringWidth( userName);
-                    MoveTo( (( WORLD_WIDTH) / 2) - (ts1 / 2),
-                            456 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
-                    DrawOutlinedString( tempString, &initialFadeColor);
-                    //                              DrawString( globals()->gUserName);
-#endif
 
                     if ( globals()->externalFileRefNum >= 0)
                     {
@@ -539,9 +430,6 @@ LMSetMBarHeight( 0);
                     TextFace( bold);
                     MoveTo( 245 + ( WORLD_WIDTH - kSmallScreenWidth) / 2,
                             18 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
-                    //                          DrawCString( __DATE__);
-                    //                          DrawCString(" ");
-                    //                          DrawCString( __TIME__);
                     error = InitDirectText();
                     if ( error == kNoError)
                     {
@@ -599,7 +487,6 @@ LMSetMBarHeight( 0);
                                                                         skipFading);
                                                                 MacShowCursor();    // one for the titlescreen
                                                                 MacShowCursor();    // one for the whole deal
-                                                                //                                                                      ColorTranslatorInit( theClut);
 
                                                                 gLastTick = TickCount();
 
@@ -665,21 +552,9 @@ LMSetMBarHeight( 0);
         WriteDebugLine("\p<GWorld");
     }
     WriteDebugLine("\p<Network");
-    /*          WriteDebugLine("\p<WAITING>");
-                WaitForAnyEvent();
-                */
     CleanUpTheDevice( TRUE);
 
     theClut.reset();
-
-    if ( theDevice == GetMainDevice())
-    {
-        /*              LMSetMBarHeight(oldMBarHeight);
-                        DiffRgn( grayRgn, mBarRgn, grayRgn);
-                        DisposeRgn( mBarRgn);
-                        */
-        SetMBarState( true, theDevice);
-    }
 
     DebugWindowCleanup();
     DisposeWindow ( gTheWindow);
@@ -688,11 +563,6 @@ LMSetMBarHeight( 0);
     DisposeNetworking();
 #endif NETSPROCKET_AVAILABLE
     RT_Close();
-
-    if ( globals()->internetConfigPresent)
-    {
-        //      ICStop( globals()->internetConfig);
-    }
 
     FlushEvents(everyEvent, 0);
     delete globals();
