@@ -66,7 +66,7 @@ void DirectTextCleanup() {
     delete[] gDirectTextData;
 }
 
-void mDirectCharWidth(unsigned char& width, char mchar, unsigned char*& widptr) {
+void mDirectCharWidth(unsigned char& width, unsigned char mchar, unsigned char*& widptr) {
     widptr = gDirectText->charSet.get()
         + gDirectText->height * gDirectText->physicalWidth * mchar + mchar;
     width = *widptr;

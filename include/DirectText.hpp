@@ -63,7 +63,7 @@ struct directTextType {
 int InitDirectText();
 void DirectTextCleanup();
 
-void mDirectCharWidth(unsigned char& mwidth, char mchar, unsigned char*& mwidptr);
+void mDirectCharWidth(unsigned char& mwidth, unsigned char mchar, unsigned char*& mwidptr);
 void mSetDirectFont(long mwhichFont);
 int mDirectFontHeight();
 int mDirectFontAscent();
