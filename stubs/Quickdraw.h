@@ -74,7 +74,6 @@ void MoveTo(int x, int y);
 void GetPen(Point* pen);
 
 STUB0(PenNormal, void());
-STUB1(DrawString, void(const unsigned char* string));
 
 STUB4(HasDepth, bool(GDHandle device, int depth, int, int), true);
 STUB4(SetDepth, void(GDHandle device, int depth, int, int));

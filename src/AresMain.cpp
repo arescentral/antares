@@ -52,7 +52,6 @@
 #include "Error.hpp"
 
 #include "Fakes.hpp"
-#include "Fonts.h"
 
 #include "GDeviceHandling.hpp"
 #include "GXMath.h"
@@ -90,7 +89,6 @@
 #include "ScenarioMaker.hpp"
 #include "ScreenLabel.hpp"
 #include "ScrollStars.hpp"
-#include "SetFontByString.h"
 #include "ShotsBeamsExplosions.hpp"
 #include "SoundFX.hpp"
 #include "SpaceObjectHandling.hpp"
@@ -195,7 +193,6 @@ void FakeInit(int argc, const char** argv);
 int main(int argc, const char** argv);
 void SetWindowColorTable( WindowPtr);
 void Pause( long time);
-void DrawOutlinedString( const unsigned char* string, RGBColor *color);
 
 int main(int argc, const char** argv) {
     Rect                    windowRect, tRect;
@@ -206,7 +203,6 @@ int main(int argc, const char** argv) {
     EventRecord             theEvent;
     scoped_ptr<ColorTable>  theClut;
     Str255                  tempString;
-    short                   ts1;
 
     FakeInit(argc, argv);
 
@@ -381,17 +377,9 @@ int main(int argc, const char** argv) {
 
                     MacSetPort( gTheWindow);
                     GetVersionString( tempString, globals()->gMainResRefNum);
-                    SetFontByString( "\pgeneva");
-                    TextSize( 9);
-                    TextFace( 0);
                     initialFadeColor.red = initialFadeColor.blue = initialFadeColor.green = 30000;
 
                     RGBForeColor( &initialFadeColor);
-
-                    MoveTo( ( WORLD_WIDTH - StringWidth( tempString) - 4),
-                            478 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
-
-                    DrawOutlinedString( tempString, &initialFadeColor);
 
                     initialFadeColor.red = 65535;
                     initialFadeColor.blue = initialFadeColor.green = 0;
@@ -402,32 +390,6 @@ int main(int argc, const char** argv) {
                             50 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
                     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 65535;
 
-                    RGBForeColor( &initialFadeColor);
-                    TextSize( 24);
-                    TextFont( 0);
-                    TextFace( 0);
-                    MoveTo( 35 + ( WORLD_WIDTH - kSmallScreenWidth) / 2,
-                            385 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
-                    TextSize( 12);
-                    TextFont( 0);
-                    TextFace( 0);
-
-                    if ( globals()->externalFileRefNum >= 0)
-                    {
-                        ts1 = StringWidth(
-                                globals()->scenarioFileInfo.titleString);
-
-                        MoveTo( (( WORLD_WIDTH) / 2) - (ts1 / 2),
-                                356 + ( WORLD_HEIGHT - kSmallScreenHeight)
-                                / 2);
-                        DrawOutlinedString(
-                                globals()->scenarioFileInfo.titleString,
-                                &initialFadeColor);
-                    }
-
-                    SetFontByString( "\pgeneva");
-                    TextSize( 10);
-                    TextFace( bold);
                     MoveTo( 245 + ( WORLD_WIDTH - kSmallScreenWidth) / 2,
                             18 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
                     error = InitDirectText();
@@ -573,7 +535,6 @@ void ToolBoxInit( void)
 
 {
     InitGraf(&qd.thePort);
-    InitFonts();
     InitWindows();
     InitMenus();
     TEInit();
@@ -2215,11 +2176,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
             DrawSpriteCursorSprite( &clipRect);
 //          DrawCurrentLongMessage();
 
-            if (( globals()->gOptions & kOptionQDOnly))
-            {
-                RGBColor    hackcolor = { 32765, 32765, 32765};
-
-                DrawOutlinedString( "\pkOptionQDOnly", &hackcolor); //DrawString( tempString);
+            if ((globals()->gOptions & kOptionQDOnly)) {
                 ShowSpriteCursorSprite();
                 DrawAllBeams();
                 DontShowScrollStars();
@@ -2472,34 +2429,3 @@ static pascal Boolean SetColorTableEntry (CTabHandle cth, short value, const RGB
     return false;
 }
 */
-
-void DrawOutlinedString( const unsigned char* string, RGBColor *color)
-{
-    RGBColor    backColor = {0, 0, 0};
-    Point       pen;
-
-    GetPen( &pen);
-
-    RGBForeColor( &backColor);
-    MoveTo( pen.h - 1, pen.v - 1);
-    DrawString( string);
-    MoveTo( pen.h, pen.v - 1);
-    DrawString( string);
-    MoveTo( pen.h + 1, pen.v - 1);
-    DrawString( string);
-    MoveTo( pen.h - 1, pen.v);
-    DrawString( string);
-    MoveTo( pen.h + 1, pen.v);
-    DrawString( string);
-    MoveTo( pen.h - 1, pen.v + 1);
-    DrawString( string);
-    MoveTo( pen.h, pen.v + 1);
-    DrawString( string);
-    MoveTo( pen.h + 1, pen.v + 1);
-    DrawString( string);
-
-    MoveTo( pen.h, pen.v);
-
-    RGBForeColor( color);
-    DrawString( string);
-}

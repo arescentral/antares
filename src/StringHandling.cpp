@@ -163,12 +163,3 @@ void UpperCasePString(unsigned char* s) {
         c++;
     }
 }
-
-
-
-void DrawCString(unsigned char *cString) {
-    Str255  pString;
-
-    PStringFromCString(pString, cString);
-    DrawString(pString);
-}

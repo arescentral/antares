@@ -260,7 +260,6 @@ typedef struct { } Dialog;
 typedef Dialog* DialogPtr;
 
 STUB3(GetNewDialog, Dialog*(int id, void*, Window* window), NULL);
-STUB3(SetDialogFontAndSize, void(Dialog* dialog, int font, int size));
 STUB2(SetDialogDefaultItem, void(Dialog*, int item));
 STUB5(GetDialogItem, void(Dialog*, int item, short* type, Handle* handle, Rect* rect));
 void ModalDialog(void*, short* item);

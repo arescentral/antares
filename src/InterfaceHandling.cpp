@@ -25,7 +25,6 @@
 #include "InterfaceHandling.hpp"
 
 #include <QDOffscreen.h>
-#include <Fonts.h>
 
 #include "AnyChar.hpp"
 #include "AresResFile.hpp"
@@ -41,7 +40,6 @@
 #include "PlayerInterfaceDrawing.hpp"
 #include "PlayerInterfaceItems.hpp"
 #include "Resources.h"
-#include "SetFontByString.h"
 #include "SoundFX.hpp"              // for button on/off
 
 #define kMakeInterfaceItem      20
@@ -1212,9 +1210,6 @@ void SetInterfaceTextEditColors( short whichItem)
         GetRGBTranslateColorShade( &color, item->color, MEDIUM);
         HiliteColor( &color);
 
-        SetFontByString( "\pmonaco");
-        TextSize( 9);
-        TextFace(  0);
     } else WriteDebugLong( whichItem);
 }
 

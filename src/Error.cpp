@@ -19,13 +19,10 @@
 
 #include "Error.hpp"
 
-#include <Fonts.h>
 #include <Quickdraw.h>
 
 #include "ConditionalMacros.h"
-#include "DialogFont.h"
 #include "Resources.h"
-#include "SetFontByString.h"
 #include "StringNumerics.hpp"
 
 #define ERROR_STR_ID    800
@@ -201,7 +198,6 @@ void ShowErrorAny(  errorRecoverType recover,
     if ( theDialog == nil) DebugStr("\pNo Error Dialog!");
     SetWRefCon( theDialog, kAnyErrorDialogID);
     MacSetPort(reinterpret_cast<Window*>(theDialog));
-    SetDialogFontAndSize( theDialog, GetFontNumByString("\pgeneva"), 10);
     if (( recover != eContinueErr) && ( recover != eContinueOnlyErr))
     {
         SetDialogDefaultItem( theDialog, kQuitButton);
