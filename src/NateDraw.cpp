@@ -20,6 +20,7 @@
 #include "NateDraw.hpp"
 
 #include <algorithm>
+#include <assert.h>
 
 #include "BinaryStream.hpp"
 #include "ConditionalMacros.h"
