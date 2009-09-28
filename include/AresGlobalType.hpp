@@ -153,15 +153,15 @@ struct aresGlobalType {
     TypedHandle<scenarioConditionType>  gScenarioConditionData; // = nil;
     TypedHandle<briefPointType>     gScenarioBriefData;     // = nil;
     TypedHandle<longPointType>      gRadarBlipData;         // = nil;
-    TypedHandle<long>               gScaleList;             // = nil;
-    TypedHandle<long>               gSectorLineData;        // = nil;
-    long            gRadarCount;            // = 0;
-    long            gRadarSpeed;            // = 30;
-    long            gRadarRange;            // kRadarSize * 50;
-    long            gWhichScaleNum;         // = 0;
-    long            gLastScale;             // = SCALE_SCALE;
-    long            gInstrumentTop;         // = 0;
-    long            gRightPanelLeftEdge;    // = 608
+    TypedHandle<int32_t>            gScaleList;             // = nil;
+    TypedHandle<int32_t>            gSectorLineData;        // = nil;
+    int32_t         gRadarCount;            // = 0;
+    int32_t         gRadarSpeed;            // = 30;
+    int32_t         gRadarRange;            // kRadarSize * 50;
+    int32_t         gWhichScaleNum;         // = 0;
+    int32_t         gLastScale;             // = SCALE_SCALE;
+    int32_t         gInstrumentTop;         // = 0;
+    int32_t         gRightPanelLeftEdge;    // = 608
     barIndicatorType    gBarIndicator[ kBarIndicatorNum];
     short           gMouseActive;           // = kMouseOff;
     scoped_ptr<MessageData>         gMessageData;

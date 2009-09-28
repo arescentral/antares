@@ -131,7 +131,7 @@ extern CWindowPtr       gTheWindow; // hack to copy bar indicators to offworld
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
 extern spaceObjectType  *gScrollStarObject;
 extern PixMapHandle     thePixMapHandle;
-extern long             gNatePortLeft, gNatePortTop, gAbsoluteScale,
+extern int32_t          gNatePortLeft, gNatePortTop, gAbsoluteScale,
                         WORLD_WIDTH, WORLD_HEIGHT, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM;
 extern coordPointType   gGlobalCorner;
 
@@ -151,19 +151,15 @@ int InstrumentInit() {
     return MiniScreenInit();
 }
 
-void InstrumentCleanup( void)
-
-{
+void InstrumentCleanup() {
     if (globals()->gRadarBlipData.get() != nil) {
         globals()->gRadarBlipData.destroy();
     }
     MiniScreenCleanup();
 }
 
-void ResetInstruments( void)
-
-{
-    long            *l, i;
+void ResetInstruments() {
+    int32_t         *l, i;
     longPointType   *lp;
 
     globals()->gRadarCount = 0;
@@ -203,10 +199,8 @@ void ResetInstruments( void)
     ResetSectorLines();
 }
 
-void ResetSectorLines( void)
-
-{
-    long    *l, count;
+void ResetSectorLines() {
+    int32_t *l, count;
 
     l = *globals()->gSectorLineData;
 
@@ -223,17 +217,16 @@ void ResetSectorLines( void)
     }
 }
 
-void UpdateRadar( long unitsDone)
-
-{
+void UpdateRadar(int32_t unitsDone) {
     Rect        lRect;
     spaceObjectType *anObject;
     baseObjectType  *baseObject;
-    long            dx, oCount, rcount, x, y, *scaleval;
-    const long      rrange = globals()->gRadarRange >> 1L;
+    long            oCount;
+    int32_t         dx, rcount, x, y, *scaleval;
+    const int32_t   rrange = globals()->gRadarRange >> 1L;
     longPointType   *lp;
     unsigned char   color, color2, *dByte;
-    unsigned long   bestScale = MIN_SCALE, rootCorrect, distance, difference, dcalc;
+    uint32_t        bestScale = MIN_SCALE, rootCorrect, distance, difference, dcalc;
     transColorType  *transColor;
     PixMapHandle    offPixBase;
     admiralType     *admiral;
@@ -381,9 +374,9 @@ void UpdateRadar( long unitsDone)
                 hugeDistance = anObject->distanceFromPlayer;
                 if (hugeDistance == 0) // if this is true, then we haven't calced its distance
                 {
-                    difference = ABS( implicit_cast<long>(gScrollStarObject->location.h) - implicit_cast<long>(anObject->location.h));
+                    difference = ABS<int32_t>(gScrollStarObject->location.h - anObject->location.h);
                     dcalc = difference;
-                    difference =  ABS( implicit_cast<long>(gScrollStarObject->location.v) - implicit_cast<long>(anObject->location.v));
+                    difference =  ABS<int32_t>(gScrollStarObject->location.v - anObject->location.v);
                     distance = difference;
 
                     if (( dcalc > kMaximumRelevantDistance) ||
@@ -647,9 +640,7 @@ void UpdateRadar( long unitsDone)
     }
 }
 
-void DrawInstrumentPanel( WindowPtr whatPort)
-
-{
+void DrawInstrumentPanel(WindowPtr whatPort) {
     scoped_ptr<Picture> pict;
     Rect            tRect;
 
@@ -706,11 +697,9 @@ void DrawInstrumentPanel( WindowPtr whatPort)
 }
 
 
-void EraseSite( void)
-
-{
-    long            *l, *olp;
-    short           sx, sy, sa, sb, sc, sd;
+void EraseSite() {
+    int32_t         *l, *olp;
+    int16_t         sx, sy, sa, sb, sc, sd;
     PixMapHandle    offPixBase;
     Rect        clipRect;
 
@@ -763,10 +752,8 @@ void EraseSite( void)
     }
 }
 
-void EraseSectorLines( void)
-
-{
-    long            *l, count, ol;
+void EraseSectorLines() {
+    int32_t         *l, count, ol;
     PixMapHandle    offPixBase;
     Rect        clipRect;
 
@@ -805,11 +792,9 @@ void EraseSectorLines( void)
     }
 }
 
-void DrawSite( void)
-
-{
-    long            *l, count;
-    short           sx, sy, sa, sb, sc, sd;
+void DrawSite() {
+    int32_t         *l, count;
+    int16_t         sx, sy, sa, sb, sc, sd;
     smallFixedType  fa, fb, fc;
     transColorType  *transColor;
     unsigned char   color;
@@ -946,11 +931,9 @@ void DrawSite( void)
     }
 }
 
-void DrawSectorLines( void)
-
-{
-    long            *l, dashon, dashoff, dashcount;
-    unsigned long   size, level, x, h, division;
+void DrawSectorLines() {
+    int32_t         *l, dashon, dashoff, dashcount;
+    uint32_t        size, level, x, h, division;
     PixMapHandle    offPixBase;
     Rect        clipRect;
     unsigned char   color;
@@ -1001,8 +984,7 @@ void DrawSectorLines( void)
     l = *globals()->gSectorLineData;
     if ( doDraw)
     {
-        while (( x < static_cast<uint32_t>(CLIP_RIGHT)) && ( h > 0))
-        {
+        while ((x < implicit_cast<uint32_t>(CLIP_RIGHT)) && (h > 0)) {
             if ( !division)
             {
                 mGetTranslateColorShade( GREEN, kSectorLineBrightness, color, transColor);
@@ -1043,8 +1025,7 @@ void DrawSectorLines( void)
         }
     } else
     {
-        while (( x < static_cast<uint32_t>(CLIP_RIGHT)) && ( h > 0))
-        {
+        while ((x < implicit_cast<uint32_t>(CLIP_RIGHT)) && (h > 0)) {
             if ( !division)
             {
                 mGetTranslateColorShade( RED, kSectorLineBrightness, color, transColor);
@@ -1080,8 +1061,7 @@ void DrawSectorLines( void)
 
     if ( doDraw)
     {
-        while (( x < static_cast<uint32_t>(CLIP_BOTTOM)) && ( h > 0))
-        {
+        while ((x < implicit_cast<uint32_t>(CLIP_BOTTOM)) && (h > 0)) {
             if ( !division)
             {
                 mGetTranslateColorShade( GREEN, kSectorLineBrightness, color, transColor);
@@ -1123,8 +1103,7 @@ void DrawSectorLines( void)
         }
     } else
     {
-        while (( x < static_cast<uint32_t>(CLIP_BOTTOM)) && ( h > 0))
-        {
+        while ((x < implicit_cast<uint32_t>(CLIP_BOTTOM)) && (h > 0)) {
             if ( !division)
             {
                 mGetTranslateColorShade( RED, kSectorLineBrightness, color, transColor);
@@ -1155,13 +1134,11 @@ void DrawSectorLines( void)
 }
 
 
-void ShowSite( void)
-
-{
-    short           sx, sy, sa, sb, sc, sd;
+void ShowSite() {
+    int16_t         sx, sy, sa, sb, sc, sd;
     PixMapHandle    offPixBase;
     Rect        clipRect;
-    long            *l;
+    int32_t         *l;
 
     offPixBase = GetGWorldPixMap( gOffWorld);
     clipRect.left = CLIP_LEFT;
@@ -1238,10 +1215,8 @@ void ShowSite( void)
     }
 }
 
-void ShowSectorLines( void)
-
-{
-    long            *l, count;
+void ShowSectorLines() {
+    int32_t         *l, count;
     PixMapHandle    offPixBase;
     Rect        clipRect;
 
@@ -1286,11 +1261,9 @@ void ShowSectorLines( void)
 
 }
 
-void InstrumentsHandleClick( void)
-
-{
+void InstrumentsHandleClick() {
     Point   where;
-    long    *l;
+    int32_t *l;
 
     l = *globals()->gSectorLineData + kCursorCoordOffset;
     where.h = *(l++);
@@ -1301,11 +1274,9 @@ void InstrumentsHandleClick( void)
     if (!SpriteCursorVisible()) globals()->gMouseActive = kMouseActive;
 }
 
-void InstrumentsHandleDoubleClick( void)
-
-{
+void InstrumentsHandleDoubleClick() {
     Point   where;
-    long    *l;
+    int32_t *l;
 
     l = *globals()->gSectorLineData + kCursorCoordOffset;
     where.h = *(l++);
@@ -1316,11 +1287,9 @@ void InstrumentsHandleDoubleClick( void)
     if (!SpriteCursorVisible()) globals()->gMouseActive = kMouseActive;
 }
 
-void InstrumentsHandleMouseUp( void)
-
-{
+void InstrumentsHandleMouseUp() {
     Point   where;
-    long    *l;
+    int32_t *l;
 
     l = *globals()->gSectorLineData + kCursorCoordOffset;
     where.h = *(l++);
@@ -1329,11 +1298,9 @@ void InstrumentsHandleMouseUp( void)
     MiniComputerHandleMouseUp( where);
 }
 
-void InstrumentsHandleMouseStillDown( void)
-
-{
+void InstrumentsHandleMouseStillDown() {
     Point   where;
-    long    *l;
+    int32_t *l;
 
     l = *globals()->gSectorLineData + kCursorCoordOffset;
     where.h = *(l++);
@@ -1342,11 +1309,9 @@ void InstrumentsHandleMouseStillDown( void)
     MiniComputerHandleMouseStillDown( where);
 }
 
-void DrawArbitrarySectorLines( coordPointType *corner, long scale, long minSectorSize, Rect *bounds,
-                                PixMapHandle pixBase, long portLeft, long portTop)
-
-{
-    unsigned long   size, level, x, h, division;
+void DrawArbitrarySectorLines(coordPointType *corner, int32_t scale, int32_t minSectorSize,
+        Rect *bounds, PixMapHandle pixBase, int32_t portLeft, int32_t portTop) {
+    uint32_t        size, level, x, h, division;
     Rect        clipRect;
     unsigned char   color;
     transColorType  *transColor;
@@ -1365,7 +1330,7 @@ void DrawArbitrarySectorLines( coordPointType *corner, long scale, long minSecto
         h = size;
         h *= scale;
         h >>= SHIFT_SCALE;
-    } while ( h < static_cast<uint32_t>(minSectorSize));
+    } while (h < implicit_cast<uint32_t>(minSectorSize));
     level >>= 1L;
     level *= level;
 
@@ -1381,8 +1346,7 @@ void DrawArbitrarySectorLines( coordPointType *corner, long scale, long minSecto
     x >>= SHIFT_SCALE;
     x += bounds->left;
 
-    while (( x < static_cast<uint32_t>(bounds->right)) && ( h > 0))
-    {
+    while ((x < implicit_cast<uint32_t>(bounds->right)) && (h > 0)) {
         if ( !division)
         {
             mGetTranslateColorShade( GREEN, DARKER, color, transColor);
@@ -1413,8 +1377,7 @@ void DrawArbitrarySectorLines( coordPointType *corner, long scale, long minSecto
     x >>= SHIFT_SCALE;
     x += bounds->top;
 
-    while (( x < static_cast<uint32_t>(bounds->bottom)) && ( h > 0))
-    {
+    while ((x < implicit_cast<uint32_t>(bounds->bottom)) && (h > 0)) {
         if ( !division)
         {
             mGetTranslateColorShade( GREEN, DARKER, color, transColor);
@@ -1436,11 +1399,9 @@ void DrawArbitrarySectorLines( coordPointType *corner, long scale, long minSecto
     }
 }
 
-void GetArbitrarySingleSectorBounds( coordPointType *corner, coordPointType *location,
-                                long scale, long minSectorSize, Rect *bounds, Rect *destRect)
-
-{
-    unsigned long   size, level, x, h, division, scaledLoc;
+void GetArbitrarySingleSectorBounds(coordPointType *corner, coordPointType *location,
+        int32_t scale, int32_t minSectorSize, Rect *bounds, Rect *destRect) {
+    uint32_t    size, level, x, h, division, scaledLoc;
     Rect        clipRect;
 
     clipRect.left = bounds->left;
@@ -1462,7 +1423,7 @@ void GetArbitrarySingleSectorBounds( coordPointType *corner, coordPointType *loc
         h = size;
         h *= scale;
         h >>= SHIFT_SCALE;
-    } while ( h < static_cast<uint32_t>(minSectorSize));
+    } while (h < implicit_cast<uint32_t>(minSectorSize));
     level >>= 1L;
     level *= level;
 
@@ -1483,13 +1444,16 @@ void GetArbitrarySingleSectorBounds( coordPointType *corner, coordPointType *loc
     scaledLoc >>= SHIFT_SCALE;
     scaledLoc += bounds->left;
 
-    while (( x < static_cast<uint32_t>(bounds->right)) && ( h > 0))
-    {
+    while ((x < implicit_cast<uint32_t>(bounds->right)) && (h > 0)) {
         division += level;
         division &= 0x0000000f;
 
-        if (( x < scaledLoc) && ( x > static_cast<uint32_t>(destRect->left))) destRect->left = x;
-        if (( x > scaledLoc) && ( x < static_cast<uint32_t>(destRect->right))) destRect->right = x;
+        if ((x < scaledLoc) && (x > implicit_cast<uint32_t>(destRect->left))) {
+            destRect->left = x;
+        }
+        if ((x > scaledLoc) && (x < implicit_cast<uint32_t>(destRect->right))) {
+            destRect->right = x;
+        }
 
         x += h;
     }
@@ -1511,23 +1475,23 @@ void GetArbitrarySingleSectorBounds( coordPointType *corner, coordPointType *loc
     scaledLoc >>= SHIFT_SCALE;
     scaledLoc += bounds->top;
 
-    while (( x < static_cast<uint32_t>(bounds->bottom)) && ( h > 0))
-    {
+    while ((x < implicit_cast<uint32_t>(bounds->bottom)) && (h > 0)) {
         division += level;
         division &= 0x0000000f;
 
-        if (( x < scaledLoc) && ( x > static_cast<uint32_t>(destRect->top))) destRect->top = x;
-        if (( x > scaledLoc) && ( x < static_cast<uint32_t>(destRect->bottom))) destRect->bottom = x;
+        if ((x < scaledLoc) && (x > implicit_cast<uint32_t>(destRect->top))) {
+            destRect->top = x;
+        }
+        if ((x > scaledLoc) && (x < implicit_cast<uint32_t>(destRect->bottom))) {
+            destRect->bottom = x;
+        }
 
         x += h;
     }
 }
 
-
-void UpdateBarIndicator( short which, long value, long max, PixMapHandle pixMap)
-
-{
-    long            graphicValue;
+void UpdateBarIndicator(int16_t which, int32_t value, int32_t max, PixMapHandle pixMap) {
+    int32_t         graphicValue;
     Rect        tRect, clipRect;
     transColorType  *transColor;
     unsigned char   color, lightColor, darkColor;
@@ -1580,9 +1544,7 @@ void UpdateBarIndicator( short which, long value, long max, PixMapHandle pixMap)
     }
 }
 
-void DrawBuildTimeBar( long value)
-
-{
+void DrawBuildTimeBar(int32_t value) {
     Rect        tRect, clipRect;
     transColorType  *transColor;
     unsigned char   color;

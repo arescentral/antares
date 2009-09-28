@@ -26,28 +26,29 @@
 
 #define kMiniBuildTimeHeight    ( 25)
 
-int InstrumentInit( void);
-void UpdateRadar( long);
-void InstrumentCleanup( void);
-void ResetInstruments( void);
-void ResetSectorLines( void);
+int InstrumentInit();
+void UpdateRadar(int32_t);
+void InstrumentCleanup();
+void ResetInstruments();
+void ResetSectorLines();
 void DrawInstrumentPanel( WindowPtr);
-//void EraseDrawMainSectorLines( void);
-//void ShowMainSectorLines( void);
-void EraseSite( void);
-void EraseSectorLines( void);
-void DrawSite( void);
-void DrawSectorLines( void);
-void ShowSite( void);
-void ShowSectorLines( void);
-void InstrumentsHandleClick( void);
-void InstrumentsHandleDoubleClick( void);
-void InstrumentsHandleMouseUp( void);
-void InstrumentsHandleMouseStillDown( void);
-void DrawArbitrarySectorLines( coordPointType *, long, long, Rect *, PixMapHandle, long, long);
-void GetArbitrarySingleSectorBounds( coordPointType *, coordPointType *, long, long, Rect *,
-                                Rect *);
-void UpdateBarIndicator( short, long, long, PixMapHandle);
-void DrawBuildTimeBar( long);
+//void EraseDrawMainSectorLines();
+//void ShowMainSectorLines();
+void EraseSite();
+void EraseSectorLines();
+void DrawSite();
+void DrawSectorLines();
+void ShowSite();
+void ShowSectorLines();
+void InstrumentsHandleClick();
+void InstrumentsHandleDoubleClick();
+void InstrumentsHandleMouseUp();
+void InstrumentsHandleMouseStillDown();
+void DrawArbitrarySectorLines(coordPointType *, int32_t, int32_t, Rect *, PixMapHandle, int32_t,
+        int32_t);
+void GetArbitrarySingleSectorBounds(coordPointType*, coordPointType*, int32_t, int32_t, Rect*,
+        Rect*);
+void UpdateBarIndicator(int16_t, int32_t, int32_t, PixMapHandle);
+void DrawBuildTimeBar(int32_t);
 
 #endif // ANTARES_RADAR_HPP_
