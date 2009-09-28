@@ -89,7 +89,7 @@ struct beamType;
 struct briefPointType;
 struct destBalanceType;
 struct longMessageType;
-struct preferencesDataType;
+struct Preferences;
 struct proximityUnitType;
 struct raceType;
 struct scenarioType;
@@ -112,7 +112,7 @@ struct aresGlobalType {
     scoped_ptr<InputSource> gInputSource;
     short           gMainResRefNum;
     unsigned long   gFrameCount;
-    TypedHandle<preferencesDataType>    gPreferencesData;
+    scoped_ptr<Preferences> gPreferencesData;
     long            gGameOver;
     TypedHandle<admiralType>        gAdmiralData;
     TypedHandle<destBalanceType>    gDestBalanceData;

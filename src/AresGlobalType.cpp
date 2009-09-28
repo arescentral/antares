@@ -17,6 +17,7 @@
 
 #include "AresGlobalType.hpp"
 
+#include "AresPreferences.hpp"
 #include "ColorTable.hpp"
 #include "InputSource.hpp"
 #include "MessageScreen.hpp"

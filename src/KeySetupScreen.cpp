@@ -200,7 +200,7 @@ Boolean Key_Setup_Screen_Do( void)
                             flashOn = false;
     EventRecord             theEvent;
     KeyMap                  keyMap;
-    preferencesDataType     *prefsData = nil;
+    Preferences     *prefsData = nil;
     unsigned long           options = globals()->gOptions;
     tempKeyControlType      *tempKeyControls;
     long                    lastFlashTime = 0;
@@ -225,7 +225,7 @@ Boolean Key_Setup_Screen_Do( void)
     error = OpenInterface( kKeyScreenID);
     if ( error == kNoError)
     {
-        prefsData = *globals()->gPreferencesData;
+        prefsData = globals()->gPreferencesData.get();
 
 //      SwitchAnyRadioOrCheckbox( kKeySubstituteCheckbox,
 //          ((options & kOptionSubstituteFKeys) ? (true):(false)));

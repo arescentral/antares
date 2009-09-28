@@ -214,8 +214,8 @@ int main(int argc, const char** argv) {
 
     init_globals();
 
-    error = InitPreferences();
-    if (error == kNoError) {
+    globals()->gPreferencesData.reset(new Preferences);
+    {
 
 #if NETSPROCKET_AVAILABLE
         if ( InitNetworking() == kNoError)
@@ -639,7 +639,7 @@ int main(int argc, const char** argv) {
                             TextFace( 0);
 //                          DrawEncodedString( "\p\x7B\x36\x66\x3F\x55\x36\x1C\x5B\x0A\x5F\x67\x12\x1B\x77\x6E"); // version 1.0.0A2
 //                          DrawEncodedString( "\p\x66\x46\x68\x34\x5B\x39\x17\x36\x3E\x16\x57\x59\x5E\x1C\x2F\x62\x0D"); // authorized user:
-//                          prefsData = (preferencesDataType *)*globals()->gPreferencesData;
+//                          prefsData = (Preferences *)*globals()->gPreferencesData;
 //                          DrawYeOldeEncodedString( (StringPtr)prefsData->serialNumber.name);
 
                             #ifdef kUsePublicCopyProtection
@@ -826,7 +826,6 @@ int main(int argc, const char** argv) {
         DisposeNetworking();
 #endif NETSPROCKET_AVAILABLE
         RT_Close();
-        PreferencesCleanup();
     }
 
     if ( globals()->internetConfigPresent)

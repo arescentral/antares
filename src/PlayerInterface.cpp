@@ -1419,19 +1419,13 @@ void DoOptionsInterface( void)
     Boolean                 done = FALSE, cancel = FALSE;
     EventRecord             theEvent;
     char                    whichChar;
-    TypedHandle<preferencesDataType> tempPrefs = globals()->gPreferencesData;
-    preferencesDataType*    prefsData = nil;
+    scoped_ptr<Preferences> tempPrefs(new Preferences(*globals()->gPreferencesData));
+    Preferences*    prefsData = globals()->gPreferencesData.get();
     Rect                    volumeRect;
 
     BlackenWindow();
 
     FlushEvents(everyEvent, 0);
-    tempPrefs = tempPrefs.clone();
-    if (tempPrefs.get() == nil) {
-        return;
-    }
-
-    prefsData = *globals()->gPreferencesData;
 
     error = OpenInterface( kOptionsScreenID);
     SetOptionCheckboxes( prefsData->options);
@@ -1614,7 +1608,7 @@ void DoOptionsInterface( void)
             SaveAllPreferences(); // sets globals()->gOptions
         } else
         {
-            **globals()->gPreferencesData = **tempPrefs;
+            *globals()->gPreferencesData = *tempPrefs;
             if ( globals()->gSoundVolume != prefsData->volume)
             {
                 globals()->gSoundVolume = prefsData->volume;
@@ -1639,7 +1633,6 @@ void DoOptionsInterface( void)
         }
         CloseInterface();
     }
-    tempPrefs.destroy();
 }
 
 void SetOptionCheckboxes( unsigned long options)
@@ -1714,7 +1707,7 @@ Boolean DoKeyInterface( void)
     Boolean                 done = FALSE, result = TRUE, cancel = FALSE;
     EventRecord             theEvent;
     KeyMap                  keyMap;
-    preferencesDataType     *prefsData = nil;
+    Preferences     *prefsData = nil;
     unsigned long           options = globals()->gOptions;
 
     BlackenOffscreen();
@@ -1729,7 +1722,7 @@ Boolean DoKeyInterface( void)
                 GetKeyNumFromKeyMap( globals()->gKeyControl[i]));
         }
 
-        prefsData = *globals()->gPreferencesData;
+        prefsData = globals()->gPreferencesData.get();
 
         SwitchAnyRadioOrCheckbox( kKeySubstituteCheckbox,
             ((options & kOptionSubstituteFKeys) ? (true):(false)));

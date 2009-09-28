@@ -70,7 +70,7 @@ bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouse
             if (mission_briefing_test) {
                 evt->what = autoKey;
                 evt->message = 0x0100;  // S
-                (*globals()->gPreferencesData)->startingLevel = 22;
+                globals()->gPreferencesData->startingLevel = 22;
             } else if (main_screen_test) {
                 DumpTo(GetOutputDir() + "/main-screen.bin");
                 exit(0);

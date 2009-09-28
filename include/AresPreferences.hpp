@@ -20,70 +20,9 @@
 
 #include <Base.h>
 
-//#define   kUseAlphaCopyProtection
 #define kUsePublicCopyProtection
 
-// Ares Preferences.h
-
-#define kKeyControlDataNum  80//40
-
-/*
-#define kMusicDuringGame            0x00000001
-#define kMusicDuringIdle            0x00000002
-#define kQuickDrawOnly              0x00000004
-#define kRowSkip                    0x00000008
-#define kBlackground                0x00000010
-#define kNoScaleUp                  0x00000020
-#define kPBit7                      0x00000040
-#define kPBit8                      0x00000080
-#define kPBit9                      0x00000100
-#define kPBit10                     0x00000200
-#define kPBit11                     0x00000400
-#define kPBit12                     0x00000800
-#define kPBit13                     0x00001000
-#define kPBit14                     0x00002000
-#define kPBit15                     0x00004000
-#define kPBit16                     0x00008000
-#define kPBit17                     0x00010000
-#define kPBit18                     0x00020000
-#define kPBit19                     0x00040000
-#define kPBit20                     0x00080000
-#define kPBit21                     0x00100000
-#define kPBit22                     0x00200000
-#define kPBit23                     0x00400000
-#define kPBit24                     0x00800000
-#define kPBit25                     0x01000000
-#define kPBit26                     0x02000000
-#define kPBit27                     0x04000000
-#define kPBit28                     0x08000000
-#define kPBit29                     0x10000000
-#define kPBit30                     0x20000000
-#define kPBit31                     0x40000000
-#define kPBit32                     0x80000000
-*/
-
-/*
-typedef struct
-{
-    long                version;
-    short               keyMap[kKeyControlDataNum];
-    serialNumberType    serialNumber;
-    unsigned long       options;
-    long                startingLevel;
-    short               volume;
-    short               reservedShort1;
-    long                reserved2;
-    long                reserved3;
-    long                reserved4;
-    Str31               playerName;
-    Str31               gameName;
-    long                resendDelay;
-    long                registeredSetting;
-    unsigned long       registeredFlags;
-    unsigned long       protocolFlags;
-    long                netLatency;
-} preferencesDataType;
-*/
+#define kKeyControlDataNum  80
 
 class BinaryReader;
 
@@ -95,7 +34,10 @@ struct serialNumberType {
     void read(BinaryReader* bin);
 };
 
-struct preferencesDataType {
+struct Preferences {
+    Preferences();
+    ~Preferences();
+
     int32_t             version;
     int16_t             keyMap[kKeyControlDataNum];
     serialNumberType    serialNumber;
@@ -116,7 +58,6 @@ struct preferencesDataType {
     uint32_t            protocolFlags;
     int16_t             netLevel;
     int16_t             netLatency;
-//  long                netLatency;
 
     size_t load_data(const char* data, size_t len);
 };
@@ -137,8 +78,6 @@ struct startingLevelPreferenceType {
     unsigned long       unused_8;
 };
 
-int InitPreferences( void);
-void PreferencesCleanup( void);
 int SaveKeyControlPreferences( void);
 short SaveOptionsPreferences( void);
 short SaveStartingLevelPreferences( short);
