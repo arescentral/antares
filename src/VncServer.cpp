@@ -17,6 +17,7 @@
 
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <signal.h>
 #include <sys/socket.h>
 #include <exception>
 
@@ -25,6 +26,7 @@
 #include "ColorTable.hpp"
 #include "FakeDrawing.hpp"
 #include "MappedFile.hpp"
+#include "PosixException.hpp"
 
 extern scoped_ptr<ColorTable> fake_colors;
 extern FakeWindow fakeWindow;
@@ -44,7 +46,7 @@ class SocketBinaryReader : public BinaryReader {
             char more[1024];
             ssize_t recd = recv(_fd, more, 1024, 0);
             if (recd <= 0) {
-                throw VncServerException();
+                throw PosixException();
             }
             _buffer.append(more, recd);
         }
@@ -66,7 +68,7 @@ class SocketBinaryWriter : public BinaryWriter {
         if (!_buffer.empty()) {
             size_t sent = send(_fd, _buffer.c_str(), _buffer.size(), 0);
             if (sent != _buffer.size()) {
-                throw VncServerException();
+                throw PosixException();
             }
             _buffer.clear();
         }
@@ -95,15 +97,15 @@ int listen_on(int port) {
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) {
-        throw VncServerException();
+        throw PosixException();
     }
     setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
 
     if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-        throw VncServerException();
+        throw PosixException();
     }
     if (listen(sock, 5) < 0) {
-        throw VncServerException();
+        throw PosixException();
     }
 
     return sock;
@@ -115,7 +117,7 @@ int accept_on(int sock) {
     socklen_t addrlen;
     int fd = accept(sock, &addr, &addrlen);
     if (fd < 0) {
-        throw VncServerException();
+        throw PosixException();
     }
 
     setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
@@ -510,158 +512,180 @@ struct FramebufferPixel {
 
 FramebufferPixel results[640 * 480];
 
-void* vnc_server(void*) {
-    AutoClosedFd sock(listen_on(5901));
-    AutoClosedFd stream(accept_on(sock.fd()));
+void* vnc_serve(void* arg) {
+    try {
+        AutoClosedFd stream(*reinterpret_cast<int*>(arg));
+        delete reinterpret_cast<int*>(arg);
 
-    SocketBinaryReader in(stream.fd());
-    SocketBinaryWriter out(stream.fd());
+        SocketBinaryReader in(stream.fd());
+        SocketBinaryWriter out(stream.fd());
 
-    {
-        // Negotiate version of RFB protocol.  Only 3.8 is offered or accepted.
-        ProtocolVersion version;
-        strncpy(version.version, "RFB 003.008\n", sizeof(ProtocolVersion));
-        out.write(version);
-        out.flush();
-        in.read(&version);
-        if (strncmp(version.version, "RFB 003.008\n", sizeof(ProtocolVersion)) != 0) {
-            throw VncServerException();
-        }
-    }
-
-    {
-        // Negotiate security.  No security is provided.
-        SecurityMessage security;
-        security.number_of_security_types = 1;
-        uint8_t security_types[1] = { '\1' };  // None.
-        out.write(security);
-        out.write(security_types, security.number_of_security_types);
-        out.flush();
-
-        uint8_t selected_security;
-        in.read(&selected_security);
-        if (selected_security != '\1') {
-            throw VncServerException();
-        }
-
-        SecurityResultMessage result;
-        result.status = 0;  // OK.
-        out.write(result);
-        out.flush();
-    }
-
-    {
-        // Initialize connection.
-        ClientInitMessage client_init;
-        in.read(&client_init);
-
-        const char* const name = "Antares";
-
-        ServerInitMessage server_init;
-        server_init.width = 640;
-        server_init.height = 480;
-        server_init.format.bits_per_pixel = 32;
-        server_init.format.depth = 24;
-        server_init.format.big_endian = 1;
-        server_init.format.true_color = 1;
-        server_init.format.red_max = 255;
-        server_init.format.green_max = 255;
-        server_init.format.blue_max = 255;
-        server_init.format.red_shift = 16;
-        server_init.format.green_shift = 8;
-        server_init.format.blue_shift = 0;
-        server_init.name_length = strlen(name);
-
-        out.write(server_init);
-        out.write(name, strlen(name));
-        out.flush();
-    }
-
-    while (true) {
-        uint8_t client_message_type;
-        in.read(&client_message_type);
-        switch (client_message_type) {
-        case SET_PIXEL_FORMAT:
-            {
-                SetPixelFormatMessage msg;
-                in.read(&msg);
-            }
-            break;
-        case SET_ENCODINGS:
-            {
-                SetEncodingsMessage msg;
-                in.read(&msg);
-                for (int i = 0; i < msg.number_of_encodings; ++i) {
-                    int32_t encoding_type;
-                    in.read(&encoding_type);
-                }
-            }
-            break;
-        case FRAMEBUFFER_UPDATE_REQUEST:
-            {
-                FramebufferUpdateRequestMessage request;
-                in.read(&request);
-
-                FramebufferUpdateMessage response;
-                uint8_t server_message_type = FRAMEBUFFER_UPDATE;
-                out.write(server_message_type);
-                response.number_of_rectangles = 1;
-
-                FramebufferUpdateRectangle rect;
-                rect.x_position = 0;
-                rect.y_position = 0;
-                rect.width = 640;
-                rect.height = 480;
-                rect.encoding_type = RAW;
-
-                for (int i = 0; i < 640 * 480; ++i) {
-                    uint8_t color = fakeWindow.portBits.baseAddr[i];
-                    results[i].red = fake_colors->color(color).red >> 8;
-                    results[i].green = fake_colors->color(color).green >> 8;
-                    results[i].blue = fake_colors->color(color).blue >> 8;
-                }
-
-                out.write(response);
-                out.write(rect);
-                out.write(results, 640 * 480);
-            }
-            break;
-        case KEY_EVENT:
-            {
-                KeyEventMessage msg;
-                in.read(&msg);
-            }
-            break;
-        case POINTER_EVENT:
-            {
-                PointerEventMessage msg;
-                in.read(&msg);
-            }
-            break;
-        case CLIENT_CUT_TEXT:
-            {
-                ClientCutTextMessage msg;
-                in.read(&msg);
-                for (size_t i = 0; i < msg.length; ++i) {
-                    char c;
-                    in.read(&c, 1);
-                }
-            }
-            break;
-        default:
-            {
-                printf("Received %d\n", implicit_cast<int>(client_message_type));
-                exit(1);
+        {
+            // Negotiate version of RFB protocol.  Only 3.8 is offered or accepted.
+            ProtocolVersion version;
+            strncpy(version.version, "RFB 003.008\n", sizeof(ProtocolVersion));
+            out.write(version);
+            out.flush();
+            in.read(&version);
+            if (strncmp(version.version, "RFB 003.008\n", sizeof(ProtocolVersion)) != 0) {
+                throw VncServerException();
             }
         }
-        out.flush();
+
+        {
+            // Negotiate security.  No security is provided.
+            SecurityMessage security;
+            security.number_of_security_types = 1;
+            uint8_t security_types[1] = { '\1' };  // None.
+            out.write(security);
+            out.write(security_types, security.number_of_security_types);
+            out.flush();
+
+            uint8_t selected_security;
+            in.read(&selected_security);
+            if (selected_security != '\1') {
+                throw VncServerException();
+            }
+
+            SecurityResultMessage result;
+            result.status = 0;  // OK.
+            out.write(result);
+            out.flush();
+        }
+
+        {
+            // Initialize connection.
+            ClientInitMessage client_init;
+            in.read(&client_init);
+
+            const char* const name = "Antares";
+
+            ServerInitMessage server_init;
+            server_init.width = 640;
+            server_init.height = 480;
+            server_init.format.bits_per_pixel = 32;
+            server_init.format.depth = 24;
+            server_init.format.big_endian = 1;
+            server_init.format.true_color = 1;
+            server_init.format.red_max = 255;
+            server_init.format.green_max = 255;
+            server_init.format.blue_max = 255;
+            server_init.format.red_shift = 16;
+            server_init.format.green_shift = 8;
+            server_init.format.blue_shift = 0;
+            server_init.name_length = strlen(name);
+
+            out.write(server_init);
+            out.write(name, strlen(name));
+            out.flush();
+        }
+
+        while (true) {
+            uint8_t client_message_type;
+            in.read(&client_message_type);
+            switch (client_message_type) {
+            case SET_PIXEL_FORMAT:
+                {
+                    SetPixelFormatMessage msg;
+                    in.read(&msg);
+                }
+                break;
+            case SET_ENCODINGS:
+                {
+                    SetEncodingsMessage msg;
+                    in.read(&msg);
+                    for (int i = 0; i < msg.number_of_encodings; ++i) {
+                        int32_t encoding_type;
+                        in.read(&encoding_type);
+                    }
+                }
+                break;
+            case FRAMEBUFFER_UPDATE_REQUEST:
+                {
+                    FramebufferUpdateRequestMessage request;
+                    in.read(&request);
+
+                    FramebufferUpdateMessage response;
+                    uint8_t server_message_type = FRAMEBUFFER_UPDATE;
+                    out.write(server_message_type);
+                    response.number_of_rectangles = 1;
+
+                    FramebufferUpdateRectangle rect;
+                    rect.x_position = 0;
+                    rect.y_position = 0;
+                    rect.width = 640;
+                    rect.height = 480;
+                    rect.encoding_type = RAW;
+
+                    for (int i = 0; i < 640 * 480; ++i) {
+                        uint8_t color = fakeWindow.portBits.baseAddr[i];
+                        results[i].red = fake_colors->color(color).red >> 8;
+                        results[i].green = fake_colors->color(color).green >> 8;
+                        results[i].blue = fake_colors->color(color).blue >> 8;
+                    }
+
+                    out.write(response);
+                    out.write(rect);
+                    out.write(results, 640 * 480);
+                }
+                break;
+            case KEY_EVENT:
+                {
+                    KeyEventMessage msg;
+                    in.read(&msg);
+                }
+                break;
+            case POINTER_EVENT:
+                {
+                    PointerEventMessage msg;
+                    in.read(&msg);
+                }
+                break;
+            case CLIENT_CUT_TEXT:
+                {
+                    ClientCutTextMessage msg;
+                    in.read(&msg);
+                    for (size_t i = 0; i < msg.length; ++i) {
+                        char c;
+                        in.read(&c, 1);
+                    }
+                }
+                break;
+            default:
+                {
+                    printf("Received %d\n", implicit_cast<int>(client_message_type));
+                    exit(1);
+                }
+            }
+            out.flush();
+        }
+    } catch (std::exception& e) {
+        printf("vnc_serve: %s\n", e.what());
+    }
+    return NULL;
+}
+
+void* vnc_listen(void*) {
+    try {
+        signal(SIGPIPE, SIG_IGN);
+        AutoClosedFd sock(listen_on(5901));
+        while (true) {
+            int fd = accept_on(sock.fd());
+            pthread_t thread;
+            if (pthread_create(&thread, NULL, vnc_serve, new int(fd)) != 0) {
+                throw VncServerException();
+            }
+        }
+    } catch (std::exception& e) {
+        printf("vnc_listen: %s\n", e.what());
+        exit(1);
     }
     return NULL;
 }
 
 void VncServerInit() {
     pthread_t thread;
-    if (pthread_create(&thread, NULL, vnc_server, NULL) != 0) {
+    if (pthread_create(&thread, NULL, vnc_listen, NULL) != 0) {
         throw VncServerException();
     }
 }
