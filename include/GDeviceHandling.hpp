@@ -23,8 +23,6 @@
 #include <Base.h>
 #include <Quickdraw.h>
 
-Boolean ChooseTheDevice( int, Boolean);
-Boolean UserChooseTheDevice( int, Boolean, Rect *);
 void CleanUpTheDevice( Boolean);
 void SetTheDevice( GDHandle, int, Boolean);
 void RestoreDeviceColorDepth( void);

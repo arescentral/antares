@@ -175,6 +175,7 @@ extern long gNatePortLeft, gNatePortTop, gNetLatency;
 extern scenarioType *gThisScenario;
 extern short gSpriteFileRefID, gInterfaceFileRefID;
 extern GDHandle theDevice;
+extern PixMap** thePixMapHandle;
 
 CWindowPtr      gTheWindow = nil;//, globals()->gBackWindow = nil;
 MenuHandle      gAppleMenu;
@@ -206,7 +207,6 @@ int main(int argc, const char** argv) {
     Point                   tpoint;
     EventRecord             theEvent;
     scoped_ptr<ColorTable>  theClut;
-    Size                    freeMemory = 0;
     Str255                  tempString, userName;
     short                   ts1;
 
@@ -229,147 +229,14 @@ int main(int argc, const char** argv) {
     GetDateTime( reinterpret_cast<unsigned long *>(&qd.randSeed));
     GetDateTime( reinterpret_cast<unsigned long *>(&gRandomSeed));
 
-    error  = RT_Open( true, VERSION_2_CODES);
-    if ( error != noErr)
-    {
-        ShowErrorOfTypeOccurred( eQuitErr, kErrorStrID, 77, error, __FILE__, 0);
-    }
-
-    if ( OptionKey())
-    {
-        globals()->gOptions &= ~(kOptionScreenMedium | kOptionScreenLarge | kOptionScreenSmall);
-        globals()->gOptions |= kOptionScreenSmall;//kOptionScreenLarge;
-    }
-
-    if ( globals()->gOptions & kOptionScreenMedium)
-    {
-        WORLD_WIDTH = kMediumScreenWidth;
-        WORLD_HEIGHT = kMediumScreenHeight;
-        CLIP_LEFT = kLeftPanelWidth;
-        CLIP_TOP = 0;
-        CLIP_RIGHT = kMediumScreenWidth - kRightPanelWidth;
-        CLIP_BOTTOM = kMediumScreenHeight;
-        gPlayScreenWidth = kMediumScreenWidth - (kLeftPanelWidth + kRightPanelWidth);
-        gPlayScreenHeight = kMediumScreenHeight;
-    } else if ( globals()->gOptions & kOptionScreenLarge)
-    {
-        WORLD_WIDTH = kLargeScreenWidth;
-        WORLD_HEIGHT = kLargeScreenHeight;
-        CLIP_LEFT = kLeftPanelWidth;
-        CLIP_TOP = 0;
-        CLIP_RIGHT = kLargeScreenWidth - kRightPanelWidth;
-        CLIP_BOTTOM = kLargeScreenHeight;
-        gPlayScreenWidth = kLargeScreenWidth - (kLeftPanelWidth + kRightPanelWidth);
-        gPlayScreenHeight = kLargeScreenHeight;
-    } else
-    {
-        WORLD_WIDTH = kSmallScreenWidth;
-        WORLD_HEIGHT = kSmallScreenHeight;
-        CLIP_LEFT = kLeftPanelWidth;
-        CLIP_TOP = 0;
-        CLIP_RIGHT = kSmallScreenWidth - kRightPanelWidth;
-        CLIP_BOTTOM = kSmallScreenHeight;
-        gPlayScreenWidth = kSmallScreenWidth - (kLeftPanelWidth + kRightPanelWidth);
-        gPlayScreenHeight = kSmallScreenHeight;
-    }
-
-    // returns true if device of desired size available
-    //      Debugger();
-    //      error = ChooseTheDevice( 8, TRUE);
-
-    MacSetRect( &tRect, 0, 0, 640, 480);
-    error = UserChooseTheDevice( 8, TRUE, &tRect);
-
-#ifndef kUseSmallPlayWindow
-    WORLD_WIDTH = tRect.right - tRect.left;
-    WORLD_HEIGHT = tRect.bottom - tRect.top;
-#else
-    WORLD_WIDTH = 640;
-    WORLD_HEIGHT = 480;
-#endif
-
-    if (( WORLD_WIDTH > kLargeScreenWidth) || ( WORLD_HEIGHT > kLargeScreenHeight))
-    {
-        MacSetRect( &tRect, 0, 0, kLargeScreenWidth, kLargeScreenHeight);
-        CenterRectInDevice( theDevice, &tRect);
-        WORLD_WIDTH = tRect.right - tRect.left;
-        WORLD_HEIGHT = tRect.bottom - tRect.top;
-    }
-
-
-    freeMemory = CompactMem( maxSize) - kBaseMemorySize;
-    freeMemory /= 3;
-    if ( freeMemory < (WORLD_WIDTH * WORLD_HEIGHT))
-    {
-        WORLD_HEIGHT = 3L * freeMemory;
-        WORLD_HEIGHT /= 4;
-        WORLD_HEIGHT = lsqrt( WORLD_HEIGHT);
-        WORLD_WIDTH = WORLD_HEIGHT * 4;
-        WORLD_WIDTH /= 3;
-        WORLD_WIDTH -= WORLD_WIDTH % 8;
-        if (( WORLD_WIDTH > kLargeScreenWidth) || ( WORLD_HEIGHT > kLargeScreenHeight))
-        {
-            WORLD_WIDTH = kLargeScreenWidth;
-            WORLD_HEIGHT = kLargeScreenHeight;
-        }
-        if (( WORLD_WIDTH < kSmallScreenWidth) || ( WORLD_HEIGHT > kSmallScreenHeight))
-        {
-            // ERROR put in error handing & exit here -- perhaps you can calc it?
-        }
-        MacSetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-        CenterRectInDevice( theDevice, &tRect);
-        WORLD_WIDTH = tRect.right - tRect.left;
-        WORLD_HEIGHT = tRect.bottom - tRect.top;
-        //          NumToString( WORLD_WIDTH, tempString);
-        //          ParamText( tempString, nil, nil, nil);
-        //          Alert( 802, nil);
-    } else // we had enough memory to fill the screen (up to large screen size)
-    {
-        //          NumToString( freeMemory, tempString);
-        //          ParamText( tempString, nil, nil, nil);
-        //          Alert( 802, nil);
-    }
-
-    CLIP_LEFT = kLeftPanelWidth;
-    CLIP_TOP = 0;
-    CLIP_RIGHT = WORLD_WIDTH - kRightPanelWidth;
-    CLIP_BOTTOM = WORLD_HEIGHT;
-    gPlayScreenWidth = WORLD_WIDTH - (kLeftPanelWidth + kRightPanelWidth);
-    gPlayScreenHeight = WORLD_HEIGHT;
-
-    {
-        short   oldResFile = CurResFile();
-
-        UseResFile( globals()->gMainResRefNum);
-
-        theClut.reset(new ColorTable(256));
-
-        UseResFile( oldResFile);
-    }
+    theClut.reset(new ColorTable(256));
 
     if (theClut.get() == nil) {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, RESOURCE_ERROR, -1, -1, -1, __FILE__, 500);
     }
 
-    //      theDevice = GetMainDevice();
-    //      error = true;
-    //      SetColorDepth( theDevice, 8);
-    if ( !error) // really if device was not available
-    {
-        WORLD_WIDTH = kSmallScreenWidth;
-        WORLD_HEIGHT = kSmallScreenHeight;
-        CLIP_LEFT = kLeftPanelWidth;
-        CLIP_TOP = 0;
-        CLIP_RIGHT = kSmallScreenWidth - kRightPanelWidth;
-        CLIP_BOTTOM = kSmallScreenHeight;
-        gPlayScreenWidth = kSmallScreenWidth - (kLeftPanelWidth + kRightPanelWidth);
-        gPlayScreenHeight = kSmallScreenHeight;
-        globals()->gOptions &= ~( kOptionScreenSmall | kOptionScreenMedium |
-                kOptionScreenLarge);
-        globals()->gOptions |= kOptionScreenSmall;
-        error = ChooseTheDevice( 8, TRUE);
-    }
-    if ( error) // really if device was available
+    theDevice = GetMainDevice();
+    thePixMapHandle = (*theDevice)->gdPMap;
     {
         MacSetRect( &windowRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
         GetDeviceRect( theDevice, &tRect);
@@ -816,9 +683,6 @@ LMSetMBarHeight( 0);
 
         DebugWindowCleanup();
         DisposeWindow ( gTheWindow);
-    } else
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, PIX_DEPTH_ERROR, -1, -1, -1, __FILE__, 1);
     }
 
 #if NETSPROCKET_AVAILABLE
