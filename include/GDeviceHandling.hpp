@@ -23,14 +23,6 @@
 #include <Base.h>
 #include <Quickdraw.h>
 
-void CleanUpTheDevice( Boolean);
-void SetTheDevice( GDHandle, int, Boolean);
-void RestoreDeviceColorDepth( void);
-void CenterRectInDevice( GDHandle, Rect *);
-void GetDeviceRect( GDHandle, Rect *);
-void ShieldCursorInDevice( void);
-void SetColorDepth (GDHandle, int);
-int GetDeviceDepth( GDHandle);
-GDHandle GetBestDevice ( int *, int, int);
+void CenterRectInDevice(GDevice** device, Rect* rect);
 
 #endif // ANTARES_GDEVICE_HANDLING_HPP_

@@ -5455,8 +5455,6 @@ void HandleOSEvent( EventRecord *event)
                 {
                     // we don't care about clipboard
                 }
-                if ( GetDeviceDepth( theDevice) != 8)
-                    SetColorDepth( theDevice, 8);
                 SetMBarState( false, theDevice);
                 globals()->gOptions &= ~kOptionInBackground;
                 SelectWindow( gTheWindow);

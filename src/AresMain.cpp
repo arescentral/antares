@@ -233,7 +233,7 @@ int main(int argc, const char** argv) {
     thePixMapHandle = (*theDevice)->gdPMap;
 
     MacSetRect( &windowRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-    GetDeviceRect( theDevice, &tRect);
+    tRect = (*theDevice)->gdRect;
     tpoint.h = tpoint.v = 0;
     ShieldCursor( &tRect, tpoint);
 
@@ -290,8 +290,6 @@ int main(int argc, const char** argv) {
 
     BringDebugToFront();
     skipFading = AutoFadeFrom(1, true);
-
-    ShieldCursorInDevice();
 
     do {
         Ares_WaitNextEvent(everyEvent, &theEvent, 3, nil);
@@ -514,7 +512,6 @@ int main(int argc, const char** argv) {
         WriteDebugLine("\p<GWorld");
     }
     WriteDebugLine("\p<Network");
-    CleanUpTheDevice( TRUE);
 
     theClut.reset();
 
