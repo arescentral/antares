@@ -215,622 +215,620 @@ int main(int argc, const char** argv) {
     init_globals();
 
     globals()->gPreferencesData.reset(new Preferences);
-    {
 
 #if NETSPROCKET_AVAILABLE
-        if ( InitNetworking() == kNoError)
-        {
-            globals()->gOptions |= kOptionNetworkAvailable;
-        } else
+    if ( InitNetworking() == kNoError)
+    {
+        globals()->gOptions |= kOptionNetworkAvailable;
+    } else
 #endif NETSPROCKET_AVAILABLE
-        {
-            globals()->gOptions &= ~kOptionNetworkAvailable;
-        }
+    {
+        globals()->gOptions &= ~kOptionNetworkAvailable;
+    }
 
-        GetDateTime( reinterpret_cast<unsigned long *>(&qd.randSeed));
-        GetDateTime( reinterpret_cast<unsigned long *>(&gRandomSeed));
+    GetDateTime( reinterpret_cast<unsigned long *>(&qd.randSeed));
+    GetDateTime( reinterpret_cast<unsigned long *>(&gRandomSeed));
 
-        error  = RT_Open( true, VERSION_2_CODES);
-        if ( error != noErr)
-        {
-            ShowErrorOfTypeOccurred( eQuitErr, kErrorStrID, 77, error, __FILE__, 0);
-        }
+    error  = RT_Open( true, VERSION_2_CODES);
+    if ( error != noErr)
+    {
+        ShowErrorOfTypeOccurred( eQuitErr, kErrorStrID, 77, error, __FILE__, 0);
+    }
 
-        if ( OptionKey())
-        {
-            globals()->gOptions &= ~(kOptionScreenMedium | kOptionScreenLarge | kOptionScreenSmall);
-            globals()->gOptions |= kOptionScreenSmall;//kOptionScreenLarge;
-        }
+    if ( OptionKey())
+    {
+        globals()->gOptions &= ~(kOptionScreenMedium | kOptionScreenLarge | kOptionScreenSmall);
+        globals()->gOptions |= kOptionScreenSmall;//kOptionScreenLarge;
+    }
 
-        if ( globals()->gOptions & kOptionScreenMedium)
-        {
-            WORLD_WIDTH = kMediumScreenWidth;
-            WORLD_HEIGHT = kMediumScreenHeight;
-            CLIP_LEFT = kLeftPanelWidth;
-            CLIP_TOP = 0;
-            CLIP_RIGHT = kMediumScreenWidth - kRightPanelWidth;
-            CLIP_BOTTOM = kMediumScreenHeight;
-            gPlayScreenWidth = kMediumScreenWidth - (kLeftPanelWidth + kRightPanelWidth);
-            gPlayScreenHeight = kMediumScreenHeight;
-        } else if ( globals()->gOptions & kOptionScreenLarge)
+    if ( globals()->gOptions & kOptionScreenMedium)
+    {
+        WORLD_WIDTH = kMediumScreenWidth;
+        WORLD_HEIGHT = kMediumScreenHeight;
+        CLIP_LEFT = kLeftPanelWidth;
+        CLIP_TOP = 0;
+        CLIP_RIGHT = kMediumScreenWidth - kRightPanelWidth;
+        CLIP_BOTTOM = kMediumScreenHeight;
+        gPlayScreenWidth = kMediumScreenWidth - (kLeftPanelWidth + kRightPanelWidth);
+        gPlayScreenHeight = kMediumScreenHeight;
+    } else if ( globals()->gOptions & kOptionScreenLarge)
+    {
+        WORLD_WIDTH = kLargeScreenWidth;
+        WORLD_HEIGHT = kLargeScreenHeight;
+        CLIP_LEFT = kLeftPanelWidth;
+        CLIP_TOP = 0;
+        CLIP_RIGHT = kLargeScreenWidth - kRightPanelWidth;
+        CLIP_BOTTOM = kLargeScreenHeight;
+        gPlayScreenWidth = kLargeScreenWidth - (kLeftPanelWidth + kRightPanelWidth);
+        gPlayScreenHeight = kLargeScreenHeight;
+    } else
+    {
+        WORLD_WIDTH = kSmallScreenWidth;
+        WORLD_HEIGHT = kSmallScreenHeight;
+        CLIP_LEFT = kLeftPanelWidth;
+        CLIP_TOP = 0;
+        CLIP_RIGHT = kSmallScreenWidth - kRightPanelWidth;
+        CLIP_BOTTOM = kSmallScreenHeight;
+        gPlayScreenWidth = kSmallScreenWidth - (kLeftPanelWidth + kRightPanelWidth);
+        gPlayScreenHeight = kSmallScreenHeight;
+    }
+
+    // returns true if device of desired size available
+    //      Debugger();
+    //      error = ChooseTheDevice( 8, TRUE);
+
+    MacSetRect( &tRect, 0, 0, 640, 480);
+    error = UserChooseTheDevice( 8, TRUE, &tRect);
+
+#ifndef kUseSmallPlayWindow
+    WORLD_WIDTH = tRect.right - tRect.left;
+    WORLD_HEIGHT = tRect.bottom - tRect.top;
+#else
+    WORLD_WIDTH = 640;
+    WORLD_HEIGHT = 480;
+#endif
+
+    if (( WORLD_WIDTH > kLargeScreenWidth) || ( WORLD_HEIGHT > kLargeScreenHeight))
+    {
+        MacSetRect( &tRect, 0, 0, kLargeScreenWidth, kLargeScreenHeight);
+        CenterRectInDevice( theDevice, &tRect);
+        WORLD_WIDTH = tRect.right - tRect.left;
+        WORLD_HEIGHT = tRect.bottom - tRect.top;
+    }
+
+
+    freeMemory = CompactMem( maxSize) - kBaseMemorySize;
+    freeMemory /= 3;
+    if ( freeMemory < (WORLD_WIDTH * WORLD_HEIGHT))
+    {
+        WORLD_HEIGHT = 3L * freeMemory;
+        WORLD_HEIGHT /= 4;
+        WORLD_HEIGHT = lsqrt( WORLD_HEIGHT);
+        WORLD_WIDTH = WORLD_HEIGHT * 4;
+        WORLD_WIDTH /= 3;
+        WORLD_WIDTH -= WORLD_WIDTH % 8;
+        if (( WORLD_WIDTH > kLargeScreenWidth) || ( WORLD_HEIGHT > kLargeScreenHeight))
         {
             WORLD_WIDTH = kLargeScreenWidth;
             WORLD_HEIGHT = kLargeScreenHeight;
-            CLIP_LEFT = kLeftPanelWidth;
-            CLIP_TOP = 0;
-            CLIP_RIGHT = kLargeScreenWidth - kRightPanelWidth;
-            CLIP_BOTTOM = kLargeScreenHeight;
-            gPlayScreenWidth = kLargeScreenWidth - (kLeftPanelWidth + kRightPanelWidth);
-            gPlayScreenHeight = kLargeScreenHeight;
-        } else
-        {
-            WORLD_WIDTH = kSmallScreenWidth;
-            WORLD_HEIGHT = kSmallScreenHeight;
-            CLIP_LEFT = kLeftPanelWidth;
-            CLIP_TOP = 0;
-            CLIP_RIGHT = kSmallScreenWidth - kRightPanelWidth;
-            CLIP_BOTTOM = kSmallScreenHeight;
-            gPlayScreenWidth = kSmallScreenWidth - (kLeftPanelWidth + kRightPanelWidth);
-            gPlayScreenHeight = kSmallScreenHeight;
         }
-
-        // returns true if device of desired size available
-//      Debugger();
-//      error = ChooseTheDevice( 8, TRUE);
-
-        MacSetRect( &tRect, 0, 0, 640, 480);
-        error = UserChooseTheDevice( 8, TRUE, &tRect);
-
-        #ifndef kUseSmallPlayWindow
-            WORLD_WIDTH = tRect.right - tRect.left;
-            WORLD_HEIGHT = tRect.bottom - tRect.top;
-        #else
-            WORLD_WIDTH = 640;
-            WORLD_HEIGHT = 480;
-        #endif
-
-        if (( WORLD_WIDTH > kLargeScreenWidth) || ( WORLD_HEIGHT > kLargeScreenHeight))
+        if (( WORLD_WIDTH < kSmallScreenWidth) || ( WORLD_HEIGHT > kSmallScreenHeight))
         {
-            MacSetRect( &tRect, 0, 0, kLargeScreenWidth, kLargeScreenHeight);
-            CenterRectInDevice( theDevice, &tRect);
-            WORLD_WIDTH = tRect.right - tRect.left;
-            WORLD_HEIGHT = tRect.bottom - tRect.top;
+            // ERROR put in error handing & exit here -- perhaps you can calc it?
         }
+        MacSetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+        CenterRectInDevice( theDevice, &tRect);
+        WORLD_WIDTH = tRect.right - tRect.left;
+        WORLD_HEIGHT = tRect.bottom - tRect.top;
+        //          NumToString( WORLD_WIDTH, tempString);
+        //          ParamText( tempString, nil, nil, nil);
+        //          Alert( 802, nil);
+    } else // we had enough memory to fill the screen (up to large screen size)
+    {
+        //          NumToString( freeMemory, tempString);
+        //          ParamText( tempString, nil, nil, nil);
+        //          Alert( 802, nil);
+    }
 
+    CLIP_LEFT = kLeftPanelWidth;
+    CLIP_TOP = 0;
+    CLIP_RIGHT = WORLD_WIDTH - kRightPanelWidth;
+    CLIP_BOTTOM = WORLD_HEIGHT;
+    gPlayScreenWidth = WORLD_WIDTH - (kLeftPanelWidth + kRightPanelWidth);
+    gPlayScreenHeight = WORLD_HEIGHT;
 
-        freeMemory = CompactMem( maxSize) - kBaseMemorySize;
-        freeMemory /= 3;
-        if ( freeMemory < (WORLD_WIDTH * WORLD_HEIGHT))
+    {
+        short   oldResFile = CurResFile();
+
+        UseResFile( globals()->gMainResRefNum);
+
+        theClut.reset(new ColorTable(256));
+
+        UseResFile( oldResFile);
+    }
+
+    if (theClut.get() == nil) {
+        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, RESOURCE_ERROR, -1, -1, -1, __FILE__, 500);
+    }
+
+    //      theDevice = GetMainDevice();
+    //      error = true;
+    //      SetColorDepth( theDevice, 8);
+    if ( !error) // really if device was not available
+    {
+        WORLD_WIDTH = kSmallScreenWidth;
+        WORLD_HEIGHT = kSmallScreenHeight;
+        CLIP_LEFT = kLeftPanelWidth;
+        CLIP_TOP = 0;
+        CLIP_RIGHT = kSmallScreenWidth - kRightPanelWidth;
+        CLIP_BOTTOM = kSmallScreenHeight;
+        gPlayScreenWidth = kSmallScreenWidth - (kLeftPanelWidth + kRightPanelWidth);
+        gPlayScreenHeight = kSmallScreenHeight;
+        globals()->gOptions &= ~( kOptionScreenSmall | kOptionScreenMedium |
+                kOptionScreenLarge);
+        globals()->gOptions |= kOptionScreenSmall;
+        error = ChooseTheDevice( 8, TRUE);
+    }
+    if ( error) // really if device was available
+    {
+        MacSetRect( &windowRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+        GetDeviceRect( theDevice, &tRect);
+        tpoint.h = tpoint.v = 0;
+        ShieldCursor( &tRect, tpoint);
+
+        if ( theDevice == GetMainDevice())
         {
-            WORLD_HEIGHT = 3L * freeMemory;
-            WORLD_HEIGHT /= 4;
-            WORLD_HEIGHT = lsqrt( WORLD_HEIGHT);
-            WORLD_WIDTH = WORLD_HEIGHT * 4;
-            WORLD_WIDTH /= 3;
-            WORLD_WIDTH -= WORLD_WIDTH % 8;
-            if (( WORLD_WIDTH > kLargeScreenWidth) || ( WORLD_HEIGHT > kLargeScreenHeight))
-            {
-                WORLD_WIDTH = kLargeScreenWidth;
-                WORLD_HEIGHT = kLargeScreenHeight;
-            }
-            if (( WORLD_WIDTH < kSmallScreenWidth) || ( WORLD_HEIGHT > kSmallScreenHeight))
-            {
-                // ERROR put in error handing & exit here -- perhaps you can calc it?
-            }
-            MacSetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-            CenterRectInDevice( theDevice, &tRect);
-            WORLD_WIDTH = tRect.right - tRect.left;
-            WORLD_HEIGHT = tRect.bottom - tRect.top;
-//          NumToString( WORLD_WIDTH, tempString);
-//          ParamText( tempString, nil, nil, nil);
-//          Alert( 802, nil);
-        } else // we had enough memory to fill the screen (up to large screen size)
-        {
-//          NumToString( freeMemory, tempString);
-//          ParamText( tempString, nil, nil, nil);
-//          Alert( 802, nil);
-        }
 
-            CLIP_LEFT = kLeftPanelWidth;
-            CLIP_TOP = 0;
-            CLIP_RIGHT = WORLD_WIDTH - kRightPanelWidth;
-            CLIP_BOTTOM = WORLD_HEIGHT;
-            gPlayScreenWidth = WORLD_WIDTH - (kLeftPanelWidth + kRightPanelWidth);
-            gPlayScreenHeight = WORLD_HEIGHT;
+            // FROM ADG:TOOL CHEST 2/95: HIDEMENUBAR CODE SNIPPET
+            //
+            // Set the global MBarHeight to 0 to prevent any
+            //  other apps from writing to the menu bar.
+            //
 
-        {
-            short   oldResFile = CurResFile();
+            /*              MacSetRect( &mBarRect, tRect.left, tRect.top, tRect.right, tRect.top + oldMBarHeight);
 
-            UseResFile( globals()->gMainResRefNum);
+#ifdef kHideMenuBar
+grayRgn = LMGetGrayRgn();
+LMSetMBarHeight( 0);
 
-            theClut.reset(new ColorTable(256));
+            // from TotMGPG p 127-129
+            //              oldGrayRgn = NewRgn();
+            //              CopyRgn( grayRgn, oldGrayRgn);
 
-            UseResFile( oldResFile);
-        }
-
-        if (theClut.get() == nil) {
-            ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, RESOURCE_ERROR, -1, -1, -1, __FILE__, 500);
-        }
-
-//      theDevice = GetMainDevice();
-//      error = true;
-//      SetColorDepth( theDevice, 8);
-        if ( !error) // really if device was not available
-        {
-            WORLD_WIDTH = kSmallScreenWidth;
-            WORLD_HEIGHT = kSmallScreenHeight;
-            CLIP_LEFT = kLeftPanelWidth;
-            CLIP_TOP = 0;
-            CLIP_RIGHT = kSmallScreenWidth - kRightPanelWidth;
-            CLIP_BOTTOM = kSmallScreenHeight;
-            gPlayScreenWidth = kSmallScreenWidth - (kLeftPanelWidth + kRightPanelWidth);
-            gPlayScreenHeight = kSmallScreenHeight;
-            globals()->gOptions &= ~( kOptionScreenSmall | kOptionScreenMedium |
-                            kOptionScreenLarge);
-            globals()->gOptions |= kOptionScreenSmall;
-            error = ChooseTheDevice( 8, TRUE);
-        }
-        if ( error) // really if device was available
-        {
-            MacSetRect( &windowRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-            GetDeviceRect( theDevice, &tRect);
-            tpoint.h = tpoint.v = 0;
-            ShieldCursor( &tRect, tpoint);
-
-            if ( theDevice == GetMainDevice())
-            {
-
-                // FROM ADG:TOOL CHEST 2/95: HIDEMENUBAR CODE SNIPPET
-                //
-                // Set the global MBarHeight to 0 to prevent any
-                //  other apps from writing to the menu bar.
-                //
-
-/*              MacSetRect( &mBarRect, tRect.left, tRect.top, tRect.right, tRect.top + oldMBarHeight);
-
-                #ifdef kHideMenuBar
-                grayRgn = LMGetGrayRgn();
-                LMSetMBarHeight( 0);
-
-                // from TotMGPG p 127-129
-//              oldGrayRgn = NewRgn();
-//              CopyRgn( grayRgn, oldGrayRgn);
-
-                mBarRgn = NewRgn();
-                if ( mBarRgn == nil)
-                        ShowErrorRecover( OFFSCREEN_GRAPHICS_ERROR, kMainError, 2);
-                RectRgn( mBarRgn, &mBarRect);
-                UnionRgn( grayRgn, mBarRgn, grayRgn);
-                #endif
+            mBarRgn = NewRgn();
+            if ( mBarRgn == nil)
+            ShowErrorRecover( OFFSCREEN_GRAPHICS_ERROR, kMainError, 2);
+            RectRgn( mBarRgn, &mBarRect);
+            UnionRgn( grayRgn, mBarRgn, grayRgn);
+#endif
 */
-//              InitHideMenubar();
-//              SetMBarState( false);
-            }
+            //              InitHideMenubar();
+            //              SetMBarState( false);
+        }
 
-            InitHideMenubar();
-            SetMBarState( false, theDevice);
+        InitHideMenubar();
+        SetMBarState( false, theDevice);
 
-            InitSpriteCursor();
-            CenterRectInDevice( theDevice, &windowRect);
+        InitSpriteCursor();
+        CenterRectInDevice( theDevice, &windowRect);
 
-            globals()->gBackWindow = nil;
-            globals()->gBackWindow = NewCWindow (nil, &tRect, "\p", false, plainDBox,
-                        reinterpret_cast<WindowPtr>(-1), false, 701);
-            SetWindowColorTable( globals()->gBackWindow);
-            InitTransitions();
+        globals()->gBackWindow = nil;
+        globals()->gBackWindow = NewCWindow (nil, &tRect, "\p", false, plainDBox,
+                reinterpret_cast<WindowPtr>(-1), false, 701);
+        SetWindowColorTable( globals()->gBackWindow);
+        InitTransitions();
 
-            initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
-            MacSetPort( globals()->gBackWindow);
-            RGBBackColor( &initialFadeColor);
-            BackPat( &qd.black);
+        initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
+        MacSetPort( globals()->gBackWindow);
+        RGBBackColor( &initialFadeColor);
+        BackPat( &qd.black);
 
-            initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
-//          initialFadeColor.green = 65000;
-            RGBForeColor( &initialFadeColor);
-            skipFading = AutoFadeTo( 30, &initialFadeColor, true);
+        initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
+        //          initialFadeColor.green = 65000;
+        RGBForeColor( &initialFadeColor);
+        skipFading = AutoFadeTo( 30, &initialFadeColor, true);
 
-            MacShowCursor();
+        MacShowCursor();
 
-            do
+        do
+        {
+            Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
+        } while ( theEvent.what != nullEvent);
+
+        //          WaitForAnyEvent();
+
+        HideCursor();
+
+        MacShowWindow( globals()->gBackWindow);
+
+        RGBBackColor( &initialFadeColor);
+        //          BackPat( &qd.black);
+
+        //          WaitForAnyEvent();
+
+        MacSetPort( globals()->gBackWindow);
+
+        PaintRect( &(globals()->gBackWindow->portRect));
+
+        //          WaitForAnyEvent();
+
+        RestoreDeviceClut( theDevice);
+
+        //          WaitForAnyEvent();
+
+        ResetTransitions();
+
+        //          WaitForAnyEvent();
+
+        skipFading = AutoFadeFrom( 1, true);
+
+
+        skipFading = AutoFadeTo( 1, &initialFadeColor, true);
+
+        gTheWindow = NewCWindow (nil, &windowRect, "\p", TRUE, plainDBox, //documentProc,//
+                reinterpret_cast<WindowPtr>(-1), true, 700);
+
+        SetWindowColorTable( gTheWindow);
+        initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
+        MacSetPort( gTheWindow);
+        RGBBackColor( &initialFadeColor);
+        //          BackPat( &qd.black);
+
+        MacShowWindow ( gTheWindow);
+        RGBBackColor( &initialFadeColor);
+        //          BackPat( &qd.black);
+
+        //          WriteDebugLine("\p>Debug Win");
+
+        MacSetPort ( gTheWindow);
+        MacSetRect( &windowRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+        MacFillRect( &tRect, &qd.black);
+
+        BringDebugToFront();
+        skipFading = AutoFadeFrom(1, true);
+
+        ShieldCursorInDevice();
+
+        do
+        {
+            Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
+        } while ( theEvent.what != nullEvent);
+        MacSetPort ( gTheWindow);
+        MacShowCursor();
+
+        error = CreateOffscreenWorld(gTheWindow->portRect, *theClut);
+        if ( error == kNoError)
+        {
+            WriteDebugLine("\p>Offworld");
+            WriteDebugLine("\pGDPMapBounds");
+            WriteDebugLong( (*(*theDevice)->gdPMap)->bounds.left);
+            WriteDebugLine("\pGDRect");
+            WriteDebugLong( (*theDevice)->gdRect.left);
+            WriteDebugLine("\pgNatePortLeft");
+            WriteDebugLong( gNatePortLeft);
+            WriteDebugLine("\pPortRect");
+            WriteDebugLong( gTheWindow->portRect.left);
+
+            error = MusicInit();
+            WriteDebugLine("\p>Music");
+            if ( OpenSoundFile() == kNoError)
             {
-                Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
-            } while ( theEvent.what != nullEvent);
+                mWriteDebugString("\p>Sound File");
+                InitMoviePlayer();
 
-//          WaitForAnyEvent();
-
-            HideCursor();
-
-            MacShowWindow( globals()->gBackWindow);
-
-            RGBBackColor( &initialFadeColor);
-//          BackPat( &qd.black);
-
-//          WaitForAnyEvent();
-
-            MacSetPort( globals()->gBackWindow);
-
-            PaintRect( &(globals()->gBackWindow->portRect));
-
-//          WaitForAnyEvent();
-
-            RestoreDeviceClut( theDevice);
-
-//          WaitForAnyEvent();
-
-            ResetTransitions();
-
-//          WaitForAnyEvent();
-
-            skipFading = AutoFadeFrom( 1, true);
-
-
-            skipFading = AutoFadeTo( 1, &initialFadeColor, true);
-
-            gTheWindow = NewCWindow (nil, &windowRect, "\p", TRUE, plainDBox, //documentProc,//
-                        reinterpret_cast<WindowPtr>(-1), true, 700);
-
-            SetWindowColorTable( gTheWindow);
-            initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
-            MacSetPort( gTheWindow);
-            RGBBackColor( &initialFadeColor);
-//          BackPat( &qd.black);
-
-            MacShowWindow ( gTheWindow);
-            RGBBackColor( &initialFadeColor);
-//          BackPat( &qd.black);
-
-//          WriteDebugLine("\p>Debug Win");
-
-            MacSetPort ( gTheWindow);
-            MacSetRect( &windowRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-            MacFillRect( &tRect, &qd.black);
-
-            BringDebugToFront();
-            skipFading = AutoFadeFrom(1, true);
-
-            ShieldCursorInDevice();
-
-            do
-            {
-                Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
-            } while ( theEvent.what != nullEvent);
-            MacSetPort ( gTheWindow);
-            MacShowCursor();
-
-            error = CreateOffscreenWorld(gTheWindow->portRect, *theClut);
-            if ( error == kNoError)
-            {
-                WriteDebugLine("\p>Offworld");
-                WriteDebugLine("\pGDPMapBounds");
-                WriteDebugLong( (*(*theDevice)->gdPMap)->bounds.left);
-                WriteDebugLine("\pGDRect");
-                WriteDebugLong( (*theDevice)->gdRect.left);
-                WriteDebugLine("\pgNatePortLeft");
-                WriteDebugLong( gNatePortLeft);
-                WriteDebugLine("\pPortRect");
-                WriteDebugLong( gTheWindow->portRect.left);
-
-                error = MusicInit();
-                    WriteDebugLine("\p>Music");
-                if ( OpenSoundFile() == kNoError)
+                WriteDebugLine("\p>Movie");
+                error = RotationInit();
+                if ( error == kNoError)
                 {
-                    mWriteDebugString("\p>Sound File");
-                    InitMoviePlayer();
+                    WriteDebugLine("\p>Rot");
 
-                    WriteDebugLine("\p>Movie");
-                    error = RotationInit();
+                    NormalizeColors();
+                    DrawInRealWorld();
+                    //                      AutoFadeFrom( 30);
+                    ColorTranslatorInit(*theClut);
+                    //                      InitTransitions();
+                    //                      ResetTransitions();
+                    error = InterfaceHandlingInit();
                     if ( error == kNoError)
                     {
-                        WriteDebugLine("\p>Rot");
+                        WriteDebugLine("\p>Interface");
 
-                        NormalizeColors();
-                        DrawInRealWorld();
-//                      AutoFadeFrom( 30);
-                        ColorTranslatorInit(*theClut);
-//                      InitTransitions();
-//                      ResetTransitions();
-                        error = InterfaceHandlingInit();
-                        if ( error == kNoError)
+                        if ( globals()->originalExternalFileSpec.name[0] > 0)
                         {
-                            WriteDebugLine("\p>Interface");
+                            globals()->externalFileSpec =
+                                globals()->originalExternalFileSpec;
 
-                            if ( globals()->originalExternalFileSpec.name[0] > 0)
-                            {
-                                globals()->externalFileSpec =
-                                    globals()->originalExternalFileSpec;
+                            EF_OpenExternalFile();
+                        }
 
-                                EF_OpenExternalFile();
-                            }
-
-                            if ( globals()->gOptions & kOptionMusicIdle)
-                            {
-                                LoadSong( kTitleSongID);
-                                SetSongVolume( kMaxMusicVolume);
-                                PlaySong();
-                            }
-                            MacSetPort( gTheWindow);
+                        if ( globals()->gOptions & kOptionMusicIdle)
+                        {
+                            LoadSong( kTitleSongID);
+                            SetSongVolume( kMaxMusicVolume);
+                            PlaySong();
+                        }
+                        MacSetPort( gTheWindow);
+                        if ( !skipFading)
+                        {
+                            skipFading = CustomPictFade( 20, 20, 2000, 2000, gTheWindow);
                             if ( !skipFading)
                             {
-                                skipFading = CustomPictFade( 20, 20, 2000, 2000, gTheWindow);
-                                if ( !skipFading)
-                                {
-                                    skipFading = CustomPictFade( 20, 20, 2001, 2000, gTheWindow);
-                                }
+                                skipFading = CustomPictFade( 20, 20, 2001, 2000, gTheWindow);
                             }
+                        }
 
-                            BlackTitleScreen();
+                        BlackTitleScreen();
 
-                            if ( !skipFading) PlayMovieByName("\p:Ares Data Folder:Title", gTheWindow,
+                        if ( !skipFading) PlayMovieByName("\p:Ares Data Folder:Title", gTheWindow,
                                 false, theDevice);
 
-//                          AutoFadeTo( 1, &initialFadeColor, FALSE);
-//                          DrawTitleScreen();
-//                          AutoFadeFrom( 90, FALSE);
-                            MacSetPort( gTheWindow);
+                        //                          AutoFadeTo( 1, &initialFadeColor, FALSE);
+                        //                          DrawTitleScreen();
+                        //                          AutoFadeFrom( 90, FALSE);
+                        MacSetPort( gTheWindow);
 
-                            skipFading = StartCustomPictFade( 20, 20, 502, 2001,
+                        skipFading = StartCustomPictFade( 20, 20, 502, 2001,
                                 gTheWindow, skipFading);
 
 
-//                          MacShowCursor();
+                        //                          MacShowCursor();
 
-/*                          ColorTest();
-                            MacSetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-                            CopyOffWorldToRealWorld( (WindowPtr)gTheWindow, &tRect);
+                        /*                          ColorTest();
+                                                    MacSetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+                                                    CopyOffWorldToRealWorld( (WindowPtr)gTheWindow, &tRect);
 
-                            WaitForAnyEvent();
-*/
+                                                    WaitForAnyEvent();
+                                                    */
 
-            do
-            {
-                Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
-            } while ( theEvent.what != nullEvent);
+                        do
+                        {
+                            Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
+                        } while ( theEvent.what != nullEvent);
 
-                            MacSetPort( gTheWindow);
-                            GetVersionString( tempString, globals()->gMainResRefNum);
-                            SetFontByString( "\pgeneva");
-                            TextSize( 9);
-                            TextFace( 0);
-                            initialFadeColor.red = initialFadeColor.blue = initialFadeColor.green = 30000;
+                        MacSetPort( gTheWindow);
+                        GetVersionString( tempString, globals()->gMainResRefNum);
+                        SetFontByString( "\pgeneva");
+                        TextSize( 9);
+                        TextFace( 0);
+                        initialFadeColor.red = initialFadeColor.blue = initialFadeColor.green = 30000;
 
-                            RGBForeColor( &initialFadeColor);
+                        RGBForeColor( &initialFadeColor);
 
-/*                          MoveTo( ((WORLD_WIDTH - kSmallScreenWidth) / 2) +
-                                ( kSmallScreenWidth / 2) - (StringWidth( tempString) / 2),
-                                465 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
-*/
-                            MoveTo( ( WORLD_WIDTH - StringWidth( tempString) - 4),
+                        /*                          MoveTo( ((WORLD_WIDTH - kSmallScreenWidth) / 2) +
+                                                    ( kSmallScreenWidth / 2) - (StringWidth( tempString) / 2),
+                                                    465 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
+                                                    */
+                        MoveTo( ( WORLD_WIDTH - StringWidth( tempString) - 4),
                                 478 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
 
-/*
-                            MoveTo( 370 + ( WORLD_WIDTH - kSmallScreenWidth) / 2,
-                                    450 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
-*/
-                            DrawOutlinedString( tempString, &initialFadeColor); //DrawString( tempString);
+                        /*
+                           MoveTo( 370 + ( WORLD_WIDTH - kSmallScreenWidth) / 2,
+                           450 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
+                           */
+                        DrawOutlinedString( tempString, &initialFadeColor); //DrawString( tempString);
 
-                            initialFadeColor.red = 65535;
-                            initialFadeColor.blue = initialFadeColor.green = 0;
-                            RGBForeColor( &initialFadeColor);
-                            MoveTo( 4, 12 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
-                            #ifdef kUseAlphaCopyProtection
-                                DrawOutlinedString("\pALPHA COPY PROTECTION IS ON. ",
-                                    &initialFadeColor);
-                            #endif
-                            #ifndef kUsePublicCopyProtection
-                                DrawOutlinedString("\pPUBLIC COPY PROTECTION IS OFF. ",
-                                    &initialFadeColor);
-                            #endif
+                        initialFadeColor.red = 65535;
+                        initialFadeColor.blue = initialFadeColor.green = 0;
+                        RGBForeColor( &initialFadeColor);
+                        MoveTo( 4, 12 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
+#ifdef kUseAlphaCopyProtection
+                        DrawOutlinedString("\pALPHA COPY PROTECTION IS ON. ",
+                                &initialFadeColor);
+#endif
+#ifndef kUsePublicCopyProtection
+                        DrawOutlinedString("\pPUBLIC COPY PROTECTION IS OFF. ",
+                                &initialFadeColor);
+#endif
 
-//                          ColorTest();
-                            MoveTo( 35 + ( WORLD_WIDTH - kSmallScreenWidth) / 2,
-                                    50 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
-                            initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 65535;
+                        //                          ColorTest();
+                        MoveTo( 35 + ( WORLD_WIDTH - kSmallScreenWidth) / 2,
+                                50 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
+                        initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 65535;
 
-                            RGBForeColor( &initialFadeColor);
-                            TextSize( 24);
-                            TextFont( 0);
-                            TextFace( 0);
-//                          DrawEncodedString( "\p\x67\x36\x68\x2D\x0C\x0B\x13\x29\x48\x51\x64\x11\x0B\x27\x29\x0E\x4E\x4D\x46\x12\x57\x3D\x12\x3B\x75\x24\x14\x65\x31\x10\x5B\x30\x4D\x5F\x44\x16\x66\x4C\x4E\x6E"); // Beta Demo -- please do NOT redistribute!
-//                          DrawEncodedString( "\p\x75\x43\x59\x42\x55\x2C\x25\x5B\x1D\x17\x25\x53\x0B\x63\x5C\x78\x59\x3F\x42\x65\x58\x6D\x36\x5C\x46\x1E\x63\x67\x6B\x7D\x57\x21\x42\x60\x4F\x26\x5A\x3A\x5E\x42\x35"); // Preview Demo - Please Do Not Redistribute
-                            MoveTo( 35 + ( WORLD_WIDTH - kSmallScreenWidth) / 2,
-                                        385 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
-                            TextSize( 12);
-                            TextFont( 0);
-                            TextFace( 0);
-//                          DrawEncodedString( "\p\x7B\x36\x66\x3F\x55\x36\x1C\x5B\x0A\x5F\x67\x12\x1B\x77\x6E"); // version 1.0.0A2
-//                          DrawEncodedString( "\p\x66\x46\x68\x34\x5B\x39\x17\x36\x3E\x16\x57\x59\x5E\x1C\x2F\x62\x0D"); // authorized user:
-//                          prefsData = (Preferences *)*globals()->gPreferencesData;
-//                          DrawYeOldeEncodedString( (StringPtr)prefsData->serialNumber.name);
+                        RGBForeColor( &initialFadeColor);
+                        TextSize( 24);
+                        TextFont( 0);
+                        TextFace( 0);
+                        //                          DrawEncodedString( "\p\x67\x36\x68\x2D\x0C\x0B\x13\x29\x48\x51\x64\x11\x0B\x27\x29\x0E\x4E\x4D\x46\x12\x57\x3D\x12\x3B\x75\x24\x14\x65\x31\x10\x5B\x30\x4D\x5F\x44\x16\x66\x4C\x4E\x6E"); // Beta Demo -- please do NOT redistribute!
+                        //                          DrawEncodedString( "\p\x75\x43\x59\x42\x55\x2C\x25\x5B\x1D\x17\x25\x53\x0B\x63\x5C\x78\x59\x3F\x42\x65\x58\x6D\x36\x5C\x46\x1E\x63\x67\x6B\x7D\x57\x21\x42\x60\x4F\x26\x5A\x3A\x5E\x42\x35"); // Preview Demo - Please Do Not Redistribute
+                        MoveTo( 35 + ( WORLD_WIDTH - kSmallScreenWidth) / 2,
+                                385 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
+                        TextSize( 12);
+                        TextFont( 0);
+                        TextFace( 0);
+                        //                          DrawEncodedString( "\p\x7B\x36\x66\x3F\x55\x36\x1C\x5B\x0A\x5F\x67\x12\x1B\x77\x6E"); // version 1.0.0A2
+                        //                          DrawEncodedString( "\p\x66\x46\x68\x34\x5B\x39\x17\x36\x3E\x16\x57\x59\x5E\x1C\x2F\x62\x0D"); // authorized user:
+                        //                          prefsData = (Preferences *)*globals()->gPreferencesData;
+                        //                          DrawYeOldeEncodedString( (StringPtr)prefsData->serialNumber.name);
 
-                            #ifdef kUsePublicCopyProtection
-                                GetIndString( tempString, 700, 3);  // "REGISTERED TO:"
-                                RT_GetLicenseeName( userName);
-                                ConcatenatePString( tempString, userName);
+#ifdef kUsePublicCopyProtection
+                        GetIndString( tempString, 700, 3);  // "REGISTERED TO:"
+                        RT_GetLicenseeName( userName);
+                        ConcatenatePString( tempString, userName);
 
-                                ts1 = StringWidth( tempString);
-//                              ts1 += StringWidth( userName);
-                                MoveTo( (( WORLD_WIDTH) / 2) - (ts1 / 2),
-                                            456 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
-                                DrawOutlinedString( tempString, &initialFadeColor);
-//                              DrawString( globals()->gUserName);
-                            #endif
+                        ts1 = StringWidth( tempString);
+                        //                              ts1 += StringWidth( userName);
+                        MoveTo( (( WORLD_WIDTH) / 2) - (ts1 / 2),
+                                456 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
+                        DrawOutlinedString( tempString, &initialFadeColor);
+                        //                              DrawString( globals()->gUserName);
+#endif
 
-                            if ( globals()->externalFileRefNum >= 0)
-                            {
-                                ts1 = StringWidth(
+                        if ( globals()->externalFileRefNum >= 0)
+                        {
+                            ts1 = StringWidth(
                                     globals()->scenarioFileInfo.titleString);
 
-                                MoveTo( (( WORLD_WIDTH) / 2) - (ts1 / 2),
-                                            356 + ( WORLD_HEIGHT - kSmallScreenHeight)
-                                                / 2);
-                                DrawOutlinedString(
-                                        globals()->scenarioFileInfo.titleString,
-                                        &initialFadeColor);
-                            }
+                            MoveTo( (( WORLD_WIDTH) / 2) - (ts1 / 2),
+                                    356 + ( WORLD_HEIGHT - kSmallScreenHeight)
+                                    / 2);
+                            DrawOutlinedString(
+                                    globals()->scenarioFileInfo.titleString,
+                                    &initialFadeColor);
+                        }
 
-                            SetFontByString( "\pgeneva");
-                            TextSize( 10);
-                            TextFace( bold);
-                            MoveTo( 245 + ( WORLD_WIDTH - kSmallScreenWidth) / 2,
-                                    18 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
-//                          DrawCString( __DATE__);
-//                          DrawCString(" ");
-//                          DrawCString( __TIME__);
-                            error = InitDirectText();
+                        SetFontByString( "\pgeneva");
+                        TextSize( 10);
+                        TextFace( bold);
+                        MoveTo( 245 + ( WORLD_WIDTH - kSmallScreenWidth) / 2,
+                                18 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
+                        //                          DrawCString( __DATE__);
+                        //                          DrawCString(" ");
+                        //                          DrawCString( __TIME__);
+                        error = InitDirectText();
+                        if ( error == kNoError)
+                        {
+                            WriteDebugLine("\p>DText");
+
+                            error = ScreenLabelInit();
                             if ( error == kNoError)
                             {
-                                WriteDebugLine("\p>DText");
+                                WriteDebugLine("\p>Label");
 
-                                error = ScreenLabelInit();
+                                error = InitMessageScreen();
                                 if ( error == kNoError)
                                 {
-                                    WriteDebugLine("\p>Label");
+                                    WriteDebugLine("\p>Message");
 
-                                    error = InitMessageScreen();
+                                    error = InitScrollStars();
                                     if ( error == kNoError)
                                     {
-                                        WriteDebugLine("\p>Message");
+                                        WriteDebugLine("\p>ScrollStar");
 
-                                        error = InitScrollStars();
+                                        error = InstrumentInit();
                                         if ( error == kNoError)
                                         {
-                                            WriteDebugLine("\p>ScrollStar");
+                                            WriteDebugLine("\p>Instrument");
 
-                                            error = InstrumentInit();
-                                            if ( error == kNoError)
+
+                                            SpriteHandlingInit();
+                                            AresCheatInit();
+                                            error = ScenarioMakerInit();
                                             {
-                                                WriteDebugLine("\p>Instrument");
-
-
-                                                SpriteHandlingInit();
-                                                AresCheatInit();
-                                                error = ScenarioMakerInit();
+                                                error = SpaceObjectHandlingInit();  // MUST be after ScenarioMakerInit()
+                                                if ( error == kNoError)
                                                 {
-                                                    error = SpaceObjectHandlingInit();  // MUST be after ScenarioMakerInit()
-                                                    if ( error == kNoError)
+                                                    WriteDebugLine("\p>SpaceObj");
+                                                    error = InitSoundFX();
+                                                    //                                                      if ( error == kNoError)
                                                     {
-                                                        WriteDebugLine("\p>SpaceObj");
-                                                        error = InitSoundFX();
-//                                                      if ( error == kNoError)
+                                                        WriteDebugLine("\p>SoundFX");
+                                                        error =InitMotion();
+                                                        if ( error == kNoError)
                                                         {
-                                                            WriteDebugLine("\p>SoundFX");
-                                                            error =InitMotion();
+                                                            WriteDebugLine("\p>Motion");
+
+                                                            error = AdmiralInit();
                                                             if ( error == kNoError)
                                                             {
-                                                                WriteDebugLine("\p>Motion");
-
-                                                                error = AdmiralInit();
+                                                                error = InitBeams();
                                                                 if ( error == kNoError)
                                                                 {
-                                                                    error = InitBeams();
-                                                                    if ( error == kNoError)
-                                                                    {
-//          InitNetworking();
-                                                                        TimedWaitForAnyEvent(
+                                                                    //          InitNetworking();
+                                                                    TimedWaitForAnyEvent(
                                                                             skipFading?1:1400);
-                                                                        EndCustomPictFade(
+                                                                    EndCustomPictFade(
                                                                             gTheWindow,
                                                                             skipFading);
-                                                                        MacShowCursor();    // one for the titlescreen
-                                                                        MacShowCursor();    // one for the whole deal
-//                                                                      ColorTranslatorInit( theClut);
+                                                                    MacShowCursor();    // one for the titlescreen
+                                                                    MacShowCursor();    // one for the whole deal
+                                                                    //                                                                      ColorTranslatorInit( theClut);
 
-                                                                        gLastTick = TickCount();
+                                                                    gLastTick = TickCount();
 
-//          RandomInit();
-                                                                        globals()->okToOpenFile = true;
-                                                                        MainLoop();
-//          RandomCleanup();
-            CleanupMoviePlayer();
-//          DisposeNetworking();
-                                                                        CleanupBeams();
-                                                                        WriteDebugLine("\p<Beams");
-                                                                    }
-                                                                    AdmiralCleanup();
-                                                                    WriteDebugLine("\p<Admiral");
+                                                                    //          RandomInit();
+                                                                    globals()->okToOpenFile = true;
+                                                                    MainLoop();
+                                                                    //          RandomCleanup();
+                                                                    CleanupMoviePlayer();
+                                                                    //          DisposeNetworking();
+                                                                    CleanupBeams();
+                                                                    WriteDebugLine("\p<Beams");
                                                                 }
-
-                                                                MotionCleanup();
-                                                                WriteDebugLine("\p<Motion");
+                                                                AdmiralCleanup();
+                                                                WriteDebugLine("\p<Admiral");
                                                             }
 
-                                                            SoundFXCleanup();
-                                                            WriteDebugLine("\p<Sound");
+                                                            MotionCleanup();
+                                                            WriteDebugLine("\p<Motion");
                                                         }
-                                                        CleanupSpaceObjectHandling();
-                                                        WriteDebugLine("\p<Obj Handle");
-                                                        CleanupSpriteHandling();
-                                                        CleanupAresCheat();
-                                                        WriteDebugLine("\p<Sprite");
+
+                                                        SoundFXCleanup();
+                                                        WriteDebugLine("\p<Sound");
                                                     }
-                                                    ScenarioMakerCleanup();
+                                                    CleanupSpaceObjectHandling();
+                                                    WriteDebugLine("\p<Obj Handle");
+                                                    CleanupSpriteHandling();
+                                                    CleanupAresCheat();
+                                                    WriteDebugLine("\p<Sprite");
                                                 }
-                                                InstrumentCleanup();
-                                                WriteDebugLine("\p<Instrument");
+                                                ScenarioMakerCleanup();
                                             }
-                                            CleanupScrollStars();
-                                            WriteDebugLine("\p<Stars");
+                                            InstrumentCleanup();
+                                            WriteDebugLine("\p<Instrument");
                                         }
-                                        MessageScreenCleanup();
-                                        WriteDebugLine("\p<Message");
+                                        CleanupScrollStars();
+                                        WriteDebugLine("\p<Stars");
                                     }
-                                    ScreenLabelCleanup();
-                                    WriteDebugLine("\p<Label");
+                                    MessageScreenCleanup();
+                                    WriteDebugLine("\p<Message");
                                 }
-                                DirectTextCleanup();
-                                WriteDebugLine("\p<DText");
+                                ScreenLabelCleanup();
+                                WriteDebugLine("\p<Label");
                             }
-                            InterfaceHandlingCleanup();
-                            WriteDebugLine("\p<Interface");
+                            DirectTextCleanup();
+                            WriteDebugLine("\p<DText");
                         }
-                        ColorTranslatorCleanup();
-                        WriteDebugLine("\p<Color");
-                        RotationCleanup();
-                        WriteDebugLine("\p<Rotation");
-                        CleanupTransitions();
-                        CleanupSpriteCursor();
-                        WriteDebugLine("\p<Transition");
-                        CleanupMoviePlayer();
+                        InterfaceHandlingCleanup();
+                        WriteDebugLine("\p<Interface");
                     }
-                    MusicCleanup();
-                    WriteDebugLine("\p<Music");
+                    ColorTranslatorCleanup();
+                    WriteDebugLine("\p<Color");
+                    RotationCleanup();
+                    WriteDebugLine("\p<Rotation");
+                    CleanupTransitions();
+                    CleanupSpriteCursor();
+                    WriteDebugLine("\p<Transition");
+                    CleanupMoviePlayer();
                 }
-                CleanUpOffscreenWorld();
-                WriteDebugLine("\p<GWorld");
+                MusicCleanup();
+                WriteDebugLine("\p<Music");
             }
-            WriteDebugLine("\p<Network");
-/*          WriteDebugLine("\p<WAITING>");
-            WaitForAnyEvent();
-*/
-            CleanUpTheDevice( TRUE);
+            CleanUpOffscreenWorld();
+            WriteDebugLine("\p<GWorld");
+        }
+        WriteDebugLine("\p<Network");
+        /*          WriteDebugLine("\p<WAITING>");
+                    WaitForAnyEvent();
+                    */
+        CleanUpTheDevice( TRUE);
 
-            theClut.reset();
+        theClut.reset();
 
-            if ( theDevice == GetMainDevice())
-            {
-/*              LMSetMBarHeight(oldMBarHeight);
-                DiffRgn( grayRgn, mBarRgn, grayRgn);
-                DisposeRgn( mBarRgn);
-*/
-                SetMBarState( true, theDevice);
-            }
-
-            DebugWindowCleanup();
-            DisposeWindow ( gTheWindow);
-        } else
+        if ( theDevice == GetMainDevice())
         {
-            ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, PIX_DEPTH_ERROR, -1, -1, -1, __FILE__, 1);
+            /*              LMSetMBarHeight(oldMBarHeight);
+                            DiffRgn( grayRgn, mBarRgn, grayRgn);
+                            DisposeRgn( mBarRgn);
+                            */
+            SetMBarState( true, theDevice);
         }
 
-#if NETSPROCKET_AVAILABLE
-        DisposeNetworking();
-#endif NETSPROCKET_AVAILABLE
-        RT_Close();
+        DebugWindowCleanup();
+        DisposeWindow ( gTheWindow);
+    } else
+    {
+        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, PIX_DEPTH_ERROR, -1, -1, -1, __FILE__, 1);
     }
+
+#if NETSPROCKET_AVAILABLE
+    DisposeNetworking();
+#endif NETSPROCKET_AVAILABLE
+    RT_Close();
 
     if ( globals()->internetConfigPresent)
     {
-//      ICStop( globals()->internetConfig);
+        //      ICStop( globals()->internetConfig);
     }
 
     FlushEvents(everyEvent, 0);
