@@ -46,8 +46,8 @@ class BinaryReader {
 
 template <> void BinaryReader::read<bool>(bool* b, size_t count);
 template <> void BinaryReader::read<char>(char* c, size_t count);
-template <> void BinaryReader::read<unsigned char>(unsigned char* uc, size_t count);
 template <> void BinaryReader::read<int8_t>(int8_t* i8, size_t count);
+template <> void BinaryReader::read<uint8_t>(uint8_t* u8, size_t count);
 template <> void BinaryReader::read<int16_t>(int16_t* i16, size_t count);
 template <> void BinaryReader::read<uint16_t>(uint16_t* u16, size_t count);
 template <> void BinaryReader::read<int32_t>(int32_t* i32, size_t count);
@@ -103,8 +103,8 @@ class BinaryWriter {
 
 template <> void BinaryWriter::write<bool>(const bool* b, size_t count);
 template <> void BinaryWriter::write<char>(const char* c, size_t count);
-template <> void BinaryWriter::write<unsigned char>(const unsigned char* uc, size_t count);
 template <> void BinaryWriter::write<int8_t>(const int8_t* i8, size_t count);
+template <> void BinaryWriter::write<uint8_t>(const uint8_t* u8, size_t count);
 template <> void BinaryWriter::write<int16_t>(const int16_t* i16, size_t count);
 template <> void BinaryWriter::write<uint16_t>(const uint16_t* u16, size_t count);
 template <> void BinaryWriter::write<int32_t>(const int32_t* i32, size_t count);

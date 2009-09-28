@@ -82,7 +82,11 @@ void BinaryReader::read_primitive(T* t, size_t count) {
 
 template <>
 void BinaryReader::read<bool>(bool* b, size_t count) {
-    read_primitive(b, count);
+    for (size_t i = 0; i < count; ++i) {
+        char c;
+        read_bytes(&c, 1);
+        b[i] = c;
+    }
 }
 
 template <>
@@ -166,7 +170,10 @@ void BinaryWriter::write_primitive(T* t, size_t count) {
 }
 
 template <> void BinaryWriter::write<bool>(const bool* b, size_t count) {
-    write_primitive(b, count);
+    for (size_t i = 0; i < count; ++i) {
+        char c = b[i];
+        write_bytes(&c, 1);
+    }
 }
 
 template <> void BinaryWriter::write<char>(const char* c, size_t count) {
@@ -174,13 +181,13 @@ template <> void BinaryWriter::write<char>(const char* c, size_t count) {
     _bytes_written += count;
 }
 
-template <> void BinaryWriter::write<unsigned char>(const unsigned char* uc, size_t count) {
-    write_bytes(reinterpret_cast<const char*>(uc), count);
+template <> void BinaryWriter::write<int8_t>(const int8_t* i8, size_t count) {
+    write_bytes(reinterpret_cast<const char*>(i8), count);
     _bytes_written += count;
 }
 
-template <> void BinaryWriter::write<int8_t>(const int8_t* i8, size_t count) {
-    write_bytes(reinterpret_cast<const char*>(i8), count);
+template <> void BinaryWriter::write<uint8_t>(const uint8_t* uc, size_t count) {
+    write_bytes(reinterpret_cast<const char*>(uc), count);
     _bytes_written += count;
 }
 
