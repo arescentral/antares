@@ -104,9 +104,9 @@ void ShowErrorNoRecover ( int, const unsigned char*, int);
 void ShowErrorRecover ( int, const unsigned char*, int);
 void ShowSimpleStringAlert( const unsigned char*, const unsigned char*, const unsigned char*, const unsigned char*);
 void ShowSimpleStrResAlert( short, short, short, short, short);
-void ShowErrorAny( errorRecoverType, short, const unsigned char*, const unsigned char*, const unsigned char*, const unsigned char*, long, long,
-                        long, long, char *, long);
-void ShowErrorOfTypeOccurred( errorRecoverType, short, short, OSErr, char *, long);
+void ShowErrorAny(errorRecoverType, short, const unsigned char*, const unsigned char*, const
+        unsigned char*, const unsigned char*, long, long, long, long, const char*, long);
+void ShowErrorOfTypeOccurred(errorRecoverType, short, short, OSErr, const char*, long);
 void MyDebugString( const unsigned char*);
 
 #endif // ANTARES_ERROR_HPP_

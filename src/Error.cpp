@@ -145,10 +145,8 @@ void ShowErrorAny(  errorRecoverType recover,
                         long num2,
                         long num3,
                         long num4,
-                        char *caller, // pass __FILE__
-                        long callerNum)
-
-{
+                        const char *caller, // pass __FILE__
+                        long callerNum) {
     Str255          s1, s2, s3, s4;
     GrafPtr         oldPort = nil;
     DialogPtr       theDialog = nil;
@@ -257,9 +255,8 @@ void ShowErrorAny(  errorRecoverType recover,
 // ShowErrorOfTypeOccurred( false, kErrorStrID, -1, status, __FILE__, 0);
 //
 
-void ShowErrorOfTypeOccurred( errorRecoverType recover, short resID, short stringNum,
-    OSErr error, char *caller, long callerNum)
-{
+void ShowErrorOfTypeOccurred(errorRecoverType recover, short resID, short stringNum,
+    OSErr error, const char *caller, long callerNum) {
     Str255  occurredString, errorString;
 
     GetIndString( occurredString, kErrorStrID, kOccurredError);
