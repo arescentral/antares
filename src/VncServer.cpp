@@ -28,7 +28,7 @@
 #include "MappedFile.hpp"
 #include "PosixException.hpp"
 
-extern Window fakeWindow;
+extern scoped_ptr<Window> fakeWindow;
 
 class VncServerException : public std::exception { };
 
@@ -509,9 +509,10 @@ struct FramebufferPixel {
     }
 };
 
-FramebufferPixel results[640 * 480];
-
 void* vnc_serve(void* arg) {
+    int width = fakeWindow->portRect.right;
+    int height = fakeWindow->portRect.bottom;
+    scoped_array<FramebufferPixel> pixels(new FramebufferPixel[width * height]);
     try {
         AutoClosedFd stream(*reinterpret_cast<int*>(arg));
         delete reinterpret_cast<int*>(arg);
@@ -560,8 +561,8 @@ void* vnc_serve(void* arg) {
             const char* const name = "Antares";
 
             ServerInitMessage server_init;
-            server_init.width = 640;
-            server_init.height = 480;
+            server_init.width = width;
+            server_init.height = height;
             server_init.format.bits_per_pixel = 32;
             server_init.format.depth = 24;
             server_init.format.big_endian = 1;
@@ -612,20 +613,21 @@ void* vnc_serve(void* arg) {
                     FramebufferUpdateRectangle rect;
                     rect.x_position = 0;
                     rect.y_position = 0;
-                    rect.width = 640;
-                    rect.height = 480;
+                    rect.width = width;
+                    rect.height = height;
                     rect.encoding_type = RAW;
 
-                    for (int i = 0; i < 640 * 480; ++i) {
-                        uint8_t color = fakeWindow.portBits.baseAddr[i];
-                        results[i].red = fakeWindow.portBits.colors->color(color).red >> 8;
-                        results[i].green = fakeWindow.portBits.colors->color(color).green >> 8;
-                        results[i].blue = fakeWindow.portBits.colors->color(color).blue >> 8;
+                    const ColorTable& table = *fakeWindow->portBits.colors;
+                    for (int i = 0; i < width * height; ++i) {
+                        uint8_t color = fakeWindow->portBits.baseAddr[i];
+                        pixels.get()[i].red = table.color(color).red >> 8;
+                        pixels.get()[i].green = table.color(color).green >> 8;
+                        pixels.get()[i].blue = table.color(color).blue >> 8;
                     }
 
                     out.write(response);
                     out.write(rect);
-                    out.write(results, 640 * 480);
+                    out.write(pixels.get(), width * height);
                 }
                 break;
             case KEY_EVENT:

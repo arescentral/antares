@@ -24,6 +24,8 @@
 #include "BinaryStream.hpp"
 #include "FakeDrawing.hpp"
 
+extern PixMap* gActiveWorld;
+
 Picture::Picture(int32_t id) {
     char fileglob[64];
     glob_t g;
@@ -60,8 +62,7 @@ Picture::Picture(int32_t id) {
 
 void Picture::draw(const Rect& dst) {
     ClippedTransfer transfer(_frame, dst);
-    Rect bounds = { 0, 0, 640, 480 };
-    transfer.ClipDestTo(bounds);
+    transfer.ClipDestTo(gActiveWorld->bounds);
 
     for (int i = 0; i < transfer.Height(); ++i) {
         uint8_t* source_bytes =

@@ -163,7 +163,7 @@ void FakeInit(int argc, const char** argv) {
 
     MakeDirs(output_dir, 0755);
 
-    FakeDrawingInit();
+    FakeDrawingInit(640, 480);
     FakeHandlesInit();
     FakeMathInit();
     FakeSoundsInit();

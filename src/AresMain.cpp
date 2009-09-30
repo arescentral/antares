@@ -168,7 +168,7 @@ extern long gNatePortLeft, gNatePortTop, gNetLatency;
 extern scenarioType *gThisScenario;
 extern short gSpriteFileRefID, gInterfaceFileRefID;
 extern PixMap* gActiveWorld;
-extern Window fakeWindow;
+extern scoped_ptr<Window> fakeWindow;
 
 CWindowPtr      gTheWindow = nil;//, globals()->gBackWindow = nil;
 MenuHandle      gAppleMenu;
@@ -203,6 +203,12 @@ int main(int argc, const char** argv) {
     FakeInit(argc, argv);
 
     init_globals();
+    WORLD_WIDTH = fakeWindow->portRect.right;
+    WORLD_HEIGHT = fakeWindow->portRect.bottom;
+    CLIP_RIGHT = WORLD_WIDTH - kRightPanelWidth;
+    CLIP_BOTTOM = WORLD_HEIGHT;
+    gPlayScreenWidth = CLIP_RIGHT - CLIP_LEFT;
+    gPlayScreenHeight = CLIP_BOTTOM - CLIP_TOP;
 
     globals()->gPreferencesData.reset(new Preferences);
 
@@ -224,7 +230,7 @@ int main(int argc, const char** argv) {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, RESOURCE_ERROR, -1, -1, -1, __FILE__, 500);
     }
 
-    gActiveWorld = &fakeWindow.portBits;
+    gActiveWorld = &fakeWindow->portBits;
 
     MacSetRect( &windowRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     tRect = gActiveWorld->bounds;

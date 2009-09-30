@@ -47,7 +47,7 @@
 
 extern long gInterfaceFileRefID;
 extern short gSpriteFileRefID;
-extern Window fakeWindow;
+extern scoped_ptr<Window> fakeWindow;
 
 struct bigReqListRec {
     short   reqLSize;
@@ -55,7 +55,7 @@ struct bigReqListRec {
 };
 
 void InitTransitions() {
-    PixMap* onScreenPixMap = &fakeWindow.portBits;
+    PixMap* onScreenPixMap = &fakeWindow->portBits;
     globals()->gColorAnimationTable.reset(onScreenPixMap->colors->clone());
     globals()->gSaveColorTable.reset(onScreenPixMap->colors->clone());
 }

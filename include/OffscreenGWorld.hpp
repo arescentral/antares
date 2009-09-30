@@ -21,20 +21,6 @@
 #include <Base.h>
 #include <Quickdraw.h>
 
-// #define WORLD_WIDTH     800//640
-// #define WORLD_HEIGHT    600//480
-
-//
-// #define CLIP_LEFT               128
-// #define CLIP_TOP                0
-// #define CLIP_RIGHT              768//608
-// #define CLIP_BOTTOM             WORLD_HEIGHT
-//
-// #define kPlayScreenSize         WORLD_HEIGHT
-// #define kPlayScreenWidth        kPlayScreenSize
-// #define kPlayScreenHeight       kPlayScreenSize
-//
-
 // these defs are here for historic reason:
 #define kLeftPanelWidth         128
 #define kRightPanelWidth        32

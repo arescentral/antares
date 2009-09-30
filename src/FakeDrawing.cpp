@@ -30,8 +30,9 @@
 #include "Fakes.hpp"
 #include "File.hpp"
 
-Window fakeWindow(640, 480);
+scoped_ptr<Window> fakeWindow;
 
+extern PixMap* gRealWorld;
 extern PixMap* gActiveWorld;
 
 namespace {
@@ -75,19 +76,21 @@ void DumpTo(const std::string& path) {
     std::string contents;
     StringBinaryWriter bin(&contents);
 
-    bin.write<uint32_t>(640);
-    bin.write<uint32_t>(480);
+    uint32_t width = gRealWorld->bounds.right;
+    uint32_t height = gRealWorld->bounds.bottom;
+
+    bin.write<uint32_t>(width);
+    bin.write<uint32_t>(height);
 
     for (size_t i = 0; i < 256; ++i) {
-        RGBColor color = fakeWindow.portBits.colors->color(i);
+        RGBColor color = gRealWorld->colors->color(i);
         bin.write<uint32_t>(i);
         bin.write(color.red);
         bin.write(color.green);
         bin.write(color.blue);
     }
 
-    const PixMap* p = &fakeWindow.portBits;
-    bin.write(p->baseAddr, 640 * 480);
+    bin.write(gRealWorld->baseAddr, width * height);
 
     MakeDirs(DirName(path), 0755);
     int fd = open(path.c_str(), O_WRONLY | O_CREAT, 0644);
@@ -135,7 +138,7 @@ Window* NewWindow(
     (void)title;
     (void)behind;
     (void)id;
-    return &fakeWindow;
+    return fakeWindow.get();
 }
 
 CWindow* NewCWindow(
@@ -144,11 +147,11 @@ CWindow* NewCWindow(
     (void)title;
     (void)behind;
     (void)id;
-    return &fakeWindow;
+    return fakeWindow.get();
 }
 
 void GetPort(Window** port) {
-    *port = &fakeWindow;
+    *port = fakeWindow.get();
 }
 
 void MacSetPort(Window* port) {
@@ -159,9 +162,9 @@ uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue) {
     uint8_t best_color = 0;
     int min_distance = std::numeric_limits<int>::max();
     for (int i = 0; i < 256; ++i) {
-        int distance = abs(fakeWindow.portBits.colors->color(i).red - red)
-            + abs(fakeWindow.portBits.colors->color(i).green - green)
-            + abs(fakeWindow.portBits.colors->color(i).blue - blue);
+        int distance = abs(fakeWindow->portBits.colors->color(i).red - red)
+            + abs(fakeWindow->portBits.colors->color(i).green - green)
+            + abs(fakeWindow->portBits.colors->color(i).blue - blue);
         if (distance == 0) {
             return i;
         } else if (distance < min_distance) {
@@ -173,7 +176,7 @@ uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue) {
 }
 
 uint8_t GetPixel(int x, int y) {
-    const PixMap* p = &fakeWindow.portBits;
+    const PixMap* p = &fakeWindow->portBits;
     return p->baseAddr[x + y * (p->rowBytes & 0x7fff)];
 }
 
@@ -188,7 +191,9 @@ void SetPixelRow(int x, int y, uint8_t* c, int count) {
 }
 
 void ClearScreen() {
-    memset(gActiveWorld->baseAddr, 0xFF, 640 * 480);
+    int width = gActiveWorld->bounds.right;
+    int height = gActiveWorld->bounds.bottom;
+    memset(gActiveWorld->baseAddr, 0xFF, width * height);
 }
 
 Point MakePoint(int x, int y) {
@@ -298,9 +303,9 @@ void MacFrameRect(Rect* rect) {
 }
 
 void Index2Color(long index, RGBColor* color) {
-    color->red = fakeWindow.portBits.colors->color(index).red;
-    color->green = fakeWindow.portBits.colors->color(index).green;
-    color->blue = fakeWindow.portBits.colors->color(index).blue;
+    color->red = fakeWindow->portBits.colors->color(index).red;
+    color->green = fakeWindow->portBits.colors->color(index).green;
+    color->blue = fakeWindow->portBits.colors->color(index).blue;
 }
 
 Point currentPen = { 0, 0 };
@@ -311,8 +316,10 @@ void MoveTo(int x, int y) {
 }
 
 bool IsOnScreen(int x, int y) {
-    return 0 <= x && x < 640
-        && 0 <= y && y < 480;
+    int width = gActiveWorld->bounds.right;
+    int height = gActiveWorld->bounds.bottom;
+    return 0 <= x && x < width
+        && 0 <= y && y < height;
 }
 
 void MacLineTo(int h, int v) {
@@ -347,8 +354,8 @@ void GetPen(Point* pen) {
 }
 
 void GetMouse(Point* point) {
-    point->h = 320;
-    point->v = 240;
+    point->h = gActiveWorld->bounds.right / 2;
+    point->v = gActiveWorld->bounds.bottom / 2;
 }
 
 uint16_t DoubleBits(uint8_t in) {
@@ -360,9 +367,10 @@ uint16_t DoubleBits(uint8_t in) {
 
 void RestoreEntries(const ColorTable& table) {
     for (size_t i = 0; i < table.size(); ++i) {
-        fakeWindow.portBits.colors->set_color(i, table.color(i));
+        fakeWindow->portBits.colors->set_color(i, table.color(i));
     }
 }
 
-void FakeDrawingInit() {
+void FakeDrawingInit(int width, int height) {
+    fakeWindow.reset(new Window(width, height));
 }

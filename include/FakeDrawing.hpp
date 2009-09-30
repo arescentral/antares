@@ -95,6 +95,6 @@ extern PixMap* gRealWorld;
 extern PixMap* gSaveWorld;
 
 void DumpTo(const std::string& path);
-void FakeDrawingInit();
+void FakeDrawingInit(int width, int height);
 
 #endif  // ANTARES_FAKE_DRAWING_HPP_
