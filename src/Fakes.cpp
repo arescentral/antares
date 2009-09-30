@@ -29,13 +29,135 @@
 #include "File.hpp"
 #include "VncServer.hpp"
 
-bool mission_briefing_test = false;
-bool main_screen_test = false;
-int briefing_num = 0;
+namespace {
 
-int level = 23;
+class Mode {
+  public:
+    virtual ~Mode() { }
+    virtual bool wait_next_event(EventRecord* evt) = 0;
+    virtual void set_game_state(GameState state) = 0;
+    virtual int get_demo_scenario() = 0;
+    virtual void main_loop_iteration_complete(uint32_t game_time) = 0;
+};
+
+class MainScreenMode : public Mode {
+  public:
+    MainScreenMode()
+            : _ready(false) { }
+
+    virtual bool wait_next_event(EventRecord*) {
+        if (_ready) {
+            DumpTo(GetOutputDir() + "/main-screen.bin");
+            exit(0);
+        }
+        return true;
+    }
+
+    virtual void set_game_state(GameState state) {
+        if (state == MAIN_SCREEN_INTERFACE) {
+            _ready = true;
+        }
+    }
+
+    virtual int get_demo_scenario() { return -1; }
+    virtual void main_loop_iteration_complete(uint32_t) { }
+
+  public:
+    bool _ready;
+};
+
+class MissionBriefingMode : public Mode {
+  public:
+    MissionBriefingMode(int level)
+            : _level(level),
+              _briefing_num(0) { }
+
+    virtual bool wait_next_event(EventRecord* evt) {
+        switch (_state) {
+          case MAIN_SCREEN_INTERFACE:
+            {
+                evt->what = autoKey;
+                evt->message = 0x0100;  // S
+                globals()->gPreferencesData->startingLevel = _level;
+            }
+            break;
+          case SELECT_LEVEL_INTERFACE:
+            {
+                evt->what = autoKey;
+                evt->message = 0x2400;  // RTRN
+                DumpTo(GetOutputDir() + "/select-level.bin");
+            }
+            break;
+          case MISSION_INTERFACE:
+            {
+                char path[64];
+                sprintf(path, "/mission-%u.bin", _briefing_num);
+                DumpTo(GetOutputDir() + path);
+                ++_briefing_num;
+                if (_briefing_num >= 9) {
+                    exit(0);
+                } else {
+                    evt->what = autoKey;
+                    evt->message = 0x7C00;  // RGHT
+                }
+            }
+            break;
+          default:
+            break;
+        };
+        return true;
+    }
+
+    virtual void set_game_state(GameState state) {
+        _state = state;
+    }
+
+    virtual int get_demo_scenario() { return -1; }
+    virtual void main_loop_iteration_complete(uint32_t) { }
+
+  public:
+    const int _level;
+    int _briefing_num;
+    GameState _state;
+};
+
+class DemoMode : public Mode {
+  public:
+    DemoMode(int level)
+            : _level(level) {
+        if (level != 0 && level != 5 && level != 23) {
+            fprintf(stderr, "Only have demos of levels 0, 5, and 23; not %d.\n", level);
+            exit(1);
+        }
+        SetDoSounds(true);
+    }
+
+    virtual bool wait_next_event(EventRecord*) { return true; }
+    virtual void set_game_state(GameState) { }
+
+    virtual int get_demo_scenario() {
+        return _level;
+    }
+
+    virtual void main_loop_iteration_complete(uint32_t game_time) {
+        if (game_time % 60 == 1) {
+            char path[64];
+            uint32_t seconds = game_time / 60;
+            sprintf(path, "/screens/%03um%02u.bin", seconds / 60, seconds % 60);
+            DumpTo(GetOutputDir() + path);
+        }
+    }
+
+  public:
+    int _level;
+};
+
+Mode* mode;
+
+}  // namespace
+
 int GetDemoScenario() {
-    return level;
+    return mode->get_demo_scenario();
 }
 
 std::string output_dir;
@@ -47,67 +169,20 @@ void ModalDialog(void*, short* item) {
     *item = 1;
 }
 
-GameState game_state = UNKNOWN;
 void SetGameState(GameState state) {
-    game_state = state;
+    mode->set_game_state(state);
 }
 
 void MainLoopIterationComplete(uint32_t game_time) {
-    if (game_time % 60 == 1) {
-        char path[64];
-        uint32_t seconds = game_time / 60;
-        sprintf(path, "/screens/%03um%02u.bin", seconds / 60, seconds % 60);
-        DumpTo(GetOutputDir() + path);
-    }
+    mode->main_loop_iteration_complete(game_time);
 }
 
 bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouseRgn) {
     static_cast<void>(mask);
     static_cast<void>(sleep);
     static_cast<void>(mouseRgn);
-    switch (game_state) {
-    case MAIN_SCREEN_INTERFACE:
-        {
-            if (mission_briefing_test) {
-                evt->what = autoKey;
-                evt->message = 0x0100;  // S
-                globals()->gPreferencesData->startingLevel = level;
-            } else if (main_screen_test) {
-                DumpTo(GetOutputDir() + "/main-screen.bin");
-                exit(0);
-            } else {
-                evt->what = 0;
-            }
-        }
-        break;
-    case SELECT_LEVEL_INTERFACE:
-        {
-            evt->what = autoKey;
-            evt->message = 0x2400;  // RTRN
-            DumpTo(GetOutputDir() + "/select-level.bin");
-        }
-        break;
-    case MISSION_INTERFACE:
-        {
-            char path[64];
-            sprintf(path, "/mission-%u.bin", briefing_num);
-            DumpTo(GetOutputDir() + path);
-            ++briefing_num;
-            if (briefing_num >= 9) {
-                exit(0);
-            } else {
-                evt->what = autoKey;
-                evt->message = 0x7C00;  // RGHT
-            }
-        }
-        break;
-    default:
-        {
-            evt->what = 0;
-        }
-        break;
-    }
-    return true;
+    evt->what = 0;
+    return mode->wait_next_event(evt);
 }
 
 bool Button() {
@@ -160,7 +235,8 @@ int string_to_int(const char* string) {
 
 void FakeInit(int argc, char* const* argv) {
     const char* bin = argv[0];
-    int mode = -1;
+    int mode_int = -1;
+    int level = -1;
     int width = 640;
     int height = 480;
     option longopts[] = {
@@ -179,11 +255,11 @@ void FakeInit(int argc, char* const* argv) {
             {
                 std::string arg = optarg;
                 if (arg == "main-screen") {
-                    mode = 0;
+                    mode_int = 0;
                 } else if (arg == "mission-briefing") {
-                    mode = 1;
+                    mode_int = 1;
                 } else if (arg == "demo") {
-                    mode = 2;
+                    mode_int = 2;
                 } else {
                     fprintf(stderr, "%s: unknown mode '%s'\n", bin, optarg);
                     usage(bin);
@@ -216,21 +292,15 @@ void FakeInit(int argc, char* const* argv) {
         usage(bin);
     }
 
-    switch (mode) {
+    switch (mode_int) {
       case 0:
-        main_screen_test = true;
+        mode = new MainScreenMode();
         break;
       case 1:
-        mission_briefing_test = true;
+        mode = new MissionBriefingMode(level);
         break;
       case 2:
-        {
-            if (level != 0 && level != 5 && level != 23) {
-                fprintf(stderr, "Only have demos of levels 0, 5, and 23; not %d.\n", level);
-                exit(1);
-            }
-            SetDoSounds(true);
-        }
+        mode = new DemoMode(level);
         break;
       default:
         fprintf(stderr, "%s: must specify --mode\n", bin);
