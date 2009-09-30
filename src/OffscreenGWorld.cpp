@@ -17,22 +17,20 @@
 
 #include "OffscreenGWorld.hpp"
 
-#include <QDOffscreen.h>
-
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "GDeviceHandling.hpp"
 #include "NateDraw.hpp"
 
 extern GDHandle         theDevice;
-GWorldPtr       gOffWorld, gRealWorld, gSaveWorld;
+PixMap*         gActiveWorld;
+PixMap*         gOffWorld;
+PixMap*         gRealWorld;
+PixMap*         gSaveWorld;
 long            gNatePortLeft, gNatePortTop;
 
-int CreateOffscreenWorld(const Rect& bounds, const ColorTable& theClut) {
-    QDErr           error;
-    PixMapHandle    pixBase;
+int CreateOffscreenWorld(const Rect& bounds, const ColorTable&) {
     Rect            tRect;
-    GDHandle        originalDevice;
 
     //
     //  NewGWorld creates the world.  See p.21-12--13 in IM VI.  Note that
@@ -42,48 +40,16 @@ int CreateOffscreenWorld(const Rect& bounds, const ColorTable& theClut) {
     //  device of choice, but I'm too lazy.
     //
 
-    GetGWorld(&gRealWorld, &originalDevice);
-
-    pixBase = GetGWorldPixMap(gRealWorld);
-    error = NewGWorld(&gOffWorld, 8, bounds, theClut, theDevice, 0);
-    if (error) {
-        ShowErrorAny(eQuitErr, kErrorStrID, nil, nil, nil, nil, OFFSCREEN_GRAPHICS_ERROR, -1, -1, -1, __FILE__, 1);
-        return OFFSCREEN_GRAPHICS_ERROR;
-    }
-
-    error = NewGWorld(&gSaveWorld, 8, bounds, theClut, theDevice, 0);
-    if (error) {
-        ShowErrorAny(eQuitErr, kErrorStrID, nil, nil, nil, nil, OFFSCREEN_GRAPHICS_ERROR, -1, -1, -1, __FILE__, 2);
-
-        DisposeGWorld(gOffWorld);
-        return OFFSCREEN_GRAPHICS_ERROR;
-    }
-
-    pixBase = GetGWorldPixMap(gSaveWorld);
-    error = LockPixels(pixBase);
-    if (!error) {
-        ShowErrorAny(eQuitErr, kErrorStrID, nil, nil, nil, nil, OFFSCREEN_GRAPHICS_ERROR, -1, -1, -1, __FILE__, 3);
-        DisposeGWorld(gOffWorld);
-        DisposeGWorld(gSaveWorld);
-        return OFFSCREEN_GRAPHICS_ERROR;
-    }
-
-    pixBase = GetGWorldPixMap(gOffWorld);
-    error = LockPixels(pixBase);
-    if ( !error) {
-        ShowErrorAny(eQuitErr, kErrorStrID, nil, nil, nil, nil, OFFSCREEN_GRAPHICS_ERROR, -1, -1, -1, __FILE__, 4);
-        DisposeGWorld(gOffWorld);
-        DisposeGWorld(gSaveWorld);
-        return OFFSCREEN_GRAPHICS_ERROR;
-    }
+    theDevice = GetGDevice();
+    gRealWorld = (*theDevice)->gdPMap;
+    gOffWorld = new PixMap(bounds.right, bounds.bottom);
+    gSaveWorld = new PixMap(bounds.right, bounds.bottom);
+    gActiveWorld = gRealWorld;
 
     tRect = bounds;
     CenterRectInDevice(theDevice, &tRect);
     gNatePortLeft = tRect.left - (*theDevice)->gdRect.left;
     gNatePortLeft /= 4;
-
-    mWriteDebugString("\pNatePortLeft:");
-    WriteDebugLong(gNatePortLeft);
 
     gNatePortTop = tRect.top - (*theDevice)->gdRect.top;
 
@@ -96,39 +62,31 @@ int CreateOffscreenWorld(const Rect& bounds, const ColorTable& theClut) {
 void CleanUpOffscreenWorld() {
     DrawInRealWorld();
     if (gOffWorld != nil) {
-        PixMap** pixBase = GetGWorldPixMap(gOffWorld);
-        UnlockPixels(pixBase);
-        DisposeGWorld(gOffWorld);
+        delete gOffWorld;
     }
-    WriteDebugLine("\p<OffWorld");
-
     if (gSaveWorld != nil) {
-        PixMap** pixBase = GetGWorldPixMap(gSaveWorld);
-        UnlockPixels(pixBase);
-        DisposeGWorld(gSaveWorld);
+        delete gSaveWorld;
     }
-    WriteDebugLine("\p<SaveWorld");
 }
 
 void DrawInRealWorld() {
-    SetGWorld(gRealWorld, nil);
+    gActiveWorld = gRealWorld;
 }
 
 void DrawInOffWorld() {
-    SetGWorld(gOffWorld, nil);
+    gActiveWorld = gOffWorld;
 }
 
 void DrawInSaveWorld() {
-    SetGWorld(gSaveWorld, nil);
+    gActiveWorld = gSaveWorld;
 }
 
 void EraseOffWorld() {
     DrawInOffWorld();
-    PixMap** pixBase = GetGWorldPixMap(gOffWorld);
-    EraseRect(&((*pixBase)->bounds));
+    EraseRect(&gOffWorld->bounds);
     RGBColor c = { 0, 0, 0 };
     RGBForeColor(&c);
-    PaintRect(&((*pixBase)->bounds));
+    PaintRect(&gOffWorld->bounds);
     NormalizeColors();
     DrawInRealWorld();
     NormalizeColors();
@@ -136,46 +94,38 @@ void EraseOffWorld() {
 
 void EraseSaveWorld() {
     DrawInSaveWorld();
-    PixMap** pixBase = GetGWorldPixMap(gSaveWorld);
     NormalizeColors();
-    EraseRect(&((*pixBase)->bounds));
+    EraseRect(&gSaveWorld->bounds);
     RGBColor c = { 0, 0, 0 };
     RGBForeColor(&c);
-    PaintRect(&((*pixBase)->bounds));
+    PaintRect(&gSaveWorld->bounds);
     NormalizeColors();
     DrawInRealWorld();
 }
 
-void CopyOffWorldToRealWorld(WindowPtr port, Rect *bounds) {
-    PixMap** pixBase = GetGWorldPixMap(gOffWorld);
+void CopyOffWorldToRealWorld(Rect *bounds) {
     NormalizeColors();
-    CopyBits(*pixBase, &(port->portBits), bounds, bounds, srcCopy, nil);
+    CopyBits(gOffWorld, gRealWorld, bounds, bounds, srcCopy, nil);
 }
 
-void CopyRealWorldToSaveWorld(WindowPtr port, Rect *bounds) {
-    PixMap** pixBase = GetGWorldPixMap(gSaveWorld);
+void CopyRealWorldToSaveWorld(Rect *bounds) {
     NormalizeColors();
-    CopyBits(&(port->portBits), *pixBase, bounds, bounds, srcCopy, nil);
+    CopyBits(gRealWorld, gSaveWorld, bounds, bounds, srcCopy, nil);
 }
 
-void CopyRealWorldToOffWorld(WindowPtr port, Rect *bounds) {
-    PixMap** pixBase = GetGWorldPixMap(gOffWorld);
+void CopyRealWorldToOffWorld(Rect *bounds) {
     NormalizeColors();
-    CopyBits(&(port->portBits), *pixBase, bounds, bounds, srcCopy, nil);
+    CopyBits(gRealWorld, gOffWorld, bounds, bounds, srcCopy, nil);
 }
 
 void CopySaveWorldToOffWorld(Rect *bounds) {
-    PixMap** savePixBase = GetGWorldPixMap(gSaveWorld);
-    PixMap** offPixBase = GetGWorldPixMap(gOffWorld);
     NormalizeColors();
-    CopyBits(*savePixBase, *offPixBase, bounds, bounds, srcCopy, nil);
+    CopyBits(gSaveWorld, gOffWorld, bounds, bounds, srcCopy, nil);
 }
 
 void CopyOffWorldToSaveWorld(Rect *bounds) {
-    PixMap** savePixBase = GetGWorldPixMap(gSaveWorld);
-    PixMap** offPixBase = GetGWorldPixMap(gOffWorld);
     NormalizeColors();
-    CopyBits(*offPixBase, *savePixBase, bounds, bounds, srcCopy, nil);
+    CopyBits(gOffWorld, gSaveWorld, bounds, bounds, srcCopy, nil);
 }
 
 void NormalizeColors() {

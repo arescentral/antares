@@ -19,8 +19,6 @@
 
 #include "Motion.hpp"
 
-//#include <math routines.h>
-#include <QDOffscreen.h>
 #include <Timer.h>
 
 #include "AresGlobalType.hpp"
@@ -84,9 +82,7 @@ struct proximityUnitType {
     adjacentUnitType        unitsToCheck[kUnitsToCheckNumber];  // adjacent units to check
 };
 
-extern GWorldPtr        gOffWorld, gRealWorld, gSaveWorld;
 extern Handle           gPixTable[];
-extern PixMapHandle     thePixMapHandle;
 extern long             gAbsoluteScale, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM,
                         gPlayScreenWidth, gPlayScreenHeight, gRootObjectNumber;
 extern spaceObjectType  *gScrollStarObject, *gRootObject;

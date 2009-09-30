@@ -24,7 +24,7 @@
 
 void EZDrawSpriteOffByID( short, long, long, unsigned char, Rect *);
 void EZDrawSpriteOffToOnByID( short, long, long, unsigned char, Rect *);
-void EZDrawSpriteCenteredInRectBySprite( spritePix *, PixMapHandle, long, Rect *);
+void EZDrawSpriteCenteredInRectBySprite( spritePix *, PixMap*, long, Rect *);
 void EZMakeSpriteFromID( short, TypedHandle<natePixType>*, spritePix *, long);
 void DrawAnySpriteOffToOn( short, long, long, unsigned char, Rect *);
 

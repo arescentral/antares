@@ -24,7 +24,7 @@
 
 // Briefing_Renderer.h
 
-void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
+void Briefing_Objects_Render( long whichScenario, PixMap* destmap,
             long maxSize, Rect *bounds, long portleft, long portright,
             coordPointType *corner, long scale);
 

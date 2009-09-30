@@ -21,7 +21,6 @@
 
 #include "AresGuideMaker.hpp"
 
-#include <QDOffscreen.h>
 #include <Quickdraw.h>
 
 #include "AnyChar.hpp"
@@ -598,8 +597,7 @@ PicHandle MakePicHandleFromScreen( PixMapHandle sourceMap, Rect *sourceRect)
     newPic = OpenPicture( sourceRect);
     if ( newPic != nil)
     {
-        CopyBits( reinterpret_cast<BitMap *>(*sourceMap), reinterpret_cast<BitMap *>(*sourceMap),
-                sourceRect, sourceRect, srcCopy, nil);
+        CopyBits(*sourceMap, *sourceMap, sourceRect, sourceRect, srcCopy, nil);
         ClosePicture();
     }
     return( newPic);

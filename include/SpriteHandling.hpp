@@ -121,14 +121,14 @@ struct natePixType;
 void SpriteHandlingInit( void);
 void CleanupSpriteHandling( void);
 void ResetAllSprites( void);
-void RunLengthSpritePixInPixMap( spritePix *, Point, PixMapHandle);
-void OptScaleSpritePixInPixMap( spritePix *, Point, long, Rect *, Rect *, PixMapHandle);
+void RunLengthSpritePixInPixMap( spritePix *, Point, PixMap*);
+void OptScaleSpritePixInPixMap( spritePix *, Point, long, Rect *, Rect *, PixMap*);
 void StaticScaleSpritePixInPixMap( spritePix *, Point, long, Rect *, Rect *,
-    PixMapHandle, short);
+    PixMap*, short);
 void ColorScaleSpritePixInPixMap( spritePix *, Point, long, Rect *, Rect *,
-    PixMapHandle, short, unsigned char, unsigned char);
+    PixMap*, short, unsigned char, unsigned char);
 void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect *dRect,
-        Rect *clipRect, PixMapHandle pixMap, unsigned char colorOut,
+        Rect *clipRect, PixMap* pixMap, unsigned char colorOut,
         unsigned char colorIn);
 void ResetAllPixTables( void);
 void SetAllPixTablesNoKeep( void);
@@ -143,7 +143,7 @@ void DrawSpriteTableInOffWorld( Rect *);
 void GetOldSpritePixData( spriteType *, spritePix *);
 void ShowSpriteTable( void);
 void CullSprites( void);
-void  PixMapTest( spritePix *, Point, long, Rect *, Rect *, PixMapHandle);
+void  PixMapTest( spritePix *, Point, long, Rect *, Rect *, PixMap*);
 void TestByte(unsigned char*, PixMap*, unsigned char*);
 int Randomize( int);
 

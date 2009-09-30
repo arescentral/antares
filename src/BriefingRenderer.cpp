@@ -380,7 +380,7 @@ void SpriteBounds_Get( spritePix *sprite, Point where, long scale,
     bounds->bottom = tlong;
 }
 
-void Briefing_Objects_Render( long whichScenario, PixMapHandle destmap,
+void Briefing_Objects_Render( long whichScenario, PixMap* destmap,
             long maxSize, Rect *bounds, long portleft, long portright,
             coordPointType *corner, long scale)
 

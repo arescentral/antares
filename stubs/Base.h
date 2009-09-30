@@ -284,19 +284,28 @@ STUB3(KeyTranslate, long(Ptr kchr, short keyCode, unsigned long* keyTranslateSta
 
 class ColorTable;
 struct PixMap {
+    PixMap(int32_t width, int32_t height);
+    ~PixMap();
+
     Rect bounds;
     ColorTable* colors;
     long rowBytes;
     unsigned char* baseAddr;
     int pixelSize;
+
+    DISALLOW_COPY_AND_ASSIGN(PixMap);
 };
 typedef PixMap* PixMapPtr;
 typedef PixMap** PixMapHandle;
-typedef PixMap BitMap;
 
 struct Window {
+    Window(int32_t width, int32_t height);
+    ~Window();
+
     Rect portRect;
-    BitMap portBits;
+    PixMap portBits;
+
+    DISALLOW_COPY_AND_ASSIGN(Window);
 };
 
 #endif // ANTARES_STUB_BASE_H_

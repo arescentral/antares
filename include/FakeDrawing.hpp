@@ -23,27 +23,11 @@
 
 #include "Fakes.hpp"
 
-class FakePixMap : public PixMap {
-  public:
-    FakePixMap(int width, int height) {
-        SetRect(&bounds, 0, 0, width, height);
-        rowBytes = width | 0x8000;
-        baseAddr = new unsigned char[width * height];
-        pixelSize = 1;
-    }
-
-    ~FakePixMap() {
-        delete[] baseAddr;
-    }
-
+/*
     int width() const { return bounds.right - bounds.left; }
     int height() const { return bounds.bottom - bounds.top; }
-
     unsigned char& PixelAt(int x, int y) { return baseAddr[(y * rowBytes) + x]; }
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(FakePixMap);
-};
+*/
 
 class ClippedTransfer {
   public:
@@ -105,39 +89,17 @@ uint8_t GetPixel(int x, int y);
 void SetPixel(int x, int y, uint8_t c);
 void SetPixelRow(int x, int y, uint8_t* c, int count);
 
-class GWorld {
-  public:
-    GWorld(int width, int height)
-            : pixMap(width, height),
-              pixMapPtr(&pixMap) { }
-
-    FakePixMap pixMap;
-    PixMap* pixMapPtr;
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(GWorld);
-};
-
-class FakeWindow : public Window {
-  public:
-    FakeWindow(int width, int height, GWorld* world) {
-        SetRect(&portRect, 0, 0, width, height);
-        portBits = world->pixMap;  // Copying here, is that right?
-    }
-};
-
 class FakeGDevice : public GDevice {
   public:
-    FakeGDevice(int width, int height, GWorld* world_) {
-        gdPMap = &world_->pixMapPtr;
+    FakeGDevice(int width, int height, PixMap* pixmap) {
+        gdPMap = pixmap;
         SetRect(&gdRect, 0, 0, width, height);
-        world = world_;
     }
 };
 
-extern GWorld* gOffWorld;
-extern GWorld* gRealWorld;
-extern GWorld* gSaveWorld;
+extern PixMap* gOffWorld;
+extern PixMap* gRealWorld;
+extern PixMap* gSaveWorld;
 
 void DumpTo(const std::string& path);
 void FakeDrawingInit();

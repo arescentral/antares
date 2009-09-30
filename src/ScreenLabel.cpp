@@ -17,8 +17,6 @@
 
 #include "ScreenLabel.hpp"
 
-#include <QDOffscreen.h>
-
 #include "Admiral.hpp"            // hack for checking strength
 #include "AresGlobalType.hpp"
 #include "ColorTranslation.hpp"
@@ -46,9 +44,10 @@
 extern long             CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM,
                         WORLD_WIDTH, WORLD_HEIGHT, gNatePortLeft, gNatePortTop; //temp hack?
 extern directTextType*  gDirectText;
-extern GWorldPtr        gOffWorld, gRealWorld, gSaveWorld;
-extern PixMapHandle     thePixMapHandle;
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
+extern PixMap*          gActiveWorld;
+extern PixMap*          gOffWorld;
+extern PixMap*          gSaveWorld;
 
 // local function prototypes
 static long String_Count_Lines(unsigned char* s);
@@ -204,10 +203,7 @@ void EraseAllLabels( void)
 #ifdef kUseLabels
     short           i = 0;
     screenLabelType *label;
-    PixMapHandle    savePixBase, offPixBase;
 
-    savePixBase = GetGWorldPixMap( gSaveWorld);
-    offPixBase = GetGWorldPixMap( gOffWorld);
     label = *globals()->gScreenLabelData;
     for ( i = 0; i < kMaxLabelNum; i++)
     {
@@ -216,8 +212,7 @@ void EraseAllLabels( void)
             if (( label->thisRect.right > label->thisRect.left) &&
                 ( label->thisRect.bottom > label->thisRect.top))
             {
-            //  ChunkCopyPixMapToPixMap( *savePixBase, &(label->thisRect), *offPixBase);
-                ChunkErasePixMap( *offPixBase, &(label->thisRect));
+                ChunkErasePixMap( gOffWorld, &(label->thisRect));
             }
             if ( label->killMe)
                 label->lastRect = label->thisRect;
@@ -233,7 +228,6 @@ void DrawAllLabels( void)
 #ifdef kUseLabels
     short           i = 0, originalLength;
     screenLabelType *label;
-    PixMapHandle    offPixBase;
     Rect        clipRect, tRect;
     unsigned char   color;//, *getwidchar, *getwidwid;
     transColorType  *transColor;
@@ -243,7 +237,6 @@ void DrawAllLabels( void)
 
     label = *globals()->gScreenLabelData;
     SetLongRect( &clipRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
-    offPixBase = GetGWorldPixMap( gOffWorld);
     for ( i = 0; i < kMaxLabelNum; i++)
     {
         if (( label->active) && ( !label->killMe) && ( *(label->label) > 0) && ( label->visibleState > 0))
@@ -270,8 +263,6 @@ void DrawAllLabels( void)
                     Rect    tc;
 
                     SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-//                  DrawNateLine( *offPixBase, &tc, label->where.h, label->where.v,
-//                      10, 10, 0, 0, 0);
                 }
                 originalLength = label->label[0];
                 if ( label->retroCount >= 0)
@@ -292,35 +283,35 @@ void DrawAllLabels( void)
                     long    j, y;
                     Str255  s;
 
-                    DrawNateRectVScan( *offPixBase, &tRect, 0, 0, color);
+                    DrawNateRectVScan( gOffWorld, &tRect, 0, 0, color);
                     mGetTranslateColorShade( label->color, VERY_LIGHT, color, transColor);
                     y = label->where.v + gDirectText->ascent + kLabelInnerSpace;
                     for ( j = 1; j <= label->lineNum; j++)
                     {
                         String_Get_Nth_Line( s, label->label, j);
                         MoveTo( label->where.h+1+kLabelInnerSpace, y+1);
-                        DrawDirectTextStringClipped( s, BLACK, *offPixBase, &clipRect,
+                        DrawDirectTextStringClipped( s, BLACK, gOffWorld, &clipRect,
                             0, 0);
                         MoveTo( label->where.h-1+kLabelInnerSpace, y-1);
-                        DrawDirectTextStringClipped( s, BLACK, *offPixBase, &clipRect,
+                        DrawDirectTextStringClipped( s, BLACK, gOffWorld, &clipRect,
                             0, 0);
                         MoveTo( label->where.h+kLabelInnerSpace, y);
-                        DrawDirectTextStringClipped( s, color, *offPixBase, &clipRect,
+                        DrawDirectTextStringClipped( s, color, gOffWorld, &clipRect,
                             0, 0);
                         y += label->lineHeight;
                     }
 
                 } else
                 {
-                    DrawNateRectVScan( *offPixBase, &tRect, 0, 0, color);
+                    DrawNateRectVScan( gOffWorld, &tRect, 0, 0, color);
                     mGetTranslateColorShade( label->color, VERY_LIGHT, color, transColor);
                     MoveTo( label->where.h+1+kLabelInnerSpace, label->where.v +
                         gDirectText->ascent +1 + kLabelInnerSpace);
-                    DrawDirectTextStringClipped( label->label, BLACK, *offPixBase, &clipRect,
+                    DrawDirectTextStringClipped( label->label, BLACK, gOffWorld, &clipRect,
                         0, 0);
                     MoveTo( label->where.h + kLabelInnerSpace,
                         label->where.v + gDirectText->ascent + kLabelInnerSpace);
-                    DrawDirectTextStringClipped( label->label, color, *offPixBase, &clipRect,
+                    DrawDirectTextStringClipped( label->label, color, gOffWorld, &clipRect,
                         0, 0);
                 }
                 label->label[0] = originalLength;
@@ -339,10 +330,8 @@ void ShowAllLabels( void)
     Rect            tRect;
     short           i = 0;
     screenLabelType *label;
-    PixMapHandle    pixMap;
 
     label = *globals()->gScreenLabelData;
-    pixMap = GetGWorldPixMap( gOffWorld);
     for ( i = 0; i < kMaxLabelNum; i++)
     {
         if (( label->active) && ( label->visibleState >= 0))
@@ -355,25 +344,22 @@ void ShowAllLabels( void)
                 (ABS( tRect.top - label->lastRect.top) > (( tRect.bottom - tRect.top) * 4)))
             {
                 if ( !(( tRect.right <= tRect.left) || ( tRect.bottom <= tRect.top)))
-                    ChunkCopyPixMapToScreenPixMap( *pixMap, &tRect, *thePixMapHandle);
+                    ChunkCopyPixMapToScreenPixMap( gOffWorld, &tRect, gActiveWorld);
                 if ( !(( label->lastRect.right <= label->lastRect.left) || ( label->lastRect.bottom <= label->lastRect.top)))
-                    ChunkCopyPixMapToScreenPixMap( *pixMap, &(label->lastRect),
-                            *thePixMapHandle);
+                    ChunkCopyPixMapToScreenPixMap( gOffWorld, &(label->lastRect),
+                            gActiveWorld);
 
                 if ( label->keepOnScreenAnyway)
                 {
                     Rect    tc;
 
                     SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-//                  CopyNateLine( *pixMap, *thePixMapHandle,
-//                      &tc, label->where.h, label->where.v,
-//                      10, 10, gNatePortLeft << 2, gNatePortTop);
                 }
             } else
 
             {
                 BiggestRect( &tRect, &(label->lastRect));
-                ChunkCopyPixMapToScreenPixMap( *pixMap, &tRect, *thePixMapHandle);
+                ChunkCopyPixMapToScreenPixMap( gOffWorld, &tRect, gActiveWorld);
             }
             label->lastRect = label->thisRect;
             if ( label->killMe)

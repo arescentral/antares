@@ -4,13 +4,9 @@
 #include <Base.h>
 #include <Files.h>
 
-struct GWorld;
-typedef GWorld* GWorldPtr;
-
 typedef struct {
-    PixMapHandle gdPMap;
+    PixMap* gdPMap;
     Rect gdRect;
-    GWorld* world;
 } GDevice;
 typedef GDevice** GDHandle;
 
@@ -32,7 +28,6 @@ void RGBBackColor(RGBColor* color);
 void RGBForeColor(RGBColor* color);
 STUB1(HiliteColor, void(RGBColor* color));
 
-PixMapHandle GetGWorldPixMap(GWorldPtr world);
 STUB1(LockPixels, bool(PixMap** pix), true);
 STUB1(UnlockPixels, void(PixMap** pix));
 
@@ -42,7 +37,7 @@ void MacSetPort(GrafPtr port);
 STUB1(InvalRect, void(Rect* rect));
 STUB1(ClipRect, void(Rect* rect));
 
-void CopyBits(BitMap* source, BitMap* source2, Rect* source_rect,
+void CopyBits(PixMap* source, PixMap* source2, Rect* source_rect,
       Rect* source_rect2, int mode, void*);
 
 STUB0(GetMainDevice, GDHandle(), &fakeGDevicePtr);

@@ -24,8 +24,6 @@
 
 #include "InterfaceHandling.hpp"
 
-#include <QDOffscreen.h>
-
 #include "AnyChar.hpp"
 #include "AresResFile.hpp"
 #include "AresGlobalType.hpp"
@@ -60,7 +58,8 @@
 
 extern CWindowPtr       gTheWindow;     // we need the window for copying to the real world, a hack
 extern long             WORLD_WIDTH, WORLD_HEIGHT;
-extern GWorldPtr        gOffWorld, gSaveWorld;
+extern PixMap*          gOffWorld;
+extern PixMap*          gSaveWorld;
 
 TypedHandle<interfaceItemType> gInterfaceItemData;
 short               gInterfaceFileRefID = -1, gCurrentTEItem = -1;
@@ -219,7 +218,6 @@ void DrawEntireInterface( void)
     long                number, count;
     interfaceItemType   *item;
     Rect                tRect;
-    PixMapHandle        offMap = GetGWorldPixMap( gOffWorld);
 
     DrawInOffWorld();
     MacSetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
@@ -231,11 +229,11 @@ void DrawEntireInterface( void)
 
     for ( count = 0; count < number; count++)
     {
-        DrawAnyInterfaceItem( item, *offMap, 0, 0);
+        DrawAnyInterfaceItem( item, gOffWorld, 0, 0);
         item++;
     }
     DrawInRealWorld();
-    CopyOffWorldToRealWorld( gTheWindow, &tRect);
+    CopyOffWorldToRealWorld(&tRect);
 }
 
 void DrawInterfaceRange( long from, long to, long withinItem)
@@ -244,7 +242,6 @@ void DrawInterfaceRange( long from, long to, long withinItem)
     long                number, count;
     interfaceItemType   *item;
     Rect                tRect;
-    PixMapHandle        offMap = GetGWorldPixMap( gOffWorld);
 
     DrawInOffWorld();
     if ( withinItem >= 0)
@@ -262,12 +259,12 @@ void DrawInterfaceRange( long from, long to, long withinItem)
 
         for ( count = from; count < to; count++)
         {
-            DrawAnyInterfaceItem( item, *offMap, 0, 0);
+            DrawAnyInterfaceItem( item, gOffWorld, 0, 0);
             item++;
         }
         DrawInRealWorld();
         if ( withinItem >= 0)
-            CopyOffWorldToRealWorld( gTheWindow, &tRect);
+            CopyOffWorldToRealWorld(&tRect);
     }
 }
 
@@ -278,7 +275,6 @@ void DrawAllItemsOfKind( interfaceKindType kind, Boolean sound, Boolean clearFir
     long                number, count;
     interfaceItemType   *item;
     Rect                tRect;
-    PixMapHandle        offMap = GetGWorldPixMap( gOffWorld);
 
     DrawInOffWorld();
     MacSetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
@@ -296,7 +292,7 @@ void DrawAllItemsOfKind( interfaceKindType kind, Boolean sound, Boolean clearFir
         if ( item->kind == kind)
         {
             if ( showAtEnd)
-                DrawAnyInterfaceItem( item, *offMap, 0, 0);
+                DrawAnyInterfaceItem( item, gOffWorld, 0, 0);
             else
                 DrawAnyInterfaceItemOffToOn( item);
         }
@@ -304,35 +300,33 @@ void DrawAllItemsOfKind( interfaceKindType kind, Boolean sound, Boolean clearFir
     }
     DrawInRealWorld();
     if ( showAtEnd)
-        CopyOffWorldToRealWorld( gTheWindow, &tRect);
+        CopyOffWorldToRealWorld(&tRect);
 }
 
 void DrawAnyInterfaceItemOffToOn( interfaceItemType *item)
 
 {
     Rect            bounds;
-    PixMapHandle        offMap = GetGWorldPixMap( gOffWorld);
 
     GetAnyInterfaceItemGraphicBounds( item, &bounds);
     DrawInOffWorld();
-    DrawAnyInterfaceItem( item, *offMap, 0, 0);
+    DrawAnyInterfaceItem( item, gOffWorld, 0, 0);
     DrawInRealWorld();
-    CopyOffWorldToRealWorld( gTheWindow, &bounds);
+    CopyOffWorldToRealWorld(&bounds);
 }
 
 void DrawAnyInterfaceItemSaveToOffToOn( interfaceItemType   *item)
 
 {
     Rect            bounds;
-    PixMapHandle    saveMap = GetGWorldPixMap( gSaveWorld);
 
     GetAnyInterfaceItemGraphicBounds( item, &bounds);
     DrawInSaveWorld();
-    DrawAnyInterfaceItem( item, *saveMap, 0, 0);
+    DrawAnyInterfaceItem( item, gSaveWorld, 0, 0);
     DrawInOffWorld();
     CopySaveWorldToOffWorld( &bounds);
     DrawInRealWorld();
-    CopyOffWorldToRealWorld( gTheWindow, &bounds);
+    CopyOffWorldToRealWorld(&bounds);
 }
 
 void OffsetAllItems( long hoffset, long voffset)

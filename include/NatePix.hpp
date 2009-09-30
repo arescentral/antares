@@ -29,12 +29,6 @@ struct natePix {
     Point           center;
 };
 
-struct nateBit {
-    BitMap          bit;
-    Handle          bitBase;
-    Point           center;
-};
-
 #define kNatePix
 
 /* typedef of BitMap (I-144):

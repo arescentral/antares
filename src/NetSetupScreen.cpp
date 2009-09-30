@@ -17,8 +17,6 @@
 
 #include "NetSetupScreen.hpp"
 
-#include <QDOffscreen.h>
-
 #include "AmbrosiaSerial.h"
 #include "AresExternalFile.hpp"
 #include "AresGlobalType.hpp"

@@ -55,11 +55,9 @@ struct bigReqListRec {
 };
 
 void InitTransitions() {
-    PixMapHandle        onScreenPixMap;
-
-    onScreenPixMap = (**theDevice).gdPMap;
-    globals()->gColorAnimationTable.reset((**onScreenPixMap).colors->clone());
-    globals()->gSaveColorTable.reset((**onScreenPixMap).colors->clone());
+    PixMap* onScreenPixMap = (**theDevice).gdPMap;
+    globals()->gColorAnimationTable.reset(onScreenPixMap->colors->clone());
+    globals()->gSaveColorTable.reset(onScreenPixMap->colors->clone());
 }
 
 void ResetTransitions( void) // for resetting the color map

@@ -28,8 +28,7 @@
 #include "MappedFile.hpp"
 #include "PosixException.hpp"
 
-extern scoped_ptr<ColorTable> fake_colors;
-extern FakeWindow fakeWindow;
+extern Window fakeWindow;
 
 class VncServerException : public std::exception { };
 
@@ -619,9 +618,9 @@ void* vnc_serve(void* arg) {
 
                     for (int i = 0; i < 640 * 480; ++i) {
                         uint8_t color = fakeWindow.portBits.baseAddr[i];
-                        results[i].red = fake_colors->color(color).red >> 8;
-                        results[i].green = fake_colors->color(color).green >> 8;
-                        results[i].blue = fake_colors->color(color).blue >> 8;
+                        results[i].red = fakeWindow.portBits.colors->color(color).red >> 8;
+                        results[i].green = fakeWindow.portBits.colors->color(color).green >> 8;
+                        results[i].blue = fakeWindow.portBits.colors->color(color).blue >> 8;
                     }
 
                     out.write(response);

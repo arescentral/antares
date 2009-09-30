@@ -20,8 +20,6 @@
 
 #include "MessageScreen.hpp"
 
-#include <QDOffscreen.h>
-
 #include "AnyChar.hpp"
 #include "AresGlobalType.hpp"
 #include "ColorTranslation.hpp"
@@ -120,11 +118,11 @@ inline void mClipAnyRect(T0& mtrect, const T1& mclip) {
 extern directTextType   *gDirectText;
 extern long             CLIP_LEFT, CLIP_RIGHT, CLIP_BOTTOM;
 
-extern GWorldPtr        gOffWorld, gRealWorld, gSaveWorld;
 extern WindowPtr        gTheWindow;
-extern PixMapHandle     thePixMapHandle;
 extern long             gNatePortLeft, gNatePortTop, WORLD_HEIGHT, WORLD_WIDTH;
 extern scenarioType     *gThisScenario; // for special message labels
+extern PixMap*          gActiveWorld;
+extern PixMap*          gOffWorld;
 
 void MessageLabel_Set_Special(short id, TypedHandle<unsigned char> text);
 
@@ -500,7 +498,6 @@ void ClipToCurrentLongMessage( void)
 void DrawCurrentLongMessage( long timePass)
 
 {
-    PixMapHandle    offPixBase;
     Rect            tRect, uRect;
     Rect        lRect, cRect;
     transColorType  *transColor;
@@ -527,14 +524,13 @@ void DrawCurrentLongMessage( long timePass)
                 SetScreenLabelAge( tmessage->labelMessageID, 1);
             } else
             {
-                offPixBase = GetGWorldPixMap( gOffWorld);
                 DrawInOffWorld();
                 SetLongRect( &lRect, CLIP_LEFT, globals()->gTrueClipBottom - tmessage->textHeight, CLIP_RIGHT,
                         globals()->gTrueClipBottom);
                 cRect = lRect;
-                DrawNateRect( *offPixBase, &cRect, 0, 0, 0xff);
+                DrawNateRect(gOffWorld, &cRect, 0, 0, 0xff);
                 LongRectToRect( &lRect, &tRect);
-                ChunkCopyPixMapToScreenPixMap( *offPixBase, &tRect, *thePixMapHandle);
+                ChunkCopyPixMapToScreenPixMap(gOffWorld, &tRect, gActiveWorld);
                 NormalizeColors();
                 DrawInRealWorld();
     //          CLIP_BOTTOM = globals()->gTrueClipBottom;
@@ -548,22 +544,21 @@ void DrawCurrentLongMessage( long timePass)
             if (tmessage->retroTextSpec.text.get() != nil) {
                 if ( !tmessage->labelMessage)
                 {
-                    offPixBase = GetGWorldPixMap( gOffWorld);
                     DrawInOffWorld();
                     SetLongRect( &lRect, CLIP_LEFT, CLIP_BOTTOM, CLIP_RIGHT,
                             globals()->gTrueClipBottom);
                     mGetTranslateColorShade( SKY_BLUE, DARKEST, color, transColor);
                     cRect = lRect;
-                    DrawNateRect( *offPixBase, &cRect, 0, 0, color);
+                    DrawNateRect(gOffWorld, &cRect, 0, 0, color);
                     LongRectToRect( &lRect, &tRect);
                     mGetTranslateColorShade( SKY_BLUE, VERY_LIGHT, color, transColor);
     //              DrawDirectTextInRect( (anyCharType *)*tmessage->retroTextSpec.text, tmessage->retroTextSpec.textLength,
     //                      &lRect, *offPixBase, 0, 0, 0);
-                    DrawNateLine( *offPixBase, &cRect, cRect.left, cRect.top, cRect.right - 1,
+                    DrawNateLine(gOffWorld, &cRect, cRect.left, cRect.top, cRect.right - 1,
                         cRect.top, 0, 0, color);
-                    DrawNateLine( *offPixBase, &cRect, cRect.left, cRect.bottom - 1, cRect.right - 1,
+                    DrawNateLine(gOffWorld, &cRect, cRect.left, cRect.bottom - 1, cRect.right - 1,
                         cRect.bottom - 1, 0, 0, color);
-                    ChunkCopyPixMapToScreenPixMap( *offPixBase, &tRect, *thePixMapHandle);
+                    ChunkCopyPixMapToScreenPixMap(gOffWorld, &tRect, gActiveWorld);
                     NormalizeColors();
                     DrawInRealWorld();
                     NormalizeColors();
@@ -577,14 +572,13 @@ void DrawCurrentLongMessage( long timePass)
             }
         } else if ( !tmessage->labelMessage)
         {
-            offPixBase = GetGWorldPixMap( gOffWorld);
             DrawInOffWorld();
             SetLongRect( &lRect, CLIP_LEFT, globals()->gTrueClipBottom - tmessage->textHeight, CLIP_RIGHT,
                     globals()->gTrueClipBottom);
             cRect = lRect;
-            DrawNateRect( *offPixBase, &cRect, 0, 0, 0xff);
+            DrawNateRect(gOffWorld, &cRect, 0, 0, 0xff);
             LongRectToRect( &lRect, &tRect);
-            ChunkCopyPixMapToScreenPixMap( *offPixBase, &tRect, *thePixMapHandle);
+            ChunkCopyPixMapToScreenPixMap(gOffWorld, &tRect, gActiveWorld);
             NormalizeColors();
             DrawInRealWorld();
 //          CLIP_BOTTOM = globals()->gTrueClipBottom;
@@ -610,7 +604,6 @@ void DrawCurrentLongMessage( long timePass)
                 SetLongRect( &lRect, CLIP_LEFT, CLIP_BOTTOM, CLIP_RIGHT,
                         globals()->gTrueClipBottom);
                 PlayVolumeSound(  kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
-                offPixBase = GetGWorldPixMap( gOffWorld);
                 while ( tmessage->charDelayCount > 0)
                 {
                     i = 3;
@@ -631,7 +624,7 @@ void DrawCurrentLongMessage( long timePass)
                         lRect.right -= kHBuffer;
 
                         DrawRetroTextCharInRect( &(tmessage->retroTextSpec),
-                            3, &lRect, &lRect,*offPixBase, 0, 0);
+                            3, &lRect, &lRect, gOffWorld, 0, 0);
 //                           *thePixMapHandle, gNatePortLeft, gNatePortTop);
 
                         lRect.left -= kHBuffer;
@@ -650,8 +643,8 @@ void DrawCurrentLongMessage( long timePass)
                             uRect.left = lRect.left;
                         }
                         BiggestRect( &tRect, &uRect);
-                        ChunkCopyPixMapToScreenPixMap( *offPixBase, &tRect,
-                            *thePixMapHandle);
+                        ChunkCopyPixMapToScreenPixMap(gOffWorld, &tRect,
+                            gActiveWorld);
                         if ( tmessage->retroTextSpec.thisPosition >
                             tmessage->retroTextSpec.textLength)
                         {

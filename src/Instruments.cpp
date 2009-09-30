@@ -20,9 +20,6 @@
 
 #include "Instruments.hpp"
 
-//#include <math routines.h>
-#include <QDOffscreen.h>
-
 #include "Admiral.hpp"
 #include "AresGlobalType.hpp"
 #include "ColorTranslation.hpp"
@@ -130,12 +127,12 @@
 extern CWindowPtr       gTheWindow; // hack to copy bar indicators to offworld
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
 extern spaceObjectType  *gScrollStarObject;
-extern PixMapHandle     thePixMapHandle;
 extern int32_t          gNatePortLeft, gNatePortTop, gAbsoluteScale,
                         WORLD_WIDTH, WORLD_HEIGHT, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM;
 extern coordPointType   gGlobalCorner;
 
-extern GWorldPtr        gOffWorld, gRealWorld, gSaveWorld;
+extern PixMap*          gActiveWorld;
+extern PixMap*          gOffWorld;
 
 coordPointType          gLastGlobalCorner;
 
@@ -228,7 +225,6 @@ void UpdateRadar(int32_t unitsDone) {
     unsigned char   color, color2, *dByte;
     uint32_t        bestScale = MIN_SCALE, rootCorrect, distance, difference, dcalc;
     transColorType  *transColor;
-    PixMapHandle    offPixBase;
     admiralType     *admiral;
     Rect            tRect;
     Boolean         doDraw;
@@ -257,7 +253,7 @@ void UpdateRadar(int32_t unitsDone) {
         mGetTranslateColorShade( kRadarColor, (( kRadarColorSteps * globals()->gRadarCount) / globals()->gRadarSpeed) + 1, color, transColor);
     }
 
-    mGetRowBytes( oCount, *thePixMapHandle);
+    mGetRowBytes( oCount, gActiveWorld);
 
     if ( doDraw)
     {
@@ -267,7 +263,7 @@ void UpdateRadar(int32_t unitsDone) {
             if ( lp->h >= 0)
             {
                 mSetNatePixel( dByte, oCount, lp->h, lp->v, gNatePortLeft << 2L,
-                        gNatePortTop, *thePixMapHandle, color);
+                        gNatePortTop, gActiveWorld, color);
             }
             lp++;
         }
@@ -277,14 +273,13 @@ void UpdateRadar(int32_t unitsDone) {
     {
         if (( globals()->gRadarCount <= 0) && ( doDraw))
         {
-            offPixBase = GetGWorldPixMap( gOffWorld);
             DrawInOffWorld();
 
             MacSetRect( &tRect, kRadarLeft + 1, kRadarTop + 1 + globals()->gInstrumentTop, kRadarRight - 1,
                     kRadarBottom - 1 + globals()->gInstrumentTop);
             RectToLongRect( &tRect, &lRect);
             mGetTranslateColorShade( kRadarColor, DARKEST, color, transColor);
-            DrawNateRect( *offPixBase, &lRect, 0, 0, color);
+            DrawNateRect(gOffWorld, &lRect, 0, 0, color);
             SetTranslateColorShadeFore( kRadarColor, VERY_LIGHT);
             MacFrameRect( &tRect);
 
@@ -301,10 +296,10 @@ void UpdateRadar(int32_t unitsDone) {
             lRect.bottom = kRadarTop + kRadarCenter + dx + globals()->gInstrumentTop;
             if ( lRect.bottom >= tRect.bottom) lRect.bottom = tRect.bottom - 1;
             mGetTranslateColorShade( kRadarColor, VERY_DARK, color, transColor);
-            DrawNateRect( *offPixBase, &lRect, 0, 0, color);
+            DrawNateRect(gOffWorld, &lRect, 0, 0, color);
             NormalizeColors();
             DrawInRealWorld();
-            ChunkCopyPixMapToScreenPixMap( *offPixBase, &tRect, *thePixMapHandle);
+            ChunkCopyPixMapToScreenPixMap(gOffWorld, &tRect, gActiveWorld);
 
             lp = *globals()->gRadarBlipData;
             for ( rcount = 0; rcount < kRadarBlipNum; rcount++)
@@ -349,7 +344,7 @@ void UpdateRadar(int32_t unitsDone) {
                     kRadarBottom - 1 + globals()->gInstrumentTop);
             RectToLongRect( &tRect, &lRect);
             mGetTranslateColorShade( kRadarColor, DARKEST, color, transColor);
-            DrawNateRect( *thePixMapHandle, &lRect, gNatePortLeft << 2L, gNatePortTop, color);
+            DrawNateRect( gActiveWorld, &lRect, gNatePortLeft << 2L, gNatePortTop, color);
         }
 
         switch ( globals()->gZoomMode)
@@ -488,9 +483,9 @@ void UpdateRadar(int32_t unitsDone) {
 //      gAbsoluteScale = SCALE_SCALE;
 
         baseObject = gScrollStarObject->baseType;
-        UpdateBarIndicator( kShieldBar, gScrollStarObject->health, baseObject->health, thePixMapHandle);
-        UpdateBarIndicator( kEnergyBar, gScrollStarObject->energy, baseObject->energy, thePixMapHandle);
-        UpdateBarIndicator( kBatteryBar, gScrollStarObject->battery, baseObject->energy * 5, thePixMapHandle);
+        UpdateBarIndicator( kShieldBar, gScrollStarObject->health, baseObject->health, gActiveWorld);
+        UpdateBarIndicator( kEnergyBar, gScrollStarObject->energy, baseObject->energy, gActiveWorld);
+        UpdateBarIndicator( kBatteryBar, gScrollStarObject->battery, baseObject->energy * 5, gActiveWorld);
 
         // SHOW ME THE MONEY
         admiral = mGetAdmiralPtr( globals()->gPlayerAdmiralNumber);
@@ -524,10 +519,10 @@ void UpdateRadar(int32_t unitsDone) {
                                 kFineMoneyVBuffer + rcount * kFineMoneyBarHeight;
                         lRect.bottom = lRect.top + kFineMoneyBarHeight - 1;
                         if ( rcount % 5)
-                            DrawNateRect( *thePixMapHandle, &lRect,
+                            DrawNateRect( gActiveWorld, &lRect,
                                 gNatePortLeft << 2L, gNatePortTop, color2);
                         else
-                            DrawNateRect( *thePixMapHandle, &lRect,
+                            DrawNateRect( gActiveWorld, &lRect,
                                 gNatePortLeft << 2L, gNatePortTop, color);
 
                     }
@@ -544,10 +539,10 @@ void UpdateRadar(int32_t unitsDone) {
                                 kFineMoneyVBuffer + rcount * kFineMoneyBarHeight;
                         lRect.bottom = lRect.top + kFineMoneyBarHeight - 1;
                         if ( rcount % 5)
-                            DrawNateRect( *thePixMapHandle, &lRect,
+                            DrawNateRect( gActiveWorld, &lRect,
                                 gNatePortLeft << 2L, gNatePortTop, color2);
                         else
-                            DrawNateRect( *thePixMapHandle, &lRect,
+                            DrawNateRect( gActiveWorld, &lRect,
                                 gNatePortLeft << 2L, gNatePortTop, color);
 
                     }
@@ -567,10 +562,10 @@ void UpdateRadar(int32_t unitsDone) {
                                 kFineMoneyVBuffer + rcount * kFineMoneyBarHeight;
                         lRect.bottom = lRect.top + kFineMoneyBarHeight - 1;
                         if ( rcount % 5)
-                            DrawNateRect( *thePixMapHandle, &lRect,
+                            DrawNateRect( gActiveWorld, &lRect,
                                 gNatePortLeft << 2L, gNatePortTop, color2);
                         else
-                            DrawNateRect( *thePixMapHandle, &lRect,
+                            DrawNateRect( gActiveWorld, &lRect,
                                 gNatePortLeft << 2L, gNatePortTop, color);
 
                     }
@@ -587,10 +582,10 @@ void UpdateRadar(int32_t unitsDone) {
                                 kFineMoneyVBuffer + rcount * kFineMoneyBarHeight;
                         lRect.bottom = lRect.top + kFineMoneyBarHeight - 1;
                         if ( rcount % 5)
-                            DrawNateRect( *thePixMapHandle, &lRect,
+                            DrawNateRect( gActiveWorld, &lRect,
                                 gNatePortLeft << 2L, gNatePortTop, color2);
                         else
-                            DrawNateRect( *thePixMapHandle, &lRect,
+                            DrawNateRect( gActiveWorld, &lRect,
                                 gNatePortLeft << 2L, gNatePortTop, color);
 
                     }
@@ -605,7 +600,7 @@ void UpdateRadar(int32_t unitsDone) {
                     lRect.top = kFineMoneyTop + globals()->gInstrumentTop +
                         kFineMoneyVBuffer + rcount * kFineMoneyBarHeight;
                     lRect.bottom = lRect.top + kFineMoneyBarHeight - 1;
-                    DrawNateRect( *thePixMapHandle, &lRect, gNatePortLeft << 2L,
+                    DrawNateRect( gActiveWorld, &lRect, gNatePortLeft << 2L,
                         gNatePortTop, color);
                 }
         }
@@ -625,7 +620,7 @@ void UpdateRadar(int32_t unitsDone) {
                 lRect.top = kGrossMoneyTop + globals()->gInstrumentTop + kGrossMoneyVBuffer + rcount *
                             kGrossMoneyBarHeight;
                 lRect.bottom = lRect.top + kGrossMoneyBarHeight - 1;
-                DrawNateRect( *thePixMapHandle, &lRect, gNatePortLeft << 2L, gNatePortTop, color);
+                DrawNateRect( gActiveWorld, &lRect, gNatePortLeft << 2L, gNatePortTop, color);
             }
             mGetTranslateColorShade( kGrossMoneyColor, VERY_DARK, color, transColor);
 
@@ -634,13 +629,13 @@ void UpdateRadar(int32_t unitsDone) {
                 lRect.top = kGrossMoneyTop + globals()->gInstrumentTop + kGrossMoneyVBuffer + rcount *
                             kGrossMoneyBarHeight;
                 lRect.bottom = lRect.top + kGrossMoneyBarHeight - 1;
-                DrawNateRect( *thePixMapHandle, &lRect, gNatePortLeft << 2L, gNatePortTop, color);
+                DrawNateRect( gActiveWorld, &lRect, gNatePortLeft << 2L, gNatePortTop, color);
             }
         }
     }
 }
 
-void DrawInstrumentPanel(WindowPtr whatPort) {
+void DrawInstrumentPanel(WindowPtr) {
     scoped_ptr<Picture> pict;
     Rect            tRect;
 
@@ -685,7 +680,7 @@ void DrawInstrumentPanel(WindowPtr whatPort) {
     pict.reset();
 
     MacSetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-    CopyOffWorldToRealWorld( whatPort, &tRect);
+    CopyOffWorldToRealWorld(&tRect);
     MakeMiniScreenFromIndString( 1);
     DrawMiniScreen();
     ResetInstruments();
@@ -700,10 +695,8 @@ void DrawInstrumentPanel(WindowPtr whatPort) {
 void EraseSite() {
     int32_t         *l, *olp;
     int16_t         sx, sy, sa, sb, sc, sd;
-    PixMapHandle    offPixBase;
     Rect        clipRect;
 
-    offPixBase = GetGWorldPixMap( gOffWorld);
     clipRect.left = CLIP_LEFT;
     clipRect.right = CLIP_RIGHT;
     clipRect.top = CLIP_TOP;
@@ -717,14 +710,14 @@ void EraseSite() {
     sb = *(olp++) = *(l++);
     sc = *(olp++) = *(l++);
     sd = *(olp++) = *(l++);
-    DrawNateLine( *offPixBase, &clipRect, sa,
+    DrawNateLine(gOffWorld, &clipRect, sa,
                 sb, sx, sy, 0,
                 0, BLACK);
 
-    DrawNateLine( *offPixBase, &clipRect, sc,
+    DrawNateLine(gOffWorld, &clipRect, sc,
                 sd, sx, sy, 0,
                 0, BLACK);
-    DrawNateLine( *offPixBase, &clipRect, sc,
+    DrawNateLine(gOffWorld, &clipRect, sc,
                 sd, sa, sb, 0,
                 0, BLACK);
 
@@ -737,16 +730,16 @@ void EraseSite() {
 
     if ( globals()->gMouseActive)
     {
-        DrawNateLine( *offPixBase, &clipRect, sx,
+        DrawNateLine(gOffWorld, &clipRect, sx,
                     clipRect.top, sx, (sy - kCursorBoundsSize), 0,
                     0, BLACK);
-        DrawNateLine( *offPixBase, &clipRect, sx,
+        DrawNateLine(gOffWorld, &clipRect, sx,
                     (sy + kCursorBoundsSize), sx, clipRect.bottom - 1, 0,
                     0, BLACK);
-        DrawNateLine( *offPixBase, &clipRect, clipRect.left,
+        DrawNateLine(gOffWorld, &clipRect, clipRect.left,
                     sy, (sx - kCursorBoundsSize), sy, 0,
                     0, BLACK);
-        DrawNateLine( *offPixBase, &clipRect, (sx + kCursorBoundsSize),
+        DrawNateLine(gOffWorld, &clipRect, (sx + kCursorBoundsSize),
                     sy, clipRect.right - 1, sy, 0,
                     0, BLACK);
     }
@@ -754,10 +747,8 @@ void EraseSite() {
 
 void EraseSectorLines() {
     int32_t         *l, count, ol;
-    PixMapHandle    offPixBase;
     Rect        clipRect;
 
-    offPixBase = GetGWorldPixMap( gOffWorld);
     clipRect.left = CLIP_LEFT;
     clipRect.right = CLIP_RIGHT;
     clipRect.top = CLIP_TOP;
@@ -768,7 +759,7 @@ void EraseSectorLines() {
 
     while (( *l != -1) && ( count < kMaxSectorLine))
     {
-        DrawNateLine( *offPixBase, &clipRect, *l, CLIP_TOP, *l, CLIP_BOTTOM, 0, 0, BLACK);
+        DrawNateLine(gOffWorld, &clipRect, *l, CLIP_TOP, *l, CLIP_BOTTOM, 0, 0, BLACK);
         ol = *l;
         *l = -1;
         l++;
@@ -782,7 +773,7 @@ void EraseSectorLines() {
 
     while (( *l != -1) && ( count < kMaxSectorLine))
     {
-        DrawNateLine( *offPixBase, &clipRect, CLIP_LEFT, *l, CLIP_RIGHT, *l, 0, 0, BLACK);
+        DrawNateLine(gOffWorld, &clipRect, CLIP_LEFT, *l, CLIP_RIGHT, *l, 0, 0, BLACK);
         ol = *l;
         *l = -1;
         l++;
@@ -798,7 +789,6 @@ void DrawSite() {
     smallFixedType  fa, fb, fc;
     transColorType  *transColor;
     unsigned char   color;
-    PixMapHandle    offPixBase;
     Rect        clipRect;
     Point           cursorCoord;
     Boolean         doDraw;
@@ -813,7 +803,6 @@ void DrawSite() {
         }
     } else doDraw = false;
 
-    offPixBase = GetGWorldPixMap( gOffWorld);
     clipRect.left = CLIP_LEFT;
     clipRect.right = CLIP_RIGHT;
     clipRect.top = CLIP_TOP;
@@ -845,7 +834,7 @@ void DrawSite() {
         mGetTranslateColorShade( PALE_GREEN, MEDIUM, color, transColor);
         if ( doDraw)
         {
-            DrawNateLine( *offPixBase, &clipRect, (sx + sa),
+            DrawNateLine(gOffWorld, &clipRect, (sx + sa),
                     (sy + sb), sx, sy, 0,
                     0, color);
         }
@@ -862,11 +851,11 @@ void DrawSite() {
 
         if ( doDraw)
         {
-            DrawNateLine( *offPixBase, &clipRect, (sx + sc),
+            DrawNateLine(gOffWorld, &clipRect, (sx + sc),
                     (sy + sd), sx, sy, 0,
                     0, color);
             mGetTranslateColorShade( PALE_GREEN, DARKER+kSlightlyDarkerColor, color, transColor);
-            DrawNateLine( *offPixBase, &clipRect, (sx + sc),
+            DrawNateLine(gOffWorld, &clipRect, (sx + sc),
                     (sy + sd), (sx + sa), (sy + sb), 0,
                     0, color);
         }
@@ -916,16 +905,16 @@ void DrawSite() {
     if ( globals()->gMouseActive > kMouseTurningOff)
     {
         mGetTranslateColorShade( SKY_BLUE, MEDIUM, color, transColor);
-        DrawNateLine( *offPixBase, &clipRect, sx,
+        DrawNateLine(gOffWorld, &clipRect, sx,
                     clipRect.top, sx, (sy - kCursorBoundsSize), 0,
                     0, color);
-        DrawNateLine( *offPixBase, &clipRect, sx,
+        DrawNateLine(gOffWorld, &clipRect, sx,
                     (sy + kCursorBoundsSize), sx, clipRect.bottom - 1, 0,
                     0, color);
-        DrawNateLine( *offPixBase, &clipRect, clipRect.left,
+        DrawNateLine(gOffWorld, &clipRect, clipRect.left,
                     sy, (sx - kCursorBoundsSize), sy, 0,
                     0, color);
-        DrawNateLine( *offPixBase, &clipRect, (sx + kCursorBoundsSize),
+        DrawNateLine(gOffWorld, &clipRect, (sx + kCursorBoundsSize),
                     sy, clipRect.right - 1, sy, 0,
                     0, color);
     }
@@ -934,7 +923,6 @@ void DrawSite() {
 void DrawSectorLines() {
     int32_t         *l, dashon, dashoff, dashcount;
     uint32_t        size, level, x, h, division;
-    PixMapHandle    offPixBase;
     Rect        clipRect;
     unsigned char   color;
     transColorType  *transColor;
@@ -950,7 +938,6 @@ void DrawSectorLines() {
         }
     } else doDraw = false;
 
-    offPixBase = GetGWorldPixMap( gOffWorld);
     clipRect.left = CLIP_LEFT;
     clipRect.right = CLIP_RIGHT;
     clipRect.top = CLIP_TOP;
@@ -1010,11 +997,11 @@ void DrawSectorLines() {
 //              dashcount = ((gGlobalCorner.v * gAbsoluteScale) >> SHIFT_SCALE) % 128;
                 dashcount = gGlobalCorner.v % ( 64);
                 dashcount = (( dashcount * gAbsoluteScale) >> SHIFT_SCALE);
-                DashNateLine( *offPixBase, &clipRect, x, CLIP_TOP, x, CLIP_BOTTOM, 0,
+                DashNateLine(gOffWorld, &clipRect, x, CLIP_TOP, x, CLIP_BOTTOM, 0,
                     0, color, dashon, dashoff, dashcount);
             } else
             {
-                DrawNateLine( *offPixBase, &clipRect, x, CLIP_TOP, x, CLIP_BOTTOM, 0,
+                DrawNateLine(gOffWorld, &clipRect, x, CLIP_TOP, x, CLIP_BOTTOM, 0,
                     0, color);
             }
             *l = x;
@@ -1086,11 +1073,11 @@ void DrawSectorLines() {
             {
                 dashcount = gGlobalCorner.v % ( 64);
                 dashcount = (( dashcount * gAbsoluteScale) >> SHIFT_SCALE);
-                DashNateLine( *offPixBase, &clipRect, CLIP_LEFT, x, CLIP_RIGHT, x, 0,
+                DashNateLine(gOffWorld, &clipRect, CLIP_LEFT, x, CLIP_RIGHT, x, 0,
                     0, color, dashon, dashoff, dashcount);
             } else
             {
-                DrawNateLine( *offPixBase, &clipRect, CLIP_LEFT, x, CLIP_RIGHT, x, 0,
+                DrawNateLine(gOffWorld, &clipRect, CLIP_LEFT, x, CLIP_RIGHT, x, 0,
                     0, color);
             }
             *l = x;
@@ -1136,11 +1123,9 @@ void DrawSectorLines() {
 
 void ShowSite() {
     int16_t         sx, sy, sa, sb, sc, sd;
-    PixMapHandle    offPixBase;
     Rect        clipRect;
     int32_t         *l;
 
-    offPixBase = GetGWorldPixMap( gOffWorld);
     clipRect.left = CLIP_LEFT;
     clipRect.right = CLIP_RIGHT;
     clipRect.top = CLIP_TOP;
@@ -1154,13 +1139,13 @@ void ShowSite() {
     sc = *(l++);
     sd = *(l++);
 
-    CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, sa,
+    CopyNateLine(gOffWorld, gActiveWorld, &clipRect, sa,
                 sb, sx, sy,
                 gNatePortLeft << 2L, gNatePortTop);
-    CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, sc,
+    CopyNateLine(gOffWorld, gActiveWorld, &clipRect, sc,
                 sd, sx, sy,
                 gNatePortLeft << 2L, gNatePortTop);
-    CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, sc,
+    CopyNateLine(gOffWorld, gActiveWorld, &clipRect, sc,
                 sd, sa, sb,
                 gNatePortLeft << 2L, gNatePortTop);
 
@@ -1170,13 +1155,13 @@ void ShowSite() {
     sb = *(l++);
     sc = *(l++);
     sd = *(l++);
-    CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, sa,
+    CopyNateLine(gOffWorld, gActiveWorld, &clipRect, sa,
                 sb, sx, sy,
                 gNatePortLeft << 2L, gNatePortTop);
-    CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, sc,
+    CopyNateLine(gOffWorld, gActiveWorld, &clipRect, sc,
                 sd, sx, sy,
                 gNatePortLeft << 2L, gNatePortTop);
-    CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, sc,
+    CopyNateLine(gOffWorld, gActiveWorld, &clipRect, sc,
                 sd, sa, sb,
                 gNatePortLeft << 2L, gNatePortTop);
 
@@ -1186,10 +1171,10 @@ void ShowSite() {
 
     if ( globals()->gMouseActive > kMouseTurningOff)
     {
-        CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, sx,
+        CopyNateLine(gOffWorld, gActiveWorld, &clipRect, sx,
                     clipRect.top, sx, clipRect.bottom - 1,
                     gNatePortLeft << 2L, gNatePortTop);
-        CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, clipRect.left,
+        CopyNateLine(gOffWorld, gActiveWorld, &clipRect, clipRect.left,
                     sy, clipRect.right - 1, sy,
                     gNatePortLeft << 2L, gNatePortTop);
     }
@@ -1199,16 +1184,16 @@ void ShowSite() {
 
     if ( globals()->gMouseActive)
     {
-        CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, sx,
+        CopyNateLine(gOffWorld, gActiveWorld, &clipRect, sx,
                     clipRect.top, sx, (sy - kCursorBoundsSize),
                     gNatePortLeft << 2L, gNatePortTop);
-        CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, sx,
+        CopyNateLine(gOffWorld, gActiveWorld, &clipRect, sx,
                     (sy + kCursorBoundsSize), sx, clipRect.bottom - 1,
                     gNatePortLeft << 2L, gNatePortTop);
-        CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, clipRect.left,
+        CopyNateLine(gOffWorld, gActiveWorld, &clipRect, clipRect.left,
                     sy, (sx - kCursorBoundsSize), sy,
                     gNatePortLeft << 2L, gNatePortTop);
-        CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, (sx + kCursorBoundsSize),
+        CopyNateLine(gOffWorld, gActiveWorld, &clipRect, (sx + kCursorBoundsSize),
                     sy, clipRect.right - 1, sy,
                     gNatePortLeft << 2L, gNatePortTop);
         if ( globals()->gMouseActive == kMouseTurningOff) globals()->gMouseActive = kMouseOff;
@@ -1217,10 +1202,8 @@ void ShowSite() {
 
 void ShowSectorLines() {
     int32_t         *l, count;
-    PixMapHandle    offPixBase;
     Rect        clipRect;
 
-    offPixBase = GetGWorldPixMap( gOffWorld);
     clipRect.left = CLIP_LEFT;
     clipRect.right = CLIP_RIGHT;
     clipRect.top = CLIP_TOP;
@@ -1232,11 +1215,11 @@ void ShowSectorLines() {
     while ( count < kMaxSectorLine)
     {
         if ( *l != -1)
-            CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, *l, CLIP_TOP, *l, CLIP_BOTTOM,
+            CopyNateLine(gOffWorld, gActiveWorld, &clipRect, *l, CLIP_TOP, *l, CLIP_BOTTOM,
                 gNatePortLeft << 2L, gNatePortTop);
         l++;
         if ( *l != -1)
-            CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, *l, CLIP_TOP, *l, CLIP_BOTTOM,
+            CopyNateLine(gOffWorld, gActiveWorld, &clipRect, *l, CLIP_TOP, *l, CLIP_BOTTOM,
                 gNatePortLeft << 2L, gNatePortTop);
         l++;
         count++;
@@ -1248,11 +1231,11 @@ void ShowSectorLines() {
     while ( count < kMaxSectorLine)
     {
         if ( *l != -1)
-            CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, CLIP_LEFT, *l, CLIP_RIGHT, *l,
+            CopyNateLine(gOffWorld, gActiveWorld, &clipRect, CLIP_LEFT, *l, CLIP_RIGHT, *l,
                 gNatePortLeft << 2L, gNatePortTop);
         l++;
         if ( *l != -1)
-            CopyNateLine( *offPixBase, *thePixMapHandle, &clipRect, CLIP_LEFT, *l, CLIP_RIGHT, *l,
+            CopyNateLine(gOffWorld, gActiveWorld, &clipRect, CLIP_LEFT, *l, CLIP_RIGHT, *l,
                 gNatePortLeft << 2L, gNatePortTop);
         l++;
         count++;
@@ -1310,7 +1293,7 @@ void InstrumentsHandleMouseStillDown() {
 }
 
 void DrawArbitrarySectorLines(coordPointType *corner, int32_t scale, int32_t minSectorSize,
-        Rect *bounds, PixMapHandle pixBase, int32_t portLeft, int32_t portTop) {
+        Rect *bounds, PixMap* pixBase, int32_t portLeft, int32_t portTop) {
     uint32_t        size, level, x, h, division;
     Rect        clipRect;
     unsigned char   color;
@@ -1358,7 +1341,7 @@ void DrawArbitrarySectorLines(coordPointType *corner, int32_t scale, int32_t min
             mGetTranslateColorShade( BLUE, DARKER, color, transColor);
         }
 
-        DrawNateLine( *pixBase, &clipRect, x, bounds->top, x, bounds->bottom,
+        DrawNateLine( pixBase, &clipRect, x, bounds->top, x, bounds->bottom,
                 portLeft << 2, portTop, color);
         division += level;
         division &= 0x0000000f;
@@ -1389,7 +1372,7 @@ void DrawArbitrarySectorLines(coordPointType *corner, int32_t scale, int32_t min
             mGetTranslateColorShade( BLUE, DARKER, color, transColor);
         }
 
-        DrawNateLine( *pixBase, &clipRect, bounds->left, x, bounds->right, x,
+        DrawNateLine( pixBase, &clipRect, bounds->left, x, bounds->right, x,
                 portLeft << 2, portTop, color);
 
         division += level;
@@ -1490,7 +1473,7 @@ void GetArbitrarySingleSectorBounds(coordPointType *corner, coordPointType *loca
     }
 }
 
-void UpdateBarIndicator(int16_t which, int32_t value, int32_t max, PixMapHandle pixMap) {
+void UpdateBarIndicator(int16_t which, int32_t value, int32_t max, PixMap* pixMap) {
     int32_t         graphicValue;
     Rect        tRect, clipRect;
     transColorType  *transColor;
@@ -1524,7 +1507,7 @@ void UpdateBarIndicator(int16_t which, int32_t value, int32_t max, PixMapHandle 
         mGetTranslateColorShade( globals()->gBarIndicator[which].color, MEDIUM, lightColor, transColor);
         mGetTranslateColorShade( globals()->gBarIndicator[which].color, DARKER, darkColor, transColor);
 //      DrawNateRect( *pixMap, &tRect, gNatePortLeft << 2, gNatePortTop, color);
-        DrawNateShadedRect( *pixMap, &tRect, &clipRect, gNatePortLeft << 2L, gNatePortTop, color, lightColor, darkColor);
+        DrawNateShadedRect(pixMap, &tRect, &clipRect, gNatePortLeft << 2L, gNatePortTop, color, lightColor, darkColor);
 
         if ( graphicValue > 0)
         {
@@ -1534,11 +1517,11 @@ void UpdateBarIndicator(int16_t which, int32_t value, int32_t max, PixMapHandle 
             mGetTranslateColorShade( globals()->gBarIndicator[which].color, VERY_LIGHT, lightColor, transColor);
             mGetTranslateColorShade( globals()->gBarIndicator[which].color, MEDIUM, darkColor, transColor);
     //      DrawNateRect( *pixMap, &tRect, gNatePortLeft << 2, gNatePortTop, color);
-            DrawNateShadedRect( *pixMap, &tRect, &clipRect, gNatePortLeft << 2L, gNatePortTop, color, lightColor, darkColor);
+            DrawNateShadedRect(pixMap, &tRect, &clipRect, gNatePortLeft << 2L, gNatePortTop, color, lightColor, darkColor);
         }
         SetRect( &rrect, tRect.left, globals()->gBarIndicator[ which].top,
             tRect.right, globals()->gBarIndicator[ which].top + kBarIndicatorHeight);
-        CopyRealWorldToOffWorld( gTheWindow, &rrect);
+        CopyRealWorldToOffWorld(&rrect);
 
         globals()->gBarIndicator[ which].thisValue = value;
     }
@@ -1558,7 +1541,7 @@ void DrawBuildTimeBar(int32_t value) {
     tRect.right = clipRect.right = kMiniBuildTimeRight;
 
     mGetTranslateColorShade( PALE_PURPLE, MEDIUM, color, transColor);
-    DrawNateVBracket( *thePixMapHandle, &tRect, &clipRect, gNatePortLeft << 2L, gNatePortTop,
+    DrawNateVBracket( gActiveWorld, &tRect, &clipRect, gNatePortLeft << 2L, gNatePortTop,
                      color);
 
     tRect.left = kMiniBuildTimeLeft + 2;
@@ -1570,7 +1553,7 @@ void DrawBuildTimeBar(int32_t value) {
     {
         mGetTranslateColorShade( PALE_PURPLE, LIGHT, color, transColor);
 
-        DrawNateRect( *thePixMapHandle, &tRect, gNatePortLeft << 2L, gNatePortTop, color);
+        DrawNateRect( gActiveWorld, &tRect, gNatePortLeft << 2L, gNatePortTop, color);
 
         tRect.top = kMiniBuildTimeTop + 2 + globals()->gInstrumentTop;
     } else value = 0;
@@ -1579,5 +1562,5 @@ void DrawBuildTimeBar(int32_t value) {
 
     mGetTranslateColorShade( PALE_PURPLE, DARK, color, transColor);
 
-    DrawNateRect( *thePixMapHandle, &tRect, gNatePortLeft << 2L, gNatePortTop, color);
+    DrawNateRect( gActiveWorld, &tRect, gNatePortLeft << 2L, gNatePortTop, color);
 }

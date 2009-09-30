@@ -17,8 +17,6 @@
 
 #include "SpriteCursor.hpp"
 
-#include <QDOffscreen.h>
-
 #include "ColorTranslation.hpp"
 #include "ConditionalMacros.h"
 #include "Error.hpp"
@@ -26,9 +24,10 @@
 #include "OffscreenGWorld.hpp"
 #include "Resources.h"
 
-extern  GWorldPtr       gOffWorld, gRealWorld, gSaveWorld;
-extern  PixMapHandle    thePixMapHandle;
 extern  long            WORLD_WIDTH, WORLD_HEIGHT, gNatePortLeft, gNatePortTop;
+extern PixMap* gActiveWorld;
+extern PixMap* gOffWorld;
+extern PixMap* gSaveWorld;
 
 spriteCursorType    *gSpriteCursor = nil;
 
@@ -133,15 +132,11 @@ void SetSpriteCursorShape( short whichShape)
 void EraseSpriteCursorSprite( void)
 
 {
-    PixMapHandle    savePixBase, offPixBase;
-
-    savePixBase = GetGWorldPixMap( gSaveWorld);
-    offPixBase = GetGWorldPixMap( gOffWorld);
     if (gSpriteCursor->sprite.table.get() != nil) {
         if ( gSpriteCursor->sprite.thisRect.left < gSpriteCursor->sprite.thisRect.right)
         {
-            ChunkCopyPixMapToPixMap( *savePixBase,
-                &(gSpriteCursor->sprite.thisRect), *offPixBase);
+            ChunkCopyPixMapToPixMap( gSaveWorld,
+                &(gSpriteCursor->sprite.thisRect), gOffWorld);
             if ( gSpriteCursor->showLevel <= kSpriteCursorHidden)
                 gSpriteCursor->sprite.lastRect = gSpriteCursor->sprite.thisRect;
         }
@@ -152,15 +147,15 @@ void EraseSpriteCursorSprite( void)
 
         SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
-        CopyNateLine( *savePixBase, *offPixBase,
+        CopyNateLine( gSaveWorld, gOffWorld,
             &tc, gSpriteCursor->thisLineStart.h, gSpriteCursor->thisLineStart.v,
             gSpriteCursor->thisLineEnd.h, gSpriteCursor->thisLineEnd.v,
             0, 0);
-        CopyNateLine( *savePixBase, *offPixBase,
+        CopyNateLine( gSaveWorld, gOffWorld,
             &tc, gSpriteCursor->thisLineStart.h, gSpriteCursor->thisLineStart.v+1,
             gSpriteCursor->thisLineEnd.h, gSpriteCursor->thisLineEnd.v+1,
             0, 0);
-        CopyNateLine( *savePixBase, *offPixBase,
+        CopyNateLine( gSaveWorld, gOffWorld,
             &tc, gSpriteCursor->thisLineStart.h, gSpriteCursor->thisLineStart.v+2,
             gSpriteCursor->thisLineEnd.h, gSpriteCursor->thisLineEnd.v+2,
             0, 0);
@@ -170,15 +165,15 @@ void EraseSpriteCursorSprite( void)
 
         SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
-        CopyNateLine( *savePixBase, *offPixBase,
+        CopyNateLine( gSaveWorld, gOffWorld,
             &tc, gSpriteCursor->lastLineStart.h, gSpriteCursor->lastLineStart.v,
             gSpriteCursor->lastLineEnd.h, gSpriteCursor->lastLineEnd.v,
             0, 0);
-        CopyNateLine( *savePixBase, *offPixBase,
+        CopyNateLine( gSaveWorld, gOffWorld,
             &tc, gSpriteCursor->lastLineStart.h, gSpriteCursor->lastLineStart.v+1,
             gSpriteCursor->lastLineEnd.h, gSpriteCursor->lastLineEnd.v+1,
             0, 0);
-        CopyNateLine( *savePixBase, *offPixBase,
+        CopyNateLine( gSaveWorld, gOffWorld,
             &tc, gSpriteCursor->lastLineStart.h, gSpriteCursor->lastLineStart.v+2,
             gSpriteCursor->lastLineEnd.h, gSpriteCursor->lastLineEnd.v+2,
             0, 0);
@@ -188,21 +183,18 @@ void EraseSpriteCursorSprite( void)
 void DrawSpriteCursorSprite( Rect *clipRect)
 
 {
-    PixMapHandle    pixMap, savePixBase;
     Rect        sRect, tc;
     spritePix       aSpritePix;
     TypedHandle<natePixType> pixTable;
     int             whichShape;
     Rect            tRect;
 
-    pixMap = GetGWorldPixMap( gOffWorld);
-    savePixBase = GetGWorldPixMap( gSaveWorld);
     if ((gSpriteCursor->sprite.table.get() != nil) &&
         ( gSpriteCursor->showLevel >= kSpriteCursorVisible))
     {
         MacSetRect( &tRect, gSpriteCursor->where.h - 16, gSpriteCursor->where.v - 16,
             gSpriteCursor->where.h + 16, gSpriteCursor->where.v + 16);
-        ChunkCopyPixMapToPixMap( *pixMap, &tRect, *savePixBase);
+        ChunkCopyPixMapToPixMap( gOffWorld, &tRect, gSaveWorld);
     }
 
     if ( gSpriteCursor->thisShowLine)
@@ -210,15 +202,15 @@ void DrawSpriteCursorSprite( Rect *clipRect)
 
         SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
-        CopyNateLine( *pixMap, *savePixBase,
+        CopyNateLine( gOffWorld, gSaveWorld,
             &tc, gSpriteCursor->thisLineStart.h, gSpriteCursor->thisLineStart.v,
             gSpriteCursor->thisLineEnd.h, gSpriteCursor->thisLineEnd.v,
             0, 0);
-        CopyNateLine( *pixMap, *savePixBase,
+        CopyNateLine( gOffWorld, gSaveWorld,
             &tc, gSpriteCursor->thisLineStart.h, gSpriteCursor->thisLineStart.v+1,
             gSpriteCursor->thisLineEnd.h, gSpriteCursor->thisLineEnd.v+1,
             0, 0);
-        CopyNateLine( *pixMap, *savePixBase,
+        CopyNateLine( gOffWorld, gSaveWorld,
             &tc, gSpriteCursor->thisLineStart.h, gSpriteCursor->thisLineStart.v+2,
             gSpriteCursor->thisLineEnd.h, gSpriteCursor->thisLineEnd.v+2,
             0, 0);
@@ -236,7 +228,7 @@ void DrawSpriteCursorSprite( Rect *clipRect)
         aSpritePix.height = GetNatePixTableNatePixHeight( pixTable, whichShape);
 
         OptScaleSpritePixInPixMap( &aSpritePix, gSpriteCursor->where, SCALE_SCALE,
-                &sRect, clipRect, pixMap);
+                &sRect, clipRect, gOffWorld);
         mCopyAnyRect( gSpriteCursor->sprite.thisRect, sRect);
     } else
     {
@@ -256,15 +248,15 @@ void DrawSpriteCursorSprite( Rect *clipRect)
         gFlashingLineColor--;
         if ( gFlashingLineColor < 2) gFlashingLineColor = 14;
 
-        DrawNateLine( *pixMap, &tc,
+        DrawNateLine( gOffWorld, &tc,
             gSpriteCursor->thisLineStart.h, gSpriteCursor->thisLineStart.v+2,
             gSpriteCursor->thisLineEnd.h, gSpriteCursor->thisLineEnd.v+2,
             0, 0, gSpriteCursor->thisLineColorDark);
-        DrawNateLine( *pixMap, &tc,
+        DrawNateLine( gOffWorld, &tc,
             gSpriteCursor->thisLineStart.h, gSpriteCursor->thisLineStart.v+1,
             gSpriteCursor->thisLineEnd.h, gSpriteCursor->thisLineEnd.v+1,
             0, 0, gSpriteCursor->thisLineColor);
-        DrawNateLine( *pixMap, &tc,
+        DrawNateLine( gOffWorld, &tc,
             gSpriteCursor->thisLineStart.h, gSpriteCursor->thisLineStart.v,
             gSpriteCursor->thisLineEnd.h, gSpriteCursor->thisLineEnd.v,
             0, 0, gSpriteCursor->thisLineColor);
@@ -275,12 +267,10 @@ void ShowSpriteCursorSprite( void)
 
 {
     Rect            tRect;
-    PixMapHandle    pixMap;
     Rect        tc;
 
     SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
-    pixMap = GetGWorldPixMap( gOffWorld);
     if (gSpriteCursor->sprite.table.get() != nil) {
         // if thisRect is null
         if (( gSpriteCursor->sprite.thisRect.right <=
@@ -293,8 +283,8 @@ void ShowSpriteCursorSprite( void)
             {
                 // show lastRect
 
-                ChunkCopyPixMapToScreenPixMap( *pixMap, &(gSpriteCursor->sprite.lastRect),
-                        *thePixMapHandle);
+                ChunkCopyPixMapToScreenPixMap( gOffWorld, &(gSpriteCursor->sprite.lastRect),
+                        gActiveWorld);
 
 
             }
@@ -304,8 +294,8 @@ void ShowSpriteCursorSprite( void)
         {
             // then show thisRect
 
-            ChunkCopyPixMapToScreenPixMap( *pixMap,
-                &(gSpriteCursor->sprite.thisRect), *thePixMapHandle);
+            ChunkCopyPixMapToScreenPixMap( gOffWorld,
+                &(gSpriteCursor->sprite.thisRect), gActiveWorld);
 
         // else if the rects don't intersect
         } else if ( ( gSpriteCursor->sprite.lastRect.right <
@@ -320,10 +310,10 @@ void ShowSpriteCursorSprite( void)
             // then draw them individually
 
 
-            ChunkCopyPixMapToScreenPixMap( *pixMap, &(gSpriteCursor->sprite.lastRect),
-                    *thePixMapHandle);
-            ChunkCopyPixMapToScreenPixMap( *pixMap, &(gSpriteCursor->sprite.thisRect),
-                    *thePixMapHandle);
+            ChunkCopyPixMapToScreenPixMap( gOffWorld, &(gSpriteCursor->sprite.lastRect),
+                    gActiveWorld);
+            ChunkCopyPixMapToScreenPixMap( gOffWorld, &(gSpriteCursor->sprite.thisRect),
+                    gActiveWorld);
 
         // else the rects do intersect (and we know are both non-null)
         } else
@@ -331,22 +321,22 @@ void ShowSpriteCursorSprite( void)
             tRect = gSpriteCursor->sprite.thisRect;
             mBiggestRect( tRect, gSpriteCursor->sprite.lastRect);
 
-            ChunkCopyPixMapToScreenPixMap( *pixMap, &tRect, *thePixMapHandle);
+            ChunkCopyPixMapToScreenPixMap( gOffWorld, &tRect, gActiveWorld);
 
         }
         gSpriteCursor->sprite.lastRect = gSpriteCursor->sprite.thisRect;
     }
     if ( gSpriteCursor->lastShowLine)
     {
-        CopyNateLine( *pixMap, *thePixMapHandle,
+        CopyNateLine( gOffWorld, gActiveWorld,
             &tc, gSpriteCursor->lastLineStart.h, gSpriteCursor->lastLineStart.v,
             gSpriteCursor->lastLineEnd.h, gSpriteCursor->lastLineEnd.v,
             gNatePortLeft << 2, gNatePortTop);
-        CopyNateLine( *pixMap, *thePixMapHandle,
+        CopyNateLine( gOffWorld, gActiveWorld,
             &tc, gSpriteCursor->lastLineStart.h, gSpriteCursor->lastLineStart.v+1,
             gSpriteCursor->lastLineEnd.h, gSpriteCursor->lastLineEnd.v+1,
             gNatePortLeft << 2, gNatePortTop);
-        CopyNateLine( *pixMap, *thePixMapHandle,
+        CopyNateLine( gOffWorld, gActiveWorld,
             &tc, gSpriteCursor->lastLineStart.h, gSpriteCursor->lastLineStart.v+2,
             gSpriteCursor->lastLineEnd.h, gSpriteCursor->lastLineEnd.v+2,
             gNatePortLeft << 2, gNatePortTop);
@@ -354,15 +344,15 @@ void ShowSpriteCursorSprite( void)
     }
     if ( gSpriteCursor->thisShowLine)
     {
-        CopyNateLine( *pixMap, *thePixMapHandle,
+        CopyNateLine( gOffWorld, gActiveWorld,
             &tc, gSpriteCursor->thisLineStart.h, gSpriteCursor->thisLineStart.v,
             gSpriteCursor->thisLineEnd.h, gSpriteCursor->thisLineEnd.v,
             gNatePortLeft << 2, gNatePortTop);
-        CopyNateLine( *pixMap, *thePixMapHandle,
+        CopyNateLine( gOffWorld, gActiveWorld,
             &tc, gSpriteCursor->thisLineStart.h, gSpriteCursor->thisLineStart.v+1,
             gSpriteCursor->thisLineEnd.h, gSpriteCursor->thisLineEnd.v+1,
             gNatePortLeft << 2, gNatePortTop);
-        CopyNateLine( *pixMap, *thePixMapHandle,
+        CopyNateLine( gOffWorld, gActiveWorld,
             &tc, gSpriteCursor->thisLineStart.h, gSpriteCursor->thisLineStart.v+2,
             gSpriteCursor->thisLineEnd.h, gSpriteCursor->thisLineEnd.v+2,
             gNatePortLeft << 2, gNatePortTop);

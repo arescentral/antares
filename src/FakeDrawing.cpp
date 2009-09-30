@@ -30,13 +30,10 @@
 #include "Fakes.hpp"
 #include "File.hpp"
 
-scoped_ptr<ColorTable> fake_colors;
+Window fakeWindow(640, 480);
+FakeGDevice fakeGDevice(640, 480, &fakeWindow.portBits);
 
-GWorld fakeOffGWorld(640, 480);
-GWorld fakeRealGWorld(640, 480);
-GWorld fakeSaveGWorld(640, 480);
-FakeWindow fakeWindow(640, 480, &fakeRealGWorld);
-FakeGDevice fakeGDevice(640, 480, &fakeRealGWorld);
+extern PixMap* gActiveWorld;
 
 GDevice* fakeGDevicePtr = &fakeGDevice;
 
@@ -58,6 +55,25 @@ public:
 
 }  // namespace
 
+PixMap::PixMap(int width, int height) {
+    SetRect(&bounds, 0, 0, width, height);
+    rowBytes = width | 0x8000;
+    baseAddr = new unsigned char[width * height];
+    pixelSize = 1;
+    colors = new ColorTable(256);
+}
+
+PixMap::~PixMap() {
+    delete[] baseAddr;
+}
+
+Window::Window(int width, int height)
+        : portBits(width, height) {
+    SetRect(&portRect, 0, 0, width, height);
+}
+
+Window::~Window() { }
+
 void DumpTo(const std::string& path) {
     std::string contents;
     StringBinaryWriter bin(&contents);
@@ -66,7 +82,7 @@ void DumpTo(const std::string& path) {
     bin.write<uint32_t>(480);
 
     for (size_t i = 0; i < 256; ++i) {
-        RGBColor color = fake_colors->color(i);
+        RGBColor color = fakeWindow.portBits.colors->color(i);
         bin.write<uint32_t>(i);
         bin.write(color.red);
         bin.write(color.green);
@@ -142,45 +158,13 @@ void MacSetPort(Window* port) {
     (void)port;
 }
 
-void GetGWorld(GWorld** world, GDevice*** device) {
-    *world = fakeGDevice.world;
-    *device = &fakeGDevicePtr;
-}
-
-void SetGWorld(GWorld* world, GDevice***) {
-    fakeGDevice.world = world;
-    fakeGDevice.gdPMap = &world->pixMapPtr;
-}
-
-OSErr NewGWorld(GWorld** world, int, const Rect&, const ColorTable&, GDHandle device, int) {
-    assert(device == &fakeGDevicePtr);
-    if (world == &gOffWorld) {
-        *world = &fakeOffGWorld;
-    } else if (world == &gRealWorld) {
-        *world = &fakeRealGWorld;
-    } else if (world == &gSaveWorld) {
-        *world = &fakeSaveGWorld;
-    } else {
-        assert(false);
-    }
-    return noErr;
-}
-
-void DisposeGWorld(GWorld*) {
-    assert(false);
-}
-
-PixMap** GetGWorldPixMap(GWorld* world) {
-    return &world->pixMapPtr;
-}
-
 uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue) {
     uint8_t best_color = 0;
     int min_distance = std::numeric_limits<int>::max();
     for (int i = 0; i < 256; ++i) {
-        int distance = abs(fake_colors->color(i).red - red)
-            + abs(fake_colors->color(i).green - green)
-            + abs(fake_colors->color(i).blue - blue);
+        int distance = abs(fakeWindow.portBits.colors->color(i).red - red)
+            + abs(fakeWindow.portBits.colors->color(i).green - green)
+            + abs(fakeWindow.portBits.colors->color(i).blue - blue);
         if (distance == 0) {
             return i;
         } else if (distance < min_distance) {
@@ -197,12 +181,12 @@ uint8_t GetPixel(int x, int y) {
 }
 
 void SetPixel(int x, int y, uint8_t c) {
-    const PixMap* p = *fakeGDevice.gdPMap;
+    const PixMap* p = gActiveWorld;
     p->baseAddr[x + y * (p->rowBytes & 0x7fff)] = c;
 }
 
 void SetPixelRow(int x, int y, uint8_t* c, int count) {
-    const PixMap* p = *fakeGDevice.gdPMap;
+    const PixMap* p = gActiveWorld;
     memcpy(&p->baseAddr[x + y * (p->rowBytes & 0x7fff)], c, count);
 }
 
@@ -211,7 +195,7 @@ Point MakePoint(int x, int y) {
     return result;
 }
 
-void CopyBits(BitMap* source, BitMap* dest, Rect* source_rect, Rect* dest_rect, int mode, void*) {
+void CopyBits(PixMap* source, PixMap* dest, Rect* source_rect, Rect* dest_rect, int mode, void*) {
     static_cast<void>(mode);
     if (source == dest) {
         return;
@@ -258,7 +242,7 @@ void RGBBackColor(RGBColor* color) {
 }
 
 void PaintRect(Rect* rect) {
-    Rect clipped = ClipRectToRect(*rect, (*fakeGDevice.gdPMap)->bounds);
+    Rect clipped = ClipRectToRect(*rect, gActiveWorld->bounds);
     for (int y = clipped.top; y < clipped.bottom; ++y) {
         for (int x = clipped.left; x < clipped.right; ++x) {
             SetPixel(x, y, currentForeColor);
@@ -268,7 +252,7 @@ void PaintRect(Rect* rect) {
 
 void MacFillRect(Rect* rect, Pattern* pattern) {
     static_cast<void>(pattern);
-    Rect clipped = ClipRectToRect(*rect, (*fakeGDevice.gdPMap)->bounds);
+    Rect clipped = ClipRectToRect(*rect, gActiveWorld->bounds);
     for (int y = clipped.top; y < clipped.bottom; ++y) {
         for (int x = clipped.left; x < clipped.right; ++x) {
             SetPixel(x, y, 255);
@@ -277,7 +261,7 @@ void MacFillRect(Rect* rect, Pattern* pattern) {
 }
 
 void EraseRect(Rect* rect) {
-    Rect clipped = ClipRectToRect(*rect, (*fakeGDevice.gdPMap)->bounds);
+    Rect clipped = ClipRectToRect(*rect, gActiveWorld->bounds);
     for (int y = clipped.top; y < clipped.bottom; ++y) {
         for (int x = clipped.left; x < clipped.right; ++x) {
             SetPixel(x, y, currentBackColor);
@@ -286,7 +270,7 @@ void EraseRect(Rect* rect) {
 }
 
 void FrameRect(Rect* rect) {
-    Rect clipped = ClipRectToRect(*rect, (*fakeGDevice.gdPMap)->bounds);
+    Rect clipped = ClipRectToRect(*rect, gActiveWorld->bounds);
     if (clipped.left == clipped.right || clipped.top == clipped.bottom) {
         return;
     }
@@ -313,9 +297,9 @@ void MacFrameRect(Rect* rect) {
 }
 
 void Index2Color(long index, RGBColor* color) {
-    color->red = fake_colors->color(index).red;
-    color->green = fake_colors->color(index).green;
-    color->blue = fake_colors->color(index).blue;
+    color->red = fakeWindow.portBits.colors->color(index).red;
+    color->green = fakeWindow.portBits.colors->color(index).green;
+    color->blue = fakeWindow.portBits.colors->color(index).blue;
 }
 
 Point currentPen = { 0, 0 };
@@ -374,14 +358,10 @@ uint16_t DoubleBits(uint8_t in) {
 }
 
 void RestoreEntries(const ColorTable& table) {
-    for (size_t i = 0; i <= table.size(); ++i) {
-        fake_colors->set_color(i, table.color(i));
+    for (size_t i = 0; i < table.size(); ++i) {
+        fakeWindow.portBits.colors->set_color(i, table.color(i));
     }
 }
 
 void FakeDrawingInit() {
-    fake_colors.reset(new ColorTable(256));
-    fakeOffGWorld.pixMap.colors = new ColorTable(256);
-    fakeRealGWorld.pixMap.colors = new ColorTable(256);
-    fakeSaveGWorld.pixMap.colors = new ColorTable(256);
 }

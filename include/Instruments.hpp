@@ -44,11 +44,11 @@ void InstrumentsHandleClick();
 void InstrumentsHandleDoubleClick();
 void InstrumentsHandleMouseUp();
 void InstrumentsHandleMouseStillDown();
-void DrawArbitrarySectorLines(coordPointType *, int32_t, int32_t, Rect *, PixMapHandle, int32_t,
+void DrawArbitrarySectorLines(coordPointType *, int32_t, int32_t, Rect *, PixMap*, int32_t,
         int32_t);
 void GetArbitrarySingleSectorBounds(coordPointType*, coordPointType*, int32_t, int32_t, Rect*,
         Rect*);
-void UpdateBarIndicator(int16_t, int32_t, int32_t, PixMapHandle);
+void UpdateBarIndicator(int16_t, int32_t, int32_t, PixMap*);
 void DrawBuildTimeBar(int32_t);
 
 #endif // ANTARES_RADAR_HPP_

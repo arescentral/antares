@@ -20,8 +20,6 @@
 
 #include "Minicomputer.hpp"
 
-#include <QDOffscreen.h>
-
 #include "Admiral.hpp"
 #include "AnyChar.hpp"
 #include "AresGlobalType.hpp"
@@ -173,12 +171,12 @@
 #define kMaxShipBuffer          40
 
 inline void mBlackMiniScreenLine(
-        long mtop, long mlinenum, long mleft, long mright, Rect& mbounds, PixMap** mpixbase) {
+        long mtop, long mlinenum, long mleft, long mright, Rect& mbounds, PixMap* mpixbase) {
     mbounds.left = kMiniScreenLeft + mleft;
     mbounds.top = mtop + mlinenum * mDirectFontHeight();
     mbounds.right = kMiniScreenLeft + mright;
     mbounds.bottom = mbounds.top + mDirectFontHeight();
-    DrawNateRect( *mpixbase, &mbounds, 0, 0, BLACK);
+    DrawNateRect(mpixbase, &mbounds, 0, 0, BLACK);
 }
 
 inline long mGetLineNumFromV(long mV) {
@@ -270,12 +268,12 @@ inline spaceObjectType* mGetMiniObjectPtr(long mwhich) {
     return *globals()->gMiniScreenData.objectData + mwhich;
 }
 
-extern GWorldPtr        gOffWorld, gRealWorld, gSaveWorld;
 extern WindowPtr        gTheWindow;
-extern PixMapHandle     thePixMapHandle;
 extern long             gNatePortLeft, gNatePortTop, gNetLatency;
 extern directTextType*  gDirectText;
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
+extern PixMap*          gActiveWorld;
+extern PixMap*          gOffWorld;
 
 miniComputerDataType    *gMiniScreenData = nil;
 
@@ -399,7 +397,6 @@ void DrawMiniScreen( void)
 {
     Rect                mRect;
     Rect            lRect, cRect;
-    PixMapHandle        offPixBase;
     miniScreenLineType  *c;
     unsigned char       color, lightcolor, darkcolor, textcolor, lineColor = kMiniScreenColor;
     transColorType      *transColor;
@@ -407,13 +404,12 @@ void DrawMiniScreen( void)
 
     mSetDirectFont( kComputerFontNum);
 
-    offPixBase = GetGWorldPixMap( gOffWorld);
     DrawInOffWorld();
     SetLongRect( &lRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
                 kMiniScreenBottom + globals()->gInstrumentTop);
     color = GetTranslateColorShade( kMiniScreenColor, DARKEST);
     cRect = lRect;
-    DrawNateRect( *offPixBase, &cRect, 0, 0, color);
+    DrawNateRect(gOffWorld, &cRect, 0, 0, color);
 
     mRect.left = kMiniScreenLeft;
     mRect.top = kMiniScreenTop + globals()->gInstrumentTop;
@@ -432,7 +428,7 @@ void DrawMiniScreen( void)
             lRect.bottom = mRect.bottom = kButBoxBottom + globals()->gInstrumentTop;
             color = GetTranslateColorShade( kMiniScreenColor, DARKEST);
             cRect = lRect;
-            DrawNateRect( *offPixBase, &cRect, 0, 0, color);
+            DrawNateRect(gOffWorld, &cRect, 0, 0, color);
             lineCorrect = -kMiniScreenCharHeight;
             lineColor = kMiniButColor;
         }
@@ -465,8 +461,7 @@ void DrawMiniScreen( void)
                         mGetTranslateColorShade( lineColor, DARK, color, transColor);
                         mGetTranslateColorShade( lineColor, MEDIUM, lightcolor, transColor);
                         mGetTranslateColorShade( lineColor, DARKER, darkcolor, transColor);
-                        DrawNateShadedRect( *offPixBase, &cRect, &lRect, 0, 0, color, lightcolor, darkcolor);
-//                      DrawNateRect( *offPixBase, &cRect, 0, 0, color);
+                        DrawNateShadedRect(gOffWorld, &cRect, &lRect, 0, 0, color, lightcolor, darkcolor);
                     }
                     break;
 
@@ -479,7 +474,7 @@ void DrawMiniScreen( void)
                     mGetTranslateColorShade( lineColor, MEDIUM, color, transColor);
                     mGetTranslateColorShade( lineColor, LIGHT, lightcolor, transColor);
                     mGetTranslateColorShade( lineColor, DARK, darkcolor, transColor);
-                    DrawNateShadedRect( *offPixBase, &cRect, &lRect, 0, 0, color, lightcolor, darkcolor);
+                    DrawNateShadedRect(gOffWorld, &cRect, &lRect, 0, 0, color, lightcolor, darkcolor);
                     break;
 
                 case buttonOnLineKind:
@@ -491,7 +486,7 @@ void DrawMiniScreen( void)
                     mGetTranslateColorShade( lineColor, LIGHT, color, transColor);
                     mGetTranslateColorShade( lineColor, VERY_LIGHT, lightcolor, transColor);
                     mGetTranslateColorShade( lineColor, MEDIUM, darkcolor, transColor);
-                    DrawNateShadedRect( *offPixBase, &cRect, &lRect, 0, 0, color, lightcolor, darkcolor);
+                    DrawNateShadedRect(gOffWorld, &cRect, &lRect, 0, 0, color, lightcolor, darkcolor);
                     textcolor = BLACK;
                     break;
 
@@ -505,7 +500,7 @@ void DrawMiniScreen( void)
         }
         MoveTo( mRect.left + kMiniScreenLeftBuffer, mRect.top + (count + lineCorrect) * ((
             gDirectText->height) /* * 2 */) + gDirectText->ascent /* * 2 */);
-        DrawDirectTextStringClipped( c->string, textcolor, *offPixBase, &lRect, 0, 0);
+        DrawDirectTextStringClipped( c->string, textcolor, gOffWorld, &lRect, 0, 0);
         c++;
     }
 
@@ -519,7 +514,6 @@ void DrawAndShowMiniScreenLine( long whichLine)
 {
     Rect                tRect;
     Rect            lRect, cRect;
-    PixMapHandle        offPixBase;
     miniScreenLineType  *c;
     unsigned char       color, textcolor, lineColor = kMiniScreenColor, lightcolor, darkcolor;
     transColorType      *transColor;
@@ -529,7 +523,6 @@ void DrawAndShowMiniScreenLine( long whichLine)
 
     mSetDirectFont( kComputerFontNum);
 
-    offPixBase = GetGWorldPixMap( gOffWorld);
     DrawInOffWorld();
     if ( whichLine < kMiniScreenCharHeight)
     {
@@ -550,7 +543,7 @@ void DrawAndShowMiniScreenLine( long whichLine)
     }
 
     color = GetTranslateColorShade( lineColor, DARKEST);
-    DrawNateRect( *offPixBase, &cRect, 0, 0, color);
+    DrawNateRect(gOffWorld, &cRect, 0, 0, color);
 
     c = *globals()->gMiniScreenData.lineData + whichLine;
 
@@ -582,8 +575,7 @@ void DrawAndShowMiniScreenLine( long whichLine)
                         mGetTranslateColorShade( lineColor, DARK, color, transColor);
                         mGetTranslateColorShade( lineColor, MEDIUM, lightcolor, transColor);
                         mGetTranslateColorShade( lineColor, DARKER, darkcolor, transColor);
-                        DrawNateShadedRect( *offPixBase, &cRect, &lRect, 0, 0, color, lightcolor, darkcolor);
-//                      DrawNateRect( *offPixBase, &cRect, 0, 0, color);
+                        DrawNateShadedRect(gOffWorld, &cRect, &lRect, 0, 0, color, lightcolor, darkcolor);
                     }
                 break;
 
@@ -596,7 +588,7 @@ void DrawAndShowMiniScreenLine( long whichLine)
                 mGetTranslateColorShade( lineColor, MEDIUM, color, transColor);
                 mGetTranslateColorShade( lineColor, LIGHT, lightcolor, transColor);
                 mGetTranslateColorShade( lineColor, DARK, darkcolor, transColor);
-                DrawNateShadedRect( *offPixBase, &cRect, &lRect, 0, 0, color, lightcolor, darkcolor);
+                DrawNateShadedRect(gOffWorld, &cRect, &lRect, 0, 0, color, lightcolor, darkcolor);
                 break;
 
             case buttonOnLineKind:
@@ -608,7 +600,7 @@ void DrawAndShowMiniScreenLine( long whichLine)
                 mGetTranslateColorShade( lineColor, LIGHT, color, transColor);
                 mGetTranslateColorShade( lineColor, VERY_LIGHT, lightcolor, transColor);
                 mGetTranslateColorShade( lineColor, MEDIUM, darkcolor, transColor);
-                DrawNateShadedRect( *offPixBase, &cRect, &lRect, 0, 0, color, lightcolor, darkcolor);
+                DrawNateShadedRect(gOffWorld, &cRect, &lRect, 0, 0, color, lightcolor, darkcolor);
                 textcolor = BLACK;
                 break;
         }
@@ -623,7 +615,7 @@ void DrawAndShowMiniScreenLine( long whichLine)
         gDirectText->height) /* * 2 */) + gDirectText->ascent /* * 2 */);
 
     DrawDirectTextStringClipped(    c->string, textcolor,
-                                    *offPixBase, &lRect, 0, 0);
+                                    gOffWorld, &lRect, 0, 0);
     NormalizeColors();
     DrawInRealWorld();
     NormalizeColors();
@@ -632,23 +624,20 @@ void DrawAndShowMiniScreenLine( long whichLine)
     tRect.right = kMiniScreenRight;
     tRect.top = lRect.top + (( whichLine + lineCorrect) * ( gDirectText->height /* * 2 */));
     tRect.bottom = tRect.top + gDirectText->height/* * 2 */;
-    ChunkCopyPixMapToScreenPixMap( *offPixBase, &tRect, *thePixMapHandle);
+    ChunkCopyPixMapToScreenPixMap(gOffWorld, &tRect, gActiveWorld);
 }
 
 void ShowWholeMiniScreen( void)
 
 {
     Rect                tRect;
-    PixMapHandle        offPixBase;
-
-    offPixBase = GetGWorldPixMap( gOffWorld);
 
     MacSetRect( &tRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
                 kMiniScreenBottom + globals()->gInstrumentTop);
-    ChunkCopyPixMapToScreenPixMap( *offPixBase, &tRect, *thePixMapHandle);
+    ChunkCopyPixMapToScreenPixMap(gOffWorld, &tRect, gActiveWorld);
     MacSetRect( &tRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
                 kButBoxBottom + globals()->gInstrumentTop);
-    ChunkCopyPixMapToScreenPixMap( *offPixBase, &tRect, *thePixMapHandle);
+    ChunkCopyPixMapToScreenPixMap(gOffWorld, &tRect, gActiveWorld);
 }
 
 void MakeMiniScreenFromIndString( short whichString)
@@ -1272,7 +1261,6 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
 {
     static long         lastOne = -1, lastTwo = -1, lastSpecial = -1;
     unsigned char       lightcolor;
-    PixMapHandle        offPixBase;
     Rect            lRect, clipRect;
     transColorType      *transColor;
     Rect                mRect;
@@ -1280,7 +1268,6 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
     unsigned char       digit[3], *digitp;
     long                scratch;
 
-    offPixBase = GetGWorldPixMap( gOffWorld);
     mSetDirectFont( kComputerFontNum);
 
     clipRect.left = kMiniScreenLeft;
@@ -1295,7 +1282,7 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
         lRect.left = kMiniAmmoLeftOne;
         lRect.right = lRect.left + kMiniAmmoSingleWidth;
 
-        DrawNateRect( *offPixBase, &lRect, 0, 0, BLACK);
+        DrawNateRect(gOffWorld, &lRect, 0, 0, BLACK);
 
         if ( thisOne >= 0)
         {
@@ -1315,7 +1302,7 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
 
             MoveTo( lRect.left + kMiniAmmoTextHBuffer, lRect.bottom-1/*lRect.top + gDirectText->ascent*/);
 
-            DrawDirectTextStringClipped( digit, lightcolor, *offPixBase,
+            DrawDirectTextStringClipped( digit, lightcolor, gOffWorld,
                                         &clipRect, 0, 0);
         }
 
@@ -1329,7 +1316,7 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
         lRect.left = kMiniAmmoLeftTwo;
         lRect.right = lRect.left + kMiniAmmoSingleWidth;
 
-        DrawNateRect( *offPixBase, &lRect, 0, 0, BLACK);
+        DrawNateRect(gOffWorld, &lRect, 0, 0, BLACK);
 
         if ( thisTwo >= 0)
         {
@@ -1349,7 +1336,7 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
 
             MoveTo( lRect.left + kMiniAmmoTextHBuffer, lRect.bottom-1/*lRect.top + gDirectText->ascent*/);
 
-            DrawDirectTextStringClipped( digit, lightcolor, *offPixBase,
+            DrawDirectTextStringClipped( digit, lightcolor, gOffWorld,
                                         &clipRect, 0, 0);
         }
         update = TRUE;
@@ -1362,7 +1349,7 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
         lRect.left = kMiniAmmoLeftSpecial;
         lRect.right = lRect.left + kMiniAmmoSingleWidth;
 
-        DrawNateRect( *offPixBase, &lRect, 0, 0, BLACK);
+        DrawNateRect(gOffWorld, &lRect, 0, 0, BLACK);
 
         if ( thisSpecial >= 0)
         {
@@ -1382,7 +1369,7 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
 
             MoveTo( lRect.left + kMiniAmmoTextHBuffer, lRect.bottom-1/*lRect.top + gDirectText->ascent*/);
 
-            DrawDirectTextStringClipped( digit, lightcolor, *offPixBase,
+            DrawDirectTextStringClipped( digit, lightcolor, gOffWorld,
                                         &clipRect, 0, 0);
         }
         update = TRUE;
@@ -1396,7 +1383,7 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
         mRect.bottom = clipRect.bottom;
 
         // copy the dirty rect
-        ChunkCopyPixMapToScreenPixMap( *offPixBase, &mRect, *thePixMapHandle);
+        ChunkCopyPixMapToScreenPixMap(gOffWorld, &mRect, gActiveWorld);
     }
 
     lastOne = thisOne;
@@ -1409,7 +1396,6 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                     short screenTop, short whichString)
 
 {
-    PixMapHandle        offPixBase;
     transColorType      *transColor;
     unsigned char       color, lightcolor, darkcolor;
     Str255              s;
@@ -1424,7 +1410,6 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     Rect            lRect, dRect, spriteRect, uRect, clipRect;
 
     // get ready to draw in offworld
-    offPixBase = GetGWorldPixMap( gOffWorld);
     DrawInOffWorld();
 
     clipRect.left = kMiniScreenLeft;
@@ -1439,17 +1424,17 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     if ( oldObject->id != newObject->id)
     {
 
-        mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, 0, 0, kMiniScreenWidth, lRect, offPixBase);
+        mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, 0, 0, kMiniScreenWidth, lRect, gOffWorld);
         mGetTranslateColorShade( headerColor, LIGHT, color, transColor);
         mGetTranslateColorShade( headerColor, VERY_LIGHT, lightcolor, transColor);
         mGetTranslateColorShade( headerColor, MEDIUM, darkcolor, transColor);
 
-        DrawNateShadedRect( *offPixBase, &lRect, &clipRect, 0, 0, color, lightcolor, darkcolor);
+        DrawNateShadedRect(gOffWorld, &lRect, &clipRect, 0, 0, color, lightcolor, darkcolor);
 
         MoveTo( lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent);
         GetIndString( s, kMiniDataStringID, whichString);
 
-        DrawDirectTextStringClipped( s, BLACK, *offPixBase,
+        DrawDirectTextStringClipped( s, BLACK, gOffWorld,
                                     &clipRect, 0, 0);
         uRect = lRect;
         uRect = clipRect;
@@ -1457,7 +1442,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         if ( newObject->attributes & kIsDestination)
         {
             // blacken the line for the object type name
-            mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth, lRect, offPixBase);
+            mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth, lRect, gOffWorld);
 
             // get the color for writing the name
             mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, color, transColor);
@@ -1465,13 +1450,9 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
             // move to the 1st line in the selection miniscreen
             MoveTo( lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent);
 
-            DrawDirectTextStringClipped( GetDestBalanceName( newObject->destinationObject), color, *offPixBase,
+            DrawDirectTextStringClipped( GetDestBalanceName( newObject->destinationObject), color, gOffWorld,
                                         &clipRect, 0, 0);
-/*
-            SmallFixedToString( HackGetObjectStrength( newObject), s);
-            DrawDirectTextStringClipped( s, color, *offPixBase,
-                                        &clipRect, 0, 0);
-*/          if ( uRect.left == -1)
+            if ( uRect.left == -1)
             {
                 uRect = lRect;
             } else
@@ -1482,7 +1463,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         {
 
             // blacken the line for the object type name
-            mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth, lRect, offPixBase);
+            mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth, lRect, gOffWorld);
 
             if ( newObject->whichBaseObject >= 0)
             {
@@ -1496,7 +1477,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                 MoveTo( lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent);
 
                 // write the name
-                DrawDirectTextStringClipped( s, color, *offPixBase, &clipRect, 0, 0);
+                DrawDirectTextStringClipped( s, color, gOffWorld, &clipRect, 0, 0);
             }
 
             if ( uRect.left == -1)
@@ -1519,7 +1500,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
 
         // erase the area
 
-        DrawNateRect( *offPixBase, &dRect, 0, 0, BLACK);
+        DrawNateRect(gOffWorld, &dRect, 0, 0, BLACK);
 
         if (( newObject->whichBaseObject >= 0) && ( newObject->pixResID >= 0))
         {
@@ -1572,12 +1553,12 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                 // draw the sprite
 
                 OptScaleSpritePixInPixMap( &aSpritePix, where, thisScale,
-                        &spriteRect, &dRect, offPixBase);
+                        &spriteRect, &dRect, gOffWorld);
             }
         }
 
         mGetTranslateColorShade( PALE_GREEN, MEDIUM, color, transColor);
-        DrawNateVBracket( *offPixBase, &dRect, &clipRect, 0, 0, color);
+        DrawNateVBracket(gOffWorld, &dRect, &clipRect, 0, 0, color);
 
         if ( uRect.left == -1)
         {
@@ -1598,7 +1579,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
 
         // erase the area
 
-        DrawNateRect( *offPixBase, &dRect, 0, 0, BLACK);
+        DrawNateRect(gOffWorld, &dRect, 0, 0, BLACK);
 
         if ( newObject->baseType != nil)
         {
@@ -1613,15 +1594,15 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                 lRect.top = dRect.top + 2;
                 lRect.right = dRect.right - 2;
                 lRect.bottom = dRect.bottom - 2 - tlong;
-                DrawNateRect( *offPixBase, &lRect, 0, 0, color);
+                DrawNateRect(gOffWorld, &lRect, 0, 0, color);
 
                 mGetTranslateColorShade( SKY_BLUE, LIGHT, color, transColor);
                 lRect.top = dRect.bottom - 2 - tlong;
                 lRect.bottom = dRect.bottom - 2;
-                DrawNateRect( *offPixBase, &lRect, 0, 0, color);
+                DrawNateRect(gOffWorld, &lRect, 0, 0, color);
 
                 mGetTranslateColorShade( SKY_BLUE, MEDIUM, color, transColor);
-                DrawNateVBracket( *offPixBase, &dRect, &clipRect, 0, 0, color);
+                DrawNateVBracket(gOffWorld, &dRect, &clipRect, 0, 0, color);
             }
         }
 
@@ -1646,7 +1627,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
 
         // erase the area
 
-        DrawNateRect( *offPixBase, &dRect, 0, 0, BLACK);
+        DrawNateRect(gOffWorld, &dRect, 0, 0, BLACK);
 
         if ( newObject->baseType != nil)
         {
@@ -1661,15 +1642,15 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                 lRect.top = dRect.top + 2;
                 lRect.right = dRect.right - 2;
                 lRect.bottom = dRect.bottom - 2 - tlong;
-                DrawNateRect( *offPixBase, &lRect, 0, 0, color);
+                DrawNateRect(gOffWorld, &lRect, 0, 0, color);
 
                 mGetTranslateColorShade( YELLOW, LIGHT, color, transColor);
                 lRect.top = dRect.bottom - 2 - tlong;
                 lRect.bottom = dRect.bottom - 2;
-                DrawNateRect( *offPixBase, &lRect, 0, 0, color);
+                DrawNateRect(gOffWorld, &lRect, 0, 0, color);
 
                 mGetTranslateColorShade( YELLOW, MEDIUM, color, transColor);
-                DrawNateVBracket( *offPixBase, &dRect, &clipRect, 0, 0, color);
+                DrawNateVBracket(gOffWorld, &dRect, &clipRect, 0, 0, color);
             }
         }
 
@@ -1686,7 +1667,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     if ( oldObject->beamType != newObject->beamType)
     {
         // blacken the line for the weapon1 name
-        mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, offPixBase);
+        mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, gOffWorld);
 
         // get the color for writing the name
         mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, color, transColor);
@@ -1698,7 +1679,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         if ( newObject->beamType >= 0)
         {
             GetIndString( s, kSpaceObjectShortNameResID, newObject->beamType + 1);
-            DrawDirectTextStringClipped( s, color, *offPixBase, &clipRect, 0, 0);
+            DrawDirectTextStringClipped( s, color, gOffWorld, &clipRect, 0, 0);
         }
 
         if ( uRect.left == -1)
@@ -1714,7 +1695,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     if ( oldObject->pulseType != newObject->pulseType)
     {
         // blacken the line for the weapon1 name
-        mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, offPixBase);
+        mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, gOffWorld);
 
         // get the color for writing the name
         mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, color, transColor);
@@ -1726,7 +1707,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         if ( newObject->pulseType >= 0)
         {
             GetIndString( s, kSpaceObjectShortNameResID, newObject->pulseType + 1);
-            DrawDirectTextStringClipped( s, color, *offPixBase, &clipRect, 0, 0);
+            DrawDirectTextStringClipped( s, color, gOffWorld, &clipRect, 0, 0);
         }
 
         if ( uRect.left == -1)
@@ -1742,7 +1723,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     if (( oldObject->specialType != newObject->specialType) && ( ! (newObject->attributes & kIsDestination)))
     {
         // blacken the line for the weapon1 name
-        mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, offPixBase);
+        mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, gOffWorld);
 
         // get the color for writing the name
         mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, color, transColor);
@@ -1754,7 +1735,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         if ( newObject->specialType >= 0)
         {
             GetIndString( s, kSpaceObjectShortNameResID, newObject->specialType + 1);
-            DrawDirectTextStringClipped( s, color, *offPixBase, &clipRect, 0, 0);
+            DrawDirectTextStringClipped( s, color, gOffWorld, &clipRect, 0, 0);
         }
 
         if ( uRect.left == -1)
@@ -1770,7 +1751,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     if ( oldObject->destinationObject != newObject->destinationObject)
     {
         // blacken the line for the weapon1 name
-        mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniDestLineNum, 0, kMiniScreenWidth, lRect, offPixBase);
+        mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniDestLineNum, 0, kMiniScreenWidth, lRect, gOffWorld);
 
         // move to the 1st line in the selection miniscreen
         MoveTo( lRect.left, lRect.top + gDirectText->ascent);
@@ -1793,12 +1774,12 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
 
                 if ( dObject->attributes & kIsDestination)
                 {
-                    DrawDirectTextStringClipped( GetDestBalanceName( dObject->destinationObject), color, *offPixBase,
+                    DrawDirectTextStringClipped( GetDestBalanceName( dObject->destinationObject), color, gOffWorld,
                                                 &clipRect, 0, 0);
                 } else
                 {
                     GetIndString( s, kSpaceObjectNameResID, dObject->whichBaseObject + 1);
-                    DrawDirectTextStringClipped( s, color, *offPixBase, &clipRect, 0, 0);
+                    DrawDirectTextStringClipped( s, color, gOffWorld, &clipRect, 0, 0);
                 }
             }
         }
@@ -1822,7 +1803,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     mRect.bottom = uRect.bottom;
 
     // copy the dirty rect
-    ChunkCopyPixMapToScreenPixMap( *offPixBase, &mRect, *thePixMapHandle);
+    ChunkCopyPixMapToScreenPixMap(gOffWorld, &mRect, gActiveWorld);
 
     mCopyMiniSpaceObject( *oldObject, *newObject);
 }

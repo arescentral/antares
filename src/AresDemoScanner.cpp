@@ -34,8 +34,6 @@
 
 #include "AresDemoScanner.hpp"
 
-#include <QDOffscreen.h>
-
 #include "AresGlobalType.hpp"
 #include "AresPreferences.hpp"
 #include "ConditionalMacros.h"

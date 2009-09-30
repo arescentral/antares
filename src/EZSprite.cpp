@@ -17,8 +17,6 @@
 
 #include "EZSprite.hpp"
 
-#include <QDOffscreen.h>
-
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
@@ -29,9 +27,10 @@
 #include "SpriteHandling.hpp"
 
 extern  WindowPtr       gTheWindow;
-extern  PixMapHandle    thePixMapHandle;
-extern  GDHandle        theDevice;
-extern  GWorldPtr       gOffWorld, gRealWorld, gSaveWorld;
+extern  PixMap*         gActiveWorld;
+extern  PixMap*         gOffWorld;
+extern  PixMap*         gRealWorld;
+extern  PixMap*         gSaveWorld;
 extern  long            gNatePortLeft, gNatePortTop;
 
 void EZDrawSpriteOffByID( short resID, long whichShape, long scale, unsigned char color,
@@ -40,7 +39,6 @@ void EZDrawSpriteOffByID( short resID, long whichShape, long scale, unsigned cha
     GrafPtr             oldPort;
     TypedHandle<natePixType> spriteTable;
     spritePix           aSpritePix;
-    PixMapHandle        offPixBase = GetGWorldPixMap( gOffWorld);
 
     GetPort( &oldPort);
     EZMakeSpriteFromID( resID, &spriteTable, &aSpritePix, whichShape);
@@ -53,7 +51,7 @@ void EZDrawSpriteOffByID( short resID, long whichShape, long scale, unsigned cha
 
     DrawInOffWorld();
     NormalizeColors();
-    EZDrawSpriteCenteredInRectBySprite( &aSpritePix, offPixBase, scale, bounds);
+    EZDrawSpriteCenteredInRectBySprite( &aSpritePix, gOffWorld, scale, bounds);
 
     spriteTable.destroy();
 
@@ -72,7 +70,6 @@ void EZDrawSpriteOffToOnByID( short resID, long whichShape, long scale,
     GrafPtr             oldPort;
     TypedHandle<natePixType> spriteTable;
     spritePix           aSpritePix;
-    PixMapHandle        offPixBase = GetGWorldPixMap( gOffWorld);
 
     GetPort( &oldPort);
     EZMakeSpriteFromID( resID, &spriteTable, &aSpritePix, whichShape);
@@ -85,18 +82,18 @@ void EZDrawSpriteOffToOnByID( short resID, long whichShape, long scale,
 
     DrawInOffWorld();
     NormalizeColors();
-    EZDrawSpriteCenteredInRectBySprite( &aSpritePix, offPixBase, scale, bounds);
+    EZDrawSpriteCenteredInRectBySprite( &aSpritePix, gOffWorld, scale, bounds);
 
     spriteTable.destroy();
 
     DrawInRealWorld();
-    CopyOffWorldToRealWorld( gTheWindow, bounds);
+    CopyOffWorldToRealWorld(bounds);
 
     MacSetPort( oldPort);
 }
 
 void EZDrawSpriteCenteredInRectBySprite( spritePix *aSpritePix,
-    PixMapHandle pixBase, long thisScale, Rect *bounds)
+    PixMap* pixBase, long thisScale, Rect *bounds)
 {
     coordPointType      coord;
     long                tlong;
@@ -156,7 +153,6 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
     Rect *bounds)
 {
     TypedHandle<natePixType> spriteTable;
-    PixMapHandle        offPixBase = GetGWorldPixMap( gOffWorld);
     spritePix           aSpritePix;
     Point               where;
     long                tlong, thisScale;
@@ -216,14 +212,14 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
     // draw the sprite
 
     OptScaleSpritePixInPixMap( &aSpritePix, where, thisScale,
-            &spriteRect, &dRect, offPixBase);
+            &spriteRect, &dRect, gOffWorld);
 
     // clean up the sprite
 
     spriteTable.destroy();
 
     DrawInRealWorld();
-    CopyOffWorldToRealWorld( gTheWindow, bounds);
+    CopyOffWorldToRealWorld(bounds);
 
     MacSetPort( oldPort);
 }

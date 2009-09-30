@@ -26,7 +26,7 @@
 
 #define kColorTransError        "\pCLTR"
 
-extern  GDHandle        theDevice;
+extern PixMap* gActiveWorld;
 
 TypedHandle<transColorType> gColorTranslateTable;
 
@@ -46,11 +46,9 @@ void ColorTranslatorCleanup( void)
 void MakeColorTranslatorTable(const ColorTable& referenceTable) {
     transColorType      *entry, *retroEntry;
     int                 i, j;
-    PixMapHandle        devicePixMap;
     RGBColor            paletteColor, deviceColor;
 
-    devicePixMap = (*theDevice)->gdPMap;
-    const ColorTable& deviceTable = *(**devicePixMap).colors;
+    const ColorTable& deviceTable = *gActiveWorld->colors;
     entry = *gColorTranslateTable;
 //  referenceTable = GetCTable( kReferenceColorTableID);
 

@@ -48,25 +48,20 @@
 #define kLargeScreenHeight      768
 
 int CreateOffscreenWorld(const Rect& bounds, const ColorTable& colors);
-void CleanUpOffscreenWorld( void);
-void DrawInRealWorld( void);
-void DrawInOffWorld ( void);
-void DrawInSaveWorld ( void);
-void EraseOffWorld( void);
-void EraseSaveWorld( void);
-void CopyOffWorldToRealWorld ( WindowPtr, Rect *);
-void CopyRealWorldToSaveWorld( WindowPtr, Rect *);
-void CopyRealWorldToOffWorld( WindowPtr port, Rect *bounds);
-void CopySaveWorldToOffWorld( Rect *);
-void CopyOffWorldToSaveWorld( Rect *);
-void NormalizeColors( void);
-void SetBlackBack( void);
-void GWorldExperiment ( void);
+void CleanUpOffscreenWorld();
+void DrawInRealWorld();
+void DrawInOffWorld();
+void DrawInSaveWorld();
+void EraseOffWorld();
+void EraseSaveWorld();
+void CopyOffWorldToRealWorld(Rect* bounds);
+void CopyRealWorldToSaveWorld(Rect* bounds);
+void CopyRealWorldToOffWorld(Rect* bounds);
+void CopySaveWorldToOffWorld(Rect* bounds);
+void CopyOffWorldToSaveWorld(Rect* bounds);
+void NormalizeColors();
 void ChunkCopyPixMapToScreenPixMap( PixMap *, Rect *, PixMap *);
 void ChunkCopyPixMapToPixMap( PixMap *, Rect *, PixMap *);
-void AsmChunkCopyPixMapToPixMap( PixMap *, Rect *, PixMap *);
-void SetWindowPaletteFromClut(Window* window, const ColorTable& colors);
-void ColorTest( void);
 void ChunkErasePixMap( PixMap *, Rect *);
 
 #endif // ANTARES_OFFSCREEN_GWORLD_HPP_

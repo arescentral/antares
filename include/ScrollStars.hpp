@@ -56,7 +56,7 @@ void DontShowScrollStars( void);
 void DrawAllBeams( void);
 void Reset3DStars( Point, Rect *);
 void Move3DStars( Point, long, Rect *);
-void Draw3DStars( Boolean, Rect *, PixMapHandle);
-void Show3DStars( Boolean, Rect *, PixMapHandle);
+void Draw3DStars( Boolean, Rect *, PixMap*);
+void Show3DStars( Boolean, Rect *, PixMap*);
 
 #endif // ANTARES_SCROLL_STARS_HPP_

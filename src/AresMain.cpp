@@ -171,7 +171,7 @@ extern long gNatePortLeft, gNatePortTop, gNetLatency;
 extern scenarioType *gThisScenario;
 extern short gSpriteFileRefID, gInterfaceFileRefID;
 extern GDHandle theDevice;
-extern PixMap** thePixMapHandle;
+extern PixMap* gActiveWorld;
 
 CWindowPtr      gTheWindow = nil;//, globals()->gBackWindow = nil;
 MenuHandle      gAppleMenu;
@@ -230,7 +230,7 @@ int main(int argc, const char** argv) {
     }
 
     theDevice = GetMainDevice();
-    thePixMapHandle = (*theDevice)->gdPMap;
+    gActiveWorld = (*theDevice)->gdPMap;
 
     MacSetRect( &windowRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     tRect = (*theDevice)->gdRect;
@@ -300,16 +300,6 @@ int main(int argc, const char** argv) {
     error = CreateOffscreenWorld(gTheWindow->portRect, *theClut);
     if ( error == kNoError)
     {
-        WriteDebugLine("\p>Offworld");
-        WriteDebugLine("\pGDPMapBounds");
-        WriteDebugLong( (*(*theDevice)->gdPMap)->bounds.left);
-        WriteDebugLine("\pGDRect");
-        WriteDebugLong( (*theDevice)->gdRect.left);
-        WriteDebugLine("\pgNatePortLeft");
-        WriteDebugLong( gNatePortLeft);
-        WriteDebugLine("\pPortRect");
-        WriteDebugLong( gTheWindow->portRect.left);
-
         error = MusicInit();
         WriteDebugLine("\p>Music");
         if ( OpenSoundFile() == kNoError)
@@ -1997,7 +1987,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                 kScenarioWinnerNoText;
                             break;
                     }
-                    CopyOffWorldToRealWorld( gTheWindow, &playAreaRect);
+                    CopyOffWorldToRealWorld(&playAreaRect);
                     HideCursor();
                     playerPaused = true;
                     if ( globals()->gOptions & kOptionNetworkOn)
@@ -2044,7 +2034,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                 MacShowCursor();
                 DoHelpScreen();
                 HideCursor();
-                CopyOffWorldToRealWorld( gTheWindow, &playAreaRect);
+                CopyOffWorldToRealWorld(&playAreaRect);
                 playerPaused = true;
                 if ( globals()->gOptions & kOptionNetworkOn)
                 {
@@ -2084,7 +2074,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                 DoNetSettings();
 #endif NETSPROCKET_AVAILABLE
                 HideCursor();
-                CopyOffWorldToRealWorld( gTheWindow, &playAreaRect);
+                CopyOffWorldToRealWorld(&playAreaRect);
                 playerPaused = true;
                 if ( globals()->gOptions & kOptionNetworkOn)
                 {
@@ -2177,7 +2167,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                 ShowSpriteCursorSprite();
                 DrawAllBeams();
                 DontShowScrollStars();
-                CopyOffWorldToRealWorld( gTheWindow, &playAreaRect);
+                CopyOffWorldToRealWorld(&playAreaRect);
             } else
             {
                 ShowSpriteCursorSprite();
@@ -2188,7 +2178,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                 ShowScrollStars( TRUE);
                 ShowSectorLines();
                 ShowSite();
-                CopyOffWorldToRealWorld( gTheWindow, &playAreaRect);
+                CopyOffWorldToRealWorld(&playAreaRect);
 
             }
 //          if ( hacktcsamplecount > hacktcsamplesize)

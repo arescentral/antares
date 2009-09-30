@@ -19,8 +19,6 @@
 
 #include "SpriteHandling.hpp"
 
-#include <QDOffscreen.h>
-
 #include "AresResFile.hpp"
 #include "AresGlobalType.hpp"
 #include "ColorTranslation.hpp"
@@ -79,9 +77,7 @@
 #define kStaticTableSize        2000
 
 extern WindowPtr        gTheWindow;
-extern PixMapHandle     thePixMapHandle;
 extern GDHandle         theDevice;
-extern GWorldPtr        gOffWorld, gRealWorld, gSaveWorld;
 extern long             gNatePortLeft, gNatePortTop;
 
 long                    *gScaleHMap = nil, *gScaleVMap = nil, gAbsoluteScale = MIN_SCALE;
@@ -90,6 +86,10 @@ TypedHandle<spriteType> gSpriteTable;
 TypedHandle<long>       gBothScaleMaps;
 TypedHandle<unsigned char> gStaticTable;
 short                   gSpriteFileRefID = 0;
+
+extern PixMap* gActiveWorld;
+extern PixMap* gOffWorld;
+extern PixMap* gSaveWorld;
 
 Boolean PixelInSprite_IsOutside( spritePix *sprite, long x, long y, long *hmap,
 long *vamp);
@@ -330,15 +330,15 @@ void RemoveSprite( spriteType *aSprite)
 //  WARNING: DOES NOT CLIP.  WILL CRASH IF DESTINATION RECT IS NOT CONTAINED IN
 //  DESTINATION PIX MAP.
 
-void RunLengthSpritePixInPixMap( spritePix *sprite, Point where, PixMapHandle pixMap)
+void RunLengthSpritePixInPixMap( spritePix *sprite, Point where, PixMap* pixMap)
 
 {
     int     width, height, runlen, pixlen, *sword;
     unsigned char *source, *dest;
     long    rowBytes, sRowPlus, dRowPlus, *slong, *dlong;
 
-    rowBytes = 0x0000ffff & ((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
-    dest = (*pixMap)->baseAddr + where.v * rowBytes + where.h;
+    rowBytes = 0x0000ffff & (pixMap->rowBytes ^ ROW_BYTES_MASK);
+    dest = pixMap->baseAddr + where.v * rowBytes + where.h;
     sword = reinterpret_cast<int*>(*(sprite->data));
     sRowPlus = 0;
     dRowPlus = rowBytes - sprite->width;
@@ -389,7 +389,7 @@ void RunLengthSpritePixInPixMap( spritePix *sprite, Point where, PixMapHandle pi
 
 
 void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect *dRect,
-        Rect *clipRect, PixMapHandle pixMap)
+        Rect *clipRect, PixMap* pixMap)
 {
     long        mapWidth, mapHeight, x, y, i, h, v, d, last;
     long        shapeRowPlus, destRowPlus, rowbytes, *hmap, *vmap, *hmapoffset, *lhend, scaleCalc;
@@ -529,16 +529,15 @@ void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect
                 } // otherwise sourceRect is set
 
                 scaleCalc = (dRect->right - dRect->left);
-//              rowbytes = 0x0000ffff & ((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
 
-                rowbytes = (*pixMap)->rowBytes;
+                rowbytes = pixMap->rowBytes;
                 rowbytes &= 0x0000ffff;
                 rowbytes |= 0x00008000;
                 rowbytes ^= 0x00008000;
 
                 destRowPlus = rowbytes - scaleCalc;
                 shapeRowPlus = sprite->width - (sourceRect.right - sourceRect.left);                                              //KLUDGE ALERT
-                destByte = (*pixMap)->baseAddr + dRect->top * rowbytes + dRect->left;
+                destByte = pixMap->baseAddr + dRect->top * rowbytes + dRect->left;
                 shapeByte = sprite->data + sourceRect.top * sprite->width + sourceRect.left;
 
                 vmap = gScaleVMap + mapRect.top;
@@ -548,31 +547,17 @@ void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect
 
                 shapeRowPlus += *(hmapoffset + scaleCalc);
                 mapWidth = sprite->width;
-                chunkByte = (*pixMap)->baseAddr + ((*pixMap)->bounds.bottom) * rowbytes;
-
-                // for debugging
-//              x = dRect->left;
-//              y = dRect->top;
+                chunkByte = pixMap->baseAddr + (pixMap->bounds.bottom) * rowbytes;
 
                 do
                 {
                     hmap = hmapoffset;
                     hend = destByte + scaleCalc;
 
-                    // for debugging
-//                  x = dRect->left;
-//                  TestByte( destByte);
-
                     do
                     {
                         if ( *shapeByte)
                             *destByte = *shapeByte;
-
-//#ifdef kByteLevelTesting
-//                      TestByte( (char *)destByte, *pixMap, "\pSMALLSP");
-//#endif
-
-//                      // debugging
 
                         shapeByte += *hmap++;
                         destByte++;
@@ -673,9 +658,9 @@ void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect
                 } // otherwise sourceRect is already set
 
                 scaleCalc = (dRect->right - dRect->left);
-                rowbytes = 0x0000ffff & ((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
+                rowbytes = 0x0000ffff & (pixMap->rowBytes ^ ROW_BYTES_MASK);
                 destRowPlus = rowbytes - scaleCalc;
-                destByte = (*pixMap)->baseAddr + dRect->top * rowbytes + dRect->left;
+                destByte = pixMap->baseAddr + dRect->top * rowbytes + dRect->left;
                 shapeByte = sprite->data + sourceRect.top * sprite->width + sourceRect.left;
 
                 vmap = gScaleVMap + sourceRect.top;
@@ -715,7 +700,7 @@ void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect
 }
 
 void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect *dRect,
-        Rect *clipRect, PixMapHandle pixMap, short staticValue)
+        Rect *clipRect, PixMap* pixMap, short staticValue)
 
 {
     long        mapWidth, mapHeight, x, y, i, h, v, d, last;
@@ -859,14 +844,14 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, R
 
                 scaleCalc = (dRect->right - dRect->left);
 
-                rowbytes = (*pixMap)->rowBytes;
+                rowbytes = pixMap->rowBytes;
                 rowbytes &= 0x0000ffff;
                 rowbytes |= 0x00008000;
                 rowbytes ^= 0x00008000;
 
                 destRowPlus = rowbytes - scaleCalc;
                 shapeRowPlus = sprite->width - (sourceRect.right - sourceRect.left);                                              //KLUDGE ALERT
-                destByte = (*pixMap)->baseAddr + dRect->top * rowbytes + dRect->left;
+                destByte = pixMap->baseAddr + dRect->top * rowbytes + dRect->left;
                 shapeByte = sprite->data + sourceRect.top * sprite->width + sourceRect.left;
 
                 vmap = gScaleVMap + mapRect.top;
@@ -876,7 +861,7 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, R
 
                 shapeRowPlus += *(hmapoffset + scaleCalc);
                 mapWidth = sprite->width;
-                chunkByte = (*pixMap)->baseAddr + ((*pixMap)->bounds.bottom) * rowbytes;
+                chunkByte = pixMap->baseAddr + (pixMap->bounds.bottom) * rowbytes;
 
                 do
                 {
@@ -892,10 +877,6 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, R
                     {
                         if ( *shapeByte)
                             *destByte = *staticByte;
-
-#ifdef kByteLevelTesting
-                        TestByte( (char *)destByte, *pixMap, "\pSMALLSP");
-#endif
 
                         shapeByte += *hmap++;
                         destByte++;
@@ -982,9 +963,9 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, R
                 } // otherwise sourceRect is already set
 
                 scaleCalc = (dRect->right - dRect->left);
-                rowbytes = 0x0000ffff & ((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
+                rowbytes = 0x0000ffff & (pixMap->rowBytes ^ ROW_BYTES_MASK);
                 destRowPlus = rowbytes - scaleCalc;
-                destByte = (*pixMap)->baseAddr + dRect->top * rowbytes + dRect->left;
+                destByte = pixMap->baseAddr + dRect->top * rowbytes + dRect->left;
                 shapeByte = sprite->data + sourceRect.top * sprite->width + sourceRect.left;
 
                 vmap = gScaleVMap + sourceRect.top;
@@ -1030,7 +1011,7 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, R
 }
 
 void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect *dRect,
-        Rect *clipRect, PixMapHandle pixMap, short staticValue, unsigned char color,
+        Rect *clipRect, PixMap* pixMap, short staticValue, unsigned char color,
         unsigned char colorAmount)
 
 {
@@ -1175,14 +1156,14 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Re
 
                 scaleCalc = (dRect->right - dRect->left);
 
-                rowbytes = (*pixMap)->rowBytes;
+                rowbytes = pixMap->rowBytes;
                 rowbytes &= 0x0000ffff;
                 rowbytes |= 0x00008000;
                 rowbytes ^= 0x00008000;
 
                 destRowPlus = rowbytes - scaleCalc;
                 shapeRowPlus = sprite->width - (sourceRect.right - sourceRect.left);                                              //KLUDGE ALERT
-                destByte = (*pixMap)->baseAddr + dRect->top * rowbytes + dRect->left;
+                destByte = pixMap->baseAddr + dRect->top * rowbytes + dRect->left;
                 shapeByte = sprite->data + sourceRect.top * sprite->width + sourceRect.left;
 
                 vmap = gScaleVMap + mapRect.top;
@@ -1192,7 +1173,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Re
 
                 shapeRowPlus += *(hmapoffset + scaleCalc);
                 mapWidth = sprite->width;
-                chunkByte = (*pixMap)->baseAddr + ((*pixMap)->bounds.bottom) * rowbytes;
+                chunkByte = pixMap->baseAddr + (pixMap->bounds.bottom) * rowbytes;
 
                 if ( color != 0xff)
                 {
@@ -1332,9 +1313,9 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Re
                 } // otherwise sourceRect is already set
 
                 scaleCalc = (dRect->right - dRect->left);
-                rowbytes = 0x0000ffff & ((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
+                rowbytes = 0x0000ffff & (pixMap->rowBytes ^ ROW_BYTES_MASK);
                 destRowPlus = rowbytes - scaleCalc;
-                destByte = (*pixMap)->baseAddr + dRect->top * rowbytes + dRect->left;
+                destByte = pixMap->baseAddr + dRect->top * rowbytes + dRect->left;
                 shapeByte = sprite->data + sourceRect.top * sprite->width + sourceRect.left;
 
                 vmap = gScaleVMap + sourceRect.top;
@@ -1389,7 +1370,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Re
 // a hack; not fast
 
 void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect *dRect,
-        Rect *clipRect, PixMapHandle pixMap, unsigned char colorOut,
+        Rect *clipRect, PixMap* pixMap, unsigned char colorOut,
         unsigned char colorIn)
 
 {
@@ -1531,16 +1512,15 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
                 } // otherwise sourceRect is set
 
                 scaleCalc = (dRect->right - dRect->left);
-//              rowbytes = 0x0000ffff & ((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
 
-                rowbytes = (*pixMap)->rowBytes;
+                rowbytes = pixMap->rowBytes;
                 rowbytes &= 0x0000ffff;
                 rowbytes |= 0x00008000;
                 rowbytes ^= 0x00008000;
 
                 destRowPlus = rowbytes - scaleCalc;
                 shapeRowPlus = sprite->width - (sourceRect.right - sourceRect.left);                                              //KLUDGE ALERT
-                destByte = (*pixMap)->baseAddr + dRect->top * rowbytes + dRect->left;
+                destByte = pixMap->baseAddr + dRect->top * rowbytes + dRect->left;
                 shapeByte = sprite->data + sourceRect.top * sprite->width + sourceRect.left;
 
                 vmap = gScaleVMap + mapRect.top;
@@ -1550,11 +1530,7 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
 
                 shapeRowPlus += *(hmapoffset + scaleCalc);
                 mapWidth = sprite->width;
-                chunkByte = (*pixMap)->baseAddr + ((*pixMap)->bounds.bottom) * rowbytes;
-
-                // for debugging
-//              x = dRect->left;
-//              y = dRect->top;
+                chunkByte = pixMap->baseAddr + (pixMap->bounds.bottom) * rowbytes;
 
                 sourceY = sourceRect.top;
                 do
@@ -1562,10 +1538,6 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
                     sourceX = sourceRect.left;
                     hmap = hmapoffset;
                     hend = destByte + scaleCalc;
-
-                    // for debugging
-//                  x = dRect->left;
-//                  TestByte( destByte);
 
                     do
                     {
@@ -1577,10 +1549,6 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
                             else
                                 *destByte = colorIn;
                         }
-
-//#ifdef kByteLevelTesting
-//                      TestByte( (char *)destByte, *pixMap, "\pSMALLSP");
-//#endif
 
 //                      // debugging
                         sourceX += *hmap;
@@ -1683,9 +1651,9 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
                 } // otherwise sourceRect is already set
 
                 scaleCalc = (dRect->right - dRect->left);
-                rowbytes = 0x0000ffff & ((*pixMap)->rowBytes ^ ROW_BYTES_MASK);
+                rowbytes = 0x0000ffff & (pixMap->rowBytes ^ ROW_BYTES_MASK);
                 destRowPlus = rowbytes - scaleCalc;
-                destByte = (*pixMap)->baseAddr + dRect->top * rowbytes + dRect->left;
+                destByte = pixMap->baseAddr + dRect->top * rowbytes + dRect->left;
                 shapeByte = sprite->data + sourceRect.top * sprite->width + sourceRect.left;
 
                 vmap = gScaleVMap + sourceRect.top;
@@ -1756,12 +1724,9 @@ Boolean PixelInSprite_IsOutside( spritePix *sprite, long x, long y,
 void EraseSpriteTable( void)
 
 {
-    PixMapHandle    savePixBase, offPixBase;
     long                i;
     spriteType          *aSprite;
 
-    savePixBase = GetGWorldPixMap( gSaveWorld);
-    offPixBase = GetGWorldPixMap( gOffWorld);
     aSprite = *gSpriteTable;
     for ( i = 0; i < kMaxSpriteNum; i++)
     {
@@ -1769,8 +1734,7 @@ void EraseSpriteTable( void)
         #ifndef kDrawOverride
             if ( aSprite->thisRect.left < aSprite->thisRect.right)
             {
-//              ChunkCopyPixMapToPixMap( *savePixBase, &(aSprite->thisRect), *offPixBase);
-                ChunkErasePixMap( *offPixBase, &(aSprite->thisRect));
+                ChunkErasePixMap( gOffWorld, &(aSprite->thisRect));
             }
         #endif
             if ( aSprite->killMe)
@@ -1785,7 +1749,6 @@ void EraseSpriteTable( void)
 void DrawSpriteTableInOffWorld( Rect *clipRect)
 
 {
-    PixMapHandle    pixMap;
     long            i, trueScale, layer, tinySize;
     Rect        sRect;
     spritePix       aSpritePix;
@@ -1793,7 +1756,6 @@ void DrawSpriteTableInOffWorld( Rect *clipRect)
     int             whichShape;
     spriteType      *aSprite;
 
-    pixMap = GetGWorldPixMap( gOffWorld);
     aSprite = *gSpriteTable;
 
 //  WriteDebugLong( gAbsoluteScale);
@@ -1827,18 +1789,18 @@ void DrawSpriteTableInOffWorld( Rect *clipRect)
                     {
                         case spriteNormal:
                             OptScaleSpritePixInPixMap( &aSpritePix, aSprite->where, trueScale,
-                                &sRect, clipRect, pixMap);
+                                &sRect, clipRect, gOffWorld);
                             break;
 
                         case spriteColor:
                             ColorScaleSpritePixInPixMap( &aSpritePix, aSprite->where, trueScale,
-                                    &sRect, clipRect, pixMap, Randomize( kStaticTableSize),
+                                    &sRect, clipRect, gOffWorld, Randomize( kStaticTableSize),
                                     aSprite->styleColor, aSprite->styleData);
                             break;
 
                         case spriteStatic:
                             StaticScaleSpritePixInPixMap( &aSpritePix, aSprite->where, trueScale,
-                                    &sRect, clipRect, pixMap, Randomize( kStaticTableSize));
+                                    &sRect, clipRect, gOffWorld, Randomize( kStaticTableSize));
                             break;
                     }
 //                  sRect.top = sRect.left = sRect.bottom = sRect.right = 0;
@@ -1876,23 +1838,23 @@ void DrawSpriteTableInOffWorld( Rect *clipRect)
                     switch( aSprite->tinySize & kBlipTypeMask)
                     {
                         case kTriangeUpBlip:
-                            DrawNateTriangleUpClipped( *pixMap, &sRect, clipRect, 0, 0, aSprite->tinyColor);
+                            DrawNateTriangleUpClipped( gOffWorld, &sRect, clipRect, 0, 0, aSprite->tinyColor);
                             break;
 
                         case kSolidSquareBlip:
-                            DrawNateRectClipped( *pixMap, &sRect, clipRect, 0, 0, aSprite->tinyColor);
+                            DrawNateRectClipped( gOffWorld, &sRect, clipRect, 0, 0, aSprite->tinyColor);
                             break;
 
                         case kPlusBlip:
-                            DrawNatePlusClipped( *pixMap, &sRect, clipRect, 0, 0, aSprite->tinyColor);
+                            DrawNatePlusClipped( gOffWorld, &sRect, clipRect, 0, 0, aSprite->tinyColor);
                             break;
 
                         case kDiamondBlip:
-                            DrawNateDiamondClipped( *pixMap, &sRect, clipRect, 0, 0, aSprite->tinyColor);
+                            DrawNateDiamondClipped( gOffWorld, &sRect, clipRect, 0, 0, aSprite->tinyColor);
                             break;
 
                         case kFramedSquareBlip:
-                            DrawNateRectClipped( *pixMap, &sRect, clipRect, 0, 0, aSprite->tinyColor);
+                            DrawNateRectClipped( gOffWorld, &sRect, clipRect, 0, 0, aSprite->tinyColor);
                             break;
 
                         default:
@@ -1901,7 +1863,6 @@ void DrawSpriteTableInOffWorld( Rect *clipRect)
 //                          DebugStr( hack);
                             break;
                     }
-//                  DrawNateRectClipped( *pixMap, &sRect, clipRect, 0, 0, aSprite->tinyColor);
 
                     mCopyAnyRect( aSprite->thisRect, sRect);
                 #endif
@@ -1948,12 +1909,10 @@ void ShowSpriteTable( void)
 
 {
     Rect            tRect;
-    PixMapHandle    pixMap;
     long            i;
     spriteType      *aSprite;
 
     aSprite = *gSpriteTable;
-    pixMap = GetGWorldPixMap( gOffWorld);
     for ( i = 0; i < kMaxSpriteNum; i++)
     {
         if (aSprite->table.get() != nil) {
@@ -1966,8 +1925,8 @@ void ShowSpriteTable( void)
                 {
                     // show lastRect
 
-                    ChunkCopyPixMapToScreenPixMap( *pixMap, &(aSprite->lastRect),
-                            *thePixMapHandle);
+                    ChunkCopyPixMapToScreenPixMap( gOffWorld, &(aSprite->lastRect),
+                            gActiveWorld);
 
 
                 }
@@ -1977,8 +1936,8 @@ void ShowSpriteTable( void)
             {
                 // then show thisRect
 
-                ChunkCopyPixMapToScreenPixMap( *pixMap, &(aSprite->thisRect),
-                        *thePixMapHandle);
+                ChunkCopyPixMapToScreenPixMap( gOffWorld, &(aSprite->thisRect),
+                        gActiveWorld);
 
             // else if the rects don't intersect
             } else if ( ( aSprite->lastRect.right < ( aSprite->thisRect.left - 32)) ||
@@ -1989,10 +1948,10 @@ void ShowSpriteTable( void)
                 // then draw them individually
 
 
-                ChunkCopyPixMapToScreenPixMap( *pixMap, &(aSprite->lastRect),
-                        *thePixMapHandle);
-                ChunkCopyPixMapToScreenPixMap( *pixMap, &(aSprite->thisRect),
-                        *thePixMapHandle);
+                ChunkCopyPixMapToScreenPixMap( gOffWorld, &(aSprite->lastRect),
+                        gActiveWorld);
+                ChunkCopyPixMapToScreenPixMap( gOffWorld, &(aSprite->thisRect),
+                        gActiveWorld);
 
             // else the rects do intersect (and we know are both non-null)
             } else
@@ -2000,7 +1959,7 @@ void ShowSpriteTable( void)
                 tRect = aSprite->thisRect;
                 mBiggestRect( tRect, aSprite->lastRect);
 
-                ChunkCopyPixMapToScreenPixMap( *pixMap, &tRect, *thePixMapHandle);
+                ChunkCopyPixMapToScreenPixMap( gOffWorld, &tRect, gActiveWorld);
 
             }
             aSprite->lastRect = aSprite->thisRect;
