@@ -133,30 +133,47 @@ void usage(const char* bin) {
     fprintf(stderr,
             "usage: %s [-m|--mode=<mode>] [<options>]\n"
             "options:\n"
-            "       -h|--help           display this screen\n"
-            "       -l|--level=<number> choose a level to use in the given mode\n"
-            "       -o|--output=<dir>   directory to save dumps to\n"
+            "    -l|--level=<int>   choose a level to use in the given mode\n"
+            "    -o|--output=<dir>  directory to save dumps to\n"
+            "    -w|--width=<int>   width of screen (default: 640)\n"
+            "    -h|--height=<int>  height of screen (default: 480)\n"
             "modes:\n"
-            "       main-screen         dumps the main screen, then exits\n"
-            "       mission-briefing    dumps the mission briefing screens for <level>\n"
-            "       demo                runs the demo for <level>\n",
+            "    main-screen        dumps the main screen, then exits\n"
+            "    mission-briefing   dumps the mission briefing screens for <level>\n"
+            "    demo               runs the demo for <level>\n",
             bin);
     exit(1);
+}
+
+int string_to_int(const char* string) {
+    int value;
+    char* end = NULL;
+    if (string && *string) {
+        value = strtol(string, &end, 10);
+    }
+    if (!string || end != string + strlen(string)) {
+        fprintf(stderr, "Couldn't parse '%s' as an integer\n", string);
+        exit(1);
+    }
+    return value;
 }
 
 void FakeInit(int argc, char* const* argv) {
     const char* bin = argv[0];
     int mode = -1;
+    int width = 640;
+    int height = 480;
     option longopts[] = {
-        { "help",   no_argument,        NULL,   'h' },
         { "mode",   required_argument,  NULL,   'm' },
         { "level",  required_argument,  NULL,   'l' },
         { "output", required_argument,  NULL,   'o' },
+        { "width",  required_argument,  NULL,   'w' },
+        { "height", required_argument,  NULL,   'h' },
         { NULL,     0,                  NULL,   0 }
     };
 
     char ch;
-    while ((ch = getopt_long(argc, argv, "hm:l:o:", longopts, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "m:l:o:w:h:", longopts, NULL)) != -1) {
         switch (ch) {
           case 'm':
             {
@@ -174,18 +191,16 @@ void FakeInit(int argc, char* const* argv) {
             }
             break;
           case 'l':
-            {
-                char* end = NULL;
-                if (*optarg) {
-                    level = strtol(optarg, &end, 10);
-                }
-                if (end != optarg + strlen(optarg)) {
-                    fprintf(stderr, "Couldn't parse --level=%s as an integer\n", optarg);
-                }
-            }
+            level = string_to_int(optarg);
             break;
           case 'o':
             output_dir = optarg;
+            break;
+          case 'w':
+            width = string_to_int(optarg);
+            break;
+          case 'h':
+            height = string_to_int(optarg);
             break;
           default:
             fprintf(stderr, "%s: unknown argument %s\n", bin, argv[optind]);
@@ -230,7 +245,7 @@ void FakeInit(int argc, char* const* argv) {
 
     MakeDirs(output_dir, 0755);
 
-    FakeDrawingInit(640, 480);
+    FakeDrawingInit(width, height);
     FakeHandlesInit();
     FakeMathInit();
     FakeSoundsInit();
