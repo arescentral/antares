@@ -25,7 +25,6 @@
 #include "ColorTranslation.hpp"
 #include "Debug.hpp"
 #include "Error.hpp"
-#include "HideMenubar.hpp"
 #include "InterfaceHandling.hpp"
 #include "KeyMapTranslation.hpp"
 #include "OffscreenGWorld.hpp"
@@ -334,11 +333,6 @@ Boolean Key_Setup_Screen_Do( void)
                             lastFlashTime = TickCount();
                         }
                         InterfaceIdle();
-                        if ( globals()->gOptions & kOptionInBackground)
-                        {
-                        } else if (AutoShowHideMenubar( theEvent.where, theDevice))
-                        {
-                        }
                         if ( globals()->returnToMain)
                         {
                             done = true;

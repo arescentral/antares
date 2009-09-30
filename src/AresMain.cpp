@@ -56,8 +56,6 @@
 #include "GDeviceHandling.hpp"
 #include "GXMath.h"
 
-#include "HideMenubar.hpp"
-
 #include "InputSource.hpp"
 #include "Instruments.hpp"
 #include "InterfaceHandling.hpp"
@@ -749,7 +747,6 @@ void MainLoop (void)
 
                         if ( gameResult != kQuitGame)
                         {
-                            SetMBarState( false, theDevice);
                             if ( globals()->gOptions & kOptionMusicIdle)
                             {
                                 StopAndUnloadSong();

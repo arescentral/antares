@@ -37,7 +37,6 @@
 #include "Error.hpp"
 #include "Fakes.hpp"
 #include "GDeviceHandling.hpp"
-#include "HideMenubar.hpp"
 #include "Instruments.hpp"
 #include "InterfaceHandling.hpp"
 #include "KeyCodes.hpp"
@@ -421,9 +420,7 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
 
                 if ( !Ambrosia_Is_Registered())
                 {
-                    SetMBarState( true, theDevice);
                     RT_DisplayNotice( false);
-                    SetMBarState( false, theDevice);
                 }
                 globals()->haveSeenRTNotice = true;
             }
@@ -439,9 +436,6 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
                 case nullEvent:
                     InterfaceIdle();
                     if ( globals()->gOptions & kOptionInBackground)
-                    {
-                        startDemoTime = TickCount();
-                    } else if (AutoShowHideMenubar( theEvent.where, theDevice))
                     {
                         startDemoTime = TickCount();
                     }
@@ -632,11 +626,6 @@ void DoAboutAresInterface( void)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( globals()->gOptions & kOptionInBackground)
-                        {
-                        } else if (AutoShowHideMenubar( theEvent.where, theDevice))
-                        {
-                        }
                         if ( globals()->returnToMain)
                         {
                             done = true;
@@ -870,11 +859,6 @@ short DoPlayAgain( Boolean allowResume, Boolean allowSkip) // return 0 = quit, 1
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( globals()->gOptions & kOptionInBackground)
-                        {
-                        } else if (AutoShowHideMenubar( theEvent.where, theDevice))
-                        {
-                        }
                         if ( globals()->returnToMain)
                         {
                             done = true;
@@ -1018,11 +1002,6 @@ void DoNetSettings( void)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( globals()->gOptions & kOptionInBackground)
-                        {
-                        } else if (AutoShowHideMenubar( theEvent.where, theDevice))
-                        {
-                        }
                         if ( globals()->returnToMain)
                         {
                             cancel = true;
@@ -1251,16 +1230,7 @@ void DoHelpScreen( void)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( globals()->gOptions & kOptionInBackground)
-                        {
-                        } else if (AutoShowHideMenubar( theEvent.where, theDevice))
-                        {
-                        }
                         break;
-                        if ( globals()->returnToMain)
-                        {
-                            done = true;
-                        }
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
                         break;
@@ -1435,11 +1405,6 @@ void DoOptionsInterface( void)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( globals()->gOptions & kOptionInBackground)
-                        {
-                        } else if (AutoShowHideMenubar( theEvent.where, theDevice))
-                        {
-                        }
                         if ( globals()->returnToMain)
                         {
                             done = true;
@@ -1773,11 +1738,6 @@ Boolean DoKeyInterface( void)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( globals()->gOptions & kOptionInBackground)
-                        {
-                        } else if (AutoShowHideMenubar( theEvent.where, theDevice))
-                        {
-                        }
                         if ( globals()->returnToMain)
                         {
                             done = true;
@@ -2035,12 +1995,6 @@ netResultType StartNetworkGameSetup( void)
                     {
                         case nullEvent:
                             InterfaceIdle();
-                            if ( globals()->gOptions & kOptionInBackground)
-                            {
-                            } else if (AutoShowHideMenubar( theEvent.where, theDevice))
-                            {
-
-                            }
                             if ( globals()->returnToMain)
                             {
                                 done = true;
@@ -2185,11 +2139,6 @@ netResultType ClientWaitInterface( void)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( globals()->gOptions & kOptionInBackground)
-                        {
-                        } else if (AutoShowHideMenubar( theEvent.where, theDevice))
-                        {
-                        }
                         if ( globals()->returnToMain)
                         {
                             whichItem = kClientWaitCancelButton;
@@ -2349,11 +2298,6 @@ netResultType HostAcceptClientInterface( void)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( globals()->gOptions & kOptionInBackground)
-                        {
-                        } else if (AutoShowHideMenubar( theEvent.where, theDevice))
-                        {
-                        }
                         if ( globals()->returnToMain)
                         {
                             whichItem = kHostCancelButton;
@@ -3534,11 +3478,6 @@ long DoSelectLevelInterface( long startChapter)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( globals()->gOptions & kOptionInBackground)
-                        {
-                        } else if (AutoShowHideMenubar( theEvent.where, theDevice))
-                        {
-                        }
                         if ( globals()->returnToMain)
                         {
                             whichItem = kSelectLevelCancelButton;
@@ -3848,11 +3787,6 @@ Boolean DoMissionInterface( long whichScenario)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( globals()->gOptions & kOptionInBackground)
-                        {
-                        } else if (AutoShowHideMenubar( theEvent.where, theDevice))
-                        {
-                        }
                         if (( globals()->gOptions & (kOptionAutoPlay | kOptionReplay)) && (!( globals()->gOptions & kOptionInBackground))
                             && ( (TickCount() - nextStartTime) > thisMissionWaitTime))
                         {
@@ -5389,7 +5323,6 @@ void HandleOSEvent( EventRecord *event)
                 {
                     // we don't care about clipboard
                 }
-                SetMBarState( false, theDevice);
                 globals()->gOptions &= ~kOptionInBackground;
                 SelectWindow( gTheWindow);
                 MacSetPort( gTheWindow);
@@ -5410,7 +5343,6 @@ void HandleOSEvent( EventRecord *event)
             } else
             {
                 ToggleSong();
-                SetMBarState( true, theDevice);
                 globals()->gOptions |= kOptionInBackground;
                 SuspendActiveTextEdit();
                 WriteDebugLine("\pSUSPEND");
