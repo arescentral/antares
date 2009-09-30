@@ -17,6 +17,7 @@
 
 #include "Fakes.hpp"
 
+#include <getopt.h>
 #include <string>
 
 #include "AresPreferences.hpp"
@@ -32,9 +33,9 @@ bool mission_briefing_test = false;
 bool main_screen_test = false;
 int briefing_num = 0;
 
-int demo_scenario = 23;
+int level = 23;
 int GetDemoScenario() {
-    return demo_scenario;
+    return level;
 }
 
 std::string output_dir;
@@ -70,7 +71,7 @@ bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouse
             if (mission_briefing_test) {
                 evt->what = autoKey;
                 evt->message = 0x0100;  // S
-                globals()->gPreferencesData->startingLevel = 22;
+                globals()->gPreferencesData->startingLevel = level;
             } else if (main_screen_test) {
                 DumpTo(GetOutputDir() + "/main-screen.bin");
                 exit(0);
@@ -128,37 +129,103 @@ void StringToNum(unsigned char* p_str, long* value) {
     assert(end == c_str + len);
 }
 
-void Usage() {
-    fprintf(stderr, "usage: ./Antares space-race <dump-prefix>\n"
-                    "       ./Antares the-stars-have-ears <dump-prefix>\n"
-                    "       ./Antares while-the-iron-is-hot <dump-prefix>\n"
-                    "       ./Antares main-screen <dump-prefix>\n"
-                    "       ./Antares mission-briefing <dump-prefix>\n");
+void usage(const char* bin) {
+    fprintf(stderr,
+            "usage: %s [-m|--mode=<mode>] [<options>]\n"
+            "options:\n"
+            "       -h|--help           display this screen\n"
+            "       -l|--level=<number> choose a level to use in the given mode\n"
+            "       -o|--output=<dir>   directory to save dumps to\n"
+            "modes:\n"
+            "       main-screen         dumps the main screen, then exits\n"
+            "       mission-briefing    dumps the mission briefing screens for <level>\n"
+            "       demo                runs the demo for <level>\n",
+            bin);
     exit(1);
 }
 
-void FakeInit(int argc, const char** argv) {
-    if (argc == 3) {
-        std::string demo = argv[1];
-        output_dir = argv[2];
-        if (demo == "space-race") {
-            demo_scenario = 23;
-            SetDoSounds(true);
-        } else if (demo == "the-stars-have-ears") {
-            demo_scenario = 0;
-            SetDoSounds(true);
-        } else if (demo == "while-the-iron-is-hot") {
-            demo_scenario = 5;
-            SetDoSounds(true);
-        } else if (demo == "main-screen") {
-            main_screen_test = true;
-        } else if (demo == "mission-briefing") {
-            mission_briefing_test = true;
-        } else {
-            Usage();
+void FakeInit(int argc, char* const* argv) {
+    const char* bin = argv[0];
+    int mode = -1;
+    option longopts[] = {
+        { "help",   no_argument,        NULL,   'h' },
+        { "mode",   required_argument,  NULL,   'm' },
+        { "level",  required_argument,  NULL,   'l' },
+        { "output", required_argument,  NULL,   'o' },
+        { NULL,     0,                  NULL,   0 }
+    };
+
+    char ch;
+    while ((ch = getopt_long(argc, argv, "hm:l:o:", longopts, NULL)) != -1) {
+        switch (ch) {
+          case 'm':
+            {
+                std::string arg = optarg;
+                if (arg == "main-screen") {
+                    mode = 0;
+                } else if (arg == "mission-briefing") {
+                    mode = 1;
+                } else if (arg == "demo") {
+                    mode = 2;
+                } else {
+                    fprintf(stderr, "%s: unknown mode '%s'\n", bin, optarg);
+                    usage(bin);
+                }
+            }
+            break;
+          case 'l':
+            {
+                char* end = NULL;
+                if (*optarg) {
+                    level = strtol(optarg, &end, 10);
+                }
+                if (end != optarg + strlen(optarg)) {
+                    fprintf(stderr, "Couldn't parse --level=%s as an integer\n", optarg);
+                }
+            }
+            break;
+          case 'o':
+            output_dir = optarg;
+            break;
+          default:
+            fprintf(stderr, "%s: unknown argument %s\n", bin, argv[optind]);
+            usage(bin);
+            break;
         }
-    } else {
-        Usage();
+    }
+
+    argc -= optind;
+    argv += optind;
+    if (argc != 0) {
+        fprintf(stderr, "%s: too many arguments\n", bin);
+        usage(bin);
+    }
+
+    switch (mode) {
+      case 0:
+        main_screen_test = true;
+        break;
+      case 1:
+        mission_briefing_test = true;
+        break;
+      case 2:
+        {
+            if (level != 0 && level != 5 && level != 23) {
+                fprintf(stderr, "Only have demos of levels 0, 5, and 23; not %d.\n", level);
+                exit(1);
+            }
+            SetDoSounds(true);
+        }
+        break;
+      default:
+        fprintf(stderr, "%s: must specify --mode\n", bin);
+        usage(bin);
+        break;
+    }
+
+    if (output_dir.empty()) {
+        fprintf(stderr, "%s: must specify --output\n", bin);
+        usage(bin);
     }
 
     MakeDirs(output_dir, 0755);

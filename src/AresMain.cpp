@@ -186,11 +186,10 @@ Boolean         hackWarn = true;
 unsigned long kNoKeys = 0;
 
 int GetDemoScenario();
-void FakeInit(int argc, const char** argv);
-int main(int argc, const char** argv);
+void FakeInit(int argc, char* const* argv);
 void Pause( long time);
 
-int main(int argc, const char** argv) {
+int main(int argc, char* const* argv) {
     Rect                    windowRect, tRect;
     OSErr                   error;
     RGBColor                initialFadeColor;

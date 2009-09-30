@@ -14,13 +14,13 @@ import termios
 import time
 
 
-ALL_TEST_CASES = [
-    'main-screen',
-    'mission-briefing',
-    'space-race',
-    'the-stars-have-ears',
-    'while-the-iron-is-hot',
-]
+ALL_TEST_CASES = {
+    'main-screen': ['--mode=main-screen'],
+    'mission-briefing': ['--mode=mission-briefing', '--level=22'],
+    'space-race': ['--mode=demo', '--level=23'],
+    'the-stars-have-ears': ['--mode=demo', '--level=0'],
+    'while-the-iron-is-hot': ['--mode=demo', '--level=5'],
+}
 SCRIPT_NAME = os.path.basename(sys.argv[0])
 
 def usage():
@@ -31,7 +31,7 @@ def usage():
             '       %(test_cases)s\n'
             % {
                 'script_name': SCRIPT_NAME,
-                'test_cases': '\n       '.join(ALL_TEST_CASES),
+                'test_cases': '\n       '.join(ALL_TEST_CASES.iterkeys()),
             })
     sys.exit(1)
 
@@ -58,14 +58,14 @@ def main(argv):
             if args:
                 usage()
             else:
-                args = ALL_TEST_CASES
+                args = ALL_TEST_CASES.keys()
 
         for case in args:
             if case not in ALL_TEST_CASES:
                 sys.__stderr__.write('unknown test case: %r\n' % case)
                 sys.exit(1)
             else:
-                test_cases.append(TestCase(case))
+                test_cases.append(TestCase(case, ALL_TEST_CASES[case]))
 
         with Timed():
             with Timed():
@@ -104,8 +104,9 @@ def main(argv):
 
 class TestCase(object):
 
-    def __init__(self, name):
+    def __init__(self, name, args):
         self.name = name
+        self.args = args
         self.output = None
 
     def test(self):
@@ -115,7 +116,7 @@ class TestCase(object):
             print('Running Antares...')
             with Timed():
                 antares = subprocess.Popen(
-                        ['./Antares', self.name, dir],
+                        ['./Antares', '--output=%s' % dir] + self.args,
                         stderr=subprocess.PIPE)
                 stdout, stderr = antares.communicate()
 
