@@ -3758,18 +3758,6 @@ Boolean DoMissionInterface( long whichScenario)
                                 &mapRect, &tRect, inlinePict) * 2;
         thisMissionWaitTime += thisMissionWaitTime / 2;
 
-
-/////////////////////////////////////
-// Display free memory
-/*      DrawInRealWorld();
-        NumToString( CompactMem( maxSize), s);
-        MoveTo( 10, 50);
-        SetTranslateColorFore( WHITE);
-        DrawString( s);
-        SetTranslateColorFore( BLACK);
-*/
-//
-/////////////////////////////////////
         nextStartTime = TickCount();
 
         while ( !done)

@@ -188,7 +188,6 @@ unsigned long kNoKeys = 0;
 int GetDemoScenario();
 void FakeInit(int argc, const char** argv);
 int main(int argc, const char** argv);
-void SetWindowColorTable( WindowPtr);
 void Pause( long time);
 
 int main(int argc, const char** argv) {
@@ -238,7 +237,6 @@ int main(int argc, const char** argv) {
     globals()->gBackWindow = nil;
     globals()->gBackWindow = NewCWindow (nil, &tRect, "\p", false, plainDBox,
             reinterpret_cast<WindowPtr>(-1), false, 701);
-    SetWindowColorTable( globals()->gBackWindow);
     InitTransitions();
 
     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
@@ -269,7 +267,6 @@ int main(int argc, const char** argv) {
     gTheWindow = NewCWindow (nil, &windowRect, "\p", TRUE, plainDBox,
             reinterpret_cast<WindowPtr>(-1), true, 700);
 
-    SetWindowColorTable( gTheWindow);
     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
     MacSetPort( gTheWindow);
     RGBBackColor( &initialFadeColor);
@@ -2239,7 +2236,6 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
 Boolean HandleMouseDown( EventRecord *theEvent)
 
 {
-    long        menuChoice;
     short       whichPart;
     WindowPtr   whichWindow;
     Point       where;
@@ -2248,10 +2244,6 @@ Boolean HandleMouseDown( EventRecord *theEvent)
     whichPart = MacFindWindow (theEvent->where,  &whichWindow);
     switch (whichPart)
     {
-        case inMenuBar:
-            menuChoice = MenuSelect( theEvent->where);
-            done = HandleMenuChoice( menuChoice);
-            break;
         case inSysWindow:
             SystemClick( theEvent, whichWindow);
             break;
@@ -2269,72 +2261,6 @@ Boolean HandleMouseDown( EventRecord *theEvent)
             break;
     }
     return ( done);
-}
-
-Boolean HandleMenuChoice( long menuChoice)
-
-{
-    int     theMenu;
-    int     theItem;
-    Boolean done = FALSE;
-
-    if (menuChoice != 0)
-    {
-        theMenu = HiWord( menuChoice);
-        theItem = LoWord( menuChoice);
-        switch (theMenu)
-        {
-            case APPLE_MENU_ID:
-                HandleAppleChoice( theItem);
-                break;
-            case FILE_MENU_ID:
-                done = HandleFileChoice( theItem);
-                break;
-            case EDIT_MENU_ID:
-                HandleEditChoice( theItem);
-                break;
-        }
-        HiliteMenu( 0 );
-    }
-    return ( done);
-}
-
-void HandleAppleChoice ( int theItem)
-
-{
-    Str255      accName;
-    int         accNumber;
-
-    switch ( theItem)
-    {
-        case ABOUT_ITEM:
-            NoteAlert( ABOUT_ALERT, nil);
-            break;
-        default:
-            GetMenuItemText ( gAppleMenu, theItem, accName);
-#if TARGET_OS_MAC
-            accNumber = OpenDeskAcc( accName);
-#endif TARGET_OS_MAC
-            break;
-    }
-}
-
-Boolean HandleFileChoice( int theItem)
-
-{
-    switch( theItem)
-    {
-        case QUIT_ITEM:
-            return ( TRUE);
-            break;
-    }
-    return ( FALSE);
-}
-
-void HandleEditChoice( int theItem)
-
-{
-#pragma unused( theItem)
 }
 
 Boolean HandleKeyDown( EventRecord *theEvent)
@@ -2357,49 +2283,3 @@ void Pause( long time)
         // DO NOTHING
     }
 }
-
-void SetWindowColorTable( WindowPtr)
-{
-    /*
-
-    WCTabHandle     winCTabHandle;                                                  // 2
-    AuxWinHandle    auxWinHandle;                                                   // 2
-
-    GetAuxWin (window,&auxWinHandle);                                               // 2
-    winCTabHandle = (WCTabHandle) ((**auxWinHandle).awCTable);                      // 2
-
-    HandToHand ((Handle *) &winCTabHandle);                                         // 3
-    if (!MemError ( ))                                                              // 3
-    {
-        RGBColor blackness = { 0, 0, 0 };                                           // 4
-
-        if (SetColorTableEntry ((CTabHandle) winCTabHandle, 0, &blackness))         // 4
-        {
-            SetWinColor (window,winCTabHandle);                                     // 5
-        }
-    }
-    */
-}
-
-/*
-static pascal Boolean SetColorTableEntry (CTabHandle cth, short value, const RGBColor *rgbP)
-{
-    ColorSpecPtr    ctTable     = (**cth).ctTable;
-    short           ctSize      = (**cth).ctSize;
-
-    while (ctSize > -1)
-    {
-        if (ctTable->value == value)
-        {
-            ctTable->rgb = *rgbP;
-            CTabChanged (cth);
-            return true;
-        }
-
-        ++ctTable;
-        --ctSize;
-    }
-
-    return false;
-}
-*/

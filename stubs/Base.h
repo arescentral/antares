@@ -50,7 +50,6 @@ enum {
     suspendResumeMessage = 801,
 };
 
-typedef short ShortBoolean;
 typedef bool Boolean;
 typedef int16_t OSErr;
 
@@ -71,12 +70,8 @@ typedef long Size;
 typedef unsigned char* Ptr;
 typedef Ptr* Handle;
 
-STUB1(HiWord, int(long value), 0);
-STUB1(LoWord, int(long value), 0);
-
 void Microseconds(uint64_t* wide);
 
-STUB1(CompactMem, Size(int), 100 * 1024 * 1024);  // 100MB
 void BlockMove(void* src, void* dst, size_t size);
 
 typedef void* AddrBlock;
@@ -130,8 +125,6 @@ struct Window;
 typedef Window* WindowPtr;
 typedef Window** WindowRef;
 
-STUB1(BeginUpdate, void(Window* window));
-STUB1(EndUpdate, void(Window* window));
 Window* NewWindow(void*, Rect*, const unsigned char* title, bool, int,
       Window* behind, bool, int);
 STUB1(MacShowWindow, void(Window*));
