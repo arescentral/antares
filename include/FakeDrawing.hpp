@@ -88,6 +88,7 @@ uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue);
 uint8_t GetPixel(int x, int y);
 void SetPixel(int x, int y, uint8_t c);
 void SetPixelRow(int x, int y, uint8_t* c, int count);
+void ClearScreen();
 
 extern PixMap* gOffWorld;
 extern PixMap* gRealWorld;

@@ -51,6 +51,7 @@
 #include "EnvironmentCheck.hpp"
 #include "Error.hpp"
 
+#include "FakeDrawing.hpp"
 #include "Fakes.hpp"
 
 #include "GXMath.h"
@@ -102,7 +103,6 @@
 
 #include "VersionString.hpp"
 
-#include "WinAresGlue.hpp"
 #include "WrapGameRanger.hpp"
 
 //#define   kTempNet
@@ -217,7 +217,6 @@ int main(int argc, const char** argv) {
         globals()->gOptions &= ~kOptionNetworkAvailable;
     }
 
-    GetDateTime( reinterpret_cast<unsigned long *>(&qd.randSeed));
     GetDateTime( reinterpret_cast<unsigned long *>(&gRandomSeed));
 
     theClut.reset(new ColorTable(256));
@@ -245,7 +244,6 @@ int main(int argc, const char** argv) {
     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
     MacSetPort( globals()->gBackWindow);
     RGBBackColor( &initialFadeColor);
-    BackPat( &qd.black);
 
     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
     RGBForeColor( &initialFadeColor);
@@ -281,7 +279,7 @@ int main(int argc, const char** argv) {
 
     MacSetPort ( gTheWindow);
     MacSetRect( &windowRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-    MacFillRect( &tRect, &qd.black);
+    ClearScreen();
 
     BringDebugToFront();
     skipFading = AutoFadeFrom(1, true);
@@ -516,7 +514,6 @@ int main(int argc, const char** argv) {
 void ToolBoxInit( void)
 
 {
-    InitGraf(&qd.thePort);
     InitWindows();
     InitMenus();
     TEInit();
@@ -2261,9 +2258,6 @@ Boolean HandleMouseDown( EventRecord *theEvent)
         case inContent:
             where = theEvent->where;
             GlobalToLocal( &where);
-            break;
-        case inDrag:
-            DragWindow (whichWindow, theEvent->where, &qd.screenBits.bounds);
             break;
         case inGoAway:
             if ( TrackGoAway (whichWindow, theEvent->where))

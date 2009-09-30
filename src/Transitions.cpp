@@ -29,10 +29,10 @@
 #include "ColorTranslation.hpp"
 #include "Debug.hpp"
 #include "Error.hpp"
+#include "FakeDrawing.hpp"
 #include "KeyMapTranslation.hpp"
 #include "Music.hpp"
 #include "Picture.hpp"
-#include "WinAresGlue.hpp"
 
 //#define   kDontMessWithColors
 
@@ -384,7 +384,7 @@ Boolean CustomPictFade( long fadeSpeed, long holdTime, short pictID, short clutI
 
     UseResFile( gSpriteFileRefID);
 
-    MacFillRect( &(aWindow->portRect), &(qd.black));
+    ClearScreen();
     theClut.reset(new ColorTable(clutID));
     if (theClut.get() == nil) {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadColorTableError, -1, -1, -1, __FILE__, 1);
@@ -417,7 +417,7 @@ Boolean CustomPictFade( long fadeSpeed, long holdTime, short pictID, short clutI
     if ( !gotAnyEvent) gotAnyEvent = TimedWaitForAnyEvent(80);
     if ( !gotAnyEvent) gotAnyEvent = AutoFadeTo( 100, &fadeColor, true);
     else AutoFadeTo( 1, &fadeColor, true);
-    MacFillRect( &(aWindow->portRect), &(qd.black));
+    ClearScreen();
     AutoFadeFrom( 1, TRUE);
 
     MacShowCursor();
@@ -436,7 +436,7 @@ bool StartCustomPictFade(long fadeSpeed, long holdTime, short pictID, short clut
 
 #pragma unused( fadeSpeed, holdTime)
 
-    MacFillRect( &(aWindow->portRect), &(qd.black));
+    ClearScreen();
     theClut.reset(new ColorTable(clutID));
 
     thePict.reset(new Picture(pictID));

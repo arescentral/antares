@@ -81,7 +81,6 @@ Main Antares : src/Admiral.cpp
                src/Transitions.cpp
                src/VersionString.cpp
                src/VncServer.cpp
-               src/WinAresGlue.cpp
                #src/WrapGameRanger.cpp
                #src/WrapGameRangerNull.cpp
                ;

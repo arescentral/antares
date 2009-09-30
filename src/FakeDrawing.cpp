@@ -187,6 +187,10 @@ void SetPixelRow(int x, int y, uint8_t* c, int count) {
     memcpy(&p->baseAddr[x + y * (p->rowBytes & 0x7fff)], c, count);
 }
 
+void ClearScreen() {
+    memset(gActiveWorld->baseAddr, 0xFF, 640 * 480);
+}
+
 Point MakePoint(int x, int y) {
     Point result = { x, y };
     return result;

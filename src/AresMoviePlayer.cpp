@@ -23,10 +23,10 @@
 #include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
+#include "FakeDrawing.hpp"
 #include "KeyMapTranslation.hpp"
 #include "Options.hpp"
 #include "Randomize.hpp"
-#include "WinAresGlue.hpp"
 
 #define kSoundVolumeMultiplier  32  // = 256 (1.0) / 8 (kMaxSoundVolumePreference)
 
@@ -115,7 +115,7 @@ void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean d
     */
 
             // if we have a custom color table for this movie
-            MacFillRect( &(aWindow->portRect), &(qd.black));
+            ClearScreen();
 
             if ( (( movieBox.right - movieBox.left) <= (( aWindow->portRect.right -
                 aWindow->portRect.left) / 2)) && (( movieBox.bottom - movieBox.top) <= (( aWindow->portRect.bottom -
@@ -146,7 +146,7 @@ void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean d
             }
             MacShowCursor();
             DisposeMovie (aMovie);
-            MacFillRect( &(aWindow->portRect), &(qd.black));
+            ClearScreen();
 
     //      DisposeWindow( (WindowPtr)movieWindow);
 
@@ -220,7 +220,7 @@ OSErr LoadMiniMovie(unsigned char* filePath, Movie *aMovie, Rect *destRect, Wind
 
             MacOffsetRect (&movieBox, offH, offV);
 
-            MacFillRect( &movieBox, &(qd.black));
+            ClearScreen();
 
             SetMovieGWorld (*aMovie, aWindow, nil);
             SetMovieVolume( *aMovie, kSoundVolumeMultiplier * globals()->gSoundVolume);
@@ -300,7 +300,7 @@ OSErr CleanUpMiniMovie( Movie *aMovie)
         GetMovieBox( *aMovie, &movieBox);
         err = GetMoviesError();
         if ( err != noErr) return err;//Debugger();
-        MacFillRect( &movieBox, &(qd.black));
+        ClearScreen();
         StopMovie (*aMovie);
         err = GetMoviesError();
         if ( err != noErr) return err;//Debugger();

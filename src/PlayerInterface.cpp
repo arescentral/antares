@@ -59,7 +59,6 @@
 #include "TitleScreen.hpp"           // for CenterRectInRect
 #include "Transitions.hpp"
 #include "WrapGameRanger.hpp"
-#include "WinAresGlue.hpp"
 
 #define kThisVersion    0x00000201  // last was 200; last was 104
 

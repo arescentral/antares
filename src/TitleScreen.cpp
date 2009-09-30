@@ -26,7 +26,6 @@
 #include "Error.hpp"
 #include "OffscreenGWorld.hpp"
 #include "Picture.hpp"
-#include "WinAresGlue.hpp"
 
 #define kTitleScreenID      502
 #define kPublisherScreenID  2000
@@ -101,7 +100,6 @@ void BlackTitleScreen( void)
     MacSetPort( gTheWindow);
     DrawInRealWorld();
     MacSetPort( gTheWindow);
-    PenPat( &qd.black);
     RGBForeColor( &black);
 
     PaintRect(  &(gTheWindow->portRect));
