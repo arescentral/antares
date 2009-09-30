@@ -31,11 +31,8 @@
 #include "File.hpp"
 
 Window fakeWindow(640, 480);
-FakeGDevice fakeGDevice(640, 480, &fakeWindow.portBits);
 
 extern PixMap* gActiveWorld;
-
-GDevice* fakeGDevicePtr = &fakeGDevice;
 
 namespace {
 

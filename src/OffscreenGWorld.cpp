@@ -19,10 +19,11 @@
 
 #include "Debug.hpp"
 #include "Error.hpp"
-#include "GDeviceHandling.hpp"
 #include "NateDraw.hpp"
+#include "TitleScreen.hpp"
 
-extern GDHandle         theDevice;
+extern Window fakeWindow;
+
 PixMap*         gActiveWorld;
 PixMap*         gOffWorld;
 PixMap*         gRealWorld;
@@ -40,18 +41,17 @@ int CreateOffscreenWorld(const Rect& bounds, const ColorTable&) {
     //  device of choice, but I'm too lazy.
     //
 
-    theDevice = GetGDevice();
-    gRealWorld = (*theDevice)->gdPMap;
+    gRealWorld = &fakeWindow.portBits;
     gOffWorld = new PixMap(bounds.right, bounds.bottom);
     gSaveWorld = new PixMap(bounds.right, bounds.bottom);
     gActiveWorld = gRealWorld;
 
     tRect = bounds;
-    CenterRectInDevice(theDevice, &tRect);
-    gNatePortLeft = tRect.left - (*theDevice)->gdRect.left;
+    CenterRectInRect(&tRect, &gRealWorld->bounds);
+    gNatePortLeft = tRect.left - gRealWorld->bounds.left;
     gNatePortLeft /= 4;
 
-    gNatePortTop = tRect.top - (*theDevice)->gdRect.top;
+    gNatePortTop = tRect.top - gRealWorld->bounds.top;
 
     EraseOffWorld();
     EraseSaveWorld();

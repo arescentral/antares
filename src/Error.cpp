@@ -37,7 +37,6 @@
 #define kAnyAlertID         805
 #define kAnyErrorDialogID   810
 #endif
-extern GDHandle                 theDevice;
 
 #define kContinueButton     1
 #define kQuitButton         2

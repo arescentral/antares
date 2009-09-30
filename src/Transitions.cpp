@@ -45,9 +45,9 @@
 
 #define kTransitionError    "\pTRAN"
 
-extern GDHandle theDevice;
 extern long gInterfaceFileRefID;
 extern short gSpriteFileRefID;
+extern Window fakeWindow;
 
 struct bigReqListRec {
     short   reqLSize;
@@ -55,7 +55,7 @@ struct bigReqListRec {
 };
 
 void InitTransitions() {
-    PixMap* onScreenPixMap = (**theDevice).gdPMap;
+    PixMap* onScreenPixMap = &fakeWindow.portBits;
     globals()->gColorAnimationTable.reset(onScreenPixMap->colors->clone());
     globals()->gSaveColorTable.reset(onScreenPixMap->colors->clone());
 }
@@ -142,9 +142,6 @@ void StartColorAnimation( long inSpeed, long outSpeed, unsigned char goalColor)
 void UpdateColorAnimation( long timePassed)
 
 {
-    GDHandle            originalDevice = GetGDevice();
-
-    SetGDevice( theDevice);
     if ( globals()->gColorAnimationInSpeed != kNoColorGoal)
     {
 
@@ -201,22 +198,17 @@ void UpdateColorAnimation( long timePassed)
             globals()->gColorAnimationInSpeed = kNoColorGoal;
         }
     }
-    SetGDevice( originalDevice);
 }
 
 void StartBooleanColorAnimation( long inSpeed, long outSpeed, unsigned char goalColor)
 
 {
-    GDHandle            originalDevice = GetGDevice();
-
     if ( globals()->gColorAnimationInSpeed == kNoColorGoal)
     {
         globals()->gColorAnimationStep = kStartAnimation;
         globals()->gColorAnimationInSpeed = inSpeed;
         globals()->gColorAnimationOutSpeed = outSpeed;
         GetRGBTranslateColor( &globals()->gColorAnimationGoal,  GetRetroIndex( goalColor));
-
-        SetGDevice( theDevice);
 
         for (size_t i = 0; i < globals()->gColorAnimationTable->size(); ++i) {
             RGBColor color = {
@@ -230,7 +222,6 @@ void StartBooleanColorAnimation( long inSpeed, long outSpeed, unsigned char goal
             globals()->gColorAnimationTable->set_color(i, color);
         }
         RestoreEntries(*globals()->gColorAnimationTable);
-        SetGDevice( originalDevice);
     } else
     {
         globals()->gColorAnimationStep = kStartAnimation;
@@ -243,9 +234,6 @@ void StartBooleanColorAnimation( long inSpeed, long outSpeed, unsigned char goal
 void UpdateBooleanColorAnimation( long timePassed)
 
 {
-    GDHandle            originalDevice = GetGDevice();
-
-    SetGDevice( theDevice);
     if ( globals()->gColorAnimationInSpeed != kNoColorGoal)
     {
         if ( globals()->gColorAnimationStep < 0)
@@ -260,34 +248,24 @@ void UpdateBooleanColorAnimation( long timePassed)
             globals()->gColorAnimationInSpeed = kNoColorGoal;
         }
     }
-    SetGDevice( originalDevice);
 }
 
 void RestoreOriginalColors( void)
 {
-    GDHandle            originalDevice = GetGDevice();
-
-    SetGDevice( theDevice);
     if ( globals()->gColorAnimationInSpeed != kNoColorGoal)
     {
         RestoreEntries(*globals()->gSaveColorTable);
         globals()->gColorAnimationInSpeed = kNoColorGoal;
     }
-    SetGDevice( originalDevice);
 }
 
 void InstantGoalTransition( void)   // instantly goes to total goal color
 
 {
-    GDHandle            originalDevice = GetGDevice();
-
-    SetGDevice( theDevice);
-
     for (size_t i = 0; i < globals()->gColorAnimationTable->size(); ++i) {
         globals()->gColorAnimationTable->set_color(i, globals()->gColorAnimationGoal);
     }
     RestoreEntries(*globals()->gColorAnimationTable);
-    SetGDevice( originalDevice);
 }
 
 Boolean AutoFadeTo( long tickTime, RGBColor *goalColor, Boolean eventSkip)

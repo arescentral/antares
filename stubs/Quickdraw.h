@@ -4,16 +4,6 @@
 #include <Base.h>
 #include <Files.h>
 
-typedef struct {
-    PixMap* gdPMap;
-    Rect gdRect;
-} GDevice;
-typedef GDevice** GDHandle;
-
-extern GDevice* fakeGDevicePtr;
-STUB0(GetGDevice, GDevice**(), &fakeGDevicePtr);
-STUB1(SetGDevice, void(GDevice** device));
-
 typedef Window* GrafPtr;
 typedef GrafPtr CGrafPtr;
 
@@ -40,10 +30,6 @@ STUB1(ClipRect, void(Rect* rect));
 void CopyBits(PixMap* source, PixMap* source2, Rect* source_rect,
       Rect* source_rect2, int mode, void*);
 
-STUB0(GetMainDevice, GDHandle(), &fakeGDevicePtr);
-STUB0(GetDeviceList, GDHandle(), &fakeGDevicePtr);
-STUB1(GetNextDevice, GDHandle(GDHandle gd), NULL);
-
 STUB0(NewRgn, Rgn**(), new Rgn*(new Rgn));
 STUB1(DisposeRgn, void(Rgn** rgn));
 STUB2(RectRgn, void(Rgn** src, Rect* dst));
@@ -69,9 +55,6 @@ void MoveTo(int x, int y);
 void GetPen(Point* pen);
 
 STUB0(PenNormal, void());
-
-STUB4(HasDepth, bool(GDHandle device, int depth, int, int), true);
-STUB4(SetDepth, void(GDHandle device, int depth, int, int));
 
 enum {
     colorPaletteSystem = 1000,

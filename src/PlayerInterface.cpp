@@ -36,7 +36,6 @@
 #include "DirectText.hpp"
 #include "Error.hpp"
 #include "Fakes.hpp"
-#include "GDeviceHandling.hpp"
 #include "Instruments.hpp"
 #include "InterfaceHandling.hpp"
 #include "KeyCodes.hpp"
@@ -357,7 +356,6 @@ extern directTextType*          gDirectText;
 extern long                     WORLD_WIDTH, WORLD_HEIGHT;
 extern TypedHandle<baseObjectType> gBaseObjectData;
 extern TypedHandle<objectActionType> gObjectActionData;
-extern GDHandle                 theDevice;
 extern PixMap*                  gActiveWorld;
 extern PixMap*                  gOffWorld;
 extern PixMap*                  gSaveWorld;

@@ -34,7 +34,6 @@ Main Antares : src/Admiral.cpp
                src/FakeTime.cpp
                src/Fakes.cpp
                src/File.cpp
-               src/GDeviceHandling.cpp
                #src/Icl8ToCicn.cpp
                #src/IconSuiteFromAlias.cpp
                src/InputSource.cpp

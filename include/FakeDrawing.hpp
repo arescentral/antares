@@ -89,14 +89,6 @@ uint8_t GetPixel(int x, int y);
 void SetPixel(int x, int y, uint8_t c);
 void SetPixelRow(int x, int y, uint8_t* c, int count);
 
-class FakeGDevice : public GDevice {
-  public:
-    FakeGDevice(int width, int height, PixMap* pixmap) {
-        gdPMap = pixmap;
-        SetRect(&gdRect, 0, 0, width, height);
-    }
-};
-
 extern PixMap* gOffWorld;
 extern PixMap* gRealWorld;
 extern PixMap* gSaveWorld;

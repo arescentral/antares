@@ -84,7 +84,6 @@ struct tempKeyControlType {
     Boolean didConflict;
 };
 
-extern GDHandle         theDevice;
 extern CWindowPtr       gTheWindow;
 
 static void ConflictText_Update( tempKeyControlType *keyControls);

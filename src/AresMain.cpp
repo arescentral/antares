@@ -53,7 +53,6 @@
 
 #include "Fakes.hpp"
 
-#include "GDeviceHandling.hpp"
 #include "GXMath.h"
 
 #include "InputSource.hpp"
@@ -168,8 +167,8 @@ extern int32_t gRandomSeed;
 extern long gNatePortLeft, gNatePortTop, gNetLatency;
 extern scenarioType *gThisScenario;
 extern short gSpriteFileRefID, gInterfaceFileRefID;
-extern GDHandle theDevice;
 extern PixMap* gActiveWorld;
+extern Window fakeWindow;
 
 CWindowPtr      gTheWindow = nil;//, globals()->gBackWindow = nil;
 MenuHandle      gAppleMenu;
@@ -227,16 +226,15 @@ int main(int argc, const char** argv) {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, RESOURCE_ERROR, -1, -1, -1, __FILE__, 500);
     }
 
-    theDevice = GetMainDevice();
-    gActiveWorld = (*theDevice)->gdPMap;
+    gActiveWorld = &fakeWindow.portBits;
 
     MacSetRect( &windowRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-    tRect = (*theDevice)->gdRect;
+    tRect = gActiveWorld->bounds;
     tpoint.h = tpoint.v = 0;
     ShieldCursor( &tRect, tpoint);
 
     InitSpriteCursor();
-    CenterRectInDevice( theDevice, &windowRect);
+    CenterRectInRect(&windowRect, &gActiveWorld->bounds);
 
     globals()->gBackWindow = nil;
     globals()->gBackWindow = NewCWindow (nil, &tRect, "\p", false, plainDBox,
@@ -266,7 +264,6 @@ int main(int argc, const char** argv) {
     RGBBackColor( &initialFadeColor);
     MacSetPort( globals()->gBackWindow);
     PaintRect( &(globals()->gBackWindow->portRect));
-    RestoreDeviceClut( theDevice);
     ResetTransitions();
 
     skipFading = AutoFadeFrom( 1, true);
@@ -349,7 +346,7 @@ int main(int argc, const char** argv) {
                     BlackTitleScreen();
 
                     if ( !skipFading) PlayMovieByName("\p:Ares Data Folder:Title", gTheWindow,
-                            false, theDevice);
+                            false);
 
                     MacSetPort( gTheWindow);
 
@@ -704,7 +701,7 @@ void MainLoop (void)
                             if ( movieName[0] != 0)
                             {
                                 PlayMovieByName( movieName, gTheWindow,
-                                    true, theDevice);
+                                    true);
                             }
 
                             if ( GetScenarioPrologueID( whichScenario) > 0)
@@ -847,7 +844,7 @@ void MainLoop (void)
 // *********
 
                                     PlayMovieByName("\p:Ares Data Folder:Next Level", gTheWindow,
-                                        true, theDevice);
+                                        true);
                                     if ( globals()->gOptions & kOptionMusicIdle)
                                     {
                                         BlackTitleScreen();
@@ -981,7 +978,6 @@ void MainLoop (void)
                             {
     //                          EMERGENCYHACKTEST = true;
 
-                                SetMBarState( false, theDevice);
                                 if ( globals()->gOptions & kOptionMusicIdle)
                                 {
                                     StopAndUnloadSong();

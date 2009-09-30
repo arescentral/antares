@@ -33,8 +33,6 @@ struct qdGlobalStruct {
     screenBitsStruct    screenBits;
 };
 
-void RestoreDeviceClut( GDHandle);
-
 extern qdGlobalStruct qd;
 
 #endif // ANTARES_WIN_ARES_GLUE_HPP_

@@ -20,6 +20,3 @@
 #include "WinAresGlue.hpp"
 
 qdGlobalStruct qd;
-
-void RestoreDeviceClut( GDHandle) {
-}

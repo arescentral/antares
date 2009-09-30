@@ -25,7 +25,7 @@
 
 #include "Movies.h"
 
-void PlayMovieByName( const unsigned char*, WindowPtr, Boolean, GDHandle);
+void PlayMovieByName( const unsigned char*, WindowPtr, Boolean);
 void InitMoviePlayer( void);
 void CleanupMoviePlayer( void);
 OSErr LoadMiniMovie(unsigned char*, Movie *, Rect *, WindowPtr, Boolean);
