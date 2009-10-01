@@ -17,6 +17,7 @@
 
 #include "Fakes.hpp"
 
+#include <sys/time.h>
 #include <getopt.h>
 #include <string>
 
@@ -40,6 +41,36 @@ class Mode {
     virtual int get_demo_scenario() = 0;
     virtual void main_loop_iteration_complete(uint32_t game_time) = 0;
     virtual int ticks() = 0;
+};
+
+class RealMode : public Mode {
+  public:
+    RealMode()
+            : _start_time(usecs()) { }
+
+    virtual bool wait_next_event(EventRecord*) { return true; }
+
+    virtual void set_game_state(GameState) { }
+
+    virtual int get_demo_scenario() {
+        int levels[] = { 0, 5, 23 };
+        return levels[rand() % 3];
+    }
+
+    virtual void main_loop_iteration_complete(uint32_t) { }
+
+    virtual int ticks() {
+        return (usecs() - _start_time) * 60 / 1000000;
+    }
+
+  private:
+    int64_t usecs() const {
+        timeval tv;
+        gettimeofday(&tv, NULL);
+        return tv.tv_sec * 1000000ll + tv.tv_usec;
+    }
+
+    int64_t _start_time;
 };
 
 class TestingMode : public Mode {
@@ -292,6 +323,8 @@ void FakeInit(int argc, char* const* argv) {
                     mode_int = 1;
                 } else if (arg == "demo") {
                     mode_int = 2;
+                } else if (arg == "real") {
+                    mode_int = 3;
                 } else {
                     fprintf(stderr, "%s: unknown mode '%s'\n", bin, optarg);
                     usage(bin);
@@ -333,6 +366,9 @@ void FakeInit(int argc, char* const* argv) {
         break;
       case 2:
         mode = new DemoMode(level);
+        break;
+      case 3:
+        mode = new RealMode;
         break;
       default:
         fprintf(stderr, "%s: must specify --mode\n", bin);
