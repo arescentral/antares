@@ -38,7 +38,8 @@ STUB3(DiffRgn, void(Rgn**, Rgn**, Rgn**));
 STUB3(MacUnionRgn, void(Rgn**, Rgn**, Rgn**));
 STUB0(OpenRgn, void());
 STUB1(CloseRgn, void(Rgn** rgn));
-STUB4(ScrollRect, void(Rect* rect, int x, int y, Rgn** clip));
+
+void ScrollRect(Rect* rect, int x, int y, Rect clip);
 
 void MacFillRect(Rect* rect, Pattern* pattern);
 void PaintRect(Rect* rect);

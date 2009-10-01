@@ -120,6 +120,15 @@ void MacOffsetRect(Rect* rect, int x, int y) {
     OffsetRect(rect, x, y);
 }
 
+void ScrollRect(Rect* rect, int x, int y, Rect clip) {
+    assert(x == 0 && y == -1);
+    int rowBytes = gActiveWorld->rowBytes & 0x7fff;
+    for (int i = std::min(rect->top - 1, clip.top); i < rect->bottom - 1; ++i) {
+        uint8_t* base = gActiveWorld->baseAddr + i * rowBytes + rect->left;
+        memcpy(base, base + rowBytes, rect->right - rect->left);
+    }
+}
+
 bool MacPtInRect(Point p, Rect* rect) {
     return (rect->left <= p.h && p.h <= rect->right)
         && (rect->top <= p.v && p.v <= rect->bottom);

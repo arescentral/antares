@@ -4787,7 +4787,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
     scoped_ptr<Picture> bgPict;
     Boolean             sectionOver, abort = false, wasPicture = true;
     Movie               theMovie = nil;
-    RgnHandle           clipRgn = nil;
+    Rect                clipRgn;
 
     if (( globals()->gOptions & kOptionMusicIdle) && ( songID >= 0))
     {
@@ -4832,11 +4832,7 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
         movieRect.top = movieRect.bottom - kScrollMovieHeight;
 
         mCopyAnyRect( tRect, scrollRect);
-        clipRgn = NewRgn();
-        if ( clipRgn == nil) return;
-        OpenRgn();
-        FrameRect( &tRect);
-        CloseRgn( clipRgn);
+        clipRgn = tRect;
 
         DrawInRealWorld();
         MacSetPort( thePort);
@@ -5281,7 +5277,6 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
     {
         StopAndUnloadSong();
     }
-    if ( clipRgn != nil) DisposeRgn( clipRgn);
 }
 
 // HANDLING SUSPEND & RESUME
