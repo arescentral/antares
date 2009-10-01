@@ -24,9 +24,43 @@
 
 #include "Fakes.hpp"
 
-bool do_sounds = false;
-void SetDoSounds(bool flag) {
-    do_sounds = flag;
+namespace {
+
+scoped_ptr<SoundDriver> sound_driver;
+
+}  // namespace
+
+void SoundDriver::set_driver(SoundDriver* driver) {
+    assert(driver);
+    sound_driver.reset(driver);
+}
+
+void NullSoundDriver::play(int32_t, int32_t) { }
+void NullSoundDriver::amp(int32_t, uint8_t) { }
+void NullSoundDriver::quiet(int32_t) { }
+
+LogSoundDriver::LogSoundDriver(const std::string& path)
+        : _sound_log(fopen(path.c_str(), "w")) {
+    assert(_sound_log);
+    setbuf(_sound_log, NULL);
+}
+
+void LogSoundDriver::play(int32_t channel, int32_t id) {
+    if (globals()->gGameTime > 0) {
+        fprintf(_sound_log, "play\t%d\t%ld\t%d\n", channel, globals()->gGameTime, id);
+    }
+}
+
+void LogSoundDriver::amp(int32_t channel, uint8_t volume) {
+    if (globals()->gGameTime > 0) {
+        fprintf(_sound_log, "amp\t%d\t%ld\t%d\n", channel, globals()->gGameTime, volume);
+    }
+}
+
+void LogSoundDriver::quiet(int32_t channel) {
+    if (globals()->gGameTime > 0) {
+        fprintf(_sound_log, "quiet\t%d\t%ld\n", channel, globals()->gGameTime);
+    }
 }
 
 static int last_id = -1;
@@ -47,30 +81,16 @@ OSErr SndDisposeChannel(SndChannel* chan, bool) {
     return noErr;
 }
 
-static FILE* sound_log;
-
 OSErr SndDoImmediate(SndChannel* chan, SndCommand* cmd) {
-    if (do_sounds) {
-        switch (cmd->cmd) {
-        case quietCmd:
-            if (globals()->gGameTime > 0) {
-                fprintf(sound_log, "quiet\t%d\t%ld\n", chan->id, globals()->gGameTime);
-            }
-            break;
-
-        case flushCmd:
-            break;
-
-        case ampCmd:
-            if (globals()->gGameTime > 0) {
-                fprintf(sound_log, "amp\t%d\t%ld\t%d\n",
-                        chan->id, globals()->gGameTime, cmd->param1);
-            }
-            break;
-
-        default:
-            assert(false);
-        }
+    switch (cmd->cmd) {
+      case ampCmd:
+        sound_driver->amp(chan->id, cmd->param1);
+        break;
+      case quietCmd:
+        sound_driver->quiet(chan->id);
+        break;
+      default:
+        break;
     }
     return noErr;
 }
@@ -80,10 +100,7 @@ OSErr SndDoCommand(SndChannel* chan, SndCommand* cmd, bool) {
 }
 
 OSErr SndPlay(SndChannel* channel, TypedHandle<Sound> sound, bool) {
-    if (do_sounds && globals()->gGameTime > 0) {
-        int sound_id = (*sound)->id;
-        fprintf(sound_log, "play\t%d\t%ld\t%d\n", channel->id, globals()->gGameTime, sound_id);
-    }
+    sound_driver->play(channel->id, (*sound)->id);
     return noErr;
 }
 
@@ -95,10 +112,7 @@ TypedHandle<Sound> GetSound(int id) {
 }
 
 void FakeSoundsInit() {
-    if (do_sounds) {
-        std::string filename = GetOutputDir() + "/sound.log";
-        sound_log = fopen(filename.c_str(), "w");
-        setbuf(sound_log, NULL);
-        assert(sound_log);
+    if (!sound_driver.get()) {
+        sound_driver.reset(new NullSoundDriver);
     }
 }

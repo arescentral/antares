@@ -31,6 +31,8 @@
 
 namespace {
 
+std::string output_dir;
+
 class Mode {
   public:
     virtual ~Mode() { }
@@ -129,7 +131,9 @@ class DemoMode : public Mode {
             fprintf(stderr, "Only have demos of levels 0, 5, and 23; not %d.\n", level);
             exit(1);
         }
-        SetDoSounds(true);
+        if (!output_dir.empty()) {
+            SoundDriver::set_driver(new LogSoundDriver(output_dir + "/sound.log"));
+        }
     }
 
     virtual bool wait_next_event(EventRecord*) { return true; }
@@ -160,7 +164,6 @@ int GetDemoScenario() {
     return mode->get_demo_scenario();
 }
 
-std::string output_dir;
 std::string GetOutputDir() {
     return output_dir;
 }
