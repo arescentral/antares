@@ -49,7 +49,9 @@ class MainScreenMode : public Mode {
 
     virtual bool wait_next_event(EventRecord*) {
         if (_ready) {
-            DumpTo(GetOutputDir() + "/main-screen.bin");
+            if (!output_dir.empty()) {
+                DumpTo(output_dir + "/main-screen.bin");
+            }
             exit(0);
         }
         return true;
@@ -87,14 +89,18 @@ class MissionBriefingMode : public Mode {
             {
                 evt->what = autoKey;
                 evt->message = 0x2400;  // RTRN
-                DumpTo(GetOutputDir() + "/select-level.bin");
+                if (!output_dir.empty()) {
+                    DumpTo(output_dir + "/select-level.bin");
+                }
             }
             break;
           case MISSION_INTERFACE:
             {
                 char path[64];
                 sprintf(path, "/mission-%u.bin", _briefing_num);
-                DumpTo(GetOutputDir() + path);
+                if (!output_dir.empty()) {
+                    DumpTo(output_dir + path);
+                }
                 ++_briefing_num;
                 if (_briefing_num >= 9) {
                     exit(0);
@@ -148,7 +154,9 @@ class DemoMode : public Mode {
             char path[64];
             uint32_t seconds = game_time / 60;
             sprintf(path, "/screens/%03um%02u.bin", seconds / 60, seconds % 60);
-            DumpTo(GetOutputDir() + path);
+            if (!output_dir.empty()) {
+                DumpTo(output_dir + path);
+            }
         }
     }
 
@@ -162,10 +170,6 @@ Mode* mode;
 
 int GetDemoScenario() {
     return mode->get_demo_scenario();
-}
-
-std::string GetOutputDir() {
-    return output_dir;
 }
 
 void ModalDialog(void*, short* item) {
@@ -311,12 +315,9 @@ void FakeInit(int argc, char* const* argv) {
         break;
     }
 
-    if (output_dir.empty()) {
-        fprintf(stderr, "%s: must specify --output\n", bin);
-        usage(bin);
+    if (!output_dir.empty()) {
+        MakeDirs(output_dir, 0755);
     }
-
-    MakeDirs(output_dir, 0755);
 
     FakeDrawingInit(width, height);
     FakeHandlesInit();
