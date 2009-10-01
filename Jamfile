@@ -31,7 +31,6 @@ Main Antares : src/Admiral.cpp
                src/FakeHandles.cpp
                src/FakeMath.cpp
                src/FakeSounds.cpp
-               src/FakeTime.cpp
                src/Fakes.cpp
                src/File.cpp
                #src/Icl8ToCicn.cpp

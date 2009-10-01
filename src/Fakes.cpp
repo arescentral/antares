@@ -25,7 +25,6 @@
 #include "FakeHandles.hpp"
 #include "FakeMath.hpp"
 #include "FakeSounds.hpp"
-#include "FakeTime.hpp"
 #include "File.hpp"
 #include "VncServer.hpp"
 
@@ -40,9 +39,27 @@ class Mode {
     virtual void set_game_state(GameState state) = 0;
     virtual int get_demo_scenario() = 0;
     virtual void main_loop_iteration_complete(uint32_t game_time) = 0;
+    virtual int ticks() = 0;
 };
 
-class MainScreenMode : public Mode {
+class TestingMode : public Mode {
+  public:
+    TestingMode()
+            : _current_time(0) { }
+
+    virtual int ticks() {
+        if (globals()->gGameTime > 0) {
+            return _current_time + globals()->gGameTime;
+        } else {
+            return ++_current_time;
+        }
+    }
+
+  private:
+    int _current_time;
+};
+
+class MainScreenMode : public TestingMode {
   public:
     MainScreenMode()
             : _ready(false) { }
@@ -70,7 +87,7 @@ class MainScreenMode : public Mode {
     bool _ready;
 };
 
-class MissionBriefingMode : public Mode {
+class MissionBriefingMode : public TestingMode {
   public:
     MissionBriefingMode(int level)
             : _level(level),
@@ -129,7 +146,7 @@ class MissionBriefingMode : public Mode {
     GameState _state;
 };
 
-class DemoMode : public Mode {
+class DemoMode : public TestingMode {
   public:
     DemoMode(int level)
             : _level(level) {
@@ -198,6 +215,14 @@ bool Button() {
 
 void GetKeys(KeyMap keys) {
     bzero(keys, sizeof(KeyMap));
+}
+
+int TickCount() {
+    return mode->ticks();
+}
+
+void Microseconds(uint64_t* wide) {
+    *wide = TickCount();
 }
 
 void StringToNum(unsigned char* p_str, long* value) {
@@ -323,6 +348,5 @@ void FakeInit(int argc, char* const* argv) {
     FakeHandlesInit();
     FakeMathInit();
     FakeSoundsInit();
-    FakeTimeInit();
     VncServerInit();
 }
