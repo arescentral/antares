@@ -19,6 +19,7 @@
 
 #include <sys/time.h>
 #include <getopt.h>
+#include <queue>
 #include <string>
 
 #include "AresPreferences.hpp"
@@ -27,28 +28,62 @@
 #include "FakeMath.hpp"
 #include "FakeSounds.hpp"
 #include "File.hpp"
+#include "Threading.hpp"
 #include "VncServer.hpp"
 
 namespace {
 
 std::string output_dir;
 
-class Mode {
-  public:
-    virtual ~Mode() { }
-    virtual bool wait_next_event(EventRecord* evt) = 0;
-    virtual void set_game_state(GameState state) = 0;
-    virtual int get_demo_scenario() = 0;
-    virtual void main_loop_iteration_complete(uint32_t game_time) = 0;
-    virtual int ticks() = 0;
-};
-
 class RealMode : public Mode {
   public:
     RealMode()
-            : _start_time(usecs()) { }
+            : _start_time(usecs()),
+              _button(false) { }
 
-    virtual bool wait_next_event(EventRecord*) { return true; }
+    virtual void send_event(EventRecord evt) {
+        {
+            MutexLock lock(&_mu);
+            if (evt.what == mouseDown) {
+                _button = true;
+            } else if (evt.what == mouseUp) {
+                _button = false;
+            } else if (evt.what == autoKey) {
+            }
+            _event_queue.push(evt);
+        }
+        _have_event.broadcast();
+    }
+
+    virtual bool button() {
+        MutexLock lock(&_mu);
+        return _button;
+    }
+
+    virtual void get_keys(KeyMap keys) {
+        MutexLock lock(&_mu);
+        bzero(keys, sizeof(KeyMap));
+    }
+
+    virtual bool wait_next_event(EventRecord* evt, int sleep) {
+        MutexLock lock(&_mu);
+        timeval tv;
+        gettimeofday(&tv, NULL);
+        int64_t timeout = (sleep + tv.tv_sec) * 1000000000ll + tv.tv_usec;
+        while (_event_queue.empty()) {
+            if (!_mu.await_with_timeout(&_have_event, timeout)) {
+                return false;
+            }
+        }
+        *evt = _event_queue.front();
+        if (evt->what == mouseDown) {
+            printf("received mouse down at (%d, %d)\n", evt->where.h, evt->where.v);
+        } else if (evt->what == mouseUp) {
+            printf("received mouse up at (%d, %d)\n", evt->where.h, evt->where.v);
+        }
+        _event_queue.pop();
+        return true;
+    }
 
     virtual void set_game_state(GameState) { }
 
@@ -70,13 +105,22 @@ class RealMode : public Mode {
         return tv.tv_sec * 1000000ll + tv.tv_usec;
     }
 
-    int64_t _start_time;
+    Mutex _mu;
+    Condition _have_event;
+    const int64_t _start_time;
+    bool _button;
+    std::queue<EventRecord> _event_queue;
 };
 
 class TestingMode : public Mode {
   public:
     TestingMode()
             : _current_time(0) { }
+
+    virtual void send_event(EventRecord) { }
+
+    virtual bool button() { return false; }
+    virtual void get_keys(KeyMap keys) { bzero(keys, sizeof(KeyMap)); }
 
     virtual int ticks() {
         if (globals()->gGameTime > 0) {
@@ -95,7 +139,7 @@ class MainScreenMode : public TestingMode {
     MainScreenMode()
             : _ready(false) { }
 
-    virtual bool wait_next_event(EventRecord*) {
+    virtual bool wait_next_event(EventRecord*, int) {
         if (_ready) {
             if (!output_dir.empty()) {
                 DumpTo(output_dir + "/main-screen.bin");
@@ -124,7 +168,7 @@ class MissionBriefingMode : public TestingMode {
             : _level(level),
               _briefing_num(0) { }
 
-    virtual bool wait_next_event(EventRecord* evt) {
+    virtual bool wait_next_event(EventRecord* evt, int) {
         switch (_state) {
           case MAIN_SCREEN_INTERFACE:
             {
@@ -190,7 +234,7 @@ class DemoMode : public TestingMode {
         }
     }
 
-    virtual bool wait_next_event(EventRecord*) { return true; }
+    virtual bool wait_next_event(EventRecord*, int) { return true; }
     virtual void set_game_state(GameState) { }
 
     virtual int get_demo_scenario() {
@@ -212,9 +256,17 @@ class DemoMode : public TestingMode {
     int _level;
 };
 
-Mode* mode;
+scoped_ptr<Mode> mode;
 
 }  // namespace
+
+Mode* Mode::mode() {
+    return ::mode.get();
+}
+
+void Mode::set_mode(Mode* mode) {
+    ::mode.reset(mode);
+}
 
 int GetDemoScenario() {
     return mode->get_demo_scenario();
@@ -234,18 +286,17 @@ void MainLoopIterationComplete(uint32_t game_time) {
 
 bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouseRgn) {
     static_cast<void>(mask);
-    static_cast<void>(sleep);
     static_cast<void>(mouseRgn);
     evt->what = 0;
-    return mode->wait_next_event(evt);
+    return mode->wait_next_event(evt, sleep);
 }
 
 bool Button() {
-    return false;
+    return mode->button();
 }
 
 void GetKeys(KeyMap keys) {
-    bzero(keys, sizeof(KeyMap));
+    mode->get_keys(keys);
 }
 
 int TickCount() {
@@ -359,16 +410,16 @@ void FakeInit(int argc, char* const* argv) {
 
     switch (mode_int) {
       case 0:
-        mode = new MainScreenMode();
+        Mode::set_mode(new MainScreenMode());
         break;
       case 1:
-        mode = new MissionBriefingMode(level);
+        Mode::set_mode(new MissionBriefingMode(level));
         break;
       case 2:
-        mode = new DemoMode(level);
+        Mode::set_mode(new DemoMode(level));
         break;
       case 3:
-        mode = new RealMode;
+        Mode::set_mode(new RealMode);
         break;
       default:
         fprintf(stderr, "%s: must specify --mode\n", bin);

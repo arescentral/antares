@@ -18,7 +18,8 @@
 #ifndef ANTARES_FAKES_HPP_
 #define ANTARES_FAKES_HPP_
 
-#include <string>
+#include <stdint.h>
+#include <Base.h>
 #include "AresGlobalType.hpp"
 
 enum GameState {
@@ -26,6 +27,23 @@ enum GameState {
     MAIN_SCREEN_INTERFACE,
     SELECT_LEVEL_INTERFACE,
     MISSION_INTERFACE,
+};
+
+class Mode {
+  public:
+    virtual ~Mode() { }
+    virtual void send_event(EventRecord evt) = 0;
+    virtual bool wait_next_event(EventRecord* evt, int sleep) = 0;
+    virtual bool button() = 0;
+    virtual void get_keys(KeyMap k) = 0;
+
+    virtual void set_game_state(GameState state) = 0;
+    virtual int get_demo_scenario() = 0;
+    virtual void main_loop_iteration_complete(uint32_t game_time) = 0;
+    virtual int ticks() = 0;
+
+    static Mode* mode();
+    static void set_mode(Mode* mode);
 };
 
 void SetGameState(GameState state);
