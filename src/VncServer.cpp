@@ -27,6 +27,7 @@
 #include "FakeDrawing.hpp"
 #include "MappedFile.hpp"
 #include "PosixException.hpp"
+#include "Threading.hpp"
 
 extern scoped_ptr<Window> fakeWindow;
 
@@ -509,14 +510,12 @@ struct FramebufferPixel {
     }
 };
 
-void* vnc_serve(void* arg) {
+void vnc_serve(int fd) {
     int width = fakeWindow->portRect.right;
     int height = fakeWindow->portRect.bottom;
     scoped_array<FramebufferPixel> pixels(new FramebufferPixel[width * height]);
     try {
-        AutoClosedFd stream(*reinterpret_cast<int*>(arg));
-        delete reinterpret_cast<int*>(arg);
-
+        AutoClosedFd stream(fd);
         SocketBinaryReader in(stream.fd());
         SocketBinaryWriter out(stream.fd());
 
@@ -663,30 +662,26 @@ void* vnc_serve(void* arg) {
     } catch (std::exception& e) {
         printf("vnc_serve: %s\n", e.what());
     }
-    return NULL;
 }
 
-void* vnc_listen(void*) {
+void vnc_listen() {
     try {
         signal(SIGPIPE, SIG_IGN);
         AutoClosedFd sock(listen_on(5901));
         while (true) {
             int fd = accept_on(sock.fd());
-            pthread_t thread;
-            if (pthread_create(&thread, NULL, vnc_serve, new int(fd)) != 0) {
-                throw VncServerException();
-            }
+            Thread thread;
+            thread.start(vnc_serve, fd);
+            thread.detach();
         }
     } catch (std::exception& e) {
         printf("vnc_listen: %s\n", e.what());
         exit(1);
     }
-    return NULL;
 }
 
 void VncServerInit() {
-    pthread_t thread;
-    if (pthread_create(&thread, NULL, vnc_listen, NULL) != 0) {
-        throw VncServerException();
-    }
+    Thread thread;
+    thread.start(vnc_listen);
+    thread.detach();
 }
