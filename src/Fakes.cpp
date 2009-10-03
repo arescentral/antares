@@ -22,6 +22,7 @@
 #include <queue>
 #include <string>
 
+#include "AresMain.hpp"
 #include "AresPreferences.hpp"
 #include "FakeDrawing.hpp"
 #include "FakeHandles.hpp"
@@ -428,4 +429,6 @@ void FakeInit(int argc, char* const* argv) {
     FakeMathInit();
     FakeSoundsInit();
     VncServerInit();
+
+    AresMain();
 }

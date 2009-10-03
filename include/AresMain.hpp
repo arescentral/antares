@@ -26,6 +26,7 @@
 
 #define kHackLevelMax   26//4//21
 
+void AresMain();
 void ToolBoxInit( void);
 void MenuBarInit( void);
 void MainLoop (void);

@@ -189,6 +189,11 @@ void FakeInit(int argc, char* const* argv);
 void Pause( long time);
 
 int main(int argc, char* const* argv) {
+    FakeInit(argc, argv);
+    return 0;
+}
+
+void AresMain() {
     Rect                    windowRect, tRect;
     OSErr                   error;
     RGBColor                initialFadeColor;
@@ -197,8 +202,6 @@ int main(int argc, char* const* argv) {
     EventRecord             theEvent;
     scoped_ptr<ColorTable>  theClut;
     Str255                  tempString;
-
-    FakeInit(argc, argv);
 
     init_globals();
     WORLD_WIDTH = fakeWindow->portRect.right;
