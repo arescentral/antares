@@ -156,7 +156,6 @@
 #define kInterfaceResFileName   "\p:Ares Data Folder:Ares Interfaces"
 #define kSpriteResFileName      "\p:Ares Data Folder:Ares Sprites"
 #define kSoundResFileName       "\p:Ares Data Folder:Ares Sounds"
-//#define   kConstantRate
 
 //#define   kTestNumber     50//5
 
@@ -1233,6 +1232,8 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
     EventRecord         theEvent;
 //  long                hacktc = TickCount(), hacktcsamplesize = 4, hacktcsamplecount = 0;
 
+    SetGameState(PLAY_GAME);
+
     DebugFileCleanup();
     DebugFileInit();
     DebugFileAppendString("\p<START DEBUG FILE>\r\r");
@@ -1332,10 +1333,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                 scrapTime = thisTime;
                 thisTime -= globals()->gLastTime;
                 newGameTime = (thisTime / kTimeUnit) + ((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
-//              newGameTime = globals()->gGameTime + Randomize( 7) + 1;//Randomize( kDecideEveryCycles);
-#ifdef kConstantRate
-                newGameTime = globals()->gGameTime + 1;
-#endif
+
 //#ifndef powerc
 #ifdef powercxx
                 if ( globals()->gOptions & kOptionNetworkOn)

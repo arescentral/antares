@@ -123,24 +123,32 @@ class TestingMode : public Mode {
     virtual void get_keys(KeyMap keys) { bzero(keys, sizeof(KeyMap)); }
 
     virtual int ticks() {
-        if (globals()->gGameTime > 0) {
-            return _current_time + globals()->gGameTime;
+        if (_state == PLAY_GAME) {
+            return _current_time;
         } else {
             return ++_current_time;
         }
     }
 
+    virtual void main_loop_iteration_complete(uint32_t) {
+        ++_current_time;
+    }
+
+    virtual void set_game_state(GameState state) {
+        _state = state;
+    }
+
+    GameState state() const { return _state; }
+
   private:
     int _current_time;
+    GameState _state;
 };
 
 class MainScreenMode : public TestingMode {
   public:
-    MainScreenMode()
-            : _ready(false) { }
-
     virtual bool wait_next_event(EventRecord*, int) {
-        if (_ready) {
+        if (state() == MAIN_SCREEN_INTERFACE) {
             if (!output_dir.empty()) {
                 DumpTo(output_dir + "/main-screen.bin");
             }
@@ -149,17 +157,7 @@ class MainScreenMode : public TestingMode {
         return true;
     }
 
-    virtual void set_game_state(GameState state) {
-        if (state == MAIN_SCREEN_INTERFACE) {
-            _ready = true;
-        }
-    }
-
     virtual int get_demo_scenario() { return -1; }
-    virtual void main_loop_iteration_complete(uint32_t) { }
-
-  public:
-    bool _ready;
 };
 
 class MissionBriefingMode : public TestingMode {
@@ -169,7 +167,7 @@ class MissionBriefingMode : public TestingMode {
               _briefing_num(0) { }
 
     virtual bool wait_next_event(EventRecord* evt, int) {
-        switch (_state) {
+        switch (state()) {
           case MAIN_SCREEN_INTERFACE:
             {
                 evt->what = autoKey;
@@ -208,17 +206,11 @@ class MissionBriefingMode : public TestingMode {
         return true;
     }
 
-    virtual void set_game_state(GameState state) {
-        _state = state;
-    }
-
     virtual int get_demo_scenario() { return -1; }
-    virtual void main_loop_iteration_complete(uint32_t) { }
 
   public:
     const int _level;
     int _briefing_num;
-    GameState _state;
 };
 
 class DemoMode : public TestingMode {
@@ -235,13 +227,13 @@ class DemoMode : public TestingMode {
     }
 
     virtual bool wait_next_event(EventRecord*, int) { return true; }
-    virtual void set_game_state(GameState) { }
 
     virtual int get_demo_scenario() {
         return _level;
     }
 
     virtual void main_loop_iteration_complete(uint32_t game_time) {
+        TestingMode::main_loop_iteration_complete(game_time);
         if (game_time % 60 == 1) {
             char path[64];
             uint32_t seconds = game_time / 60;
@@ -304,7 +296,7 @@ int TickCount() {
 }
 
 void Microseconds(uint64_t* wide) {
-    *wide = TickCount();
+    *wide = 16667 * TickCount();
 }
 
 void StringToNum(unsigned char* p_str, long* value) {

@@ -1,4 +1,4 @@
-C++FLAGS    = -W -Wall -Dpowerc -DTARGET_OS_MAC -DkConstantRate -fpascal-strings ;
+C++FLAGS    = -W -Wall -Dpowerc -DTARGET_OS_MAC -fpascal-strings ;
 OPTIM       = -O2 ;
 HDRS        = include stubs ;
 LINK        = $(C++) ;

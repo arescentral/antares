@@ -27,6 +27,7 @@ enum GameState {
     MAIN_SCREEN_INTERFACE,
     SELECT_LEVEL_INTERFACE,
     MISSION_INTERFACE,
+    PLAY_GAME,
 };
 
 class Mode {
