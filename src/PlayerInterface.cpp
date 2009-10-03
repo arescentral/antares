@@ -35,7 +35,6 @@
 #include "Debug.hpp"
 #include "DirectText.hpp"
 #include "Error.hpp"
-#include "Fakes.hpp"
 #include "Instruments.hpp"
 #include "InterfaceHandling.hpp"
 #include "KeyCodes.hpp"
@@ -58,6 +57,7 @@
 #include "StringNumerics.hpp"
 #include "TitleScreen.hpp"           // for CenterRectInRect
 #include "Transitions.hpp"
+#include "VideoDriver.hpp"
 #include "WrapGameRanger.hpp"
 
 #define kThisVersion    0x00000201  // last was 200; last was 104
@@ -422,7 +422,7 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
             }
 
             InterfaceIdle();
-            SetGameState(MAIN_SCREEN_INTERFACE);
+            VideoDriver::driver()->set_game_state(MAIN_SCREEN_INTERFACE);
             Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
             globals()->returnToMain = false;
 
@@ -3466,7 +3466,7 @@ long DoSelectLevelInterface( long startChapter)
         {
             InterfaceIdle();
 
-            SetGameState(SELECT_LEVEL_INTERFACE);
+            VideoDriver::driver()->set_game_state(SELECT_LEVEL_INTERFACE);
             Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
@@ -3763,7 +3763,7 @@ Boolean DoMissionInterface( long whichScenario)
         {
             InterfaceIdle();
 //          if (Ares_WaitNextEvent (everyEvent, &theEvent, 0, nil))
-            SetGameState(MISSION_INTERFACE);
+            VideoDriver::driver()->set_game_state(MISSION_INTERFACE);
             Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;

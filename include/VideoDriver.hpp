@@ -15,15 +15,35 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_FAKES_HPP_
-#define ANTARES_FAKES_HPP_
+#ifndef ANTARES_VIDEO_DRIVER_HPP_
+#define ANTARES_VIDEO_DRIVER_HPP_
 
 #include <stdint.h>
-#include <string>
 #include <Base.h>
-#include "AresGlobalType.hpp"
 
-void FakeInit(int argc, char* const* argv);
-const std::string& get_output_dir();
+enum GameState {
+    UNKNOWN,
+    MAIN_SCREEN_INTERFACE,
+    SELECT_LEVEL_INTERFACE,
+    MISSION_INTERFACE,
+    PLAY_GAME,
+};
 
-#endif  // ANTARES_FAKES_HPP_
+class VideoDriver {
+  public:
+    virtual ~VideoDriver() { }
+    virtual void send_event(EventRecord evt) = 0;
+    virtual bool wait_next_event(EventRecord* evt, int sleep) = 0;
+    virtual bool button() = 0;
+    virtual void get_keys(KeyMap k) = 0;
+
+    virtual void set_game_state(GameState state) = 0;
+    virtual int get_demo_scenario() = 0;
+    virtual void main_loop_iteration_complete(uint32_t game_time) = 0;
+    virtual int ticks() = 0;
+
+    static VideoDriver* driver();
+    static void set_driver(VideoDriver* mode);
+};
+
+#endif  // ANTARES_VIDEO_DRIVER_HPP_

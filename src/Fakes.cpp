@@ -29,16 +29,18 @@
 #include "FakeMath.hpp"
 #include "FakeSounds.hpp"
 #include "File.hpp"
+#include "TestVideoDriver.hpp"
 #include "Threading.hpp"
+#include "VideoDriver.hpp"
 #include "VncServer.hpp"
 
 namespace {
 
 std::string output_dir;
 
-class RealMode : public Mode {
+class RealVideoDriver : public VideoDriver {
   public:
-    RealMode()
+    RealVideoDriver()
             : _start_time(usecs()),
               _button(false) { }
 
@@ -113,187 +115,37 @@ class RealMode : public Mode {
     std::queue<EventRecord> _event_queue;
 };
 
-class TestingMode : public Mode {
-  public:
-    TestingMode()
-            : _current_time(0) { }
-
-    virtual void send_event(EventRecord) { }
-
-    virtual bool button() { return false; }
-    virtual void get_keys(KeyMap keys) { bzero(keys, sizeof(KeyMap)); }
-
-    virtual int ticks() {
-        if (_state == PLAY_GAME) {
-            return _current_time;
-        } else {
-            return ++_current_time;
-        }
-    }
-
-    virtual void main_loop_iteration_complete(uint32_t) {
-        ++_current_time;
-    }
-
-    virtual void set_game_state(GameState state) {
-        _state = state;
-    }
-
-    GameState state() const { return _state; }
-
-  private:
-    int _current_time;
-    GameState _state;
-};
-
-class MainScreenMode : public TestingMode {
-  public:
-    virtual bool wait_next_event(EventRecord*, int) {
-        if (state() == MAIN_SCREEN_INTERFACE) {
-            if (!output_dir.empty()) {
-                DumpTo(output_dir + "/main-screen.bin");
-            }
-            exit(0);
-        }
-        return true;
-    }
-
-    virtual int get_demo_scenario() { return -1; }
-};
-
-class MissionBriefingMode : public TestingMode {
-  public:
-    MissionBriefingMode(int level)
-            : _level(level),
-              _briefing_num(0) { }
-
-    virtual bool wait_next_event(EventRecord* evt, int) {
-        switch (state()) {
-          case MAIN_SCREEN_INTERFACE:
-            {
-                evt->what = autoKey;
-                evt->message = 0x0100;  // S
-                globals()->gPreferencesData->startingLevel = _level;
-            }
-            break;
-          case SELECT_LEVEL_INTERFACE:
-            {
-                evt->what = autoKey;
-                evt->message = 0x2400;  // RTRN
-                if (!output_dir.empty()) {
-                    DumpTo(output_dir + "/select-level.bin");
-                }
-            }
-            break;
-          case MISSION_INTERFACE:
-            {
-                char path[64];
-                sprintf(path, "/mission-%u.bin", _briefing_num);
-                if (!output_dir.empty()) {
-                    DumpTo(output_dir + path);
-                }
-                ++_briefing_num;
-                if (_briefing_num >= 9) {
-                    exit(0);
-                } else {
-                    evt->what = autoKey;
-                    evt->message = 0x7C00;  // RGHT
-                }
-            }
-            break;
-          default:
-            break;
-        };
-        return true;
-    }
-
-    virtual int get_demo_scenario() { return -1; }
-
-  public:
-    const int _level;
-    int _briefing_num;
-};
-
-class DemoMode : public TestingMode {
-  public:
-    DemoMode(int level)
-            : _level(level) {
-        if (level != 0 && level != 5 && level != 23) {
-            fprintf(stderr, "Only have demos of levels 0, 5, and 23; not %d.\n", level);
-            exit(1);
-        }
-        if (!output_dir.empty()) {
-            SoundDriver::set_driver(new LogSoundDriver(output_dir + "/sound.log"));
-        }
-    }
-
-    virtual bool wait_next_event(EventRecord*, int) { return true; }
-
-    virtual int get_demo_scenario() {
-        return _level;
-    }
-
-    virtual void main_loop_iteration_complete(uint32_t game_time) {
-        TestingMode::main_loop_iteration_complete(game_time);
-        if (game_time % 60 == 1) {
-            char path[64];
-            uint32_t seconds = game_time / 60;
-            sprintf(path, "/screens/%03um%02u.bin", seconds / 60, seconds % 60);
-            if (!output_dir.empty()) {
-                DumpTo(output_dir + path);
-            }
-        }
-    }
-
-  public:
-    int _level;
-};
-
-scoped_ptr<Mode> mode;
-
 }  // namespace
 
-Mode* Mode::mode() {
-    return ::mode.get();
-}
-
-void Mode::set_mode(Mode* mode) {
-    ::mode.reset(mode);
+const std::string& get_output_dir() {
+    return output_dir;
 }
 
 int GetDemoScenario() {
-    return mode->get_demo_scenario();
+    return VideoDriver::driver()->get_demo_scenario();
 }
 
 void ModalDialog(void*, short* item) {
     *item = 1;
 }
 
-void SetGameState(GameState state) {
-    mode->set_game_state(state);
-}
-
-void MainLoopIterationComplete(uint32_t game_time) {
-    mode->main_loop_iteration_complete(game_time);
-}
-
 bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouseRgn) {
     static_cast<void>(mask);
     static_cast<void>(mouseRgn);
     evt->what = 0;
-    return mode->wait_next_event(evt, sleep);
+    return VideoDriver::driver()->wait_next_event(evt, sleep);
 }
 
 bool Button() {
-    return mode->button();
+    return VideoDriver::driver()->button();
 }
 
 void GetKeys(KeyMap keys) {
-    mode->get_keys(keys);
+    VideoDriver::driver()->get_keys(keys);
 }
 
 int TickCount() {
-    return mode->ticks();
+    return VideoDriver::driver()->ticks();
 }
 
 void Microseconds(uint64_t* wide) {
@@ -313,16 +165,17 @@ void StringToNum(unsigned char* p_str, long* value) {
 
 void usage(const char* bin) {
     fprintf(stderr,
-            "usage: %s [-m|--mode=<mode>] [<options>]\n"
+            "usage: %s [-v|--video-driver=<driver>] [<options>]\n"
             "options:\n"
             "    -l|--level=<int>   choose a level to use in the given mode\n"
             "    -o|--output=<dir>  directory to save dumps to\n"
             "    -w|--width=<int>   width of screen (default: 640)\n"
             "    -h|--height=<int>  height of screen (default: 480)\n"
-            "modes:\n"
+            "video drivers:\n"
             "    main-screen        dumps the main screen, then exits\n"
             "    mission-briefing   dumps the mission briefing screens for <level>\n"
-            "    demo               runs the demo for <level>\n",
+            "    demo               runs the demo for <level>\n"
+            "    real               uses as much 'real' code as possible\n",
             bin);
     exit(1);
 }
@@ -342,35 +195,35 @@ int string_to_int(const char* string) {
 
 void FakeInit(int argc, char* const* argv) {
     const char* bin = argv[0];
-    int mode_int = -1;
+    int video_int = -1;
     int level = -1;
     int width = 640;
     int height = 480;
     option longopts[] = {
-        { "mode",   required_argument,  NULL,   'm' },
-        { "level",  required_argument,  NULL,   'l' },
-        { "output", required_argument,  NULL,   'o' },
-        { "width",  required_argument,  NULL,   'w' },
-        { "height", required_argument,  NULL,   'h' },
-        { NULL,     0,                  NULL,   0 }
+        { "video-driver",   required_argument,  NULL,   'v' },
+        { "level",          required_argument,  NULL,   'l' },
+        { "output",         required_argument,  NULL,   'o' },
+        { "width",          required_argument,  NULL,   'w' },
+        { "height",         required_argument,  NULL,   'h' },
+        { NULL,             0,                  NULL,   0 }
     };
 
     char ch;
-    while ((ch = getopt_long(argc, argv, "m:l:o:w:h:", longopts, NULL)) != -1) {
+    while ((ch = getopt_long(argc, argv, "v:l:o:w:h:", longopts, NULL)) != -1) {
         switch (ch) {
-          case 'm':
+          case 'v':
             {
                 std::string arg = optarg;
                 if (arg == "main-screen") {
-                    mode_int = 0;
+                    video_int = 0;
                 } else if (arg == "mission-briefing") {
-                    mode_int = 1;
+                    video_int = 1;
                 } else if (arg == "demo") {
-                    mode_int = 2;
+                    video_int = 2;
                 } else if (arg == "real") {
-                    mode_int = 3;
+                    video_int = 3;
                 } else {
-                    fprintf(stderr, "%s: unknown mode '%s'\n", bin, optarg);
+                    fprintf(stderr, "%s: unknown video driver '%s'\n", bin, optarg);
                     usage(bin);
                 }
             }
@@ -401,21 +254,21 @@ void FakeInit(int argc, char* const* argv) {
         usage(bin);
     }
 
-    switch (mode_int) {
+    switch (video_int) {
       case 0:
-        Mode::set_mode(new MainScreenMode());
+        VideoDriver::set_driver(new MainScreenVideoDriver());
         break;
       case 1:
-        Mode::set_mode(new MissionBriefingMode(level));
+        VideoDriver::set_driver(new MissionBriefingVideoDriver(level));
         break;
       case 2:
-        Mode::set_mode(new DemoMode(level));
+        VideoDriver::set_driver(new DemoVideoDriver(level));
         break;
       case 3:
-        Mode::set_mode(new RealMode);
+        VideoDriver::set_driver(new RealVideoDriver);
         break;
       default:
-        fprintf(stderr, "%s: must specify --mode\n", bin);
+        fprintf(stderr, "%s: must specify --video-driver\n", bin);
         usage(bin);
         break;
     }

@@ -102,6 +102,7 @@
 #include "Traps.h"
 
 #include "VersionString.hpp"
+#include "VideoDriver.hpp"
 
 #include "WrapGameRanger.hpp"
 
@@ -1235,7 +1236,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
     EventRecord         theEvent;
 //  long                hacktc = TickCount(), hacktcsamplesize = 4, hacktcsamplecount = 0;
 
-    SetGameState(PLAY_GAME);
+    VideoDriver::driver()->set_game_state(PLAY_GAME);
 
     DebugFileCleanup();
     DebugFileInit();
@@ -2186,7 +2187,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
             UpdateBooleanColorAnimation( unitsDone);
 //          CheckScenarioConditions( unitsDone);
             globals()->gFrameCount++;
-            MainLoopIterationComplete(globals()->gGameTime);
+            VideoDriver::driver()->main_loop_iteration_complete(globals()->gGameTime);
         }
     }
     exit(0);  // Temporary: exit after finishing demo.

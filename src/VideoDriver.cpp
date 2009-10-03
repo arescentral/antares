@@ -15,15 +15,18 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_FAKES_HPP_
-#define ANTARES_FAKES_HPP_
+#include "VideoDriver.hpp"
 
-#include <stdint.h>
-#include <string>
-#include <Base.h>
-#include "AresGlobalType.hpp"
+namespace {
 
-void FakeInit(int argc, char* const* argv);
-const std::string& get_output_dir();
+scoped_ptr<VideoDriver> video_driver;
 
-#endif  // ANTARES_FAKES_HPP_
+}  // namespace
+
+VideoDriver* VideoDriver::driver() {
+    return ::video_driver.get();
+}
+
+void VideoDriver::set_driver(VideoDriver* video_driver) {
+    ::video_driver.reset(video_driver);
+}
