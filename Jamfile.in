@@ -1,5 +1,7 @@
-C++FLAGS    = -W -Wall -Dpowerc -DTARGET_OS_MAC -fpascal-strings ;
-OPTIM       = -O2 ;
+ARCH        = -arch @@ARCH@@ ;
+C++FLAGS    = $(ARCH) @@DEBUG@@ -W -Wall -Dpowerc -DTARGET_OS_MAC -fpascal-strings ;
+LINKFLAGS   = $(ARCH) ;
+OPTIM       = @@OPTIM@@ ;
 HDRS        = include stubs ;
 LINK        = $(C++) ;
 

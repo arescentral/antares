@@ -4,3 +4,4 @@
 *.o
 Antares
 gmon.out
+Jamfile
