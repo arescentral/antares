@@ -63,6 +63,7 @@ class DemoVideoDriver : public TestingVideoDriver {
     DemoVideoDriver(int level);
 
     virtual bool wait_next_event(EventRecord*, int);
+    void set_game_state(GameState state);
     virtual int get_demo_scenario();
     virtual void main_loop_iteration_complete(uint32_t game_time);
 

@@ -125,6 +125,13 @@ DemoVideoDriver::DemoVideoDriver(int level)
 
 bool DemoVideoDriver::wait_next_event(EventRecord*, int) { return true; }
 
+void DemoVideoDriver::set_game_state(GameState state) {
+    TestingVideoDriver::set_game_state(state);
+    if (state == DONE_GAME) {
+        exit(0);
+    }
+}
+
 int DemoVideoDriver::get_demo_scenario() {
     return _level;
 }

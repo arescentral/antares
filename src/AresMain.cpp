@@ -389,7 +389,9 @@ void MainLoop() {
                     }
                     ResetLastTime((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
 
+                    VideoDriver::driver()->set_game_state(PLAY_GAME);
                     gameResult = PlayTheGame(&gameLength);
+                    VideoDriver::driver()->set_game_state(DONE_GAME);
 
                     switch (gameResult) {
                       case LOSE_GAME:
@@ -680,8 +682,6 @@ GameResult PlayTheGame(long *seconds) {
     Rect                    playAreaRect;
     GameResult          result = NO_GAME;
     EventRecord         theEvent;
-
-    VideoDriver::driver()->set_game_state(PLAY_GAME);
 
     commandAndQ = BothCommandAndQ();
 
@@ -1007,7 +1007,6 @@ GameResult PlayTheGame(long *seconds) {
             VideoDriver::driver()->main_loop_iteration_complete(globals()->gGameTime);
         }
     }
-    exit(0);  // Temporary: exit after finishing demo.
 
     Microseconds(&thisTime);
     thisTime -= globals()->gLastTime;

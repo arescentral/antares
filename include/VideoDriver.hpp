@@ -27,6 +27,7 @@ enum GameState {
     SELECT_LEVEL_INTERFACE,
     MISSION_INTERFACE,
     PLAY_GAME,
+    DONE_GAME,
 };
 
 class VideoDriver {
