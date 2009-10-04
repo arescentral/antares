@@ -30,7 +30,6 @@
 #include <Sound.h>
 
 #include "AresGlobalType.hpp"
-#include "ConditionalMacros.h"
 #include "KeyMapTranslation.hpp"
 #include "Options.hpp"
 #include "Resources.h"

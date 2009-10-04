@@ -21,7 +21,6 @@
 // Math Special.h
 
 #include <Base.h>
-#include <ConditionalMacros.h>
 
 #include "Casts.hpp"
 

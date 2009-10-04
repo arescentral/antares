@@ -21,7 +21,6 @@
 
 #include "AresGlobalType.hpp"
 #include "BinaryStream.hpp"
-#include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "Resource.hpp"

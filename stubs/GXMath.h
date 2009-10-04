@@ -1,4 +1,0 @@
-#ifndef ANTARES_STUB_GXMATH_H_
-#define ANTARES_STUB_GXMATH_H_
-
-#endif // ANTARES_STUB_GXMATH_H_

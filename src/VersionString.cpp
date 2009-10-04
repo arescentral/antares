@@ -17,7 +17,6 @@
 
 #include "VersionString.hpp"
 
-#include "ConditionalMacros.h"
 #include "Resources.h"
 #include "StringHandling.hpp"
 

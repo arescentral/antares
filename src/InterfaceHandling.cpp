@@ -29,15 +29,12 @@
 #include "AresGlobalType.hpp"
 #include "BinaryStream.hpp"
 #include "ColorTranslation.hpp"
-#include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "KeyMapTranslation.hpp"
-#include "MixedMode.h"
 #include "OffscreenGWorld.hpp"
 #include "PlayerInterfaceDrawing.hpp"
 #include "PlayerInterfaceItems.hpp"
-#include "Resources.h"
 #include "SoundFX.hpp"              // for button on/off
 
 #define kMakeInterfaceItem      20

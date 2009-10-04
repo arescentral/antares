@@ -19,7 +19,6 @@
 
 #include "TitleScreen.hpp"
 
-#include <ConditionalMacros.h>
 #include <Resources.h>
 
 #include "Debug.hpp"

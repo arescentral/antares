@@ -21,7 +21,6 @@
 
 #include "AresGlobalType.hpp"
 #include "AresPreferences.hpp"
-#include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "Resources.h"

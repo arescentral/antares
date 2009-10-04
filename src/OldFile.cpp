@@ -19,8 +19,6 @@
 
 #include "OldFile.hpp"
 
-#include "str_bp.h"
-
 #define mApple                                  128
 #define  iAbout                                 1
 #define mFile                                   129

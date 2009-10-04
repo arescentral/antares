@@ -23,8 +23,6 @@
 
 #include "BinaryStream.hpp"
 #include "ColorTranslation.hpp"
-#include "ConditionalMacros.h"
-#include "Debug.hpp"
 #include "Resources.h"
 #include "Sound.h"
 

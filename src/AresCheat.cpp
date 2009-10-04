@@ -24,14 +24,12 @@
 #include "Admiral.hpp"
 #include "AresGlobalType.hpp"
 #include "AresNetworkSprocket.hpp"
-#include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "MessageScreen.hpp"
 #include "PlayerShip.hpp"
 #include "StringHandling.hpp"
 #include "StringList.hpp"
 #include "StringNumerics.hpp"
-#include "strlist.h"
 
 #define kCheatStringListID      750
 #define kCheatFeedbackOnID      751

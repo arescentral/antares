@@ -21,7 +21,6 @@
 
 #include <Resources.h>
 
-#include "AmbrosiaSerial.h"
 #include "AresGlobalType.hpp"
 #include "Debug.hpp"
 #include "Error.hpp"

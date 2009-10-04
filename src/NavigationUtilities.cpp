@@ -19,11 +19,8 @@
 
 #include "NavigationUtilities.hpp"
 
-#include <Navigation.h>
-
 #include "AresGlobalType.hpp"
 #include "OffscreenGWorld.hpp"
-#include "str_bp.h"
 //#include "WindowDispatch.h"
 
 #define kMaxDocumentCount       100     // maximum number of documents allowed

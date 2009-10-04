@@ -1,4 +1,0 @@
-#ifndef ANTARES_STUB_MAD_H_
-#define ANTARES_STUB_MAD_H_
-
-#endif // ANTARES_STUB_MAD_H_

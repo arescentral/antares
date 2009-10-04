@@ -20,7 +20,6 @@
 #include "Admiral.hpp"            // hack for checking strength
 #include "AresGlobalType.hpp"
 #include "ColorTranslation.hpp"
-#include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "DirectText.hpp"
 #include "Error.hpp"

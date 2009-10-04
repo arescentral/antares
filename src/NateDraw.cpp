@@ -23,8 +23,6 @@
 #include <assert.h>
 
 #include "BinaryStream.hpp"
-#include "ConditionalMacros.h"
-#include "Debug.hpp"
 #include "Error.hpp"
 #include "MathMacros.hpp"
 

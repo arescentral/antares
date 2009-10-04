@@ -20,10 +20,8 @@
 #include "Rotation.hpp"
 
 #include "BinaryStream.hpp"
-#include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
-#include "math.h"
 #include "MathMacros.hpp"
 #include "MathSpecial.hpp"
 #include "Resources.h"

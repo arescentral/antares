@@ -1,4 +1,0 @@
-#ifndef ANTARES_STUB_LOW_MEM_H_
-#define ANTARES_STUB_LOW_MEM_H_
-
-#endif // ANTARES_STUB_LOW_MEM_H_

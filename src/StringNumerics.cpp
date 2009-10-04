@@ -19,7 +19,6 @@
 
 #include "StringNumerics.hpp"
 
-#include "ConditionalMacros.h"
 #include "StringHandling.hpp"
 
 void SmallFixedToString( smallFixedType f, Str255 s)

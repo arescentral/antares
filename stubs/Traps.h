@@ -1,4 +1,0 @@
-#ifndef ANTARES_STUB_TRAPS_H_
-#define ANTARES_STUB_TRAPS_H_
-
-#endif // ANTARES_STUB_TRAPS_H_

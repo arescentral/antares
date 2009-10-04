@@ -18,7 +18,6 @@
 #include "SpriteCursor.hpp"
 
 #include "ColorTranslation.hpp"
-#include "ConditionalMacros.h"
 #include "Error.hpp"
 #include "NatePixTable.hpp"
 #include "OffscreenGWorld.hpp"

@@ -17,15 +17,7 @@
 
 #include "Music.hpp"
 
-#include "AIFF.h"
-#include "AresGlobalType.hpp"
-#include "ConditionalMacros.h"
-#include "Debug.hpp"
 #include "Error.hpp"
-#include "MAD.h"
-#include "Options.hpp"
-#include "RDriver.h"
-#include "Resources.h"
 #include "Sound.h"
 #include "SoundFX.hpp"
 

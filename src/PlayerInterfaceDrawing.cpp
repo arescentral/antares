@@ -19,7 +19,6 @@
 
 #include "PlayerInterfaceDrawing.hpp"
 
-#include <ConditionalMacros.h>
 #include <Quickdraw.h>
 #include <Resources.h>
 

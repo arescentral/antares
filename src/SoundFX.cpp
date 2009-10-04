@@ -21,7 +21,6 @@
 
 #include "AresGlobalType.hpp"
 #include "AresResFile.hpp"
-#include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "FakeSounds.hpp"

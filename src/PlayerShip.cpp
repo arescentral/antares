@@ -19,19 +19,15 @@
 
 #include "PlayerShip.hpp"
 
-//#include <math routines.h>
-
 #include "Admiral.hpp"
 #include "AresCheat.hpp"
 #include "AresGlobalType.hpp"
 #include "AresNetworkSprocket.hpp"
 #include "AresPreferences.hpp"
 #include "ColorTranslation.hpp"
-#include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "DirectText.hpp"
 #include "Error.hpp"
-#include "GXMath.h"
 #include "KeyCodes.hpp"
 #include "KeyMapTranslation.hpp"        // major hack for testing
 #include "MathMacros.hpp"
@@ -50,7 +46,6 @@
 #include "SpaceObject.hpp"
 #include "SpaceObjectHandling.hpp"
 #include "StringHandling.hpp"
-#include "ToolUtils.h"
 #include "UniverseUnit.hpp"
 
 #define kSendMessageVOffset     20

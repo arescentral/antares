@@ -22,7 +22,6 @@
 #include "AresResFile.hpp"
 #include "AresGlobalType.hpp"
 #include "ColorTranslation.hpp"
-#include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "DirectText.hpp"
 #include "Error.hpp"

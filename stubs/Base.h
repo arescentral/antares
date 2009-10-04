@@ -12,9 +12,6 @@
 enum {
     noErr = 0,
     paramErr = 1,
-    memFullErr = 2,
-
-    maxSize = 100,
 
     plainDBox = 200,
 
@@ -25,13 +22,6 @@ enum {
     keyDown = 305,
     autoKey = 306,
     osEvt = 307,
-    kHighLevelEvent = 308,
-
-    inMenuBar = 400,
-    inSysWindow = 401,
-    inContent = 402,
-    inDrag = 403,
-    inGoAway = 404,
 
     cmdKey = 500,
     optionKey = 501,
@@ -41,13 +31,6 @@ enum {
 
     charCodeMask = 0x00FF,
     keyCodeMask = 0xFF00,
-    resumeFlag = 602,
-    convertClipboardFlag = 603,
-
-    noGrowDocProc = 700,
-
-    mouseMovedMessage = 800,
-    suspendResumeMessage = 801,
 };
 
 typedef bool Boolean;
@@ -61,8 +44,6 @@ typedef int16_t SInt16;
 typedef uint16_t UInt16;
 typedef int32_t SInt32;
 typedef uint32_t UInt32;
-
-void WideMultiply(long a, long b, int64_t* c);
 
 typedef int32_t Fixed;
 typedef long Size;
@@ -79,11 +60,10 @@ typedef void* AddrBlock;
 #define nil NULL
 
 typedef unsigned char Str255[256];
-typedef unsigned char Str63[64];
 typedef unsigned char Str31[32];
 typedef const unsigned char* ConstStr255Param;
 typedef const unsigned char* ConstStr31Param;
-typedef Str63 StrFileName;
+typedef unsigned char StrFileName[64];
 
 typedef uint32_t FourCharCode;
 typedef FourCharCode OSType;
@@ -125,17 +105,9 @@ struct Window;
 typedef Window* WindowPtr;
 typedef Window** WindowRef;
 
-Window* NewWindow(void*, Rect*, const unsigned char* title, bool, int,
-      Window* behind, bool, int);
 STUB1(MacShowWindow, void(Window*));
-STUB1(DisposeWindow, void(Window*));
 STUB2(MacFindWindow, short(Point where, Window** window), 0);
-STUB4(MacMoveWindow, void(Window*, int x, int y, bool));
-STUB2(ShowHide, void(Window*, bool hide));
-STUB3(DragWindow, void(Window*, Point where, Rect* bounds));
-STUB2(TrackGoAway, bool(Window*, Point where), false);
 STUB1(GlobalToLocal, void(Point*));
-STUB1(SelectWindow, void(Window*));
 
 typedef Window CWindow;
 typedef CWindow* CWindowPtr;
@@ -175,35 +147,12 @@ typedef Rgn* RgnPtr;
 typedef Rgn** RgnHandle;
 
 STUB2(FlushEvents, void(int mask, int));
-STUB1(SetEventMask, void(int mask));
 bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouseRgn);
 
 typedef Handle MenuHandle;
 
-STUB1(GetNewMBar, MenuHandle(int id), NULL);
-STUB1(SetMenuBar, void(MenuHandle menu));
-STUB1(GetMenuHandle, MenuHandle(int id), NULL);
-STUB2(AppendResMenu, void(MenuHandle handle, FourCharCode));
-STUB0(MacDrawMenuBar, void());
-STUB1(HiliteMenu, void(int));
-STUB1(MenuSelect, long(Point where), 0);
-STUB2(SystemClick, void(EventRecord* event, Window* window));
-STUB3(GetMenuItemText, void(MenuHandle, int item, unsigned char* name));
-STUB1(HandleMenuChoice, bool(int), false);
-STUB1(MenuKey, int(char which_char), 0);
-STUB1(OpenDeskAcc, int(const unsigned char* name), 0);
-
-STUB2(NoteAlert, void(int type, void*));
-
 // Gets STR# from resource fork
 void GetIndString(unsigned char* result, int id, int index);
-
-STUB2(GetIndResource, Handle(FourCharCode type, int id), NULL);
-
-STUB0(Debugger, void());
-
-STUB6(Munger, int(Handle, int, const unsigned char* dest, size_t dest_length,
-      const void* source, size_t source_length), 0);
 
 STUB1(SysBeep, void(int));
 
@@ -214,23 +163,9 @@ STUB1(GetDateTime, void(unsigned long* time));
 STUB0(InitCursor, void());
 STUB0(MacShowCursor, void());
 STUB0(HideCursor, void());
-STUB2(ShieldCursor, void(Rect* rect, Point point));
 void GetMouse(Point* point);
 
-STUB0(InitWindows, void());
-STUB0(InitMenus, void());
-STUB1(InitDialogs, void(void*));
-STUB0(MoreMasters, void());
-STUB0(MaxApplZone, void());
-
 int TickCount();
-
-STUB4(GetResInfo, void(Handle resource, short* id, FourCharCode* type, unsigned char* name));
-STUB1(RemoveResource, void(Handle resource));
-STUB1(UpdateResFile, void(int file));
-STUB4(AddResource, void(Handle resource, FourCharCode type, int id, const unsigned char* name));
-STUB1(ChangedResource, void(Handle resource));
-STUB1(WriteResource, void(Handle resource));
 
 bool Button();
 STUB0(GetDblTime, double(), 0.0);

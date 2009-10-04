@@ -17,15 +17,9 @@
 
 #include "TimeUnit.hpp"
 
-//#include <math routines.h>
-#include <Timer.h>
-
 #include "AresGlobalType.hpp"
-#include "ConditionalMacros.h"
-#include "GXMath.h"
 #include "MathSpecial.hpp"
 #include "Resources.h"
-#include "ToolUtils.h"
 
 void ResetLastTime( long defecit)
 

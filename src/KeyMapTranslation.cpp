@@ -19,7 +19,6 @@
 
 #include "KeyMapTranslation.hpp"
 
-#include "ConditionalMacros.h"
 #include "Error.hpp"
 #include "Resources.h"
 

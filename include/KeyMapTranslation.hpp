@@ -18,10 +18,7 @@
 #ifndef ANTARES_KEY_MAP_TRANSLATION_HPP_
 #define ANTARES_KEY_MAP_TRANSLATION_HPP_
 
-// Key Map Translation.h
-
 #include <Base.h>
-#include <ConditionalMacros.h>
 
 #define kKeyMapNameID           1000
 #define kKeyMapNameLongID       1002

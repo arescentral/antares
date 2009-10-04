@@ -9,9 +9,6 @@ typedef GrafPtr CGrafPtr;
 
 typedef struct { } Pattern;
 
-STUB1(BackPat, void(Pattern*));
-STUB1(PenPat, void(Pattern*));
-
 typedef Window* Port;
 
 void RGBBackColor(RGBColor* color);
@@ -21,7 +18,6 @@ STUB1(HiliteColor, void(RGBColor* color));
 STUB1(LockPixels, bool(PixMap** pix), true);
 STUB1(UnlockPixels, void(PixMap** pix));
 
-STUB1(InitGraf, void(GrafPtr* port));
 void GetPort(GrafPtr* port);
 void MacSetPort(GrafPtr port);
 STUB1(InvalRect, void(Rect* rect));
@@ -32,16 +28,9 @@ void CopyBits(PixMap* source, PixMap* source2, Rect* source_rect,
 
 STUB0(NewRgn, Rgn**(), new Rgn*(new Rgn));
 STUB1(DisposeRgn, void(Rgn** rgn));
-STUB2(RectRgn, void(Rgn** src, Rect* dst));
-STUB2(PtInRgn, bool(Point p, Rgn** rgn), false);
-STUB3(DiffRgn, void(Rgn**, Rgn**, Rgn**));
-STUB3(MacUnionRgn, void(Rgn**, Rgn**, Rgn**));
-STUB0(OpenRgn, void());
-STUB1(CloseRgn, void(Rgn** rgn));
 
 void ScrollRect(Rect* rect, int x, int y, Rect clip);
 
-void MacFillRect(Rect* rect, Pattern* pattern);
 void PaintRect(Rect* rect);
 void FrameRect(Rect* rect);
 void MacFrameRect(Rect* rect);
@@ -67,20 +56,6 @@ enum {
 
 STUB1(SetClip, void(Rgn** clip));
 STUB1(GetClip, void(Rgn** clip));
-STUB2(PaintBehind, void(Window**, Rgn**));
-STUB2(CalcVisBehind, void(Window**, Rgn**));
-
-STUB0(LMGetGrayRgn, Rgn**(), NULL);
-STUB1(LMSetMBarHeight, void(int height));
-STUB0(LMGetWMgrPort, Port(), NULL);
-STUB0(LMGetWindowList, Window**(), NULL);
-STUB0(GetMBarHeight, int(), 0);
-
-STUB0(ShowMenuBar, void());
-STUB0(HideMenuBar, void());
-STUB0(IsMenuBarVisible, bool(), false);
-
-typedef struct { } ReqListRec;
 
 class ColorTable;
 void RestoreEntries(const ColorTable& table);

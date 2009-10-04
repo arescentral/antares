@@ -20,7 +20,6 @@
 #include "ColorTranslation.hpp"
 
 #include "ColorTable.hpp"
-#include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
 

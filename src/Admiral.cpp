@@ -22,7 +22,6 @@
 #include "AnyChar.hpp"
 #include "AresCheat.hpp"
 #include "AresGlobalType.hpp"
-#include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "MathMacros.hpp"

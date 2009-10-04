@@ -17,17 +17,9 @@
 
 #include "AresMain.hpp"
 
-#include <Timer.h>
 #include <Quickdraw.h>
-//#include <stdio.h>        // for _DATE_ & _TIME_ macros
-
-#define kProfiling_On   0
-#if kProfiling_On
-#include <profiler.h>
-#endif
 
 #include "Admiral.hpp"
-#include "AmbrosiaSerial.h"
 #include "AresCheat.hpp"
 #include "AresDemoScanner.hpp"
 #include "AresExternalFile.hpp"
@@ -53,7 +45,6 @@
 #include "FakeDrawing.hpp"
 #include "Fakes.hpp"
 
-#include "GXMath.h"
 
 #include "InputSource.hpp"
 #include "Instruments.hpp"
@@ -79,7 +70,6 @@
 #include "PlayerShip.hpp"
 
 #include "Randomize.hpp"
-#include "RegistrationTool.h"
 #include "Resources.h"
 #include "Rotation.hpp"
 
@@ -96,9 +86,7 @@
 #include "TimeLimit.hpp"
 #include "TimeUnit.hpp"
 #include "TitleScreen.hpp"
-#include "ToolUtils.h"
 #include "Transitions.hpp"
-#include "Traps.h"
 
 #include "VersionString.hpp"
 #include "VideoDriver.hpp"

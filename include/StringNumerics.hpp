@@ -18,10 +18,6 @@
 #ifndef ANTARES_STRING_NUMERICS_HPP_
 #define ANTARES_STRING_NUMERICS_HPP_
 
-// String Numerics.h
-
-#include <MacTypes.h>
-
 #include "MathSpecial.hpp"
 
 void SmallFixedToString( smallFixedType, Str255);

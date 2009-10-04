@@ -21,7 +21,6 @@
 
 #include "PlayerInterface.hpp"
 
-#include "AmbrosiaSerial.h"
 #include "AresExternalFile.hpp"
 #include "AresGlobalType.hpp"
 #include "AresMain.hpp"
@@ -30,8 +29,6 @@
 #include "AresPreferences.hpp"
 #include "BriefingRenderer.hpp"
 #include "ColorTranslation.hpp"
-#include "ConditionalMacros.h"
-//#include "CopyProtection.h"  // included in prefs
 #include "Debug.hpp"
 #include "DirectText.hpp"
 #include "Error.hpp"
@@ -48,7 +45,6 @@
 #include "Options.hpp"
 #include "Picture.hpp"
 #include "Races.hpp"
-#include "RegistrationTool.h"
 #include "Resources.h"
 #include "ScenarioMaker.hpp"
 #include "ScrollStars.hpp"

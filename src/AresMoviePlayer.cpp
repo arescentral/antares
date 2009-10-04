@@ -20,7 +20,6 @@
 #include "AresMoviePlayer.hpp"
 
 #include "AresGlobalType.hpp"
-#include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "FakeDrawing.hpp"

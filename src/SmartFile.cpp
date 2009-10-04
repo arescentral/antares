@@ -19,8 +19,6 @@
 
 #include "SmartFile.hpp"
 
-#include <Navigation.h>
-
 #include "NavigationUtilities.hpp"
 #include "OldFile.hpp"
 

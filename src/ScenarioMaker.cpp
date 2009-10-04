@@ -23,7 +23,6 @@
 #include "AresResFile.hpp"
 #include "Beam.hpp"
 #include "ColorTranslation.hpp"
-#include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "Instruments.hpp"

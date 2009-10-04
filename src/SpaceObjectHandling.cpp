@@ -19,18 +19,14 @@
 
 #include "SpaceObjectHandling.hpp"
 
-//#include <math routines.h>
-
 #include "Admiral.hpp"
 #include "AresDemoScanner.hpp"
 #include "AresGlobalType.hpp"
 #include "Beam.hpp"
 #include "BinaryStream.hpp"
 #include "ColorTranslation.hpp"
-#include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
-#include "GXMath.h"
 #include "MathMacros.hpp"
 #include "MessageScreen.hpp"
 #include "Minicomputer.hpp" // for MiniComputer_SetScreenAndLineHack
@@ -46,7 +42,6 @@
 #include "ScrollStars.hpp"
 #include "SpaceObject.hpp"
 #include "SpriteHandling.hpp"
-#include "ToolUtils.h"
 #include "Transitions.hpp"
 #include "UniverseUnit.hpp"
 

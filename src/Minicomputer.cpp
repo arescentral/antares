@@ -25,7 +25,6 @@
 #include "AresGlobalType.hpp"
 #include "AresNetworkSprocket.hpp"
 #include "ColorTranslation.hpp"
-#include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "DirectText.hpp"
 #include "Error.hpp"
@@ -46,7 +45,6 @@
 #include "StringHandling.hpp"
 #include "StringList.hpp"
 #include "StringNumerics.hpp"
-#include "strlist.h"
 
 #define kMiniScreenLeft         12
 #define kMiniScreenTop          320 //191

@@ -19,15 +19,11 @@
 
 #include "NonPlayerShip.hpp"
 
-//#include <math routines.h>
-
 #include "Admiral.hpp"
 #include "AresGlobalType.hpp"
 #include "ColorTranslation.hpp"     // a hack
-#include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
-#include "GXMath.h"
 #include "KeyCodes.hpp"
 #include "KeyMapTranslation.hpp"  // HACK FOR TESTING
 #include "MathMacros.hpp"
@@ -46,7 +42,6 @@
 #include "SpaceObjectHandling.hpp"
 #include "StringNumerics.hpp"
 #include "TimeUnit.hpp"
-#include "ToolUtils.h"
 #include "Transitions.hpp"
 #include "UniverseUnit.hpp"
 

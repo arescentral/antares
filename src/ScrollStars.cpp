@@ -21,7 +21,6 @@
 
 #include "AresGlobalType.hpp"
 #include "ColorTranslation.hpp"
-#include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "MathMacros.hpp"

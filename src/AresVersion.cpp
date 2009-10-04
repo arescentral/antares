@@ -23,8 +23,6 @@
 
 #include "StringHandling.hpp"
 #include "StringNumerics.hpp"
-#include "Assert.h"
-#include "str_bp.h"
 
 inline bool mChar_is_numeric(char m_c) {
     return (((m_c) >= '0') && ((m_c) <= '9'));

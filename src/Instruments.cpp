@@ -23,10 +23,8 @@
 #include "Admiral.hpp"
 #include "AresGlobalType.hpp"
 #include "ColorTranslation.hpp"
-#include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
-#include "GXMath.h"
 #include "MathMacros.hpp"
 #include "Minicomputer.hpp"
 #include "NateDraw.hpp"
@@ -39,7 +37,6 @@
 //#include "SoundFX.hpp"
 #include "SpaceObject.hpp"
 #include "SpriteCursor.hpp"
-#include "ToolUtils.h"
 #include "UniverseUnit.hpp"
 
 #define kRadarBlipNum       50L

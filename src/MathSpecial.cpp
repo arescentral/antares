@@ -21,11 +21,7 @@
 
 #include "MathSpecial.hpp"
 
-#include <ToolUtils.h>
-
 #include "BinaryStream.hpp"
-#include "ConditionalMacros.h"
-#include "GXMath.h"
 #include "Resources.h"
 
 //      FOR THE SQUARE ROOT CODE:

@@ -19,13 +19,9 @@
 
 #include "Motion.hpp"
 
-#include <Timer.h>
-
 #include "AresGlobalType.hpp"
-#include "ConditionalMacros.h"
 #include "Debug.hpp"
 #include "Error.hpp"
-#include "GXMath.h"
 #include "MathMacros.hpp"
 #include "NatePixTable.hpp"
 #include "NonPlayerShip.hpp"
@@ -39,7 +35,6 @@
 #include "SpaceObject.hpp"
 #include "SpaceObjectHandling.hpp"
 #include "SpriteHandling.hpp"
-#include "ToolUtils.h"
 #include "UniverseUnit.hpp"
 
 #define kCenterScaleSize    983040L//61440L         // = 240 * SCALE_SCALE

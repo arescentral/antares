@@ -1,6 +1,0 @@
-#ifndef ANTARES_STUB_AEPACKOBJECT_H_
-#define ANTARES_STUB_AEPACKOBJECT_H_
-
-#include <AppleEvent.h>
-
-#endif // ANTARES_STUB_AEPACKOBJECT_H_
