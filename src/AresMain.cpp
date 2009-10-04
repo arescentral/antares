@@ -864,7 +864,7 @@ GameResult PlayTheGame(long *seconds) {
                             && ((TickCount() - l1) < 20)) {
                         GetKeys( keyMap);
                         if (CommandKey()) {
-                            Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
+                            WaitNextEvent (everyEvent, &theEvent, 3, nil);
                         }
                     }
 

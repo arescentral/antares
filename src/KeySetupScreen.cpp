@@ -301,7 +301,7 @@ Boolean Key_Setup_Screen_Do( void)
                 }
                 keyNum = currentKey = 0;
             }
-            Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
+            WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
                 switch ( theEvent.what )

@@ -468,7 +468,7 @@ long DoTabbedNetLevelInterface( void)
             }
 
             InterfaceIdle();
-            Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
+            WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
                 switch ( theEvent.what )

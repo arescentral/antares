@@ -422,7 +422,7 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
 
             InterfaceIdle();
             VideoDriver::driver()->set_game_state(MAIN_SCREEN_INTERFACE);
-            Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
+            WaitNextEvent (everyEvent, &theEvent, 3, nil);
             globals()->returnToMain = false;
 
             whichItem = -1;
@@ -614,7 +614,7 @@ void DoAboutAresInterface( void)
 
             InterfaceIdle();
 
-            Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
+            WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
                 switch ( theEvent.what )
@@ -846,7 +846,7 @@ PlayAgainResult DoPlayAgain(Boolean allowResume, Boolean allowSkip) {
 
             InterfaceIdle();
 
-            Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
+            WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
                 switch ( theEvent.what )
@@ -989,7 +989,7 @@ void DoNetSettings( void)
 
             InterfaceIdle();
 
-            Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
+            WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
                 switch ( theEvent.what )
@@ -1217,7 +1217,7 @@ void DoHelpScreen( void)
 
             InterfaceIdle();
 
-            Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
+            WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
                 switch ( theEvent.what )
@@ -1392,7 +1392,7 @@ void DoOptionsInterface( void)
         while ( !done)
         {
             InterfaceIdle();
-            Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
+            WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
                 switch ( theEvent.what )
@@ -1725,7 +1725,7 @@ Boolean DoKeyInterface( void)
                 }
                 keyNum = currentKey = 0;
             }
-            Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
+            WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
                 switch ( theEvent.what )
@@ -1982,7 +1982,7 @@ netResultType StartNetworkGameSetup( void)
             while ( !done)
             {
                 InterfaceIdle();
-                Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
+                WaitNextEvent (everyEvent, &theEvent, 3, nil);
                 {
                     whichItem = -1;
                     switch ( theEvent.what )
@@ -2126,7 +2126,7 @@ netResultType ClientWaitInterface( void)
         while ( !done)
         {
             InterfaceIdle();
-            Ares_WaitNextEvent (everyEvent, &theEvent, 0, nil);
+            WaitNextEvent (everyEvent, &theEvent, 0, nil);
             {
                 whichItem = -1;
                 switch ( theEvent.what )
@@ -2285,7 +2285,7 @@ netResultType HostAcceptClientInterface( void)
         while ( !done)
         {
             InterfaceIdle();
-            Ares_WaitNextEvent (everyEvent, &theEvent, 0, nil);
+            WaitNextEvent (everyEvent, &theEvent, 0, nil);
             {
                 whichItem = -1;
                 switch ( theEvent.what )
@@ -3465,7 +3465,7 @@ long DoSelectLevelInterface( long startChapter)
             InterfaceIdle();
 
             VideoDriver::driver()->set_game_state(SELECT_LEVEL_INTERFACE);
-            Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
+            WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
                 switch ( theEvent.what )
@@ -3762,7 +3762,7 @@ Boolean DoMissionInterface( long whichScenario)
             InterfaceIdle();
 //          if (Ares_WaitNextEvent (everyEvent, &theEvent, 0, nil))
             VideoDriver::driver()->set_game_state(MISSION_INTERFACE);
-            Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
+            WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
                 switch ( theEvent.what )
@@ -5241,85 +5241,6 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
     {
         StopAndUnloadSong();
     }
-}
-
-// HANDLING SUSPEND & RESUME
-
-void HandleOSEvent( EventRecord *event)
-{
-    long    eventType = event->message;
-
-    eventType >>= 24L;
-    eventType &= 0xff;
-
-    switch (eventType)
-    {
-        case mouseMovedMessage:
-    //                          DoIdle(event); {mouse-moved same as idle for this app}
-            break;
-
-        case suspendResumeMessage:
-            if ( event->message & resumeFlag)
-            {
-                ToggleSong();
-                InitCursor();
-                if ( event->message & convertClipboardFlag)
-                {
-                    // we don't care about clipboard
-                }
-                globals()->gOptions &= ~kOptionInBackground;
-                SelectWindow( gTheWindow);
-                MacSetPort( gTheWindow);
-                ResumeActiveTextEdit();
-
-                WriteDebugLine("\pRESUME");
-                Ambrosia_Update_Registered();
-            } else
-            {
-                ToggleSong();
-                globals()->gOptions |= kOptionInBackground;
-                SuspendActiveTextEdit();
-                WriteDebugLine("\pSUSPEND");
-            }
-            break;
-    }
-}
-
-Boolean Ares_WaitNextEvent( short eventMask, EventRecord *theEvent,
-    unsigned long sleep, RgnHandle mouseRgn)
-{
-    Boolean result = WaitNextEvent( eventMask, theEvent, sleep, mouseRgn);
-
-    if ( globals() != nil)
-    {
-        switch( theEvent->what)
-        {
-            case osEvt:
-                HandleOSEvent( theEvent);
-                break;
-
-        }
-    }
-
-        if ((!(globals()->gOptions & kOptionInBackground)) &&
-            (!globals()->gameRangerPending))
-{
-    if (( Wrap_GRIsWaitingCmd())/* && ( !globals()->gameRangerPending)*/)
-    {
-        WriteDebugLine("\pGRIsWaiting!");
-        if ( !globals()->gameRangerPending)
-        {
-            globals()->gameRangerPending = true;
-            globals()->returnToMain = true;
-        }
-    }
-}
-//  if ( Wrap_GRIsCmd())
-//  {
-//      WriteDebugLine((char *)"\pGRCommand!");
-//  }
-
-    return result;
 }
 
 void Replace_KeyCode_Strings_With_Actual_Key_Names(TypedHandle<unsigned char> text, short resID,

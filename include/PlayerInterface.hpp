@@ -91,8 +91,6 @@ void ShowSuccessAnimation( WindowPtr);
 void DoMissionDebriefingText(long, long, long, long, long, long, long, long);
 void DoScrollText(long, long, long, long, long);
 void HandleOSEvent( EventRecord *);
-Boolean Ares_WaitNextEvent( short eventMask, EventRecord *theEvent,
-    unsigned long sleep, RgnHandle mouseRgn);
 void Replace_KeyCode_Strings_With_Actual_Key_Names(TypedHandle<unsigned char> text, short resID, short padTo);
 
 #endif // ANTARES_PLAYER_INTERFACE_HPP_
