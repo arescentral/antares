@@ -337,271 +337,113 @@ Boolean IsKeyReserved( KeyMap, Boolean);
 void BlackenOffscreen( void);
 void Pause( long);
 
-Boolean stickyCheat = false;
-
-mainScreenResultType DoMainScreenInterface( long *demoLevel)
-
-{
-    Point                   where;
-    int                     error;
-    short                   whichItem;
-    Boolean                 done = FALSE, readyToCheat = false, timeout = false;
-    EventRecord             theEvent;
-    char                    whichChar;
+mainScreenResultType DoMainScreenInterface() {
     mainScreenResultType    result = kNullResult;
-    long                    startDemoTime = TickCount();
 
-    *demoLevel = -1;
     FlushEvents(everyEvent, 0);
     BlackenOffscreen();
-    error = OpenInterface( kMainScreenResID);
-    if ( error == kNoError)
-    {
-        if ( !(globals()->gOptions & kOptionNetworkAvailable))// NetSprocketPresent())
-        {
-            SetStatusOfAnyInterfaceItem( kMainNetworkButton, kDimmed, FALSE);
+    if (OpenInterface(kMainScreenResID) == kNoError) {
+        if (!(globals()->gOptions & kOptionNetworkAvailable)) {
+            SetStatusOfAnyInterfaceItem(kMainNetworkButton, kDimmed, false);
         }
 
-        if ( globals()->gOptions & kOptionNoSinglePlayer)
-        {
-            SetStatusOfAnyInterfaceItem( kMainPlayButton, kDimmed, false);
+        if (globals()->gOptions & kOptionNoSinglePlayer) {
+            SetStatusOfAnyInterfaceItem(kMainPlayButton, kDimmed, false);
         }
 
+        long startDemoTime = TickCount();
         DrawEntireInterface();
         AutoFadeFrom( 30, FALSE);
-        while ( !done)
-        {
-
-            if ( !globals()->haveSeenRTNotice)
-            {
-                Ambrosia_Update_Registered();
-
-                if ( !Ambrosia_Is_Registered())
-                {
-                    RT_DisplayNotice( false);
-                }
-                globals()->haveSeenRTNotice = true;
-            }
-
+        while (result == kNullResult) {
             InterfaceIdle();
             VideoDriver::driver()->set_game_state(MAIN_SCREEN_INTERFACE);
-            WaitNextEvent (everyEvent, &theEvent, 3, nil);
-            globals()->returnToMain = false;
 
-            whichItem = -1;
-            switch ( theEvent.what )
-            {
-                case nullEvent:
-                    InterfaceIdle();
-                    if ( globals()->gOptions & kOptionInBackground)
-                    {
-                        startDemoTime = TickCount();
-                    }
+            EventRecord evt;
+            WaitNextEvent(everyEvent, &evt, 3, nil);
 
-                    if (( TickCount() - startDemoTime) > kMainDemoTimeOutTime)
-                    {
-                        whichItem = kMainDemoButton;
-                        timeout = true;
-                    }
-                    if ( globals()->isQuitting)
-                    {
-                        result = kMainQuit;
-                        done = true;
-                    }
-                    if ( globals()->gameRangerPending)
-                    {
-                        result = kMainNetwork;
-                        done = true;
-
-                        Wrap_GRGetWaitingCmd();
-
-
-                    }
-                    break;
-
-                case osEvt:
-//                  HandleOSEvent( &theEvent);
+            int whichItem = -1;
+            bool timeout = false;
+            switch (evt.what ) {
+              case nullEvent:
+                InterfaceIdle();
+                if (globals()->gOptions & kOptionInBackground) {
                     startDemoTime = TickCount();
-                    break;
+                }
+                if ((TickCount() - startDemoTime) > kMainDemoTimeOutTime) {
+                    whichItem = kMainDemoButton;
+                    timeout = true;
+                }
+                break;
 
-                case mouseDown:
+              case osEvt:
+                startDemoTime = TickCount();
+                break;
+
+              case mouseDown:
+                {
                     startDemoTime = TickCount();
-                    where = theEvent.where;
-                    GlobalToLocal( &where);
+                    Point where = evt.where;
+                    GlobalToLocal(&where);
+                    whichItem = InterfaceMouseDown(where);
+                }
+                break;
 
-                    if ( HandleMouseDown( &theEvent))
-                    {
-                        result = kMainQuit;
-                        done = true;
-                    }
-
-                    whichItem = InterfaceMouseDown( where);
-                    break;
-                case mouseUp:
-                    break;
-                case keyDown:
-                case autoKey:
-                    if ( HandleKeyDown( &theEvent))
-                    {
-                        result = kMainQuit;
-                        done = true;
-                    }
-
-                    startDemoTime = TickCount();
-                    whichChar = theEvent.message & charCodeMask;
-
-                    if (( whichChar >= '0') && ( whichChar <= '9'))
-                    {
-                        *demoLevel = whichChar - '0';
-                        result = kMainDemo;
-                        done = true;
-                    }
-                    if ( whichChar == 'f')
-                    {
-                        readyToCheat = true;
-                        PlayVolumeSound( kCloakOn, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
-                    } else if (( whichChar == '-') && ( readyToCheat))
-                    {
-                        SetStatusOfAnyInterfaceItem( kMainPlayButton, kActive, true);
-                        DrawAnyInterfaceItemOffToOn( GetAnyInterfaceItemPtr( kMainPlayButton));
-                        SetStatusOfAnyInterfaceItem( kMainOptionsButton, kActive, true);
-                        DrawAnyInterfaceItemOffToOn( GetAnyInterfaceItemPtr( kMainOptionsButton));
-                        PlayVolumeSound( kCloakOff, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
-                        stickyCheat = true;
-                    } else readyToCheat = false;
-
-                    whichItem = InterfaceKeyDown( theEvent.message);
-                    break;
-            }
-            switch ( whichItem)
-            {
-                case kMainQuitButton:
-                    done = TRUE;
-                    result = kMainQuit;
-                    break;
-
-                case kMainDemoButton:
-                    done = TRUE;
-                    if ( timeout)
-                        result = kMainTimeoutDemo;
-                    else
-                        result = kMainDemo;
-                    break;
-
-                case kMainTrainButton:
-                    done = true;
-                    result = kMainTrain;
-                    break;
-
-                case kMainPlayButton:
-                    result = kMainPlay;
-                    done = TRUE;
-                    break;
-
-                case kMainNetworkButton:
-                    result = kMainNetwork;
-                    done = TRUE;
-                    break;
-
-                case kMainAboutButton:
-                    result = kMainAbout;
-                    done = true;
-                    break;
-
-                case kMainOptionsButton:
-//                  #ifndef kNonPlayableDemo
-                    CloseInterface();
-                    DoOptionsInterface();
-
-                    OpenInterface( kMainScreenResID);
-                    if ( !(globals()->gOptions & kOptionNetworkAvailable))// NetSprocketPresent())
-                    {
-                        SetStatusOfAnyInterfaceItem( kMainNetworkButton, kDimmed, FALSE);
-                    }
-                    if ( globals()->gOptions & kOptionNoSinglePlayer)
-                    {
-                        SetStatusOfAnyInterfaceItem( kMainPlayButton, kDimmed, false);
-                    }
-
-                    DrawEntireInterface();
-//                  #endif
-                    startDemoTime = TickCount();
-                    break;
-
+              case keyDown:
+              case autoKey:
+                startDemoTime = TickCount();
+                whichItem = InterfaceKeyDown(evt.message);
+                break;
             }
 
+            switch (whichItem) {
+              case kMainQuitButton:
+                result = kMainQuit;
+                break;
 
-        }
-        CloseInterface();
-    }
-    return ( result);
-}
-
-void DoAboutAresInterface( void)
-
-{
-    Point                   where;
-    int                     error;
-    short                   whichItem;
-    Boolean                 done = FALSE;
-    EventRecord             theEvent;
-    char                    whichChar;
-
-    FlushEvents(everyEvent, 0);
-    BlackenWindow();
-
-    error = OpenInterface( kAboutAresID);
-    if ( error == kNoError)
-    {
-        DrawEntireInterface();
-
-        while ( !done)
-        {
-
-            InterfaceIdle();
-
-            WaitNextEvent (everyEvent, &theEvent, 3, nil);
-            {
-                whichItem = -1;
-                switch ( theEvent.what )
-                {
-                    case nullEvent:
-                        InterfaceIdle();
-                        if ( globals()->returnToMain)
-                        {
-                            done = true;
-                        }
-                        break;
-
-                    case osEvt:
-//                      HandleOSEvent( &theEvent);
-                        break;
-
-                    case mouseDown:
-                        where = theEvent.where;
-                        GlobalToLocal( &where);
-                        HandleMouseDown( &theEvent);
-                        whichItem = InterfaceMouseDown( where);
-                        break;
-                    case mouseUp:
-                        break;
-                    case keyDown:
-                    case autoKey:
-                        whichChar = theEvent.message & charCodeMask;
-                        whichItem = InterfaceKeyDown( theEvent.message);
-                        break;
+              case kMainDemoButton:
+                if (timeout) {
+                    result = kMainTimeoutDemo;
+                } else {
+                    result = kMainDemo;
                 }
-                switch ( whichItem)
-                {
-                    case kAboutAresOKButton:
-                        done = TRUE;
-                        break;
+                break;
+
+              case kMainTrainButton:
+                result = kMainTrain;
+                break;
+
+              case kMainPlayButton:
+                result = kMainPlay;
+                break;
+
+              case kMainNetworkButton:
+                result = kMainNetwork;
+                break;
+
+              case kMainAboutButton:
+                result = kMainAbout;
+                break;
+
+              case kMainOptionsButton:
+                CloseInterface();
+                DoOptionsInterface();
+
+                OpenInterface( kMainScreenResID);
+                if (!(globals()->gOptions & kOptionNetworkAvailable)) {
+                    SetStatusOfAnyInterfaceItem( kMainNetworkButton, kDimmed, FALSE);
+                }
+                if (globals()->gOptions & kOptionNoSinglePlayer) {
+                    SetStatusOfAnyInterfaceItem( kMainPlayButton, kDimmed, false);
                 }
 
+                DrawEntireInterface();
+                startDemoTime = TickCount();
+                break;
             }
         }
         CloseInterface();
     }
+    return result;
 }
 
 void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
@@ -804,7 +646,6 @@ PlayAgainResult DoPlayAgain(Boolean allowResume, Boolean allowSkip) {
                     case mouseDown:
                         where = theEvent.where;
                         GlobalToLocal( &where);
-                        HandleMouseDown( &theEvent);
                         whichItem = InterfaceMouseDown( where);
                         break;
                     case mouseUp:
@@ -948,7 +789,6 @@ void DoNetSettings( void)
                     case mouseDown:
                         where = theEvent.where;
                         GlobalToLocal( &where);
-                        HandleMouseDown( &theEvent);
                         whichItem = InterfaceMouseDown( where);
                         break;
                     case mouseUp:
@@ -1150,7 +990,6 @@ void DoHelpScreen( void)
                     case mouseDown:
                         where = theEvent.where;
                         GlobalToLocal( &where);
-                        HandleMouseDown( &theEvent);
                         whichItem = InterfaceMouseDown( where);
                         break;
                     case mouseUp:
@@ -1329,7 +1168,6 @@ void DoOptionsInterface( void)
                     case mouseDown:
                         where = theEvent.where;
                         GlobalToLocal( &where);
-                        HandleMouseDown( &theEvent);
                         whichItem = InterfaceMouseDown( where);
                         break;
                     case mouseUp:
@@ -1639,7 +1477,6 @@ Boolean DoKeyInterface( void)
                     case mouseDown:
                         where = theEvent.where;
                         GlobalToLocal( &where);
-                        HandleMouseDown( &theEvent);
                         whichItem = InterfaceMouseDown( where);
                         break;
                     case mouseUp:
@@ -1861,7 +1698,6 @@ netResultType StartNetworkGameSetup( void)
                         case mouseDown:
                             where = theEvent.where;
                             GlobalToLocal( &where);
-                            HandleMouseDown( &theEvent);
                             whichItem = InterfaceMouseDown( where);
                             break;
                         case mouseUp:
@@ -2004,7 +1840,6 @@ netResultType ClientWaitInterface( void)
                     case mouseDown:
                         where = theEvent.where;
                         GlobalToLocal( &where);
-                        HandleMouseDown( &theEvent);
                         whichItem = InterfaceMouseDown( where);
                         break;
                     case mouseUp:
@@ -2162,7 +1997,6 @@ netResultType HostAcceptClientInterface( void)
                     case mouseDown:
                         where = theEvent.where;
                         GlobalToLocal( &where);
-                        HandleMouseDown( &theEvent);
                         whichItem = InterfaceMouseDown( where);
                         break;
                     case mouseUp:
@@ -2382,7 +2216,6 @@ long DoSelectLevelInterface( long startChapter)
                     case mouseDown:
                         where = theEvent.where;
                         GlobalToLocal( &where);
-                        HandleMouseDown( &theEvent);
                         whichItem = InterfaceMouseDown( where);
                         break;
                     case mouseUp:
@@ -2676,7 +2509,6 @@ Boolean DoMissionInterface( long whichScenario)
                     case mouseDown:
                         where = theEvent.where;
                         GlobalToLocal( &where);
-                        HandleMouseDown( &theEvent);
                         for ( i = 0; i < kMaxInlinePictNum; i++)
                         {
                             if (( inlinePict[i].id >= 0) &&

@@ -203,12 +203,10 @@ struct aresGlobalType {
     long            gLastSelectedBuildPrice;
     Str255          gUserName;
     Boolean         gAutoPilotOff;          // hack for turning off auto in netgame
-    Boolean         isQuitting;             // x-ares; for appleevent handling
     Boolean         returnToMain;           // x-ares;
     // returnToMain is for both getting a quit appleEvent or
     // a GameRanger command; it stops whatever is going on
     // and returns to main menu
-    Boolean         aeInited;               // x-ares; for appleevent handling
     Boolean         gameRangerPending;      // x-ares; for gameRanger
     Boolean         gameRangerInProgress;
     Boolean         useGameRanger;

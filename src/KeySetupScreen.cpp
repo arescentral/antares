@@ -344,7 +344,6 @@ Boolean Key_Setup_Screen_Do( void)
                     case mouseDown:
                         where = theEvent.where;
                         GlobalToLocal( &where);
-                        HandleMouseDown( &theEvent);
                         whichItem = InterfaceMouseDown( where);
                         break;
                     case mouseUp:

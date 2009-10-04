@@ -89,8 +89,6 @@ aresGlobalType::aresGlobalType() {
     gSoundFileRefID = 0;
     gLastSelectedBuildPrice = 0;
     gAutoPilotOff = true;
-    isQuitting = false;
-    aeInited = false;
     gameRangerPending = false;
     gameRangerInProgress = false;
     useGameRanger = false;

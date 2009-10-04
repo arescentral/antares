@@ -279,7 +279,6 @@ void AresMain() {
 void MainLoop() {
     long                    saveSeed = 0, gameLength;
     bool                    done = false;
-    short                   resID = 0;
 
     if (!(globals()->gOptions & kOptionHaveSeenIntro)) {
         DoScrollText(5600, 4, kTitleTextScrollWidth, kTitleFontNum, -1);
@@ -289,8 +288,7 @@ void MainLoop() {
     }
 
     while (!done) {
-        long whichDemoLevel;
-        switch (DoMainScreenInterface(&whichDemoLevel)) {
+        switch (DoMainScreenInterface()) {
           case kMainQuit:
             {
                 RGBColor fadeColor = { 0, 0, 0 };
@@ -319,12 +317,6 @@ void MainLoop() {
                 int whichScenario = 0;
 
                 if (globals()->gOptions & kOptionReplay) {
-                    if (whichDemoLevel >= 0) {
-                        globals()->gInputSource.reset(
-                                new ReplayInputSource(whichDemoLevel + 1));
-                        whichScenario = resID - kReplayResID;
-                    }
-
                     while (globals()->gInputSource.get() == nil) {
                         whichScenario = GetDemoScenario();
                         globals()->gInputSource.reset(
@@ -1025,47 +1017,6 @@ GameResult PlayTheGame(long *seconds) {
     } else {
         return result;
     }
-}
-
-Boolean HandleMouseDown( EventRecord *theEvent)
-
-{
-    short       whichPart;
-    WindowPtr   whichWindow;
-    Point       where;
-    Boolean     done = FALSE;
-
-    whichPart = MacFindWindow (theEvent->where,  &whichWindow);
-    switch (whichPart)
-    {
-        case inSysWindow:
-            SystemClick( theEvent, whichWindow);
-            break;
-        case inContent:
-            where = theEvent->where;
-            GlobalToLocal( &where);
-            break;
-        case inGoAway:
-            if ( TrackGoAway (whichWindow, theEvent->where))
-            {
-                ShowHide ( whichWindow, FALSE);
-                if ( whichWindow == gTheWindow)
-                    done = TRUE;
-            }
-            break;
-    }
-    return ( done);
-}
-
-Boolean HandleKeyDown( EventRecord *theEvent)
-
-{
-    char    whichChar;
-
-    whichChar = theEvent->message & charCodeMask;
-    if (( theEvent->modifiers & cmdKey ) != 0)
-        return( HandleMenuChoice( MenuKey( whichChar )));
-    else return( false);
 }
 
 void Pause( long time)

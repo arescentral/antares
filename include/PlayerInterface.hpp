@@ -49,8 +49,7 @@ enum PlayAgainResult {
     PLAY_AGAIN_SKIP,
 };
 
-mainScreenResultType DoMainScreenInterface( long *);
-void DoAboutAresInterface( void);
+mainScreenResultType DoMainScreenInterface();
 void DoLoadingInterface(Rect*, unsigned char*);
 void UpdateLoadingInterface( long, long, Rect *);
 PlayAgainResult DoPlayAgain(bool allow_resume, bool allow_skip);
