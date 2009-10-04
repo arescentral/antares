@@ -138,11 +138,13 @@
 
 // result 0 = lose, 1 = win, 2 = restart, 3 = quit
 
-#define kLoseGame       0
-#define kWinGame            1
-#define kRestartGame    2
-#define kQuitGame       3
-#define kNoGame         -1
+enum GameResult {
+    NO_GAME = -1,
+    LOSE_GAME = 0,
+    WIN_GAME = 1,
+    RESTART_GAME = 2,
+    QUIT_GAME = 3,
+};
 
 //#define   kCanRecordGame
 
@@ -188,6 +190,8 @@ unsigned long kNoKeys = 0;
 int GetDemoScenario();
 void FakeInit(int argc, char* const* argv);
 void Pause( long time);
+void MainLoop();
+GameResult PlayTheGame(long *seconds);
 
 int main(int argc, char* const* argv) {
     FakeInit(argc, argv);
@@ -260,6 +264,7 @@ void AresMain() {
     AresCheatInit();
     ScenarioMakerInit();
     SpaceObjectHandlingInit();  // MUST be after ScenarioMakerInit()
+    InitSoundFX();
     InitMotion();
     AdmiralInit();
     InitBeams();
@@ -272,53 +277,12 @@ void AresMain() {
     MainLoop();
 }
 
-void ToolBoxInit( void)
+void MainLoop() {
+    long                    saveSeed = 0, gameLength;
+    bool                    done = false;
+    short                   resID = 0;
 
-{
-    InitWindows();
-    InitMenus();
-    TEInit();
-    InitDialogs( nil);
-    InitCursor();
-    SetEventMask( everyEvent);
-    MoreMasters();
-    MoreMasters();
-    MoreMasters();
-    MoreMasters();
-    MoreMasters();
-    MoreMasters();
-    MaxApplZone();
-    FlushEvents(everyEvent, 0);     // Removes all events
-    /*SetGrowZone( &OutOfMemoryError);*/
-}
-//#pragma code68020 reset
-
-
-void MenuBarInit( void)
-{
-    Handle      myMenuBar;
-
-    myMenuBar = GetNewMBar( MENU_BAR_ID);
-    SetMenuBar ( myMenuBar);
-    gAppleMenu = GetMenuHandle (APPLE_MENU_ID);
-
-    AppendResMenu( gAppleMenu, 'DRVR');
-    MacDrawMenuBar();
-}
-
-void MainLoop (void)
-
-{
-    long                    whichScenario = 0, saveSeed = 0, gameLength, whichDemoLevel, t;
-    Boolean                 done = FALSE, jumpLevel = false;
-    mainScreenResultType    mainResult;
-    RGBColor                fadeColor;
-    short                   gameResult;
-    Str255                  movieName;     // for GetResInfo, when we're jumping to a demo
-    short                   resID = 0;          // '' ''
-
-    if (!(globals()->gOptions & kOptionHaveSeenIntro))
-    {
+    if (!(globals()->gOptions & kOptionHaveSeenIntro)) {
         DoScrollText( gTheWindow, 5600, 4, kTitleTextScrollWidth,
             kTitleFontNum, -1);
 
@@ -326,344 +290,220 @@ void MainLoop (void)
         SaveOptionsPreferences();
     }
 
-    while ( !done)
-    {
-        WriteDebugLine("\p>MainScreen");
-        MacSetPort( gTheWindow);
-        mainResult = DoMainScreenInterface( &whichDemoLevel);
-
-        switch( mainResult)
-        {
-            case kMainQuit:
-#ifdef kCreateAresDemoData
-                MakeDemoDataHack();
-#endif
-//              DoScrollText( (WindowPtr)gTheWindow, 6501, 4, 540,
-//                  kTitleFontNum/*kComputerFontNum*/, -1);
-//              MakeAresGuide();
-
-                fadeColor.red = fadeColor.green = fadeColor.blue = 0;
-                if ( globals()->gOptions & kOptionMusicIdle)
-                {
+    while (!done) {
+        long whichDemoLevel;
+        switch (DoMainScreenInterface(&whichDemoLevel)) {
+          case kMainQuit:
+            {
+                RGBColor fadeColor = { 0, 0, 0 };
+                if (globals()->gOptions & kOptionMusicIdle) {
                     AutoMusicFadeTo( 60, &fadeColor, FALSE);
-                } else
-                {
+                } else {
                     AutoFadeTo( 60, &fadeColor, FALSE);
                 }
-                done = TRUE;
-                break;
+                done = true;
+            }
+            break;
 
-            case kMainTimeoutDemo:
-
-                if ( Randomize( 4) == 2)
-                {
-                    DoScrollText( gTheWindow, 5600, 4, kTitleTextScrollWidth,
+          case kMainTimeoutDemo:
+            if (Randomize(4) == 2) {
+                DoScrollText( gTheWindow, 5600, 4, kTitleTextScrollWidth,
                         kTitleFontNum, -1);
-                }
+            }
+            // fall through
 
-                // NO BREAK! FALL THROUGH TO case kMainDemo:
+          case kMainDemo:
+            globals()->gOptions |= kOptionReplay;
+            // fall through
 
-            case kMainDemo: // identical to main play, except we turn on autoplay bit
-//              AutoFadeTo( 60, &fadeColor, FALSE);
-//              ShowSuccessAnimation( (WindowPtr)gTheWindow);
+          case kMainPlay:
+            {
+                int whichScenario = 0;
 
-                globals()->gOptions |= kOptionReplay;
-
-                // NO BREAK! FALL THROUGH TO case kMainPlay:
-
-//What you are about to do is totally unsupported. Nothing is final. This is a pre-release development build!
-                                  //This is a pre-release development build! This is not the final demo. Elements are subject to change.
-            case kMainPlay:
-                whichScenario = 0;
-                jumpLevel = FALSE;
-
-                if ( (!Ambrosia_Is_Registered()) &&
-                    (globals()->externalFileRefNum > 0))
-                {
-                    ShowErrorAny( eContinueErr, kErrorStrID,  nil, nil, nil, nil,
-                        79, -1, -1, -1, __FILE__, 2);
-
-                    globals()->externalFileSpec.name[0] = 0;
-                    EF_OpenExternalFile();
-                }
-
-                if ( !( globals()->gOptions & kOptionReplay))
-                {
-                    whichScenario = DoSelectLevelInterface( GetStartingLevelPreference());
-                    jumpLevel = TRUE;
-                }
-//              globals()->gOptions |= kOptionAutoPlay;
-
-                if ( whichScenario >= 0)
-                {
-                    if ( globals()->gOptions & kOptionReplay)
-                    {
-                        #ifdef kReplayNotAutoPlay
-
-                        short   refNum = CurResFile();
-
-                        UseResFile( globals()->gMainResRefNum);
-
-                        if (!(jumpLevel))
-                        {
-                            if ( whichDemoLevel >= 0)// get indexed demo level
-                            {
-                                globals()->gInputSource.reset(
-                                        new ReplayInputSource(whichDemoLevel + 1));
-                                if (globals()->gInputSource.get() != nil) {
-                                    //GetResInfo(reinterpret_cast<Handle>(globals()->gReplayData),
-                                    //        &resID, &resType, resName);
-                                    whichScenario = resID - kReplayResID;
-                                }
-                            }
-
-                            if (globals()->gInputSource.get() == nil) {
-                                do
-                                {
-                                    whichScenario = GetDemoScenario();
-                                    // whichScenario = Randomize( globals()->levelNum);//Randomize( 30 + 1);
-                                    // whichScenario = GetScenarioNumberFromChapterNumber( whichScenario);
-                                    globals()->gInputSource.reset(
-                                            new ReplayInputSource(kReplayResID + whichScenario));
-                                } while (globals()->gInputSource.get() == nil);
-                            }
-                        } else {
-                                globals()->gInputSource.reset(
-                                        new ReplayInputSource(kReplayResID + whichScenario));
-                        }
-
-                        if (globals()->gInputSource.get() != nil) {
-                            saveSeed = gRandomSeed;
-                            gRandomSeed = globals()->gInputSource->random_seed();
-                        }
-                        UseResFile( refNum);
-
-                        #else
-
-//                      whichScenario = Randomize( kHackLevelMax);
-                        whichScenario = 5;
-
-                        #endif
+                if (globals()->gOptions & kOptionReplay) {
+                    if (whichDemoLevel >= 0) {
+                        globals()->gInputSource.reset(
+                                new ReplayInputSource(whichDemoLevel + 1));
+                        whichScenario = resID - kReplayResID;
                     }
 
-                    StopAndUnloadSong();
+                    while (globals()->gInputSource.get() == nil) {
+                        whichScenario = GetDemoScenario();
+                        globals()->gInputSource.reset(
+                                new ReplayInputSource(kReplayResID + whichScenario));
+                    }
 
+                    saveSeed = gRandomSeed;
+                    gRandomSeed = globals()->gInputSource->random_seed();
+                } else {
+                    whichScenario = DoSelectLevelInterface(GetStartingLevelPreference());
+                    if (whichScenario < 0) {
+                        break;
+                    }
+                }
 
-                    gameResult = kNoGame;
+                StopAndUnloadSong();
 
-                    do
-                    {
-                        if (( gameResult == kNoGame) || ( gameResult == kWinGame))
-                        {
-                            GetScenarioMovieName( whichScenario, movieName);
-                            if ( movieName[0] != 0)
-                            {
-                                PlayMovieByName( movieName, gTheWindow,
-                                    true);
-                            }
-
-                            if ( GetScenarioPrologueID( whichScenario) > 0)
-                            {
-                                DoScrollText( gTheWindow,
+                GameResult gameResult = NO_GAME;
+                do {
+                    if ((gameResult == NO_GAME) || (gameResult == WIN_GAME)) {
+                        if (GetScenarioPrologueID(whichScenario) > 0) {
+                            DoScrollText( gTheWindow,
                                     GetScenarioPrologueID( whichScenario),
                                     4, kTitleTextScrollWidth, kTitleFontNum, 4002);
-                            }
                         }
+                    }
 
-                    gameResult = kNoGame;
-                    fadeColor.red = fadeColor.green = fadeColor.blue = 0;
-                    if ( globals()->gOptions & kOptionMusicIdle)
-                    {
-                        AutoMusicFadeTo( 60, &fadeColor, FALSE);
+                    gameResult = NO_GAME;
+                    RGBColor fadeColor = { 0, 0, 0 };
+                    if (globals()->gOptions & kOptionMusicIdle) {
+                        AutoMusicFadeTo(60, &fadeColor, FALSE);
                         StopAndUnloadSong();
-                    } else
-                    {
+                    } else {
                         AutoFadeTo( 60, &fadeColor, FALSE);
                     }
 
-                        RemoveAllSpaceObjects();
-                        globals()->gGameOver = 0;
+                    RemoveAllSpaceObjects();
+                    globals()->gGameOver = 0;
 
-                        // mission briefing unfades screen
-
-    //                  if ( globals()->gOptions & kOptionAutoPlay) whichScenario = 2;
-
-                        if ( globals()->gOptions & kOptionMusicIdle)
-                        {
-                            LoadSong( 3000);
-                            SetSongVolume( kMaxMusicVolume);
-                            PlaySong();
-                        }
-
-    //gRandomSeed = 910697788;
-                        gameResult = kNoGame;
-                        if ( !ConstructScenario( whichScenario))
-                            gameResult = kQuitGame;
-
-                        if ( gameResult != kQuitGame)
-                        {
-                            if ( globals()->gOptions & kOptionMusicIdle)
-                            {
-                                StopAndUnloadSong();
-                            }
-
-                            HideCursor();
-                            DrawInstrumentPanel(  gTheWindow);
-                            MacShowCursor();
-
-                            if ( globals()->gOptions & kOptionMusicPlay)
-                            {
-                                LoadSong( gThisScenario->songID);
-                                SetSongVolume( kMusicVolume);
-                                PlaySong();
-                            }
-                            ResetLastTime( (gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
-
-// *** PLAY THE GAME
-
-                            gameResult = PlayTheGame( &gameLength);
-
-//              DebugFileSave( "\p_Poopy");
-//              DebugFileCleanup();
-
-
-                            if (( !( globals()->gOptions & (kOptionAutoPlay | kOptionReplay))) && ( gameResult == kLoseGame))
-                            {
-                                if ( (globals()->gScenarioWinner & kScenarioWinnerTextMask) != kScenarioWinnerNoText)
-                                {
-                                    DoMissionDebriefingText(  gTheWindow,
-                                        (globals()->gScenarioWinner & kScenarioWinnerTextMask) >> kScenarioWinnerTextShift,
-                                            -1, -1, -1, -1, -1, -1, -1);
-                                }
-                                if ( DoPlayAgain( false, false))
-                                {
-                                    gameResult = kRestartGame;
-                                    WriteDebugLine("\pAGAIN!");
-                                }  else
-                                {
-                                    gameResult = kQuitGame;
-                                    WriteDebugLine("\pNOT AGAIN!");
-                                    BlackTitleScreen();
-                                    AutoFadeFrom( 1, false);
-                                }
-                            } else if ( gameResult == kWinGame)
-                            {
-                                if ( (globals()->gScenarioWinner & kScenarioWinnerTextMask) != kScenarioWinnerNoText)
-                                {
-                                    DoMissionDebriefingText(  gTheWindow,
-                                        (globals()->gScenarioWinner & kScenarioWinnerTextMask) >> kScenarioWinnerTextShift,
-                                        gameLength, gThisScenario->parTime,
-                                        GetAdmiralLoss( 0), gThisScenario->parLosses, GetAdmiralKill( 0), gThisScenario->parKills, 100);
-                                }
-
-                                fadeColor.red = fadeColor.green = fadeColor.blue = 0;
-                                if ( globals()->gOptions & kOptionMusicPlay)
-                                {
-                                    AutoMusicFadeTo( 60, &fadeColor, FALSE);
-                                    StopAndUnloadSong();
-                                } else
-                                {
-                                    AutoFadeTo( 60, &fadeColor, FALSE);
-                                }
-
-                                if ( gameResult == kWinGame)
-                                {
-
-                                    BlackTitleScreen();
-                                    AutoFadeFrom( 1, FALSE);
-
-                                    t = 4002; // normal scrolltext song
-                                    if (( globals()->gScenarioWinner & kScenarioWinnerNextMask) ==
-                                        kScenarioWinnerNoNext)
-                                        t = 4003; // we win but no next level? Play triumph song
-
-                                    if ( (!Ambrosia_Is_Registered()) &&
-                                        ( GetChapterNumberFromScenarioNumber( whichScenario) >= 9))
-                                    {
-                                        globals()->gScenarioWinner = (globals()->gScenarioWinner
-                                            & ~kScenarioWinnerNextMask) | kScenarioWinnerNoNext;
-
-                                        SaveStartingLevelPreferences( 10);
-                                        DoScrollText( gTheWindow,
-                                            6501,
-                                            4, kTitleTextScrollWidth, kTitleFontNum, t);
-                                    } else
-                                    {
-
-                                        if ( GetScenarioEpilogueID( whichScenario) > 0)
-                                            DoScrollText( gTheWindow,
-                                                GetScenarioEpilogueID( whichScenario),
-                                                4, kTitleTextScrollWidth, kTitleFontNum, t);
-                                    }
-        /*                              DoMissionDebriefing( (WindowPtr) gTheWindow, gameLength, gThisScenario->parTime,
-                                        GetAdmiralLoss( 0), gThisScenario->parLosses, GetAdmiralKill( 0), gThisScenario->parKills, 100);
-    */
-
-// *********
-
-                                    PlayMovieByName("\p:Ares Data Folder:Next Level", gTheWindow,
-                                        true);
-                                    if ( globals()->gOptions & kOptionMusicIdle)
-                                    {
-                                        BlackTitleScreen();
-                                        StopAndUnloadSong();
-                                    }
-
-                                    if ( globals()->gOptions & kOptionReplay)
-                                    {
-                                        gRandomSeed = saveSeed;
-                                    }
-
-                                    globals()->gInputSource.reset();
-
-    //                              whichScenario++;
-                                    // whichScenario = GetNextScenarioChapter( whichScenario);
-                                    if (( globals()->gScenarioWinner & kScenarioWinnerNextMask) ==
-                                        kScenarioWinnerNoNext)
-                                        whichScenario = -1;
-                                    else
-                                    {
-                                        whichScenario = GetScenarioNumberFromChapterNumber(
-                                            (globals()->gScenarioWinner &
-                                            kScenarioWinnerNextMask) >>
-                                            kScenarioWinnerNextShift);
-                                    }
-                                    if (( !( globals()->gOptions & (kOptionAutoPlay | kOptionReplay))) && ( whichScenario <= GetScenarioNumber()) &&
-                                        ( whichScenario >= 0))
-                                    {
-                                        if (( GetChapterNumberFromScenarioNumber( whichScenario) >= 0) &&
-                                            ( GetChapterNumberFromScenarioNumber( whichScenario) <= kHackLevelMax) &&
-                                            ( GetChapterNumberFromScenarioNumber( whichScenario) <= GetScenarioNumber()))
-                                        {
-                                            SaveStartingLevelPreferences( GetChapterNumberFromScenarioNumber( whichScenario));
-                                        } else whichScenario = -1;
-                                    }
-                                } else
-                                {
-                                    BlackTitleScreen();
-                                    AutoFadeFrom( 1, false);
-                                }
-                            }
-                        }
-                        if ( globals()->gOptions & kOptionMusicPlay) StopAndUnloadSong();
-                    } while ( (gameResult != kQuitGame) &&
-                        ( GetChapterNumberFromScenarioNumber( whichScenario) <= kHackLevelMax)
-                        && ( GetChapterNumberFromScenarioNumber( whichScenario) <= GetScenarioNumber())
-                        && ( whichScenario >= 0) &&
-                        ( !( globals()->gOptions & (kOptionAutoPlay | kOptionReplay))));
-                    if ( globals()->gOptions & kOptionMusicIdle)
-                    {
-                        LoadSong( kTitleSongID);
+                    if (globals()->gOptions & kOptionMusicIdle) {
+                        LoadSong(3000);
                         SetSongVolume( kMaxMusicVolume);
                         PlaySong();
                     }
-                }
-                globals()->gOptions &= ~(kOptionAutoPlay | kOptionReplay);
-                if ( OptionKey()) DebugFileSave( "\p_Poopy");
-                DebugFileCleanup();
-                break;
 
-            case kMainNetwork:
+                    gameResult = NO_GAME;
+                    if (!ConstructScenario(whichScenario)) {
+                        break;
+                    }
+
+                    if (globals()->gOptions & kOptionMusicIdle) {
+                        StopAndUnloadSong();
+                    }
+
+                    DrawInstrumentPanel(gTheWindow);
+
+                    if (globals()->gOptions & kOptionMusicPlay) {
+                        LoadSong(gThisScenario->songID);
+                        SetSongVolume(kMusicVolume);
+                        PlaySong();
+                    }
+                    ResetLastTime((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
+
+                    gameResult = PlayTheGame(&gameLength);
+
+                    switch (gameResult) {
+                      case LOSE_GAME:
+                        if (!(globals()->gOptions & kOptionReplay)) {
+                            if ((globals()->gScenarioWinner & kScenarioWinnerTextMask) !=
+                                    kScenarioWinnerNoText) {
+                                DoMissionDebriefingText(
+                                        (globals()->gScenarioWinner & kScenarioWinnerTextMask) >> kScenarioWinnerTextShift,
+                                        -1, -1, -1, -1, -1, -1, -1);
+                            }
+                            if (DoPlayAgain(false, false)) {
+                                gameResult = RESTART_GAME;
+                            } else {
+                                gameResult = QUIT_GAME;
+                                ClearScreen();
+                                AutoFadeFrom(1, false);
+                            }
+                        }
+                        break;
+
+                      case WIN_GAME:
+                        {
+                            if ((globals()->gScenarioWinner & kScenarioWinnerTextMask) !=
+                                    kScenarioWinnerNoText) {
+                                DoMissionDebriefingText(
+                                        (globals()->gScenarioWinner & kScenarioWinnerTextMask) >> kScenarioWinnerTextShift,
+                                        gameLength, gThisScenario->parTime,
+                                        GetAdmiralLoss(0), gThisScenario->parLosses,
+                                        GetAdmiralKill(0), gThisScenario->parKills,
+                                        100);
+                            }
+
+                            fadeColor.red = fadeColor.green = fadeColor.blue = 0;
+                            if (globals()->gOptions & kOptionMusicPlay) {
+                                AutoMusicFadeTo( 60, &fadeColor, FALSE);
+                                StopAndUnloadSong();
+                            } else {
+                                AutoFadeTo( 60, &fadeColor, FALSE);
+                            }
+
+                            ClearScreen();
+                            AutoFadeFrom( 1, FALSE);
+
+                            // normal scrolltext song
+                            int scroll_song = 4002;
+                            if ((globals()->gScenarioWinner & kScenarioWinnerNextMask) ==
+                                    kScenarioWinnerNoNext) {
+                                // we win but no next level? Play triumph song
+                                scroll_song = 4003;
+                            }
+
+                            if (GetScenarioEpilogueID( whichScenario) > 0) {
+                                DoScrollText(gTheWindow,
+                                        GetScenarioEpilogueID( whichScenario),
+                                        4, kTitleTextScrollWidth, kTitleFontNum, scroll_song);
+                            }
+
+                            if (globals()->gOptions & kOptionMusicIdle) {
+                                ClearScreen();
+                                StopAndUnloadSong();
+                            }
+
+                            if (globals()->gOptions & kOptionReplay) {
+                                gRandomSeed = saveSeed;
+                            }
+                            globals()->gInputSource.reset();
+
+                            if ((globals()->gScenarioWinner & kScenarioWinnerNextMask) ==
+                                    kScenarioWinnerNoNext) {
+                                whichScenario = -1;
+                            } else {
+                                whichScenario = GetScenarioNumberFromChapterNumber(
+                                        (globals()->gScenarioWinner & kScenarioWinnerNextMask)
+                                        >> kScenarioWinnerNextShift);
+                            }
+
+                            if ((!(globals()->gOptions & kOptionReplay))
+                                    && (whichScenario <= GetScenarioNumber())
+                                    && (whichScenario >= 0)) {
+                                int chapter = GetChapterNumberFromScenarioNumber(whichScenario);
+                                if ((chapter >= 0) && (chapter <= kHackLevelMax)
+                                        && (chapter <= GetScenarioNumber())) {
+                                    SaveStartingLevelPreferences(chapter);
+                                } else {
+                                    whichScenario = -1;
+                                }
+                            }
+                        }
+                        break;
+
+                      default:
+                        break;
+                    }
+                    if (globals()->gOptions & kOptionMusicPlay) {
+                        StopAndUnloadSong();
+                    }
+                } while ((gameResult != QUIT_GAME)
+                        && (GetChapterNumberFromScenarioNumber(whichScenario) <= kHackLevelMax)
+                        && (GetChapterNumberFromScenarioNumber(whichScenario) <= GetScenarioNumber())
+                        && (whichScenario >= 0)
+                        && (!(globals()->gOptions & kOptionReplay)));
+
+                if ( globals()->gOptions & kOptionMusicIdle) {
+                    LoadSong(kTitleSongID);
+                    SetSongVolume(kMaxMusicVolume);
+                    PlaySong();
+                }
+                globals()->gOptions &= ~kOptionReplay;
+            }
+            break;
+
+          case kMainNetwork:
+            {
 #if NETSPROCKET_AVAILABLE
                 if ( globals()->gOptions & kOptionNetworkOn)
                     StopNetworking();
@@ -702,10 +542,10 @@ void MainLoop (void)
                             WriteDebugLong( whichScenario);
                             StopAndUnloadSong();
 
-    /*                      if ( GetScenarioPrologueID( whichScenario) > 0)
-                                DoScrollText( (WindowPtr)gTheWindow, GetScenarioPrologueID( whichScenario), \
-                                    4, kTitleFontNum);
-    */
+                            /*                      if ( GetScenarioPrologueID( whichScenario) > 0)
+                                                    DoScrollText( (WindowPtr)gTheWindow, GetScenarioPrologueID( whichScenario), \
+                                                    4, kTitleFontNum);
+                                                    */
                             gameResult = kNoGame;
                             fadeColor.red = fadeColor.green = fadeColor.blue = 0;
                             if ( globals()->gOptions & kOptionMusicIdle)
@@ -734,7 +574,7 @@ void MainLoop (void)
                             WriteDebugLong( whichScenario);
                             if (ConstructScenario( whichScenario))
                             {
-    //                          EMERGENCYHACKTEST = true;
+                                //                          EMERGENCYHACKTEST = true;
 
                                 if ( globals()->gOptions & kOptionMusicIdle)
                                 {
@@ -778,19 +618,19 @@ void MainLoop (void)
                                 SetNetKills( GetNetKills() + GetAdmiralKill( globals()->gPlayerAdmiralNumber));
                                 SetNetLosses( GetNetLosses() + GetAdmiralLoss( globals()->gPlayerAdmiralNumber));
                                 if ( (globals()->gScenarioWinner &
-                                    kScenarioWinnerTextMask) != kScenarioWinnerNoText)
+                                            kScenarioWinnerTextMask) != kScenarioWinnerNoText)
                                 {
-//                                  DoMissionDebriefingText( (WindowPtr) gTheWindow,
-//                                      (globals()->gScenarioWinner & kScenarioWinnerTextMask) >> kScenarioWinnerTextShift,
-//                                      -1, -1, -1, -1, -1, -1, -1);
+                                    //                                  DoMissionDebriefingText( (WindowPtr) gTheWindow,
+                                    //                                      (globals()->gScenarioWinner & kScenarioWinnerTextMask) >> kScenarioWinnerTextShift,
+                                    //                                      -1, -1, -1, -1, -1, -1, -1);
                                     DoMissionDebriefingText(  gTheWindow,
-                                        (globals()->gScenarioWinner & kScenarioWinnerTextMask)
-                                        >> kScenarioWinnerTextShift,
-                                        gameLength, gThisScenario->parTime,
-                                        GetAdmiralLoss( globals()->gPlayerAdmiralNumber),
-                                        gThisScenario->parLosses,
-                                        GetAdmiralKill( globals()->gPlayerAdmiralNumber),
-                                        gThisScenario->parKills, 100);
+                                            (globals()->gScenarioWinner & kScenarioWinnerTextMask)
+                                            >> kScenarioWinnerTextShift,
+                                            gameLength, gThisScenario->parTime,
+                                            GetAdmiralLoss( globals()->gPlayerAdmiralNumber),
+                                            gThisScenario->parLosses,
+                                            GetAdmiralKill( globals()->gPlayerAdmiralNumber),
+                                            gThisScenario->parKills, 100);
 
                                 }
                                 if ( globals()->gOptions & kOptionMusicPlay)
@@ -813,168 +653,23 @@ void MainLoop (void)
                 if ( OptionKey()) DebugFileSave( "\p_Poopy");
                 DebugFileCleanup();
 #endif NETSPROCKET_AVAILABLE
-                break;
-            case kMainTrain:    // now replay intro
-                    DoScrollText( gTheWindow, 5600, 4, kTitleTextScrollWidth,
-                        kTitleFontNum, -1);
-            /*
-                whichScenario = GetScenarioNumberFromChapterNumber( 1);
-                StopAndUnloadSong();
-                if ( GetScenarioPrologueID( whichScenario) > 0)
-                    DoScrollText( (WindowPtr)gTheWindow,
-                        GetScenarioPrologueID( whichScenario),
-                        4, kTitleTextScrollWidth, kTitleFontNum, 4002);
+            }
+            break;
 
-                gameResult = kNoGame;
-                fadeColor.red = fadeColor.green = fadeColor.blue = 0;
-                if ( globals()->gOptions & kOptionMusicIdle)
-                {
-                    AutoMusicFadeTo( 60, &fadeColor, FALSE);
-                    StopAndUnloadSong();
-                } else
-                {
-                    AutoFadeTo( 60, &fadeColor, FALSE);
-                }
+          case kMainTrain:
+            DoScrollText( gTheWindow, 5600, 4, kTitleTextScrollWidth,
+                    kTitleFontNum, -1);
 
-                do
-                {
-                    RemoveAllSpaceObjects();
-                    globals()->gGameOver = 0;
-
-                    // mission briefing unfades screen
-
-                    if ( globals()->gOptions & kOptionMusicIdle)
-                    {
-                        LoadSong( 3000);
-                        SetSongVolume( kMaxMusicVolume);
-                        PlaySong();
-                    }
-
-                    ConstructScenario( whichScenario);
-
-                    SetMBarState( false, theDevice);
-                    if ( globals()->gOptions & kOptionMusicIdle)
-                    {
-                        StopAndUnloadSong();
-                    }
-
-                    HideCursor();
-                    DrawInstrumentPanel( (WindowPtr) gTheWindow);
-                    MacShowCursor();
-
-                    if ( globals()->gOptions & kOptionMusicPlay)
-                    {
-                        LoadSong( gThisScenario->songID);
-                        SetSongVolume( kMusicVolume);
-                        PlaySong();
-                    }
-                    ResetLastTime( (gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
-                    gameResult = PlayTheGame( &gameLength);
-
-                    if (( !( globals()->gOptions & (kOptionAutoPlay | kOptionRecord | kOptionReplay))) && ( gameResult == kLoseGame))
-                    {
-                        if ( (globals()->gScenarioWinner & kScenarioWinnerTextMask) != kScenarioWinnerNoText)
-                        {
-                            DoMissionDebriefingText( (WindowPtr) gTheWindow,
-                                (globals()->gScenarioWinner & kScenarioWinnerTextMask) >> kScenarioWinnerTextShift,
-                                    -1, -1, -1, -1, -1, -1, -1);
-                        }
-                        if ( DoPlayAgain( false, false))
-                        {
-                            gameResult = kRestartGame;
-                            WriteDebugLine("\pAGAIN!");
-                        }  else
-                        {
-                            gameResult = kQuitGame;
-                            WriteDebugLine("\pNOT AGAIN!");
-                            BlackTitleScreen();
-                            AutoFadeFrom( 1, false);
-                        }
-                    } else if ( gameResult == kWinGame)
-                    {
-                        fadeColor.red = fadeColor.green = fadeColor.blue = 0;
-                        if ( globals()->gOptions & kOptionMusicPlay)
-                        {
-                            AutoMusicFadeTo( 60, &fadeColor, FALSE);
-                            StopAndUnloadSong();
-                        } else
-                        {
-                            AutoFadeTo( 60, &fadeColor, FALSE);
-                        }
-
-                        if ( gameResult == kWinGame)
-                        {
-
-                            BlackTitleScreen();
-                            AutoFadeFrom( 1, FALSE);
-
-                            if ( GetScenarioEpilogueID( whichScenario) > 0)
-                                DoScrollText( (WindowPtr)gTheWindow,
-                                    GetScenarioEpilogueID( whichScenario),
-                                    4, kTitleTextScrollWidth, kTitleFontNum, 4002);
-
-                        if ( globals()->gOptions & kOptionMusicIdle)
-                            {
-                                BlackTitleScreen();
-                                StopAndUnloadSong();
-                            }
-
-                            if ( globals()->gOptions & kOptionReplay)
-                            {
-                                gRandomSeed = saveSeed;
-                            }
-                        }
-                    }
-                    if ( globals()->gOptions & kOptionMusicPlay) StopAndUnloadSong();
-                } while ( (gameResult != kQuitGame) && ( gameResult != kWinGame) &&
-                    ( GetChapterNumberFromScenarioNumber( whichScenario) <= kHackLevelMax)
-                    && ( GetChapterNumberFromScenarioNumber( whichScenario) <= GetScenarioNumber())
-                    && ( whichScenario >= 0) &&
-                    ( !( globals()->gOptions & (kOptionAutoPlay | kOptionRecord | kOptionReplay))));
-                if ( globals()->gOptions & kOptionMusicIdle)
-                {
-                    LoadSong( kTitleSongID);
-                    SetSongVolume( kMaxMusicVolume);
-                    PlaySong();
-                }
-*/              break;
-
-            case kMainAbout:
-//              if ( ShiftKey())
-//                  DoMissionDebriefing( (WindowPtr) gTheWindow, 371, 123, 456, 789, 101, 112, 131);
-                break;
-
-            case kMainOptions:
-            case kNullResult:
-                break;
+          case kMainAbout:
+          case kMainOptions:
+          case kNullResult:
+            // These options are already handled by DoMainScreenInterface().
+            break;
         }
     }
-
-
-/*  for ( hackCount = 0; hackCount < kTestNumber; hackCount++)
-    {
-        globals()->gGameTime = 0;
-        RemoveAllSpaceObjects();
-        DrawInstrumentPanel();
-        MacSetRect( &bounds, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-        CopyOffWorldToRealWorld( (WindowPtr) gTheWindow, &bounds);
-        globals()->gGameOver = -1;
-
-        MakeOneScenario();
-
-        ResetLastTime();
-        HideCursor();
-        PlayTheGame();
-        MacShowCursor();
-    }
-
-    done = TRUE;
-*/
 }
 
-short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 = quit
-
-{
+GameResult PlayTheGame(long *seconds) {
     unsigned long       decideCycle = 0;
     Str255              string;
     uint64_t            lastTime, thisTime, scrapTime = { 0 }, netTime;
@@ -988,7 +683,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                             afEntering = false, demoKey = false, newKeyMap = false, commandAndQ = false;
     unsigned long       keyDataSize = 0, scenarioCheckTime = 0;
     Rect                    playAreaRect;
-    short                   result = -1;
+    GameResult          result = NO_GAME;
     EventRecord         theEvent;
 //  long                hacktc = TickCount(), hacktcsamplesize = 4, hacktcsamplecount = 0;
 
@@ -1260,7 +955,7 @@ short PlayTheGame( long *seconds)   // result 0 = lose, 1 = win, 2 = restart, 3 
                     {
                         if ( globals()->gOptions & kOptionReplay)
                         {
-                            result = kQuitGame;
+                            result = QUIT_GAME;
                             globals()->gGameOver = 1;
                         } else
                         {
@@ -1299,7 +994,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                         {
                             if ( globals()->gGameTime > kTimeLimit)
                             {
-                                result = kQuitGame;
+                                result = QUIT_GAME;
                                 globals()->gGameOver = 1;
                                 DeclareWinner( -1, -1, 302);
                             } else if ( !GetHaveSeenUnregisteredTimeLimitWarning())
@@ -1334,7 +1029,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                     if ( globals()->gGameOver == 0)
                                     {
                                         globals()->gGameOver = 1;
-                                        result = kRestartGame;
+                                        result = RESTART_GAME;
                                     }
 
                                     mWriteDebugString("\pPROC ERR");
@@ -1373,7 +1068,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                         {
                                             case 0: // quit
 //                                              ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p the user chose to quit.", nil, nil, -1, -1, -1, -1, __FILE__, 33);
-                                                result = kQuitGame;
+                                                result = QUIT_GAME;
                                                 globals()->gGameOver = 1;
                                                 if ( CommandKey())
                                                     globals()->gScenarioWinner = globals()->gPlayerAdmiralNumber;
@@ -1382,7 +1077,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
 
                                             case 1: // restart
 //                                              ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p the user chose to restart.", nil, nil, -1, -1, -1, -1, __FILE__, 34);
-                                                result = kRestartGame;
+                                                result = RESTART_GAME;
                                                 globals()->gGameOver = 1;
                                                 if ( CommandKey())
                                                     globals()->gScenarioWinner = globals()->gPlayerAdmiralNumber;
@@ -1393,7 +1088,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                                 break;
 
                                             case 3: // skip
-                                                result = kWinGame;
+                                                result = WIN_GAME;
                                                 globals()->gGameOver = 1;
                                                 globals()->gScenarioWinner =  globals()->gPlayerAdmiralNumber |
                                                     (( GetChapterNumberFromScenarioNumber(
@@ -1420,7 +1115,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                     } else
                                     {
 //                                      ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p this isn't a real game and the user hit ESC or COMMAND-Q.", nil, nil, -1, -1, -1, -1, __FILE__, 35);
-                                        result = kQuitGame;
+                                        result = QUIT_GAME;
                                         globals()->gGameOver = 1;
                                         if ( CommandKey())
                                             globals()->gScenarioWinner = globals()->gPlayerAdmiralNumber;
@@ -1484,7 +1179,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                         DeclareWinner( globals()->gPlayerAdmiralNumber, -1, 6004);
                                         globals()->gGameOver = 1;
                                     }
-                                    result = kQuitGame;
+                                    result = QUIT_GAME;
                                 }
 
                                 if ( !NetGameIsOn())
@@ -1495,7 +1190,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                         DeclareWinner( globals()->gPlayerAdmiralNumber, -1, 6004);
                                         globals()->gGameOver = 1;
                                     }
-                                    result = kQuitGame;
+                                    result = QUIT_GAME;
                                 } else
                                 {
                                     if ((( TickCount() - l3) > 60) && ( pauseLevel <= 0))
@@ -1546,7 +1241,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                                     }
                                 }
                             } while (((pauseLevel > 0) || ( !GotAllMessages())) &&
-                                ( result == -1));
+                                ( result == NO_GAME));
                         } else
                         {
 //                          ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p SendInGameMessage failed.", nil, nil, -1, -1, -1, -1, __FILE__, 5);
@@ -1709,7 +1404,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                     {
                         case 0: // quit
 //                          ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p the user chose to quit.", nil, nil, -1, -1, -1, -1, __FILE__, 35);
-                            result = kQuitGame;
+                            result = QUIT_GAME;
                             globals()->gGameOver = 1;
                             if ( CommandKey())
                                 globals()->gScenarioWinner = globals()->gPlayerAdmiralNumber;
@@ -1718,7 +1413,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
 
                         case 1: // restart
 //                          ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p the user chose to restart.", nil, nil, -1, -1, -1, -1, __FILE__, 36);
-                            result = kRestartGame;
+                            result = RESTART_GAME;
                             globals()->gGameOver = 1;
                             if ( CommandKey())
                                 globals()->gScenarioWinner = globals()->gPlayerAdmiralNumber;
@@ -1729,7 +1424,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                             break;
 
                         case 3: // skip
-                            result = kWinGame;
+                            result = WIN_GAME;
                             globals()->gGameOver = 1;
                             globals()->gScenarioWinner =  globals()->gPlayerAdmiralNumber |
                                 (( GetChapterNumberFromScenarioNumber(globals()->gThisScenarioNumber)+1)
@@ -1756,7 +1451,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                 } else
                 {
 //                  ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p this isn't a real game and the user hit ESC or COMMAND-Q.", nil, nil, -1, -1, -1, -1, __FILE__, 37);
-                    result = kQuitGame;
+                    result = QUIT_GAME;
                     globals()->gGameOver = 1;
                     if ( CommandKey())
                         globals()->gScenarioWinner = globals()->gPlayerAdmiralNumber;
@@ -1887,7 +1582,7 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                 (keyMap[3].bigEndianValue != 0)))
 #endif TARGET_OS_MAC
             {
-                result = kQuitGame;
+                result = QUIT_GAME;
                 globals()->gGameOver = 1;
             }
             demoKey = false;
@@ -1989,11 +1684,15 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
     *seconds = newGameTime + additionalSeconds;
 //  HHCheckAllHandles();
     RestoreOriginalColors();
-    if ( result < 0)
-    {
-        if ( (globals()->gScenarioWinner & kScenarioWinnerPlayerMask) == globals()->gPlayerAdmiralNumber) return ( 1);
-        else return ( 0);
-    } else return ( result);
+    if (result == NO_GAME) {
+        if ((globals()->gScenarioWinner & kScenarioWinnerPlayerMask) == globals()->gPlayerAdmiralNumber) {
+            return WIN_GAME;
+        } else {
+            return LOSE_GAME;
+        }
+    } else {
+        return result;
+    }
 }
 
 Boolean HandleMouseDown( EventRecord *theEvent)

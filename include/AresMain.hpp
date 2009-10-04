@@ -27,16 +27,12 @@
 #define kHackLevelMax   26//4//21
 
 void AresMain();
-void ToolBoxInit( void);
-void MenuBarInit( void);
-void MainLoop (void);
 Boolean HandleMouseDown( EventRecord *);
 Boolean HandleMenuChoice ( long);
 void HandleAppleChoice ( int);
 Boolean HandleFileChoice ( int);
 void HandleEditChoice ( int);
 Boolean HandleKeyDown( EventRecord *);
-short PlayTheGame( long *);
 void Pause();
 
 #endif // ANTARES_ARES_MAIN_HPP_

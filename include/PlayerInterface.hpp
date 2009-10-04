@@ -81,8 +81,7 @@ long UpdateMissionBriefPoint( interfaceItemType *, long, long, coordPointType *,
 void ShowObjectData( Point, short, Rect *);
 TypedHandle<unsigned char> CreateWeaponDataText(long, unsigned char*);
 void ShowSuccessAnimation( WindowPtr);
-void DoMissionDebriefing( WindowPtr, Rect *, long, long, long, long, long, long, long);
-void DoMissionDebriefingText( WindowPtr, long, long, long, long, long, long, long, long);
+void DoMissionDebriefingText(long, long, long, long, long, long, long, long);
 void DoScrollText( WindowPtr, long, long, long, long, long);
 void HandleOSEvent( EventRecord *);
 Boolean Ares_WaitNextEvent( short eventMask, EventRecord *theEvent,

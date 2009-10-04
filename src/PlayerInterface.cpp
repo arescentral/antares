@@ -4501,8 +4501,8 @@ void ShowSuccessAnimation(WindowPtr) {
     }
 }
 
-void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, long parlength, long yourloss, long parloss,
-    long yourkill, long parkill, long parScore)
+void DoMissionDebriefing(Rect *destRect, long yourlength, long parlength, long yourloss, long parloss,
+    long yourkill, long parkill)
 {
     Rect            clipRect, boundsRect, tlRect;
     Rect                tRect;
@@ -4510,10 +4510,6 @@ void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, lo
     retroTextSpecType   retroTextSpec;
     transColorType      *transColor;
     Str255              tempString, numString;
-
-#pragma unused( thePort, parScore)
-//  MacSetPort( thePort);
-//  BlackenWindow();
 
     // ** CALCULATE THE SCORE
     //  for time you get a max of 100 points
@@ -4694,7 +4690,7 @@ void DoMissionDebriefing( WindowPtr thePort, Rect *destRect, long yourlength, lo
 */
 }
 
-void DoMissionDebriefingText( WindowPtr thePort, long textID, long yourlength, long parlength,
+void DoMissionDebriefingText(long textID, long yourlength, long parlength,
             long yourloss, long parloss, long yourkill, long parkill, long parScore)
 {
     Rect                tRect, iRect, scoreRect;
@@ -4752,8 +4748,8 @@ void DoMissionDebriefingText( WindowPtr thePort, long textID, long yourlength, l
             scoreRect.bottom = dataItem.bounds.bottom;
             scoreRect.top = scoreRect.bottom - kScoreTableHeight;
 
-            DoMissionDebriefing( thePort, &scoreRect, yourlength, parlength, yourloss, parloss,
-                        yourkill, parkill, parScore);
+            DoMissionDebriefing(&scoreRect, yourlength, parlength, yourloss, parloss,
+                        yourkill, parkill);
         }
     }
     while (( AnyRealKeyDown()) || ( Button())) {
