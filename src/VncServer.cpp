@@ -28,10 +28,9 @@
 #include "MappedFile.hpp"
 #include "PosixException.hpp"
 #include "Threading.hpp"
+#include "VncServer.hpp"
 
 extern scoped_ptr<Window> fakeWindow;
-
-class VncServerException : public std::exception { };
 
 namespace {
 
@@ -84,7 +83,11 @@ class SocketBinaryWriter : public BinaryWriter {
     std::string _buffer;
 };
 
-}  // namespace
+int64_t usecs() {
+    timeval tv;
+    gettimeofday(&tv, NULL);
+    return tv.tv_sec * 1000000ll + tv.tv_usec;
+}
 
 int listen_on(int port) {
     int one = 1;
@@ -496,10 +499,10 @@ struct FramebufferPixel {
     uint8_t blue;
 
     void read(BinaryReader* bin) {
-        bin->discard(1);
         bin->read(&red);
         bin->read(&green);
         bin->read(&blue);
+        bin->discard(1);
     }
 
     void write(BinaryWriter* bin) const {
@@ -510,76 +513,33 @@ struct FramebufferPixel {
     }
 };
 
-void vnc_serve(int fd) {
+}  // namespace
+
+bool VncVideoDriver::vnc_poll(EventRecord*, int64_t timeout) {
     int width = fakeWindow->portRect.right;
     int height = fakeWindow->portRect.bottom;
-    scoped_array<FramebufferPixel> pixels(new FramebufferPixel[width * height]);
-    try {
-        AutoClosedFd stream(fd);
-        SocketBinaryReader in(stream.fd());
-        SocketBinaryWriter out(stream.fd());
+    SocketBinaryReader in(_socket.fd());
+    SocketBinaryWriter out(_socket.fd());
+    int64_t stop_time = usecs() + timeout;
+    bool more = false;
+    bool did_framebuffer_update = false;
 
-        {
-            // Negotiate version of RFB protocol.  Only 3.8 is offered or accepted.
-            ProtocolVersion version;
-            strncpy(version.version, "RFB 003.008\n", sizeof(ProtocolVersion));
-            out.write(version);
-            out.flush();
-            in.read(&version);
-            if (strncmp(version.version, "RFB 003.008\n", sizeof(ProtocolVersion)) != 0) {
-                throw VncServerException();
-            }
-        }
+    do {
+        more = false;
+        timeout = std::max(0ll, stop_time - usecs());
+        timeval tv;
+        tv.tv_sec = timeout / 1000000ll;
+        tv.tv_usec = timeout % 1000000ll;
 
-        {
-            // Negotiate security.  No security is provided.
-            SecurityMessage security;
-            security.number_of_security_types = 1;
-            uint8_t security_types[1] = { '\1' };  // None.
-            out.write(security);
-            out.write(security_types, security.number_of_security_types);
-            out.flush();
+        fd_set read;
+        fd_set write;
+        fd_set error;
+        FD_ZERO(&read);
+        FD_ZERO(&write);
+        FD_ZERO(&error);
+        FD_SET(_socket.fd(), &read);
 
-            uint8_t selected_security;
-            in.read(&selected_security);
-            if (selected_security != '\1') {
-                throw VncServerException();
-            }
-
-            SecurityResultMessage result;
-            result.status = 0;  // OK.
-            out.write(result);
-            out.flush();
-        }
-
-        {
-            // Initialize connection.
-            ClientInitMessage client_init;
-            in.read(&client_init);
-
-            const char* const name = "Antares";
-
-            ServerInitMessage server_init;
-            server_init.width = width;
-            server_init.height = height;
-            server_init.format.bits_per_pixel = 32;
-            server_init.format.depth = 24;
-            server_init.format.big_endian = 1;
-            server_init.format.true_color = 1;
-            server_init.format.red_max = 255;
-            server_init.format.green_max = 255;
-            server_init.format.blue_max = 255;
-            server_init.format.red_shift = 16;
-            server_init.format.green_shift = 8;
-            server_init.format.blue_shift = 0;
-            server_init.name_length = strlen(name);
-
-            out.write(server_init);
-            out.write(name, strlen(name));
-            out.flush();
-        }
-
-        while (true) {
+        if (select(_socket.fd() + 1, &read, &write, &error, &tv) > 0) {
             uint8_t client_message_type;
             in.read(&client_message_type);
             switch (client_message_type) {
@@ -587,8 +547,10 @@ void vnc_serve(int fd) {
                 {
                     SetPixelFormatMessage msg;
                     in.read(&msg);
+                    more = true;
                 }
                 break;
+
             case SET_ENCODINGS:
                 {
                     SetEncodingsMessage msg;
@@ -597,50 +559,58 @@ void vnc_serve(int fd) {
                         int32_t encoding_type;
                         in.read(&encoding_type);
                     }
+                    more = true;
                 }
                 break;
+
             case FRAMEBUFFER_UPDATE_REQUEST:
                 {
                     FramebufferUpdateRequestMessage request;
                     in.read(&request);
 
-                    FramebufferUpdateMessage response;
-                    uint8_t server_message_type = FRAMEBUFFER_UPDATE;
-                    out.write(server_message_type);
-                    response.number_of_rectangles = 1;
+                        FramebufferUpdateMessage response;
+                        uint8_t server_message_type = FRAMEBUFFER_UPDATE;
+                        response.number_of_rectangles = 1;
 
-                    FramebufferUpdateRectangle rect;
-                    rect.x_position = 0;
-                    rect.y_position = 0;
-                    rect.width = width;
-                    rect.height = height;
-                    rect.encoding_type = RAW;
+                        FramebufferUpdateRectangle rect;
+                        rect.x_position = 0;
+                        rect.y_position = 0;
+                        rect.width = width;
+                        rect.height = height;
+                        rect.encoding_type = RAW;
 
-                    const ColorTable& table = *fakeWindow->portBits.colors;
-                    for (int i = 0; i < width * height; ++i) {
-                        uint8_t color = fakeWindow->portBits.baseAddr[i];
-                        pixels.get()[i].red = table.color(color).red >> 8;
-                        pixels.get()[i].green = table.color(color).green >> 8;
-                        pixels.get()[i].blue = table.color(color).blue >> 8;
-                    }
+                        const ColorTable& table = *fakeWindow->portBits.colors;
+                        scoped_array<FramebufferPixel> pixels(new FramebufferPixel[width * height]);
+                        for (int i = 0; i < width * height; ++i) {
+                            uint8_t color = fakeWindow->portBits.baseAddr[i];
+                            pixels.get()[i].red = table.color(color).red >> 8;
+                            pixels.get()[i].green = table.color(color).green >> 8;
+                            pixels.get()[i].blue = table.color(color).blue >> 8;
+                        }
 
-                    out.write(response);
-                    out.write(rect);
-                    out.write(pixels.get(), width * height);
+                        out.write(server_message_type);
+                        out.write(response);
+                        out.write(rect);
+                        out.write(pixels.get(), width * height);
                 }
                 break;
+
             case KEY_EVENT:
                 {
                     KeyEventMessage msg;
                     in.read(&msg);
+                    more = true;
                 }
                 break;
+
             case POINTER_EVENT:
                 {
                     PointerEventMessage msg;
                     in.read(&msg);
+                    more = true;
                 }
                 break;
+
             case CLIENT_CUT_TEXT:
                 {
                     ClientCutTextMessage msg;
@@ -651,37 +621,118 @@ void vnc_serve(int fd) {
                     }
                 }
                 break;
+
             default:
                 {
-                    printf("Received %d\n", implicit_cast<int>(client_message_type));
+                    fprintf(stderr, "Received %d\n", implicit_cast<int>(client_message_type));
                     exit(1);
                 }
             }
-            out.flush();
         }
-    } catch (std::exception& e) {
-        printf("vnc_serve: %s\n", e.what());
-    }
+        out.flush();
+    } while (more || usecs() < stop_time);
+
+    return false;
 }
 
-void vnc_listen() {
-    try {
-        signal(SIGPIPE, SIG_IGN);
-        AutoClosedFd sock(listen_on(5901));
-        while (true) {
-            int fd = accept_on(sock.fd());
-            Thread thread;
-            thread.start(vnc_serve, fd);
-            thread.detach();
+VncVideoDriver::VncVideoDriver(int port)
+        : _start_time(usecs()),
+          _listen(listen_on(port)),
+          _socket(accept_on(_listen.fd())) {
+    SocketBinaryReader in(_socket.fd());
+    SocketBinaryWriter out(_socket.fd());
+    int width = fakeWindow->portRect.right;
+    int height = fakeWindow->portRect.bottom;
+
+    {
+        // Negotiate version of RFB protocol.  Only 3.8 is offered or accepted.
+        ProtocolVersion version;
+        strncpy(version.version, "RFB 003.008\n", sizeof(ProtocolVersion));
+        out.write(version);
+        out.flush();
+        in.read(&version);
+        if (strncmp(version.version, "RFB 003.008\n", sizeof(ProtocolVersion)) != 0) {
+            fprintf(stderr, "Unacceptable client version %11s\n", version.version);
+            exit(1);
         }
-    } catch (std::exception& e) {
-        printf("vnc_listen: %s\n", e.what());
-        exit(1);
     }
+
+    {
+        // Negotiate security.  No security is provided.
+        SecurityMessage security;
+        security.number_of_security_types = 1;
+        uint8_t security_types[1] = { '\1' };  // None.
+        out.write(security);
+        out.write(security_types, security.number_of_security_types);
+        out.flush();
+
+        uint8_t selected_security;
+        in.read(&selected_security);
+        if (selected_security != '\1') {
+            fprintf(stderr, "Unacceptable security %d\n", implicit_cast<int>(selected_security));
+            exit(1);
+        }
+
+        SecurityResultMessage result;
+        result.status = 0;  // OK.
+        out.write(result);
+        out.flush();
+    }
+
+    {
+        // Initialize connection.
+        ClientInitMessage client_init;
+        in.read(&client_init);
+
+        const char* const name = "Antares";
+
+        ServerInitMessage server_init;
+        server_init.width = width;
+        server_init.height = height;
+        server_init.format.bits_per_pixel = 32;
+        server_init.format.depth = 24;
+        server_init.format.big_endian = 1;
+        server_init.format.true_color = 1;
+        server_init.format.red_max = 255;
+        server_init.format.green_max = 255;
+        server_init.format.blue_max = 255;
+        server_init.format.red_shift = 8;
+        server_init.format.green_shift = 16;
+        server_init.format.blue_shift = 24;
+        server_init.name_length = strlen(name);
+
+        out.write(server_init);
+        out.write(name, strlen(name));
+        out.flush();
+    }
+    vnc_poll(NULL, 0);
 }
 
-void VncServerInit() {
-    Thread thread;
-    thread.start(vnc_listen);
-    thread.detach();
+void VncVideoDriver::send_event(EventRecord) { }
+
+bool VncVideoDriver::wait_next_event(EventRecord* evt, int sleep) {
+    return vnc_poll(evt, sleep * 1000000ll);
+}
+
+bool VncVideoDriver::button() {
+    vnc_poll(NULL, 0);
+    return false;
+}
+
+void VncVideoDriver::get_keys(KeyMap keys) {
+    vnc_poll(NULL, 0);
+    bzero(keys, sizeof(KeyMap));
+}
+
+void VncVideoDriver::set_game_state(GameState) { }
+
+int VncVideoDriver::get_demo_scenario() {
+    int levels[] = { 0, 5, 23 };
+    return levels[rand() % 3];
+}
+
+void VncVideoDriver::main_loop_iteration_complete(uint32_t) { }
+
+int VncVideoDriver::ticks() {
+    return (usecs() - _start_time) * 60 / 1000000;
 }

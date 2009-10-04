@@ -18,6 +18,27 @@
 #ifndef ANTARES_VNC_SERVER_HPP_
 #define ANTARES_VNC_SERVER_HPP_
 
-void VncServerInit();
+#include "VideoDriver.hpp"
+
+class VncVideoDriver : public VideoDriver {
+  public:
+    VncVideoDriver(int port);
+    virtual void send_event(EventRecord evt);
+    virtual bool wait_next_event(EventRecord* evt, int sleep);
+    virtual bool button();
+    virtual void get_keys(KeyMap k);
+
+    virtual void set_game_state(GameState state);
+    virtual int get_demo_scenario();
+    virtual void main_loop_iteration_complete(uint32_t game_time);
+    virtual int ticks();
+
+  private:
+    bool vnc_poll(EventRecord*, int64_t timeout);
+
+    const int64_t _start_time;
+    AutoClosedFd _listen;
+    AutoClosedFd _socket;
+};
 
 #endif  // ANTARES_VNC_SERVER_HPP_
