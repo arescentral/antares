@@ -333,7 +333,6 @@
 #define kScrollTextDelimiter1       '#'
 #define kScrollTextDelimiter2       '+'
 #define kReturnChar                 0x0d
-#define kScrollTextMovieChar        'M'
 #define kScrollTextBackgroundChar   'B'
 
 #define mPlayScreenSound            PlayVolumeSound( kComputerBeep3, kMediumLowVolume, kShortPersistence, kMustPlaySound)
@@ -547,7 +546,7 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
 
                     CloseInterface();
 //                  DoAboutAresInterface();
-                    DoScrollText( gTheWindow, 6500, 2/*kScrollTextSpeed*/,
+                    DoScrollText(6500, 2/*kScrollTextSpeed*/,
                         540, kTitleFontNum/*kComputerFontNum*/, -1);
                     OpenInterface( kMainScreenResID);
                     if ( !(globals()->gOptions & kOptionNetworkAvailable))// NetSprocketPresent())
@@ -4766,7 +4765,7 @@ void DoMissionDebriefingText(long textID, long yourlength, long parlength,
 #define kBackground_Height  480
 #define kScrollText_Buffer  10
 
-void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scrollWidth,
+void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
     long textFontNum, long songID)
 {
     Rect            clipRect, boundsRect, scrollRect, textRect;
@@ -4774,7 +4773,6 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                         charNum, pictID = 0, bgVOffset = 0, bgPictID = -1;
     retroTextSpecType   retroTextSpec;
     transColorType      *transColor;
-    Str255              movieName;
     Rect                tRect, uRect, vRect, pictRect, pictSourceRect, movieRect;
     TypedHandle<unsigned char> textHandle;
     unsigned char       *thisChar = nil, *sectionStart = nil, *nextChar;
@@ -4795,7 +4793,6 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
         PlaySong();
     }
 
-    MacSetPort( thePort);
     HideCursor();
 
     BlackenWindow();
@@ -4830,14 +4827,9 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
         clipRgn = tRect;
 
         DrawInRealWorld();
-        MacSetPort( thePort);
 
-/*      if ( LoadMiniMovie("\p:Ares Data Folder:Title", &theMovie, &movieRect, thePort, false) != noErr)
-            Debugger();
-
-        StartMiniMovie( theMovie);
-*/
         DrawNateRect( gOffWorld, &scrollRect, 0, 0, 0xff);
+
         // Here's the behavior:
         //  a section is started with a '#' followed by a '+'
         //  it must be the first character, or the first character after a return
@@ -4907,28 +4899,6 @@ void DoScrollText( WindowPtr thePort, long textID, long scrollSpeed, long scroll
                                         }
                                     }
                                 }
-                            } else if ( *sectionStart == kScrollTextMovieChar)
-                            {
-                                if ( theMovie != nil) CleanUpMiniMovie( &theMovie);
-                                movieName[0] = 0;
-
-                                sectionStart++;
-                                charNum++;
-                                l = 1;
-                                while (( *sectionStart != kReturnChar) && ( charNum < textLength))
-                                {
-                                    movieName[0]++;
-                                    movieName[l] = *sectionStart;
-                                    sectionStart++;
-                                    charNum++;
-                                    l++;
-                                }
-                                if ( LoadMiniMovie( movieName, &theMovie, &movieRect, thePort, false) != noErr)
-                                {
-                                    //Debugger();
-                                }
-
-                                StartMiniMovie( theMovie);
                             }
                         }
                         sectionStart++;

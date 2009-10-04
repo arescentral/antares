@@ -82,7 +82,7 @@ void ShowObjectData( Point, short, Rect *);
 TypedHandle<unsigned char> CreateWeaponDataText(long, unsigned char*);
 void ShowSuccessAnimation( WindowPtr);
 void DoMissionDebriefingText(long, long, long, long, long, long, long, long);
-void DoScrollText( WindowPtr, long, long, long, long, long);
+void DoScrollText(long, long, long, long, long);
 void HandleOSEvent( EventRecord *);
 Boolean Ares_WaitNextEvent( short eventMask, EventRecord *theEvent,
     unsigned long sleep, RgnHandle mouseRgn);

@@ -283,8 +283,7 @@ void MainLoop() {
     short                   resID = 0;
 
     if (!(globals()->gOptions & kOptionHaveSeenIntro)) {
-        DoScrollText( gTheWindow, 5600, 4, kTitleTextScrollWidth,
-            kTitleFontNum, -1);
+        DoScrollText(5600, 4, kTitleTextScrollWidth, kTitleFontNum, -1);
 
         globals()->gOptions |= kOptionHaveSeenIntro;
         SaveOptionsPreferences();
@@ -307,7 +306,7 @@ void MainLoop() {
 
           case kMainTimeoutDemo:
             if (Randomize(4) == 2) {
-                DoScrollText( gTheWindow, 5600, 4, kTitleTextScrollWidth,
+                DoScrollText(5600, 4, kTitleTextScrollWidth,
                         kTitleFontNum, -1);
             }
             // fall through
@@ -348,7 +347,7 @@ void MainLoop() {
                 do {
                     if ((gameResult == NO_GAME) || (gameResult == WIN_GAME)) {
                         if (GetScenarioPrologueID(whichScenario) > 0) {
-                            DoScrollText( gTheWindow,
+                            DoScrollText(
                                     GetScenarioPrologueID( whichScenario),
                                     4, kTitleTextScrollWidth, kTitleFontNum, 4002);
                         }
@@ -443,7 +442,7 @@ void MainLoop() {
                             }
 
                             if (GetScenarioEpilogueID( whichScenario) > 0) {
-                                DoScrollText(gTheWindow,
+                                DoScrollText(
                                         GetScenarioEpilogueID( whichScenario),
                                         4, kTitleTextScrollWidth, kTitleFontNum, scroll_song);
                             }
@@ -657,7 +656,7 @@ void MainLoop() {
             break;
 
           case kMainTrain:
-            DoScrollText( gTheWindow, 5600, 4, kTitleTextScrollWidth,
+            DoScrollText(5600, 4, kTitleTextScrollWidth,
                     kTitleFontNum, -1);
 
           case kMainAbout:
