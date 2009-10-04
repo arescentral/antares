@@ -59,6 +59,10 @@ bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouse
     return VideoDriver::driver()->wait_next_event(evt, sleep);
 }
 
+void GetMouse(Point* point) {
+    *point = VideoDriver::driver()->get_mouse();
+}
+
 bool Button() {
     return VideoDriver::driver()->button();
 }

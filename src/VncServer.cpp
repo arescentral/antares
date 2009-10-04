@@ -515,16 +515,17 @@ struct FramebufferPixel {
 
 }  // namespace
 
-bool VncVideoDriver::vnc_poll(EventRecord*, int64_t timeout) {
+bool VncVideoDriver::vnc_poll(int64_t timeout) {
     int width = fakeWindow->portRect.right;
     int height = fakeWindow->portRect.bottom;
     SocketBinaryReader in(_socket.fd());
     SocketBinaryWriter out(_socket.fd());
     int64_t stop_time = usecs() + timeout;
     bool more = false;
-    bool did_framebuffer_update = false;
 
     do {
+        scoped_ptr<EventRecord> evt(new EventRecord);
+
         more = false;
         timeout = std::max(0ll, stop_time - usecs());
         timeval tv;
@@ -607,6 +608,22 @@ bool VncVideoDriver::vnc_poll(EventRecord*, int64_t timeout) {
                 {
                     PointerEventMessage msg;
                     in.read(&msg);
+
+                    if (_button != implicit_cast<bool>(msg.button_mask & 0x1)) {
+                        if (_button) {
+                            evt->what = mouseUp;
+                        } else {
+                            evt->what = mouseDown;
+                        }
+                        evt->where.h = msg.x_position;
+                        evt->where.v = msg.y_position;
+                        printf("enqueueing %d\n", evt->what);
+                        _event_queue.push(evt.release());
+                    }
+
+                    _button = msg.button_mask & 0x1;
+                    _mouse.h = msg.x_position;
+                    _mouse.v = msg.y_position;
                     more = true;
                 }
                 break;
@@ -630,7 +647,7 @@ bool VncVideoDriver::vnc_poll(EventRecord*, int64_t timeout) {
             }
         }
         out.flush();
-    } while (more || usecs() < stop_time);
+    } while (_event_queue.empty() && (more || usecs() < stop_time));
 
     return false;
 }
@@ -638,7 +655,11 @@ bool VncVideoDriver::vnc_poll(EventRecord*, int64_t timeout) {
 VncVideoDriver::VncVideoDriver(int port)
         : _start_time(usecs()),
           _listen(listen_on(port)),
-          _socket(accept_on(_listen.fd())) {
+          _socket(accept_on(_listen.fd())),
+          _button(false) {
+    _mouse.h = 0;
+    _mouse.v = 0;
+
     SocketBinaryReader in(_socket.fd());
     SocketBinaryWriter out(_socket.fd());
     int width = fakeWindow->portRect.right;
@@ -705,22 +726,35 @@ VncVideoDriver::VncVideoDriver(int port)
         out.write(name, strlen(name));
         out.flush();
     }
-    vnc_poll(NULL, 0);
+    vnc_poll(0);
 }
 
 void VncVideoDriver::send_event(EventRecord) { }
 
 bool VncVideoDriver::wait_next_event(EventRecord* evt, int sleep) {
-    return vnc_poll(evt, sleep * 1000000ll);
+    vnc_poll(sleep * 1000000ll);
+    if (_event_queue.empty()) {
+        return false;
+    } else {
+        *evt = *_event_queue.front();
+        delete _event_queue.front();
+        _event_queue.pop();
+        return true;
+    }
 }
 
 bool VncVideoDriver::button() {
-    vnc_poll(NULL, 0);
-    return false;
+    vnc_poll(0);
+    return _button;
+}
+
+Point VncVideoDriver::get_mouse() {
+    vnc_poll(0);
+    return _mouse;
 }
 
 void VncVideoDriver::get_keys(KeyMap keys) {
-    vnc_poll(NULL, 0);
+    vnc_poll(0);
     bzero(keys, sizeof(KeyMap));
 }
 

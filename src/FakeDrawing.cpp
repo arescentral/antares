@@ -362,11 +362,6 @@ void GetPen(Point* pen) {
     *pen = currentPen;
 }
 
-void GetMouse(Point* point) {
-    point->h = gActiveWorld->bounds.right / 2;
-    point->v = gActiveWorld->bounds.bottom / 2;
-}
-
 uint16_t DoubleBits(uint8_t in) {
     uint16_t result = in;
     result <<= 8;

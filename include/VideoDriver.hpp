@@ -35,6 +35,7 @@ class VideoDriver {
     virtual void send_event(EventRecord evt) = 0;
     virtual bool wait_next_event(EventRecord* evt, int sleep) = 0;
     virtual bool button() = 0;
+    virtual Point get_mouse() = 0;
     virtual void get_keys(KeyMap k) = 0;
 
     virtual void set_game_state(GameState state) = 0;

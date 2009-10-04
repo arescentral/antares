@@ -18,6 +18,7 @@
 #ifndef ANTARES_VNC_SERVER_HPP_
 #define ANTARES_VNC_SERVER_HPP_
 
+#include <queue>
 #include "VideoDriver.hpp"
 
 class VncVideoDriver : public VideoDriver {
@@ -26,6 +27,7 @@ class VncVideoDriver : public VideoDriver {
     virtual void send_event(EventRecord evt);
     virtual bool wait_next_event(EventRecord* evt, int sleep);
     virtual bool button();
+    virtual Point get_mouse();
     virtual void get_keys(KeyMap k);
 
     virtual void set_game_state(GameState state);
@@ -34,11 +36,14 @@ class VncVideoDriver : public VideoDriver {
     virtual int ticks();
 
   private:
-    bool vnc_poll(EventRecord*, int64_t timeout);
+    bool vnc_poll(int64_t timeout);
 
     const int64_t _start_time;
     AutoClosedFd _listen;
     AutoClosedFd _socket;
+    bool _button;
+    Point _mouse;
+    std::queue<EventRecord*> _event_queue;
 };
 
 #endif  // ANTARES_VNC_SERVER_HPP_
