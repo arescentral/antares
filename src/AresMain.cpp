@@ -449,11 +449,6 @@ void MainLoop() {
                                 StopAndUnloadSong();
                             }
 
-                            if (globals()->gOptions & kOptionReplay) {
-                                gRandomSeed = saveSeed;
-                            }
-                            globals()->gInputSource.reset();
-
                             if (globals()->gScenarioWinner.next == -1) {
                                 whichScenario = -1;
                             } else {
@@ -478,6 +473,12 @@ void MainLoop() {
                       default:
                         break;
                     }
+
+                    if (globals()->gOptions & kOptionReplay) {
+                        gRandomSeed = saveSeed;
+                    }
+                    globals()->gInputSource.reset();
+
                     if (globals()->gOptions & kOptionMusicPlay) {
                         StopAndUnloadSong();
                     }
