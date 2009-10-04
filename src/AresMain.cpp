@@ -671,7 +671,7 @@ void MainLoop() {
 GameResult PlayTheGame(long *seconds) {
     unsigned long       decideCycle = 0;
     Str255              string;
-    uint64_t            lastTime, thisTime, scrapTime = { 0 }, netTime;
+    uint64_t            lastTime, thisTime, scrapTime = 0;
     Rect                clipRect;
     long                    unitsToDo = 0, unitsPassed = 0, unitsDone = 0,
                             l1, l2, newGameTime = 0, lastclicktime = 0,
@@ -680,98 +680,36 @@ GameResult PlayTheGame(long *seconds) {
     Boolean             playerPaused = FALSE, mouseDown = FALSE,
                             enteringMessage = false,
                             afEntering = false, demoKey = false, newKeyMap = false, commandAndQ = false;
-    unsigned long       keyDataSize = 0, scenarioCheckTime = 0;
+    unsigned long       scenarioCheckTime = 0;
     Rect                    playAreaRect;
     GameResult          result = NO_GAME;
     EventRecord         theEvent;
-//  long                hacktc = TickCount(), hacktcsamplesize = 4, hacktcsamplecount = 0;
 
     VideoDriver::driver()->set_game_state(PLAY_GAME);
 
-    DebugFileCleanup();
-    DebugFileInit();
-    DebugFileAppendString("\p<START DEBUG FILE>\r\r");
-
     commandAndQ = BothCommandAndQ();
 
-    if ( globals()->gOptions & kOptionNetworkOn)
-    {
-#if NETSPROCKET_AVAILABLE
-        ResetGotMessages( 0x7fffffff);
-        if ( !JumpstartLatencyQueue(globals()->gGameTime, kDecideEveryCycles))
-        {
-//          ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because ", "\pJumpstart failed.", nil, nil, -1, -1, -1, -1, __FILE__, 1);
-            mAbortNetworkGame
-            DeclareWinner( -1, -1, 300);
-        }
-#endif NETSPROCKET_AVAILABLE
-    }
-    SetSpriteCursorTable( 500);
-    ShowSpriteCursor( true);
+    SetSpriteCursorTable(500);
+    ShowSpriteCursor(true);
     ResetHintLine();
-    MacSetRect( &playAreaRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
+    MacSetRect(&playAreaRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
 
     globals()->gLastKeys = globals()->gTheseKeys = 0;
 
     HideCursor();
-    Microseconds( &lastTime);
+    Microseconds(&lastTime);
 
-    unitsPassed = 0;
+    CheckScenarioConditions(0);
 
-    WriteDebugLine("\pEntr Game");
-    WriteDebugLong( gRandomSeed);
-    DebugFileAppendString("\p---NEW GAME---");
+    const int64_t scenario_start_time = (gThisScenario->startTime & kScenario_StartTimeMask)
+        * kScenarioTimeMultiple;
 
-    DebugFileAppendString("\pTime\tFile\tLine\t#\r");
-
-    if ((globals()->gOptions & kOptionReplay)
-            && (globals()->gInputSource.get() != nil)) {
-        // pass
-    } else
-    {
-        if ( globals()->user_is_scum)
-        {
-            ShowErrorAny( eQuitErr, -1, "\pCan't continue because an error of type "
-                "-2021 occurred; contact Ambrosia Software for a valid "
-                "registration code.", "\p", nil, nil, -1, -1, -1, -1, __FILE__, 1);
-            ExitToShell();
-        }
-    }
-    netTime = 0;
-//  EMERGENCYHACKTEST = false;
-
-    CheckScenarioConditions( 0);
-
-/*  ExecuteCheat( 1, 0);
-    ExecuteCheat( 1, 1);
-
-    ExecuteCheat( 3, 0);
-    ExecuteCheat( 3, 1);
-
-    ExecuteCheat( 3, 0);
-    ExecuteCheat( 3, 1);
-
-    ExecuteCheat( 6, 0);
-    ExecuteCheat( 6, 1);
-
-    ExecuteCheat( 2, 0);
-    ExecuteCheat( 2, 1);
-*/
-#if kProfiling_On
-    if (ProfilerInit( collectSummary, bestTimeBase, 256, 8) != noErr)
-        DebugStr("\pprofiler init error");
-    ProfilerSetStatus( true);
-#endif
-
-    while (( globals()->gGameOver <= 0 ) && ( !globals()->returnToMain))
-    {
-
+    while ((globals()->gGameOver <= 0 ) && (!globals()->returnToMain)) {
         globals()->gFrameCount = 0;
         gLastTick = TickCount();
 
-        SetLongRect( &clipRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
-        while (globals()->gGameOver <= 0)
-        {
+        SetLongRect(&clipRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
+        while (globals()->gGameOver <= 0) {
             EraseSpriteCursorSprite();
             EraseSpriteTable();
             EraseAllLabels();
@@ -779,630 +717,176 @@ GameResult PlayTheGame(long *seconds) {
             PrepareToMoveScrollStars();
             EraseSite();
 
-            while ( unitsPassed == 0)
-            {
-//              MyWideAdd( (wide *)&globals()->gLastTime, (wide *)&netTime);
-                netTime = 0;
-                Microseconds( &thisTime);
+            while (unitsPassed == 0) {
+                Microseconds(&thisTime);
                 scrapTime = thisTime;
                 thisTime -= globals()->gLastTime;
-                newGameTime = (thisTime / kTimeUnit) + ((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
+                newGameTime = (thisTime / kTimeUnit) + scenario_start_time;
 
-//#ifndef powerc
-#ifdef powercxx
-                if ( globals()->gOptions & kOptionNetworkOn)
-                {
-#endif
-                    if ( (newGameTime - globals()->gGameTime) > k68KMaxFrameSkip)
-                    {
-                        newGameTime = globals()->gGameTime + k68KMaxFrameSkip;
-                        l1 = newGameTime - ((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
-                        l2 = kTimeUnit;
-                        MyWideMul(l1, l2, reinterpret_cast<int64_t*>(&thisTime));
-                        globals()->gLastTime = scrapTime;
-                        globals()->gLastTime -= thisTime;
-                    }
-#ifdef powercxx
-                }
-#endif
-
-//#endif
-//              if ( (!(globals()->gOptions & kOptionReplay)) &&
-//                  (mSlowMotionKey( keyMap)))
-/*              if ( (mSlowMotionKey( keyMap)))
-                {
-                    demoKey = true;
-                    if ( unitsPassed < 3) Pause( 3);
-                    newGameTime = globals()->gGameTime + 1;
-                    l1 = newGameTime - ((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
-                    l2 = kTimeUnit;
-                    MyWideMul( l1, l2, (wide *)&thisTime);
-                    globals()->gLastTime = scrapTime;
-                    WideSubtract( (wide *)&globals()->gLastTime, (wide *)&thisTime);
-                } else */if (((( globals()->gOptions & kOptionSubstituteFKeys) ?
-                    ( mNOFFastMotionKey( keyMap)):( mFastMotionKey( keyMap)))) &&
-                    (!enteringMessage))
-                {
+                if (((globals()->gOptions & kOptionSubstituteFKeys)
+                            ? mNOFFastMotionKey(keyMap)
+                            : mFastMotionKey(keyMap)) &&
+                        !enteringMessage) {
                     demoKey = true;
                     newGameTime = globals()->gGameTime + 12;
-                    l1 = newGameTime - ((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
+                    l1 = newGameTime - scenario_start_time;
                     l2 = kTimeUnit;
-                    MyWideMul(l1, l2, reinterpret_cast<int64_t*>(&thisTime));
-                    globals()->gLastTime = scrapTime;
-                    globals()->gLastTime -= thisTime;
-                }/* else
-                {
-                    newGameTime = globals()->gGameTime + Randomize( 9) + 1;
-                    l1 = newGameTime - ((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
-                    l2 = kTimeUnit;
-                    MyWideMul( l1, l2, (wide *)&thisTime);
-                    globals()->gLastTime = scrapTime;
-                    WideSubtract( (wide *)&globals()->gLastTime, (wide *)&thisTime);
-                }*/
-//              if (( newGameTime - globals()->gGameTime) > 6) newGameTime = globals()->gGameTime + 6;
+                    thisTime = (newGameTime - scenario_start_time) * kTimeUnit;
+                    globals()->gLastTime = scrapTime - thisTime;
+                }
 
-                if ( newGameTime >= kMaxGameTime)
-                {
-                    l1 = kTimeUnit;
-                    l2 = newGameTime - kMaxGameTime;
-                    MyWideMul(l1, l2, reinterpret_cast<int64_t*>(&thisTime));
-                    globals()->gLastTime = scrapTime;
-                    globals()->gLastTime -= thisTime;
-                    additionalSeconds += ( newGameTime / 60);
-                    newGameTime -= kMaxGameTime;
-//                  globals()->gGameTime -= kMaxGameTime;
-                }
-                if ( globals()->gGameTime <= newGameTime)
-                    unitsDone = unitsPassed = newGameTime - globals()->gGameTime;
-                else
-                    unitsDone = unitsPassed = newGameTime - ( globals()->gGameTime - kMaxGameTime);
-/*              if ( globals()->gOptions & ( kOptionReplay | kOptionRecord))
-                {
-                    if ( unitsDone > kDecideEveryCycles)
-                    {
-                        globals()->gGameTime = newGameTime - kDecideEveryCycles;
-                        unitsDone = unitsPassed = kDecideEveryCycles;
-                    }
-                }
-*/
-//              WideSubtract( (wide *)&thisTime, (wide *)&lastTime);
-//              unitsDone = unitsPassed = thisTime.lo / kTimeUnit;
-//              thisTick = TickCount();
-//              unitsDone = unitsPassed = thisTick - lastTick;
-//              newGameTime = TickCount() - globals()->gGameStartTime;
-//              unitsDone = unitsPassed = newGameTime - globals()->gGameTime;
+                unitsDone = unitsPassed = newGameTime - globals()->gGameTime;
             }
-//          Microseconds( &lastTime);   // don't activate
-//          lastTick = thisTick;
 
-            if ( playerPaused)
-            {
+            if (playerPaused) {
                 playerPaused = false;
                 unitsDone = unitsPassed = 0;
                 newGameTime = globals()->gGameTime;
-                l1 = newGameTime - ((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
-                l2 = kTimeUnit;
-                MyWideMul(l1, l2, reinterpret_cast<int64_t*>(&thisTime));
-                globals()->gLastTime = scrapTime;
-                globals()->gLastTime -= thisTime;
+                thisTime = (newGameTime - scenario_start_time) * kTimeUnit;
+                globals()->gLastTime = scrapTime - thisTime;
             }
 
-            if ( globals()->gGameOver < 0)
-            {
+            if (globals()->gGameOver < 0) {
                 globals()->gGameOver += unitsPassed;
                 if ( globals()->gGameOver == 0)
                     globals()->gGameOver = 1;
             }
 
-            while ( unitsPassed > 0)
-            {
+            while (unitsPassed > 0) {
                 unitsToDo = unitsPassed;
-                if ( unitsToDo > kMaxTimePerCycle) unitsToDo = kMaxTimePerCycle;
-                if ( (decideCycle + unitsToDo) > kDecideEveryCycles)
+                if (unitsToDo > kMaxTimePerCycle) {
+                    unitsToDo = kMaxTimePerCycle;
+                }
+                if ((decideCycle + unitsToDo) > kDecideEveryCycles) {
                     unitsToDo = kDecideEveryCycles - decideCycle;
+                }
                 decideCycle += unitsToDo;
 
-                if ( unitsToDo > 0) // executed arbitrarily, but at least once every kDecideEveryCycles
-                {
-
-                    MoveScrollStars( unitsToDo);
+                if (unitsToDo > 0) {
+                    // executed arbitrarily, but at least once every kDecideEveryCycles
+                    MoveScrollStars(unitsToDo);
                     MoveSpaceObjects(*gSpaceObjectData, kMaxSpaceObject, unitsToDo);
-
-//                  WriteDebugLine("\pMove");
-//                  WriteDebugLong( decideCycle);
-//                  WriteDebugLong( unitsToDo);
                 }
 
                 globals()->gGameTime += unitsToDo;
-                if ( globals()->gGameTime >= kMaxGameTime) globals()->gGameTime -= kMaxGameTime;
-                if ( decideCycle == kDecideEveryCycles) // everything in here gets executed once every kDecideEveryCycles
-                {
-//                  MoveScrollStars( kDecideEveryCycles);
-//                  MoveSpaceObjects( (spaceObjectType *)*gSpaceObjectData, kMaxSpaceObject,
-//                                  kDecideEveryCycles);
 
+                if ( decideCycle == kDecideEveryCycles) {
+                    // everything in here gets executed once every kDecideEveryCycles
                     playerPaused = FALSE;
-
 
                     NonplayerShipThink( kDecideEveryCycles);
                     AdmiralThink();
                     ExecuteActionQueue( kDecideEveryCycles);
 
-                    if ( globals()->gOptions & kOptionReplay)
-                    {
+                    if (globals()->gOptions & kOptionReplay) {
                         uint32_t keys;
                         if (!globals()->gInputSource->next(&keys)) {
                             globals()->gGameOver = 1;
                         }
 
-                        if ( !playerPaused) {
+                        if (!playerPaused) {
                             playerPaused = PlayerShipGetKeys(
                                     kDecideEveryCycles, keys, &enteringMessage);
                         } else {
                             PlayerShipGetKeys( kDecideEveryCycles, keys, &enteringMessage);
                         }
-                    } else
-                    {
-                        if ( !playerPaused) playerPaused =
-                            PlayerShipGetKeys( kDecideEveryCycles,
-                                0xffffffff, &enteringMessage);
-                        else PlayerShipGetKeys( kDecideEveryCycles, 0xffffffff,
-                            &enteringMessage);
+                    } else {
+                        if (!playerPaused) {
+                            playerPaused = PlayerShipGetKeys(
+                                    kDecideEveryCycles, 0xffffffff, &enteringMessage);
+                        } else {
+                            PlayerShipGetKeys(kDecideEveryCycles, 0xffffffff, &enteringMessage);
+                        }
                     }
 
-                    if ( Button())
-                    {
-                        if ( globals()->gOptions & kOptionReplay)
-                        {
+                    if (Button()) {
+                        if (globals()->gOptions & kOptionReplay) {
                             result = QUIT_GAME;
                             globals()->gGameOver = 1;
-                        } else
-                        {
-                            if ( !mouseDown)
-                            {
-                                if ( !(globals()->gOptions & ( kOptionAutoPlay | kOptionReplay)))
-                                {
-                                    if ((( globals()->gGameTime - lastclicktime)) <= GetDblTime())
-                                    {
+                        } else {
+                            if (!mouseDown) {
+                                if (!(globals()->gOptions & ( kOptionAutoPlay | kOptionReplay))) {
+                                    if (((globals()->gGameTime - lastclicktime)) <= GetDblTime()) {
                                         InstrumentsHandleDoubleClick();
                                         lastclicktime -= GetDblTime();
-                                    } else
-                                    {
+                                    } else {
                                         InstrumentsHandleClick();
                                         lastclicktime = globals()->gGameTime;
                                     }
                                 }
                                 mouseDown = TRUE;
-                            } else
-                            {
+                            } else {
                                 InstrumentsHandleMouseStillDown();
                             }
                         }
-                    } else if ( mouseDown)
-                    {
+                    } else if (mouseDown) {
                         mouseDown = FALSE;
                         InstrumentsHandleMouseUp();
                     }
 
-                    if ( globals()->gOptions & kOptionNetworkOn)
-                    {
-//#ifdef kDemoTimeLimit
-if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
-{
-                        if ( globals()->gGameTime > kTimeLimitWarning)
-                        {
-                            if ( globals()->gGameTime > kTimeLimit)
-                            {
-                                result = QUIT_GAME;
-                                globals()->gGameOver = 1;
-                                DeclareWinner( -1, -1, 302);
-                            } else if ( !GetHaveSeenUnregisteredTimeLimitWarning())
-                            {
-                                SetHaveSeenUnregisteredTimeLimitWarning( true);
-                                StartLongMessage( 6123, 6123);
-
-                            }
-                        }
-}
-//#endif
-#if NETSPROCKET_AVAILABLE
-                        l2 = -1;
-                        waitingForMessage = false;
-                        resendTime = kResendRequestFirstTime;
-                        l1 = l3 = TickCount();
-                        afEntering = enteringMessage;
-                        Microseconds( &thisTime);   // don't activate
-//                      TickleOutgoingMessage( false);
-                        if ( SendInGameMessage( globals()->gGameTime + gNetLatency))
-                        {
-                            do
-                            {
-                                GetKeys( keyMap);
-                                HandleTextMessageKeys( keyMap, lastMessageKeyMap, &afEntering);
-                                for ( scratch = 0; scratch < 4; scratch++)
-                                    lastMessageKeyMap[scratch] = keyMap[scratch];
-                                if ( !ProcessInGameMessages( globals()->gGameTime, &pauseLevel))
-                                {
-//                                  ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because ", "\pProcessInGamesMessages failed.", nil, nil, -1, -1, -1, -1, __FILE__, 2);
-//                                  mAbortNetworkGame
-                                    if ( globals()->gGameOver == 0)
-                                    {
-                                        globals()->gGameOver = 1;
-                                        result = RESTART_GAME;
-                                    }
-
-                                    mWriteDebugString("\pPROC ERR");
-                                    if ( (globals()->gScenarioWinner &
-                                        kScenarioWinnerTextMask) == kScenarioWinnerNoText)
-                                        DeclareWinner( -1, -1,  6004);
-                                }
-
-                                // *** START HANDLING NETWORK PAUSE ***
-                                if ((mRestartResumeKey( keyMap)) || ((!commandAndQ) &&
-                                    ( mQuitKeys( keyMap))))
-                                {
-                                    if ( blinkOn)
-                                    {
-                                        StopPauseIndicator( string);
-                                        blinkOn = false;
-                                    }
-                                    if ( !( globals()->gOptions & (kOptionAutoPlay | kOptionReplay)))
-                                    {
-                                        if ( globals()->gOptions & kOptionNetworkOn)
-                                        {
-                                            if ( !SendInGameBasicMessage( 0, eStartPauseMessage,
-                                                true, false))
-                                            {
-//                                              ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because ", "\pStartPause failed.", nil, nil, -1, -1, -1, -1, __FILE__, 3);
-                                                mAbortNetworkGame
-                                                mWriteDebugString("\pPSE SEND ERR");
-                                                DeclareWinner( -1, -1, 300);
-                                            }
-                                        }
-
-                                        MacShowCursor();
-                                        RestoreOriginalColors();
-                                        switch ( DoPlayAgain( true,
-                                            (gThisScenario->startTime & kScenario_IsTraining_Bit) ? (true):(false)))
-                                        {
-                                            case 0: // quit
-//                                              ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p the user chose to quit.", nil, nil, -1, -1, -1, -1, __FILE__, 33);
-                                                result = QUIT_GAME;
-                                                globals()->gGameOver = 1;
-                                                if ( CommandKey())
-                                                    globals()->gScenarioWinner = globals()->gPlayerAdmiralNumber;
-                                                globals()->gScenarioWinner |= kScenarioWinnerNoNext | kScenarioWinnerNoText;
-                                                break;
-
-                                            case 1: // restart
-//                                              ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p the user chose to restart.", nil, nil, -1, -1, -1, -1, __FILE__, 34);
-                                                result = RESTART_GAME;
-                                                globals()->gGameOver = 1;
-                                                if ( CommandKey())
-                                                    globals()->gScenarioWinner = globals()->gPlayerAdmiralNumber;
-                                                globals()->gScenarioWinner |= kScenarioWinnerNoNext | kScenarioWinnerNoText;
-                                                break;
-
-                                            case 2: // resume
-                                                break;
-
-                                            case 3: // skip
-                                                result = WIN_GAME;
-                                                globals()->gGameOver = 1;
-                                                globals()->gScenarioWinner =  globals()->gPlayerAdmiralNumber |
-                                                    (( GetChapterNumberFromScenarioNumber(
-                                                        globals()->gThisScenarioNumber)
-                                                            +1) << kScenarioWinnerNextShift) |
-                                                    kScenarioWinnerNoText;
-                                                break;
-                                        }
-                                        CopyOffWorldToRealWorld( gTheWindow, &playAreaRect);
-                                        HideCursor();
-                                        playerPaused = true;
-                                        if ( globals()->gOptions & kOptionNetworkOn)
-                                        {
-                                            if ( !SendInGameBasicMessage( 0, eEndPauseMessage,
-                                                true, false))
-                                            {
-//                                              ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because ", "\pEndPause failed.", nil, nil, -1, -1, -1, -1, __FILE__, 4);
-                                                mAbortNetworkGame
-                                                mWriteDebugString("\pPSE END ERR");
-                                                DeclareWinner( -1, -1, 300);
-                                            }
-                                            mWriteDebugString("\pSent End Pause");
-                                        }
-                                    } else
-                                    {
-//                                      ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p this isn't a real game and the user hit ESC or COMMAND-Q.", nil, nil, -1, -1, -1, -1, __FILE__, 35);
-                                        result = QUIT_GAME;
-                                        globals()->gGameOver = 1;
-                                        if ( CommandKey())
-                                            globals()->gScenarioWinner = globals()->gPlayerAdmiralNumber;
-                                        globals()->gScenarioWinner |= kScenarioWinnerNoNext | kScenarioWinnerNoText;
-                                    }
-                                    l1 = TickCount();
-                                }
-                                // *** END HANDLING NETWORK PAUSE ***
-
-                                if (( pauseLevel > 0) && ( l2 < 0))
-                                {
-                                    if ( blinkOn)
-                                    {
-                                        StopPauseIndicator( string);
-                                    }
-                                    blinkOn = false;
-                                    playerPaused = true;
-                                    l2 = TickCount();
-                                }// else if  ( pauseLevel <= 0) l2 = -1;
-
-                                /*
-                                if (( pauseLevel > 0) && (!wasPaused))
-                                {
-                                    playerPaused = true;
-                                    wasPaused = true;
-                                    blinkOn = false;
-                                    l2 = TickCount();
-                                }
-                                if ( (wasPaused) && (pauseLevel <= 0))
-                                {
-                                    wasPaused = false;
-                                }
-                                */
-
-                                if ( pauseLevel > 0)
-                                {
-                                    l1 = l3 = TickCount();
-                                    if ( (TickCount() - l2) > 20)
-                                    {
-                                        if ( blinkOn)
-                                        {
-//                                          GetIndString( string, 3100, 12);
-                                            StopPauseIndicator( string);
-                                            blinkOn = false;
-                                        } else
-                                        {
-                                            GetIndString( string, 3100, 12);
-                                            RestoreOriginalColors();
-                                            StartPauseIndicator( string, Randomize(16));
-                                            blinkOn = true;
-                                        }
-                                        l2 = TickCount();
-                                    }
-                                }
-
-                                if ( (IAmHosting()) && ( GetNumberOfPlayers() < 2))
-                                {
-                                    if ( globals()->gGameOver == 0)
-                                    {
-//                                      ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p I am the host and there are fewer than 2 players.", nil, nil, -1, -1, -1, -1, __FILE__, 22);
-                                        DeclareWinner( globals()->gPlayerAdmiralNumber, -1, 6004);
-                                        globals()->gGameOver = 1;
-                                    }
-                                    result = QUIT_GAME;
-                                }
-
-                                if ( !NetGameIsOn())
-                                {
-                                    if ( globals()->gGameOver == 0)
-                                    {
-//                                      ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p there is no network game.", nil, nil, -1, -1, -1, -1, __FILE__, 23);
-                                        DeclareWinner( globals()->gPlayerAdmiralNumber, -1, 6004);
-                                        globals()->gGameOver = 1;
-                                    }
-                                    result = QUIT_GAME;
-                                } else
-                                {
-                                    if ((( TickCount() - l3) > 60) && ( pauseLevel <= 0))
-                                    {
-                                        if ( l2 < 0)
-                                        {
-                                            l2 = TickCount();
-                                            if ( blinkOn)
-                                            {
-                                                StopPauseIndicator( string);
-                                                blinkOn = false;
-                                            } else
-                                            {
-                                                GetIndString( string, 3100, 13);
-                                                RestoreOriginalColors();
-                                                StartPauseIndicator( string, Randomize(16));
-                                                blinkOn = true;
-                                            }
-
-                                        }
-                                        if (( TickCount() - l2) > 20)
-                                        {
-                                            if (blinkOn)
-                                            {
-//                                              GetIndString( string, 3100, 13);
-                                                StopPauseIndicator( string);
-                                                blinkOn = false;
-                                            } else
-                                            {
-                                                GetIndString( string, 3100, 13);
-                                                RestoreOriginalColors();
-                                                StartPauseIndicator( string, Randomize(16));
-                                                blinkOn = true;
-                                            }
-                                            l2 = TickCount();
-                                        }
-                                    }
-                                    scratch = TickCount() - l1;
-                                    if ( scratch > GetResendDelay())
-                                    {
-                                        SendResendMessage( globals()->gGameTime);
-                                        l1 = TickCount();
-
-                                        if ( GetRegisteredSetting() > 0)
-                                            resendTime = GetResendDelay() * 20;
-                                        else
-                                            resendTime = GetResendDelay() * 2;
-                                    }
-                                }
-                            } while (((pauseLevel > 0) || ( !GotAllMessages())) &&
-                                ( result == NO_GAME));
-                        } else
-                        {
-//                          ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p SendInGameMessage failed.", nil, nil, -1, -1, -1, -1, __FILE__, 5);
-                            mAbortNetworkGame
-                            mWriteDebugString("\pSEND MSG ERR");
-                            DeclareWinner( -1, -1, 300);
-                        }
-
-                        Microseconds( &netTime);    // don't activate
-                        netTime -= thisTime;
-                        if ( netTime > kTimeUnit)
-                        {
-                            netCount++;
-                            if ( netCount > kFractionalLagCorrectTolerance)
-                            {
-                                playerPaused = true;
-                                netCount = 0;
-                            }
-                        } else netCount = 0;
-
-                        if ( blinkOn)
-                        {
-                            StopPauseIndicator( string);
-                            blinkOn = false;
-                        }
-                        ExecuteInGameData();
-                        ResetGotMessages( globals()->gGameTime);
-//                      UseNextLatency();
-#endif NETSPROCKET_AVAILABLE
-                    }
-
                     CollideSpaceObjects(*gSpaceObjectData, kMaxSpaceObject);
-                    decideCycle  = 0;
+                    decideCycle = 0;
                     scenarioCheckTime++;
-                    if ( scenarioCheckTime == 30)
-                    {
+                    if (scenarioCheckTime == 30) {
                         scenarioCheckTime = 0;
                         CheckScenarioConditions( 0);
                     }
-//                  WriteDebugLine("\pDecide");
                 }
                 unitsPassed -= unitsToDo;
             }
 
-//          CollideSpaceObjects( (spaceObjectType *)*gSpaceObjectData, kMaxSpaceObject);
             newKeyMap = false;
-            for ( l1 = 0; l1 < 4; l1++)
-            {
+            for ( l1 = 0; l1 < 4; l1++) {
                 lastKeyMap[l1] = keyMap[l1];
             }
-            GetKeys( keyMap);
-            for ( l1 = 0; l1 < 4; l1++)
-            {
-#if TARGET_OS_MAC
-                if ( lastKeyMap[l1] != keyMap[l1]) newKeyMap = true;
-#else
-                if ( lastKeyMap[l1].bigEndianValue != keyMap[l1].bigEndianValue) newKeyMap = true;
-#endif TARGET_OS_MAC
+            GetKeys(keyMap);
+            for (l1 = 0; l1 < 4; l1++) {
+                if (lastKeyMap[l1] != keyMap[l1]) {
+                    newKeyMap = true;
+                }
             }
-            if ( !(globals()->gOptions & kOptionNetworkOn))
-            {
-#if NETSPROCKET_AVAILABLE
-                afEntering = enteringMessage;
-                HandleTextMessageKeys( keyMap, lastMessageKeyMap, &afEntering);
-                for ( scratch = 0; scratch < 4; scratch++)
-                    lastMessageKeyMap[scratch] = keyMap[scratch];
-#endif
-            }
-            if (
-                //(!(globals()->gOptions & kOptionReplay)) &&
-                (mPauseKey( keyMap)))
-            {
-                mWriteDebugString("\pThis Time:");
-                WriteDebugLong( newGameTime);
-                WriteDebugLong( globals()->gGameTime);
-#if NETSPROCKET_AVAILABLE
-                DebugMessageQueue();
-#endif
+
+            if (mPauseKey(keyMap)) {
                 RestoreOriginalColors();
                 GetIndString( string, 3100, 11);
-                if ( globals()->gOptions & kOptionNetworkOn)
-                {
-#if NETSPROCKET_AVAILABLE
-                    if ( !SendInGameBasicMessage( 0, eStartPauseMessage, true,
-                        false))
-                    {
-//                      ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p StartPause failed.", nil, nil, -1, -1, -1, -1, __FILE__, 6);
-                        mAbortNetworkGame
-                        DeclareWinner( -1, -1, 300);
-                    }
-#endif NETSPROCKET_AVAILABLE
-                }
 
-                PlayVolumeSound( kComputerBeep4, kMaxSoundVolume, kShortPersistence, kMustPlaySound);
-                while ( (mPauseKey( keyMap)) && (!(mReturnKey(keyMap))))
-                {
-
+                PlayVolumeSound(kComputerBeep4, kMaxSoundVolume, kShortPersistence, kMustPlaySound);
+                while ( (mPauseKey( keyMap)) && (!(mReturnKey(keyMap)))) {
                     l1 = TickCount();
-                    StartPauseIndicator( string, Randomize( 16));
+                    StartPauseIndicator(string, Randomize(16));
                     playerPaused = false;
-                    while ( (mPauseKey( keyMap)) && (!(mReturnKey(keyMap)))
-                        && ( (TickCount() - l1) < 20))
-                    {
-                        GetKeys( keyMap);
+                    while ((mPauseKey(keyMap))
+                            && (!(mReturnKey(keyMap)))
+                            && ((TickCount() - l1) < 20)) {
+                        GetKeys(keyMap);
                     }
-
 
                     l1 = TickCount();
                     StopPauseIndicator( string);
                     playerPaused = true;
-                    while ( (mPauseKey( keyMap)) && (!(mReturnKey(keyMap)))
-                        && ( (TickCount() - l1) < 20))
-                    {
+                    while ((mPauseKey(keyMap))
+                            && (!(mReturnKey(keyMap)))
+                            && ((TickCount() - l1) < 20)) {
                         GetKeys( keyMap);
-                        if ( CommandKey())
-                        {
+                        if (CommandKey()) {
                             Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
                         }
                     }
 
                 }
-                if ( globals()->gOptions & kOptionNetworkOn)
-                {
-#if NETSPROCKET_AVAILABLE
-                    if ( !SendInGameBasicMessage( 0, eEndPauseMessage, true,
-                        false))
-                    {
-//                      ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p Endpause failed.", nil, nil, -1, -1, -1, -1, __FILE__, 7);
-                        mAbortNetworkGame
-                        DeclareWinner( -1, -1, 300);
-                    }
-                    mWriteDebugString("\pSent End Pause");
-#endif
-                }
             }
 
-            if ((!( globals()->gOptions & kOptionNetworkOn)) &&
-                ( !(globals()->gOptions & kOptionReplay)) &&
-                ((mRestartResumeKey( keyMap)) || ((!commandAndQ) && ( mQuitKeys( keyMap)))))
-            {
-                if ( !( globals()->gOptions & (kOptionAutoPlay | kOptionReplay)))
-                {
-                    if ( globals()->gOptions & kOptionNetworkOn)
-                    {
-#if NETSPROCKET_AVAILABLE
-                        if ( !SendInGameBasicMessage( 0, eStartPauseMessage, true,
-                            false))
-                        {
-//                          ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p Startpause failed.", nil, nil, -1, -1, -1, -1, __FILE__, 8);
-                            mAbortNetworkGame
-                            DeclareWinner( -1, -1, 300);
-                        }
-#endif NETSPROCKET_AVAILABLE
-                    }
+            if ((!(globals()->gOptions & kOptionNetworkOn)) &&
+                    (!(globals()->gOptions & kOptionReplay)) &&
+                    ((mRestartResumeKey(keyMap))
+                     || ((!commandAndQ) && (mQuitKeys(keyMap))))) {
 
+                if (!(globals()->gOptions & kOptionReplay)) {
                     RestoreOriginalColors();
                     MacShowCursor();
-                    switch ( DoPlayAgain( true,
-                                            (gThisScenario->startTime & kScenario_IsTraining_Bit) ? (true):(false)))
-                    {
+                    bool is_training = gThisScenario->startTime & kScenario_IsTraining_Bit;
+                    switch (DoPlayAgain(true, is_training)) {
                         case 0: // quit
-//                          ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p the user chose to quit.", nil, nil, -1, -1, -1, -1, __FILE__, 35);
                             result = QUIT_GAME;
                             globals()->gGameOver = 1;
                             if ( CommandKey())
@@ -1411,7 +895,6 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                             break;
 
                         case 1: // restart
-//                          ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p the user chose to restart.", nil, nil, -1, -1, -1, -1, __FILE__, 36);
                             result = RESTART_GAME;
                             globals()->gGameOver = 1;
                             if ( CommandKey())
@@ -1434,257 +917,118 @@ if ( (!Ambrosia_Is_Registered()) || ( GetOpponentIsUnregistered()))
                     CopyOffWorldToRealWorld(&playAreaRect);
                     HideCursor();
                     playerPaused = true;
-                    if ( globals()->gOptions & kOptionNetworkOn)
-                    {
-#if NETSPROCKET_AVAILABLE
-                        if ( !SendInGameBasicMessage( 0, eEndPauseMessage, true,
-                            false))
-                        {
-//                          ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p EndPause failed.", nil, nil, -1, -1, -1, -1, __FILE__, 8);
-                            mAbortNetworkGame
-                            DeclareWinner( -1, -1, 300);
-                        }
-                        mWriteDebugString("\pSent End Pause");
-#endif NETSPROCKET_AVAILABLE
-                    }
-                } else
-                {
-//                  ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p this isn't a real game and the user hit ESC or COMMAND-Q.", nil, nil, -1, -1, -1, -1, __FILE__, 37);
+                } else {
                     result = QUIT_GAME;
                     globals()->gGameOver = 1;
-                    if ( CommandKey())
+                    if (CommandKey()) {
                         globals()->gScenarioWinner = globals()->gPlayerAdmiralNumber;
+                    }
                     globals()->gScenarioWinner |= kScenarioWinnerNoNext | kScenarioWinnerNoText;
                 }
             }
 
-            if ((!(globals()->gOptions & kOptionReplay)) &&
-                (((!afEntering)&&( mHelpKey( keyMap)))))
-
-            {
-                if ( globals()->gOptions & kOptionNetworkOn)
-                {
-#if NETSPROCKET_AVAILABLE
-                    if ( !SendInGameBasicMessage( 0, eStartPauseMessage, true,
-                        false))
-                    {
-//                      ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p StartPause failed.", nil, nil, -1, -1, -1, -1, __FILE__, 9);
-                        mAbortNetworkGame
-                        DeclareWinner( -1, -1, 300);
-                    }
-#endif NETSPROCKET_AVAILABLE
-                }
+            if (!(globals()->gOptions & kOptionReplay)
+                    && !afEntering
+                    && mHelpKey(keyMap)) {
                 RestoreOriginalColors();
                 MacShowCursor();
                 DoHelpScreen();
                 HideCursor();
                 CopyOffWorldToRealWorld(&playAreaRect);
                 playerPaused = true;
-                if ( globals()->gOptions & kOptionNetworkOn)
-                {
-#if NETSPROCKET_AVAILABLE
-                    if ( !SendInGameBasicMessage( 0, eEndPauseMessage, true,
-                        false))
-                    {
-//                      ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p Endpause failed.", nil, nil, -1, -1, -1, -1, __FILE__, 10);
-                        mAbortNetworkGame
-                        DeclareWinner( -1, -1, 300);
-                    }
-                    mWriteDebugString("\pSent End Pause");
-#endif NETSPROCKET_AVAILABLE
-                }
             }
-            if ((globals()->gOptions & kOptionNetworkOn) &&
-#if NETSPROCKET_AVAILABLE
-            ( IAmHosting()) &&
-#endif NETSPROCKET_AVAILABLE
-                    (((!afEntering)&&( mNetSettingsKey( keyMap)))))
-            {
-                if ( globals()->gOptions & kOptionNetworkOn)
-                {
-#if NETSPROCKET_AVAILABLE
-                    if ( !SendInGameBasicMessage( 0, eStartPauseMessage, true,
-                        false))
-                    {
-//                      ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p Startpause failed.", nil, nil, -1, -1, -1, -1, __FILE__, 11);
-                        mAbortNetworkGame
-                        DeclareWinner( -1, -1, 300);
-                    }
-#endif NETSPROCKET_AVAILABLE
+
+            if (!(globals()->gOptions & kOptionReplay)
+                    && !afEntering
+                    && mVolumeDownKey(keyMap)
+                    && !mVolumeDownKey(lastKeyMap)) {
+                if ( globals()->gSoundVolume > 0) {
+                    globals()->gSoundVolume--;
                 }
-                RestoreOriginalColors();
-                MacShowCursor();
-#if NETSPROCKET_AVAILABLE
-                DoNetSettings();
-#endif NETSPROCKET_AVAILABLE
-                HideCursor();
-                CopyOffWorldToRealWorld(&playAreaRect);
-                playerPaused = true;
-                if ( globals()->gOptions & kOptionNetworkOn)
-                {
-#if NETSPROCKET_AVAILABLE
-                    if ( !SendInGameBasicMessage( 0, eEndPauseMessage, true,
-                        false))
-                    {
-//                      ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p EndPause failed.", nil, nil, -1, -1, -1, -1, __FILE__, 12);
-                        mAbortNetworkGame
-                        DeclareWinner( -1, -1, 300);
-                    }
-                    mWriteDebugString("\pSent End Pause");
-#endif NETSPROCKET_AVAILABLE
+                if ( globals()->gOptions & kOptionMusicPlay) {
+                    SetSongVolume(kMusicVolume);
                 }
             }
 
-            if (((!(globals()->gOptions & kOptionReplay)) &&
-            ((!afEntering) && ( ( mVolumeDownKey( keyMap) && !mVolumeDownKey( lastKeyMap))))))
-            {
-                if ( globals()->gSoundVolume > 0) globals()->gSoundVolume--;
-                if ( globals()->gOptions & kOptionMusicPlay)
-                {
+            if (!(globals()->gOptions & kOptionReplay)
+                    && !afEntering
+                    && mVolumeUpKey( keyMap)
+                    && !mVolumeUpKey(lastKeyMap)) {
+                if (globals()->gSoundVolume < kMaxVolumePreference) {
+                    globals()->gSoundVolume++;
+                }
+                if (globals()->gOptions & kOptionMusicPlay) {
                     SetSongVolume( kMusicVolume);
                 }
             }
 
-            if (((!(globals()->gOptions & kOptionReplay)) &&
-                ((!afEntering) && ( mVolumeUpKey( keyMap) && !mVolumeUpKey( lastKeyMap)))))
-            {
-                if ( globals()->gSoundVolume < kMaxVolumePreference) globals()->gSoundVolume++;
-                if ( globals()->gOptions & kOptionMusicPlay)
-                {
-                    SetSongVolume( kMusicVolume);
-                }
-            }
-
-            if ((!(globals()->gOptions & kOptionReplay)) && (!afEntering) &&
-                ( mActionMusicKey( keyMap)) && ( !mActionMusicKey( lastKeyMap)))
-            {
-                if ( globals()->gOptions & kOptionMusicPlay)
-                {
+            if (!(globals()->gOptions & kOptionReplay)
+                    && !afEntering
+                    && mActionMusicKey(keyMap)
+                    && !mActionMusicKey(lastKeyMap)) {
+                if (globals()->gOptions & kOptionMusicPlay) {
                     ToggleSong();
                 }
             }
 
-#if TARGET_OS_MAC
             keyMap[3] &= ~0x80; // mask out power key
             keyMap[1] &= ~0x02; // mask out caps lock key
-            if ( (globals()->gOptions & kOptionReplay) && (!demoKey) &&
-                (!newKeyMap) &&
-                ((keyMap[0] != 0) || ( keyMap[1] != 0) || ( keyMap[2] != 0) ||
-                (keyMap[3] != 0)))
-#else
-            keyMap[3].bigEndianValue &= EndianU32_NtoB(~0x80);  // mask out power key
-            keyMap[1].bigEndianValue &= EndianU32_NtoB(~0x02);  // mask out caps lock key
-            if ( (globals()->gOptions & kOptionReplay) && (!demoKey) &&
-                (!newKeyMap) &&
-                ((keyMap[0].bigEndianValue != 0) || ( keyMap[1].bigEndianValue != 0) ||
-                ( keyMap[2].bigEndianValue != 0) ||
-                (keyMap[3].bigEndianValue != 0)))
-#endif TARGET_OS_MAC
-            {
+            if ((globals()->gOptions & kOptionReplay)
+                    && !demoKey
+                    && !newKeyMap
+                    && ((keyMap[0] != 0)
+                        || (keyMap[1] != 0)
+                        || (keyMap[2] != 0)
+                        || (keyMap[3] != 0))) {
                 result = QUIT_GAME;
                 globals()->gGameOver = 1;
             }
             demoKey = false;
 
-//          if ( globals()->gGameTime > newGameTime) { WriteDebugLong( newGameTime); globals()->gGameTime = newGameTime;}
-
-            MiniComputerHandleNull( unitsDone);
+            MiniComputerHandleNull(unitsDone);
 
             ClipToCurrentLongMessage();
             SetLongRect( &clipRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
-//          hacktc = TickCount();
-//          hacktcsamplecount++;
-            DrawScrollStars( TRUE);
+            DrawScrollStars(true);
             DrawCurrentLongMessage( unitsDone);
 
             DrawSectorLines();
             DrawAllBeams();
-            DrawSpriteTableInOffWorld( &clipRect);
-            UpdateAllLabelPositions( unitsDone);
+            DrawSpriteTableInOffWorld(&clipRect);
+            UpdateAllLabelPositions(unitsDone);
             DrawAllLabels();
             DrawSite();
-            SetLongRect( &clipRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-            DrawSpriteCursorSprite( &clipRect);
-//          DrawCurrentLongMessage();
+            SetLongRect(&clipRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+            DrawSpriteCursorSprite(&clipRect);
 
-            if ((globals()->gOptions & kOptionQDOnly)) {
-                ShowSpriteCursorSprite();
-                DrawAllBeams();
-                DontShowScrollStars();
-                CopyOffWorldToRealWorld(&playAreaRect);
-            } else
-            {
-                ShowSpriteCursorSprite();
-                ShowSpriteTable();
-                ShowAllLabels();
-//              DrawAllBeams();
-                ShowAllBeams();
-                ShowScrollStars( TRUE);
-                ShowSectorLines();
-                ShowSite();
-                CopyOffWorldToRealWorld(&playAreaRect);
+            ShowSpriteCursorSprite();
+            ShowSpriteTable();
+            ShowAllLabels();
+            ShowAllBeams();
+            ShowScrollStars( TRUE);
+            ShowSectorLines();
+            ShowSite();
+            CopyOffWorldToRealWorld(&playAreaRect);
 
-            }
-//          if ( hacktcsamplecount > hacktcsamplesize)
-//          {
-//              hacktcsamplecount = 0;
-//              WriteDebugLong( TickCount() - hacktc);
-//          }
-            //PixMapTest();
+            DrawMessageScreen(unitsDone);
+            UpdateRadar(unitsDone);
+            UpdateBooleanColorAnimation(unitsDone);
 
-            DrawMessageScreen( unitsDone);
-            UpdateRadar( unitsDone);
-            UpdateBooleanColorAnimation( unitsDone);
-//          CheckScenarioConditions( unitsDone);
-            globals()->gFrameCount++;
+            ++globals()->gFrameCount;
             VideoDriver::driver()->main_loop_iteration_complete(globals()->gGameTime);
         }
     }
     exit(0);  // Temporary: exit after finishing demo.
 
-#if kProfiling_On
-    ProfilerSetStatus( false);
-    if (ProfilerDump("\pares_profile") != noErr)
-        DebugStr("\pprofiler dump error");
-    ProfilerTerm();
-#endif
-
-    if ( globals()->gOptions & kOptionNetworkOn)
-    {
-#if NETSPROCKET_AVAILABLE
-        if ( IAmHosting())
-        {
-//          StopNetworking();
-            if ( !SendInGameMiscLongMessage( 0, eStopPlayingMessage,
-                globals()->gScenarioWinner, true, false))
-            {
-                mAbortNetworkGame
-            }
-        } else
-        {
-//          StopNetworking();
-            if ( !SendInGameMiscLongMessage( 0, eStopPlayingMessage,
-                globals()->gScenarioWinner, true, false))
-            {
-                mAbortNetworkGame
-            }
-        }
-#endif NETSPROCKET_AVAILABLE
-    }
-
-    WriteDebugLine("\p<GameOver");
-    WriteDebugLong( keyDataSize);
-    MacShowCursor();
-
-    Microseconds( &thisTime);
+    Microseconds(&thisTime);
     thisTime -= globals()->gLastTime;
     newGameTime = thisTime / 1000000; // divide by a million to get seconds
-//  *seconds = newGameTime + additionalSeconds;
     *seconds = newGameTime + additionalSeconds;
-//  HHCheckAllHandles();
     RestoreOriginalColors();
+
     if (result == NO_GAME) {
-        if ((globals()->gScenarioWinner & kScenarioWinnerPlayerMask) == globals()->gPlayerAdmiralNumber) {
+        if ((globals()->gScenarioWinner & kScenarioWinnerPlayerMask)
+                == globals()->gPlayerAdmiralNumber) {
             return WIN_GAME;
         } else {
             return LOSE_GAME;

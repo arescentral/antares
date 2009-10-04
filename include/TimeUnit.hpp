@@ -24,7 +24,6 @@
 #define kMaxTimePerCycle    3       // max number of time units to move by at once
 #define kDecideEveryCycles  3       // every time this many cycles pass, we have to process player & computer decisions
 #define kBroadcastSelfTime  4
-#define kMaxGameTime        65535   // the time wraps around here
 
 void ResetLastTime( long);
 long GetTimeLapse( void);

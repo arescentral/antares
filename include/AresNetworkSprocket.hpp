@@ -34,7 +34,6 @@
 #define kMaxMessageLatency      ((long)48)
 
 #define kMessageLatencyUnit     ((long)3)       // must be the same as kDecideEveryCycles
-#define kMaxNetTime             ((long)65535)   // must be the same as kMaxGameTime
 #define kMaxCriticalNetTime     ((long)(kMaxNetTime - (kMaxMessageLatency * (long)2)))
 #define kMinCriticalNetTime     ((long)(kMaxMessageLatency * (long)2))
 
