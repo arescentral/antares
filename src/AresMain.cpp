@@ -28,7 +28,6 @@
 
 #include "Admiral.hpp"
 #include "AmbrosiaSerial.h"
-#include "AresAppleEvent.hpp"
 #include "AresCheat.hpp"
 #include "AresDemoScanner.hpp"
 #include "AresExternalFile.hpp"

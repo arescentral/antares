@@ -5272,16 +5272,6 @@ void HandleOSEvent( EventRecord *event)
                 MacSetPort( gTheWindow);
                 ResumeActiveTextEdit();
 
-                if ( globals()->useGameRanger)
-                {
-                    if (( Wrap_GRCheckForAE())/* && (!globals()->gameRangerPending)*/)
-                    {
-                        globals()->gameRangerPending = true;
-                        globals()->returnToMain = true;
-                        SysBeep(20);
-                    }
-                }
-
                 WriteDebugLine("\pRESUME");
                 Ambrosia_Update_Registered();
             } else
@@ -5304,13 +5294,6 @@ Boolean Ares_WaitNextEvent( short eventMask, EventRecord *theEvent,
     {
         switch( theEvent->what)
         {
-            case kHighLevelEvent:
-                if ( globals()->aeInited)
-                {
-                    AEProcessAppleEvent( theEvent);
-                }
-                break;
-
             case osEvt:
                 HandleOSEvent( theEvent);
                 break;

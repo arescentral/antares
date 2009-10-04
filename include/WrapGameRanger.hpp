@@ -20,11 +20,9 @@
 
 // Wrap_GameRanger.h
 
-#include <AppleEvent.h>
 #include <Base.h>
 #include <NetSprocket.h>
 
-STUB1(Wrap_GRCheckAEForCmd, bool(const AppleEvent *theEvent), false);
 STUB0(Wrap_GRCheckForAE, bool(), false);
 STUB0(Wrap_GRGetWaitingCmd, void());
 STUB0(Wrap_GRInstallResumeHandler, OSErr(), noErr);
