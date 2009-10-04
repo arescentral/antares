@@ -42,11 +42,18 @@ enum netResultType {
     kCancel = 0
 };
 
+enum PlayAgainResult {
+    PLAY_AGAIN_QUIT,
+    PLAY_AGAIN_RESTART,
+    PLAY_AGAIN_RESUME,
+    PLAY_AGAIN_SKIP,
+};
+
 mainScreenResultType DoMainScreenInterface( long *);
 void DoAboutAresInterface( void);
 void DoLoadingInterface(Rect*, unsigned char*);
 void UpdateLoadingInterface( long, long, Rect *);
-short DoPlayAgain( Boolean, Boolean);
+PlayAgainResult DoPlayAgain(bool allow_resume, bool allow_skip);
 void DoNetSettings( void);
 void DoHelpScreen( void);
 void StartPauseIndicator(unsigned char*, unsigned char);

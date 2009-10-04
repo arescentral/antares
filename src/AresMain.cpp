@@ -400,12 +400,19 @@ void MainLoop() {
                                         (globals()->gScenarioWinner & kScenarioWinnerTextMask) >> kScenarioWinnerTextShift,
                                         -1, -1, -1, -1, -1, -1, -1);
                             }
-                            if (DoPlayAgain(false, false)) {
+                            switch (DoPlayAgain(false, false)) {
+                              case PLAY_AGAIN_RESTART:
                                 gameResult = RESTART_GAME;
-                            } else {
+                                break;
+
+                              case PLAY_AGAIN_QUIT:
                                 gameResult = QUIT_GAME;
                                 ClearScreen();
                                 AutoFadeFrom(1, false);
+                                break;
+
+                              default:
+                                fprintf(stderr, "DoPlayAgain(false, false) returned bad value\n");
                             }
                         }
                         break;
@@ -886,7 +893,7 @@ GameResult PlayTheGame(long *seconds) {
                     MacShowCursor();
                     bool is_training = gThisScenario->startTime & kScenario_IsTraining_Bit;
                     switch (DoPlayAgain(true, is_training)) {
-                        case 0: // quit
+                        case PLAY_AGAIN_QUIT:
                             result = QUIT_GAME;
                             globals()->gGameOver = 1;
                             if ( CommandKey())
@@ -894,7 +901,7 @@ GameResult PlayTheGame(long *seconds) {
                             globals()->gScenarioWinner |= kScenarioWinnerNoNext | kScenarioWinnerNoText;
                             break;
 
-                        case 1: // restart
+                        case PLAY_AGAIN_RESTART:
                             result = RESTART_GAME;
                             globals()->gGameOver = 1;
                             if ( CommandKey())
@@ -902,10 +909,10 @@ GameResult PlayTheGame(long *seconds) {
                             globals()->gScenarioWinner |= kScenarioWinnerNoNext | kScenarioWinnerNoText;
                             break;
 
-                        case 2: // resume
+                        case PLAY_AGAIN_RESUME:
                             break;
 
-                        case 3: // skip
+                        case PLAY_AGAIN_SKIP:
                             result = WIN_GAME;
                             globals()->gGameOver = 1;
                             globals()->gScenarioWinner =  globals()->gPlayerAdmiralNumber |

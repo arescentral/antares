@@ -797,15 +797,14 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
     }
 }
 
-short DoPlayAgain( Boolean allowResume, Boolean allowSkip) // return 0 = quit, 1 = restart, 2 = resume, 3 = skip
-
-{
+PlayAgainResult DoPlayAgain(Boolean allowResume, Boolean allowSkip) {
     int                     error = kNoError;
     Rect                    tRect;
     interfaceItemType       *item;
     Boolean                 done = false;
     Point                   where;
-    short                   whichItem, result = 0;
+    short                   whichItem;
+    PlayAgainResult         result = PLAY_AGAIN_QUIT;
     EventRecord             theEvent;
     char                    whichChar;
 
@@ -882,22 +881,22 @@ short DoPlayAgain( Boolean allowResume, Boolean allowSkip) // return 0 = quit, 1
                 {
                     case kPlayAgainOKButton:
                         done = TRUE;
-                        result = 1;
+                        result = PLAY_AGAIN_RESTART;
                         break;
 
                     case kPlayAgainNoButton:
                         done = true;
-                        result = 0;
+                        result = PLAY_AGAIN_QUIT;
                         break;
 
                     case kPlayAgainResumeButton:
                         done = true;
-                        result = 2;
+                        result = PLAY_AGAIN_RESUME;
                         break;
 
                     case 5:
                         done = true;
-                        result = 3;
+                        result = PLAY_AGAIN_SKIP;
                         break;
                 }
 
@@ -910,7 +909,7 @@ short DoPlayAgain( Boolean allowResume, Boolean allowSkip) // return 0 = quit, 1
         DrawInRealWorld();
         CloseInterface();
     }
-    return ( result);
+    return result;
 }
 
 void DoNetSettings( void)
