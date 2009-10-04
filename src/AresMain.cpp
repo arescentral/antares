@@ -653,10 +653,13 @@ void MainLoop() {
             break;
 
           case kMainTrain:
-            DoScrollText(5600, 4, kTitleTextScrollWidth,
-                    kTitleFontNum, -1);
+            DoScrollText(5600, 4, kTitleTextScrollWidth, kTitleFontNum, -1);
+            break;
 
           case kMainAbout:
+            DoScrollText(6500, 2, 540, kTitleFontNum, -1);
+            break;
+
           case kMainOptions:
           case kNullResult:
             // These options are already handled by DoMainScreenInterface().

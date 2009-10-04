@@ -504,25 +504,8 @@ mainScreenResultType DoMainScreenInterface( long *demoLevel)
                     break;
 
                 case kMainAboutButton:
-//                  result = kMainAbout;
-//                  done = true;
-
-                    CloseInterface();
-//                  DoAboutAresInterface();
-                    DoScrollText(6500, 2/*kScrollTextSpeed*/,
-                        540, kTitleFontNum/*kComputerFontNum*/, -1);
-                    OpenInterface( kMainScreenResID);
-                    if ( !(globals()->gOptions & kOptionNetworkAvailable))// NetSprocketPresent())
-                    {
-                        SetStatusOfAnyInterfaceItem( kMainNetworkButton, kDimmed, FALSE);
-                    }
-                    if ( globals()->gOptions & kOptionNoSinglePlayer)
-                    {
-                        SetStatusOfAnyInterfaceItem( kMainPlayButton, kDimmed, false);
-                    }
-                    DrawEntireInterface();
-                    startDemoTime = TickCount();
-
+                    result = kMainAbout;
+                    done = true;
                     break;
 
                 case kMainOptionsButton:
