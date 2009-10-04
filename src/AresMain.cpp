@@ -405,6 +405,7 @@ void MainLoop() {
 
                               default:
                                 fprintf(stderr, "DoPlayAgain(false, false) returned bad value\n");
+                                exit(1);
                             }
                         }
                         break;
