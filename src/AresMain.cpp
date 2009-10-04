@@ -888,50 +888,41 @@ GameResult PlayTheGame(long *seconds) {
                     ((mRestartResumeKey(keyMap))
                      || ((!commandAndQ) && (mQuitKeys(keyMap))))) {
 
-                if (!(globals()->gOptions & kOptionReplay)) {
-                    RestoreOriginalColors();
-                    MacShowCursor();
-                    bool is_training = gThisScenario->startTime & kScenario_IsTraining_Bit;
-                    switch (DoPlayAgain(true, is_training)) {
-                        case PLAY_AGAIN_QUIT:
-                            result = QUIT_GAME;
-                            globals()->gGameOver = 1;
-                            if ( CommandKey())
-                                globals()->gScenarioWinner = globals()->gPlayerAdmiralNumber;
-                            globals()->gScenarioWinner |= kScenarioWinnerNoNext | kScenarioWinnerNoText;
-                            break;
-
-                        case PLAY_AGAIN_RESTART:
-                            result = RESTART_GAME;
-                            globals()->gGameOver = 1;
-                            if ( CommandKey())
-                                globals()->gScenarioWinner = globals()->gPlayerAdmiralNumber;
-                            globals()->gScenarioWinner |= kScenarioWinnerNoNext | kScenarioWinnerNoText;
-                            break;
-
-                        case PLAY_AGAIN_RESUME:
-                            break;
-
-                        case PLAY_AGAIN_SKIP:
-                            result = WIN_GAME;
-                            globals()->gGameOver = 1;
-                            globals()->gScenarioWinner =  globals()->gPlayerAdmiralNumber |
-                                (( GetChapterNumberFromScenarioNumber(globals()->gThisScenarioNumber)+1)
-                                    << kScenarioWinnerNextShift) |
-                                kScenarioWinnerNoText;
-                            break;
-                    }
-                    CopyOffWorldToRealWorld(&playAreaRect);
-                    HideCursor();
-                    playerPaused = true;
-                } else {
+                RestoreOriginalColors();
+                MacShowCursor();
+                bool is_training = gThisScenario->startTime & kScenario_IsTraining_Bit;
+                switch (DoPlayAgain(true, is_training)) {
+                case PLAY_AGAIN_QUIT:
                     result = QUIT_GAME;
                     globals()->gGameOver = 1;
-                    if (CommandKey()) {
+                    if ( CommandKey())
                         globals()->gScenarioWinner = globals()->gPlayerAdmiralNumber;
-                    }
                     globals()->gScenarioWinner |= kScenarioWinnerNoNext | kScenarioWinnerNoText;
+                    break;
+
+                case PLAY_AGAIN_RESTART:
+                    result = RESTART_GAME;
+                    globals()->gGameOver = 1;
+                    if ( CommandKey())
+                        globals()->gScenarioWinner = globals()->gPlayerAdmiralNumber;
+                    globals()->gScenarioWinner |= kScenarioWinnerNoNext | kScenarioWinnerNoText;
+                    break;
+
+                case PLAY_AGAIN_RESUME:
+                    break;
+
+                case PLAY_AGAIN_SKIP:
+                    result = WIN_GAME;
+                    globals()->gGameOver = 1;
+                    globals()->gScenarioWinner =  globals()->gPlayerAdmiralNumber |
+                        (( GetChapterNumberFromScenarioNumber(globals()->gThisScenarioNumber)+1)
+                         << kScenarioWinnerNextShift) |
+                        kScenarioWinnerNoText;
+                    break;
                 }
+                CopyOffWorldToRealWorld(&playAreaRect);
+                HideCursor();
+                playerPaused = true;
             }
 
             if (!(globals()->gOptions & kOptionReplay)
