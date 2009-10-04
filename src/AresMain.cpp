@@ -394,10 +394,9 @@ void MainLoop() {
                     switch (gameResult) {
                       case LOSE_GAME:
                         if (!(globals()->gOptions & kOptionReplay)) {
-                            if ((globals()->gScenarioWinner & kScenarioWinnerTextMask) !=
-                                    kScenarioWinnerNoText) {
+                            if (globals()->gScenarioWinner.text != -1) {
                                 DoMissionDebriefingText(
-                                        (globals()->gScenarioWinner & kScenarioWinnerTextMask) >> kScenarioWinnerTextShift,
+                                        globals()->gScenarioWinner.text,
                                         -1, -1, -1, -1, -1, -1, -1);
                             }
                             switch (DoPlayAgain(false, false)) {
@@ -419,10 +418,9 @@ void MainLoop() {
 
                       case WIN_GAME:
                         {
-                            if ((globals()->gScenarioWinner & kScenarioWinnerTextMask) !=
-                                    kScenarioWinnerNoText) {
+                            if (globals()->gScenarioWinner.text != -1) {
                                 DoMissionDebriefingText(
-                                        (globals()->gScenarioWinner & kScenarioWinnerTextMask) >> kScenarioWinnerTextShift,
+                                        globals()->gScenarioWinner.text,
                                         gameLength, gThisScenario->parTime,
                                         GetAdmiralLoss(0), gThisScenario->parLosses,
                                         GetAdmiralKill(0), gThisScenario->parKills,
@@ -442,8 +440,7 @@ void MainLoop() {
 
                             // normal scrolltext song
                             int scroll_song = 4002;
-                            if ((globals()->gScenarioWinner & kScenarioWinnerNextMask) ==
-                                    kScenarioWinnerNoNext) {
+                            if (globals()->gScenarioWinner.next == -1) {
                                 // we win but no next level? Play triumph song
                                 scroll_song = 4003;
                             }
@@ -464,13 +461,11 @@ void MainLoop() {
                             }
                             globals()->gInputSource.reset();
 
-                            if ((globals()->gScenarioWinner & kScenarioWinnerNextMask) ==
-                                    kScenarioWinnerNoNext) {
+                            if (globals()->gScenarioWinner.next == -1) {
                                 whichScenario = -1;
                             } else {
                                 whichScenario = GetScenarioNumberFromChapterNumber(
-                                        (globals()->gScenarioWinner & kScenarioWinnerNextMask)
-                                        >> kScenarioWinnerNextShift);
+                                        globals()->gScenarioWinner.next);
                             }
 
                             if ((!(globals()->gOptions & kOptionReplay))
@@ -607,8 +602,8 @@ void MainLoop() {
 
                                 if ( globals()->gameRangerInProgress)
                                 {
-                                    if ( (globals()->gScenarioWinner & kScenarioWinnerPlayerMask) == globals()->gPlayerAdmiralNumber)
-                                    {
+                                    if (globals()->gScenarioWinner.player
+                                            == globals()->gPlayerAdmiralNumber) {
                                         Wrap_GRStatScore( 1);
                                         Wrap_GRStatOtherScore( 0);
                                     } else
@@ -623,15 +618,9 @@ void MainLoop() {
                                 SetNetMinutesPlayed( GetNetMinutesPlayed() + (( gameLength + 30) / 60));
                                 SetNetKills( GetNetKills() + GetAdmiralKill( globals()->gPlayerAdmiralNumber));
                                 SetNetLosses( GetNetLosses() + GetAdmiralLoss( globals()->gPlayerAdmiralNumber));
-                                if ( (globals()->gScenarioWinner &
-                                            kScenarioWinnerTextMask) != kScenarioWinnerNoText)
-                                {
-                                    //                                  DoMissionDebriefingText( (WindowPtr) gTheWindow,
-                                    //                                      (globals()->gScenarioWinner & kScenarioWinnerTextMask) >> kScenarioWinnerTextShift,
-                                    //                                      -1, -1, -1, -1, -1, -1, -1);
+                                if (globals()->gScenarioWinner.text != -1) {
                                     DoMissionDebriefingText(  gTheWindow,
-                                            (globals()->gScenarioWinner & kScenarioWinnerTextMask)
-                                            >> kScenarioWinnerTextShift,
+                                            globals()->gScenarioWinner.text,
                                             gameLength, gThisScenario->parTime,
                                             GetAdmiralLoss( globals()->gPlayerAdmiralNumber),
                                             gThisScenario->parLosses,
@@ -896,16 +885,18 @@ GameResult PlayTheGame(long *seconds) {
                     result = QUIT_GAME;
                     globals()->gGameOver = 1;
                     if ( CommandKey())
-                        globals()->gScenarioWinner = globals()->gPlayerAdmiralNumber;
-                    globals()->gScenarioWinner |= kScenarioWinnerNoNext | kScenarioWinnerNoText;
+                        globals()->gScenarioWinner.player = globals()->gPlayerAdmiralNumber;
+                    globals()->gScenarioWinner.next = -1;
+                    globals()->gScenarioWinner.text = -1;
                     break;
 
                 case PLAY_AGAIN_RESTART:
                     result = RESTART_GAME;
                     globals()->gGameOver = 1;
                     if ( CommandKey())
-                        globals()->gScenarioWinner = globals()->gPlayerAdmiralNumber;
-                    globals()->gScenarioWinner |= kScenarioWinnerNoNext | kScenarioWinnerNoText;
+                        globals()->gScenarioWinner.player = globals()->gPlayerAdmiralNumber;
+                    globals()->gScenarioWinner.next = -1;
+                    globals()->gScenarioWinner.text = -1;
                     break;
 
                 case PLAY_AGAIN_RESUME:
@@ -914,10 +905,10 @@ GameResult PlayTheGame(long *seconds) {
                 case PLAY_AGAIN_SKIP:
                     result = WIN_GAME;
                     globals()->gGameOver = 1;
-                    globals()->gScenarioWinner =  globals()->gPlayerAdmiralNumber |
-                        (( GetChapterNumberFromScenarioNumber(globals()->gThisScenarioNumber)+1)
-                         << kScenarioWinnerNextShift) |
-                        kScenarioWinnerNoText;
+                    globals()->gScenarioWinner.player = globals()->gPlayerAdmiralNumber;
+                    globals()->gScenarioWinner.next =
+                        GetChapterNumberFromScenarioNumber(globals()->gThisScenarioNumber) + 1;
+                    globals()->gScenarioWinner.text = -1;
                     break;
                 }
                 CopyOffWorldToRealWorld(&playAreaRect);
@@ -1025,8 +1016,7 @@ GameResult PlayTheGame(long *seconds) {
     RestoreOriginalColors();
 
     if (result == NO_GAME) {
-        if ((globals()->gScenarioWinner & kScenarioWinnerPlayerMask)
-                == globals()->gPlayerAdmiralNumber) {
+        if (globals()->gScenarioWinner.player == globals()->gPlayerAdmiralNumber) {
             return WIN_GAME;
         } else {
             return LOSE_GAME;

@@ -101,6 +101,12 @@ class InputSource;
 class MessageData;
 class StringList;
 
+struct ScenarioWinnerType {
+    int8_t next;
+    int16_t text;
+    int8_t player;
+};
+
 struct aresGlobalType {
     aresGlobalType();
     ~aresGlobalType();
@@ -144,7 +150,7 @@ struct aresGlobalType {
     long            gSendMessageLabel;
     Boolean         gDemoZoomOverride;
     long            gPlayerAdmiralNumber;
-    long            gScenarioWinner;    // -1 = noone, 0 = player loses
+    ScenarioWinnerType gScenarioWinner;
     long            gScenarioRotation;  // = 0;
     long            gThisScenarioNumber;// = -1;
     short           gScenarioRefID;     // = 0;

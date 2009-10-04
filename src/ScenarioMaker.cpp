@@ -235,7 +235,9 @@ Boolean ConstructScenario( long which)
 
     gThisScenario = *globals()->gScenarioData + which;
 
-    globals()->gScenarioWinner = kScenarioWinnerNoPlayer | kScenarioWinnerNoNext | kScenarioWinnerNoText;
+    globals()->gScenarioWinner.player = -1;
+    globals()->gScenarioWinner.next = -1;
+    globals()->gScenarioWinner.text = -1;
 
     SetMiniScreenStatusStrList( gThisScenario->scoreStringResID);
 
@@ -1754,38 +1756,29 @@ spaceObjectType *GetObjectFromInitialNumber( long initialNumber)
     return( anObject);
 }
 
-void DeclareWinner( long whichPlayer, long nextLevel, long textID)
-
-{
-    if ( whichPlayer < 0) // if there's no winner, we want to exit immediately
-    {
-        if ( nextLevel >= 0)
-        {
-            globals()->gScenarioWinner = ( nextLevel << kScenarioWinnerNextShift);
-        } else globals()->gScenarioWinner = kScenarioWinnerNoNext;
-        if ( textID >= 0)
-        {
-            globals()->gScenarioWinner |= ( textID << kScenarioWinnerTextShift);
+void DeclareWinner(long whichPlayer, long nextLevel, long textID) {
+    if (whichPlayer < 0) {
+        // if there's no winner, we want to exit immediately
+        if (nextLevel >= 0) {
+            globals()->gScenarioWinner.next = nextLevel;
+        } else {
+            globals()->gScenarioWinner.next = -1;
         }
-//      ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p no-one won.", nil, nil, -1, -1, -1, -1, __FILE__, 1);
+        if (textID >= 0) {
+            globals()->gScenarioWinner.text = textID;
+        }
         globals()->gGameOver = 1;
-    } else
-    {
-        if ( (globals()->gScenarioWinner & kScenarioWinnerPlayerMask) == kScenarioWinnerNoPlayer)
-        {
-            if ( nextLevel >= 0)
-            {
-                globals()->gScenarioWinner =  whichPlayer | ( nextLevel << kScenarioWinnerNextShift) |
-                                ( textID << kScenarioWinnerTextShift);
-            } else
-            {
-                globals()->gScenarioWinner =  whichPlayer | ( kScenarioWinnerNoNext) |
-                                ( textID << kScenarioWinnerTextShift);
+    } else {
+        if (globals()->gScenarioWinner.player == -1) {
+            globals()->gScenarioWinner.player = whichPlayer;
+            globals()->gScenarioWinner.text = textID;
+            if (nextLevel >= 0) {
+                globals()->gScenarioWinner.next = nextLevel;
+            } else {
+                globals()->gScenarioWinner.next = -1;
             }
-            if ( globals()->gGameOver >= 0)
-            {
+            if (globals()->gGameOver >= 0) {
                 globals()->gGameOver = -180;
-//              ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p we have a winner.", nil, nil, -1, -1, -1, -1, __FILE__, 1);
             }
         }
     }

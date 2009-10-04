@@ -1201,16 +1201,10 @@ void PlayerShipBodyExpire( spaceObjectType *theShip, Boolean sourceIsBody)
             globals()->gGameOver = -180;
 //          ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p the player died.", nil, nil, -1, -1, -1, -1, __FILE__, 1);
         }
-        if ( theShip->owner == globals()->gPlayerAdmiralNumber)
-        {
-            globals()->gScenarioWinner = (globals()->gScenarioWinner & ~kScenarioWinnerTextMask) |
-                (( kScenarioNoShipTextID + gThisScenario->levelNameStrNum) <<
-                    kScenarioWinnerTextShift);
-        } else
-        {
-            globals()->gScenarioWinner = (globals()->gScenarioWinner & ~kScenarioWinnerTextMask) |
-                (( 10050 + gThisScenario->levelNameStrNum) <<
-                    kScenarioWinnerTextShift);
+        if (theShip->owner == globals()->gPlayerAdmiralNumber) {
+            globals()->gScenarioWinner.text = kScenarioNoShipTextID + gThisScenario->levelNameStrNum;
+        } else {
+            globals()->gScenarioWinner.text = 10050 + gThisScenario->levelNameStrNum;
         }
         SetAdmiralFlagship( theShip->owner, -1);
     } else if ( selectShip != nil)

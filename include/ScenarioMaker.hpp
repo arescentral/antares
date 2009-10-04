@@ -26,16 +26,6 @@
 #include "Scenario.hpp"
 #include "SpaceObject.hpp"
 
-#define kScenarioWinnerPlayerMask   0x000000ff
-#define kScenarioWinnerNoPlayer     0x000000ff
-#define kScenarioWinnerNextMask     0xff000000
-#define kScenarioWinnerNextShift    implicit_cast<long>(24)
-#define kScenarioWinnerTextMask     0x00ffff00
-#define kScenarioWinnerTextShift    implicit_cast<long>(8)
-
-#define kScenarioWinnerNoNext       0xff000000
-#define kScenarioWinnerNoText       0x00ffff00
-
 #define kScenarioNoShipTextID       10000
 
 #define kScenarioResFileName    "\p:Ares Data Folder:Ares Scenarios"
