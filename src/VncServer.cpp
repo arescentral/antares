@@ -768,8 +768,9 @@ VncVideoDriver::VncVideoDriver(int port)
     _key_map['z'] = 0x06;
     _key_map[' '] = 0x31;
 
+    _key_map[65507] = 0x36;  // CAPS
     _key_map[65289] = 0x30;  // TAB
-    _key_map[65307] = 0x0A;  // ESC
+    _key_map[65307] = 0x35;  // ESC
     _key_map[65293] = 0x24;  // RET
 
     _key_map[65361] = 0x3B;  // LEFT

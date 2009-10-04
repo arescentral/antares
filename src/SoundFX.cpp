@@ -60,23 +60,6 @@ extern coordPointType gGlobalCorner;
 SSpListenerReference    gListener;
 #endif
 
-int OpenSoundFile( void)
-{
-/*
-    globals()->gSoundFileRefID = ARF_OpenResFile( kSoundResFileName);
-    if ( globals()->gSoundFileRefID == -1)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kSoundsFileError, kDataFolderError, -1, -1, __FILE__, 3);
-        return( RESOURCE_ERROR);
-    }
-    UseResFile( globals()->gSoundFileRefID);
-*/
-//  if ( globals()->externalFileRefNum > 0)
-//      UseResFile( globals()->externalFileRefNum);
-
-    return ( kNoError);
-}
-
 int InitSoundFX( void)
 
 {

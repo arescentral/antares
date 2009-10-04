@@ -101,7 +101,6 @@ struct smartSoundHandle {
     Boolean             keepMe;
 };
 
-int OpenSoundFile( void);
 int InitSoundFX( void);
 void SetListenerLocation( long, long);
 void SetAllSoundsNoKeep( void);

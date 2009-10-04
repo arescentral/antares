@@ -195,14 +195,9 @@ int main(int argc, char* const* argv) {
 }
 
 void AresMain() {
-    Rect                    windowRect, tRect;
-    OSErr                   error;
     RGBColor                initialFadeColor;
     Boolean                 skipFading = false;
-    Point                   tpoint;
-    EventRecord             theEvent;
     scoped_ptr<ColorTable>  theClut;
-    Str255                  tempString;
 
     init_globals();
     WORLD_WIDTH = fakeWindow->portRect.right;
@@ -214,306 +209,67 @@ void AresMain() {
 
     globals()->gPreferencesData.reset(new Preferences);
 
-#if NETSPROCKET_AVAILABLE
-    if ( InitNetworking() == kNoError)
-    {
-        globals()->gOptions |= kOptionNetworkAvailable;
-    } else
-#endif NETSPROCKET_AVAILABLE
-    {
-        globals()->gOptions &= ~kOptionNetworkAvailable;
-    }
+    // Disable networking.
+    globals()->gOptions &= ~kOptionNetworkAvailable;
 
     GetDateTime( reinterpret_cast<unsigned long *>(&gRandomSeed));
 
     theClut.reset(new ColorTable(256));
-
-    if (theClut.get() == nil) {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, RESOURCE_ERROR, -1, -1, -1, __FILE__, 500);
-    }
-
+    gTheWindow = fakeWindow.get();
     gActiveWorld = &fakeWindow->portBits;
-
-    MacSetRect( &windowRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-    tRect = gActiveWorld->bounds;
-    tpoint.h = tpoint.v = 0;
-    ShieldCursor( &tRect, tpoint);
+    ColorTranslatorInit(*theClut);
 
     InitSpriteCursor();
-    CenterRectInRect(&windowRect, &gActiveWorld->bounds);
-
-    globals()->gBackWindow = nil;
-    globals()->gBackWindow = NewCWindow (nil, &tRect, "\p", false, plainDBox,
-            reinterpret_cast<WindowPtr>(-1), false, 701);
     InitTransitions();
 
     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
-    MacSetPort( globals()->gBackWindow);
-    RGBBackColor( &initialFadeColor);
+    skipFading = AutoFadeTo(30, &initialFadeColor, true);
 
-    initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
-    RGBForeColor( &initialFadeColor);
-    skipFading = AutoFadeTo( 30, &initialFadeColor, true);
-
-    MacShowCursor();
-
-    do {
-        Ares_WaitNextEvent(everyEvent, &theEvent, 3, nil);
-    } while (theEvent.what != nullEvent);
-
-    HideCursor();
-
-    MacShowWindow( globals()->gBackWindow);
-
-    RGBBackColor( &initialFadeColor);
-    MacSetPort( globals()->gBackWindow);
-    PaintRect( &(globals()->gBackWindow->portRect));
+    ClearScreen();
     ResetTransitions();
 
-    skipFading = AutoFadeFrom( 1, true);
-    skipFading = AutoFadeTo( 1, &initialFadeColor, true);
-    gTheWindow = NewCWindow (nil, &windowRect, "\p", TRUE, plainDBox,
-            reinterpret_cast<WindowPtr>(-1), true, 700);
+    CreateOffscreenWorld(gTheWindow->portRect, *theClut);
+    MusicInit();
 
-    initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
-    MacSetPort( gTheWindow);
-    RGBBackColor( &initialFadeColor);
+    InitMoviePlayer();
+    RotationInit();
+    NormalizeColors();
+    DrawInRealWorld();
 
-    MacShowWindow ( gTheWindow);
-    RGBBackColor( &initialFadeColor);
+    InterfaceHandlingInit();
 
-    MacSetPort ( gTheWindow);
-    MacSetRect( &windowRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-    ClearScreen();
-
-    BringDebugToFront();
-    skipFading = AutoFadeFrom(1, true);
-
-    do {
-        Ares_WaitNextEvent(everyEvent, &theEvent, 3, nil);
-    } while (theEvent.what != nullEvent);
-    MacSetPort ( gTheWindow);
-    MacShowCursor();
-
-    error = CreateOffscreenWorld(gTheWindow->portRect, *theClut);
-    if ( error == kNoError)
-    {
-        error = MusicInit();
-        WriteDebugLine("\p>Music");
-        if ( OpenSoundFile() == kNoError)
-        {
-            mWriteDebugString("\p>Sound File");
-            InitMoviePlayer();
-
-            WriteDebugLine("\p>Movie");
-            error = RotationInit();
-            if ( error == kNoError)
-            {
-                WriteDebugLine("\p>Rot");
-
-                NormalizeColors();
-                DrawInRealWorld();
-                //                      AutoFadeFrom( 30);
-                ColorTranslatorInit(*theClut);
-                //                      InitTransitions();
-                //                      ResetTransitions();
-                error = InterfaceHandlingInit();
-                if ( error == kNoError)
-                {
-                    WriteDebugLine("\p>Interface");
-
-                    if ( globals()->originalExternalFileSpec.name[0] > 0)
-                    {
-                        globals()->externalFileSpec =
-                            globals()->originalExternalFileSpec;
-
-                        EF_OpenExternalFile();
-                    }
-
-                    if ( globals()->gOptions & kOptionMusicIdle)
-                    {
-                        LoadSong( kTitleSongID);
-                        SetSongVolume( kMaxMusicVolume);
-                        PlaySong();
-                    }
-                    MacSetPort( gTheWindow);
-                    if ( !skipFading)
-                    {
-                        skipFading = CustomPictFade( 20, 20, 2000, 2000, gTheWindow);
-                        if ( !skipFading)
-                        {
-                            skipFading = CustomPictFade( 20, 20, 2001, 2000, gTheWindow);
-                        }
-                    }
-
-                    BlackTitleScreen();
-
-                    if ( !skipFading) PlayMovieByName("\p:Ares Data Folder:Title", gTheWindow,
-                            false);
-
-                    MacSetPort( gTheWindow);
-
-                    skipFading = StartCustomPictFade( 20, 20, 502, 2001,
-                            gTheWindow, skipFading);
-
-                    do
-                    {
-                        Ares_WaitNextEvent (everyEvent, &theEvent, 3, nil);
-                    } while ( theEvent.what != nullEvent);
-
-                    MacSetPort( gTheWindow);
-                    GetVersionString( tempString, globals()->gMainResRefNum);
-                    initialFadeColor.red = initialFadeColor.blue = initialFadeColor.green = 30000;
-
-                    RGBForeColor( &initialFadeColor);
-
-                    initialFadeColor.red = 65535;
-                    initialFadeColor.blue = initialFadeColor.green = 0;
-                    RGBForeColor( &initialFadeColor);
-                    MoveTo( 4, 12 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
-
-                    MoveTo( 35 + ( WORLD_WIDTH - kSmallScreenWidth) / 2,
-                            50 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
-                    initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 65535;
-
-                    MoveTo( 245 + ( WORLD_WIDTH - kSmallScreenWidth) / 2,
-                            18 + ( WORLD_HEIGHT - kSmallScreenHeight) / 2);
-                    error = InitDirectText();
-                    if ( error == kNoError)
-                    {
-                        WriteDebugLine("\p>DText");
-
-                        error = ScreenLabelInit();
-                        if ( error == kNoError)
-                        {
-                            WriteDebugLine("\p>Label");
-
-                            error = InitMessageScreen();
-                            if ( error == kNoError)
-                            {
-                                WriteDebugLine("\p>Message");
-
-                                error = InitScrollStars();
-                                if ( error == kNoError)
-                                {
-                                    WriteDebugLine("\p>ScrollStar");
-
-                                    error = InstrumentInit();
-                                    if ( error == kNoError)
-                                    {
-                                        WriteDebugLine("\p>Instrument");
-
-
-                                        SpriteHandlingInit();
-                                        AresCheatInit();
-                                        error = ScenarioMakerInit();
-                                        {
-                                            error = SpaceObjectHandlingInit();  // MUST be after ScenarioMakerInit()
-                                            if ( error == kNoError)
-                                            {
-                                                WriteDebugLine("\p>SpaceObj");
-                                                error = InitSoundFX();
-                                                //                                                      if ( error == kNoError)
-                                                {
-                                                    WriteDebugLine("\p>SoundFX");
-                                                    error =InitMotion();
-                                                    if ( error == kNoError)
-                                                    {
-                                                        WriteDebugLine("\p>Motion");
-
-                                                        error = AdmiralInit();
-                                                        if ( error == kNoError)
-                                                        {
-                                                            error = InitBeams();
-                                                            if ( error == kNoError)
-                                                            {
-                                                                //          InitNetworking();
-                                                                TimedWaitForAnyEvent(
-                                                                        skipFading?1:1400);
-                                                                EndCustomPictFade(
-                                                                        gTheWindow,
-                                                                        skipFading);
-                                                                MacShowCursor();    // one for the titlescreen
-                                                                MacShowCursor();    // one for the whole deal
-
-                                                                gLastTick = TickCount();
-
-                                                                //          RandomInit();
-                                                                globals()->okToOpenFile = true;
-                                                                MainLoop();
-                                                                //          RandomCleanup();
-                                                                CleanupMoviePlayer();
-                                                                //          DisposeNetworking();
-                                                                CleanupBeams();
-                                                                WriteDebugLine("\p<Beams");
-                                                            }
-                                                            AdmiralCleanup();
-                                                            WriteDebugLine("\p<Admiral");
-                                                        }
-
-                                                        MotionCleanup();
-                                                        WriteDebugLine("\p<Motion");
-                                                    }
-
-                                                    SoundFXCleanup();
-                                                    WriteDebugLine("\p<Sound");
-                                                }
-                                                CleanupSpaceObjectHandling();
-                                                WriteDebugLine("\p<Obj Handle");
-                                                CleanupSpriteHandling();
-                                                CleanupAresCheat();
-                                                WriteDebugLine("\p<Sprite");
-                                            }
-                                            ScenarioMakerCleanup();
-                                        }
-                                        InstrumentCleanup();
-                                        WriteDebugLine("\p<Instrument");
-                                    }
-                                    CleanupScrollStars();
-                                    WriteDebugLine("\p<Stars");
-                                }
-                                MessageScreenCleanup();
-                                WriteDebugLine("\p<Message");
-                            }
-                            ScreenLabelCleanup();
-                            WriteDebugLine("\p<Label");
-                        }
-                        DirectTextCleanup();
-                        WriteDebugLine("\p<DText");
-                    }
-                    InterfaceHandlingCleanup();
-                    WriteDebugLine("\p<Interface");
-                }
-                ColorTranslatorCleanup();
-                WriteDebugLine("\p<Color");
-                RotationCleanup();
-                WriteDebugLine("\p<Rotation");
-                CleanupTransitions();
-                CleanupSpriteCursor();
-                WriteDebugLine("\p<Transition");
-                CleanupMoviePlayer();
-            }
-            MusicCleanup();
-            WriteDebugLine("\p<Music");
-        }
-        CleanUpOffscreenWorld();
-        WriteDebugLine("\p<GWorld");
+    if (globals()->gOptions & kOptionMusicIdle) {
+        LoadSong( kTitleSongID);
+        SetSongVolume( kMaxMusicVolume);
+        PlaySong();
     }
-    WriteDebugLine("\p<Network");
+    if (!skipFading) {
+        skipFading = CustomPictFade(20, 20, 2000, 2000, gTheWindow);
+    }
+    if (!skipFading) {
+        skipFading = CustomPictFade(20, 20, 2001, 2000, gTheWindow);
+    }
 
-    theClut.reset();
+    StartCustomPictFade(20, 20, 502, 2001, gTheWindow, skipFading);
+    InitDirectText();
+    ScreenLabelInit();
+    InitMessageScreen();
+    InitScrollStars();
+    InstrumentInit();
+    SpriteHandlingInit();
+    AresCheatInit();
+    ScenarioMakerInit();
+    SpaceObjectHandlingInit();  // MUST be after ScenarioMakerInit()
+    InitMotion();
+    AdmiralInit();
+    InitBeams();
+    TimedWaitForAnyEvent(skipFading ? 1 : 1400);
+    EndCustomPictFade(gTheWindow, skipFading);
 
-    DebugWindowCleanup();
-    DisposeWindow ( gTheWindow);
+    gLastTick = TickCount();
 
-#if NETSPROCKET_AVAILABLE
-    DisposeNetworking();
-#endif NETSPROCKET_AVAILABLE
-    RT_Close();
-
-    FlushEvents(everyEvent, 0);
-    delete globals();
-    InitCursor();
+    globals()->okToOpenFile = true;
+    MainLoop();
 }
 
 void ToolBoxInit( void)
