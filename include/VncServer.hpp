@@ -19,6 +19,7 @@
 #define ANTARES_VNC_SERVER_HPP_
 
 #include <queue>
+#include <map>
 #include "VideoDriver.hpp"
 
 class VncVideoDriver : public VideoDriver {
@@ -44,6 +45,7 @@ class VncVideoDriver : public VideoDriver {
     bool _button;
     Point _mouse;
     std::queue<EventRecord*> _event_queue;
+    std::map<int, int> _key_map;
 };
 
 #endif  // ANTARES_VNC_SERVER_HPP_

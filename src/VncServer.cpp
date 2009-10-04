@@ -600,6 +600,18 @@ bool VncVideoDriver::vnc_poll(int64_t timeout) {
                 {
                     KeyEventMessage msg;
                     in.read(&msg);
+                    printf("key %d\n", msg.key);
+
+                    if (_key_map.find(msg.key) == _key_map.end()) {
+                        printf("unknown key\n");
+                        exit(1);
+                    } else {
+                        evt->what = autoKey;
+                        evt->message = _key_map[msg.key] << 8;
+                        printf("enqueued %d\n", evt->message);
+                        _event_queue.push(evt.release());
+                    }
+
                     more = true;
                 }
                 break;
@@ -727,6 +739,43 @@ VncVideoDriver::VncVideoDriver(int port)
         out.flush();
     }
     vnc_poll(0);
+
+    _key_map['a'] = 0x00;
+    _key_map['b'] = 0x0B;
+    _key_map['c'] = 0x08;
+    _key_map['d'] = 0x02;
+    _key_map['e'] = 0x0E;
+    _key_map['f'] = 0x03;
+    _key_map['g'] = 0x05;
+    _key_map['h'] = 0x04;
+    _key_map['i'] = 0x22;
+    _key_map['j'] = 0x26;
+    _key_map['k'] = 0x28;
+    _key_map['l'] = 0x25;
+    _key_map['m'] = 0x2E;
+    _key_map['n'] = 0x2D;
+    _key_map['o'] = 0x1F;
+    _key_map['p'] = 0x23;
+    _key_map['q'] = 0x0C;
+    _key_map['r'] = 0x0F;
+    _key_map['s'] = 0x01;
+    _key_map['t'] = 0x11;
+    _key_map['u'] = 0x20;
+    _key_map['v'] = 0x09;
+    _key_map['w'] = 0x0D;
+    _key_map['x'] = 0x07;
+    _key_map['y'] = 0x10;
+    _key_map['z'] = 0x06;
+    _key_map[' '] = 0x31;
+
+    _key_map[65289] = 0x30;  // TAB
+    _key_map[65307] = 0x0A;  // ESC
+    _key_map[65293] = 0x24;  // RET
+
+    _key_map[65361] = 0x3B;  // LEFT
+    _key_map[65362] = 0x3E;  // UP
+    _key_map[65363] = 0x3C;  // RGHT
+    _key_map[65364] = 0x3D;  // DOWN
 }
 
 void VncVideoDriver::send_event(EventRecord) { }
