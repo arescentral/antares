@@ -70,9 +70,6 @@ typedef uint32_t FourCharCode;
 typedef FourCharCode OSType;
 typedef FourCharCode ResType;
 
-STUB0(MemError, OSErr(), noErr);
-STUB0(ResError, OSErr(), noErr);
-
 enum {
     TRUE = true,
     FALSE = false,

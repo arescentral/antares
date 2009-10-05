@@ -3499,7 +3499,6 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
 
 
     textHandle.load_resource('TEXT', textID);
-    if ( ResError() != noErr) return;//Debugger();
     if (textHandle.get() != nil) {
         mSetDirectFont( textFontNum);
 
@@ -3880,11 +3879,9 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                             if ( AnyEvent()) abort = true;
                         }
                     }
-                    if ( MemError() != noErr) return;//Debugger();
                     retroTextSpec.text.destroy();
-                    if ( MemError() != noErr) return;//Debugger();
-                }// else DebugStr("\pNil Handle");
-            }// else DebugStr("\pError");
+                }
+            }
         }
 
         for (   l = 0;
