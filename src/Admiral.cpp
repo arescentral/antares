@@ -33,6 +33,8 @@
 #include "StringHandling.hpp"
 #include "UniverseUnit.hpp"
 
+namespace antares {
+
 #define kConvoySpeed                3
 
 #define kDestNoObject               -1
@@ -1829,3 +1831,5 @@ long GetAdmiralKill( long whichAdmiral)
         return( admiral->kills);
     else return (0);
 }
+
+}  // namespace antares

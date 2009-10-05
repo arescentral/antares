@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #include "SmartPtr.hpp"
 
+namespace antares {
+
 class BinaryReader {
   public:
     virtual ~BinaryReader();
@@ -123,5 +125,7 @@ void BinaryWriter::write(const T* t, size_t count) {
         t[i].write(this);
     }
 }
+
+}  // namespace antares
 
 #endif  // ANTARES_BINARY_STREAM_HPP_

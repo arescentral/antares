@@ -21,6 +21,8 @@
 #include <stdint.h>
 #include <string>
 
+namespace antares {
+
 class AutoClosedFd {
   public:
     AutoClosedFd() : _fd(-1) { }
@@ -54,5 +56,7 @@ class MappedFile {
     size_t _size;
     const char* _data;
 };
+
+}  // namespace antares
 
 #endif // ANTARES_MAPPED_FILE_HPP_

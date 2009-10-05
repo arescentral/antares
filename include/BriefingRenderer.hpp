@@ -22,6 +22,8 @@
 
 #include "NateDraw.hpp"
 
+namespace antares {
+
 // Briefing_Renderer.h
 
 void Briefing_Objects_Render( long whichScenario, PixMap* destmap,
@@ -32,5 +34,7 @@ void BriefPoint_Data_Get( long whichPoint, long whichScenario, long *headerID,
                     long *headerNumber, long *contentID, Rect *hiliteBounds,
                     coordPointType *corner, long scale, long minSectorSize, long maxSize,
                     Rect *bounds);
+
+}  // namespace antares
 
 #endif // ANTARES_BRIEFING_RENDERER_HPP_

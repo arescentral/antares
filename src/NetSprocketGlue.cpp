@@ -21,6 +21,8 @@
 
 #include "GameRanger.h"
 
+namespace antares {
+
 #ifndef powerc
 #pragma mpwc on
 #endif
@@ -825,3 +827,5 @@ static pascal OSErr GetSystemArchitecture(OSType *archType)
 #ifndef powerc
 #pragma mpwc reset
 #endif
+
+}  // namespace antares

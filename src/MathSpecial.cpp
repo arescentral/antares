@@ -24,6 +24,8 @@
 #include "BinaryStream.hpp"
 #include "Resources.h"
 
+namespace antares {
+
 //      FOR THE SQUARE ROOT CODE:
 //        Saturday, May 14, 1994 11:01:56 AM
 //        mac.programmer Item
@@ -239,3 +241,5 @@ void fixedPointType::read(BinaryReader* bin) {
     bin->read(&h);
     bin->read(&v);
 }
+
+}  // namespace antares

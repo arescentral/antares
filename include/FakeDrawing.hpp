@@ -23,6 +23,8 @@
 
 #include "Fakes.hpp"
 
+namespace antares {
+
 /*
     int width() const { return bounds.right - bounds.left; }
     int height() const { return bounds.bottom - bounds.top; }
@@ -96,5 +98,7 @@ extern PixMap* gSaveWorld;
 
 void DumpTo(const std::string& path);
 void FakeDrawingInit(int width, int height);
+
+}  // namespace antares
 
 #endif  // ANTARES_FAKE_DRAWING_HPP_

@@ -19,6 +19,8 @@
 
 #include <assert.h>
 
+namespace antares {
+
 InputSource::~InputSource() { }
 
 ReplayInputSource::ReplayInputSource(int32_t id)
@@ -46,3 +48,5 @@ bool ReplayInputSource::next(uint32_t* key_map) {
     *key_map = _keys;
     return true;
 }
+
+}  // namespace antares

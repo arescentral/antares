@@ -24,6 +24,8 @@
 #include "Handle.hpp"
 #include "MathSpecial.hpp"
 
+namespace antares {
+
 /*
 #define ROT_RES     5
 #define ROT_POS     72
@@ -113,5 +115,7 @@ void SetRotPoint( long, long, long);
 void GetRotPoint( long *x, long *y, long rotpos);
 void RotatePoint( long, long, Fixed *, Fixed *, long);
 long GetAngleFromVector( long, long);
+
+}  // namespace antares
 
 #endif // ANTARES_ROTATION_HPP_

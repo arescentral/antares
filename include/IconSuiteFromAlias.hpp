@@ -20,9 +20,13 @@
 
 // IconSuiteFromAlias.h
 
+namespace antares {
+
 void DrawAliasSmallIcon( AliasHandle alias, short left, short right);
 void DrawFSpecSmallIcon( FSSpec *fspec, short left, short top);
 Handle GetIconSuiteFromAlias( AliasHandle alias);
 OSErr GetIconSuiteFromFSSpec(FSSpecPtr hfsObj, Handle *iconSuite);
+
+}  // namespace antares
 
 #endif // ANTARES_ICON_SUITE_FROM_ALIAS_HPP_

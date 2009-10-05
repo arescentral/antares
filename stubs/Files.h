@@ -3,6 +3,8 @@
 
 #include <Base.h>
 
+namespace antares {
+
 typedef SInt16 FSVolumeRefNum;
 
 typedef struct {
@@ -28,5 +30,7 @@ enum {
     fnfErr = 4200,  // File not found?
     dupFNErr = 4201,  // Duplicate file name?
 };
+
+}  // namespace antares
 
 #endif // ANTARES_STUB_FILES_H_

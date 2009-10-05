@@ -20,11 +20,15 @@
 
 #include <Base.h>
 
+namespace antares {
+
 #define kThis_Version_Is                    0x01010100
 
 typedef uint32_t aresVersionType;
 
 aresVersionType AresVersion_Get_FromString(unsigned char* s);
 unsigned char* String_Get_FromAresVersion(unsigned char* s, aresVersionType t);
+
+}  // namespace antares
 
 #endif // ANTARES_ARES_VERSION_HPP_

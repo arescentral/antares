@@ -20,6 +20,8 @@
 
 // Math Macros.h
 
+namespace antares {
+
 template <typename T>
 inline T ABS(T x) {
     if (x >= 0) {
@@ -35,5 +37,7 @@ inline int mClipCode(int x, int y, const Rect& bounds) {
         | ((y < bounds.top) << 1)
         | (y > ( bounds.bottom - 1));
 }
+
+}  // namespace antares
 
 #endif // ANTARES_MATH_MACROS_HPP_

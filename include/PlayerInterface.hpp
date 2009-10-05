@@ -24,6 +24,8 @@
 #include "PlayerInterfaceDrawing.hpp"
 #include "PlayerInterfaceItems.hpp"
 
+namespace antares {
+
 enum mainScreenResultType {
     kMainPlay = 1,
     kMainQuit = 2,
@@ -90,5 +92,7 @@ void DoMissionDebriefingText(long, long, long, long, long, long, long, long);
 void DoScrollText(long, long, long, long, long);
 void HandleOSEvent( EventRecord *);
 void Replace_KeyCode_Strings_With_Actual_Key_Names(TypedHandle<unsigned char> text, short resID, short padTo);
+
+}  // namespace antares
 
 #endif // ANTARES_PLAYER_INTERFACE_HPP_

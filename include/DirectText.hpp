@@ -25,6 +25,8 @@
 #include "Handle.hpp"
 #include "SpriteHandling.hpp"
 
+namespace antares {
+
 #define kCharSpace              0
 #define kFirstCharacter         0
 #define kLastCharacter          255
@@ -69,5 +71,7 @@ int mDirectFontHeight();
 int mDirectFontAscent();
 void mGetDirectStringDimensions(unsigned char* string, long& width, long& height);
 void DrawDirectTextStringClipped(unsigned char*, unsigned char, PixMap *, Rect *, long, long);
+
+}  // namespace antares
 
 #endif // ANTARES_DIRECT_TEXT_HPP_

@@ -30,6 +30,8 @@
 #include "SpriteCursor.hpp"  // for hint line
 #include "StringHandling.hpp"
 
+namespace antares {
+
 #define kScreenLabelError       "\pSCLB"
 #define kUseLabels
 
@@ -784,3 +786,5 @@ static void Auto_Animate_Line( Point *source, Point *dest)
             break;
     }
 }
+
+}  // namespace antares

@@ -24,6 +24,8 @@
 #include "Error.hpp"
 #include "Resource.hpp"
 
+namespace antares {
+
 directTextType* gDirectText = nil;
 long gWhichDirectText = 0;
 scoped_ptr<directTextType>* gDirectTextData;
@@ -162,3 +164,5 @@ void DrawDirectTextStringClipped(unsigned char* string, unsigned char color, Pix
     }
     MoveTo(pen.h, pen.v + gDirectText->ascent);
 }
+
+}  // namespace antares

@@ -21,6 +21,8 @@
 #include <Base.h>
 #include "Handle.hpp"
 
+namespace antares {
+
 class SoundDriver {
   public:
     virtual ~SoundDriver() { }
@@ -59,5 +61,7 @@ TypedHandle<Sound> GetSound(int id);
 OSErr SndPlay(SndChannel* channel, TypedHandle<Sound> sound, bool);
 
 void FakeSoundsInit();
+
+}  // namespace antares
 
 #endif  // ANTARES_FAKE_SOUNDS_HPP_

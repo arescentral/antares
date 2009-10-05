@@ -18,9 +18,13 @@
 #ifndef ANTARES_CASTS_HPP_
 #define ANTARES_CASTS_HPP_
 
+namespace antares {
+
 template <typename T, typename U>
 T implicit_cast(const U& u) {
     return u;
 }
+
+}  // namespace antares
 
 #endif  // ANTARES_CASTS_HPP_

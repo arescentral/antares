@@ -33,6 +33,8 @@
 #include "Music.hpp"
 #include "Picture.hpp"
 
+namespace antares {
+
 //#define   kDontMessWithColors
 
 #define kStartAnimation     -255
@@ -477,3 +479,5 @@ bool EndCustomPictFade(Window* aWindow, bool fast) {
     if ( fast) return true;
     return (gotAnyEvent);
 }
+
+}  // namespace antares

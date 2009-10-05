@@ -21,6 +21,8 @@
 
 #include <AEPackObject.h>
 
+namespace antares {
+
 //#include "BP_Error.h"
 
 #define require(x,y,merrtitle,merrdesc) do { if (!(x))\
@@ -648,3 +650,5 @@ Handle GetIconSuiteFromAlias( AliasHandle alias)
     return iconSuite;
 }
 
+
+}  // namespace antares

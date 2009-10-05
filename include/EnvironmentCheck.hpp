@@ -18,10 +18,14 @@
 #ifndef ANTARES_ENVIRONMENT_CHECK_HPP_
 #define ANTARES_ENVIRONMENT_CHECK_HPP_
 
+namespace antares {
+
 // Environment Check.h
 STUB0(EnvironmentCheck, bool(), true);
 void EnvironmentError( short);
 bool EnvironmentWarning( short);
 bool MySWRoutineAvailable( short);
+
+}  // namespace antares
 
 #endif // ANTARES_ENVIRONMENT_CHECK_HPP_

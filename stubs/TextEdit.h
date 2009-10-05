@@ -3,6 +3,8 @@
 
 #include <Base.h>
 
+namespace antares {
+
 struct TextEdit {
     int teLength;
     Handle hText;
@@ -21,5 +23,7 @@ STUB3(TESetSelect, void(int start, int end, TEHandle data));
 STUB1(TEActivate, void(TEHandle data));
 STUB1(TEDeactivate, void(TEHandle data));
 STUB2(TEUpdate, void(Rect*, TEHandle data));
+
+}  // namespace antares
 
 #endif // ANTARES_STUB_AIFF_H_

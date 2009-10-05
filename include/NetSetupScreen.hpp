@@ -18,6 +18,8 @@
 #ifndef ANTARES_NET_SETUP_SCREEN_HPP_
 #define ANTARES_NET_SETUP_SCREEN_HPP_
 
+namespace antares {
+
 long DoTabbedNetLevelInterface( void);
 void NetLevelShowLag( long, long);
 void NetLevelShowRaces( short, short);
@@ -25,5 +27,7 @@ void ConvertOffscreenRectToPortraitData( short, short, unsigned char *);
 void DisplayPortraitData( short, short, unsigned char *, unsigned char);
 void ClearPortrait( unsigned char *);
 bool PlotCustomIcon( Rect *);
+
+}  // namespace antares
 
 #endif // ANTARES_NET_SETUP_SCREEN_HPP_

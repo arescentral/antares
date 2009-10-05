@@ -29,6 +29,8 @@
 #include "Fakes.hpp"
 #include "File.hpp"
 
+namespace antares {
+
 scoped_ptr<Window> fakeWindow;
 
 extern PixMap* gRealWorld;
@@ -335,3 +337,5 @@ void RestoreEntries(const ColorTable& table) {
 void FakeDrawingInit(int width, int height) {
     fakeWindow.reset(new Window(width, height));
 }
+
+}  // namespace antares

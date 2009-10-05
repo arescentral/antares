@@ -21,6 +21,8 @@
 #include <errno.h>
 #include <pthread.h>
 
+namespace antares {
+
 class Thread {
   public:
     Thread();
@@ -252,5 +254,7 @@ inline void Condition::broadcast() {
 inline void Condition::signal() {
     pthread_check("pthread_cond_signal", pthread_cond_signal(&_cond));
 }
+
+}  // namespace antares
 
 #endif  // ANTARES_PTHREAD_HPP_

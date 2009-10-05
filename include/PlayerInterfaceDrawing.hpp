@@ -23,6 +23,8 @@
 #include "AnyChar.hpp"
 #include "PlayerInterfaceItems.hpp"
 
+namespace antares {
+
 #define kInterfaceTextVBuffer       2
 #define kInterfaceTextHBuffer       3
 
@@ -84,5 +86,7 @@ void BiggestRect( Rect  *, Rect *);
 void LongRectToRect( Rect *, Rect *);
 void RectToLongRect( Rect *, Rect *);
 void SetLongRect( Rect *, long, long, long, long);
+
+}  // namespace antares
 
 #endif // ANTARES_PLAYER_INTERFACE_DRAWING_HPP_

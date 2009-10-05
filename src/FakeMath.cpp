@@ -22,6 +22,8 @@
 
 #include "Casts.hpp"
 
+namespace antares {
+
 void WideMultiply(long a, long b, int64_t* c) {
     *c = implicit_cast<int64_t>(a) * implicit_cast<int64_t>(b);
 }
@@ -234,3 +236,5 @@ long AngleFromSlope(Fixed slope) {
     }
     return 90;
 }
+
+}  // namespace antares

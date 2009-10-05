@@ -20,6 +20,8 @@
 
 #include <Base.h>
 
+namespace antares {
+
 #define kUsePublicCopyProtection
 
 #define kKeyControlDataNum  80
@@ -87,5 +89,7 @@ void GetNetPreferences(unsigned char*, unsigned char*, unsigned long *, long *, 
     short *, unsigned short *, unsigned short *, unsigned short *, short *, short *, short *);
 OSErr SaveNetPreferences(unsigned char*, unsigned char*, unsigned long, long, long, unsigned long,
     short, unsigned short, unsigned short, unsigned short, short, short, short);
+
+}  // namespace antares
 
 #endif // ANTARES_ARES_PREFERENCES_HPP_

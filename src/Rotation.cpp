@@ -26,6 +26,8 @@
 #include "MathSpecial.hpp"
 #include "Resources.h"
 
+namespace antares {
+
 #define kRotationError  "\pROTN"
 
 TypedHandle<RotTableEntry> gRotTable;
@@ -197,3 +199,5 @@ long GetAngleFromVector( long x, long y)
     return ( whichBest);
 
 }
+
+}  // namespace antares

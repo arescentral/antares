@@ -20,6 +20,10 @@
 
 #include <string>
 
+namespace antares {
+
 typedef std::basic_string<unsigned char> ustring;
+
+}  // namespace antares
 
 #endif  // ANTARES_STRING_HPP_

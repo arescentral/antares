@@ -45,6 +45,8 @@
 #include "TimeUnit.hpp"
 #include "UniverseUnit.hpp"
 
+namespace antares {
+
 #define kScenarioError          "\pSCNR"
 
 #define kOwnerMayChangeFlag         0x80000000
@@ -2036,3 +2038,5 @@ bool ThisChapterIsNetworkable( long whichChapter)
     }
     return( false);
 }
+
+}  // namespace antares

@@ -19,6 +19,8 @@
 
 #include "PosixException.hpp"
 
+namespace antares {
+
 std::string BaseName(const std::string& path) {
     if (path == "/") {
         return "/";
@@ -64,3 +66,5 @@ void MakeDirs(const std::string& path, mode_t mode) {
         Mkdir(path, mode);
     }
 }
+
+}  // namespace antares

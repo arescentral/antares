@@ -26,6 +26,8 @@
 #include "Resources.h"
 #include "Sound.h"
 
+namespace antares {
+
 #define EMPTY_NATE_PIX_SIZE         8L
 
 class natePixEntryType {
@@ -310,3 +312,5 @@ void ColorizeNatePixTableColor(TypedHandle<natePixType> table, unsigned char col
         }
     }
 }
+
+}  // namespace antares

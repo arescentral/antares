@@ -21,6 +21,8 @@
 #include "MathSpecial.hpp"
 #include "Resources.h"
 
+namespace antares {
+
 void ResetLastTime( long defecit)
 
 {
@@ -49,3 +51,5 @@ void UpdateGameTime( void)
 //  globals()->gGameTime += GetTimeLapse();
 //  ResetLastTime();
 }
+
+}  // namespace antares

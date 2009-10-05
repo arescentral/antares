@@ -23,6 +23,8 @@
 #include <Base.h>
 #include "SmartPtr.hpp"
 
+namespace antares {
+
 class PictureNotFoundException : public std::exception { };
 
 class Picture {
@@ -39,5 +41,7 @@ class Picture {
 
     DISALLOW_COPY_AND_ASSIGN(Picture);
 };
+
+}  // namespace antares
 
 #endif  // ANTARES_PICTURE_HPP_

@@ -36,6 +36,8 @@
 #include "ScreenLabel.hpp"
 #include "SpriteHandling.hpp"
 
+namespace antares {
+
 #define kMessageScreenLeft      200
 #define kMessageScreenTop       454
 #define kMessageScreenRight     420
@@ -1503,3 +1505,5 @@ void MessageLabel_Set_Special(short id, TypedHandle<unsigned char> text) {
     attachPoint.v -= 2;
     SetScreenLabelAttachedHintLine( id, hintLine, attachPoint);
 }
+
+}  // namespace antares

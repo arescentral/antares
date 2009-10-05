@@ -26,6 +26,8 @@
 #include "Resource.hpp"
 #include "Resources.h"
 
+namespace antares {
+
 #define kRaceError          "\pRACE"
 
 short InitRaces( void)
@@ -175,3 +177,5 @@ size_t raceType::load_data(const char* data, size_t len) {
 
     return bin.bytes_read();
 }
+
+}  // namespace antares

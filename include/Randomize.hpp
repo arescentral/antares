@@ -20,6 +20,8 @@
 
 #include <stdint.h>
 
+namespace antares {
+
 int RandomInit();
 void RandomCleanup();
 int Randomize(int range);
@@ -28,5 +30,7 @@ int16_t XRandomSeeded(int16_t range, int32_t* seed);
 inline int16_t RandomSeeded(int16_t range, int32_t* seed, int32_t, int32_t) {
     return XRandomSeeded(range, seed);
 }
+
+}  // namespace antares
 
 #endif // ANTARES_RANDOMIZE_HPP_

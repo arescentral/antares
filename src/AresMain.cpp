@@ -83,6 +83,8 @@
 
 #include "WrapGameRanger.hpp"
 
+namespace antares {
+
 namespace {
 
 const int kReplayResID = 600;
@@ -120,11 +122,6 @@ void FakeInit(int argc, char* const* argv);
 void Pause( long time);
 void MainLoop();
 GameResult PlayTheGame(long *seconds);
-
-int main(int argc, char* const* argv) {
-    FakeInit(argc, argv);
-    return 0;
-}
 
 void AresMain() {
     RGBColor                initialFadeColor;
@@ -953,4 +950,11 @@ void Pause( long time)
     while (( TickCount() - starttime) < time) {
         // DO NOTHING
     }
+}
+
+}  // namespace antares
+
+int main(int argc, char* const* argv) {
+    antares::FakeInit(argc, argv);
+    return 0;
 }

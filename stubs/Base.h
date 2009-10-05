@@ -8,6 +8,8 @@
 #include "Geometry.hpp"
 #include "SmartPtr.hpp"
 
+namespace antares {
+
 #define pascal
 
 enum {
@@ -205,5 +207,7 @@ struct Window {
 
     DISALLOW_COPY_AND_ASSIGN(Window);
 };
+
+}  // namespace antares
 
 #endif // ANTARES_STUB_BASE_H_

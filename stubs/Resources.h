@@ -6,6 +6,8 @@
 
 #include "Handle.hpp"
 
+namespace antares {
+
 typedef void* ResFile;
 
 STUB0(CurResFile, int(), 0);
@@ -21,5 +23,7 @@ STUB2(FSpOpenResFile, int(FSSpec* spec, int options), 0);
 enum {
     resNotFound = 2000,
 };
+
+}  // namespace antares
 
 #endif // ANTARES_STUB_RESOURCES_H_

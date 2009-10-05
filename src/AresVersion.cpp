@@ -24,6 +24,8 @@
 #include "StringHandling.hpp"
 #include "StringNumerics.hpp"
 
+namespace antares {
+
 inline bool mChar_is_numeric(char m_c) {
     return (((m_c) >= '0') && ((m_c) <= '9'));
 }
@@ -135,3 +137,5 @@ unsigned char* String_Get_FromAresVersion(unsigned char* s, aresVersionType t) {
 
     return s;
 }
+
+}  // namespace antares

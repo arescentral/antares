@@ -21,6 +21,8 @@
 // Options.h
 //#define   kNonPlayableDemo
 
+namespace antares {
+
 #define kOptionAutoPlay                 0x00000001
 #define kOptionMusicIdle                0x00000002
 #define kOptionMusicPlay                0x00000004
@@ -55,5 +57,7 @@
 #define kOptionInBackground             0x80000000
 
 #define kCarryOverOptionMask            (kOptionMusicDriver | kOptionQuicktime | kOptionSoundSprocketOn | kOptionSpeechAvailable | kOptionNetworkAvailable | kOptionNoSinglePlayer | kOptionSoundAvailable | kOptionUseSystemHideMenuBar)
+
+}  // namespace antares
 
 #endif // ANTARES_OPTIONS_HPP_

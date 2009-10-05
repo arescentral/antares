@@ -20,8 +20,12 @@
 
 #include <Base.h>
 
+namespace antares {
+
 // Key_Setup_Screen.h
 
 bool Key_Setup_Screen_Do( void);
+
+}  // namespace antares
 
 #endif // ANTARES_KEY_SETUP_SCREEN_HPP_

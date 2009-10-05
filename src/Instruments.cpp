@@ -39,6 +39,8 @@
 #include "SpriteCursor.hpp"
 #include "UniverseUnit.hpp"
 
+namespace antares {
+
 #define kRadarBlipNum       50L
 #define kRadarColor         GREEN
 #define kSectorColor        SKY_BLUE
@@ -1561,3 +1563,5 @@ void DrawBuildTimeBar(int32_t value) {
 
     DrawNateRect( gActiveWorld, &tRect, gNatePortLeft << 2L, gNatePortTop, color);
 }
+
+}  // namespace antares

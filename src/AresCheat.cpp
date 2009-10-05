@@ -31,6 +31,8 @@
 #include "StringList.hpp"
 #include "StringNumerics.hpp"
 
+namespace antares {
+
 #define kCheatStringListID      750
 #define kCheatFeedbackOnID      751
 #define kCheatFeedbackOffID     752
@@ -234,3 +236,5 @@ void CheatFeedbackPlus( short whichCheat, bool activate, long whichPlayer,
     AppendStringToMessage( infoString);
     EndMessage();
 }
+
+}  // namespace antares

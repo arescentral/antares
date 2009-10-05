@@ -23,6 +23,8 @@
 #include "AnyChar.hpp"
 #include "PlayerInterfaceItems.hpp"
 
+namespace antares {
+
 class ScopedOpenInterface {
   public:
     ScopedOpenInterface(int id);
@@ -79,5 +81,7 @@ void SetInterfaceListCallback(  short       whichItem,
                                 bool     (*itemHilited)( short, bool));
 void SetButtonKeyNum( short, short);
 short GetButtonKeyNum( short);
+
+}  // namespace antares
 
 #endif // ANTARES_INTERFACE_HANDLING_HPP_

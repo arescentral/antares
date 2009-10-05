@@ -45,6 +45,8 @@
 #include "StringHandling.hpp"
 #include "StringNumerics.hpp"
 
+namespace antares {
+
 #define kHasCustomIcon      0x0400
 
 #define kNetLevelID                 5020
@@ -3289,3 +3291,5 @@ void LaunchURL( StringPtr s)
 
 
 #endif NETSPROCKET_AVAILABLE
+
+}  // namespace antares

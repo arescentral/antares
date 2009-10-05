@@ -23,7 +23,11 @@
 #include <Base.h>
 #include "AresGlobalType.hpp"
 
+namespace antares {
+
 void FakeInit(int argc, char* const* argv);
 const std::string& get_output_dir();
+
+}  // namespace antares
 
 #endif  // ANTARES_FAKES_HPP_

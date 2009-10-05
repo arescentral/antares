@@ -24,6 +24,8 @@
 
 #include "AresVersion.hpp"
 
+namespace antares {
+
 #define kScenario_Data_ResType          'nlAG'
 #define kScenario_Data_ResID            128
 
@@ -49,5 +51,7 @@ struct scenarioInfoType {
 
     size_t load_data(const char* data, size_t len);
 };
+
+}  // namespace antares
 
 #endif // ANTARES_SCENARIO_DATA_HPP_

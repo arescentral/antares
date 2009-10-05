@@ -17,6 +17,8 @@
 
 #include "VideoDriver.hpp"
 
+namespace antares {
+
 namespace {
 
 scoped_ptr<VideoDriver> video_driver;
@@ -24,9 +26,11 @@ scoped_ptr<VideoDriver> video_driver;
 }  // namespace
 
 VideoDriver* VideoDriver::driver() {
-    return ::video_driver.get();
+    return antares::video_driver.get();
 }
 
 void VideoDriver::set_driver(VideoDriver* video_driver) {
-    ::video_driver.reset(video_driver);
+    antares::video_driver.reset(video_driver);
 }
+
+}  // namespace antares

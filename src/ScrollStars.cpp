@@ -31,6 +31,8 @@
 #include "Randomize.hpp"
 #include "Resources.h"
 
+namespace antares {
+
 #ifdef powerc
 #define kScrollStarNum          125
 #define kSparkStarNum           125
@@ -1185,3 +1187,5 @@ void CorrectScrollStarObject( Handle data)
     else
         gScrollStarObject = nil;
 }
+
+}  // namespace antares

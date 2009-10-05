@@ -19,6 +19,8 @@
 
 #include "BinaryStream.hpp"
 
+namespace antares {
+
 Point::Point()
         : h(0),
           v(0) { }
@@ -83,3 +85,5 @@ void Rect::read(BinaryReader* bin) {
     bin->read(&right);
     bin->read(&bottom);
 }
+
+}  // namespace antares

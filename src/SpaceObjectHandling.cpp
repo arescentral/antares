@@ -44,6 +44,8 @@
 #include "Transitions.hpp"
 #include "UniverseUnit.hpp"
 
+namespace antares {
+
 #define kTestSpriteError    "\pSOHD"
 
 #define kActionQueueLength      120
@@ -3191,3 +3193,5 @@ void objectFrameType::Weapon::read(BinaryReader* bin) {
     bin->read(&inverseSpeed);
     bin->read(&restockCost);
 }
+
+}  // namespace antares

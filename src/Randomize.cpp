@@ -27,6 +27,8 @@
 #include "StringHandling.hpp"
 #include "StringNumerics.hpp"
 
+namespace antares {
+
 int32_t gRandomSeed = 14586;
 
 int RandomInit() {
@@ -73,3 +75,5 @@ int16_t XRandomSeeded(int16_t range, int32_t* seed) {
 //
 // as documented on page 67 of the Apple Numerics Manual, Second Edition.
 //
+
+}  // namespace antares

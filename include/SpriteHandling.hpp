@@ -25,6 +25,8 @@
 #include "Handle.hpp"
 #include "NateDraw.hpp"
 
+namespace antares {
+
 #define kNoSpriteTable  -1
 
 #define ROW_BYTES_MASK  0x8000
@@ -146,5 +148,7 @@ void CullSprites( void);
 void  PixMapTest( spritePix *, Point, long, Rect *, Rect *, PixMap*);
 void TestByte(unsigned char*, PixMap*, unsigned char*);
 int Randomize( int);
+
+}  // namespace antares
 
 #endif // ANTARES_SPRITE_HANDLING_HPP_

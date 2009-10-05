@@ -23,6 +23,8 @@
 #include <Base.h>
 #include "SpaceObject.hpp"
 
+namespace antares {
+
 #define kShapeNum               24
 #define kPixResID               501
 
@@ -39,5 +41,7 @@ bool IsPlayerShipOnAutoPilot( void);
 void PlayerShipGiveCommand( long);
 void PlayerShipBodyExpire( spaceObjectType *, bool);
 void HandleTextMessageKeys( KeyMap, KeyMap, bool *);
+
+}  // namespace antares
 
 #endif // ANTARES_PLAYER_SHIP_HPP_

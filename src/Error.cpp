@@ -24,6 +24,8 @@
 #include "Resources.h"
 #include "StringNumerics.hpp"
 
+namespace antares {
+
 #define ERROR_STR_ID    800
 #define ERROR_ALERT_ID  800
 
@@ -300,3 +302,5 @@ void MyDebugString( const unsigned char* s)
     ShowSimpleStringAlert( s, "\p", "\p", "\p");
 #endif
 }
+
+}  // namespace antares

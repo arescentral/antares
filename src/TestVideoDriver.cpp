@@ -21,6 +21,8 @@
 #include "FakeDrawing.hpp"
 #include "Fakes.hpp"
 
+namespace antares {
+
 TestingVideoDriver::TestingVideoDriver()
         : _current_time(0) { }
 
@@ -145,3 +147,5 @@ void DemoVideoDriver::main_loop_iteration_complete(uint32_t game_time) {
         }
     }
 }
+
+}  // namespace antares

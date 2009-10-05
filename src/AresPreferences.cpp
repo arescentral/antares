@@ -25,6 +25,8 @@
 #include "KeyMapTranslation.hpp"
 #include "Options.hpp"
 
+namespace antares {
+
 Preferences::Preferences() {
     Resource rsrc('ArPr', 1000);
     BufferBinaryReader bin(rsrc.data(), rsrc.size());
@@ -109,3 +111,5 @@ void serialNumberType::read(BinaryReader* bin) {
     bin->read(name, 76);
     bin->read(number, kDigitNumber);
 }
+
+}  // namespace antares

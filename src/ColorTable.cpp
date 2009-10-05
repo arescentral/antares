@@ -21,6 +21,8 @@
 #include <Base.h>
 #include "SmartPtr.hpp"
 
+namespace antares {
+
 struct Color24Bit {
     uint8_t red;
     uint8_t green;
@@ -313,3 +315,5 @@ const RGBColor& ColorTable::color(size_t index) const {
 void ColorTable::set_color(size_t index, const RGBColor& color) {
     _colors[index] = color;
 }
+
+}  // namespace antares

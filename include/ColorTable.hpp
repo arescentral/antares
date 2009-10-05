@@ -23,6 +23,8 @@
 #include <Base.h>
 #include "SmartPtr.hpp"
 
+namespace antares {
+
 class ColorTable {
   public:
     explicit ColorTable(int32_t id);
@@ -39,5 +41,7 @@ class ColorTable {
 
     DISALLOW_COPY_AND_ASSIGN(ColorTable);
 };
+
+}  // namespace antares
 
 #endif  // ANTARES_COLOR_TABLE_HPP_

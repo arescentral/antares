@@ -18,6 +18,8 @@
 #ifndef ANTARES_ANY_CHAR_HPP_
 #define ANTARES_ANY_CHAR_HPP_
 
+namespace antares {
+
 // AnyChar.h
 
 // ONE BYTE CHARACTER SYSTEM
@@ -39,5 +41,7 @@ inline void mGetPStringFromSingleAnyChar(
 void CopyAnyCharPString(unsigned char *, const unsigned char*);
 void InsertAnyCharPStringInPString(unsigned char*, const unsigned char*, long);
 void CutCharsFromAnyCharPString(unsigned char*, long, long);
+
+}  // namespace antares
 
 #endif // ANTARES_ANY_CHAR_HPP_

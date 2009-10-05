@@ -47,6 +47,8 @@
 #include "StringHandling.hpp"
 #include "UniverseUnit.hpp"
 
+namespace antares {
+
 #define kSendMessageVOffset     20
 
 
@@ -1353,3 +1355,5 @@ void Update_LabelStrings_ForHotKeyChange( void)
         }
     }
 }
+
+}  // namespace antares

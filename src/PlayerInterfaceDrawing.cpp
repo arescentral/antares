@@ -33,6 +33,8 @@
 #include "PlayerInterfaceItems.hpp"
 #include "StringNumerics.hpp"
 
+namespace antares {
+
 #define kInterfaceLargeHBorder      13
 #define kInterfaceSmallHBorder      3
 #define kInterfaceVEdgeHeight       1//2
@@ -2507,3 +2509,5 @@ void SetInterfaceLargeLowerFont( interfaceStyleType style)
 */  }
 }
 
+
+}  // namespace antares

@@ -24,6 +24,8 @@
 #include <Base.h>
 #include <Quickdraw.h>
 
+namespace antares {
+
 class BinaryReader;
 
 inline void mGetRowBytes(long& rBytes, PixMap* pix) {
@@ -78,5 +80,7 @@ void DrawNateLine( PixMap *, Rect *, long, long, long,
 void CopyNateLine( PixMap *, PixMap *, Rect *, long, long, long, long , long, long);
 void DashNateLine( PixMap *, Rect *, long, long, long,
                     long, long, long, unsigned char, unsigned char, unsigned char, unsigned char);
+
+}  // namespace antares
 
 #endif // ANTARES_NATE_DRAW_HPP_

@@ -30,6 +30,8 @@
 #include "ScenarioMaker.hpp"
 #include "SpriteHandling.hpp"
 
+namespace antares {
+
 #define kBriefing_Grid_Size             16
 
 struct briefingSpriteBoundsType {
@@ -569,3 +571,5 @@ void BriefPoint_Data_Get( long whichPoint, long whichScenario, long *headerID,
     *headerNumber = brief->titleNum;
     *contentID = brief->contentResID;
 }
+
+}  // namespace antares

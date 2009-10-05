@@ -25,6 +25,8 @@
 #include "AnyChar.hpp"
 #include "NateDraw.hpp"
 
+namespace antares {
+
 class BinaryReader;
 
 enum interfaceKindEnum {
@@ -159,5 +161,7 @@ struct interfaceItemType {
 
     size_t load_data(const char* data, size_t len);
 };
+
+}  // namespace antares
 
 #endif // ANTARES_PLAYER_INTERFACE_ITEMS_HPP_

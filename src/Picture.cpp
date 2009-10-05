@@ -24,6 +24,8 @@
 #include "BinaryStream.hpp"
 #include "FakeDrawing.hpp"
 
+namespace antares {
+
 extern PixMap* gActiveWorld;
 
 Picture::Picture(int32_t id) {
@@ -70,3 +72,5 @@ void Picture::draw(const Rect& dst) {
         SetPixelRow(transfer.DestColumn(0), transfer.DestRow(i), source_bytes, transfer.Width());
     }
 }
+
+}  // namespace antares

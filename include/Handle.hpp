@@ -26,6 +26,8 @@
 #include "Resource.hpp"
 #include "SmartPtr.hpp"
 
+namespace antares {
+
 template <typename T> class TypedHandle;
 
 template <typename T>
@@ -151,5 +153,7 @@ void TypedHandleBase<T>::load_resource(uint32_t code, int id) {
 
 int Munger(TypedHandle<unsigned char> data, int pos, const unsigned char* search, size_t search_len,
         const unsigned char* replace, size_t replace_len);
+
+}  // namespace antares
 
 #endif  // ANTARES_HANDLE_HPP_

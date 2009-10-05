@@ -24,6 +24,8 @@
 #include <vector>
 #include "SpriteHandling.hpp"
 
+namespace antares {
+
 class natePixEntryType;
 class natePixType {
   public:
@@ -57,5 +59,7 @@ Handle GetNatePixTableNatePixDataCopy(TypedHandle<natePixType>, long);
 // void GetNatePixTableNatePixDuplicate( natePix *, Handle, int);
 void RemapNatePixTableColor(TypedHandle<natePixType>);
 void ColorizeNatePixTableColor(TypedHandle<natePixType>, unsigned char);
+
+}  // namespace antares
 
 #endif // ANTARES_NATE_PIX_TABLE_HPP_

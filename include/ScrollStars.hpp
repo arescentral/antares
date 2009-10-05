@@ -22,6 +22,8 @@
 
 #include "SpaceObject.hpp"
 
+namespace antares {
+
 #define kMaxSparkAge            1023L
 #define kSparkAgeToShadeShift   6L
 
@@ -58,5 +60,7 @@ void Reset3DStars( Point, Rect *);
 void Move3DStars( Point, long, Rect *);
 void Draw3DStars( bool, Rect *, PixMap*);
 void Show3DStars( bool, Rect *, PixMap*);
+
+}  // namespace antares
 
 #endif // ANTARES_SCROLL_STARS_HPP_

@@ -37,6 +37,8 @@
 #include "SpriteHandling.hpp"
 #include "UniverseUnit.hpp"
 
+namespace antares {
+
 #define kCenterScaleSize    983040L//61440L         // = 240 * SCALE_SCALE
 #define kMotionError        "\pMOTN"
 
@@ -1519,3 +1521,5 @@ void CorrectPhysicalSpace( spaceObjectType *aObject, spaceObjectType *bObject)
         }
     }
 }
+
+}  // namespace antares

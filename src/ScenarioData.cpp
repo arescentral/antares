@@ -20,6 +20,8 @@
 #include "BinaryStream.hpp"
 #include "Scenario.hpp"
 
+namespace antares {
+
 size_t scenarioInfoType::load_data(const char* data, size_t len) {
     BufferBinaryReader bin(data, len);
 
@@ -191,3 +193,5 @@ size_t scenarioInitialType::load_data(const char* data, size_t len) {
 
     return bin.bytes_read();
 }
+
+}  // namespace antares

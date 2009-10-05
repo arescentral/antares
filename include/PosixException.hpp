@@ -20,6 +20,8 @@
 
 #include <exception>
 
+namespace antares {
+
 class PosixException : public std::exception {
   public:
     PosixException() throw();
@@ -31,5 +33,7 @@ class PosixException : public std::exception {
     int _errno;
     char _what[_what_size];
 };
+
+}  // namespace antares
 
 #endif // ANTARES_POSIX_EXCEPTION_HPP_

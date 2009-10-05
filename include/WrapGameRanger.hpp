@@ -23,6 +23,8 @@
 #include <Base.h>
 #include <NetSprocket.h>
 
+namespace antares {
+
 STUB0(Wrap_GRCheckForAE, bool(), false);
 STUB0(Wrap_GRGetWaitingCmd, void());
 STUB0(Wrap_GRInstallResumeHandler, OSErr(), noErr);
@@ -80,5 +82,7 @@ Wrap_GRNSpDoModalJoinDialog         (ConstStr31Param        inGameType,
 void
 Wrap_GRNSpReleaseAddressReference   (NSpAddressReference    inAddr);
 #endif
+
+}  // namespace antares
 
 #endif // ANTARES_WRAP_GAME_RANGER_HPP_

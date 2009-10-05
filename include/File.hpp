@@ -22,10 +22,14 @@
 #include <exception>
 #include <string>
 
+namespace antares {
+
 bool IsDir(const std::string& path);
 void Mkdir(const std::string& path, mode_t mode);
 void MakeDirs(const std::string& path, mode_t mode);
 std::string BaseName(const std::string& path);
 std::string DirName(const std::string& path);
+
+}  // namespace antares
 
 #endif  // ANTARES_FILE_HPP_

@@ -20,11 +20,15 @@
 
 // Navigation_Utilities.h
 
+namespace antares {
+
 OSErr NS_SelectFileObject( FSSpecPtr destFile, short openListResID);
 
 OSErr NS_SelectFolderObject(FSSpecPtr destFile, unsigned char*, unsigned char*);
 
 OSErr NS_SaveAs(FSSpecPtr destFile, unsigned char* fileName, unsigned char* appName,
     OSType fileTypeToSave, OSType fileCreator);
+
+}  // namespace antares
 
 #endif // ANTARES_NAVIGATION_UTILITIES_HPP_

@@ -20,6 +20,8 @@
 
 // definitions for turn cycles
 
+namespace antares {
+
 #define kTimeUnit           16667   // in microseconds--essentially one tick (1/60th of second)
 #define kMaxTimePerCycle    3       // max number of time units to move by at once
 #define kDecideEveryCycles  3       // every time this many cycles pass, we have to process player & computer decisions
@@ -28,5 +30,7 @@
 void ResetLastTime( long);
 long GetTimeLapse( void);
 void UpdateGameTime( void);
+
+}  // namespace antares
 
 #endif // ANTARES_TIME_UNIT_HPP_

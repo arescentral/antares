@@ -23,6 +23,8 @@
 #include "Casts.hpp"
 #include "Handle.hpp"
 
+namespace antares {
+
 // Color Translation.h
 
 #define kPaletteSize            256
@@ -93,5 +95,7 @@ void GetRGBTranslateColorShade( RGBColor *, unsigned char, unsigned char);
 void SetTranslateColorFore( unsigned char);
 void GetRGBTranslateColor( RGBColor *, unsigned char);
 void DefaultColors( void);
+
+}  // namespace antares
 
 #endif // ANTARES_COLOR_TRANSLATION_HPP_

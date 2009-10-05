@@ -32,6 +32,8 @@
 #include "VideoDriver.hpp"
 #include "VncServer.hpp"
 
+namespace antares {
+
 namespace {
 
 std::string output_dir;
@@ -207,3 +209,5 @@ void FakeInit(int argc, char* const* argv) {
 
     AresMain();
 }
+
+}  // namespace antares

@@ -24,6 +24,8 @@
 
 #include "AnyChar.hpp"
 
+namespace antares {
+
 #define kBackupData
 #define kBackupData2
 
@@ -351,5 +353,7 @@ void StopIncomingTextMessage( anyCharType *);
 #else   // TARGET_OS_MAC
 #define NETSPROCKET_AVAILABLE   0
 #endif // TARGET_OS_MAC
+
+}  // namespace antares
 
 #endif // ANTARES_ARES_NETWORK_SPROCKET_HPP_

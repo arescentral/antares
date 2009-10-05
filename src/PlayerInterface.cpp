@@ -53,6 +53,8 @@
 #include "VideoDriver.hpp"
 #include "WrapGameRanger.hpp"
 
+namespace antares {
+
 #define kThisVersion    0x00000201  // last was 200; last was 104
 
 #define kContentStringID            2002
@@ -3852,3 +3854,5 @@ void Replace_KeyCode_Strings_With_Actual_Key_Names(TypedHandle<unsigned char> te
         };
     }
 }
+
+}  // namespace antares

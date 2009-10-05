@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include <string>
 
+namespace antares {
+
 namespace {
 
 struct FreedGlob : public glob_t {
@@ -55,3 +57,5 @@ std::string glob_for_resource(uint32_t code, int id) {
 
 Resource::Resource(uint32_t code, int id)
         : MappedFile(glob_for_resource(code, id)) { }
+
+}  // namespace antares

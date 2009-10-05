@@ -21,6 +21,8 @@
 
 #include <Quickdraw.h>
 
+namespace antares {
+
 void CopyPString( unsigned char *to, const unsigned char *from)
 
 {
@@ -162,3 +164,5 @@ void UpperCasePString(unsigned char* s) {
         c++;
     }
 }
+
+}  // namespace antares

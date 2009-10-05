@@ -23,6 +23,8 @@
 #include "AnyChar.hpp"
 #include "SpaceObject.hpp"
 
+namespace antares {
+
 #define kNoLabel        -1
 #define kMaxLabelLen            250
 #define kMaxLabelNum            16
@@ -75,5 +77,7 @@ void SetScreenLabelKeepOnScreenAnyway( long which, bool keepOnScreenAnyWay);
 void SetScreenLabelAttachedHintLine( long which, bool attachedHintLine, Point toWhere);
 unsigned char* GetScreenLabelStringPtr(long);
 void RecalcScreenLabelSize( long);
+
+}  // namespace antares
 
 #endif // ANTARES_SCREEN_LABEL_HPP_

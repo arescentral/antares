@@ -23,6 +23,8 @@
 #include "NateDraw.hpp"
 #include "SpaceObject.hpp"
 
+namespace antares {
+
 spaceObjectType *HackNewNonplayerShip( long, short, Rect *);
 void NonplayerShipThink( long);
 void UpdateMyNonplayerShip( void);
@@ -33,5 +35,7 @@ long GetManualSelectObject( spaceObjectType *, unsigned long,
                             const uint64_t*, long, short);
 long GetSpritePointSelectObject( Rect *, spaceObjectType *, unsigned long,
                             unsigned long, unsigned long, long, short);
+
+}  // namespace antares
 
 #endif // ANTARES_NON_PLAYER_SHIP_HPP_

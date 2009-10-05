@@ -44,6 +44,8 @@
 #include "Transitions.hpp"
 #include "UniverseUnit.hpp"
 
+namespace antares {
+
 #define kDirectionError         5           // how picky in degrees we are about angle
 #define kShootAngle             15          // how picky we are about shooting in degrees
 #define kParanoiaAngle          30          // angle of terror
@@ -2613,3 +2615,5 @@ long GetSpritePointSelectObject( Rect *bounds, spaceObjectType *sourceObject, un
 
     return ( resultShip);
 }
+
+}  // namespace antares

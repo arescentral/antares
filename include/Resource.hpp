@@ -21,11 +21,15 @@
 #include <exception>
 #include "MappedFile.hpp"
 
+namespace antares {
+
 class NoSuchResourceException : public std::exception { };
 
 class Resource : public MappedFile {
   public:
     Resource(uint32_t code, int id);
 };
+
+}  // namespace antares
 
 #endif // ANTARES_RESOURCE_HPP_

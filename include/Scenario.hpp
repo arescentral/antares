@@ -23,6 +23,8 @@
 #include "NateDraw.hpp"
 #include "SpaceObject.hpp"
 
+namespace antares {
+
 class BinaryReader;
 
 #define kScenarioInitialNum             12
@@ -271,5 +273,7 @@ struct raceType {
 
     size_t load_data(const char* data, size_t len);
 };
+
+}  // namespace antares
 
 #endif // ANTARES_SCENARIO_HPP_

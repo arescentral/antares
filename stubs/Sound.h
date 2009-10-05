@@ -3,6 +3,8 @@
 
 #include <Base.h>
 
+namespace antares {
+
 typedef OSErr OSStatus;
 
 typedef Handle SndListHandle;
@@ -40,5 +42,7 @@ OSErr SndDoImmediate(SndChannel* chan, SndCommand* cmd);
 OSErr SndDoCommand(SndChannel* chan, SndCommand* cmd, bool);
 
 STUB2(GetSoundHeaderOffset, OSErr(Handle sound, long* offset), noErr);
+
+}  // namespace antares
 
 #endif // ANTARES_STUB_SOUND_H_

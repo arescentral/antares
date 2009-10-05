@@ -30,6 +30,8 @@
 #include "SpaceObject.hpp"
 #include "UniverseUnit.hpp"
 
+namespace antares {
+
 #define kSoundFXError           "\pSNDX"
 #define kSoundResID             500
 
@@ -1008,3 +1010,5 @@ void mPlayDistanceSound(
         }
     }
 }
+
+}  // namespace antares

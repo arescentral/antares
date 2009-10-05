@@ -26,6 +26,8 @@
 #include "Scenario.hpp"
 #include "SpaceObject.hpp"
 
+namespace antares {
+
 #define kScenarioNoShipTextID       10000
 
 #define kScenarioResFileName    "\p:Ares Data Folder:Ares Scenarios"
@@ -175,5 +177,7 @@ long GetFirstNetworkScenario( void);
 long GetNextNetworkScenario( long);
 long GetPreviousNetworkScenario( long);
 bool ThisChapterIsNetworkable( long);
+
+}  // namespace antares
 
 #endif // ANTARES_SCENARIO_MAKER_HPP_

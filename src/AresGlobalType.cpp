@@ -24,6 +24,8 @@
 #include "Options.hpp"
 #include "SpriteHandling.hpp"
 
+namespace antares {
+
 static aresGlobalType* gAresGlobal;
 
 aresGlobalType* globals() {
@@ -113,3 +115,5 @@ aresGlobalType::aresGlobalType() {
 
 aresGlobalType::~aresGlobalType() {
 }
+
+}  // namespace antares

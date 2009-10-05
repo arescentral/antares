@@ -21,6 +21,8 @@
 
 #include "StringHandling.hpp"
 
+namespace antares {
+
 void SmallFixedToString( smallFixedType f, Str255 s)
 
 {
@@ -353,3 +355,5 @@ long StringToLong(unsigned char* s) {
     result *= sign;
     return( result);
 }
+
+}  // namespace antares

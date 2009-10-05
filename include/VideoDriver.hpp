@@ -21,6 +21,8 @@
 #include <stdint.h>
 #include <Base.h>
 
+namespace antares {
+
 enum GameState {
     UNKNOWN,
     MAIN_SCREEN_INTERFACE,
@@ -47,5 +49,7 @@ class VideoDriver {
     static VideoDriver* driver();
     static void set_driver(VideoDriver* mode);
 };
+
+}  // namespace antares
 
 #endif  // ANTARES_VIDEO_DRIVER_HPP_

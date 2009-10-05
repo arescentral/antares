@@ -24,6 +24,8 @@
 
 #include "Casts.hpp"
 
+namespace antares {
+
 class BinaryReader;
 
 #define kMathSpecial
@@ -91,5 +93,7 @@ template <typename T>
 inline void MyWideMul(int32_t mlong1, int32_t mlong2, T* mwide) {
     *mwide = implicit_cast<int64_t>(mlong1) * implicit_cast<int64_t>(mlong2);
 }
+
+}  // namespace antares
 
 #endif // ANTARES_MATH_SPECIAL_HPP_

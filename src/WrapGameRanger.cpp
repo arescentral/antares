@@ -22,6 +22,8 @@
 #include "Debug.hpp"
 #include "GameRanger.h"
 
+namespace antares {
+
 #pragma mark **DEFINITIONS**
 
 bool Wrap_UseGameRanger( void)
@@ -235,3 +237,5 @@ Wrap_GRNSpReleaseAddressReference   (NSpAddressReference    inAddr)
     GRNSpReleaseAddressReference    (inAddr);
 }
 
+
+}  // namespace antares

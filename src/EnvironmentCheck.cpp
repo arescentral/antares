@@ -34,6 +34,8 @@
 #include "Options.hpp"
 #include "Resources.h"
 
+namespace antares {
+
 #define kEnvironmentErrorAlert      801
 #define kEnvironmentWarningAlert    802
 #define kEnvironmentStringID        800
@@ -253,3 +255,5 @@ bool MySWRoutineAvailable( short trapWord)
 }
 //#pragma code68020 reset
 
+
+}  // namespace antares

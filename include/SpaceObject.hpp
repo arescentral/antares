@@ -27,6 +27,8 @@
 #include "SoundFX.hpp"
 #include "SpriteHandling.hpp"
 
+namespace antares {
+
 class BinaryReader;
 
 #define kMaxSpaceObject     250
@@ -890,5 +892,7 @@ inline void mGetBaseObjectFromClassRace(
         if ( mcount >= kMaxBaseObject) mbaseObject = nil;
     }
 }
+
+}  // namespace antares
 
 #endif // ANTARES_SPACE_OBJECT_HPP_

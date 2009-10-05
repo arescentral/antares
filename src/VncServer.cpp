@@ -30,6 +30,8 @@
 #include "Threading.hpp"
 #include "VncServer.hpp"
 
+namespace antares {
+
 extern scoped_ptr<Window> fakeWindow;
 
 namespace {
@@ -820,3 +822,5 @@ void VncVideoDriver::main_loop_iteration_complete(uint32_t) { }
 int VncVideoDriver::ticks() {
     return (usecs() - _start_time) * 60 / 1000000;
 }
+
+}  // namespace antares

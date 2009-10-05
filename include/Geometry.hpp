@@ -20,6 +20,8 @@
 
 #include <stdint.h>
 
+namespace antares {
+
 class BinaryReader;
 
 struct Point {
@@ -51,5 +53,7 @@ struct Rect {
 
     void read(BinaryReader* bin);
 };
+
+}  // namespace antares
 
 #endif // ANTARES_GEOMETRY_HPP_

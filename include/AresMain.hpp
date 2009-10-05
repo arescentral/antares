@@ -22,11 +22,15 @@
 
 #include <Base.h>
 
+namespace antares {
+
 //#define kHideMenuBar
 
 #define kHackLevelMax   26//4//21
 
 void AresMain();
 void Pause();
+
+}  // namespace antares
 
 #endif // ANTARES_ARES_MAIN_HPP_

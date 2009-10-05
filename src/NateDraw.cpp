@@ -26,6 +26,8 @@
 #include "Error.hpp"
 #include "MathMacros.hpp"
 
+namespace antares {
+
 // #define kByteLevelTesting
 
 #ifdef kByteLevelTesting
@@ -1942,3 +1944,5 @@ void DashNateLine( PixMap *destPix, Rect *clipRect, long XStart, long YStart, lo
         return;
     }
 }
+
+}  // namespace antares

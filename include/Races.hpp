@@ -22,6 +22,8 @@
 
 #include "Scenario.hpp"
 
+namespace antares {
+
 #define kRaceResID          500
 #define kRaceResType        'race'
 
@@ -35,5 +37,7 @@ smallFixedType GetRaceAdvantage( short raceNum);
 short GetRaceNumFromID( short);
 short GetRaceIDFromNum( short);
 unsigned char GetApparentColorFromRace( short);
+
+}  // namespace antares
 
 #endif // ANTARES_RACES_HPP_

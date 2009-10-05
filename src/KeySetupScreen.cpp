@@ -33,6 +33,8 @@
 #include "SoundFX.hpp"
 #include "StringHandling.hpp"
 
+namespace antares {
+
 #define kKeyScreenID                5030
 #define kKeyCancelButton            0
 #define kKeyDoneButton              1
@@ -473,3 +475,5 @@ bool Key_Setup_Screen_Do( void)
     return( result);
 }
 
+
+}  // namespace antares

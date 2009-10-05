@@ -18,6 +18,8 @@
 #ifndef ANTARES_SMART_PTR_HPP_
 #define ANTARES_SMART_PTR_HPP_
 
+namespace antares {
+
 #define DISALLOW_COPY_AND_ASSIGN(CLASS) \
   private: \
     CLASS(const CLASS&); \
@@ -84,5 +86,7 @@ class scoped_array {
 
     DISALLOW_COPY_AND_ASSIGN(scoped_array);
 };
+
+}  // namespace antares
 
 #endif  // ANTARES_SMART_PTR_HPP_

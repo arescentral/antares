@@ -22,6 +22,8 @@
 #include "GameRanger.h"
 #include "NetSprocketGlue.hpp"
 
+namespace antares {
+
 bool Wrap_UseGameRanger( void)
 {
     return true;
@@ -175,3 +177,5 @@ Wrap_GRNSpReleaseAddressReference   (NSpAddressReference    inAddr)
 {
     Glue_NSpReleaseAddressReference( inAddr);
 }
+
+}  // namespace antares

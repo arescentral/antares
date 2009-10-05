@@ -22,6 +22,8 @@
 
 #include "SpaceObject.hpp"
 
+namespace antares {
+
 #define kBaseObjectResType      'bsob'
 #define kBaseObjectResID        500
 
@@ -62,5 +64,7 @@ void AlterObjectCloakState( spaceObjectType *, bool);
 void DestroyObject( spaceObjectType *);
 void ActivateObjectSpecial( spaceObjectType *);
 void CreateFloatingBodyOfPlayer( spaceObjectType *);
+
+}  // namespace antares
 
 #endif // ANTARES_SPACE_OBJECT_HANDLING_HPP_

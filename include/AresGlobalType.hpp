@@ -32,6 +32,8 @@
 #include "SmartPtr.hpp"
 #include "SoundFX.hpp"
 
+namespace antares {
+
 #define kDefaultOptions             (kOptionScreenSmall | kOptionBlackground | kOptionMusicIdle)
 #define kMaxPlayerNum               4 // kMaxScenarioPlayerNum in Scenario.h
 
@@ -238,5 +240,7 @@ struct aresGlobalType {
 
 aresGlobalType* globals();
 void init_globals();
+
+}  // namespace antares
 
 #endif // ANTARES_ARES_GLOBAL_TYPE_HPP_

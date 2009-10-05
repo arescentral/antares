@@ -20,6 +20,8 @@
 
 #include "MathSpecial.hpp"
 
+namespace antares {
+
 inline void DebugWindowInit(WindowPtr) { }
 inline void BringDebugToFront() { }
 inline void DebugWindowCleanup() { }
@@ -48,5 +50,7 @@ inline void DebugFileAppendLong(long) { }
 inline void DebugFileAppendLongHex(long) { }
 inline void DebugFileAppendSmallFixed(smallFixedType) { }
 inline void DebugFileSave(const unsigned char*) { }
+
+}  // namespace antares
 
 #endif // ANTARES_DEBUG_HPP_

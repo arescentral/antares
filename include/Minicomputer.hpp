@@ -24,6 +24,8 @@
 
 #include "SpaceObject.hpp"
 
+namespace antares {
+
 int MiniScreenInit( void);
 void MiniScreenCleanup( void);
 void SetMiniScreenStatusStrList( short);
@@ -49,5 +51,7 @@ void MiniComputerHandleDoubleClick( Point);
 void MiniComputerHandleMouseUp( Point);
 void MiniComputerHandleMouseStillDown( Point);
 void MiniComputer_SetScreenAndLineHack( long whichScreen, long whichLine);
+
+}  // namespace antares
 
 #endif // ANTARES_MINICOMPUTER_HPP_

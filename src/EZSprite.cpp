@@ -25,6 +25,8 @@
 #include "Resources.h"
 #include "SpriteHandling.hpp"
 
+namespace antares {
+
 extern  WindowPtr       gTheWindow;
 extern  PixMap*         gActiveWorld;
 extern  PixMap*         gOffWorld;
@@ -222,3 +224,5 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
 
     MacSetPort( oldPort);
 }
+
+}  // namespace antares

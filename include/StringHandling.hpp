@@ -22,6 +22,8 @@
 
 #include <Base.h>
 
+namespace antares {
+
 void CopyPString( unsigned char *, const unsigned char *);
 bool ComparePString( unsigned char *, const unsigned char *);
 int PStringLen( const unsigned char *s);
@@ -34,5 +36,7 @@ void UpperCasePString(unsigned char*);
 void DrawCString( const unsigned char *);
 
 STUB2(pstrcat, void(const unsigned char*, const unsigned char*));
+
+}  // namespace antares
 
 #endif // ANTARES_STRING_HANDLING_HPP_

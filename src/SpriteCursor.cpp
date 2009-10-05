@@ -23,6 +23,8 @@
 #include "OffscreenGWorld.hpp"
 #include "Resources.h"
 
+namespace antares {
+
 extern  long            WORLD_WIDTH, WORLD_HEIGHT, gNatePortLeft, gNatePortTop;
 extern PixMap* gActiveWorld;
 extern PixMap* gOffWorld;
@@ -394,3 +396,5 @@ void ResetHintLine( void)
         gSpriteCursor->lastLineEnd.h = gSpriteCursor->lastLineEnd.v = -1;
     gSpriteCursor->thisLineColor = gSpriteCursor->thisLineColorDark = 0;
 }
+
+}  // namespace antares

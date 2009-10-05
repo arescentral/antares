@@ -20,6 +20,8 @@
 
 #include "MathSpecial.hpp"
 
+namespace antares {
+
 void SmallFixedToString( smallFixedType, Str255);
 smallFixedType StringToSmallFixed( Str255);
 void DoubleToString(double, unsigned char*, long);
@@ -34,5 +36,7 @@ long StringToLong(unsigned char*);
 inline void NumToString(unsigned long num, unsigned char* string) {
     UnsignedLongToString(num, string);
 }
+
+}  // namespace antares
 
 #endif // ANTARES_STRING_NUMERICS_HPP_

@@ -30,6 +30,8 @@
 #include "Rotation.hpp"
 #include "UniverseUnit.hpp"
 
+namespace antares {
+
 #define kBeamError      "\pBEAM"
 
 #define kBeamNum        256
@@ -604,3 +606,5 @@ void CullBeams( void)
         aBeam++;
     }
 }
+
+}  // namespace antares

@@ -20,6 +20,8 @@
 
 #include <Base.h>
 
+namespace antares {
+
 #define kKeyMapNameID           1000
 #define kKeyMapNameLongID       1002
 
@@ -88,5 +90,7 @@ bool AnyModifierKeyDown( void);
 bool AnyKeyButThisOne( KeyMap, long, long);
 long GetAsciiFromKeyMap( KeyMap, KeyMap);
 long GetAsciiFromKeyNum( short);
+
+}  // namespace antares
 
 #endif // ANTARES_KEY_MAP_TRANSLATION_HPP_

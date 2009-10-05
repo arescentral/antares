@@ -21,6 +21,8 @@
 #include "Sound.h"
 #include "SoundFX.hpp"
 
+namespace antares {
+
 //
 //  Player PRO 4.4 -- Music Driver EXAMPLE
 //
@@ -288,3 +290,5 @@ void SetSongVolume( long volume)
 }
 
 // END PLAYERPRO LIBRARY 3.5
+
+}  // namespace antares

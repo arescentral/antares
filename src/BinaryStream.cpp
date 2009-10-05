@@ -21,6 +21,8 @@
 #include <string.h>
 #include <libkern/OSByteOrder.h>
 
+namespace antares {
+
 namespace {
 
 template <typename T>
@@ -222,3 +224,5 @@ void BinaryWriter::pad(size_t bytes) {
     }
     _bytes_written += bytes;
 }
+
+}  // namespace antares

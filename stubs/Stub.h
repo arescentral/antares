@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 
+namespace antares {
+
 template <typename T>
 struct function_traits { };
 
@@ -216,5 +218,7 @@ struct function_traits<R(A0, A1, A2, A3, A4, A5, A6, A7)> {
     (void)a7; \
     return __VA_ARGS__; \
   }
+
+}  // namespace antares
 
 #endif // ANTARES_STUB_STUB_H_

@@ -23,6 +23,8 @@
 #include "Resource.hpp"
 #include "String.hpp"
 
+namespace antares {
+
 void GetIndString(unsigned char* result, int id, int index) {
     if (index <= 0) {
         *result = '\0';
@@ -63,3 +65,5 @@ int Munger(TypedHandle<unsigned char> data, int pos, const unsigned char* search
     }
     return at;
 }
+
+}  // namespace antares

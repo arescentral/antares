@@ -23,6 +23,8 @@
 #include "sys/stat.h"
 #include "PosixException.hpp"
 
+namespace antares {
+
 AutoClosedFd::~AutoClosedFd() {
     Close();
 }
@@ -65,3 +67,5 @@ MappedFile::MappedFile(const std::string& path)
 MappedFile::~MappedFile() {
     munmap(const_cast<char*>(_data), _size);
 }
+
+}  // namespace antares

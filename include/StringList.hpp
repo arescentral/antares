@@ -21,6 +21,8 @@
 #include <string>
 #include <vector>
 
+namespace antares {
+
 class StringList {
   public:
     void load(int id);
@@ -33,5 +35,7 @@ class StringList {
 };
 
 void string_to_pstring(const std::string& src, unsigned char* dest);
+
+}  // namespace antares
 
 #endif // ANTARES_STRING_LIST_HPP_

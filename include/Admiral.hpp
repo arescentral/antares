@@ -25,6 +25,8 @@
 #include "Casts.hpp"
 #include "Scenario.hpp"
 
+namespace antares {
+
 #define kAIsHuman                   0x00000001
 #define kAIsRemote                  0x00000002
 #define kAIsComputer                0x00000004
@@ -210,5 +212,7 @@ long GetAdmiralKill( long);
 #define kABit31                     0x40000000
 #define kABit32                     0x80000000
 */
+
+}  // namespace antares
 
 #endif // ANTARES_ADMIRAL_HPP_

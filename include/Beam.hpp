@@ -22,6 +22,8 @@
 
 #include "SpaceObject.hpp"
 
+namespace antares {
+
 short InitBeams( void);
 void CleanupBeams( void);
 void ResetBeams( void);
@@ -31,5 +33,7 @@ void DrawAllBeams( void);
 void EraseAllBeams( void);
 void ShowAllBeams( void);
 void CullBeams( void);
+
+}  // namespace antares
 
 #endif // ANTARES_BEAM_HPP_

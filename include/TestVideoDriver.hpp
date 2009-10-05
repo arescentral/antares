@@ -20,6 +20,8 @@
 
 #include "VideoDriver.hpp"
 
+namespace antares {
+
 class TestingVideoDriver : public VideoDriver {
   public:
     TestingVideoDriver();
@@ -70,5 +72,7 @@ class DemoVideoDriver : public TestingVideoDriver {
   private:
     int _level;
 };
+
+}  // namespace antares
 
 #endif  // ANTARES_TEST_VIDEO_DRIVER_HPP_

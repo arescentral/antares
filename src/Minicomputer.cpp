@@ -46,6 +46,8 @@
 #include "StringList.hpp"
 #include "StringNumerics.hpp"
 
+namespace antares {
+
 #define kMiniScreenLeft         12
 #define kMiniScreenTop          320 //191
 #define kMiniScreenRight        121
@@ -3000,3 +3002,5 @@ void MiniComputer_SetScreenAndLineHack( long whichScreen, long whichLine)
     w.h = kMiniScreenLeft + 5;
     MiniComputerHandleClick( w);    // what an atrocious hack! oh well
 }
+
+}  // namespace antares

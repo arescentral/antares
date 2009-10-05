@@ -24,6 +24,8 @@
 
 #include "Fakes.hpp"
 
+namespace antares {
+
 namespace {
 
 scoped_ptr<SoundDriver> sound_driver;
@@ -116,3 +118,5 @@ void FakeSoundsInit() {
         sound_driver.reset(new NullSoundDriver);
     }
 }
+
+}  // namespace antares

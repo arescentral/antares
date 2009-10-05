@@ -20,6 +20,8 @@
 
 // Universe Unit.h
 
+namespace antares {
+
 #define kUniversalCenter                1073741823L//92680L
 #define kMaximumRelevantDistance        46340L
 #define kMaximumRelevantDistanceSquared 2147395600L // maximumrelevant ^ 2
@@ -34,5 +36,7 @@
 #define kSuperSectorShift               15L
 
 #define kSectorDivision                 16
+
+}  // namespace antares
 
 #endif // ANTARES_UNIVERSE_UNIT_HPP_

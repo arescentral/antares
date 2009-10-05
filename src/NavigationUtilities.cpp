@@ -23,6 +23,8 @@
 #include "OffscreenGWorld.hpp"
 //#include "WindowDispatch.h"
 
+namespace antares {
+
 #define kMaxDocumentCount       100     // maximum number of documents allowed
 #define kSelectObjectPrefKey    7
 
@@ -349,3 +351,5 @@ OSErr AEGetDescData(const AEDesc *desc, DescType *typeCode, void *dataBuffer, By
     return noErr;
 }
 
+
+}  // namespace antares

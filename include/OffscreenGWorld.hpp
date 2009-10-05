@@ -21,6 +21,8 @@
 #include <Base.h>
 #include <Quickdraw.h>
 
+namespace antares {
+
 // these defs are here for historic reason:
 #define kLeftPanelWidth         128
 #define kRightPanelWidth        32
@@ -49,5 +51,7 @@ void NormalizeColors();
 void ChunkCopyPixMapToScreenPixMap( PixMap *, Rect *, PixMap *);
 void ChunkCopyPixMapToPixMap( PixMap *, Rect *, PixMap *);
 void ChunkErasePixMap( PixMap *, Rect *);
+
+}  // namespace antares
 
 #endif // ANTARES_OFFSCREEN_GWORLD_HPP_

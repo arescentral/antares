@@ -22,6 +22,8 @@
 
 #include <appletalk.h>
 
+namespace antares {
+
 #define BUFFER_SIZE             700
 
 #define BUFFER_QUEUE_SIZE       30
@@ -61,5 +63,7 @@ OSErr NatewerkLookupName( EntityName *, int *, Ptr);
 int NatewerkSendData( AddrBlock, char, Ptr, short);
 void PopTopUsedQueue( void);
 Ptr GetTopUsedQueue( void);
+
+}  // namespace antares
 
 #endif // ANTARES_NATEWORKING_HPP_

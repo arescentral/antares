@@ -20,6 +20,8 @@
 #include "AnyChar.hpp"
 #include "Casts.hpp"
 
+namespace antares {
+
 void CopyAnyCharPString(unsigned char* to, const unsigned char* from)
 
 {
@@ -97,3 +99,5 @@ void CutCharsFromAnyCharPString(unsigned char*string, long start, long length)
         *string -= length;
     }
 }
+
+}  // namespace antares

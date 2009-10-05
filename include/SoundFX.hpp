@@ -35,6 +35,8 @@
 #include <SoundComponents.h>
 #endif
 
+namespace antares {
+
 #define kSoundNum           48
 #define kMaxChannelNum      3
 
@@ -117,5 +119,7 @@ void mPlayDistanceSound(
         long& mdistance, long mvolume, spaceObjectType* mobjectptr, long msoundid,
         long msoundpersistence, soundPriorityType msoundpriority, unsigned long& mul1,
         unsigned long& mul2, spaceObjectType*& mplayerobjectptr);
+
+}  // namespace antares
 
 #endif // ANTARES_SOUND_FX_HPP_

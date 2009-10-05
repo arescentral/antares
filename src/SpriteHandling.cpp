@@ -33,6 +33,8 @@
 #include "Rotation.hpp"
 #include "StringNumerics.hpp"
 
+namespace antares {
+
 #define kMaxSpriteNum           500//300
 
 #define kDefaultBoxSize         3
@@ -2000,3 +2002,5 @@ void TestByte(unsigned char *dbyte, PixMap *pixMap, unsigned char* name) {
         WriteDebugLine("\p<<BAD>>");
     }
 }
+
+}  // namespace antares

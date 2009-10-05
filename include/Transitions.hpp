@@ -20,6 +20,8 @@
 
 #include <Base.h>
 
+namespace antares {
+
 void InitTransitions( void);
 void ResetTransitions( void);
 void CleanupTransitions( void);
@@ -35,5 +37,7 @@ bool AutoMusicFadeTo( long, RGBColor *, bool);
 bool CustomPictFade( long, long, short, short, WindowPtr);
 bool StartCustomPictFade(long, long, short, short, WindowPtr, bool);
 bool EndCustomPictFade(WindowPtr, bool);
+
+}  // namespace antares
 
 #endif // ANTARES_TRANSITIONS_HPP_

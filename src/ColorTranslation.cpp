@@ -23,6 +23,8 @@
 #include "Debug.hpp"
 #include "Error.hpp"
 
+namespace antares {
+
 #define kColorTransError        "\pCLTR"
 
 extern PixMap* gActiveWorld;
@@ -153,3 +155,5 @@ void DefaultColors( void)
     c.red = c.blue = c.green = 65535;
     RGBBackColor( &c);
 }
+
+}  // namespace antares

@@ -22,6 +22,8 @@
 #include <map>
 #include "VideoDriver.hpp"
 
+namespace antares {
+
 class VncVideoDriver : public VideoDriver {
   public:
     VncVideoDriver(int port);
@@ -47,5 +49,7 @@ class VncVideoDriver : public VideoDriver {
     std::queue<EventRecord*> _event_queue;
     std::map<int, int> _key_map;
 };
+
+}  // namespace antares
 
 #endif  // ANTARES_VNC_SERVER_HPP_

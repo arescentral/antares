@@ -22,6 +22,8 @@
 #include "Error.hpp"
 #include "Resources.h"
 
+namespace antares {
+
 #define kKeyMapError            "\pKEYM"
 
 unsigned long   gKeyTranslateState = 0;
@@ -396,3 +398,5 @@ long GetAsciiFromKeyNum( short keyNum)
     KCHRPtr = reinterpret_cast<Ptr>(GetScriptManagerVariable( smKCHRCache));
     return ( KeyTranslate( KCHRPtr, keyNum - 1, &gKeyTranslateState));
 }
+
+}  // namespace antares

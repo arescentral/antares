@@ -23,6 +23,8 @@
 #include "Resource.hpp"
 #include "SmartPtr.hpp"
 
+namespace antares {
+
 class InputSource {
   public:
     virtual ~InputSource();
@@ -48,5 +50,7 @@ class ReplayInputSource : public InputSource {
 
     DISALLOW_COPY_AND_ASSIGN(ReplayInputSource);
 };
+
+}  // namespace antares
 
 #endif  // ANTARES_INPUT_SOURCE_HPP_

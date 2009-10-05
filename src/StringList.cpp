@@ -22,6 +22,8 @@
 #include "Casts.hpp"
 #include "Resource.hpp"
 
+namespace antares {
+
 void StringList::load(int id) {
     _strings.clear();
 
@@ -60,3 +62,5 @@ void string_to_pstring(const std::string& src, unsigned char* dst) {
     *dst = src.size();
     memcpy(dst + 1, src.c_str(), src.size());
 }
+
+}  // namespace antares

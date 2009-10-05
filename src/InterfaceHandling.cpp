@@ -36,6 +36,8 @@
 #include "PlayerInterfaceItems.hpp"
 #include "SoundFX.hpp"              // for button on/off
 
+namespace antares {
+
 #define kMakeInterfaceItem      20
 
 #define kInterfaceError         "\pINTF"
@@ -1407,3 +1409,5 @@ void interfacePictureRectType::read(BinaryReader* bin) {
 void interfaceTabBoxType::read(BinaryReader* bin) {
     bin->read(&topRightBorderSize);
 }
+
+}  // namespace antares

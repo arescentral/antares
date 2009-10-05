@@ -20,6 +20,8 @@
 
 #include "KeyMapTranslation.hpp"
 
+namespace antares {
+
 // Key Codes
 
 //#define   kModeKeyNum                 7
@@ -196,5 +198,7 @@ inline bool mQuitKeys(KeyMap km)            { return mQuitKey1(km) && mQuitKey2(
 //#define   mNOFScaleHostileKey     m8Key
 //#define   mNOFScaleObjectKey      m9Key
 //#define   mNOFScaleAllKey         m0Key
+
+}  // namespace antares
 
 #endif // ANTARES_KEY_CODES_HPP_

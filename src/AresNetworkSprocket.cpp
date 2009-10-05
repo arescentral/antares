@@ -47,6 +47,8 @@
 #include "StringHandling.hpp"
 #include "WrapGameRanger.hpp"
 
+namespace antares {
+
 #define kDebugFileName      "\p_Debug Ares "
 #define kAresNetworkError   "\pANET"
 #ifdef kBackupData2
@@ -3410,3 +3412,5 @@ void StopIncomingTextMessage( anyCharType *dest)
     }
     gNetData->incomingCharNum = 0;
 }
+
+}  // namespace antares

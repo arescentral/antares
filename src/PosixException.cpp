@@ -20,6 +20,8 @@
 #include <errno.h>
 #include <string.h>
 
+namespace antares {
+
 PosixException::PosixException() throw()
     : _errno(errno) {
   strerror_r(errno, _what, _what_size);
@@ -28,3 +30,5 @@ PosixException::PosixException() throw()
 const char* PosixException::what() const throw() {
     return _what;
 }
+
+}  // namespace antares

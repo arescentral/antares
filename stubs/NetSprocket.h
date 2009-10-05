@@ -3,6 +3,8 @@
 
 #include <Base.h>
 
+namespace antares {
+
 enum {
   kNSpPlayerJoined = 1,
   kNSpPlayerLeft = 2,
@@ -15,5 +17,7 @@ typedef NSpEventProc* NSpEventProcPtr;
 
 typedef struct { } NSpAddressReference;
 typedef struct { } NSpMessageHeader;
+
+}  // namespace antares
 
 #endif // ANTARES_STUB_NET_SPROCKET_H_

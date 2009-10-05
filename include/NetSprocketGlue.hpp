@@ -38,6 +38,8 @@
 
 #include <NetSprocket.h>
 
+namespace antares {
+
 #ifndef powerc
 #pragma mpwc on // NetSprocket returns pointers in D0
 #endif
@@ -563,5 +565,7 @@ void Glue_NSpMessage_Release(
 #ifndef powerc
 #pragma mpwc reset
 #endif
+
+}  // namespace antares
 
 #endif // ANTARES_NET_SPROCKET_LIB_GLUE_HPP_

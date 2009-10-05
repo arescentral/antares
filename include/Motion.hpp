@@ -23,6 +23,8 @@
 #include "MathSpecial.hpp"
 #include "SpaceObject.hpp"
 
+namespace antares {
+
 #define kMotionResolution           100     // must be same as kRotUnit ( see Rotation.h)
 
 #define kProximitySuperSize         16      // number of cUnits in cSuperUnits
@@ -68,5 +70,7 @@ void MotionCleanup( void);
 void MoveSpaceObjects( spaceObjectType *, const long, const long);
 void CollideSpaceObjects( spaceObjectType *, const long);
 void CorrectPhysicalSpace( spaceObjectType *, spaceObjectType *);
+
+}  // namespace antares
 
 #endif // ANTARES_MOTION_HPP_

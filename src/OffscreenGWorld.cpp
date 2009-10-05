@@ -21,6 +21,8 @@
 #include "Error.hpp"
 #include "NateDraw.hpp"
 
+namespace antares {
+
 extern scoped_ptr<Window> fakeWindow;
 
 PixMap*         gActiveWorld;
@@ -145,3 +147,5 @@ void ChunkCopyPixMapToPixMap(PixMap *sourcePix, Rect *sourceRect, PixMap *destMa
 void ChunkErasePixMap(PixMap *destMap, Rect *sourceRect) {
     DrawNateRect(destMap, sourceRect, 0, 0, 0xFF);
 }
+
+}  // namespace antares

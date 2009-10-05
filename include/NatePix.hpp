@@ -20,6 +20,8 @@
 
 // NATEPIX.H
 
+namespace antares {
+
 typedef unsigned char   colorByte;
 typedef unsigned char   byte;
 
@@ -64,5 +66,7 @@ typedef struct {
 
 */
 
+
+}  // namespace antares
 
 #endif // ANTARES_NATE_PIX_HPP_

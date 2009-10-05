@@ -4,6 +4,8 @@
 #include <Base.h>
 #include <Files.h>
 
+namespace antares {
+
 typedef Window* GrafPtr;
 typedef GrafPtr CGrafPtr;
 
@@ -59,5 +61,7 @@ STUB1(GetClip, void(Rgn** clip));
 
 class ColorTable;
 void RestoreEntries(const ColorTable& table);
+
+}  // namespace antares
 
 #endif // ANTARES_STUB_QUICKDRAW_H_

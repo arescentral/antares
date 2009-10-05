@@ -22,6 +22,8 @@
 
 #include "SpriteHandling.hpp"
 
+namespace antares {
+
 #define kSpriteCursorHidden     0   // if showLevel <= this, cursor is hidden
 #define kSpriteCursorVisible    1   // if showLevel <= this, cursor is hidden
 
@@ -60,5 +62,7 @@ void ShowHintLine( Point fromWhere, Point toWhere,
     unsigned char color, unsigned char brightness);
 void HideHintLine( void);
 void ResetHintLine( void);
+
+}  // namespace antares
 
 #endif // ANTARES_SPRITE_CURSOR_HPP_
