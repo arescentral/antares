@@ -334,112 +334,102 @@ void BlackenOffscreen( void);
 void Pause( long);
 
 mainScreenResultType DoMainScreenInterface() {
-    mainScreenResultType    result = kNullResult;
-
     FlushEvents(everyEvent, 0);
     BlackenOffscreen();
-    if (OpenInterface(kMainScreenResID) == kNoError) {
-        if (!(globals()->gOptions & kOptionNetworkAvailable)) {
-            SetStatusOfAnyInterfaceItem(kMainNetworkButton, kDimmed, false);
-        }
+    ScopedOpenInterface interface(kMainScreenResID);
 
-        if (globals()->gOptions & kOptionNoSinglePlayer) {
-            SetStatusOfAnyInterfaceItem(kMainPlayButton, kDimmed, false);
-        }
-
-        long startDemoTime = TickCount();
-        DrawEntireInterface();
-        AutoFadeFrom( 30, false);
-        while (result == kNullResult) {
-            InterfaceIdle();
-            VideoDriver::driver()->set_game_state(MAIN_SCREEN_INTERFACE);
-
-            EventRecord evt;
-            WaitNextEvent(everyEvent, &evt, 3, nil);
-
-            int whichItem = -1;
-            bool timeout = false;
-            switch (evt.what ) {
-              case nullEvent:
-                InterfaceIdle();
-                if (globals()->gOptions & kOptionInBackground) {
-                    startDemoTime = TickCount();
-                }
-                if ((TickCount() - startDemoTime) > kMainDemoTimeOutTime) {
-                    whichItem = kMainDemoButton;
-                    timeout = true;
-                }
-                break;
-
-              case osEvt:
-                startDemoTime = TickCount();
-                break;
-
-              case mouseDown:
-                {
-                    startDemoTime = TickCount();
-                    Point where = evt.where;
-                    GlobalToLocal(&where);
-                    whichItem = InterfaceMouseDown(where);
-                }
-                break;
-
-              case keyDown:
-              case autoKey:
-                startDemoTime = TickCount();
-                whichItem = InterfaceKeyDown(evt.message);
-                break;
-            }
-
-            switch (whichItem) {
-              case kMainQuitButton:
-                result = kMainQuit;
-                break;
-
-              case kMainDemoButton:
-                if (timeout) {
-                    result = kMainTimeoutDemo;
-                } else {
-                    result = kMainDemo;
-                }
-                break;
-
-              case kMainTrainButton:
-                result = kMainTrain;
-                break;
-
-              case kMainPlayButton:
-                result = kMainPlay;
-                break;
-
-              case kMainNetworkButton:
-                result = kMainNetwork;
-                break;
-
-              case kMainAboutButton:
-                result = kMainAbout;
-                break;
-
-              case kMainOptionsButton:
-                CloseInterface();
-                DoOptionsInterface();
-
-                OpenInterface( kMainScreenResID);
-                if (!(globals()->gOptions & kOptionNetworkAvailable)) {
-                    SetStatusOfAnyInterfaceItem( kMainNetworkButton, kDimmed, false);
-                }
-                if (globals()->gOptions & kOptionNoSinglePlayer) {
-                    SetStatusOfAnyInterfaceItem( kMainPlayButton, kDimmed, false);
-                }
-
-                DrawEntireInterface();
-                startDemoTime = TickCount();
-                break;
-            }
-        }
-        CloseInterface();
+    if (!(globals()->gOptions & kOptionNetworkAvailable)) {
+        SetStatusOfAnyInterfaceItem(kMainNetworkButton, kDimmed, false);
     }
-    return result;
+
+    if (globals()->gOptions & kOptionNoSinglePlayer) {
+        SetStatusOfAnyInterfaceItem(kMainPlayButton, kDimmed, false);
+    }
+
+    long startDemoTime = TickCount();
+    DrawEntireInterface();
+    AutoFadeFrom( 30, false);
+    while (true) {
+        InterfaceIdle();
+        VideoDriver::driver()->set_game_state(MAIN_SCREEN_INTERFACE);
+
+        EventRecord evt;
+        WaitNextEvent(everyEvent, &evt, 3, nil);
+
+        int whichItem = -1;
+        bool timeout = false;
+        switch (evt.what ) {
+        case nullEvent:
+            InterfaceIdle();
+            if (globals()->gOptions & kOptionInBackground) {
+                startDemoTime = TickCount();
+            }
+            if ((TickCount() - startDemoTime) > kMainDemoTimeOutTime) {
+                whichItem = kMainDemoButton;
+                timeout = true;
+            }
+            break;
+
+        case osEvt:
+            startDemoTime = TickCount();
+            break;
+
+        case mouseDown:
+            {
+                startDemoTime = TickCount();
+                Point where = evt.where;
+                GlobalToLocal(&where);
+                whichItem = InterfaceMouseDown(where);
+            }
+            break;
+
+        case keyDown:
+        case autoKey:
+            startDemoTime = TickCount();
+            whichItem = InterfaceKeyDown(evt.message);
+            break;
+        }
+
+        switch (whichItem) {
+        case kMainQuitButton:
+            return kMainQuit;
+
+        case kMainDemoButton:
+            if (timeout) {
+                return kMainTimeoutDemo;
+            } else {
+                return kMainDemo;
+            }
+
+        case kMainTrainButton:
+            return kMainTrain;
+
+        case kMainPlayButton:
+            return kMainPlay;
+
+        case kMainNetworkButton:
+            return kMainNetwork;
+
+        case kMainAboutButton:
+            return kMainAbout;
+
+        case kMainOptionsButton:
+            CloseInterface();
+            DoOptionsInterface();
+
+            OpenInterface( kMainScreenResID);
+            if (!(globals()->gOptions & kOptionNetworkAvailable)) {
+                SetStatusOfAnyInterfaceItem( kMainNetworkButton, kDimmed, false);
+            }
+            if (globals()->gOptions & kOptionNoSinglePlayer) {
+                SetStatusOfAnyInterfaceItem( kMainPlayButton, kDimmed, false);
+            }
+
+            DrawEntireInterface();
+            startDemoTime = TickCount();
+            break;
+        }
+    }
 }
 
 void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {

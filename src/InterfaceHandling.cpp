@@ -62,6 +62,14 @@ TypedHandle<interfaceItemType> gInterfaceItemData;
 short               gInterfaceFileRefID = -1, gCurrentTEItem = -1;
 long                gInterfaceScreenHBuffer = 0, gInterfaceScreenVBuffer = 0;
 
+ScopedOpenInterface::ScopedOpenInterface(int id) {
+    OpenInterface(id);
+}
+
+ScopedOpenInterface::~ScopedOpenInterface() {
+    CloseInterface();
+}
+
 int InterfaceHandlingInit( void)
 
 {
