@@ -607,10 +607,6 @@ PlayAgainResult DoPlayAgain(bool allowResume, bool allowSkip) {
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( globals()->returnToMain)
-                        {
-                            done = true;
-                        }
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
@@ -749,11 +745,6 @@ void DoNetSettings( void)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( globals()->returnToMain)
-                        {
-                            cancel = true;
-                            done = true;
-                        }
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
@@ -1129,10 +1120,6 @@ void DoOptionsInterface( void)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( globals()->returnToMain)
-                        {
-                            done = true;
-                        }
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
@@ -1437,11 +1424,6 @@ bool DoKeyInterface( void)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( globals()->returnToMain)
-                        {
-                            done = true;
-                            result = false;
-                        }
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
@@ -1658,11 +1640,6 @@ netResultType StartNetworkGameSetup( void)
                     {
                         case nullEvent:
                             InterfaceIdle();
-                            if ( globals()->returnToMain)
-                            {
-                                done = true;
-                                result = kCancel;
-                            }
                             break;
                         case osEvt:
 //                          HandleOSEvent( &theEvent);
@@ -1801,10 +1778,6 @@ netResultType ClientWaitInterface( void)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( globals()->returnToMain)
-                        {
-                            whichItem = kClientWaitCancelButton;
-                        }
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
@@ -1959,10 +1932,6 @@ netResultType HostAcceptClientInterface( void)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( globals()->returnToMain)
-                        {
-                            whichItem = kHostCancelButton;
-                        }
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
@@ -2176,11 +2145,6 @@ long DoSelectLevelInterface( long startChapter)
                 {
                     case nullEvent:
                         InterfaceIdle();
-                        if ( globals()->returnToMain)
-                        {
-                            whichItem = kSelectLevelCancelButton;
-                        }
-
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
@@ -2469,11 +2433,6 @@ bool DoMissionInterface( long whichScenario)
                             nextStartTime = TickCount();
                         }
 
-                        if ( globals()->returnToMain)
-                        {
-                            done = true;
-                            cancel = true;
-                        }
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);

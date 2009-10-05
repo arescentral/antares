@@ -331,11 +331,6 @@ bool Key_Setup_Screen_Do( void)
                             lastFlashTime = TickCount();
                         }
                         InterfaceIdle();
-                        if ( globals()->returnToMain)
-                        {
-                            done = true;
-                            result = false;
-                        }
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);

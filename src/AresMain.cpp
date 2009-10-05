@@ -632,7 +632,7 @@ GameResult PlayTheGame(long *seconds) {
     const int64_t scenario_start_time = (gThisScenario->startTime & kScenario_StartTimeMask)
         * kScenarioTimeMultiple;
 
-    while ((globals()->gGameOver <= 0 ) && (!globals()->returnToMain)) {
+    while (globals()->gGameOver <= 0) {
         globals()->gFrameCount = 0;
 
         SetLongRect(&clipRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);

@@ -89,15 +89,8 @@ aresGlobalType::aresGlobalType() {
     gSoundFileRefID = 0;
     gLastSelectedBuildPrice = 0;
     gAutoPilotOff = true;
-    gameRangerPending = false;
-    gameRangerInProgress = false;
-    useGameRanger = false;
-    returnToMain = false;
     levelNum = 31;
     keyMask = 0;
-    haveSeenRTNotice = false;
-    ambrosia_Is_Registered = false;
-    user_is_scum = false;
     gSerialNumerator = 0;
     gSerialDenominator = 0;
     okToOpenFile = true;

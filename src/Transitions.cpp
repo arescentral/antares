@@ -271,7 +271,7 @@ bool AutoFadeTo( long tickTime, RGBColor *goalColor, bool eventSkip)
 
 {
     long        startTime, thisTime = 0, lastStep = 0, thisStep = 0;
-    bool     anyEventHappened = globals()->returnToMain;
+    bool     anyEventHappened = false;
 
     globals()->gColorAnimationStep = kStartAnimation;
     globals()->gColorAnimationInSpeed = 1;
@@ -299,7 +299,7 @@ bool AutoFadeFrom( long tickTime, bool eventSkip) // assumes you've set up with 
 
 {
     long        startTime, thisTime = 0, lastStep = 0, thisStep = 0;
-    bool         anyEventHappened = globals()->returnToMain;
+    bool         anyEventHappened = false;
 
     globals()->gColorAnimationOutSpeed = 1;
     startTime = TickCount();
@@ -326,7 +326,7 @@ bool AutoMusicFadeTo( long tickTime, RGBColor *goalColor, bool eventSkip)
 
 {
     long        startTime, thisTime = 0, lastStep = 0, thisStep = 0, musicVol, musicStep;
-    bool     anyEventHappened = globals()->returnToMain;
+    bool     anyEventHappened = false;
 
     globals()->gColorAnimationStep = kStartAnimation;
     globals()->gColorAnimationInSpeed = 1;

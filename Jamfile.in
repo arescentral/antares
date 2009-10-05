@@ -10,7 +10,6 @@ Main Antares : src/Admiral.cpp
                src/AresCheat.cpp
                #src/AresDemoScanner.cpp
                src/AresExternalFile.cpp
-               src/AresGameRanger.cpp
                src/AresGlobalType.cpp
                #src/AresGuideMaker.cpp
                src/AresMain.cpp
