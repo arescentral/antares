@@ -163,7 +163,7 @@ void ScenarioMakerCleanup( void)
 }
 
 
-Boolean ConstructScenario( long which)
+bool ConstructScenario( long which)
 
 {
     long                count, owner, type, specialAttributes,
@@ -957,7 +957,7 @@ void CheckActionMedia( long whichAction, long actionNum, unsigned char color)
 {
     baseObjectType      *baseObject;
     objectActionType    *action = *gObjectActionData + whichAction;
-    Boolean             OKtoExecute;
+    bool             OKtoExecute;
     long                count;
 
     while ((actionNum > 0) && (action->verb != kNoAction))
@@ -1102,7 +1102,7 @@ void AddActionMedia( objectActionType *action, unsigned char color)
 {
     baseObjectType      *baseObject = nil;
     long                count = 0, l1, l2;
-    Boolean             OKtoExecute;
+    bool             OKtoExecute;
 
     if ( action != nil)
     {
@@ -1220,7 +1220,7 @@ void GetInitialCoord( scenarioInitialType *initial, coordPointType *coord, long 
     coord->v += lscrap;
 }
 
-void HackWinLoseMessage( Boolean win)
+void HackWinLoseMessage( bool win)
 
 {
     if ( win)
@@ -1245,7 +1245,7 @@ void CheckScenarioConditions( long timePass)
     unsigned long           distance, dcalc;
     scenarioInitialType     *initial;
     longPointType           offset = {0, 0};
-    Boolean                 conditionTrue = FALSE;
+    bool                 conditionTrue = false;
 
 #pragma unused( timePass)
 
@@ -1254,7 +1254,7 @@ void CheckScenarioConditions( long timePass)
         {
             if ( (!(condition->flags & kTrueOnlyOnce)) || ( !(condition->flags & kHasBeenTrue)))
             {
-                conditionTrue = FALSE;
+                conditionTrue = false;
                 switch( condition->condition)
                 {
                     case kCounterCondition:
@@ -1262,7 +1262,7 @@ void CheckScenarioConditions( long timePass)
                         if ( GetAdmiralScore( l, condition->conditionArgument.counter.whichCounter) ==
                             condition->conditionArgument.counter.amount)
                         {
-                            conditionTrue = TRUE;
+                            conditionTrue = true;
                         }
                         break;
 
@@ -1271,7 +1271,7 @@ void CheckScenarioConditions( long timePass)
                         if ( GetAdmiralScore( l, condition->conditionArgument.counter.whichCounter) >=
                             condition->conditionArgument.counter.amount)
                         {
-                            conditionTrue = TRUE;
+                            conditionTrue = true;
                         }
                         break;
 
@@ -1280,7 +1280,7 @@ void CheckScenarioConditions( long timePass)
                         if ( GetAdmiralScore( l, condition->conditionArgument.counter.whichCounter) !=
                             condition->conditionArgument.counter.amount)
                         {
-                            conditionTrue = TRUE;
+                            conditionTrue = true;
                         }
                         break;
 
@@ -1289,7 +1289,7 @@ void CheckScenarioConditions( long timePass)
                         mGetRealObjectFromInitial( sObject, initial, condition->conditionArgument.longValue);
                         if ( sObject == nil)
                         {
-                            conditionTrue = TRUE;
+                            conditionTrue = true;
                         }
                         break;
 
@@ -1301,7 +1301,7 @@ void CheckScenarioConditions( long timePass)
                             l = mGetRealAdmiralNum(condition->conditionArgument.longValue);
                             if ( l == sObject->owner)
                             {
-                                conditionTrue = TRUE;
+                                conditionTrue = true;
                             }
 
                         }
@@ -1376,7 +1376,7 @@ void CheckScenarioConditions( long timePass)
                         mGetRealObjectFromInitial( sObject, initial, condition->subjectObject);
                         if ( sObject == nil)
                         {
-                            conditionTrue = TRUE;
+                            conditionTrue = true;
                         } else if ( sObject->health <= ( sObject->baseType->health >> 1))
                         {
                             conditionTrue = true;
@@ -1538,7 +1538,7 @@ void CheckScenarioConditions( long timePass)
                 }
                 if ( conditionTrue)
                 {
-//                  WriteDebugLine((char *)"\pTRUE!");
+//                  WriteDebugLine((char *)"\ptrue!");
 //                  WriteDebugLong( i);
 
                     condition->flags |= kHasBeenTrue;
@@ -1554,7 +1554,7 @@ void CheckScenarioConditions( long timePass)
         }
 }
 
-void SetScenarioConditionTrueYet( long whichCondition, Boolean state)
+void SetScenarioConditionTrueYet( long whichCondition, bool state)
 
 {
     scenarioConditionType   *condition = nil;
@@ -1562,18 +1562,18 @@ void SetScenarioConditionTrueYet( long whichCondition, Boolean state)
     condition = mGetScenarioCondition( gThisScenario, whichCondition);
     if ( state)
     {
-//      WriteDebugLine((char *)"\pSET:TRUE");
+//      WriteDebugLine((char *)"\pSET:true");
 //      WriteDebugLong( whichCondition);
         condition->flags |= kHasBeenTrue;
     } else
     {
-//      WriteDebugLine((char *)"\pSET:NOTTRUE");
+//      WriteDebugLine((char *)"\pSET:NOTtrue");
 //      WriteDebugLong( whichCondition);
         condition->flags &= ~kHasBeenTrue;
     }
 }
 
-Boolean GetScenarioConditionTrue( long whichCondition)
+bool GetScenarioConditionTrue( long whichCondition)
 {
     scenarioConditionType   *condition = nil;
 
@@ -2031,7 +2031,7 @@ long GetPreviousNetworkScenario( long thisChapter)
     return( result);
 }
 
-Boolean ThisChapterIsNetworkable( long whichChapter)
+bool ThisChapterIsNetworkable( long whichChapter)
 
 {
     scenarioType    *aScenario = *globals()->gScenarioData + GetScenarioNumberFromChapterNumber( whichChapter);

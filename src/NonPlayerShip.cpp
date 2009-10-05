@@ -90,7 +90,7 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *);
 void ThinkObjectGetCoordVector( spaceObjectType *, coordPointType *, unsigned long *, short *);
 void ThinkObjectGetCoordDistance( spaceObjectType *, coordPointType *, unsigned long *);
 void ThinkObjectResolveDestination( spaceObjectType *, coordPointType *, spaceObjectType **);
-Boolean ThinkObjectResolveTarget( spaceObjectType *, coordPointType *, unsigned long *, spaceObjectType **);
+bool ThinkObjectResolveTarget( spaceObjectType *, coordPointType *, unsigned long *, spaceObjectType **);
 unsigned long ThinkObjectEngageTarget( spaceObjectType *, spaceObjectType *, unsigned long, short *, long);
 
 spaceObjectType *HackNewNonplayerShip( long owner, short type, Rect *bounds)
@@ -1918,7 +1918,7 @@ void ThinkObjectResolveDestination( spaceObjectType *anObject, coordPointType *d
     }
 }
 
-Boolean ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
+bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
     unsigned long *distance, spaceObjectType **targetObject)
 {
     spaceObjectType *closestObject;
@@ -2355,7 +2355,7 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
             if ((anObject->attributes & kIsHumanControlled) && ( sObject->baseType->damage > 0))
             {
 //#ifndef   powerc
-                StartBooleanColorAnimation( 128, 128, WHITE);//GetTranslateColorShade( AQUA, VERY_LIGHT));
+                StartboolColorAnimation( 128, 128, WHITE);//GetTranslateColorShade( AQUA, VERY_LIGHT));
 //#endif
             }
         }

@@ -362,7 +362,7 @@ void MoveScrollStars( const long byUnits)
 #endif
 }
 
-void DrawScrollStars( Boolean warp)
+void DrawScrollStars( bool warp)
 
 {
 #ifdef kUseScrollStar
@@ -432,7 +432,7 @@ void DrawScrollStars( Boolean warp)
             }
         } else // we were warping but now are not; erase warped stars
         {
-//          globals()->gWarpStars = FALSE;
+//          globals()->gWarpStars = false;
             for ( i = 0; i < kScrollStarNum; i++)
             {
                 if ( star->speed != kNoStar)
@@ -464,7 +464,7 @@ void DrawScrollStars( Boolean warp)
         }
     } else // we're warping now
     {
-//      globals()->gWarpStars = TRUE;
+//      globals()->gWarpStars = true;
 
         for ( i = 0; i < kScrollStarNum; i++)
         {
@@ -537,7 +537,7 @@ void DrawScrollStars( Boolean warp)
 #endif
 }
 
-void ShowScrollStars( Boolean warp)
+void ShowScrollStars( bool warp)
 
 {
 #ifdef kUseScrollStar
@@ -613,7 +613,7 @@ void ShowScrollStars( Boolean warp)
             }
         } else // we were warping but now are not; erase warped stars
         {
-            globals()->gWarpStars = FALSE;
+            globals()->gWarpStars = false;
             for ( i = 0; i < kScrollStarNum; i++)
             {
                 if ( star->speed != kNoStar)
@@ -639,7 +639,7 @@ void ShowScrollStars( Boolean warp)
         }
     } else // we're warping now
     {
-        globals()->gWarpStars = TRUE;
+        globals()->gWarpStars = true;
 
         for ( i = 0; i < kScrollStarNum; i++)
         {
@@ -753,7 +753,7 @@ void DontShowScrollStars( void)
             }
         } else // we were warping but now are not; erase warped stars
         {
-            globals()->gWarpStars = FALSE;
+            globals()->gWarpStars = false;
             for ( i = 0; i < kScrollStarNum; i++)
             {
                 if ( star->speed != kNoStar)
@@ -773,7 +773,7 @@ void DontShowScrollStars( void)
         }
     } else // we're warping now
     {
-        globals()->gWarpStars = TRUE;
+        globals()->gWarpStars = true;
 
         for ( i = 0; i < kScrollStarNum; i++)
         {
@@ -1020,7 +1020,7 @@ void Move3DStars( Point center, long byUnits, Rect *bounds)
     }
 }
 
-void Draw3DStars( Boolean warp, Rect *bounds, PixMap* destMap)
+void Draw3DStars( bool warp, Rect *bounds, PixMap* destMap)
 
 {
     short           i;
@@ -1104,7 +1104,7 @@ void Draw3DStars( Boolean warp, Rect *bounds, PixMap* destMap)
     }
 }
 
-void Show3DStars( Boolean warp, Rect *bounds, PixMap* sourceMap)
+void Show3DStars( bool warp, Rect *bounds, PixMap* sourceMap)
 
 {
     short           i;

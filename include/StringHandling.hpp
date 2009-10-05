@@ -23,7 +23,7 @@
 #include <Base.h>
 
 void CopyPString( unsigned char *, const unsigned char *);
-Boolean ComparePString( unsigned char *, const unsigned char *);
+bool ComparePString( unsigned char *, const unsigned char *);
 int PStringLen( const unsigned char *s);
 void ConcatenatePString( unsigned char *, const unsigned char *);
 void PStringFromCString( unsigned char *, const unsigned char *);

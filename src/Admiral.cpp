@@ -77,7 +77,7 @@ void ResetAllAdmirals( void)
 
     for ( i = 0; i < kScenarioPlayerNum; i++)
     {
-        a->active = FALSE;
+        a->active = false;
         a->attributes = 0;
         a->destinationObject = kNoDestinationObject;
         a->destinationObjectID = -1;
@@ -144,7 +144,7 @@ long MakeNewAdmiral( long flagship, long destinationObject, destinationType dTyp
 
     if ( n == kScenarioPlayerNum) return ( kNoFreeAdmiral);
 
-    a->active = TRUE;
+    a->active = true;
     a->attributes = attributes;
     a->earningPower = earningPower;
 
@@ -525,7 +525,7 @@ void SetAdmiralConsiderObject( long whichAdmiral, long whichObject)
     } else a->considerShipID = -1;
 }
 
-Boolean BaseHasSomethingToBuild( long whichObject)
+bool BaseHasSomethingToBuild( long whichObject)
 {
     long            buildAtNum, l;
     destBalanceType *d = mGetDestObjectBalancePtr( 0);
@@ -1674,7 +1674,7 @@ void AdmiralBuildAtObject( long whichAdmiral, long baseTypeNum, long whichDestOb
     }
 }
 
-Boolean AdmiralScheduleBuild( long whichAdmiral, long buildWhichType)
+bool AdmiralScheduleBuild( long whichAdmiral, long buildWhichType)
 
 {
     admiralType     *admiral = *globals()->gAdmiralData + whichAdmiral;
@@ -1700,9 +1700,9 @@ Boolean AdmiralScheduleBuild( long whichAdmiral, long buildWhichType)
                 buildAtDest->totalBuildTime = buildAtDest->buildTime;
             }
             buildAtDest->buildObjectBaseNum = baseNum;
-            return ( TRUE);
-        } else return ( FALSE);
-    } else return ( FALSE);
+            return ( true);
+        } else return ( false);
+    } else return ( false);
 }
 
 void StopBuilding( long whichDestObject)

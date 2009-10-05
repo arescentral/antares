@@ -70,22 +70,22 @@ inline bool mLeftArrowKey(KeyMap km)  { return (km[3] >> 3) & 0x01; }   // left 
 
 void GetKeyMapFromKeyNum( short, KeyMap);
 short GetKeyNumFromKeyMap( KeyMap);
-Boolean DoesKeyMapContainKeyNum( KeyMap, short);
+bool DoesKeyMapContainKeyNum( KeyMap, short);
 void WaitForAnyEvent( void);
-Boolean TimedWaitForAnyEvent( long);
-Boolean AnyEvent( void);
-Boolean ControlKey( void);
-Boolean CommandKey( void);
-Boolean OptionKey( void);
-Boolean ShiftKey( void);
-Boolean EscapeKey( void);
-Boolean PeriodKey( void);
-Boolean QKey( void);
-Boolean AnyCancelKeys( void);
+bool TimedWaitForAnyEvent( long);
+bool AnyEvent( void);
+bool ControlKey( void);
+bool CommandKey( void);
+bool OptionKey( void);
+bool ShiftKey( void);
+bool EscapeKey( void);
+bool PeriodKey( void);
+bool QKey( void);
+bool AnyCancelKeys( void);
 void GetKeyNumName(unsigned char*, short);
-Boolean AnyRealKeyDown( void);
-Boolean AnyModifierKeyDown( void);
-Boolean AnyKeyButThisOne( KeyMap, long, long);
+bool AnyRealKeyDown( void);
+bool AnyModifierKeyDown( void);
+bool AnyKeyButThisOne( KeyMap, long, long);
 long GetAsciiFromKeyMap( KeyMap, KeyMap);
 long GetAsciiFromKeyNum( short);
 

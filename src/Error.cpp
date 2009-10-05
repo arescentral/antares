@@ -146,7 +146,7 @@ void ShowErrorAny(  errorRecoverType recover,
     GrafPtr         oldPort = nil;
     DialogPtr       theDialog = nil;
     short           itemHit, itemType;
-    Boolean         done = false, quit = false;
+    bool         done = false, quit = false;
     Rect            itemRect;
     Handle          itemHandle;
 

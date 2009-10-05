@@ -329,7 +329,7 @@ extern PixMap*                  gActiveWorld;
 extern PixMap*                  gOffWorld;
 extern PixMap*                  gSaveWorld;
 
-Boolean IsKeyReserved( KeyMap, Boolean);
+bool IsKeyReserved( KeyMap, bool);
 void BlackenOffscreen( void);
 void Pause( long);
 
@@ -349,7 +349,7 @@ mainScreenResultType DoMainScreenInterface() {
 
         long startDemoTime = TickCount();
         DrawEntireInterface();
-        AutoFadeFrom( 30, FALSE);
+        AutoFadeFrom( 30, false);
         while (result == kNullResult) {
             InterfaceIdle();
             VideoDriver::driver()->set_game_state(MAIN_SCREEN_INTERFACE);
@@ -426,7 +426,7 @@ mainScreenResultType DoMainScreenInterface() {
 
                 OpenInterface( kMainScreenResID);
                 if (!(globals()->gOptions & kOptionNetworkAvailable)) {
-                    SetStatusOfAnyInterfaceItem( kMainNetworkButton, kDimmed, FALSE);
+                    SetStatusOfAnyInterfaceItem( kMainNetworkButton, kDimmed, false);
                 }
                 if (globals()->gOptions & kOptionNoSinglePlayer) {
                     SetStatusOfAnyInterfaceItem( kMainPlayButton, kDimmed, false);
@@ -462,7 +462,7 @@ void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
         CloseInterface();
 
 // it is assumed that we're "recovering" from a fade-out
-        AutoFadeFrom( 10, FALSE);
+        AutoFadeFrom( 10, false);
 
         DrawInRealWorld();
         mSetDirectFont( kTitleFontNum);
@@ -570,15 +570,15 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
         NormalizeColors();
         tRect = Rect(contentRect->left, contentRect->top, contentRect->right, contentRect->bottom);
         CopyOffWorldToRealWorld(&tRect);
-        if ( tRect.left >= tRect.right - 2) AutoFadeTo( 10, &fadeColor, FALSE);
+        if ( tRect.left >= tRect.right - 2) AutoFadeTo( 10, &fadeColor, false);
     }
 }
 
-PlayAgainResult DoPlayAgain(Boolean allowResume, Boolean allowSkip) {
+PlayAgainResult DoPlayAgain(bool allowResume, bool allowSkip) {
     int                     error = kNoError;
     Rect                    tRect;
     interfaceItemType       *item;
-    Boolean                 done = false;
+    bool                 done = false;
     Point                   where;
     short                   whichItem;
     PlayAgainResult         result = PLAY_AGAIN_QUIT;
@@ -607,13 +607,13 @@ PlayAgainResult DoPlayAgain(Boolean allowResume, Boolean allowSkip) {
         {
             SetStatusOfAnyInterfaceItem( kPlayAgainOKButton, kDimmed, false);
         }
-        DrawAllItemsOfKind( kPictureRect, FALSE, false, false);
-        DrawAllItemsOfKind( kLabeledRect, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kPlainRect, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kCheckboxButton, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kRadioButton, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kPlainButton, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kTextRect, TRUE, FALSE, FALSE);
+        DrawAllItemsOfKind( kPictureRect, false, false, false);
+        DrawAllItemsOfKind( kLabeledRect, true, false, false);
+        DrawAllItemsOfKind( kPlainRect, true, false, false);
+        DrawAllItemsOfKind( kCheckboxButton, true, false, false);
+        DrawAllItemsOfKind( kRadioButton, true, false, false);
+        DrawAllItemsOfKind( kPlainButton, true, false, false);
+        DrawAllItemsOfKind( kTextRect, true, false, false);
         while ( AnyRealKeyDown()) {
             // DO NOTHING
         };
@@ -656,7 +656,7 @@ PlayAgainResult DoPlayAgain(Boolean allowResume, Boolean allowSkip) {
                 switch ( whichItem)
                 {
                     case kPlayAgainOKButton:
-                        done = TRUE;
+                        done = true;
                         result = PLAY_AGAIN_RESTART;
                         break;
 
@@ -695,7 +695,7 @@ void DoNetSettings( void)
     int                     error = kNoError;
     Rect                    tRect;
     interfaceItemType       *item;
-    Boolean                 done = false, cancel = false, currentBandwidth = GetBandwidth();
+    bool                 done = false, cancel = false, currentBandwidth = GetBandwidth();
     Point                   where;
     short                   whichItem, result = 0, currentRegistered = 0,
                             currentDelay = 0, i;
@@ -749,13 +749,13 @@ void DoNetSettings( void)
 
         SwitchAnyRadioOrCheckbox( kNetSettingsLowerBandwidthCheck, currentBandwidth);
 
-        DrawAllItemsOfKind( kPictureRect, FALSE, false, false);
-        DrawAllItemsOfKind( kLabeledRect, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kPlainRect, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kCheckboxButton, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kRadioButton, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kPlainButton, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kTextRect, TRUE, FALSE, FALSE);
+        DrawAllItemsOfKind( kPictureRect, false, false, false);
+        DrawAllItemsOfKind( kLabeledRect, true, false, false);
+        DrawAllItemsOfKind( kPlainRect, true, false, false);
+        DrawAllItemsOfKind( kCheckboxButton, true, false, false);
+        DrawAllItemsOfKind( kRadioButton, true, false, false);
+        DrawAllItemsOfKind( kPlainButton, true, false, false);
+        DrawAllItemsOfKind( kTextRect, true, false, false);
         while ( AnyRealKeyDown()) {
             // DO NOTHING
         };
@@ -799,7 +799,7 @@ void DoNetSettings( void)
                 switch ( whichItem)
                 {
                     case kNetSettingsOKButton:
-                        done = TRUE;
+                        done = true;
                         break;
 
                     case kNetSettingsCancelButton:
@@ -880,7 +880,7 @@ void DoHelpScreen( void)
     int                     error = kNoError;
     Rect                    tRect, textRect;
     interfaceItemType       *item;
-    Boolean                 done = false;
+    bool                 done = false;
     Point                   where;
     short                   whichItem;
     EventRecord             theEvent;
@@ -908,13 +908,13 @@ void DoHelpScreen( void)
         PaintRect( &tRect);
         DrawInRealWorld();
 
-        DrawAllItemsOfKind( kPictureRect, FALSE, false, false);
-        DrawAllItemsOfKind( kLabeledRect, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kPlainRect, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kCheckboxButton, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kRadioButton, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kPlainButton, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kTextRect, TRUE, FALSE, FALSE);
+        DrawAllItemsOfKind( kPictureRect, false, false, false);
+        DrawAllItemsOfKind( kLabeledRect, true, false, false);
+        DrawAllItemsOfKind( kPlainRect, true, false, false);
+        DrawAllItemsOfKind( kCheckboxButton, true, false, false);
+        DrawAllItemsOfKind( kRadioButton, true, false, false);
+        DrawAllItemsOfKind( kPlainButton, true, false, false);
+        DrawAllItemsOfKind( kTextRect, true, false, false);
 
         if ( globals()->gOptions & kOptionSubstituteFKeys) {
             retroTextSpec.text.load_resource('TEXT', kNOFHelpScreenTextID);
@@ -1000,7 +1000,7 @@ void DoHelpScreen( void)
                 switch ( whichItem)
                 {
                     case kHelpScreenDoneButton:
-                        done = TRUE;
+                        done = true;
                         break;
 
                 }
@@ -1097,15 +1097,15 @@ void StopPauseIndicator(unsigned char* pauseString) {
 void DrawInterfaceOneAtATime( void)
 
 {
-        DrawAllItemsOfKind( kPictureRect, FALSE, TRUE, TRUE);
-        DrawAllItemsOfKind( kLabeledRect, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kTabBox, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kTabBoxButton, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kPlainRect, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kCheckboxButton, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kRadioButton, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kPlainButton, TRUE, FALSE, FALSE);
-        DrawAllItemsOfKind( kTextRect, TRUE, FALSE, FALSE);
+        DrawAllItemsOfKind( kPictureRect, false, true, true);
+        DrawAllItemsOfKind( kLabeledRect, true, false, false);
+        DrawAllItemsOfKind( kTabBox, true, false, false);
+        DrawAllItemsOfKind( kTabBoxButton, true, false, false);
+        DrawAllItemsOfKind( kPlainRect, true, false, false);
+        DrawAllItemsOfKind( kCheckboxButton, true, false, false);
+        DrawAllItemsOfKind( kRadioButton, true, false, false);
+        DrawAllItemsOfKind( kPlainButton, true, false, false);
+        DrawAllItemsOfKind( kTextRect, true, false, false);
 }
 
 void DoOptionsInterface( void)
@@ -1114,7 +1114,7 @@ void DoOptionsInterface( void)
     Point                   where;
     int                     error;
     short                   whichItem;
-    Boolean                 done = FALSE, cancel = FALSE;
+    bool                 done = false, cancel = false;
     EventRecord             theEvent;
     char                    whichChar;
     scoped_ptr<Preferences> tempPrefs(new Preferences(*globals()->gPreferencesData));
@@ -1177,12 +1177,12 @@ void DoOptionsInterface( void)
                 switch ( whichItem)
                 {
                     case kOptionCancelButton:
-                        done = TRUE;
-                        cancel = TRUE;
+                        done = true;
+                        cancel = true;
                         break;
 
                     case kOptionDoneButton:
-                        done = TRUE;
+                        done = true;
                         break;
 
                     case kOptionSoundUpButton:
@@ -1366,13 +1366,13 @@ void DrawOptionVolumeLevel( Rect *bounds, long level)
     CopyOffWorldToRealWorld(bounds);
 }
 
-Boolean DoKeyInterface( void)
+bool DoKeyInterface( void)
 
 {
     Point                   where;
     int                     error;
     short                   whichItem, i, whichKeyButton = -1, keyNum = 0, currentKey = 0, checkKey;
-    Boolean                 done = FALSE, result = TRUE, cancel = FALSE;
+    bool                 done = false, result = true, cancel = false;
     EventRecord             theEvent;
     KeyMap                  keyMap;
     Preferences     *prefsData = nil;
@@ -1422,33 +1422,33 @@ Boolean DoKeyInterface( void)
                 {
                     PlayVolumeSound( kWarningTone, kMediumLowVolume, kShortPersistence, kMustPlaySound);
                     keyNum = -1;
-                    SetStatusOfAnyInterfaceItem( checkKey, kIH_Hilite, TRUE);
+                    SetStatusOfAnyInterfaceItem( checkKey, kIH_Hilite, true);
                     Pause( 12);
-                    SetStatusOfAnyInterfaceItem( checkKey, kActive, TRUE);
+                    SetStatusOfAnyInterfaceItem( checkKey, kActive, true);
                     Pause( 12);
-                    SetStatusOfAnyInterfaceItem( checkKey, kIH_Hilite, TRUE);
+                    SetStatusOfAnyInterfaceItem( checkKey, kIH_Hilite, true);
                     Pause( 12);
                     while ( AnyEvent()) {
                         // DO NOTHING
                     };
-                    SetStatusOfAnyInterfaceItem( checkKey, kActive, TRUE);
+                    SetStatusOfAnyInterfaceItem( checkKey, kActive, true);
                 }
 
                 if (( keyNum > 0) && (whichKeyButton >= 0) && (whichKeyButton < kKeyControlNum))
                 {
                     mPlayScreenSound;
                     SetButtonKeyNum( whichKeyButton, keyNum);
-                    SetStatusOfAnyInterfaceItem( whichKeyButton, kIH_Hilite, TRUE);
+                    SetStatusOfAnyInterfaceItem( whichKeyButton, kIH_Hilite, true);
                     do
                     {
                         GetKeys( keyMap);
                         currentKey = GetKeyNumFromKeyMap( keyMap);
                     } while ( currentKey > 0);
 
-                    SetStatusOfAnyInterfaceItem( whichKeyButton, kActive, TRUE);
+                    SetStatusOfAnyInterfaceItem( whichKeyButton, kActive, true);
                     whichKeyButton++;
                     if ( whichKeyButton >= kKeyControlNum) whichKeyButton = 0;
-                    SetStatusOfAnyInterfaceItem( whichKeyButton, kIH_Hilite, TRUE);
+                    SetStatusOfAnyInterfaceItem( whichKeyButton, kIH_Hilite, true);
                     DrawKeyControlPicture( whichKeyButton);
                 }
                 keyNum = currentKey = 0;
@@ -1487,8 +1487,8 @@ Boolean DoKeyInterface( void)
                 if (( whichItem >= 0) &&  (whichItem < kKeyControlNum))
                 {
                     if (( whichKeyButton >= 0) &&  (whichKeyButton < kKeyControlNum))
-                        SetStatusOfAnyInterfaceItem( whichKeyButton, kActive, TRUE);
-                    SetStatusOfAnyInterfaceItem( whichItem, kIH_Hilite, TRUE);
+                        SetStatusOfAnyInterfaceItem( whichKeyButton, kActive, true);
+                    SetStatusOfAnyInterfaceItem( whichItem, kIH_Hilite, true);
                     whichKeyButton = whichItem;
                     DrawKeyControlPicture( whichKeyButton);
                 }
@@ -1496,15 +1496,15 @@ Boolean DoKeyInterface( void)
                 switch ( whichItem)
                 {
                     case kKeyCancelButton:
-                        cancel = TRUE;
-                        done = TRUE;
+                        cancel = true;
+                        done = true;
                         break;
                     case kKeyDoneButton:
-                        done = TRUE;
+                        done = true;
                         break;
                     case kKeyOptionButton:
-                        result = FALSE;
-                        done = TRUE;
+                        result = false;
+                        done = true;
                         break;
 
                     case kKeySubstituteCheckbox:
@@ -1527,17 +1527,17 @@ Boolean DoKeyInterface( void)
                         {
                             PlayVolumeSound( kWarningTone, kMediumLowVolume, kShortPersistence, kMustPlaySound);
                             keyNum = -1;
-                            SetStatusOfAnyInterfaceItem( checkKey, kIH_Hilite, TRUE);
+                            SetStatusOfAnyInterfaceItem( checkKey, kIH_Hilite, true);
                             Pause( 12);
-                            SetStatusOfAnyInterfaceItem( checkKey, kActive, TRUE);
+                            SetStatusOfAnyInterfaceItem( checkKey, kActive, true);
                             Pause( 12);
-                            SetStatusOfAnyInterfaceItem( checkKey, kIH_Hilite, TRUE);
+                            SetStatusOfAnyInterfaceItem( checkKey, kIH_Hilite, true);
                             Pause( 12);
                             while ( AnyEvent()) {
                                 // DO NOTHING
                             };
                             if ( checkKey != whichKeyButton)
-                                SetStatusOfAnyInterfaceItem( checkKey, kActive, TRUE);
+                                SetStatusOfAnyInterfaceItem( checkKey, kActive, true);
                             options ^= kOptionSubstituteFKeys;
                             SwitchAnyRadioOrCheckbox( kKeySubstituteCheckbox,
                                 ((options & kOptionSubstituteFKeys) ? (true):(false)));
@@ -1573,9 +1573,9 @@ Boolean DoKeyInterface( void)
 //  true, then command-q for quit during a game should be disabled.
 //
 
-Boolean BothCommandAndQ( void)
+bool BothCommandAndQ( void)
 {
-    Boolean command = false, q = false;
+    bool command = false, q = false;
     short   b;
 
     for ( b = 0; b < kKeyExtendedControlNum; b++)
@@ -1588,7 +1588,7 @@ Boolean BothCommandAndQ( void)
     else return( false);
 }
 
-Boolean IsKeyReserved( KeyMap keyMap, Boolean alternateFKey)
+bool IsKeyReserved( KeyMap keyMap, bool alternateFKey)
 {
 #pragma unused( alternateFKey)
 
@@ -1646,7 +1646,7 @@ netResultType StartNetworkGameSetup( void)
     Point                   where;
     int                     error;
     short                   whichItem = -1;
-    Boolean                 done = FALSE;
+    bool                 done = false;
     EventRecord             theEvent;
     char                    whichChar;
     netResultType           result = kCancel;
@@ -1709,20 +1709,20 @@ netResultType StartNetworkGameSetup( void)
                     switch ( whichItem)
                     {
                         case kNetSetupCancelButton:
-                            done = TRUE;
+                            done = true;
                             result = kCancel;
                             break;
 
                         case kNetSetupHostButton:
 //                          BlackenWindow();
 //                          if ( DoHostGame()) result = kHost;
-                            done = TRUE;
+                            done = true;
                             break;
 
                         case kNetSetupJoinButton:
 //                          BlackenWindow();
 //                          if ( DoJoinGameModalDialog()) result = kClient;
-                            done = TRUE;
+                            done = true;
                             break;
                     }
 
@@ -1777,7 +1777,7 @@ netResultType ClientWaitInterface( void)
     Point                   where;
     int                     error;
     short                   whichItem;
-    Boolean                 done = FALSE;
+    bool                 done = false;
     EventRecord             theEvent;
     char                    whichChar;
     netResultType           result = kCancel;
@@ -1850,7 +1850,7 @@ netResultType ClientWaitInterface( void)
                 switch ( whichItem)
                 {
                     case kClientWaitCancelButton:
-                        done = TRUE;
+                        done = true;
                         result = kCancel;
                         StopNetworking();
                         break;
@@ -1940,7 +1940,7 @@ netResultType HostAcceptClientInterface( void)
     Point                   where;
     int                     error;
     short                   whichItem;
-    Boolean                 done = FALSE;
+    bool                 done = false;
     EventRecord             theEvent;
     char                    whichChar;
     netResultType           result = kCancel;
@@ -2007,7 +2007,7 @@ netResultType HostAcceptClientInterface( void)
                 switch ( whichItem)
                 {
                     case kHostCancelButton:
-                        done = TRUE;
+                        done = true;
                         result = kCancel;
                         StopNetworking();
                         break;
@@ -2123,11 +2123,11 @@ void BlackenOffscreen( void)
 }
 
 
-Boolean IsThisInGameHilited( short which, Boolean set)
+bool IsThisInGameHilited( short which, bool set)
 
 {
 #pragma unused( which, set)
-    return ( FALSE);
+    return ( false);
 }
 
 long DoSelectLevelInterface( long startChapter)
@@ -2136,7 +2136,7 @@ long DoSelectLevelInterface( long startChapter)
     Point                   where;
     int                     error, x;
     short                   whichItem;
-    Boolean                 done = FALSE, enteringCheat = false;
+    bool                 done = false, enteringCheat = false;
     EventRecord             theEvent;
     char                    whichChar;
     interfaceItemType       *anItem;
@@ -2185,7 +2185,7 @@ long DoSelectLevelInterface( long startChapter)
         DrawLevelNameInBox( chapterName, kTitleFontNum, -1, kSelectLevelNameBox);
 
 // it is assumed that we're "recovering" from a fade-out
-        AutoFadeFrom( 60, FALSE);
+        AutoFadeFrom( 60, false);
         MacShowCursor();
         while ( !done)
         {
@@ -2269,7 +2269,7 @@ long DoSelectLevelInterface( long startChapter)
                         break;
 
                     case kSelectLevelOKButton:
-                        done = TRUE;
+                        done = true;
                         break;
 
                     case kSelectLevelCancelButton:
@@ -2384,13 +2384,13 @@ void DrawLevelNameInBox(unsigned char* name, long fontNum, short descriptionText
     retroTextSpec.text.destroy();
 }
 
-Boolean DoMissionInterface( long whichScenario)
+bool DoMissionInterface( long whichScenario)
 
 {
     Point                   where, dataPoint;
     int                     error, x, y;
     short                   whichItem, i;
-    Boolean                 done = FALSE, cancel = FALSE;
+    bool                 done = false, cancel = false;
     EventRecord             theEvent;
     char                    whichChar;
     interfaceItemType       dataItem;
@@ -2412,11 +2412,11 @@ Boolean DoMissionInterface( long whichScenario)
     {
 //      DrawEntireInterface();
         HideCursor();
-        SetStatusOfAnyInterfaceItem( kMissionPreviousButton, kDimmed, FALSE);
+        SetStatusOfAnyInterfaceItem( kMissionPreviousButton, kDimmed, false);
         DrawInterfaceOneAtATime();
         CopyOffWorldToSaveWorld( &totalRect);
 // it is assumed that we're "recovering" from a fade-out
-        AutoFadeFrom( 60, FALSE);
+        AutoFadeFrom( 60, false);
 
         GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kMissionMapRect), &mapRect);
 
@@ -2590,7 +2590,7 @@ Boolean DoMissionInterface( long whichScenario)
                         break;
 
                     case kMissionDoneButton:
-                        done = TRUE;
+                        done = true;
                         break;
 
                 }
@@ -2994,7 +2994,7 @@ TypedHandle<unsigned char> CreateWeaponDataText(long whichWeapon, unsigned char*
     Str255              numString, tempString;
     long                mostDamage, actionNum;
     objectActionType    *action;
-    Boolean             isGuided = false;
+    bool             isGuided = false;
 
     if ( whichWeapon != kNoShip)
     {
@@ -3079,7 +3079,7 @@ void ShowSuccessAnimation(WindowPtr) {
     TypedHandle<natePixType> shipSprite;
     spritePix       aSpritePix;
     unsigned char   color;
-    Boolean         warp;
+    bool         warp;
     unsigned char   hackString[] = "\pMISSION COMPLETE";
     transColorType  *transColor;
 
@@ -3094,7 +3094,7 @@ void ShowSuccessAnimation(WindowPtr) {
 
 // we assume we're recovering from a fade-out
 
-    AutoFadeFrom( 1, FALSE);
+    AutoFadeFrom( 1, false);
 
     SetAllSoundsNoKeep();
     RemoveAllUnusedSounds();
@@ -3126,7 +3126,7 @@ void ShowSuccessAnimation(WindowPtr) {
         lastTime = TickCount();
         zpoint = kDebriefZMax;
         PlayVolumeSound( 516, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
-        warp = FALSE;
+        warp = false;
         ztimes = 1;
         startimes = 1;
         warpcount = 0;
@@ -3144,7 +3144,7 @@ void ShowSuccessAnimation(WindowPtr) {
             warpcount += unitsToDo;
             if ( warpcount > 80)
             {
-                warp = TRUE;
+                warp = true;
                 startimes = 8;
                 ztimes = 4;
             }
@@ -3166,7 +3166,7 @@ void ShowSuccessAnimation(WindowPtr) {
             tRect = theseBounds;
             BiggestRect( &tRect, &lastBounds);
 
-            Show3DStars( TRUE, &starBounds, gOffWorld);
+            Show3DStars( true, &starBounds, gOffWorld);
 
             ChunkCopyPixMapToScreenPixMap( gOffWorld, &tRect, gActiveWorld);
             lastBounds = theseBounds;
@@ -3200,7 +3200,7 @@ void ShowSuccessAnimation(WindowPtr) {
                 0, 0);
 
             ChunkCopyPixMapToScreenPixMap( gOffWorld, &tRect, gActiveWorld);
-            Show3DStars( TRUE, &starBounds, gOffWorld);
+            Show3DStars( true, &starBounds, gOffWorld);
         }
         MacShowCursor();
         shipSprite.destroy();
@@ -3396,7 +3396,7 @@ void DoMissionDebriefingText(long textID, long yourlength, long parlength,
     TypedHandle<unsigned char> textData;
     long                length, autoTimeStart, textlength = 0;
     short               textHeight = 0;
-    Boolean             doScore = (parScore >= 0);
+    bool             doScore = (parScore >= 0);
     interfaceItemType       dataItem;
 
     tRect = Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
@@ -3478,7 +3478,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
     unsigned char       *thisChar = nil, *sectionStart = nil, *nextChar;
     scoped_ptr<Picture> thePict;
     scoped_ptr<Picture> bgPict;
-    Boolean             sectionOver, abort = false, wasPicture = true;
+    bool             sectionOver, abort = false, wasPicture = true;
     Movie               theMovie = nil;
     Rect                clipRgn;
 

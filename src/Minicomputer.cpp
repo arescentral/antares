@@ -231,7 +231,7 @@ struct miniScreenLineType {
     long            hiliteRight;
     long            whichButton;
     lineSelectType  selectable;
-    Boolean         underline;
+    bool         underline;
     lineKindType    lineKind;
     long            value;      // for keeping track of changing values
     long            statusType;
@@ -344,7 +344,7 @@ void ClearMiniScreenLines( void)
         c->hiliteLeft = c->hiliteRight = 0;
         c->whichButton = kNoLineButton;
         c->selectable = cannotSelect;
-        c->underline = FALSE;
+        c->underline = false;
         c->lineKind = plainLineKind;
         c->sourceData = nil;
         c++;
@@ -672,7 +672,7 @@ void MakeMiniScreenFromIndString( short whichString)
             switch( *c)
             {
                 case kUnderlineEndLineChar:
-                    line->underline = TRUE;
+                    line->underline = true;
 
                     // ||| NO BREAK
                     // VVV fall through to kEndLineChar
@@ -1262,7 +1262,7 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
     Rect            lRect, clipRect;
     transColorType      *transColor;
     Rect                mRect;
-    Boolean             update = FALSE;
+    bool             update = false;
     unsigned char       digit[3], *digitp;
     long                scratch;
 
@@ -1304,7 +1304,7 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
                                         &clipRect, 0, 0);
         }
 
-        update = TRUE;
+        update = true;
     }
 
     if ( thisTwo != lastTwo)
@@ -1337,7 +1337,7 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
             DrawDirectTextStringClipped( digit, lightcolor, gOffWorld,
                                         &clipRect, 0, 0);
         }
-        update = TRUE;
+        update = true;
     }
 
     if ( thisSpecial != lastSpecial)
@@ -1370,7 +1370,7 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
             DrawDirectTextStringClipped( digit, lightcolor, gOffWorld,
                                         &clipRect, 0, 0);
         }
-        update = TRUE;
+        update = true;
     }
 
     if ( update)
@@ -1857,7 +1857,7 @@ void MiniComputerDoAccept( void)
         case kBuildMiniScreen:
             if ( globals()->gMiniScreenData.selectLine != kMiniScreenNoLineSelected)
                 if (AdmiralScheduleBuild( globals()->gPlayerAdmiralNumber,
-                    globals()->gMiniScreenData.selectLine - kBuildScreenFirstTypeLine) == FALSE)
+                    globals()->gMiniScreenData.selectLine - kBuildScreenFirstTypeLine) == false)
                 {
                     mPlayBeepBad;
                 }
@@ -2023,7 +2023,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                     (kMaxSpaceObject - kMaxShipBuffer))
                 {
                     if (AdmiralScheduleBuild( whichAdmiral,
-                        whichLine - kBuildScreenFirstTypeLine) == FALSE)
+                        whichLine - kBuildScreenFirstTypeLine) == false)
                     {
                         if ( whichAdmiral == globals()->gPlayerAdmiralNumber)
                             mPlayBeepBad;
@@ -2032,7 +2032,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                 {
                     if ( whichAdmiral == globals()->gPlayerAdmiralNumber)
                     {
-                        SetStatusString( "\pMaximum number of ships built", TRUE,
+                        SetStatusString( "\pMaximum number of ships built", true,
                             ORANGE);
                     }
                 }

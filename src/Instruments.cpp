@@ -224,7 +224,7 @@ void UpdateRadar(int32_t unitsDone) {
     transColorType  *transColor;
     admiralType     *admiral;
     Rect            tRect;
-    Boolean         doDraw;
+    bool         doDraw;
     uint64_t        tempWide, hugeDistance;
 
     if ( gScrollStarObject != nil)
@@ -788,7 +788,7 @@ void DrawSite() {
     unsigned char   color;
     Rect        clipRect;
     Point           cursorCoord;
-    Boolean         doDraw;
+    bool         doDraw;
 
     if ( gScrollStarObject != nil)
     {
@@ -923,7 +923,7 @@ void DrawSectorLines() {
     Rect        clipRect;
     unsigned char   color;
     transColorType  *transColor;
-    Boolean         doDraw;
+    bool         doDraw;
 
     if ( gScrollStarObject != nil)
     {

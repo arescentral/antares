@@ -170,7 +170,7 @@ long            gLastTick, // globals()->gGameOver = 0,
                 CLIP_BOTTOM = 480,
                 gPlayScreenWidth = 480,
                 gPlayScreenHeight = 480;
-Boolean         hackWarn = true;
+bool         hackWarn = true;
 
 unsigned long kNoKeys = 0;
 
@@ -187,7 +187,7 @@ int main(int argc, char* const* argv) {
 
 void AresMain() {
     RGBColor                initialFadeColor;
-    Boolean                 skipFading = false;
+    bool                 skipFading = false;
     scoped_ptr<ColorTable>  theClut;
 
     init_globals();
@@ -281,9 +281,9 @@ void MainLoop() {
             {
                 RGBColor fadeColor = { 0, 0, 0 };
                 if (globals()->gOptions & kOptionMusicIdle) {
-                    AutoMusicFadeTo( 60, &fadeColor, FALSE);
+                    AutoMusicFadeTo( 60, &fadeColor, false);
                 } else {
-                    AutoFadeTo( 60, &fadeColor, FALSE);
+                    AutoFadeTo( 60, &fadeColor, false);
                 }
                 done = true;
             }
@@ -335,10 +335,10 @@ void MainLoop() {
                     gameResult = NO_GAME;
                     RGBColor fadeColor = { 0, 0, 0 };
                     if (globals()->gOptions & kOptionMusicIdle) {
-                        AutoMusicFadeTo(60, &fadeColor, FALSE);
+                        AutoMusicFadeTo(60, &fadeColor, false);
                         StopAndUnloadSong();
                     } else {
-                        AutoFadeTo( 60, &fadeColor, FALSE);
+                        AutoFadeTo( 60, &fadeColor, false);
                     }
 
                     RemoveAllSpaceObjects();
@@ -411,14 +411,14 @@ void MainLoop() {
 
                             fadeColor.red = fadeColor.green = fadeColor.blue = 0;
                             if (globals()->gOptions & kOptionMusicPlay) {
-                                AutoMusicFadeTo( 60, &fadeColor, FALSE);
+                                AutoMusicFadeTo( 60, &fadeColor, false);
                                 StopAndUnloadSong();
                             } else {
-                                AutoFadeTo( 60, &fadeColor, FALSE);
+                                AutoFadeTo( 60, &fadeColor, false);
                             }
 
                             ClearScreen();
-                            AutoFadeFrom( 1, FALSE);
+                            AutoFadeFrom( 1, false);
 
                             // normal scrolltext song
                             int scroll_song = 4002;
@@ -534,11 +534,11 @@ void MainLoop() {
                             fadeColor.red = fadeColor.green = fadeColor.blue = 0;
                             if ( globals()->gOptions & kOptionMusicIdle)
                             {
-                                AutoMusicFadeTo( 60, &fadeColor, FALSE);
+                                AutoMusicFadeTo( 60, &fadeColor, false);
                                 StopAndUnloadSong();
                             } else
                             {
-                                AutoFadeTo( 60, &fadeColor, FALSE);
+                                AutoFadeTo( 60, &fadeColor, false);
                             }
 
                             RemoveAllSpaceObjects();
@@ -659,7 +659,7 @@ GameResult PlayTheGame(long *seconds) {
                             l1, l2, newGameTime = 0, lastclicktime = 0,
                             additionalSeconds = 0;
     KeyMap              keyMap = { }, lastKeyMap;
-    Boolean             playerPaused = FALSE, mouseDown = FALSE,
+    bool             playerPaused = false, mouseDown = false,
                             enteringMessage = false,
                             afEntering = false, demoKey = false, newKeyMap = false, commandAndQ = false;
     unsigned long       scenarioCheckTime = 0;
@@ -752,7 +752,7 @@ GameResult PlayTheGame(long *seconds) {
 
                 if ( decideCycle == kDecideEveryCycles) {
                     // everything in here gets executed once every kDecideEveryCycles
-                    playerPaused = FALSE;
+                    playerPaused = false;
 
                     NonplayerShipThink( kDecideEveryCycles);
                     AdmiralThink();
@@ -794,13 +794,13 @@ GameResult PlayTheGame(long *seconds) {
                                         lastclicktime = globals()->gGameTime;
                                     }
                                 }
-                                mouseDown = TRUE;
+                                mouseDown = true;
                             } else {
                                 InstrumentsHandleMouseStillDown();
                             }
                         }
                     } else if (mouseDown) {
-                        mouseDown = FALSE;
+                        mouseDown = false;
                         InstrumentsHandleMouseUp();
                     }
 
@@ -978,14 +978,14 @@ GameResult PlayTheGame(long *seconds) {
             ShowSpriteTable();
             ShowAllLabels();
             ShowAllBeams();
-            ShowScrollStars( TRUE);
+            ShowScrollStars( true);
             ShowSectorLines();
             ShowSite();
             CopyOffWorldToRealWorld(&playAreaRect);
 
             DrawMessageScreen(unitsDone);
             UpdateRadar(unitsDone);
-            UpdateBooleanColorAnimation(unitsDone);
+            UpdateboolColorAnimation(unitsDone);
 
             ++globals()->gFrameCount;
             VideoDriver::driver()->main_loop_iteration_complete(globals()->gGameTime);

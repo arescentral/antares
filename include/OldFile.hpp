@@ -20,11 +20,11 @@
 
 // Old_File.h
 
-pascal Boolean  filterFunctionOpenDialog(CInfoPBPtr pbPtr,void *dataPtr);
+pascal bool  filterFunctionOpenDialog(CInfoPBPtr pbPtr,void *dataPtr);
 pascal SInt16  hookFunctionOpenDialog(SInt16 item,DialogPtr theDialog,
     void *dataPtr);
 OSErr  doDirectorySelectionDialog( StandardFileReply *);
-pascal Boolean  filterFunctionDirSelect(CInfoPBPtr pbPtr,void *dataPtr);
+pascal bool  filterFunctionDirSelect(CInfoPBPtr pbPtr,void *dataPtr);
 pascal SInt16  hookFunctionDirSelect(SInt16 item,DialogPtr theDialog,
     void *dataPtr);
 

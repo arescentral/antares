@@ -67,7 +67,7 @@ struct interfaceLabeledRectType {
     unsigned char       color;
     TEHandle            teData;
     bool                editable;
-    // Boolean             editable;
+    // bool             editable;
 
     void read(BinaryReader* bin);
 };
@@ -76,7 +76,7 @@ struct interfaceListType {
     interfaceLabelType          label;
     short                       (*getListLength)( void);
     void                        (*getItemString)(short, unsigned char*);
-    Boolean                     (*itemHilited)( short, Boolean);
+    bool                     (*itemHilited)( short, bool);
 //  void                        (*hiliteItem)( short);
     short                       topItem;
     interfaceItemStatusType     lineUpStatus;
@@ -90,7 +90,7 @@ struct interfaceListType {
 struct interfaceTextRectType {
     short               textID;
     uint8_t             visibleBounds;
-    // Boolean             visibleBounds;
+    // bool             visibleBounds;
 
     void read(BinaryReader* bin);
 };
@@ -104,7 +104,7 @@ struct interfaceTabBoxType {
 struct interfacePictureRectType {
     short               pictureID;
     uint8_t             visibleBounds;
-    // Boolean             visibleBounds;
+    // bool             visibleBounds;
 
     void read(BinaryReader* bin);
 };
@@ -113,7 +113,7 @@ struct interfaceButtonType {
     interfaceLabelType          label;
     short                       key;
     uint8_t                     defaultButton;
-    // Boolean                     defaultButton;
+    // bool                     defaultButton;
     interfaceItemStatusType     status;
 
     void read(BinaryReader* bin);
@@ -123,7 +123,7 @@ struct interfaceRadioType {
     interfaceLabelType          label;
     short                       key;
     uint8_t                     on;
-    // Boolean                     on;
+    // bool                     on;
     interfaceItemStatusType     status;
 
     void read(BinaryReader* bin);
@@ -133,7 +133,7 @@ struct interfaceCheckboxType {
     interfaceLabelType          label;
     short                       key;
     uint8_t                     on;
-    // Boolean                     on;
+    // bool                     on;
     interfaceItemStatusType     status;
 
     void read(BinaryReader* bin);

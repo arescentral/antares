@@ -38,7 +38,7 @@
 // delving into the System.
 //
 
-Boolean Ploticl8ToCICN( short resID, short resRefNum, Rect *destRect,
+bool Ploticl8ToCICN( short resID, short resRefNum, Rect *destRect,
     Handle icl8Handle, Handle ICNnHandle)
 {
     Handle      icn;            // Handle to the icon's bitmap image and mask.

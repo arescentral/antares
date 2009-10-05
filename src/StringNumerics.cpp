@@ -79,7 +79,7 @@ smallFixedType StringToSmallFixed( Str255 s)
 
 {
     short           charnum = 1;
-    Boolean     negative = false, seenDecimal = false;
+    bool     negative = false, seenDecimal = false;
     double          value = 0, divider = 0, tfloat, sign = 1.0;
     
     while (( charnum <= s[0]) && (( s[charnum] < '0') || ( s[charnum] > '9')) &&
@@ -328,7 +328,7 @@ unsigned char* LongToString(long l, unsigned char* s) {
 
 long StringToLong(unsigned char* s) {
     long                result = 0, charNum = 1, strLen = s[0], sign = 1;
-    Boolean             seenSign = false;
+    bool             seenSign = false;
     
 //  if ( s[1] == '-')
 //  {

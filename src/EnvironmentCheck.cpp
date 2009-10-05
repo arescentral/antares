@@ -40,7 +40,7 @@
 
 //#pragma code68020 off
 
-Boolean EnvironmentCheck( void)
+bool EnvironmentCheck( void)
 
 {
 #if TARGET_OS_MAC
@@ -201,7 +201,7 @@ void EnvironmentError( short stringNum)
     Alert( kEnvironmentErrorAlert, nil);
 }
 
-Boolean EnvironmentWarning( short stringNum)
+bool EnvironmentWarning( short stringNum)
 
 {
     Str255      s1;
@@ -215,7 +215,7 @@ Boolean EnvironmentWarning( short stringNum)
 
 // From IM:OS Utilities p 8-22
 
-/*FUNCTION MySWRoutineAvailable (trapWord: Integer): Boolean;
+/*FUNCTION MySWRoutineAvailable (trapWord: Integer): bool;
 VAR
 trType: TrapType;
 BEGIN
@@ -227,13 +227,13 @@ trType := ToolTrap;
 {filter cases where older systems mask with $1FF rather than $3FF}
 IF (trType = ToolTrap) AND (ORD(BAND(trapWord, $03FF)) >= $200) AND
 (GetToolboxTrapAddress($A86E) = GetToolboxTrapAddress($AA6E)) THEN
-MySWRoutineAvailable := FALSE
+MySWRoutineAvailable := false
 ELSE
 MySWRoutineAvailable := (NGetTrapAddress(trapWord, trType) <>
 GetToolboxTrapAddress(_Unimplemented));
 END;
 */
-Boolean MySWRoutineAvailable( short trapWord)
+bool MySWRoutineAvailable( short trapWord)
 {
 #if TARGET_OS_MAC
     TrapType    trType;

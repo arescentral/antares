@@ -84,10 +84,10 @@ struct longMessageType {
     unsigned char           backColor;
     unsigned char           stringMessage[kAnyCharPStringMaxLen];
     unsigned char           lastStringMessage[kAnyCharPStringMaxLen];
-    Boolean                 newStringMessage;
+    bool                 newStringMessage;
     retroTextSpecType       retroTextSpec;
-    Boolean                 labelMessage;
-    Boolean                 lastLabelMessage;
+    bool                 labelMessage;
+    bool                 lastLabelMessage;
     short                   labelMessageID;
 };
 
@@ -118,7 +118,7 @@ void AdvanceCurrentLongMessage( void);
 void PreviousCurrentLongMessage( void);
 void ReplayLastLongMessage( void);
 void DrawMessageScreen( long);
-void SetStatusString(const unsigned char *, Boolean, unsigned char);
+void SetStatusString(const unsigned char *, bool, unsigned char);
 void UpdateStatusString( void);
 long DetermineDirectTextHeightInWidth( retroTextSpecType *, long);
 void DrawDirectTextInRect( retroTextSpecType *, Rect *, Rect *, PixMap *, long, long);

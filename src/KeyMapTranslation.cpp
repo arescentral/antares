@@ -79,7 +79,7 @@ short GetKeyNumFromKeyMap( KeyMap keyMap)
     else return (0);
 }
 
-Boolean DoesKeyMapContainKeyNum( KeyMap smap, short keyNum)
+bool DoesKeyMapContainKeyNum( KeyMap smap, short keyNum)
 {
     KeyMap  dmap;
     short   i;
@@ -109,12 +109,12 @@ void WaitForAnyEvent( void)
     FlushEvents(everyEvent, 0);
 }
 
-Boolean TimedWaitForAnyEvent( long time)
+bool TimedWaitForAnyEvent( long time)
 
 {
     long    starttime = TickCount();
     KeyMap  keyMap;
-    Boolean result = false;
+    bool result = false;
 
     do
     {
@@ -129,17 +129,17 @@ Boolean TimedWaitForAnyEvent( long time)
     return( result);
 }
 
-Boolean AnyEvent( void)
+bool AnyEvent( void)
 
 {
     KeyMap  keyMap;
 
     GetKeys(keyMap);
-    if (( Button()) || (AnyRealKeyDown())) return ( TRUE);
-    return( FALSE);
+    if (( Button()) || (AnyRealKeyDown())) return ( true);
+    return( false);
 }
 
-Boolean ControlKey( void)
+bool ControlKey( void)
 
 {
     KeyMap  keyMap;
@@ -152,7 +152,7 @@ Boolean ControlKey( void)
 #endif TARGET_OS_MAC
 }
 
-Boolean CommandKey( void)
+bool CommandKey( void)
 
 {
     KeyMap  keyMap;
@@ -165,7 +165,7 @@ Boolean CommandKey( void)
 #endif TARGET_OS_MAC
 }
 
-Boolean OptionKey( void)
+bool OptionKey( void)
 
 {
     KeyMap  keyMap;
@@ -178,7 +178,7 @@ Boolean OptionKey( void)
 #endif TARGET_OS_MAC
 }
 
-Boolean ShiftKey( void)
+bool ShiftKey( void)
 
 {
     KeyMap  keyMap;
@@ -191,7 +191,7 @@ Boolean ShiftKey( void)
 #endif TARGET_OS_MAC
 }
 
-Boolean EscapeKey( void)
+bool EscapeKey( void)
 {
     KeyMap  keyMap;
 
@@ -203,7 +203,7 @@ Boolean EscapeKey( void)
 #endif TARGET_OS_MAC
 }
 
-Boolean PeriodKey( void)
+bool PeriodKey( void)
 {
     KeyMap  keyMap;
 
@@ -215,7 +215,7 @@ Boolean PeriodKey( void)
 #endif TARGET_OS_MAC
 }
 
-Boolean QKey( void)
+bool QKey( void)
 {
     KeyMap  keyMap;
 
@@ -223,7 +223,7 @@ Boolean QKey( void)
     return (mQKey( keyMap));
 }
 
-Boolean AnyCancelKeys( void)
+bool AnyCancelKeys( void)
 {
     return( EscapeKey() || (CommandKey() && ( PeriodKey() || QKey())));
 }
@@ -234,7 +234,7 @@ void GetKeyNumName(unsigned char* s, short keyNum) {
 
 // returns true if any keys OTHER THAN POWER ON AND CAPS LOCK are down
 
-Boolean AnyRealKeyDown( void)
+bool AnyRealKeyDown( void)
 
 {
     KeyMap  keyMap;
@@ -246,18 +246,18 @@ Boolean AnyRealKeyDown( void)
     keyMap[1] &= ~0x02; // mask out caps lock key
 
     if (( keyMap[0]) || ( keyMap[1]) || ( keyMap[2]) ||
-        ( keyMap[3])) return ( TRUE);
+        ( keyMap[3])) return ( true);
 #else
     keyMap[3].bigEndianValue &= EndianU32_NtoB(~0x80);  // mask out power key
     keyMap[1].bigEndianValue &= EndianU32_NtoB(~0x02);  // mask out caps lock key
 
     if (( keyMap[0].bigEndianValue) || ( keyMap[1].bigEndianValue) || ( keyMap[2].bigEndianValue) ||
-        ( keyMap[3].bigEndianValue)) return ( TRUE);
+        ( keyMap[3].bigEndianValue)) return ( true);
 #endif TARGET_OS_MAC
-    else return ( FALSE);
+    else return ( false);
 }
 
-Boolean AnyModifierKeyDown( void) // checks for shift, option, command, control
+bool AnyModifierKeyDown( void) // checks for shift, option, command, control
 {
     if ( ControlKey()) return true;
     if ( OptionKey()) return true;
@@ -267,7 +267,7 @@ Boolean AnyModifierKeyDown( void) // checks for shift, option, command, control
     return false;
 }
 
-Boolean AnyKeyButThisOne( KeyMap keyMap, long whichWord, long whichBit)
+bool AnyKeyButThisOne( KeyMap keyMap, long whichWord, long whichBit)
 {
     long    i;
 

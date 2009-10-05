@@ -39,11 +39,11 @@ void RemoveAllSpaceObjects( void);
 void CorrectAllBaseObjectColor( void);
 void InitSpaceObjectFromBaseObject( spaceObjectType *, long, short, long, fixedPointType *, long,
                                     short);
-void ChangeObjectBaseType( spaceObjectType *, long, long, Boolean);
+void ChangeObjectBaseType( spaceObjectType *, long, long, bool);
 void AddActionToQueue( objectActionType *, long, long, long, spaceObjectType *,
                         spaceObjectType *, longPointType *);
 void ExecuteActionQueue( long);
-void ExecuteObjectActions( long, long, spaceObjectType *, spaceObjectType *, longPointType *, Boolean);
+void ExecuteObjectActions( long, long, spaceObjectType *, spaceObjectType *, longPointType *, bool);
 void DebugExecuteObjectActions( long, long, spaceObjectType *, spaceObjectType *, longPointType *, char *, long);
 //long CreateAnySpaceObject( long, fixedPointType *, coordPointType *, long, long, unsigned long,
 //                          long *, short, short, short);
@@ -52,13 +52,13 @@ long CreateAnySpaceObject( long, fixedPointType *, coordPointType *, long, long,
 long DebugCreateAnySpaceObject( long, fixedPointType *, coordPointType *, long, long, unsigned long,
                             long *, short, short, short, char *, long);
 long CountObjectsOfBaseType( long, long);
-long GetNextObjectWithAttributes( long, unsigned long, Boolean);
+long GetNextObjectWithAttributes( long, unsigned long, bool);
 void AlterObjectHealth( spaceObjectType *, long);
 void AlterObjectEnergy( spaceObjectType *, long);
 void AlterObjectBattery( spaceObjectType *, long);
-void AlterObjectOwner( spaceObjectType *, long, Boolean);
-void AlterObjectOccupation( spaceObjectType *, long, long, Boolean);
-void AlterObjectCloakState( spaceObjectType *, Boolean);
+void AlterObjectOwner( spaceObjectType *, long, bool);
+void AlterObjectOccupation( spaceObjectType *, long, long, bool);
+void AlterObjectCloakState( spaceObjectType *, bool);
 void DestroyObject( spaceObjectType *);
 void ActivateObjectSpecial( spaceObjectType *);
 void CreateFloatingBodyOfPlayer( spaceObjectType *);

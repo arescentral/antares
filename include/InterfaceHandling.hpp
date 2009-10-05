@@ -26,12 +26,12 @@
 int InterfaceHandlingInit( void);
 void InterfaceHandlingCleanup( void);
 int OpenInterface( short);
-long AppendInterface( short, long, Boolean);
+long AppendInterface( short, long, bool);
 void ShortenInterface( long);
 void CloseInterface( void);
 void DrawEntireInterface( void);
 void DrawInterfaceRange( long, long, long);
-void DrawAllItemsOfKind( interfaceKindType, Boolean, Boolean, Boolean);
+void DrawAllItemsOfKind( interfaceKindType, bool, bool, bool);
 void OffsetItemRange( long, long, long, long);
 void OffsetAllItems( long, long);
 void CenterItemRangeInRect( Rect *, long, long);
@@ -44,16 +44,16 @@ void InterfaceIdle( void);
 short PtInInterfaceItem( Point);
 short InterfaceMouseDown( Point);
 short InterfaceKeyDown( long);
-Boolean InterfaceButtonHit( interfaceItemType *);
-Boolean InterfaceCheckboxHit( interfaceItemType *);
-Boolean InterfaceRadioButtonHit( interfaceItemType *);
-Boolean InterfaceTabBoxButtonHit( interfaceItemType *);
+bool InterfaceButtonHit( interfaceItemType *);
+bool InterfaceCheckboxHit( interfaceItemType *);
+bool InterfaceRadioButtonHit( interfaceItemType *);
+bool InterfaceTabBoxButtonHit( interfaceItemType *);
 void InterfaceListRectHit( interfaceItemType *, Point);
 void DrawStringInInterfaceContent(short, unsigned char*);
 interfaceItemType *GetAnyInterfaceItemPtr( long);
-void SetStatusOfAnyInterfaceItem( short, interfaceItemStatusType, Boolean);
-void SwitchAnyRadioOrCheckbox( short, Boolean);
-Boolean GetAnyRadioOrCheckboxOn( short);
+void SetStatusOfAnyInterfaceItem( short, interfaceItemStatusType, bool);
+void SwitchAnyRadioOrCheckbox( short, bool);
+bool GetAnyRadioOrCheckboxOn( short);
 void RefreshInterfaceItem( short);
 void RefreshInterfaceListEntry( short, short);
 void InterfaceTextEditItemInit( short);
@@ -70,7 +70,7 @@ long GetInterfaceTextEditLength( short);
 void SetInterfaceListCallback(  short       whichItem,
                                 short       (*getListLength)( void),
                                 void        (*getItemString)(short, unsigned char*),
-                                Boolean     (*itemHilited)( short, Boolean));
+                                bool     (*itemHilited)( short, bool));
 void SetButtonKeyNum( short, short);
 short GetButtonKeyNum( short);
 

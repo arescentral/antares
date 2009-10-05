@@ -50,13 +50,13 @@ void ResetScrollStars ( long);
 void MakeNewSparks( long, long, smallFixedType, unsigned char, longPointType *);
 void PrepareToMoveScrollStars( void);
 void MoveScrollStars( const long );
-void DrawScrollStars( Boolean);
-void ShowScrollStars( Boolean);
+void DrawScrollStars( bool);
+void ShowScrollStars( bool);
 void DontShowScrollStars( void);
 void DrawAllBeams( void);
 void Reset3DStars( Point, Rect *);
 void Move3DStars( Point, long, Rect *);
-void Draw3DStars( Boolean, Rect *, PixMap*);
-void Show3DStars( Boolean, Rect *, PixMap*);
+void Draw3DStars( bool, Rect *, PixMap*);
+void Show3DStars( bool, Rect *, PixMap*);
 
 #endif // ANTARES_SCROLL_STARS_HPP_

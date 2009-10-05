@@ -44,7 +44,7 @@
 
 #define kInterfaceResourceType  'intr'
 
-#define kClickLoopInfo          ( kRegisterBased | RESULT_SIZE( SIZE_CODE ( sizeof ( Boolean))) | REGISTER_RESULT_LOCATION( kRegisterD0))
+#define kClickLoopInfo          ( kRegisterBased | RESULT_SIZE( SIZE_CODE ( sizeof ( bool))) | REGISTER_RESULT_LOCATION( kRegisterD0))
 
 #define kTargetScreenWidth      640
 #define kTargetScreenHeight     480
@@ -129,7 +129,7 @@ int OpenInterface( short resID)
     return ( kNoError);
 }
 
-long AppendInterface( short resID, long relativeNumber, Boolean center)
+long AppendInterface( short resID, long relativeNumber, bool center)
 {
     TypedHandle<interfaceItemType> appendData;
     long                count, originalNumber, number;
@@ -265,8 +265,8 @@ void DrawInterfaceRange( long from, long to, long withinItem)
     }
 }
 
-void DrawAllItemsOfKind( interfaceKindType kind, Boolean sound, Boolean clearFirst,
-                            Boolean showAtEnd)
+void DrawAllItemsOfKind( interfaceKindType kind, bool sound, bool clearFirst,
+                            bool showAtEnd)
 
 {
     long                number, count;
@@ -570,7 +570,7 @@ short InterfaceKeyDown( long message)
     interfaceItemType   *item;
     short               buttonKey;
     KeyMap              keyMap;
-    Boolean             caughtKey = false;
+    bool             caughtKey = false;
     char                whichChar;
     long                keyCode;
 
@@ -642,7 +642,7 @@ short InterfaceKeyDown( long message)
             switch ( item->kind)
             {
                 case kTabBoxButton:
-                    item->item.radioButton.on = TRUE;
+                    item->item.radioButton.on = true;
                     break;
 
                 default:
@@ -694,7 +694,7 @@ short InterfaceKeyDown( long message)
     return( -1);
 }
 
-Boolean InterfaceButtonHit( interfaceItemType *button)
+bool InterfaceButtonHit( interfaceItemType *button)
 
 {
     Rect    tRect;
@@ -703,7 +703,7 @@ Boolean InterfaceButtonHit( interfaceItemType *button)
 //  LongRectToRect( &(button->bounds), &tRect);
     GetAnyInterfaceItemGraphicBounds( button, &tRect);
 
-    if ( button->item.plainButton.status == kDimmed) return( FALSE);
+    if ( button->item.plainButton.status == kDimmed) return( false);
 
     while ( Button())
     {
@@ -733,7 +733,7 @@ Boolean InterfaceButtonHit( interfaceItemType *button)
     return tRect.contains(where);
 }
 
-Boolean InterfaceCheckboxHit( interfaceItemType *button)
+bool InterfaceCheckboxHit( interfaceItemType *button)
 
 {
     Rect    tRect;
@@ -742,7 +742,7 @@ Boolean InterfaceCheckboxHit( interfaceItemType *button)
 //  LongRectToRect( &(button->bounds), &tRect);
     GetAnyInterfaceItemGraphicBounds( button, &tRect);
 
-    if ( button->item.checkboxButton.status == kDimmed) return( FALSE);
+    if ( button->item.checkboxButton.status == kDimmed) return( false);
 
     do
     {
@@ -770,8 +770,8 @@ Boolean InterfaceCheckboxHit( interfaceItemType *button)
     GetMouse( &where);
     if (tRect.contains(where)) {
         if ( button->item.checkboxButton.on)
-            button->item.checkboxButton.on = FALSE;
-        else button->item.checkboxButton.on = TRUE;
+            button->item.checkboxButton.on = false;
+        else button->item.checkboxButton.on = true;
         DrawAnyInterfaceItemOffToOn( button);
         return( true);
     } else
@@ -781,7 +781,7 @@ Boolean InterfaceCheckboxHit( interfaceItemType *button)
     }
 }
 
-Boolean InterfaceRadioButtonHit( interfaceItemType *button)
+bool InterfaceRadioButtonHit( interfaceItemType *button)
 
 {
     Rect    tRect;
@@ -790,10 +790,10 @@ Boolean InterfaceRadioButtonHit( interfaceItemType *button)
 //  LongRectToRect( &(button->bounds), &tRect);
     GetAnyInterfaceItemGraphicBounds( button, &tRect);
 
-    if ( button->item.radioButton.status == kDimmed) return( FALSE);
+    if ( button->item.radioButton.status == kDimmed) return( false);
 
-    if ( button->item.radioButton.on == FALSE)
-        button->item.radioButton.on = TRUE;
+    if ( button->item.radioButton.on == false)
+        button->item.radioButton.on = true;
 
     do
     {
@@ -820,10 +820,10 @@ Boolean InterfaceRadioButtonHit( interfaceItemType *button)
     }
     DrawAnyInterfaceItemOffToOn( button);
 //  return( MacPtInRect( where, &tRect));
-    return(TRUE);
+    return(true);
 }
 
-Boolean InterfaceTabBoxButtonHit( interfaceItemType *button)
+bool InterfaceTabBoxButtonHit( interfaceItemType *button)
 
 {
     Rect    tRect;
@@ -831,9 +831,9 @@ Boolean InterfaceTabBoxButtonHit( interfaceItemType *button)
 
     GetAnyInterfaceItemGraphicBounds( button, &tRect);
 
-    if ( button->item.radioButton.status == kDimmed) return( FALSE);
+    if ( button->item.radioButton.status == kDimmed) return( false);
 
-    if ( button->item.radioButton.on != FALSE) return( false);
+    if ( button->item.radioButton.on != false) return( false);
 
     do
     {
@@ -858,10 +858,10 @@ Boolean InterfaceTabBoxButtonHit( interfaceItemType *button)
     {
         button->item.radioButton.status = kActive;
     }
-    button->item.radioButton.on = TRUE;
+    button->item.radioButton.on = true;
     DrawAnyInterfaceItemOffToOn( button);
 
-    return(TRUE);
+    return(true);
 }
 
 void InterfaceListRectHit( interfaceItemType *listRect, Point where)
@@ -878,7 +878,7 @@ void InterfaceListRectHit( interfaceItemType *listRect, Point where)
         whichHit = where.v / lineHeight + listRect->item.listRect.topItem;
         if ( whichHit >= (*(listRect->item.listRect.getListLength))())
             whichHit = -1;
-        (*(listRect->item.listRect.itemHilited))( whichHit, TRUE);
+        (*(listRect->item.listRect.itemHilited))( whichHit, true);
     }
 }
 
@@ -907,7 +907,7 @@ interfaceItemType *GetAnyInterfaceItemPtr( long whichItem)
     return ( *gInterfaceItemData + whichItem);
 }
 
-void SetStatusOfAnyInterfaceItem( short whichItem, interfaceItemStatusType status, Boolean drawNow)
+void SetStatusOfAnyInterfaceItem( short whichItem, interfaceItemStatusType status, bool drawNow)
 
 {
     interfaceItemType       *item;
@@ -938,7 +938,7 @@ void SetStatusOfAnyInterfaceItem( short whichItem, interfaceItemStatusType statu
 }
 
 
-void SwitchAnyRadioOrCheckbox( short whichItem, Boolean turnOn)
+void SwitchAnyRadioOrCheckbox( short whichItem, bool turnOn)
 
 {
     interfaceItemType       *item;
@@ -954,7 +954,7 @@ void SwitchAnyRadioOrCheckbox( short whichItem, Boolean turnOn)
 
 }
 
-Boolean GetAnyRadioOrCheckboxOn( short whichItem)
+bool GetAnyRadioOrCheckboxOn( short whichItem)
 
 {
     interfaceItemType       *item;
@@ -967,7 +967,7 @@ Boolean GetAnyRadioOrCheckboxOn( short whichItem)
         return (item->item.radioButton.on);
 
 
-    return( FALSE);
+    return( false);
 }
 
 
@@ -1237,7 +1237,7 @@ long GetInterfaceTextEditLength( short whichItem)
 void SetInterfaceListCallback(  short       whichItem,
                                 short       (*getListLength)( void),
                                 void        (*getItemString)(short, unsigned char*),
-                                Boolean     (*itemHilited)( short, Boolean))
+                                bool     (*itemHilited)( short, bool))
 {
     interfaceItemType   *item;
 

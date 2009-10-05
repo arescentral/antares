@@ -34,7 +34,7 @@ void CopyPString( unsigned char *to, const unsigned char *from)
         *(to++) = *(from++);
 }
 
-Boolean ComparePString( unsigned char *s1, unsigned char *s2)
+bool ComparePString( unsigned char *s1, unsigned char *s2)
 
 {
     int     len;
@@ -54,7 +54,7 @@ Boolean ComparePString( unsigned char *s1, unsigned char *s2)
             len--;
         } while (( c1 == c2) && ( len > 0));
         return ( c1 == c2);
-    } else { return ( FALSE);}
+    } else { return ( false);}
 }
 
 int PStringLen( unsigned char *s)

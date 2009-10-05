@@ -535,8 +535,8 @@ struct beamType {
     coordPointType      lastApparentLocation;
     coordPointType      endLocation;
     unsigned char       color;
-    Boolean             killMe;
-    Boolean             active;
+    bool             killMe;
+    bool             active;
     long                fromObjectNumber;
     long                fromObjectID;
     spaceObjectTypePtr  fromObject;

@@ -64,7 +64,7 @@ static OSErr Find_Symbol(Ptr* pSymAddr,
 static pascal OSErr GetSystemArchitecture(OSType *archType);
 
 
-Boolean NetSprocketGlueInit( void)
+bool NetSprocketGlueInit( void)
 {
 #ifdef kUseCFMGlue
     long    gestaltInfo;
@@ -575,7 +575,7 @@ NSpAddressReference Glue_NSpDoModalJoinDialog(
 #endif
 }
 
-Boolean Glue_NSpDoModalHostDialog(
+bool Glue_NSpDoModalHostDialog(
     NSpProtocolListReference    ioProtocolList,
     Str31                       ioGameName,
     Str31                       ioPlayerName,

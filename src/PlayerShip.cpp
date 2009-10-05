@@ -81,8 +81,8 @@ void ResetPlayerShip( long which)
     WriteDebugLine("\pPLAYER:");
     WriteDebugLong( which);
     globals()->gPlayerShipNumber = which;
-    globals()->gSelectionLabel = AddScreenLabel( 0, 0, 0, 10, &nilLabel, nil, TRUE, YELLOW);
-    globals()->gDestinationLabel = AddScreenLabel( 0, 0, 0, -20, &nilLabel, nil, TRUE, SKY_BLUE);
+    globals()->gSelectionLabel = AddScreenLabel( 0, 0, 0, 10, &nilLabel, nil, true, YELLOW);
+    globals()->gDestinationLabel = AddScreenLabel( 0, 0, 0, -20, &nilLabel, nil, true, SKY_BLUE);
     globals()->gSendMessageLabel = AddScreenLabel( 200, 200, 0, 30, &nilLabel, nil, false, GREEN);
     ResetScrollStars( globals()->gPlayerShipNumber);
     globals()->gAlarmCount = -1;
@@ -114,8 +114,8 @@ void ResetPlayerShip( long which)
     globals()->hotKey_target = false;
 }
 
-Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
-    Boolean *enterMessage)
+bool PlayerShipGetKeys( long timePass, unsigned long theKeys,
+    bool *enterMessage)
 {
     KeyMap          keyMap, *bufMap;
     short           a, b, h, friendOrFoe;
@@ -123,7 +123,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
     baseObjectType  *baseObject = nil;
     long            selectShipNum;
     unsigned long   distance, difference, dcalc, attributes, nonattributes;
-    Boolean         everPaused = FALSE, newKeys = false;
+    bool         everPaused = false, newKeys = false;
     uint64_t        hugeDistance;
     unsigned char   *message;
     long            width, height, strlen;
@@ -480,7 +480,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
     {
         PlayVolumeSound(  kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
         GetIndString( s, kMessageStringID, globals()->gZoomMode + kZoomStringOffset);
-        SetStatusString( s, TRUE, kStatusLabelColor);
+        SetStatusString( s, true, kStatusLabelColor);
     }
 
     theShip = *gSpaceObjectData + globals()->gPlayerShipNumber;
@@ -493,7 +493,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
          {
             PlayVolumeSound( kKlaxon, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
             globals()->gAlarmCount = 0;
-            SetStatusString( "\pWARNING: Shields Low", TRUE, kStatusWarnColor);
+            SetStatusString( "\pWARNING: Shields Low", true, kStatusWarnColor);
          } else
          {
             globals()->gAlarmCount += timePass;
@@ -501,7 +501,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
             {
                 PlayVolumeSound( kKlaxon, kMediumVolume, kMediumLongPersistence, kPrioritySound);
                 globals()->gAlarmCount = 0;
-                SetStatusString( "\pWARNING: Shields Low", TRUE, kStatusWarnColor);
+                SetStatusString( "\pWARNING: Shields Low", true, kStatusWarnColor);
             }
         }
     } else globals()->gAlarmCount = -1;
@@ -746,12 +746,12 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
                 if ( selectShip->attributes & kIsDestination)
                 {
                     SetScreenLabelString( globals()->gDestinationLabel, GetDestBalanceName( selectShip->destinationObject));
-//                  SetDestinationString( GetDestBalanceName( selectShip->destinationObject), TRUE);
+//                  SetDestinationString( GetDestBalanceName( selectShip->destinationObject), true);
                 } else
                 {
                     GetIndString( s, kSpaceObjectNameResID, selectShip->whichBaseObject + 1);
                     SetScreenLabelString( globals()->gDestinationLabel, (anyCharType *)s);
-//                  SetDestinationString( s, TRUE);
+//                  SetDestinationString( s, true);
                 }
 
                 SetObjectDestination( theShip, nil);
@@ -790,7 +790,7 @@ Boolean PlayerShipGetKeys( long timePass, unsigned long theKeys,
     //          NumToString(  selectShip->entryNumber, s);
         //      SetAdmiralDestinationObject( globals()->gPlayerAdmiralNumber, globals()->gPlayerShipNumber, kCoordinateDestinationType);
         //      SetObjectDestination( selectShip);
-        //      SetDestinationString( s, TRUE);
+        //      SetDestinationString( s, true);
                 */
                 if ( !(globals()->gOptions & kOptionNetworkOn))
                 {
@@ -898,12 +898,12 @@ void PlayerShipHandleClick( Point where)
                     if ( selectShip->attributes & kIsDestination)
                     {
                         SetScreenLabelString( globals()->gDestinationLabel, GetDestBalanceName( selectShip->destinationObject));
-    //                  SetDestinationString( GetDestBalanceName( selectShip->destinationObject), TRUE);
+    //                  SetDestinationString( GetDestBalanceName( selectShip->destinationObject), true);
                     } else
                     {
                         GetIndString( s, kSpaceObjectNameResID, selectShip->whichBaseObject + 1);
                         SetScreenLabelString( globals()->gDestinationLabel, (anyCharType *)s);
-    //                  SetDestinationString( s, TRUE);
+    //                  SetDestinationString( s, true);
                     }
 
                     SetObjectDestination( theShip, nil);
@@ -961,7 +961,7 @@ void PlayerShipHandleClick( Point where)
     }
 }
 
-void SetPlayerSelectShip( long whichShip, Boolean target, long admiralNumber)
+void SetPlayerSelectShip( long whichShip, bool target, long admiralNumber)
 {
     spaceObjectType *selectShip = *gSpaceObjectData + whichShip,
                     *theShip = GetAdmiralFlagship( admiralNumber);
@@ -1097,7 +1097,7 @@ void TogglePlayerAutoPilot( spaceObjectType *theShip)
             ( theShip->attributes & kIsHumanControlled))
         {
             GetIndString( s, kMessageStringID, kAutoPilotOffString);
-            SetStatusString( s, TRUE, kStatusLabelColor);
+            SetStatusString( s, true, kStatusLabelColor);
         }
     } else
     {
@@ -1107,12 +1107,12 @@ void TogglePlayerAutoPilot( spaceObjectType *theShip)
             ( theShip->attributes & kIsHumanControlled))
         {
             GetIndString( s, kMessageStringID, kAutoPilotOnString);
-            SetStatusString( s, TRUE, kStatusLabelColor);
+            SetStatusString( s, true, kStatusLabelColor);
         }
     }
 }
 
-Boolean IsPlayerShipOnAutoPilot( void)
+bool IsPlayerShipOnAutoPilot( void)
 {
     spaceObjectType *theShip;
 
@@ -1142,8 +1142,8 @@ void PlayerShipGiveCommand( long whichAdmiral)
     }
 }
 
-// Boolean sourceIsBody was hacked in to use this for xferring control
-void PlayerShipBodyExpire( spaceObjectType *theShip, Boolean sourceIsBody)
+// bool sourceIsBody was hacked in to use this for xferring control
+void PlayerShipBodyExpire( spaceObjectType *theShip, bool sourceIsBody)
 {
     spaceObjectType *selectShip = nil;
     long            selectShipNum;
@@ -1209,9 +1209,9 @@ void PlayerShipBodyExpire( spaceObjectType *theShip, Boolean sourceIsBody)
 }
 
 void HandleTextMessageKeys( KeyMap keyMap, KeyMap lastKeyMap,
-    Boolean *enterMessage)
+    bool *enterMessage)
 {
-    Boolean         newKeys = false, anyKeys = false;
+    bool         newKeys = false, anyKeys = false;
     short           h;
     KeyMap          *bufferMap;
 

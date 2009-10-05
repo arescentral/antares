@@ -24,7 +24,7 @@
 
 #pragma mark **DEFINITIONS**
 
-Boolean Wrap_UseGameRanger( void)
+bool Wrap_UseGameRanger( void)
 {
     return true;
 }
@@ -51,28 +51,28 @@ OSErr       Wrap_GRInstallResumeHandler(void)
     return result;
 }
 
-Boolean     Wrap_GRCheckAEForCmd(const AppleEvent *theEvent)
+bool     Wrap_GRCheckAEForCmd(const AppleEvent *theEvent)
 {
     mWriteDebugString("\p>GRCheckAEForCmd");
 
     return GRCheckAEForCmd( theEvent);
 }
 
-Boolean     Wrap_GRCheckFileForCmd(void)
+bool     Wrap_GRCheckFileForCmd(void)
 {
     mWriteDebugString("\p>GRCheckFileForCmd");
 
     return GRCheckFileForCmd();
 }
 
-Boolean     Wrap_GRCheckForAE(void)
+bool     Wrap_GRCheckForAE(void)
 {
     mWriteDebugString("\p>GRCheckForAE");
 
     return GRCheckForAE();
 }
 
-Boolean     Wrap_GRIsWaitingCmd(void)
+bool     Wrap_GRIsWaitingCmd(void)
 {
 //  mWriteDebugString("\p>GRIsWaitingCmd");
 
@@ -86,21 +86,21 @@ void        Wrap_GRGetWaitingCmd(void)
     GRGetWaitingCmd();
 }
 
-Boolean     Wrap_GRIsCmd(void)
+bool     Wrap_GRIsCmd(void)
 {
     mWriteDebugString("\p>GRIsCmd");
 
     return GRIsCmd();
 }
 
-Boolean     Wrap_GRIsHostCmd(void)
+bool     Wrap_GRIsHostCmd(void)
 {
     mWriteDebugString("\p>GRIsHostCmd");
 
     return GRIsHostCmd();
 }
 
-Boolean     Wrap_GRIsJoinCmd(void)
+bool     Wrap_GRIsJoinCmd(void)
 {
     mWriteDebugString("\p>GRIsJoinCmd");
 
@@ -201,7 +201,7 @@ OSErr       Wrap_GROpenGameRanger(void)
     return GROpenGameRanger();
 }
 
-Boolean
+bool
 Wrap_GRNSpDoModalHostDialog         (NSpProtocolListReference  ioProtocolList,
                                  Str31                  ioGameName,
                                  Str31                  ioPlayerName,

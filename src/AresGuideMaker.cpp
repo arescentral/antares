@@ -82,8 +82,8 @@ struct weaponDataType {
     long                        velocity;
     long                        range;
     long                        damage;
-    Boolean                     guided;
-    Boolean                     autoTarget;
+    bool                     guided;
+    bool                     autoTarget;
     long                        energyCost;
 };
 
@@ -449,7 +449,7 @@ void InsertWeaponText( short resID, short startNum, Handle newText, weaponDataTy
 
 OSErr ConvertSpriteIntoGIF(short resID, long whichShape, unsigned char* forceName)
 {
-    Boolean             tableExisted = true;
+    bool             tableExisted = true;
     TypedHandle<natePixType> spriteTable;
     Rect                r;
     PixMapHandle        offPixBase = GetGWorldPixMap( gOffWorld);
@@ -682,7 +682,7 @@ void GetWeaponData( long whichWeapon, weaponDataType *data)
     baseObjectType      *weaponObject, *missileObject;
     long                mostDamage, actionNum, mostSpeed;
     objectActionType    *action;
-    Boolean             isGuided = false;
+    bool             isGuided = false;
 
     if ( whichWeapon != kNoShip)
     {
@@ -996,7 +996,7 @@ void InsertIndexText( long whichObject, long myRace, Handle text)
     Handle          newData = nil;
     Str255          s;
     short           raceNum = 0, raceID;
-    Boolean         raceHasName = true;
+    bool         raceHasName = true;
     baseObjectType  *o;
     long            lowestClass, highestClass, thisClass, nextClass, count;
 

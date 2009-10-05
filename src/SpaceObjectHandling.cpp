@@ -92,7 +92,7 @@ TypedHandle<actionQueueType> gActionQueueData;
 void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord);
 
 int SpaceObjectHandlingInit() {
-    Boolean correctBaseObjectColor = false;
+    bool correctBaseObjectColor = false;
 
     gSpaceObjectData.create(kMaxSpaceObject);
     if (gBaseObjectData.get() == nil)
@@ -749,7 +749,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
         dObject->frame.animation.frameSpeed = sObject->frame.animation.frameSpeed;
     } else if ( dObject->attributes & kIsBeam)
     {
-//      dObject->frame.beam.killMe = FALSE;
+//      dObject->frame.beam.killMe = false;
     }
 //  DebugFileAppendString( "\p\t");
 
@@ -864,7 +864,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
 //
 
 void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
-    long spriteIDOverride, Boolean relative)
+    long spriteIDOverride, bool relative)
 
 {
     baseObjectType  *sObject = mGetBaseObjectPtr( whichBaseObject), *weaponBase = nil;
@@ -913,7 +913,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
         dObject->frame.animation.frameSpeed = sObject->frame.animation.frameSpeed;
     } else if ( dObject->attributes & kIsBeam)
     {
-//      dObject->frame.beam.killMe = FALSE;
+//      dObject->frame.beam.killMe = false;
     }
 
     dObject->maxVelocity = sObject->maxVelocity;
@@ -1209,7 +1209,7 @@ void ExecuteActionQueue( long unitsToDo)
 
 void ExecuteObjectActions( long whichAction, long actionNum,
                 spaceObjectType *sObject, spaceObjectType *dObject, longPointType *offset,
-                Boolean allowDelay)
+                bool allowDelay)
 
 {
 
@@ -1224,7 +1224,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
     smallFixedType  f, f2;
     coordPointType  newLocation;
     longPointType   location;
-    Boolean         OKtoExecute, checkConditions = false;
+    bool         OKtoExecute, checkConditions = false;
     Fixed           aFixed;
     transColorType  *transColor;
     unsigned char   tinyColor;
@@ -1483,7 +1483,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 //                  WriteDebugLong( anObject->id);
 
 //                  if ( anObject->attributes & kIsBeam)
-//                      anObject->frame.beam.killMe = TRUE;
+//                      anObject->frame.beam.killMe = true;
                     switch ( action->argument.killObject.dieType)
                     {
                         case kDieExpire:
@@ -1832,7 +1832,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                             break;
 
                         case kAlterConditionTrueYet:
-//                  WriteDebugLine((char *)"\pTRUEYET");
+//                  WriteDebugLine((char *)"\ptrueYET");
                             if ( action->argument.alterObject.range <= 0)
                             {
                                 SetScenarioConditionTrueYet( action->argument.alterObject.minimum,
@@ -2097,7 +2097,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 
                 case kColorFlash:
                     mGetTranslateColorShade( action->argument.colorFlash.color, action->argument.colorFlash.shade, tinyColor, transColor);
-                    StartBooleanColorAnimation( action->argument.colorFlash.length,
+                    StartboolColorAnimation( action->argument.colorFlash.length,
                         action->argument.colorFlash.length, tinyColor);//GetTranslateColorShade( AQUA, VERY_LIGHT));
                     break;
 
@@ -2117,7 +2117,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                         globals()->gZoomMode = static_cast<ZoomType>(action->argument.zoom.zoomLevel);
                         PlayVolumeSound(  kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
                         GetIndString( s, kMessageStringID, globals()->gZoomMode + kZoomStringOffset);
-                        SetStatusString( s, TRUE, kStatusLabelColor);
+                        SetStatusString( s, true, kStatusLabelColor);
                     }
                     break;
 
@@ -2273,7 +2273,7 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
     }else if ( newObject.attributes & kIsBeam)
     {
 /*      newObject.frame.beam.lastGlobalLocation = *location;
-        newObject.frame.beam.killMe = FALSE;
+        newObject.frame.beam.killMe = false;
 
         h = ( newObject.location.h - gGlobalCorner.h) * gAbsoluteScale;
         h >>= SHIFT_SCALE;
@@ -2372,7 +2372,7 @@ long CountObjectsOfBaseType( long whichType, long owner)
     return (result);
 }
 
-long GetNextObjectWithAttributes( long startWith, unsigned long attributes, Boolean exclude)
+long GetNextObjectWithAttributes( long startWith, unsigned long attributes, bool exclude)
 
 {
     long    original = startWith;
@@ -2466,7 +2466,7 @@ void AlterObjectBattery( spaceObjectType *anObject, long energy)
 }
 
 
-void AlterObjectOwner( spaceObjectType *anObject, long owner, Boolean message)
+void AlterObjectOwner( spaceObjectType *anObject, long owner, bool message)
 
 {
     spaceObjectType *fixObject = nil;
@@ -2635,7 +2635,7 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, Boolean message)
 //  if ( anObject->attributes & kIsEndgameObject) CheckEndgame();
 }
 
-void AlterObjectOccupation( spaceObjectType *anObject, long owner, long howMuch, Boolean message)
+void AlterObjectOccupation( spaceObjectType *anObject, long owner, long howMuch, bool message)
 {
     if ( ( anObject->active) && ( anObject->attributes & kIsDestination) && ( anObject->attributes & kNeutralDeath))
     {
@@ -2646,7 +2646,7 @@ void AlterObjectOccupation( spaceObjectType *anObject, long owner, long howMuch,
     }
 }
 
-void AlterObjectCloakState( spaceObjectType *anObject, Boolean cloak)
+void AlterObjectCloakState( spaceObjectType *anObject, bool cloak)
 {
     long            longscrap = kMaxSoundVolume;
     long            difference;

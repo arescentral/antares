@@ -30,21 +30,21 @@ STUB0(Wrap_GRIsWaitingCmd, bool(), false);
 STUB0(Wrap_UseGameRanger, bool(), false);
 
 #if 0
-Boolean Wrap_UseGameRanger( void);
+bool Wrap_UseGameRanger( void);
 
 OSErr       Wrap_GRInstallStartupHandler(void);
 OSErr       Wrap_GRInstallResumeHandler(void);
 
-Boolean     Wrap_GRCheckAEForCmd(const AppleEvent *theEvent);
-Boolean     Wrap_GRCheckFileForCmd(void);
-Boolean     Wrap_GRCheckForAE(void);
+bool     Wrap_GRCheckAEForCmd(const AppleEvent *theEvent);
+bool     Wrap_GRCheckFileForCmd(void);
+bool     Wrap_GRCheckForAE(void);
 
-Boolean     Wrap_GRIsWaitingCmd(void);
+bool     Wrap_GRIsWaitingCmd(void);
 void        Wrap_GRGetWaitingCmd(void);
 
-Boolean     Wrap_GRIsCmd(void);
-Boolean     Wrap_GRIsHostCmd(void);
-Boolean     Wrap_GRIsJoinCmd(void);
+bool     Wrap_GRIsCmd(void);
+bool     Wrap_GRIsHostCmd(void);
+bool     Wrap_GRIsJoinCmd(void);
 
 char*       Wrap_GRGetHostGameName(void);
 UInt16      Wrap_GRGetHostMaxPlayers(void);
@@ -63,7 +63,7 @@ void        Wrap_GRHostClosed(void);
 
 OSErr       Wrap_GROpenGameRanger(void);
 
-Boolean
+bool
 Wrap_GRNSpDoModalHostDialog         (NSpProtocolListReference  ioProtocolList,
                                  Str31                  ioGameName,
                                  Str31                  ioPlayerName,

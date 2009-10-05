@@ -117,7 +117,7 @@ struct admiralType {
     smallFixedType      totalBuildChance;
     long                hopeToBuild;
     unsigned char       color;
-    Boolean             active;
+    bool             active;
     unsigned char       name[kAdmiralNameLen + 1];
 };
 
@@ -151,7 +151,7 @@ void SetAdmiralConsiderObject( long, long);
 long GetAdmiralConsiderObject( long);
 long GetAdmiralBuildAtObject( long);
 void SetAdmiralBuildAtObject( long, long);
-Boolean BaseHasSomethingToBuild( long);
+bool BaseHasSomethingToBuild( long);
 unsigned char* GetAdmiralBuildAtName(long);
 void SetAdmiralBuildAtName(long, unsigned char*);
 unsigned char* GetDestBalanceName(long);
@@ -163,7 +163,7 @@ void RemoveObjectFromDestination( spaceObjectType *);
 void AdmiralThink( void);
 smallFixedType HackGetObjectStrength( spaceObjectType *);
 void AdmiralBuildAtObject( long, long, long);
-Boolean AdmiralScheduleBuild( long, long);
+bool AdmiralScheduleBuild( long, long);
 void StopBuilding( long);
 void PayAdmiral( long, smallFixedType);
 void PayAdmiralAbsolute( long, smallFixedType);

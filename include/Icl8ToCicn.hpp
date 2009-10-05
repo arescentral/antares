@@ -20,6 +20,6 @@
 
 // icl8 to cicn.h
 
-Boolean Ploticl8ToCICN( short, short, Rect *, Handle, Handle);
+bool Ploticl8ToCICN( short, short, Rect *, Handle, Handle);
 
 #endif // ANTARES_ICL8_TO_CICN_HPP_

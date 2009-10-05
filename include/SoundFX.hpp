@@ -89,7 +89,7 @@ struct smartSoundChannel {
     short               soundVolume;
     soundPriorityType   soundPriority;
     SndChannelPtr       channelPtr;
-    Boolean             useSoundSprocket;
+    bool             useSoundSprocket;
 #ifdef kAllowSoundSprocket
     SSpSourceReference  source;
 #endif
@@ -98,7 +98,7 @@ struct smartSoundChannel {
 struct smartSoundHandle {
     TypedHandle<Sound>  soundHandle;
     short               id;
-    Boolean             keepMe;
+    bool             keepMe;
 };
 
 int InitSoundFX( void);

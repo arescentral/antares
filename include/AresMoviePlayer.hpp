@@ -25,12 +25,12 @@
 
 #include "Movies.h"
 
-void PlayMovieByName( const unsigned char*, WindowPtr, Boolean);
+void PlayMovieByName( const unsigned char*, WindowPtr, bool);
 void InitMoviePlayer( void);
 void CleanupMoviePlayer( void);
-OSErr LoadMiniMovie(unsigned char*, Movie *, Rect *, WindowPtr, Boolean);
+OSErr LoadMiniMovie(unsigned char*, Movie *, Rect *, WindowPtr, bool);
 OSErr StartMiniMovie( Movie);
-Boolean DoMiniMovieTask( Movie);
+bool DoMiniMovieTask( Movie);
 OSErr CleanUpMiniMovie( Movie *);
 
 #endif // ANTARES_ARES_MOVIE_PLAYER_HPP_

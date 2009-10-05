@@ -234,7 +234,7 @@ void DrawNateTriangleUpClipped( PixMap *destPix, Rect *destRect,
 {
     long            drowPlus, x, leftEdge, rightPlus, trueWidth, count;
     unsigned char   *dbyte;
-    Boolean         clipped = false;
+    bool         clipped = false;
 
     if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds.right - destPix->bounds.left))
         || ( destRect->bottom <= 0) || ( destRect->top >= (destPix->bounds.bottom - destPix->bounds.top)))
@@ -336,7 +336,7 @@ void DrawNatePlusClipped( PixMap *destPix, Rect *destRect,
 {
     long            drowPlus, x, half, trueWidth, count;
     unsigned char   *dbyte;
-    Boolean         clipped = false;
+    bool         clipped = false;
 
     if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds.right - destPix->bounds.left))
         || ( destRect->bottom <= 0) || ( destRect->top >= (destPix->bounds.bottom - destPix->bounds.top)))
@@ -449,7 +449,7 @@ void DrawNateSquareClipped( PixMap *destPix, Rect *destRect,
 {
     long            drowPlus, x, rightPlus, trueWidth;
     unsigned char   *dbyte;
-    Boolean         clipped = false;
+    bool         clipped = false;
 
     if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds.right - destPix->bounds.left))
         || ( destRect->bottom <= 0) || ( destRect->top >= (destPix->bounds.bottom - destPix->bounds.top)))
@@ -536,7 +536,7 @@ void DrawNateDiamondClipped( PixMap *destPix, Rect *destRect,
 {
     long            drowPlus, leftEdge, rightPlus, trueWidth, count;
     unsigned char   *dbyte;
-    Boolean         clipped = false;
+    bool         clipped = false;
 
     if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds.right - destPix->bounds.left))
         || ( destRect->bottom <= 0) || ( destRect->top >= (destPix->bounds.bottom - destPix->bounds.top)))

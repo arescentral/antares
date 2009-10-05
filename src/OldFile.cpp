@@ -58,20 +58,20 @@ typedef struct
     PicHandle       pictureHdl;
     SInt16          fileRefNum;
     FSSpec          fileFSSpec;
-    Boolean         windowTouched;
+    bool         windowTouched;
 }   docStructure, *docStructurePointer, **docStructureHandle;
 
 typedef StandardFileReply *standardFileReplyPtr;
 
 SInt16  gCurrentType = 1;
 Str255  gPrevSelectedName;
-Boolean gDirectorySelectionFlag;
+bool gDirectorySelectionFlag;
 
 SFTypeList  gFileTypes;
 
 // ************************************************************* filterFunctionOpenDialog
 
-pascal Boolean  filterFunctionOpenDialog(CInfoPBPtr pbPtr,void *dataPtr)
+pascal bool  filterFunctionOpenDialog(CInfoPBPtr pbPtr,void *dataPtr)
 {
 #pragma unused ( dataPtr)
 
@@ -148,10 +148,10 @@ OSErr  doDirectorySelectionDialog( StandardFileReply *stdFileReplyStruct)
 
 // ************************************************************** filterFunctionDirSelect
 
-pascal Boolean  filterFunctionDirSelect(CInfoPBPtr pbPtr,void *dataPtr)
+pascal bool  filterFunctionDirSelect(CInfoPBPtr pbPtr,void *dataPtr)
 {
     SInt32  attributes;
-    Boolean result;
+    bool result;
 
 #pragma unused ( dataPtr)
 

@@ -83,33 +83,33 @@ void ResetSpriteCursor( void)
     gSpriteCursor->thisLineColor = gSpriteCursor->thisLineColorDark = 0;
 }
 
-void ShowSpriteCursor( Boolean force)
+void ShowSpriteCursor( bool force)
 {
     if ( !force)
         gSpriteCursor->showLevel++;
     else gSpriteCursor->showLevel = kSpriteCursorVisible;
 }
 
-void HideSpriteCursor( Boolean force)
+void HideSpriteCursor( bool force)
 {
     if ( !force)
         gSpriteCursor->showLevel--;
     else gSpriteCursor->showLevel = kSpriteCursorHidden;
 }
 
-void ShowHideSpriteCursor( Boolean showOrHide)  // true = show
+void ShowHideSpriteCursor( bool showOrHide)  // true = show
 {
     if ( showOrHide) ShowSpriteCursor( true);
     else HideSpriteCursor( true);
 }
 
-Boolean SpriteCursorVisible( void)
+bool SpriteCursorVisible( void)
 {
     if ( gSpriteCursor->showLevel >= kSpriteCursorVisible) return( true);
     else return ( false);
 }
 
-Boolean SetSpriteCursorTable( short resID)
+bool SetSpriteCursorTable( short resID)
 
 {
     gSpriteCursor->sprite.table = GetPixTable( resID);

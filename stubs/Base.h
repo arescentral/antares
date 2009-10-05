@@ -34,7 +34,6 @@ enum {
     keyCodeMask = 0xFF00,
 };
 
-typedef bool Boolean;
 typedef int16_t OSErr;
 
 typedef int8_t SignedByte;
@@ -69,11 +68,6 @@ typedef unsigned char StrFileName[64];
 typedef uint32_t FourCharCode;
 typedef FourCharCode OSType;
 typedef FourCharCode ResType;
-
-enum {
-    TRUE = true,
-    FALSE = false,
-};
 
 ////////////////////////////
 

@@ -30,14 +30,14 @@
 
 void StartPlayerShip( long, short);
 void ResetPlayerShip( long);
-Boolean PlayerShipGetKeys( long, unsigned long, Boolean *);
+bool PlayerShipGetKeys( long, unsigned long, bool *);
 void PlayerShipHandleClick( Point);
-void SetPlayerSelectShip( long, Boolean, long);
+void SetPlayerSelectShip( long, bool, long);
 void ChangePlayerShipNumber( long, long);
 void TogglePlayerAutoPilot( spaceObjectType *);
-Boolean IsPlayerShipOnAutoPilot( void);
+bool IsPlayerShipOnAutoPilot( void);
 void PlayerShipGiveCommand( long);
-void PlayerShipBodyExpire( spaceObjectType *, Boolean);
-void HandleTextMessageKeys( KeyMap, KeyMap, Boolean *);
+void PlayerShipBodyExpire( spaceObjectType *, bool);
+void HandleTextMessageKeys( KeyMap, KeyMap, bool *);
 
 #endif // ANTARES_PLAYER_SHIP_HPP_

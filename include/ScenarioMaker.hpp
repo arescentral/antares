@@ -130,14 +130,14 @@ inline void mGetRealObjectFromInitial(
 
 short ScenarioMakerInit( void);
 void ScenarioMakerCleanup( void);
-Boolean ConstructScenario( long);
+bool ConstructScenario( long);
 void CheckEndgame( void);
 void DeclareWinner( long, long, long);
 void GetInitialCoord( scenarioInitialType *, coordPointType *, long);
-void HackWinLoseMessage( Boolean);
+void HackWinLoseMessage( bool);
 void CheckScenarioConditions( long);
-void SetScenarioConditionTrueYet( long, Boolean);
-Boolean GetScenarioConditionTrue( long);
+void SetScenarioConditionTrueYet( long, bool);
+bool GetScenarioConditionTrue( long);
 long GetRealAdmiralNumber( long);
 void UnhideInitialObject( long);
 spaceObjectType *GetObjectFromInitialNumber( long);
@@ -175,6 +175,6 @@ long GetNextScenarioChapter( long);
 long GetFirstNetworkScenario( void);
 long GetNextNetworkScenario( long);
 long GetPreviousNetworkScenario( long);
-Boolean ThisChapterIsNetworkable( long);
+bool ThisChapterIsNetworkable( long);
 
 #endif // ANTARES_SCENARIO_MAKER_HPP_

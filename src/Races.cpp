@@ -90,7 +90,7 @@ short GetPreviousLegalRace( short raceNum, short playerNum, scenarioType *scenar
     else return( raceNum);
 }
 
-Boolean IsRaceLegal( short raceNum, short playerNum, scenarioType *scenario)
+bool IsRaceLegal( short raceNum, short playerNum, scenarioType *scenario)
 {
     if ( playerNum >= scenario->playerNum) return false;
 

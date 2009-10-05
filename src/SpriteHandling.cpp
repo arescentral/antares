@@ -89,7 +89,7 @@ extern PixMap* gActiveWorld;
 extern PixMap* gOffWorld;
 extern PixMap* gSaveWorld;
 
-Boolean PixelInSprite_IsOutside( spritePix *sprite, long x, long y, long *hmap,
+bool PixelInSprite_IsOutside( spritePix *sprite, long x, long y, long *hmap,
 long *vamp);
 
 void SpriteHandlingInit() {
@@ -124,7 +124,7 @@ void ResetAllSprites( void)
     for ( i = 0; i < kMaxSpriteNum; i++)
     {
         aSprite->resID = -1;
-        aSprite->killMe = FALSE;
+        aSprite->killMe = false;
         aSprite->thisRect.left = aSprite->thisRect.top = aSprite->thisRect.right =
                 aSprite->thisRect.bottom = aSprite->lastRect.left = aSprite->lastRect.top =
                 aSprite->lastRect.right = aSprite->lastRect.bottom = 0;
@@ -147,7 +147,7 @@ void ResetAllPixTables( void)
         if (gPixTable[i].resource.get() != nil) {
             gPixTable[i].resource.destroy();
         }
-        gPixTable[i].keepMe = FALSE;
+        gPixTable[i].keepMe = false;
         gPixTable[i].resID = -1;
     }
 }
@@ -179,7 +179,7 @@ void SetAllPixTablesNoKeep( void)
     short   i;
 
     for ( i = kMinVolatilePixTable; i < kMaxPixTableEntry; i++)
-        gPixTable[i].keepMe = FALSE;
+        gPixTable[i].keepMe = false;
 }
 
 void KeepPixTable( short resID)
@@ -188,7 +188,7 @@ void KeepPixTable( short resID)
     short   i = 0;
 
     while (( gPixTable[i].resID != resID) && ( i < kMaxPixTableEntry)) i++;
-    if ( i != kMaxPixTableEntry) gPixTable[i].keepMe = TRUE;
+    if ( i != kMaxPixTableEntry) gPixTable[i].keepMe = true;
 }
 
 void RemoveAllUnusedPixTables( void)
@@ -198,9 +198,9 @@ void RemoveAllUnusedPixTables( void)
 
     for ( i = kMinVolatilePixTable; i < kMaxPixTableEntry; i++)
     {
-        if ((gPixTable[i].keepMe == FALSE) && (gPixTable[i].resource.get() != nil)) {
+        if ((gPixTable[i].keepMe == false) && (gPixTable[i].resource.get() != nil)) {
             gPixTable[i].resource.destroy();
-            gPixTable[i].keepMe = FALSE;
+            gPixTable[i].keepMe = false;
             gPixTable[i].resID = -1;
         }
     }
@@ -309,7 +309,7 @@ spriteType *AddSprite( Point where, TypedHandle<natePixType> table, short resID,
     aSprite->whichLayer = layer;
     aSprite->tinySize = size;
     aSprite->tinyColor = color;
-    aSprite->killMe = FALSE;
+    aSprite->killMe = false;
     aSprite->style = spriteNormal;
     aSprite->styleColor = 0x00;
     aSprite->styleData = 0;
@@ -319,7 +319,7 @@ spriteType *AddSprite( Point where, TypedHandle<natePixType> table, short resID,
 void RemoveSprite( spriteType *aSprite)
 
 {
-    aSprite->killMe = FALSE;
+    aSprite->killMe = false;
     aSprite->table = TypedHandle<natePixType>();
     aSprite->resID = -1;
 }
@@ -393,7 +393,7 @@ void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect
     long        shapeRowPlus, destRowPlus, rowbytes, *hmap, *vmap, *hmapoffset, *lhend, scaleCalc;
     unsigned char *destByte, *shapeByte, *hend, *vend, *chunkByte;
     Rect    mapRect, sourceRect;
-    Boolean     clipped = FALSE;
+    bool     clipped = false;
 
     scaleCalc = (sprite->width * scale);
     scaleCalc >>= SHIFT_SCALE;
@@ -427,25 +427,25 @@ void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect
         {
             mapRect.left += clipRect->left - dRect->left;
             dRect->left = clipRect->left;
-            clipped = TRUE;
+            clipped = true;
         }
         if ( dRect->right > clipRect->right)
         {
             mapRect.right -= dRect->right - clipRect->right;// + 1;
             dRect->right = clipRect->right;// - 1;
-            clipped = TRUE;
+            clipped = true;
         }
         if ( dRect->top < clipRect->top)
         {
             mapRect.top += clipRect->top - dRect->top;
             dRect->top = clipRect->top;
-            clipped = TRUE;
+            clipped = true;
         }
         if ( dRect->bottom > clipRect->bottom)
         {
             mapRect.bottom -= dRect->bottom - clipRect->bottom;// + 1;
             dRect->bottom = clipRect->bottom;// - 1;
-            clipped = TRUE;
+            clipped = true;
         }
 
         if (( (dRect->left + 1) < clipRect->right) && ( dRect->right > clipRect->left) &&
@@ -706,7 +706,7 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, R
     unsigned char *destByte, *shapeByte, *hend, *vend, *chunkByte;
     unsigned char   *staticByte;
     Rect    mapRect, sourceRect;
-    Boolean     clipped = FALSE;
+    bool     clipped = false;
 
     scaleCalc = (sprite->width * scale);
     scaleCalc >>= SHIFT_SCALE;
@@ -740,25 +740,25 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, R
         {
             mapRect.left += clipRect->left - dRect->left;
             dRect->left = clipRect->left;
-            clipped = TRUE;
+            clipped = true;
         }
         if ( dRect->right > clipRect->right)
         {
             mapRect.right -= dRect->right - clipRect->right;// + 1;
             dRect->right = clipRect->right;// - 1;
-            clipped = TRUE;
+            clipped = true;
         }
         if ( dRect->top < clipRect->top)
         {
             mapRect.top += clipRect->top - dRect->top;
             dRect->top = clipRect->top;
-            clipped = TRUE;
+            clipped = true;
         }
         if ( dRect->bottom > clipRect->bottom)
         {
             mapRect.bottom -= dRect->bottom - clipRect->bottom;// + 1;
             dRect->bottom = clipRect->bottom;// - 1;
-            clipped = TRUE;
+            clipped = true;
         }
 
         if (( (dRect->left + 1) < clipRect->right) && ( dRect->right > clipRect->left) &&
@@ -1018,7 +1018,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Re
     unsigned char *destByte, *shapeByte, *hend, *vend, *chunkByte;
     unsigned char   *staticByte;
     Rect    mapRect, sourceRect;
-    Boolean     clipped = FALSE;
+    bool     clipped = false;
 
     scaleCalc = (sprite->width * scale);
     scaleCalc >>= SHIFT_SCALE;
@@ -1052,25 +1052,25 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Re
         {
             mapRect.left += clipRect->left - dRect->left;
             dRect->left = clipRect->left;
-            clipped = TRUE;
+            clipped = true;
         }
         if ( dRect->right > clipRect->right)
         {
             mapRect.right -= dRect->right - clipRect->right;// + 1;
             dRect->right = clipRect->right;// - 1;
-            clipped = TRUE;
+            clipped = true;
         }
         if ( dRect->top < clipRect->top)
         {
             mapRect.top += clipRect->top - dRect->top;
             dRect->top = clipRect->top;
-            clipped = TRUE;
+            clipped = true;
         }
         if ( dRect->bottom > clipRect->bottom)
         {
             mapRect.bottom -= dRect->bottom - clipRect->bottom;// + 1;
             dRect->bottom = clipRect->bottom;// - 1;
-            clipped = TRUE;
+            clipped = true;
         }
 
         if (( (dRect->left + 1) < clipRect->right) && ( dRect->right > clipRect->left) &&
@@ -1376,7 +1376,7 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
     long        shapeRowPlus, destRowPlus, rowbytes, *hmap, *vmap, *hmapoffset, *lhend, scaleCalc;
     unsigned char *destByte, *shapeByte, *hend, *vend, *chunkByte;
     Rect    mapRect, sourceRect;
-    Boolean     clipped = FALSE;
+    bool     clipped = false;
 
     scaleCalc = (sprite->width * scale);
     scaleCalc >>= SHIFT_SCALE;
@@ -1410,25 +1410,25 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
         {
             mapRect.left += clipRect->left - dRect->left;
             dRect->left = clipRect->left;
-            clipped = TRUE;
+            clipped = true;
         }
         if ( dRect->right > clipRect->right)
         {
             mapRect.right -= dRect->right - clipRect->right;// + 1;
             dRect->right = clipRect->right;// - 1;
-            clipped = TRUE;
+            clipped = true;
         }
         if ( dRect->top < clipRect->top)
         {
             mapRect.top += clipRect->top - dRect->top;
             dRect->top = clipRect->top;
-            clipped = TRUE;
+            clipped = true;
         }
         if ( dRect->bottom > clipRect->bottom)
         {
             mapRect.bottom -= dRect->bottom - clipRect->bottom;// + 1;
             dRect->bottom = clipRect->bottom;// - 1;
-            clipped = TRUE;
+            clipped = true;
         }
 
         if (( (dRect->left + 1) < clipRect->right) && ( dRect->right > clipRect->left) &&
@@ -1690,7 +1690,7 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
     } else dRect->left = dRect->right = dRect->top = dRect->bottom = 0;
 }
 
-Boolean PixelInSprite_IsOutside( spritePix *sprite, long x, long y,
+bool PixelInSprite_IsOutside( spritePix *sprite, long x, long y,
     long *hmap, long *vmap)
 {
     unsigned char* pixel;

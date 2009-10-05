@@ -220,7 +220,7 @@ NSpAddressReference NSpDoModalJoinDialog(
         | STACK_ROUTINE_PARAMETER( 5, SIZE_CODE(sizeof(NSpEventProcPtr))),
 
 /*
-Boolean NSpDoModalHostDialog(
+bool NSpDoModalHostDialog(
     NSpProtocolListReference    ioProtocolList,
     Str31                       ioGameName,
     Str31                       ioPlayerName,
@@ -228,7 +228,7 @@ Boolean NSpDoModalHostDialog(
     NSpEventProcPtr             inEventProcPtr);
 */
     kNSpDoModalHostDialog_ProcInfo = kCStackBased
-        | RESULT_SIZE( SIZE_CODE(sizeof( Boolean)))
+        | RESULT_SIZE( SIZE_CODE(sizeof( bool)))
         | STACK_ROUTINE_PARAMETER( 1, SIZE_CODE(sizeof(NSpProtocolListReference)))
         | STACK_ROUTINE_PARAMETER( 2, SIZE_CODE(sizeof(StringPtr)))
         | STACK_ROUTINE_PARAMETER( 3, SIZE_CODE(sizeof(StringPtr)))
@@ -394,7 +394,7 @@ typedef NSpAddressReference (*NSpDoModalJoinDialog_ProcPtr)(
     Str31                       ioPassword,
     NSpEventProcPtr             inEventProcPtr);
 
-typedef Boolean (*NSpDoModalHostDialog_ProcPtr)(
+typedef bool (*NSpDoModalHostDialog_ProcPtr)(
     NSpProtocolListReference    ioProtocolList,
     Str31                       ioGameName,
     Str31                       ioPlayerName,
@@ -440,7 +440,7 @@ typedef void (*NSpMessage_Release_ProcPtr)(
     NSpGameReference            inGame,
     NSpMessageHeader*           inMessage);
 
-Boolean NetSprocketGlueInit( void);
+bool NetSprocketGlueInit( void);
 void NetSprocketGlueCleanup( void);
 
 OSStatus Glue_NSpInitialize(
@@ -514,7 +514,7 @@ NSpAddressReference Glue_NSpDoModalJoinDialog(
     Str31                       ioPassword,
     NSpEventProcPtr             inEventProcPtr);
 
-Boolean Glue_NSpDoModalHostDialog(
+bool Glue_NSpDoModalHostDialog(
     NSpProtocolListReference    ioProtocolList,
     Str31                       ioGameName,
     Str31                       ioPlayerName,

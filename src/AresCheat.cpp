@@ -46,8 +46,8 @@
 #define kRaisePayRateCheat      7   // determines your payscale
 #define kLowerPayRateCheat      8
 
-void CheatFeedback( short, Boolean, long);
-void CheatFeedbackPlus(short, Boolean, long, unsigned char*);
+void CheatFeedback( short, bool, long);
+void CheatFeedbackPlus(short, bool, long, unsigned char*);
 
 void AresCheatInit( void)
 {
@@ -203,7 +203,7 @@ void ExecuteCheat( short whichCheat, long whichPlayer)
     }
 }
 
-void CheatFeedback( short whichCheat, Boolean activate, long whichPlayer)
+void CheatFeedback( short whichCheat, bool activate, long whichPlayer)
 {
     Str255          s, feedback;
     unsigned char* name;
@@ -218,7 +218,7 @@ void CheatFeedback( short whichCheat, Boolean activate, long whichPlayer)
     EndMessage();
 }
 
-void CheatFeedbackPlus( short whichCheat, Boolean activate, long whichPlayer,
+void CheatFeedbackPlus( short whichCheat, bool activate, long whichPlayer,
     unsigned char* infoString)
 {
     Str255          s, feedback;

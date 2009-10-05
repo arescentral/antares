@@ -54,7 +54,7 @@ void CleanupMoviePlayer( void)
 }
 
 
-void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean doubleIt)
+void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, bool doubleIt)
 
 {
 #ifdef kUseMovies
@@ -63,7 +63,7 @@ void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean d
     Movie                       aMovie = nil;
     short                       movieResFile;
     Rect                        movieBox;
-    Boolean                     done = false;
+    bool                     done = false;
     Fixed                       movieRate;
     TimeValue               movieTime;
 
@@ -79,7 +79,7 @@ void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean d
             {
                 short               movieResID = 0;                     // want first movie
                 Str255              movieName;
-                Boolean             wasChanged;
+                bool             wasChanged;
 
                 err = NewMovieFromFile (&aMovie, movieResFile, &movieResID, movieName,  newMovieActive,
                                         &wasChanged);
@@ -161,7 +161,7 @@ void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean d
 // the "mini movie" routines are for playing a movie within a rect without disturbing the rest of the display.
 // The PlayMovieByName is for playing a movie in one step, automatically clearing the diplay and all.
 
-OSErr LoadMiniMovie(unsigned char* filePath, Movie *aMovie, Rect *destRect, WindowPtr aWindow, Boolean doubleIt)
+OSErr LoadMiniMovie(unsigned char* filePath, Movie *aMovie, Rect *destRect, WindowPtr aWindow, bool doubleIt)
 
 {
 #ifdef kUseMovies
@@ -183,7 +183,7 @@ OSErr LoadMiniMovie(unsigned char* filePath, Movie *aMovie, Rect *destRect, Wind
             {
                 short               movieResID = 0;                     // want first movie
                 Str255              movieName;
-                Boolean             wasChanged;
+                bool             wasChanged;
 
                 err = NewMovieFromFile ( aMovie, movieResFile, &movieResID, movieName,  newMovieActive,
                                         &wasChanged);
@@ -261,12 +261,12 @@ OSErr StartMiniMovie( Movie aMovie)
 }
 
 // returns true if movie is done
-Boolean DoMiniMovieTask( Movie aMovie)
+bool DoMiniMovieTask( Movie aMovie)
 
 {
 #ifdef kUseMovies
     OSErr   err;
-    Boolean done = false;
+    bool done = false;
 
     if ( aMovie == nil) return( true);
     else

@@ -103,7 +103,7 @@ struct spriteType {
     long            tinySize;
     short           whichLayer;
     unsigned char   tinyColor;
-    Boolean         killMe;
+    bool         killMe;
 
     Rect        thisRect;
     Rect        lastRect;
@@ -113,7 +113,7 @@ struct spriteType {
 struct pixTableType {
     TypedHandle<natePixType> resource;
     int         resID;
-    Boolean     keepMe;
+    bool     keepMe;
     };
 
 struct natePixType;

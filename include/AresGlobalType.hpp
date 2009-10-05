@@ -64,7 +64,7 @@ struct barIndicatorType {
     long            thisValue;
     long            lastValue;
     unsigned char   color;
-    Boolean         automatic;      // if it's automatic, it is redrawn automatically
+    bool         automatic;      // if it's automatic, it is redrawn automatically
 };
 
 struct miniScreenLineType;
@@ -126,7 +126,7 @@ struct aresGlobalType {
     unsigned long   gOptions;
     TypedHandle<raceType>           gRaceData;
     TypedHandle<scrollStarType>     gScrollStarData;
-    Boolean         gWarpStars;
+    bool         gWarpStars;
     long            gLastClipBottom;
     long            gScrollStarNumber;
     long            gGameTime;
@@ -147,7 +147,7 @@ struct aresGlobalType {
     long            gDestinationLabel;
     long            gAlarmCount;
     long            gSendMessageLabel;
-    Boolean         gDemoZoomOverride;
+    bool         gDemoZoomOverride;
     long            gPlayerAdmiralNumber;
     ScenarioWinnerType gScenarioWinner;
     long            gScenarioRotation;  // = 0;
@@ -201,17 +201,17 @@ struct aresGlobalType {
     unsigned long   gSerialDenominator;
     long            gLastSelectedBuildPrice;
     Str255          gUserName;
-    Boolean         gAutoPilotOff;          // hack for turning off auto in netgame
-    Boolean         returnToMain;           // x-ares;
+    bool         gAutoPilotOff;          // hack for turning off auto in netgame
+    bool         returnToMain;           // x-ares;
     // returnToMain is for both getting a quit appleEvent or
     // a GameRanger command; it stops whatever is going on
     // and returns to main menu
-    Boolean         gameRangerPending;      // x-ares; for gameRanger
-    Boolean         gameRangerInProgress;
-    Boolean         useGameRanger;
-    Boolean         haveSeenRTNotice;
-    Boolean         ambrosia_Is_Registered;
-    Boolean         user_is_scum;
+    bool         gameRangerPending;      // x-ares; for gameRanger
+    bool         gameRangerInProgress;
+    bool         useGameRanger;
+    bool         haveSeenRTNotice;
+    bool         ambrosia_Is_Registered;
+    bool         user_is_scum;
     long            levelNum;
     unsigned long   keyMask;
     FSSpec          originalExternalFileSpec;
@@ -219,7 +219,7 @@ struct aresGlobalType {
     short           externalFileRefNum;     // x-ares; for 3rd party files
     scenarioInfoType    scenarioFileInfo;   // x-ares; for factory +
                                             // 3rd party files
-    Boolean         okToOpenFile;           // x-ares; only ok to open
+    bool         okToOpenFile;           // x-ares; only ok to open
                                             // before factory is loaded
     long            maxScenarioBrief;
     long            maxScenarioCondition;
@@ -233,7 +233,7 @@ struct aresGlobalType {
     unsigned long   otherPlayerScenarioFileVersion;
     unsigned long   otherPlayerScenarioFileCheckSum;
 
-    Boolean         internetConfigPresent;
+    bool         internetConfigPresent;
     ICInstance      internetConfig;
 
     hotKeyType      hotKey[kHotKeyNum];
@@ -242,8 +242,8 @@ struct aresGlobalType {
 
     long            lastSelectedObject;
     long            lastSelectedObjectID;
-    Boolean         destKeyUsedForSelection;
-    Boolean         hotKey_target;
+    bool         destKeyUsedForSelection;
+    bool         hotKey_target;
 };
 
 aresGlobalType* globals();

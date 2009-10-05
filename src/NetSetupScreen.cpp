@@ -191,28 +191,28 @@ typedef struct
     short                   opponentKills;
     short                   opponentLosses;
     Str255              visibleString[kMaxNetPlayerNum];
-    Boolean             opponentHasArrived;
-    Boolean             currentBandwidth;
-    Boolean             hostIsPlayer2;
-    Boolean             imReady;
-    Boolean             opponentReady;
-    Boolean             canMakeChanges;
-    Boolean             clientCanMakeChanges;
-    Boolean             scenarioLoaded;
+    bool             opponentHasArrived;
+    bool             currentBandwidth;
+    bool             hostIsPlayer2;
+    bool             imReady;
+    bool             opponentReady;
+    bool             canMakeChanges;
+    bool             clientCanMakeChanges;
+    bool             scenarioLoaded;
     Str255              whyScenarioNotLoaded;
 } netSetupType;
 
 #if NETSPROCKET_AVAILABLE
 
-void SetNetLevelCanMakeChanges( netSetupType *, Boolean);
-void ActivateLevelTab( netSetupType *, Boolean);
+void SetNetLevelCanMakeChanges( netSetupType *, bool);
+void ActivateLevelTab( netSetupType *, bool);
 void HandleLevelTabHit( short, Point, netSetupType *);
 void SetNetLevelNum( netSetupType *);
-void ActivatePlayerTab( netSetupType *, Boolean);
+void ActivatePlayerTab( netSetupType *, bool);
 void HandlePlayerTabHit( short, Point, netSetupType *);
 void SetNetHostIsPlayer2( netSetupType *);
 void SetCurrentNetRace( netSetupType *);
-void ActivateSettingTab( netSetupType *, Boolean);
+void ActivateSettingTab( netSetupType *, bool);
 long GetDelayValueFromDelayRadio( short);
 void SetNetLag( netSetupType *);
 void SetNetRegistered( netSetupType *, short);
@@ -225,11 +225,11 @@ void NetLevelDrawLagGraph( netSetupType *);
 long NetLevelGetLagMean( netSetupType *);
 long NetLevelGetLagStandardDeviation( netSetupType *, long);
 long NetLevelGetLagHighestBelow( netSetupType *, long);
-unsigned char NetLevelSetColor( netSetupType *, unsigned char, unsigned char, Point, Boolean, Boolean);
-void ShowNetTextMessage( netSetupType *, Boolean);
+unsigned char NetLevelSetColor( netSetupType *, unsigned char, unsigned char, Point, bool, bool);
+void ShowNetTextMessage( netSetupType *, bool);
 void SendNetTextMessage( netSetupType *);
-void AddCharToVisibleString( netSetupType *, long, anyCharType, Boolean);
-Boolean GetPortraitHRun( long *, long *, unsigned char *, unsigned char *, unsigned char *);
+void AddCharToVisibleString( netSetupType *, long, anyCharType, bool);
+bool GetPortraitHRun( long *, long *, unsigned char *, unsigned char *, unsigned char *);
 void AddPortraitHRun( long *, long *, unsigned char, unsigned char, unsigned char *);
 short GetSpriteResIDFromRace( short, long *);
 void UpdateSampleShip( netSetupType *, long);
@@ -243,7 +243,7 @@ long DoTabbedNetLevelInterface( void)
     Point                       where;
     int                     error;
     short                       whichItem, helpItem = -1;
-    Boolean                 done = FALSE, cancel = FALSE, gotDummy = false,
+    bool                 done = false, cancel = false, gotDummy = false,
                                     messageToResend = false;
     EventRecord             theEvent;
     char                        whichChar;
@@ -1055,8 +1055,8 @@ long DoTabbedNetLevelInterface( void)
                 switch ( whichItem)
                 {
                     case kNetLevelCancelButton:
-                        done = TRUE;
-                        cancel = TRUE;
+                        done = true;
+                        cancel = true;
                         SendPreGameBasicMessage( eCancelMessage);
                         StopNetworking();
                         break;
@@ -1182,7 +1182,7 @@ long DoTabbedNetLevelInterface( void)
     return( setup.thisChapter);
 }
 
-void SetNetLevelCanMakeChanges( netSetupType *setup, Boolean canMakeChanges)
+void SetNetLevelCanMakeChanges( netSetupType *setup, bool canMakeChanges)
 {
     interfaceItemType   *tabBox = GetAnyInterfaceItemPtr( kNetLevelTabBox);
     Rect                    tabBounds;
@@ -1206,7 +1206,7 @@ void SetNetLevelCanMakeChanges( netSetupType *setup, Boolean canMakeChanges)
 //  CopyOffWorldToRealWorld( (WindowPtr)gTheWindow, &tabBounds);
 }
 
-void ActivateLevelTab( netSetupType *setup, Boolean drawLive)
+void ActivateLevelTab( netSetupType *setup, bool drawLive)
 {
     Str255          whyDisabledString;
 
@@ -1444,7 +1444,7 @@ void SetNetLevelNum( netSetupType *setup)
 
 }
 
-void ActivatePlayerTab( netSetupType *setup, Boolean drawLive)
+void ActivatePlayerTab( netSetupType *setup, bool drawLive)
 {
     scenarioType    *scenario = GetScenarioPtrFromChapter( setup->thisChapter);
 
@@ -1621,7 +1621,7 @@ void SetNetHostIsPlayer2( netSetupType *setup)
 
 void SetCurrentNetRace( netSetupType *setup)
 {
-    Boolean         tabActive = (setup->whichTab == kNetLevelPlayerTabNum);
+    bool         tabActive = (setup->whichTab == kNetLevelPlayerTabNum);
     scenarioType    *scenario;
     Point           where;
 
@@ -1665,7 +1665,7 @@ if ( (Ambrosia_Is_Registered()) && ( scenario != nil))
     UpdateSampleShip( setup, setup->myNum);
 }
 
-void ActivateSettingTab( netSetupType *setup, Boolean drawLive)
+void ActivateSettingTab( netSetupType *setup, bool drawLive)
 {
     short i;
 
@@ -1835,7 +1835,7 @@ void SetNetLowerBandwidth( netSetupType *setup)
 
 void SetNetLag( netSetupType *setup)
 {
-    Boolean     tabActive = ( setup->whichTab == kNetLevelSettingTabNum);
+    bool     tabActive = ( setup->whichTab == kNetLevelSettingTabNum);
 
     if ( tabActive)
     {
@@ -2059,7 +2059,7 @@ void NetLevelShowRaces( short myRace, short opponentRace)
 
 unsigned char NetLevelSetColor( netSetupType *setup,
     unsigned char color, unsigned char myApparentColor,
-    Point where, Boolean allowColors, Boolean handleClick)
+    Point where, bool allowColors, bool handleClick)
 {
     short   legalColor[COLOR_NUM] = {   1,  // no colorization
                                         1,  // orange
@@ -2080,7 +2080,7 @@ unsigned char NetLevelSetColor( netSetupType *setup,
                                     }; // 0 = do not show, 1 = show & use, -1 = show no use
     short   colorNum = 0, swatchWidth, thisPosition, i, leftBuffer, spriteID = -1, whichShape;
     Rect    boundsRect, tRect, swatchRect[COLOR_NUM];
-    Boolean tabActive = ( setup->whichTab == kNetLevelPlayerTabNum);
+    bool tabActive = ( setup->whichTab == kNetLevelPlayerTabNum);
     long    race, count, scale;
     baseObjectType  *base = nil;
     unsigned char   originalColor;
@@ -2421,7 +2421,7 @@ long NetLevelGetLagStandardDeviation( netSetupType *setup, long mean)
     return ( l);
 }
 
-void ShowNetTextMessage( netSetupType *setup, Boolean fromMyself)
+void ShowNetTextMessage( netSetupType *setup, bool fromMyself)
 {
     PixMapHandle    offMap = GetGWorldPixMap( gOffWorld);
 
@@ -2559,7 +2559,7 @@ void SendNetTextMessage( netSetupType *setup)
 }
 
 void AddCharToVisibleString( netSetupType *setup, long whichPlayer,
-    anyCharType what, Boolean addIt)
+    anyCharType what, bool addIt)
 {
     PixMapHandle    offMap = GetGWorldPixMap( gOffWorld);
     transColorType  *transColor;
@@ -2755,7 +2755,7 @@ void DisplayPortraitData( short left, short top, unsigned char *data, unsigned c
     CopyOffWorldToRealWorld((WindowPtr)gTheWindow, &tRect);
 }
 
-Boolean GetPortraitHRun( long *x, long *y, unsigned char *originalColor, unsigned char *length,
+bool GetPortraitHRun( long *x, long *y, unsigned char *originalColor, unsigned char *length,
     unsigned char *data)
 {
     unsigned char   *color;
@@ -2843,7 +2843,7 @@ void ClearPortrait( unsigned char *data)
 
 //-16455
 
-Boolean PlotCustomIcon( Rect *bounds)
+bool PlotCustomIcon( Rect *bounds)
 {
     short                   refID = -1, homeRes;
     OSErr                   anErr = 0;
@@ -3018,7 +3018,7 @@ void UpdatePlayerData( netSetupType *setup, long whichPlayer)
     long                height, l;
     short               race, minutesPlayed, kills, losses;
     unsigned char       color;
-    Boolean             isRegistered;
+    bool             isRegistered;
 
     if ( whichPlayer == setup->myNum)
     {

@@ -151,7 +151,7 @@ void MakeDemoDataHack( void)
     SaveAnyResourceInPreferences('snro', 500, nil, reinterpret_cast<Handle>(globals()->gScenarioData), true);
 }
 
-void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
+void ScanLevel( long whatLevel, bool *baseObjectKeepList)
 
 {
     long                    count, c2, c3, newShipNum;
@@ -317,7 +317,7 @@ void ScanLevel( long whatLevel, Boolean *baseObjectKeepList)
 
 // Clear all unused baseobjects, and copy changed data
 
-void ClearAndCopyAllUnusedBaseObjects( Boolean *baseObjectKeepList)
+void ClearAndCopyAllUnusedBaseObjects( bool *baseObjectKeepList)
 
 {
     long            count;

@@ -147,7 +147,7 @@ int InitMessageScreen() {
 
     globals()->gMessageLabelNum = AddScreenLabel( kMessageScreenLeft,
                         kMessageScreenTop, 0, 0,
-                        &nilLabel, nil, FALSE, kMessageColor);
+                        &nilLabel, nil, false, kMessageColor);
 
     if ( globals()->gMessageLabelNum < 0)
     {
@@ -155,7 +155,7 @@ int InitMessageScreen() {
         return( MEMORY_ERROR);
     }
     globals()->gStatusLabelNum = AddScreenLabel( kStatusLabelLeft, kStatusLabelTop, 0, 0,
-                        &nilLabel, nil, FALSE, kStatusLabelColor);
+                        &nilLabel, nil, false, kStatusLabelColor);
     if ( globals()->gStatusLabelNum < 0)
     {
         ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kAddScreenLabelError, -1, -1, -1, __FILE__, 4);
@@ -214,9 +214,9 @@ void ClearMessage( void)
         *anyChar++ = kMessageEndChar;
     globals()->gMessageTimeCount = 0;
     globals()->gMessageLabelNum = AddScreenLabel( kMessageScreenLeft, kMessageScreenTop, 0, 0,
-                        &nilLabel, nil, FALSE, kMessageColor);
+                        &nilLabel, nil, false, kMessageColor);
     globals()->gStatusLabelNum = AddScreenLabel( kStatusLabelLeft, kStatusLabelTop, 0, 0,
-                        &nilLabel, nil, FALSE, kStatusLabelColor);
+                        &nilLabel, nil, false, kStatusLabelColor);
 
     tmessage = *globals()->gLongMessageData;
     tmessage->startResID = -1;
@@ -828,7 +828,7 @@ void DrawMessageScreen( long byUnits)
 
 // SetStatusString: pass nil to set to 0
 
-void SetStatusString(const unsigned char *s, Boolean drawNow, unsigned char color)
+void SetStatusString(const unsigned char *s, bool drawNow, unsigned char color)
 
 {
 #pragma unused( drawNow)
@@ -1181,7 +1181,7 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
     long            oldx, wordLen, *lineLength = &(retroTextSpec->lineLength[retroTextSpec->lineCount]);
     unsigned char   tempColor, calcColor, calcShade;
     transColorType  *transColor;
-    Boolean         drawCursor = ( charsToDo > 0);
+    bool         drawCursor = ( charsToDo > 0);
 
     cursorRect.left = retroTextSpec->xpos;
     cursorRect.top = retroTextSpec->ypos -
@@ -1390,7 +1390,7 @@ void MessageLabel_Set_Special(short id, TypedHandle<unsigned char> text) {
     long    value = 0, charNum = 0, textLength, safetyCount;
     Str255  s;
     Point   attachPoint;
-    Boolean hintLine = false;
+    bool hintLine = false;
 
     s[0] = 0;
     if (text.get() == nil) {

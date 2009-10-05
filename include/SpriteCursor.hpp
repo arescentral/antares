@@ -33,8 +33,8 @@ struct spriteCursorType {
     short       showLevel;
     short       lastShowLevel;
     spriteType  sprite;
-    Boolean     thisShowLine;
-    Boolean     lastShowLine;
+    bool     thisShowLine;
+    bool     lastShowLine;
     Point       thisLineStart;
     Point       thisLineEnd;
     Point       lastLineStart;
@@ -46,11 +46,11 @@ struct spriteCursorType {
 short InitSpriteCursor( void);
 void CleanupSpriteCursor( void);
 void ResetSpriteCursor( void);
-void ShowSpriteCursor( Boolean);
-void HideSpriteCursor( Boolean);
-void ShowHideSpriteCursor( Boolean);
-Boolean SpriteCursorVisible( void);
-Boolean SetSpriteCursorTable( short);
+void ShowSpriteCursor( bool);
+void HideSpriteCursor( bool);
+void ShowHideSpriteCursor( bool);
+bool SpriteCursorVisible( void);
+bool SetSpriteCursorTable( short);
 void SetSpriteCursorShape( short);
 void EraseSpriteCursorSprite( void);
 void DrawSpriteCursorSprite( Rect *);

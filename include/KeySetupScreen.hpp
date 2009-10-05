@@ -22,6 +22,6 @@
 
 // Key_Setup_Screen.h
 
-Boolean Key_Setup_Screen_Do( void);
+bool Key_Setup_Screen_Do( void);
 
 #endif // ANTARES_KEY_SETUP_SCREEN_HPP_

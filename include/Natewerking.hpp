@@ -55,7 +55,7 @@ struct nateQueue {
 char NatewerkInit( void);
 void NatewerkDispose( char);
 void NatewerkRemoveName(unsigned char*, unsigned char*);
-Boolean NatewerkPostName(char, unsigned char*, unsigned char*);
+bool NatewerkPostName(char, unsigned char*, unsigned char*);
 int NatewerkGetName(AddrBlock *, unsigned char*, unsigned char*, short);
 OSErr NatewerkLookupName( EntityName *, int *, Ptr);
 int NatewerkSendData( AddrBlock, char, Ptr, short);

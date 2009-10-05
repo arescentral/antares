@@ -28,7 +28,7 @@
 #define Has_Navigation_Services     false
 #endif
 
-extern Boolean gDirectorySelectionFlag;
+extern bool gDirectorySelectionFlag;
 
 OSErr SmartFile_SelectFolder( FSSpecPtr destFile, StringPtr windowName,
     StringPtr prompt)

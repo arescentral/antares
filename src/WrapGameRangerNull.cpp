@@ -22,7 +22,7 @@
 #include "GameRanger.h"
 #include "NetSprocketGlue.hpp"
 
-Boolean Wrap_UseGameRanger( void)
+bool Wrap_UseGameRanger( void)
 {
     return true;
 }
@@ -37,24 +37,24 @@ OSErr       Wrap_GRInstallResumeHandler(void)
     return noErr;
 }
 
-Boolean     Wrap_GRCheckAEForCmd(const AppleEvent *theEvent)
+bool     Wrap_GRCheckAEForCmd(const AppleEvent *theEvent)
 {
     #pragma unused( theEvent)
 
     return false;
 }
 
-Boolean     Wrap_GRCheckFileForCmd(void)
+bool     Wrap_GRCheckFileForCmd(void)
 {
     return false;
 }
 
-Boolean     Wrap_GRCheckForAE(void)
+bool     Wrap_GRCheckForAE(void)
 {
     return false;
 }
 
-Boolean     Wrap_GRIsWaitingCmd(void)
+bool     Wrap_GRIsWaitingCmd(void)
 {
     return false;
 }
@@ -64,17 +64,17 @@ void        Wrap_GRGetWaitingCmd(void)
 
 }
 
-Boolean     Wrap_GRIsCmd(void)
+bool     Wrap_GRIsCmd(void)
 {
     return false;
 }
 
-Boolean     Wrap_GRIsHostCmd(void)
+bool     Wrap_GRIsHostCmd(void)
 {
     return false;
 }
 
-Boolean     Wrap_GRIsJoinCmd(void)
+bool     Wrap_GRIsJoinCmd(void)
 {
     return false;
 }
@@ -148,7 +148,7 @@ OSErr       Wrap_GROpenGameRanger(void)
     return noErr;
 }
 
-Boolean
+bool
 Wrap_GRNSpDoModalHostDialog         (NSpProtocolListReference  ioProtocolList,
                                  Str31                  ioGameName,
                                  Str31                  ioPlayerName,

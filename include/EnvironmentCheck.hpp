@@ -21,7 +21,7 @@
 // Environment Check.h
 STUB0(EnvironmentCheck, bool(), true);
 void EnvironmentError( short);
-Boolean EnvironmentWarning( short);
-Boolean MySWRoutineAvailable( short);
+bool EnvironmentWarning( short);
+bool MySWRoutineAvailable( short);
 
 #endif // ANTARES_ENVIRONMENT_CHECK_HPP_

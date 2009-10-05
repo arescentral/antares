@@ -142,7 +142,7 @@ enum briefingPointKindEnum {
 //
 // We need to know:
 // type of tour point: object, absolute, or free-standing
-// either scenario object # & visible --or-- location ((long & Boolean) or longPoint)
+// either scenario object # & visible --or-- location ((long & bool) or longPoint)
 // range (longPoint)
 // title ID, # (short, short)
 // content ID, # (short, short)

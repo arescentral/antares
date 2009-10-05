@@ -199,7 +199,7 @@ void UpdateColorAnimation( long timePassed)
     }
 }
 
-void StartBooleanColorAnimation( long inSpeed, long outSpeed, unsigned char goalColor)
+void StartboolColorAnimation( long inSpeed, long outSpeed, unsigned char goalColor)
 
 {
     if ( globals()->gColorAnimationInSpeed == kNoColorGoal)
@@ -230,7 +230,7 @@ void StartBooleanColorAnimation( long inSpeed, long outSpeed, unsigned char goal
     }
 }
 
-void UpdateBooleanColorAnimation( long timePassed)
+void UpdateboolColorAnimation( long timePassed)
 
 {
     if ( globals()->gColorAnimationInSpeed != kNoColorGoal)
@@ -267,11 +267,11 @@ void InstantGoalTransition( void)   // instantly goes to total goal color
     RestoreEntries(*globals()->gColorAnimationTable);
 }
 
-Boolean AutoFadeTo( long tickTime, RGBColor *goalColor, Boolean eventSkip)
+bool AutoFadeTo( long tickTime, RGBColor *goalColor, bool eventSkip)
 
 {
     long        startTime, thisTime = 0, lastStep = 0, thisStep = 0;
-    Boolean     anyEventHappened = globals()->returnToMain;
+    bool     anyEventHappened = globals()->returnToMain;
 
     globals()->gColorAnimationStep = kStartAnimation;
     globals()->gColorAnimationInSpeed = 1;
@@ -295,11 +295,11 @@ Boolean AutoFadeTo( long tickTime, RGBColor *goalColor, Boolean eventSkip)
     return( anyEventHappened);
 }
 
-Boolean AutoFadeFrom( long tickTime, Boolean eventSkip) // assumes you've set up with AutoFadeTo
+bool AutoFadeFrom( long tickTime, bool eventSkip) // assumes you've set up with AutoFadeTo
 
 {
     long        startTime, thisTime = 0, lastStep = 0, thisStep = 0;
-    Boolean         anyEventHappened = globals()->returnToMain;
+    bool         anyEventHappened = globals()->returnToMain;
 
     globals()->gColorAnimationOutSpeed = 1;
     startTime = TickCount();
@@ -322,11 +322,11 @@ Boolean AutoFadeFrom( long tickTime, Boolean eventSkip) // assumes you've set up
     return( anyEventHappened);
 }
 
-Boolean AutoMusicFadeTo( long tickTime, RGBColor *goalColor, Boolean eventSkip)
+bool AutoMusicFadeTo( long tickTime, RGBColor *goalColor, bool eventSkip)
 
 {
     long        startTime, thisTime = 0, lastStep = 0, thisStep = 0, musicVol, musicStep;
-    Boolean     anyEventHappened = globals()->returnToMain;
+    bool     anyEventHappened = globals()->returnToMain;
 
     globals()->gColorAnimationStep = kStartAnimation;
     globals()->gColorAnimationInSpeed = 1;
@@ -368,7 +368,7 @@ Boolean AutoMusicFadeTo( long tickTime, RGBColor *goalColor, Boolean eventSkip)
 // >>> YOU SHOULD PROBABLY CALL RESETTRANSITIONS AFTER CALLING THIS since it could screw up
 // the color translation table.
 
-Boolean CustomPictFade( long fadeSpeed, long holdTime, short pictID, short clutID,
+bool CustomPictFade( long fadeSpeed, long holdTime, short pictID, short clutID,
         WindowPtr aWindow)
 
 {
@@ -376,7 +376,7 @@ Boolean CustomPictFade( long fadeSpeed, long holdTime, short pictID, short clutI
     scoped_ptr<Picture> thePict;
     Rect                        pictRect;
     RGBColor                    fadeColor = {0, 0, 0};
-    Boolean                     gotAnyEvent = false;
+    bool                     gotAnyEvent = false;
     short                       oldResFile = CurResFile();
 
 #pragma unused( fadeSpeed, holdTime)
@@ -408,16 +408,16 @@ Boolean CustomPictFade( long fadeSpeed, long holdTime, short pictID, short clutI
 
     HideCursor();
     ResetTransitions();
-    AutoFadeTo( 1, &fadeColor, TRUE);
+    AutoFadeTo( 1, &fadeColor, true);
     thePict->draw(pictRect);
     thePict.reset();
 
-    gotAnyEvent = AutoFadeFrom( 100, TRUE);
+    gotAnyEvent = AutoFadeFrom( 100, true);
     if ( !gotAnyEvent) gotAnyEvent = TimedWaitForAnyEvent(80);
     if ( !gotAnyEvent) gotAnyEvent = AutoFadeTo( 100, &fadeColor, true);
     else AutoFadeTo( 1, &fadeColor, true);
     ClearScreen();
-    AutoFadeFrom( 1, TRUE);
+    AutoFadeFrom( 1, true);
 
     MacShowCursor();
     ResetTransitions();
@@ -431,7 +431,7 @@ bool StartCustomPictFade(long fadeSpeed, long holdTime, short pictID, short clut
     scoped_ptr<ColorTable> theClut;
     Rect                        pictRect;
     RGBColor                    fadeColor = {0, 0, 0};
-    Boolean                     gotAnyEvent = false;
+    bool                     gotAnyEvent = false;
 
 #pragma unused( fadeSpeed, holdTime)
 
@@ -453,17 +453,17 @@ bool StartCustomPictFade(long fadeSpeed, long holdTime, short pictID, short clut
 
     HideCursor();
     ResetTransitions();
-    AutoFadeTo( 1, &fadeColor, TRUE);
+    AutoFadeTo( 1, &fadeColor, true);
     thePict->draw(pictRect);
     thePict.reset();
 
-    gotAnyEvent = AutoFadeFrom( fast?20:100, TRUE);
+    gotAnyEvent = AutoFadeFrom( fast?20:100, true);
     if ( fast) return true;
     return( gotAnyEvent);
 }
 
 bool EndCustomPictFade(Window* aWindow, bool fast) {
-    Boolean     gotAnyEvent;
+    bool     gotAnyEvent;
     RGBColor    fadeColor = {0, 0, 0};
 
     gotAnyEvent = TimedWaitForAnyEvent(fast?60:60);
@@ -471,7 +471,7 @@ bool EndCustomPictFade(Window* aWindow, bool fast) {
     else AutoFadeTo( 1, &fadeColor, true);
     RGBForeColor( &fadeColor);
     PaintRect( &(aWindow->portRect));
-    AutoFadeFrom( 1, TRUE);
+    AutoFadeFrom( 1, true);
 
     ResetTransitions();
     if ( fast) return true;

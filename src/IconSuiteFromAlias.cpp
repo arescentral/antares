@@ -40,20 +40,20 @@
 #define require_plain( x, y) do { if (!(x)) { goto y; } } while (0)
 
 OSErr GetIconSuiteFromFSSpec(FSSpecPtr hfsObj, Handle *iconSuite);
-Boolean HaveScriptableFinder( void);
+bool HaveScriptableFinder( void);
 OSErr SendAppleEvent(AppleEvent *ae, AppleEvent *reply, AESendMode sendMode);
 OSErr MakeAppleEvent(AEEventClass aeClass, AEEventID aeID,
             AEDesc *target, AppleEvent *ae);
 OSErr MakeSpecifierForFile(FSSpecPtr hfsObj, AEDesc *fileSpecifier);
 OSErr MakePropertySpecifierForSpecifier(DescType property,
             AEDesc *ofSpecifier, AEDesc *propertySpecifier);
-OSErr BuildIconSuiteFromAEDesc(Boolean largeIcons, Handle *iconSuite, AEDesc *iconFam);
-Boolean FinderIsRunning( void);
+OSErr BuildIconSuiteFromAEDesc(bool largeIcons, Handle *iconSuite, AEDesc *iconFam);
+bool FinderIsRunning( void);
 static Size GetSizeFromIconType(DescType iconType);
 
-pascal Boolean IdleHandle( EventRecord *theEvent, long *sleepTime, RgnHandle *mouseRgn);
+pascal bool IdleHandle( EventRecord *theEvent, long *sleepTime, RgnHandle *mouseRgn);
 
-pascal Boolean IdleHandle( EventRecord *theEvent, long *sleepTime, RgnHandle *mouseRgn)
+pascal bool IdleHandle( EventRecord *theEvent, long *sleepTime, RgnHandle *mouseRgn)
 
 {
 #pragma unused (mouseRgn)
@@ -248,10 +248,10 @@ HaveScriptableFinder:
 //
 // We have it if the Gestalt bit is set and the Finder is running
 //----------------------------------------------------------------------------
-Boolean HaveScriptableFinder( void)
+bool HaveScriptableFinder( void)
 {
     long        response;
-    Boolean     haveScriptableFinder;
+    bool     haveScriptableFinder;
     OSErr       err;
 
     haveScriptableFinder = false;
@@ -388,7 +388,7 @@ AECreateDesc:
 // OK, this uses the Apple Event Manager to pick the icon data out of the
 // 'ifam' AEDesc.
 //----------------------------------------------------------------------------
-OSErr BuildIconSuiteFromAEDesc(Boolean largeIcons, Handle *iconSuite, AEDesc *iconFam)
+OSErr BuildIconSuiteFromAEDesc(bool largeIcons, Handle *iconSuite, AEDesc *iconFam)
 {
     OSErr       err;
     Handle      suite, icon;
@@ -399,7 +399,7 @@ OSErr BuildIconSuiteFromAEDesc(Boolean largeIcons, Handle *iconSuite, AEDesc *ic
     DescType    *type, iconType, typeCode;
     long        count, i;
     Size        maxSize, size, iconSize;
-    Boolean     maskAdded;
+    bool     maskAdded;
     DescType    maskType;
 
 //  largeIcons = true;
@@ -510,12 +510,12 @@ NewPtr:
 //
 // Walk the Process Mgr list to check if the Finder is running
 //----------------------------------------------------------------------------
-Boolean FinderIsRunning( void)
+bool FinderIsRunning( void)
 {
     OSErr           err;
     ProcessInfoRec  pInfo;
     ProcessSerialNumber psn;
-    Boolean         foundIt;
+    bool         foundIt;
 
     foundIt = false;
     psn.highLongOfPSN = 0; psn.lowLongOfPSN = kNoProcess;
@@ -573,7 +573,7 @@ void DrawAliasSmallIcon( AliasHandle alias, short left, short top)
     Handle      iconSuite = nil;
     FSSpec      fspec;
     OSStatus    error = noErr;
-    Boolean     changed;
+    bool     changed;
     Str255      s;
 
     error = ResolveAlias( nil, alias, &fspec, &changed);
@@ -631,7 +631,7 @@ Handle GetIconSuiteFromAlias( AliasHandle alias)
     Handle      iconSuite = nil;
     FSSpec      fspec;
     OSStatus    error = noErr;
-    Boolean     changed;
+    bool     changed;
 
     error = ResolveAlias( nil, alias, &fspec, &changed);
     if ( error != noErr)

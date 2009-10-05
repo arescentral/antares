@@ -25,8 +25,8 @@
 //#define kCreateAresDemoData
 
 void MakeDemoDataHack( void);
-void ScanLevel( long, Boolean *);
-void ClearAndCopyAllUnusedBaseObjects( Boolean *);
+void ScanLevel( long, bool *);
+void ClearAndCopyAllUnusedBaseObjects( bool *);
 void CopyAllUsedPixTables( void);
 void CopyAllUsedSounds( void);
 void CopyAllBriefingData( long);

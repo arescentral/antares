@@ -43,7 +43,7 @@ extern scenarioType* gThisScenario;
 briefingSpriteBoundsType    *gBriefingSpriteBounds = nil;
 
 Point BriefingSprite_GetBestLocation( spritePix *sprite, long scale,
-    Point fromWhere, Boolean *grid, long gridWidth, long gridHeight,
+    Point fromWhere, bool *grid, long gridWidth, long gridHeight,
     Rect *bounds);
 
 void GetInitialObjectSpriteData( long whichScenario, long whichObject,
@@ -59,23 +59,23 @@ void GetRealObjectSpriteData( coordPointType *realCoord, baseObjectType *baseObj
 void SpriteBounds_Get( spritePix *sprite, Point where, long scale,
     Rect *bounds);
 
-Boolean BriefingSprite_IsLocationLegal( spritePix *sprite, long scale,
-    Point where, Boolean *grid, long gridWidth, long gridHeight,
+bool BriefingSprite_IsLocationLegal( spritePix *sprite, long scale,
+    Point where, bool *grid, long gridWidth, long gridHeight,
     Rect *bounds);
 
 void BriefingSprite_UseLocation( spritePix *sprite, long scale,
-    Point where, Boolean *grid, long gridWidth, long gridHeight,
+    Point where, bool *grid, long gridWidth, long gridHeight,
     Rect *bounds);
 
-Boolean Briefing_Grid_Get( Boolean *grid, long x, long y, long gridWidth,
+bool Briefing_Grid_Get( bool *grid, long x, long y, long gridWidth,
     long gridHeight);
 
-void Briefing_Grid_Set( Boolean *grid, long x, long y, long gridWidth,
-    long gridHeight, Boolean value);
+void Briefing_Grid_Set( bool *grid, long x, long y, long gridWidth,
+    long gridHeight, bool value);
 
 
 Point BriefingSprite_GetBestLocation( spritePix *sprite, long scale,
-    Point fromWhere, Boolean *grid, long gridWidth, long gridHeight,
+    Point fromWhere, bool *grid, long gridWidth, long gridHeight,
     Rect *bounds)
 {
     long            offsetSize = 1, i;
@@ -118,8 +118,8 @@ Point BriefingSprite_GetBestLocation( spritePix *sprite, long scale,
     return result;
 }
 
-Boolean BriefingSprite_IsLocationLegal( spritePix *sprite, long scale,
-    Point where, Boolean *grid, long gridWidth, long gridHeight,
+bool BriefingSprite_IsLocationLegal( spritePix *sprite, long scale,
+    Point where, bool *grid, long gridWidth, long gridHeight,
     Rect *bounds)
 {
     Rect    spriteBounds;
@@ -148,7 +148,7 @@ Boolean BriefingSprite_IsLocationLegal( spritePix *sprite, long scale,
 }
 
 void BriefingSprite_UseLocation( spritePix *sprite, long scale,
-    Point where, Boolean *grid, long gridWidth, long gridHeight,
+    Point where, bool *grid, long gridWidth, long gridHeight,
     Rect *bounds)
 {
     Rect    spriteBounds;
@@ -174,7 +174,7 @@ void BriefingSprite_UseLocation( spritePix *sprite, long scale,
     }
 }
 
-Boolean Briefing_Grid_Get( Boolean *grid, long x, long y, long gridWidth,
+bool Briefing_Grid_Get( bool *grid, long x, long y, long gridWidth,
     long gridHeight)
 {
     if ( grid == nil) return true;
@@ -187,8 +187,8 @@ Boolean Briefing_Grid_Get( Boolean *grid, long x, long y, long gridWidth,
     return *grid;
 }
 
-void Briefing_Grid_Set( Boolean *grid, long x, long y, long gridWidth,
-    long gridHeight, Boolean value)
+void Briefing_Grid_Set( bool *grid, long x, long y, long gridWidth,
+    long gridHeight, bool value)
 {
     if ( grid == nil) return;
     if ( x < 1) return;
@@ -394,7 +394,7 @@ void Briefing_Objects_Render( long whichScenario, PixMap* destmap,
     Rect    spriteRect, clipRect;
     baseObjectType  *baseObject = nil;
     spaceObjectType *anObject = *gSpaceObjectData;
-    Boolean         *gridCells = nil;
+    bool         *gridCells = nil;
     briefingSpriteBoundsType    *sBounds = nil;
 
 #pragma unused( portleft, portright)

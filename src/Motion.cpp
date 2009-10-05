@@ -93,7 +93,7 @@ static longPointType    cAdjacentUnits[] = {
 coordPointType          gGlobalCorner;
 
 // HACK TO FIND BUG:
-Boolean gHackMoitionInitedYet = FALSE;
+bool gHackMoitionInitedYet = false;
 
 int InitMotion( void)
 
@@ -165,7 +165,7 @@ int InitMotion( void)
             p++;
         }
     }
-    gHackMoitionInitedYet = TRUE;
+    gHackMoitionInitedYet = true;
     return ( kNoError);
 }
 
@@ -680,7 +680,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
                             *player = nil, *taObject, *tbObject;
     long                    i = 0, j = 0, k, xs, xe, ys, ye, xd, yd, superx, supery, scaleCalc, difference;
     short                   cs, ce;
-    Boolean                 beamHit;
+    bool                 beamHit;
     unsigned long           distance, dcalc/*,
                             closestDist = kMaximumRelevantDistanceSquared + kMaximumRelevantDistanceSquared*/;
     proximityUnitType       *proximityObject, *currentProximity;
@@ -728,7 +728,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
                         aObject->active = kObjectToBeFreed;
 
     //              if ( aObject->attributes & kIsBeam)
-    //                  aObject->frame.beam.killMe = TRUE;
+    //                  aObject->frame.beam.killMe = true;
 
                     ExecuteObjectActions( aObject->baseType->expireAction,
                             aObject->baseType->expireActionNum
@@ -1014,18 +1014,18 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
 
                                         cs = mClipCode( xs, ys, dObject->absoluteBounds);
                                         ce = mClipCode( xe, ye, dObject->absoluteBounds);
-                                        beamHit = TRUE;
+                                        beamHit = true;
                                         if ( sObject->active == kObjectToBeFreed)
                                         {
                                             cs = ce = 1;
-                                            beamHit = FALSE;
+                                            beamHit = false;
                                         }
 
                                         while ( cs | ce)
                                         {
                                             if ( cs & ce)
                                             {
-                                                beamHit = FALSE;
+                                                beamHit = false;
                                                 break;
                                             }
                                             xd = xe - xs;
@@ -1283,7 +1283,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
             {
                 if ( aObject->frame.beam.beam != nil)
                 {
-                    aObject->frame.beam.beam->killMe = TRUE;
+                    aObject->frame.beam.beam->killMe = true;
                 }
                 aObject->active = kObjectAvailable;
                 aObject->attributes = 0;
@@ -1314,7 +1314,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
                 aObject->active = kObjectAvailable;
                 if ( aObject->sprite != nil)
                 {
-                    aObject->sprite->killMe = TRUE;
+                    aObject->sprite->killMe = true;
                 }
                 aObject->attributes = 0;
                 aObject->nextNearObject = aObject->nextFarObject = nil;

@@ -1361,7 +1361,7 @@ void DrawPlayerInterfaceList( interfaceItemType *dItem, PixMap *destMap, long po
             vcenter += GetInterfaceFontAscent(dItem->style) + kInterfaceTextVBuffer;
             uRect = Rect(tRect.left, vcenter - GetInterfaceFontAscent(dItem->style) -
                     kInterfaceTextVBuffer, tRect.right, vcenter);
-            if ( (*(dItem->item.listRect.itemHilited))( swidth, FALSE))
+            if ( (*(dItem->item.listRect.itemHilited))( swidth, false))
             {
                 SetTranslateColorShadeFore( dItem->color, LIGHT);
                 PaintRect( &uRect);
@@ -1428,7 +1428,7 @@ void DrawPlayerInterfaceListEntry( interfaceItemType *dItem, short whichEntry, P
             vcenter += GetInterfaceFontAscent(dItem->style) + kInterfaceTextVBuffer;
             uRect = Rect(tRect.left, vcenter - GetInterfaceFontAscent(dItem->style) -
                     kInterfaceTextVBuffer, tRect.right, vcenter);
-            if ( (*(dItem->item.listRect.itemHilited))( swidth, FALSE))
+            if ( (*(dItem->item.listRect.itemHilited))( swidth, false))
             {
                 SetTranslateColorShadeFore( dItem->color, LIGHT);
                 PaintRect( &uRect);
@@ -1792,7 +1792,7 @@ void DrawInterfaceTextInRect( Rect *tRect, const unsigned char *textData, long l
     const unsigned char* aheadChar;
     unsigned char   *dChar, *wordlen, *theLine, thisLen;
     short           vline = 0, hleft = 0, fheight = 0, xpos = 0, inlinePictNum = 0, i;
-    Boolean         processInline = false;
+    bool         processInline = false;
     Str255          inlineString;
     inlineKindType  inlineKind = kNoKind;
     long            inlineValue = 0;

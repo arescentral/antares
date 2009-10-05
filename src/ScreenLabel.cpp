@@ -74,13 +74,13 @@ void ResetAllLabels( void)
         label->thisRect = Rect(0, 0, -1, -1);
         label->lastRect = label->thisRect;
         label->label[0] = 0;
-        label->active = FALSE;
-        label->killMe = FALSE;
+        label->active = false;
+        label->killMe = false;
         label->whichObject = kNoShip;
         label->object = nil;
         label->visibleState = -1;
         label->age = 0;
-        label->objectLink = TRUE;
+        label->objectLink = true;
         label->lineNum = 1;
 //      label->width = label->height = 0;
         label->keepOnScreenAnyway = false;
@@ -102,7 +102,7 @@ void ScreenLabelCleanup( void)
 }
 
 short AddScreenLabel( short h, short v, short hoff, short voff, const unsigned char *string,
-                    spaceObjectType *object, Boolean objectLink, unsigned char color)
+                    spaceObjectType *object, bool objectLink, unsigned char color)
 
 {
 #ifdef kUseLabels
@@ -113,8 +113,8 @@ short AddScreenLabel( short h, short v, short hoff, short voff, const unsigned c
     while (( whichLabel < kMaxLabelNum) && ( label->active)) { label++; whichLabel++;}
     if ( whichLabel >= kMaxLabelNum) return ( -1);  // no free label
 
-    label->active = TRUE;
-    label->killMe = FALSE;
+    label->active = true;
+    label->killMe = false;
     label->where.h = h;
     label->where.v = v;
     label->offset.h = hoff;
@@ -189,8 +189,8 @@ void RemoveScreenLabel( long which)
     label->thisRect = Rect(0, 0, -1, -1);
     label->lastRect = label->thisRect;
     label->label[0] = 0;
-    label->active = FALSE;
-    label->killMe = FALSE;
+    label->active = false;
+    label->killMe = false;
     label->object = nil;
     label->width = label->height = label->lineNum = label->lineHeight = 0;
 #endif
@@ -362,7 +362,7 @@ void ShowAllLabels( void)
             }
             label->lastRect = label->thisRect;
             if ( label->killMe)
-                label->active = FALSE;
+                label->active = false;
             if ( label->visibleState == 0) label->visibleState = -1;
         }
         label++;
@@ -389,7 +389,7 @@ void UpdateAllLabelPositions( long unitsDone)
     short           i = 0;
     screenLabelType *label;
     unsigned char   nilLabel = 0;
-    Boolean         isOffScreen = FALSE;
+    bool         isOffScreen = false;
     Point           source, dest;
 
     label = *globals()->gScreenLabelData;
@@ -401,17 +401,17 @@ void UpdateAllLabelPositions( long unitsDone)
             {
                 if ( label->object->active)
                 {
-                    isOffScreen = FALSE;
+                    isOffScreen = false;
                     label->where.h = label->object->sprite->where.h + label->offset.h;
 
                     if ( label->where.h < ( CLIP_LEFT + kLabelBufferLeft))
                     {
-                        isOffScreen = TRUE;
+                        isOffScreen = true;
                         label->where.h = CLIP_LEFT + kLabelBufferLeft;
                     }
                     if ( label->where.h > ( CLIP_RIGHT - kLabelBufferRight - label->width))
                     {
-                        isOffScreen = TRUE;
+                        isOffScreen = true;
                         label->where.h = CLIP_RIGHT - kLabelBufferRight - label->width;
                     }
 
@@ -420,12 +420,12 @@ void UpdateAllLabelPositions( long unitsDone)
 
                     if ( label->where.v < (CLIP_TOP + kLabelBufferTop))
                     {
-                        isOffScreen = TRUE;
+                        isOffScreen = true;
                         label->where.v = CLIP_TOP + kLabelBufferTop;
                     }
                     if ( label->where.v > (CLIP_BOTTOM - kLabelBufferBottom - label->height))
                     {
-                        isOffScreen = TRUE;
+                        isOffScreen = true;
                         label->where.v = CLIP_BOTTOM - kLabelBufferBottom - label->height;
                     }
 
@@ -611,7 +611,7 @@ void SetScreenLabelColor( long which, unsigned char color)
 #endif
 }
 
-void SetScreenLabelKeepOnScreenAnyway( long which, Boolean keepOnScreenAnyway)
+void SetScreenLabelKeepOnScreenAnyway( long which, bool keepOnScreenAnyway)
 
 {
 #ifdef kUseLabels
@@ -623,7 +623,7 @@ void SetScreenLabelKeepOnScreenAnyway( long which, Boolean keepOnScreenAnyway)
 #endif
 }
 
-void SetScreenLabelAttachedHintLine( long which, Boolean attachedHintLine, Point toWhere)
+void SetScreenLabelAttachedHintLine( long which, bool attachedHintLine, Point toWhere)
 
 {
 #ifdef kUseLabels

@@ -79,8 +79,8 @@
 
 struct tempKeyControlType {
     short   keyNum;
-    Boolean conflicts;
-    Boolean didConflict;
+    bool conflicts;
+    bool didConflict;
 };
 
 extern CWindowPtr       gTheWindow;
@@ -88,9 +88,9 @@ extern CWindowPtr       gTheWindow;
 static void ConflictText_Update( tempKeyControlType *keyControls);
 static long KeyControlIndex_GetTabNum( long whichKeyControl);
 static void KeyControlButton_SetFlash( long whichKey, long currentTab,
-    long currentKeyOffset, long currentButton, Boolean flash);
+    long currentKeyOffset, long currentButton, bool flash);
 
-Boolean IsKeyReserved( KeyMap, Boolean);
+bool IsKeyReserved( KeyMap, bool);
 void BlackenOffscreen( void);
 void Pause( long);
 
@@ -98,7 +98,7 @@ static void ConflictText_Update( tempKeyControlType *keyControls)
 {
     long    i, j;
     Str255  textString, tString;
-    Boolean conflictFound = false;
+    bool conflictFound = false;
 
     textString[0] = 0;
     for ( i = 0; i < kKeyExtendedControlNum; i++)
@@ -148,13 +148,13 @@ static long KeyControlIndex_GetTabNum( long whichKeyControl)
 }
 
 static void KeyControlButton_SetFlash( long whichKey, long currentTab,
-    long currentKeyOffset, long currentButton, Boolean flash)
+    long currentKeyOffset, long currentButton, bool flash)
 {
     long                    whichTab =
                                     KeyControlIndex_GetTabNum( whichKey),
                                     whichButton = -1;
     interfaceItemType       *anItem;
-    Boolean                 hilite = false;
+    bool                 hilite = false;
 
     if ( whichTab != currentTab) whichButton = kShipTabNum + whichTab;
     else
@@ -185,7 +185,7 @@ static void KeyControlButton_SetFlash( long whichKey, long currentTab,
 
 }
 
-Boolean Key_Setup_Screen_Do( void)
+bool Key_Setup_Screen_Do( void)
 
 {
     Point                   where;
@@ -193,7 +193,7 @@ Boolean Key_Setup_Screen_Do( void)
     short                   whichItem, i, whichKeyButton = -1, keyNum = 0,
                             currentKey = 0, checkKey, currentKeyOffset = -1,
                             currentMaxKey = -1, tabItemNum, whichTab;
-    Boolean                 done = FALSE, result = TRUE, cancel = FALSE,
+    bool                 done = false, result = true, cancel = false,
                             flashOn = false;
     EventRecord             theEvent;
     KeyMap                  keyMap;
@@ -272,7 +272,7 @@ Boolean Key_Setup_Screen_Do( void)
                     tempKeyControls[whichKeyButton + currentKeyOffset].keyNum =
                         keyNum;
                     SetStatusOfAnyInterfaceItem( whichKeyButton + kFirstKey,
-                        kIH_Hilite, TRUE);
+                        kIH_Hilite, true);
                     do
                     {
                         GetKeys( keyMap);
@@ -280,12 +280,12 @@ Boolean Key_Setup_Screen_Do( void)
                     } while ( currentKey > 0);
 
                     SetStatusOfAnyInterfaceItem( whichKeyButton + kFirstKey,
-                        kActive, TRUE);
+                        kActive, true);
                     whichKeyButton++;
                     if ( whichKeyButton >= (currentMaxKey))
                         whichKeyButton = 0;
                     SetStatusOfAnyInterfaceItem( whichKeyButton + kFirstKey,
-                        kIH_Hilite, TRUE);
+                        kIH_Hilite, true);
                     ConflictText_Update( tempKeyControls);
                     for ( i = 0; i < kKeyExtendedControlNum; i++)
                     {
@@ -360,9 +360,9 @@ Boolean Key_Setup_Screen_Do( void)
                 {
                     if (( whichKeyButton >= 0) &&  (whichKeyButton < currentMaxKey))
                         SetStatusOfAnyInterfaceItem(
-                            whichKeyButton + kFirstKey, kActive, TRUE);
+                            whichKeyButton + kFirstKey, kActive, true);
                     SetStatusOfAnyInterfaceItem( whichItem,
-                            kIH_Hilite, TRUE);
+                            kIH_Hilite, true);
                     whichKeyButton = whichItem - kFirstKey;
 //                  DrawKeyControlPicture( whichKeyButton);
                 }
@@ -370,15 +370,15 @@ Boolean Key_Setup_Screen_Do( void)
                 switch ( whichItem)
                 {
                     case kKeyCancelButton:
-                        cancel = TRUE;
-                        done = TRUE;
+                        cancel = true;
+                        done = true;
                         break;
                     case kKeyDoneButton:
-                        done = TRUE;
+                        done = true;
                         break;
                     case kKeyOptionButton:
-                        result = FALSE;
-                        done = TRUE;
+                        result = false;
+                        done = true;
                         break;
 
                     case kShipTabNum:

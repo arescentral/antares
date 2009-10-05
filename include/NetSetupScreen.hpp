@@ -24,6 +24,6 @@ void NetLevelShowRaces( short, short);
 void ConvertOffscreenRectToPortraitData( short, short, unsigned char *);
 void DisplayPortraitData( short, short, unsigned char *, unsigned char);
 void ClearPortrait( unsigned char *);
-Boolean PlotCustomIcon( Rect *);
+bool PlotCustomIcon( Rect *);
 
 #endif // ANTARES_NET_SETUP_SCREEN_HPP_

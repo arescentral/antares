@@ -186,14 +186,14 @@ void PlaySong( void)
             ShowErrorOfTypeOccurred( eContinueOnlyErr, kErrorStrID, kPlaySongError, err, __FILE__, 3);
         } else
         {
-            MADDriver->Reading = TRUE;
+            MADDriver->Reading = true;
         }
     //  MADDriver->Reading = !MADDriver->Reading; // toggles playing of music
     #endif
     }
 }
 
-Boolean SongIsPlaying( void)
+bool SongIsPlaying( void)
 {
     if ( globals()->gOptions & kOptionMusicDriver)
     {

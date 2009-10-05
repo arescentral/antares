@@ -39,16 +39,16 @@ struct screenLabelType {
     long            age;
     unsigned char   label[kMaxLabelLen];
     unsigned char   color;
-    Boolean         active;
-    Boolean         killMe;
+    bool         active;
+    bool         killMe;
     short           visibleState;   // < 0 = invisible 0 = turn me invisible, 1 = visible
     long            whichObject;
     spaceObjectType *object;
-    Boolean         objectLink;     // true if label requires an object to be seen
+    bool         objectLink;     // true if label requires an object to be seen
     long            lineNum;
     long            lineHeight;
-    Boolean         keepOnScreenAnyway; // if not attached to object, keep on screen if it's off
-    Boolean         attachedHintLine;
+    bool         keepOnScreenAnyway; // if not attached to object, keep on screen if it's off
+    bool         attachedHintLine;
     Point           attachedToWhere;
     long            retroCount;
 };
@@ -58,7 +58,7 @@ int ScreenLabelInit( void);
 void ResetAllLabels( void);
 void ScreenLabelCleanup( void);
 short AddScreenLabel( short, short, short, short, const unsigned char *, spaceObjectType *,
-                    Boolean, unsigned char);
+                    bool, unsigned char);
 void RemoveScreenLabel( long);
 void EraseAllLabels( void);
 void DrawAllLabels( void);
@@ -71,8 +71,8 @@ void SetScreenLabelString( long, const unsigned char *);
 void SetScreenLabelColor( long, unsigned char);
 void SetScreenLabelOffset( long which, long hoff, long voff);
 long GetScreenLabelWidth( long which);
-void SetScreenLabelKeepOnScreenAnyway( long which, Boolean keepOnScreenAnyWay);
-void SetScreenLabelAttachedHintLine( long which, Boolean attachedHintLine, Point toWhere);
+void SetScreenLabelKeepOnScreenAnyway( long which, bool keepOnScreenAnyWay);
+void SetScreenLabelAttachedHintLine( long which, bool attachedHintLine, Point toWhere);
 unsigned char* GetScreenLabelStringPtr(long);
 void RecalcScreenLabelSize( long);
 

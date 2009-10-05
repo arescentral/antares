@@ -664,7 +664,7 @@ void SetAllSoundsNoKeep( void)
 
     for ( count = kMinVolatileSound; count < kSoundNum; count++)
     {
-        globals()->gSound[count].keepMe = FALSE;
+        globals()->gSound[count].keepMe = false;
     }
 
 }
@@ -690,7 +690,7 @@ void ResetAllSounds( void)
 
     for ( count = 0; count < kSoundNum; count++)
     {
-        globals()->gSound[count].keepMe = FALSE;
+        globals()->gSound[count].keepMe = false;
         globals()->gSound[count].id = -1;
     }
 }
@@ -704,7 +704,7 @@ void KeepSound( short soundID)
     while ((globals()->gSound[whichSound].id != soundID) && ( whichSound < kSoundNum)) { whichSound++;}
     if ( whichSound < kSoundNum)
     {
-        globals()->gSound[whichSound].keepMe = TRUE;
+        globals()->gSound[whichSound].keepMe = true;
     }
 }
 
@@ -769,7 +769,7 @@ void SoundFXCleanup( void)
     {
         if (  globals()->gChannel[i].channelPtr != nil)
         {
-            err = SndDisposeChannel( globals()->gChannel[i].channelPtr, TRUE);
+            err = SndDisposeChannel( globals()->gChannel[i].channelPtr, true);
             if ( err != noErr)
             {
                 WriteDebugLine("\pSnd Err:");

@@ -29,7 +29,7 @@ short InitRaces( void);
 void CleanupRaces( void);
 short GetNextLegalRace( short, short, scenarioType *);
 short GetPreviousLegalRace( short, short, scenarioType *);
-Boolean IsRaceLegal( short, short, scenarioType *);
+bool IsRaceLegal( short, short, scenarioType *);
 void GetRaceString(unsigned char*, short, short);
 smallFixedType GetRaceAdvantage( short raceNum);
 short GetRaceNumFromID( short);

@@ -137,14 +137,14 @@ typedef struct
 {
     packedDataType              data;
     long                        next;
-    Boolean                     used;
+    bool                     used;
 } latencyQueueNodeType;
 
 typedef struct
 {
     long                        id;
     Str31                       name;
-    Boolean                     exists;
+    bool                     exists;
     short                       race;
     unsigned char               color;
 } playerIDType;
@@ -166,7 +166,7 @@ typedef struct
     long                        lineNum;
     long                        whichCheat;
     long                        whichShip;
-    Boolean                     target;
+    bool                     target;
 
     unsigned long               keysDown[kMaxNetPlayerNum];
     latencyQueueNodeType        latencyQueue[kLatencyQueueLen];
@@ -187,7 +187,7 @@ typedef struct
     unsigned long               latencySample;
     long                        latencySampleCount;
     long                        preserveSeed;
-    Boolean                     inSynch;
+    bool                     inSynch;
     unsigned long               sanityCheckTime;
     unsigned long               lastKeysSent;
 
@@ -210,14 +210,14 @@ typedef struct
     short                       netRace;
     short                       netEnemyColor;
     short                       netLevel;
-    Boolean                     opponentIsUnregistered;
-    Boolean                     haveSeenUnregisteredTimeWarning;
+    bool                     opponentIsUnregistered;
+    bool                     haveSeenUnregisteredTimeWarning;
 
-    Boolean                     thisSelectIsTarget[kMaxNetPlayerNum];
-    Boolean                     gotMessage[kMaxNetPlayerNum];
-    Boolean                     hosting;
-    Boolean                     gotEndGameMessage;
-    Boolean                     haveEncounteredSynchError;
+    bool                     thisSelectIsTarget[kMaxNetPlayerNum];
+    bool                     gotMessage[kMaxNetPlayerNum];
+    bool                     hosting;
+    bool                     gotEndGameMessage;
+    bool                     haveEncounteredSynchError;
     long                        netSynchBarfCountDown;
 } netDataType;
 
@@ -255,11 +255,11 @@ extern long     /*globals()->gThisScenarioNumber, globals()->gPlayerAdmiralNumbe
 netDataType     *gNetData = nil;
 long            gNetLatency;
 
-Boolean AddIncomingTextMessageLong( unsigned long, unsigned long);
+bool AddIncomingTextMessageLong( unsigned long, unsigned long);
 void AddIncomingTextMessageCharacter( unsigned char);
 long GetOtherPlayerNum( void);
 
-Boolean NetSprocketPresent(void)
+bool NetSprocketPresent(void)
 {
 #ifdef kAllowNetSprocket
  #ifdef kUseCFMGlue
@@ -549,13 +549,13 @@ void SetRegisteredSetting( long setting)
     }
 }
 
-Boolean GetBandwidth( void)
+bool GetBandwidth( void)
 {
     if ( gNetData->registeredFlags & kLowerBandwidth) return ( true); // lower bandwidth yes
     else return( false);
 }
 
-void SetBandwidth( Boolean setting)
+void SetBandwidth( bool setting)
 {
     if ( setting)
         gNetData->registeredFlags |= kLowerBandwidth;
@@ -628,29 +628,29 @@ void SetNetLevel( short level)
     gNetData->netLevel = level;
 }
 
-Boolean GetOpponentIsUnregistered( void)
+bool GetOpponentIsUnregistered( void)
 {
     return( gNetData->opponentIsUnregistered);
 }
 
-void SetOpponentIsUnregistered( Boolean unregistered)
+void SetOpponentIsUnregistered( bool unregistered)
 {
     gNetData->opponentIsUnregistered = unregistered;
 }
 
-Boolean GetHaveSeenUnregisteredTimeLimitWarning( void)
+bool GetHaveSeenUnregisteredTimeLimitWarning( void)
 {
     return( gNetData->haveSeenUnregisteredTimeWarning);
 }
 
-void SetHaveSeenUnregisteredTimeLimitWarning( Boolean seenIt)
+void SetHaveSeenUnregisteredTimeLimitWarning( bool seenIt)
 {
     gNetData->haveSeenUnregisteredTimeWarning = seenIt;
 }
 
-Boolean GetAllNetPlayersCheating( void)
+bool GetAllNetPlayersCheating( void)
 {
-    Boolean result = true;
+    bool result = true;
     long    i;
 
     if ( !NetGameIsOn()) return( true);
@@ -672,7 +672,7 @@ Boolean GetAllNetPlayersCheating( void)
     return( result);
 }
 
-Boolean NetGameIsOn( void)
+bool NetGameIsOn( void)
 {
     if ( gNetData == nil) return false; // if no NSp, no net game
     return ( gNetData->netGame != nil);
@@ -923,7 +923,7 @@ void GetProtocolFlagsFromList( NSpProtocolListReference theList, unsigned long *
 #endif
 }
 
-Boolean IsIDInDefString( char *definitionString, char *idString)
+bool IsIDInDefString( char *definitionString, char *idString)
 {
     char    *dc, ds[kNSpDefStringIDLen + 1], *dsc;
     long    i, j;
@@ -946,12 +946,12 @@ Boolean IsIDInDefString( char *definitionString, char *idString)
     return( false);
 }
 
-Boolean DoHostGame( void)
+bool DoHostGame( void)
 {
 #ifdef kAllowNetSprocket
     OSStatus                    status = noErr;
     NSpProtocolListReference    theList = NULL;
-    Boolean                     OKHit;
+    bool                     OKHit;
 
     if ( Wrap_GRIsHostCmd()) WriteDebugLine((char *)"\pGR HOST");
     else WriteDebugLine((char *)"\pNO GR HOST");
@@ -1000,11 +1000,11 @@ Boolean DoHostGame( void)
 #endif
 }
 
-Boolean DoJoinGameModalDialog( void)
+bool DoJoinGameModalDialog( void)
 
 {
 #ifdef kAllowNetSprocket
-    Boolean             OKHit = true;
+    bool             OKHit = true;
 
     ClearNetData();
 
@@ -1025,11 +1025,11 @@ Boolean DoJoinGameModalDialog( void)
 #endif
 }
 
-Boolean DoJoinGame( void)
+bool DoJoinGame( void)
 {
 #ifdef kAllowNetSprocket
     OSStatus            status;
-    Boolean             OKHit = true;
+    bool             OKHit = true;
 
     status = Glue_NSpGame_Join(&gNetData->netGame, gNetData->address, gNetData->playerName,
         gNetData->password, 0, NULL, 0, 0);
@@ -1082,7 +1082,7 @@ error:
 }
 
 /*
-Boolean WaitForAllPlayers( short maxPlayerNum)
+bool WaitForAllPlayers( short maxPlayerNum)
 {
     NSpMessageHeader    *theMessage;
 
@@ -1110,11 +1110,11 @@ Boolean WaitForAllPlayers( short maxPlayerNum)
 }
 */
 
-Boolean WaitForAllStart( void)
+bool WaitForAllStart( void)
 {
 #ifdef kAllowNetSprocket
     NSpMessageHeader    *theMessage;
-    Boolean             startYet = false;
+    bool             startYet = false;
     messageDataType     *theMessageData;
 
     globals()->gThisScenarioNumber = -1;
@@ -1197,9 +1197,9 @@ void SendEndGame(void)
 #endif
 }
 
-Boolean GotAllMessages( void)
+bool GotAllMessages( void)
 {
-    Boolean result = true;
+    bool result = true;
     short   i;
 
     for ( i = 0; i < kMaxNetPlayerNum; i++)
@@ -1674,7 +1674,7 @@ void SendPreGameBasicMessage( long whatMessage)
 #endif
 }
 
-void SendPreGameDummyMessage( long time, Boolean registered,
+void SendPreGameDummyMessage( long time, bool registered,
     short useLastSentChar)  // 0 = no, 1 = yes, -1 = send no char)
 {
 #ifdef kAllowNetSprocket
@@ -1751,8 +1751,8 @@ void SendPreGameDummyMessage( long time, Boolean registered,
 #endif
 }
 
-void SendPreGameAnyMessage( long time, Boolean registered, long message, unsigned char value1,
-    unsigned char value2, unsigned char value3, unsigned char value4, Boolean useLastMessage)
+void SendPreGameAnyMessage( long time, bool registered, long message, unsigned char value1,
+    unsigned char value2, unsigned char value3, unsigned char value4, bool useLastMessage)
 {
 #ifdef kAllowNetSprocket
     messageDataType     theMessage;
@@ -1945,13 +1945,13 @@ void SendPreGameTextMessage( Ptr sourceText, long length)
 
 // returns false if other player quit
 
-Boolean ProcessInGameMessages( long time, short *pauseLevel)
+bool ProcessInGameMessages( long time, short *pauseLevel)
 
 {
 #ifdef kAllowNetSprocket
     messageDataType     *theMessageData;
     NSpMessageHeader    *theMessage;
-    Boolean             endGame = false;
+    bool             endGame = false;
     long                messageTime, admiralNumber;
     packedDataType      *packedData;
 
@@ -2056,10 +2056,10 @@ Boolean ProcessInGameMessages( long time, short *pauseLevel)
 #endif
 }
 
-Boolean HandleInGameMessage( long whatMessage, packedDataType *theMessageData, Boolean rightNow, short *pauseLevel)
+bool HandleInGameMessage( long whatMessage, packedDataType *theMessageData, bool rightNow, short *pauseLevel)
 {
     unsigned long       admiralNumber = (theMessageData->packedData2 & kAdmiralMask) >> kAdmiralBitShift;
-    Boolean             stopNetworking = false, gotTextMessageChar = false;
+    bool             stopNetworking = false, gotTextMessageChar = false;
     unsigned long       textMessageChar = 0;
 
     switch( whatMessage)
@@ -2461,13 +2461,13 @@ void SendPrefabMessage( packedDataType *theData)
 #endif
 }
 
-Boolean SendInGameMessage( long time)
+bool SendInGameMessage( long time)
 {
 #ifdef kAllowNetSprocket
     messageDataType     theMessage;
     OSStatus            status = noErr;
     spaceObjectType     *anObject = GetAdmiralFlagship( globals()->gPlayerAdmiralNumber);
-    Boolean             charSent = false;
+    bool             charSent = false;
     unsigned long       textMessageChar;
 
 //  if ( time > (globals()->gGameTime + (gNetLatency * 2))) DebugStr("\pTIME PROBLEM!");
@@ -2582,7 +2582,7 @@ Boolean SendInGameMessage( long time)
 #endif
 }
 
-Boolean SendInGameBasicMessage( long time, long whatMessage, Boolean registered, Boolean toSelf)
+bool SendInGameBasicMessage( long time, long whatMessage, bool registered, bool toSelf)
 {
 #ifdef kAllowNetSprocket
     messageDataType     theMessage;
@@ -2652,8 +2652,8 @@ Boolean SendInGameBasicMessage( long time, long whatMessage, Boolean registered,
 #endif
 }
 
-Boolean SendInGameMiscLongMessage( long time, long whatMessage, long data,
-    Boolean registered, Boolean toSelf)
+bool SendInGameMiscLongMessage( long time, long whatMessage, long data,
+    bool registered, bool toSelf)
 {
 #ifdef kAllowNetSprocket
     messageDataType     theMessage;
@@ -2731,7 +2731,7 @@ Boolean SendInGameMiscLongMessage( long time, long whatMessage, long data,
 #endif
 }
 
-Boolean SendSelectMessage( long time, long whichShip, Boolean target)
+bool SendSelectMessage( long time, long whichShip, bool target)
 {
 #ifdef kAllowNetSprocket
 
@@ -2780,7 +2780,7 @@ Boolean SendSelectMessage( long time, long whichShip, Boolean target)
 #endif
 }
 
-Boolean SendMenuMessage( long time, short whichPage, short whichLine)
+bool SendMenuMessage( long time, short whichPage, short whichLine)
 {
 #ifdef kAllowNetSprocket
 
@@ -2827,7 +2827,7 @@ void SendCheatMessage( short whichCheat)
      if (( gNetData->pageNum == -1) && ( gNetData->whichCheat < 0)) gNetData->whichCheat = whichCheat;
 }
 
-Boolean SendSetLatencyMessage( long time)
+bool SendSetLatencyMessage( long time)
 {
 #ifdef kAllowNetSprocket
 #pragma unused ( time)
@@ -2866,7 +2866,7 @@ Boolean SendSetLatencyMessage( long time)
 #endif
 }
 
-Boolean SendSanityCheckMessage( long time)
+bool SendSanityCheckMessage( long time)
 {
 #ifdef kAllowNetSprocket
 #pragma unused ( time)
@@ -2901,7 +2901,7 @@ Boolean SendSanityCheckMessage( long time)
 #endif
 }
 
-Boolean SendPreserveSeedMessage( long time)
+bool SendPreserveSeedMessage( long time)
 {
 #pragma unused ( time)
 #ifdef kAllowNetSprocket
@@ -2970,7 +2970,7 @@ void SendInGameTextMessage( Ptr sourceText, long length)
 #endif
 }
 
-Boolean SendInGameShortMessage( long time)
+bool SendInGameShortMessage( long time)
 {
 #pragma unused ( time)
 #ifdef kAllowNetSprocket
@@ -3073,17 +3073,17 @@ void SendResendMessage( long time)
 #endif
 }
 
-Boolean IAmHosting( void)
+bool IAmHosting( void)
 
 {
     return( gNetData->hosting);
 }
 
-Boolean InsertMessageInQueue( packedDataType *theData, long time)
+bool InsertMessageInQueue( packedDataType *theData, long time)
 {
     short   queueNumber = 0, nextQueue = gNetData->queueTop, previousQueue = -1;
     long    relativeTime;   // "corrected" for time wrap-around
-    Boolean placeFound = false;
+    bool placeFound = false;
 
     while (( gNetData->latencyQueue[queueNumber].used == true) &&
         ( queueNumber < kLatencyQueueLen))
@@ -3190,7 +3190,7 @@ void DebugMessageQueue( void)
     }
 }
 
-Boolean JumpstartLatencyQueue( long fromTime, long byUnit)
+bool JumpstartLatencyQueue( long fromTime, long byUnit)
 
 {
     long    i;
@@ -3202,7 +3202,7 @@ Boolean JumpstartLatencyQueue( long fromTime, long byUnit)
     return( true);
 }
 
-Boolean StoreSentMessage( packedDataType *theMessageData)
+bool StoreSentMessage( packedDataType *theMessageData)
 
 {
     short   i = 0;
@@ -3318,7 +3318,7 @@ void ResetSentMessages( void)
     }
 }
 
-unsigned char TickleOutgoingMessage( Boolean registered)
+unsigned char TickleOutgoingMessage( bool registered)
 {
     unsigned long textOut = 0, charNum = 0;
     unsigned char   result = 0;
@@ -3363,9 +3363,9 @@ void StartIncomingTextMessage( void)
 //  gNetData->incomingCharNum = 0;
 }
 
-Boolean AddIncomingTextMessageLong( unsigned long what, unsigned long bitShift)
+bool AddIncomingTextMessageLong( unsigned long what, unsigned long bitShift)
 {
-    Boolean         endFound = false;
+    bool         endFound = false;
 
     while ((  bitShift > 0) && ( gNetData->incomingCharNum < kTextMessageLength)
         && ( !endFound))
