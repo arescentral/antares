@@ -20,7 +20,6 @@
 #include "SpaceObjectHandling.hpp"
 
 #include "Admiral.hpp"
-#include "AresDemoScanner.hpp"
 #include "AresGlobalType.hpp"
 #include "Beam.hpp"
 #include "BinaryStream.hpp"

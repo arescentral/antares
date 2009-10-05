@@ -37,7 +37,6 @@
 #include "ScenarioMaker.hpp"
 #include "ScreenLabel.hpp"
 #include "ScrollStars.hpp"  // for resetting the player ship
-#include "ShotsBeamsExplosions.hpp"
 #include "SoundFX.hpp"
 #include "SpaceObjectHandling.hpp"
 #include "StringNumerics.hpp"

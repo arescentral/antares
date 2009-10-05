@@ -21,7 +21,6 @@
 
 #include "PlayerInterface.hpp"
 
-#include "AresExternalFile.hpp"
 #include "AresGlobalType.hpp"
 #include "AresMain.hpp"
 #include "AresMoviePlayer.hpp"
@@ -2096,15 +2095,7 @@ long DoSelectLevelInterface( long startChapter)
     cheatString[0] = 0;
 
     if ( ThisChapterIsNetworkable( thisChapter)) thisChapter = 1;
-    if ( ThisChapterIsNetworkable( thisChapter))
-    {
-        globals()->externalFileSpec.name[0] = 0;
-        EF_OpenExternalFile();
-        ShowErrorAny( eContinueOnlyErr, kErrorStrID,
-            nil, nil, nil, nil, 80, -1, -1, -1, __FILE__, 0);
-        startChapter = GetStartingLevelPreference();
-        thisLevel = GetScenarioNumberFromChapterNumber( startChapter);
-    }
+    // Old code would now revert to factory scenarios now if still networkable.
 
     BlackenWindow();
     FlushEvents(everyEvent, 0);

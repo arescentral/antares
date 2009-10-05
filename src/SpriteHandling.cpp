@@ -19,13 +19,11 @@
 
 #include "SpriteHandling.hpp"
 
-#include "AresResFile.hpp"
 #include "AresGlobalType.hpp"
 #include "ColorTranslation.hpp"
 #include "Debug.hpp"
 #include "DirectText.hpp"
 #include "Error.hpp"
-#include "MacroColors.hpp"
 #include "MathMacros.hpp"
 #include "NateDraw.hpp"
 #include "NatePixTable.hpp"
@@ -33,7 +31,6 @@
 #include "Randomize.hpp" // for static table
 #include "Resources.h"
 #include "Rotation.hpp"
-#include "SingleDataFile.hpp"
 #include "StringNumerics.hpp"
 
 #define kMaxSpriteNum           500//300

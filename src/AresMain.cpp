@@ -21,15 +21,11 @@
 
 #include "Admiral.hpp"
 #include "AresCheat.hpp"
-#include "AresDemoScanner.hpp"
-#include "AresExternalFile.hpp"
-#include "AresGameRanger.hpp"
 #include "AresGlobalType.hpp"
 #include "AresGuideMaker.hpp"
 #include "AresMoviePlayer.hpp"
 #include "AresNetworkSprocket.hpp"
 #include "AresPreferences.hpp"
-#include "AresResFile.hpp"
 
 #include "Beam.hpp"
 
@@ -76,19 +72,16 @@
 #include "ScenarioMaker.hpp"
 #include "ScreenLabel.hpp"
 #include "ScrollStars.hpp"
-#include "ShotsBeamsExplosions.hpp"
 #include "SoundFX.hpp"
 #include "SpaceObjectHandling.hpp"
 #include "SpriteCursor.hpp"
 #include "SpriteHandling.hpp"
 #include "StringHandling.hpp"
 
-#include "TimeLimit.hpp"
 #include "TimeUnit.hpp"
 #include "TitleScreen.hpp"
 #include "Transitions.hpp"
 
-#include "VersionString.hpp"
 #include "VideoDriver.hpp"
 
 #include "WrapGameRanger.hpp"

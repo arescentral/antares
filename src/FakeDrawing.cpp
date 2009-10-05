@@ -26,7 +26,6 @@
 
 #include "BinaryStream.hpp"
 #include "ColorTable.hpp"
-#include "FakeHandles.hpp"
 #include "Fakes.hpp"
 #include "File.hpp"
 

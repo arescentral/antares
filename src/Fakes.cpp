@@ -25,8 +25,6 @@
 #include "AresMain.hpp"
 #include "AresPreferences.hpp"
 #include "FakeDrawing.hpp"
-#include "FakeHandles.hpp"
-#include "FakeMath.hpp"
 #include "FakeSounds.hpp"
 #include "File.hpp"
 #include "TestVideoDriver.hpp"
@@ -205,8 +203,6 @@ void FakeInit(int argc, char* const* argv) {
         MakeDirs(output_dir, 0755);
     }
 
-    FakeHandlesInit();
-    FakeMathInit();
     FakeSoundsInit();
 
     AresMain();

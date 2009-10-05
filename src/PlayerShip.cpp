@@ -41,7 +41,6 @@
 #include "ScenarioMaker.hpp"
 #include "ScreenLabel.hpp"
 #include "ScrollStars.hpp"
-#include "ShotsBeamsExplosions.hpp"
 #include "SoundFX.hpp"
 #include "SpaceObject.hpp"
 #include "SpaceObjectHandling.hpp"

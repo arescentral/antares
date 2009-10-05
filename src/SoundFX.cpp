@@ -20,7 +20,6 @@
 #include "SoundFX.hpp"
 
 #include "AresGlobalType.hpp"
-#include "AresResFile.hpp"
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "FakeSounds.hpp"
@@ -28,7 +27,6 @@
 #include "MathSpecial.hpp"
 #include "Options.hpp"
 #include "Resources.h"
-#include "SingleDataFile.hpp"
 #include "SpaceObject.hpp"
 #include "UniverseUnit.hpp"
 

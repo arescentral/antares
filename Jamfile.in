@@ -9,14 +9,12 @@ Main Antares : src/Admiral.cpp
                src/AnyCharStringHandling.cpp
                src/AresCheat.cpp
                #src/AresDemoScanner.cpp
-               src/AresExternalFile.cpp
                src/AresGlobalType.cpp
                #src/AresGuideMaker.cpp
                src/AresMain.cpp
                src/AresMoviePlayer.cpp
                #src/AresNetworkSprocket.cpp
                src/AresPreferences.cpp
-               src/AresResFile.cpp
                src/AresVersion.cpp
                src/Beam.cpp
                src/BinaryStream.cpp
@@ -34,7 +32,6 @@ Main Antares : src/Admiral.cpp
                src/Fakes.cpp
                src/File.cpp
                src/Geometry.cpp
-               #src/Icl8ToCicn.cpp
                #src/IconSuiteFromAlias.cpp
                src/InputSource.cpp
                src/Instruments.cpp
@@ -54,7 +51,6 @@ Main Antares : src/Admiral.cpp
                #src/NetSprocketGlue.cpp
                src/NonPlayerShip.cpp
                src/OffscreenGWorld.cpp
-               #src/OldFile.cpp
                src/Picture.cpp
                src/PlayerInterface.cpp
                src/PlayerInterfaceDrawing.cpp
@@ -68,7 +64,6 @@ Main Antares : src/Admiral.cpp
                src/ScenarioMaker.cpp
                src/ScreenLabel.cpp
                src/ScrollStars.cpp
-               #src/SmartFile.cpp
                src/SoundFX.cpp
                src/SpaceObjectHandling.cpp
                src/SpriteCursor.cpp
@@ -76,10 +71,11 @@ Main Antares : src/Admiral.cpp
                src/StringHandling.cpp
                src/StringList.cpp
                src/StringNumerics.cpp
+               src/TestVideoDriver.cpp
                src/TimeUnit.cpp
                src/TitleScreen.cpp
                src/Transitions.cpp
-               src/VersionString.cpp
+               src/VideoDriver.cpp
                src/VncServer.cpp
                #src/WrapGameRanger.cpp
                #src/WrapGameRangerNull.cpp

@@ -15,8 +15,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "FakeHandles.hpp"
-
 #include <assert.h>
 
 #include "BinaryStream.hpp"
@@ -64,7 +62,4 @@ int Munger(TypedHandle<unsigned char> data, int pos, const unsigned char* search
         memcpy(*data + at + r.size(), d.c_str() + at + s.size(), d.size() - at - s.size());
     }
     return at;
-}
-
-void FakeHandlesInit() {
 }

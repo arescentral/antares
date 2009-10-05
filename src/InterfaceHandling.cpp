@@ -25,7 +25,6 @@
 #include "InterfaceHandling.hpp"
 
 #include "AnyChar.hpp"
-#include "AresResFile.hpp"
 #include "AresGlobalType.hpp"
 #include "BinaryStream.hpp"
 #include "ColorTranslation.hpp"
