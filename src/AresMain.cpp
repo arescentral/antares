@@ -93,37 +93,9 @@
 
 #include "WrapGameRanger.hpp"
 
-//#define   kTempNet
+namespace {
 
-#define MENU_BAR_ID     500
-#define APPLE_MENU_ID   500
-#define FILE_MENU_ID    501
-#define EDIT_MENU_ID    502
-
-#define ABOUT_ALERT     500
-
-#define ABOUT_ITEM      1
-
-#define QUIT_ITEM       1
-
-#define kSmallScreenMem     2580
-#define kMediumScreenMem    3092
-#define kLargeScreenMem     3855
-#define kBaseMemorySize     2000000//1652000
-
-#define kReplayDataSize     6000L
-#define kReplayBufferSize   5000L
-
-#define kMainError      "\pmain"
-#define kReplayResType  'NLRP'
-#define kReplayResID    600
-
-#define k68KMaxFrameSkip    9
-
-#define kResendRequestFirstTime     600
-#define kResendRequestSecondTime    1200
-
-// result 0 = lose, 1 = win, 2 = restart, 3 = quit
+const int kReplayResID = 600;
 
 enum GameResult {
     NO_GAME = -1,
@@ -133,36 +105,18 @@ enum GameResult {
     QUIT_GAME = 3,
 };
 
-//#define   kCanRecordGame
+const int kTitleTextScrollWidth = 450;
 
-#define kReplayNotAutoPlay  // if this is set, will play back recorded games
-
-#define mAbortNetworkGame       { if ( globals()->gGameOver == 0) globals()->gGameOver = 1; result = kQuitGame; StopNetworking();}
-
-#define kTitleTextScrollWidth   450
-
-#define kFractionalLagCorrectTolerance  8
-
-#define kInterfaceResFileName   "\p:Ares Data Folder:Ares Interfaces"
-#define kSpriteResFileName      "\p:Ares Data Folder:Ares Sprites"
-#define kSoundResFileName       "\p:Ares Data Folder:Ares Sounds"
-
-//#define   kTestNumber     50//5
-
-//#define   kUseSmallPlayWindow // for debugging
+}  // namespace
 
 extern TypedHandle<spaceObjectType> gSpaceObjectData;
 extern int32_t gRandomSeed;
-extern long gNatePortLeft, gNatePortTop, gNetLatency;
 extern scenarioType *gThisScenario;
-extern short gSpriteFileRefID, gInterfaceFileRefID;
 extern PixMap* gActiveWorld;
 extern scoped_ptr<Window> fakeWindow;
 
-CWindowPtr      gTheWindow = nil;//, globals()->gBackWindow = nil;
-MenuHandle      gAppleMenu;
-long            gLastTick, // globals()->gGameOver = 0,
-                WORLD_WIDTH = 640,
+CWindowPtr      gTheWindow = nil;
+long            WORLD_WIDTH = 640,
                 WORLD_HEIGHT = 480,
                 CLIP_LEFT = 128,
                 CLIP_TOP = 0,
@@ -170,9 +124,6 @@ long            gLastTick, // globals()->gGameOver = 0,
                 CLIP_BOTTOM = 480,
                 gPlayScreenWidth = 480,
                 gPlayScreenHeight = 480;
-bool         hackWarn = true;
-
-unsigned long kNoKeys = 0;
 
 int GetDemoScenario();
 void FakeInit(int argc, char* const* argv);
@@ -257,8 +208,6 @@ void AresMain() {
     InitBeams();
     TimedWaitForAnyEvent(skipFading ? 1 : 1400);
     EndCustomPictFade(gTheWindow, skipFading);
-
-    gLastTick = TickCount();
 
     globals()->okToOpenFile = true;
     MainLoop();
@@ -685,7 +634,6 @@ GameResult PlayTheGame(long *seconds) {
 
     while ((globals()->gGameOver <= 0 ) && (!globals()->returnToMain)) {
         globals()->gFrameCount = 0;
-        gLastTick = TickCount();
 
         SetLongRect(&clipRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
         while (globals()->gGameOver <= 0) {
