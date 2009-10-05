@@ -22,7 +22,6 @@
 #include "Admiral.hpp"
 #include "AresCheat.hpp"
 #include "AresGlobalType.hpp"
-#include "AresGuideMaker.hpp"
 #include "AresNetworkSprocket.hpp"
 #include "AresPreferences.hpp"
 

@@ -8,9 +8,7 @@ LINK        = $(C++) ;
 Main Antares : src/Admiral.cpp
                src/AnyCharStringHandling.cpp
                src/AresCheat.cpp
-               #src/AresDemoScanner.cpp
                src/AresGlobalType.cpp
-               #src/AresGuideMaker.cpp
                src/AresMain.cpp
                #src/AresNetworkSprocket.cpp
                src/AresPreferences.cpp
