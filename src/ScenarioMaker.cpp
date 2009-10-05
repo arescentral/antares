@@ -1950,13 +1950,6 @@ long GetScenarioEpilogueID( long whichScenario)
     return ( aScenario->epilogueID);
 }
 
-void GetScenarioMovieName(long whichScenario, unsigned char* movieName) {
-    scenarioType    *aScenario = *globals()->gScenarioData + whichScenario;
-
-    movieName[0] = 0;
-    GetIndString( movieName, 4500, aScenario->movieNameStrNum);
-}
-
 long GetNextScenarioChapter( long whichScenario)
 {
     scenarioType    *aScenario = *globals()->gScenarioData + whichScenario, *newScenario = nil;

@@ -254,7 +254,6 @@ struct scenarioType {
     int16_t                     starMapV;
     int16_t                     briefPointNum;  // use kScenarioBriefMask
     int16_t                     parTime;
-    int16_t                     movieNameStrNum;
     int16_t                     parKills;
     int16_t                     levelNameStrNum;
     smallFixedType              parKillRatio;

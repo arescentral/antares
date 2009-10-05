@@ -23,7 +23,6 @@
 
 #include "AresGlobalType.hpp"
 #include "AresMain.hpp"
-#include "AresMoviePlayer.hpp"
 #include "AresNetworkSprocket.hpp"
 #include "AresPreferences.hpp"
 #include "BriefingRenderer.hpp"
@@ -294,11 +293,7 @@
 #define kScrollTextWidth            640//540
 #define kScrollTextHeight           200
 #define kScrollTextSpeed            4
-#define kScrollMovieHeight          140
 
-
-
-//4
 #define kScrollTextLineBuffer       2
 #define kScrollTextDelimiter1       '#'
 #define kScrollTextDelimiter2       '+'
@@ -3399,13 +3394,12 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                         charNum, pictID = 0, bgVOffset = 0, bgPictID = -1;
     retroTextSpecType   retroTextSpec;
     transColorType      *transColor;
-    Rect                tRect, uRect, vRect, pictRect, pictSourceRect, movieRect;
+    Rect                tRect, uRect, vRect, pictRect, pictSourceRect;
     TypedHandle<unsigned char> textHandle;
     unsigned char       *thisChar = nil, *sectionStart = nil, *nextChar;
     scoped_ptr<Picture> thePict;
     scoped_ptr<Picture> bgPict;
     bool             sectionOver, abort = false, wasPicture = true;
-    Movie               theMovie = nil;
     Rect                clipRgn;
 
     if (( globals()->gOptions & kOptionMusicIdle) && ( songID >= 0))
@@ -3442,11 +3436,6 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
         scrollRect.right = boundsRect.right;
         scrollRect.top = boundsRect.top;
         scrollRect.bottom = textRect.bottom;
-
-        movieRect.left = boundsRect.left;
-        movieRect.right = boundsRect.right;
-        movieRect.bottom = boundsRect.top;
-        movieRect.top = movieRect.bottom - kScrollMovieHeight;
 
         mCopyAnyRect( tRect, scrollRect);
         clipRgn = tRect;
@@ -3664,14 +3653,6 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                                     bgVOffset++;
                                     if ( bgVOffset >= kBackground_Height) bgVOffset = 0;
 
-                                    if ( theMovie != nil)
-                                    {
-                                        if ( DoMiniMovieTask( theMovie))
-                                        {
-                                            CleanUpMiniMovie( &theMovie);
-                                        }
-                                    }
-
                                     while (( TickCount() - waitTime) < scrollSpeed) {
                                         // DO NOTHING
                                     };
@@ -3779,14 +3760,6 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                             DrawInRealWorld();
                             CopyOffWorldToRealWorld(&vRect);
 
-                            if ( theMovie != nil)
-                            {
-                                if ( DoMiniMovieTask( theMovie))
-                                {
-                                    CleanUpMiniMovie( &theMovie);
-                                }
-                            }
-
                             while (( TickCount() - waitTime) < scrollSpeed) {
                                 // DO NOTHING
                             };
@@ -3823,14 +3796,6 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
             DrawInRealWorld();
             CopyOffWorldToRealWorld(&vRect);
 
-            if ( theMovie != nil)
-            {
-                if ( DoMiniMovieTask( theMovie))
-                {
-                    CleanUpMiniMovie( &theMovie);
-                }
-            }
-
             while (( TickCount() - waitTime) < scrollSpeed) {
                 // DO NOTHING
             };
@@ -3856,7 +3821,6 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
     };
     autoTimeStart = TickCount();
 
-    if ( theMovie != nil) CleanUpMiniMovie( &theMovie);
 //  while (( !AnyRealKeyDown()) && (!abort) && (!(( globals()->gOptions & (kOptionAutoPlay | kOptionReplay)) && (( TickCount() - autoTimeStart) < kDebriefTimeOutTime))));
     MacShowCursor();
 

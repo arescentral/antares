@@ -23,7 +23,6 @@
 #include "AresCheat.hpp"
 #include "AresGlobalType.hpp"
 #include "AresGuideMaker.hpp"
-#include "AresMoviePlayer.hpp"
 #include "AresNetworkSprocket.hpp"
 #include "AresPreferences.hpp"
 
@@ -165,7 +164,6 @@ void AresMain() {
     CreateOffscreenWorld(gTheWindow->portRect, *theClut);
     MusicInit();
 
-    InitMoviePlayer();
     RotationInit();
     NormalizeColors();
     DrawInRealWorld();

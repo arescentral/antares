@@ -58,7 +58,7 @@ size_t scenarioType::load_data(const char* data, size_t len) {
     bin.read(&starMapV);
     bin.read(&briefPointNum);
     bin.read(&parTime);
-    bin.read(&movieNameStrNum);
+    bin.discard(2);
     bin.read(&parKills);
     bin.read(&levelNameStrNum);
     bin.read(&parKillRatio);

@@ -170,7 +170,6 @@ long GetScenarioNumber( void);
 long GetScenarioPlayerNum( long);
 long GetScenarioPrologueID( long);
 long GetScenarioEpilogueID( long);
-void GetScenarioMovieName(long, unsigned char*);
 long GetNextScenarioChapter( long);
 long GetFirstNetworkScenario( void);
 long GetNextNetworkScenario( long);
