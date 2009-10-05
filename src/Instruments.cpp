@@ -272,7 +272,7 @@ void UpdateRadar(int32_t unitsDone) {
         {
             DrawInOffWorld();
 
-            MacSetRect( &tRect, kRadarLeft + 1, kRadarTop + 1 + globals()->gInstrumentTop, kRadarRight - 1,
+            tRect = Rect(kRadarLeft + 1, kRadarTop + 1 + globals()->gInstrumentTop, kRadarRight - 1,
                     kRadarBottom - 1 + globals()->gInstrumentTop);
             RectToLongRect( &tRect, &lRect);
             mGetTranslateColorShade( kRadarColor, DARKEST, color, transColor);
@@ -337,7 +337,7 @@ void UpdateRadar(int32_t unitsDone) {
             }
         } else if (!doDraw)
         {
-            MacSetRect( &tRect, kRadarLeft + 1, kRadarTop + 1 + globals()->gInstrumentTop, kRadarRight - 1,
+            tRect = Rect(kRadarLeft + 1, kRadarTop + 1 + globals()->gInstrumentTop, kRadarRight - 1,
                     kRadarBottom - 1 + globals()->gInstrumentTop);
             RectToLongRect( &tRect, &lRect);
             mGetTranslateColorShade( kRadarColor, DARKEST, color, transColor);
@@ -639,7 +639,7 @@ void DrawInstrumentPanel(WindowPtr) {
 //  pict = GetPicture( kBackgroundPictID);
     globals()->gZoomMode = kNearestFoeZoom;
     DrawInSaveWorld();
-    MacSetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    tRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     SetTranslateColorFore( BLACK);
     PaintRect( &tRect);
     CopySaveWorldToOffWorld( &tRect);
@@ -676,7 +676,7 @@ void DrawInstrumentPanel(WindowPtr) {
     }
     pict.reset();
 
-    MacSetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    tRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     CopyOffWorldToRealWorld(&tRect);
     MakeMiniScreenFromIndString( 1);
     DrawMiniScreen();
@@ -1516,7 +1516,7 @@ void UpdateBarIndicator(int16_t which, int32_t value, int32_t max, PixMap* pixMa
     //      DrawNateRect( *pixMap, &tRect, gNatePortLeft << 2, gNatePortTop, color);
             DrawNateShadedRect(pixMap, &tRect, &clipRect, gNatePortLeft << 2L, gNatePortTop, color, lightColor, darkColor);
         }
-        SetRect( &rrect, tRect.left, globals()->gBarIndicator[ which].top,
+        rrect = Rect(tRect.left, globals()->gBarIndicator[ which].top,
             tRect.right, globals()->gBarIndicator[ which].top + kBarIndicatorHeight);
         CopyRealWorldToOffWorld(&rrect);
 

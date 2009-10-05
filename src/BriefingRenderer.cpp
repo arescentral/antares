@@ -126,7 +126,7 @@ Boolean BriefingSprite_IsLocationLegal( spritePix *sprite, long scale,
     long    i, j;
 
     SpriteBounds_Get( sprite, where, scale, &spriteBounds);
-    OffsetRect( &spriteBounds, -bounds->left, -bounds->top);
+    spriteBounds.offset(-bounds->left, -bounds->top);
     spriteBounds.left /= kBriefing_Grid_Size;
     spriteBounds.right /= kBriefing_Grid_Size;
     spriteBounds.top /= kBriefing_Grid_Size;
@@ -155,7 +155,7 @@ void BriefingSprite_UseLocation( spritePix *sprite, long scale,
     long    i, j;
 
     SpriteBounds_Get( sprite, where, scale, &spriteBounds);
-    OffsetRect( &spriteBounds, -bounds->left, -bounds->top);
+    spriteBounds.offset(-bounds->left, -bounds->top);
     spriteBounds.left /= kBriefing_Grid_Size;
     spriteBounds.right /= kBriefing_Grid_Size;
     spriteBounds.top /= kBriefing_Grid_Size;

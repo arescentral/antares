@@ -217,7 +217,7 @@ void DrawEntireInterface( void)
     Rect                tRect;
 
     DrawInOffWorld();
-    MacSetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    tRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     SetTranslateColorFore( BLACK);
     PaintRect( &tRect);
 
@@ -274,7 +274,7 @@ void DrawAllItemsOfKind( interfaceKindType kind, Boolean sound, Boolean clearFir
     Rect                tRect;
 
     DrawInOffWorld();
-    MacSetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    tRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     SetTranslateColorFore( BLACK);
     if ( clearFirst)
         PaintRect( &tRect);
@@ -358,7 +358,7 @@ void CenterItemRangeInRect( Rect *destRect, long from, long to)
 {
     long                number, count, hoffset, voffset;
     interfaceItemType   *item;
-    Rect            itemsBounds = { 0x7fffffff, 0x7fffffff, 0, 0};
+    Rect            itemsBounds(0x7fffffff, 0x7fffffff, 0, 0);
 
     number = to - from;//GetHandleSize( gInterfaceItemData) / sizeof( interfaceItemType);
     item = *gInterfaceItemData + from;
@@ -481,8 +481,7 @@ short PtInInterfaceItem( Point where)
     {
         GetAnyInterfaceItemGraphicBounds( item, &tRect);
 
-        if ( MacPtInRect( where, &tRect))
-        {
+        if (tRect.contains(where)) {
             if (( item->kind != kTabBox) && ( item->kind != kPictureRect))
             {
                 return( count);
@@ -510,8 +509,7 @@ short InterfaceMouseDown( Point where)
 //      LongRectToRect( &(item->bounds), &tRect);
         GetAnyInterfaceItemGraphicBounds( item, &tRect);
 
-        if ( MacPtInRect( where, &tRect))
-        {
+        if (tRect.contains(where)) {
             switch ( item->kind)
             {
                 case kPlainButton:
@@ -710,8 +708,7 @@ Boolean InterfaceButtonHit( interfaceItemType *button)
     while ( Button())
     {
         GetMouse( &where);
-        if ( MacPtInRect( where, &tRect))
-        {
+        if (tRect.contains(where)) {
             if ( button->item.plainButton.status != kIH_Hilite)
             {
                 mPlayButtonDown;
@@ -733,7 +730,7 @@ Boolean InterfaceButtonHit( interfaceItemType *button)
         button->item.plainButton.status = kActive;
         DrawAnyInterfaceItemOffToOn( button);
     }
-    return( MacPtInRect( where, &tRect));
+    return tRect.contains(where);
 }
 
 Boolean InterfaceCheckboxHit( interfaceItemType *button)
@@ -750,8 +747,7 @@ Boolean InterfaceCheckboxHit( interfaceItemType *button)
     do
     {
         GetMouse( &where);
-        if ( MacPtInRect( where, &tRect))
-        {
+        if (tRect.contains(where)) {
             if ( button->item.checkboxButton.status != kIH_Hilite)
             {
                 mPlayButtonDown;
@@ -772,8 +768,7 @@ Boolean InterfaceCheckboxHit( interfaceItemType *button)
         button->item.checkboxButton.status = kActive;
     }
     GetMouse( &where);
-    if ( MacPtInRect( where, &tRect))
-    {
+    if (tRect.contains(where)) {
         if ( button->item.checkboxButton.on)
             button->item.checkboxButton.on = FALSE;
         else button->item.checkboxButton.on = TRUE;
@@ -803,8 +798,7 @@ Boolean InterfaceRadioButtonHit( interfaceItemType *button)
     do
     {
         GetMouse( &where);
-        if ( MacPtInRect( where, &tRect))
-        {
+        if (tRect.contains(where)) {
             if ( button->item.radioButton.status != kIH_Hilite)
             {
                 mPlayButtonDown;
@@ -844,8 +838,7 @@ Boolean InterfaceTabBoxButtonHit( interfaceItemType *button)
     do
     {
         GetMouse( &where);
-        if ( MacPtInRect( where, &tRect))
-        {
+        if (tRect.contains(where)) {
             if ( button->item.radioButton.status != kIH_Hilite)
             {
                 mPlayButtonDown;

@@ -191,7 +191,7 @@ void DrawSpriteCursorSprite( Rect *clipRect)
     if ((gSpriteCursor->sprite.table.get() != nil) &&
         ( gSpriteCursor->showLevel >= kSpriteCursorVisible))
     {
-        MacSetRect( &tRect, gSpriteCursor->where.h - 16, gSpriteCursor->where.v - 16,
+        tRect = Rect(gSpriteCursor->where.h - 16, gSpriteCursor->where.v - 16,
             gSpriteCursor->where.h + 16, gSpriteCursor->where.v + 16);
         ChunkCopyPixMapToPixMap( gOffWorld, &tRect, gSaveWorld);
     }

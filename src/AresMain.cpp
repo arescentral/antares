@@ -672,7 +672,7 @@ GameResult PlayTheGame(long *seconds) {
     SetSpriteCursorTable(500);
     ShowSpriteCursor(true);
     ResetHintLine();
-    MacSetRect(&playAreaRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
+    playAreaRect = Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
 
     globals()->gLastKeys = globals()->gTheseKeys = 0;
 

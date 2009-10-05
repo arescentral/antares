@@ -1389,7 +1389,7 @@ void MessageLabel_Set_Special(short id, TypedHandle<unsigned char> text) {
     unsigned char    whichType, *c;
     long    value = 0, charNum = 0, textLength, safetyCount;
     Str255  s;
-    Point   attachPoint = {0, 0};
+    Point   attachPoint;
     Boolean hintLine = false;
 
     s[0] = 0;

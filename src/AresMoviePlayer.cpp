@@ -123,7 +123,7 @@ void PlayMovieByName(const unsigned char* filePath, WindowPtr aWindow, Boolean d
                 movieBox.right *= 2;
                 movieBox.bottom *= 2;
             }
-            MacOffsetRect (&movieBox,
+            movieBox.offset(
                 ((aWindow->portRect.right - aWindow->portRect.left) / 2) -
                 ((movieBox.right - movieBox.left) / 2),
                 ((aWindow->portRect.bottom - aWindow->portRect.top) / 2) -
@@ -217,7 +217,7 @@ OSErr LoadMiniMovie(unsigned char* filePath, Movie *aMovie, Rect *destRect, Wind
             offV = ((destRect->bottom - destRect->top) / 2) -
                 ((movieBox.bottom - movieBox.top) / 2) + destRect->top;
 
-            MacOffsetRect (&movieBox, offH, offV);
+            movieBox.offset(offH, offV);
 
             ClearScreen();
 

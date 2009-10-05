@@ -29,8 +29,7 @@ void TestingVideoDriver::send_event(EventRecord) { }
 bool TestingVideoDriver::button() { return false; }
 
 Point TestingVideoDriver::get_mouse() {
-    Point result = { 240, 320 };
-    return result;
+    return Point(320, 240);
 }
 
 void TestingVideoDriver::get_keys(KeyMap keys) { bzero(keys, sizeof(KeyMap)); }

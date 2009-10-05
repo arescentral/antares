@@ -34,6 +34,7 @@ Main Antares : src/Admiral.cpp
                src/FakeSounds.cpp
                src/Fakes.cpp
                src/File.cpp
+               src/Geometry.cpp
                #src/Icl8ToCicn.cpp
                #src/IconSuiteFromAlias.cpp
                src/InputSource.cpp

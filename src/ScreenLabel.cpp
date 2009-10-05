@@ -71,7 +71,7 @@ void ResetAllLabels( void)
 
     for ( i = 0; i < kMaxLabelNum; i++)
     {
-        MacSetRect( &(label->thisRect), 0, 0, -1, -1);
+        label->thisRect = Rect(0, 0, -1, -1);
         label->lastRect = label->thisRect;
         label->label[0] = 0;
         label->active = FALSE;
@@ -186,7 +186,7 @@ void RemoveScreenLabel( long which)
 
     label = *globals()->gScreenLabelData + which;
 
-    MacSetRect( &(label->thisRect), 0, 0, -1, -1);
+    label->thisRect = Rect(0, 0, -1, -1);
     label->lastRect = label->thisRect;
     label->label[0] = 0;
     label->active = FALSE;

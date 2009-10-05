@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <sys/time.h>
 #include <Stub.h>
+#include "Geometry.hpp"
 #include "SmartPtr.hpp"
 
 #define pascal
@@ -76,28 +77,6 @@ enum {
     TRUE = true,
     FALSE = false,
 };
-
-typedef struct {
-    int v;
-    int h;
-} Point;
-
-class BinaryReader;
-struct Rect {
-    int32_t left;
-    int32_t top;
-    int32_t right;
-    int32_t bottom;
-
-    void read(BinaryReader* bin);
-};
-
-void SetRect(Rect*, int, int, int, int);
-void MacSetRect(Rect*, int, int, int, int);
-void OffsetRect(Rect*, int, int);
-void MacOffsetRect(Rect*, int, int);
-bool MacPtInRect(Point, Rect*);
-void MacInsetRect(Rect*, int, int);
 
 ////////////////////////////
 

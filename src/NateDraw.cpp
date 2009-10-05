@@ -37,13 +37,6 @@ void longPointType::read(BinaryReader* bin) {
     bin->read(&v);
 }
 
-void Rect::read(BinaryReader* bin) {
-    bin->read(&left);
-    bin->read(&top);
-    bin->read(&right);
-    bin->read(&bottom);
-}
-
 inline void mHBlitz(unsigned char*& mdbyte, long mrunLen, long mcolor, long& mcount) {
     mcount = mrunLen;
     while ( mcount-- > 0)
@@ -149,13 +142,7 @@ inline void mDashVerticalRun(
 namespace {
 
 Rect from_origin(const Rect& r) {
-    Rect result = {
-        0,
-        0,
-        r.right - r.left,
-        r.bottom - r.top,
-    };
-    return result;
+    return Rect(0, 0, r.width(), r.height());
 }
 
 bool intersects(const Rect& contained, const Rect& container) {

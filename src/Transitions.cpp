@@ -401,7 +401,7 @@ Boolean CustomPictFade( long fadeSpeed, long holdTime, short pictID, short clutI
 
     pictRect = thePict->frame();
 
-    MacOffsetRect (&pictRect, ((aWindow->portRect.right - aWindow->portRect.left) / 2) -
+    pictRect.offset(((aWindow->portRect.right - aWindow->portRect.left) / 2) -
         ((pictRect.right - pictRect.left) / 2),
         ((aWindow->portRect.bottom - aWindow->portRect.top) / 2) -
         ((pictRect.bottom - pictRect.top) / 2));
@@ -446,7 +446,7 @@ bool StartCustomPictFade(long fadeSpeed, long holdTime, short pictID, short clut
 
     pictRect = thePict->frame();
 
-    MacOffsetRect (&pictRect, ((aWindow->portRect.right - aWindow->portRect.left) / 2) -
+    pictRect.offset(((aWindow->portRect.right - aWindow->portRect.left) / 2) -
         ((pictRect.right - pictRect.left) / 2),
         ((aWindow->portRect.bottom - aWindow->portRect.top) / 2) -
         ((pictRect.bottom - pictRect.top) / 2));

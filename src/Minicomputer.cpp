@@ -630,10 +630,10 @@ void ShowWholeMiniScreen( void)
 {
     Rect                tRect;
 
-    MacSetRect( &tRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+    tRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
                 kMiniScreenBottom + globals()->gInstrumentTop);
     ChunkCopyPixMapToScreenPixMap(gOffWorld, &tRect, gActiveWorld);
-    MacSetRect( &tRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+    tRect = Rect(kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
                 kButBoxBottom + globals()->gInstrumentTop);
     ChunkCopyPixMapToScreenPixMap(gOffWorld, &tRect, gActiveWorld);
 }
@@ -649,7 +649,7 @@ void MakeMiniScreenFromIndString( short whichString)
 
     mSetDirectFont( kComputerFontNum);
 
-    MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+    mRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
                 kMiniScreenBottom + globals()->gInstrumentTop);
     ClearMiniScreenLines();
     globals()->gMiniScreenData.currentScreen = whichString;
@@ -681,7 +681,7 @@ void MakeMiniScreenFromIndString( short whichString)
                     lineNum++;
                     if ( lineNum == kMiniScreenCharHeight)
                     {
-                        MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+                        mRect = Rect(kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
                                     kButBoxBottom + globals()->gInstrumentTop);
                     }
 
@@ -744,7 +744,7 @@ void MakeMiniScreenFromIndString( short whichString)
                             lineNum++;
                             if ( lineNum == kMiniScreenCharHeight)
                             {
-                                MacSetRect( &mRect, kButBoxLeft,
+                                mRect = Rect(kButBoxLeft,
                                     kButBoxTop + globals()->gInstrumentTop,
                                     kButBoxRight,
                                     kButBoxBottom + globals()->gInstrumentTop);
@@ -792,7 +792,7 @@ void MakeMiniScreenFromIndString( short whichString)
                             lineNum++;
                             if ( lineNum == kMiniScreenCharHeight)
                             {
-                                MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+                                mRect = Rect(kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
                                             kButBoxBottom + globals()->gInstrumentTop);
                             }
 
@@ -815,7 +815,7 @@ void MakeMiniScreenFromIndString( short whichString)
                         lineNum++;
                         if ( lineNum == kMiniScreenCharHeight)
                         {
-                            MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+                            mRect = Rect(kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
                                         kButBoxBottom + globals()->gInstrumentTop);
                         }
 
@@ -840,7 +840,7 @@ void MakeMiniScreenFromIndString( short whichString)
                 lineNum++;
                 if ( lineNum == kMiniScreenCharHeight)
                 {
-                    MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+                    mRect = Rect(kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
                                 kButBoxBottom + globals()->gInstrumentTop);
                 }
 
@@ -904,11 +904,11 @@ void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)
 
         if ( count < kMiniScreenCharHeight)
         {
-            MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+            mRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
                         kMiniScreenBottom + globals()->gInstrumentTop);
         } else
         {
-            MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+            mRect = Rect(kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
                         kButBoxBottom + globals()->gInstrumentTop);
         }
 
@@ -948,11 +948,11 @@ void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)
 
         if ( globals()->gMiniScreenData.selectLine < kMiniScreenCharHeight)
         {
-            MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+            mRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
                         kMiniScreenBottom + globals()->gInstrumentTop);
         } else
         {
-            MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+            mRect = Rect(kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
                         kButBoxBottom + globals()->gInstrumentTop);
         }
 
@@ -984,11 +984,11 @@ void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)
 
         if ( globals()->gMiniScreenData.selectLine < kMiniScreenCharHeight)
         {
-            MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+            mRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
                         kMiniScreenBottom + globals()->gInstrumentTop);
         } else
         {
-            MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+            mRect = Rect(kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
                         kButBoxBottom + globals()->gInstrumentTop);
         }
 
@@ -1169,7 +1169,7 @@ void UpdateMiniScreenLines( void)
     long                lineNum, count;
     Rect                mRect;
 
-    MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+    mRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
                         kMiniScreenBottom + globals()->gInstrumentTop);
     switch( globals()->gMiniScreenData.currentScreen)
     {
@@ -2213,7 +2213,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
     short               namelen, linelen;
     Rect                mRect;
 
-    MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+    mRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
                 kMiniScreenBottom + globals()->gInstrumentTop);
 
     globals()->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
@@ -2631,12 +2631,11 @@ void MiniComputerHandleClick( Point where)
         line++;
     }
 
-    MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+    mRect = Rect(kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
                 kButBoxBottom + globals()->gInstrumentTop);
 
     // if click is in button screen
-    if ( MacPtInRect( where, &mRect))
-    {
+    if (mRect.contains(where)) {
         lineNum = (( where.v - ( kButBoxTop + globals()->gInstrumentTop)) / gDirectText->height) + kMiniScreenCharHeight;
         globals()->gMiniScreenData.clickLine = lineNum;
         line = *globals()->gMiniScreenData.lineData + lineNum;
@@ -2699,12 +2698,11 @@ void MiniComputerHandleClick( Point where)
             }
         }
 
-        MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+        mRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
                 kMiniScreenBottom + globals()->gInstrumentTop);
 
         // if click is in main menu screen
-        if ( MacPtInRect( where, &mRect))
-        {
+        if (mRect.contains(where)) {
             if ( globals()->gMiniScreenData.selectLine !=
                 kMiniScreenNoLineSelected)
             {
@@ -2749,12 +2747,11 @@ void MiniComputerHandleDoubleClick( Point where)
         line++;
     }
 
-    MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+    mRect = Rect(kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
                 kButBoxBottom + globals()->gInstrumentTop);
 
     // if click is in button screen
-    if ( MacPtInRect( where, &mRect))
-    {
+    if (mRect.contains(where)) {
         lineNum = (( where.v - ( kButBoxTop + globals()->gInstrumentTop)) / gDirectText->height) + kMiniScreenCharHeight;
         line = *globals()->gMiniScreenData.lineData + lineNum;
         if ( line->whichButton == kInLineButton)
@@ -2815,12 +2812,11 @@ void MiniComputerHandleDoubleClick( Point where)
             }
         }
 
-        MacSetRect( &mRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+        mRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
                 kMiniScreenBottom + globals()->gInstrumentTop);
 
         // if click is in main menu screen
-        if ( MacPtInRect( where, &mRect))
-        {
+        if (mRect.contains(where)) {
             lineNum = mGetLineNumFromV( where.v);
             if ( lineNum == globals()->gMiniScreenData.selectLine)
             {
@@ -2870,12 +2866,11 @@ void MiniComputerHandleMouseUp( Point where)
         line++;
     }
 
-    MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+    mRect = Rect(kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
                 kButBoxBottom + globals()->gInstrumentTop);
 
     // if click is in button screen
-    if ( MacPtInRect( where, &mRect))
-    {
+    if (mRect.contains(where)) {
         lineNum = (( where.v - ( kButBoxTop + globals()->gInstrumentTop)) / gDirectText->height) + kMiniScreenCharHeight;
         line = *globals()->gMiniScreenData.lineData + lineNum;
         if ( line->whichButton == kInLineButton)
@@ -2916,12 +2911,11 @@ void MiniComputerHandleMouseStillDown( Point where)
         line++;
     }
 
-    MacSetRect( &mRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+    mRect = Rect(kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
                 kButBoxBottom + globals()->gInstrumentTop);
 
     // if click is in button screen
-    if ( MacPtInRect( where, &mRect))
-    {
+    if (mRect.contains(where)) {
         lineNum = (( where.v - ( kButBoxTop + globals()->gInstrumentTop)) / gDirectText->height) + kMiniScreenCharHeight;
         line = *globals()->gMiniScreenData.lineData + lineNum;
         if (( line->whichButton == kInLineButton) &&

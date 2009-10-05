@@ -539,7 +539,7 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
         mGetDirectStringDimensions(string, width, height);
 
         mCopyAnyRect( clipRect, *contentRect);
-        MacSetRect( &tRect, 0, 0, width, height);
+        tRect = Rect(0, 0, width, height);
         CenterRectInRect( &tRect, contentRect);
 
         mGetTranslateColorShade( kLoadingScreenColor, LIGHTER, color, transColor);
@@ -558,17 +558,17 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
         temp = (value * width);
         temp /= total;
 
-        MacSetRect( &tRect, contentRect->left, contentRect->top, contentRect->left + temp, contentRect->bottom);
+        tRect = Rect(contentRect->left, contentRect->top, contentRect->left + temp, contentRect->bottom);
         SetTranslateColorShadeFore( kLoadingScreenColor, LIGHT);
         PaintRect( &tRect);
 
-        MacSetRect( &tRect, contentRect->left + temp, contentRect->top, contentRect->right, contentRect->bottom);
+        tRect = Rect(contentRect->left + temp, contentRect->top, contentRect->right, contentRect->bottom);
         SetTranslateColorShadeFore( kLoadingScreenColor, DARK);
         PaintRect( &tRect);
         NormalizeColors();
         DrawInRealWorld();
         NormalizeColors();
-        MacSetRect( &tRect, contentRect->left, contentRect->top, contentRect->right, contentRect->bottom);
+        tRect = Rect(contentRect->left, contentRect->top, contentRect->right, contentRect->bottom);
         CopyOffWorldToRealWorld(&tRect);
         if ( tRect.left >= tRect.right - 2) AutoFadeTo( 10, &fadeColor, FALSE);
     }
@@ -593,7 +593,7 @@ PlayAgainResult DoPlayAgain(Boolean allowResume, Boolean allowSkip) {
     else error = OpenInterface( kPlayAgainID);
     if ( error == kNoError)
     {
-        MacSetRect( &tRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
+        tRect = Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
         CenterAllItemsInRect( &tRect);
         item = GetAnyInterfaceItemPtr( kPlayAgainBox);
         DrawInOffWorld();
@@ -708,7 +708,7 @@ void DoNetSettings( void)
     OpenInterface( kNetSettingsID);
     if ( error == kNoError)
     {
-        MacSetRect( &tRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
+        tRect = Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
         CenterAllItemsInRect( &tRect);
         item = GetAnyInterfaceItemPtr( kNetSettingsBox);
         DrawInOffWorld();
@@ -897,7 +897,7 @@ void DoHelpScreen( void)
         error = OpenInterface( kHelpScreenID);
     if ( error == kNoError)
     {
-        MacSetRect( &tRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, globals()->gTrueClipBottom);
+        tRect = Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, globals()->gTrueClipBottom);
         CenterAllItemsInRect( &tRect);
         item = GetAnyInterfaceItemPtr( kHelpScreenBox);
         DrawInOffWorld();
@@ -1027,9 +1027,9 @@ void StartPauseIndicator(unsigned char* pauseString, unsigned char hue) {
 #pragma unused( hue)
     mSetDirectFont( kTitleFontNum);
     mGetDirectStringDimensions(pauseString, width, height);
-    MacSetRect( &tRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, globals()->gTrueClipBottom);
+    tRect = Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, globals()->gTrueClipBottom);
 
-    MacSetRect( &stringRect, 0, 0, width, height);
+    stringRect = Rect(0, 0, width, height);
     CenterRectInRect( &stringRect, &tRect);
     mCopyAnyRect( tRect, stringRect);
     tRect.left -= 4;
@@ -1071,9 +1071,9 @@ void StopPauseIndicator(unsigned char* pauseString) {
 
     mSetDirectFont( kTitleFontNum);
     mGetDirectStringDimensions(pauseString, width, height);
-    MacSetRect( &tRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, globals()->gTrueClipBottom);
+    tRect = Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, globals()->gTrueClipBottom);
 
-    MacSetRect( &stringRect, 0, 0, width, height);
+    stringRect = Rect(0, 0, width, height);
     CenterRectInRect( &stringRect, &tRect);
     stringRect.left -= 4;
     stringRect.top -= 4;
@@ -1333,7 +1333,7 @@ void DrawOptionVolumeLevel( Rect *bounds, long level)
 
     DrawInOffWorld();
 
-    MacSetRect( &tRect, notchBounds.left, notchBounds.top,
+    tRect = Rect(notchBounds.left, notchBounds.top,
           notchBounds.left + notchWidth - 2,
         notchBounds.bottom);
 
@@ -1342,7 +1342,7 @@ void DrawOptionVolumeLevel( Rect *bounds, long level)
     {
         SetTranslateColorShadeFore( kOptionVolumeColor, shade);
         graphicRect = tRect;
-        MacInsetRect( &graphicRect, 2, 6);
+        graphicRect.inset(2, 6);
         CenterRectInRect( &graphicRect, &tRect);
         PaintRect( &graphicRect);
         tRect.left += notchWidth;
@@ -1354,7 +1354,7 @@ void DrawOptionVolumeLevel( Rect *bounds, long level)
     for ( count = level; count < ( kMaxVolumePreference); count++)
     {
         graphicRect = tRect;
-        MacInsetRect( &graphicRect, 2, 6);
+        graphicRect.inset(2, 6);
         CenterRectInRect( &graphicRect, &tRect);
         PaintRect( &graphicRect);
         tRect.left += notchWidth;
@@ -2094,7 +2094,7 @@ void BlackenWindow( void)
 {
     Rect    tRect;
 
-    MacSetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    tRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     DrawInSaveWorld();
     DefaultColors();
     PaintRect( &tRect);
@@ -2111,7 +2111,7 @@ void BlackenOffscreen( void)
 {
     Rect    tRect;
 
-    MacSetRect( &tRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    tRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     DrawInSaveWorld();
     DefaultColors();
     PaintRect( &tRect);
@@ -2163,7 +2163,7 @@ long DoSelectLevelInterface( long startChapter)
     BlackenWindow();
     FlushEvents(everyEvent, 0);
     error = OpenInterface( kSelectLevelID);
-    MacSetRect( &totalRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    totalRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     if ( error == kNoError)
     {
 //      DrawEntireInterface();
@@ -2405,7 +2405,7 @@ Boolean DoMissionInterface( long whichScenario)
 
     error = OpenInterface( kMissionBriefingScreenID);
 //  HHCheckAllHandles();
-    MacSetRect( &totalRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    totalRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
 
     if ( error == kNoError)
@@ -2507,9 +2507,8 @@ Boolean DoMissionInterface( long whichScenario)
                         GlobalToLocal( &where);
                         for ( i = 0; i < kMaxInlinePictNum; i++)
                         {
-                            if (( inlinePict[i].id >= 0) &&
-                                ( MacPtInRect( where, &(inlinePict[i].bounds))))
-                            {
+                            if ((inlinePict[i].id >= 0) &&
+                                    inlinePict[i].bounds.contains(where)) {
                                 ShowObjectData( where, inlinePict[i].id, &mapRect);
                             }
                         }
@@ -2934,18 +2933,18 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
 
             if ( dataRect.left < clipRect->left)
             {
-                MacOffsetRect( &dataRect, clipRect->left - dataRect.left + 1, 0);
+                dataRect.offset(clipRect->left - dataRect.left + 1, 0);
             } else if ( dataRect.right > clipRect->right)
             {
-                MacOffsetRect( &dataRect, clipRect->right - dataRect.right - 1, 0);
+                dataRect.offset(clipRect->right - dataRect.right - 1, 0);
             }
 
             if ( dataRect.top < clipRect->top)
             {
-                MacOffsetRect( &dataRect, 0, clipRect->top - dataRect.top + 1);
+                dataRect.offset(0, clipRect->top - dataRect.top + 1);
             } else if ( dataRect.bottom > clipRect->bottom)
             {
-                MacOffsetRect( &dataRect, 0, clipRect->bottom - dataRect.bottom - 1);
+                dataRect.offset(0, clipRect->bottom - dataRect.bottom - 1);
             }
             retroTextSpec.xpos = dataRect.left;
             retroTextSpec.ypos = dataRect.top + mDirectFontAscent();
@@ -2958,7 +2957,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
             RectToLongRect( &dataRect, &lRect);
             DrawInRealWorld();
             NormalizeColors();
-            MacInsetRect( &dataRect, -8, -4);
+            dataRect.inset(-8, -4);
             PaintRect( &dataRect);
             SetTranslateColorShadeFore( GREEN, VERY_LIGHT);
             MacFrameRect( &dataRect);
@@ -3400,8 +3399,8 @@ void DoMissionDebriefingText(long textID, long yourlength, long parlength,
     Boolean             doScore = (parScore >= 0);
     interfaceItemType       dataItem;
 
-    MacSetRect( &tRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
-    MacSetRect( &iRect, 0, 0, kDebriefTextWidth, 1);
+    tRect = Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
+    iRect = Rect(0, 0, kDebriefTextWidth, 1);
 
     dataItem.style = kLarge;
     textData.load_resource('TEXT', textID);
@@ -3689,13 +3688,12 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                                 if (bgPict.get() != nil) {
                                     Rect bgRect = bgPict->frame();
 
-                                    OffsetRect( &bgRect, -bgRect.left, -bgRect.top);
-                                    OffsetRect( &bgRect, scrollRect.left,
-                                        pictSourceRect.top - bgVOffset);
+                                    bgRect.offset(-bgRect.left, -bgRect.top);
+                                    bgRect.offset(scrollRect.left, pictSourceRect.top - bgVOffset);
                                     do
                                     {
                                         bgPict->draw(bgRect);
-                                        MacOffsetRect( &bgRect, 0, kBackground_Height);
+                                        bgRect.offset(0, kBackground_Height);
                                     } while ( bgRect.top < gSaveWorld->bounds.bottom);
                                 }
                             thePict->draw(pictSourceRect);
@@ -3718,7 +3716,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
 
                                 LongRectToRect( &scrollRect, &tRect);
                                 uRect = tRect;
-                                MacOffsetRect( &uRect, 0, -1);
+                                uRect.offset(0, -1);
                                 LongRectToRect( &boundsRect, &vRect);
 
 
@@ -3767,7 +3765,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                                     if ( AnyEvent()) abort = true;
                                 }
 
-                                MacOffsetRect( &pictSourceRect, 0, (mDirectFontHeight() + kScrollTextLineBuffer));
+                                pictSourceRect.offset(0, (mDirectFontHeight() + kScrollTextLineBuffer));
                             }
                             thePict.reset();
 //                          if ( ResError() != noErr) Debugger();
@@ -3780,12 +3778,12 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                         wasPicture = false;
                         DrawInSaveWorld();
                         if (bgPict.get() != nil) {
-                            OffsetRect( &bgRect, -bgRect.left, -bgRect.top);
-                            OffsetRect( &bgRect, scrollRect.left, 0);
+                            bgRect.offset(-bgRect.left, -bgRect.top);
+                            bgRect.offset(scrollRect.left, 0);
                             do
                             {
                                 bgPict->draw(bgRect);
-                                MacOffsetRect( &bgRect, 0, kBackground_Height);
+                                bgRect.offset(0, kBackground_Height);
                             }  while ( bgRect.top < gSaveWorld->bounds.bottom);
                         } else
                         {
@@ -3803,8 +3801,8 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                         DrawInOffWorld();
                         mCopyAnyRect( bgRect, textRect);
                         mCopyAnyRect( stRect, textRect);
-                        OffsetRect( &bgRect, 0, -bgRect.top);
-                        OffsetRect( &bgRect, 0, bgVOffset);
+                        bgRect.offset(0, -bgRect.top);
+                        bgRect.offset(0, bgVOffset);
                         // if source bg pict is partially offscreen
                         if ( bgRect.bottom > gSaveWorld->bounds.bottom)
                         {
@@ -3834,7 +3832,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                         textRect.right += kScrollText_Buffer;
                         LongRectToRect( &scrollRect, &tRect);
                         uRect = tRect;
-                        MacOffsetRect( &uRect, 0, -1);
+                        uRect.offset(0, -1);
 
                         bgVOffset++;
                         if ( bgVOffset >= kBackground_Height) bgVOffset = 0;

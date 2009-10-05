@@ -53,8 +53,8 @@ public:
 
 }  // namespace
 
-PixMap::PixMap(int width, int height) {
-    SetRect(&bounds, 0, 0, width, height);
+PixMap::PixMap(int width, int height)
+        : bounds(0, 0, width, height) {
     rowBytes = width | 0x8000;
     baseAddr = new unsigned char[width * height];
     pixelSize = 1;
@@ -66,9 +66,8 @@ PixMap::~PixMap() {
 }
 
 Window::Window(int width, int height)
-        : portBits(width, height) {
-    SetRect(&portRect, 0, 0, width, height);
-}
+        : portRect(0, 0, width, height),
+          portBits(width, height) { }
 
 Window::~Window() { }
 
@@ -98,28 +97,6 @@ void DumpTo(const std::string& path) {
     close(fd);
 }
 
-void SetRect(Rect* rect, int left, int top, int right, int bottom) {
-    rect->left = left;
-    rect->top = top;
-    rect->right = right;
-    rect->bottom = bottom;
-}
-
-void MacSetRect(Rect* rect, int left, int top, int right, int bottom) {
-    SetRect(rect, left, top, right, bottom);
-}
-
-void OffsetRect(Rect* rect, int x, int y) {
-    rect->left += x;
-    rect->right += x;
-    rect->top += y;
-    rect->bottom += y;
-}
-
-void MacOffsetRect(Rect* rect, int x, int y) {
-    OffsetRect(rect, x, y);
-}
-
 void ScrollRect(Rect* rect, int x, int y, Rect clip) {
     assert(x == 0 && y == -1);
     int rowBytes = gActiveWorld->rowBytes & 0x7fff;
@@ -127,18 +104,6 @@ void ScrollRect(Rect* rect, int x, int y, Rect clip) {
         uint8_t* base = gActiveWorld->baseAddr + i * rowBytes + rect->left;
         memcpy(base, base + rowBytes, rect->right - rect->left);
     }
-}
-
-bool MacPtInRect(Point p, Rect* rect) {
-    return (rect->left <= p.h && p.h <= rect->right)
-        && (rect->top <= p.v && p.v <= rect->bottom);
-}
-
-void MacInsetRect(Rect* rect, int x, int y) {
-    rect->left += x;
-    rect->right -= x;
-    rect->top += y;
-    rect->bottom -= y;
 }
 
 Window* NewWindow(
@@ -205,11 +170,6 @@ void ClearScreen() {
     memset(gActiveWorld->baseAddr, 0xFF, width * height);
 }
 
-Point MakePoint(int x, int y) {
-    Point result = { x, y };
-    return result;
-}
-
 void CopyBits(PixMap* source, PixMap* dest, Rect* source_rect, Rect* dest_rect, int mode, void*) {
     static_cast<void>(mode);
     if (source == dest) {
@@ -236,13 +196,11 @@ void CopyBits(PixMap* source, PixMap* dest, Rect* source_rect, Rect* dest_rect, 
 }
 
 Rect ClipRectToRect(const Rect& src, const Rect& clip) {
-    Rect result = {
+    return Rect(
         std::max(src.left, clip.left),
         std::max(src.top, clip.top),
         std::min(src.right, clip.right),
-        std::min(src.bottom, clip.bottom),
-    };
-    return result;
+        std::min(src.bottom, clip.bottom));
 }
 
 int currentForeColor;
@@ -317,7 +275,7 @@ void Index2Color(long index, RGBColor* color) {
     color->blue = fakeWindow->portBits.colors->color(index).blue;
 }
 
-Point currentPen = { 0, 0 };
+Point currentPen;
 
 void MoveTo(int x, int y) {
     currentPen.h = x;
