@@ -643,8 +643,7 @@ void MainLoop() {
             break;
 
           case kMainOptions:
-          case kNullResult:
-            // These options are already handled by DoMainScreenInterface().
+            DoOptionsInterface();
             break;
         }
     }

@@ -33,7 +33,6 @@ enum mainScreenResultType {
     kMainDemo = 6,
     kMainTimeoutDemo = 7,
     kMainTrain = 8,
-    kNullResult = 0
 };
 
 enum netResultType {

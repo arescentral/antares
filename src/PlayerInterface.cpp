@@ -391,43 +391,30 @@ mainScreenResultType DoMainScreenInterface() {
         }
 
         switch (whichItem) {
-        case kMainQuitButton:
+          case kMainQuitButton:
             return kMainQuit;
 
-        case kMainDemoButton:
+          case kMainDemoButton:
             if (timeout) {
                 return kMainTimeoutDemo;
             } else {
                 return kMainDemo;
             }
 
-        case kMainTrainButton:
+          case kMainTrainButton:
             return kMainTrain;
 
-        case kMainPlayButton:
+          case kMainPlayButton:
             return kMainPlay;
 
-        case kMainNetworkButton:
+          case kMainNetworkButton:
             return kMainNetwork;
 
-        case kMainAboutButton:
+          case kMainAboutButton:
             return kMainAbout;
 
-        case kMainOptionsButton:
-            CloseInterface();
-            DoOptionsInterface();
-
-            OpenInterface( kMainScreenResID);
-            if (!(globals()->gOptions & kOptionNetworkAvailable)) {
-                SetStatusOfAnyInterfaceItem( kMainNetworkButton, kDimmed, false);
-            }
-            if (globals()->gOptions & kOptionNoSinglePlayer) {
-                SetStatusOfAnyInterfaceItem( kMainPlayButton, kDimmed, false);
-            }
-
-            DrawEntireInterface();
-            startDemoTime = TickCount();
-            break;
+          case kMainOptionsButton:
+            return kMainOptions;
         }
     }
 }
