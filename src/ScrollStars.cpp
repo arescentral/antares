@@ -138,7 +138,7 @@ void ResetScrollStars ( long which)
 }
 
 void MakeNewSparks( long sparkNum, long sparkSpeed, smallFixedType maxVelocity,
-                    unsigned char color, longPointType *location)
+                    unsigned char color, Point* location)
 
 {
     long            i, whichSpark = kSparkStarOffset;

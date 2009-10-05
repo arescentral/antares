@@ -68,7 +68,7 @@
 
 struct adjacentUnitType {
     long                    adjacentUnit;           // the normal adjacent unit
-    longPointType           superOffset;            // the offset of the super unit (for wrap-around)
+    Point                   superOffset;            // the offset of the super unit (for wrap-around)
 };
 
 struct proximityUnitType {
@@ -82,13 +82,13 @@ extern long             gAbsoluteScale, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BO
                         gPlayScreenWidth, gPlayScreenHeight, gRootObjectNumber;
 extern spaceObjectType  *gScrollStarObject, *gRootObject;
 
-static longPointType    cAdjacentUnits[] = {
-                                            { 0, 0 },
-                                            { 1, 0 },
-                                            { -1, 1 },
-                                            { 0, 1},
-                                            { 1, 1}
-                                            };
+static Point            cAdjacentUnits[] = {
+    Point(0, 0),
+    Point(1, 0),
+    Point(-1, 1),
+    Point(0, 1),
+    Point(1, 1)
+};
 
 coordPointType          gGlobalCorner;
 

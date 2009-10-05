@@ -543,7 +543,7 @@ struct beamType {
     long                toObjectNumber;
     long                toObjectID;
     spaceObjectTypePtr  toObject;
-    longPointType       toRelativeCoord;
+    Point               toRelativeCoord;
     unsigned long       boltRandomSeed;
     unsigned long       lastBoldRandomSeed;
     long                boltCycleTime;
@@ -734,9 +734,9 @@ struct spaceObjectType {
     coordPointType          lastLocation;
     long                    lastDir;
     spaceObjectTypePtr      collideObject;
-    longPointType           collisionGrid;
+    Point                   collisionGrid;
     spaceObjectTypePtr      nextNearObject;
-    longPointType           distanceGrid;
+    Point                   distanceGrid;
     spaceObjectTypePtr      nextFarObject;
     spaceObjectTypePtr      previousObject;
     long                    previousObjectNumber;
@@ -770,8 +770,8 @@ struct spaceObjectType {
     fixedPointType          velocity;
     smallFixedType          thrust;
     smallFixedType          maxVelocity;
-    longPointType           scaledCornerOffset;
-    longPointType           scaledSize;
+    Point                   scaledCornerOffset;
+    Point                   scaledSize;
     Rect                absoluteBounds;
     int32_t                 randomSeed;
 

@@ -32,11 +32,6 @@
 #include "SpriteHandling.hpp" // for test byte debugging kludge
 #endif
 
-void longPointType::read(BinaryReader* bin) {
-    bin->read(&h);
-    bin->read(&v);
-}
-
 inline void mHBlitz(unsigned char*& mdbyte, long mrunLen, long mcolor, long& mcount) {
     mcount = mrunLen;
     while ( mcount-- > 0)

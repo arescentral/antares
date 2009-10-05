@@ -1089,7 +1089,7 @@ void AdmiralThink( void)
                     difference;
     smallFixedType  friendValue, foeValue, thisValue;
     baseObjectType  *baseObject;
-    longPointType   gridLoc;
+    Point           gridLoc;
 
     destBalance = mGetDestObjectBalancePtr( 0);
     for ( i = 0; i < kMaxDestObject; i++)
@@ -1619,7 +1619,7 @@ smallFixedType HackGetObjectStrength( spaceObjectType *anObject)
 
 {
     spaceObjectType *tObject = anObject;
-    longPointType   gridLoc;
+    Point           gridLoc;
     long            owner = anObject->owner;
 
     gridLoc = anObject->distanceGrid;

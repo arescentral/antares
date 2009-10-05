@@ -68,7 +68,7 @@ struct actionQueueType {
     spaceObjectType         *directObject;
     long                            directObjectNum;
     long                            directObjectID;
-    longPointType               offset;
+    Point                       offset;
 };
 
 extern int32_t gRandomSeed;
@@ -1061,7 +1061,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
 
 void AddActionToQueue( objectActionType *action, long actionNumber, long actionToDo,
                         long delayTime, spaceObjectType *subjectObject,
-                        spaceObjectType *directObject, longPointType *offset)
+                        spaceObjectType *directObject, Point* offset)
 {
     long                queueNumber = 0;
     actionQueueType     *actionQueue = *gActionQueueData,
@@ -1207,7 +1207,7 @@ void ExecuteActionQueue( long unitsToDo)
 }
 
 void ExecuteObjectActions( long whichAction, long actionNum,
-                spaceObjectType *sObject, spaceObjectType *dObject, longPointType *offset,
+                spaceObjectType *sObject, spaceObjectType *dObject, Point* offset,
                 bool allowDelay)
 
 {
@@ -1222,7 +1222,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
     unsigned long   m, ul1, ul2;
     smallFixedType  f, f2;
     coordPointType  newLocation;
-    longPointType   location;
+    Point           location;
     bool         OKtoExecute, checkConditions = false;
     Fixed           aFixed;
     transColorType  *transColor;
@@ -2152,7 +2152,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 }
 
 void DebugExecuteObjectActions( long whichAction, long actionNum,
-                spaceObjectType *sObject, spaceObjectType *dObject, longPointType *offset, char *file, long line)
+                spaceObjectType *sObject, spaceObjectType *dObject, Point* offset, char *file, long line)
 {
 #pragma unused( whichAction, actionNum, sObject, dObject, offset, file, line)
 //  DebugFileAppendString( "\pEX\t");
@@ -2770,7 +2770,7 @@ void DestroyObject( spaceObjectType *anObject)
 void ActivateObjectSpecial( spaceObjectType *anObject)
 {
     baseObjectType  *weaponObject, *baseObject = anObject->baseType;
-    longPointType   offset;
+    Point           offset;
     short           h;
     smallFixedType  fcos, fsin;
 

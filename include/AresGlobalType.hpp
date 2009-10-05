@@ -157,7 +157,7 @@ struct aresGlobalType {
     TypedHandle<scenarioInitialType>    gScenarioInitialData;   // = nil;
     TypedHandle<scenarioConditionType>  gScenarioConditionData; // = nil;
     TypedHandle<briefPointType>     gScenarioBriefData;     // = nil;
-    TypedHandle<longPointType>      gRadarBlipData;         // = nil;
+    TypedHandle<Point>              gRadarBlipData;         // = nil;
     TypedHandle<int32_t>            gScaleList;             // = nil;
     TypedHandle<int32_t>            gSectorLineData;        // = nil;
     int32_t         gRadarCount;            // = 0;

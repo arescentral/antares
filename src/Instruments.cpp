@@ -154,7 +154,7 @@ void InstrumentCleanup() {
 
 void ResetInstruments() {
     int32_t         *l, i;
-    longPointType   *lp;
+    Point           *lp;
 
     globals()->gRadarCount = 0;
     globals()->gRadarSpeed = 30;
@@ -218,7 +218,7 @@ void UpdateRadar(int32_t unitsDone) {
     long            oCount;
     int32_t         dx, rcount, x, y, *scaleval;
     const int32_t   rrange = globals()->gRadarRange >> 1L;
-    longPointType   *lp;
+    Point           *lp;
     unsigned char   color, color2, *dByte;
     uint32_t        bestScale = MIN_SCALE, rootCorrect, distance, difference, dcalc;
     transColorType  *transColor;

@@ -58,13 +58,6 @@ struct coordPointType {
     uint32_t    v;
 };
 
-struct longPointType {
-    int32_t     h;
-    int32_t     v;
-
-    void read(BinaryReader* bin);
-};
-
 void DrawNateRect( PixMap *, Rect *, long, long, unsigned char);
 void DrawNateRectVScan( PixMap *, Rect *, long, long, unsigned char);
 void DrawNateRectClipped( PixMap *, Rect *, Rect *, long, long, unsigned char);

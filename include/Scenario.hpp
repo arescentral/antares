@@ -156,17 +156,18 @@ struct briefPointType {
         void read(BinaryReader* bin);
     };
     struct AbsoluteBrief {
-        longPointType   location;
+        Point location;
 
         void read(BinaryReader* bin);
     };
 
     briefingPointKindType   briefPointKind;
-    union {
+    struct {
+        // Really a union
         ObjectBrief objectBriefType;
         AbsoluteBrief absoluteBriefType;
     } briefPointData;
-    longPointType           range;
+    Point                   range;
     int16_t                 titleResID;
     int16_t                 titleNum;
     int16_t                 contentResID;
@@ -179,7 +180,7 @@ struct scenarioInitialType {
     int32_t         owner;
     int32_t         realObjectNumber;
     int32_t         realObjectID;
-    longPointType   location;
+    Point           location;
     smallFixedType  earning;
     int32_t         distanceRange;
     int32_t         rotationMinimum;
@@ -204,9 +205,9 @@ struct counterArgumentType {
 
 struct scenarioConditionType {
     uint8_t         condition;
-    union
-    {
-        longPointType       location;
+    struct {
+        // Really a union
+        Point               location;
         counterArgumentType counter;
         int32_t             longValue;
         uint32_t            unsignedLongValue;

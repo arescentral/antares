@@ -28,6 +28,8 @@ struct Point {
 
     Point();
     Point(int x, int y);
+
+    void read(BinaryReader* bin);
 };
 
 struct Rect {

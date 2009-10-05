@@ -1241,7 +1241,7 @@ void CheckScenarioConditions( long timePass)
     long                    i, l, difference;
     unsigned long           distance, dcalc;
     scenarioInitialType     *initial;
-    longPointType           offset = {0, 0};
+    Point                   offset(0, 0);
     bool                 conditionTrue = false;
 
 #pragma unused( timePass)
@@ -1789,7 +1789,7 @@ void GetScenarioFullScaleAndCorner( long whichScenario, long rotation,
 
 {
     long            biggest, count, otherCount, mustFit;
-    longPointType   coord, otherCoord, tempCoord;
+    Point           coord, otherCoord, tempCoord;
     scenarioType    *scenario = *globals()->gScenarioData + whichScenario;
     scenarioInitialType     *initial;
 

@@ -106,7 +106,7 @@ void NonplayerShipThink( long timePass)
     admiralType     *anAdmiral;
     spaceObjectType *anObject, *targetObject;
     baseObjectType  *baseObject, *weaponObject;
-    longPointType   offset;
+    Point           offset;
     long            count, difference;
     unsigned long   keysDown;
     short           h;
@@ -711,7 +711,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
     Fixed           slope;
     short           angle, theta, beta;
     smallFixedType  calcv, fdist;
-    longPointType   offset;
+    Point           offset;
 
     if ((!(anObject->attributes & kRemoteOrHuman))
         || ( anObject->attributes & kOnAutoPilot))

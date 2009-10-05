@@ -27,6 +27,11 @@ Point::Point(int x, int y)
         : h(x),
           v(y) { }
 
+void Point::read(BinaryReader* bin) {
+    bin->read(&h);
+    bin->read(&v);
+}
+
 Rect::Rect()
         : left(0),
           top(0),

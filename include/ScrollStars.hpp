@@ -33,9 +33,9 @@ enum StarSpeed {
 };
 
 struct scrollStarType {
-    longPointType   oldOldLocation;
-    longPointType   oldLocation;
-    longPointType   location;
+    Point           oldOldLocation;
+    Point           oldLocation;
+    Point           location;
     fixedPointType  motionFraction;
     fixedPointType  velocity;
     long            age;
@@ -47,7 +47,7 @@ struct scrollStarType {
 int InitScrollStars( void);
 void CleanupScrollStars( void);
 void ResetScrollStars ( long);
-void MakeNewSparks( long, long, smallFixedType, unsigned char, longPointType *);
+void MakeNewSparks( long, long, smallFixedType, unsigned char, Point*);
 void PrepareToMoveScrollStars( void);
 void MoveScrollStars( const long );
 void DrawScrollStars( bool);

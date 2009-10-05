@@ -41,10 +41,10 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *, long, short, long, fixedP
                                     short);
 void ChangeObjectBaseType( spaceObjectType *, long, long, bool);
 void AddActionToQueue( objectActionType *, long, long, long, spaceObjectType *,
-                        spaceObjectType *, longPointType *);
+                        spaceObjectType *, Point*);
 void ExecuteActionQueue( long);
-void ExecuteObjectActions( long, long, spaceObjectType *, spaceObjectType *, longPointType *, bool);
-void DebugExecuteObjectActions( long, long, spaceObjectType *, spaceObjectType *, longPointType *, char *, long);
+void ExecuteObjectActions( long, long, spaceObjectType *, spaceObjectType *, Point*, bool);
+void DebugExecuteObjectActions( long, long, spaceObjectType *, spaceObjectType *, Point*, char *, long);
 //long CreateAnySpaceObject( long, fixedPointType *, coordPointType *, long, long, unsigned long,
 //                          long *, short, short, short);
 long CreateAnySpaceObject( long, fixedPointType *, coordPointType *, long, long, unsigned long,
