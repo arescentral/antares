@@ -66,6 +66,12 @@ void Rect::inset(int32_t x, int32_t y) {
     bottom -= y;
 }
 
+void Rect::center_in(const Rect& r) {
+    int32_t offset_x = (r.left / 2 - left / 2) + (r.right / 2 - right / 2);
+    int32_t offset_y = (r.top / 2 - top / 2) + (r.bottom / 2 - bottom / 2);
+    offset(offset_x, offset_y);
+}
+
 void Rect::read(BinaryReader* bin) {
     bin->read(&left);
     bin->read(&top);

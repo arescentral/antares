@@ -73,7 +73,6 @@ Main Antares : src/Admiral.cpp
                src/StringNumerics.cpp
                src/TestVideoDriver.cpp
                src/TimeUnit.cpp
-               src/TitleScreen.cpp
                src/Transitions.cpp
                src/VideoDriver.cpp
                src/VncServer.cpp

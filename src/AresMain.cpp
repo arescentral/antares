@@ -79,7 +79,6 @@
 #include "StringHandling.hpp"
 
 #include "TimeUnit.hpp"
-#include "TitleScreen.hpp"
 #include "Transitions.hpp"
 
 #include "VideoDriver.hpp"

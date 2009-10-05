@@ -50,7 +50,6 @@
 #include "SoundFX.hpp"               // for button on/off
 #include "StringHandling.hpp"
 #include "StringNumerics.hpp"
-#include "TitleScreen.hpp"           // for CenterRectInRect
 #include "Transitions.hpp"
 #include "VideoDriver.hpp"
 #include "WrapGameRanger.hpp"
@@ -516,7 +515,7 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
 
         mCopyAnyRect( clipRect, *contentRect);
         tRect = Rect(0, 0, width, height);
-        CenterRectInRect( &tRect, contentRect);
+        tRect.center_in(*contentRect);
 
         mGetTranslateColorShade( kLoadingScreenColor, LIGHTER, color, transColor);
         MoveTo( tRect.left, tRect.top + mDirectFontAscent());
@@ -997,7 +996,7 @@ void StartPauseIndicator(unsigned char* pauseString, unsigned char hue) {
     tRect = Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, globals()->gTrueClipBottom);
 
     stringRect = Rect(0, 0, width, height);
-    CenterRectInRect( &stringRect, &tRect);
+    stringRect.center_in(tRect);
     mCopyAnyRect( tRect, stringRect);
     tRect.left -= 4;
     tRect.top -= 4;
@@ -1041,7 +1040,7 @@ void StopPauseIndicator(unsigned char* pauseString) {
     tRect = Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, globals()->gTrueClipBottom);
 
     stringRect = Rect(0, 0, width, height);
-    CenterRectInRect( &stringRect, &tRect);
+    stringRect.center_in(tRect);
     stringRect.left -= 4;
     stringRect.top -= 4;
     stringRect.right += 4;
@@ -1306,7 +1305,7 @@ void DrawOptionVolumeLevel( Rect *bounds, long level)
         SetTranslateColorShadeFore( kOptionVolumeColor, shade);
         graphicRect = tRect;
         graphicRect.inset(2, 6);
-        CenterRectInRect( &graphicRect, &tRect);
+        graphicRect.center_in(tRect);
         PaintRect( &graphicRect);
         tRect.left += notchWidth;
         tRect.right = tRect.left + notchWidth - 2;
@@ -1318,7 +1317,7 @@ void DrawOptionVolumeLevel( Rect *bounds, long level)
     {
         graphicRect = tRect;
         graphicRect.inset(2, 6);
-        CenterRectInRect( &graphicRect, &tRect);
+        graphicRect.center_in(tRect);
         PaintRect( &graphicRect);
         tRect.left += notchWidth;
         tRect.right = tRect.left + notchWidth - 2;
@@ -1569,7 +1568,7 @@ void DrawKeyControlPicture( long whichKey)
     thePict.reset(new Picture(kKeyIllustrationPictID));
     if (thePict.get() != nil) {
         newRect = thePict->frame();
-        CenterRectInRect( &newRect, &tRect);
+        newRect.center_in(tRect);
         thePict->draw(newRect);
     }
     if ( whichKey >= kSelectFriendKeyNum)
@@ -1586,7 +1585,7 @@ void DrawKeyControlPicture( long whichKey)
     thePict.reset(new Picture(kKeyIllustrationPictID + 1 + whichKey));
     if (thePict.get() != nil) {
         newRect = thePict->frame();
-        CenterRectInRect( &newRect, &tRect);
+        newRect.center_in(tRect);
         thePict->draw(newRect);
     }
     thePict.reset();
@@ -2685,7 +2684,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
             thePict.reset(new Picture(kMissionStarMapPictID));
             if (thePict.get() != nil) {
                 newRect = thePict->frame();
-                CenterRectInRect( &newRect, bounds);
+                newRect.center_in(*bounds);
                 thePict->draw(newRect);
                 thePict.reset();
                 GetScenarioStarMapPoint( whichScenario, &starPoint);
@@ -3338,7 +3337,7 @@ void DoMissionDebriefingText(long textID, long yourlength, long parlength,
         if ( doScore) textHeight += kScoreTableHeight;
 
         iRect.bottom = iRect.top + textHeight;
-        CenterRectInRect( &iRect, &tRect);
+        iRect.center_in(tRect);
 
         RectToLongRect( &iRect, &(dataItem.bounds));
         dataItem.color = GOLD;

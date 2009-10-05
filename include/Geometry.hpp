@@ -45,6 +45,7 @@ struct Rect {
 
     void offset(int32_t x, int32_t y);
     void inset(int32_t x, int32_t y);
+    void center_in(const Rect& r);
 
     void read(BinaryReader* bin);
 };

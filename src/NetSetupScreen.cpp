@@ -44,7 +44,6 @@
 #include "SmartFile.hpp"
 #include "StringHandling.hpp"
 #include "StringNumerics.hpp"
-#include "TitleScreen.hpp" // for CenterRectInRect
 
 #define kHasCustomIcon      0x0400
 
@@ -1967,7 +1966,7 @@ void NetLevelShowLag( long lag, long recommended)
         mSetDirectFont( kButtonSmallFontNum);
         mGetDirectStringDimensions(string, width, height)
         SetRect( &stringRect, 0, 0, width, height);
-        CenterRectInRect( &stringRect, &tRect);
+        stringRect.center_in(tRect);
         stringRect.top = tRect.top;
         stringRect.bottom = tRect.top + height;
         mGetTranslateColorShade( AQUA, MEDIUM, color, transColor)
@@ -1986,7 +1985,7 @@ void NetLevelShowLag( long lag, long recommended)
     mGetDirectStringDimensions(string, width, height)
 
     SetRect( &stringRect, 0, 0, width, height);
-    CenterRectInRect( &stringRect, &bottomRect);
+    stringRect.center_in(bottomRect);
 
     mGetTranslateColorShade( AQUA, LIGHTER, color, transColor)
     MoveTo( stringRect.left, stringRect.top + mDirectFontAscent);
@@ -2022,7 +2021,7 @@ void NetLevelShowRaces( short myRace, short opponentRace)
     mSetDirectFont( kButtonSmallFontNum);
     mGetDirectStringDimensions(string, width, height)
     SetRect( &stringRect, 0, 0, width, height);
-    CenterRectInRect( &stringRect, &tRect);
+    stringRect.center_in(tRect);
     spacingHeight = ((tRect.bottom - tRect.top) - (height * 2)) / 3;
     stringRect.top = tRect.top + spacingHeight;
     stringRect.bottom = stringRect.top + height;
@@ -2041,7 +2040,7 @@ void NetLevelShowRaces( short myRace, short opponentRace)
     mGetDirectStringDimensions(string, width, height)
 
     SetRect( &stringRect, 0, 0, width, height);
-    CenterRectInRect( &stringRect, &bottomRect);
+    stringRect.center_in(bottomRect);
     stringRect.top = tRect.top + spacingHeight * 2 + height;
     stringRect.bottom = stringRect.top + height;
     mGetTranslateColorShade( RED, LIGHTER, color, transColor)

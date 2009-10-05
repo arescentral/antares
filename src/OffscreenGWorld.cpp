@@ -20,7 +20,6 @@
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "NateDraw.hpp"
-#include "TitleScreen.hpp"
 
 extern scoped_ptr<Window> fakeWindow;
 
@@ -47,7 +46,7 @@ int CreateOffscreenWorld(const Rect& bounds, const ColorTable&) {
     gActiveWorld = gRealWorld;
 
     tRect = bounds;
-    CenterRectInRect(&tRect, &gRealWorld->bounds);
+    tRect.center_in(gRealWorld->bounds);
     gNatePortLeft = tRect.left - gRealWorld->bounds.left;
     gNatePortLeft /= 4;
 
