@@ -171,14 +171,7 @@ void AresMain() {
         SetSongVolume( kMaxMusicVolume);
         PlaySong();
     }
-    if (!skipFading) {
-        skipFading = CustomPictFade(20, 20, 2000, 2000, gTheWindow);
-    }
-    if (!skipFading) {
-        skipFading = CustomPictFade(20, 20, 2001, 2000, gTheWindow);
-    }
 
-    StartCustomPictFade(20, 20, 502, 2001, gTheWindow, skipFading);
     InitDirectText();
     ScreenLabelInit();
     InitMessageScreen();
@@ -192,6 +185,15 @@ void AresMain() {
     InitMotion();
     AdmiralInit();
     InitBeams();
+
+    if (!skipFading) {
+        skipFading = CustomPictFade(20, 20, 2000, 2000, gTheWindow);
+    }
+    if (!skipFading) {
+        skipFading = CustomPictFade(20, 20, 2001, 2000, gTheWindow);
+    }
+
+    StartCustomPictFade(20, 20, 502, 2001, gTheWindow, skipFading);
     TimedWaitForAnyEvent(skipFading ? 1 : 1400);
     EndCustomPictFade(gTheWindow, skipFading);
 
