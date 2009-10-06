@@ -500,6 +500,7 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
     RGBColor        fadeColor = {0, 0, 0};
     Str255          string;
 
+    Button();  // Hack to get it to update.
     if ( total < 0)
     {
         DrawInOffWorld();

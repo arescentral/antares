@@ -38,6 +38,8 @@ extern PixMap* gActiveWorld;
 
 namespace {
 
+scoped_ptr<ColorTable> colors;
+
 class StringBinaryWriter : public BinaryWriter {
 public:
     StringBinaryWriter(std::string* out)
@@ -137,9 +139,9 @@ uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue) {
     uint8_t best_color = 0;
     int min_distance = std::numeric_limits<int>::max();
     for (int i = 0; i < 256; ++i) {
-        int distance = abs(fakeWindow->portBits.colors->color(i).red - red)
-            + abs(fakeWindow->portBits.colors->color(i).green - green)
-            + abs(fakeWindow->portBits.colors->color(i).blue - blue);
+        int distance = abs(colors->color(i).red - red)
+            + abs(colors->color(i).green - green)
+            + abs(colors->color(i).blue - blue);
         if (distance == 0) {
             return i;
         } else if (distance < min_distance) {
@@ -271,9 +273,9 @@ void MacFrameRect(Rect* rect) {
 }
 
 void Index2Color(long index, RGBColor* color) {
-    color->red = fakeWindow->portBits.colors->color(index).red;
-    color->green = fakeWindow->portBits.colors->color(index).green;
-    color->blue = fakeWindow->portBits.colors->color(index).blue;
+    color->red = colors->color(index).red;
+    color->green = colors->color(index).green;
+    color->blue = colors->color(index).blue;
 }
 
 Point currentPen;
@@ -336,6 +338,7 @@ void RestoreEntries(const ColorTable& table) {
 
 void FakeDrawingInit(int width, int height) {
     fakeWindow.reset(new Window(width, height));
+    colors.reset(new ColorTable(256));
 }
 
 }  // namespace antares
