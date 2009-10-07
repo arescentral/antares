@@ -122,7 +122,7 @@ void UpdateColorAnimation(long timePassed) {
     }
 }
 
-void StartboolColorAnimation(long inSpeed, long outSpeed, unsigned char goalColor) {
+void StartBooleanColorAnimation(long inSpeed, long outSpeed, unsigned char goalColor) {
     if ( globals()->gColorAnimationInSpeed == kNoColorGoal)
     {
         globals()->gColorAnimationStep = kStartAnimation;
@@ -151,7 +151,7 @@ void StartboolColorAnimation(long inSpeed, long outSpeed, unsigned char goalColo
     }
 }
 
-void UpdateboolColorAnimation(long timePassed) {
+void UpdateBooleanColorAnimation(long timePassed) {
     if ( globals()->gColorAnimationInSpeed != kNoColorGoal)
     {
         if ( globals()->gColorAnimationStep < 0)

@@ -920,7 +920,7 @@ GameResult PlayTheGame(long *seconds) {
 
             DrawMessageScreen(unitsDone);
             UpdateRadar(unitsDone);
-            UpdateboolColorAnimation(unitsDone);
+            UpdateBooleanColorAnimation(unitsDone);
 
             ++globals()->gFrameCount;
             VideoDriver::driver()->main_loop_iteration_complete(globals()->gGameTime);

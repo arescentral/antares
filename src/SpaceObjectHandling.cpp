@@ -2098,7 +2098,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 
                 case kColorFlash:
                     mGetTranslateColorShade( action->argument.colorFlash.color, action->argument.colorFlash.shade, tinyColor, transColor);
-                    StartboolColorAnimation( action->argument.colorFlash.length,
+                    StartBooleanColorAnimation( action->argument.colorFlash.length,
                         action->argument.colorFlash.length, tinyColor);//GetTranslateColorShade( AQUA, VERY_LIGHT));
                     break;
 

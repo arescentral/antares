@@ -2356,7 +2356,7 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
             if ((anObject->attributes & kIsHumanControlled) && ( sObject->baseType->damage > 0))
             {
 //#ifndef   powerc
-                StartboolColorAnimation( 128, 128, WHITE);//GetTranslateColorShade( AQUA, VERY_LIGHT));
+                StartBooleanColorAnimation( 128, 128, WHITE);//GetTranslateColorShade( AQUA, VERY_LIGHT));
 //#endif
             }
         }
