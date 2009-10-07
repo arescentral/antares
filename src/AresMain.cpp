@@ -132,15 +132,15 @@ class Master : public EventListener {
         switch (_state) {
           case START:
             _state = PUBLISHER_PICT;
-            _listener.reset(new PictFade(2000, 2000));
-            VideoDriver::driver()->push_listener(_listener.get());
+            _pict_fade.reset(new PictFade(2000, 2000));
+            VideoDriver::driver()->push_listener(_pict_fade.get());
             break;
 
           case PUBLISHER_PICT:
-            if (!_skipped_publisher_or_ego)  {
-                _state = EGO_PICT;
-                _listener.reset(new PictFade(2001, 2000));
-                VideoDriver::driver()->push_listener(_listener.get());
+            _state = EGO_PICT;
+            if (!_pict_fade->skipped())  {
+                _pict_fade.reset(new PictFade(2001, 2000));
+                VideoDriver::driver()->push_listener(_pict_fade.get());
                 break;
             }
             // fall through.
@@ -148,11 +148,11 @@ class Master : public EventListener {
           case EGO_PICT:
           case TITLE_SCREEN_PICT:
           case INTRO_SCROLL:
+            _pict_fade.reset();
             // Not yet implemented as EventListener objects.
 
           case MAIN_SCREEN:
             // When the main screen returns, exit loop.
-            _listener.reset();
             VideoDriver::driver()->pop_listener(this);
             break;
         }
@@ -169,7 +169,7 @@ class Master : public EventListener {
     };
 
     State _state;
-    scoped_ptr<EventListener> _listener;
+    scoped_ptr<PictFade> _pict_fade;
     bool _skipped_publisher_or_ego;
 };
 
