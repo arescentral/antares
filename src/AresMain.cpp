@@ -125,7 +125,6 @@ GameResult PlayTheGame(long *seconds);
 
 void AresMain() {
     RGBColor                initialFadeColor;
-    bool                 skipFading = false;
     scoped_ptr<ColorTable>  theClut;
 
     init_globals();
@@ -146,18 +145,17 @@ void AresMain() {
     theClut.reset(new ColorTable(256));
     gTheWindow = fakeWindow.get();
     gActiveWorld = &fakeWindow->portBits;
+    CreateOffscreenWorld(gTheWindow->portRect, *theClut);
     ColorTranslatorInit(*theClut);
 
     InitSpriteCursor();
     InitTransitions();
 
     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
-    skipFading = AutoFadeTo(30, &initialFadeColor, true);
 
     ClearScreen();
     ResetTransitions();
 
-    CreateOffscreenWorld(gTheWindow->portRect, *theClut);
     MusicInit();
 
     RotationInit();
@@ -186,16 +184,18 @@ void AresMain() {
     AdmiralInit();
     InitBeams();
 
+    // TODO(sfiera): perform initial fade-out only when running full-screen.
+    bool skipFading = AutoFadeTo(30, &initialFadeColor, true);
     if (!skipFading) {
-        skipFading = CustomPictFade(20, 20, 2000, 2000, gTheWindow);
+        skipFading = CustomPictFade(2000, 2000);
     }
     if (!skipFading) {
-        skipFading = CustomPictFade(20, 20, 2001, 2000, gTheWindow);
+        skipFading = CustomPictFade(2001, 2000);
     }
 
-    StartCustomPictFade(20, 20, 502, 2001, gTheWindow, skipFading);
+    StartCustomPictFade(502, 2001, skipFading);
     TimedWaitForAnyEvent(skipFading ? 1 : 1400);
-    EndCustomPictFade(gTheWindow, skipFading);
+    EndCustomPictFade(skipFading);
 
     globals()->okToOpenFile = true;
     MainLoop();

@@ -35,8 +35,6 @@
 
 namespace antares {
 
-//#define   kDontMessWithColors
-
 #define kStartAnimation     -255
 #define kEndAnimation       255
 
@@ -44,27 +42,12 @@ namespace antares {
 
 #define kNoColorGoal        -1
 
-#define kTransitionError    "\pTRAN"
-
-extern long gInterfaceFileRefID;
-extern short gSpriteFileRefID;
-extern scoped_ptr<Window> fakeWindow;
-
-struct bigReqListRec {
-    short   reqLSize;
-    short   reqLData[256];
-};
-
 void InitTransitions() {
-    PixMap* onScreenPixMap = &fakeWindow->portBits;
-    globals()->gColorAnimationTable.reset(onScreenPixMap->colors->clone());
-    globals()->gSaveColorTable.reset(onScreenPixMap->colors->clone());
+    globals()->gColorAnimationTable.reset(gRealWorld->colors->clone());
+    globals()->gSaveColorTable.reset(gRealWorld->colors->clone());
 }
 
-void ResetTransitions( void) // for resetting the color map
-
-{
-    CleanupTransitions();
+void ResetTransitions() {
     InitTransitions();
 }
 
@@ -73,76 +56,14 @@ void CleanupTransitions() {
     globals()->gSaveColorTable.reset();
 }
 
-// DitherFadePixMapToScreenPixMap
-//
-//  Takes in two sources, one of which is a COPY of the screen map, and fades from the first
-//  to the second using B&W patterns (PAT# 500)
-
-/*
-PROCEDURE GetIndPattern (VAR thePattern: Pattern;
-                                 patListID: Integer; index: Integer);
-
-void DitherFadePixMapToScreenPixMap( PixMap *sourcePix, Rect *sourceRect, PixMap *destMap)
-
-{
-    int     x, y, width, height;
-    long    *sword, *dword, srowplus, drowplus, srowbytes, drowbytes, sright;
-    Rect    fixRect;
-
-    fixRect = *sourceRect;
-    fixRect.left /= 4;
-    if (( fixRect.right % 4) == 0)
-        fixRect.right /= 4;
-    else fixRect.right = fixRect.right / 4 + 1;
-    srowbytes = sourcePix->rowBytes & 0x3fff;
-    srowbytes /= 4;
-    drowbytes = destMap->rowBytes & 0x3fff;
-    drowbytes /= 4;
-    sright = sourcePix->bounds.right / 4;
-    if ( fixRect.left < 0)
-        fixRect.left = 0;
-    if ( fixRect.right > sright)
-        fixRect.right = sright;
-    if ( fixRect.right > drowbytes)
-        fixRect.right = drowbytes;
-    if ( fixRect.top < 0)
-        fixRect.top = 0;
-    if ( fixRect.bottom > sourcePix->bounds.bottom)
-        fixRect.bottom = sourcePix->bounds.bottom;
-    if ( fixRect.bottom > destMap->bounds.bottom)
-        fixRect.bottom = destMap->bounds.bottom;
-    srowplus = srowbytes - (fixRect.right - fixRect.left);
-    drowplus = drowbytes - (fixRect.right - fixRect.left);
-    sword = (long *)sourcePix->baseAddr + (long)fixRect.top * srowbytes +
-            (long)fixRect.left;
-    dword = (long *)destMap->baseAddr + (long)(fixRect.top + gNatePortTop) * drowbytes +
-            (long)(fixRect.left + gNatePortLeft);
-    for ( y = fixRect.top; y < fixRect.bottom; y++)
-    {
-        for ( x = fixRect.left; x < fixRect.right; x++)
-        {
-            *dword++ = *sword++;
-        }
-        dword += drowplus;
-        sword += srowplus;
-    }
-}
-*/
-
-void StartColorAnimation( long inSpeed, long outSpeed, unsigned char goalColor)
-
-{
-
+void StartColorAnimation( long inSpeed, long outSpeed, unsigned char goalColor) {
     globals()->gColorAnimationStep = kStartAnimation;
     globals()->gColorAnimationInSpeed = inSpeed;
     globals()->gColorAnimationOutSpeed = outSpeed;
     GetRGBTranslateColor( &globals()->gColorAnimationGoal,  GetRetroIndex( goalColor));
-
 }
 
-void UpdateColorAnimation( long timePassed)
-
-{
+void UpdateColorAnimation(long timePassed) {
     if ( globals()->gColorAnimationInSpeed != kNoColorGoal)
     {
 
@@ -201,9 +122,7 @@ void UpdateColorAnimation( long timePassed)
     }
 }
 
-void StartboolColorAnimation( long inSpeed, long outSpeed, unsigned char goalColor)
-
-{
+void StartboolColorAnimation(long inSpeed, long outSpeed, unsigned char goalColor) {
     if ( globals()->gColorAnimationInSpeed == kNoColorGoal)
     {
         globals()->gColorAnimationStep = kStartAnimation;
@@ -232,9 +151,7 @@ void StartboolColorAnimation( long inSpeed, long outSpeed, unsigned char goalCol
     }
 }
 
-void UpdateboolColorAnimation( long timePassed)
-
-{
+void UpdateboolColorAnimation(long timePassed) {
     if ( globals()->gColorAnimationInSpeed != kNoColorGoal)
     {
         if ( globals()->gColorAnimationStep < 0)
@@ -251,8 +168,7 @@ void UpdateboolColorAnimation( long timePassed)
     }
 }
 
-void RestoreOriginalColors( void)
-{
+void RestoreOriginalColors() {
     if ( globals()->gColorAnimationInSpeed != kNoColorGoal)
     {
         RestoreEntries(*globals()->gSaveColorTable);
@@ -260,18 +176,14 @@ void RestoreOriginalColors( void)
     }
 }
 
-void InstantGoalTransition( void)   // instantly goes to total goal color
-
-{
+void InstantGoalTransition() {  // instantly goes to total goal color
     for (size_t i = 0; i < globals()->gColorAnimationTable->size(); ++i) {
         globals()->gColorAnimationTable->set_color(i, globals()->gColorAnimationGoal);
     }
     RestoreEntries(*globals()->gColorAnimationTable);
 }
 
-bool AutoFadeTo( long tickTime, RGBColor *goalColor, bool eventSkip)
-
-{
+bool AutoFadeTo(long tickTime, RGBColor *goalColor, bool eventSkip) {
     long        startTime, thisTime = 0, lastStep = 0, thisStep = 0;
     bool     anyEventHappened = false;
 
@@ -297,9 +209,7 @@ bool AutoFadeTo( long tickTime, RGBColor *goalColor, bool eventSkip)
     return( anyEventHappened);
 }
 
-bool AutoFadeFrom( long tickTime, bool eventSkip) // assumes you've set up with AutoFadeTo
-
-{
+bool AutoFadeFrom(long tickTime, bool eventSkip) { // assumes you've set up with AutoFadeTo
     long        startTime, thisTime = 0, lastStep = 0, thisStep = 0;
     bool         anyEventHappened = false;
 
@@ -324,9 +234,7 @@ bool AutoFadeFrom( long tickTime, bool eventSkip) // assumes you've set up with 
     return( anyEventHappened);
 }
 
-bool AutoMusicFadeTo( long tickTime, RGBColor *goalColor, bool eventSkip)
-
-{
+bool AutoMusicFadeTo(long tickTime, RGBColor *goalColor, bool eventSkip) {
     long        startTime, thisTime = 0, lastStep = 0, thisStep = 0, musicVol, musicStep;
     bool     anyEventHappened = false;
 
@@ -363,121 +271,65 @@ bool AutoMusicFadeTo( long tickTime, RGBColor *goalColor, bool eventSkip)
     return( anyEventHappened);
 }
 
-// CustomPictFade:
-// blackens the window; sets color table to clutD; draws pict resource pictID; fades from
-// black to pict; holds pict; fades to black; restores orignal palette; stops & returns true
-// if any key pressed.
-// >>> YOU SHOULD PROBABLY CALL RESETTRANSITIONS AFTER CALLING THIS since it could screw up
-// the color translation table.
-
-bool CustomPictFade( long fadeSpeed, long holdTime, short pictID, short clutID,
-        WindowPtr aWindow)
-
-{
-    scoped_ptr<ColorTable> theClut;
-    scoped_ptr<Picture> thePict;
-    Rect                        pictRect;
-    RGBColor                    fadeColor = {0, 0, 0};
-    bool                     gotAnyEvent = false;
-    short                       oldResFile = CurResFile();
-
-#pragma unused( fadeSpeed, holdTime)
-
-    UseResFile( gSpriteFileRefID);
+bool CustomPictFade(short pictID, short clutID) {
+    ColorTable colors(clutID);
+    Picture pict(pictID);
+    RGBColor fadeColor = {0, 0, 0};
 
     ClearScreen();
-    theClut.reset(new ColorTable(clutID));
-    if (theClut.get() == nil) {
-        ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadColorTableError, -1, -1, -1, __FILE__, 1);
-        UseResFile( oldResFile);
-        return( true);
-    }
+    Rect pictRect = pict.frame();
+    pictRect.center_in(gRealWorld->bounds);
 
-    thePict.reset(new Picture(pictID));
-    if (thePict.get() == nil) {
-        ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 4);
-        UseResFile( oldResFile);
-        return( true);
-    }
-    UseResFile( oldResFile);
-
-    pictRect = thePict->frame();
-
-    pictRect.offset(((aWindow->portRect.right - aWindow->portRect.left) / 2) -
-        ((pictRect.right - pictRect.left) / 2),
-        ((aWindow->portRect.bottom - aWindow->portRect.top) / 2) -
-        ((pictRect.bottom - pictRect.top) / 2));
-
-    HideCursor();
     ResetTransitions();
-    AutoFadeTo( 1, &fadeColor, true);
-    thePict->draw(pictRect);
-    thePict.reset();
+    AutoFadeTo(1, &fadeColor, true);
+    pict.draw(pictRect);
 
-    gotAnyEvent = AutoFadeFrom( 100, true);
-    if ( !gotAnyEvent) gotAnyEvent = TimedWaitForAnyEvent(80);
-    if ( !gotAnyEvent) gotAnyEvent = AutoFadeTo( 100, &fadeColor, true);
-    else AutoFadeTo( 1, &fadeColor, true);
+    bool gotAnyEvent = AutoFadeFrom(100, true);
+    if (!gotAnyEvent) {
+        gotAnyEvent = TimedWaitForAnyEvent(80);
+    }
+    if (!gotAnyEvent) {
+        gotAnyEvent = AutoFadeTo(100, &fadeColor, true);
+    } else {
+        AutoFadeTo(1, &fadeColor, true);
+    }
+
     ClearScreen();
-    AutoFadeFrom( 1, true);
-
-    MacShowCursor();
+    AutoFadeFrom(1, true);
     ResetTransitions();
-
-    return (gotAnyEvent);
+    return gotAnyEvent;
 }
 
-bool StartCustomPictFade(long fadeSpeed, long holdTime, short pictID, short clutID,
-        Window* aWindow, bool fast) {
-    scoped_ptr<Picture> thePict;
-    scoped_ptr<ColorTable> theClut;
-    Rect                        pictRect;
-    RGBColor                    fadeColor = {0, 0, 0};
-    bool                     gotAnyEvent = false;
-
-#pragma unused( fadeSpeed, holdTime)
+bool StartCustomPictFade(short pictID, short clutID, bool fast) {
+    ColorTable colors(clutID);
+    Picture pict(pictID);
+    RGBColor fadeColor = {0, 0, 0};
 
     ClearScreen();
-    theClut.reset(new ColorTable(clutID));
+    Rect pictRect = pict.frame();
+    pictRect.center_in(gRealWorld->bounds);
 
-    thePict.reset(new Picture(pictID));
-    if (thePict.get() == nil) {
-        ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadPictError, -1, -1, -1, __FILE__, 4);
-        return( true);
-    }
-
-    pictRect = thePict->frame();
-
-    pictRect.offset(((aWindow->portRect.right - aWindow->portRect.left) / 2) -
-        ((pictRect.right - pictRect.left) / 2),
-        ((aWindow->portRect.bottom - aWindow->portRect.top) / 2) -
-        ((pictRect.bottom - pictRect.top) / 2));
-
-    HideCursor();
     ResetTransitions();
-    AutoFadeTo( 1, &fadeColor, true);
-    thePict->draw(pictRect);
-    thePict.reset();
+    AutoFadeTo(1, &fadeColor, true);
+    pict.draw(pictRect);
 
-    gotAnyEvent = AutoFadeFrom( fast?20:100, true);
-    if ( fast) return true;
-    return( gotAnyEvent);
+    return AutoFadeFrom(fast ? 20 : 100, true) || fast;
 }
 
-bool EndCustomPictFade(Window* aWindow, bool fast) {
-    bool     gotAnyEvent;
-    RGBColor    fadeColor = {0, 0, 0};
+bool EndCustomPictFade(bool fast) {
+    RGBColor fadeColor = {0, 0, 0};
 
-    gotAnyEvent = TimedWaitForAnyEvent(fast?60:60);
-    if ( !gotAnyEvent) gotAnyEvent = AutoFadeTo( fast?20:100, &fadeColor, true);
-    else AutoFadeTo( 1, &fadeColor, true);
-    RGBForeColor( &fadeColor);
-    PaintRect( &(aWindow->portRect));
-    AutoFadeFrom( 1, true);
+    bool gotAnyEvent = TimedWaitForAnyEvent(fast ? 60 : 300);
+    if (!gotAnyEvent) {
+        gotAnyEvent = AutoFadeTo(fast ? 20 : 100, &fadeColor, true);
+    } else {
+        AutoFadeTo(1, &fadeColor, true);
+    }
 
+    ClearScreen();
+    AutoFadeFrom(1, true);
     ResetTransitions();
-    if ( fast) return true;
-    return (gotAnyEvent);
+    return fast || gotAnyEvent;
 }
 
 }  // namespace antares

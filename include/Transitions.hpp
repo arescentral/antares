@@ -34,9 +34,9 @@ void InstantGoalTransition( void);
 bool AutoFadeTo( long, RGBColor *, bool);
 bool AutoFadeFrom( long, bool);
 bool AutoMusicFadeTo( long, RGBColor *, bool);
-bool CustomPictFade( long, long, short, short, WindowPtr);
-bool StartCustomPictFade(long, long, short, short, WindowPtr, bool);
-bool EndCustomPictFade(WindowPtr, bool);
+bool CustomPictFade(short pictID, short clutID);
+bool StartCustomPictFade(short pictID, short clutID, bool fast);
+bool EndCustomPictFade(bool fast);
 
 }  // namespace antares
 
