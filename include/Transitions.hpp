@@ -86,7 +86,15 @@ class PictFade : public EventListener {
 
     bool skipped() const;
 
+  protected:
+    virtual double fade_time() const;
+    virtual double display_time() const;
+    virtual bool skip() const;
+
   private:
+    void wax();
+    void wane();
+
     enum State {
         NEW,
         WAXING,

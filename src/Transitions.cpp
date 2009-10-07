@@ -405,28 +405,14 @@ PictFade::PictFade(int pict_id, int clut_id)
 void PictFade::become_front() {
     switch (_state) {
       case NEW:
-        {
-            _state = WAXING;
-            _skipped = false;
-
-            ClearScreen();
-            Picture pict(_pict_id);
-            Rect pictRect = pict.frame();
-            pictRect.center_in(gRealWorld->bounds);
-            pict.draw(pictRect);
-
-            RGBColor black = {0, 0, 0};
-            _color_fade.reset(
-                    new ColorFade(_clut_id, ColorFade::FROM_COLOR, black, 5.0 / 3.0, true));
-            VideoDriver::driver()->push_listener(_color_fade.get());
-        }
+        wax();
         break;
 
       case WAXING:
         _skipped = _skipped || _color_fade->skipped();
-        if (!_skipped) {
+        if (!this->skip()) {
             _state = FULL;
-            _wane_start = now() + (4.0 / 3.0);
+            _wane_start = now() + this->display_time();
             break;
         }
         // fall through.
@@ -454,13 +440,17 @@ bool PictFade::mouse_down(int button, const Point& loc) {
     (void)button;
     (void)loc;
     _skipped = true;
-    VideoDriver::driver()->pop_listener(this);
+    if (this->skip()) {
+        VideoDriver::driver()->pop_listener(this);
+    } else {
+        wane();
+    }
     return true;
 }
 
 double PictFade::delay() {
     if (_state == FULL) {
-        return std::max(0.0, now() - _wane_start);
+        return std::max(0.001, _wane_start - now());
     } else {
         return 0.0;
     }
@@ -468,13 +458,46 @@ double PictFade::delay() {
 
 void PictFade::fire_timer() {
     // Timer only fires when _state == FULL.
+    wane();
+}
+
+void PictFade::wax() {
+    _state = WAXING;
+    _skipped = false;
+
+    ClearScreen();
+    Picture pict(_pict_id);
+    Rect pictRect = pict.frame();
+    pictRect.center_in(gRealWorld->bounds);
+    pict.draw(pictRect);
+
     RGBColor black = {0, 0, 0};
+    _color_fade.reset(new ColorFade(
+                _clut_id, ColorFade::FROM_COLOR, black, this->fade_time(), true));
+    VideoDriver::driver()->push_listener(_color_fade.get());
+}
+
+void PictFade::wane() {
     _state = WANING;
-    _color_fade.reset(new ColorFade(_clut_id, ColorFade::TO_COLOR, black, 5.0 / 3.0, true));
+    RGBColor black = {0, 0, 0};
+    _color_fade.reset(new ColorFade(
+                _clut_id, ColorFade::TO_COLOR, black, this->fade_time(), true));
     VideoDriver::driver()->push_listener(_color_fade.get());
 }
 
 bool PictFade::skipped() const {
+    return _skipped;
+}
+
+double PictFade::fade_time() const {
+    return 5.0 / 3.0;
+}
+
+double PictFade::display_time() const {
+    return 4.0 / 3.0;
+}
+
+bool PictFade::skip() const {
     return _skipped;
 }
 

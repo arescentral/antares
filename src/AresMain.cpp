@@ -123,6 +123,33 @@ void Pause( long time);
 void MainLoop();
 GameResult PlayTheGame(long *seconds);
 
+class TitleScreenFade : public PictFade {
+  public:
+    TitleScreenFade(bool fast)
+            : PictFade(502, 2001),
+              _fast(fast) { }
+
+  protected:
+    virtual double fade_time() const {
+        return (fast() ? 1.0 : 5.0) / 3.0;
+    }
+
+    virtual double display_time() const {
+        return fast() ? 1.0 : 5.0;
+    }
+
+    virtual bool skip() const {
+        return false;
+    }
+
+  private:
+    bool fast() const {
+        return _fast || skipped();
+    }
+
+    bool _fast;
+};
+
 class Master : public EventListener {
   public:
     Master()
@@ -146,6 +173,11 @@ class Master : public EventListener {
             // fall through.
 
           case EGO_PICT:
+            _state = TITLE_SCREEN_PICT;
+            _pict_fade.reset(new TitleScreenFade(_pict_fade->skipped()));
+            VideoDriver::driver()->push_listener(_pict_fade.get());
+            break;
+
           case TITLE_SCREEN_PICT:
           case INTRO_SCROLL:
             _pict_fade.reset();
@@ -237,10 +269,6 @@ void AresMain() {
     Master master;
     VideoDriver::driver()->push_listener(&master);
     VideoDriver::driver()->loop();
-
-    StartCustomPictFade(502, 2001, false /* skipped */);
-    TimedWaitForAnyEvent(false /* skipped */ ? 1 : 1400);
-    EndCustomPictFade(false /* skipped */);
 
     globals()->okToOpenFile = true;
     MainLoop();
