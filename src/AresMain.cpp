@@ -202,7 +202,6 @@ class Master : public EventListener {
 
     State _state;
     scoped_ptr<PictFade> _pict_fade;
-    bool _skipped_publisher_or_ego;
 };
 
 void AresMain() {
