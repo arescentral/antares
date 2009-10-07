@@ -40,9 +40,16 @@ bool CustomPictFade(short pictID, short clutID);
 bool StartCustomPictFade(short pictID, short clutID, bool fast);
 bool EndCustomPictFade(bool fast);
 
-class PictFade : public EventListener {
+class ColorFade : public EventListener {
   public:
-    PictFade(int pict_id, int clut_id, bool* skipped);
+    enum Direction {
+        TO_COLOR = 0,
+        FROM_COLOR = 1,
+    };
+
+    ColorFade(
+            int clut_id, Direction direction, const RGBColor& color, double duration,
+            bool allow_skip);
 
     virtual void become_front();
     virtual void resign_front();
@@ -50,6 +57,34 @@ class PictFade : public EventListener {
     virtual bool mouse_down(int button, const Point& loc);
     virtual double delay();
     virtual void fire_timer();
+
+    bool skipped() const;
+
+  private:
+    const Direction _direction;
+    const ColorTable _transition_colors;
+    ColorTable _current_colors;
+    const RGBColor _color;
+
+    const bool _allow_skip;
+    bool _skipped;
+
+    double _start;
+    const double _duration;
+};
+
+class PictFade : public EventListener {
+  public:
+    PictFade(int pict_id, int clut_id);
+
+    virtual void become_front();
+    virtual void resign_front();
+
+    virtual bool mouse_down(int button, const Point& loc);
+    virtual double delay();
+    virtual void fire_timer();
+
+    bool skipped() const;
 
   private:
     enum State {
@@ -60,15 +95,13 @@ class PictFade : public EventListener {
     };
 
     State _state;
-    int _pict_id;
-    const ColorTable _transition_colors;
-    ColorTable _current_colors;
-    bool* _skipped;
+    const int _pict_id;
+    const int _clut_id;
+    bool _skipped;
 
-    double _wax_start;
-    double _wax_duration;
+    scoped_ptr<ColorFade> _color_fade;
+
     double _wane_start;
-    double _wane_duration;
 };
 
 }  // namespace antares

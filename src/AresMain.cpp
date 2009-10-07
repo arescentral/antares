@@ -132,14 +132,14 @@ class Master : public EventListener {
         switch (_state) {
           case START:
             _state = PUBLISHER_PICT;
-            _listener.reset(new PictFade(2000, 2000, &_skipped_publisher_or_ego));
+            _listener.reset(new PictFade(2000, 2000));
             VideoDriver::driver()->push_listener(_listener.get());
             break;
 
           case PUBLISHER_PICT:
             if (!_skipped_publisher_or_ego)  {
                 _state = EGO_PICT;
-                _listener.reset(new PictFade(2001, 2000, &_skipped_publisher_or_ego));
+                _listener.reset(new PictFade(2001, 2000));
                 VideoDriver::driver()->push_listener(_listener.get());
                 break;
             }

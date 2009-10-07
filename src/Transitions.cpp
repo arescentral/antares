@@ -342,95 +342,140 @@ double now() {
 
 }  // namespace
 
-PictFade::PictFade(int pict_id, int clut_id, bool* skipped)
-        : _state(NEW),
-          _pict_id(pict_id),
+ColorFade::ColorFade(
+        int clut_id, Direction direction, const RGBColor& color, double duration, bool allow_skip)
+        : _direction(direction),
           _transition_colors(clut_id),
           _current_colors(clut_id),
-          _skipped(skipped) { }
+          _color(color),
+          _allow_skip(allow_skip),
+          _skipped(false),
+          _duration(duration) { }
 
+void ColorFade::become_front() {
+    _skipped = false;
+    _start = now();
+    _current_colors.transition_between(_transition_colors, _color, _direction);
+    RestoreEntries(_current_colors);
+}
+
+void ColorFade::resign_front() {
+    _current_colors.transition_between(_transition_colors, _color, 1.0 - _direction);
+    RestoreEntries(_current_colors);
+}
+
+bool ColorFade::mouse_down(int button, const Point& loc) {
+    (void)button;
+    (void)loc;
+    if (_allow_skip) {
+        _skipped = true;
+        VideoDriver::driver()->pop_listener(this);
+    }
+    return true;
+}
+
+double ColorFade::delay() {
+    return 1.0 / 60.0;
+}
+
+void ColorFade::fire_timer() {
+    double fraction = (now() - _start) / _duration;
+    if (fraction < 1.0) {
+        if (_direction == TO_COLOR) {
+            _current_colors.transition_between(_transition_colors, _color, fraction);
+        } else {
+            _current_colors.transition_between(_transition_colors, _color, 1.0 - fraction);
+        }
+        RestoreEntries(_current_colors);
+    } else {
+        VideoDriver::driver()->pop_listener(this);
+    }
+}
+
+bool ColorFade::skipped() const {
+    return _skipped;
+}
+
+PictFade::PictFade(int pict_id, int clut_id)
+        : _state(NEW),
+          _pict_id(pict_id),
+          _clut_id(clut_id),
+          _skipped(false) { }
 
 void PictFade::become_front() {
-    *_skipped = false;
+    switch (_state) {
+      case NEW:
+        {
+            _state = WAXING;
+            _skipped = false;
 
-    RGBColor black = {0, 0, 0};
-    _current_colors.transition_between(_transition_colors, black, 1.0);
-    RestoreEntries(_current_colors);
+            ClearScreen();
+            Picture pict(_pict_id);
+            Rect pictRect = pict.frame();
+            pictRect.center_in(gRealWorld->bounds);
+            pict.draw(pictRect);
 
-    ClearScreen();
-    Picture pict(_pict_id);
-    Rect pictRect = pict.frame();
-    pictRect.center_in(gRealWorld->bounds);
-    pict.draw(pictRect);
+            RGBColor black = {0, 0, 0};
+            _color_fade.reset(
+                    new ColorFade(_clut_id, ColorFade::FROM_COLOR, black, 5.0 / 3.0, true));
+            VideoDriver::driver()->push_listener(_color_fade.get());
+        }
+        break;
 
-    _state = WAXING;
-    _wax_start = now();
-    _wax_duration = 5.0 / 3.0;
-    _wane_start = _wax_start + 3.0;
-    _wane_duration = 5.0 / 3.0;
+      case WAXING:
+        _skipped = _skipped || _color_fade->skipped();
+        if (!_skipped) {
+            _state = FULL;
+            _wane_start = now() + (4.0 / 3.0);
+            break;
+        }
+        // fall through.
+
+      case WANING:
+        _state = NEW;
+        _skipped = _skipped || _color_fade->skipped();
+        VideoDriver::driver()->pop_listener(this);
+        break;
+
+      default:
+        break;
+    }
 }
 
 void PictFade::resign_front() {
-    ClearScreen();
-    RestoreEntries(*globals()->gSaveColorTable);
+    if (_state == NEW) {
+        _color_fade.reset();
+        ClearScreen();
+        RestoreEntries(*globals()->gSaveColorTable);
+    }
 }
 
 bool PictFade::mouse_down(int button, const Point& loc) {
     (void)button;
     (void)loc;
-    *_skipped = true;
+    _skipped = true;
     VideoDriver::driver()->pop_listener(this);
     return true;
 }
 
 double PictFade::delay() {
-    double tick = 1.0 / 60.0;
-    switch (_state) {
-      case WAXING:
-      case WANING:
-        return tick;
-      case FULL:
-        return std::max(_wane_start - now(), tick);
-      default:
+    if (_state == FULL) {
+        return std::max(0.0, now() - _wane_start);
+    } else {
         return 0.0;
     }
 }
 
 void PictFade::fire_timer() {
+    // Timer only fires when _state == FULL.
     RGBColor black = {0, 0, 0};
-    switch (_state) {
-      case WAXING:
-        {
-            double fraction = 1.0 - ((now() - _wax_start) / _wax_duration);
-            if (fraction > 0.0) {
-                _current_colors.transition_between(_transition_colors, black, fraction);
-                RestoreEntries(_current_colors);
-            } else {
-                _state = FULL;
-                RestoreEntries(_transition_colors);
-            }
-        }
-        break;
+    _state = WANING;
+    _color_fade.reset(new ColorFade(_clut_id, ColorFade::TO_COLOR, black, 5.0 / 3.0, true));
+    VideoDriver::driver()->push_listener(_color_fade.get());
+}
 
-      case FULL:
-        _state = WANING;
-        break;
-
-      case WANING:
-        {
-            double fraction = (now() - _wane_start) / _wane_duration;
-            if (fraction < 1.0) {
-                _current_colors.transition_between(_transition_colors, black, fraction);
-                RestoreEntries(_current_colors);
-            } else {
-                VideoDriver::driver()->pop_listener(this);
-            }
-        }
-        break;
-
-      default:
-        break;
-    }
+bool PictFade::skipped() const {
+    return _skipped;
 }
 
 }  // namespace antares
