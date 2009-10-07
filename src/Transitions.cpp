@@ -332,4 +332,105 @@ bool EndCustomPictFade(bool fast) {
     return fast || gotAnyEvent;
 }
 
+namespace {
+
+double now() {
+    uint64_t usec;
+    Microseconds(&usec);
+    return usec / 1000000.0;
+}
+
+}  // namespace
+
+PictFade::PictFade(int pict_id, int clut_id, bool* skipped)
+        : _state(NEW),
+          _pict_id(pict_id),
+          _transition_colors(clut_id),
+          _current_colors(clut_id),
+          _skipped(skipped) { }
+
+
+void PictFade::become_front() {
+    *_skipped = false;
+
+    RGBColor black = {0, 0, 0};
+    _current_colors.transition_between(_transition_colors, black, 1.0);
+    RestoreEntries(_current_colors);
+
+    ClearScreen();
+    Picture pict(_pict_id);
+    Rect pictRect = pict.frame();
+    pictRect.center_in(gRealWorld->bounds);
+    pict.draw(pictRect);
+
+    _state = WAXING;
+    _wax_start = now();
+    _wax_duration = 5.0 / 3.0;
+    _wane_start = _wax_start + 3.0;
+    _wane_duration = 5.0 / 3.0;
+}
+
+void PictFade::resign_front() {
+    ClearScreen();
+    RestoreEntries(*globals()->gSaveColorTable);
+}
+
+bool PictFade::mouse_down(int button, const Point& loc) {
+    (void)button;
+    (void)loc;
+    *_skipped = true;
+    VideoDriver::driver()->pop_listener(this);
+    return true;
+}
+
+double PictFade::delay() {
+    double tick = 1.0 / 60.0;
+    switch (_state) {
+      case WAXING:
+      case WANING:
+        return tick;
+      case FULL:
+        return std::max(_wane_start - now(), tick);
+      default:
+        return 0.0;
+    }
+}
+
+void PictFade::fire_timer() {
+    RGBColor black = {0, 0, 0};
+    switch (_state) {
+      case WAXING:
+        {
+            double fraction = 1.0 - ((now() - _wax_start) / _wax_duration);
+            if (fraction > 0.0) {
+                _current_colors.transition_between(_transition_colors, black, fraction);
+                RestoreEntries(_current_colors);
+            } else {
+                _state = FULL;
+                RestoreEntries(_transition_colors);
+            }
+        }
+        break;
+
+      case FULL:
+        _state = WANING;
+        break;
+
+      case WANING:
+        {
+            double fraction = (now() - _wane_start) / _wane_duration;
+            if (fraction < 1.0) {
+                _current_colors.transition_between(_transition_colors, black, fraction);
+                RestoreEntries(_current_colors);
+            } else {
+                VideoDriver::driver()->pop_listener(this);
+            }
+        }
+        break;
+
+      default:
+        break;
+    }
+}
+
 }  // namespace antares

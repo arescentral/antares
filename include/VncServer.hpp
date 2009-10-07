@@ -20,6 +20,7 @@
 
 #include <queue>
 #include <map>
+#include "EventListenerList.hpp"
 #include "VideoDriver.hpp"
 
 namespace antares {
@@ -28,7 +29,7 @@ class VncVideoDriver : public VideoDriver {
   public:
     VncVideoDriver(int port);
     virtual void send_event(EventRecord evt);
-    virtual bool wait_next_event(EventRecord* evt, int sleep);
+    virtual bool wait_next_event(EventRecord* evt, double sleep);
     virtual bool button();
     virtual Point get_mouse();
     virtual void get_keys(KeyMap k);
@@ -37,6 +38,10 @@ class VncVideoDriver : public VideoDriver {
     virtual int get_demo_scenario();
     virtual void main_loop_iteration_complete(uint32_t game_time);
     virtual int ticks();
+
+    virtual void loop();
+    virtual void push_listener(EventListener* listener);
+    virtual void pop_listener(EventListener* listener);
 
   private:
     bool vnc_poll(int64_t timeout);
@@ -48,6 +53,7 @@ class VncVideoDriver : public VideoDriver {
     Point _mouse;
     std::queue<EventRecord*> _event_queue;
     std::map<int, int> _key_map;
+    EventListenerList _listeners;
 };
 
 }  // namespace antares

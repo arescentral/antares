@@ -123,6 +123,56 @@ void Pause( long time);
 void MainLoop();
 GameResult PlayTheGame(long *seconds);
 
+class Master : public EventListener {
+  public:
+    Master()
+        : _state(START) { }
+
+    virtual void become_front() {
+        switch (_state) {
+          case START:
+            _state = PUBLISHER_PICT;
+            _listener.reset(new PictFade(2000, 2000, &_skipped_publisher_or_ego));
+            VideoDriver::driver()->push_listener(_listener.get());
+            break;
+
+          case PUBLISHER_PICT:
+            if (!_skipped_publisher_or_ego)  {
+                _state = EGO_PICT;
+                _listener.reset(new PictFade(2001, 2000, &_skipped_publisher_or_ego));
+                VideoDriver::driver()->push_listener(_listener.get());
+                break;
+            }
+            // fall through.
+
+          case EGO_PICT:
+          case TITLE_SCREEN_PICT:
+          case INTRO_SCROLL:
+            // Not yet implemented as EventListener objects.
+
+          case MAIN_SCREEN:
+            // When the main screen returns, exit loop.
+            _listener.reset();
+            VideoDriver::driver()->pop_listener(this);
+            break;
+        }
+    }
+
+  private:
+    enum State {
+        START,
+        PUBLISHER_PICT,
+        EGO_PICT,
+        TITLE_SCREEN_PICT,
+        INTRO_SCROLL,
+        MAIN_SCREEN,
+    };
+
+    State _state;
+    scoped_ptr<EventListener> _listener;
+    bool _skipped_publisher_or_ego;
+};
+
 void AresMain() {
     RGBColor                initialFadeColor;
     scoped_ptr<ColorTable>  theClut;
@@ -184,18 +234,13 @@ void AresMain() {
     AdmiralInit();
     InitBeams();
 
-    // TODO(sfiera): perform initial fade-out only when running full-screen.
-    bool skipFading = AutoFadeTo(30, &initialFadeColor, true);
-    if (!skipFading) {
-        skipFading = CustomPictFade(2000, 2000);
-    }
-    if (!skipFading) {
-        skipFading = CustomPictFade(2001, 2000);
-    }
+    Master master;
+    VideoDriver::driver()->push_listener(&master);
+    VideoDriver::driver()->loop();
 
-    StartCustomPictFade(502, 2001, skipFading);
-    TimedWaitForAnyEvent(skipFading ? 1 : 1400);
-    EndCustomPictFade(skipFading);
+    StartCustomPictFade(502, 2001, false /* skipped */);
+    TimedWaitForAnyEvent(false /* skipped */ ? 1 : 1400);
+    EndCustomPictFade(false /* skipped */);
 
     globals()->okToOpenFile = true;
     MainLoop();

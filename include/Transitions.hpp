@@ -19,6 +19,8 @@
 #define ANTARES_TRANSITIONS_HPP_
 
 #include <Base.h>
+#include "ColorTable.hpp"
+#include "VideoDriver.hpp"
 
 namespace antares {
 
@@ -37,6 +39,37 @@ bool AutoMusicFadeTo( long, RGBColor *, bool);
 bool CustomPictFade(short pictID, short clutID);
 bool StartCustomPictFade(short pictID, short clutID, bool fast);
 bool EndCustomPictFade(bool fast);
+
+class PictFade : public EventListener {
+  public:
+    PictFade(int pict_id, int clut_id, bool* skipped);
+
+    virtual void become_front();
+    virtual void resign_front();
+
+    virtual bool mouse_down(int button, const Point& loc);
+    virtual double delay();
+    virtual void fire_timer();
+
+  private:
+    enum State {
+        NEW,
+        WAXING,
+        FULL,
+        WANING,
+    };
+
+    State _state;
+    int _pict_id;
+    const ColorTable _transition_colors;
+    ColorTable _current_colors;
+    bool* _skipped;
+
+    double _wax_start;
+    double _wax_duration;
+    double _wane_start;
+    double _wane_duration;
+};
 
 }  // namespace antares
 

@@ -316,4 +316,18 @@ void ColorTable::set_color(size_t index, const RGBColor& color) {
     _colors[index] = color;
 }
 
+void ColorTable::transition_between(
+        const ColorTable& source, const RGBColor& dest, double fraction) {
+    double source_fraction = 1 - fraction;
+    double dest_fraction = fraction;
+    for (int i = 0; i < 256; ++i) {
+        RGBColor out = {
+            source.color(i).red * source_fraction + dest.red * dest_fraction,
+            source.color(i).green * source_fraction + dest.green * dest_fraction,
+            source.color(i).blue * source_fraction + dest.blue * dest_fraction,
+        };
+        _colors[i] = out;
+    }
+}
+
 }  // namespace antares

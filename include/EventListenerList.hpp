@@ -15,35 +15,29 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_COLOR_TABLE_HPP_
-#define ANTARES_COLOR_TABLE_HPP_
+#ifndef ANTARES_EVENT_LISTENER_LIST_HPP_
+#define ANTARES_EVENT_LISTENER_LIST_HPP_
 
-#include <stdint.h>
 #include <vector>
-#include <Base.h>
-#include "SmartPtr.hpp"
+#include "VideoDriver.hpp"
 
 namespace antares {
 
-class ColorTable {
+class EventListenerList {
   public:
-    explicit ColorTable(int32_t id);
-
-    ColorTable* clone() const;
-
-    size_t size() const;
-
-    const RGBColor& color(size_t index) const;
-    void set_color(size_t index, const RGBColor& color);
-
-    void transition_between(const ColorTable& source, const RGBColor& dest, double fraction);
+    bool empty() const;
+    void push(EventListener* listener);
+    void pop(EventListener* listener);
+    void send(const EventRecord& evt);
+    double next_delay();
+    void fire_next_timer();
 
   private:
-    std::vector<RGBColor> _colors;
+    bool min_delay_index(int* min_index);
 
-    DISALLOW_COPY_AND_ASSIGN(ColorTable);
+    std::vector<EventListener*> _list;
 };
 
 }  // namespace antares
 
-#endif  // ANTARES_COLOR_TABLE_HPP_
+#endif  // ANTARES_EVENT_LISTENER_LIST_HPP_

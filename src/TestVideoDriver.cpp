@@ -52,9 +52,28 @@ void TestingVideoDriver::set_game_state(GameState state) {
     _state = state;
 }
 
+void TestingVideoDriver::loop() {
+    while (!_listeners.empty()) {
+        EventRecord evt;
+        if (wait_next_event(&evt, _listeners.next_delay())) {
+            _listeners.send(evt);
+        } else {
+            _listeners.fire_next_timer();
+        }
+    }
+}
+
+void TestingVideoDriver::push_listener(EventListener* listener) {
+    _listeners.push(listener);
+}
+
+void TestingVideoDriver::pop_listener(EventListener* listener) {
+    _listeners.pop(listener);
+}
+
 GameState TestingVideoDriver::state() const { return _state; }
 
-bool MainScreenVideoDriver::wait_next_event(EventRecord*, int) {
+bool MainScreenVideoDriver::wait_next_event(EventRecord*, double) {
     if (state() == MAIN_SCREEN_INTERFACE) {
         if (!get_output_dir().empty()) {
             DumpTo(get_output_dir() + "/main-screen.bin");
@@ -70,7 +89,7 @@ MissionBriefingVideoDriver::MissionBriefingVideoDriver(int level)
         : _level(level),
           _briefing_num(0) { }
 
-bool MissionBriefingVideoDriver::wait_next_event(EventRecord* evt, int) {
+bool MissionBriefingVideoDriver::wait_next_event(EventRecord* evt, double) {
     switch (state()) {
       case MAIN_SCREEN_INTERFACE:
         {
@@ -123,7 +142,7 @@ DemoVideoDriver::DemoVideoDriver(int level)
     }
 }
 
-bool DemoVideoDriver::wait_next_event(EventRecord*, int) { return true; }
+bool DemoVideoDriver::wait_next_event(EventRecord*, double) { return true; }
 
 void DemoVideoDriver::set_game_state(GameState state) {
     TestingVideoDriver::set_game_state(state);

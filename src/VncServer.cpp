@@ -783,7 +783,7 @@ VncVideoDriver::VncVideoDriver(int port)
 
 void VncVideoDriver::send_event(EventRecord) { }
 
-bool VncVideoDriver::wait_next_event(EventRecord* evt, int sleep) {
+bool VncVideoDriver::wait_next_event(EventRecord* evt, double sleep) {
     vnc_poll(sleep * 1000000ll);
     if (_event_queue.empty()) {
         return false;
@@ -821,6 +821,25 @@ void VncVideoDriver::main_loop_iteration_complete(uint32_t) { }
 
 int VncVideoDriver::ticks() {
     return (usecs() - _start_time) * 60 / 1000000;
+}
+
+void VncVideoDriver::loop() {
+    while (!_listeners.empty()) {
+        EventRecord evt;
+        if (wait_next_event(&evt, _listeners.next_delay())) {
+            _listeners.send(evt);
+        } else {
+            _listeners.fire_next_timer();
+        }
+    }
+}
+
+void VncVideoDriver::push_listener(EventListener* listener) {
+    _listeners.push(listener);
+}
+
+void VncVideoDriver::pop_listener(EventListener* listener) {
+    _listeners.pop(listener);
 }
 
 }  // namespace antares

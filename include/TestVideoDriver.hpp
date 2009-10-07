@@ -18,6 +18,7 @@
 #ifndef ANTARES_TEST_VIDEO_DRIVER_HPP_
 #define ANTARES_TEST_VIDEO_DRIVER_HPP_
 
+#include "EventListenerList.hpp"
 #include "VideoDriver.hpp"
 
 namespace antares {
@@ -34,17 +35,22 @@ class TestingVideoDriver : public VideoDriver {
     virtual void main_loop_iteration_complete(uint32_t);
     virtual void set_game_state(GameState state);
 
+    virtual void loop();
+    virtual void push_listener(EventListener* listener);
+    virtual void pop_listener(EventListener* listener);
+
   protected:
     GameState state() const;
 
   private:
     int _current_time;
     GameState _state;
+    EventListenerList _listeners;
 };
 
 class MainScreenVideoDriver : public TestingVideoDriver {
   public:
-    virtual bool wait_next_event(EventRecord*, int);
+    virtual bool wait_next_event(EventRecord*, double);
     virtual int get_demo_scenario();
 };
 
@@ -52,7 +58,7 @@ class MissionBriefingVideoDriver : public TestingVideoDriver {
   public:
     MissionBriefingVideoDriver(int level);
 
-    virtual bool wait_next_event(EventRecord* evt, int);
+    virtual bool wait_next_event(EventRecord* evt, double);
     virtual int get_demo_scenario();
 
   private:
@@ -64,7 +70,7 @@ class DemoVideoDriver : public TestingVideoDriver {
   public:
     DemoVideoDriver(int level);
 
-    virtual bool wait_next_event(EventRecord*, int);
+    virtual bool wait_next_event(EventRecord*, double);
     void set_game_state(GameState state);
     virtual int get_demo_scenario();
     virtual void main_loop_iteration_complete(uint32_t game_time);
