@@ -80,7 +80,7 @@ bool MainScreenVideoDriver::wait_next_event(EventRecord*, double) {
         }
         exit(0);
     }
-    return true;
+    return false;
 }
 
 int MainScreenVideoDriver::get_demo_scenario() { return -1; }
@@ -97,7 +97,7 @@ bool MissionBriefingVideoDriver::wait_next_event(EventRecord* evt, double) {
             evt->message = 0x0100;  // S
             globals()->gPreferencesData->startingLevel = _level;
         }
-        break;
+        return true;
       case SELECT_LEVEL_INTERFACE:
         {
             evt->what = autoKey;
@@ -106,7 +106,7 @@ bool MissionBriefingVideoDriver::wait_next_event(EventRecord* evt, double) {
                 DumpTo(get_output_dir() + "/select-level.bin");
             }
         }
-        break;
+        return true;
       case MISSION_INTERFACE:
         {
             char path[64];
@@ -122,11 +122,10 @@ bool MissionBriefingVideoDriver::wait_next_event(EventRecord* evt, double) {
                 evt->message = 0x7C00;  // RGHT
             }
         }
-        break;
+        return true;
       default:
-        break;
+        return false;
     };
-    return true;
 }
 
 int MissionBriefingVideoDriver::get_demo_scenario() { return -1; }
@@ -142,7 +141,7 @@ DemoVideoDriver::DemoVideoDriver(int level)
     }
 }
 
-bool DemoVideoDriver::wait_next_event(EventRecord*, double) { return true; }
+bool DemoVideoDriver::wait_next_event(EventRecord*, double) { return false; }
 
 void DemoVideoDriver::set_game_state(GameState state) {
     TestingVideoDriver::set_game_state(state);

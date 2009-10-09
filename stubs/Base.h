@@ -107,12 +107,18 @@ void GetKeys(KeyMap keys);
 
 typedef struct { } ICInstance;
 
-typedef struct {
+struct EventRecord {
+    EventRecord()
+            : what(nullEvent),
+              message(0),
+              where(0, 0),
+              modifiers(0) { }
+
     int what;
     int message;
     Point where;
     int modifiers;
-} EventRecord;
+};
 
 struct Rgn { };
 typedef Rgn* RgnPtr;
