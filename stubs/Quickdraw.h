@@ -25,8 +25,8 @@ void MacSetPort(GrafPtr port);
 STUB1(InvalRect, void(Rect* rect));
 STUB1(ClipRect, void(Rect* rect));
 
-void CopyBits(PixMap* source, PixMap* source2, Rect* source_rect,
-      Rect* source_rect2, int mode, void*);
+void CopyBits(PixMap* source, PixMap* source2, const Rect* source_rect,
+      const Rect* source_rect2, int mode, void*);
 
 STUB0(NewRgn, Rgn**(), new Rgn*(new Rgn));
 STUB1(DisposeRgn, void(Rgn** rgn));

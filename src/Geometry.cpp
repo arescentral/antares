@@ -17,6 +17,7 @@
 
 #include "Geometry.hpp"
 
+#include <algorithm>
 #include "BinaryStream.hpp"
 
 namespace antares {
@@ -51,6 +52,11 @@ bool Rect::contains(const Point& p) const {
         && top <= p.v && p.v < bottom;
 }
 
+bool Rect::intersects(const Rect& r) const {
+    return left < r.right && r.left < right
+        && top < r.bottom && r.top < bottom;
+}
+
 int32_t Rect::width() const {
     return right - left;
 }
@@ -77,6 +83,13 @@ void Rect::center_in(const Rect& r) {
     int32_t offset_x = (r.left / 2 - left / 2) + (r.right / 2 - right / 2);
     int32_t offset_y = (r.top / 2 - top / 2) + (r.bottom / 2 - bottom / 2);
     offset(offset_x, offset_y);
+}
+
+void Rect::clip_to(const Rect& r) {
+    left = std::max(left, r.left);
+    top = std::max(top, r.top);
+    right = std::min(right, r.right);
+    bottom = std::min(bottom, r.bottom);
 }
 
 void Rect::read(BinaryReader* bin) {

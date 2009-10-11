@@ -73,4 +73,18 @@ void Picture::draw(const Rect& dst) {
     }
 }
 
+void Picture::draw_to(PixMap* pix, const Rect& from, const Rect& to) {
+    ClippedTransfer transfer(from, to);
+    transfer.ClipSourceTo(_frame);
+    transfer.ClipDestTo(pix->bounds);
+
+    for (int i = 0; i < transfer.Height(); ++i) {
+        const uint8_t* source_bytes =
+            _pixels.get() + transfer.SourceColumn(0) + transfer.SourceRow(i) * _frame.right;
+        uint8_t* dest_bytes =
+            pix->baseAddr + transfer.DestColumn(0) + transfer.DestRow(i) * pix->bounds.right;
+        memcpy(dest_bytes, source_bytes, transfer.Width());
+    }
+}
+
 }  // namespace antares

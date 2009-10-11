@@ -58,6 +58,9 @@ class ClippedTransfer {
     int DestRow(int i) const { return _to.top + i; }
     int DestColumn(int i) const { return _to.left + i; }
 
+    const Rect& from() const { return _from; }
+    const Rect& to() const { return _to; }
+
   private:
     inline void ClipFirstToSecond(const Rect& rect, const Rect& clip) {
         if (clip.left > rect.left) {

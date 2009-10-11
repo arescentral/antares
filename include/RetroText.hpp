@@ -15,47 +15,35 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_GEOMETRY_HPP_
-#define ANTARES_GEOMETRY_HPP_
+#ifndef ANTARES_RETRO_TEXT_HPP_
+#define ANTARES_RETRO_TEXT_HPP_
 
-#include <stdint.h>
+#include <string>
+#include "Geometry.hpp"
+#include "SmartPtr.hpp"
 
 namespace antares {
 
-class BinaryReader;
+class Picture;
+class PixMap;
 
-struct Point {
-    int32_t h;
-    int32_t v;
+class RetroText {
+  public:
+    RetroText(const char* data, size_t len, int font, int fore_color, int back_color);
+    ~RetroText();
 
-    Point();
-    Point(int x, int y);
+    int height_for_width(int width);
+    void draw(PixMap* pix, const Rect& bounds);
 
-    void read(BinaryReader* bin);
-};
+  private:
+    const std::string _text;
+    const int _font;
+    const int _fore_color;
+    const int _back_color;
 
-struct Rect {
-    int32_t left;
-    int32_t top;
-    int32_t right;
-    int32_t bottom;
-
-    Rect();
-    Rect(int32_t left, int32_t top, int32_t right, int32_t bottom);
-
-    bool contains(const Point& p) const;
-    bool intersects(const Rect& r) const;
-    int32_t width() const;
-    int32_t height() const;
-
-    void offset(int32_t x, int32_t y);
-    void inset(int32_t x, int32_t y);
-    void center_in(const Rect& r);
-    void clip_to(const Rect& r);
-
-    void read(BinaryReader* bin);
+    DISALLOW_COPY_AND_ASSIGN(RetroText);
 };
 
 }  // namespace antares
 
-#endif // ANTARES_GEOMETRY_HPP_
+#endif  // ANTARES_RETRO_TEXT_HPP_

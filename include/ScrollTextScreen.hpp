@@ -15,47 +15,41 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_GEOMETRY_HPP_
-#define ANTARES_GEOMETRY_HPP_
+#ifndef ANTARES_SCROLL_TEXT_HPP_
+#define ANTARES_SCROLL_TEXT_HPP_
 
-#include <stdint.h>
+#include "Geometry.hpp"
+#include "SmartPtr.hpp"
+#include "VideoDriver.hpp"
 
 namespace antares {
 
-class BinaryReader;
+class PixMap;
 
-struct Point {
-    int32_t h;
-    int32_t v;
+class ScrollTextScreen : public EventListener {
+  public:
+    ScrollTextScreen(int text_id, int width, double speed);
+    ScrollTextScreen(int text_id, int width, double speed, int song_id);
 
-    Point();
-    Point(int x, int y);
+    virtual void become_front();
+    virtual void resign_front();
 
-    void read(BinaryReader* bin);
-};
+    virtual bool mouse_down(int button, const Point& where);
+    virtual bool key_down(int key);
 
-struct Rect {
-    int32_t left;
-    int32_t top;
-    int32_t right;
-    int32_t bottom;
+    virtual double delay();
+    virtual void fire_timer();
 
-    Rect();
-    Rect(int32_t left, int32_t top, int32_t right, int32_t bottom);
+  private:
+    scoped_ptr<PixMap> _pix_map;
+    const double _speed;
+    const bool _play_song;
+    const int _song_id;
 
-    bool contains(const Point& p) const;
-    bool intersects(const Rect& r) const;
-    int32_t width() const;
-    int32_t height() const;
-
-    void offset(int32_t x, int32_t y);
-    void inset(int32_t x, int32_t y);
-    void center_in(const Rect& r);
-    void clip_to(const Rect& r);
-
-    void read(BinaryReader* bin);
+    double _start;
+    Rect _window;
 };
 
 }  // namespace antares
 
-#endif // ANTARES_GEOMETRY_HPP_
+#endif  // ANTARES_SCROLL_TEXT_HPP_

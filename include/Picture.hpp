@@ -35,6 +35,8 @@ class Picture {
 
     void draw(const Rect& dest);
 
+    void draw_to(PixMap* pix, const Rect& from, const Rect& to);
+
   private:
     Rect _frame;
     scoped_array<uint8_t> _pixels;

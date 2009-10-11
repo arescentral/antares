@@ -57,11 +57,13 @@ Main Antares : src/Admiral.cpp
                src/Races.cpp
                src/Randomize.cpp
                src/Resource.cpp
+               src/RetroText.cpp
                src/Rotation.cpp
                src/ScenarioData.cpp
                src/ScenarioMaker.cpp
                src/ScreenLabel.cpp
                src/ScrollStars.cpp
+               src/ScrollTextScreen.cpp
                src/SoundFX.cpp
                src/SpaceObjectHandling.cpp
                src/SpriteCursor.cpp

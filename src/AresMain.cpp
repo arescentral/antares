@@ -70,6 +70,7 @@
 #include "ScenarioMaker.hpp"
 #include "ScreenLabel.hpp"
 #include "ScrollStars.hpp"
+#include "ScrollTextScreen.hpp"
 #include "SoundFX.hpp"
 #include "SpaceObjectHandling.hpp"
 #include "SpriteCursor.hpp"
@@ -179,8 +180,16 @@ class Master : public EventListener {
             break;
 
           case TITLE_SCREEN_PICT:
-          case INTRO_SCROLL:
+            _state = INTRO_SCROLL;
             _pict_fade.reset();
+            if (!(globals()->gOptions & kOptionHaveSeenIntro)) {
+                _scroll_text.reset(new ScrollTextScreen(5600, 450, 15.0));
+                VideoDriver::driver()->push_listener(_scroll_text.get());
+            }
+            break;
+
+          case INTRO_SCROLL:
+            _scroll_text.reset();
             // Not yet implemented as EventListener objects.
 
           case MAIN_SCREEN:
@@ -202,6 +211,7 @@ class Master : public EventListener {
 
     State _state;
     scoped_ptr<PictFade> _pict_fade;
+    scoped_ptr<ScrollTextScreen> _scroll_text;
 };
 
 void AresMain() {

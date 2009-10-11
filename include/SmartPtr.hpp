@@ -18,6 +18,8 @@
 #ifndef ANTARES_SMART_PTR_HPP_
 #define ANTARES_SMART_PTR_HPP_
 
+#include <stdlib.h>
+
 namespace antares {
 
 #define DISALLOW_COPY_AND_ASSIGN(CLASS) \
