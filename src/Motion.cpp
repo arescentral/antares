@@ -42,8 +42,6 @@ namespace antares {
 #define kCenterScaleSize    983040L//61440L         // = 240 * SCALE_SCALE
 #define kMotionError        "\pMOTN"
 
-#define kUnitsToCheckNumber     5
-
 #define H_UR                1
 #define H_DR                2
 #define H_UL                3
@@ -67,17 +65,6 @@ namespace antares {
 //#endif
 #define kThinkiverseTopLeft     (kUniversalCenter - 131068) // universe for thinking or owned objects
 #define kThinkiverseBottomRight (kUniversalCenter + 131068)
-
-struct adjacentUnitType {
-    long                    adjacentUnit;           // the normal adjacent unit
-    Point                   superOffset;            // the offset of the super unit (for wrap-around)
-};
-
-struct proximityUnitType {
-    spaceObjectTypePtr      nearObject;                         // for collision checking
-    spaceObjectTypePtr      farObject;                          // for distance checking
-    adjacentUnitType        unitsToCheck[kUnitsToCheckNumber];  // adjacent units to check
-};
 
 extern Handle           gPixTable[];
 extern long             gAbsoluteScale, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM,
@@ -107,17 +94,10 @@ int InitMotion( void)
     globals()->gCenterScaleH = (gPlayScreenWidth / 2) * SCALE_SCALE;
     globals()->gCenterScaleV = (gPlayScreenHeight / 2) * SCALE_SCALE;
 
-    globals()->gProximityGrid.create(kProximityGridDataLength);
-    if (globals()->gProximityGrid.get() == nil)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, MEMORY_ERROR, -1, -1, -1, __FILE__, 1);
-        return( MEMORY_ERROR);
-    }
-
-//  mHandleLockAndRegister( globals()->gProximityGrid, nil, nil, nil)
+    globals()->gProximityGrid.reset(new proximityUnitType[kProximityGridDataLength]);
 
     // initialize the proximityGrid & set up the needed lookups (see Notebook 2 p.34)
-    p = *globals()->gProximityGrid;
+    p = globals()->gProximityGrid.get();
     for ( y = 0; y < kProximitySuperSize; y++)
     {
         for ( x = 0; x < kProximitySuperSize; x++)
@@ -180,7 +160,7 @@ void ResetMotionGlobals( void)
     globals()->gClosestObject = 0;
     globals()->gFarthestObject = 0;
 
-    proximityObject = *globals()->gProximityGrid;
+    proximityObject = globals()->gProximityGrid.get();
     for ( i = 0; i < kProximityGridDataLength; i++)
     {
         proximityObject->nearObject = proximityObject->farObject = nil;
@@ -194,7 +174,7 @@ void HackCheckProxGrid( long sayswho)
     if ( gHackMoitionInitedYet)
     {
 
-    proximityUnitType       *p = *globals()->gProximityGrid;
+    proximityUnitType       *p = globals()->gProximityGrid.get();
     long                    count, c2;
 
 
@@ -214,12 +194,8 @@ void HackCheckProxGrid( long sayswho)
 
 }
 
-void MotionCleanup( void)
-
-{
-    if ( globals()->gProximityGrid.get() != nil) {
-        globals()->gProximityGrid.destroy();
-    }
+void MotionCleanup() {
+    globals()->gProximityGrid.reset();
 }
 
 void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const long unitsToDo)
@@ -704,7 +680,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
     globals()->gFarthestObject = 0;
 
     // reset the collision grid
-    proximityObject = *globals()->gProximityGrid;
+    proximityObject = globals()->gProximityGrid.get();
     for ( i = 0; i < kProximityGridDataLength; i++)
     {
         proximityObject->nearObject = proximityObject->farObject = nil;
@@ -827,7 +803,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
             ye = ys >> kCollisionSuperExtraShift;
             ys &= kProximityUnitAndModulo;
 
-            proximityObject = *globals()->gProximityGrid + (ys << kProximityWidthMultiply) + xs;
+            proximityObject = globals()->gProximityGrid.get() + (ys << kProximityWidthMultiply) + xs;
             aObject->nextNearObject = proximityObject->nearObject;
             proximityObject->nearObject = aObject;
             aObject->collisionGrid.h = xe;
@@ -841,7 +817,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
             ys = ye >> kDistanceSuperExtraShift;
             ye &= kProximityUnitAndModulo;
 
-            proximityObject = *globals()->gProximityGrid + (ye << kProximityWidthMultiply) + xe;
+            proximityObject = globals()->gProximityGrid.get() + (ye << kProximityWidthMultiply) + xe;
             aObject->nextFarObject = proximityObject->farObject;
             proximityObject->farObject = aObject;
             aObject->distanceGrid.h = xs;
@@ -874,7 +850,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
         aObject = aObject->nextObject;
     }
 
-    proximityObject = *globals()->gProximityGrid;
+    proximityObject = globals()->gProximityGrid.get();
     for ( j = 0; j < kProximitySuperSize; j++)
     {
         for ( i = 0; i < kProximitySuperSize; i++)
@@ -1131,7 +1107,7 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
         }
     }
 
-    proximityObject = *globals()->gProximityGrid;
+    proximityObject = globals()->gProximityGrid.get();
     for ( j = 0; j < kProximitySuperSize; j++)
     {
         for ( i = 0; i < kProximitySuperSize; i++)

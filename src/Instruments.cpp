@@ -124,7 +124,7 @@ namespace antares {
 #define kSectorLineBrightness   DARKER
 
 extern CWindowPtr       gTheWindow; // hack to copy bar indicators to offworld
-extern TypedHandle<spaceObjectType> gSpaceObjectData;
+extern scoped_array<spaceObjectType> gSpaceObjectData;
 extern spaceObjectType  *gScrollStarObject;
 extern int32_t          gNatePortLeft, gNatePortTop, gAbsoluteScale,
                         WORLD_WIDTH, WORLD_HEIGHT, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM;
@@ -139,18 +139,16 @@ int InstrumentInit() {
     globals()->gInstrumentTop = (WORLD_HEIGHT / 2) - ( kPanelHeight / 2);
     globals()->gRightPanelLeftEdge = WORLD_WIDTH - kRightPanelWidth;
 
-    globals()->gRadarBlipData.create(kRadarBlipNum);
-    globals()->gScaleList.create(kScaleListNum);
-    globals()->gSectorLineData.create(kMaxSectorLine * 4 + kSiteCoordNum * 2 + kCursorCoordNum * 2);
+    globals()->gRadarBlipData.reset(new Point[kRadarBlipNum]);
+    globals()->gScaleList.reset(new int32_t[kScaleListNum]);
+    globals()->gSectorLineData.reset(new int32_t[kMaxSectorLine * 4 + kSiteCoordNum * 2 + kCursorCoordNum * 2]);
     ResetInstruments();
 
     return MiniScreenInit();
 }
 
 void InstrumentCleanup() {
-    if (globals()->gRadarBlipData.get() != nil) {
-        globals()->gRadarBlipData.destroy();
-    }
+    globals()->gRadarBlipData.reset();
     MiniScreenCleanup();
 }
 
@@ -165,9 +163,8 @@ void ResetInstruments() {
     globals()->gWhichScaleNum = 0;
     gLastGlobalCorner.h = gLastGlobalCorner.v = 0;
     globals()->gMouseActive = kMouseOff;
-    l = *globals()->gScaleList;
-    for ( i = 0; i < kScaleListNum; i++)
-    {
+    l = globals()->gScaleList.get();
+    for (i = 0; i < kScaleListNum; i++) {
         *l = SCALE_SCALE;
         l++;
     }
@@ -186,7 +183,7 @@ void ResetInstruments() {
     globals()->gBarIndicator[kBatteryBar].top = 103 + globals()->gInstrumentTop;
     globals()->gBarIndicator[kBatteryBar].color = SALMON;
 
-    lp = *globals()->gRadarBlipData;
+    lp = globals()->gRadarBlipData.get();
     for ( i = 0; i < kRadarBlipNum; i++)
     {
         lp->h = -1;
@@ -198,7 +195,7 @@ void ResetInstruments() {
 void ResetSectorLines() {
     int32_t *l, count;
 
-    l = *globals()->gSectorLineData;
+    l = globals()->gSectorLineData.get();
 
     for ( count = 0; count < kMaxSectorLine; count++)
     {
@@ -256,7 +253,7 @@ void UpdateRadar(int32_t unitsDone) {
 
     if ( doDraw)
     {
-        lp = *globals()->gRadarBlipData;
+        lp = globals()->gRadarBlipData.get();
         for ( rcount = 0; rcount < kRadarBlipNum; rcount++)
         {
             if ( lp->h >= 0)
@@ -300,7 +297,7 @@ void UpdateRadar(int32_t unitsDone) {
             DrawInRealWorld();
             ChunkCopyPixMapToScreenPixMap(gOffWorld, &tRect, gActiveWorld);
 
-            lp = *globals()->gRadarBlipData;
+            lp = globals()->gRadarBlipData.get();
             for ( rcount = 0; rcount < kRadarBlipNum; rcount++)
             {
                 lp->h = -1;
@@ -308,9 +305,9 @@ void UpdateRadar(int32_t unitsDone) {
             }
             rcount = 0;
 
-            lp = *globals()->gRadarBlipData;
+            lp = globals()->gRadarBlipData.get();
             globals()->gRadarCount = globals()->gRadarSpeed;
-            anObject = *gSpaceObjectData;
+            anObject = gSpaceObjectData.get();
 
             for ( oCount = 0; oCount < kMaxSpaceObject; oCount++)
             {
@@ -350,7 +347,7 @@ void UpdateRadar(int32_t unitsDone) {
         {
             case kNearestFoeZoom:
             case kNearestAnythingZoom:
-                anObject = *gSpaceObjectData + globals()->gClosestObject;
+                anObject = gSpaceObjectData.get() + globals()->gClosestObject;
                 bestScale = MIN_SCALE;
                 /*
                 dx = ( (long)anObject->location.h - (long)gScrollStarObject->location.h);
@@ -427,7 +424,7 @@ void UpdateRadar(int32_t unitsDone) {
 
             case kSmallestZoom:
 //              bestScale = kSuperSmallScale;
-                anObject = *gSpaceObjectData + globals()->gFarthestObject;
+                anObject = gSpaceObjectData.get() + globals()->gFarthestObject;
                 bestScale = MIN_SCALE;
                 /*
                 dx = ( (long)anObject->location.h - (long)gScrollStarObject->location.h);
@@ -464,13 +461,13 @@ void UpdateRadar(int32_t unitsDone) {
 
         for ( x = 0; x < unitsDone; x++)
         {
-            scaleval = *globals()->gScaleList + globals()->gWhichScaleNum;
+            scaleval = globals()->gScaleList.get() + globals()->gWhichScaleNum;
             *scaleval = bestScale;
             globals()->gWhichScaleNum++;
             if ( globals()->gWhichScaleNum == kScaleListNum) globals()->gWhichScaleNum = 0;
         }
 
-        scaleval = *globals()->gScaleList;
+        scaleval = globals()->gScaleList.get();
         rcount = 0;
         for ( oCount = 0; oCount < kScaleListNum; oCount++)
         {
@@ -701,7 +698,7 @@ void EraseSite() {
     clipRect.top = CLIP_TOP;
     clipRect.bottom = CLIP_BOTTOM;
 
-    l = *globals()->gSectorLineData + kSiteCoordOffset;
+    l = globals()->gSectorLineData.get() + kSiteCoordOffset;
     olp = l + kSiteCoordNum;
     sx = *(olp++) = *(l++);
     sy = *(olp++) = *(l++);
@@ -722,7 +719,7 @@ void EraseSite() {
 
     // do the cursor, too
 
-    l = *globals()->gSectorLineData + kCursorCoordOffset;
+    l = globals()->gSectorLineData.get() + kCursorCoordOffset;
     olp = l + kCursorCoordNum;
     sx = *(olp++) = *(l++);
     sy = *(olp++) = *(l++);
@@ -753,7 +750,7 @@ void EraseSectorLines() {
     clipRect.top = CLIP_TOP;
     clipRect.bottom = CLIP_BOTTOM;
 
-    l = *globals()->gSectorLineData;
+    l = globals()->gSectorLineData.get();
     count = 0;
 
     while (( *l != -1) && ( count < kMaxSectorLine))
@@ -767,7 +764,7 @@ void EraseSectorLines() {
         count++;
     }
 
-    l = *globals()->gSectorLineData + (kMaxSectorLine << 1L);
+    l = globals()->gSectorLineData.get() + (kMaxSectorLine << 1L);
     count = 0;
 
     while (( *l != -1) && ( count < kMaxSectorLine))
@@ -859,7 +856,7 @@ void DrawSite() {
                     0, color);
         }
 
-        l = *globals()->gSectorLineData + kSiteCoordOffset;
+        l = globals()->gSectorLineData.get() + kSiteCoordOffset;
         *(l++) = sx;
         *(l++) = sy;
         *(l++) = (sx + sa);
@@ -891,7 +888,7 @@ void DrawSite() {
 //      ShowSpriteCursor( true);
     }
 
-    l = *globals()->gSectorLineData + kCursorCoordOffset;
+    l = globals()->gSectorLineData.get() + kCursorCoordOffset;
     sx = *(l++) = cursorCoord.h;
     sy = *(l++) = cursorCoord.v;
 
@@ -967,7 +964,7 @@ void DrawSectorLines() {
     x >>= SHIFT_SCALE;
     x += CLIP_LEFT;
 
-    l = *globals()->gSectorLineData;
+    l = globals()->gSectorLineData.get();
     if ( doDraw)
     {
         while ((x < implicit_cast<uint32_t>(CLIP_RIGHT)) && (h > 0)) {
@@ -1043,7 +1040,7 @@ void DrawSectorLines() {
     x >>= SHIFT_SCALE;
     x += CLIP_TOP;
 
-    l = *globals()->gSectorLineData + (kMaxSectorLine << 1L);
+    l = globals()->gSectorLineData.get() + (kMaxSectorLine << 1L);
 
     if ( doDraw)
     {
@@ -1130,7 +1127,7 @@ void ShowSite() {
     clipRect.top = CLIP_TOP;
     clipRect.bottom = CLIP_BOTTOM;
 
-    l = *globals()->gSectorLineData + kSiteCoordOffset;
+    l = globals()->gSectorLineData.get() + kSiteCoordOffset;
     sx = *(l++);
     sy = *(l++);
     sa = *(l++);
@@ -1164,7 +1161,7 @@ void ShowSite() {
                 sd, sa, sb,
                 gNatePortLeft << 2L, gNatePortTop);
 
-    l = *globals()->gSectorLineData + kCursorCoordOffset;
+    l = globals()->gSectorLineData.get() + kCursorCoordOffset;
     sx = *(l++);
     sy = *(l++);
 
@@ -1208,7 +1205,7 @@ void ShowSectorLines() {
     clipRect.top = CLIP_TOP;
     clipRect.bottom = CLIP_BOTTOM;
 
-    l = *globals()->gSectorLineData;
+    l = globals()->gSectorLineData.get();
     count = 0;
 
     while ( count < kMaxSectorLine)
@@ -1224,7 +1221,7 @@ void ShowSectorLines() {
         count++;
     }
 
-    l = *globals()->gSectorLineData + (kMaxSectorLine << 1L);
+    l = globals()->gSectorLineData.get() + (kMaxSectorLine << 1L);
     count = 0;
 
     while ( count < kMaxSectorLine)
@@ -1247,7 +1244,7 @@ void InstrumentsHandleClick() {
     Point   where;
     int32_t *l;
 
-    l = *globals()->gSectorLineData + kCursorCoordOffset;
+    l = globals()->gSectorLineData.get() + kCursorCoordOffset;
     where.h = *(l++);
     where.v = *(l++);
 
@@ -1260,7 +1257,7 @@ void InstrumentsHandleDoubleClick() {
     Point   where;
     int32_t *l;
 
-    l = *globals()->gSectorLineData + kCursorCoordOffset;
+    l = globals()->gSectorLineData.get() + kCursorCoordOffset;
     where.h = *(l++);
     where.v = *(l++);
 
@@ -1273,7 +1270,7 @@ void InstrumentsHandleMouseUp() {
     Point   where;
     int32_t *l;
 
-    l = *globals()->gSectorLineData + kCursorCoordOffset;
+    l = globals()->gSectorLineData.get() + kCursorCoordOffset;
     where.h = *(l++);
     where.v = *(l++);
 
@@ -1284,7 +1281,7 @@ void InstrumentsHandleMouseStillDown() {
     Point   where;
     int32_t *l;
 
-    l = *globals()->gSectorLineData + kCursorCoordOffset;
+    l = globals()->gSectorLineData.get() + kCursorCoordOffset;
     where.h = *(l++);
     where.v = *(l++);
 

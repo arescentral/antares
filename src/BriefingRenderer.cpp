@@ -39,7 +39,7 @@ struct briefingSpriteBoundsType {
     long    objectIndex;
 };
 
-extern TypedHandle<spaceObjectType> gSpaceObjectData;
+extern scoped_array<spaceObjectType> gSpaceObjectData;
 extern scenarioType* gThisScenario;
 
 briefingSpriteBoundsType    *gBriefingSpriteBounds = nil;
@@ -395,7 +395,7 @@ void Briefing_Objects_Render( long whichScenario, PixMap* destmap,
     spritePix   aSpritePix;
     Rect    spriteRect, clipRect;
     baseObjectType  *baseObject = nil;
-    spaceObjectType *anObject = *gSpaceObjectData;
+    spaceObjectType *anObject = gSpaceObjectData.get();
     bool         *gridCells = nil;
     briefingSpriteBoundsType    *sBounds = nil;
 

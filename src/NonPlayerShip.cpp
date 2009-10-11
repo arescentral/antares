@@ -77,7 +77,7 @@ namespace antares {
 
 //#define   kUseOldThinking
 
-extern TypedHandle<spaceObjectType> gSpaceObjectData;
+extern scoped_array<spaceObjectType> gSpaceObjectData;
 extern long                     gRandomSeed, gRootObjectNumber;
 extern spaceObjectType*         gScrollStarObject;
 extern spaceObjectType*         gRootObject;
@@ -525,7 +525,7 @@ void NonplayerShipThink( long timePass)
                 // targetObject is set for all three weapons -- do not change
                 if ( anObject->targetObjectNumber >= 0)
                 {
-                    targetObject = *gSpaceObjectData + anObject->targetObjectNumber;
+                    targetObject = gSpaceObjectData.get() + anObject->targetObjectNumber;
                 } else targetObject = nil;
 
                 if ( anObject->pulseTime > 0) anObject->pulseTime -= timePass;
@@ -657,7 +657,7 @@ void NonplayerShipThink( long timePass)
                         /*
                         if ( anObject->targetObjectNumber >= 0)
                         {
-                            targetObject = *gSpaceObjectData + anObject->targetObjectNumber;
+                            targetObject = gSpaceObjectData.get() + anObject->targetObjectNumber;
                         } else targetObject = nil;
                         */
                         ExecuteObjectActions( weaponObject->activateAction,
@@ -1088,7 +1088,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                             if ( anObject->destinationObject !=
                                 kNoDestinationObject)
                             {
-                                targetObject = *gSpaceObjectData + anObject->destinationObject;
+                                targetObject = gSpaceObjectData.get() + anObject->destinationObject;
                                 if ( targetObject->id != anObject->destObjectDestID) targetObject = nil;
                             } else targetObject = nil;
                             if ( targetObject != nil)
@@ -1570,7 +1570,7 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
                     if ( anObject->destinationObject !=
                         kNoDestinationObject)
                     {
-                        targetObject = *gSpaceObjectData + anObject->destinationObject;
+                        targetObject = gSpaceObjectData.get() + anObject->destinationObject;
                         if ( targetObject->id != anObject->destObjectDestID) targetObject = nil;
                     } else targetObject = nil;
                     if ( targetObject != nil)
@@ -1875,7 +1875,7 @@ void ThinkObjectResolveDestination( spaceObjectType *anObject, coordPointType *d
                     if ( anObject->destinationObject !=
                         kNoDestinationObject)
                     {
-                        (*targetObject) = *gSpaceObjectData + anObject->destinationObject;
+                        (*targetObject) = gSpaceObjectData.get() + anObject->destinationObject;
                         if ( (*targetObject)->id != anObject->destObjectDestID) *targetObject = nil;
                     } else *targetObject = nil;
                     if ( *targetObject != nil)
@@ -1929,7 +1929,7 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
 
     if ( anObject->closestObject != kNoShip)
     {
-        closestObject = *gSpaceObjectData + anObject->closestObject;
+        closestObject = gSpaceObjectData.get() + anObject->closestObject;
     } else closestObject = nil;
 
     // if we have no target  then
@@ -1962,7 +1962,7 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
     if ( anObject->targetObjectNumber != kNoShip)
     {
         // make sure we're still talking about the same object
-        *targetObject = *gSpaceObjectData + anObject->targetObjectNumber;
+        *targetObject = gSpaceObjectData.get() + anObject->targetObjectNumber;
 
         // if the object is wrong or smells at all funny, then
         if  (
@@ -1994,7 +1994,7 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
             {
                 // make it our target
                 anObject->targetObjectNumber = anObject->closestObject;
-                closestObject = *targetObject = *gSpaceObjectData + anObject->targetObjectNumber;
+                closestObject = *targetObject = gSpaceObjectData.get() + anObject->targetObjectNumber;
                 anObject->targetObjectID = closestObject->id;
                 if ( !((*targetObject)->attributes & kPotentialTarget))
                 {   // cancel
@@ -2024,7 +2024,7 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
                     ( !(targetObject->active))) &&
                     ( anObject->closestObject != kNoShip))
                 {
-                    closestObject = *gSpaceObjectData + anObject->closestObject;
+                    closestObject = gSpaceObjectData.get() + anObject->closestObject;
                     if ( ( closestObject->attributes & kHated))
                     {
                         targetObject = closestObject;
@@ -2054,7 +2054,7 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
                 kRemoteOrHuman))
             {
                 anObject->targetObjectNumber = anObject->closestObject;
-                *targetObject = *gSpaceObjectData + anObject->targetObjectNumber;
+                *targetObject = gSpaceObjectData.get() + anObject->targetObjectNumber;
                 anObject->targetObjectID = (*targetObject)->id;
                 dest->h = (*targetObject)->location.h;
                 dest->v = (*targetObject)->location.v;
@@ -2329,7 +2329,7 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
                         anObject->attributes &= (~kIsHumanControlled) & (~kIsPlayerShip);
                         globals()->gPlayerShipNumber = count;
                         ResetScrollStars( globals()->gPlayerShipNumber);
-                        anObject = *gSpaceObjectData + globals()->gPlayerShipNumber;
+                        anObject = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
                         anObject->attributes |= attributes;
                     } else
                     {
@@ -2396,7 +2396,7 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
     whichShip = startShip = currentShipNum;
     if ( whichShip >= 0)
     {
-        anObject = *gSpaceObjectData + startShip;
+        anObject = gSpaceObjectData.get() + startShip;
         if ( anObject->active != kObjectInUse) // if it's not in the loop
         {
             anObject = gRootObject;
@@ -2576,7 +2576,7 @@ long GetSpritePointSelectObject( Rect *bounds, spaceObjectType *sourceObject, un
     long            whichShip = 0, resultShip = -1, closestShip = -1;
     unsigned long   myOwnerFlag = 1 << sourceObject->owner;
 
-    anObject = *gSpaceObjectData;
+    anObject = gSpaceObjectData.get();
 
     for ( whichShip = 0; whichShip < kMaxSpaceObject; whichShip++)
     {

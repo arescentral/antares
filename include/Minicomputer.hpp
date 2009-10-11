@@ -26,6 +26,40 @@
 
 namespace antares {
 
+#define kMiniScreenCharWidth    25//18
+
+enum lineKindType {
+    plainLineKind = 0,
+    buttonOffLineKind = 1,
+    buttonOnLineKind = 2
+};
+
+enum lineSelectType {
+    cannotSelect = 0,
+    selectDim = 1,
+    selectable = 2
+};
+
+struct miniScreenLineType {
+    unsigned char   string[kMiniScreenCharWidth + 1];
+    unsigned char   statusFalse[kMiniScreenCharWidth + 1];
+    unsigned char   statusTrue[kMiniScreenCharWidth + 1];
+    unsigned char   statusString[kMiniScreenCharWidth + 1];
+    unsigned char   postString[kMiniScreenCharWidth + 1];
+    long            hiliteLeft;
+    long            hiliteRight;
+    long            whichButton;
+    lineSelectType  selectable;
+    bool         underline;
+    lineKindType    lineKind;
+    long            value;      // for keeping track of changing values
+    long            statusType;
+    long            whichStatus;
+    long            statusPlayer;
+    long            negativeValue;
+    baseObjectType* sourceData;
+};
+
 int MiniScreenInit( void);
 void MiniScreenCleanup( void);
 void SetMiniScreenStatusStrList( short);

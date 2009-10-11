@@ -45,7 +45,6 @@ class natePixType {
     std::vector<natePixEntryType*> _entries;
 };
 
-TypedHandle<natePixType> CreateNatePixTable();
 unsigned long GetNatePixTableSize(TypedHandle<natePixType>);
 long GetNatePixTablePixNum(TypedHandle<natePixType>);
 int GetNatePixTableNatePixWidth(TypedHandle<natePixType>, long);

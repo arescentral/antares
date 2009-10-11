@@ -106,12 +106,6 @@ natePixType::~natePixType() {
     clear();
 }
 
-TypedHandle<natePixType> CreateNatePixTable() {
-    TypedHandle<natePixType> newTable;
-    newTable.create(1);
-    return newTable;
-}
-
 natePixEntryType* natePixType::at(size_t index) const {
     return _entries.at(index);
 }

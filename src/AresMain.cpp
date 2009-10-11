@@ -102,7 +102,7 @@ const int kTitleTextScrollWidth = 450;
 
 }  // namespace
 
-extern TypedHandle<spaceObjectType> gSpaceObjectData;
+extern scoped_array<spaceObjectType> gSpaceObjectData;
 extern int32_t gRandomSeed;
 extern scenarioType *gThisScenario;
 extern PixMap* gActiveWorld;
@@ -762,7 +762,7 @@ GameResult PlayTheGame(long *seconds) {
                 if (unitsToDo > 0) {
                     // executed arbitrarily, but at least once every kDecideEveryCycles
                     MoveScrollStars(unitsToDo);
-                    MoveSpaceObjects(*gSpaceObjectData, kMaxSpaceObject, unitsToDo);
+                    MoveSpaceObjects(gSpaceObjectData.get(), kMaxSpaceObject, unitsToDo);
                 }
 
                 globals()->gGameTime += unitsToDo;
@@ -821,7 +821,7 @@ GameResult PlayTheGame(long *seconds) {
                         InstrumentsHandleMouseUp();
                     }
 
-                    CollideSpaceObjects(*gSpaceObjectData, kMaxSpaceObject);
+                    CollideSpaceObjects(gSpaceObjectData.get(), kMaxSpaceObject);
                     decideCycle = 0;
                     scenarioCheckTime++;
                     if (scenarioCheckTime == 30) {

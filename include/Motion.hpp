@@ -55,6 +55,19 @@ namespace antares {
 #define kDistanceSuperExtraShift    4L      // for sake of speed = kDistanceSperUnitBitShift - kDistanceUnitBitShift
 #define kDistanceUnitExtraShift     0L      // speed from kCollisionSuperUnitBitShift to kDistanceUnitBitShift
 
+struct adjacentUnitType {
+    long                    adjacentUnit;           // the normal adjacent unit
+    Point                   superOffset;            // the offset of the super unit (for wrap-around)
+};
+
+#define kUnitsToCheckNumber     5
+
+struct proximityUnitType {
+    spaceObjectTypePtr      nearObject;                         // for collision checking
+    spaceObjectTypePtr      farObject;                          // for distance checking
+    adjacentUnitType        unitsToCheck[kUnitsToCheckNumber];  // adjacent units to check
+};
+
 // for the macro mRanged, time is assumed to be a long game ticks, velocity a fixed, result long, scratch fixed
 inline void mRange(long& result, long time, Fixed velocity, Fixed& scratch) {
     scratch = mLongToFixed( time);

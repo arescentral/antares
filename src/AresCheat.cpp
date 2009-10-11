@@ -51,20 +51,13 @@ namespace antares {
 void CheatFeedback( short, bool, long);
 void CheatFeedbackPlus(short, bool, long, unsigned char*);
 
-void AresCheatInit( void)
-{
-    globals()->gAresCheatStrings.create(1);
-    if (globals()->gAresCheatStrings.get() == nil) {
-        return;
-    }
-    (*globals()->gAresCheatStrings)->load(kCheatStringListID);
+void AresCheatInit() {
+    globals()->gAresCheatStrings.reset(new StringList);
+    globals()->gAresCheatStrings->load(kCheatStringListID);
 }
 
-void CleanupAresCheat( void)
-{
-    if (globals()->gAresCheatStrings.get() != nil) {
-        globals()->gAresCheatStrings.destroy();
-    }
+void CleanupAresCheat() {
+    globals()->gAresCheatStrings.reset();
 }
 
 short GetCheatNumFromString(unsigned char* s)
@@ -81,7 +74,7 @@ short GetCheatNumFromString(unsigned char* s)
         strLen--;
     }
     std::string cpp_string(reinterpret_cast<const char*>(codeString + 1), *codeString);
-    return (*globals()->gAresCheatStrings)->index_of(cpp_string) + 1;
+    return globals()->gAresCheatStrings.get()->index_of(cpp_string) + 1;
 }
 
 void ExecuteCheat( short whichCheat, long whichPlayer)

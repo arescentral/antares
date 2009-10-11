@@ -42,7 +42,7 @@ extern PixMap*          gOffWorld;
 extern long             gNatePortLeft, gNatePortTop, gAbsoluteScale,
                         CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM;
 extern coordPointType   gGlobalCorner;
-extern TypedHandle<spaceObjectType> gSpaceObjectData;
+extern scoped_array<spaceObjectType> gSpaceObjectData;
 
 void DetermineBeamRelativeCoordFromAngle( spaceObjectType *, short);
 
@@ -50,8 +50,8 @@ short InitBeams() {
     beamType    *beam;
     short           i;
 
-    globals()->gBeamData.create(kBeamNum);
-    beam = *globals()->gBeamData;
+    globals()->gBeamData.reset(new beamType[kBeamNum]);
+    beam = globals()->gBeamData.get();
     for (i = 0; i < kBeamNum; i++) {
         beam->active = false;
         beam++;
@@ -59,14 +59,12 @@ short InitBeams() {
     return kNoError;
 }
 
-void CleanupBeams( void)
-{
-    if (globals()->gBeamData.get() != nil) globals()->gBeamData.destroy();
+void CleanupBeams( void) {
+    globals()->gBeamData.reset();
 }
 
-void ResetBeams( void)
-{
-    beamType    *aBeam = *globals()->gBeamData;
+void ResetBeams() {
+    beamType    *aBeam = globals()->gBeamData.get();
     short       i;
 
     for ( i = 0; i < kBeamNum; i++)
@@ -88,7 +86,7 @@ void ResetBeams( void)
 beamType *AddBeam(coordPointType *location, unsigned char color,
     beamKindType kind, long accuracy, long range, long *whichBeam)
 {
-    beamType    *aBeam = *globals()->gBeamData;
+    beamType    *aBeam = globals()->gBeamData.get();
     long        h;
 
     *whichBeam = 0;
@@ -147,7 +145,7 @@ void SetSpecialBeamAttributes( spaceObjectType *beamObject, spaceObjectType *sou
 
     if ( sourceObject->targetObjectNumber >= 0)
     {
-        target = *gSpaceObjectData + sourceObject->targetObjectNumber;
+        target = gSpaceObjectData.get() + sourceObject->targetObjectNumber;
 
         if ( ( target->active) && ( target->id == sourceObject->targetObjectID))
         {
@@ -347,7 +345,7 @@ void DrawAllBeams( void)
 void DrawAllBeams( void)
 
 {
-    beamType        *aBeam = *globals()->gBeamData;
+    beamType        *aBeam = globals()->gBeamData.get();
     short           i, j;
     Rect        bounds;
     long            h, v;
@@ -505,7 +503,7 @@ void EraseAllBeams( void)
 
 void ShowAllBeams( void)
 {
-    beamType        *aBeam = *globals()->gBeamData;
+    beamType        *aBeam = globals()->gBeamData.get();
     short           i, j;
     Rect        bounds;
 
@@ -590,7 +588,7 @@ void ShowAllBeams( void)
 
 void CullBeams( void)
 {
-    beamType        *aBeam = *globals()->gBeamData;
+    beamType        *aBeam = globals()->gBeamData.get();
     short           i;
 
     for ( i = 0; i < kBeamNum; i++)

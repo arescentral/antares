@@ -79,9 +79,9 @@ extern long             gNatePortLeft, gNatePortTop;
 
 long                    *gScaleHMap = nil, *gScaleVMap = nil, gAbsoluteScale = MIN_SCALE;
 pixTableType            gPixTable[ kMaxPixTableEntry];
-TypedHandle<spriteType> gSpriteTable;
-TypedHandle<long>       gBothScaleMaps;
-TypedHandle<unsigned char> gStaticTable;
+scoped_array<spriteType> gSpriteTable;
+scoped_array<long> gBothScaleMaps;
+scoped_array<unsigned char> gStaticTable;
 short                   gSpriteFileRefID = 0;
 
 extern PixMap* gActiveWorld;
@@ -95,17 +95,17 @@ void SpriteHandlingInit() {
     int             i, j;
     unsigned char   *staticValue = nil;
 
-    gBothScaleMaps.create(MAX_PIX_SIZE * 2);
-    gScaleHMap = *gBothScaleMaps;
-    gScaleVMap = *gBothScaleMaps + MAX_PIX_SIZE;
+    gBothScaleMaps.reset(new long[MAX_PIX_SIZE * 2]);
+    gScaleHMap = gBothScaleMaps.get();
+    gScaleVMap = gBothScaleMaps.get() + MAX_PIX_SIZE;
 
     ResetAllPixTables();
 
-    gSpriteTable.create(kMaxSpriteNum);
+    gSpriteTable.reset(new spriteType[kMaxSpriteNum]);
     ResetAllSprites();
 
-    gStaticTable.create(kStaticTableSize * 2);
-    staticValue = *gStaticTable;
+    gStaticTable.reset(new unsigned char[kStaticTableSize * 2]);
+    staticValue = gStaticTable.get();
     for (i = 0; i < (kStaticTableSize * 2); i++) {
         j = Randomize( 256);
         *staticValue = j;
@@ -119,7 +119,7 @@ void ResetAllSprites( void)
     spriteType  *aSprite;
     short       i;
 
-    aSprite = *gSpriteTable;
+    aSprite = gSpriteTable.get();
     for ( i = 0; i < kMaxSpriteNum; i++)
     {
         aSprite->resID = -1;
@@ -156,9 +156,7 @@ void CleanupSpriteHandling( void)
 {
     int i;
 
-    if (gBothScaleMaps.get() != nil) {
-        gBothScaleMaps.destroy();
-    }
+    gBothScaleMaps.reset();
 //  CloseResFile( gSpriteFileRefID);
     for ( i = 0; i < kMaxPixTableEntry; i++)
     {
@@ -167,9 +165,7 @@ void CleanupSpriteHandling( void)
             gPixTable[i].resource.destroy();
         }
     }
-    if (gSpriteTable.get() != nil) {
-        gSpriteTable.destroy();
-    }
+    gSpriteTable.reset();
 }
 
 void SetAllPixTablesNoKeep( void)
@@ -286,7 +282,7 @@ spriteType *AddSprite( Point where, TypedHandle<natePixType> table, short resID,
     int         i = 0;
     spriteType  *aSprite;
 
-    aSprite = *gSpriteTable;
+    aSprite = gSpriteTable.get();
     while ((aSprite->table.get() != nil) && ( i < kMaxSpriteNum)) {
         i++;
         aSprite++;
@@ -763,7 +759,7 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, R
         if (( (dRect->left + 1) < clipRect->right) && ( dRect->right > clipRect->left) &&
                 ( dRect->top < clipRect->bottom) && ( dRect->bottom > clipRect->top))
         {
-            staticByte = *gStaticTable + staticValue;
+            staticByte = gStaticTable.get() + staticValue;
             if ( scale <= SCALE_SCALE)
             {
 
@@ -867,7 +863,7 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, R
                     if ( (staticValue + scaleCalc) > ( kStaticTableSize))
                     {
                         staticValue += scaleCalc - kStaticTableSize;
-                        staticByte = *gStaticTable + staticValue;
+                        staticByte = gStaticTable.get() + staticValue;
                     } else staticValue += scaleCalc;
 
                     do
@@ -982,7 +978,7 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, R
                         if ( (staticValue + mapWidth) > ( kStaticTableSize))
                         {
                             staticValue += mapWidth - kStaticTableSize;
-                            staticByte = *gStaticTable + staticValue;
+                            staticByte = gStaticTable.get() + staticValue;
                         } else staticValue += mapWidth;
                         while ( hmap < lhend)
                         {
@@ -1075,7 +1071,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Re
         if (( (dRect->left + 1) < clipRect->right) && ( dRect->right > clipRect->left) &&
                 ( dRect->top < clipRect->bottom) && ( dRect->bottom > clipRect->top))
         {
-            staticByte = *gStaticTable + staticValue;
+            staticByte = gStaticTable.get() + staticValue;
             if ( scale <= SCALE_SCALE)
             {
 
@@ -1181,7 +1177,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Re
                         if ( (staticValue + scaleCalc) > ( kStaticTableSize))
                         {
                             staticValue += scaleCalc - kStaticTableSize;
-                            staticByte = *gStaticTable + staticValue;
+                            staticByte = gStaticTable.get() + staticValue;
                         } else staticValue += scaleCalc;
 
                         do
@@ -1213,7 +1209,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Re
                         if ( (staticValue + scaleCalc) > ( kStaticTableSize))
                         {
                             staticValue += scaleCalc - kStaticTableSize;
-                            staticByte = *gStaticTable + staticValue;
+                            staticByte = gStaticTable.get() + staticValue;
                         } else staticValue += scaleCalc;
 
                         do
@@ -1332,7 +1328,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Re
                         if ( (staticValue + mapWidth) > ( kStaticTableSize))
                         {
                             staticValue += mapWidth - kStaticTableSize;
-                            staticByte = *gStaticTable + staticValue;
+                            staticByte = gStaticTable.get() + staticValue;
                         } else staticValue += mapWidth;
                         while ( hmap < lhend)
                         {
@@ -1724,7 +1720,7 @@ void EraseSpriteTable( void)
     long                i;
     spriteType          *aSprite;
 
-    aSprite = *gSpriteTable;
+    aSprite = gSpriteTable.get();
     for ( i = 0; i < kMaxSpriteNum; i++)
     {
         if (aSprite->table.get() != nil) {
@@ -1753,14 +1749,14 @@ void DrawSpriteTableInOffWorld( Rect *clipRect)
     int             whichShape;
     spriteType      *aSprite;
 
-    aSprite = *gSpriteTable;
+    aSprite = gSpriteTable.get();
 
 //  WriteDebugLong( gAbsoluteScale);
     if ( gAbsoluteScale >= kSpriteBlipThreshhold)
     {
         for ( layer = kFirstSpriteLayer; layer <= kLastSpriteLayer; layer++)
         {
-            aSprite = *gSpriteTable;
+            aSprite = gSpriteTable.get();
             for ( i = 0; i < kMaxSpriteNum; i++)
             {
                 if ((aSprite->table.get() != nil) && ( !aSprite->killMe) && ( aSprite->whichLayer == layer))
@@ -1812,7 +1808,7 @@ void DrawSpriteTableInOffWorld( Rect *clipRect)
     {
         for ( layer = kFirstSpriteLayer; layer <= kLastSpriteLayer; layer++)
         {
-            aSprite = *gSpriteTable;
+            aSprite = gSpriteTable.get();
             for ( i = 0; i < kMaxSpriteNum; i++)
             {
                 tinySize = aSprite->tinySize & kBlipSizeMask;
@@ -1909,7 +1905,7 @@ void ShowSpriteTable( void)
     long            i;
     spriteType      *aSprite;
 
-    aSprite = *gSpriteTable;
+    aSprite = gSpriteTable.get();
     for ( i = 0; i < kMaxSpriteNum; i++)
     {
         if (aSprite->table.get() != nil) {
@@ -1976,7 +1972,7 @@ void CullSprites( void)
     long            i;
     spriteType      *aSprite;
 
-    aSprite = *gSpriteTable;
+    aSprite = gSpriteTable.get();
     for ( i = 0; i < kMaxSpriteNum; i++)
     {
         if (aSprite->table.get() != nil) {

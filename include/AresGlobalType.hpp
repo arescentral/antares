@@ -71,8 +71,8 @@ struct barIndicatorType {
 
 struct miniScreenLineType;
 struct miniComputerDataType {
-    TypedHandle<miniScreenLineType> lineData;
-    TypedHandle<spaceObjectType> objectData;
+    scoped_array<miniScreenLineType> lineData;
+    scoped_array<spaceObjectType> objectData;
     long                    selectLine;
     long                    pollTime;
     long                    buildTimeBarValue;
@@ -121,13 +121,13 @@ struct aresGlobalType {
     unsigned long   gFrameCount;
     scoped_ptr<Preferences> gPreferencesData;
     long            gGameOver;
-    TypedHandle<admiralType>        gAdmiralData;
-    TypedHandle<destBalanceType>    gDestBalanceData;
+    scoped_array<admiralType>       gAdmiralData;
+    scoped_array<destBalanceType>   gDestBalanceData;
     KeyMap          gKeyControl[kKeyExtendedControlNum];
     short           gPreferenceRefNum;
     unsigned long   gOptions;
     TypedHandle<raceType>           gRaceData;
-    TypedHandle<scrollStarType>     gScrollStarData;
+    scoped_array<scrollStarType>    gScrollStarData;
     bool         gWarpStars;
     long            gLastClipBottom;
     long            gScrollStarNumber;
@@ -138,7 +138,7 @@ struct aresGlobalType {
     long            gFarthestObject;
     long            gCenterScaleH;
     long            gCenterScaleV;
-    TypedHandle<proximityUnitType>  gProximityGrid;
+    scoped_array<proximityUnitType> gProximityGrid;
     KeyMap          gLastKeyMap;
     unsigned long   gLastKeys;
     unsigned long   gTheseKeys;
@@ -159,9 +159,9 @@ struct aresGlobalType {
     TypedHandle<scenarioInitialType>    gScenarioInitialData;   // = nil;
     TypedHandle<scenarioConditionType>  gScenarioConditionData; // = nil;
     TypedHandle<briefPointType>     gScenarioBriefData;     // = nil;
-    TypedHandle<Point>              gRadarBlipData;         // = nil;
-    TypedHandle<int32_t>            gScaleList;             // = nil;
-    TypedHandle<int32_t>            gSectorLineData;        // = nil;
+    scoped_array<Point>             gRadarBlipData;         // = nil;
+    scoped_array<int32_t>           gScaleList;             // = nil;
+    scoped_array<int32_t>           gSectorLineData;        // = nil;
     int32_t         gRadarCount;            // = 0;
     int32_t         gRadarSpeed;            // = 30;
     int32_t         gRadarRange;            // kRadarSize * 50;
@@ -172,17 +172,17 @@ struct aresGlobalType {
     barIndicatorType    gBarIndicator[ kBarIndicatorNum];
     short           gMouseActive;           // = kMouseOff;
     scoped_ptr<MessageData>         gMessageData;
-    TypedHandle<unsigned char>      gStatusString;          // = nil
-    TypedHandle<longMessageType>    gLongMessageData;       // = nil
+    scoped_array<unsigned char>     gStatusString;          // = nil
+    scoped_ptr<longMessageType>     gLongMessageData;       // = nil
     long            gMessageTimeCount;      // = 0;
     long            gMessageLabelNum;       // = -1;
     long            gStatusLabelNum;        // = -1;
     long            gTrueClipBottom;        // = 0;
 //  Handle          gMiniScreenHandle;      // = nil;
     miniComputerDataType    gMiniScreenData;
-    TypedHandle<StringList>         gMissionStatusStrList;
-    TypedHandle<screenLabelType>    gScreenLabelData;       // = nil;
-    TypedHandle<beamType>           gBeamData;              // = nil;
+    scoped_ptr<StringList>          gMissionStatusStrList;
+    scoped_array<screenLabelType>   gScreenLabelData;       // = nil;
+    scoped_array<beamType>          gBeamData;              // = nil;
     long            gColorAnimationStep;    // = 0;
     long            gColorAnimationInSpeed; // = -1;
     long            gColorAnimationOutSpeed;// = -1;
@@ -194,7 +194,7 @@ struct aresGlobalType {
     long            gLastSoundTime;         // = 0
     long            gSoundVolume;           // = 0;
     short           gSoundFileRefID;        // = 0;
-    TypedHandle<StringList>         gAresCheatStrings;
+    scoped_ptr<StringList>        gAresCheatStrings;
     KeyMap*         gKeyMapBuffer;          // = NewPtr( sizeof (KeyMap) * (long)kKeyMapBufferNum;
     long            gKeyMapBufferTop;       // = 0;
     long            gKeyMapBufferBottom;    // = 0;

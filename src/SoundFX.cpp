@@ -52,7 +52,7 @@ SSpSourceReference MyCreateSource( void);
 #endif
 SndChannelPtr MyCreateLocalizedChannel( void);
 
-extern TypedHandle<spaceObjectType> gSpaceObjectData;
+extern scoped_array<spaceObjectType> gSpaceObjectData;
 extern coordPointType gGlobalCorner;
 
 #ifdef kAllowSoundSprocket
@@ -412,7 +412,7 @@ void PlayVolumeSound( short whichSoundID, short amplitude, short persistence, so
                 WriteDebugLong(err);
             }
 */
-            err = SndPlay( globals()->gChannel[whichChannel].channelPtr, globals()->gSound[whichSound].soundHandle, true);
+            err = SndPlay( globals()->gChannel[whichChannel].channelPtr, globals()->gSound[whichSound].soundHandle.get(), true);
 
         }
     }
@@ -651,7 +651,7 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
             }
 #endif
             err = SndPlay( globals()->gChannel[whichChannel].channelPtr,
-                globals()->gSound[whichSound].soundHandle, true);
+                globals()->gSound[whichSound].soundHandle.get(), true);
 
         }
     }
@@ -677,7 +677,7 @@ void RemoveAllUnusedSounds( void)
     {
         if ((!globals()->gSound[count].keepMe) &&
                 (globals()->gSound[count].soundHandle.get() != nil)) {
-            globals()->gSound[count].soundHandle.destroy();
+            globals()->gSound[count].soundHandle.reset();
             globals()->gSound[count].id = -1;
         }
     }
@@ -737,7 +737,7 @@ short AddSound( short soundID)
             WriteDebugLine("\pADDSND>");
             WriteDebugLong( soundID);
 
-            globals()->gSound[whichSound].soundHandle = GetSound(soundID);
+            globals()->gSound[whichSound].soundHandle.reset(GetSound(soundID));
             if (globals()->gSound[whichSound].soundHandle.get() == nil) {
                 ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadSoundError, -1, -1, -1, __FILE__, soundID);
 //              Debugger();
@@ -779,11 +779,8 @@ void SoundFXCleanup( void)
     }
 
     WriteDebugLine("\p<SndChannels");
-    for ( i = 0; i < kSoundNum; i++)
-    {
-        if (globals()->gSound[i].soundHandle.get() != nil) {
-            globals()->gSound[i].soundHandle.destroy();
-        }
+    for (i = 0; i < kSoundNum; i++) {
+        globals()->gSound[i].soundHandle.reset();
     }
     WriteDebugLine("\p<SndHndles");
 }
@@ -944,7 +941,7 @@ void mPlayDistanceSound(
         if ( mdistance == 0)
         {
             if ( globals()->gPlayerShipNumber >= 0)
-                mplayerobjectptr = *gSpaceObjectData + globals()->gPlayerShipNumber;
+                mplayerobjectptr = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
             else mplayerobjectptr = nil;
             if (( mplayerobjectptr != nil) && ( mplayerobjectptr->active))
             {
@@ -996,7 +993,7 @@ void mPlayDistanceSound(
                     mvolume = ( (1920 - mdistance) * mvolume) / 1920;
             }
             if ( globals()->gPlayerShipNumber >= 0)
-                mplayerobjectptr = *gSpaceObjectData + globals()->gPlayerShipNumber;
+                mplayerobjectptr = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
             else mplayerobjectptr = nil;
             if (( mplayerobjectptr != nil) && ( mplayerobjectptr->active))
             {

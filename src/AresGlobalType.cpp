@@ -17,12 +17,19 @@
 
 #include "AresGlobalType.hpp"
 
+#include "Admiral.hpp"
 #include "AresPreferences.hpp"
+#include "Beam.hpp"
 #include "ColorTable.hpp"
 #include "InputSource.hpp"
 #include "MessageScreen.hpp"
+#include "Minicomputer.hpp"
+#include "Motion.hpp"
 #include "Options.hpp"
+#include "ScreenLabel.hpp"
+#include "ScrollStars.hpp"
 #include "SpriteHandling.hpp"
+#include "StringList.hpp"
 
 namespace antares {
 

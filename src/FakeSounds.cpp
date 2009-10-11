@@ -101,16 +101,13 @@ OSErr SndDoCommand(SndChannel* chan, SndCommand* cmd, bool) {
     return SndDoImmediate(chan, cmd);
 }
 
-OSErr SndPlay(SndChannel* channel, TypedHandle<Sound> sound, bool) {
-    sound_driver->play(channel->id, (*sound)->id);
+OSErr SndPlay(SndChannel* channel, Sound* sound, bool) {
+    sound_driver->play(channel->id, sound->id);
     return noErr;
 }
 
-TypedHandle<Sound> GetSound(int id) {
-    TypedHandle<Sound> result;
-    result.create(1);
-    (*result)->id = id;
-    return result;
+Sound* GetSound(int id) {
+    return new Sound(id);
 }
 
 void FakeSoundsInit() {

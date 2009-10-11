@@ -65,7 +65,7 @@ namespace antares {
 extern long             gNatePortLeft, gNatePortTop, gAbsoluteScale,
                         CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM,
                         gPlayScreenWidth, gPlayScreenHeight, gRootObjectNumber;
-extern TypedHandle<spaceObjectType> gSpaceObjectData;
+extern scoped_array<spaceObjectType> gSpaceObjectData;
 extern coordPointType   gGlobalCorner;
 extern spaceObjectType* gRootObject;
 extern PixMap*          gActiveWorld;
@@ -83,8 +83,8 @@ int InitScrollStars() {
     scrollStarType  *star;
     short           i;
 
-    globals()->gScrollStarData.create(kAllStarNum);
-    star = *globals()->gScrollStarData;
+    globals()->gScrollStarData.reset(new scrollStarType[kAllStarNum]);
+    star = globals()->gScrollStarData.get();
     for (i = 0; i < kAllStarNum; i++) {
         star->speed = kNoStar;
         star++;
@@ -94,13 +94,9 @@ int InitScrollStars() {
     return kNoError;
 }
 
-void CleanupScrollStars( void)
-
-{
+void CleanupScrollStars() {
 #ifdef kUseScrollStar
-    if (globals()->gScrollStarData.get() != nil) {
-        globals()->gScrollStarData.destroy();
-    }
+    globals()->gScrollStarData.reset();
 #endif
 }
 
@@ -109,7 +105,7 @@ void ResetScrollStars ( long which)
 {
     short           i;
     scrollStarType  *star;
-    spaceObjectType *centerObject = *gSpaceObjectData + which;
+    spaceObjectType *centerObject = gSpaceObjectData.get() + which;
 
     gScrollStarObject = centerObject;
     globals()->gScrollStarNumber = which;
@@ -117,7 +113,7 @@ void ResetScrollStars ( long which)
 #ifdef kUseScrollStar
     if ( gScrollStarObject != nil)
     {
-        star = *globals()->gScrollStarData;
+        star = globals()->gScrollStarData.get();
         for ( i = 0; i < kScrollStarNum; i++)
         {
             star->location.h = Randomize( gPlayScreenWidth) + CLIP_LEFT;
@@ -144,7 +140,7 @@ void MakeNewSparks( long sparkNum, long sparkSpeed, smallFixedType maxVelocity,
 
 {
     long            i, whichSpark = kSparkStarOffset;
-    scrollStarType  *spark = *globals()->gScrollStarData + kSparkStarOffset;
+    scrollStarType  *spark = globals()->gScrollStarData.get() + kSparkStarOffset;
 
     maxVelocity *= gAbsoluteScale;
     maxVelocity >>= SHIFT_SCALE;
@@ -184,7 +180,7 @@ void PrepareToMoveScrollStars( void)
     short           i;
     scrollStarType  *star;
 
-    star = *globals()->gScrollStarData;
+    star = globals()->gScrollStarData.get();
     for ( i = 0; i < kAllStarNum; i++)
     {
         star->oldOldLocation.h = star->oldLocation.h;
@@ -237,7 +233,7 @@ void MoveScrollStars( const long byUnits)
     fastVelocity.v *= gAbsoluteScale;
     fastVelocity.v /= SCALE_SCALE;
 
-    star = *globals()->gScrollStarData;
+    star = globals()->gScrollStarData.get();
     for ( i = 0; i < kScrollStarNum; i++)
     {
         if ( star->speed != kNoStar)
@@ -392,7 +388,7 @@ void DrawScrollStars( bool warp)
     bounds.right = lastBounds.right = CLIP_RIGHT;
     lastBounds.bottom = globals()->gLastClipBottom;
 
-    star = *globals()->gScrollStarData;
+    star = globals()->gScrollStarData.get();
 
     if (( gScrollStarObject->presenceState != kWarpInPresence) &&
         ( gScrollStarObject->presenceState != kWarpOutPresence) &&
@@ -569,7 +565,7 @@ void ShowScrollStars( bool warp)
     bounds.right = lastBounds.right = CLIP_RIGHT;
     lastBounds.bottom = globals()->gLastClipBottom;
 
-    star = *globals()->gScrollStarData;
+    star = globals()->gScrollStarData.get();
 
     if (( gScrollStarObject->presenceState != kWarpInPresence) &&
         ( gScrollStarObject->presenceState != kWarpOutPresence) &&
@@ -728,7 +724,7 @@ void DontShowScrollStars( void)
     bounds.right = lastBounds.right = CLIP_RIGHT;
     lastBounds.bottom = globals()->gLastClipBottom;
 
-    star = *globals()->gScrollStarData;
+    star = globals()->gScrollStarData.get();
 
     if (( gScrollStarObject->presenceState != kWarpInPresence) &&
         ( gScrollStarObject->presenceState != kWarpOutPresence) &&
@@ -838,7 +834,7 @@ void DrawAllBeams( void)
     bounds.top = CLIP_TOP;
     bounds.bottom = CLIP_BOTTOM;
 
-    anObject = *gSpaceObjectData;
+    anObject = gSpaceObjectData.get();
 
     for ( i = 0; i < kMaxSpaceObject; i++)
     {
@@ -928,7 +924,7 @@ void Reset3DStars( Point center, Rect *bounds)
     scrollStarType  *star;
     smallFixedType  f;
 
-    star = *globals()->gScrollStarData;
+    star = globals()->gScrollStarData.get();
     for ( i = 0; i < kAllStarNum; i++)
     {
         star->oldOldLocation.h = star->oldLocation.h = star->location.h =
@@ -961,7 +957,7 @@ void Move3DStars( Point center, long byUnits, Rect *bounds)
     smallFixedType  f;
     long            h, v, l = byUnits * 32;
 
-    star = *globals()->gScrollStarData;
+    star = globals()->gScrollStarData.get();
     for ( i = 0; i < kAllStarNum; i++)
     {
         if ( star->speed != kNoStar)
@@ -1032,7 +1028,7 @@ void Draw3DStars( bool warp, Rect *bounds, PixMap* destMap)
     transColorType  *transColor;
 
     mGetRowBytes( rowBytes, destMap);
-    star = *globals()->gScrollStarData;
+    star = globals()->gScrollStarData.get();
 
     for ( i = 0; i < kAllStarNum; i++)
     {
@@ -1062,7 +1058,7 @@ void Draw3DStars( bool warp, Rect *bounds, PixMap* destMap)
         star++;
     }
 
-    star = *globals()->gScrollStarData;
+    star = globals()->gScrollStarData.get();
 
     for ( i = 0; i < kAllStarNum; i++)
     {
@@ -1116,7 +1112,7 @@ void Show3DStars( bool warp, Rect *bounds, PixMap* sourceMap)
 
     mGetRowBytes( srowBytes, sourceMap);
     mGetRowBytes( drowBytes, gActiveWorld);
-    star = *globals()->gScrollStarData;
+    star = globals()->gScrollStarData.get();
 
     for ( i = 0; i < kAllStarNum; i++)
     {
@@ -1182,7 +1178,7 @@ void CorrectScrollStarObject( Handle data)
 #pragma unused( data)
 
     if ( globals()->gScrollStarNumber >= 0)
-        gScrollStarObject = *gSpaceObjectData +
+        gScrollStarObject = gSpaceObjectData.get() +
             globals()->gScrollStarNumber;
     else
         gScrollStarObject = nil;

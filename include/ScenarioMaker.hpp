@@ -46,7 +46,7 @@ namespace antares {
 
 extern scenarioType* gThisScenario;
 extern TypedHandle<objectActionType>    gObjectActionData;
-extern TypedHandle<spaceObjectType> gSpaceObjectData;
+extern scoped_array<spaceObjectType> gSpaceObjectData;
 
 inline int mGetRealAdmiralNum(int mplayernum) {
     return gThisScenario->player[mplayernum].admiralNumber;
@@ -116,13 +116,13 @@ inline void mGetRealObjectFromInitial(
         minitialobject = mGetScenarioInitial( gThisScenario, minum);
         if ( minitialobject->realObjectNumber >= 0)
         {
-            mobject = *gSpaceObjectData + minitialobject->realObjectNumber;
+            mobject = gSpaceObjectData.get() + minitialobject->realObjectNumber;
             if (( mobject->id != minitialobject->realObjectID) || ( mobject->active != kObjectInUse))
                 mobject = nil;
         } else mobject = nil;
     } else if ( minum == -2)
     {
-        mobject = *gSpaceObjectData + globals()->gPlayerShipNumber;
+        mobject = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
         if ((!(mobject->active)) || ( !(mobject->attributes & kCanThink)))
         {
             mobject = nil;

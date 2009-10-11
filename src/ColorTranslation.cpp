@@ -29,19 +29,15 @@ namespace antares {
 
 extern PixMap* gActiveWorld;
 
-TypedHandle<transColorType> gColorTranslateTable;
+scoped_array<transColorType> gColorTranslateTable;
 
 void ColorTranslatorInit(const ColorTable& theClut) {
-    gColorTranslateTable.create(kPaletteSize);
+    gColorTranslateTable.reset(new transColorType[kPaletteSize]);
     MakeColorTranslatorTable(theClut);
 }
 
-void ColorTranslatorCleanup( void)
-
-{
-    if (gColorTranslateTable.get() != nil) {
-        gColorTranslateTable.destroy();
-    }
+void ColorTranslatorCleanup() {
+    gColorTranslateTable.reset();
 }
 
 void MakeColorTranslatorTable(const ColorTable& referenceTable) {
@@ -50,7 +46,7 @@ void MakeColorTranslatorTable(const ColorTable& referenceTable) {
     RGBColor            paletteColor, deviceColor;
 
     const ColorTable& deviceTable = *gActiveWorld->colors;
-    entry = *gColorTranslateTable;
+    entry = gColorTranslateTable.get();
 //  referenceTable = GetCTable( kReferenceColorTableID);
 
     for ( i = 0; i < kPaletteSize; i++)
@@ -66,7 +62,7 @@ void MakeColorTranslatorTable(const ColorTable& referenceTable) {
                     (deviceColor.blue == paletteColor.blue))
             {
                 entry->trueColor = j;
-                retroEntry = *gColorTranslateTable + implicit_cast<long>(j);
+                retroEntry = gColorTranslateTable.get() + implicit_cast<long>(j);
                 retroEntry->retroColor = i;
             }
         }
@@ -80,7 +76,7 @@ unsigned char GetRetroIndex( unsigned char which)
 {
     transColorType  *entry;
 
-    entry = *gColorTranslateTable + implicit_cast<long>(which);
+    entry = gColorTranslateTable.get() + implicit_cast<long>(which);
     return( entry->retroColor);
 }
 
@@ -89,7 +85,7 @@ unsigned char GetTranslateIndex( unsigned char which)
 {
     transColorType  *entry;
 
-    entry = *gColorTranslateTable + implicit_cast<long>(which);
+    entry = gColorTranslateTable.get() + implicit_cast<long>(which);
     return( entry->trueColor);
 }
 
@@ -98,7 +94,7 @@ unsigned char GetTranslateColorShade( unsigned char color, unsigned char shade)
 {
     transColorType  *entry;
 
-    entry = *gColorTranslateTable + implicit_cast<long>((16 - shade) + 1 +
+    entry = gColorTranslateTable.get() + implicit_cast<long>((16 - shade) + 1 +
             color * 16);
     return( entry->trueColor);
 }
@@ -109,7 +105,7 @@ void SetTranslateColorShadeFore( unsigned char color, unsigned char shade)
     RGBColor        c;
     transColorType  *entry;
 
-    entry = *gColorTranslateTable + implicit_cast<long>((16 - shade) + 1L +
+    entry = gColorTranslateTable.get() + implicit_cast<long>((16 - shade) + 1L +
             implicit_cast<long>(color) * 16L);
     Index2Color(entry->trueColor, &c);
     RGBForeColor( &c);
@@ -120,7 +116,7 @@ void GetRGBTranslateColorShade( RGBColor *c, unsigned char color, unsigned char 
 {
     transColorType  *entry;
 
-    entry = *gColorTranslateTable + implicit_cast<long>((16 - shade) + 1L +
+    entry = gColorTranslateTable.get() + implicit_cast<long>((16 - shade) + 1L +
             implicit_cast<long>(color) * 16L);
     Index2Color( implicit_cast<long>(entry->trueColor), c);
 }
@@ -131,7 +127,7 @@ void SetTranslateColorFore( unsigned char color)
     RGBColor        c;
     transColorType  *entry;
 
-    entry = *gColorTranslateTable + implicit_cast<long>(color);
+    entry = gColorTranslateTable.get() + implicit_cast<long>(color);
     Index2Color(entry->trueColor, &c);
     RGBForeColor( &c);
 }
@@ -141,7 +137,7 @@ void GetRGBTranslateColor( RGBColor *c, unsigned char color)
 {
     transColorType  *entry;
 
-    entry = *gColorTranslateTable + implicit_cast<long>(color);
+    entry = gColorTranslateTable.get() + implicit_cast<long>(color);
     Index2Color(entry->trueColor, c);
 }
 

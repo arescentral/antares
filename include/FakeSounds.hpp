@@ -18,8 +18,8 @@
 #ifndef ANTARES_FAKE_SOUNDS_HPP_
 #define ANTARES_FAKE_SOUNDS_HPP_
 
+#include <string>
 #include <Base.h>
-#include "Handle.hpp"
 
 namespace antares {
 
@@ -52,13 +52,15 @@ class LogSoundDriver : public SoundDriver {
 };
 
 struct Sound {
+    Sound(int id) : id(id) { }
+
     int id;
 };
 
 struct SndChannel;
 
-TypedHandle<Sound> GetSound(int id);
-OSErr SndPlay(SndChannel* channel, TypedHandle<Sound> sound, bool);
+Sound* GetSound(int id);
+OSErr SndPlay(SndChannel* channel, Sound* sound, bool);
 
 void FakeSoundsInit();
 

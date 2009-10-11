@@ -134,8 +134,8 @@ int InitMessageScreen() {
 
     globals()->gTrueClipBottom = CLIP_BOTTOM;
     globals()->gMessageData.reset(new MessageData(kMaxMessageLength));
-    globals()->gStatusString.create(kDestinationLength);
-    globals()->gLongMessageData.create(1);
+    globals()->gStatusString.reset(new unsigned char[kDestinationLength]);
+    globals()->gLongMessageData.reset(new longMessageType);
 
     globals()->gMessageData->_first_char = 0;
     globals()->gMessageData->_first_free = 0;
@@ -164,7 +164,7 @@ int InitMessageScreen() {
         return( MEMORY_ERROR);
     }
 
-    tmessage = *globals()->gLongMessageData;
+    tmessage = globals()->gLongMessageData.get();
     tmessage->startResID =  tmessage->endResID = tmessage->lastResID = tmessage->currentResID =
         -1;
     tmessage->time = 0;
@@ -195,9 +195,7 @@ void MessageScreenCleanup( void)
 {
 #ifdef kUseMessage
     globals()->gMessageData.reset();
-    if (globals()->gStatusString.get() != nil) {
-        globals()->gStatusString.destroy();
-    }
+    globals()->gStatusString.reset();
 #endif
 }
 
@@ -220,14 +218,14 @@ void ClearMessage( void)
     globals()->gStatusLabelNum = AddScreenLabel( kStatusLabelLeft, kStatusLabelTop, 0, 0,
                         &nilLabel, nil, false, kStatusLabelColor);
 
-    tmessage = *globals()->gLongMessageData;
+    tmessage = globals()->gLongMessageData.get();
     tmessage->startResID = -1;
     tmessage->endResID = -1;
     tmessage->currentResID = -1;
     tmessage->lastResID = -1;
     tmessage->textHeight = 0;
     tmessage->previousStartResID = tmessage->previousEndResID = -1;
-    tmessage = *globals()->gLongMessageData;
+    tmessage = globals()->gLongMessageData.get();
     tmessage->stringMessage[0] = 0;
     tmessage->lastStringMessage[0] = 0;
     tmessage->newStringMessage = false;
@@ -328,7 +326,7 @@ void StartLongMessage( short startResID, short endResID)
 {
     longMessageType *tmessage;
 
-    tmessage = *globals()->gLongMessageData;
+    tmessage = globals()->gLongMessageData.get();
 
     if ( tmessage->currentResID != -1)
     {
@@ -368,7 +366,7 @@ void StartStringMessage(unsigned char* string)
 {
     longMessageType *tmessage;
 
-    tmessage = *globals()->gLongMessageData;
+    tmessage = globals()->gLongMessageData.get();
 
     tmessage->newStringMessage = true;
     if ( tmessage->currentResID != -1)
@@ -415,7 +413,7 @@ void ClipToCurrentLongMessage( void)
     unsigned char* ac;
     long            count;
 
-    tmessage = *globals()->gLongMessageData;
+    tmessage = globals()->gLongMessageData.get();
     if (( tmessage->currentResID != tmessage->lastResID) || ( tmessage->newStringMessage))
     {
 
@@ -506,7 +504,7 @@ void DrawCurrentLongMessage( long timePass)
     longMessageType *tmessage;
     unsigned char   color;
 
-    tmessage = *globals()->gLongMessageData;
+    tmessage = globals()->gLongMessageData.get();
     if (( tmessage->currentResID != tmessage->lastResID) ||
         ( tmessage->newStringMessage))
     {
@@ -664,7 +662,7 @@ void EndLongMessage( void)
 {
     longMessageType *tmessage;
 
-    tmessage = *globals()->gLongMessageData;
+    tmessage = globals()->gLongMessageData.get();
     tmessage->previousStartResID = tmessage->startResID;
     tmessage->previousEndResID = tmessage->endResID;
     tmessage->startResID = -1;
@@ -681,7 +679,7 @@ void AdvanceCurrentLongMessage( void)
 {
     longMessageType *tmessage;
 
-    tmessage = *globals()->gLongMessageData;
+    tmessage = globals()->gLongMessageData.get();
     if ( tmessage->currentResID != -1)
     {
         if ( tmessage->currentResID < tmessage->endResID)
@@ -700,7 +698,7 @@ void PreviousCurrentLongMessage( void)
 {
     longMessageType *tmessage;
 
-    tmessage = *globals()->gLongMessageData;
+    tmessage = globals()->gLongMessageData.get();
     if ( tmessage->currentResID != -1)
     {
         if ( tmessage->currentResID > tmessage->startResID)
@@ -718,7 +716,7 @@ void ReplayLastLongMessage( void)
 {
     longMessageType *tmessage;
 
-    tmessage = *globals()->gLongMessageData;
+    tmessage = globals()->gLongMessageData.get();
     if (( tmessage->previousStartResID >= 0) && ( tmessage->currentResID < 0))
     {
         CopyAnyCharPString( tmessage->stringMessage, tmessage->lastStringMessage);

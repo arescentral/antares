@@ -85,17 +85,17 @@ long gRootObjectNumber = -1;
 actionQueueType* gFirstActionQueue = nil;
 long gFirstActionQueueNumber = -1;
 
-TypedHandle<spaceObjectType> gSpaceObjectData;
+scoped_array<spaceObjectType> gSpaceObjectData;
 TypedHandle<baseObjectType> gBaseObjectData;
 TypedHandle<objectActionType> gObjectActionData;
-TypedHandle<actionQueueType> gActionQueueData;
+scoped_array<actionQueueType> gActionQueueData;
 
 void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord);
 
 int SpaceObjectHandlingInit() {
     bool correctBaseObjectColor = false;
 
-    gSpaceObjectData.create(kMaxSpaceObject);
+    gSpaceObjectData.reset(new spaceObjectType[kMaxSpaceObject]);
     if (gBaseObjectData.get() == nil)
     {
         gBaseObjectData.load_resource('bsob', kBaseObjectResID);
@@ -120,7 +120,7 @@ int SpaceObjectHandlingInit() {
         globals()->maxObjectAction = gObjectActionData.count();
     }
 
-    gActionQueueData.create(kActionQueueLength);
+    gActionQueueData.reset(new actionQueueType[kActionQueueLength]);
     if (correctBaseObjectColor) {
         CorrectAllBaseObjectColor();
     }
@@ -135,15 +135,11 @@ void CleanupSpaceObjectHandling( void)
     if (gBaseObjectData.get() != nil) {
         gBaseObjectData.destroy();
     }
-    if (gSpaceObjectData.get() != nil) {
-        gSpaceObjectData.destroy();
-    }
+    gSpaceObjectData.reset();
     if (gObjectActionData.get() != nil) {
         gObjectActionData.destroy();
     }
-    if (gActionQueueData.get() != nil) {
-        gActionQueueData.destroy();
-    }
+    gActionQueueData.reset();
 }
 
 void ResetAllSpaceObjects() {
@@ -152,7 +148,7 @@ void ResetAllSpaceObjects() {
 
     gRootObject = nil;
     gRootObjectNumber = -1;
-    anObject = *gSpaceObjectData;
+    anObject = gSpaceObjectData.get();
     for (i = 0; i < kMaxSpaceObject; i++) {
 //      anObject->attributes = 0;
         anObject->active = kObjectAvailable;
@@ -245,7 +241,7 @@ void ResetAllSpaceObjects() {
 
 void ResetActionQueueData( void)
 {
-    actionQueueType *action = *gActionQueueData;
+    actionQueueType *action = gActionQueueData.get();
     long            i;
 
     WriteDebugLine("\p>RESETACT");
@@ -292,7 +288,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
     transColorType  *transColor;
     short           whichShape = 0, angle;
 
-    destObject = *gSpaceObjectData;
+    destObject = gSpaceObjectData.get();
 
     while (( destObject->active) && ( whichObject < kMaxSpaceObject))
     {
@@ -475,7 +471,7 @@ int AddNumberedSpaceObject( spaceObjectType *sourceObject, long whichObject)
     spritePix       oldStyleSprite;
     long            scaleCalc;
 
-    destObject = *gSpaceObjectData + whichObject;
+    destObject = gSpaceObjectData.get() + whichObject;
 
     if ( whichObject == kMaxSpaceObject) return( -1);
 
@@ -536,7 +532,7 @@ void RemoveAllSpaceObjects( void)
     spaceObjectType *anObject;
     int             i;
 
-    anObject = *gSpaceObjectData;
+    anObject = gSpaceObjectData.get();
     for ( i = 0; i < kMaxSpaceObject; i++)
     {
         if ( anObject->sprite != nil)
@@ -1066,7 +1062,7 @@ void AddActionToQueue( objectActionType *action, long actionNumber, long actionT
                         spaceObjectType *directObject, Point* offset)
 {
     long                queueNumber = 0;
-    actionQueueType     *actionQueue = *gActionQueueData,
+    actionQueueType     *actionQueue = gActionQueueData.get(),
                         *nextQueue = gFirstActionQueue, *previousQueue = nil;
 
     while (( actionQueue->action != nil) && ( queueNumber < kActionQueueLength))
@@ -1140,7 +1136,7 @@ void ExecuteActionQueue( long unitsToDo)
 
 {
 //  actionQueueType     *actionQueue = gFirstActionQueue;
-    actionQueueType     *actionQueue = *gActionQueueData;
+    actionQueueType     *actionQueue = gActionQueueData.get();
     long                        subjectid, directid, i;
 
     for ( i = 0; i < kActionQueueLength; i++)
@@ -1365,7 +1361,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 
                         if ( l >= 0)
                         {
-                            spaceObjectType *newObject = *gSpaceObjectData + l;
+                            spaceObjectType *newObject = gSpaceObjectData.get() + l;
                             if ( newObject->attributes & kCanAcceptDestination)
                             {
                                 ul1 = newObject->attributes;
@@ -2205,7 +2201,7 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
                                     direction, velocity, owner, spriteIDOverride);
     newObject.location = *location;
     if ( globals()->gPlayerShipNumber >= 0)
-        player = *gSpaceObjectData + globals()->gPlayerShipNumber;
+        player = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
     else player = nil;
     if (( player != nil) && ( player->active))
     {
@@ -2299,7 +2295,7 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
 //      DebugStr("\pCouldn't create an object!");
     } else
     {
-        madeObject = *gSpaceObjectData + newObjectNumber;
+        madeObject = gSpaceObjectData.get() + newObjectNumber;
         madeObject->attributes |= specialAttributes;
 /*      if ( madeObject->sprite != nil)
         {
@@ -2362,7 +2358,7 @@ long CountObjectsOfBaseType( long whichType, long owner)
 
     spaceObjectType *anObject;
 
-    anObject = *gSpaceObjectData;
+    anObject = gSpaceObjectData.get();
     for ( count = 0; count < kMaxSpaceObject; count++)
     {
         if (( anObject->active) &&
@@ -2379,7 +2375,7 @@ long GetNextObjectWithAttributes( long startWith, unsigned long attributes, bool
     long    original = startWith;
     spaceObjectType *anObject;
 
-    anObject = *gSpaceObjectData + startWith;
+    anObject = gSpaceObjectData.get() + startWith;
 
     if ( exclude)
     {
@@ -2566,7 +2562,7 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, bool message)
         anObject->bestConsideredTargetValue = anObject->currentTargetValue = 0xffffffff;
         anObject->bestConsideredTargetNumber = -1;
 
-        fixObject = *gSpaceObjectData;
+        fixObject = gSpaceObjectData.get();
         for ( i = 0; i < kMaxSpaceObject; i++)
         {
             if (( fixObject->destinationObject == anObject->entryNumber) && ( fixObject->active !=
@@ -2688,7 +2684,7 @@ void DestroyObject( spaceObjectType *anObject)
         {
             anObject->health = anObject->baseType->health;
             // if anyone is targeting it, they should stop
-            fixObject = *gSpaceObjectData;
+            fixObject = gSpaceObjectData.get();
             for ( i = 0; i < kMaxSpaceObject; i++)
             {
                 if (( fixObject->attributes & kCanAcceptDestination) && ( fixObject->active !=
@@ -2732,7 +2728,7 @@ void DestroyObject( spaceObjectType *anObject)
 //              mWriteDebugString( "\pKillDest");
 
                 RemoveDestination( anObject->destinationObject);
-                fixObject = *gSpaceObjectData;
+                fixObject = gSpaceObjectData.get();
                 for ( i = 0; i < kMaxSpaceObject; i++)
                 {
                     if (( fixObject->attributes & kCanAcceptDestination) && ( fixObject->active !=
@@ -2829,14 +2825,14 @@ void CreateFloatingBodyOfPlayer( spaceObjectType *anObject)
             anObject->attributes &= (~kIsHumanControlled) & (~kIsPlayerShip);
             globals()->gPlayerShipNumber = count;
             ResetScrollStars( globals()->gPlayerShipNumber);
-            anObject = *gSpaceObjectData + globals()->gPlayerShipNumber;
+            anObject = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
             anObject->attributes |= attributes;
         } else
         {
             mWriteDebugString("\pREMOTE BODY");
             attributes = anObject->attributes & kIsRemote;
             anObject->attributes &= ~kIsRemote;
-            anObject = *gSpaceObjectData + count;
+            anObject = gSpaceObjectData.get() + count;
             anObject->attributes |= attributes;
         }
         SetAdmiralFlagship( anObject->owner, count);

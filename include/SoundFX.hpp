@@ -98,7 +98,7 @@ struct smartSoundChannel {
 };
 
 struct smartSoundHandle {
-    TypedHandle<Sound>  soundHandle;
+    scoped_ptr<Sound>   soundHandle;
     short               id;
     bool             keepMe;
 };
