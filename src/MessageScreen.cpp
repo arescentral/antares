@@ -524,11 +524,11 @@ void DrawCurrentLongMessage( long timePass)
             } else
             {
                 DrawInOffWorld();
-                SetLongRect( &lRect, CLIP_LEFT, globals()->gTrueClipBottom - tmessage->textHeight, CLIP_RIGHT,
-                        globals()->gTrueClipBottom);
+                lRect = Rect(CLIP_LEFT, globals()->gTrueClipBottom - tmessage->textHeight,
+                        CLIP_RIGHT, globals()->gTrueClipBottom);
                 cRect = lRect;
                 DrawNateRect(gOffWorld, &cRect, 0, 0, 0xff);
-                LongRectToRect( &lRect, &tRect);
+                tRect = lRect;
                 ChunkCopyPixMapToScreenPixMap(gOffWorld, &tRect, gActiveWorld);
                 NormalizeColors();
                 DrawInRealWorld();
@@ -544,12 +544,12 @@ void DrawCurrentLongMessage( long timePass)
                 if ( !tmessage->labelMessage)
                 {
                     DrawInOffWorld();
-                    SetLongRect( &lRect, CLIP_LEFT, CLIP_BOTTOM, CLIP_RIGHT,
+                    lRect = Rect(CLIP_LEFT, CLIP_BOTTOM, CLIP_RIGHT,
                             globals()->gTrueClipBottom);
                     mGetTranslateColorShade( SKY_BLUE, DARKEST, color, transColor);
                     cRect = lRect;
                     DrawNateRect(gOffWorld, &cRect, 0, 0, color);
-                    LongRectToRect( &lRect, &tRect);
+                    tRect = lRect;
                     mGetTranslateColorShade( SKY_BLUE, VERY_LIGHT, color, transColor);
     //              DrawDirectTextInRect( (anyCharType *)*tmessage->retroTextSpec.text, tmessage->retroTextSpec.textLength,
     //                      &lRect, *offPixBase, 0, 0, 0);
@@ -572,11 +572,11 @@ void DrawCurrentLongMessage( long timePass)
         } else if ( !tmessage->labelMessage)
         {
             DrawInOffWorld();
-            SetLongRect( &lRect, CLIP_LEFT, globals()->gTrueClipBottom - tmessage->textHeight, CLIP_RIGHT,
+            lRect = Rect(CLIP_LEFT, globals()->gTrueClipBottom - tmessage->textHeight, CLIP_RIGHT,
                     globals()->gTrueClipBottom);
             cRect = lRect;
             DrawNateRect(gOffWorld, &cRect, 0, 0, 0xff);
-            LongRectToRect( &lRect, &tRect);
+            tRect = lRect;
             ChunkCopyPixMapToScreenPixMap(gOffWorld, &tRect, gActiveWorld);
             NormalizeColors();
             DrawInRealWorld();
@@ -600,8 +600,7 @@ void DrawCurrentLongMessage( long timePass)
             if ( tmessage->charDelayCount > 0)
             {
                 mSetDirectFont( kLongMessageFontNum);
-                SetLongRect( &lRect, CLIP_LEFT, CLIP_BOTTOM, CLIP_RIGHT,
-                        globals()->gTrueClipBottom);
+                lRect = Rect(CLIP_LEFT, CLIP_BOTTOM, CLIP_RIGHT, globals()->gTrueClipBottom);
                 PlayVolumeSound(  kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
                 while ( tmessage->charDelayCount > 0)
                 {

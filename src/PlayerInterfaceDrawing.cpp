@@ -254,7 +254,7 @@ void DrawPlayerInterfacePlainRect( Rect *dRect, unsigned char color,
 
 #pragma unused ( destMap, portLeft, portTop)
     if ( style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    LongRectToRect( dRect, &tRect);
+    tRect = *dRect;
     tRect.left -= kInterfaceContentBuffer;
     tRect.top -= kInterfaceContentBuffer;
     tRect.right += kInterfaceContentBuffer;
@@ -310,7 +310,7 @@ void DrawPlayerInterfaceTabBox( Rect    *dRect, unsigned char color,
 
 #pragma unused ( destMap, portLeft, portTop)
     if ( style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    LongRectToRect( dRect, &tRect);
+    tRect = *dRect;
     tRect.left -= kInterfaceContentBuffer;
     tRect.top -= kInterfaceContentBuffer;
     tRect.right += kInterfaceContentBuffer;
@@ -399,7 +399,7 @@ void DrawPlayerInterfaceButton( interfaceItemType *dItem, PixMap *destMap, long 
     transColorType  *transColor;
 
     if ( dItem->style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    LongRectToRect( &(dItem->bounds), &tRect);
+    tRect = dItem->bounds;
 
     uRect = tRect;
     uRect.right++;
@@ -571,7 +571,7 @@ void DrawPlayerInterfaceTabBoxButton( interfaceItemType *dItem, PixMap *destMap,
     transColorType  *transColor;
 
     if ( dItem->style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    LongRectToRect( &(dItem->bounds), &tRect);
+    tRect = dItem->bounds;
 
     uRect = tRect;
     uRect.right++;
@@ -837,7 +837,7 @@ void DrawPlayerInterfaceRadioButton( interfaceItemType *dItem, PixMap *destMap, 
     transColorType  *transColor;
 
     if ( dItem->style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    LongRectToRect( &(dItem->bounds), &tRect);
+    tRect = dItem->bounds;
 
     tRect.left -= kInterfaceContentBuffer;
     tRect.top -= kInterfaceContentBuffer;
@@ -973,7 +973,7 @@ void DrawPlayerInterfaceCheckBox( interfaceItemType *dItem, PixMap *destMap, lon
     transColorType  *transColor;
 
     if ( dItem->style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    LongRectToRect( &(dItem->bounds), &tRect);
+    tRect = dItem->bounds;
 
     tRect.left -= kInterfaceContentBuffer;
     tRect.top -= kInterfaceContentBuffer;
@@ -1091,7 +1091,7 @@ void DrawPlayerInterfaceLabeledBox( interfaceItemType *dItem, PixMap *destMap, l
     transColorType  *transColor;
 
     if ( dItem->style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    LongRectToRect( &(dItem->bounds), &tRect);
+    tRect = dItem->bounds;
     tRect.left -= kInterfaceContentBuffer;
     tRect.top -= kInterfaceContentBuffer + GetInterfaceFontHeight( dItem->style) +
             kInterfaceTextVBuffer * 2 + kLabelBottomHeight;
@@ -1218,7 +1218,7 @@ void DrawPlayerInterfaceList( interfaceItemType *dItem, PixMap *destMap, long po
     transColorType  *transColor;
 
     if ( dItem->style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    LongRectToRect( &(dItem->bounds), &tRect);
+    tRect = dItem->bounds;
 
     tRect.left -= kInterfaceContentBuffer;
     tRect.top -= kInterfaceContentBuffer + GetInterfaceFontAscent( dItem->style) +
@@ -1350,7 +1350,7 @@ void DrawPlayerInterfaceList( interfaceItemType *dItem, PixMap *destMap, long po
     {
         clipRgn = NewRgn();
         GetClip( clipRgn);
-        LongRectToRect( &(dItem->bounds), &tRect);
+        tRect = dItem->bounds;
         ClipRect( &tRect);
 
         SetTranslateColorShadeFore( dItem->color, VERY_LIGHT);
@@ -1417,7 +1417,7 @@ void DrawPlayerInterfaceListEntry( interfaceItemType *dItem, short whichEntry, P
     {
         clipRgn = NewRgn();
         GetClip( clipRgn);
-        LongRectToRect( &(dItem->bounds), &tRect);
+        tRect = dItem->bounds;
         ClipRect( &tRect);
 
         SetTranslateColorShadeFore( dItem->color, VERY_LIGHT);
@@ -1502,7 +1502,7 @@ void GetPlayerListLineUpRect( interfaceItemType *dItem, Rect *dRect)
     short       thisHBorder = kInterfaceSmallHBorder;
 
     if ( dItem->style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    LongRectToRect( &(dItem->bounds), dRect);
+    *dRect = dItem->bounds;
     dRect->left = dRect->right + kInterfaceContentBuffer;
     dRect->right = dRect->left + thisHBorder + 1;
     dRect->top = dRect->top - kInterfaceContentBuffer + kInterfaceHTop;
@@ -1609,7 +1609,7 @@ void GetPlayerListLineDownRect( interfaceItemType *dItem, Rect *dRect)
     short       thisHBorder = kInterfaceSmallHBorder;
 
     if ( dItem->style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    LongRectToRect( &(dItem->bounds), dRect);
+    *dRect = dItem->bounds;
 
     dRect->left = dRect->right + kInterfaceContentBuffer;
     dRect->right = dRect->left + thisHBorder + 1;
@@ -1691,7 +1691,7 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
                 destMap, portLeft, portTop);
     clipRgn = NewRgn();
     GetClip( clipRgn);
-    LongRectToRect( &(dItem->bounds), &tRect);
+    tRect = dItem->bounds;
     ClipRect( &tRect);
 
     hleft = tRect.left + kInterfaceTextHBuffer;
@@ -2200,7 +2200,7 @@ void DrawInterfacePictureRect( interfaceItemType *dItem, PixMap *destMap, long p
 
     clipRgn = NewRgn();
     GetClip( clipRgn);
-    LongRectToRect( &(dItem->bounds), &tRect);
+    tRect = dItem->bounds;
     ClipRect( &tRect);
 
 //  thePicture = GetPicture( dItem->item.pictureRect.pictureID);
@@ -2274,7 +2274,7 @@ void GetAnyInterfaceItemGraphicBounds( interfaceItemType *anItem, Rect *bounds)
 {
     short   thisHBorder = kInterfaceSmallHBorder;
 
-    LongRectToRect( &anItem->bounds, bounds);
+    *bounds = anItem->bounds;
 
     if ( anItem->style == kLarge)
         thisHBorder = kInterfaceLargeHBorder;
@@ -2371,7 +2371,7 @@ void GetAnyInterfaceItemGraphicBounds( interfaceItemType *anItem, Rect *bounds)
 void GetAnyInterfaceItemContentBounds( interfaceItemType *anItem, Rect *bounds)
 
 {
-    LongRectToRect( &anItem->bounds, bounds);
+    *bounds = anItem->bounds;
 }
 
 short GetInterfaceStringWidth(unsigned char* s, interfaceStyleType style)
@@ -2451,7 +2451,7 @@ void DrawInterfaceString(unsigned char* s, interfaceStyleType style, PixMap *des
 {
     Rect    clipRect;
 
-    RectToLongRect( &(destMap->bounds), &clipRect);
+    clipRect = destMap->bounds;
 //  mSetDirectFont( kButtonFontNum)
     SetInterfaceLargeUpperFont( style);
     DrawDirectTextStringClipped( s, color, destMap, &clipRect, portLeft, portTop);

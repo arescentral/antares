@@ -705,7 +705,7 @@ GameResult PlayTheGame(long *seconds) {
     while (globals()->gGameOver <= 0) {
         globals()->gFrameCount = 0;
 
-        SetLongRect(&clipRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
+        clipRect = Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
         while (globals()->gGameOver <= 0) {
             EraseSpriteCursorSprite();
             EraseSpriteTable();
@@ -978,7 +978,7 @@ GameResult PlayTheGame(long *seconds) {
             MiniComputerHandleNull(unitsDone);
 
             ClipToCurrentLongMessage();
-            SetLongRect( &clipRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
+            clipRect = Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
             DrawScrollStars(true);
             DrawCurrentLongMessage( unitsDone);
 
@@ -988,7 +988,7 @@ GameResult PlayTheGame(long *seconds) {
             UpdateAllLabelPositions(unitsDone);
             DrawAllLabels();
             DrawSite();
-            SetLongRect(&clipRect, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+            clipRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
             DrawSpriteCursorSprite(&clipRect);
 
             ShowSpriteCursorSprite();

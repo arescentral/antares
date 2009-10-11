@@ -83,9 +83,6 @@ void DrawInterfaceString(unsigned char*, interfaceStyleType, PixMap *, long,
 void SetInterfaceLargeUpperFont( interfaceStyleType);
 void SetInterfaceLargeLowerFont( interfaceStyleType);
 void BiggestRect( Rect  *, Rect *);
-void LongRectToRect( Rect *, Rect *);
-void RectToLongRect( Rect *, Rect *);
-void SetLongRect( Rect *, long, long, long, long);
 
 }  // namespace antares
 

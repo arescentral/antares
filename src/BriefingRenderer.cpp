@@ -254,7 +254,7 @@ void GetInitialObjectSpriteData( long whichScenario, long whichObject,
             SysBeep( 20);
             return;
         }
-        RectToLongRect( &sBounds->bounds, spriteRect);
+        *spriteRect = sBounds->bounds;
     } else
     {
         aSpritePix->data = nil;
@@ -450,7 +450,7 @@ void Briefing_Objects_Render( long whichScenario, PixMap* destmap,
 //                  thisScale = kOneHalfScale;
                     thisScale = (kOneQuarterScale * baseObject->naturalScale)
                                 >> SHIFT_SCALE,
-                    RectToLongRect( bounds, &clipRect);
+                    clipRect = *bounds;
 
                     clipRect.left = clipRect.top = 0;
                     clipRect.right -= 1;
@@ -473,7 +473,7 @@ void Briefing_Objects_Render( long whichScenario, PixMap* destmap,
                             thisScale,
                             &spriteRect, &clipRect, destmap);
 
-                    LongRectToRect( &spriteRect, &sBounds->bounds);
+                    sBounds->bounds = spriteRect;
                     sBounds->objectIndex = count;
                     sBounds++;
                 }
@@ -492,7 +492,7 @@ void Briefing_Objects_Render( long whichScenario, PixMap* destmap,
                     thisScale = (kOneQuarterScale * baseObject->naturalScale)
                         >> SHIFT_SCALE,
 
-                    RectToLongRect( bounds, &clipRect);
+                    clipRect = *bounds;
 
                     clipRect.left = clipRect.top = 0;
                     clipRect.right -= 1;
@@ -518,7 +518,7 @@ void Briefing_Objects_Render( long whichScenario, PixMap* destmap,
                             GetTranslateColorShade( color, DARK)
                             );
 
-                    LongRectToRect( &spriteRect, &sBounds->bounds);
+                    sBounds->bounds = spriteRect;
                     sBounds->objectIndex = count;
                     sBounds++;
                 }

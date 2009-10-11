@@ -273,7 +273,7 @@ void UpdateRadar(int32_t unitsDone) {
 
             tRect = Rect(kRadarLeft + 1, kRadarTop + 1 + globals()->gInstrumentTop, kRadarRight - 1,
                     kRadarBottom - 1 + globals()->gInstrumentTop);
-            RectToLongRect( &tRect, &lRect);
+            lRect = tRect;
             mGetTranslateColorShade( kRadarColor, DARKEST, color, transColor);
             DrawNateRect(gOffWorld, &lRect, 0, 0, color);
             SetTranslateColorShadeFore( kRadarColor, VERY_LIGHT);
@@ -338,7 +338,7 @@ void UpdateRadar(int32_t unitsDone) {
         {
             tRect = Rect(kRadarLeft + 1, kRadarTop + 1 + globals()->gInstrumentTop, kRadarRight - 1,
                     kRadarBottom - 1 + globals()->gInstrumentTop);
-            RectToLongRect( &tRect, &lRect);
+            lRect = tRect;
             mGetTranslateColorShade( kRadarColor, DARKEST, color, transColor);
             DrawNateRect( gActiveWorld, &lRect, gNatePortLeft << 2L, gNatePortTop, color);
         }

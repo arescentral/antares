@@ -485,7 +485,7 @@ void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
 
         retroTextSpec.text.destroy();
 
-        LongRectToRect( &boundsRect, &tRect);
+        tRect = boundsRect;
     }
 }
 
@@ -866,7 +866,7 @@ void DoHelpScreen( void)
         item = GetAnyInterfaceItemPtr( kHelpScreenBox);
         DrawInOffWorld();
         GetAnyInterfaceItemGraphicBounds( item, &tRect);
-        LongRectToRect( &item->bounds, &textRect);
+        textRect = item->bounds;
         DefaultColors();
         CopyOffWorldToSaveWorld( &tRect);
         PaintRect( &tRect);
@@ -918,7 +918,7 @@ void DoHelpScreen( void)
             clipRect.right = clipRect.left + WORLD_WIDTH;
             clipRect.top = 0;
             clipRect.bottom = clipRect.top + WORLD_HEIGHT;
-            RectToLongRect( &textRect, &clipRect);
+            clipRect = textRect;
 
             DrawDirectTextInRect( &retroTextSpec, &clipRect, &clipRect, gOffWorld, 0, 0);
             CopyOffWorldToRealWorld(&tRect);
@@ -2303,7 +2303,7 @@ void DrawLevelNameInBox(unsigned char* name, long fontNum, short descriptionText
 //  clipRect.top = 0;
 //  clipRect.bottom = clipRect.top + WORLD_HEIGHT;
     clipRect = anItem->bounds;
-    LongRectToRect( &anItem->bounds, &tRect);
+    tRect = anItem->bounds;
     DrawInOffWorld();
     DefaultColors();
     PaintRect( &tRect);
@@ -2381,7 +2381,7 @@ bool DoMissionInterface( long whichScenario)
         tRect.top = ( mapRect.bottom - mapRect.top) / 2 - ( kMissionDataWidth / 2) + mapRect.top;
         tRect.bottom = tRect.top + kMissionDataWidth;
 
-        RectToLongRect( &tRect, &(dataItem.bounds));
+        dataItem.bounds = tRect;
         dataItem.color = GOLD;
         dataItem.kind = kLabeledRect;
         dataItem.style = kLarge;
@@ -2648,7 +2648,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
 
         DrawInOffWorld();
         if (textData.get() != nil) {
-            LongRectToRect( &(dataItem->bounds), &newRect);
+            newRect = dataItem->bounds;
             DrawInterfaceTextInRect(&newRect, *textData, length,
                             dataItem->style, dataItem->color, gOffWorld, 0, 0, inlinePict);
             textData.destroy();
@@ -2690,7 +2690,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
                 starPoint.v += bounds->top;
 
                 mGetTranslateColorShade( GOLD, VERY_LIGHT, color, transColor);
-                RectToLongRect( bounds, &longClipRect);
+                longClipRect = *bounds;
                 starRect.left = starPoint.h - kMissionStarPointWidth;
                 starRect.top = starPoint.v - kMissionStarPointHeight;
                 starRect.right = starPoint.h + kMissionStarPointWidth;
@@ -2877,8 +2877,8 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
     //      clipRect.right = dataRect.right;
     //      clipRect.top = dataRect.top;
     //      clipRect.bottom = dataRect.bottom;
-            RectToLongRect( clipRect, &longClipRect);
-            RectToLongRect( &dataRect, &lRect);
+            longClipRect = *clipRect;
+            lRect = dataRect;
             DrawInRealWorld();
             NormalizeColors();
             dataRect.inset(-8, -4);
@@ -3007,8 +3007,8 @@ void ShowSuccessAnimation(WindowPtr) {
     unsigned char   hackString[] = "\pMISSION COMPLETE";
     transColorType  *transColor;
 
-    SetLongRect( &starBounds, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-    LongRectToRect( &starBounds, &tRect);
+    starBounds = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    tRect = starBounds;
     DrawInSaveWorld();
     SetTranslateColorFore( BLACK);
     PaintRect( &tRect);
@@ -3041,10 +3041,10 @@ void ShowSuccessAnimation(WindowPtr) {
         OptScaleSpritePixInPixMap( &aSpritePix, shipPoint, SCALE_SCALE,
                 &spriteBounds, &starBounds, gOffWorld);
 
-        LongRectToRect( &spriteBounds, &lastBounds);
+        lastBounds = spriteBounds;
         HideCursor();
 
-        LongRectToRect( &spriteBounds, &tRect);
+        tRect = spriteBounds;
 
         Reset3DStars( vanishingPoint, &starBounds);
         lastTime = TickCount();
@@ -3086,7 +3086,7 @@ void ShowSuccessAnimation(WindowPtr) {
 
             OptScaleSpritePixInPixMap( &aSpritePix, shipPoint, shipScale,
                     &spriteBounds, &starBounds, gOffWorld);
-            LongRectToRect( &spriteBounds, &theseBounds);
+            theseBounds = spriteBounds;
             tRect = theseBounds;
             BiggestRect( &tRect, &lastBounds);
 
@@ -3287,7 +3287,7 @@ void DoMissionDebriefing(Rect *destRect, long yourlength, long parlength, long y
         clipRect.right = clipRect.left + WORLD_WIDTH;
         clipRect.top = 0;
         clipRect.bottom = clipRect.top + WORLD_HEIGHT;
-        RectToLongRect( destRect, &clipRect);
+        clipRect = *destRect;
         mCopyAnyRect( tlRect, boundsRect);
         tlRect.left -= 2;
         tlRect.top -= 2;
@@ -3337,7 +3337,7 @@ void DoMissionDebriefingText(long textID, long yourlength, long parlength,
         iRect.bottom = iRect.top + textHeight;
         iRect.center_in(tRect);
 
-        RectToLongRect( &iRect, &(dataItem.bounds));
+        dataItem.bounds = iRect;
         dataItem.color = GOLD;
         dataItem.kind = kLabeledRect;
         dataItem.style = kLarge;
@@ -3352,7 +3352,7 @@ void DoMissionDebriefingText(long textID, long yourlength, long parlength,
 
         DrawAnyInterfaceItem( &dataItem, gOffWorld, 0, 0);
 
-        LongRectToRect( &(dataItem.bounds), &tRect);
+        dataItem.bounds = tRect;
         DrawInterfaceTextInRect(&tRect, *textData, length,
                             dataItem.style, dataItem.color, gOffWorld, 0, 0, nil);
 
@@ -3631,11 +3631,10 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                                     &pictSourceRect, &pictRect,
                                     srcCopy, nil);
 
-                                LongRectToRect( &scrollRect, &tRect);
+                                tRect = scrollRect;
                                 uRect = tRect;
                                 uRect.offset(0, -1);
-                                LongRectToRect( &boundsRect, &vRect);
-
+                                vRect = boundsRect;
 
                                 for (   l = 0;
                                         ((l < (mDirectFontHeight() + kScrollTextLineBuffer)) &&
@@ -3739,14 +3738,14 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                         textRect.right -= kScrollText_Buffer;
                         DrawRetroTextCharInRect( &retroTextSpec, -1, &textRect, &textRect, gOffWorld, 0, 0);
                         textRect.right += kScrollText_Buffer;
-                        LongRectToRect( &scrollRect, &tRect);
+                        tRect = scrollRect;
                         uRect = tRect;
                         uRect.offset(0, -1);
 
                         bgVOffset++;
                         if ( bgVOffset >= kBackground_Height) bgVOffset = 0;
 
-                        LongRectToRect( &boundsRect, &vRect);
+                        vRect = boundsRect;
                         for (   l = 0;
                                 ((l < (mDirectFontHeight() + kScrollTextLineBuffer)) &&
                                     (!abort));
@@ -3792,7 +3791,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                 l++)
         {
             DrawInOffWorld();
-            LongRectToRect( &scrollRect, &tRect);
+            tRect = scrollRect;
             ScrollRect( &tRect, 0, -1, clipRgn);
             DrawNateLine(gOffWorld, &scrollRect, scrollRect.left, scrollRect.bottom - 1, scrollRect.right - 1,
                 scrollRect.bottom - 1, 0, 0, BLACK);

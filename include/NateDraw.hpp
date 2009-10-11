@@ -72,9 +72,6 @@ void DrawNateVBracket( PixMap *, Rect *, Rect *, long, long, unsigned char);
 void DrawNateShadedRect( PixMap *, Rect *, Rect *, long, long, unsigned char, unsigned char,
                     unsigned char);
 void BiggestRect( Rect  *, Rect *);
-void LongRectToRect( Rect *, Rect *);
-void RectToLongRect( Rect *, Rect *);
-void SetLongRect( Rect *, long, long, long, long);
 void DrawNateLine( PixMap *, Rect *, long, long, long,
                     long, long, long, unsigned char);
 void CopyNateLine( PixMap *, PixMap *, Rect *, long, long, long, long , long, long);

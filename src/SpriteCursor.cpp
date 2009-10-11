@@ -146,7 +146,7 @@ void EraseSpriteCursorSprite( void)
     {
         Rect    tc;
 
-        SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+        tc = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
         CopyNateLine( gSaveWorld, gOffWorld,
             &tc, gSpriteCursor->thisLineStart.h, gSpriteCursor->thisLineStart.v,
@@ -164,7 +164,7 @@ void EraseSpriteCursorSprite( void)
     {
         Rect    tc;
 
-        SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+        tc = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
         CopyNateLine( gSaveWorld, gOffWorld,
             &tc, gSpriteCursor->lastLineStart.h, gSpriteCursor->lastLineStart.v,
@@ -201,7 +201,7 @@ void DrawSpriteCursorSprite( Rect *clipRect)
     if ( gSpriteCursor->thisShowLine)
     {
 
-        SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+        tc = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
         CopyNateLine( gOffWorld, gSaveWorld,
             &tc, gSpriteCursor->thisLineStart.h, gSpriteCursor->thisLineStart.v,
@@ -264,13 +264,9 @@ void DrawSpriteCursorSprite( Rect *clipRect)
     }
 }
 
-void ShowSpriteCursorSprite( void)
-
-{
-    Rect            tRect;
-    Rect        tc;
-
-    SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+void ShowSpriteCursorSprite() {
+    Rect tRect;
+    Rect tc = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
     if (gSpriteCursor->sprite.table.get() != nil) {
         // if thisRect is null

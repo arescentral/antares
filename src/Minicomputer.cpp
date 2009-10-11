@@ -360,7 +360,7 @@ void DrawMiniScreen( void)
     mSetDirectFont( kComputerFontNum);
 
     DrawInOffWorld();
-    SetLongRect( &lRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+    lRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
                 kMiniScreenBottom + globals()->gInstrumentTop);
     color = GetTranslateColorShade( kMiniScreenColor, DARKEST);
     cRect = lRect;
@@ -481,14 +481,14 @@ void DrawAndShowMiniScreenLine( long whichLine)
     DrawInOffWorld();
     if ( whichLine < kMiniScreenCharHeight)
     {
-        SetLongRect( &lRect, kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
+        lRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
                     kMiniScreenBottom + globals()->gInstrumentTop);
         cRect = lRect;
         cRect.top = lRect.top + whichLine * gDirectText->height;
         cRect.bottom = cRect.top + gDirectText->height;
     } else
     {
-        SetLongRect( &lRect, kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
+        lRect = Rect(kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
                     kButBoxBottom + globals()->gInstrumentTop);
         lineCorrect = -kMiniScreenCharHeight;
         lineColor = kMiniButColor;

@@ -678,33 +678,6 @@ void BiggestRect( Rect  *dRect, Rect *sRect)
     if ( sRect->bottom > dRect->bottom) dRect->bottom = sRect->bottom;
 }
 
-void LongRectToRect( Rect *sRect, Rect *dRect)
-
-{
-    dRect->left = sRect->left;
-    dRect->top = sRect->top;
-    dRect->right = sRect->right;
-    dRect->bottom = sRect->bottom;
-}
-
-void RectToLongRect( Rect *sRect, Rect *dRect)
-
-{
-    dRect->left = sRect->left;
-    dRect->top = sRect->top;
-    dRect->right = sRect->right;
-    dRect->bottom = sRect->bottom;
-}
-
-void SetLongRect( Rect *dRect, long left, long top, long right, long bottom)
-
-{
-    dRect->left = left;
-    dRect->top = top;
-    dRect->right = right;
-    dRect->bottom = bottom;
-}
-
 //
 //           Sunday, November 6, 1994 4:11:09 AM
 //           mac.programmer Item

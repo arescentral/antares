@@ -253,7 +253,7 @@ void DrawInterfaceRange( long from, long to, long withinItem)
     if ( withinItem >= 0)
     {
         item = GetAnyInterfaceItemPtr( withinItem);
-        LongRectToRect( &item->bounds, &tRect);
+        tRect = item->bounds;
         SetTranslateColorFore( BLACK);
         PaintRect( &tRect);
     }
@@ -881,7 +881,7 @@ void InterfaceListRectHit( interfaceItemType *listRect, Point where)
 
     if ( listRect->item.listRect.getListLength != nil)
     {
-        LongRectToRect( &(listRect->bounds), &tRect);
+        tRect = listRect->bounds;
         lineHeight = GetInterfaceFontHeight(listRect->style) + kInterfaceTextVBuffer;
         where.v -= tRect.top;
         whichHit = where.v / lineHeight + listRect->item.listRect.topItem;
@@ -1018,7 +1018,7 @@ void InterfaceTextEditItemInit( short whichItem)
     {
         if ( item->item.labeledRect.teData == nil)
         {
-            LongRectToRect( &(item->bounds), &tRect);
+            tRect = item->bounds;
             SetInterfaceTextEditColors( whichItem);
 
             item->item.labeledRect.teData = TENew( &tRect, &tRect);
@@ -1071,7 +1071,7 @@ void InterfaceTextEditActivate( short whichItem)
     {
         SetInterfaceTextEditColors( whichItem);
 
-        LongRectToRect( &(item->bounds), &tRect);
+        tRect = item->bounds;
         TEActivate( item->item.labeledRect.teData);
         EraseRect( &tRect);
         TEUpdate( &tRect, item->item.labeledRect.teData);
@@ -1091,7 +1091,7 @@ void InterfaceTextEditDeactivate( short whichItem)
     if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
             ( item->item.labeledRect.teData != nil))
     {
-        LongRectToRect( &(item->bounds), &tRect);
+        tRect = item->bounds;
 
         SetInterfaceTextEditColors( whichItem);
 
@@ -1119,7 +1119,7 @@ void SuspendActiveTextEdit( void)
             {
                 SetInterfaceTextEditColors( gCurrentTEItem);
 
-                LongRectToRect( &(item->bounds), &tRect);
+                tRect = item->bounds;
                 TEDeactivate( item->item.labeledRect.teData);
                 EraseRect( &tRect);
                 TEUpdate( &tRect, item->item.labeledRect.teData);
@@ -1143,7 +1143,7 @@ void ResumeActiveTextEdit( void)
             {
                 SetInterfaceTextEditColors( gCurrentTEItem);
 
-                LongRectToRect( &(item->bounds), &tRect);
+                tRect = item->bounds;
                 TEActivate( item->item.labeledRect.teData);
                 EraseRect( &tRect);
                 TEUpdate( &tRect, item->item.labeledRect.teData);
@@ -1169,7 +1169,7 @@ void UpdateAllTextEdit( void)
             if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
                 ( item->item.labeledRect.teData != nil))
             {
-                LongRectToRect( &(item->bounds), &tRect);
+                tRect = item->bounds;
 
                 EraseRect( &tRect);
                 TEUpdate( &tRect, item->item.labeledRect.teData);

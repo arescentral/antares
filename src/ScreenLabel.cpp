@@ -230,7 +230,7 @@ void DrawAllLabels( void)
     mSetDirectFont( kTacticalFontNum);
 
     label = globals()->gScreenLabelData.get();
-    SetLongRect( &clipRect, CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
+    clipRect = Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
     for ( i = 0; i < kMaxLabelNum; i++)
     {
         if (( label->active) && ( !label->killMe) && ( *(label->label) > 0) && ( label->visibleState > 0))
@@ -249,14 +249,14 @@ void DrawAllLabels( void)
                 ( label->thisRect.bottom > label->thisRect.top))
             {
 
-                RectToLongRect( &(label->thisRect), &tRect);
+                tRect = label->thisRect;
                 mGetTranslateColorShade( label->color, VERY_DARK, color, transColor);
 
                 if ( label->keepOnScreenAnyway)
                 {
                     Rect    tc;
 
-                    SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+                    tc = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
                 }
                 originalLength = label->label[0];
                 if ( label->retroCount >= 0)
@@ -347,7 +347,7 @@ void ShowAllLabels( void)
                 {
                     Rect    tc;
 
-                    SetLongRect( &tc, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+                    tc = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
                 }
             } else
 
