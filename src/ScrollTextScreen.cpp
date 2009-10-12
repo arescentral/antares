@@ -75,16 +75,16 @@ class ScrollTextPixBuilder {
     }
 
     void add_text(const std::string& text) {
-        uint8_t black = 0xFF;
+        uint8_t white = 0xFF;
         uint8_t red = GetTranslateColorShade(RED, VERY_LIGHT);
-        RetroText retro(text.c_str(), text.size(), kTitleFontNum, red, black);
-        int text_height = retro.height_for_width(_pix->bounds.right - 12);
+        RetroText retro(text.c_str(), text.size(), kTitleFontNum, red, white);
+        retro.wrap_to(_pix->bounds.right - 12, 2);
 
-        Rect dest(0, 0, _pix->bounds.right, text_height);
+        Rect dest(0, 0, _pix->bounds.right, retro.height());
         dest.offset(0, _pix->bounds.bottom);
         dest.inset(6, 0);
 
-        extend(text_height);
+        extend(retro.height());
         retro.draw(_pix, dest);
     }
 

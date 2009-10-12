@@ -18,7 +18,7 @@
 #ifndef ANTARES_RETRO_TEXT_HPP_
 #define ANTARES_RETRO_TEXT_HPP_
 
-#include <string>
+#include <vector>
 #include "Geometry.hpp"
 #include "SmartPtr.hpp"
 
@@ -29,17 +29,41 @@ class PixMap;
 
 class RetroText {
   public:
-    RetroText(const char* data, size_t len, int font, int fore_color, int back_color);
+    RetroText(const char* data, size_t len, int font, uint8_t fore_color, uint8_t back_color);
     ~RetroText();
 
-    int height_for_width(int width);
-    void draw(PixMap* pix, const Rect& bounds);
+    void wrap_to(int width, int line_spacing);
+
+    int width() const;
+    int height() const;
+
+    void draw(PixMap* pix, const Rect& bounds) const;
 
   private:
-    const std::string _text;
+    enum SpecialChar {
+        NONE,
+        TAB,
+        WORD_BREAK,
+        LINE_BREAK,
+    };
+
+    struct RetroChar {
+        RetroChar(char character, SpecialChar special, uint8_t fore_color, uint8_t back_color);
+
+        char character;
+        SpecialChar special;
+        uint8_t fore_color;
+        uint8_t back_color;
+        int h;
+        int v;
+    };
+
+    int move_word_down(int index, int v);
+
+    std::vector<RetroChar> _chars;
+    int _width;
+    int _height;
     const int _font;
-    const int _fore_color;
-    const int _back_color;
 
     DISALLOW_COPY_AND_ASSIGN(RetroText);
 };

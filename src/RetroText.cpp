@@ -18,7 +18,9 @@
 #include "RetroText.hpp"
 
 #include <algorithm>
+#include <limits>
 #include <Quickdraw.h>
+#include "ColorTranslation.hpp"
 #include "DirectText.hpp"
 
 namespace antares {
@@ -265,79 +267,196 @@ int char_width(uint8_t ch) {
     return w;
 }
 
-int word_width(const std::string& str) {
-    int sum = 0;
-    for (std::string::const_iterator it = str.begin(); it != str.end(); ++it) {
-        sum += char_width(*it);
+int hex_digit(char c) {
+    assert(isxdigit(c));
+    if (c >= 'a') {
+        return c - 'a' + 10;
+    } else if (c >= 'A') {
+        return c - 'A' + 10;
+    } else {
+        return c - '0';
     }
-    return sum;
-}
-
-// TODO(sfiera): replace use of "_" with e.g. "\_".
-void split_lines(const std::string& in, std::vector<std::string>* out, int width) {
-    std::vector<std::string> words;
-    const char* start = in.c_str();
-    const char* end = strchr(start, ' ');;
-    while (end != NULL) {
-        words.push_back(std::string(start, end - start));
-        start = end + 1;
-        end = strchr(start, ' ');
-    }
-    words.push_back(std::string(start, in.size() - (start - in.c_str())));
-
-    const int space_width = char_width(' ');
-    int line_width = 0;
-    std::string line;
-    for (std::vector<std::string>::const_iterator it = words.begin(); it != words.end(); ++it) {
-        const int word_width = antares::word_width(*it);
-        if (line.empty()) {
-            line = *it;
-            line_width = word_width;
-        } else if (line_width + space_width + word_width <= width) {
-            line += ' ' + *it;
-            line_width += space_width + word_width;
-        } else if (!it->empty()) {
-            out->push_back(line);
-            line = *it;
-            line_width = word_width;
-        }
-    }
-    out->push_back(line);
 }
 
 }  // namespace
 
-RetroText::RetroText(const char* data, size_t len, int font, int fore_color, int back_color)
-        : _text(data, len),
-          _font(font),
-          _fore_color(fore_color),
-          _back_color(back_color) { }
+RetroText::RetroText(const char* data, size_t len, int font, uint8_t fore_color, uint8_t back_color)
+        : _font(font) {
+    const uint8_t original_fore_color = fore_color;
+    const uint8_t original_back_color = back_color;
+    transColorType* trans_color;
+
+    for (size_t i = 0; i < len; ++i) {
+        switch (data[i]) {
+          case '\r':
+            _chars.push_back(RetroChar('\r', LINE_BREAK, fore_color, back_color));
+            break;
+
+          case '_':
+            // TODO(sfiera): replace use of "_" with e.g. "\_".
+            _chars.push_back(RetroChar(' ', NONE, fore_color, back_color));
+            break;
+
+          case ' ':
+            _chars.push_back(RetroChar(' ', WORD_BREAK, fore_color, back_color));
+            break;
+
+          case '\\':
+            if (i >= len) {
+                fprintf(stderr, "not enough input for special code.\n");
+                exit(1);
+            }
+            ++i;
+            switch (data[i]) {
+              case 'i':
+                std::swap(fore_color, back_color);
+                break;
+
+              case 'f':
+                if (i + 2 >= len) {
+                    fprintf(stderr, "not enough input for foreground code.\n");
+                    exit(1);
+                }
+                mGetTranslateColorShade(
+                        hex_digit(data[i + 1]), hex_digit(data[i + 2]), fore_color, trans_color);
+                i += 2;
+                break;
+
+              case 'b':
+                if (i + 2 >= len) {
+                    fprintf(stderr, "not enough input for foreground code.\n");
+                    exit(1);
+                }
+                mGetTranslateColorShade(
+                        hex_digit(data[i + 1]), hex_digit(data[i + 2]), back_color, trans_color);
+                i += 2;
+                break;
+
+              case 'r':
+                fore_color = original_fore_color;
+                back_color = original_back_color;
+                break;
+
+              case 't':
+                _chars.push_back(RetroChar('\t', TAB, fore_color, back_color));
+                break;
+
+              case '\\':
+                _chars.push_back(RetroChar('\\', NONE, fore_color, back_color));
+                break;
+
+              default:
+                fprintf(stderr, "found bad special character '%c'.\n", data[i]);
+                exit(1);
+            }
+            break;
+
+          default:
+            _chars.push_back(RetroChar(data[i], NONE, fore_color, back_color));
+            break;
+        }
+    }
+
+    wrap_to(std::numeric_limits<int>::max(), 0);
+}
 
 RetroText::~RetroText() {
 }
 
-int RetroText::height_for_width(int width) {
+void RetroText::wrap_to(int width, int line_spacing) {
     mSetDirectFont(_font);
-    int line_height = mDirectFontHeight() + 2;
-    std::vector<std::string> lines;
-    split_lines(_text, &lines, width);
-    return line_height * lines.size();
+    _width = width;
+    int h = 0;
+    int v = line_spacing;
+
+    for (size_t i = 0; i < _chars.size(); ++i) {
+        _chars[i].h = h;
+        _chars[i].v = v;
+        switch (_chars[i].special) {
+          case NONE:
+            h += char_width(_chars[i].character);
+            if (h > width) {
+                v += mDirectFontHeight() + line_spacing;
+                h = move_word_down(i, v);
+            }
+            break;
+
+          case TAB:
+            // TODO(sfiera): handle tabs properly.
+            h += char_width(' ');
+            break;
+
+          case LINE_BREAK:
+            h = 0;
+            v += mDirectFontHeight() + line_spacing;
+            break;
+
+          case WORD_BREAK:
+            h += char_width(_chars[i].character);
+            break;
+        }
+    }
+    _height = v + mDirectFontHeight();
 }
 
-void RetroText::draw(PixMap* pix, const Rect& bounds) {
+int RetroText::width() const {
+    return _width;
+}
+
+int RetroText::height() const {
+    return _height;
+}
+
+void RetroText::draw(PixMap* pix, const Rect& bounds) const {
     mSetDirectFont(_font);
-    int line_height = mDirectFontHeight() + 2;
-    int y = mDirectFontAscent() + 2;
-    std::vector<std::string> lines;
-    split_lines(_text, &lines, bounds.width());
-    for (std::vector<std::string>::const_iterator it = lines.begin(); it != lines.end(); ++it) {
-        MoveTo(bounds.left, bounds.top + y);
-        y += line_height;
-        unsigned char pstr[255];
-        pstr[0] = std::min<int>(255, it->size());
-        memcpy(pstr + 1, it->c_str(), pstr[0]);
-        DrawDirectTextStringClipped(pstr, _fore_color, pix, bounds, 0, 0);
+    for (std::vector<RetroChar>::const_iterator it = _chars.begin(); it != _chars.end(); ++it) {
+        MoveTo(bounds.left + it->h, bounds.top + it->v + mDirectFontAscent());
+        unsigned char pstr[2] = {1, it->character};
+        if (it->back_color != 0xFF) {
+            Rect char_rect(0, 0, char_width(it->character), mDirectFontHeight());
+            char_rect.offset(it->h, it->v + mDirectFontAscent());
+            DrawNateRect(pix, &char_rect, 0, 0, it->back_color);
+        }
+        DrawDirectTextStringClipped(pstr, it->fore_color, pix, bounds, 0, 0);
     }
 }
+
+int RetroText::move_word_down(int index, int v) {
+    for (int i = index; i >= 0; --i) {
+        switch (_chars[i].special) {
+          case LINE_BREAK:
+            return 0;
+
+          case WORD_BREAK:
+          case TAB:
+            {
+                if (_chars[i + 1].h == 0) {
+                    return 0;
+                }
+
+                int h = 0;
+                for (int j = i + 1; j <= index; ++j) {
+                    _chars[j].h = h;
+                    _chars[j].v = v;
+                    h += char_width(_chars[j].character);
+                }
+                return h;
+            }
+
+          case NONE:
+            break;
+        }
+    }
+    return 0;
+}
+
+RetroText::RetroChar::RetroChar(
+        char character, SpecialChar special, uint8_t fore_color, uint8_t back_color)
+        : character(character),
+          special(special),
+          fore_color(fore_color),
+          back_color(back_color),
+          h(0),
+          v(0) { }
 
 }  // namespace antares
