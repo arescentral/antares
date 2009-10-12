@@ -323,64 +323,6 @@ void RemoveSprite( spriteType *aSprite)
 //  WARNING: DOES NOT CLIP.  WILL CRASH IF DESTINATION RECT IS NOT CONTAINED IN
 //  DESTINATION PIX MAP.
 
-void RunLengthSpritePixInPixMap( spritePix *sprite, Point where, PixMap* pixMap)
-
-{
-    int     width, height, runlen, pixlen, *sword;
-    unsigned char *source, *dest;
-    long    rowBytes, sRowPlus, dRowPlus, *slong, *dlong;
-
-    rowBytes = 0x0000ffff & (pixMap->rowBytes ^ ROW_BYTES_MASK);
-    dest = pixMap->baseAddr + where.v * rowBytes + where.h;
-    sword = reinterpret_cast<int*>(*(sprite->data));
-    sRowPlus = 0;
-    dRowPlus = rowBytes - sprite->width;
-    width = sprite->width;
-    height = sprite->height - 1;
-
-    startrow:
-        sword++;
-    addnil:
-        dest += *sword;
-        sword++;
-        if ( *sword == 0)
-            goto endrow;
-        runlen = *sword;
-        sword++;
-        if ( runlen < 4)
-            goto pixbyte;
-        pixlen = runlen >> 2;
-        runlen %= 4;
-        pixlen--;
-        dlong = reinterpret_cast<long*>(dest);
-        slong = reinterpret_cast<long*>(sword);
-    longloop:
-        *dlong++ = *slong++;
-        if ( --pixlen >= 0)
-            goto longloop;
-        dest = reinterpret_cast<unsigned char*>(dlong);
-        sword = reinterpret_cast<int*>(slong);
-        if ( runlen == 0)
-            goto addnil;
-
-    pixbyte:
-        runlen--;
-        source = reinterpret_cast<unsigned char*>(sword);
-    byteloop:
-        *dest++ = *source++;
-        if ( --runlen >= 0)
-            goto byteloop;
-        sword = reinterpret_cast<int*>(source);
-        goto addnil;
-
-    endrow:
-        dest += dRowPlus;
-        sword++;
-        if ( --height >= 0)
-            goto startrow;
-}
-
-
 void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect *dRect,
         Rect *clipRect, PixMap* pixMap)
 {

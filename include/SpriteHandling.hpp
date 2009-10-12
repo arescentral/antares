@@ -123,7 +123,6 @@ struct natePixType;
 void SpriteHandlingInit( void);
 void CleanupSpriteHandling( void);
 void ResetAllSprites( void);
-void RunLengthSpritePixInPixMap( spritePix *, Point, PixMap*);
 void OptScaleSpritePixInPixMap( spritePix *, Point, long, Rect *, Rect *, PixMap*);
 void StaticScaleSpritePixInPixMap( spritePix *, Point, long, Rect *, Rect *,
     PixMap*, short);
