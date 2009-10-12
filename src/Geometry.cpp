@@ -92,6 +92,13 @@ void Rect::clip_to(const Rect& r) {
     bottom = std::min(bottom, r.bottom);
 }
 
+void Rect::enlarge_to(const Rect& r) {
+    left = std::min(left, r.left);
+    top = std::min(top, r.top);
+    right = std::max(right, r.right);
+    bottom = std::max(bottom, r.bottom);
+}
+
 void Rect::read(BinaryReader* bin) {
     bin->read(&left);
     bin->read(&top);

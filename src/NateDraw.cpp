@@ -666,13 +666,6 @@ void DrawNateShadedRect(
 
 }
 
-void BiggestRect(Rect* dRect, const Rect& sRect) {
-    if (sRect.left < dRect->left) dRect->left = sRect.left;
-    if (sRect.right > dRect->right) dRect->right = sRect.right;
-    if (sRect.top < dRect->top) dRect->top = sRect.top;
-    if (sRect.bottom > dRect->bottom) dRect->bottom = sRect.bottom;
-}
-
 //
 //           Sunday, November 6, 1994 4:11:09 AM
 //           mac.programmer Item

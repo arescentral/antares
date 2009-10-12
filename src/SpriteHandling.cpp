@@ -1886,7 +1886,7 @@ void ShowSpriteTable( void)
             } else
             {
                 tRect = aSprite->thisRect;
-                mBiggestRect( tRect, aSprite->lastRect);
+                tRect.enlarge_to(aSprite->lastRect);
 
                 ChunkCopyPixMapToScreenPixMap(gOffWorld, tRect, gActiveWorld);
 

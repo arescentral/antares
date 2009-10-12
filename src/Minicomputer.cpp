@@ -1412,7 +1412,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                 uRect = lRect;
             } else
             {
-                mBiggestRect( uRect, lRect);
+                uRect.enlarge_to(lRect);
             }
         } else if ( oldObject->whichBaseObject != newObject->whichBaseObject)
         {
@@ -1440,7 +1440,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                 uRect = lRect;
             } else
             {
-                mBiggestRect( uRect, lRect);
+                uRect.enlarge_to(lRect);
             }
         }
     }
@@ -1521,7 +1521,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         }
         else
         {
-            mBiggestRect( uRect, dRect);
+            uRect.enlarge_to(dRect);
         }
     }
 
@@ -1568,7 +1568,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         }
         else
         {
-            mBiggestRect( uRect, dRect);
+            uRect.enlarge_to(dRect);
         }
 
     }
@@ -1615,7 +1615,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         }
         else
         {
-            mBiggestRect( uRect, dRect);
+            uRect.enlarge_to(dRect);
         }
     }
 
@@ -1643,7 +1643,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         }
         else
         {
-            mBiggestRect( uRect, lRect);
+            uRect.enlarge_to(lRect);
         }
     }
 
@@ -1671,7 +1671,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         }
         else
         {
-            mBiggestRect( uRect, lRect);
+            uRect.enlarge_to(lRect);
         }
     }
 
@@ -1699,7 +1699,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         }
         else
         {
-            mBiggestRect( uRect, lRect);
+            uRect.enlarge_to(lRect);
         }
     }
 
@@ -1745,7 +1745,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         }
         else
         {
-            mBiggestRect( uRect, lRect);
+            uRect.enlarge_to(lRect);
         }
     }
 

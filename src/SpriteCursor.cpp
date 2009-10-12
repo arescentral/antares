@@ -316,7 +316,7 @@ void ShowSpriteCursorSprite() {
         } else
         {
             tRect = gSpriteCursor->sprite.thisRect;
-            mBiggestRect( tRect, gSpriteCursor->sprite.lastRect);
+            tRect.enlarge_to(gSpriteCursor->sprite.lastRect);
 
             ChunkCopyPixMapToScreenPixMap(gOffWorld, tRect, gActiveWorld);
         }

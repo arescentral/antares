@@ -41,13 +41,6 @@ inline void mGetNatePixel(uint8_t*& destByte, long rowBytes, long x, long y, lon
     destByte = destPix->baseAddr + (y + yoff) * rowBytes + x + xoff;
 }
 
-inline void mBiggestRect(Rect& mdrect, const Rect& morect) {
-    mdrect.left = std::min(mdrect.left, morect.left);
-    mdrect.top = std::min(mdrect.top, morect.top);
-    mdrect.right = std::max(mdrect.right, morect.right);
-    mdrect.bottom = std::max(mdrect.bottom, morect.bottom);
-}
-
 struct coordPointType {
     uint32_t    h;
     uint32_t    v;
@@ -64,7 +57,6 @@ void DrawNateDiamondClipped( PixMap *, Rect *, const Rect&, long, long, unsigned
 void DrawNateVBracket(PixMap *, const Rect&, const Rect&, long, long, unsigned char);
 void DrawNateShadedRect( PixMap *, Rect *, const Rect&, long, long, unsigned char, unsigned char,
                     unsigned char);
-void BiggestRect(Rect*, const Rect&);
 void DrawNateLine(PixMap *, const Rect&, long, long, long,
                     long, long, long, unsigned char);
 void CopyNateLine( PixMap *, PixMap *, const Rect&, long, long, long, long , long, long);

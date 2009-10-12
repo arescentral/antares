@@ -632,7 +632,7 @@ void DrawCurrentLongMessage( long timePass)
                             uRect.right = lRect.right;
                             uRect.left = lRect.left;
                         }
-                        BiggestRect(&tRect, uRect);
+                        tRect.enlarge_to(uRect);
                         ChunkCopyPixMapToScreenPixMap(gOffWorld, tRect, gActiveWorld);
                         if ( tmessage->retroTextSpec.thisPosition >
                             tmessage->retroTextSpec.textLength)

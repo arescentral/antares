@@ -352,7 +352,7 @@ void ShowAllLabels( void)
             } else
 
             {
-                BiggestRect(&tRect, label->lastRect);
+                tRect.enlarge_to(label->lastRect);
                 ChunkCopyPixMapToScreenPixMap(gOffWorld, tRect, gActiveWorld);
             }
             label->lastRect = label->thisRect;

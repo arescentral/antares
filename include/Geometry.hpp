@@ -52,6 +52,7 @@ struct Rect {
     void inset(int32_t x, int32_t y);
     void center_in(const Rect& r);
     void clip_to(const Rect& r);
+    void enlarge_to(const Rect& r);
 
     void read(BinaryReader* bin);
 };

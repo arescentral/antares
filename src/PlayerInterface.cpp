@@ -2658,10 +2658,10 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
         NormalizeColors();
 
         GetAnyInterfaceItemGraphicBounds( dataItem, &newRect);
-        BiggestRect(&newRect, oldRect);
-        BiggestRect(&newRect, hiliteBounds);
+        newRect.enlarge_to(oldRect);
+        newRect.enlarge_to(hiliteBounds);
         oldRect = *usedRect;
-        BiggestRect(&oldRect, newRect);
+        oldRect.enlarge_to(newRect);
         CopyOffWorldToRealWorld(oldRect);
         *usedRect = newRect;
     } else // it's a special briefpoint!
@@ -2715,7 +2715,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
                             starPoint.v, 0, 0, color);
 
                 oldRect = *usedRect;
-                BiggestRect(&oldRect, *bounds);
+                oldRect.enlarge_to(*bounds);
                 DrawInRealWorld();
                 NormalizeColors();
                 CopyOffWorldToRealWorld(oldRect);
@@ -3088,7 +3088,7 @@ void ShowSuccessAnimation(WindowPtr) {
                     &spriteBounds, &starBounds, gOffWorld);
             theseBounds = spriteBounds;
             tRect = theseBounds;
-            BiggestRect(&tRect, lastBounds);
+            tRect.enlarge_to(lastBounds);
 
             Show3DStars(true, starBounds, gOffWorld);
 
