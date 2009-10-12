@@ -62,20 +62,20 @@ struct coordPointType {
 
 void DrawNateRect( PixMap *, Rect *, long, long, unsigned char);
 void DrawNateRectVScan( PixMap *, Rect *, long, long, unsigned char);
-void DrawNateRectClipped( PixMap *, Rect *, Rect *, long, long, unsigned char);
+void DrawNateRectClipped( PixMap *, Rect *, const Rect&, long, long, unsigned char);
 
-void DrawNateTriangleUpClipped( PixMap *, Rect *, Rect *, long, long, unsigned char);
-void DrawNatePlusClipped( PixMap *, Rect *, Rect *, long, long, unsigned char);
-void DrawNateSquareClipped( PixMap *, Rect *, Rect *, long, long, unsigned char);
-void DrawNateDiamondClipped( PixMap *, Rect *, Rect *, long, long, unsigned char);
-void DrawNateVBracket( PixMap *, Rect *, Rect *, long, long, unsigned char);
-void DrawNateShadedRect( PixMap *, Rect *, Rect *, long, long, unsigned char, unsigned char,
+void DrawNateTriangleUpClipped( PixMap *, Rect *, const Rect&, long, long, unsigned char);
+void DrawNatePlusClipped( PixMap *, Rect *, const Rect&, long, long, unsigned char);
+void DrawNateSquareClipped( PixMap *, Rect *, const Rect&, long, long, unsigned char);
+void DrawNateDiamondClipped( PixMap *, Rect *, const Rect&, long, long, unsigned char);
+void DrawNateVBracket(PixMap *, const Rect&, const Rect&, long, long, unsigned char);
+void DrawNateShadedRect( PixMap *, Rect *, const Rect&, long, long, unsigned char, unsigned char,
                     unsigned char);
-void BiggestRect( Rect  *, Rect *);
-void DrawNateLine( PixMap *, Rect *, long, long, long,
+void BiggestRect(Rect*, const Rect&);
+void DrawNateLine(PixMap *, const Rect&, long, long, long,
                     long, long, long, unsigned char);
-void CopyNateLine( PixMap *, PixMap *, Rect *, long, long, long, long , long, long);
-void DashNateLine( PixMap *, Rect *, long, long, long,
+void CopyNateLine( PixMap *, PixMap *, const Rect&, long, long, long, long , long, long);
+void DashNateLine(PixMap *, const Rect&, long, long, long,
                     long, long, long, unsigned char, unsigned char, unsigned char, unsigned char);
 
 }  // namespace antares

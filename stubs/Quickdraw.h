@@ -22,24 +22,24 @@ STUB1(UnlockPixels, void(PixMap** pix));
 
 void GetPort(GrafPtr* port);
 void MacSetPort(GrafPtr port);
-STUB1(InvalRect, void(Rect* rect));
-STUB1(ClipRect, void(Rect* rect));
+STUB1(InvalRect, void(const Rect& rect));
+STUB1(ClipRect, void(const Rect& rect));
 
-void CopyBits(PixMap* source, PixMap* source2, const Rect* source_rect,
-      const Rect* source_rect2, int mode, void*);
+void CopyBits(PixMap* source, PixMap* source2, const Rect& source_rect,
+      const Rect& source_rect2, int mode, void*);
 
 STUB0(NewRgn, Rgn**(), new Rgn*(new Rgn));
 STUB1(DisposeRgn, void(Rgn** rgn));
 
-void ScrollRect(Rect* rect, int x, int y, Rect clip);
+void ScrollRect(const Rect& rect, int x, int y, const Rect& clip);
 
-void PaintRect(Rect* rect);
-void FrameRect(Rect* rect);
-void MacFrameRect(Rect* rect);
-void EraseRect(Rect* rect);
+void PaintRect(const Rect& rect);
+void FrameRect(const Rect& rect);
+void MacFrameRect(const Rect& rect);
+void EraseRect(const Rect& rect);
 
-STUB1(FrameOval, void(Rect* rect));
-STUB1(PaintOval, void(Rect* rect));
+STUB1(FrameOval, void(const Rect& rect));
+STUB1(PaintOval, void(const Rect& rect));
 
 void MacLineTo(int x, int y);
 

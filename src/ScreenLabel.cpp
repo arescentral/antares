@@ -284,13 +284,13 @@ void DrawAllLabels( void)
                     {
                         String_Get_Nth_Line( s, label->label, j);
                         MoveTo( label->where.h+1+kLabelInnerSpace, y+1);
-                        DrawDirectTextStringClipped( s, BLACK, gOffWorld, &clipRect,
+                        DrawDirectTextStringClipped( s, BLACK, gOffWorld, clipRect,
                             0, 0);
                         MoveTo( label->where.h-1+kLabelInnerSpace, y-1);
-                        DrawDirectTextStringClipped( s, BLACK, gOffWorld, &clipRect,
+                        DrawDirectTextStringClipped( s, BLACK, gOffWorld, clipRect,
                             0, 0);
                         MoveTo( label->where.h+kLabelInnerSpace, y);
-                        DrawDirectTextStringClipped( s, color, gOffWorld, &clipRect,
+                        DrawDirectTextStringClipped( s, color, gOffWorld, clipRect,
                             0, 0);
                         y += label->lineHeight;
                     }
@@ -301,11 +301,11 @@ void DrawAllLabels( void)
                     mGetTranslateColorShade( label->color, VERY_LIGHT, color, transColor);
                     MoveTo( label->where.h+1+kLabelInnerSpace, label->where.v +
                         gDirectText->ascent +1 + kLabelInnerSpace);
-                    DrawDirectTextStringClipped( label->label, BLACK, gOffWorld, &clipRect,
+                    DrawDirectTextStringClipped( label->label, BLACK, gOffWorld, clipRect,
                         0, 0);
                     MoveTo( label->where.h + kLabelInnerSpace,
                         label->where.v + gDirectText->ascent + kLabelInnerSpace);
-                    DrawDirectTextStringClipped( label->label, color, gOffWorld, &clipRect,
+                    DrawDirectTextStringClipped( label->label, color, gOffWorld, clipRect,
                         0, 0);
                 }
                 label->label[0] = originalLength;
@@ -338,9 +338,9 @@ void ShowAllLabels( void)
                 (ABS( tRect.top - label->lastRect.top) > (( tRect.bottom - tRect.top) * 4)))
             {
                 if ( !(( tRect.right <= tRect.left) || ( tRect.bottom <= tRect.top)))
-                    ChunkCopyPixMapToScreenPixMap( gOffWorld, &tRect, gActiveWorld);
+                    ChunkCopyPixMapToScreenPixMap( gOffWorld, tRect, gActiveWorld);
                 if ( !(( label->lastRect.right <= label->lastRect.left) || ( label->lastRect.bottom <= label->lastRect.top)))
-                    ChunkCopyPixMapToScreenPixMap( gOffWorld, &(label->lastRect),
+                    ChunkCopyPixMapToScreenPixMap( gOffWorld, label->lastRect,
                             gActiveWorld);
 
                 if ( label->keepOnScreenAnyway)
@@ -352,8 +352,8 @@ void ShowAllLabels( void)
             } else
 
             {
-                BiggestRect( &tRect, &(label->lastRect));
-                ChunkCopyPixMapToScreenPixMap( gOffWorld, &tRect, gActiveWorld);
+                BiggestRect(&tRect, label->lastRect);
+                ChunkCopyPixMapToScreenPixMap(gOffWorld, tRect, gActiveWorld);
             }
             label->lastRect = label->thisRect;
             if ( label->killMe)

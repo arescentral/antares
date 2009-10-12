@@ -84,7 +84,7 @@ STUB1(GlobalToLocal, void(Point*));
 typedef Window CWindow;
 typedef CWindow* CWindowPtr;
 
-CWindow* NewCWindow(void*, Rect* size, const unsigned char* title, bool, int,
+CWindow* NewCWindow(void*, const Rect& size, const unsigned char* title, bool, int,
       Window* behind, bool, int id);
 
 typedef struct {
@@ -167,7 +167,7 @@ typedef Dialog* DialogPtr;
 
 STUB3(GetNewDialog, Dialog*(int id, void*, Window* window), NULL);
 STUB2(SetDialogDefaultItem, void(Dialog*, int item));
-STUB5(GetDialogItem, void(Dialog*, int item, short* type, Handle* handle, Rect* rect));
+STUB5(GetDialogItem, void(Dialog*, int item, short* type, Handle* handle, const Rect& rect));
 void ModalDialog(void*, short* item);
 STUB1(DisposeDialog, void(Dialog* dialog));
 STUB1(DrawDialog, void(Dialog* dialog));

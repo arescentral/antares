@@ -70,7 +70,7 @@ void mSetDirectFont(long mwhichFont);
 int mDirectFontHeight();
 int mDirectFontAscent();
 void mGetDirectStringDimensions(unsigned char* string, long& width, long& height);
-void DrawDirectTextStringClipped(unsigned char*, unsigned char, PixMap *, Rect *, long, long);
+void DrawDirectTextStringClipped(unsigned char*, unsigned char, PixMap *, const Rect&, long, long);
 
 }  // namespace antares
 

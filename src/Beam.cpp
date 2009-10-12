@@ -388,7 +388,7 @@ void DrawAllBeams( void)
                 {
                     for ( j = 1; j < kBoltPointNum; j++)
                     {
-                        DrawNateLine(gOffWorld, &bounds,
+                        DrawNateLine(gOffWorld, bounds,
                                     aBeam->lastBoltPoint[j-1].h,
                                     aBeam->lastBoltPoint[j-1].v,
                                     aBeam->lastBoltPoint[j].h,
@@ -397,7 +397,7 @@ void DrawAllBeams( void)
                     }
                 } else
                 {
-                    DrawNateLine(gOffWorld, &bounds, aBeam->lastLocation.left,
+                    DrawNateLine(gOffWorld, bounds, aBeam->lastLocation.left,
                                 aBeam->lastLocation.top,
                                 aBeam->lastLocation.right,
                                 aBeam->lastLocation.bottom,
@@ -472,7 +472,7 @@ void DrawAllBeams( void)
                         }
                         for ( j = 1; j < kBoltPointNum; j++)
                         {
-                            DrawNateLine(gOffWorld, &bounds,
+                            DrawNateLine(gOffWorld, bounds,
                                         aBeam->thisBoltPoint[j-1].h,
                                         aBeam->thisBoltPoint[j-1].v,
                                         aBeam->thisBoltPoint[j].h,
@@ -481,7 +481,7 @@ void DrawAllBeams( void)
                         }
                     } else
                     {
-                        DrawNateLine(gOffWorld, &bounds, aBeam->thisLocation.left,
+                        DrawNateLine(gOffWorld, bounds, aBeam->thisLocation.left,
                                 aBeam->thisLocation.top,
                                 aBeam->thisLocation.right,
                                 aBeam->thisLocation.bottom,
@@ -525,7 +525,7 @@ void ShowAllBeams( void)
                     {
                         for ( j = 1; j < kBoltPointNum; j++)
                         {
-                            CopyNateLine(gOffWorld, gActiveWorld, &bounds,
+                            CopyNateLine(gOffWorld, gActiveWorld, bounds,
                                         aBeam->thisBoltPoint[j-1].h,
                                         aBeam->thisBoltPoint[j-1].v,
                                         aBeam->thisBoltPoint[j].h,
@@ -534,7 +534,7 @@ void ShowAllBeams( void)
                         }
                     } else
                     {
-                        CopyNateLine(gOffWorld, gActiveWorld, &bounds,
+                        CopyNateLine(gOffWorld, gActiveWorld, bounds,
                                 aBeam->thisLocation.left,
                                 aBeam->thisLocation.top,
                                 aBeam->thisLocation.right,
@@ -553,7 +553,7 @@ void ShowAllBeams( void)
                 {
                     for ( j = 1; j < kBoltPointNum; j++)
                     {
-                        CopyNateLine(gOffWorld, gActiveWorld, &bounds,
+                        CopyNateLine(gOffWorld, gActiveWorld, bounds,
                                     aBeam->lastBoltPoint[j-1].h,
                                     aBeam->lastBoltPoint[j-1].v,
                                     aBeam->lastBoltPoint[j].h,
@@ -570,7 +570,7 @@ void ShowAllBeams( void)
 
                 } else
                 {
-                    CopyNateLine(gOffWorld, gActiveWorld, &bounds,
+                    CopyNateLine(gOffWorld, gActiveWorld, bounds,
                             aBeam->lastLocation.left,
                             aBeam->lastLocation.top,
                             aBeam->lastLocation.right,

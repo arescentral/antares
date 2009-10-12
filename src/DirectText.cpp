@@ -102,16 +102,16 @@ void mGetDirectStringDimensions(unsigned char* string, long& width, long& height
 }
 
 void DrawDirectTextStringClipped(unsigned char* string, unsigned char color, PixMap *destMap,
-                Rect *clip, long portLeft, long portTop) {
+                const Rect& clip, long portLeft, long portTop) {
     // move the pen to the resulting location
     Point pen;
     GetPen(&pen);
     pen.v -= gDirectText->ascent;
 
     // Top and bottom boundaries of where we draw.
-    int topEdge = std::max(0, clip->top - pen.v);
+    int topEdge = std::max(0, clip.top - pen.v);
     int bottomEdge = gDirectText->height - std::max(
-            0, pen.v + gDirectText->height - clip->bottom + 1);
+            0, pen.v + gDirectText->height - clip.bottom + 1);
 
     int rowBytes = destMap->rowBytes & 0x3FFF;
 
@@ -128,10 +128,10 @@ void DrawDirectTextStringClipped(unsigned char* string, unsigned char color, Pix
         int width = *sbyte;
         ++sbyte;
 
-        if ((pen.h + width >= clip->left) || (pen.h < clip->right)) {
+        if ((pen.h + width >= clip.left) || (pen.h < clip.right)) {
             // Left and right boundaries of where we draw.
-            int leftEdge = std::max(0, clip->left - pen.h);
-            int rightEdge = width - std::max(0, pen.h + width - clip->right);
+            int leftEdge = std::max(0, clip.left - pen.h);
+            int rightEdge = width - std::max(0, pen.h + width - clip.right);
 
             // skip over the clipped top rows
             sbyte += topEdge * gDirectText->physicalWidth;

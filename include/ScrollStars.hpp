@@ -56,10 +56,10 @@ void DrawScrollStars( bool);
 void ShowScrollStars( bool);
 void DontShowScrollStars( void);
 void DrawAllBeams( void);
-void Reset3DStars( Point, Rect *);
-void Move3DStars( Point, long, Rect *);
-void Draw3DStars( bool, Rect *, PixMap*);
-void Show3DStars( bool, Rect *, PixMap*);
+void Reset3DStars( Point, const Rect&);
+void Move3DStars( Point, long, const Rect&);
+void Draw3DStars( bool, const Rect&, PixMap*);
+void Show3DStars( bool, const Rect&, PixMap*);
 
 }  // namespace antares
 

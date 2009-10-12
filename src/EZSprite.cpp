@@ -35,7 +35,7 @@ extern  PixMap*         gSaveWorld;
 extern  long            gNatePortLeft, gNatePortTop;
 
 void EZDrawSpriteOffByID( short resID, long whichShape, long scale, unsigned char color,
-    Rect *bounds)
+    const Rect& bounds)
 {
     GrafPtr             oldPort;
     TypedHandle<natePixType> spriteTable;
@@ -66,7 +66,7 @@ void EZDrawSpriteOffByID( short resID, long whichShape, long scale, unsigned cha
 //  The sprite data is released before this returns. Not for animation.
 
 void EZDrawSpriteOffToOnByID( short resID, long whichShape, long scale,
-    unsigned char color, Rect *bounds)
+    unsigned char color, const Rect& bounds)
 {
     GrafPtr             oldPort;
     TypedHandle<natePixType> spriteTable;
@@ -94,17 +94,17 @@ void EZDrawSpriteOffToOnByID( short resID, long whichShape, long scale,
 }
 
 void EZDrawSpriteCenteredInRectBySprite( spritePix *aSpritePix,
-    PixMap* pixBase, long thisScale, Rect *bounds)
+    PixMap* pixBase, long thisScale, const Rect& bounds)
 {
     coordPointType      coord;
     long                tlong;
     Point               where;
     Rect            dRect, spriteRect;
 
-    dRect.left = bounds->left;
-    dRect.right = bounds->right;
-    dRect.top = bounds->top;
-    dRect.bottom = bounds->bottom;
+    dRect.left = bounds.left;
+    dRect.right = bounds.right;
+    dRect.top = bounds.top;
+    dRect.bottom = bounds.bottom;
 
     coord.h = aSpritePix->center.h;
     coord.h *= thisScale;
@@ -112,7 +112,7 @@ void EZDrawSpriteCenteredInRectBySprite( spritePix *aSpritePix,
     tlong = aSpritePix->width;
     tlong *= thisScale;
     tlong >>= SHIFT_SCALE;
-    where.h = ( (bounds->right - bounds->left) / 2) - ( tlong / 2);
+    where.h = ( (bounds.right - bounds.left) / 2) - ( tlong / 2);
     where.h += dRect.left + coord.h;
 
     coord.v = aSpritePix->center.v;
@@ -121,7 +121,7 @@ void EZDrawSpriteCenteredInRectBySprite( spritePix *aSpritePix,
     tlong = aSpritePix->height;
     tlong *= thisScale;
     tlong >>= SHIFT_SCALE;
-    where.v = ( (bounds->bottom - bounds->top) / 2) - ( tlong / 2);
+    where.v = ( (bounds.bottom - bounds.top) / 2) - ( tlong / 2);
     where.v += dRect.top + coord.v;
 
 
@@ -151,7 +151,7 @@ void EZMakeSpriteFromID( short resID, TypedHandle<natePixType>* spriteTable, spr
 }
 
 void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned char color,
-    Rect *bounds)
+    const Rect& bounds)
 {
     TypedHandle<natePixType> spriteTable;
     spritePix           aSpritePix;
@@ -177,10 +177,10 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
 
     // set up the sprite
 
-    dRect.left = bounds->left;
-    dRect.right = bounds->right;
-    dRect.top = bounds->top;
-    dRect.bottom = bounds->bottom;
+    dRect.left = bounds.left;
+    dRect.right = bounds.right;
+    dRect.top = bounds.top;
+    dRect.bottom = bounds.bottom;
 
     aSpritePix.data = GetNatePixTableNatePixData( spriteTable, whichShape);
     aSpritePix.center.h = GetNatePixTableNatePixHRef( spriteTable, whichShape);
@@ -197,7 +197,7 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
     tlong = aSpritePix.width;
     tlong *= thisScale;
     tlong >>= SHIFT_SCALE;
-    where.h = ( (bounds->right - bounds->left) / 2) - ( tlong / 2);
+    where.h = ( (bounds.right - bounds.left) / 2) - ( tlong / 2);
     where.h += dRect.left + coord.h;
 
     coord.v = aSpritePix.center.v;
@@ -206,7 +206,7 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
     tlong = aSpritePix.height;
     tlong *= thisScale;
     tlong >>= SHIFT_SCALE;
-    where.v = ( (bounds->bottom - bounds->top) / 2) - ( tlong / 2);
+    where.v = ( (bounds.bottom - bounds.top) / 2) - ( tlong / 2);
     where.v += dRect.top + coord.v;
 
 

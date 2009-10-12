@@ -912,7 +912,7 @@ GameResult PlayTheGame(long *seconds) {
                     globals()->gScenarioWinner.text = -1;
                     break;
                 }
-                CopyOffWorldToRealWorld(&playAreaRect);
+                CopyOffWorldToRealWorld(playAreaRect);
                 HideCursor();
                 playerPaused = true;
             }
@@ -924,7 +924,7 @@ GameResult PlayTheGame(long *seconds) {
                 MacShowCursor();
                 DoHelpScreen();
                 HideCursor();
-                CopyOffWorldToRealWorld(&playAreaRect);
+                CopyOffWorldToRealWorld(playAreaRect);
                 playerPaused = true;
             }
 
@@ -998,7 +998,7 @@ GameResult PlayTheGame(long *seconds) {
             ShowScrollStars( true);
             ShowSectorLines();
             ShowSite();
-            CopyOffWorldToRealWorld(&playAreaRect);
+            CopyOffWorldToRealWorld(playAreaRect);
 
             DrawMessageScreen(unitsDone);
             UpdateRadar(unitsDone);

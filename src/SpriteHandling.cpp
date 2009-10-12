@@ -1831,23 +1831,23 @@ void DrawSpriteTableInOffWorld( Rect *clipRect)
                     switch( aSprite->tinySize & kBlipTypeMask)
                     {
                         case kTriangeUpBlip:
-                            DrawNateTriangleUpClipped( gOffWorld, &sRect, clipRect, 0, 0, aSprite->tinyColor);
+                            DrawNateTriangleUpClipped( gOffWorld, &sRect, *clipRect, 0, 0, aSprite->tinyColor);
                             break;
 
                         case kSolidSquareBlip:
-                            DrawNateRectClipped( gOffWorld, &sRect, clipRect, 0, 0, aSprite->tinyColor);
+                            DrawNateRectClipped( gOffWorld, &sRect, *clipRect, 0, 0, aSprite->tinyColor);
                             break;
 
                         case kPlusBlip:
-                            DrawNatePlusClipped( gOffWorld, &sRect, clipRect, 0, 0, aSprite->tinyColor);
+                            DrawNatePlusClipped( gOffWorld, &sRect, *clipRect, 0, 0, aSprite->tinyColor);
                             break;
 
                         case kDiamondBlip:
-                            DrawNateDiamondClipped( gOffWorld, &sRect, clipRect, 0, 0, aSprite->tinyColor);
+                            DrawNateDiamondClipped( gOffWorld, &sRect, *clipRect, 0, 0, aSprite->tinyColor);
                             break;
 
                         case kFramedSquareBlip:
-                            DrawNateRectClipped( gOffWorld, &sRect, clipRect, 0, 0, aSprite->tinyColor);
+                            DrawNateRectClipped( gOffWorld, &sRect, *clipRect, 0, 0, aSprite->tinyColor);
                             break;
 
                         default:
@@ -1917,11 +1917,7 @@ void ShowSpriteTable( void)
                 if ( aSprite->lastRect.right > aSprite->lastRect.left)
                 {
                     // show lastRect
-
-                    ChunkCopyPixMapToScreenPixMap( gOffWorld, &(aSprite->lastRect),
-                            gActiveWorld);
-
-
+                    ChunkCopyPixMapToScreenPixMap( gOffWorld, aSprite->lastRect, gActiveWorld);
                 }
             // else if lastRect is null (we now know this rect isn't)
             } else if (( aSprite->lastRect.right <= aSprite->lastRect.left) ||
@@ -1929,7 +1925,7 @@ void ShowSpriteTable( void)
             {
                 // then show thisRect
 
-                ChunkCopyPixMapToScreenPixMap( gOffWorld, &(aSprite->thisRect),
+                ChunkCopyPixMapToScreenPixMap( gOffWorld, aSprite->thisRect,
                         gActiveWorld);
 
             // else if the rects don't intersect
@@ -1941,10 +1937,8 @@ void ShowSpriteTable( void)
                 // then draw them individually
 
 
-                ChunkCopyPixMapToScreenPixMap( gOffWorld, &(aSprite->lastRect),
-                        gActiveWorld);
-                ChunkCopyPixMapToScreenPixMap( gOffWorld, &(aSprite->thisRect),
-                        gActiveWorld);
+                ChunkCopyPixMapToScreenPixMap( gOffWorld, aSprite->lastRect, gActiveWorld);
+                ChunkCopyPixMapToScreenPixMap( gOffWorld, aSprite->thisRect, gActiveWorld);
 
             // else the rects do intersect (and we know are both non-null)
             } else
@@ -1952,7 +1946,7 @@ void ShowSpriteTable( void)
                 tRect = aSprite->thisRect;
                 mBiggestRect( tRect, aSprite->lastRect);
 
-                ChunkCopyPixMapToScreenPixMap( gOffWorld, &tRect, gActiveWorld);
+                ChunkCopyPixMapToScreenPixMap(gOffWorld, tRect, gActiveWorld);
 
             }
             aSprite->lastRect = aSprite->thisRect;

@@ -42,15 +42,15 @@ void DrawInOffWorld();
 void DrawInSaveWorld();
 void EraseOffWorld();
 void EraseSaveWorld();
-void CopyOffWorldToRealWorld(Rect* bounds);
-void CopyRealWorldToSaveWorld(Rect* bounds);
-void CopyRealWorldToOffWorld(Rect* bounds);
-void CopySaveWorldToOffWorld(Rect* bounds);
-void CopyOffWorldToSaveWorld(Rect* bounds);
+void CopyOffWorldToRealWorld(const Rect& bounds);
+void CopyRealWorldToSaveWorld(const Rect& bounds);
+void CopyRealWorldToOffWorld(const Rect& bounds);
+void CopySaveWorldToOffWorld(const Rect& bounds);
+void CopyOffWorldToSaveWorld(const Rect& bounds);
 void NormalizeColors();
-void ChunkCopyPixMapToScreenPixMap( PixMap *, Rect *, PixMap *);
-void ChunkCopyPixMapToPixMap( PixMap *, Rect *, PixMap *);
-void ChunkErasePixMap( PixMap *, Rect *);
+void ChunkCopyPixMapToScreenPixMap(PixMap* source_pix, const Rect& source_rect, PixMap* dest_pix);
+void ChunkCopyPixMapToPixMap(PixMap* source_pix, const Rect& source_rect, PixMap* dest_pix);
+void ChunkErasePixMap(PixMap* source_pix, Rect* source_rect);
 
 }  // namespace antares
 

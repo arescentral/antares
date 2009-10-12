@@ -84,10 +84,10 @@ void DrawInSaveWorld() {
 
 void EraseOffWorld() {
     DrawInOffWorld();
-    EraseRect(&gOffWorld->bounds);
+    EraseRect(gOffWorld->bounds);
     RGBColor c = { 0, 0, 0 };
     RGBForeColor(&c);
-    PaintRect(&gOffWorld->bounds);
+    PaintRect(gOffWorld->bounds);
     NormalizeColors();
     DrawInRealWorld();
     NormalizeColors();
@@ -96,35 +96,35 @@ void EraseOffWorld() {
 void EraseSaveWorld() {
     DrawInSaveWorld();
     NormalizeColors();
-    EraseRect(&gSaveWorld->bounds);
+    EraseRect(gSaveWorld->bounds);
     RGBColor c = { 0, 0, 0 };
     RGBForeColor(&c);
-    PaintRect(&gSaveWorld->bounds);
+    PaintRect(gSaveWorld->bounds);
     NormalizeColors();
     DrawInRealWorld();
 }
 
-void CopyOffWorldToRealWorld(Rect *bounds) {
+void CopyOffWorldToRealWorld(const Rect& bounds) {
     NormalizeColors();
     CopyBits(gOffWorld, gRealWorld, bounds, bounds, srcCopy, nil);
 }
 
-void CopyRealWorldToSaveWorld(Rect *bounds) {
+void CopyRealWorldToSaveWorld(const Rect& bounds) {
     NormalizeColors();
     CopyBits(gRealWorld, gSaveWorld, bounds, bounds, srcCopy, nil);
 }
 
-void CopyRealWorldToOffWorld(Rect *bounds) {
+void CopyRealWorldToOffWorld(const Rect& bounds) {
     NormalizeColors();
     CopyBits(gRealWorld, gOffWorld, bounds, bounds, srcCopy, nil);
 }
 
-void CopySaveWorldToOffWorld(Rect *bounds) {
+void CopySaveWorldToOffWorld(const Rect& bounds) {
     NormalizeColors();
     CopyBits(gSaveWorld, gOffWorld, bounds, bounds, srcCopy, nil);
 }
 
-void CopyOffWorldToSaveWorld(Rect *bounds) {
+void CopyOffWorldToSaveWorld(const Rect& bounds) {
     NormalizeColors();
     CopyBits(gOffWorld, gSaveWorld, bounds, bounds, srcCopy, nil);
 }
@@ -136,15 +136,15 @@ void NormalizeColors() {
     RGBBackColor(&c);
 }
 
-void ChunkCopyPixMapToScreenPixMap(PixMap *sourcePix, Rect *sourceRect, PixMap *destMap) {
+void ChunkCopyPixMapToScreenPixMap(PixMap* sourcePix, const Rect& sourceRect, PixMap* destMap) {
     CopyBits(sourcePix, destMap, sourceRect, sourceRect, 0, NULL);
 }
 
-void ChunkCopyPixMapToPixMap(PixMap *sourcePix, Rect *sourceRect, PixMap *destMap) {
+void ChunkCopyPixMapToPixMap(PixMap* sourcePix, const Rect& sourceRect, PixMap* destMap) {
     CopyBits(sourcePix, destMap, sourceRect, sourceRect, 0, NULL);
 }
 
-void ChunkErasePixMap(PixMap *destMap, Rect *sourceRect) {
+void ChunkErasePixMap(PixMap* destMap, Rect* sourceRect) {
     DrawNateRect(destMap, sourceRect, 0, 0, 0xFF);
 }
 

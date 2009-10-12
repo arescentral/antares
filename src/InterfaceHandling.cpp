@@ -228,7 +228,7 @@ void DrawEntireInterface( void)
     DrawInOffWorld();
     tRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     SetTranslateColorFore( BLACK);
-    PaintRect( &tRect);
+    PaintRect(tRect);
 
     number = gInterfaceItemData.count();
     item = *gInterfaceItemData;
@@ -239,7 +239,7 @@ void DrawEntireInterface( void)
         item++;
     }
     DrawInRealWorld();
-    CopyOffWorldToRealWorld(&tRect);
+    CopyOffWorldToRealWorld(tRect);
 }
 
 void DrawInterfaceRange( long from, long to, long withinItem)
@@ -255,7 +255,7 @@ void DrawInterfaceRange( long from, long to, long withinItem)
         item = GetAnyInterfaceItemPtr( withinItem);
         tRect = item->bounds;
         SetTranslateColorFore( BLACK);
-        PaintRect( &tRect);
+        PaintRect(tRect);
     }
     number = gInterfaceItemData.count();
     if ( from < number)
@@ -270,7 +270,7 @@ void DrawInterfaceRange( long from, long to, long withinItem)
         }
         DrawInRealWorld();
         if ( withinItem >= 0)
-            CopyOffWorldToRealWorld(&tRect);
+            CopyOffWorldToRealWorld(tRect);
     }
 }
 
@@ -286,7 +286,7 @@ void DrawAllItemsOfKind( interfaceKindType kind, bool sound, bool clearFirst,
     tRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     SetTranslateColorFore( BLACK);
     if ( clearFirst)
-        PaintRect( &tRect);
+        PaintRect(tRect);
 
     number = gInterfaceItemData.count();
     item = *gInterfaceItemData;
@@ -306,7 +306,7 @@ void DrawAllItemsOfKind( interfaceKindType kind, bool sound, bool clearFirst,
     }
     DrawInRealWorld();
     if ( showAtEnd)
-        CopyOffWorldToRealWorld(&tRect);
+        CopyOffWorldToRealWorld(tRect);
 }
 
 void DrawAnyInterfaceItemOffToOn( interfaceItemType *item)
@@ -318,7 +318,7 @@ void DrawAnyInterfaceItemOffToOn( interfaceItemType *item)
     DrawInOffWorld();
     DrawAnyInterfaceItem( item, gOffWorld, 0, 0);
     DrawInRealWorld();
-    CopyOffWorldToRealWorld(&bounds);
+    CopyOffWorldToRealWorld(bounds);
 }
 
 void DrawAnyInterfaceItemSaveToOffToOn( interfaceItemType   *item)
@@ -330,9 +330,9 @@ void DrawAnyInterfaceItemSaveToOffToOn( interfaceItemType   *item)
     DrawInSaveWorld();
     DrawAnyInterfaceItem( item, gSaveWorld, 0, 0);
     DrawInOffWorld();
-    CopySaveWorldToOffWorld( &bounds);
+    CopySaveWorldToOffWorld(bounds);
     DrawInRealWorld();
-    CopyOffWorldToRealWorld(&bounds);
+    CopyOffWorldToRealWorld(bounds);
 }
 
 void OffsetAllItems( long hoffset, long voffset)
@@ -990,7 +990,7 @@ void RefreshInterfaceItem( short whichItem)
     GetAnyInterfaceItemGraphicBounds( item, &tRect);
     DrawInOffWorld();
     DefaultColors();
-    PaintRect( &tRect);
+    PaintRect(tRect);
     DrawAnyInterfaceItemOffToOn( item);
 }
 
@@ -1021,7 +1021,7 @@ void InterfaceTextEditItemInit( short whichItem)
             tRect = item->bounds;
             SetInterfaceTextEditColors( whichItem);
 
-            item->item.labeledRect.teData = TENew( &tRect, &tRect);
+            item->item.labeledRect.teData = TENew(tRect, tRect);
 //          SetClikLoop( (UniversalProcPtr)gCallBackTest, item->item.labeledRect.teData);
             DefaultColors();
         }
@@ -1073,8 +1073,8 @@ void InterfaceTextEditActivate( short whichItem)
 
         tRect = item->bounds;
         TEActivate( item->item.labeledRect.teData);
-        EraseRect( &tRect);
-        TEUpdate( &tRect, item->item.labeledRect.teData);
+        EraseRect(tRect);
+        TEUpdate(tRect, item->item.labeledRect.teData);
         gCurrentTEItem = whichItem;
 
     }
@@ -1096,8 +1096,8 @@ void InterfaceTextEditDeactivate( short whichItem)
         SetInterfaceTextEditColors( whichItem);
 
         TEDeactivate( item->item.labeledRect.teData);
-        EraseRect( &tRect);
-        TEUpdate( &tRect, item->item.labeledRect.teData);
+        EraseRect(tRect);
+        TEUpdate(tRect, item->item.labeledRect.teData);
         gCurrentTEItem = -1;
 
         DefaultColors();
@@ -1121,8 +1121,8 @@ void SuspendActiveTextEdit( void)
 
                 tRect = item->bounds;
                 TEDeactivate( item->item.labeledRect.teData);
-                EraseRect( &tRect);
-                TEUpdate( &tRect, item->item.labeledRect.teData);
+                EraseRect(tRect);
+                TEUpdate(tRect, item->item.labeledRect.teData);
             }
         }
     }
@@ -1145,8 +1145,8 @@ void ResumeActiveTextEdit( void)
 
                 tRect = item->bounds;
                 TEActivate( item->item.labeledRect.teData);
-                EraseRect( &tRect);
-                TEUpdate( &tRect, item->item.labeledRect.teData);
+                EraseRect(tRect);
+                TEUpdate(tRect, item->item.labeledRect.teData);
             }
         }
     }
@@ -1171,8 +1171,8 @@ void UpdateAllTextEdit( void)
             {
                 tRect = item->bounds;
 
-                EraseRect( &tRect);
-                TEUpdate( &tRect, item->item.labeledRect.teData);
+                EraseRect(tRect);
+                TEUpdate(tRect, item->item.labeledRect.teData);
             }
             item++;
         }

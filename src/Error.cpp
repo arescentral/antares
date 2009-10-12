@@ -201,14 +201,14 @@ void ShowErrorAny(  errorRecoverType recover,
     if (( recover != eContinueErr) && ( recover != eContinueOnlyErr))
     {
         SetDialogDefaultItem( theDialog, kQuitButton);
-        GetDialogItem( theDialog, kContinueButton, &itemType, &itemHandle, &itemRect);
+        GetDialogItem( theDialog, kContinueButton, &itemType, &itemHandle, itemRect);
 //      SetControlTitle( (ControlHandle)itemHandle, "\pDebugger");
         HiliteControl( reinterpret_cast<ControlHandle>(itemHandle), 255);
     } else
     {
         if ( recover == eContinueOnlyErr)
         {
-            GetDialogItem( theDialog, kQuitButton, &itemType, &itemHandle, &itemRect);
+            GetDialogItem( theDialog, kQuitButton, &itemType, &itemHandle, itemRect);
             HiliteControl( reinterpret_cast<ControlHandle>(itemHandle), 255);
         }
         SetDialogDefaultItem( theDialog, kContinueButton);

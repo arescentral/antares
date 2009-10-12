@@ -65,7 +65,7 @@ void DrawPlayerListPageDown( interfaceItemType *);
 void GetPlayerListPageDownRect( interfaceItemType *, Rect *);
 void DrawInterfaceTextRect( interfaceItemType *, PixMap *, long,
                         long);
-void DrawInterfaceTextInRect( Rect *, const unsigned char *, long, interfaceStyleType, unsigned char, PixMap *, long,
+void DrawInterfaceTextInRect(const Rect&, const unsigned char *, long, interfaceStyleType, unsigned char, PixMap *, long,
                         long, inlinePictType *);
 short GetInterfaceTextHeightFromWidth(unsigned char*, long, interfaceStyleType, short);
 void DrawInterfacePictureRect( interfaceItemType *, PixMap *, long,
@@ -82,7 +82,7 @@ void DrawInterfaceString(unsigned char*, interfaceStyleType, PixMap *, long,
                         long, unsigned char);
 void SetInterfaceLargeUpperFont( interfaceStyleType);
 void SetInterfaceLargeLowerFont( interfaceStyleType);
-void BiggestRect( Rect  *, Rect *);
+void BiggestRect(Rect*, const Rect&);
 
 }  // namespace antares
 

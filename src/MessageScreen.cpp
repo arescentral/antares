@@ -529,7 +529,7 @@ void DrawCurrentLongMessage( long timePass)
                 cRect = lRect;
                 DrawNateRect(gOffWorld, &cRect, 0, 0, 0xff);
                 tRect = lRect;
-                ChunkCopyPixMapToScreenPixMap(gOffWorld, &tRect, gActiveWorld);
+                ChunkCopyPixMapToScreenPixMap(gOffWorld, tRect, gActiveWorld);
                 NormalizeColors();
                 DrawInRealWorld();
     //          CLIP_BOTTOM = globals()->gTrueClipBottom;
@@ -553,11 +553,11 @@ void DrawCurrentLongMessage( long timePass)
                     mGetTranslateColorShade( SKY_BLUE, VERY_LIGHT, color, transColor);
     //              DrawDirectTextInRect( (anyCharType *)*tmessage->retroTextSpec.text, tmessage->retroTextSpec.textLength,
     //                      &lRect, *offPixBase, 0, 0, 0);
-                    DrawNateLine(gOffWorld, &cRect, cRect.left, cRect.top, cRect.right - 1,
+                    DrawNateLine(gOffWorld, cRect, cRect.left, cRect.top, cRect.right - 1,
                         cRect.top, 0, 0, color);
-                    DrawNateLine(gOffWorld, &cRect, cRect.left, cRect.bottom - 1, cRect.right - 1,
+                    DrawNateLine(gOffWorld, cRect, cRect.left, cRect.bottom - 1, cRect.right - 1,
                         cRect.bottom - 1, 0, 0, color);
-                    ChunkCopyPixMapToScreenPixMap(gOffWorld, &tRect, gActiveWorld);
+                    ChunkCopyPixMapToScreenPixMap(gOffWorld, tRect, gActiveWorld);
                     NormalizeColors();
                     DrawInRealWorld();
                     NormalizeColors();
@@ -577,7 +577,7 @@ void DrawCurrentLongMessage( long timePass)
             cRect = lRect;
             DrawNateRect(gOffWorld, &cRect, 0, 0, 0xff);
             tRect = lRect;
-            ChunkCopyPixMapToScreenPixMap(gOffWorld, &tRect, gActiveWorld);
+            ChunkCopyPixMapToScreenPixMap(gOffWorld, tRect, gActiveWorld);
             NormalizeColors();
             DrawInRealWorld();
 //          CLIP_BOTTOM = globals()->gTrueClipBottom;
@@ -622,7 +622,7 @@ void DrawCurrentLongMessage( long timePass)
                         lRect.right -= kHBuffer;
 
                         DrawRetroTextCharInRect( &(tmessage->retroTextSpec),
-                            3, &lRect, &lRect, gOffWorld, 0, 0);
+                            3, lRect, lRect, gOffWorld, 0, 0);
 //                           *thePixMapHandle, gNatePortLeft, gNatePortTop);
 
                         lRect.left -= kHBuffer;
@@ -640,9 +640,8 @@ void DrawCurrentLongMessage( long timePass)
                             uRect.right = lRect.right;
                             uRect.left = lRect.left;
                         }
-                        BiggestRect( &tRect, &uRect);
-                        ChunkCopyPixMapToScreenPixMap(gOffWorld, &tRect,
-                            gActiveWorld);
+                        BiggestRect(&tRect, uRect);
+                        ChunkCopyPixMapToScreenPixMap(gOffWorld, tRect, gActiveWorld);
                         if ( tmessage->retroTextSpec.thisPosition >
                             tmessage->retroTextSpec.textLength)
                         {
@@ -992,10 +991,10 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
     return ( height);
 }
 
-void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, Rect *bounds, Rect *clipRect, PixMap *destMap,
-                        long portLeft, long portTop)
-{
-    long            charNum = 0, y = bounds->top + mDirectFontAscent() + retroTextSpec->topBuffer, x = bounds->left,
+void DrawDirectTextInRect(
+        retroTextSpecType *retroTextSpec, const Rect& bounds, const Rect& clipRect,
+        PixMap *destMap, long portLeft, long portTop) {
+    long            charNum = 0, y = bounds.top + mDirectFontAscent() + retroTextSpec->topBuffer, x = bounds.left,
                     oldx = 0, oldCharNum, wordLen;
     unsigned char   *widthPtr, charWidth, wrapState, // 0 = none, 1 = once, 2 = more than once
                     tempColor;
@@ -1009,14 +1008,14 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, Rect *bounds, Rect 
         if ( *thisChar == kReturnChar)
         {
             lineRect.left = x;
-            lineRect.right = bounds->right;
+            lineRect.right = bounds.right;
             lineRect.top = y - (mDirectFontAscent() + retroTextSpec->topBuffer);
             lineRect.bottom = lineRect.top + mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
-            DrawNateRectClipped( destMap, &lineRect, clipRect, (portLeft << 2),
+            DrawNateRectClipped(destMap, &lineRect, clipRect, (portLeft << 2),
                 portTop, retroTextSpec->backColor);
 
             y += mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
-            x = bounds->left;
+            x = bounds.left;
             thisChar++;
             charNum++;
         } else if ( *thisChar == ' ')
@@ -1032,7 +1031,7 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, Rect *bounds, Rect 
                 charNum++;
             } while (( *thisChar == ' ')  && ( charNum < retroTextSpec->textLength));
             backRect.right = x;
-            DrawNateRectClipped( destMap, &backRect, clipRect, (portLeft << 2),
+            DrawNateRectClipped(destMap, &backRect, clipRect, (portLeft << 2),
                 portTop, retroTextSpec->backColor);
         } else if ( *thisChar == kCodeChar)
         {
@@ -1042,7 +1041,7 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, Rect *bounds, Rect 
             {
                 case kCodeTabChar:
                     wordLen = 0;
-                    oldx = bounds->left;
+                    oldx = bounds.left;
                     backRect.left = x;
                     backRect.top = y - (mDirectFontAscent() + retroTextSpec->topBuffer);
                     backRect.bottom = backRect.top + mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
@@ -1051,9 +1050,9 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, Rect *bounds, Rect 
                         oldx += retroTextSpec->tabSize;
                         wordLen++;
                     }
-                    x = bounds->left + retroTextSpec->tabSize * wordLen;
+                    x = bounds.left + retroTextSpec->tabSize * wordLen;
                     backRect.right = x;
-                    DrawNateRectClipped( destMap, &backRect, clipRect, (portLeft << 2),
+                    DrawNateRectClipped(destMap, &backRect, clipRect, (portLeft << 2),
                         portTop, retroTextSpec->backColor);
                     break;
 
@@ -1063,7 +1062,7 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, Rect *bounds, Rect 
                     backRect.bottom = backRect.top + mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
                     mDirectCharWidth( charWidth, *thisChar, widthPtr);
                     x += charWidth;
-                    DrawNateRectClipped( destMap, &backRect, clipRect, (portLeft << 2),
+                    DrawNateRectClipped(destMap, &backRect, clipRect, (portLeft << 2),
                         portTop, retroTextSpec->backColor);
                     thisWord[0] = 1;
                     thisWord[1] = kCodeChar;
@@ -1132,20 +1131,20 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, Rect *bounds, Rect 
                 wordLen++;
                 *thisWordChar = *thisChar;
                 thisWordChar++;
-                if ( x >= (bounds->right /*- gDirectText->logicalWidth*/))
+                if ( x >= (bounds.right /*- gDirectText->logicalWidth*/))
                 {
                     if ( !wrapState)
                     {
                         lineRect.left = oldx;
-                        lineRect.right = bounds->right;
+                        lineRect.right = bounds.right;
                         lineRect.top = y - (mDirectFontAscent() + retroTextSpec->topBuffer);
                         lineRect.bottom = lineRect.top + mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
-                        DrawNateRectClipped( destMap, &lineRect, clipRect, (portLeft << 2),
+                        DrawNateRectClipped(destMap, &lineRect, clipRect, (portLeft << 2),
                             portTop, retroTextSpec->backColor);
 
                         wrapState = 1;
-                        x = bounds->left + (x - oldx);
-                        oldx = bounds->left;
+                        x = bounds.left + (x - oldx);
+                        oldx = bounds.left;
                         y += mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
                         backRect.left = x;
                         backRect.top = y - (mDirectFontAscent() + retroTextSpec->topBuffer);
@@ -1163,7 +1162,7 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, Rect *bounds, Rect 
                 ( charNum < retroTextSpec->textLength));
             thisWord[0] = wordLen;
             backRect.right = x;
-            DrawNateRectClipped( destMap, &backRect, clipRect, (portLeft << 2),
+            DrawNateRectClipped(destMap, &backRect, clipRect, (portLeft << 2),
                 portTop, retroTextSpec->backColor);
             MoveTo( oldx, y);
             DrawDirectTextStringClipped( thisWord, retroTextSpec->color, destMap, clipRect, portLeft,
@@ -1172,9 +1171,9 @@ void DrawDirectTextInRect( retroTextSpecType *retroTextSpec, Rect *bounds, Rect 
     }
 }
 
-void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
-    Rect *bounds, Rect *clipRect, PixMap *destMap, long portLeft, long portTop)
-{
+void DrawRetroTextCharInRect(
+        retroTextSpecType *retroTextSpec, long charsToDo, const Rect& bounds, const Rect& clipRect,
+        PixMap *destMap, long portLeft, long portTop) {
     unsigned char   *thisChar = *(retroTextSpec->text), thisWord[kMaxRetroSize], charWidth, *widthPtr;
     Rect        cursorRect, lineRect, tlRect;
     long            oldx, wordLen, *lineLength = &(retroTextSpec->lineLength[retroTextSpec->lineCount]);
@@ -1189,9 +1188,9 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
     cursorRect.bottom = cursorRect.top + mDirectFontHeight() +
         retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
     mCopyAnyRect( tlRect, cursorRect);
-    mClipAnyRect( tlRect, *bounds);
+    mClipAnyRect( tlRect, bounds);
     if ( retroTextSpec->originalBackColor != WHITE)
-        DrawNateRectClipped( destMap, &tlRect, clipRect, (portLeft << 2),
+        DrawNateRectClipped(destMap, &tlRect, clipRect, (portLeft << 2),
             portTop, retroTextSpec->originalBackColor);
 
     if ( charsToDo <= 0) charsToDo = retroTextSpec->lineLength[retroTextSpec->lineCount];
@@ -1210,20 +1209,20 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
             {
                 case kCodeTabChar:
                     wordLen = 0;
-                    oldx = bounds->left;
+                    oldx = bounds.left;
                     cursorRect.left = retroTextSpec->xpos;
                     while ( oldx <= retroTextSpec->xpos)
                     {
                         oldx += retroTextSpec->tabSize;
                         wordLen++;
                     }
-                    retroTextSpec->xpos = bounds->left + retroTextSpec->tabSize *
+                    retroTextSpec->xpos = bounds.left + retroTextSpec->tabSize *
                         wordLen;
                     cursorRect.right = retroTextSpec->xpos;
                     mCopyAnyRect( tlRect, cursorRect);
-                    mClipAnyRect( tlRect, *bounds);
+                    mClipAnyRect( tlRect, bounds);
                     if ( retroTextSpec->backColor != WHITE)
-                        DrawNateRectClipped( destMap, &tlRect, clipRect, (portLeft << 2), portTop,
+                        DrawNateRectClipped(destMap, &tlRect, clipRect, (portLeft << 2), portTop,
                             retroTextSpec->backColor);
                     break;
 
@@ -1234,9 +1233,9 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
                     mDirectCharWidth( charWidth, *thisChar, widthPtr);
                     retroTextSpec->xpos += charWidth;
                     mCopyAnyRect( tlRect, cursorRect);
-                    mClipAnyRect( tlRect, *bounds);
+                    mClipAnyRect( tlRect, bounds);
                     if ( retroTextSpec->backColor != WHITE)
-                        DrawNateRectClipped( destMap, &tlRect, clipRect, (portLeft << 2),
+                        DrawNateRectClipped(destMap, &tlRect, clipRect, (portLeft << 2),
                             portTop, retroTextSpec->backColor);
                     thisWord[0] = 1;
                     thisWord[1] = '\\';
@@ -1321,9 +1320,9 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
             retroTextSpec->xpos += charWidth;
             cursorRect.right = retroTextSpec->xpos;
             mCopyAnyRect( tlRect, cursorRect);
-            mClipAnyRect( tlRect, *bounds);
+            mClipAnyRect( tlRect, bounds);
             if ( retroTextSpec->backColor != WHITE)
-                DrawNateRectClipped( destMap, &tlRect, clipRect, (portLeft << 2), portTop,
+                DrawNateRectClipped(destMap, &tlRect, clipRect, (portLeft << 2), portTop,
                     retroTextSpec->backColor);
             DrawDirectTextStringClipped( thisWord,
                 (retroTextSpec->color==WHITE)?(BLACK):(retroTextSpec->color),
@@ -1335,18 +1334,18 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
         if ( retroTextSpec->linePosition >= *lineLength)
         {
             lineRect.left = retroTextSpec->xpos;
-            lineRect.right = bounds->right;
+            lineRect.right = bounds.right;
             lineRect.top = cursorRect.top;
             lineRect.bottom = cursorRect.bottom;
             mCopyAnyRect( tlRect, lineRect);
-            mClipAnyRect( tlRect, *bounds);
+            mClipAnyRect( tlRect, bounds);
             if ( retroTextSpec->backColor != WHITE)
-                DrawNateRectClipped( destMap, &tlRect, clipRect, (portLeft << 2), portTop,
+                DrawNateRectClipped(destMap, &tlRect, clipRect, (portLeft << 2), portTop,
                     retroTextSpec->backColor);
 
             retroTextSpec->linePosition = 0;
             retroTextSpec->ypos += mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
-            retroTextSpec->xpos = bounds->left;
+            retroTextSpec->xpos = bounds.left;
             (retroTextSpec->lineCount)++;
             lineLength++;
             cursorRect.top = retroTextSpec->ypos - (mDirectFontAscent() + retroTextSpec->topBuffer);
@@ -1363,9 +1362,9 @@ void DrawRetroTextCharInRect( retroTextSpecType *retroTextSpec, long charsToDo,
         if ( drawCursor)
         {
             mCopyAnyRect( tlRect, cursorRect);
-            mClipAnyRect( tlRect, *bounds);
+            mClipAnyRect( tlRect, bounds);
             if ( retroTextSpec->backColor != WHITE)
-                DrawNateRectClipped( destMap, &tlRect, clipRect, (portLeft << 2), portTop,
+                DrawNateRectClipped(destMap, &tlRect, clipRect, (portLeft << 2), portTop,
                     retroTextSpec->originalColor);
         }
     }

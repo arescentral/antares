@@ -479,7 +479,7 @@ void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
         while ( retroTextSpec.thisPosition < retroTextSpec.textLength)
         {
             PlayVolumeSound(  kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
-            DrawRetroTextCharInRect( &retroTextSpec, 3, &boundsRect, &clipRect, gActiveWorld, gNatePortLeft,
+            DrawRetroTextCharInRect( &retroTextSpec, 3, boundsRect, clipRect, gActiveWorld, gNatePortLeft,
                 gNatePortTop);
         }
 
@@ -505,7 +505,7 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
     {
         DrawInOffWorld();
         DefaultColors();
-        PaintRect( contentRect);
+        PaintRect(*contentRect);
         GetIndString( string, 2004, 33);
 
         mSetDirectFont( kButtonFontNum);
@@ -517,12 +517,12 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
 
         mGetTranslateColorShade( kLoadingScreenColor, LIGHTER, color, transColor);
         MoveTo( tRect.left, tRect.top + mDirectFontAscent());
-        DrawDirectTextStringClipped( string, color, gOffWorld, &clipRect, 0, 0);
+        DrawDirectTextStringClipped( string, color, gOffWorld, clipRect, 0, 0);
 
 
         DrawInRealWorld();
         DefaultColors();
-        CopyOffWorldToRealWorld(contentRect);
+        CopyOffWorldToRealWorld(*contentRect);
     } else
     {
         width = contentRect->right - contentRect->left;
@@ -533,16 +533,16 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
 
         tRect = Rect(contentRect->left, contentRect->top, contentRect->left + temp, contentRect->bottom);
         SetTranslateColorShadeFore( kLoadingScreenColor, LIGHT);
-        PaintRect( &tRect);
+        PaintRect(tRect);
 
         tRect = Rect(contentRect->left + temp, contentRect->top, contentRect->right, contentRect->bottom);
         SetTranslateColorShadeFore( kLoadingScreenColor, DARK);
-        PaintRect( &tRect);
+        PaintRect(tRect);
         NormalizeColors();
         DrawInRealWorld();
         NormalizeColors();
         tRect = Rect(contentRect->left, contentRect->top, contentRect->right, contentRect->bottom);
-        CopyOffWorldToRealWorld(&tRect);
+        CopyOffWorldToRealWorld(tRect);
         if ( tRect.left >= tRect.right - 2) AutoFadeTo( 10, &fadeColor, false);
     }
 }
@@ -573,7 +573,7 @@ PlayAgainResult DoPlayAgain(bool allowResume, bool allowSkip) {
 //      LongRectToRect( &(item->bounds), &tRect);
         GetAnyInterfaceItemGraphicBounds( item, &tRect);
         DefaultColors();
-        PaintRect( &tRect);
+        PaintRect(tRect);
         DrawInRealWorld();
 
         if ( globals()->gOptions & kOptionNetworkOn)
@@ -650,7 +650,7 @@ PlayAgainResult DoPlayAgain(bool allowResume, bool allowSkip) {
         DrawInOffWorld();
         GetAnyInterfaceItemGraphicBounds( item, &tRect);
         DefaultColors();
-        PaintRect( &tRect);
+        PaintRect(tRect);
         DrawInRealWorld();
         CloseInterface();
     }
@@ -868,8 +868,8 @@ void DoHelpScreen( void)
         GetAnyInterfaceItemGraphicBounds( item, &tRect);
         textRect = item->bounds;
         DefaultColors();
-        CopyOffWorldToSaveWorld( &tRect);
-        PaintRect( &tRect);
+        CopyOffWorldToSaveWorld(tRect);
+        PaintRect(tRect);
         DrawInRealWorld();
 
         DrawAllItemsOfKind( kPictureRect, false, false, false);
@@ -920,8 +920,8 @@ void DoHelpScreen( void)
             clipRect.bottom = clipRect.top + WORLD_HEIGHT;
             clipRect = textRect;
 
-            DrawDirectTextInRect( &retroTextSpec, &clipRect, &clipRect, gOffWorld, 0, 0);
-            CopyOffWorldToRealWorld(&tRect);
+            DrawDirectTextInRect(&retroTextSpec, clipRect, clipRect, gOffWorld, 0, 0);
+            CopyOffWorldToRealWorld(tRect);
 
             retroTextSpec.text.destroy();
         }
@@ -974,8 +974,8 @@ void DoHelpScreen( void)
         DrawInOffWorld();
         GetAnyInterfaceItemGraphicBounds( item, &tRect);
         DefaultColors();
-        PaintRect( &tRect);
-        CopySaveWorldToOffWorld( &tRect);
+        PaintRect(tRect);
+        CopySaveWorldToOffWorld(tRect);
         DrawInRealWorld();
         CloseInterface();
     }
@@ -1003,10 +1003,10 @@ void StartPauseIndicator(unsigned char* pauseString, unsigned char hue) {
 
     DrawInSaveWorld();
     DefaultColors();
-    CopyRealWorldToSaveWorld(&tRect);
+    CopyRealWorldToSaveWorld(tRect);
     DrawInOffWorld();
     DefaultColors();
-    CopySaveWorldToOffWorld( &tRect);
+    CopySaveWorldToOffWorld(tRect);
     DrawInOffWorld();
 
     mCopyAnyRect( clipRect, tRect);
@@ -1014,19 +1014,19 @@ void StartPauseIndicator(unsigned char* pauseString, unsigned char hue) {
     mGetTranslateColorShade( GREEN, DARKER, color, transColor);
     for ( count = clipRect.top + 2; count < clipRect.bottom; count += 2)
     {
-        DrawNateLine( gOffWorld, &clipRect, clipRect.left, count, clipRect.right - 1,
+        DrawNateLine( gOffWorld, clipRect, clipRect.left, count, clipRect.right - 1,
                     count, 0, 0, color);
     }
 
     mGetTranslateColorShade( GREEN, LIGHTER, color, transColor);
-    DrawNateVBracket( gOffWorld, &clipRect, &clipRect, 0, 0,color);
+    DrawNateVBracket( gOffWorld, clipRect, clipRect, 0, 0,color);
     MoveTo( stringRect.left, stringRect.top + mDirectFontAscent());
-    DrawDirectTextStringClipped( pauseString, color, gOffWorld, &clipRect, 0, 0);
+    DrawDirectTextStringClipped( pauseString, color, gOffWorld, clipRect, 0, 0);
 
     DrawInRealWorld();
     DefaultColors();
     mCopyAnyRect( tRect, clipRect);
-    CopyOffWorldToRealWorld(&tRect);
+    CopyOffWorldToRealWorld(tRect);
 }
 
 void StopPauseIndicator(unsigned char* pauseString) {
@@ -1046,12 +1046,12 @@ void StopPauseIndicator(unsigned char* pauseString) {
 
     DrawInOffWorld();
     DefaultColors();
-    CopySaveWorldToOffWorld( &stringRect);
+    CopySaveWorldToOffWorld(stringRect);
     DrawInRealWorld();
-    CopyOffWorldToRealWorld(&stringRect);
+    CopyOffWorldToRealWorld(stringRect);
     DrawInOffWorld();
     DefaultColors();
-    PaintRect( &stringRect);
+    PaintRect(stringRect);
 
     DrawInRealWorld();
     DefaultColors();
@@ -1304,7 +1304,7 @@ void DrawOptionVolumeLevel( Rect *bounds, long level)
         graphicRect = tRect;
         graphicRect.inset(2, 6);
         graphicRect.center_in(tRect);
-        PaintRect( &graphicRect);
+        PaintRect(graphicRect);
         tRect.left += notchWidth;
         tRect.right = tRect.left + notchWidth - 2;
         shade += 2;
@@ -1316,14 +1316,14 @@ void DrawOptionVolumeLevel( Rect *bounds, long level)
         graphicRect = tRect;
         graphicRect.inset(2, 6);
         graphicRect.center_in(tRect);
-        PaintRect( &graphicRect);
+        PaintRect(graphicRect);
         tRect.left += notchWidth;
         tRect.right = tRect.left + notchWidth - 2;
     }
 
     DrawInRealWorld();
     NormalizeColors();
-    CopyOffWorldToRealWorld(bounds);
+    CopyOffWorldToRealWorld(*bounds);
 }
 
 bool DoKeyInterface( void)
@@ -1589,7 +1589,7 @@ void DrawKeyControlPicture( long whichKey)
     thePict.reset();
 
     DrawInRealWorld();
-    CopyOffWorldToRealWorld(&tRect);
+    CopyOffWorldToRealWorld(tRect);
 
 }
 
@@ -1708,16 +1708,16 @@ void DrawStringInInterfaceItem( long whichItem, const unsigned char* string)
     DefaultColors();
     GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( whichItem), &tRect);
 
-    PaintRect( &tRect);
+    PaintRect(tRect);
     anItem = GetAnyInterfaceItemPtr( whichItem);
     if ( string != nil)
     {
-        DrawInterfaceTextInRect( &tRect, string + 1, string[0],
+        DrawInterfaceTextInRect(tRect, string + 1, string[0],
                                 anItem->style, anItem->color, gOffWorld,
                                 0, 0, nil);
     }
     DrawInRealWorld();
-    CopyOffWorldToRealWorld(&tRect);
+    CopyOffWorldToRealWorld(tRect);
 }
 
 netResultType ClientWaitInterface( void)
@@ -2039,13 +2039,13 @@ void BlackenWindow( void)
     tRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     DrawInSaveWorld();
     DefaultColors();
-    PaintRect( &tRect);
+    PaintRect(tRect);
     DrawInOffWorld();
     DefaultColors();
-    PaintRect( &tRect);
+    PaintRect(tRect);
     DrawInRealWorld();
     DefaultColors();
-    PaintRect( &tRect);
+    PaintRect(tRect);
 }
 
 void BlackenOffscreen( void)
@@ -2056,10 +2056,10 @@ void BlackenOffscreen( void)
     tRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     DrawInSaveWorld();
     DefaultColors();
-    PaintRect( &tRect);
+    PaintRect(tRect);
     DrawInOffWorld();
     DefaultColors();
-    PaintRect( &tRect);
+    PaintRect(tRect);
     DrawInRealWorld();
     DefaultColors();
 }
@@ -2306,10 +2306,10 @@ void DrawLevelNameInBox(unsigned char* name, long fontNum, short descriptionText
     tRect = anItem->bounds;
     DrawInOffWorld();
     DefaultColors();
-    PaintRect( &tRect);
+    PaintRect(tRect);
     DrawInRealWorld();
-    DrawDirectTextInRect( &retroTextSpec, &anItem->bounds, &clipRect, gOffWorld, 0,0);
-    CopyOffWorldToRealWorld(&tRect);
+    DrawDirectTextInRect( &retroTextSpec, anItem->bounds, clipRect, gOffWorld, 0,0);
+    CopyOffWorldToRealWorld(tRect);
     retroTextSpec.text.destroy();
 }
 
@@ -2343,7 +2343,7 @@ bool DoMissionInterface( long whichScenario)
         HideCursor();
         SetStatusOfAnyInterfaceItem( kMissionPreviousButton, kDimmed, false);
         DrawInterfaceOneAtATime();
-        CopyOffWorldToSaveWorld( &totalRect);
+        CopyOffWorldToSaveWorld(totalRect);
 // it is assumed that we're "recovering" from a fade-out
         AutoFadeFrom( 60, false);
 
@@ -2362,8 +2362,8 @@ bool DoMissionInterface( long whichScenario)
         NormalizeColors();
         DrawInRealWorld();
 
-        CopySaveWorldToOffWorld( &totalRect);
-        CopyOffWorldToRealWorld(&totalRect);
+        CopySaveWorldToOffWorld(totalRect);
+        CopyOffWorldToRealWorld(totalRect);
 
         GetScenarioFullScaleAndCorner( whichScenario, 0, &corner, &scale, &mapRect);
         DrawArbitrarySectorLines( &corner, scale, 16, &mapRect, gSaveWorld,  0, 0);
@@ -2548,7 +2548,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
 
     HideCursor();
     GetAnyInterfaceItemGraphicBounds( dataItem, &oldRect);
-    CopySaveWorldToOffWorld( usedRect);
+    CopySaveWorldToOffWorld(*usedRect);
 
     DrawInOffWorld();
 //  HHCheckAllHandles();
@@ -2613,7 +2613,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
             SetTranslateColorShadeFore( kMissionDataHiliteColor, VERY_LIGHT);
             hiliteBounds.right++;
             hiliteBounds.bottom++;
-            MacFrameRect( &hiliteBounds);
+            MacFrameRect(hiliteBounds);
             SetTranslateColorShadeFore( kMissionDataHiliteColor, MEDIUM);
             GetAnyInterfaceItemGraphicBounds( dataItem, &newRect);
             if ( dataItem->bounds.right < hiliteBounds.left)
@@ -2643,13 +2643,13 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
         dataItem->item.labeledRect.label.stringNumber = headerNumber;
         GetAnyInterfaceItemGraphicBounds( dataItem, &newRect);
         SetTranslateColorFore( BLACK);
-        PaintRect( &newRect);
+        PaintRect(newRect);
         DrawAnyInterfaceItem( dataItem, gOffWorld, 0, 0);
 
         DrawInOffWorld();
         if (textData.get() != nil) {
             newRect = dataItem->bounds;
-            DrawInterfaceTextInRect(&newRect, *textData, length,
+            DrawInterfaceTextInRect(newRect, *textData, length,
                             dataItem->style, dataItem->color, gOffWorld, 0, 0, inlinePict);
             textData.destroy();
         }
@@ -2658,11 +2658,11 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
         NormalizeColors();
 
         GetAnyInterfaceItemGraphicBounds( dataItem, &newRect);
-        BiggestRect( &newRect, &oldRect);
-        BiggestRect( &newRect, &hiliteBounds);
+        BiggestRect(&newRect, oldRect);
+        BiggestRect(&newRect, hiliteBounds);
         oldRect = *usedRect;
-        BiggestRect( &oldRect, &newRect);
-        CopyOffWorldToRealWorld(&oldRect);
+        BiggestRect(&oldRect, newRect);
+        CopyOffWorldToRealWorld(oldRect);
         *usedRect = newRect;
     } else // it's a special briefpoint!
     {
@@ -2696,29 +2696,29 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
                 starRect.right = starPoint.h + kMissionStarPointWidth;
                 starRect.bottom = starPoint.v + kMissionStarPointHeight;
 
-                DrawNateVBracket( gOffWorld, &starRect, &longClipRect, 0, 0,color);
-                DrawNateLine( gOffWorld, &longClipRect, starPoint.h,
+                DrawNateVBracket( gOffWorld, starRect, longClipRect, 0, 0,color);
+                DrawNateLine( gOffWorld, longClipRect, starPoint.h,
                             starPoint.v + kMissionStarPointHeight,
                             starPoint.h,
                             bounds->bottom, 0, 0, color);
-                DrawNateLine( gOffWorld, &longClipRect, starPoint.h,
+                DrawNateLine( gOffWorld, longClipRect, starPoint.h,
                             starPoint.v - kMissionStarPointHeight,
                             starPoint.h,
                             bounds->top, 0, 0, color);
-                DrawNateLine( gOffWorld, &longClipRect, starPoint.h - kMissionStarPointWidth,
+                DrawNateLine( gOffWorld, longClipRect, starPoint.h - kMissionStarPointWidth,
                             starPoint.v,
                             bounds->left,
                             starPoint.v, 0, 0, color);
-                DrawNateLine( gOffWorld, &longClipRect, starPoint.h + kMissionStarPointWidth,
+                DrawNateLine( gOffWorld, longClipRect, starPoint.h + kMissionStarPointWidth,
                             starPoint.v,
                             bounds->right,
                             starPoint.v, 0, 0, color);
 
                 oldRect = *usedRect;
-                BiggestRect(&oldRect, bounds);
+                BiggestRect(&oldRect, *bounds);
                 DrawInRealWorld();
                 NormalizeColors();
-                CopyOffWorldToRealWorld(&oldRect);
+                CopyOffWorldToRealWorld(oldRect);
                 *usedRect = newRect;
                 textlength = 100;
             }
@@ -2727,7 +2727,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
             oldRect = *bounds;
             DrawInRealWorld();
             NormalizeColors();
-            CopyOffWorldToRealWorld(&oldRect);
+            CopyOffWorldToRealWorld(oldRect);
             *usedRect = oldRect;
             textlength = 50;
         }
@@ -2882,16 +2882,16 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
             DrawInRealWorld();
             NormalizeColors();
             dataRect.inset(-8, -4);
-            PaintRect( &dataRect);
+            PaintRect(dataRect);
             SetTranslateColorShadeFore( GREEN, VERY_LIGHT);
-            MacFrameRect( &dataRect);
+            MacFrameRect(dataRect);
             NormalizeColors();
 
 
             while (( retroTextSpec.thisPosition < retroTextSpec.textLength) && (( Button()) || (AnyRealKeyDown())))
             {
                 PlayVolumeSound(  kComputerBeep3, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
-                DrawRetroTextCharInRect( &retroTextSpec, 24, &lRect, &lRect, gActiveWorld, gNatePortLeft,
+                DrawRetroTextCharInRect( &retroTextSpec, 24, lRect, lRect, gActiveWorld, gNatePortLeft,
                     gNatePortTop);
 
                 waitTime = TickCount();
@@ -2908,7 +2908,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
             // DO NOTHING
         };
 
-        CopyOffWorldToRealWorld(&dataRect);
+        CopyOffWorldToRealWorld(dataRect);
     }
 }
 
@@ -3011,10 +3011,10 @@ void ShowSuccessAnimation(WindowPtr) {
     tRect = starBounds;
     DrawInSaveWorld();
     SetTranslateColorFore( BLACK);
-    PaintRect( &tRect);
-    CopySaveWorldToOffWorld( &tRect);
+    PaintRect(tRect);
+    CopySaveWorldToOffWorld(tRect);
     DrawInRealWorld();
-    CopyOffWorldToRealWorld(&tRect);
+    CopyOffWorldToRealWorld(tRect);
 
 // we assume we're recovering from a fade-out
 
@@ -3046,7 +3046,7 @@ void ShowSuccessAnimation(WindowPtr) {
 
         tRect = spriteBounds;
 
-        Reset3DStars( vanishingPoint, &starBounds);
+        Reset3DStars(vanishingPoint, starBounds);
         lastTime = TickCount();
         zpoint = kDebriefZMax;
         PlayVolumeSound( 516, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
@@ -3057,7 +3057,7 @@ void ShowSuccessAnimation(WindowPtr) {
 
         while ( (!AnyRealKeyDown()) && ( zpoint > kDebriefZMin))
         {
-            ChunkCopyPixMapToPixMap( gSaveWorld, &(lastBounds), gOffWorld);
+            ChunkCopyPixMapToPixMap( gSaveWorld, lastBounds, gOffWorld);
 
             PrepareToMoveScrollStars();
             do
@@ -3073,8 +3073,8 @@ void ShowSuccessAnimation(WindowPtr) {
                 ztimes = 4;
             }
 
-            Move3DStars( vanishingPoint, unitsToDo * startimes, &starBounds);
-            Draw3DStars( warp, &starBounds, gOffWorld);
+            Move3DStars(vanishingPoint, unitsToDo * startimes, starBounds);
+            Draw3DStars(warp, starBounds, gOffWorld);
 
             shipScale = (1 + zpoint * zpoint) / kDebriefZScaleMultiple;
             hpos = (zpoint * zpoint) / kDebriefShipHMultiple;
@@ -3088,11 +3088,11 @@ void ShowSuccessAnimation(WindowPtr) {
                     &spriteBounds, &starBounds, gOffWorld);
             theseBounds = spriteBounds;
             tRect = theseBounds;
-            BiggestRect( &tRect, &lastBounds);
+            BiggestRect(&tRect, lastBounds);
 
-            Show3DStars( true, &starBounds, gOffWorld);
+            Show3DStars(true, starBounds, gOffWorld);
 
-            ChunkCopyPixMapToScreenPixMap( gOffWorld, &tRect, gActiveWorld);
+            ChunkCopyPixMapToScreenPixMap( gOffWorld, tRect, gActiveWorld);
             lastBounds = theseBounds;
             zpoint -= 30 * unitsToDo * ztimes;
         }
@@ -3109,8 +3109,8 @@ void ShowSuccessAnimation(WindowPtr) {
                 unitsToDo = TickCount() - lastTime;
             } while ( unitsToDo < 3);
             lastTime = TickCount();
-            Move3DStars( vanishingPoint, unitsToDo * startimes, &starBounds);
-            Draw3DStars( warp, &starBounds, gOffWorld);
+            Move3DStars(vanishingPoint, unitsToDo * startimes, starBounds);
+            Draw3DStars(warp, starBounds, gOffWorld);
 
             mGetDirectStringDimensions(hackString, hpos, zpoint);
             mGetTranslateColorShade( RED, VERY_LIGHT, color, transColor);
@@ -3120,11 +3120,11 @@ void ShowSuccessAnimation(WindowPtr) {
             tRect.bottom = tRect.top + zpoint;
 
             MoveTo( tRect.left, tRect.top + gDirectText->ascent);
-            DrawDirectTextStringClipped(hackString, color, gOffWorld, &starBounds,
+            DrawDirectTextStringClipped(hackString, color, gOffWorld, starBounds,
                 0, 0);
 
-            ChunkCopyPixMapToScreenPixMap( gOffWorld, &tRect, gActiveWorld);
-            Show3DStars( true, &starBounds, gOffWorld);
+            ChunkCopyPixMapToScreenPixMap( gOffWorld, tRect, gActiveWorld);
+            Show3DStars(true, starBounds, gOffWorld);
         }
         MacShowCursor();
         shipSprite.destroy();
@@ -3293,14 +3293,14 @@ void DoMissionDebriefing(Rect *destRect, long yourlength, long parlength, long y
         tlRect.top -= 2;
         tlRect.right += 2;
         tlRect.bottom += 2;
-        DrawNateVBracket( gOffWorld, &tlRect, &clipRect, 0, 0, retroTextSpec.color);
+        DrawNateVBracket( gOffWorld, tlRect, clipRect, 0, 0, retroTextSpec.color);
         mCopyAnyRect( tRect, tlRect);
-        CopyOffWorldToRealWorld(&tRect);
+        CopyOffWorldToRealWorld(tRect);
 
         while ( retroTextSpec.thisPosition < retroTextSpec.textLength)
         {
             PlayVolumeSound(  kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
-            DrawRetroTextCharInRect( &retroTextSpec, 3, &boundsRect, &clipRect, gActiveWorld, gNatePortLeft,
+            DrawRetroTextCharInRect( &retroTextSpec, 3, boundsRect, clipRect, gActiveWorld, gNatePortLeft,
                 gNatePortTop);
 
             waitTime = TickCount();
@@ -3348,12 +3348,12 @@ void DoMissionDebriefingText(long textID, long yourlength, long parlength,
 
         GetAnyInterfaceItemGraphicBounds( &dataItem, &tRect);
         SetTranslateColorFore( BLACK);
-        PaintRect( &tRect);
+        PaintRect(tRect);
 
         DrawAnyInterfaceItem( &dataItem, gOffWorld, 0, 0);
 
         dataItem.bounds = tRect;
-        DrawInterfaceTextInRect(&tRect, *textData, length,
+        DrawInterfaceTextInRect(tRect, *textData, length,
                             dataItem.style, dataItem.color, gOffWorld, 0, 0, nil);
 
         textData.destroy();
@@ -3362,7 +3362,7 @@ void DoMissionDebriefingText(long textID, long yourlength, long parlength,
         NormalizeColors();
 
         GetAnyInterfaceItemGraphicBounds( &dataItem, &tRect);
-        CopyOffWorldToRealWorld(&tRect);
+        CopyOffWorldToRealWorld(tRect);
 
         if ( doScore)
         {
@@ -3628,7 +3628,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                                     pictSourceRect.bottom = thePict->frame().bottom;
                                 }
                                 CopyBits( gSaveWorld, gOffWorld,
-                                    &pictSourceRect, &pictRect,
+                                    pictSourceRect, pictRect,
                                     srcCopy, nil);
 
                                 tRect = scrollRect;
@@ -3645,12 +3645,12 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                                 {
                                     DrawInOffWorld();
 
-                                    ScrollRect( &tRect, 0, -1, clipRgn);
+                                    ScrollRect(tRect, 0, -1, clipRgn);
                                     DrawInRealWorld();
 
-                                    DrawNateLine(gOffWorld, &scrollRect, scrollRect.left, scrollRect.bottom - 1, scrollRect.right - 1,
+                                    DrawNateLine(gOffWorld, scrollRect, scrollRect.left, scrollRect.bottom - 1, scrollRect.right - 1,
                                         scrollRect.bottom - 1, 0, 0, BLACK);
-                                    CopyOffWorldToRealWorld(&vRect);
+                                    CopyOffWorldToRealWorld(vRect);
 
                                     bgVOffset++;
                                     if ( bgVOffset >= kBackground_Height) bgVOffset = 0;
@@ -3717,7 +3717,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                             stRect.bottom -= bgRect.bottom - gSaveWorld->bounds.bottom;
                             bgRect.bottom = gSaveWorld->bounds.bottom;
                             CopyBits( gSaveWorld, gOffWorld,
-                                &bgRect, &stRect,
+                                bgRect, stRect,
                                 srcCopy, nil);
                             stRect.top = stRect.bottom;
                             stRect.bottom = stRect.top + ((textRect.bottom - textRect.top) -
@@ -3725,18 +3725,18 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                             bgRect.top = 0;
                             bgRect.bottom = bgRect.top + (stRect.bottom - stRect.top);
                             CopyBits( gSaveWorld, gOffWorld,
-                                &bgRect, &stRect,
+                                bgRect, stRect,
                                 srcCopy, nil);
                         } else // just copy appropriate segment
                         {
                             CopyBits( gSaveWorld, gOffWorld,
-                                &bgRect, &stRect,
+                                bgRect, stRect,
                                 srcCopy, nil);
                         }
                         DrawInRealWorld();
 
                         textRect.right -= kScrollText_Buffer;
-                        DrawRetroTextCharInRect( &retroTextSpec, -1, &textRect, &textRect, gOffWorld, 0, 0);
+                        DrawRetroTextCharInRect( &retroTextSpec, -1, textRect, textRect, gOffWorld, 0, 0);
                         textRect.right += kScrollText_Buffer;
                         tRect = scrollRect;
                         uRect = tRect;
@@ -3752,15 +3752,15 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                                 l++)
                         {
                             DrawInOffWorld();
-                            ScrollRect( &tRect, 0, -1, clipRgn);
+                            ScrollRect(tRect, 0, -1, clipRgn);
 
                             bgVOffset++;
                             if ( bgVOffset >= kBackground_Height) bgVOffset = 0;
 
-                            DrawNateLine(gOffWorld, &scrollRect, scrollRect.left, scrollRect.bottom - 1, scrollRect.right - 1,
+                            DrawNateLine(gOffWorld, scrollRect, scrollRect.left, scrollRect.bottom - 1, scrollRect.right - 1,
                                 scrollRect.bottom - 1, 0, 0, BLACK);
                             DrawInRealWorld();
-                            CopyOffWorldToRealWorld(&vRect);
+                            CopyOffWorldToRealWorld(vRect);
 
                             while (( TickCount() - waitTime) < scrollSpeed) {
                                 // DO NOTHING
@@ -3792,11 +3792,11 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
         {
             DrawInOffWorld();
             tRect = scrollRect;
-            ScrollRect( &tRect, 0, -1, clipRgn);
-            DrawNateLine(gOffWorld, &scrollRect, scrollRect.left, scrollRect.bottom - 1, scrollRect.right - 1,
+            ScrollRect(tRect, 0, -1, clipRgn);
+            DrawNateLine(gOffWorld, scrollRect, scrollRect.left, scrollRect.bottom - 1, scrollRect.right - 1,
                 scrollRect.bottom - 1, 0, 0, BLACK);
             DrawInRealWorld();
-            CopyOffWorldToRealWorld(&vRect);
+            CopyOffWorldToRealWorld(vRect);
 
             while (( TickCount() - waitTime) < scrollSpeed) {
                 // DO NOTHING

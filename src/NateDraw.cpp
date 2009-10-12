@@ -213,22 +213,22 @@ void DrawNateRectVScan( PixMap *destPix, Rect *destRect, long hoff, long voff,
     }
 }
 
-void DrawNateRectClipped(PixMap* destPix, Rect* destRect, Rect* clipRect, long hoff, long voff,
+void DrawNateRectClipped(
+        PixMap* destPix, Rect* destRect, const Rect& clipRect, long hoff, long voff,
         unsigned char color) {
     if (!intersects(*destRect, from_origin(destPix->bounds))) {
         destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
         return;
     }
-    clip_rect(destRect, *clipRect);
+    clip_rect(destRect, clipRect);
 
     DrawNateRect(destPix, destRect, hoff, voff, color);
 }
 
 // must be square
-void DrawNateTriangleUpClipped( PixMap *destPix, Rect *destRect,
-    Rect *clipRect, long hoff, long voff, unsigned char color)
-
-{
+void DrawNateTriangleUpClipped(
+        PixMap *destPix, Rect *destRect, const Rect& clipRect, long hoff, long voff,
+        unsigned char color) {
     long            drowPlus, x, leftEdge, rightPlus, trueWidth, count;
     unsigned char   *dbyte;
     bool         clipped = false;
@@ -243,24 +243,24 @@ void DrawNateTriangleUpClipped( PixMap *destPix, Rect *destRect,
     drowPlus = destPix->rowBytes & 0x3fff;
     trueWidth = destRect->right - destRect->left;
 
-    if ( destRect->left < clipRect->left)
+    if ( destRect->left < clipRect.left)
     {
-        destRect->left = clipRect->left;
+        destRect->left = clipRect.left;
         clipped = true;
     }
-    if ( destRect->right > clipRect->right)
+    if ( destRect->right > clipRect.right)
     {
-        destRect->right = clipRect->right;
+        destRect->right = clipRect.right;
         clipped = true;
     }
-    if ( destRect->top < clipRect->top)
+    if ( destRect->top < clipRect.top)
     {
-        destRect->top = clipRect->top;
+        destRect->top = clipRect.top;
         clipped = true;
     }
-    if ( destRect->bottom > clipRect->bottom)
+    if ( destRect->bottom > clipRect.bottom)
     {
-        destRect->bottom = clipRect->bottom;
+        destRect->bottom = clipRect.bottom;
         clipped = true;
     }
 
@@ -328,7 +328,7 @@ void DrawNateTriangleUpClipped( PixMap *destPix, Rect *destRect,
 }
 
 void DrawNatePlusClipped( PixMap *destPix, Rect *destRect,
-    Rect *clipRect, long hoff, long voff, unsigned char color)
+    const Rect& clipRect, long hoff, long voff, unsigned char color)
 
 {
     long            drowPlus, x, half, trueWidth, count;
@@ -345,24 +345,24 @@ void DrawNatePlusClipped( PixMap *destPix, Rect *destRect,
     drowPlus = destPix->rowBytes & 0x3fff;
     trueWidth = destRect->right - destRect->left - 1;
 
-    if ( destRect->left < clipRect->left)
+    if ( destRect->left < clipRect.left)
     {
-        destRect->left = clipRect->left;
+        destRect->left = clipRect.left;
         clipped = true;
     }
-    if ( destRect->right > clipRect->right)
+    if ( destRect->right > clipRect.right)
     {
-        destRect->right = clipRect->right;
+        destRect->right = clipRect.right;
         clipped = true;
     }
-    if ( destRect->top < clipRect->top)
+    if ( destRect->top < clipRect.top)
     {
-        destRect->top = clipRect->top;
+        destRect->top = clipRect.top;
         clipped = true;
     }
-    if ( destRect->bottom > clipRect->bottom)
+    if ( destRect->bottom > clipRect.bottom)
     {
-        destRect->bottom = clipRect->bottom;
+        destRect->bottom = clipRect.bottom;
         clipped = true;
     }
 
@@ -441,7 +441,7 @@ void DrawNatePlusClipped( PixMap *destPix, Rect *destRect,
 }
 
 void DrawNateSquareClipped( PixMap *destPix, Rect *destRect,
-    Rect *clipRect, long hoff, long voff, unsigned char color)
+        const Rect& clipRect, long hoff, long voff, unsigned char color)
 
 {
     long            drowPlus, x, rightPlus, trueWidth;
@@ -458,24 +458,24 @@ void DrawNateSquareClipped( PixMap *destPix, Rect *destRect,
     drowPlus = destPix->rowBytes & 0x3fff;
     trueWidth = destRect->right - destRect->left - 1;
 
-    if ( destRect->left < clipRect->left)
+    if ( destRect->left < clipRect.left)
     {
-        destRect->left = clipRect->left;
+        destRect->left = clipRect.left;
         clipped = true;
     }
-    if ( destRect->right > clipRect->right)
+    if ( destRect->right > clipRect.right)
     {
-        destRect->right = clipRect->right;
+        destRect->right = clipRect.right;
         clipped = true;
     }
-    if ( destRect->top < clipRect->top)
+    if ( destRect->top < clipRect.top)
     {
-        destRect->top = clipRect->top;
+        destRect->top = clipRect.top;
         clipped = true;
     }
-    if ( destRect->bottom > clipRect->bottom)
+    if ( destRect->bottom > clipRect.bottom)
     {
-        destRect->bottom = clipRect->bottom;
+        destRect->bottom = clipRect.bottom;
         clipped = true;
     }
 
@@ -527,10 +527,9 @@ void DrawNateSquareClipped( PixMap *destPix, Rect *destRect,
     }
 }
 
-void DrawNateDiamondClipped( PixMap *destPix, Rect *destRect,
-    Rect *clipRect, long hoff, long voff, unsigned char color)
-
-{
+void DrawNateDiamondClipped(
+        PixMap *destPix, Rect *destRect, const Rect& clipRect, long hoff, long voff,
+        unsigned char color) {
     long            drowPlus, leftEdge, rightPlus, trueWidth, count;
     unsigned char   *dbyte;
     bool         clipped = false;
@@ -545,24 +544,24 @@ void DrawNateDiamondClipped( PixMap *destPix, Rect *destRect,
     drowPlus = destPix->rowBytes & 0x3fff;
     trueWidth = destRect->right - destRect->left - 1;
 
-    if ( destRect->left < clipRect->left)
+    if ( destRect->left < clipRect.left)
     {
-        destRect->left = clipRect->left;
+        destRect->left = clipRect.left;
         clipped = true;
     }
-    if ( destRect->right > clipRect->right)
+    if ( destRect->right > clipRect.right)
     {
-        destRect->right = clipRect->right;
+        destRect->right = clipRect.right;
         clipped = true;
     }
-    if ( destRect->top < clipRect->top)
+    if ( destRect->top < clipRect.top)
     {
-        destRect->top = clipRect->top;
+        destRect->top = clipRect.top;
         clipped = true;
     }
-    if ( destRect->bottom > clipRect->bottom)
+    if ( destRect->bottom > clipRect.bottom)
     {
-        destRect->bottom = clipRect->bottom;
+        destRect->bottom = clipRect.bottom;
         clipped = true;
     }
 
@@ -623,31 +622,29 @@ void DrawNateDiamondClipped( PixMap *destPix, Rect *destRect,
     }
 }
 
-void DrawNateVBracket( PixMap *destPix, Rect *destRect, Rect *clipRect, long hoff, long voff,
-                        unsigned char color)
-
-{
+void DrawNateVBracket(
+        PixMap *destPix, const Rect& destRect, const Rect& clipRect, long hoff, long voff,
+        unsigned char color) {
     long            rowBytes = 0;
     unsigned char   *aByte;
 
-    DrawNateLine ( destPix, clipRect, destRect->left, destRect->top, destRect->right - 1,
-                    destRect->top, hoff, voff, color);
-    DrawNateLine ( destPix, clipRect, destRect->left, destRect->bottom - 1, destRect->right - 1,
-                    destRect->bottom - 1, hoff, voff, color);
+    DrawNateLine ( destPix, clipRect, destRect.left, destRect.top, destRect.right - 1,
+                    destRect.top, hoff, voff, color);
+    DrawNateLine ( destPix, clipRect, destRect.left, destRect.bottom - 1, destRect.right - 1,
+                    destRect.bottom - 1, hoff, voff, color);
 
     mGetRowBytes( rowBytes, destPix);
 
-    mSetNatePixel( aByte, rowBytes, destRect->left, destRect->top + 1, hoff, voff, destPix, color);
-    mSetNatePixel( aByte, rowBytes, destRect->right - 1, destRect->top + 1, hoff, voff, destPix, color);
+    mSetNatePixel( aByte, rowBytes, destRect.left, destRect.top + 1, hoff, voff, destPix, color);
+    mSetNatePixel( aByte, rowBytes, destRect.right - 1, destRect.top + 1, hoff, voff, destPix, color);
 
-    mSetNatePixel( aByte, rowBytes, destRect->left, destRect->bottom - 2, hoff, voff, destPix, color);
-    mSetNatePixel( aByte, rowBytes, destRect->right - 1, destRect->bottom - 2, hoff, voff, destPix, color);
+    mSetNatePixel( aByte, rowBytes, destRect.left, destRect.bottom - 2, hoff, voff, destPix, color);
+    mSetNatePixel( aByte, rowBytes, destRect.right - 1, destRect.bottom - 2, hoff, voff, destPix, color);
 }
 
-void DrawNateShadedRect( PixMap *destPix, Rect *destRect, Rect *clipRect, long hoff, long voff,
-                        unsigned char fillcolor, unsigned char lightcolor, unsigned char darkcolor)
-
-{
+void DrawNateShadedRect(
+        PixMap *destPix, Rect *destRect, const Rect& clipRect, long hoff, long voff,
+        unsigned char fillcolor, unsigned char lightcolor, unsigned char darkcolor) {
     Rect    tRect = *destRect;
 
     tRect.right--;
@@ -669,13 +666,11 @@ void DrawNateShadedRect( PixMap *destPix, Rect *destRect, Rect *clipRect, long h
 
 }
 
-void BiggestRect( Rect  *dRect, Rect *sRect)
-
-{
-    if ( sRect->left < dRect->left) dRect->left = sRect->left;
-    if ( sRect->right > dRect->right) dRect->right = sRect->right;
-    if ( sRect->top < dRect->top) dRect->top = sRect->top;
-    if ( sRect->bottom > dRect->bottom) dRect->bottom = sRect->bottom;
+void BiggestRect(Rect* dRect, const Rect& sRect) {
+    if (sRect.left < dRect->left) dRect->left = sRect.left;
+    if (sRect.right > dRect->right) dRect->right = sRect.right;
+    if (sRect.top < dRect->top) dRect->top = sRect.top;
+    if (sRect.bottom > dRect->bottom) dRect->bottom = sRect.bottom;
 }
 
 //
@@ -946,13 +941,13 @@ void BiggestRect( Rect  *dRect, Rect *sRect)
 
 // Draws a line between the specified endpoints in color Color.
 
-void DrawNateLine( PixMap *destPix, Rect *clipRect, long XStart, long YStart, long XEnd,
-                    long YEnd, long hoff, long voff, unsigned char Color)
-{
+void DrawNateLine(
+        PixMap *destPix, const Rect& clipRect, long XStart, long YStart, long XEnd, long YEnd,
+        long hoff, long voff, unsigned char Color) {
     long            Temp, AdjUp, AdjDown, ErrorTerm, XAdvance, XDelta, YDelta, drowPlus;
     long            WholeStep, InitialPixelCount, FinalPixelCount, i, RunLength;
     unsigned char   *dbyte;
-    short           cs = mClipCode( XStart, YStart, *clipRect), ce = mClipCode( XEnd, YEnd, *clipRect);
+    short           cs = mClipCode( XStart, YStart, clipRect), ce = mClipCode( XEnd, YEnd, clipRect);
 
     while ( cs | ce)
     {
@@ -963,48 +958,48 @@ void DrawNateLine( PixMap *destPix, Rect *clipRect, long XStart, long YStart, lo
         {
             if ( cs & 8)
             {
-                YStart += YDelta * ( clipRect->left - XStart) / XDelta;
-                XStart = clipRect->left;
+                YStart += YDelta * ( clipRect.left - XStart) / XDelta;
+                XStart = clipRect.left;
             } else
             if ( cs & 4)
             {
-                YStart += YDelta * ( clipRect->right - 1 - XStart) / XDelta;
-                XStart = clipRect->right - 1;
+                YStart += YDelta * ( clipRect.right - 1 - XStart) / XDelta;
+                XStart = clipRect.right - 1;
             } else
             if ( cs & 2)
             {
-                XStart += XDelta * ( clipRect->top - YStart) / YDelta;
-                YStart = clipRect->top;
+                XStart += XDelta * ( clipRect.top - YStart) / YDelta;
+                YStart = clipRect.top;
             } else
             if ( cs & 1)
             {
-                XStart += XDelta * ( clipRect->bottom - 1 - YStart) / YDelta;
-                YStart = clipRect->bottom - 1;
+                XStart += XDelta * ( clipRect.bottom - 1 - YStart) / YDelta;
+                YStart = clipRect.bottom - 1;
             }
-            cs = mClipCode( XStart, YStart, *clipRect);
+            cs = mClipCode( XStart, YStart, clipRect);
         } else if ( ce)
         {
             if ( ce & 8)
             {
-                YEnd += YDelta * ( clipRect->left - XEnd) / XDelta;
-                XEnd = clipRect->left;
+                YEnd += YDelta * ( clipRect.left - XEnd) / XDelta;
+                XEnd = clipRect.left;
             } else
             if ( ce & 4)
             {
-                YEnd += YDelta * ( clipRect->right - 1 - XEnd) / XDelta;
-                XEnd = clipRect->right - 1;
+                YEnd += YDelta * ( clipRect.right - 1 - XEnd) / XDelta;
+                XEnd = clipRect.right - 1;
             } else
             if ( ce & 2)
             {
-                XEnd += XDelta * ( clipRect->top - YEnd) / YDelta;
-                YEnd = clipRect->top;
+                XEnd += XDelta * ( clipRect.top - YEnd) / YDelta;
+                YEnd = clipRect.top;
             } else
             if ( ce & 1)
             {
-                XEnd += XDelta * ( clipRect->bottom - 1 - YEnd) / YDelta;
-                YEnd = clipRect->bottom - 1;
+                XEnd += XDelta * ( clipRect.bottom - 1 - YEnd) / YDelta;
+                YEnd = clipRect.bottom - 1;
             }
-            ce = mClipCode( XEnd, YEnd, *clipRect);
+            ce = mClipCode( XEnd, YEnd, clipRect);
         }
     }
 
@@ -1251,14 +1246,14 @@ void DrawNateLine( PixMap *destPix, Rect *clipRect, long XStart, long YStart, lo
 // Copies a line from sourcemap to destmap between the specified endpoints.  hoff and voff are for
 // the destPix only (for copying onscreen).
 
-void CopyNateLine( PixMap *sourcePix, PixMap *destPix, Rect *clipRect,
+void CopyNateLine( PixMap *sourcePix, PixMap *destPix, const Rect& clipRect,
                     long XStart, long YStart, long XEnd, long YEnd, long hoff,
                     long voff)
 {
     long            Temp, AdjUp, AdjDown, ErrorTerm, XAdvance, XDelta, YDelta, drowPlus, srowPlus;
     long            WholeStep, InitialPixelCount, FinalPixelCount, i, RunLength;
     unsigned char   *sbyte, *dbyte;
-    short           cs = mClipCode( XStart, YStart, *clipRect), ce = mClipCode( XEnd, YEnd, *clipRect);
+    short           cs = mClipCode( XStart, YStart, clipRect), ce = mClipCode( XEnd, YEnd, clipRect);
 
     while ( cs | ce)
     {
@@ -1269,48 +1264,48 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, Rect *clipRect,
         {
             if ( cs & 8)
             {
-                YStart += YDelta * ( clipRect->left - XStart) / XDelta;
-                XStart = clipRect->left;
+                YStart += YDelta * ( clipRect.left - XStart) / XDelta;
+                XStart = clipRect.left;
             } else
             if ( cs & 4)
             {
-                YStart += YDelta * ( clipRect->right - 1 - XStart) / XDelta;
-                XStart = clipRect->right - 1;
+                YStart += YDelta * ( clipRect.right - 1 - XStart) / XDelta;
+                XStart = clipRect.right - 1;
             } else
             if ( cs & 2)
             {
-                XStart += XDelta * ( clipRect->top - YStart) / YDelta;
-                YStart = clipRect->top;
+                XStart += XDelta * ( clipRect.top - YStart) / YDelta;
+                YStart = clipRect.top;
             } else
             if ( cs & 1)
             {
-                XStart += XDelta * ( clipRect->bottom - 1 - YStart) / YDelta;
-                YStart = clipRect->bottom - 1;
+                XStart += XDelta * ( clipRect.bottom - 1 - YStart) / YDelta;
+                YStart = clipRect.bottom - 1;
             }
-            cs = mClipCode( XStart, YStart, *clipRect);
+            cs = mClipCode( XStart, YStart, clipRect);
         } else if ( ce)
         {
             if ( ce & 8)
             {
-                YEnd += YDelta * ( clipRect->left - XEnd) / XDelta;
-                XEnd = clipRect->left;
+                YEnd += YDelta * ( clipRect.left - XEnd) / XDelta;
+                XEnd = clipRect.left;
             } else
             if ( ce & 4)
             {
-                YEnd += YDelta * ( clipRect->right - 1 - XEnd) / XDelta;
-                XEnd = clipRect->right - 1;
+                YEnd += YDelta * ( clipRect.right - 1 - XEnd) / XDelta;
+                XEnd = clipRect.right - 1;
             } else
             if ( ce & 2)
             {
-                XEnd += XDelta * ( clipRect->top - YEnd) / YDelta;
-                YEnd = clipRect->top;
+                XEnd += XDelta * ( clipRect.top - YEnd) / YDelta;
+                YEnd = clipRect.top;
             } else
             if ( ce & 1)
             {
-                XEnd += XDelta * ( clipRect->bottom - 1 - YEnd) / YDelta;
-                YEnd = clipRect->bottom - 1;
+                XEnd += XDelta * ( clipRect.bottom - 1 - YEnd) / YDelta;
+                YEnd = clipRect.bottom - 1;
             }
-            ce = mClipCode( XEnd, YEnd, *clipRect);
+            ce = mClipCode( XEnd, YEnd, clipRect);
         }
     }
 
@@ -1602,14 +1597,14 @@ void DrawVerticalRun(char far **dbyte, int XAdvance,
 }
 */
 
-void DashNateLine( PixMap *destPix, Rect *clipRect, long XStart, long YStart, long XEnd,
+void DashNateLine( PixMap *destPix, const Rect& clipRect, long XStart, long YStart, long XEnd,
                     long YEnd, long hoff, long voff, unsigned char Color, unsigned char dashon,
                     unsigned char dashoff, unsigned char dashcount)
 {
     long            Temp, AdjUp, AdjDown, ErrorTerm, XAdvance, XDelta, YDelta, drowPlus;
     long            WholeStep, InitialPixelCount, FinalPixelCount, i, RunLength;
     unsigned char   *dbyte;
-    short           cs = mClipCode( XStart, YStart, *clipRect), ce = mClipCode( XEnd, YEnd, *clipRect);
+    short           cs = mClipCode( XStart, YStart, clipRect), ce = mClipCode( XEnd, YEnd, clipRect);
 
     dashoff += dashon;
     dashcount %= dashoff;
@@ -1623,48 +1618,48 @@ void DashNateLine( PixMap *destPix, Rect *clipRect, long XStart, long YStart, lo
         {
             if ( cs & 8)
             {
-                YStart += YDelta * ( clipRect->left - XStart) / XDelta;
-                XStart = clipRect->left;
+                YStart += YDelta * ( clipRect.left - XStart) / XDelta;
+                XStart = clipRect.left;
             } else
             if ( cs & 4)
             {
-                YStart += YDelta * ( clipRect->right - 1 - XStart) / XDelta;
-                XStart = clipRect->right - 1;
+                YStart += YDelta * ( clipRect.right - 1 - XStart) / XDelta;
+                XStart = clipRect.right - 1;
             } else
             if ( cs & 2)
             {
-                XStart += XDelta * ( clipRect->top - YStart) / YDelta;
-                YStart = clipRect->top;
+                XStart += XDelta * ( clipRect.top - YStart) / YDelta;
+                YStart = clipRect.top;
             } else
             if ( cs & 1)
             {
-                XStart += XDelta * ( clipRect->bottom - 1 - YStart) / YDelta;
-                YStart = clipRect->bottom - 1;
+                XStart += XDelta * ( clipRect.bottom - 1 - YStart) / YDelta;
+                YStart = clipRect.bottom - 1;
             }
-            cs = mClipCode( XStart, YStart, *clipRect);
+            cs = mClipCode( XStart, YStart, clipRect);
         } else if ( ce)
         {
             if ( ce & 8)
             {
-                YEnd += YDelta * ( clipRect->left - XEnd) / XDelta;
-                XEnd = clipRect->left;
+                YEnd += YDelta * ( clipRect.left - XEnd) / XDelta;
+                XEnd = clipRect.left;
             } else
             if ( ce & 4)
             {
-                YEnd += YDelta * ( clipRect->right - 1 - XEnd) / XDelta;
-                XEnd = clipRect->right - 1;
+                YEnd += YDelta * ( clipRect.right - 1 - XEnd) / XDelta;
+                XEnd = clipRect.right - 1;
             } else
             if ( ce & 2)
             {
-                XEnd += XDelta * ( clipRect->top - YEnd) / YDelta;
-                YEnd = clipRect->top;
+                XEnd += XDelta * ( clipRect.top - YEnd) / YDelta;
+                YEnd = clipRect.top;
             } else
             if ( ce & 1)
             {
-                XEnd += XDelta * ( clipRect->bottom - 1 - YEnd) / YDelta;
-                YEnd = clipRect->bottom - 1;
+                XEnd += XDelta * ( clipRect.bottom - 1 - YEnd) / YDelta;
+                YEnd = clipRect.bottom - 1;
             }
-            ce = mClipCode( XEnd, YEnd, *clipRect);
+            ce = mClipCode( XEnd, YEnd, clipRect);
         }
     }
 

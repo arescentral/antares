@@ -439,7 +439,7 @@ void DrawScrollStars( bool warp)
                     {
                         if ( star->age > 1)
                         {
-                            DrawNateLine( gOffWorld, &lastBounds, star->oldOldLocation.h,
+                            DrawNateLine(gOffWorld, lastBounds, star->oldOldLocation.h,
                                         star->oldOldLocation.v,
                                         star->oldLocation.h,
                                         star->oldLocation.v,
@@ -448,7 +448,7 @@ void DrawScrollStars( bool warp)
                         }/* else star->age = 2;*/
                     } else
                     {
-                        DrawNateLine( gOffWorld, &lastBounds, star->oldOldLocation.h,
+                        DrawNateLine(gOffWorld, lastBounds, star->oldOldLocation.h,
                                     star->oldOldLocation.v,
                                     star->oldLocation.h,
                                     star->oldLocation.v,
@@ -475,14 +475,14 @@ void DrawScrollStars( bool warp)
                 {
                     if ( star->age > 1)
                     {
-                        DrawNateLine( gOffWorld, &lastBounds, star->oldOldLocation.h,
+                        DrawNateLine(gOffWorld, lastBounds, star->oldOldLocation.h,
                                     star->oldOldLocation.v,
                                     star->oldLocation.h,
                                     star->oldLocation.v,
                                     0,
                                     0, 0xff);
                     }/* else star->age = 2;*/
-                    DrawNateLine( gOffWorld, &bounds, star->oldLocation.h,
+                    DrawNateLine(gOffWorld, bounds, star->oldLocation.h,
                                 star->oldLocation.v,
                                 star->location.h,
                                 star->location.v,
@@ -490,7 +490,7 @@ void DrawScrollStars( bool warp)
                                 0, *color);
                 } else
                 {
-                    DrawNateLine( gOffWorld, &lastBounds, star->oldOldLocation.h,
+                    DrawNateLine(gOffWorld, lastBounds, star->oldOldLocation.h,
                                 star->oldOldLocation.v,
                                 star->oldLocation.h,
                                 star->oldLocation.v,
@@ -620,13 +620,13 @@ void ShowScrollStars( bool warp)
                     {
                         if ( star->age > 1)
                         {
-                            CopyNateLine( gOffWorld, gActiveWorld, &lastBounds, star->oldOldLocation.h,
+                            CopyNateLine( gOffWorld, gActiveWorld, lastBounds, star->oldOldLocation.h,
                                     star->oldOldLocation.v, star->oldLocation.h, star->oldLocation.v,
                                     gNatePortLeft << 2, gNatePortTop);
                         } else star->age = 2;
                     } else
                     {
-                        CopyNateLine( gOffWorld, gActiveWorld, &lastBounds, star->oldOldLocation.h,
+                        CopyNateLine( gOffWorld, gActiveWorld, lastBounds, star->oldOldLocation.h,
                                 star->oldOldLocation.v, star->oldLocation.h, star->oldLocation.v,
                                 gNatePortLeft << 2, gNatePortTop);
                         star->age = 1;
@@ -650,16 +650,16 @@ void ShowScrollStars( bool warp)
                 {
                     if ( star->age > 1)
                     {
-                        CopyNateLine( gOffWorld, gActiveWorld, &lastBounds, star->oldOldLocation.h,
+                        CopyNateLine( gOffWorld, gActiveWorld, lastBounds, star->oldOldLocation.h,
                                 star->oldOldLocation.v, star->oldLocation.h, star->oldLocation.v,
                                 gNatePortLeft << 2, gNatePortTop);
                     } else star->age = 2;
-                    CopyNateLine( gOffWorld, gActiveWorld, &bounds, star->oldLocation.h,
+                    CopyNateLine( gOffWorld, gActiveWorld, bounds, star->oldLocation.h,
                             star->oldLocation.v, star->location.h, star->location.v,
                             gNatePortLeft << 2, gNatePortTop);
                 } else
                 {
-                    CopyNateLine( gOffWorld, gActiveWorld, &lastBounds, star->oldOldLocation.h,
+                    CopyNateLine( gOffWorld, gActiveWorld, lastBounds, star->oldOldLocation.h,
                             star->oldOldLocation.v, star->oldLocation.h, star->oldLocation.v,
                             gNatePortLeft << 2, gNatePortTop);
                     star->age = 1;
@@ -917,7 +917,7 @@ void DrawAllBeams( void)
 }
 #endif
 
-void Reset3DStars( Point center, Rect *bounds)
+void Reset3DStars( Point center, const Rect& bounds)
 
 {
     short           i;
@@ -928,9 +928,9 @@ void Reset3DStars( Point center, Rect *bounds)
     for ( i = 0; i < kAllStarNum; i++)
     {
         star->oldOldLocation.h = star->oldLocation.h = star->location.h =
-            Randomize( bounds->right - bounds->left) + bounds->left;
+            Randomize( bounds.right - bounds.left) + bounds.left;
         star->oldOldLocation.v = star->oldLocation.v = star->location.v =
-            Randomize( bounds->bottom - bounds->top) + bounds->top;
+            Randomize( bounds.bottom - bounds.top) + bounds.top;
         star->motionFraction.h = star->motionFraction.v = 0;
 
         star->speed = kMediumStarSpeed;
@@ -949,7 +949,7 @@ void Reset3DStars( Point center, Rect *bounds)
     }
 }
 
-void Move3DStars( Point center, long byUnits, Rect *bounds)
+void Move3DStars( Point center, long byUnits, const Rect& bounds)
 
 {
     short           i;
@@ -991,15 +991,15 @@ void Move3DStars( Point center, long byUnits, Rect *bounds)
             star->location.v += v;
             star->motionFraction.v -= mLongToFixed(v);
 
-            if ( (!((star->location.h < bounds->left) || ( star->location.h >= bounds->right) ||
-                ( star->location.v < bounds->top) ||  ( star->location.v >= bounds->bottom))) ||
-                (!((star->oldLocation.h < bounds->left) || ( star->oldLocation.h >= bounds->right) ||
-                ( star->oldLocation.v < bounds->top) ||  ( star->oldLocation.v >= bounds->bottom))))
+            if ( (!((star->location.h < bounds.left) || ( star->location.h >= bounds.right) ||
+                ( star->location.v < bounds.top) ||  ( star->location.v >= bounds.bottom))) ||
+                (!((star->oldLocation.h < bounds.left) || ( star->oldLocation.h >= bounds.right) ||
+                ( star->oldLocation.v < bounds.top) ||  ( star->oldLocation.v >= bounds.bottom))))
             {
             } else
             {
-                star->location.h = Randomize( bounds->right - bounds->left) + bounds->left;
-                star->location.v = Randomize( bounds->bottom - bounds->top) + bounds->top;
+                star->location.h = Randomize( bounds.right - bounds.left) + bounds.left;
+                star->location.v = Randomize( bounds.bottom - bounds.top) + bounds.top;
                 star->motionFraction.h = star->motionFraction.v = 0;
 
                 star->speed = kMediumStarSpeed;
@@ -1018,7 +1018,7 @@ void Move3DStars( Point center, long byUnits, Rect *bounds)
     }
 }
 
-void Draw3DStars( bool warp, Rect *bounds, PixMap* destMap)
+void Draw3DStars( bool warp, const Rect& bounds, PixMap* destMap)
 
 {
     short           i;
@@ -1036,8 +1036,8 @@ void Draw3DStars( bool warp, Rect *bounds, PixMap* destMap)
         {
             if (( !warp))
             {
-                if ( !((star->oldLocation.h < bounds->left) || ( star->oldLocation.h >= bounds->right) ||
-                    ( star->oldLocation.v < bounds->top) ||  ( star->oldLocation.v >= bounds->bottom)))
+                if ( !((star->oldLocation.h < bounds.left) || ( star->oldLocation.h >= bounds.right) ||
+                    ( star->oldLocation.v < bounds.top) ||  ( star->oldLocation.v >= bounds.bottom)))
                 {
                     mSetNatePixel ( dByte, rowBytes, star->oldLocation.h, star->oldLocation.v,
                         0, 0, destMap, 0xff);
@@ -1078,8 +1078,8 @@ void Draw3DStars( bool warp, Rect *bounds, PixMap* destMap)
                 }
                 if ( !warp)
                 {
-                    if ( !((star->location.h < bounds->left) || ( star->location.h >= bounds->right) ||
-                        ( star->location.v < bounds->top) ||  ( star->location.v >= bounds->bottom)))
+                    if ( !((star->location.h < bounds.left) || ( star->location.h >= bounds.right) ||
+                        ( star->location.v < bounds.top) ||  ( star->location.v >= bounds.bottom)))
                     {
                         mSetNatePixel( dByte, rowBytes, star->location.h, star->location.v, 0,
                             0, destMap, color);
@@ -1102,7 +1102,7 @@ void Draw3DStars( bool warp, Rect *bounds, PixMap* destMap)
     }
 }
 
-void Show3DStars( bool warp, Rect *bounds, PixMap* sourceMap)
+void Show3DStars( bool warp, const Rect& bounds, PixMap* sourceMap)
 
 {
     short           i;
@@ -1122,8 +1122,8 @@ void Show3DStars( bool warp, Rect *bounds, PixMap* sourceMap)
             {
                 if ( !warp)
                 {
-                    if ( !((star->location.h < bounds->left) || ( star->location.h >= bounds->right) ||
-                        ( star->location.v < bounds->top) ||  ( star->location.v >= bounds->bottom)))
+                    if ( !((star->location.h < bounds.left) || ( star->location.h >= bounds.right) ||
+                        ( star->location.v < bounds.top) ||  ( star->location.v >= bounds.bottom)))
                     {
                         mGetNatePixel( dByte, srowBytes, star->location.h, star->location.v, 0,
                             0, sourceMap);
@@ -1142,8 +1142,8 @@ void Show3DStars( bool warp, Rect *bounds, PixMap* sourceMap)
             }
             if (( !warp))
             {
-                if ( !((star->oldLocation.h < bounds->left) || ( star->oldLocation.h >= bounds->right) ||
-                    ( star->oldLocation.v < bounds->top) ||  ( star->oldLocation.v >= bounds->bottom)))
+                if ( !((star->oldLocation.h < bounds.left) || ( star->oldLocation.h >= bounds.right) ||
+                    ( star->oldLocation.v < bounds.top) ||  ( star->oldLocation.v >= bounds.bottom)))
                 {
                     mGetNatePixel( dByte, srowBytes, star->oldLocation.h, star->oldLocation.v, 0,
                         0, sourceMap);

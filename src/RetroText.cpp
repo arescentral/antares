@@ -336,8 +336,7 @@ void RetroText::draw(PixMap* pix, const Rect& bounds) {
         unsigned char pstr[255];
         pstr[0] = std::min<int>(255, it->size());
         memcpy(pstr + 1, it->c_str(), pstr[0]);
-        Rect mutable_bounds = bounds;
-        DrawDirectTextStringClipped(pstr, _fore_color, pix, &mutable_bounds, 0, 0);
+        DrawDirectTextStringClipped(pstr, _fore_color, pix, bounds, 0, 0);
     }
 }
 

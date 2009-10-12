@@ -123,8 +123,8 @@ void DrawMessageScreen( long);
 void SetStatusString(const unsigned char *, bool, unsigned char);
 void UpdateStatusString( void);
 long DetermineDirectTextHeightInWidth( retroTextSpecType *, long);
-void DrawDirectTextInRect( retroTextSpecType *, Rect *, Rect *, PixMap *, long, long);
-void DrawRetroTextCharInRect( retroTextSpecType *, long, Rect *, Rect *, PixMap *, long, long);
+void DrawDirectTextInRect( retroTextSpecType *, const Rect&, const Rect&, PixMap *, long, long);
+void DrawRetroTextCharInRect( retroTextSpecType *, long, const Rect&, const Rect&, PixMap *, long, long);
 
 }  // namespace antares
 

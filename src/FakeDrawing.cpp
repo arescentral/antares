@@ -72,7 +72,7 @@ void PixMap::resize(const Rect& new_bounds) {
     PixMap new_pix_map(new_bounds.width(), new_bounds.height());
     Rect transfer = bounds;
     transfer.clip_to(new_bounds);
-    CopyBits(this, &new_pix_map, &transfer, &transfer, 0, NULL);
+    CopyBits(this, &new_pix_map, transfer, transfer, 0, NULL);
     bounds = new_bounds;
     std::swap(baseAddr, new_pix_map.baseAddr);
 }
@@ -109,12 +109,12 @@ void DumpTo(const std::string& path) {
     close(fd);
 }
 
-void ScrollRect(Rect* rect, int x, int y, Rect clip) {
+void ScrollRect(const Rect& rect, int x, int y, const Rect& clip) {
     assert(x == 0 && y == -1);
     int rowBytes = gActiveWorld->rowBytes & 0x7fff;
-    for (int i = std::min(rect->top - 1, clip.top); i < rect->bottom - 1; ++i) {
-        uint8_t* base = gActiveWorld->baseAddr + i * rowBytes + rect->left;
-        memcpy(base, base + rowBytes, rect->right - rect->left);
+    for (int i = std::min(rect.top - 1, clip.top); i < rect.bottom - 1; ++i) {
+        uint8_t* base = gActiveWorld->baseAddr + i * rowBytes + rect.left;
+        memcpy(base, base + rowBytes, rect.right - rect.left);
     }
 }
 
@@ -182,13 +182,13 @@ void ClearScreen() {
     memset(gActiveWorld->baseAddr, 0xFF, width * height);
 }
 
-void CopyBits(PixMap* source, PixMap* dest, const Rect* source_rect, const Rect* dest_rect,
+void CopyBits(PixMap* source, PixMap* dest, const Rect& source_rect, const Rect& dest_rect,
         int, void*) {
     if (source == dest) {
         return;
     }
 
-    ClippedTransfer transfer(*source_rect, *dest_rect);
+    ClippedTransfer transfer(source_rect, dest_rect);
     transfer.ClipSourceTo(source->bounds);
     transfer.ClipDestTo(dest->bounds);
 
@@ -226,8 +226,8 @@ void RGBBackColor(RGBColor* color) {
     currentBackColor = NearestColor(color->red, color->green, color->blue);
 }
 
-void PaintRect(Rect* rect) {
-    Rect clipped = ClipRectToRect(*rect, gActiveWorld->bounds);
+void PaintRect(const Rect& rect) {
+    Rect clipped = ClipRectToRect(rect, gActiveWorld->bounds);
     for (int y = clipped.top; y < clipped.bottom; ++y) {
         for (int x = clipped.left; x < clipped.right; ++x) {
             SetPixel(x, y, currentForeColor);
@@ -235,9 +235,9 @@ void PaintRect(Rect* rect) {
     }
 }
 
-void MacFillRect(Rect* rect, Pattern* pattern) {
+void MacFillRect(const Rect& rect, Pattern* pattern) {
     static_cast<void>(pattern);
-    Rect clipped = ClipRectToRect(*rect, gActiveWorld->bounds);
+    Rect clipped = ClipRectToRect(rect, gActiveWorld->bounds);
     for (int y = clipped.top; y < clipped.bottom; ++y) {
         for (int x = clipped.left; x < clipped.right; ++x) {
             SetPixel(x, y, 255);
@@ -245,8 +245,8 @@ void MacFillRect(Rect* rect, Pattern* pattern) {
     }
 }
 
-void EraseRect(Rect* rect) {
-    Rect clipped = ClipRectToRect(*rect, gActiveWorld->bounds);
+void EraseRect(const Rect& rect) {
+    Rect clipped = ClipRectToRect(rect, gActiveWorld->bounds);
     for (int y = clipped.top; y < clipped.bottom; ++y) {
         for (int x = clipped.left; x < clipped.right; ++x) {
             SetPixel(x, y, currentBackColor);
@@ -254,30 +254,30 @@ void EraseRect(Rect* rect) {
     }
 }
 
-void FrameRect(Rect* rect) {
-    Rect clipped = ClipRectToRect(*rect, gActiveWorld->bounds);
+void FrameRect(const Rect& rect) {
+    Rect clipped = ClipRectToRect(rect, gActiveWorld->bounds);
     if (clipped.left == clipped.right || clipped.top == clipped.bottom) {
         return;
     }
     for (int x = clipped.left; x < clipped.right; ++x) {
-        if (rect->top == clipped.top) {
-            SetPixel(x, rect->top, currentForeColor);
+        if (rect.top == clipped.top) {
+            SetPixel(x, rect.top, currentForeColor);
         }
-        if (rect->bottom == clipped.bottom) {
-            SetPixel(x, rect->bottom - 1, currentForeColor);
+        if (rect.bottom == clipped.bottom) {
+            SetPixel(x, rect.bottom - 1, currentForeColor);
         }
     }
     for (int y = clipped.top; y < clipped.bottom; ++y) {
-        if (rect->left == clipped.left) {
-            SetPixel(rect->left, y, currentForeColor);
+        if (rect.left == clipped.left) {
+            SetPixel(rect.left, y, currentForeColor);
         }
-        if (rect->right == clipped.right) {
-            SetPixel(rect->right - 1, y, currentForeColor);
+        if (rect.right == clipped.right) {
+            SetPixel(rect.right - 1, y, currentForeColor);
         }
     }
 }
 
-void MacFrameRect(Rect* rect) {
+void MacFrameRect(const Rect& rect) {
     FrameRect(rect);
 }
 
