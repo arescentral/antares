@@ -48,13 +48,6 @@ inline void mBiggestRect(Rect& mdrect, const Rect& morect) {
     mdrect.bottom = std::max(mdrect.bottom, morect.bottom);
 }
 
-inline void mCopyAnyRect(Rect& mdrect, const Rect& msrect) {
-    mdrect.left = msrect.left;
-    mdrect.top = msrect.top;
-    mdrect.right = msrect.right;
-    mdrect.bottom = msrect.bottom;
-}
-
 struct coordPointType {
     uint32_t    h;
     uint32_t    v;

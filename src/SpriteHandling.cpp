@@ -1739,7 +1739,7 @@ void DrawSpriteTableInOffWorld( Rect *clipRect)
                             break;
                     }
 //                  sRect.top = sRect.left = sRect.bottom = sRect.right = 0;
-                    mCopyAnyRect( aSprite->thisRect, sRect);
+                    aSprite->thisRect = sRect;
     //              LongRectToRect( &sRect, &(aSprite->thisRect));
                 #endif
                 }
@@ -1799,7 +1799,7 @@ void DrawSpriteTableInOffWorld( Rect *clipRect)
                             break;
                     }
 
-                    mCopyAnyRect( aSprite->thisRect, sRect);
+                    aSprite->thisRect = sRect;
                 #endif
                 }
 

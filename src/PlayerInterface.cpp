@@ -511,7 +511,7 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
         mSetDirectFont( kButtonFontNum);
         mGetDirectStringDimensions(string, width, height);
 
-        mCopyAnyRect( clipRect, *contentRect);
+        clipRect = *contentRect;
         tRect = Rect(0, 0, width, height);
         tRect.center_in(*contentRect);
 
@@ -995,7 +995,7 @@ void StartPauseIndicator(unsigned char* pauseString, unsigned char hue) {
 
     stringRect = Rect(0, 0, width, height);
     stringRect.center_in(tRect);
-    mCopyAnyRect( tRect, stringRect);
+    tRect = stringRect;
     tRect.left -= 4;
     tRect.top -= 4;
     tRect.right += 4;
@@ -1009,7 +1009,7 @@ void StartPauseIndicator(unsigned char* pauseString, unsigned char hue) {
     CopySaveWorldToOffWorld(tRect);
     DrawInOffWorld();
 
-    mCopyAnyRect( clipRect, tRect);
+    clipRect = tRect;
 
     mGetTranslateColorShade( GREEN, DARKER, color, transColor);
     for ( count = clipRect.top + 2; count < clipRect.bottom; count += 2)
@@ -1025,7 +1025,7 @@ void StartPauseIndicator(unsigned char* pauseString, unsigned char hue) {
 
     DrawInRealWorld();
     DefaultColors();
-    mCopyAnyRect( tRect, clipRect);
+    tRect = clipRect;
     CopyOffWorldToRealWorld(tRect);
 }
 
@@ -3288,13 +3288,13 @@ void DoMissionDebriefing(Rect *destRect, long yourlength, long parlength, long y
         clipRect.top = 0;
         clipRect.bottom = clipRect.top + WORLD_HEIGHT;
         clipRect = *destRect;
-        mCopyAnyRect( tlRect, boundsRect);
+        tlRect = boundsRect;
         tlRect.left -= 2;
         tlRect.top -= 2;
         tlRect.right += 2;
         tlRect.bottom += 2;
         DrawNateVBracket( gOffWorld, tlRect, clipRect, 0, 0, retroTextSpec.color);
-        mCopyAnyRect( tRect, tlRect);
+        tRect = tlRect;
         CopyOffWorldToRealWorld(tRect);
 
         while ( retroTextSpec.thisPosition < retroTextSpec.textLength)
@@ -3440,7 +3440,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
         scrollRect.top = boundsRect.top;
         scrollRect.bottom = textRect.bottom;
 
-        mCopyAnyRect( tRect, scrollRect);
+        tRect = scrollRect;
         clipRgn = tRect;
 
         DrawInRealWorld();
@@ -3707,8 +3707,8 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                         retroTextSpec.ypos = textRect.top + mDirectFontAscent() + kScrollTextLineBuffer;
 
                         DrawInOffWorld();
-                        mCopyAnyRect( bgRect, textRect);
-                        mCopyAnyRect( stRect, textRect);
+                        bgRect = textRect;
+                        stRect = textRect;
                         bgRect.offset(0, -bgRect.top);
                         bgRect.offset(0, bgVOffset);
                         // if source bg pict is partially offscreen

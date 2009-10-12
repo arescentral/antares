@@ -105,14 +105,6 @@ inline int mHexDigitValue(char c) {
     }
 }
 
-template <typename T0, typename T1>
-inline void mClipAnyRect(T0& mtrect, const T1& mclip) {
-    mtrect.left = std::max(mtrect.left, mclip.left);
-    mtrect.top = std::max(mtrect.top, mclip.top);
-    mtrect.right = std::min(mtrect.right, mclip.right);
-    mtrect.bottom = std::min(mtrect.bottom, mclip.bottom);
-}
-
 #define kHBuffer        4
 #define kHBufferTotal   (kHBuffer)
 
@@ -1187,8 +1179,8 @@ void DrawRetroTextCharInRect(
     cursorRect.right = cursorRect.left + gDirectText->logicalWidth;
     cursorRect.bottom = cursorRect.top + mDirectFontHeight() +
         retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
-    mCopyAnyRect( tlRect, cursorRect);
-    mClipAnyRect( tlRect, bounds);
+    tlRect = cursorRect;
+    tlRect.clip_to(bounds);
     if ( retroTextSpec->originalBackColor != WHITE)
         DrawNateRectClipped(destMap, &tlRect, clipRect, (portLeft << 2),
             portTop, retroTextSpec->originalBackColor);
@@ -1219,8 +1211,8 @@ void DrawRetroTextCharInRect(
                     retroTextSpec->xpos = bounds.left + retroTextSpec->tabSize *
                         wordLen;
                     cursorRect.right = retroTextSpec->xpos;
-                    mCopyAnyRect( tlRect, cursorRect);
-                    mClipAnyRect( tlRect, bounds);
+                    tlRect = cursorRect;
+                    tlRect.clip_to(bounds);
                     if ( retroTextSpec->backColor != WHITE)
                         DrawNateRectClipped(destMap, &tlRect, clipRect, (portLeft << 2), portTop,
                             retroTextSpec->backColor);
@@ -1232,8 +1224,8 @@ void DrawRetroTextCharInRect(
                     cursorRect.bottom = cursorRect.top + mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
                     mDirectCharWidth( charWidth, *thisChar, widthPtr);
                     retroTextSpec->xpos += charWidth;
-                    mCopyAnyRect( tlRect, cursorRect);
-                    mClipAnyRect( tlRect, bounds);
+                    tlRect = cursorRect;
+                    tlRect.clip_to(bounds);
                     if ( retroTextSpec->backColor != WHITE)
                         DrawNateRectClipped(destMap, &tlRect, clipRect, (portLeft << 2),
                             portTop, retroTextSpec->backColor);
@@ -1319,8 +1311,8 @@ void DrawRetroTextCharInRect(
             mDirectCharWidth( charWidth, *thisChar, widthPtr);
             retroTextSpec->xpos += charWidth;
             cursorRect.right = retroTextSpec->xpos;
-            mCopyAnyRect( tlRect, cursorRect);
-            mClipAnyRect( tlRect, bounds);
+            tlRect = cursorRect;
+            tlRect.clip_to(bounds);
             if ( retroTextSpec->backColor != WHITE)
                 DrawNateRectClipped(destMap, &tlRect, clipRect, (portLeft << 2), portTop,
                     retroTextSpec->backColor);
@@ -1337,8 +1329,8 @@ void DrawRetroTextCharInRect(
             lineRect.right = bounds.right;
             lineRect.top = cursorRect.top;
             lineRect.bottom = cursorRect.bottom;
-            mCopyAnyRect( tlRect, lineRect);
-            mClipAnyRect( tlRect, bounds);
+            tlRect = lineRect;
+            tlRect.clip_to(bounds);
             if ( retroTextSpec->backColor != WHITE)
                 DrawNateRectClipped(destMap, &tlRect, clipRect, (portLeft << 2), portTop,
                     retroTextSpec->backColor);
@@ -1361,8 +1353,8 @@ void DrawRetroTextCharInRect(
         cursorRect.right = cursorRect.left + gDirectText->logicalWidth;
         if ( drawCursor)
         {
-            mCopyAnyRect( tlRect, cursorRect);
-            mClipAnyRect( tlRect, bounds);
+            tlRect = cursorRect;
+            tlRect.clip_to(bounds);
             if ( retroTextSpec->backColor != WHITE)
                 DrawNateRectClipped(destMap, &tlRect, clipRect, (portLeft << 2), portTop,
                     retroTextSpec->originalColor);

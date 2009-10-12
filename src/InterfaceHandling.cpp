@@ -185,7 +185,7 @@ long AppendInterface( short resID, long relativeNumber, bool center)
         Rect    tRect;
 
         relativeItem = *gInterfaceItemData + relativeNumber;
-        mCopyAnyRect( tRect, relativeItem->bounds);
+        tRect = relativeItem->bounds;
         CenterItemRangeInRect( &tRect, originalNumber, number);
     }
     return( number - originalNumber);

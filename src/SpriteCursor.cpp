@@ -230,7 +230,7 @@ void DrawSpriteCursorSprite( Rect *clipRect)
 
         OptScaleSpritePixInPixMap( &aSpritePix, gSpriteCursor->where, SCALE_SCALE,
                 &sRect, clipRect, gOffWorld);
-        mCopyAnyRect( gSpriteCursor->sprite.thisRect, sRect);
+        gSpriteCursor->sprite.thisRect = sRect;
     } else
     {
         gSpriteCursor->sprite.thisRect.left = gSpriteCursor->sprite.thisRect.top = 0;
