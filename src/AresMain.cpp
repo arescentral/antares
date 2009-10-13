@@ -185,6 +185,9 @@ class Master : public EventListener {
             if (!(globals()->gOptions & kOptionHaveSeenIntro)) {
                 _scroll_text.reset(new ScrollTextScreen(5600, 450, 15.0));
                 VideoDriver::driver()->push_listener(_scroll_text.get());
+
+                globals()->gOptions |= kOptionHaveSeenIntro;
+                SaveOptionsPreferences();
             }
             break;
 
@@ -286,13 +289,6 @@ void AresMain() {
 void MainLoop() {
     long                    saveSeed = 0, gameLength;
     bool                    done = false;
-
-    if (!(globals()->gOptions & kOptionHaveSeenIntro)) {
-        DoScrollText(5600, 4, kTitleTextScrollWidth, kTitleFontNum, -1);
-
-        globals()->gOptions |= kOptionHaveSeenIntro;
-        SaveOptionsPreferences();
-    }
 
     while (!done) {
         switch (DoMainScreenInterface()) {
