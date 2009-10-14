@@ -38,7 +38,6 @@
 #include "FakeDrawing.hpp"
 #include "Fakes.hpp"
 
-
 #include "InputSource.hpp"
 #include "Instruments.hpp"
 #include "InterfaceHandling.hpp"
@@ -81,8 +80,6 @@
 #include "Transitions.hpp"
 
 #include "VideoDriver.hpp"
-
-#include "WrapGameRanger.hpp"
 
 namespace antares {
 

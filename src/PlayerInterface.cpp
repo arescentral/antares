@@ -50,7 +50,6 @@
 #include "StringNumerics.hpp"
 #include "Transitions.hpp"
 #include "VideoDriver.hpp"
-#include "WrapGameRanger.hpp"
 
 namespace antares {
 
