@@ -24,7 +24,6 @@
 #include "Error.hpp"
 #include "MathMacros.hpp"
 #include "MathSpecial.hpp"
-#include "Resources.h"
 
 namespace antares {
 

@@ -31,7 +31,6 @@
 #include "Options.hpp"
 #include "PlayerInterface.hpp"  // for Replace_KeyCode_Strings_With_Actual_Key_Names
 #include "PlayerInterfaceDrawing.hpp" // for long messages
-#include "Resources.h"
 #include "ScenarioMaker.hpp"
 #include "ScreenLabel.hpp"
 #include "SpriteHandling.hpp"

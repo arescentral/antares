@@ -42,7 +42,6 @@
 #include "Options.hpp"
 #include "Picture.hpp"
 #include "Races.hpp"
-#include "Resources.h"
 #include "ScenarioMaker.hpp"
 #include "ScrollStars.hpp"
 #include "SoundFX.hpp"               // for button on/off

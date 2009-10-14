@@ -22,7 +22,6 @@
 
 #include <Base.h>
 #include <Quickdraw.h>
-#include <Resources.h>
 
 #include "AnyChar.hpp"
 #include "Handle.hpp"

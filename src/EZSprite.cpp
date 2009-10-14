@@ -22,7 +22,6 @@
 #include "NateDraw.hpp"
 #include "NatePixTable.hpp"
 #include "OffscreenGWorld.hpp"
-#include "Resources.h"
 #include "SpriteHandling.hpp"
 
 namespace antares {

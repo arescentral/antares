@@ -26,7 +26,6 @@
 #include "MathMacros.hpp"
 //#include "MathSpecial.hpp"      // hack for checking strength
 #include "OffscreenGWorld.hpp"
-#include "Resources.h"
 #include "SpriteCursor.hpp"  // for hint line
 #include "StringHandling.hpp"
 

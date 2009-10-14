@@ -36,7 +36,6 @@
 #include "PlayerShip.hpp"
 #include "Races.hpp"
 #include "Randomize.hpp"
-#include "Resources.h"
 #include "Rotation.hpp"
 #include "ScreenLabel.hpp"
 #include "ScrollStars.hpp"

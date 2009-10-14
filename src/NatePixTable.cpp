@@ -23,7 +23,6 @@
 
 #include "BinaryStream.hpp"
 #include "ColorTranslation.hpp"
-#include "Resources.h"
 #include "Sound.h"
 
 namespace antares {

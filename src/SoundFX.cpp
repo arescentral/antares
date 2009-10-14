@@ -26,7 +26,6 @@
 #include "MathMacros.hpp"
 #include "MathSpecial.hpp"
 #include "Options.hpp"
-#include "Resources.h"
 #include "SpaceObject.hpp"
 #include "UniverseUnit.hpp"
 

@@ -19,7 +19,6 @@
 
 #include "AresGlobalType.hpp"
 #include "MathSpecial.hpp"
-#include "Resources.h"
 
 namespace antares {
 

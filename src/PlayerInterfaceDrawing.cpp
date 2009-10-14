@@ -20,7 +20,6 @@
 #include "PlayerInterfaceDrawing.hpp"
 
 #include <Quickdraw.h>
-#include <Resources.h>
 
 #include "AnyChar.hpp"
 #include "ColorTranslation.hpp"

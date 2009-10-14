@@ -26,7 +26,6 @@
 #include "Error.hpp"
 #include "MathMacros.hpp"
 #include "Randomize.hpp"
-#include "Resources.h"
 #include "SoundFX.hpp"
 #include "SpaceObject.hpp"
 #include "SpaceObjectHandling.hpp"

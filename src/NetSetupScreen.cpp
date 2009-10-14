@@ -37,7 +37,6 @@
 #include "Options.hpp"
 #include "PlayerInterface.hpp"
 #include "Races.hpp"
-#include "Resources.h"
 #include "ScenarioMaker.hpp"
 #include "SingleDataFile.hpp" // to determine whether or not to allow changing of mission or race
 #include "SmartFile.hpp"

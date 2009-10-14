@@ -35,7 +35,6 @@
 #include "OffscreenGWorld.hpp"
 #include "Options.hpp"
 #include "PlayerShip.hpp"
-#include "Resources.h"
 #include "ScenarioMaker.hpp"
 #include "ScrollStars.hpp"
 #include "SoundFX.hpp"

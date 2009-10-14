@@ -28,7 +28,6 @@
 #include "OffscreenGWorld.hpp"
 #include "PlayerShip.hpp"
 #include "Randomize.hpp"
-#include "Resources.h"
 #include "Rotation.hpp"
 #include "ScreenLabel.hpp"
 #include "SoundFX.hpp"

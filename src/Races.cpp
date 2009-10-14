@@ -24,7 +24,6 @@
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "Resource.hpp"
-#include "Resources.h"
 
 namespace antares {
 

@@ -20,7 +20,6 @@
 #include "KeyMapTranslation.hpp"
 
 #include "Error.hpp"
-#include "Resources.h"
 
 namespace antares {
 

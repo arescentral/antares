@@ -32,7 +32,6 @@
 #include "AresGlobalType.hpp"
 #include "KeyMapTranslation.hpp"
 #include "Options.hpp"
-#include "Resources.h"
 
 namespace antares {
 

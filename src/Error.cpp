@@ -21,7 +21,6 @@
 
 #include <Quickdraw.h>
 
-#include "Resources.h"
 #include "StringNumerics.hpp"
 
 namespace antares {

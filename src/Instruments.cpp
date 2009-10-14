@@ -31,7 +31,6 @@
 #include "OffscreenGWorld.hpp"
 #include "Picture.hpp"
 #include "PlayerShip.hpp"
-#include "Resources.h"
 #include "Rotation.hpp"
 #include "ScreenLabel.hpp"
 //#include "SoundFX.hpp"

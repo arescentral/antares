@@ -22,7 +22,6 @@
 #include "MathSpecial.hpp"
 
 #include "BinaryStream.hpp"
-#include "Resources.h"
 
 namespace antares {
 

@@ -23,7 +23,6 @@
 #include "AresPreferences.hpp"
 #include "Debug.hpp"
 #include "Error.hpp"
-#include "Resources.h"
 #include "StringHandling.hpp"
 #include "StringNumerics.hpp"
 

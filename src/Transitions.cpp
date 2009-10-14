@@ -20,7 +20,6 @@
 #include "Transitions.hpp"
 
 #include <Quickdraw.h>
-#include <Resources.h>
 
 #include "AresGlobalType.hpp"
 #include "AresMain.hpp"

@@ -35,7 +35,6 @@
 #include "NonPlayerShip.hpp"
 #include "Options.hpp"
 #include "Randomize.hpp"
-#include "Resources.h"
 #include "Rotation.hpp"
 #include "ScenarioMaker.hpp"
 #include "ScreenLabel.hpp"

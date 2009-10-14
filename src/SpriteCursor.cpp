@@ -21,7 +21,6 @@
 #include "Error.hpp"
 #include "NatePixTable.hpp"
 #include "OffscreenGWorld.hpp"
-#include "Resources.h"
 
 namespace antares {
 

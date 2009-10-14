@@ -29,7 +29,6 @@
 #include "OffscreenGWorld.hpp"
 #include "SpaceObject.hpp"
 #include "Randomize.hpp"
-#include "Resources.h"
 
 namespace antares {
 
