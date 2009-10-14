@@ -47,19 +47,12 @@ struct scrollStarType {
 
 
 int InitScrollStars( void);
-void CleanupScrollStars( void);
 void ResetScrollStars ( long);
 void MakeNewSparks( long, long, smallFixedType, unsigned char, Point*);
 void PrepareToMoveScrollStars( void);
 void MoveScrollStars( const long );
 void DrawScrollStars( bool);
 void ShowScrollStars( bool);
-void DontShowScrollStars( void);
-void DrawAllBeams( void);
-void Reset3DStars( Point, const Rect&);
-void Move3DStars( Point, long, const Rect&);
-void Draw3DStars( bool, const Rect&, PixMap*);
-void Show3DStars( bool, const Rect&, PixMap*);
 
 }  // namespace antares
 
