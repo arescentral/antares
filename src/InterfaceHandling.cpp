@@ -60,7 +60,7 @@ extern PixMap*          gOffWorld;
 extern PixMap*          gSaveWorld;
 
 TypedHandle<interfaceItemType> gInterfaceItemData;
-short               gInterfaceFileRefID = -1, gCurrentTEItem = -1;
+short               gInterfaceFileRefID = -1;
 long                gInterfaceScreenHBuffer = 0, gInterfaceScreenVBuffer = 0;
 
 ScopedOpenInterface::ScopedOpenInterface(int id) {
@@ -71,27 +71,11 @@ ScopedOpenInterface::~ScopedOpenInterface() {
     CloseInterface();
 }
 
-int InterfaceHandlingInit( void)
-
-{
-//  gCallBackTest = NewRoutineDescriptor( (ProcPtr)MyClipLoop, kClickLoopInfo, GetCurrentISA());
-
-/*  gInterfaceFileRefID = ARF_OpenResFile( kInterfaceResFileName);
-    if ( gInterfaceFileRefID < 0)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kInterfacesFileError, kDataFolderError, -1, -1, __FILE__, 1);
-        return( RESOURCE_ERROR);
-    } else
-        UseResFile ( gInterfaceFileRefID);
-*/
-
-//  if ( globals()->externalFileRefNum > 0)
-//      UseResFile( globals()->externalFileRefNum);
-
+int InterfaceHandlingInit() {
     gInterfaceScreenHBuffer = ( WORLD_WIDTH / 2) - ( kTargetScreenWidth / 2);
     gInterfaceScreenVBuffer = ( WORLD_HEIGHT / 2) - ( kTargetScreenHeight / 2);
 
-    return ( kNoError);
+    return kNoError;
 }
 
 void InterfaceHandlingCleanup( void)
@@ -204,15 +188,7 @@ void ShortenInterface( long howMany)
     }
 }
 
-void CloseInterface( void)
-
-{
-    if ( gCurrentTEItem != -1)
-    {
-        InterfaceTextEditDeactivate( gCurrentTEItem);
-    }
-    InterfaceDisposeAllEditableText();
-
+void CloseInterface() {
     if (gInterfaceItemData.get() != nil) {
         gInterfaceItemData.destroy();
     }
@@ -443,40 +419,6 @@ void InvalidateInterfaceFunctions( void)
     }
 }
 
-void InterfaceDisposeAllEditableText( void)
-
-{
-    long                number, count;
-    interfaceItemType   *item;
-
-    if (gInterfaceItemData.get() != nil) {
-        number = gInterfaceItemData.count();
-        item = *gInterfaceItemData;
-
-        for ( count = 0; count < number; count++)
-        {
-            if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
-                ( item->item.labeledRect.teData != nil))
-            {
-                TEDispose( item->item.labeledRect.teData);
-            }
-            item++;
-        }
-    }
-}
-
-void InterfaceIdle( void)
-
-{
-    interfaceItemType   *item;
-
-    if ( gCurrentTEItem != -1)
-    {
-        item = *gInterfaceItemData + gCurrentTEItem;
-        TEIdle( item->item.labeledRect.teData);
-    }
-}
-
 short PtInInterfaceItem( Point where)
 {
     long                number, count;
@@ -543,18 +485,6 @@ short InterfaceMouseDown( Point where)
                     break;
 
                 case kLabeledRect:
-                    if (( item->item.labeledRect.editable) && ( item->item.labeledRect.teData != nil))
-                    {
-                        if ( count != gCurrentTEItem)
-                        {
-                            InterfaceTextEditDeactivate( gCurrentTEItem);
-                            gCurrentTEItem = count;
-                            InterfaceTextEditActivate( gCurrentTEItem);
-                        }
-                        SetInterfaceTextEditColors( gCurrentTEItem);
-                        TEClick( where, ShiftKey(), item->item.labeledRect.teData);
-                        DefaultColors();
-                    }
                     return( result);
                     break;
                 case kListRect:
@@ -664,42 +594,6 @@ short InterfaceKeyDown( long message)
 
     }
 
-    if (( gCurrentTEItem != -1) && ( !caughtKey))
-    {
-        if ( whichChar == 0x09) // TAB KEY
-        {
-            number = gInterfaceItemData.count();
-            count = gCurrentTEItem + 1;
-            item = *gInterfaceItemData + count;
-
-            while ( !(( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
-                    ( item->item.labeledRect.teData != nil)))
-            {
-                if ( count >= number)
-                {
-                    count = 0;
-                    item = *gInterfaceItemData;
-                }
-                item++;
-                count++;
-            }
-
-            if ( count != gCurrentTEItem)
-            {
-                InterfaceTextEditDeactivate( gCurrentTEItem);
-                gCurrentTEItem = count;
-            }
-//          InterfaceTextEditSelectAll( gCurrentTEItem);
-            InterfaceTextEditActivate( gCurrentTEItem);
-        } else
-        {
-            SetInterfaceTextEditColors( gCurrentTEItem);
-            item = *gInterfaceItemData + gCurrentTEItem;
-            TEKey( whichChar, item->item.labeledRect.teData);
-            DefaultColors();
-        }
-        return( gCurrentTEItem);
-    }
     return( -1);
 }
 
@@ -994,255 +888,6 @@ void RefreshInterfaceItem( short whichItem)
     DrawAnyInterfaceItemOffToOn( item);
 }
 
-/*
-void RefreshInterfaceListEntry( short whichItem, short whichEntry)
-
-{
-    interfaceItemType   *item;
-
-    item = *gInterfaceItemData + (long)whichItem;
-
-    DrawPlayerInterfaceListEntry( item, whichEntry);
-}
-*/
-
-void InterfaceTextEditItemInit( short whichItem)
-
-{
-    interfaceItemType   *item;
-    Rect                tRect;
-
-    item = *gInterfaceItemData + whichItem;
-
-    if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable))
-    {
-        if ( item->item.labeledRect.teData == nil)
-        {
-            tRect = item->bounds;
-            SetInterfaceTextEditColors( whichItem);
-
-            item->item.labeledRect.teData = TENew(tRect, tRect);
-//          SetClikLoop( (UniversalProcPtr)gCallBackTest, item->item.labeledRect.teData);
-            DefaultColors();
-        }
-    }
-}
-
-void InterfaceTextEditSetText(short whichItem, unsigned char* s)
-
-{
-    interfaceItemType   *item;
-
-    item = *gInterfaceItemData + whichItem;
-
-    if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
-            ( item->item.labeledRect.teData != nil))
-    {
-        TESetText( reinterpret_cast<Ptr>( s + 1), *s, item->item.labeledRect.teData);
-    }
-}
-
-void InterfaceTextEditSelectAll( short whichItem)
-
-{
-    interfaceItemType   *item;
-
-    item = *gInterfaceItemData + whichItem;
-
-    if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
-            ( item->item.labeledRect.teData != nil))
-    {
-        SetInterfaceTextEditColors( whichItem);
-        TESetSelect( 0, 32767, item->item.labeledRect.teData);
-        DefaultColors();
-    }
-}
-
-void InterfaceTextEditActivate( short whichItem)
-
-{
-    interfaceItemType   *item;
-    Rect                tRect;
-
-    item = *gInterfaceItemData + whichItem;
-
-    if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
-            ( item->item.labeledRect.teData != nil))
-    {
-        SetInterfaceTextEditColors( whichItem);
-
-        tRect = item->bounds;
-        TEActivate( item->item.labeledRect.teData);
-        EraseRect(tRect);
-        TEUpdate(tRect, item->item.labeledRect.teData);
-        gCurrentTEItem = whichItem;
-
-    }
-}
-
-void InterfaceTextEditDeactivate( short whichItem)
-
-{
-    interfaceItemType   *item;
-    Rect                tRect;
-
-    item = *gInterfaceItemData + whichItem;
-
-    if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
-            ( item->item.labeledRect.teData != nil))
-    {
-        tRect = item->bounds;
-
-        SetInterfaceTextEditColors( whichItem);
-
-        TEDeactivate( item->item.labeledRect.teData);
-        EraseRect(tRect);
-        TEUpdate(tRect, item->item.labeledRect.teData);
-        gCurrentTEItem = -1;
-
-        DefaultColors();
-    }
-}
-
-void SuspendActiveTextEdit( void)
-{
-    interfaceItemType   *item;
-    Rect                tRect;
-
-    if (gInterfaceItemData.get() != nil) {
-        if ( gCurrentTEItem != -1)
-        {
-            item = *gInterfaceItemData + gCurrentTEItem;
-
-            if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
-                    ( item->item.labeledRect.teData != nil))
-            {
-                SetInterfaceTextEditColors( gCurrentTEItem);
-
-                tRect = item->bounds;
-                TEDeactivate( item->item.labeledRect.teData);
-                EraseRect(tRect);
-                TEUpdate(tRect, item->item.labeledRect.teData);
-            }
-        }
-    }
-}
-
-void ResumeActiveTextEdit( void)
-{
-    interfaceItemType   *item;
-    Rect                tRect;
-
-    if (gInterfaceItemData.get() != nil) {
-        if ( gCurrentTEItem != -1)
-        {
-            item = *gInterfaceItemData + gCurrentTEItem;
-
-            if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
-                    ( item->item.labeledRect.teData != nil))
-            {
-                SetInterfaceTextEditColors( gCurrentTEItem);
-
-                tRect = item->bounds;
-                TEActivate( item->item.labeledRect.teData);
-                EraseRect(tRect);
-                TEUpdate(tRect, item->item.labeledRect.teData);
-            }
-        }
-    }
-}
-
-void UpdateAllTextEdit( void)
-{
-    long                number, count;
-    interfaceItemType   *item;
-    Rect                tRect;
-
-    if (gInterfaceItemData.get() != nil) {
-
-        number = gInterfaceItemData.count();
-        item = *gInterfaceItemData;
-
-        for ( count = 0; count < number; count++)
-        {
-            SetInterfaceTextEditColors( count);
-            if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
-                ( item->item.labeledRect.teData != nil))
-            {
-                tRect = item->bounds;
-
-                EraseRect(tRect);
-                TEUpdate(tRect, item->item.labeledRect.teData);
-            }
-            item++;
-        }
-        DefaultColors();
-    }
-}
-
-void SetInterfaceTextEditColors( short whichItem)
-
-{
-    interfaceItemType   *item;
-    RGBColor            color;
-
-    item = *gInterfaceItemData + whichItem;
-    DrawInRealWorld();
-    MacSetPort( gTheWindow);
-    PenNormal();
-    DefaultColors();
-    if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable))
-    {
-
-        GetRGBTranslateColor( &color, BLACK);
-        RGBBackColor( &color);
-
-        GetRGBTranslateColorShade( &color, item->color, VERY_LIGHT);
-        RGBForeColor( &color);
-
-        GetRGBTranslateColorShade( &color, item->color, MEDIUM);
-        HiliteColor( &color);
-
-    } else WriteDebugLong( whichItem);
-}
-
-void CopyInterfaceTextEditContents(short whichItem, unsigned char* d, long *maxlen)
-
-{
-    interfaceItemType   *item;
-    long                slen;
-
-    item = *gInterfaceItemData + whichItem;
-
-    if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
-            ( item->item.labeledRect.teData != nil))
-    {
-        slen = (*(item->item.labeledRect.teData))->teLength;
-        if ( slen <= *maxlen)
-        {
-            BlockMove( *((*(item->item.labeledRect.teData))->hText), d, slen);
-            *maxlen = slen;
-        } else
-        {
-            BlockMove( *((*(item->item.labeledRect.teData))->hText), d, *maxlen);
-        }
-    }
-}
-
-long GetInterfaceTextEditLength( short whichItem)
-{
-
-    interfaceItemType   *item;
-
-    item = *gInterfaceItemData + whichItem;
-
-    if (( item->kind == kLabeledRect) && ( item->item.labeledRect.editable) &&
-            ( item->item.labeledRect.teData != nil))
-    {
-        return ( (*(item->item.labeledRect.teData))->teLength);
-    } else return( -1);
-}
-
 void SetInterfaceListCallback(  short       whichItem,
                                 short       (*getListLength)( void),
                                 void        (*getItemString)(short, unsigned char*),
@@ -1357,8 +1002,6 @@ void interfaceLabeledRectType::read(BinaryReader* bin) {
     bin->read(&color);
     bin->discard(5);
     bin->read(&editable);
-
-    teData = NULL;
 }
 
 void interfaceListType::read(BinaryReader* bin) {

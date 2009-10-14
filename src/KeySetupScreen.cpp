@@ -245,9 +245,7 @@ bool Key_Setup_Screen_Do( void)
 
         DrawStringInInterfaceItem( kConflictText, nil);
 
-        while ( !done)
-        {
-            InterfaceIdle();
+        while (!done) {
             if (( AnyEvent()) && ( !( globals()->gOptions & kOptionInBackground)))
             {
                 GetKeys( keyMap);
@@ -332,7 +330,6 @@ bool Key_Setup_Screen_Do( void)
                                 true);
                             lastFlashTime = TickCount();
                         }
-                        InterfaceIdle();
                         break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);

@@ -505,19 +505,12 @@ PlayAgainResult DoPlayAgain(bool allowResume, bool allowSkip) {
             // DO NOTHING
         };
 
-        while ( !done)
-        {
-
-            InterfaceIdle();
-
+        while (!done) {
             WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
                 switch ( theEvent.what )
                 {
-                    case nullEvent:
-                        InterfaceIdle();
-                        break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
                         break;
@@ -643,19 +636,12 @@ void DoNetSettings( void)
             // DO NOTHING
         };
 
-        while ( !done)
-        {
-
-            InterfaceIdle();
-
+        while (!done) {
             WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
                 switch ( theEvent.what )
                 {
-                    case nullEvent:
-                        InterfaceIdle();
-                        break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
                         break;
@@ -844,19 +830,12 @@ void DoHelpScreen( void)
             // DO NOTHING
         };
 
-        while ( !done)
-        {
-
-            InterfaceIdle();
-
+        while (!done) {
             WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
                 switch ( theEvent.what )
                 {
-                    case nullEvent:
-                        InterfaceIdle();
-                        break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
                         break;
@@ -1020,17 +999,12 @@ void DoOptionsInterface( void)
 //      DrawEntireInterface();
         DrawInterfaceOneAtATime();
         DrawOptionVolumeLevel( &volumeRect, prefsData->volume);
-        while ( !done)
-        {
-            InterfaceIdle();
+        while (!done) {
             WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
                 switch ( theEvent.what )
                 {
-                    case nullEvent:
-                        InterfaceIdle();
-                        break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
                         break;
@@ -1270,9 +1244,7 @@ bool DoKeyInterface( void)
             ((options & kOptionSubstituteFKeys) ? (true):(false)));
 
         DrawInterfaceOneAtATime();
-        while ( !done)
-        {
-            InterfaceIdle();
+        while (!done) {
             if (( AnyEvent()) && ( !( globals()->gOptions & kOptionInBackground)))
             {
                 GetKeys( keyMap);
@@ -1332,9 +1304,6 @@ bool DoKeyInterface( void)
                 whichItem = -1;
                 switch ( theEvent.what )
                 {
-                    case nullEvent:
-                        InterfaceIdle();
-                        break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
                         break;
@@ -1540,17 +1509,12 @@ netResultType StartNetworkGameSetup( void)
             DrawInterfaceOneAtATime();
             MacSetPort( gTheWindow);
             InvalRect( &(gTheWindow->portRect));
-            while ( !done)
-            {
-                InterfaceIdle();
+            while (!done) {
                 WaitNextEvent (everyEvent, &theEvent, 3, nil);
                 {
                     whichItem = -1;
                     switch ( theEvent.what )
                     {
-                        case nullEvent:
-                            InterfaceIdle();
-                            break;
                         case osEvt:
 //                          HandleOSEvent( &theEvent);
                             break;
@@ -1678,17 +1642,12 @@ netResultType ClientWaitInterface( void)
 
         SetStatusOfAnyInterfaceItem( kClientWaitCancelButton, kActive, true);
 
-        while ( !done)
-        {
-            InterfaceIdle();
+        while (!done) {
             WaitNextEvent (everyEvent, &theEvent, 0, nil);
             {
                 whichItem = -1;
                 switch ( theEvent.what )
                 {
-                    case nullEvent:
-                        InterfaceIdle();
-                        break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
                         break;
@@ -1832,17 +1791,12 @@ netResultType HostAcceptClientInterface( void)
             SetStatusOfAnyInterfaceItem( kHostDeclineButton, kDimmed, false);
         }
         DrawInterfaceOneAtATime();
-        while ( !done)
-        {
-            InterfaceIdle();
+        while (!done) {
             WaitNextEvent (everyEvent, &theEvent, 0, nil);
             {
                 whichItem = -1;
                 switch ( theEvent.what )
                 {
-                    case nullEvent:
-                        InterfaceIdle();
-                        break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
                         break;
@@ -2035,19 +1989,13 @@ long DoSelectLevelInterface( long startChapter)
 // it is assumed that we're "recovering" from a fade-out
         AutoFadeFrom( 60, false);
         MacShowCursor();
-        while ( !done)
-        {
-            InterfaceIdle();
-
+        while (!done) {
             VideoDriver::driver()->set_game_state(SELECT_LEVEL_INTERFACE);
             WaitNextEvent (everyEvent, &theEvent, 3, nil);
             {
                 whichItem = -1;
                 switch ( theEvent.what )
                 {
-                    case nullEvent:
-                        InterfaceIdle();
-                        break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
                         break;
@@ -2310,9 +2258,7 @@ bool DoMissionInterface( long whichScenario)
 
         nextStartTime = TickCount();
 
-        while ( !done)
-        {
-            InterfaceIdle();
+        while (!done) {
 //          if (Ares_WaitNextEvent (everyEvent, &theEvent, 0, nil))
             VideoDriver::driver()->set_game_state(MISSION_INTERFACE);
             WaitNextEvent (everyEvent, &theEvent, 3, nil);
@@ -2320,22 +2266,6 @@ bool DoMissionInterface( long whichScenario)
                 whichItem = -1;
                 switch ( theEvent.what )
                 {
-                    case nullEvent:
-                        InterfaceIdle();
-                        if (( globals()->gOptions & (kOptionAutoPlay | kOptionReplay)) && (!( globals()->gOptions & kOptionInBackground))
-                            && ( (TickCount() - nextStartTime) > thisMissionWaitTime))
-                        {
-                            if ( whichBriefPoint < ( GetBriefPointNumber( whichScenario) - 1))
-                            {
-                                whichItem = kMissionNextButton;
-                            } else
-                            {
-                                whichItem = kMissionDoneButton;
-                            }
-                            nextStartTime = TickCount();
-                        }
-
-                        break;
                     case osEvt:
 //                      HandleOSEvent( &theEvent);
                         break;

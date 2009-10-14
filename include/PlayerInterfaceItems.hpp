@@ -20,8 +20,6 @@
 
 // Player Interface Items.h
 
-#include <TextEdit.h>
-
 #include "AnyChar.hpp"
 #include "NateDraw.hpp"
 
@@ -67,7 +65,7 @@ struct interfaceLabelType {
 struct interfaceLabeledRectType {
     interfaceLabelType  label;
     unsigned char       color;
-    TEHandle            teData;
+    uint32_t             unused;
     bool                editable;
     // bool             editable;
 

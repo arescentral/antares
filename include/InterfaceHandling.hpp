@@ -47,8 +47,6 @@ void CenterAllItemsInRect( Rect *);
 void DrawAnyInterfaceItemOffToOn( interfaceItemType *);
 void DrawAnyInterfaceItemSaveToOffToOn( interfaceItemType *);
 void InvalidateInterfaceFunctions( void);
-void InterfaceDisposeAllEditableText( void);
-void InterfaceIdle( void);
 short PtInInterfaceItem( Point);
 short InterfaceMouseDown( Point);
 short InterfaceKeyDown( long);
@@ -64,17 +62,6 @@ void SwitchAnyRadioOrCheckbox( short, bool);
 bool GetAnyRadioOrCheckboxOn( short);
 void RefreshInterfaceItem( short);
 void RefreshInterfaceListEntry( short, short);
-void InterfaceTextEditItemInit( short);
-void InterfaceTextEditSetText(short, unsigned char*);
-void InterfaceTextEditSelectAll( short);
-void InterfaceTextEditActivate( short);
-void InterfaceTextEditDeactivate( short);
-void SuspendActiveTextEdit( void);
-void ResumeActiveTextEdit( void);
-void UpdateAllTextEdit( void);
-void SetInterfaceTextEditColors( short);
-void CopyInterfaceTextEditContents(short, unsigned char*, long*);
-long GetInterfaceTextEditLength( short);
 void SetInterfaceListCallback(  short       whichItem,
                                 short       (*getListLength)( void),
                                 void        (*getItemString)(short, unsigned char*),
