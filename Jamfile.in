@@ -34,8 +34,10 @@ Main Antares : src/Admiral.cpp
                src/InputSource.cpp
                src/Instruments.cpp
                src/InterfaceHandling.cpp
+               src/InterfaceScreen.cpp
                src/KeyMapTranslation.cpp
                src/KeySetupScreen.cpp
+               src/MainScreen.cpp
                src/MappedFile.cpp
                src/MathSpecial.cpp
                src/MessageScreen.cpp

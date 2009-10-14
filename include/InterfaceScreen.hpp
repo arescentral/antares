@@ -15,20 +15,40 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_ARES_MAIN_HPP_
-#define ANTARES_ARES_MAIN_HPP_
+#ifndef ANTARES_INTERFACE_SCREEN_HPP_
+#define ANTARES_INTERFACE_SCREEN_HPP_
 
-#include <Base.h>
-#include "PlayerInterface.hpp"
+#include "SmartPtr.hpp"
+#include "VideoDriver.hpp"
 
 namespace antares {
 
-#define kHackLevelMax   26//4//21
+class PixMap;
 
-void AresMain();
-void Pause();
-bool HandleMainScreenResult(mainScreenResultType result);
+class InterfaceScreen : public EventListener {
+  public:
+    InterfaceScreen(int id);
+    ~InterfaceScreen();
+
+    virtual void become_front();
+
+    virtual bool mouse_down(int button, const Point& where);
+    virtual bool mouse_up(int button, const Point& where);
+    virtual bool mouse_moved(int button, const Point& where);
+    virtual bool key_down(int key);
+
+  protected:
+    double last_event() const;
+    virtual void adjust_interface();
+    virtual void handle_button(int button) = 0;
+
+  private:
+    int _id;
+    double _last_event;
+
+    DISALLOW_COPY_AND_ASSIGN(InterfaceScreen);
+};
 
 }  // namespace antares
 
-#endif // ANTARES_ARES_MAIN_HPP_
+#endif  // ANTARES_INTERFACE_SCREEN_HPP_

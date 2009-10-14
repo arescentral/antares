@@ -15,20 +15,47 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_ARES_MAIN_HPP_
-#define ANTARES_ARES_MAIN_HPP_
+#ifndef ANTARES_MAIN_SCREEN_HPP_
+#define ANTARES_MAIN_SCREEN_HPP_
 
-#include <Base.h>
-#include "PlayerInterface.hpp"
+#include "InterfaceScreen.hpp"
+#include "SmartPtr.hpp"
 
 namespace antares {
 
-#define kHackLevelMax   26//4//21
+class ScrollTextScreen;
 
-void AresMain();
-void Pause();
-bool HandleMainScreenResult(mainScreenResultType result);
+class MainScreen : public InterfaceScreen {
+  public:
+    MainScreen();
+    ~MainScreen();
+
+    virtual void become_front();
+
+    virtual double delay();
+    virtual void fire_timer();
+
+  protected:
+    virtual void adjust_interface();
+    virtual void handle_button(int button);
+
+  private:
+    enum Button {
+        START_NEW_GAME = 0,
+        START_NETWORK_GAME = 1,
+        OPTIONS = 2,
+        QUIT = 3,
+        ABOUT_ARES = 4,
+        DEMO = 5,
+        REPLAY_INTRO = 6,
+    };
+
+    double _last_event;
+    scoped_ptr<ScrollTextScreen> _scroll_text;
+
+    DISALLOW_COPY_AND_ASSIGN(MainScreen);
+};
 
 }  // namespace antares
 
-#endif // ANTARES_ARES_MAIN_HPP_
+#endif  // ANTARES_MAIN_SCREEN_HPP_

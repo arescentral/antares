@@ -47,6 +47,7 @@
 #include "KeyCodes.hpp"
 #include "KeyMapTranslation.hpp"
 
+#include "MainScreen.hpp"
 #include "MathSpecial.hpp"
 #include "MessageScreen.hpp"
 #include "Minicomputer.hpp"
@@ -192,8 +193,11 @@ class Master : public EventListener {
             break;
 
           case INTRO_SCROLL:
+            _state = MAIN_SCREEN;
             _scroll_text.reset();
-            // Not yet implemented as EventListener objects.
+            _main_screen.reset(new MainScreen);
+            VideoDriver::driver()->push_listener(_main_screen.get());
+            break;
 
           case MAIN_SCREEN:
             // When the main screen returns, exit loop.
@@ -215,6 +219,7 @@ class Master : public EventListener {
     State _state;
     scoped_ptr<PictFade> _pict_fade;
     scoped_ptr<ScrollTextScreen> _scroll_text;
+    scoped_ptr<MainScreen> _main_screen;
 };
 
 void AresMain() {
@@ -281,36 +286,11 @@ void AresMain() {
     Master master;
     VideoDriver::driver()->push_listener(&master);
     VideoDriver::driver()->loop();
-
-    globals()->okToOpenFile = true;
-    MainLoop();
 }
 
 bool HandleMainScreenResult(mainScreenResultType result) {
     long saveSeed = 0, gameLength;
     switch (result) {
-      case kMainQuit:
-        {
-            RGBColor fadeColor = { 0, 0, 0 };
-            if (globals()->gOptions & kOptionMusicIdle) {
-                AutoMusicFadeTo( 60, &fadeColor, false);
-            } else {
-                AutoFadeTo( 60, &fadeColor, false);
-            }
-        }
-        return false;
-
-      case kMainTimeoutDemo:
-        if (Randomize(4) == 2) {
-            DoScrollText(5600, 4, kTitleTextScrollWidth,
-                    kTitleFontNum, -1);
-        }
-        // fall through
-
-      case kMainDemo:
-        globals()->gOptions |= kOptionReplay;
-        // fall through
-
       case kMainPlay:
         {
             int whichScenario = 0;
@@ -645,26 +625,12 @@ bool HandleMainScreenResult(mainScreenResultType result) {
         }
         break;
 
-      case kMainTrain:
-        DoScrollText(5600, 4, kTitleTextScrollWidth, kTitleFontNum, -1);
-        break;
-
-      case kMainAbout:
-        DoScrollText(6500, 2, 540, kTitleFontNum, -1);
-        break;
-
-      case kMainOptions:
-        DoOptionsInterface();
+      default:
+        fprintf(stderr, "HandleMainScreenResult() no longer handles %d\n", result);
+        exit(1);
         break;
     }
     return true;
-}
-
-void MainLoop() {
-    mainScreenResultType result = DoMainScreenInterface();
-    while (HandleMainScreenResult(result)) {
-        result = DoMainScreenInterface();
-    }
 }
 
 GameResult PlayTheGame(long *seconds) {
