@@ -26,8 +26,6 @@
 
 namespace antares {
 
-class BinaryReader;
-
 inline void mGetRowBytes(long& rBytes, PixMap* pix) {
     rBytes = pix->rowBytes & 0x3fff;
 }
@@ -52,7 +50,6 @@ void DrawNateRectClipped( PixMap *, Rect *, const Rect&, long, long, unsigned ch
 
 void DrawNateTriangleUpClipped( PixMap *, Rect *, const Rect&, long, long, unsigned char);
 void DrawNatePlusClipped( PixMap *, Rect *, const Rect&, long, long, unsigned char);
-void DrawNateSquareClipped( PixMap *, Rect *, const Rect&, long, long, unsigned char);
 void DrawNateDiamondClipped( PixMap *, Rect *, const Rect&, long, long, unsigned char);
 void DrawNateVBracket(PixMap *, const Rect&, const Rect&, long, long, unsigned char);
 void DrawNateShadedRect( PixMap *, Rect *, const Rect&, long, long, unsigned char, unsigned char,
@@ -60,8 +57,6 @@ void DrawNateShadedRect( PixMap *, Rect *, const Rect&, long, long, unsigned cha
 void DrawNateLine(PixMap *, const Rect&, long, long, long,
                     long, long, long, unsigned char);
 void CopyNateLine( PixMap *, PixMap *, const Rect&, long, long, long, long , long, long);
-void DashNateLine(PixMap *, const Rect&, long, long, long,
-                    long, long, long, unsigned char, unsigned char, unsigned char, unsigned char);
 
 }  // namespace antares
 

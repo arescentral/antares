@@ -28,12 +28,6 @@
 
 namespace antares {
 
-// #define kByteLevelTesting
-
-#ifdef kByteLevelTesting
-#include "SpriteHandling.hpp" // for test byte debugging kludge
-#endif
-
 inline void mHBlitz(unsigned char*& mdbyte, long mrunLen, long mcolor, long& mcount) {
     mcount = mrunLen;
     while ( mcount-- > 0)
@@ -90,50 +84,6 @@ inline void mCopyVerticalRun(
     }
     dbyte += xAdvance;
     sbyte += xAdvance;
-}
-
-inline void mDashHorizontalRun(
-        unsigned char*& dbyte, long xAdvance, long runLen, long color, long drowPlus, long count,
-        long mdashon, long mdashoff, long mdashcount) {
-    count = runLen;
-    do
-    {
-        while (( count-- > 0) && ( mdashcount < mdashon))
-        {
-            *dbyte = color;
-            dbyte += xAdvance;
-            mdashcount++;
-        }
-        while (( count-- > 0) && ( mdashcount < mdashoff))
-        {
-            dbyte += xAdvance;
-            mdashcount++;
-        }
-        if ( mdashcount == mdashoff) mdashcount = 0;
-    } while ( count > 0);
-    dbyte += drowPlus;
-}
-
-inline void mDashVerticalRun(
-        unsigned char*& dbyte, long xAdvance, long runLen, long color, long drowPlus, long count,
-        long mdashon, long mdashoff, long mdashcount) {
-    count = runLen;
-    do
-    {
-        while (( count-- > 0) && ( mdashcount < mdashon))
-        {
-            *dbyte = color;
-            dbyte += drowPlus;
-            mdashcount++;
-        }
-        while (( count-- > 0) && ( mdashcount < mdashon))
-        {
-            dbyte += drowPlus;
-            mdashcount++;
-        }
-        if ( mdashcount == mdashoff) mdashcount = 0;
-    } while ( count > 0);
-    dbyte += xAdvance;
 }
 
 namespace {
@@ -438,93 +388,6 @@ void DrawNatePlusClipped( PixMap *destPix, Rect *destRect,
         }
     }
 
-}
-
-void DrawNateSquareClipped( PixMap *destPix, Rect *destRect,
-        const Rect& clipRect, long hoff, long voff, unsigned char color)
-
-{
-    long            drowPlus, x, rightPlus, trueWidth;
-    unsigned char   *dbyte;
-    bool         clipped = false;
-
-    if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds.right - destPix->bounds.left))
-        || ( destRect->bottom <= 0) || ( destRect->top >= (destPix->bounds.bottom - destPix->bounds.top)))
-    {
-        destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
-        return;
-    }
-
-    drowPlus = destPix->rowBytes & 0x3fff;
-    trueWidth = destRect->right - destRect->left - 1;
-
-    if ( destRect->left < clipRect.left)
-    {
-        destRect->left = clipRect.left;
-        clipped = true;
-    }
-    if ( destRect->right > clipRect.right)
-    {
-        destRect->right = clipRect.right;
-        clipped = true;
-    }
-    if ( destRect->top < clipRect.top)
-    {
-        destRect->top = clipRect.top;
-        clipped = true;
-    }
-    if ( destRect->bottom > clipRect.bottom)
-    {
-        destRect->bottom = clipRect.bottom;
-        clipped = true;
-    }
-
-    if ( clipped) return;
-
-    if ( trueWidth == 0)
-    {
-        dbyte = destPix->baseAddr + ((destRect->top + voff) *
-            drowPlus) + destRect->left + hoff;
-        *dbyte = color;
-        return;
-    }
-
-    dbyte = destPix->baseAddr + ((destRect->top + voff) *
-        drowPlus) + destRect->left + hoff;
-
-    rightPlus = trueWidth;
-    drowPlus -= rightPlus;
-
-    x = 0;
-    while ( x <= trueWidth)
-    {
-        *(dbyte++) = color;
-        x++;
-    }
-
-    if ( trueWidth == 0) return;
-
-    dbyte += drowPlus - 1;
-
-    if ( trueWidth > 1)
-    {
-        x = 2;
-        while ( x <= trueWidth)
-        {
-            *dbyte = color;
-            dbyte += rightPlus;
-            *dbyte = color;
-            dbyte += drowPlus;
-            x++;
-        }
-    }
-
-    x = 0;
-    while ( x <= trueWidth)
-    {
-        *(dbyte++) = color;
-        x++;
-    }
 }
 
 void DrawNateDiamondClipped(
@@ -1035,9 +898,6 @@ void DrawNateLine(
         // Vertical line
         for (i=0; i<=YDelta; i++)
         {
-#ifdef kByteLevelTesting
-            TestByte( (char *)dbyte, destPix, "\pVLINE");
-#endif
             *dbyte = Color;
             dbyte += drowPlus;
         }
@@ -1048,9 +908,6 @@ void DrawNateLine(
         // Horizontal line
         for (i=0; i<=XDelta; i++)
         {
-#ifdef kByteLevelTesting
-            TestByte( (char *)dbyte, destPix, "\pHLINE");
-#endif
             *dbyte = Color;
             dbyte += XAdvance;
         }
@@ -1061,9 +918,6 @@ void DrawNateLine(
         // Diagonal line
         for (i=0; i<=XDelta; i++)
         {
-#ifdef kByteLevelTesting
-            TestByte( (char *)dbyte, destPix, "\pDLINE");
-#endif
             *dbyte = Color;
             dbyte += XAdvance + drowPlus;
         }
@@ -1112,14 +966,7 @@ void DrawNateLine(
             ErrorTerm += YDelta;
         }
         // Draw the first, partial run of pixels
-#ifdef kByteLevelTesting
-        TestByte( (char *)dbyte, destPix, "\pHRUN1");
-#endif
         mDrawHorizontalRun( dbyte, XAdvance, InitialPixelCount, Color, drowPlus, Temp);
-
-#ifdef kByteLevelTesting
-        TestByte( (char *)dbyte, destPix, "\pHRUN2");
-#endif
 
         // Draw all full runs
         for (i=0; i<(YDelta-1); i++)
@@ -1133,25 +980,10 @@ void DrawNateLine(
                 ErrorTerm -= AdjDown;   // reset the error term
             }
             // Draw this scan line's run
-#ifdef kByteLevelTesting
-            TestByte( (char *)dbyte, destPix, "\pHRUN3");
-#endif
             mDrawHorizontalRun( dbyte, XAdvance, RunLength, Color, drowPlus, Temp);
-
-#ifdef kByteLevelTesting
-            TestByte( (char *)dbyte, destPix, "\pHRUN4");
-#endif
         }
         // Draw the final run of pixels
-#ifdef kByteLevelTesting
-        TestByte( (char *)dbyte, destPix, "\pHRUN5");
-#endif
         mDrawHorizontalRun( dbyte, XAdvance, FinalPixelCount, Color, drowPlus, Temp);
-
-#ifdef kByteLevelTesting
-        TestByte( (char *)dbyte, destPix, "\pHRUN6");
-#endif
-        return;
     }
     else
     {
@@ -1194,14 +1026,8 @@ void DrawNateLine(
             ErrorTerm += XDelta;
         }
         // Draw the first, partial run of pixels
-#ifdef kByteLevelTesting
-        TestByte( (char *)dbyte, destPix, "\pVRUN1");
-#endif
         mDrawVerticalRun( dbyte, XAdvance, InitialPixelCount, Color, drowPlus, Temp);
 
-#ifdef kByteLevelTesting
-        TestByte( (char *)dbyte, destPix, "\pVRUN2");
-#endif
         // Draw all full runs
         for (i=0; i<(XDelta-1); i++)
         {
@@ -1214,25 +1040,10 @@ void DrawNateLine(
                 ErrorTerm -= AdjDown;   // reset the error term
             }
             // Draw this scan line's run
-#ifdef kByteLevelTesting
-            TestByte( (char *)dbyte, destPix, "\pVRUN3");
-#endif
             mDrawVerticalRun( dbyte, XAdvance, RunLength, Color, drowPlus, Temp);
-
-#ifdef kByteLevelTesting
-            TestByte( (char *)dbyte, destPix, "\pVRUN4");
-#endif
         }
         // Draw the final run of pixels
-#ifdef kByteLevelTesting
-        TestByte( (char *)dbyte, destPix, "\pVRUN5");
-#endif
         mDrawVerticalRun( dbyte, XAdvance, FinalPixelCount, Color, drowPlus, Temp);
-
-#ifdef kByteLevelTesting
-        TestByte( (char *)dbyte, destPix, "\pVRUN6");
-#endif
-        return;
     }
 }
 
@@ -1344,9 +1155,6 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, const Rect& clipRect,
         // Vertical line
         for (i=0; i<=YDelta; i++)
         {
-#ifdef kByteLevelTesting
-            TestByte( (char *)dbyte, destPix, "\pVLINE");
-#endif
             *dbyte = *sbyte;
             dbyte += drowPlus;
             sbyte += srowPlus;
@@ -1358,9 +1166,6 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, const Rect& clipRect,
         // Horizontal line
         for (i=0; i<=XDelta; i++)
         {
-#ifdef kByteLevelTesting
-            TestByte( (char *)dbyte, destPix, "\pHLINE");
-#endif
             *dbyte = *sbyte;
             dbyte += XAdvance;
             sbyte += XAdvance;
@@ -1372,9 +1177,6 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, const Rect& clipRect,
         // Diagonal line
         for (i=0; i<=XDelta; i++)
         {
-#ifdef kByteLevelTesting
-            TestByte( (char *)dbyte, destPix, "\pDLINE");
-#endif
             *dbyte = *sbyte;
             dbyte += XAdvance + drowPlus;
             sbyte += XAdvance + srowPlus;
@@ -1424,15 +1226,8 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, const Rect& clipRect,
             ErrorTerm += YDelta;
         }
         // Draw the first, partial run of pixels
-#ifdef kByteLevelTesting
-        TestByte( (char *)dbyte, destPix, "\pHRUN1");
-#endif
         mCopyHorizontalRun( dbyte, sbyte, XAdvance, InitialPixelCount, drowPlus, srowPlus, Temp);
 
-#ifdef kByteLevelTesting
-        TestByte( (char *)dbyte, destPix, "\pHRUN2");
-#endif
-
         // Draw all full runs
         for (i=0; i<(YDelta-1); i++)
         {
@@ -1445,24 +1240,11 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, const Rect& clipRect,
                 ErrorTerm -= AdjDown;   // reset the error term
             }
             // Draw this scan line's run
-#ifdef kByteLevelTesting
-            TestByte( (char *)dbyte, destPix, "\pHRUN3");
-#endif
             mCopyHorizontalRun( dbyte, sbyte, XAdvance, RunLength, drowPlus, srowPlus, Temp);
-
-#ifdef kByteLevelTesting
-            TestByte( (char *)dbyte, destPix, "\pHRUN4");
-#endif
         }
         // Draw the final run of pixels
-#ifdef kByteLevelTesting
-        TestByte( (char *)dbyte, destPix, "\pHRUN5");
-#endif
         mCopyHorizontalRun( dbyte, sbyte, XAdvance, FinalPixelCount, drowPlus, srowPlus, Temp);
 
-#ifdef kByteLevelTesting
-        TestByte( (char *)dbyte, destPix, "\pHRUN6");
-#endif
         return;
     }
     else
@@ -1506,14 +1288,8 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, const Rect& clipRect,
             ErrorTerm += XDelta;
         }
         // Draw the first, partial run of pixels
-#ifdef kByteLevelTesting
-        TestByte( (char *)dbyte, destPix, "\pVRUN1");
-#endif
         mCopyVerticalRun( dbyte, sbyte, XAdvance, InitialPixelCount, drowPlus, srowPlus, Temp);
 
-#ifdef kByteLevelTesting
-        TestByte( (char *)dbyte, destPix, "\pVRUN2");
-#endif
         // Draw all full runs
         for (i=0; i<(XDelta-1); i++)
         {
@@ -1526,381 +1302,10 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, const Rect& clipRect,
                 ErrorTerm -= AdjDown;   // reset the error term
             }
             // Draw this scan line's run
-#ifdef kByteLevelTesting
-            TestByte( (char *)dbyte, destPix, "\pVRUN3");
-#endif
             mCopyVerticalRun( dbyte, sbyte, XAdvance, RunLength, drowPlus, srowPlus, Temp);
-
-#ifdef kByteLevelTesting
-            TestByte( (char *)dbyte, destPix, "\pVRUN4");
-#endif
         }
         // Draw the final run of pixels
-#ifdef kByteLevelTesting
-        TestByte( (char *)dbyte, destPix, "\pVRUN5");
-#endif
         mCopyVerticalRun( dbyte, sbyte, XAdvance, FinalPixelCount, drowPlus, srowPlus, Temp);
-
-#ifdef kByteLevelTesting
-        TestByte( (char *)dbyte, destPix, "\pVRUN6");
-#endif
-        return;
-    }
-}
-
-// Draws a horizontal run of pixels, then advances the bitmap pointer to
-// the first pixel of the next run.
-
-/*
-void DrawHorizontalRun( unsigned char **dbyte, long XAdvance,
-    long RunLength, long Color, long drowPlus)
-{
-    int             i;
-    unsigned char   *Workingdbyte = *dbyte;
-
-    for (i=0; i < RunLength; i++)
-    {
-        *Workingdbyte = Color;
-        Workingdbyte += XAdvance;
-    }
-    // Advance to the next scan line
-    Workingdbyte += SCREEN_WIDTH;
-    *dbyte = Workingdbyte;
-}
-*/
-
-// Draws a vertical run of pixels, then advances the bitmap pointer to
-// the first pixel of the next run. */
-
-/*
-void DrawVerticalRun(char far **dbyte, int XAdvance,
-    int RunLength, int Color)
-{
-    int i;
-    char far *Workingdbyte = *dbyte;
-
-    for (i=0; i<RunLength; i++)
-    {
-        *Workingdbyte = Color;
-        Workingdbyte += SCREEN_WIDTH;
-    }
-// Advance to the next column
-    Workingdbyte += XAdvance;
-    *dbyte = Workingdbyte;
-}
-*/
-
-void DashNateLine( PixMap *destPix, const Rect& clipRect, long XStart, long YStart, long XEnd,
-                    long YEnd, long hoff, long voff, unsigned char Color, unsigned char dashon,
-                    unsigned char dashoff, unsigned char dashcount)
-{
-    long            Temp, AdjUp, AdjDown, ErrorTerm, XAdvance, XDelta, YDelta, drowPlus;
-    long            WholeStep, InitialPixelCount, FinalPixelCount, i, RunLength;
-    unsigned char   *dbyte;
-    short           cs = mClipCode( XStart, YStart, clipRect), ce = mClipCode( XEnd, YEnd, clipRect);
-
-    dashoff += dashon;
-    dashcount %= dashoff;
-
-    while ( cs | ce)
-    {
-        if ( cs & ce) return;
-        XDelta = XEnd - XStart;
-        YDelta = YEnd - YStart;
-        if ( cs)
-        {
-            if ( cs & 8)
-            {
-                YStart += YDelta * ( clipRect.left - XStart) / XDelta;
-                XStart = clipRect.left;
-            } else
-            if ( cs & 4)
-            {
-                YStart += YDelta * ( clipRect.right - 1 - XStart) / XDelta;
-                XStart = clipRect.right - 1;
-            } else
-            if ( cs & 2)
-            {
-                XStart += XDelta * ( clipRect.top - YStart) / YDelta;
-                YStart = clipRect.top;
-            } else
-            if ( cs & 1)
-            {
-                XStart += XDelta * ( clipRect.bottom - 1 - YStart) / YDelta;
-                YStart = clipRect.bottom - 1;
-            }
-            cs = mClipCode( XStart, YStart, clipRect);
-        } else if ( ce)
-        {
-            if ( ce & 8)
-            {
-                YEnd += YDelta * ( clipRect.left - XEnd) / XDelta;
-                XEnd = clipRect.left;
-            } else
-            if ( ce & 4)
-            {
-                YEnd += YDelta * ( clipRect.right - 1 - XEnd) / XDelta;
-                XEnd = clipRect.right - 1;
-            } else
-            if ( ce & 2)
-            {
-                XEnd += XDelta * ( clipRect.top - YEnd) / YDelta;
-                YEnd = clipRect.top;
-            } else
-            if ( ce & 1)
-            {
-                XEnd += XDelta * ( clipRect.bottom - 1 - YEnd) / YDelta;
-                YEnd = clipRect.bottom - 1;
-            }
-            ce = mClipCode( XEnd, YEnd, clipRect);
-        }
-    }
-
-   // We'll always draw top to bottom, to reduce the number of cases we have to
-   // handle, and to make lines between the same endpoints draw the same pixels
-    if (YStart > YEnd)
-    {
-        Temp = YStart;
-        YStart = YEnd;
-        YEnd = Temp;
-        Temp = XStart;
-        XStart = XEnd;
-        XEnd = Temp;
-    }
-
-
-    // Point to the bitmap address first pixel to draw
-    drowPlus = destPix->rowBytes & 0x3fff;
-    dbyte = destPix->baseAddr + (YStart + voff) * drowPlus +
-                XStart + hoff;
-
-    // Figure out whether we're going left or right, and how far we're
-    // going horizontally
-    if ((XDelta = XEnd - XStart) < 0)
-    {
-        XAdvance = -1;
-        XDelta = -XDelta;
-    }
-    else
-    {
-        XAdvance = 1;
-    }
-    // Figure out how far we're going vertically
-    YDelta = YEnd - YStart;
-
-    // Special-case horizontal, vertical, and diagonal lines, for speed
-    // and to avoid nasty boundary conditions and division by 0
-    if (XDelta == 0)
-    {
-        // Vertical line
-/*      for (i=0; i<=YDelta; i++)
-        {
-            *dbyte = Color;
-            dbyte += drowPlus;
-        }
-*/      i = 0;
-        while ( i <= YDelta)
-        {
-            while (( dashcount < dashon) && ( i <= YDelta))
-            {
-                *dbyte = Color;
-                dbyte += drowPlus;
-                i++;
-                dashcount++;
-            }
-            while (( dashcount < dashoff) && ( i <= YDelta))
-            {
-                dbyte += drowPlus;
-                i++;
-                dashcount++;
-            }
-            if ( dashcount == dashoff) dashcount = 0;
-        }
-
-        return;
-    }
-    if (YDelta == 0)
-    {
-        // Horizontal line
-/*      for (i=0; i<=XDelta; i++)
-        {
-            *dbyte = Color;
-            dbyte += XAdvance;
-        }
-*/      i = 0;
-        while ( i <= XDelta)
-        {
-            while (( dashcount < dashon) && ( i <= XDelta))
-            {
-                *dbyte = Color;
-                dbyte += XAdvance;
-                i++;
-                dashcount++;
-            }
-            while (( dashcount < dashoff) && ( i <= XDelta))
-            {
-                dbyte += XAdvance;
-                i++;
-                dashcount++;
-            }
-            if ( dashcount == dashoff) dashcount = 0;
-        }
-        return;
-    }
-    if (XDelta == YDelta)
-    {
-        // Diagonal line
-/*      for (i=0; i<=XDelta; i++)
-        {
-            *dbyte = Color;
-            dbyte += XAdvance + drowPlus;
-        }
-*/      i = 0;
-        while ( i <= XDelta)
-        {
-            while (( dashcount < dashon) && ( i <= XDelta))
-            {
-                *dbyte = Color;
-                dbyte += XAdvance + drowPlus;
-                i++;
-                dashcount++;
-            }
-            while (( dashcount < dashoff) && ( i <= XDelta))
-            {
-                dbyte += XAdvance + drowPlus;
-                i++;
-                dashcount++;
-            }
-            if ( dashcount == dashoff) dashcount = 0;
-        }
-        return;
-    }
-
-    // Determine whether the line is X or Y major, and handle accordingly
-    if (XDelta >= YDelta)
-    {
-        // X major line
-        // Minimum # of pixels in a run in this line
-        WholeStep = XDelta / YDelta;
-
-        // Error term adjust each time Y steps by 1; used to tell when one
-        // extra pixel should be drawn as part of a run, to account for
-        // fractional steps along the X axis per 1-pixel steps along Y
-        AdjUp = (XDelta % YDelta) << 1;
-
-        // Error term adjust when the error term turns over, used to factor
-        // out the X step made at that time
-        AdjDown = YDelta * 2;
-
-        // Initial error term; reflects an initial step of 0.5 along the Y
-        // axis
-        ErrorTerm = (XDelta % YDelta) - (YDelta << 1);
-
-        // The initial and last runs are partial, because Y advances only 0.5
-        // for these runs, rather than 1. Divide one full run, plus the
-        // initial pixel, between the initial and last runs
-        InitialPixelCount = (WholeStep >> 1) + 1;
-        FinalPixelCount = InitialPixelCount;
-
-        // If the basic run length is even and there's no fractional
-        // advance, we have one pixel that could go to either the initial
-        // or last partial run, which we'll arbitrarily allocate to the
-        // last run
-        if ((AdjUp == 0) && ((WholeStep & 0x01) == 0))
-        {
-            InitialPixelCount--;
-        }
-        // If there're an odd number of pixels per run, we have 1 pixel that can't
-        // be allocated to either the initial or last partial run, so we'll add 0.5
-        // to error term so this pixel will be handled by the normal full-run loop
-        if ((WholeStep & 0x01) != 0)
-        {
-            ErrorTerm += YDelta;
-        }
-        // Draw the first, partial run of pixels
-        mDashHorizontalRun( dbyte, XAdvance, InitialPixelCount, Color, drowPlus, Temp, dashon, dashoff, dashcount);
-
-
-        // Draw all full runs
-        for (i=0; i<(YDelta-1); i++)
-        {
-            RunLength = WholeStep;  // run is at least this long
-            // Advance the error term and add an extra pixel if the error
-            // term so indicates
-            if ((ErrorTerm += AdjUp) > 0)
-            {
-                RunLength++;
-                ErrorTerm -= AdjDown;   // reset the error term
-            }
-            // Draw this scan line's run
-            mDashHorizontalRun( dbyte, XAdvance, RunLength, Color, drowPlus, Temp, dashon, dashoff, dashcount);
-
-        }
-        // Draw the final run of pixels
-        mDashHorizontalRun( dbyte, XAdvance, FinalPixelCount, Color, drowPlus, Temp, dashon, dashoff, dashcount);
-
-        return;
-    }
-    else
-    {
-        // Y major line
-
-        // Minimum # of pixels in a run in this line
-        WholeStep = YDelta / XDelta;
-
-        // Error term adjust each time X steps by 1; used to tell when 1 extra
-        // pixel should be drawn as part of a run, to account for
-        // fractional steps along the Y axis per 1-pixel steps along X
-        AdjUp = (YDelta % XDelta) << 1;
-
-        // Error term adjust when the error term turns over, used to factor
-        // out the Y step made at that time
-        AdjDown = XDelta << 1;
-
-        // Initial error term; reflects initial step of 0.5 along the X axis
-        ErrorTerm = (YDelta % XDelta) - (XDelta << 1);
-
-        // The initial and last runs are partial, because X advances only 0.5
-        // for these runs, rather than 1. Divide one full run, plus the
-        // initial pixel, between the initial and last runs
-        InitialPixelCount = (WholeStep >> 1) + 1;
-        FinalPixelCount = InitialPixelCount;
-
-        // If the basic run length is even and there's no fractional advance, we
-        // have 1 pixel that could go to either the initial or last partial run,
-        // which we'll arbitrarily allocate to the last run
-        if ((AdjUp == 0) && ((WholeStep & 0x01) == 0))
-        {
-            InitialPixelCount--;
-        }
-        // If there are an odd number of pixels per run, we have one pixel
-        // that can't be allocated to either the initial or last partial
-        // run, so we'll add 0.5 to the error term so this pixel will be
-        // handled by the normal full-run loop
-        if ((WholeStep & 0x01) != 0)
-        {
-            ErrorTerm += XDelta;
-        }
-        // Draw the first, partial run of pixels
-        mDashVerticalRun( dbyte, XAdvance, InitialPixelCount, Color, drowPlus, Temp, dashon, dashoff, dashcount);
-
-        // Draw all full runs
-        for (i=0; i<(XDelta-1); i++)
-        {
-            RunLength = WholeStep;  // run is at least this long
-            // Advance the error term and add an extra pixel if the error
-            // term so indicates
-            if ((ErrorTerm += AdjUp) > 0)
-            {
-                RunLength++;
-                ErrorTerm -= AdjDown;   // reset the error term
-            }
-            // Draw this scan line's run
-            mDashVerticalRun( dbyte, XAdvance, RunLength, Color, drowPlus, Temp, dashon, dashoff, dashcount);
-
-        }
-        // Draw the final run of pixels
-        mDashVerticalRun( dbyte, XAdvance, FinalPixelCount, Color, drowPlus, Temp, dashon, dashoff, dashcount);
 
         return;
     }

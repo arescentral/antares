@@ -917,7 +917,7 @@ void DrawSite() {
 }
 
 void DrawSectorLines() {
-    int32_t         *l, dashon, dashoff, dashcount;
+    int32_t         *l;
     uint32_t        size, level, x, h, division;
     Rect        clipRect;
     unsigned char   color;
@@ -968,38 +968,15 @@ void DrawSectorLines() {
     if ( doDraw)
     {
         while ((x < implicit_cast<uint32_t>(CLIP_RIGHT)) && (h > 0)) {
-            if ( !division)
-            {
+            if (!division) {
                 mGetTranslateColorShade( GREEN, kSectorLineBrightness, color, transColor);
-                dashon = 56;
-                dashoff = 8;
-            } else if ( !(division & 0x3))
-            {
+            } else if ( !(division & 0x3)) {
                 mGetTranslateColorShade( SKY_BLUE, kSectorLineBrightness, color, transColor);
-                dashon = 32;
-                dashoff = 32;
-            } else
-            {
+            } else {
                 mGetTranslateColorShade( BLUE, kSectorLineBrightness, color, transColor);
-                dashon = 8;
-                dashoff = 56;
             }
 
-            dashon = (( dashon * gAbsoluteScale) >> SHIFT_SCALE);
-            dashoff = (( dashoff * gAbsoluteScale) >> SHIFT_SCALE);
-            dashon = dashoff = 0;
-            if (( dashon > 0) && ( dashoff > 0))
-            {
-//              dashcount = ((gGlobalCorner.v * gAbsoluteScale) >> SHIFT_SCALE) % 128;
-                dashcount = gGlobalCorner.v % ( 64);
-                dashcount = (( dashcount * gAbsoluteScale) >> SHIFT_SCALE);
-                DashNateLine(gOffWorld, clipRect, x, CLIP_TOP, x, CLIP_BOTTOM, 0,
-                    0, color, dashon, dashoff, dashcount);
-            } else
-            {
-                DrawNateLine(gOffWorld, clipRect, x, CLIP_TOP, x, CLIP_BOTTOM, 0,
-                    0, color);
-            }
+            DrawNateLine(gOffWorld, clipRect, x, CLIP_TOP, x, CLIP_BOTTOM, 0, 0, color);
             *l = x;
             l += 2;
             division += level;
@@ -1045,37 +1022,15 @@ void DrawSectorLines() {
     if ( doDraw)
     {
         while ((x < implicit_cast<uint32_t>(CLIP_BOTTOM)) && (h > 0)) {
-            if ( !division)
-            {
+            if (!division) {
                 mGetTranslateColorShade( GREEN, kSectorLineBrightness, color, transColor);
-                dashon = 56;
-                dashoff = 8;
-            } else if ( !(division & 0x3))
-            {
+            } else if ( !(division & 0x3)) {
                 mGetTranslateColorShade( SKY_BLUE, kSectorLineBrightness, color, transColor);
-                dashon = 32;
-                dashoff = 32;
-            } else
-            {
+            } else {
                 mGetTranslateColorShade( BLUE, kSectorLineBrightness, color, transColor);
-                dashon = 8;
-                dashoff = 56;
             }
 
-            dashon = (( dashon * gAbsoluteScale) >> SHIFT_SCALE);
-            dashoff = (( dashoff * gAbsoluteScale) >> SHIFT_SCALE);
-            dashon = dashoff = 0;
-            if (( dashon > 0) && ( dashoff > 0))
-            {
-                dashcount = gGlobalCorner.v % ( 64);
-                dashcount = (( dashcount * gAbsoluteScale) >> SHIFT_SCALE);
-                DashNateLine(gOffWorld, clipRect, CLIP_LEFT, x, CLIP_RIGHT, x, 0,
-                    0, color, dashon, dashoff, dashcount);
-            } else
-            {
-                DrawNateLine(gOffWorld, clipRect, CLIP_LEFT, x, CLIP_RIGHT, x, 0,
-                    0, color);
-            }
+            DrawNateLine(gOffWorld, clipRect, CLIP_LEFT, x, CLIP_RIGHT, x, 0, 0, color);
             *l = x;
             l += 2;
 
