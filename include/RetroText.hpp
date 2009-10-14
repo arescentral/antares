@@ -63,6 +63,7 @@ class RetroText {
     std::vector<RetroChar> _chars;
     int _width;
     int _height;
+    int _line_spacing;
     const int _font;
 
     DISALLOW_COPY_AND_ASSIGN(RetroText);

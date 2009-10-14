@@ -122,13 +122,22 @@ PixMap* build_pix(int text_id, int width) {
 
     std::vector<std::string> lines;
     const char* start = text.data();
-    const char* end = strchr(start, '\r');;
-    while (end != NULL) {
-        lines.push_back(std::string(start, end - start));
-        start = end + 1;
-        end = strchr(start, '\r');
+    const char* const end = start + text.size();
+    bool in_section_header = (start + 2 <= end) && (memcmp(start, "#+", 2) == 0);
+    for (const char* p = start; p != end; ++p) {
+        if (p + 3 <= end && memcmp(p, "\r#+", 3) == 0) {
+            lines.push_back(std::string(start, p - start));
+            start = p + 1;
+            in_section_header = true;
+        } else if (in_section_header && (*p == '\r')) {
+            lines.push_back(std::string(start, p - start));
+            start = p + 1;
+            in_section_header = false;
+        }
     }
-    lines.push_back(std::string(start, text.size() - (start - text.data())));
+    if (start != end) {
+        lines.push_back(std::string(start, end - start));
+    }
 
     for (std::vector<std::string>::iterator it = lines.begin(); it != lines.end(); ++it) {
         if (it->substr(0, 2) == "#+") {

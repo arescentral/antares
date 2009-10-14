@@ -366,8 +366,9 @@ RetroText::~RetroText() {
 void RetroText::wrap_to(int width, int line_spacing) {
     mSetDirectFont(_font);
     _width = width;
+    _line_spacing = line_spacing;
     int h = 0;
-    int v = line_spacing;
+    int v = 0;
 
     for (size_t i = 0; i < _chars.size(); ++i) {
         _chars[i].h = h;
@@ -375,20 +376,23 @@ void RetroText::wrap_to(int width, int line_spacing) {
         switch (_chars[i].special) {
           case NONE:
             h += char_width(_chars[i].character);
-            if (h > width) {
-                v += mDirectFontHeight() + line_spacing;
+            if (h > _width) {
+                v += mDirectFontHeight() + _line_spacing;
                 h = move_word_down(i, v);
             }
             break;
 
           case TAB:
-            // TODO(sfiera): handle tabs properly.
-            h += char_width(' ');
+            if (h >= _width / 2) {
+                // If we're already at or past the midpoint of the line, shift a line down.
+                v += mDirectFontHeight() + _line_spacing;
+            }
+            h = _width / 2;
             break;
 
           case LINE_BREAK:
             h = 0;
-            v += mDirectFontHeight() + line_spacing;
+            v += mDirectFontHeight() + _line_spacing;
             break;
 
           case WORD_BREAK:
@@ -396,7 +400,7 @@ void RetroText::wrap_to(int width, int line_spacing) {
             break;
         }
     }
-    _height = v + mDirectFontHeight();
+    _height = v + mDirectFontHeight() + _line_spacing;
 }
 
 int RetroText::width() const {
@@ -409,15 +413,55 @@ int RetroText::height() const {
 
 void RetroText::draw(PixMap* pix, const Rect& bounds) const {
     mSetDirectFont(_font);
+    const int line_height = mDirectFontHeight() + _line_spacing;
+    const int char_adjust = mDirectFontAscent() + _line_spacing;
     for (std::vector<RetroChar>::const_iterator it = _chars.begin(); it != _chars.end(); ++it) {
-        MoveTo(bounds.left + it->h, bounds.top + it->v + mDirectFontAscent());
-        unsigned char pstr[2] = {1, it->character};
-        if (it->back_color != 0xFF) {
-            Rect char_rect(0, 0, char_width(it->character), mDirectFontHeight());
-            char_rect.offset(it->h, it->v + mDirectFontAscent());
-            DrawNateRect(pix, &char_rect, 0, 0, it->back_color);
+        Point corner(bounds.left + it->h, bounds.top + it->v);
+        switch (it->special) {
+          case NONE:
+          case WORD_BREAK:
+            {
+                if (it->back_color != 0xFF) {
+                    Rect char_rect(0, 0, char_width(it->character), line_height);
+                    char_rect.offset(corner.h, corner.v);
+                    DrawNateRect(pix, &char_rect, 0, 0, it->back_color);
+                }
+                MoveTo(corner.h, corner.v + char_adjust);
+                unsigned char pstr[2] = {1, it->character};
+                DrawDirectTextStringClipped(pstr, it->fore_color, pix, bounds, 0, 0);
+            }
+            break;
+
+          case TAB:
+            if (it->back_color != 0xFF) {
+                if (it->h >= _width) {
+                    // If the tab starts at or past the midpoint of the line, first draw one box to
+                    // the end of the line.
+                    Rect line_rect(0, 0, bounds.width() - it->h, line_height);
+                    line_rect.offset(corner.h, corner.v);
+                    DrawNateRect(pix, &line_rect, 0, 0, it->back_color);
+
+                    // Then draw a box from the start of the next line to its midpoint.
+                    Rect tab_rect(0, 0, bounds.width() / 2, line_height);
+                    tab_rect.offset(bounds.left, corner.v + line_height);
+                    DrawNateRect(pix, &tab_rect, 0, 0, it->back_color);
+                } else {
+                    // Otherwise, we just have to draw a box to the midpoint of the line.
+                    Rect tab_rect(0, 0, bounds.width() / 2 - it->h, line_height);
+                    tab_rect.offset(corner.h, corner.v);
+                    DrawNateRect(pix, &tab_rect, 0, 0, it->back_color);
+                }
+            }
+            break;
+
+          case LINE_BREAK:
+            if (it->back_color != 0xFF) {
+                Rect line_rect(0, 0, bounds.width() - it->h, line_height);
+                line_rect.offset(corner.h, corner.v);
+                DrawNateRect(pix, &line_rect, 0, 0, it->back_color);
+            }
+            break;
         }
-        DrawDirectTextStringClipped(pstr, it->fore_color, pix, bounds, 0, 0);
     }
 }
 
