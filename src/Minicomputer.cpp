@@ -23,7 +23,6 @@
 #include "Admiral.hpp"
 #include "AnyChar.hpp"
 #include "AresGlobalType.hpp"
-#include "AresNetworkSprocket.hpp"
 #include "ColorTranslation.hpp"
 #include "Debug.hpp"
 #include "DirectText.hpp"
@@ -1772,7 +1771,7 @@ void MiniComputerDoAccept( void)
             globals()->gMiniScreenData.selectLine, globals()->gPlayerAdmiralNumber);
     } else
     {
-#if NETSPROCKET_AVAILABLE
+#ifdef NETSPROCKET_AVAILABLE
         if ( !SendMenuMessage( globals()->gGameTime + gNetLatency, globals()->gMiniScreenData.currentScreen,
             globals()->gMiniScreenData.selectLine))
             StopNetworking();

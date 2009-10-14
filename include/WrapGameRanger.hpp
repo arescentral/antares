@@ -21,7 +21,6 @@
 // Wrap_GameRanger.h
 
 #include <Base.h>
-#include <NetSprocket.h>
 
 namespace antares {
 

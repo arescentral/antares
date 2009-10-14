@@ -21,7 +21,6 @@
 #include "AresExternalFile.hpp"
 #include "AresGlobalType.hpp"
 #include "AresMain.hpp"
-#include "AresNetworkSprocket.hpp"
 #include "AresResFile.hpp"
 #include "ColorTranslation.hpp"
 #include "ConditionalMacros.h"
@@ -203,7 +202,7 @@ typedef struct
     Str255              whyScenarioNotLoaded;
 } netSetupType;
 
-#if NETSPROCKET_AVAILABLE
+#ifdef NETSPROCKET_AVAILABLE
 
 void SetNetLevelCanMakeChanges( netSetupType *, bool);
 void ActivateLevelTab( netSetupType *, bool);

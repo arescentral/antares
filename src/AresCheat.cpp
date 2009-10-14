@@ -23,7 +23,6 @@
 
 #include "Admiral.hpp"
 #include "AresGlobalType.hpp"
-#include "AresNetworkSprocket.hpp"
 #include "Debug.hpp"
 #include "MessageScreen.hpp"
 #include "PlayerShip.hpp"
@@ -96,7 +95,7 @@ void ExecuteCheat( short whichCheat, long whichPlayer)
         return;
     }
 
-#if NETSPROCKET_AVAILABLE
+#ifdef NETSPROCKET_AVAILABLE
     if ( GetAllNetPlayersCheating())
 #else
     if ( true)

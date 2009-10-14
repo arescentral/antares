@@ -22,7 +22,6 @@
 #include "Admiral.hpp"
 #include "AresCheat.hpp"
 #include "AresGlobalType.hpp"
-#include "AresNetworkSprocket.hpp"
 #include "AresPreferences.hpp"
 #include "ColorTranslation.hpp"
 #include "Debug.hpp"
@@ -218,7 +217,7 @@ bool PlayerShipGetKeys( long timePass, unsigned long theKeys,
                 {
                     if ( globals()->gOptions & kOptionNetworkOn)
                     {
-#if NETSPROCKET_AVAILABLE
+#ifdef NETSPROCKET_AVAILABLE
                         SendCheatMessage( a);
 #endif NETSPROCKET_AVAILABLE
                     } else
@@ -230,7 +229,7 @@ bool PlayerShipGetKeys( long timePass, unsigned long theKeys,
                         SetAdmiralBuildAtName( globals()->gPlayerAdmiralNumber, message);
                         globals()->gActiveCheats[globals()->gPlayerAdmiralNumber] &= ~kNameObjectBit;
                     }
-#if NETSPROCKET_AVAILABLE
+#ifdef NETSPROCKET_AVAILABLE
                     SendInGameTextMessage( (Ptr)(message + 1), mGetAnyCharPStringLength( message));
 #endif NETSPROCKET_AVAILABLE
                 }
@@ -433,7 +432,7 @@ bool PlayerShipGetKeys( long timePass, unsigned long theKeys,
                     1, globals()->gPlayerAdmiralNumber);
             } else
             {
-    #if NETSPROCKET_AVAILABLE
+#ifdef NETSPROCKET_AVAILABLE
                 SendMenuMessage( globals()->gGameTime + gNetLatency,
                     3,  // the special screen
                     1   // kSpecialMiniTransfer
@@ -540,7 +539,7 @@ bool PlayerShipGetKeys( long timePass, unsigned long theKeys,
                         globals()->gPlayerAdmiralNumber);
                 } else
                 {
-#if NETSPROCKET_AVAILABLE
+#ifdef NETSPROCKET_AVAILABLE
                     if ( !SendSelectMessage( globals()->gGameTime + gNetLatency,
                         globals()->gPlayerShipNumber, true))
                         StopNetworking();
@@ -625,7 +624,7 @@ bool PlayerShipGetKeys( long timePass, unsigned long theKeys,
                             globals()->gPlayerAdmiralNumber);
                     } else
                     {
-    #if NETSPROCKET_AVAILABLE
+#ifdef NETSPROCKET_AVAILABLE
                         if ( !SendSelectMessage(
                                 globals()->gGameTime + gNetLatency,
                                 globals()->hotKey[b].objectNum,
@@ -762,7 +761,7 @@ bool PlayerShipGetKeys( long timePass, unsigned long theKeys,
                     SetPlayerSelectShip( selectShipNum, true, globals()->gPlayerAdmiralNumber);
                 } else
                 {
-#if NETSPROCKET_AVAILABLE
+#ifdef NETSPROCKET_AVAILABLE
                     if ( !SendSelectMessage( globals()->gGameTime + gNetLatency, selectShipNum, true))
                         StopNetworking();
 #endif
@@ -798,7 +797,7 @@ bool PlayerShipGetKeys( long timePass, unsigned long theKeys,
                     SetPlayerSelectShip( selectShipNum, false, globals()->gPlayerAdmiralNumber);
                 } else
                 {
-#if NETSPROCKET_AVAILABLE
+#ifdef NETSPROCKET_AVAILABLE
                     if ( !SendSelectMessage( globals()->gGameTime + gNetLatency, selectShipNum, false))
                         StopNetworking();
 #endif NETSPROCKET_AVAILABLE
@@ -914,7 +913,7 @@ void PlayerShipHandleClick( Point where)
                         SetPlayerSelectShip( selectShipNum, true, globals()->gPlayerAdmiralNumber);
                     } else
                     {
-#if NETSPROCKET_AVAILABLE
+#ifdef NETSPROCKET_AVAILABLE
                         if ( !SendSelectMessage( globals()->gGameTime + gNetLatency, selectShipNum, true))
                             StopNetworking();
 #endif NETSPROCKET_AVAILABLE
@@ -951,7 +950,7 @@ void PlayerShipHandleClick( Point where)
                         SetPlayerSelectShip( selectShipNum, false, globals()->gPlayerAdmiralNumber);
                     } else
                     {
-#if NETSPROCKET_AVAILABLE
+#ifdef NETSPROCKET_AVAILABLE
                         if ( !SendSelectMessage( globals()->gGameTime + gNetLatency, selectShipNum, false))
                             StopNetworking();
 #endif NETSPROCKET_AVAILABLE

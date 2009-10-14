@@ -19,7 +19,6 @@
 
 #include "Admiral.hpp"
 #include "AresGlobalType.hpp"
-#include "AresNetworkSprocket.hpp"
 #include "Beam.hpp"
 #include "ColorTranslation.hpp"
 #include "Debug.hpp"
@@ -198,7 +197,7 @@ bool ConstructScenario( long which)
 
     if ( globals()->gOptions & kOptionNetworkOn)
     {
-#if NETSPROCKET_AVAILABLE
+#ifdef NETSPROCKET_AVAILABLE
         if ( IAmHosting())
         {
             globals()->gThisScenarioNumber = which;
@@ -255,7 +254,7 @@ bool ConstructScenario( long which)
     {
         if ( globals()->gOptions & kOptionNetworkOn)
         {
-#if NETSPROCKET_AVAILABLE
+#ifdef NETSPROCKET_AVAILABLE
             if ( gThisScenario->player[count].playerType == kComputerPlayer)
             {
                 gThisScenario->player[count].admiralNumber =
@@ -871,7 +870,7 @@ bool ConstructScenario( long which)
 
     if ( globals()->gOptions & kOptionNetworkOn)
     {
-#if NETSPROCKET_AVAILABLE
+#ifdef NETSPROCKET_AVAILABLE
         UpdateLoadingInterface( -1, -1, &loadingRect);
         SendPreGameBasicMessage( eStartToPlayMessage);
         do

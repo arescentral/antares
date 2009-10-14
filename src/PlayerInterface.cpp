@@ -23,7 +23,6 @@
 
 #include "AresGlobalType.hpp"
 #include "AresMain.hpp"
-#include "AresNetworkSprocket.hpp"
 #include "AresPreferences.hpp"
 #include "BriefingRenderer.hpp"
 #include "ColorTranslation.hpp"
@@ -567,7 +566,7 @@ PlayAgainResult DoPlayAgain(bool allowResume, bool allowSkip) {
 void DoNetSettings( void)
 
 {
-#if NETSPROCKET_AVAILABLE
+#ifdef NETSPROCKET_AVAILABLE
     int                     error = kNoError;
     Rect                    tRect;
     interfaceItemType       *item;
@@ -1480,7 +1479,7 @@ void DrawKeyControlPicture( long whichKey)
 netResultType StartNetworkGameSetup( void)
 
 {
-#if NETSPROCKET_AVAILABLE
+#ifdef NETSPROCKET_AVAILABLE
     Point                   where;
     int                     error;
     short                   whichItem = -1;
@@ -1601,7 +1600,7 @@ void DrawStringInInterfaceItem( long whichItem, const unsigned char* string)
 netResultType ClientWaitInterface( void)
 
 {
-#if NETSPROCKET_AVAILABLE
+#ifdef NETSPROCKET_AVAILABLE
     Point                   where;
     int                     error;
     short                   whichItem;
@@ -1755,7 +1754,7 @@ netResultType ClientWaitInterface( void)
 netResultType HostAcceptClientInterface( void)
 
 {
-#if NETSPROCKET_AVAILABLE
+#ifdef NETSPROCKET_AVAILABLE
     Point                   where;
     int                     error;
     short                   whichItem;
