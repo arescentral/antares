@@ -62,8 +62,7 @@ void MainScreen::fire_timer() {
     if (Randomize(4) == 2) {
         DoScrollText(5600, 4, kTitleTextScrollWidth, kTitleFontNum, -1);
     }
-    globals()->gOptions |= kOptionReplay;
-    HandleMainScreenResult(kMainPlay);
+    StartReplay();
     become_front();
 }
 
@@ -84,8 +83,7 @@ void MainScreen::handle_button(int button) {
         break;
 
       case DEMO:
-        globals()->gOptions |= kOptionReplay;
-        HandleMainScreenResult(kMainPlay);
+        StartReplay();
         become_front();
         break;
 
@@ -95,13 +93,13 @@ void MainScreen::handle_button(int button) {
         break;
 
       case START_NEW_GAME:
-        HandleMainScreenResult(kMainPlay);
+        StartNewGame();
         become_front();
         break;
 
       case START_NETWORK_GAME:
-        HandleMainScreenResult(kMainNetwork);
-        become_front();
+        fprintf(stderr, "Networked games not yet implemented.\n");
+        exit(1);
         break;
 
       case ABOUT_ARES:

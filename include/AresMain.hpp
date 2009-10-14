@@ -27,7 +27,8 @@ namespace antares {
 
 void AresMain();
 void Pause();
-bool HandleMainScreenResult(mainScreenResultType result);
+void StartNewGame();
+void StartReplay();
 
 }  // namespace antares
 
