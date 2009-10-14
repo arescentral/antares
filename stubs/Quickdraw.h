@@ -2,7 +2,6 @@
 #define ANTARES_STUB_QUICKDRAW_H_
 
 #include <Base.h>
-#include <Files.h>
 
 namespace antares {
 

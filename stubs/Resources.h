@@ -2,7 +2,6 @@
 #define ANTARES_STUB_RESOURCES_H_
 
 #include <Base.h>
-#include <Files.h>
 
 #include "Handle.hpp"
 
@@ -17,8 +16,6 @@ STUB1(HomeResFile, int(Handle handle), 0);
 
 STUB1(ReleaseResource, void(Handle handle));
 STUB1(DetachResource, void(Handle handle));
-
-STUB2(FSpOpenResFile, int(FSSpec* spec, int options), 0);
 
 enum {
     resNotFound = 2000,

@@ -102,20 +102,10 @@ aresGlobalType::aresGlobalType() {
     keyMask = 0;
     gSerialNumerator = 0;
     gSerialDenominator = 0;
-    okToOpenFile = true;
-    externalFileRefNum = -1;
-    externalFileSpec.vRefNum = 0;
-    externalFileSpec.parID = 0;
-    externalFileSpec.name[0] = 0;
-    originalExternalFileSpec.vRefNum = 0;
-    originalExternalFileSpec.parID = 0;
-    originalExternalFileSpec.name[0] = 0;
     otherPlayerScenarioFileName[0] = 0;
     otherPlayerScenarioFileURL[0] = 0;
     otherPlayerScenarioFileVersion = 0;
     otherPlayerScenarioFileCheckSum = 0;
-
-    internetConfigPresent = false;
 
     hotKeyDownTime = -1;
 }

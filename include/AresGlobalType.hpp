@@ -21,7 +21,6 @@
 // Ares Global Type.h
 
 #include <Base.h>
-#include <Files.h>
 #include <Quickdraw.h>
 #include <Resources.h>
 
@@ -206,13 +205,8 @@ struct aresGlobalType {
     bool         gAutoPilotOff;          // hack for turning off auto in netgame
     long            levelNum;
     unsigned long   keyMask;
-    FSSpec          originalExternalFileSpec;
-    FSSpec          externalFileSpec;       // x-ares; for 3rd party files
-    short           externalFileRefNum;     // x-ares; for 3rd party files
     scenarioInfoType    scenarioFileInfo;   // x-ares; for factory +
                                             // 3rd party files
-    bool         okToOpenFile;           // x-ares; only ok to open
-                                            // before factory is loaded
     long            maxScenarioBrief;
     long            maxScenarioCondition;
     long            maxScenarioInitial;
@@ -224,9 +218,6 @@ struct aresGlobalType {
     Str255          otherPlayerScenarioFileURL;     // ''
     unsigned long   otherPlayerScenarioFileVersion;
     unsigned long   otherPlayerScenarioFileCheckSum;
-
-    bool         internetConfigPresent;
-    ICInstance      internetConfig;
 
     hotKeyType      hotKey[kHotKeyNum];
     long            hotKeyDownTime;
