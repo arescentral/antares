@@ -38,15 +38,6 @@ enum {
 
 typedef int16_t OSErr;
 
-typedef int8_t SignedByte;
-typedef uint8_t Byte;
-typedef int8_t SInt8;
-typedef uint8_t UInt8;
-typedef int16_t SInt16;
-typedef uint16_t UInt16;
-typedef int32_t SInt32;
-typedef uint32_t UInt32;
-
 typedef int32_t Fixed;
 typedef long Size;
 
@@ -63,9 +54,6 @@ typedef void* AddrBlock;
 
 typedef unsigned char Str255[256];
 typedef unsigned char Str31[32];
-typedef const unsigned char* ConstStr255Param;
-typedef const unsigned char* ConstStr31Param;
-typedef unsigned char StrFileName[64];
 
 typedef uint32_t FourCharCode;
 typedef FourCharCode OSType;
@@ -84,28 +72,16 @@ STUB1(GlobalToLocal, void(Point*));
 typedef Window CWindow;
 typedef CWindow* CWindowPtr;
 
-CWindow* NewCWindow(void*, const Rect& size, const unsigned char* title, bool, int,
-      Window* behind, bool, int id);
-
 typedef struct {
     int red;
     int green;
     int blue;
 } RGBColor;
 
-typedef struct {
-    int value;
-    RGBColor rgb;
-} ColorSpec;
-typedef ColorSpec* ColorSpecPtr;
-
 void Index2Color(long index, RGBColor* color);
 
 typedef int KeyMap[4];
-
 void GetKeys(KeyMap keys);
-
-typedef struct { } ICInstance;
 
 struct EventRecord {
     EventRecord()
@@ -127,8 +103,6 @@ typedef Rgn** RgnHandle;
 STUB2(FlushEvents, void(int mask, int));
 bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouseRgn);
 
-typedef Handle MenuHandle;
-
 // Gets STR# from resource fork
 void GetIndString(unsigned char* result, int id, int index);
 
@@ -147,11 +121,6 @@ int TickCount();
 
 bool Button();
 STUB0(GetDblTime, double(), 0.0);
-
-typedef struct { } NumVersion;
-
-STUB4(EasyOpenPreferenceFile,
-    bool(const unsigned char* file_name, int creator, int type, short* ref_num), true);
 
 STUB1(mAssert, void(bool condition));
 

@@ -118,32 +118,6 @@ void ScrollRect(const Rect& rect, int x, int y, const Rect& clip) {
     }
 }
 
-Window* NewWindow(
-        void*, Rect* rect, const unsigned char* title, bool, int, Window* behind, bool, int id) {
-    (void)rect;
-    (void)title;
-    (void)behind;
-    (void)id;
-    return fakeWindow.get();
-}
-
-CWindow* NewCWindow(
-        void*, Rect* rect, const unsigned char* title, bool, int, Window* behind, bool, int id) {
-    (void)rect;
-    (void)title;
-    (void)behind;
-    (void)id;
-    return fakeWindow.get();
-}
-
-void GetPort(Window** port) {
-    *port = fakeWindow.get();
-}
-
-void MacSetPort(Window* port) {
-    (void)port;
-}
-
 uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue) {
     uint8_t best_color = 0;
     int min_distance = std::numeric_limits<int>::max();

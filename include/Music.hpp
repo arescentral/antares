@@ -42,7 +42,6 @@ STUB2(DoConversionS3M, void( Str255, short));
 STUB2(pStrcat, unsigned char *(unsigned char *, unsigned char *), NULL);
 STUB2(DoExp1to3, Handle( Handle, unsigned long), NULL);
 STUB2(DoExp1to6, Handle( Handle, unsigned long), NULL);
-STUB2(ConvertInstrument, void( register    Byte    *,  register long));
 STUB2(SndToHandle, Handle( Handle, short   *), NULL);
 
 #if 0
@@ -61,7 +60,6 @@ void DoConversionS3M( Str255, short);
 unsigned char *pStrcat(unsigned char *, unsigned char *);
 Handle DoExp1to3( Handle, unsigned long);
 Handle DoExp1to6( Handle, unsigned long);
-void ConvertInstrument( register    Byte    *,  register long);
 Handle SndToHandle( Handle, short   *);
 #endif
 
