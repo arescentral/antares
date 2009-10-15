@@ -488,21 +488,16 @@ void DrawNateDiamondClipped(
 void DrawNateVBracket(
         PixMap *destPix, const Rect& destRect, const Rect& clipRect, long hoff, long voff,
         unsigned char color) {
-    long            rowBytes = 0;
-    unsigned char   *aByte;
-
     DrawNateLine ( destPix, clipRect, destRect.left, destRect.top, destRect.right - 1,
                     destRect.top, hoff, voff, color);
     DrawNateLine ( destPix, clipRect, destRect.left, destRect.bottom - 1, destRect.right - 1,
                     destRect.bottom - 1, hoff, voff, color);
 
-    mGetRowBytes( rowBytes, destPix);
+    destPix->set(destRect.left + hoff, destRect.top + 1 + voff, color);
+    destPix->set(destRect.right - 1 + hoff, destRect.top + 1 + voff, color);
 
-    mSetNatePixel( aByte, rowBytes, destRect.left, destRect.top + 1, hoff, voff, destPix, color);
-    mSetNatePixel( aByte, rowBytes, destRect.right - 1, destRect.top + 1, hoff, voff, destPix, color);
-
-    mSetNatePixel( aByte, rowBytes, destRect.left, destRect.bottom - 2, hoff, voff, destPix, color);
-    mSetNatePixel( aByte, rowBytes, destRect.right - 1, destRect.bottom - 2, hoff, voff, destPix, color);
+    destPix->set(destRect.left + hoff, destRect.bottom - 2 + voff, color);
+    destPix->set(destRect.right - 1 + hoff, destRect.bottom - 2 + voff, color);
 }
 
 void DrawNateShadedRect(

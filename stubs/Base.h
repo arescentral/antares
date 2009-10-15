@@ -164,6 +164,9 @@ struct PixMap {
 
     void resize(const Rect& r);
 
+    void set(int x, int y, uint8_t color);
+    uint8_t get(int x, int y) const;
+
     Rect bounds;
     ColorTable* colors;
     long rowBytes;

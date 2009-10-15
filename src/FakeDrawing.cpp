@@ -77,6 +77,16 @@ void PixMap::resize(const Rect& new_bounds) {
     std::swap(baseAddr, new_pix_map.baseAddr);
 }
 
+void PixMap::set(int x, int y, uint8_t color) {
+    int row_bytes = rowBytes & 0x3FFF;
+    baseAddr[y * row_bytes + x] = color;
+}
+
+uint8_t PixMap::get(int x, int y) const {
+    int row_bytes = rowBytes & 0x3FFF;
+    return baseAddr[y * row_bytes + x];
+}
+
 Window::Window(int width, int height)
         : portRect(0, 0, width, height),
           portBits(width, height) { }

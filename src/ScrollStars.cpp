@@ -325,8 +325,7 @@ void MoveScrollStars(const long byUnits) {
 void DrawScrollStars(bool warp) {
     short           i;
     scrollStarType  *star;
-    unsigned char   slowColor, mediumColor, fastColor, *color, *dByte;
-    long            rowBytes;
+    unsigned char   slowColor, mediumColor, fastColor, *color;
     transColorType  *transColor;
     Rect        bounds, lastBounds;
 
@@ -336,7 +335,6 @@ void DrawScrollStars(bool warp) {
     mGetTranslateColorShade( kStarColor, LIGHT, mediumColor, transColor);
     mGetTranslateColorShade( kStarColor, LIGHTER, fastColor, transColor);
 
-    mGetRowBytes( rowBytes, gOffWorld);
     bounds.left = lastBounds.left = CLIP_LEFT;
     bounds.top = lastBounds.top = CLIP_TOP;
     bounds.bottom = CLIP_BOTTOM;
@@ -362,23 +360,14 @@ void DrawScrollStars(bool warp) {
                     if (( star->location.h >= CLIP_LEFT) && ( star->location.v >= CLIP_TOP)
                         && ( star->location.h < CLIP_RIGHT) && ( star->location.v < CLIP_BOTTOM))
                     {
-                        mSetNatePixel( dByte, rowBytes, star->location.h, star->location.v, 0,
-                                0, gOffWorld, *color);
-            #ifdef kByteLevelTesting
-                        TestByte( (char *)dByte, gOffWorld, "\pDRAWSTAR");
-            #endif
+                        gOffWorld->set(star->location.h, star->location.v, *color);
                     }
                     if ((( star->location.h != star->oldLocation.h) ||
                     ( star->location.v != star->oldLocation.v)) &&
                     (( star->oldLocation.h >= CLIP_LEFT) && ( star->oldLocation.v >= CLIP_TOP)
                         && ( star->oldLocation.h < CLIP_RIGHT) && ( star->oldLocation.v < CLIP_BOTTOM)))
                     {
-                        mSetNatePixel ( dByte, rowBytes, star->oldLocation.h, star->oldLocation.v,
-                            0, 0, gOffWorld, 0xff);
-
-        #ifdef kByteLevelTesting
-                        TestByte( (char *)dByte, gOffWorld, "\pERASTAR");
-        #endif
+                        gOffWorld->set(star->oldLocation.h, star->oldLocation.v, 0xff);
                     }
                 }
                 star++;
@@ -468,8 +457,7 @@ void DrawScrollStars(bool warp) {
                     ( star->location.v < CLIP_TOP) ||  ( star->location.v >= CLIP_BOTTOM)))
                 {
                     mGetTranslateColorShade( star->color, (star->age >> kSparkAgeToShadeShift) + 1, slowColor, transColor);
-                    mSetNatePixel( dByte, rowBytes, star->location.h, star->location.v, 0,
-                        0, gOffWorld, slowColor);
+                    gOffWorld->set(star->location.h, star->location.v, slowColor);
                 }
             } else
             {
@@ -479,8 +467,7 @@ void DrawScrollStars(bool warp) {
             if ( !((star->oldLocation.h < CLIP_LEFT) || ( star->oldLocation.h >= CLIP_RIGHT) ||
                 ( star->oldLocation.v < CLIP_TOP) ||  ( star->oldLocation.v >= CLIP_BOTTOM)))
             {
-                mSetNatePixel ( dByte, rowBytes, star->oldLocation.h, star->oldLocation.v,
-                    0, 0, gOffWorld, 0xff);
+                gOffWorld->set(star->oldLocation.h, star->oldLocation.v, 0xff);
             }
 
         }
@@ -491,8 +478,7 @@ void DrawScrollStars(bool warp) {
 void ShowScrollStars(bool warp) {
     short           i;
     scrollStarType  *star;
-    unsigned char   slowColor, mediumColor, fastColor, *color, *dByte, *sByte;
-    long            srowBytes, drowBytes;
+    unsigned char   slowColor, mediumColor, fastColor, *color;
     transColorType  *transColor;
     Rect        bounds, lastBounds;
 
@@ -501,9 +487,6 @@ void ShowScrollStars(bool warp) {
     mGetTranslateColorShade( kStarColor, MEDIUM, slowColor, transColor);
     mGetTranslateColorShade( kStarColor, LIGHT, mediumColor, transColor);
     mGetTranslateColorShade( kStarColor, LIGHTER, fastColor, transColor);
-
-    mGetRowBytes( srowBytes, gOffWorld);
-    mGetRowBytes( drowBytes, gActiveWorld);
 
     bounds.left = lastBounds.left = CLIP_LEFT;
     bounds.top = lastBounds.top = CLIP_TOP;
@@ -530,27 +513,16 @@ void ShowScrollStars(bool warp) {
                     if (( star->location.h >= CLIP_LEFT) && ( star->location.v >= CLIP_TOP)
                         && ( star->location.h < CLIP_RIGHT) && ( star->location.v < CLIP_BOTTOM))
                     {
-                        mGetNatePixel( dByte, srowBytes, star->location.h, star->location.v, 0,
-                            0, gOffWorld);
-                        mSetNatePixel( sByte, drowBytes, star->location.h, star->location.v, gNatePortLeft << 2,
-                                gNatePortTop, gActiveWorld, *dByte);
-            #ifdef kByteLevelTesting
-                        TestByte( (char *)dByte, gActiveWorld, "\pDRAWSTAR");
-            #endif
+                        uint8_t c = gOffWorld->get(star->location.h, star->location.v);
+                        gActiveWorld->set(star->location.h, star->location.v, c);
                     }
                     if ((( star->location.h != star->oldLocation.h) ||
                     ( star->location.v != star->oldLocation.v)) &&
                     (( star->oldLocation.h >= CLIP_LEFT) && ( star->oldLocation.v >= CLIP_TOP)
                         && ( star->oldLocation.h < CLIP_RIGHT) && ( star->oldLocation.v < CLIP_BOTTOM)))
                     {
-                        mGetNatePixel( dByte, srowBytes, star->oldLocation.h, star->oldLocation.v, 0,
-                            0, gOffWorld);
-                        mSetNatePixel( sByte, drowBytes, star->oldLocation.h, star->oldLocation.v, gNatePortLeft << 2,
-                                gNatePortTop, gActiveWorld, *dByte);
-
-        #ifdef kByteLevelTesting
-                        TestByte( (char *)dByte, gActiveWorld, "\pERASTAR");
-        #endif
+                        uint8_t c = gOffWorld->get(star->oldLocation.h, star->oldLocation.v);
+                        gActiveWorld->set(star->oldLocation.h, star->oldLocation.v, c);
                     }
                 }
                 star++;
@@ -624,10 +596,8 @@ void ShowScrollStars(bool warp) {
                 if ( !((star->location.h < CLIP_LEFT) || ( star->location.h >= CLIP_RIGHT) ||
                     ( star->location.v < CLIP_TOP) ||  ( star->location.v >= CLIP_BOTTOM)))
                 {
-                    mGetNatePixel( dByte, srowBytes, star->location.h, star->location.v, 0,
-                        0, gOffWorld);
-                    mSetNatePixel( sByte, drowBytes, star->location.h, star->location.v, gNatePortLeft << 2,
-                            gNatePortTop, gActiveWorld, *dByte);
+                    uint8_t c = gOffWorld->get(star->location.h, star->location.v);
+                    gActiveWorld->set(star->location.h, star->location.v, c);
                 }
             } else
             {
@@ -637,10 +607,8 @@ void ShowScrollStars(bool warp) {
             if ( !((star->oldLocation.h < CLIP_LEFT) || ( star->oldLocation.h >= CLIP_RIGHT) ||
                 ( star->oldLocation.v < CLIP_TOP) ||  ( star->oldLocation.v >= CLIP_BOTTOM)))
             {
-                mGetNatePixel( dByte, srowBytes, star->oldLocation.h, star->oldLocation.v, 0,
-                    0, gOffWorld);
-                mSetNatePixel( sByte, drowBytes, star->oldLocation.h, star->oldLocation.v, gNatePortLeft << 2,
-                        gNatePortTop, gActiveWorld, *dByte);
+                uint8_t c = gOffWorld->get(star->oldLocation.h, star->oldLocation.v);
+                gActiveWorld->set(star->oldLocation.h, star->oldLocation.v, c);
             }
 
         }

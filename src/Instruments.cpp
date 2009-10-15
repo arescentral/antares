@@ -217,7 +217,7 @@ void UpdateRadar(int32_t unitsDone) {
     int32_t         dx, rcount, x, y, *scaleval;
     const int32_t   rrange = globals()->gRadarRange >> 1L;
     Point           *lp;
-    unsigned char   color, color2, *dByte;
+    unsigned char   color, color2;
     uint32_t        bestScale = MIN_SCALE, rootCorrect, distance, difference, dcalc;
     transColorType  *transColor;
     admiralType     *admiral;
@@ -248,8 +248,6 @@ void UpdateRadar(int32_t unitsDone) {
         mGetTranslateColorShade( kRadarColor, (( kRadarColorSteps * globals()->gRadarCount) / globals()->gRadarSpeed) + 1, color, transColor);
     }
 
-    mGetRowBytes( oCount, gActiveWorld);
-
     if ( doDraw)
     {
         lp = globals()->gRadarBlipData.get();
@@ -257,8 +255,7 @@ void UpdateRadar(int32_t unitsDone) {
         {
             if ( lp->h >= 0)
             {
-                mSetNatePixel( dByte, oCount, lp->h, lp->v, gNatePortLeft << 2L,
-                        gNatePortTop, gActiveWorld, color);
+                gActiveWorld->set(lp->h, lp->v, color);
             }
             lp++;
         }
