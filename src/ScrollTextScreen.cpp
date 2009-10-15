@@ -223,7 +223,7 @@ void ScrollTextScreen::fire_timer() {
 
         if (_window.intersects(_pix_map->bounds)) {
             ClearScreen();
-            CopyBits(_pix_map.get(), gRealWorld, _window, dest, 0, NULL);
+            CopyBits(_pix_map.get(), gRealWorld, _window, dest);
         } else {
             VideoDriver::driver()->pop_listener(this);
         }

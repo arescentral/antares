@@ -36,11 +36,9 @@ extern  long            gNatePortLeft, gNatePortTop;
 void EZDrawSpriteOffByID( short resID, long whichShape, long scale, unsigned char color,
     const Rect& bounds)
 {
-    GrafPtr             oldPort;
     TypedHandle<natePixType> spriteTable;
     spritePix           aSpritePix;
 
-    GetPort( &oldPort);
     EZMakeSpriteFromID( resID, &spriteTable, &aSpritePix, whichShape);
     if (spriteTable.get() == nil) {
         return;
@@ -54,8 +52,6 @@ void EZDrawSpriteOffByID( short resID, long whichShape, long scale, unsigned cha
     EZDrawSpriteCenteredInRectBySprite( &aSpritePix, gOffWorld, scale, bounds);
 
     spriteTable.destroy();
-
-    MacSetPort( oldPort);
 }
 
 // EZDrawSpriteOffToOnByID
@@ -67,11 +63,9 @@ void EZDrawSpriteOffByID( short resID, long whichShape, long scale, unsigned cha
 void EZDrawSpriteOffToOnByID( short resID, long whichShape, long scale,
     unsigned char color, const Rect& bounds)
 {
-    GrafPtr             oldPort;
     TypedHandle<natePixType> spriteTable;
     spritePix           aSpritePix;
 
-    GetPort( &oldPort);
     EZMakeSpriteFromID( resID, &spriteTable, &aSpritePix, whichShape);
     if (spriteTable.get() == nil) {
         return;
@@ -88,8 +82,6 @@ void EZDrawSpriteOffToOnByID( short resID, long whichShape, long scale,
 
     DrawInRealWorld();
     CopyOffWorldToRealWorld(bounds);
-
-    MacSetPort( oldPort);
 }
 
 void EZDrawSpriteCenteredInRectBySprite( spritePix *aSpritePix,
@@ -158,9 +150,7 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
     long                tlong, thisScale;
     Rect            dRect, spriteRect;
     coordPointType      coord;
-    GrafPtr             oldPort;
 
-    GetPort( &oldPort);
     mWriteDebugString("\pOpening:");
     WriteDebugLong( resID);
     spriteTable.load_resource(kPixResType, resID);
@@ -220,8 +210,6 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
 
     DrawInRealWorld();
     CopyOffWorldToRealWorld(bounds);
-
-    MacSetPort( oldPort);
 }
 
 }  // namespace antares

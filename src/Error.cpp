@@ -144,7 +144,6 @@ void ShowErrorAny(  errorRecoverType recover,
                         const char *caller, // pass __FILE__
                         long callerNum) {
     Str255          s1, s2, s3, s4;
-    GrafPtr         oldPort = nil;
     DialogPtr       theDialog = nil;
     short           itemHit, itemType;
     bool         done = false, quit = false;
@@ -191,12 +190,10 @@ void ShowErrorAny(  errorRecoverType recover,
 
     ParamText( sp1, sp2, sp3, sp4);
 //  StopAlert( kAnyAlertID, nil);
-    GetPort( &oldPort);
     theDialog = GetNewDialog( kAnyErrorDialogID, nil, reinterpret_cast<WindowPtr>(-1L));
 
     if ( theDialog == nil) DebugStr("\pNo Error Dialog!");
     SetWRefCon( theDialog, kAnyErrorDialogID);
-    MacSetPort(reinterpret_cast<Window*>(theDialog));
     if (( recover != eContinueErr) && ( recover != eContinueOnlyErr))
     {
         SetDialogDefaultItem( theDialog, kQuitButton);
@@ -233,7 +230,6 @@ void ShowErrorAny(  errorRecoverType recover,
         }
     }
     if ( theDialog != nil) DisposeDialog( theDialog);
-    MacSetPort( oldPort);
     if (( recover == eExitToShellErr) || (( recover == eContinueErr) && ( quit)))
     {
         ExitToShell();

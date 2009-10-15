@@ -72,7 +72,7 @@ void PixMap::resize(const Rect& new_bounds) {
     PixMap new_pix_map(new_bounds.width(), new_bounds.height());
     Rect transfer = bounds;
     transfer.clip_to(new_bounds);
-    CopyBits(this, &new_pix_map, transfer, transfer, 0, NULL);
+    CopyBits(this, &new_pix_map, transfer, transfer);
     bounds = new_bounds;
     std::swap(baseAddr, new_pix_map.baseAddr);
 }
@@ -182,8 +182,7 @@ void ClearScreen() {
     memset(gActiveWorld->baseAddr, 0xFF, width * height);
 }
 
-void CopyBits(PixMap* source, PixMap* dest, const Rect& source_rect, const Rect& dest_rect,
-        int, void*) {
+void CopyBits(PixMap* source, PixMap* dest, const Rect& source_rect, const Rect& dest_rect) {
     if (source == dest) {
         return;
     }

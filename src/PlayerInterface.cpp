@@ -3332,9 +3332,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                                     pictRect.bottom -= pictSourceRect.bottom - thePict->frame().bottom;
                                     pictSourceRect.bottom = thePict->frame().bottom;
                                 }
-                                CopyBits( gSaveWorld, gOffWorld,
-                                    pictSourceRect, pictRect,
-                                    srcCopy, nil);
+                                CopyBits(gSaveWorld, gOffWorld, pictSourceRect, pictRect);
 
                                 tRect = scrollRect;
                                 uRect = tRect;
@@ -3421,22 +3419,16 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                         {
                             stRect.bottom -= bgRect.bottom - gSaveWorld->bounds.bottom;
                             bgRect.bottom = gSaveWorld->bounds.bottom;
-                            CopyBits( gSaveWorld, gOffWorld,
-                                bgRect, stRect,
-                                srcCopy, nil);
+                            CopyBits(gSaveWorld, gOffWorld, bgRect, stRect);
                             stRect.top = stRect.bottom;
                             stRect.bottom = stRect.top + ((textRect.bottom - textRect.top) -
                                             ( bgRect.bottom - bgRect.top));
                             bgRect.top = 0;
                             bgRect.bottom = bgRect.top + (stRect.bottom - stRect.top);
-                            CopyBits( gSaveWorld, gOffWorld,
-                                bgRect, stRect,
-                                srcCopy, nil);
+                            CopyBits(gSaveWorld, gOffWorld, bgRect, stRect);
                         } else // just copy appropriate segment
                         {
-                            CopyBits( gSaveWorld, gOffWorld,
-                                bgRect, stRect,
-                                srcCopy, nil);
+                            CopyBits(gSaveWorld, gOffWorld, bgRect, stRect);
                         }
                         DrawInRealWorld();
 

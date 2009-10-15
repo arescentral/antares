@@ -106,27 +106,27 @@ void EraseSaveWorld() {
 
 void CopyOffWorldToRealWorld(const Rect& bounds) {
     NormalizeColors();
-    CopyBits(gOffWorld, gRealWorld, bounds, bounds, srcCopy, nil);
+    CopyBits(gOffWorld, gRealWorld, bounds, bounds);
 }
 
 void CopyRealWorldToSaveWorld(const Rect& bounds) {
     NormalizeColors();
-    CopyBits(gRealWorld, gSaveWorld, bounds, bounds, srcCopy, nil);
+    CopyBits(gRealWorld, gSaveWorld, bounds, bounds);
 }
 
 void CopyRealWorldToOffWorld(const Rect& bounds) {
     NormalizeColors();
-    CopyBits(gRealWorld, gOffWorld, bounds, bounds, srcCopy, nil);
+    CopyBits(gRealWorld, gOffWorld, bounds, bounds);
 }
 
 void CopySaveWorldToOffWorld(const Rect& bounds) {
     NormalizeColors();
-    CopyBits(gSaveWorld, gOffWorld, bounds, bounds, srcCopy, nil);
+    CopyBits(gSaveWorld, gOffWorld, bounds, bounds);
 }
 
 void CopyOffWorldToSaveWorld(const Rect& bounds) {
     NormalizeColors();
-    CopyBits(gOffWorld, gSaveWorld, bounds, bounds, srcCopy, nil);
+    CopyBits(gOffWorld, gSaveWorld, bounds, bounds);
 }
 
 void NormalizeColors() {
@@ -137,11 +137,11 @@ void NormalizeColors() {
 }
 
 void ChunkCopyPixMapToScreenPixMap(PixMap* sourcePix, const Rect& sourceRect, PixMap* destMap) {
-    CopyBits(sourcePix, destMap, sourceRect, sourceRect, 0, NULL);
+    CopyBits(sourcePix, destMap, sourceRect, sourceRect);
 }
 
 void ChunkCopyPixMapToPixMap(PixMap* sourcePix, const Rect& sourceRect, PixMap* destMap) {
-    CopyBits(sourcePix, destMap, sourceRect, sourceRect, 0, NULL);
+    CopyBits(sourcePix, destMap, sourceRect, sourceRect);
 }
 
 void ChunkErasePixMap(PixMap* destMap, Rect* sourceRect) {
