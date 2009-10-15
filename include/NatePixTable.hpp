@@ -51,13 +51,10 @@ int GetNatePixTableNatePixWidth(TypedHandle<natePixType>, long);
 int GetNatePixTableNatePixHeight(TypedHandle<natePixType>, long);
 int GetNatePixTableNatePixHRef(TypedHandle<natePixType>, long);
 int GetNatePixTableNatePixVRef(TypedHandle<natePixType>, long);
-unsigned char *GetNatePixTableNatePixData(TypedHandle<natePixType>, long);
-unsigned char GetNatePixTableNatePixDataPixel(TypedHandle<natePixType>, long, int, int);
+uint8_t* GetNatePixTableNatePixData(TypedHandle<natePixType>, long);
 Handle GetNatePixTableNatePixDataCopy(TypedHandle<natePixType>, long);
-// void GetNatePixTableNatePixPtr( natePix *, Handle, int);
-// void GetNatePixTableNatePixDuplicate( natePix *, Handle, int);
 void RemapNatePixTableColor(TypedHandle<natePixType>);
-void ColorizeNatePixTableColor(TypedHandle<natePixType>, unsigned char);
+void ColorizeNatePixTableColor(TypedHandle<natePixType>, uint8_t);
 
 }  // namespace antares
 
