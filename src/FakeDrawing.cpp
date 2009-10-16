@@ -54,37 +54,6 @@ public:
 
 }  // namespace
 
-PixMap::PixMap(int width, int height)
-        : bounds(0, 0, width, height) {
-    rowBytes = width;
-    baseAddr = new unsigned char[width * height];
-    pixelSize = 1;
-    colors = new ColorTable(256);
-}
-
-PixMap::~PixMap() {
-    delete[] baseAddr;
-}
-
-void PixMap::resize(const Rect& new_bounds) {
-    PixMap new_pix_map(new_bounds.width(), new_bounds.height());
-    Rect transfer = bounds;
-    transfer.clip_to(new_bounds);
-    CopyBits(this, &new_pix_map, transfer, transfer);
-    bounds = new_bounds;
-    std::swap(baseAddr, new_pix_map.baseAddr);
-}
-
-void PixMap::set(int x, int y, uint8_t color) {
-    int row_bytes = rowBytes & 0x3FFF;
-    baseAddr[y * row_bytes + x] = color;
-}
-
-uint8_t PixMap::get(int x, int y) const {
-    int row_bytes = rowBytes & 0x3FFF;
-    return baseAddr[y * row_bytes + x];
-}
-
 void DumpTo(const std::string& path) {
     std::string contents;
     StringBinaryWriter bin(&contents);

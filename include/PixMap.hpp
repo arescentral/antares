@@ -15,37 +15,34 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_PICTURE_HPP_
-#define ANTARES_PICTURE_HPP_
+#ifndef ANTARES_PIX_MAP_HPP_
+#define ANTARES_PIX_MAP_HPP_
 
-#include <stdint.h>
-#include <exception>
-#include <Base.h>
+#include "Geometry.hpp"
 #include "SmartPtr.hpp"
 
 namespace antares {
 
-class PixMap;
+class ColorTable;
 
-class PictureNotFoundException : public std::exception { };
+struct PixMap {
+    PixMap(int32_t width, int32_t height);
+    ~PixMap();
 
-class Picture {
-  public:
-    Picture(int32_t id);
+    void resize(const Rect& r);
 
-    const Rect& frame() { return _frame; }
+    void set(int x, int y, uint8_t color);
+    uint8_t get(int x, int y) const;
 
-    void draw(const Rect& dest);
+    Rect bounds;
+    ColorTable* colors;
+    long rowBytes;
+    uint8_t* baseAddr;
+    int pixelSize;
 
-    void draw_to(PixMap* pix, const Rect& from, const Rect& to);
-
-  private:
-    Rect _frame;
-    scoped_array<uint8_t> _pixels;
-
-    DISALLOW_COPY_AND_ASSIGN(Picture);
+    DISALLOW_COPY_AND_ASSIGN(PixMap);
 };
 
 }  // namespace antares
 
-#endif  // ANTARES_PICTURE_HPP_
+#endif  // ANTARES_PIX_MAP_HPP_

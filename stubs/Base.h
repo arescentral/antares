@@ -152,27 +152,6 @@ void StringToNum(unsigned char* string, long* value);
 STUB1(GetScriptManagerVariable, Ptr(int cache), NULL);
 STUB3(KeyTranslate, long(Ptr kchr, short keyCode, unsigned long* keyTranslateState), 0);
 
-class ColorTable;
-struct PixMap {
-    PixMap(int32_t width, int32_t height);
-    ~PixMap();
-
-    void resize(const Rect& r);
-
-    void set(int x, int y, uint8_t color);
-    uint8_t get(int x, int y) const;
-
-    Rect bounds;
-    ColorTable* colors;
-    long rowBytes;
-    unsigned char* baseAddr;
-    int pixelSize;
-
-    DISALLOW_COPY_AND_ASSIGN(PixMap);
-};
-typedef PixMap* PixMapPtr;
-typedef PixMap** PixMapHandle;
-
 }  // namespace antares
 
 #endif // ANTARES_STUB_BASE_H_

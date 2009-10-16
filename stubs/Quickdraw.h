@@ -2,6 +2,7 @@
 #define ANTARES_STUB_QUICKDRAW_H_
 
 #include <Base.h>
+#include "PixMap.hpp"
 
 namespace antares {
 
