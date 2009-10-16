@@ -22,8 +22,6 @@
 
 #include <Base.h>
 
-#include "AresVersion.hpp"
-
 namespace antares {
 
 #define kScenario_Data_ResType          'nlAG'
@@ -44,8 +42,8 @@ struct scenarioInfoType {
     Str255          titleString;
     Str255          authorNameString;
     Str255          authorURLString;
-    aresVersionType version;
-    aresVersionType requiresAresVersion;
+    uint32_t        version;
+    uint32_t        requiresAresVersion;
     uint32_t        flags;
     uint32_t        checkSum;
 
