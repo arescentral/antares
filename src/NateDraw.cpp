@@ -111,25 +111,25 @@ void clip_rect(Rect* contained, const Rect& container) {
 // DrawNateRect: Direct-draws a rectangle
 // hoff & voff are the h & v offsets frop the left and top edges of the destination map
 // (ie the top & right edges of the destination window)
-// CLIPS to destPix->bounds, NOT counting hoff & voff
+// CLIPS to destPix->bounds(), NOT counting hoff & voff
 
 void DrawNateRect(PixMap* destPix, Rect* destRect, long hoff, long voff, unsigned char color) {
     assert(hoff == 0);
     assert(voff == 0);
 
-    if (!intersects(*destRect, from_origin(destPix->bounds))) {
+    if (!intersects(*destRect, from_origin(destPix->bounds()))) {
         destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
         return;
     }
-    clip_rect(destRect, from_origin(destPix->bounds));
+    clip_rect(destRect, from_origin(destPix->bounds()));
 
     int32_t width = destRect->right - destRect->left;
     if (width < 0) {
         return;
     }
 
-    int32_t drowPlus = destPix->rowBytes;
-    unsigned char* bytes = destPix->baseAddr + destRect->top * drowPlus + destRect->left;
+    int32_t drowPlus = destPix->row_bytes();
+    unsigned char* bytes = destPix->mutable_bytes() + destRect->top * drowPlus + destRect->left;
     for (int i = destRect->top; i < destRect->bottom; ++i) {
         memset(bytes, color, width);
         bytes += drowPlus;
@@ -141,18 +141,18 @@ void DrawNateRectVScan( PixMap *destPix, Rect *destRect, long hoff, long voff,
     assert(hoff == 0);
     assert(voff == 0);
 
-    if (!intersects(*destRect, from_origin(destPix->bounds))) {
+    if (!intersects(*destRect, from_origin(destPix->bounds()))) {
         destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
         return;
     }
-    clip_rect(destRect, from_origin(destPix->bounds));
+    clip_rect(destRect, from_origin(destPix->bounds()));
 
     if (destRect->right <= destRect->left) {
         return;
     }
 
-    int32_t drowPlus = destPix->rowBytes;
-    unsigned char* bytes = destPix->baseAddr + destRect->top * drowPlus;
+    int32_t drowPlus = destPix->row_bytes();
+    unsigned char* bytes = destPix->mutable_bytes() + destRect->top * drowPlus;
     for (int i = destRect->top; i < destRect->bottom; ++i) {
         for (int j = destRect->left; j < destRect->right; ++j) {
             if ((i ^ j) & 0x1) {
@@ -166,7 +166,7 @@ void DrawNateRectVScan( PixMap *destPix, Rect *destRect, long hoff, long voff,
 void DrawNateRectClipped(
         PixMap* destPix, Rect* destRect, const Rect& clipRect, long hoff, long voff,
         unsigned char color) {
-    if (!intersects(*destRect, from_origin(destPix->bounds))) {
+    if (!intersects(*destRect, from_origin(destPix->bounds()))) {
         destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
         return;
     }
@@ -183,14 +183,14 @@ void DrawNateTriangleUpClipped(
     unsigned char   *dbyte;
     bool         clipped = false;
 
-    if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds.right - destPix->bounds.left))
-        || ( destRect->bottom <= 0) || ( destRect->top >= (destPix->bounds.bottom - destPix->bounds.top)))
+    if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds().right - destPix->bounds().left))
+        || ( destRect->bottom <= 0) || ( destRect->top >= (destPix->bounds().bottom - destPix->bounds().top)))
     {
         destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
         return;
     }
 
-    drowPlus = destPix->rowBytes;
+    drowPlus = destPix->row_bytes();
     trueWidth = destRect->right - destRect->left;
 
     if ( destRect->left < clipRect.left)
@@ -218,7 +218,7 @@ void DrawNateTriangleUpClipped(
 
     if ( trueWidth == 0)
     {
-        dbyte = destPix->baseAddr + ((destRect->top + voff) *
+        dbyte = destPix->mutable_bytes() + ((destRect->top + voff) *
             drowPlus) + destRect->left + hoff;
         *dbyte = color;
         return;
@@ -226,7 +226,7 @@ void DrawNateTriangleUpClipped(
 
     leftEdge = 0;
     x = rightPlus = trueWidth - 1;
-    dbyte = destPix->baseAddr + ((destRect->top + voff) *
+    dbyte = destPix->mutable_bytes() + ((destRect->top + voff) *
         drowPlus) + destRect->left + hoff;
     drowPlus -= rightPlus;
     while ( x >= 0)
@@ -285,14 +285,14 @@ void DrawNatePlusClipped( PixMap *destPix, Rect *destRect,
     unsigned char   *dbyte;
     bool         clipped = false;
 
-    if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds.right - destPix->bounds.left))
-        || ( destRect->bottom <= 0) || ( destRect->top >= (destPix->bounds.bottom - destPix->bounds.top)))
+    if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds().right - destPix->bounds().left))
+        || ( destRect->bottom <= 0) || ( destRect->top >= (destPix->bounds().bottom - destPix->bounds().top)))
     {
         destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
         return;
     }
 
-    drowPlus = destPix->rowBytes;
+    drowPlus = destPix->row_bytes();
     trueWidth = destRect->right - destRect->left - 1;
 
     if ( destRect->left < clipRect.left)
@@ -320,7 +320,7 @@ void DrawNatePlusClipped( PixMap *destPix, Rect *destRect,
 
     if ( trueWidth == 0)
     {
-        dbyte = destPix->baseAddr + ((destRect->top + voff) *
+        dbyte = destPix->mutable_bytes() + ((destRect->top + voff) *
             drowPlus) + destRect->left + hoff;
         *dbyte = color;
         return;
@@ -331,7 +331,7 @@ void DrawNatePlusClipped( PixMap *destPix, Rect *destRect,
     {
         half = (trueWidth >> 1) + 1;
 
-        dbyte = destPix->baseAddr + ((destRect->top + voff) *
+        dbyte = destPix->mutable_bytes() + ((destRect->top + voff) *
             drowPlus) + destRect->left + hoff + half;
 
         x = 1;
@@ -360,7 +360,7 @@ void DrawNatePlusClipped( PixMap *destPix, Rect *destRect,
     {
         half = (trueWidth >> 1) + 1;
 
-        dbyte = destPix->baseAddr + ((destRect->top + voff) *
+        dbyte = destPix->mutable_bytes() + ((destRect->top + voff) *
             drowPlus) + destRect->left + hoff + half - 1;
 
         x = 2;
@@ -397,14 +397,14 @@ void DrawNateDiamondClipped(
     unsigned char   *dbyte;
     bool         clipped = false;
 
-    if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds.right - destPix->bounds.left))
-        || ( destRect->bottom <= 0) || ( destRect->top >= (destPix->bounds.bottom - destPix->bounds.top)))
+    if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds().right - destPix->bounds().left))
+        || ( destRect->bottom <= 0) || ( destRect->top >= (destPix->bounds().bottom - destPix->bounds().top)))
     {
         destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
         return;
     }
 
-    drowPlus = destPix->rowBytes;
+    drowPlus = destPix->row_bytes();
     trueWidth = destRect->right - destRect->left - 1;
 
     if ( destRect->left < clipRect.left)
@@ -432,7 +432,7 @@ void DrawNateDiamondClipped(
 
     if ( trueWidth == 0)
     {
-        dbyte = destPix->baseAddr + ((destRect->top + voff) *
+        dbyte = destPix->mutable_bytes() + ((destRect->top + voff) *
             drowPlus) + destRect->left + hoff;
         *dbyte = color;
         return;
@@ -441,7 +441,7 @@ void DrawNateDiamondClipped(
     leftEdge = (trueWidth >> 1) + (trueWidth & 1);
     rightPlus = ((trueWidth >> 1) + 1) - leftEdge;
 
-    dbyte = destPix->baseAddr + ((destRect->top + voff) *
+    dbyte = destPix->mutable_bytes() + ((destRect->top + voff) *
         drowPlus) + destRect->left + hoff + leftEdge;
     drowPlus -= rightPlus + 1;
     while ( leftEdge > 0)
@@ -868,8 +868,8 @@ void DrawNateLine(
 
 
     // Point to the bitmap address first pixel to draw
-    drowPlus = destPix->rowBytes;
-    dbyte = destPix->baseAddr + (YStart + voff) * drowPlus +
+    drowPlus = destPix->row_bytes();
+    dbyte = destPix->mutable_bytes() + (YStart + voff) * drowPlus +
                 XStart + hoff;
 
     // Figure out whether we're going left or right, and how far we're
@@ -1122,12 +1122,12 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, const Rect& clipRect,
 
 
     // Point to the bitmap address first pixel to draw
-    drowPlus = destPix->rowBytes;
-    dbyte = destPix->baseAddr + (YStart + voff) * drowPlus +
+    drowPlus = destPix->row_bytes();
+    dbyte = destPix->mutable_bytes() + (YStart + voff) * drowPlus +
                 XStart + hoff;
 
-    srowPlus = sourcePix->rowBytes;
-    sbyte = sourcePix->baseAddr + (YStart) * srowPlus + XStart;
+    srowPlus = sourcePix->row_bytes();
+    sbyte = sourcePix->mutable_bytes() + (YStart) * srowPlus + XStart;
 
     // Figure out whether we're going left or right, and how far we're
     // going horizontally

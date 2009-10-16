@@ -113,10 +113,10 @@ void DrawDirectTextStringClipped(unsigned char* string, unsigned char color, Pix
     int bottomEdge = gDirectText->height - std::max(
             0, pen.v + gDirectText->height - clip.bottom + 1);
 
-    int rowBytes = destMap->rowBytes;
+    int rowBytes = destMap->row_bytes();
 
     // set hchar = place holder for start of each char we draw
-    unsigned char* hchar = destMap->baseAddr + (pen.v + portTop + topEdge) * rowBytes
+    unsigned char* hchar = destMap->mutable_bytes() + (pen.v + portTop + topEdge) * rowBytes
         + pen.h + (portLeft << 2);
 
     int size = *string;

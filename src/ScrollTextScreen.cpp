@@ -55,7 +55,7 @@ class ScrollTextPixBuilder {
 
     void set_background(int id) {
         _background.reset(new Picture(id));
-        _background_start = _pix->bounds.bottom;
+        _background_start = _pix->bounds().bottom;
     }
 
     void add_picture(int id) {
@@ -63,8 +63,8 @@ class ScrollTextPixBuilder {
         extend(pict.frame().bottom);
         Rect dest = pict.frame();
         Rect surround(
-                0, _pix->bounds.bottom - pict.frame().height(),
-                _pix->bounds.right, _pix->bounds.bottom);
+                0, _pix->bounds().bottom - pict.frame().height(),
+                _pix->bounds().right, _pix->bounds().bottom);
         dest.center_in(surround);
         pict.draw_to(_pix, pict.frame(), dest);
     }
@@ -73,10 +73,10 @@ class ScrollTextPixBuilder {
         uint8_t white = 0xFF;
         uint8_t red = GetTranslateColorShade(RED, VERY_LIGHT);
         RetroText retro(text.c_str(), text.size(), kTitleFontNum, red, white);
-        retro.wrap_to(_pix->bounds.right - 12, 2);
+        retro.wrap_to(_pix->bounds().right - 12, 2);
 
-        Rect dest(0, 0, _pix->bounds.right, retro.height());
-        dest.offset(0, _pix->bounds.bottom);
+        Rect dest(0, 0, _pix->bounds().right, retro.height());
+        dest.offset(0, _pix->bounds().bottom);
         dest.inset(6, 0);
 
         extend(retro.height());
@@ -85,15 +85,15 @@ class ScrollTextPixBuilder {
 
   private:
     void extend(int height) {
-        int old_height = _pix->bounds.bottom;
+        int old_height = _pix->bounds().bottom;
         int new_height = old_height + height;
-        _pix->resize(Rect(0, 0, _pix->bounds.right, new_height));
+        _pix->resize(Rect(0, 0, _pix->bounds().right, new_height));
 
         if (_background.get()) {
-            Rect new_area(0, old_height, _pix->bounds.right, new_height);
+            Rect new_area(0, old_height, _pix->bounds().right, new_height);
             Rect dest = _background->frame();
             dest.offset(0, _background_start);
-            while (dest.top < _pix->bounds.bottom) {
+            while (dest.top < _pix->bounds().bottom) {
                 if (dest.bottom >= old_height) {
                     ClippedTransfer transfer(_background->frame(), dest);
                     transfer.ClipDestTo(new_area);
@@ -180,7 +180,7 @@ void ScrollTextScreen::become_front() {
 
     ClearScreen();
     _start = now();
-    _window = Rect(0, -kScrollTextHeight, _pix_map->bounds.right, 0);
+    _window = Rect(0, -kScrollTextHeight, _pix_map->bounds().right, 0);
 }
 
 void ScrollTextScreen::resign_front() {
@@ -214,9 +214,9 @@ void ScrollTextScreen::fire_timer() {
     if (top > _window.top) {
         _window.offset(0, top - _window.top);
         Rect dest = _window;
-        dest.center_in(gRealWorld->bounds);
+        dest.center_in(gRealWorld->bounds());
 
-        if (_window.intersects(_pix_map->bounds)) {
+        if (_window.intersects(_pix_map->bounds())) {
             ClearScreen();
             CopyBits(_pix_map.get(), gRealWorld, _window, dest);
         } else {

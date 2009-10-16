@@ -219,8 +219,8 @@ void AresMain() {
     scoped_ptr<ColorTable>  theClut;
 
     init_globals();
-    WORLD_WIDTH = gRealWorld->bounds.right;
-    WORLD_HEIGHT = gRealWorld->bounds.bottom;
+    WORLD_WIDTH = gRealWorld->bounds().right;
+    WORLD_HEIGHT = gRealWorld->bounds().bottom;
     CLIP_RIGHT = WORLD_WIDTH - kRightPanelWidth;
     CLIP_BOTTOM = WORLD_HEIGHT;
     gPlayScreenWidth = CLIP_RIGHT - CLIP_LEFT;
@@ -235,7 +235,7 @@ void AresMain() {
 
     theClut.reset(new ColorTable(256));
     gActiveWorld = gRealWorld;
-    CreateOffscreenWorld(gRealWorld->bounds, *theClut);
+    CreateOffscreenWorld(gRealWorld->bounds(), *theClut);
     ColorTranslatorInit(*theClut);
 
     InitSpriteCursor();

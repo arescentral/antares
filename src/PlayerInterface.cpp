@@ -3314,7 +3314,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                                     {
                                         bgPict->draw(bgRect);
                                         bgRect.offset(0, kBackground_Height);
-                                    } while ( bgRect.top < gSaveWorld->bounds.bottom);
+                                    } while ( bgRect.top < gSaveWorld->bounds().bottom);
                                 }
                             thePict->draw(pictSourceRect);
                             DrawInRealWorld();
@@ -3393,7 +3393,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                             {
                                 bgPict->draw(bgRect);
                                 bgRect.offset(0, kBackground_Height);
-                            }  while ( bgRect.top < gSaveWorld->bounds.bottom);
+                            }  while ( bgRect.top < gSaveWorld->bounds().bottom);
                         } else
                         {
                             EraseSaveWorld();
@@ -3413,10 +3413,10 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                         bgRect.offset(0, -bgRect.top);
                         bgRect.offset(0, bgVOffset);
                         // if source bg pict is partially offscreen
-                        if ( bgRect.bottom > gSaveWorld->bounds.bottom)
+                        if ( bgRect.bottom > gSaveWorld->bounds().bottom)
                         {
-                            stRect.bottom -= bgRect.bottom - gSaveWorld->bounds.bottom;
-                            bgRect.bottom = gSaveWorld->bounds.bottom;
+                            stRect.bottom -= bgRect.bottom - gSaveWorld->bounds().bottom;
+                            bgRect.bottom = gSaveWorld->bounds().bottom;
                             CopyBits(gSaveWorld, gOffWorld, bgRect, stRect);
                             stRect.top = stRect.bottom;
                             stRect.bottom = stRect.top + ((textRect.bottom - textRect.top) -

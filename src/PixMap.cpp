@@ -24,33 +24,53 @@
 namespace antares {
 
 PixMap::PixMap(int width, int height)
-        : bounds(0, 0, width, height),
-          colors(new ColorTable(256)),
-          rowBytes(width),
-          baseAddr(new unsigned char[width * height]),
-          pixelSize(1) { }
+        : _bounds(0, 0, width, height),
+          _colors(new ColorTable(256)),
+          _bytes(new unsigned char[width * height]) { }
 
 PixMap::~PixMap() {
-    delete[] baseAddr;
+    delete[] _bytes;
+}
+
+const Rect& PixMap::bounds() const {
+    return _bounds;
+}
+
+const ColorTable& PixMap::colors() const {
+    return *_colors;
+}
+
+int PixMap::row_bytes() const {
+    return _bounds.right;
+}
+
+const uint8_t* PixMap::bytes() const {
+    return _bytes;
+}
+
+uint8_t* PixMap::mutable_bytes() {
+    return _bytes;
+}
+
+ColorTable* PixMap::mutable_colors() {
+    return _colors;
 }
 
 void PixMap::resize(const Rect& new_bounds) {
     PixMap new_pix_map(new_bounds.width(), new_bounds.height());
-    Rect transfer = bounds;
+    Rect transfer = _bounds;
     transfer.clip_to(new_bounds);
     CopyBits(this, &new_pix_map, transfer, transfer);
-    bounds = new_bounds;
-    std::swap(baseAddr, new_pix_map.baseAddr);
+    _bounds = new_bounds;
+    std::swap(_bytes, new_pix_map._bytes);
 }
 
 void PixMap::set(int x, int y, uint8_t color) {
-    int row_bytes = rowBytes;
-    baseAddr[y * row_bytes + x] = color;
+    _bytes[y * _bounds.right + x] = color;
 }
 
 uint8_t PixMap::get(int x, int y) const {
-    int row_bytes = rowBytes;
-    return baseAddr[y * row_bytes + x];
+    return _bytes[y * _bounds.right + x];
 }
 
 }  // namespace antares

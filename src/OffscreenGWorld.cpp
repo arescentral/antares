@@ -45,11 +45,11 @@ int CreateOffscreenWorld(const Rect& bounds, const ColorTable&) {
     gActiveWorld = gRealWorld;
 
     tRect = bounds;
-    tRect.center_in(gRealWorld->bounds);
-    gNatePortLeft = tRect.left - gRealWorld->bounds.left;
+    tRect.center_in(gRealWorld->bounds());
+    gNatePortLeft = tRect.left - gRealWorld->bounds().left;
     gNatePortLeft /= 4;
 
-    gNatePortTop = tRect.top - gRealWorld->bounds.top;
+    gNatePortTop = tRect.top - gRealWorld->bounds().top;
 
     EraseOffWorld();
     EraseSaveWorld();
@@ -81,10 +81,10 @@ void DrawInSaveWorld() {
 
 void EraseOffWorld() {
     DrawInOffWorld();
-    EraseRect(gOffWorld->bounds);
+    EraseRect(gOffWorld->bounds());
     RGBColor c = { 0, 0, 0 };
     RGBForeColor(&c);
-    PaintRect(gOffWorld->bounds);
+    PaintRect(gOffWorld->bounds());
     NormalizeColors();
     DrawInRealWorld();
     NormalizeColors();
@@ -93,10 +93,10 @@ void EraseOffWorld() {
 void EraseSaveWorld() {
     DrawInSaveWorld();
     NormalizeColors();
-    EraseRect(gSaveWorld->bounds);
+    EraseRect(gSaveWorld->bounds());
     RGBColor c = { 0, 0, 0 };
     RGBForeColor(&c);
-    PaintRect(gSaveWorld->bounds);
+    PaintRect(gSaveWorld->bounds());
     NormalizeColors();
     DrawInRealWorld();
 }

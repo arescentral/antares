@@ -64,7 +64,7 @@ Picture::Picture(int32_t id) {
 
 void Picture::draw(const Rect& dst) {
     ClippedTransfer transfer(_frame, dst);
-    transfer.ClipDestTo(gActiveWorld->bounds);
+    transfer.ClipDestTo(gActiveWorld->bounds());
 
     for (int i = 0; i < transfer.Height(); ++i) {
         uint8_t* source_bytes =
@@ -76,13 +76,13 @@ void Picture::draw(const Rect& dst) {
 void Picture::draw_to(PixMap* pix, const Rect& from, const Rect& to) {
     ClippedTransfer transfer(from, to);
     transfer.ClipSourceTo(_frame);
-    transfer.ClipDestTo(pix->bounds);
+    transfer.ClipDestTo(pix->bounds());
 
     for (int i = 0; i < transfer.Height(); ++i) {
         const uint8_t* source_bytes =
             _pixels.get() + transfer.SourceColumn(0) + transfer.SourceRow(i) * _frame.right;
         uint8_t* dest_bytes =
-            pix->baseAddr + transfer.DestColumn(0) + transfer.DestRow(i) * pix->bounds.right;
+            pix->mutable_bytes() + transfer.DestColumn(0) + transfer.DestRow(i) * pix->bounds().right;
         memcpy(dest_bytes, source_bytes, transfer.Width());
     }
 }

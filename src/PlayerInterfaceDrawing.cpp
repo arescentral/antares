@@ -2449,7 +2449,7 @@ void DrawInterfaceString(unsigned char* s, interfaceStyleType style, PixMap *des
 {
     Rect    clipRect;
 
-    clipRect = destMap->bounds;
+    clipRect = destMap->bounds();
 //  mSetDirectFont( kButtonFontNum)
     SetInterfaceLargeUpperFont( style);
     DrawDirectTextStringClipped( s, color, destMap, clipRect, portLeft, portTop);

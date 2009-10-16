@@ -43,8 +43,8 @@ namespace antares {
 #define kNoColorGoal        -1
 
 void InitTransitions() {
-    globals()->gColorAnimationTable.reset(gRealWorld->colors->clone());
-    globals()->gSaveColorTable.reset(gRealWorld->colors->clone());
+    globals()->gColorAnimationTable.reset(gRealWorld->colors().clone());
+    globals()->gSaveColorTable.reset(gRealWorld->colors().clone());
 }
 
 void ResetTransitions() {
@@ -278,7 +278,7 @@ bool CustomPictFade(short pictID, short clutID) {
 
     ClearScreen();
     Rect pictRect = pict.frame();
-    pictRect.center_in(gRealWorld->bounds);
+    pictRect.center_in(gRealWorld->bounds());
 
     ResetTransitions();
     AutoFadeTo(1, &fadeColor, true);
@@ -307,7 +307,7 @@ bool StartCustomPictFade(short pictID, short clutID, bool fast) {
 
     ClearScreen();
     Rect pictRect = pict.frame();
-    pictRect.center_in(gRealWorld->bounds);
+    pictRect.center_in(gRealWorld->bounds());
 
     ResetTransitions();
     AutoFadeTo(1, &fadeColor, true);
@@ -458,7 +458,7 @@ void PictFade::wax() {
     ClearScreen();
     Picture pict(_pict_id);
     Rect pictRect = pict.frame();
-    pictRect.center_in(gRealWorld->bounds);
+    pictRect.center_in(gRealWorld->bounds());
     pict.draw(pictRect);
 
     RGBColor black = {0, 0, 0};

@@ -58,21 +58,21 @@ void DumpTo(const std::string& path) {
     std::string contents;
     StringBinaryWriter bin(&contents);
 
-    uint32_t width = gRealWorld->bounds.right;
-    uint32_t height = gRealWorld->bounds.bottom;
+    uint32_t width = gRealWorld->bounds().right;
+    uint32_t height = gRealWorld->bounds().bottom;
 
     bin.write<uint32_t>(width);
     bin.write<uint32_t>(height);
 
     for (size_t i = 0; i < 256; ++i) {
-        RGBColor color = gRealWorld->colors->color(i);
+        RGBColor color = gRealWorld->colors().color(i);
         bin.write<uint32_t>(i);
         bin.write(color.red);
         bin.write(color.green);
         bin.write(color.blue);
     }
 
-    bin.write(gRealWorld->baseAddr, width * height);
+    bin.write(gRealWorld->bytes(), width * height);
 
     MakeDirs(DirName(path), 0755);
     int fd = open(path.c_str(), O_WRONLY | O_CREAT, 0644);
@@ -82,9 +82,9 @@ void DumpTo(const std::string& path) {
 
 void ScrollRect(const Rect& rect, int x, int y, const Rect& clip) {
     assert(x == 0 && y == -1);
-    int rowBytes = gActiveWorld->rowBytes & 0x7fff;
+    int rowBytes = gActiveWorld->row_bytes();
     for (int i = std::min(rect.top - 1, clip.top); i < rect.bottom - 1; ++i) {
-        uint8_t* base = gActiveWorld->baseAddr + i * rowBytes + rect.left;
+        uint8_t* base = gActiveWorld->mutable_bytes() + i * rowBytes + rect.left;
         memcpy(base, base + rowBytes, rect.right - rect.left);
     }
 }
@@ -108,23 +108,23 @@ uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue) {
 
 uint8_t GetPixel(int x, int y) {
     const PixMap* p = gRealWorld;
-    return p->baseAddr[x + y * (p->rowBytes & 0x7fff)];
+    return p->bytes()[x + y * p->row_bytes()];
 }
 
 void SetPixel(int x, int y, uint8_t c) {
-    const PixMap* p = gActiveWorld;
-    p->baseAddr[x + y * (p->rowBytes & 0x7fff)] = c;
+    PixMap* p = gActiveWorld;
+    p->mutable_bytes()[x + y * p->row_bytes()] = c;
 }
 
 void SetPixelRow(int x, int y, uint8_t* c, int count) {
-    const PixMap* p = gActiveWorld;
-    memcpy(&p->baseAddr[x + y * (p->rowBytes & 0x7fff)], c, count);
+    PixMap* p = gActiveWorld;
+    memcpy(&p->mutable_bytes()[x + y * p->row_bytes()], c, count);
 }
 
 void ClearScreen() {
-    int width = gActiveWorld->bounds.right;
-    int height = gActiveWorld->bounds.bottom;
-    memset(gActiveWorld->baseAddr, 0xFF, width * height);
+    int width = gActiveWorld->bounds().right;
+    int height = gActiveWorld->bounds().bottom;
+    memset(gActiveWorld->mutable_bytes(), 0xFF, width * height);
 }
 
 void CopyBits(PixMap* source, PixMap* dest, const Rect& source_rect, const Rect& dest_rect) {
@@ -133,19 +133,19 @@ void CopyBits(PixMap* source, PixMap* dest, const Rect& source_rect, const Rect&
     }
 
     ClippedTransfer transfer(source_rect, dest_rect);
-    transfer.ClipSourceTo(source->bounds);
-    transfer.ClipDestTo(dest->bounds);
+    transfer.ClipSourceTo(source->bounds());
+    transfer.ClipDestTo(dest->bounds());
 
     for (int i = 0; i < transfer.Height(); ++i) {
-        unsigned char* sourceBytes
-            = source->baseAddr
+        const uint8_t* sourceBytes
+            = source->bytes()
             + transfer.SourceColumn(0)
-            + transfer.SourceRow(i) * (source->rowBytes & 0x7fff);
+            + transfer.SourceRow(i) * source->row_bytes();
 
-        unsigned char* destBytes
-            = dest->baseAddr
+        uint8_t* destBytes
+            = dest->mutable_bytes()
             + transfer.DestColumn(0)
-            + transfer.DestRow(i) * (dest->rowBytes & 0x7fff);
+            + transfer.DestRow(i) * dest->row_bytes();
 
         memcpy(destBytes, sourceBytes, transfer.Width());
     }
@@ -171,7 +171,7 @@ void RGBBackColor(RGBColor* color) {
 }
 
 void PaintRect(const Rect& rect) {
-    Rect clipped = ClipRectToRect(rect, gActiveWorld->bounds);
+    Rect clipped = ClipRectToRect(rect, gActiveWorld->bounds());
     for (int y = clipped.top; y < clipped.bottom; ++y) {
         for (int x = clipped.left; x < clipped.right; ++x) {
             SetPixel(x, y, currentForeColor);
@@ -181,7 +181,7 @@ void PaintRect(const Rect& rect) {
 
 void MacFillRect(const Rect& rect, Pattern* pattern) {
     static_cast<void>(pattern);
-    Rect clipped = ClipRectToRect(rect, gActiveWorld->bounds);
+    Rect clipped = ClipRectToRect(rect, gActiveWorld->bounds());
     for (int y = clipped.top; y < clipped.bottom; ++y) {
         for (int x = clipped.left; x < clipped.right; ++x) {
             SetPixel(x, y, 255);
@@ -190,7 +190,7 @@ void MacFillRect(const Rect& rect, Pattern* pattern) {
 }
 
 void EraseRect(const Rect& rect) {
-    Rect clipped = ClipRectToRect(rect, gActiveWorld->bounds);
+    Rect clipped = ClipRectToRect(rect, gActiveWorld->bounds());
     for (int y = clipped.top; y < clipped.bottom; ++y) {
         for (int x = clipped.left; x < clipped.right; ++x) {
             SetPixel(x, y, currentBackColor);
@@ -199,7 +199,7 @@ void EraseRect(const Rect& rect) {
 }
 
 void FrameRect(const Rect& rect) {
-    Rect clipped = ClipRectToRect(rect, gActiveWorld->bounds);
+    Rect clipped = ClipRectToRect(rect, gActiveWorld->bounds());
     if (clipped.left == clipped.right || clipped.top == clipped.bottom) {
         return;
     }
@@ -239,8 +239,8 @@ void MoveTo(int x, int y) {
 }
 
 bool IsOnScreen(int x, int y) {
-    int width = gActiveWorld->bounds.right;
-    int height = gActiveWorld->bounds.bottom;
+    int width = gActiveWorld->bounds().right;
+    int height = gActiveWorld->bounds().bottom;
     return 0 <= x && x < width
         && 0 <= y && y < height;
 }
@@ -285,7 +285,7 @@ uint16_t DoubleBits(uint8_t in) {
 
 void RestoreEntries(const ColorTable& table) {
     for (size_t i = 0; i < table.size(); ++i) {
-        gRealWorld->colors->set_color(i, table.color(i));
+        gRealWorld->mutable_colors()->set_color(i, table.color(i));
     }
 }
 

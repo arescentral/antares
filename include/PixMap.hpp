@@ -25,20 +25,28 @@ namespace antares {
 
 class ColorTable;
 
-struct PixMap {
+class PixMap {
+  public:
     PixMap(int32_t width, int32_t height);
     ~PixMap();
+
+    const Rect& bounds() const;
+    const ColorTable& colors() const;
+    int row_bytes() const;
+    const uint8_t* bytes() const;
+
+    uint8_t* mutable_bytes();
+    ColorTable* mutable_colors();
 
     void resize(const Rect& r);
 
     void set(int x, int y, uint8_t color);
     uint8_t get(int x, int y) const;
 
-    Rect bounds;
-    ColorTable* colors;
-    long rowBytes;
-    uint8_t* baseAddr;
-    int pixelSize;
+  private:
+    Rect _bounds;
+    ColorTable* _colors;
+    uint8_t* _bytes;
 
     DISALLOW_COPY_AND_ASSIGN(PixMap);
 };

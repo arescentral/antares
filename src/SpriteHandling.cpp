@@ -461,11 +461,11 @@ void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect
 
                 scaleCalc = (dRect->right - dRect->left);
 
-                rowbytes = pixMap->rowBytes;
+                rowbytes = pixMap->row_bytes();
 
                 destRowPlus = rowbytes - scaleCalc;
                 shapeRowPlus = sprite->width - (sourceRect.right - sourceRect.left);                                              //KLUDGE ALERT
-                destByte = pixMap->baseAddr + dRect->top * rowbytes + dRect->left;
+                destByte = pixMap->mutable_bytes() + dRect->top * rowbytes + dRect->left;
                 shapeByte = sprite->data + sourceRect.top * sprite->width + sourceRect.left;
 
                 vmap = gScaleVMap + mapRect.top;
@@ -475,7 +475,7 @@ void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect
 
                 shapeRowPlus += *(hmapoffset + scaleCalc);
                 mapWidth = sprite->width;
-                chunkByte = pixMap->baseAddr + (pixMap->bounds.bottom) * rowbytes;
+                chunkByte = pixMap->mutable_bytes() + (pixMap->bounds().bottom) * rowbytes;
 
                 do
                 {
@@ -586,9 +586,9 @@ void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect
                 } // otherwise sourceRect is already set
 
                 scaleCalc = (dRect->right - dRect->left);
-                rowbytes = pixMap->rowBytes;
+                rowbytes = pixMap->row_bytes();
                 destRowPlus = rowbytes - scaleCalc;
-                destByte = pixMap->baseAddr + dRect->top * rowbytes + dRect->left;
+                destByte = pixMap->mutable_bytes() + dRect->top * rowbytes + dRect->left;
                 shapeByte = sprite->data + sourceRect.top * sprite->width + sourceRect.left;
 
                 vmap = gScaleVMap + sourceRect.top;
@@ -772,11 +772,11 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, R
 
                 scaleCalc = (dRect->right - dRect->left);
 
-                rowbytes = pixMap->rowBytes;
+                rowbytes = pixMap->row_bytes();
 
                 destRowPlus = rowbytes - scaleCalc;
                 shapeRowPlus = sprite->width - (sourceRect.right - sourceRect.left);                                              //KLUDGE ALERT
-                destByte = pixMap->baseAddr + dRect->top * rowbytes + dRect->left;
+                destByte = pixMap->mutable_bytes() + dRect->top * rowbytes + dRect->left;
                 shapeByte = sprite->data + sourceRect.top * sprite->width + sourceRect.left;
 
                 vmap = gScaleVMap + mapRect.top;
@@ -786,7 +786,7 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, R
 
                 shapeRowPlus += *(hmapoffset + scaleCalc);
                 mapWidth = sprite->width;
-                chunkByte = pixMap->baseAddr + (pixMap->bounds.bottom) * rowbytes;
+                chunkByte = pixMap->mutable_bytes() + (pixMap->bounds().bottom) * rowbytes;
 
                 do
                 {
@@ -888,9 +888,9 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, R
                 } // otherwise sourceRect is already set
 
                 scaleCalc = (dRect->right - dRect->left);
-                rowbytes = pixMap->rowBytes;
+                rowbytes = pixMap->row_bytes();
                 destRowPlus = rowbytes - scaleCalc;
-                destByte = pixMap->baseAddr + dRect->top * rowbytes + dRect->left;
+                destByte = pixMap->mutable_bytes() + dRect->top * rowbytes + dRect->left;
                 shapeByte = sprite->data + sourceRect.top * sprite->width + sourceRect.left;
 
                 vmap = gScaleVMap + sourceRect.top;
@@ -1081,11 +1081,11 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Re
 
                 scaleCalc = (dRect->right - dRect->left);
 
-                rowbytes = pixMap->rowBytes;
+                rowbytes = pixMap->row_bytes();
 
                 destRowPlus = rowbytes - scaleCalc;
                 shapeRowPlus = sprite->width - (sourceRect.right - sourceRect.left);                                              //KLUDGE ALERT
-                destByte = pixMap->baseAddr + dRect->top * rowbytes + dRect->left;
+                destByte = pixMap->mutable_bytes() + dRect->top * rowbytes + dRect->left;
                 shapeByte = sprite->data + sourceRect.top * sprite->width + sourceRect.left;
 
                 vmap = gScaleVMap + mapRect.top;
@@ -1095,7 +1095,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Re
 
                 shapeRowPlus += *(hmapoffset + scaleCalc);
                 mapWidth = sprite->width;
-                chunkByte = pixMap->baseAddr + (pixMap->bounds.bottom) * rowbytes;
+                chunkByte = pixMap->mutable_bytes() + (pixMap->bounds().bottom) * rowbytes;
 
                 if ( color != 0xff)
                 {
@@ -1235,9 +1235,9 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Re
                 } // otherwise sourceRect is already set
 
                 scaleCalc = (dRect->right - dRect->left);
-                rowbytes = pixMap->rowBytes;
+                rowbytes = pixMap->row_bytes();
                 destRowPlus = rowbytes - scaleCalc;
-                destByte = pixMap->baseAddr + dRect->top * rowbytes + dRect->left;
+                destByte = pixMap->mutable_bytes() + dRect->top * rowbytes + dRect->left;
                 shapeByte = sprite->data + sourceRect.top * sprite->width + sourceRect.left;
 
                 vmap = gScaleVMap + sourceRect.top;
@@ -1435,11 +1435,11 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
 
                 scaleCalc = (dRect->right - dRect->left);
 
-                rowbytes = pixMap->rowBytes;
+                rowbytes = pixMap->row_bytes();
 
                 destRowPlus = rowbytes - scaleCalc;
                 shapeRowPlus = sprite->width - (sourceRect.right - sourceRect.left);                                              //KLUDGE ALERT
-                destByte = pixMap->baseAddr + dRect->top * rowbytes + dRect->left;
+                destByte = pixMap->mutable_bytes() + dRect->top * rowbytes + dRect->left;
                 shapeByte = sprite->data + sourceRect.top * sprite->width + sourceRect.left;
 
                 vmap = gScaleVMap + mapRect.top;
@@ -1449,7 +1449,7 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
 
                 shapeRowPlus += *(hmapoffset + scaleCalc);
                 mapWidth = sprite->width;
-                chunkByte = pixMap->baseAddr + (pixMap->bounds.bottom) * rowbytes;
+                chunkByte = pixMap->mutable_bytes() + (pixMap->bounds().bottom) * rowbytes;
 
                 sourceY = sourceRect.top;
                 do
@@ -1570,9 +1570,9 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
                 } // otherwise sourceRect is already set
 
                 scaleCalc = (dRect->right - dRect->left);
-                rowbytes = pixMap->rowBytes;
+                rowbytes = pixMap->row_bytes();
                 destRowPlus = rowbytes - scaleCalc;
-                destByte = pixMap->baseAddr + dRect->top * rowbytes + dRect->left;
+                destByte = pixMap->mutable_bytes() + dRect->top * rowbytes + dRect->left;
                 shapeByte = sprite->data + sourceRect.top * sprite->width + sourceRect.left;
 
                 vmap = gScaleVMap + sourceRect.top;
@@ -1907,10 +1907,10 @@ void TestByte(unsigned char *dbyte, PixMap *pixMap, unsigned char* name) {
     long            rowbytes, rowplus;
     unsigned char* lbyte;
 
-    rowbytes = pixMap->rowBytes;
-    rowplus = (pixMap->bounds.bottom - pixMap->bounds.top + 1) * rowbytes;
-    lbyte = pixMap->baseAddr + rowplus;
-    if (( dbyte < pixMap->baseAddr) || ( dbyte >= lbyte))
+    rowbytes = pixMap->row_bytes();
+    rowplus = (pixMap->bounds().bottom - pixMap->bounds().top + 1) * rowbytes;
+    lbyte = pixMap->mutable_bytes() + rowplus;
+    if (( dbyte < pixMap->mutable_bytes()) || ( dbyte >= lbyte))
     {
         DebugStr( name);
         WriteDebugLine(name);

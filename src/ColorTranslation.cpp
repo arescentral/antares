@@ -45,7 +45,7 @@ void MakeColorTranslatorTable(const ColorTable& referenceTable) {
     int                 i, j;
     RGBColor            paletteColor, deviceColor;
 
-    const ColorTable& deviceTable = *gActiveWorld->colors;
+    const ColorTable& deviceTable = gActiveWorld->colors();
     entry = gColorTranslateTable.get();
 //  referenceTable = GetCTable( kReferenceColorTableID);
 
