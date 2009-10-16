@@ -128,7 +128,7 @@ void DrawNateRect(PixMap* destPix, Rect* destRect, long hoff, long voff, unsigne
         return;
     }
 
-    int32_t drowPlus = destPix->rowBytes & 0x3fff;
+    int32_t drowPlus = destPix->rowBytes;
     unsigned char* bytes = destPix->baseAddr + destRect->top * drowPlus + destRect->left;
     for (int i = destRect->top; i < destRect->bottom; ++i) {
         memset(bytes, color, width);
@@ -151,7 +151,7 @@ void DrawNateRectVScan( PixMap *destPix, Rect *destRect, long hoff, long voff,
         return;
     }
 
-    int32_t drowPlus = destPix->rowBytes & 0x3fff;
+    int32_t drowPlus = destPix->rowBytes;
     unsigned char* bytes = destPix->baseAddr + destRect->top * drowPlus;
     for (int i = destRect->top; i < destRect->bottom; ++i) {
         for (int j = destRect->left; j < destRect->right; ++j) {
@@ -190,7 +190,7 @@ void DrawNateTriangleUpClipped(
         return;
     }
 
-    drowPlus = destPix->rowBytes & 0x3fff;
+    drowPlus = destPix->rowBytes;
     trueWidth = destRect->right - destRect->left;
 
     if ( destRect->left < clipRect.left)
@@ -292,7 +292,7 @@ void DrawNatePlusClipped( PixMap *destPix, Rect *destRect,
         return;
     }
 
-    drowPlus = destPix->rowBytes & 0x3fff;
+    drowPlus = destPix->rowBytes;
     trueWidth = destRect->right - destRect->left - 1;
 
     if ( destRect->left < clipRect.left)
@@ -404,7 +404,7 @@ void DrawNateDiamondClipped(
         return;
     }
 
-    drowPlus = destPix->rowBytes & 0x3fff;
+    drowPlus = destPix->rowBytes;
     trueWidth = destRect->right - destRect->left - 1;
 
     if ( destRect->left < clipRect.left)
@@ -868,7 +868,7 @@ void DrawNateLine(
 
 
     // Point to the bitmap address first pixel to draw
-    drowPlus = destPix->rowBytes & 0x3fff;
+    drowPlus = destPix->rowBytes;
     dbyte = destPix->baseAddr + (YStart + voff) * drowPlus +
                 XStart + hoff;
 
@@ -1122,11 +1122,11 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, const Rect& clipRect,
 
 
     // Point to the bitmap address first pixel to draw
-    drowPlus = destPix->rowBytes & 0x3fff;
+    drowPlus = destPix->rowBytes;
     dbyte = destPix->baseAddr + (YStart + voff) * drowPlus +
                 XStart + hoff;
 
-    srowPlus = sourcePix->rowBytes & 0x3fff;
+    srowPlus = sourcePix->rowBytes;
     sbyte = sourcePix->baseAddr + (YStart) * srowPlus + XStart;
 
     // Figure out whether we're going left or right, and how far we're

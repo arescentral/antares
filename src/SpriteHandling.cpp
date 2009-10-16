@@ -462,9 +462,6 @@ void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect
                 scaleCalc = (dRect->right - dRect->left);
 
                 rowbytes = pixMap->rowBytes;
-                rowbytes &= 0x0000ffff;
-                rowbytes |= 0x00008000;
-                rowbytes ^= 0x00008000;
 
                 destRowPlus = rowbytes - scaleCalc;
                 shapeRowPlus = sprite->width - (sourceRect.right - sourceRect.left);                                              //KLUDGE ALERT
@@ -589,7 +586,7 @@ void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect
                 } // otherwise sourceRect is already set
 
                 scaleCalc = (dRect->right - dRect->left);
-                rowbytes = 0x0000ffff & (pixMap->rowBytes ^ ROW_BYTES_MASK);
+                rowbytes = pixMap->rowBytes;
                 destRowPlus = rowbytes - scaleCalc;
                 destByte = pixMap->baseAddr + dRect->top * rowbytes + dRect->left;
                 shapeByte = sprite->data + sourceRect.top * sprite->width + sourceRect.left;
@@ -776,9 +773,6 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, R
                 scaleCalc = (dRect->right - dRect->left);
 
                 rowbytes = pixMap->rowBytes;
-                rowbytes &= 0x0000ffff;
-                rowbytes |= 0x00008000;
-                rowbytes ^= 0x00008000;
 
                 destRowPlus = rowbytes - scaleCalc;
                 shapeRowPlus = sprite->width - (sourceRect.right - sourceRect.left);                                              //KLUDGE ALERT
@@ -894,7 +888,7 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, R
                 } // otherwise sourceRect is already set
 
                 scaleCalc = (dRect->right - dRect->left);
-                rowbytes = 0x0000ffff & (pixMap->rowBytes ^ ROW_BYTES_MASK);
+                rowbytes = pixMap->rowBytes;
                 destRowPlus = rowbytes - scaleCalc;
                 destByte = pixMap->baseAddr + dRect->top * rowbytes + dRect->left;
                 shapeByte = sprite->data + sourceRect.top * sprite->width + sourceRect.left;
@@ -1088,9 +1082,6 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Re
                 scaleCalc = (dRect->right - dRect->left);
 
                 rowbytes = pixMap->rowBytes;
-                rowbytes &= 0x0000ffff;
-                rowbytes |= 0x00008000;
-                rowbytes ^= 0x00008000;
 
                 destRowPlus = rowbytes - scaleCalc;
                 shapeRowPlus = sprite->width - (sourceRect.right - sourceRect.left);                                              //KLUDGE ALERT
@@ -1244,7 +1235,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Re
                 } // otherwise sourceRect is already set
 
                 scaleCalc = (dRect->right - dRect->left);
-                rowbytes = 0x0000ffff & (pixMap->rowBytes ^ ROW_BYTES_MASK);
+                rowbytes = pixMap->rowBytes;
                 destRowPlus = rowbytes - scaleCalc;
                 destByte = pixMap->baseAddr + dRect->top * rowbytes + dRect->left;
                 shapeByte = sprite->data + sourceRect.top * sprite->width + sourceRect.left;
@@ -1445,9 +1436,6 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
                 scaleCalc = (dRect->right - dRect->left);
 
                 rowbytes = pixMap->rowBytes;
-                rowbytes &= 0x0000ffff;
-                rowbytes |= 0x00008000;
-                rowbytes ^= 0x00008000;
 
                 destRowPlus = rowbytes - scaleCalc;
                 shapeRowPlus = sprite->width - (sourceRect.right - sourceRect.left);                                              //KLUDGE ALERT
@@ -1582,7 +1570,7 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
                 } // otherwise sourceRect is already set
 
                 scaleCalc = (dRect->right - dRect->left);
-                rowbytes = 0x0000ffff & (pixMap->rowBytes ^ ROW_BYTES_MASK);
+                rowbytes = pixMap->rowBytes;
                 destRowPlus = rowbytes - scaleCalc;
                 destByte = pixMap->baseAddr + dRect->top * rowbytes + dRect->left;
                 shapeByte = sprite->data + sourceRect.top * sprite->width + sourceRect.left;
@@ -1919,7 +1907,7 @@ void TestByte(unsigned char *dbyte, PixMap *pixMap, unsigned char* name) {
     long            rowbytes, rowplus;
     unsigned char* lbyte;
 
-    rowbytes = 0x0000ffff & ((pixMap->rowBytes | ROW_BYTES_MASK) ^ ROW_BYTES_MASK);
+    rowbytes = pixMap->rowBytes;
     rowplus = (pixMap->bounds.bottom - pixMap->bounds.top + 1) * rowbytes;
     lbyte = pixMap->baseAddr + rowplus;
     if (( dbyte < pixMap->baseAddr) || ( dbyte >= lbyte))

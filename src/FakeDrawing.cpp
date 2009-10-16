@@ -56,7 +56,7 @@ public:
 
 PixMap::PixMap(int width, int height)
         : bounds(0, 0, width, height) {
-    rowBytes = width | 0x8000;
+    rowBytes = width;
     baseAddr = new unsigned char[width * height];
     pixelSize = 1;
     colors = new ColorTable(256);

@@ -29,7 +29,6 @@ namespace antares {
 
 #define kNoSpriteTable  -1
 
-#define ROW_BYTES_MASK  0x8000
 #define kPixResType             'SMIV'
 
 #define BLOCK_TYPE      0
