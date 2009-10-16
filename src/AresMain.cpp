@@ -32,7 +32,6 @@
 #include "Debug.hpp"
 #include "DirectText.hpp"
 
-#include "EnvironmentCheck.hpp"
 #include "Error.hpp"
 
 #include "FakeDrawing.hpp"
