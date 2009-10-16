@@ -149,39 +149,40 @@ void natePixType::clear() {
     _entries.clear();
 }
 
-long GetNatePixTablePixNum(TypedHandle<natePixType> table) {
-    return (*table)->size();
+long GetNatePixTablePixNum(const natePixType& table) {
+    return table.size();
 }
 
-int GetNatePixTableNatePixWidth(TypedHandle<natePixType> table, long pixnum) {
-    return (*table)->at(pixnum)->width();
+int GetNatePixTableNatePixWidth(const natePixType& table, long pixnum) {
+    return table.at(pixnum)->width();
 }
 
-int GetNatePixTableNatePixHeight(TypedHandle<natePixType> table, long pixnum) {
-    return (*table)->at(pixnum)->height();
+int GetNatePixTableNatePixHeight(const natePixType& table, long pixnum) {
+    return table.at(pixnum)->height();
 }
 
-int GetNatePixTableNatePixHRef(TypedHandle<natePixType> table, long pixnum) {
-    return (*table)->at(pixnum)->h_offset();
+int GetNatePixTableNatePixHRef(const natePixType& table, long pixnum) {
+    return table.at(pixnum)->h_offset();
 }
 
-int GetNatePixTableNatePixVRef(TypedHandle<natePixType> table, long pixnum) {
-    return (*table)->at(pixnum)->v_offset();
+int GetNatePixTableNatePixVRef(const natePixType& table, long pixnum) {
+    return table.at(pixnum)->v_offset();
 }
 
-uint8_t* GetNatePixTableNatePixData(TypedHandle<natePixType> table, long pixnum) {
-    return (*table)->at(pixnum)->data();
+uint8_t* GetNatePixTableNatePixData(const natePixType& table, long pixnum) {
+    return table.at(pixnum)->data();
 }
 
 // RemapNatePixTableColor:
 //  given a NatePixTable, converts the raw pixel data based on custom color table, and translates
 //  into device's color table, using Backbone Graphic's GetTranslateIndex().
 
-void RemapNatePixTableColor(TypedHandle<natePixType> table) {
-    for (int l = 0; l < GetNatePixTablePixNum(table); ++l) {
-        int w = GetNatePixTableNatePixWidth(table, l);
-        int h = GetNatePixTableNatePixHeight(table, l);
-        uint8_t* p = GetNatePixTableNatePixData(table, l);
+void RemapNatePixTableColor(natePixType* table) {
+    for (size_t l = 0; l < table->size(); ++l) {
+        natePixEntryType* frame = table->at(l);
+        int w = frame->width();
+        int h = frame->height();
+        uint8_t* p = frame->data();
         for (int i = 0; i < h; ++i) {
             for (int j = 0; j < w; ++j) {
                 *p = GetTranslateIndex(*p);
@@ -195,17 +196,18 @@ void RemapNatePixTableColor(TypedHandle<natePixType> table) {
 //  given a NatePixTable, converts the raw pixel data based on custom color table, and translates
 //  into device's color table, but colorizes to color.
 
-void ColorizeNatePixTableColor(TypedHandle<natePixType> table, uint8_t color) {
+void ColorizeNatePixTableColor(natePixType* table, uint8_t color) {
     color <<= 4;
 
-    for (int l = 0; l < GetNatePixTablePixNum(table); ++l) {
-        const int w = GetNatePixTableNatePixWidth(table, l);
-        const int h = GetNatePixTableNatePixHeight(table, l);
+    for (size_t l = 0; l < table->size(); ++l) {
+        natePixEntryType* frame = table->at(l);
+        const int w = frame->width();
+        const int h = frame->height();
 
         // count the # of pixels, and # of pixels that are white
         int white_count = 0;
         int pixel_count = 0;
-        uint8_t* p = GetNatePixTableNatePixData(table, l);
+        uint8_t* p = frame->data();
         for (int i = 0; i < h; ++i) {
             for (int j = 0; j < w; ++j) {
                 if (*p != 0) {
@@ -222,7 +224,7 @@ void ColorizeNatePixTableColor(TypedHandle<natePixType> table, uint8_t color) {
         // color table, then colorize all opaque (non-0x00) pixels.  Otherwise, only colorize
         // pixels which are opaque and outside of the white band (which is 0x01..0x0F).
         const uint8_t color_mask = (white_count > (pixel_count / 3)) ? 0xFF : 0xF0;
-        p = GetNatePixTableNatePixData(table, l);
+        p = frame->data();
         for (int i = 0; i < h; ++i) {
             for (int j = 0; j < w; ++j) {
                 if (*p & color_mask) {

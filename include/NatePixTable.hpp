@@ -45,16 +45,15 @@ class natePixType {
     std::vector<natePixEntryType*> _entries;
 };
 
-unsigned long GetNatePixTableSize(TypedHandle<natePixType>);
-long GetNatePixTablePixNum(TypedHandle<natePixType>);
-int GetNatePixTableNatePixWidth(TypedHandle<natePixType>, long);
-int GetNatePixTableNatePixHeight(TypedHandle<natePixType>, long);
-int GetNatePixTableNatePixHRef(TypedHandle<natePixType>, long);
-int GetNatePixTableNatePixVRef(TypedHandle<natePixType>, long);
-uint8_t* GetNatePixTableNatePixData(TypedHandle<natePixType>, long);
-Handle GetNatePixTableNatePixDataCopy(TypedHandle<natePixType>, long);
-void RemapNatePixTableColor(TypedHandle<natePixType>);
-void ColorizeNatePixTableColor(TypedHandle<natePixType>, uint8_t);
+unsigned long GetNatePixTableSize(const natePixType& table);
+long GetNatePixTablePixNum(const natePixType& table);
+int GetNatePixTableNatePixWidth(const natePixType& table, long pixnum);
+int GetNatePixTableNatePixHeight(const natePixType& table, long pixnum);
+int GetNatePixTableNatePixHRef(const natePixType& table, long pixnum);
+int GetNatePixTableNatePixVRef(const natePixType& table, long pixnum);
+uint8_t* GetNatePixTableNatePixData(const natePixType& table, long pixnum);
+void RemapNatePixTableColor(natePixType* table);
+void ColorizeNatePixTableColor(natePixType* table, uint8_t color);
 
 }  // namespace antares
 

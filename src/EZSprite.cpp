@@ -44,8 +44,11 @@ void EZDrawSpriteOffByID( short resID, long whichShape, long scale, unsigned cha
         return;
     }
 
-    if ( color != 0) ColorizeNatePixTableColor( spriteTable, color);
-    else RemapNatePixTableColor( spriteTable);
+    if (color != 0) {
+        ColorizeNatePixTableColor(*spriteTable, color);
+    } else {
+        RemapNatePixTableColor(*spriteTable);
+    }
 
     DrawInOffWorld();
     NormalizeColors();
@@ -71,8 +74,11 @@ void EZDrawSpriteOffToOnByID( short resID, long whichShape, long scale,
         return;
     }
 
-    if ( color != 0) ColorizeNatePixTableColor( spriteTable, color);
-    else RemapNatePixTableColor( spriteTable);
+    if (color != 0) {
+        ColorizeNatePixTableColor(*spriteTable, color);
+    } else {
+        RemapNatePixTableColor(*spriteTable);
+    }
 
     DrawInOffWorld();
     NormalizeColors();
@@ -134,11 +140,11 @@ void EZMakeSpriteFromID( short resID, TypedHandle<natePixType>* spriteTable, spr
         return;
     }
 
-    aSpritePix->data = GetNatePixTableNatePixData( *spriteTable, whichShape);
-    aSpritePix->center.h = GetNatePixTableNatePixHRef( *spriteTable, whichShape);
-    aSpritePix->center.v = GetNatePixTableNatePixVRef( *spriteTable, whichShape);
-    aSpritePix->width = GetNatePixTableNatePixWidth( *spriteTable, whichShape);
-    aSpritePix->height = GetNatePixTableNatePixHeight( *spriteTable, whichShape);
+    aSpritePix->data = GetNatePixTableNatePixData(***spriteTable, whichShape);
+    aSpritePix->center.h = GetNatePixTableNatePixHRef(***spriteTable, whichShape);
+    aSpritePix->center.v = GetNatePixTableNatePixVRef(***spriteTable, whichShape);
+    aSpritePix->width = GetNatePixTableNatePixWidth(***spriteTable, whichShape);
+    aSpritePix->height = GetNatePixTableNatePixHeight(***spriteTable, whichShape);
 }
 
 void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned char color,
@@ -158,8 +164,11 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
         return;
     }
 
-    if ( color != 0) ColorizeNatePixTableColor( spriteTable, color);
-    else RemapNatePixTableColor( spriteTable);
+    if (color != 0) {
+        ColorizeNatePixTableColor(*spriteTable, color);
+    } else {
+        RemapNatePixTableColor(*spriteTable);
+    }
 
     DrawInOffWorld();
     NormalizeColors();
@@ -171,11 +180,11 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
     dRect.top = bounds.top;
     dRect.bottom = bounds.bottom;
 
-    aSpritePix.data = GetNatePixTableNatePixData( spriteTable, whichShape);
-    aSpritePix.center.h = GetNatePixTableNatePixHRef( spriteTable, whichShape);
-    aSpritePix.center.v = GetNatePixTableNatePixVRef( spriteTable, whichShape);
-    aSpritePix.width = GetNatePixTableNatePixWidth( spriteTable, whichShape);
-    aSpritePix.height = GetNatePixTableNatePixHeight( spriteTable, whichShape);
+    aSpritePix.data = GetNatePixTableNatePixData(**spriteTable, whichShape);
+    aSpritePix.center.h = GetNatePixTableNatePixHRef(**spriteTable, whichShape);
+    aSpritePix.center.v = GetNatePixTableNatePixVRef(**spriteTable, whichShape);
+    aSpritePix.width = GetNatePixTableNatePixWidth(**spriteTable, whichShape);
+    aSpritePix.height = GetNatePixTableNatePixHeight(**spriteTable, whichShape);
 
     thisScale = scale;//SCALE_SCALE;
     // calculate the correct position

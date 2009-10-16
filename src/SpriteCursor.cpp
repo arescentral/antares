@@ -221,11 +221,11 @@ void DrawSpriteCursorSprite( Rect *clipRect)
     {
         pixTable = gSpriteCursor->sprite.table;
         whichShape = gSpriteCursor->sprite.whichShape;
-        aSpritePix.data = GetNatePixTableNatePixData( pixTable, whichShape);
-        aSpritePix.center.h = GetNatePixTableNatePixHRef( pixTable, whichShape);
-        aSpritePix.center.v = GetNatePixTableNatePixVRef( pixTable, whichShape);
-        aSpritePix.width = GetNatePixTableNatePixWidth( pixTable, whichShape);
-        aSpritePix.height = GetNatePixTableNatePixHeight( pixTable, whichShape);
+        aSpritePix.data = GetNatePixTableNatePixData(**pixTable, whichShape);
+        aSpritePix.center.h = GetNatePixTableNatePixHRef(**pixTable, whichShape);
+        aSpritePix.center.v = GetNatePixTableNatePixVRef(**pixTable, whichShape);
+        aSpritePix.width = GetNatePixTableNatePixWidth(**pixTable, whichShape);
+        aSpritePix.height = GetNatePixTableNatePixHeight(**pixTable, whichShape);
 
         OptScaleSpritePixInPixMap( &aSpritePix, gSpriteCursor->where, SCALE_SCALE,
                 &sRect, clipRect, gOffWorld);

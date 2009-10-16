@@ -1466,11 +1466,11 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                     whichShape = 0;
 
                 // get the picture data
-                aSpritePix.data = GetNatePixTableNatePixData( pixTable, whichShape);
-                aSpritePix.center.h = GetNatePixTableNatePixHRef( pixTable, whichShape);
-                aSpritePix.center.v = GetNatePixTableNatePixVRef( pixTable, whichShape);
-                aSpritePix.width = GetNatePixTableNatePixWidth( pixTable, whichShape);
-                aSpritePix.height = GetNatePixTableNatePixHeight( pixTable, whichShape);
+                aSpritePix.data = GetNatePixTableNatePixData(**pixTable, whichShape);
+                aSpritePix.center.h = GetNatePixTableNatePixHRef(**pixTable, whichShape);
+                aSpritePix.center.v = GetNatePixTableNatePixVRef(**pixTable, whichShape);
+                aSpritePix.width = GetNatePixTableNatePixWidth(**pixTable, whichShape);
+                aSpritePix.height = GetNatePixTableNatePixHeight(**pixTable, whichShape);
 
                 // calculate the correct size
 

@@ -305,11 +305,11 @@ void GetRealObjectSpriteData( coordPointType *realCoord,
     //  but we only have a ptr.  Thus we pass back a ptr in the ->data field.  It must be altered to be a ptr to a ptr
     //  before it is used in any sprite drawing routines.
 
-    aSpritePix->data = GetNatePixTableNatePixData( pixTable, whichShape);
-    aSpritePix->center.h = GetNatePixTableNatePixHRef( pixTable, whichShape);
-    aSpritePix->center.v = GetNatePixTableNatePixVRef( pixTable, whichShape);
-    aSpritePix->width = GetNatePixTableNatePixWidth( pixTable, whichShape);
-    aSpritePix->height = GetNatePixTableNatePixHeight( pixTable, whichShape);
+    aSpritePix->data = GetNatePixTableNatePixData(**pixTable, whichShape);
+    aSpritePix->center.h = GetNatePixTableNatePixHRef(**pixTable, whichShape);
+    aSpritePix->center.v = GetNatePixTableNatePixVRef(**pixTable, whichShape);
+    aSpritePix->width = GetNatePixTableNatePixWidth(**pixTable, whichShape);
+    aSpritePix->height = GetNatePixTableNatePixHeight(**pixTable, whichShape);
 
     tlong = *thisScale = implicit_cast<long>(maxSize) * SCALE_SCALE;
     *thisScale /= aSpritePix->width;

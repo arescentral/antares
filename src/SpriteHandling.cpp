@@ -249,12 +249,10 @@ TypedHandle<natePixType> AddPixTable( short resID)
 //      WriteDebugLine((char *)"\pADDPIX");
 //      WriteDebugLong( resID);
 
-        if ( color == 0)
-        {
-            RemapNatePixTableColor( gPixTable[i].resource);
-        } else
-        {
-            ColorizeNatePixTableColor( gPixTable[i].resource, color);
+        if (color == 0) {
+            RemapNatePixTableColor(*gPixTable[i].resource);
+        } else {
+            ColorizeNatePixTableColor(*gPixTable[i].resource, color);
         }
 
         gPixTable[i].resID = resID;
@@ -1709,11 +1707,11 @@ void DrawSpriteTableInOffWorld( Rect *clipRect)
     //      if (( whichShape < 0) || ( whichShape >= GetNatePixTablePixNum( pixTable)))
     //          WriteDebugLong( whichShape);
 
-                    aSpritePix.data = GetNatePixTableNatePixData( pixTable, aSprite->whichShape);
-                    aSpritePix.center.h = GetNatePixTableNatePixHRef( pixTable, whichShape);
-                    aSpritePix.center.v = GetNatePixTableNatePixVRef( pixTable, whichShape);
-                    aSpritePix.width = GetNatePixTableNatePixWidth( pixTable, whichShape);
-                    aSpritePix.height = GetNatePixTableNatePixHeight( pixTable, whichShape);
+                    aSpritePix.data = GetNatePixTableNatePixData(**pixTable, aSprite->whichShape);
+                    aSpritePix.center.h = GetNatePixTableNatePixHRef(**pixTable, whichShape);
+                    aSpritePix.center.v = GetNatePixTableNatePixVRef(**pixTable, whichShape);
+                    aSpritePix.width = GetNatePixTableNatePixWidth(**pixTable, whichShape);
+                    aSpritePix.height = GetNatePixTableNatePixHeight(**pixTable, whichShape);
 
                     trueScale = aSprite->scale * gAbsoluteScale;
                     trueScale >>= SHIFT_SCALE;
@@ -1819,8 +1817,7 @@ void GetOldSpritePixData( spriteType *sourceSprite, spritePix *oldData)
         whichShape = sourceSprite->whichShape;
 
 //      WriteDebugLong( pixTable);
-        if ( whichShape >= GetNatePixTablePixNum( pixTable))
-        {
+        if (whichShape >= GetNatePixTablePixNum(**pixTable)) {
             Str255  resIDString, shapeNumString;
 
             NumToString( sourceSprite->resID, resIDString);
@@ -1831,11 +1828,11 @@ void GetOldSpritePixData( spriteType *sourceSprite, spritePix *oldData)
 //          Debugger();
             return;
         }
-        oldData->data = GetNatePixTableNatePixData( pixTable, sourceSprite->whichShape);
-        oldData->center.h = GetNatePixTableNatePixHRef( pixTable, whichShape);
-        oldData->center.v = GetNatePixTableNatePixVRef( pixTable, whichShape);
-        oldData->width = GetNatePixTableNatePixWidth( pixTable, whichShape);
-        oldData->height = GetNatePixTableNatePixHeight( pixTable, whichShape);
+        oldData->data = GetNatePixTableNatePixData(**pixTable, sourceSprite->whichShape);
+        oldData->center.h = GetNatePixTableNatePixHRef(**pixTable, whichShape);
+        oldData->center.v = GetNatePixTableNatePixVRef(**pixTable, whichShape);
+        oldData->width = GetNatePixTableNatePixWidth(**pixTable, whichShape);
+        oldData->height = GetNatePixTableNatePixHeight(**pixTable, whichShape);
     }
 }
 
