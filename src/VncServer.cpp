@@ -32,8 +32,6 @@
 
 namespace antares {
 
-extern scoped_ptr<Window> fakeWindow;
-
 namespace {
 
 class SocketBinaryReader : public BinaryReader {
@@ -518,8 +516,8 @@ struct FramebufferPixel {
 }  // namespace
 
 bool VncVideoDriver::vnc_poll(int64_t timeout) {
-    int width = fakeWindow->portRect.right;
-    int height = fakeWindow->portRect.bottom;
+    int width = gRealWorld->bounds.right;
+    int height = gRealWorld->bounds.bottom;
     SocketBinaryReader in(_socket.fd());
     SocketBinaryWriter out(_socket.fd());
     int64_t stop_time = usecs() + timeout;
@@ -582,10 +580,10 @@ bool VncVideoDriver::vnc_poll(int64_t timeout) {
                         rect.height = height;
                         rect.encoding_type = RAW;
 
-                        const ColorTable& table = *fakeWindow->portBits.colors;
+                        const ColorTable& table = *gRealWorld->colors;
                         scoped_array<FramebufferPixel> pixels(new FramebufferPixel[width * height]);
                         for (int i = 0; i < width * height; ++i) {
-                            uint8_t color = fakeWindow->portBits.baseAddr[i];
+                            uint8_t color = gRealWorld->baseAddr[i];
                             pixels.get()[i].red = table.color(color).red >> 8;
                             pixels.get()[i].green = table.color(color).green >> 8;
                             pixels.get()[i].blue = table.color(color).blue >> 8;
@@ -676,8 +674,8 @@ VncVideoDriver::VncVideoDriver(int port)
 
     SocketBinaryReader in(_socket.fd());
     SocketBinaryWriter out(_socket.fd());
-    int width = fakeWindow->portRect.right;
-    int height = fakeWindow->portRect.bottom;
+    int width = gRealWorld->bounds.right;
+    int height = gRealWorld->bounds.bottom;
 
     {
         // Negotiate version of RFB protocol.  Only 3.8 is offered or accepted.

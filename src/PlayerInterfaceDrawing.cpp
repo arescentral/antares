@@ -240,7 +240,6 @@ enum inlineKindType {
     kVClearPictKind = 2
 };
 
-extern CWindowPtr       gTheWindow;
 extern directTextType*  gDirectText;
 
 void DrawPlayerInterfacePlainRect( Rect *dRect, unsigned char color,

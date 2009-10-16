@@ -110,7 +110,6 @@ inline int mHexDigitValue(char c) {
 extern directTextType   *gDirectText;
 extern long             CLIP_LEFT, CLIP_RIGHT, CLIP_BOTTOM;
 
-extern WindowPtr        gTheWindow;
 extern long             gNatePortLeft, gNatePortTop, WORLD_HEIGHT, WORLD_WIDTH;
 extern scenarioType     *gThisScenario; // for special message labels
 extern PixMap*          gActiveWorld;

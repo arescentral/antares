@@ -65,12 +65,7 @@ struct Window;
 typedef Window* WindowPtr;
 typedef Window** WindowRef;
 
-STUB1(MacShowWindow, void(Window*));
-STUB2(MacFindWindow, short(Point where, Window** window), 0);
 STUB1(GlobalToLocal, void(Point*));
-
-typedef Window CWindow;
-typedef CWindow* CWindowPtr;
 
 typedef struct {
     int red;
@@ -177,16 +172,6 @@ struct PixMap {
 };
 typedef PixMap* PixMapPtr;
 typedef PixMap** PixMapHandle;
-
-struct Window {
-    Window(int32_t width, int32_t height);
-    ~Window();
-
-    Rect portRect;
-    PixMap portBits;
-
-    DISALLOW_COPY_AND_ASSIGN(Window);
-};
 
 }  // namespace antares
 

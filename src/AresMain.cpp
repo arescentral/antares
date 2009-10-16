@@ -101,9 +101,7 @@ extern scoped_array<spaceObjectType> gSpaceObjectData;
 extern int32_t gRandomSeed;
 extern scenarioType *gThisScenario;
 extern PixMap* gActiveWorld;
-extern scoped_ptr<Window> fakeWindow;
 
-CWindowPtr      gTheWindow = nil;
 long            WORLD_WIDTH = 640,
                 WORLD_HEIGHT = 480,
                 CLIP_LEFT = 128,
@@ -221,8 +219,8 @@ void AresMain() {
     scoped_ptr<ColorTable>  theClut;
 
     init_globals();
-    WORLD_WIDTH = fakeWindow->portRect.right;
-    WORLD_HEIGHT = fakeWindow->portRect.bottom;
+    WORLD_WIDTH = gRealWorld->bounds.right;
+    WORLD_HEIGHT = gRealWorld->bounds.bottom;
     CLIP_RIGHT = WORLD_WIDTH - kRightPanelWidth;
     CLIP_BOTTOM = WORLD_HEIGHT;
     gPlayScreenWidth = CLIP_RIGHT - CLIP_LEFT;
@@ -236,9 +234,8 @@ void AresMain() {
     GetDateTime( reinterpret_cast<unsigned long *>(&gRandomSeed));
 
     theClut.reset(new ColorTable(256));
-    gTheWindow = fakeWindow.get();
-    gActiveWorld = &fakeWindow->portBits;
-    CreateOffscreenWorld(gTheWindow->portRect, *theClut);
+    gActiveWorld = gRealWorld;
+    CreateOffscreenWorld(gRealWorld->bounds, *theClut);
     ColorTranslatorInit(*theClut);
 
     InitSpriteCursor();
@@ -324,7 +321,7 @@ void MainPlay(int whichScenario) {
             StopAndUnloadSong();
         }
 
-        DrawInstrumentPanel(gTheWindow);
+        DrawInstrumentPanel();
 
         if (globals()->gOptions & kOptionMusicPlay) {
             LoadSong(gThisScenario->songID);

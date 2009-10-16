@@ -73,7 +73,6 @@ namespace antares {
 
 #define kStaticTableSize        2000
 
-extern WindowPtr        gTheWindow;
 extern long             gNatePortLeft, gNatePortTop;
 
 long                    *gScaleHMap = nil, *gScaleVMap = nil, gAbsoluteScale = MIN_SCALE;

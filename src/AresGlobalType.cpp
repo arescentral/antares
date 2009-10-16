@@ -50,7 +50,6 @@ aresGlobalType::aresGlobalType() {
     gKeyMapBuffer = new KeyMap[kKeyMapBufferNum];
     gKeyMapBufferTop = 0;
     gKeyMapBufferBottom = 0;
-    gBackWindow = nil;
     gForceDemoLevel = 1;
     gFrameCount = 0;
     gGameOver = 1;

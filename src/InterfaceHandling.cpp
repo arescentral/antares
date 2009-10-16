@@ -54,7 +54,6 @@ namespace antares {
 #define mPlayButtonUp           PlayVolumeSound( kComputerBeep2, kMediumLowVolume, kShortPersistence, kMustPlaySound)
 #define mPlayScreenSound        PlayVolumeSound( kComputerBeep3, kMediumLowVolume, kShortPersistence, kVeryLowPrioritySound)
 
-extern CWindowPtr       gTheWindow;     // we need the window for copying to the real world, a hack
 extern long             WORLD_WIDTH, WORLD_HEIGHT;
 extern PixMap*          gOffWorld;
 extern PixMap*          gSaveWorld;

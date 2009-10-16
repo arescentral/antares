@@ -33,7 +33,7 @@ void UpdateRadar(int32_t);
 void InstrumentCleanup();
 void ResetInstruments();
 void ResetSectorLines();
-void DrawInstrumentPanel( WindowPtr);
+void DrawInstrumentPanel();
 //void EraseDrawMainSectorLines();
 //void ShowMainSectorLines();
 void EraseSite();

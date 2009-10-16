@@ -233,7 +233,6 @@ inline spaceObjectType* mGetMiniObjectPtr(long mwhich) {
     return globals()->gMiniScreenData.objectData.get() + mwhich;
 }
 
-extern WindowPtr        gTheWindow;
 extern long             gNatePortLeft, gNatePortTop, gNetLatency;
 extern directTextType*  gDirectText;
 extern scoped_array<spaceObjectType> gSpaceObjectData;

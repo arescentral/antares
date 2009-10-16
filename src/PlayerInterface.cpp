@@ -312,7 +312,6 @@ inline void mDoubleDigitize(unsigned char* mstring) {
 extern Handle                   gHostEntity, gClientEntity;
 extern long                     gNatePortLeft, gNatePortTop, gNetLatency, gRandomSeed,
                                 CLIP_LEFT, CLIP_RIGHT, CLIP_TOP, CLIP_BOTTOM;
-extern CWindowPtr               gTheWindow;       // we need the window for copying to the real world, a hack
 extern directTextType*          gDirectText;
 extern long                     WORLD_WIDTH, WORLD_HEIGHT;
 extern TypedHandle<baseObjectType> gBaseObjectData;
@@ -1504,8 +1503,7 @@ netResultType StartNetworkGameSetup( void)
         if ( error == kNoError)
         {
             DrawInterfaceOneAtATime();
-            MacSetPort( gTheWindow);
-            InvalRect( &(gTheWindow->portRect));
+            InvalRect(&gRealWorld->bounds);
             while (!done) {
                 WaitNextEvent (everyEvent, &theEvent, 3, nil);
                 {

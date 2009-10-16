@@ -112,7 +112,6 @@ struct aresGlobalType {
 
     unsigned long   gActiveCheats[kMaxPlayerNum];
     unsigned long   gSynchValue;
-    CWindowPtr      gBackWindow;
     long            gForceDemoLevel;
     scoped_ptr<InputSource> gInputSource;
     short           gMainResRefNum;

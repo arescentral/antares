@@ -85,7 +85,6 @@ struct tempKeyControlType {
     bool didConflict;
 };
 
-extern CWindowPtr       gTheWindow;
 
 static void ConflictText_Update( tempKeyControlType *keyControls);
 static long KeyControlIndex_GetTabNum( long whichKeyControl);

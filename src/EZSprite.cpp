@@ -26,7 +26,6 @@
 
 namespace antares {
 
-extern  WindowPtr       gTheWindow;
 extern  PixMap*         gActiveWorld;
 extern  PixMap*         gOffWorld;
 extern  PixMap*         gRealWorld;

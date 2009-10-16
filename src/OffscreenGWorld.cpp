@@ -23,8 +23,6 @@
 
 namespace antares {
 
-extern scoped_ptr<Window> fakeWindow;
-
 PixMap*         gActiveWorld;
 PixMap*         gOffWorld;
 PixMap*         gRealWorld;
@@ -42,7 +40,6 @@ int CreateOffscreenWorld(const Rect& bounds, const ColorTable&) {
     //  device of choice, but I'm too lazy.
     //
 
-    gRealWorld = &fakeWindow->portBits;
     gOffWorld = new PixMap(bounds.right, bounds.bottom);
     gSaveWorld = new PixMap(bounds.right, bounds.bottom);
     gActiveWorld = gRealWorld;

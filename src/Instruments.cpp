@@ -122,7 +122,6 @@ namespace antares {
 
 #define kSectorLineBrightness   DARKER
 
-extern CWindowPtr       gTheWindow; // hack to copy bar indicators to offworld
 extern scoped_array<spaceObjectType> gSpaceObjectData;
 extern spaceObjectType  *gScrollStarObject;
 extern int32_t          gNatePortLeft, gNatePortTop, gAbsoluteScale,
@@ -627,7 +626,7 @@ void UpdateRadar(int32_t unitsDone) {
     }
 }
 
-void DrawInstrumentPanel(WindowPtr) {
+void DrawInstrumentPanel() {
     scoped_ptr<Picture> pict;
     Rect            tRect;
 

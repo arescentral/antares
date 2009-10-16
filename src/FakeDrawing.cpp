@@ -31,8 +31,6 @@
 
 namespace antares {
 
-scoped_ptr<Window> fakeWindow;
-
 extern PixMap* gRealWorld;
 extern PixMap* gActiveWorld;
 
@@ -87,12 +85,6 @@ uint8_t PixMap::get(int x, int y) const {
     return baseAddr[y * row_bytes + x];
 }
 
-Window::Window(int width, int height)
-        : portRect(0, 0, width, height),
-          portBits(width, height) { }
-
-Window::~Window() { }
-
 void DumpTo(const std::string& path) {
     std::string contents;
     StringBinaryWriter bin(&contents);
@@ -146,7 +138,7 @@ uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue) {
 }
 
 uint8_t GetPixel(int x, int y) {
-    const PixMap* p = &fakeWindow->portBits;
+    const PixMap* p = gRealWorld;
     return p->baseAddr[x + y * (p->rowBytes & 0x7fff)];
 }
 
@@ -324,12 +316,12 @@ uint16_t DoubleBits(uint8_t in) {
 
 void RestoreEntries(const ColorTable& table) {
     for (size_t i = 0; i < table.size(); ++i) {
-        fakeWindow->portBits.colors->set_color(i, table.color(i));
+        gRealWorld->colors->set_color(i, table.color(i));
     }
 }
 
 void FakeDrawingInit(int width, int height) {
-    fakeWindow.reset(new Window(width, height));
+    gRealWorld = new PixMap(width, height);
     colors.reset(new ColorTable(256));
 }
 

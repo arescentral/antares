@@ -210,8 +210,6 @@ void ShowErrorAny(  errorRecoverType recover,
         SetDialogDefaultItem( theDialog, kContinueButton);
     }
 
-    MacShowWindow(reinterpret_cast<Window*>(theDialog));
-
     done = false;
     while ( done == false)
     {
