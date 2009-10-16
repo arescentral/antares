@@ -20,18 +20,9 @@
 #include "FakeDrawing.hpp"
 #include "InterfaceHandling.hpp"
 #include "PlayerInterface.hpp"
+#include "Time.hpp"
 
 namespace antares {
-
-namespace {
-
-double now() {
-    uint64_t usecs;
-    Microseconds(&usecs);
-    return usecs / 1000000.0;
-}
-
-}  // namespace
 
 InterfaceScreen::InterfaceScreen(int id)
         : _id(id),

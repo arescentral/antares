@@ -31,6 +31,7 @@
 #include "KeyMapTranslation.hpp"
 #include "Music.hpp"
 #include "Picture.hpp"
+#include "Time.hpp"
 
 namespace antares {
 
@@ -330,16 +331,6 @@ bool EndCustomPictFade(bool fast) {
     ResetTransitions();
     return fast || gotAnyEvent;
 }
-
-namespace {
-
-double now() {
-    uint64_t usec;
-    Microseconds(&usec);
-    return usec / 1000000.0;
-}
-
-}  // namespace
 
 ColorFade::ColorFade(
         int clut_id, Direction direction, const RGBColor& color, double duration, bool allow_skip)

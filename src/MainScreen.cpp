@@ -26,6 +26,7 @@
 #include "PlayerInterface.hpp"
 #include "Randomize.hpp"
 #include "ScrollTextScreen.hpp"
+#include "Time.hpp"
 
 namespace antares {
 
@@ -34,12 +35,6 @@ namespace {
 const int kMainScreenResID = 5000;
 const double kMainDemoTimeOutTime = 30.0;
 const int kTitleTextScrollWidth = 450;
-
-double now() {
-    uint64_t usecs;
-    Microseconds(&usecs);
-    return usecs / 1000000.0;
-}
 
 }  // namespace
 

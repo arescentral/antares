@@ -28,18 +28,13 @@
 #include "Options.hpp"
 #include "Picture.hpp"
 #include "RetroText.hpp"
+#include "Time.hpp"
 
 namespace antares {
 
 namespace {
 
 const int kScrollTextHeight = 200;
-
-double now() {
-    uint64_t usecs;
-    Microseconds(&usecs);
-    return usecs / 1000000.0;
-}
 
 int string_to_int(const std::string str) {
     if (str.size() > 0) {
