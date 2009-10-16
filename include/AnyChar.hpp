@@ -20,22 +20,12 @@
 
 namespace antares {
 
-// AnyChar.h
-
-// ONE BYTE CHARACTER SYSTEM
-
 #define kAnyCharSpace   ' '
 
 #define kAnyCharPStringMaxLen   254
 
 inline int mGetAnyCharPStringLength(const unsigned char* mAnyCharPtr) {
     return *mAnyCharPtr;
-}
-
-inline void mGetPStringFromSingleAnyChar(
-        unsigned char* mDestAnyCharPtr, unsigned char mAnyChar) {
-    *mDestAnyCharPtr = 1;
-    *(mDestAnyCharPtr + 1) = mAnyChar;
 }
 
 void CopyAnyCharPString(unsigned char *, const unsigned char*);
