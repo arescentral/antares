@@ -95,17 +95,17 @@ inline void mGetActionFromBaseTypeNum(
 }
 
 inline scenarioInitialType* mGetScenarioInitial(scenarioType* mscenario, long minitialnum) {
-    return *globals()->gScenarioInitialData
+    return globals()->gScenarioInitialData.get()
         + (mscenario)->initialFirst + (minitialnum);
 }
 
 inline briefPointType* mGetScenarioBrief(scenarioType* mscenario, long mbriefnum) {
-    return *globals()->gScenarioBriefData
+    return globals()->gScenarioBriefData.get()
         + ((mscenario)->briefPointFirst) + (mbriefnum);
 }
 
 inline scenarioConditionType* mGetScenarioCondition(scenarioType* mscenario, long mconditionnum) {
-    return *globals()->gScenarioConditionData
+    return globals()->gScenarioConditionData.get()
         + (mscenario)->conditionFirst + (mconditionnum);
 }
 

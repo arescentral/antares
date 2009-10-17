@@ -27,28 +27,24 @@
 
 namespace antares {
 
-#define kRaceError          "\pRACE"
-
-short InitRaces( void)
-{
-    if (globals()->gRaceData.get() == nil)
-    {
-        globals()->gRaceData.load_resource('race', kRaceResID);
-        if (globals()->gRaceData.get() == nil)
-        {
-            ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kReadRaceDataError, -1, -1, -1, __FILE__, 1);
-            return( RESOURCE_ERROR);
+short InitRaces() {
+    if (globals()->gRaceData.get() == nil) {
+        Resource rsrc('race', kRaceResID);
+        BufferBinaryReader bin(rsrc.data(), rsrc.size());
+        size_t count = rsrc.size() / raceType::byte_size;
+        assert(count == kRaceNum);
+        globals()->gRaceData.reset(new raceType[count]);
+        for (size_t i = 0; i < count; ++i) {
+            bin.read(globals()->gRaceData.get() + i);
         }
+        assert(bin.bytes_read() == rsrc.size());
     }
 
     return( kNoError);
 }
 
-void CleanupRaces( void)
-{
-    if (globals()->gRaceData.get() != nil) {
-        globals()->gRaceData.destroy();
-    }
+void CleanupRaces() {
+    globals()->gRaceData.reset();
 }
 
 // GetNextLegalRace: Gets the next legal race *after* raceNum in the scenario it
@@ -110,7 +106,7 @@ void GetRaceString(unsigned char* string, short whatString, short raceNum) {
 
 smallFixedType GetRaceAdvantage( short raceNum)
 {
-    raceType    *race = *globals()->gRaceData + raceNum;
+    raceType    *race = globals()->gRaceData.get() + raceNum;
 
     if ( raceNum >= 0)
     {
@@ -123,7 +119,7 @@ smallFixedType GetRaceAdvantage( short raceNum)
 
 short GetRaceNumFromID( short raceID)
 {
-    raceType    *race = *globals()->gRaceData;
+    raceType    *race = globals()->gRaceData.get();
     short       raceNum = 0;
 
     while ( (race->id != raceID) && ( raceNum < kRaceNum))
@@ -140,7 +136,7 @@ short GetRaceNumFromID( short raceID)
 
 short GetRaceIDFromNum( short raceNum)
 {
-    raceType    *race = *globals()->gRaceData + raceNum;
+    raceType    *race = globals()->gRaceData.get() + raceNum;
 
     if (( raceNum >= 0) && ( raceNum < kRaceNum))
     {
@@ -153,7 +149,7 @@ short GetRaceIDFromNum( short raceNum)
 
 unsigned char GetApparentColorFromRace( short raceNum)
 {
-    raceType    *race = *globals()->gRaceData + raceNum;
+    raceType    *race = globals()->gRaceData.get() + raceNum;
 
 
     if (( raceNum >= 0) && ( raceNum < kRaceNum))
@@ -165,16 +161,12 @@ unsigned char GetApparentColorFromRace( short raceNum)
     }
 }
 
-size_t raceType::load_data(const char* data, size_t len) {
-    BufferBinaryReader bin(data, len);
-
-    bin.read(&id);
-    bin.read(&apparentColor);
-    bin.discard(1);
-    bin.read(&illegalColors);
-    bin.read(&advantage);
-
-    return bin.bytes_read();
+void raceType::read(BinaryReader* bin) {
+    bin->read(&id);
+    bin->read(&apparentColor);
+    bin->discard(1);
+    bin->read(&illegalColors);
+    bin->read(&advantage);
 }
 
 }  // namespace antares

@@ -174,7 +174,8 @@ struct briefPointType {
     int16_t                 titleNum;
     int16_t                 contentResID;
 
-    size_t load_data(const char* data, size_t len);
+    static const size_t byte_size = 24;
+    void read(BinaryReader* bin);
 };
 
 struct scenarioInitialType {
@@ -194,7 +195,8 @@ struct scenarioInitialType {
     int32_t         nameStrNum;
     uint32_t        attributes;
 
-    size_t load_data(const char* data, size_t len);
+    static const size_t byte_size = 108;
+    void read(BinaryReader* bin);
 };
 
 struct counterArgumentType {
@@ -221,7 +223,8 @@ struct scenarioConditionType {
     uint32_t        flags;
     int32_t         direction;
 
-    size_t load_data(const char* data, size_t len);
+    static const size_t byte_size = 38;
+    void read(BinaryReader* bin);
 };
 
 struct scenarioPlayerType
@@ -262,7 +265,8 @@ struct scenarioType {
     int16_t                     parLosses;
     int16_t                     startTime;      // use kScenario_StartTimeMask
 
-    size_t load_data(const char* data, size_t len);
+    static const size_t byte_size = 124;
+    void read(BinaryReader* bin);
 };
 
 struct raceType {
@@ -271,7 +275,8 @@ struct raceType {
     uint32_t illegalColors;
     int32_t advantage;
 
-    size_t load_data(const char* data, size_t len);
+    static const size_t byte_size = 14;
+    void read(BinaryReader* bin);
 };
 
 }  // namespace antares

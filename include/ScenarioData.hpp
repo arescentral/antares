@@ -18,8 +18,6 @@
 #ifndef ANTARES_SCENARIO_DATA_HPP_
 #define ANTARES_SCENARIO_DATA_HPP_
 
-// Scenario_Data.h
-
 #include <Base.h>
 
 namespace antares {
@@ -32,6 +30,8 @@ namespace antares {
 #define kScenario_Data_Flag_HasCustomRaces      0x00000004
 #define kScenario_Data_Flag_HasCustomScenarios  0x00000008
 #define kScenario_Data_Flag_NotOptimized        0x00000010
+
+class BinaryStream;
 
 struct scenarioInfoType {
     int32_t         warpInFlareID;
@@ -47,7 +47,7 @@ struct scenarioInfoType {
     uint32_t        flags;
     uint32_t        checkSum;
 
-    size_t load_data(const char* data, size_t len);
+    void read(BinaryReader* bin);
 };
 
 }  // namespace antares

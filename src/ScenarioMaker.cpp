@@ -20,6 +20,7 @@
 #include "Admiral.hpp"
 #include "AresGlobalType.hpp"
 #include "Beam.hpp"
+#include "BinaryStream.hpp"
 #include "ColorTranslation.hpp"
 #include "Debug.hpp"
 #include "Error.hpp"
@@ -90,52 +91,58 @@ short ScenarioMakerInit( void)
 //      UseResFile( globals()->externalFileRefNum);
 
     {
-        TypedHandle<scenarioInfoType> tempScenarioInfo;
-        tempScenarioInfo.load_resource('nlAG', 128);
-        if (tempScenarioInfo.get() != nil) {
-            globals()->scenarioFileInfo = **tempScenarioInfo;
-            tempScenarioInfo.destroy();
-        }
+        Resource rsrc('nlAG', 128);
+        BufferBinaryReader bin(rsrc.data(), rsrc.size());
+        bin.read(&globals()->scenarioFileInfo);
+        assert(bin.bytes_read() == rsrc.size());
     }
 
     if (globals()->gScenarioData.get() == nil) {
-        globals()->gScenarioData.load_resource('snro', kScenarioResID);
-        if (globals()->gScenarioData.get() == nil) {
-            ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioDataError, -1, -1, -1, __FILE__, 2);
-            return( RESOURCE_ERROR);
+        Resource rsrc('snro', kScenarioResID);
+        BufferBinaryReader bin(rsrc.data(), rsrc.size());
+        size_t count = rsrc.size() / scenarioType::byte_size;
+        globals()->scenarioNum = count;
+        globals()->gScenarioData.reset(new scenarioType[count]);
+        for (size_t i = 0; i < count; ++i) {
+            bin.read(globals()->gScenarioData.get() + i);
         }
-
-        globals()->scenarioNum = globals()->gScenarioData.count();
+        assert(bin.bytes_read() == rsrc.size());
     }
 
     if (globals()->gScenarioInitialData.get() == nil) {
-        globals()->gScenarioInitialData.load_resource('snit', kScenarioInitialResID);
-        if (globals()->gScenarioInitialData.get() == nil) {
-            ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioInitialDataError, -1, -1, -1, __FILE__, 3);
-            return( RESOURCE_ERROR);
+        Resource rsrc('snit', kScenarioInitialResID);
+        BufferBinaryReader bin(rsrc.data(), rsrc.size());
+        size_t count = rsrc.size() / scenarioInitialType::byte_size;
+        globals()->maxScenarioInitial = count;
+        globals()->gScenarioInitialData.reset(new scenarioInitialType[count]);
+        for (size_t i = 0; i < count; ++i) {
+            bin.read(globals()->gScenarioInitialData.get() + i);
         }
-
-        globals()->maxScenarioInitial = globals()->gScenarioInitialData.count();
+        assert(bin.bytes_read() == rsrc.size());
     }
 
     if (globals()->gScenarioConditionData.get() == nil) {
-        globals()->gScenarioConditionData.load_resource('sncd', kScenarioConditionResID);
-        if (globals()->gScenarioConditionData.get() == nil) {
-            ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioConditionDataError, -1, -1, -1, __FILE__, 4);
-            return( RESOURCE_ERROR);
+        Resource rsrc('sncd', kScenarioConditionResID);
+        BufferBinaryReader bin(rsrc.data(), rsrc.size());
+        size_t count = rsrc.size() / scenarioConditionType::byte_size;
+        globals()->maxScenarioCondition = count;
+        globals()->gScenarioConditionData.reset(new scenarioConditionType[count]);
+        for (size_t i = 0; i < count; ++i) {
+            bin.read(globals()->gScenarioConditionData.get() + i);
         }
-
-        globals()->maxScenarioCondition = globals()->gScenarioConditionData.count();
+        assert(bin.bytes_read() == rsrc.size());
     }
 
     if (globals()->gScenarioBriefData.get() == nil) {
-        globals()->gScenarioBriefData.load_resource('snbf', kScenarioBriefResID);
-        if (globals()->gScenarioBriefData.get() == nil) {
-            ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kScenarioBriefDataError, -1, -1, -1, __FILE__, 5);
-            return( RESOURCE_ERROR);
+        Resource rsrc('snbf', kScenarioBriefResID);
+        BufferBinaryReader bin(rsrc.data(), rsrc.size());
+        size_t count = rsrc.size() / briefPointType::byte_size;
+        globals()->maxScenarioBrief = count;
+        globals()->gScenarioBriefData.reset(new briefPointType[count]);
+        for (size_t i = 0; i < count; ++i) {
+            bin.read(globals()->gScenarioBriefData.get() + i);
         }
-
-        globals()->maxScenarioBrief = globals()->gScenarioBriefData.count();
+        assert(bin.bytes_read() == rsrc.size());
     }
 
     return ( InitRaces());
@@ -144,18 +151,10 @@ short ScenarioMakerInit( void)
 void ScenarioMakerCleanup( void)
 
 {
-    if ( globals()->gScenarioData.get() != nil) {
-        globals()->gScenarioData.destroy();
-    }
-    if (globals()->gScenarioBriefData.get() != nil) {
-        globals()->gScenarioBriefData.destroy();
-    }
-    if (globals()->gScenarioInitialData.get() != nil) {
-        globals()->gScenarioInitialData.destroy();
-    }
-    if (globals()->gScenarioConditionData.get() != nil) {
-        globals()->gScenarioConditionData.destroy();
-    }
+    globals()->gScenarioData.reset();
+    globals()->gScenarioBriefData.reset();
+    globals()->gScenarioInitialData.reset();
+    globals()->gScenarioConditionData.reset();
     CleanupRaces();
 }
 
@@ -229,7 +228,7 @@ bool ConstructScenario( long which)
     else
         globals()->gScenarioRotation = count;
 
-    gThisScenario = *globals()->gScenarioData + which;
+    gThisScenario = globals()->gScenarioData.get() + which;
 
     globals()->gScenarioWinner.player = -1;
     globals()->gScenarioWinner.next = -1;
@@ -1790,7 +1789,7 @@ void GetScenarioFullScaleAndCorner( long whichScenario, long rotation,
 {
     long            biggest, count, otherCount, mustFit;
     Point           coord, otherCoord, tempCoord;
-    scenarioType    *scenario = *globals()->gScenarioData + whichScenario;
+    scenarioType    *scenario = globals()->gScenarioData.get() + whichScenario;
     scenarioInitialType     *initial;
 
 
@@ -1865,14 +1864,14 @@ void GetScenarioFullScaleAndCorner( long whichScenario, long rotation,
 long GetBriefPointNumber( long whichScenario)
 
 {
-    scenarioType    *scenario = *globals()->gScenarioData + whichScenario;
+    scenarioType    *scenario = globals()->gScenarioData.get() + whichScenario;
 
     return ( scenario->briefPointNum & kScenarioBriefMask);
 }
 
 long GetScenarioAngle( long whichScenario)
 {
-    scenarioType    *scenario = *globals()->gScenarioData + whichScenario;
+    scenarioType    *scenario = globals()->gScenarioData.get() + whichScenario;
 
     if ( scenario->briefPointNum & kScenarioAngleMask)
         return (( (scenario->briefPointNum & kScenarioAngleMask) >> kScenarioAngleShift) - 1) * 2;
@@ -1882,7 +1881,7 @@ long GetScenarioAngle( long whichScenario)
 
 long GetScenarioNumberFromChapterNumber( long whichChapter)
 {
-    scenarioType    *aScenario = *globals()->gScenarioData;
+    scenarioType    *aScenario = globals()->gScenarioData.get();
     long            whichScenario = 0;
 
     while (( whichScenario < kScenarioNum) && ( aScenario->levelNameStrNum != whichChapter))
@@ -1898,7 +1897,7 @@ long GetScenarioNumberFromChapterNumber( long whichChapter)
 void GetScenarioStarMapPoint( long whichScenario, Point *starPoint)
 
 {
-    scenarioType    *scenario = *globals()->gScenarioData + whichScenario;
+    scenarioType    *scenario = globals()->gScenarioData.get() + whichScenario;
 
     starPoint->h = scenario->starMapH;
     starPoint->v = scenario->starMapV;
@@ -1906,7 +1905,7 @@ void GetScenarioStarMapPoint( long whichScenario, Point *starPoint)
 
 long GetChapterNumberFromScenarioNumber( long whichScenario)
 {
-    scenarioType    *aScenario = *globals()->gScenarioData + whichScenario;
+    scenarioType    *aScenario = globals()->gScenarioData.get() + whichScenario;
 
     if ( whichScenario < 0) return ( -1);
     return( aScenario->levelNameStrNum);
@@ -1915,7 +1914,7 @@ long GetChapterNumberFromScenarioNumber( long whichScenario)
 scenarioType *GetScenarioPtrFromChapter( long whichChapter)
 {
     scenarioType    *aScenario =
-                        *globals()->gScenarioData +
+                        globals()->gScenarioData.get() +
                         GetScenarioNumberFromChapterNumber( whichChapter);
 
     if ( whichChapter < 0) return ( nil);
@@ -1924,48 +1923,48 @@ scenarioType *GetScenarioPtrFromChapter( long whichChapter)
 }
 
 void GetScenarioName(long whichScenario, unsigned char* scenarioName) {
-    scenarioType    *aScenario = *globals()->gScenarioData + whichScenario;
+    scenarioType    *aScenario = globals()->gScenarioData.get() + whichScenario;
     GetIndString( scenarioName, kLevelNameID, aScenario->levelNameStrNum);
 }
 
 long GetScenarioNumber() {
-    return globals()->gScenarioData.count();
+    return globals()->scenarioNum;
 }
 
 long GetScenarioPlayerNum( long whichScenario)
 {
-    scenarioType    *aScenario = *globals()->gScenarioData + whichScenario;
+    scenarioType    *aScenario = globals()->gScenarioData.get() + whichScenario;
     return ( aScenario->playerNum);
 }
 
 long GetScenarioPrologueID( long whichScenario)
 {
-    scenarioType    *aScenario = *globals()->gScenarioData + whichScenario;
+    scenarioType    *aScenario = globals()->gScenarioData.get() + whichScenario;
     return ( aScenario->prologueID);
 }
 
 long GetScenarioEpilogueID( long whichScenario)
 {
-    scenarioType    *aScenario = *globals()->gScenarioData + whichScenario;
+    scenarioType    *aScenario = globals()->gScenarioData.get() + whichScenario;
     return ( aScenario->epilogueID);
 }
 
 long GetNextScenarioChapter( long whichScenario)
 {
-    scenarioType    *aScenario = *globals()->gScenarioData + whichScenario, *newScenario = nil;
+    scenarioType    *aScenario = globals()->gScenarioData.get() + whichScenario, *newScenario = nil;
     long            newScenarioNum, newChapterNum = aScenario->levelNameStrNum + 1;
 
     newScenarioNum = GetScenarioNumberFromChapterNumber( newChapterNum);
     if ( newScenarioNum >= 0)
     {
-        newScenario = *globals()->gScenarioData + newScenarioNum;
+        newScenario = globals()->gScenarioData.get() + newScenarioNum;
         while ( ( newScenario->playerNum <= 0) && ( newChapterNum < GetScenarioNumber()) && ( newScenario != nil))
         {
             newChapterNum++;
             newScenarioNum = GetScenarioNumberFromChapterNumber( newChapterNum);
             if ( newScenarioNum >= 0)
             {
-                newScenario = *globals()->gScenarioData + newScenarioNum;
+                newScenario = globals()->gScenarioData.get() + newScenarioNum;
             } else newScenario = nil;
         }
     }
@@ -2024,7 +2023,7 @@ long GetPreviousNetworkScenario( long thisChapter)
 bool ThisChapterIsNetworkable( long whichChapter)
 
 {
-    scenarioType    *aScenario = *globals()->gScenarioData + GetScenarioNumberFromChapterNumber( whichChapter);
+    scenarioType    *aScenario = globals()->gScenarioData.get() + GetScenarioNumberFromChapterNumber( whichChapter);
     long            i;
 
     if (( whichChapter < 0) || ( whichChapter > GetScenarioNumber()))

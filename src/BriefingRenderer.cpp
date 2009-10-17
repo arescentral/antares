@@ -210,7 +210,7 @@ void GetInitialObjectSpriteData( long whichScenario, long whichObject,
 {
     spaceObjectType         *sObject = nil;
     scenarioInitialType     *initial;
-    scenarioType            *scenario = *globals()->gScenarioData + whichScenario;
+    scenarioType            *scenario = globals()->gScenarioData.get() + whichScenario;
     briefingSpriteBoundsType    *sBounds = gBriefingSpriteBounds;
 
     initial = mGetScenarioInitial( scenario, whichObject);
@@ -538,7 +538,7 @@ void BriefPoint_Data_Get( long whichPoint, long whichScenario, long *headerID,
                     Rect *bounds)
 
 {
-    scenarioType    *scenario = *globals()->gScenarioData + whichScenario;
+    scenarioType    *scenario = globals()->gScenarioData.get() + whichScenario;
     Point           where;
     spritePix       aSpritePix;
     Rect        spriteRect;

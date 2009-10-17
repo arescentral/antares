@@ -22,52 +22,44 @@
 
 namespace antares {
 
-size_t scenarioInfoType::load_data(const char* data, size_t len) {
-    BufferBinaryReader bin(data, len);
-
-    bin.read(&warpInFlareID);
-    bin.read(&warpOutFlareID);
-    bin.read(&playerBodyID);
-    bin.read(&energyBlobID);
-    bin.read(downloadURLString, 256);
-    bin.read(titleString, 256);
-    bin.read(authorNameString, 256);
-    bin.read(authorURLString, 256);
-    bin.read(&version);
-    bin.read(&requiresAresVersion);
-    bin.read(&flags);
-    bin.read(&checkSum);
-
-    return bin.bytes_read();
+void scenarioInfoType::read(BinaryReader* bin) {
+    bin->read(&warpInFlareID);
+    bin->read(&warpOutFlareID);
+    bin->read(&playerBodyID);
+    bin->read(&energyBlobID);
+    bin->read(downloadURLString, 256);
+    bin->read(titleString, 256);
+    bin->read(authorNameString, 256);
+    bin->read(authorURLString, 256);
+    bin->read(&version);
+    bin->read(&requiresAresVersion);
+    bin->read(&flags);
+    bin->read(&checkSum);
 }
 
-size_t scenarioType::load_data(const char* data, size_t len) {
-    BufferBinaryReader bin(data, len);
-
-    bin.read(&netRaceFlags);
-    bin.read(&playerNum);
-    bin.read(player, kScenarioPlayerNum);
-    bin.read(&scoreStringResID);
-    bin.read(&initialFirst);
-    bin.read(&prologueID);
-    bin.read(&initialNum);
-    bin.read(&songID);
-    bin.read(&conditionFirst);
-    bin.read(&epilogueID);
-    bin.read(&conditionNum);
-    bin.read(&starMapH);
-    bin.read(&briefPointFirst);
-    bin.read(&starMapV);
-    bin.read(&briefPointNum);
-    bin.read(&parTime);
-    bin.discard(2);
-    bin.read(&parKills);
-    bin.read(&levelNameStrNum);
-    bin.read(&parKillRatio);
-    bin.read(&parLosses);
-    bin.read(&startTime);
-
-    return bin.bytes_read();
+void scenarioType::read(BinaryReader* bin) {
+    bin->read(&netRaceFlags);
+    bin->read(&playerNum);
+    bin->read(player, kScenarioPlayerNum);
+    bin->read(&scoreStringResID);
+    bin->read(&initialFirst);
+    bin->read(&prologueID);
+    bin->read(&initialNum);
+    bin->read(&songID);
+    bin->read(&conditionFirst);
+    bin->read(&epilogueID);
+    bin->read(&conditionNum);
+    bin->read(&starMapH);
+    bin->read(&briefPointFirst);
+    bin->read(&starMapV);
+    bin->read(&briefPointNum);
+    bin->read(&parTime);
+    bin->discard(2);
+    bin->read(&parKills);
+    bin->read(&levelNameStrNum);
+    bin->read(&parKillRatio);
+    bin->read(&parLosses);
+    bin->read(&startTime);
 }
 
 void scenarioPlayerType::read(BinaryReader* bin) {
@@ -81,19 +73,18 @@ void scenarioPlayerType::read(BinaryReader* bin) {
     bin->discard(2);
 }
 
-size_t scenarioConditionType::load_data(const char* data, size_t len) {
-    BufferBinaryReader bin(data, len);
+void scenarioConditionType::read(BinaryReader* bin) {
     char section[12];
 
-    bin.read(&condition);
-    bin.discard(1);
-    bin.read(section, 12);
-    bin.read(&subjectObject);
-    bin.read(&directObject);
-    bin.read(&startVerb);
-    bin.read(&verbNum);
-    bin.read(&flags);
-    bin.read(&direction);
+    bin->read(&condition);
+    bin->discard(1);
+    bin->read(section, 12);
+    bin->read(&subjectObject);
+    bin->read(&directObject);
+    bin->read(&startVerb);
+    bin->read(&verbNum);
+    bin->read(&flags);
+    bin->read(&direction);
 
     BufferBinaryReader sub(section, 12);
     switch (condition) {
@@ -122,8 +113,6 @@ size_t scenarioConditionType::load_data(const char* data, size_t len) {
         sub.read(&conditionArgument.location);
         break;
     }
-
-    return bin.bytes_read();
 }
 
 void counterArgumentType::read(BinaryReader* bin) {
@@ -132,18 +121,16 @@ void counterArgumentType::read(BinaryReader* bin) {
     bin->read(&amount);
 }
 
-size_t briefPointType::load_data(const char* data, size_t len) {
-    BufferBinaryReader bin(data, len);
-
+void briefPointType::read(BinaryReader* bin) {
     char section[8];
 
-    bin.read(&briefPointKind);
-    bin.discard(1);
-    bin.read(section, 8);
-    bin.read(&range);
-    bin.read(&titleResID);
-    bin.read(&titleNum);
-    bin.read(&contentResID);
+    bin->read(&briefPointKind);
+    bin->discard(1);
+    bin->read(section, 8);
+    bin->read(&range);
+    bin->read(&titleResID);
+    bin->read(&titleNum);
+    bin->read(&contentResID);
 
     BufferBinaryReader sub(section, 8);
     switch (briefPointKind) {
@@ -159,8 +146,6 @@ size_t briefPointType::load_data(const char* data, size_t len) {
         sub.read(&briefPointData.absoluteBriefType);
         break;
     }
-
-    return bin.bytes_read();
 }
 
 void briefPointType::ObjectBrief::read(BinaryReader* bin) {
@@ -172,26 +157,22 @@ void briefPointType::AbsoluteBrief::read(BinaryReader* bin) {
     bin->read(&location);
 }
 
-size_t scenarioInitialType::load_data(const char* data, size_t len) {
-    BufferBinaryReader bin(data, len);
-
-    bin.read(&type);
-    bin.read(&owner);
-    bin.read(&realObjectNumber);
-    bin.read(&realObjectID);
-    bin.read(&location);
-    bin.read(&earning);
-    bin.read(&distanceRange);
-    bin.read(&rotationMinimum);
-    bin.read(&rotationRange);
-    bin.read(&spriteIDOverride);
-    bin.read(canBuild, kMaxTypeBaseCanBuild);
-    bin.read(&initialDestination);
-    bin.read(&nameResID);
-    bin.read(&nameStrNum);
-    bin.read(&attributes);
-
-    return bin.bytes_read();
+void scenarioInitialType::read(BinaryReader* bin) {
+    bin->read(&type);
+    bin->read(&owner);
+    bin->read(&realObjectNumber);
+    bin->read(&realObjectID);
+    bin->read(&location);
+    bin->read(&earning);
+    bin->read(&distanceRange);
+    bin->read(&rotationMinimum);
+    bin->read(&rotationRange);
+    bin->read(&spriteIDOverride);
+    bin->read(canBuild, kMaxTypeBaseCanBuild);
+    bin->read(&initialDestination);
+    bin->read(&nameResID);
+    bin->read(&nameStrNum);
+    bin->read(&attributes);
 }
 
 }  // namespace antares
