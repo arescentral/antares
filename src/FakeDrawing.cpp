@@ -119,8 +119,7 @@ void CopyBits(PixMap* source, PixMap* dest, const Rect& source_rect, const Rect&
     transfer.ClipSourceTo(source->bounds());
     transfer.ClipDestTo(dest->bounds());
 
-    ViewPixMap clipped_src(source, transfer.from());
-    ViewPixMap(dest, transfer.to()).copy(clipped_src);
+    ViewPixMap(dest, transfer.to()).copy(ViewPixMap(source, transfer.from()));
 }
 
 int currentForeColor;

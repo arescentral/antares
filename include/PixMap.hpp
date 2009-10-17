@@ -96,7 +96,7 @@ class ViewPixMap : public PixMap {
     const Point _offset;
     Rect _bounds;
 
-    DISALLOW_COPY_AND_ASSIGN(ViewPixMap);
+    // ALLOW_COPY_AND_ASSIGN(ViewPixMap);
 };
 
 }  // namespace antares
