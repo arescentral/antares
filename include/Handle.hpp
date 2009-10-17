@@ -36,8 +36,6 @@ class TypedHandleBase {
     TypedHandleBase()
             : _data(NULL) { }
 
-    TypedHandle<T> clone() const;
-
     void create(int count) {
         _data = new Data(count);
     }
@@ -99,16 +97,6 @@ class TypedHandle<unsigned char> : public TypedHandleBase<unsigned char> {
         memcpy(**this, rsrc.data(), rsrc.size());
     }
 };
-
-template <typename T>
-TypedHandle<T> TypedHandleBase<T>::clone() const {
-    TypedHandle<T> cloned;
-    cloned.create(count());
-    for (size_t i = 0; i < count(); ++i) {
-        (*cloned)[i] = (**this)[i];
-    }
-    return cloned;
-}
 
 template <typename T>
 void TypedHandleBase<T>::resize(size_t new_count) {
