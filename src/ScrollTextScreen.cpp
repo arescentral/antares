@@ -85,19 +85,17 @@ class ScrollTextPixBuilder {
 
   private:
     void extend(int height) {
-        int old_height = _pix->bounds().bottom;
-        int new_height = old_height + height;
+        const int old_height = _pix->bounds().bottom;
+        const int new_height = old_height + height;
         _pix->resize(Rect(0, 0, _pix->bounds().right, new_height));
 
         if (_background.get()) {
-            Rect new_area(0, old_height, _pix->bounds().right, new_height);
+            PixMap::View view(_pix, Rect(0, old_height, _pix->bounds().right, new_height));
             Rect dest = _background->frame();
-            dest.offset(0, _background_start);
-            while (dest.top < _pix->bounds().bottom) {
-                if (dest.bottom >= old_height) {
-                    ClippedTransfer transfer(_background->frame(), dest);
-                    transfer.ClipDestTo(new_area);
-                    _background->draw_to(_pix, transfer.from(), transfer.to());
+            dest.offset(0, -old_height);
+            while (dest.top < height) {
+                if (dest.bottom >= 0) {
+                    CopyBits(_background.get(), &view, _background->frame(), dest);
                 }
                 dest.offset(0, dest.height());
             }
