@@ -124,14 +124,6 @@ void CopyBits(PixMap* source, PixMap* dest, const Rect& source_rect, const Rect&
     clipped_dst.copy(clipped_src);
 }
 
-Rect ClipRectToRect(const Rect& src, const Rect& clip) {
-    return Rect(
-        std::max(src.left, clip.left),
-        std::max(src.top, clip.top),
-        std::min(src.right, clip.right),
-        std::min(src.bottom, clip.bottom));
-}
-
 int currentForeColor;
 int currentBackColor;
 
@@ -153,27 +145,36 @@ void EraseRect(const Rect& rect) {
     view.fill(currentBackColor);
 }
 
-void FrameRect(const Rect& rect) {
-    Rect clipped = ClipRectToRect(rect, gActiveWorld->bounds());
-    if (clipped.left == clipped.right || clipped.top == clipped.bottom) {
-        return;
+void DrawLine(PixMap* pix, const Point& from, const Point& to) {
+    assert(to.h == from.h || to.v == from.v);  // no diagonal lines yet.
+    if (to.h == from.h) {
+        int step = 1;
+        if (to.v < from.v) {
+            step = -1;
+        }
+        for (int i = from.v; i != to.v; i += step) {
+            if (pix->bounds().contains(Point(from.h, i))) {
+                pix->set(from.h, i, currentForeColor);
+            }
+        }
+    } else {
+        int step = 1;
+        if (to.h < from.h) {
+            step = -1;
+        }
+        for (int i = from.h; i != to.h; i += step) {
+            if (pix->bounds().contains(Point(i, from.v))) {
+                pix->set(i, from.v, currentForeColor);
+            }
+        }
     }
-    for (int x = clipped.left; x < clipped.right; ++x) {
-        if (rect.top == clipped.top) {
-            gActiveWorld->set(x, rect.top, currentForeColor);
-        }
-        if (rect.bottom == clipped.bottom) {
-            gActiveWorld->set(x, rect.bottom - 1, currentForeColor);
-        }
-    }
-    for (int y = clipped.top; y < clipped.bottom; ++y) {
-        if (rect.left == clipped.left) {
-            gActiveWorld->set(rect.left, y, currentForeColor);
-        }
-        if (rect.right == clipped.right) {
-            gActiveWorld->set(rect.right - 1, y, currentForeColor);
-        }
-    }
+}
+
+void FrameRect(const Rect& r) {
+    DrawLine(gActiveWorld, Point(r.left, r.top), Point(r.left, r.bottom - 1));
+    DrawLine(gActiveWorld, Point(r.left, r.bottom - 1), Point(r.right - 1, r.bottom - 1));
+    DrawLine(gActiveWorld, Point(r.right - 1, r.bottom - 1), Point(r.right - 1, r.top));
+    DrawLine(gActiveWorld, Point(r.right - 1, r.top), Point(r.left, r.top));
 }
 
 void MacFrameRect(const Rect& rect) {
@@ -193,38 +194,9 @@ void MoveTo(int x, int y) {
     currentPen.v = y;
 }
 
-bool IsOnScreen(int x, int y) {
-    int width = gActiveWorld->bounds().right;
-    int height = gActiveWorld->bounds().bottom;
-    return 0 <= x && x < width
-        && 0 <= y && y < height;
-}
-
 void MacLineTo(int h, int v) {
-    assert(h == currentPen.h || v == currentPen.v);  // no diagonal lines yet.
-    if (h == currentPen.h) {
-        int step = 1;
-        if (v < currentPen.v) {
-            step = -1;
-        }
-        for (int i = currentPen.v; i != v; i += step) {
-            if (IsOnScreen(currentPen.h, i)) {
-                gActiveWorld->set(currentPen.h, i, currentForeColor);
-            }
-        }
-        currentPen.v = v;
-    } else {
-        int step = 1;
-        if (h < currentPen.h) {
-            step = -1;
-        }
-        for (int i = currentPen.h; i != h; i += step) {
-            if (IsOnScreen(i, currentPen.v)) {
-                gActiveWorld->set(i, currentPen.v, currentForeColor);
-            }
-        }
-        currentPen.h = h;
-    }
+    DrawLine(gActiveWorld, currentPen, Point(h, v));
+    MoveTo(h, v);
 }
 
 void GetPen(Point* pen) {
