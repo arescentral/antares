@@ -40,8 +40,8 @@ int CreateOffscreenWorld(const Rect& bounds, const ColorTable&) {
     //  device of choice, but I'm too lazy.
     //
 
-    gOffWorld = new PixMap(bounds.right, bounds.bottom);
-    gSaveWorld = new PixMap(bounds.right, bounds.bottom);
+    gOffWorld = new ArrayPixMap(bounds.right, bounds.bottom);
+    gSaveWorld = new ArrayPixMap(bounds.right, bounds.bottom);
     gActiveWorld = gRealWorld;
 
     tRect = bounds;

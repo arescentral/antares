@@ -27,28 +27,42 @@ class ColorTable;
 
 class PixMap {
   public:
-    PixMap(int32_t width, int32_t height);
-    ~PixMap();
+    virtual const Rect& bounds() const = 0;
+    virtual const ColorTable& colors() const = 0;
+    virtual int row_bytes() const = 0;
+    virtual const uint8_t* bytes() const = 0;
 
-    const Rect& bounds() const;
-    const ColorTable& colors() const;
-    int row_bytes() const;
-    const uint8_t* bytes() const;
+    virtual uint8_t* mutable_bytes() = 0;
+    virtual ColorTable* mutable_colors() = 0;
 
-    uint8_t* mutable_bytes();
-    ColorTable* mutable_colors();
+    virtual void set(int x, int y, uint8_t color) = 0;
+    virtual uint8_t get(int x, int y) const = 0;
+};
+
+class ArrayPixMap : public PixMap {
+  public:
+    ArrayPixMap(int32_t width, int32_t height);
+    ~ArrayPixMap();
 
     void resize(const Rect& r);
 
-    void set(int x, int y, uint8_t color);
-    uint8_t get(int x, int y) const;
+    virtual const Rect& bounds() const;
+    virtual const ColorTable& colors() const;
+    virtual int row_bytes() const;
+    virtual const uint8_t* bytes() const;
+
+    virtual uint8_t* mutable_bytes();
+    virtual ColorTable* mutable_colors();
+
+    virtual void set(int x, int y, uint8_t color);
+    virtual uint8_t get(int x, int y) const;
 
   private:
     Rect _bounds;
     scoped_ptr<ColorTable> _colors;
     scoped_array<uint8_t> _bytes;
 
-    DISALLOW_COPY_AND_ASSIGN(PixMap);
+    DISALLOW_COPY_AND_ASSIGN(ArrayPixMap);
 };
 
 }  // namespace antares

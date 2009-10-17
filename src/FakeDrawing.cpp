@@ -290,7 +290,7 @@ void RestoreEntries(const ColorTable& table) {
 }
 
 void FakeDrawingInit(int width, int height) {
-    gRealWorld = new PixMap(width, height);
+    gRealWorld = new ArrayPixMap(width, height);
     colors.reset(new ColorTable(256));
 }
 

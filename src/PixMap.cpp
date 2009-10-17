@@ -23,39 +23,39 @@
 
 namespace antares {
 
-PixMap::PixMap(int width, int height)
+ArrayPixMap::ArrayPixMap(int width, int height)
         : _bounds(0, 0, width, height),
           _colors(new ColorTable(256)),
           _bytes(new unsigned char[width * height]) { }
 
-PixMap::~PixMap() { }
+ArrayPixMap::~ArrayPixMap() { }
 
-const Rect& PixMap::bounds() const {
+const Rect& ArrayPixMap::bounds() const {
     return _bounds;
 }
 
-const ColorTable& PixMap::colors() const {
+const ColorTable& ArrayPixMap::colors() const {
     return *_colors;
 }
 
-int PixMap::row_bytes() const {
+int ArrayPixMap::row_bytes() const {
     return _bounds.right;
 }
 
-const uint8_t* PixMap::bytes() const {
+const uint8_t* ArrayPixMap::bytes() const {
     return _bytes.get();
 }
 
-uint8_t* PixMap::mutable_bytes() {
+uint8_t* ArrayPixMap::mutable_bytes() {
     return _bytes.get();
 }
 
-ColorTable* PixMap::mutable_colors() {
+ColorTable* ArrayPixMap::mutable_colors() {
     return _colors.get();
 }
 
-void PixMap::resize(const Rect& new_bounds) {
-    PixMap new_pix_map(new_bounds.width(), new_bounds.height());
+void ArrayPixMap::resize(const Rect& new_bounds) {
+    ArrayPixMap new_pix_map(new_bounds.width(), new_bounds.height());
     Rect transfer = _bounds;
     transfer.clip_to(new_bounds);
     CopyBits(this, &new_pix_map, transfer, transfer);
@@ -63,11 +63,11 @@ void PixMap::resize(const Rect& new_bounds) {
     _bytes.swap(&new_pix_map._bytes);
 }
 
-void PixMap::set(int x, int y, uint8_t color) {
+void ArrayPixMap::set(int x, int y, uint8_t color) {
     _bytes.get()[y * _bounds.right + x] = color;
 }
 
-uint8_t PixMap::get(int x, int y) const {
+uint8_t ArrayPixMap::get(int x, int y) const {
     return _bytes.get()[y * _bounds.right + x];
 }
 

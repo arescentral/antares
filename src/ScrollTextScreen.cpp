@@ -50,7 +50,7 @@ int string_to_int(const std::string str) {
 
 class ScrollTextPixBuilder {
   public:
-    ScrollTextPixBuilder(PixMap* pix)
+    ScrollTextPixBuilder(ArrayPixMap* pix)
             : _pix(pix) { }
 
     void set_background(int id) {
@@ -104,14 +104,14 @@ class ScrollTextPixBuilder {
         }
     }
 
-    PixMap* _pix;
+    ArrayPixMap* _pix;
 
     scoped_ptr<Picture> _background;
     int _background_start;
 };
 
 PixMap* build_pix(int text_id, int width) {
-    scoped_ptr<PixMap> pix(new PixMap(width, 0));
+    scoped_ptr<ArrayPixMap> pix(new ArrayPixMap(width, 0));
     ScrollTextPixBuilder build(pix.get());
     Resource text('TEXT', text_id);
 
