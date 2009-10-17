@@ -249,7 +249,7 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                         {
                             // get the goal dh & dv
 
-                            mGetRotPoint( fa, fb, anObject->direction);
+                            GetRotPoint(&fa, &fb, anObject->direction);
 
                             // multiply by max velocity
 
@@ -301,7 +301,7 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
 
                         // get the maxthrust of new vector
 
-                        mGetRotPoint( fh, fv, angle);
+                        GetRotPoint(&fh, &fv, angle);
 
                         fh = mMultiplyFixed( useThrust, fh);
                         fv = mMultiplyFixed( useThrust, fv);
@@ -1407,7 +1407,7 @@ void CorrectPhysicalSpace( spaceObjectType *aObject, spaceObjectType *bObject)
         tfix = mDivideFixed( tfix, totalMass);
     }
     tfix += aObject->maxVelocity >> 1;
-    mGetRotPoint( tvel.h, tvel.v, angle);
+    GetRotPoint(&tvel.h, &tvel.v, angle);
     tvel.h = mMultiplyFixed( tfix, tvel.h);
     tvel.v = mMultiplyFixed( tfix, tvel.v);
 //  tvel.h = mMultiplyFixed( aObject->baseType->maxVelocity, tvel.h);
@@ -1424,7 +1424,7 @@ void CorrectPhysicalSpace( spaceObjectType *aObject, spaceObjectType *bObject)
         tfix = mDivideFixed( tfix, totalMass);
     }
     tfix += bObject->maxVelocity >> 1;
-    mGetRotPoint( tvel.h, tvel.v, angle);
+    GetRotPoint(&tvel.h, &tvel.v, angle);
     tvel.h = mMultiplyFixed( tfix, tvel.h);
     tvel.v = mMultiplyFixed( tfix, tvel.v);
 //  tvel.h = mMultiplyFixed( bObject->baseType->maxVelocity, tvel.h);

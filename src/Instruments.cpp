@@ -801,7 +801,7 @@ void DrawSite() {
 
     if (( gScrollStarObject != nil) && ( gScrollStarObject->active) && ( gScrollStarObject->sprite != nil))
     {
-        mGetRotPoint( fa, fb, gScrollStarObject->direction);
+        GetRotPoint(&fa, &fb, gScrollStarObject->direction);
 
         fc = mLongToFixed( -kSiteDistance);
         fa = mMultiplyFixed( fc, fa);
@@ -814,7 +814,7 @@ void DrawSite() {
 
         count = gScrollStarObject->direction;
         mAddAngle( count, 30);
-        mGetRotPoint( fa, fb, count);
+        GetRotPoint(&fa, &fb, count);
         fc = mLongToFixed( kSiteSize);
         fa = mMultiplyFixed( fc, fa);
         fb = mMultiplyFixed( fc, fb);
@@ -832,7 +832,7 @@ void DrawSite() {
 
         count = gScrollStarObject->direction;
         mAddAngle( count, -30);
-        mGetRotPoint( fa, fb, count);
+        GetRotPoint(&fa, &fb, count);
         fc = mLongToFixed( kSiteSize);
         fa = mMultiplyFixed( fc, fa);
         fb = mMultiplyFixed( fc, fb);

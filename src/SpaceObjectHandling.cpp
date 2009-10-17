@@ -652,7 +652,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
         f += RandomSeeded( sObject->initialVelocityRange,
                     &(dObject->randomSeed), 'soh3', whichBaseObject);
     }
-    mGetRotPoint( newVel.h, newVel.v, r);
+    GetRotPoint(&newVel.h, &newVel.v, r);
     newVel.h = mMultiplyFixed( newVel.h, f);
     newVel.v = mMultiplyFixed( newVel.v, f);
 
@@ -1717,7 +1717,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 
                                             // get the maxthrust of new vector
 
-                                            mGetRotPoint( f, f2, angle);
+                                            GetRotPoint(&f, &f2, angle);
 
                                             f = mMultiplyFixed( dObject->maxVelocity, f);
                                             f2 = mMultiplyFixed( dObject->maxVelocity, f2);
@@ -1744,7 +1744,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                         }
                                     } else
                                     {
-                                        mGetRotPoint( f, f2, sObject->direction);
+                                        GetRotPoint(&f, &f2, sObject->direction);
                                         f = mMultiplyFixed( action->argument.alterObject.minimum, f);
                                         f2 = mMultiplyFixed( action->argument.alterObject.minimum, f2);
                                         anObject->velocity.h = f;
@@ -1756,7 +1756,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                 // excede its max velocity.
                                 // Minimum value is absolute speed in direction.
                                 {
-                                    mGetRotPoint( f, f2, anObject->direction);
+                                    GetRotPoint(&f, &f2, anObject->direction);
                                     f = mMultiplyFixed( action->argument.alterObject.minimum, f);
                                     f2 = mMultiplyFixed( action->argument.alterObject.minimum, f2);
                                     if ( action->argument.alterObject.relative)
@@ -2783,7 +2783,7 @@ void ActivateObjectSpecial( spaceObjectType *anObject)
 
             h = anObject->direction;
             mAddAngle( h, -90);
-            mGetRotPoint( fcos, fsin, h);
+            GetRotPoint(&fcos, &fsin, h);
             fcos = -fcos;
             fsin = -fsin;
 
@@ -2851,10 +2851,10 @@ void CreateFloatingBodyOfPlayer( spaceObjectType *anObject)
 void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord)
 
 {
-    long    lcos, lsin, lscrap, angle = globals()->gScenarioRotation;
+    int32_t lcos, lsin, lscrap, angle = globals()->gScenarioRotation;
 
     mAddAngle( angle, 90);
-    mGetRotPoint( lcos, lsin, angle);
+    GetRotPoint(&lcos, &lsin, angle);
     lcos = -lcos;
     lsin = -lsin;
 

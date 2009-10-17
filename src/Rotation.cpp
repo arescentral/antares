@@ -29,122 +29,28 @@ namespace antares {
 
 #define kRotationError  "\pROTN"
 
-TypedHandle<RotTableEntry> gRotTable;
+const int kRotTableSize = 720;
+int32_t gRotTable[kRotTableSize];
 
-size_t RotTableEntry::load_data(const char* data, size_t len) {
-    BufferBinaryReader bin(data, len);
-    bin.read(&value);
-    return bin.bytes_read();
+void RotationInit() {
+    Resource rsrc('rot ', 500);
+    BufferBinaryReader bin(rsrc.data(), rsrc.size());
+    bin.read(gRotTable, kRotTableSize);
+    assert(bin.bytes_read() == rsrc.size());
 }
 
-int RotationInit( void)
+void GetRotPoint(int32_t *x, int32_t *y, int32_t rotpos) {
+    int32_t* i;
 
-{
-/*
-    gRotTable = NewHandle( sizeof( smallFixedType) * 2L * ROT_POS);
-    if ( gRotTable == 0L)
-    {
-        ShowErrorRecover( MEMORY_ERROR, kRotationError, 1);
-        return( MEMORY_ERROR);
-    } else
-    {
-        MoveHHi( gRotTable);
-        HLock( gRotTable);
-        for ( d = 0; d < 360; d += ROT_RES)
-        {
-            sx = 0;
-            sy = 1; // kRotUnit
-            RotatePoint( sx, sy, &x, &y, (d + .5));
-            SetRotPoint( x, y, i);
-            i++;
-        }
-        AddResource( gRotTable, 'rot ', 500, "\pRotation Table");
-    }
-
-
-*/
-
-    gRotTable.load_resource('rot ', 500);
-    if (gRotTable.get() == nil) {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kReadRotationDataError, -1, -1, -1, __FILE__, 1);
-        return( MEMORY_ERROR);
-    }
-    return( kNoError);
-}
-
-void RotationCleanup( void) {
-//  WriteResource( gRotTable);
-//  DisposeHandle( gRotTable);
-}
-
-void SetRotPoint( smallFixedType x, smallFixedType y, long rotpos)
-
-{
-    RotTableEntry* i;
-
-    i = *gRotTable + rotpos * 2L;
-    i->value = x;
+    i = gRotTable + rotpos * 2L;
+    *x = *i;
     i++;
-    i->value = y;
+    *y = *i;
 }
 
-void GetRotPoint( smallFixedType *x, smallFixedType *y, long rotpos)
-
-{
-    RotTableEntry* i;
-
-    i = *gRotTable + rotpos * 2L;
-    *x = i->value;
-    i++;
-    *y = i->value;
-}
-
-
-void RotatePoint( long sx, long sy, smallFixedType *x, smallFixedType *y, long theta)
-
-{
-#pragma unused( sx, sy, x, y, theta)
-
-/*
-    double fx, fx2, fy, fcos, fsin, rot, d;
-    long        rx, ry;
-
-    fx = fx2 = sx;
-    fy = sy;
-    d = theta;
-    rot = d / 57.295827909;
-    fcos = cos( rot);
-    fsin = sin( rot);
-    if ( theta == 0)
-    {
-        fcos = 1;
-        fsin = 0;
-    } else if ( theta == 90)
-    {
-        fcos = 0;
-        fsin = 1;
-    } else if ( theta == 180)
-    {
-        fcos = -1;
-        fsin = 0;
-    } else if ( theta == 270)
-    {
-        fcos = 0;
-        fsin = -1;
-    }
-    fx = fx * fcos - fy * fsin;
-    fy = fx2 * fsin + fy * fcos;
-
-    *x = fx * kFixedWholeMultiplier;    //  * 65536
-    *y = fy * kFixedWholeMultiplier;
-*/
-}
-
-long GetAngleFromVector( long x, long y)
-
-{
-    RotTableEntry* h;
-    RotTableEntry* v;
+int32_t GetAngleFromVector(int32_t x, int32_t y) {
+    int32_t* h;
+    int32_t* v;
     int32_t a, b, test = 0, best = 0, whichBest = -1, whichAngle;
 
     a = x;
@@ -154,12 +60,12 @@ long GetAngleFromVector( long x, long y)
     if ( b < 0) b = -b;
     if ( b < a)
     {
-        h = (*gRotTable) + ROT_45 * 2;
+        h = gRotTable + ROT_45 * 2;
         whichAngle = ROT_45;
         v = h + 1;
         do
         {
-            test = (v->value * a) + (h->value * b); // we're adding b/c in my table 45-90 degrees, h < 0
+            test = (*v * a) + (*h * b); // we're adding b/c in my table 45-90 degrees, h < 0
             if ( test < 0) test = -test;
             if (( whichBest < 0)  || ( test < best))
             {
@@ -172,12 +78,12 @@ long GetAngleFromVector( long x, long y)
         } while ( ( test == best) && ( whichAngle <= ROT_90));
     } else
     {
-        h = (*gRotTable) + ROT_0 * 2;
+        h = gRotTable + ROT_0 * 2;
         whichAngle = ROT_0;
         v = h + 1;
         do
         {
-            test = (v->value * a) + (h->value * b);
+            test = (*v * a) + (*h * b);
             if ( test < 0) test = -test;
             if (( whichBest < 0)  || ( test < best))
             {
@@ -196,7 +102,6 @@ long GetAngleFromVector( long x, long y)
     } else if ( y < 0) whichBest = ROT_180 - whichBest;
     if ( whichBest == ROT_POS) whichBest = ROT_0;
     return ( whichBest);
-
 }
 
 }  // namespace antares

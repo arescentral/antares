@@ -64,22 +64,8 @@ namespace antares {
 
 #define kRotUnit    100     // must be same as kMotionResolution ( see Motion.h)
 
-struct RotTableEntry {
-    int32_t value;
-
-    size_t load_data(const char* data, size_t len);
-};
-
-extern TypedHandle<RotTableEntry> gRotTable;
-
-template <typename T>
-inline void mGetRotPoint(T& x, T& y, long angle) {
-    x = (*gRotTable)[angle * 2].value;
-    y = (*gRotTable)[(angle * 2) + 1].value;
-}
-
 // mAngleDifference: get the smallest difference from theta to other
-inline long mAngleDifference(long theta, long other) {
+inline int32_t mAngleDifference(int32_t theta, int32_t other) {
     if (theta >= other) {
         if ((theta - other) > ROT_180) {
             return other - theta + ROT_POS;
@@ -100,7 +86,7 @@ inline long mAngleDifference(long theta, long other) {
 // have had their "else if" clauses reinterpreted as a branch of the below statement, rather than
 // the intended ones in that file.
 template <typename T>
-inline void mAddAngle(T& theta, long other) {
+inline void mAddAngle(T& theta, int32_t other) {
     theta += (other);
     if (theta >= ROT_POS) {
         theta -= ROT_POS;
@@ -109,12 +95,9 @@ inline void mAddAngle(T& theta, long other) {
     }
 }
 
-int RotationInit( void);
-void RotationCleanup( void);
-void SetRotPoint( long, long, long);
-void GetRotPoint( long *x, long *y, long rotpos);
-void RotatePoint( long, long, Fixed *, Fixed *, long);
-long GetAngleFromVector( long, long);
+void RotationInit();
+void GetRotPoint(int32_t *x, int32_t *y, int32_t rotpos);
+int32_t GetAngleFromVector(int32_t x, int32_t y);
 
 }  // namespace antares
 

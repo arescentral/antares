@@ -555,7 +555,7 @@ void NonplayerShipThink( long timePass)
 
                         h = anObject->direction;
                         mAddAngle( h, -90);
-                        mGetRotPoint( fcos, fsin, h);
+                        GetRotPoint(&fcos, &fsin, h);
                         fcos = -fcos;
                         fsin = -fsin;
 
@@ -592,7 +592,7 @@ void NonplayerShipThink( long timePass)
 
                         h = anObject->direction;
                         mAddAngle( h, -90);
-                        mGetRotPoint( fcos, fsin, h);
+                        GetRotPoint(&fcos, &fsin, h);
                         fcos = -fcos;
                         fsin = -fsin;
 
@@ -639,7 +639,7 @@ void NonplayerShipThink( long timePass)
 
                         h = anObject->direction;
                         mAddAngle( h, -90);
-                        mGetRotPoint( fcos, fsin, h);
+                        GetRotPoint(&fcos, &fsin, h);
                         fcos = -fcos;
                         fsin = -fsin;
 
@@ -1486,7 +1486,7 @@ unsigned long ThinkObjectWarpOutPresence( spaceObjectType *anObject, baseObjectT
 
         // warp out
 
-        mGetRotPoint( fdist, calcv, anObject->direction);
+        GetRotPoint(&fdist, &calcv, anObject->direction);
 
         // multiply by max velocity
 

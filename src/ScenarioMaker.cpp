@@ -1176,7 +1176,7 @@ void CheckEndgame( void)
 void GetInitialCoord( scenarioInitialType *initial, coordPointType *coord, long rotation)
 
 {
-    long    lcos, lsin, lscrap;
+    int32_t lcos, lsin, lscrap;
 //  double  dcos, dsin, dscrap;
 
 //  Debugger();
@@ -1202,7 +1202,7 @@ void GetInitialCoord( scenarioInitialType *initial, coordPointType *coord, long 
     coord->v += lscrap;
 */
     mAddAngle( rotation, 90);
-    mGetRotPoint( lcos, lsin, rotation);
+    GetRotPoint(&lcos, &lsin, rotation);
     lcos = -lcos;
     lsin = -lsin;
 
