@@ -241,6 +241,7 @@ enum inlineKindType {
 };
 
 extern directTextType*  gDirectText;
+extern PixMap* gActiveWorld;
 
 void DrawPlayerInterfacePlainRect( Rect *dRect, unsigned char color,
                 interfaceStyleType style, PixMap *destMap, long portLeft,
@@ -1974,12 +1975,12 @@ void DrawInterfaceTextInRect(const Rect& tRect, const unsigned char *textData, l
                         xpos = hleft;
                         if ( *theLine == 0) vline -= fheight;
                         if (thePicture.get() != nil) {
-                            uRect = thePicture->frame();
+                            uRect = thePicture->bounds();
                             uRect.offset(-uRect.left + xpos - kInterfaceTextHBuffer +
                                         ( tRect.right - tRect.left) / 2 - ( uRect.right -
                                         uRect.left) / 2,
                                         -uRect.top + vline);
-                            thePicture->draw(uRect);
+                            CopyBits(thePicture.get(), gActiveWorld, thePicture->bounds(), uRect);
                             thePicture.reset();
                             vline += uRect.bottom - uRect.top;
                             xpos = hleft;
@@ -2164,7 +2165,7 @@ short GetInterfaceTextHeightFromWidth(unsigned char* textData, long length,
                         vline += ( fheight - GetInterfaceFontAscent( style));
                         if ( *theLine == 0) vline -= fheight;
                         if (thePicture.get() != nil) {
-                            uRect = thePicture->frame();
+                            uRect = thePicture->bounds();
                             uRect.offset(-uRect.left + xpos, -uRect.top + vline);
 //                          DrawPicture( thePicture, &uRect);
                             thePicture.reset();
@@ -2204,9 +2205,9 @@ void DrawInterfacePictureRect( interfaceItemType *dItem, PixMap *destMap, long p
 //  thePicture = GetPicture( dItem->item.pictureRect.pictureID);
     thePicture.reset(new Picture(dItem->item.pictureRect.pictureID));  // HHGetResource
     if (thePicture.get() != nil) {
-        uRect = thePicture->frame();
+        uRect = thePicture->bounds();
         uRect.offset(-uRect.left + tRect.left, -uRect.top + tRect.top);
-        thePicture->draw(uRect);
+        CopyBits(thePicture.get(), gActiveWorld, thePicture->bounds(), uRect);
     }
 
     SetClip( clipRgn);

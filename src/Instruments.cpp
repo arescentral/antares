@@ -644,12 +644,12 @@ void DrawInstrumentPanel() {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, OFFSCREEN_GRAPHICS_ERROR, -1, -1, -1, __FILE__, 2);
     } else {
         DrawInSaveWorld();
-        tRect = pict->frame();
+        tRect = pict->bounds();
         tRect.left = 0;
-        tRect.right = pict->frame().right - pict->frame().left;
-        tRect.top = (WORLD_HEIGHT / 2) - (pict->frame().bottom - pict->frame().top) / 2;
-        tRect.bottom = tRect.top + pict->frame().bottom - pict->frame().top;
-        pict->draw(tRect);
+        tRect.right = pict->bounds().right - pict->bounds().left;
+        tRect.top = (WORLD_HEIGHT / 2) - (pict->bounds().bottom - pict->bounds().top) / 2;
+        tRect.bottom = tRect.top + pict->bounds().bottom - pict->bounds().top;
+        CopyBits(pict.get(), gActiveWorld, pict->bounds(), tRect);
         CopySaveWorldToOffWorld(tRect);
         DrawInRealWorld();
     }
@@ -659,12 +659,12 @@ void DrawInstrumentPanel() {
         ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, OFFSCREEN_GRAPHICS_ERROR, -1, -1, -1, __FILE__, 3);
     } else {
         DrawInSaveWorld();
-        tRect = pict->frame();
-        tRect.left = WORLD_WIDTH - (pict->frame().right - pict->frame().left);
-        tRect.right = tRect.left + pict->frame().right - pict->frame().left;
-        tRect.top = (WORLD_HEIGHT / 2) - (pict->frame().bottom - pict->frame().top) / 2;
-        tRect.bottom = tRect.top + pict->frame().bottom - pict->frame().top;
-        pict->draw(tRect);
+        tRect = pict->bounds();
+        tRect.left = WORLD_WIDTH - (pict->bounds().right - pict->bounds().left);
+        tRect.right = tRect.left + pict->bounds().right - pict->bounds().left;
+        tRect.top = (WORLD_HEIGHT / 2) - (pict->bounds().bottom - pict->bounds().top) / 2;
+        tRect.bottom = tRect.top + pict->bounds().bottom - pict->bounds().top;
+        CopyBits(pict.get(), gActiveWorld, pict->bounds(), tRect);
         CopySaveWorldToOffWorld(tRect);
         DrawInRealWorld();
     }

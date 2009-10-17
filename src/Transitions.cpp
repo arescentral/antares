@@ -42,6 +42,8 @@ namespace antares {
 
 #define kNoColorGoal        -1
 
+extern PixMap* gActiveWorld;
+
 void InitTransitions() {
     globals()->gColorAnimationTable.reset(gRealWorld->colors().clone());
     globals()->gSaveColorTable.reset(gRealWorld->colors().clone());
@@ -277,12 +279,12 @@ bool CustomPictFade(short pictID, short clutID) {
     RGBColor fadeColor = {0, 0, 0};
 
     ClearScreen();
-    Rect pictRect = pict.frame();
+    Rect pictRect = pict.bounds();
     pictRect.center_in(gRealWorld->bounds());
 
     ResetTransitions();
     AutoFadeTo(1, &fadeColor, true);
-    pict.draw(pictRect);
+    CopyBits(&pict, gActiveWorld, pict.bounds(), pictRect);
 
     bool gotAnyEvent = AutoFadeFrom(100, true);
     if (!gotAnyEvent) {
@@ -306,12 +308,12 @@ bool StartCustomPictFade(short pictID, short clutID, bool fast) {
     RGBColor fadeColor = {0, 0, 0};
 
     ClearScreen();
-    Rect pictRect = pict.frame();
+    Rect pictRect = pict.bounds();
     pictRect.center_in(gRealWorld->bounds());
 
     ResetTransitions();
     AutoFadeTo(1, &fadeColor, true);
-    pict.draw(pictRect);
+    CopyBits(&pict, gActiveWorld, pict.bounds(), pictRect);
 
     return AutoFadeFrom(fast ? 20 : 100, true) || fast;
 }
@@ -457,9 +459,9 @@ void PictFade::wax() {
 
     ClearScreen();
     Picture pict(_pict_id);
-    Rect pictRect = pict.frame();
+    Rect pictRect = pict.bounds();
     pictRect.center_in(gRealWorld->bounds());
-    pict.draw(pictRect);
+    CopyBits(&pict, gActiveWorld, pict.bounds(), pictRect);
 
     RGBColor black = {0, 0, 0};
     _color_fade.reset(new ColorFade(

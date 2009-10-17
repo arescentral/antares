@@ -53,16 +53,4 @@ Picture::Picture(int32_t id)
     globfree(&g);
 }
 
-const Rect& Picture::frame() {
-    return bounds();
-}
-
-void Picture::draw(const Rect& dst) {
-    CopyBits(this, gActiveWorld, bounds(), dst);
-}
-
-void Picture::draw_to(PixMap* pix, const Rect& from, const Rect& to) {
-    CopyBits(this, pix, from, to);
-}
-
 }  // namespace antares

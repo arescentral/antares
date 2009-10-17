@@ -32,10 +32,6 @@ class Picture : public ArrayPixMap {
   public:
     Picture(int32_t id);
 
-    const Rect& frame();
-    void draw(const Rect& dest);
-    void draw_to(PixMap* pix, const Rect& from, const Rect& to);
-
   private:
     DISALLOW_COPY_AND_ASSIGN(Picture);
 };

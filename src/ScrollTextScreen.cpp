@@ -60,13 +60,13 @@ class ScrollTextPixBuilder {
 
     void add_picture(int id) {
         Picture pict(id);
-        extend(pict.frame().bottom);
-        Rect dest = pict.frame();
+        extend(pict.bounds().bottom);
+        Rect dest = pict.bounds();
         Rect surround(
-                0, _pix->bounds().bottom - pict.frame().height(),
+                0, _pix->bounds().bottom - pict.bounds().height(),
                 _pix->bounds().right, _pix->bounds().bottom);
         dest.center_in(surround);
-        pict.draw_to(_pix, pict.frame(), dest);
+        CopyBits(&pict, _pix, pict.bounds(), dest);
     }
 
     void add_text(const std::string& text) {
@@ -91,11 +91,11 @@ class ScrollTextPixBuilder {
 
         if (_background.get()) {
             PixMap::View view(_pix, Rect(0, old_height, _pix->bounds().right, new_height));
-            Rect dest = _background->frame();
+            Rect dest = _background->bounds();
             dest.offset(0, -old_height);
             while (dest.top < height) {
                 if (dest.bottom >= 0) {
-                    CopyBits(_background.get(), &view, _background->frame(), dest);
+                    CopyBits(_background.get(), &view, _background->bounds(), dest);
                 }
                 dest.offset(0, dest.height());
             }

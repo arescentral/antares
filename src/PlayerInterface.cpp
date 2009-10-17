@@ -1444,9 +1444,9 @@ void DrawKeyControlPicture( long whichKey)
 
     thePict.reset(new Picture(kKeyIllustrationPictID));
     if (thePict.get() != nil) {
-        newRect = thePict->frame();
+        newRect = thePict->bounds();
         newRect.center_in(tRect);
-        thePict->draw(newRect);
+        CopyBits(thePict.get(), gActiveWorld, thePict->bounds(), newRect);
     }
     if ( whichKey >= kSelectFriendKeyNum)
     {
@@ -1461,9 +1461,9 @@ void DrawKeyControlPicture( long whichKey)
 
     thePict.reset(new Picture(kKeyIllustrationPictID + 1 + whichKey));
     if (thePict.get() != nil) {
-        newRect = thePict->frame();
+        newRect = thePict->bounds();
         newRect.center_in(tRect);
-        thePict->draw(newRect);
+        CopyBits(thePict.get(), gActiveWorld, thePict->bounds(), newRect);
     }
     thePict.reset();
 
@@ -2520,9 +2520,9 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
         {
             thePict.reset(new Picture(kMissionStarMapPictID));
             if (thePict.get() != nil) {
-                newRect = thePict->frame();
+                newRect = thePict->bounds();
                 newRect.center_in(*bounds);
-                thePict->draw(newRect);
+                CopyBits(thePict.get(), gActiveWorld, thePict->bounds(), newRect);
                 thePict.reset();
                 GetScenarioStarMapPoint( whichScenario, &starPoint);
                 starPoint.h += bounds->left;
@@ -3291,32 +3291,32 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                         if (thePict.get() != nil) {
                             wasPicture = true;
                             pictRect.left = ( scrollWidth / 2) -
-                                (((thePict->frame().right - thePict->frame().left)) / 2) +
+                                (((thePict->bounds().right - thePict->bounds().left)) / 2) +
                                 boundsRect.left;
-                            pictRect.right = pictRect.left + ((thePict->frame().right - thePict->frame().left));
+                            pictRect.right = pictRect.left + ((thePict->bounds().right - thePict->bounds().left));
                             pictRect.top = boundsRect.bottom;
 //                          pictRect.bottom = pictRect.top + ((**thePict).picFrame.bottom - (**thePict).picFrame.top);
                             pictRect.bottom = pictRect.top + mDirectFontHeight() + kScrollTextLineBuffer;
 
-                            pictSourceRect = thePict->frame();
+                            pictSourceRect = thePict->bounds();
                             pictSourceRect.left = ( scrollWidth / 2) -
-                                (((thePict->frame().right - thePict->frame().left)) / 2) +
+                                (((thePict->bounds().right - thePict->bounds().left)) / 2) +
                                 boundsRect.left;
-                            pictSourceRect.right = pictRect.left + ((thePict->frame().right - thePict->frame().left));
+                            pictSourceRect.right = pictRect.left + ((thePict->bounds().right - thePict->bounds().left));
 
                             DrawInSaveWorld();
                                 if (bgPict.get() != nil) {
-                                    Rect bgRect = bgPict->frame();
+                                    Rect bgRect = bgPict->bounds();
 
                                     bgRect.offset(-bgRect.left, -bgRect.top);
                                     bgRect.offset(scrollRect.left, pictSourceRect.top - bgVOffset);
                                     do
                                     {
-                                        bgPict->draw(bgRect);
+                                        CopyBits(bgPict.get(), gActiveWorld, bgPict->bounds(), bgRect);
                                         bgRect.offset(0, kBackground_Height);
                                     } while ( bgRect.top < gSaveWorld->bounds().bottom);
                                 }
-                            thePict->draw(pictSourceRect);
+                            CopyBits(thePict.get(), gActiveWorld, thePict->bounds(), pictSourceRect);
                             DrawInRealWorld();
 
                             if (bgPict.get() != nil) {
@@ -3325,10 +3325,10 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                             }
                             pictSourceRect.bottom = pictSourceRect.top + mDirectFontHeight() + kScrollTextLineBuffer;
 
-                            while ((pictSourceRect.top < thePict->frame().bottom) && (!abort)) {
-                                if (pictSourceRect.bottom > thePict->frame().bottom) {
-                                    pictRect.bottom -= pictSourceRect.bottom - thePict->frame().bottom;
-                                    pictSourceRect.bottom = thePict->frame().bottom;
+                            while ((pictSourceRect.top < thePict->bounds().bottom) && (!abort)) {
+                                if (pictSourceRect.bottom > thePict->bounds().bottom) {
+                                    pictRect.bottom -= pictSourceRect.bottom - thePict->bounds().bottom;
+                                    pictSourceRect.bottom = thePict->bounds().bottom;
                                 }
                                 CopyBits(gSaveWorld, gOffWorld, pictSourceRect, pictRect);
 
@@ -3341,7 +3341,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                                         ((l < (mDirectFontHeight() + kScrollTextLineBuffer)) &&
                                             (!abort) &&
                                             ((pictSourceRect.top+l)<
-                                                thePict->frame().bottom));
+                                                thePict->bounds().bottom));
                                         l++)
                                 {
                                     DrawInOffWorld();
@@ -3382,7 +3382,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                     }
                     if  ( wasPicture)
                     {
-                        Rect bgRect = bgPict->frame();
+                        Rect bgRect = bgPict->bounds();
 
                         wasPicture = false;
                         DrawInSaveWorld();
@@ -3391,7 +3391,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                             bgRect.offset(scrollRect.left, 0);
                             do
                             {
-                                bgPict->draw(bgRect);
+                                CopyBits(bgPict.get(), gActiveWorld, bgPict->bounds(), bgRect);
                                 bgRect.offset(0, kBackground_Height);
                             }  while ( bgRect.top < gSaveWorld->bounds().bottom);
                         } else
