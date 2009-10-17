@@ -120,8 +120,7 @@ void CopyBits(PixMap* source, PixMap* dest, const Rect& source_rect, const Rect&
     transfer.ClipDestTo(dest->bounds());
 
     ViewPixMap clipped_src(source, transfer.from());
-    ViewPixMap clipped_dst(dest, transfer.to());
-    clipped_dst.copy(clipped_src);
+    ViewPixMap(dest, transfer.to()).copy(clipped_src);
 }
 
 int currentForeColor;
@@ -136,13 +135,11 @@ void RGBBackColor(RGBColor* color) {
 }
 
 void PaintRect(const Rect& rect) {
-    ViewPixMap view(gActiveWorld, rect);
-    view.fill(currentForeColor);
+    ViewPixMap(gActiveWorld, rect).fill(currentForeColor);
 }
 
 void EraseRect(const Rect& rect) {
-    ViewPixMap view(gActiveWorld, rect);
-    view.fill(currentBackColor);
+    ViewPixMap(gActiveWorld, rect).fill(currentBackColor);
 }
 
 void DrawLine(PixMap* pix, const Point& from, const Point& to) {
