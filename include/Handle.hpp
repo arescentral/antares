@@ -34,10 +34,6 @@ class TypedHandle {
     TypedHandle()
             : _data(NULL) { }
 
-    void create(int count) {
-        _data = new Data(count);
-    }
-
     void resize(size_t new_count);
     void extend(TypedHandle<T> other);
 
@@ -82,13 +78,6 @@ class TypedHandle {
     Data* _data;
 };
 
-template <>
-inline void TypedHandle<unsigned char>::load_resource(uint32_t code, int id) {
-    Resource rsrc(code, id);
-    create(rsrc.size());
-    memcpy(**this, rsrc.data(), rsrc.size());
-}
-
 template <typename T>
 void TypedHandle<T>::resize(size_t new_count) {
     scoped_array<T> old_ptr(_data->_ptr.release());
@@ -124,14 +113,11 @@ void TypedHandle<T>::load_resource(uint32_t code, int id) {
         data += consumed;
         remainder -= consumed;
     }
-    create(loaded.size());
+    _data = new Data(loaded.size());
     for (size_t i = 0; i < loaded.size(); ++i) {
         (**this)[i] = loaded[i];
     }
 }
-
-int Munger(TypedHandle<unsigned char> data, int pos, const unsigned char* search, size_t search_len,
-        const unsigned char* replace, size_t replace_len);
 
 }  // namespace antares
 

@@ -50,20 +50,4 @@ void BlockMove(void* src, void* dst, size_t size) {
     memcpy(dst, src, size);
 }
 
-int Munger(TypedHandle<unsigned char> data, int pos, const unsigned char* search, size_t search_len,
-        const unsigned char* replace, size_t replace_len) {
-    ustring s(search, search_len);
-    ustring r(replace, replace_len);
-    ustring d(*data, data.count());
-    ustring::size_type at = d.find(s, pos);
-    if (at != std::string::npos) {
-        if (replace_len > search_len) {
-            data.resize(data.count() + replace_len - search_len);
-        }
-        memcpy(*data + at, r.c_str(), r.size());
-        memcpy(*data + at + r.size(), d.c_str() + at + s.size(), d.size() - at - s.size());
-    }
-    return at;
-}
-
 }  // namespace antares

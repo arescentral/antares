@@ -58,4 +58,9 @@ std::string glob_for_resource(uint32_t code, int id) {
 Resource::Resource(uint32_t code, int id)
         : MappedFile(glob_for_resource(code, id)) { }
 
+std::string Resource::get_data(uint32_t code, int id) {
+    Resource rsrc(code, id);
+    return std::string(rsrc.data(), rsrc.size());
+}
+
 }  // namespace antares

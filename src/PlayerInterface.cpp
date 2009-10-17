@@ -29,6 +29,7 @@
 #include "Debug.hpp"
 #include "DirectText.hpp"
 #include "Error.hpp"
+#include "Fakes.hpp"
 #include "Instruments.hpp"
 #include "InterfaceHandling.hpp"
 #include "KeyCodes.hpp"
@@ -358,7 +359,7 @@ void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
 
         strPtr = levelName + 1;
         retroTextSpec.textLength = *levelName;
-        retroTextSpec.text.create(retroTextSpec.textLength);
+        retroTextSpec.text.reset(new std::string);
         for (int i = 0; i < retroTextSpec.textLength; ++i) {
             (*retroTextSpec.text)[i] = strPtr[i];
         }
@@ -393,7 +394,7 @@ void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
                 gNatePortTop);
         }
 
-        retroTextSpec.text.destroy();
+        retroTextSpec.text.reset();
 
         tRect = boundsRect;
     }
@@ -777,16 +778,18 @@ void DoHelpScreen( void)
         DrawAllItemsOfKind( kTextRect, true, false, false);
 
         if ( globals()->gOptions & kOptionSubstituteFKeys) {
-            retroTextSpec.text.load_resource('TEXT', kNOFHelpScreenTextID);
+            retroTextSpec.text.reset(
+                    new std::string(Resource::get_data('TEXT', kNOFHelpScreenTextID)));
         } else {
-            retroTextSpec.text.load_resource('TEXT', kHelpScreenTextID);
+            retroTextSpec.text.reset(
+                    new std::string(Resource::get_data('TEXT', kHelpScreenTextID)));
         }
 
         if (retroTextSpec.text.get() != nil) {
-            Replace_KeyCode_Strings_With_Actual_Key_Names( retroTextSpec.text, kKeyMapNameID,
-                4);
+            Replace_KeyCode_Strings_With_Actual_Key_Names(
+                    retroTextSpec.text.get(), kKeyMapNameID, 4);
 
-            retroTextSpec.textLength = retroTextSpec.text.count();
+            retroTextSpec.textLength = retroTextSpec.text->size();
 
             mSetDirectFont( kComputerFontNum);
             retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
@@ -819,7 +822,7 @@ void DoHelpScreen( void)
             DrawDirectTextInRect(&retroTextSpec, clipRect, clipRect, gOffWorld, 0, 0);
             CopyOffWorldToRealWorld(tRect);
 
-            retroTextSpec.text.destroy();
+            retroTextSpec.text.reset();
         }
 
         while ( AnyRealKeyDown()) {
@@ -2109,34 +2112,18 @@ void DrawLevelNameInBox(unsigned char* name, long fontNum, short descriptionText
     retroTextSpecType       retroTextSpec;
     transColorType          *transColor;
     interfaceItemType       *anItem;
-    long                    height, descriptionLength = 0;
-    TypedHandle<unsigned char> textData;
+    long                    height;
+    scoped_ptr<std::string> textData;
 
     anItem = GetAnyInterfaceItemPtr( itemNum);
     strPtr = name + 1;
 
-    if ( descriptionTextID > 0)
-    {
-        textData.load_resource('TEXT', descriptionTextID);
-        if (textData.get() != nil) {
-            descriptionLength = textData.count();
-        }
-    }
+    assert(descriptionTextID <= 0);
 
-    descriptionLength += name[0];
-    retroTextSpec.textLength = descriptionLength;
-    retroTextSpec.text.create(descriptionLength);
-    if (retroTextSpec.text.get() == nil) {
-        if (textData.get() != nil) {
-            textData.destroy();
-        }
-        return;
-    }
-
-    BlockMove( name + 1, *retroTextSpec.text, name[0]);
-    if (textData.get() != nil) {
-        BlockMove( *textData, *retroTextSpec.text + name[0], textData.count());
-        textData.destroy();
+    retroTextSpec.textLength = name[0];
+    retroTextSpec.text.reset(new std::string);
+    for (int i = 1; i < name[0] + 1; ++i) {
+        *retroTextSpec.text += name[i];
     }
 
     retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
@@ -2167,7 +2154,7 @@ void DrawLevelNameInBox(unsigned char* name, long fontNum, short descriptionText
     DrawInRealWorld();
     DrawDirectTextInRect( &retroTextSpec, anItem->bounds, clipRect, gOffWorld, 0,0);
     CopyOffWorldToRealWorld(tRect);
-    retroTextSpec.text.destroy();
+    retroTextSpec.text.reset();
 }
 
 bool DoMissionInterface( long whichScenario)
@@ -2372,7 +2359,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
 
 {
     Rect            oldRect, newRect, hiliteBounds;
-    TypedHandle<unsigned char> textData;
+    scoped_ptr<std::string> textData;
     long            length = 0, headerID, headerNumber, contentID, textlength = 0,
                     i;
     short           textHeight = 0;
@@ -2399,11 +2386,13 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
         BriefPoint_Data_Get( whichBriefPoint, whichScenario, &headerID, &headerNumber, &contentID,
                                  &hiliteBounds, corner, scale, 16, 32, bounds);
 
-        textData.load_resource('TEXT', contentID);
+        // TODO(sfiera): catch exception.
+        textData.reset(new std::string(Resource::get_data('TEXT', contentID)));
         if (textData.get() != nil) {
-            textlength = length = textData.count();
-            textHeight = GetInterfaceTextHeightFromWidth(*textData, length,
-                            dataItem->style, kMissionDataWidth);
+            textlength = length = textData->size();
+            textHeight = GetInterfaceTextHeightFromWidth(
+                    reinterpret_cast<const unsigned char*>(textData->c_str()), length,
+                    dataItem->style, kMissionDataWidth);
         }
         if ( hiliteBounds.left == hiliteBounds.right)
         {
@@ -2488,9 +2477,10 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
         DrawInOffWorld();
         if (textData.get() != nil) {
             newRect = dataItem->bounds;
-            DrawInterfaceTextInRect(newRect, *textData, length,
-                            dataItem->style, dataItem->color, gOffWorld, 0, 0, inlinePict);
-            textData.destroy();
+            DrawInterfaceTextInRect(
+                    newRect, reinterpret_cast<const unsigned char*>(textData->c_str()), length,
+                    dataItem->style, dataItem->color, gOffWorld, 0, 0, inlinePict);
+            textData.reset();
         }
 
         DrawInRealWorld();
@@ -2586,7 +2576,6 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
     Str255          tempString, numString;
     retroTextSpecType   retroTextSpec;
     long            height, waitTime, i;
-    TypedHandle<unsigned char> weaponText;
 
     // find object who belongs to this pict id
     i = 0;
@@ -2602,7 +2591,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
     {
         HideCursor();
 
-        retroTextSpec.text.load_resource('TEXT', kShipDataTextID);
+        retroTextSpec.text.reset(new std::string(Resource::get_data('TEXT', kShipDataTextID)));
         if ( retroTextSpec.text.get() != nil) {
             // *** Replace place-holders in text with real data, using the fabulous Munger routine
             // an object or a ship?
@@ -2612,70 +2601,57 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
                 GetIndString( numString, kShipDataNameID, 2);
 
             GetIndString( tempString, kShipDataKeyStringID, kShipOrObjectStringNum);
-            Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
+            Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
 
             // ship name
 //          GetIndString( numString, 5000, pictID - kFirstShipDataPictID + 1);
             GetIndString( numString, 5000, i + 1);
             GetIndString( tempString, kShipDataKeyStringID, kShipTypeStringNum);
-            Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
+            Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
 
             // ship mass
             SmallFixedToString( baseObject->mass, numString);
             GetIndString( tempString, kShipDataKeyStringID, kMassStringNum);
-            Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
+            Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
 
             // ship shields
             NumToString( baseObject->health, numString);
             GetIndString( tempString, kShipDataKeyStringID, kShieldStringNum);
-            Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
+            Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
 
             // light speed
             NumToString( baseObject->warpSpeed, numString);
             GetIndString( tempString, kShipDataKeyStringID, kHasLightStringNum);
-            Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
+            Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
 
             // max velocity
             SmallFixedToString( baseObject->maxVelocity, numString);
             GetIndString( tempString, kShipDataKeyStringID, kMaxSpeedStringNum);
-            Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
+            Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
 
             // thrust
             SmallFixedToString( baseObject->maxThrust, numString);
             GetIndString( tempString, kShipDataKeyStringID, kThrustStringNum);
-            Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
+            Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
 
             // par turn
             SmallFixedToString( baseObject->frame.rotation.turnAcceleration, numString);
             GetIndString( tempString, kShipDataKeyStringID, kTurnStringNum);
-            Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
+            Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
 
             // now, check for weapons!
 
 
-            GetIndString( numString, kShipDataNameID, kShipDataPulseStringNum);
-            weaponText = CreateWeaponDataText( baseObject->pulse, numString);
-            if (weaponText.get() != nil) {
-                retroTextSpec.text.extend(weaponText);
-                weaponText.destroy();
-            }
+            GetIndString(numString, kShipDataNameID, kShipDataPulseStringNum);
+            *retroTextSpec.text += CreateWeaponDataText(baseObject->pulse, numString);
 
-            GetIndString( numString, kShipDataNameID, kShipDataBeamStringNum);
-            weaponText = CreateWeaponDataText( baseObject->beam, numString);
-            if (weaponText.get() != nil) {
-                retroTextSpec.text.extend(weaponText);
-                weaponText.destroy();
-            }
+            GetIndString(numString, kShipDataNameID, kShipDataBeamStringNum);
+            *retroTextSpec.text += CreateWeaponDataText(baseObject->beam, numString);
 
-            GetIndString( numString, kShipDataNameID, kShipDataSpecialStringNum);
-            weaponText = CreateWeaponDataText( baseObject->special, numString);
-            if (weaponText.get() != nil) {
-                retroTextSpec.text.extend(weaponText);
-                weaponText.destroy();
-            }
+            GetIndString(numString, kShipDataNameID, kShipDataSpecialStringNum);
+            *retroTextSpec.text += CreateWeaponDataText(baseObject->special, numString);
 
-
-            retroTextSpec.textLength = retroTextSpec.text.count();
+            retroTextSpec.textLength = retroTextSpec.text->size();
 
             mSetDirectFont( kButtonFontNum);
             retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
@@ -2739,7 +2715,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
                 };
             }
 
-            retroTextSpec.text.destroy();
+            retroTextSpec.text.reset();
         }
 
         MacShowCursor();
@@ -2751,9 +2727,9 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
     }
 }
 
-TypedHandle<unsigned char> CreateWeaponDataText(long whichWeapon, unsigned char* weaponName) {
+std::string CreateWeaponDataText(long whichWeapon, unsigned char* weaponName) {
     baseObjectType      *weaponObject, *missileObject;
-    TypedHandle<unsigned char> weaponText;
+    std::string weaponText;
     Str255              numString, tempString;
     long                mostDamage, actionNum;
     objectActionType    *action;
@@ -2763,8 +2739,9 @@ TypedHandle<unsigned char> CreateWeaponDataText(long whichWeapon, unsigned char*
     {
         weaponObject = *gBaseObjectData + whichWeapon;
 
-        weaponText.load_resource('TEXT', kWeaponDataTextID);
-        if (weaponText.get() != nil) {
+        // TODO(sfiera): catch exception.
+        weaponText = Resource::get_data('TEXT', kWeaponDataTextID);
+        if (true) {
             // damage; this is tricky--we have to guess by walking through activate actions,
             //  and for all the createObject actions, see which creates the most damaging
             //  object.  We calc this first so we can use isGuided
@@ -2789,12 +2766,12 @@ TypedHandle<unsigned char> CreateWeaponDataText(long whichWeapon, unsigned char*
 
             // weapon name #
             GetIndString( tempString, kShipDataKeyStringID, kWeaponNumberStringNum);
-            Munger( weaponText, 0, (tempString + 1), *tempString, weaponName + 1, *weaponName);
+            Munger(&weaponText, 0, (tempString + 1), *tempString, weaponName + 1, *weaponName);
 
             // weapon name
             GetIndString( numString, 5000, whichWeapon + 1);
             GetIndString( tempString, kShipDataKeyStringID, kWeaponNameStringNum);
-            Munger( weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
+            Munger(&weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
 
             // is guided
             if ( isGuided)
@@ -2802,7 +2779,7 @@ TypedHandle<unsigned char> CreateWeaponDataText(long whichWeapon, unsigned char*
             else
                 GetIndString( numString, kShipDataNameID, kShipDataNoStringNum);
             GetIndString( tempString, kShipDataKeyStringID, kWeaponGuidedStringNum);
-            Munger( weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
+            Munger(&weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
 
             // is autotarget
             if ( weaponObject->attributes & kAutoTarget)
@@ -2810,23 +2787,23 @@ TypedHandle<unsigned char> CreateWeaponDataText(long whichWeapon, unsigned char*
             else
                 GetIndString( numString, kShipDataNameID, kShipDataNoStringNum);
             GetIndString( tempString, kShipDataKeyStringID, kWeaponAutoTargetStringNum);
-            Munger( weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
+            Munger(&weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
 
             // range
             NumToString( lsqrt(weaponObject->frame.weapon.range), numString);
             GetIndString( tempString, kShipDataKeyStringID, kWeaponRangeStringNum);
-            Munger( weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
+            Munger(&weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
 
             if ( mostDamage > 0)
             {
                 NumToString( mostDamage, numString);
                 GetIndString( tempString, kShipDataKeyStringID, kWeaponDamageStringNum);
-                Munger( weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
+                Munger(&weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
             } else
             {
                 GetIndString( numString, kShipDataNameID, kShipDataDashStringNum);
                 GetIndString( tempString, kShipDataKeyStringID, kWeaponDamageStringNum);
-                Munger( weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
+                Munger(&weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
             }
 
         }
@@ -2893,13 +2870,13 @@ void DoMissionDebriefing(Rect *destRect, long yourlength, long parlength, long y
         } else score += kKillsPoints * 2;
     } else score += kKillsPoints;
 
-    retroTextSpec.text.load_resource('TEXT', kSummaryTextID);
+    retroTextSpec.text.reset(new std::string(Resource::get_data('TEXT', kSummaryTextID)));
     if (retroTextSpec.text.get() != nil) {
         // *** Replace place-holders in text with real data, using the fabulous Munger routine
         // your minutes
         NumToString( yourlength / 60, numString);
         GetIndString( tempString, kSummaryKeyStringID, kYourMinStringNum);
-        Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
+        Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
         // your seconds
         NumToString( yourlength % 60, numString);
 //      WriteDebugLine((char *)numString);
@@ -2907,13 +2884,13 @@ void DoMissionDebriefing(Rect *destRect, long yourlength, long parlength, long y
 
         mDoubleDigitize( numString);
         GetIndString( tempString, kSummaryKeyStringID, kYourSecStringNum);
-        Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
+        Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
         // par minutes
         if ( parlength > 0)
             NumToString( parlength / 60, numString);
         else GetIndString( numString, 6002, 9); // = N/A
             GetIndString( tempString, kSummaryKeyStringID, kParMinStringNum);
-        Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
+        Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
         // par seconds
         if ( parlength > 0)
         {
@@ -2922,47 +2899,47 @@ void DoMissionDebriefing(Rect *destRect, long yourlength, long parlength, long y
             CopyPString( numString, "\p:");
             ConcatenatePString( numString, tempString);
             GetIndString( tempString, kSummaryKeyStringID, kParSecStringNum);
-            Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
+            Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
         } else
         {
             GetIndString( tempString, kSummaryKeyStringID, kParSecStringNum);
-            Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, 0);
+            Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, 0);
         }
 
         // your loss
         NumToString( yourloss, numString);
         GetIndString( tempString, kSummaryKeyStringID, kYourLossStringNum);
-        Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
+        Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
         // par loss
         if ( parlength > 0)
             NumToString( parloss, numString);
         else GetIndString( numString, 6002, 9); // = N/A
         GetIndString( tempString, kSummaryKeyStringID, kParLossStringNum);
-        Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
+        Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
         // your kill
         NumToString( yourkill, numString);
         GetIndString( tempString, kSummaryKeyStringID, kYourKillStringNum);
-        Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
+        Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
         // par kill
         if ( parlength > 0)
             NumToString( parkill, numString);
         else GetIndString( numString, 6002, 9); // = N/A
         GetIndString( tempString, kSummaryKeyStringID, kParKillStringNum);
-        Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
+        Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
         // your score
         if ( parlength > 0)
             NumToString( score, numString);
         else GetIndString( numString, 6002, 9); // = N/A
         GetIndString( tempString, kSummaryKeyStringID, kYourScoreStringNum);
-        Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
+        Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
         // par score
         if ( parlength > 0)
             CopyPString( numString, "\p100");
         else GetIndString( numString, 6002, 9); // = N/A
         GetIndString( tempString, kSummaryKeyStringID, kParScoreStringNum);
-        Munger( retroTextSpec.text, 0, (tempString + 1), *tempString, numString + 1, *numString);
+        Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
 
-        retroTextSpec.textLength = retroTextSpec.text.count();
+        retroTextSpec.textLength = retroTextSpec.text->size();
 
         mSetDirectFont( kButtonFontNum);
         retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
@@ -3011,7 +2988,7 @@ void DoMissionDebriefing(Rect *destRect, long yourlength, long parlength, long y
                 // DO NOTHING
             };
         }
-        retroTextSpec.text.destroy();
+        retroTextSpec.text.reset();
     }
 
 }
@@ -3020,7 +2997,7 @@ void DoMissionDebriefingText(long textID, long yourlength, long parlength,
             long yourloss, long parloss, long yourkill, long parkill, long parScore)
 {
     Rect                tRect, iRect, scoreRect;
-    TypedHandle<unsigned char> textData;
+    scoped_ptr<std::string> textData;
     long                length, autoTimeStart, textlength = 0;
     short               textHeight = 0;
     bool             doScore = (parScore >= 0);
@@ -3030,11 +3007,12 @@ void DoMissionDebriefingText(long textID, long yourlength, long parlength,
     iRect = Rect(0, 0, kDebriefTextWidth, 1);
 
     dataItem.style = kLarge;
-    textData.load_resource('TEXT', textID);
+    textData.reset(new std::string(Resource::get_data('TEXT', textID)));
     if (textData.get() != nil) {
-        textlength = length = textData.count();
-        textHeight = GetInterfaceTextHeightFromWidth(*textData, length,
-                        dataItem.style, kDebriefTextWidth);
+        textlength = length = textData->size();
+        textHeight = GetInterfaceTextHeightFromWidth(
+                reinterpret_cast<const unsigned char*>(textData->c_str()), length, dataItem.style,
+                kDebriefTextWidth);
         if ( doScore) textHeight += kScoreTableHeight;
 
         iRect.bottom = iRect.top + textHeight;
@@ -3056,10 +3034,11 @@ void DoMissionDebriefingText(long textID, long yourlength, long parlength,
         DrawAnyInterfaceItem( &dataItem, gOffWorld, 0, 0);
 
         dataItem.bounds = tRect;
-        DrawInterfaceTextInRect(tRect, *textData, length,
-                            dataItem.style, dataItem.color, gOffWorld, 0, 0, nil);
+        DrawInterfaceTextInRect(
+                tRect, reinterpret_cast<const unsigned char*>(textData->c_str()), length,
+                dataItem.style, dataItem.color, gOffWorld, 0, 0, nil);
 
-        textData.destroy();
+        textData.reset();
 
         DrawInRealWorld();
         NormalizeColors();
@@ -3101,8 +3080,10 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
     retroTextSpecType   retroTextSpec;
     transColorType      *transColor;
     Rect                tRect, uRect, vRect, pictRect, pictSourceRect;
-    TypedHandle<unsigned char> textHandle;
-    unsigned char       *thisChar = nil, *sectionStart = nil, *nextChar;
+    scoped_ptr<std::string> textHandle;
+    const char*         sectionStart = NULL;
+    const char*         thisChar = NULL;
+    const char*         nextChar = NULL;
     scoped_ptr<Picture> thePict;
     scoped_ptr<Picture> bgPict;
     bool             sectionOver, abort = false, wasPicture = true;
@@ -3124,7 +3105,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
     BlackenWindow();
 
 
-    textHandle.load_resource('TEXT', textID);
+    textHandle.reset(new std::string(Resource::get_data('TEXT', textID)));
     if (textHandle.get() != nil) {
         mSetDirectFont( textFontNum);
 
@@ -3161,8 +3142,8 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
 
         // look for beginning of section
         charNum = 0;
-        textLength = textHandle.count();
-        sectionStart = *textHandle;
+        textLength = textHandle->size();
+        sectionStart = textHandle->c_str();
 
         // while we still have text to do
         while (( charNum < textLength) && ( !abort))
@@ -3254,7 +3235,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                 }
             }
 //          retroTextSpec.text = NewHandle( 1);
-            retroTextSpec.text.create(sectionLength);
+            retroTextSpec.text.reset(new std::string);
             for (int i = 0; i < sectionLength; ++i) {
                 (*retroTextSpec.text)[i] = sectionStart[i];
             }
@@ -3262,7 +3243,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                 if (retroTextSpec.text.get() != nil) {
                     sectionStart = thisChar;
 
-                    retroTextSpec.textLength = retroTextSpec.text.count();
+                    retroTextSpec.textLength = retroTextSpec.text->size();
 
                     retroTextSpec.thisPosition = retroTextSpec.linePosition =
                         retroTextSpec.lineCount = 0;
@@ -3475,7 +3456,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                             if ( AnyEvent()) abort = true;
                         }
                     }
-                    retroTextSpec.text.destroy();
+                    retroTextSpec.text.reset();
                 }
             }
         }
@@ -3510,7 +3491,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
             }
             if ( AnyEvent()) abort = true;
         }
-        textHandle.destroy();
+        textHandle.reset();
     } else SysBeep( 20);
 
     while ( AnyRealKeyDown()) {
@@ -3527,7 +3508,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
     }
 }
 
-void Replace_KeyCode_Strings_With_Actual_Key_Names(TypedHandle<unsigned char> text, short resID,
+void Replace_KeyCode_Strings_With_Actual_Key_Names(std::string* text, short resID,
     short padTo)
 {
     long    l;
@@ -3543,7 +3524,7 @@ void Replace_KeyCode_Strings_With_Actual_Key_Names(TypedHandle<unsigned char> te
             numString[numString[0]] = ' ';
         }
         GetIndString( tempString, kHelpScreenKeyStringID, l + 1);
-        while ( Munger( text, 0, (tempString + 1), *tempString,
+        while ( Munger(text, 0, (tempString + 1), *tempString,
             numString + 1, *numString) > 0) {
             // DO NOTHING
         };

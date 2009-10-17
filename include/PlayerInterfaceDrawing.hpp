@@ -67,7 +67,7 @@ void DrawInterfaceTextRect( interfaceItemType *, PixMap *, long,
                         long);
 void DrawInterfaceTextInRect(const Rect&, const unsigned char *, long, interfaceStyleType, unsigned char, PixMap *, long,
                         long, inlinePictType *);
-short GetInterfaceTextHeightFromWidth(unsigned char*, long, interfaceStyleType, short);
+short GetInterfaceTextHeightFromWidth(const unsigned char*, long, interfaceStyleType, short);
 void DrawInterfacePictureRect( interfaceItemType *, PixMap *, long,
                         long);
 void DrawAnyInterfaceItem( interfaceItemType *, PixMap *, long,

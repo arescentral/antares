@@ -1676,11 +1676,11 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
                         long portTop)
 
 {
-    TypedHandle<unsigned char> textData;
+    scoped_ptr<std::string> textData;
     long            length;
     RgnHandle       clipRgn = nil;
     Rect            tRect;
-    unsigned char   *sChar, *dChar, *aheadChar, *wordlen, *theLine, thisLen;
+    unsigned char   *dChar, *wordlen, *theLine, thisLen;
     short           vline = 0, hleft = 0, fheight = 0, xpos = 0;
     unsigned char   color, *charwidthptr, charwidth;
     transColorType  *transColor;
@@ -1702,10 +1702,10 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
     {
         wordlen = theLine;
 
-        textData.load_resource('TEXT', dItem->item.textRect.textID);
+        textData.reset(new std::string(Resource::get_data('TEXT', dItem->item.textRect.textID)));
         if (textData.get() != nil) {
-            length = textData.size();
-            sChar = *textData;
+            length = textData->size();
+            const char* sChar = textData->c_str();
 
             SetTranslateColorShadeFore( dItem->color, VERY_LIGHT);
 
@@ -1716,7 +1716,7 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
                 *wordlen = 0;
                 thisLen = 0;
                 dChar = wordlen + 1;
-                aheadChar = sChar;
+                const char* aheadChar = sChar;
                 while (( *aheadChar == kSpaceChar) && ( length > 0)) { aheadChar++; length--;}
 
                 while (( xpos < tRect.right - kInterfaceTextHBuffer) && ( length > 0))
@@ -1774,7 +1774,7 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
                 DrawInterfaceString( theLine, dItem->style, destMap, portLeft,
                         portTop,  color);
             }
-            textData.destroy();
+            textData.reset();
         }
         delete[] theLine;
     }
@@ -2006,11 +2006,13 @@ void DrawInterfaceTextInRect(const Rect& tRect, const unsigned char *textData, l
     DisposeRgn( clipRgn);
 }
 
-short GetInterfaceTextHeightFromWidth(unsigned char* textData, long length,
+short GetInterfaceTextHeightFromWidth(const unsigned char* textData, long length,
                             interfaceStyleType style, short boundsWidth)
 
 {
-    unsigned char   *sChar, *dChar, *aheadChar, *wordlen, *theLine, thisLen;
+    const unsigned char* sChar;
+    const unsigned char* aheadChar;
+    unsigned char   *dChar, *wordlen, *theLine, thisLen;
     short           vline = 0, hleft = 0, fheight = 0, xpos = 0;
     Str255          inlineString;
     inlineKindType  inlineKind = kNoKind;

@@ -37,7 +37,7 @@ namespace antares {
 #define kMaxLineNumber          48
 
 struct retroTextSpecType {
-    TypedHandle<unsigned char> text;
+    scoped_ptr<std::string> text;
     long            textLength;
     long            lineLength[kMaxLineNumber];
     long            lineNumber;

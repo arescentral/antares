@@ -115,7 +115,7 @@ extern scenarioType     *gThisScenario; // for special message labels
 extern PixMap*          gActiveWorld;
 extern PixMap*          gOffWorld;
 
-void MessageLabel_Set_Special(short id, TypedHandle<unsigned char> text);
+void MessageLabel_Set_Special(short id, const std::string* text);
 
 int InitMessageScreen() {
     unsigned char *anyChar, nilLabel = 0;
@@ -160,7 +160,7 @@ int InitMessageScreen() {
     tmessage->time = 0;
     tmessage->stage = kNoStage;
     tmessage->textHeight = 0;
-    tmessage->retroTextSpec.text = TypedHandle<unsigned char>();
+    tmessage->retroTextSpec.text.reset();
     tmessage->retroTextSpec.textLength = 0;
     tmessage->retroTextSpec.thisPosition = 0;
     tmessage->charDelayCount = 0;
@@ -221,9 +221,7 @@ void ClearMessage( void)
     tmessage->newStringMessage = false;
     tmessage->labelMessage = false;
     tmessage->lastLabelMessage = false;
-    if (tmessage->retroTextSpec.text.get() != nil) {
-        tmessage->retroTextSpec.text.destroy();
-    }
+    tmessage->retroTextSpec.text.reset();
     CLIP_BOTTOM = globals()->gTrueClipBottom;
     tmessage->labelMessageID = AddScreenLabel( 0, 0, 0, 0, &nilLabel, nil,
         false, SKY_BLUE);
@@ -334,9 +332,7 @@ void StartLongMessage( short startResID, short endResID)
         tmessage->time = 0;
         tmessage->stage = kStartStage;
         tmessage->textHeight = 0;
-        if ( tmessage->retroTextSpec.text.get() != nil) {
-            tmessage->retroTextSpec.text.destroy();
-        }
+        tmessage->retroTextSpec.text.reset();
         tmessage->retroTextSpec.textLength = 0;
         tmessage->retroTextSpec.thisPosition = 0;
         tmessage->retroTextSpec.topBuffer = kMessageCharTopBuffer;
@@ -376,9 +372,7 @@ void StartStringMessage(unsigned char* string)
         tmessage->time = 0;
         tmessage->stage = kStartStage;
         tmessage->textHeight = 0;
-        if (tmessage->retroTextSpec.text.get() != nil) {
-            tmessage->retroTextSpec.text.destroy();
-        }
+        tmessage->retroTextSpec.text.reset();
         tmessage->retroTextSpec.textLength = 0;
         tmessage->retroTextSpec.thisPosition = 0;
         tmessage->retroTextSpec.topBuffer = kMessageCharTopBuffer;
@@ -398,9 +392,8 @@ void ClipToCurrentLongMessage( void)
 
 {
     longMessageType *tmessage;
-    TypedHandle<unsigned char> textData;
+    scoped_ptr<std::string> textData;
     transColorType  *transColor;
-    unsigned char* ac;
     long            count;
 
     tmessage = globals()->gLongMessageData.get();
@@ -417,25 +410,21 @@ void ClipToCurrentLongMessage( void)
         {
             if ( tmessage->currentResID == kStringMessageID)
             {
-                textData.create(tmessage->stringMessage[0]);
+                textData.reset(new std::string);
                 if (textData.get() != nil) {
                     count = 1;
-                    ac = *textData;
                     while ( count <= tmessage->stringMessage[0])
                     {
-                        *ac = tmessage->stringMessage[count];
-                        ac++;
+                        *textData += tmessage->stringMessage[count];
                         count++;
                     }
                 }
                 tmessage->labelMessage = false;
             } else
             {
-                textData.load_resource('TEXT', tmessage->currentResID);
-                Replace_KeyCode_Strings_With_Actual_Key_Names( textData,
-                    kKeyMapNameLongID, 0);
-                if ( **textData == '#')
-                {
+                textData.reset(new std::string(Resource::get_data('TEXT', tmessage->currentResID)));
+                Replace_KeyCode_Strings_With_Actual_Key_Names(textData.get(), kKeyMapNameLongID, 0);
+                if ((*textData)[0] == '#') {
                     tmessage->labelMessage = true;
                 }
                 else tmessage->labelMessage = false;
@@ -446,11 +435,8 @@ void ClipToCurrentLongMessage( void)
 //              tmessage->textHeight = GetInterfaceTextHeightFromWidth( (anyCharType *)*textData, GetHandleSize( textData),
 //                                  kLarge, CLIP_RIGHT - CLIP_LEFT);
                 mSetDirectFont( kLongMessageFontNum);
-                if (tmessage->retroTextSpec.text.get() != nil) {
-                    tmessage->retroTextSpec.text.destroy();
-                }
-                tmessage->retroTextSpec.text = textData;
-                tmessage->retroTextSpec.textLength = tmessage->retroTextSpec.text.count();
+                tmessage->retroTextSpec.text.reset(textData.release());
+                tmessage->retroTextSpec.textLength = tmessage->retroTextSpec.text->size();
                 tmessage->textHeight = DetermineDirectTextHeightInWidth( &tmessage->retroTextSpec,
                 (CLIP_RIGHT - CLIP_LEFT) - kHBufferTotal);
                 tmessage->textHeight += kLongMessageVPadDouble;
@@ -556,7 +542,7 @@ void DrawCurrentLongMessage( long timePass)
                     SetScreenLabelAge( tmessage->labelMessageID, 0);
 
                     MessageLabel_Set_Special( tmessage->labelMessageID,
-                        tmessage->retroTextSpec.text);
+                        tmessage->retroTextSpec.text.get());
                 }
             }
         } else if ( !tmessage->labelMessage)
@@ -582,7 +568,7 @@ void DrawCurrentLongMessage( long timePass)
     } else
     {
         if ((tmessage->labelMessage) && (tmessage->retroTextSpec.text.get() != nil)) {
-            tmessage->retroTextSpec.text.destroy();
+            tmessage->retroTextSpec.text.reset();
         } else if ((tmessage->currentResID >= 0) && (tmessage->retroTextSpec.text.get() != nil) &&
             ( tmessage->retroTextSpec.thisPosition < tmessage->retroTextSpec.textLength) && ( tmessage->stage == kShowStage))
         {
@@ -635,7 +621,7 @@ void DrawCurrentLongMessage( long timePass)
                         if ( tmessage->retroTextSpec.thisPosition >
                             tmessage->retroTextSpec.textLength)
                         {
-                            tmessage->retroTextSpec.text.destroy();
+                            tmessage->retroTextSpec.text.reset();
                         }
                     }
                     tmessage->charDelayCount -= 3;
@@ -657,9 +643,7 @@ void EndLongMessage( void)
     tmessage->endResID = -1;
     tmessage->currentResID = -1;
     tmessage->stage = kStartStage;
-    if (tmessage->retroTextSpec.text.get() != nil) {
-        tmessage->retroTextSpec.text.destroy();
-    }
+    tmessage->retroTextSpec.text.reset();
     CopyAnyCharPString( tmessage->lastStringMessage, tmessage->stringMessage);
 }
 
@@ -870,7 +854,7 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
     long            charNum = 0, height = mDirectFontHeight(), x = 0, oldx = 0, oldCharNum, wordLen,
                     *lineLengthList = retroTextSpec->lineLength;
     unsigned char   *widthPtr, charWidth, wrapState; // 0 = none, 1 = once, 2 = more than once
-    unsigned char   *thisChar = *retroTextSpec->text;
+    const char*     thisChar = retroTextSpec->text->c_str();
 
     *lineLengthList = 0;
     retroTextSpec->autoWidth = 0;
@@ -988,7 +972,8 @@ void DrawDirectTextInRect(
                     oldx = 0, oldCharNum, wordLen;
     unsigned char   *widthPtr, charWidth, wrapState, // 0 = none, 1 = once, 2 = more than once
                     tempColor;
-    unsigned char   *thisChar = *retroTextSpec->text, *thisWordChar, thisWord[255];
+    const char*     thisChar = retroTextSpec->text->c_str();
+    unsigned char   *thisWordChar, thisWord[255];
     Rect        backRect, lineRect;
     unsigned char   calcColor, calcShade;
     transColorType  *transColor;
@@ -1164,7 +1149,8 @@ void DrawDirectTextInRect(
 void DrawRetroTextCharInRect(
         retroTextSpecType *retroTextSpec, long charsToDo, const Rect& bounds, const Rect& clipRect,
         PixMap *destMap, long portLeft, long portTop) {
-    unsigned char   *thisChar = *(retroTextSpec->text), thisWord[kMaxRetroSize], charWidth, *widthPtr;
+    const char*     thisChar = retroTextSpec->text->c_str();
+    unsigned char   thisWord[kMaxRetroSize], charWidth, *widthPtr;
     Rect        cursorRect, lineRect, tlRect;
     long            oldx, wordLen, *lineLength = &(retroTextSpec->lineLength[retroTextSpec->lineCount]);
     unsigned char   tempColor, calcColor, calcShade;
@@ -1188,7 +1174,7 @@ void DrawRetroTextCharInRect(
     while (( charsToDo > 0) && ( retroTextSpec->thisPosition <
         retroTextSpec->textLength))
     {
-        thisChar = *(retroTextSpec->text) + retroTextSpec->thisPosition;
+        thisChar = retroTextSpec->text->c_str() + retroTextSpec->thisPosition;
         if ( *thisChar == kCodeChar)
         {
             thisChar++;
@@ -1373,19 +1359,19 @@ void DrawRetroTextCharInRect(
 //  t = one of three characters: 'L' for left, 'R' for right, and 'O' for object
 //  nnn... are digits specifying value (distance from top, or initial object #)
 //
-void MessageLabel_Set_Special(short id, TypedHandle<unsigned char> text) {
-    unsigned char    whichType, *c;
+void MessageLabel_Set_Special(short id, const std::string* text) {
+    unsigned char    whichType;
     long    value = 0, charNum = 0, textLength, safetyCount;
     Str255  s;
     Point   attachPoint;
     bool hintLine = false;
 
     s[0] = 0;
-    if (text.get() == nil) {
+    if (text == nil) {
         return;
     }
-    textLength = text.count();
-    c = *text;
+    textLength = text->size();
+    const char* c = text->c_str();
 
     // if not legal, bail
     if ( *c != '#') return;
