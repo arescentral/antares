@@ -63,28 +63,35 @@ Picture::Picture(int32_t id) {
 }
 
 void Picture::draw(const Rect& dst) {
-    ClippedTransfer transfer(_frame, dst);
-    transfer.ClipDestTo(gActiveWorld->bounds());
-
-    for (int i = 0; i < transfer.Height(); ++i) {
-        uint8_t* source_bytes =
-            _pixels.get() + transfer.SourceColumn(0) + transfer.SourceRow(i) * _frame.right;
-        SetPixelRow(transfer.DestColumn(0), transfer.DestRow(i), source_bytes, transfer.Width());
-    }
+    CopyBits(this, gActiveWorld, _frame, dst);
 }
 
 void Picture::draw_to(PixMap* pix, const Rect& from, const Rect& to) {
-    ClippedTransfer transfer(from, to);
-    transfer.ClipSourceTo(_frame);
-    transfer.ClipDestTo(pix->bounds());
+    CopyBits(this, pix, from, to);
+}
 
-    for (int i = 0; i < transfer.Height(); ++i) {
-        const uint8_t* source_bytes =
-            _pixels.get() + transfer.SourceColumn(0) + transfer.SourceRow(i) * _frame.right;
-        uint8_t* dest_bytes =
-            pix->mutable_bytes() + transfer.DestColumn(0) + transfer.DestRow(i) * pix->bounds().right;
-        memcpy(dest_bytes, source_bytes, transfer.Width());
-    }
+const Rect& Picture::bounds() const {
+    return _frame;
+}
+
+const ColorTable& Picture::colors() const {
+    return gActiveWorld->colors();
+}
+
+int Picture::row_bytes() const {
+    return _frame.width();
+}
+
+const uint8_t* Picture::bytes() const {
+    return _pixels.get();
+}
+
+uint8_t* Picture::mutable_bytes() {
+    return _pixels.get();
+}
+
+ColorTable* Picture::mutable_colors() {
+    return gActiveWorld->mutable_colors();
 }
 
 }  // namespace antares

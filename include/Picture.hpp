@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include <exception>
 #include <Base.h>
+#include "PixMap.hpp"
 #include "SmartPtr.hpp"
 
 namespace antares {
@@ -29,7 +30,7 @@ class PixMap;
 
 class PictureNotFoundException : public std::exception { };
 
-class Picture {
+class Picture : public PixMap {
   public:
     Picture(int32_t id);
 
@@ -38,6 +39,14 @@ class Picture {
     void draw(const Rect& dest);
 
     void draw_to(PixMap* pix, const Rect& from, const Rect& to);
+
+    virtual const Rect& bounds() const;
+    virtual const ColorTable& colors() const;
+    virtual int row_bytes() const;
+    virtual const uint8_t* bytes() const;
+
+    virtual uint8_t* mutable_bytes();
+    virtual ColorTable* mutable_colors();
 
   private:
     Rect _frame;

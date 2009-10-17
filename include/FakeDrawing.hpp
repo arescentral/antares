@@ -49,15 +49,6 @@ class ClippedTransfer {
         ClipFirstToSecond(_to, clip);
     }
 
-    int Height() const { return _from.bottom - _from.top; }
-    int Width() const { return _from.right - _from.left; }
-
-    int SourceRow(int i) const { return _from.top + i; }
-    int SourceColumn(int i) const { return _from.left + i; }
-
-    int DestRow(int i) const { return _to.top + i; }
-    int DestColumn(int i) const { return _to.left + i; }
-
     const Rect& from() const { return _from; }
     const Rect& to() const { return _to; }
 
@@ -90,7 +81,6 @@ class ClippedTransfer {
 };
 
 uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue);
-void SetPixelRow(int x, int y, uint8_t* c, int count);
 void ClearScreen();
 
 extern PixMap* gOffWorld;

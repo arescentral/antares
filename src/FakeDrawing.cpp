@@ -106,11 +106,6 @@ uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue) {
     return best_color;
 }
 
-void SetPixelRow(int x, int y, uint8_t* c, int count) {
-    PixMap* p = gActiveWorld;
-    memcpy(p->mutable_row(y) + x, c, count);
-}
-
 void ClearScreen() {
     gActiveWorld->fill(0xFF);
 }
