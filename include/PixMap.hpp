@@ -52,6 +52,9 @@ class PixMap {
     virtual void set(int x, int y, uint8_t color);
     virtual void fill(uint8_t color);
     virtual void copy(const PixMap& pix);
+
+    class View;
+    View view(const Rect& bounds);
 };
 
 class ArrayPixMap : public PixMap {
@@ -79,9 +82,9 @@ class ArrayPixMap : public PixMap {
     DISALLOW_COPY_AND_ASSIGN(ArrayPixMap);
 };
 
-class ViewPixMap : public PixMap {
+class PixMap::View : public PixMap {
   public:
-    ViewPixMap(PixMap* pix, const Rect& r);
+    View(PixMap* pix, const Rect& r);
 
     virtual const Rect& bounds() const;
     virtual const ColorTable& colors() const;
@@ -96,7 +99,7 @@ class ViewPixMap : public PixMap {
     const Point _offset;
     Rect _bounds;
 
-    // ALLOW_COPY_AND_ASSIGN(ViewPixMap);
+    // ALLOW_COPY_AND_ASSIGN(View);
 };
 
 }  // namespace antares
