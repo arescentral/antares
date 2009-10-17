@@ -19,7 +19,6 @@
 
 #include <assert.h>
 #include <fcntl.h>
-#include <libkern/OSByteOrder.h>
 #include <algorithm>
 #include <limits>
 #include <string>
@@ -56,23 +55,7 @@ public:
 
 void DumpTo(const std::string& path) {
     std::string contents;
-    StringBinaryWriter bin(&contents);
-
-    uint32_t width = gRealWorld->bounds().right;
-    uint32_t height = gRealWorld->bounds().bottom;
-
-    bin.write<uint32_t>(width);
-    bin.write<uint32_t>(height);
-
-    for (size_t i = 0; i < 256; ++i) {
-        RGBColor color = gRealWorld->colors().color(i);
-        bin.write<uint32_t>(i);
-        bin.write(color.red);
-        bin.write(color.green);
-        bin.write(color.blue);
-    }
-
-    bin.write(gRealWorld->bytes(), width * height);
+    StringBinaryWriter(&contents).write(*gRealWorld);
 
     MakeDirs(DirName(path), 0755);
     int fd = open(path.c_str(), O_WRONLY | O_CREAT, 0644);

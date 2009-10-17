@@ -341,4 +341,14 @@ void ColorTable::read(BinaryReader* bin) {
     }
 }
 
+void ColorTable::write(BinaryWriter* bin) const {
+    for (int i = 0; i < 256; ++i) {
+        uint32_t index = i;
+        bin->write(index);
+        bin->write(_colors[i].red);
+        bin->write(_colors[i].green);
+        bin->write(_colors[i].blue);
+    }
+}
+
 }  // namespace antares

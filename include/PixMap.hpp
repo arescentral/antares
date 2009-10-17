@@ -25,6 +25,8 @@
 
 namespace antares {
 
+class BinaryReader;
+class BinaryWriter;
 class ColorTable;
 
 class PixMapException : public std::exception {
@@ -52,6 +54,8 @@ class PixMap {
     virtual void set(int x, int y, uint8_t color);
     virtual void fill(uint8_t color);
     virtual void copy(const PixMap& pix);
+
+    virtual void write(BinaryWriter* bin) const;
 
     class View;
     View view(const Rect& bounds);

@@ -56,6 +56,13 @@ void PixMap::copy(const PixMap& pix) {
     }
 }
 
+void PixMap::write(BinaryWriter* bin) const {
+    bin->write(bounds().width());
+    bin->write(bounds().height());
+    bin->write(colors());
+    bin->write(bytes(), bounds().width() * bounds().height());
+}
+
 ArrayPixMap::ArrayPixMap(int width, int height)
         : _bounds(0, 0, width, height),
           _colors(new ColorTable(256)),

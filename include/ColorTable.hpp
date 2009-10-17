@@ -25,6 +25,9 @@
 
 namespace antares {
 
+class BinaryReader;
+class BinaryWriter;
+
 class ColorTable {
   public:
     explicit ColorTable(int32_t id);
@@ -39,6 +42,7 @@ class ColorTable {
     void transition_between(const ColorTable& source, const RGBColor& dest, double fraction);
 
     void read(BinaryReader* bin);
+    void write(BinaryWriter* bin) const;
 
   private:
     std::vector<RGBColor> _colors;
