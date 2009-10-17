@@ -63,6 +63,7 @@ class ArrayPixMap : public PixMap {
     ~ArrayPixMap();
 
     void resize(const Rect& r);
+    void read(BinaryReader* bin);
 
     virtual const Rect& bounds() const;
     virtual const ColorTable& colors() const;

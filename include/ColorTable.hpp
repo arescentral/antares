@@ -38,6 +38,8 @@ class ColorTable {
 
     void transition_between(const ColorTable& source, const RGBColor& dest, double fraction);
 
+    void read(BinaryReader* bin);
+
   private:
     std::vector<RGBColor> _colors;
 

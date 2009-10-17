@@ -28,7 +28,8 @@ namespace antares {
 
 extern PixMap* gActiveWorld;
 
-Picture::Picture(int32_t id) {
+Picture::Picture(int32_t id)
+        : ArrayPixMap(0, 0) {
     char fileglob[64];
     glob_t g;
     g.gl_offs = 0;
@@ -43,17 +44,7 @@ Picture::Picture(int32_t id) {
     } else if (g.gl_pathc == 1) {
         MappedFile file(g.gl_pathv[0]);
         BufferBinaryReader bin(file.data(), file.size());
-
-        _frame.left = 0;
-        _frame.top = 0;
-        bin.read(&_frame.right);
-        bin.read(&_frame.bottom);
-
-        int pixel_size = _frame.right * _frame.bottom;
-        _pixels.reset(new uint8_t[pixel_size]);
-        bin.discard(0x1000);
-        bin.read(_pixels.get(), pixel_size);
-
+        read(&bin);
         assert(bin.bytes_read() == file.size());
     } else {
         fprintf(stderr, "Found %lu matches for %d\n", g.gl_pathc, id);
@@ -62,36 +53,16 @@ Picture::Picture(int32_t id) {
     globfree(&g);
 }
 
+const Rect& Picture::frame() {
+    return bounds();
+}
+
 void Picture::draw(const Rect& dst) {
-    CopyBits(this, gActiveWorld, _frame, dst);
+    CopyBits(this, gActiveWorld, bounds(), dst);
 }
 
 void Picture::draw_to(PixMap* pix, const Rect& from, const Rect& to) {
     CopyBits(this, pix, from, to);
-}
-
-const Rect& Picture::bounds() const {
-    return _frame;
-}
-
-const ColorTable& Picture::colors() const {
-    return gActiveWorld->colors();
-}
-
-int Picture::row_bytes() const {
-    return _frame.width();
-}
-
-const uint8_t* Picture::bytes() const {
-    return _pixels.get();
-}
-
-uint8_t* Picture::mutable_bytes() {
-    return _pixels.get();
-}
-
-ColorTable* Picture::mutable_colors() {
-    return gActiveWorld->mutable_colors();
 }
 
 }  // namespace antares

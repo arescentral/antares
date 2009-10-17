@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <Quickdraw.h>
+#include "BinaryStream.hpp"
 #include "ColorTable.hpp"
 
 namespace antares {
@@ -61,6 +62,16 @@ ArrayPixMap::ArrayPixMap(int width, int height)
           _bytes(new unsigned char[width * height]) { }
 
 ArrayPixMap::~ArrayPixMap() { }
+
+void ArrayPixMap::read(BinaryReader* bin) {
+    Rect bounds(0, 0, 0, 0);
+    bin->read(&bounds.right);
+    bin->read(&bounds.bottom);
+    resize(bounds);
+
+    bin->read(_colors.get());
+    bin->read(_bytes.get(), bounds.right * bounds.bottom);
+}
 
 const Rect& ArrayPixMap::bounds() const {
     return _bounds;

@@ -19,6 +19,7 @@
 
 #include <stdint.h>
 #include <Base.h>
+#include "BinaryStream.hpp"
 #include "SmartPtr.hpp"
 
 namespace antares {
@@ -327,6 +328,16 @@ void ColorTable::transition_between(
             source.color(i).blue * source_fraction + dest.blue * dest_fraction,
         };
         _colors[i] = out;
+    }
+}
+
+void ColorTable::read(BinaryReader* bin) {
+    for (int i = 0; i < 256; ++i) {
+        uint32_t index;
+        bin->read(&index);
+        bin->read(&_colors[i].red);
+        bin->read(&_colors[i].green);
+        bin->read(&_colors[i].blue);
     }
 }
 

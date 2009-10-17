@@ -26,32 +26,17 @@
 
 namespace antares {
 
-class PixMap;
-
 class PictureNotFoundException : public std::exception { };
 
-class Picture : public PixMap {
+class Picture : public ArrayPixMap {
   public:
     Picture(int32_t id);
 
-    const Rect& frame() { return _frame; }
-
+    const Rect& frame();
     void draw(const Rect& dest);
-
     void draw_to(PixMap* pix, const Rect& from, const Rect& to);
 
-    virtual const Rect& bounds() const;
-    virtual const ColorTable& colors() const;
-    virtual int row_bytes() const;
-    virtual const uint8_t* bytes() const;
-
-    virtual uint8_t* mutable_bytes();
-    virtual ColorTable* mutable_colors();
-
   private:
-    Rect _frame;
-    scoped_array<uint8_t> _pixels;
-
     DISALLOW_COPY_AND_ASSIGN(Picture);
 };
 
