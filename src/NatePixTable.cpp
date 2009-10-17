@@ -107,28 +107,32 @@ size_t natePixType::size() const {
     return _entries.size();
 }
 
+void natePixType::read(BinaryReader* bin) {
+    uint32_t size;
+    int32_t pixnum;
+    bin->read(&size);
+    bin->read(&pixnum);
+
+    std::vector<uint32_t> offsets;
+    for (int i = 0; i < pixnum; ++i) {
+        uint32_t offset;
+        bin->read(&offset);
+        offsets.push_back(offset);
+    }
+
+    for (int i = 0; i < pixnum; ++i) {
+        bin->discard(offsets[i] - bin->bytes_read());
+        _entries.push_back(new natePixEntryType);
+        bin->read(_entries.back());
+    }
+}
+
 size_t natePixType::load_data(const char* data, size_t len) {
     clear();
 
     BufferBinaryReader bin(data, len);
 
-    uint32_t size;
-    int32_t pixnum;
-    bin.read(&size);
-    bin.read(&pixnum);
-
-    std::vector<uint32_t> offsets;
-    for (int i = 0; i < pixnum; ++i) {
-        uint32_t offset;
-        bin.read(&offset);
-        offsets.push_back(offset);
-    }
-
-    for (int i = 0; i < pixnum; ++i) {
-        bin.discard(offsets[i] - bin.bytes_read());
-        _entries.push_back(new natePixEntryType);
-        bin.read(_entries.back());
-    }
+    bin.read(this);
     bin.discard(len - bin.bytes_read());
 
     return bin.bytes_read();

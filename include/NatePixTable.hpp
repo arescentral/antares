@@ -37,6 +37,7 @@ class natePixType {
     natePixEntryType* at(size_t index) const;
     size_t size() const;
 
+    void read(BinaryReader* bin);
     size_t load_data(const char* data, size_t len);
     void copy_from(const natePixType& other);
     void clear();
