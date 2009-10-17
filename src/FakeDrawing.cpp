@@ -136,18 +136,12 @@ void CopyBits(PixMap* source, PixMap* dest, const Rect& source_rect, const Rect&
     transfer.ClipSourceTo(source->bounds());
     transfer.ClipDestTo(dest->bounds());
 
-    for (int i = 0; i < transfer.Height(); ++i) {
-        const uint8_t* sourceBytes
-            = source->bytes()
-            + transfer.SourceColumn(0)
-            + transfer.SourceRow(i) * source->row_bytes();
-
-        uint8_t* destBytes
-            = dest->mutable_bytes()
-            + transfer.DestColumn(0)
-            + transfer.DestRow(i) * dest->row_bytes();
-
-        memcpy(destBytes, sourceBytes, transfer.Width());
+    ViewPixMap clipped_src(source, transfer.from());
+    ViewPixMap clipped_dst(dest, transfer.to());
+    for (int i = 0; i < transfer.from().height(); ++i) {
+        const uint8_t* src_bytes = clipped_src.bytes() + i * clipped_src.row_bytes();
+        uint8_t* dst_bytes = clipped_dst.mutable_bytes() + i * clipped_dst.row_bytes();
+        memcpy(dst_bytes, src_bytes, transfer.from().width());
     }
 }
 

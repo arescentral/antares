@@ -71,4 +71,41 @@ uint8_t ArrayPixMap::get(int x, int y) const {
     return _bytes.get()[y * _bounds.right + x];
 }
 
+ViewPixMap::ViewPixMap(PixMap* pix, const Rect& r)
+        : _parent(pix),
+          _offset(r.left, r.top),
+          _bounds(0, 0, r.width(), r.height()) { }
+
+const Rect& ViewPixMap::bounds() const {
+    return _bounds;
+}
+
+const ColorTable& ViewPixMap::colors() const {
+    return _parent->colors();
+}
+
+int ViewPixMap::row_bytes() const {
+    return _parent->row_bytes();
+}
+
+const uint8_t* ViewPixMap::bytes() const {
+    return _parent->bytes() + _offset.v * row_bytes() + _offset.h;
+}
+
+uint8_t* ViewPixMap::mutable_bytes() {
+    return _parent->mutable_bytes() + _offset.v * row_bytes() + _offset.h;
+}
+
+ColorTable* ViewPixMap::mutable_colors() {
+    return _parent->mutable_colors();
+}
+
+void ViewPixMap::set(int x, int y, uint8_t color) {
+    _parent->mutable_bytes()[(_offset.v + y) * row_bytes() + _offset.h + x] = color;
+}
+
+uint8_t ViewPixMap::get(int x, int y) const {
+    return _parent->bytes()[(_offset.v + y) * row_bytes() + _offset.h + x];
+}
+
 }  // namespace antares

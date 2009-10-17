@@ -65,6 +65,29 @@ class ArrayPixMap : public PixMap {
     DISALLOW_COPY_AND_ASSIGN(ArrayPixMap);
 };
 
+class ViewPixMap : public PixMap {
+  public:
+    ViewPixMap(PixMap* pix, const Rect& r);
+
+    virtual const Rect& bounds() const;
+    virtual const ColorTable& colors() const;
+    virtual int row_bytes() const;
+    virtual const uint8_t* bytes() const;
+
+    virtual uint8_t* mutable_bytes();
+    virtual ColorTable* mutable_colors();
+
+    virtual void set(int x, int y, uint8_t color);
+    virtual uint8_t get(int x, int y) const;
+
+  private:
+    PixMap* _parent;
+    Point _offset;
+    Rect _bounds;
+
+    DISALLOW_COPY_AND_ASSIGN(ViewPixMap);
+};
+
 }  // namespace antares
 
 #endif  // ANTARES_PIX_MAP_HPP_
