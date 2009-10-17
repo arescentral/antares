@@ -18,12 +18,23 @@
 #ifndef ANTARES_PIX_MAP_HPP_
 #define ANTARES_PIX_MAP_HPP_
 
+#include <exception>
+#include <string>
 #include "Geometry.hpp"
 #include "SmartPtr.hpp"
 
 namespace antares {
 
 class ColorTable;
+
+class PixMapException : public std::exception {
+  public:
+    PixMapException(const std::string& what) throw() : _what(what) { }
+    ~PixMapException() throw() { }
+    virtual const char* what() const throw() { return _what.c_str(); }
+  private:
+    const std::string _what;
+};
 
 class PixMap {
   public:
@@ -35,8 +46,12 @@ class PixMap {
     virtual uint8_t* mutable_bytes() = 0;
     virtual ColorTable* mutable_colors() = 0;
 
-    virtual void set(int x, int y, uint8_t color) = 0;
-    virtual uint8_t get(int x, int y) const = 0;
+    virtual const uint8_t* row(int y) const;
+    virtual uint8_t* mutable_row(int y);
+    virtual uint8_t get(int x, int y) const;
+    virtual void set(int x, int y, uint8_t color);
+    virtual void fill(uint8_t color);
+    virtual void copy(const PixMap& pix);
 };
 
 class ArrayPixMap : public PixMap {
@@ -54,8 +69,7 @@ class ArrayPixMap : public PixMap {
     virtual uint8_t* mutable_bytes();
     virtual ColorTable* mutable_colors();
 
-    virtual void set(int x, int y, uint8_t color);
-    virtual uint8_t get(int x, int y) const;
+    virtual void fill(uint8_t color);
 
   private:
     Rect _bounds;
@@ -77,12 +91,9 @@ class ViewPixMap : public PixMap {
     virtual uint8_t* mutable_bytes();
     virtual ColorTable* mutable_colors();
 
-    virtual void set(int x, int y, uint8_t color);
-    virtual uint8_t get(int x, int y) const;
-
   private:
-    PixMap* _parent;
-    Point _offset;
+    PixMap* const _parent;
+    const Point _offset;
     Rect _bounds;
 
     DISALLOW_COPY_AND_ASSIGN(ViewPixMap);

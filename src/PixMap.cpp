@@ -23,6 +23,38 @@
 
 namespace antares {
 
+const uint8_t* PixMap::row(int y) const {
+    return bytes() + y * row_bytes();
+}
+
+uint8_t* PixMap::mutable_row(int y) {
+    return mutable_bytes() + y * row_bytes();
+}
+
+uint8_t PixMap::get(int x, int y) const {
+    return row(y)[x];
+}
+
+void PixMap::set(int x, int y, uint8_t color) {
+    mutable_row(y)[x] = color;
+}
+
+void PixMap::fill(uint8_t color) {
+    for (int i = 0; i < bounds().height(); ++i) {
+        memset(mutable_row(i), color, bounds().width());
+    }
+}
+
+void PixMap::copy(const PixMap& pix) {
+    if (bounds().width() != pix.bounds().width()
+            || bounds().height() != pix.bounds().height()) {
+        throw PixMapException("Mismatch in PixMap sizes");
+    }
+    for (int i = 0; i < bounds().height(); ++i) {
+        memcpy(mutable_row(i), pix.row(i), bounds().width());
+    }
+}
+
 ArrayPixMap::ArrayPixMap(int width, int height)
         : _bounds(0, 0, width, height),
           _colors(new ColorTable(256)),
@@ -54,6 +86,10 @@ ColorTable* ArrayPixMap::mutable_colors() {
     return _colors.get();
 }
 
+void ArrayPixMap::fill(uint8_t color) {
+    memset(_bytes.get(), color, _bounds.width() * _bounds.height());
+}
+
 void ArrayPixMap::resize(const Rect& new_bounds) {
     ArrayPixMap new_pix_map(new_bounds.width(), new_bounds.height());
     Rect transfer = _bounds;
@@ -63,18 +99,12 @@ void ArrayPixMap::resize(const Rect& new_bounds) {
     _bytes.swap(&new_pix_map._bytes);
 }
 
-void ArrayPixMap::set(int x, int y, uint8_t color) {
-    _bytes.get()[y * _bounds.right + x] = color;
-}
-
-uint8_t ArrayPixMap::get(int x, int y) const {
-    return _bytes.get()[y * _bounds.right + x];
-}
-
 ViewPixMap::ViewPixMap(PixMap* pix, const Rect& r)
         : _parent(pix),
           _offset(r.left, r.top),
-          _bounds(0, 0, r.width(), r.height()) { }
+          _bounds(0, 0, r.width(), r.height()) {
+    _bounds.clip_to(pix->bounds());
+}
 
 const Rect& ViewPixMap::bounds() const {
     return _bounds;
@@ -98,14 +128,6 @@ uint8_t* ViewPixMap::mutable_bytes() {
 
 ColorTable* ViewPixMap::mutable_colors() {
     return _parent->mutable_colors();
-}
-
-void ViewPixMap::set(int x, int y, uint8_t color) {
-    _parent->mutable_bytes()[(_offset.v + y) * row_bytes() + _offset.h + x] = color;
-}
-
-uint8_t ViewPixMap::get(int x, int y) const {
-    return _parent->bytes()[(_offset.v + y) * row_bytes() + _offset.h + x];
 }
 
 }  // namespace antares

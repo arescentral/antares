@@ -106,25 +106,13 @@ uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue) {
     return best_color;
 }
 
-uint8_t GetPixel(int x, int y) {
-    const PixMap* p = gRealWorld;
-    return p->bytes()[x + y * p->row_bytes()];
-}
-
-void SetPixel(int x, int y, uint8_t c) {
-    PixMap* p = gActiveWorld;
-    p->mutable_bytes()[x + y * p->row_bytes()] = c;
-}
-
 void SetPixelRow(int x, int y, uint8_t* c, int count) {
     PixMap* p = gActiveWorld;
-    memcpy(&p->mutable_bytes()[x + y * p->row_bytes()], c, count);
+    memcpy(p->mutable_row(y) + x, c, count);
 }
 
 void ClearScreen() {
-    int width = gActiveWorld->bounds().right;
-    int height = gActiveWorld->bounds().bottom;
-    memset(gActiveWorld->mutable_bytes(), 0xFF, width * height);
+    gActiveWorld->fill(0xFF);
 }
 
 void CopyBits(PixMap* source, PixMap* dest, const Rect& source_rect, const Rect& dest_rect) {
@@ -138,11 +126,7 @@ void CopyBits(PixMap* source, PixMap* dest, const Rect& source_rect, const Rect&
 
     ViewPixMap clipped_src(source, transfer.from());
     ViewPixMap clipped_dst(dest, transfer.to());
-    for (int i = 0; i < transfer.from().height(); ++i) {
-        const uint8_t* src_bytes = clipped_src.bytes() + i * clipped_src.row_bytes();
-        uint8_t* dst_bytes = clipped_dst.mutable_bytes() + i * clipped_dst.row_bytes();
-        memcpy(dst_bytes, src_bytes, transfer.from().width());
-    }
+    clipped_dst.copy(clipped_src);
 }
 
 Rect ClipRectToRect(const Rect& src, const Rect& clip) {
@@ -165,31 +149,13 @@ void RGBBackColor(RGBColor* color) {
 }
 
 void PaintRect(const Rect& rect) {
-    Rect clipped = ClipRectToRect(rect, gActiveWorld->bounds());
-    for (int y = clipped.top; y < clipped.bottom; ++y) {
-        for (int x = clipped.left; x < clipped.right; ++x) {
-            SetPixel(x, y, currentForeColor);
-        }
-    }
-}
-
-void MacFillRect(const Rect& rect, Pattern* pattern) {
-    static_cast<void>(pattern);
-    Rect clipped = ClipRectToRect(rect, gActiveWorld->bounds());
-    for (int y = clipped.top; y < clipped.bottom; ++y) {
-        for (int x = clipped.left; x < clipped.right; ++x) {
-            SetPixel(x, y, 255);
-        }
-    }
+    ViewPixMap view(gActiveWorld, rect);
+    view.fill(currentForeColor);
 }
 
 void EraseRect(const Rect& rect) {
-    Rect clipped = ClipRectToRect(rect, gActiveWorld->bounds());
-    for (int y = clipped.top; y < clipped.bottom; ++y) {
-        for (int x = clipped.left; x < clipped.right; ++x) {
-            SetPixel(x, y, currentBackColor);
-        }
-    }
+    ViewPixMap view(gActiveWorld, rect);
+    view.fill(currentBackColor);
 }
 
 void FrameRect(const Rect& rect) {
@@ -199,18 +165,18 @@ void FrameRect(const Rect& rect) {
     }
     for (int x = clipped.left; x < clipped.right; ++x) {
         if (rect.top == clipped.top) {
-            SetPixel(x, rect.top, currentForeColor);
+            gActiveWorld->set(x, rect.top, currentForeColor);
         }
         if (rect.bottom == clipped.bottom) {
-            SetPixel(x, rect.bottom - 1, currentForeColor);
+            gActiveWorld->set(x, rect.bottom - 1, currentForeColor);
         }
     }
     for (int y = clipped.top; y < clipped.bottom; ++y) {
         if (rect.left == clipped.left) {
-            SetPixel(rect.left, y, currentForeColor);
+            gActiveWorld->set(rect.left, y, currentForeColor);
         }
         if (rect.right == clipped.right) {
-            SetPixel(rect.right - 1, y, currentForeColor);
+            gActiveWorld->set(rect.right - 1, y, currentForeColor);
         }
     }
 }
@@ -248,7 +214,7 @@ void MacLineTo(int h, int v) {
         }
         for (int i = currentPen.v; i != v; i += step) {
             if (IsOnScreen(currentPen.h, i)) {
-                SetPixel(currentPen.h, i, currentForeColor);
+                gActiveWorld->set(currentPen.h, i, currentForeColor);
             }
         }
         currentPen.v = v;
@@ -259,7 +225,7 @@ void MacLineTo(int h, int v) {
         }
         for (int i = currentPen.h; i != h; i += step) {
             if (IsOnScreen(i, currentPen.v)) {
-                SetPixel(i, currentPen.v, currentForeColor);
+                gActiveWorld->set(i, currentPen.v, currentForeColor);
             }
         }
         currentPen.h = h;
