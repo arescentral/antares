@@ -28,12 +28,10 @@
 
 namespace antares {
 
-template <typename T> class TypedHandle;
-
 template <typename T>
-class TypedHandleBase {
+class TypedHandle {
   public:
-    TypedHandleBase()
+    TypedHandle()
             : _data(NULL) { }
 
     void create(int count) {
@@ -74,7 +72,7 @@ class TypedHandleBase {
                   _count(count) { }
 
       private:
-        friend class TypedHandleBase;
+        friend class TypedHandle;
 
         scoped_array<T> _ptr;
         size_t _count;
@@ -84,22 +82,15 @@ class TypedHandleBase {
     Data* _data;
 };
 
-template <typename T>
-class TypedHandle : public TypedHandleBase<T> {
-};
-
 template <>
-class TypedHandle<unsigned char> : public TypedHandleBase<unsigned char> {
-  public:
-    void load_resource(uint32_t code, int id) {
-        Resource rsrc(code, id);
-        create(rsrc.size());
-        memcpy(**this, rsrc.data(), rsrc.size());
-    }
-};
+inline void TypedHandle<unsigned char>::load_resource(uint32_t code, int id) {
+    Resource rsrc(code, id);
+    create(rsrc.size());
+    memcpy(**this, rsrc.data(), rsrc.size());
+}
 
 template <typename T>
-void TypedHandleBase<T>::resize(size_t new_count) {
+void TypedHandle<T>::resize(size_t new_count) {
     scoped_array<T> old_ptr(_data->_ptr.release());
     size_t old_count = _data->_count;
     _data->_ptr.reset(new T[new_count]);
@@ -110,7 +101,7 @@ void TypedHandleBase<T>::resize(size_t new_count) {
 }
 
 template <typename T>
-void TypedHandleBase<T>::extend(TypedHandle<T> other) {
+void TypedHandle<T>::extend(TypedHandle<T> other) {
     if (other.count() > 0) {
         size_t old_count = count();
         resize(old_count + other.count());
@@ -121,7 +112,7 @@ void TypedHandleBase<T>::extend(TypedHandle<T> other) {
 }
 
 template <typename T>
-void TypedHandleBase<T>::load_resource(uint32_t code, int id) {
+void TypedHandle<T>::load_resource(uint32_t code, int id) {
     Resource rsrc(code, id);
     std::vector<T> loaded;
     const char* data = rsrc.data();
