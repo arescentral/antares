@@ -28,9 +28,7 @@ PixMap::PixMap(int width, int height)
           _colors(new ColorTable(256)),
           _bytes(new unsigned char[width * height]) { }
 
-PixMap::~PixMap() {
-    delete[] _bytes;
-}
+PixMap::~PixMap() { }
 
 const Rect& PixMap::bounds() const {
     return _bounds;
@@ -45,15 +43,15 @@ int PixMap::row_bytes() const {
 }
 
 const uint8_t* PixMap::bytes() const {
-    return _bytes;
+    return _bytes.get();
 }
 
 uint8_t* PixMap::mutable_bytes() {
-    return _bytes;
+    return _bytes.get();
 }
 
 ColorTable* PixMap::mutable_colors() {
-    return _colors;
+    return _colors.get();
 }
 
 void PixMap::resize(const Rect& new_bounds) {
@@ -62,15 +60,15 @@ void PixMap::resize(const Rect& new_bounds) {
     transfer.clip_to(new_bounds);
     CopyBits(this, &new_pix_map, transfer, transfer);
     _bounds = new_bounds;
-    std::swap(_bytes, new_pix_map._bytes);
+    _bytes.swap(&new_pix_map._bytes);
 }
 
 void PixMap::set(int x, int y, uint8_t color) {
-    _bytes[y * _bounds.right + x] = color;
+    _bytes.get()[y * _bounds.right + x] = color;
 }
 
 uint8_t PixMap::get(int x, int y) const {
-    return _bytes[y * _bounds.right + x];
+    return _bytes.get()[y * _bounds.right + x];
 }
 
 }  // namespace antares

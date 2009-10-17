@@ -45,8 +45,8 @@ class PixMap {
 
   private:
     Rect _bounds;
-    ColorTable* _colors;
-    uint8_t* _bytes;
+    scoped_ptr<ColorTable> _colors;
+    scoped_array<uint8_t> _bytes;
 
     DISALLOW_COPY_AND_ASSIGN(PixMap);
 };

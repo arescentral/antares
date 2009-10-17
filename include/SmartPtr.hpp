@@ -19,6 +19,7 @@
 #define ANTARES_SMART_PTR_HPP_
 
 #include <stdlib.h>
+#include <algorithm>
 
 namespace antares {
 
@@ -35,9 +36,9 @@ class scoped_ptr {
     ~scoped_ptr() { reset(); }
 
     // TODO(sfiera): remove 'const&' once TypedHandle<> no longer requires it.
-    T* const& get() { return _ptr; }
-    T* operator->() { return _ptr; }
-    T& operator*() { return *_ptr; }
+    T* const& get() const { return _ptr; }
+    T* operator->() const { return _ptr; }
+    T& operator*() const { return *_ptr; }
 
     T* release() {
         T* ptr = _ptr;
@@ -50,6 +51,10 @@ class scoped_ptr {
             delete _ptr;
         }
         _ptr = new_ptr;
+    }
+
+    void swap(scoped_ptr<T>* s) {
+        std::swap(_ptr, s->_ptr);
     }
 
   private:
@@ -66,9 +71,9 @@ class scoped_array {
     ~scoped_array() { reset(); }
 
     // TODO(sfiera): remove 'const&' once TypedHandle<> no longer requires it.
-    T* const& get() { return _ptr; }
-    T* operator->() { return _ptr; }
-    T& operator*() { return *_ptr; }
+    T* const& get() const { return _ptr; }
+    T* operator->() const { return _ptr; }
+    T& operator*() const { return *_ptr; }
 
     T* release() {
         T* ptr = _ptr;
@@ -81,6 +86,10 @@ class scoped_array {
             delete [] _ptr;
         }
         _ptr = new_ptr;
+    }
+
+    void swap(scoped_array<T>* s) {
+        std::swap(_ptr, s->_ptr);
     }
 
   private:
