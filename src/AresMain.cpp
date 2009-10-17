@@ -243,7 +243,7 @@ void AresMain() {
 
     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
 
-    ClearScreen();
+    gActiveWorld->fill(BLACK);
     ResetTransitions();
 
     MusicInit();
@@ -349,7 +349,7 @@ void MainPlay(int whichScenario) {
 
                   case PLAY_AGAIN_QUIT:
                     gameResult = QUIT_GAME;
-                    ClearScreen();
+                    gActiveWorld->fill(BLACK);
                     AutoFadeFrom(1, false);
                     break;
 
@@ -379,7 +379,7 @@ void MainPlay(int whichScenario) {
                     AutoFadeTo( 60, &fadeColor, false);
                 }
 
-                ClearScreen();
+                gActiveWorld->fill(BLACK);
                 AutoFadeFrom( 1, false);
 
                 // normal scrolltext song
@@ -396,7 +396,7 @@ void MainPlay(int whichScenario) {
                 }
 
                 if (globals()->gOptions & kOptionMusicIdle) {
-                    ClearScreen();
+                    gActiveWorld->fill(BLACK);
                     StopAndUnloadSong();
                 }
 

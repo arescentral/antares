@@ -17,6 +17,7 @@
 
 #include "InterfaceScreen.hpp"
 
+#include "ColorTranslation.hpp"
 #include "FakeDrawing.hpp"
 #include "InterfaceHandling.hpp"
 #include "PlayerInterface.hpp"
@@ -31,7 +32,7 @@ InterfaceScreen::InterfaceScreen(int id)
 InterfaceScreen::~InterfaceScreen() { }
 
 void InterfaceScreen::become_front() {
-    ClearScreen();
+    gActiveWorld->fill(BLACK);
     OpenInterface(_id);
     this->adjust_interface();
     DrawEntireInterface();

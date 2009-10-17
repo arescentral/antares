@@ -26,8 +26,8 @@
 namespace antares {
 
 uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue);
-void ClearScreen();
 
+extern PixMap* gActiveWorld;
 extern PixMap* gOffWorld;
 extern PixMap* gRealWorld;
 extern PixMap* gSaveWorld;

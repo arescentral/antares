@@ -176,13 +176,13 @@ void ScrollTextScreen::become_front() {
         PlaySong();
     }
 
-    ClearScreen();
+    gActiveWorld->fill(BLACK);
     _start = now();
     _window = Rect(0, -kScrollTextHeight, _pix_map->bounds().right, 0);
 }
 
 void ScrollTextScreen::resign_front() {
-    ClearScreen();
+    gActiveWorld->fill(BLACK);
 
     // If a song was requested, stop it.
     if (_play_song && SongIsPlaying()) {
@@ -215,7 +215,7 @@ void ScrollTextScreen::fire_timer() {
         dest.center_in(gRealWorld->bounds());
 
         if (_window.intersects(_pix_map->bounds())) {
-            ClearScreen();
+            gActiveWorld->fill(BLACK);
             CopyBits(_pix_map.get(), gRealWorld, _window, dest);
         } else {
             VideoDriver::driver()->pop_listener(this);

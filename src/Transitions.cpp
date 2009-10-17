@@ -278,7 +278,7 @@ bool CustomPictFade(short pictID, short clutID) {
     Picture pict(pictID);
     RGBColor fadeColor = {0, 0, 0};
 
-    ClearScreen();
+    gActiveWorld->fill(BLACK);
     Rect pictRect = pict.bounds();
     pictRect.center_in(gRealWorld->bounds());
 
@@ -296,7 +296,7 @@ bool CustomPictFade(short pictID, short clutID) {
         AutoFadeTo(1, &fadeColor, true);
     }
 
-    ClearScreen();
+    gActiveWorld->fill(BLACK);
     AutoFadeFrom(1, true);
     ResetTransitions();
     return gotAnyEvent;
@@ -307,7 +307,7 @@ bool StartCustomPictFade(short pictID, short clutID, bool fast) {
     Picture pict(pictID);
     RGBColor fadeColor = {0, 0, 0};
 
-    ClearScreen();
+    gActiveWorld->fill(BLACK);
     Rect pictRect = pict.bounds();
     pictRect.center_in(gRealWorld->bounds());
 
@@ -328,7 +328,7 @@ bool EndCustomPictFade(bool fast) {
         AutoFadeTo(1, &fadeColor, true);
     }
 
-    ClearScreen();
+    gActiveWorld->fill(BLACK);
     AutoFadeFrom(1, true);
     ResetTransitions();
     return fast || gotAnyEvent;
@@ -423,7 +423,7 @@ void PictFade::become_front() {
 void PictFade::resign_front() {
     if (_state == NEW) {
         _color_fade.reset();
-        ClearScreen();
+        gActiveWorld->fill(BLACK);
         RestoreEntries(*globals()->gSaveColorTable);
     }
 }
@@ -457,7 +457,7 @@ void PictFade::wax() {
     _state = WAXING;
     _skipped = false;
 
-    ClearScreen();
+    gActiveWorld->fill(BLACK);
     Picture pict(_pict_id);
     Rect pictRect = pict.bounds();
     pictRect.center_in(gRealWorld->bounds());
