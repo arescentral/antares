@@ -516,7 +516,8 @@ struct objectActionType {
     uint32_t                    reserved2;
     argumentType                argument;
 
-    size_t load_data(const char* data, size_t len);
+    static const size_t byte_size = 48;
+    void read(BinaryReader* bin);
 };
 
 typedef uint8_t beamKindType;
@@ -700,7 +701,8 @@ struct baseObjectType {
     int32_t             reserved3;
     int32_t             internalFlags;
 
-    size_t load_data(const char* data, size_t len);
+    static const int byte_size = 318;
+    void read(BinaryReader* bin);
 };
 
 enum dutyType {
@@ -867,10 +869,10 @@ struct spaceObjectType {
     unsigned char           originalColor;
 };
 
-extern TypedHandle<baseObjectType> gBaseObjectData;
+extern scoped_array<baseObjectType> gBaseObjectData;
 
 inline baseObjectType* mGetBaseObjectPtr(long whichObject) {
-    return *gBaseObjectData + whichObject;
+    return gBaseObjectData.get() + whichObject;
 }
 
 inline void mGetBaseObjectFromClassRace(

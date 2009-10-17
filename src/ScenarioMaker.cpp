@@ -71,8 +71,8 @@ struct endgameCheckType {
 extern int32_t gRandomSeed;
 extern long gAbsoluteScale;
 extern scoped_array<spaceObjectType> gSpaceObjectData;
-extern TypedHandle<baseObjectType> gBaseObjectData;
-extern TypedHandle<objectActionType> gObjectActionData;
+extern scoped_array<baseObjectType> gBaseObjectData;
+extern scoped_array<objectActionType> gObjectActionData;
 
 scenarioType* gThisScenario = nil;
 
@@ -574,11 +574,11 @@ bool ConstructScenario( long which)
     for ( count = 0; count < gThisScenario->conditionNum; count++)
     {
         condition = mGetScenarioCondition( gThisScenario, count);
-        action = *gObjectActionData + condition->startVerb;
+        action = gObjectActionData.get() + condition->startVerb;
         for ( c2 = 0; c2 < condition->verbNum; c2++)
         {
             condition = mGetScenarioCondition( gThisScenario, count);
-            action = *gObjectActionData + condition->startVerb + c2;
+            action = gObjectActionData.get() + condition->startVerb + c2;
             AddActionMedia( action, 0);
 //          action++;
         }
@@ -893,7 +893,7 @@ bool ConstructScenario( long which)
 void SetAllBaseObjectsUnchecked( void)
 
 {
-    baseObjectType  *aBase = *gBaseObjectData;
+    baseObjectType  *aBase = gBaseObjectData.get();
     long            count;
 
     for ( count = 0; count < kMaxBaseObject; count++)
@@ -952,7 +952,7 @@ void CheckActionMedia( long whichAction, long actionNum, unsigned char color)
 
 {
     baseObjectType      *baseObject;
-    objectActionType    *action = *gObjectActionData + whichAction;
+    objectActionType    *action = gObjectActionData.get() + whichAction;
     bool             OKtoExecute;
     long                count;
 
@@ -985,7 +985,7 @@ void CheckActionMedia( long whichAction, long actionNum, unsigned char color)
                         break;
 
                     case kAlterOwner:
-                        baseObject = *gBaseObjectData;
+                        baseObject = gBaseObjectData.get();
                         for ( count = 0; count < kMaxBaseObject; count++)
                         {
                             OKtoExecute = false;
@@ -1133,7 +1133,7 @@ void AddActionMedia( objectActionType *action, unsigned char color)
                         break;
 
                     case kAlterOwner:
-                        baseObject = *gBaseObjectData;
+                        baseObject = gBaseObjectData.get();
                         for ( count = 0; count < kMaxBaseObject; count++)
                         {
                             OKtoExecute = false;

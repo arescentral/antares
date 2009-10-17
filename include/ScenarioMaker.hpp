@@ -45,7 +45,7 @@ namespace antares {
 #define kScenarioBriefResID     500
 
 extern scenarioType* gThisScenario;
-extern TypedHandle<objectActionType>    gObjectActionData;
+extern scoped_array<objectActionType> gObjectActionData;
 extern scoped_array<spaceObjectType> gSpaceObjectData;
 
 inline int mGetRealAdmiralNum(int mplayernum) {
@@ -67,30 +67,30 @@ inline void mGetActionFromBaseTypeNum(
     if ( (mactionType) == kDestroyActionType)
     {
         if ( mactionNum >= ((mbaseObjPtr)->destroyActionNum & kDestroyActionNotMask)) mactPtr = nil;
-        else mactPtr = *gObjectActionData + (mbaseObjPtr)->destroyAction + implicit_cast<long>(mactionNum);
+        else mactPtr = gObjectActionData.get() + (mbaseObjPtr)->destroyAction + implicit_cast<long>(mactionNum);
     } else if ( (mactionType) == kExpireActionType) 
     {
         if ( mactionNum >= ((mbaseObjPtr)->expireActionNum  & kDestroyActionNotMask)) mactPtr = nil;
-        else mactPtr = *gObjectActionData + (mbaseObjPtr)->expireAction + implicit_cast<long>(mactionNum);
+        else mactPtr = gObjectActionData.get() + (mbaseObjPtr)->expireAction + implicit_cast<long>(mactionNum);
     } else if ( (mactionType) == kCreateActionType)
     {
         if ( mactionNum >= (mbaseObjPtr)->createActionNum) mactPtr = nil;
-        else mactPtr = *gObjectActionData + (mbaseObjPtr)->createAction + implicit_cast<long>(mactionNum);
+        else mactPtr = gObjectActionData.get() + (mbaseObjPtr)->createAction + implicit_cast<long>(mactionNum);
     } else if ( (mactionType) == kCollideActionType)
     {
         if ( mactionNum >= (mbaseObjPtr)->collideActionNum) mactPtr = nil;
-        else mactPtr = *gObjectActionData + (mbaseObjPtr)->collideAction + implicit_cast<long>(mactionNum);
+        else mactPtr = gObjectActionData.get() + (mbaseObjPtr)->collideAction + implicit_cast<long>(mactionNum);
     } else if ( (mactionType) == kActivateActionType)
     {
         if ( mactionNum >= ((mbaseObjPtr)->activateActionNum & kPeriodicActionNotMask)) mactPtr = nil;
-        else mactPtr = *gObjectActionData + (mbaseObjPtr)->activateAction + implicit_cast<long>(mactionNum);
+        else mactPtr = gObjectActionData.get() + (mbaseObjPtr)->activateAction + implicit_cast<long>(mactionNum);
     } else if ( (mactionType) == kArriveActionType)
     {
         mWriteDebugString("\pArrive Action:");
         WriteDebugLong( mactionNum);
         WriteDebugLong( (mbaseObjPtr)->arriveActionNum);
         if ( mactionNum >= (mbaseObjPtr)->arriveActionNum) mactPtr = nil;
-        else mactPtr = *gObjectActionData + (mbaseObjPtr)->arriveAction + implicit_cast<long>(mactionNum);
+        else mactPtr = gObjectActionData.get() + (mbaseObjPtr)->arriveAction + implicit_cast<long>(mactionNum);
     } else mactPtr = nil;
 }
 

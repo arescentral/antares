@@ -85,8 +85,8 @@ actionQueueType* gFirstActionQueue = nil;
 long gFirstActionQueueNumber = -1;
 
 scoped_array<spaceObjectType> gSpaceObjectData;
-TypedHandle<baseObjectType> gBaseObjectData;
-TypedHandle<objectActionType> gObjectActionData;
+scoped_array<baseObjectType> gBaseObjectData;
+scoped_array<objectActionType> gObjectActionData;
 scoped_array<actionQueueType> gActionQueueData;
 
 void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord);
@@ -95,28 +95,29 @@ int SpaceObjectHandlingInit() {
     bool correctBaseObjectColor = false;
 
     gSpaceObjectData.reset(new spaceObjectType[kMaxSpaceObject]);
-    if (gBaseObjectData.get() == nil)
-    {
-        gBaseObjectData.load_resource('bsob', kBaseObjectResID);
-        if (gBaseObjectData.get() == nil)
-        {
-            ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kReadBaseObjectDataError, -1, -1, -1, __FILE__, 2);
-            return( MEMORY_ERROR);
+    if (gBaseObjectData.get() == nil) {
+        Resource rsrc('bsob', kBaseObjectResID);
+        BufferBinaryReader bin(rsrc.data(), rsrc.size());
+        size_t count = rsrc.size() / baseObjectType::byte_size;
+        globals()->maxBaseObject = count;
+        gBaseObjectData.reset(new baseObjectType[count]);
+        for (size_t i = 0; i < count; ++i) {
+            bin.read(gBaseObjectData.get() + i);
         }
-
-        globals()->maxBaseObject = gBaseObjectData.count();
-
+        assert(bin.bytes_read() == rsrc.size());
         correctBaseObjectColor = true;
     }
 
     if (gObjectActionData.get() == nil) {
-        gObjectActionData.load_resource('obac', kObjectActionResID);
-        if (gObjectActionData.get() == nil) {
-            ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kReadObjectActionDataError, -1, -1, -1, __FILE__, 2);
-            return( MEMORY_ERROR);
+        Resource rsrc('obac', kObjectActionResID);
+        BufferBinaryReader bin(rsrc.data(), rsrc.size());
+        size_t count = rsrc.size() / objectActionType::byte_size;
+        globals()->maxObjectAction = count;
+        gObjectActionData.reset(new objectActionType[count]);
+        for (size_t i = 0; i < count; ++i) {
+            bin.read(gObjectActionData.get() + i);
         }
-
-        globals()->maxObjectAction = gObjectActionData.count();
+        assert(bin.bytes_read() == rsrc.size());
     }
 
     gActionQueueData.reset(new actionQueueType[kActionQueueLength]);
@@ -128,16 +129,10 @@ int SpaceObjectHandlingInit() {
     return ( kNoError);
 }
 
-void CleanupSpaceObjectHandling( void)
-
-{
-    if (gBaseObjectData.get() != nil) {
-        gBaseObjectData.destroy();
-    }
+void CleanupSpaceObjectHandling() {
+    gBaseObjectData.reset();
     gSpaceObjectData.reset();
-    if (gObjectActionData.get() != nil) {
-        gObjectActionData.destroy();
-    }
+    gObjectActionData.reset();
     gActionQueueData.reset();
 }
 
@@ -550,7 +545,7 @@ void RemoveAllSpaceObjects( void)
 void CorrectAllBaseObjectColor( void)
 
 {
-    baseObjectType  *aBase = *gBaseObjectData;
+    baseObjectType  *aBase = gBaseObjectData.get();
     short           i;
     transColorType  *transColor;
     unsigned char   fixColor;
@@ -1212,7 +1207,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
     spaceObjectType *anObject, *playerPtr, *originalSObject = sObject,
                     *originalDObject = dObject;
     baseObjectType  *baseObject;
-    objectActionType    *action = *gObjectActionData + whichAction;
+    objectActionType    *action = gObjectActionData.get() + whichAction;
     short           end, angle;
     fixedPointType  fpoint, newVel;
     long            l, distance;
@@ -2869,20 +2864,19 @@ void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord
     coord->v += lscrap;
 }
 
-size_t objectActionType::load_data(const char* data, size_t len) {
-    BufferBinaryReader bin(data, len);
+void objectActionType::read(BinaryReader* bin) {
     char section[24];
 
-    bin.read(&verb);
-    bin.read(&reflexive);
-    bin.read(&inclusiveFilter);
-    bin.read(&exclusiveFilter);
-    bin.read(&owner);
-    bin.read(&delay);
-    bin.read(&initialSubjectOverride);
-    bin.read(&initialDirectOverride);
-    bin.discard(4);
-    bin.read(section, 24);
+    bin->read(&verb);
+    bin->read(&reflexive);
+    bin->read(&inclusiveFilter);
+    bin->read(&exclusiveFilter);
+    bin->read(&owner);
+    bin->read(&delay);
+    bin->read(&initialSubjectOverride);
+    bin->read(&initialDirectOverride);
+    bin->discard(4);
+    bin->read(section, 24);
 
     BufferBinaryReader sub(section, 24);
     switch (verb) {
@@ -2960,8 +2954,6 @@ size_t objectActionType::load_data(const char* data, size_t len) {
         sub.read(&argument.assumeInitial);
         break;
     }
-
-    return bin.bytes_read();
 }
 
 void argumentType::CreateObject::read(BinaryReader* bin) {
@@ -3055,90 +3047,89 @@ void argumentType::AssumeInitial::read(BinaryReader* bin) {
     bin->read(&whichInitialObject);
 }
 
-size_t baseObjectType::load_data(const char* data, size_t len) {
-    BufferBinaryReader bin(data, len);
+void baseObjectType::read(BinaryReader* bin) {
     char section[32];
 
-    bin.read(&attributes);
-    bin.read(&baseClass);
-    bin.read(&baseRace);
-    bin.read(&price);
+    bin->read(&attributes);
+    bin->read(&baseClass);
+    bin->read(&baseRace);
+    bin->read(&price);
 
-    bin.read(&offenseValue);
-    bin.read(&destinationClass);
+    bin->read(&offenseValue);
+    bin->read(&destinationClass);
 
-    bin.read(&maxVelocity);
-    bin.read(&warpSpeed);
-    bin.read(&warpOutDistance);
+    bin->read(&maxVelocity);
+    bin->read(&warpSpeed);
+    bin->read(&warpOutDistance);
 
-    bin.read(&initialVelocity);
-    bin.read(&initialVelocityRange);
+    bin->read(&initialVelocity);
+    bin->read(&initialVelocityRange);
 
-    bin.read(&mass);
-    bin.read(&maxThrust);
+    bin->read(&mass);
+    bin->read(&maxThrust);
 
-    bin.read(&health);
-    bin.read(&damage);
-    bin.read(&energy);
+    bin->read(&health);
+    bin->read(&damage);
+    bin->read(&energy);
 
-    bin.read(&initialAge);
-    bin.read(&initialAgeRange);
+    bin->read(&initialAge);
+    bin->read(&initialAgeRange);
 
-    bin.read(&naturalScale);
+    bin->read(&naturalScale);
 
-    bin.read(&pixLayer);
-    bin.read(&pixResID);
-    bin.read(&tinySize);
-    bin.read(&shieldColor);
-    bin.discard(1);
+    bin->read(&pixLayer);
+    bin->read(&pixResID);
+    bin->read(&tinySize);
+    bin->read(&shieldColor);
+    bin->discard(1);
 
-    bin.read(&initialDirection);
-    bin.read(&initialDirectionRange);
+    bin->read(&initialDirection);
+    bin->read(&initialDirectionRange);
 
-    bin.read(&pulse);
-    bin.read(&beam);
-    bin.read(&special);
+    bin->read(&pulse);
+    bin->read(&beam);
+    bin->read(&special);
 
-    bin.read(&pulsePositionNum);
-    bin.read(&beamPositionNum);
-    bin.read(&specialPositionNum);
+    bin->read(&pulsePositionNum);
+    bin->read(&beamPositionNum);
+    bin->read(&specialPositionNum);
 
-    bin.read(pulsePosition, kMaxWeaponPosition);
-    bin.read(beamPosition, kMaxWeaponPosition);
-    bin.read(specialPosition, kMaxWeaponPosition);
+    bin->read(pulsePosition, kMaxWeaponPosition);
+    bin->read(beamPosition, kMaxWeaponPosition);
+    bin->read(specialPosition, kMaxWeaponPosition);
 
-    bin.read(&friendDefecit);
-    bin.read(&dangerThreshold);
-    bin.read(&specialDirection);
+    bin->read(&friendDefecit);
+    bin->read(&dangerThreshold);
+    bin->read(&specialDirection);
 
-    bin.read(&arriveActionDistance);
+    bin->read(&arriveActionDistance);
 
-    bin.read(&destroyAction);
-    bin.read(&destroyActionNum);
-    bin.read(&expireAction);
-    bin.read(&expireActionNum);
-    bin.read(&createAction);
-    bin.read(&createActionNum);
-    bin.read(&collideAction);
-    bin.read(&collideActionNum);
-    bin.read(&activateAction);
-    bin.read(&activateActionNum);
-    bin.read(&arriveAction);
-    bin.read(&arriveActionNum);
+    bin->read(&destroyAction);
+    bin->read(&destroyActionNum);
+    bin->read(&expireAction);
+    bin->read(&expireActionNum);
+    bin->read(&createAction);
+    bin->read(&createActionNum);
+    bin->read(&collideAction);
+    bin->read(&collideActionNum);
+    bin->read(&activateAction);
+    bin->read(&activateActionNum);
+    bin->read(&arriveAction);
+    bin->read(&arriveActionNum);
 
-    bin.read(section, 32);
+    bin->read(section, 32);
 
-    bin.read(&buildFlags);
-    bin.read(&orderFlags);
-    bin.read(&buildRatio);
-    bin.read(&buildTime);
-    bin.read(&skillNum);
-    bin.read(&skillDen);
-    bin.read(&skillNumAdj);
-    bin.read(&skillDenAdj);
-    bin.read(&pictPortraitResID);
-    bin.discard(6);
-    bin.read(&internalFlags);
+    bin->read(&buildFlags);
+    bin->read(&orderFlags);
+    bin->read(&buildRatio);
+    bin->read(&buildTime);
+    bin->read(&skillNum);
+    bin->read(&skillDen);
+    bin->read(&skillNumAdj);
+    bin->read(&skillDenAdj);
+    bin->read(&pictPortraitResID);
+    bin->discard(6);
+    bin->read(&internalFlags);
 
     BufferBinaryReader sub(section, 32);
     if (attributes & kShapeFromDirection) {
@@ -3150,8 +3141,6 @@ size_t baseObjectType::load_data(const char* data, size_t len) {
     } else {
         sub.read(&frame.weapon);
     }
-
-    return bin.bytes_read();
 }
 
 void objectFrameType::Rotation::read(BinaryReader* bin) {

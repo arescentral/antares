@@ -315,8 +315,8 @@ extern long                     gNatePortLeft, gNatePortTop, gNetLatency, gRando
                                 CLIP_LEFT, CLIP_RIGHT, CLIP_TOP, CLIP_BOTTOM;
 extern directTextType*          gDirectText;
 extern long                     WORLD_WIDTH, WORLD_HEIGHT;
-extern TypedHandle<baseObjectType> gBaseObjectData;
-extern TypedHandle<objectActionType> gObjectActionData;
+extern scoped_array<baseObjectType> gBaseObjectData;
+extern scoped_array<objectActionType> gObjectActionData;
 extern PixMap*                  gActiveWorld;
 extern PixMap*                  gOffWorld;
 extern PixMap*                  gSaveWorld;
@@ -2572,7 +2572,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
     Rect            dataRect;
     transColorType  *transColor;
     Rect        lRect, longClipRect;
-    baseObjectType  *baseObject = *gBaseObjectData;// + (pictID - kFirstShipDataPictID);
+    baseObjectType  *baseObject = gBaseObjectData.get();// + (pictID - kFirstShipDataPictID);
     Str255          tempString, numString;
     retroTextSpecType   retroTextSpec;
     long            height, waitTime, i;
@@ -2737,7 +2737,7 @@ std::string CreateWeaponDataText(long whichWeapon, unsigned char* weaponName) {
 
     if ( whichWeapon != kNoShip)
     {
-        weaponObject = *gBaseObjectData + whichWeapon;
+        weaponObject = gBaseObjectData.get() + whichWeapon;
 
         // TODO(sfiera): catch exception.
         weaponText = Resource::get_data('TEXT', kWeaponDataTextID);
@@ -2750,12 +2750,12 @@ std::string CreateWeaponDataText(long whichWeapon, unsigned char* weaponName) {
             isGuided = false;
             if ( weaponObject->activateActionNum > 0)
             {
-                action = *gObjectActionData + weaponObject->activateAction;
+                action = gObjectActionData.get() + weaponObject->activateAction;
                 for ( actionNum = 0; actionNum < weaponObject->activateActionNum; actionNum++)
                 {
                     if (( action->verb == kCreateObject) || ( action->verb == kCreateObjectSetDest))
                     {
-                        missileObject = *gBaseObjectData +
+                        missileObject = gBaseObjectData.get() +
                             action->argument.createObject.whichBaseType;
                         if ( missileObject->attributes & kIsGuided) isGuided = true;
                         if ( missileObject->damage > mostDamage) mostDamage = missileObject->damage;
