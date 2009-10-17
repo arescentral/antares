@@ -27,7 +27,7 @@ namespace antares {
 void EZDrawSpriteOffByID( short, long, long, unsigned char, const Rect&);
 void EZDrawSpriteOffToOnByID( short, long, long, unsigned char, const Rect&);
 void EZDrawSpriteCenteredInRectBySprite( spritePix *, PixMap*, long, const Rect&);
-void EZMakeSpriteFromID( short, TypedHandle<natePixType>*, spritePix *, long);
+natePixType* EZMakeSpriteFromID( short, spritePix *, long);
 void DrawAnySpriteOffToOn( short, long, long, unsigned char, const Rect&);
 
 }  // namespace antares

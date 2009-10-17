@@ -30,6 +30,7 @@ class natePixEntryType;
 class natePixType {
   public:
     natePixType();
+    natePixType(int id);
     natePixType(const natePixType& other);
     natePixType& operator=(const natePixType& other);
     ~natePixType();

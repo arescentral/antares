@@ -32,28 +32,21 @@ extern  PixMap*         gRealWorld;
 extern  PixMap*         gSaveWorld;
 extern  long            gNatePortLeft, gNatePortTop;
 
-void EZDrawSpriteOffByID( short resID, long whichShape, long scale, unsigned char color,
-    const Rect& bounds)
-{
-    TypedHandle<natePixType> spriteTable;
-    spritePix           aSpritePix;
-
-    EZMakeSpriteFromID( resID, &spriteTable, &aSpritePix, whichShape);
-    if (spriteTable.get() == nil) {
-        return;
-    }
-
+void EZDrawSpriteOffByID(
+        short resID, long whichShape, long scale, unsigned char color, const Rect& bounds) {
+    spritePix aSpritePix;
+    scoped_ptr<natePixType> spriteTable(
+            EZMakeSpriteFromID(resID, &aSpritePix, whichShape));
+    
     if (color != 0) {
-        ColorizeNatePixTableColor(*spriteTable, color);
+        ColorizeNatePixTableColor(spriteTable.get(), color);
     } else {
-        RemapNatePixTableColor(*spriteTable);
+        RemapNatePixTableColor(spriteTable.get());
     }
 
     DrawInOffWorld();
     NormalizeColors();
     EZDrawSpriteCenteredInRectBySprite( &aSpritePix, gOffWorld, scale, bounds);
-
-    spriteTable.destroy();
 }
 
 // EZDrawSpriteOffToOnByID
@@ -65,25 +58,19 @@ void EZDrawSpriteOffByID( short resID, long whichShape, long scale, unsigned cha
 void EZDrawSpriteOffToOnByID( short resID, long whichShape, long scale,
     unsigned char color, const Rect& bounds)
 {
-    TypedHandle<natePixType> spriteTable;
-    spritePix           aSpritePix;
-
-    EZMakeSpriteFromID( resID, &spriteTable, &aSpritePix, whichShape);
-    if (spriteTable.get() == nil) {
-        return;
-    }
+    spritePix aSpritePix;
+    scoped_ptr<natePixType> spriteTable(
+            EZMakeSpriteFromID(resID, &aSpritePix, whichShape));
 
     if (color != 0) {
-        ColorizeNatePixTableColor(*spriteTable, color);
+        ColorizeNatePixTableColor(spriteTable.get(), color);
     } else {
-        RemapNatePixTableColor(*spriteTable);
+        RemapNatePixTableColor(spriteTable.get());
     }
 
     DrawInOffWorld();
     NormalizeColors();
     EZDrawSpriteCenteredInRectBySprite( &aSpritePix, gOffWorld, scale, bounds);
-
-    spriteTable.destroy();
 
     DrawInRealWorld();
     CopyOffWorldToRealWorld(bounds);
@@ -131,25 +118,21 @@ void EZDrawSpriteCenteredInRectBySprite( spritePix *aSpritePix,
 //  Given resID, loads resource into spriteTable and fills out aSpritePix.
 //  spriteTable is locked and unlocking it invalidates aSpritePix->pixData.
 
-void EZMakeSpriteFromID( short resID, TypedHandle<natePixType>* spriteTable, spritePix *aSpritePix,
-    long whichShape)
-{
-    spriteTable->load_resource(kPixResType, resID);
-    if (spriteTable->get() == nil) {
-        return;
-    }
+natePixType* EZMakeSpriteFromID(short resID, spritePix *aSpritePix, long whichShape) {
+    scoped_ptr<natePixType> result(new natePixType(resID));
 
-    aSpritePix->data = GetNatePixTableNatePixData(***spriteTable, whichShape);
-    aSpritePix->center.h = GetNatePixTableNatePixHRef(***spriteTable, whichShape);
-    aSpritePix->center.v = GetNatePixTableNatePixVRef(***spriteTable, whichShape);
-    aSpritePix->width = GetNatePixTableNatePixWidth(***spriteTable, whichShape);
-    aSpritePix->height = GetNatePixTableNatePixHeight(***spriteTable, whichShape);
+    aSpritePix->data = GetNatePixTableNatePixData(*result, whichShape);
+    aSpritePix->center.h = GetNatePixTableNatePixHRef(*result, whichShape);
+    aSpritePix->center.v = GetNatePixTableNatePixVRef(*result, whichShape);
+    aSpritePix->width = GetNatePixTableNatePixWidth(*result, whichShape);
+    aSpritePix->height = GetNatePixTableNatePixHeight(*result, whichShape);
+
+    return result.release();
 }
 
 void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned char color,
     const Rect& bounds)
 {
-    TypedHandle<natePixType> spriteTable;
     spritePix           aSpritePix;
     Point               where;
     long                tlong, thisScale;
@@ -158,15 +141,12 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
 
     mWriteDebugString("\pOpening:");
     WriteDebugLong( resID);
-    spriteTable.load_resource(kPixResType, resID);
-    if (spriteTable.get() == nil) {
-        return;
-    }
+    scoped_ptr<natePixType> spriteTable(new natePixType(resID));
 
     if (color != 0) {
-        ColorizeNatePixTableColor(*spriteTable, color);
+        ColorizeNatePixTableColor(spriteTable.get(), color);
     } else {
-        RemapNatePixTableColor(*spriteTable);
+        RemapNatePixTableColor(spriteTable.get());
     }
 
     DrawInOffWorld();
@@ -179,11 +159,11 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
     dRect.top = bounds.top;
     dRect.bottom = bounds.bottom;
 
-    aSpritePix.data = GetNatePixTableNatePixData(**spriteTable, whichShape);
-    aSpritePix.center.h = GetNatePixTableNatePixHRef(**spriteTable, whichShape);
-    aSpritePix.center.v = GetNatePixTableNatePixVRef(**spriteTable, whichShape);
-    aSpritePix.width = GetNatePixTableNatePixWidth(**spriteTable, whichShape);
-    aSpritePix.height = GetNatePixTableNatePixHeight(**spriteTable, whichShape);
+    aSpritePix.data = GetNatePixTableNatePixData(*spriteTable, whichShape);
+    aSpritePix.center.h = GetNatePixTableNatePixHRef(*spriteTable, whichShape);
+    aSpritePix.center.v = GetNatePixTableNatePixVRef(*spriteTable, whichShape);
+    aSpritePix.width = GetNatePixTableNatePixWidth(*spriteTable, whichShape);
+    aSpritePix.height = GetNatePixTableNatePixHeight(*spriteTable, whichShape);
 
     thisScale = scale;//SCALE_SCALE;
     // calculate the correct position
@@ -211,10 +191,6 @@ void DrawAnySpriteOffToOn( short resID, long whichShape, long scale, unsigned ch
 
     OptScaleSpritePixInPixMap( &aSpritePix, where, thisScale,
             &spriteRect, &dRect, gOffWorld);
-
-    // clean up the sprite
-
-    spriteTable.destroy();
 
     DrawInRealWorld();
     CopyOffWorldToRealWorld(bounds);

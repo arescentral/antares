@@ -86,6 +86,12 @@ class natePixEntryType {
 
 natePixType::natePixType() { }
 
+natePixType::natePixType(int id) {
+    Resource rsrc('SMIV', id);
+    BufferBinaryReader bin(rsrc.data(), rsrc.size());
+    bin.read(this);
+}
+
 natePixType::natePixType(const natePixType& other) {
     copy_from(other);
 }
