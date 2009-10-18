@@ -93,7 +93,7 @@ struct spritePix {
 struct natePixType;
 struct spriteType {
     Point           where;
-    natePixType** table;
+    natePixType* table;
     short           resID;
     int             whichShape;
     long            scale;
@@ -111,7 +111,7 @@ struct spriteType {
 
 
 struct pixTableType {
-    scoped_ptr<natePixType*> resource;
+    scoped_ptr<natePixType> resource;
     int         resID;
     bool     keepMe;
     };
@@ -133,9 +133,9 @@ void ResetAllPixTables( void);
 void SetAllPixTablesNoKeep( void);
 void KeepPixTable( short);
 void RemoveAllUnusedPixTables( void);
-natePixType** AddPixTable( short);
-natePixType** GetPixTable( short);
-spriteType *AddSprite( Point, natePixType**, short, short, long, long, short, unsigned char, long *);
+natePixType* AddPixTable( short);
+natePixType* GetPixTable( short);
+spriteType *AddSprite( Point, natePixType*, short, short, long, long, short, unsigned char, long *);
 void RemoveSprite( spriteType *);
 void EraseSpriteTable( void);
 void DrawSpriteTableInOffWorld( Rect *);
