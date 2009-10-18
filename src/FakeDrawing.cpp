@@ -219,13 +219,6 @@ void GetPen(Point* pen) {
     *pen = currentPen;
 }
 
-uint16_t DoubleBits(uint8_t in) {
-    uint16_t result = in;
-    result <<= 8;
-    result |= in;
-    return result;
-}
-
 void RestoreEntries(const ColorTable& table) {
     for (size_t i = 0; i < table.size(); ++i) {
         gRealWorld->mutable_colors()->set_color(i, table.color(i));
