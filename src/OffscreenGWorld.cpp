@@ -17,6 +17,7 @@
 
 #include "OffscreenGWorld.hpp"
 
+#include "ColorTranslation.hpp"
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "NateDraw.hpp"
@@ -84,7 +85,7 @@ void EraseOffWorld() {
     EraseRect(gOffWorld->bounds());
     RGBColor c = { 0, 0, 0 };
     RGBForeColor(&c);
-    PaintRect(gOffWorld->bounds());
+    gActiveWorld->view(gOffWorld->bounds()).fill(BLACK);
     NormalizeColors();
     DrawInRealWorld();
     NormalizeColors();
@@ -96,7 +97,7 @@ void EraseSaveWorld() {
     EraseRect(gSaveWorld->bounds());
     RGBColor c = { 0, 0, 0 };
     RGBForeColor(&c);
-    PaintRect(gSaveWorld->bounds());
+    gActiveWorld->view(gSaveWorld->bounds()).fill(BLACK);
     NormalizeColors();
     DrawInRealWorld();
 }

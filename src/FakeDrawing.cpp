@@ -161,10 +161,6 @@ void RGBBackColor(RGBColor* color) {
     currentBackColor = NearestColor(color->red, color->green, color->blue);
 }
 
-void PaintRect(const Rect& rect) {
-    gActiveWorld->view(rect).fill(currentForeColor);
-}
-
 void EraseRect(const Rect& rect) {
     gActiveWorld->view(rect).fill(currentBackColor);
 }

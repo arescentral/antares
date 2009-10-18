@@ -67,9 +67,18 @@ namespace antares {
 #define kInlinePictChar             'p'
 #define kInlinePictClearLineChar    'P'
 
+enum inlineKindType {
+    kNoKind = 0,
+    kVPictKind = 1,
+    kVClearPictKind = 2
+};
+
+extern directTextType* gDirectText;
+extern PixMap* gActiveWorld;
+
 inline void mDrawPuffUpRect(Rect& mrect, uint8_t mcolor, int mshade) {
     SetTranslateColorShadeFore(mcolor, mshade);
-    PaintRect(mrect);
+    gActiveWorld->view(mrect).fill(GetTranslateColorShade(mcolor, mshade));
     SetTranslateColorShadeFore(mcolor, mshade + kLighterColor);
     MoveTo(mrect.left, mrect.bottom - 1);
     MacLineTo(mrect.left, mrect.top);
@@ -108,7 +117,7 @@ inline void mDrawPuffUpOval(Rect& mrect, uint8_t mcolor, int mshade) {
 
 inline void mDrawPuffDownRect(Rect& mrect, uint8_t mcolor, int mshade) {
     SetTranslateColorFore(BLACK);
-    PaintRect(mrect);
+    gActiveWorld->view(mrect).fill(BLACK);
     SetTranslateColorShadeFore(mcolor, mshade + kDarkerColor);
     MoveTo(mrect.left - 1, mrect.bottom);
     MacLineTo(mrect.left - 1, mrect.top - 1);
@@ -150,15 +159,15 @@ inline void mDrawPuffUpTopBorder(Rect& mrect, Rect& mtrect, uint8_t mcolor, int 
     mtrect = Rect(mrect.left - mthisHBorder,
         mrect.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight,
         mrect.left, mrect.top);
-    PaintRect(mtrect);
+    gActiveWorld->view(mtrect).fill(GetTranslateColorShade(mcolor, mshade));
     mtrect = Rect(mrect.right,
         mrect.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight,
         mrect.right + mthisHBorder, mrect.top);
-    PaintRect(mtrect);
+    gActiveWorld->view(mtrect).fill(GetTranslateColorShade(mcolor, mshade));
     mtrect = Rect(mrect.left,
         mrect.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight,
         mrect.right, mrect.top  - kInterfaceVLipHeight);
-    PaintRect(mtrect);
+    gActiveWorld->view(mtrect).fill(GetTranslateColorShade(mcolor, mshade));
     SetTranslateColorShadeFore(mcolor, mshade + kDarkerColor);
     MoveTo(mrect.left - mthisHBorder, mrect.top);
     MacLineTo(mrect.left, mrect.top);
@@ -177,15 +186,15 @@ inline void mDrawPuffUpBottomBorder(Rect& mrect, Rect& mtrect, uint8_t mcolor, i
     mtrect = Rect(mrect.left - mthisHBorder,
         mrect.bottom,
         mrect.left, mrect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
-    PaintRect(mtrect);
+    gActiveWorld->view(mtrect).fill(GetTranslateColorShade(mcolor, mshade));
     mtrect = Rect(mrect.right,
         mrect.bottom,
         mrect.right + mthisHBorder, mrect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
-    PaintRect(mtrect);
+    gActiveWorld->view(mtrect).fill(GetTranslateColorShade(mcolor, mshade));
     mtrect = Rect(mrect.left,
         mrect.bottom + kInterfaceVLipHeight,
         mrect.right, mrect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
-    PaintRect(mtrect);
+    gActiveWorld->view(mtrect).fill(GetTranslateColorShade(mcolor, mshade));
     SetTranslateColorShadeFore(mcolor, mshade + kLighterColor);
     MoveTo(mrect.left - mthisHBorder, mrect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
     MacLineTo(mrect.left - mthisHBorder, mrect.bottom);
@@ -205,17 +214,17 @@ inline void mDrawPuffUpTBorder(Rect& mrect, Rect& mtrect, uint8_t mcolor, int ms
         mrect.top + msheight,
         mrect.left,
         mrect.top + msheight + kLabelBottomHeight);
-    PaintRect(mtrect);
+    gActiveWorld->view(mtrect).fill(GetTranslateColorShade(mcolor, mshade));
     mtrect = Rect(mrect.right,
         mrect.top + msheight,
         mrect.right + mthisHBorder,
         mrect.top + msheight + kLabelBottomHeight);
-    PaintRect(mtrect);
+    gActiveWorld->view(mtrect).fill(GetTranslateColorShade(mcolor, mshade));
     mtrect = Rect(mrect.left,
         mrect.top + msheight + kInterfaceVLipHeight,
         mrect.right,
         mrect.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight);
-    PaintRect(mtrect);
+    gActiveWorld->view(mtrect).fill(GetTranslateColorShade(mcolor, mshade));
     SetTranslateColorShadeFore(mcolor, mshade + kLighterColor);
     MoveTo(mrect.left - mthisHBorder, mrect.top + msheight + kLabelBottomHeight);
     MacLineTo(mrect.left - mthisHBorder, mrect.top + msheight);
@@ -232,15 +241,6 @@ inline void mDrawPuffUpTBorder(Rect& mrect, Rect& mtrect, uint8_t mcolor, int ms
     MacLineTo(mrect.left, mrect.top + msheight + kLabelBottomHeight);
     MacLineTo(mrect.left - mthisHBorder, mrect.top + msheight + kLabelBottomHeight);
 }
-
-enum inlineKindType {
-    kNoKind = 0,
-    kVPictKind = 1,
-    kVClearPictKind = 2
-};
-
-extern directTextType* gDirectText;
-extern PixMap* gActiveWorld;
 
 void DrawPlayerInterfacePlainRect(
         const Rect& rect, uint8_t color, interfaceStyleType style, PixMap* pix) {
@@ -315,19 +315,19 @@ void DrawPlayerInterfaceTabBox(
     uRect = Rect((tRect).left - thisHBorder,
         (tRect).top - 3 - kInterfaceVCornerHeight,
         (tRect).left, (tRect).top);
-    PaintRect(uRect);
+    gActiveWorld->view(uRect).fill(GetTranslateColorShade(color, shade));
     uRect = Rect((tRect).right,
         (tRect).top - 3 - kInterfaceVCornerHeight,
         (tRect).right + thisHBorder, (tRect).top);
-    PaintRect(uRect);
+    gActiveWorld->view(uRect).fill(GetTranslateColorShade(color, shade));
     uRect = Rect((tRect).left,
         (tRect).top - 3 - kInterfaceVCornerHeight,
         (tRect).left + 6, (tRect).top  - kInterfaceVLipHeight);
-    PaintRect(uRect);
+    gActiveWorld->view(uRect).fill(GetTranslateColorShade(color, shade));
     uRect = Rect((tRect).right - top_right_border_size,
         (tRect).top - 3 - kInterfaceVCornerHeight,
         (tRect).right, (tRect).top  - kInterfaceVLipHeight);
-    PaintRect(uRect);
+    gActiveWorld->view(uRect).fill(GetTranslateColorShade(color, shade));
     SetTranslateColorShadeFore( color, shade + kDarkerColor);
     MoveTo( (tRect).left - thisHBorder, (tRect).top);
     MacLineTo( (tRect).left, (tRect).top);
@@ -452,7 +452,7 @@ void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
                         tRect.right - kInterfaceContentBuffer + 1,
                         tRect.bottom - kInterfaceContentBuffer + 1);
         SetTranslateColorShadeFore(item.color, shade);
-        PaintRect(uRect);
+        gActiveWorld->view(uRect).fill(GetTranslateColorShade(item.color, shade));
 
         if (item.item.plainButton.status == kIH_Hilite)
         {
@@ -500,7 +500,7 @@ void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
                         tRect.right - kInterfaceContentBuffer + 1,
                         tRect.bottom - kInterfaceContentBuffer + 1);
         SetTranslateColorShadeFore(item.color, shade);
-        PaintRect(vRect);
+        gActiveWorld->view(vRect).fill(GetTranslateColorShade(item.color, shade));
 
         swidth = GetInterfaceStringWidth(s, item.style);
         swidth = uRect.left + ( uRect.right - uRect.left) / 2 - swidth / 2;
@@ -604,12 +604,12 @@ void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix)
         uRect = Rect(uRect.left, uRect.bottom, uRect.right, uRect.bottom + 3);
         vRect = Rect(vRect.left, vRect.bottom, vRect.right, vRect.bottom + 3);
         SetTranslateColorFore( BLACK);
-        PaintRect(uRect);
-        PaintRect(vRect);
+        gActiveWorld->view(uRect).fill(BLACK);
+        gActiveWorld->view(vRect).fill(BLACK);
         uRect = Rect(uRect.left - 3, uRect.bottom, vRect.right + 3, uRect.bottom + 3);
         shade = MEDIUM;
         SetTranslateColorShadeFore( item.color, shade);
-        PaintRect(uRect);
+        gActiveWorld->view(uRect).fill(GetTranslateColorShade(item.color, shade));
         SetTranslateColorShadeFore( item.color, shade + kLighterColor);
         MoveTo( uRect.left, uRect.top - 1);
         MacLineTo( uRect.right - 1, uRect.top - 1);
@@ -630,8 +630,8 @@ void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix)
         uRect.bottom += 7;
         vRect.bottom += 7;
         SetTranslateColorShadeFore( item.color, shade);
-        PaintRect(uRect);
-        PaintRect(vRect);
+        gActiveWorld->view(uRect).fill(GetTranslateColorShade(item.color, shade));
+        gActiveWorld->view(vRect).fill(GetTranslateColorShade(item.color, shade));
         SetTranslateColorShadeFore( item.color, shade + kLighterColor);
         MoveTo( uRect.right - 2, uRect.top);
         MacLineTo( uRect.left, uRect.top);
@@ -652,15 +652,15 @@ void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix)
         MacLineTo( vRect.right + 2, vRect.bottom - 1);
         uRect = Rect(uRect.left - 3, uRect.bottom - 4, uRect.right - 1, uRect.bottom - 1);
         SetTranslateColorShadeFore( item.color, shade);
-        PaintRect(uRect);
+        gActiveWorld->view(uRect).fill(GetTranslateColorShade(item.color, shade));
         vRect = Rect(vRect.left + 1, vRect.bottom - 4, vRect.right + 3, vRect.bottom - 1);
-        PaintRect(vRect);
+        gActiveWorld->view(vRect).fill(GetTranslateColorShade(item.color, shade));
         uRect.top--;
         uRect.bottom++;
         uRect.left = uRect.right + 1;
         uRect.right = vRect.left - 1;
         SetTranslateColorFore( BLACK);
-        PaintRect(uRect);
+        gActiveWorld->view(uRect).fill(BLACK);
     }
 
 
@@ -684,7 +684,7 @@ void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix)
                         tRect.right - kInterfaceContentBuffer + 1,
                         tRect.bottom - kInterfaceContentBuffer + 1);
         SetTranslateColorShadeFore( item.color, shade);
-        PaintRect(uRect);
+        gActiveWorld->view(uRect).fill(GetTranslateColorShade(item.color, shade));
 
         if ( !item.item.radioButton.on)
         {
@@ -750,7 +750,7 @@ void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix)
                         tRect.right - kInterfaceContentBuffer + 1,
                         tRect.bottom - kInterfaceContentBuffer + 1);
         SetTranslateColorShadeFore( item.color, shade);
-        PaintRect(vRect);
+        gActiveWorld->view(vRect).fill(GetTranslateColorShade(item.color, shade));
 
         swidth = GetInterfaceStringWidth( s, item.style);
         swidth = uRect.left + ( uRect.right - uRect.left) / 2 - swidth / 2;
@@ -910,7 +910,7 @@ void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix) 
                     tRect.right - kInterfaceContentBuffer + 1,
                     tRect.bottom - kInterfaceContentBuffer + 1);
     SetTranslateColorShadeFore( item.color, shade);
-    PaintRect(uRect);
+    gActiveWorld->view(uRect).fill(GetTranslateColorShade(item.color, shade));
 
     if ( item.item.radioButton.status == kIH_Hilite)
     {
@@ -994,9 +994,14 @@ void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix) {
         wRect.inset(3, 3);
         mDrawPuffDownRect( wRect, item.color, shade);
         wRect.inset(1, 1);
-        if ( !item.item.checkboxButton.on) SetTranslateColorFore( BLACK);
-        else SetTranslateColorShadeFore( item.color, VERY_LIGHT);
-        PaintRect(wRect);
+        uint8_t color;
+        if ( !item.item.checkboxButton.on) {
+            color = BLACK;
+        } else {
+            color = GetTranslateColorShade(item.color, VERY_LIGHT);
+        }
+        SetTranslateColorFore(color);
+        gActiveWorld->view(wRect).fill(color);
     } else
     {
         if ( item.item.checkboxButton.status == kDimmed)
@@ -1008,11 +1013,16 @@ void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix) {
         wRect.inset(3, 3);
         mDrawPuffDownRect( wRect, item.color, shade);
         wRect.inset(1, 1);
-        if ( !item.item.checkboxButton.on) SetTranslateColorFore( BLACK);
-        else if ( item.item.checkboxButton.status == kActive)
-            SetTranslateColorShadeFore( item.color, LIGHT);
-        else SetTranslateColorShadeFore( item.color, MEDIUM);
-        PaintRect(wRect);
+        uint8_t color;
+        if (!item.item.checkboxButton.on) {
+            color = BLACK;
+        } else if (item.item.checkboxButton.status == kActive) {
+            color = GetTranslateColorShade(item.color, LIGHT);
+        } else {
+            color = GetTranslateColorShade(item.color, MEDIUM);
+        }
+        SetTranslateColorFore(color);
+        gActiveWorld->view(wRect).fill(color);
     }
 
     uRect = Rect(tRect.left +  kInterfaceContentBuffer,
@@ -1027,7 +1037,7 @@ void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix) {
                     tRect.right - kInterfaceContentBuffer + 1,
                     tRect.bottom - kInterfaceContentBuffer + 1);
     SetTranslateColorShadeFore( item.color, shade);
-    PaintRect(uRect);
+    gActiveWorld->view(uRect).fill(GetTranslateColorShade(item.color, shade));
 
     if ( item.item.checkboxButton.status == kIH_Hilite)
     {
@@ -1091,7 +1101,7 @@ void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
         tRect.right - swidth - kInterfaceTextHBuffer + 1,
         tRect.top + sheight - kInterfaceHTop);
     SetTranslateColorShadeFore( item.color, VERY_DARK);
-    PaintRect(uRect);
+    gActiveWorld->view(uRect).fill(GetTranslateColorShade(item.color, VERY_DARK));
 
     SetTranslateColorShadeFore( item.color, LIGHT);
     mGetTranslateColorShade( item.color, LIGHT, color, transColor);
@@ -1319,13 +1329,13 @@ void DrawPlayerInterfaceList(const interfaceItemType& item, PixMap* pix) {
             if ( (*(item.item.listRect.itemHilited))( swidth, false))
             {
                 SetTranslateColorShadeFore( item.color, LIGHT);
-                PaintRect(uRect);
+                gActiveWorld->view(uRect).fill(GetTranslateColorShade(item.color, LIGHT));
                 SetTranslateColorShadeFore( item.color, VERY_DARK);
                 mGetTranslateColorShade( item.color, VERY_DARK, color, transColor);
             } else
             {
                 DefaultColors();
-                PaintRect(uRect);
+                gActiveWorld->view(uRect).fill(BLACK);
                 SetTranslateColorShadeFore( item.color, LIGHT);
                 mGetTranslateColorShade( item.color, LIGHT, color, transColor);
             }
@@ -1387,13 +1397,12 @@ void DrawPlayerInterfaceListEntry(
             if ( (*(item.item.listRect.itemHilited))( swidth, false))
             {
                 SetTranslateColorShadeFore( item.color, LIGHT);
-                PaintRect(uRect);
+                gActiveWorld->view(uRect).fill(GetTranslateColorShade(item.color, LIGHT));
                 SetTranslateColorShadeFore( item.color, VERY_DARK);
                 mGetTranslateColorShade( item.color, VERY_DARK, color, transColor);
             } else
             {
-                DefaultColors();
-                PaintRect(uRect);
+                gActiveWorld->view(uRect).fill(GetTranslateColorShade(item.color, VERY_LIGHT));
                 SetTranslateColorShadeFore( item.color, LIGHT);
                 mGetTranslateColorShade( item.color, LIGHT, color, transColor);
             }
@@ -1422,14 +1431,14 @@ void DrawPlayerListLineUp(const interfaceItemType& item, interfaceItemStatusEnum
         MacFrameRect(tRect);
         SetTranslateColorFore( BLACK);
         tRect.inset(1, 1);
-        PaintRect(tRect);
+        gActiveWorld->view(tRect).fill(BLACK);
         if (status == kDimmed) SetTranslateColorShadeFore( item.color, DARKER);
         else SetTranslateColorShadeFore( item.color, LIGHT);
         tRect.inset(-1, -1);
     } else
     {
         SetTranslateColorShadeFore( item.color, VERY_LIGHT);
-        PaintRect(tRect);
+        gActiveWorld->view(tRect).fill(GetTranslateColorShade(item.color, VERY_LIGHT));
         SetTranslateColorFore( BLACK);
     }
 
@@ -1473,14 +1482,14 @@ void DrawPlayerListPageUp(const interfaceItemType& item, interfaceItemStatusEnum
         MacFrameRect(tRect);
         SetTranslateColorFore( BLACK);
         tRect.inset(1, 1);
-        PaintRect(tRect);
+        gActiveWorld->view(tRect).fill(BLACK);
         if (status == kDimmed) SetTranslateColorShadeFore( item.color, DARKER);
         else SetTranslateColorShadeFore( item.color, LIGHT);
         tRect.inset(-1, -1);
     } else
     {
         SetTranslateColorShadeFore( item.color, VERY_LIGHT);
-        PaintRect(tRect);
+        gActiveWorld->view(tRect).fill(GetTranslateColorShade(item.color, VERY_LIGHT));
         SetTranslateColorFore( BLACK);
     }
 
@@ -1519,14 +1528,14 @@ void DrawPlayerListLineDown(const interfaceItemType& item, interfaceItemStatusEn
         MacFrameRect(tRect);
         SetTranslateColorFore( BLACK);
         tRect.inset(1, 1);
-        PaintRect(tRect);
+        gActiveWorld->view(tRect).fill(BLACK);
         if (status == kDimmed) SetTranslateColorShadeFore( item.color, DARKER);
         else SetTranslateColorShadeFore( item.color, LIGHT);
         tRect.inset(-1, -1);
     } else
     {
         SetTranslateColorShadeFore( item.color, VERY_LIGHT);
-        PaintRect(tRect);
+        gActiveWorld->view(tRect).fill(GetTranslateColorShade(item.color, VERY_LIGHT));
         SetTranslateColorFore( BLACK);
     }
 
@@ -1573,14 +1582,14 @@ void DrawPlayerListPageDown(const interfaceItemType& item, interfaceItemStatusEn
         MacFrameRect(tRect);
         SetTranslateColorFore( BLACK);
         tRect.inset(1, 1);
-        PaintRect(tRect);
+        gActiveWorld->view(tRect).fill(BLACK);
         if (status == kDimmed) SetTranslateColorShadeFore( item.color, DARKER);
         else SetTranslateColorShadeFore( item.color, LIGHT);
         tRect.inset(-1, -1);
     } else
     {
         SetTranslateColorShadeFore( item.color, VERY_LIGHT);
-        PaintRect(tRect);
+        gActiveWorld->view(tRect).fill(GetTranslateColorShade(item.color, VERY_LIGHT));
         SetTranslateColorFore( BLACK);
     }
 

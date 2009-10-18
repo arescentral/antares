@@ -24,7 +24,6 @@ STUB1(DisposeRgn, void(Rgn** rgn));
 
 void ScrollRect(const Rect& rect, int x, int y, const Rect& clip);
 
-void PaintRect(const Rect& rect);
 void FrameRect(const Rect& rect);
 void MacFrameRect(const Rect& rect);
 void EraseRect(const Rect& rect);

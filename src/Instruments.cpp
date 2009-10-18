@@ -635,7 +635,7 @@ void DrawInstrumentPanel() {
     DrawInSaveWorld();
     tRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     SetTranslateColorFore( BLACK);
-    PaintRect(tRect);
+    gActiveWorld->view(tRect).fill(BLACK);
     CopySaveWorldToOffWorld(tRect);
     DrawInRealWorld();
 

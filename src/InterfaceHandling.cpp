@@ -58,6 +58,7 @@ namespace antares {
 #define mPlayScreenSound        PlayVolumeSound( kComputerBeep3, kMediumLowVolume, kShortPersistence, kVeryLowPrioritySound)
 
 extern long             WORLD_WIDTH, WORLD_HEIGHT;
+extern PixMap*          gActiveWorld;
 extern PixMap*          gOffWorld;
 extern PixMap*          gSaveWorld;
 
@@ -143,7 +144,7 @@ void DrawEntireInterface() {
     DrawInOffWorld();
     Rect tRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     SetTranslateColorFore(BLACK);
-    PaintRect(tRect);
+    gActiveWorld->view(tRect).fill(BLACK);
 
     for (size_t i = 0; i < gInterfaceItemData.size(); ++i) {
         DrawAnyInterfaceItem(gInterfaceItemData[i], gOffWorld);
@@ -158,7 +159,7 @@ void DrawInterfaceRange(long from, long to, long withinItem) {
     Rect tRect = item->bounds;
     if (withinItem >= 0) {
         SetTranslateColorFore(BLACK);
-        PaintRect(tRect);
+        gActiveWorld->view(tRect).fill(BLACK);
     }
     from = std::max<int>(from, 0);
     to = std::min<int>(to, gInterfaceItemData.size());
@@ -178,7 +179,7 @@ void DrawAllItemsOfKind(interfaceKindType kind, bool sound, bool clearFirst, boo
     Rect tRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     SetTranslateColorFore(BLACK);
     if (clearFirst) {
-        PaintRect(tRect);
+        gActiveWorld->view(tRect).fill(BLACK);
     }
 
     for (size_t i = 0; i < gInterfaceItemData.size(); ++i) {
@@ -623,7 +624,7 @@ void RefreshInterfaceItem(short whichItem) {
     GetAnyInterfaceItemGraphicBounds(item, &tRect);
     DrawInOffWorld();
     DefaultColors();
-    PaintRect(tRect);
+    gActiveWorld->view(tRect).fill(BLACK);
     DrawAnyInterfaceItemOffToOn(item);
 }
 

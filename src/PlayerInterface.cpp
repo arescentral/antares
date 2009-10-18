@@ -418,7 +418,7 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
     {
         DrawInOffWorld();
         DefaultColors();
-        PaintRect(*contentRect);
+        gActiveWorld->view(*contentRect).fill(BLACK);
         GetIndString( string, 2004, 33);
 
         mSetDirectFont( kButtonFontNum);
@@ -446,11 +446,11 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
 
         tRect = Rect(contentRect->left, contentRect->top, contentRect->left + temp, contentRect->bottom);
         SetTranslateColorShadeFore( kLoadingScreenColor, LIGHT);
-        PaintRect(tRect);
+        gActiveWorld->view(tRect).fill(GetTranslateColorShade(kLoadingScreenColor, LIGHT));
 
         tRect = Rect(contentRect->left + temp, contentRect->top, contentRect->right, contentRect->bottom);
         SetTranslateColorShadeFore( kLoadingScreenColor, DARK);
-        PaintRect(tRect);
+        gActiveWorld->view(tRect).fill(GetTranslateColorShade(kLoadingScreenColor, DARK));
         NormalizeColors();
         DrawInRealWorld();
         NormalizeColors();
@@ -484,7 +484,7 @@ PlayAgainResult DoPlayAgain(bool allowResume, bool allowSkip) {
         DrawInOffWorld();
         GetAnyInterfaceItemGraphicBounds(item, &tRect);
         DefaultColors();
-        PaintRect(tRect);
+        gActiveWorld->view(tRect).fill(BLACK);
         DrawInRealWorld();
 
         if ( globals()->gOptions & kOptionNetworkOn)
@@ -554,7 +554,7 @@ PlayAgainResult DoPlayAgain(bool allowResume, bool allowSkip) {
         DrawInOffWorld();
         GetAnyInterfaceItemGraphicBounds(item, &tRect);
         DefaultColors();
-        PaintRect(tRect);
+        gActiveWorld->view(tRect).fill(BLACK);
         DrawInRealWorld();
         CloseInterface();
     }
@@ -588,7 +588,7 @@ void DoNetSettings( void)
         GetAnyInterfaceItemGraphicBounds( item, &tRect);
         DefaultColors();
         CopyOffWorldToSaveWorld( &tRect);
-        PaintRect( &tRect);
+        gActiveWorld->view( &tRect).fill(BLACK);
         DrawInRealWorld();
 
         currentRegistered = GetRegisteredSetting();
@@ -702,7 +702,7 @@ void DoNetSettings( void)
         DrawInOffWorld();
         GetAnyInterfaceItemGraphicBounds( item, &tRect);
         DefaultColors();
-        PaintRect( &tRect);
+        gActiveWorld->view( &tRect).fill(BLACK);
         CopySaveWorldToOffWorld( &tRect);
         DrawInRealWorld();
         CloseInterface();
@@ -765,7 +765,7 @@ void DoHelpScreen( void)
         textRect = item.bounds;
         DefaultColors();
         CopyOffWorldToSaveWorld(tRect);
-        PaintRect(tRect);
+        gActiveWorld->view(tRect).fill(BLACK);
         DrawInRealWorld();
 
         DrawAllItemsOfKind( kPictureRect, false, false, false);
@@ -865,7 +865,7 @@ void DoHelpScreen( void)
         DrawInOffWorld();
         GetAnyInterfaceItemGraphicBounds(item, &tRect);
         DefaultColors();
-        PaintRect(tRect);
+        gActiveWorld->view(tRect).fill(BLACK);
         CopySaveWorldToOffWorld(tRect);
         DrawInRealWorld();
         CloseInterface();
@@ -942,7 +942,7 @@ void StopPauseIndicator(unsigned char* pauseString) {
     CopyOffWorldToRealWorld(stringRect);
     DrawInOffWorld();
     DefaultColors();
-    PaintRect(stringRect);
+    gActiveWorld->view(stringRect).fill(BLACK);
 
     DrawInRealWorld();
     DefaultColors();
@@ -1190,7 +1190,7 @@ void DrawOptionVolumeLevel( Rect *bounds, long level)
         graphicRect = tRect;
         graphicRect.inset(2, 6);
         graphicRect.center_in(tRect);
-        PaintRect(graphicRect);
+        gActiveWorld->view(graphicRect).fill(GetTranslateColorShade(kOptionVolumeColor, shade));
         tRect.left += notchWidth;
         tRect.right = tRect.left + notchWidth - 2;
         shade += 2;
@@ -1202,7 +1202,7 @@ void DrawOptionVolumeLevel( Rect *bounds, long level)
         graphicRect = tRect;
         graphicRect.inset(2, 6);
         graphicRect.center_in(tRect);
-        PaintRect(graphicRect);
+        gActiveWorld->view(graphicRect).fill(BLACK);
         tRect.left += notchWidth;
         tRect.right = tRect.left + notchWidth - 2;
     }
@@ -1583,7 +1583,7 @@ void DrawStringInInterfaceItem( long whichItem, const unsigned char* string)
     DefaultColors();
     GetAnyInterfaceItemContentBounds(*GetAnyInterfaceItemPtr( whichItem), &tRect);
 
-    PaintRect(tRect);
+    gActiveWorld->view(tRect).fill(BLACK);
     anItem = GetAnyInterfaceItemPtr( whichItem);
     if ( string != nil)
     {
@@ -1903,13 +1903,13 @@ void BlackenWindow( void)
     tRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     DrawInSaveWorld();
     DefaultColors();
-    PaintRect(tRect);
+    gActiveWorld->view(tRect).fill(BLACK);
     DrawInOffWorld();
     DefaultColors();
-    PaintRect(tRect);
+    gActiveWorld->view(tRect).fill(BLACK);
     DrawInRealWorld();
     DefaultColors();
-    PaintRect(tRect);
+    gActiveWorld->view(tRect).fill(BLACK);
 }
 
 void BlackenOffscreen( void)
@@ -1920,10 +1920,10 @@ void BlackenOffscreen( void)
     tRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     DrawInSaveWorld();
     DefaultColors();
-    PaintRect(tRect);
+    gActiveWorld->view(tRect).fill(BLACK);
     DrawInOffWorld();
     DefaultColors();
-    PaintRect(tRect);
+    gActiveWorld->view(tRect).fill(BLACK);
     DrawInRealWorld();
     DefaultColors();
 }
@@ -2148,7 +2148,7 @@ void DrawLevelNameInBox(unsigned char* name, long fontNum, short descriptionText
     tRect = anItem->bounds;
     DrawInOffWorld();
     DefaultColors();
-    PaintRect(tRect);
+    gActiveWorld->view(tRect).fill(BLACK);
     DrawInRealWorld();
     DrawDirectTextInRect( &retroTextSpec, anItem->bounds, clipRect, gOffWorld, 0,0);
     CopyOffWorldToRealWorld(tRect);
@@ -2469,7 +2469,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
         dataItem->item.labeledRect.label.stringNumber = headerNumber;
         GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
         SetTranslateColorFore( BLACK);
-        PaintRect(newRect);
+        gActiveWorld->view(newRect).fill(BLACK);
         DrawAnyInterfaceItem(*dataItem, gOffWorld);
 
         DrawInOffWorld();
@@ -2695,7 +2695,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
             DrawInRealWorld();
             NormalizeColors();
             dataRect.inset(-8, -4);
-            PaintRect(dataRect);
+            gActiveWorld->view(dataRect).fill(BLACK);
             SetTranslateColorShadeFore( GREEN, VERY_LIGHT);
             MacFrameRect(dataRect);
             NormalizeColors();
@@ -3027,7 +3027,7 @@ void DoMissionDebriefingText(long textID, long yourlength, long parlength,
 
         GetAnyInterfaceItemGraphicBounds(dataItem, &tRect);
         SetTranslateColorFore( BLACK);
-        PaintRect(tRect);
+        gActiveWorld->view(tRect).fill(BLACK);
 
         DrawAnyInterfaceItem(dataItem, gOffWorld);
 
