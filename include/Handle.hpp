@@ -34,9 +34,6 @@ class TypedHandle {
     TypedHandle()
             : _data(NULL) { }
 
-    void resize(size_t new_count);
-    void extend(TypedHandle<T> other);
-
     void destroy() {
         delete _data;
         _data = NULL;
@@ -50,14 +47,6 @@ class TypedHandle {
 
     T* const* get() const {
         return &_data->_ptr.get();
-    }
-
-    size_t count() const {
-        return _data->_count;
-    }
-
-    size_t size() const {
-        return count() * sizeof(T);
     }
 
   private:
@@ -77,28 +66,6 @@ class TypedHandle {
     };
     Data* _data;
 };
-
-template <typename T>
-void TypedHandle<T>::resize(size_t new_count) {
-    scoped_array<T> old_ptr(_data->_ptr.release());
-    size_t old_count = _data->_count;
-    _data->_ptr.reset(new T[new_count]);
-    _data->_count = new_count;
-    for (size_t i = 0; i < std::min(old_count, new_count); ++i) {
-        _data->_ptr.get()[i] = old_ptr.get()[i];
-    }
-}
-
-template <typename T>
-void TypedHandle<T>::extend(TypedHandle<T> other) {
-    if (other.count() > 0) {
-        size_t old_count = count();
-        resize(old_count + other.count());
-        for (size_t i = 0; i < other.count(); ++i) {
-            _data->_ptr.get()[i + old_count] = other._data->_ptr.get()[i];
-        }
-    }
-}
 
 template <typename T>
 void TypedHandle<T>::load_resource(uint32_t code, int id) {
