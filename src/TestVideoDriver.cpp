@@ -87,13 +87,20 @@ int MainScreenVideoDriver::get_demo_scenario() { return -1; }
 
 MissionBriefingVideoDriver::MissionBriefingVideoDriver(int level)
         : _level(level),
-          _briefing_num(0) { }
+          _briefing_num(0),
+          _key_down(false) { }
 
 bool MissionBriefingVideoDriver::wait_next_event(EventRecord* evt, double) {
     switch (state()) {
       case MAIN_SCREEN_INTERFACE:
         {
-            evt->what = autoKey;
+            if (_key_down) {
+                evt->what = keyUp;
+                _key_down = false;
+            } else {
+                evt->what = autoKey;
+                _key_down = true;
+            }
             evt->message = 0x0100;  // S
             globals()->gPreferencesData->startingLevel = _level;
         }

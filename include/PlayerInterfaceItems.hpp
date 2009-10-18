@@ -152,6 +152,11 @@ struct interfaceItemType {
     interfaceKindType   kind;
     interfaceStyleType  style;
 
+    interfaceItemStatusType status() const;
+    void set_status(interfaceItemStatusType status);
+    int key() const;
+    void set_key(int key);
+
     void read(BinaryReader* bin);
 };
 

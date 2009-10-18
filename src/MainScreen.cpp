@@ -63,10 +63,10 @@ void MainScreen::fire_timer() {
 
 void MainScreen::adjust_interface() {
     if (!(globals()->gOptions & kOptionNetworkAvailable)) {
-        SetStatusOfAnyInterfaceItem(START_NETWORK_GAME, kDimmed, false);
+        mutable_item(START_NETWORK_GAME)->set_status(kDimmed);
     }
     if (globals()->gOptions & kOptionNoSinglePlayer) {
-        SetStatusOfAnyInterfaceItem(START_NEW_GAME, kDimmed, false);
+        mutable_item(START_NEW_GAME)->set_status(kDimmed);
     }
 }
 

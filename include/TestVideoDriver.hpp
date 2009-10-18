@@ -64,6 +64,7 @@ class MissionBriefingVideoDriver : public TestingVideoDriver {
   private:
     const int _level;
     int _briefing_num;
+    bool _key_down;
 };
 
 class DemoVideoDriver : public TestingVideoDriver {

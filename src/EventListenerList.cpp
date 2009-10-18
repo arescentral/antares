@@ -64,6 +64,11 @@ void EventListenerList::send(const EventRecord& evt) {
                 return;
             }
             break;
+          case keyUp:
+            if ((*it)->key_up(evt.message)) {
+                return;
+            }
+            break;
         }
     }
 }

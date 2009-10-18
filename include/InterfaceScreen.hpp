@@ -18,6 +18,8 @@
 #ifndef ANTARES_INTERFACE_SCREEN_HPP_
 #define ANTARES_INTERFACE_SCREEN_HPP_
 
+#include <vector>
+#include "PlayerInterfaceItems.hpp"
 #include "SmartPtr.hpp"
 #include "VideoDriver.hpp"
 
@@ -36,15 +38,30 @@ class InterfaceScreen : public EventListener {
     virtual bool mouse_up(int button, const Point& where);
     virtual bool mouse_moved(int button, const Point& where);
     virtual bool key_down(int key);
+    virtual bool key_up(int key);
 
   protected:
     double last_event() const;
     virtual void adjust_interface();
     virtual void handle_button(int button) = 0;
 
+    const interfaceItemType& item(int index) const;
+    interfaceItemType* mutable_item(int index);
+
   private:
+    void draw() const;
+
+    enum State {
+        NORMAL,
+        MOUSE_DOWN,
+        KEY_DOWN,
+    };
+    State _state;
+
     int _id;
     double _last_event;
+    std::vector<interfaceItemType> _items;
+    int _hit_item;
 
     DISALLOW_COPY_AND_ASSIGN(InterfaceScreen);
 };

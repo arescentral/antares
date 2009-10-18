@@ -705,6 +705,71 @@ void interfaceItemType::read(BinaryReader* bin) {
     }
 }
 
+interfaceItemStatusType interfaceItemType::status() const {
+    switch (kind) {
+      case kPlainButton:
+        return item.plainButton.status;
+      case kRadioButton:
+      case kTabBoxButton:
+        return item.radioButton.status;
+      case kCheckboxButton:
+        return item.checkboxButton.status;
+      case kTextRect:
+        return item.textRect.visibleBounds ? kActive : kDimmed;
+      case kPictureRect:
+        return item.pictureRect.visibleBounds ? kActive : kDimmed;
+      default:
+        return kDimmed;
+    }
+}
+
+void interfaceItemType::set_status(interfaceItemStatusType status) {
+    switch (kind) {
+      case kPlainButton:
+        item.plainButton.status = status;
+        break;
+      case kRadioButton:
+      case kTabBoxButton:
+        item.radioButton.status = status;
+        break;
+      case kCheckboxButton:
+        item.checkboxButton.status = status;
+        break;
+      case kTextRect:
+        item.textRect.visibleBounds = (status == kActive);
+        break;
+      case kPictureRect:
+        item.pictureRect.visibleBounds = (status == kActive);
+        break;
+      default:
+        break;
+    }
+}
+
+int interfaceItemType::key() const {
+    switch (kind) {
+      case kPlainButton:
+        return item.plainButton.key;
+      case kTabBoxButton:
+        return item.radioButton.key;
+      default:
+        return 0;
+    }
+}
+
+void interfaceItemType::set_key(int key) {
+    switch (kind) {
+      case kPlainButton:
+        item.plainButton.key = key;
+        break;
+      case kTabBoxButton:
+        item.radioButton.key = key;
+        break;
+      default:
+        break;
+    }
+}
+
 void interfaceLabelType::read(BinaryReader* bin) {
     bin->read(&stringID);
     bin->read(&stringNumber);

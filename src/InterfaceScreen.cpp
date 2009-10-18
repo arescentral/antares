@@ -17,40 +17,115 @@
 
 #include "InterfaceScreen.hpp"
 
+#include "BinaryStream.hpp"
 #include "ColorTranslation.hpp"
 #include "FakeDrawing.hpp"
 #include "InterfaceHandling.hpp"
+#include "OffscreenGWorld.hpp"
 #include "PlayerInterface.hpp"
+#include "Resource.hpp"
 #include "Time.hpp"
 
 namespace antares {
 
+extern long WORLD_WIDTH;
+extern long WORLD_HEIGHT;
+extern PixMap* gRealWorld;
+extern PixMap* gOffWorld;
+
 InterfaceScreen::InterfaceScreen(int id)
-        : _id(id),
-          _last_event(now()) { }
+        : _state(NORMAL),
+          _id(id),
+          _last_event(now()),
+          _hit_item(0) {
+    Resource rsrc('intr', id);
+    BufferBinaryReader bin(rsrc.data(), rsrc.size());
+    const int offset_x = (WORLD_WIDTH / 2) - 320;
+    const int offset_y = (WORLD_HEIGHT / 2) - 240;
+    while (bin.bytes_read() < rsrc.size()) {
+        _items.push_back(interfaceItemType());
+        interfaceItemType* const item = &_items.back();
+        bin.read(item);
+        item->bounds.offset(offset_x, offset_y);
+    }
+}
 
 InterfaceScreen::~InterfaceScreen() { }
 
 void InterfaceScreen::become_front() {
     gActiveWorld->fill(BLACK);
-    OpenInterface(_id);
     this->adjust_interface();
-    DrawEntireInterface();
+    draw();
     _last_event = now();
     // half-second fade from black.
 }
 
+void InterfaceScreen::draw() const {
+    DrawInOffWorld();
+    gOffWorld->fill(BLACK);
+    for (std::vector<interfaceItemType>::const_iterator it = _items.begin(); it != _items.end();
+            ++it) {
+        DrawAnyInterfaceItem(*it, gOffWorld);
+    }
+    DrawInRealWorld();
+    CopyOffWorldToRealWorld(gRealWorld->bounds());
+}
+
 bool InterfaceScreen::mouse_down(int button, const Point& where) {
-    int which_item = InterfaceMouseDown(where);
-    if (which_item >= 0) {
-        this->handle_button(which_item);
+    if (button != 0) {
+        return true;
+    }
+    for (size_t i = 0; i < _items.size(); ++i) {
+        interfaceItemType* const item = &_items[i];
+        Rect bounds;
+        GetAnyInterfaceItemGraphicBounds(*item, &bounds);
+        if (item->status() != kDimmed && bounds.contains(where)) {
+            switch (item->kind) {
+              case kPlainButton:
+              case kCheckboxButton:
+              case kRadioButton:
+              case kTabBoxButton:
+                _state = MOUSE_DOWN;
+                item->set_status(kIH_Hilite);
+                DrawAnyInterfaceItemOffToOn(*item);
+                // play kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound.
+                _hit_item = i;
+                return true;
+
+              case kLabeledRect:
+                return true;
+
+              case kListRect:
+                fprintf(stderr, "kListRect not yet handled\n");
+                exit(1);
+
+              default:
+                break;
+            }
+        }
     }
     return true;
 }
 
 bool InterfaceScreen::mouse_up(int button, const Point& where) {
-    (void)button;
-    (void)where;
+    if (button != 0) {
+        return true;
+    }
+    if (_state == MOUSE_DOWN) {
+        _state = NORMAL;
+        interfaceItemType* const item = &_items[_hit_item];
+        Rect bounds;
+        GetAnyInterfaceItemGraphicBounds(*item, &bounds);
+        item->set_status(kActive);
+        DrawAnyInterfaceItemOffToOn(*item);
+        if (bounds.contains(where)) {
+            if (item->kind == kTabBoxButton) {
+                item->item.radioButton.on = true;
+            }
+            handle_button(_hit_item);
+        }
+        _hit_item = 0;
+    }
     return true;
 }
 
@@ -61,9 +136,36 @@ bool InterfaceScreen::mouse_moved(int button, const Point& where) {
 }
 
 bool InterfaceScreen::key_down(int key) {
-    int which_item = InterfaceKeyDown(key);
-    if (which_item >= 0) {
-        this->handle_button(which_item);
+    const int32_t key_code = ((key & keyCodeMask) >> 8) + 1;
+    if (key_code > 0) {
+        for (size_t i = 0; i < _items.size(); ++i) {
+            interfaceItemType* const item = &_items[i];
+            if (item->status() != kDimmed && item->key() == key_code) {
+                _state = KEY_DOWN;
+                item->set_status(kIH_Hilite);
+                DrawAnyInterfaceItemOffToOn(*item);
+                // play kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound.
+                _hit_item = i;
+                return true;
+            }
+        }
+    }
+    return true;
+}
+
+bool InterfaceScreen::key_up(int key) {
+    // TODO(sfiera): verify that the same key that was pressed was released.
+    (void)key;
+    if (_state == KEY_DOWN) {
+        _state = NORMAL;
+        interfaceItemType* const item = &_items[_hit_item];
+        item->set_status(kActive);
+        if (item->kind == kTabBoxButton) {
+            item->item.radioButton.on = true;
+        }
+        DrawAnyInterfaceItemOffToOn(*item);
+        handle_button(_hit_item);
+        _hit_item = 0;
     }
     return true;
 }
@@ -73,5 +175,13 @@ double InterfaceScreen::last_event() const {
 }
 
 void InterfaceScreen::adjust_interface() { }
+
+const interfaceItemType& InterfaceScreen::item(int i) const {
+    return _items[i];
+}
+
+interfaceItemType* InterfaceScreen::mutable_item(int i) {
+    return &_items[i];
+}
 
 }  // namespace antares

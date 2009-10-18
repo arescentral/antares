@@ -600,15 +600,20 @@ bool VncVideoDriver::vnc_poll(int64_t timeout) {
                 {
                     KeyEventMessage msg;
                     in.read(&msg);
-                    printf("key %d\n", msg.key);
+                    printf("key %d %d\n", msg.key, implicit_cast<int>(msg.down_flag));
 
                     if (_key_map.find(msg.key) == _key_map.end()) {
                         printf("unknown key\n");
                         exit(1);
-                    } else {
+                    } else if (msg.down_flag) {
                         evt->what = autoKey;
                         evt->message = _key_map[msg.key] << 8;
                         printf("enqueued %d\n", evt->message);
+                        _event_queue.push(evt.release());
+
+                        evt.reset(new EventRecord);
+                        evt->what = keyUp;
+                        evt->message = _key_map[msg.key] << 8;
                         _event_queue.push(evt.release());
                     }
 

@@ -23,6 +23,7 @@ enum {
     keyDown = 305,
     autoKey = 306,
     osEvt = 307,
+    keyUp = 308,
 
     cmdKey = 500,
     optionKey = 501,
