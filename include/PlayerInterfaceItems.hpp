@@ -77,12 +77,7 @@ struct interfaceListType {
     short                       (*getListLength)( void);
     void                        (*getItemString)(short, unsigned char*);
     bool                     (*itemHilited)( short, bool);
-//  void                        (*hiliteItem)( short);
     short                       topItem;
-    interfaceItemStatusType     lineUpStatus;
-    interfaceItemStatusType     lineDownStatus;
-    interfaceItemStatusType     pageUpStatus;
-    interfaceItemStatusType     pageDownStatus;
 
     void read(BinaryReader* bin);
 };

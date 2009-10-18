@@ -18,8 +18,6 @@
 #ifndef ANTARES_PLAYER_INTERFACE_DRAWING_HPP_
 #define ANTARES_PLAYER_INTERFACE_DRAWING_HPP_
 
-// Player Interface Drawing.h
-
 #include "AnyChar.hpp"
 #include "PlayerInterfaceItems.hpp"
 
@@ -31,57 +29,54 @@ namespace antares {
 #define kMaxInlinePictNum           8   // max # of inline picts it'll keep track of
 
 // the inline pictType struct is for keeping track of picts included in my text boxes.
-struct inlinePictType
-{
-    Rect    bounds;
-    short   id;
+struct inlinePictType {
+    Rect bounds;
+    short id;
 };
 
-void DrawPlayerInterfacePlainRect( Rect *, unsigned char, interfaceStyleType, PixMap *, long,
-                        long);
-void DrawPlayerInterfaceTabBox( Rect *, unsigned char, interfaceStyleType, PixMap *, long,
-                        long, short);
-void DrawPlayerInterfaceButton( interfaceItemType *, PixMap *, long,
-                        long);
-void DrawPlayerInterfaceTabBoxButton( interfaceItemType *, PixMap *, long,
-                        long);
-void DrawPlayerInterfaceRadioButton( interfaceItemType *, PixMap *, long,
-                        long);
-void DrawPlayerInterfaceCheckBox( interfaceItemType *, PixMap *, long,
-                        long);
-void DrawPlayerInterfaceLabeledBox( interfaceItemType *, PixMap *, long,
-                        long);
-void DrawPlayerInterfaceList( interfaceItemType *, PixMap *, long,
-                        long);
-void DrawPlayerInterfaceListEntry( interfaceItemType *, short, PixMap *, long,
-                        long);
-void DrawPlayerListLineUp( interfaceItemType *);
-void GetPlayerListLineUpRect( interfaceItemType *, Rect *);
-void DrawPlayerListPageUp( interfaceItemType *);
-void GetPlayerListPageUpRect( interfaceItemType *, Rect *);
-void DrawPlayerListLineDown( interfaceItemType *);
-void GetPlayerListLineDownRect( interfaceItemType *, Rect *);
-void DrawPlayerListPageDown( interfaceItemType *);
-void GetPlayerListPageDownRect( interfaceItemType *, Rect *);
-void DrawInterfaceTextRect( interfaceItemType *, PixMap *, long,
-                        long);
-void DrawInterfaceTextInRect(const Rect&, const unsigned char *, long, interfaceStyleType, unsigned char, PixMap *, long,
-                        long, inlinePictType *);
+void DrawPlayerInterfacePlainRect(
+        const Rect& rect, uint8_t color, interfaceStyleType style, PixMap* pix);
+void DrawPlayerInterfaceTabBox(
+        const Rect& rect, uint8_t color, interfaceStyleType style, PixMap* pix,
+        int top_right_border_size);
+void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix);
+void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix);
+void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix);
+void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix);
+void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix);
+void DrawPlayerInterfaceList(const interfaceItemType& item, PixMap* pix);
+void DrawPlayerInterfaceListEntry(const interfaceItemType& item, int which_entry, PixMap* pix);
+
+void DrawPlayerListLineUp(const interfaceItemType& item, interfaceItemStatusEnum status);
+void GetPlayerListLineUpRect(const interfaceItemType& item, Rect* rect);
+void DrawPlayerListPageUp(const interfaceItemType& item, interfaceItemStatusEnum status);
+void GetPlayerListPageUpRect(const interfaceItemType& item, Rect* rect);
+void DrawPlayerListLineDown(const interfaceItemType& item, interfaceItemStatusEnum status);
+void GetPlayerListLineDownRect(const interfaceItemType& item, Rect* rect);
+void DrawPlayerListPageDown(const interfaceItemType& item, interfaceItemStatusEnum status);
+void GetPlayerListPageDownRect(const interfaceItemType& item, Rect* rect);
+
+void DrawInterfaceTextRect(const interfaceItemType& item, PixMap* pix);
+void DrawInterfaceTextInRect(
+        const Rect& rect, const unsigned char* textData, long length, interfaceStyleType style,
+        unsigned char textcolor, PixMap* pix, inlinePictType* inlinePict);
+
 short GetInterfaceTextHeightFromWidth(const unsigned char*, long, interfaceStyleType, short);
-void DrawInterfacePictureRect( interfaceItemType *, PixMap *, long,
-                        long);
-void DrawAnyInterfaceItem( interfaceItemType *, PixMap *, long,
-                        long);
-void GetAnyInterfaceItemGraphicBounds( interfaceItemType *, Rect *);
-void GetAnyInterfaceItemContentBounds( interfaceItemType *, Rect *);
-short GetInterfaceStringWidth(unsigned char*, interfaceStyleType);
-short GetInterfaceFontHeight( interfaceStyleType);
-short GetInterfaceFontAscent( interfaceStyleType);
-short GetInterfaceFontWidth( interfaceStyleType);
-void DrawInterfaceString(unsigned char*, interfaceStyleType, PixMap *, long,
-                        long, unsigned char);
-void SetInterfaceLargeUpperFont( interfaceStyleType);
-void SetInterfaceLargeLowerFont( interfaceStyleType);
+void DrawInterfacePictureRect(const interfaceItemType& item, PixMap* pix);
+void DrawAnyInterfaceItem(const interfaceItemType& item, PixMap* pix);
+
+void GetAnyInterfaceItemGraphicBounds(const interfaceItemType& item, Rect* rect);
+void GetAnyInterfaceItemContentBounds(const interfaceItemType& item, Rect* rect);
+
+short GetInterfaceStringWidth(unsigned char* s, interfaceStyleType style);
+short GetInterfaceFontHeight(interfaceStyleType style);
+short GetInterfaceFontAscent(interfaceStyleType style);
+short GetInterfaceFontWidth(interfaceStyleType style);
+
+void DrawInterfaceString(unsigned char* s, interfaceStyleType style, PixMap* pix, uint8_t color);
+
+void SetInterfaceLargeUpperFont(interfaceStyleType style);
+void SetInterfaceLargeLowerFont(interfaceStyleType style);
 
 }  // namespace antares
 

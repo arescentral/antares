@@ -146,7 +146,7 @@ void DrawEntireInterface() {
     PaintRect(tRect);
 
     for (size_t i = 0; i < gInterfaceItemData.size(); ++i) {
-        DrawAnyInterfaceItem(&gInterfaceItemData[i], gOffWorld, 0, 0);
+        DrawAnyInterfaceItem(gInterfaceItemData[i], gOffWorld);
     }
     DrawInRealWorld();
     CopyOffWorldToRealWorld(tRect);
@@ -164,7 +164,7 @@ void DrawInterfaceRange(long from, long to, long withinItem) {
     to = std::min<int>(to, gInterfaceItemData.size());
     if (from < to) {
         for (int i = from; i < to; ++i) {
-            DrawAnyInterfaceItem(&gInterfaceItemData[i], gOffWorld, 0, 0);
+            DrawAnyInterfaceItem(gInterfaceItemData[i], gOffWorld);
         }
         DrawInRealWorld();
         if (withinItem >= 0) {
@@ -182,13 +182,13 @@ void DrawAllItemsOfKind(interfaceKindType kind, bool sound, bool clearFirst, boo
     }
 
     for (size_t i = 0; i < gInterfaceItemData.size(); ++i) {
-        interfaceItemType* const item = &gInterfaceItemData[i];
+        const interfaceItemType& item = gInterfaceItemData[i];
         if (sound) {
             mPlayScreenSound;
         }
-        if (item->kind == kind) {
+        if (item.kind == kind) {
             if (showAtEnd) {
-                DrawAnyInterfaceItem(item, gOffWorld, 0, 0);
+                DrawAnyInterfaceItem(item, gOffWorld);
             } else {
                 DrawAnyInterfaceItemOffToOn(item);
             }
@@ -200,22 +200,22 @@ void DrawAllItemsOfKind(interfaceKindType kind, bool sound, bool clearFirst, boo
     }
 }
 
-void DrawAnyInterfaceItemOffToOn(interfaceItemType* item) {
+void DrawAnyInterfaceItemOffToOn(const interfaceItemType& item) {
     Rect bounds;
 
     GetAnyInterfaceItemGraphicBounds(item, &bounds);
     DrawInOffWorld();
-    DrawAnyInterfaceItem(item, gOffWorld, 0, 0);
+    DrawAnyInterfaceItem(item, gOffWorld);
     DrawInRealWorld();
     CopyOffWorldToRealWorld(bounds);
 }
 
-void DrawAnyInterfaceItemSaveToOffToOn(interfaceItemType* item) {
+void DrawAnyInterfaceItemSaveToOffToOn(const interfaceItemType& item) {
     Rect bounds;
 
     GetAnyInterfaceItemGraphicBounds(item, &bounds);
     DrawInSaveWorld();
-    DrawAnyInterfaceItem(item, gSaveWorld, 0, 0);
+    DrawAnyInterfaceItem(item, gSaveWorld);
     DrawInOffWorld();
     CopySaveWorldToOffWorld(bounds);
     DrawInRealWorld();
@@ -274,12 +274,12 @@ void InvalidateInterfaceFunctions() {
 
 short PtInInterfaceItem(Point where) {
     for (size_t i = 0; i < gInterfaceItemData.size(); ++i) {
-        interfaceItemType* const item = &gInterfaceItemData[i];
+        const interfaceItemType& item = gInterfaceItemData[i];
         Rect tRect;
         GetAnyInterfaceItemGraphicBounds(item, &tRect);
 
         if (tRect.contains(where)) {
-            if ((item->kind != kTabBox) && (item->kind != kPictureRect)) {
+            if ((item.kind != kTabBox) && (item.kind != kPictureRect)) {
                 return i;
             }
         }
@@ -292,7 +292,7 @@ short InterfaceMouseDown(Point where) {
     for (size_t i = 0; i < gInterfaceItemData.size(); ++i) {
         interfaceItemType* const item = &gInterfaceItemData[i];
         Rect tRect;
-        GetAnyInterfaceItemGraphicBounds(item, &tRect);
+        GetAnyInterfaceItemGraphicBounds(*item, &tRect);
 
         if (tRect.contains(where)) {
             switch (item->kind) {
@@ -328,7 +328,7 @@ short InterfaceMouseDown(Point where) {
                 return -1;
 
               case kListRect:
-                InterfaceListRectHit(item, where);
+                InterfaceListRectHit(*item, where);
                 return i;
 
               default:
@@ -376,7 +376,7 @@ short InterfaceKeyDown(long message) {
 
         if (hit) {
             SetStatusOfAnyInterfaceItem(hit_number, kIH_Hilite, false);
-            DrawAnyInterfaceItemOffToOn(hit);
+            DrawAnyInterfaceItemOffToOn(*hit);
             mPlayButtonDown;
             KeyMap key_map;
             do {
@@ -393,198 +393,170 @@ short InterfaceKeyDown(long message) {
                 break;
             }
 
-            DrawAnyInterfaceItemOffToOn(hit);
+            DrawAnyInterfaceItemOffToOn(*hit);
             return hit_number;
         }
     }
     return -1;
 }
 
-bool InterfaceButtonHit( interfaceItemType *button)
+bool InterfaceButtonHit(interfaceItemType* button) {
+    if (button->item.plainButton.status == kDimmed) {
+        return false;
+    }
 
-{
-    Rect    tRect;
-    Point   where;
+    Rect tRect;
+    GetAnyInterfaceItemGraphicBounds(*button, &tRect);
 
-//  LongRectToRect( &(button->bounds), &tRect);
-    GetAnyInterfaceItemGraphicBounds( button, &tRect);
-
-    if ( button->item.plainButton.status == kDimmed) return( false);
-
-    while ( Button())
-    {
-        GetMouse( &where);
+    Point where;
+    while (Button()) {
+        GetMouse(&where);
         if (tRect.contains(where)) {
-            if ( button->item.plainButton.status != kIH_Hilite)
-            {
+            if (button->item.plainButton.status != kIH_Hilite) {
                 mPlayButtonDown;
                 button->item.plainButton.status = kIH_Hilite;
-                DrawAnyInterfaceItemOffToOn( button);
+                DrawAnyInterfaceItemOffToOn(*button);
             }
-        } else
-        {
-            if ( button->item.plainButton.status != kActive)
-            {
+        } else {
+            if (button->item.plainButton.status != kActive) {
                 mPlayButtonUp;
                 button->item.plainButton.status = kActive;
-                DrawAnyInterfaceItemOffToOn( button);
+                DrawAnyInterfaceItemOffToOn(*button);
             }
         }
     }
-    if ( button->item.plainButton.status == kIH_Hilite)
-    {
+    if (button->item.plainButton.status == kIH_Hilite) {
         button->item.plainButton.status = kActive;
-        DrawAnyInterfaceItemOffToOn( button);
+        DrawAnyInterfaceItemOffToOn(*button);
     }
     return tRect.contains(where);
 }
 
-bool InterfaceCheckboxHit( interfaceItemType *button)
+bool InterfaceCheckboxHit(interfaceItemType* button) {
+    if (button->item.checkboxButton.status == kDimmed) {
+        return false;
+    }
 
-{
-    Rect    tRect;
-    Point   where;
+    Rect tRect;
+    GetAnyInterfaceItemGraphicBounds(*button, &tRect);
 
-//  LongRectToRect( &(button->bounds), &tRect);
-    GetAnyInterfaceItemGraphicBounds( button, &tRect);
-
-    if ( button->item.checkboxButton.status == kDimmed) return( false);
-
-    do
-    {
-        GetMouse( &where);
+    Point where;
+    do {
+        GetMouse(&where);
         if (tRect.contains(where)) {
-            if ( button->item.checkboxButton.status != kIH_Hilite)
-            {
+            if (button->item.checkboxButton.status != kIH_Hilite) {
                 mPlayButtonDown;
                 button->item.checkboxButton.status = kIH_Hilite;
-                DrawAnyInterfaceItemOffToOn( button);
+                DrawAnyInterfaceItemOffToOn(*button);
             }
-        } else
-        {
-            if ( button->item.checkboxButton.status != kActive)
-            {
+        } else {
+            if (button->item.checkboxButton.status != kActive) {
                 button->item.checkboxButton.status = kActive;
-                DrawAnyInterfaceItemOffToOn( button);
+                DrawAnyInterfaceItemOffToOn(*button);
             }
         }
-    } while ( Button());
-    if ( button->item.checkboxButton.status == kIH_Hilite)
-    {
+    } while (Button());
+    if ( button->item.checkboxButton.status == kIH_Hilite) {
         button->item.checkboxButton.status = kActive;
     }
-    GetMouse( &where);
+    GetMouse(&where);
     if (tRect.contains(where)) {
-        if ( button->item.checkboxButton.on)
+        if ( button->item.checkboxButton.on) {
             button->item.checkboxButton.on = false;
-        else button->item.checkboxButton.on = true;
-        DrawAnyInterfaceItemOffToOn( button);
-        return( true);
-    } else
-    {
-        DrawAnyInterfaceItemOffToOn( button);
+        } else {
+            button->item.checkboxButton.on = true;
+        }
+        DrawAnyInterfaceItemOffToOn(*button);
+        return true;
+    } else {
+        DrawAnyInterfaceItemOffToOn(*button);
+        return false;
+    }
+}
+
+bool InterfaceRadioButtonHit(interfaceItemType* button) {
+    Rect tRect;
+    GetAnyInterfaceItemGraphicBounds(*button, &tRect);
+
+    if (button->item.radioButton.status == kDimmed) {
         return( false);
     }
-}
 
-bool InterfaceRadioButtonHit( interfaceItemType *button)
-
-{
-    Rect    tRect;
-    Point   where;
-
-//  LongRectToRect( &(button->bounds), &tRect);
-    GetAnyInterfaceItemGraphicBounds( button, &tRect);
-
-    if ( button->item.radioButton.status == kDimmed) return( false);
-
-    if ( button->item.radioButton.on == false)
+    if (button->item.radioButton.on == false) {
         button->item.radioButton.on = true;
+    }
 
-    do
-    {
-        GetMouse( &where);
+    Point where;
+    do {
+        GetMouse(&where);
         if (tRect.contains(where)) {
-            if ( button->item.radioButton.status != kIH_Hilite)
-            {
+            if (button->item.radioButton.status != kIH_Hilite) {
                 mPlayButtonDown;
                 button->item.radioButton.status = kIH_Hilite;
-                DrawAnyInterfaceItemOffToOn( button);
+                DrawAnyInterfaceItemOffToOn(*button);
             }
-        } else
-        {
-            if ( button->item.radioButton.status != kActive)
-            {
+        } else {
+            if (button->item.radioButton.status != kActive) {
                 button->item.radioButton.status = kActive;
-                DrawAnyInterfaceItemOffToOn( button);
+                DrawAnyInterfaceItemOffToOn(*button);
             }
         }
-    } while ( Button());
-    if ( button->item.radioButton.status == kIH_Hilite)
-    {
+    } while (Button());
+    if (button->item.radioButton.status == kIH_Hilite) {
         button->item.radioButton.status = kActive;
     }
-    DrawAnyInterfaceItemOffToOn( button);
-//  return( MacPtInRect( where, &tRect));
-    return(true);
+    DrawAnyInterfaceItemOffToOn(*button);
+    return true;
 }
 
-bool InterfaceTabBoxButtonHit( interfaceItemType *button)
+bool InterfaceTabBoxButtonHit(interfaceItemType* button) {
+    Rect tRect;
+    GetAnyInterfaceItemGraphicBounds(*button, &tRect);
 
-{
-    Rect    tRect;
-    Point   where;
+    if (button->item.radioButton.status == kDimmed) {
+        return false;
+    }
 
-    GetAnyInterfaceItemGraphicBounds( button, &tRect);
+    if (button->item.radioButton.on != false) {
+        return false;
+    }
 
-    if ( button->item.radioButton.status == kDimmed) return( false);
-
-    if ( button->item.radioButton.on != false) return( false);
-
-    do
-    {
-        GetMouse( &where);
+    Point where;
+    do {
+        GetMouse(&where);
         if (tRect.contains(where)) {
-            if ( button->item.radioButton.status != kIH_Hilite)
-            {
+            if (button->item.radioButton.status != kIH_Hilite) {
                 mPlayButtonDown;
                 button->item.radioButton.status = kIH_Hilite;
-                DrawAnyInterfaceItemOffToOn( button);
+                DrawAnyInterfaceItemOffToOn(*button);
             }
-        } else
-        {
-            if ( button->item.radioButton.status != kActive)
-            {
+        } else {
+            if (button->item.radioButton.status != kActive) {
                 button->item.radioButton.status = kActive;
-                DrawAnyInterfaceItemOffToOn( button);
+                DrawAnyInterfaceItemOffToOn(*button);
             }
         }
     } while ( Button());
-    if ( button->item.radioButton.status == kIH_Hilite)
-    {
+    if ( button->item.radioButton.status == kIH_Hilite) {
         button->item.radioButton.status = kActive;
     }
     button->item.radioButton.on = true;
-    DrawAnyInterfaceItemOffToOn( button);
-
-    return(true);
+    DrawAnyInterfaceItemOffToOn(*button);
+    return true;
 }
 
-void InterfaceListRectHit( interfaceItemType *listRect, Point where)
-
-{
+void InterfaceListRectHit(const interfaceItemType& listRect, Point where) {
     Rect    tRect;
     short   lineHeight, whichHit;
 
-    if ( listRect->item.listRect.getListLength != nil)
-    {
-        tRect = listRect->bounds;
-        lineHeight = GetInterfaceFontHeight(listRect->style) + kInterfaceTextVBuffer;
+    if (listRect.item.listRect.getListLength != nil) {
+        tRect = listRect.bounds;
+        lineHeight = GetInterfaceFontHeight(listRect.style) + kInterfaceTextVBuffer;
         where.v -= tRect.top;
-        whichHit = where.v / lineHeight + listRect->item.listRect.topItem;
-        if ( whichHit >= (*(listRect->item.listRect.getListLength))())
+        whichHit = where.v / lineHeight + listRect.item.listRect.topItem;
+        if ( whichHit >= (*(listRect.item.listRect.getListLength))())
             whichHit = -1;
-        (*(listRect->item.listRect.itemHilited))( whichHit, true);
+        (*(listRect.item.listRect.itemHilited))( whichHit, true);
     }
 }
 
@@ -646,7 +618,7 @@ bool GetAnyRadioOrCheckboxOn(short whichItem) {
 
 
 void RefreshInterfaceItem(short whichItem) {
-    interfaceItemType* const item = &gInterfaceItemData[whichItem];
+    const interfaceItemType& item = gInterfaceItemData[whichItem];
     Rect tRect;
     GetAnyInterfaceItemGraphicBounds(item, &tRect);
     DrawInOffWorld();
@@ -756,10 +728,6 @@ void interfaceListType::read(BinaryReader* bin) {
     bin->read(&label);
     bin->discard(12);
     bin->read(&topItem);
-    bin->read(&lineUpStatus);
-    bin->read(&lineDownStatus);
-    bin->read(&pageUpStatus);
-    bin->read(&pageDownStatus);
 
     getListLength = NULL;
     getItemString = NULL;

@@ -15,14 +15,11 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-// Ares Controls.c
-
 #include "PlayerInterfaceDrawing.hpp"
 
 #include <assert.h>
 #include <Quickdraw.h>
 
-#include "AnyChar.hpp"
 #include "ColorTranslation.hpp"
 #include "Debug.hpp"
 #include "DirectText.hpp"
@@ -242,20 +239,18 @@ enum inlineKindType {
     kVClearPictKind = 2
 };
 
-extern directTextType*  gDirectText;
+extern directTextType* gDirectText;
 extern PixMap* gActiveWorld;
 
-void DrawPlayerInterfacePlainRect( Rect *dRect, unsigned char color,
-                interfaceStyleType style, PixMap *destMap, long portLeft,
-                        long portTop)
-
-{
+void DrawPlayerInterfacePlainRect(
+        const Rect& rect, uint8_t color, interfaceStyleType style, PixMap* pix) {
     Rect            tRect, uRect;
     short           vcenter, thisHBorder = kInterfaceSmallHBorder;
 
-#pragma unused ( destMap, portLeft, portTop)
-    if ( style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    tRect = *dRect;
+    if (style == kLarge) {
+        thisHBorder = kInterfaceLargeHBorder;
+    }
+    tRect = rect;
     tRect.left -= kInterfaceContentBuffer;
     tRect.top -= kInterfaceContentBuffer;
     tRect.right += kInterfaceContentBuffer;
@@ -300,18 +295,15 @@ void DrawPlayerInterfacePlainRect( Rect *dRect, unsigned char color,
     SetTranslateColorFore( BLACK);
 }
 
-void DrawPlayerInterfaceTabBox( Rect    *dRect, unsigned char color,
-                interfaceStyleType style, PixMap *destMap, long portLeft,
-                        long portTop, short topRightBorderSize)
-
-{
+void DrawPlayerInterfaceTabBox(
+        const Rect& rect, uint8_t color, interfaceStyleType style, PixMap* pix,
+        int top_right_border_size) {
     Rect            tRect, uRect;
     short           vcenter, thisHBorder = kInterfaceSmallHBorder;
     unsigned char   shade;
 
-#pragma unused ( destMap, portLeft, portTop)
     if ( style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    tRect = *dRect;
+    tRect = rect;
     tRect.left -= kInterfaceContentBuffer;
     tRect.top -= kInterfaceContentBuffer;
     tRect.right += kInterfaceContentBuffer;
@@ -332,7 +324,7 @@ void DrawPlayerInterfaceTabBox( Rect    *dRect, unsigned char color,
         (tRect).top - 3 - kInterfaceVCornerHeight,
         (tRect).left + 6, (tRect).top  - kInterfaceVLipHeight);
     PaintRect(uRect);
-    uRect = Rect((tRect).right - topRightBorderSize,
+    uRect = Rect((tRect).right - top_right_border_size,
         (tRect).top - 3 - kInterfaceVCornerHeight,
         (tRect).right, (tRect).top  - kInterfaceVLipHeight);
     PaintRect(uRect);
@@ -341,13 +333,13 @@ void DrawPlayerInterfaceTabBox( Rect    *dRect, unsigned char color,
     MacLineTo( (tRect).left, (tRect).top);
     MacLineTo( (tRect).left, (tRect).top - kInterfaceVLipHeight);
     MacLineTo( (tRect).left + 5, (tRect).top - kInterfaceVLipHeight);
-    MoveTo( (tRect).right - topRightBorderSize, (tRect).top - kInterfaceVLipHeight);
+    MoveTo( (tRect).right - top_right_border_size, (tRect).top - kInterfaceVLipHeight);
     MacLineTo( (tRect).right, (tRect).top - kInterfaceVLipHeight);
     MacLineTo( (tRect).right, (tRect).top);
     MacLineTo( (tRect).right + thisHBorder, (tRect).top);
     MacLineTo( (tRect).right + thisHBorder, (tRect).top - 3 - kInterfaceVCornerHeight);
     SetTranslateColorShadeFore( color, shade + kLighterColor);
-    MacLineTo( (tRect).right - topRightBorderSize, (tRect).top - 3 - kInterfaceVCornerHeight);
+    MacLineTo( (tRect).right - top_right_border_size, (tRect).top - 3 - kInterfaceVCornerHeight);
     MoveTo( (tRect).left + 5, (tRect).top - 3 - kInterfaceVCornerHeight);
     MacLineTo( (tRect).left - thisHBorder, (tRect).top - 3 - kInterfaceVCornerHeight);
     MacLineTo( (tRect).left - thisHBorder, (tRect).top);
@@ -388,10 +380,7 @@ void DrawPlayerInterfaceTabBox( Rect    *dRect, unsigned char color,
     SetTranslateColorFore( BLACK);
 }
 
-void DrawPlayerInterfaceButton( interfaceItemType *dItem, PixMap *destMap, long portLeft,
-                        long portTop)
-
-{
+void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
     Rect            tRect, uRect, vRect;
     short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     Str255          s;
@@ -399,8 +388,10 @@ void DrawPlayerInterfaceButton( interfaceItemType *dItem, PixMap *destMap, long 
     unsigned char   color;
     transColorType  *transColor;
 
-    if ( dItem->style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    tRect = dItem->bounds;
+    if (item.style == kLarge) {
+        thisHBorder = kInterfaceLargeHBorder;
+    }
+    tRect = item.bounds;
 
     uRect = tRect;
     uRect.right++;
@@ -413,14 +404,16 @@ void DrawPlayerInterfaceButton( interfaceItemType *dItem, PixMap *destMap, long 
 
     // top border
 
-    if ( dItem->item.plainButton.status == kDimmed)
+    if (item.item.plainButton.status == kDimmed) {
         shade = VERY_DARK;
-    else shade = MEDIUM;
+    } else {
+        shade = MEDIUM;
+    }
 
-    mDrawPuffUpTopBorder( tRect, uRect, dItem->color, shade, thisHBorder);
+    mDrawPuffUpTopBorder( tRect, uRect, item.color, shade, thisHBorder);
     // bottom border
 
-    mDrawPuffUpBottomBorder( tRect, uRect, dItem->color, shade, thisHBorder);
+    mDrawPuffUpBottomBorder( tRect, uRect, item.color, shade, thisHBorder);
 
     // side border top
 
@@ -430,140 +423,131 @@ void DrawPlayerInterfaceButton( interfaceItemType *dItem, PixMap *destMap, long 
             tRect.bottom - kInterfaceHTop + 1);
     vRect = Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
             tRect.bottom - kInterfaceHTop + 1);
-    if ( dItem->item.plainButton.status == kIH_Hilite)
-    {
+    if (item.item.plainButton.status == kIH_Hilite) {
         shade = LIGHT;
-        mDrawPuffUpRect( uRect, dItem->color, shade);
-        mDrawPuffUpRect( vRect, dItem->color, shade);
-    } else
-    {
-        if ( dItem->item.plainButton.status == kDimmed)
+        mDrawPuffUpRect( uRect, item.color, shade);
+        mDrawPuffUpRect( vRect, item.color, shade);
+    } else {
+        if (item.item.plainButton.status == kDimmed) {
             shade = VERY_DARK;
-        else shade = MEDIUM + kSlightlyLighterColor;
-        mDrawPuffUpRect( uRect, dItem->color, shade);
-        mDrawPuffUpRect( vRect, dItem->color, shade);
+        } else {
+            shade = MEDIUM + kSlightlyLighterColor;
+        }
+        mDrawPuffUpRect( uRect, item.color, shade);
+        mDrawPuffUpRect( vRect, item.color, shade);
     }
 
 
-    if ( dItem->item.plainButton.key == 0)
+    if (item.item.plainButton.key == 0)
     {
         uRect = Rect(tRect.left +  kInterfaceContentBuffer,
             tRect.top + kInterfaceContentBuffer,
             tRect.left +  kInterfaceContentBuffer,
             tRect.bottom - kInterfaceContentBuffer);
 
-        if ( dItem->item.plainButton.status == kIH_Hilite)
+        if (item.item.plainButton.status == kIH_Hilite)
             shade = LIGHT;
         else shade = DARK;//DARKEST + kSlightlyLighterColor;
         uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                         tRect.right - kInterfaceContentBuffer + 1,
                         tRect.bottom - kInterfaceContentBuffer + 1);
-        SetTranslateColorShadeFore( dItem->color, shade);
+        SetTranslateColorShadeFore(item.color, shade);
         PaintRect(uRect);
 
-        if ( dItem->item.plainButton.status == kIH_Hilite)
+        if (item.item.plainButton.status == kIH_Hilite)
         {
-            SetTranslateColorShadeFore( dItem->color, DARKEST);
-            mGetTranslateColorShade( dItem->color, DARKEST, color, transColor);
+            SetTranslateColorShadeFore(item.color, DARKEST);
+            mGetTranslateColorShade(item.color, DARKEST, color, transColor);
         }
-        else if ( dItem->item.plainButton.status == kDimmed)
+        else if (item.item.plainButton.status == kDimmed)
         {
-            SetTranslateColorShadeFore( dItem->color, VERY_DARK);
-            mGetTranslateColorShade( dItem->color, VERY_DARK, color, transColor);
+            SetTranslateColorShadeFore(item.color, VERY_DARK);
+            mGetTranslateColorShade(item.color, VERY_DARK, color, transColor);
         }
 
         else
         {
-            SetTranslateColorShadeFore( dItem->color, LIGHTER);
-            mGetTranslateColorShade( dItem->color, LIGHTER, color, transColor);
+            SetTranslateColorShadeFore(item.color, LIGHTER);
+            mGetTranslateColorShade(item.color, LIGHTER, color, transColor);
         }
-        GetIndString( s, dItem->item.plainButton.label.stringID,
-                    dItem->item.plainButton.label.stringNumber);
-        swidth = GetInterfaceStringWidth( s, dItem->style);
+        GetIndString(s, item.item.plainButton.label.stringID,
+                    item.item.plainButton.label.stringNumber);
+        swidth = GetInterfaceStringWidth(s, item.style);
         swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
-        sheight = GetInterfaceFontAscent(dItem->style) + kInterfaceTextVBuffer + tRect.top;
+        sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
         MoveTo( swidth, sheight);
-        DrawInterfaceString(s, dItem->style, destMap, portLeft,
-                        portTop,  color);
+        DrawInterfaceString(s, item.style, pix, color);
     } else
     {
         // draw the key code
 
-
-        if ( dItem->item.plainButton.status == kDimmed)
+        if (item.item.plainButton.status == kDimmed)
             shade = VERY_DARK;
         else shade = LIGHT;
-        GetKeyNumName( s, dItem->item.plainButton.key);
-        swidth = GetInterfaceFontWidth( dItem->style) * kMaxKeyNameLength;
+        GetKeyNumName(s, item.item.plainButton.key);
+        swidth = GetInterfaceFontWidth(item.style) * kMaxKeyNameLength;
 
         uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                 tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 1,
                 tRect.bottom - kInterfaceContentBuffer + 1);
-        mDrawPuffUpRect( uRect, dItem->color, shade);
+        mDrawPuffUpRect(uRect, item.color, shade);
 
-        if ( dItem->item.plainButton.status == kIH_Hilite)
+        if (item.item.plainButton.status == kIH_Hilite)
             shade = LIGHT;
         else shade = DARK;//DARKEST;
         vRect = Rect(tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 2,
         tRect.top + kInterfaceContentBuffer,
                         tRect.right - kInterfaceContentBuffer + 1,
                         tRect.bottom - kInterfaceContentBuffer + 1);
-        SetTranslateColorShadeFore( dItem->color, shade);
+        SetTranslateColorShadeFore(item.color, shade);
         PaintRect(vRect);
 
-        swidth = GetInterfaceStringWidth( s, dItem->style);
+        swidth = GetInterfaceStringWidth(s, item.style);
         swidth = uRect.left + ( uRect.right - uRect.left) / 2 - swidth / 2;
-        MoveTo( swidth, uRect.top + GetInterfaceFontAscent(dItem->style));
-        if ( dItem->item.plainButton.status == kDimmed)
+        MoveTo( swidth, uRect.top + GetInterfaceFontAscent(item.style));
+        if (item.item.plainButton.status == kDimmed)
         {
-            SetTranslateColorShadeFore( dItem->color, VERY_DARK);
-            mGetTranslateColorShade( dItem->color, VERY_DARK, color, transColor);
+            SetTranslateColorShadeFore(item.color, VERY_DARK);
+            mGetTranslateColorShade(item.color, VERY_DARK, color, transColor);
         }
 
         else
         {
-            SetTranslateColorShadeFore( dItem->color, DARKEST);
-            mGetTranslateColorShade( dItem->color, DARKEST, color, transColor);
+            SetTranslateColorShadeFore(item.color, DARKEST);
+            mGetTranslateColorShade(item.color, DARKEST, color, transColor);
         }
 
-
-        DrawInterfaceString(s, dItem->style, destMap, portLeft,
-                        portTop,  color);
-
+        DrawInterfaceString(s, item.style, pix, color);
 
         // draw the button title
 
-        if ( dItem->item.plainButton.status == kIH_Hilite)
+        if (item.item.plainButton.status == kIH_Hilite)
         {
-            SetTranslateColorShadeFore( dItem->color, DARKEST);
-            mGetTranslateColorShade( dItem->color, DARKEST, color, transColor);
-        } else if ( dItem->item.plainButton.status == kDimmed)
+            SetTranslateColorShadeFore(item.color, DARKEST);
+            mGetTranslateColorShade(item.color, DARKEST, color, transColor);
+        } else if (item.item.plainButton.status == kDimmed)
         {
-            SetTranslateColorShadeFore( dItem->color, DARKEST + kSlightlyLighterColor);
-            mGetTranslateColorShade( dItem->color, DARKEST + kSlightlyLighterColor, color, transColor);
+            SetTranslateColorShadeFore(item.color, DARKEST + kSlightlyLighterColor);
+            mGetTranslateColorShade(item.color, DARKEST + kSlightlyLighterColor, color, transColor);
         }
         else
         {
-            SetTranslateColorShadeFore( dItem->color, LIGHTER);
-            mGetTranslateColorShade( dItem->color, LIGHTER, color, transColor);
+            SetTranslateColorShadeFore(item.color, LIGHTER);
+            mGetTranslateColorShade(item.color, LIGHTER, color, transColor);
         }
-        GetIndString( s, dItem->item.plainButton.label.stringID,
-                    dItem->item.plainButton.label.stringNumber);
-        swidth = GetInterfaceStringWidth( s, dItem->style);
+        GetIndString(s, item.item.plainButton.label.stringID,
+                    item.item.plainButton.label.stringNumber);
+        swidth = GetInterfaceStringWidth(s, item.style);
         swidth = uRect.right + ( tRect.right - uRect.right) / 2 - swidth / 2;
-        sheight = GetInterfaceFontAscent(dItem->style) + kInterfaceTextVBuffer + tRect.top;
+        sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
         MoveTo( swidth, sheight);
-        DrawInterfaceString(s, dItem->style, destMap, portLeft,
-                        portTop,  color);
+        DrawInterfaceString(s, item.style, pix, color);
     }
 
     SetTranslateColorFore( BLACK);
 }
 
-void DrawPlayerInterfaceTabBoxButton( interfaceItemType *dItem, PixMap *destMap, long portLeft,
-                        long portTop)
-
-{
+void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix) {
     Rect            tRect, uRect, vRect;
     short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     Str255          s;
@@ -571,8 +555,8 @@ void DrawPlayerInterfaceTabBoxButton( interfaceItemType *dItem, PixMap *destMap,
     unsigned char   color;
     transColorType  *transColor;
 
-    if ( dItem->style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    tRect = dItem->bounds;
+    if ( item.style == kLarge) thisHBorder = kInterfaceLargeHBorder;
+    tRect = item.bounds;
 
     uRect = tRect;
     uRect.right++;
@@ -585,14 +569,14 @@ void DrawPlayerInterfaceTabBoxButton( interfaceItemType *dItem, PixMap *destMap,
 
     // top border
 
-    if ( dItem->item.radioButton.status == kDimmed)
+    if ( item.item.radioButton.status == kDimmed)
         shade = VERY_DARK;
     else shade = MEDIUM;
 
-    mDrawPuffUpTopBorder( tRect, uRect, dItem->color, shade, thisHBorder);
+    mDrawPuffUpTopBorder( tRect, uRect, item.color, shade, thisHBorder);
     // bottom border
 
-//  mDrawPuffUpBottomBorder( tRect, uRect, dItem->color, shade, thisHBorder)
+//  mDrawPuffUpBottomBorder( tRect, uRect, item.color, shade, thisHBorder)
 
     // side border top
 
@@ -602,20 +586,20 @@ void DrawPlayerInterfaceTabBoxButton( interfaceItemType *dItem, PixMap *destMap,
             tRect.bottom - kInterfaceHTop + 1);
     vRect = Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
             tRect.bottom - kInterfaceHTop + 1);
-    if ( !dItem->item.radioButton.on)
+    if ( !item.item.radioButton.on)
     {
-        if ( dItem->item.radioButton.status == kIH_Hilite)
+        if ( item.item.radioButton.status == kIH_Hilite)
         {
             shade = LIGHT;
-            mDrawPuffUpRect( uRect, dItem->color, shade);
-            mDrawPuffUpRect( vRect, dItem->color, shade);
+            mDrawPuffUpRect( uRect, item.color, shade);
+            mDrawPuffUpRect( vRect, item.color, shade);
         } else
         {
-            if ( dItem->item.radioButton.status == kDimmed)
+            if ( item.item.radioButton.status == kDimmed)
                 shade = VERY_DARK;
             else shade = DARK;
-            mDrawPuffUpRect( uRect, dItem->color, shade);
-            mDrawPuffUpRect( vRect, dItem->color, shade);
+            mDrawPuffUpRect( uRect, item.color, shade);
+            mDrawPuffUpRect( vRect, item.color, shade);
         }
         uRect = Rect(uRect.left, uRect.bottom, uRect.right, uRect.bottom + 3);
         vRect = Rect(vRect.left, vRect.bottom, vRect.right, vRect.bottom + 3);
@@ -624,31 +608,31 @@ void DrawPlayerInterfaceTabBoxButton( interfaceItemType *dItem, PixMap *destMap,
         PaintRect(vRect);
         uRect = Rect(uRect.left - 3, uRect.bottom, vRect.right + 3, uRect.bottom + 3);
         shade = MEDIUM;
-        SetTranslateColorShadeFore( dItem->color, shade);
+        SetTranslateColorShadeFore( item.color, shade);
         PaintRect(uRect);
-        SetTranslateColorShadeFore( dItem->color, shade + kLighterColor);
+        SetTranslateColorShadeFore( item.color, shade + kLighterColor);
         MoveTo( uRect.left, uRect.top - 1);
         MacLineTo( uRect.right - 1, uRect.top - 1);
-        SetTranslateColorShadeFore( dItem->color, shade + kDarkerColor);
+        SetTranslateColorShadeFore( item.color, shade + kDarkerColor);
         MoveTo( uRect.left, uRect.bottom);
         MacLineTo( uRect.right - 1, uRect.bottom);
     } else
     {
-        if ( dItem->item.radioButton.status == kIH_Hilite)
+        if ( item.item.radioButton.status == kIH_Hilite)
         {
             shade = LIGHT;
         } else
         {
-            if ( dItem->item.radioButton.status == kDimmed)
+            if ( item.item.radioButton.status == kDimmed)
                 shade = VERY_DARK;
             else shade = MEDIUM;
         }
         uRect.bottom += 7;
         vRect.bottom += 7;
-        SetTranslateColorShadeFore( dItem->color, shade);
+        SetTranslateColorShadeFore( item.color, shade);
         PaintRect(uRect);
         PaintRect(vRect);
-        SetTranslateColorShadeFore( dItem->color, shade + kLighterColor);
+        SetTranslateColorShadeFore( item.color, shade + kLighterColor);
         MoveTo( uRect.right - 2, uRect.top);
         MacLineTo( uRect.left, uRect.top);
         MacLineTo( uRect.left, uRect.bottom - 5);
@@ -658,7 +642,7 @@ void DrawPlayerInterfaceTabBoxButton( interfaceItemType *dItem, PixMap *destMap,
         MacLineTo( vRect.left, vRect.bottom - 2);
         MoveTo( vRect.right, vRect.bottom - 5);
         MacLineTo( vRect.right + 2, vRect.bottom - 5);
-        SetTranslateColorShadeFore( dItem->color, shade + kDarkerColor);
+        SetTranslateColorShadeFore( item.color, shade + kDarkerColor);
         MoveTo( uRect.right - 1, uRect.top);
         MacLineTo( uRect.right - 1, uRect.bottom - 1);
         MacLineTo( uRect.left - 3, uRect.bottom - 1);
@@ -667,7 +651,7 @@ void DrawPlayerInterfaceTabBoxButton( interfaceItemType *dItem, PixMap *destMap,
         MoveTo( vRect.left, vRect.bottom - 1);
         MacLineTo( vRect.right + 2, vRect.bottom - 1);
         uRect = Rect(uRect.left - 3, uRect.bottom - 4, uRect.right - 1, uRect.bottom - 1);
-        SetTranslateColorShadeFore( dItem->color, shade);
+        SetTranslateColorShadeFore( item.color, shade);
         PaintRect(uRect);
         vRect = Rect(vRect.left + 1, vRect.bottom - 4, vRect.right + 3, vRect.bottom - 1);
         PaintRect(vRect);
@@ -680,16 +664,16 @@ void DrawPlayerInterfaceTabBoxButton( interfaceItemType *dItem, PixMap *destMap,
     }
 
 
-    if ( dItem->item.radioButton.key == 0)
+    if ( item.item.radioButton.key == 0)
     {
         uRect = Rect(tRect.left +  kInterfaceContentBuffer,
             tRect.top + kInterfaceContentBuffer,
             tRect.left +  kInterfaceContentBuffer,
             tRect.bottom - kInterfaceContentBuffer);
 
-        if ( !dItem->item.radioButton.on)
+        if ( !item.item.radioButton.on)
         {
-            if ( dItem->item.radioButton.status == kIH_Hilite)
+            if ( item.item.radioButton.status == kIH_Hilite)
                 shade = LIGHT;
             else shade = DARKER;//DARKEST + kSlightlyLighterColor;
         } else
@@ -699,63 +683,62 @@ void DrawPlayerInterfaceTabBoxButton( interfaceItemType *dItem, PixMap *destMap,
         uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                         tRect.right - kInterfaceContentBuffer + 1,
                         tRect.bottom - kInterfaceContentBuffer + 1);
-        SetTranslateColorShadeFore( dItem->color, shade);
+        SetTranslateColorShadeFore( item.color, shade);
         PaintRect(uRect);
 
-        if ( !dItem->item.radioButton.on)
+        if ( !item.item.radioButton.on)
         {
-            if ( dItem->item.radioButton.status == kIH_Hilite)
+            if ( item.item.radioButton.status == kIH_Hilite)
             {
-                SetTranslateColorShadeFore( dItem->color, DARKEST);
-                mGetTranslateColorShade( dItem->color, DARKEST, color, transColor);
+                SetTranslateColorShadeFore( item.color, DARKEST);
+                mGetTranslateColorShade( item.color, DARKEST, color, transColor);
             }
-            else if ( dItem->item.radioButton.status == kDimmed)
+            else if ( item.item.radioButton.status == kDimmed)
             {
-                SetTranslateColorShadeFore( dItem->color, VERY_DARK);
-                mGetTranslateColorShade( dItem->color, VERY_DARK, color, transColor);
+                SetTranslateColorShadeFore( item.color, VERY_DARK);
+                mGetTranslateColorShade( item.color, VERY_DARK, color, transColor);
             } else
             {
-                SetTranslateColorShadeFore( dItem->color, LIGHT);
-                mGetTranslateColorShade( dItem->color, LIGHT, color, transColor);
+                SetTranslateColorShadeFore( item.color, LIGHT);
+                mGetTranslateColorShade( item.color, LIGHT, color, transColor);
             }
         } else
         {
-            SetTranslateColorShadeFore( dItem->color, VERY_LIGHT);
-            mGetTranslateColorShade( dItem->color, VERY_LIGHT, color, transColor);
+            SetTranslateColorShadeFore( item.color, VERY_LIGHT);
+            mGetTranslateColorShade( item.color, VERY_LIGHT, color, transColor);
         }
-        GetIndString( s, dItem->item.radioButton.label.stringID,
-                    dItem->item.radioButton.label.stringNumber);
-        swidth = GetInterfaceStringWidth( s, dItem->style);
+        GetIndString( s, item.item.radioButton.label.stringID,
+                    item.item.radioButton.label.stringNumber);
+        swidth = GetInterfaceStringWidth( s, item.style);
         swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
-        sheight = GetInterfaceFontAscent(dItem->style) + kInterfaceTextVBuffer + tRect.top;
+        sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
         MoveTo( swidth, sheight);
-        DrawInterfaceString(s, dItem->style, destMap, portLeft,
-                        portTop,  color);
+        DrawInterfaceString(s, item.style, pix, color);
     } else
     {
         // draw the key code
 
 
-        if ( !dItem->item.radioButton.on)
+        if ( !item.item.radioButton.on)
         {
-            if ( dItem->item.radioButton.status == kIH_Hilite)
+            if ( item.item.radioButton.status == kIH_Hilite)
                 shade = VERY_LIGHT;
             else shade = DARK;//DARKEST + kSlightlyLighterColor;
         } else
         {
             shade = MEDIUM + kLighterColor;
         }
-        GetKeyNumName( s, dItem->item.radioButton.key);
-        swidth = GetInterfaceFontWidth( dItem->style) * kMaxKeyNameLength;
+        GetKeyNumName( s, item.item.radioButton.key);
+        swidth = GetInterfaceFontWidth( item.style) * kMaxKeyNameLength;
 
         uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                 tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 1,
                 tRect.bottom - kInterfaceContentBuffer + 1);
-        mDrawPuffUpRect( uRect, dItem->color, shade);
+        mDrawPuffUpRect( uRect, item.color, shade);
 
-        if ( !dItem->item.radioButton.on)
+        if ( !item.item.radioButton.on)
         {
-            if ( dItem->item.radioButton.status == kIH_Hilite)
+            if ( item.item.radioButton.status == kIH_Hilite)
                 shade = VERY_LIGHT;
             else shade = DARKER;//DARKEST + kSlightlyLighterColor;
         } else
@@ -766,70 +749,65 @@ void DrawPlayerInterfaceTabBoxButton( interfaceItemType *dItem, PixMap *destMap,
         tRect.top + kInterfaceContentBuffer,
                         tRect.right - kInterfaceContentBuffer + 1,
                         tRect.bottom - kInterfaceContentBuffer + 1);
-        SetTranslateColorShadeFore( dItem->color, shade);
+        SetTranslateColorShadeFore( item.color, shade);
         PaintRect(vRect);
 
-        swidth = GetInterfaceStringWidth( s, dItem->style);
+        swidth = GetInterfaceStringWidth( s, item.style);
         swidth = uRect.left + ( uRect.right - uRect.left) / 2 - swidth / 2;
-        MoveTo( swidth, uRect.top + GetInterfaceFontAscent(dItem->style));
-        if ( dItem->item.radioButton.status == kDimmed)
+        MoveTo( swidth, uRect.top + GetInterfaceFontAscent(item.style));
+        if ( item.item.radioButton.status == kDimmed)
         {
-            SetTranslateColorShadeFore( dItem->color, VERY_DARK);
-            mGetTranslateColorShade( dItem->color, VERY_DARK, color, transColor);
+            SetTranslateColorShadeFore( item.color, VERY_DARK);
+            mGetTranslateColorShade( item.color, VERY_DARK, color, transColor);
         }
 
         else
         {
-            SetTranslateColorShadeFore( dItem->color, DARKEST);
-            mGetTranslateColorShade( dItem->color, DARKEST, color, transColor);
+            SetTranslateColorShadeFore( item.color, DARKEST);
+            mGetTranslateColorShade( item.color, DARKEST, color, transColor);
         }
 
 
-        DrawInterfaceString(s, dItem->style, destMap, portLeft,
-                        portTop,  color);
+        DrawInterfaceString(s, item.style, pix, color);
 
 
         // draw the button title
 
-        if ( !dItem->item.radioButton.on)
+        if ( !item.item.radioButton.on)
         {
-            if ( dItem->item.radioButton.status == kIH_Hilite)
+            if ( item.item.radioButton.status == kIH_Hilite)
             {
-                SetTranslateColorShadeFore( dItem->color, DARKEST);
-                mGetTranslateColorShade( dItem->color, DARKEST, color, transColor);
+                SetTranslateColorShadeFore( item.color, DARKEST);
+                mGetTranslateColorShade( item.color, DARKEST, color, transColor);
             }
-            else if ( dItem->item.radioButton.status == kDimmed)
+            else if ( item.item.radioButton.status == kDimmed)
             {
-                SetTranslateColorShadeFore( dItem->color, VERY_DARK);
-                mGetTranslateColorShade( dItem->color, VERY_DARK, color, transColor);
+                SetTranslateColorShadeFore( item.color, VERY_DARK);
+                mGetTranslateColorShade( item.color, VERY_DARK, color, transColor);
             } else
             {
-                SetTranslateColorShadeFore( dItem->color, LIGHT);
-                mGetTranslateColorShade( dItem->color, LIGHT, color, transColor);
+                SetTranslateColorShadeFore( item.color, LIGHT);
+                mGetTranslateColorShade( item.color, LIGHT, color, transColor);
             }
         } else
         {
-            SetTranslateColorShadeFore( dItem->color, VERY_LIGHT);
-            mGetTranslateColorShade( dItem->color, VERY_LIGHT, color, transColor);
+            SetTranslateColorShadeFore( item.color, VERY_LIGHT);
+            mGetTranslateColorShade( item.color, VERY_LIGHT, color, transColor);
         }
-        GetIndString( s, dItem->item.radioButton.label.stringID,
-                    dItem->item.radioButton.label.stringNumber);
-        swidth = GetInterfaceStringWidth( s, dItem->style);
+        GetIndString( s, item.item.radioButton.label.stringID,
+                    item.item.radioButton.label.stringNumber);
+        swidth = GetInterfaceStringWidth( s, item.style);
         swidth = uRect.right + ( tRect.right - uRect.right) / 2 - swidth / 2;
-        sheight = GetInterfaceFontAscent(dItem->style) + kInterfaceTextVBuffer + tRect.top;
+        sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
         MoveTo( swidth, sheight);
-        DrawInterfaceString(s, dItem->style, destMap, portLeft,
-                        portTop,  color);
+        DrawInterfaceString(s, item.style, pix, color);
     }
 
     SetTranslateColorFore( BLACK);
 }
 
 
-void DrawPlayerInterfaceRadioButton( interfaceItemType *dItem, PixMap *destMap, long portLeft,
-                        long portTop)
-
-{
+void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix) {
     Rect            tRect, uRect, vRect, wRect;
     short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     Str255          s;
@@ -837,8 +815,8 @@ void DrawPlayerInterfaceRadioButton( interfaceItemType *dItem, PixMap *destMap, 
     unsigned char   color;
     transColorType  *transColor;
 
-    if ( dItem->style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    tRect = dItem->bounds;
+    if ( item.style == kLarge) thisHBorder = kInterfaceLargeHBorder;
+    tRect = item.bounds;
 
     tRect.left -= kInterfaceContentBuffer;
     tRect.top -= kInterfaceContentBuffer;
@@ -847,14 +825,14 @@ void DrawPlayerInterfaceRadioButton( interfaceItemType *dItem, PixMap *destMap, 
 
     // top border
 
-    if ( dItem->item.radioButton.status == kDimmed)
+    if ( item.item.radioButton.status == kDimmed)
         shade = VERY_DARK;
     else shade = MEDIUM;
 
-    mDrawPuffUpTopBorder( tRect, uRect, dItem->color, shade, thisHBorder);
+    mDrawPuffUpTopBorder( tRect, uRect, item.color, shade, thisHBorder);
     // bottom border
 
-    mDrawPuffUpBottomBorder( tRect, uRect, dItem->color, shade, thisHBorder);
+    mDrawPuffUpBottomBorder( tRect, uRect, item.color, shade, thisHBorder);
 
     // side border top
 
@@ -875,11 +853,11 @@ void DrawPlayerInterfaceRadioButton( interfaceItemType *dItem, PixMap *destMap, 
             /*tRect.top + vcenter - kInterfaceVLipHeight + 1*/
             tRect.bottom - kInterfaceHTop + 1);
 
-    if ( dItem->item.radioButton.status == kIH_Hilite)
+    if ( item.item.radioButton.status == kIH_Hilite)
     {
         shade = LIGHT;
-        mDrawPuffUpRect( uRect, dItem->color, shade);
-        mDrawPuffUpRect( vRect, dItem->color, shade);
+        mDrawPuffUpRect( uRect, item.color, shade);
+        mDrawPuffUpRect( vRect, item.color, shade);
 
         wRect.left += 2;
         wRect.right += 2;
@@ -887,36 +865,36 @@ void DrawPlayerInterfaceRadioButton( interfaceItemType *dItem, PixMap *destMap, 
         FrameOval(wRect);
         wRect.left -= 2;
         wRect.right -= 2;
-        mDrawPuffUpOval( wRect, dItem->color, shade);
+        mDrawPuffUpOval( wRect, item.color, shade);
 
         wRect.inset(3, 3);
-        mDrawPuffDownOval( wRect, dItem->color, shade);
+        mDrawPuffDownOval( wRect, item.color, shade);
         wRect.inset(1, 1);
-        if ( !dItem->item.radioButton.on) SetTranslateColorFore( BLACK);
-        else SetTranslateColorShadeFore( dItem->color, VERY_LIGHT);
+        if ( !item.item.radioButton.on) SetTranslateColorFore( BLACK);
+        else SetTranslateColorShadeFore( item.color, VERY_LIGHT);
         PaintOval(wRect);
     } else
     {
-        if ( dItem->item.radioButton.status == kDimmed)
+        if ( item.item.radioButton.status == kDimmed)
             shade = VERY_DARK;
         else shade = MEDIUM + kSlightlyLighterColor;
-        mDrawPuffUpRect( uRect, dItem->color, shade);
-        mDrawPuffUpRect( vRect, dItem->color, shade);
+        mDrawPuffUpRect( uRect, item.color, shade);
+        mDrawPuffUpRect( vRect, item.color, shade);
         wRect.left += 2;
         wRect.right += 2;
         SetTranslateColorFore( BLACK);
         FrameOval(wRect);
         wRect.left -= 2;
         wRect.right -= 2;
-        mDrawPuffUpOval( wRect, dItem->color, shade);
+        mDrawPuffUpOval( wRect, item.color, shade);
 
         wRect.inset(3, 3);
-        mDrawPuffDownOval( wRect, dItem->color, shade);
+        mDrawPuffDownOval( wRect, item.color, shade);
         wRect.inset(1, 1);
-        if ( !dItem->item.radioButton.on) SetTranslateColorFore( BLACK);
-        else if ( dItem->item.radioButton.status == kActive)
-            SetTranslateColorShadeFore( dItem->color, LIGHT);
-        else SetTranslateColorShadeFore( dItem->color, MEDIUM);
+        if ( !item.item.radioButton.on) SetTranslateColorFore( BLACK);
+        else if ( item.item.radioButton.status == kActive)
+            SetTranslateColorShadeFore( item.color, LIGHT);
+        else SetTranslateColorShadeFore( item.color, MEDIUM);
         PaintOval(wRect);
     }
 
@@ -925,47 +903,43 @@ void DrawPlayerInterfaceRadioButton( interfaceItemType *dItem, PixMap *destMap, 
         tRect.left +  kInterfaceContentBuffer,
         tRect.bottom - kInterfaceContentBuffer);
 
-    if ( dItem->item.radioButton.status == kIH_Hilite)
+    if ( item.item.radioButton.status == kIH_Hilite)
         shade = LIGHT;
     else shade = DARKEST + kSlightlyLighterColor;
     uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                     tRect.right - kInterfaceContentBuffer + 1,
                     tRect.bottom - kInterfaceContentBuffer + 1);
-    SetTranslateColorShadeFore( dItem->color, shade);
+    SetTranslateColorShadeFore( item.color, shade);
     PaintRect(uRect);
 
-    if ( dItem->item.radioButton.status == kIH_Hilite)
+    if ( item.item.radioButton.status == kIH_Hilite)
     {
-        SetTranslateColorShadeFore( dItem->color, DARKEST);
-        mGetTranslateColorShade( dItem->color, DARKEST, color, transColor);
+        SetTranslateColorShadeFore( item.color, DARKEST);
+        mGetTranslateColorShade( item.color, DARKEST, color, transColor);
     }
 
-    else if ( dItem->item.radioButton.status == kDimmed)
+    else if ( item.item.radioButton.status == kDimmed)
     {
-        SetTranslateColorShadeFore( dItem->color, DARK);
-        mGetTranslateColorShade( dItem->color, DARK, color, transColor);
+        SetTranslateColorShadeFore( item.color, DARK);
+        mGetTranslateColorShade( item.color, DARK, color, transColor);
     }
     else
     {
-        SetTranslateColorShadeFore( dItem->color, LIGHT);
-        mGetTranslateColorShade( dItem->color, LIGHT, color, transColor);
+        SetTranslateColorShadeFore( item.color, LIGHT);
+        mGetTranslateColorShade( item.color, LIGHT, color, transColor);
     }
-    GetIndString( s, dItem->item.radioButton.label.stringID,
-                dItem->item.radioButton.label.stringNumber);
-    swidth = GetInterfaceStringWidth( s, dItem->style);
+    GetIndString( s, item.item.radioButton.label.stringID,
+                item.item.radioButton.label.stringNumber);
+    swidth = GetInterfaceStringWidth( s, item.style);
     swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
-    sheight = GetInterfaceFontAscent(dItem->style) + kInterfaceTextVBuffer + tRect.top;
+    sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
     MoveTo( swidth, sheight);
-    DrawInterfaceString(s, dItem->style, destMap, portLeft,
-                        portTop,  color);
+    DrawInterfaceString(s, item.style, pix, color);
 
     SetTranslateColorFore( BLACK);
 }
 
-void DrawPlayerInterfaceCheckBox( interfaceItemType *dItem, PixMap *destMap, long portLeft,
-                        long portTop)
-
-{
+void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix) {
     Rect            tRect, uRect, vRect, wRect;
     short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     Str255          s;
@@ -973,8 +947,8 @@ void DrawPlayerInterfaceCheckBox( interfaceItemType *dItem, PixMap *destMap, lon
     unsigned char   color;
     transColorType  *transColor;
 
-    if ( dItem->style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    tRect = dItem->bounds;
+    if ( item.style == kLarge) thisHBorder = kInterfaceLargeHBorder;
+    tRect = item.bounds;
 
     tRect.left -= kInterfaceContentBuffer;
     tRect.top -= kInterfaceContentBuffer;
@@ -983,14 +957,14 @@ void DrawPlayerInterfaceCheckBox( interfaceItemType *dItem, PixMap *destMap, lon
 
     // top border
 
-    if ( dItem->item.checkboxButton.status == kDimmed)
+    if ( item.item.checkboxButton.status == kDimmed)
         shade = VERY_DARK;
     else shade = MEDIUM;
 
-    mDrawPuffUpTopBorder( tRect, uRect, dItem->color, shade, thisHBorder);
+    mDrawPuffUpTopBorder( tRect, uRect, item.color, shade, thisHBorder);
     // bottom border
 
-    mDrawPuffUpBottomBorder( tRect, uRect, dItem->color, shade, thisHBorder);
+    mDrawPuffUpBottomBorder( tRect, uRect, item.color, shade, thisHBorder);
 
     // side border top
 
@@ -1011,33 +985,33 @@ void DrawPlayerInterfaceCheckBox( interfaceItemType *dItem, PixMap *destMap, lon
             /*tRect.top + vcenter - kInterfaceVLipHeight + 1*/
             tRect.bottom - kInterfaceHTop + 1);
 
-    if ( dItem->item.checkboxButton.status == kIH_Hilite)
+    if ( item.item.checkboxButton.status == kIH_Hilite)
     {
         shade = LIGHT;
-        mDrawPuffUpRect( uRect, dItem->color, shade);
-        mDrawPuffUpRect( vRect, dItem->color, shade);
-        mDrawPuffUpRect( wRect, dItem->color, shade);
+        mDrawPuffUpRect( uRect, item.color, shade);
+        mDrawPuffUpRect( vRect, item.color, shade);
+        mDrawPuffUpRect( wRect, item.color, shade);
         wRect.inset(3, 3);
-        mDrawPuffDownRect( wRect, dItem->color, shade);
+        mDrawPuffDownRect( wRect, item.color, shade);
         wRect.inset(1, 1);
-        if ( !dItem->item.checkboxButton.on) SetTranslateColorFore( BLACK);
-        else SetTranslateColorShadeFore( dItem->color, VERY_LIGHT);
+        if ( !item.item.checkboxButton.on) SetTranslateColorFore( BLACK);
+        else SetTranslateColorShadeFore( item.color, VERY_LIGHT);
         PaintRect(wRect);
     } else
     {
-        if ( dItem->item.checkboxButton.status == kDimmed)
+        if ( item.item.checkboxButton.status == kDimmed)
             shade = VERY_DARK;
         else shade = MEDIUM + kSlightlyLighterColor;
-        mDrawPuffUpRect( uRect, dItem->color, shade);
-        mDrawPuffUpRect( vRect, dItem->color, shade);
-        mDrawPuffUpRect( wRect, dItem->color, shade);
+        mDrawPuffUpRect( uRect, item.color, shade);
+        mDrawPuffUpRect( vRect, item.color, shade);
+        mDrawPuffUpRect( wRect, item.color, shade);
         wRect.inset(3, 3);
-        mDrawPuffDownRect( wRect, dItem->color, shade);
+        mDrawPuffDownRect( wRect, item.color, shade);
         wRect.inset(1, 1);
-        if ( !dItem->item.checkboxButton.on) SetTranslateColorFore( BLACK);
-        else if ( dItem->item.checkboxButton.status == kActive)
-            SetTranslateColorShadeFore( dItem->color, LIGHT);
-        else SetTranslateColorShadeFore( dItem->color, MEDIUM);
+        if ( !item.item.checkboxButton.on) SetTranslateColorFore( BLACK);
+        else if ( item.item.checkboxButton.status == kActive)
+            SetTranslateColorShadeFore( item.color, LIGHT);
+        else SetTranslateColorShadeFore( item.color, MEDIUM);
         PaintRect(wRect);
     }
 
@@ -1046,44 +1020,40 @@ void DrawPlayerInterfaceCheckBox( interfaceItemType *dItem, PixMap *destMap, lon
         tRect.left +  kInterfaceContentBuffer,
         tRect.bottom - kInterfaceContentBuffer);
 
-    if ( dItem->item.checkboxButton.status == kIH_Hilite)
+    if ( item.item.checkboxButton.status == kIH_Hilite)
         shade = LIGHT;
     else shade = DARKEST + kSlightlyLighterColor;
     uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                     tRect.right - kInterfaceContentBuffer + 1,
                     tRect.bottom - kInterfaceContentBuffer + 1);
-    SetTranslateColorShadeFore( dItem->color, shade);
+    SetTranslateColorShadeFore( item.color, shade);
     PaintRect(uRect);
 
-    if ( dItem->item.checkboxButton.status == kIH_Hilite)
+    if ( item.item.checkboxButton.status == kIH_Hilite)
     {
-        SetTranslateColorShadeFore( dItem->color, DARKEST);
-        mGetTranslateColorShade( dItem->color, DARKEST, color, transColor);
-    } else if ( dItem->item.checkboxButton.status == kDimmed)
+        SetTranslateColorShadeFore( item.color, DARKEST);
+        mGetTranslateColorShade( item.color, DARKEST, color, transColor);
+    } else if ( item.item.checkboxButton.status == kDimmed)
     {
-        SetTranslateColorShadeFore( dItem->color, DARK);
-        mGetTranslateColorShade( dItem->color, DARK, color, transColor);
+        SetTranslateColorShadeFore( item.color, DARK);
+        mGetTranslateColorShade( item.color, DARK, color, transColor);
     } else
     {
-        SetTranslateColorShadeFore( dItem->color, LIGHT);
-        mGetTranslateColorShade( dItem->color, LIGHT, color, transColor);
+        SetTranslateColorShadeFore( item.color, LIGHT);
+        mGetTranslateColorShade( item.color, LIGHT, color, transColor);
     }
-    GetIndString( s, dItem->item.checkboxButton.label.stringID,
-                dItem->item.checkboxButton.label.stringNumber);
-    swidth = GetInterfaceStringWidth( s, dItem->style);
+    GetIndString( s, item.item.checkboxButton.label.stringID,
+                item.item.checkboxButton.label.stringNumber);
+    swidth = GetInterfaceStringWidth( s, item.style);
     swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
-    sheight = GetInterfaceFontAscent(dItem->style) + kInterfaceTextVBuffer + tRect.top;
+    sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
     MoveTo( swidth, sheight);
-    DrawInterfaceString(s, dItem->style, destMap, portLeft,
-                        portTop,  color);
+    DrawInterfaceString(s, item.style, pix, color);
 
     SetTranslateColorFore( BLACK);
 }
 
-void DrawPlayerInterfaceLabeledBox( interfaceItemType *dItem, PixMap *destMap, long portLeft,
-                        long portTop)
-
-{
+void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
     Rect            tRect, uRect;
     short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     Str255          s;
@@ -1091,43 +1061,44 @@ void DrawPlayerInterfaceLabeledBox( interfaceItemType *dItem, PixMap *destMap, l
     unsigned char   color;
     transColorType  *transColor;
 
-    if ( dItem->style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    tRect = dItem->bounds;
+    if (item.style == kLarge) {
+        thisHBorder = kInterfaceLargeHBorder;
+    }
+    tRect = item.bounds;
     tRect.left -= kInterfaceContentBuffer;
-    tRect.top -= kInterfaceContentBuffer + GetInterfaceFontHeight( dItem->style) +
+    tRect.top -= kInterfaceContentBuffer + GetInterfaceFontHeight(item.style) +
             kInterfaceTextVBuffer * 2 + kLabelBottomHeight;
     tRect.right += kInterfaceContentBuffer;
     tRect.bottom += kInterfaceContentBuffer;
 
     shade = DARK;
 
-    mDrawPuffUpTopBorder( tRect, uRect, dItem->color, shade, thisHBorder);
+    mDrawPuffUpTopBorder( tRect, uRect, item.color, shade, thisHBorder);
     // bottom border
 
-    mDrawPuffUpBottomBorder( tRect, uRect, dItem->color, shade, thisHBorder);
+    mDrawPuffUpBottomBorder( tRect, uRect, item.color, shade, thisHBorder);
 
 
     // draw the string
 
-    GetIndString( s, dItem->item.labeledRect.label.stringID, dItem->item.labeledRect.label.stringNumber);
-    swidth = GetInterfaceStringWidth( s, dItem->style) + kInterfaceTextHBuffer * 2;
+    GetIndString( s, item.item.labeledRect.label.stringID, item.item.labeledRect.label.stringNumber);
+    swidth = GetInterfaceStringWidth( s, item.style) + kInterfaceTextHBuffer * 2;
     swidth = ( tRect.right - tRect.left) - swidth;
-    sheight = GetInterfaceFontHeight( dItem->style) + kInterfaceTextVBuffer * 2;
+    sheight = GetInterfaceFontHeight( item.style) + kInterfaceTextVBuffer * 2;
 
     uRect = Rect(tRect.left + kInterfaceTextHBuffer - 1,
         tRect.top + kInterfaceHTop,
         tRect.right - swidth - kInterfaceTextHBuffer + 1,
         tRect.top + sheight - kInterfaceHTop);
-    SetTranslateColorShadeFore( dItem->color, VERY_DARK);
+    SetTranslateColorShadeFore( item.color, VERY_DARK);
     PaintRect(uRect);
 
-    SetTranslateColorShadeFore( dItem->color, LIGHT);
-    mGetTranslateColorShade( dItem->color, LIGHT, color, transColor);
+    SetTranslateColorShadeFore( item.color, LIGHT);
+    mGetTranslateColorShade( item.color, LIGHT, color, transColor);
 
-    MoveTo( tRect.left + kInterfaceTextHBuffer, tRect.top + GetInterfaceFontAscent( dItem->style) +
+    MoveTo( tRect.left + kInterfaceTextHBuffer, tRect.top + GetInterfaceFontAscent( item.style) +
             kInterfaceTextVBuffer);
-    DrawInterfaceString(s, dItem->style, destMap, portLeft,
-                        portTop,  color);
+    DrawInterfaceString(s, item.style, pix, color);
 
     // string left border
 
@@ -1137,7 +1108,7 @@ void DrawPlayerInterfaceLabeledBox( interfaceItemType *dItem, PixMap *destMap, l
     uRect = Rect(tRect.left - thisHBorder,
             tRect.top + kInterfaceHTop,
             tRect.left + 1, tRect.top + sheight - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, dItem->color, shade);
+    mDrawPuffUpRect( uRect, item.color, shade);
 
     // string right border
 
@@ -1146,31 +1117,16 @@ void DrawPlayerInterfaceLabeledBox( interfaceItemType *dItem, PixMap *destMap, l
         tRect.top + kInterfaceHTop,
         tRect.right - 2,
         tRect.top + sheight - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, dItem->color, shade);
+    mDrawPuffUpRect( uRect, item.color, shade);
     uRect = Rect(tRect.right,
         tRect.top + kInterfaceHTop,
         tRect.right + thisHBorder + 1,
         tRect.top + sheight - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, dItem->color, shade);
+    mDrawPuffUpRect( uRect, item.color, shade);
 
-    /*
-    SetTranslateColorShadeFore( dItem->color, MEDIUM);
-    MoveTo( tRect.right - swidth, tRect.top + kInterfaceHTop);
-    MacLineTo( tRect.right + thisHBorder, tRect.top + kInterfaceHTop);
-    MacLineTo( tRect.right + thisHBorder, tRect.top + vcenter - kInterfaceVLipHeight);
-    MacLineTo( tRect.right - swidth, tRect.top + vcenter - kInterfaceVLipHeight);
-    MacLineTo( tRect.right - swidth, tRect.top + kInterfaceHTop);
-
-    SetTranslateColorShadeFore( dItem->color, DARK);
-    MoveTo( tRect.right - swidth, tRect.top + sheight - vcenter + kInterfaceVLipHeight);
-    MacLineTo( tRect.right + thisHBorder, tRect.top + sheight - vcenter + kInterfaceVLipHeight);
-    MacLineTo( tRect.right + thisHBorder, tRect.top + sheight - kInterfaceHTop);
-    MacLineTo( tRect.right - swidth, tRect.top + sheight - kInterfaceHTop);
-    MacLineTo( tRect.right - swidth, tRect.top + sheight - vcenter + kInterfaceVLipHeight);
-    */
     // string bottom border
 
-    mDrawPuffUpTBorder( tRect, uRect, dItem->color, DARK, sheight, thisHBorder);
+    mDrawPuffUpTBorder( tRect, uRect, item.color, DARK, sheight, thisHBorder);
 
     // main part left border
 
@@ -1182,13 +1138,13 @@ void DrawPlayerInterfaceLabeledBox( interfaceItemType *dItem, PixMap *destMap, l
         tRect.top + kInterfaceHTop,
         tRect.left + 1,
         tRect.top + vcenter - kInterfaceVLipHeight + 1);
-    mDrawPuffUpRect( uRect, dItem->color, DARKER);
+    mDrawPuffUpRect( uRect, item.color, DARKER);
 
     uRect = Rect(tRect.left - thisHBorder,
         tRect.bottom - vcenter + kInterfaceVLipHeight,
         tRect.left + 1,
         tRect.bottom - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, dItem->color, VERY_DARK);
+    mDrawPuffUpRect( uRect, item.color, VERY_DARK);
 
     // right border
 
@@ -1196,21 +1152,18 @@ void DrawPlayerInterfaceLabeledBox( interfaceItemType *dItem, PixMap *destMap, l
         tRect.top + kInterfaceHTop,
         tRect.right + thisHBorder + 1,
         tRect.top + vcenter - kInterfaceVLipHeight + 1);
-    mDrawPuffUpRect( uRect, dItem->color, DARKER);
+    mDrawPuffUpRect( uRect, item.color, DARKER);
 
     uRect = Rect(tRect.right,
         tRect.bottom - vcenter + kInterfaceVLipHeight,
         tRect.right + thisHBorder + 1,
         tRect.bottom - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, dItem->color, VERY_DARK);
+    mDrawPuffUpRect( uRect, item.color, VERY_DARK);
 
     SetTranslateColorFore( BLACK);
 }
 
-void DrawPlayerInterfaceList( interfaceItemType *dItem, PixMap *destMap, long portLeft,
-                        long portTop)
-
-{
+void DrawPlayerInterfaceList(const interfaceItemType& item, PixMap* pix) {
     Rect            tRect, uRect;
     short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     Str255          s;
@@ -1218,16 +1171,16 @@ void DrawPlayerInterfaceList( interfaceItemType *dItem, PixMap *destMap, long po
     unsigned char   color;
     transColorType  *transColor;
 
-    if ( dItem->style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    tRect = dItem->bounds;
+    if ( item.style == kLarge) thisHBorder = kInterfaceLargeHBorder;
+    tRect = item.bounds;
 
     tRect.left -= kInterfaceContentBuffer;
-    tRect.top -= kInterfaceContentBuffer + GetInterfaceFontAscent( dItem->style) +
+    tRect.top -= kInterfaceContentBuffer + GetInterfaceFontAscent( item.style) +
             kInterfaceTextVBuffer * 2 + kLabelBottomHeight;
     tRect.right += kInterfaceContentBuffer;
     tRect.bottom += kInterfaceContentBuffer;
 
-    SetTranslateColorShadeFore( dItem->color, DARK);
+    SetTranslateColorShadeFore( item.color, DARK);
 
     // top border
 
@@ -1259,19 +1212,18 @@ void DrawPlayerInterfaceList( interfaceItemType *dItem, PixMap *destMap, long po
 
     // draw the string
 
-    SetTranslateColorShadeFore( dItem->color, LIGHT);
-    mGetTranslateColorShade( dItem->color, LIGHT, color, transColor);
+    SetTranslateColorShadeFore( item.color, LIGHT);
+    mGetTranslateColorShade( item.color, LIGHT, color, transColor);
 
-    GetIndString( s, dItem->item.listRect.label.stringID, dItem->item.listRect.label.stringNumber);
-    swidth = GetInterfaceStringWidth( s, dItem->style) + kInterfaceTextHBuffer * 2;
-    sheight = GetInterfaceFontAscent(dItem->style) + kInterfaceTextVBuffer * 2;
+    GetIndString( s, item.item.listRect.label.stringID, item.item.listRect.label.stringNumber);
+    swidth = GetInterfaceStringWidth( s, item.style) + kInterfaceTextHBuffer * 2;
+    sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer * 2;
     MoveTo( tRect.left + kInterfaceTextHBuffer, tRect.top + sheight - kInterfaceTextVBuffer);
-    DrawInterfaceString(s, dItem->style, destMap, portLeft,
-                        portTop,  color);
+    DrawInterfaceString(s, item.style, pix, color);
 
     // string left border
 
-    SetTranslateColorShadeFore( dItem->color, MEDIUM);
+    SetTranslateColorShadeFore( item.color, MEDIUM);
     vcenter = sheight / 2;
     swidth = ( tRect.right - tRect.left) - swidth;
 
@@ -1281,7 +1233,7 @@ void DrawPlayerInterfaceList( interfaceItemType *dItem, PixMap *destMap, long po
     MacLineTo( tRect.left, tRect.top + vcenter - kInterfaceVLipHeight);
     MacLineTo( tRect.left, tRect.top + kInterfaceHTop);
 
-    SetTranslateColorShadeFore( dItem->color, DARK);
+    SetTranslateColorShadeFore( item.color, DARK);
     MoveTo( tRect.left, tRect.top + sheight - vcenter + kInterfaceVLipHeight);
     MacLineTo( tRect.left - thisHBorder, tRect.top + sheight- vcenter + kInterfaceVLipHeight);
     MacLineTo( tRect.left - thisHBorder, tRect.top + sheight - kInterfaceHTop);
@@ -1290,14 +1242,14 @@ void DrawPlayerInterfaceList( interfaceItemType *dItem, PixMap *destMap, long po
 
     // string right border
 
-    SetTranslateColorShadeFore( dItem->color, MEDIUM);
+    SetTranslateColorShadeFore( item.color, MEDIUM);
     MoveTo( tRect.right - swidth, tRect.top + kInterfaceHTop);
     MacLineTo( tRect.right + thisHBorder, tRect.top + kInterfaceHTop);
     MacLineTo( tRect.right + thisHBorder, tRect.top + vcenter - kInterfaceVLipHeight);
     MacLineTo( tRect.right - swidth, tRect.top + vcenter - kInterfaceVLipHeight);
     MacLineTo( tRect.right - swidth, tRect.top + kInterfaceHTop);
 
-    SetTranslateColorShadeFore( dItem->color, DARK);
+    SetTranslateColorShadeFore( item.color, DARK);
     MoveTo( tRect.right - swidth, tRect.top + sheight - vcenter + kInterfaceVLipHeight);
     MacLineTo( tRect.right + thisHBorder, tRect.top + sheight - vcenter + kInterfaceVLipHeight);
     MacLineTo( tRect.right + thisHBorder, tRect.top + sheight - kInterfaceHTop);
@@ -1306,7 +1258,7 @@ void DrawPlayerInterfaceList( interfaceItemType *dItem, PixMap *destMap, long po
 
     // string bottom border
 
-    SetTranslateColorShadeFore( dItem->color, DARK);
+    SetTranslateColorShadeFore( item.color, DARK);
     MoveTo( tRect.left, tRect.top + sheight);
     MacLineTo( tRect.left, tRect.top + sheight + kInterfaceVLipHeight);
     MacLineTo( tRect.right, tRect.top + sheight + kInterfaceVLipHeight);
@@ -1327,14 +1279,14 @@ void DrawPlayerInterfaceList( interfaceItemType *dItem, PixMap *destMap, long po
 
     vcenter = ( tRect.bottom - tRect.top) / 2;
 
-    SetTranslateColorShadeFore( dItem->color, DARKER);
+    SetTranslateColorShadeFore( item.color, DARKER);
     MoveTo( tRect.left, tRect.top + kInterfaceHTop);
     MacLineTo( tRect.left - thisHBorder, tRect.top + kInterfaceHTop);
     MacLineTo( tRect.left - thisHBorder, tRect.top + vcenter - kInterfaceVLipHeight);
     MacLineTo( tRect.left, tRect.top + vcenter - kInterfaceVLipHeight);
     MacLineTo( tRect.left, tRect.top + kInterfaceHTop);
 
-    SetTranslateColorShadeFore( dItem->color, VERY_DARK);
+    SetTranslateColorShadeFore( item.color, VERY_DARK);
     MoveTo( tRect.left, tRect.bottom - vcenter + kInterfaceVLipHeight);
     MacLineTo( tRect.left - thisHBorder, tRect.bottom - vcenter + kInterfaceVLipHeight);
     MacLineTo( tRect.left - thisHBorder, tRect.bottom - kInterfaceHTop);
@@ -1343,70 +1295,71 @@ void DrawPlayerInterfaceList( interfaceItemType *dItem, PixMap *destMap, long po
 
     // draw the list
 
-    if (( dItem->item.listRect.getListLength == nil) || ( dItem->item.listRect.getItemString == nil))
-    {
-        dItem->item.listRect.lineUpStatus = dItem->item.listRect.pageUpStatus =
-        dItem->item.listRect.lineDownStatus = dItem->item.listRect.pageDownStatus = kDimmed;
-    } else
-    {
+    interfaceItemStatusEnum lineUpStatus = kDimmed;
+    interfaceItemStatusEnum lineDownStatus = kDimmed;
+    interfaceItemStatusEnum pageUpStatus = kDimmed;
+    interfaceItemStatusEnum pageDownStatus = kDimmed;
+
+    if ((item.item.listRect.getListLength != nil) && (item.item.listRect.getItemString != nil)) {
         clipRgn = NewRgn();
         GetClip( clipRgn);
-        tRect = dItem->bounds;
+        tRect = item.bounds;
         ClipRect(tRect);
 
-        SetTranslateColorShadeFore( dItem->color, VERY_LIGHT);
-        sheight = (*(dItem->item.listRect.getListLength))();
+        SetTranslateColorShadeFore( item.color, VERY_LIGHT);
+        sheight = (*(item.item.listRect.getListLength))();
         vcenter = tRect.top;
-        swidth = dItem->item.listRect.topItem;
-        while (( swidth < (*(dItem->item.listRect.getListLength))()) &&
+        swidth = item.item.listRect.topItem;
+        while (( swidth < (*(item.item.listRect.getListLength))()) &&
                 ( vcenter < tRect.bottom))
         {
-            vcenter += GetInterfaceFontAscent(dItem->style) + kInterfaceTextVBuffer;
-            uRect = Rect(tRect.left, vcenter - GetInterfaceFontAscent(dItem->style) -
+            vcenter += GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer;
+            uRect = Rect(tRect.left, vcenter - GetInterfaceFontAscent(item.style) -
                     kInterfaceTextVBuffer, tRect.right, vcenter);
-            if ( (*(dItem->item.listRect.itemHilited))( swidth, false))
+            if ( (*(item.item.listRect.itemHilited))( swidth, false))
             {
-                SetTranslateColorShadeFore( dItem->color, LIGHT);
+                SetTranslateColorShadeFore( item.color, LIGHT);
                 PaintRect(uRect);
-                SetTranslateColorShadeFore( dItem->color, VERY_DARK);
-                mGetTranslateColorShade( dItem->color, VERY_DARK, color, transColor);
+                SetTranslateColorShadeFore( item.color, VERY_DARK);
+                mGetTranslateColorShade( item.color, VERY_DARK, color, transColor);
             } else
             {
                 DefaultColors();
                 PaintRect(uRect);
-                SetTranslateColorShadeFore( dItem->color, LIGHT);
-                mGetTranslateColorShade( dItem->color, LIGHT, color, transColor);
+                SetTranslateColorShadeFore( item.color, LIGHT);
+                mGetTranslateColorShade( item.color, LIGHT, color, transColor);
             }
             MoveTo( tRect.left, vcenter);
-            (*(dItem->item.listRect.getItemString))( swidth, s);
-            DrawInterfaceString(s, dItem->style, destMap, portLeft,
-                        portTop,  color);
+            (*(item.item.listRect.getItemString))( swidth, s);
+            DrawInterfaceString(s, item.style, pix, color);
             swidth++;
         }
         SetClip( clipRgn);
         DisposeRgn( clipRgn);
 
 
-        if ( dItem->item.listRect.topItem == 0)
-            dItem->item.listRect.lineUpStatus = dItem->item.listRect.pageUpStatus = kDimmed;
-        else dItem->item.listRect.lineUpStatus = dItem->item.listRect.pageUpStatus = kActive;
-        if ( vcenter < tRect.bottom)
-            dItem->item.listRect.lineDownStatus = dItem->item.listRect.pageDownStatus = kDimmed;
-        else dItem->item.listRect.lineDownStatus = dItem->item.listRect.pageDownStatus = kActive;
+        if (item.item.listRect.topItem == 0) {
+            lineUpStatus = pageUpStatus = kDimmed;
+        } else {
+            lineUpStatus = pageUpStatus = kActive;
+        }
+        if (vcenter < tRect.bottom) {
+            lineDownStatus = pageDownStatus = kDimmed;
+        } else {
+            lineDownStatus = pageDownStatus = kActive;
+        }
     }
     // right border
 
-    DrawPlayerListLineUp( dItem);
-    DrawPlayerListPageUp( dItem);
-    DrawPlayerListLineDown( dItem);
-    DrawPlayerListPageDown( dItem);
+    DrawPlayerListLineUp(item, lineUpStatus);
+    DrawPlayerListPageUp(item, pageUpStatus);
+    DrawPlayerListLineDown(item, lineDownStatus);
+    DrawPlayerListPageDown(item, pageDownStatus);
     SetTranslateColorFore( BLACK);
 }
 
-void DrawPlayerInterfaceListEntry( interfaceItemType *dItem, short whichEntry, PixMap *destMap, long portLeft,
-                        long portTop)
-
-{
+void DrawPlayerInterfaceListEntry(
+        const interfaceItemType& item, short whichEntry, PixMap* pix) {
     Str255          s;
     RgnHandle       clipRgn = nil;
     Rect            tRect, uRect;
@@ -1414,40 +1367,39 @@ void DrawPlayerInterfaceListEntry( interfaceItemType *dItem, short whichEntry, P
     unsigned char   color;
     transColorType  *transColor;
 
-    if (( dItem->item.listRect.getListLength != nil) && ( dItem->item.listRect.getItemString != nil))
+    if (( item.item.listRect.getListLength != nil) && ( item.item.listRect.getItemString != nil))
     {
         clipRgn = NewRgn();
         GetClip( clipRgn);
-        tRect = dItem->bounds;
+        tRect = item.bounds;
         ClipRect(tRect);
 
-        SetTranslateColorShadeFore( dItem->color, VERY_LIGHT);
-        vcenter = tRect.top + ( whichEntry - dItem->item.listRect.topItem) *
-                (GetInterfaceFontAscent(dItem->style) + kInterfaceTextVBuffer);
+        SetTranslateColorShadeFore( item.color, VERY_LIGHT);
+        vcenter = tRect.top + ( whichEntry - item.item.listRect.topItem) *
+                (GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer);
         swidth = whichEntry;
-        if (( swidth < (*(dItem->item.listRect.getListLength))()) &&
+        if (( swidth < (*(item.item.listRect.getListLength))()) &&
                 ( vcenter < tRect.bottom))
         {
-            vcenter += GetInterfaceFontAscent(dItem->style) + kInterfaceTextVBuffer;
-            uRect = Rect(tRect.left, vcenter - GetInterfaceFontAscent(dItem->style) -
+            vcenter += GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer;
+            uRect = Rect(tRect.left, vcenter - GetInterfaceFontAscent(item.style) -
                     kInterfaceTextVBuffer, tRect.right, vcenter);
-            if ( (*(dItem->item.listRect.itemHilited))( swidth, false))
+            if ( (*(item.item.listRect.itemHilited))( swidth, false))
             {
-                SetTranslateColorShadeFore( dItem->color, LIGHT);
+                SetTranslateColorShadeFore( item.color, LIGHT);
                 PaintRect(uRect);
-                SetTranslateColorShadeFore( dItem->color, VERY_DARK);
-                mGetTranslateColorShade( dItem->color, VERY_DARK, color, transColor);
+                SetTranslateColorShadeFore( item.color, VERY_DARK);
+                mGetTranslateColorShade( item.color, VERY_DARK, color, transColor);
             } else
             {
                 DefaultColors();
                 PaintRect(uRect);
-                SetTranslateColorShadeFore( dItem->color, LIGHT);
-                mGetTranslateColorShade( dItem->color, LIGHT, color, transColor);
+                SetTranslateColorShadeFore( item.color, LIGHT);
+                mGetTranslateColorShade( item.color, LIGHT, color, transColor);
             }
             MoveTo( tRect.left, vcenter);
-            (*(dItem->item.listRect.getItemString))(swidth, s);
-            DrawInterfaceString(s, dItem->style, destMap, portLeft,
-                        portTop,  color);
+            (*(item.item.listRect.getItemString))(swidth, s);
+            DrawInterfaceString(s, item.style, pix, color);
             swidth++;
         }
         SetClip( clipRgn);
@@ -1456,29 +1408,27 @@ void DrawPlayerInterfaceListEntry( interfaceItemType *dItem, short whichEntry, P
     }
 }
 
-void DrawPlayerListLineUp( interfaceItemType *dItem)
-
-{
+void DrawPlayerListLineUp(const interfaceItemType& item, interfaceItemStatusEnum status) {
     Rect        tRect;
     short       thisHBorder = kInterfaceSmallHBorder;
 
-    if ( dItem->style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    GetPlayerListLineUpRect( dItem, &tRect);
+    if ( item.style == kLarge) thisHBorder = kInterfaceLargeHBorder;
+    GetPlayerListLineUpRect(item, &tRect);
 
-    if ( dItem->item.listRect.lineUpStatus != kIH_Hilite)
+    if (status != kIH_Hilite)
     {
-        if (  dItem->item.listRect.lineUpStatus == kDimmed) SetTranslateColorShadeFore( dItem->color, DARKER);
-        else SetTranslateColorShadeFore( dItem->color, LIGHT);
+        if (status == kDimmed) SetTranslateColorShadeFore( item.color, DARKER);
+        else SetTranslateColorShadeFore( item.color, LIGHT);
         MacFrameRect(tRect);
         SetTranslateColorFore( BLACK);
         tRect.inset(1, 1);
         PaintRect(tRect);
-        if (  dItem->item.listRect.lineUpStatus == kDimmed) SetTranslateColorShadeFore( dItem->color, DARKER);
-        else SetTranslateColorShadeFore( dItem->color, LIGHT);
+        if (status == kDimmed) SetTranslateColorShadeFore( item.color, DARKER);
+        else SetTranslateColorShadeFore( item.color, LIGHT);
         tRect.inset(-1, -1);
     } else
     {
-        SetTranslateColorShadeFore( dItem->color, VERY_LIGHT);
+        SetTranslateColorShadeFore( item.color, VERY_LIGHT);
         PaintRect(tRect);
         SetTranslateColorFore( BLACK);
     }
@@ -1497,13 +1447,11 @@ void DrawPlayerListLineUp( interfaceItemType *dItem)
             kScrollArrowVBuffer);
 }
 
-void GetPlayerListLineUpRect( interfaceItemType *dItem, Rect *dRect)
-
-{
+void GetPlayerListLineUpRect(const interfaceItemType& item, Rect *dRect) {
     short       thisHBorder = kInterfaceSmallHBorder;
 
-    if ( dItem->style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    *dRect = dItem->bounds;
+    if ( item.style == kLarge) thisHBorder = kInterfaceLargeHBorder;
+    *dRect = item.bounds;
     dRect->left = dRect->right + kInterfaceContentBuffer;
     dRect->right = dRect->left + thisHBorder + 1;
     dRect->top = dRect->top - kInterfaceContentBuffer + kInterfaceHTop;
@@ -1511,29 +1459,27 @@ void GetPlayerListLineUpRect( interfaceItemType *dItem, Rect *dRect)
         kSmallArrowBaseHeight + 1;
 }
 
-void DrawPlayerListPageUp( interfaceItemType *dItem)
-
-{
+void DrawPlayerListPageUp(const interfaceItemType& item, interfaceItemStatusEnum status) {
     Rect        tRect;
     short       thisHBorder = kInterfaceSmallHBorder;
 
-    if ( dItem->style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    GetPlayerListPageUpRect( dItem, &tRect);
+    if ( item.style == kLarge) thisHBorder = kInterfaceLargeHBorder;
+    GetPlayerListPageUpRect(item, &tRect);
 
-    if (  dItem->item.listRect.pageUpStatus != kIH_Hilite)
+    if (status != kIH_Hilite)
     {
-        if ( dItem->item.listRect.pageUpStatus == kDimmed) SetTranslateColorShadeFore( dItem->color, DARKER);
-        else SetTranslateColorShadeFore( dItem->color, LIGHT);
+        if (status == kDimmed) SetTranslateColorShadeFore( item.color, DARKER);
+        else SetTranslateColorShadeFore( item.color, LIGHT);
         MacFrameRect(tRect);
         SetTranslateColorFore( BLACK);
         tRect.inset(1, 1);
         PaintRect(tRect);
-        if ( dItem->item.listRect.pageUpStatus == kDimmed) SetTranslateColorShadeFore( dItem->color, DARKER);
-        else SetTranslateColorShadeFore( dItem->color, LIGHT);
+        if (status == kDimmed) SetTranslateColorShadeFore( item.color, DARKER);
+        else SetTranslateColorShadeFore( item.color, LIGHT);
         tRect.inset(-1, -1);
     } else
     {
-        SetTranslateColorShadeFore( dItem->color, VERY_LIGHT);
+        SetTranslateColorShadeFore( item.color, VERY_LIGHT);
         PaintRect(tRect);
         SetTranslateColorFore( BLACK);
     }
@@ -1552,38 +1498,34 @@ void DrawPlayerListPageUp( interfaceItemType *dItem)
             kScrollArrowVBuffer);
 }
 
-void GetPlayerListPageUpRect( interfaceItemType *dItem, Rect *dRect)
-
-{
-    GetPlayerListLineUpRect( dItem, dRect);
+void GetPlayerListPageUpRect(const interfaceItemType& item, Rect *dRect) {
+    GetPlayerListLineUpRect(item, dRect);
     dRect->top = dRect->bottom + kInterfaceVLipHeight;
     dRect->bottom = dRect->top + kScrollArrowVBuffer * 2 + kLargeArrowPointHeight +
             kLargeArrowBaseHeight + 1;
 }
 
-void DrawPlayerListLineDown( interfaceItemType *dItem)
-
-{
+void DrawPlayerListLineDown(const interfaceItemType& item, interfaceItemStatusEnum status) {
     Rect        tRect;
     short       thisHBorder = kInterfaceSmallHBorder;
 
-    if ( dItem->style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    GetPlayerListLineDownRect( dItem, &tRect);
+    if ( item.style == kLarge) thisHBorder = kInterfaceLargeHBorder;
+    GetPlayerListLineDownRect( item, &tRect);
 
-    if ( dItem->item.listRect.lineDownStatus != kIH_Hilite)
+    if (status != kIH_Hilite)
     {
-        if ( dItem->item.listRect.lineDownStatus == kDimmed) SetTranslateColorShadeFore( dItem->color, DARKER);
-        else SetTranslateColorShadeFore( dItem->color, LIGHT);
+        if (status == kDimmed) SetTranslateColorShadeFore( item.color, DARKER);
+        else SetTranslateColorShadeFore( item.color, LIGHT);
         MacFrameRect(tRect);
         SetTranslateColorFore( BLACK);
         tRect.inset(1, 1);
         PaintRect(tRect);
-        if ( dItem->item.listRect.lineDownStatus == kDimmed) SetTranslateColorShadeFore( dItem->color, DARKER);
-        else SetTranslateColorShadeFore( dItem->color, LIGHT);
+        if (status == kDimmed) SetTranslateColorShadeFore( item.color, DARKER);
+        else SetTranslateColorShadeFore( item.color, LIGHT);
         tRect.inset(-1, -1);
     } else
     {
-        SetTranslateColorShadeFore( dItem->color, VERY_LIGHT);
+        SetTranslateColorShadeFore( item.color, VERY_LIGHT);
         PaintRect(tRect);
         SetTranslateColorFore( BLACK);
     }
@@ -1604,13 +1546,11 @@ void DrawPlayerListLineDown( interfaceItemType *dItem)
             kScrollArrowVBuffer);
 }
 
-void GetPlayerListLineDownRect( interfaceItemType *dItem, Rect *dRect)
-
-{
+void GetPlayerListLineDownRect(const interfaceItemType& item, Rect *dRect) {
     short       thisHBorder = kInterfaceSmallHBorder;
 
-    if ( dItem->style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    *dRect = dItem->bounds;
+    if ( item.style == kLarge) thisHBorder = kInterfaceLargeHBorder;
+    *dRect = item.bounds;
 
     dRect->left = dRect->right + kInterfaceContentBuffer;
     dRect->right = dRect->left + thisHBorder + 1;
@@ -1619,29 +1559,27 @@ void GetPlayerListLineDownRect( interfaceItemType *dItem, Rect *dRect)
     dRect->bottom = dRect->bottom + kInterfaceContentBuffer - kInterfaceHTop + 1;
 }
 
-void DrawPlayerListPageDown( interfaceItemType *dItem)
-
-{
+void DrawPlayerListPageDown(const interfaceItemType& item, interfaceItemStatusEnum status) {
     Rect        tRect;
     short       thisHBorder = kInterfaceSmallHBorder;
 
-    if ( dItem->style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    GetPlayerListPageDownRect( dItem, &tRect);
+    if ( item.style == kLarge) thisHBorder = kInterfaceLargeHBorder;
+    GetPlayerListPageDownRect( item, &tRect);
 
-    if ( dItem->item.listRect.pageDownStatus != kIH_Hilite)
+    if (status != kIH_Hilite)
     {
-        if ( dItem->item.listRect.pageDownStatus == kDimmed) SetTranslateColorShadeFore( dItem->color, DARKER);
-        else SetTranslateColorShadeFore( dItem->color, LIGHT);
+        if (status == kDimmed) SetTranslateColorShadeFore( item.color, DARKER);
+        else SetTranslateColorShadeFore( item.color, LIGHT);
         MacFrameRect(tRect);
         SetTranslateColorFore( BLACK);
         tRect.inset(1, 1);
         PaintRect(tRect);
-        if ( dItem->item.listRect.pageDownStatus == kDimmed) SetTranslateColorShadeFore( dItem->color, DARKER);
-        else SetTranslateColorShadeFore( dItem->color, LIGHT);
+        if (status == kDimmed) SetTranslateColorShadeFore( item.color, DARKER);
+        else SetTranslateColorShadeFore( item.color, LIGHT);
         tRect.inset(-1, -1);
     } else
     {
-        SetTranslateColorShadeFore( dItem->color, VERY_LIGHT);
+        SetTranslateColorShadeFore( item.color, VERY_LIGHT);
         PaintRect(tRect);
         SetTranslateColorFore( BLACK);
     }
@@ -1662,22 +1600,17 @@ void DrawPlayerListPageDown( interfaceItemType *dItem)
             kScrollArrowVBuffer);
 }
 
-void GetPlayerListPageDownRect( interfaceItemType *dItem, Rect *dRect)
-
-{
+void GetPlayerListPageDownRect(const interfaceItemType& item, Rect *dRect) {
     short       thisHBorder = kInterfaceSmallHBorder;
 
-    if ( dItem->style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    GetPlayerListLineDownRect( dItem, dRect);
+    if ( item.style == kLarge) thisHBorder = kInterfaceLargeHBorder;
+    GetPlayerListLineDownRect( item, dRect);
     dRect->bottom = dRect->top - kInterfaceVLipHeight;
     dRect->top = dRect->bottom - kScrollArrowVBuffer * 2 - kLargeArrowPointHeight -
             kLargeArrowBaseHeight;
 }
 
-void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long portLeft,
-                        long portTop)
-
-{
+void DrawInterfaceTextRect(const interfaceItemType& item, PixMap* pix) {
     scoped_ptr<std::string> textData;
     long            length;
     RgnHandle       clipRgn = nil;
@@ -1687,29 +1620,28 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
     unsigned char   color, *charwidthptr, charwidth;
     transColorType  *transColor;
 
-    if ( dItem->item.textRect.visibleBounds)
-        DrawPlayerInterfacePlainRect( &(dItem->bounds), dItem->color, dItem->style,
-                destMap, portLeft, portTop);
+    if ( item.item.textRect.visibleBounds)
+        DrawPlayerInterfacePlainRect(item.bounds, item.color, item.style, pix);
     clipRgn = NewRgn();
     GetClip( clipRgn);
-    tRect = dItem->bounds;
+    tRect = item.bounds;
     ClipRect(tRect);
 
     hleft = tRect.left + kInterfaceTextHBuffer;
-    fheight = GetInterfaceFontHeight( dItem->style) + kInterfaceTextVBuffer;
-    vline = tRect.top - ( fheight - GetInterfaceFontAscent( dItem->style));
+    fheight = GetInterfaceFontHeight( item.style) + kInterfaceTextVBuffer;
+    vline = tRect.top - ( fheight - GetInterfaceFontAscent( item.style));
 
     theLine = new unsigned char[kMaxLineLength];
     if ( theLine != nil)
     {
         wordlen = theLine;
 
-        textData.reset(new std::string(Resource::get_data('TEXT', dItem->item.textRect.textID)));
+        textData.reset(new std::string(Resource::get_data('TEXT', item.item.textRect.textID)));
         if (textData.get() != nil) {
             length = textData->size();
             const char* sChar = textData->c_str();
 
-            SetTranslateColorShadeFore( dItem->color, VERY_LIGHT);
+            SetTranslateColorShadeFore( item.color, VERY_LIGHT);
 
             while (( length > 0) && ( vline < tRect.bottom))
             {
@@ -1731,8 +1663,8 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
                     {
                         if ((( *aheadChar >= 'A') && ( *aheadChar <= 'Z')) || (( *aheadChar >= '0') &&
                                 ( *aheadChar <= '9')))
-                            SetInterfaceLargeUpperFont( dItem->style);
-                        else SetInterfaceLargeLowerFont( dItem->style);
+                            SetInterfaceLargeUpperFont( item.style);
+                        else SetInterfaceLargeLowerFont( item.style);
                         if (( *aheadChar >= 'a') && ( *aheadChar <= 'z'))
                         {
                             mDirectCharWidth( charwidth, *aheadChar/* - 'a' + 'A'*/, charwidthptr);
@@ -1770,11 +1702,10 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
                 }
                 MoveTo( hleft, vline);
 
-                SetTranslateColorShadeFore( dItem->color, VERY_LIGHT);
-                mGetTranslateColorShade( dItem->color, VERY_LIGHT, color, transColor);
+                SetTranslateColorShadeFore( item.color, VERY_LIGHT);
+                mGetTranslateColorShade( item.color, VERY_LIGHT, color, transColor);
 
-                DrawInterfaceString( theLine, dItem->style, destMap, portLeft,
-                        portTop,  color);
+                DrawInterfaceString( theLine, item.style, pix, color);
             }
             textData.reset();
         }
@@ -1784,12 +1715,9 @@ void DrawInterfaceTextRect( interfaceItemType *dItem, PixMap *destMap, long port
     DisposeRgn( clipRgn);
 }
 
-void DrawInterfaceTextInRect(const Rect& tRect, const unsigned char *textData, long length,
-                            interfaceStyleType style, unsigned char textcolor,
-                            PixMap *destMap,
-                            long portLeft, long portTop, inlinePictType *inlinePict)
-
-{
+void DrawInterfaceTextInRect(
+        const Rect& tRect, const unsigned char *textData, long length, interfaceStyleType style,
+        unsigned char textcolor, PixMap* pix, inlinePictType* inlinePict) {
     RgnHandle       clipRgn = nil;
     const unsigned char* sChar;
     const unsigned char* aheadChar;
@@ -1966,8 +1894,7 @@ void DrawInterfaceTextInRect(const Rect& tRect, const unsigned char *textData, l
                 MoveTo( hleft, vline);
                 SetTranslateColorShadeFore( textcolor, VERY_LIGHT);
                 mGetTranslateColorShade( textcolor, VERY_LIGHT, color, transColor);
-                DrawInterfaceString( theLine, style, destMap, portLeft,
-                        portTop,  color);
+                DrawInterfaceString( theLine, style, pix, color);
                 switch( inlineKind)
                 {
                     case kVPictKind:
@@ -2008,10 +1935,8 @@ void DrawInterfaceTextInRect(const Rect& tRect, const unsigned char *textData, l
     DisposeRgn( clipRgn);
 }
 
-short GetInterfaceTextHeightFromWidth(const unsigned char* textData, long length,
-                            interfaceStyleType style, short boundsWidth)
-
-{
+short GetInterfaceTextHeightFromWidth(
+        const unsigned char* textData, long length, interfaceStyleType style, short boundsWidth) {
     const unsigned char* sChar;
     const unsigned char* aheadChar;
     unsigned char   *dChar, *wordlen, *theLine, thisLen;
@@ -2171,7 +2096,6 @@ short GetInterfaceTextHeightFromWidth(const unsigned char* textData, long length
                         if (thePicture.get() != nil) {
                             uRect = thePicture->bounds();
                             uRect.offset(-uRect.left + xpos, -uRect.top + vline);
-//                          DrawPicture( thePicture, &uRect);
                             thePicture.reset();
                             vline += uRect.bottom - uRect.top;
                             xpos = hleft;
@@ -2189,25 +2113,20 @@ short GetInterfaceTextHeightFromWidth(const unsigned char* textData, long length
     return( vline + ( fheight - GetInterfaceFontAscent( style)) );
 }
 
-void DrawInterfacePictureRect( interfaceItemType *dItem, PixMap *destMap, long portLeft,
-                        long portTop)
-
-{
+void DrawInterfacePictureRect(const interfaceItemType& item, PixMap* pix) {
     scoped_ptr<Picture> thePicture;
     RgnHandle       clipRgn = nil;
     Rect            tRect, uRect;
 
-    if ( dItem->item.pictureRect.visibleBounds)
-        DrawPlayerInterfacePlainRect( &(dItem->bounds), dItem->color, dItem->style,
-                destMap, portLeft, portTop);
+    if ( item.item.pictureRect.visibleBounds)
+        DrawPlayerInterfacePlainRect(item.bounds, item.color, item.style, pix);
 
     clipRgn = NewRgn();
     GetClip( clipRgn);
-    tRect = dItem->bounds;
+    tRect = item.bounds;
     ClipRect(tRect);
 
-//  thePicture = GetPicture( dItem->item.pictureRect.pictureID);
-    thePicture.reset(new Picture(dItem->item.pictureRect.pictureID));  // HHGetResource
+    thePicture.reset(new Picture(item.item.pictureRect.pictureID));
     if (thePicture.get() != nil) {
         uRect = thePicture->bounds();
         uRect.offset(-uRect.left + tRect.left, -uRect.top + tRect.top);
@@ -2218,77 +2137,72 @@ void DrawInterfacePictureRect( interfaceItemType *dItem, PixMap *destMap, long p
     DisposeRgn( clipRgn);
 }
 
-void DrawAnyInterfaceItem( interfaceItemType *anItem, PixMap *destMap, long portLeft,
-                        long portTop)
-
-{
-    switch ( anItem->kind)
-    {
+void DrawAnyInterfaceItem(const interfaceItemType& item, PixMap* pix) {
+    switch (item.kind) {
         case kPlainRect:
-            if (anItem->item.pictureRect.visibleBounds)
-                DrawPlayerInterfacePlainRect( &(anItem->bounds), anItem->color, anItem->style,
-                    destMap, portLeft, portTop);
+            if (item.item.pictureRect.visibleBounds) {
+                DrawPlayerInterfacePlainRect(item.bounds, item.color, item.style, pix);
+            }
             break;
+
         case kTabBox:
-            DrawPlayerInterfaceTabBox( &(anItem->bounds), anItem->color, anItem->style,
-                destMap, portLeft, portTop, anItem->item.tabBox.topRightBorderSize);
+            DrawPlayerInterfaceTabBox(
+                    item.bounds, item.color, item.style, pix, item.item.tabBox.topRightBorderSize);
             break;
+
         case kLabeledRect:
-            DrawPlayerInterfaceLabeledBox( anItem,
-                destMap, portLeft, portTop);
+            DrawPlayerInterfaceLabeledBox(item, pix);
             break;
+
         case kListRect:
-            DrawPlayerInterfaceList( anItem,
-                destMap, portLeft, portTop);
+            DrawPlayerInterfaceList(item, pix);
             break;
+
         case kTextRect:
-             DrawInterfaceTextRect( anItem,
-                destMap, portLeft, portTop);
+             DrawInterfaceTextRect(item, pix);
             break;
+
         case kPlainButton:
-            DrawPlayerInterfaceButton( anItem,
-                destMap, portLeft, portTop);
+            DrawPlayerInterfaceButton(item, pix);
             break;
+
         case kRadioButton:
-            DrawPlayerInterfaceRadioButton( anItem,
-                destMap, portLeft, portTop);
+            DrawPlayerInterfaceRadioButton(item, pix);
             break;
+
         case kTabBoxButton:
-            DrawPlayerInterfaceTabBoxButton( anItem,
-                destMap, portLeft, portTop);
+            DrawPlayerInterfaceTabBoxButton(item, pix);
             break;
 
         case kCheckboxButton:
-            DrawPlayerInterfaceCheckBox( anItem,
-                destMap, portLeft, portTop);
+            DrawPlayerInterfaceCheckBox(item, pix);
             break;
+
         case kPictureRect:
-            DrawInterfacePictureRect( anItem,
-                destMap, portLeft, portTop);
+            DrawInterfacePictureRect(item, pix);
             break;
+
         default:
             WriteDebugLine( "\pHuh?");
             break;
     }
 }
 
-void GetAnyInterfaceItemGraphicBounds( interfaceItemType *anItem, Rect *bounds)
-
-{
+void GetAnyInterfaceItemGraphicBounds(const interfaceItemType& item, Rect *bounds) {
     short   thisHBorder = kInterfaceSmallHBorder;
 
-    *bounds = anItem->bounds;
+    *bounds = item.bounds;
 
-    if ( anItem->style == kLarge)
+    if (item.style == kLarge) {
         thisHBorder = kInterfaceLargeHBorder;
+    }
 
     bounds->left -= kInterfaceContentBuffer;
     bounds->top -= kInterfaceContentBuffer;
     bounds->right += kInterfaceContentBuffer + 1;
     bounds->bottom += kInterfaceContentBuffer + 1;
 
-    switch ( anItem->kind)
-    {
+    switch (item.kind) {
         case kPlainRect:
             bounds->left -= thisHBorder;
             bounds->right += thisHBorder;
@@ -2299,7 +2213,7 @@ void GetAnyInterfaceItemGraphicBounds( interfaceItemType *anItem, Rect *bounds)
         case kLabeledRect:
             bounds->left -= thisHBorder;
             bounds->right += thisHBorder;
-            bounds->top -= GetInterfaceFontHeight( anItem->style) + kInterfaceTextVBuffer * 2 +
+            bounds->top -= GetInterfaceFontHeight(item.style) + kInterfaceTextVBuffer * 2 +
                             kLabelBottomHeight + kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
             bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
             break;
@@ -2314,7 +2228,7 @@ void GetAnyInterfaceItemGraphicBounds( interfaceItemType *anItem, Rect *bounds)
         case kListRect:
             bounds->left -= thisHBorder;
             bounds->right += thisHBorder;
-            bounds->top -= GetInterfaceFontAscent( anItem->style) + kInterfaceTextVBuffer * 2 +
+            bounds->top -= GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer * 2 +
                             kLabelBottomHeight + kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
             bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
             break;
@@ -2371,31 +2285,11 @@ void GetAnyInterfaceItemGraphicBounds( interfaceItemType *anItem, Rect *bounds)
     }
 }
 
-void GetAnyInterfaceItemContentBounds( interfaceItemType *anItem, Rect *bounds)
-
-{
-    *bounds = anItem->bounds;
+void GetAnyInterfaceItemContentBounds(const interfaceItemType& item, Rect *bounds) {
+    *bounds = item.bounds;
 }
 
-short GetInterfaceStringWidth(unsigned char* s, interfaceStyleType style)
-
-{
-/*  short   len, width = 0;
-
-    len = (short)*s++;
-    while ( len > 0)
-    {
-        if ((( *s >= 'A') && ( *s <= 'Z')) || (( *s >= '0') && ( *s <= '9')))
-            SetInterfaceLargeUpperFont( style);
-        else SetInterfaceLargeLowerFont( style);
-
-        if (( *s >= 'a') && ( *s <= 'z'))
-            width += CharWidth( *s - 'a' + 'A');
-        else width += CharWidth( *s);
-        s++;
-        len--;
-    }
-*/
+short GetInterfaceStringWidth(unsigned char* s, interfaceStyleType style) {
     long            width, height;
 
     SetInterfaceLargeUpperFont( style);
@@ -2411,106 +2305,47 @@ short GetInterfaceStringWidth(unsigned char* s, interfaceStyleType style)
 //  using the width of 'R' which is about as wide as our normal letters get.
 //
 
-short GetInterfaceFontWidth( interfaceStyleType style)
-
-{
-
-    SetInterfaceLargeUpperFont( style);
-//  return( CharWidth( kWidestChar));
-//  mSetDirectFont( kButtonFontNum)
-    return( gDirectText->logicalWidth);
+short GetInterfaceFontWidth(interfaceStyleType style) {
+    SetInterfaceLargeUpperFont(style);
+    return gDirectText->logicalWidth;
 }
 
-short GetInterfaceFontHeight( interfaceStyleType style)
-
-{
-//  FontInfo    f;
-
-    SetInterfaceLargeUpperFont( style);
-//  GetFontInfo( &f);
-//  return( f.ascent);
-//  mSetDirectFont( kButtonFontNum)
-    return( gDirectText->height);
+short GetInterfaceFontHeight(interfaceStyleType style) {
+    SetInterfaceLargeUpperFont(style);
+    return gDirectText->height;
 }
 
-short GetInterfaceFontAscent( interfaceStyleType style)
-
-{
-//  FontInfo    f;
-
-    SetInterfaceLargeUpperFont( style);
-//  GetFontInfo( &f);
-//  return( f.ascent);
-//  mSetDirectFont( kButtonFontNum)
-    return( gDirectText->ascent);
+short GetInterfaceFontAscent( interfaceStyleType style) {
+    SetInterfaceLargeUpperFont(style);
+    return gDirectText->ascent;
 }
 
 // DrawInterfaceString:
 //  Relies on roman alphabet for upper/lower casing.  NOT WORLD-READY!
 
-void DrawInterfaceString(unsigned char* s, interfaceStyleType style, PixMap *destMap, long portLeft,
-                        long portTop, unsigned char color)
-
-{
+void DrawInterfaceString(
+        unsigned char* s, interfaceStyleType style, PixMap* pix, unsigned char color) {
     Rect    clipRect;
 
-    clipRect = destMap->bounds();
-//  mSetDirectFont( kButtonFontNum)
+    clipRect = pix->bounds();
     SetInterfaceLargeUpperFont( style);
-    DrawDirectTextStringClipped( s, color, destMap, clipRect, portLeft, portTop);
+    DrawDirectTextStringClipped(s, color, pix, clipRect, 0, 0);
+}
 
-    /*
-    len = (short)*s++;
-    while ( len > 0)
-    {
-        if ((( *s >= 'A') && ( *s <= 'Z')) || (( *s >= '0') && ( *s <= '9')))
-            SetInterfaceLargeUpperFont( style);
-        else SetInterfaceLargeLowerFont( style);
-
-        if (( *s >= 'a') && ( *s <= 'z'))
-            DrawChar( *s - 'a' + 'A');
-        else DrawChar( *s);
-        s++;
-        len--;
+void SetInterfaceLargeUpperFont(interfaceStyleType style) {
+    if ( style == kSmall) {
+        mSetDirectFont( kButtonSmallFontNum);
+    } else {
+        mSetDirectFont( kButtonFontNum);
     }
-    */
 }
 
-void SetInterfaceLargeUpperFont( interfaceStyleType style)
-
-{
-    if ( style == kSmall)
-    {
+void SetInterfaceLargeLowerFont(interfaceStyleType style) {
+    if ( style == kSmall) {
         mSetDirectFont( kButtonSmallFontNum);
-/*      TextFont( monaco);
-        TextSize( 9);
-        TextFace(  0);
-*/  } else
-    {
+    } else {
         mSetDirectFont( kButtonFontNum);
-/*      TextFont( helvetica);
-        TextSize( 12);
-        TextFace( bold | extend);
-*/  }
+    }
 }
-
-void SetInterfaceLargeLowerFont( interfaceStyleType style)
-
-{
-    if ( style == kSmall)
-    {
-        mSetDirectFont( kButtonSmallFontNum);
-/*      TextFont( monaco);
-        TextSize( 9);
-        TextFace(  0);
-*/  } else
-    {
-        mSetDirectFont( kButtonFontNum);
-/*      SetFontByString( "\pgeneva");
-        TextSize( 10);
-        TextFace( bold | extend);
-*/  }
-}
-
 
 }  // namespace antares

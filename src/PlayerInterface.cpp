@@ -343,7 +343,7 @@ void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
     {
         DrawEntireInterface();
 
-        GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( 0), contentRect); // item 0 = loading rect
+        GetAnyInterfaceItemContentBounds(*GetAnyInterfaceItemPtr(0), contentRect); // item 0 = loading rect
         CloseInterface();
 
 // it is assumed that we're "recovering" from a fade-out
@@ -463,7 +463,6 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
 PlayAgainResult DoPlayAgain(bool allowResume, bool allowSkip) {
     int                     error = kNoError;
     Rect                    tRect;
-    interfaceItemType       *item;
     bool                 done = false;
     Point                   where;
     short                   whichItem;
@@ -481,10 +480,9 @@ PlayAgainResult DoPlayAgain(bool allowResume, bool allowSkip) {
     {
         tRect = Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
         CenterAllItemsInRect( &tRect);
-        item = GetAnyInterfaceItemPtr( kPlayAgainBox);
+        const interfaceItemType& item = *GetAnyInterfaceItemPtr(kPlayAgainBox);
         DrawInOffWorld();
-//      LongRectToRect( &(item->bounds), &tRect);
-        GetAnyInterfaceItemGraphicBounds( item, &tRect);
+        GetAnyInterfaceItemGraphicBounds(item, &tRect);
         DefaultColors();
         PaintRect(tRect);
         DrawInRealWorld();
@@ -554,7 +552,7 @@ PlayAgainResult DoPlayAgain(bool allowResume, bool allowSkip) {
             }
         }
         DrawInOffWorld();
-        GetAnyInterfaceItemGraphicBounds( item, &tRect);
+        GetAnyInterfaceItemGraphicBounds(item, &tRect);
         DefaultColors();
         PaintRect(tRect);
         DrawInRealWorld();
@@ -742,7 +740,6 @@ void DoHelpScreen( void)
 {
     int                     error = kNoError;
     Rect                    tRect, textRect;
-    interfaceItemType       *item;
     bool                 done = false;
     Point                   where;
     short                   whichItem;
@@ -762,10 +759,10 @@ void DoHelpScreen( void)
     {
         tRect = Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, globals()->gTrueClipBottom);
         CenterAllItemsInRect( &tRect);
-        item = GetAnyInterfaceItemPtr( kHelpScreenBox);
+        const interfaceItemType& item = *GetAnyInterfaceItemPtr(kHelpScreenBox);
         DrawInOffWorld();
-        GetAnyInterfaceItemGraphicBounds( item, &tRect);
-        textRect = item->bounds;
+        GetAnyInterfaceItemGraphicBounds(item, &tRect);
+        textRect = item.bounds;
         DefaultColors();
         CopyOffWorldToSaveWorld(tRect);
         PaintRect(tRect);
@@ -866,7 +863,7 @@ void DoHelpScreen( void)
             }
         }
         DrawInOffWorld();
-        GetAnyInterfaceItemGraphicBounds( item, &tRect);
+        GetAnyInterfaceItemGraphicBounds(item, &tRect);
         DefaultColors();
         PaintRect(tRect);
         CopySaveWorldToOffWorld(tRect);
@@ -986,7 +983,7 @@ void DoOptionsInterface( void)
     error = OpenInterface( kOptionsScreenID);
     SetOptionCheckboxes( prefsData->options);
     if ( !(globals()->gOptions & kOptionSpeechAvailable)) SetStatusOfAnyInterfaceItem( kOptionSpeechOnButton, kDimmed, false);
-    GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kOptionVolumeBox), &volumeRect);
+    GetAnyInterfaceItemContentBounds(*GetAnyInterfaceItemPtr(kOptionVolumeBox), &volumeRect);
     if ( prefsData->volume == 0)
     {
         SetStatusOfAnyInterfaceItem( kOptionSoundDownButton, kDimmed, false);
@@ -1443,7 +1440,7 @@ void DrawKeyControlPicture( long whichKey)
     Rect    tRect, newRect;
     scoped_ptr<Picture> thePict;
 
-    GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kKeyIllustrationBox), &tRect);
+    GetAnyInterfaceItemContentBounds(*GetAnyInterfaceItemPtr(kKeyIllustrationBox), &tRect);
 
     DrawInOffWorld();
 
@@ -1584,15 +1581,14 @@ void DrawStringInInterfaceItem( long whichItem, const unsigned char* string)
 
     DrawInOffWorld();
     DefaultColors();
-    GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( whichItem), &tRect);
+    GetAnyInterfaceItemContentBounds(*GetAnyInterfaceItemPtr( whichItem), &tRect);
 
     PaintRect(tRect);
     anItem = GetAnyInterfaceItemPtr( whichItem);
     if ( string != nil)
     {
         DrawInterfaceTextInRect(tRect, string + 1, string[0],
-                                anItem->style, anItem->color, gOffWorld,
-                                0, 0, nil);
+                                anItem->style, anItem->color, gOffWorld, nil);
     }
     DrawInRealWorld();
     CopyOffWorldToRealWorld(tRect);
@@ -2193,7 +2189,7 @@ bool DoMissionInterface( long whichScenario)
 // it is assumed that we're "recovering" from a fade-out
         AutoFadeFrom( 60, false);
 
-        GetAnyInterfaceItemContentBounds( GetAnyInterfaceItemPtr( kMissionMapRect), &mapRect);
+        GetAnyInterfaceItemContentBounds(*GetAnyInterfaceItemPtr(kMissionMapRect), &mapRect);
 
         DrawInSaveWorld();
 
@@ -2309,12 +2305,12 @@ bool DoMissionInterface( long whichScenario)
                                 (( GetBriefPointNumber( whichScenario) + kMissionBriefPointOffset) - 1))
                             {
                                 SetStatusOfAnyInterfaceItem( kMissionNextButton, kDimmed, true);
-                                DrawAnyInterfaceItemSaveToOffToOn( GetAnyInterfaceItemPtr( kMissionNextButton));
+                                DrawAnyInterfaceItemSaveToOffToOn(*GetAnyInterfaceItemPtr( kMissionNextButton));
                             }
                             if ( whichBriefPoint == 1)
                             {
                                 SetStatusOfAnyInterfaceItem( kMissionPreviousButton, kActive, true);
-                                DrawAnyInterfaceItemSaveToOffToOn( GetAnyInterfaceItemPtr( kMissionPreviousButton));
+                                DrawAnyInterfaceItemSaveToOffToOn(*GetAnyInterfaceItemPtr( kMissionPreviousButton));
                             }
                         }
                         break;
@@ -2330,13 +2326,13 @@ bool DoMissionInterface( long whichScenario)
                             if ( whichBriefPoint == 0)
                             {
                                 SetStatusOfAnyInterfaceItem( kMissionPreviousButton, kDimmed, true);
-                                DrawAnyInterfaceItemSaveToOffToOn( GetAnyInterfaceItemPtr( kMissionPreviousButton));
+                                DrawAnyInterfaceItemSaveToOffToOn(*GetAnyInterfaceItemPtr( kMissionPreviousButton));
                             }
                             if ( whichBriefPoint ==
                                 (( GetBriefPointNumber( whichScenario) + kMissionBriefPointOffset) - 2))
                             {
                                 SetStatusOfAnyInterfaceItem( kMissionNextButton, kActive, true);
-                                DrawAnyInterfaceItemSaveToOffToOn( GetAnyInterfaceItemPtr( kMissionNextButton));
+                                DrawAnyInterfaceItemSaveToOffToOn(*GetAnyInterfaceItemPtr( kMissionNextButton));
                             }
                         }
                         break;
@@ -2375,7 +2371,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
 #pragma unused( mustFit)
 
     HideCursor();
-    GetAnyInterfaceItemGraphicBounds( dataItem, &oldRect);
+    GetAnyInterfaceItemGraphicBounds(*dataItem, &oldRect);
     CopySaveWorldToOffWorld(*usedRect);
 
     DrawInOffWorld();
@@ -2445,7 +2441,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
             hiliteBounds.bottom++;
             MacFrameRect(hiliteBounds);
             SetTranslateColorShadeFore( kMissionDataHiliteColor, MEDIUM);
-            GetAnyInterfaceItemGraphicBounds( dataItem, &newRect);
+            GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
             if ( dataItem->bounds.right < hiliteBounds.left)
             {
                 MoveTo( hiliteBounds.left, hiliteBounds.top);
@@ -2471,24 +2467,24 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
         }
         dataItem->item.labeledRect.label.stringID = headerID;
         dataItem->item.labeledRect.label.stringNumber = headerNumber;
-        GetAnyInterfaceItemGraphicBounds( dataItem, &newRect);
+        GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
         SetTranslateColorFore( BLACK);
         PaintRect(newRect);
-        DrawAnyInterfaceItem( dataItem, gOffWorld, 0, 0);
+        DrawAnyInterfaceItem(*dataItem, gOffWorld);
 
         DrawInOffWorld();
         if (textData.get() != nil) {
             newRect = dataItem->bounds;
             DrawInterfaceTextInRect(
                     newRect, reinterpret_cast<const unsigned char*>(textData->c_str()), length,
-                    dataItem->style, dataItem->color, gOffWorld, 0, 0, inlinePict);
+                    dataItem->style, dataItem->color, gOffWorld, inlinePict);
             textData.reset();
         }
 
         DrawInRealWorld();
         NormalizeColors();
 
-        GetAnyInterfaceItemGraphicBounds( dataItem, &newRect);
+        GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
         newRect.enlarge_to(oldRect);
         newRect.enlarge_to(hiliteBounds);
         oldRect = *usedRect;
@@ -3029,23 +3025,23 @@ void DoMissionDebriefingText(long textID, long yourlength, long parlength,
 
         DrawInOffWorld();
 
-        GetAnyInterfaceItemGraphicBounds( &dataItem, &tRect);
+        GetAnyInterfaceItemGraphicBounds(dataItem, &tRect);
         SetTranslateColorFore( BLACK);
         PaintRect(tRect);
 
-        DrawAnyInterfaceItem( &dataItem, gOffWorld, 0, 0);
+        DrawAnyInterfaceItem(dataItem, gOffWorld);
 
         dataItem.bounds = tRect;
         DrawInterfaceTextInRect(
                 tRect, reinterpret_cast<const unsigned char*>(textData->c_str()), length,
-                dataItem.style, dataItem.color, gOffWorld, 0, 0, nil);
+                dataItem.style, dataItem.color, gOffWorld, nil);
 
         textData.reset();
 
         DrawInRealWorld();
         NormalizeColors();
 
-        GetAnyInterfaceItemGraphicBounds( &dataItem, &tRect);
+        GetAnyInterfaceItemGraphicBounds(dataItem, &tRect);
         CopyOffWorldToRealWorld(tRect);
 
         if ( doScore)

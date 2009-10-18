@@ -171,17 +171,12 @@ static void KeyControlButton_SetFlash( long whichKey, long currentTab,
     anItem = GetAnyInterfaceItemPtr( whichButton);
     if ( anItem == nil) return;
 
-    if ( !flash)
-    {
+    if (!flash) {
         anItem->color = AQUA;
-//      SetStatusOfAnyInterfaceItem( whichButton, (hilite)?(kIH_Hilite):
-//          (kActive), true);
-        DrawAnyInterfaceItemOffToOn( anItem);
-    } else
-    {
+        DrawAnyInterfaceItemOffToOn(*anItem);
+    } else {
         anItem->color = GOLD;
-//      SetStatusOfAnyInterfaceItem( whichButton, kIH_Hilite, true);
-        DrawAnyInterfaceItemOffToOn( anItem);
+        DrawAnyInterfaceItemOffToOn(*anItem);
     }
 
 }
@@ -386,7 +381,7 @@ bool Key_Setup_Screen_Do( void)
                             anItem->color = AQUA;
                         }
                         SwitchAnyRadioOrCheckbox( whichTab, false);
-                        DrawAnyInterfaceItemOffToOn( GetAnyInterfaceItemPtr( whichTab));
+                        DrawAnyInterfaceItemOffToOn(*GetAnyInterfaceItemPtr( whichTab));
                         whichTab = whichItem;
 
                         anItem = GetAnyInterfaceItemPtr( whichTab);
@@ -395,7 +390,7 @@ bool Key_Setup_Screen_Do( void)
                             anItem->color = AQUA;
                         }
                         SwitchAnyRadioOrCheckbox( whichTab, true);
-                        DrawAnyInterfaceItemOffToOn( GetAnyInterfaceItemPtr( whichTab));
+                        DrawAnyInterfaceItemOffToOn(*GetAnyInterfaceItemPtr( whichTab));
 
                         whichKeyButton = -1;
                         keyNum = 0;
