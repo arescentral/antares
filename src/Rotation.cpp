@@ -19,11 +19,13 @@
 
 #include "Rotation.hpp"
 
+#include <assert.h>
 #include "BinaryStream.hpp"
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "MathMacros.hpp"
 #include "MathSpecial.hpp"
+#include "Resource.hpp"
 
 namespace antares {
 

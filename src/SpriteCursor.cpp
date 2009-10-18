@@ -114,10 +114,10 @@ bool SetSpriteCursorTable( short resID)
 
 {
     gSpriteCursor->sprite.table = GetPixTable( resID);
-    if (gSpriteCursor->sprite.table.get() == nil) {
+    if (gSpriteCursor->sprite.table == nil) {
         gSpriteCursor->sprite.table = AddPixTable( resID);
 
-        if (gSpriteCursor->sprite.table.get() == nil) {
+        if (gSpriteCursor->sprite.table == nil) {
             return false;
         }
         else return( true);
@@ -132,7 +132,7 @@ void SetSpriteCursorShape( short whichShape)
 void EraseSpriteCursorSprite( void)
 
 {
-    if (gSpriteCursor->sprite.table.get() != nil) {
+    if (gSpriteCursor->sprite.table != nil) {
         if ( gSpriteCursor->sprite.thisRect.left < gSpriteCursor->sprite.thisRect.right)
         {
             ChunkCopyPixMapToPixMap( gSaveWorld,
@@ -185,11 +185,10 @@ void DrawSpriteCursorSprite( Rect *clipRect)
 {
     Rect        sRect, tc;
     spritePix       aSpritePix;
-    TypedHandle<natePixType> pixTable;
     int             whichShape;
     Rect            tRect;
 
-    if ((gSpriteCursor->sprite.table.get() != nil) &&
+    if ((gSpriteCursor->sprite.table != nil) &&
         ( gSpriteCursor->showLevel >= kSpriteCursorVisible))
     {
         tRect = Rect(gSpriteCursor->where.h - 16, gSpriteCursor->where.v - 16,
@@ -216,10 +215,10 @@ void DrawSpriteCursorSprite( Rect *clipRect)
             0, 0);
     }
 
-    if ((gSpriteCursor->sprite.table.get() != nil) &&
+    if ((gSpriteCursor->sprite.table != nil) &&
         ( gSpriteCursor->showLevel >= kSpriteCursorVisible))
     {
-        pixTable = gSpriteCursor->sprite.table;
+        natePixType** pixTable = gSpriteCursor->sprite.table;
         whichShape = gSpriteCursor->sprite.whichShape;
         aSpritePix.data = GetNatePixTableNatePixData(**pixTable, whichShape);
         aSpritePix.center.h = GetNatePixTableNatePixHRef(**pixTable, whichShape);
@@ -267,7 +266,7 @@ void ShowSpriteCursorSprite() {
     Rect tRect;
     Rect tc = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
-    if (gSpriteCursor->sprite.table.get() != nil) {
+    if (gSpriteCursor->sprite.table != nil) {
         // if thisRect is null
         if (( gSpriteCursor->sprite.thisRect.right <=
                 gSpriteCursor->sprite.thisRect.left) ||

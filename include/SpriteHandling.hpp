@@ -22,7 +22,6 @@
 
 #include <Base.h>
 
-#include "Handle.hpp"
 #include "NateDraw.hpp"
 
 namespace antares {
@@ -94,7 +93,7 @@ struct spritePix {
 struct natePixType;
 struct spriteType {
     Point           where;
-    TypedHandle<natePixType> table;
+    natePixType** table;
     short           resID;
     int             whichShape;
     long            scale;
@@ -112,7 +111,7 @@ struct spriteType {
 
 
 struct pixTableType {
-    TypedHandle<natePixType> resource;
+    scoped_ptr<natePixType*> resource;
     int         resID;
     bool     keepMe;
     };
@@ -134,9 +133,9 @@ void ResetAllPixTables( void);
 void SetAllPixTablesNoKeep( void);
 void KeepPixTable( short);
 void RemoveAllUnusedPixTables( void);
-TypedHandle<natePixType> AddPixTable( short);
-TypedHandle<natePixType> GetPixTable( short);
-spriteType *AddSprite( Point, TypedHandle<natePixType>, short, short, long, long, short, unsigned char, long *);
+natePixType** AddPixTable( short);
+natePixType** GetPixTable( short);
+spriteType *AddSprite( Point, natePixType**, short, short, long, long, short, unsigned char, long *);
 void RemoveSprite( spriteType *);
 void EraseSpriteTable( void);
 void DrawSpriteTableInOffWorld( Rect *);

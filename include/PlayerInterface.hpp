@@ -19,7 +19,6 @@
 #define ANTARES_PLAYER_INTERFACE_HPP_
 
 #include <string>
-#include "Handle.hpp"
 #include "PlayerInterfaceDrawing.hpp"
 #include "PlayerInterfaceItems.hpp"
 

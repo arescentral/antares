@@ -21,7 +21,6 @@
 #include <Quickdraw.h>
 
 #include "Casts.hpp"
-#include "Handle.hpp"
 
 namespace antares {
 

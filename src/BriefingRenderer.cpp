@@ -268,7 +268,7 @@ void GetRealObjectSpriteData( coordPointType *realCoord,
         long scale, long *thisScale, spritePix *aSpritePix, Point *where,
         Rect *spriteRect)
 {
-    TypedHandle<natePixType> pixTable;
+    natePixType** pixTable;
     int             whichShape;
     long            tlong;
     coordPointType  coord = *realCoord;
@@ -292,7 +292,7 @@ void GetRealObjectSpriteData( coordPointType *realCoord,
     }
 
 
-    if (pixTable.get() == nil) {
+    if (pixTable == nil) {
         ShowErrorAny( eContinueErr, kErrorStrID, nil, nil, nil, nil, kLoadSpriteError, -1, -1, -1, __FILE__, tlong);
     }
 

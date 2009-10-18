@@ -17,6 +17,7 @@
 
 #include "RetroText.hpp"
 
+#include <assert.h>
 #include <algorithm>
 #include <limits>
 #include <Quickdraw.h>

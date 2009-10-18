@@ -24,6 +24,7 @@
 
 #include "InterfaceHandling.hpp"
 
+#include <assert.h>
 #include <vector>
 #include "AnyChar.hpp"
 #include "AresGlobalType.hpp"
@@ -35,6 +36,7 @@
 #include "OffscreenGWorld.hpp"
 #include "PlayerInterfaceDrawing.hpp"
 #include "PlayerInterfaceItems.hpp"
+#include "Resource.hpp"
 #include "SoundFX.hpp"              // for button on/off
 
 namespace antares {

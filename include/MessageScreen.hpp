@@ -21,7 +21,6 @@
 // Message Screen.h
 
 #include "AnyChar.hpp"
-#include "Handle.hpp"
 #include "NateDraw.hpp"
 
 namespace antares {

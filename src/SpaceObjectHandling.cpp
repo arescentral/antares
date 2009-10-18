@@ -19,6 +19,7 @@
 
 #include "SpaceObjectHandling.hpp"
 
+#include <assert.h>
 #include "Admiral.hpp"
 #include "AresGlobalType.hpp"
 #include "Beam.hpp"
@@ -34,6 +35,7 @@
 #include "Options.hpp"
 #include "PlayerShip.hpp"
 #include "Randomize.hpp"
+#include "Resource.hpp"
 #include "Rotation.hpp"
 #include "ScenarioMaker.hpp"
 #include "ScreenLabel.hpp"
@@ -274,7 +276,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
 {
     spaceObjectType *destObject = nil;
     int             whichObject = 0;
-    TypedHandle<natePixType> spriteTable;
+    natePixType** spriteTable = NULL;
     Point           where;
     spritePix       oldStyleSprite;
     long            scaleCalc;
@@ -299,11 +301,11 @@ int AddSpaceObject( spaceObjectType *sourceObject)
     {
         spriteTable = GetPixTable( sourceObject->pixResID);
 
-        if (spriteTable.get() == nil) {
+        if (spriteTable == nil) {
             ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kIntraLevelLoadSpriteError, -1, -1, -1, __FILE__, sourceObject->pixResID);
 //          DebugStr("\pAdding Sprite Table in the Middle of Level?");
             spriteTable = AddPixTable( sourceObject->pixResID);
-            if (spriteTable.get() == nil) {
+            if (spriteTable == nil) {
                 return -1;
             }
         }
@@ -329,7 +331,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
 //  where.v = destObject->location.v - gGlobalCorner.v /*+ CLIP_TOP*/;
     if ( destObject->sprite != nil) RemoveSprite( destObject->sprite);
 
-    if (spriteTable.get() != nil) {
+    if (spriteTable != nil) {
         switch( destObject->layer)
         {
             case kFirstSpriteLayer:
@@ -861,7 +863,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
     baseObjectType  *sObject = mGetBaseObjectPtr( whichBaseObject), *weaponBase = nil;
     short           angle;
     long            r;
-    TypedHandle<natePixType> spriteTable;
+    natePixType** spriteTable;
 
     dObject->attributes = sObject->attributes | (dObject->attributes &
         (kIsHumanControlled | kIsRemote | kIsPlayerShip | kStaticDestination));
@@ -1024,7 +1026,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
     {
         spriteTable = GetPixTable( dObject->pixResID);
 
-        if (spriteTable.get() == nil) {
+        if (spriteTable == nil) {
             ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadSpriteError, -1, -1, -1, __FILE__, 191);
             spriteTable = AddPixTable( dObject->pixResID);
 //          if ( spriteTable == nil) Debugger();
@@ -2531,7 +2533,7 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, bool message)
 
             if ( anObject->attributes & kCanThink)
             {
-                TypedHandle<natePixType> pixTable;
+                natePixType** pixTable;
 
                 if (( anObject->pixResID == anObject->baseType->pixResID) ||
                     ( anObject->pixResID == (anObject->baseType->pixResID |
@@ -2544,7 +2546,7 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, bool message)
                         << kSpriteTableColorShift);
 
                     pixTable = GetPixTable( anObject->pixResID);
-                    if (pixTable.get() != nil) {
+                    if (pixTable != nil) {
                         anObject->sprite->table = pixTable;
                     }
                 }

@@ -19,6 +19,7 @@
 
 #include "Races.hpp"
 
+#include <assert.h>
 #include "AresGlobalType.hpp"
 #include "BinaryStream.hpp"
 #include "Debug.hpp"

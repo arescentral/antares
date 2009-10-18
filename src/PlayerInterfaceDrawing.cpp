@@ -19,6 +19,7 @@
 
 #include "PlayerInterfaceDrawing.hpp"
 
+#include <assert.h>
 #include <Quickdraw.h>
 
 #include "AnyChar.hpp"
@@ -30,6 +31,7 @@
 #include "NateDraw.hpp"
 #include "Picture.hpp"
 #include "PlayerInterfaceItems.hpp"
+#include "Resource.hpp"
 #include "StringNumerics.hpp"
 
 namespace antares {

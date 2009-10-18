@@ -17,6 +17,7 @@
 
 #include "ScenarioMaker.hpp"
 
+#include <assert.h>
 #include "Admiral.hpp"
 #include "AresGlobalType.hpp"
 #include "Beam.hpp"
@@ -37,6 +38,7 @@
 #include "PlayerShip.hpp"
 #include "Races.hpp"
 #include "Randomize.hpp"
+#include "Resource.hpp"
 #include "Rotation.hpp"
 #include "ScreenLabel.hpp"
 #include "ScrollStars.hpp"

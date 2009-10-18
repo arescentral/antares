@@ -21,7 +21,6 @@
 // ROTATION.H
 
 #include <Base.h>
-#include "Handle.hpp"
 #include "MathSpecial.hpp"
 
 namespace antares {

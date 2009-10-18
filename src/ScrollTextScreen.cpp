@@ -17,6 +17,7 @@
 
 #include "ScrollTextScreen.hpp"
 
+#include <assert.h>
 #include <string>
 #include <vector>
 #include "AresGlobalType.hpp"
@@ -27,6 +28,7 @@
 #include "Music.hpp"
 #include "Options.hpp"
 #include "Picture.hpp"
+#include "Resource.hpp"
 #include "RetroText.hpp"
 #include "Time.hpp"
 

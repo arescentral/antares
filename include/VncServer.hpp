@@ -21,6 +21,7 @@
 #include <queue>
 #include <map>
 #include "EventListenerList.hpp"
+#include "MappedFile.hpp"
 #include "VideoDriver.hpp"
 
 namespace antares {

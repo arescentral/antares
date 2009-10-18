@@ -24,6 +24,7 @@
 #include "Error.hpp"
 #include "KeyMapTranslation.hpp"
 #include "Options.hpp"
+#include "Resource.hpp"
 
 namespace antares {
 

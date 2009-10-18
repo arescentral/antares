@@ -22,7 +22,6 @@
 
 #include "AnyChar.hpp"
 #include "Casts.hpp"
-#include "Handle.hpp"
 #include "SpriteHandling.hpp"
 
 namespace antares {

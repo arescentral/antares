@@ -120,6 +120,7 @@ void ResetAllSprites( void)
     aSprite = gSpriteTable.get();
     for ( i = 0; i < kMaxSpriteNum; i++)
     {
+        aSprite->table = NULL;
         aSprite->resID = -1;
         aSprite->killMe = false;
         aSprite->thisRect.left = aSprite->thisRect.top = aSprite->thisRect.right =
@@ -142,8 +143,9 @@ void ResetAllPixTables( void)
     for ( i = 0; i < kMaxPixTableEntry; i++)
     {
         if (gPixTable[i].resource.get() != nil) {
-            gPixTable[i].resource.destroy();
+            delete *gPixTable[i].resource;
         }
+        gPixTable[i].resource.reset();
         gPixTable[i].keepMe = false;
         gPixTable[i].resID = -1;
     }
@@ -159,9 +161,9 @@ void CleanupSpriteHandling( void)
     for ( i = 0; i < kMaxPixTableEntry; i++)
     {
         if (gPixTable[i].resource.get() != nil) {
-//          mHandleDisposeAndDeregister( gPixTable[i].resource);
-            gPixTable[i].resource.destroy();
+            delete *gPixTable[i].resource;
         }
+        gPixTable[i].resource.reset();
     }
     gSpriteTable.reset();
 }
@@ -192,7 +194,8 @@ void RemoveAllUnusedPixTables( void)
     for ( i = kMinVolatilePixTable; i < kMaxPixTableEntry; i++)
     {
         if ((gPixTable[i].keepMe == false) && (gPixTable[i].resource.get() != nil)) {
-            gPixTable[i].resource.destroy();
+            delete *gPixTable[i].resource;
+            gPixTable[i].resource.reset();
             gPixTable[i].keepMe = false;
             gPixTable[i].resID = -1;
         }
@@ -200,8 +203,7 @@ void RemoveAllUnusedPixTables( void)
 
 }
 
-TypedHandle<natePixType> AddPixTable( short resID)
-{
+natePixType** AddPixTable(short resID) {
     short           i = 0, realResID = resID;
     short           color = 0;
 
@@ -232,12 +234,12 @@ TypedHandle<natePixType> AddPixTable( short resID)
             WriteDebugLong( color);
         }
 
-        gPixTable[i].resource.load_resource(realResID);
+        gPixTable[i].resource.reset(new natePixType*(new natePixType(realResID)));
 
         if (gPixTable[i].resource.get() == nil) {
 //          Debugger();
             ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadSpriteError, -1, -1, -1, __FILE__, resID);
-            return TypedHandle<natePixType>();
+            return NULL;
         }
 
         /*
@@ -255,31 +257,31 @@ TypedHandle<natePixType> AddPixTable( short resID)
         }
 
         gPixTable[i].resID = resID;
-        return( gPixTable[i].resource);
-    } return( GetPixTable( resID));
+        return gPixTable[i].resource.get();
+    } else {
+        return GetPixTable(resID);
+    }
 }
 
-TypedHandle<natePixType> GetPixTable( short resID)
-{
+natePixType** GetPixTable(short resID) {
     short       i = 0;
 
 //  mWriteDebugString("\pGETpix < HANDLE");
     while (( gPixTable[i].resID != resID) && ( i < kMaxPixTableEntry)) i++;
     if (i == kMaxPixTableEntry) {
-        return TypedHandle<natePixType>();
+        return NULL;
     }
-    return ( gPixTable[i].resource);
+    return gPixTable[i].resource.get();
 }
 
-spriteType *AddSprite( Point where, TypedHandle<natePixType> table, short resID, short whichShape, long scale, long size,
-                    short layer, unsigned char color, long *whichSprite)
-
-{
+spriteType *AddSprite(
+        Point where, natePixType** table, short resID, short whichShape, long scale, long size,
+        short layer, unsigned char color, long *whichSprite) {
     int         i = 0;
     spriteType  *aSprite;
 
     aSprite = gSpriteTable.get();
-    while ((aSprite->table.get() != nil) && ( i < kMaxSpriteNum)) {
+    while ((aSprite->table != nil) && ( i < kMaxSpriteNum)) {
         i++;
         aSprite++;
     }
@@ -311,7 +313,7 @@ void RemoveSprite( spriteType *aSprite)
 
 {
     aSprite->killMe = false;
-    aSprite->table = TypedHandle<natePixType>();
+    aSprite->table = NULL;
     aSprite->resID = -1;
 }
 
@@ -1649,7 +1651,7 @@ void EraseSpriteTable( void)
     aSprite = gSpriteTable.get();
     for ( i = 0; i < kMaxSpriteNum; i++)
     {
-        if (aSprite->table.get() != nil) {
+        if (aSprite->table != nil) {
         #ifndef kDrawOverride
             if ( aSprite->thisRect.left < aSprite->thisRect.right)
             {
@@ -1671,7 +1673,7 @@ void DrawSpriteTableInOffWorld( Rect *clipRect)
     long            i, trueScale, layer, tinySize;
     Rect        sRect;
     spritePix       aSpritePix;
-    TypedHandle<natePixType> pixTable;
+    natePixType** pixTable;
     int             whichShape;
     spriteType      *aSprite;
 
@@ -1685,7 +1687,7 @@ void DrawSpriteTableInOffWorld( Rect *clipRect)
             aSprite = gSpriteTable.get();
             for ( i = 0; i < kMaxSpriteNum; i++)
             {
-                if ((aSprite->table.get() != nil) && ( !aSprite->killMe) && ( aSprite->whichLayer == layer))
+                if ((aSprite->table != nil) && ( !aSprite->killMe) && ( aSprite->whichLayer == layer))
                 {
 
                     pixTable = aSprite->table;
@@ -1738,7 +1740,7 @@ void DrawSpriteTableInOffWorld( Rect *clipRect)
             for ( i = 0; i < kMaxSpriteNum; i++)
             {
                 tinySize = aSprite->tinySize & kBlipSizeMask;
-                if (( aSprite->table.get() != nil) && ( !aSprite->killMe) &&
+                if (( aSprite->table != nil) && ( !aSprite->killMe) &&
                     ( aSprite->tinyColor != kNoTinyColor) &&
                     ( tinySize)
                     && ( aSprite->whichLayer == layer))
@@ -1797,9 +1799,9 @@ void GetOldSpritePixData( spriteType *sourceSprite, spritePix *oldData)
 
 {
     short               whichShape;
-    TypedHandle<natePixType> pixTable;
+    natePixType** pixTable;
 
-    if (sourceSprite->table.get() != nil) {
+    if (sourceSprite->table != nil) {
         pixTable = sourceSprite->table;
         whichShape = sourceSprite->whichShape;
 
@@ -1833,7 +1835,7 @@ void ShowSpriteTable( void)
     aSprite = gSpriteTable.get();
     for ( i = 0; i < kMaxSpriteNum; i++)
     {
-        if (aSprite->table.get() != nil) {
+        if (aSprite->table != nil) {
             // if thisRect is null
             if (( aSprite->thisRect.right <= aSprite->thisRect.left) ||
                 ( aSprite->thisRect.bottom <= aSprite->thisRect.top))
@@ -1894,7 +1896,7 @@ void CullSprites( void)
     aSprite = gSpriteTable.get();
     for ( i = 0; i < kMaxSpriteNum; i++)
     {
-        if (aSprite->table.get() != nil) {
+        if (aSprite->table != nil) {
             aSprite->lastRect = aSprite->thisRect;
             if ( aSprite->killMe)
                 RemoveSprite( aSprite);

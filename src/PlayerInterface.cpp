@@ -21,6 +21,7 @@
 
 #include "PlayerInterface.hpp"
 
+#include <assert.h>
 #include "AresGlobalType.hpp"
 #include "AresMain.hpp"
 #include "AresPreferences.hpp"
@@ -43,6 +44,7 @@
 #include "Options.hpp"
 #include "Picture.hpp"
 #include "Races.hpp"
+#include "Resource.hpp"
 #include "ScenarioMaker.hpp"
 #include "ScrollStars.hpp"
 #include "SoundFX.hpp"               // for button on/off

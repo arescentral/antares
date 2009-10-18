@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include "BinaryStream.hpp"
 #include "FakeDrawing.hpp"
+#include "MappedFile.hpp"
 
 namespace antares {
 

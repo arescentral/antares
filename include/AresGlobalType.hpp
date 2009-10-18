@@ -24,7 +24,6 @@
 #include <Quickdraw.h>
 
 #include "AnyChar.hpp"
-#include "Handle.hpp"
 #include "NateDraw.hpp"
 #include "ScenarioData.hpp"
 #include "SmartPtr.hpp"
