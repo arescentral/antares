@@ -82,9 +82,6 @@ void DrawInSaveWorld() {
 
 void EraseOffWorld() {
     DrawInOffWorld();
-    EraseRect(gOffWorld->bounds());
-    RGBColor c = { 0, 0, 0 };
-    RGBForeColor(&c);
     gActiveWorld->view(gOffWorld->bounds()).fill(BLACK);
     NormalizeColors();
     DrawInRealWorld();
@@ -93,10 +90,6 @@ void EraseOffWorld() {
 
 void EraseSaveWorld() {
     DrawInSaveWorld();
-    NormalizeColors();
-    EraseRect(gSaveWorld->bounds());
-    RGBColor c = { 0, 0, 0 };
-    RGBForeColor(&c);
     gActiveWorld->view(gSaveWorld->bounds()).fill(BLACK);
     NormalizeColors();
     DrawInRealWorld();

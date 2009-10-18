@@ -161,10 +161,6 @@ void RGBBackColor(RGBColor* color) {
     currentBackColor = NearestColor(color->red, color->green, color->blue);
 }
 
-void EraseRect(const Rect& rect) {
-    gActiveWorld->view(rect).fill(currentBackColor);
-}
-
 void DrawLine(PixMap* pix, const Point& from, const Point& to) {
     assert(to.h == from.h || to.v == from.v);  // no diagonal lines yet.
     if (to.h == from.h) {
