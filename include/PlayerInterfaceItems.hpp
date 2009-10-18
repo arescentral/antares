@@ -157,7 +157,7 @@ struct interfaceItemType {
     interfaceKindType   kind;
     interfaceStyleType  style;
 
-    size_t load_data(const char* data, size_t len);
+    void read(BinaryReader* bin);
 };
 
 }  // namespace antares
