@@ -35,55 +35,28 @@ class TypedHandle {
             : _data(NULL) { }
 
     void destroy() {
+        delete *_data;
         delete _data;
         _data = NULL;
     }
 
-    void load_resource(uint32_t code, int id);
+    void load_resource(int id);
 
     T* operator*() const {
-        return _data->_ptr.get();
+        return *_data;
     }
 
     T* const* get() const {
-        return &_data->_ptr.get();
+        return _data;
     }
 
   private:
-    class Data {
-      public:
-        Data(int count)
-                : _ptr(new T[count]),
-                  _count(count) { }
-
-      private:
-        friend class TypedHandle;
-
-        scoped_array<T> _ptr;
-        size_t _count;
-
-        DISALLOW_COPY_AND_ASSIGN(Data);
-    };
-    Data* _data;
+    T* const* _data;
 };
 
 template <typename T>
-void TypedHandle<T>::load_resource(uint32_t code, int id) {
-    Resource rsrc(code, id);
-    std::vector<T> loaded;
-    const char* data = rsrc.data();
-    size_t remainder = rsrc.size();
-    while (remainder > 0) {
-        loaded.push_back(T());
-        size_t consumed = loaded.back().load_data(data, remainder);
-        assert(consumed <= remainder);
-        data += consumed;
-        remainder -= consumed;
-    }
-    _data = new Data(loaded.size());
-    for (size_t i = 0; i < loaded.size(); ++i) {
-        (**this)[i] = loaded[i];
-    }
+void TypedHandle<T>::load_resource(int id) {
+    _data = new T*(new T(id));
 }
 
 }  // namespace antares

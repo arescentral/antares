@@ -232,7 +232,7 @@ TypedHandle<natePixType> AddPixTable( short resID)
             WriteDebugLong( color);
         }
 
-        gPixTable[i].resource.load_resource(kPixResType, realResID);
+        gPixTable[i].resource.load_resource(realResID);
 
         if (gPixTable[i].resource.get() == nil) {
 //          Debugger();

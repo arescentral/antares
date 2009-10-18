@@ -31,20 +31,18 @@ class natePixType {
   public:
     natePixType();
     natePixType(int id);
-    natePixType(const natePixType& other);
-    natePixType& operator=(const natePixType& other);
     ~natePixType();
 
     natePixEntryType* at(size_t index) const;
     size_t size() const;
 
     void read(BinaryReader* bin);
-    size_t load_data(const char* data, size_t len);
-    void copy_from(const natePixType& other);
     void clear();
 
   private:
     std::vector<natePixEntryType*> _entries;
+
+    DISALLOW_COPY_AND_ASSIGN(natePixType);
 };
 
 unsigned long GetNatePixTableSize(const natePixType& table);

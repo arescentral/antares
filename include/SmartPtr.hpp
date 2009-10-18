@@ -35,8 +35,7 @@ class scoped_ptr {
 
     ~scoped_ptr() { reset(); }
 
-    // TODO(sfiera): remove 'const&' once TypedHandle<> no longer requires it.
-    T* const& get() const { return _ptr; }
+    T* get() const { return _ptr; }
     T* operator->() const { return _ptr; }
     T& operator*() const { return *_ptr; }
 
@@ -70,8 +69,7 @@ class scoped_array {
 
     ~scoped_array() { reset(); }
 
-    // TODO(sfiera): remove 'const&' once TypedHandle<> no longer requires it.
-    T* const& get() const { return _ptr; }
+    T* get() const { return _ptr; }
     T* operator->() const { return _ptr; }
     T& operator*() const { return *_ptr; }
 

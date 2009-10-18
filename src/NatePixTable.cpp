@@ -32,16 +32,6 @@ class natePixEntryType {
               _v_offset(0),
               _data(NULL) { }
 
-    natePixEntryType(const natePixEntryType& other)
-            : _data(NULL) {
-        copy_from(other);
-    }
-
-    natePixEntryType& operator=(const natePixEntryType& other) {
-        copy_from(other);
-        return *this;
-    }
-
     ~natePixEntryType() {
         clear();
     }
@@ -61,16 +51,6 @@ class natePixEntryType {
         bin->read(_data, _width * _height);
     }
 
-    void copy_from(const natePixEntryType& other) {
-        clear();
-        _width = other._width;
-        _height = other._height;
-        _h_offset = other._h_offset;
-        _v_offset = other._v_offset;
-        _data = new uint8_t[_width * _height];
-        memcpy(_data, other._data, _width * _height);
-    }
-
     void clear() {
         delete[] _data;
         _data = NULL;
@@ -82,6 +62,8 @@ class natePixEntryType {
     int16_t _h_offset;
     int16_t _v_offset;
     uint8_t* _data;
+
+    DISALLOW_COPY_AND_ASSIGN(natePixEntryType);
 };
 
 natePixType::natePixType() { }
@@ -90,15 +72,6 @@ natePixType::natePixType(int id) {
     Resource rsrc('SMIV', id);
     BufferBinaryReader bin(rsrc.data(), rsrc.size());
     bin.read(this);
-}
-
-natePixType::natePixType(const natePixType& other) {
-    copy_from(other);
-}
-
-natePixType& natePixType::operator=(const natePixType& other) {
-    copy_from(other);
-    return *this;
 }
 
 natePixType::~natePixType() {
@@ -130,24 +103,6 @@ void natePixType::read(BinaryReader* bin) {
         bin->discard(offsets[i] - bin->bytes_read());
         _entries.push_back(new natePixEntryType);
         bin->read(_entries.back());
-    }
-}
-
-size_t natePixType::load_data(const char* data, size_t len) {
-    clear();
-
-    BufferBinaryReader bin(data, len);
-
-    bin.read(this);
-    bin.discard(len - bin.bytes_read());
-
-    return bin.bytes_read();
-}
-
-void natePixType::copy_from(const natePixType& other) {
-    clear();
-    for (size_t i = 0; i < other.size(); ++i) {
-        _entries.push_back(new natePixEntryType(*other.at(i)));
     }
 }
 
