@@ -66,14 +66,6 @@ std::vector<interfaceItemType> gInterfaceItemData;
 uint32_t gInterfaceScreenHBuffer = 0;
 uint32_t gInterfaceScreenVBuffer = 0;
 
-ScopedOpenInterface::ScopedOpenInterface(int id) {
-    OpenInterface(id);
-}
-
-ScopedOpenInterface::~ScopedOpenInterface() {
-    CloseInterface();
-}
-
 int InterfaceHandlingInit() {
     gInterfaceScreenHBuffer = (WORLD_WIDTH / 2) - (kTargetScreenWidth / 2);
     gInterfaceScreenVBuffer = (WORLD_HEIGHT / 2) - (kTargetScreenHeight / 2);

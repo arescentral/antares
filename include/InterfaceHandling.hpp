@@ -25,12 +25,6 @@
 
 namespace antares {
 
-class ScopedOpenInterface {
-  public:
-    ScopedOpenInterface(int id);
-    ~ScopedOpenInterface();
-};
-
 int InterfaceHandlingInit( void);
 void InterfaceHandlingCleanup( void);
 int OpenInterface( short);
