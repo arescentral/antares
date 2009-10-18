@@ -46,8 +46,4 @@ void GetIndString(unsigned char* result, int id, int index) {
     bin.read(result + 1, result[0]);
 }
 
-void BlockMove(void* src, void* dst, size_t size) {
-    memcpy(dst, src, size);
-}
-
 }  // namespace antares

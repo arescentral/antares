@@ -6,8 +6,6 @@
 
 namespace antares {
 
-typedef struct { } Pattern;
-
 typedef Window* Port;
 
 void RGBBackColor(RGBColor* color);

@@ -16,8 +16,6 @@ enum {
     noErr = 0,
     paramErr = 1,
 
-    plainDBox = 200,
-
     nullEvent = 0,
     everyEvent = 300,
     mouseDown = 303,
@@ -45,10 +43,6 @@ typedef unsigned char* Ptr;
 typedef Ptr* Handle;
 
 void Microseconds(uint64_t* wide);
-
-void BlockMove(void* src, void* dst, size_t size);
-
-typedef void* AddrBlock;
 
 #define nil NULL
 
@@ -116,8 +110,6 @@ int TickCount();
 
 bool Button();
 STUB0(GetDblTime, double(), 0.0);
-
-STUB1(mAssert, void(bool condition));
 
 STUB4(ParamText, void(const unsigned char*, const unsigned char*,
       const unsigned char*, const unsigned char*));
