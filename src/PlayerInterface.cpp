@@ -361,7 +361,7 @@ void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
         retroTextSpec.textLength = *levelName;
         retroTextSpec.text.reset(new std::string);
         for (int i = 0; i < retroTextSpec.textLength; ++i) {
-            (*retroTextSpec.text)[i] = strPtr[i];
+            *retroTextSpec.text += strPtr[i];
         }
 
         retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
@@ -3237,7 +3237,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
 //          retroTextSpec.text = NewHandle( 1);
             retroTextSpec.text.reset(new std::string);
             for (int i = 0; i < sectionLength; ++i) {
-                (*retroTextSpec.text)[i] = sectionStart[i];
+                *retroTextSpec.text += sectionStart[i];
             }
             if (true) {
                 if (retroTextSpec.text.get() != nil) {
