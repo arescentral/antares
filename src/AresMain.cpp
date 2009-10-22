@@ -444,14 +444,6 @@ void MainPlay(int whichScenario) {
     globals()->gOptions &= ~kOptionReplay;
 }
 
-void StartNewGame() {
-    globals()->gOptions &= ~kOptionReplay;
-    int whichScenario = DoSelectLevelInterface(GetStartingLevelPreference());
-    if (whichScenario >= 0) {
-        MainPlay(whichScenario);
-    }
-}
-
 void StartReplay() {
     globals()->gOptions |= kOptionReplay;
 

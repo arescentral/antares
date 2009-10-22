@@ -44,12 +44,12 @@ class InterfaceScreen : public EventListener {
     double last_event() const;
     virtual void adjust_interface();
     virtual void handle_button(int button) = 0;
+    virtual void draw() const;
 
     const interfaceItemType& item(int index) const;
     interfaceItemType* mutable_item(int index);
 
   private:
-    void draw() const;
 
     enum State {
         NORMAL,

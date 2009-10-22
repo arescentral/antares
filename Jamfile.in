@@ -63,6 +63,7 @@ Main Antares : src/Admiral.cpp
                src/ScenarioData.cpp
                src/ScenarioMaker.cpp
                src/ScreenLabel.cpp
+               src/SelectLevelScreen.cpp
                src/ScrollStars.cpp
                src/ScrollTextScreen.cpp
                src/SoundFX.cpp

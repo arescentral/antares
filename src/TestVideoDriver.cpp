@@ -107,27 +107,37 @@ bool MissionBriefingVideoDriver::wait_next_event(EventRecord* evt, double) {
         return true;
       case SELECT_LEVEL_INTERFACE:
         {
-            evt->what = autoKey;
-            evt->message = 0x2400;  // RTRN
-            if (!get_output_dir().empty()) {
-                DumpTo(get_output_dir() + "/select-level.bin");
+            if (_key_down) {
+                evt->what = keyUp;
+                _key_down = false;
+            } else {
+                if (!get_output_dir().empty()) {
+                    DumpTo(get_output_dir() + "/select-level.bin");
+                }
+                evt->what = autoKey;
+                _key_down = true;
             }
+            evt->message = 0x2400;  // RTRN
         }
         return true;
       case MISSION_INTERFACE:
         {
             char path[64];
-            sprintf(path, "/mission-%u.bin", _briefing_num);
-            if (!get_output_dir().empty()) {
-                DumpTo(get_output_dir() + path);
-            }
-            ++_briefing_num;
             if (_briefing_num >= 9) {
                 exit(0);
+            } else if (_key_down) {
+                evt->what = keyUp;
+                _key_down = false;
             } else {
+                sprintf(path, "/mission-%u.bin", _briefing_num);
+                if (!get_output_dir().empty()) {
+                    DumpTo(get_output_dir() + path);
+                }
+                ++_briefing_num;
                 evt->what = autoKey;
-                evt->message = 0x7C00;  // RGHT
+                _key_down = true;
             }
+            evt->message = 0x7C00;  // RGHT
         }
         return true;
       default:

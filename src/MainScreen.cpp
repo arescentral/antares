@@ -26,6 +26,7 @@
 #include "PlayerInterface.hpp"
 #include "Randomize.hpp"
 #include "ScrollTextScreen.hpp"
+#include "SelectLevelScreen.hpp"
 #include "Time.hpp"
 
 namespace antares {
@@ -44,7 +45,7 @@ MainScreen::MainScreen()
 MainScreen::~MainScreen() { }
 
 void MainScreen::become_front() {
-    _scroll_text.reset();
+    _next_listener.reset();
     InterfaceScreen::become_front();
     VideoDriver::driver()->set_game_state(MAIN_SCREEN_INTERFACE);
 }
@@ -83,13 +84,14 @@ void MainScreen::handle_button(int button) {
         break;
 
       case REPLAY_INTRO:
-        _scroll_text.reset(new ScrollTextScreen(5600, kTitleTextScrollWidth, 15.0));
-        VideoDriver::driver()->push_listener(_scroll_text.get());
+        _next_listener.reset(new ScrollTextScreen(5600, kTitleTextScrollWidth, 15.0));
+        VideoDriver::driver()->push_listener(_next_listener.get());
         break;
 
       case START_NEW_GAME:
-        StartNewGame();
-        become_front();
+        globals()->gOptions &= ~kOptionReplay;
+        _next_listener.reset(new SelectLevelScreen);
+        VideoDriver::driver()->push_listener(_next_listener.get());
         break;
 
       case START_NETWORK_GAME:
@@ -98,8 +100,8 @@ void MainScreen::handle_button(int button) {
         break;
 
       case ABOUT_ARES:
-        _scroll_text.reset(new ScrollTextScreen(6500, 540, 30.0));
-        VideoDriver::driver()->push_listener(_scroll_text.get());
+        _next_listener.reset(new ScrollTextScreen(6500, 540, 30.0));
+        VideoDriver::driver()->push_listener(_next_listener.get());
         break;
 
       case OPTIONS:

@@ -77,7 +77,6 @@ short GetInGameListLength( void);
 void GetInGameListName(short, unsigned char*);
 bool IsThisInGameHilited( short, bool);
 long DoNetLevelInterface( void);
-long DoSelectLevelInterface( long);
 void DrawLevelNameInBox(unsigned char*, long, short, long);
 bool DoMissionInterface( long);
 long UpdateMissionBriefPoint( interfaceItemType *, long, long, coordPointType *, long, long,

@@ -15,8 +15,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_MAIN_SCREEN_HPP_
-#define ANTARES_MAIN_SCREEN_HPP_
+#ifndef ANTARES_SELECT_LEVEL_SCREEN_HPP_
+#define ANTARES_SELECT_LEVEL_SCREEN_HPP_
 
 #include "InterfaceScreen.hpp"
 #include "SmartPtr.hpp"
@@ -25,37 +25,37 @@ namespace antares {
 
 class ScrollTextScreen;
 
-class MainScreen : public InterfaceScreen {
+class SelectLevelScreen : public InterfaceScreen {
   public:
-    MainScreen();
-    ~MainScreen();
+    SelectLevelScreen();
+    ~SelectLevelScreen();
 
     virtual void become_front();
-
-    virtual double delay();
-    virtual void fire_timer();
 
   protected:
     virtual void adjust_interface();
     virtual void handle_button(int button);
+    virtual void draw() const;
 
   private:
-    enum Button {
-        START_NEW_GAME = 0,
-        START_NETWORK_GAME = 1,
-        OPTIONS = 2,
-        QUIT = 3,
-        ABOUT_ARES = 4,
-        DEMO = 5,
-        REPLAY_INTRO = 6,
+    enum Item {
+        // Buttons:
+        OK = 0,
+        CANCEL = 1,
+        PREVIOUS = 2,
+        NEXT = 3,
+
+        // Text box:
+        NAME = 4,
     };
 
-    double _last_event;
-    scoped_ptr<EventListener> _next_listener;
+    void draw_level_name(unsigned char* name, long fontNum, long itemNum) const;
 
-    DISALLOW_COPY_AND_ASSIGN(MainScreen);
+    int _chapter;
+
+    DISALLOW_COPY_AND_ASSIGN(SelectLevelScreen);
 };
 
 }  // namespace antares
 
-#endif  // ANTARES_MAIN_SCREEN_HPP_
+#endif  // ANTARES_SELECT_LEVEL_SCREEN_HPP_
