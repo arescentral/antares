@@ -135,6 +135,7 @@ void RetroText::wrap_to(int width, int line_spacing) {
     mSetDirectFont(_font);
     _width = width;
     _line_spacing = line_spacing;
+    _auto_width = 0;
     int h = 0;
     int v = 0;
 
@@ -148,6 +149,7 @@ void RetroText::wrap_to(int width, int line_spacing) {
                 v += mDirectFontHeight() + _line_spacing;
                 h = move_word_down(i, v);
             }
+            _auto_width = std::max(_auto_width, h);
             break;
 
           case TAB:
@@ -177,6 +179,10 @@ int RetroText::width() const {
 
 int RetroText::height() const {
     return _height;
+}
+
+int RetroText::auto_width() const {
+    return _auto_width;
 }
 
 void RetroText::draw(PixMap* pix, const Rect& bounds) const {

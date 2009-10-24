@@ -36,6 +36,7 @@ class RetroText {
 
     int width() const;
     int height() const;
+    int auto_width() const;
 
     void draw(PixMap* pix, const Rect& bounds) const;
 
@@ -63,6 +64,7 @@ class RetroText {
     std::vector<RetroChar> _chars;
     int _width;
     int _height;
+    int _auto_width;
     int _line_spacing;
     const int _font;
 
