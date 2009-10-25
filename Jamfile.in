@@ -67,6 +67,7 @@ Main Antares : src/Admiral.cpp
                src/SelectLevelScreen.cpp
                src/ScrollStars.cpp
                src/ScrollTextScreen.cpp
+               src/SoloGame.cpp
                src/SoundFX.cpp
                src/SpaceObjectHandling.cpp
                src/SpriteCursor.cpp

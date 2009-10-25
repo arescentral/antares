@@ -39,6 +39,7 @@ const int kSelectLevelScreenResID = 5011;
 
 SelectLevelScreen::SelectLevelScreen()
         : InterfaceScreen(kSelectLevelScreenResID),
+          _cancelled(false),
           _chapter(GetStartingLevelPreference()) { }
 
 SelectLevelScreen::~SelectLevelScreen() { }
@@ -46,6 +47,18 @@ SelectLevelScreen::~SelectLevelScreen() { }
 void SelectLevelScreen::become_front() {
     InterfaceScreen::become_front();
     VideoDriver::driver()->set_game_state(SELECT_LEVEL_INTERFACE);
+}
+
+bool SelectLevelScreen::cancelled() const {
+    return _cancelled;
+}
+
+int SelectLevelScreen::chapter() const {
+    return _chapter;
+}
+
+int SelectLevelScreen::level() const {
+    return GetScenarioNumberFromChapterNumber(_chapter);
 }
 
 void SelectLevelScreen::adjust_interface() {
@@ -64,14 +77,8 @@ void SelectLevelScreen::adjust_interface() {
 void SelectLevelScreen::handle_button(int button) {
     switch (button) {
       case OK:
-        {
-            int level = GetScenarioNumberFromChapterNumber(_chapter);
-            MainPlay(level);
-            VideoDriver::driver()->pop_listener(this);
-        }
-        break;
-
       case CANCEL:
+        _cancelled = (button == CANCEL);
         VideoDriver::driver()->pop_listener(this);
         break;
 

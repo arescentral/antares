@@ -15,45 +15,41 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_MAIN_SCREEN_HPP_
-#define ANTARES_MAIN_SCREEN_HPP_
+#include "SoloGame.hpp"
 
-#include "InterfaceScreen.hpp"
-#include "SmartPtr.hpp"
+#include "AresMain.hpp"
+#include "SelectLevelScreen.hpp"
 
 namespace antares {
 
-class MainScreen : public InterfaceScreen {
-  public:
-    MainScreen();
-    ~MainScreen();
+SoloGame::SoloGame()
+        : _state(NEW) { }
 
-    virtual void become_front();
+SoloGame::~SoloGame() { }
 
-    virtual double delay();
-    virtual void fire_timer();
+void SoloGame::become_front() {
+    switch (_state) {
+      case NEW:
+        _state = SELECT_LEVEL;
+        _select_level.reset(new SelectLevelScreen);
+        VideoDriver::driver()->push_listener(_select_level.get());
+        break;
 
-  protected:
-    virtual void adjust_interface();
-    virtual void handle_button(int button);
+      case SELECT_LEVEL:
+        _state = PLAYING;
+        start_main_play(_select_level->level());
+        _select_level.reset();
+        break;
 
-  private:
-    enum Button {
-        START_NEW_GAME = 0,
-        START_NETWORK_GAME = 1,
-        OPTIONS = 2,
-        QUIT = 3,
-        ABOUT_ARES = 4,
-        DEMO = 5,
-        REPLAY_INTRO = 6,
-    };
+      case PLAYING:
+        VideoDriver::driver()->pop_listener(this);
+        break;
+    }
+}
 
-    double _last_event;
-    scoped_ptr<EventListener> _next_listener;
-
-    DISALLOW_COPY_AND_ASSIGN(MainScreen);
-};
+void SoloGame::start_main_play(int level) {
+    MainPlay(level);
+    become_front();
+}
 
 }  // namespace antares
-
-#endif  // ANTARES_MAIN_SCREEN_HPP_

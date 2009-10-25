@@ -32,6 +32,10 @@ class SelectLevelScreen : public InterfaceScreen {
 
     virtual void become_front();
 
+    bool cancelled() const;
+    int chapter() const;
+    int level() const;
+
   protected:
     virtual void adjust_interface();
     virtual void handle_button(int button);
@@ -51,6 +55,7 @@ class SelectLevelScreen : public InterfaceScreen {
 
     void draw_level_name(unsigned char* name, long fontNum, long itemNum) const;
 
+    bool _cancelled;
     int _chapter;
 
     DISALLOW_COPY_AND_ASSIGN(SelectLevelScreen);

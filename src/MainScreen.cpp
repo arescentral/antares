@@ -26,7 +26,7 @@
 #include "PlayerInterface.hpp"
 #include "Randomize.hpp"
 #include "ScrollTextScreen.hpp"
-#include "SelectLevelScreen.hpp"
+#include "SoloGame.hpp"
 #include "Time.hpp"
 
 namespace antares {
@@ -90,7 +90,7 @@ void MainScreen::handle_button(int button) {
 
       case START_NEW_GAME:
         globals()->gOptions &= ~kOptionReplay;
-        _next_listener.reset(new SelectLevelScreen);
+        _next_listener.reset(new SoloGame);
         VideoDriver::driver()->push_listener(_next_listener.get());
         break;
 
