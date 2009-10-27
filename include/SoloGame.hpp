@@ -18,6 +18,7 @@
 #ifndef ANTARES_SOLO_GAME_HPP_
 #define ANTARES_SOLO_GAME_HPP_
 
+#include "AresMain.hpp"
 #include "SmartPtr.hpp"
 #include "VideoDriver.hpp"
 
@@ -40,9 +41,11 @@ class SoloGame : public EventListener {
     };
     State _state;
 
-    void start_main_play(int level);
+    void start_main_play();
 
     scoped_ptr<SelectLevelScreen> _select_level;
+    int _scenario;
+    GameResult _game_result;
 };
 
 }  // namespace antares

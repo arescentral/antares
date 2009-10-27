@@ -57,10 +57,6 @@ int SelectLevelScreen::chapter() const {
     return _chapter;
 }
 
-int SelectLevelScreen::level() const {
-    return GetScenarioNumberFromChapterNumber(_chapter);
-}
-
 void SelectLevelScreen::adjust_interface() {
     if (_chapter > 1) {
         mutable_item(PREVIOUS)->set_status(kActive);

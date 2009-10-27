@@ -34,7 +34,6 @@ class SelectLevelScreen : public InterfaceScreen {
 
     bool cancelled() const;
     int chapter() const;
-    int level() const;
 
   protected:
     virtual void adjust_interface();

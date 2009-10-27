@@ -25,9 +25,17 @@ namespace antares {
 
 #define kHackLevelMax   26//4//21
 
+enum GameResult {
+    NO_GAME = -1,
+    LOSE_GAME = 0,
+    WIN_GAME = 1,
+    RESTART_GAME = 2,
+    QUIT_GAME = 3,
+};
+
 void AresMain();
 void Pause();
-void MainPlay(int whichScenario);
+void MainPlay(int whichScenario, GameResult* gameResult, long* gameLength);
 void StartReplay();
 
 }  // namespace antares

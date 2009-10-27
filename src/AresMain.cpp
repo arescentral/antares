@@ -85,14 +85,6 @@ namespace {
 
 const int kReplayResID = 600;
 
-enum GameResult {
-    NO_GAME = -1,
-    LOSE_GAME = 0,
-    WIN_GAME = 1,
-    RESTART_GAME = 2,
-    QUIT_GAME = 3,
-};
-
 const int kTitleTextScrollWidth = 450;
 
 }  // namespace
@@ -279,169 +271,53 @@ void AresMain() {
     VideoDriver::driver()->loop();
 }
 
-void MainPlay(int whichScenario) {
-    long gameLength;
+void MainPlay(int whichScenario, GameResult* gameResult, long* gameLength) {
+    *gameResult = NO_GAME;
+    RGBColor fadeColor = { 0, 0, 0 };
+    if (globals()->gOptions & kOptionMusicIdle) {
+        AutoMusicFadeTo(60, &fadeColor, false);
+        StopAndUnloadSong();
+    } else {
+        AutoFadeTo( 60, &fadeColor, false);
+    }
 
-    StopAndUnloadSong();
+    RemoveAllSpaceObjects();
+    globals()->gGameOver = 0;
 
-    GameResult gameResult = NO_GAME;
-    do {
-        if ((gameResult == NO_GAME) || (gameResult == WIN_GAME)) {
-            if (GetScenarioPrologueID(whichScenario) > 0) {
-                DoScrollText(
-                        GetScenarioPrologueID( whichScenario),
-                        4, kTitleTextScrollWidth, kTitleFontNum, 4002);
-            }
-        }
-
-        gameResult = NO_GAME;
-        RGBColor fadeColor = { 0, 0, 0 };
-        if (globals()->gOptions & kOptionMusicIdle) {
-            AutoMusicFadeTo(60, &fadeColor, false);
-            StopAndUnloadSong();
-        } else {
-            AutoFadeTo( 60, &fadeColor, false);
-        }
-
-        RemoveAllSpaceObjects();
-        globals()->gGameOver = 0;
-
-        if (globals()->gOptions & kOptionMusicIdle) {
-            LoadSong(3000);
-            SetSongVolume( kMaxMusicVolume);
-            PlaySong();
-        }
-
-        gameResult = NO_GAME;
-        if (!ConstructScenario(whichScenario)) {
-            break;
-        }
-
-        if (globals()->gOptions & kOptionMusicIdle) {
-            StopAndUnloadSong();
-        }
-
-        DrawInstrumentPanel();
-
-        if (globals()->gOptions & kOptionMusicPlay) {
-            LoadSong(gThisScenario->songID);
-            SetSongVolume(kMusicVolume);
-            PlaySong();
-        }
-        ResetLastTime((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
-
-        VideoDriver::driver()->set_game_state(PLAY_GAME);
-        gameResult = PlayTheGame(&gameLength);
-        VideoDriver::driver()->set_game_state(DONE_GAME);
-
-        switch (gameResult) {
-          case LOSE_GAME:
-            if (!(globals()->gOptions & kOptionReplay)) {
-                if (globals()->gScenarioWinner.text != -1) {
-                    DoMissionDebriefingText(
-                            globals()->gScenarioWinner.text,
-                            -1, -1, -1, -1, -1, -1, -1);
-                }
-                switch (DoPlayAgain(false, false)) {
-                  case PLAY_AGAIN_RESTART:
-                    gameResult = RESTART_GAME;
-                    break;
-
-                  case PLAY_AGAIN_QUIT:
-                    gameResult = QUIT_GAME;
-                    gActiveWorld->fill(BLACK);
-                    AutoFadeFrom(1, false);
-                    break;
-
-                  default:
-                    fprintf(stderr, "DoPlayAgain(false, false) returned bad value\n");
-                    exit(1);
-                }
-            }
-            break;
-
-          case WIN_GAME:
-            {
-                if (globals()->gScenarioWinner.text != -1) {
-                    DoMissionDebriefingText(
-                            globals()->gScenarioWinner.text,
-                            gameLength, gThisScenario->parTime,
-                            GetAdmiralLoss(0), gThisScenario->parLosses,
-                            GetAdmiralKill(0), gThisScenario->parKills,
-                            100);
-                }
-
-                fadeColor.red = fadeColor.green = fadeColor.blue = 0;
-                if (globals()->gOptions & kOptionMusicPlay) {
-                    AutoMusicFadeTo( 60, &fadeColor, false);
-                    StopAndUnloadSong();
-                } else {
-                    AutoFadeTo( 60, &fadeColor, false);
-                }
-
-                gActiveWorld->fill(BLACK);
-                AutoFadeFrom( 1, false);
-
-                // normal scrolltext song
-                int scroll_song = 4002;
-                if (globals()->gScenarioWinner.next == -1) {
-                    // we win but no next level? Play triumph song
-                    scroll_song = 4003;
-                }
-
-                if (GetScenarioEpilogueID( whichScenario) > 0) {
-                    DoScrollText(
-                            GetScenarioEpilogueID( whichScenario),
-                            4, kTitleTextScrollWidth, kTitleFontNum, scroll_song);
-                }
-
-                if (globals()->gOptions & kOptionMusicIdle) {
-                    gActiveWorld->fill(BLACK);
-                    StopAndUnloadSong();
-                }
-
-                if (globals()->gScenarioWinner.next == -1) {
-                    whichScenario = -1;
-                } else {
-                    whichScenario = GetScenarioNumberFromChapterNumber(
-                            globals()->gScenarioWinner.next);
-                }
-
-                if ((!(globals()->gOptions & kOptionReplay))
-                        && (whichScenario <= GetScenarioNumber())
-                        && (whichScenario >= 0)) {
-                    int chapter = GetChapterNumberFromScenarioNumber(whichScenario);
-                    if ((chapter >= 0) && (chapter <= kHackLevelMax)
-                            && (chapter <= GetScenarioNumber())) {
-                        SaveStartingLevelPreferences(chapter);
-                    } else {
-                        whichScenario = -1;
-                    }
-                }
-            }
-            break;
-
-          default:
-            break;
-        }
-
-        globals()->gInputSource.reset();
-
-        if (globals()->gOptions & kOptionMusicPlay) {
-            StopAndUnloadSong();
-        }
-    } while ((gameResult != QUIT_GAME)
-            && (GetChapterNumberFromScenarioNumber(whichScenario) <= kHackLevelMax)
-            && (GetChapterNumberFromScenarioNumber(whichScenario) <= GetScenarioNumber())
-            && (whichScenario >= 0)
-            && (!(globals()->gOptions & kOptionReplay)));
-
-    if ( globals()->gOptions & kOptionMusicIdle) {
-        LoadSong(kTitleSongID);
-        SetSongVolume(kMaxMusicVolume);
+    if (globals()->gOptions & kOptionMusicIdle) {
+        LoadSong(3000);
+        SetSongVolume( kMaxMusicVolume);
         PlaySong();
     }
-    globals()->gOptions &= ~kOptionReplay;
+
+    *gameResult = NO_GAME;
+    if (!ConstructScenario(whichScenario)) {
+        *gameResult = QUIT_GAME;
+        return;
+    }
+
+    if (globals()->gOptions & kOptionMusicIdle) {
+        StopAndUnloadSong();
+    }
+
+    DrawInstrumentPanel();
+
+    if (globals()->gOptions & kOptionMusicPlay) {
+        LoadSong(gThisScenario->songID);
+        SetSongVolume(kMusicVolume);
+        PlaySong();
+    }
+    ResetLastTime((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
+
+    VideoDriver::driver()->set_game_state(PLAY_GAME);
+    *gameResult = PlayTheGame(gameLength);
+    VideoDriver::driver()->set_game_state(DONE_GAME);
+
+    globals()->gInputSource.reset();
+
+    if (globals()->gOptions & kOptionMusicPlay) {
+        StopAndUnloadSong();
+    }
 }
 
 void StartReplay() {
@@ -452,8 +328,11 @@ void StartReplay() {
 
     int saveSeed = gRandomSeed;
     gRandomSeed = globals()->gInputSource->random_seed();
-    MainPlay(whichScenario);
+    GameResult game_result = NO_GAME;
+    long game_length;
+    MainPlay(whichScenario, &game_result, &game_length);
     gRandomSeed = saveSeed;
+    globals()->gOptions &= ~kOptionReplay;
 }
 
 GameResult PlayTheGame(long *seconds) {
