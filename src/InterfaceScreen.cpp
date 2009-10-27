@@ -112,6 +112,11 @@ bool InterfaceScreen::mouse_up(int button, const Point& where) {
         return true;
     }
     if (_state == MOUSE_DOWN) {
+        // Save _hit_item and set it to 0 before calling handle_button(), as calling
+        // handle_button() can result in the deletion of `this`.
+        int hit_item = _hit_item;
+        _hit_item = 0;
+
         _state = NORMAL;
         interfaceItemType* const item = &_items[_hit_item];
         Rect bounds;
@@ -122,9 +127,8 @@ bool InterfaceScreen::mouse_up(int button, const Point& where) {
             if (item->kind == kTabBoxButton) {
                 item->item.radioButton.on = true;
             }
-            handle_button(_hit_item);
+            handle_button(hit_item);
         }
-        _hit_item = 0;
     }
     return true;
 }
@@ -157,6 +161,11 @@ bool InterfaceScreen::key_up(int key) {
     // TODO(sfiera): verify that the same key that was pressed was released.
     (void)key;
     if (_state == KEY_DOWN) {
+        // Save _hit_item and set it to 0 before calling handle_button(), as calling
+        // handle_button() can result in the deletion of `this`.
+        int hit_item = _hit_item;
+        _hit_item = 0;
+
         _state = NORMAL;
         interfaceItemType* const item = &_items[_hit_item];
         item->set_status(kActive);
@@ -164,8 +173,7 @@ bool InterfaceScreen::key_up(int key) {
             item->item.radioButton.on = true;
         }
         DrawAnyInterfaceItemOffToOn(*item);
-        handle_button(_hit_item);
-        _hit_item = 0;
+        handle_button(hit_item);
     }
     return true;
 }
