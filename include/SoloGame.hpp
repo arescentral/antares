@@ -37,7 +37,11 @@ class SoloGame : public EventListener {
     enum State {
         NEW,
         SELECT_LEVEL,
+        PROLOGUE,
+        START_LEVEL,
+        RESTART_LEVEL,
         PLAYING,
+        QUIT,
     };
     State _state;
 
@@ -46,6 +50,7 @@ class SoloGame : public EventListener {
     scoped_ptr<SelectLevelScreen> _select_level;
     int _scenario;
     GameResult _game_result;
+    scoped_ptr<EventListener> _next_listener;
 };
 
 }  // namespace antares

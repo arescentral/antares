@@ -27,6 +27,7 @@
 #include "SelectLevelScreen.hpp"
 #include "Music.hpp"
 #include "Options.hpp"
+#include "ScrollTextScreen.hpp"
 #include "Transitions.hpp"
 
 namespace antares {
@@ -49,40 +50,41 @@ void SoloGame::become_front() {
         break;
 
       case SELECT_LEVEL:
-        _state = PLAYING;
+        _state = START_LEVEL;
         _scenario = GetScenarioNumberFromChapterNumber(_select_level->chapter());
         _select_level.reset();
-        StopAndUnloadSong();
+        // fall through.
+
+      case START_LEVEL:
+        _state = PROLOGUE;
+        if (GetScenarioPrologueID(_scenario) > 0) {
+            _next_listener.reset(new ScrollTextScreen(
+                        GetScenarioPrologueID(_scenario), 450, 15.0, 4002));
+            VideoDriver::driver()->push_listener(_next_listener.get());
+            break;
+        }
+        // else fall through
+
+      case PROLOGUE:
+      case RESTART_LEVEL:
+        _state = PLAYING;
         start_main_play();
         break;
 
       case PLAYING:
+        fprintf(stderr, "Not yet reachable\n");
+        exit(1);
+        break;
+
+      case QUIT:
         VideoDriver::driver()->pop_listener(this);
-        start_main_play();
         break;
     }
 }
 
 void SoloGame::start_main_play() {
-    if ((_game_result == QUIT_GAME)
-            || (GetChapterNumberFromScenarioNumber(_scenario) > kHackLevelMax)
-            || (GetChapterNumberFromScenarioNumber(_scenario) > GetScenarioNumber())
-            || (_scenario < 0)) {
-        VideoDriver::driver()->pop_listener(this);
-        return;
-    }
-
     long game_length;
-
-    if ((_game_result == NO_GAME) || (_game_result == WIN_GAME)) {
-        if (GetScenarioPrologueID(_scenario) > 0) {
-            DoScrollText(
-                    GetScenarioPrologueID(_scenario), 4, 450, kTitleFontNum, 4002);
-        }
-    }
-
     _game_result = NO_GAME;
-
     MainPlay(_scenario, &_game_result, &game_length);
 
     switch (_game_result) {
@@ -93,11 +95,11 @@ void SoloGame::start_main_play() {
         }
         switch (DoPlayAgain(false, false)) {
           case PLAY_AGAIN_RESTART:
-            _game_result = RESTART_GAME;
+            _state = RESTART_LEVEL;
             break;
 
           case PLAY_AGAIN_QUIT:
-            _game_result = QUIT_GAME;
+            _state = QUIT;
             break;
 
           default:
@@ -159,11 +161,26 @@ void SoloGame::start_main_play() {
                     _scenario = 0;
                 }
             }
+
+            if (_scenario >= 0) {
+                _state = START_LEVEL;
+            } else {
+                _state = QUIT;
+            }
         }
         break;
 
-      default:
+      case RESTART_GAME:
+        _state = RESTART_LEVEL;
         break;
+
+      case QUIT_GAME:
+        _state = QUIT;
+        break;
+
+      default:
+        fprintf(stderr, "MainPlay() resulted in bad game_result\n");
+        exit(1);
     }
 
     become_front();
