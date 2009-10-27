@@ -50,8 +50,13 @@ class TestingVideoDriver : public VideoDriver {
 
 class MainScreenVideoDriver : public TestingVideoDriver {
   public:
+    MainScreenVideoDriver();
+
     virtual bool wait_next_event(EventRecord*, double);
     virtual int get_demo_scenario();
+
+  public:
+    bool _key_down;
 };
 
 class MissionBriefingVideoDriver : public TestingVideoDriver {
@@ -60,6 +65,7 @@ class MissionBriefingVideoDriver : public TestingVideoDriver {
 
     virtual bool wait_next_event(EventRecord* evt, double);
     virtual int get_demo_scenario();
+    virtual void get_keys(KeyMap keys);
 
   private:
     const int _level;
@@ -72,12 +78,13 @@ class DemoVideoDriver : public TestingVideoDriver {
     DemoVideoDriver(int level);
 
     virtual bool wait_next_event(EventRecord*, double);
-    void set_game_state(GameState state);
     virtual int get_demo_scenario();
     virtual void main_loop_iteration_complete(uint32_t game_time);
 
   private:
     int _level;
+    bool _started_replay;
+    bool _key_down;
 };
 
 }  // namespace antares

@@ -17,6 +17,7 @@
 
 #include "TestVideoDriver.hpp"
 
+#include <assert.h>
 #include "AresPreferences.hpp"
 #include "FakeDrawing.hpp"
 #include "Fakes.hpp"
@@ -73,14 +74,26 @@ void TestingVideoDriver::pop_listener(EventListener* listener) {
 
 GameState TestingVideoDriver::state() const { return _state; }
 
-bool MainScreenVideoDriver::wait_next_event(EventRecord*, double) {
+MainScreenVideoDriver::MainScreenVideoDriver()
+        : _key_down(false) { }
+
+bool MainScreenVideoDriver::wait_next_event(EventRecord* evt, double) {
     if (state() == MAIN_SCREEN_INTERFACE) {
-        if (!get_output_dir().empty()) {
-            DumpTo(get_output_dir() + "/main-screen.bin");
+        if (_key_down) {
+            evt->what = keyUp;
+            _key_down = false;
+        } else {
+            if (!get_output_dir().empty()) {
+                DumpTo(get_output_dir() + "/main-screen.bin");
+            }
+            evt->what = autoKey;
+            _key_down = true;
         }
-        exit(0);
+        evt->message = 0x0C00;  // Q
+        return true;
+    } else {
+        return false;
     }
-    return false;
 }
 
 int MainScreenVideoDriver::get_demo_scenario() { return -1; }
@@ -101,7 +114,11 @@ bool MissionBriefingVideoDriver::wait_next_event(EventRecord* evt, double) {
                 evt->what = autoKey;
                 _key_down = true;
             }
-            evt->message = 0x0100;  // S
+            if (_briefing_num >= 9) {
+                evt->message = 0x0C00;  // Q
+            } else {
+                evt->message = 0x0100;  // S
+            }
             globals()->gPreferencesData->startingLevel = _level;
         }
         return true;
@@ -123,9 +140,7 @@ bool MissionBriefingVideoDriver::wait_next_event(EventRecord* evt, double) {
       case MISSION_INTERFACE:
         {
             char path[64];
-            if (_briefing_num >= 9) {
-                exit(0);
-            } else if (_key_down) {
+            if (_key_down) {
                 evt->what = keyUp;
                 _key_down = false;
             } else {
@@ -137,7 +152,11 @@ bool MissionBriefingVideoDriver::wait_next_event(EventRecord* evt, double) {
                 evt->what = autoKey;
                 _key_down = true;
             }
-            evt->message = 0x7C00;  // RGHT
+            if (_briefing_num >= 9) {
+                evt->message = 0x3500;  // ESC
+            } else {
+                evt->message = 0x7C00;  // RGHT
+            }
         }
         return true;
       default:
@@ -147,8 +166,17 @@ bool MissionBriefingVideoDriver::wait_next_event(EventRecord* evt, double) {
 
 int MissionBriefingVideoDriver::get_demo_scenario() { return -1; }
 
+void MissionBriefingVideoDriver::get_keys(KeyMap keys) {
+    TestingVideoDriver::get_keys(keys);
+    if (state() == MISSION_INTERFACE && _briefing_num >= 9 && keyDown) {
+        keys[1] |= (0x01 << 13);
+    }
+}
+
 DemoVideoDriver::DemoVideoDriver(int level)
-        : _level(level) {
+        : _level(level),
+          _started_replay(false),
+          _key_down(false) {
     if (level != 0 && level != 5 && level != 23) {
         fprintf(stderr, "Only have demos of levels 0, 5, and 23; not %d.\n", level);
         exit(1);
@@ -158,12 +186,19 @@ DemoVideoDriver::DemoVideoDriver(int level)
     }
 }
 
-bool DemoVideoDriver::wait_next_event(EventRecord*, double) { return false; }
-
-void DemoVideoDriver::set_game_state(GameState state) {
-    TestingVideoDriver::set_game_state(state);
-    if (state == DONE_GAME) {
-        exit(0);
+bool DemoVideoDriver::wait_next_event(EventRecord* evt, double) {
+    if (_started_replay && state() == MAIN_SCREEN_INTERFACE) {
+        if (_key_down) {
+            evt->what = keyUp;
+            _key_down = false;
+        } else {
+            evt->what = autoKey;
+            _key_down = true;
+        }
+        evt->message = 0x0C00;  // Q
+        return true;
+    } else {
+        return false;
     }
 }
 
@@ -173,6 +208,7 @@ int DemoVideoDriver::get_demo_scenario() {
 
 void DemoVideoDriver::main_loop_iteration_complete(uint32_t game_time) {
     TestingVideoDriver::main_loop_iteration_complete(game_time);
+    _started_replay = true;
     if (game_time % 60 == 1) {
         char path[64];
         uint32_t seconds = game_time / 60;
