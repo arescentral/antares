@@ -19,15 +19,15 @@
 #define ANTARES_INTERFACE_SCREEN_HPP_
 
 #include <vector>
+#include "Card.hpp"
 #include "PlayerInterfaceItems.hpp"
 #include "SmartPtr.hpp"
-#include "VideoDriver.hpp"
 
 namespace antares {
 
 class PixMap;
 
-class InterfaceScreen : public EventListener {
+class InterfaceScreen : public Card {
   public:
     InterfaceScreen(int id);
     ~InterfaceScreen();

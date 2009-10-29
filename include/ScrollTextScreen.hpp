@@ -18,15 +18,15 @@
 #ifndef ANTARES_SCROLL_TEXT_HPP_
 #define ANTARES_SCROLL_TEXT_HPP_
 
+#include "Card.hpp"
 #include "Geometry.hpp"
 #include "SmartPtr.hpp"
-#include "VideoDriver.hpp"
 
 namespace antares {
 
 class PixMap;
 
-class ScrollTextScreen : public EventListener {
+class ScrollTextScreen : public Card {
   public:
     ScrollTextScreen(int text_id, int width, double speed);
     ScrollTextScreen(int text_id, int width, double speed, int song_id);

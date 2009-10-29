@@ -21,6 +21,7 @@
 #include "AresGlobalType.hpp"
 #include "AresPreferences.hpp"
 #include "AresMain.hpp"
+#include "CardStack.hpp"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
 #include "ScenarioMaker.hpp"
@@ -46,14 +47,14 @@ void SoloGame::become_front() {
       case NEW:
         _state = SELECT_LEVEL;
         _select_level.reset(new SelectLevelScreen);
-        VideoDriver::driver()->push_listener(_select_level.get());
+        stack()->push(_select_level.get());
         break;
 
       case SELECT_LEVEL:
         _state = START_LEVEL;
         if (_select_level->cancelled()) {
             _state = QUIT;
-            VideoDriver::driver()->pop_listener(this);
+            stack()->pop(this);
             break;
         } else {
             _scenario = GetScenarioNumberFromChapterNumber(_select_level->chapter());
@@ -66,7 +67,7 @@ void SoloGame::become_front() {
         if (GetScenarioPrologueID(_scenario) > 0) {
             _next_listener.reset(new ScrollTextScreen(
                         GetScenarioPrologueID(_scenario), 450, 15.0, 4002));
-            VideoDriver::driver()->push_listener(_next_listener.get());
+            stack()->push(_next_listener.get());
             break;
         }
         // else fall through
@@ -83,7 +84,7 @@ void SoloGame::become_front() {
         break;
 
       case QUIT:
-        VideoDriver::driver()->pop_listener(this);
+        stack()->pop(this);
         break;
     }
 }

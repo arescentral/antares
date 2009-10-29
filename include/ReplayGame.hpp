@@ -19,14 +19,14 @@
 #define ANTARES_REPLAY_GAME_HPP_
 
 #include "AresMain.hpp"
+#include "Card.hpp"
 #include "SmartPtr.hpp"
-#include "VideoDriver.hpp"
 
 namespace antares {
 
 class SelectLevelScreen;
 
-class ReplayGame : public EventListener {
+class ReplayGame : public Card {
   public:
     ReplayGame(int scenario);
     ~ReplayGame();
@@ -46,7 +46,7 @@ class ReplayGame : public EventListener {
     const int _scenario;
     GameResult _game_result;
     int _saved_seed;
-    scoped_ptr<EventListener> _next_listener;
+    scoped_ptr<Card> _next_listener;
 };
 
 }  // namespace antares

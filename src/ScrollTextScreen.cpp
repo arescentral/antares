@@ -21,6 +21,7 @@
 #include <string>
 #include <vector>
 #include "AresGlobalType.hpp"
+#include "CardStack.hpp"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
 #include "FakeDrawing.hpp"
@@ -195,13 +196,13 @@ void ScrollTextScreen::resign_front() {
 bool ScrollTextScreen::mouse_down(int button, const Point& where) {
     (void)button;
     (void)where;
-    VideoDriver::driver()->pop_listener(this);
+    stack()->pop(this);
     return true;
 }
 
 bool ScrollTextScreen::key_down(int key) {
     (void)key;
-    VideoDriver::driver()->pop_listener(this);
+    stack()->pop(this);
     return true;
 }
 
@@ -220,7 +221,7 @@ void ScrollTextScreen::fire_timer() {
             gActiveWorld->fill(BLACK);
             CopyBits(_pix_map.get(), gRealWorld, _window, dest);
         } else {
-            VideoDriver::driver()->pop_listener(this);
+            stack()->pop(this);
         }
     }
 }

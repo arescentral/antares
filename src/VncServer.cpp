@@ -22,6 +22,7 @@
 #include <exception>
 
 #include "BinaryStream.hpp"
+#include "CardStack.hpp"
 #include "Casts.hpp"
 #include "ColorTable.hpp"
 #include "FakeDrawing.hpp"
@@ -826,23 +827,15 @@ int VncVideoDriver::ticks() {
     return (usecs() - _start_time) * 60 / 1000000;
 }
 
-void VncVideoDriver::loop() {
-    while (!_listeners.empty()) {
+void VncVideoDriver::loop(CardStack* stack) {
+    while (!stack->empty()) {
         EventRecord evt;
-        if (wait_next_event(&evt, _listeners.next_delay())) {
-            _listeners.send(evt);
+        if (wait_next_event(&evt, stack->next_delay())) {
+            stack->send(evt);
         } else {
-            _listeners.fire_next_timer();
+            stack->fire_next_timer();
         }
     }
-}
-
-void VncVideoDriver::push_listener(EventListener* listener) {
-    _listeners.push(listener);
-}
-
-void VncVideoDriver::pop_listener(EventListener* listener) {
-    _listeners.pop(listener);
 }
 
 }  // namespace antares

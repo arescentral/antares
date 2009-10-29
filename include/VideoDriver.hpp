@@ -24,6 +24,8 @@
 
 namespace antares {
 
+class CardStack;
+
 enum GameState {
     UNKNOWN,
     MAIN_SCREEN_INTERFACE,
@@ -31,28 +33,6 @@ enum GameState {
     MISSION_INTERFACE,
     PLAY_GAME,
     DONE_GAME,
-};
-
-class EventListener {
-  public:
-    virtual ~EventListener() { }
-
-    // Stack-related.
-    virtual void become_front() { }
-    virtual void resign_front() { }
-
-    // Mouse-related.
-    virtual bool mouse_down(int button, const Point& loc) { (void)button; (void)loc; return false; }
-    virtual bool mouse_up(int button, const Point& loc) { (void)button; (void)loc; return false; }
-    virtual bool mouse_moved(const Point& loc) { (void)loc; return false; }
-
-    // Key-related.
-    virtual bool key_down(int key) { (void)key; return false; }
-    virtual bool key_up(int key) { (void)key; return false; }
-
-    // Timer-related.
-    virtual double delay() { return 0.0; }
-    virtual void fire_timer() { }
 };
 
 class VideoDriver {
@@ -69,10 +49,8 @@ class VideoDriver {
     virtual void main_loop_iteration_complete(uint32_t game_time) = 0;
     virtual int ticks() = 0;
 
-    // EventLoop interface.  Should eventually be its own class.
-    virtual void loop() = 0;
-    virtual void push_listener(EventListener* listener) = 0;
-    virtual void pop_listener(EventListener* listener) = 0;
+    // Event loop interface.  Should eventually be its own class.
+    virtual void loop(CardStack* stack) = 0;
 
     static VideoDriver* driver();
     static void set_driver(VideoDriver* mode);

@@ -19,6 +19,7 @@
 
 #include "AresMain.hpp"
 #include "AresPreferences.hpp"
+#include "CardStack.hpp"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
 #include "OffscreenGWorld.hpp"
@@ -62,7 +63,7 @@ void LoadingScreen::fire_timer() {
     _loading_progress += 1.0 / 60.0;
     draw();
     if (_loading_progress >= 1.0) {
-        VideoDriver::driver()->pop_listener(this);
+        stack()->pop(this);
     }
 }
 

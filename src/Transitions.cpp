@@ -23,6 +23,7 @@
 
 #include "AresGlobalType.hpp"
 #include "AresMain.hpp"
+#include "CardStack.hpp"
 #include "ColorTable.hpp"
 #include "ColorTranslation.hpp"
 #include "Debug.hpp"
@@ -361,7 +362,7 @@ bool ColorFade::mouse_down(int button, const Point& loc) {
     (void)loc;
     if (_allow_skip) {
         _skipped = true;
-        VideoDriver::driver()->pop_listener(this);
+        stack()->pop(this);
     }
     return true;
 }
@@ -380,7 +381,7 @@ void ColorFade::fire_timer() {
         }
         RestoreEntries(_current_colors);
     } else {
-        VideoDriver::driver()->pop_listener(this);
+        stack()->pop(this);
     }
 }
 
@@ -412,7 +413,7 @@ void PictFade::become_front() {
       case WANING:
         _state = NEW;
         _skipped = _skipped || _color_fade->skipped();
-        VideoDriver::driver()->pop_listener(this);
+        stack()->pop(this);
         break;
 
       default:
@@ -433,7 +434,7 @@ bool PictFade::mouse_down(int button, const Point& loc) {
     (void)loc;
     _skipped = true;
     if (this->skip()) {
-        VideoDriver::driver()->pop_listener(this);
+        stack()->pop(this);
     } else {
         wane();
     }
@@ -466,7 +467,7 @@ void PictFade::wax() {
     RGBColor black = {0, 0, 0};
     _color_fade.reset(new ColorFade(
                 _clut_id, ColorFade::FROM_COLOR, black, this->fade_time(), true));
-    VideoDriver::driver()->push_listener(_color_fade.get());
+    stack()->push(_color_fade.get());
 }
 
 void PictFade::wane() {
@@ -474,7 +475,7 @@ void PictFade::wane() {
     RGBColor black = {0, 0, 0};
     _color_fade.reset(new ColorFade(
                 _clut_id, ColorFade::TO_COLOR, black, this->fade_time(), true));
-    VideoDriver::driver()->push_listener(_color_fade.get());
+    stack()->push(_color_fade.get());
 }
 
 bool PictFade::skipped() const {

@@ -15,45 +15,47 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_MAIN_SCREEN_HPP_
-#define ANTARES_MAIN_SCREEN_HPP_
+#ifndef ANTARES_CARD_HPP_
+#define ANTARES_CARD_HPP_
 
-#include "InterfaceScreen.hpp"
-#include "SmartPtr.hpp"
+#include "Geometry.hpp"
 
 namespace antares {
 
-class MainScreen : public InterfaceScreen {
+class CardStack;
+
+class Card {
   public:
-    MainScreen();
-    ~MainScreen();
+    Card();
+    virtual ~Card();
 
+    // Stack-related.
     virtual void become_front();
+    virtual void resign_front();
 
+    // Mouse-related.
+    virtual bool mouse_down(int button, const Point& loc);
+    virtual bool mouse_up(int button, const Point& loc);
+    virtual bool mouse_moved(const Point& loc);
+
+    // Key-related.
+    virtual bool key_down(int key);
+    virtual bool key_up(int key);
+
+    // Timer-related.
     virtual double delay();
     virtual void fire_timer();
 
-  protected:
-    virtual void adjust_interface();
-    virtual void handle_button(int button);
+    CardStack* stack() const;
 
   private:
-    enum Button {
-        START_NEW_GAME = 0,
-        START_NETWORK_GAME = 1,
-        OPTIONS = 2,
-        QUIT = 3,
-        ABOUT_ARES = 4,
-        DEMO = 5,
-        REPLAY_INTRO = 6,
-    };
+    friend class CardStack;
 
-    double _last_event;
-    scoped_ptr<Card> _next_listener;
+    void set_stack(CardStack* stack);
 
-    DISALLOW_COPY_AND_ASSIGN(MainScreen);
+    CardStack* _stack;
 };
 
 }  // namespace antares
 
-#endif  // ANTARES_MAIN_SCREEN_HPP_
+#endif  // ANTARES_CARD_HPP_

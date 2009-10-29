@@ -53,23 +53,15 @@ void TestingVideoDriver::set_game_state(GameState state) {
     _state = state;
 }
 
-void TestingVideoDriver::loop() {
-    while (!_listeners.empty()) {
+void TestingVideoDriver::loop(CardStack* stack) {
+    while (!stack->empty()) {
         EventRecord evt;
-        if (wait_next_event(&evt, _listeners.next_delay())) {
-            _listeners.send(evt);
+        if (wait_next_event(&evt, stack->next_delay())) {
+            stack->send(evt);
         } else {
-            _listeners.fire_next_timer();
+            stack->fire_next_timer();
         }
     }
-}
-
-void TestingVideoDriver::push_listener(EventListener* listener) {
-    _listeners.push(listener);
-}
-
-void TestingVideoDriver::pop_listener(EventListener* listener) {
-    _listeners.pop(listener);
 }
 
 GameState TestingVideoDriver::state() const { return _state; }

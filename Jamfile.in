@@ -15,12 +15,13 @@ Main Antares : src/Admiral.cpp
                src/Beam.cpp
                src/BinaryStream.cpp
                src/BriefingRenderer.cpp
+               src/Card.cpp
+               src/CardStack.cpp
                src/ColorTable.cpp
                src/ColorTranslation.cpp
                src/DirectText.cpp
                src/EZSprite.cpp
                src/Error.cpp
-               src/EventListenerList.cpp
                src/FakeDrawing.cpp
                src/FakeHandles.cpp
                src/FakeMath.cpp

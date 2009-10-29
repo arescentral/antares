@@ -19,12 +19,14 @@
 
 #include "AresMain.hpp"
 #include "AresPreferences.hpp"
+#include "CardStack.hpp"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
 #include "OffscreenGWorld.hpp"
 #include "PlayerInterface.hpp"
 #include "RetroText.hpp"
 #include "ScenarioMaker.hpp"
+#include "VideoDriver.hpp"
 
 namespace antares {
 
@@ -75,7 +77,7 @@ void SelectLevelScreen::handle_button(int button) {
       case OK:
       case CANCEL:
         _cancelled = (button == CANCEL);
-        VideoDriver::driver()->pop_listener(this);
+        stack()->pop(this);
         break;
 
       case PREVIOUS:

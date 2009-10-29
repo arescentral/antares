@@ -20,7 +20,6 @@
 
 #include <queue>
 #include <map>
-#include "EventListenerList.hpp"
 #include "MappedFile.hpp"
 #include "VideoDriver.hpp"
 
@@ -40,9 +39,7 @@ class VncVideoDriver : public VideoDriver {
     virtual void main_loop_iteration_complete(uint32_t game_time);
     virtual int ticks();
 
-    virtual void loop();
-    virtual void push_listener(EventListener* listener);
-    virtual void pop_listener(EventListener* listener);
+    virtual void loop(CardStack* stack);
 
   private:
     bool vnc_poll(int64_t timeout);
@@ -54,7 +51,6 @@ class VncVideoDriver : public VideoDriver {
     Point _mouse;
     std::queue<EventRecord*> _event_queue;
     std::map<int, int> _key_map;
-    EventListenerList _listeners;
 };
 
 }  // namespace antares

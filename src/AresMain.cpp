@@ -26,6 +26,8 @@
 
 #include "Beam.hpp"
 
+#include "Card.hpp"
+#include "CardStack.hpp"
 #include "ColorTable.hpp"
 #include "ColorTranslation.hpp"
 
@@ -134,7 +136,7 @@ class TitleScreenFade : public PictFade {
     bool _fast;
 };
 
-class Master : public EventListener {
+class Master : public Card {
   public:
     Master()
         : _state(START) { }
@@ -144,14 +146,14 @@ class Master : public EventListener {
           case START:
             _state = PUBLISHER_PICT;
             _pict_fade.reset(new PictFade(2000, 2000));
-            VideoDriver::driver()->push_listener(_pict_fade.get());
+            stack()->push(_pict_fade.get());
             break;
 
           case PUBLISHER_PICT:
             _state = EGO_PICT;
             if (!_pict_fade->skipped())  {
                 _pict_fade.reset(new PictFade(2001, 2000));
-                VideoDriver::driver()->push_listener(_pict_fade.get());
+                stack()->push(_pict_fade.get());
                 break;
             }
             // fall through.
@@ -159,7 +161,7 @@ class Master : public EventListener {
           case EGO_PICT:
             _state = TITLE_SCREEN_PICT;
             _pict_fade.reset(new TitleScreenFade(_pict_fade->skipped()));
-            VideoDriver::driver()->push_listener(_pict_fade.get());
+            stack()->push(_pict_fade.get());
             break;
 
           case TITLE_SCREEN_PICT:
@@ -167,7 +169,7 @@ class Master : public EventListener {
             _pict_fade.reset();
             if (!(globals()->gOptions & kOptionHaveSeenIntro)) {
                 _scroll_text.reset(new ScrollTextScreen(5600, 450, 15.0));
-                VideoDriver::driver()->push_listener(_scroll_text.get());
+                stack()->push(_scroll_text.get());
 
                 globals()->gOptions |= kOptionHaveSeenIntro;
                 SaveOptionsPreferences();
@@ -178,12 +180,12 @@ class Master : public EventListener {
             _state = MAIN_SCREEN;
             _scroll_text.reset();
             _main_screen.reset(new MainScreen);
-            VideoDriver::driver()->push_listener(_main_screen.get());
+            stack()->push(_main_screen.get());
             break;
 
           case MAIN_SCREEN:
             // When the main screen returns, exit loop.
-            VideoDriver::driver()->pop_listener(this);
+            stack()->pop(this);
             break;
         }
     }
@@ -265,8 +267,8 @@ void AresMain() {
     InitBeams();
 
     Master master;
-    VideoDriver::driver()->push_listener(&master);
-    VideoDriver::driver()->loop();
+    CardStack stack(&master);
+    VideoDriver::driver()->loop(&stack);
 }
 
 void MainPlay(int whichScenario, GameResult* gameResult, long* gameLength) {

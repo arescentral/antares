@@ -18,7 +18,7 @@
 #ifndef ANTARES_TEST_VIDEO_DRIVER_HPP_
 #define ANTARES_TEST_VIDEO_DRIVER_HPP_
 
-#include "EventListenerList.hpp"
+#include "CardStack.hpp"
 #include "VideoDriver.hpp"
 
 namespace antares {
@@ -35,9 +35,7 @@ class TestingVideoDriver : public VideoDriver {
     virtual void main_loop_iteration_complete(uint32_t);
     virtual void set_game_state(GameState state);
 
-    virtual void loop();
-    virtual void push_listener(EventListener* listener);
-    virtual void pop_listener(EventListener* listener);
+    virtual void loop(CardStack* stack);
 
   protected:
     GameState state() const;
@@ -45,7 +43,6 @@ class TestingVideoDriver : public VideoDriver {
   private:
     int _current_time;
     GameState _state;
-    EventListenerList _listeners;
 };
 
 class MainScreenVideoDriver : public TestingVideoDriver {

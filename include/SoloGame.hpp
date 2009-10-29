@@ -19,14 +19,14 @@
 #define ANTARES_SOLO_GAME_HPP_
 
 #include "AresMain.hpp"
+#include "Card.hpp"
 #include "SmartPtr.hpp"
-#include "VideoDriver.hpp"
 
 namespace antares {
 
 class SelectLevelScreen;
 
-class SoloGame : public EventListener {
+class SoloGame : public Card {
   public:
     SoloGame();
     ~SoloGame();
@@ -50,7 +50,7 @@ class SoloGame : public EventListener {
     scoped_ptr<SelectLevelScreen> _select_level;
     int _scenario;
     GameResult _game_result;
-    scoped_ptr<EventListener> _next_listener;
+    scoped_ptr<Card> _next_listener;
 };
 
 }  // namespace antares

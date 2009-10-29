@@ -19,8 +19,8 @@
 #define ANTARES_TRANSITIONS_HPP_
 
 #include <Base.h>
+#include "Card.hpp"
 #include "ColorTable.hpp"
-#include "VideoDriver.hpp"
 
 namespace antares {
 
@@ -40,7 +40,7 @@ bool CustomPictFade(short pictID, short clutID);
 bool StartCustomPictFade(short pictID, short clutID, bool fast);
 bool EndCustomPictFade(bool fast);
 
-class ColorFade : public EventListener {
+class ColorFade : public Card {
   public:
     enum Direction {
         TO_COLOR = 0,
@@ -73,7 +73,7 @@ class ColorFade : public EventListener {
     const double _duration;
 };
 
-class PictFade : public EventListener {
+class PictFade : public Card {
   public:
     PictFade(int pict_id, int clut_id);
 

@@ -15,19 +15,23 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_EVENT_LISTENER_LIST_HPP_
-#define ANTARES_EVENT_LISTENER_LIST_HPP_
+#ifndef ANTARES_CARD_STACK_HPP_
+#define ANTARES_CARD_STACK_HPP_
 
 #include <vector>
-#include "VideoDriver.hpp"
 
 namespace antares {
 
-class EventListenerList {
+class Card;
+class EventRecord;
+
+class CardStack {
   public:
+    CardStack(Card* top);
+
     bool empty() const;
-    void push(EventListener* listener);
-    void pop(EventListener* listener);
+    void push(Card* card);
+    void pop(Card* card);
     void send(const EventRecord& evt);
     double next_delay();
     void fire_next_timer();
@@ -35,9 +39,9 @@ class EventListenerList {
   private:
     bool min_delay_index(int* min_index);
 
-    std::vector<EventListener*> _list;
+    std::vector<Card*> _list;
 };
 
 }  // namespace antares
 
-#endif  // ANTARES_EVENT_LISTENER_LIST_HPP_
+#endif  // ANTARES_CARD_STACK_HPP_

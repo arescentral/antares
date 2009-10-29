@@ -15,38 +15,46 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "EventListenerList.hpp"
+#include "CardStack.hpp"
 
 #include <algorithm>
+#include <Base.h>
+#include "Card.hpp"
 
 namespace antares {
 
-bool EventListenerList::empty() const {
+CardStack::CardStack(Card* top) {
+    push(top);
+}
+
+bool CardStack::empty() const {
     return _list.empty();
 }
 
-void EventListenerList::push(EventListener* listener) {
+void CardStack::push(Card* card) {
     if (!_list.empty()) {
         _list.back()->resign_front();
     }
-    _list.push_back(listener);
-    listener->become_front();
+    _list.push_back(card);
+    card->set_stack(this);
+    card->become_front();
 }
 
-void EventListenerList::pop(EventListener* listener) {
-    if (listener != _list.back()) {
-        fprintf(stderr, "tried to pop listener %p when not frontmost\n", listener);
+void CardStack::pop(Card* card) {
+    if (card != _list.back()) {
+        fprintf(stderr, "tried to pop card %p when not frontmost\n", card);
         exit(1);
     }
-    listener->resign_front();
+    card->resign_front();
+    card->set_stack(NULL);
     _list.pop_back();
     if (!_list.empty()) {
         _list.back()->become_front();
     }
 }
 
-void EventListenerList::send(const EventRecord& evt) {
-    for (std::vector<EventListener*>::reverse_iterator it = _list.rbegin(); it != _list.rend(); ++it) {
+void CardStack::send(const EventRecord& evt) {
+    for (std::vector<Card*>::reverse_iterator it = _list.rbegin(); it != _list.rend(); ++it) {
         switch (evt.what) {
           case mouseDown:
             if ((*it)->mouse_down(0, evt.where)) {
@@ -73,7 +81,7 @@ void EventListenerList::send(const EventRecord& evt) {
     }
 }
 
-double EventListenerList::next_delay() {
+double CardStack::next_delay() {
     int i;
     if (min_delay_index(&i)) {
         return _list[i]->delay();
@@ -82,14 +90,14 @@ double EventListenerList::next_delay() {
     }
 }
 
-void EventListenerList::fire_next_timer() {
+void CardStack::fire_next_timer() {
     int i;
     if (min_delay_index(&i)) {
         _list[i]->fire_timer();
     }
 }
 
-bool EventListenerList::min_delay_index(int* min_index) {
+bool CardStack::min_delay_index(int* min_index) {
     bool result = false;
     double min_delay = std::numeric_limits<double>::infinity();
     for (size_t i = 0; i < _list.size(); ++i) {

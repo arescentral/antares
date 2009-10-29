@@ -19,6 +19,7 @@
 
 #include "AresGlobalType.hpp"
 #include "AresMain.hpp"
+#include "CardStack.hpp"
 #include "DirectText.hpp"
 #include "FakeDrawing.hpp"
 #include "Fakes.hpp"
@@ -30,6 +31,7 @@
 #include "ScrollTextScreen.hpp"
 #include "SoloGame.hpp"
 #include "Time.hpp"
+#include "VideoDriver.hpp"
 
 namespace antares {
 
@@ -61,7 +63,7 @@ void MainScreen::fire_timer() {
         DoScrollText(5600, 4, kTitleTextScrollWidth, kTitleFontNum, -1);
     }
     _next_listener.reset(new ReplayGame(GetDemoScenario()));
-    VideoDriver::driver()->push_listener(_next_listener.get());
+    stack()->push(_next_listener.get());
 }
 
 void MainScreen::adjust_interface() {
@@ -77,24 +79,24 @@ void MainScreen::handle_button(int button) {
     switch (button) {
       case QUIT:
         // 1-second fade-out.
-        VideoDriver::driver()->pop_listener(this);
+        stack()->pop(this);
         break;
 
       case DEMO:
         _next_listener.reset(new ReplayGame(GetDemoScenario()));
-        VideoDriver::driver()->push_listener(_next_listener.get());
+        stack()->push(_next_listener.get());
         become_front();
         break;
 
       case REPLAY_INTRO:
         _next_listener.reset(new ScrollTextScreen(5600, kTitleTextScrollWidth, 15.0));
-        VideoDriver::driver()->push_listener(_next_listener.get());
+        stack()->push(_next_listener.get());
         break;
 
       case START_NEW_GAME:
         globals()->gOptions &= ~kOptionReplay;
         _next_listener.reset(new SoloGame);
-        VideoDriver::driver()->push_listener(_next_listener.get());
+        stack()->push(_next_listener.get());
         break;
 
       case START_NETWORK_GAME:
@@ -104,7 +106,7 @@ void MainScreen::handle_button(int button) {
 
       case ABOUT_ARES:
         _next_listener.reset(new ScrollTextScreen(6500, 540, 30.0));
-        VideoDriver::driver()->push_listener(_next_listener.get());
+        stack()->push(_next_listener.get());
         break;
 
       case OPTIONS:

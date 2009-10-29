@@ -18,6 +18,7 @@
 #include "ReplayGame.hpp"
 
 #include "AresGlobalType.hpp"
+#include "CardStack.hpp"
 #include "InputSource.hpp"
 #include "Options.hpp"
 
@@ -58,7 +59,7 @@ void ReplayGame::become_front() {
         gRandomSeed = _saved_seed;
         globals()->gInputSource.reset();
         globals()->gOptions &= ~kOptionReplay;
-        VideoDriver::driver()->pop_listener(this);
+        stack()->pop(this);
         break;
     }
 }
