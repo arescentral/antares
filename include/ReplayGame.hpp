@@ -15,22 +15,40 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_FAKES_HPP_
-#define ANTARES_FAKES_HPP_
+#ifndef ANTARES_REPLAY_GAME_HPP_
+#define ANTARES_REPLAY_GAME_HPP_
 
-#include <stdint.h>
-#include <string>
-#include <Base.h>
-#include "AresGlobalType.hpp"
+#include "AresMain.hpp"
+#include "SmartPtr.hpp"
+#include "VideoDriver.hpp"
 
 namespace antares {
 
-void FakeInit(int argc, char* const* argv);
-int GetDemoScenario();
-const std::string& get_output_dir();
-int Munger(std::string* data, int pos, const unsigned char* search, size_t search_len,
-        const unsigned char* replace, size_t replace_len);
+class SelectLevelScreen;
+
+class ReplayGame : public EventListener {
+  public:
+    ReplayGame(int scenario);
+    ~ReplayGame();
+
+    virtual void become_front();
+
+  private:
+    enum State {
+        NEW,
+        PLAYING,
+        QUIT,
+    };
+    State _state;
+
+    void start_main_play();
+
+    const int _scenario;
+    GameResult _game_result;
+    int _saved_seed;
+    scoped_ptr<EventListener> _next_listener;
+};
 
 }  // namespace antares
 
-#endif  // ANTARES_FAKES_HPP_
+#endif  // ANTARES_REPLAY_GAME_HPP_

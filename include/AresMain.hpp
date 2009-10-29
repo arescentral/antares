@@ -36,7 +36,6 @@ enum GameResult {
 void AresMain();
 void Pause();
 void MainPlay(int whichScenario, GameResult* gameResult, long* gameLength);
-void StartReplay();
 
 }  // namespace antares
 

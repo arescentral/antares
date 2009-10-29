@@ -58,6 +58,7 @@ Main Antares : src/Admiral.cpp
                src/PosixException.cpp
                src/Races.cpp
                src/Randomize.cpp
+               src/ReplayGame.cpp
                src/Resource.cpp
                src/RetroText.cpp
                src/Rotation.cpp

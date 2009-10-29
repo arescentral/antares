@@ -21,10 +21,12 @@
 #include "AresMain.hpp"
 #include "DirectText.hpp"
 #include "FakeDrawing.hpp"
+#include "Fakes.hpp"
 #include "InterfaceHandling.hpp"
 #include "Options.hpp"
 #include "PlayerInterface.hpp"
 #include "Randomize.hpp"
+#include "ReplayGame.hpp"
 #include "ScrollTextScreen.hpp"
 #include "SoloGame.hpp"
 #include "Time.hpp"
@@ -58,8 +60,8 @@ void MainScreen::fire_timer() {
     if (Randomize(4) == 2) {
         DoScrollText(5600, 4, kTitleTextScrollWidth, kTitleFontNum, -1);
     }
-    StartReplay();
-    become_front();
+    _next_listener.reset(new ReplayGame(GetDemoScenario()));
+    VideoDriver::driver()->push_listener(_next_listener.get());
 }
 
 void MainScreen::adjust_interface() {
@@ -79,7 +81,8 @@ void MainScreen::handle_button(int button) {
         break;
 
       case DEMO:
-        StartReplay();
+        _next_listener.reset(new ReplayGame(GetDemoScenario()));
+        VideoDriver::driver()->push_listener(_next_listener.get());
         become_front();
         break;
 

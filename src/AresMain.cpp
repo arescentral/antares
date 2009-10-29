@@ -103,8 +103,6 @@ long            WORLD_WIDTH = 640,
                 gPlayScreenWidth = 480,
                 gPlayScreenHeight = 480;
 
-int GetDemoScenario();
-void FakeInit(int argc, char* const* argv);
 void Pause( long time);
 void MainLoop();
 GameResult PlayTheGame(long *seconds);
@@ -318,21 +316,6 @@ void MainPlay(int whichScenario, GameResult* gameResult, long* gameLength) {
     if (globals()->gOptions & kOptionMusicPlay) {
         StopAndUnloadSong();
     }
-}
-
-void StartReplay() {
-    globals()->gOptions |= kOptionReplay;
-
-    int whichScenario = GetDemoScenario();
-    globals()->gInputSource.reset(new ReplayInputSource(kReplayResID + whichScenario));
-
-    int saveSeed = gRandomSeed;
-    gRandomSeed = globals()->gInputSource->random_seed();
-    GameResult game_result = NO_GAME;
-    long game_length;
-    MainPlay(whichScenario, &game_result, &game_length);
-    gRandomSeed = saveSeed;
-    globals()->gOptions &= ~kOptionReplay;
 }
 
 GameResult PlayTheGame(long *seconds) {
