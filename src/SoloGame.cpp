@@ -51,9 +51,15 @@ void SoloGame::become_front() {
 
       case SELECT_LEVEL:
         _state = START_LEVEL;
-        _scenario = GetScenarioNumberFromChapterNumber(_select_level->chapter());
-        _select_level.reset();
-        // fall through.
+        if (_select_level->cancelled()) {
+            _state = QUIT;
+            VideoDriver::driver()->pop_listener(this);
+            break;
+        } else {
+            _scenario = GetScenarioNumberFromChapterNumber(_select_level->chapter());
+            _select_level.reset();
+            // fall through.
+        }
 
       case START_LEVEL:
         _state = PROLOGUE;
