@@ -118,7 +118,7 @@ bool InterfaceScreen::mouse_up(int button, const Point& where) {
         _hit_item = 0;
 
         _state = NORMAL;
-        interfaceItemType* const item = &_items[_hit_item];
+        interfaceItemType* const item = &_items[hit_item];
         Rect bounds;
         GetAnyInterfaceItemGraphicBounds(*item, &bounds);
         item->set_status(kActive);
@@ -167,7 +167,7 @@ bool InterfaceScreen::key_up(int key) {
         _hit_item = 0;
 
         _state = NORMAL;
-        interfaceItemType* const item = &_items[_hit_item];
+        interfaceItemType* const item = &_items[hit_item];
         item->set_status(kActive);
         if (item->kind == kTabBoxButton) {
             item->item.radioButton.on = true;
