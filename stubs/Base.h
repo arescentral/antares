@@ -110,7 +110,6 @@ void GetMouse(Point* point);
 int TickCount();
 
 bool Button();
-STUB0(GetDblTime, double(), 0.0);
 
 STUB4(ParamText, void(const unsigned char*, const unsigned char*,
       const unsigned char*, const unsigned char*));

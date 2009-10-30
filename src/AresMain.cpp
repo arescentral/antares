@@ -76,6 +76,7 @@
 #include "SpriteHandling.hpp"
 #include "StringHandling.hpp"
 
+#include "Time.hpp"
 #include "TimeUnit.hpp"
 #include "Transitions.hpp"
 
@@ -482,9 +483,9 @@ GameResult PlayTheGame(long *seconds) {
                     } else {
                         if (!mouseDown) {
                             if (!(globals()->gOptions & ( kOptionAutoPlay | kOptionReplay))) {
-                                if (((globals()->gGameTime - lastclicktime)) <= GetDblTime()) {
+                                if (((globals()->gGameTime - lastclicktime)) <= now()) {
                                     InstrumentsHandleDoubleClick();
-                                    lastclicktime -= GetDblTime();
+                                    lastclicktime -= now();
                                 } else {
                                     InstrumentsHandleClick();
                                     lastclicktime = globals()->gGameTime;
