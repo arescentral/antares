@@ -77,6 +77,7 @@ void SelectLevelScreen::handle_button(int button) {
       case OK:
       case CANCEL:
         _cancelled = (button == CANCEL);
+        VideoDriver::driver()->set_game_state(UNKNOWN);
         stack()->pop(this);
         break;
 

@@ -85,7 +85,6 @@ void MainScreen::handle_button(int button) {
       case DEMO:
         _next_listener.reset(new ReplayGame(GetDemoScenario()));
         stack()->push(_next_listener.get());
-        become_front();
         break;
 
       case REPLAY_INTRO:

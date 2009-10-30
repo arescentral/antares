@@ -38,7 +38,8 @@ extern scenarioType* gThisScenario;
 
 SoloGame::SoloGame()
         : _state(NEW),
-          _game_result(NO_GAME) { }
+          _game_result(NO_GAME),
+          _game_length(0) { }
 
 SoloGame::~SoloGame() { }
 
@@ -65,9 +66,9 @@ void SoloGame::become_front() {
       case START_LEVEL:
         _state = PROLOGUE;
         if (GetScenarioPrologueID(_scenario) > 0) {
-            _next_listener.reset(new ScrollTextScreen(
+            _next_card.reset(new ScrollTextScreen(
                         GetScenarioPrologueID(_scenario), 450, 15.0, 4002));
-            stack()->push(_next_listener.get());
+            stack()->push(_next_card.get());
             break;
         }
         // else fall through
@@ -75,12 +76,16 @@ void SoloGame::become_front() {
       case PROLOGUE:
       case RESTART_LEVEL:
         _state = PLAYING;
-        start_main_play();
+        _game_result = NO_GAME;
+        _game_length = 0;
+        _next_card.reset(new MainPlay(_scenario, &_game_result, &_game_length));
+        stack()->push(_next_card.get());
         break;
 
       case PLAYING:
-        fprintf(stderr, "Not yet reachable\n");
-        exit(1);
+        handle_game_result();
+        // TODO(sfiera): make less hacky.
+        become_front();
         break;
 
       case QUIT:
@@ -89,11 +94,7 @@ void SoloGame::become_front() {
     }
 }
 
-void SoloGame::start_main_play() {
-    long game_length;
-    _game_result = NO_GAME;
-    MainPlay(_scenario, &_game_result, &game_length);
-
+void SoloGame::handle_game_result() {
     switch (_game_result) {
       case LOSE_GAME:
         if (globals()->gScenarioWinner.text != -1) {
@@ -120,7 +121,7 @@ void SoloGame::start_main_play() {
             if (globals()->gScenarioWinner.text != -1) {
                 DoMissionDebriefingText(
                         globals()->gScenarioWinner.text,
-                        game_length, gThisScenario->parTime,
+                        _game_length, gThisScenario->parTime,
                         GetAdmiralLoss(0), gThisScenario->parLosses,
                         GetAdmiralKill(0), gThisScenario->parKills,
                         100);
@@ -189,8 +190,6 @@ void SoloGame::start_main_play() {
         fprintf(stderr, "MainPlay() resulted in bad game_result\n");
         exit(1);
     }
-
-    become_front();
 }
 
 }  // namespace antares

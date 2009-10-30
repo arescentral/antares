@@ -19,6 +19,7 @@
 #define ANTARES_ARES_MAIN_HPP_
 
 #include <Base.h>
+#include "Card.hpp"
 #include "PlayerInterface.hpp"
 
 namespace antares {
@@ -35,7 +36,27 @@ enum GameResult {
 
 void AresMain();
 void Pause();
-void MainPlay(int whichScenario, GameResult* gameResult, long* gameLength);
+
+class MainPlay : public Card {
+  public:
+    MainPlay(int scenario, GameResult* game_result, long* game_length);
+
+    virtual void become_front();
+
+  private:
+    enum State {
+        NEW,
+        FADING_OUT,
+        LOADING,
+        PLAYING,
+    };
+    State _state;
+
+    int _scenario;
+    GameResult* _game_result;
+    long* _game_length;
+    scoped_ptr<Card> _next_card;
+};
 
 }  // namespace antares
 

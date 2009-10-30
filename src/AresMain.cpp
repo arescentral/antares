@@ -271,52 +271,77 @@ void AresMain() {
     VideoDriver::driver()->loop(&stack);
 }
 
-void MainPlay(int whichScenario, GameResult* gameResult, long* gameLength) {
-    *gameResult = NO_GAME;
-    RGBColor fadeColor = { 0, 0, 0 };
-    if (globals()->gOptions & kOptionMusicIdle) {
-        AutoMusicFadeTo(60, &fadeColor, false);
-        StopAndUnloadSong();
-    } else {
-        AutoFadeTo( 60, &fadeColor, false);
-    }
+MainPlay::MainPlay(int scenario, GameResult* game_result, long* game_length)
+        : _state(NEW),
+          _scenario(scenario),
+          _game_result(game_result),
+          _game_length(game_length) { }
 
-    RemoveAllSpaceObjects();
-    globals()->gGameOver = 0;
+void MainPlay::become_front() {
+    switch (_state) {
+      case NEW:
+        {
+            _state = FADING_OUT;
+            *_game_result = NO_GAME;
+            RGBColor black = {0, 0, 0};
+            _next_card.reset(new ColorFade(256, ColorFade::TO_COLOR, black, 1.0, false));
+            stack()->push(_next_card.get());
+        }
+        break;
 
-    if (globals()->gOptions & kOptionMusicIdle) {
-        LoadSong(3000);
-        SetSongVolume( kMaxMusicVolume);
-        PlaySong();
-    }
+      case FADING_OUT:
+        {
+            _state = LOADING;
+            ColorTable colors(256);
+            RestoreEntries(colors);
+            RemoveAllSpaceObjects();
+            globals()->gGameOver = 0;
 
-    *gameResult = NO_GAME;
-    if (!ConstructScenario(whichScenario)) {
-        *gameResult = QUIT_GAME;
-        return;
-    }
+            if (globals()->gOptions & kOptionMusicIdle) {
+                LoadSong(3000);
+                SetSongVolume( kMaxMusicVolume);
+                PlaySong();
+            }
 
-    if (globals()->gOptions & kOptionMusicIdle) {
-        StopAndUnloadSong();
-    }
+            // TODO(sfiera): implement as a Card.
+            if (!ConstructScenario(_scenario)) {
+                *_game_result = QUIT_GAME;
+                stack()->pop(this);
+                return;
+            }
+        }
+        // fall through
 
-    DrawInstrumentPanel();
+      case LOADING:
+        {
+            _state = PLAYING;
+            if (globals()->gOptions & kOptionMusicIdle) {
+                StopAndUnloadSong();
+            }
 
-    if (globals()->gOptions & kOptionMusicPlay) {
-        LoadSong(gThisScenario->songID);
-        SetSongVolume(kMusicVolume);
-        PlaySong();
-    }
-    ResetLastTime((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
+            DrawInstrumentPanel();
 
-    VideoDriver::driver()->set_game_state(PLAY_GAME);
-    *gameResult = PlayTheGame(gameLength);
-    VideoDriver::driver()->set_game_state(DONE_GAME);
+            if (globals()->gOptions & kOptionMusicPlay) {
+                LoadSong(gThisScenario->songID);
+                SetSongVolume(kMusicVolume);
+                PlaySong();
+            }
+            ResetLastTime((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
 
-    globals()->gInputSource.reset();
+            VideoDriver::driver()->set_game_state(PLAY_GAME);
+            *_game_result = PlayTheGame(_game_length);
+            VideoDriver::driver()->set_game_state(DONE_GAME);
+        }
+        // fall through
 
-    if (globals()->gOptions & kOptionMusicPlay) {
-        StopAndUnloadSong();
+      case PLAYING:
+        {
+            if (globals()->gOptions & kOptionMusicPlay) {
+                StopAndUnloadSong();
+            }
+            stack()->pop(this);
+        }
+        break;
     }
 }
 

@@ -41,12 +41,11 @@ class ReplayGame : public Card {
     };
     State _state;
 
-    void start_main_play();
-
     const int _scenario;
     GameResult _game_result;
+    long _game_length;
     int _saved_seed;
-    scoped_ptr<Card> _next_listener;
+    scoped_ptr<Card> _next_card;
 };
 
 }  // namespace antares

@@ -45,12 +45,13 @@ class SoloGame : public Card {
     };
     State _state;
 
-    void start_main_play();
+    void handle_game_result();
 
     scoped_ptr<SelectLevelScreen> _select_level;
     int _scenario;
     GameResult _game_result;
-    scoped_ptr<Card> _next_listener;
+    long _game_length;
+    scoped_ptr<Card> _next_card;
 };
 
 }  // namespace antares

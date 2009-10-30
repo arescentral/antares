@@ -35,7 +35,8 @@ extern long gRandomSeed;
 ReplayGame::ReplayGame(int scenario)
         : _state(NEW),
           _scenario(scenario),
-          _game_result(NO_GAME) { }
+          _game_result(NO_GAME),
+          _game_length(0) { }
 
 ReplayGame::~ReplayGame() { }
 
@@ -47,12 +48,15 @@ void ReplayGame::become_front() {
         globals()->gInputSource.reset(new ReplayInputSource(kReplayResId + _scenario));
         _saved_seed = gRandomSeed;
         gRandomSeed = globals()->gInputSource->random_seed();
-        start_main_play();
+        _game_result = NO_GAME;
+        _game_length = 0;
+        _next_card.reset(new MainPlay(_scenario, &_game_result, &_game_length));
+        stack()->push(_next_card.get());
         break;
 
       case PLAYING:
-        fprintf(stderr, "Not yet reachable\n");
-        exit(1);
+        _state = QUIT;
+        become_front();
         break;
 
       case QUIT:
@@ -62,14 +66,6 @@ void ReplayGame::become_front() {
         stack()->pop(this);
         break;
     }
-}
-
-void ReplayGame::start_main_play() {
-    long game_length;
-    _game_result = NO_GAME;
-    MainPlay(_scenario, &_game_result, &game_length);
-    _state = QUIT;
-    become_front();
 }
 
 }  // namespace antares
