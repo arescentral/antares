@@ -483,9 +483,9 @@ GameResult PlayTheGame(long *seconds) {
                     } else {
                         if (!mouseDown) {
                             if (!(globals()->gOptions & ( kOptionAutoPlay | kOptionReplay))) {
-                                if (((globals()->gGameTime - lastclicktime)) <= now()) {
+                                if (((globals()->gGameTime - lastclicktime)) <= now_secs()) {
                                     InstrumentsHandleDoubleClick();
-                                    lastclicktime -= now();
+                                    lastclicktime -= now_secs();
                                 } else {
                                     InstrumentsHandleClick();
                                     lastclicktime = globals()->gGameTime;

@@ -36,7 +36,7 @@ extern PixMap* gOffWorld;
 InterfaceScreen::InterfaceScreen(int id)
         : _state(NORMAL),
           _id(id),
-          _last_event(now()),
+          _last_event(now_secs()),
           _hit_item(0) {
     Resource rsrc('intr', id);
     BufferBinaryReader bin(rsrc.data(), rsrc.size());
@@ -56,7 +56,7 @@ void InterfaceScreen::become_front() {
     gActiveWorld->fill(BLACK);
     this->adjust_interface();
     draw();
-    _last_event = now();
+    _last_event = now_secs();
     // half-second fade from black.
 }
 

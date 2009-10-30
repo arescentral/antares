@@ -180,7 +180,7 @@ void ScrollTextScreen::become_front() {
     }
 
     gActiveWorld->fill(BLACK);
-    _start = now();
+    _start = now_secs();
     _window = Rect(0, -kScrollTextHeight, _pix_map->bounds().right, 0);
 }
 
@@ -211,7 +211,7 @@ double ScrollTextScreen::delay() {
 }
 
 void ScrollTextScreen::fire_timer() {
-    int top = ((now() - _start) * _speed) - kScrollTextHeight;
+    int top = ((now_secs() - _start) * _speed) - kScrollTextHeight;
     if (top > _window.top) {
         _window.offset(0, top - _window.top);
         Rect dest = _window;

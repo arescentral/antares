@@ -18,9 +18,12 @@
 #ifndef ANTARES_TIME_HPP_
 #define ANTARES_TIME_HPP_
 
+#include <stdint.h>
+
 namespace antares {
 
-double now();
+uint64_t now_usecs();
+double now_secs();
 
 }  // namespace antares
 

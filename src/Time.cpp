@@ -21,10 +21,14 @@
 
 namespace antares {
 
-double now() {
+uint64_t now_usecs() {
     uint64_t usecs;
     Microseconds(&usecs);
-    return usecs / 1000000.0;
+    return usecs;
+}
+
+double now_secs() {
+    return now_usecs() / 1000000.0;
 }
 
 }  // namespace antares

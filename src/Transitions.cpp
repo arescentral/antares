@@ -347,7 +347,7 @@ ColorFade::ColorFade(
 
 void ColorFade::become_front() {
     _skipped = false;
-    _start = now();
+    _start = now_secs();
     _current_colors.transition_between(_transition_colors, _color, _direction);
     RestoreEntries(_current_colors);
 }
@@ -372,7 +372,7 @@ double ColorFade::delay() {
 }
 
 void ColorFade::fire_timer() {
-    double fraction = (now() - _start) / _duration;
+    double fraction = (now_secs() - _start) / _duration;
     if (fraction < 1.0) {
         if (_direction == TO_COLOR) {
             _current_colors.transition_between(_transition_colors, _color, fraction);
@@ -405,7 +405,7 @@ void PictFade::become_front() {
         _skipped = _skipped || _color_fade->skipped();
         if (!this->skip()) {
             _state = FULL;
-            _wane_start = now() + this->display_time();
+            _wane_start = now_secs() + this->display_time();
             break;
         }
         // fall through.
@@ -443,7 +443,7 @@ bool PictFade::mouse_down(int button, const Point& loc) {
 
 double PictFade::delay() {
     if (_state == FULL) {
-        return std::max(0.001, _wane_start - now());
+        return std::max(0.001, _wane_start - now_secs());
     } else {
         return 0.0;
     }
