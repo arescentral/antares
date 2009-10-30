@@ -384,33 +384,35 @@ GameResult PlayTheGame(long *seconds) {
     clipRect = Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
 
     while (globals()->gGameOver <= 0) {
+        Microseconds(&thisTime);
+        scrapTime = thisTime;
+        thisTime -= globals()->gLastTime;
+        newGameTime = (thisTime / kTimeUnit) + scenario_start_time;
+
+        if (((globals()->gOptions & kOptionSubstituteFKeys)
+                    ? mNOFFastMotionKey(keyMap)
+                    : mFastMotionKey(keyMap)) &&
+                !enteringMessage) {
+            demoKey = true;
+            newGameTime = globals()->gGameTime + 12;
+            l1 = newGameTime - scenario_start_time;
+            l2 = kTimeUnit;
+            thisTime = (newGameTime - scenario_start_time) * kTimeUnit;
+            globals()->gLastTime = scrapTime - thisTime;
+        }
+
+        unitsDone = unitsPassed = newGameTime - globals()->gGameTime;
+
+        if (unitsPassed <= 0) {
+            continue;
+        }
+
         EraseSpriteCursorSprite();
         EraseSpriteTable();
         EraseAllLabels();
         EraseSectorLines();
         PrepareToMoveScrollStars();
         EraseSite();
-
-        while (unitsPassed == 0) {
-            Microseconds(&thisTime);
-            scrapTime = thisTime;
-            thisTime -= globals()->gLastTime;
-            newGameTime = (thisTime / kTimeUnit) + scenario_start_time;
-
-            if (((globals()->gOptions & kOptionSubstituteFKeys)
-                        ? mNOFFastMotionKey(keyMap)
-                        : mFastMotionKey(keyMap)) &&
-                    !enteringMessage) {
-                demoKey = true;
-                newGameTime = globals()->gGameTime + 12;
-                l1 = newGameTime - scenario_start_time;
-                l2 = kTimeUnit;
-                thisTime = (newGameTime - scenario_start_time) * kTimeUnit;
-                globals()->gLastTime = scrapTime - thisTime;
-            }
-
-            unitsDone = unitsPassed = newGameTime - globals()->gGameTime;
-        }
 
         if (playerPaused) {
             playerPaused = false;
