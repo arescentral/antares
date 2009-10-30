@@ -2345,8 +2345,8 @@ void MiniComputerSetStatusStrings( void)
                 globals()->gMissionStatusStrList->size()) {
             // we have some data for this line to interpret
 
-            string_to_pstring(globals()->gMissionStatusStrList->at((count -
-                            kStatusMiniScreenFirstLine) + 1), sourceString);
+            string_to_pstring(globals()->gMissionStatusStrList->at(count -
+                            kStatusMiniScreenFirstLine), sourceString);
 
             charNum = 1;
             if ( sourceString[charNum] == '_')
