@@ -108,7 +108,6 @@ long            WORLD_WIDTH = 640,
 
 void Pause( long time);
 void MainLoop();
-GameResult PlayTheGame(long *seconds);
 
 class TitleScreenFade : public PictFade {
   public:
@@ -192,6 +191,28 @@ class Master : public Card {
 
     State _state;
     bool _skipped;
+};
+
+class GamePlay {
+  public:
+    GamePlay(GameResult* game_result, long* seconds);
+
+    void iteration();
+
+  private:
+    GameResult* const _game_result;
+    long* const _seconds;
+    const Rect _play_area;
+    const int64_t _scenario_start_time;
+    const bool _command_and_q;
+    bool _mouse_down;
+    bool _entering_message;
+    bool _player_paused;
+    KeyMap _key_map;
+    KeyMap _last_key_map;
+    uint32_t _decide_cycle;
+    int _last_click_time;
+    int _scenario_check_time;
 };
 
 void AresMain() {
@@ -315,7 +336,10 @@ void MainPlay::become_front() {
             ResetLastTime((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
 
             VideoDriver::driver()->set_game_state(PLAY_GAME);
-            *_game_result = PlayTheGame(_game_length);
+            GamePlay play(_game_result, _game_length);
+            while (*_game_result == NO_GAME) {
+                play.iteration();
+            }
             VideoDriver::driver()->set_game_state(DONE_GAME);
         }
         // fall through
@@ -331,362 +355,355 @@ void MainPlay::become_front() {
     }
 }
 
-GameResult PlayTheGame(long *seconds) {
-    unsigned long       decideCycle = 0;
-    Str255              string;
-    uint64_t            lastTime, thisTime, scrapTime = 0;
-    Rect                clipRect;
-    long                    unitsToDo = 0, unitsPassed = 0, unitsDone = 0,
-                            l1, l2, newGameTime = 0, lastclicktime = 0,
-                            additionalSeconds = 0;
-    KeyMap              keyMap = { }, lastKeyMap;
-    bool             playerPaused = false, mouseDown = false,
-                            enteringMessage = false,
-                            afEntering = false, demoKey = false, newKeyMap = false, commandAndQ = false;
-    unsigned long       scenarioCheckTime = 0;
-    Rect                    playAreaRect;
-    GameResult          result = NO_GAME;
-    EventRecord         theEvent;
-
-    commandAndQ = BothCommandAndQ();
-
+GamePlay::GamePlay(GameResult* game_result, long* seconds)
+        : _game_result(game_result),
+          _seconds(seconds),
+          _play_area(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM),
+          _scenario_start_time(
+                  (gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple),
+          _command_and_q(BothCommandAndQ()),
+          _mouse_down(false),
+          _entering_message(false),
+          _player_paused(false),
+          _decide_cycle(0),
+          _last_click_time(0),
+          _scenario_check_time(0) {
     SetSpriteCursorTable(500);
     ShowSpriteCursor(true);
     ResetHintLine();
-    playAreaRect = Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
 
     globals()->gLastKeys = globals()->gTheseKeys = 0;
 
     HideCursor();
-    Microseconds(&lastTime);
 
     CheckScenarioConditions(0);
 
-    const int64_t scenario_start_time = (gThisScenario->startTime & kScenario_StartTimeMask)
-        * kScenarioTimeMultiple;
+    bzero(_key_map, sizeof(_key_map));
+    bzero(_last_key_map, sizeof(_key_map));
 
     globals()->gFrameCount = 0;
+}
 
-    clipRect = Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
-
-    while (globals()->gGameOver <= 0) {
-        Microseconds(&thisTime);
-        scrapTime = thisTime;
-        thisTime -= globals()->gLastTime;
-        newGameTime = (thisTime / kTimeUnit) + scenario_start_time;
-
-        if (((globals()->gOptions & kOptionSubstituteFKeys)
-                    ? mNOFFastMotionKey(keyMap)
-                    : mFastMotionKey(keyMap)) &&
-                !enteringMessage) {
-            demoKey = true;
-            newGameTime = globals()->gGameTime + 12;
-            l1 = newGameTime - scenario_start_time;
-            l2 = kTimeUnit;
-            thisTime = (newGameTime - scenario_start_time) * kTimeUnit;
-            globals()->gLastTime = scrapTime - thisTime;
-        }
-
-        unitsDone = unitsPassed = newGameTime - globals()->gGameTime;
-
-        if (unitsPassed <= 0) {
-            continue;
-        }
-
-        EraseSpriteCursorSprite();
-        EraseSpriteTable();
-        EraseAllLabels();
-        EraseSectorLines();
-        PrepareToMoveScrollStars();
-        EraseSite();
-
-        if (playerPaused) {
-            playerPaused = false;
-            unitsDone = unitsPassed = 0;
-            newGameTime = globals()->gGameTime;
-            thisTime = (newGameTime - scenario_start_time) * kTimeUnit;
-            globals()->gLastTime = scrapTime - thisTime;
-        }
-
-        if (globals()->gGameOver < 0) {
-            globals()->gGameOver += unitsPassed;
-            if ( globals()->gGameOver == 0)
-                globals()->gGameOver = 1;
-        }
-
-        while (unitsPassed > 0) {
-            unitsToDo = unitsPassed;
-            if (unitsToDo > kMaxTimePerCycle) {
-                unitsToDo = kMaxTimePerCycle;
-            }
-            if ((decideCycle + unitsToDo) > kDecideEveryCycles) {
-                unitsToDo = kDecideEveryCycles - decideCycle;
-            }
-            decideCycle += unitsToDo;
-
-            if (unitsToDo > 0) {
-                // executed arbitrarily, but at least once every kDecideEveryCycles
-                MoveScrollStars(unitsToDo);
-                MoveSpaceObjects(gSpaceObjectData.get(), kMaxSpaceObject, unitsToDo);
-            }
-
-            globals()->gGameTime += unitsToDo;
-
-            if ( decideCycle == kDecideEveryCycles) {
-                // everything in here gets executed once every kDecideEveryCycles
-                playerPaused = false;
-
-                NonplayerShipThink( kDecideEveryCycles);
-                AdmiralThink();
-                ExecuteActionQueue( kDecideEveryCycles);
-
-                if (globals()->gOptions & kOptionReplay) {
-                    uint32_t keys;
-                    if (!globals()->gInputSource->next(&keys)) {
-                        globals()->gGameOver = 1;
-                    }
-
-                    if (!playerPaused) {
-                        playerPaused = PlayerShipGetKeys(
-                                kDecideEveryCycles, keys, &enteringMessage);
-                    } else {
-                        PlayerShipGetKeys( kDecideEveryCycles, keys, &enteringMessage);
-                    }
-                } else {
-                    if (!playerPaused) {
-                        playerPaused = PlayerShipGetKeys(
-                                kDecideEveryCycles, 0xffffffff, &enteringMessage);
-                    } else {
-                        PlayerShipGetKeys(kDecideEveryCycles, 0xffffffff, &enteringMessage);
-                    }
-                }
-
-                if (Button()) {
-                    if (globals()->gOptions & kOptionReplay) {
-                        result = QUIT_GAME;
-                        globals()->gGameOver = 1;
-                    } else {
-                        if (!mouseDown) {
-                            if (!(globals()->gOptions & ( kOptionAutoPlay | kOptionReplay))) {
-                                if (((globals()->gGameTime - lastclicktime)) <= now_secs()) {
-                                    InstrumentsHandleDoubleClick();
-                                    lastclicktime -= now_secs();
-                                } else {
-                                    InstrumentsHandleClick();
-                                    lastclicktime = globals()->gGameTime;
-                                }
-                            }
-                            mouseDown = true;
-                        } else {
-                            InstrumentsHandleMouseStillDown();
-                        }
-                    }
-                } else if (mouseDown) {
-                    mouseDown = false;
-                    InstrumentsHandleMouseUp();
-                }
-
-                CollideSpaceObjects(gSpaceObjectData.get(), kMaxSpaceObject);
-                decideCycle = 0;
-                scenarioCheckTime++;
-                if (scenarioCheckTime == 30) {
-                    scenarioCheckTime = 0;
-                    CheckScenarioConditions( 0);
-                }
-            }
-            unitsPassed -= unitsToDo;
-        }
-
-        newKeyMap = false;
-        for ( l1 = 0; l1 < 4; l1++) {
-            lastKeyMap[l1] = keyMap[l1];
-        }
-        GetKeys(keyMap);
-        for (l1 = 0; l1 < 4; l1++) {
-            if (lastKeyMap[l1] != keyMap[l1]) {
-                newKeyMap = true;
-            }
-        }
-
-        if (mPauseKey(keyMap)) {
-            RestoreOriginalColors();
-            GetIndString( string, 3100, 11);
-
-            PlayVolumeSound(kComputerBeep4, kMaxSoundVolume, kShortPersistence, kMustPlaySound);
-            while ( (mPauseKey( keyMap)) && (!(mReturnKey(keyMap)))) {
-                l1 = TickCount();
-                StartPauseIndicator(string, Randomize(16));
-                playerPaused = false;
-                while ((mPauseKey(keyMap))
-                        && (!(mReturnKey(keyMap)))
-                        && ((TickCount() - l1) < 20)) {
-                    GetKeys(keyMap);
-                }
-
-                l1 = TickCount();
-                StopPauseIndicator( string);
-                playerPaused = true;
-                while ((mPauseKey(keyMap))
-                        && (!(mReturnKey(keyMap)))
-                        && ((TickCount() - l1) < 20)) {
-                    GetKeys( keyMap);
-                    if (CommandKey()) {
-                        WaitNextEvent (everyEvent, &theEvent, 3, nil);
-                    }
-                }
-
-            }
-        }
-
-        if ((!(globals()->gOptions & kOptionNetworkOn)) &&
-                (!(globals()->gOptions & kOptionReplay)) &&
-                ((mRestartResumeKey(keyMap))
-                 || ((!commandAndQ) && (mQuitKeys(keyMap))))) {
-
-            RestoreOriginalColors();
-            MacShowCursor();
-            bool is_training = gThisScenario->startTime & kScenario_IsTraining_Bit;
-            switch (DoPlayAgain(true, is_training)) {
-              case PLAY_AGAIN_QUIT:
-                result = QUIT_GAME;
-                globals()->gGameOver = 1;
-                if ( CommandKey())
-                    globals()->gScenarioWinner.player = globals()->gPlayerAdmiralNumber;
-                globals()->gScenarioWinner.next = -1;
-                globals()->gScenarioWinner.text = -1;
-                break;
-
-              case PLAY_AGAIN_RESTART:
-                result = RESTART_GAME;
-                globals()->gGameOver = 1;
-                if ( CommandKey())
-                    globals()->gScenarioWinner.player = globals()->gPlayerAdmiralNumber;
-                globals()->gScenarioWinner.next = -1;
-                globals()->gScenarioWinner.text = -1;
-                break;
-
-              case PLAY_AGAIN_RESUME:
-                break;
-
-              case PLAY_AGAIN_SKIP:
-                result = WIN_GAME;
-                globals()->gGameOver = 1;
-                globals()->gScenarioWinner.player = globals()->gPlayerAdmiralNumber;
-                globals()->gScenarioWinner.next =
-                    GetChapterNumberFromScenarioNumber(globals()->gThisScenarioNumber) + 1;
-                globals()->gScenarioWinner.text = -1;
-                break;
-            }
-            CopyOffWorldToRealWorld(playAreaRect);
-            HideCursor();
-            playerPaused = true;
-        }
-
-        if (!(globals()->gOptions & kOptionReplay)
-                && !afEntering
-                && mHelpKey(keyMap)) {
-            RestoreOriginalColors();
-            MacShowCursor();
-            DoHelpScreen();
-            HideCursor();
-            CopyOffWorldToRealWorld(playAreaRect);
-            playerPaused = true;
-        }
-
-        if (!(globals()->gOptions & kOptionReplay)
-                && !afEntering
-                && mVolumeDownKey(keyMap)
-                && !mVolumeDownKey(lastKeyMap)) {
-            if ( globals()->gSoundVolume > 0) {
-                globals()->gSoundVolume--;
-            }
-            if ( globals()->gOptions & kOptionMusicPlay) {
-                SetSongVolume(kMusicVolume);
-            }
-        }
-
-        if (!(globals()->gOptions & kOptionReplay)
-                && !afEntering
-                && mVolumeUpKey( keyMap)
-                && !mVolumeUpKey(lastKeyMap)) {
-            if (globals()->gSoundVolume < kMaxVolumePreference) {
-                globals()->gSoundVolume++;
-            }
-            if (globals()->gOptions & kOptionMusicPlay) {
-                SetSongVolume( kMusicVolume);
-            }
-        }
-
-        if (!(globals()->gOptions & kOptionReplay)
-                && !afEntering
-                && mActionMusicKey(keyMap)
-                && !mActionMusicKey(lastKeyMap)) {
-            if (globals()->gOptions & kOptionMusicPlay) {
-                ToggleSong();
-            }
-        }
-
-        keyMap[3] &= ~0x80; // mask out power key
-        keyMap[1] &= ~0x02; // mask out caps lock key
-        if ((globals()->gOptions & kOptionReplay)
-                && !demoKey
-                && !newKeyMap
-                && ((keyMap[0] != 0)
-                    || (keyMap[1] != 0)
-                    || (keyMap[2] != 0)
-                    || (keyMap[3] != 0))) {
-            result = QUIT_GAME;
-            globals()->gGameOver = 1;
-        }
-        demoKey = false;
-
-        MiniComputerHandleNull(unitsDone);
-
-        ClipToCurrentLongMessage();
-        clipRect = Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
-        DrawScrollStars(true);
-        DrawCurrentLongMessage( unitsDone);
-
-        DrawSectorLines();
-        DrawAllBeams();
-        DrawSpriteTableInOffWorld(&clipRect);
-        UpdateAllLabelPositions(unitsDone);
-        DrawAllLabels();
-        DrawSite();
-        clipRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-        DrawSpriteCursorSprite(&clipRect);
-
-        ShowSpriteCursorSprite();
-        ShowSpriteTable();
-        ShowAllLabels();
-        ShowAllBeams();
-        ShowScrollStars( true);
-        ShowSectorLines();
-        ShowSite();
-        CopyOffWorldToRealWorld(playAreaRect);
-
-        DrawMessageScreen(unitsDone);
-        UpdateRadar(unitsDone);
-        UpdateBooleanColorAnimation(unitsDone);
-
-        ++globals()->gFrameCount;
-        VideoDriver::driver()->main_loop_iteration_complete(globals()->gGameTime);
-    }
+void GamePlay::iteration() {
+    uint64_t thisTime;
+    uint64_t scrapTime;
+    int newGameTime;
+    Rect clipRect;
 
     Microseconds(&thisTime);
+    scrapTime = thisTime;
     thisTime -= globals()->gLastTime;
-    newGameTime = thisTime / 1000000; // divide by a million to get seconds
-    *seconds = newGameTime + additionalSeconds;
-    RestoreOriginalColors();
+    newGameTime = (thisTime / kTimeUnit) + _scenario_start_time;
 
-    if (result == NO_GAME) {
-        if (globals()->gScenarioWinner.player == globals()->gPlayerAdmiralNumber) {
-            return WIN_GAME;
-        } else {
-            return LOSE_GAME;
+    bool demoKey = false;
+    if (((globals()->gOptions & kOptionSubstituteFKeys)
+                ? mNOFFastMotionKey(_key_map)
+                : mFastMotionKey(_key_map)) &&
+            !_entering_message) {
+        demoKey = true;
+        newGameTime = globals()->gGameTime + 12;
+        thisTime = (newGameTime - _scenario_start_time) * kTimeUnit;
+        globals()->gLastTime = scrapTime - thisTime;
+    }
+
+    int unitsPassed = newGameTime - globals()->gGameTime;
+    int unitsDone = unitsPassed;
+
+    if (unitsPassed <= 0) {
+        return;
+    }
+
+    EraseSpriteCursorSprite();
+    EraseSpriteTable();
+    EraseAllLabels();
+    EraseSectorLines();
+    PrepareToMoveScrollStars();
+    EraseSite();
+
+    if (_player_paused) {
+        _player_paused = false;
+        unitsDone = unitsPassed = 0;
+        newGameTime = globals()->gGameTime;
+        thisTime = (newGameTime - _scenario_start_time) * kTimeUnit;
+        globals()->gLastTime = scrapTime - thisTime;
+    }
+
+    if (globals()->gGameOver < 0) {
+        globals()->gGameOver += unitsPassed;
+        if ( globals()->gGameOver == 0)
+            globals()->gGameOver = 1;
+    }
+
+    while (unitsPassed > 0) {
+        int unitsToDo = unitsPassed;
+        if (unitsToDo > kMaxTimePerCycle) {
+            unitsToDo = kMaxTimePerCycle;
         }
-    } else {
-        return result;
+        if ((_decide_cycle + unitsToDo) > kDecideEveryCycles) {
+            unitsToDo = kDecideEveryCycles - _decide_cycle;
+        }
+        _decide_cycle += unitsToDo;
+
+        if (unitsToDo > 0) {
+            // executed arbitrarily, but at least once every kDecideEveryCycles
+            MoveScrollStars(unitsToDo);
+            MoveSpaceObjects(gSpaceObjectData.get(), kMaxSpaceObject, unitsToDo);
+        }
+
+        globals()->gGameTime += unitsToDo;
+
+        if ( _decide_cycle == kDecideEveryCycles) {
+            // everything in here gets executed once every kDecideEveryCycles
+            _player_paused = false;
+
+            NonplayerShipThink( kDecideEveryCycles);
+            AdmiralThink();
+            ExecuteActionQueue( kDecideEveryCycles);
+
+            if (globals()->gOptions & kOptionReplay) {
+                uint32_t keys;
+                if (!globals()->gInputSource->next(&keys)) {
+                    globals()->gGameOver = 1;
+                }
+
+                if (!_player_paused) {
+                    _player_paused = PlayerShipGetKeys(
+                            kDecideEveryCycles, keys, &_entering_message);
+                } else {
+                    PlayerShipGetKeys( kDecideEveryCycles, keys, &_entering_message);
+                }
+            } else {
+                if (!_player_paused) {
+                    _player_paused = PlayerShipGetKeys(
+                            kDecideEveryCycles, 0xffffffff, &_entering_message);
+                } else {
+                    PlayerShipGetKeys(kDecideEveryCycles, 0xffffffff, &_entering_message);
+                }
+            }
+
+            if (Button()) {
+                if (globals()->gOptions & kOptionReplay) {
+                    *_game_result = QUIT_GAME;
+                    globals()->gGameOver = 1;
+                } else {
+                    if (!_mouse_down) {
+                        if (!(globals()->gOptions & ( kOptionAutoPlay | kOptionReplay))) {
+                            if (((globals()->gGameTime - _last_click_time)) <= now_secs()) {
+                                InstrumentsHandleDoubleClick();
+                                _last_click_time -= now_secs();
+                            } else {
+                                InstrumentsHandleClick();
+                                _last_click_time = globals()->gGameTime;
+                            }
+                        }
+                        _mouse_down = true;
+                    } else {
+                        InstrumentsHandleMouseStillDown();
+                    }
+                }
+            } else if (_mouse_down) {
+                _mouse_down = false;
+                InstrumentsHandleMouseUp();
+            }
+
+            CollideSpaceObjects(gSpaceObjectData.get(), kMaxSpaceObject);
+            _decide_cycle = 0;
+            _scenario_check_time++;
+            if (_scenario_check_time == 30) {
+                _scenario_check_time = 0;
+                CheckScenarioConditions( 0);
+            }
+        }
+        unitsPassed -= unitsToDo;
+    }
+
+    bool newKeyMap = false;
+    for (int l1 = 0; l1 < 4; l1++) {
+        _last_key_map[l1] = _key_map[l1];
+    }
+    GetKeys(_key_map);
+    for (int l1 = 0; l1 < 4; l1++) {
+        if (_last_key_map[l1] != _key_map[l1]) {
+            newKeyMap = true;
+        }
+    }
+
+    if (mPauseKey(_key_map)) {
+        Str255 string;
+        RestoreOriginalColors();
+        GetIndString( string, 3100, 11);
+
+        PlayVolumeSound(kComputerBeep4, kMaxSoundVolume, kShortPersistence, kMustPlaySound);
+        while ( (mPauseKey( _key_map)) && (!(mReturnKey(_key_map)))) {
+            int l1 = TickCount();
+            StartPauseIndicator(string, Randomize(16));
+            _player_paused = false;
+            while ((mPauseKey(_key_map))
+                    && (!(mReturnKey(_key_map)))
+                    && ((TickCount() - l1) < 20)) {
+                GetKeys(_key_map);
+            }
+
+            l1 = TickCount();
+            StopPauseIndicator( string);
+            _player_paused = true;
+            while ((mPauseKey(_key_map))
+                    && (!(mReturnKey(_key_map)))
+                    && ((TickCount() - l1) < 20)) {
+                GetKeys( _key_map);
+                if (CommandKey()) {
+                    EventRecord theEvent;
+                    WaitNextEvent (everyEvent, &theEvent, 3, nil);
+                }
+            }
+
+        }
+    }
+
+    if ((!(globals()->gOptions & kOptionNetworkOn)) &&
+            (!(globals()->gOptions & kOptionReplay)) &&
+            ((mRestartResumeKey(_key_map))
+             || ((!_command_and_q) && (mQuitKeys(_key_map))))) {
+
+        RestoreOriginalColors();
+        MacShowCursor();
+        bool is_training = gThisScenario->startTime & kScenario_IsTraining_Bit;
+        switch (DoPlayAgain(true, is_training)) {
+          case PLAY_AGAIN_QUIT:
+            *_game_result = QUIT_GAME;
+            globals()->gGameOver = 1;
+            if ( CommandKey())
+                globals()->gScenarioWinner.player = globals()->gPlayerAdmiralNumber;
+            globals()->gScenarioWinner.next = -1;
+            globals()->gScenarioWinner.text = -1;
+            break;
+
+          case PLAY_AGAIN_RESTART:
+            *_game_result = RESTART_GAME;
+            globals()->gGameOver = 1;
+            if ( CommandKey())
+                globals()->gScenarioWinner.player = globals()->gPlayerAdmiralNumber;
+            globals()->gScenarioWinner.next = -1;
+            globals()->gScenarioWinner.text = -1;
+            break;
+
+          case PLAY_AGAIN_RESUME:
+            break;
+
+          case PLAY_AGAIN_SKIP:
+            *_game_result = WIN_GAME;
+            globals()->gGameOver = 1;
+            globals()->gScenarioWinner.player = globals()->gPlayerAdmiralNumber;
+            globals()->gScenarioWinner.next =
+                GetChapterNumberFromScenarioNumber(globals()->gThisScenarioNumber) + 1;
+            globals()->gScenarioWinner.text = -1;
+            break;
+        }
+        CopyOffWorldToRealWorld(_play_area);
+        HideCursor();
+        _player_paused = true;
+    }
+
+    if (!(globals()->gOptions & kOptionReplay)
+            && mHelpKey(_key_map)) {
+        RestoreOriginalColors();
+        MacShowCursor();
+        DoHelpScreen();
+        HideCursor();
+        CopyOffWorldToRealWorld(_play_area);
+        _player_paused = true;
+    }
+
+    if (!(globals()->gOptions & kOptionReplay)
+            && mVolumeDownKey(_key_map)
+            && !mVolumeDownKey(_last_key_map)) {
+        if ( globals()->gSoundVolume > 0) {
+            globals()->gSoundVolume--;
+        }
+        if ( globals()->gOptions & kOptionMusicPlay) {
+            SetSongVolume(kMusicVolume);
+        }
+    }
+
+    if (!(globals()->gOptions & kOptionReplay)
+            && mVolumeUpKey( _key_map)
+            && !mVolumeUpKey(_last_key_map)) {
+        if (globals()->gSoundVolume < kMaxVolumePreference) {
+            globals()->gSoundVolume++;
+        }
+        if (globals()->gOptions & kOptionMusicPlay) {
+            SetSongVolume( kMusicVolume);
+        }
+    }
+
+    if (!(globals()->gOptions & kOptionReplay)
+            && mActionMusicKey(_key_map)
+            && !mActionMusicKey(_last_key_map)) {
+        if (globals()->gOptions & kOptionMusicPlay) {
+            ToggleSong();
+        }
+    }
+
+    _key_map[3] &= ~0x80; // mask out power key
+    _key_map[1] &= ~0x02; // mask out caps lock key
+    if ((globals()->gOptions & kOptionReplay)
+            && !demoKey
+            && !newKeyMap
+            && ((_key_map[0] != 0)
+                || (_key_map[1] != 0)
+                || (_key_map[2] != 0)
+                || (_key_map[3] != 0))) {
+        *_game_result = QUIT_GAME;
+        globals()->gGameOver = 1;
+    }
+    demoKey = false;
+
+    MiniComputerHandleNull(unitsDone);
+
+    ClipToCurrentLongMessage();
+    clipRect = Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
+    DrawScrollStars(true);
+    DrawCurrentLongMessage( unitsDone);
+
+    DrawSectorLines();
+    DrawAllBeams();
+    DrawSpriteTableInOffWorld(&clipRect);
+    UpdateAllLabelPositions(unitsDone);
+    DrawAllLabels();
+    DrawSite();
+    clipRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    DrawSpriteCursorSprite(&clipRect);
+
+    ShowSpriteCursorSprite();
+    ShowSpriteTable();
+    ShowAllLabels();
+    ShowAllBeams();
+    ShowScrollStars( true);
+    ShowSectorLines();
+    ShowSite();
+    CopyOffWorldToRealWorld(_play_area);
+
+    DrawMessageScreen(unitsDone);
+    UpdateRadar(unitsDone);
+    UpdateBooleanColorAnimation(unitsDone);
+
+    ++globals()->gFrameCount;
+    VideoDriver::driver()->main_loop_iteration_complete(globals()->gGameTime);
+
+    if (globals()->gGameOver > 0) {
+        Microseconds(&thisTime);
+        thisTime -= globals()->gLastTime;
+        newGameTime = thisTime / 1000000; // divide by a million to get seconds
+        *_seconds = newGameTime;
+        RestoreOriginalColors();
+
+        if (*_game_result == NO_GAME) {
+            if (globals()->gScenarioWinner.player == globals()->gPlayerAdmiralNumber) {
+                *_game_result = WIN_GAME;
+            } else {
+                *_game_result = LOSE_GAME;
+            }
+        }
     }
 }
 
