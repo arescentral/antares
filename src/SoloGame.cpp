@@ -47,21 +47,18 @@ void SoloGame::become_front() {
     switch (_state) {
       case NEW:
         _state = SELECT_LEVEL;
-        _select_level.reset(new SelectLevelScreen);
-        stack()->push(_select_level.get());
+        _next_card.reset(new SelectLevelScreen(&_cancelled, &_scenario));
+        stack()->push(_next_card.get());
         break;
 
       case SELECT_LEVEL:
         _state = START_LEVEL;
-        if (_select_level->cancelled()) {
+        if (_cancelled) {
             _state = QUIT;
             stack()->pop(this);
             break;
-        } else {
-            _scenario = GetScenarioNumberFromChapterNumber(_select_level->chapter());
-            _select_level.reset();
-            // fall through.
         }
+        // else fall through.
 
       case START_LEVEL:
         _state = PROLOGUE;

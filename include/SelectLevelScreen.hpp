@@ -27,13 +27,10 @@ class ScrollTextScreen;
 
 class SelectLevelScreen : public InterfaceScreen {
   public:
-    SelectLevelScreen();
+    SelectLevelScreen(bool* cancelled, int* scenario);
     ~SelectLevelScreen();
 
     virtual void become_front();
-
-    bool cancelled() const;
-    int chapter() const;
 
   protected:
     virtual void adjust_interface();
@@ -54,8 +51,9 @@ class SelectLevelScreen : public InterfaceScreen {
 
     void draw_level_name(unsigned char* name, long fontNum, long itemNum) const;
 
-    bool _cancelled;
+    bool* _cancelled;
     int _chapter;
+    int* _scenario;
 
     DISALLOW_COPY_AND_ASSIGN(SelectLevelScreen);
 };

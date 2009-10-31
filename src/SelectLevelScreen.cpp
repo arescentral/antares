@@ -39,24 +39,19 @@ const int kSelectLevelScreenResID = 5011;
 
 }  // namespace
 
-SelectLevelScreen::SelectLevelScreen()
+SelectLevelScreen::SelectLevelScreen(bool* cancelled, int* scenario)
         : InterfaceScreen(kSelectLevelScreenResID),
-          _cancelled(false),
-          _chapter(GetStartingLevelPreference()) { }
+          _cancelled(cancelled),
+          _chapter(GetStartingLevelPreference()),
+          _scenario(scenario) {
+    *_scenario = GetScenarioNumberFromChapterNumber(_chapter);
+}
 
 SelectLevelScreen::~SelectLevelScreen() { }
 
 void SelectLevelScreen::become_front() {
     InterfaceScreen::become_front();
     VideoDriver::driver()->set_game_state(SELECT_LEVEL_INTERFACE);
-}
-
-bool SelectLevelScreen::cancelled() const {
-    return _cancelled;
-}
-
-int SelectLevelScreen::chapter() const {
-    return _chapter;
 }
 
 void SelectLevelScreen::adjust_interface() {
@@ -76,7 +71,7 @@ void SelectLevelScreen::handle_button(int button) {
     switch (button) {
       case OK:
       case CANCEL:
-        _cancelled = (button == CANCEL);
+        *_cancelled = (button == CANCEL);
         VideoDriver::driver()->set_game_state(UNKNOWN);
         stack()->pop(this);
         break;
@@ -84,6 +79,7 @@ void SelectLevelScreen::handle_button(int button) {
       case PREVIOUS:
         if (_chapter > 1) {
             --_chapter;
+            *_scenario = GetScenarioNumberFromChapterNumber(_chapter);
         }
         adjust_interface();
         draw();
@@ -92,6 +88,7 @@ void SelectLevelScreen::handle_button(int button) {
       case NEXT:
         if (_chapter < GetStartingLevelPreference()) {
             ++_chapter;
+            *_scenario = GetScenarioNumberFromChapterNumber(_chapter);
         }
         adjust_interface();
         draw();
@@ -106,9 +103,8 @@ void SelectLevelScreen::handle_button(int button) {
 
 void SelectLevelScreen::draw() const {
     InterfaceScreen::draw();
-    int level = GetScenarioNumberFromChapterNumber(_chapter);
     unsigned char chapter_name[256];
-    GetScenarioName(level, chapter_name);
+    GetScenarioName(*_scenario, chapter_name);
     draw_level_name(chapter_name, kTitleFontNum, NAME);
 }
 

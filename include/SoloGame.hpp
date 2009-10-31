@@ -47,7 +47,7 @@ class SoloGame : public Card {
 
     void handle_game_result();
 
-    scoped_ptr<SelectLevelScreen> _select_level;
+    bool _cancelled;
     int _scenario;
     GameResult _game_result;
     long _game_length;
