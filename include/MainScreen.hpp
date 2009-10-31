@@ -49,7 +49,7 @@ class MainScreen : public InterfaceScreen {
     };
 
     double _last_event;
-    scoped_ptr<Card> _next_listener;
+    scoped_ptr<Card> _next_card;
 
     DISALLOW_COPY_AND_ASSIGN(MainScreen);
 };
