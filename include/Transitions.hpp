@@ -103,8 +103,6 @@ class PictFade : public Card {
     const int _clut_id;
     bool* _skipped;
 
-    scoped_ptr<Card> _color_fade;
-
     double _wane_start;
 };
 

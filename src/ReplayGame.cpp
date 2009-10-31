@@ -50,8 +50,7 @@ void ReplayGame::become_front() {
         gRandomSeed = globals()->gInputSource->random_seed();
         _game_result = NO_GAME;
         _game_length = 0;
-        _next_card.reset(new MainPlay(_scenario, &_game_result, &_game_length));
-        stack()->push(_next_card.get());
+        stack()->push(new MainPlay(_scenario, &_game_result, &_game_length));
         break;
 
       case PLAYING:

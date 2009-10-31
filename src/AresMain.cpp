@@ -143,31 +143,26 @@ class Master : public Card {
         switch (_state) {
           case START:
             _state = PUBLISHER_PICT;
-            _next_card.reset(new PictFade(2000, 2000, &_skipped));
-            stack()->push(_next_card.get());
+            stack()->push(new PictFade(2000, 2000, &_skipped));
             break;
 
           case PUBLISHER_PICT:
             _state = EGO_PICT;
             if (!_skipped) {
-                _next_card.reset(new PictFade(2001, 2000, &_skipped));
-                stack()->push(_next_card.get());
+                stack()->push(new PictFade(2001, 2000, &_skipped));
                 break;
             }
             // fall through.
 
           case EGO_PICT:
             _state = TITLE_SCREEN_PICT;
-            _next_card.reset(new TitleScreenFade(&_skipped));
-            stack()->push(_next_card.get());
+            stack()->push(new TitleScreenFade(&_skipped));
             break;
 
           case TITLE_SCREEN_PICT:
             _state = INTRO_SCROLL;
             if (!(globals()->gOptions & kOptionHaveSeenIntro)) {
-                _next_card.reset(new ScrollTextScreen(5600, 450, 15.0));
-                stack()->push(_next_card.get());
-
+                stack()->push(new ScrollTextScreen(5600, 450, 15.0));
                 globals()->gOptions |= kOptionHaveSeenIntro;
                 SaveOptionsPreferences();
             }
@@ -175,8 +170,7 @@ class Master : public Card {
 
           case INTRO_SCROLL:
             _state = MAIN_SCREEN;
-            _next_card.reset(new MainScreen);
-            stack()->push(_next_card.get());
+            stack()->push(new MainScreen);
             break;
 
           case MAIN_SCREEN:
@@ -198,7 +192,6 @@ class Master : public Card {
 
     State _state;
     bool _skipped;
-    scoped_ptr<Card> _next_card;
 };
 
 void AresMain() {
@@ -261,8 +254,7 @@ void AresMain() {
     AdmiralInit();
     InitBeams();
 
-    Master master;
-    CardStack stack(&master);
+    CardStack stack(new Master);
     VideoDriver::driver()->loop(&stack);
 }
 
@@ -279,8 +271,7 @@ void MainPlay::become_front() {
             _state = FADING_OUT;
             *_game_result = NO_GAME;
             RGBColor black = {0, 0, 0};
-            _next_card.reset(new ColorFade(256, ColorFade::TO_COLOR, black, 1.0, false, NULL));
-            stack()->push(_next_card.get());
+            stack()->push(new ColorFade(256, ColorFade::TO_COLOR, black, 1.0, false, NULL));
         }
         break;
 

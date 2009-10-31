@@ -47,8 +47,7 @@ void SoloGame::become_front() {
     switch (_state) {
       case NEW:
         _state = SELECT_LEVEL;
-        _next_card.reset(new SelectLevelScreen(&_cancelled, &_scenario));
-        stack()->push(_next_card.get());
+        stack()->push(new SelectLevelScreen(&_cancelled, &_scenario));
         break;
 
       case SELECT_LEVEL:
@@ -63,9 +62,8 @@ void SoloGame::become_front() {
       case START_LEVEL:
         _state = PROLOGUE;
         if (GetScenarioPrologueID(_scenario) > 0) {
-            _next_card.reset(new ScrollTextScreen(
+            stack()->push(new ScrollTextScreen(
                         GetScenarioPrologueID(_scenario), 450, 15.0, 4002));
-            stack()->push(_next_card.get());
             break;
         }
         // else fall through
@@ -75,8 +73,7 @@ void SoloGame::become_front() {
         _state = PLAYING;
         _game_result = NO_GAME;
         _game_length = 0;
-        _next_card.reset(new MainPlay(_scenario, &_game_result, &_game_length));
-        stack()->push(_next_card.get());
+        stack()->push(new MainPlay(_scenario, &_game_result, &_game_length));
         break;
 
       case PLAYING:

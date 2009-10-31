@@ -46,7 +46,7 @@ void CardStack::pop(Card* card) {
         exit(1);
     }
     card->resign_front();
-    card->set_stack(NULL);
+    delete card;
     _list.pop_back();
     if (!_list.empty()) {
         _list.back()->become_front();

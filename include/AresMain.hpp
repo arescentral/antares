@@ -55,7 +55,6 @@ class MainPlay : public Card {
     int _scenario;
     GameResult* _game_result;
     long* _game_length;
-    scoped_ptr<Card> _next_card;
 };
 
 }  // namespace antares

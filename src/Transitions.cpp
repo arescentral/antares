@@ -417,7 +417,6 @@ void PictFade::become_front() {
 
 void PictFade::resign_front() {
     if (_state == NEW) {
-        _color_fade.reset();
         gActiveWorld->fill(BLACK);
         RestoreEntries(*globals()->gSaveColorTable);
     }
@@ -458,17 +457,15 @@ void PictFade::wax() {
     CopyBits(&pict, gActiveWorld, pict.bounds(), pictRect);
 
     RGBColor black = {0, 0, 0};
-    _color_fade.reset(new ColorFade(
+    stack()->push(new ColorFade(
                 _clut_id, ColorFade::FROM_COLOR, black, this->fade_time(), true, _skipped));
-    stack()->push(_color_fade.get());
 }
 
 void PictFade::wane() {
     _state = WANING;
     RGBColor black = {0, 0, 0};
-    _color_fade.reset(new ColorFade(
+    stack()->push(new ColorFade(
                 _clut_id, ColorFade::TO_COLOR, black, this->fade_time(), true, _skipped));
-    stack()->push(_color_fade.get());
 }
 
 double PictFade::fade_time() const {

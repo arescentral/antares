@@ -45,7 +45,6 @@ class ReplayGame : public Card {
     GameResult _game_result;
     long _game_length;
     int _saved_seed;
-    scoped_ptr<Card> _next_card;
 };
 
 }  // namespace antares

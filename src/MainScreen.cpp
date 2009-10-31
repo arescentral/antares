@@ -49,7 +49,6 @@ MainScreen::MainScreen()
 MainScreen::~MainScreen() { }
 
 void MainScreen::become_front() {
-    _next_card.reset();
     InterfaceScreen::become_front();
     VideoDriver::driver()->set_game_state(MAIN_SCREEN_INTERFACE);
 }
@@ -62,8 +61,7 @@ void MainScreen::fire_timer() {
     if (Randomize(4) == 2) {
         DoScrollText(5600, 4, kTitleTextScrollWidth, kTitleFontNum, -1);
     }
-    _next_card.reset(new ReplayGame(GetDemoScenario()));
-    stack()->push(_next_card.get());
+    stack()->push(new ReplayGame(GetDemoScenario()));
 }
 
 void MainScreen::adjust_interface() {
@@ -83,19 +81,16 @@ void MainScreen::handle_button(int button) {
         break;
 
       case DEMO:
-        _next_card.reset(new ReplayGame(GetDemoScenario()));
-        stack()->push(_next_card.get());
+        stack()->push(new ReplayGame(GetDemoScenario()));
         break;
 
       case REPLAY_INTRO:
-        _next_card.reset(new ScrollTextScreen(5600, kTitleTextScrollWidth, 15.0));
-        stack()->push(_next_card.get());
+        stack()->push(new ScrollTextScreen(5600, kTitleTextScrollWidth, 15.0));
         break;
 
       case START_NEW_GAME:
         globals()->gOptions &= ~kOptionReplay;
-        _next_card.reset(new SoloGame);
-        stack()->push(_next_card.get());
+        stack()->push(new SoloGame);
         break;
 
       case START_NETWORK_GAME:
@@ -104,8 +99,7 @@ void MainScreen::handle_button(int button) {
         break;
 
       case ABOUT_ARES:
-        _next_card.reset(new ScrollTextScreen(6500, 540, 30.0));
-        stack()->push(_next_card.get());
+        stack()->push(new ScrollTextScreen(6500, 540, 30.0));
         break;
 
       case OPTIONS:
