@@ -521,6 +521,7 @@ bool VncVideoDriver::vnc_poll(int64_t timeout) {
     int height = gRealWorld->bounds().bottom;
     SocketBinaryWriter out(_socket.fd());
     int64_t stop_time = usecs() + timeout;
+    bool unchanged = false;
 
     do {
         scoped_ptr<EventRecord> evt(new EventRecord);
@@ -565,8 +566,13 @@ bool VncVideoDriver::vnc_poll(int64_t timeout) {
                     FramebufferUpdateRequestMessage request;
                     _in->read(&request);
 
-                        FramebufferUpdateMessage response;
-                        uint8_t server_message_type = FRAMEBUFFER_UPDATE;
+                    FramebufferUpdateMessage response;
+                    uint8_t server_message_type = FRAMEBUFFER_UPDATE;
+                    if (unchanged) {
+                        response.number_of_rectangles = 0;
+                        out.write(server_message_type);
+                        out.write(response);
+                    } else {
                         response.number_of_rectangles = 1;
 
                         FramebufferUpdateRectangle rect;
@@ -589,6 +595,9 @@ bool VncVideoDriver::vnc_poll(int64_t timeout) {
                         out.write(response);
                         out.write(rect);
                         out.write(pixels.get(), width * height);
+
+                        unchanged = true;
+                    }
                 }
                 break;
 
