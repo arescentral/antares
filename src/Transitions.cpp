@@ -336,17 +336,17 @@ bool EndCustomPictFade(bool fast) {
 }
 
 ColorFade::ColorFade(
-        int clut_id, Direction direction, const RGBColor& color, double duration, bool allow_skip)
+        int clut_id, Direction direction, const RGBColor& color, double duration, bool allow_skip,
+        bool* skipped)
         : _direction(direction),
           _transition_colors(clut_id),
           _current_colors(clut_id),
           _color(color),
           _allow_skip(allow_skip),
-          _skipped(false),
+          _skipped(skipped),
           _duration(duration) { }
 
 void ColorFade::become_front() {
-    _skipped = false;
     _start = now_secs();
     _current_colors.transition_between(_transition_colors, _color, _direction);
     RestoreEntries(_current_colors);
@@ -361,7 +361,7 @@ bool ColorFade::mouse_down(int button, const Point& loc) {
     (void)button;
     (void)loc;
     if (_allow_skip) {
-        _skipped = true;
+        *_skipped = true;
         stack()->pop(this);
     }
     return true;
@@ -385,15 +385,11 @@ void ColorFade::fire_timer() {
     }
 }
 
-bool ColorFade::skipped() const {
-    return _skipped;
-}
-
-PictFade::PictFade(int pict_id, int clut_id)
+PictFade::PictFade(int pict_id, int clut_id, bool* skipped)
         : _state(NEW),
           _pict_id(pict_id),
           _clut_id(clut_id),
-          _skipped(false) { }
+          _skipped(skipped) { }
 
 void PictFade::become_front() {
     switch (_state) {
@@ -402,7 +398,6 @@ void PictFade::become_front() {
         break;
 
       case WAXING:
-        _skipped = _skipped || _color_fade->skipped();
         if (!this->skip()) {
             _state = FULL;
             _wane_start = now_secs() + this->display_time();
@@ -412,7 +407,6 @@ void PictFade::become_front() {
 
       case WANING:
         _state = NEW;
-        _skipped = _skipped || _color_fade->skipped();
         stack()->pop(this);
         break;
 
@@ -432,7 +426,7 @@ void PictFade::resign_front() {
 bool PictFade::mouse_down(int button, const Point& loc) {
     (void)button;
     (void)loc;
-    _skipped = true;
+    *_skipped = true;
     if (this->skip()) {
         stack()->pop(this);
     } else {
@@ -456,7 +450,6 @@ void PictFade::fire_timer() {
 
 void PictFade::wax() {
     _state = WAXING;
-    _skipped = false;
 
     gActiveWorld->fill(BLACK);
     Picture pict(_pict_id);
@@ -466,7 +459,7 @@ void PictFade::wax() {
 
     RGBColor black = {0, 0, 0};
     _color_fade.reset(new ColorFade(
-                _clut_id, ColorFade::FROM_COLOR, black, this->fade_time(), true));
+                _clut_id, ColorFade::FROM_COLOR, black, this->fade_time(), true, _skipped));
     stack()->push(_color_fade.get());
 }
 
@@ -474,12 +467,8 @@ void PictFade::wane() {
     _state = WANING;
     RGBColor black = {0, 0, 0};
     _color_fade.reset(new ColorFade(
-                _clut_id, ColorFade::TO_COLOR, black, this->fade_time(), true));
+                _clut_id, ColorFade::TO_COLOR, black, this->fade_time(), true, _skipped));
     stack()->push(_color_fade.get());
-}
-
-bool PictFade::skipped() const {
-    return _skipped;
 }
 
 double PictFade::fade_time() const {
@@ -491,7 +480,7 @@ double PictFade::display_time() const {
 }
 
 bool PictFade::skip() const {
-    return _skipped;
+    return *_skipped;
 }
 
 }  // namespace antares

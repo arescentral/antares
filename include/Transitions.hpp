@@ -49,7 +49,7 @@ class ColorFade : public Card {
 
     ColorFade(
             int clut_id, Direction direction, const RGBColor& color, double duration,
-            bool allow_skip);
+            bool allow_skip, bool* skipped);
 
     virtual void become_front();
     virtual void resign_front();
@@ -57,8 +57,6 @@ class ColorFade : public Card {
     virtual bool mouse_down(int button, const Point& loc);
     virtual double delay();
     virtual void fire_timer();
-
-    bool skipped() const;
 
   private:
     const Direction _direction;
@@ -67,7 +65,7 @@ class ColorFade : public Card {
     const RGBColor _color;
 
     const bool _allow_skip;
-    bool _skipped;
+    bool* _skipped;
 
     double _start;
     const double _duration;
@@ -75,7 +73,7 @@ class ColorFade : public Card {
 
 class PictFade : public Card {
   public:
-    PictFade(int pict_id, int clut_id);
+    PictFade(int pict_id, int clut_id, bool* skipped);
 
     virtual void become_front();
     virtual void resign_front();
@@ -83,8 +81,6 @@ class PictFade : public Card {
     virtual bool mouse_down(int button, const Point& loc);
     virtual double delay();
     virtual void fire_timer();
-
-    bool skipped() const;
 
   protected:
     virtual double fade_time() const;
@@ -105,9 +101,9 @@ class PictFade : public Card {
     State _state;
     const int _pict_id;
     const int _clut_id;
-    bool _skipped;
+    bool* _skipped;
 
-    scoped_ptr<ColorFade> _color_fade;
+    scoped_ptr<Card> _color_fade;
 
     double _wane_start;
 };

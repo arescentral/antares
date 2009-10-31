@@ -112,17 +112,17 @@ GameResult PlayTheGame(long *seconds);
 
 class TitleScreenFade : public PictFade {
   public:
-    TitleScreenFade(bool fast)
-            : PictFade(502, 2001),
+    TitleScreenFade(bool* fast)
+            : PictFade(502, 2001, fast),
               _fast(fast) { }
 
   protected:
     virtual double fade_time() const {
-        return (fast() ? 1.0 : 5.0) / 3.0;
+        return (*_fast ? 1.0 : 5.0) / 3.0;
     }
 
     virtual double display_time() const {
-        return fast() ? 1.0 : 5.0;
+        return *_fast ? 1.0 : 5.0;
     }
 
     virtual bool skip() const {
@@ -130,30 +130,27 @@ class TitleScreenFade : public PictFade {
     }
 
   private:
-    bool fast() const {
-        return _fast || skipped();
-    }
-
-    bool _fast;
+    bool* _fast;
 };
 
 class Master : public Card {
   public:
     Master()
-        : _state(START) { }
+        : _state(START),
+          _skipped(false) { }
 
     virtual void become_front() {
         switch (_state) {
           case START:
             _state = PUBLISHER_PICT;
-            _pict_fade.reset(new PictFade(2000, 2000));
+            _pict_fade.reset(new PictFade(2000, 2000, &_skipped));
             stack()->push(_pict_fade.get());
             break;
 
           case PUBLISHER_PICT:
             _state = EGO_PICT;
-            if (!_pict_fade->skipped())  {
-                _pict_fade.reset(new PictFade(2001, 2000));
+            if (!_skipped) {
+                _pict_fade.reset(new PictFade(2001, 2000, &_skipped));
                 stack()->push(_pict_fade.get());
                 break;
             }
@@ -161,7 +158,7 @@ class Master : public Card {
 
           case EGO_PICT:
             _state = TITLE_SCREEN_PICT;
-            _pict_fade.reset(new TitleScreenFade(_pict_fade->skipped()));
+            _pict_fade.reset(new TitleScreenFade(&_skipped));
             stack()->push(_pict_fade.get());
             break;
 
@@ -202,7 +199,8 @@ class Master : public Card {
     };
 
     State _state;
-    scoped_ptr<PictFade> _pict_fade;
+    bool _skipped;
+    scoped_ptr<Card> _pict_fade;
     scoped_ptr<ScrollTextScreen> _scroll_text;
     scoped_ptr<MainScreen> _main_screen;
 };
@@ -285,7 +283,7 @@ void MainPlay::become_front() {
             _state = FADING_OUT;
             *_game_result = NO_GAME;
             RGBColor black = {0, 0, 0};
-            _next_card.reset(new ColorFade(256, ColorFade::TO_COLOR, black, 1.0, false));
+            _next_card.reset(new ColorFade(256, ColorFade::TO_COLOR, black, 1.0, false, NULL));
             stack()->push(_next_card.get());
         }
         break;
