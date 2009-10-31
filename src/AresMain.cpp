@@ -143,31 +143,30 @@ class Master : public Card {
         switch (_state) {
           case START:
             _state = PUBLISHER_PICT;
-            _pict_fade.reset(new PictFade(2000, 2000, &_skipped));
-            stack()->push(_pict_fade.get());
+            _next_card.reset(new PictFade(2000, 2000, &_skipped));
+            stack()->push(_next_card.get());
             break;
 
           case PUBLISHER_PICT:
             _state = EGO_PICT;
             if (!_skipped) {
-                _pict_fade.reset(new PictFade(2001, 2000, &_skipped));
-                stack()->push(_pict_fade.get());
+                _next_card.reset(new PictFade(2001, 2000, &_skipped));
+                stack()->push(_next_card.get());
                 break;
             }
             // fall through.
 
           case EGO_PICT:
             _state = TITLE_SCREEN_PICT;
-            _pict_fade.reset(new TitleScreenFade(&_skipped));
-            stack()->push(_pict_fade.get());
+            _next_card.reset(new TitleScreenFade(&_skipped));
+            stack()->push(_next_card.get());
             break;
 
           case TITLE_SCREEN_PICT:
             _state = INTRO_SCROLL;
-            _pict_fade.reset();
             if (!(globals()->gOptions & kOptionHaveSeenIntro)) {
-                _scroll_text.reset(new ScrollTextScreen(5600, 450, 15.0));
-                stack()->push(_scroll_text.get());
+                _next_card.reset(new ScrollTextScreen(5600, 450, 15.0));
+                stack()->push(_next_card.get());
 
                 globals()->gOptions |= kOptionHaveSeenIntro;
                 SaveOptionsPreferences();
@@ -176,9 +175,8 @@ class Master : public Card {
 
           case INTRO_SCROLL:
             _state = MAIN_SCREEN;
-            _scroll_text.reset();
-            _main_screen.reset(new MainScreen);
-            stack()->push(_main_screen.get());
+            _next_card.reset(new MainScreen);
+            stack()->push(_next_card.get());
             break;
 
           case MAIN_SCREEN:
@@ -200,9 +198,7 @@ class Master : public Card {
 
     State _state;
     bool _skipped;
-    scoped_ptr<Card> _pict_fade;
-    scoped_ptr<ScrollTextScreen> _scroll_text;
-    scoped_ptr<MainScreen> _main_screen;
+    scoped_ptr<Card> _next_card;
 };
 
 void AresMain() {
