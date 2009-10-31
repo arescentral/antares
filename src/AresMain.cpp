@@ -193,11 +193,12 @@ class Master : public Card {
     bool _skipped;
 };
 
-class GamePlay {
+class GamePlay : public Card {
   public:
     GamePlay(GameResult* game_result, long* seconds);
 
-    void iteration();
+    virtual double delay();
+    virtual void fire_timer();
 
   private:
     GameResult* const _game_result;
@@ -336,16 +337,13 @@ void MainPlay::become_front() {
             ResetLastTime((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
 
             VideoDriver::driver()->set_game_state(PLAY_GAME);
-            GamePlay play(_game_result, _game_length);
-            while (*_game_result == NO_GAME) {
-                play.iteration();
-            }
-            VideoDriver::driver()->set_game_state(DONE_GAME);
+            stack()->push(new GamePlay(_game_result, _game_length));
         }
-        // fall through
+        break;
 
       case PLAYING:
         {
+            VideoDriver::driver()->set_game_state(DONE_GAME);
             if (globals()->gOptions & kOptionMusicPlay) {
                 StopAndUnloadSong();
             }
@@ -384,7 +382,11 @@ GamePlay::GamePlay(GameResult* game_result, long* seconds)
     globals()->gFrameCount = 0;
 }
 
-void GamePlay::iteration() {
+double GamePlay::delay() {
+    return 1.0 / 120.0;
+}
+
+void GamePlay::fire_timer() {
     uint64_t thisTime;
     uint64_t scrapTime;
     int newGameTime;
@@ -704,6 +706,10 @@ void GamePlay::iteration() {
                 *_game_result = LOSE_GAME;
             }
         }
+    }
+
+    if (*_game_result != NO_GAME) {
+        stack()->pop(this);
     }
 }
 
