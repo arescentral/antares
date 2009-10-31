@@ -145,7 +145,6 @@ struct aresGlobalType {
     long            gDestinationLabel;
     long            gAlarmCount;
     long            gSendMessageLabel;
-    bool         gDemoZoomOverride;
     long            gPlayerAdmiralNumber;
     ScenarioWinnerType gScenarioWinner;
     long            gScenarioRotation;  // = 0;

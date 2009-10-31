@@ -73,7 +73,6 @@ aresGlobalType::aresGlobalType() {
     gDestinationLabel = -1;
     gAlarmCount = -1;
     gSendMessageLabel = -1;
-    gDemoZoomOverride = false;
     gScenarioRotation = 0;
     gThisScenarioNumber = -1;
     gScenarioRefID = 0;

@@ -85,7 +85,6 @@ void ResetPlayerShip( long which)
     globals()->gSendMessageLabel = AddScreenLabel( 200, 200, 0, 30, &nilLabel, nil, false, GREEN);
     ResetScrollStars( globals()->gPlayerShipNumber);
     globals()->gAlarmCount = -1;
-    globals()->gDemoZoomOverride = false;
     globals()->gLastKeys = globals()->gTheseKeys = 0;
     globals()->gAutoPilotOff = true;
     globals()->keyMask = 0;
@@ -162,32 +161,8 @@ bool PlayerShipGetKeys( long timePass, unsigned long theKeys,
             }
         }
 //#endif
-    } else
-    {
+    } else {
         globals()->gTheseKeys = theKeys;
-        distance = 0;
-        for ( b = 0; b < kKeyControlNum; b++)
-        {
-            for ( a = 0; a < 4; a++)
-            {
-#if TARGET_OS_MAC
-                if ( keyMap[a] & globals()->gKeyControl[b][a])
-#else
-                if ( keyMap[a].bigEndianValue &
-                    globals()->gKeyControl[b][a].bigEndianValue)
-#endif TARGET_OS_MAC
-                {
-                    distance |= 0x01 << b;
-                }
-            }
-        }
-        if ( distance & (kZoomOutKey | kZoomInKey))
-            globals()->gDemoZoomOverride = true;
-        if ( globals()->gDemoZoomOverride)
-        {
-            globals()->gTheseKeys &= ~(kZoomOutKey | kZoomInKey);
-            globals()->gTheseKeys |= distance & (kZoomOutKey | kZoomInKey);
-        }
     }
 
     if ( *enterMessage) globals()->gTheseKeys = 0;
