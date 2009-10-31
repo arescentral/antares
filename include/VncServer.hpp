@@ -51,6 +51,8 @@ class VncVideoDriver : public VideoDriver {
     Point _mouse;
     std::queue<EventRecord*> _event_queue;
     std::map<int, int> _key_map;
+
+    scoped_ptr<BinaryReader> _in;
 };
 
 }  // namespace antares

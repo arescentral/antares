@@ -519,15 +519,12 @@ struct FramebufferPixel {
 bool VncVideoDriver::vnc_poll(int64_t timeout) {
     int width = gRealWorld->bounds().right;
     int height = gRealWorld->bounds().bottom;
-    SocketBinaryReader in(_socket.fd());
     SocketBinaryWriter out(_socket.fd());
     int64_t stop_time = usecs() + timeout;
-    bool more = false;
 
     do {
         scoped_ptr<EventRecord> evt(new EventRecord);
 
-        more = false;
         timeout = std::max(0ll, stop_time - usecs());
         timeval tv;
         tv.tv_sec = timeout / 1000000ll;
@@ -543,32 +540,30 @@ bool VncVideoDriver::vnc_poll(int64_t timeout) {
 
         if (select(_socket.fd() + 1, &read, &write, &error, &tv) > 0) {
             uint8_t client_message_type;
-            in.read(&client_message_type);
+            _in->read(&client_message_type);
             switch (client_message_type) {
             case SET_PIXEL_FORMAT:
                 {
                     SetPixelFormatMessage msg;
-                    in.read(&msg);
-                    more = true;
+                    _in->read(&msg);
                 }
                 break;
 
             case SET_ENCODINGS:
                 {
                     SetEncodingsMessage msg;
-                    in.read(&msg);
+                    _in->read(&msg);
                     for (int i = 0; i < msg.number_of_encodings; ++i) {
                         int32_t encoding_type;
-                        in.read(&encoding_type);
+                        _in->read(&encoding_type);
                     }
-                    more = true;
                 }
                 break;
 
             case FRAMEBUFFER_UPDATE_REQUEST:
                 {
                     FramebufferUpdateRequestMessage request;
-                    in.read(&request);
+                    _in->read(&request);
 
                         FramebufferUpdateMessage response;
                         uint8_t server_message_type = FRAMEBUFFER_UPDATE;
@@ -600,32 +595,33 @@ bool VncVideoDriver::vnc_poll(int64_t timeout) {
             case KEY_EVENT:
                 {
                     KeyEventMessage msg;
-                    in.read(&msg);
+                    _in->read(&msg);
                     printf("key %d %d\n", msg.key, implicit_cast<int>(msg.down_flag));
 
                     if (_key_map.find(msg.key) == _key_map.end()) {
                         printf("unknown key\n");
                         exit(1);
-                    } else if (msg.down_flag) {
-                        evt->what = autoKey;
-                        evt->message = _key_map[msg.key] << 8;
-                        printf("enqueued %d\n", evt->message);
-                        _event_queue.push(evt.release());
-
-                        evt.reset(new EventRecord);
-                        evt->what = keyUp;
-                        evt->message = _key_map[msg.key] << 8;
-                        _event_queue.push(evt.release());
                     }
 
-                    more = true;
+                    if (msg.down_flag) {
+                        evt->what = autoKey;
+                    } else {
+                        evt->what = keyUp;
+                    }
+                    evt->message = _key_map[msg.key] << 8;
+                    _event_queue.push(evt.release());
+
+                    evt.reset(new EventRecord);
+                    evt->what = keyUp;
+                    evt->message = _key_map[msg.key] << 8;
+                    _event_queue.push(evt.release());
                 }
                 break;
 
             case POINTER_EVENT:
                 {
                     PointerEventMessage msg;
-                    in.read(&msg);
+                    _in->read(&msg);
 
                     if (_button != implicit_cast<bool>(msg.button_mask & 0x1)) {
                         if (_button) {
@@ -642,17 +638,16 @@ bool VncVideoDriver::vnc_poll(int64_t timeout) {
                     _button = msg.button_mask & 0x1;
                     _mouse.h = msg.x_position;
                     _mouse.v = msg.y_position;
-                    more = true;
                 }
                 break;
 
             case CLIENT_CUT_TEXT:
                 {
                     ClientCutTextMessage msg;
-                    in.read(&msg);
+                    _in->read(&msg);
                     for (size_t i = 0; i < msg.length; ++i) {
                         char c;
-                        in.read(&c, 1);
+                        _in->read(&c, 1);
                     }
                 }
                 break;
@@ -665,7 +660,7 @@ bool VncVideoDriver::vnc_poll(int64_t timeout) {
             }
         }
         out.flush();
-    } while (_event_queue.empty() && (more || usecs() < stop_time));
+    } while (_event_queue.empty() && usecs() < stop_time);
 
     return false;
 }
@@ -674,11 +669,11 @@ VncVideoDriver::VncVideoDriver(int port)
         : _start_time(usecs()),
           _listen(listen_on(port)),
           _socket(accept_on(_listen.fd())),
-          _button(false) {
+          _button(false),
+          _in(new SocketBinaryReader(_socket.fd())) {
     _mouse.h = 0;
     _mouse.v = 0;
 
-    SocketBinaryReader in(_socket.fd());
     SocketBinaryWriter out(_socket.fd());
     int width = gRealWorld->bounds().right;
     int height = gRealWorld->bounds().bottom;
@@ -689,7 +684,7 @@ VncVideoDriver::VncVideoDriver(int port)
         strncpy(version.version, "RFB 003.008\n", sizeof(ProtocolVersion));
         out.write(version);
         out.flush();
-        in.read(&version);
+        _in->read(&version);
         if (strncmp(version.version, "RFB 003.008\n", sizeof(ProtocolVersion)) != 0) {
             fprintf(stderr, "Unacceptable client version %11s\n", version.version);
             exit(1);
@@ -706,7 +701,7 @@ VncVideoDriver::VncVideoDriver(int port)
         out.flush();
 
         uint8_t selected_security;
-        in.read(&selected_security);
+        _in->read(&selected_security);
         if (selected_security != '\1') {
             fprintf(stderr, "Unacceptable security %d\n", implicit_cast<int>(selected_security));
             exit(1);
@@ -721,7 +716,7 @@ VncVideoDriver::VncVideoDriver(int port)
     {
         // Initialize connection.
         ClientInitMessage client_init;
-        in.read(&client_init);
+        _in->read(&client_init);
 
         const char* const name = "Antares";
 
