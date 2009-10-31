@@ -112,11 +112,9 @@ void ResetPlayerShip( long which)
     globals()->hotKey_target = false;
 }
 
-bool PlayerShipGetKeys( long timePass, unsigned long theKeys,
-    bool *enterMessage)
-{
+bool PlayerShipGetKeys(long timePass, unsigned long theKeys, bool *enterMessage) {
     KeyMap          keyMap, *bufMap;
-    short           a, b, h, friendOrFoe;
+    short           friendOrFoe;
     spaceObjectType *theShip = nil, *selectShip = nil;
     baseObjectType  *baseObject = nil;
     long            selectShipNum;
@@ -127,396 +125,257 @@ bool PlayerShipGetKeys( long timePass, unsigned long theKeys,
     long            width, height, strlen;
     Str255          s;
 
-    if ( globals()->gPlayerShipNumber < 0) return ( everPaused);
+    if (globals()->gPlayerShipNumber < 0) {
+        return everPaused;
+    }
 
-    GetKeys( keyMap);
-    for ( h = 0; h < 4; h++)
-#if TARGET_OS_MAC
-        if ( globals()->gLastKeyMap[h] != keyMap[h]) newKeys = true;
-#else
-        if ( globals()->gLastKeyMap[h].bigEndianValue !=
-            keyMap[h].bigEndianValue) newKeys = true;
-#endif TARGET_OS_MAC
+    GetKeys(keyMap);
+    for (int i = 0; i < 4; ++i) {
+        if (globals()->gLastKeyMap[i] != keyMap[i]) {
+            newKeys = true;
+        }
+    }
 
     globals()->gLastKeys = globals()->gTheseKeys;
 
-    if ( theKeys == 0xffffffff)
-    {
+    if (theKeys == 0xffffffff) {
         globals()->gTheseKeys = 0;
 
-//#ifndef kNonPlayableDemo
-        for ( b = 0; b < kKeyControlNum; b++)
-        {
-            for ( a = 0; a < 4; a++)
-            {
-#if TARGET_OS_MAC
-                if ( keyMap[a] & globals()->gKeyControl[b][a])
-#else
-                if ( keyMap[a].bigEndianValue &
-                    globals()->gKeyControl[b][a].bigEndianValue)
-#endif TARGET_OS_MAC
-                {
-                    globals()->gTheseKeys |= (0x01 << b) & ~globals()->keyMask;
+        for (int i = 0; i < kKeyControlNum; ++i) {
+            for (int j = 0; j < 4; ++j) {
+                if (keyMap[j] & globals()->gKeyControl[i][j]) {
+                    globals()->gTheseKeys |= (0x01 << i) & ~globals()->keyMask;
                 }
             }
         }
-//#endif
     } else {
         globals()->gTheseKeys = theKeys;
     }
 
-    if ( *enterMessage) globals()->gTheseKeys = 0;
-    while (( globals()->gKeyMapBufferBottom != globals()->gKeyMapBufferTop))
-        // && ( globals()->gOptions & kOptionNetworkOn))
-    {
+    if (*enterMessage) {
+        globals()->gTheseKeys = 0;
+    }
+
+    while ((globals()->gKeyMapBufferBottom != globals()->gKeyMapBufferTop)) {
         bufMap = globals()->gKeyMapBuffer + globals()->gKeyMapBufferBottom;
         globals()->gKeyMapBufferBottom++;
-        if ( globals()->gKeyMapBufferBottom >= kKeyMapBufferNum)
+        if (globals()->gKeyMapBufferBottom >= kKeyMapBufferNum)
             globals()->gKeyMapBufferBottom = 0;
-        if (( *enterMessage))// && ( globals()->gOptions & kOptionNetworkOn))
-        {
-            message = GetScreenLabelStringPtr( globals()->gSendMessageLabel);
-            if ( mGetAnyCharPStringLength( message) == 0)
-            {
-                CopyAnyCharPString( message, "\p<>");
+        if (*enterMessage) {
+            message = GetScreenLabelStringPtr(globals()->gSendMessageLabel);
+            if (mGetAnyCharPStringLength(message) == 0) {
+                CopyAnyCharPString(message, "\p<>");
             }
-//          globals()->gTheseKeys = 0;
-            if (( mReturnKey( *bufMap)) && (!AnyKeyButThisOne( *bufMap, 1, 28)))
-            {
+            if ((mReturnKey(*bufMap)) && (!AnyKeyButThisOne(*bufMap, 1, 28))) {
                 *enterMessage = false;
-                CutCharsFromAnyCharPString( message, mGetAnyCharPStringLength( message) - 1, 1);
-                CutCharsFromAnyCharPString( message, 0, 1);
-                a = GetCheatNumFromString( message);
-                if ( a > 0)
-                {
-                    if ( globals()->gOptions & kOptionNetworkOn)
-                    {
+                CutCharsFromAnyCharPString(message, mGetAnyCharPStringLength(message) - 1, 1);
+                CutCharsFromAnyCharPString(message, 0, 1);
+                int cheat = GetCheatNumFromString(message);
+                if (cheat > 0) {
+                    if (globals()->gOptions & kOptionNetworkOn) {
 #ifdef NETSPROCKET_AVAILABLE
-                        SendCheatMessage( a);
-#endif NETSPROCKET_AVAILABLE
-                    } else
-                        ExecuteCheat( a, globals()->gPlayerAdmiralNumber);
-                } else if ( message[0] > 0)
-                {
-                    if ( globals()->gActiveCheats[globals()->gPlayerAdmiralNumber] & kNameObjectBit)
+                        SendCheatMessage(cheat);
+#endif  // NETSPROCKET_AVAILABLE
+                    } else {
+                        ExecuteCheat(cheat, globals()->gPlayerAdmiralNumber);
+                    }
+                } else if (message[0] > 0) {
+                    if (globals()->gActiveCheats[globals()->gPlayerAdmiralNumber] & kNameObjectBit)
                     {
-                        SetAdmiralBuildAtName( globals()->gPlayerAdmiralNumber, message);
+                        SetAdmiralBuildAtName(globals()->gPlayerAdmiralNumber, message);
                         globals()->gActiveCheats[globals()->gPlayerAdmiralNumber] &= ~kNameObjectBit;
                     }
 #ifdef NETSPROCKET_AVAILABLE
-                    SendInGameTextMessage( (Ptr)(message + 1), mGetAnyCharPStringLength( message));
-#endif NETSPROCKET_AVAILABLE
+                    SendInGameTextMessage(message + 1, mGetAnyCharPStringLength(message));
+#endif  // NETSPROCKET_AVAILABLE
                 }
                 message[0] = 0;
-                SetScreenLabelPosition( globals()->gSendMessageLabel, CLIP_LEFT +
-                    (((CLIP_RIGHT - CLIP_LEFT) / 2)), CLIP_TOP +
-                    (((globals()->gTrueClipBottom - CLIP_TOP) / 2)) + kSendMessageVOffset);
-                RecalcScreenLabelSize( globals()->gSendMessageLabel);
-            } else
-            {
-                message = GetScreenLabelStringPtr( globals()->gSendMessageLabel);
-                if (( mDeleteKey( *bufMap)) || (mLeftArrowKey(*bufMap)))
-                {
-                    if ( mGetAnyCharPStringLength( message) > 2)
-                    {
-                        if ( mCommandKey( *bufMap)) // delete whole message
-                        {
-                            CutCharsFromAnyCharPString( message,
-                                1, mGetAnyCharPStringLength( message) - 2);
-                        } else
-                        {
-                            CutCharsFromAnyCharPString( message,
-                                mGetAnyCharPStringLength( message) - 2, 1);
+                SetScreenLabelPosition(
+                        globals()->gSendMessageLabel,
+                        CLIP_LEFT + (((CLIP_RIGHT - CLIP_LEFT) / 2)),
+                        CLIP_TOP + (((globals()->gTrueClipBottom - CLIP_TOP) / 2)) +
+                        kSendMessageVOffset);
+                RecalcScreenLabelSize(globals()->gSendMessageLabel);
+            } else {
+                message = GetScreenLabelStringPtr(globals()->gSendMessageLabel);
+                if ((mDeleteKey(*bufMap)) || (mLeftArrowKey(*bufMap))) {
+                    if (mGetAnyCharPStringLength(message) > 2) {
+                        if (mCommandKey(*bufMap)) {
+                            // delete whole message
+                            CutCharsFromAnyCharPString(
+                                    message, 1, mGetAnyCharPStringLength(message) - 2);
+                        } else {
+                            CutCharsFromAnyCharPString(
+                                    message, mGetAnyCharPStringLength(message) - 2, 1);
                         }
                     }
                 } else
                 {
-                    if ( message[0] < 120)
+                    if (message[0] < 120)
                     {
                         s[0] = 1;
-                        s[1] = GetAsciiFromKeyMap( *bufMap,
+                        s[1] = GetAsciiFromKeyMap(*bufMap,
                             globals()->gLastMessageKeyMap);
                         if (s[1])
                         {
-                            InsertAnyCharPStringInPString( message, s,
-                                mGetAnyCharPStringLength( message) - 1);
-//                          PlayVolumeSound(  kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
+                            InsertAnyCharPStringInPString(message, s,
+                                mGetAnyCharPStringLength(message) - 1);
                         }
                     }
                 }
-                mGetDirectStringDimensions( message, width, height);
-                strlen = CLIP_LEFT + (((CLIP_RIGHT - CLIP_LEFT) / 2) - ( width / 2));
-                if (( strlen + width) > (CLIP_RIGHT))
+                mGetDirectStringDimensions(message, width, height);
+                strlen = CLIP_LEFT + (((CLIP_RIGHT - CLIP_LEFT) / 2) - (width / 2));
+                if ((strlen + width) > (CLIP_RIGHT))
                 {
                     strlen -= (strlen + width) - (CLIP_RIGHT);
                 }
-                RecalcScreenLabelSize( globals()->gSendMessageLabel);
-                SetScreenLabelPosition( globals()->gSendMessageLabel, strlen, CLIP_TOP +
+                RecalcScreenLabelSize(globals()->gSendMessageLabel);
+                SetScreenLabelPosition(globals()->gSendMessageLabel, strlen, CLIP_TOP +
                     (((globals()->gTrueClipBottom - CLIP_TOP) / 2) + kSendMessageVOffset));
             }
-        } else //if  ( globals()->gOptions & kOptionNetworkOn)
-        {
-            if ( (mReturnKey( *bufMap)) && ( !(globals()->keyMask & kReturnKeyMask)))
+        } else {
+            if ((mReturnKey(*bufMap)) && (!(globals()->keyMask & kReturnKeyMask)))
                 *enterMessage = true;
         }
-        for ( h = 0; h < 4; h++)
-            globals()->gLastMessageKeyMap[h] = (*bufMap)[h];
-    }
-/*  if (( *enterMessage) && ( globals()->gOptions & kOptionNetworkOn))
-    {
-        message = GetScreenLabelStringPtr( globals()->gSendMessageLabel);
-        if ( mGetAnyCharPStringLength( message) == 0)
-        {
-            CopyAnyCharPString( message, (anyCharType *)"\p<>");
+        for (int i = 0; i < 4; ++i) {
+            globals()->gLastMessageKeyMap[i] = (*bufMap)[i];
         }
-        globals()->gTheseKeys = 0;
-        if (( mReturnKey( keyMap)) && ((!mReturnKey( globals()->gLastKeyMap))))
-        {
-            *enterMessage = false;
-            CutCharsFromAnyCharPString( message, mGetAnyCharPStringLength( message) - 1, 1);
-            CutCharsFromAnyCharPString( message, 0, 1);
-            a = GetCheatNumFromString( message);
-            if ( a > 0)
-            {
-                SendCheatMessage( a);
-            } else if ( message[0] > 0)
-            {
-                if ( globals()->gActiveCheats[globals()->gPlayerAdmiralNumber] & kNameObjectBit)
-                {
-                    SetAdmiralBuildAtName( globals()->gPlayerAdmiralNumber, message);
-                    globals()->gActiveCheats[globals()->gPlayerAdmiralNumber] &= ~kNameObjectBit;
-                }
-                SendInGameTextMessage( (Ptr)(message + 1), mGetAnyCharPStringLength( message));
-            }
-            message[0] = 0;
-            SetScreenLabelPosition( globals()->gSendMessageLabel, CLIP_LEFT +
-                (((CLIP_RIGHT - CLIP_LEFT) / 2)), CLIP_TOP +
-                (((globals()->gTrueClipBottom - CLIP_TOP) / 2)) + kSendMessageVOffset);
-            RecalcScreenLabelSize( globals()->gSendMessageLabel);
-        } else if ( newKeys)
-        {
-            message = GetScreenLabelStringPtr( globals()->gSendMessageLabel);
-            if (( mDeleteKey( keyMap)) || (mLeftArrowKey(keyMap)))
-            {
-                if ( mGetAnyCharPStringLength( message) > 2)
-                {
-                    if ( mCommandKey( keyMap)) // delete whole message
-                    {
-                        CutCharsFromAnyCharPString( message,
-                            1, mGetAnyCharPStringLength( message) - 2);
-                    } else
-                    {
-                        CutCharsFromAnyCharPString( message,
-                            mGetAnyCharPStringLength( message) - 2, 1);
-                    }
-                }
-            } else
-            {
-                if ( message[0] < 120)
-                {
-                    s[0] = 1;
-                    s[1] = GetAsciiFromKeyMap( keyMap, globals()->gLastKeyMap);
-                    if (s[1])
-                    {
-                        InsertAnyCharPStringInPString( message, (anyCharType *)s,
-                            mGetAnyCharPStringLength( message) - 1);
-                        PlayVolumeSound(  kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
-                    }
-                }
-            }
-            mGetDirectStringDimensions( message, width, height, strlen, getwidchar, getwidwid)
-            strlen = CLIP_LEFT + (((CLIP_RIGHT - CLIP_LEFT) / 2) - ( width / 2));
-            if (( strlen + width) > (CLIP_RIGHT))
-            {
-                strlen -= (strlen + width) - (CLIP_RIGHT);
-            }
-            RecalcScreenLabelSize( globals()->gSendMessageLabel);
-            SetScreenLabelPosition( globals()->gSendMessageLabel, strlen, CLIP_TOP +
-                (((globals()->gTrueClipBottom - CLIP_TOP) / 2) + kSendMessageVOffset));
-        }
-    } else if  ( globals()->gOptions & kOptionNetworkOn)
-    {
-        if (( mReturnKey( keyMap)) && ((!mReturnKey( globals()->gLastKeyMap)))) *enterMessage = true;
     }
-*/
+
     // TERRIBLE HACK:
     //  this implements the often requested feature of having a shortcut for
     //  transfering control.
 
-    a = globals()->gZoomMode;
+    int old_zoom = globals()->gZoomMode;
 
-    if (( globals()->gTheseKeys & kZoomOutKey) && ( !(globals()->gLastKeys & kZoomOutKey)))
+    if ((globals()->gTheseKeys & kZoomOutKey) && (!(globals()->gLastKeys & kZoomOutKey)))
     {
         reinterpret_cast<int&>(globals()->gZoomMode)++;
-        if ( globals()->gZoomMode > kSmallestZoom)
+        if (globals()->gZoomMode > kSmallestZoom)
         {
              globals()->gZoomMode = kSmallestZoom;
         }
     }
-    if (( globals()->gTheseKeys & kZoomInKey) && ( !(globals()->gLastKeys & kZoomInKey)))
+    if ((globals()->gTheseKeys & kZoomInKey) && (!(globals()->gLastKeys & kZoomInKey)))
     {
         reinterpret_cast<int&>(globals()->gZoomMode)--;
-        if ( globals()->gZoomMode < kTimesTwoZoom)
+        if (globals()->gZoomMode < kTimesTwoZoom)
         {
             globals()->gZoomMode = kTimesTwoZoom;
         }
     }
 
-//  if ((( globals()->gOptions & kOptionSubstituteFKeys) ?
-//      ((!*enterMessage) && ( mNOFScale221Key( keyMap))):( mScale221Key( keyMap))))
-
-/*
-    if ( mScale221Key( keyMap))
-    {
-        globals()->gZoomMode = 1;
-    } else if ( mScale121Key( keyMap))
-    {
-        globals()->gZoomMode = 2;
-    } else if ( mScale122Key( keyMap))
-    {
-        globals()->gZoomMode = 3;
-    } else if ( mScale124Key( keyMap))
-    {
-        globals()->gZoomMode = 4;
-    } else if ( mScaleHostileKey( keyMap))
-    {
-        globals()->gZoomMode = 5;
-    } else if ( mScaleObjectKey( keyMap))
-    {
-        globals()->gZoomMode = 6;
-    } else if ( mScaleAllKey( keyMap))
-    {
-        globals()->gZoomMode = 7;
-    }
-*/
-//  if ((( globals()->gOptions & kOptionSubstituteFKeys) ?
-//      ((!*enterMessage) && ( mNOFScale221Key( keyMap))):( mScale221Key( keyMap))))
-//  {
-//      globals()->gZoomMode = 1;
-//  }
-
-    if ( !*enterMessage)
-    {
-        if ((!(globals()->gOptions & kOptionSubstituteFKeys)) &&
-            ( mTransferKey( keyMap)) && ( !(mTransferKey( globals()->gLastKeyMap))))
-        {
-            if (!(globals()->gOptions & kOptionNetworkOn))
-            {
-                MiniComputerExecute( 3,
-                    1, globals()->gPlayerAdmiralNumber);
-            } else
-            {
+    if (!*enterMessage) {
+        if ((!(globals()->gOptions & kOptionSubstituteFKeys))
+                && (mTransferKey(keyMap))
+                && (!(mTransferKey(globals()->gLastKeyMap)))) {
+            if (!(globals()->gOptions & kOptionNetworkOn)) {
+                MiniComputerExecute(
+                        3, 1, globals()->gPlayerAdmiralNumber);
+            } else {
 #ifdef NETSPROCKET_AVAILABLE
-                SendMenuMessage( globals()->gGameTime + gNetLatency,
-                    3,  // the special screen
-                    1   // kSpecialMiniTransfer
-                    );
-    #endif NETSPROCKET_AVAILABLE
+                SendMenuMessage(
+                        globals()->gGameTime + gNetLatency,
+                        3,  // the special screen
+                        1   // kSpecialMiniTransfer
+                        );
+#endif NETSPROCKET_AVAILABLE
             }
         }
-        if (( ( mScale121Key( keyMap))))
-        {
+        if (((mScale121Key(keyMap)))) {
             globals()->gZoomMode = kActualSizeZoom;
         }
 
-        if ((  ( mScale122Key( keyMap))))
-        {
+        if (((mScale122Key(keyMap)))) {
             globals()->gZoomMode = kHalfSizeZoom;
         }
 
-        if ((  ( mScale124Key( keyMap))))
-        {
+        if (((mScale124Key(keyMap)))) {
             globals()->gZoomMode = kQuarterSizeZoom;
         }
 
-        if ((  ( mScale1216Key( keyMap))))
-        {
+        if (((mScale1216Key(keyMap)))) {
             globals()->gZoomMode = kEighthSizeZoom;
         }
 
-        if ((  ( mScaleHostileKey( keyMap))))
-        {
+        if (((mScaleHostileKey(keyMap)))) {
             globals()->gZoomMode = kNearestFoeZoom;
         }
 
-        if ((  ( mScaleObjectKey( keyMap))))
-        {
+        if (((mScaleObjectKey(keyMap)))) {
             globals()->gZoomMode = kNearestAnythingZoom;
         }
 
-        if ((  ( mScaleAllKey( keyMap))))
-        {
+        if (((mScaleAllKey(keyMap)))) {
             globals()->gZoomMode = kSmallestZoom;
         }
     }
 
-    if ( globals()->gZoomMode != a)
-    {
-        PlayVolumeSound(  kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
-        GetIndString( s, kMessageStringID, globals()->gZoomMode + kZoomStringOffset);
-        SetStatusString( s, true, kStatusLabelColor);
+    if (globals()->gZoomMode != old_zoom) {
+        PlayVolumeSound(kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+        GetIndString(s, kMessageStringID, globals()->gZoomMode + kZoomStringOffset);
+        SetStatusString(s, true, kStatusLabelColor);
     }
 
     theShip = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
-//  theShip->attributes &= ~kIsHumanControlled;
-    if ( !theShip->active) return ( everPaused);
 
-    if ( theShip->health < ( theShip->baseType->health >> 2L))
-    {
-         if ( globals()->gAlarmCount < 0)
-         {
-            PlayVolumeSound( kKlaxon, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
+    if (!theShip->active) {
+        return everPaused;
+    }
+
+    if (theShip->health < (theShip->baseType->health >> 2L)) {
+         if (globals()->gAlarmCount < 0) {
+            PlayVolumeSound(kKlaxon, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
             globals()->gAlarmCount = 0;
-            SetStatusString( "\pWARNING: Shields Low", true, kStatusWarnColor);
-         } else
-         {
+            SetStatusString("\pWARNING: Shields Low", true, kStatusWarnColor);
+         } else {
             globals()->gAlarmCount += timePass;
-            if ( globals()->gAlarmCount > 125)
-            {
-                PlayVolumeSound( kKlaxon, kMediumVolume, kMediumLongPersistence, kPrioritySound);
+            if (globals()->gAlarmCount > 125) {
+                PlayVolumeSound(kKlaxon, kMediumVolume, kMediumLongPersistence, kPrioritySound);
                 globals()->gAlarmCount = 0;
-                SetStatusString( "\pWARNING: Shields Low", true, kStatusWarnColor);
+                SetStatusString("\pWARNING: Shields Low", true, kStatusWarnColor);
             }
         }
-    } else globals()->gAlarmCount = -1;
+    } else {
+        globals()->gAlarmCount = -1;
+    }
 
-    if ( !(theShip->attributes & kIsHumanControlled)) return( everPaused);
+    if (!(theShip->attributes & kIsHumanControlled)) {
+        return everPaused;
+    }
 
     baseObject = theShip->baseType;
 
-    MiniComputerHandleKeys( globals()->gTheseKeys, globals()->gLastKeys);
-    if ( (mMessageNextKey( keyMap)) && (!(mMessageNextKey(globals()->gLastKeyMap))) && (!*enterMessage))
+    MiniComputerHandleKeys(globals()->gTheseKeys, globals()->gLastKeys);
+
+    if ((mMessageNextKey(keyMap))
+            && (!(mMessageNextKey(globals()->gLastKeyMap)))
+            && (!*enterMessage)) {
         AdvanceCurrentLongMessage();
+    }
+
     dcalc = kSelectFriendKey | kSelectFoeKey | kSelectBaseKey;
     attributes = globals()->gTheseKeys & dcalc;
 
-    if ( globals()->gTheseKeys & kDestinationKey)
-    {
-        if ( globals()->gDestKeyTime >= 0)
+    if (globals()->gTheseKeys & kDestinationKey) {
+        if (globals()->gDestKeyTime >= 0) {
             globals()->gDestKeyTime += timePass;
-    } else
-    {
-        if ( globals()->gDestKeyTime > 45)
-        {
-            if (( theShip->attributes & kCanBeDestination) &&
-                (!globals()->destKeyUsedForSelection))
-            {
-/*              SetScreenLabelObject( globals()->gDestinationLabel, theShip);
-                SetScreenLabelAge( globals()->gDestinationLabel, kLabelOffVisibleTime);
-                GetIndString( s, kSpaceObjectNameResID, theShip->whichBaseObject + 1);
-                SetScreenLabelString( globals()->gDestinationLabel, (anyCharType *)s);
-                PlayVolumeSound(  kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
-                SetAdmiralDestinationObject( globals()->gPlayerAdmiralNumber, globals()->gPlayerShipNumber, kObjectDestinationType);
-*/              if ( !(globals()->gOptions & kOptionNetworkOn))
-                {
-                    SetPlayerSelectShip( globals()->gPlayerShipNumber, true,
-                        globals()->gPlayerAdmiralNumber);
-                } else
-                {
+        }
+    } else {
+        if (globals()->gDestKeyTime > 45) {
+            if ((theShip->attributes & kCanBeDestination)
+                    && (!globals()->destKeyUsedForSelection)) {
+                if (!(globals()->gOptions & kOptionNetworkOn)) {
+                    SetPlayerSelectShip(globals()->gPlayerShipNumber, true,
+                            globals()->gPlayerAdmiralNumber);
+                } else {
 #ifdef NETSPROCKET_AVAILABLE
-                    if ( !SendSelectMessage( globals()->gGameTime + gNetLatency,
-                        globals()->gPlayerShipNumber, true))
+                    if (!SendSelectMessage(
+                                globals()->gGameTime + gNetLatency,
+                                globals()->gPlayerShipNumber,
+                                true)) {
                         StopNetworking();
+                    }
 #endif NETSPROCKET_AVAILABLE
                 }
             }
@@ -526,309 +385,195 @@ bool PlayerShipGetKeys( long timePass, unsigned long theKeys,
     }
 
 // NEW -- do hot key selection
-    b = -1;
-    for ( a = 0; a < kHotKeyNum; a++)
-    {
-        if ( mCheckKeyMap( keyMap, a + kFirstHotKeyNum))
-        {
-            b = a;
+    int hot_key = -1;
+    for (int i = 0; i < kHotKeyNum; i++) {
+        if (mCheckKeyMap(keyMap, kFirstHotKeyNum + i)) {
+            hot_key = i;
         }
     }
 
-    if ( b >= 0)
-    {
-        if ( b != globals()->lastHotKey)
-        {
-            globals()->lastHotKey = b;
+    if (hot_key >= 0) {
+        if (hot_key != globals()->lastHotKey) {
+            globals()->lastHotKey = hot_key;
             globals()->hotKeyDownTime = 0;
             globals()->hotKey_target = false;
-            if ( globals()->gTheseKeys & kDestinationKey)
+            if (globals()->gTheseKeys & kDestinationKey) {
                 globals()->hotKey_target = true;
-
-        } else
-        {
+            }
+        } else {
             globals()->hotKeyDownTime += timePass;
         }
-    } else if ( globals()->lastHotKey >= 0)
-    {
-        b = globals()->lastHotKey;
+    } else if (globals()->lastHotKey >= 0) {
+        hot_key = globals()->lastHotKey;
         globals()->lastHotKey = -1;
 
-        if ( globals()->hotKeyDownTime > 45)
-        {
-            if ( globals()->lastSelectedObject >= 0)
-            {
+        if (globals()->hotKeyDownTime > 45) {
+            if (globals()->lastSelectedObject >= 0) {
                 selectShip = gSpaceObjectData.get() + globals()->lastSelectedObject;
 
-                if ( selectShip->active)
-                {
-                    globals()->hotKey[b].objectNum =
-                        globals()->lastSelectedObject;
+                if (selectShip->active) {
+                    globals()->hotKey[hot_key].objectNum = globals()->lastSelectedObject;
 
-                    globals()->hotKey[b].objectID =
-                        globals()->lastSelectedObjectID;
+                    globals()->hotKey[hot_key].objectID = globals()->lastSelectedObjectID;
                     Update_LabelStrings_ForHotKeyChange();
-                    PlayVolumeSound(  kComputerBeep1, kMediumLoudVolume,
-                        kMediumPersistence, kLowPrioritySound);
+                    PlayVolumeSound(
+                            kComputerBeep1, kMediumLoudVolume, kMediumPersistence,
+                            kLowPrioritySound);
                 }
             }
-        } else
-        {
+        } else {
             globals()->destKeyUsedForSelection = true;
-            if ( globals()->hotKey[b].objectNum >= 0)
-            {
-                selectShip = gSpaceObjectData.get() + globals()->hotKey[b].objectNum;
-                if ( (selectShip->active) && ( selectShip->id ==
-                        globals()->hotKey[b].objectID))
-                {
-                    if (( globals()->gTheseKeys & kDestinationKey) ||
-                        ( selectShip->owner !=
-                            globals()->gPlayerAdmiralNumber) ||
-                        ( globals()->hotKey_target))
-                    {
-                        a = 1;  // is target
-                    } else
-                    {
-                        a = 0; // is not target
-                    }
-                    if ( !(globals()->gOptions & kOptionNetworkOn))
-                    {
-                        SetPlayerSelectShip( globals()->hotKey[b].objectNum,
-                            (a != 0)?(true):(false),
-                            globals()->gPlayerAdmiralNumber);
-                    } else
-                    {
+            if (globals()->hotKey[hot_key].objectNum >= 0) {
+                selectShip = gSpaceObjectData.get() + globals()->hotKey[hot_key].objectNum;
+                if ((selectShip->active)
+                        && (selectShip->id == globals()->hotKey[hot_key].objectID)) {
+                    bool is_target = (globals()->gTheseKeys & kDestinationKey)
+                        || (selectShip->owner != globals()->gPlayerAdmiralNumber)
+                        || (globals()->hotKey_target);
+                    if (!(globals()->gOptions & kOptionNetworkOn)) {
+                        SetPlayerSelectShip(
+                                globals()->hotKey[hot_key].objectNum,
+                                is_target,
+                                globals()->gPlayerAdmiralNumber);
+                    } else {
 #ifdef NETSPROCKET_AVAILABLE
-                        if ( !SendSelectMessage(
-                                globals()->gGameTime + gNetLatency,
-                                globals()->hotKey[b].objectNum,
-                                (a != 0)?(true):(false)))
+                        if (!SendSelectMessage(
+                                    globals()->gGameTime + gNetLatency,
+                                    globals()->hotKey[hot_key].objectNum,
+                                    is_target)) {
                             StopNetworking();
-    #endif NETSPROCKET_AVAILABLE
+                        }
+#endif  // NETSPROCKET_AVAILABLE
                     }
-                } else
-                {
-                    globals()->hotKey[b].objectNum = -1;
+                } else {
+                    globals()->hotKey[hot_key].objectNum = -1;
                 }
             }
             globals()->hotKeyDownTime = 0;
-
         }
     }
 // end new hotkey selection
 
     // for this we check lastKeys against theseKeys & relevent keys now being pressed
-    if (( attributes) && ( !(globals()->gLastKeys & attributes)) &&
-            (!globals()->gMouseActive))
-    {
+    if ((attributes) && (!(globals()->gLastKeys & attributes))
+            && (!globals()->gMouseActive)) {
         globals()->gDestKeyTime = -1;
         nonattributes = 0;
-        if ( globals()->gTheseKeys & kSelectFriendKey)
-        {
-            if ( !(globals()->gTheseKeys & kDestinationKey))
-            {
-                selectShipNum = GetAdmiralConsiderObject( globals()->gPlayerAdmiralNumber);
+        if (globals()->gTheseKeys & kSelectFriendKey) {
+            if (!(globals()->gTheseKeys & kDestinationKey)) {
+                selectShipNum = GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber);
                 attributes = kCanBeDestination;
                 nonattributes = kIsDestination;
-            } else
-            {
-                selectShipNum = GetAdmiralDestinationObject( globals()->gPlayerAdmiralNumber);
+            } else {
+                selectShipNum = GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber);
                 attributes = kCanBeDestination;
                 nonattributes = kIsDestination;
             }
-//          attributes = kCanAcceptDestination;
             friendOrFoe = 1;
-        } else if ( globals()->gTheseKeys & kSelectFoeKey)
-        {
-            selectShipNum = GetAdmiralDestinationObject( globals()->gPlayerAdmiralNumber);
+        } else if (globals()->gTheseKeys & kSelectFoeKey) {
+            selectShipNum = GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber);
             attributes = kCanBeDestination;
             nonattributes = kIsDestination;
             friendOrFoe = -1;
-        } else
-        {
-            if ( !(globals()->gTheseKeys & kDestinationKey))
-            {
-                selectShipNum = GetAdmiralConsiderObject( globals()->gPlayerAdmiralNumber);
+        } else {
+            if (!(globals()->gTheseKeys & kDestinationKey)) {
+                selectShipNum = GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber);
                 attributes = kCanAcceptBuild;
                 friendOrFoe = 1;
-            } else
-            {
-                selectShipNum = GetAdmiralDestinationObject( globals()->gPlayerAdmiralNumber);
+            } else {
+                selectShipNum = GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber);
                 attributes = kIsDestination;
                 friendOrFoe = 0;
             }
         }
-        if ( selectShipNum >= 0)
-        {
+        if (selectShipNum >= 0) {
             selectShip = gSpaceObjectData.get() + selectShipNum;
-/*          if (( selectShip->attributes & kCanThink) || ( selectShip->attributes & kIsHumanControlled))
-            {
-                distance = selectShip->distanceFromPlayer;
-            } else
-*/          {
-                difference = ABS<int>( theShip->location.h - selectShip->location.h);
-                dcalc = difference;
-                difference =  ABS<int>( theShip->location.v - selectShip->location.v);
-                distance = difference;
+            difference = ABS<int>(theShip->location.h - selectShip->location.h);
+            dcalc = difference;
+            difference =  ABS<int>(theShip->location.v - selectShip->location.v);
+            distance = difference;
 
-                if (( dcalc > kMaximumRelevantDistance) ||
-                    ( distance > kMaximumRelevantDistance))
-                {
-                    hugeDistance = dcalc;    // must be positive
-                    MyWideMul(hugeDistance, hugeDistance, &hugeDistance);    // ppc automatically generates WideMultiply
-                    selectShip->distanceFromPlayer = distance;
-                    MyWideMul(selectShip->distanceFromPlayer, selectShip->distanceFromPlayer, &selectShip->distanceFromPlayer);
-                    selectShip->distanceFromPlayer += hugeDistance;
-                }
-                else
-                {
-                    selectShip->distanceFromPlayer = distance * distance + dcalc * dcalc;
-                }
-                /*
-                selectShip->distanceFromPlayer = (double long)distance * (double long)distance +
-                                    (double long)dcalc * (double long)dcalc;
-                */
-                hugeDistance = selectShip->distanceFromPlayer;
+            if ((dcalc > kMaximumRelevantDistance)
+                    || (distance > kMaximumRelevantDistance)) {
+                hugeDistance = dcalc;  // must be positive
+                MyWideMul(hugeDistance, hugeDistance, &hugeDistance);
+                selectShip->distanceFromPlayer = distance;
+                MyWideMul(selectShip->distanceFromPlayer, selectShip->distanceFromPlayer, &selectShip->distanceFromPlayer);
+                selectShip->distanceFromPlayer += hugeDistance;
+            } else {
+                selectShip->distanceFromPlayer = distance * distance + dcalc * dcalc;
             }
+            hugeDistance = selectShip->distanceFromPlayer;
         } else {
             hugeDistance = 0;
         }
 
-/*      WriteDebugDivider();
-        WriteDebugLong( hugeDistance.lo);
-        WriteDebugLong( selectShipNum);
-        WriteDebugLong( theShip->location.h);
-        WriteDebugLong( theShip->location.v);
-        WriteDebugLong( theShip->direction);
-*/      selectShipNum = GetManualSelectObject( theShip, 0, attributes,
-                                                nonattributes, &hugeDistance, selectShipNum, friendOrFoe);
+        selectShipNum = GetManualSelectObject(
+                theShip, 0, attributes, nonattributes, &hugeDistance, selectShipNum, friendOrFoe);
 
-        if ( selectShipNum >= 0)
-        {
-            if ( (globals()->gTheseKeys & kDestinationKey) || ( globals()->gTheseKeys & kSelectFoeKey))
-            {
-                /*
-                // set new destination object
-                selectShip = gSpaceObjectData.get() + selectShipNum;
-                SetScreenLabelObject( globals()->gDestinationLabel, selectShip);
-                if ( selectShipNum == globals()->gPlayerShipNumber)
-                {
-                    SetScreenLabelAge( globals()->gDestinationLabel, kLabelOffVisibleTime);
-                }
-                PlayVolumeSound(  kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
-                SetAdmiralDestinationObject( globals()->gPlayerAdmiralNumber, selectShipNum, kObjectDestinationType);
-                if ( selectShip->attributes & kIsDestination)
-                {
-                    SetScreenLabelString( globals()->gDestinationLabel, GetDestBalanceName( selectShip->destinationObject));
-//                  SetDestinationString( GetDestBalanceName( selectShip->destinationObject), true);
-                } else
-                {
-                    GetIndString( s, kSpaceObjectNameResID, selectShip->whichBaseObject + 1);
-                    SetScreenLabelString( globals()->gDestinationLabel, (anyCharType *)s);
-//                  SetDestinationString( s, true);
-                }
-
-                SetObjectDestination( theShip, nil);
-                */
-                if ( !(globals()->gOptions & kOptionNetworkOn))
-                {
-                    SetPlayerSelectShip( selectShipNum, true, globals()->gPlayerAdmiralNumber);
-                } else
-                {
+        if (selectShipNum >= 0) {
+            if ((globals()->gTheseKeys & kDestinationKey)
+                    || (globals()->gTheseKeys & kSelectFoeKey)) {
+                if (!(globals()->gOptions & kOptionNetworkOn)) {
+                    SetPlayerSelectShip(selectShipNum, true, globals()->gPlayerAdmiralNumber);
+                } else {
 #ifdef NETSPROCKET_AVAILABLE
-                    if ( !SendSelectMessage( globals()->gGameTime + gNetLatency, selectShipNum, true))
+                    if (!SendSelectMessage(
+                                globals()->gGameTime + gNetLatency, selectShipNum, true)) {
                         StopNetworking();
-#endif
+                    }
+#endif  // NETSPROCKET_AVAILABLE
+                }
+            } else {
+                if (!(globals()->gOptions & kOptionNetworkOn)) {
+                    SetPlayerSelectShip(selectShipNum, false, globals()->gPlayerAdmiralNumber);
+                } else {
+#ifdef NETSPROCKET_AVAILABLE
+                    if (!SendSelectMessage(
+                                globals()->gGameTime + gNetLatency, selectShipNum, false)) {
+                        StopNetworking();
+                    }
+#endif  // NETSPROCKET_AVAILABLE
                 }
             }
-            else
-            {
-                /*
-//              ResetScrollStars( selectShipNum);
-                selectShip = gSpaceObjectData.get() + selectShipNum;
-                SetScreenLabelObject( globals()->gSelectionLabel, selectShip);
-                if ( selectShipNum == globals()->gPlayerShipNumber)
-                {
-                    SetScreenLabelAge( globals()->gSelectionLabel, kLabelOffVisibleTime);
-                }
-                PlayVolumeSound(  kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
-                SetAdmiralConsiderObject( globals()->gPlayerAdmiralNumber, selectShipNum);
-                if ( selectShip->attributes & kIsDestination)
-                {
-                    SetScreenLabelString( globals()->gSelectionLabel, GetAdmiralBuildAtName( globals()->gPlayerAdmiralNumber));
-                } else
-                {
-                    GetIndString( s, kSpaceObjectNameResID, selectShip->whichBaseObject + 1);
-                    SetScreenLabelString( globals()->gSelectionLabel, (anyCharType *)s);
-                }
-    //          NumToString(  selectShip->entryNumber, s);
-        //      SetAdmiralDestinationObject( globals()->gPlayerAdmiralNumber, globals()->gPlayerShipNumber, kCoordinateDestinationType);
-        //      SetObjectDestination( selectShip);
-        //      SetDestinationString( s, true);
-                */
-                if ( !(globals()->gOptions & kOptionNetworkOn))
-                {
-                    SetPlayerSelectShip( selectShipNum, false, globals()->gPlayerAdmiralNumber);
-                } else
-                {
-#ifdef NETSPROCKET_AVAILABLE
-                    if ( !SendSelectMessage( globals()->gGameTime + gNetLatency, selectShipNum, false))
-                        StopNetworking();
-#endif NETSPROCKET_AVAILABLE
-                }
-            }
-    //      WriteDebugLong( selectShipNum);
         }
     }
 
-    if ( theShip->attributes & kOnAutoPilot)
-    {
+    if (theShip->attributes & kOnAutoPilot) {
         if ((globals()->gAutoPilotOff) && // no off request pending
-            ( globals()->gTheseKeys & ( kUpKey | kDownKey | kLeftKey | kRightKey)))
-        {
+                (globals()->gTheseKeys & (kUpKey | kDownKey | kLeftKey | kRightKey))) {
             theShip->keysDown = globals()->gTheseKeys | kAutoPilotKey;
             globals()->gAutoPilotOff = false;
-        } else
-        {
-            theShip->keysDown = (theShip->keysDown & ( ~kMiscKeyMask)) |
-                            (globals()->gTheseKeys & ( kMiscKeyMask));
+        } else {
+            theShip->keysDown
+                = (theShip->keysDown & (~kMiscKeyMask))
+                | (globals()->gTheseKeys & (kMiscKeyMask));
         }
-    } else
-    {
+    } else {
         theShip->keysDown = globals()->gTheseKeys;
         globals()->gAutoPilotOff = true;
     }
 
-    if (( globals()->gTheseKeys & kOrderKey) && ( !(globals()->gLastKeys & kOrderKey)))
-    {
+    if ((globals()->gTheseKeys & kOrderKey) && (!(globals()->gLastKeys & kOrderKey))) {
         theShip->keysDown |= kGiveCommandKey;
-        /*
-        selectShipNum = GetAdmiralConsiderObject( globals()->gPlayerAdmiralNumber);
-        if ( selectShipNum >= 0)
-        {
-            selectShip = gSpaceObjectData.get() + selectShipNum;
-            SetObjectDestination( selectShip, nil);
-            PlayVolumeSound(  kMorseBeepSound, kMediumVolume, kMediumPersistence, kLowPrioritySound);
-        }
-        */
     }
 
-    if (( globals()->gTheseKeys & kWarpKey) &&
-        ( globals()->gTheseKeys & kDestinationKey))
-    {
+    if ((globals()->gTheseKeys & kWarpKey)
+            && (globals()->gTheseKeys & kDestinationKey)) {
         globals()->gDestKeyTime = -1;
-        if ( !(globals()->gLastKeys & kWarpKey))
-        {
-            if ( !(theShip->attributes & kOnAutoPilot))
+        if (!(globals()->gLastKeys & kWarpKey)) {
+            if (!(theShip->attributes & kOnAutoPilot)) {
                 theShip->keysDown |= kAutoPilotKey;
+            }
             theShip->keysDown |= kAdoptTargetKey;
         }
         theShip->keysDown &= ~kWarpKey;
     }
 
-    for ( h = 0; h < 4; h++)
-        globals()->gLastKeyMap[h] = keyMap[h];
-    return ( everPaused);
+    for (int i = 0; i < 4; i++) {
+        globals()->gLastKeyMap[i] = keyMap[i];
+    }
+    return everPaused;
 }
 
 void PlayerShipHandleClick( Point where)
