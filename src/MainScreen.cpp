@@ -59,7 +59,8 @@ double MainScreen::delay() {
 
 void MainScreen::fire_timer() {
     if (Randomize(4) == 2) {
-        DoScrollText(5600, 4, kTitleTextScrollWidth, kTitleFontNum, -1);
+        // TODO(sfiera): reinstate.
+        // DoScrollText(5600, 4, kTitleTextScrollWidth, kTitleFontNum, -1);
     }
     stack()->push(new ReplayGame(GetDemoScenario()));
 }
