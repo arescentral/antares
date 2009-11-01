@@ -200,6 +200,13 @@ class GamePlay : public Card {
     virtual double delay();
     virtual void fire_timer();
 
+    virtual bool mouse_down(int button, const Point& loc);
+    virtual bool mouse_up(int button, const Point& loc);
+    virtual bool mouse_moved(int button);
+
+    virtual bool key_down(int key);
+    virtual bool key_up(int key);
+
   private:
     GameResult* const _game_result;
     long* const _seconds;
@@ -711,6 +718,33 @@ void GamePlay::fire_timer() {
     if (*_game_result != NO_GAME) {
         stack()->pop(this);
     }
+}
+
+bool GamePlay::mouse_down(int button, const Point& loc) {
+    static_cast<void>(button);
+    static_cast<void>(loc);
+    return true;
+}
+
+bool GamePlay::mouse_up(int button, const Point& loc) {
+    static_cast<void>(button);
+    static_cast<void>(loc);
+    return true;
+}
+
+bool GamePlay::mouse_moved(int button) {
+    static_cast<void>(button);
+    return true;
+}
+
+bool GamePlay::key_down(int key) {
+    static_cast<void>(key);
+    return true;
+}
+
+bool GamePlay::key_up(int key) {
+    static_cast<void>(key);
+    return true;
 }
 
 void Pause( long time)
