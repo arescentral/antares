@@ -18,7 +18,7 @@
 #include "ColorTable.hpp"
 
 #include <stdint.h>
-#include <Base.h>
+#include "Base.h"
 #include "BinaryStream.hpp"
 #include "SmartPtr.hpp"
 

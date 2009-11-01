@@ -18,7 +18,7 @@
 #include "DirectText.hpp"
 
 #include <algorithm>
-#include <Base.h>
+#include "Base.h"
 
 #include "BinaryStream.hpp"
 #include "Error.hpp"

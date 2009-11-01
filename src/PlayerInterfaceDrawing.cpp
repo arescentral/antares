@@ -18,7 +18,7 @@
 #include "PlayerInterfaceDrawing.hpp"
 
 #include <assert.h>
-#include <Quickdraw.h>
+#include "Quickdraw.h"
 
 #include "ColorTranslation.hpp"
 #include "Debug.hpp"

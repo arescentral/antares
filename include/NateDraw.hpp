@@ -21,8 +21,8 @@
 // Natedraw.h
 
 #include <algorithm>
-#include <Base.h>
-#include <Quickdraw.h>
+#include "Base.h"
+#include "Quickdraw.h"
 
 namespace antares {
 

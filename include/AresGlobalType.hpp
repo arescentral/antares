@@ -20,8 +20,8 @@
 
 // Ares Global Type.h
 
-#include <Base.h>
-#include <Quickdraw.h>
+#include "Base.h"
+#include "Quickdraw.h"
 
 #include "AnyChar.hpp"
 #include "NateDraw.hpp"

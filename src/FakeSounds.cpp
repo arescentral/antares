@@ -17,7 +17,7 @@
 
 #include "FakeSounds.hpp"
 
-#include <Sound.h>
+#include "Sound.h"
 
 #include <assert.h>
 #include <stdio.h>

@@ -20,7 +20,7 @@
 #include <assert.h>
 #include <algorithm>
 #include <limits>
-#include <Quickdraw.h>
+#include "Quickdraw.h"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
 

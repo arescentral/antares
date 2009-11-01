@@ -18,7 +18,7 @@
 #ifndef ANTARES_SCENARIO_DATA_HPP_
 #define ANTARES_SCENARIO_DATA_HPP_
 
-#include <Base.h>
+#include "Base.h"
 
 namespace antares {
 

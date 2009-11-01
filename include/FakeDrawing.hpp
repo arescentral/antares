@@ -19,7 +19,7 @@
 #define ANTARES_FAKE_DRAWING_HPP_
 
 #include <stdint.h>
-#include <Quickdraw.h>
+#include "Quickdraw.h"
 
 #include "Fakes.hpp"
 

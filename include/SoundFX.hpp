@@ -20,8 +20,8 @@
 
 // SOUND FX.H
 
-#include <Base.h>
-#include <Sound.h>
+#include "Base.h"
+#include "Sound.h"
 
 #include "MathSpecial.hpp"
 #include "FakeSounds.hpp"

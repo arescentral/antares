@@ -18,7 +18,7 @@
 #ifndef ANTARES_TRANSITIONS_HPP_
 #define ANTARES_TRANSITIONS_HPP_
 
-#include <Base.h>
+#include "Base.h"
 #include "Card.hpp"
 #include "ColorTable.hpp"
 

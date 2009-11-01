@@ -18,7 +18,7 @@
 #ifndef ANTARES_COLOR_TRANSLATION_HPP_
 #define ANTARES_COLOR_TRANSLATION_HPP_
 
-#include <Quickdraw.h>
+#include "Quickdraw.h"
 
 #include "Casts.hpp"
 

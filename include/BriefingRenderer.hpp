@@ -18,7 +18,7 @@
 #ifndef ANTARES_BRIEFING_RENDERER_HPP_
 #define ANTARES_BRIEFING_RENDERER_HPP_
 
-#include <Quickdraw.h>
+#include "Quickdraw.h"
 
 #include "NateDraw.hpp"
 

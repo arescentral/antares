@@ -18,8 +18,8 @@
 #ifndef ANTARES_OFFSCREEN_GWORLD_HPP_
 #define ANTARES_OFFSCREEN_GWORLD_HPP_
 
-#include <Base.h>
-#include <Quickdraw.h>
+#include "Base.h"
+#include "Quickdraw.h"
 
 namespace antares {
 

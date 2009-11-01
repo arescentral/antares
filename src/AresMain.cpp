@@ -17,7 +17,7 @@
 
 #include "AresMain.hpp"
 
-#include <Quickdraw.h>
+#include "Quickdraw.h"
 
 #include "Admiral.hpp"
 #include "AresCheat.hpp"

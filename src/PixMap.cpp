@@ -18,7 +18,7 @@
 #include "PixMap.hpp"
 
 #include <algorithm>
-#include <Quickdraw.h>
+#include "Quickdraw.h"
 #include "BinaryStream.hpp"
 #include "ColorTable.hpp"
 

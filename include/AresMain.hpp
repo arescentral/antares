@@ -18,7 +18,7 @@
 #ifndef ANTARES_ARES_MAIN_HPP_
 #define ANTARES_ARES_MAIN_HPP_
 
-#include <Base.h>
+#include "Base.h"
 #include "Card.hpp"
 #include "PlayerInterface.hpp"
 

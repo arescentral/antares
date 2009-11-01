@@ -19,7 +19,7 @@
 
 #include "Error.hpp"
 
-#include <Quickdraw.h>
+#include "Quickdraw.h"
 
 #include "StringNumerics.hpp"
 

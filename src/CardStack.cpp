@@ -18,7 +18,7 @@
 #include "CardStack.hpp"
 
 #include <algorithm>
-#include <Base.h>
+#include "Base.h"
 #include "Card.hpp"
 
 namespace antares {
