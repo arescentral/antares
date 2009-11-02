@@ -348,7 +348,9 @@ void RecalcAllAdmiralBuildData( void)
                             a->canBuildType[j].baseNum = d->canBuildType[k];
                             a->canBuildType[j].base = baseObject;
                             a->canBuildType[j].chanceRange = a->totalBuildChance;
-                            a->totalBuildChance += baseObject->buildRatio;
+                            if (baseObject != NULL) {
+                                a->totalBuildChance += baseObject->buildRatio;
+                            }
                         }
                     }
                 }
