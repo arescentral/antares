@@ -271,67 +271,6 @@ bool AutoMusicFadeTo(long tickTime, RgbColor *goalColor, bool eventSkip) {
     return( anyEventHappened);
 }
 
-bool CustomPictFade(short pictID, short clutID) {
-    ColorTable colors(clutID);
-    Picture pict(pictID);
-    RgbColor fadeColor(0, 0, 0);
-
-    gActiveWorld->fill(BLACK);
-    Rect pictRect = pict.bounds();
-    pictRect.center_in(gRealWorld->bounds());
-
-    ResetTransitions();
-    AutoFadeTo(1, &fadeColor, true);
-    CopyBits(&pict, gActiveWorld, pict.bounds(), pictRect);
-
-    bool gotAnyEvent = AutoFadeFrom(100, true);
-    if (!gotAnyEvent) {
-        gotAnyEvent = TimedWaitForAnyEvent(80);
-    }
-    if (!gotAnyEvent) {
-        gotAnyEvent = AutoFadeTo(100, &fadeColor, true);
-    } else {
-        AutoFadeTo(1, &fadeColor, true);
-    }
-
-    gActiveWorld->fill(BLACK);
-    AutoFadeFrom(1, true);
-    ResetTransitions();
-    return gotAnyEvent;
-}
-
-bool StartCustomPictFade(short pictID, short clutID, bool fast) {
-    ColorTable colors(clutID);
-    Picture pict(pictID);
-    RgbColor fadeColor(0, 0, 0);
-
-    gActiveWorld->fill(BLACK);
-    Rect pictRect = pict.bounds();
-    pictRect.center_in(gRealWorld->bounds());
-
-    ResetTransitions();
-    AutoFadeTo(1, &fadeColor, true);
-    CopyBits(&pict, gActiveWorld, pict.bounds(), pictRect);
-
-    return AutoFadeFrom(fast ? 20 : 100, true) || fast;
-}
-
-bool EndCustomPictFade(bool fast) {
-    RgbColor fadeColor(0, 0, 0);
-
-    bool gotAnyEvent = TimedWaitForAnyEvent(fast ? 60 : 300);
-    if (!gotAnyEvent) {
-        gotAnyEvent = AutoFadeTo(fast ? 20 : 100, &fadeColor, true);
-    } else {
-        AutoFadeTo(1, &fadeColor, true);
-    }
-
-    gActiveWorld->fill(BLACK);
-    AutoFadeFrom(1, true);
-    ResetTransitions();
-    return fast || gotAnyEvent;
-}
-
 ColorFade::ColorFade(
         int clut_id, Direction direction, const RgbColor& color, double duration, bool allow_skip,
         bool* skipped)

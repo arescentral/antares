@@ -36,9 +36,6 @@ void InstantGoalTransition( void);
 bool AutoFadeTo( long, RgbColor *, bool);
 bool AutoFadeFrom( long, bool);
 bool AutoMusicFadeTo( long, RgbColor *, bool);
-bool CustomPictFade(short pictID, short clutID);
-bool StartCustomPictFade(short pictID, short clutID, bool fast);
-bool EndCustomPictFade(bool fast);
 
 class ColorFade : public Card {
   public:
