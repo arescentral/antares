@@ -299,6 +299,24 @@ RgbColor::RgbColor(uint16_t red, uint16_t green, uint16_t blue)
           green(green),
           blue(blue) { }
 
+void RgbColor::read(BinaryReader* bin) {
+    bin->discard(2);
+    bin->read(&red);
+    bin->discard(2);
+    bin->read(&green);
+    bin->discard(2);
+    bin->read(&blue);
+}
+
+void RgbColor::write(BinaryWriter* bin) const {
+    bin->pad(2);
+    bin->write(red);
+    bin->pad(2);
+    bin->write(green);
+    bin->pad(2);
+    bin->write(blue);
+}
+
 ColorTable::ColorTable(int32_t id) {
     static_cast<void>(id);
     for (int i = 0; i < 256; ++i) {
@@ -343,12 +361,7 @@ void ColorTable::read(BinaryReader* bin) {
     for (int i = 0; i < 256; ++i) {
         uint32_t index;
         bin->read(&index);
-        bin->discard(2);
-        bin->read(&_colors[i].red);
-        bin->discard(2);
-        bin->read(&_colors[i].green);
-        bin->discard(2);
-        bin->read(&_colors[i].blue);
+        bin->read(&_colors[i]);
     }
 }
 
@@ -356,12 +369,7 @@ void ColorTable::write(BinaryWriter* bin) const {
     for (int i = 0; i < 256; ++i) {
         uint32_t index = i;
         bin->write(index);
-        bin->pad(2);
-        bin->write(_colors[i].red);
-        bin->pad(2);
-        bin->write(_colors[i].green);
-        bin->pad(2);
-        bin->write(_colors[i].blue);
+        bin->write(_colors[i]);
     }
 }
 

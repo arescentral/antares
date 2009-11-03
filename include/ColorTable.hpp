@@ -36,6 +36,9 @@ class RgbColor {
     uint16_t red;
     uint16_t green;
     uint16_t blue;
+
+    void read(BinaryReader* bin);
+    void write(BinaryWriter* bin) const;
 };
 
 class ColorTable {
