@@ -128,12 +128,7 @@ void DrawNateRect(PixMap* destPix, Rect* destRect, long hoff, long voff, unsigne
         return;
     }
 
-    int32_t drowPlus = destPix->row_bytes();
-    unsigned char* bytes = destPix->mutable_bytes() + destRect->top * drowPlus + destRect->left;
-    for (int i = destRect->top; i < destRect->bottom; ++i) {
-        memset(bytes, color, width);
-        bytes += drowPlus;
-    }
+    destPix->view(*destRect).fill(color);
 }
 
 void DrawNateRectVScan( PixMap *destPix, Rect *destRect, long hoff, long voff,
