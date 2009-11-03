@@ -153,12 +153,12 @@ void CopyBits(PixMap* source, PixMap* dest, const Rect& source_rect, const Rect&
 int currentForeColor;
 int currentBackColor;
 
-void RGBForeColor(RgbColor* color) {
-    currentForeColor = NearestColor(color->red, color->green, color->blue);
+void RGBForeColor(const RgbColor& color) {
+    currentForeColor = NearestColor(color.red, color.green, color.blue);
 }
 
-void RGBBackColor(RgbColor* color) {
-    currentBackColor = NearestColor(color->red, color->green, color->blue);
+void RGBBackColor(const RgbColor& color) {
+    currentBackColor = NearestColor(color.red, color.green, color.blue);
 }
 
 void DrawLine(PixMap* pix, const Point& from, const Point& to) {

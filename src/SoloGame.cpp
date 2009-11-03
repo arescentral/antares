@@ -121,12 +121,11 @@ void SoloGame::handle_game_result() {
                         100);
             }
 
-            RgbColor black(0, 0, 0);
             if (globals()->gOptions & kOptionMusicPlay) {
-                AutoMusicFadeTo(60, &black, false);
+                AutoMusicFadeTo(60, RgbColor::kBlack, false);
                 StopAndUnloadSong();
             } else {
-                AutoFadeTo(60, &black, false);
+                AutoFadeTo(60, RgbColor::kBlack, false);
             }
             gActiveWorld->fill(BLACK);
             AutoFadeFrom(1, false);

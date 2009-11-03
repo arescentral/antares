@@ -289,6 +289,9 @@ Color24Bit colors_24_bit[256] = {
     {0, 0, 0},
 };
 
+const RgbColor RgbColor::kBlack(0, 0, 0);
+const RgbColor RgbColor::kWhite(65535, 65535, 65535);
+
 RgbColor::RgbColor()
         : red(0),
           green(0),

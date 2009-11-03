@@ -121,10 +121,8 @@ void CopyOffWorldToSaveWorld(const Rect& bounds) {
 }
 
 void NormalizeColors() {
-    RgbColor c(0, 0, 0);
-    RGBForeColor (&c);
-    c.red = c.blue = c.green = 255;
-    RGBBackColor(&c);
+    RGBForeColor(RgbColor::kBlack);
+    RGBBackColor(RgbColor::kWhite);
 }
 
 void ChunkCopyPixMapToScreenPixMap(PixMap* sourcePix, const Rect& sourceRect, PixMap* destMap) {

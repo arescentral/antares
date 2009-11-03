@@ -299,8 +299,7 @@ void MainPlay::become_front() {
         {
             _state = FADING_OUT;
             *_game_result = NO_GAME;
-            RgbColor black(0, 0, 0);
-            stack()->push(new ColorFade(256, ColorFade::TO_COLOR, black, 1.0, false, NULL));
+            stack()->push(new ColorFade(256, ColorFade::TO_COLOR, RgbColor::kBlack, 1.0, false, NULL));
         }
         break;
 

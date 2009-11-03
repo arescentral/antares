@@ -183,14 +183,14 @@ void InstantGoalTransition() {  // instantly goes to total goal color
     RestoreEntries(*globals()->gColorAnimationTable);
 }
 
-bool AutoFadeTo(long tickTime, RgbColor *goalColor, bool eventSkip) {
+bool AutoFadeTo(long tickTime, const RgbColor& goalColor, bool eventSkip) {
     long        startTime, thisTime = 0, lastStep = 0, thisStep = 0;
     bool     anyEventHappened = false;
 
     globals()->gColorAnimationStep = kStartAnimation;
     globals()->gColorAnimationInSpeed = 1;
     globals()->gColorAnimationOutSpeed = globals()->gColorAnimationInSpeed;
-    globals()->gColorAnimationGoal = *goalColor;
+    globals()->gColorAnimationGoal = goalColor;
     startTime = TickCount();
     while (( globals()->gColorAnimationStep < 0) && ( !anyEventHappened))
     {
@@ -234,14 +234,14 @@ bool AutoFadeFrom(long tickTime, bool eventSkip) { // assumes you've set up with
     return( anyEventHappened);
 }
 
-bool AutoMusicFadeTo(long tickTime, RgbColor *goalColor, bool eventSkip) {
+bool AutoMusicFadeTo(long tickTime, const RgbColor& goalColor, bool eventSkip) {
     long        startTime, thisTime = 0, lastStep = 0, thisStep = 0, musicVol, musicStep;
     bool     anyEventHappened = false;
 
     globals()->gColorAnimationStep = kStartAnimation;
     globals()->gColorAnimationInSpeed = 1;
     globals()->gColorAnimationOutSpeed = globals()->gColorAnimationInSpeed;
-    globals()->gColorAnimationGoal = *goalColor;
+    globals()->gColorAnimationGoal = goalColor;
     musicVol = GetSongVolume();
     if ( musicVol > 0)
         musicStep = kAnimationSteps / musicVol + 1;
@@ -392,16 +392,16 @@ void PictFade::wax() {
     pictRect.center_in(gRealWorld->bounds());
     CopyBits(&pict, gActiveWorld, pict.bounds(), pictRect);
 
-    RgbColor black(0, 0, 0);
     stack()->push(new ColorFade(
-                _clut_id, ColorFade::FROM_COLOR, black, this->fade_time(), true, _skipped));
+                _clut_id, ColorFade::FROM_COLOR, RgbColor::kBlack, this->fade_time(), true,
+                _skipped));
 }
 
 void PictFade::wane() {
     _state = WANING;
-    RgbColor black(0, 0, 0);
     stack()->push(new ColorFade(
-                _clut_id, ColorFade::TO_COLOR, black, this->fade_time(), true, _skipped));
+                _clut_id, ColorFade::TO_COLOR, RgbColor::kBlack, this->fade_time(), true,
+                _skipped));
 }
 
 double PictFade::fade_time() const {

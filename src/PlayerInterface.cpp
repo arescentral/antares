@@ -410,7 +410,6 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
     transColorType  *transColor;
     Rect        clipRect;
     Rect            tRect;
-    RgbColor        fadeColor(0, 0, 0);
     Str255          string;
 
     Button();  // Hack to get it to update.
@@ -456,7 +455,9 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
         NormalizeColors();
         tRect = Rect(contentRect->left, contentRect->top, contentRect->right, contentRect->bottom);
         CopyOffWorldToRealWorld(tRect);
-        if ( tRect.left >= tRect.right - 2) AutoFadeTo( 10, &fadeColor, false);
+        if (tRect.left >= tRect.right - 2) {
+            AutoFadeTo( 10, RgbColor::kBlack, false);
+        }
     }
 }
 

@@ -108,7 +108,7 @@ void SetTranslateColorShadeFore( unsigned char color, unsigned char shade)
     entry = gColorTranslateTable.get() + implicit_cast<long>((16 - shade) + 1L +
             implicit_cast<long>(color) * 16L);
     Index2Color(entry->trueColor, &c);
-    RGBForeColor( &c);
+    RGBForeColor( c);
 }
 
 void GetRGBTranslateColorShade( RgbColor *c, unsigned char color, unsigned char shade)
@@ -118,7 +118,7 @@ void GetRGBTranslateColorShade( RgbColor *c, unsigned char color, unsigned char 
 
     entry = gColorTranslateTable.get() + implicit_cast<long>((16 - shade) + 1L +
             implicit_cast<long>(color) * 16L);
-    Index2Color( implicit_cast<long>(entry->trueColor), c);
+    Index2Color(entry->trueColor, c);
 }
 
 void SetTranslateColorFore( unsigned char color)
@@ -129,7 +129,7 @@ void SetTranslateColorFore( unsigned char color)
 
     entry = gColorTranslateTable.get() + implicit_cast<long>(color);
     Index2Color(entry->trueColor, &c);
-    RGBForeColor( &c);
+    RGBForeColor( c);
 }
 
 void GetRGBTranslateColor( RgbColor *c, unsigned char color)
@@ -141,15 +141,9 @@ void GetRGBTranslateColor( RgbColor *c, unsigned char color)
     Index2Color(entry->trueColor, c);
 }
 
-void DefaultColors( void)
-
-{
-    RgbColor    c;
-
-    c.red = c.blue = c.green = 0;
-    RGBForeColor ( &c);
-    c.red = c.blue = c.green = 65535;
-    RGBBackColor( &c);
+void DefaultColors() {
+    RGBForeColor(RgbColor::kBlack);
+    RGBBackColor(RgbColor::kWhite);
 }
 
 }  // namespace antares

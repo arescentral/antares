@@ -30,6 +30,9 @@ class BinaryWriter;
 
 class RgbColor {
   public:
+    static const RgbColor kBlack;
+    static const RgbColor kWhite;
+
     RgbColor();
     RgbColor(uint16_t red, uint16_t green, uint16_t blue);
 

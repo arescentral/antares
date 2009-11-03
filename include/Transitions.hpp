@@ -33,9 +33,9 @@ void StartBooleanColorAnimation( long, long, unsigned char);
 void UpdateBooleanColorAnimation( long);
 void RestoreOriginalColors( void);
 void InstantGoalTransition( void);
-bool AutoFadeTo( long, RgbColor *, bool);
+bool AutoFadeTo( long, const RgbColor&, bool);
 bool AutoFadeFrom( long, bool);
-bool AutoMusicFadeTo( long, RgbColor *, bool);
+bool AutoMusicFadeTo( long, const RgbColor&, bool);
 
 class ColorFade : public Card {
   public:
