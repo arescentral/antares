@@ -43,7 +43,7 @@ void ColorTranslatorCleanup() {
 void MakeColorTranslatorTable(const ColorTable& referenceTable) {
     transColorType      *entry, *retroEntry;
     int                 i, j;
-    RGBColor            paletteColor, deviceColor;
+    RgbColor            paletteColor, deviceColor;
 
     const ColorTable& deviceTable = gActiveWorld->colors();
     entry = gColorTranslateTable.get();
@@ -102,7 +102,7 @@ unsigned char GetTranslateColorShade( unsigned char color, unsigned char shade)
 void SetTranslateColorShadeFore( unsigned char color, unsigned char shade)
 
 {
-    RGBColor        c;
+    RgbColor        c;
     transColorType  *entry;
 
     entry = gColorTranslateTable.get() + implicit_cast<long>((16 - shade) + 1L +
@@ -111,7 +111,7 @@ void SetTranslateColorShadeFore( unsigned char color, unsigned char shade)
     RGBForeColor( &c);
 }
 
-void GetRGBTranslateColorShade( RGBColor *c, unsigned char color, unsigned char shade)
+void GetRGBTranslateColorShade( RgbColor *c, unsigned char color, unsigned char shade)
 
 {
     transColorType  *entry;
@@ -124,7 +124,7 @@ void GetRGBTranslateColorShade( RGBColor *c, unsigned char color, unsigned char 
 void SetTranslateColorFore( unsigned char color)
 
 {
-    RGBColor        c;
+    RgbColor        c;
     transColorType  *entry;
 
     entry = gColorTranslateTable.get() + implicit_cast<long>(color);
@@ -132,7 +132,7 @@ void SetTranslateColorFore( unsigned char color)
     RGBForeColor( &c);
 }
 
-void GetRGBTranslateColor( RGBColor *c, unsigned char color)
+void GetRGBTranslateColor( RgbColor *c, unsigned char color)
 
 {
     transColorType  *entry;
@@ -144,7 +144,7 @@ void GetRGBTranslateColor( RGBColor *c, unsigned char color)
 void DefaultColors( void)
 
 {
-    RGBColor    c;
+    RgbColor    c;
 
     c.red = c.blue = c.green = 0;
     RGBForeColor ( &c);

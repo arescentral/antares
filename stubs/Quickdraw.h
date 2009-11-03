@@ -8,8 +8,8 @@ namespace antares {
 
 typedef Window* Port;
 
-void RGBBackColor(RGBColor* color);
-void RGBForeColor(RGBColor* color);
+void RGBBackColor(RgbColor* color);
+void RGBForeColor(RgbColor* color);
 
 STUB1(InvalRect, void(const Rect& rect));
 STUB1(ClipRect, void(const Rect& rect));

@@ -121,7 +121,7 @@ void CopyOffWorldToSaveWorld(const Rect& bounds) {
 }
 
 void NormalizeColors() {
-    RGBColor c = { 0, 0, 0 };
+    RgbColor c(0, 0, 0);
     RGBForeColor (&c);
     c.red = c.blue = c.green = 255;
     RGBBackColor(&c);

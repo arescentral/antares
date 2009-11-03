@@ -21,6 +21,7 @@
 #include "Quickdraw.h"
 
 #include "Casts.hpp"
+#include "ColorTable.hpp"
 
 namespace antares {
 
@@ -71,7 +72,7 @@ namespace antares {
 struct transColorType {
     unsigned char           trueColor;
     unsigned char           retroColor;
-    RGBColor                rgbcolor;
+    RgbColor                rgbcolor;
 };
 
 extern scoped_array<transColorType> gColorTranslateTable;
@@ -90,9 +91,9 @@ unsigned char GetRetroIndex( unsigned char);
 unsigned char GetTranslateIndex( unsigned char);
 unsigned char GetTranslateColorShade( unsigned char, unsigned char);
 void SetTranslateColorShadeFore( unsigned char, unsigned char);
-void GetRGBTranslateColorShade( RGBColor *, unsigned char, unsigned char);
+void GetRGBTranslateColorShade( RgbColor *, unsigned char, unsigned char);
 void SetTranslateColorFore( unsigned char);
-void GetRGBTranslateColor( RGBColor *, unsigned char);
+void GetRGBTranslateColor( RgbColor *, unsigned char);
 void DefaultColors( void);
 
 }  // namespace antares

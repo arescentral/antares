@@ -121,7 +121,7 @@ void SoloGame::handle_game_result() {
                         100);
             }
 
-            RGBColor black = {0, 0, 0};
+            RgbColor black(0, 0, 0);
             if (globals()->gOptions & kOptionMusicPlay) {
                 AutoMusicFadeTo(60, &black, false);
                 StopAndUnloadSong();

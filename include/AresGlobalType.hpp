@@ -24,6 +24,7 @@
 #include "Quickdraw.h"
 
 #include "AnyChar.hpp"
+#include "ColorTable.hpp"
 #include "NateDraw.hpp"
 #include "ScenarioData.hpp"
 #include "SmartPtr.hpp"
@@ -183,7 +184,7 @@ struct aresGlobalType {
     long            gColorAnimationOutSpeed;// = -1;
     scoped_ptr<ColorTable>          gColorAnimationTable;   // = nil;
     scoped_ptr<ColorTable>          gSaveColorTable;        // = nil;
-    RGBColor        gColorAnimationGoal;
+    RgbColor        gColorAnimationGoal;
     smartSoundHandle    gSound[kSoundNum];
     smartSoundChannel   gChannel[kMaxChannelNum];
     long            gLastSoundTime;         // = 0

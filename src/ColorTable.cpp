@@ -289,14 +289,23 @@ Color24Bit colors_24_bit[256] = {
     {0, 0, 0},
 };
 
+RgbColor::RgbColor()
+        : red(0),
+          green(0),
+          blue(0) { }
+
+RgbColor::RgbColor(uint16_t red, uint16_t green, uint16_t blue)
+        : red(red),
+          green(green),
+          blue(blue) { }
+
 ColorTable::ColorTable(int32_t id) {
     static_cast<void>(id);
     for (int i = 0; i < 256; ++i) {
-        RGBColor color = {
-            colors_24_bit[i].red * 0x101,
-            colors_24_bit[i].green * 0x101,
-            colors_24_bit[i].blue * 0x101,
-        };
+        RgbColor color(
+                colors_24_bit[i].red * 0x101,
+                colors_24_bit[i].green * 0x101,
+                colors_24_bit[i].blue * 0x101);
         _colors.push_back(color);
     }
 }
@@ -309,24 +318,23 @@ size_t ColorTable::size() const {
     return _colors.size();
 }
 
-const RGBColor& ColorTable::color(size_t index) const {
+const RgbColor& ColorTable::color(size_t index) const {
     return _colors[index];
 }
 
-void ColorTable::set_color(size_t index, const RGBColor& color) {
+void ColorTable::set_color(size_t index, const RgbColor& color) {
     _colors[index] = color;
 }
 
 void ColorTable::transition_between(
-        const ColorTable& source, const RGBColor& dest, double fraction) {
+        const ColorTable& source, const RgbColor& dest, double fraction) {
     double source_fraction = 1 - fraction;
     double dest_fraction = fraction;
     for (int i = 0; i < 256; ++i) {
-        RGBColor out = {
+        RgbColor out(
             source.color(i).red * source_fraction + dest.red * dest_fraction,
             source.color(i).green * source_fraction + dest.green * dest_fraction,
-            source.color(i).blue * source_fraction + dest.blue * dest_fraction,
-        };
+            source.color(i).blue * source_fraction + dest.blue * dest_fraction);
         _colors[i] = out;
     }
 }

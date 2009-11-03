@@ -62,13 +62,8 @@ typedef Window** WindowRef;
 
 STUB1(GlobalToLocal, void(Point*));
 
-typedef struct {
-    uint16_t red;
-    uint16_t green;
-    uint16_t blue;
-} RGBColor;
-
-void Index2Color(long index, RGBColor* color);
+class RgbColor;
+void Index2Color(long index, RgbColor* color);
 
 typedef int KeyMap[4];
 void GetKeys(KeyMap keys);

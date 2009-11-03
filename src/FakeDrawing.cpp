@@ -153,11 +153,11 @@ void CopyBits(PixMap* source, PixMap* dest, const Rect& source_rect, const Rect&
 int currentForeColor;
 int currentBackColor;
 
-void RGBForeColor(RGBColor* color) {
+void RGBForeColor(RgbColor* color) {
     currentForeColor = NearestColor(color->red, color->green, color->blue);
 }
 
-void RGBBackColor(RGBColor* color) {
+void RGBBackColor(RgbColor* color) {
     currentBackColor = NearestColor(color->red, color->green, color->blue);
 }
 
@@ -197,7 +197,7 @@ void MacFrameRect(const Rect& rect) {
     FrameRect(rect);
 }
 
-void Index2Color(long index, RGBColor* color) {
+void Index2Color(long index, RgbColor* color) {
     color->red = colors->color(index).red;
     color->green = colors->color(index).green;
     color->blue = colors->color(index).blue;

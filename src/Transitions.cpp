@@ -73,7 +73,7 @@ void UpdateColorAnimation(long timePassed) {
         if ( globals()->gColorAnimationStep < 0)
         {
             for (size_t i = 0; i < globals()->gColorAnimationTable->size(); ++i) {
-                RGBColor color = {
+                RgbColor color(
                     globals()->gColorAnimationGoal.red
                         - ((globals()->gColorAnimationGoal.red
                                     - globals()->gSaveColorTable->color(i).red)
@@ -90,8 +90,7 @@ void UpdateColorAnimation(long timePassed) {
                         - ((globals()->gColorAnimationGoal.blue
                                     - globals()->gSaveColorTable->color(i).blue)
                             / kAnimationSteps) *
-                        -globals()->gColorAnimationStep,
-                };
+                        -globals()->gColorAnimationStep);
                 globals()->gColorAnimationTable->set_color(i, color);
             }
             RestoreEntries(*globals()->gColorAnimationTable);
@@ -99,7 +98,7 @@ void UpdateColorAnimation(long timePassed) {
         } else if (( globals()->gColorAnimationStep + globals()->gColorAnimationOutSpeed * timePassed) < kAnimationSteps)
         {
             for (size_t i = 0; i < globals()->gColorAnimationTable->size(); ++i) {
-                RGBColor color = {
+                RgbColor color(
                     globals()->gColorAnimationGoal.red - (( globals()->gColorAnimationGoal.red -
                     globals()->gSaveColorTable->color(i).red) / kAnimationSteps) *
                     globals()->gColorAnimationStep,
@@ -110,8 +109,7 @@ void UpdateColorAnimation(long timePassed) {
 
                     globals()->gColorAnimationGoal.blue - (( globals()->gColorAnimationGoal.blue -
                     globals()->gSaveColorTable->color(i).blue) / kAnimationSteps) *
-                    globals()->gColorAnimationStep,
-                };
+                    globals()->gColorAnimationStep);
 
                 globals()->gColorAnimationTable->set_color(i, color);
             }
@@ -134,14 +132,13 @@ void StartBooleanColorAnimation(long inSpeed, long outSpeed, unsigned char goalC
         GetRGBTranslateColor( &globals()->gColorAnimationGoal,  GetRetroIndex( goalColor));
 
         for (size_t i = 0; i < globals()->gColorAnimationTable->size(); ++i) {
-            RGBColor color = {
+            RgbColor color(
                 (globals()->gColorAnimationGoal.red >> 1L) +
                     (globals()->gSaveColorTable->color(i).red >> 1L),
                 (globals()->gColorAnimationGoal.green >> 1L) +
                     (globals()->gSaveColorTable->color(i).green >> 1L),
                 (globals()->gColorAnimationGoal.blue >> 1L) +
-                    (globals()->gSaveColorTable->color(i).blue >> 1L),
-            };
+                    (globals()->gSaveColorTable->color(i).blue >> 1L));
             globals()->gColorAnimationTable->set_color(i, color);
         }
         RestoreEntries(*globals()->gColorAnimationTable);
@@ -186,7 +183,7 @@ void InstantGoalTransition() {  // instantly goes to total goal color
     RestoreEntries(*globals()->gColorAnimationTable);
 }
 
-bool AutoFadeTo(long tickTime, RGBColor *goalColor, bool eventSkip) {
+bool AutoFadeTo(long tickTime, RgbColor *goalColor, bool eventSkip) {
     long        startTime, thisTime = 0, lastStep = 0, thisStep = 0;
     bool     anyEventHappened = false;
 
@@ -237,7 +234,7 @@ bool AutoFadeFrom(long tickTime, bool eventSkip) { // assumes you've set up with
     return( anyEventHappened);
 }
 
-bool AutoMusicFadeTo(long tickTime, RGBColor *goalColor, bool eventSkip) {
+bool AutoMusicFadeTo(long tickTime, RgbColor *goalColor, bool eventSkip) {
     long        startTime, thisTime = 0, lastStep = 0, thisStep = 0, musicVol, musicStep;
     bool     anyEventHappened = false;
 
@@ -277,7 +274,7 @@ bool AutoMusicFadeTo(long tickTime, RGBColor *goalColor, bool eventSkip) {
 bool CustomPictFade(short pictID, short clutID) {
     ColorTable colors(clutID);
     Picture pict(pictID);
-    RGBColor fadeColor = {0, 0, 0};
+    RgbColor fadeColor(0, 0, 0);
 
     gActiveWorld->fill(BLACK);
     Rect pictRect = pict.bounds();
@@ -306,7 +303,7 @@ bool CustomPictFade(short pictID, short clutID) {
 bool StartCustomPictFade(short pictID, short clutID, bool fast) {
     ColorTable colors(clutID);
     Picture pict(pictID);
-    RGBColor fadeColor = {0, 0, 0};
+    RgbColor fadeColor(0, 0, 0);
 
     gActiveWorld->fill(BLACK);
     Rect pictRect = pict.bounds();
@@ -320,7 +317,7 @@ bool StartCustomPictFade(short pictID, short clutID, bool fast) {
 }
 
 bool EndCustomPictFade(bool fast) {
-    RGBColor fadeColor = {0, 0, 0};
+    RgbColor fadeColor(0, 0, 0);
 
     bool gotAnyEvent = TimedWaitForAnyEvent(fast ? 60 : 300);
     if (!gotAnyEvent) {
@@ -336,7 +333,7 @@ bool EndCustomPictFade(bool fast) {
 }
 
 ColorFade::ColorFade(
-        int clut_id, Direction direction, const RGBColor& color, double duration, bool allow_skip,
+        int clut_id, Direction direction, const RgbColor& color, double duration, bool allow_skip,
         bool* skipped)
         : _direction(direction),
           _transition_colors(clut_id),
@@ -456,14 +453,14 @@ void PictFade::wax() {
     pictRect.center_in(gRealWorld->bounds());
     CopyBits(&pict, gActiveWorld, pict.bounds(), pictRect);
 
-    RGBColor black = {0, 0, 0};
+    RgbColor black(0, 0, 0);
     stack()->push(new ColorFade(
                 _clut_id, ColorFade::FROM_COLOR, black, this->fade_time(), true, _skipped));
 }
 
 void PictFade::wane() {
     _state = WANING;
-    RGBColor black = {0, 0, 0};
+    RgbColor black(0, 0, 0);
     stack()->push(new ColorFade(
                 _clut_id, ColorFade::TO_COLOR, black, this->fade_time(), true, _skipped));
 }

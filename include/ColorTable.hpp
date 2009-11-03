@@ -28,6 +28,16 @@ namespace antares {
 class BinaryReader;
 class BinaryWriter;
 
+class RgbColor {
+  public:
+    RgbColor();
+    RgbColor(uint16_t red, uint16_t green, uint16_t blue);
+
+    uint16_t red;
+    uint16_t green;
+    uint16_t blue;
+};
+
 class ColorTable {
   public:
     explicit ColorTable(int32_t id);
@@ -36,16 +46,16 @@ class ColorTable {
 
     size_t size() const;
 
-    const RGBColor& color(size_t index) const;
-    void set_color(size_t index, const RGBColor& color);
+    const RgbColor& color(size_t index) const;
+    void set_color(size_t index, const RgbColor& color);
 
-    void transition_between(const ColorTable& source, const RGBColor& dest, double fraction);
+    void transition_between(const ColorTable& source, const RgbColor& dest, double fraction);
 
     void read(BinaryReader* bin);
     void write(BinaryWriter* bin) const;
 
   private:
-    std::vector<RGBColor> _colors;
+    std::vector<RgbColor> _colors;
 
     DISALLOW_COPY_AND_ASSIGN(ColorTable);
 };

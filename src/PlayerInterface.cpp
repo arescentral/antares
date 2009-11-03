@@ -410,7 +410,7 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
     transColorType  *transColor;
     Rect        clipRect;
     Rect            tRect;
-    RGBColor        fadeColor = {0, 0, 0};
+    RgbColor        fadeColor(0, 0, 0);
     Str255          string;
 
     Button();  // Hack to get it to update.

@@ -33,9 +33,9 @@ void StartBooleanColorAnimation( long, long, unsigned char);
 void UpdateBooleanColorAnimation( long);
 void RestoreOriginalColors( void);
 void InstantGoalTransition( void);
-bool AutoFadeTo( long, RGBColor *, bool);
+bool AutoFadeTo( long, RgbColor *, bool);
 bool AutoFadeFrom( long, bool);
-bool AutoMusicFadeTo( long, RGBColor *, bool);
+bool AutoMusicFadeTo( long, RgbColor *, bool);
 bool CustomPictFade(short pictID, short clutID);
 bool StartCustomPictFade(short pictID, short clutID, bool fast);
 bool EndCustomPictFade(bool fast);
@@ -48,7 +48,7 @@ class ColorFade : public Card {
     };
 
     ColorFade(
-            int clut_id, Direction direction, const RGBColor& color, double duration,
+            int clut_id, Direction direction, const RgbColor& color, double duration,
             bool allow_skip, bool* skipped);
 
     virtual void become_front();
@@ -62,7 +62,7 @@ class ColorFade : public Card {
     const Direction _direction;
     const ColorTable _transition_colors;
     ColorTable _current_colors;
-    const RGBColor _color;
+    const RgbColor _color;
 
     const bool _allow_skip;
     bool* _skipped;
