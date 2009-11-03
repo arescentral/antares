@@ -63,9 +63,9 @@ typedef Window** WindowRef;
 STUB1(GlobalToLocal, void(Point*));
 
 typedef struct {
-    int red;
-    int green;
-    int blue;
+    uint16_t red;
+    uint16_t green;
+    uint16_t blue;
 } RGBColor;
 
 void Index2Color(long index, RGBColor* color);

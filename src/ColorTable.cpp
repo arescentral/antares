@@ -335,8 +335,11 @@ void ColorTable::read(BinaryReader* bin) {
     for (int i = 0; i < 256; ++i) {
         uint32_t index;
         bin->read(&index);
+        bin->discard(2);
         bin->read(&_colors[i].red);
+        bin->discard(2);
         bin->read(&_colors[i].green);
+        bin->discard(2);
         bin->read(&_colors[i].blue);
     }
 }
@@ -345,8 +348,11 @@ void ColorTable::write(BinaryWriter* bin) const {
     for (int i = 0; i < 256; ++i) {
         uint32_t index = i;
         bin->write(index);
+        bin->pad(2);
         bin->write(_colors[i].red);
+        bin->pad(2);
         bin->write(_colors[i].green);
+        bin->pad(2);
         bin->write(_colors[i].blue);
     }
 }
