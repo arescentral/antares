@@ -641,7 +641,7 @@ void DrawInstrumentPanel() {
 
     pict.reset(new Picture(kInstLeftPictID));
     if (pict.get() == nil) {
-        ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, OFFSCREEN_GRAPHICS_ERROR, -1, -1, -1, __FILE__, 2);
+        fail("Couldn't create the offscreen graphics.");
     } else {
         DrawInSaveWorld();
         tRect = pict->bounds();
@@ -656,7 +656,7 @@ void DrawInstrumentPanel() {
 
     pict.reset(new Picture(kInstRightPictID));
     if (pict.get() == nil) {
-        ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, OFFSCREEN_GRAPHICS_ERROR, -1, -1, -1, __FILE__, 3);
+        fail("Couldn't create the offscreen graphics");
     } else {
         DrawInSaveWorld();
         tRect = pict->bounds();

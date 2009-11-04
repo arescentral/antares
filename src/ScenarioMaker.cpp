@@ -339,39 +339,13 @@ bool ConstructScenario( long which)
 
     // for each initial object
 
-    if ( globals()->scenarioFileInfo.energyBlobID < 0)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, "\pNo energy blob defined",
-            nil, nil, nil, -1, -1, -1, -1, __FILE__, 1);
-        ExitToShell();
-    }
-
-    if ( globals()->scenarioFileInfo.warpInFlareID < 0)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, "\pNo warp in flare defined",
-            nil, nil, nil, -1, -1, -1, -1, __FILE__, 1);
-        ExitToShell();
-    }
-
-    if ( globals()->scenarioFileInfo.warpOutFlareID < 0)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, "\pNo warp out flare defined",
-            nil, nil, nil, -1, -1, -1, -1, __FILE__, 1);
-        ExitToShell();
-    }
-
-    if ( globals()->scenarioFileInfo.playerBodyID < 0)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, "\pNo player body defined",
-            nil, nil, nil, -1, -1, -1, -1, __FILE__, 1);
-        ExitToShell();
-    }
+    check(globals()->scenarioFileInfo.energyBlobID >= 0, "No energy blob defined");
+    check(globals()->scenarioFileInfo.warpInFlareID >= 0, "No warp in flare defined");
+    check(globals()->scenarioFileInfo.warpOutFlareID >= 0, "No warp out flare defined");
+    check(globals()->scenarioFileInfo.playerBodyID >= 0, "No player body defined");
 
     for ( count = 0; count < gThisScenario->playerNum; count++)
     {
-        if ( globals()->scenarioFileInfo.energyBlobID < 0)
-            ShowErrorAny( eQuitErr, kErrorStrID, "\pNo energy blob defined",
-                nil, nil, nil, -1, -1, -1, -1, __FILE__, 1);
         baseObject = mGetBaseObjectPtr( globals()->scenarioFileInfo.energyBlobID);
         if ( baseObject != nil)
             CheckBaseObjectMedia( baseObject, 0);   // special case; always neutral

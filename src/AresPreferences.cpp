@@ -83,10 +83,7 @@ short SaveOptionsPreferences() {
 short SaveStartingLevelPreferences(short whatLevel) {
     Preferences *prefsData = globals()->gPreferencesData.get();
     if (whatLevel <= 0) {
-        ShowErrorAny( eContinueErr, -1, "\pAn attempt was made to save an "
-            "invalid starting level number. Save aborted.",
-            "\p", nil, nil, -1, -1, -1, -1, __FILE__, 1);
-        return paramErr;
+        fail("An attempt was made to save an invalid starting level number. Save aborted.");
     }
     if (whatLevel != prefsData->startingLevel) {
         prefsData->startingLevel = whatLevel;

@@ -301,7 +301,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
         spriteTable = GetPixTable( sourceObject->pixResID);
 
         if (spriteTable == nil) {
-            ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kIntraLevelLoadSpriteError, -1, -1, -1, __FILE__, sourceObject->pixResID);
+            fail("Received an unexpected request to load a sprite");
 //          DebugStr("\pAdding Sprite Table in the Middle of Level?");
             spriteTable = AddPixTable( sourceObject->pixResID);
             if (spriteTable == nil) {
@@ -381,10 +381,8 @@ int AddSpaceObject( spaceObjectType *sourceObject)
 
         if ( destObject->sprite == nil)
         {
-//          DebugStr("\pNo Sprites!");
             globals()->gGameOver = -1;
             destObject->active = kObjectAvailable;
-//          ShowErrorAny( eContinueOnlyErr, -1, "\pEnding the game because", "\p we have a spriteless object.", nil, nil, -1, -1, -1, -1, __FILE__, 1);
             return( -1);
         }
         GetOldSpritePixData( destObject->sprite, &oldStyleSprite);
@@ -1026,7 +1024,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
         spriteTable = GetPixTable( dObject->pixResID);
 
         if (spriteTable == nil) {
-            ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadSpriteError, -1, -1, -1, __FILE__, 191);
+            fail("Couldn't load a requested sprite");
             spriteTable = AddPixTable( dObject->pixResID);
 //          if ( spriteTable == nil) Debugger();
         }

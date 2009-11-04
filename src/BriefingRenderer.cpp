@@ -292,9 +292,7 @@ void GetRealObjectSpriteData( coordPointType *realCoord,
     }
 
 
-    if (pixTable == nil) {
-        ShowErrorAny( eContinueErr, kErrorStrID, nil, nil, nil, nil, kLoadSpriteError, -1, -1, -1, __FILE__, tlong);
-    }
+    check(pixTable != nil, "Couldn't load a requested sprite");
 
     if ( baseObject->attributes & kIsSelfAnimated)
         whichShape = baseObject->frame.animation.firstShape >> kFixedBitShiftNumber;

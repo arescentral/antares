@@ -211,11 +211,7 @@ natePixType* AddPixTable(short resID) {
         while ((gPixTable[i].resource.get() != nil) && ( i < kMaxPixTableEntry)) {
             i++;
         }
-        if ( i == kMaxPixTableEntry)
-        {
-//          Debugger();
-            ShowErrorAny( eExitToShellErr, kErrorStrID, nil, nil, nil, nil, kNoMoreSpriteTablesError, -1, -1, -1, __FILE__, 111);
-        }
+        check(i != kMaxPixTableEntry, "Can't manage any more sprite tables");
 
         if ( realResID & kSpriteTableColorIDMask)
         {
@@ -229,19 +225,7 @@ natePixType* AddPixTable(short resID) {
 
         gPixTable[i].resource.reset(new natePixType(realResID));
 
-        if (gPixTable[i].resource.get() == nil) {
-//          Debugger();
-            ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadSpriteError, -1, -1, -1, __FILE__, resID);
-            return NULL;
-        }
-
-        /*
-        MoveHHi( gPixTable[i].resource);
-        HLock( gPixTable[i].resource);
-        */
-
-//      WriteDebugLine((char *)"\pADDPIX");
-//      WriteDebugLong( resID);
+        check(gPixTable[i].resource.get() != NULL, "Couldn't load a requested sprite");
 
         if (color == 0) {
             RemapNatePixTableColor(gPixTable[i].resource.get());
@@ -1798,18 +1782,11 @@ void GetOldSpritePixData( spriteType *sourceSprite, spritePix *oldData)
         pixTable = sourceSprite->table;
         whichShape = sourceSprite->whichShape;
 
-//      WriteDebugLong( pixTable);
-        if (whichShape >= GetNatePixTablePixNum(*pixTable)) {
-            Str255  resIDString, shapeNumString;
+        check(
+                whichShape < GetNatePixTablePixNum(*pixTable),
+                "There was a problem with the sprite data: shape #%d does not exist in sprite #%d",
+                whichShape, sourceSprite->resID);
 
-            NumToString( sourceSprite->resID, resIDString);
-            NumToString( whichShape, shapeNumString);
-
-            ShowErrorAny( eQuitErr, kErrorStrID, nil, shapeNumString, nil, resIDString,
-                SPRITE_DATA_ERROR, -1, 78, -1, __FILE__, sourceSprite->resID);
-//          Debugger();
-            return;
-        }
         oldData->data = GetNatePixTableNatePixData(*pixTable, sourceSprite->whichShape);
         oldData->center.h = GetNatePixTableNatePixHRef(*pixTable, whichShape);
         oldData->center.v = GetNatePixTableNatePixVRef(*pixTable, whichShape);

@@ -142,18 +142,10 @@ int InitMessageScreen() {
                         kMessageScreenTop, 0, 0,
                         &nilLabel, nil, false, kMessageColor);
 
-    if ( globals()->gMessageLabelNum < 0)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kAddScreenLabelError, -1, -1, -1, __FILE__, 3);
-        return( MEMORY_ERROR);
-    }
+    check(globals()->gMessageLabelNum >= 0, "Couldn't add a screen label.");
     globals()->gStatusLabelNum = AddScreenLabel( kStatusLabelLeft, kStatusLabelTop, 0, 0,
                         &nilLabel, nil, false, kStatusLabelColor);
-    if ( globals()->gStatusLabelNum < 0)
-    {
-        ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, kAddScreenLabelError, -1, -1, -1, __FILE__, 4);
-        return( MEMORY_ERROR);
-    }
+    check(globals()->gStatusLabelNum >= 0, "Couldn't add a screen label.");
 
     tmessage = globals()->gLongMessageData.get();
     tmessage->startResID =  tmessage->endResID = tmessage->lastResID = tmessage->currentResID =

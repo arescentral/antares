@@ -880,7 +880,9 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
                         if (( proximityObject->unitsToCheck[k].adjacentUnit > 256) ||
                             ( proximityObject->unitsToCheck[k].adjacentUnit < -256))
                         {
-                            ShowErrorAny( eContinueErr, kErrorStrID, nil, nil, nil, nil, kAdjacentError, -1, -1, -1, __FILE__, proximityObject->unitsToCheck[k].adjacentUnit);
+                            fail(
+                                    "Internal error occurred during processing of adjacent "
+                                    "proximity units");
                         }
                         currentProximity += proximityObject->unitsToCheck[k].adjacentUnit;
                         bObject = currentProximity->nearObject;

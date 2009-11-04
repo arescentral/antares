@@ -93,8 +93,6 @@ int InitSoundFX( void)
             if (( err != noErr) || ( glob->gChannel[i].channelPtr == nil))
             {
                 fail("Couldn't create new sound channel");
-
-//              ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, SOUND_CHANNEL_ERROR, -1, -1, -1, __FILE__, 1);
                 SoundFXCleanup();
                 glob->gOptions &= kOptionSoundAvailable;
                 return ( SOUND_CHANNEL_ERROR);
@@ -115,9 +113,8 @@ int InitSoundFX( void)
         {
             globals()->gChannel[i].source = MyCreateSource();
             globals()->gChannel[i].channelPtr = MyCreateLocalizedChannel();
-            if ( globals()->gChannel[i].channelPtr == nil)
-            {
-                ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, SOUND_CHANNEL_ERROR, -1, -1, -1, __FILE__, 91);
+            if ( globals()->gChannel[i].channelPtr == nil) {
+                fail("Couldn't create a sound channel because an error occurred");
             }
 
             globals()->gChannel[i].soundAge = 0;
@@ -725,20 +722,15 @@ short AddSound( short soundID)
             whichSound++;
         }
 
-        if ( whichSound == kSoundNum)
-        {
-            ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kNoMoreSoundsError, -1, -1, -1, __FILE__, soundID);
-            return( -1);
-        } else
-        {
+        if ( whichSound == kSoundNum) {
+            fail("Can't manage any more sounds");
+        } else {
             WriteDebugLine("\pADDSND>");
             WriteDebugLong( soundID);
 
             globals()->gSound[whichSound].soundHandle.reset(GetSound(soundID));
             if (globals()->gSound[whichSound].soundHandle.get() == nil) {
-                ShowErrorAny( eContinueOnlyErr, kErrorStrID, nil, nil, nil, nil, kLoadSoundError, -1, -1, -1, __FILE__, soundID);
-//              Debugger();
-                return ( -1);
+                fail("Couldn't load a requested sound");
             }
 //          HLockHi( globals()->gSound[whichSound].soundHandle);
 
