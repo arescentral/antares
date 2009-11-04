@@ -249,8 +249,7 @@ TQ3CameraPlacement  location;
 
     theErr = SSpListener_SetCameraPlacement (gListener, &location);
     if (theErr)
-        ShowSimpleStringAlert ("\pFailed to set the listener location",
-            nil, nil, nil);
+        fail("Failed to set the listener location");
 #else
 #pragma unused ( x, y)
 #endif
@@ -563,26 +562,22 @@ void PlayLocalizedSound( unsigned long sx, unsigned long sy, unsigned long dx,
                 // retrieve update info - send it to localization component
                 theErr = SSpSource_SetPosition( globals()->gChannel[whichChannel].source, &myPoint);
                 if (theErr)
-                    ShowSimpleStringAlert ("\pFailed to set the source position",
-                        nil, nil, nil);
+                    fail("Failed to set the source position");
 
                 theErr = SSpSource_SetVelocity( globals()->gChannel[whichChannel].source,
                     &myVector);
                 if (theErr)
-                    ShowSimpleStringAlert ("\pFailed to set the velocity.",
-                        nil, nil, nil);
+                    fail("Failed to set the velocity.");
 
                 theErr = SSpSource_CalcLocalization( globals()->gChannel[whichChannel].source, gListener,
                     &myLocalization);
                 if (theErr)
-                    ShowSimpleStringAlert ("\pFailed to calculate the localization",
-                        nil, nil, nil);
+                    fail("Failed to calculate the localization");
 
                 theErr = SndSetInfo( globals()->gChannel[whichChannel].channelPtr, siSSpLocalization,
                     &myLocalization);
                 if (theErr)
-                    ShowSimpleStringAlert("\pFailed to localize the channel",
-                        nil, nil, nil);
+                    fail("Failed to localize the channel");
 /*
 
                 // *    Position the sound in space.  The lower left corner of the screen is (0, 0)
@@ -857,8 +852,7 @@ OSStatus My3DSoundInit( void)
         SSpListener_SetMetersPerUnit( gListener, 1);
     } else
     {
-        ShowSimpleStringAlert("\pCould not create a SoundSprocket listener.",
-            nil, nil, nil);
+        fail("Could not create a SoundSprocket listener.");
     }
     return( myStatus);
 #else
@@ -877,8 +871,7 @@ SSpSourceReference MyCreateSource( void)
     myStatus = SSpSource_New( &mySource);
     if ( myStatus != noErr)
     {
-        ShowSimpleStringAlert("\pCould not create a sound sprocket source.",
-            nil, nil, nil);
+        fail("Could not create a sound sprocket source.");
     }
     return( mySource);
 }

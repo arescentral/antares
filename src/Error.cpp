@@ -82,14 +82,4 @@ void fail(const char* fmt, ...) {
     throw Failure(error);
 }
 
-void ShowSimpleStringAlert(
-    const unsigned char* string1, const unsigned char* string2,
-    const unsigned char* string3, const unsigned char* string4)
-{
-//  if ( theDevice != nil) RestoreDeviceClut( theDevice);
-
-    ParamText( string1, string2, string3, string4);
-    StopAlert( 805, nil);
-}
-
 }  // namespace antares
