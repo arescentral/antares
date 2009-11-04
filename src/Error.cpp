@@ -42,6 +42,46 @@ namespace antares {
 #define kContinueButton     1
 #define kQuitButton         2
 
+namespace {
+
+class Failure : public std::exception {
+  public:
+    // Takes ownership of `what`.
+    Failure(char* what) throw() : _what(what) { }
+    virtual ~Failure() throw() { free(_what); }
+    virtual const char* what() const throw() { return _what; }
+  private:
+    char* _what;
+};
+
+}  // namespace
+
+void check(bool condition, const char* fmt, ...) {
+    if (!condition) {
+        char* error = NULL;
+        va_list args;
+        va_start(args, fmt);
+        if (vasprintf(&error, fmt, args) < 0) {
+            perror("vasprintf");
+            abort();
+        }
+        va_end(args);
+        throw Failure(error);
+    }
+}
+
+void fail(const char* fmt, ...) {
+    char* error = NULL;
+    va_list args;
+    va_start(args, fmt);
+    if (vasprintf(&error, fmt, args) < 0) {
+        perror("vasprintf");
+        abort();
+    }
+    va_end(args);
+    throw Failure(error);
+}
+
 void ShowSimpleStringAlert(
     const unsigned char* string1, const unsigned char* string2,
     const unsigned char* string3, const unsigned char* string4)

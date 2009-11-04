@@ -102,6 +102,13 @@ enum errorRecoverType {
     eContinueOnlyErr
 };
 
+void check(bool condition, const char* fmt, ...)
+        __attribute__((format(printf, 2, 3)));
+
+void fail(const char* fmt, ...)
+        __attribute__((format(printf, 1, 2)))
+        __attribute__((noreturn));
+
 void ShowSimpleStringAlert( const unsigned char*, const unsigned char*, const unsigned char*, const unsigned char*);
 void ShowErrorAny(errorRecoverType, short, const unsigned char*, const unsigned char*, const
         unsigned char*, const unsigned char*, long, long, long, long, const char*, long);
