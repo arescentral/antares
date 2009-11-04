@@ -24,6 +24,7 @@
 #include "CardStack.hpp"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
+#include "Error.hpp"
 #include "ScenarioMaker.hpp"
 #include "SelectLevelScreen.hpp"
 #include "Music.hpp"
@@ -105,8 +106,7 @@ void SoloGame::handle_game_result() {
             break;
 
           default:
-            fprintf(stderr, "DoPlayAgain(false, false) returned bad value\n");
-            exit(1);
+            fail("DoPlayAgain(false, false) returned bad value.");
         }
         break;
 
@@ -180,8 +180,7 @@ void SoloGame::handle_game_result() {
         break;
 
       default:
-        fprintf(stderr, "MainPlay() resulted in bad game_result\n");
-        exit(1);
+        fail("MainPlay() resulted in bad game_result.");
     }
 }
 

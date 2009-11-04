@@ -20,6 +20,7 @@
 #include <algorithm>
 #include "Base.h"
 #include "Card.hpp"
+#include "Error.hpp"
 
 namespace antares {
 
@@ -42,8 +43,7 @@ void CardStack::push(Card* card) {
 
 void CardStack::pop(Card* card) {
     if (card != _list.back()) {
-        fprintf(stderr, "tried to pop card %p when not frontmost\n", card);
-        exit(1);
+        fail("tried to pop card %p when not frontmost", card);
     }
     card->resign_front();
     delete card;

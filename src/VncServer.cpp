@@ -25,6 +25,7 @@
 #include "CardStack.hpp"
 #include "Casts.hpp"
 #include "ColorTable.hpp"
+#include "Error.hpp"
 #include "FakeDrawing.hpp"
 #include "MappedFile.hpp"
 #include "PosixException.hpp"
@@ -608,8 +609,7 @@ bool VncVideoDriver::vnc_poll(int64_t timeout) {
                     printf("key %d %d\n", msg.key, implicit_cast<int>(msg.down_flag));
 
                     if (_key_map.find(msg.key) == _key_map.end()) {
-                        printf("unknown key\n");
-                        exit(1);
+                        fail("unknown key");
                     }
 
                     if (msg.down_flag) {
@@ -663,8 +663,7 @@ bool VncVideoDriver::vnc_poll(int64_t timeout) {
 
             default:
                 {
-                    fprintf(stderr, "Received %d\n", implicit_cast<int>(client_message_type));
-                    exit(1);
+                    fail("Received %d", implicit_cast<int>(client_message_type));
                 }
             }
         }
@@ -695,8 +694,7 @@ VncVideoDriver::VncVideoDriver(int port)
         out.flush();
         _in->read(&version);
         if (strncmp(version.version, "RFB 003.008\n", sizeof(ProtocolVersion)) != 0) {
-            fprintf(stderr, "Unacceptable client version %11s\n", version.version);
-            exit(1);
+            fail("Unacceptable client version %11s", version.version);
         }
     }
 
@@ -712,8 +710,7 @@ VncVideoDriver::VncVideoDriver(int port)
         uint8_t selected_security;
         _in->read(&selected_security);
         if (selected_security != '\1') {
-            fprintf(stderr, "Unacceptable security %d\n", implicit_cast<int>(selected_security));
-            exit(1);
+            fail("Unacceptable security %d", implicit_cast<int>(selected_security));
         }
 
         SecurityResultMessage result;

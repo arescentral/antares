@@ -22,6 +22,7 @@
 #include "CardStack.hpp"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
+#include "Error.hpp"
 #include "OffscreenGWorld.hpp"
 #include "PlayerInterface.hpp"
 #include "RetroText.hpp"
@@ -95,9 +96,7 @@ void SelectLevelScreen::handle_button(int button) {
         break;
 
       default:
-        fprintf(stderr, "Got unknown button %d.\n", button);
-        exit(1);
-        break;
+        fail("Got unknown button %d.", button);
     }
 }
 

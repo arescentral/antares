@@ -95,8 +95,7 @@ inline void pthread_check(const char* method, int error) {
     if (error != 0) {
         char what[256];
         strerror_r(error, what, 256);
-        fprintf(stderr, "%s: %s\n", method, what);
-        exit(1);
+        fail("%s: %s", method, what);
     }
 }
 

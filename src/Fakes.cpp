@@ -25,6 +25,7 @@
 
 #include "AresMain.hpp"
 #include "AresPreferences.hpp"
+#include "Error.hpp"
 #include "FakeDrawing.hpp"
 #include "FakeSounds.hpp"
 #include "File.hpp"
@@ -106,7 +107,8 @@ int Munger(std::string* data, int pos, const unsigned char* search, size_t searc
 }
 
 void usage(const char* bin) {
-    fprintf(stderr,
+    fprintf(
+            stderr,
             "usage: %s [-v|--video-driver=<driver>] [<options>]\n"
             "options:\n"
             "    -l|--level=<int>   choose a level to use in the given mode\n"
@@ -129,8 +131,7 @@ int string_to_int(const char* string) {
         value = strtol(string, &end, 10);
     }
     if (!string || end != string + strlen(string)) {
-        fprintf(stderr, "Couldn't parse '%s' as an integer\n", string);
-        exit(1);
+        fail("Couldn't parse '%s' as an integer", string);
     }
     return value;
 }

@@ -139,7 +139,7 @@ void NonplayerShipThink( long timePass)
         mGetTranslateColorShade( kHostileColor, DARKER-1, foeSick, transColor);
         mGetTranslateColorShade( kNeutralColor, DARKEST, neutralSick, transColor);
     } else {
-        exit(1);
+        fail("invalid value of sickCount");
     }
 
     anAdmiral = mGetAdmiralPtr( 0);

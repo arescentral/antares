@@ -213,8 +213,7 @@ void MoveScrollStars(const long byUnits) {
                     velocity = &fastVelocity;
                     break;
                 case kNoStar:
-                    exit(1);
-                    break;
+                    fail("invalid value of star->speed.");
             }
 
             star->motionFraction.h += velocity->h;
@@ -278,8 +277,7 @@ void MoveScrollStars(const long byUnits) {
                         velocity = &fastVelocity;
                         break;
                     case kNoStar:
-                        exit(1);
-                        break;
+                        fail("invalid value of star->speed.");
                 }
                 if ( velocity->h >= 0)
                     star->location.h -= (velocity->h >> kFixedBitShiftNumber);

@@ -23,6 +23,7 @@
 #include "Quickdraw.h"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
+#include "Error.hpp"
 
 namespace antares {
 
@@ -71,8 +72,7 @@ RetroText::RetroText(const char* data, size_t len, int font, uint8_t fore_color,
 
           case '\\':
             if (i >= len) {
-                fprintf(stderr, "not enough input for special code.\n");
-                exit(1);
+                fail("not enough input for special code.");
             }
             ++i;
             switch (data[i]) {
@@ -82,8 +82,7 @@ RetroText::RetroText(const char* data, size_t len, int font, uint8_t fore_color,
 
               case 'f':
                 if (i + 2 >= len) {
-                    fprintf(stderr, "not enough input for foreground code.\n");
-                    exit(1);
+                    fail("not enough input for foreground code.");
                 }
                 mGetTranslateColorShade(
                         hex_digit(data[i + 1]), hex_digit(data[i + 2]), fore_color, trans_color);
@@ -92,8 +91,7 @@ RetroText::RetroText(const char* data, size_t len, int font, uint8_t fore_color,
 
               case 'b':
                 if (i + 2 >= len) {
-                    fprintf(stderr, "not enough input for foreground code.\n");
-                    exit(1);
+                    fail("not enough input for foreground code.");
                 }
                 mGetTranslateColorShade(
                         hex_digit(data[i + 1]), hex_digit(data[i + 2]), back_color, trans_color);
@@ -114,8 +112,7 @@ RetroText::RetroText(const char* data, size_t len, int font, uint8_t fore_color,
                 break;
 
               default:
-                fprintf(stderr, "found bad special character '%c'.\n", data[i]);
-                exit(1);
+                fail("found bad special character '%c'.", data[i]);
             }
             break;
 

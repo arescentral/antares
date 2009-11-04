@@ -22,6 +22,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include "BinaryStream.hpp"
+#include "Error.hpp"
 #include "FakeDrawing.hpp"
 #include "MappedFile.hpp"
 
@@ -48,8 +49,7 @@ Picture::Picture(int32_t id)
         read(&bin);
         assert(bin.bytes_read() == file.size());
     } else {
-        fprintf(stderr, "Found %lu matches for %d\n", g.gl_pathc, id);
-        exit(1);
+        fail("Found %lu matches for %d", g.gl_pathc, id);
     }
     globfree(&g);
 }

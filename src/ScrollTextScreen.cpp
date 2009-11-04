@@ -24,6 +24,7 @@
 #include "CardStack.hpp"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
+#include "Error.hpp"
 #include "FakeDrawing.hpp"
 #include "MessageScreen.hpp"
 #include "Music.hpp"
@@ -47,8 +48,7 @@ int string_to_int(const std::string str) {
             return value;
         }
     }
-    fprintf(stderr, "Couldn't parse '%s' as an integer\n", str.c_str());
-    exit(1);
+    fail("Couldn't parse '%s' as an integer", str.c_str());
 }
 
 class ScrollTextPixBuilder {

@@ -19,6 +19,7 @@
 
 #include <assert.h>
 #include "AresPreferences.hpp"
+#include "Error.hpp"
 #include "FakeDrawing.hpp"
 #include "Fakes.hpp"
 
@@ -170,8 +171,7 @@ DemoVideoDriver::DemoVideoDriver(int level)
           _started_replay(false),
           _key_down(false) {
     if (level != 0 && level != 5 && level != 23) {
-        fprintf(stderr, "Only have demos of levels 0, 5, and 23; not %d.\n", level);
-        exit(1);
+        fail("Only have demos of levels 0, 5, and 23; not %d.", level);
     }
     if (!get_output_dir().empty()) {
         SoundDriver::set_driver(new LogSoundDriver(get_output_dir() + "/sound.log"));

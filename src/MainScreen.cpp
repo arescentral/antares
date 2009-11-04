@@ -21,6 +21,7 @@
 #include "AresMain.hpp"
 #include "CardStack.hpp"
 #include "DirectText.hpp"
+#include "Error.hpp"
 #include "FakeDrawing.hpp"
 #include "Fakes.hpp"
 #include "InterfaceHandling.hpp"
@@ -95,8 +96,7 @@ void MainScreen::handle_button(int button) {
         break;
 
       case START_NETWORK_GAME:
-        fprintf(stderr, "Networked games not yet implemented.\n");
-        exit(1);
+        fail("Networked games not yet implemented.");
         break;
 
       case ABOUT_ARES:

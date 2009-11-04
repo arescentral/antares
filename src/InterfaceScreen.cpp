@@ -19,6 +19,7 @@
 
 #include "BinaryStream.hpp"
 #include "ColorTranslation.hpp"
+#include "Error.hpp"
 #include "FakeDrawing.hpp"
 #include "InterfaceHandling.hpp"
 #include "OffscreenGWorld.hpp"
@@ -96,8 +97,7 @@ bool InterfaceScreen::mouse_down(int button, const Point& where) {
                 return true;
 
               case kListRect:
-                fprintf(stderr, "kListRect not yet handled\n");
-                exit(1);
+                fail("kListRect not yet handled");
 
               default:
                 break;
