@@ -25,41 +25,65 @@ namespace antares {
 
 namespace {
 
+// Stores enough bytes to store an object of type `T`.
+//
+// This class allows us to avoid referring to bytes which are not in host byte order as being
+// 'integers', but as simply sequences of bytes.  We might prefer to use `char[sizeof(T)]`
+// directly, but arrays cannot be the return types of functions, so this serves the role.
 template <typename T>
 struct Bytes {
+    // Creates an uninitialized array of sizeof(T).
     Bytes() { }
+
+    // Creates an array containing the bytes in `t`.
+    //
+    // @param [in] t        The integer to represent the bytes of.
     explicit Bytes(const T& t) { memcpy(value, &t, sizeof(T)); }
+
+    // An array of sizeof(T) bytes.
     char value[sizeof(T)];
 };
 
+// Generic converter between network and host byte order for integral types of size 2, 4, or 8.
+//
+// See the documentation for individual classes for more explanation.
 template <typename T, size_t bytes = sizeof(T)>
 struct EndiannessConverter;
 
+// Specialization of EndiannessConverter for `int16_t` and `uint16_t`.
 template <typename T>
-struct EndiannessConverter<T, 2> {
+struct EndiannessConverter<T, sizeof(int16_t)> {
+    // Swaps 16 bits of data in network byte order into a 16-bit integer in host byte order.
     inline static T big_to_host(const Bytes<T> bytes) {
         return OSSwapBigToHostInt16(*reinterpret_cast<const T*>(bytes.value));
     }
+    // Swaps a 16-bit integer in host byte order into 16 bits of data in network byte order.
     inline static Bytes<T> host_to_big(const T& t) {
         return Bytes<T>(OSSwapHostToBigInt16(t));
     }
 };
 
+// Specialization of EndiannessConverter for `int32_t` and `uint32_t`.
 template <typename T>
-struct EndiannessConverter<T, 4> {
+struct EndiannessConverter<T, sizeof(int32_t)> {
+    // Swaps 32 bits of data in network byte order into a 32-bit integer in host byte order.
     inline static T big_to_host(const Bytes<T> bytes) {
         return OSSwapBigToHostInt32(*reinterpret_cast<const T*>(bytes.value));
     }
+    // Swaps a 32-bit integer in host byte order into 32 bits of data in network byte order.
     inline static Bytes<T> host_to_big(const T& t) {
         return Bytes<T>(OSSwapHostToBigInt32(t));
     }
 };
 
+// Specialization of EndiannessConverter for `int64_t` and `uint64_t`.
 template <typename T>
-struct EndiannessConverter<T, 8> {
+struct EndiannessConverter<T, sizeof(int64_t)> {
+    // Swaps 64 bits of data in network byte order into a 64-bit integer in host byte order.
     inline static T big_to_host(const Bytes<T> bytes) {
         return OSSwapBigToHostInt64(*reinterpret_cast<const T*>(bytes.value));
     }
+    // Swaps a 64-bit integer in host byte order into 64 bits of data in network byte order.
     inline static Bytes<T> host_to_big(const T& t) {
         return Bytes<T>(OSSwapHostToBigInt64(t));
     }
@@ -150,8 +174,6 @@ void BinaryReader::discard(size_t bytes) {
 BufferBinaryReader::BufferBinaryReader(const char* data, size_t len)
     : _data(data),
       _len(len) { }
-
-#include <stdio.h>
 
 void BufferBinaryReader::read_bytes(char* bytes, size_t count) {
     assert(bytes_read() + count <= _len);
