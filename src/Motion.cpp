@@ -512,7 +512,9 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                         {
     //                      anObject->frame.beam.beam->endLocation
                         }
-                    } else MyDebugString( "\pUnexpected error: a beam appears to be missing.");
+                    } else {
+                        fail( "Unexpected error: a beam appears to be missing.");
+                    }
                 }
             } // if (anObject->active)
             anObject = anObject->nextObject;
@@ -618,7 +620,7 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                     mAddAngle( angle, baseObject->frame.rotation.rotRes >> 1);
                     anObject->sprite->whichShape = angle / baseObject->frame.rotation.rotRes;
                 }
-            } //else MyDebugString("\pUnexpected Error: a sprite seems to be missing.");
+            }
         }
         anObject = anObject->nextObject;
     }

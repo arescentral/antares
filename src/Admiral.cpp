@@ -344,7 +344,7 @@ void RecalcAllAdmiralBuildData( void)
                             mGetBaseObjectFromClassRace( baseObject, l, d->canBuildType[k], a->race);
                             j = 0;
                             while ((a->canBuildType[j].baseNum != -1) && ( j < kMaxNumAdmiralCanBuild)) j++;
-                            if ( j == kMaxNumAdmiralCanBuild) MyDebugString("\pToo Many Types to Build!");
+                            check(j != kMaxNumAdmiralCanBuild, "Too Many Types to Build!");
                             a->canBuildType[j].baseNum = d->canBuildType[k];
                             a->canBuildType[j].base = baseObject;
                             a->canBuildType[j].chanceRange = a->totalBuildChance;
@@ -401,10 +401,7 @@ void SetAdmiralFlagship( long whichAdmiral, long whichShip)
     admiralType     *a;
     spaceObjectType *anObject;
 
-    if ( whichAdmiral < 0)
-    {
-        MyDebugString("\pCan't set flagship of -1 admiral.");
-    }
+    check(whichAdmiral >= 0, "Can't set flagship of -1 admiral.");
 
     a = globals()->gAdmiralData.get() + whichAdmiral;
     if ( whichShip >= 0)
@@ -500,7 +497,7 @@ void SetAdmiralConsiderObject( long whichAdmiral, long whichObject)
     destBalanceType *d = mGetDestObjectBalancePtr( 0);
     long            buildAtNum, l;
 
-    if ( whichAdmiral < 0) MyDebugString("\pCan't set consider ship for -1 admiral.");
+    check(whichAdmiral >= 0, "Can't set consider ship for -1 admiral.");
     a = globals()->gAdmiralData.get() + whichAdmiral;
     a->considerShip = whichObject;
     if ( whichObject >= 0)
@@ -577,7 +574,7 @@ long GetAdmiralConsiderObject( long whichAdmiral)
         }
     } else
     {
-        if ( a->considerShip != -1) MyDebugString("\pStrange Admiral Consider Ship");
+        check(a->considerShip == -1, "Strange Admiral Consider Ship");
         return ( a->considerShip);
     }
 }
@@ -611,7 +608,9 @@ void SetAdmiralBuildAtObject( long whichAdmiral, long whichObject)
     destBalanceType *d = mGetDestObjectBalancePtr( 0);
     long            buildAtNum, l;
 
-    if ( whichAdmiral < 0) MyDebugString("\pCan't set consider ship for -1 admiral.");
+    if ( whichAdmiral < 0) {
+        fail("Can't set consider ship for -1 admiral.");
+    }
     a = globals()->gAdmiralData.get() + whichAdmiral;
     if ( whichObject >= 0)
     {

@@ -113,7 +113,6 @@ void ShowSimpleStringAlert( const unsigned char*, const unsigned char*, const un
 void ShowErrorAny(errorRecoverType, short, const unsigned char*, const unsigned char*, const
         unsigned char*, const unsigned char*, long, long, long, long, const char*, long);
 void ShowErrorOfTypeOccurred(errorRecoverType, short, short, OSErr, const char*, long);
-void MyDebugString( const unsigned char*);
 
 }  // namespace antares
 

@@ -221,13 +221,4 @@ void ShowErrorOfTypeOccurred(errorRecoverType recover, short resID, short string
         -1, -1, -1, caller, callerNum);
 }
 
-void MyDebugString( const unsigned char* s)
-{
-#ifdef kDebugError
-    DebugStr( s);
-#else
-    ShowSimpleStringAlert( s, "\p", "\p", "\p");
-#endif
-}
-
 }  // namespace antares
