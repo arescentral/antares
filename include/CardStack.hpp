@@ -25,20 +25,78 @@ namespace antares {
 class Card;
 class EventRecord;
 
+// A stack of Card objects that constitutes an application.
+//
+// There should be exactly one CardStack running in the application; it defines the user interface
+// and the control flow between different screens of the interface.  A stack starts with a single
+// Card on top.  Eventually, when all Card objects have been popped from the stack, the application
+// should quit.
+//
+// The `push()` and `pop()` methods are provided mainly for the benefit of Card objects in the
+// stack, so that they may push new cards and eventually pop themselves.  The remaining methods are
+// primarily useful for the platform-specific code which needs to dispatch events to Cards.
 class CardStack {
   public:
+    // Initializes the stack with a single card.
+    //
+    // @param [in] top      The initial top of the stack.  Must be non-NULL; takes ownership.
     CardStack(Card* top);
 
+    // @returns             true if the stack is empty, false otherwise.
     bool empty() const;
+
+    // Pushes a new Card on top of the stack.
+    //
+    // Results in a call to `resign_front()` on the old top of the stack, and a call to
+    // `card->become_front()`.
+    //
+    // @param [in] card     The Card to push.  Must be non-NULL; takes ownership.
     void push(Card* card);
+
+    // Pops the top-most card from the stack.
+    //
+    // Results in a call to `card->resign_front()`, the deletion of `card`, and a call
+    // `become_front()` on the new top of the stack.
+    //
+    // @param [in] card     The Card to pop.  Must be non-NULL, and the top-most card on the stack.
     void pop(Card* card);
+
+    // Dispatches an event to the appropriate Card on the stack.
+    //
+    // Given an EventRecord which can be mapped to some event method of `Card`, tries dispatching
+    // the appropriate method to each Card on the stack, working from the top down until a Card
+    // claims to have handled it (represented by returning true from the event method).
+    //
+    // The use of this method is largely considered a legacy at this point, but will continue until
+    // WaitNextEvent() is fully excised from the code and EventRecord can be removed with it.
+    //
+    // @param [in] evt      A record containing the event to dispatch and its parameters.
     void send(const EventRecord& evt);
+
+    // Returns the delay until the next Card's timer should fire.
+    //
+    // @returns             The minimum of all non-zero values from Card objects' `next_delay()`.
     double next_delay();
+
+    // Fires the timer of the next Card.
+    //
+    // TODO(sfiera): the combination of `next_delay()` and `fire_next_timer()` should be stateful,
+    // i.e., we should not have to walk the stack a second time in `fire_next_timer()` to find out
+    // which Card was next when we previously called `next_delay()`.
     void fire_next_timer();
 
   private:
+    // Gets the index of the Card whose timer should be fired, if any.
+    //
+    // Walks the stack, asking each Card when it would next like its timer to be fired.  If no Card
+    // requests a timer, returns false; otherwise, sets `*min_index` to the index of the next Card,
+    // and returns true.
+    //
+    // @param [out] min_index Set to the index of the next Card to fire, if any.
+    // @returns             true if any timer was found, false otherwise.
     bool min_delay_index(int* min_index);
 
+    // The stack of cards.  The back/bottom is at index 0, and the top at `size() - 1`.
     std::vector<Card*> _list;
 };
 
