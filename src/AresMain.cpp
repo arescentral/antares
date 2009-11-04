@@ -340,7 +340,8 @@ void MainPlay::become_front() {
                 SetSongVolume(kMusicVolume);
                 PlaySong();
             }
-            ResetLastTime((gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple);
+            Microseconds(&globals()->gLastTime);
+            globals()->gGameStartTime = TickCount();// - defecit;
 
             VideoDriver::driver()->set_game_state(PLAY_GAME);
             stack()->push(new GamePlay(_game_result, _game_length));
