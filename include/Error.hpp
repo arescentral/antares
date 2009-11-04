@@ -112,7 +112,6 @@ void fail(const char* fmt, ...)
 void ShowSimpleStringAlert( const unsigned char*, const unsigned char*, const unsigned char*, const unsigned char*);
 void ShowErrorAny(errorRecoverType, short, const unsigned char*, const unsigned char*, const
         unsigned char*, const unsigned char*, long, long, long, long, const char*, long);
-void ShowErrorOfTypeOccurred(errorRecoverType, short, short, OSErr, const char*, long);
 
 }  // namespace antares
 

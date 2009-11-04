@@ -92,7 +92,7 @@ int InitSoundFX( void)
                     sampledSynth, initMono, nil);
             if (( err != noErr) || ( glob->gChannel[i].channelPtr == nil))
             {
-                ShowErrorOfTypeOccurred( eContinueOnlyErr, kErrorStrID, SOUND_CHANNEL_ERROR, err, __FILE__, 0);
+                fail("Couldn't create new sound channel");
 
 //              ShowErrorAny( eQuitErr, kErrorStrID, nil, nil, nil, nil, SOUND_CHANNEL_ERROR, -1, -1, -1, __FILE__, 1);
                 SoundFXCleanup();

@@ -200,25 +200,4 @@ void ShowErrorAny(  errorRecoverType recover,
     }
 }
 
-//
-// shows an alert which reads:
-// [string] [error#] occured.
-// where [string] is specified by an indexed string and error # is an error result
-// code. Use it to show simple errors like:
-// Couldn't create the monkey because an error of type -234 occured.
-// template:
-// ShowErrorOfTypeOccurred( false, kErrorStrID, -1, status, __FILE__, 0);
-//
-
-void ShowErrorOfTypeOccurred(errorRecoverType recover, short resID, short stringNum,
-    OSErr error, const char *caller, long callerNum) {
-    Str255  occurredString, errorString;
-
-    GetIndString( occurredString, kErrorStrID, kOccurredError);
-    NumToString( error, errorString);
-    ConcatenatePString( errorString, occurredString);
-    ShowErrorAny( recover, resID, nil, errorString, nil, nil, stringNum,
-        -1, -1, -1, caller, callerNum);
-}
-
 }  // namespace antares
