@@ -46,7 +46,7 @@ void PixMap::fill(uint8_t color) {
     }
 }
 
-void PixMap::copy(const PixMap& pix) {
+void PixMap::copy(const PixMap& pix) throw(PixMapException) {
     if (bounds().width() != pix.bounds().width()
             || bounds().height() != pix.bounds().height()) {
         throw PixMapException("Mismatch in PixMap sizes");
@@ -69,6 +69,15 @@ ArrayPixMap::ArrayPixMap(int width, int height)
           _bytes(new unsigned char[width * height]) { }
 
 ArrayPixMap::~ArrayPixMap() { }
+
+void ArrayPixMap::resize(const Rect& new_bounds) {
+    ArrayPixMap new_pix_map(new_bounds.width(), new_bounds.height());
+    Rect transfer = _bounds;
+    transfer.clip_to(new_bounds);
+    CopyBits(this, &new_pix_map, transfer, transfer);
+    _bounds = new_bounds;
+    _bytes.swap(&new_pix_map._bytes);
+}
 
 void ArrayPixMap::read(BinaryReader* bin) {
     Rect bounds(0, 0, 0, 0);
@@ -108,19 +117,10 @@ void ArrayPixMap::fill(uint8_t color) {
     memset(_bytes.get(), color, _bounds.width() * _bounds.height());
 }
 
-void ArrayPixMap::resize(const Rect& new_bounds) {
-    ArrayPixMap new_pix_map(new_bounds.width(), new_bounds.height());
-    Rect transfer = _bounds;
-    transfer.clip_to(new_bounds);
-    CopyBits(this, &new_pix_map, transfer, transfer);
-    _bounds = new_bounds;
-    _bytes.swap(&new_pix_map._bytes);
-}
-
-PixMap::View::View(PixMap* pix, const Rect& r)
+PixMap::View::View(PixMap* pix, const Rect& bounds)
         : _parent(pix),
-          _offset(r.left, r.top),
-          _bounds(0, 0, r.width(), r.height()) {
+          _offset(bounds.left, bounds.top),
+          _bounds(0, 0, bounds.width(), bounds.height()) {
     _bounds.clip_to(pix->bounds());
 }
 
