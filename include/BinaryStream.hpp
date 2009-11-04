@@ -161,7 +161,7 @@ class BinaryWriter {
     //
     // Identical to `write()`, except that it only supports primitives in its selection of `T`.
     template <typename T>
-    void write_primitive(T* t, size_t count);
+    void write_primitive(const T* t, size_t count);
 
     // The number of bytes that have been written using this object.  Maintained internally by
     // `write_primitive()` so that subclasses don't have to.
