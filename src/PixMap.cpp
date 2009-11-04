@@ -18,6 +18,7 @@
 #include "PixMap.hpp"
 
 #include <algorithm>
+#include <assert.h>
 #include "Quickdraw.h"
 #include "BinaryStream.hpp"
 #include "ColorTable.hpp"
@@ -60,7 +61,7 @@ void PixMap::write(BinaryWriter* bin) const {
     bin->write(bounds().width());
     bin->write(bounds().height());
     bin->write(colors());
-    bin->write(bytes(), bounds().width() * bounds().height());
+    bin->write(bytes(), bounds().area());
 }
 
 ArrayPixMap::ArrayPixMap(int width, int height)
@@ -114,13 +115,14 @@ ColorTable* ArrayPixMap::mutable_colors() {
 }
 
 void ArrayPixMap::fill(uint8_t color) {
-    memset(_bytes.get(), color, _bounds.width() * _bounds.height());
+    memset(_bytes.get(), color, _bounds.area());
 }
 
 PixMap::View::View(PixMap* pix, const Rect& bounds)
         : _parent(pix),
           _offset(bounds.left, bounds.top),
           _bounds(0, 0, bounds.width(), bounds.height()) {
+    assert(pix->bounds().encloses(bounds));
     _bounds.clip_to(pix->bounds());
 }
 

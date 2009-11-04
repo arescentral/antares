@@ -43,10 +43,13 @@ struct Rect {
     Rect();
     Rect(int32_t left, int32_t top, int32_t right, int32_t bottom);
 
-    bool contains(const Point& p) const;
-    bool intersects(const Rect& r) const;
     int32_t width() const;
     int32_t height() const;
+    int32_t area() const;
+
+    bool contains(const Point& p) const;
+    bool encloses(const Rect& r) const;
+    bool intersects(const Rect& r) const;
 
     void offset(int32_t x, int32_t y);
     void inset(int32_t x, int32_t y);

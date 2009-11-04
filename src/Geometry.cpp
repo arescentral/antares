@@ -47,22 +47,31 @@ Rect::Rect(int32_t left, int32_t top, int32_t right, int32_t bottom)
           right(right),
           bottom(bottom) { }
 
-bool Rect::contains(const Point& p) const {
-    return left <= p.h && p.h < right
-        && top <= p.v && p.v < bottom;
-}
-
-bool Rect::intersects(const Rect& r) const {
-    return left < r.right && r.left < right
-        && top < r.bottom && r.top < bottom;
-}
-
 int32_t Rect::width() const {
     return right - left;
 }
 
 int32_t Rect::height() const {
     return bottom - top;
+}
+
+int32_t Rect::area() const {
+    return width() * height();
+}
+
+bool Rect::contains(const Point& p) const {
+    return left <= p.h && p.h < right
+        && top <= p.v && p.v < bottom;
+}
+
+bool Rect::encloses(const Rect& r) const {
+    return left <= r.left && r.right <= right
+        && top <= r.top && r.bottom <= bottom;
+}
+
+bool Rect::intersects(const Rect& r) const {
+    return left < r.right && r.left < right
+        && top < r.bottom && r.top < bottom;
 }
 
 void Rect::offset(int32_t x, int32_t y) {
