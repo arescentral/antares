@@ -17,7 +17,6 @@
 
 #include "TestVideoDriver.hpp"
 
-#include <assert.h>
 #include "AresPreferences.hpp"
 #include "Error.hpp"
 #include "FakeDrawing.hpp"

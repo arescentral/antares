@@ -15,9 +15,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include <assert.h>
-
 #include "BinaryStream.hpp"
+#include "Error.hpp"
 #include "FakeSounds.hpp"
 #include "Fakes.hpp"
 #include "Resource.hpp"
@@ -34,7 +33,7 @@ void GetIndString(unsigned char* result, int id, int index) {
     BufferBinaryReader bin(rsrc.data(), rsrc.size());
     uint16_t count;
     bin.read(&count);
-    assert(index <= count);
+    check(index <= count, "out-of-bounds string requested in GetIndString()");
 
     while (index > 1) {
         uint8_t size;

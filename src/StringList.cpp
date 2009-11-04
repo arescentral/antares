@@ -17,9 +17,8 @@
 
 #include "StringList.hpp"
 
-#include <assert.h>
 #include "BinaryStream.hpp"
-#include "Casts.hpp"
+#include "Error.hpp"
 #include "Resource.hpp"
 
 namespace antares {
@@ -58,7 +57,7 @@ const std::string& StringList::at(size_t index) const {
 }
 
 void string_to_pstring(const std::string& src, unsigned char* dst) {
-    assert(src.size() <= 254);
+    check(src.size() <= 254, "'%s' is too long to convert to a pstring", src.c_str());
     *dst = src.size();
     memcpy(dst + 1, src.c_str(), src.size());
 }

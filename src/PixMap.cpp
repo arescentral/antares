@@ -18,10 +18,10 @@
 #include "PixMap.hpp"
 
 #include <algorithm>
-#include <assert.h>
 #include "Quickdraw.h"
 #include "BinaryStream.hpp"
 #include "ColorTable.hpp"
+#include "Error.hpp"
 
 namespace antares {
 
@@ -122,7 +122,7 @@ PixMap::View::View(PixMap* pix, const Rect& bounds)
         : _parent(pix),
           _offset(bounds.left, bounds.top),
           _bounds(0, 0, bounds.width(), bounds.height()) {
-    assert(pix->bounds().encloses(bounds));
+    check(pix->bounds().encloses(bounds), "tried to take view outside of parent PixMap");
     _bounds.clip_to(pix->bounds());
 }
 

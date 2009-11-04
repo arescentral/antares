@@ -24,7 +24,6 @@
 
 #include "InterfaceHandling.hpp"
 
-#include <assert.h>
 #include <vector>
 #include "AnyChar.hpp"
 #include "AresGlobalType.hpp"
@@ -98,7 +97,7 @@ int OpenInterface(short resID) {
 }
 
 long AppendInterface(short resID, long relative_number, bool center) {
-    assert(relative_number >= 0);
+    check(relative_number >= 0, "interfaces must be appended within existing elements");
     const int32_t original_number = gInterfaceItemData.size();
 
     Resource rsrc(kInterfaceResourceType, resID);

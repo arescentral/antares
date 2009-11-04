@@ -21,7 +21,6 @@
 
 #include "PlayerInterface.hpp"
 
-#include <assert.h>
 #include "AresGlobalType.hpp"
 #include "AresMain.hpp"
 #include "AresPreferences.hpp"
@@ -1951,7 +1950,7 @@ void DrawLevelNameInBox(unsigned char* name, long fontNum, short descriptionText
     anItem = GetAnyInterfaceItemPtr( itemNum);
     strPtr = name + 1;
 
-    assert(descriptionTextID <= 0);
+    check(descriptionTextID <= 0, "descriptionTextID is not supported");
 
     retroTextSpec.textLength = name[0];
     retroTextSpec.text.reset(new std::string);

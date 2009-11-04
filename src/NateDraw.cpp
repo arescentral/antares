@@ -20,7 +20,6 @@
 #include "NateDraw.hpp"
 
 #include <algorithm>
-#include <assert.h>
 
 #include "BinaryStream.hpp"
 #include "Error.hpp"
@@ -114,8 +113,8 @@ void clip_rect(Rect* contained, const Rect& container) {
 // CLIPS to destPix->bounds(), NOT counting hoff & voff
 
 void DrawNateRect(PixMap* destPix, Rect* destRect, long hoff, long voff, unsigned char color) {
-    assert(hoff == 0);
-    assert(voff == 0);
+    check(hoff == 0, "hoff is not supported");
+    check(voff == 0, "voff is not supported");
 
     if (!intersects(*destRect, from_origin(destPix->bounds()))) {
         destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
@@ -133,8 +132,8 @@ void DrawNateRect(PixMap* destPix, Rect* destRect, long hoff, long voff, unsigne
 
 void DrawNateRectVScan( PixMap *destPix, Rect *destRect, long hoff, long voff,
         unsigned char color) {
-    assert(hoff == 0);
-    assert(voff == 0);
+    check(hoff == 0, "hoff is not supported");
+    check(voff == 0, "voff is not supported");
 
     if (!intersects(*destRect, from_origin(destPix->bounds()))) {
         destRect->left = destRect->right = destRect->top = destRect->bottom = 0;

@@ -17,7 +17,6 @@
 
 #include "Fakes.hpp"
 
-#include <assert.h>
 #include <sys/time.h>
 #include <getopt.h>
 #include <queue>
@@ -89,7 +88,7 @@ void StringToNum(unsigned char* p_str, long* value) {
 
     char* end;
     *value = strtol(c_str, &end, 10);
-    assert(end == c_str + len);
+    check(end == c_str + len, "couldn't interpret '%s' as an integer", c_str);
 }
 
 int Munger(std::string* data, int pos, const unsigned char* search, size_t search_len,

@@ -19,7 +19,6 @@
 
 #include "Rotation.hpp"
 
-#include <assert.h>
 #include "BinaryStream.hpp"
 #include "Debug.hpp"
 #include "Error.hpp"
@@ -38,7 +37,7 @@ void RotationInit() {
     Resource rsrc('rot ', 500);
     BufferBinaryReader bin(rsrc.data(), rsrc.size());
     bin.read(gRotTable, kRotTableSize);
-    assert(bin.bytes_read() == rsrc.size());
+    check(bin.bytes_read() == rsrc.size(), "didn't consume all of rotation data");
 }
 
 void GetRotPoint(int32_t *x, int32_t *y, int32_t rotpos) {

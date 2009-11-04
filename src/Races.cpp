@@ -19,7 +19,6 @@
 
 #include "Races.hpp"
 
-#include <assert.h>
 #include "AresGlobalType.hpp"
 #include "BinaryStream.hpp"
 #include "Debug.hpp"
@@ -33,12 +32,12 @@ short InitRaces() {
         Resource rsrc('race', kRaceResID);
         BufferBinaryReader bin(rsrc.data(), rsrc.size());
         size_t count = rsrc.size() / raceType::byte_size;
-        assert(count == kRaceNum);
+        check(count == kRaceNum, "got unexpected number of races");
         globals()->gRaceData.reset(new raceType[count]);
         for (size_t i = 0; i < count; ++i) {
             bin.read(globals()->gRaceData.get() + i);
         }
-        assert(bin.bytes_read() == rsrc.size());
+        check(bin.bytes_read() == rsrc.size(), "didn't consume all of race data");
     }
 
     return( kNoError);

@@ -17,7 +17,6 @@
 
 #include "ScenarioMaker.hpp"
 
-#include <assert.h>
 #include "Admiral.hpp"
 #include "AresGlobalType.hpp"
 #include "Beam.hpp"
@@ -96,7 +95,7 @@ short ScenarioMakerInit( void)
         Resource rsrc('nlAG', 128);
         BufferBinaryReader bin(rsrc.data(), rsrc.size());
         bin.read(&globals()->scenarioFileInfo);
-        assert(bin.bytes_read() == rsrc.size());
+        check(bin.bytes_read() == rsrc.size(), "didn't consume all of scenario file info data");
     }
 
     if (globals()->gScenarioData.get() == nil) {
@@ -108,7 +107,7 @@ short ScenarioMakerInit( void)
         for (size_t i = 0; i < count; ++i) {
             bin.read(globals()->gScenarioData.get() + i);
         }
-        assert(bin.bytes_read() == rsrc.size());
+        check(bin.bytes_read() == rsrc.size(), "didn't consume all of scenario data");
     }
 
     if (globals()->gScenarioInitialData.get() == nil) {
@@ -120,7 +119,7 @@ short ScenarioMakerInit( void)
         for (size_t i = 0; i < count; ++i) {
             bin.read(globals()->gScenarioInitialData.get() + i);
         }
-        assert(bin.bytes_read() == rsrc.size());
+        check(bin.bytes_read() == rsrc.size(), "didn't consume all of initial object data");
     }
 
     if (globals()->gScenarioConditionData.get() == nil) {
@@ -132,7 +131,7 @@ short ScenarioMakerInit( void)
         for (size_t i = 0; i < count; ++i) {
             bin.read(globals()->gScenarioConditionData.get() + i);
         }
-        assert(bin.bytes_read() == rsrc.size());
+        check(bin.bytes_read() == rsrc.size(), "didn't consume all of condition data");
     }
 
     if (globals()->gScenarioBriefData.get() == nil) {
@@ -144,7 +143,7 @@ short ScenarioMakerInit( void)
         for (size_t i = 0; i < count; ++i) {
             bin.read(globals()->gScenarioBriefData.get() + i);
         }
-        assert(bin.bytes_read() == rsrc.size());
+        check(bin.bytes_read() == rsrc.size(), "didn't consume all of briefing data");
     }
 
     return ( InitRaces());

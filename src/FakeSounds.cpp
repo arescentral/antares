@@ -17,11 +17,9 @@
 
 #include "FakeSounds.hpp"
 
-#include "Sound.h"
-
-#include <assert.h>
 #include <stdio.h>
-
+#include "Sound.h"
+#include "Error.hpp"
 #include "Fakes.hpp"
 
 namespace antares {
@@ -33,7 +31,7 @@ scoped_ptr<SoundDriver> sound_driver;
 }  // namespace
 
 void SoundDriver::set_driver(SoundDriver* driver) {
-    assert(driver);
+    check(driver, "tried to set NULL SoundDriver");
     sound_driver.reset(driver);
 }
 
@@ -43,7 +41,7 @@ void NullSoundDriver::quiet(int32_t) { }
 
 LogSoundDriver::LogSoundDriver(const std::string& path)
         : _sound_log(fopen(path.c_str(), "w")) {
-    assert(_sound_log);
+    check(_sound_log, "Couldn't open sound log");
     setbuf(_sound_log, NULL);
 }
 

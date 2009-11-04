@@ -17,7 +17,8 @@
 
 #include "Card.hpp"
 
-#include <assert.h>
+#include <stdlib.h>
+#include "Error.hpp"
 
 namespace antares {
 
@@ -69,7 +70,7 @@ CardStack* Card::stack() const {
 
 void Card::set_stack(CardStack* stack) {
     // Can add or remove from stack, not move between.
-    assert(stack == NULL || _stack == NULL);
+    check(_stack == NULL, "Card is already on a stack");
     _stack = stack;
 }
 

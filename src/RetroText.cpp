@@ -17,7 +17,6 @@
 
 #include "RetroText.hpp"
 
-#include <assert.h>
 #include <algorithm>
 #include <limits>
 #include "Quickdraw.h"
@@ -37,7 +36,7 @@ int char_width(uint8_t ch) {
 }
 
 int hex_digit(char c) {
-    assert(isxdigit(c));
+    check(isxdigit(c), "%c is not a valid hex digit", c);
     if (c >= 'a') {
         return c - 'a' + 10;
     } else if (c >= 'A') {

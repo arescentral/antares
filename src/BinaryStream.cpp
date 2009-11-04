@@ -17,9 +17,9 @@
 
 #include "BinaryStream.hpp"
 
-#include <assert.h>
 #include <string.h>
 #include <libkern/OSByteOrder.h>
+#include "Error.hpp"
 
 namespace antares {
 
@@ -203,7 +203,7 @@ BufferBinaryReader::BufferBinaryReader(const char* data, size_t len)
       _len(len) { }
 
 void BufferBinaryReader::read_bytes(char* bytes, size_t count) {
-    assert(bytes_read() + count <= _len);
+    check(bytes_read() + count <= _len, "read past end of buffer");
     memcpy(bytes, _data + bytes_read(), count);
 }
 

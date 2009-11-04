@@ -19,7 +19,6 @@
 
 #include "SpaceObjectHandling.hpp"
 
-#include <assert.h>
 #include "Admiral.hpp"
 #include "AresGlobalType.hpp"
 #include "Beam.hpp"
@@ -106,7 +105,7 @@ int SpaceObjectHandlingInit() {
         for (size_t i = 0; i < count; ++i) {
             bin.read(gBaseObjectData.get() + i);
         }
-        assert(bin.bytes_read() == rsrc.size());
+        check(bin.bytes_read() == rsrc.size(), "didn't consume all of base object data");
         correctBaseObjectColor = true;
     }
 
@@ -119,7 +118,7 @@ int SpaceObjectHandlingInit() {
         for (size_t i = 0; i < count; ++i) {
             bin.read(gObjectActionData.get() + i);
         }
-        assert(bin.bytes_read() == rsrc.size());
+        check(bin.bytes_read() == rsrc.size(), "didn't consume all of object action data");
     }
 
     gActionQueueData.reset(new actionQueueType[kActionQueueLength]);

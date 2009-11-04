@@ -17,8 +17,6 @@
 
 #include "InputSource.hpp"
 
-#include <assert.h>
-
 namespace antares {
 
 InputSource::~InputSource() { }

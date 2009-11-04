@@ -17,7 +17,6 @@
 
 #include "ScrollTextScreen.hpp"
 
-#include <assert.h>
 #include <string>
 #include <vector>
 #include "AresGlobalType.hpp"

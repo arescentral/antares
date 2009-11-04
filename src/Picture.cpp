@@ -17,7 +17,6 @@
 
 #include "Picture.hpp"
 
-#include <assert.h>
 #include <glob.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -47,7 +46,7 @@ Picture::Picture(int32_t id)
         MappedFile file(g.gl_pathv[0]);
         BufferBinaryReader bin(file.data(), file.size());
         read(&bin);
-        assert(bin.bytes_read() == file.size());
+        check(bin.bytes_read() == file.size(), "reading Picture didn't consume whole file");
     } else {
         fail("Found %lu matches for %d", g.gl_pathc, id);
     }

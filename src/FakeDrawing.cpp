@@ -17,7 +17,6 @@
 
 #include "FakeDrawing.hpp"
 
-#include <assert.h>
 #include <fcntl.h>
 #include <algorithm>
 #include <limits>
@@ -25,6 +24,7 @@
 
 #include "BinaryStream.hpp"
 #include "ColorTable.hpp"
+#include "Error.hpp"
 #include "Fakes.hpp"
 #include "File.hpp"
 
@@ -64,7 +64,7 @@ void DumpTo(const std::string& path) {
 }
 
 void ScrollRect(const Rect& rect, int x, int y, const Rect& clip) {
-    assert(x == 0 && y == -1);
+    check(x == 0 && y == -1, "ScrollRect only supports shifting up by one pixel");
     int rowBytes = gActiveWorld->row_bytes();
     for (int i = std::min(rect.top - 1, clip.top); i < rect.bottom - 1; ++i) {
         uint8_t* base = gActiveWorld->mutable_bytes() + i * rowBytes + rect.left;
@@ -95,8 +95,8 @@ class ClippedTransfer {
             : _from(from),
               _to(to) {
         // Rects must be the same size.
-        assert(_from.right - _from.left == _to.right - _to.left);
-        assert(_from.bottom - _from.top == _to.bottom - _to.top);
+        check(_from.width() == _to.width(), "rects have unequal width");
+        check(_from.height() == _to.height(), "rects have unequal height");
     }
 
     void ClipSourceTo(const Rect& clip) {
@@ -162,7 +162,7 @@ void RGBBackColor(const RgbColor& color) {
 }
 
 void DrawLine(PixMap* pix, const Point& from, const Point& to) {
-    assert(to.h == from.h || to.v == from.v);  // no diagonal lines yet.
+    check(to.h == from.h || to.v == from.v, "DrawLine() doesn't do diagonal lines");
     if (to.h == from.h) {
         int step = 1;
         if (to.v < from.v) {
