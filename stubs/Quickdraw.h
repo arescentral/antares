@@ -6,8 +6,6 @@
 
 namespace antares {
 
-typedef Window* Port;
-
 void RGBBackColor(const RgbColor& color);
 void RGBForeColor(const RgbColor& color);
 

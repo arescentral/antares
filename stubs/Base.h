@@ -56,10 +56,6 @@ typedef FourCharCode ResType;
 
 ////////////////////////////
 
-struct Window;
-typedef Window* WindowPtr;
-typedef Window** WindowRef;
-
 STUB1(GlobalToLocal, void(Point*));
 
 class RgbColor;
@@ -106,30 +102,7 @@ int TickCount();
 
 bool Button();
 
-STUB4(ParamText, void(const unsigned char*, const unsigned char*,
-      const unsigned char*, const unsigned char*));
-
-STUB2(StopAlert, void(int id, void*));
-
 STUB1(DebugStr, void(const unsigned char* str));
-
-typedef struct { } Dialog;
-typedef Dialog* DialogPtr;
-
-STUB3(GetNewDialog, Dialog*(int id, void*, Window* window), NULL);
-STUB2(SetDialogDefaultItem, void(Dialog*, int item));
-STUB5(GetDialogItem, void(Dialog*, int item, short* type, Handle* handle, const Rect& rect));
-void ModalDialog(void*, short* item);
-STUB1(DisposeDialog, void(Dialog* dialog));
-STUB1(DrawDialog, void(Dialog* dialog));
-
-typedef struct { } Control;
-typedef Control* ControlPtr;
-typedef Control** ControlHandle;
-
-STUB2(HiliteControl, void(Control**, int));
-
-STUB2(SetWRefCon, void(Dialog*, long));
 
 long AngleFromSlope(Fixed slope);
 long Random();

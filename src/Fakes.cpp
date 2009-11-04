@@ -49,10 +49,6 @@ int GetDemoScenario() {
     return VideoDriver::driver()->get_demo_scenario();
 }
 
-void ModalDialog(void*, short* item) {
-    *item = 1;
-}
-
 bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouseRgn) {
     static_cast<void>(mask);
     static_cast<void>(mouseRgn);

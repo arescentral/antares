@@ -22,7 +22,8 @@
 
 namespace antares {
 
-inline void DebugWindowInit(WindowPtr) { }
+struct Window;
+inline void DebugWindowInit(Window*) { }
 inline void BringDebugToFront() { }
 inline void DebugWindowCleanup() { }
 inline void ScrollDebugWindowUp() { }
