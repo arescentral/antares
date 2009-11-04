@@ -18,24 +18,10 @@
 #ifndef ANTARES_STRING_HANDLING_HPP_
 #define ANTARES_STRING_HANDLING_HPP_
 
-// String Handling.h
-
-#include "Base.h"
-
 namespace antares {
 
-void CopyPString( unsigned char *, const unsigned char *);
-bool ComparePString( unsigned char *, const unsigned char *);
-int PStringLen( const unsigned char *s);
-void ConcatenatePString( unsigned char *, const unsigned char *);
-void PStringFromCString( unsigned char *, const unsigned char *);
-void ReplacePStringChar(unsigned char*, unsigned char, const unsigned char);
-void FilterAlphaPString(unsigned char*);
-void ChopAlphaPString(unsigned char*);
-void UpperCasePString(unsigned char*);
-void DrawCString( const unsigned char *);
-
-STUB2(pstrcat, void(const unsigned char*, const unsigned char*));
+void CopyPString(unsigned char* to, const unsigned char* from);
+void ConcatenatePString(unsigned char* s1, const unsigned char* s2);
 
 }  // namespace antares
 
