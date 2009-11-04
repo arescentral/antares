@@ -21,6 +21,7 @@
 
 #include "Quickdraw.h"
 
+#include "StringHandling.hpp"
 #include "StringNumerics.hpp"
 
 namespace antares {
@@ -40,28 +41,6 @@ namespace antares {
 
 #define kContinueButton     1
 #define kQuitButton         2
-
-void ErrPStringFromCString( unsigned char *, unsigned char *);
-void ErrConcatenatePString(unsigned char*, unsigned char*);
-
-void ShowErrorNoRecover( int whichError, const unsigned char* sourceCode, int sourceNum)
-
-{
-    Str255  s1, s3;
-
-//  if ( theDevice != nil) RestoreDeviceClut( theDevice);
-
-    GetIndString( s1, ERROR_STR_ID, whichError);
-    if ( sourceCode == nil)
-        ParamText( s1, nil, nil, nil);
-     else
-     {
-        NumToString(sourceNum, s3);
-        ParamText( s1, sourceCode, s3, nil);
-     }
-    StopAlert( ERROR_ALERT_ID, nil);
-    ExitToShell();
-}
 
 void ShowErrorRecover( int whichError, const unsigned char* sourceCode, int sourceNum)
 
@@ -89,41 +68,6 @@ void ShowSimpleStringAlert(
 
     ParamText( string1, string2, string3, string4);
     StopAlert( 805, nil);
-}
-
-void ShowSimpleStrResAlert( short ResID, short num1, short num2, short num3, short num4)
-
-{
-    Str255      s1, s2, s3, s4;
-    unsigned char* sp1 = nil;
-    unsigned char* sp2 = nil;
-    unsigned char* sp3 = nil;
-    unsigned char* sp4 = nil;
-
-    if ( ResID >= 0)
-    {
-        if ( num1 > 0)
-        {
-            GetIndString( s1, ResID, num1);
-            sp1 = s1;
-        }
-        if ( num2 > 0)
-        {
-            GetIndString( s2, ResID, num2);
-            sp2 = s2;
-        }
-        if ( num3 > 0)
-        {
-            GetIndString( s3, ResID, num3);
-            sp3 = s3;
-        }
-        if ( num4 > 0)
-        {
-            GetIndString( s4, ResID, num4);
-            sp4 = s4;
-        }
-    }
-    ShowSimpleStringAlert( sp1, sp2, sp3, sp4);
 }
 
 //
@@ -180,9 +124,9 @@ void ShowErrorAny(  errorRecoverType recover,
 #ifdef kDebugError
 
     ErrPStringFromCString( (unsigned char *)callerString, (unsigned char *)caller);
-    ErrConcatenatePString( callerString, "\p, #");
+    ConcatenatePString( callerString, "\p, #");
     NumToString( callerNum, s4);
-    ErrConcatenatePString( callerString, s4);
+    ConcatenatePString( callerString, s4);
     sp4 = callerString;
 #endif
 
@@ -250,41 +194,9 @@ void ShowErrorOfTypeOccurred(errorRecoverType recover, short resID, short string
 
     GetIndString( occurredString, kErrorStrID, kOccurredError);
     NumToString( error, errorString);
-    ErrConcatenatePString( errorString, occurredString);
+    ConcatenatePString( errorString, occurredString);
     ShowErrorAny( recover, resID, nil, errorString, nil, nil, stringNum,
         -1, -1, -1, caller, callerNum);
-}
-
-void ErrPStringFromCString( unsigned char *pString, unsigned char *cString)
-
-{
-    unsigned char   *len;
-
-    len = pString;
-    pString++;
-    *len = 0;
-    while( *cString != '\0')
-    {
-        *pString = *cString;
-        (*len)++;
-        pString++;
-        cString++;
-    }
-}
-
-void ErrConcatenatePString(unsigned char* dString, unsigned char* sString) {
-    unsigned char   *dc, *sc;
-    int     i;
-
-    dc = dString + implicit_cast<long>(*dString) + 1L;
-    sc = sString + 1L;
-    for ( i = 0; i < *sString; i++)
-    {
-        *dc = *sc;
-        (*dString)++;
-        dc++;
-        sc++;
-    }
 }
 
 void MyDebugString( const unsigned char* s)
