@@ -151,14 +151,12 @@ int InitSoundFX( void)
         globals()->gSound[i].soundHandle = GetResource( 'snd ', kSoundResID + i);
         if ( globals()->gSound[i].soundHandle == nil)
         {
-            ShowErrorRecover( RESOURCE_ERROR, kSoundFXError, 2);
             SoundFXCleanup();
             return ( RESOURCE_ERROR);
         }
         GetSoundHeaderOffset( (SndListHandle)globals()->gSound[i].soundHandle, &(globals()->gSound[i].offset));
         if ( err != noErr)
         {
-            ShowErrorRecover( SOUND_CHANNEL_ERROR, kSoundFXError, 3);
             SoundFXCleanup();
             return ( SOUND_CHANNEL_ERROR);
         }

@@ -2287,7 +2287,6 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
     if ( newObjectNumber == -1)
     {
         return ( -1);
-//      ShowErrorRecover( SPRITE_CREATE_ERROR, kTestSpriteError, whichBase);
 //      DebugStr("\pCouldn't create an object!");
     } else
     {

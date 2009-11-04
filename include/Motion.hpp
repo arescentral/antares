@@ -77,7 +77,6 @@ inline void mRange(long& result, long time, Fixed velocity, Fixed& scratch) {
 
 int InitMotion( void);
 void ResetMotionGlobals( void);
-void HackCheckProxGrid( long);
 
 void MotionCleanup( void);
 void MoveSpaceObjects( spaceObjectType *, const long, const long);

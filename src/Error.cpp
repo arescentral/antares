@@ -42,24 +42,6 @@ namespace antares {
 #define kContinueButton     1
 #define kQuitButton         2
 
-void ShowErrorRecover( int whichError, const unsigned char* sourceCode, int sourceNum)
-
-{
-    Str255  s1, s3;
-
-//  if ( theDevice != nil) RestoreDeviceClut( theDevice);
-
-    GetIndString( s1, ERROR_STR_ID, whichError);
-    if ( sourceCode == nil)
-        ParamText( s1, nil, nil, nil);
-     else
-     {
-        NumToString(sourceNum, s3);
-        ParamText( s1, sourceCode, s3, nil);
-     }
-    StopAlert( ERROR_ALERT_ID, nil);
-}
-
 void ShowSimpleStringAlert(
     const unsigned char* string1, const unsigned char* string2,
     const unsigned char* string3, const unsigned char* string4)

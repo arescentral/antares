@@ -167,32 +167,6 @@ void ResetMotionGlobals( void)
     }
 }
 
-void HackCheckProxGrid( long sayswho)
-
-{
-    if ( gHackMoitionInitedYet)
-    {
-
-    proximityUnitType       *p = globals()->gProximityGrid.get();
-    long                    count, c2;
-
-
-    for ( count = 0; count < kProximityGridDataLength; count++)
-    {
-        for ( c2 = 0; c2 < kUnitsToCheckNumber; c2++)
-        {
-            if (( p->unitsToCheck[c2].adjacentUnit > 256) || ( p->unitsToCheck[c2].adjacentUnit < -256))
-            {
-                ShowErrorRecover( SPRITE_DATA_ERROR, kMotionError, sayswho);
-            }
-        }
-        p++;
-    }
-
-    }
-
-}
-
 void MotionCleanup() {
     globals()->gProximityGrid.reset();
 }
