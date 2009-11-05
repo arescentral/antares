@@ -587,9 +587,9 @@ bool VncVideoDriver::vnc_poll(int64_t timeout) {
                         scoped_array<FramebufferPixel> pixels(new FramebufferPixel[width * height]);
                         for (int i = 0; i < width * height; ++i) {
                             uint8_t color = gRealWorld->bytes()[i];
-                            pixels.get()[i].red = table.color(color).red >> 8;
-                            pixels.get()[i].green = table.color(color).green >> 8;
-                            pixels.get()[i].blue = table.color(color).blue >> 8;
+                            pixels.get()[i].red = table.color(color).red;
+                            pixels.get()[i].green = table.color(color).green;
+                            pixels.get()[i].blue = table.color(color).blue;
                         }
 
                         out.write(server_message_type);
