@@ -20,6 +20,7 @@
 #include "Motion.hpp"
 
 #include "AresGlobalType.hpp"
+#include "ColorTranslation.hpp"
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "MathMacros.hpp"
@@ -566,7 +567,7 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                     {
                         // we know it has sprite
                         anObject->sprite->style = spriteColor;
-                        anObject->sprite->styleColor = anObject->shieldColor;
+                        GetRGBTranslateColor(&anObject->sprite->styleColor, anObject->shieldColor);
                         anObject->sprite->styleData = anObject->hitState;
                     }
                 } else
@@ -581,7 +582,7 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                                 anObject->cloakState = kCloakOnStateMax;
                         }
                         anObject->sprite->style = spriteColor;
-                        anObject->sprite->styleColor = 0xff;
+                        anObject->sprite->styleColor = RgbColor::kBlack;
                         anObject->sprite->styleData = anObject->cloakState;
                         if ( anObject->owner == globals()->gPlayerAdmiralNumber)
                             anObject->sprite->styleData -=
@@ -597,7 +598,7 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                         } else
                         {
                             anObject->sprite->style = spriteColor;
-                            anObject->sprite->styleColor = 0xff;
+                            anObject->sprite->styleColor = RgbColor::kBlack;
                             anObject->sprite->styleData = -anObject->cloakState;
                             if ( anObject->owner == globals()->gPlayerAdmiralNumber)
                                 anObject->sprite->styleData -=

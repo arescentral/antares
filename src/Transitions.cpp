@@ -117,7 +117,7 @@ void UpdateColorAnimation(long timePassed) {
             globals()->gColorAnimationStep += globals()->gColorAnimationOutSpeed * timePassed;
         } else
         {
-            RestoreEntries(*globals()->gSaveColorTable);
+            gRealWorld->set_transition_fraction(0.0);
             globals()->gColorAnimationInSpeed = kNoColorGoal;
         }
     }
@@ -130,24 +130,15 @@ void StartBooleanColorAnimation(long inSpeed, long outSpeed, unsigned char goalC
         globals()->gColorAnimationInSpeed = inSpeed;
         globals()->gColorAnimationOutSpeed = outSpeed;
         GetRGBTranslateColor( &globals()->gColorAnimationGoal,  GetRetroIndex( goalColor));
-
-        for (size_t i = 0; i < globals()->gColorAnimationTable->size(); ++i) {
-            RgbColor color(
-                (globals()->gColorAnimationGoal.red >> 1L) +
-                    (globals()->gSaveColorTable->color(i).red >> 1L),
-                (globals()->gColorAnimationGoal.green >> 1L) +
-                    (globals()->gSaveColorTable->color(i).green >> 1L),
-                (globals()->gColorAnimationGoal.blue >> 1L) +
-                    (globals()->gSaveColorTable->color(i).blue >> 1L));
-            globals()->gColorAnimationTable->set_color(i, color);
-        }
-        RestoreEntries(*globals()->gColorAnimationTable);
+        gRealWorld->set_transition_fraction(0.5);
+        gRealWorld->set_transition_to(globals()->gColorAnimationGoal);
     } else
     {
         globals()->gColorAnimationStep = kStartAnimation;
         globals()->gColorAnimationInSpeed = inSpeed;
         globals()->gColorAnimationOutSpeed = outSpeed;
         GetRGBTranslateColor( &globals()->gColorAnimationGoal,  GetRetroIndex( goalColor));
+        gRealWorld->set_transition_to(globals()->gColorAnimationGoal);
     }
 }
 
@@ -162,7 +153,7 @@ void UpdateBooleanColorAnimation(long timePassed) {
             globals()->gColorAnimationStep += globals()->gColorAnimationOutSpeed * timePassed;
         } else
         {
-            RestoreEntries(*globals()->gSaveColorTable);
+            gRealWorld->set_transition_fraction(0.0);
             globals()->gColorAnimationInSpeed = kNoColorGoal;
         }
     }
@@ -284,13 +275,13 @@ ColorFade::ColorFade(
 
 void ColorFade::become_front() {
     _start = now_secs();
-    _current_colors.transition_between(_transition_colors, _color, _direction);
-    RestoreEntries(_current_colors);
+    gActiveWorld->set_transition_to(_color);
+    gActiveWorld->set_transition_fraction(_direction);
 }
 
 void ColorFade::resign_front() {
-    _current_colors.transition_between(_transition_colors, _color, 1.0 - _direction);
-    RestoreEntries(_current_colors);
+    gActiveWorld->set_transition_to(_color);
+    gActiveWorld->set_transition_fraction(0.0);
 }
 
 bool ColorFade::mouse_down(int button, const Point& loc) {
@@ -311,11 +302,10 @@ void ColorFade::fire_timer() {
     double fraction = (now_secs() - _start) / _duration;
     if (fraction < 1.0) {
         if (_direction == TO_COLOR) {
-            _current_colors.transition_between(_transition_colors, _color, fraction);
+            gActiveWorld->set_transition_fraction(fraction);
         } else {
-            _current_colors.transition_between(_transition_colors, _color, 1.0 - fraction);
+            gActiveWorld->set_transition_fraction(1.0 - fraction);
         }
-        RestoreEntries(_current_colors);
     } else {
         stack()->pop(this);
     }
@@ -353,8 +343,8 @@ void PictFade::become_front() {
 
 void PictFade::resign_front() {
     if (_state == NEW) {
-        gActiveWorld->fill(BLACK);
-        RestoreEntries(*globals()->gSaveColorTable);
+        gActiveWorld->fill(RgbColor::kBlack);
+        gActiveWorld->set_transition_fraction(0);
     }
 }
 
@@ -386,7 +376,7 @@ void PictFade::fire_timer() {
 void PictFade::wax() {
     _state = WAXING;
 
-    gActiveWorld->fill(BLACK);
+    gActiveWorld->fill(RgbColor::kBlack);
     Picture pict(_pict_id);
     Rect pictRect = pict.bounds();
     pictRect.center_in(gRealWorld->bounds());

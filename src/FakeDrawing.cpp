@@ -55,6 +55,11 @@ public:
 
 void DumpTo(const std::string& path) {
     std::string contents;
+    char header[64];
+    int width = gRealWorld->bounds().width();
+    int height = gRealWorld->bounds().height();
+    snprintf(header, 64, "P6 %d %d 255\n", width, height);
+    contents += header;
     StringBinaryWriter(&contents).write(*gRealWorld);
 
     MakeDirs(DirName(path), 0755);
@@ -67,26 +72,9 @@ void ScrollRect(const Rect& rect, int x, int y, const Rect& clip) {
     check(x == 0 && y == -1, "ScrollRect only supports shifting up by one pixel");
     int rowBytes = gActiveWorld->row_bytes();
     for (int i = std::min(rect.top - 1, clip.top); i < rect.bottom - 1; ++i) {
-        uint8_t* base = gActiveWorld->mutable_bytes() + i * rowBytes + rect.left;
-        memcpy(base, base + rowBytes, rect.right - rect.left);
+        RgbColor* base = gActiveWorld->mutable_bytes() + i * rowBytes + rect.left;
+        memcpy(base, base + rowBytes, rect.width() * sizeof(RgbColor));
     }
-}
-
-uint8_t NearestColor(uint16_t red, uint16_t green, uint16_t blue) {
-    uint8_t best_color = 0;
-    int min_distance = std::numeric_limits<int>::max();
-    for (int i = 0; i < 256; ++i) {
-        int distance = abs(colors->color(i).red - red)
-            + abs(colors->color(i).green - green)
-            + abs(colors->color(i).blue - blue);
-        if (distance == 0) {
-            return i;
-        } else if (distance < min_distance) {
-            min_distance = distance;
-            best_color = i;
-        }
-    }
-    return best_color;
 }
 
 class ClippedTransfer {
@@ -150,15 +138,15 @@ void CopyBits(PixMap* source, PixMap* dest, const Rect& source_rect, const Rect&
     dest->view(transfer.to()).copy(source->view(transfer.from()));
 }
 
-int currentForeColor;
-int currentBackColor;
+RgbColor currentForeColor;
+RgbColor currentBackColor;
 
 void RGBForeColor(const RgbColor& color) {
-    currentForeColor = NearestColor(color.red, color.green, color.blue);
+    currentForeColor = color;
 }
 
 void RGBBackColor(const RgbColor& color) {
-    currentBackColor = NearestColor(color.red, color.green, color.blue);
+    currentBackColor = color;
 }
 
 void DrawLine(PixMap* pix, const Point& from, const Point& to) {

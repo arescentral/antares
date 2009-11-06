@@ -19,6 +19,7 @@
 #define ANTARES_RETRO_TEXT_HPP_
 
 #include <vector>
+#include "ColorTable.hpp"
 #include "Geometry.hpp"
 #include "SmartPtr.hpp"
 
@@ -29,7 +30,8 @@ class PixMap;
 
 class RetroText {
   public:
-    RetroText(const char* data, size_t len, int font, uint8_t fore_color, uint8_t back_color);
+    RetroText(
+            const char* data, size_t len, int font, RgbColor fore_color, RgbColor back_color);
     ~RetroText();
 
     void wrap_to(int width, int line_spacing);
@@ -49,12 +51,14 @@ class RetroText {
     };
 
     struct RetroChar {
-        RetroChar(char character, SpecialChar special, uint8_t fore_color, uint8_t back_color);
+        RetroChar(
+                char character, SpecialChar special, const RgbColor& fore_color,
+                const RgbColor& back_color);
 
         char character;
         SpecialChar special;
-        uint8_t fore_color;
-        uint8_t back_color;
+        RgbColor fore_color;
+        RgbColor back_color;
         int h;
         int v;
     };

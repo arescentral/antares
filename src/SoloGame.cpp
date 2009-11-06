@@ -127,7 +127,7 @@ void SoloGame::handle_game_result() {
             } else {
                 AutoFadeTo(60, RgbColor::kBlack, false);
             }
-            gActiveWorld->fill(BLACK);
+            gActiveWorld->fill(RgbColor::kBlack);
             AutoFadeFrom(1, false);
 
             // normal scrolltext song
@@ -144,7 +144,7 @@ void SoloGame::handle_game_result() {
             }
 
             if (globals()->gOptions & kOptionMusicIdle) {
-                gActiveWorld->fill(BLACK);
+                gActiveWorld->fill(RgbColor::kBlack);
                 StopAndUnloadSong();
             }
 

@@ -19,31 +19,37 @@
 
 #include <algorithm>
 #include "Quickdraw.h"
+#include "Casts.hpp"
 #include "BinaryStream.hpp"
 #include "ColorTable.hpp"
 #include "Error.hpp"
 
 namespace antares {
 
-const uint8_t* PixMap::row(int y) const {
+const RgbColor* PixMap::row(int y) const {
     return bytes() + y * row_bytes();
 }
 
-uint8_t* PixMap::mutable_row(int y) {
+RgbColor* PixMap::mutable_row(int y) {
     return mutable_bytes() + y * row_bytes();
 }
 
-uint8_t PixMap::get(int x, int y) const {
+const RgbColor& PixMap::get(int x, int y) const {
     return row(y)[x];
 }
 
-void PixMap::set(int x, int y, uint8_t color) {
+void PixMap::set(int x, int y, const RgbColor& color) {
     mutable_row(y)[x] = color;
 }
 
-void PixMap::fill(uint8_t color) {
-    for (int i = 0; i < bounds().height(); ++i) {
-        memset(mutable_row(i), color, bounds().width());
+void PixMap::fill(const RgbColor& color) {
+    if (bounds().height() > 0) {
+        for (int x = 0; x < bounds().width(); ++x) {
+            set(x, 0, color);
+        }
+        for (int y = 1; y < bounds().height(); ++y) {
+            memcpy(mutable_row(y), row(y - 1), bounds().width() * sizeof(RgbColor));
+        }
     }
 }
 
@@ -53,21 +59,39 @@ void PixMap::copy(const PixMap& pix) throw(PixMapException) {
         throw PixMapException("Mismatch in PixMap sizes");
     }
     for (int i = 0; i < bounds().height(); ++i) {
-        memcpy(mutable_row(i), pix.row(i), bounds().width());
+        memcpy(mutable_row(i), pix.row(i), bounds().width() * sizeof(RgbColor));
     }
 }
 
 void PixMap::write(BinaryWriter* bin) const {
-    bin->write(bounds().width());
-    bin->write(bounds().height());
-    bin->write(colors());
-    bin->write(bytes(), bounds().area());
+    double f = transition_fraction();
+    if (f == 0.0) {
+        for (int y = 0; y < bounds().height(); ++y) {
+            const RgbColor* r = row(y);
+            for (int x = 0; x < bounds().width(); ++x) {
+                bin->write(r[x].red);
+                bin->write(r[x].green);
+                bin->write(r[x].blue);
+            }
+        }
+    } else {
+        double g = 1.0 - f;
+        const RgbColor& to = transition_to();
+        for (int y = 0; y < bounds().height(); ++y) {
+            const RgbColor* r = row(y);
+            for (int x = 0; x < bounds().width(); ++x) {
+                bin->write(implicit_cast<uint8_t>(to.red * f + r[x].red * g));
+                bin->write(implicit_cast<uint8_t>(to.green * f + r[x].green * g));
+                bin->write(implicit_cast<uint8_t>(to.blue * f + r[x].blue * g));
+            }
+        }
+    }
 }
 
 ArrayPixMap::ArrayPixMap(int width, int height)
         : _bounds(0, 0, width, height),
           _colors(new ColorTable(256)),
-          _bytes(new unsigned char[width * height]) { }
+          _bytes(new RgbColor[width * height]) { }
 
 ArrayPixMap::~ArrayPixMap() { }
 
@@ -87,7 +111,11 @@ void ArrayPixMap::read(BinaryReader* bin) {
     resize(bounds);
 
     bin->read(_colors.get());
-    bin->read(_bytes.get(), bounds.right * bounds.bottom);
+    scoped_array<uint8_t> bytes(new uint8_t[bounds.area()]);
+    bin->read(bytes.get(), bounds.right * bounds.bottom);
+    for (int i = 0; i < bounds.area(); ++i) {
+        _bytes.get()[i] = _colors->color(bytes.get()[i]);
+    }
 }
 
 const Rect& ArrayPixMap::bounds() const {
@@ -102,11 +130,11 @@ int ArrayPixMap::row_bytes() const {
     return _bounds.right;
 }
 
-const uint8_t* ArrayPixMap::bytes() const {
+const RgbColor* ArrayPixMap::bytes() const {
     return _bytes.get();
 }
 
-uint8_t* ArrayPixMap::mutable_bytes() {
+RgbColor* ArrayPixMap::mutable_bytes() {
     return _bytes.get();
 }
 
@@ -114,8 +142,20 @@ ColorTable* ArrayPixMap::mutable_colors() {
     return _colors.get();
 }
 
-void ArrayPixMap::fill(uint8_t color) {
-    memset(_bytes.get(), color, _bounds.area());
+double ArrayPixMap::transition_fraction() const {
+    return _transition_fraction;
+}
+
+void ArrayPixMap::set_transition_fraction(double fraction) {
+    _transition_fraction = fraction;
+}
+
+const RgbColor& ArrayPixMap::transition_to() const {
+    return *_transition_to;
+}
+
+void ArrayPixMap::set_transition_to(const RgbColor& color) {
+    _transition_to.reset(new RgbColor(color));
 }
 
 PixMap::View::View(PixMap* pix, const Rect& bounds)
@@ -138,16 +178,32 @@ int PixMap::View::row_bytes() const {
     return _parent->row_bytes();
 }
 
-const uint8_t* PixMap::View::bytes() const {
+const RgbColor* PixMap::View::bytes() const {
     return _parent->bytes() + _offset.v * row_bytes() + _offset.h;
 }
 
-uint8_t* PixMap::View::mutable_bytes() {
+RgbColor* PixMap::View::mutable_bytes() {
     return _parent->mutable_bytes() + _offset.v * row_bytes() + _offset.h;
 }
 
 ColorTable* PixMap::View::mutable_colors() {
     return _parent->mutable_colors();
+}
+
+double PixMap::View::transition_fraction() const {
+    return _parent->transition_fraction();
+}
+
+void PixMap::View::set_transition_fraction(double fraction) {
+    _parent->set_transition_fraction(fraction);
+}
+
+const RgbColor& PixMap::View::transition_to() const {
+    return _parent->transition_to();
+}
+
+void PixMap::View::set_transition_to(const RgbColor& color) {
+    _parent->set_transition_to(color);
 }
 
 PixMap::View PixMap::view(const Rect& bounds) {

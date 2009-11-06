@@ -20,6 +20,7 @@
 
 // Sprite Cursor.h
 
+#include "ColorTable.hpp"
 #include "SpriteHandling.hpp"
 
 namespace antares {
@@ -41,8 +42,8 @@ struct spriteCursorType {
     Point       thisLineEnd;
     Point       lastLineStart;
     Point       lastLineEnd;
-    unsigned char   thisLineColor;
-    unsigned char   thisLineColorDark;
+    RgbColor thisLineColor;
+    RgbColor thisLineColorDark;
 };
 
 short InitSpriteCursor( void);

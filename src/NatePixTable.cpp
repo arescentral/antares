@@ -31,7 +31,8 @@ class natePixEntryType {
               _height(0),
               _h_offset(0),
               _v_offset(0),
-              _data(NULL) { }
+              _data(NULL),
+              _pixels(NULL) { }
 
     ~natePixEntryType() {
         clear();
@@ -42,6 +43,7 @@ class natePixEntryType {
     int16_t h_offset() const { return _h_offset; }
     int16_t v_offset() const { return _v_offset; }
     uint8_t* data() const { return _data; }
+    RgbColor* pixels() const { return _pixels; }
 
     void read(BinaryReader* bin) {
         bin->read(&_width);
@@ -49,12 +51,24 @@ class natePixEntryType {
         bin->read(&_h_offset);
         bin->read(&_v_offset);
         _data = new uint8_t[_width * _height];
+        _pixels = new RgbColor[_width * _height];
         bin->read(_data, _width * _height);
+
+        ColorTable table(256);
+        for (int i = 0; i < _width * _height; ++i) {
+            if (_data[i]) {
+                _pixels[i] = table.color(_data[i]);
+            } else {
+                _pixels[i] = RgbColor::kClear;
+            }
+        }
     }
 
     void clear() {
         delete[] _data;
         _data = NULL;
+        delete[] _pixels;
+        _pixels = NULL;
     }
 
   private:
@@ -63,6 +77,7 @@ class natePixEntryType {
     int16_t _h_offset;
     int16_t _v_offset;
     uint8_t* _data;
+    RgbColor* _pixels;
 
     DISALLOW_COPY_AND_ASSIGN(natePixEntryType);
 };
@@ -135,8 +150,8 @@ int GetNatePixTableNatePixVRef(const natePixType& table, long pixnum) {
     return table.at(pixnum)->v_offset();
 }
 
-uint8_t* GetNatePixTableNatePixData(const natePixType& table, long pixnum) {
-    return table.at(pixnum)->data();
+RgbColor* GetNatePixTableNatePixData(const natePixType& table, long pixnum) {
+    return table.at(pixnum)->pixels();
 }
 
 // RemapNatePixTableColor:

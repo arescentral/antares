@@ -72,9 +72,9 @@ class ScrollTextPixBuilder {
     }
 
     void add_text(const std::string& text) {
-        uint8_t white = 0xFF;
-        uint8_t red = GetTranslateColorShade(RED, VERY_LIGHT);
-        RetroText retro(text.c_str(), text.size(), kTitleFontNum, red, white);
+        RgbColor red;
+        GetRGBTranslateColorShade(&red, RED, VERY_LIGHT);
+        RetroText retro(text.c_str(), text.size(), kTitleFontNum, red, RgbColor::kBlack);
         retro.wrap_to(_pix->bounds().right - 12, 2);
 
         Rect dest(0, 0, _pix->bounds().right, retro.height());
@@ -178,13 +178,13 @@ void ScrollTextScreen::become_front() {
         PlaySong();
     }
 
-    gActiveWorld->fill(BLACK);
+    gActiveWorld->fill(RgbColor::kBlack);
     _start = now_secs();
     _window = Rect(0, -kScrollTextHeight, _pix_map->bounds().right, 0);
 }
 
 void ScrollTextScreen::resign_front() {
-    gActiveWorld->fill(BLACK);
+    gActiveWorld->fill(RgbColor::kBlack);
 
     // If a song was requested, stop it.
     if (_play_song && SongIsPlaying()) {
@@ -217,7 +217,7 @@ void ScrollTextScreen::fire_timer() {
         dest.center_in(gRealWorld->bounds());
 
         if (_window.intersects(_pix_map->bounds())) {
-            gActiveWorld->fill(BLACK);
+            gActiveWorld->fill(RgbColor::kBlack);
             CopyBits(_pix_map.get(), gRealWorld, _window, dest);
         } else {
             stack()->pop(this);

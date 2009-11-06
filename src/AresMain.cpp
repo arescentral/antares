@@ -252,7 +252,7 @@ void AresMain() {
 
     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
 
-    gActiveWorld->fill(BLACK);
+    gActiveWorld->fill(RgbColor::kBlack);
     ResetTransitions();
 
     MusicInit();

@@ -328,8 +328,8 @@ void Pause( long);
 
 void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
     int                     error;
-    unsigned char           color, *strPtr;
-    transColorType          *transColor;
+    RgbColor color;
+    unsigned char           *strPtr;
     Rect                lRect, clipRect, boundsRect;
     Rect                    tRect;
     retroTextSpecType       retroTextSpec;
@@ -350,7 +350,7 @@ void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
 
         DrawInRealWorld();
         mSetDirectFont( kTitleFontNum);
-        mGetTranslateColorShade( PALE_GREEN, LIGHT, color, transColor);
+        GetRGBTranslateColorShade(&color, PALE_GREEN, LIGHT);
         lRect.left = 0;
         lRect.top = 0;
         lRect.right = WORLD_WIDTH;
@@ -367,9 +367,9 @@ void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
 
         retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
         retroTextSpec.tabSize =220;
-        mGetTranslateColorShade( PALE_GREEN, VERY_LIGHT, retroTextSpec.color, transColor);
-        mGetTranslateColorShade( SKY_BLUE, DARKEST, retroTextSpec.backColor, transColor);
-        retroTextSpec.backColor = 0xff;
+        GetRGBTranslateColorShade(&retroTextSpec.color, PALE_GREEN, VERY_LIGHT);
+        GetRGBTranslateColorShade(&retroTextSpec.backColor, SKY_BLUE, DARKEST);
+        retroTextSpec.backColor = RgbColor::kBlack;
         retroTextSpec.originalColor = retroTextSpec.nextColor = retroTextSpec.color;
         retroTextSpec.originalBackColor = retroTextSpec.nextBackColor = retroTextSpec.backColor;
 
@@ -404,9 +404,8 @@ void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
 void UpdateLoadingInterface( long value, long total, Rect *contentRect)
 
 {
-    unsigned char   color;
+    RgbColor        color;
     long            width, height, temp;
-    transColorType  *transColor;
     Rect        clipRect;
     Rect            tRect;
     Str255          string;
@@ -416,7 +415,7 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
     {
         DrawInOffWorld();
         DefaultColors();
-        gActiveWorld->view(*contentRect).fill(BLACK);
+        gActiveWorld->view(*contentRect).fill(RgbColor::kBlack);
         GetIndString( string, 2004, 33);
 
         mSetDirectFont( kButtonFontNum);
@@ -426,7 +425,7 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
         tRect = Rect(0, 0, width, height);
         tRect.center_in(*contentRect);
 
-        mGetTranslateColorShade( kLoadingScreenColor, LIGHTER, color, transColor);
+        GetRGBTranslateColorShade(&color, kLoadingScreenColor, LIGHTER);
         MoveTo( tRect.left, tRect.top + mDirectFontAscent());
         DrawDirectTextStringClipped( string, color, gOffWorld, clipRect, 0, 0);
 
@@ -444,11 +443,13 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
 
         tRect = Rect(contentRect->left, contentRect->top, contentRect->left + temp, contentRect->bottom);
         SetTranslateColorShadeFore( kLoadingScreenColor, LIGHT);
-        gActiveWorld->view(tRect).fill(GetTranslateColorShade(kLoadingScreenColor, LIGHT));
+        GetRGBTranslateColorShade(&color, kLoadingScreenColor, LIGHT);
+        gActiveWorld->view(tRect).fill(color);
 
         tRect = Rect(contentRect->left + temp, contentRect->top, contentRect->right, contentRect->bottom);
         SetTranslateColorShadeFore( kLoadingScreenColor, DARK);
-        gActiveWorld->view(tRect).fill(GetTranslateColorShade(kLoadingScreenColor, DARK));
+        GetRGBTranslateColorShade(&color, kLoadingScreenColor, DARK);
+        gActiveWorld->view(tRect).fill(color);
         NormalizeColors();
         DrawInRealWorld();
         NormalizeColors();
@@ -484,7 +485,7 @@ PlayAgainResult DoPlayAgain(bool allowResume, bool allowSkip) {
         DrawInOffWorld();
         GetAnyInterfaceItemGraphicBounds(item, &tRect);
         DefaultColors();
-        gActiveWorld->view(tRect).fill(BLACK);
+        gActiveWorld->view(tRect).fill(RgbColor::kBlack);
         DrawInRealWorld();
 
         if ( globals()->gOptions & kOptionNetworkOn)
@@ -554,7 +555,7 @@ PlayAgainResult DoPlayAgain(bool allowResume, bool allowSkip) {
         DrawInOffWorld();
         GetAnyInterfaceItemGraphicBounds(item, &tRect);
         DefaultColors();
-        gActiveWorld->view(tRect).fill(BLACK);
+        gActiveWorld->view(tRect).fill(RgbColor::kBlack);
         DrawInRealWorld();
         CloseInterface();
     }
@@ -588,7 +589,7 @@ void DoNetSettings( void)
         GetAnyInterfaceItemGraphicBounds( item, &tRect);
         DefaultColors();
         CopyOffWorldToSaveWorld( &tRect);
-        gActiveWorld->view( &tRect).fill(BLACK);
+        gActiveWorld->view( &tRect).fill(RgbColor::kBlack);
         DrawInRealWorld();
 
         currentRegistered = GetRegisteredSetting();
@@ -702,7 +703,7 @@ void DoNetSettings( void)
         DrawInOffWorld();
         GetAnyInterfaceItemGraphicBounds( item, &tRect);
         DefaultColors();
-        gActiveWorld->view( &tRect).fill(BLACK);
+        gActiveWorld->view( &tRect).fill(RgbColor::kBlack);
         CopySaveWorldToOffWorld( &tRect);
         DrawInRealWorld();
         CloseInterface();
@@ -748,7 +749,6 @@ void DoHelpScreen( void)
     Rect                clipRect, boundsRect;
     long                    height;
     retroTextSpecType       retroTextSpec;
-    transColorType          *transColor;
 
     FlushEvents(everyEvent, 0);
     if ( globals()->gOptions & kOptionSubstituteFKeys)
@@ -765,7 +765,7 @@ void DoHelpScreen( void)
         textRect = item.bounds;
         DefaultColors();
         CopyOffWorldToSaveWorld(tRect);
-        gActiveWorld->view(tRect).fill(BLACK);
+        gActiveWorld->view(tRect).fill(RgbColor::kBlack);
         DrawInRealWorld();
 
         DrawAllItemsOfKind( kPictureRect, false, false, false);
@@ -793,8 +793,8 @@ void DoHelpScreen( void)
             mSetDirectFont( kComputerFontNum);
             retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
             retroTextSpec.tabSize = 220;
-            mGetTranslateColorShade( RED, VERY_LIGHT, retroTextSpec.color, transColor);
-            mGetTranslateColorShade( RED, VERY_DARK, retroTextSpec.backColor, transColor);
+            GetRGBTranslateColorShade(&retroTextSpec.color, RED, VERY_LIGHT);
+            GetRGBTranslateColorShade(&retroTextSpec.backColor, RED, VERY_DARK);
             retroTextSpec.originalColor = retroTextSpec.nextColor = retroTextSpec.color;
             retroTextSpec.originalBackColor = retroTextSpec.nextBackColor = retroTextSpec.backColor;
 
@@ -865,7 +865,7 @@ void DoHelpScreen( void)
         DrawInOffWorld();
         GetAnyInterfaceItemGraphicBounds(item, &tRect);
         DefaultColors();
-        gActiveWorld->view(tRect).fill(BLACK);
+        gActiveWorld->view(tRect).fill(RgbColor::kBlack);
         CopySaveWorldToOffWorld(tRect);
         DrawInRealWorld();
         CloseInterface();
@@ -873,10 +873,9 @@ void DoHelpScreen( void)
 }
 
 void StartPauseIndicator(unsigned char* pauseString, unsigned char hue) {
-    unsigned char   color;
+    RgbColor        color;
     long            width, height, count;
     Rect            tRect, stringRect;
-    transColorType  *transColor;
     Rect        clipRect;
 
 #pragma unused( hue)
@@ -902,14 +901,14 @@ void StartPauseIndicator(unsigned char* pauseString, unsigned char hue) {
 
     clipRect = tRect;
 
-    mGetTranslateColorShade( GREEN, DARKER, color, transColor);
+    GetRGBTranslateColorShade(&color, GREEN, DARKER);
     for ( count = clipRect.top + 2; count < clipRect.bottom; count += 2)
     {
         DrawNateLine( gOffWorld, clipRect, clipRect.left, count, clipRect.right - 1,
                     count, 0, 0, color);
     }
 
-    mGetTranslateColorShade( GREEN, LIGHTER, color, transColor);
+    GetRGBTranslateColorShade(&color, GREEN, LIGHTER);
     DrawNateVBracket( gOffWorld, clipRect, clipRect, 0, 0,color);
     MoveTo( stringRect.left, stringRect.top + mDirectFontAscent());
     DrawDirectTextStringClipped( pauseString, color, gOffWorld, clipRect, 0, 0);
@@ -942,7 +941,7 @@ void StopPauseIndicator(unsigned char* pauseString) {
     CopyOffWorldToRealWorld(stringRect);
     DrawInOffWorld();
     DefaultColors();
-    gActiveWorld->view(stringRect).fill(BLACK);
+    gActiveWorld->view(stringRect).fill(RgbColor::kBlack);
 
     DrawInRealWorld();
     DefaultColors();
@@ -1190,7 +1189,9 @@ void DrawOptionVolumeLevel( Rect *bounds, long level)
         graphicRect = tRect;
         graphicRect.inset(2, 6);
         graphicRect.center_in(tRect);
-        gActiveWorld->view(graphicRect).fill(GetTranslateColorShade(kOptionVolumeColor, shade));
+        RgbColor color;
+        GetRGBTranslateColorShade(&color, kOptionVolumeColor, shade);
+        gActiveWorld->view(graphicRect).fill(color);
         tRect.left += notchWidth;
         tRect.right = tRect.left + notchWidth - 2;
         shade += 2;
@@ -1202,7 +1203,7 @@ void DrawOptionVolumeLevel( Rect *bounds, long level)
         graphicRect = tRect;
         graphicRect.inset(2, 6);
         graphicRect.center_in(tRect);
-        gActiveWorld->view(graphicRect).fill(BLACK);
+        gActiveWorld->view(graphicRect).fill(RgbColor::kBlack);
         tRect.left += notchWidth;
         tRect.right = tRect.left + notchWidth - 2;
     }
@@ -1583,7 +1584,7 @@ void DrawStringInInterfaceItem( long whichItem, const unsigned char* string)
     DefaultColors();
     GetAnyInterfaceItemContentBounds(*GetAnyInterfaceItemPtr( whichItem), &tRect);
 
-    gActiveWorld->view(tRect).fill(BLACK);
+    gActiveWorld->view(tRect).fill(RgbColor::kBlack);
     anItem = GetAnyInterfaceItemPtr( whichItem);
     if ( string != nil)
     {
@@ -1903,13 +1904,13 @@ void BlackenWindow( void)
     tRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     DrawInSaveWorld();
     DefaultColors();
-    gActiveWorld->view(tRect).fill(BLACK);
+    gActiveWorld->view(tRect).fill(RgbColor::kBlack);
     DrawInOffWorld();
     DefaultColors();
-    gActiveWorld->view(tRect).fill(BLACK);
+    gActiveWorld->view(tRect).fill(RgbColor::kBlack);
     DrawInRealWorld();
     DefaultColors();
-    gActiveWorld->view(tRect).fill(BLACK);
+    gActiveWorld->view(tRect).fill(RgbColor::kBlack);
 }
 
 void BlackenOffscreen( void)
@@ -1920,10 +1921,10 @@ void BlackenOffscreen( void)
     tRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     DrawInSaveWorld();
     DefaultColors();
-    gActiveWorld->view(tRect).fill(BLACK);
+    gActiveWorld->view(tRect).fill(RgbColor::kBlack);
     DrawInOffWorld();
     DefaultColors();
-    gActiveWorld->view(tRect).fill(BLACK);
+    gActiveWorld->view(tRect).fill(RgbColor::kBlack);
     DrawInRealWorld();
     DefaultColors();
 }
@@ -1942,7 +1943,6 @@ void DrawLevelNameInBox(unsigned char* name, long fontNum, short descriptionText
     Rect                    tRect;
     unsigned char           *strPtr;
     retroTextSpecType       retroTextSpec;
-    transColorType          *transColor;
     interfaceItemType       *anItem;
     long                    height;
     scoped_ptr<std::string> textData;
@@ -1960,9 +1960,9 @@ void DrawLevelNameInBox(unsigned char* name, long fontNum, short descriptionText
 
     retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
     retroTextSpec.tabSize =220;
-    mGetTranslateColorShade( AQUA, VERY_LIGHT, retroTextSpec.color, transColor);
-    mGetTranslateColorShade( AQUA, DARKEST, retroTextSpec.backColor, transColor);
-    retroTextSpec.backColor = 0xff;
+    GetRGBTranslateColorShade(&retroTextSpec.color, AQUA, VERY_LIGHT);
+    GetRGBTranslateColorShade(&retroTextSpec.backColor, AQUA, DARKEST);
+    retroTextSpec.backColor = RgbColor::kBlack;
     retroTextSpec.originalColor = retroTextSpec.nextColor = retroTextSpec.color;
     retroTextSpec.originalBackColor = retroTextSpec.nextBackColor = retroTextSpec.backColor;
     retroTextSpec.topBuffer = 2;
@@ -1982,7 +1982,7 @@ void DrawLevelNameInBox(unsigned char* name, long fontNum, short descriptionText
     tRect = anItem->bounds;
     DrawInOffWorld();
     DefaultColors();
-    gActiveWorld->view(tRect).fill(BLACK);
+    gActiveWorld->view(tRect).fill(RgbColor::kBlack);
     DrawInRealWorld();
     DrawDirectTextInRect( &retroTextSpec, anItem->bounds, clipRect, gOffWorld, 0,0);
     CopyOffWorldToRealWorld(tRect);
@@ -2197,8 +2197,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
     short           textHeight = 0;
     scoped_ptr<Picture> thePict;
     Point           starPoint;
-    transColorType  *transColor;
-    unsigned char   color;
+    RgbColor        color;
     Rect        longClipRect, starRect;
     inlinePictType  *thisInlinePict;
 
@@ -2302,8 +2301,8 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
         dataItem->item.labeledRect.label.stringID = headerID;
         dataItem->item.labeledRect.label.stringNumber = headerNumber;
         GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
-        SetTranslateColorFore( BLACK);
-        gActiveWorld->view(newRect).fill(BLACK);
+        SetTranslateColorFore(BLACK);
+        gActiveWorld->view(newRect).fill(RgbColor::kBlack);
         DrawAnyInterfaceItem(*dataItem, gOffWorld);
 
         DrawInOffWorld();
@@ -2350,7 +2349,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
                 starPoint.h += bounds->left;
                 starPoint.v += bounds->top;
 
-                mGetTranslateColorShade( GOLD, VERY_LIGHT, color, transColor);
+                GetRGBTranslateColorShade(&color, GOLD, VERY_LIGHT);
                 longClipRect = *bounds;
                 starRect.left = starPoint.h - kMissionStarPointWidth;
                 starRect.top = starPoint.v - kMissionStarPointHeight;
@@ -2402,7 +2401,6 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
 void ShowObjectData( Point where, short pictID, Rect *clipRect)
 {
     Rect            dataRect;
-    transColorType  *transColor;
     Rect        lRect, longClipRect;
     baseObjectType  *baseObject = gBaseObjectData.get();// + (pictID - kFirstShipDataPictID);
     Str255          tempString, numString;
@@ -2488,8 +2486,8 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
             mSetDirectFont( kButtonFontNum);
             retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
             retroTextSpec.tabSize = 100;
-            mGetTranslateColorShade( GREEN, VERY_LIGHT, retroTextSpec.color, transColor);
-            mGetTranslateColorShade( GREEN, DARKEST, retroTextSpec.backColor, transColor);
+            GetRGBTranslateColorShade(&retroTextSpec.color, GREEN, VERY_LIGHT);
+            GetRGBTranslateColorShade(&retroTextSpec.backColor, GREEN, DARKEST);
             retroTextSpec.originalColor = retroTextSpec.nextColor = retroTextSpec.color;
             retroTextSpec.originalBackColor = retroTextSpec.nextBackColor = retroTextSpec.backColor;
             retroTextSpec.topBuffer = 1;
@@ -2529,7 +2527,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
             DrawInRealWorld();
             NormalizeColors();
             dataRect.inset(-8, -4);
-            gActiveWorld->view(dataRect).fill(BLACK);
+            gActiveWorld->view(dataRect).fill(RgbColor::kBlack);
             SetTranslateColorShadeFore( GREEN, VERY_LIGHT);
             MacFrameRect(dataRect);
             NormalizeColors();
@@ -2650,7 +2648,6 @@ void DoMissionDebriefing(Rect *destRect, long yourlength, long parlength, long y
     Rect                tRect;
     long                height, waitTime, score = 0;
     retroTextSpecType   retroTextSpec;
-    transColorType      *transColor;
     Str255              tempString, numString;
 
     // ** CALCULATE THE SCORE
@@ -2776,8 +2773,8 @@ void DoMissionDebriefing(Rect *destRect, long yourlength, long parlength, long y
         mSetDirectFont( kButtonFontNum);
         retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
         retroTextSpec.tabSize = 60;
-        mGetTranslateColorShade( GOLD, VERY_LIGHT, retroTextSpec.color, transColor);
-        mGetTranslateColorShade( GOLD, DARKEST, retroTextSpec.backColor, transColor);
+        GetRGBTranslateColorShade(&retroTextSpec.color, GOLD, VERY_LIGHT);
+        GetRGBTranslateColorShade(&retroTextSpec.backColor, GOLD, DARKEST);
         retroTextSpec.originalColor = retroTextSpec.nextColor = retroTextSpec.color;
         retroTextSpec.originalBackColor = retroTextSpec.nextBackColor = retroTextSpec.backColor;
 
@@ -2860,8 +2857,8 @@ void DoMissionDebriefingText(long textID, long yourlength, long parlength,
         DrawInOffWorld();
 
         GetAnyInterfaceItemGraphicBounds(dataItem, &tRect);
-        SetTranslateColorFore( BLACK);
-        gActiveWorld->view(tRect).fill(BLACK);
+        SetTranslateColorFore(BLACK);
+        gActiveWorld->view(tRect).fill(RgbColor::kBlack);
 
         DrawAnyInterfaceItem(dataItem, gOffWorld);
 
@@ -2910,7 +2907,6 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
     long                height, waitTime = TickCount(), l, autoTimeStart, sectionLength, textLength,
                         charNum, pictID = 0, bgVOffset = 0, bgPictID = -1;
     retroTextSpecType   retroTextSpec;
-    transColorType      *transColor;
     Rect                tRect, uRect, vRect, pictRect, pictSourceRect;
     scoped_ptr<std::string> textHandle;
     const char*         sectionStart = NULL;
@@ -2961,7 +2957,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
 
         DrawInRealWorld();
 
-        DrawNateRect( gOffWorld, &scrollRect, 0, 0, 0xff);
+        DrawNateRect( gOffWorld, &scrollRect, 0, 0, RgbColor::kBlack);
 
         // Here's the behavior:
         //  a section is started with a '#' followed by a '+'
@@ -3080,9 +3076,8 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                     retroTextSpec.thisPosition = retroTextSpec.linePosition =
                         retroTextSpec.lineCount = 0;
                     retroTextSpec.tabSize = scrollWidth / 2;
-                    mGetTranslateColorShade( RED, VERY_LIGHT, retroTextSpec.color, transColor);
-            //      mGetTranslateColorShade( RED, DARKEST, retroTextSpec.backColor, transColor);
-                    retroTextSpec.backColor = WHITE;//0xff;
+                    GetRGBTranslateColorShade(&retroTextSpec.color, RED, VERY_LIGHT);
+                    retroTextSpec.backColor = RgbColor::kWhite;//0xff;
                     retroTextSpec.originalColor = retroTextSpec.nextColor = retroTextSpec.color;
                     retroTextSpec.originalBackColor = retroTextSpec.nextBackColor = retroTextSpec.backColor;
                     retroTextSpec.topBuffer = kScrollTextLineBuffer;
@@ -3163,7 +3158,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                                     DrawInRealWorld();
 
                                     DrawNateLine(gOffWorld, scrollRect, scrollRect.left, scrollRect.bottom - 1, scrollRect.right - 1,
-                                        scrollRect.bottom - 1, 0, 0, BLACK);
+                                        scrollRect.bottom - 1, 0, 0, RgbColor::kBlack);
                                     CopyOffWorldToRealWorld(vRect);
 
                                     bgVOffset++;
@@ -3266,7 +3261,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                             if ( bgVOffset >= kBackground_Height) bgVOffset = 0;
 
                             DrawNateLine(gOffWorld, scrollRect, scrollRect.left, scrollRect.bottom - 1, scrollRect.right - 1,
-                                scrollRect.bottom - 1, 0, 0, BLACK);
+                                scrollRect.bottom - 1, 0, 0, RgbColor::kBlack);
                             DrawInRealWorld();
                             CopyOffWorldToRealWorld(vRect);
 
@@ -3302,7 +3297,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
             tRect = scrollRect;
             ScrollRect(tRect, 0, -1, clipRgn);
             DrawNateLine(gOffWorld, scrollRect, scrollRect.left, scrollRect.bottom - 1, scrollRect.right - 1,
-                scrollRect.bottom - 1, 0, 0, BLACK);
+                scrollRect.bottom - 1, 0, 0, RgbColor::kBlack);
             DrawInRealWorld();
             CopyOffWorldToRealWorld(vRect);
 

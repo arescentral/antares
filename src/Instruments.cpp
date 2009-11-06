@@ -216,9 +216,8 @@ void UpdateRadar(int32_t unitsDone) {
     int32_t         dx, rcount, x, y, *scaleval;
     const int32_t   rrange = globals()->gRadarRange >> 1L;
     Point           *lp;
-    unsigned char   color, color2;
+    RgbColor        color, color2;
     uint32_t        bestScale = MIN_SCALE, rootCorrect, distance, difference, dcalc;
-    transColorType  *transColor;
     admiralType     *admiral;
     Rect            tRect;
     bool         doDraw;
@@ -241,10 +240,10 @@ void UpdateRadar(int32_t unitsDone) {
 
     if ( globals()->gRadarCount <= 0)
     {
-        mGetTranslateColorShade( kRadarColor, VERY_DARK, color, transColor);
+        GetRGBTranslateColorShade(&color, kRadarColor, VERY_DARK);
     } else
     {
-        mGetTranslateColorShade( kRadarColor, (( kRadarColorSteps * globals()->gRadarCount) / globals()->gRadarSpeed) + 1, color, transColor);
+        GetRGBTranslateColorShade(&color, kRadarColor, (( kRadarColorSteps * globals()->gRadarCount) / globals()->gRadarSpeed) + 1);
     }
 
     if ( doDraw)
@@ -269,7 +268,7 @@ void UpdateRadar(int32_t unitsDone) {
             tRect = Rect(kRadarLeft + 1, kRadarTop + 1 + globals()->gInstrumentTop, kRadarRight - 1,
                     kRadarBottom - 1 + globals()->gInstrumentTop);
             lRect = tRect;
-            mGetTranslateColorShade( kRadarColor, DARKEST, color, transColor);
+            GetRGBTranslateColorShade(&color, kRadarColor, DARKEST);
             DrawNateRect(gOffWorld, &lRect, 0, 0, color);
             SetTranslateColorShadeFore( kRadarColor, VERY_LIGHT);
             MacFrameRect(tRect);
@@ -286,7 +285,7 @@ void UpdateRadar(int32_t unitsDone) {
             if ( lRect.top <= tRect.top) lRect.top = tRect.top + 1;
             lRect.bottom = kRadarTop + kRadarCenter + dx + globals()->gInstrumentTop;
             if ( lRect.bottom >= tRect.bottom) lRect.bottom = tRect.bottom - 1;
-            mGetTranslateColorShade( kRadarColor, VERY_DARK, color, transColor);
+            GetRGBTranslateColorShade(&color, kRadarColor, VERY_DARK);
             DrawNateRect(gOffWorld, &lRect, 0, 0, color);
             NormalizeColors();
             DrawInRealWorld();
@@ -334,7 +333,7 @@ void UpdateRadar(int32_t unitsDone) {
             tRect = Rect(kRadarLeft + 1, kRadarTop + 1 + globals()->gInstrumentTop, kRadarRight - 1,
                     kRadarBottom - 1 + globals()->gInstrumentTop);
             lRect = tRect;
-            mGetTranslateColorShade( kRadarColor, DARKEST, color, transColor);
+            GetRGBTranslateColorShade(&color, kRadarColor, DARKEST);
             DrawNateRect( gActiveWorld, &lRect, gNatePortLeft << 2L, gNatePortTop, color);
         }
 
@@ -499,8 +498,8 @@ void UpdateRadar(int32_t unitsDone) {
                 if ( globals()->gBarIndicator[kFineMoneyBar].thisValue < x)
                 {
                     // draw the money we have
-                    mGetTranslateColorShade( kFineMoneyColor, VERY_LIGHT, color, transColor);
-                    mGetTranslateColorShade( kFineMoneyColor, LIGHT, color2, transColor);
+                    GetRGBTranslateColorShade(&color, kFineMoneyColor, VERY_LIGHT);
+                    GetRGBTranslateColorShade(&color2, kFineMoneyColor, LIGHT);
 
                     for ( rcount = 0;
                         rcount < globals()->gBarIndicator[kFineMoneyBar].thisValue;
@@ -519,8 +518,8 @@ void UpdateRadar(int32_t unitsDone) {
                     }
 
                     // draw the money we need
-                    mGetTranslateColorShade( kFineMoneyNeedColor, MEDIUM, color, transColor);
-                    mGetTranslateColorShade( kFineMoneyNeedColor, DARK, color2, transColor);
+                    GetRGBTranslateColorShade(&color, kFineMoneyNeedColor, MEDIUM);
+                    GetRGBTranslateColorShade(&color2, kFineMoneyNeedColor, DARK);
 
                     for ( rcount = globals()->gBarIndicator[kFineMoneyBar].thisValue;
                         rcount < x;
@@ -542,8 +541,8 @@ void UpdateRadar(int32_t unitsDone) {
                 } else
                 {
                     // draw the money we'll have left
-                    mGetTranslateColorShade( kFineMoneyColor, VERY_LIGHT, color, transColor);
-                    mGetTranslateColorShade( kFineMoneyColor, LIGHT, color2, transColor);
+                    GetRGBTranslateColorShade(&color, kFineMoneyColor, VERY_LIGHT);
+                    GetRGBTranslateColorShade(&color2, kFineMoneyColor, LIGHT);
 
                     for ( rcount = 0;
                         rcount < ( globals()->gBarIndicator[kFineMoneyBar].thisValue - x);
@@ -562,8 +561,8 @@ void UpdateRadar(int32_t unitsDone) {
                     }
 
                     // draw the money we'll have left
-                    mGetTranslateColorShade( kFineMoneyUseColor, VERY_LIGHT, color, transColor);
-                    mGetTranslateColorShade( kFineMoneyUseColor, LIGHT, color2, transColor);
+                    GetRGBTranslateColorShade(&color, kFineMoneyUseColor, VERY_LIGHT);
+                    GetRGBTranslateColorShade(&color2, kFineMoneyUseColor, LIGHT);
 
                     for ( rcount = (globals()->gBarIndicator[kFineMoneyBar].thisValue -x);
                         rcount < globals()->gBarIndicator[kFineMoneyBar].thisValue;
@@ -583,7 +582,7 @@ void UpdateRadar(int32_t unitsDone) {
 
                 }
 
-                mGetTranslateColorShade( kFineMoneyColor, VERY_DARK, color, transColor);
+                GetRGBTranslateColorShade(&color, kFineMoneyColor, VERY_DARK);
 
                 for ( rcount = globals()->gBarIndicator[kFineMoneyBar].thisValue;
                     rcount < kFineMoneyBarNum; rcount++)
@@ -604,7 +603,7 @@ void UpdateRadar(int32_t unitsDone) {
         {
             lRect.left = kGrossMoneyLeft + kGrossMoneyHBuffer + globals()->gRightPanelLeftEdge;
             lRect.right = lRect.left + kGrossMoneyBarWidth;
-            mGetTranslateColorShade( kGrossMoneyColor, VERY_LIGHT, color, transColor);
+            GetRGBTranslateColorShade(&color, kGrossMoneyColor, VERY_LIGHT);
 
             for ( rcount = 0; rcount < globals()->gBarIndicator[kGrossMoneyBar].thisValue; rcount++)
             {
@@ -613,7 +612,7 @@ void UpdateRadar(int32_t unitsDone) {
                 lRect.bottom = lRect.top + kGrossMoneyBarHeight - 1;
                 DrawNateRect( gActiveWorld, &lRect, gNatePortLeft << 2L, gNatePortTop, color);
             }
-            mGetTranslateColorShade( kGrossMoneyColor, VERY_DARK, color, transColor);
+            GetRGBTranslateColorShade(&color, kGrossMoneyColor, VERY_DARK);
 
             for ( rcount = globals()->gBarIndicator[kGrossMoneyBar].thisValue; rcount < kGrossMoneyBarNum; rcount++)
             {
@@ -635,7 +634,7 @@ void DrawInstrumentPanel() {
     DrawInSaveWorld();
     tRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     SetTranslateColorFore( BLACK);
-    gActiveWorld->view(tRect).fill(BLACK);
+    gActiveWorld->view(tRect).fill(RgbColor::kBlack);
     CopySaveWorldToOffWorld(tRect);
     DrawInRealWorld();
 
@@ -703,14 +702,14 @@ void EraseSite() {
     sd = *(olp++) = *(l++);
     DrawNateLine(gOffWorld, clipRect, sa,
                 sb, sx, sy, 0,
-                0, BLACK);
+                0, RgbColor::kBlack);
 
     DrawNateLine(gOffWorld, clipRect, sc,
                 sd, sx, sy, 0,
-                0, BLACK);
+                0, RgbColor::kBlack);
     DrawNateLine(gOffWorld, clipRect, sc,
                 sd, sa, sb, 0,
-                0, BLACK);
+                0, RgbColor::kBlack);
 
     // do the cursor, too
 
@@ -723,16 +722,16 @@ void EraseSite() {
     {
         DrawNateLine(gOffWorld, clipRect, sx,
                     clipRect.top, sx, (sy - kCursorBoundsSize), 0,
-                    0, BLACK);
+                    0, RgbColor::kBlack);
         DrawNateLine(gOffWorld, clipRect, sx,
                     (sy + kCursorBoundsSize), sx, clipRect.bottom - 1, 0,
-                    0, BLACK);
+                    0, RgbColor::kBlack);
         DrawNateLine(gOffWorld, clipRect, clipRect.left,
                     sy, (sx - kCursorBoundsSize), sy, 0,
-                    0, BLACK);
+                    0, RgbColor::kBlack);
         DrawNateLine(gOffWorld, clipRect, (sx + kCursorBoundsSize),
                     sy, clipRect.right - 1, sy, 0,
-                    0, BLACK);
+                    0, RgbColor::kBlack);
     }
 }
 
@@ -750,7 +749,7 @@ void EraseSectorLines() {
 
     while (( *l != -1) && ( count < kMaxSectorLine))
     {
-        DrawNateLine(gOffWorld, clipRect, *l, CLIP_TOP, *l, CLIP_BOTTOM, 0, 0, BLACK);
+        DrawNateLine(gOffWorld, clipRect, *l, CLIP_TOP, *l, CLIP_BOTTOM, 0, 0, RgbColor::kBlack);
         ol = *l;
         *l = -1;
         l++;
@@ -764,7 +763,7 @@ void EraseSectorLines() {
 
     while (( *l != -1) && ( count < kMaxSectorLine))
     {
-        DrawNateLine(gOffWorld, clipRect, CLIP_LEFT, *l, CLIP_RIGHT, *l, 0, 0, BLACK);
+        DrawNateLine(gOffWorld, clipRect, CLIP_LEFT, *l, CLIP_RIGHT, *l, 0, 0, RgbColor::kBlack);
         ol = *l;
         *l = -1;
         l++;
@@ -778,8 +777,7 @@ void DrawSite() {
     int32_t         *l, count;
     int16_t         sx, sy, sa, sb, sc, sd;
     smallFixedType  fa, fb, fc;
-    transColorType  *transColor;
-    unsigned char   color;
+    RgbColor        color;
     Rect        clipRect;
     Point           cursorCoord;
     bool         doDraw;
@@ -822,7 +820,7 @@ void DrawSite() {
         sa = mFixedToLong( fa);
         sb = mFixedToLong( fb);
 
-        mGetTranslateColorShade( PALE_GREEN, MEDIUM, color, transColor);
+        GetRGBTranslateColorShade(&color, PALE_GREEN, MEDIUM);
         if ( doDraw)
         {
             DrawNateLine(gOffWorld, clipRect, (sx + sa),
@@ -845,7 +843,7 @@ void DrawSite() {
             DrawNateLine(gOffWorld, clipRect, (sx + sc),
                     (sy + sd), sx, sy, 0,
                     0, color);
-            mGetTranslateColorShade( PALE_GREEN, DARKER+kSlightlyDarkerColor, color, transColor);
+            GetRGBTranslateColorShade(&color, PALE_GREEN, DARKER+kSlightlyDarkerColor);
             DrawNateLine(gOffWorld, clipRect, (sx + sc),
                     (sy + sd), (sx + sa), (sy + sb), 0,
                     0, color);
@@ -895,7 +893,7 @@ void DrawSite() {
 
     if ( globals()->gMouseActive > kMouseTurningOff)
     {
-        mGetTranslateColorShade( SKY_BLUE, MEDIUM, color, transColor);
+        GetRGBTranslateColorShade(&color, SKY_BLUE, MEDIUM);
         DrawNateLine(gOffWorld, clipRect, sx,
                     clipRect.top, sx, (sy - kCursorBoundsSize), 0,
                     0, color);
@@ -915,8 +913,7 @@ void DrawSectorLines() {
     int32_t         *l;
     uint32_t        size, level, x, h, division;
     Rect        clipRect;
-    unsigned char   color;
-    transColorType  *transColor;
+    RgbColor        color;
     bool         doDraw;
 
     if ( gScrollStarObject != nil)
@@ -964,11 +961,11 @@ void DrawSectorLines() {
     {
         while ((x < implicit_cast<uint32_t>(CLIP_RIGHT)) && (h > 0)) {
             if (!division) {
-                mGetTranslateColorShade( GREEN, kSectorLineBrightness, color, transColor);
+                GetRGBTranslateColorShade(&color, GREEN, kSectorLineBrightness);
             } else if ( !(division & 0x3)) {
-                mGetTranslateColorShade( SKY_BLUE, kSectorLineBrightness, color, transColor);
+                GetRGBTranslateColorShade(&color, SKY_BLUE, kSectorLineBrightness);
             } else {
-                mGetTranslateColorShade( BLUE, kSectorLineBrightness, color, transColor);
+                GetRGBTranslateColorShade(&color, BLUE, kSectorLineBrightness);
             }
 
             DrawNateLine(gOffWorld, clipRect, x, CLIP_TOP, x, CLIP_BOTTOM, 0, 0, color);
@@ -983,13 +980,13 @@ void DrawSectorLines() {
         while ((x < implicit_cast<uint32_t>(CLIP_RIGHT)) && (h > 0)) {
             if ( !division)
             {
-                mGetTranslateColorShade( RED, kSectorLineBrightness, color, transColor);
+                GetRGBTranslateColorShade(&color, RED, kSectorLineBrightness);
             } else if ( !(division & 0x3))
             {
-                mGetTranslateColorShade( YELLOW, kSectorLineBrightness, color, transColor);
+                GetRGBTranslateColorShade(&color, YELLOW, kSectorLineBrightness);
             } else
             {
-                mGetTranslateColorShade( BLUE, kSectorLineBrightness, color, transColor);
+                GetRGBTranslateColorShade(&color, BLUE, kSectorLineBrightness);
             }
 
             *l = x;
@@ -1018,11 +1015,11 @@ void DrawSectorLines() {
     {
         while ((x < implicit_cast<uint32_t>(CLIP_BOTTOM)) && (h > 0)) {
             if (!division) {
-                mGetTranslateColorShade( GREEN, kSectorLineBrightness, color, transColor);
+                GetRGBTranslateColorShade(&color, GREEN, kSectorLineBrightness);
             } else if ( !(division & 0x3)) {
-                mGetTranslateColorShade( SKY_BLUE, kSectorLineBrightness, color, transColor);
+                GetRGBTranslateColorShade(&color, SKY_BLUE, kSectorLineBrightness);
             } else {
-                mGetTranslateColorShade( BLUE, kSectorLineBrightness, color, transColor);
+                GetRGBTranslateColorShade(&color, BLUE, kSectorLineBrightness);
             }
 
             DrawNateLine(gOffWorld, clipRect, CLIP_LEFT, x, CLIP_RIGHT, x, 0, 0, color);
@@ -1039,13 +1036,13 @@ void DrawSectorLines() {
         while ((x < implicit_cast<uint32_t>(CLIP_BOTTOM)) && (h > 0)) {
             if ( !division)
             {
-                mGetTranslateColorShade( RED, kSectorLineBrightness, color, transColor);
+                GetRGBTranslateColorShade(&color, RED, kSectorLineBrightness);
             } else if ( !(division & 0x3))
             {
-                mGetTranslateColorShade( YELLOW, kSectorLineBrightness, color, transColor);
+                GetRGBTranslateColorShade(&color, YELLOW, kSectorLineBrightness);
             } else
             {
-                mGetTranslateColorShade( BLUE, kSectorLineBrightness, color, transColor);
+                GetRGBTranslateColorShade(&color, BLUE, kSectorLineBrightness);
             }
 
             *l = x;
@@ -1242,8 +1239,7 @@ void DrawArbitrarySectorLines(coordPointType *corner, int32_t scale, int32_t min
         Rect *bounds, PixMap* pixBase, int32_t portLeft, int32_t portTop) {
     uint32_t        size, level, x, h, division;
     Rect        clipRect;
-    unsigned char   color;
-    transColorType  *transColor;
+    RgbColor        color;
 
     clipRect.left = bounds->left;
     clipRect.right = bounds->right;
@@ -1278,13 +1274,13 @@ void DrawArbitrarySectorLines(coordPointType *corner, int32_t scale, int32_t min
     while ((x < implicit_cast<uint32_t>(bounds->right)) && (h > 0)) {
         if ( !division)
         {
-            mGetTranslateColorShade( GREEN, DARKER, color, transColor);
+            GetRGBTranslateColorShade(&color, GREEN, DARKER);
         } else if ( !(division & 0x3))
         {
-            mGetTranslateColorShade( SKY_BLUE, DARKER, color, transColor);
+            GetRGBTranslateColorShade(&color, SKY_BLUE, DARKER);
         } else
         {
-            mGetTranslateColorShade( BLUE, DARKER, color, transColor);
+            GetRGBTranslateColorShade(&color, BLUE, DARKER);
         }
 
         DrawNateLine( pixBase, clipRect, x, bounds->top, x, bounds->bottom,
@@ -1309,13 +1305,13 @@ void DrawArbitrarySectorLines(coordPointType *corner, int32_t scale, int32_t min
     while ((x < implicit_cast<uint32_t>(bounds->bottom)) && (h > 0)) {
         if ( !division)
         {
-            mGetTranslateColorShade( GREEN, DARKER, color, transColor);
+            GetRGBTranslateColorShade(&color, GREEN, DARKER);
         } else if ( !(division & 0x3))
         {
-            mGetTranslateColorShade( SKY_BLUE, DARKER, color, transColor);
+            GetRGBTranslateColorShade(&color, SKY_BLUE, DARKER);
         } else
         {
-            mGetTranslateColorShade( BLUE, DARKER, color, transColor);
+            GetRGBTranslateColorShade(&color, BLUE, DARKER);
         }
 
         DrawNateLine( pixBase, clipRect, bounds->left, x, bounds->right, x,
@@ -1422,8 +1418,7 @@ void GetArbitrarySingleSectorBounds(coordPointType *corner, coordPointType *loca
 void UpdateBarIndicator(int16_t which, int32_t value, int32_t max, PixMap* pixMap) {
     int32_t         graphicValue;
     Rect        tRect, clipRect;
-    transColorType  *transColor;
-    unsigned char   color, lightColor, darkColor;
+    RgbColor        color, lightColor, darkColor;
     Rect            rrect;
 
     if ( value > max) value = max;
@@ -1449,9 +1444,9 @@ void UpdateBarIndicator(int16_t which, int32_t value, int32_t max, PixMap* pixMa
         clipRect.right = clipRect.left + kRightPanelWidth;
         clipRect.bottom = clipRect.top + kPanelHeight;
 
-        mGetTranslateColorShade( globals()->gBarIndicator[which].color, DARK, color, transColor);
-        mGetTranslateColorShade( globals()->gBarIndicator[which].color, MEDIUM, lightColor, transColor);
-        mGetTranslateColorShade( globals()->gBarIndicator[which].color, DARKER, darkColor, transColor);
+        GetRGBTranslateColorShade(&color, globals()->gBarIndicator[which].color, DARK);
+        GetRGBTranslateColorShade(&lightColor, globals()->gBarIndicator[which].color, MEDIUM);
+        GetRGBTranslateColorShade(&darkColor, globals()->gBarIndicator[which].color, DARKER);
 //      DrawNateRect( *pixMap, &tRect, gNatePortLeft << 2, gNatePortTop, color);
         DrawNateShadedRect(pixMap, &tRect, clipRect, gNatePortLeft << 2L, gNatePortTop, color, lightColor, darkColor);
 
@@ -1459,9 +1454,9 @@ void UpdateBarIndicator(int16_t which, int32_t value, int32_t max, PixMap* pixMa
         {
             tRect.top = tRect.bottom;//tRect.bottom - graphicValue;
             tRect.bottom = globals()->gBarIndicator[which].top + kBarIndicatorHeight;
-            mGetTranslateColorShade( globals()->gBarIndicator[which].color, LIGHTER, color, transColor);
-            mGetTranslateColorShade( globals()->gBarIndicator[which].color, VERY_LIGHT, lightColor, transColor);
-            mGetTranslateColorShade( globals()->gBarIndicator[which].color, MEDIUM, darkColor, transColor);
+            GetRGBTranslateColorShade(&color, globals()->gBarIndicator[which].color, LIGHTER);
+            GetRGBTranslateColorShade(&lightColor, globals()->gBarIndicator[which].color, VERY_LIGHT);
+            GetRGBTranslateColorShade(&darkColor, globals()->gBarIndicator[which].color, MEDIUM);
     //      DrawNateRect( *pixMap, &tRect, gNatePortLeft << 2, gNatePortTop, color);
             DrawNateShadedRect(pixMap, &tRect, clipRect, gNatePortLeft << 2L, gNatePortTop, color, lightColor, darkColor);
         }
@@ -1475,8 +1470,7 @@ void UpdateBarIndicator(int16_t which, int32_t value, int32_t max, PixMap* pixMa
 
 void DrawBuildTimeBar(int32_t value) {
     Rect        tRect, clipRect;
-    transColorType  *transColor;
-    unsigned char   color;
+    RgbColor        color;
 
     if ( value < 0) value = 0;
     value = kMiniBuildTimeHeight - value;
@@ -1486,7 +1480,7 @@ void DrawBuildTimeBar(int32_t value) {
     tRect.bottom = clipRect.bottom = kMiniBuildTimeBottom + globals()->gInstrumentTop;
     tRect.right = clipRect.right = kMiniBuildTimeRight;
 
-    mGetTranslateColorShade( PALE_PURPLE, MEDIUM, color, transColor);
+    GetRGBTranslateColorShade(&color, PALE_PURPLE, MEDIUM);
     DrawNateVBracket( gActiveWorld, tRect, clipRect, gNatePortLeft << 2L, gNatePortTop,
                      color);
 
@@ -1497,7 +1491,7 @@ void DrawBuildTimeBar(int32_t value) {
 
     if ( value > 0)
     {
-        mGetTranslateColorShade( PALE_PURPLE, LIGHT, color, transColor);
+        GetRGBTranslateColorShade(&color, PALE_PURPLE, LIGHT);
 
         DrawNateRect( gActiveWorld, &tRect, gNatePortLeft << 2L, gNatePortTop, color);
 
@@ -1506,7 +1500,7 @@ void DrawBuildTimeBar(int32_t value) {
 
     tRect.bottom = kMiniBuildTimeTop + 2 + value + globals()->gInstrumentTop;
 
-    mGetTranslateColorShade( PALE_PURPLE, DARK, color, transColor);
+    GetRGBTranslateColorShade(&color, PALE_PURPLE, DARK);
 
     DrawNateRect( gActiveWorld, &tRect, gNatePortLeft << 2L, gNatePortTop, color);
 }

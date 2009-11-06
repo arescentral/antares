@@ -323,15 +323,14 @@ void MoveScrollStars(const long byUnits) {
 void DrawScrollStars(bool warp) {
     short           i;
     scrollStarType  *star;
-    unsigned char   slowColor, mediumColor, fastColor, *color;
-    transColorType  *transColor;
+    RgbColor        slowColor, mediumColor, fastColor, *color;
     Rect        bounds, lastBounds;
 
 #pragma unused( warp)
 
-    mGetTranslateColorShade( kStarColor, MEDIUM, slowColor, transColor);
-    mGetTranslateColorShade( kStarColor, LIGHT, mediumColor, transColor);
-    mGetTranslateColorShade( kStarColor, LIGHTER, fastColor, transColor);
+    GetRGBTranslateColorShade(&slowColor, kStarColor, MEDIUM);
+    GetRGBTranslateColorShade(&mediumColor, kStarColor, LIGHT);
+    GetRGBTranslateColorShade(&fastColor, kStarColor, LIGHTER);
 
     bounds.left = lastBounds.left = CLIP_LEFT;
     bounds.top = lastBounds.top = CLIP_TOP;
@@ -365,7 +364,7 @@ void DrawScrollStars(bool warp) {
                     (( star->oldLocation.h >= CLIP_LEFT) && ( star->oldLocation.v >= CLIP_TOP)
                         && ( star->oldLocation.h < CLIP_RIGHT) && ( star->oldLocation.v < CLIP_BOTTOM)))
                     {
-                        gOffWorld->set(star->oldLocation.h, star->oldLocation.v, 0xff);
+                        gOffWorld->set(star->oldLocation.h, star->oldLocation.v, RgbColor::kBlack);
                     }
                 }
                 star++;
@@ -386,7 +385,7 @@ void DrawScrollStars(bool warp) {
                                         star->oldLocation.h,
                                         star->oldLocation.v,
                                         0,
-                                        0, 0xff);
+                                        0, RgbColor::kBlack);
                         }/* else star->age = 2;*/
                     } else
                     {
@@ -395,7 +394,7 @@ void DrawScrollStars(bool warp) {
                                     star->oldLocation.h,
                                     star->oldLocation.v,
                                     0,
-                                    0, 0xff);
+                                    0, RgbColor::kBlack);
                         /*star->age = 1;*/
                     }
                 }
@@ -422,7 +421,7 @@ void DrawScrollStars(bool warp) {
                                     star->oldLocation.h,
                                     star->oldLocation.v,
                                     0,
-                                    0, 0xff);
+                                    0, RgbColor::kBlack);
                     }/* else star->age = 2;*/
                     DrawNateLine(gOffWorld, bounds, star->oldLocation.h,
                                 star->oldLocation.v,
@@ -437,7 +436,7 @@ void DrawScrollStars(bool warp) {
                                 star->oldLocation.h,
                                 star->oldLocation.v,
                                 0,
-                                0, 0xff);
+                                0, RgbColor::kBlack);
                     /*star->age = 1;*/
                 }
             }
@@ -454,7 +453,7 @@ void DrawScrollStars(bool warp) {
                 if ( !((star->location.h < CLIP_LEFT) || ( star->location.h >= CLIP_RIGHT) ||
                     ( star->location.v < CLIP_TOP) ||  ( star->location.v >= CLIP_BOTTOM)))
                 {
-                    mGetTranslateColorShade( star->color, (star->age >> kSparkAgeToShadeShift) + 1, slowColor, transColor);
+                    GetRGBTranslateColorShade(&slowColor, star->color, (star->age >> kSparkAgeToShadeShift) + 1);
                     gOffWorld->set(star->location.h, star->location.v, slowColor);
                 }
             } else
@@ -465,7 +464,7 @@ void DrawScrollStars(bool warp) {
             if ( !((star->oldLocation.h < CLIP_LEFT) || ( star->oldLocation.h >= CLIP_RIGHT) ||
                 ( star->oldLocation.v < CLIP_TOP) ||  ( star->oldLocation.v >= CLIP_BOTTOM)))
             {
-                gOffWorld->set(star->oldLocation.h, star->oldLocation.v, 0xff);
+                gOffWorld->set(star->oldLocation.h, star->oldLocation.v, RgbColor::kBlack);
             }
 
         }
@@ -511,7 +510,7 @@ void ShowScrollStars(bool warp) {
                     if (( star->location.h >= CLIP_LEFT) && ( star->location.v >= CLIP_TOP)
                         && ( star->location.h < CLIP_RIGHT) && ( star->location.v < CLIP_BOTTOM))
                     {
-                        uint8_t c = gOffWorld->get(star->location.h, star->location.v);
+                        const RgbColor& c = gOffWorld->get(star->location.h, star->location.v);
                         gActiveWorld->set(star->location.h, star->location.v, c);
                     }
                     if ((( star->location.h != star->oldLocation.h) ||
@@ -519,7 +518,8 @@ void ShowScrollStars(bool warp) {
                     (( star->oldLocation.h >= CLIP_LEFT) && ( star->oldLocation.v >= CLIP_TOP)
                         && ( star->oldLocation.h < CLIP_RIGHT) && ( star->oldLocation.v < CLIP_BOTTOM)))
                     {
-                        uint8_t c = gOffWorld->get(star->oldLocation.h, star->oldLocation.v);
+                        const RgbColor& c = gOffWorld->get(
+                                star->oldLocation.h, star->oldLocation.v);
                         gActiveWorld->set(star->oldLocation.h, star->oldLocation.v, c);
                     }
                 }
@@ -594,7 +594,7 @@ void ShowScrollStars(bool warp) {
                 if ( !((star->location.h < CLIP_LEFT) || ( star->location.h >= CLIP_RIGHT) ||
                     ( star->location.v < CLIP_TOP) ||  ( star->location.v >= CLIP_BOTTOM)))
                 {
-                    uint8_t c = gOffWorld->get(star->location.h, star->location.v);
+                    const RgbColor& c = gOffWorld->get(star->location.h, star->location.v);
                     gActiveWorld->set(star->location.h, star->location.v, c);
                 }
             } else
@@ -605,7 +605,7 @@ void ShowScrollStars(bool warp) {
             if ( !((star->oldLocation.h < CLIP_LEFT) || ( star->oldLocation.h >= CLIP_RIGHT) ||
                 ( star->oldLocation.v < CLIP_TOP) ||  ( star->oldLocation.v >= CLIP_BOTTOM)))
             {
-                uint8_t c = gOffWorld->get(star->oldLocation.h, star->oldLocation.v);
+                const RgbColor& c = gOffWorld->get(star->oldLocation.h, star->oldLocation.v);
                 gActiveWorld->set(star->oldLocation.h, star->oldLocation.v, c);
             }
 

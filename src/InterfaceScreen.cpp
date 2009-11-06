@@ -54,7 +54,7 @@ InterfaceScreen::InterfaceScreen(int id)
 InterfaceScreen::~InterfaceScreen() { }
 
 void InterfaceScreen::become_front() {
-    gActiveWorld->fill(BLACK);
+    gActiveWorld->fill(RgbColor::kBlack);
     this->adjust_interface();
     draw();
     _last_event = now_secs();
@@ -63,7 +63,7 @@ void InterfaceScreen::become_front() {
 
 void InterfaceScreen::draw() const {
     DrawInOffWorld();
-    gOffWorld->fill(BLACK);
+    gOffWorld->fill(RgbColor::kBlack);
     for (std::vector<interfaceItemType>::const_iterator it = _items.begin(); it != _items.end();
             ++it) {
         DrawAnyInterfaceItem(*it, gOffWorld);

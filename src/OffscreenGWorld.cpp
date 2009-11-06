@@ -82,7 +82,7 @@ void DrawInSaveWorld() {
 
 void EraseOffWorld() {
     DrawInOffWorld();
-    gActiveWorld->view(gOffWorld->bounds()).fill(BLACK);
+    gActiveWorld->view(gOffWorld->bounds()).fill(RgbColor::kBlack);
     NormalizeColors();
     DrawInRealWorld();
     NormalizeColors();
@@ -90,7 +90,7 @@ void EraseOffWorld() {
 
 void EraseSaveWorld() {
     DrawInSaveWorld();
-    gActiveWorld->view(gSaveWorld->bounds()).fill(BLACK);
+    gActiveWorld->view(gSaveWorld->bounds()).fill(RgbColor::kBlack);
     NormalizeColors();
     DrawInRealWorld();
 }
@@ -134,7 +134,7 @@ void ChunkCopyPixMapToPixMap(PixMap* sourcePix, const Rect& sourceRect, PixMap* 
 }
 
 void ChunkErasePixMap(PixMap* destMap, Rect* sourceRect) {
-    DrawNateRect(destMap, sourceRect, 0, 0, 0xFF);
+    DrawNateRect(destMap, sourceRect, 0, 0, RgbColor::kBlack);
 }
 
 }  // namespace antares

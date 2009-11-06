@@ -38,6 +38,7 @@ namespace antares {
 #define kBoltChangeTime 0
 
 extern PixMap*          gActiveWorld;
+extern PixMap*          gRealWorld;
 extern PixMap*          gOffWorld;
 extern long             gNatePortLeft, gNatePortTop, gAbsoluteScale,
                         CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM;
@@ -350,6 +351,7 @@ void DrawAllBeams( void)
     Rect        bounds;
     long            h, v;
     unsigned char   currentColor;
+    RgbColor color;
 
     bounds.left = CLIP_LEFT;
     bounds.right = CLIP_RIGHT;
@@ -393,7 +395,7 @@ void DrawAllBeams( void)
                                     aBeam->lastBoltPoint[j-1].v,
                                     aBeam->lastBoltPoint[j].h,
                                     aBeam->lastBoltPoint[j].v,
-                                    0, 0, BLACK);
+                                    0, 0, RgbColor::kBlack);
                     }
                 } else
                 {
@@ -401,7 +403,7 @@ void DrawAllBeams( void)
                                 aBeam->lastLocation.top,
                                 aBeam->lastLocation.right,
                                 aBeam->lastLocation.bottom,
-                                0, 0, BLACK);
+                                0, 0, RgbColor::kBlack);
                 }
             }
 
@@ -472,20 +474,22 @@ void DrawAllBeams( void)
                         }
                         for ( j = 1; j < kBoltPointNum; j++)
                         {
+                            GetRGBTranslateColor(&color, aBeam->color);
                             DrawNateLine(gOffWorld, bounds,
                                         aBeam->thisBoltPoint[j-1].h,
                                         aBeam->thisBoltPoint[j-1].v,
                                         aBeam->thisBoltPoint[j].h,
                                         aBeam->thisBoltPoint[j].v,
-                                        0, 0, aBeam->color);
+                                        0, 0, color);
                         }
                     } else
                     {
+                        GetRGBTranslateColor(&color, aBeam->color);
                         DrawNateLine(gOffWorld, bounds, aBeam->thisLocation.left,
                                 aBeam->thisLocation.top,
                                 aBeam->thisLocation.right,
                                 aBeam->thisLocation.bottom,
-                                0, 0, aBeam->color);
+                                0, 0, color);
                     }
                 }
             } else

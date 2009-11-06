@@ -21,6 +21,7 @@
 // Space Object.h
 
 #include "AresGlobalType.hpp"
+#include "ColorTable.hpp"
 #include "MathSpecial.hpp"
 #include "NateDraw.hpp"
 #include "Scenario.hpp"
@@ -725,7 +726,7 @@ struct spaceObjectType {
     unsigned long           keysDown;
 
     long                    tinySize;
-    unsigned char           tinyColor;
+    RgbColor                tinyColor;
 
     long                    direction;
     long                    directionGoal;

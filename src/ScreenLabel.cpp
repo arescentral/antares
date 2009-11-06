@@ -222,8 +222,7 @@ void DrawAllLabels( void)
     short           i = 0, originalLength;
     screenLabelType *label;
     Rect        clipRect, tRect;
-    unsigned char   color;//, *getwidchar, *getwidwid;
-    transColorType  *transColor;
+    RgbColor        color;//, *getwidchar, *getwidwid;
 //  long            width, height, strlen;
 
     mSetDirectFont( kTacticalFontNum);
@@ -249,7 +248,7 @@ void DrawAllLabels( void)
             {
 
                 tRect = label->thisRect;
-                mGetTranslateColorShade( label->color, VERY_DARK, color, transColor);
+                GetRGBTranslateColorShade(&color, label->color, VERY_DARK);
 
                 if ( label->keepOnScreenAnyway)
                 {
@@ -277,16 +276,16 @@ void DrawAllLabels( void)
                     Str255  s;
 
                     DrawNateRectVScan( gOffWorld, &tRect, 0, 0, color);
-                    mGetTranslateColorShade( label->color, VERY_LIGHT, color, transColor);
+                    GetRGBTranslateColorShade(&color, label->color, VERY_LIGHT);
                     y = label->where.v + gDirectText->ascent + kLabelInnerSpace;
                     for ( j = 1; j <= label->lineNum; j++)
                     {
                         String_Get_Nth_Line( s, label->label, j);
                         MoveTo( label->where.h+1+kLabelInnerSpace, y+1);
-                        DrawDirectTextStringClipped( s, BLACK, gOffWorld, clipRect,
+                        DrawDirectTextStringClipped( s, RgbColor::kBlack, gOffWorld, clipRect,
                             0, 0);
                         MoveTo( label->where.h-1+kLabelInnerSpace, y-1);
-                        DrawDirectTextStringClipped( s, BLACK, gOffWorld, clipRect,
+                        DrawDirectTextStringClipped( s, RgbColor::kBlack, gOffWorld, clipRect,
                             0, 0);
                         MoveTo( label->where.h+kLabelInnerSpace, y);
                         DrawDirectTextStringClipped( s, color, gOffWorld, clipRect,
@@ -297,10 +296,10 @@ void DrawAllLabels( void)
                 } else
                 {
                     DrawNateRectVScan( gOffWorld, &tRect, 0, 0, color);
-                    mGetTranslateColorShade( label->color, VERY_LIGHT, color, transColor);
+                    GetRGBTranslateColorShade(&color, label->color, VERY_LIGHT);
                     MoveTo( label->where.h+1+kLabelInnerSpace, label->where.v +
                         gDirectText->ascent +1 + kLabelInnerSpace);
-                    DrawDirectTextStringClipped( label->label, BLACK, gOffWorld, clipRect,
+                    DrawDirectTextStringClipped( label->label, RgbColor::kBlack, gOffWorld, clipRect,
                         0, 0);
                     MoveTo( label->where.h + kLabelInnerSpace,
                         label->where.v + gDirectText->ascent + kLabelInnerSpace);

@@ -494,27 +494,6 @@ enum {
     RAW = 0,
 };
 
-struct FramebufferPixel {
-    uint8_t unused;
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
-
-    void read(BinaryReader* bin) {
-        bin->read(&red);
-        bin->read(&green);
-        bin->read(&blue);
-        bin->discard(1);
-    }
-
-    void write(BinaryWriter* bin) const {
-        bin->pad(1);
-        bin->write(red);
-        bin->write(green);
-        bin->write(blue);
-    }
-};
-
 }  // namespace
 
 bool VncVideoDriver::vnc_poll(int64_t timeout) {
@@ -583,19 +562,25 @@ bool VncVideoDriver::vnc_poll(int64_t timeout) {
                         rect.height = height;
                         rect.encoding_type = RAW;
 
-                        const ColorTable& table = gRealWorld->colors();
-                        scoped_array<FramebufferPixel> pixels(new FramebufferPixel[width * height]);
-                        for (int i = 0; i < width * height; ++i) {
-                            uint8_t color = gRealWorld->bytes()[i];
-                            pixels.get()[i].red = table.color(color).red;
-                            pixels.get()[i].green = table.color(color).green;
-                            pixels.get()[i].blue = table.color(color).blue;
-                        }
-
                         out.write(server_message_type);
                         out.write(response);
                         out.write(rect);
-                        out.write(pixels.get(), width * height);
+                        if (gRealWorld->transition_fraction() == 0.0) {
+                            out.write(
+                                    reinterpret_cast<const char*>(gRealWorld->bytes()),
+                                    width * height * 4);
+                        } else {
+                            double f = gRealWorld->transition_fraction();
+                            double g = 1.0 - f;
+                            const RgbColor& to = gRealWorld->transition_to();
+                            for (int i = 0; i < gRealWorld->bounds().area(); ++i) {
+                                const RgbColor& from = gRealWorld->bytes()[i];
+                                out.pad(1);
+                                out.write(implicit_cast<uint8_t>(to.red * f + from.red * g));
+                                out.write(implicit_cast<uint8_t>(to.green * f + from.green * g));
+                                out.write(implicit_cast<uint8_t>(to.blue * f + from.blue * g));
+                            }
+                        }
 
                         unchanged = true;
                     }

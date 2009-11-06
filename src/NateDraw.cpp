@@ -22,12 +22,13 @@
 #include <algorithm>
 
 #include "BinaryStream.hpp"
+#include "ColorTable.hpp"
 #include "Error.hpp"
 #include "MathMacros.hpp"
 
 namespace antares {
 
-inline void mHBlitz(unsigned char*& mdbyte, long mrunLen, long mcolor, long& mcount) {
+inline void mHBlitz(RgbColor*& mdbyte, long mrunLen, const RgbColor& mcolor, long& mcount) {
     mcount = mrunLen;
     while ( mcount-- > 0)
     {
@@ -36,7 +37,7 @@ inline void mHBlitz(unsigned char*& mdbyte, long mrunLen, long mcolor, long& mco
 }
 
 inline void mDrawHorizontalRun(
-        unsigned char*& dbyte, long xAdvance, long runLen, long color, long drowPlus, long count) {
+        RgbColor*& dbyte, long xAdvance, long runLen, const RgbColor& color, long drowPlus, long count) {
     count = runLen;
     while ( count-- > 0)
     {
@@ -47,7 +48,7 @@ inline void mDrawHorizontalRun(
 }
 
 inline void mDrawVerticalRun(
-        unsigned char*& dbyte, long xAdvance, long runLen, long color, long drowPlus, long count) {
+        RgbColor*& dbyte, long xAdvance, long runLen, const RgbColor& color, long drowPlus, long count) {
     count = runLen;
     while ( count-- > 0)
     {
@@ -58,7 +59,7 @@ inline void mDrawVerticalRun(
 }
 
 inline void mCopyHorizontalRun(
-        unsigned char*& dbyte, unsigned char*& sbyte, long xAdvance, long runLen, long drowPlus,
+        RgbColor*& dbyte, RgbColor*& sbyte, long xAdvance, long runLen, long drowPlus,
         long srowPlus, long count) {
     count = runLen;
     while ( count-- > 0)
@@ -72,7 +73,7 @@ inline void mCopyHorizontalRun(
 }
 
 inline void mCopyVerticalRun(
-        unsigned char*& dbyte, unsigned char*& sbyte, long xAdvance, long runLen, long drowPlus,
+        RgbColor*& dbyte, RgbColor*& sbyte, long xAdvance, long runLen, long drowPlus,
         long srowPlus, long count) {
     count = runLen;
     while ( count-- > 0)
@@ -112,7 +113,7 @@ void clip_rect(Rect* contained, const Rect& container) {
 // (ie the top & right edges of the destination window)
 // CLIPS to destPix->bounds(), NOT counting hoff & voff
 
-void DrawNateRect(PixMap* destPix, Rect* destRect, long hoff, long voff, unsigned char color) {
+void DrawNateRect(PixMap* destPix, Rect* destRect, long hoff, long voff, const RgbColor& color) {
     check(hoff == 0, "hoff is not supported");
     check(voff == 0, "voff is not supported");
 
@@ -131,7 +132,7 @@ void DrawNateRect(PixMap* destPix, Rect* destRect, long hoff, long voff, unsigne
 }
 
 void DrawNateRectVScan( PixMap *destPix, Rect *destRect, long hoff, long voff,
-        unsigned char color) {
+        const RgbColor& color) {
     check(hoff == 0, "hoff is not supported");
     check(voff == 0, "voff is not supported");
 
@@ -146,7 +147,7 @@ void DrawNateRectVScan( PixMap *destPix, Rect *destRect, long hoff, long voff,
     }
 
     int32_t drowPlus = destPix->row_bytes();
-    unsigned char* bytes = destPix->mutable_bytes() + destRect->top * drowPlus;
+    RgbColor* bytes = destPix->mutable_bytes() + destRect->top * drowPlus;
     for (int i = destRect->top; i < destRect->bottom; ++i) {
         for (int j = destRect->left; j < destRect->right; ++j) {
             if ((i ^ j) & 0x1) {
@@ -159,7 +160,7 @@ void DrawNateRectVScan( PixMap *destPix, Rect *destRect, long hoff, long voff,
 
 void DrawNateRectClipped(
         PixMap* destPix, Rect* destRect, const Rect& clipRect, long hoff, long voff,
-        unsigned char color) {
+        const RgbColor& color) {
     if (!intersects(*destRect, from_origin(destPix->bounds()))) {
         destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
         return;
@@ -172,9 +173,9 @@ void DrawNateRectClipped(
 // must be square
 void DrawNateTriangleUpClipped(
         PixMap *destPix, Rect *destRect, const Rect& clipRect, long hoff, long voff,
-        unsigned char color) {
+        const RgbColor& color) {
     long            drowPlus, x, leftEdge, rightPlus, trueWidth, count;
-    unsigned char   *dbyte;
+    RgbColor        *dbyte;
     bool         clipped = false;
 
     if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds().right - destPix->bounds().left))
@@ -272,11 +273,11 @@ void DrawNateTriangleUpClipped(
 }
 
 void DrawNatePlusClipped( PixMap *destPix, Rect *destRect,
-    const Rect& clipRect, long hoff, long voff, unsigned char color)
+    const Rect& clipRect, long hoff, long voff, const RgbColor& color)
 
 {
     long            drowPlus, x, half, trueWidth, count;
-    unsigned char   *dbyte;
+    RgbColor        *dbyte;
     bool         clipped = false;
 
     if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds().right - destPix->bounds().left))
@@ -386,9 +387,9 @@ void DrawNatePlusClipped( PixMap *destPix, Rect *destRect,
 
 void DrawNateDiamondClipped(
         PixMap *destPix, Rect *destRect, const Rect& clipRect, long hoff, long voff,
-        unsigned char color) {
+        const RgbColor& color) {
     long            drowPlus, leftEdge, rightPlus, trueWidth, count;
-    unsigned char   *dbyte;
+    RgbColor        *dbyte;
     bool         clipped = false;
 
     if (( destRect->right <= 0) || ( destRect->left >= ( destPix->bounds().right - destPix->bounds().left))
@@ -481,7 +482,7 @@ void DrawNateDiamondClipped(
 
 void DrawNateVBracket(
         PixMap *destPix, const Rect& destRect, const Rect& clipRect, long hoff, long voff,
-        unsigned char color) {
+        const RgbColor& color) {
     DrawNateLine ( destPix, clipRect, destRect.left, destRect.top, destRect.right - 1,
                     destRect.top, hoff, voff, color);
     DrawNateLine ( destPix, clipRect, destRect.left, destRect.bottom - 1, destRect.right - 1,
@@ -496,7 +497,7 @@ void DrawNateVBracket(
 
 void DrawNateShadedRect(
         PixMap *destPix, Rect *destRect, const Rect& clipRect, long hoff, long voff,
-        unsigned char fillcolor, unsigned char lightcolor, unsigned char darkcolor) {
+        const RgbColor& fillcolor, const RgbColor& lightcolor, const RgbColor& darkcolor) {
     Rect    tRect = *destRect;
 
     tRect.right--;
@@ -788,10 +789,10 @@ void DrawNateShadedRect(
 
 void DrawNateLine(
         PixMap *destPix, const Rect& clipRect, long XStart, long YStart, long XEnd, long YEnd,
-        long hoff, long voff, unsigned char Color) {
+        long hoff, long voff, const RgbColor& color) {
     long            Temp, AdjUp, AdjDown, ErrorTerm, XAdvance, XDelta, YDelta, drowPlus;
     long            WholeStep, InitialPixelCount, FinalPixelCount, i, RunLength;
-    unsigned char   *dbyte;
+    RgbColor        *dbyte;
     short           cs = mClipCode( XStart, YStart, clipRect), ce = mClipCode( XEnd, YEnd, clipRect);
 
     while ( cs | ce)
@@ -887,7 +888,7 @@ void DrawNateLine(
         // Vertical line
         for (i=0; i<=YDelta; i++)
         {
-            *dbyte = Color;
+            *dbyte = color;
             dbyte += drowPlus;
         }
         return;
@@ -897,7 +898,7 @@ void DrawNateLine(
         // Horizontal line
         for (i=0; i<=XDelta; i++)
         {
-            *dbyte = Color;
+            *dbyte = color;
             dbyte += XAdvance;
         }
         return;
@@ -907,7 +908,7 @@ void DrawNateLine(
         // Diagonal line
         for (i=0; i<=XDelta; i++)
         {
-            *dbyte = Color;
+            *dbyte = color;
             dbyte += XAdvance + drowPlus;
         }
         return;
@@ -955,7 +956,7 @@ void DrawNateLine(
             ErrorTerm += YDelta;
         }
         // Draw the first, partial run of pixels
-        mDrawHorizontalRun( dbyte, XAdvance, InitialPixelCount, Color, drowPlus, Temp);
+        mDrawHorizontalRun( dbyte, XAdvance, InitialPixelCount, color, drowPlus, Temp);
 
         // Draw all full runs
         for (i=0; i<(YDelta-1); i++)
@@ -969,10 +970,10 @@ void DrawNateLine(
                 ErrorTerm -= AdjDown;   // reset the error term
             }
             // Draw this scan line's run
-            mDrawHorizontalRun( dbyte, XAdvance, RunLength, Color, drowPlus, Temp);
+            mDrawHorizontalRun( dbyte, XAdvance, RunLength, color, drowPlus, Temp);
         }
         // Draw the final run of pixels
-        mDrawHorizontalRun( dbyte, XAdvance, FinalPixelCount, Color, drowPlus, Temp);
+        mDrawHorizontalRun( dbyte, XAdvance, FinalPixelCount, color, drowPlus, Temp);
     }
     else
     {
@@ -1015,7 +1016,7 @@ void DrawNateLine(
             ErrorTerm += XDelta;
         }
         // Draw the first, partial run of pixels
-        mDrawVerticalRun( dbyte, XAdvance, InitialPixelCount, Color, drowPlus, Temp);
+        mDrawVerticalRun( dbyte, XAdvance, InitialPixelCount, color, drowPlus, Temp);
 
         // Draw all full runs
         for (i=0; i<(XDelta-1); i++)
@@ -1029,10 +1030,10 @@ void DrawNateLine(
                 ErrorTerm -= AdjDown;   // reset the error term
             }
             // Draw this scan line's run
-            mDrawVerticalRun( dbyte, XAdvance, RunLength, Color, drowPlus, Temp);
+            mDrawVerticalRun( dbyte, XAdvance, RunLength, color, drowPlus, Temp);
         }
         // Draw the final run of pixels
-        mDrawVerticalRun( dbyte, XAdvance, FinalPixelCount, Color, drowPlus, Temp);
+        mDrawVerticalRun( dbyte, XAdvance, FinalPixelCount, color, drowPlus, Temp);
     }
 }
 
@@ -1045,7 +1046,7 @@ void CopyNateLine( PixMap *sourcePix, PixMap *destPix, const Rect& clipRect,
 {
     long            Temp, AdjUp, AdjDown, ErrorTerm, XAdvance, XDelta, YDelta, drowPlus, srowPlus;
     long            WholeStep, InitialPixelCount, FinalPixelCount, i, RunLength;
-    unsigned char   *sbyte, *dbyte;
+    RgbColor        *sbyte, *dbyte;
     short           cs = mClipCode( XStart, YStart, clipRect), ce = mClipCode( XEnd, YEnd, clipRect);
 
     while ( cs | ce)

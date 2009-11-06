@@ -21,6 +21,7 @@
 #include "Base.h"
 
 #include "BinaryStream.hpp"
+#include "ColorTable.hpp"
 #include "Error.hpp"
 #include "Resource.hpp"
 
@@ -101,7 +102,7 @@ void mGetDirectStringDimensions(unsigned char* string, long& width, long& height
     }
 }
 
-void DrawDirectTextStringClipped(unsigned char* string, unsigned char color, PixMap *destMap,
+void DrawDirectTextStringClipped(unsigned char* string, const RgbColor& color, PixMap *destMap,
                 const Rect& clip, long portLeft, long portTop) {
     // move the pen to the resulting location
     Point pen;
@@ -116,7 +117,7 @@ void DrawDirectTextStringClipped(unsigned char* string, unsigned char color, Pix
     int rowBytes = destMap->row_bytes();
 
     // set hchar = place holder for start of each char we draw
-    unsigned char* hchar = destMap->mutable_bytes() + (pen.v + portTop + topEdge) * rowBytes
+    RgbColor* hchar = destMap->mutable_bytes() + (pen.v + portTop + topEdge) * rowBytes
         + pen.h + (portLeft << 2);
 
     int size = *string;
@@ -137,7 +138,7 @@ void DrawDirectTextStringClipped(unsigned char* string, unsigned char color, Pix
             sbyte += topEdge * gDirectText->physicalWidth;
 
             // dbyte = destination pixel
-            unsigned char* dbyte = hchar;
+            RgbColor* dbyte = hchar;
 
             // repeat for every unclipped row
             for (int y = topEdge; y < bottomEdge; ++y) {

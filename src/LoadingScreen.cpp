@@ -77,10 +77,12 @@ void LoadingScreen::draw() const {
     const interfaceItemType& i = item(0);
     DrawInOffWorld();
 
+    RgbColor color;
+    GetRGBTranslateColorShade(&color, PALE_GREEN, LIGHT);
+
     // TODO(sfiera): type this out one character at a time.
     RetroText retro(
-            _chapter_name.c_str(), _chapter_name.size(), kTitleFontNum,
-            GetTranslateColorShade(PALE_GREEN, LIGHT), BLACK);
+            _chapter_name.c_str(), _chapter_name.size(), kTitleFontNum, color, RgbColor::kBlack);
     retro.wrap_to(640, 2);
     Rect bounds(0, 0, retro.auto_width(), retro.height());
     bounds.offset(WORLD_WIDTH / 2 - bounds.width() / 2, i.bounds.top / 2 - bounds.height() / 2);
@@ -89,10 +91,14 @@ void LoadingScreen::draw() const {
 
     Rect r(i.bounds);
     r.right = std::min<int>(r.right, r.left + _loading_progress * r.width());
-    gActiveWorld->view(r).fill(GetTranslateColorShade(PALE_GREEN, LIGHT));
+
+    GetRGBTranslateColorShade(&color, PALE_GREEN, LIGHT);
+    gActiveWorld->view(r).fill(color);
+
     r.left = r.right;
     r.right = i.bounds.right;
-    gActiveWorld->view(r).fill(GetTranslateColorShade(PALE_GREEN, DARK));
+    GetRGBTranslateColorShade(&color, PALE_GREEN, DARK);
+    gActiveWorld->view(r).fill(color);
     CopyOffWorldToRealWorld(i.bounds);
 }
 

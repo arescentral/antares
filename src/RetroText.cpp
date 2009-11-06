@@ -48,11 +48,11 @@ int hex_digit(char c) {
 
 }  // namespace
 
-RetroText::RetroText(const char* data, size_t len, int font, uint8_t fore_color, uint8_t back_color)
+RetroText::RetroText(
+        const char* data, size_t len, int font, RgbColor fore_color, RgbColor back_color)
         : _font(font) {
-    const uint8_t original_fore_color = fore_color;
-    const uint8_t original_back_color = back_color;
-    transColorType* trans_color;
+    const RgbColor original_fore_color = fore_color;
+    const RgbColor original_back_color = back_color;
 
     for (size_t i = 0; i < len; ++i) {
         switch (data[i]) {
@@ -83,8 +83,8 @@ RetroText::RetroText(const char* data, size_t len, int font, uint8_t fore_color,
                 if (i + 2 >= len) {
                     fail("not enough input for foreground code.");
                 }
-                mGetTranslateColorShade(
-                        hex_digit(data[i + 1]), hex_digit(data[i + 2]), fore_color, trans_color);
+                GetRGBTranslateColorShade(
+                        &fore_color, hex_digit(data[i + 1]), hex_digit(data[i + 2]));
                 i += 2;
                 break;
 
@@ -92,8 +92,8 @@ RetroText::RetroText(const char* data, size_t len, int font, uint8_t fore_color,
                 if (i + 2 >= len) {
                     fail("not enough input for foreground code.");
                 }
-                mGetTranslateColorShade(
-                        hex_digit(data[i + 1]), hex_digit(data[i + 2]), back_color, trans_color);
+                GetRGBTranslateColorShade(
+                        &back_color, hex_digit(data[i + 1]), hex_digit(data[i + 2]));
                 i += 2;
                 break;
 
@@ -191,7 +191,7 @@ void RetroText::draw(PixMap* pix, const Rect& bounds) const {
           case NONE:
           case WORD_BREAK:
             {
-                if (it->back_color != 0xFF) {
+                if (it->back_color != RgbColor::kBlack) {
                     Rect char_rect(0, 0, char_width(it->character), line_height);
                     char_rect.offset(corner.h, corner.v);
                     DrawNateRect(pix, &char_rect, 0, 0, it->back_color);
@@ -203,7 +203,7 @@ void RetroText::draw(PixMap* pix, const Rect& bounds) const {
             break;
 
           case TAB:
-            if (it->back_color != 0xFF) {
+            if (it->back_color != RgbColor::kBlack) {
                 if (it->h >= _width) {
                     // If the tab starts at or past the midpoint of the line, first draw one box to
                     // the end of the line.
@@ -225,7 +225,7 @@ void RetroText::draw(PixMap* pix, const Rect& bounds) const {
             break;
 
           case LINE_BREAK:
-            if (it->back_color != 0xFF) {
+            if (it->back_color != RgbColor::kBlack) {
                 Rect line_rect(0, 0, bounds.width() - it->h, line_height);
                 line_rect.offset(corner.h, corner.v);
                 DrawNateRect(pix, &line_rect, 0, 0, it->back_color);
@@ -265,7 +265,7 @@ int RetroText::move_word_down(int index, int v) {
 }
 
 RetroText::RetroChar::RetroChar(
-        char character, SpecialChar special, uint8_t fore_color, uint8_t back_color)
+        char character, SpecialChar special, const RgbColor& fore_color, const RgbColor& back_color)
         : character(character),
           special(special),
           fore_color(fore_color),

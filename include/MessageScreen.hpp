@@ -21,6 +21,7 @@
 // Message Screen.h
 
 #include "AnyChar.hpp"
+#include "ColorTable.hpp"
 #include "NateDraw.hpp"
 
 namespace antares {
@@ -50,12 +51,12 @@ struct retroTextSpecType {
     long            autoWidth;
     long            topBuffer;
     long            bottomBuffer;
-    unsigned char   color;
-    unsigned char   backColor;
-    unsigned char   originalColor;
-    unsigned char   originalBackColor;
-    unsigned char   nextColor;
-    unsigned char   nextBackColor;
+    RgbColor        color;
+    RgbColor        backColor;
+    RgbColor        originalColor;
+    RgbColor        originalBackColor;
+    RgbColor        nextColor;
+    RgbColor        nextBackColor;
 };
 
 enum longMessageStageType {

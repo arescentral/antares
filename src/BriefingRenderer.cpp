@@ -506,14 +506,18 @@ void Briefing_Objects_Render( long whichScenario, PixMap* destmap,
                     else if ( anObject->owner < 0) color = BLUE;
                     else color = RED;
 
+                    RgbColor light_color;
+                    RgbColor dark_color;
+                    GetRGBTranslateColorShade(&light_color, color, LIGHT);
+                    GetRGBTranslateColorShade(&dark_color, color, DARK);
+
                     OutlineScaleSpritePixInPixMap( &aSpritePix, where,
 //                          (kOneQuarterScale * baseObject->naturalScale) >> SHIFT_SCALE,
                             //(kOneHalfScale * baseObject->naturalScale) >> SHIFT_SCALE,
                             thisScale,
-                            &spriteRect, &clipRect, destmap
-                            ,
-                            GetTranslateColorShade( color, LIGHT),
-                            GetTranslateColorShade( color, DARK)
+                            &spriteRect, &clipRect, destmap,
+                            light_color,
+                            dark_color
                             );
 
                     sBounds->bounds = spriteRect;

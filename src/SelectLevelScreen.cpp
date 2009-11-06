@@ -109,13 +109,14 @@ void SelectLevelScreen::draw() const {
 
 void SelectLevelScreen::draw_level_name(unsigned char* name, long fontNum, long itemNum) const {
     const interfaceItemType& i = item(itemNum);
+    RgbColor color;
+    GetRGBTranslateColorShade(&color, AQUA, VERY_LIGHT);
     RetroText retro(
-            reinterpret_cast<char*>(name + 1), name[0], fontNum,
-            GetTranslateColorShade(AQUA, VERY_LIGHT), BLACK);
+            reinterpret_cast<char*>(name + 1), name[0], fontNum, color, RgbColor::kBlack);
     retro.wrap_to(440, 2);
 
     DrawInOffWorld();
-    gActiveWorld->view(i.bounds).fill(BLACK);
+    gActiveWorld->view(i.bounds).fill(RgbColor::kBlack);
     retro.draw(gActiveWorld, i.bounds);
     DrawInRealWorld();
     CopyOffWorldToRealWorld(i.bounds);

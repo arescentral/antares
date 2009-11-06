@@ -28,6 +28,7 @@ namespace antares {
 class BinaryReader;
 class BinaryWriter;
 class ColorTable;
+class RgbColor;
 
 // Thrown by PixMap methods.
 //
@@ -75,7 +76,7 @@ class PixMap {
     // separated; see the documentation for `row_bytes()`.
     //
     // @returns             a read-only pointer to the first pixel in the PixMap.
-    virtual const uint8_t* bytes() const = 0;
+    virtual const RgbColor* bytes() const = 0;
 
     // Returns the offset between successive rows in `bytes()`.
     //
@@ -92,7 +93,13 @@ class PixMap {
     virtual ColorTable* mutable_colors() = 0;
 
     // @returns             a mutable version of `bytes()`.
-    virtual uint8_t* mutable_bytes() = 0;
+    virtual RgbColor* mutable_bytes() = 0;
+
+    // XXX: hacks for transition
+    virtual double transition_fraction() const = 0;
+    virtual void set_transition_fraction(double fraction) = 0;
+    virtual const RgbColor& transition_to() const = 0;
+    virtual void set_transition_to(const RgbColor& color) = 0;
 
     // Utility methods.
     //
@@ -102,21 +109,21 @@ class PixMap {
 
     // @param [in] y        a row.  Must be in the range [0, bounds().height()).
     // @returns             a read-only pointer to the first pixel in row `y`.
-    virtual const uint8_t* row(int y) const;
+    virtual const RgbColor* row(int y) const;
 
     // @param [in] y        a row.  Must be in the range [0, bounds().height()).
     // @returns             a mutable pointer to the first pixel in row `y`.
-    virtual uint8_t* mutable_row(int y);
+    virtual RgbColor* mutable_row(int y);
 
     // @param [in] x        a column.  Must be in the range [0, bounds().width()).
     // @param [in] y        a row.  Must be in the range [0, bounds().height()).
     // @returns             the pixel at location (x, y).
-    virtual uint8_t get(int x, int y) const;
+    virtual const RgbColor& get(int x, int y) const;
 
     // @param [in] x        a column.  Must be in the range [0, bounds().width()).
     // @param [in] y        a row.  Must be in the range [0, bounds().height()).
     // @param [in] color    the color to set the pixel at location (x, y) to.
-    virtual void set(int x, int y, uint8_t color);
+    virtual void set(int x, int y, const RgbColor& color);
 
     // Fills the entirety of the PixMap with a single color.
     //
@@ -125,7 +132,7 @@ class PixMap {
     // implemented as `pix->fill(rect, color)` should be instead `pix->view(rect).fill(color)`.
     //
     // @param [in] color    the color which should fill the PixMap.
-    virtual void fill(uint8_t color);
+    virtual void fill(const RgbColor& color);
 
     // Copies the entirety of another PixMap into this one.
     //
@@ -190,14 +197,24 @@ class ArrayPixMap : public PixMap {
     // Implementations of the core PixMap methods.
     virtual const Rect& bounds() const;
     virtual const ColorTable& colors() const;
-    virtual const uint8_t* bytes() const;
+    virtual const RgbColor* bytes() const;
     virtual int row_bytes() const;
 
     virtual ColorTable* mutable_colors();
-    virtual uint8_t* mutable_bytes();
+    virtual RgbColor* mutable_bytes();
 
-    // Implementations of the utility PixMap methods.
-    virtual void fill(uint8_t color);
+    // XXX: hacks for transition
+    virtual double transition_fraction() const;
+    virtual void set_transition_fraction(double fraction);
+    virtual const RgbColor& transition_to() const;
+    virtual void set_transition_to(const RgbColor& color);
+
+  private:
+    double _transition_fraction;
+    scoped_ptr<RgbColor> _transition_to;
+  public:
+
+    // Uses default implementations of all utility PixMap methods.
 
   private:
     // The size of this PixMap.
@@ -209,7 +226,7 @@ class ArrayPixMap : public PixMap {
     // An array of pixel data.  Although not required to by the PixMap interface, ArrayPixMap
     // stores all rows of pixels contiguously.  This permits the optimization of `fill()` provided
     // above.
-    scoped_array<uint8_t> _bytes;
+    scoped_array<RgbColor> _bytes;
 
     DISALLOW_COPY_AND_ASSIGN(ArrayPixMap);
 };
@@ -231,11 +248,17 @@ class PixMap::View : public PixMap {
     // Implementations of the core PixMap methods.
     virtual const Rect& bounds() const;
     virtual const ColorTable& colors() const;
-    virtual const uint8_t* bytes() const;
+    virtual const RgbColor* bytes() const;
     virtual int row_bytes() const;
 
     virtual ColorTable* mutable_colors();
-    virtual uint8_t* mutable_bytes();
+    virtual RgbColor* mutable_bytes();
+
+    // XXX: hacks for transition
+    virtual double transition_fraction() const;
+    virtual void set_transition_fraction(double fraction);
+    virtual const RgbColor& transition_to() const;
+    virtual void set_transition_to(const RgbColor& color);
 
     // Uses default implementations of all utility PixMap methods.
 

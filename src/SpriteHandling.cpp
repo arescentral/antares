@@ -128,7 +128,7 @@ void ResetAllSprites( void)
                 aSprite->lastRect.right = aSprite->lastRect.bottom = 0;
         aSprite->whichLayer = kNoSpriteLayer;
         aSprite->style = spriteNormal;
-        aSprite->styleColor = 0x00;
+        aSprite->styleColor = RgbColor::kWhite;
         aSprite->styleData = 0;
         aSprite++;
     }
@@ -253,7 +253,7 @@ natePixType* GetPixTable(short resID) {
 
 spriteType *AddSprite(
         Point where, natePixType* table, short resID, short whichShape, long scale, long size,
-        short layer, unsigned char color, long *whichSprite) {
+        short layer, const RgbColor& color, long *whichSprite) {
     int         i = 0;
     spriteType  *aSprite;
 
@@ -281,7 +281,7 @@ spriteType *AddSprite(
     aSprite->tinyColor = color;
     aSprite->killMe = false;
     aSprite->style = spriteNormal;
-    aSprite->styleColor = 0x00;
+    aSprite->styleColor = RgbColor::kWhite;
     aSprite->styleData = 0;
 
     return ( aSprite);
@@ -303,7 +303,7 @@ void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect
 {
     long        mapWidth, mapHeight, x, y, i, h, v, d, last;
     long        shapeRowPlus, destRowPlus, rowbytes, *hmap, *vmap, *hmapoffset, *lhend, scaleCalc;
-    unsigned char *destByte, *shapeByte, *hend, *vend, *chunkByte;
+    RgbColor *destByte, *shapeByte, *hend, *vend, *chunkByte;
     Rect    mapRect, sourceRect;
     bool     clipped = false;
 
@@ -463,7 +463,7 @@ void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect
 
                     do
                     {
-                        if ( *shapeByte)
+                        if (shapeByte->alpha)
                             *destByte = *shapeByte;
 
                         shapeByte += *hmap++;
@@ -586,7 +586,7 @@ void OptScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect
                         chunkByte = shapeByte;
                         while ( hmap < lhend)
                         {
-                            if (( *chunkByte) && ( *hmap))
+                            if ((chunkByte->alpha) && ( *hmap))
                             {
                                 for ( h = *hmap; h > 0; h--)
                                     *destByte++ = *chunkByte;
@@ -612,7 +612,7 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, R
 {
     long        mapWidth, mapHeight, x, y, i, h, v, d, last;
     long        shapeRowPlus, destRowPlus, rowbytes, *hmap, *vmap, *hmapoffset, *lhend, scaleCalc;
-    unsigned char *destByte, *shapeByte, *hend, *vend, *chunkByte;
+    RgbColor *destByte, *shapeByte, *hend, *vend, *chunkByte;
     unsigned char   *staticByte;
     Rect    mapRect, sourceRect;
     bool     clipped = false;
@@ -779,8 +779,8 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, R
 
                     do
                     {
-                        if ( *shapeByte)
-                            *destByte = *staticByte;
+                        if (shapeByte->alpha)
+                            GetRGBTranslateColor(destByte, *staticByte);
 
                         shapeByte += *hmap++;
                         destByte++;
@@ -893,10 +893,10 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, R
                         } else staticValue += mapWidth;
                         while ( hmap < lhend)
                         {
-                            if (( *chunkByte) && ( *hmap))
+                            if ((chunkByte->alpha) && ( *hmap))
                             {
                                 for ( h = *hmap; h > 0; h--)
-                                    *destByte++ = *staticByte;
+                                    GetRGBTranslateColor(destByte++, *staticByte);
                             } else destByte += *hmap;
                             hmap++;
                             chunkByte++;
@@ -915,13 +915,13 @@ void StaticScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, R
 }
 
 void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect *dRect,
-        Rect *clipRect, PixMap* pixMap, short staticValue, unsigned char color,
+        Rect *clipRect, PixMap* pixMap, short staticValue, const RgbColor& color,
         unsigned char colorAmount)
 
 {
     long        mapWidth, mapHeight, x, y, i, h, v, d, last;
     long        shapeRowPlus, destRowPlus, rowbytes, *hmap, *vmap, *hmapoffset, *lhend, scaleCalc;
-    unsigned char *destByte, *shapeByte, *hend, *vend, *chunkByte;
+    RgbColor *destByte, *shapeByte, *hend, *vend, *chunkByte;
     unsigned char   *staticByte;
     Rect    mapRect, sourceRect;
     bool     clipped = false;
@@ -1076,7 +1076,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Re
                 mapWidth = sprite->width;
                 chunkByte = pixMap->mutable_bytes() + (pixMap->bounds().bottom) * rowbytes;
 
-                if ( color != 0xff)
+                if ( color != RgbColor::kBlack)
                 {
                     do
                     {
@@ -1090,8 +1090,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Re
 
                         do
                         {
-                            if ( *shapeByte)
-                            {
+                            if (shapeByte->alpha) {
                                 if ( *staticByte > colorAmount)
                                     *destByte = *shapeByte;
                                 else *destByte = color;
@@ -1122,7 +1121,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Re
 
                         do
                         {
-                            if ( *shapeByte)
+                            if (shapeByte->alpha)
                             {
                                 if ( *staticByte > colorAmount)
                                     *destByte = *shapeByte;
@@ -1240,7 +1239,7 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Re
                         } else staticValue += mapWidth;
                         while ( hmap < lhend)
                         {
-                            if (( *chunkByte) && ( *hmap))
+                            if ((chunkByte->alpha) && ( *hmap))
                             {
                                 if ( *staticByte > colorAmount)
                                 {
@@ -1271,13 +1270,13 @@ void ColorScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Re
 // a hack; not fast
 
 void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect *dRect,
-        Rect *clipRect, PixMap* pixMap, unsigned char colorOut,
-        unsigned char colorIn)
+        Rect *clipRect, PixMap* pixMap, const RgbColor& colorOut,
+        const RgbColor& colorIn)
 
 {
     long        mapWidth, mapHeight, x, y, i, h, v, d, last, sourceX, sourceY;
     long        shapeRowPlus, destRowPlus, rowbytes, *hmap, *vmap, *hmapoffset, *lhend, scaleCalc;
-    unsigned char *destByte, *shapeByte, *hend, *vend, *chunkByte;
+    RgbColor *destByte, *shapeByte, *hend, *vend, *chunkByte;
     Rect    mapRect, sourceRect;
     bool     clipped = false;
 
@@ -1439,7 +1438,7 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
 
                     do
                     {
-                        if ( *shapeByte)
+                        if (shapeByte->alpha)
                         {
                             if ( PixelInSprite_IsOutside( sprite, sourceX, sourceY,
                                 hmap, vmap))
@@ -1570,7 +1569,7 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
                         chunkByte = shapeByte;
                         while ( hmap < lhend)
                         {
-                            if (( *chunkByte) && ( *hmap))
+                            if ((chunkByte->alpha) && ( *hmap))
                             {
                                 for ( h = *hmap; h > 0; h--)
                                     *destByte++ = *chunkByte;
@@ -1593,7 +1592,7 @@ void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, 
 bool PixelInSprite_IsOutside( spritePix *sprite, long x, long y,
     long *hmap, long *vmap)
 {
-    unsigned char* pixel;
+    RgbColor* pixel;
     long    rowPlus = sprite->width, i, j, *hmapStart = hmap;
 
     if ( x == 0) return true;
@@ -1611,7 +1610,7 @@ bool PixelInSprite_IsOutside( spritePix *sprite, long x, long y,
         hmap = hmapStart;
         for ( i = x - 1; i <= ( x + 1); i++)
         {
-            if ((( j != y) || ( x != i)) && ( !(*pixel))) return true;
+            if ((( j != y) || ( x != i)) && ( !(pixel->alpha))) return true;
             pixel += *hmap++;
         }
         pixel += ((*vmap++ - 1) * sprite->width) + rowPlus;
@@ -1872,21 +1871,6 @@ void CullSprites( void)
                 RemoveSprite( aSprite);
         }
         aSprite++;
-    }
-}
-
-void TestByte(unsigned char *dbyte, PixMap *pixMap, unsigned char* name) {
-    long            rowbytes, rowplus;
-    unsigned char* lbyte;
-
-    rowbytes = pixMap->row_bytes();
-    rowplus = (pixMap->bounds().bottom - pixMap->bounds().top + 1) * rowbytes;
-    lbyte = pixMap->mutable_bytes() + rowplus;
-    if (( dbyte < pixMap->mutable_bytes()) || ( dbyte >= lbyte))
-    {
-        DebugStr( name);
-        WriteDebugLine(name);
-        WriteDebugLine("\p<<BAD>>");
     }
 }
 

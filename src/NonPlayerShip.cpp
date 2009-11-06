@@ -112,32 +112,31 @@ void NonplayerShipThink( long timePass)
     unsigned long   keysDown;
     short           h;
     smallFixedType  fcos, fsin;
-    unsigned char   friendSick, foeSick, neutralSick;
-    transColorType  *transColor;
+    RgbColor        friendSick, foeSick, neutralSick;
     unsigned long   sickCount = globals()->gGameTime / 9;
 
     globals()->gSynchValue = gRandomSeed;
     sickCount &= 0x00000003;
     if ( sickCount == 0)
     {
-        mGetTranslateColorShade( kFriendlyColor, MEDIUM, friendSick, transColor);
-        mGetTranslateColorShade( kHostileColor, MEDIUM, foeSick, transColor);
-        mGetTranslateColorShade( kNeutralColor, MEDIUM, neutralSick, transColor);
+        GetRGBTranslateColorShade(&friendSick, kFriendlyColor, MEDIUM);
+        GetRGBTranslateColorShade(&foeSick, kHostileColor, MEDIUM);
+        GetRGBTranslateColorShade(&neutralSick, kNeutralColor, MEDIUM);
     } else if ( sickCount == 1)
     {
-        mGetTranslateColorShade( kFriendlyColor, DARK, friendSick, transColor);
-        mGetTranslateColorShade( kHostileColor, DARK, foeSick, transColor);
-        mGetTranslateColorShade( kNeutralColor, DARK, neutralSick, transColor);
+        GetRGBTranslateColorShade(&friendSick, kFriendlyColor, DARK);
+        GetRGBTranslateColorShade(&foeSick, kHostileColor, DARK);
+        GetRGBTranslateColorShade(&neutralSick, kNeutralColor, DARK);
     } else if ( sickCount == 2)
     {
-        mGetTranslateColorShade( kFriendlyColor, DARKER, friendSick, transColor);
-        mGetTranslateColorShade( kHostileColor, DARKER, foeSick, transColor);
-        mGetTranslateColorShade( kNeutralColor, DARKER, neutralSick, transColor);
+        GetRGBTranslateColorShade(&friendSick, kFriendlyColor, DARKER);
+        GetRGBTranslateColorShade(&foeSick, kHostileColor, DARKER);
+        GetRGBTranslateColorShade(&neutralSick, kNeutralColor, DARKER);
     } else if ( sickCount == 3)
     {
-        mGetTranslateColorShade( kFriendlyColor, DARKEST, friendSick, transColor);
-        mGetTranslateColorShade( kHostileColor, DARKER-1, foeSick, transColor);
-        mGetTranslateColorShade( kNeutralColor, DARKEST, neutralSick, transColor);
+        GetRGBTranslateColorShade(&friendSick, kFriendlyColor, DARKEST);
+        GetRGBTranslateColorShade(&foeSick, kHostileColor, DARKER-1);
+        GetRGBTranslateColorShade(&neutralSick, kNeutralColor, DARKEST);
     } else {
         fail("invalid value of sickCount");
     }
@@ -2287,7 +2286,7 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
             CreateFloatingBodyOfPlayer( anObject);
         }
         AlterObjectHealth( anObject, -(sObject->baseType->damage));
-        if ( anObject->shieldColor != kNoTinyColor)
+        if ( anObject->shieldColor != 0xFF)
         {
             anObject->hitState = ( anObject->health * kHitStateMax) / anObject->baseType->health;
             anObject->hitState += 16;

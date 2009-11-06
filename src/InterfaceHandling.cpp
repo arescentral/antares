@@ -135,7 +135,7 @@ void DrawEntireInterface() {
     DrawInOffWorld();
     Rect tRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     SetTranslateColorFore(BLACK);
-    gActiveWorld->view(tRect).fill(BLACK);
+    gActiveWorld->view(tRect).fill(RgbColor::kBlack);
 
     for (size_t i = 0; i < gInterfaceItemData.size(); ++i) {
         DrawAnyInterfaceItem(gInterfaceItemData[i], gOffWorld);
@@ -150,7 +150,7 @@ void DrawInterfaceRange(long from, long to, long withinItem) {
     Rect tRect = item->bounds;
     if (withinItem >= 0) {
         SetTranslateColorFore(BLACK);
-        gActiveWorld->view(tRect).fill(BLACK);
+        gActiveWorld->view(tRect).fill(RgbColor::kBlack);
     }
     from = std::max<int>(from, 0);
     to = std::min<int>(to, gInterfaceItemData.size());
@@ -170,7 +170,7 @@ void DrawAllItemsOfKind(interfaceKindType kind, bool sound, bool clearFirst, boo
     Rect tRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
     SetTranslateColorFore(BLACK);
     if (clearFirst) {
-        gActiveWorld->view(tRect).fill(BLACK);
+        gActiveWorld->view(tRect).fill(RgbColor::kBlack);
     }
 
     for (size_t i = 0; i < gInterfaceItemData.size(); ++i) {
@@ -615,7 +615,7 @@ void RefreshInterfaceItem(short whichItem) {
     GetAnyInterfaceItemGraphicBounds(item, &tRect);
     DrawInOffWorld();
     DefaultColors();
-    gActiveWorld->view(tRect).fill(BLACK);
+    gActiveWorld->view(tRect).fill(RgbColor::kBlack);
     DrawAnyInterfaceItemOffToOn(item);
 }
 

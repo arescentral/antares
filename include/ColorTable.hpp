@@ -32,10 +32,13 @@ class RgbColor {
   public:
     static const RgbColor kBlack;
     static const RgbColor kWhite;
+    static const RgbColor kClear;
 
     RgbColor();
     RgbColor(uint8_t red, uint8_t green, uint8_t blue);
+    RgbColor(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue);
 
+    uint8_t alpha;
     uint8_t red;
     uint8_t green;
     uint8_t blue;
@@ -43,6 +46,14 @@ class RgbColor {
     void read(BinaryReader* bin);
     void write(BinaryWriter* bin) const;
 };
+
+inline bool operator==(const RgbColor& lhs, const RgbColor& rhs) {
+    return memcmp(&lhs, &rhs, sizeof(RgbColor)) == 0;
+}
+
+inline bool operator!=(const RgbColor& lhs, const RgbColor& rhs) {
+    return memcmp(&lhs, &rhs, sizeof(RgbColor)) != 0;
+}
 
 class ColorTable {
   public:

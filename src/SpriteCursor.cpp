@@ -67,11 +67,11 @@ void ResetSpriteCursor( void)
     gSpriteCursor->sprite.whichShape = 0;
     gSpriteCursor->sprite.scale = SCALE_SCALE;
     gSpriteCursor->sprite.style = spriteNormal;
-    gSpriteCursor->sprite.styleColor = 0;
+    gSpriteCursor->sprite.styleColor = RgbColor::kWhite;
     gSpriteCursor->sprite.styleData = 0;
     gSpriteCursor->sprite.tinySize = 0;
     gSpriteCursor->sprite.whichLayer = 0;
-    gSpriteCursor->sprite.tinyColor = 0;
+    gSpriteCursor->sprite.tinyColor = RgbColor::kWhite;
     gSpriteCursor->sprite.killMe = false;
 
     gSpriteCursor->showLevel = kSpriteCursorHidden;
@@ -81,7 +81,6 @@ void ResetSpriteCursor( void)
         gSpriteCursor->thisLineEnd.h = gSpriteCursor->thisLineEnd.v =
         gSpriteCursor->lastLineStart.h = gSpriteCursor->lastLineStart.v =
         gSpriteCursor->lastLineEnd.h = gSpriteCursor->lastLineEnd.v = -1;
-    gSpriteCursor->thisLineColor = gSpriteCursor->thisLineColorDark = 0;
 }
 
 void ShowSpriteCursor( bool force)
@@ -364,14 +363,12 @@ void MoveSpriteCursor( Point where)
 void ShowHintLine( Point fromWhere, Point toWhere,
     unsigned char color, unsigned char brightness)
 {
-    transColorType  *transColor;
-
     gSpriteCursor->thisLineStart = fromWhere;
     gSpriteCursor->thisLineEnd = toWhere;
     gSpriteCursor->thisShowLine = true;
 
-    mGetTranslateColorShade( color, brightness, gSpriteCursor->thisLineColor, transColor);
-    mGetTranslateColorShade( color, VERY_DARK, gSpriteCursor->thisLineColorDark, transColor);
+    GetRGBTranslateColorShade(&gSpriteCursor->thisLineColor, color, brightness);
+    GetRGBTranslateColorShade(&gSpriteCursor->thisLineColorDark, color, VERY_DARK);
 
 }
 
@@ -387,7 +384,7 @@ void ResetHintLine( void)
         gSpriteCursor->thisLineEnd.h = gSpriteCursor->thisLineEnd.v =
         gSpriteCursor->lastLineStart.h = gSpriteCursor->lastLineStart.v =
         gSpriteCursor->lastLineEnd.h = gSpriteCursor->lastLineEnd.v = -1;
-    gSpriteCursor->thisLineColor = gSpriteCursor->thisLineColorDark = 0;
+    gSpriteCursor->thisLineColor = gSpriteCursor->thisLineColorDark = RgbColor::kBlack;
 }
 
 }  // namespace antares

@@ -27,8 +27,6 @@ namespace antares {
 void InitTransitions( void);
 void ResetTransitions( void);
 void CleanupTransitions( void);
-void StartColorAnimation( long, long, unsigned char);
-void UpdateColorAnimation( long);
 void StartBooleanColorAnimation( long, long, unsigned char);
 void UpdateBooleanColorAnimation( long);
 void RestoreOriginalColors( void);

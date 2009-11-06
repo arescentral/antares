@@ -279,8 +279,8 @@ int AddSpaceObject( spaceObjectType *sourceObject)
     Point           where;
     spritePix       oldStyleSprite;
     long            scaleCalc;
-    unsigned char   tinyColor, tinyShade;
-    transColorType  *transColor;
+    RgbColor        tinyColor;
+    unsigned char   tinyShade;
     short           whichShape = 0, angle;
 
     destObject = gSpaceObjectData.get();
@@ -355,13 +355,13 @@ int AddSpaceObject( spaceObjectType *sourceObject)
             tinyColor = kNoTinyColor;
         } else if ( destObject->owner == globals()->gPlayerAdmiralNumber)
         {
-            mGetTranslateColorShade( kFriendlyColor, tinyShade, tinyColor, transColor);
+            GetRGBTranslateColorShade(&tinyColor, kFriendlyColor, tinyShade);
         } else if ( destObject->owner <= kNoOwner)
         {
-            mGetTranslateColorShade( kNeutralColor, tinyShade, tinyColor, transColor);
+            GetRGBTranslateColorShade(&tinyColor, kNeutralColor, tinyShade);
         } else
         {
-            mGetTranslateColorShade( kHostileColor, tinyShade, tinyColor, transColor);
+            GetRGBTranslateColorShade(&tinyColor, kHostileColor, tinyShade);
         }
 
         if ( destObject->attributes & kIsSelfAnimated)
@@ -551,7 +551,7 @@ void CorrectAllBaseObjectColor( void)
 
     for ( i = 0; i < kMaxBaseObject; i++)
     {
-        if (( aBase->shieldColor != kNoTinyColor) && ( aBase->shieldColor != 0))
+        if (( aBase->shieldColor != 0xFF) && ( aBase->shieldColor != 0))
         {
 //          aBase->shieldColor = GetTranslateColorShade( aBase->shieldColor, VERY_LIGHT);
             mGetTranslateColorShade( aBase->shieldColor, 15, fixColor, transColor);
@@ -2461,8 +2461,8 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, bool message)
     spaceObjectType *fixObject = nil;
     long            i, originalOwner = anObject->owner;
     Str255          s;
-    unsigned char   tinyShade, tinyColor;
-    transColorType  *transColor;
+    RgbColor        tinyColor;
+    unsigned char   tinyShade;
 
     if ( anObject->owner != owner)
     {
@@ -2517,13 +2517,13 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, bool message)
 
             if ( owner == globals()->gPlayerAdmiralNumber)
             {
-                mGetTranslateColorShade( kFriendlyColor, tinyShade, tinyColor, transColor);
+                GetRGBTranslateColorShade(&tinyColor, kFriendlyColor, tinyShade);
             } else if ( owner <= kNoOwner)
             {
-                mGetTranslateColorShade( kNeutralColor, tinyShade, tinyColor, transColor);
+                GetRGBTranslateColorShade(&tinyColor, kNeutralColor, tinyShade);
             } else
             {
-                mGetTranslateColorShade( kHostileColor, tinyShade, tinyColor, transColor);
+                GetRGBTranslateColorShade(&tinyColor, kHostileColor, tinyShade);
             }
             anObject->tinyColor = anObject->sprite->tinyColor = tinyColor;
 

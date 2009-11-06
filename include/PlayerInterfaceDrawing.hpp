@@ -73,7 +73,8 @@ short GetInterfaceFontHeight(interfaceStyleType style);
 short GetInterfaceFontAscent(interfaceStyleType style);
 short GetInterfaceFontWidth(interfaceStyleType style);
 
-void DrawInterfaceString(unsigned char* s, interfaceStyleType style, PixMap* pix, uint8_t color);
+void DrawInterfaceString(
+        unsigned char* s, interfaceStyleType style, PixMap* pix, const RgbColor& color);
 
 void SetInterfaceLargeUpperFont(interfaceStyleType style);
 void SetInterfaceLargeLowerFont(interfaceStyleType style);

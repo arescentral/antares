@@ -22,6 +22,7 @@
 
 #include "Base.h"
 
+#include "ColorTable.hpp"
 #include "NateDraw.hpp"
 
 namespace antares {
@@ -62,7 +63,7 @@ namespace antares {
 #define ASM_SHIFT_SCALE_1       8
 #define ASM_SHIFT_SCALE_2       4
 
-#define kNoTinyColor            0xff
+#define kNoTinyColor            RgbColor::kBlack
 
 #define kNoSpriteLayer          0
 #define kFirstSpriteLayer       1
@@ -85,7 +86,7 @@ struct spritePix {
     int         width;
     int         height;
     int         type;
-    unsigned char* data;
+    RgbColor* data;
 };
 
 //typedef  spritePix;
@@ -98,11 +99,11 @@ struct spriteType {
     int             whichShape;
     long            scale;
     spriteStyleType style;
-    unsigned char   styleColor;
+    RgbColor        styleColor;
     short           styleData;
     long            tinySize;
     short           whichLayer;
-    unsigned char   tinyColor;
+    RgbColor        tinyColor;
     bool         killMe;
 
     Rect        thisRect;
@@ -125,17 +126,17 @@ void OptScaleSpritePixInPixMap( spritePix *, Point, long, Rect *, Rect *, PixMap
 void StaticScaleSpritePixInPixMap( spritePix *, Point, long, Rect *, Rect *,
     PixMap*, short);
 void ColorScaleSpritePixInPixMap( spritePix *, Point, long, Rect *, Rect *,
-    PixMap*, short, unsigned char, unsigned char);
+    PixMap*, short, const RgbColor& color, unsigned char);
 void OutlineScaleSpritePixInPixMap( spritePix *sprite, Point where, long scale, Rect *dRect,
-        Rect *clipRect, PixMap* pixMap, unsigned char colorOut,
-        unsigned char colorIn);
+        Rect *clipRect, PixMap* pixMap, const RgbColor& colorOut, const RgbColor& colorIn);
 void ResetAllPixTables( void);
 void SetAllPixTablesNoKeep( void);
 void KeepPixTable( short);
 void RemoveAllUnusedPixTables( void);
 natePixType* AddPixTable( short);
 natePixType* GetPixTable( short);
-spriteType *AddSprite( Point, natePixType*, short, short, long, long, short, unsigned char, long *);
+spriteType *AddSprite(
+        Point, natePixType*, short, short, long, long, short, const RgbColor& tiny_color, long *);
 void RemoveSprite( spriteType *);
 void EraseSpriteTable( void);
 void DrawSpriteTableInOffWorld( Rect *);
@@ -143,7 +144,6 @@ void GetOldSpritePixData( spriteType *, spritePix *);
 void ShowSpriteTable( void);
 void CullSprites( void);
 void  PixMapTest( spritePix *, Point, long, Rect *, Rect *, PixMap*);
-void TestByte(unsigned char*, PixMap*, unsigned char*);
 int Randomize( int);
 
 }  // namespace antares

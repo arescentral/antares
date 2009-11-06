@@ -51,7 +51,7 @@ int GetNatePixTableNatePixWidth(const natePixType& table, long pixnum);
 int GetNatePixTableNatePixHeight(const natePixType& table, long pixnum);
 int GetNatePixTableNatePixHRef(const natePixType& table, long pixnum);
 int GetNatePixTableNatePixVRef(const natePixType& table, long pixnum);
-uint8_t* GetNatePixTableNatePixData(const natePixType& table, long pixnum);
+RgbColor* GetNatePixTableNatePixData(const natePixType& table, long pixnum);
 void RemapNatePixTableColor(natePixType* table);
 void ColorizeNatePixTableColor(natePixType* table, uint8_t color);
 
