@@ -24,8 +24,10 @@
 
 namespace antares {
 
-TestingVideoDriver::TestingVideoDriver()
-        : _current_time(0) { }
+TestingVideoDriver::TestingVideoDriver(const std::string& output_dir)
+        : _current_time(0),
+          _state(UNKNOWN),
+          _output_dir(output_dir) { }
 
 void TestingVideoDriver::send_event(EventRecord) { }
 
@@ -66,8 +68,13 @@ void TestingVideoDriver::loop(CardStack* stack) {
 
 GameState TestingVideoDriver::state() const { return _state; }
 
-MainScreenVideoDriver::MainScreenVideoDriver()
-        : _key_down(false) { }
+const std::string& TestingVideoDriver::output_dir() const {
+    return _output_dir;
+}
+
+MainScreenVideoDriver::MainScreenVideoDriver(const std::string& output_dir)
+        : TestingVideoDriver(output_dir),
+          _key_down(false) { }
 
 bool MainScreenVideoDriver::wait_next_event(EventRecord* evt, double) {
     if (state() == MAIN_SCREEN_INTERFACE) {
@@ -75,8 +82,8 @@ bool MainScreenVideoDriver::wait_next_event(EventRecord* evt, double) {
             evt->what = keyUp;
             _key_down = false;
         } else {
-            if (!get_output_dir().empty()) {
-                DumpTo(get_output_dir() + "/main-screen.png");
+            if (!output_dir().empty()) {
+                DumpTo(output_dir() + "/main-screen.png");
             }
             evt->what = autoKey;
             _key_down = true;
@@ -90,8 +97,9 @@ bool MainScreenVideoDriver::wait_next_event(EventRecord* evt, double) {
 
 int MainScreenVideoDriver::get_demo_scenario() { return -1; }
 
-MissionBriefingVideoDriver::MissionBriefingVideoDriver(int level)
-        : _level(level),
+MissionBriefingVideoDriver::MissionBriefingVideoDriver(const std::string& output_dir, int level)
+        : TestingVideoDriver(output_dir),
+          _level(level),
           _briefing_num(0),
           _key_down(false) { }
 
@@ -120,8 +128,8 @@ bool MissionBriefingVideoDriver::wait_next_event(EventRecord* evt, double) {
                 evt->what = keyUp;
                 _key_down = false;
             } else {
-                if (!get_output_dir().empty()) {
-                    DumpTo(get_output_dir() + "/select-level.png");
+                if (!output_dir().empty()) {
+                    DumpTo(output_dir() + "/select-level.png");
                 }
                 evt->what = autoKey;
                 _key_down = true;
@@ -137,8 +145,8 @@ bool MissionBriefingVideoDriver::wait_next_event(EventRecord* evt, double) {
                 _key_down = false;
             } else {
                 sprintf(path, "/mission-%u.png", _briefing_num);
-                if (!get_output_dir().empty()) {
-                    DumpTo(get_output_dir() + path);
+                if (!output_dir().empty()) {
+                    DumpTo(output_dir() + path);
                 }
                 ++_briefing_num;
                 evt->what = autoKey;
@@ -165,15 +173,13 @@ void MissionBriefingVideoDriver::get_keys(KeyMap keys) {
     }
 }
 
-DemoVideoDriver::DemoVideoDriver(int level)
-        : _level(level),
+DemoVideoDriver::DemoVideoDriver(const std::string& output_dir, int level)
+        : TestingVideoDriver(output_dir),
+          _level(level),
           _started_replay(false),
           _key_down(false) {
     if (level != 0 && level != 5 && level != 23) {
         fail("Only have demos of levels 0, 5, and 23; not %d.", level);
-    }
-    if (!get_output_dir().empty()) {
-        SoundDriver::set_driver(new LogSoundDriver(get_output_dir() + "/sound.log"));
     }
 }
 
@@ -204,8 +210,8 @@ void DemoVideoDriver::main_loop_iteration_complete(uint32_t game_time) {
         char path[64];
         uint32_t seconds = game_time / 60;
         sprintf(path, "/screens/%03um%02u.png", seconds / 60, seconds % 60);
-        if (!get_output_dir().empty()) {
-            DumpTo(get_output_dir() + path);
+        if (!output_dir().empty()) {
+            DumpTo(output_dir() + path);
         }
     }
 }

@@ -2,6 +2,8 @@
 *~
 .DS_Store
 *.o
-Antares
+*.a
+AntaresTest
+AntaresVnc
 gmon.out
 Jamfile

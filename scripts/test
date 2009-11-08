@@ -15,11 +15,11 @@ import time
 
 
 ALL_TEST_CASES = {
-    'main-screen': ['--video-driver=main-screen'],
-    'mission-briefing': ['--video-driver=mission-briefing', '--level=22'],
-    'space-race': ['--video-driver=demo', '--level=23'],
-    'the-stars-have-ears': ['--video-driver=demo', '--level=0'],
-    'while-the-iron-is-hot': ['--video-driver=demo', '--level=5'],
+    'main-screen': ['main-screen'],
+    'mission-briefing': ['mission-briefing', '--level=22'],
+    'space-race': ['demo', '--level=23'],
+    'the-stars-have-ears': ['demo', '--level=0'],
+    'while-the-iron-is-hot': ['demo', '--level=5'],
 }
 SCRIPT_NAME = os.path.basename(sys.argv[0])
 
@@ -116,7 +116,7 @@ class TestCase(object):
             print('Running Antares...')
             with Timed():
                 antares = subprocess.Popen(
-                        ['./Antares', '--output=%s' % dir] + self.args,
+                        ['./AntaresTest'] + self.args + ['--output=%s' % dir],
                         stderr=subprocess.PIPE)
                 stdout, stderr = antares.communicate()
 

@@ -758,8 +758,3 @@ void Pause( long time)
 }
 
 }  // namespace antares
-
-int main(int argc, char* const* argv) {
-    antares::FakeInit(argc, argv);
-    return 0;
-}

@@ -108,10 +108,4 @@ Sound* GetSound(int id) {
     return new Sound(id);
 }
 
-void FakeSoundsInit() {
-    if (!sound_driver.get()) {
-        sound_driver.reset(new NullSoundDriver);
-    }
-}
-
 }  // namespace antares

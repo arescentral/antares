@@ -62,8 +62,6 @@ struct SndChannel;
 Sound* GetSound(int id);
 OSErr SndPlay(SndChannel* channel, Sound* sound, bool);
 
-void FakeSoundsInit();
-
 }  // namespace antares
 
 #endif  // ANTARES_FAKE_SOUNDS_HPP_

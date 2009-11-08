@@ -18,6 +18,7 @@
 #ifndef ANTARES_TEST_VIDEO_DRIVER_HPP_
 #define ANTARES_TEST_VIDEO_DRIVER_HPP_
 
+#include <string>
 #include "CardStack.hpp"
 #include "VideoDriver.hpp"
 
@@ -25,7 +26,7 @@ namespace antares {
 
 class TestingVideoDriver : public VideoDriver {
   public:
-    TestingVideoDriver();
+    TestingVideoDriver(const std::string& output_dir);
 
     virtual void send_event(EventRecord);
     virtual bool button();
@@ -39,15 +40,17 @@ class TestingVideoDriver : public VideoDriver {
 
   protected:
     GameState state() const;
+    const std::string& output_dir() const;
 
   private:
     int _current_time;
     GameState _state;
+    const std::string _output_dir;
 };
 
 class MainScreenVideoDriver : public TestingVideoDriver {
   public:
-    MainScreenVideoDriver();
+    MainScreenVideoDriver(const std::string& output_dir);
 
     virtual bool wait_next_event(EventRecord*, double);
     virtual int get_demo_scenario();
@@ -58,7 +61,7 @@ class MainScreenVideoDriver : public TestingVideoDriver {
 
 class MissionBriefingVideoDriver : public TestingVideoDriver {
   public:
-    MissionBriefingVideoDriver(int level);
+    MissionBriefingVideoDriver(const std::string& output_dir, int level);
 
     virtual bool wait_next_event(EventRecord* evt, double);
     virtual int get_demo_scenario();
@@ -72,7 +75,7 @@ class MissionBriefingVideoDriver : public TestingVideoDriver {
 
 class DemoVideoDriver : public TestingVideoDriver {
   public:
-    DemoVideoDriver(int level);
+    DemoVideoDriver(const std::string& output_dir, int level);
 
     virtual bool wait_next_event(EventRecord*, double);
     virtual int get_demo_scenario();
