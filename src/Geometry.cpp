@@ -30,6 +30,13 @@ Point::Point(int x, int y)
         : h(x),
           v(y) { }
 
+void Point::clamp_to(const Rect& rect) {
+    h = std::max(h, rect.left);
+    v = std::max(v, rect.top);
+    h = std::min(h, rect.right - 1);
+    v = std::min(v, rect.bottom - 1);
+}
+
 void Point::read(BinaryReader* bin) {
     bin->read(&h);
     bin->read(&v);

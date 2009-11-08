@@ -24,6 +24,8 @@ namespace antares {
 
 class BinaryReader;
 
+struct Rect;
+
 // A point (h, v) in two-dimensional space.
 struct Point {
     int32_t h;
@@ -36,6 +38,10 @@ struct Point {
     // @param [in] x        The desired value of `h`.
     // @param [in] y        The desired value of `v`.
     Point(int x, int y);
+
+    // Move the point to the nearest point within `rect`.
+    // @param [in] rect     The rectangle to clamp to.
+    void clamp_to(const Rect& rect);
 
     // Reads in the point via a BinaryReader.
     //
