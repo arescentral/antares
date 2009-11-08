@@ -1,6 +1,7 @@
 ARCH        = -arch @@ARCH@@ ;
-C++FLAGS    = $(ARCH) @@DEBUG@@ -W -Wall -Dpowerc -DTARGET_OS_MAC -fpascal-strings ;
-LINKFLAGS   = $(ARCH) ;
+C++FLAGS    = $(ARCH) @@DEBUG@@ -W -Wall -Dpowerc -DTARGET_OS_MAC -fpascal-strings
+                -I/opt/local/include ;
+LINKFLAGS   = $(ARCH) -L/opt/local/lib -lpng ;
 OPTIM       = @@OPTIM@@ ;
 HDRS        = include stubs ;
 LINK        = $(C++) ;
@@ -36,6 +37,7 @@ Main Antares : src/Admiral.cpp
                src/InterfaceScreen.cpp
                src/KeyMapTranslation.cpp
                src/KeySetupScreen.cpp
+               src/LibpngImageIo.cpp
                src/LoadingScreen.cpp
                src/MainScreen.cpp
                src/MappedFile.cpp

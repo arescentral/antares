@@ -76,7 +76,7 @@ bool MainScreenVideoDriver::wait_next_event(EventRecord* evt, double) {
             _key_down = false;
         } else {
             if (!get_output_dir().empty()) {
-                DumpTo(get_output_dir() + "/main-screen.pnm");
+                DumpTo(get_output_dir() + "/main-screen.png");
             }
             evt->what = autoKey;
             _key_down = true;
@@ -121,7 +121,7 @@ bool MissionBriefingVideoDriver::wait_next_event(EventRecord* evt, double) {
                 _key_down = false;
             } else {
                 if (!get_output_dir().empty()) {
-                    DumpTo(get_output_dir() + "/select-level.pnm");
+                    DumpTo(get_output_dir() + "/select-level.png");
                 }
                 evt->what = autoKey;
                 _key_down = true;
@@ -136,7 +136,7 @@ bool MissionBriefingVideoDriver::wait_next_event(EventRecord* evt, double) {
                 evt->what = keyUp;
                 _key_down = false;
             } else {
-                sprintf(path, "/mission-%u.pnm", _briefing_num);
+                sprintf(path, "/mission-%u.png", _briefing_num);
                 if (!get_output_dir().empty()) {
                     DumpTo(get_output_dir() + path);
                 }
@@ -203,7 +203,7 @@ void DemoVideoDriver::main_loop_iteration_complete(uint32_t game_time) {
     if (game_time % 60 == 1) {
         char path[64];
         uint32_t seconds = game_time / 60;
-        sprintf(path, "/screens/%03um%02u.pnm", seconds / 60, seconds % 60);
+        sprintf(path, "/screens/%03um%02u.png", seconds / 60, seconds % 60);
         if (!get_output_dir().empty()) {
             DumpTo(get_output_dir() + path);
         }

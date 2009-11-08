@@ -15,45 +15,24 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "Picture.hpp"
+#ifndef ANTARES_IMAGE_IO_HPP_
+#define ANTARES_IMAGE_IO_HPP_
 
-#include <glob.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include "BinaryStream.hpp"
-#include "Error.hpp"
-#include "LibpngImageIo.hpp"
-#include "MappedFile.hpp"
+#include <stdio.h>
 
 namespace antares {
 
-namespace {
+class ArrayPixMap;
+class BinaryReader;
+class BinaryWriter;
+class PixMap;
 
-struct FreedGlob : public glob_t {
-    ~FreedGlob() {
-        globfree(this);
-    }
+class ImageIo {
+  public:
+    virtual void read(BinaryReader* bin, ArrayPixMap* pix) = 0;
+    virtual void write(BinaryWriter* bin, const PixMap& pix) = 0;
 };
 
-}  // namespace
-
-Picture::Picture(int32_t id)
-        : ArrayPixMap(0, 0) {
-    char fileglob[64];
-    FreedGlob g;
-    g.gl_offs = 0;
-
-    sprintf(fileglob, "data/derived/Pictures/%d.png", id);
-    glob(fileglob, 0, NULL, &g);
-    sprintf(fileglob, "data/derived/Pictures/%d *.png", id);
-    glob(fileglob, GLOB_APPEND, NULL, &g);
-
-    check(g.gl_pathc == 1, "found %lu matches for %d", g.gl_pathc, id);
-
-    MappedFile file(g.gl_pathv[0]);
-    LibpngImageIo io;
-    BufferBinaryReader bin(file.data(), file.size());
-    io.read(&bin, this);
-}
-
 }  // namespace antares
+
+#endif  // ANTARES_IMAGE_IO_HPP_

@@ -23,6 +23,7 @@
 #include "BinaryStream.hpp"
 #include "ColorTable.hpp"
 #include "Error.hpp"
+#include "LibpngImageIo.hpp"
 
 namespace antares {
 
@@ -66,30 +67,29 @@ void PixMap::copy(const PixMap& pix) throw(PixMapException) {
 void PixMap::write(BinaryWriter* bin) const {
     double f = transition_fraction();
     if (f == 0.0) {
-        for (int y = 0; y < bounds().height(); ++y) {
-            const RgbColor* r = row(y);
-            for (int x = 0; x < bounds().width(); ++x) {
-                bin->write(r[x].red);
-                bin->write(r[x].green);
-                bin->write(r[x].blue);
-            }
-        }
+        LibpngImageIo io;
+        io.write(bin, *this);
     } else {
+        ArrayPixMap pix(bounds().width(), bounds().height());
         double g = 1.0 - f;
         const RgbColor& to = transition_to();
         for (int y = 0; y < bounds().height(); ++y) {
-            const RgbColor* r = row(y);
+            const RgbColor* src = row(y);
+            RgbColor* dst = pix.mutable_row(y);
             for (int x = 0; x < bounds().width(); ++x) {
-                bin->write(implicit_cast<uint8_t>(to.red * f + r[x].red * g));
-                bin->write(implicit_cast<uint8_t>(to.green * f + r[x].green * g));
-                bin->write(implicit_cast<uint8_t>(to.blue * f + r[x].blue * g));
+                dst[x].alpha = 0xFF;
+                dst[x].red = to.red * f + src[x].red * g;
+                dst[x].green = to.green * f + src[x].green * g;
+                dst[x].blue = to.blue * f + src[x].blue * g;
             }
         }
+        pix.write(bin);
     }
 }
 
 ArrayPixMap::ArrayPixMap(int width, int height)
-        : _bounds(0, 0, width, height),
+        : _transition_fraction(0.0),
+          _bounds(0, 0, width, height),
           _colors(new ColorTable(256)),
           _bytes(new RgbColor[width * height]) { }
 

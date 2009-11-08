@@ -55,11 +55,6 @@ public:
 
 void DumpTo(const std::string& path) {
     std::string contents;
-    char header[64];
-    int width = gRealWorld->bounds().width();
-    int height = gRealWorld->bounds().height();
-    snprintf(header, 64, "P6 %d %d 255\n", width, height);
-    contents += header;
     StringBinaryWriter(&contents).write(*gRealWorld);
 
     MakeDirs(DirName(path), 0755);
