@@ -214,7 +214,8 @@ void FakeInit(int argc, char* const* argv) {
 
     FakeSoundsInit();
 
-    AresMain();
+    CardStack stack(AresInit());
+    VideoDriver::driver()->loop(&stack);
 }
 
 }  // namespace antares

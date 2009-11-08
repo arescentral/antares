@@ -34,7 +34,7 @@ enum GameResult {
     QUIT_GAME = 3,
 };
 
-void AresMain();
+Card* AresInit();
 void Pause();
 
 class MainPlay : public Card {

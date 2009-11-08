@@ -224,7 +224,7 @@ class GamePlay : public Card {
     int _scenario_check_time;
 };
 
-void AresMain() {
+Card* AresInit() {
     RgbColor                initialFadeColor;
     scoped_ptr<ColorTable>  theClut;
 
@@ -284,8 +284,7 @@ void AresMain() {
     AdmiralInit();
     InitBeams();
 
-    CardStack stack(new Master);
-    VideoDriver::driver()->loop(&stack);
+    return new Master;
 }
 
 MainPlay::MainPlay(int scenario, GameResult* game_result, long* game_length)
