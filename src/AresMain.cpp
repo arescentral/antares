@@ -142,8 +142,9 @@ class Master : public Card {
         switch (_state) {
           case START:
             _state = PUBLISHER_PICT;
-            stack()->push(new PictFade(2000, 2000, &_skipped));
-            break;
+            // We don't have permission to display the Ambrosia logo.
+            // stack()->push(new PictFade(2000, 2000, &_skipped));
+            // break;
 
           case PUBLISHER_PICT:
             _state = EGO_PICT;
