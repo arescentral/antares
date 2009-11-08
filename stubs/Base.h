@@ -43,8 +43,6 @@ typedef long Size;
 typedef unsigned char* Ptr;
 typedef Ptr* Handle;
 
-void Microseconds(uint64_t* wide);
-
 #define nil NULL
 
 typedef unsigned char Str255[256];

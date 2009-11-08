@@ -22,9 +22,7 @@
 namespace antares {
 
 uint64_t now_usecs() {
-    uint64_t usecs;
-    Microseconds(&usecs);
-    return usecs;
+    return 16667ull * TickCount();
 }
 
 double now_secs() {

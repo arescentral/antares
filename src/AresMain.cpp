@@ -341,7 +341,7 @@ void MainPlay::become_front() {
                 SetSongVolume(kMusicVolume);
                 PlaySong();
             }
-            Microseconds(&globals()->gLastTime);
+            globals()->gLastTime = now_usecs();
             globals()->gGameStartTime = TickCount();// - defecit;
 
             VideoDriver::driver()->set_game_state(PLAY_GAME);
@@ -400,7 +400,7 @@ void GamePlay::fire_timer() {
     int newGameTime;
     Rect clipRect;
 
-    Microseconds(&thisTime);
+    thisTime = now_usecs();
     scrapTime = thisTime;
     thisTime -= globals()->gLastTime;
     newGameTime = (thisTime / kTimeUnit) + _scenario_start_time;
@@ -701,7 +701,7 @@ void GamePlay::fire_timer() {
     VideoDriver::driver()->main_loop_iteration_complete(globals()->gGameTime);
 
     if (globals()->gGameOver > 0) {
-        Microseconds(&thisTime);
+        thisTime = now_usecs();
         thisTime -= globals()->gLastTime;
         newGameTime = thisTime / 1000000; // divide by a million to get seconds
         *_seconds = newGameTime;

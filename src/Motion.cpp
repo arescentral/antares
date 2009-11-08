@@ -638,15 +638,12 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
     unsigned long           distance, dcalc/*,
                             closestDist = kMaximumRelevantDistanceSquared + kMaximumRelevantDistanceSquared*/;
     proximityUnitType       *proximityObject, *currentProximity;
-    uint64_t                hackTimeStart, hackTimePassed;
 
     spritePix               oldStyleSprite; // a temporary hack
     long                    magicHack1 = 0, magicHack2 = 0, magicHack3 = 0;
     uint64_t                farthestDist, hugeDistance, wideScrap, closestDist;
     farthestDist = 0;
     closestDist = 0x7fffffffffffffffull;
-
-    Microseconds( &hackTimeStart);
 
     // set up player info so we can find closest ship (for scaling)
     if ( globals()->gPlayerShipNumber >= 0)
@@ -1222,10 +1219,6 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
             proximityObject++;
         }
     }
-
-    Microseconds( &hackTimePassed);
-    hackTimePassed -= hackTimeStart;
-//  WriteDebugLong( hackTimePassed.as_struct.lo);
 
 // here, it doesn't matter in what order we step through the table
     aObject = table;
