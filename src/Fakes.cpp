@@ -73,7 +73,7 @@ int TickCount() {
 }
 
 void Microseconds(uint64_t* wide) {
-    *wide = 16667 * TickCount();
+    *wide = 16667ull * TickCount();
 }
 
 void StringToNum(unsigned char* p_str, long* value) {
