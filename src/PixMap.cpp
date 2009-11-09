@@ -19,11 +19,11 @@
 
 #include <algorithm>
 #include "Quickdraw.h"
-#include "Casts.hpp"
 #include "BinaryStream.hpp"
+#include "Casts.hpp"
 #include "ColorTable.hpp"
 #include "Error.hpp"
-#include "LibpngImageIo.hpp"
+#include "ImageIo.hpp"
 
 namespace antares {
 
@@ -67,8 +67,7 @@ void PixMap::copy(const PixMap& pix) throw(PixMapException) {
 void PixMap::write(BinaryWriter* bin) const {
     double f = transition_fraction();
     if (f == 0.0) {
-        LibpngImageIo io;
-        io.write(bin, *this);
+        ImageIo::io()->write(bin, *this);
     } else {
         ArrayPixMap pix(bounds().width(), bounds().height());
         double g = 1.0 - f;

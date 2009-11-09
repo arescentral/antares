@@ -32,6 +32,7 @@ Library Antares :
     src/File.cpp
     src/Geometry.cpp
     #src/IconSuiteFromAlias.cpp
+    src/ImageIo.cpp
     src/InputSource.cpp
     src/Instruments.cpp
     src/InterfaceHandling.cpp

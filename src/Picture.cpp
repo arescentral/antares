@@ -22,7 +22,7 @@
 #include <unistd.h>
 #include "BinaryStream.hpp"
 #include "Error.hpp"
-#include "LibpngImageIo.hpp"
+#include "ImageIo.hpp"
 #include "MappedFile.hpp"
 
 namespace antares {
@@ -51,9 +51,8 @@ Picture::Picture(int32_t id)
     check(g.gl_pathc == 1, "found %lu matches for %d", g.gl_pathc, id);
 
     MappedFile file(g.gl_pathv[0]);
-    LibpngImageIo io;
     BufferBinaryReader bin(file.data(), file.size());
-    io.read(&bin, this);
+    ImageIo::io()->read(&bin, this);
 }
 
 }  // namespace antares
