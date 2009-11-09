@@ -41,6 +41,10 @@ class SocketBinaryReader : public BinaryReader {
     SocketBinaryReader(int fd)
         : _fd(fd) { }
 
+    virtual size_t size() const {
+        return -1;
+    }
+
   protected:
     virtual void read_bytes(char* bytes, size_t len) {
         while (_buffer.size() < len) {

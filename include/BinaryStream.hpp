@@ -57,6 +57,9 @@ class BinaryReader {
     // @returns             The number of bytes that have been read using this object.
     size_t bytes_read() const { return _bytes_read; }
 
+    // @returns             The total number of bytes if known, or -1.
+    virtual size_t size() const = 0;
+
   protected:
     // Reads `count` bytes into `bytes`.
     //
@@ -88,8 +91,10 @@ class BufferBinaryReader : public BinaryReader {
     // @param [in] len      The number of bytes in `data`.
     BufferBinaryReader(const char* data, size_t len);
 
-  protected:
     // Implementation of virtual BinaryReader methods.
+    size_t size() const;
+
+  protected:
     virtual void read_bytes(char* bytes, size_t count);
 
   private:

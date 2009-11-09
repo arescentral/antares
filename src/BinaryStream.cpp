@@ -207,6 +207,10 @@ void BufferBinaryReader::read_bytes(char* bytes, size_t count) {
     memcpy(bytes, _data + bytes_read(), count);
 }
 
+size_t BufferBinaryReader::size() const {
+    return _len;
+}
+
 BinaryWriter::BinaryWriter()
         : _bytes_written(0) { }
 
