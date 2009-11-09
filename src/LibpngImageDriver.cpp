@@ -15,7 +15,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "LibpngImageIo.hpp"
+#include "LibpngImageDriver.hpp"
 
 #include <png.h>
 #include "BinaryStream.hpp"
@@ -40,9 +40,9 @@ void png_flush_data(png_struct*) { }
 
 }  // namespace
 
-LibpngImageIo::LibpngImageIo() { }
+LibpngImageDriver::LibpngImageDriver() { }
 
-void LibpngImageIo::read(BinaryReader* bin, ArrayPixMap* pix) {
+void LibpngImageDriver::read(BinaryReader* bin, ArrayPixMap* pix) {
     png_byte sig[8];
     bin->read(sig, 8);
     if (!png_check_sig(sig, 8)) {
@@ -106,7 +106,7 @@ void LibpngImageIo::read(BinaryReader* bin, ArrayPixMap* pix) {
     }
 }
 
-void LibpngImageIo::write(BinaryWriter* bin, const PixMap& pix) {
+void LibpngImageDriver::write(BinaryWriter* bin, const PixMap& pix) {
     png_struct* png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if (!png) {
         fail("couldn't create png_struct");

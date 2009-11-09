@@ -28,8 +28,8 @@
 #include "FakeDrawing.hpp"
 #include "FakeSounds.hpp"
 #include "File.hpp"
-#include "ImageIo.hpp"
-#include "LibpngImageIo.hpp"
+#include "ImageDriver.hpp"
+#include "LibpngImageDriver.hpp"
 #include "TestVideoDriver.hpp"
 #include "Threading.hpp"
 #include "VideoDriver.hpp"
@@ -134,7 +134,7 @@ void TestMain(int argc, char* const* argv) {
     }
 
     FakeDrawingInit(640, 480);
-    ImageIo::set_io(new LibpngImageIo);
+    ImageDriver::set_driver(new LibpngImageDriver);
     switch (test) {
       case TEST_MAIN_SCREEN:
         SoundDriver::set_driver(new NullSoundDriver);

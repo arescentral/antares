@@ -15,27 +15,22 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_IMAGE_IO_HPP_
-#define ANTARES_IMAGE_IO_HPP_
-
-#include <stdio.h>
+#include "ImageDriver.hpp"
 
 namespace antares {
 
-class ArrayPixMap;
-class BinaryReader;
-class BinaryWriter;
-class PixMap;
+namespace {
 
-class ImageIo {
-  public:
-    virtual void read(BinaryReader* bin, ArrayPixMap* pix) = 0;
-    virtual void write(BinaryWriter* bin, const PixMap& pix) = 0;
+ImageDriver* image_driver;
 
-    static ImageIo* io();
-    static void set_io(ImageIo* io);
-};
+}  // namespace
+
+ImageDriver* ImageDriver::driver() {
+    return image_driver;
+}
+
+void ImageDriver::set_driver(ImageDriver* driver) {
+    image_driver = driver;
+}
 
 }  // namespace antares
-
-#endif  // ANTARES_IMAGE_IO_HPP_

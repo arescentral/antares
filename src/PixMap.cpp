@@ -23,7 +23,7 @@
 #include "Casts.hpp"
 #include "ColorTable.hpp"
 #include "Error.hpp"
-#include "ImageIo.hpp"
+#include "ImageDriver.hpp"
 
 namespace antares {
 
@@ -67,7 +67,7 @@ void PixMap::copy(const PixMap& pix) throw(PixMapException) {
 void PixMap::write(BinaryWriter* bin) const {
     double f = transition_fraction();
     if (f == 0.0) {
-        ImageIo::io()->write(bin, *this);
+        ImageDriver::driver()->write(bin, *this);
     } else {
         ArrayPixMap pix(bounds().width(), bounds().height());
         double g = 1.0 - f;

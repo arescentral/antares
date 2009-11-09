@@ -22,7 +22,7 @@
 #include <unistd.h>
 #include "BinaryStream.hpp"
 #include "Error.hpp"
-#include "ImageIo.hpp"
+#include "ImageDriver.hpp"
 #include "MappedFile.hpp"
 
 namespace antares {
@@ -52,7 +52,7 @@ Picture::Picture(int32_t id)
 
     MappedFile file(g.gl_pathv[0]);
     BufferBinaryReader bin(file.data(), file.size());
-    ImageIo::io()->read(&bin, this);
+    ImageDriver::driver()->read(&bin, this);
 }
 
 }  // namespace antares

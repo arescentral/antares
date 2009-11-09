@@ -32,14 +32,14 @@ Library Antares :
     src/File.cpp
     src/Geometry.cpp
     #src/IconSuiteFromAlias.cpp
-    src/ImageIo.cpp
+    src/ImageDriver.cpp
     src/InputSource.cpp
     src/Instruments.cpp
     src/InterfaceHandling.cpp
     src/InterfaceScreen.cpp
     src/KeyMapTranslation.cpp
     src/KeySetupScreen.cpp
-    src/LibpngImageIo.cpp
+    src/LibpngImageDriver.cpp
     src/LoadingScreen.cpp
     src/MainScreen.cpp
     src/MappedFile.cpp

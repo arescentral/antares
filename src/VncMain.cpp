@@ -28,8 +28,8 @@
 #include "FakeDrawing.hpp"
 #include "FakeSounds.hpp"
 #include "File.hpp"
-#include "ImageIo.hpp"
-#include "LibpngImageIo.hpp"
+#include "ImageDriver.hpp"
+#include "LibpngImageDriver.hpp"
 #include "TestVideoDriver.hpp"
 #include "Threading.hpp"
 #include "VideoDriver.hpp"
@@ -94,7 +94,7 @@ void VncMain(int argc, char* const* argv) {
     }
 
     FakeDrawingInit(width, height);
-    ImageIo::set_io(new LibpngImageIo);
+    ImageDriver::set_driver(new LibpngImageDriver);
     VideoDriver::set_driver(new VncVideoDriver(5901));
     SoundDriver::set_driver(new NullSoundDriver);
 
