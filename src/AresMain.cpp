@@ -75,6 +75,7 @@
 #include "SpriteCursor.hpp"
 #include "SpriteHandling.hpp"
 #include "StringHandling.hpp"
+#include "StringList.hpp"
 
 #include "Time.hpp"
 #include "TimeUnit.hpp"
@@ -198,6 +199,8 @@ class GamePlay : public Card {
   public:
     GamePlay(GameResult* game_result, long* seconds);
 
+    virtual void become_front();
+
     virtual double delay();
     virtual void fire_timer();
 
@@ -209,6 +212,13 @@ class GamePlay : public Card {
     virtual bool key_up(int key);
 
   private:
+    enum State {
+        PLAYING,
+        PAUSED,
+        PLAY_AGAIN,
+    };
+    State _state;
+
     GameResult* const _game_result;
     long* const _seconds;
     const Rect _play_area;
@@ -361,7 +371,8 @@ void MainPlay::become_front() {
 }
 
 GamePlay::GamePlay(GameResult* game_result, long* seconds)
-        : _game_result(game_result),
+        : _state(PLAYING),
+          _game_result(game_result),
           _seconds(seconds),
           _play_area(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM),
           _scenario_start_time(
@@ -373,15 +384,7 @@ GamePlay::GamePlay(GameResult* game_result, long* seconds)
           _decide_cycle(0),
           _last_click_time(0),
           _scenario_check_time(0) {
-    SetSpriteCursorTable(500);
-    ShowSpriteCursor(true);
-    ResetHintLine();
-
     globals()->gLastKeys = globals()->gTheseKeys = 0;
-
-    HideCursor();
-
-    CheckScenarioConditions(0);
 
     bzero(_key_map, sizeof(_key_map));
     bzero(_last_key_map, sizeof(_key_map));
@@ -389,8 +392,88 @@ GamePlay::GamePlay(GameResult* game_result, long* seconds)
     globals()->gFrameCount = 0;
 }
 
+class PauseScreen : public Card {
+  public:
+    PauseScreen()
+            : _visible(false),
+              _next_switch(0.0) {
+        StringList list;
+        list.load(3100);
+        string_to_pstring(list.at(11), _text);
+    }
+
+    virtual void become_front() {
+        // TODO(sfiera): cancel any active transition.
+        PlayVolumeSound(kComputerBeep4, kMaxSoundVolume, kShortPersistence, kMustPlaySound);
+        show_hide();
+    }
+
+    virtual bool key_down(int key) {
+        if (key == 0x24) {
+            stack()->pop(this);
+        }
+        return true;
+    }
+
+    virtual bool key_up(int key) {
+        if (key == 0x36) {
+            stack()->pop(this);
+        }
+        return true;
+    }
+
+    virtual double delay() {
+        return _next_switch - now_secs();
+    }
+
+    virtual void fire_timer() {
+        show_hide();
+    }
+
+  public:
+    void show_hide() {
+        _visible = !_visible;
+        _next_switch = now_secs() + (1.0 / 3.0);
+
+        if (_visible) {
+            StartPauseIndicator(_text, Randomize(16));
+        } else {
+            StopPauseIndicator(_text);
+        }
+    }
+
+    Str255 _text;
+    bool _visible;
+    double _next_switch;
+};
+
+void GamePlay::become_front() {
+    switch (_state) {
+      case PLAYING:
+        SetSpriteCursorTable(500);
+        ShowSpriteCursor(true);
+        ResetHintLine();
+
+        HideCursor();
+
+        CheckScenarioConditions(0);
+        break;
+
+      case PAUSED:
+        _state = PLAYING;
+        break;
+        
+      case PLAY_AGAIN:
+        break;
+    }
+}
+
 double GamePlay::delay() {
-    return 1.0 / 120.0;
+    if (_state == PLAYING) {
+        return 1.0 / 120.0;
+    } else {
+        return 0.0;
+    }
 }
 
 void GamePlay::fire_timer() {
@@ -538,35 +621,9 @@ void GamePlay::fire_timer() {
     }
 
     if (mPauseKey(_key_map)) {
-        Str255 string;
-        RestoreOriginalColors();
-        GetIndString( string, 3100, 11);
-
-        PlayVolumeSound(kComputerBeep4, kMaxSoundVolume, kShortPersistence, kMustPlaySound);
-        while ( (mPauseKey( _key_map)) && (!(mReturnKey(_key_map)))) {
-            int l1 = TickCount();
-            StartPauseIndicator(string, Randomize(16));
-            _player_paused = false;
-            while ((mPauseKey(_key_map))
-                    && (!(mReturnKey(_key_map)))
-                    && ((TickCount() - l1) < 20)) {
-                GetKeys(_key_map);
-            }
-
-            l1 = TickCount();
-            StopPauseIndicator( string);
-            _player_paused = true;
-            while ((mPauseKey(_key_map))
-                    && (!(mReturnKey(_key_map)))
-                    && ((TickCount() - l1) < 20)) {
-                GetKeys( _key_map);
-                if (CommandKey()) {
-                    EventRecord theEvent;
-                    WaitNextEvent (everyEvent, &theEvent, 3, nil);
-                }
-            }
-
-        }
+        _state = PAUSED;
+        stack()->push(new PauseScreen);
+        return;
     }
 
     if ((!(globals()->gOptions & kOptionNetworkOn)) &&
