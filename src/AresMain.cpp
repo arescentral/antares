@@ -399,7 +399,7 @@ class PauseScreen : public Card {
               _next_switch(0.0) {
         StringList list;
         list.load(3100);
-        string_to_pstring(list.at(11), _text);
+        string_to_pstring(list.at(10), _text);
     }
 
     virtual void become_front() {
@@ -408,22 +408,21 @@ class PauseScreen : public Card {
         show_hide();
     }
 
-    virtual bool key_down(int key) {
-        if (key == 0x24) {
-            stack()->pop(this);
+    virtual void resign_front() {
+        if (_visible) {
+            StopPauseIndicator(_text);
         }
-        return true;
     }
 
     virtual bool key_up(int key) {
-        if (key == 0x36) {
+        if (key == 0x3900) {
             stack()->pop(this);
         }
         return true;
     }
 
     virtual double delay() {
-        return _next_switch - now_secs();
+        return std::max(_next_switch - now_secs(), 0.001);
     }
 
     virtual void fire_timer() {
@@ -622,6 +621,7 @@ void GamePlay::fire_timer() {
 
     if (mPauseKey(_key_map)) {
         _state = PAUSED;
+        _player_paused = true;
         stack()->push(new PauseScreen);
         return;
     }
