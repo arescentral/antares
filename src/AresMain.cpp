@@ -472,6 +472,7 @@ void GamePlay::become_front() {
             globals()->gGameOver = 1;
             globals()->gScenarioWinner.next = -1;
             globals()->gScenarioWinner.text = -1;
+            stack()->pop(this);
             break;
 
           case PlayAgainScreen::RESTART:
@@ -479,6 +480,7 @@ void GamePlay::become_front() {
             globals()->gGameOver = 1;
             globals()->gScenarioWinner.next = -1;
             globals()->gScenarioWinner.text = -1;
+            stack()->pop(this);
             break;
 
           case PlayAgainScreen::RESUME:
@@ -491,6 +493,7 @@ void GamePlay::become_front() {
             globals()->gScenarioWinner.next =
                 GetChapterNumberFromScenarioNumber(globals()->gThisScenarioNumber) + 1;
             globals()->gScenarioWinner.text = -1;
+            stack()->pop(this);
             break;
 
           default:
