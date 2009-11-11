@@ -31,8 +31,7 @@
 
 namespace antares {
 
-extern PixMap* gActiveWorld;
-extern PixMap* gOffWorld;
+extern PixMap* gRealWorld;
 
 namespace {
 
@@ -115,11 +114,9 @@ void SelectLevelScreen::draw_level_name(unsigned char* name, long fontNum, long 
             reinterpret_cast<char*>(name + 1), name[0], fontNum, color, RgbColor::kBlack);
     retro.wrap_to(440, 2);
 
-    DrawInOffWorld();
-    gActiveWorld->view(i.bounds).fill(RgbColor::kBlack);
-    retro.draw(gActiveWorld, i.bounds);
-    DrawInRealWorld();
-    CopyOffWorldToRealWorld(i.bounds);
+    pix()->view(i.bounds).fill(RgbColor::kBlack);
+    retro.draw(pix(), i.bounds);
+    gRealWorld->copy(*pix());
 }
 
 }  // namespace antares

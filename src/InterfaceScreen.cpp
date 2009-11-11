@@ -32,13 +32,13 @@ namespace antares {
 extern long WORLD_WIDTH;
 extern long WORLD_HEIGHT;
 extern PixMap* gRealWorld;
-extern PixMap* gOffWorld;
 
 InterfaceScreen::InterfaceScreen(int id)
         : _state(NORMAL),
           _id(id),
           _last_event(now_secs()),
-          _hit_item(0) {
+          _hit_item(0),
+          _pix(new ArrayPixMap(WORLD_WIDTH, WORLD_HEIGHT)) {
     Resource rsrc('intr', id);
     BufferBinaryReader bin(rsrc.data(), rsrc.size());
     const int offset_x = (WORLD_WIDTH / 2) - 320;
@@ -63,13 +63,13 @@ void InterfaceScreen::become_front() {
 
 void InterfaceScreen::draw() const {
     DrawInOffWorld();
-    gOffWorld->fill(RgbColor::kBlack);
+    _pix->fill(RgbColor::kBlack);
     for (std::vector<interfaceItemType>::const_iterator it = _items.begin(); it != _items.end();
             ++it) {
-        DrawAnyInterfaceItem(*it, gOffWorld);
+        DrawAnyInterfaceItem(*it, _pix.get());
     }
     DrawInRealWorld();
-    CopyOffWorldToRealWorld(gRealWorld->bounds());
+    gRealWorld->copy(*_pix);
 }
 
 bool InterfaceScreen::mouse_down(int button, const Point& where) {
@@ -190,6 +190,10 @@ const interfaceItemType& InterfaceScreen::item(int i) const {
 
 interfaceItemType* InterfaceScreen::mutable_item(int i) {
     return &_items[i];
+}
+
+PixMap* InterfaceScreen::pix() const {
+    return _pix.get();
 }
 
 }  // namespace antares

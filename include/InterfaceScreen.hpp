@@ -48,9 +48,9 @@ class InterfaceScreen : public Card {
 
     const interfaceItemType& item(int index) const;
     interfaceItemType* mutable_item(int index);
+    PixMap* pix() const;
 
   private:
-
     enum State {
         NORMAL,
         MOUSE_DOWN,
@@ -62,6 +62,7 @@ class InterfaceScreen : public Card {
     double _last_event;
     std::vector<interfaceItemType> _items;
     int _hit_item;
+    scoped_ptr<PixMap> _pix;
 
     DISALLOW_COPY_AND_ASSIGN(InterfaceScreen);
 };
