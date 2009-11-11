@@ -193,8 +193,8 @@ void MoveTo(int x, int y) {
     currentPen.v = y;
 }
 
-void MacLineTo(int h, int v) {
-    DrawLine(gActiveWorld, currentPen, Point(h, v));
+void MacLineTo(PixMap* pix, int h, int v) {
+    DrawLine(pix, currentPen, Point(h, v));
     MoveTo(h, v);
 }
 

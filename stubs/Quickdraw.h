@@ -26,7 +26,7 @@ void MacFrameRect(const Rect& rect);
 STUB1(FrameOval, void(const Rect& rect));
 STUB1(PaintOval, void(const Rect& rect));
 
-void MacLineTo(int x, int y);
+void MacLineTo(PixMap* pix, int x, int y);
 
 void MoveTo(int x, int y);
 void GetPen(Point* pen);

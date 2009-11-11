@@ -2033,7 +2033,7 @@ bool DoMissionInterface( long whichScenario)
             x = Randomize( mapRect.right - mapRect.left) + mapRect.left;
             y = Randomize( mapRect.bottom - mapRect.top) + mapRect.top;
             MoveTo( x, y);
-            MacLineTo( x, y);
+            MacLineTo(gActiveWorld, x, y);
         }
         NormalizeColors();
         DrawInRealWorld();
@@ -2278,23 +2278,23 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
             if ( dataItem->bounds.right < hiliteBounds.left)
             {
                 MoveTo( hiliteBounds.left, hiliteBounds.top);
-                MacLineTo( newRect.right + kMissionLineHJog, hiliteBounds.top);
-                MacLineTo( newRect.right + kMissionLineHJog, newRect.top);
-                MacLineTo( newRect.right + 1, newRect.top);
+                MacLineTo(gActiveWorld, newRect.right + kMissionLineHJog, hiliteBounds.top);
+                MacLineTo(gActiveWorld, newRect.right + kMissionLineHJog, newRect.top);
+                MacLineTo(gActiveWorld, newRect.right + 1, newRect.top);
                 MoveTo( hiliteBounds.left, hiliteBounds.bottom - 1);
-                MacLineTo( newRect.right + kMissionLineHJog, hiliteBounds.bottom - 1);
-                MacLineTo( newRect.right + kMissionLineHJog, newRect.bottom - 1);
-                MacLineTo( newRect.right + 1, newRect.bottom - 1);
+                MacLineTo(gActiveWorld, newRect.right + kMissionLineHJog, hiliteBounds.bottom - 1);
+                MacLineTo(gActiveWorld, newRect.right + kMissionLineHJog, newRect.bottom - 1);
+                MacLineTo(gActiveWorld, newRect.right + 1, newRect.bottom - 1);
             } else
             {
                 MoveTo( hiliteBounds.right, hiliteBounds.top);
-                MacLineTo( newRect.left - kMissionLineHJog, hiliteBounds.top);
-                MacLineTo( newRect.left - kMissionLineHJog, newRect.top);
-                MacLineTo( newRect.left - 2, newRect.top);
+                MacLineTo(gActiveWorld, newRect.left - kMissionLineHJog, hiliteBounds.top);
+                MacLineTo(gActiveWorld, newRect.left - kMissionLineHJog, newRect.top);
+                MacLineTo(gActiveWorld, newRect.left - 2, newRect.top);
                 MoveTo( hiliteBounds.right, hiliteBounds.bottom - 1);
-                MacLineTo( newRect.left - kMissionLineHJog, hiliteBounds.bottom - 1);
-                MacLineTo( newRect.left - kMissionLineHJog, newRect.bottom - 1);
-                MacLineTo( newRect.left - 2, newRect.bottom - 1);
+                MacLineTo(gActiveWorld, newRect.left - kMissionLineHJog, hiliteBounds.bottom - 1);
+                MacLineTo(gActiveWorld, newRect.left - kMissionLineHJog, newRect.bottom - 1);
+                MacLineTo(gActiveWorld, newRect.left - 2, newRect.bottom - 1);
             }
 
         }

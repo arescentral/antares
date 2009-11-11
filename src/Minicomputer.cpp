@@ -391,7 +391,7 @@ void DrawMiniScreen( void)
             MoveTo( mRect.left, mRect.top + (count + lineCorrect) * ((
                 gDirectText->height)/* * 2*/) + gDirectText->ascent/* * 2*/);
             SetTranslateColorShadeFore( lineColor, MEDIUM);
-            MacLineTo( mRect.right - 1, mRect.top + (count + lineCorrect) * ((
+            MacLineTo(gActiveWorld, mRect.right - 1, mRect.top + (count + lineCorrect) * ((
                 gDirectText->height) /* * 2 */) + gDirectText->ascent /* * 2 */);
         }
 
@@ -505,7 +505,7 @@ void DrawAndShowMiniScreenLine( long whichLine)
         MoveTo( lRect.left, lRect.top + (whichLine + lineCorrect) * ((
             gDirectText->height) /* * 2 */) + gDirectText->ascent /* * 2 */);
         SetTranslateColorShadeFore( lineColor, MEDIUM);
-        MacLineTo( lRect.right - 1, lRect.top + (whichLine + lineCorrect) * ((
+        MacLineTo(gActiveWorld, lRect.right - 1, lRect.top + (whichLine + lineCorrect) * ((
             gDirectText->height) /* * 2 */) + gDirectText->ascent /* * 2 */);
     }
 

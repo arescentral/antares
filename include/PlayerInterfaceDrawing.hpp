@@ -47,13 +47,13 @@ void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix);
 void DrawPlayerInterfaceList(const interfaceItemType& item, PixMap* pix);
 void DrawPlayerInterfaceListEntry(const interfaceItemType& item, int which_entry, PixMap* pix);
 
-void DrawPlayerListLineUp(const interfaceItemType& item, interfaceItemStatusEnum status);
+void DrawPlayerListLineUp(const interfaceItemType& item, interfaceItemStatusEnum status, PixMap* pix);
 void GetPlayerListLineUpRect(const interfaceItemType& item, Rect* rect);
-void DrawPlayerListPageUp(const interfaceItemType& item, interfaceItemStatusEnum status);
+void DrawPlayerListPageUp(const interfaceItemType& item, interfaceItemStatusEnum status, PixMap* pix);
 void GetPlayerListPageUpRect(const interfaceItemType& item, Rect* rect);
-void DrawPlayerListLineDown(const interfaceItemType& item, interfaceItemStatusEnum status);
+void DrawPlayerListLineDown(const interfaceItemType& item, interfaceItemStatusEnum status, PixMap* pix);
 void GetPlayerListLineDownRect(const interfaceItemType& item, Rect* rect);
-void DrawPlayerListPageDown(const interfaceItemType& item, interfaceItemStatusEnum status);
+void DrawPlayerListPageDown(const interfaceItemType& item, interfaceItemStatusEnum status, PixMap* pix);
 void GetPlayerListPageDownRect(const interfaceItemType& item, Rect* rect);
 
 void DrawInterfaceTextRect(const interfaceItemType& item, PixMap* pix);

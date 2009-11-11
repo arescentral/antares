@@ -73,23 +73,22 @@ enum inlineKindType {
 };
 
 extern directTextType* gDirectText;
-extern PixMap* gActiveWorld;
 
-inline void mDrawPuffUpRect(Rect& mrect, uint8_t mcolor, int mshade) {
+inline void mDrawPuffUpRect(Rect& mrect, uint8_t mcolor, int mshade, PixMap* pix) {
     SetTranslateColorShadeFore(mcolor, mshade);
     RgbColor color;
     GetRGBTranslateColorShade(&color, mcolor, mshade);
-    gActiveWorld->view(mrect).fill(color);
+    pix->view(mrect).fill(color);
     SetTranslateColorShadeFore(mcolor, mshade + kLighterColor);
     MoveTo(mrect.left, mrect.bottom - 1);
-    MacLineTo(mrect.left, mrect.top);
-    MacLineTo(mrect.right - 1, mrect.top);
+    MacLineTo(pix, mrect.left, mrect.top);
+    MacLineTo(pix, mrect.right - 1, mrect.top);
     SetTranslateColorShadeFore(mcolor, mshade + kDarkerColor);
-    MacLineTo(mrect.right - 1, mrect.bottom - 1);
-    MacLineTo(mrect.left, mrect.bottom - 1);
+    MacLineTo(pix, mrect.right - 1, mrect.bottom - 1);
+    MacLineTo(pix, mrect.left, mrect.bottom - 1);
 }
 
-inline void mDrawPuffUpOval(Rect& mrect, uint8_t mcolor, int mshade) {
+inline void mDrawPuffUpOval(Rect& mrect, uint8_t mcolor, int mshade, PixMap* pix) {
     SetTranslateColorShadeFore(mcolor, mshade + kDarkerColor);
     mrect.left++;
     mrect.right++;
@@ -116,19 +115,19 @@ inline void mDrawPuffUpOval(Rect& mrect, uint8_t mcolor, int mshade) {
     PaintOval(mrect);
 }
 
-inline void mDrawPuffDownRect(Rect& mrect, uint8_t mcolor, int mshade) {
+inline void mDrawPuffDownRect(Rect& mrect, uint8_t mcolor, int mshade, PixMap* pix) {
     SetTranslateColorFore(BLACK);
-    gActiveWorld->view(mrect).fill(RgbColor::kBlack);
+    pix->view(mrect).fill(RgbColor::kBlack);
     SetTranslateColorShadeFore(mcolor, mshade + kDarkerColor);
     MoveTo(mrect.left - 1, mrect.bottom);
-    MacLineTo(mrect.left - 1, mrect.top - 1);
-    MacLineTo(mrect.right, mrect.top - 1);
+    MacLineTo(pix, mrect.left - 1, mrect.top - 1);
+    MacLineTo(pix, mrect.right, mrect.top - 1);
     SetTranslateColorShadeFore(mcolor, mshade + kLighterColor);
-    MacLineTo(mrect.right, mrect.bottom);
-    MacLineTo(mrect.left - 1, mrect.bottom);
+    MacLineTo(pix, mrect.right, mrect.bottom);
+    MacLineTo(pix, mrect.left - 1, mrect.bottom);
 }
 
-inline void mDrawPuffDownOval(Rect& mrect, uint8_t mcolor, int mshade) {
+inline void mDrawPuffDownOval(Rect& mrect, uint8_t mcolor, int mshade, PixMap* pix) {
     SetTranslateColorShadeFore(mcolor, mshade + kLighterColor);
     mrect.left++;
     mrect.right++;
@@ -155,65 +154,65 @@ inline void mDrawPuffDownOval(Rect& mrect, uint8_t mcolor, int mshade) {
     PaintOval(mrect);
 }
 
-inline void mDrawPuffUpTopBorder(Rect& mrect, Rect& mtrect, uint8_t mcolor, int mshade, int mthisHBorder) {
+inline void mDrawPuffUpTopBorder(Rect& mrect, Rect& mtrect, uint8_t mcolor, int mshade, int mthisHBorder, PixMap* pix) {
     RgbColor color;
     GetRGBTranslateColorShade(&color, mcolor, mshade);
     SetTranslateColorShadeFore(mcolor, mshade);
     mtrect = Rect(mrect.left - mthisHBorder,
         mrect.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight,
         mrect.left, mrect.top);
-    gActiveWorld->view(mtrect).fill(color);
+    pix->view(mtrect).fill(color);
     mtrect = Rect(mrect.right,
         mrect.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight,
         mrect.right + mthisHBorder, mrect.top);
-    gActiveWorld->view(mtrect).fill(color);
+    pix->view(mtrect).fill(color);
     mtrect = Rect(mrect.left,
         mrect.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight,
         mrect.right, mrect.top  - kInterfaceVLipHeight);
-    gActiveWorld->view(mtrect).fill(color);
+    pix->view(mtrect).fill(color);
     SetTranslateColorShadeFore(mcolor, mshade + kDarkerColor);
     MoveTo(mrect.left - mthisHBorder, mrect.top);
-    MacLineTo(mrect.left, mrect.top);
-    MacLineTo(mrect.left, mrect.top - kInterfaceVLipHeight);
-    MacLineTo(mrect.right, mrect.top - kInterfaceVLipHeight);
-    MacLineTo(mrect.right, mrect.top);
-    MacLineTo(mrect.right + mthisHBorder, mrect.top);
-    MacLineTo(mrect.right + mthisHBorder, mrect.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight);
+    MacLineTo(pix, mrect.left, mrect.top);
+    MacLineTo(pix, mrect.left, mrect.top - kInterfaceVLipHeight);
+    MacLineTo(pix, mrect.right, mrect.top - kInterfaceVLipHeight);
+    MacLineTo(pix, mrect.right, mrect.top);
+    MacLineTo(pix, mrect.right + mthisHBorder, mrect.top);
+    MacLineTo(pix, mrect.right + mthisHBorder, mrect.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight);
     SetTranslateColorShadeFore(mcolor, mshade + kLighterColor);
-    MacLineTo(mrect.left - mthisHBorder, mrect.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight);
-    MacLineTo(mrect.left - mthisHBorder, mrect.top);
+    MacLineTo(pix, mrect.left - mthisHBorder, mrect.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight);
+    MacLineTo(pix, mrect.left - mthisHBorder, mrect.top);
 }
 
-inline void mDrawPuffUpBottomBorder(Rect& mrect, Rect& mtrect, uint8_t mcolor, int mshade, int mthisHBorder) {
+inline void mDrawPuffUpBottomBorder(Rect& mrect, Rect& mtrect, uint8_t mcolor, int mshade, int mthisHBorder, PixMap* pix) {
     RgbColor color;
     GetRGBTranslateColorShade(&color, mcolor, mshade);
     SetTranslateColorShadeFore(mcolor, mshade);
     mtrect = Rect(mrect.left - mthisHBorder,
         mrect.bottom,
         mrect.left, mrect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
-    gActiveWorld->view(mtrect).fill(color);
+    pix->view(mtrect).fill(color);
     mtrect = Rect(mrect.right,
         mrect.bottom,
         mrect.right + mthisHBorder, mrect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
-    gActiveWorld->view(mtrect).fill(color);
+    pix->view(mtrect).fill(color);
     mtrect = Rect(mrect.left,
         mrect.bottom + kInterfaceVLipHeight,
         mrect.right, mrect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
-    gActiveWorld->view(mtrect).fill(color);
+    pix->view(mtrect).fill(color);
     SetTranslateColorShadeFore(mcolor, mshade + kLighterColor);
     MoveTo(mrect.left - mthisHBorder, mrect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
-    MacLineTo(mrect.left - mthisHBorder, mrect.bottom);
-    MacLineTo(mrect.left, mrect.bottom);
-    MacLineTo(mrect.left, mrect.bottom + kInterfaceVLipHeight);
-    MacLineTo(mrect.right, mrect.bottom + kInterfaceVLipHeight);
-    MacLineTo(mrect.right, mrect.bottom);
-    MacLineTo(mrect.right + mthisHBorder, mrect.bottom);
+    MacLineTo(pix, mrect.left - mthisHBorder, mrect.bottom);
+    MacLineTo(pix, mrect.left, mrect.bottom);
+    MacLineTo(pix, mrect.left, mrect.bottom + kInterfaceVLipHeight);
+    MacLineTo(pix, mrect.right, mrect.bottom + kInterfaceVLipHeight);
+    MacLineTo(pix, mrect.right, mrect.bottom);
+    MacLineTo(pix, mrect.right + mthisHBorder, mrect.bottom);
     SetTranslateColorShadeFore(mcolor, mshade + kDarkerColor);
-    MacLineTo(mrect.right + mthisHBorder, mrect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
-    MacLineTo(mrect.left - mthisHBorder, mrect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
+    MacLineTo(pix, mrect.right + mthisHBorder, mrect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
+    MacLineTo(pix, mrect.left - mthisHBorder, mrect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
 }
 
-inline void mDrawPuffUpTBorder(Rect& mrect, Rect& mtrect, uint8_t mcolor, int mshade, int msheight, int mthisHBorder) {
+inline void mDrawPuffUpTBorder(Rect& mrect, Rect& mtrect, uint8_t mcolor, int mshade, int msheight, int mthisHBorder, PixMap* pix) {
     RgbColor color;
     GetRGBTranslateColorShade(&color, mcolor, mshade);
     SetTranslateColorShadeFore(mcolor, mshade);
@@ -221,32 +220,32 @@ inline void mDrawPuffUpTBorder(Rect& mrect, Rect& mtrect, uint8_t mcolor, int ms
         mrect.top + msheight,
         mrect.left,
         mrect.top + msheight + kLabelBottomHeight);
-    gActiveWorld->view(mtrect).fill(color);
+    pix->view(mtrect).fill(color);
     mtrect = Rect(mrect.right,
         mrect.top + msheight,
         mrect.right + mthisHBorder,
         mrect.top + msheight + kLabelBottomHeight);
-    gActiveWorld->view(mtrect).fill(color);
+    pix->view(mtrect).fill(color);
     mtrect = Rect(mrect.left,
         mrect.top + msheight + kInterfaceVLipHeight,
         mrect.right,
         mrect.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight);
-    gActiveWorld->view(mtrect).fill(color);
+    pix->view(mtrect).fill(color);
     SetTranslateColorShadeFore(mcolor, mshade + kLighterColor);
     MoveTo(mrect.left - mthisHBorder, mrect.top + msheight + kLabelBottomHeight);
-    MacLineTo(mrect.left - mthisHBorder, mrect.top + msheight);
-    MacLineTo(mrect.left, mrect.top + msheight);
-    MacLineTo(mrect.left, mrect.top + msheight + kInterfaceVLipHeight);
-    MacLineTo(mrect.right, mrect.top + msheight + kInterfaceVLipHeight);
-    MacLineTo(mrect.right, mrect.top + msheight);
-    MacLineTo(mrect.right + mthisHBorder, mrect.top + msheight);
+    MacLineTo(pix, mrect.left - mthisHBorder, mrect.top + msheight);
+    MacLineTo(pix, mrect.left, mrect.top + msheight);
+    MacLineTo(pix, mrect.left, mrect.top + msheight + kInterfaceVLipHeight);
+    MacLineTo(pix, mrect.right, mrect.top + msheight + kInterfaceVLipHeight);
+    MacLineTo(pix, mrect.right, mrect.top + msheight);
+    MacLineTo(pix, mrect.right + mthisHBorder, mrect.top + msheight);
     SetTranslateColorShadeFore(mcolor, mshade + kDarkerColor);
-    MacLineTo(mrect.right + mthisHBorder, mrect.top + msheight + kLabelBottomHeight);
-    MacLineTo(mrect.right, mrect.top + msheight + kLabelBottomHeight);
-    MacLineTo(mrect.right, mrect.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight);
-    MacLineTo(mrect.left, mrect.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight);
-    MacLineTo(mrect.left, mrect.top + msheight + kLabelBottomHeight);
-    MacLineTo(mrect.left - mthisHBorder, mrect.top + msheight + kLabelBottomHeight);
+    MacLineTo(pix, mrect.right + mthisHBorder, mrect.top + msheight + kLabelBottomHeight);
+    MacLineTo(pix, mrect.right, mrect.top + msheight + kLabelBottomHeight);
+    MacLineTo(pix, mrect.right, mrect.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight);
+    MacLineTo(pix, mrect.left, mrect.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight);
+    MacLineTo(pix, mrect.left, mrect.top + msheight + kLabelBottomHeight);
+    MacLineTo(pix, mrect.left - mthisHBorder, mrect.top + msheight + kLabelBottomHeight);
 }
 
 void DrawPlayerInterfacePlainRect(
@@ -264,10 +263,10 @@ void DrawPlayerInterfacePlainRect(
     tRect.bottom += kInterfaceContentBuffer;
 
     // top border
-    mDrawPuffUpTopBorder( tRect, uRect, color, DARK, thisHBorder);
+    mDrawPuffUpTopBorder( tRect, uRect, color, DARK, thisHBorder, pix);
     // bottom border
 
-    mDrawPuffUpBottomBorder( tRect, uRect, color, DARK, thisHBorder);
+    mDrawPuffUpBottomBorder( tRect, uRect, color, DARK, thisHBorder, pix);
 
     // main part left border
 
@@ -277,13 +276,13 @@ void DrawPlayerInterfacePlainRect(
         tRect.top + kInterfaceHTop,
         tRect.left + 1,
         tRect.top + vcenter - kInterfaceVLipHeight + 1);
-    mDrawPuffUpRect( uRect, color, DARKER);
+    mDrawPuffUpRect( uRect, color, DARKER, pix);
 
     uRect = Rect(tRect.left - thisHBorder,
         tRect.bottom - vcenter + kInterfaceVLipHeight,
         tRect.left + 1,
         tRect.bottom - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, color, VERY_DARK);
+    mDrawPuffUpRect( uRect, color, VERY_DARK, pix);
 
     // right border
 
@@ -291,13 +290,13 @@ void DrawPlayerInterfacePlainRect(
         tRect.top + kInterfaceHTop,
         tRect.right + thisHBorder + 1,
         tRect.top + vcenter - kInterfaceVLipHeight + 1);
-    mDrawPuffUpRect( uRect, color, DARKER);
+    mDrawPuffUpRect( uRect, color, DARKER, pix);
 
     uRect = Rect(tRect.right,
         tRect.bottom - vcenter + kInterfaceVLipHeight,
         tRect.right + thisHBorder + 1,
         tRect.bottom - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, color, VERY_DARK);
+    mDrawPuffUpRect( uRect, color, VERY_DARK, pix);
 
     SetTranslateColorFore( BLACK);
 }
@@ -324,37 +323,37 @@ void DrawPlayerInterfaceTabBox(
         (tRect).left, (tRect).top);
     RgbColor rgb;
     GetRGBTranslateColorShade(&rgb, color, shade);
-    gActiveWorld->view(uRect).fill(rgb);
+    pix->view(uRect).fill(rgb);
     uRect = Rect((tRect).right,
         (tRect).top - 3 - kInterfaceVCornerHeight,
         (tRect).right + thisHBorder, (tRect).top);
-    gActiveWorld->view(uRect).fill(rgb);
+    pix->view(uRect).fill(rgb);
     uRect = Rect((tRect).left,
         (tRect).top - 3 - kInterfaceVCornerHeight,
         (tRect).left + 6, (tRect).top  - kInterfaceVLipHeight);
-    gActiveWorld->view(uRect).fill(rgb);
+    pix->view(uRect).fill(rgb);
     uRect = Rect((tRect).right - top_right_border_size,
         (tRect).top - 3 - kInterfaceVCornerHeight,
         (tRect).right, (tRect).top  - kInterfaceVLipHeight);
-    gActiveWorld->view(uRect).fill(rgb);
+    pix->view(uRect).fill(rgb);
     SetTranslateColorShadeFore( color, shade + kDarkerColor);
     MoveTo( (tRect).left - thisHBorder, (tRect).top);
-    MacLineTo( (tRect).left, (tRect).top);
-    MacLineTo( (tRect).left, (tRect).top - kInterfaceVLipHeight);
-    MacLineTo( (tRect).left + 5, (tRect).top - kInterfaceVLipHeight);
+    MacLineTo(pix, (tRect).left, (tRect).top);
+    MacLineTo(pix, (tRect).left, (tRect).top - kInterfaceVLipHeight);
+    MacLineTo(pix, (tRect).left + 5, (tRect).top - kInterfaceVLipHeight);
     MoveTo( (tRect).right - top_right_border_size, (tRect).top - kInterfaceVLipHeight);
-    MacLineTo( (tRect).right, (tRect).top - kInterfaceVLipHeight);
-    MacLineTo( (tRect).right, (tRect).top);
-    MacLineTo( (tRect).right + thisHBorder, (tRect).top);
-    MacLineTo( (tRect).right + thisHBorder, (tRect).top - 3 - kInterfaceVCornerHeight);
+    MacLineTo(pix, (tRect).right, (tRect).top - kInterfaceVLipHeight);
+    MacLineTo(pix, (tRect).right, (tRect).top);
+    MacLineTo(pix, (tRect).right + thisHBorder, (tRect).top);
+    MacLineTo(pix, (tRect).right + thisHBorder, (tRect).top - 3 - kInterfaceVCornerHeight);
     SetTranslateColorShadeFore( color, shade + kLighterColor);
-    MacLineTo( (tRect).right - top_right_border_size, (tRect).top - 3 - kInterfaceVCornerHeight);
+    MacLineTo(pix, (tRect).right - top_right_border_size, (tRect).top - 3 - kInterfaceVCornerHeight);
     MoveTo( (tRect).left + 5, (tRect).top - 3 - kInterfaceVCornerHeight);
-    MacLineTo( (tRect).left - thisHBorder, (tRect).top - 3 - kInterfaceVCornerHeight);
-    MacLineTo( (tRect).left - thisHBorder, (tRect).top);
+    MacLineTo(pix, (tRect).left - thisHBorder, (tRect).top - 3 - kInterfaceVCornerHeight);
+    MacLineTo(pix, (tRect).left - thisHBorder, (tRect).top);
     // bottom border
 
-    mDrawPuffUpBottomBorder( tRect, uRect, color, DARK, thisHBorder);
+    mDrawPuffUpBottomBorder( tRect, uRect, color, DARK, thisHBorder, pix);
 
     // main part left border
 
@@ -364,13 +363,13 @@ void DrawPlayerInterfaceTabBox(
         tRect.top + kInterfaceHTop,
         tRect.left + 1,
         tRect.top + vcenter - kInterfaceVLipHeight + 1);
-    mDrawPuffUpRect( uRect, color, DARKER);
+    mDrawPuffUpRect( uRect, color, DARKER, pix);
 
     uRect = Rect(tRect.left - thisHBorder,
         tRect.bottom - vcenter + kInterfaceVLipHeight,
         tRect.left + 1,
         tRect.bottom - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, color, VERY_DARK);
+    mDrawPuffUpRect( uRect, color, VERY_DARK, pix);
 
     // right border
 
@@ -378,13 +377,13 @@ void DrawPlayerInterfaceTabBox(
         tRect.top + kInterfaceHTop,
         tRect.right + thisHBorder + 1,
         tRect.top + vcenter - kInterfaceVLipHeight + 1);
-    mDrawPuffUpRect( uRect, color, DARKER);
+    mDrawPuffUpRect( uRect, color, DARKER, pix);
 
     uRect = Rect(tRect.right,
         tRect.bottom - vcenter + kInterfaceVLipHeight,
         tRect.right + thisHBorder + 1,
         tRect.bottom - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, color, VERY_DARK);
+    mDrawPuffUpRect( uRect, color, VERY_DARK, pix);
 
     SetTranslateColorFore( BLACK);
 }
@@ -418,10 +417,10 @@ void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
         shade = MEDIUM;
     }
 
-    mDrawPuffUpTopBorder( tRect, uRect, item.color, shade, thisHBorder);
+    mDrawPuffUpTopBorder( tRect, uRect, item.color, shade, thisHBorder, pix);
     // bottom border
 
-    mDrawPuffUpBottomBorder( tRect, uRect, item.color, shade, thisHBorder);
+    mDrawPuffUpBottomBorder( tRect, uRect, item.color, shade, thisHBorder, pix);
 
     // side border top
 
@@ -433,16 +432,16 @@ void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
             tRect.bottom - kInterfaceHTop + 1);
     if (item.item.plainButton.status == kIH_Hilite) {
         shade = LIGHT;
-        mDrawPuffUpRect( uRect, item.color, shade);
-        mDrawPuffUpRect( vRect, item.color, shade);
+        mDrawPuffUpRect( uRect, item.color, shade, pix);
+        mDrawPuffUpRect( vRect, item.color, shade, pix);
     } else {
         if (item.item.plainButton.status == kDimmed) {
             shade = VERY_DARK;
         } else {
             shade = MEDIUM + kSlightlyLighterColor;
         }
-        mDrawPuffUpRect( uRect, item.color, shade);
-        mDrawPuffUpRect( vRect, item.color, shade);
+        mDrawPuffUpRect( uRect, item.color, shade, pix);
+        mDrawPuffUpRect( vRect, item.color, shade, pix);
     }
 
 
@@ -462,7 +461,7 @@ void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
         SetTranslateColorShadeFore(item.color, shade);
 
         GetRGBTranslateColorShade(&color, item.color, shade);
-        gActiveWorld->view(uRect).fill(color);
+        pix->view(uRect).fill(color);
 
         if (item.item.plainButton.status == kIH_Hilite)
         {
@@ -500,7 +499,7 @@ void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
         uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                 tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 1,
                 tRect.bottom - kInterfaceContentBuffer + 1);
-        mDrawPuffUpRect(uRect, item.color, shade);
+        mDrawPuffUpRect(uRect, item.color, shade, pix);
 
         if (item.item.plainButton.status == kIH_Hilite)
             shade = LIGHT;
@@ -511,7 +510,7 @@ void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
                         tRect.bottom - kInterfaceContentBuffer + 1);
         SetTranslateColorShadeFore(item.color, shade);
         GetRGBTranslateColorShade(&color, item.color, shade);
-        gActiveWorld->view(vRect).fill(color);
+        pix->view(vRect).fill(color);
 
         swidth = GetInterfaceStringWidth(s, item.style);
         swidth = uRect.left + ( uRect.right - uRect.left) / 2 - swidth / 2;
@@ -583,7 +582,7 @@ void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix)
         shade = VERY_DARK;
     else shade = MEDIUM;
 
-    mDrawPuffUpTopBorder( tRect, uRect, item.color, shade, thisHBorder);
+    mDrawPuffUpTopBorder( tRect, uRect, item.color, shade, thisHBorder, pix);
     // bottom border
 
 //  mDrawPuffUpBottomBorder( tRect, uRect, item.color, shade, thisHBorder)
@@ -601,32 +600,32 @@ void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix)
         if ( item.item.radioButton.status == kIH_Hilite)
         {
             shade = LIGHT;
-            mDrawPuffUpRect( uRect, item.color, shade);
-            mDrawPuffUpRect( vRect, item.color, shade);
+            mDrawPuffUpRect( uRect, item.color, shade, pix);
+            mDrawPuffUpRect( vRect, item.color, shade, pix);
         } else
         {
             if ( item.item.radioButton.status == kDimmed)
                 shade = VERY_DARK;
             else shade = DARK;
-            mDrawPuffUpRect( uRect, item.color, shade);
-            mDrawPuffUpRect( vRect, item.color, shade);
+            mDrawPuffUpRect( uRect, item.color, shade, pix);
+            mDrawPuffUpRect( vRect, item.color, shade, pix);
         }
         uRect = Rect(uRect.left, uRect.bottom, uRect.right, uRect.bottom + 3);
         vRect = Rect(vRect.left, vRect.bottom, vRect.right, vRect.bottom + 3);
         SetTranslateColorFore( BLACK);
-        gActiveWorld->view(uRect).fill(RgbColor::kBlack);
-        gActiveWorld->view(vRect).fill(RgbColor::kBlack);
+        pix->view(uRect).fill(RgbColor::kBlack);
+        pix->view(vRect).fill(RgbColor::kBlack);
         uRect = Rect(uRect.left - 3, uRect.bottom, vRect.right + 3, uRect.bottom + 3);
         shade = MEDIUM;
         SetTranslateColorShadeFore( item.color, shade);
         GetRGBTranslateColorShade(&color, item.color, shade);
-        gActiveWorld->view(uRect).fill(color);
+        pix->view(uRect).fill(color);
         SetTranslateColorShadeFore( item.color, shade + kLighterColor);
         MoveTo( uRect.left, uRect.top - 1);
-        MacLineTo( uRect.right - 1, uRect.top - 1);
+        MacLineTo(pix, uRect.right - 1, uRect.top - 1);
         SetTranslateColorShadeFore( item.color, shade + kDarkerColor);
         MoveTo( uRect.left, uRect.bottom);
-        MacLineTo( uRect.right - 1, uRect.bottom);
+        MacLineTo(pix, uRect.right - 1, uRect.bottom);
     } else
     {
         if ( item.item.radioButton.status == kIH_Hilite)
@@ -642,38 +641,38 @@ void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix)
         vRect.bottom += 7;
         SetTranslateColorShadeFore( item.color, shade);
         GetRGBTranslateColorShade(&color, item.color, shade);
-        gActiveWorld->view(uRect).fill(color);
-        gActiveWorld->view(vRect).fill(color);
+        pix->view(uRect).fill(color);
+        pix->view(vRect).fill(color);
         SetTranslateColorShadeFore( item.color, shade + kLighterColor);
         MoveTo( uRect.right - 2, uRect.top);
-        MacLineTo( uRect.left, uRect.top);
-        MacLineTo( uRect.left, uRect.bottom - 5);
-        MacLineTo( uRect.left - 3, uRect.bottom - 5);
+        MacLineTo(pix, uRect.left, uRect.top);
+        MacLineTo(pix, uRect.left, uRect.bottom - 5);
+        MacLineTo(pix, uRect.left - 3, uRect.bottom - 5);
         MoveTo( vRect.right - 2, vRect.top);
-        MacLineTo( vRect.left, vRect.top);
-        MacLineTo( vRect.left, vRect.bottom - 2);
+        MacLineTo(pix, vRect.left, vRect.top);
+        MacLineTo(pix, vRect.left, vRect.bottom - 2);
         MoveTo( vRect.right, vRect.bottom - 5);
-        MacLineTo( vRect.right + 2, vRect.bottom - 5);
+        MacLineTo(pix, vRect.right + 2, vRect.bottom - 5);
         SetTranslateColorShadeFore( item.color, shade + kDarkerColor);
         MoveTo( uRect.right - 1, uRect.top);
-        MacLineTo( uRect.right - 1, uRect.bottom - 1);
-        MacLineTo( uRect.left - 3, uRect.bottom - 1);
+        MacLineTo(pix, uRect.right - 1, uRect.bottom - 1);
+        MacLineTo(pix, uRect.left - 3, uRect.bottom - 1);
         MoveTo( vRect.right - 1, vRect.top);
-        MacLineTo( vRect.right - 1, vRect.bottom - 4);
+        MacLineTo(pix, vRect.right - 1, vRect.bottom - 4);
         MoveTo( vRect.left, vRect.bottom - 1);
-        MacLineTo( vRect.right + 2, vRect.bottom - 1);
+        MacLineTo(pix, vRect.right + 2, vRect.bottom - 1);
         uRect = Rect(uRect.left - 3, uRect.bottom - 4, uRect.right - 1, uRect.bottom - 1);
         SetTranslateColorShadeFore( item.color, shade);
         GetRGBTranslateColorShade(&color, item.color, shade);
-        gActiveWorld->view(uRect).fill(color);
+        pix->view(uRect).fill(color);
         vRect = Rect(vRect.left + 1, vRect.bottom - 4, vRect.right + 3, vRect.bottom - 1);
-        gActiveWorld->view(vRect).fill(color);
+        pix->view(vRect).fill(color);
         uRect.top--;
         uRect.bottom++;
         uRect.left = uRect.right + 1;
         uRect.right = vRect.left - 1;
         SetTranslateColorFore( BLACK);
-        gActiveWorld->view(uRect).fill(RgbColor::kBlack);
+        pix->view(uRect).fill(RgbColor::kBlack);
     }
 
 
@@ -698,7 +697,7 @@ void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix)
                         tRect.bottom - kInterfaceContentBuffer + 1);
         SetTranslateColorShadeFore( item.color, shade);
         GetRGBTranslateColorShade(&color, item.color, shade);
-        gActiveWorld->view(uRect).fill(color);
+        pix->view(uRect).fill(color);
 
         if ( !item.item.radioButton.on)
         {
@@ -748,7 +747,7 @@ void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix)
         uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                 tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 1,
                 tRect.bottom - kInterfaceContentBuffer + 1);
-        mDrawPuffUpRect( uRect, item.color, shade);
+        mDrawPuffUpRect( uRect, item.color, shade, pix);
 
         if ( !item.item.radioButton.on)
         {
@@ -765,7 +764,7 @@ void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix)
                         tRect.bottom - kInterfaceContentBuffer + 1);
         SetTranslateColorShadeFore( item.color, shade);
         GetRGBTranslateColorShade(&color, item.color, shade);
-        gActiveWorld->view(vRect).fill(color);
+        pix->view(vRect).fill(color);
 
         swidth = GetInterfaceStringWidth( s, item.style);
         swidth = uRect.left + ( uRect.right - uRect.left) / 2 - swidth / 2;
@@ -843,10 +842,10 @@ void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix) 
         shade = VERY_DARK;
     else shade = MEDIUM;
 
-    mDrawPuffUpTopBorder( tRect, uRect, item.color, shade, thisHBorder);
+    mDrawPuffUpTopBorder( tRect, uRect, item.color, shade, thisHBorder, pix);
     // bottom border
 
-    mDrawPuffUpBottomBorder( tRect, uRect, item.color, shade, thisHBorder);
+    mDrawPuffUpBottomBorder( tRect, uRect, item.color, shade, thisHBorder, pix);
 
     // side border top
 
@@ -870,8 +869,8 @@ void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix) 
     if ( item.item.radioButton.status == kIH_Hilite)
     {
         shade = LIGHT;
-        mDrawPuffUpRect( uRect, item.color, shade);
-        mDrawPuffUpRect( vRect, item.color, shade);
+        mDrawPuffUpRect( uRect, item.color, shade, pix);
+        mDrawPuffUpRect( vRect, item.color, shade, pix);
 
         wRect.left += 2;
         wRect.right += 2;
@@ -879,10 +878,10 @@ void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix) 
         FrameOval(wRect);
         wRect.left -= 2;
         wRect.right -= 2;
-        mDrawPuffUpOval( wRect, item.color, shade);
+        mDrawPuffUpOval( wRect, item.color, shade, pix);
 
         wRect.inset(3, 3);
-        mDrawPuffDownOval( wRect, item.color, shade);
+        mDrawPuffDownOval( wRect, item.color, shade, pix);
         wRect.inset(1, 1);
         if ( !item.item.radioButton.on) SetTranslateColorFore( BLACK);
         else SetTranslateColorShadeFore( item.color, VERY_LIGHT);
@@ -892,18 +891,18 @@ void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix) 
         if ( item.item.radioButton.status == kDimmed)
             shade = VERY_DARK;
         else shade = MEDIUM + kSlightlyLighterColor;
-        mDrawPuffUpRect( uRect, item.color, shade);
-        mDrawPuffUpRect( vRect, item.color, shade);
+        mDrawPuffUpRect( uRect, item.color, shade, pix);
+        mDrawPuffUpRect( vRect, item.color, shade, pix);
         wRect.left += 2;
         wRect.right += 2;
         SetTranslateColorFore( BLACK);
         FrameOval(wRect);
         wRect.left -= 2;
         wRect.right -= 2;
-        mDrawPuffUpOval( wRect, item.color, shade);
+        mDrawPuffUpOval( wRect, item.color, shade, pix);
 
         wRect.inset(3, 3);
-        mDrawPuffDownOval( wRect, item.color, shade);
+        mDrawPuffDownOval( wRect, item.color, shade, pix);
         wRect.inset(1, 1);
         if ( !item.item.radioButton.on) SetTranslateColorFore( BLACK);
         else if ( item.item.radioButton.status == kActive)
@@ -925,7 +924,7 @@ void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix) 
                     tRect.bottom - kInterfaceContentBuffer + 1);
     SetTranslateColorShadeFore( item.color, shade);
     GetRGBTranslateColorShade(&color, item.color, shade);
-    gActiveWorld->view(uRect).fill(color);
+    pix->view(uRect).fill(color);
 
     if ( item.item.radioButton.status == kIH_Hilite)
     {
@@ -975,10 +974,10 @@ void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix) {
         shade = VERY_DARK;
     else shade = MEDIUM;
 
-    mDrawPuffUpTopBorder( tRect, uRect, item.color, shade, thisHBorder);
+    mDrawPuffUpTopBorder( tRect, uRect, item.color, shade, thisHBorder, pix);
     // bottom border
 
-    mDrawPuffUpBottomBorder( tRect, uRect, item.color, shade, thisHBorder);
+    mDrawPuffUpBottomBorder( tRect, uRect, item.color, shade, thisHBorder, pix);
 
     // side border top
 
@@ -1002,11 +1001,11 @@ void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix) {
     if ( item.item.checkboxButton.status == kIH_Hilite)
     {
         shade = LIGHT;
-        mDrawPuffUpRect( uRect, item.color, shade);
-        mDrawPuffUpRect( vRect, item.color, shade);
-        mDrawPuffUpRect( wRect, item.color, shade);
+        mDrawPuffUpRect( uRect, item.color, shade, pix);
+        mDrawPuffUpRect( vRect, item.color, shade, pix);
+        mDrawPuffUpRect( wRect, item.color, shade, pix);
         wRect.inset(3, 3);
-        mDrawPuffDownRect( wRect, item.color, shade);
+        mDrawPuffDownRect( wRect, item.color, shade, pix);
         wRect.inset(1, 1);
         if ( !item.item.checkboxButton.on) {
             color = RgbColor::kBlack;
@@ -1014,17 +1013,17 @@ void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix) {
             GetRGBTranslateColorShade(&color, item.color, VERY_LIGHT);
         }
         RGBForeColor(color);
-        gActiveWorld->view(wRect).fill(color);
+        pix->view(wRect).fill(color);
     } else
     {
         if ( item.item.checkboxButton.status == kDimmed)
             shade = VERY_DARK;
         else shade = MEDIUM + kSlightlyLighterColor;
-        mDrawPuffUpRect( uRect, item.color, shade);
-        mDrawPuffUpRect( vRect, item.color, shade);
-        mDrawPuffUpRect( wRect, item.color, shade);
+        mDrawPuffUpRect( uRect, item.color, shade, pix);
+        mDrawPuffUpRect( vRect, item.color, shade, pix);
+        mDrawPuffUpRect( wRect, item.color, shade, pix);
         wRect.inset(3, 3);
-        mDrawPuffDownRect( wRect, item.color, shade);
+        mDrawPuffDownRect( wRect, item.color, shade, pix);
         wRect.inset(1, 1);
         if (!item.item.checkboxButton.on) {
             color = RgbColor::kBlack;
@@ -1034,7 +1033,7 @@ void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix) {
             GetRGBTranslateColorShade(&color, item.color, MEDIUM);
         }
         RGBForeColor(color);
-        gActiveWorld->view(wRect).fill(color);
+        pix->view(wRect).fill(color);
     }
 
     uRect = Rect(tRect.left +  kInterfaceContentBuffer,
@@ -1050,7 +1049,7 @@ void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix) {
                     tRect.bottom - kInterfaceContentBuffer + 1);
     SetTranslateColorShadeFore( item.color, shade);
     GetRGBTranslateColorShade(&color, item.color, shade);
-    gActiveWorld->view(uRect).fill(color);
+    pix->view(uRect).fill(color);
 
     if ( item.item.checkboxButton.status == kIH_Hilite)
     {
@@ -1095,10 +1094,10 @@ void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
 
     shade = DARK;
 
-    mDrawPuffUpTopBorder( tRect, uRect, item.color, shade, thisHBorder);
+    mDrawPuffUpTopBorder( tRect, uRect, item.color, shade, thisHBorder, pix);
     // bottom border
 
-    mDrawPuffUpBottomBorder( tRect, uRect, item.color, shade, thisHBorder);
+    mDrawPuffUpBottomBorder( tRect, uRect, item.color, shade, thisHBorder, pix);
 
 
     // draw the string
@@ -1114,7 +1113,7 @@ void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
         tRect.top + sheight - kInterfaceHTop);
     SetTranslateColorShadeFore( item.color, VERY_DARK);
     GetRGBTranslateColorShade(&color, item.color, VERY_DARK);
-    gActiveWorld->view(uRect).fill(color);
+    pix->view(uRect).fill(color);
 
     SetTranslateColorShadeFore( item.color, LIGHT);
     GetRGBTranslateColorShade(&color, item.color, LIGHT);
@@ -1131,7 +1130,7 @@ void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
     uRect = Rect(tRect.left - thisHBorder,
             tRect.top + kInterfaceHTop,
             tRect.left + 1, tRect.top + sheight - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, item.color, shade);
+    mDrawPuffUpRect( uRect, item.color, shade, pix);
 
     // string right border
 
@@ -1140,16 +1139,16 @@ void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
         tRect.top + kInterfaceHTop,
         tRect.right - 2,
         tRect.top + sheight - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, item.color, shade);
+    mDrawPuffUpRect( uRect, item.color, shade, pix);
     uRect = Rect(tRect.right,
         tRect.top + kInterfaceHTop,
         tRect.right + thisHBorder + 1,
         tRect.top + sheight - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, item.color, shade);
+    mDrawPuffUpRect( uRect, item.color, shade, pix);
 
     // string bottom border
 
-    mDrawPuffUpTBorder( tRect, uRect, item.color, DARK, sheight, thisHBorder);
+    mDrawPuffUpTBorder( tRect, uRect, item.color, DARK, sheight, thisHBorder, pix);
 
     // main part left border
 
@@ -1161,13 +1160,13 @@ void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
         tRect.top + kInterfaceHTop,
         tRect.left + 1,
         tRect.top + vcenter - kInterfaceVLipHeight + 1);
-    mDrawPuffUpRect( uRect, item.color, DARKER);
+    mDrawPuffUpRect( uRect, item.color, DARKER, pix);
 
     uRect = Rect(tRect.left - thisHBorder,
         tRect.bottom - vcenter + kInterfaceVLipHeight,
         tRect.left + 1,
         tRect.bottom - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, item.color, VERY_DARK);
+    mDrawPuffUpRect( uRect, item.color, VERY_DARK, pix);
 
     // right border
 
@@ -1175,13 +1174,13 @@ void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
         tRect.top + kInterfaceHTop,
         tRect.right + thisHBorder + 1,
         tRect.top + vcenter - kInterfaceVLipHeight + 1);
-    mDrawPuffUpRect( uRect, item.color, DARKER);
+    mDrawPuffUpRect( uRect, item.color, DARKER, pix);
 
     uRect = Rect(tRect.right,
         tRect.bottom - vcenter + kInterfaceVLipHeight,
         tRect.right + thisHBorder + 1,
         tRect.bottom - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, item.color, VERY_DARK);
+    mDrawPuffUpRect( uRect, item.color, VERY_DARK, pix);
 
     SetTranslateColorFore( BLACK);
 }
@@ -1207,30 +1206,30 @@ void DrawPlayerInterfaceList(const interfaceItemType& item, PixMap* pix) {
     // top border
 
     MoveTo( tRect.left, tRect.top);
-    MacLineTo( tRect.left - thisHBorder, tRect.top);
-    MacLineTo( tRect.left - thisHBorder, tRect.top - kInterfaceVEdgeHeight);
-    MacLineTo( tRect.left, tRect.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight);
-    MacLineTo( tRect.right, tRect.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight);
-    MacLineTo( tRect.right + thisHBorder, tRect.top + - kInterfaceVEdgeHeight);
-    MacLineTo( tRect.right + thisHBorder, tRect.top);
-    MacLineTo( tRect.right, tRect.top);
-    MacLineTo( tRect.right, tRect.top - kInterfaceVLipHeight);
-    MacLineTo( tRect.left, tRect.top - kInterfaceVLipHeight);
-    MacLineTo( tRect.left, tRect.top);
+    MacLineTo(pix, tRect.left - thisHBorder, tRect.top);
+    MacLineTo(pix, tRect.left - thisHBorder, tRect.top - kInterfaceVEdgeHeight);
+    MacLineTo(pix, tRect.left, tRect.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight);
+    MacLineTo(pix, tRect.right, tRect.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight);
+    MacLineTo(pix, tRect.right + thisHBorder, tRect.top + - kInterfaceVEdgeHeight);
+    MacLineTo(pix, tRect.right + thisHBorder, tRect.top);
+    MacLineTo(pix, tRect.right, tRect.top);
+    MacLineTo(pix, tRect.right, tRect.top - kInterfaceVLipHeight);
+    MacLineTo(pix, tRect.left, tRect.top - kInterfaceVLipHeight);
+    MacLineTo(pix, tRect.left, tRect.top);
 
     // bottom border
 
     MoveTo( tRect.left, tRect.bottom);
-    MacLineTo( tRect.left - thisHBorder, tRect.bottom);
-    MacLineTo( tRect.left - thisHBorder, tRect.bottom + kInterfaceVEdgeHeight);
-    MacLineTo( tRect.left, tRect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
-    MacLineTo( tRect.right, tRect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
-    MacLineTo( tRect.right + thisHBorder, tRect.bottom + kInterfaceVEdgeHeight);
-    MacLineTo( tRect.right + thisHBorder, tRect.bottom);
-    MacLineTo( tRect.right, tRect.bottom);
-    MacLineTo( tRect.right, tRect.bottom + kInterfaceVLipHeight);
-    MacLineTo( tRect.left, tRect.bottom + kInterfaceVLipHeight);
-    MacLineTo( tRect.left, tRect.bottom);
+    MacLineTo(pix, tRect.left - thisHBorder, tRect.bottom);
+    MacLineTo(pix, tRect.left - thisHBorder, tRect.bottom + kInterfaceVEdgeHeight);
+    MacLineTo(pix, tRect.left, tRect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
+    MacLineTo(pix, tRect.right, tRect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
+    MacLineTo(pix, tRect.right + thisHBorder, tRect.bottom + kInterfaceVEdgeHeight);
+    MacLineTo(pix, tRect.right + thisHBorder, tRect.bottom);
+    MacLineTo(pix, tRect.right, tRect.bottom);
+    MacLineTo(pix, tRect.right, tRect.bottom + kInterfaceVLipHeight);
+    MacLineTo(pix, tRect.left, tRect.bottom + kInterfaceVLipHeight);
+    MacLineTo(pix, tRect.left, tRect.bottom);
 
     // draw the string
 
@@ -1250,50 +1249,50 @@ void DrawPlayerInterfaceList(const interfaceItemType& item, PixMap* pix) {
     swidth = ( tRect.right - tRect.left) - swidth;
 
     MoveTo( tRect.left, tRect.top + kInterfaceHTop);
-    MacLineTo( tRect.left - thisHBorder, tRect.top + kInterfaceHTop);
-    MacLineTo( tRect.left - thisHBorder, tRect.top + vcenter - kInterfaceVLipHeight);
-    MacLineTo( tRect.left, tRect.top + vcenter - kInterfaceVLipHeight);
-    MacLineTo( tRect.left, tRect.top + kInterfaceHTop);
+    MacLineTo(pix, tRect.left - thisHBorder, tRect.top + kInterfaceHTop);
+    MacLineTo(pix, tRect.left - thisHBorder, tRect.top + vcenter - kInterfaceVLipHeight);
+    MacLineTo(pix, tRect.left, tRect.top + vcenter - kInterfaceVLipHeight);
+    MacLineTo(pix, tRect.left, tRect.top + kInterfaceHTop);
 
     SetTranslateColorShadeFore( item.color, DARK);
     MoveTo( tRect.left, tRect.top + sheight - vcenter + kInterfaceVLipHeight);
-    MacLineTo( tRect.left - thisHBorder, tRect.top + sheight- vcenter + kInterfaceVLipHeight);
-    MacLineTo( tRect.left - thisHBorder, tRect.top + sheight - kInterfaceHTop);
-    MacLineTo( tRect.left, tRect.top + sheight - kInterfaceHTop);
-    MacLineTo( tRect.left, tRect.top + sheight - vcenter + kInterfaceVLipHeight);
+    MacLineTo(pix, tRect.left - thisHBorder, tRect.top + sheight- vcenter + kInterfaceVLipHeight);
+    MacLineTo(pix, tRect.left - thisHBorder, tRect.top + sheight - kInterfaceHTop);
+    MacLineTo(pix, tRect.left, tRect.top + sheight - kInterfaceHTop);
+    MacLineTo(pix, tRect.left, tRect.top + sheight - vcenter + kInterfaceVLipHeight);
 
     // string right border
 
     SetTranslateColorShadeFore( item.color, MEDIUM);
     MoveTo( tRect.right - swidth, tRect.top + kInterfaceHTop);
-    MacLineTo( tRect.right + thisHBorder, tRect.top + kInterfaceHTop);
-    MacLineTo( tRect.right + thisHBorder, tRect.top + vcenter - kInterfaceVLipHeight);
-    MacLineTo( tRect.right - swidth, tRect.top + vcenter - kInterfaceVLipHeight);
-    MacLineTo( tRect.right - swidth, tRect.top + kInterfaceHTop);
+    MacLineTo(pix, tRect.right + thisHBorder, tRect.top + kInterfaceHTop);
+    MacLineTo(pix, tRect.right + thisHBorder, tRect.top + vcenter - kInterfaceVLipHeight);
+    MacLineTo(pix, tRect.right - swidth, tRect.top + vcenter - kInterfaceVLipHeight);
+    MacLineTo(pix, tRect.right - swidth, tRect.top + kInterfaceHTop);
 
     SetTranslateColorShadeFore( item.color, DARK);
     MoveTo( tRect.right - swidth, tRect.top + sheight - vcenter + kInterfaceVLipHeight);
-    MacLineTo( tRect.right + thisHBorder, tRect.top + sheight - vcenter + kInterfaceVLipHeight);
-    MacLineTo( tRect.right + thisHBorder, tRect.top + sheight - kInterfaceHTop);
-    MacLineTo( tRect.right - swidth, tRect.top + sheight - kInterfaceHTop);
-    MacLineTo( tRect.right - swidth, tRect.top + sheight - vcenter + kInterfaceVLipHeight);
+    MacLineTo(pix, tRect.right + thisHBorder, tRect.top + sheight - vcenter + kInterfaceVLipHeight);
+    MacLineTo(pix, tRect.right + thisHBorder, tRect.top + sheight - kInterfaceHTop);
+    MacLineTo(pix, tRect.right - swidth, tRect.top + sheight - kInterfaceHTop);
+    MacLineTo(pix, tRect.right - swidth, tRect.top + sheight - vcenter + kInterfaceVLipHeight);
 
     // string bottom border
 
     SetTranslateColorShadeFore( item.color, DARK);
     MoveTo( tRect.left, tRect.top + sheight);
-    MacLineTo( tRect.left, tRect.top + sheight + kInterfaceVLipHeight);
-    MacLineTo( tRect.right, tRect.top + sheight + kInterfaceVLipHeight);
-    MacLineTo( tRect.right, tRect.top + sheight);
-    MacLineTo( tRect.right + thisHBorder, tRect.top + sheight);
-    MacLineTo( tRect.right + thisHBorder, tRect.top + sheight + kLabelBottomHeight);
-    MacLineTo( tRect.right, tRect.top + sheight + kLabelBottomHeight);
-    MacLineTo( tRect.right, tRect.top + sheight + kLabelBottomHeight - kInterfaceVLipHeight);
-    MacLineTo( tRect.left, tRect.top + sheight + kLabelBottomHeight - kInterfaceVLipHeight);
-    MacLineTo( tRect.left, tRect.top + sheight + kLabelBottomHeight);
-    MacLineTo( tRect.left - thisHBorder, tRect.top + sheight + kLabelBottomHeight);
-    MacLineTo( tRect.left - thisHBorder, tRect.top + sheight);
-    MacLineTo( tRect.left, tRect.top + sheight);
+    MacLineTo(pix, tRect.left, tRect.top + sheight + kInterfaceVLipHeight);
+    MacLineTo(pix, tRect.right, tRect.top + sheight + kInterfaceVLipHeight);
+    MacLineTo(pix, tRect.right, tRect.top + sheight);
+    MacLineTo(pix, tRect.right + thisHBorder, tRect.top + sheight);
+    MacLineTo(pix, tRect.right + thisHBorder, tRect.top + sheight + kLabelBottomHeight);
+    MacLineTo(pix, tRect.right, tRect.top + sheight + kLabelBottomHeight);
+    MacLineTo(pix, tRect.right, tRect.top + sheight + kLabelBottomHeight - kInterfaceVLipHeight);
+    MacLineTo(pix, tRect.left, tRect.top + sheight + kLabelBottomHeight - kInterfaceVLipHeight);
+    MacLineTo(pix, tRect.left, tRect.top + sheight + kLabelBottomHeight);
+    MacLineTo(pix, tRect.left - thisHBorder, tRect.top + sheight + kLabelBottomHeight);
+    MacLineTo(pix, tRect.left - thisHBorder, tRect.top + sheight);
+    MacLineTo(pix, tRect.left, tRect.top + sheight);
 
     // main part left border
 
@@ -1303,17 +1302,17 @@ void DrawPlayerInterfaceList(const interfaceItemType& item, PixMap* pix) {
 
     SetTranslateColorShadeFore( item.color, DARKER);
     MoveTo( tRect.left, tRect.top + kInterfaceHTop);
-    MacLineTo( tRect.left - thisHBorder, tRect.top + kInterfaceHTop);
-    MacLineTo( tRect.left - thisHBorder, tRect.top + vcenter - kInterfaceVLipHeight);
-    MacLineTo( tRect.left, tRect.top + vcenter - kInterfaceVLipHeight);
-    MacLineTo( tRect.left, tRect.top + kInterfaceHTop);
+    MacLineTo(pix, tRect.left - thisHBorder, tRect.top + kInterfaceHTop);
+    MacLineTo(pix, tRect.left - thisHBorder, tRect.top + vcenter - kInterfaceVLipHeight);
+    MacLineTo(pix, tRect.left, tRect.top + vcenter - kInterfaceVLipHeight);
+    MacLineTo(pix, tRect.left, tRect.top + kInterfaceHTop);
 
     SetTranslateColorShadeFore( item.color, VERY_DARK);
     MoveTo( tRect.left, tRect.bottom - vcenter + kInterfaceVLipHeight);
-    MacLineTo( tRect.left - thisHBorder, tRect.bottom - vcenter + kInterfaceVLipHeight);
-    MacLineTo( tRect.left - thisHBorder, tRect.bottom - kInterfaceHTop);
-    MacLineTo( tRect.left, tRect.bottom - kInterfaceHTop);
-    MacLineTo( tRect.left, tRect.bottom - vcenter + kInterfaceVLipHeight);
+    MacLineTo(pix, tRect.left - thisHBorder, tRect.bottom - vcenter + kInterfaceVLipHeight);
+    MacLineTo(pix, tRect.left - thisHBorder, tRect.bottom - kInterfaceHTop);
+    MacLineTo(pix, tRect.left, tRect.bottom - kInterfaceHTop);
+    MacLineTo(pix, tRect.left, tRect.bottom - vcenter + kInterfaceVLipHeight);
 
     // draw the list
 
@@ -1342,13 +1341,13 @@ void DrawPlayerInterfaceList(const interfaceItemType& item, PixMap* pix) {
             {
                 SetTranslateColorShadeFore( item.color, LIGHT);
                 GetRGBTranslateColorShade(&color, item.color, LIGHT);
-                gActiveWorld->view(uRect).fill(color);
+                pix->view(uRect).fill(color);
                 SetTranslateColorShadeFore( item.color, VERY_DARK);
                 GetRGBTranslateColorShade(&color, item.color, VERY_DARK);
             } else
             {
                 DefaultColors();
-                gActiveWorld->view(uRect).fill(RgbColor::kBlack);
+                pix->view(uRect).fill(RgbColor::kBlack);
                 SetTranslateColorShadeFore( item.color, LIGHT);
                 GetRGBTranslateColorShade(&color, item.color, LIGHT);
             }
@@ -1374,10 +1373,10 @@ void DrawPlayerInterfaceList(const interfaceItemType& item, PixMap* pix) {
     }
     // right border
 
-    DrawPlayerListLineUp(item, lineUpStatus);
-    DrawPlayerListPageUp(item, pageUpStatus);
-    DrawPlayerListLineDown(item, lineDownStatus);
-    DrawPlayerListPageDown(item, pageDownStatus);
+    DrawPlayerListLineUp(item, lineUpStatus, pix);
+    DrawPlayerListPageUp(item, pageUpStatus, pix);
+    DrawPlayerListLineDown(item, lineDownStatus, pix);
+    DrawPlayerListPageDown(item, pageDownStatus, pix);
     SetTranslateColorFore( BLACK);
 }
 
@@ -1410,13 +1409,13 @@ void DrawPlayerInterfaceListEntry(
             {
                 SetTranslateColorShadeFore( item.color, LIGHT);
                 GetRGBTranslateColorShade(&color, item.color, LIGHT);
-                gActiveWorld->view(uRect).fill(color);
+                pix->view(uRect).fill(color);
                 SetTranslateColorShadeFore( item.color, VERY_DARK);
                 GetRGBTranslateColorShade(&color, item.color, VERY_DARK);
             } else
             {
                 GetRGBTranslateColorShade(&color, item.color, VERY_LIGHT);
-                gActiveWorld->view(uRect).fill(color);
+                pix->view(uRect).fill(color);
                 SetTranslateColorShadeFore( item.color, LIGHT);
                 GetRGBTranslateColorShade(&color, item.color, LIGHT);
             }
@@ -1431,7 +1430,7 @@ void DrawPlayerInterfaceListEntry(
     }
 }
 
-void DrawPlayerListLineUp(const interfaceItemType& item, interfaceItemStatusEnum status) {
+void DrawPlayerListLineUp(const interfaceItemType& item, interfaceItemStatusEnum status, PixMap* pix) {
     Rect        tRect;
     short       thisHBorder = kInterfaceSmallHBorder;
     RgbColor color;
@@ -1446,7 +1445,7 @@ void DrawPlayerListLineUp(const interfaceItemType& item, interfaceItemStatusEnum
         MacFrameRect(tRect);
         SetTranslateColorFore( BLACK);
         tRect.inset(1, 1);
-        gActiveWorld->view(tRect).fill(RgbColor::kBlack);
+        pix->view(tRect).fill(RgbColor::kBlack);
         if (status == kDimmed) SetTranslateColorShadeFore( item.color, DARKER);
         else SetTranslateColorShadeFore( item.color, LIGHT);
         tRect.inset(-1, -1);
@@ -1454,21 +1453,21 @@ void DrawPlayerListLineUp(const interfaceItemType& item, interfaceItemStatusEnum
     {
         SetTranslateColorShadeFore( item.color, VERY_LIGHT);
         GetRGBTranslateColorShade(&color, item.color, VERY_LIGHT);
-        gActiveWorld->view(tRect).fill(color);
+        pix->view(tRect).fill(color);
         SetTranslateColorFore( BLACK);
     }
 
     MoveTo( tRect.left + kScrollArrowHBuffer + kScrollArrowWidth / 2, tRect.top +
             kScrollArrowVBuffer);
-    MacLineTo( tRect.left + kScrollArrowWidth + kScrollArrowHBuffer, tRect.top +
+    MacLineTo(pix, tRect.left + kScrollArrowWidth + kScrollArrowHBuffer, tRect.top +
             kScrollArrowVBuffer + kSmallArrowPointHeight);
-    MacLineTo( tRect.left + kScrollArrowWidth + kScrollArrowHBuffer, tRect.top + kScrollArrowVBuffer +
+    MacLineTo(pix, tRect.left + kScrollArrowWidth + kScrollArrowHBuffer, tRect.top + kScrollArrowVBuffer +
             kSmallArrowPointHeight + kSmallArrowBaseHeight);
-    MacLineTo( tRect.left + kScrollArrowHBuffer, tRect.top + kScrollArrowVBuffer +
+    MacLineTo(pix, tRect.left + kScrollArrowHBuffer, tRect.top + kScrollArrowVBuffer +
             kSmallArrowPointHeight + kSmallArrowBaseHeight);
-    MacLineTo( tRect.left + kScrollArrowHBuffer, tRect.top + kScrollArrowVBuffer +
+    MacLineTo(pix, tRect.left + kScrollArrowHBuffer, tRect.top + kScrollArrowVBuffer +
             kSmallArrowPointHeight);
-    MacLineTo( tRect.left + kScrollArrowHBuffer + kScrollArrowWidth / 2, tRect.top +
+    MacLineTo(pix, tRect.left + kScrollArrowHBuffer + kScrollArrowWidth / 2, tRect.top +
             kScrollArrowVBuffer);
 }
 
@@ -1484,7 +1483,7 @@ void GetPlayerListLineUpRect(const interfaceItemType& item, Rect *dRect) {
         kSmallArrowBaseHeight + 1;
 }
 
-void DrawPlayerListPageUp(const interfaceItemType& item, interfaceItemStatusEnum status) {
+void DrawPlayerListPageUp(const interfaceItemType& item, interfaceItemStatusEnum status, PixMap* pix) {
     Rect        tRect;
     short       thisHBorder = kInterfaceSmallHBorder;
     RgbColor color;
@@ -1499,7 +1498,7 @@ void DrawPlayerListPageUp(const interfaceItemType& item, interfaceItemStatusEnum
         MacFrameRect(tRect);
         SetTranslateColorFore( BLACK);
         tRect.inset(1, 1);
-        gActiveWorld->view(tRect).fill(RgbColor::kBlack);
+        pix->view(tRect).fill(RgbColor::kBlack);
         if (status == kDimmed) SetTranslateColorShadeFore( item.color, DARKER);
         else SetTranslateColorShadeFore( item.color, LIGHT);
         tRect.inset(-1, -1);
@@ -1507,21 +1506,21 @@ void DrawPlayerListPageUp(const interfaceItemType& item, interfaceItemStatusEnum
     {
         SetTranslateColorShadeFore( item.color, VERY_LIGHT);
         GetRGBTranslateColorShade(&color, item.color, VERY_LIGHT);
-        gActiveWorld->view(tRect).fill(color);
+        pix->view(tRect).fill(color);
         SetTranslateColorFore( BLACK);
     }
 
     MoveTo( tRect.left + kScrollArrowHBuffer + kScrollArrowWidth / 2, tRect.top +
             kScrollArrowVBuffer);
-    MacLineTo( tRect.left + kScrollArrowWidth + kScrollArrowHBuffer, tRect.top +
+    MacLineTo(pix, tRect.left + kScrollArrowWidth + kScrollArrowHBuffer, tRect.top +
             kScrollArrowVBuffer + kLargeArrowPointHeight);
-    MacLineTo( tRect.left + kScrollArrowWidth + kScrollArrowHBuffer, tRect.top + kScrollArrowVBuffer +
+    MacLineTo(pix, tRect.left + kScrollArrowWidth + kScrollArrowHBuffer, tRect.top + kScrollArrowVBuffer +
             kLargeArrowPointHeight + kLargeArrowBaseHeight);
-    MacLineTo( tRect.left + kScrollArrowHBuffer, tRect.top + kScrollArrowVBuffer +
+    MacLineTo(pix, tRect.left + kScrollArrowHBuffer, tRect.top + kScrollArrowVBuffer +
             kLargeArrowPointHeight + kLargeArrowBaseHeight);
-    MacLineTo( tRect.left + kScrollArrowHBuffer, tRect.top + kScrollArrowVBuffer +
+    MacLineTo(pix, tRect.left + kScrollArrowHBuffer, tRect.top + kScrollArrowVBuffer +
             kLargeArrowPointHeight);
-    MacLineTo( tRect.left + kScrollArrowHBuffer + kScrollArrowWidth / 2, tRect.top +
+    MacLineTo(pix, tRect.left + kScrollArrowHBuffer + kScrollArrowWidth / 2, tRect.top +
             kScrollArrowVBuffer);
 }
 
@@ -1532,7 +1531,7 @@ void GetPlayerListPageUpRect(const interfaceItemType& item, Rect *dRect) {
             kLargeArrowBaseHeight + 1;
 }
 
-void DrawPlayerListLineDown(const interfaceItemType& item, interfaceItemStatusEnum status) {
+void DrawPlayerListLineDown(const interfaceItemType& item, interfaceItemStatusEnum status, PixMap* pix) {
     Rect        tRect;
     short       thisHBorder = kInterfaceSmallHBorder;
     RgbColor color;
@@ -1547,7 +1546,7 @@ void DrawPlayerListLineDown(const interfaceItemType& item, interfaceItemStatusEn
         MacFrameRect(tRect);
         SetTranslateColorFore( BLACK);
         tRect.inset(1, 1);
-        gActiveWorld->view(tRect).fill(RgbColor::kBlack);
+        pix->view(tRect).fill(RgbColor::kBlack);
         if (status == kDimmed) SetTranslateColorShadeFore( item.color, DARKER);
         else SetTranslateColorShadeFore( item.color, LIGHT);
         tRect.inset(-1, -1);
@@ -1555,7 +1554,7 @@ void DrawPlayerListLineDown(const interfaceItemType& item, interfaceItemStatusEn
     {
         SetTranslateColorShadeFore( item.color, VERY_LIGHT);
         GetRGBTranslateColorShade(&color, item.color, VERY_LIGHT);
-        gActiveWorld->view(tRect).fill(color);
+        pix->view(tRect).fill(color);
         SetTranslateColorFore( BLACK);
     }
 
@@ -1563,15 +1562,15 @@ void DrawPlayerListLineDown(const interfaceItemType& item, interfaceItemStatusEn
 
     MoveTo( tRect.left + kScrollArrowHBuffer + kScrollArrowWidth / 2, tRect.bottom -
             kScrollArrowVBuffer);
-    MacLineTo( tRect.left + kScrollArrowWidth + kScrollArrowHBuffer, tRect.bottom -
+    MacLineTo(pix, tRect.left + kScrollArrowWidth + kScrollArrowHBuffer, tRect.bottom -
             (kScrollArrowVBuffer + kSmallArrowPointHeight));
-    MacLineTo( tRect.left + kScrollArrowWidth + kScrollArrowHBuffer, tRect.bottom -
+    MacLineTo(pix, tRect.left + kScrollArrowWidth + kScrollArrowHBuffer, tRect.bottom -
             (kScrollArrowVBuffer + kSmallArrowPointHeight + kSmallArrowBaseHeight));
-    MacLineTo( tRect.left + kScrollArrowHBuffer, tRect.bottom - (kScrollArrowVBuffer +
+    MacLineTo(pix, tRect.left + kScrollArrowHBuffer, tRect.bottom - (kScrollArrowVBuffer +
             kSmallArrowPointHeight + kSmallArrowBaseHeight));
-    MacLineTo( tRect.left + kScrollArrowHBuffer, tRect.bottom - (kScrollArrowVBuffer +
+    MacLineTo(pix, tRect.left + kScrollArrowHBuffer, tRect.bottom - (kScrollArrowVBuffer +
             kSmallArrowPointHeight));
-    MacLineTo( tRect.left + kScrollArrowHBuffer + kScrollArrowWidth / 2, tRect.bottom -
+    MacLineTo(pix, tRect.left + kScrollArrowHBuffer + kScrollArrowWidth / 2, tRect.bottom -
             kScrollArrowVBuffer);
 }
 
@@ -1588,7 +1587,7 @@ void GetPlayerListLineDownRect(const interfaceItemType& item, Rect *dRect) {
     dRect->bottom = dRect->bottom + kInterfaceContentBuffer - kInterfaceHTop + 1;
 }
 
-void DrawPlayerListPageDown(const interfaceItemType& item, interfaceItemStatusEnum status) {
+void DrawPlayerListPageDown(const interfaceItemType& item, interfaceItemStatusEnum status, PixMap* pix) {
     Rect        tRect;
     short       thisHBorder = kInterfaceSmallHBorder;
     RgbColor color;
@@ -1603,7 +1602,7 @@ void DrawPlayerListPageDown(const interfaceItemType& item, interfaceItemStatusEn
         MacFrameRect(tRect);
         SetTranslateColorFore( BLACK);
         tRect.inset(1, 1);
-        gActiveWorld->view(tRect).fill(RgbColor::kBlack);
+        pix->view(tRect).fill(RgbColor::kBlack);
         if (status == kDimmed) SetTranslateColorShadeFore( item.color, DARKER);
         else SetTranslateColorShadeFore( item.color, LIGHT);
         tRect.inset(-1, -1);
@@ -1611,7 +1610,7 @@ void DrawPlayerListPageDown(const interfaceItemType& item, interfaceItemStatusEn
     {
         SetTranslateColorShadeFore( item.color, VERY_LIGHT);
         GetRGBTranslateColorShade(&color, item.color, VERY_LIGHT);
-        gActiveWorld->view(tRect).fill(color);
+        pix->view(tRect).fill(color);
         SetTranslateColorFore( BLACK);
     }
 
@@ -1619,15 +1618,15 @@ void DrawPlayerListPageDown(const interfaceItemType& item, interfaceItemStatusEn
 
     MoveTo( tRect.left + kScrollArrowHBuffer + kScrollArrowWidth / 2, tRect.bottom -
             kScrollArrowVBuffer);
-    MacLineTo( tRect.left + kScrollArrowWidth + kScrollArrowHBuffer, tRect.bottom -
+    MacLineTo(pix, tRect.left + kScrollArrowWidth + kScrollArrowHBuffer, tRect.bottom -
             (kScrollArrowVBuffer + kLargeArrowPointHeight));
-    MacLineTo( tRect.left + kScrollArrowWidth + kScrollArrowHBuffer, tRect.bottom -
+    MacLineTo(pix, tRect.left + kScrollArrowWidth + kScrollArrowHBuffer, tRect.bottom -
             (kScrollArrowVBuffer + kLargeArrowPointHeight + kLargeArrowBaseHeight));
-    MacLineTo( tRect.left + kScrollArrowHBuffer, tRect.bottom - (kScrollArrowVBuffer +
+    MacLineTo(pix, tRect.left + kScrollArrowHBuffer, tRect.bottom - (kScrollArrowVBuffer +
             kLargeArrowPointHeight + kLargeArrowBaseHeight));
-    MacLineTo( tRect.left + kScrollArrowHBuffer, tRect.bottom - (kScrollArrowVBuffer +
+    MacLineTo(pix, tRect.left + kScrollArrowHBuffer, tRect.bottom - (kScrollArrowVBuffer +
             kLargeArrowPointHeight));
-    MacLineTo( tRect.left + kScrollArrowHBuffer + kScrollArrowWidth / 2, tRect.bottom -
+    MacLineTo(pix, tRect.left + kScrollArrowHBuffer + kScrollArrowWidth / 2, tRect.bottom -
             kScrollArrowVBuffer);
 }
 
@@ -1940,7 +1939,7 @@ void DrawInterfaceTextInRect(
                                         ( tRect.right - tRect.left) / 2 - ( uRect.right -
                                         uRect.left) / 2,
                                         -uRect.top + vline);
-                            CopyBits(thePicture.get(), gActiveWorld, thePicture->bounds(), uRect);
+                            CopyBits(thePicture.get(), pix, thePicture->bounds(), uRect);
                             thePicture.reset();
                             vline += uRect.bottom - uRect.top;
                             xpos = hleft;
@@ -2161,7 +2160,7 @@ void DrawInterfacePictureRect(const interfaceItemType& item, PixMap* pix) {
     if (thePicture.get() != nil) {
         uRect = thePicture->bounds();
         uRect.offset(-uRect.left + tRect.left, -uRect.top + tRect.top);
-        CopyBits(thePicture.get(), gActiveWorld, thePicture->bounds(), uRect);
+        CopyBits(thePicture.get(), pix, thePicture->bounds(), uRect);
     }
 
     SetClip( clipRgn);
