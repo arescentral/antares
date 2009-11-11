@@ -496,7 +496,7 @@ void DrawCurrentLongMessage( long timePass)
                 cRect = lRect;
                 DrawNateRect(gOffWorld, &cRect, 0, 0, RgbColor::kBlack);
                 tRect = lRect;
-                ChunkCopyPixMapToScreenPixMap(gOffWorld, tRect, gActiveWorld);
+                CopyBits(gOffWorld, gActiveWorld, tRect, tRect);
                 NormalizeColors();
                 DrawInRealWorld();
     //          CLIP_BOTTOM = globals()->gTrueClipBottom;
@@ -524,7 +524,7 @@ void DrawCurrentLongMessage( long timePass)
                         cRect.top, 0, 0, color);
                     DrawNateLine(gOffWorld, cRect, cRect.left, cRect.bottom - 1, cRect.right - 1,
                         cRect.bottom - 1, 0, 0, color);
-                    ChunkCopyPixMapToScreenPixMap(gOffWorld, tRect, gActiveWorld);
+                    CopyBits(gOffWorld, gActiveWorld, tRect, tRect);
                     NormalizeColors();
                     DrawInRealWorld();
                     NormalizeColors();
@@ -544,7 +544,7 @@ void DrawCurrentLongMessage( long timePass)
             cRect = lRect;
             DrawNateRect(gOffWorld, &cRect, 0, 0, RgbColor::kBlack);
             tRect = lRect;
-            ChunkCopyPixMapToScreenPixMap(gOffWorld, tRect, gActiveWorld);
+            CopyBits(gOffWorld, gActiveWorld, tRect, tRect);
             NormalizeColors();
             DrawInRealWorld();
 //          CLIP_BOTTOM = globals()->gTrueClipBottom;
@@ -608,7 +608,7 @@ void DrawCurrentLongMessage( long timePass)
                             uRect.left = lRect.left;
                         }
                         tRect.enlarge_to(uRect);
-                        ChunkCopyPixMapToScreenPixMap(gOffWorld, tRect, gActiveWorld);
+                        CopyBits(gOffWorld, gActiveWorld, tRect, tRect);
                         if ( tmessage->retroTextSpec.thisPosition >
                             tmessage->retroTextSpec.textLength)
                         {

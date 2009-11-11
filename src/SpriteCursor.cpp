@@ -134,8 +134,8 @@ void EraseSpriteCursorSprite( void)
     if (gSpriteCursor->sprite.table != nil) {
         if ( gSpriteCursor->sprite.thisRect.left < gSpriteCursor->sprite.thisRect.right)
         {
-            ChunkCopyPixMapToPixMap( gSaveWorld,
-                gSpriteCursor->sprite.thisRect, gOffWorld);
+            const Rect& bounds = gSpriteCursor->sprite.thisRect;
+            CopyBits(gSaveWorld, gOffWorld, bounds, bounds);
             if ( gSpriteCursor->showLevel <= kSpriteCursorHidden)
                 gSpriteCursor->sprite.lastRect = gSpriteCursor->sprite.thisRect;
         }
@@ -192,7 +192,7 @@ void DrawSpriteCursorSprite( Rect *clipRect)
     {
         tRect = Rect(gSpriteCursor->where.h - 16, gSpriteCursor->where.v - 16,
             gSpriteCursor->where.h + 16, gSpriteCursor->where.v + 16);
-        ChunkCopyPixMapToPixMap(gOffWorld, tRect, gSaveWorld);
+        CopyBits(gOffWorld, gSaveWorld, tRect, tRect);
     }
 
     if ( gSpriteCursor->thisShowLine)
@@ -276,21 +276,16 @@ void ShowSpriteCursorSprite() {
             if ( gSpriteCursor->sprite.lastRect.right > gSpriteCursor->sprite.lastRect.left)
             {
                 // show lastRect
-
-                ChunkCopyPixMapToScreenPixMap( gOffWorld, gSpriteCursor->sprite.lastRect,
-                        gActiveWorld);
-
-
+                const Rect& bounds = gSpriteCursor->sprite.lastRect;
+                CopyBits(gOffWorld, gActiveWorld, bounds, bounds);
             }
         // else if lastRect is null (we now know this rect isn't)
         } else if (( gSpriteCursor->sprite.lastRect.right <= gSpriteCursor->sprite.lastRect.left) ||
             ( gSpriteCursor->sprite.lastRect.bottom <= gSpriteCursor->sprite.lastRect.top))
         {
             // then show thisRect
-
-            ChunkCopyPixMapToScreenPixMap( gOffWorld,
-                gSpriteCursor->sprite.thisRect, gActiveWorld);
-
+            const Rect& bounds = gSpriteCursor->sprite.thisRect;
+            CopyBits(gOffWorld, gActiveWorld, bounds, bounds);
         // else if the rects don't intersect
         } else if ( ( gSpriteCursor->sprite.lastRect.right <
                         ( gSpriteCursor->sprite.thisRect.left - 32)) ||
@@ -302,20 +297,16 @@ void ShowSpriteCursorSprite() {
                         ( gSpriteCursor->sprite.thisRect.bottom + 32)))
         {
             // then draw them individually
-
-
-            ChunkCopyPixMapToScreenPixMap(gOffWorld, gSpriteCursor->sprite.lastRect,
-                    gActiveWorld);
-            ChunkCopyPixMapToScreenPixMap(gOffWorld, gSpriteCursor->sprite.thisRect,
-                    gActiveWorld);
-
+            const Rect& last = gSpriteCursor->sprite.lastRect;
+            const Rect& current = gSpriteCursor->sprite.lastRect;
+            CopyBits(gOffWorld, gActiveWorld, last, last);
+            CopyBits(gOffWorld, gActiveWorld, current, current);
         // else the rects do intersect (and we know are both non-null)
         } else
         {
             tRect = gSpriteCursor->sprite.thisRect;
             tRect.enlarge_to(gSpriteCursor->sprite.lastRect);
-
-            ChunkCopyPixMapToScreenPixMap(gOffWorld, tRect, gActiveWorld);
+            CopyBits(gOffWorld, gActiveWorld, tRect, tRect);
         }
         gSpriteCursor->sprite.lastRect = gSpriteCursor->sprite.thisRect;
     }

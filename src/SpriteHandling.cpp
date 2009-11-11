@@ -1631,7 +1631,7 @@ void EraseSpriteTable( void)
         #ifndef kDrawOverride
             if ( aSprite->thisRect.left < aSprite->thisRect.right)
             {
-                ChunkErasePixMap( gOffWorld, &(aSprite->thisRect));
+                gOffWorld->view(aSprite->thisRect).fill(RgbColor::kBlack);
             }
         #endif
             if ( aSprite->killMe)
@@ -1813,7 +1813,7 @@ void ShowSpriteTable( void)
                 if ( aSprite->lastRect.right > aSprite->lastRect.left)
                 {
                     // show lastRect
-                    ChunkCopyPixMapToScreenPixMap( gOffWorld, aSprite->lastRect, gActiveWorld);
+                    CopyBits(gOffWorld, gActiveWorld, aSprite->lastRect, aSprite->lastRect);
                 }
             // else if lastRect is null (we now know this rect isn't)
             } else if (( aSprite->lastRect.right <= aSprite->lastRect.left) ||
@@ -1821,8 +1821,7 @@ void ShowSpriteTable( void)
             {
                 // then show thisRect
 
-                ChunkCopyPixMapToScreenPixMap( gOffWorld, aSprite->thisRect,
-                        gActiveWorld);
+                CopyBits(gOffWorld, gActiveWorld, aSprite->thisRect, aSprite->thisRect);
 
             // else if the rects don't intersect
             } else if ( ( aSprite->lastRect.right < ( aSprite->thisRect.left - 32)) ||
@@ -1831,19 +1830,15 @@ void ShowSpriteTable( void)
                         ( aSprite->lastRect.top > ( aSprite->thisRect.bottom + 32)))
             {
                 // then draw them individually
-
-
-                ChunkCopyPixMapToScreenPixMap( gOffWorld, aSprite->lastRect, gActiveWorld);
-                ChunkCopyPixMapToScreenPixMap( gOffWorld, aSprite->thisRect, gActiveWorld);
-
+                CopyBits(gOffWorld, gActiveWorld, aSprite->lastRect, aSprite->lastRect);
+                CopyBits(gOffWorld, gActiveWorld, aSprite->thisRect, aSprite->thisRect);
             // else the rects do intersect (and we know are both non-null)
             } else
             {
                 tRect = aSprite->thisRect;
                 tRect.enlarge_to(aSprite->lastRect);
 
-                ChunkCopyPixMapToScreenPixMap(gOffWorld, tRect, gActiveWorld);
-
+                CopyBits(gOffWorld, gActiveWorld, tRect, tRect);
             }
             aSprite->lastRect = aSprite->thisRect;
             if ( aSprite->killMe)

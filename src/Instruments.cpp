@@ -289,7 +289,7 @@ void UpdateRadar(int32_t unitsDone) {
             DrawNateRect(gOffWorld, &lRect, 0, 0, color);
             NormalizeColors();
             DrawInRealWorld();
-            ChunkCopyPixMapToScreenPixMap(gOffWorld, tRect, gActiveWorld);
+            CopyBits(gOffWorld, gActiveWorld, tRect, tRect);
 
             lp = globals()->gRadarBlipData.get();
             for ( rcount = 0; rcount < kRadarBlipNum; rcount++)

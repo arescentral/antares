@@ -577,7 +577,7 @@ void DrawAndShowMiniScreenLine( long whichLine)
     tRect.right = kMiniScreenRight;
     tRect.top = lRect.top + (( whichLine + lineCorrect) * ( gDirectText->height /* * 2 */));
     tRect.bottom = tRect.top + gDirectText->height/* * 2 */;
-    ChunkCopyPixMapToScreenPixMap(gOffWorld, tRect, gActiveWorld);
+    CopyBits(gOffWorld, gActiveWorld, tRect, tRect);
 }
 
 void ShowWholeMiniScreen( void)
@@ -587,10 +587,10 @@ void ShowWholeMiniScreen( void)
 
     tRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
                 kMiniScreenBottom + globals()->gInstrumentTop);
-    ChunkCopyPixMapToScreenPixMap(gOffWorld, tRect, gActiveWorld);
+    CopyBits(gOffWorld, gActiveWorld, tRect, tRect);
     tRect = Rect(kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
                 kButBoxBottom + globals()->gInstrumentTop);
-    ChunkCopyPixMapToScreenPixMap(gOffWorld, tRect, gActiveWorld);
+    CopyBits(gOffWorld, gActiveWorld, tRect, tRect);
 }
 
 void MakeMiniScreenFromIndString( short whichString)
@@ -1335,7 +1335,7 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
         mRect.bottom = clipRect.bottom;
 
         // copy the dirty rect
-        ChunkCopyPixMapToScreenPixMap(gOffWorld, mRect, gActiveWorld);
+        CopyBits(gOffWorld, gActiveWorld, mRect, mRect);
     }
 
     lastOne = thisOne;
@@ -1753,7 +1753,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     mRect.bottom = uRect.bottom;
 
     // copy the dirty rect
-    ChunkCopyPixMapToScreenPixMap(gOffWorld, mRect, gActiveWorld);
+    CopyBits(gOffWorld, gActiveWorld, mRect, mRect);
 
     mCopyMiniSpaceObject( *oldObject, *newObject);
 }

@@ -48,9 +48,6 @@ void CopyRealWorldToOffWorld(const Rect& bounds);
 void CopySaveWorldToOffWorld(const Rect& bounds);
 void CopyOffWorldToSaveWorld(const Rect& bounds);
 void NormalizeColors();
-void ChunkCopyPixMapToScreenPixMap(PixMap* source_pix, const Rect& source_rect, PixMap* dest_pix);
-void ChunkCopyPixMapToPixMap(PixMap* source_pix, const Rect& source_rect, PixMap* dest_pix);
-void ChunkErasePixMap(PixMap* source_pix, Rect* source_rect);
 
 }  // namespace antares
 

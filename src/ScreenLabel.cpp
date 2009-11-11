@@ -205,7 +205,7 @@ void EraseAllLabels( void)
             if (( label->thisRect.right > label->thisRect.left) &&
                 ( label->thisRect.bottom > label->thisRect.top))
             {
-                ChunkErasePixMap( gOffWorld, &(label->thisRect));
+                gOffWorld->view(label->thisRect).fill(RgbColor::kBlack);
             }
             if ( label->killMe)
                 label->lastRect = label->thisRect;
@@ -335,11 +335,12 @@ void ShowAllLabels( void)
                 (ABS( tRect.left - label->lastRect.left) > ( (tRect.right - tRect.left) * 4)) ||
                 (ABS( tRect.top - label->lastRect.top) > (( tRect.bottom - tRect.top) * 4)))
             {
-                if ( !(( tRect.right <= tRect.left) || ( tRect.bottom <= tRect.top)))
-                    ChunkCopyPixMapToScreenPixMap( gOffWorld, tRect, gActiveWorld);
-                if ( !(( label->lastRect.right <= label->lastRect.left) || ( label->lastRect.bottom <= label->lastRect.top)))
-                    ChunkCopyPixMapToScreenPixMap( gOffWorld, label->lastRect,
-                            gActiveWorld);
+                if ( !(( tRect.right <= tRect.left) || ( tRect.bottom <= tRect.top))) {
+                    CopyBits(gOffWorld, gActiveWorld, tRect, tRect);
+                }
+                if ( !(( label->lastRect.right <= label->lastRect.left) || ( label->lastRect.bottom <= label->lastRect.top))) {
+                    CopyBits(gOffWorld, gActiveWorld, label->lastRect, label->lastRect);
+                }
 
                 if ( label->keepOnScreenAnyway)
                 {
@@ -351,7 +352,7 @@ void ShowAllLabels( void)
 
             {
                 tRect.enlarge_to(label->lastRect);
-                ChunkCopyPixMapToScreenPixMap(gOffWorld, tRect, gActiveWorld);
+                CopyBits(gOffWorld, gActiveWorld, tRect, tRect);
             }
             label->lastRect = label->thisRect;
             if ( label->killMe)

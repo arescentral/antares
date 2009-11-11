@@ -125,16 +125,4 @@ void NormalizeColors() {
     RGBBackColor(RgbColor::kWhite);
 }
 
-void ChunkCopyPixMapToScreenPixMap(PixMap* sourcePix, const Rect& sourceRect, PixMap* destMap) {
-    CopyBits(sourcePix, destMap, sourceRect, sourceRect);
-}
-
-void ChunkCopyPixMapToPixMap(PixMap* sourcePix, const Rect& sourceRect, PixMap* destMap) {
-    CopyBits(sourcePix, destMap, sourceRect, sourceRect);
-}
-
-void ChunkErasePixMap(PixMap* destMap, Rect* sourceRect) {
-    DrawNateRect(destMap, sourceRect, 0, 0, RgbColor::kBlack);
-}
-
 }  // namespace antares
