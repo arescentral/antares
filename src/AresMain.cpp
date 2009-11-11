@@ -60,6 +60,7 @@
 #include "OffscreenGWorld.hpp"
 #include "Options.hpp"
 
+#include "PlayAgainScreen.hpp"
 #include "PlayerInterface.hpp"
 #include "PlayerShip.hpp"
 
@@ -232,6 +233,7 @@ class GamePlay : public Card {
     uint32_t _decide_cycle;
     int _last_click_time;
     int _scenario_check_time;
+    PlayAgainScreen::Item _play_again;
 };
 
 Card* AresInit() {
@@ -463,6 +465,37 @@ void GamePlay::become_front() {
         break;
         
       case PLAY_AGAIN:
+        _state = PLAYING;
+        switch (_play_again) {
+          case PlayAgainScreen::QUIT:
+            *_game_result = QUIT_GAME;
+            globals()->gGameOver = 1;
+            globals()->gScenarioWinner.next = -1;
+            globals()->gScenarioWinner.text = -1;
+            break;
+
+          case PlayAgainScreen::RESTART:
+            *_game_result = RESTART_GAME;
+            globals()->gGameOver = 1;
+            globals()->gScenarioWinner.next = -1;
+            globals()->gScenarioWinner.text = -1;
+            break;
+
+          case PlayAgainScreen::RESUME:
+            break;
+
+          case PlayAgainScreen::SKIP:
+            *_game_result = WIN_GAME;
+            globals()->gGameOver = 1;
+            globals()->gScenarioWinner.player = globals()->gPlayerAdmiralNumber;
+            globals()->gScenarioWinner.next =
+                GetChapterNumberFromScenarioNumber(globals()->gThisScenarioNumber) + 1;
+            globals()->gScenarioWinner.text = -1;
+            break;
+
+          default:
+            fail("invalid play again result %d", _play_again);
+        }
         break;
     }
 }
@@ -626,50 +659,6 @@ void GamePlay::fire_timer() {
         return;
     }
 
-    if ((!(globals()->gOptions & kOptionNetworkOn)) &&
-            (!(globals()->gOptions & kOptionReplay)) &&
-            ((mRestartResumeKey(_key_map))
-             || ((!_command_and_q) && (mQuitKeys(_key_map))))) {
-
-        RestoreOriginalColors();
-        MacShowCursor();
-        bool is_training = gThisScenario->startTime & kScenario_IsTraining_Bit;
-        switch (DoPlayAgain(true, is_training)) {
-          case PLAY_AGAIN_QUIT:
-            *_game_result = QUIT_GAME;
-            globals()->gGameOver = 1;
-            if ( CommandKey())
-                globals()->gScenarioWinner.player = globals()->gPlayerAdmiralNumber;
-            globals()->gScenarioWinner.next = -1;
-            globals()->gScenarioWinner.text = -1;
-            break;
-
-          case PLAY_AGAIN_RESTART:
-            *_game_result = RESTART_GAME;
-            globals()->gGameOver = 1;
-            if ( CommandKey())
-                globals()->gScenarioWinner.player = globals()->gPlayerAdmiralNumber;
-            globals()->gScenarioWinner.next = -1;
-            globals()->gScenarioWinner.text = -1;
-            break;
-
-          case PLAY_AGAIN_RESUME:
-            break;
-
-          case PLAY_AGAIN_SKIP:
-            *_game_result = WIN_GAME;
-            globals()->gGameOver = 1;
-            globals()->gScenarioWinner.player = globals()->gPlayerAdmiralNumber;
-            globals()->gScenarioWinner.next =
-                GetChapterNumberFromScenarioNumber(globals()->gThisScenarioNumber) + 1;
-            globals()->gScenarioWinner.text = -1;
-            break;
-        }
-        CopyOffWorldToRealWorld(_play_area);
-        HideCursor();
-        _player_paused = true;
-    }
-
     if (!(globals()->gOptions & kOptionReplay)
             && mHelpKey(_key_map)) {
         RestoreOriginalColors();
@@ -795,7 +784,15 @@ bool GamePlay::mouse_moved(int button) {
 }
 
 bool GamePlay::key_down(int key) {
-    static_cast<void>(key);
+    switch (key) {
+      case 0x3500:
+        _state = PLAY_AGAIN;
+        _player_paused = true;
+        bool is_training = gThisScenario->startTime & kScenario_IsTraining_Bit;
+        stack()->push(new PlayAgainScreen(true, is_training, &_play_again));
+        break;
+    }
+
     return true;
 }
 

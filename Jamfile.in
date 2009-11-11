@@ -57,6 +57,7 @@ Library Antares :
     src/OffscreenGWorld.cpp
     src/Picture.cpp
     src/PixMap.cpp
+    src/PlayAgainScreen.cpp
     src/PlayerInterface.cpp
     src/PlayerInterfaceDrawing.cpp
     src/PlayerShip.cpp

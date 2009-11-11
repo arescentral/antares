@@ -88,7 +88,7 @@ bool InterfaceScreen::mouse_down(int button, const Point& where) {
               case kTabBoxButton:
                 _state = MOUSE_DOWN;
                 item->set_status(kIH_Hilite);
-                DrawAnyInterfaceItemOffToOn(*item);
+                draw();
                 // play kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound.
                 _hit_item = i;
                 return true;
@@ -122,7 +122,7 @@ bool InterfaceScreen::mouse_up(int button, const Point& where) {
         Rect bounds;
         GetAnyInterfaceItemGraphicBounds(*item, &bounds);
         item->set_status(kActive);
-        DrawAnyInterfaceItemOffToOn(*item);
+        draw();
         if (bounds.contains(where)) {
             if (item->kind == kTabBoxButton) {
                 item->item.radioButton.on = true;
@@ -147,7 +147,7 @@ bool InterfaceScreen::key_down(int key) {
             if (item->status() != kDimmed && item->key() == key_code) {
                 _state = KEY_DOWN;
                 item->set_status(kIH_Hilite);
-                DrawAnyInterfaceItemOffToOn(*item);
+                draw();
                 // play kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound.
                 _hit_item = i;
                 return true;
@@ -172,7 +172,7 @@ bool InterfaceScreen::key_up(int key) {
         if (item->kind == kTabBoxButton) {
             item->item.radioButton.on = true;
         }
-        DrawAnyInterfaceItemOffToOn(*item);
+        draw();
         handle_button(hit_item);
     }
     return true;
