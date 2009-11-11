@@ -20,8 +20,7 @@ STUB1(DisposeRgn, void(Rgn** rgn));
 
 void ScrollRect(PixMap* pix, const Rect& rect, int x, int y, const Rect& clip);
 
-void FrameRect(const Rect& rect);
-void MacFrameRect(const Rect& rect);
+void FrameRect(PixMap* pix, const Rect& rect);
 
 STUB1(FrameOval, void(const Rect& rect));
 STUB1(PaintOval, void(const Rect& rect));

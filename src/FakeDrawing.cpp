@@ -31,7 +31,6 @@
 namespace antares {
 
 extern PixMap* gRealWorld;
-extern PixMap* gActiveWorld;
 
 namespace {
 
@@ -169,15 +168,11 @@ void DrawLine(PixMap* pix, const Point& from, const Point& to) {
     }
 }
 
-void FrameRect(const Rect& r) {
-    DrawLine(gActiveWorld, Point(r.left, r.top), Point(r.left, r.bottom - 1));
-    DrawLine(gActiveWorld, Point(r.left, r.bottom - 1), Point(r.right - 1, r.bottom - 1));
-    DrawLine(gActiveWorld, Point(r.right - 1, r.bottom - 1), Point(r.right - 1, r.top));
-    DrawLine(gActiveWorld, Point(r.right - 1, r.top), Point(r.left, r.top));
-}
-
-void MacFrameRect(const Rect& rect) {
-    FrameRect(rect);
+void FrameRect(PixMap* pix, const Rect& r) {
+    DrawLine(pix, Point(r.left, r.top), Point(r.left, r.bottom - 1));
+    DrawLine(pix, Point(r.left, r.bottom - 1), Point(r.right - 1, r.bottom - 1));
+    DrawLine(pix, Point(r.right - 1, r.bottom - 1), Point(r.right - 1, r.top));
+    DrawLine(pix, Point(r.right - 1, r.top), Point(r.left, r.top));
 }
 
 void Index2Color(long index, RgbColor* color) {

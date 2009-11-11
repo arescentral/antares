@@ -2272,7 +2272,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
             SetTranslateColorShadeFore( kMissionDataHiliteColor, VERY_LIGHT);
             hiliteBounds.right++;
             hiliteBounds.bottom++;
-            MacFrameRect(hiliteBounds);
+            FrameRect(gActiveWorld, hiliteBounds);
             SetTranslateColorShadeFore( kMissionDataHiliteColor, MEDIUM);
             GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
             if ( dataItem->bounds.right < hiliteBounds.left)
@@ -2529,7 +2529,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
             dataRect.inset(-8, -4);
             gActiveWorld->view(dataRect).fill(RgbColor::kBlack);
             SetTranslateColorShadeFore( GREEN, VERY_LIGHT);
-            MacFrameRect(dataRect);
+            FrameRect(gActiveWorld, dataRect);
             NormalizeColors();
 
 

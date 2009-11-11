@@ -1442,7 +1442,7 @@ void DrawPlayerListLineUp(const interfaceItemType& item, interfaceItemStatusEnum
     {
         if (status == kDimmed) SetTranslateColorShadeFore( item.color, DARKER);
         else SetTranslateColorShadeFore( item.color, LIGHT);
-        MacFrameRect(tRect);
+        FrameRect(pix, tRect);
         SetTranslateColorFore( BLACK);
         tRect.inset(1, 1);
         pix->view(tRect).fill(RgbColor::kBlack);
@@ -1495,7 +1495,7 @@ void DrawPlayerListPageUp(const interfaceItemType& item, interfaceItemStatusEnum
     {
         if (status == kDimmed) SetTranslateColorShadeFore( item.color, DARKER);
         else SetTranslateColorShadeFore( item.color, LIGHT);
-        MacFrameRect(tRect);
+        FrameRect(pix, tRect);
         SetTranslateColorFore( BLACK);
         tRect.inset(1, 1);
         pix->view(tRect).fill(RgbColor::kBlack);
@@ -1543,7 +1543,7 @@ void DrawPlayerListLineDown(const interfaceItemType& item, interfaceItemStatusEn
     {
         if (status == kDimmed) SetTranslateColorShadeFore( item.color, DARKER);
         else SetTranslateColorShadeFore( item.color, LIGHT);
-        MacFrameRect(tRect);
+        FrameRect(pix, tRect);
         SetTranslateColorFore( BLACK);
         tRect.inset(1, 1);
         pix->view(tRect).fill(RgbColor::kBlack);
@@ -1599,7 +1599,7 @@ void DrawPlayerListPageDown(const interfaceItemType& item, interfaceItemStatusEn
     {
         if (status == kDimmed) SetTranslateColorShadeFore( item.color, DARKER);
         else SetTranslateColorShadeFore( item.color, LIGHT);
-        MacFrameRect(tRect);
+        FrameRect(pix, tRect);
         SetTranslateColorFore( BLACK);
         tRect.inset(1, 1);
         pix->view(tRect).fill(RgbColor::kBlack);

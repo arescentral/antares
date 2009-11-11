@@ -271,7 +271,7 @@ void UpdateRadar(int32_t unitsDone) {
             GetRGBTranslateColorShade(&color, kRadarColor, DARKEST);
             DrawNateRect(gOffWorld, &lRect, 0, 0, color);
             SetTranslateColorShadeFore( kRadarColor, VERY_LIGHT);
-            MacFrameRect(tRect);
+            FrameRect(gOffWorld, tRect);
 
             dx = gScrollStarObject->location.h - gGlobalCorner.h;
             dx = dx * kRadarSize;
