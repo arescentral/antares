@@ -3154,7 +3154,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                                 {
                                     DrawInOffWorld();
 
-                                    ScrollRect(tRect, 0, -1, clipRgn);
+                                    ScrollRect(gOffWorld, tRect, 0, -1, clipRgn);
                                     DrawInRealWorld();
 
                                     DrawNateLine(gOffWorld, scrollRect, scrollRect.left, scrollRect.bottom - 1, scrollRect.right - 1,
@@ -3255,7 +3255,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
                                 l++)
                         {
                             DrawInOffWorld();
-                            ScrollRect(tRect, 0, -1, clipRgn);
+                            ScrollRect(gOffWorld, tRect, 0, -1, clipRgn);
 
                             bgVOffset++;
                             if ( bgVOffset >= kBackground_Height) bgVOffset = 0;
@@ -3295,7 +3295,7 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
         {
             DrawInOffWorld();
             tRect = scrollRect;
-            ScrollRect(tRect, 0, -1, clipRgn);
+            ScrollRect(gOffWorld, tRect, 0, -1, clipRgn);
             DrawNateLine(gOffWorld, scrollRect, scrollRect.left, scrollRect.bottom - 1, scrollRect.right - 1,
                 scrollRect.bottom - 1, 0, 0, RgbColor::kBlack);
             DrawInRealWorld();

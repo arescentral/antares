@@ -18,7 +18,7 @@ void CopyBits(PixMap* source, PixMap* source2, const Rect& source_rect,
 STUB0(NewRgn, Rgn**(), new Rgn*(new Rgn));
 STUB1(DisposeRgn, void(Rgn** rgn));
 
-void ScrollRect(const Rect& rect, int x, int y, const Rect& clip);
+void ScrollRect(PixMap* pix, const Rect& rect, int x, int y, const Rect& clip);
 
 void FrameRect(const Rect& rect);
 void MacFrameRect(const Rect& rect);

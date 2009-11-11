@@ -63,11 +63,11 @@ void DumpTo(const std::string& path) {
     close(fd);
 }
 
-void ScrollRect(const Rect& rect, int x, int y, const Rect& clip) {
+void ScrollRect(PixMap* pix, const Rect& rect, int x, int y, const Rect& clip) {
     check(x == 0 && y == -1, "ScrollRect only supports shifting up by one pixel");
-    int rowBytes = gActiveWorld->row_bytes();
+    int rowBytes = pix->row_bytes();
     for (int i = std::min(rect.top - 1, clip.top); i < rect.bottom - 1; ++i) {
-        RgbColor* base = gActiveWorld->mutable_bytes() + i * rowBytes + rect.left;
+        RgbColor* base = pix->mutable_bytes() + i * rowBytes + rect.left;
         memcpy(base, base + rowBytes, rect.width() * sizeof(RgbColor));
     }
 }
