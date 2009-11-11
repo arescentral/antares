@@ -519,12 +519,10 @@ void GamePlay::fire_timer() {
     thisTime -= globals()->gLastTime;
     newGameTime = (thisTime / kTimeUnit) + _scenario_start_time;
 
-    bool demoKey = false;
     if (((globals()->gOptions & kOptionSubstituteFKeys)
                 ? mNOFFastMotionKey(_key_map)
                 : mFastMotionKey(_key_map)) &&
             !_entering_message) {
-        demoKey = true;
         newGameTime = globals()->gGameTime + 12;
         thisTime = (newGameTime - _scenario_start_time) * kTimeUnit;
         globals()->gLastTime = scrapTime - thisTime;
@@ -699,20 +697,6 @@ void GamePlay::fire_timer() {
         }
     }
 
-    _key_map[3] &= ~0x80; // mask out power key
-    _key_map[1] &= ~0x02; // mask out caps lock key
-    if ((globals()->gOptions & kOptionReplay)
-            && !demoKey
-            && !newKeyMap
-            && ((_key_map[0] != 0)
-                || (_key_map[1] != 0)
-                || (_key_map[2] != 0)
-                || (_key_map[3] != 0))) {
-        *_game_result = QUIT_GAME;
-        globals()->gGameOver = 1;
-    }
-    demoKey = false;
-
     MiniComputerHandleNull(unitsDone);
 
     ClipToCurrentLongMessage();
@@ -784,6 +768,19 @@ bool GamePlay::mouse_moved(int button) {
 }
 
 bool GamePlay::key_down(int key) {
+    if (globals()->gOptions & kOptionReplay) {
+        switch (key) {
+          case 0x3900:  // Caps lock.
+            // TODO(sfiera): also F6.
+            break;
+
+          default:
+            *_game_result = QUIT_GAME;
+            globals()->gGameOver = 1;
+            return true;
+        }
+    }
+
     switch (key) {
       case 0x3500:
         _state = PLAY_AGAIN;
