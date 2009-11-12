@@ -769,10 +769,10 @@ VncVideoDriver::VncVideoDriver(int port)
     _key_map[65307] = 0x35;  // ESC
     _key_map[65293] = 0x24;  // RET
 
-    _key_map[65361] = 0x3B;  // LEFT
-    _key_map[65362] = 0x3E;  // UP
-    _key_map[65363] = 0x3C;  // RGHT
-    _key_map[65364] = 0x3D;  // DOWN
+    _key_map[65361] = 0x7B;  // LEFT
+    _key_map[65362] = 0x7E;  // UP
+    _key_map[65363] = 0x7C;  // RGHT
+    _key_map[65364] = 0x7D;  // DOWN
 }
 
 void VncVideoDriver::send_event(EventRecord) { }
