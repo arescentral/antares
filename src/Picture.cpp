@@ -48,7 +48,9 @@ Picture::Picture(int32_t id)
     sprintf(fileglob, "data/derived/Pictures/%d *.png", id);
     glob(fileglob, GLOB_APPEND, NULL, &g);
 
-    check(g.gl_pathc == 1, "found %lu matches for %d", g.gl_pathc, id);
+    if (g.gl_pathc != 1) {
+        throw PictureNotFoundException();
+    }
 
     MappedFile file(g.gl_pathv[0]);
     BufferBinaryReader bin(file.data(), file.size());

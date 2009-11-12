@@ -1930,7 +1930,11 @@ void DrawInterfaceTextInRect(
                     case kVPictKind:
                     case kVClearPictKind:
                         vline += ( fheight - GetInterfaceFontAscent( style));
-                        thePicture.reset(new Picture(inlineValue));
+                        try {
+                            thePicture.reset(new Picture(inlineValue));
+                        } catch (PictureNotFoundException) {
+                            thePicture.reset();
+                        }
                         xpos = hleft;
                         if ( *theLine == 0) vline -= fheight;
                         if (thePicture.get() != nil) {
@@ -2119,7 +2123,11 @@ short GetInterfaceTextHeightFromWidth(
                 {
                     case kVPictKind:
                     case kVClearPictKind:
-                        thePicture.reset(new Picture(inlineValue));
+                        try {
+                            thePicture.reset(new Picture(inlineValue));
+                        } catch (PictureNotFoundException) {
+                            thePicture.reset();
+                        }
                         xpos = hleft;
                         vline += ( fheight - GetInterfaceFontAscent( style));
                         if ( *theLine == 0) vline -= fheight;
