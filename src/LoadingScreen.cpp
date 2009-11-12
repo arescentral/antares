@@ -30,6 +30,7 @@
 
 namespace antares {
 
+extern PixMap* gRealWorld;
 extern PixMap* gActiveWorld;
 extern PixMap* gOffWorld;
 extern long WORLD_WIDTH;
@@ -48,7 +49,7 @@ std::string chapter_name(scenarioType* scenario) {
 }  // namespace
 
 LoadingScreen::LoadingScreen(scenarioType* scenario)
-        : InterfaceScreen(kLoadingScreenResID),
+        : InterfaceScreen(kLoadingScreenResID, gRealWorld->bounds(), true),
           _chapter_name(chapter_name(scenario)),
           _loading_progress(0.0) {
 }

@@ -20,6 +20,7 @@
 
 #include <vector>
 #include "Card.hpp"
+#include "Geometry.hpp"
 #include "PlayerInterfaceItems.hpp"
 #include "SmartPtr.hpp"
 
@@ -29,7 +30,7 @@ class PixMap;
 
 class InterfaceScreen : public Card {
   public:
-    InterfaceScreen(int id);
+    InterfaceScreen(int id, const Rect& bounds, bool full_screen);
     ~InterfaceScreen();
 
     virtual void become_front();
@@ -58,7 +59,9 @@ class InterfaceScreen : public Card {
     };
     State _state;
 
-    int _id;
+    const int _id;
+    const Rect _bounds;
+    const bool _full_screen;
     double _last_event;
     std::vector<interfaceItemType> _items;
     int _hit_item;

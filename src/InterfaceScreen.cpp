@@ -33,16 +33,18 @@ extern long WORLD_WIDTH;
 extern long WORLD_HEIGHT;
 extern PixMap* gRealWorld;
 
-InterfaceScreen::InterfaceScreen(int id)
+InterfaceScreen::InterfaceScreen(int id, const Rect& bounds, bool full_screen)
         : _state(NORMAL),
           _id(id),
+          _bounds(bounds),
+          _full_screen(full_screen),
           _last_event(now_secs()),
           _hit_item(0),
-          _pix(new ArrayPixMap(WORLD_WIDTH, WORLD_HEIGHT)) {
+          _pix(new ArrayPixMap(bounds.width(), bounds.height())) {
     Resource rsrc('intr', id);
     BufferBinaryReader bin(rsrc.data(), rsrc.size());
-    const int offset_x = (WORLD_WIDTH / 2) - 320;
-    const int offset_y = (WORLD_HEIGHT / 2) - 240;
+    const int offset_x = (bounds.width() / 2) - 320;
+    const int offset_y = (bounds.height() / 2) - 240;
     while (bin.bytes_read() < rsrc.size()) {
         _items.push_back(interfaceItemType());
         interfaceItemType* const item = &_items.back();
@@ -54,7 +56,6 @@ InterfaceScreen::InterfaceScreen(int id)
 InterfaceScreen::~InterfaceScreen() { }
 
 void InterfaceScreen::become_front() {
-    gActiveWorld->fill(RgbColor::kBlack);
     this->adjust_interface();
     draw();
     _last_event = now_secs();
@@ -62,14 +63,23 @@ void InterfaceScreen::become_front() {
 }
 
 void InterfaceScreen::draw() const {
-    DrawInOffWorld();
+    Rect copy_area;
+    if (_full_screen) {
+        copy_area = _pix->bounds();
+    } else {
+        GetAnyInterfaceItemGraphicBounds(_items[0], &copy_area);
+        for (size_t i = 1; i < _items.size(); ++i) {
+            Rect r;
+            GetAnyInterfaceItemGraphicBounds(_items[i], &r);
+            copy_area.enlarge_to(r);
+        }
+    }
     _pix->fill(RgbColor::kBlack);
     for (std::vector<interfaceItemType>::const_iterator it = _items.begin(); it != _items.end();
             ++it) {
         DrawAnyInterfaceItem(*it, _pix.get());
     }
-    DrawInRealWorld();
-    gRealWorld->copy(*_pix);
+    gRealWorld->view(_bounds).view(copy_area).copy(_pix->view(copy_area));
 }
 
 bool InterfaceScreen::mouse_down(int button, const Point& where) {

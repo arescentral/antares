@@ -27,6 +27,7 @@
 
 namespace antares {
 
+extern long CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM;
 extern PixMap* gRealWorld;
 extern PixMap* gSaveWorld;
 
@@ -51,7 +52,10 @@ int interface_id(bool allow_resume, bool allow_skip) {
 }  // namespace
 
 PlayAgainScreen::PlayAgainScreen(bool allow_resume, bool allow_skip, Item* button_pressed)
-        : InterfaceScreen(interface_id(allow_resume, allow_skip)),
+        : InterfaceScreen(
+                interface_id(allow_resume, allow_skip),
+                Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM),
+                false),
           _button_pressed(button_pressed) { }
 
 PlayAgainScreen::~PlayAgainScreen() { }
@@ -70,13 +74,6 @@ void PlayAgainScreen::adjust_interface() {
     if (globals()->gOptions & kOptionNetworkOn) {
         mutable_item(RESTART)->set_status(kDimmed);
     }
-}
-
-void PlayAgainScreen::draw() const {
-    Rect bounds;
-    GetAnyInterfaceItemGraphicBounds(item(BOX), &bounds);
-    gRealWorld->view(bounds).fill(RgbColor::kBlack);
-    InterfaceScreen::draw();
 }
 
 void PlayAgainScreen::handle_button(int button) {

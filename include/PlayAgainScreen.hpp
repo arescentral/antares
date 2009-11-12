@@ -43,7 +43,6 @@ class PlayAgainScreen : public InterfaceScreen {
 
   protected:
     virtual void adjust_interface();
-    virtual void draw() const;
     virtual void handle_button(int button);
 
   private:

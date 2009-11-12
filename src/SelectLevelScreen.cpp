@@ -40,7 +40,7 @@ const int kSelectLevelScreenResID = 5011;
 }  // namespace
 
 SelectLevelScreen::SelectLevelScreen(bool* cancelled, int* scenario)
-        : InterfaceScreen(kSelectLevelScreenResID),
+        : InterfaceScreen(kSelectLevelScreenResID, gRealWorld->bounds(), true),
           _cancelled(cancelled),
           _chapter(GetStartingLevelPreference()),
           _scenario(scenario) {

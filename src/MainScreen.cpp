@@ -36,6 +36,8 @@
 
 namespace antares {
 
+extern PixMap* gRealWorld;
+
 namespace {
 
 const int kMainScreenResID = 5000;
@@ -45,7 +47,7 @@ const int kTitleTextScrollWidth = 450;
 }  // namespace
 
 MainScreen::MainScreen()
-        : InterfaceScreen(kMainScreenResID) { }
+        : InterfaceScreen(kMainScreenResID, gRealWorld->bounds(), true) { }
 
 MainScreen::~MainScreen() { }
 
