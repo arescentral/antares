@@ -50,6 +50,7 @@
 #include "MathSpecial.hpp"
 #include "MessageScreen.hpp"
 #include "Minicomputer.hpp"
+#include "BriefingScreen.hpp"
 #include "Motion.hpp"
 #include "Music.hpp"
 
@@ -302,6 +303,7 @@ Card* AresInit() {
 MainPlay::MainPlay(int scenario, GameResult* game_result, long* game_length)
         : _state(NEW),
           _scenario(scenario),
+          _cancelled(false),
           _game_result(game_result),
           _game_length(game_length) { }
 
@@ -335,16 +337,30 @@ void MainPlay::become_front() {
                 stack()->pop(this);
                 return;
             }
+            if (!(globals()->gOptions & kOptionReplay)) {
+                stack()->push(new BriefingScreen(_scenario, &_cancelled));
+                break;
+            }
         }
-        // fall through
+        // fall through.
 
       case LOADING:
+        // fall through
+
+      case BRIEFING:
         {
+            if (_cancelled) {
+                *_game_result = QUIT_GAME;
+                stack()->pop(this);
+                break;
+            }
+
             _state = PLAYING;
             if (globals()->gOptions & kOptionMusicIdle) {
                 StopAndUnloadSong();
             }
 
+            ResetInstruments();
             DrawInstrumentPanel();
 
             if (globals()->gOptions & kOptionMusicPlay) {

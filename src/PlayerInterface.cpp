@@ -2322,7 +2322,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
         newRect.enlarge_to(hiliteBounds);
         oldRect = *usedRect;
         oldRect.enlarge_to(newRect);
-        CopyOffWorldToRealWorld(oldRect);
+        CopyOffWorldToRealWorld(*bounds);
         *usedRect = newRect;
     } else // it's a special briefpoint!
     {
@@ -2378,7 +2378,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
                 oldRect.enlarge_to(*bounds);
                 DrawInRealWorld();
                 NormalizeColors();
-                CopyOffWorldToRealWorld(oldRect);
+                CopyOffWorldToRealWorld(*bounds);
                 *usedRect = newRect;
                 textlength = 100;
             }
@@ -2387,7 +2387,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
             oldRect = *bounds;
             DrawInRealWorld();
             NormalizeColors();
-            CopyOffWorldToRealWorld(oldRect);
+            CopyOffWorldToRealWorld(*bounds);
             *usedRect = oldRect;
             textlength = 50;
         }

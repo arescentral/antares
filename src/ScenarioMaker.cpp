@@ -836,33 +836,8 @@ bool ConstructScenario( long which)
         }
     }
     globals()->gGameTime = (gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple;
-    if ( !(globals()->gOptions & ( kOptionAutoPlay | kOptionReplay | kOptionNetworkOn)))
-    {
-        if ( !DoMissionInterface( which)) return( false);
-    }
 
-    if ( globals()->gOptions & kOptionNetworkOn)
-    {
-#ifdef NETSPROCKET_AVAILABLE
-        UpdateLoadingInterface( -1, -1, &loadingRect);
-        SendPreGameBasicMessage( eStartToPlayMessage);
-        do
-        {
-            type = ProcessPreGameMessages( nil, nil, nil, nil, nil, nil, 0, nil, nil, nil, nil);
-            if (( AnyCancelKeys() || (type == eCancelMessage) ||
-                ( type == kNSpPlayerLeft)))
-            {
-                StopNetworking();
-                return( false);
-            }
-        } while (type != eStartToPlayMessage);
-#endif NETSPROCKET_AVAILABLE
-    }
-
-
-    ResetInstruments();
     return( true);
-//  gThisScenario = scenario;
 }
 
 void SetAllBaseObjectsUnchecked( void)

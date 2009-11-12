@@ -17,6 +17,7 @@ Library Antares :
     src/Beam.cpp
     src/BinaryStream.cpp
     src/BriefingRenderer.cpp
+    src/BriefingScreen.cpp
     src/Card.cpp
     src/CardStack.cpp
     src/ColorTable.cpp
