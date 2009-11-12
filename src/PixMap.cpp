@@ -161,7 +161,10 @@ PixMap::View::View(PixMap* pix, const Rect& bounds)
         : _parent(pix),
           _offset(bounds.left, bounds.top),
           _bounds(0, 0, bounds.width(), bounds.height()) {
-    check(pix->bounds().encloses(bounds), "tried to take view outside of parent PixMap");
+    check(pix->bounds().encloses(bounds), "tried to take view (%d, %d, %d, %d) outside of parent "
+            "PixMap with bounds (%d, %d, %d, %d)", bounds.left, bounds.top, bounds.right,
+            bounds.bottom, pix->bounds().left, pix->bounds().top, pix->bounds().right,
+            pix->bounds().bottom);
     _bounds.clip_to(pix->bounds());
 }
 
