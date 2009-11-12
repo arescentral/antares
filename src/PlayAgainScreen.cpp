@@ -27,7 +27,7 @@
 
 namespace antares {
 
-extern long CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM;
+extern long CLIP_LEFT, CLIP_TOP, CLIP_RIGHT;
 extern PixMap* gRealWorld;
 extern PixMap* gSaveWorld;
 
@@ -54,7 +54,7 @@ int interface_id(bool allow_resume, bool allow_skip) {
 PlayAgainScreen::PlayAgainScreen(bool allow_resume, bool allow_skip, Item* button_pressed)
         : InterfaceScreen(
                 interface_id(allow_resume, allow_skip),
-                Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM),
+                Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, globals()->gTrueClipBottom),
                 false),
           _button_pressed(button_pressed) { }
 

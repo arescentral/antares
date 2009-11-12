@@ -23,7 +23,6 @@
 
 namespace antares {
 
-// TODO(sfiera): center on the play area, and display the play area behind it.
 class PlayAgainScreen : public InterfaceScreen {
   public:
     enum Item {
