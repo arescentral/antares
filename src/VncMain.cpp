@@ -29,6 +29,7 @@
 #include "FakeSounds.hpp"
 #include "File.hpp"
 #include "ImageDriver.hpp"
+#include "Ledger.hpp"
 #include "LibpngImageDriver.hpp"
 #include "TestVideoDriver.hpp"
 #include "Threading.hpp"
@@ -97,6 +98,12 @@ void VncMain(int argc, char* const* argv) {
     ImageDriver::set_driver(new LibpngImageDriver);
     VideoDriver::set_driver(new VncVideoDriver(5901));
     SoundDriver::set_driver(new NullSoundDriver);
+
+    if (getenv("HOME") == NULL) {
+        Ledger::set_ledger(new NullLedger);
+    } else {
+        Ledger::set_ledger(new DirectoryLedger(getenv("HOME") + std::string("/.antares")));
+    }
 
     CardStack stack(AresInit());
     VideoDriver::driver()->loop(&stack);

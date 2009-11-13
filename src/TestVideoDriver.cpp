@@ -21,6 +21,7 @@
 #include "Error.hpp"
 #include "FakeDrawing.hpp"
 #include "Fakes.hpp"
+#include "Ledger.hpp"
 
 namespace antares {
 
@@ -119,7 +120,7 @@ bool MissionBriefingVideoDriver::wait_next_event(EventRecord* evt, double) {
             } else {
                 evt->message = 0x0100;  // S
             }
-            globals()->gPreferencesData->startingLevel = _level;
+            Ledger::ledger()->unlock_chapter(_level);
         }
         return true;
       case SELECT_LEVEL_INTERFACE:

@@ -44,7 +44,6 @@ struct Preferences {
     int16_t             keyMap[kKeyControlDataNum];
     serialNumberType    serialNumber;
     uint32_t            options;
-    int32_t             startingLevel;
     int16_t             volume;
     uint16_t            minutesPlayed;
     uint16_t            kills;
@@ -82,8 +81,6 @@ struct startingLevelPreferenceType {
 
 int SaveKeyControlPreferences( void);
 short SaveOptionsPreferences( void);
-short SaveStartingLevelPreferences( short);
-short GetStartingLevelPreference( void);
 short SaveAllPreferences( void);
 void GetNetPreferences(unsigned char*, unsigned char*, unsigned long *, long *, long *, unsigned long *,
     short *, unsigned short *, unsigned short *, unsigned short *, short *, short *, short *);

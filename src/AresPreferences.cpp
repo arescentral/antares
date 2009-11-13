@@ -36,7 +36,7 @@ Preferences::Preferences() {
     bin.read(keyMap, kKeyControlDataNum);
     bin.read(&serialNumber);
     bin.read(&options);
-    bin.read(&startingLevel);
+    bin.discard(4);
     bin.read(&volume);
     bin.read(&minutesPlayed);
     bin.read(&kills);
@@ -78,22 +78,6 @@ short SaveOptionsPreferences() {
     Preferences *prefsData = globals()->gPreferencesData.get();
     prefsData->options = globals()->gOptions;
     return kNoError;
-}
-
-short SaveStartingLevelPreferences(short whatLevel) {
-    Preferences *prefsData = globals()->gPreferencesData.get();
-    if (whatLevel <= 0) {
-        fail("An attempt was made to save an invalid starting level number. Save aborted.");
-    }
-    if (whatLevel != prefsData->startingLevel) {
-        prefsData->startingLevel = whatLevel;
-    }
-    return ( kNoError );
-}
-
-short GetStartingLevelPreference() {
-    Preferences *prefsData = globals()->gPreferencesData.get();
-    return prefsData->startingLevel;
 }
 
 short SaveAllPreferences() {

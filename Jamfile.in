@@ -40,6 +40,7 @@ Library Antares :
     src/InterfaceScreen.cpp
     src/KeyMapTranslation.cpp
     src/KeySetupScreen.cpp
+    src/Ledger.cpp
     src/LibpngImageDriver.cpp
     src/LoadingScreen.cpp
     src/MainScreen.cpp

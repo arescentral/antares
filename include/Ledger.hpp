@@ -15,51 +15,52 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_SELECT_LEVEL_SCREEN_HPP_
-#define ANTARES_SELECT_LEVEL_SCREEN_HPP_
+#ifndef ANTARES_LEDGER_HPP_
+#define ANTARES_LEDGER_HPP_
 
+#include <string>
 #include <vector>
-#include "InterfaceScreen.hpp"
 #include "SmartPtr.hpp"
 
 namespace antares {
 
-class ScrollTextScreen;
-
-class SelectLevelScreen : public InterfaceScreen {
+class Ledger {
   public:
-    SelectLevelScreen(bool* cancelled, int* scenario);
-    ~SelectLevelScreen();
+    static Ledger* ledger();
+    static void set_ledger(Ledger* ledger);
 
-    virtual void become_front();
+    virtual void unlock_chapter(int chapter) = 0;
+    virtual void unlocked_chapters(std::vector<int>* chapters) = 0;
+};
 
-  protected:
-    virtual void adjust_interface();
-    virtual void handle_button(int button);
-    virtual void draw() const;
+class NullLedger : public Ledger {
+  public:
+    NullLedger();
+    virtual void unlock_chapter(int chapter);
+    virtual void unlocked_chapters(std::vector<int>* chapters);
 
   private:
-    enum Item {
-        // Buttons:
-        OK = 0,
-        CANCEL = 1,
-        PREVIOUS = 2,
-        NEXT = 3,
-
-        // Text box:
-        NAME = 4,
-    };
-
-    void draw_level_name(unsigned char* name, long fontNum, long itemNum) const;
-
-    bool* _cancelled;
-    size_t _index;
-    int* _scenario;
     std::vector<int> _chapters;
 
-    DISALLOW_COPY_AND_ASSIGN(SelectLevelScreen);
+    DISALLOW_COPY_AND_ASSIGN(NullLedger);
+};
+
+class DirectoryLedger : public Ledger {
+  public:
+    DirectoryLedger(const std::string& directory);
+    virtual void unlock_chapter(int chapter);
+    virtual void unlocked_chapters(std::vector<int>* chapters);
+
+  private:
+    void load();
+    void save();
+
+    const std::string _directory;
+    std::vector<int> _chapters;
+
+    DISALLOW_COPY_AND_ASSIGN(DirectoryLedger);
 };
 
 }  // namespace antares
 
-#endif  // ANTARES_SELECT_LEVEL_SCREEN_HPP_
+#endif  // ANTARES_LEDGER_HPP_

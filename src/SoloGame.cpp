@@ -25,6 +25,7 @@
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
 #include "Error.hpp"
+#include "Ledger.hpp"
 #include "ScenarioMaker.hpp"
 #include "SelectLevelScreen.hpp"
 #include "Music.hpp"
@@ -157,7 +158,7 @@ void SoloGame::handle_game_result() {
             if (_scenario <= GetScenarioNumber() && _scenario >= 0) {
                 int chapter = GetChapterNumberFromScenarioNumber(_scenario);
                 if ((chapter >= 0) && (chapter <= kHackLevelMax)) {
-                    SaveStartingLevelPreferences(chapter);
+                    Ledger::ledger()->unlock_chapter(chapter);
                 } else {
                     _scenario = 0;
                 }

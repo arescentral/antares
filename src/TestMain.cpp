@@ -29,6 +29,7 @@
 #include "FakeSounds.hpp"
 #include "File.hpp"
 #include "ImageDriver.hpp"
+#include "Ledger.hpp"
 #include "LibpngImageDriver.hpp"
 #include "TestVideoDriver.hpp"
 #include "Threading.hpp"
@@ -158,6 +159,7 @@ void TestMain(int argc, char* const* argv) {
       case TEST_UNKNOWN:
         fail("--test was an unknown value");
     }
+    Ledger::set_ledger(new NullLedger);
 
     CardStack stack(AresInit());
     VideoDriver::driver()->loop(&stack);

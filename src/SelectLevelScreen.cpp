@@ -23,6 +23,7 @@
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
 #include "Error.hpp"
+#include "Ledger.hpp"
 #include "OffscreenGWorld.hpp"
 #include "PlayerInterface.hpp"
 #include "RetroText.hpp"
@@ -42,9 +43,10 @@ const int kSelectLevelScreenResID = 5011;
 SelectLevelScreen::SelectLevelScreen(bool* cancelled, int* scenario)
         : InterfaceScreen(kSelectLevelScreenResID, gRealWorld->bounds(), true),
           _cancelled(cancelled),
-          _chapter(GetStartingLevelPreference()),
           _scenario(scenario) {
-    *_scenario = GetScenarioNumberFromChapterNumber(_chapter);
+    Ledger::ledger()->unlocked_chapters(&_chapters);
+    _index = _chapters.size() - 1;
+    *_scenario = GetScenarioNumberFromChapterNumber(_chapters[_index]);
 }
 
 SelectLevelScreen::~SelectLevelScreen() { }
@@ -55,12 +57,12 @@ void SelectLevelScreen::become_front() {
 }
 
 void SelectLevelScreen::adjust_interface() {
-    if (_chapter > 1) {
+    if (_index > 0) {
         mutable_item(PREVIOUS)->set_status(kActive);
     } else {
         mutable_item(PREVIOUS)->set_status(kDimmed);
     }
-    if (_chapter < GetStartingLevelPreference()) {
+    if (_index < _chapters.size() - 1) {
         mutable_item(NEXT)->set_status(kActive);
     } else {
         mutable_item(NEXT)->set_status(kDimmed);
@@ -77,18 +79,18 @@ void SelectLevelScreen::handle_button(int button) {
         break;
 
       case PREVIOUS:
-        if (_chapter > 1) {
-            --_chapter;
-            *_scenario = GetScenarioNumberFromChapterNumber(_chapter);
+        if (_index > 0) {
+            --_index;
+            *_scenario = GetScenarioNumberFromChapterNumber(_chapters[_index]);
         }
         adjust_interface();
         draw();
         break;
 
       case NEXT:
-        if (_chapter < GetStartingLevelPreference()) {
-            ++_chapter;
-            *_scenario = GetScenarioNumberFromChapterNumber(_chapter);
+        if (_index < _chapters.size() - 1) {
+            ++_index;
+            *_scenario = GetScenarioNumberFromChapterNumber(_chapters[_index]);
         }
         adjust_interface();
         draw();

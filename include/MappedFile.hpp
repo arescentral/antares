@@ -43,7 +43,7 @@ class AutoClosedFd {
 
 class MappedFile {
   public:
-    MappedFile(const std::string& path);
+    explicit MappedFile(const std::string& path);
     ~MappedFile();
 
     const std::string& path() const { return _path; }
