@@ -53,6 +53,10 @@ void CardStack::pop(Card* card) {
     }
 }
 
+const Card* CardStack::top() const {
+    return _list.back();
+}
+
 void CardStack::send(const EventRecord& evt) {
     for (std::vector<Card*>::reverse_iterator it = _list.rbegin(); it != _list.rend(); ++it) {
         switch (evt.what) {

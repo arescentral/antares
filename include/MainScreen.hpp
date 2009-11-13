@@ -48,8 +48,6 @@ class MainScreen : public InterfaceScreen {
         REPLAY_INTRO = 6,
     };
 
-    double _last_event;
-
     DISALLOW_COPY_AND_ASSIGN(MainScreen);
 };
 

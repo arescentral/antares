@@ -61,6 +61,9 @@ class CardStack {
     // @param [in] card     The Card to pop.  Must be non-NULL, and the top-most card on the stack.
     void pop(Card* card);
 
+    // @returns             The top-most card on the stack.
+    const Card* top() const;
+
     // Dispatches an event to the appropriate Card on the stack.
     //
     // Given an EventRecord which can be mapped to some event method of `Card`, tries dispatching

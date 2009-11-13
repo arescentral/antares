@@ -44,6 +44,41 @@ const int kMainScreenResID = 5000;
 const double kMainDemoTimeOutTime = 30.0;
 const int kTitleTextScrollWidth = 450;
 
+class MainScreenTimeOut : public Card {
+  public:
+    MainScreenTimeOut()
+            : _state(NEW) { }
+
+    virtual void become_front() {
+        switch (_state) {
+          case NEW:
+            if (Randomize(4) == 2) {
+                _state = REPLAY_INTRO;
+                stack()->push(new ScrollTextScreen(5600, kTitleTextScrollWidth, 15.0));
+                break;
+            }
+            // else fall through
+
+          case REPLAY_INTRO:
+            _state = DEMO;
+            stack()->push(new ReplayGame(GetDemoScenario()));
+            break;
+
+          case DEMO:
+            stack()->pop(this);
+            break;
+        }
+    }
+
+  private:
+    enum State {
+        NEW,
+        REPLAY_INTRO,
+        DEMO,
+    };
+    State _state;
+};
+
 }  // namespace
 
 MainScreen::MainScreen()
@@ -57,15 +92,15 @@ void MainScreen::become_front() {
 }
 
 double MainScreen::delay() {
-    return _last_event + kMainDemoTimeOutTime;
+    if (stack()->top() == this) {
+        return std::max(last_event() + kMainDemoTimeOutTime - now_secs(), 0.001);
+    } else {
+        return 0.0;
+    }
 }
 
 void MainScreen::fire_timer() {
-    if (Randomize(4) == 2) {
-        // TODO(sfiera): reinstate.
-        // DoScrollText(5600, 4, kTitleTextScrollWidth, kTitleFontNum, -1);
-    }
-    stack()->push(new ReplayGame(GetDemoScenario()));
+    stack()->push(new MainScreenTimeOut);
 }
 
 void MainScreen::adjust_interface() {
