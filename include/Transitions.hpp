@@ -50,7 +50,7 @@ class ColorFade : public Card {
     virtual void resign_front();
 
     virtual bool mouse_down(int button, const Point& loc);
-    virtual double delay();
+    virtual double next_timer();
     virtual void fire_timer();
 
   private:
@@ -63,6 +63,7 @@ class ColorFade : public Card {
     bool* _skipped;
 
     double _start;
+    double _next_event;
     const double _duration;
 };
 
@@ -74,7 +75,7 @@ class PictFade : public Card {
     virtual void resign_front();
 
     virtual bool mouse_down(int button, const Point& loc);
-    virtual double delay();
+    virtual double next_timer();
     virtual void fire_timer();
 
   protected:

@@ -143,30 +143,30 @@ class Card {
 
     // Timer-related methods.
     //
-    // There are two timer-related methods, `delay()` and `fire_timer()`.  Each time the run loop
-    // prepares to wait for the next event, it asks each Card in the stack when it would like its
-    // timer to next fire, and ensures that the timer either fires at that time, or that it will
-    // ask for a new delay before then.
+    // There are two timer-related methods, `next_timer()` and `fire_timer()`.  Each time the run
+    // loop prepares to wait for the next event, it asks each Card in the stack when it would like
+    // its timer to next fire, and ensures that the timer either fires at that time, or that it
+    // will ask for a new time before then.
 
-    // Returns the delay after which to fire this Card's timer.
+    // Returns the time at which which to fire this Card's timer.
     //
-    // The returned value is a delta from the current time, e.g., if a Card wants `fire_timer()` to
-    // be called in one second, it should return 1.0.
+    // The returned value is an absolute time, e.g., if a Card wants `fire_timer()` to be called in
+    // one second, it should return `now_secs() + 1.0`.
     //
     // It is not guaranteed that the timer will fire in that period of time, but if not, then
-    // `delay()` will be called again before then.  So, if the Card wants `fire_timer()` to be
-    // called in one second, but `delay()` is called again after 0.6 seconds, then the second time,
-    // it should instead return 0.4.
+    // `next_timer()` will be called again before then.  So, if the Card wants `fire_timer()` to be
+    // called in one second, but `next_timer()` is called again after 0.6 seconds, then the second
+    // time, it should instead return 0.4.
     //
     // If 0.0 is returned, then `fire_timer()` will not be called at all.
     //
     // @returns             The time delta to the next requested `fire_timer()` call.
-    virtual double delay();
+    virtual double next_timer();
 
-    // Called when a Card's delay expires.
+    // Called when a Card's timer should be fired.
     //
-    // If this Card has requested that its timer fire after a certain delay, then this method is
-    // called after that delay, subject to the caveat given in the documentation for `delay()`.
+    // If this Card has requested that its timer fire at a certain time, then this method is called
+    // at that time, subject to the caveat given in the documentation for `next_timer()`.
     virtual void fire_timer();
 
     // Returns the stack this Card is in.

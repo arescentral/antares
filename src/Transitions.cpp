@@ -271,6 +271,7 @@ ColorFade::ColorFade(
           _color(color),
           _allow_skip(allow_skip),
           _skipped(skipped),
+          _next_event(now_secs() + (1.0 / 60.0)),
           _duration(duration) { }
 
 void ColorFade::become_front() {
@@ -294,12 +295,16 @@ bool ColorFade::mouse_down(int button, const Point& loc) {
     return true;
 }
 
-double ColorFade::delay() {
-    return 1.0 / 60.0;
+double ColorFade::next_timer() {
+    return _next_event;
 }
 
 void ColorFade::fire_timer() {
-    double fraction = (now_secs() - _start) / _duration;
+    double now = now_secs();
+    while (_next_event < now) {
+        _next_event += (1.0 / 60.0);
+    }
+    double fraction = (now - _start) / _duration;
     if (fraction < 1.0) {
         if (_direction == TO_COLOR) {
             gActiveWorld->set_transition_fraction(fraction);
@@ -360,9 +365,9 @@ bool PictFade::mouse_down(int button, const Point& loc) {
     return true;
 }
 
-double PictFade::delay() {
+double PictFade::next_timer() {
     if (_state == FULL) {
-        return std::max(0.001, _wane_start - now_secs());
+        return _wane_start;
     } else {
         return 0.0;
     }

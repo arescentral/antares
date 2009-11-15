@@ -30,7 +30,7 @@ class LoadingScreen : public InterfaceScreen {
     LoadingScreen(scenarioType* scenario);
     ~LoadingScreen();
 
-    virtual double delay();
+    virtual double next_timer();
     virtual void fire_timer();
 
   protected:

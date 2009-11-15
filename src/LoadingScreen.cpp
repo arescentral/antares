@@ -56,8 +56,8 @@ LoadingScreen::LoadingScreen(scenarioType* scenario)
 
 LoadingScreen::~LoadingScreen() { }
 
-double LoadingScreen::delay() {
-    return 1.0 / 60.0;
+double LoadingScreen::next_timer() {
+    return 0.0;
 }
 
 void LoadingScreen::fire_timer() {

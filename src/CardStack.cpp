@@ -85,30 +85,14 @@ void CardStack::send(const EventRecord& evt) {
     }
 }
 
-double CardStack::next_delay() {
-    int i;
-    if (min_delay_index(&i)) {
-        return _list[i]->delay();
-    } else {
-        return std::numeric_limits<double>::infinity();
-    }
-}
-
-void CardStack::fire_next_timer() {
-    int i;
-    if (min_delay_index(&i)) {
-        _list[i]->fire_timer();
-    }
-}
-
-bool CardStack::min_delay_index(int* min_index) {
-    bool result = false;
-    double min_delay = std::numeric_limits<double>::infinity();
-    for (size_t i = 0; i < _list.size(); ++i) {
-        if (_list[i]->delay() > 0.0 && _list[i]->delay() < min_delay) {
-            min_delay = _list[i]->delay();
-            *min_index = i;
-            result = true;
+Card* CardStack::next_event(double* at) {
+    *at = std::numeric_limits<double>::infinity();
+    Card* result = NULL;
+    for (std::vector<Card*>::iterator it = _list.begin(); it != _list.end(); ++it) {
+        double card_at = (*it)->next_timer();
+        if (card_at > 0.0 && card_at < *at) {
+            *at = card_at;
+            result = *it;
         }
     }
     return result;

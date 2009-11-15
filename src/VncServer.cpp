@@ -22,6 +22,7 @@
 #include <exception>
 
 #include "BinaryStream.hpp"
+#include "Card.hpp"
 #include "CardStack.hpp"
 #include "Casts.hpp"
 #include "ColorTable.hpp"
@@ -30,6 +31,7 @@
 #include "MappedFile.hpp"
 #include "PosixException.hpp"
 #include "Threading.hpp"
+#include "Time.hpp"
 #include "VncServer.hpp"
 
 namespace antares {
@@ -820,10 +822,12 @@ int VncVideoDriver::ticks() {
 void VncVideoDriver::loop(CardStack* stack) {
     while (!stack->empty()) {
         EventRecord evt;
-        if (wait_next_event(&evt, stack->next_delay())) {
+        double at;
+        Card* card = stack->next_event(&at);
+        if (wait_next_event(&evt, at - now_secs())) {
             stack->send(evt);
-        } else {
-            stack->fire_next_timer();
+        } else if (card) {
+            card->fire_timer();
         }
     }
 }

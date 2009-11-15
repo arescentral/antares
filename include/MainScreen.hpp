@@ -30,7 +30,7 @@ class MainScreen : public InterfaceScreen {
 
     virtual void become_front();
 
-    virtual double delay();
+    virtual double next_timer();
     virtual void fire_timer();
 
   protected:

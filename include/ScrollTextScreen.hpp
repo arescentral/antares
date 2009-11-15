@@ -37,7 +37,7 @@ class ScrollTextScreen : public Card {
     virtual bool mouse_down(int button, const Point& where);
     virtual bool key_down(int key);
 
-    virtual double delay();
+    virtual double next_timer();
     virtual void fire_timer();
 
   private:
@@ -47,6 +47,7 @@ class ScrollTextScreen : public Card {
     const int _song_id;
 
     double _start;
+    double _next_shift;
     Rect _window;
 };
 

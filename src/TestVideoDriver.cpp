@@ -18,10 +18,12 @@
 #include "TestVideoDriver.hpp"
 
 #include "AresPreferences.hpp"
+#include "Card.hpp"
 #include "Error.hpp"
 #include "FakeDrawing.hpp"
 #include "Fakes.hpp"
 #include "Ledger.hpp"
+#include "Time.hpp"
 
 namespace antares {
 
@@ -59,10 +61,12 @@ void TestingVideoDriver::set_game_state(GameState state) {
 void TestingVideoDriver::loop(CardStack* stack) {
     while (!stack->empty()) {
         EventRecord evt;
-        if (wait_next_event(&evt, stack->next_delay())) {
+        double at;
+        Card* card = stack->next_event(&at);
+        if (wait_next_event(&evt, at - now_secs())) {
             stack->send(evt);
-        } else {
-            stack->fire_next_timer();
+        } else if (card) {
+            card->fire_timer();
         }
     }
 }

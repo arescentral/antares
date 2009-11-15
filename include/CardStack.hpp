@@ -76,29 +76,14 @@ class CardStack {
     // @param [in] evt      A record containing the event to dispatch and its parameters.
     void send(const EventRecord& evt);
 
-    // Returns the delay until the next Card's timer should fire.
+    // Figures out which Card should have its timer fired next, and returns that card.  The time at
+    // which the timer should be fired is placed into `at`.
     //
-    // @returns             The minimum of all non-zero values from Card objects' `next_delay()`.
-    double next_delay();
-
-    // Fires the timer of the next Card.
-    //
-    // TODO(sfiera): the combination of `next_delay()` and `fire_next_timer()` should be stateful,
-    // i.e., we should not have to walk the stack a second time in `fire_next_timer()` to find out
-    // which Card was next when we previously called `next_delay()`.
-    void fire_next_timer();
+    // @param [out] at      The time at which to fire the timer.
+    // @returns             The Card whose timer should be fired.
+    Card* next_event(double* at);
 
   private:
-    // Gets the index of the Card whose timer should be fired, if any.
-    //
-    // Walks the stack, asking each Card when it would next like its timer to be fired.  If no Card
-    // requests a timer, returns false; otherwise, sets `*min_index` to the index of the next Card,
-    // and returns true.
-    //
-    // @param [out] min_index Set to the index of the next Card to fire, if any.
-    // @returns             true if any timer was found, false otherwise.
-    bool min_delay_index(int* min_index);
-
     // The stack of cards.  The back/bottom is at index 0, and the top at `size() - 1`.
     std::vector<Card*> _list;
 };

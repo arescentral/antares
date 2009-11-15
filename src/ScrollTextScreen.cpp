@@ -159,13 +159,15 @@ ScrollTextScreen::ScrollTextScreen(int text_id, int width, double speed)
         : _pix_map(build_pix(text_id, width)),
           _speed(speed),
           _play_song(false),
-          _song_id(0) { }
+          _song_id(0),
+          _next_shift(now_secs() + (1.0 / 60.0)) { }
 
 ScrollTextScreen::ScrollTextScreen(int text_id, int width, double speed, int song_id)
         : _pix_map(build_pix(text_id, width)),
           _speed(speed),
           _play_song(true),
-          _song_id(song_id) { }
+          _song_id(song_id),
+          _next_shift(now_secs() + (1.0 / 60.0)) { }
 
 void ScrollTextScreen::become_front() {
     // If a song was requested, play it.
@@ -205,12 +207,16 @@ bool ScrollTextScreen::key_down(int key) {
     return true;
 }
 
-double ScrollTextScreen::delay() {
-    return 1.0 / 60.0;
+double ScrollTextScreen::next_timer() {
+    return _next_shift;
 }
 
 void ScrollTextScreen::fire_timer() {
-    int top = ((now_secs() - _start) * _speed) - kScrollTextHeight;
+    double now = now_secs();
+    while (_next_shift < now) {
+        _next_shift += (1.0 / _speed);
+    }
+    int top = ((now - _start) * _speed) - kScrollTextHeight;
     if (top > _window.top) {
         _window.offset(0, top - _window.top);
         Rect dest = _window;

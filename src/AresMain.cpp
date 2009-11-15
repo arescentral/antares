@@ -203,7 +203,7 @@ class GamePlay : public Card {
 
     virtual void become_front();
 
-    virtual double delay();
+    virtual double next_timer();
     virtual void fire_timer();
 
     virtual bool mouse_down(int button, const Point& loc);
@@ -235,6 +235,7 @@ class GamePlay : public Card {
     int _last_click_time;
     int _scenario_check_time;
     PlayAgainScreen::Item _play_again;
+    double _last_frame;
 };
 
 Card* AresInit() {
@@ -439,8 +440,8 @@ class PauseScreen : public Card {
         return true;
     }
 
-    virtual double delay() {
-        return std::max(_next_switch - now_secs(), 0.001);
+    virtual double next_timer() {
+        return _next_switch;
     }
 
     virtual void fire_timer() {
@@ -519,9 +520,9 @@ void GamePlay::become_front() {
     }
 }
 
-double GamePlay::delay() {
+double GamePlay::next_timer() {
     if (_state == PLAYING) {
-        return 1.0 / 120.0;
+        return _last_frame + (1.0 / 60.0);
     } else {
         return 0.0;
     }

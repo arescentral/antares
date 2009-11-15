@@ -58,7 +58,7 @@ bool Card::key_up(int key) {
     return false;
 }
 
-double Card::delay() {
+double Card::next_timer() {
     return 0.0;
 }
 

@@ -91,9 +91,9 @@ void MainScreen::become_front() {
     VideoDriver::driver()->set_game_state(MAIN_SCREEN_INTERFACE);
 }
 
-double MainScreen::delay() {
+double MainScreen::next_timer() {
     if (stack()->top() == this) {
-        return std::max(last_event() + kMainDemoTimeOutTime - now_secs(), 0.001);
+        return last_event() + kMainDemoTimeOutTime;
     } else {
         return 0.0;
     }
