@@ -35,7 +35,7 @@
 
 namespace antares {
 
-extern PixMap* gActiveWorld;
+extern PixMap* gRealWorld;
 extern scenarioType* gThisScenario;
 
 SoloGame::SoloGame()
@@ -80,8 +80,31 @@ void SoloGame::become_front() {
 
       case PLAYING:
         handle_game_result();
-        // TODO(sfiera): make less hacky.
-        become_front();
+        break;
+
+      case DEBRIEFING:
+        debriefing_done();
+        break;
+
+      case PLAY_AGAIN:
+        switch (_play_again) {
+          case PLAY_AGAIN_RESTART:
+            _state = RESTART_LEVEL;
+            become_front();
+            break;
+
+          case PLAY_AGAIN_QUIT:
+            _state = QUIT;
+            become_front();
+            break;
+
+          default:
+            fail("_play_again was invalid after PLAY_AGAIN (%d)", _play_again);
+        }
+        break;
+
+      case EPILOGUE:
+        epilogue_done();
         break;
 
       case QUIT:
@@ -93,44 +116,54 @@ void SoloGame::become_front() {
 void SoloGame::handle_game_result() {
     switch (_game_result) {
       case LOSE_GAME:
+        _state = DEBRIEFING;
         if (globals()->gScenarioWinner.text != -1) {
             DoMissionDebriefingText(
                     globals()->gScenarioWinner.text, -1, -1, -1, -1, -1, -1, -1);
         }
-        switch (DoPlayAgain(false, false)) {
-          case PLAY_AGAIN_RESTART:
-            _state = RESTART_LEVEL;
-            break;
-
-          case PLAY_AGAIN_QUIT:
-            _state = QUIT;
-            break;
-
-          default:
-            fail("DoPlayAgain(false, false) returned bad value.");
-        }
+        become_front();
         break;
 
       case WIN_GAME:
-        {
-            if (globals()->gScenarioWinner.text != -1) {
-                DoMissionDebriefingText(
-                        globals()->gScenarioWinner.text,
-                        _game_length, gThisScenario->parTime,
-                        GetAdmiralLoss(0), gThisScenario->parLosses,
-                        GetAdmiralKill(0), gThisScenario->parKills,
-                        100);
-            }
+        _state = DEBRIEFING;
+        if (globals()->gScenarioWinner.text != -1) {
+            DoMissionDebriefingText(
+                    globals()->gScenarioWinner.text,
+                    _game_length, gThisScenario->parTime,
+                    GetAdmiralLoss(0), gThisScenario->parLosses,
+                    GetAdmiralKill(0), gThisScenario->parKills,
+                    100);
+        }
+        become_front();
+        break;
 
-            if (globals()->gOptions & kOptionMusicPlay) {
-                AutoMusicFadeTo(60, RgbColor::kBlack, false);
-                StopAndUnloadSong();
-            } else {
-                AutoFadeTo(60, RgbColor::kBlack, false);
-            }
-            gActiveWorld->fill(RgbColor::kBlack);
-            AutoFadeFrom(1, false);
+      case RESTART_GAME:
+        _state = RESTART_LEVEL;
+        become_front();
+        break;
 
+      case QUIT_GAME:
+        _state = QUIT;
+        become_front();
+        break;
+
+      default:
+        fail("_game_result was invalid after PLAYING (%d)", _game_result);
+    }
+}
+
+void SoloGame::debriefing_done() {
+    switch (_game_result) {
+      case LOSE_GAME:
+        _state = PLAY_AGAIN;
+        stack()->push(new PlayAgainScreen(false, false, &_play_again));
+        break;
+
+      case WIN_GAME:
+        gRealWorld->fill(RgbColor::kBlack);
+
+        _state = EPILOGUE;
+        if (GetScenarioEpilogueID(_scenario) > 0) {
             // normal scrolltext song
             int scroll_song = 4002;
             if (globals()->gScenarioWinner.next == -1) {
@@ -138,51 +171,45 @@ void SoloGame::handle_game_result() {
                 scroll_song = 4003;
             }
 
-            if (GetScenarioEpilogueID(_scenario) > 0) {
-                DoScrollText(
-                        GetScenarioEpilogueID(_scenario), 4, 450, kTitleFontNum,
-                        scroll_song);
-            }
-
-            if (globals()->gOptions & kOptionMusicIdle) {
-                gActiveWorld->fill(RgbColor::kBlack);
-                StopAndUnloadSong();
-            }
-
-            if (globals()->gScenarioWinner.next == -1) {
-                _scenario = -1;
-            } else {
-                _scenario = GetScenarioNumberFromChapterNumber(globals()->gScenarioWinner.next);
-            }
-
-            if (_scenario <= GetScenarioNumber() && _scenario >= 0) {
-                int chapter = GetChapterNumberFromScenarioNumber(_scenario);
-                if ((chapter >= 0) && (chapter <= kHackLevelMax)) {
-                    Ledger::ledger()->unlock_chapter(chapter);
-                } else {
-                    _scenario = 0;
-                }
-            }
-
-            if (_scenario >= 0) {
-                _state = START_LEVEL;
-            } else {
-                _state = QUIT;
-            }
+            stack()->push(new ScrollTextScreen(
+                        GetScenarioEpilogueID(_scenario), 450, 15.0, scroll_song));
+        } else {
+            become_front();
         }
         break;
 
-      case RESTART_GAME:
-        _state = RESTART_LEVEL;
-        break;
-
-      case QUIT_GAME:
-        _state = QUIT;
-        break;
-
       default:
-        fail("MainPlay() resulted in bad game_result.");
+        fail("_game_result was invalid after DEBRIEFING (%d)", _game_result);
     }
+}
+
+void SoloGame::epilogue_done() {
+    if (globals()->gOptions & kOptionMusicIdle) {
+        gRealWorld->fill(RgbColor::kBlack);
+        StopAndUnloadSong();
+    }
+
+    if (globals()->gScenarioWinner.next == -1) {
+        _scenario = -1;
+    } else {
+        _scenario = GetScenarioNumberFromChapterNumber(globals()->gScenarioWinner.next);
+    }
+
+    if (_scenario <= GetScenarioNumber() && _scenario >= 0) {
+        int chapter = GetChapterNumberFromScenarioNumber(_scenario);
+        if ((chapter >= 0) && (chapter <= kHackLevelMax)) {
+            Ledger::ledger()->unlock_chapter(chapter);
+        } else {
+            _scenario = 0;
+        }
+    }
+
+    if (_scenario >= 0) {
+        _state = START_LEVEL;
+    } else {
+        _state = QUIT;
+    }
+    become_front();
 }
 
 }  // namespace antares

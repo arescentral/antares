@@ -20,6 +20,7 @@
 
 #include "AresMain.hpp"
 #include "Card.hpp"
+#include "PlayAgainScreen.hpp"
 #include "SmartPtr.hpp"
 
 namespace antares {
@@ -41,16 +42,22 @@ class SoloGame : public Card {
         START_LEVEL,
         RESTART_LEVEL,
         PLAYING,
+        DEBRIEFING,
+        PLAY_AGAIN,
+        EPILOGUE,
         QUIT,
     };
     State _state;
 
     void handle_game_result();
+    void debriefing_done();
+    void epilogue_done();
 
     bool _cancelled;
     int _scenario;
     GameResult _game_result;
     long _game_length;
+    PlayAgainScreen::Item _play_again;
 };
 
 }  // namespace antares
