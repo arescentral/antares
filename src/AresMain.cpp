@@ -17,6 +17,7 @@
 
 #include "AresMain.hpp"
 
+#include <math.h>
 #include "Quickdraw.h"
 
 #include "Admiral.hpp"
@@ -235,7 +236,6 @@ class GamePlay : public Card {
     int _last_click_time;
     int _scenario_check_time;
     PlayAgainScreen::Item _play_again;
-    double _last_frame;
 };
 
 Card* AresInit() {
@@ -522,7 +522,7 @@ void GamePlay::become_front() {
 
 double GamePlay::next_timer() {
     if (_state == PLAYING) {
-        return _last_frame + (1.0 / 60.0);
+        return ceil(now_secs() * 60.0) / 60.0;
     } else {
         return 0.0;
     }
