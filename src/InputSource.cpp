@@ -36,6 +36,7 @@ uint32_t ReplayInputSource::random_seed() const {
 bool ReplayInputSource::next(uint32_t* key_map) {
     while (_turn_num == 0) {
         if (_bin.bytes_read() == _resource.size()) {
+            bzero(key_map, sizeof(uint32_t));
             return false;
         }
         _bin.read(&_turn_num);
