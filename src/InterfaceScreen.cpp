@@ -206,4 +206,10 @@ PixMap* InterfaceScreen::pix() const {
     return _pix.get();
 }
 
+void InterfaceScreen::offset(int offset_x, int offset_y) {
+    for (std::vector<interfaceItemType>::iterator it = _items.begin(); it != _items.end(); ++it) {
+        it->bounds.offset(offset_x, offset_y);
+    }
+}
+
 }  // namespace antares

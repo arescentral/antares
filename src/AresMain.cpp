@@ -44,6 +44,8 @@
 #include "Instruments.hpp"
 #include "InterfaceHandling.hpp"
 
+#include "HelpScreen.hpp"
+
 #include "KeyCodes.hpp"
 #include "KeyMapTranslation.hpp"
 
@@ -219,6 +221,7 @@ class GamePlay : public Card {
         PLAYING,
         PAUSED,
         PLAY_AGAIN,
+        HELP,
     };
     State _state;
 
@@ -478,6 +481,7 @@ void GamePlay::become_front() {
         break;
 
       case PAUSED:
+      case HELP:
         _state = PLAYING;
         break;
         
@@ -678,16 +682,6 @@ void GamePlay::fire_timer() {
     }
 
     if (!(globals()->gOptions & kOptionReplay)
-            && mHelpKey(_key_map)) {
-        RestoreOriginalColors();
-        MacShowCursor();
-        DoHelpScreen();
-        HideCursor();
-        CopyOffWorldToRealWorld(_play_area);
-        _player_paused = true;
-    }
-
-    if (!(globals()->gOptions & kOptionReplay)
             && mVolumeDownKey(_key_map)
             && !mVolumeDownKey(_last_key_map)) {
         if ( globals()->gSoundVolume > 0) {
@@ -803,10 +797,20 @@ bool GamePlay::key_down(int key) {
 
     switch (key) {
       case 0x3500:
-        _state = PLAY_AGAIN;
+        {
+            _state = PLAY_AGAIN;
+            _player_paused = true;
+            bool is_training = gThisScenario->startTime & kScenario_IsTraining_Bit;
+            stack()->push(new PlayAgainScreen(true, is_training, &_play_again));
+        }
+        break;
+
+      case 0x7A00:
+        // Help key is hard-coded to F1 at the moment.
+        // TODO(sfiera): use the help key configured in preferences.
+        _state = HELP;
         _player_paused = true;
-        bool is_training = gThisScenario->startTime & kScenario_IsTraining_Bit;
-        stack()->push(new PlayAgainScreen(true, is_training, &_play_again));
+        stack()->push(new HelpScreen);
         break;
     }
 

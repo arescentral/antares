@@ -50,6 +50,7 @@ class InterfaceScreen : public Card {
     const interfaceItemType& item(int index) const;
     interfaceItemType* mutable_item(int index);
     PixMap* pix() const;
+    void offset(int offset_x, int offset_y);
 
   private:
     enum State {

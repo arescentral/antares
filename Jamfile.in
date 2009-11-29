@@ -32,6 +32,7 @@ Library Antares :
     src/Fakes.cpp
     src/File.cpp
     src/Geometry.cpp
+    src/HelpScreen.cpp
     #src/IconSuiteFromAlias.cpp
     src/ImageDriver.cpp
     src/InputSource.cpp
