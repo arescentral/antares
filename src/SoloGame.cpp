@@ -26,6 +26,7 @@
 #include "DirectText.hpp"
 #include "Error.hpp"
 #include "Ledger.hpp"
+#include "DebriefingScreen.hpp"
 #include "ScenarioMaker.hpp"
 #include "SelectLevelScreen.hpp"
 #include "Music.hpp"
@@ -88,12 +89,12 @@ void SoloGame::become_front() {
 
       case PLAY_AGAIN:
         switch (_play_again) {
-          case PLAY_AGAIN_RESTART:
+          case PlayAgainScreen::RESTART:
             _state = RESTART_LEVEL;
             become_front();
             break;
 
-          case PLAY_AGAIN_QUIT:
+          case PlayAgainScreen::QUIT:
             _state = QUIT;
             become_front();
             break;
@@ -118,23 +119,23 @@ void SoloGame::handle_game_result() {
       case LOSE_GAME:
         _state = DEBRIEFING;
         if (globals()->gScenarioWinner.text != -1) {
-            DoMissionDebriefingText(
-                    globals()->gScenarioWinner.text, -1, -1, -1, -1, -1, -1, -1);
+            stack()->push(new DebriefingScreen(globals()->gScenarioWinner.text));
+        } else {
+            become_front();
         }
-        become_front();
         break;
 
       case WIN_GAME:
         _state = DEBRIEFING;
         if (globals()->gScenarioWinner.text != -1) {
-            DoMissionDebriefingText(
+            stack()->push(new DebriefingScreen(
                     globals()->gScenarioWinner.text,
                     _game_length, gThisScenario->parTime,
                     GetAdmiralLoss(0), gThisScenario->parLosses,
-                    GetAdmiralKill(0), gThisScenario->parKills,
-                    100);
+                    GetAdmiralKill(0), gThisScenario->parKills));
+        } else {
+            become_front();
         }
-        become_front();
         break;
 
       case RESTART_GAME:

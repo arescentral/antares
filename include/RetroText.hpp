@@ -34,13 +34,17 @@ class RetroText {
             const char* data, size_t len, int font, RgbColor fore_color, RgbColor back_color);
     ~RetroText();
 
+    void set_tab_width(int tab_width);
     void wrap_to(int width, int line_spacing);
 
+    int size() const;
+    int tab_width() const;
     int width() const;
     int height() const;
     int auto_width() const;
 
     void draw(PixMap* pix, const Rect& bounds) const;
+    void draw_char(PixMap* pix, const Rect& bounds, int index) const;
 
   private:
     enum SpecialChar {
@@ -66,6 +70,7 @@ class RetroText {
     int move_word_down(int index, int v);
 
     std::vector<RetroChar> _chars;
+    int _tab_width;
     int _width;
     int _height;
     int _auto_width;
