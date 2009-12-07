@@ -19,6 +19,7 @@
 #define ANTARES_LEDGER_HPP_
 
 #include <string>
+#include <set>
 #include <vector>
 #include "SmartPtr.hpp"
 
@@ -40,7 +41,7 @@ class NullLedger : public Ledger {
     virtual void unlocked_chapters(std::vector<int>* chapters);
 
   private:
-    std::vector<int> _chapters;
+    std::set<int> _chapters;
 
     DISALLOW_COPY_AND_ASSIGN(NullLedger);
 };
@@ -56,7 +57,7 @@ class DirectoryLedger : public Ledger {
     void save();
 
     const std::string _directory;
-    std::vector<int> _chapters;
+    std::set<int> _chapters;
 
     DISALLOW_COPY_AND_ASSIGN(DirectoryLedger);
 };

@@ -46,16 +46,15 @@ void Ledger::set_ledger(Ledger* ledger) {
 }
 
 NullLedger::NullLedger() {
-    _chapters.push_back(1);
+    _chapters.insert(1);
 }
 
 void NullLedger::unlock_chapter(int chapter) {
-    _chapters.push_back(chapter);
-    std::sort(_chapters.begin(), _chapters.end());
+    _chapters.insert(chapter);
 }
 
 void NullLedger::unlocked_chapters(std::vector<int>* chapters) {
-    *chapters = _chapters;
+    *chapters = std::vector<int>(_chapters.begin(), _chapters.end());
 }
 
 DirectoryLedger::DirectoryLedger(const std::string& directory)
@@ -64,13 +63,12 @@ DirectoryLedger::DirectoryLedger(const std::string& directory)
 }
 
 void DirectoryLedger::unlock_chapter(int chapter) {
-    _chapters.push_back(chapter);
-    std::sort(_chapters.begin(), _chapters.end());
+    _chapters.insert(chapter);
     save();
 }
 
 void DirectoryLedger::unlocked_chapters(std::vector<int>* chapters) {
-    *chapters = _chapters;
+    *chapters = std::vector<int>(_chapters.begin(), _chapters.end());
 }
 
 void DirectoryLedger::load() {
@@ -80,7 +78,7 @@ void DirectoryLedger::load() {
     try {
         file.reset(new MappedFile(path));
     } catch (PosixException& e) {
-        _chapters.push_back(1);
+        _chapters.insert(1);
         return;
     }
 
@@ -98,21 +96,20 @@ void DirectoryLedger::load() {
         if (pos == end) {
             ++pos;
         } else {
-            _chapters.push_back(chapter);
+            _chapters.insert(chapter);
             pos = end;
         }
     }
-    std::sort(_chapters.begin(), _chapters.end());
 }
 
 void DirectoryLedger::save() {
     const std::string path = _directory + "/com.biggerplanet.ares.json";
     std::string contents = "{\n  \"unlocked-levels\" = [";
-    for (size_t i = 0; i < _chapters.size(); ++i) {
-        if (i > 0) {
+    for (std::set<int>::const_iterator it = _chapters.begin(); it != _chapters.end(); ++it) {
+        if (it != _chapters.begin()) {
             contents.append(", ");
         }
-        append_int(_chapters[i], &contents);
+        append_int(*it, &contents);
     }
     contents.append("]\n}\n");
 
