@@ -132,8 +132,15 @@ RetroText* score_text(
 
     string_replace(&text, strings.at(0), string_printf("%d", your_mins));
     string_replace(&text, strings.at(1), string_printf("%.2d", your_secs));
-    string_replace(&text, strings.at(2), string_printf("%d", par_mins));
-    string_replace(&text, strings.at(3), string_printf("%.2d", par_secs));
+    if (par_length > 0) {
+        string_replace(&text, strings.at(2), string_printf("%d", par_mins));
+        string_replace(&text, strings.at(3), string_printf(":%.2d", par_secs));
+    } else {
+        StringList data_strings;
+        data_strings.load(6002);
+        string_replace(&text, strings.at(2), data_strings.at(8));  // = "N/A"
+        string_replace(&text, strings.at(3), "");
+    }
     string_replace(&text, strings.at(4), string_printf("%d", your_loss));
     string_replace(&text, strings.at(5), string_printf("%d", par_loss));
     string_replace(&text, strings.at(6), string_printf("%d", your_kill));
