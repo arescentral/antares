@@ -20,6 +20,7 @@
 #include "CardStack.hpp"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
+#include "Error.hpp"
 #include "PlayerInterfaceDrawing.hpp"
 #include "Resource.hpp"
 #include "RetroText.hpp"
@@ -35,7 +36,6 @@ extern PixMap* gRealWorld;
 namespace {
 
 const double kTypingDelay = 1.0 / 20.0;
-const double kTimeOut = 6.0;
 const int kScoreTableHeight = 120;
 const int kTextWidth = 300;
 
@@ -364,7 +364,7 @@ void DebriefingScreen::become_front() {
     if (_state == TYPING) {
         _next_update = now_secs() + kTypingDelay;
     } else {
-        _next_update = now_secs() + kTimeOut;
+        _next_update = 0;
     }
     gRealWorld->view(_pix_bounds).copy(*_pix);
 }
@@ -390,24 +390,21 @@ double DebriefingScreen::next_timer() {
 }
 
 void DebriefingScreen::fire_timer() {
-    if (_state == TYPING) {
-        PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
-        double now = now_secs();
-        while (_next_update <= now) {
-            if (_typed_chars < _score->size()) {
-                _score->draw_char(_pix.get(), _score_bounds, _typed_chars);
-                _next_update += kTypingDelay;
-                ++_typed_chars;
-            } else {
-                _next_update += kTimeOut;
-                _state = DONE;
-                break;
-            }
+    check(_state == TYPING, "DebriefingScreen::fire_timer() called but _state is %d", _state);
+    PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
+    double now = now_secs();
+    while (_next_update <= now) {
+        if (_typed_chars < _score->size()) {
+            _score->draw_char(_pix.get(), _score_bounds, _typed_chars);
+            _next_update += kTypingDelay;
+            ++_typed_chars;
+        } else {
+            _next_update = 0;
+            _state = DONE;
+            break;
         }
-        gRealWorld->view(_pix_bounds).copy(*_pix);
-    } else {
-        stack()->pop(this);
     }
+    gRealWorld->view(_pix_bounds).copy(*_pix);
 }
 
 void DebriefingScreen::initialize(bool do_score) {
