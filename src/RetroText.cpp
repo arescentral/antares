@@ -121,6 +121,7 @@ RetroText::RetroText(
             break;
         }
     }
+    _chars.push_back(RetroChar('\r', LINE_BREAK, fore_color, back_color));
 
     wrap_to(std::numeric_limits<int>::max(), 0);
 }
@@ -168,7 +169,7 @@ void RetroText::wrap_to(int width, int line_spacing) {
             break;
         }
     }
-    _height = v + mDirectFontHeight() + _line_spacing;
+    _height = v;
 }
 
 int RetroText::size() const {
