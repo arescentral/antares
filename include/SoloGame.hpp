@@ -18,10 +18,10 @@
 #ifndef ANTARES_SOLO_GAME_HPP_
 #define ANTARES_SOLO_GAME_HPP_
 
+#include "sfz/Macros.hpp"
 #include "AresMain.hpp"
 #include "Card.hpp"
 #include "PlayAgainScreen.hpp"
-#include "SmartPtr.hpp"
 
 namespace antares {
 

@@ -20,8 +20,8 @@
 
 #include <queue>
 #include <map>
-#include "MappedFile.hpp"
 #include "VideoDriver.hpp"
+#include "sfz/ScopedFd.hpp"
 
 namespace antares {
 
@@ -45,14 +45,14 @@ class VncVideoDriver : public VideoDriver {
     bool vnc_poll(int64_t timeout);
 
     const int64_t _start_time;
-    AutoClosedFd _listen;
-    AutoClosedFd _socket;
+    sfz::ScopedFd _listen;
+    sfz::ScopedFd _socket;
     bool _button;
     Point _mouse;
     std::queue<EventRecord*> _event_queue;
     std::map<int, int> _key_map;
 
-    scoped_ptr<BinaryReader> _in;
+    sfz::scoped_ptr<sfz::BinaryReader> _in;
 };
 
 }  // namespace antares

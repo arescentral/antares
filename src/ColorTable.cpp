@@ -18,9 +18,12 @@
 #include "ColorTable.hpp"
 
 #include <stdint.h>
+#include "sfz/BinaryReader.hpp"
+#include "sfz/BinaryWriter.hpp"
 #include "Base.h"
-#include "BinaryStream.hpp"
-#include "SmartPtr.hpp"
+
+using sfz::BinaryReader;
+using sfz::BinaryWriter;
 
 namespace antares {
 

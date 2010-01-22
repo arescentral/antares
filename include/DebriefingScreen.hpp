@@ -18,9 +18,9 @@
 #ifndef ANTARES_DEBRIEFING_SCREEN_HPP_
 #define ANTARES_DEBRIEFING_SCREEN_HPP_
 
-#include <string>
+#include "sfz/Bytes.hpp"
+#include "sfz/SmartPtr.hpp"
 #include "Card.hpp"
-#include "SmartPtr.hpp"
 
 namespace antares {
 
@@ -53,12 +53,12 @@ class DebriefingScreen : public Card {
     };
     State _state;
 
-    std::string _message;
-    scoped_ptr<RetroText> _score;
+    sfz::Bytes _message;
+    sfz::scoped_ptr<RetroText> _score;
     Rect _pix_bounds;
     Rect _message_bounds;
     Rect _score_bounds;
-    scoped_ptr<PixMap> _pix;
+    sfz::scoped_ptr<PixMap> _pix;
 
     double _next_update;
     int _typed_chars;

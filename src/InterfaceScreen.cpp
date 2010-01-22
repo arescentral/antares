@@ -17,7 +17,7 @@
 
 #include "InterfaceScreen.hpp"
 
-#include "BinaryStream.hpp"
+#include "sfz/BinaryReader.hpp"
 #include "ColorTranslation.hpp"
 #include "Error.hpp"
 #include "FakeDrawing.hpp"
@@ -26,6 +26,8 @@
 #include "PlayerInterface.hpp"
 #include "Resource.hpp"
 #include "Time.hpp"
+
+using sfz::BytesBinaryReader;
 
 namespace antares {
 
@@ -42,10 +44,10 @@ InterfaceScreen::InterfaceScreen(int id, const Rect& bounds, bool full_screen)
           _hit_item(0),
           _pix(new ArrayPixMap(bounds.width(), bounds.height())) {
     Resource rsrc('intr', id);
-    BufferBinaryReader bin(rsrc.data(), rsrc.size());
+    BytesBinaryReader bin(rsrc.data());
     const int offset_x = (bounds.width() / 2) - 320;
     const int offset_y = (bounds.height() / 2) - 240;
-    while (bin.bytes_read() < rsrc.size()) {
+    while (!bin.done()) {
         _items.push_back(interfaceItemType());
         interfaceItemType* const item = &_items.back();
         bin.read(item);

@@ -17,10 +17,13 @@
 
 #include "NatePixTable.hpp"
 
-#include "BinaryStream.hpp"
+#include "sfz/BinaryReader.hpp"
 #include "ColorTranslation.hpp"
 #include "Resource.hpp"
 #include "Sound.h"
+
+using sfz::BinaryReader;
+using sfz::BytesBinaryReader;
 
 namespace antares {
 
@@ -86,8 +89,25 @@ natePixType::natePixType() { }
 
 natePixType::natePixType(int id) {
     Resource rsrc('SMIV', id);
-    BufferBinaryReader bin(rsrc.data(), rsrc.size());
-    bin.read(this);
+    BytesBinaryReader bin(rsrc.data());
+
+    uint32_t size;
+    int32_t pixnum;
+    bin.read(&size);
+    bin.read(&pixnum);
+
+    std::vector<uint32_t> offsets;
+    for (int i = 0; i < pixnum; ++i) {
+        uint32_t offset;
+        bin.read(&offset);
+        offsets.push_back(offset);
+    }
+
+    for (int i = 0; i < pixnum; ++i) {
+        BytesBinaryReader bin(rsrc.data().substr(offsets[i]));
+        _entries.push_back(new natePixEntryType);
+        bin.read(_entries.back());
+    }
 }
 
 natePixType::~natePixType() {
@@ -100,26 +120,6 @@ natePixEntryType* natePixType::at(size_t index) const {
 
 size_t natePixType::size() const {
     return _entries.size();
-}
-
-void natePixType::read(BinaryReader* bin) {
-    uint32_t size;
-    int32_t pixnum;
-    bin->read(&size);
-    bin->read(&pixnum);
-
-    std::vector<uint32_t> offsets;
-    for (int i = 0; i < pixnum; ++i) {
-        uint32_t offset;
-        bin->read(&offset);
-        offsets.push_back(offset);
-    }
-
-    for (int i = 0; i < pixnum; ++i) {
-        bin->discard(offsets[i] - bin->bytes_read());
-        _entries.push_back(new natePixEntryType);
-        bin->read(_entries.back());
-    }
 }
 
 void natePixType::clear() {

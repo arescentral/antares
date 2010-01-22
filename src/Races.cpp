@@ -19,25 +19,28 @@
 
 #include "Races.hpp"
 
+#include "sfz/BinaryReader.hpp"
 #include "AresGlobalType.hpp"
-#include "BinaryStream.hpp"
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "Resource.hpp"
+
+using sfz::BinaryReader;
+using sfz::BytesBinaryReader;
 
 namespace antares {
 
 short InitRaces() {
     if (globals()->gRaceData.get() == nil) {
         Resource rsrc('race', kRaceResID);
-        BufferBinaryReader bin(rsrc.data(), rsrc.size());
-        size_t count = rsrc.size() / raceType::byte_size;
+        BytesBinaryReader bin(rsrc.data());
+        size_t count = rsrc.data().size() / raceType::byte_size;
         check(count == kRaceNum, "got unexpected number of races");
         globals()->gRaceData.reset(new raceType[count]);
         for (size_t i = 0; i < count; ++i) {
             bin.read(globals()->gRaceData.get() + i);
         }
-        check(bin.bytes_read() == rsrc.size(), "didn't consume all of race data");
+        check(bin.done(), "didn't consume all of race data");
     }
 
     return( kNoError);

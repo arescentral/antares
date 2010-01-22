@@ -20,13 +20,14 @@
 
 #include <exception>
 #include <string>
+#include "sfz/SmartPtr.hpp"
 #include "Geometry.hpp"
-#include "SmartPtr.hpp"
+
+namespace sfz { class BinaryReader; }
+namespace sfz { class BinaryWriter; }
 
 namespace antares {
 
-class BinaryReader;
-class BinaryWriter;
 class ColorTable;
 class RgbColor;
 
@@ -150,7 +151,7 @@ class PixMap {
     // The format exported by this method is a custom binary format, but can be read by
     // `ArrayPixMap::read()`.  Additionally, there is a script provided as scripts/bintopng which
     // can convert the format to PNG images.
-    virtual void write(BinaryWriter* bin) const;
+    virtual void write(sfz::BinaryWriter* bin) const;
 
     // See class documentation below.
     class View;
@@ -194,7 +195,7 @@ class ArrayPixMap : public PixMap {
     // Reads in pixel data via a BinaryReader.
     //
     // @param [in,out] bin  used to read binary data.
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 
     // Implementations of the core PixMap methods.
     virtual const Rect& bounds() const;
@@ -213,7 +214,7 @@ class ArrayPixMap : public PixMap {
 
   private:
     double _transition_fraction;
-    scoped_ptr<RgbColor> _transition_to;
+    sfz::scoped_ptr<RgbColor> _transition_to;
   public:
 
     // Uses default implementations of all utility PixMap methods.
@@ -223,12 +224,12 @@ class ArrayPixMap : public PixMap {
     Rect _bounds;
 
     // The color table returned by `colors()`.
-    scoped_ptr<ColorTable> _colors;
+    sfz::scoped_ptr<ColorTable> _colors;
 
     // An array of pixel data.  Although not required to by the PixMap interface, ArrayPixMap
     // stores all rows of pixels contiguously.  This permits the optimization of `fill()` provided
     // above.
-    scoped_array<RgbColor> _bytes;
+    sfz::scoped_array<RgbColor> _bytes;
 
     DISALLOW_COPY_AND_ASSIGN(ArrayPixMap);
 };

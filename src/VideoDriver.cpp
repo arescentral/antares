@@ -17,6 +17,8 @@
 
 #include "VideoDriver.hpp"
 
+using sfz::scoped_ptr;
+
 namespace antares {
 
 namespace {

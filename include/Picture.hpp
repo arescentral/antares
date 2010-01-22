@@ -20,9 +20,9 @@
 
 #include <stdint.h>
 #include <exception>
+#include "sfz/Macros.hpp"
 #include "Base.h"
 #include "PixMap.hpp"
-#include "SmartPtr.hpp"
 
 namespace antares {
 

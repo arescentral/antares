@@ -20,9 +20,9 @@
 
 #include <stdint.h>
 
-namespace antares {
+namespace sfz { class BinaryReader; }
 
-class BinaryReader;
+namespace antares {
 
 struct Rect;
 
@@ -46,7 +46,7 @@ struct Point {
     // Reads in the point via a BinaryReader.
     //
     // @param [in,out] bin  Used to read binary data.
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 };
 
 // A rectangle in two-dimensional space.
@@ -147,7 +147,7 @@ struct Rect {
     // Reads in the rect via a BinaryReader.
     //
     // @param [in,out] bin  used to read binary data.
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 };
 
 }  // namespace antares

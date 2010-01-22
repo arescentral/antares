@@ -30,6 +30,8 @@
 #include "RetroText.hpp"
 #include "Resource.hpp"
 
+using sfz::Bytes;
+
 namespace antares {
 
 extern long CLIP_LEFT, CLIP_TOP, CLIP_RIGHT;
@@ -64,8 +66,8 @@ HelpScreen::HelpScreen()
     // TODO(sfiera): top and bottom buffer of 1, not just top buffer of 2.
     offset((gRealWorld->bounds().width() / 2) - ((CLIP_RIGHT - CLIP_LEFT) / 2), 2);
 
-    std::string text;
-    text = Resource::get_data('TEXT', text_id());
+    Resource rsrc('TEXT', text_id());
+    std::string text(reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size());
     RgbColor fore;
     RgbColor back;
     GetRGBTranslateColorShade(&fore, RED, VERY_LIGHT);

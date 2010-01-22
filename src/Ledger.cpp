@@ -19,9 +19,17 @@
 
 #include <fcntl.h>
 #include <unistd.h>
+#include "sfz/Exception.hpp"
+#include "sfz/MappedFile.hpp"
 #include "File.hpp"
-#include "MappedFile.hpp"
-#include "PosixException.hpp"
+
+using sfz::Bytes;
+using sfz::Exception;
+using sfz::MappedFile;
+using sfz::String;
+using sfz::ascii_encoding;
+using sfz::scoped_ptr;
+using sfz::utf8_encoding;
 
 namespace antares {
 
@@ -59,7 +67,7 @@ void NullLedger::unlocked_chapters(std::vector<int>* chapters) {
     *chapters = std::vector<int>(_chapters.begin(), _chapters.end());
 }
 
-DirectoryLedger::DirectoryLedger(const std::string& directory)
+DirectoryLedger::DirectoryLedger(const String& directory)
         : _directory(directory) {
     load();
 }
@@ -74,18 +82,19 @@ void DirectoryLedger::unlocked_chapters(std::vector<int>* chapters) {
 }
 
 void DirectoryLedger::load() {
-    const std::string path = _directory + "/com.biggerplanet.ares.json";
+    String path(_directory);
+    path.append("/com.biggerplanet.ares.json", ascii_encoding());
     _chapters.clear();
     scoped_ptr<MappedFile> file;
     try {
         file.reset(new MappedFile(path));
-    } catch (PosixException& e) {
+    } catch (Exception& e) {
         _chapters.insert(1);
         return;
     }
 
     // Copy file data into a string, so that it's NUL-terminated, then close the file.
-    const std::string data(file->data(), file->size());
+    const std::string data(reinterpret_cast<const char*>(file->data().data()), file->data().size());
     file.reset();
 
     // This is not a real JSON parser, but it plays on on the Interstellar News Network.  It simply
@@ -105,7 +114,8 @@ void DirectoryLedger::load() {
 }
 
 void DirectoryLedger::save() {
-    const std::string path = _directory + "/com.biggerplanet.ares.json";
+    String path(_directory);
+    path.append("/com.biggerplanet.ares.json", ascii_encoding());
     std::string contents = "{\n  \"unlocked-levels\" = [";
     for (std::set<int>::const_iterator it = _chapters.begin(); it != _chapters.end(); ++it) {
         if (it != _chapters.begin()) {
@@ -115,8 +125,10 @@ void DirectoryLedger::save() {
     }
     contents.append("]\n}\n");
 
-    MakeDirs(DirName(path), 0755);
-    int fd = open(path.c_str(), O_WRONLY | O_CREAT, 0644);
+    Bytes path_bytes(path, utf8_encoding());
+    path_bytes.resize(path_bytes.size() + 1);
+    MakeDirs(DirName(reinterpret_cast<const char*>(path_bytes.data())), 0755);
+    int fd = open(reinterpret_cast<const char*>(path_bytes.data()), O_WRONLY | O_CREAT, 0644);
     write(fd, contents.c_str(), contents.size());
     close(fd);
 }

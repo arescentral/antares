@@ -18,7 +18,11 @@
 #include "Geometry.hpp"
 
 #include <algorithm>
-#include "BinaryStream.hpp"
+#include "sfz/BinaryReader.hpp"
+#include "sfz/BinaryWriter.hpp"
+
+using sfz::BinaryReader;
+using sfz::BinaryWriter;
 
 namespace antares {
 

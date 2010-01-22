@@ -23,9 +23,9 @@
 #include "AnyChar.hpp"
 #include "NateDraw.hpp"
 
-namespace antares {
+namespace sfz { class BinaryReader; }
 
-class BinaryReader;
+namespace antares {
 
 enum interfaceKindEnum {
     kPlainRect = 1,
@@ -59,7 +59,7 @@ struct interfaceLabelType {
     short               stringID;
     short               stringNumber;
 
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 };
 
 struct interfaceLabeledRectType {
@@ -69,7 +69,7 @@ struct interfaceLabeledRectType {
     bool                editable;
     // bool             editable;
 
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 };
 
 struct interfaceListType {
@@ -79,7 +79,7 @@ struct interfaceListType {
     bool                     (*itemHilited)( short, bool);
     short                       topItem;
 
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 };
 
 struct interfaceTextRectType {
@@ -87,13 +87,13 @@ struct interfaceTextRectType {
     uint8_t             visibleBounds;
     // bool             visibleBounds;
 
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 };
 
 struct interfaceTabBoxType {
     short               topRightBorderSize;
 
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 };
 
 struct interfacePictureRectType {
@@ -101,7 +101,7 @@ struct interfacePictureRectType {
     uint8_t             visibleBounds;
     // bool             visibleBounds;
 
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 };
 
 struct interfaceButtonType {
@@ -111,7 +111,7 @@ struct interfaceButtonType {
     // bool                     defaultButton;
     interfaceItemStatusType     status;
 
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 };
 
 struct interfaceRadioType {
@@ -121,7 +121,7 @@ struct interfaceRadioType {
     // bool                     on;
     interfaceItemStatusType     status;
 
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 }; // also tab box button type
 
 struct interfaceCheckboxType {
@@ -131,7 +131,7 @@ struct interfaceCheckboxType {
     // bool                     on;
     interfaceItemStatusType     status;
 
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 };
 
 struct interfaceItemType {
@@ -157,7 +157,7 @@ struct interfaceItemType {
     int key() const;
     void set_key(int key);
 
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 };
 
 }  // namespace antares

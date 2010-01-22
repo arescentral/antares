@@ -36,6 +36,8 @@
 #include "ScreenLabel.hpp"
 #include "SpriteHandling.hpp"
 
+using sfz::scoped_ptr;
+
 namespace antares {
 
 #define kMessageScreenLeft      200
@@ -414,7 +416,9 @@ void ClipToCurrentLongMessage( void)
                 tmessage->labelMessage = false;
             } else
             {
-                textData.reset(new std::string(Resource::get_data('TEXT', tmessage->currentResID)));
+                Resource rsrc('TEXT', tmessage->currentResID);
+                textData.reset(new std::string(
+                            reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size()));
                 Replace_KeyCode_Strings_With_Actual_Key_Names(textData.get(), kKeyMapNameLongID, 0);
                 if ((*textData)[0] == '#') {
                     tmessage->labelMessage = true;

@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <sys/time.h>
+#include "sfz/SmartPtr.hpp"
 #include "Stub.h"
 #include "Geometry.hpp"
-#include "SmartPtr.hpp"
 
 namespace antares {
 

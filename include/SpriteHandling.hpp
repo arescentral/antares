@@ -112,7 +112,7 @@ struct spriteType {
 
 
 struct pixTableType {
-    scoped_ptr<natePixType> resource;
+    sfz::scoped_ptr<natePixType> resource;
     int         resID;
     bool     keepMe;
     };

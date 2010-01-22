@@ -19,9 +19,9 @@
 #define ANTARES_INPUT_SOURCE_HPP_
 
 #include <stdint.h>
-#include "BinaryStream.hpp"
+#include "sfz/BinaryReader.hpp"
+#include "sfz/Macros.hpp"
 #include "Resource.hpp"
-#include "SmartPtr.hpp"
 
 namespace antares {
 
@@ -42,7 +42,7 @@ class ReplayInputSource : public InputSource {
 
   private:
     Resource _resource;
-    BufferBinaryReader _bin;
+    sfz::BytesBinaryReader _bin;
 
     uint32_t _random_seed;
     uint32_t _turn_num;

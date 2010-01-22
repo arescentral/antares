@@ -43,6 +43,8 @@
 #include "Transitions.hpp"
 #include "UniverseUnit.hpp"
 
+using sfz::scoped_array;
+
 namespace antares {
 
 #define kDirectionError         5           // how picky in degrees we are about angle

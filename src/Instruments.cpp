@@ -38,6 +38,9 @@
 #include "SpriteCursor.hpp"
 #include "UniverseUnit.hpp"
 
+using sfz::scoped_array;
+using sfz::scoped_ptr;
+
 namespace antares {
 
 #define kRadarBlipNum       50L

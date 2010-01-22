@@ -20,17 +20,15 @@
 
 #include <exception>
 #include <string>
-#include "MappedFile.hpp"
+#include "sfz/MappedFile.hpp"
 
 namespace antares {
 
 class NoSuchResourceException : public std::exception { };
 
-class Resource : public MappedFile {
+class Resource : public sfz::MappedFile {
   public:
     Resource(uint32_t code, int id);
-
-    static std::string get_data(uint32_t code, int id);
 };
 
 }  // namespace antares

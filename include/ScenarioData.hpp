@@ -31,8 +31,6 @@ namespace antares {
 #define kScenario_Data_Flag_HasCustomScenarios  0x00000008
 #define kScenario_Data_Flag_NotOptimized        0x00000010
 
-class BinaryStream;
-
 struct scenarioInfoType {
     int32_t         warpInFlareID;
     int32_t         warpOutFlareID;
@@ -47,7 +45,7 @@ struct scenarioInfoType {
     uint32_t        flags;
     uint32_t        checkSum;
 
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 };
 
 }  // namespace antares

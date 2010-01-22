@@ -45,8 +45,8 @@ namespace antares {
 #define kScenarioBriefResID     500
 
 extern scenarioType* gThisScenario;
-extern scoped_array<objectActionType> gObjectActionData;
-extern scoped_array<spaceObjectType> gSpaceObjectData;
+extern sfz::scoped_array<objectActionType> gObjectActionData;
+extern sfz::scoped_array<spaceObjectType> gSpaceObjectData;
 
 inline int mGetRealAdmiralNum(int mplayernum) {
     return gThisScenario->player[mplayernum].admiralNumber;

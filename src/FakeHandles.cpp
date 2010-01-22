@@ -15,12 +15,13 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "BinaryStream.hpp"
+#include "sfz/BinaryReader.hpp"
 #include "Error.hpp"
 #include "FakeSounds.hpp"
 #include "Fakes.hpp"
 #include "Resource.hpp"
-#include "String.hpp"
+
+using sfz::BytesBinaryReader;
 
 namespace antares {
 
@@ -30,7 +31,7 @@ void GetIndString(unsigned char* result, int id, int index) {
         return;
     }
     Resource rsrc('STR#', id);
-    BufferBinaryReader bin(rsrc.data(), rsrc.size());
+    BytesBinaryReader bin(rsrc.data());
     uint16_t count;
     bin.read(&count);
     check(index <= count, "out-of-bounds string requested in GetIndString()");

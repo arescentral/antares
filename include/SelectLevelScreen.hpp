@@ -19,8 +19,8 @@
 #define ANTARES_SELECT_LEVEL_SCREEN_HPP_
 
 #include <vector>
+#include "sfz/Macros.hpp"
 #include "InterfaceScreen.hpp"
-#include "SmartPtr.hpp"
 
 namespace antares {
 

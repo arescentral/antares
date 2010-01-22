@@ -24,9 +24,9 @@
 
 #include "Casts.hpp"
 
-namespace antares {
+namespace sfz { class BinaryReader; }
 
-class BinaryReader;
+namespace antares {
 
 #define kMathSpecial
 
@@ -80,7 +80,7 @@ struct fixedPointType {
     smallFixedType      h;
     smallFixedType      v;
 
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 };
 
 

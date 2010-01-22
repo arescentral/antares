@@ -30,6 +30,8 @@
 #include "SpaceObject.hpp"
 #include "Randomize.hpp"
 
+using sfz::scoped_array;
+
 namespace antares {
 
 const int kScrollStarNum = 125;

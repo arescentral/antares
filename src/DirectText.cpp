@@ -18,12 +18,15 @@
 #include "DirectText.hpp"
 
 #include <algorithm>
+#include "sfz/BinaryReader.hpp"
 #include "Base.h"
 
-#include "BinaryStream.hpp"
 #include "ColorTable.hpp"
 #include "Error.hpp"
 #include "Resource.hpp"
+
+using sfz::BytesBinaryReader;
+using sfz::scoped_ptr;
 
 namespace antares {
 
@@ -33,7 +36,7 @@ scoped_ptr<directTextType>* gDirectTextData;
 
 directTextType::directTextType(int32_t id) {
     Resource defn_rsrc(kDTextDescriptResType, id);
-    BufferBinaryReader bin(defn_rsrc.data(), defn_rsrc.size());
+    BytesBinaryReader bin(defn_rsrc.data());
 
     bin.discard(4);
     bin.read(&resID);
@@ -44,8 +47,8 @@ directTextType::directTextType(int32_t id) {
     bin.read(&ascent);
 
     Resource data_rsrc(kDTextFontMapResType, resID);
-    charSet.reset(new unsigned char[data_rsrc.size()]);
-    memcpy(charSet.get(), data_rsrc.data(), data_rsrc.size());
+    charSet.reset(new unsigned char[data_rsrc.data().size()]);
+    memcpy(charSet.get(), data_rsrc.data().data(), data_rsrc.data().size());
 }
 
 directTextType::~directTextType() { }

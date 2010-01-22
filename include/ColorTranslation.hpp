@@ -75,7 +75,7 @@ struct transColorType {
     RgbColor                rgbcolor;
 };
 
-extern scoped_array<transColorType> gColorTranslateTable;
+extern sfz::scoped_array<transColorType> gColorTranslateTable;
 
 inline void mGetTranslateColorShade(
         uint8_t mcolor, uint8_t mshade, uint8_t& mresultColor, transColorType*& mtransColor) {

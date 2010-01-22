@@ -21,18 +21,29 @@
 #include <sys/socket.h>
 #include <exception>
 
-#include "BinaryStream.hpp"
+#include "sfz/BinaryReader.hpp"
+#include "sfz/BinaryWriter.hpp"
+#include "sfz/Exception.hpp"
+#include "sfz/Format.hpp"
 #include "Card.hpp"
 #include "CardStack.hpp"
 #include "Casts.hpp"
 #include "ColorTable.hpp"
 #include "Error.hpp"
 #include "FakeDrawing.hpp"
-#include "MappedFile.hpp"
-#include "PosixException.hpp"
 #include "Threading.hpp"
 #include "Time.hpp"
 #include "VncServer.hpp"
+
+using sfz::BinaryReader;
+using sfz::BinaryWriter;
+using sfz::Bytes;
+using sfz::BytesPiece;
+using sfz::Exception;
+using sfz::StringPiece;
+using sfz::scoped_ptr;
+using sfz::latin1_encoding;
+using sfz::print;
 
 namespace antares {
 
@@ -43,27 +54,28 @@ class SocketBinaryReader : public BinaryReader {
     SocketBinaryReader(int fd)
         : _fd(fd) { }
 
-    virtual size_t size() const {
-        return -1;
+    virtual bool done() const {
+        return false;
     }
 
   protected:
-    virtual void read_bytes(char* bytes, size_t len) {
+    virtual void read_bytes(uint8_t* bytes, size_t len) {
         while (_buffer.size() < len) {
-            char more[1024];
+            uint8_t more[1024];
             ssize_t recd = recv(_fd, more, 1024, 0);
             if (recd <= 0) {
-                throw PosixException();
+                throw Exception("TODO(sfiera): posix error message");
             }
             _buffer.append(more, recd);
         }
-        memcpy(bytes, _buffer.c_str(), len);
-        _buffer = _buffer.substr(len);
+        memcpy(bytes, _buffer.data(), len);
+        Bytes new_buffer(BytesPiece(_buffer).substr(len));
+        _buffer.swap(&new_buffer);
     }
 
   private:
     int _fd;
-    std::string _buffer;
+    Bytes _buffer;
 };
 
 class SocketBinaryWriter : public BinaryWriter {
@@ -73,22 +85,22 @@ class SocketBinaryWriter : public BinaryWriter {
 
     void flush() {
         if (!_buffer.empty()) {
-            size_t sent = send(_fd, _buffer.c_str(), _buffer.size(), 0);
+            size_t sent = send(_fd, _buffer.data(), _buffer.size(), 0);
             if (sent != _buffer.size()) {
-                throw PosixException();
+                throw Exception("TODO(sfiera): posix error message");
             }
             _buffer.clear();
         }
     }
 
   protected:
-    virtual void write_bytes(const char* bytes, size_t len) {
+    virtual void write_bytes(const uint8_t* bytes, size_t len) {
         _buffer.append(bytes, len);
     }
 
   private:
     int _fd;
-    std::string _buffer;
+    Bytes _buffer;
 };
 
 int64_t usecs() {
@@ -108,15 +120,15 @@ int listen_on(int port) {
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) {
-        throw PosixException();
+        throw Exception("TODO(sfiera): posix error message");
     }
     setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
 
     if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-        throw PosixException();
+        throw Exception("TODO(sfiera): posix error message");
     }
     if (listen(sock, 5) < 0) {
-        throw PosixException();
+        throw Exception("TODO(sfiera): posix error message");
     }
 
     return sock;
@@ -128,7 +140,7 @@ int accept_on(int sock) {
     socklen_t addrlen;
     int fd = accept(sock, &addr, &addrlen);
     if (fd < 0) {
-        throw PosixException();
+        throw Exception("TODO(sfiera): posix error message");
     }
 
     setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
@@ -505,7 +517,7 @@ enum {
 bool VncVideoDriver::vnc_poll(int64_t timeout) {
     int width = gRealWorld->bounds().right;
     int height = gRealWorld->bounds().bottom;
-    SocketBinaryWriter out(_socket.fd());
+    SocketBinaryWriter out(_socket.get());
     int64_t stop_time = usecs() + timeout;
     bool unchanged = false;
 
@@ -523,9 +535,9 @@ bool VncVideoDriver::vnc_poll(int64_t timeout) {
         FD_ZERO(&read);
         FD_ZERO(&write);
         FD_ZERO(&error);
-        FD_SET(_socket.fd(), &read);
+        FD_SET(_socket.get(), &read);
 
-        if (select(_socket.fd() + 1, &read, &write, &error, &tv) > 0) {
+        if (select(_socket.get() + 1, &read, &write, &error, &tv) > 0) {
             uint8_t client_message_type;
             _in->read(&client_message_type);
             switch (client_message_type) {
@@ -597,7 +609,7 @@ bool VncVideoDriver::vnc_poll(int64_t timeout) {
                 {
                     KeyEventMessage msg;
                     _in->read(&msg);
-                    printf("key %d %d\n", msg.key, implicit_cast<int>(msg.down_flag));
+                    print(1, "key {0} {1}\n", msg.key, msg.down_flag);
 
                     if (_key_map.find(msg.key) == _key_map.end()) {
                         fail("unknown key");
@@ -631,7 +643,7 @@ bool VncVideoDriver::vnc_poll(int64_t timeout) {
                         }
                         evt->where.h = msg.x_position;
                         evt->where.v = msg.y_position;
-                        printf("enqueueing %d\n", evt->what);
+                        print(1, "enqueueing {0}\n", evt->what);
                         _event_queue.push(evt.release());
                     }
 
@@ -667,13 +679,13 @@ bool VncVideoDriver::vnc_poll(int64_t timeout) {
 VncVideoDriver::VncVideoDriver(int port)
         : _start_time(usecs()),
           _listen(listen_on(port)),
-          _socket(accept_on(_listen.fd())),
+          _socket(accept_on(_listen.get())),
           _button(false),
-          _in(new SocketBinaryReader(_socket.fd())) {
+          _in(new SocketBinaryReader(_socket.get())) {
     _mouse.h = 0;
     _mouse.v = 0;
 
-    SocketBinaryWriter out(_socket.fd());
+    SocketBinaryWriter out(_socket.get());
     int width = gRealWorld->bounds().right;
     int height = gRealWorld->bounds().bottom;
 
@@ -684,8 +696,10 @@ VncVideoDriver::VncVideoDriver(int port)
         out.write(version);
         out.flush();
         _in->read(&version);
-        if (strncmp(version.version, "RFB 003.008\n", sizeof(ProtocolVersion)) != 0) {
-            fail("Unacceptable client version %11s", version.version);
+        if (memcmp(version.version, "RFB 003.008\n", sizeof(ProtocolVersion)) != 0) {
+            throw Exception("unacceptable client version {0}", StringPiece(
+                        BytesPiece(reinterpret_cast<const uint8_t*>(version.version), 12),
+                        latin1_encoding()));
         }
     }
 
@@ -701,7 +715,7 @@ VncVideoDriver::VncVideoDriver(int port)
         uint8_t selected_security;
         _in->read(&selected_security);
         if (selected_security != '\1') {
-            fail("Unacceptable security %d", implicit_cast<int>(selected_security));
+            throw Exception("unacceptable security {0}", selected_security);
         }
 
         SecurityResultMessage result;

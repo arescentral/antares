@@ -52,6 +52,9 @@
 #include "Transitions.hpp"
 #include "VideoDriver.hpp"
 
+using sfz::scoped_ptr;
+using sfz::scoped_array;
+
 namespace antares {
 
 #define kThisVersion    0x00000201  // last was 200; last was 104
@@ -2082,7 +2085,9 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
                                  &hiliteBounds, corner, scale, 16, 32, bounds);
 
         // TODO(sfiera): catch exception.
-        textData.reset(new std::string(Resource::get_data('TEXT', contentID)));
+        Resource rsrc('TEXT', contentID);
+        textData.reset(new std::string(
+                    reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size()));
         if (textData.get() != nil) {
             textlength = length = textData->size();
             textHeight = GetInterfaceTextHeightFromWidth(
@@ -2285,7 +2290,9 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
     {
         HideCursor();
 
-        retroTextSpec.text.reset(new std::string(Resource::get_data('TEXT', kShipDataTextID)));
+        Resource rsrc('TEXT', kShipDataTextID);
+        retroTextSpec.text.reset(new std::string(
+                    reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size()));
         if ( retroTextSpec.text.get() != nil) {
             // *** Replace place-holders in text with real data, using the fabulous Munger routine
             // an object or a ship?
@@ -2434,7 +2441,8 @@ std::string CreateWeaponDataText(long whichWeapon, unsigned char* weaponName) {
         weaponObject = gBaseObjectData.get() + whichWeapon;
 
         // TODO(sfiera): catch exception.
-        weaponText = Resource::get_data('TEXT', kWeaponDataTextID);
+        Resource rsrc('TEXT', kWeaponDataTextID);
+        weaponText.assign(reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size());
         if (true) {
             // damage; this is tricky--we have to guess by walking through activate actions,
             //  and for all the createObject actions, see which creates the most damaging
@@ -2563,7 +2571,9 @@ void DoMissionDebriefing(Rect *destRect, long yourlength, long parlength, long y
         } else score += kKillsPoints * 2;
     } else score += kKillsPoints;
 
-    retroTextSpec.text.reset(new std::string(Resource::get_data('TEXT', kSummaryTextID)));
+    Resource rsrc('TEXT', kSummaryTextID);
+    retroTextSpec.text.reset(new std::string(
+                reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size()));
     if (retroTextSpec.text.get() != nil) {
         // *** Replace place-holders in text with real data, using the fabulous Munger routine
         // your minutes
@@ -2700,7 +2710,9 @@ void DoMissionDebriefingText(long textID, long yourlength, long parlength,
     iRect = Rect(0, 0, kDebriefTextWidth, 1);
 
     dataItem.style = kLarge;
-    textData.reset(new std::string(Resource::get_data('TEXT', textID)));
+    Resource rsrc('TEXT', textID);
+    textData.reset(new std::string(
+                reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size()));
     if (textData.get() != nil) {
         textlength = length = textData->size();
         textHeight = GetInterfaceTextHeightFromWidth(
@@ -2796,8 +2808,9 @@ void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
 
     BlackenWindow();
 
-
-    textHandle.reset(new std::string(Resource::get_data('TEXT', textID)));
+    Resource rsrc('TEXT', textID);
+    textHandle.reset(new std::string(
+                reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size()));
     if (textHandle.get() != nil) {
         mSetDirectFont( textFontNum);
 

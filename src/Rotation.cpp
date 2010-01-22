@@ -19,12 +19,14 @@
 
 #include "Rotation.hpp"
 
-#include "BinaryStream.hpp"
+#include "sfz/BinaryReader.hpp"
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "MathMacros.hpp"
 #include "MathSpecial.hpp"
 #include "Resource.hpp"
+
+using sfz::BytesBinaryReader;
 
 namespace antares {
 
@@ -35,9 +37,9 @@ int32_t gRotTable[kRotTableSize];
 
 void RotationInit() {
     Resource rsrc('rot ', 500);
-    BufferBinaryReader bin(rsrc.data(), rsrc.size());
+    BytesBinaryReader bin(rsrc.data());
     bin.read(gRotTable, kRotTableSize);
-    check(bin.bytes_read() == rsrc.size(), "didn't consume all of rotation data");
+    check(bin.done(), "didn't consume all of rotation data");
 }
 
 void GetRotPoint(int32_t *x, int32_t *y, int32_t rotpos) {

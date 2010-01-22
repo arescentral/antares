@@ -33,6 +33,8 @@
 #include "RetroText.hpp"
 #include "Time.hpp"
 
+using sfz::scoped_ptr;
+
 namespace antares {
 
 namespace {
@@ -116,22 +118,22 @@ PixMap* build_pix(int text_id, int width) {
     Resource text('TEXT', text_id);
 
     std::vector<std::string> lines;
-    const char* start = text.data();
-    const char* const end = start + text.size();
+    const uint8_t* start = text.data().data();
+    const uint8_t* const end = start + text.data().size();
     bool in_section_header = (start + 2 <= end) && (memcmp(start, "#+", 2) == 0);
-    for (const char* p = start; p != end; ++p) {
+    for (const uint8_t* p = start; p != end; ++p) {
         if (p + 3 <= end && memcmp(p, "\r#+", 3) == 0) {
-            lines.push_back(std::string(start, p - start));
+            lines.push_back(std::string(reinterpret_cast<const char*>(start), p - start));
             start = p + 1;
             in_section_header = true;
         } else if (in_section_header && (*p == '\r')) {
-            lines.push_back(std::string(start, p - start));
+            lines.push_back(std::string(reinterpret_cast<const char*>(start), p - start));
             start = p + 1;
             in_section_header = false;
         }
     }
     if (start != end) {
-        lines.push_back(std::string(start, end - start));
+        lines.push_back(std::string(reinterpret_cast<const char*>(start), end - start));
     }
 
     for (std::vector<std::string>::iterator it = lines.begin(); it != lines.end(); ++it) {

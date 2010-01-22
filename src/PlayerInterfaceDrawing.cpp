@@ -30,6 +30,8 @@
 #include "Resource.hpp"
 #include "StringNumerics.hpp"
 
+using sfz::scoped_ptr;
+
 namespace antares {
 
 #define kInterfaceLargeHBorder      13
@@ -1666,7 +1668,9 @@ void DrawInterfaceTextRect(const interfaceItemType& item, PixMap* pix) {
     {
         wordlen = theLine;
 
-        textData.reset(new std::string(Resource::get_data('TEXT', item.item.textRect.textID)));
+        Resource rsrc('TEXT', item.item.textRect.textID);
+        textData.reset(new std::string(
+                reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size()));
         if (textData.get() != nil) {
             length = textData->size();
             const char* sChar = textData->c_str();

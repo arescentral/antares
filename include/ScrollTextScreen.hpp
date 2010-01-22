@@ -18,9 +18,9 @@
 #ifndef ANTARES_SCROLL_TEXT_HPP_
 #define ANTARES_SCROLL_TEXT_HPP_
 
+#include "sfz/SmartPtr.hpp"
 #include "Card.hpp"
 #include "Geometry.hpp"
-#include "SmartPtr.hpp"
 
 namespace antares {
 
@@ -41,7 +41,7 @@ class ScrollTextScreen : public Card {
     virtual void fire_timer();
 
   private:
-    scoped_ptr<PixMap> _pix_map;
+    sfz::scoped_ptr<PixMap> _pix_map;
     const double _speed;
     const bool _play_song;
     const int _song_id;

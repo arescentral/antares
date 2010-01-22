@@ -18,12 +18,17 @@
 #include "PixMap.hpp"
 
 #include <algorithm>
+#include "sfz/BinaryReader.hpp"
+#include "sfz/BinaryWriter.hpp"
 #include "Quickdraw.h"
-#include "BinaryStream.hpp"
 #include "Casts.hpp"
 #include "ColorTable.hpp"
 #include "Error.hpp"
 #include "ImageDriver.hpp"
+
+using sfz::BinaryReader;
+using sfz::BinaryWriter;
+using sfz::scoped_array;
 
 namespace antares {
 

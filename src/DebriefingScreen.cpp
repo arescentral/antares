@@ -28,6 +28,8 @@
 #include "StringList.hpp"
 #include "Time.hpp"
 
+using sfz::Bytes;
+
 namespace antares {
 
 extern long CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM;
@@ -118,7 +120,8 @@ int score(
 RetroText* score_text(
         int your_length, int par_length, int your_loss, int par_loss, int your_kill,
         int par_kill) {
-    std::string text = Resource::get_data('TEXT', 6000);
+    Resource rsrc('TEXT', 6000);
+    std::string text(reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size());
 
     StringList strings;
     strings.load(6000);
@@ -152,7 +155,7 @@ RetroText* score_text(
     GetRGBTranslateColorShade(&fore_color, GOLD, VERY_LIGHT);
     RgbColor back_color;
     GetRGBTranslateColorShade(&back_color, GOLD, DARKEST);
-    return new RetroText(text.c_str(), text.size(), kButtonFontNum, fore_color, back_color);
+    return new RetroText(text.data(), text.size(), kButtonFontNum, fore_color, back_color);
 }
 
 }  // namespace
@@ -328,7 +331,7 @@ void DoMissionDebriefing(
 
 DebriefingScreen::DebriefingScreen(int text_id)
         : _state(DONE),
-          _message(Resource::get_data('TEXT', text_id)),
+          _message(Resource('TEXT', text_id).data()),
           _next_update(0.0),
           _typed_chars(0) {
     initialize(false);
@@ -338,7 +341,7 @@ DebriefingScreen::DebriefingScreen(
         int text_id, int your_length, int par_length, int your_loss, int par_loss,
         int your_kill, int par_kill)
         : _state(TYPING),
-          _message(Resource::get_data('TEXT', text_id)),
+          _message(Resource('TEXT', text_id).data()),
           _next_update(0.0),
           _typed_chars(0) {
     initialize(true);
@@ -409,7 +412,7 @@ void DebriefingScreen::fire_timer() {
 
 void DebriefingScreen::initialize(bool do_score) {
     int text_height = GetInterfaceTextHeightFromWidth(
-            reinterpret_cast<const unsigned char*>(_message.c_str()), _message.size(),
+            reinterpret_cast<const unsigned char*>(_message.data()), _message.size(),
             kLarge, kTextWidth);
     Rect text_bounds(0, 0, kTextWidth, text_height);
     if (do_score) {
@@ -424,7 +427,7 @@ void DebriefingScreen::initialize(bool do_score) {
 
     DrawAnyInterfaceItem(interface_item(_message_bounds), _pix.get());
     DrawInterfaceTextInRect(
-            _message_bounds, reinterpret_cast<const unsigned char*>(_message.c_str()),
+            _message_bounds, reinterpret_cast<const unsigned char*>(_message.data()),
             _message.size(), kLarge, GOLD, _pix.get(), NULL);
 }
 

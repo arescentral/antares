@@ -32,6 +32,8 @@
 #include "Rotation.hpp"
 #include "StringNumerics.hpp"
 
+using sfz::scoped_array;
+
 namespace antares {
 
 #define kMaxSpriteNum           500//300

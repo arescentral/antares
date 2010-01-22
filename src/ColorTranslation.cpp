@@ -23,6 +23,8 @@
 #include "Debug.hpp"
 #include "Error.hpp"
 
+using sfz::scoped_array;
+
 namespace antares {
 
 #define kColorTransError        "\pCLTR"

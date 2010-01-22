@@ -44,6 +44,8 @@
 #include "StringList.hpp"
 #include "StringNumerics.hpp"
 
+using sfz::scoped_array;
+
 namespace antares {
 
 #define kMiniScreenLeft         12

@@ -18,10 +18,10 @@
 #ifndef ANTARES_LEDGER_HPP_
 #define ANTARES_LEDGER_HPP_
 
-#include <string>
 #include <set>
 #include <vector>
-#include "SmartPtr.hpp"
+#include "sfz/Macros.hpp"
+#include "sfz/String.hpp"
 
 namespace antares {
 
@@ -50,7 +50,7 @@ class NullLedger : public Ledger {
 
 class DirectoryLedger : public Ledger {
   public:
-    DirectoryLedger(const std::string& directory);
+    DirectoryLedger(const sfz::String& directory);
     virtual void unlock_chapter(int chapter);
     virtual void unlocked_chapters(std::vector<int>* chapters);
 
@@ -58,7 +58,7 @@ class DirectoryLedger : public Ledger {
     void load();
     void save();
 
-    const std::string _directory;
+    const sfz::String _directory;
     std::set<int> _chapters;
 
     DISALLOW_COPY_AND_ASSIGN(DirectoryLedger);

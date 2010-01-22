@@ -18,8 +18,8 @@
 #ifndef ANTARES_HELP_SCREEN_HPP_
 #define ANTARES_HELP_SCREEN_HPP_
 
+#include "sfz/SmartPtr.hpp"
 #include "InterfaceScreen.hpp"
-#include "SmartPtr.hpp"
 
 namespace antares {
 
@@ -44,7 +44,7 @@ class HelpScreen : public InterfaceScreen {
         BOX = 1,
     };
 
-    scoped_ptr<RetroText> _text;
+    sfz::scoped_ptr<RetroText> _text;
     Rect _text_bounds;
 
     DISALLOW_COPY_AND_ASSIGN(HelpScreen);

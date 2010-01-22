@@ -20,13 +20,13 @@
 
 #include <stdint.h>
 #include <vector>
+#include "sfz/Macros.hpp"
 #include "Base.h"
-#include "SmartPtr.hpp"
+
+namespace sfz { class BinaryReader; }
+namespace sfz { class BinaryWriter; }
 
 namespace antares {
-
-class BinaryReader;
-class BinaryWriter;
 
 class RgbColor {
   public:
@@ -43,8 +43,8 @@ class RgbColor {
     uint8_t green;
     uint8_t blue;
 
-    void read(BinaryReader* bin);
-    void write(BinaryWriter* bin) const;
+    void read(sfz::BinaryReader* bin);
+    void write(sfz::BinaryWriter* bin) const;
 };
 
 inline bool operator==(const RgbColor& lhs, const RgbColor& rhs) {
@@ -68,8 +68,8 @@ class ColorTable {
 
     void transition_between(const ColorTable& source, const RgbColor& dest, double fraction);
 
-    void read(BinaryReader* bin);
-    void write(BinaryWriter* bin) const;
+    void read(sfz::BinaryReader* bin);
+    void write(sfz::BinaryWriter* bin) const;
 
   private:
     std::vector<RgbColor> _colors;

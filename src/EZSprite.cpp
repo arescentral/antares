@@ -24,6 +24,8 @@
 #include "OffscreenGWorld.hpp"
 #include "SpriteHandling.hpp"
 
+using sfz::scoped_ptr;
+
 namespace antares {
 
 extern  PixMap*         gActiveWorld;

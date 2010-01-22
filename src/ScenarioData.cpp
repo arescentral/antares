@@ -17,8 +17,12 @@
 
 #include "ScenarioData.hpp"
 
-#include "BinaryStream.hpp"
+#include "sfz/BinaryReader.hpp"
 #include "Scenario.hpp"
+
+using sfz::BinaryReader;
+using sfz::BytesBinaryReader;
+using sfz::BytesPiece;
 
 namespace antares {
 
@@ -74,7 +78,7 @@ void scenarioPlayerType::read(BinaryReader* bin) {
 }
 
 void scenarioConditionType::read(BinaryReader* bin) {
-    char section[12];
+    uint8_t section[12];
 
     bin->read(&condition);
     bin->discard(1);
@@ -86,7 +90,7 @@ void scenarioConditionType::read(BinaryReader* bin) {
     bin->read(&flags);
     bin->read(&direction);
 
-    BufferBinaryReader sub(section, 12);
+    BytesBinaryReader sub(BytesPiece(section, 12));
     switch (condition) {
       case kCounterCondition:
       case kCounterGreaterCondition:
@@ -122,7 +126,7 @@ void counterArgumentType::read(BinaryReader* bin) {
 }
 
 void briefPointType::read(BinaryReader* bin) {
-    char section[8];
+    uint8_t section[8];
 
     bin->read(&briefPointKind);
     bin->discard(1);
@@ -132,7 +136,7 @@ void briefPointType::read(BinaryReader* bin) {
     bin->read(&titleNum);
     bin->read(&contentResID);
 
-    BufferBinaryReader sub(section, 8);
+    BytesBinaryReader sub(BytesPiece(section, 8));
     switch (briefPointKind) {
       case kNoPointKind:
       case kBriefFreestandingKind:

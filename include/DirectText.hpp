@@ -53,7 +53,7 @@ struct directTextType {
     directTextType(int32_t id);
     ~directTextType();
 
-    scoped_array<unsigned char> charSet;
+    sfz::scoped_array<unsigned char> charSet;
     int16_t resID;
     int32_t logicalWidth;
     int32_t physicalWidth;

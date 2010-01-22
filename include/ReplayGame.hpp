@@ -18,9 +18,9 @@
 #ifndef ANTARES_REPLAY_GAME_HPP_
 #define ANTARES_REPLAY_GAME_HPP_
 
+#include "sfz/Macros.hpp"
 #include "AresMain.hpp"
 #include "Card.hpp"
-#include "SmartPtr.hpp"
 
 namespace antares {
 

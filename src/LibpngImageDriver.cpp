@@ -18,9 +18,13 @@
 #include "LibpngImageDriver.hpp"
 
 #include <png.h>
-#include "BinaryStream.hpp"
+#include "sfz/BinaryReader.hpp"
+#include "sfz/BinaryWriter.hpp"
 #include "Error.hpp"
 #include "FakeDrawing.hpp"
+
+using sfz::BinaryReader;
+using sfz::BinaryWriter;
 
 namespace antares {
 

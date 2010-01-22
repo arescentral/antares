@@ -21,7 +21,9 @@
 
 #include "MathSpecial.hpp"
 
-#include "BinaryStream.hpp"
+#include "sfz/BinaryReader.hpp"
+
+using sfz::BinaryReader;
 
 namespace antares {
 

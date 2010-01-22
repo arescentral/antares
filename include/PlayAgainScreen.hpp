@@ -18,8 +18,8 @@
 #ifndef ANTARES_PLAY_AGAIN_SCREEN_HPP_
 #define ANTARES_PLAY_AGAIN_SCREEN_HPP_
 
+#include "sfz/Macros.hpp"
 #include "InterfaceScreen.hpp"
-#include "SmartPtr.hpp"
 
 namespace antares {
 

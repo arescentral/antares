@@ -23,9 +23,9 @@
 #include "NateDraw.hpp"
 #include "SpaceObject.hpp"
 
-namespace antares {
+namespace sfz { class BinaryReader; }
 
-class BinaryReader;
+namespace antares {
 
 #define kScenarioInitialNum             12
 #define kScenarioSpontaneousNum         2
@@ -155,12 +155,12 @@ struct briefPointType {
         int32_t         objectNum;
         uint8_t         objectVisible;  // bool
 
-        void read(BinaryReader* bin);
+        void read(sfz::BinaryReader* bin);
     };
     struct AbsoluteBrief {
         Point location;
 
-        void read(BinaryReader* bin);
+        void read(sfz::BinaryReader* bin);
     };
 
     briefingPointKindType   briefPointKind;
@@ -175,7 +175,7 @@ struct briefPointType {
     int16_t                 contentResID;
 
     static const size_t byte_size = 24;
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 };
 
 struct scenarioInitialType {
@@ -196,7 +196,7 @@ struct scenarioInitialType {
     uint32_t        attributes;
 
     static const size_t byte_size = 108;
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 };
 
 struct counterArgumentType {
@@ -204,7 +204,7 @@ struct counterArgumentType {
     int32_t         whichCounter;
     int32_t         amount;
 
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 };
 
 struct scenarioConditionType {
@@ -224,7 +224,7 @@ struct scenarioConditionType {
     int32_t         direction;
 
     static const size_t byte_size = 38;
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 };
 
 struct scenarioPlayerType
@@ -239,7 +239,7 @@ struct scenarioPlayerType
     int16_t         netRaceFlags;
     int16_t         reserved1;
 
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 };
 
 struct scenarioType {
@@ -266,7 +266,7 @@ struct scenarioType {
     int16_t                     startTime;      // use kScenario_StartTimeMask
 
     static const size_t byte_size = 124;
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 };
 
 struct raceType {
@@ -276,7 +276,7 @@ struct raceType {
     int32_t advantage;
 
     static const size_t byte_size = 14;
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 };
 
 }  // namespace antares

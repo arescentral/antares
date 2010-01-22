@@ -22,11 +22,15 @@
 #include <limits>
 #include <string>
 
-#include "BinaryStream.hpp"
+#include "sfz/BinaryWriter.hpp"
 #include "ColorTable.hpp"
 #include "Error.hpp"
 #include "Fakes.hpp"
 #include "File.hpp"
+
+using sfz::Bytes;
+using sfz::BytesBinaryWriter;
+using sfz::scoped_ptr;
 
 namespace antares {
 
@@ -36,29 +40,15 @@ namespace {
 
 scoped_ptr<ColorTable> colors;
 
-class StringBinaryWriter : public BinaryWriter {
-public:
-    StringBinaryWriter(std::string* out)
-        : _out(out) { }
-
-  protected:
-    virtual void write_bytes(const char* bytes, size_t count) {
-        _out->append(bytes, count);
-    }
-
-  private:
-    std::string* _out;
-};
-
 }  // namespace
 
 void DumpTo(const std::string& path) {
-    std::string contents;
-    StringBinaryWriter(&contents).write(*gRealWorld);
+    Bytes contents;
+    BytesBinaryWriter(&contents).write(*gRealWorld);
 
     MakeDirs(DirName(path), 0755);
     int fd = open(path.c_str(), O_WRONLY | O_CREAT, 0644);
-    write(fd, contents.c_str(), contents.size());
+    write(fd, contents.data(), contents.size());
     close(fd);
 }
 

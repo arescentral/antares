@@ -19,10 +19,10 @@
 #define ANTARES_INTERFACE_SCREEN_HPP_
 
 #include <vector>
+#include "sfz/SmartPtr.hpp"
 #include "Card.hpp"
 #include "Geometry.hpp"
 #include "PlayerInterfaceItems.hpp"
-#include "SmartPtr.hpp"
 
 namespace antares {
 
@@ -66,7 +66,7 @@ class InterfaceScreen : public Card {
     double _last_event;
     std::vector<interfaceItemType> _items;
     int _hit_item;
-    scoped_ptr<PixMap> _pix;
+    sfz::scoped_ptr<PixMap> _pix;
 
     DISALLOW_COPY_AND_ASSIGN(InterfaceScreen);
 };

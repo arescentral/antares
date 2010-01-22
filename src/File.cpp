@@ -17,7 +17,9 @@
 
 #include "File.hpp"
 
-#include "PosixException.hpp"
+#include "sfz/Exception.hpp"
+
+using sfz::Exception;
 
 namespace antares {
 
@@ -56,7 +58,7 @@ bool IsDir(const std::string& path) {
 
 void Mkdir(const std::string& path, mode_t mode) {
     if (mkdir(path.c_str(), mode) != 0) {
-        throw PosixException();
+        throw Exception("TODO(sfiera): posix error message");
     }
 }
 

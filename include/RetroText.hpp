@@ -19,9 +19,9 @@
 #define ANTARES_RETRO_TEXT_HPP_
 
 #include <vector>
+#include "sfz/Macros.hpp"
 #include "ColorTable.hpp"
 #include "Geometry.hpp"
-#include "SmartPtr.hpp"
 
 namespace antares {
 

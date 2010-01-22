@@ -20,10 +20,15 @@
 #include <glob.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include "BinaryStream.hpp"
+#include "sfz/BinaryReader.hpp"
+#include "sfz/MappedFile.hpp"
 #include "Error.hpp"
 #include "ImageDriver.hpp"
-#include "MappedFile.hpp"
+
+using sfz::BytesBinaryReader;
+using sfz::MappedFile;
+using sfz::StringPiece;
+using sfz::utf8_encoding;
 
 namespace antares {
 
@@ -52,8 +57,8 @@ Picture::Picture(int32_t id)
         throw PictureNotFoundException();
     }
 
-    MappedFile file(g.gl_pathv[0]);
-    BufferBinaryReader bin(file.data(), file.size());
+    MappedFile file(StringPiece(g.gl_pathv[0], utf8_encoding()));
+    BytesBinaryReader bin(file.data());
     ImageDriver::driver()->read(&bin, this);
 }
 

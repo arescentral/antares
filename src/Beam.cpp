@@ -30,6 +30,8 @@
 #include "Rotation.hpp"
 #include "UniverseUnit.hpp"
 
+using sfz::scoped_array;
+
 namespace antares {
 
 #define kBeamError      "\pBEAM"

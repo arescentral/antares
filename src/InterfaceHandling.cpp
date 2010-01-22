@@ -25,9 +25,9 @@
 #include "InterfaceHandling.hpp"
 
 #include <vector>
+#include "sfz/BinaryReader.hpp"
 #include "AnyChar.hpp"
 #include "AresGlobalType.hpp"
-#include "BinaryStream.hpp"
 #include "ColorTranslation.hpp"
 #include "Debug.hpp"
 #include "Error.hpp"
@@ -37,6 +37,10 @@
 #include "PlayerInterfaceItems.hpp"
 #include "Resource.hpp"
 #include "SoundFX.hpp"              // for button on/off
+
+using sfz::BinaryReader;
+using sfz::BytesBinaryReader;
+using sfz::BytesPiece;
 
 namespace antares {
 
@@ -78,10 +82,10 @@ void InterfaceHandlingCleanup() {
 
 int OpenInterface(short resID) {
     Resource rsrc(kInterfaceResourceType, resID);
-    BufferBinaryReader bin(rsrc.data(), rsrc.size());
+    BytesBinaryReader bin(rsrc.data());
 
     gInterfaceItemData.clear();
-    while (bin.bytes_read() < rsrc.size()) {
+    while (!bin.done()) {
         gInterfaceItemData.push_back(interfaceItemType());
         interfaceItemType* const item = &gInterfaceItemData.back();
         bin.read(item);
@@ -101,8 +105,8 @@ long AppendInterface(short resID, long relative_number, bool center) {
     const int32_t original_number = gInterfaceItemData.size();
 
     Resource rsrc(kInterfaceResourceType, resID);
-    BufferBinaryReader bin(rsrc.data(), rsrc.size());
-    while (bin.bytes_read() < rsrc.size()) {
+    BytesBinaryReader bin(rsrc.data());
+    while (!bin.done()) {
         gInterfaceItemData.push_back(interfaceItemType());
         bin.read(&gInterfaceItemData.back());
     }
@@ -654,7 +658,7 @@ void SetInterfaceTextBoxText( short resID) {
 }
 
 void interfaceItemType::read(BinaryReader* bin) {
-    char section[22];
+    uint8_t section[22];
 
     bin->read(&bounds);
     bin->read(section, 22);
@@ -663,7 +667,7 @@ void interfaceItemType::read(BinaryReader* bin) {
     bin->read(&style);
     bin->discard(1);
 
-    BufferBinaryReader sub(section, 22);
+    BytesBinaryReader sub(BytesPiece(section, 22));
     switch (kind) {
       case kPlainRect:
       case kPictureRect:

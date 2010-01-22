@@ -17,9 +17,11 @@
 
 #include "StringList.hpp"
 
-#include "BinaryStream.hpp"
+#include "sfz/BinaryReader.hpp"
 #include "Error.hpp"
 #include "Resource.hpp"
+
+using sfz::BytesBinaryReader;
 
 namespace antares {
 
@@ -27,14 +29,14 @@ void StringList::load(int id) {
     _strings.clear();
 
     Resource rsrc('STR#', id);
-    BufferBinaryReader bin(rsrc.data(), rsrc.size());
+    BytesBinaryReader bin(rsrc.data().substr(0, 2));
     uint16_t size;
     bin.read(&size);
-    const char* data = rsrc.data() + 2;
+    const uint8_t* data = rsrc.data().data() + 2;
     for (size_t i = 0; i < size; ++i) {
         uint8_t len = *data;
         ++data;
-        _strings.push_back(std::string(data, len));
+        _strings.push_back(std::string(reinterpret_cast<const char*>(data), len));
         data += len;
     }
 }

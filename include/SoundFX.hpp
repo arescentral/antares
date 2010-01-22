@@ -98,7 +98,7 @@ struct smartSoundChannel {
 };
 
 struct smartSoundHandle {
-    scoped_ptr<Sound>   soundHandle;
+    sfz::scoped_ptr<Sound>   soundHandle;
     short               id;
     bool             keepMe;
 };

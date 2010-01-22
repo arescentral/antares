@@ -18,16 +18,16 @@
 #ifndef ANTARES_LIBPNG_IMAGE_DRIVER_HPP_
 #define ANTARES_LIBPNG_IMAGE_DRIVER_HPP_
 
+#include "sfz/Macros.hpp"
 #include "ImageDriver.hpp"
-#include "SmartPtr.hpp"
 
 namespace antares {
 
 class LibpngImageDriver : public ImageDriver {
   public:
     LibpngImageDriver();
-    virtual void read(BinaryReader* bin, ArrayPixMap* pix);
-    virtual void write(BinaryWriter* bin, const PixMap& pix);
+    virtual void read(sfz::BinaryReader* bin, ArrayPixMap* pix);
+    virtual void write(sfz::BinaryWriter* bin, const PixMap& pix);
 
   private:
     DISALLOW_COPY_AND_ASSIGN(LibpngImageDriver);

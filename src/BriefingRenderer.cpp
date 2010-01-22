@@ -30,6 +30,8 @@
 #include "ScenarioMaker.hpp"
 #include "SpriteHandling.hpp"
 
+using sfz::scoped_array;
+
 namespace antares {
 
 #define kBriefing_Grid_Size             16

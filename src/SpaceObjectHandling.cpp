@@ -19,10 +19,10 @@
 
 #include "SpaceObjectHandling.hpp"
 
+#include "sfz/BinaryReader.hpp"
 #include "Admiral.hpp"
 #include "AresGlobalType.hpp"
 #include "Beam.hpp"
-#include "BinaryStream.hpp"
 #include "ColorTranslation.hpp"
 #include "Debug.hpp"
 #include "Error.hpp"
@@ -43,6 +43,11 @@
 #include "SpriteHandling.hpp"
 #include "Transitions.hpp"
 #include "UniverseUnit.hpp"
+
+using sfz::BinaryReader;
+using sfz::BytesBinaryReader;
+using sfz::BytesPiece;
+using sfz::scoped_array;
 
 namespace antares {
 
@@ -98,27 +103,27 @@ int SpaceObjectHandlingInit() {
     gSpaceObjectData.reset(new spaceObjectType[kMaxSpaceObject]);
     if (gBaseObjectData.get() == nil) {
         Resource rsrc('bsob', kBaseObjectResID);
-        BufferBinaryReader bin(rsrc.data(), rsrc.size());
-        size_t count = rsrc.size() / baseObjectType::byte_size;
+        BytesBinaryReader bin(rsrc.data());
+        size_t count = rsrc.data().size() / baseObjectType::byte_size;
         globals()->maxBaseObject = count;
         gBaseObjectData.reset(new baseObjectType[count]);
         for (size_t i = 0; i < count; ++i) {
             bin.read(gBaseObjectData.get() + i);
         }
-        check(bin.bytes_read() == rsrc.size(), "didn't consume all of base object data");
+        check(bin.done(), "didn't consume all of base object data");
         correctBaseObjectColor = true;
     }
 
     if (gObjectActionData.get() == nil) {
         Resource rsrc('obac', kObjectActionResID);
-        BufferBinaryReader bin(rsrc.data(), rsrc.size());
-        size_t count = rsrc.size() / objectActionType::byte_size;
+        BytesBinaryReader bin(rsrc.data());
+        size_t count = rsrc.data().size() / objectActionType::byte_size;
         globals()->maxObjectAction = count;
         gObjectActionData.reset(new objectActionType[count]);
         for (size_t i = 0; i < count; ++i) {
             bin.read(gObjectActionData.get() + i);
         }
-        check(bin.bytes_read() == rsrc.size(), "didn't consume all of object action data");
+        check(bin.done(), "didn't consume all of object action data");
     }
 
     gActionQueueData.reset(new actionQueueType[kActionQueueLength]);
@@ -2863,7 +2868,7 @@ void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord
 }
 
 void objectActionType::read(BinaryReader* bin) {
-    char section[24];
+    uint8_t section[24];
 
     bin->read(&verb);
     bin->read(&reflexive);
@@ -2876,7 +2881,7 @@ void objectActionType::read(BinaryReader* bin) {
     bin->discard(4);
     bin->read(section, 24);
 
-    BufferBinaryReader sub(section, 24);
+    BytesBinaryReader sub(BytesPiece(section, 24));
     switch (verb) {
       case kNoAction:
       case kSetDestination:
@@ -3046,7 +3051,7 @@ void argumentType::AssumeInitial::read(BinaryReader* bin) {
 }
 
 void baseObjectType::read(BinaryReader* bin) {
-    char section[32];
+    uint8_t section[32];
 
     bin->read(&attributes);
     bin->read(&baseClass);
@@ -3129,7 +3134,7 @@ void baseObjectType::read(BinaryReader* bin) {
     bin->discard(6);
     bin->read(&internalFlags);
 
-    BufferBinaryReader sub(section, 32);
+    BytesBinaryReader sub(BytesPiece(section, 32));
     if (attributes & kShapeFromDirection) {
         sub.read(&frame.rotation);
     } else if (attributes & kIsSelfAnimated) {

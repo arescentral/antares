@@ -19,18 +19,21 @@
 
 #include "AresPreferences.hpp"
 
+#include "sfz/BinaryReader.hpp"
 #include "AresGlobalType.hpp"
-#include "BinaryStream.hpp"
 #include "Error.hpp"
 #include "KeyMapTranslation.hpp"
 #include "Options.hpp"
 #include "Resource.hpp"
 
+using sfz::BinaryReader;
+using sfz::BytesBinaryReader;
+
 namespace antares {
 
 Preferences::Preferences() {
     Resource rsrc('ArPr', 1000);
-    BufferBinaryReader bin(rsrc.data(), rsrc.size());
+    BytesBinaryReader bin(rsrc.data());
 
     bin.read(&version);
     bin.read(keyMap, kKeyControlDataNum);

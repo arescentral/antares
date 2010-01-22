@@ -23,7 +23,7 @@ InputSource::~InputSource() { }
 
 ReplayInputSource::ReplayInputSource(int32_t id)
         : _resource('NLRP', id),
-          _bin(_resource.data(), _resource.size()) {
+          _bin(_resource.data()) {
     _bin.read(&_random_seed);
     _bin.read(&_turn_num);
     _bin.read(&_keys);
@@ -35,7 +35,7 @@ uint32_t ReplayInputSource::random_seed() const {
 
 bool ReplayInputSource::next(uint32_t* key_map) {
     while (_turn_num == 0) {
-        if (_bin.bytes_read() == _resource.size()) {
+        if (_bin.done()) {
             bzero(key_map, sizeof(uint32_t));
             return false;
         }

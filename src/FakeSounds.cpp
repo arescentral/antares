@@ -22,6 +22,8 @@
 #include "Error.hpp"
 #include "Fakes.hpp"
 
+using sfz::scoped_ptr;
+
 namespace antares {
 
 namespace {

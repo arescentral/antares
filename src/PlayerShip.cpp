@@ -45,6 +45,8 @@
 #include "StringHandling.hpp"
 #include "UniverseUnit.hpp"
 
+using sfz::scoped_array;
+
 namespace antares {
 
 #define kSendMessageVOffset     20

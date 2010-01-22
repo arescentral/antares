@@ -21,6 +21,9 @@
 #include <stdio.h>
 #include <string>
 
+using sfz::StringKey;
+using sfz::utf8_encoding;
+
 namespace antares {
 
 namespace {
@@ -31,7 +34,7 @@ struct FreedGlob : public glob_t {
     }
 };
 
-std::string glob_for_resource(uint32_t code, int id) {
+StringKey glob_for_resource(uint32_t code, int id) {
     char fileglob[64];
     char code_chars[5] = {
         code >> 24, code >> 16, code >> 8, code, '\0',
@@ -50,17 +53,12 @@ std::string glob_for_resource(uint32_t code, int id) {
         throw NoSuchResourceException();
     }
 
-    return g.gl_pathv[0];
+    return StringKey(g.gl_pathv[0], utf8_encoding());
 }
 
 }  // namespace
 
 Resource::Resource(uint32_t code, int id)
         : MappedFile(glob_for_resource(code, id)) { }
-
-std::string Resource::get_data(uint32_t code, int id) {
-    Resource rsrc(code, id);
-    return std::string(rsrc.data(), rsrc.size());
-}
 
 }  // namespace antares

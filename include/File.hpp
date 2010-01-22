@@ -19,7 +19,6 @@
 #define ANTARES_FILE_HPP_
 
 #include <sys/stat.h>
-#include <exception>
 #include <string>
 
 namespace antares {

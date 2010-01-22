@@ -20,20 +20,20 @@
 
 #include "Base.h"
 
+namespace sfz { class BinaryReader; }
+
 namespace antares {
 
 #define kUsePublicCopyProtection
 
 #define kKeyControlDataNum  80
 
-class BinaryReader;
-
 static const int kDigitNumber = 8;
 struct serialNumberType {
     unsigned char name[76];
     char number[kDigitNumber];
 
-    void read(BinaryReader* bin);
+    void read(sfz::BinaryReader* bin);
 };
 
 struct Preferences {

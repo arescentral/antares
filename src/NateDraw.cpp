@@ -21,7 +21,6 @@
 
 #include <algorithm>
 
-#include "BinaryStream.hpp"
 #include "ColorTable.hpp"
 #include "Error.hpp"
 #include "MathMacros.hpp"

@@ -20,6 +20,7 @@
 
 // Ares Global Type.h
 
+#include "sfz/SmartPtr.hpp"
 #include "Base.h"
 #include "Quickdraw.h"
 
@@ -27,7 +28,6 @@
 #include "ColorTable.hpp"
 #include "NateDraw.hpp"
 #include "ScenarioData.hpp"
-#include "SmartPtr.hpp"
 #include "SoundFX.hpp"
 
 namespace antares {
@@ -69,8 +69,8 @@ struct barIndicatorType {
 
 struct miniScreenLineType;
 struct miniComputerDataType {
-    scoped_array<miniScreenLineType> lineData;
-    scoped_array<spaceObjectType> objectData;
+    sfz::scoped_array<miniScreenLineType> lineData;
+    sfz::scoped_array<spaceObjectType> objectData;
     long                    selectLine;
     long                    pollTime;
     long                    buildTimeBarValue;
@@ -113,18 +113,18 @@ struct aresGlobalType {
     unsigned long   gActiveCheats[kMaxPlayerNum];
     unsigned long   gSynchValue;
     long            gForceDemoLevel;
-    scoped_ptr<InputSource> gInputSource;
+    sfz::scoped_ptr<InputSource> gInputSource;
     short           gMainResRefNum;
     unsigned long   gFrameCount;
-    scoped_ptr<Preferences> gPreferencesData;
+    sfz::scoped_ptr<Preferences> gPreferencesData;
     long            gGameOver;
-    scoped_array<admiralType>       gAdmiralData;
-    scoped_array<destBalanceType>   gDestBalanceData;
+    sfz::scoped_array<admiralType>       gAdmiralData;
+    sfz::scoped_array<destBalanceType>   gDestBalanceData;
     KeyMap          gKeyControl[kKeyExtendedControlNum];
     short           gPreferenceRefNum;
     unsigned long   gOptions;
-    scoped_array<raceType>           gRaceData;
-    scoped_array<scrollStarType>    gScrollStarData;
+    sfz::scoped_array<raceType>           gRaceData;
+    sfz::scoped_array<scrollStarType>    gScrollStarData;
     bool         gWarpStars;
     long            gLastClipBottom;
     long            gScrollStarNumber;
@@ -135,7 +135,7 @@ struct aresGlobalType {
     long            gFarthestObject;
     long            gCenterScaleH;
     long            gCenterScaleV;
-    scoped_array<proximityUnitType> gProximityGrid;
+    sfz::scoped_array<proximityUnitType> gProximityGrid;
     KeyMap          gLastKeyMap;
     unsigned long   gLastKeys;
     unsigned long   gTheseKeys;
@@ -151,13 +151,13 @@ struct aresGlobalType {
     long            gScenarioRotation;  // = 0;
     long            gThisScenarioNumber;// = -1;
     short           gScenarioRefID;     // = 0;
-    scoped_array<scenarioType>          gScenarioData;      // = nil;
-    scoped_array<scenarioInitialType>    gScenarioInitialData;   // = nil;
-    scoped_array<scenarioConditionType>  gScenarioConditionData; // = nil;
-    scoped_array<briefPointType>     gScenarioBriefData;     // = nil;
-    scoped_array<Point>             gRadarBlipData;         // = nil;
-    scoped_array<int32_t>           gScaleList;             // = nil;
-    scoped_array<int32_t>           gSectorLineData;        // = nil;
+    sfz::scoped_array<scenarioType>          gScenarioData;      // = nil;
+    sfz::scoped_array<scenarioInitialType>    gScenarioInitialData;   // = nil;
+    sfz::scoped_array<scenarioConditionType>  gScenarioConditionData; // = nil;
+    sfz::scoped_array<briefPointType>     gScenarioBriefData;     // = nil;
+    sfz::scoped_array<Point>             gRadarBlipData;         // = nil;
+    sfz::scoped_array<int32_t>           gScaleList;             // = nil;
+    sfz::scoped_array<int32_t>           gSectorLineData;        // = nil;
     int32_t         gRadarCount;            // = 0;
     int32_t         gRadarSpeed;            // = 30;
     int32_t         gRadarRange;            // kRadarSize * 50;
@@ -167,30 +167,30 @@ struct aresGlobalType {
     int32_t         gRightPanelLeftEdge;    // = 608
     barIndicatorType    gBarIndicator[ kBarIndicatorNum];
     short           gMouseActive;           // = kMouseOff;
-    scoped_ptr<MessageData>         gMessageData;
-    scoped_array<unsigned char>     gStatusString;          // = nil
-    scoped_ptr<longMessageType>     gLongMessageData;       // = nil
+    sfz::scoped_ptr<MessageData>         gMessageData;
+    sfz::scoped_array<unsigned char>     gStatusString;          // = nil
+    sfz::scoped_ptr<longMessageType>     gLongMessageData;       // = nil
     long            gMessageTimeCount;      // = 0;
     long            gMessageLabelNum;       // = -1;
     long            gStatusLabelNum;        // = -1;
     long            gTrueClipBottom;        // = 0;
 //  Handle          gMiniScreenHandle;      // = nil;
     miniComputerDataType    gMiniScreenData;
-    scoped_ptr<StringList>          gMissionStatusStrList;
-    scoped_array<screenLabelType>   gScreenLabelData;       // = nil;
-    scoped_array<beamType>          gBeamData;              // = nil;
+    sfz::scoped_ptr<StringList>          gMissionStatusStrList;
+    sfz::scoped_array<screenLabelType>   gScreenLabelData;       // = nil;
+    sfz::scoped_array<beamType>          gBeamData;              // = nil;
     long            gColorAnimationStep;    // = 0;
     long            gColorAnimationInSpeed; // = -1;
     long            gColorAnimationOutSpeed;// = -1;
-    scoped_ptr<ColorTable>          gColorAnimationTable;   // = nil;
-    scoped_ptr<ColorTable>          gSaveColorTable;        // = nil;
+    sfz::scoped_ptr<ColorTable>          gColorAnimationTable;   // = nil;
+    sfz::scoped_ptr<ColorTable>          gSaveColorTable;        // = nil;
     RgbColor        gColorAnimationGoal;
     smartSoundHandle    gSound[kSoundNum];
     smartSoundChannel   gChannel[kMaxChannelNum];
     long            gLastSoundTime;         // = 0
     long            gSoundVolume;           // = 0;
     short           gSoundFileRefID;        // = 0;
-    scoped_ptr<StringList>        gAresCheatStrings;
+    sfz::scoped_ptr<StringList>        gAresCheatStrings;
     KeyMap*         gKeyMapBuffer;          // = NewPtr( sizeof (KeyMap) * (long)kKeyMapBufferNum;
     long            gKeyMapBufferTop;       // = 0;
     long            gKeyMapBufferBottom;    // = 0;
