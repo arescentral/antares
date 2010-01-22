@@ -26,6 +26,7 @@
 #include "Fakes.hpp"
 #include "InterfaceHandling.hpp"
 #include "Options.hpp"
+#include "OptionsScreen.hpp"
 #include "PlayerInterface.hpp"
 #include "Randomize.hpp"
 #include "ReplayGame.hpp"
@@ -141,8 +142,7 @@ void MainScreen::handle_button(int button) {
         break;
 
       case OPTIONS:
-        DoOptionsInterface();
-        become_front();
+        stack()->push(new OptionsScreen);
         break;
     }
 }

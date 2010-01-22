@@ -95,6 +95,7 @@
                 'src/NatePixTable.cpp',
                 'src/NonPlayerShip.cpp',
                 'src/OffscreenGWorld.cpp',
+                'src/OptionsScreen.cpp',
                 'src/Picture.cpp',
                 'src/PixMap.cpp',
                 'src/PlayAgainScreen.cpp',
