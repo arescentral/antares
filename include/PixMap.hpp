@@ -53,6 +53,8 @@ class PixMapException : public std::exception {
 // However, ArrayPixMap provides both a `read()` and a `resize()` method.
 class PixMap {
   public:
+    virtual ~PixMap();
+
     // Core methods.
     //
     // These methods must be implemented by all subclasses and provide the basic interface to

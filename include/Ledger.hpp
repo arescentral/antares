@@ -27,6 +27,8 @@ namespace antares {
 
 class Ledger {
   public:
+    virtual ~Ledger();
+
     static Ledger* ledger();
     static void set_ledger(Ledger* ledger);
 

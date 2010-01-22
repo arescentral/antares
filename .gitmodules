@@ -4,3 +4,9 @@
 [submodule "test"]
 	path = test
 	url = git://git.sfiera.net/AntaresPngTestData
+[submodule "lib/libsfz"]
+	path = lib/libsfz
+	url = git://git.sfiera.net/libsfz
+[submodule "lib/libpng"]
+	path = lib/libpng
+	url = git://git.sfiera.net/libpng

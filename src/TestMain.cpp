@@ -54,7 +54,7 @@ void usage(const char* bin) {
 }
 
 int string_to_int(const char* string) {
-    int value;
+    int value = 0;
     char* end = NULL;
     if (string && *string) {
         value = strtol(string, &end, 10);

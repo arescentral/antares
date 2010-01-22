@@ -45,7 +45,7 @@ LibpngImageDriver::LibpngImageDriver() { }
 void LibpngImageDriver::read(BinaryReader* bin, ArrayPixMap* pix) {
     png_byte sig[8];
     bin->read(sig, 8);
-    if (!png_check_sig(sig, 8)) {
+    if (png_sig_cmp(sig, 0, 8) != 0) {
         fail("invalid png signature");
     }
 
@@ -69,8 +69,8 @@ void LibpngImageDriver::read(BinaryReader* bin, ArrayPixMap* pix) {
     png_set_read_fn(png, bin, png_read_data);
     png_read_info(png, info);
 
-    unsigned long width;
-    unsigned long height;
+    png_uint_32 width;
+    png_uint_32 height;
     int bit_depth;
     int color_type;
     png_get_IHDR(png, info, &width, &height, &bit_depth, &color_type, NULL, NULL, NULL);

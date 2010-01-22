@@ -27,6 +27,8 @@ class PixMap;
 
 class ImageDriver {
   public:
+    virtual ~ImageDriver();
+
     virtual void read(BinaryReader* bin, ArrayPixMap* pix) = 0;
     virtual void write(BinaryWriter* bin, const PixMap& pix) = 0;
 

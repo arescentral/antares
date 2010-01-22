@@ -1,26 +1,5 @@
 #!/bin/sh
 
-case `uname -s` in
-    Darwin) ;;
+set -e
 
-    *)
-    echo "Unsupported system `uname -s`" 1>&2
-    exit 1
-    ;;
-esac
-
-case `uname -p` in
-    powerpc) ARCH=ppc ;;
-    i386) ARCH=i386 ;;
-
-    *)
-    echo "Unsupported architecture `uname -p`" 1>&2
-    exit 1
-    ;;
-esac
-
-sed -e"s,@@ARCH@@,$ARCH,g" \
-    -e"s,@@DEBUG@@,,g" \
-    -e"s,@@OPTIM@@,-O2," \
-    < Jamfile.in \
-    > Jamfile
+gyp --depth=0 -Dlibrary=static_library

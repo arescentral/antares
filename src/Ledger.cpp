@@ -25,6 +25,8 @@
 
 namespace antares {
 
+Ledger::~Ledger() { }
+
 namespace {
 
 Ledger* ledger;

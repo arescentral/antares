@@ -19,6 +19,8 @@
 
 namespace antares {
 
+ImageDriver::~ImageDriver() { }
+
 namespace {
 
 ImageDriver* image_driver;

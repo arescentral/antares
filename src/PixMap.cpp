@@ -27,6 +27,8 @@
 
 namespace antares {
 
+PixMap::~PixMap() { }
+
 const RgbColor* PixMap::row(int y) const {
     return bytes() + y * row_bytes();
 }

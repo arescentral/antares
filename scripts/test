@@ -70,9 +70,9 @@ def main(argv):
         with Timed():
             with Timed():
                 print('Updating binary...')
-                jam = subprocess.Popen(['jam'])
-                jam.wait()
-                if jam.returncode != 0:
+                xcodebuild = subprocess.Popen(['xcodebuild'])
+                xcodebuild.wait()
+                if xcodebuild.returncode != 0:
                     print('...failed')
                     sys.exit(1)
                 else:
@@ -116,7 +116,7 @@ class TestCase(object):
             print('Running Antares...')
             with Timed():
                 antares = subprocess.Popen(
-                        ['./AntaresTest'] + self.args + ['--output=%s' % dir],
+                        ['./build/Default/AntaresTest'] + self.args + ['--output=%s' % dir],
                         stderr=subprocess.PIPE)
                 stdout, stderr = antares.communicate()
 
