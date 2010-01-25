@@ -1650,7 +1650,7 @@ void DrawInterfaceTextRect(const interfaceItemType& item, PixMap* pix) {
     unsigned char   *dChar, *wordlen, *theLine, thisLen;
     short           vline = 0, hleft = 0, fheight = 0, xpos = 0;
     RgbColor color;
-    unsigned char   *charwidthptr, charwidth;
+    unsigned char   charwidth;
 
     if ( item.item.textRect.visibleBounds)
         DrawPlayerInterfacePlainRect(item.bounds, item.color, item.style, pix);
@@ -1701,12 +1701,12 @@ void DrawInterfaceTextRect(const interfaceItemType& item, PixMap* pix) {
                         else SetInterfaceLargeLowerFont( item.style);
                         if (( *aheadChar >= 'a') && ( *aheadChar <= 'z'))
                         {
-                            mDirectCharWidth( charwidth, *aheadChar/* - 'a' + 'A'*/, charwidthptr);
+                            mDirectCharWidth( charwidth, *aheadChar/* - 'a' + 'A'*/);
                             xpos += charwidth;
                         }
                         else
                         {
-                            mDirectCharWidth( charwidth, *aheadChar, charwidthptr);
+                            mDirectCharWidth( charwidth, *aheadChar);
                             xpos += charwidth;
                         }
                         if ( *aheadChar == kReturnChar) *dChar++ = *aheadChar;
@@ -1764,7 +1764,7 @@ void DrawInterfaceTextInRect(
     scoped_ptr<Picture> thePicture;
     Rect            uRect;
     RgbColor color;
-    unsigned char   *charwidthptr, charwidth;
+    unsigned char   charwidth;
     inlinePictType  *thisInlinePict = NULL;
 
     clipRgn = NewRgn();
@@ -1875,12 +1875,12 @@ void DrawInterfaceTextInRect(
                         else SetInterfaceLargeLowerFont( style);
                         if (( *aheadChar >= 'a') && ( *aheadChar <= 'z'))
                         {
-                            mDirectCharWidth( charwidth, *aheadChar/* - 'a' + 'A'*/, charwidthptr);
+                            mDirectCharWidth( charwidth, *aheadChar/* - 'a' + 'A'*/);
                             xpos += charwidth;
                         }
                         else
                         {
-                            mDirectCharWidth( charwidth, *aheadChar, charwidthptr);
+                            mDirectCharWidth( charwidth, *aheadChar);
                             xpos += charwidth;
                         }
                         if ( *aheadChar == kReturnChar) *dChar++ = *aheadChar;
@@ -1984,7 +1984,7 @@ short GetInterfaceTextHeightFromWidth(
     long            inlineValue = 0;
     scoped_ptr<Picture> thePicture;
     Rect            uRect;
-    unsigned char   *charwidthptr, charwidth;
+    unsigned char   charwidth;
 
     hleft = kInterfaceTextHBuffer;
     fheight = GetInterfaceFontHeight( style) + kInterfaceTextVBuffer;
@@ -2073,12 +2073,12 @@ short GetInterfaceTextHeightFromWidth(
                         else SetInterfaceLargeLowerFont( style);
                         if (( *aheadChar >= 'a') && ( *aheadChar <= 'z'))
                         {
-                            mDirectCharWidth( charwidth, *aheadChar/* - 'a' + 'A'*/, charwidthptr);
+                            mDirectCharWidth( charwidth, *aheadChar/* - 'a' + 'A'*/);
                             xpos += charwidth;
                         }
                         else
                         {
-                            mDirectCharWidth( charwidth, *aheadChar, charwidthptr);
+                            mDirectCharWidth( charwidth, *aheadChar);
                             xpos += charwidth;
                         }
                         if ( *aheadChar == kReturnChar) *dChar++ = *aheadChar;

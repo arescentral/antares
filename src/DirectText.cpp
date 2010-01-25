@@ -47,8 +47,7 @@ directTextType::directTextType(int32_t id) {
     bin.read(&ascent);
 
     Resource data_rsrc(kDTextFontMapResType, resID);
-    charSet.reset(new unsigned char[data_rsrc.data().size()]);
-    memcpy(charSet.get(), data_rsrc.data().data(), data_rsrc.data().size());
+    charSet.assign(data_rsrc.data());
 }
 
 directTextType::~directTextType() { }
@@ -72,8 +71,8 @@ void DirectTextCleanup() {
     delete[] gDirectTextData;
 }
 
-void mDirectCharWidth(unsigned char& width, unsigned char mchar, unsigned char*& widptr) {
-    widptr = gDirectText->charSet.get()
+void mDirectCharWidth(unsigned char& width, unsigned char mchar) {
+    const uint8_t* widptr = gDirectText->charSet.data()
         + gDirectText->height * gDirectText->physicalWidth * mchar + mchar;
     width = *widptr;
 }
@@ -97,7 +96,7 @@ void mGetDirectStringDimensions(unsigned char* string, long& width, long& height
     const unsigned char* charptr = string;
     int strlen = *(charptr++);
     while (strlen > 0) {
-        const unsigned char* widptr = gDirectText->charSet.get()
+        const uint8_t* widptr = gDirectText->charSet.data()
             + gDirectText->height * gDirectText->physicalWidth * (*charptr) + (*charptr);
         width += *widptr;
         charptr++;
@@ -126,7 +125,7 @@ void DrawDirectTextStringClipped(unsigned char* string, const RgbColor& color, P
     int size = *string;
     ++string;
     for (int i = 0; i < size; ++i) {
-        unsigned char* sbyte = gDirectText->charSet.get() + gDirectText->height *
+        const uint8_t* sbyte = gDirectText->charSet.data() + gDirectText->height *
                 gDirectText->physicalWidth * (string[i]) + (string[i]);
 
         int width = *sbyte;

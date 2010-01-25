@@ -30,8 +30,7 @@ namespace {
 
 int char_width(uint8_t ch) {
     uint8_t w;
-    unsigned char* p;
-    mDirectCharWidth(w, ch, p);
+    mDirectCharWidth(w, ch);
     return w;
 }
 

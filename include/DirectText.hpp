@@ -20,6 +20,7 @@
 
 // Direct Text.h
 
+#include "sfz/Bytes.hpp"
 #include "AnyChar.hpp"
 #include "Casts.hpp"
 #include "SpriteHandling.hpp"
@@ -53,7 +54,7 @@ struct directTextType {
     directTextType(int32_t id);
     ~directTextType();
 
-    sfz::scoped_array<unsigned char> charSet;
+    sfz::Bytes charSet;
     int16_t resID;
     int32_t logicalWidth;
     int32_t physicalWidth;
@@ -64,7 +65,7 @@ struct directTextType {
 int InitDirectText();
 void DirectTextCleanup();
 
-void mDirectCharWidth(unsigned char& mwidth, unsigned char mchar, unsigned char*& mwidptr);
+void mDirectCharWidth(unsigned char& mwidth, unsigned char mchar);
 void mSetDirectFont(long mwhichFont);
 int mDirectFontHeight();
 int mDirectFontAscent();

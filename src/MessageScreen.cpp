@@ -848,7 +848,7 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
 {
     long            charNum = 0, height = mDirectFontHeight(), x = 0, oldx = 0, oldCharNum, wordLen,
                     *lineLengthList = retroTextSpec->lineLength;
-    unsigned char   *widthPtr, charWidth, wrapState; // 0 = none, 1 = once, 2 = more than once
+    unsigned char   charWidth, wrapState; // 0 = none, 1 = once, 2 = more than once
     const char*     thisChar = retroTextSpec->text->c_str();
 
     *lineLengthList = 0;
@@ -869,7 +869,7 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
             retroTextSpec->lineNumber++;
         } else if ( *thisChar == ' ')
         {
-            mDirectCharWidth( charWidth, ' ', widthPtr);
+            mDirectCharWidth( charWidth, ' ');
             do
             {
                 x += charWidth;
@@ -906,7 +906,7 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
                     break;
 
                 case kCodeChar:
-                    mDirectCharWidth( charWidth, *thisChar, widthPtr);
+                    mDirectCharWidth( charWidth, *thisChar);
                     x += charWidth;
                     wordLen++;
                     break;
@@ -922,7 +922,7 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
             wrapState = 0;
             do
             {
-                mDirectCharWidth( charWidth, *thisChar, widthPtr);
+                mDirectCharWidth( charWidth, *thisChar);
                 x += charWidth;
                 wordLen++;
                 if ( x >= (inWidth - gDirectText->logicalWidth))
@@ -965,7 +965,7 @@ void DrawDirectTextInRect(
         PixMap *destMap, long portLeft, long portTop) {
     long            charNum = 0, y = bounds.top + mDirectFontAscent() + retroTextSpec->topBuffer, x = bounds.left,
                     oldx = 0, oldCharNum, wordLen;
-    unsigned char   *widthPtr, charWidth, wrapState; // 0 = none, 1 = once, 2 = more than once
+    unsigned char   charWidth, wrapState; // 0 = none, 1 = once, 2 = more than once
     RgbColor        tempColor;
     const char*     thisChar = retroTextSpec->text->c_str();
     unsigned char   *thisWordChar, thisWord[255];
@@ -992,7 +992,7 @@ void DrawDirectTextInRect(
             backRect.left = x;
             backRect.top = y - (mDirectFontAscent() + retroTextSpec->topBuffer);
             backRect.bottom = backRect.top + mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
-            mDirectCharWidth( charWidth, ' ', widthPtr);
+            mDirectCharWidth( charWidth, ' ');
             do
             {
                 x += charWidth;
@@ -1029,7 +1029,7 @@ void DrawDirectTextInRect(
                     oldx = backRect.left = x;
                     backRect.top = y - (mDirectFontAscent() + retroTextSpec->topBuffer);
                     backRect.bottom = backRect.top + mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
-                    mDirectCharWidth( charWidth, *thisChar, widthPtr);
+                    mDirectCharWidth( charWidth, *thisChar);
                     x += charWidth;
                     DrawNateRectClipped(destMap, &backRect, clipRect, (portLeft << 2),
                         portTop, retroTextSpec->backColor);
@@ -1095,7 +1095,7 @@ void DrawDirectTextInRect(
             wrapState = 0;
             do
             {
-                mDirectCharWidth( charWidth, *thisChar, widthPtr);
+                mDirectCharWidth( charWidth, *thisChar);
                 x += charWidth;
                 wordLen++;
                 *thisWordChar = *thisChar;
@@ -1144,7 +1144,7 @@ void DrawRetroTextCharInRect(
         retroTextSpecType *retroTextSpec, long charsToDo, const Rect& bounds, const Rect& clipRect,
         PixMap *destMap, long portLeft, long portTop) {
     const char*     thisChar = retroTextSpec->text->c_str();
-    unsigned char   thisWord[kMaxRetroSize], charWidth, *widthPtr;
+    unsigned char   thisWord[kMaxRetroSize], charWidth;
     Rect        cursorRect, lineRect, tlRect;
     long            oldx, wordLen, *lineLength = &(retroTextSpec->lineLength[retroTextSpec->lineCount]);
     unsigned char   calcColor, calcShade;
@@ -1200,7 +1200,7 @@ void DrawRetroTextCharInRect(
                     oldx = cursorRect.left = retroTextSpec->xpos;
                     cursorRect.top = retroTextSpec->ypos - (mDirectFontAscent() + retroTextSpec->topBuffer);
                     cursorRect.bottom = cursorRect.top + mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
-                    mDirectCharWidth( charWidth, *thisChar, widthPtr);
+                    mDirectCharWidth( charWidth, *thisChar);
                     retroTextSpec->xpos += charWidth;
                     tlRect = cursorRect;
                     tlRect.clip_to(bounds);
@@ -1286,7 +1286,7 @@ void DrawRetroTextCharInRect(
             retroTextSpec->backColor = retroTextSpec->nextBackColor;
             cursorRect.left = retroTextSpec->xpos;
             MoveTo( retroTextSpec->xpos, retroTextSpec->ypos);
-            mDirectCharWidth( charWidth, *thisChar, widthPtr);
+            mDirectCharWidth( charWidth, *thisChar);
             retroTextSpec->xpos += charWidth;
             cursorRect.right = retroTextSpec->xpos;
             tlRect = cursorRect;
