@@ -19,6 +19,9 @@
 
 #include <string>
 #include <vector>
+#include "rezin/MacRoman.hpp"
+#include "sfz/String.hpp"
+#include "sfz/SmartPtr.hpp"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
 #include "Error.hpp"
@@ -26,6 +29,8 @@
 #include "Resource.hpp"
 #include "RetroText.hpp"
 
+using rezin::mac_roman_encoding;
+using sfz::String;
 using sfz::scoped_ptr;
 using std::string;
 using std::vector;
@@ -66,10 +71,10 @@ class PixBuilder {
         CopyBits(&pict, _pix, pict.bounds(), dest);
     }
 
-    void add_text(const string& text) {
+    void add_text(const String& text) {
         RgbColor red;
         GetRGBTranslateColorShade(&red, RED, VERY_LIGHT);
-        RetroText retro(text.c_str(), text.size(), kTitleFontNum, red, RgbColor::kBlack);
+        RetroText retro(text, kTitleFontNum, red, RgbColor::kBlack);
         retro.wrap_to(_pix->bounds().right - 12, 2);
 
         Rect dest(0, 0, _pix->bounds().right, retro.height());
@@ -143,7 +148,8 @@ PixMap* build_pix(int text_id, int width) {
                 }
             }
         } else {
-            build.add_text(*it);
+            String string(it->c_str(), mac_roman_encoding());
+            build.add_text(string);
         }
     }
 

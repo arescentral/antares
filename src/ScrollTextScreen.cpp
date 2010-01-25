@@ -25,8 +25,6 @@
 #include "Options.hpp"
 #include "Time.hpp"
 
-using sfz::scoped_ptr;
-
 namespace antares {
 
 namespace {

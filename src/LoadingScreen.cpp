@@ -28,6 +28,9 @@
 #include "ScenarioMaker.hpp"
 #include "StringList.hpp"
 
+using sfz::String;
+using sfz::StringPiece;
+
 namespace antares {
 
 extern PixMap* gRealWorld;
@@ -40,18 +43,18 @@ namespace {
 const int kLoadingScreenResID = 6001;
 const int kLevelNameID = 4600;
 
-std::string chapter_name(scenarioType* scenario) {
+void get_chapter_name(sfz::String* out, scenarioType* scenario) {
     StringList strings;
     strings.load(kLevelNameID);
-    return strings.at(scenario->levelNameStrNum);
+    out->assign(strings.at(scenario->levelNameStrNum));
 }
 
 }  // namespace
 
 LoadingScreen::LoadingScreen(scenarioType* scenario)
         : InterfaceScreen(kLoadingScreenResID, gRealWorld->bounds(), true),
-          _chapter_name(chapter_name(scenario)),
           _loading_progress(0.0) {
+    get_chapter_name(&_chapter_name, scenario);
 }
 
 LoadingScreen::~LoadingScreen() { }
@@ -82,8 +85,7 @@ void LoadingScreen::draw() const {
     GetRGBTranslateColorShade(&color, PALE_GREEN, LIGHT);
 
     // TODO(sfiera): type this out one character at a time.
-    RetroText retro(
-            _chapter_name.c_str(), _chapter_name.size(), kTitleFontNum, color, RgbColor::kBlack);
+    RetroText retro(_chapter_name, kTitleFontNum, color, RgbColor::kBlack);
     retro.wrap_to(640, 2);
     Rect bounds(0, 0, retro.auto_width(), retro.height());
     bounds.offset(WORLD_WIDTH / 2 - bounds.width() / 2, i.bounds.top / 2 - bounds.height() / 2);

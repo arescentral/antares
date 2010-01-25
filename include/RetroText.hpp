@@ -20,6 +20,7 @@
 
 #include <vector>
 #include "sfz/Macros.hpp"
+#include "sfz/String.hpp"
 #include "ColorTable.hpp"
 #include "Geometry.hpp"
 
@@ -30,8 +31,7 @@ class PixMap;
 
 class RetroText {
   public:
-    RetroText(
-            const char* data, size_t len, int font, RgbColor fore_color, RgbColor back_color);
+    RetroText(const sfz::StringPiece& text, int font, RgbColor fore_color, RgbColor back_color);
     ~RetroText();
 
     void set_tab_width(int tab_width);
@@ -56,10 +56,10 @@ class RetroText {
 
     struct RetroChar {
         RetroChar(
-                char character, SpecialChar special, const RgbColor& fore_color,
+                uint32_t character, SpecialChar special, const RgbColor& fore_color,
                 const RgbColor& back_color);
 
-        char character;
+        uint32_t character;
         SpecialChar special;
         RgbColor fore_color;
         RgbColor back_color;

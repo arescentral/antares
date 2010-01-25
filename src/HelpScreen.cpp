@@ -17,6 +17,7 @@
 
 #include "HelpScreen.hpp"
 
+#include "rezin/MacRoman.hpp"
 #include "AresGlobalType.hpp"
 #include "CardStack.hpp"
 #include "ColorTranslation.hpp"
@@ -30,7 +31,9 @@
 #include "RetroText.hpp"
 #include "Resource.hpp"
 
+using rezin::mac_roman_encoding;
 using sfz::Bytes;
+using sfz::String;
 
 namespace antares {
 
@@ -67,14 +70,14 @@ HelpScreen::HelpScreen()
     offset((gRealWorld->bounds().width() / 2) - ((CLIP_RIGHT - CLIP_LEFT) / 2), 2);
 
     Resource rsrc('TEXT', text_id());
-    std::string text(reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size());
+    String text(rsrc.data(), mac_roman_encoding());
     RgbColor fore;
     RgbColor back;
     GetRGBTranslateColorShade(&fore, RED, VERY_LIGHT);
     GetRGBTranslateColorShade(&back, RED, VERY_DARK);
     Replace_KeyCode_Strings_With_Actual_Key_Names(&text, 1000, 4);
 
-    _text.reset(new RetroText(text.c_str(), text.size(), kComputerFontNum, fore, back));
+    _text.reset(new RetroText(text, kComputerFontNum, fore, back));
     _text->wrap_to(item(BOX).bounds.width(), 0);
 
     _text_bounds = item(BOX).bounds;

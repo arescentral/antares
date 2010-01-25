@@ -276,8 +276,9 @@ bool ObjectDataVideoDriver::wait_next_event(EventRecord* evt, double) {
                         throw Exception("open: {0}: {1}", path, posix_strerror());
                     }
 
-                    std::string data = CreateObjectDataText(i);
-                    write(fd.get(), data.data(), data.size());
+                    String data;
+                    CreateObjectDataText(&data, i);
+                    print(fd.get(), "{0}", data);
                 }
             }
             evt->what = autoKey;

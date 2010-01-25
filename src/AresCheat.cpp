@@ -19,6 +19,9 @@
 
 #include "AresCheat.hpp"
 
+#include "rezin/MacRoman.hpp"
+#include "sfz/Bytes.hpp"
+#include "sfz/String.hpp"
 #include "Admiral.hpp"
 #include "AresGlobalType.hpp"
 #include "Debug.hpp"
@@ -27,6 +30,10 @@
 #include "StringHandling.hpp"
 #include "StringList.hpp"
 #include "StringNumerics.hpp"
+
+using rezin::mac_roman_encoding;
+using sfz::BytesPiece;
+using sfz::String;
 
 namespace antares {
 
@@ -70,8 +77,10 @@ short GetCheatNumFromString(unsigned char* s)
         codeString[strLen] = s[strLen] + kCheatCodeValue;
         strLen--;
     }
-    std::string cpp_string(reinterpret_cast<const char*>(codeString + 1), *codeString);
-    return globals()->gAresCheatStrings.get()->index_of(cpp_string) + 1;
+    String string(
+            BytesPiece(reinterpret_cast<const uint8_t*>(codeString + 1), *codeString),
+            mac_roman_encoding());
+    return globals()->gAresCheatStrings.get()->index_of(string) + 1;
 }
 
 void ExecuteCheat( short whichCheat, long whichPlayer)

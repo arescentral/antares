@@ -21,7 +21,38 @@
 
 #include "StringHandling.hpp"
 
+using sfz::BytesPiece;
+using sfz::FormatItem;
+using sfz::FormatItemPrinter;
+using sfz::String;
+using sfz::StringPiece;
+using sfz::ascii_encoding;
+
 namespace antares {
+
+namespace {
+
+class SmallFixedFormatItem : public FormatItemPrinter {
+  public:
+    SmallFixedFormatItem(smallFixedType value)
+        : _value(value) { }
+
+    void print_to(String* out) const {
+        Str255 s;
+        SmallFixedToString(_value, s);
+        out->append(
+                BytesPiece(reinterpret_cast<const uint8_t*>(s + 1), *s), ascii_encoding());
+    }
+
+  private:
+    smallFixedType _value;
+};
+
+}  // namespace
+
+FormatItem small_fixed(smallFixedType value) {
+    return FormatItem::make(new SmallFixedFormatItem(value));
+}
 
 void SmallFixedToString( smallFixedType f, Str255 s)
 

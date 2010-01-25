@@ -18,7 +18,7 @@
 #ifndef ANTARES_PLAYER_INTERFACE_HPP_
 #define ANTARES_PLAYER_INTERFACE_HPP_
 
-#include <string>
+#include "sfz/String.hpp"
 #include "PlayerInterfaceDrawing.hpp"
 #include "PlayerInterfaceItems.hpp"
 
@@ -82,12 +82,10 @@ bool DoMissionInterface( long);
 long UpdateMissionBriefPoint( interfaceItemType *, long, long, coordPointType *, long, long,
         Rect *, Rect *, inlinePictType *);
 void ShowObjectData( Point, short, Rect *);
-std::string CreateObjectDataText(short id);
-std::string CreateWeaponDataText(long, unsigned char*);
-void DoMissionDebriefingText(long, long, long, long, long, long, long, long);
-void DoScrollText(long, long, long, long, long);
+void CreateObjectDataText(sfz::String* text, short id);
+void CreateWeaponDataText(sfz::String* text, long whichWeapon, const sfz::StringPiece& weaponName);
 void HandleOSEvent( EventRecord *);
-void Replace_KeyCode_Strings_With_Actual_Key_Names(std::string* text, short resID, short padTo);
+void Replace_KeyCode_Strings_With_Actual_Key_Names(sfz::String* text, short resID, size_t padTo);
 
 }  // namespace antares
 

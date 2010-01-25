@@ -17,6 +17,8 @@
 
 #include "DebriefingScreen.hpp"
 
+#include "rezin/MacRoman.hpp"
+#include "sfz/Formatter.hpp"
 #include "CardStack.hpp"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
@@ -28,7 +30,11 @@
 #include "StringList.hpp"
 #include "Time.hpp"
 
+using rezin::mac_roman_encoding;
 using sfz::Bytes;
+using sfz::String;
+using sfz::FormatItem;
+using sfz::dec;
 
 namespace antares {
 
@@ -41,27 +47,12 @@ const double kTypingDelay = 1.0 / 20.0;
 const int kScoreTableHeight = 120;
 const int kTextWidth = 300;
 
-std::string string_printf(const char* fmt, ...)
-        __attribute__((format(printf, 1, 2)));
-
-std::string string_printf(const char* fmt, ...) {
-    char* result = NULL;
-    va_list args;
-    va_start(args, fmt);
-    if (vasprintf(&result, fmt, args) < 0) {
-        perror("vasprintf");
-        abort();
-    }
-    va_end(args);
-    std::string string_result(result);
-    free(result);
-    return string_result;
-}
-
-void string_replace(std::string* s, const std::string& in, const std::string& out) {
-    std::string::size_type index = s->find(in);
-    while (index != std::string::npos) {
-        s->replace(index, in.size(), out);
+void string_replace(String* s, const String& in, const FormatItem& out) {
+    size_t index = s->find(in);
+    while (index != String::kNone) {
+        String out_string;
+        out.print_to(&out_string);
+        s->replace(index, in.size(), out_string);
         index = s->find(in, index + 1);
     }
 }
@@ -121,7 +112,7 @@ RetroText* score_text(
         int your_length, int par_length, int your_loss, int par_loss, int your_kill,
         int par_kill) {
     Resource rsrc('TEXT', 6000);
-    std::string text(reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size());
+    String text(rsrc.data(), mac_roman_encoding());
 
     StringList strings;
     strings.load(6000);
@@ -133,29 +124,31 @@ RetroText* score_text(
     const int your_score = score(your_length, par_length, your_loss, par_loss, your_kill, par_kill);
     const int par_score = 100;
 
-    string_replace(&text, strings.at(0), string_printf("%d", your_mins));
-    string_replace(&text, strings.at(1), string_printf("%.2d", your_secs));
+    string_replace(&text, strings.at(0), your_mins);
+    string_replace(&text, strings.at(1), dec(your_secs, 2));
     if (par_length > 0) {
-        string_replace(&text, strings.at(2), string_printf("%d", par_mins));
-        string_replace(&text, strings.at(3), string_printf(":%.2d", par_secs));
+        string_replace(&text, strings.at(2), par_mins);
+        String secs_string;
+        format(&secs_string, ":{0}", dec(par_secs, 2));
+        string_replace(&text, strings.at(3), secs_string);
     } else {
         StringList data_strings;
         data_strings.load(6002);
         string_replace(&text, strings.at(2), data_strings.at(8));  // = "N/A"
         string_replace(&text, strings.at(3), "");
     }
-    string_replace(&text, strings.at(4), string_printf("%d", your_loss));
-    string_replace(&text, strings.at(5), string_printf("%d", par_loss));
-    string_replace(&text, strings.at(6), string_printf("%d", your_kill));
-    string_replace(&text, strings.at(7), string_printf("%d", par_kill));
-    string_replace(&text, strings.at(8), string_printf("%d", your_score));
-    string_replace(&text, strings.at(9), string_printf("%d", par_score));
+    string_replace(&text, strings.at(4), your_loss);
+    string_replace(&text, strings.at(5), par_loss);
+    string_replace(&text, strings.at(6), your_kill);
+    string_replace(&text, strings.at(7), par_kill);
+    string_replace(&text, strings.at(8), your_score);
+    string_replace(&text, strings.at(9), par_score);
 
     RgbColor fore_color;
     GetRGBTranslateColorShade(&fore_color, GOLD, VERY_LIGHT);
     RgbColor back_color;
     GetRGBTranslateColorShade(&back_color, GOLD, DARKEST);
-    return new RetroText(text.data(), text.size(), kButtonFontNum, fore_color, back_color);
+    return new RetroText(text, kButtonFontNum, fore_color, back_color);
 }
 
 }  // namespace

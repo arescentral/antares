@@ -21,6 +21,7 @@
 
 #include "PlayerInterface.hpp"
 
+#include "rezin/MacRoman.hpp"
 #include "AresGlobalType.hpp"
 #include "AresMain.hpp"
 #include "AresPreferences.hpp"
@@ -48,10 +49,15 @@
 #include "ScrollStars.hpp"
 #include "SoundFX.hpp"               // for button on/off
 #include "StringHandling.hpp"
+#include "StringList.hpp"
 #include "StringNumerics.hpp"
 #include "Transitions.hpp"
 #include "VideoDriver.hpp"
 
+using rezin::mac_roman_encoding;
+using sfz::BytesPiece;
+using sfz::String;
+using sfz::StringPiece;
 using sfz::scoped_ptr;
 using sfz::scoped_array;
 
@@ -160,19 +166,6 @@ namespace antares {
 #define kDebriefCopyVChunkSize      20
 #define kDebriefCopyVChunkTime      1
 
-#define kSummaryTextID              6000
-#define kSummaryKeyStringID         6000
-#define kYourMinStringNum           1
-#define kYourSecStringNum           2
-#define kParMinStringNum            3
-#define kParSecStringNum            4
-#define kYourLossStringNum          5
-#define kParLossStringNum           6
-#define kYourKillStringNum          7
-#define kParKillStringNum           8
-#define kYourScoreStringNum         9
-#define kParScoreStringNum          10
-
 #define kTimePoints                 50
 #define kLossesPoints               30
 #define kKillsPoints                20
@@ -184,28 +177,28 @@ namespace antares {
 #define kShipDataKeyStringID        6001
 #define kShipDataNameID             6002
 #define kWeaponDataTextID           6003
-#define kShipOrObjectStringNum      1
-#define kShipTypeStringNum          2
-#define kMassStringNum              3
-#define kShieldStringNum            4
-#define kHasLightStringNum          5
-#define kMaxSpeedStringNum          6
-#define kThrustStringNum            7
-#define kTurnStringNum              8
-#define kWeaponNumberStringNum      9
-#define kWeaponNameStringNum        10
-#define kWeaponGuidedStringNum      11
-#define kWeaponRangeStringNum       12
-#define kWeaponDamageStringNum      13
-#define kWeaponAutoTargetStringNum  14
-#define kShipDataShipStringNum      1
-#define kShipDataObjectStringNum    2
-#define kShipDataDashStringNum      3
-#define kShipDataYesStringNum       4
-#define kShipDataNoStringNum        5
-#define kShipDataPulseStringNum     6
-#define kShipDataBeamStringNum      7
-#define kShipDataSpecialStringNum   8
+#define kShipOrObjectStringNum      0
+#define kShipTypeStringNum          1
+#define kMassStringNum              2
+#define kShieldStringNum            3
+#define kHasLightStringNum          4
+#define kMaxSpeedStringNum          5
+#define kThrustStringNum            6
+#define kTurnStringNum              7
+#define kWeaponNumberStringNum      8
+#define kWeaponNameStringNum        9
+#define kWeaponGuidedStringNum      10
+#define kWeaponRangeStringNum       11
+#define kWeaponDamageStringNum      12
+#define kWeaponAutoTargetStringNum  13
+#define kShipDataShipStringNum      0
+#define kShipDataObjectStringNum    1
+#define kShipDataDashStringNum      2
+#define kShipDataYesStringNum       3
+#define kShipDataNoStringNum        4
+#define kShipDataPulseStringNum     5
+#define kShipDataBeamStringNum      6
+#define kShipDataSpecialStringNum   7
 
 #define kShipDataWidth              240
 
@@ -332,7 +325,6 @@ void Pause( long);
 void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
     int                     error;
     RgbColor color;
-    unsigned char           *strPtr;
     Rect                lRect, clipRect, boundsRect;
     Rect                    tRect;
     retroTextSpecType       retroTextSpec;
@@ -361,11 +353,12 @@ void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
 //      MoveTo( contentRect->left + (( contentRect->right - contentRect->left) / 2) - (stringWidth / 2),
 //              contentRect->top);
 
-        strPtr = levelName + 1;
         retroTextSpec.textLength = *levelName;
-        retroTextSpec.text.reset(new std::string);
+        retroTextSpec.text.reset(new String);
         for (int i = 0; i < retroTextSpec.textLength; ++i) {
-            *retroTextSpec.text += strPtr[i];
+            retroTextSpec.text->append(
+                    BytesPiece(reinterpret_cast<const uint8_t*>(levelName + 1), *levelName),
+                    mac_roman_encoding());
         }
 
         retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
@@ -1812,7 +1805,6 @@ void DrawLevelNameInBox(unsigned char* name, long fontNum, short descriptionText
     retroTextSpecType       retroTextSpec;
     interfaceItemType       *anItem;
     long                    height;
-    scoped_ptr<std::string> textData;
 
     anItem = GetAnyInterfaceItemPtr( itemNum);
     strPtr = name + 1;
@@ -1820,10 +1812,10 @@ void DrawLevelNameInBox(unsigned char* name, long fontNum, short descriptionText
     check(descriptionTextID <= 0, "descriptionTextID is not supported");
 
     retroTextSpec.textLength = name[0];
-    retroTextSpec.text.reset(new std::string);
-    for (int i = 1; i < name[0] + 1; ++i) {
-        *retroTextSpec.text += name[i];
-    }
+    retroTextSpec.text.reset(new String);
+    retroTextSpec.text->assign(
+            BytesPiece(reinterpret_cast<const uint8_t*>(name + 1), *name),
+            mac_roman_encoding());
 
     retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
     retroTextSpec.tabSize =220;
@@ -2289,8 +2281,9 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
     {
         HideCursor();
 
-        retroTextSpec.text.reset(new std::string(CreateObjectDataText(i)));
+        retroTextSpec.text.reset(new String);
         if ( retroTextSpec.text.get() != nil) {
+            CreateObjectDataText(retroTextSpec.text.get(), i);
             retroTextSpec.textLength = retroTextSpec.text->size();
 
             mSetDirectFont( kButtonFontNum);
@@ -2367,875 +2360,161 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
     }
 }
 
-std::string CreateObjectDataText(short id) {
+void CreateObjectDataText(String* text, short id) {
     Resource rsrc('TEXT', kShipDataTextID);
-    std::string result(reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size());
+    String data(rsrc.data(), mac_roman_encoding());
 
-    Str255 tempString, numString;
     const baseObjectType& baseObject = gBaseObjectData.get()[id];
+
+    StringList keys;
+    StringList values;
+    keys.load(kShipDataKeyStringID);
+    values.load(kShipDataNameID);
 
     // *** Replace place-holders in text with real data, using the fabulous Munger routine
     // an object or a ship?
     if ( baseObject.attributes & kCanThink) {
-        GetIndString(numString, kShipDataNameID, 1);
+        const StringPiece& name = values.at(0);
+        Munger(&data, 0, keys.at(kShipOrObjectStringNum), name);
     } else {
-        GetIndString(numString, kShipDataNameID, 2);
+        const StringPiece& name = values.at(1);
+        Munger(&data, 0, keys.at(kShipOrObjectStringNum), name);
     }
 
-    GetIndString( tempString, kShipDataKeyStringID, kShipOrObjectStringNum);
-    Munger(&result, 0, (tempString + 1), *tempString, numString + 1, *numString);
-
     // ship name
-    //          GetIndString( numString, 5000, pictID - kFirstShipDataPictID + 1);
-    GetIndString( numString, 5000, id + 1);
-    GetIndString( tempString, kShipDataKeyStringID, kShipTypeStringNum);
-    Munger(&result, 0, (tempString + 1), *tempString, numString + 1, *numString);
+    {
+        StringList names;
+        names.load(5000);
+        const StringPiece& name = names.at(id);
+        Munger(&data, 0, keys.at(kShipTypeStringNum), name);
+    }
 
     // ship mass
-    SmallFixedToString( baseObject.mass, numString);
-    GetIndString( tempString, kShipDataKeyStringID, kMassStringNum);
-    Munger(&result, 0, (tempString + 1), *tempString, numString + 1, *numString);
+    Munger(&data, 0, keys.at(kMassStringNum), small_fixed(baseObject.mass));
 
     // ship shields
-    NumToString( baseObject.health, numString);
-    GetIndString( tempString, kShipDataKeyStringID, kShieldStringNum);
-    Munger(&result, 0, (tempString + 1), *tempString, numString + 1, *numString);
+    Munger(&data, 0, keys.at(kShieldStringNum), baseObject.health);
 
     // light speed
-    NumToString( baseObject.warpSpeed, numString);
-    GetIndString( tempString, kShipDataKeyStringID, kHasLightStringNum);
-    Munger(&result, 0, (tempString + 1), *tempString, numString + 1, *numString);
+    Munger(&data, 0, keys.at(kHasLightStringNum), baseObject.warpSpeed);
 
     // max velocity
-    SmallFixedToString( baseObject.maxVelocity, numString);
-    GetIndString( tempString, kShipDataKeyStringID, kMaxSpeedStringNum);
-    Munger(&result, 0, (tempString + 1), *tempString, numString + 1, *numString);
+    Munger(&data, 0, keys.at(kMaxSpeedStringNum), small_fixed(baseObject.maxVelocity));
 
     // thrust
-    SmallFixedToString( baseObject.maxThrust, numString);
-    GetIndString( tempString, kShipDataKeyStringID, kThrustStringNum);
-    Munger(&result, 0, (tempString + 1), *tempString, numString + 1, *numString);
+    Munger(&data, 0, keys.at(kThrustStringNum), small_fixed(baseObject.maxThrust));
 
     // par turn
-    SmallFixedToString( baseObject.frame.rotation.turnAcceleration, numString);
-    GetIndString( tempString, kShipDataKeyStringID, kTurnStringNum);
-    Munger(&result, 0, (tempString + 1), *tempString, numString + 1, *numString);
+    Munger(&data, 0, keys.at(kTurnStringNum),
+            small_fixed(baseObject.frame.rotation.turnAcceleration));
 
     // now, check for weapons!
-    GetIndString(numString, kShipDataNameID, kShipDataPulseStringNum);
-    result += CreateWeaponDataText(baseObject.pulse, numString);
+    CreateWeaponDataText(&data, baseObject.pulse, values.at(kShipDataPulseStringNum));
+    CreateWeaponDataText(&data, baseObject.beam, values.at(kShipDataBeamStringNum));
+    CreateWeaponDataText(&data, baseObject.special, values.at(kShipDataSpecialStringNum));
 
-    GetIndString(numString, kShipDataNameID, kShipDataBeamStringNum);
-    result += CreateWeaponDataText(baseObject.beam, numString);
-
-    GetIndString(numString, kShipDataNameID, kShipDataSpecialStringNum);
-    result += CreateWeaponDataText(baseObject.special, numString);
-
-    return result;
+    text->append(data);
 }
 
-std::string CreateWeaponDataText(long whichWeapon, unsigned char* weaponName) {
+void CreateWeaponDataText(String* text, long whichWeapon, const StringPiece& weaponName) {
     baseObjectType      *weaponObject, *missileObject;
-    std::string weaponText;
-    Str255              numString, tempString;
     long                mostDamage, actionNum;
     objectActionType    *action;
     bool             isGuided = false;
 
-    if ( whichWeapon != kNoShip)
+    if (whichWeapon == kNoShip) {
+        return;
+    }
+
+    weaponObject = gBaseObjectData.get() + whichWeapon;
+
+    // TODO(sfiera): catch exception.
+    Resource rsrc('TEXT', kWeaponDataTextID);
+    String data(rsrc.data(), mac_roman_encoding());
+    // damage; this is tricky--we have to guess by walking through activate actions,
+    //  and for all the createObject actions, see which creates the most damaging
+    //  object.  We calc this first so we can use isGuided
+
+    mostDamage = 0;
+    isGuided = false;
+    if ( weaponObject->activateActionNum > 0)
     {
-        weaponObject = gBaseObjectData.get() + whichWeapon;
-
-        // TODO(sfiera): catch exception.
-        Resource rsrc('TEXT', kWeaponDataTextID);
-        weaponText.assign(reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size());
-        if (true) {
-            // damage; this is tricky--we have to guess by walking through activate actions,
-            //  and for all the createObject actions, see which creates the most damaging
-            //  object.  We calc this first so we can use isGuided
-
-            mostDamage = 0;
-            isGuided = false;
-            if ( weaponObject->activateActionNum > 0)
+        action = gObjectActionData.get() + weaponObject->activateAction;
+        for ( actionNum = 0; actionNum < weaponObject->activateActionNum; actionNum++)
+        {
+            if (( action->verb == kCreateObject) || ( action->verb == kCreateObjectSetDest))
             {
-                action = gObjectActionData.get() + weaponObject->activateAction;
-                for ( actionNum = 0; actionNum < weaponObject->activateActionNum; actionNum++)
-                {
-                    if (( action->verb == kCreateObject) || ( action->verb == kCreateObjectSetDest))
-                    {
-                        missileObject = gBaseObjectData.get() +
-                            action->argument.createObject.whichBaseType;
-                        if ( missileObject->attributes & kIsGuided) isGuided = true;
-                        if ( missileObject->damage > mostDamage) mostDamage = missileObject->damage;
-                    }
-                    action++;
-                }
+                missileObject = gBaseObjectData.get() +
+                    action->argument.createObject.whichBaseType;
+                if ( missileObject->attributes & kIsGuided) isGuided = true;
+                if ( missileObject->damage > mostDamage) mostDamage = missileObject->damage;
             }
-
-            // weapon name #
-            GetIndString( tempString, kShipDataKeyStringID, kWeaponNumberStringNum);
-            Munger(&weaponText, 0, (tempString + 1), *tempString, weaponName + 1, *weaponName);
-
-            // weapon name
-            GetIndString( numString, 5000, whichWeapon + 1);
-            GetIndString( tempString, kShipDataKeyStringID, kWeaponNameStringNum);
-            Munger(&weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
-
-            // is guided
-            if ( isGuided)
-                GetIndString( numString, kShipDataNameID, kShipDataYesStringNum);
-            else
-                GetIndString( numString, kShipDataNameID, kShipDataNoStringNum);
-            GetIndString( tempString, kShipDataKeyStringID, kWeaponGuidedStringNum);
-            Munger(&weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
-
-            // is autotarget
-            if ( weaponObject->attributes & kAutoTarget)
-                GetIndString( numString, kShipDataNameID, kShipDataYesStringNum);
-            else
-                GetIndString( numString, kShipDataNameID, kShipDataNoStringNum);
-            GetIndString( tempString, kShipDataKeyStringID, kWeaponAutoTargetStringNum);
-            Munger(&weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
-
-            // range
-            NumToString( lsqrt(weaponObject->frame.weapon.range), numString);
-            GetIndString( tempString, kShipDataKeyStringID, kWeaponRangeStringNum);
-            Munger(&weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
-
-            if ( mostDamage > 0)
-            {
-                NumToString( mostDamage, numString);
-                GetIndString( tempString, kShipDataKeyStringID, kWeaponDamageStringNum);
-                Munger(&weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
-            } else
-            {
-                GetIndString( numString, kShipDataNameID, kShipDataDashStringNum);
-                GetIndString( tempString, kShipDataKeyStringID, kWeaponDamageStringNum);
-                Munger(&weaponText, 0, (tempString + 1), *tempString, numString + 1, *numString);
-            }
-
+            action++;
         }
     }
-    return ( weaponText);
-}
 
-void DoMissionDebriefing(Rect *destRect, long yourlength, long parlength, long yourloss, long parloss,
-    long yourkill, long parkill)
-{
-    Rect            clipRect, boundsRect, tlRect;
-    Rect                tRect;
-    long                height, waitTime, score = 0;
-    retroTextSpecType   retroTextSpec;
-    Str255              tempString, numString;
+    StringList keys;
+    StringList values;
+    keys.load(kShipDataKeyStringID);
+    values.load(kShipDataNameID);
 
-    // ** CALCULATE THE SCORE
-    //  for time you get a max of 100 points
-    //  50 points for par
-    //  0-50 for par -> 2 x par
-    //  50-100 for par -> 1/2 par
-    //
+    // weapon name #
+    Munger(&data, 0, keys.at(kWeaponNumberStringNum), weaponName);
 
-    if ( yourlength < parlength)
+    // weapon name
     {
-        if ( yourlength > ( parlength / 2))
-        {
-            score += (((kTimePoints * 2) * parlength - (kTimePoints * 2) * yourlength) / parlength) + kTimePoints;
-        } else score += kTimePoints * 2;
-    } else if ( yourlength > parlength)
-    {
-        if ( yourlength < ( parlength * 2))
-        {
-            score += ((kTimePoints * 2) * parlength - kTimePoints * yourlength) / parlength;
-        } else score += 0;
-    } else score += kTimePoints;
-
-    if ( yourloss < parloss)
-    {
-        if ( yourloss > ( parloss / 2))
-        {
-            score += (((kLossesPoints * 2) * parloss - (kLossesPoints * 2) * yourloss) / parloss) + kLossesPoints;
-        } else score += kLossesPoints * 2;
-    } else if ( yourloss > parloss)
-    {
-        if ( yourloss < ( parloss * 2))
-        {
-            score += ((kLossesPoints * 2) * parloss - kLossesPoints * yourloss) / parloss;
-        } else score += 0;
-    } else score += kLossesPoints;
-
-    if ( yourkill < parkill)
-    {
-        if ( yourkill > ( parkill / 2))
-        {
-            score += (((kKillsPoints * 2) * parkill - (kKillsPoints * 2) * yourkill) / parkill);
-        } else score += 0;
-    } else if ( yourkill > parkill)
-    {
-        if ( yourkill < ( parkill * 2))
-        {
-            score += ((kKillsPoints * 2) * parkill - kKillsPoints * yourkill) / parkill + kKillsPoints;
-        } else score += kKillsPoints * 2;
-    } else score += kKillsPoints;
-
-    Resource rsrc('TEXT', kSummaryTextID);
-    retroTextSpec.text.reset(new std::string(
-                reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size()));
-    if (retroTextSpec.text.get() != nil) {
-        // *** Replace place-holders in text with real data, using the fabulous Munger routine
-        // your minutes
-        NumToString( yourlength / 60, numString);
-        GetIndString( tempString, kSummaryKeyStringID, kYourMinStringNum);
-        Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
-        // your seconds
-        NumToString( yourlength % 60, numString);
-//      WriteDebugLine((char *)numString);
-//      WriteDebugLong( yourlength % 60);
-
-        mDoubleDigitize( numString);
-        GetIndString( tempString, kSummaryKeyStringID, kYourSecStringNum);
-        Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
-        // par minutes
-        if ( parlength > 0)
-            NumToString( parlength / 60, numString);
-        else GetIndString( numString, 6002, 9); // = N/A
-            GetIndString( tempString, kSummaryKeyStringID, kParMinStringNum);
-        Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
-        // par seconds
-        if ( parlength > 0)
-        {
-            NumToString( parlength % 60, tempString);
-            mDoubleDigitize( tempString);
-            CopyPString( numString, "\p:");
-            ConcatenatePString( numString, tempString);
-            GetIndString( tempString, kSummaryKeyStringID, kParSecStringNum);
-            Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
-        } else
-        {
-            GetIndString( tempString, kSummaryKeyStringID, kParSecStringNum);
-            Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, 0);
-        }
-
-        // your loss
-        NumToString( yourloss, numString);
-        GetIndString( tempString, kSummaryKeyStringID, kYourLossStringNum);
-        Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
-        // par loss
-        if ( parlength > 0)
-            NumToString( parloss, numString);
-        else GetIndString( numString, 6002, 9); // = N/A
-        GetIndString( tempString, kSummaryKeyStringID, kParLossStringNum);
-        Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
-        // your kill
-        NumToString( yourkill, numString);
-        GetIndString( tempString, kSummaryKeyStringID, kYourKillStringNum);
-        Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
-        // par kill
-        if ( parlength > 0)
-            NumToString( parkill, numString);
-        else GetIndString( numString, 6002, 9); // = N/A
-        GetIndString( tempString, kSummaryKeyStringID, kParKillStringNum);
-        Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
-        // your score
-        if ( parlength > 0)
-            NumToString( score, numString);
-        else GetIndString( numString, 6002, 9); // = N/A
-        GetIndString( tempString, kSummaryKeyStringID, kYourScoreStringNum);
-        Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
-        // par score
-        if ( parlength > 0)
-            CopyPString( numString, "\p100");
-        else GetIndString( numString, 6002, 9); // = N/A
-        GetIndString( tempString, kSummaryKeyStringID, kParScoreStringNum);
-        Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
-
-        retroTextSpec.textLength = retroTextSpec.text->size();
-
-        mSetDirectFont( kButtonFontNum);
-        retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
-        retroTextSpec.tabSize = 60;
-        GetRGBTranslateColorShade(&retroTextSpec.color, GOLD, VERY_LIGHT);
-        GetRGBTranslateColorShade(&retroTextSpec.backColor, GOLD, DARKEST);
-        retroTextSpec.originalColor = retroTextSpec.nextColor = retroTextSpec.color;
-        retroTextSpec.originalBackColor = retroTextSpec.nextBackColor = retroTextSpec.backColor;
-
-        retroTextSpec.topBuffer = 2;
-        retroTextSpec.bottomBuffer = 0;
-
-        height = DetermineDirectTextHeightInWidth( &retroTextSpec, destRect->right - destRect->left);
-
-        boundsRect.left = destRect->left + (((destRect->right - destRect->left) / 2) -
-                            ( retroTextSpec.autoWidth / 2));
-        boundsRect.right = boundsRect.left + retroTextSpec.autoWidth;
-        boundsRect.top = destRect->top + (((destRect->bottom - destRect->top) / 2) -
-                            ( retroTextSpec.autoHeight / 2));
-        boundsRect.bottom = boundsRect.top + retroTextSpec.autoHeight;
-        retroTextSpec.xpos = boundsRect.left;
-        retroTextSpec.ypos = boundsRect.top + mDirectFontAscent();
-
-        clipRect.left = 0;
-        clipRect.right = clipRect.left + WORLD_WIDTH;
-        clipRect.top = 0;
-        clipRect.bottom = clipRect.top + WORLD_HEIGHT;
-        clipRect = *destRect;
-        tlRect = boundsRect;
-        tlRect.left -= 2;
-        tlRect.top -= 2;
-        tlRect.right += 2;
-        tlRect.bottom += 2;
-        DrawNateVBracket( gOffWorld, tlRect, clipRect, 0, 0, retroTextSpec.color);
-        tRect = tlRect;
-        CopyOffWorldToRealWorld(tRect);
-
-        while ( retroTextSpec.thisPosition < retroTextSpec.textLength)
-        {
-            PlayVolumeSound(  kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
-            DrawRetroTextCharInRect( &retroTextSpec, 3, boundsRect, clipRect, gActiveWorld, gNatePortLeft,
-                gNatePortTop);
-
-            waitTime = TickCount();
-            while (( TickCount() - waitTime) < 3) {
-                // DO NOTHING
-            };
-        }
-        retroTextSpec.text.reset();
+        StringList names;
+        names.load(5000);
+        const StringPiece& name = names.at(whichWeapon);
+        Munger(&data, 0, keys.at(kWeaponNameStringNum), name);
     }
 
-}
+    const StringPiece& yes = values.at(kShipDataYesStringNum);
+    const StringPiece& no = values.at(kShipDataNoStringNum);
+    const StringPiece& dash = values.at(kShipDataDashStringNum);
 
-void DoMissionDebriefingText(long textID, long yourlength, long parlength,
-            long yourloss, long parloss, long yourkill, long parkill, long parScore)
-{
-    Rect                tRect, iRect, scoreRect;
-    scoped_ptr<std::string> textData;
-    long                length, autoTimeStart, textlength = 0;
-    short               textHeight = 0;
-    bool             doScore = (parScore >= 0);
-    interfaceItemType       dataItem;
-
-    tRect = Rect(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM);
-    iRect = Rect(0, 0, kDebriefTextWidth, 1);
-
-    dataItem.style = kLarge;
-    Resource rsrc('TEXT', textID);
-    textData.reset(new std::string(
-                reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size()));
-    if (textData.get() != nil) {
-        textlength = length = textData->size();
-        textHeight = GetInterfaceTextHeightFromWidth(
-                reinterpret_cast<const unsigned char*>(textData->c_str()), length, dataItem.style,
-                kDebriefTextWidth);
-        if ( doScore) textHeight += kScoreTableHeight;
-
-        iRect.bottom = iRect.top + textHeight;
-        iRect.center_in(tRect);
-
-        dataItem.bounds = iRect;
-        dataItem.color = GOLD;
-        dataItem.kind = kLabeledRect;
-        dataItem.style = kLarge;
-        dataItem.item.labeledRect.label.stringID = 2001;
-        dataItem.item.labeledRect.label.stringNumber = 29;
-
-        DrawInOffWorld();
-
-        GetAnyInterfaceItemGraphicBounds(dataItem, &tRect);
-        SetTranslateColorFore(BLACK);
-        gActiveWorld->view(tRect).fill(RgbColor::kBlack);
-
-        DrawAnyInterfaceItem(dataItem, gOffWorld);
-
-        dataItem.bounds = tRect;
-        DrawInterfaceTextInRect(
-                tRect, reinterpret_cast<const unsigned char*>(textData->c_str()), length,
-                dataItem.style, dataItem.color, gOffWorld, nil);
-
-        textData.reset();
-
-        DrawInRealWorld();
-        NormalizeColors();
-
-        GetAnyInterfaceItemGraphicBounds(dataItem, &tRect);
-        CopyOffWorldToRealWorld(tRect);
-
-        if ( doScore)
-        {
-            scoreRect.left = dataItem.bounds.left;
-            scoreRect.right = dataItem.bounds.right;
-            scoreRect.bottom = dataItem.bounds.bottom;
-            scoreRect.top = scoreRect.bottom - kScoreTableHeight;
-
-            DoMissionDebriefing(&scoreRect, yourlength, parlength, yourloss, parloss,
-                        yourkill, parkill);
-        }
+    // is guided
+    if (isGuided) {
+        Munger(&data, 0, keys.at(kWeaponGuidedStringNum), yes);
+    } else {
+        Munger(&data, 0, keys.at(kWeaponGuidedStringNum), no);
     }
-    while (( AnyRealKeyDown()) || ( Button())) {
-        // DO NOTHING
-    };
-    autoTimeStart = TickCount();
-    while (( !AnyRealKeyDown()) && (!(Button())) &&
-        (!(( globals()->gOptions & (kOptionAutoPlay | kOptionReplay)) &&
-        (( TickCount() - autoTimeStart) < kDebriefTimeOutTime)))) {
-        // DO NOTHING
-    };
+
+    // is autotarget
+    if (weaponObject->attributes & kAutoTarget) {
+        Munger(&data, 0, keys.at(kWeaponAutoTargetStringNum), yes);
+    } else {
+        Munger(&data, 0, keys.at(kWeaponAutoTargetStringNum), no);
+    }
+
+    // range
+    Munger(&data, 0, keys.at(kWeaponRangeStringNum),
+            lsqrt(weaponObject->frame.weapon.range));
+
+    if (mostDamage > 0) {
+        Munger(&data, 0, keys.at(kWeaponDamageStringNum), mostDamage);
+    } else {
+        Munger(&data, 0, keys.at(kWeaponDamageStringNum), dash);
+    }
+    text->append(data);
 }
 
 #define kBackground_Height  480
 #define kScrollText_Buffer  10
 
-void DoScrollText(long textID, long scrollSpeed, long scrollWidth,
-    long textFontNum, long songID)
-{
-    Rect            clipRect, boundsRect, scrollRect, textRect;
-    long                height, waitTime = TickCount(), l, autoTimeStart, sectionLength, textLength,
-                        charNum, pictID = 0, bgVOffset = 0, bgPictID = -1;
-    retroTextSpecType   retroTextSpec;
-    Rect                tRect, uRect, vRect, pictRect, pictSourceRect;
-    scoped_ptr<std::string> textHandle;
-    const char*         sectionStart = NULL;
-    const char*         thisChar = NULL;
-    const char*         nextChar = NULL;
-    scoped_ptr<Picture> thePict;
-    scoped_ptr<Picture> bgPict;
-    bool             sectionOver, abort = false, wasPicture = true;
-    Rect                clipRgn;
+void Replace_KeyCode_Strings_With_Actual_Key_Names(String* text, short resID, size_t padTo) {
+    StringList keys;
+    StringList values;
+    keys.load(kHelpScreenKeyStringID);
+    values.load(resID);
 
-    if (( globals()->gOptions & kOptionMusicIdle) && ( songID >= 0))
-    {
-        if ( SongIsPlaying())
-        {
-            StopAndUnloadSong();
+    for (int i = 0; i < kKeyExtendedControlNum; ++i) {
+        const StringPiece& search = keys.at(i);
+        String replace(values.at(GetKeyNumFromKeyMap(globals()->gKeyControl[i] - 1)));
+        if (replace.size() < padTo) {
+            replace.resize(padTo, ' ');
         }
-        LoadSong( songID);
-        SetSongVolume( kMaxMusicVolume);
-        PlaySong();
-    }
-
-    HideCursor();
-
-    BlackenWindow();
-
-    Resource rsrc('TEXT', textID);
-    textHandle.reset(new std::string(
-                reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size()));
-    if (textHandle.get() != nil) {
-        mSetDirectFont( textFontNum);
-
-        boundsRect.left = (WORLD_WIDTH / 2) - ( scrollWidth / 2);
-        boundsRect.right = boundsRect.left + scrollWidth;
-        boundsRect.top = (WORLD_HEIGHT / 2) - ( kScrollTextHeight / 2);
-        boundsRect.bottom = boundsRect.top + kScrollTextHeight;
-
-        textRect.left = boundsRect.left;
-        textRect.right = boundsRect.right;
-        textRect.top = boundsRect.bottom;
-        textRect.bottom = textRect.top + mDirectFontHeight() + kScrollTextLineBuffer + 1;
-
-        scrollRect.left = boundsRect.left;
-        scrollRect.right = boundsRect.right;
-        scrollRect.top = boundsRect.top;
-        scrollRect.bottom = textRect.bottom;
-
-        tRect = scrollRect;
-        clipRgn = tRect;
-
-        DrawInRealWorld();
-
-        DrawNateRect( gOffWorld, &scrollRect, 0, 0, RgbColor::kBlack);
-
-        // Here's the behavior:
-        //  a section is started with a '#' followed by a '+'
-        //  it must be the first character, or the first character after a return
-        //  the first section does not need a '#'
-        //  if the # is followed by a number, that # is the picture header for that section
-        //  the number must be terminated by a return
-        //  if there is no number after # then it must be followed by a return
-        //
-
-        // look for beginning of section
-        charNum = 0;
-        textLength = textHandle->size();
-        sectionStart = textHandle->c_str();
-
-        // while we still have text to do
-        while (( charNum < textLength) && ( !abort))
-        {
-            sectionLength = 0;
-            // if this section begins with a delimiter
-            if ( *sectionStart == kScrollTextDelimiter1)
-            {
-                // then increase sectionStart to check for delimiter 2
-                charNum++;
-                sectionStart++;
-                // if we haven't reached the end of the text
-                if ( charNum < textLength)
-                {
-                    // then check for delimiter 2
-                    pictID = 0;
-                    if ( *sectionStart == kScrollTextDelimiter2)
-                    {
-                        sectionStart++;
-                        charNum++;
-                        // we have delimiter 2, check for pict number
-                        if ( *sectionStart != kReturnChar)
-                        {
-                            if ((*sectionStart >= '0') && ( *sectionStart <= '9'))
-                            {
-                                while (( *sectionStart != kReturnChar) && ( charNum < textLength))
-                                {
-                                    pictID *= 10;
-                                    pictID += *sectionStart - '0';
-                                    sectionStart++;
-                                    charNum++;
-                                }
-                            } else if ( *sectionStart == kScrollTextBackgroundChar)
-                            {
-                                sectionStart++;
-                                charNum++;
-                                // we have delimiter 2, check for pict number
-                                if ( *sectionStart != kReturnChar)
-                                {
-                                    if ((*sectionStart >= '0') && ( *sectionStart <= '9'))
-                                    {
-                                        bgPictID = 0;
-                                        while (( *sectionStart != kReturnChar) &&
-                                            ( charNum < textLength))
-                                        {
-                                            bgPictID *= 10;
-                                            bgPictID += *sectionStart - '0';
-                                            sectionStart++;
-                                            charNum++;
-                                        }
-                                        if ( bgPictID > 0)
-                                        {
-                                            bgPict.reset(new Picture(bgPictID));
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        sectionStart++;
-                        charNum++;
-                    }
-                }
-            }
-
-            // now find end of section; either delimiter or end of text
-            thisChar = sectionStart;
-            sectionOver = false;
-            while (( charNum < textLength) && ( !sectionOver) && ( !abort))
-            {
-                if (( *thisChar == kScrollTextDelimiter1) && ( charNum < (textLength - 1)))
-                {
-                    nextChar = thisChar;
-                    nextChar++;
-                    if ( *nextChar == kScrollTextDelimiter2)
-                    {
-                        sectionOver = true;
-                    } else
-                    {
-                        charNum++;
-                        thisChar++;
-                        sectionLength++;
-                    }
-
-                } else
-                {
-                    charNum++;
-                    thisChar++;
-                    sectionLength++;
-                }
-            }
-//          retroTextSpec.text = NewHandle( 1);
-            retroTextSpec.text.reset(new std::string);
-            for (int i = 0; i < sectionLength; ++i) {
-                *retroTextSpec.text += sectionStart[i];
-            }
-            if (true) {
-                if (retroTextSpec.text.get() != nil) {
-                    sectionStart = thisChar;
-
-                    retroTextSpec.textLength = retroTextSpec.text->size();
-
-                    retroTextSpec.thisPosition = retroTextSpec.linePosition =
-                        retroTextSpec.lineCount = 0;
-                    retroTextSpec.tabSize = scrollWidth / 2;
-                    GetRGBTranslateColorShade(&retroTextSpec.color, RED, VERY_LIGHT);
-                    retroTextSpec.backColor = RgbColor::kWhite;//0xff;
-                    retroTextSpec.originalColor = retroTextSpec.nextColor = retroTextSpec.color;
-                    retroTextSpec.originalBackColor = retroTextSpec.nextBackColor = retroTextSpec.backColor;
-                    retroTextSpec.topBuffer = kScrollTextLineBuffer;
-                    retroTextSpec.bottomBuffer = 0;
-
-                    height = DetermineDirectTextHeightInWidth( &retroTextSpec,
-                        scrollWidth-(kScrollText_Buffer<<1));
-
-                    clipRect.left = 0;
-                    clipRect.right = clipRect.left + WORLD_WIDTH;
-                    clipRect.top = 0;
-                    clipRect.bottom = clipRect.top + WORLD_HEIGHT;
-
-                    if ( pictID != 0)
-                    {
-                        thePict.reset(new Picture(pictID));
-//                      if ( ResError() != noErr) Debugger();
-
-                        if (thePict.get() != nil) {
-                            wasPicture = true;
-                            pictRect.left = ( scrollWidth / 2) -
-                                (((thePict->bounds().right - thePict->bounds().left)) / 2) +
-                                boundsRect.left;
-                            pictRect.right = pictRect.left + ((thePict->bounds().right - thePict->bounds().left));
-                            pictRect.top = boundsRect.bottom;
-//                          pictRect.bottom = pictRect.top + ((**thePict).picFrame.bottom - (**thePict).picFrame.top);
-                            pictRect.bottom = pictRect.top + mDirectFontHeight() + kScrollTextLineBuffer;
-
-                            pictSourceRect = thePict->bounds();
-                            pictSourceRect.left = ( scrollWidth / 2) -
-                                (((thePict->bounds().right - thePict->bounds().left)) / 2) +
-                                boundsRect.left;
-                            pictSourceRect.right = pictRect.left + ((thePict->bounds().right - thePict->bounds().left));
-
-                            DrawInSaveWorld();
-                                if (bgPict.get() != nil) {
-                                    Rect bgRect = bgPict->bounds();
-
-                                    bgRect.offset(-bgRect.left, -bgRect.top);
-                                    bgRect.offset(scrollRect.left, pictSourceRect.top - bgVOffset);
-                                    do
-                                    {
-                                        CopyBits(bgPict.get(), gActiveWorld, bgPict->bounds(), bgRect);
-                                        bgRect.offset(0, kBackground_Height);
-                                    } while ( bgRect.top < gSaveWorld->bounds().bottom);
-                                }
-                            CopyBits(thePict.get(), gActiveWorld, thePict->bounds(), pictSourceRect);
-                            DrawInRealWorld();
-
-                            if (bgPict.get() != nil) {
-                                pictRect.left = pictSourceRect.left = scrollRect.left;
-                                pictRect.right = pictSourceRect.right = scrollRect.right;
-                            }
-                            pictSourceRect.bottom = pictSourceRect.top + mDirectFontHeight() + kScrollTextLineBuffer;
-
-                            while ((pictSourceRect.top < thePict->bounds().bottom) && (!abort)) {
-                                if (pictSourceRect.bottom > thePict->bounds().bottom) {
-                                    pictRect.bottom -= pictSourceRect.bottom - thePict->bounds().bottom;
-                                    pictSourceRect.bottom = thePict->bounds().bottom;
-                                }
-                                CopyBits(gSaveWorld, gOffWorld, pictSourceRect, pictRect);
-
-                                tRect = scrollRect;
-                                uRect = tRect;
-                                uRect.offset(0, -1);
-                                vRect = boundsRect;
-
-                                for (   l = 0;
-                                        ((l < (mDirectFontHeight() + kScrollTextLineBuffer)) &&
-                                            (!abort) &&
-                                            ((pictSourceRect.top+l)<
-                                                thePict->bounds().bottom));
-                                        l++)
-                                {
-                                    DrawInOffWorld();
-
-                                    ScrollRect(gOffWorld, tRect, 0, -1, clipRgn);
-                                    DrawInRealWorld();
-
-                                    DrawNateLine(gOffWorld, scrollRect, scrollRect.left, scrollRect.bottom - 1, scrollRect.right - 1,
-                                        scrollRect.bottom - 1, 0, 0, RgbColor::kBlack);
-                                    CopyOffWorldToRealWorld(vRect);
-
-                                    bgVOffset++;
-                                    if ( bgVOffset >= kBackground_Height) bgVOffset = 0;
-
-                                    while (( TickCount() - waitTime) < scrollSpeed) {
-                                        // DO NOTHING
-                                    };
-                                    waitTime = TickCount();
-                                    if ( AnyModifierKeyDown())
-                                    {
-                                        while ( AnyModifierKeyDown())
-                                        {
-                                            // do nothing
-                                        }
-                                        while ( AnyEvent())
-                                        {
-                                            // do nothing
-                                        }
-                                    }
-                                    if ( AnyEvent()) abort = true;
-                                }
-
-                                pictSourceRect.offset(0, (mDirectFontHeight() + kScrollTextLineBuffer));
-                            }
-                            thePict.reset();
-//                          if ( ResError() != noErr) Debugger();
-                        }// else DebugStr("\pNo PICT!");
-                    }
-                    if  ( wasPicture)
-                    {
-                        Rect bgRect = bgPict->bounds();
-
-                        wasPicture = false;
-                        DrawInSaveWorld();
-                        if (bgPict.get() != nil) {
-                            bgRect.offset(-bgRect.left, -bgRect.top);
-                            bgRect.offset(scrollRect.left, 0);
-                            do
-                            {
-                                CopyBits(bgPict.get(), gActiveWorld, bgPict->bounds(), bgRect);
-                                bgRect.offset(0, kBackground_Height);
-                            }  while ( bgRect.top < gSaveWorld->bounds().bottom);
-                        } else
-                        {
-                            EraseSaveWorld();
-                        }
-                        DrawInRealWorld();
-                    }
-                    while (( retroTextSpec.thisPosition < retroTextSpec.textLength) && (!abort))
-                    {
-                        Rect    bgRect, stRect;
-
-                        retroTextSpec.xpos = textRect.left + 6;
-                        retroTextSpec.ypos = textRect.top + mDirectFontAscent() + kScrollTextLineBuffer;
-
-                        DrawInOffWorld();
-                        bgRect = textRect;
-                        stRect = textRect;
-                        bgRect.offset(0, -bgRect.top);
-                        bgRect.offset(0, bgVOffset);
-                        // if source bg pict is partially offscreen
-                        if ( bgRect.bottom > gSaveWorld->bounds().bottom)
-                        {
-                            stRect.bottom -= bgRect.bottom - gSaveWorld->bounds().bottom;
-                            bgRect.bottom = gSaveWorld->bounds().bottom;
-                            CopyBits(gSaveWorld, gOffWorld, bgRect, stRect);
-                            stRect.top = stRect.bottom;
-                            stRect.bottom = stRect.top + ((textRect.bottom - textRect.top) -
-                                            ( bgRect.bottom - bgRect.top));
-                            bgRect.top = 0;
-                            bgRect.bottom = bgRect.top + (stRect.bottom - stRect.top);
-                            CopyBits(gSaveWorld, gOffWorld, bgRect, stRect);
-                        } else // just copy appropriate segment
-                        {
-                            CopyBits(gSaveWorld, gOffWorld, bgRect, stRect);
-                        }
-                        DrawInRealWorld();
-
-                        textRect.right -= kScrollText_Buffer;
-                        DrawRetroTextCharInRect( &retroTextSpec, -1, textRect, textRect, gOffWorld, 0, 0);
-                        textRect.right += kScrollText_Buffer;
-                        tRect = scrollRect;
-                        uRect = tRect;
-                        uRect.offset(0, -1);
-
-                        bgVOffset++;
-                        if ( bgVOffset >= kBackground_Height) bgVOffset = 0;
-
-                        vRect = boundsRect;
-                        for (   l = 0;
-                                ((l < (mDirectFontHeight() + kScrollTextLineBuffer)) &&
-                                    (!abort));
-                                l++)
-                        {
-                            DrawInOffWorld();
-                            ScrollRect(gOffWorld, tRect, 0, -1, clipRgn);
-
-                            bgVOffset++;
-                            if ( bgVOffset >= kBackground_Height) bgVOffset = 0;
-
-                            DrawNateLine(gOffWorld, scrollRect, scrollRect.left, scrollRect.bottom - 1, scrollRect.right - 1,
-                                scrollRect.bottom - 1, 0, 0, RgbColor::kBlack);
-                            DrawInRealWorld();
-                            CopyOffWorldToRealWorld(vRect);
-
-                            while (( TickCount() - waitTime) < scrollSpeed) {
-                                // DO NOTHING
-                            };
-                            waitTime = TickCount();
-                            if ( AnyModifierKeyDown())
-                            {
-                                while ( AnyModifierKeyDown())
-                                {
-                                    // do nothing;
-                                }
-                                while ( AnyEvent())
-                                {
-                                    // do nothing;
-                                }
-                            }
-                            if ( AnyEvent()) abort = true;
-                        }
-                    }
-                    retroTextSpec.text.reset();
-                }
-            }
-        }
-
-        for (   l = 0;
-                ((l < kScrollTextHeight) &&
-                    (!abort));
-                l++)
-        {
-            DrawInOffWorld();
-            tRect = scrollRect;
-            ScrollRect(gOffWorld, tRect, 0, -1, clipRgn);
-            DrawNateLine(gOffWorld, scrollRect, scrollRect.left, scrollRect.bottom - 1, scrollRect.right - 1,
-                scrollRect.bottom - 1, 0, 0, RgbColor::kBlack);
-            DrawInRealWorld();
-            CopyOffWorldToRealWorld(vRect);
-
-            while (( TickCount() - waitTime) < scrollSpeed) {
-                // DO NOTHING
-            };
-            waitTime = TickCount();
-            if ( AnyModifierKeyDown())
-            {
-                while ( AnyModifierKeyDown())
-                                {
-                                    // do nothing;
-                                }
-                while ( AnyEvent())
-                                {
-                                    // do nothing;
-                                }
-            }
-            if ( AnyEvent()) abort = true;
-        }
-        textHandle.reset();
-    } else SysBeep( 20);
-
-    while ( AnyRealKeyDown()) {
-        // DO NOTHING
-    };
-    autoTimeStart = TickCount();
-
-//  while (( !AnyRealKeyDown()) && (!abort) && (!(( globals()->gOptions & (kOptionAutoPlay | kOptionReplay)) && (( TickCount() - autoTimeStart) < kDebriefTimeOutTime))));
-    MacShowCursor();
-
-    if (( SongIsPlaying()) && ( songID >= 0))
-    {
-        StopAndUnloadSong();
-    }
-}
-
-void Replace_KeyCode_Strings_With_Actual_Key_Names(std::string* text, short resID,
-    short padTo)
-{
-    long    l;
-    Str255  numString, tempString;
-
-    for ( l = 0; l < kKeyExtendedControlNum; l++)
-    {
-//      GetKeyNumName( numString, GetKeyNumFromKeyMap( globals()->gKeyControl[l]));
-        GetIndString( numString, resID, GetKeyNumFromKeyMap( globals()->gKeyControl[l]));
-        while ( numString[0] < padTo)
-        {
-            numString[0]++;
-            numString[numString[0]] = ' ';
-        }
-        GetIndString( tempString, kHelpScreenKeyStringID, l + 1);
-        while ( Munger(text, 0, (tempString + 1), *tempString,
-            numString + 1, *numString) > 0) {
+        while (Munger(text, 0, search, replace) > 0) {
             // DO NOTHING
         };
     }

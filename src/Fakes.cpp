@@ -33,6 +33,10 @@
 #include "VideoDriver.hpp"
 #include "VncServer.hpp"
 
+using sfz::FormatItem;
+using sfz::String;
+using sfz::StringPiece;
+
 namespace antares {
 
 int GetDemoScenario() {
@@ -73,16 +77,12 @@ void StringToNum(unsigned char* p_str, long* value) {
     check(end == c_str + len, "couldn't interpret '%s' as an integer", c_str);
 }
 
-int Munger(std::string* data, int pos, const unsigned char* search, size_t search_len,
-        const unsigned char* replace, size_t replace_len) {
-    std::string s(reinterpret_cast<const char*>(search), search_len);
-    std::string r(reinterpret_cast<const char*>(replace), replace_len);
-    std::string d = *data;
-    std::string::size_type at = d.find(s, pos);
-    if (at != std::string::npos) {
-        data->resize(at);
-        *data += r;
-        *data += d.substr(at + s.size());
+int Munger(String* data, int pos, const StringPiece& search, const FormatItem& replace) {
+    size_t at = data->find(search, pos);
+    if (at != String::kNone) {
+        String replace_string;
+        replace.print_to(&replace_string);
+        data->replace(at, search.size(), replace_string);
     }
     return at;
 }

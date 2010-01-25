@@ -19,43 +19,55 @@
 
 #include <algorithm>
 #include <limits>
+#include "rezin/MacRoman.hpp"
+#include "sfz/Bytes.hpp"
+#include "sfz/Exception.hpp"
 #include "Quickdraw.h"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
-#include "Error.hpp"
+
+using rezin::mac_roman_encoding;
+using sfz::Bytes;
+using sfz::Exception;
+using sfz::StringPiece;
 
 namespace antares {
 
 namespace {
 
-int char_width(uint8_t ch) {
+uint8_t to_mac_roman(uint32_t code) {
+    Bytes bytes;
+    mac_roman_encoding().encode(code, &bytes);
+    return bytes.at(0);
+}
+
+int char_width(uint32_t ch) {
     uint8_t w;
-    mDirectCharWidth(w, ch);
+    mDirectCharWidth(w, to_mac_roman(ch));
     return w;
 }
 
-int hex_digit(char c) {
-    check(isxdigit(c), "%c is not a valid hex digit", c);
-    if (c >= 'a') {
-        return c - 'a' + 10;
-    } else if (c >= 'A') {
-        return c - 'A' + 10;
-    } else {
+int hex_digit(uint32_t c) {
+    if ('0' <= c && c <= '9') {
         return c - '0';
+    } else if ('A' <= c && c <= 'Z') {
+        return c - 'A' + 10;
+    } else if ('a' <= c && c <= 'z') {
+        return c - 'a' + 10;
     }
+    throw Exception("{0} is not a valid hex digit", c);
 }
 
 }  // namespace
 
-RetroText::RetroText(
-        const char* data, size_t len, int font, RgbColor fore_color, RgbColor back_color)
+RetroText::RetroText(const StringPiece& text, int font, RgbColor fore_color, RgbColor back_color)
         : _tab_width(0),
           _font(font) {
     const RgbColor original_fore_color = fore_color;
     const RgbColor original_back_color = back_color;
 
-    for (size_t i = 0; i < len; ++i) {
-        switch (data[i]) {
+    for (size_t i = 0; i < text.size(); ++i) {
+        switch (text.at(i)) {
           case '\r':
             _chars.push_back(RetroChar('\r', LINE_BREAK, fore_color, back_color));
             break;
@@ -70,30 +82,30 @@ RetroText::RetroText(
             break;
 
           case '\\':
-            if (i >= len) {
-                fail("not enough input for special code.");
+            if (i >= text.size()) {
+                throw Exception("not enough input for special code.");
             }
             ++i;
-            switch (data[i]) {
+            switch (text.at(i)) {
               case 'i':
                 std::swap(fore_color, back_color);
                 break;
 
               case 'f':
-                if (i + 2 >= len) {
-                    fail("not enough input for foreground code.");
+                if (i + 2 >= text.size()) {
+                    throw Exception("not enough input for foreground code.");
                 }
                 GetRGBTranslateColorShade(
-                        &fore_color, hex_digit(data[i + 1]), hex_digit(data[i + 2]));
+                        &fore_color, hex_digit(text.at(i + 1)), hex_digit(text.at(i + 2)));
                 i += 2;
                 break;
 
               case 'b':
-                if (i + 2 >= len) {
-                    fail("not enough input for foreground code.");
+                if (i + 2 >= text.size()) {
+                    throw Exception("not enough input for foreground code.");
                 }
                 GetRGBTranslateColorShade(
-                        &back_color, hex_digit(data[i + 1]), hex_digit(data[i + 2]));
+                        &back_color, hex_digit(text.at(i + 1)), hex_digit(text.at(i + 2)));
                 i += 2;
                 break;
 
@@ -111,12 +123,12 @@ RetroText::RetroText(
                 break;
 
               default:
-                fail("found bad special character '%c'.", data[i]);
+                throw Exception("found bad special character {0}.", text.at(i));
             }
             break;
 
           default:
-            _chars.push_back(RetroChar(data[i], NONE, fore_color, back_color));
+            _chars.push_back(RetroChar(text.at(i), NONE, fore_color, back_color));
             break;
         }
     }
@@ -217,7 +229,7 @@ void RetroText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
                 DrawNateRect(pix, &char_rect, 0, 0, ch.back_color);
             }
             MoveTo(corner.h, corner.v + char_adjust);
-            unsigned char pstr[2] = {1, ch.character};
+            unsigned char pstr[2] = {1, to_mac_roman(ch.character)};
             DrawDirectTextStringClipped(pstr, ch.fore_color, pix, bounds, 0, 0);
         }
         break;
@@ -270,7 +282,8 @@ int RetroText::move_word_down(int index, int v) {
 }
 
 RetroText::RetroChar::RetroChar(
-        char character, SpecialChar special, const RgbColor& fore_color, const RgbColor& back_color)
+        uint32_t character, SpecialChar special, const RgbColor& fore_color,
+        const RgbColor& back_color)
         : character(character),
           special(special),
           fore_color(fore_color),

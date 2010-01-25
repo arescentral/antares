@@ -21,6 +21,7 @@
 // Message Screen.h
 
 #include "sfz/SmartPtr.hpp"
+#include "sfz/String.hpp"
 #include "AnyChar.hpp"
 #include "ColorTable.hpp"
 #include "NateDraw.hpp"
@@ -38,7 +39,7 @@ namespace antares {
 #define kMaxLineNumber          48
 
 struct retroTextSpecType {
-    sfz::scoped_ptr<std::string> text;
+    sfz::scoped_ptr<sfz::String> text;
     long            textLength;
     long            lineLength[kMaxLineNumber];
     long            lineNumber;

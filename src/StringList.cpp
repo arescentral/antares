@@ -17,31 +17,53 @@
 
 #include "StringList.hpp"
 
+#include "rezin/MacRoman.hpp"
 #include "sfz/BinaryReader.hpp"
+#include "sfz/Exception.hpp"
+#include "sfz/Foreach.hpp"
+#include "sfz/Formatter.hpp"
 #include "Error.hpp"
 #include "Resource.hpp"
 
+using rezin::mac_roman_encoding;
+using sfz::Bytes;
+using sfz::BytesPiece;
 using sfz::BytesBinaryReader;
+using sfz::Exception;
+using sfz::String;
+using sfz::StringPiece;
+using sfz::quote;
 
 namespace antares {
 
-void StringList::load(int id) {
-    _strings.clear();
+StringList::~StringList() {
+    clear();
+}
 
+void StringList::clear() {
+    // TODO(sfiera): make exception-safe.
+    foreach (it, _strings) {
+        delete *it;
+    }
+    _strings.clear();
+}
+
+void StringList::load(int id) {
+    clear();
     Resource rsrc('STR#', id);
     BytesBinaryReader bin(rsrc.data().substr(0, 2));
     uint16_t size;
     bin.read(&size);
-    const uint8_t* data = rsrc.data().data() + 2;
+    BytesPiece data = BytesPiece(rsrc.data()).substr(2);
     for (size_t i = 0; i < size; ++i) {
-        uint8_t len = *data;
-        ++data;
-        _strings.push_back(std::string(reinterpret_cast<const char*>(data), len));
-        data += len;
+        uint8_t len = data.at(0);
+        data = data.substr(1);
+        _strings.push_back(new String(data.substr(0, len), mac_roman_encoding()));
+        data = data.substr(len);
     }
 }
 
-ssize_t StringList::index_of(std::string& result) const {
+ssize_t StringList::index_of(const StringPiece& result) const {
     for (size_t i = 0; i < size(); ++i) {
         if (at(i) == result) {
             return i;
@@ -54,14 +76,17 @@ size_t StringList::size() const {
     return _strings.size();
 }
 
-const std::string& StringList::at(size_t index) const {
-    return _strings.at(index);
+const String& StringList::at(size_t index) const {
+    return *_strings.at(index);
 }
 
-void string_to_pstring(const std::string& src, unsigned char* dst) {
-    check(src.size() <= 254, "'%s' is too long to convert to a pstring", src.c_str());
-    *dst = src.size();
-    memcpy(dst + 1, src.c_str(), src.size());
+void string_to_pstring(const String& src, unsigned char* dst) {
+    Bytes src_bytes(src, mac_roman_encoding());
+    if (src_bytes.size() > 254) {
+        throw Exception("{0} is too long to convert to a pstring", quote(src));
+    }
+    *dst = src_bytes.size();
+    memcpy(dst + 1, src_bytes.data(), src_bytes.size());
 }
 
 }  // namespace antares

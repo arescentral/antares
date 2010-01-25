@@ -20,6 +20,7 @@
 
 #include "MessageScreen.hpp"
 
+#include "rezin/MacRoman.hpp"
 #include "AnyChar.hpp"
 #include "AresGlobalType.hpp"
 #include "ColorTranslation.hpp"
@@ -36,6 +37,11 @@
 #include "ScreenLabel.hpp"
 #include "SpriteHandling.hpp"
 
+using rezin::mac_roman_encoding;
+using sfz::Bytes;
+using sfz::BytesPiece;
+using sfz::String;
+using sfz::StringPiece;
 using sfz::scoped_ptr;
 
 namespace antares {
@@ -118,7 +124,7 @@ extern scenarioType     *gThisScenario; // for special message labels
 extern PixMap*          gActiveWorld;
 extern PixMap*          gOffWorld;
 
-void MessageLabel_Set_Special(short id, const std::string* text);
+void MessageLabel_Set_Special(short id, const StringPiece& text);
 
 int InitMessageScreen() {
     unsigned char *anyChar, nilLabel = 0;
@@ -387,8 +393,7 @@ void ClipToCurrentLongMessage( void)
 
 {
     longMessageType *tmessage;
-    scoped_ptr<std::string> textData;
-    long            count;
+    scoped_ptr<String> textData;
 
     tmessage = globals()->gLongMessageData.get();
     if (( tmessage->currentResID != tmessage->lastResID) || ( tmessage->newStringMessage))
@@ -404,23 +409,21 @@ void ClipToCurrentLongMessage( void)
         {
             if ( tmessage->currentResID == kStringMessageID)
             {
-                textData.reset(new std::string);
+                textData.reset(new String);
                 if (textData.get() != nil) {
-                    count = 1;
-                    while ( count <= tmessage->stringMessage[0])
-                    {
-                        *textData += tmessage->stringMessage[count];
-                        count++;
-                    }
+                    textData->append(StringPiece(
+                                BytesPiece(
+                                    reinterpret_cast<const uint8_t*>(tmessage->stringMessage + 1),
+                                    tmessage->stringMessage[0]),
+                                mac_roman_encoding()));
                 }
                 tmessage->labelMessage = false;
             } else
             {
                 Resource rsrc('TEXT', tmessage->currentResID);
-                textData.reset(new std::string(
-                            reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size()));
+                textData.reset(new String(rsrc.data(), mac_roman_encoding()));
                 Replace_KeyCode_Strings_With_Actual_Key_Names(textData.get(), kKeyMapNameLongID, 0);
-                if ((*textData)[0] == '#') {
+                if (textData->at(0) == '#') {
                     tmessage->labelMessage = true;
                 }
                 else tmessage->labelMessage = false;
@@ -536,8 +539,10 @@ void DrawCurrentLongMessage( long timePass)
                 {
                     SetScreenLabelAge( tmessage->labelMessageID, 0);
 
-                    MessageLabel_Set_Special( tmessage->labelMessageID,
-                        tmessage->retroTextSpec.text.get());
+                    if (tmessage->retroTextSpec.text.get()) {
+                        MessageLabel_Set_Special( tmessage->labelMessageID,
+                                *tmessage->retroTextSpec.text);
+                    }
                 }
             }
         } else if ( !tmessage->labelMessage)
@@ -849,7 +854,8 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
     long            charNum = 0, height = mDirectFontHeight(), x = 0, oldx = 0, oldCharNum, wordLen,
                     *lineLengthList = retroTextSpec->lineLength;
     unsigned char   charWidth, wrapState; // 0 = none, 1 = once, 2 = more than once
-    const char*     thisChar = retroTextSpec->text->c_str();
+    Bytes bytes(*retroTextSpec->text, mac_roman_encoding());
+    const uint8_t*  thisChar = bytes.data();
 
     *lineLengthList = 0;
     retroTextSpec->autoWidth = 0;
@@ -967,7 +973,8 @@ void DrawDirectTextInRect(
                     oldx = 0, oldCharNum, wordLen;
     unsigned char   charWidth, wrapState; // 0 = none, 1 = once, 2 = more than once
     RgbColor        tempColor;
-    const char*     thisChar = retroTextSpec->text->c_str();
+    Bytes bytes(*retroTextSpec->text, mac_roman_encoding());
+    const uint8_t*  thisChar = bytes.data();
     unsigned char   *thisWordChar, thisWord[255];
     Rect        backRect, lineRect;
     unsigned char   calcColor, calcShade;
@@ -1143,7 +1150,8 @@ void DrawDirectTextInRect(
 void DrawRetroTextCharInRect(
         retroTextSpecType *retroTextSpec, long charsToDo, const Rect& bounds, const Rect& clipRect,
         PixMap *destMap, long portLeft, long portTop) {
-    const char*     thisChar = retroTextSpec->text->c_str();
+    Bytes bytes(*retroTextSpec->text, mac_roman_encoding());
+    const uint8_t* thisChar = bytes.data();
     unsigned char   thisWord[kMaxRetroSize], charWidth;
     Rect        cursorRect, lineRect, tlRect;
     long            oldx, wordLen, *lineLength = &(retroTextSpec->lineLength[retroTextSpec->lineCount]);
@@ -1168,7 +1176,7 @@ void DrawRetroTextCharInRect(
     while (( charsToDo > 0) && ( retroTextSpec->thisPosition <
         retroTextSpec->textLength))
     {
-        thisChar = retroTextSpec->text->c_str() + retroTextSpec->thisPosition;
+        thisChar = bytes.data() + retroTextSpec->thisPosition;
         if ( *thisChar == kCodeChar)
         {
             thisChar++;
@@ -1353,66 +1361,65 @@ void DrawRetroTextCharInRect(
 //  t = one of three characters: 'L' for left, 'R' for right, and 'O' for object
 //  nnn... are digits specifying value (distance from top, or initial object #)
 //
-void MessageLabel_Set_Special(short id, const std::string* text) {
+void MessageLabel_Set_Special(short id, const StringPiece& text) {
     unsigned char    whichType;
-    long    value = 0, charNum = 0, textLength, safetyCount;
+    size_t charNum = 0;
+    long    value = 0, safetyCount;
     Str255  s;
     Point   attachPoint;
     bool hintLine = false;
 
     s[0] = 0;
-    if (text == nil) {
-        return;
-    }
-    textLength = text->size();
-    const char* c = text->c_str();
+    StringPiece::const_iterator it = text.begin();
 
     // if not legal, bail
-    if ( *c != '#') return;
+    if (*it != '#') {
+        return;
+    }
 
-    c++;
+    ++it;
     charNum++;
 
-    whichType = *c;
-    c++;
+    whichType = *it;
+    ++it;
     charNum++;
     safetyCount = 0;
-    while (( *c != '#') && ( charNum < textLength) && ( safetyCount < 10)) // arbitrary safety net
+    while ((*it != '#') && (charNum < text.size()) && ( safetyCount < 10)) // arbitrary safety net
     {
         value *= 10;
-        value += *c - '0';
-        c++;
+        value += *it - '0';
+        ++it;
         charNum++;
         safetyCount++;
     }
 
-    c++;
+    ++it;
     charNum++;
-    if ( *c == '#') // also a hint line attached
+    if (*it == '#') // also a hint line attached
     {
         hintLine = true;
-        c++;
+        ++it;
         charNum++;
         // h coord
         safetyCount = 0;
-        while (( *c != ',') && ( charNum < textLength) && ( safetyCount < 10)) // arbitrary safety net
+        while ((*it != ',') && (charNum < text.size()) && ( safetyCount < 10)) // arbitrary safety net
         {
             attachPoint.h *= 10;
-            attachPoint.h += *c - '0';
-            c++;
+            attachPoint.h += *it - '0';
+            ++it;
             charNum++;
             safetyCount++;
         }
 
-        c++;
+        ++it;
         charNum++;
 
         safetyCount = 0;
-        while (( *c != '#') && ( charNum < textLength) && ( safetyCount < 10)) // arbitrary safety net
+        while ((*it != '#') && (charNum < text.size()) && ( safetyCount < 10)) // arbitrary safety net
         {
             attachPoint.v *= 10;
-            attachPoint.v += *c - '0';
-            c++;
+            attachPoint.v += *it - '0';
+            ++it;
             charNum++;
             safetyCount++;
         }
@@ -1422,15 +1429,15 @@ void MessageLabel_Set_Special(short id, const std::string* text) {
             attachPoint.h = (attachPoint.h - (kSmallScreenWidth - kRightPanelWidth)) +
                 globals()->gRightPanelLeftEdge;
         }
-        c++;
+        ++it;
         charNum++;
     }
 
-    while (( charNum < textLength) && ( s[0] < 255))
+    while ((charNum < text.size()) && (s[0] < 255))
     {
         s[0] += 1;
-        s[s[0]] = *c;
-        c++;
+        s[s[0]] = *it;
+        ++it;
         charNum++;
     }
     SetScreenLabelString( id, s);

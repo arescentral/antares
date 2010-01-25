@@ -19,7 +19,8 @@
 #define ANTARES_FAKES_HPP_
 
 #include <stdint.h>
-#include <string>
+#include "sfz/String.hpp"
+#include "sfz/Format.hpp"
 #include "Base.h"
 #include "AresGlobalType.hpp"
 
@@ -27,8 +28,9 @@ namespace antares {
 
 void FakeInit(int argc, char* const* argv);
 int GetDemoScenario();
-int Munger(std::string* data, int pos, const unsigned char* search, size_t search_len,
-        const unsigned char* replace, size_t replace_len);
+int Munger(
+        sfz::String* data, int pos, const sfz::StringPiece& search,
+        const sfz::FormatItem& replace);
 
 }  // namespace antares
 

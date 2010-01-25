@@ -18,9 +18,12 @@
 #ifndef ANTARES_STRING_NUMERICS_HPP_
 #define ANTARES_STRING_NUMERICS_HPP_
 
+#include "sfz/Format.hpp"
 #include "MathSpecial.hpp"
 
 namespace antares {
+
+sfz::FormatItem small_fixed(smallFixedType value);
 
 void SmallFixedToString( smallFixedType, Str255);
 smallFixedType StringToSmallFixed( Str255);

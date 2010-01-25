@@ -19,6 +19,7 @@
 #define ANTARES_LOADING_SCREEN_HPP_
 
 #include "sfz/Macros.hpp"
+#include "sfz/String.hpp"
 #include "InterfaceScreen.hpp"
 
 namespace antares {
@@ -38,7 +39,7 @@ class LoadingScreen : public InterfaceScreen {
     virtual void draw() const;
 
   private:
-    const std::string _chapter_name;
+    sfz::String _chapter_name;
     double _loading_progress;
 
     DISALLOW_COPY_AND_ASSIGN(LoadingScreen);
