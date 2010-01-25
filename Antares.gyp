@@ -4,6 +4,8 @@
             'include',
             'stubs',
             'lib/libpng',
+            'lib/librezin/include',
+            'lib/librgos/include',
             'lib/libsfz/include',
         ],
         'xcode_settings': {
@@ -125,6 +127,8 @@
             ],
             'dependencies': [
                 'lib/libpng/libpng.gyp:libpng',
+                'lib/librezin/librezin.gyp:librezin',
+                'lib/librgos/librgos.gyp:librgos',
                 'lib/libsfz/libsfz.gyp:libsfz',
             ],
         },

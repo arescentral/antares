@@ -10,3 +10,9 @@
 [submodule "lib/libpng"]
 	path = lib/libpng
 	url = git://git.sfiera.net/libpng
+[submodule "lib/librezin"]
+	path = lib/librezin
+	url = git://git.sfiera.net/librezin
+[submodule "lib/librgos"]
+	path = lib/librgos
+	url = git://git.sfiera.net/librgos
