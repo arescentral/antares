@@ -118,7 +118,7 @@ void DirectoryLedger::save() {
 
     String contents;
     contents.append("{\n", ascii_encoding());
-    contents.append("  \"unlocked-levels\" = [", ascii_encoding());
+    contents.append("  \"unlocked-levels\": [", ascii_encoding());
     for (std::set<int>::const_iterator it = _chapters.begin(); it != _chapters.end(); ++it) {
         if (it == _chapters.begin()) {
             format(&contents, "{0}", *it);
