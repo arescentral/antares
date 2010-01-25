@@ -17,6 +17,8 @@
 
 #include "TestVideoDriver.hpp"
 
+#include "sfz/Format.hpp"
+#include "sfz/Formatter.hpp"
 #include "AresPreferences.hpp"
 #include "Card.hpp"
 #include "Error.hpp"
@@ -25,9 +27,15 @@
 #include "Ledger.hpp"
 #include "Time.hpp"
 
+using sfz::String;
+using sfz::StringPiece;
+using sfz::ascii_encoding;
+using sfz::dec;
+using sfz::format;
+
 namespace antares {
 
-TestingVideoDriver::TestingVideoDriver(const std::string& output_dir)
+TestingVideoDriver::TestingVideoDriver(const StringPiece& output_dir)
         : _current_time(0),
           _state(UNKNOWN),
           _output_dir(output_dir) { }
@@ -73,11 +81,11 @@ void TestingVideoDriver::loop(CardStack* stack) {
 
 GameState TestingVideoDriver::state() const { return _state; }
 
-const std::string& TestingVideoDriver::output_dir() const {
+StringPiece TestingVideoDriver::output_dir() const {
     return _output_dir;
 }
 
-MainScreenVideoDriver::MainScreenVideoDriver(const std::string& output_dir)
+MainScreenVideoDriver::MainScreenVideoDriver(const StringPiece& output_dir)
         : TestingVideoDriver(output_dir),
           _key_down(false) { }
 
@@ -88,7 +96,9 @@ bool MainScreenVideoDriver::wait_next_event(EventRecord* evt, double) {
             _key_down = false;
         } else {
             if (!output_dir().empty()) {
-                DumpTo(output_dir() + "/main-screen.png");
+                String out(output_dir());
+                out.append("/main-screen.png", ascii_encoding());
+                DumpTo(out);
             }
             evt->what = autoKey;
             _key_down = true;
@@ -102,7 +112,7 @@ bool MainScreenVideoDriver::wait_next_event(EventRecord* evt, double) {
 
 int MainScreenVideoDriver::get_demo_scenario() { return -1; }
 
-MissionBriefingVideoDriver::MissionBriefingVideoDriver(const std::string& output_dir, int level)
+MissionBriefingVideoDriver::MissionBriefingVideoDriver(const StringPiece& output_dir, int level)
         : TestingVideoDriver(output_dir),
           _level(level),
           _briefing_num(0),
@@ -134,7 +144,9 @@ bool MissionBriefingVideoDriver::wait_next_event(EventRecord* evt, double) {
                 _key_down = false;
             } else {
                 if (!output_dir().empty()) {
-                    DumpTo(output_dir() + "/select-level.png");
+                    String out(output_dir());
+                    out.append("/select-level.png", ascii_encoding());
+                    DumpTo(out);
                 }
                 evt->what = autoKey;
                 _key_down = true;
@@ -144,14 +156,14 @@ bool MissionBriefingVideoDriver::wait_next_event(EventRecord* evt, double) {
         return true;
       case MISSION_INTERFACE:
         {
-            char path[64];
             if (_key_down) {
                 evt->what = keyUp;
                 _key_down = false;
             } else {
-                sprintf(path, "/mission-%u.png", _briefing_num);
                 if (!output_dir().empty()) {
-                    DumpTo(output_dir() + path);
+                    String out(output_dir());
+                    format(&out, "/mission-{0}.png", _briefing_num);
+                    DumpTo(out);
                 }
                 ++_briefing_num;
                 evt->what = autoKey;
@@ -178,7 +190,7 @@ void MissionBriefingVideoDriver::get_keys(KeyMap keys) {
     }
 }
 
-DemoVideoDriver::DemoVideoDriver(const std::string& output_dir, int level)
+DemoVideoDriver::DemoVideoDriver(const StringPiece& output_dir, int level)
         : TestingVideoDriver(output_dir),
           _level(level),
           _started_replay(false),
@@ -216,7 +228,9 @@ void DemoVideoDriver::main_loop_iteration_complete(uint32_t game_time) {
         uint32_t seconds = game_time / 60;
         sprintf(path, "/screens/%03um%02u.png", seconds / 60, seconds % 60);
         if (!output_dir().empty()) {
-            DumpTo(output_dir() + path);
+            String out(output_dir());
+            format(&out, "/screens/{0}m{1}.png", dec(seconds / 60, 3), dec(seconds % 60, 2));
+            DumpTo(out);
         }
     }
 }

@@ -27,7 +27,6 @@ namespace antares {
 
 void FakeInit(int argc, char* const* argv);
 int GetDemoScenario();
-const std::string& get_output_dir();
 int Munger(std::string* data, int pos, const unsigned char* search, size_t search_len,
         const unsigned char* replace, size_t replace_len);
 

@@ -31,6 +31,7 @@
 using sfz::Bytes;
 using sfz::BytesBinaryWriter;
 using sfz::scoped_ptr;
+using sfz::utf8_encoding;
 
 namespace antares {
 
@@ -42,12 +43,12 @@ scoped_ptr<ColorTable> colors;
 
 }  // namespace
 
-void DumpTo(const std::string& path) {
+void DumpTo(const sfz::StringPiece& path) {
     Bytes contents;
     BytesBinaryWriter(&contents).write(*gRealWorld);
 
     MakeDirs(DirName(path), 0755);
-    int fd = open(path.c_str(), O_WRONLY | O_CREAT, 0644);
+    int fd = open_path(path, O_WRONLY | O_CREAT, 0644);
     write(fd, contents.data(), contents.size());
     close(fd);
 }

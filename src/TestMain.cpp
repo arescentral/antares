@@ -20,7 +20,12 @@
 #include <sys/time.h>
 #include <getopt.h>
 #include <queue>
-#include <string>
+
+#include "sfz/Exception.hpp"
+#include "sfz/Format.hpp"
+#include "sfz/Formatter.hpp"
+#include "sfz/String.hpp"
+#include "sfz/StringUtilities.hpp"
 
 #include "AresMain.hpp"
 #include "AresPreferences.hpp"
@@ -36,12 +41,21 @@
 #include "VideoDriver.hpp"
 #include "VncServer.hpp"
 
+using sfz::Exception;
+using sfz::String;
+using sfz::StringPiece;
+using sfz::ascii_encoding;
+using sfz::print;
+using sfz::quote;
+using sfz::string_to_int32_t;
+using sfz::utf8_encoding;
+
 namespace antares {
 
-void usage(const char* bin) {
-    fprintf(
-            stderr,
-            "usage: %s <test> [<options>]\n"
+void usage(const StringPiece& program_name) {
+    print(
+            2,
+            "usage: {0} <test> [<options>]\n"
             "options:\n"
             "    -l|--level=<int>   choose a level to use in the given mode\n"
             "    -o|--output=<dir>  directory to save dumps to\n"
@@ -49,20 +63,8 @@ void usage(const char* bin) {
             "    main-screen        dumps the main screen, then exits\n"
             "    mission-briefing   dumps the mission briefing screens for <level>\n"
             "    demo               runs the demo for <level>\n",
-            bin);
+            program_name);
     exit(1);
-}
-
-int string_to_int(const char* string) {
-    int value = 0;
-    char* end = NULL;
-    if (string && *string) {
-        value = strtol(string, &end, 10);
-    }
-    if (!string || end != string + strlen(string)) {
-        fail("Couldn't parse '%s' as an integer", string);
-    }
-    return value;
 }
 
 enum Test {
@@ -85,9 +87,9 @@ Test string_to_test(const char* string) {
 }
 
 void TestMain(int argc, char* const* argv) {
-    const char* bin = argv[0];
+    StringPiece program_name(argv[0], utf8_encoding());
     int level = -1;
-    std::string output_dir;
+    String output_dir;
     option longopts[] = {
         { "level",          required_argument,  NULL,   'l' },
         { "output",         required_argument,  NULL,   'o' },
@@ -95,7 +97,7 @@ void TestMain(int argc, char* const* argv) {
     };
 
     if (argc < 2) {
-        usage(bin);
+        usage(program_name);
     }
     Test test = string_to_test(argv[1]);
     argc -= 1;
@@ -105,20 +107,25 @@ void TestMain(int argc, char* const* argv) {
     while ((ch = getopt_long(argc, argv, "l:o:", longopts, NULL)) != -1) {
         switch (ch) {
           case 'l':
-            level = string_to_int(optarg);
+            {
+                StringPiece opt(optarg, utf8_encoding());
+                if (!string_to_int32_t(opt, &level)) {
+                    throw Exception("invalid level {0}", quote(opt));
+                }
+            }
             break;
 
           case 'o':
             if (!*optarg) {
-                fprintf(stderr, "%s: --output-dir must not be empty\n", bin);
-                usage(bin);
+                print(2, "{0}: --output-dir must not be empty\n", program_name);
+                usage(program_name);
             }
-            output_dir = optarg;
+            output_dir.assign(optarg, utf8_encoding());
             break;
 
           default:
-            fprintf(stderr, "%s: unknown argument %s\n", bin, argv[optind]);
-            usage(bin);
+            print(2, "{0}: unknown argument {1}\n", program_name, argv[optind]);
+            usage(program_name);
             break;
         }
     }
@@ -126,8 +133,8 @@ void TestMain(int argc, char* const* argv) {
     argc -= optind;
     argv += optind;
     if (argc != 0) {
-        fprintf(stderr, "%s: too many arguments\n", bin);
-        usage(bin);
+        print(2, "{0}: too many arguments\n", program_name);
+        usage(program_name);
     }
 
     if (!output_dir.empty()) {
@@ -151,7 +158,9 @@ void TestMain(int argc, char* const* argv) {
         if (output_dir.empty()) {
             SoundDriver::set_driver(new NullSoundDriver);
         } else {
-            SoundDriver::set_driver(new LogSoundDriver(output_dir + "/sound.log"));
+            String out(output_dir);
+            out.append("/sound.log", ascii_encoding());
+            SoundDriver::set_driver(new LogSoundDriver(out));
         }
         VideoDriver::set_driver(new DemoVideoDriver(output_dir, level));
         break;

@@ -35,16 +35,6 @@
 
 namespace antares {
 
-namespace {
-
-std::string output_dir;
-
-}  // namespace
-
-const std::string& get_output_dir() {
-    return output_dir;
-}
-
 int GetDemoScenario() {
     return VideoDriver::driver()->get_demo_scenario();
 }

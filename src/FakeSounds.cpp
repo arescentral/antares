@@ -17,12 +17,20 @@
 
 #include "FakeSounds.hpp"
 
-#include <stdio.h>
+#include <fcntl.h>
+#include "sfz/Exception.hpp"
+#include "sfz/Format.hpp"
 #include "Sound.h"
 #include "Error.hpp"
 #include "Fakes.hpp"
+#include "File.hpp"
 
+using sfz::Bytes;
+using sfz::Exception;
+using sfz::StringPiece;
+using sfz::print;
 using sfz::scoped_ptr;
+using sfz::utf8_encoding;
 
 namespace antares {
 
@@ -33,7 +41,9 @@ scoped_ptr<SoundDriver> sound_driver;
 }  // namespace
 
 void SoundDriver::set_driver(SoundDriver* driver) {
-    check(driver, "tried to set NULL SoundDriver");
+    if (!driver) {
+        throw Exception("tried to set NULL SoundDriver");
+    }
     sound_driver.reset(driver);
 }
 
@@ -41,27 +51,28 @@ void NullSoundDriver::play(int32_t, int32_t) { }
 void NullSoundDriver::amp(int32_t, uint8_t) { }
 void NullSoundDriver::quiet(int32_t) { }
 
-LogSoundDriver::LogSoundDriver(const std::string& path)
-        : _sound_log(fopen(path.c_str(), "w")) {
-    check(_sound_log, "Couldn't open sound log");
-    setbuf(_sound_log, NULL);
+LogSoundDriver::LogSoundDriver(const StringPiece& path)
+        : _sound_log(open_path(path, O_CREAT | O_WRONLY, 0644)) {
+    if (_sound_log.get() < 0) {
+        throw Exception("Couldn't open sound log");
+    }
 }
 
 void LogSoundDriver::play(int32_t channel, int32_t id) {
     if (globals()->gGameTime > 0) {
-        fprintf(_sound_log, "play\t%d\t%ld\t%d\n", channel, globals()->gGameTime, id);
+        print(_sound_log.get(), "play\t{0}\t{1}\t{2}\n", channel, globals()->gGameTime, id);
     }
 }
 
 void LogSoundDriver::amp(int32_t channel, uint8_t volume) {
     if (globals()->gGameTime > 0) {
-        fprintf(_sound_log, "amp\t%d\t%ld\t%d\n", channel, globals()->gGameTime, volume);
+        print(_sound_log.get(), "amp\t{0}\t{1}\t{2}\n", channel, globals()->gGameTime, volume);
     }
 }
 
 void LogSoundDriver::quiet(int32_t channel) {
     if (globals()->gGameTime > 0) {
-        fprintf(_sound_log, "quiet\t%d\t%ld\n", channel, globals()->gGameTime);
+        print(_sound_log.get(), "quiet\t{0}\t{1}\n", channel, globals()->gGameTime);
     }
 }
 

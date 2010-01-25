@@ -20,15 +20,22 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include "sfz/Exception.hpp"
+#include "sfz/Foreach.hpp"
+#include "sfz/Format.hpp"
 #include "sfz/MappedFile.hpp"
+#include "sfz/StringUtilities.hpp"
 #include "File.hpp"
 
 using sfz::Bytes;
 using sfz::Exception;
 using sfz::MappedFile;
 using sfz::String;
+using sfz::StringPiece;
 using sfz::ascii_encoding;
+using sfz::format;
+using sfz::print;
 using sfz::scoped_ptr;
+using sfz::string_to_int32_t;
 using sfz::utf8_encoding;
 
 namespace antares {
@@ -38,12 +45,6 @@ Ledger::~Ledger() { }
 namespace {
 
 Ledger* ledger;
-
-void append_int(int i, std::string* out) {
-    char buffer[20];
-    sprintf(buffer, "%d", i);
-    out->append(buffer);
-}
 
 }  // namespace
 
@@ -93,22 +94,20 @@ void DirectoryLedger::load() {
         return;
     }
 
-    // Copy file data into a string, so that it's NUL-terminated, then close the file.
-    const std::string data(reinterpret_cast<const char*>(file->data().data()), file->data().size());
-    file.reset();
+    StringPiece data(file->data(), utf8_encoding());
 
     // This is not a real JSON parser, but it plays on on the Interstellar News Network.  It simply
     // finds all integers in the file, which is fine for now.  The only numerical data we currently
     // write to the ledger is the chapter numbers, and all chapter numbers are integers.
-    const char* pos = data.c_str();
-    while (*pos) {
-        char* end;
-        int chapter = strtol(pos, &end, 10);
-        if (pos == end) {
-            ++pos;
-        } else {
+    foreach (it, data) {
+        String number;
+        while ('0' <= *it && *it <= '9') {
+            number.append(1, *it);
+            ++it;
+        }
+        int32_t chapter;
+        if (number.size() > 0 && string_to_int32_t(number, &chapter)) {
             _chapters.insert(chapter);
-            pos = end;
         }
     }
 }
@@ -116,20 +115,23 @@ void DirectoryLedger::load() {
 void DirectoryLedger::save() {
     String path(_directory);
     path.append("/com.biggerplanet.ares.json", ascii_encoding());
-    std::string contents = "{\n  \"unlocked-levels\" = [";
-    for (std::set<int>::const_iterator it = _chapters.begin(); it != _chapters.end(); ++it) {
-        if (it != _chapters.begin()) {
-            contents.append(", ");
-        }
-        append_int(*it, &contents);
-    }
-    contents.append("]\n}\n");
 
-    Bytes path_bytes(path, utf8_encoding());
-    path_bytes.resize(path_bytes.size() + 1);
-    MakeDirs(DirName(reinterpret_cast<const char*>(path_bytes.data())), 0755);
-    int fd = open(reinterpret_cast<const char*>(path_bytes.data()), O_WRONLY | O_CREAT, 0644);
-    write(fd, contents.c_str(), contents.size());
+    String contents;
+    contents.append("{\n", ascii_encoding());
+    contents.append("  \"unlocked-levels\" = [", ascii_encoding());
+    for (std::set<int>::const_iterator it = _chapters.begin(); it != _chapters.end(); ++it) {
+        if (it == _chapters.begin()) {
+            format(&contents, "{0}", *it);
+        } else {
+            format(&contents, ", {0}", *it);
+        }
+    }
+    contents.append("]\n", ascii_encoding());
+    contents.append("}\n", ascii_encoding());
+
+    MakeDirs(DirName(path), 0755);
+    int fd = open_path(path, O_WRONLY | O_CREAT, 0644);
+    print(fd, "{0}", contents);
     close(fd);
 }
 

@@ -17,18 +17,23 @@
 
 #include "File.hpp"
 
+#include <fcntl.h>
 #include "sfz/Exception.hpp"
 
+using sfz::Bytes;
 using sfz::Exception;
+using sfz::StringPiece;
+using sfz::ascii_encoding;
+using sfz::utf8_encoding;
 
 namespace antares {
 
-std::string BaseName(const std::string& path) {
-    if (path == "/") {
-        return "/";
+StringPiece BaseName(const StringPiece& path) {
+    if (path == StringPiece("/", ascii_encoding())) {
+        return path;
     }
-    std::string::size_type pos = path.rfind('/', path.size() - 1);
-    if (pos == std::string::npos) {
+    size_t pos = path.rfind('/', path.size() - 1);
+    if (pos == StringPiece::kNone) {
         return path;
     } else if (pos == path.size() - 1) {
         return BaseName(path.substr(0, path.size() - 1));
@@ -37,12 +42,12 @@ std::string BaseName(const std::string& path) {
     }
 }
 
-std::string DirName(const std::string& path) {
-    std::string::size_type pos = path.rfind('/', path.size() - 1);
+StringPiece DirName(const StringPiece& path) {
+    size_t pos = path.rfind('/', path.size() - 1);
     if (pos == 0) {
-        return "/";
-    } else if (pos == std::string::npos) {
-        return ".";
+        return StringPiece("/", ascii_encoding());
+    } else if (pos == StringPiece::kNone) {
+        return StringPiece(".", ascii_encoding());
     } else if (pos == path.size() - 1) {
         return DirName(path.substr(0, path.size() - 1));
     } else {
@@ -50,23 +55,33 @@ std::string DirName(const std::string& path) {
     }
 }
 
-bool IsDir(const std::string& path) {
+bool IsDir(const StringPiece& path) {
+    Bytes path_bytes(path, utf8_encoding());
+    path_bytes.resize(path_bytes.size() + 1);
     struct stat st;
-    return stat(path.c_str(), &st) == 0
+    return stat(reinterpret_cast<const char*>(path_bytes.data()), &st) == 0
         && (st.st_mode & S_IFDIR);
 }
 
-void Mkdir(const std::string& path, mode_t mode) {
-    if (mkdir(path.c_str(), mode) != 0) {
+void Mkdir(const StringPiece& path, mode_t mode) {
+    Bytes path_bytes(path, utf8_encoding());
+    path_bytes.resize(path_bytes.size() + 1);
+    if (mkdir(reinterpret_cast<const char*>(path_bytes.data()), mode) != 0) {
         throw Exception("TODO(sfiera): posix error message");
     }
 }
 
-void MakeDirs(const std::string& path, mode_t mode) {
+void MakeDirs(const StringPiece& path, mode_t mode) {
     if (!IsDir(path)) {
         MakeDirs(DirName(path), mode);
         Mkdir(path, mode);
     }
+}
+
+int open_path(const StringPiece& path, int oflag, mode_t mode) {
+    Bytes path_bytes(path, utf8_encoding());
+    path_bytes.resize(path_bytes.size() + 1);
+    return open(reinterpret_cast<const char*>(path_bytes.data()), oflag, mode);
 }
 
 }  // namespace antares

@@ -19,6 +19,7 @@
 #define ANTARES_FAKE_DRAWING_HPP_
 
 #include <stdint.h>
+#include "sfz/String.hpp"
 #include "Quickdraw.h"
 
 #include "Fakes.hpp"
@@ -32,7 +33,7 @@ extern PixMap* gOffWorld;
 extern PixMap* gRealWorld;
 extern PixMap* gSaveWorld;
 
-void DumpTo(const std::string& path);
+void DumpTo(const sfz::StringPiece& path);
 void FakeDrawingInit(int width, int height);
 
 }  // namespace antares

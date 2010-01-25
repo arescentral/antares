@@ -18,7 +18,8 @@
 #ifndef ANTARES_FAKE_SOUNDS_HPP_
 #define ANTARES_FAKE_SOUNDS_HPP_
 
-#include <string>
+#include "sfz/String.hpp"
+#include "sfz/ScopedFd.hpp"
 #include "Base.h"
 
 namespace antares {
@@ -42,13 +43,13 @@ class NullSoundDriver : public SoundDriver {
 
 class LogSoundDriver : public SoundDriver {
   public:
-    LogSoundDriver(const std::string& path);
+    LogSoundDriver(const sfz::StringPiece& path);
     virtual void play(int32_t channel, int32_t id);
     virtual void amp(int32_t channel, uint8_t volume);
     virtual void quiet(int32_t channel);
 
   private:
-    FILE* _sound_log;
+    sfz::ScopedFd _sound_log;
 };
 
 struct Sound {

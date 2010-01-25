@@ -19,15 +19,17 @@
 #define ANTARES_FILE_HPP_
 
 #include <sys/stat.h>
-#include <string>
+#include "sfz/String.hpp"
 
 namespace antares {
 
-bool IsDir(const std::string& path);
-void Mkdir(const std::string& path, mode_t mode);
-void MakeDirs(const std::string& path, mode_t mode);
-std::string BaseName(const std::string& path);
-std::string DirName(const std::string& path);
+bool IsDir(const sfz::StringPiece& path);
+void Mkdir(const sfz::StringPiece& path, mode_t mode);
+void MakeDirs(const sfz::StringPiece& path, mode_t mode);
+sfz::StringPiece BaseName(const sfz::StringPiece& path);
+sfz::StringPiece DirName(const sfz::StringPiece& path);
+
+int open_path(const sfz::StringPiece& path, int oflag, mode_t mode = 0644);
 
 }  // namespace antares
 

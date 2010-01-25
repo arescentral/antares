@@ -18,7 +18,7 @@
 #ifndef ANTARES_TEST_VIDEO_DRIVER_HPP_
 #define ANTARES_TEST_VIDEO_DRIVER_HPP_
 
-#include <string>
+#include "sfz/String.hpp"
 #include "CardStack.hpp"
 #include "VideoDriver.hpp"
 
@@ -26,7 +26,7 @@ namespace antares {
 
 class TestingVideoDriver : public VideoDriver {
   public:
-    TestingVideoDriver(const std::string& output_dir);
+    TestingVideoDriver(const sfz::StringPiece& output_dir);
 
     virtual void send_event(EventRecord);
     virtual bool button();
@@ -40,17 +40,17 @@ class TestingVideoDriver : public VideoDriver {
 
   protected:
     GameState state() const;
-    const std::string& output_dir() const;
+    sfz::StringPiece output_dir() const;
 
   private:
     int _current_time;
     GameState _state;
-    const std::string _output_dir;
+    const sfz::String _output_dir;
 };
 
 class MainScreenVideoDriver : public TestingVideoDriver {
   public:
-    MainScreenVideoDriver(const std::string& output_dir);
+    MainScreenVideoDriver(const sfz::StringPiece& output_dir);
 
     virtual bool wait_next_event(EventRecord*, double);
     virtual int get_demo_scenario();
@@ -61,7 +61,7 @@ class MainScreenVideoDriver : public TestingVideoDriver {
 
 class MissionBriefingVideoDriver : public TestingVideoDriver {
   public:
-    MissionBriefingVideoDriver(const std::string& output_dir, int level);
+    MissionBriefingVideoDriver(const sfz::StringPiece& output_dir, int level);
 
     virtual bool wait_next_event(EventRecord* evt, double);
     virtual int get_demo_scenario();
@@ -75,7 +75,7 @@ class MissionBriefingVideoDriver : public TestingVideoDriver {
 
 class DemoVideoDriver : public TestingVideoDriver {
   public:
-    DemoVideoDriver(const std::string& output_dir, int level);
+    DemoVideoDriver(const sfz::StringPiece& output_dir, int level);
 
     virtual bool wait_next_event(EventRecord*, double);
     virtual int get_demo_scenario();
