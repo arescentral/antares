@@ -2272,7 +2272,6 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
     Rect            dataRect;
     Rect        lRect, longClipRect;
     baseObjectType  *baseObject = gBaseObjectData.get();// + (pictID - kFirstShipDataPictID);
-    Str255          tempString, numString;
     retroTextSpecType   retroTextSpec;
     long            height, waitTime, i;
 
@@ -2290,68 +2289,8 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
     {
         HideCursor();
 
-        Resource rsrc('TEXT', kShipDataTextID);
-        retroTextSpec.text.reset(new std::string(
-                    reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size()));
+        retroTextSpec.text.reset(new std::string(CreateObjectDataText(i)));
         if ( retroTextSpec.text.get() != nil) {
-            // *** Replace place-holders in text with real data, using the fabulous Munger routine
-            // an object or a ship?
-            if ( baseObject->attributes & kCanThink)
-                GetIndString( numString, kShipDataNameID, 1);
-            else
-                GetIndString( numString, kShipDataNameID, 2);
-
-            GetIndString( tempString, kShipDataKeyStringID, kShipOrObjectStringNum);
-            Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
-
-            // ship name
-//          GetIndString( numString, 5000, pictID - kFirstShipDataPictID + 1);
-            GetIndString( numString, 5000, i + 1);
-            GetIndString( tempString, kShipDataKeyStringID, kShipTypeStringNum);
-            Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
-
-            // ship mass
-            SmallFixedToString( baseObject->mass, numString);
-            GetIndString( tempString, kShipDataKeyStringID, kMassStringNum);
-            Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
-
-            // ship shields
-            NumToString( baseObject->health, numString);
-            GetIndString( tempString, kShipDataKeyStringID, kShieldStringNum);
-            Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
-
-            // light speed
-            NumToString( baseObject->warpSpeed, numString);
-            GetIndString( tempString, kShipDataKeyStringID, kHasLightStringNum);
-            Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
-
-            // max velocity
-            SmallFixedToString( baseObject->maxVelocity, numString);
-            GetIndString( tempString, kShipDataKeyStringID, kMaxSpeedStringNum);
-            Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
-
-            // thrust
-            SmallFixedToString( baseObject->maxThrust, numString);
-            GetIndString( tempString, kShipDataKeyStringID, kThrustStringNum);
-            Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
-
-            // par turn
-            SmallFixedToString( baseObject->frame.rotation.turnAcceleration, numString);
-            GetIndString( tempString, kShipDataKeyStringID, kTurnStringNum);
-            Munger(retroTextSpec.text.get(), 0, (tempString + 1), *tempString, numString + 1, *numString);
-
-            // now, check for weapons!
-
-
-            GetIndString(numString, kShipDataNameID, kShipDataPulseStringNum);
-            *retroTextSpec.text += CreateWeaponDataText(baseObject->pulse, numString);
-
-            GetIndString(numString, kShipDataNameID, kShipDataBeamStringNum);
-            *retroTextSpec.text += CreateWeaponDataText(baseObject->beam, numString);
-
-            GetIndString(numString, kShipDataNameID, kShipDataSpecialStringNum);
-            *retroTextSpec.text += CreateWeaponDataText(baseObject->special, numString);
-
             retroTextSpec.textLength = retroTextSpec.text->size();
 
             mSetDirectFont( kButtonFontNum);
@@ -2426,6 +2365,73 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
 
         CopyOffWorldToRealWorld(dataRect);
     }
+}
+
+std::string CreateObjectDataText(short id) {
+    Resource rsrc('TEXT', kShipDataTextID);
+    std::string result(reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size());
+
+    Str255 tempString, numString;
+    const baseObjectType& baseObject = gBaseObjectData.get()[id];
+
+    // *** Replace place-holders in text with real data, using the fabulous Munger routine
+    // an object or a ship?
+    if ( baseObject.attributes & kCanThink) {
+        GetIndString(numString, kShipDataNameID, 1);
+    } else {
+        GetIndString(numString, kShipDataNameID, 2);
+    }
+
+    GetIndString( tempString, kShipDataKeyStringID, kShipOrObjectStringNum);
+    Munger(&result, 0, (tempString + 1), *tempString, numString + 1, *numString);
+
+    // ship name
+    //          GetIndString( numString, 5000, pictID - kFirstShipDataPictID + 1);
+    GetIndString( numString, 5000, id + 1);
+    GetIndString( tempString, kShipDataKeyStringID, kShipTypeStringNum);
+    Munger(&result, 0, (tempString + 1), *tempString, numString + 1, *numString);
+
+    // ship mass
+    SmallFixedToString( baseObject.mass, numString);
+    GetIndString( tempString, kShipDataKeyStringID, kMassStringNum);
+    Munger(&result, 0, (tempString + 1), *tempString, numString + 1, *numString);
+
+    // ship shields
+    NumToString( baseObject.health, numString);
+    GetIndString( tempString, kShipDataKeyStringID, kShieldStringNum);
+    Munger(&result, 0, (tempString + 1), *tempString, numString + 1, *numString);
+
+    // light speed
+    NumToString( baseObject.warpSpeed, numString);
+    GetIndString( tempString, kShipDataKeyStringID, kHasLightStringNum);
+    Munger(&result, 0, (tempString + 1), *tempString, numString + 1, *numString);
+
+    // max velocity
+    SmallFixedToString( baseObject.maxVelocity, numString);
+    GetIndString( tempString, kShipDataKeyStringID, kMaxSpeedStringNum);
+    Munger(&result, 0, (tempString + 1), *tempString, numString + 1, *numString);
+
+    // thrust
+    SmallFixedToString( baseObject.maxThrust, numString);
+    GetIndString( tempString, kShipDataKeyStringID, kThrustStringNum);
+    Munger(&result, 0, (tempString + 1), *tempString, numString + 1, *numString);
+
+    // par turn
+    SmallFixedToString( baseObject.frame.rotation.turnAcceleration, numString);
+    GetIndString( tempString, kShipDataKeyStringID, kTurnStringNum);
+    Munger(&result, 0, (tempString + 1), *tempString, numString + 1, *numString);
+
+    // now, check for weapons!
+    GetIndString(numString, kShipDataNameID, kShipDataPulseStringNum);
+    result += CreateWeaponDataText(baseObject.pulse, numString);
+
+    GetIndString(numString, kShipDataNameID, kShipDataBeamStringNum);
+    result += CreateWeaponDataText(baseObject.beam, numString);
+
+    GetIndString(numString, kShipDataNameID, kShipDataSpecialStringNum);
+    result += CreateWeaponDataText(baseObject.special, numString);
+
+    return result;
 }
 
 std::string CreateWeaponDataText(long whichWeapon, unsigned char* weaponName) {

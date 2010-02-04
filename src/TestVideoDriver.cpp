@@ -17,21 +17,31 @@
 
 #include "TestVideoDriver.hpp"
 
+#include <fcntl.h>
+#include "sfz/Exception.hpp"
 #include "sfz/Format.hpp"
 #include "sfz/Formatter.hpp"
+#include "sfz/PosixFormatter.hpp"
+#include "sfz/ScopedFd.hpp"
 #include "AresPreferences.hpp"
 #include "Card.hpp"
 #include "Error.hpp"
 #include "FakeDrawing.hpp"
 #include "Fakes.hpp"
+#include "File.hpp"
 #include "Ledger.hpp"
+#include "PlayerInterface.hpp"
+#include "SpaceObject.hpp"
 #include "Time.hpp"
 
+using sfz::Exception;
+using sfz::ScopedFd;
 using sfz::String;
 using sfz::StringPiece;
 using sfz::ascii_encoding;
 using sfz::dec;
 using sfz::format;
+using sfz::posix_strerror;
 
 namespace antares {
 
@@ -234,5 +244,45 @@ void DemoVideoDriver::main_loop_iteration_complete(uint32_t game_time) {
         }
     }
 }
+
+ObjectDataVideoDriver::ObjectDataVideoDriver(const StringPiece& output_dir)
+        : TestingVideoDriver(output_dir),
+          _key_down(false) { }
+
+bool ObjectDataVideoDriver::wait_next_event(EventRecord* evt, double) {
+    if (state() == MAIN_SCREEN_INTERFACE) {
+        if (_key_down) {
+            evt->what = keyUp;
+            _key_down = false;
+        } else {
+            if (!output_dir().empty()) {
+                for (int i = 0; i < globals()->maxBaseObject; ++i) {
+                    int pict_id = gBaseObjectData.get()[i].pictPortraitResID;
+                    if (pict_id <= 0) {
+                        continue;
+                    }
+
+                    String path;
+                    format(&path, "{0}/{1}.txt", output_dir(), dec(pict_id, 5));
+                    ScopedFd fd(open_path(path, O_WRONLY | O_CREAT, 0644));
+                    if (fd.get() < 0) {
+                        throw Exception("open: {0}: {1}", path, posix_strerror());
+                    }
+
+                    std::string data = CreateObjectDataText(i);
+                    write(fd.get(), data.data(), data.size());
+                }
+            }
+            evt->what = autoKey;
+            _key_down = true;
+        }
+        evt->message = 0x0C00;  // Q
+        return true;
+    } else {
+        return false;
+    }
+}
+
+int ObjectDataVideoDriver::get_demo_scenario() { return -1; }
 
 }  // namespace antares

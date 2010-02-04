@@ -20,6 +20,7 @@ ALL_TEST_CASES = {
     'space-race': ['demo', '--level=23'],
     'the-stars-have-ears': ['demo', '--level=0'],
     'while-the-iron-is-hot': ['demo', '--level=5'],
+    'object-data': ['object-data'],
 }
 SCRIPT_NAME = os.path.basename(sys.argv[0])
 

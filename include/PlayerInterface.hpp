@@ -82,6 +82,7 @@ bool DoMissionInterface( long);
 long UpdateMissionBriefPoint( interfaceItemType *, long, long, coordPointType *, long, long,
         Rect *, Rect *, inlinePictType *);
 void ShowObjectData( Point, short, Rect *);
+std::string CreateObjectDataText(short id);
 std::string CreateWeaponDataText(long, unsigned char*);
 void DoMissionDebriefingText(long, long, long, long, long, long, long, long);
 void DoScrollText(long, long, long, long, long);
