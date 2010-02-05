@@ -18,12 +18,16 @@
 #include "TestVideoDriver.hpp"
 
 #include <fcntl.h>
+#include "sfz/BinaryWriter.hpp"
+#include "sfz/Bytes.hpp"
 #include "sfz/Exception.hpp"
 #include "sfz/Format.hpp"
 #include "sfz/Formatter.hpp"
 #include "sfz/PosixFormatter.hpp"
 #include "sfz/ScopedFd.hpp"
+#include "sfz/SmartPtr.hpp"
 #include "AresPreferences.hpp"
+#include "BuildPix.hpp"
 #include "Card.hpp"
 #include "Error.hpp"
 #include "FakeDrawing.hpp"
@@ -34,6 +38,8 @@
 #include "SpaceObject.hpp"
 #include "Time.hpp"
 
+using sfz::Bytes;
+using sfz::BytesBinaryWriter;
 using sfz::Exception;
 using sfz::ScopedFd;
 using sfz::String;
@@ -42,6 +48,7 @@ using sfz::ascii_encoding;
 using sfz::dec;
 using sfz::format;
 using sfz::posix_strerror;
+using sfz::scoped_ptr;
 
 namespace antares {
 
@@ -284,5 +291,50 @@ bool ObjectDataVideoDriver::wait_next_event(EventRecord* evt, double) {
 }
 
 int ObjectDataVideoDriver::get_demo_scenario() { return -1; }
+
+BuildPixVideoDriver::BuildPixVideoDriver(const StringPiece& output_dir)
+        : TestingVideoDriver(output_dir),
+          _key_down(false) { }
+
+bool BuildPixVideoDriver::wait_next_event(EventRecord* evt, double) {
+    if (state() == MAIN_SCREEN_INTERFACE) {
+        if (_key_down) {
+            evt->what = keyUp;
+            _key_down = false;
+        } else {
+            if (!output_dir().empty()) {
+                const int text_count = 13;
+                const int text[text_count] = {
+                    3020, 3025, 3080, 3081, 3120, 3211, 4063, 4509, 4606, 5600, 6500, 6501, 10199,
+                };
+                const int width[text_count] = {
+                    450, 450, 450, 450, 450, 450, 450, 450, 450, 450, 540, 450, 450,
+                };
+                for (int i = 0; i < text_count; ++i) {
+                    scoped_ptr<PixMap> pix(build_pix(text[i], width[i]));
+
+                    String path;
+                    format(&path, "{0}/{1}.png", output_dir(), dec(text[i], 5));
+                    ScopedFd fd(open_path(path, O_WRONLY | O_CREAT, 0644));
+                    if (fd.get() < 0) {
+                        throw Exception("open: {0}: {1}", path, posix_strerror());
+                    }
+
+                    Bytes data;
+                    BytesBinaryWriter(&data).write(*pix);
+                    write(fd.get(), data.data(), data.size());
+                }
+            }
+            evt->what = autoKey;
+            _key_down = true;
+        }
+        evt->message = 0x0C00;  // Q
+        return true;
+    } else {
+        return false;
+    }
+}
+
+int BuildPixVideoDriver::get_demo_scenario() { return -1; }
 
 }  // namespace antares

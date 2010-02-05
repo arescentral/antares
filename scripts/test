@@ -21,6 +21,7 @@ ALL_TEST_CASES = {
     'the-stars-have-ears': ['demo', '--level=0'],
     'while-the-iron-is-hot': ['demo', '--level=5'],
     'object-data': ['object-data'],
+    'build-pix': ['build-pix'],
 }
 SCRIPT_NAME = os.path.basename(sys.argv[0])
 

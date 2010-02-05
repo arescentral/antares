@@ -24,8 +24,6 @@
 
 namespace antares {
 
-class ScrollTextScreen;
-
 class SelectLevelScreen : public InterfaceScreen {
   public:
     SelectLevelScreen(bool* cancelled, int* scenario);

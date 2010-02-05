@@ -58,6 +58,7 @@
                 'src/Beam.cpp',
                 'src/BriefingRenderer.cpp',
                 'src/BriefingScreen.cpp',
+                'src/BuildPix.cpp',
                 'src/Card.cpp',
                 'src/CardStack.cpp',
                 'src/ColorTable.cpp',

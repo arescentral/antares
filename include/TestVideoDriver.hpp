@@ -98,6 +98,17 @@ class ObjectDataVideoDriver : public TestingVideoDriver {
     bool _key_down;
 };
 
+class BuildPixVideoDriver : public TestingVideoDriver {
+  public:
+    BuildPixVideoDriver(const sfz::StringPiece& output_dir);
+
+    virtual bool wait_next_event(EventRecord*, double);
+    virtual int get_demo_scenario();
+
+  public:
+    bool _key_down;
+};
+
 }  // namespace antares
 
 #endif  // ANTARES_TEST_VIDEO_DRIVER_HPP_

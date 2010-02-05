@@ -74,6 +74,7 @@ enum Test {
     TEST_MISSION_BRIEFING,
     TEST_DEMO,
     TEST_OBJECT_DATA,
+    TEST_BUILD_PIX,
 };
 
 Test string_to_test(const char* string) {
@@ -85,6 +86,8 @@ Test string_to_test(const char* string) {
         return TEST_DEMO;
     } else if (strcmp(string, "object-data") == 0) {
         return TEST_OBJECT_DATA;
+    } else if (strcmp(string, "build-pix") == 0) {
+        return TEST_BUILD_PIX;
     } else {
         return TEST_UNKNOWN;
     }
@@ -172,6 +175,11 @@ void TestMain(int argc, char* const* argv) {
       case TEST_OBJECT_DATA:
         SoundDriver::set_driver(new NullSoundDriver);
         VideoDriver::set_driver(new ObjectDataVideoDriver(output_dir));
+        break;
+
+      case TEST_BUILD_PIX:
+        SoundDriver::set_driver(new NullSoundDriver);
+        VideoDriver::set_driver(new BuildPixVideoDriver(output_dir));
         break;
 
       case TEST_UNKNOWN:

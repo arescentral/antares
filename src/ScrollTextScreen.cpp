@@ -17,20 +17,12 @@
 
 #include "ScrollTextScreen.hpp"
 
-#include <string>
-#include <vector>
 #include "AresGlobalType.hpp"
+#include "BuildPix.hpp"
 #include "CardStack.hpp"
-#include "ColorTranslation.hpp"
-#include "DirectText.hpp"
-#include "Error.hpp"
 #include "FakeDrawing.hpp"
-#include "MessageScreen.hpp"
 #include "Music.hpp"
 #include "Options.hpp"
-#include "Picture.hpp"
-#include "Resource.hpp"
-#include "RetroText.hpp"
 #include "Time.hpp"
 
 using sfz::scoped_ptr;
@@ -40,120 +32,6 @@ namespace antares {
 namespace {
 
 const int kScrollTextHeight = 200;
-
-int string_to_int(const std::string str) {
-    if (str.size() > 0) {
-        char* end;
-        int value = strtol(str.c_str(), &end, 10);
-        if (end == str.c_str() + str.size()) {
-            return value;
-        }
-    }
-    fail("Couldn't parse '%s' as an integer", str.c_str());
-}
-
-class ScrollTextPixBuilder {
-  public:
-    ScrollTextPixBuilder(ArrayPixMap* pix)
-            : _pix(pix) { }
-
-    void set_background(int id) {
-        _background.reset(new Picture(id));
-        _background_start = _pix->bounds().bottom;
-    }
-
-    void add_picture(int id) {
-        Picture pict(id);
-        extend(pict.bounds().bottom);
-        Rect dest = pict.bounds();
-        Rect surround(
-                0, _pix->bounds().bottom - pict.bounds().height(),
-                _pix->bounds().right, _pix->bounds().bottom);
-        dest.center_in(surround);
-        CopyBits(&pict, _pix, pict.bounds(), dest);
-    }
-
-    void add_text(const std::string& text) {
-        RgbColor red;
-        GetRGBTranslateColorShade(&red, RED, VERY_LIGHT);
-        RetroText retro(text.c_str(), text.size(), kTitleFontNum, red, RgbColor::kBlack);
-        retro.wrap_to(_pix->bounds().right - 12, 2);
-
-        Rect dest(0, 0, _pix->bounds().right, retro.height());
-        dest.offset(0, _pix->bounds().bottom);
-        dest.inset(6, 0);
-
-        extend(retro.height());
-        retro.draw(_pix, dest);
-    }
-
-  private:
-    void extend(int height) {
-        const int old_height = _pix->bounds().bottom;
-        const int new_height = old_height + height;
-        _pix->resize(Rect(0, 0, _pix->bounds().right, new_height));
-
-        if (_background.get()) {
-            PixMap::View view(_pix, Rect(0, old_height, _pix->bounds().right, new_height));
-            Rect dest = _background->bounds();
-            dest.offset(0, -old_height);
-            while (dest.top < height) {
-                if (dest.bottom >= 0) {
-                    CopyBits(_background.get(), &view, _background->bounds(), dest);
-                }
-                dest.offset(0, dest.height());
-            }
-        }
-    }
-
-    ArrayPixMap* _pix;
-
-    scoped_ptr<Picture> _background;
-    int _background_start;
-};
-
-PixMap* build_pix(int text_id, int width) {
-    scoped_ptr<ArrayPixMap> pix(new ArrayPixMap(width, 0));
-    ScrollTextPixBuilder build(pix.get());
-    Resource text('TEXT', text_id);
-
-    std::vector<std::string> lines;
-    const uint8_t* start = text.data().data();
-    const uint8_t* const end = start + text.data().size();
-    bool in_section_header = (start + 2 <= end) && (memcmp(start, "#+", 2) == 0);
-    for (const uint8_t* p = start; p != end; ++p) {
-        if (p + 3 <= end && memcmp(p, "\r#+", 3) == 0) {
-            lines.push_back(std::string(reinterpret_cast<const char*>(start), p - start));
-            start = p + 1;
-            in_section_header = true;
-        } else if (in_section_header && (*p == '\r')) {
-            lines.push_back(std::string(reinterpret_cast<const char*>(start), p - start));
-            start = p + 1;
-            in_section_header = false;
-        }
-    }
-    if (start != end) {
-        lines.push_back(std::string(reinterpret_cast<const char*>(start), end - start));
-    }
-
-    for (std::vector<std::string>::iterator it = lines.begin(); it != lines.end(); ++it) {
-        if (it->substr(0, 2) == "#+") {
-            if (it->size() > 2) {
-                if ((*it)[2] == 'B') {
-                    int id = string_to_int(it->substr(3));
-                    build.set_background(id);
-                } else {
-                    int id = string_to_int(it->substr(2));
-                    build.add_picture(id);
-                }
-            }
-        } else {
-            build.add_text(*it);
-        }
-    }
-
-    return pix.release();
-}
 
 }  // namespace
 
