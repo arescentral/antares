@@ -82,7 +82,7 @@ RetroText::RetroText(const StringPiece& text, int font, RgbColor fore_color, Rgb
             break;
 
           case '\\':
-            if (i >= text.size()) {
+            if (i + 1 >= text.size()) {
                 throw Exception("not enough input for special code.");
             }
             ++i;

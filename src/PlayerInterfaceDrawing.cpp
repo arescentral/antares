@@ -19,10 +19,13 @@
 
 #include "Quickdraw.h"
 
+#include "rezin/MacRoman.hpp"
+#include "sfz/String.hpp"
 #include "ColorTranslation.hpp"
 #include "Debug.hpp"
 #include "DirectText.hpp"
 #include "Error.hpp"
+#include "InterfaceText.hpp"
 #include "KeyMapTranslation.hpp"
 #include "NateDraw.hpp"
 #include "Picture.hpp"
@@ -30,6 +33,9 @@
 #include "Resource.hpp"
 #include "StringNumerics.hpp"
 
+using rezin::mac_roman_encoding;
+using sfz::BytesPiece;
+using sfz::StringPiece;
 using sfz::scoped_ptr;
 
 namespace antares {
@@ -60,13 +66,6 @@ namespace antares {
 #define kMaxLineLength              255
 
 #define kMaxKeyNameLength           4       // how many chars can be in name of key for plainButton
-
-#define kReturnChar                 0x0d
-#define kSpaceChar                  ' '
-#define kWidestChar                 'R'
-#define kInlineChar                 '^'
-#define kInlinePictChar             'p'
-#define kInlinePictClearLineChar    'P'
 
 enum inlineKindType {
     kNoKind = 0,
@@ -1643,516 +1642,40 @@ void GetPlayerListPageDownRect(const interfaceItemType& item, Rect *dRect) {
 }
 
 void DrawInterfaceTextRect(const interfaceItemType& item, PixMap* pix) {
-    scoped_ptr<std::string> textData;
-    long            length;
-    RgnHandle       clipRgn = nil;
-    Rect            tRect;
-    unsigned char   *dChar, *wordlen, *theLine, thisLen;
-    short           vline = 0, hleft = 0, fheight = 0, xpos = 0;
-    RgbColor color;
-    unsigned char   charwidth;
-
-    if ( item.item.textRect.visibleBounds)
-        DrawPlayerInterfacePlainRect(item.bounds, item.color, item.style, pix);
-    clipRgn = NewRgn();
-    GetClip( clipRgn);
-    tRect = item.bounds;
-    ClipRect(tRect);
-
-    hleft = tRect.left + kInterfaceTextHBuffer;
-    fheight = GetInterfaceFontHeight( item.style) + kInterfaceTextVBuffer;
-    vline = tRect.top - ( fheight - GetInterfaceFontAscent( item.style));
-
-    theLine = new unsigned char[kMaxLineLength];
-    if ( theLine != nil)
-    {
-        wordlen = theLine;
-
-        Resource rsrc('TEXT', item.item.textRect.textID);
-        textData.reset(new std::string(
-                reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size()));
-        if (textData.get() != nil) {
-            length = textData->size();
-            const char* sChar = textData->c_str();
-
-            SetTranslateColorShadeFore( item.color, VERY_LIGHT);
-
-            while (( length > 0) && ( vline < tRect.bottom))
-            {
-                vline += fheight;
-                xpos = hleft;
-                *wordlen = 0;
-                thisLen = 0;
-                dChar = wordlen + 1;
-                const char* aheadChar = sChar;
-                while (( *aheadChar == kSpaceChar) && ( length > 0)) { aheadChar++; length--;}
-
-                while (( xpos < tRect.right - kInterfaceTextHBuffer) && ( length > 0))
-                {
-                    *wordlen += thisLen;
-                    sChar = aheadChar;
-                    length -= thisLen;
-                    thisLen = 0;
-                    do
-                    {
-                        if ((( *aheadChar >= 'A') && ( *aheadChar <= 'Z')) || (( *aheadChar >= '0') &&
-                                ( *aheadChar <= '9')))
-                            SetInterfaceLargeUpperFont( item.style);
-                        else SetInterfaceLargeLowerFont( item.style);
-                        if (( *aheadChar >= 'a') && ( *aheadChar <= 'z'))
-                        {
-                            mDirectCharWidth( charwidth, *aheadChar/* - 'a' + 'A'*/);
-                            xpos += charwidth;
-                        }
-                        else
-                        {
-                            mDirectCharWidth( charwidth, *aheadChar);
-                            xpos += charwidth;
-                        }
-                        if ( *aheadChar == kReturnChar) *dChar++ = *aheadChar;
-                        else *dChar++ = *aheadChar;
-                        aheadChar++;
-                        thisLen++;
-                    } while (( *aheadChar != kSpaceChar) && ( length - thisLen > 0) &&
-                            ( *aheadChar != kReturnChar) && ( *aheadChar != kInlineChar) &&
-                            !(( *wordlen == 0) && (xpos >= tRect.right - kInterfaceTextHBuffer)));
-
-                    if ( *aheadChar == kReturnChar)
-                    {
-                        if ( xpos < tRect.right - kInterfaceTextHBuffer)
-                        {
-                            *wordlen += thisLen;
-                            length -= thisLen;
-                            sChar = aheadChar;
-                        }
-                        xpos = tRect.right;     // to force us out of loop
-                    } else if (( *wordlen == 0) && (xpos >= tRect.right - kInterfaceTextHBuffer))
-                    {
-                        thisLen--;
-                        *wordlen = thisLen;
-                        length -= thisLen;
-                        sChar = aheadChar - 1;
-                    }
-                }
-                MoveTo( hleft, vline);
-
-                SetTranslateColorShadeFore( item.color, VERY_LIGHT);
-                GetRGBTranslateColorShade(&color, item.color, VERY_LIGHT);
-
-                DrawInterfaceString( theLine, item.style, pix, color);
-            }
-            textData.reset();
-        }
-        delete[] theLine;
-    }
-    SetClip( clipRgn);
-    DisposeRgn( clipRgn);
+    Resource rsrc('TEXT', item.item.textRect.textID);
+    DrawInterfaceTextInRect(item.bounds, rsrc.data().data(), rsrc.data().size(), item.style,
+            item.color, pix, NULL);
 }
 
 void DrawInterfaceTextInRect(
         const Rect& tRect, const unsigned char *textData, long length, interfaceStyleType style,
         unsigned char textcolor, PixMap* pix, inlinePictType* inlinePict) {
-    RgnHandle       clipRgn = nil;
-    const unsigned char* sChar;
-    const unsigned char* aheadChar;
-    unsigned char   *dChar, *wordlen, *theLine, thisLen;
-    short           vline = 0, hleft = 0, fheight = 0, xpos = 0, inlinePictNum = 0, i;
-    bool         processInline = false;
-    Str255          inlineString;
-    inlineKindType  inlineKind = kNoKind;
-    long            inlineValue = 0;
-    scoped_ptr<Picture> thePicture;
-    Rect            uRect;
     RgbColor color;
-    unsigned char   charwidth;
-    inlinePictType  *thisInlinePict = NULL;
+    GetRGBTranslateColorShade(&color, textcolor, VERY_LIGHT);
+    StringPiece text(BytesPiece(textData, length), mac_roman_encoding());
+    InterfaceText interface_text(text, style, color);
+    interface_text.wrap_to(tRect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer);
 
-    clipRgn = NewRgn();
-    if ( clipRgn == nil) return;
-    GetClip( clipRgn);
-    ClipRect(tRect);
-
-    hleft = tRect.left + kInterfaceTextHBuffer;
-    fheight = GetInterfaceFontHeight( style) + kInterfaceTextVBuffer;
-    vline = tRect.top - ( fheight - GetInterfaceFontAscent( style));
-
-    if ( inlinePict != nil)
-    {
-        thisInlinePict = inlinePict;
-
-        for ( i = 0; i < kMaxInlinePictNum; i++)
-        {
-            thisInlinePict->id = -1;
-            thisInlinePict->bounds.left = thisInlinePict->bounds.right = -1;
-            thisInlinePict++;
-        }
-        thisInlinePict = inlinePict;
-    }
-
-    theLine = new unsigned char[kMaxLineLength];
-    if ( theLine != nil)
-    {
-        wordlen = theLine;
-
-        if ( textData != nil)
-        {
-            sChar = textData;
-
-            SetTranslateColorShadeFore( textcolor, VERY_LIGHT);
-
-            while (( length > 0) && ( vline < tRect.bottom))
-            {
-                vline += fheight;
-                xpos = hleft;
-                *wordlen = 0;
-                thisLen = 0;
-                dChar = wordlen + 1;
-                aheadChar = sChar;
-                while (( *aheadChar == kSpaceChar) && ( length > 0)) { aheadChar++; length--;}
-
-                processInline= false;
-                inlineValue = 0;
-                inlineString[0] = 0;
-                inlineKind = kNoKind;
-
-                while (( xpos < tRect.right - kInterfaceTextHBuffer) && ( length > 0))
-                {
-                    *wordlen += thisLen;
-                    sChar = aheadChar;
-                    length -= thisLen;
-                    thisLen = 0;
-                    do
-                    {
-                        while ( *aheadChar == kInlineChar)
-                        {
-                            inlineString[0] = 0;
-                            inlineKind = kNoKind;
-                            aheadChar++;
-                            length--;
-
-                            if (( length - thisLen) > 0)
-                            {
-                                switch( *aheadChar)
-                                {
-                                    case kInlinePictChar:
-                                        aheadChar++;
-                                        length--;
-                                        while ((( length - thisLen) > 0) && ( *aheadChar != kInlineChar))
-                                        {
-                                            inlineString[0] += 1;
-                                            inlineString[inlineString[0]] = *aheadChar;
-                                            aheadChar++;
-                                            length--;
-                                        }
-                                        StringToNum( inlineString, &inlineValue);
-                                        inlineKind = kVPictKind;
-                                        aheadChar++;
-                                        length--;
-                                        break;
-
-                                    case kInlinePictClearLineChar:
-                                        aheadChar++;
-                                        length--;
-                                        while ((( length - thisLen) > 0) && ( *aheadChar != kInlineChar))
-                                        {
-                                            inlineString[0] += 1;
-                                            inlineString[inlineString[0]] = *aheadChar;
-                                            aheadChar++;
-                                            length--;
-                                        }
-                                        StringToNum( inlineString, &inlineValue);
-                                        inlineKind = kVClearPictKind;
-                                        aheadChar++;
-                                        length--;
-                                        xpos = tRect.right;
-                                        break;
-                                }
-                            }
-                        }
-                        if ((( *aheadChar >= 'A') && ( *aheadChar <= 'Z')) || (( *aheadChar >= '0') &&
-                                ( *aheadChar <= '9')))
-                            SetInterfaceLargeUpperFont( style);
-                        else SetInterfaceLargeLowerFont( style);
-                        if (( *aheadChar >= 'a') && ( *aheadChar <= 'z'))
-                        {
-                            mDirectCharWidth( charwidth, *aheadChar/* - 'a' + 'A'*/);
-                            xpos += charwidth;
-                        }
-                        else
-                        {
-                            mDirectCharWidth( charwidth, *aheadChar);
-                            xpos += charwidth;
-                        }
-                        if ( *aheadChar == kReturnChar) *dChar++ = *aheadChar;
-                        else *dChar++ = *aheadChar;
-                        thisLen++;
-                        aheadChar++;
-
-                    } while (( *aheadChar != kSpaceChar) && ( length - thisLen > 0) &&
-                            ( *aheadChar != kReturnChar) && ( inlineKind == kNoKind) &&
-                            !(( *wordlen == 0) && (xpos >= tRect.right - kInterfaceTextHBuffer)));
-
-                    if ( *aheadChar == kReturnChar)
-                    {
-                        if ( xpos < tRect.right - kInterfaceTextHBuffer)
-                        {
-                            *wordlen += thisLen;
-                            length -= thisLen;
-                            sChar = aheadChar;
-                        }
-                        xpos = tRect.right;        // to force us out of loop
-                    } else if (( *wordlen == 0) && (xpos >= tRect.right - kInterfaceTextHBuffer))
-                    {
-                        thisLen--;
-                        *wordlen = thisLen;
-                        length -= thisLen;
-                        sChar = aheadChar - 1;
-                    } else
-                    {
-                        switch( inlineKind)
-                        {
-                            case kVClearPictKind:
-                                thisLen--;
-                                *wordlen += thisLen;
-                                length -= thisLen;
-                                sChar = aheadChar - 1;
-                                break;
-
-                            case kNoKind:
-                            case kVPictKind:
-                                break;
-                        }
-                    }
-
-                }
-                MoveTo( hleft, vline);
-                SetTranslateColorShadeFore( textcolor, VERY_LIGHT);
-                GetRGBTranslateColorShade(&color, textcolor, VERY_LIGHT);
-                DrawInterfaceString( theLine, style, pix, color);
-                switch( inlineKind)
-                {
-                    case kVPictKind:
-                    case kVClearPictKind:
-                        vline += ( fheight - GetInterfaceFontAscent( style));
-                        try {
-                            thePicture.reset(new Picture(inlineValue));
-                        } catch (PictureNotFoundException) {
-                            thePicture.reset();
-                        }
-                        xpos = hleft;
-                        if ( *theLine == 0) vline -= fheight;
-                        if (thePicture.get() != nil) {
-                            uRect = thePicture->bounds();
-                            uRect.offset(-uRect.left + xpos - kInterfaceTextHBuffer +
-                                        ( tRect.right - tRect.left) / 2 - ( uRect.right -
-                                        uRect.left) / 2,
-                                        -uRect.top + vline);
-                            CopyBits(thePicture.get(), pix, thePicture->bounds(), uRect);
-                            thePicture.reset();
-                            vline += uRect.bottom - uRect.top;
-                            xpos = hleft;
-                            if (( inlinePict != nil) && ( inlinePictNum < kMaxInlinePictNum))
-                            {
-                                thisInlinePict->bounds = uRect;
-                                thisInlinePict->id = inlineValue;
-                                thisInlinePict++;
-                                inlinePictNum++;
-                            }
-                        }
-                        inlineKind = kNoKind;
-                        break;
-
-                    case kNoKind:
-                        break;
-                }
+    if (inlinePict != NULL) {
+        for (size_t i = 0; i < kMaxInlinePictNum; ++i) {
+            if (i < interface_text.inline_picts().size()) {
+                inlinePict[i] = interface_text.inline_picts()[i];
+            } else {
+                inlinePict[i].id = -1;
+                inlinePict[i].bounds = Rect(0, 0, 0, 0);
             }
         }
-        delete[] theLine;
     }
-    SetClip( clipRgn);
-    DisposeRgn( clipRgn);
+
+    interface_text.draw(pix, tRect);
 }
 
 short GetInterfaceTextHeightFromWidth(
         const unsigned char* textData, long length, interfaceStyleType style, short boundsWidth) {
-    const unsigned char* sChar;
-    const unsigned char* aheadChar;
-    unsigned char   *dChar, *wordlen, *theLine, thisLen;
-    short           vline = 0, hleft = 0, fheight = 0, xpos = 0;
-    Str255          inlineString;
-    inlineKindType  inlineKind = kNoKind;
-    long            inlineValue = 0;
-    scoped_ptr<Picture> thePicture;
-    Rect            uRect;
-    unsigned char   charwidth;
-
-    hleft = kInterfaceTextHBuffer;
-    fheight = GetInterfaceFontHeight( style) + kInterfaceTextVBuffer;
-    vline = 0 - ( fheight - GetInterfaceFontAscent( style));
-
-    theLine = new unsigned char[kMaxLineLength];
-    if ( theLine != nil)
-    {
-        wordlen = theLine;
-
-        if ( textData != nil)
-        {
-            sChar = textData;
-
-            while ( length > 0)
-            {
-                vline += fheight;
-                xpos = hleft;
-                *wordlen = 0;
-                thisLen = 0;
-                dChar = wordlen + 1;
-                aheadChar = sChar;
-                while (( *aheadChar == kSpaceChar) && ( length > 0)) { aheadChar++; length--;}
-
-                inlineValue = 0;
-                inlineString[0] = 0;
-                inlineKind = kNoKind;
-
-                while (( xpos < boundsWidth - kInterfaceTextHBuffer) && ( length > 0))
-                {
-                    *wordlen += thisLen;
-                    sChar = aheadChar;
-                    length -= thisLen;
-                    thisLen = 0;
-                    do
-                    {
-                        while ( *aheadChar == kInlineChar)
-                        {
-                            inlineString[0] = 0;
-                            inlineKind = kNoKind;
-                            aheadChar++;
-                            length--;
-
-                            if (( length - thisLen) > 0)
-                            {
-                                switch( *aheadChar)
-                                {
-                                    case kInlinePictChar:
-                                        aheadChar++;
-                                        length--;
-                                        while ((( length - thisLen) > 0) && ( *aheadChar != kInlineChar))
-                                        {
-                                            inlineString[0] += 1;
-                                            inlineString[inlineString[0]] = *aheadChar;
-                                            aheadChar++;
-                                            length--;
-                                        }
-                                        StringToNum( inlineString, &inlineValue);
-                                        inlineKind = kVPictKind;
-                                        aheadChar++;
-                                        length--;
-                                        break;
-
-                                    case kInlinePictClearLineChar:
-                                        aheadChar++;
-                                        length--;
-                                        while ((( length - thisLen) > 0) && ( *aheadChar != kInlineChar))
-                                        {
-                                            inlineString[0] += 1;
-                                            inlineString[inlineString[0]] = *aheadChar;
-                                            aheadChar++;
-                                            length--;
-                                        }
-                                        StringToNum( inlineString, &inlineValue);
-                                        inlineKind = kVClearPictKind;
-                                        aheadChar++;
-                                        length--;
-                                        xpos = boundsWidth;
-                                        break;
-                                }
-                            }
-                        }
-                        if ((( *aheadChar >= 'A') && ( *aheadChar <= 'Z')) || (( *aheadChar >= '0') &&
-                                ( *aheadChar <= '9')))
-                            SetInterfaceLargeUpperFont( style);
-                        else SetInterfaceLargeLowerFont( style);
-                        if (( *aheadChar >= 'a') && ( *aheadChar <= 'z'))
-                        {
-                            mDirectCharWidth( charwidth, *aheadChar/* - 'a' + 'A'*/);
-                            xpos += charwidth;
-                        }
-                        else
-                        {
-                            mDirectCharWidth( charwidth, *aheadChar);
-                            xpos += charwidth;
-                        }
-                        if ( *aheadChar == kReturnChar) *dChar++ = *aheadChar;
-                        else *dChar++ = *aheadChar;
-                        aheadChar++;
-                        thisLen++;
-                    } while (( *aheadChar != kSpaceChar) && ( length - thisLen > 0) &&
-                            ( *aheadChar != kReturnChar) && ( inlineKind == kNoKind) &&
-                            !(( *wordlen == 0) && (xpos >= boundsWidth - kInterfaceTextHBuffer)));
-
-                    if ( *aheadChar == kReturnChar)
-                    {
-                        if ( xpos < boundsWidth - kInterfaceTextHBuffer)
-                        {
-                            *wordlen += thisLen;
-                            length -= thisLen;
-                            sChar = aheadChar;
-                        }
-                        xpos = boundsWidth;     // to force us out of loop
-                    } else if (( *wordlen == 0) && (xpos >= boundsWidth - kInterfaceTextHBuffer))
-                    {
-                        thisLen--;
-                        *wordlen = thisLen;
-                        length -= thisLen;
-                        sChar = aheadChar - 1;
-                    } else
-                    {
-                        switch( inlineKind)
-                        {
-                            case kVClearPictKind:
-                                thisLen--;
-                                *wordlen += thisLen;
-                                length -= thisLen;
-                                sChar = aheadChar - 1;
-                                break;
-
-                            case kNoKind:
-                            case kVPictKind:
-                                break;
-                        }
-                    }
-
-                }
-
-                switch( inlineKind)
-                {
-                    case kVPictKind:
-                    case kVClearPictKind:
-                        try {
-                            thePicture.reset(new Picture(inlineValue));
-                        } catch (PictureNotFoundException) {
-                            thePicture.reset();
-                        }
-                        xpos = hleft;
-                        vline += ( fheight - GetInterfaceFontAscent( style));
-                        if ( *theLine == 0) vline -= fheight;
-                        if (thePicture.get() != nil) {
-                            uRect = thePicture->bounds();
-                            uRect.offset(-uRect.left + xpos, -uRect.top + vline);
-                            thePicture.reset();
-                            vline += uRect.bottom - uRect.top;
-                            xpos = hleft;
-                        }
-                        inlineKind = kNoKind;
-                        break;
-
-                    case kNoKind:
-                        break;
-                }
-            }
-        }
-        delete[] theLine;
-    }
-    return( vline + ( fheight - GetInterfaceFontAscent( style)) );
+    StringPiece text(BytesPiece(textData, length), mac_roman_encoding());
+    InterfaceText interface_text(text, style, RgbColor::kBlack);
+    interface_text.wrap_to(boundsWidth, kInterfaceTextHBuffer, kInterfaceTextVBuffer);
+    return interface_text.height();
 }
 
 void DrawInterfacePictureRect(const interfaceItemType& item, PixMap* pix) {

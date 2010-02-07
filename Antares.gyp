@@ -80,6 +80,7 @@
                 'src/Instruments.cpp',
                 'src/InterfaceHandling.cpp',
                 'src/InterfaceScreen.cpp',
+                'src/InterfaceText.cpp',
                 'src/KeyMapTranslation.cpp',
                 'src/KeySetupScreen.cpp',
                 'src/Ledger.cpp',
