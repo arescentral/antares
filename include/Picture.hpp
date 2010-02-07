@@ -19,14 +19,11 @@
 #define ANTARES_PICTURE_HPP_
 
 #include <stdint.h>
-#include <exception>
 #include "sfz/Macros.hpp"
 #include "Base.h"
 #include "PixMap.hpp"
 
 namespace antares {
-
-class PictureNotFoundException : public std::exception { };
 
 class Picture : public ArrayPixMap {
   public:

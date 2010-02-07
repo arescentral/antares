@@ -20,7 +20,6 @@
 #include <fcntl.h>
 #include <algorithm>
 #include <limits>
-#include <string>
 
 #include "sfz/BinaryWriter.hpp"
 #include "ColorTable.hpp"

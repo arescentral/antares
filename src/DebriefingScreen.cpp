@@ -324,20 +324,18 @@ void DoMissionDebriefing(
 
 DebriefingScreen::DebriefingScreen(int text_id)
         : _state(DONE),
-          _message(Resource('TEXT', text_id).data()),
           _next_update(0.0),
           _typed_chars(0) {
-    initialize(false);
+    initialize(text_id, false);
 }
 
 DebriefingScreen::DebriefingScreen(
         int text_id, int your_length, int par_length, int your_loss, int par_loss,
         int your_kill, int par_kill)
         : _state(TYPING),
-          _message(Resource('TEXT', text_id).data()),
           _next_update(0.0),
           _typed_chars(0) {
-    initialize(true);
+    initialize(text_id, true);
 
     Rect score_area = _message_bounds;
     score_area.top = score_area.bottom - kScoreTableHeight;
@@ -403,10 +401,11 @@ void DebriefingScreen::fire_timer() {
     gRealWorld->view(_pix_bounds).copy(*_pix);
 }
 
-void DebriefingScreen::initialize(bool do_score) {
-    int text_height = GetInterfaceTextHeightFromWidth(
-            reinterpret_cast<const unsigned char*>(_message.data()), _message.size(),
-            kLarge, kTextWidth);
+void DebriefingScreen::initialize(int text_id, bool do_score) {
+    Resource rsrc('TEXT', text_id);
+    _message.assign(rsrc.data(), mac_roman_encoding());
+
+    int text_height = GetInterfaceTextHeightFromWidth(_message, kLarge, kTextWidth);
     Rect text_bounds(0, 0, kTextWidth, text_height);
     if (do_score) {
         text_bounds.bottom += kScoreTableHeight;
@@ -419,9 +418,7 @@ void DebriefingScreen::initialize(bool do_score) {
     _pix.reset(new ArrayPixMap(_pix_bounds.width(), _pix_bounds.height()));
 
     DrawAnyInterfaceItem(interface_item(_message_bounds), _pix.get());
-    DrawInterfaceTextInRect(
-            _message_bounds, reinterpret_cast<const unsigned char*>(_message.data()),
-            _message.size(), kLarge, GOLD, _pix.get(), NULL);
+    DrawInterfaceTextInRect(_message_bounds, _message, kLarge, GOLD, _pix.get(), NULL);
 }
 
 }  // namespace antares

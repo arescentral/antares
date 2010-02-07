@@ -18,8 +18,8 @@
 #ifndef ANTARES_DEBRIEFING_SCREEN_HPP_
 #define ANTARES_DEBRIEFING_SCREEN_HPP_
 
-#include "sfz/Bytes.hpp"
 #include "sfz/SmartPtr.hpp"
+#include "sfz/String.hpp"
 #include "Card.hpp"
 
 namespace antares {
@@ -45,7 +45,7 @@ class DebriefingScreen : public Card {
     virtual void fire_timer();
 
   private:
-    void initialize(bool do_score);
+    void initialize(int text_id, bool do_score);
 
     enum State {
         TYPING,
@@ -53,7 +53,7 @@ class DebriefingScreen : public Card {
     };
     State _state;
 
-    sfz::Bytes _message;
+    sfz::String _message;
     sfz::scoped_ptr<RetroText> _score;
     Rect _pix_bounds;
     Rect _message_bounds;

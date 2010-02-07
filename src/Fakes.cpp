@@ -20,7 +20,6 @@
 #include <sys/time.h>
 #include <getopt.h>
 #include <queue>
-#include <string>
 
 #include "AresMain.hpp"
 #include "AresPreferences.hpp"

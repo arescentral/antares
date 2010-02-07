@@ -18,13 +18,9 @@
 #ifndef ANTARES_RESOURCE_HPP_
 #define ANTARES_RESOURCE_HPP_
 
-#include <exception>
-#include <string>
 #include "sfz/MappedFile.hpp"
 
 namespace antares {
-
-class NoSuchResourceException : public std::exception { };
 
 class Resource : public sfz::MappedFile {
   public:

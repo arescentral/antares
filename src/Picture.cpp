@@ -21,11 +21,13 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include "sfz/BinaryReader.hpp"
+#include "sfz/Exception.hpp"
 #include "sfz/MappedFile.hpp"
 #include "Error.hpp"
 #include "ImageDriver.hpp"
 
 using sfz::BytesBinaryReader;
+using sfz::Exception;
 using sfz::MappedFile;
 using sfz::StringPiece;
 using sfz::utf8_encoding;
@@ -54,7 +56,7 @@ Picture::Picture(int32_t id)
     glob(fileglob, GLOB_APPEND, NULL, &g);
 
     if (g.gl_pathc != 1) {
-        throw PictureNotFoundException();
+        throw Exception("PICT {0} not found", id);
     }
 
     MappedFile file(StringPiece(g.gl_pathv[0], utf8_encoding()));

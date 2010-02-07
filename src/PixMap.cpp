@@ -20,6 +20,7 @@
 #include <algorithm>
 #include "sfz/BinaryReader.hpp"
 #include "sfz/BinaryWriter.hpp"
+#include "sfz/Exception.hpp"
 #include "Quickdraw.h"
 #include "Casts.hpp"
 #include "ColorTable.hpp"
@@ -28,6 +29,7 @@
 
 using sfz::BinaryReader;
 using sfz::BinaryWriter;
+using sfz::Exception;
 using sfz::scoped_array;
 
 namespace antares {
@@ -61,10 +63,10 @@ void PixMap::fill(const RgbColor& color) {
     }
 }
 
-void PixMap::copy(const PixMap& pix) throw(PixMapException) {
+void PixMap::copy(const PixMap& pix) {
     if (bounds().width() != pix.bounds().width()
             || bounds().height() != pix.bounds().height()) {
-        throw PixMapException("Mismatch in PixMap sizes");
+        throw Exception("Mismatch in PixMap sizes");
     }
     for (int i = 0; i < bounds().height(); ++i) {
         memcpy(mutable_row(i), pix.row(i), bounds().width() * sizeof(RgbColor));

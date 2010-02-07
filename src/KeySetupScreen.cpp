@@ -19,6 +19,9 @@
 
 #include "KeySetupScreen.hpp"
 
+#include "rezin/MacRoman.hpp"
+#include "sfz/Bytes.hpp"
+#include "sfz/String.hpp"
 #include "AresGlobalType.hpp"
 #include "AresMain.hpp"
 #include "AresPreferences.hpp"
@@ -32,6 +35,11 @@
 #include "PlayerInterface.hpp"
 #include "SoundFX.hpp"
 #include "StringHandling.hpp"
+
+using rezin::mac_roman_encoding;
+using sfz::BytesPiece;
+using sfz::StringPiece;
+using sfz::ascii_encoding;
 
 namespace antares {
 
@@ -129,14 +137,18 @@ static void ConflictText_Update( tempKeyControlType *keyControls)
                     ConcatenatePString( textString, "\p: ");
                     GetIndString( tString, 2005, j + 1);
                     ConcatenatePString( textString, tString);
-                    DrawStringInInterfaceItem( kConflictText, textString);
+
+                    BytesPiece bytes(textString + 1, *textString);
+                    StringPiece string(bytes, mac_roman_encoding());
+                    DrawStringInInterfaceItem( kConflictText, string);
+
                     conflictFound = true;
                 }
             }
         }
     }
     if ( !conflictFound) DrawStringInInterfaceItem( kConflictText,
-        "\pNo Key Conflicts");
+        StringPiece("No Key Conflicts", ascii_encoding()));
 }
 
 static long KeyControlIndex_GetTabNum( long whichKeyControl)
@@ -237,7 +249,7 @@ bool Key_Setup_Screen_Do( void)
         DrawInterfaceOneAtATime();
         ConflictText_Update( tempKeyControls);
 
-        DrawStringInInterfaceItem( kConflictText, nil);
+        DrawStringInInterfaceItem( kConflictText, StringPiece("", ascii_encoding()));
 
         while (!done) {
             if (( AnyEvent()) && ( !( globals()->gOptions & kOptionInBackground)))

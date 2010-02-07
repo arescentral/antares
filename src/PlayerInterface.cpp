@@ -1435,7 +1435,7 @@ netResultType StartNetworkGameSetup( void)
 #endif NETSPROCKET_AVAILABLE
 }
 
-void DrawStringInInterfaceItem( long whichItem, const unsigned char* string)
+void DrawStringInInterfaceItem( long whichItem, const StringPiece& string)
 {
     Rect                tRect;
     interfaceItemType   *anItem;
@@ -1446,11 +1446,7 @@ void DrawStringInInterfaceItem( long whichItem, const unsigned char* string)
 
     gActiveWorld->view(tRect).fill(RgbColor::kBlack);
     anItem = GetAnyInterfaceItemPtr( whichItem);
-    if ( string != nil)
-    {
-        DrawInterfaceTextInRect(tRect, string + 1, string[0],
-                                anItem->style, anItem->color, gOffWorld, nil);
-    }
+    DrawInterfaceTextInRect(tRect, string, anItem->style, anItem->color, gOffWorld, nil);
     DrawInRealWorld();
     CopyOffWorldToRealWorld(tRect);
 }
@@ -2050,7 +2046,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
 
 {
     Rect            oldRect, newRect, hiliteBounds;
-    scoped_ptr<std::string> textData;
+    scoped_ptr<String> textData;
     long            length = 0, headerID, headerNumber, contentID, textlength = 0,
                     i;
     short           textHeight = 0;
@@ -2078,13 +2074,11 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
 
         // TODO(sfiera): catch exception.
         Resource rsrc('TEXT', contentID);
-        textData.reset(new std::string(
-                    reinterpret_cast<const char*>(rsrc.data().data()), rsrc.data().size()));
+        textData.reset(new String(rsrc.data(), mac_roman_encoding()));
         if (textData.get() != nil) {
             textlength = length = textData->size();
             textHeight = GetInterfaceTextHeightFromWidth(
-                    reinterpret_cast<const unsigned char*>(textData->c_str()), length,
-                    dataItem->style, kMissionDataWidth);
+                    *textData, dataItem->style, kMissionDataWidth);
         }
         if ( hiliteBounds.left == hiliteBounds.right)
         {
@@ -2170,8 +2164,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
         if (textData.get() != nil) {
             newRect = dataItem->bounds;
             DrawInterfaceTextInRect(
-                    newRect, reinterpret_cast<const unsigned char*>(textData->c_str()), length,
-                    dataItem->style, dataItem->color, gOffWorld, inlinePict);
+                    newRect, *textData, dataItem->style, dataItem->color, gOffWorld, inlinePict);
             textData.reset();
         }
 

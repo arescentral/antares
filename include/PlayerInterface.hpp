@@ -18,9 +18,11 @@
 #ifndef ANTARES_PLAYER_INTERFACE_HPP_
 #define ANTARES_PLAYER_INTERFACE_HPP_
 
-#include "sfz/String.hpp"
 #include "PlayerInterfaceDrawing.hpp"
 #include "PlayerInterfaceItems.hpp"
+
+namespace sfz { class String; }
+namespace sfz { class StringPiece; }
 
 namespace antares {
 
@@ -65,7 +67,7 @@ bool BothCommandAndQ( void);
 netResultType StartNetworkGameSetup( void);
 netResultType HostAcceptClientInterface( void);
 netResultType ClientNetworkGameSetup( void);
-void DrawStringInInterfaceItem( long, const unsigned char*);
+void DrawStringInInterfaceItem(long which_item, const sfz::StringPiece& string);
 netResultType ClientWaitInterface( void);
 netResultType HostBeginGame( void);
 netResultType ClientBeginGame( void);

@@ -19,7 +19,6 @@
 #include <netinet/tcp.h>
 #include <signal.h>
 #include <sys/socket.h>
-#include <exception>
 
 #include "sfz/BinaryReader.hpp"
 #include "sfz/BinaryWriter.hpp"

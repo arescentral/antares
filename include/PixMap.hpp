@@ -18,8 +18,6 @@
 #ifndef ANTARES_PIX_MAP_HPP_
 #define ANTARES_PIX_MAP_HPP_
 
-#include <exception>
-#include <string>
 #include "sfz/SmartPtr.hpp"
 #include "Geometry.hpp"
 
@@ -30,19 +28,6 @@ namespace antares {
 
 class ColorTable;
 class RgbColor;
-
-// Thrown by PixMap methods.
-//
-// Currently, is only thrown by `PixMap::copy()`, in the event of trying to copy a PixMap of one
-// size into a PixMap of a different size.
-class PixMapException : public std::exception {
-  public:
-    PixMapException(const std::string& what) throw() : _what(what) { }
-    ~PixMapException() throw() { }
-    virtual const char* what() const throw() { return _what.c_str(); }
-  private:
-    const std::string _what;
-};
 
 // A representation of pixel data.
 //
@@ -143,8 +128,8 @@ class PixMap {
     // `Rect` parameters given by this method; use views instead.
     //
     // @param [in] pix      the PixMap to copy from.
-    // @throws PixMapException if `this->bounds()` and `pix.bounds()` are not equal.
-    virtual void copy(const PixMap& pix) throw(PixMapException);
+    // @throws Exception if `this->bounds()` and `pix.bounds()` are not equal.
+    virtual void copy(const PixMap& pix);
 
     // Serializes this PixMap to a BinaryWriter.
     //

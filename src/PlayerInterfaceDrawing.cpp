@@ -20,6 +20,7 @@
 #include "Quickdraw.h"
 
 #include "rezin/MacRoman.hpp"
+#include "sfz/Exception.hpp"
 #include "sfz/String.hpp"
 #include "ColorTranslation.hpp"
 #include "Debug.hpp"
@@ -35,6 +36,8 @@
 
 using rezin::mac_roman_encoding;
 using sfz::BytesPiece;
+using sfz::Exception;
+using sfz::String;
 using sfz::StringPiece;
 using sfz::scoped_ptr;
 
@@ -1643,16 +1646,15 @@ void GetPlayerListPageDownRect(const interfaceItemType& item, Rect *dRect) {
 
 void DrawInterfaceTextRect(const interfaceItemType& item, PixMap* pix) {
     Resource rsrc('TEXT', item.item.textRect.textID);
-    DrawInterfaceTextInRect(item.bounds, rsrc.data().data(), rsrc.data().size(), item.style,
-            item.color, pix, NULL);
+    DrawInterfaceTextInRect(item.bounds, StringPiece(rsrc.data(), mac_roman_encoding()),
+            item.style, item.color, pix, NULL);
 }
 
 void DrawInterfaceTextInRect(
-        const Rect& tRect, const unsigned char *textData, long length, interfaceStyleType style,
+        const Rect& tRect, const StringPiece& text, interfaceStyleType style,
         unsigned char textcolor, PixMap* pix, inlinePictType* inlinePict) {
     RgbColor color;
     GetRGBTranslateColorShade(&color, textcolor, VERY_LIGHT);
-    StringPiece text(BytesPiece(textData, length), mac_roman_encoding());
     InterfaceText interface_text(text, style, color);
     interface_text.wrap_to(tRect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer);
 
@@ -1671,8 +1673,7 @@ void DrawInterfaceTextInRect(
 }
 
 short GetInterfaceTextHeightFromWidth(
-        const unsigned char* textData, long length, interfaceStyleType style, short boundsWidth) {
-    StringPiece text(BytesPiece(textData, length), mac_roman_encoding());
+        const StringPiece& text, interfaceStyleType style, short boundsWidth) {
     InterfaceText interface_text(text, style, RgbColor::kBlack);
     interface_text.wrap_to(boundsWidth, kInterfaceTextHBuffer, kInterfaceTextVBuffer);
     return interface_text.height();

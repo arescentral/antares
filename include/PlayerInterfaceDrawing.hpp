@@ -21,6 +21,8 @@
 #include "AnyChar.hpp"
 #include "PlayerInterfaceItems.hpp"
 
+namespace sfz { class StringPiece; }
+
 namespace antares {
 
 #define kInterfaceTextVBuffer       2
@@ -58,10 +60,11 @@ void GetPlayerListPageDownRect(const interfaceItemType& item, Rect* rect);
 
 void DrawInterfaceTextRect(const interfaceItemType& item, PixMap* pix);
 void DrawInterfaceTextInRect(
-        const Rect& rect, const unsigned char* textData, long length, interfaceStyleType style,
+        const Rect& rect, const sfz::StringPiece& text, interfaceStyleType style,
         unsigned char textcolor, PixMap* pix, inlinePictType* inlinePict);
 
-short GetInterfaceTextHeightFromWidth(const unsigned char*, long, interfaceStyleType, short);
+short GetInterfaceTextHeightFromWidth(
+        const sfz::StringPiece& text, interfaceStyleType style, short width);
 void DrawInterfacePictureRect(const interfaceItemType& item, PixMap* pix);
 void DrawAnyInterfaceItem(const interfaceItemType& item, PixMap* pix);
 

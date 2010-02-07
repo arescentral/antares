@@ -19,8 +19,9 @@
 
 #include <glob.h>
 #include <stdio.h>
-#include <string>
+#include "sfz/Exception.hpp"
 
+using sfz::Exception;
 using sfz::StringKey;
 using sfz::utf8_encoding;
 
@@ -50,7 +51,7 @@ StringKey glob_for_resource(uint32_t code, int id) {
 
     if (g.gl_pathc != 1) {
         perror(fileglob);
-        throw NoSuchResourceException();
+        throw Exception("{0} {1} not found", code_chars + 0, id);
     }
 
     return StringKey(g.gl_pathv[0], utf8_encoding());
