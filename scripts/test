@@ -68,6 +68,7 @@ def main(argv):
                 sys.exit(1)
             else:
                 test_cases.append(TestCase(case, ALL_TEST_CASES[case]))
+        test_cases.sort(key=lambda case: case.name)
 
         with Timed():
             with Timed():
