@@ -20,9 +20,13 @@
 #include <glob.h>
 #include <stdio.h>
 #include "sfz/Exception.hpp"
+#include "sfz/MappedFile.hpp"
 
+using sfz::BytesPiece;
 using sfz::Exception;
-using sfz::StringKey;
+using sfz::MappedFile;
+using sfz::String;
+using sfz::StringPiece;
 using sfz::utf8_encoding;
 
 namespace antares {
@@ -35,7 +39,7 @@ struct FreedGlob : public glob_t {
     }
 };
 
-StringKey glob_for_resource(uint32_t code, int id) {
+void glob_for_resource(uint32_t code, int id, String* out) {
     char fileglob[64];
     char code_chars[5] = {
         code >> 24, code >> 16, code >> 8, code, '\0',
@@ -54,12 +58,21 @@ StringKey glob_for_resource(uint32_t code, int id) {
         throw Exception("{0} {1} not found", code_chars + 0, id);
     }
 
-    return StringKey(g.gl_pathv[0], utf8_encoding());
+    out->append(StringPiece(g.gl_pathv[0], utf8_encoding()));
 }
 
 }  // namespace
 
-Resource::Resource(uint32_t code, int id)
-        : MappedFile(glob_for_resource(code, id)) { }
+Resource::Resource(uint32_t code, int id) {
+    String path;
+    glob_for_resource(code, id, &path);
+    _file.reset(new MappedFile(path));
+}
+
+Resource::~Resource() { }
+
+BytesPiece Resource::data() const {
+    return _file->data();
+}
 
 }  // namespace antares

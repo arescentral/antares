@@ -18,13 +18,24 @@
 #ifndef ANTARES_RESOURCE_HPP_
 #define ANTARES_RESOURCE_HPP_
 
-#include "sfz/MappedFile.hpp"
+#include <stdint.h>
+#include "sfz/Bytes.hpp"
+#include "sfz/SmartPtr.hpp"
+
+namespace sfz { class BytesPiece; }
+namespace sfz { class MappedFile; }
 
 namespace antares {
 
-class Resource : public sfz::MappedFile {
+class Resource {
   public:
     Resource(uint32_t code, int id);
+    ~Resource();
+
+    sfz::BytesPiece data() const;
+
+  private:
+    sfz::scoped_ptr<sfz::MappedFile> _file;
 };
 
 }  // namespace antares
