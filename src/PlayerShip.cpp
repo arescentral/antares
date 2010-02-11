@@ -225,7 +225,7 @@ bool PlayerShipGetKeys(long timePass, unsigned long theKeys, bool *enterMessage)
                         }
                     }
                 }
-                mGetDirectStringDimensions(message, width, height);
+                mGetDirectStringDimensions(PStringPiece(message), width, height);
                 strlen = CLIP_LEFT + (((CLIP_RIGHT - CLIP_LEFT) / 2) - (width / 2));
                 if ((strlen + width) > (CLIP_RIGHT))
                 {

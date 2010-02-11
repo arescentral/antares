@@ -88,6 +88,7 @@
 
 #include "VideoDriver.hpp"
 
+using sfz::String;
 using sfz::scoped_ptr;
 using sfz::scoped_array;
 
@@ -424,7 +425,7 @@ class PauseScreen : public Card {
               _next_switch(0.0) {
         StringList list;
         list.load(3100);
-        string_to_pstring(list.at(10), _text);
+        _text.assign(list.at(10));
     }
 
     virtual void become_front() {
@@ -466,7 +467,7 @@ class PauseScreen : public Card {
         }
     }
 
-    Str255 _text;
+    String _text;
     bool _visible;
     double _next_switch;
 };

@@ -18,14 +18,19 @@
 #include "DirectText.hpp"
 
 #include <algorithm>
+#include "rezin/MacRoman.hpp"
 #include "sfz/BinaryReader.hpp"
+#include "sfz/String.hpp"
 #include "Base.h"
 
 #include "ColorTable.hpp"
 #include "Error.hpp"
 #include "Resource.hpp"
 
+using rezin::mac_roman_encoding;
+using sfz::Bytes;
 using sfz::BytesBinaryReader;
+using sfz::StringPiece;
 using sfz::scoped_ptr;
 
 namespace antares {
@@ -33,6 +38,16 @@ namespace antares {
 directTextType* gDirectText = nil;
 long gWhichDirectText = 0;
 scoped_ptr<directTextType>* gDirectTextData;
+
+namespace {
+
+uint8_t to_mac_roman(uint32_t code) {
+    Bytes bytes;
+    mac_roman_encoding().encode(code, &bytes);
+    return bytes.at(0);
+}
+
+}  // namespace
 
 directTextType::directTextType(int32_t id) {
     Resource defn_rsrc(kDTextDescriptResType, id);
@@ -71,9 +86,10 @@ void DirectTextCleanup() {
     delete[] gDirectTextData;
 }
 
-void mDirectCharWidth(unsigned char& width, unsigned char mchar) {
+void mDirectCharWidth(unsigned char& width, uint32_t mchar) {
     const uint8_t* widptr = gDirectText->charSet.data()
-        + gDirectText->height * gDirectText->physicalWidth * mchar + mchar;
+        + gDirectText->height * gDirectText->physicalWidth * to_mac_roman(mchar)
+        + to_mac_roman(mchar);
     width = *widptr;
 }
 
@@ -90,22 +106,20 @@ int mDirectFontAscent() {
     return gDirectText->ascent;
 }
 
-void mGetDirectStringDimensions(unsigned char* string, long& width, long& height) {
+void mGetDirectStringDimensions(const StringPiece& string, long& width, long& height) {
     height = gDirectText->height;
     width = 0;
-    const unsigned char* charptr = string;
-    int strlen = *(charptr++);
-    while (strlen > 0) {
+    for (size_t i = 0; i < string.size(); ++i) {
         const uint8_t* widptr = gDirectText->charSet.data()
-            + gDirectText->height * gDirectText->physicalWidth * (*charptr) + (*charptr);
+            + gDirectText->height * gDirectText->physicalWidth * to_mac_roman(string.at(i))
+            + to_mac_roman(string.at(i));
         width += *widptr;
-        charptr++;
-        strlen--;
     }
 }
 
-void DrawDirectTextStringClipped(unsigned char* string, const RgbColor& color, PixMap *destMap,
-                const Rect& clip, long portLeft, long portTop) {
+void DrawDirectTextStringClipped(
+        const StringPiece& string, const RgbColor& color, PixMap* destMap, const Rect& clip,
+        long portLeft, long portTop) {
     // move the pen to the resulting location
     Point pen;
     GetPen(&pen);
@@ -122,11 +136,10 @@ void DrawDirectTextStringClipped(unsigned char* string, const RgbColor& color, P
     RgbColor* hchar = destMap->mutable_bytes() + (pen.v + portTop + topEdge) * rowBytes
         + pen.h + (portLeft << 2);
 
-    int size = *string;
-    ++string;
-    for (int i = 0; i < size; ++i) {
-        const uint8_t* sbyte = gDirectText->charSet.data() + gDirectText->height *
-                gDirectText->physicalWidth * (string[i]) + (string[i]);
+    for (size_t i = 0; i < string.size(); ++i) {
+        const uint8_t* sbyte = gDirectText->charSet.data()
+            + gDirectText->height * gDirectText->physicalWidth * to_mac_roman(string.at(i))
+            + to_mac_roman(string.at(i));
 
         int width = *sbyte;
         ++sbyte;

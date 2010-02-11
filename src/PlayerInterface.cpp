@@ -415,7 +415,7 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
         GetIndString( string, 2004, 33);
 
         mSetDirectFont( kButtonFontNum);
-        mGetDirectStringDimensions(string, width, height);
+        mGetDirectStringDimensions(PStringPiece(string), width, height);
 
         clipRect = *contentRect;
         tRect = Rect(0, 0, width, height);
@@ -423,7 +423,7 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
 
         GetRGBTranslateColorShade(&color, kLoadingScreenColor, LIGHTER);
         MoveTo( tRect.left, tRect.top + mDirectFontAscent());
-        DrawDirectTextStringClipped( string, color, gOffWorld, clipRect, 0, 0);
+        DrawDirectTextStringClipped(PStringPiece(string), color, gOffWorld, clipRect, 0, 0);
 
 
         DrawInRealWorld();
@@ -732,7 +732,7 @@ void DoNetSettings( void)
 #endif NETSPROCKET_AVAILABLE
 }
 
-void StartPauseIndicator(unsigned char* pauseString, unsigned char hue) {
+void StartPauseIndicator(const StringPiece& pauseString, unsigned char hue) {
     RgbColor        color;
     long            width, height, count;
     Rect            tRect, stringRect;
@@ -771,7 +771,7 @@ void StartPauseIndicator(unsigned char* pauseString, unsigned char hue) {
     GetRGBTranslateColorShade(&color, GREEN, LIGHTER);
     DrawNateVBracket( gOffWorld, clipRect, clipRect, 0, 0,color);
     MoveTo( stringRect.left, stringRect.top + mDirectFontAscent());
-    DrawDirectTextStringClipped( pauseString, color, gOffWorld, clipRect, 0, 0);
+    DrawDirectTextStringClipped(pauseString, color, gOffWorld, clipRect, 0, 0);
 
     DrawInRealWorld();
     DefaultColors();
@@ -779,7 +779,7 @@ void StartPauseIndicator(unsigned char* pauseString, unsigned char hue) {
     CopyOffWorldToRealWorld(tRect);
 }
 
-void StopPauseIndicator(unsigned char* pauseString) {
+void StopPauseIndicator(const StringPiece& pauseString) {
     long            width, height;
     Rect            tRect, stringRect;
 

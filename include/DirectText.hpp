@@ -25,6 +25,8 @@
 #include "Casts.hpp"
 #include "SpriteHandling.hpp"
 
+namespace sfz { class StringPiece; }
+
 namespace antares {
 
 #define kCharSpace              0
@@ -65,12 +67,14 @@ struct directTextType {
 int InitDirectText();
 void DirectTextCleanup();
 
-void mDirectCharWidth(unsigned char& mwidth, unsigned char mchar);
+void mDirectCharWidth(unsigned char& mwidth, uint32_t mchar);
 void mSetDirectFont(long mwhichFont);
 int mDirectFontHeight();
 int mDirectFontAscent();
-void mGetDirectStringDimensions(unsigned char* string, long& width, long& height);
-void DrawDirectTextStringClipped(unsigned char*, const RgbColor& color, PixMap *, const Rect&, long, long);
+void mGetDirectStringDimensions(const sfz::StringPiece& string, long& width, long& height);
+void DrawDirectTextStringClipped(
+        const sfz::StringPiece& string, const RgbColor& color, PixMap* pix, const Rect& clip,
+        long portLeft, long portTop);
 
 }  // namespace antares
 

@@ -18,10 +18,13 @@
 #ifndef ANTARES_STRING_HANDLING_HPP_
 #define ANTARES_STRING_HANDLING_HPP_
 
+namespace sfz { class StringPiece; }
+
 namespace antares {
 
 void CopyPString(unsigned char* to, const unsigned char* from);
 void ConcatenatePString(unsigned char* s1, const unsigned char* s2);
+sfz::StringPiece PStringPiece(const unsigned char* string);
 
 }  // namespace antares
 

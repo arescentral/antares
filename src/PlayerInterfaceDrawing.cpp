@@ -32,6 +32,7 @@
 #include "Picture.hpp"
 #include "PlayerInterfaceItems.hpp"
 #include "Resource.hpp"
+#include "StringHandling.hpp"
 #include "StringNumerics.hpp"
 
 using rezin::mac_roman_encoding;
@@ -1859,7 +1860,7 @@ short GetInterfaceStringWidth(unsigned char* s, interfaceStyleType style) {
     long            width, height;
 
     SetInterfaceLargeUpperFont( style);
-    mGetDirectStringDimensions(s, width, height);
+    mGetDirectStringDimensions(PStringPiece(s), width, height);
 
     return ( width);
 }
@@ -1895,7 +1896,7 @@ void DrawInterfaceString(
 
     clipRect = pix->bounds();
     SetInterfaceLargeUpperFont( style);
-    DrawDirectTextStringClipped(s, color, pix, clipRect, 0, 0);
+    DrawDirectTextStringClipped(PStringPiece(s), color, pix, clipRect, 0, 0);
 }
 
 void SetInterfaceLargeUpperFont(interfaceStyleType style) {

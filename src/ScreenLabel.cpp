@@ -282,14 +282,14 @@ void DrawAllLabels( void)
                     {
                         String_Get_Nth_Line( s, label->label, j);
                         MoveTo( label->where.h+1+kLabelInnerSpace, y+1);
-                        DrawDirectTextStringClipped( s, RgbColor::kBlack, gOffWorld, clipRect,
-                            0, 0);
+                        DrawDirectTextStringClipped(
+                                PStringPiece(s), RgbColor::kBlack, gOffWorld, clipRect, 0, 0);
                         MoveTo( label->where.h-1+kLabelInnerSpace, y-1);
-                        DrawDirectTextStringClipped( s, RgbColor::kBlack, gOffWorld, clipRect,
-                            0, 0);
+                        DrawDirectTextStringClipped(
+                                PStringPiece(s), RgbColor::kBlack, gOffWorld, clipRect, 0, 0);
                         MoveTo( label->where.h+kLabelInnerSpace, y);
-                        DrawDirectTextStringClipped( s, color, gOffWorld, clipRect,
-                            0, 0);
+                        DrawDirectTextStringClipped(
+                                PStringPiece(s), color, gOffWorld, clipRect, 0, 0);
                         y += label->lineHeight;
                     }
 
@@ -299,12 +299,13 @@ void DrawAllLabels( void)
                     GetRGBTranslateColorShade(&color, label->color, VERY_LIGHT);
                     MoveTo( label->where.h+1+kLabelInnerSpace, label->where.v +
                         gDirectText->ascent +1 + kLabelInnerSpace);
-                    DrawDirectTextStringClipped( label->label, RgbColor::kBlack, gOffWorld, clipRect,
-                        0, 0);
+                    DrawDirectTextStringClipped(
+                            PStringPiece(label->label), RgbColor::kBlack, gOffWorld, clipRect, 0,
+                            0);
                     MoveTo( label->where.h + kLabelInnerSpace,
                         label->where.v + gDirectText->ascent + kLabelInnerSpace);
-                    DrawDirectTextStringClipped( label->label, color, gOffWorld, clipRect,
-                        0, 0);
+                    DrawDirectTextStringClipped(
+                            PStringPiece(label->label), color, gOffWorld, clipRect, 0, 0);
                 }
                 label->label[0] = originalLength;
 
@@ -687,7 +688,7 @@ void RecalcScreenLabelSize( long which) // do this if you mess with its string
             for ( i = 1; i <= lineNum; i++)
             {
                 String_Get_Nth_Line( tString, label->label, i);
-                mGetDirectStringDimensions(tString, label->width, label->height);
+                mGetDirectStringDimensions(PStringPiece(tString), label->width, label->height);
                 label->width += kLabelTotalInnerSpace;
                 if ( label->width > maxWidth)
                     maxWidth = label->width;
@@ -699,7 +700,7 @@ void RecalcScreenLabelSize( long which) // do this if you mess with its string
         } else
         {
             label->lineNum = 1;
-            mGetDirectStringDimensions(label->label, label->width, label->height);
+            mGetDirectStringDimensions(PStringPiece(label->label), label->width, label->height);
             label->width += kLabelTotalInnerSpace;
             label->lineHeight = label->height;
             label->height += kLabelTotalInnerSpace;

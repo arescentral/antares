@@ -17,6 +17,14 @@
 
 #include "StringHandling.hpp"
 
+#include "rezin/MacRoman.hpp"
+#include "sfz/Bytes.hpp"
+#include "sfz/String.hpp"
+
+using rezin::mac_roman_encoding;
+using sfz::BytesPiece;
+using sfz::StringPiece;
+
 namespace antares {
 
 void CopyPString(unsigned char *to, const unsigned char *from) {
@@ -38,6 +46,11 @@ void ConcatenatePString(unsigned char *s1, const unsigned char *s2) {
         ++dc;
         ++sc;
     }
+}
+
+StringPiece PStringPiece(const unsigned char* string) {
+    BytesPiece bytes(string + 1, *string);
+    return StringPiece(bytes, mac_roman_encoding());
 }
 
 }  // namespace antares

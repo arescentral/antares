@@ -455,7 +455,7 @@ void DrawMiniScreen( void)
         }
         MoveTo( mRect.left + kMiniScreenLeftBuffer, mRect.top + (count + lineCorrect) * ((
             gDirectText->height) /* * 2 */) + gDirectText->ascent /* * 2 */);
-        DrawDirectTextStringClipped( c->string, textcolor, gOffWorld, lRect, 0, 0);
+        DrawDirectTextStringClipped(PStringPiece(c->string), textcolor, gOffWorld, lRect, 0, 0);
         c++;
     }
 
@@ -569,8 +569,7 @@ void DrawAndShowMiniScreenLine( long whichLine)
     MoveTo( lRect.left + kMiniScreenLeftBuffer, lRect.top + (whichLine + lineCorrect) * ((
         gDirectText->height) /* * 2 */) + gDirectText->ascent /* * 2 */);
 
-    DrawDirectTextStringClipped(    c->string, textcolor,
-                                    gOffWorld, lRect, 0, 0);
+    DrawDirectTextStringClipped(PStringPiece(c->string), textcolor, gOffWorld, lRect, 0, 0);
     NormalizeColors();
     DrawInRealWorld();
     NormalizeColors();
@@ -1256,8 +1255,8 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
 
             MoveTo( lRect.left + kMiniAmmoTextHBuffer, lRect.bottom-1/*lRect.top + gDirectText->ascent*/);
 
-            DrawDirectTextStringClipped( digit, lightcolor, gOffWorld,
-                                        clipRect, 0, 0);
+            DrawDirectTextStringClipped(
+                    PStringPiece(digit), lightcolor, gOffWorld, clipRect, 0, 0);
         }
 
         update = true;
@@ -1290,8 +1289,8 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
 
             MoveTo( lRect.left + kMiniAmmoTextHBuffer, lRect.bottom-1/*lRect.top + gDirectText->ascent*/);
 
-            DrawDirectTextStringClipped( digit, lightcolor, gOffWorld,
-                                        clipRect, 0, 0);
+            DrawDirectTextStringClipped(
+                    PStringPiece(digit), lightcolor, gOffWorld, clipRect, 0, 0);
         }
         update = true;
     }
@@ -1323,8 +1322,8 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
 
             MoveTo( lRect.left + kMiniAmmoTextHBuffer, lRect.bottom-1/*lRect.top + gDirectText->ascent*/);
 
-            DrawDirectTextStringClipped( digit, lightcolor, gOffWorld,
-                                        clipRect, 0, 0);
+            DrawDirectTextStringClipped(
+                    PStringPiece(digit), lightcolor, gOffWorld, clipRect, 0, 0);
         }
         update = true;
     }
@@ -1386,8 +1385,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         MoveTo( lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent);
         GetIndString( s, kMiniDataStringID, whichString);
 
-        DrawDirectTextStringClipped( s, RgbColor::kBlack, gOffWorld,
-                                    clipRect, 0, 0);
+        DrawDirectTextStringClipped(PStringPiece(s), RgbColor::kBlack, gOffWorld, clipRect, 0, 0);
         uRect = lRect;
         uRect = clipRect;
 
@@ -1402,8 +1400,9 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
             // move to the 1st line in the selection miniscreen
             MoveTo( lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent);
 
-            DrawDirectTextStringClipped( GetDestBalanceName( newObject->destinationObject), color, gOffWorld,
-                                        clipRect, 0, 0);
+            DrawDirectTextStringClipped(
+                    PStringPiece(GetDestBalanceName(newObject->destinationObject)), color,
+                    gOffWorld, clipRect, 0, 0);
             if ( uRect.left == -1)
             {
                 uRect = lRect;
@@ -1429,7 +1428,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                 MoveTo( lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent);
 
                 // write the name
-                DrawDirectTextStringClipped( s, color, gOffWorld, clipRect, 0, 0);
+                DrawDirectTextStringClipped(PStringPiece(s), color, gOffWorld, clipRect, 0, 0);
             }
 
             if ( uRect.left == -1)
@@ -1630,8 +1629,8 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         // write the name
         if ( newObject->beamType >= 0)
         {
-            GetIndString( s, kSpaceObjectShortNameResID, newObject->beamType + 1);
-            DrawDirectTextStringClipped( s, color, gOffWorld, clipRect, 0, 0);
+            GetIndString(s, kSpaceObjectShortNameResID, newObject->beamType + 1);
+            DrawDirectTextStringClipped(PStringPiece(s), color, gOffWorld, clipRect, 0, 0);
         }
 
         if ( uRect.left == -1)
@@ -1658,8 +1657,8 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         // write the name
         if ( newObject->pulseType >= 0)
         {
-            GetIndString( s, kSpaceObjectShortNameResID, newObject->pulseType + 1);
-            DrawDirectTextStringClipped( s, color, gOffWorld, clipRect, 0, 0);
+            GetIndString(s, kSpaceObjectShortNameResID, newObject->pulseType + 1);
+            DrawDirectTextStringClipped(PStringPiece(s), color, gOffWorld, clipRect, 0, 0);
         }
 
         if ( uRect.left == -1)
@@ -1686,8 +1685,8 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         // write the name
         if ( newObject->specialType >= 0)
         {
-            GetIndString( s, kSpaceObjectShortNameResID, newObject->specialType + 1);
-            DrawDirectTextStringClipped( s, color, gOffWorld, clipRect, 0, 0);
+            GetIndString(s, kSpaceObjectShortNameResID, newObject->specialType + 1);
+            DrawDirectTextStringClipped(PStringPiece(s), color, gOffWorld, clipRect, 0, 0);
         }
 
         if ( uRect.left == -1)
@@ -1726,12 +1725,13 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
 
                 if ( dObject->attributes & kIsDestination)
                 {
-                    DrawDirectTextStringClipped( GetDestBalanceName( dObject->destinationObject), color, gOffWorld,
-                                                clipRect, 0, 0);
+                    DrawDirectTextStringClipped(
+                            PStringPiece(GetDestBalanceName(dObject->destinationObject)), color,
+                            gOffWorld, clipRect, 0, 0);
                 } else
                 {
                     GetIndString( s, kSpaceObjectNameResID, dObject->whichBaseObject + 1);
-                    DrawDirectTextStringClipped( s, color, gOffWorld, clipRect, 0, 0);
+                    DrawDirectTextStringClipped(PStringPiece(s), color, gOffWorld, clipRect, 0, 0);
                 }
             }
         }

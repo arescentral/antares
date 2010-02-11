@@ -29,21 +29,16 @@
 using rezin::mac_roman_encoding;
 using sfz::Bytes;
 using sfz::Exception;
+using sfz::String;
 using sfz::StringPiece;
 
 namespace antares {
 
 namespace {
 
-uint8_t to_mac_roman(uint32_t code) {
-    Bytes bytes;
-    mac_roman_encoding().encode(code, &bytes);
-    return bytes.at(0);
-}
-
 int char_width(uint32_t ch) {
     uint8_t w;
-    mDirectCharWidth(w, to_mac_roman(ch));
+    mDirectCharWidth(w, ch);
     return w;
 }
 
@@ -229,8 +224,8 @@ void RetroText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
                 DrawNateRect(pix, &char_rect, 0, 0, ch.back_color);
             }
             MoveTo(corner.h, corner.v + char_adjust);
-            unsigned char pstr[2] = {1, to_mac_roman(ch.character)};
-            DrawDirectTextStringClipped(pstr, ch.fore_color, pix, bounds, 0, 0);
+            String str(1, ch.character);
+            DrawDirectTextStringClipped(str, ch.fore_color, pix, bounds, 0, 0);
         }
         break;
 
