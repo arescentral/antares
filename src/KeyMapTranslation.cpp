@@ -20,6 +20,7 @@
 #include "KeyMapTranslation.hpp"
 
 #include "Error.hpp"
+#include "StringList.hpp"
 
 namespace antares {
 
@@ -229,8 +230,10 @@ bool AnyCancelKeys( void)
     return( EscapeKey() || (CommandKey() && ( PeriodKey() || QKey())));
 }
 
-void GetKeyNumName(unsigned char* s, short keyNum) {
-    GetIndString( s, kKeyMapNameID, keyNum);
+void GetKeyNumName(short key_num, sfz::String* out) {
+    StringList strings;
+    strings.load(kKeyMapNameID);
+    out->assign(strings.at(key_num - 1));
 }
 
 // returns true if any keys OTHER THAN POWER ON AND CAPS LOCK are down

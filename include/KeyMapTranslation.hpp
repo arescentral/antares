@@ -19,6 +19,7 @@
 #define ANTARES_KEY_MAP_TRANSLATION_HPP_
 
 #include "Base.h"
+#include "sfz/String.hpp"
 
 namespace antares {
 
@@ -84,7 +85,7 @@ bool EscapeKey( void);
 bool PeriodKey( void);
 bool QKey( void);
 bool AnyCancelKeys( void);
-void GetKeyNumName(unsigned char*, short);
+void GetKeyNumName(short key_num, sfz::String* out);
 bool AnyRealKeyDown( void);
 bool AnyModifierKeyDown( void);
 bool AnyKeyButThisOne( KeyMap, long, long);

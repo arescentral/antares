@@ -623,20 +623,6 @@ void RefreshInterfaceItem(short whichItem) {
     DrawAnyInterfaceItemOffToOn(item);
 }
 
-void SetInterfaceListCallback(
-        short whichItem,
-        short (*getListLength)(void),
-        void (*getItemString)(short, unsigned char*),
-        bool (*itemHilited)(short, bool)) {
-    interfaceItemType* const item = &gInterfaceItemData[whichItem];
-    if (item->kind == kListRect) {
-        item->item.listRect.getListLength = getListLength;
-        item->item.listRect.getItemString = getItemString;
-        item->item.listRect.itemHilited = itemHilited;
-        item->item.listRect.topItem = 0;
-    }
-}
-
 void SetButtonKeyNum(short whichItem, short whichKey) {
     interfaceItemType* const item = &gInterfaceItemData[whichItem];
     if (item->kind == kPlainButton) {

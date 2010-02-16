@@ -33,6 +33,7 @@
 #include "PlayerInterfaceItems.hpp"
 #include "Resource.hpp"
 #include "StringHandling.hpp"
+#include "StringList.hpp"
 #include "StringNumerics.hpp"
 
 using rezin::mac_roman_encoding;
@@ -396,7 +397,6 @@ void DrawPlayerInterfaceTabBox(
 void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
     Rect            tRect, uRect, vRect;
     short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
-    Str255          s;
     unsigned char   shade;
     RgbColor        color;
 
@@ -484,8 +484,9 @@ void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
             SetTranslateColorShadeFore(item.color, LIGHTER);
             GetRGBTranslateColorShade(&color, item.color, LIGHTER);
         }
-        GetIndString(s, item.item.plainButton.label.stringID,
-                    item.item.plainButton.label.stringNumber);
+        StringList strings;
+        strings.load(item.item.plainButton.label.stringID);
+        StringPiece s = strings.at(item.item.plainButton.label.stringNumber - 1);
         swidth = GetInterfaceStringWidth(s, item.style);
         swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
         sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
@@ -494,69 +495,75 @@ void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
     } else
     {
         // draw the key code
-
-        if (item.item.plainButton.status == kDimmed)
-            shade = VERY_DARK;
-        else shade = LIGHT;
-        GetKeyNumName(s, item.item.plainButton.key);
-        swidth = GetInterfaceFontWidth(item.style) * kMaxKeyNameLength;
-
-        uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
-                tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 1,
-                tRect.bottom - kInterfaceContentBuffer + 1);
-        mDrawPuffUpRect(uRect, item.color, shade, pix);
-
-        if (item.item.plainButton.status == kIH_Hilite)
-            shade = LIGHT;
-        else shade = DARK;//DARKEST;
-        vRect = Rect(tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 2,
-        tRect.top + kInterfaceContentBuffer,
-                        tRect.right - kInterfaceContentBuffer + 1,
-                        tRect.bottom - kInterfaceContentBuffer + 1);
-        SetTranslateColorShadeFore(item.color, shade);
-        GetRGBTranslateColorShade(&color, item.color, shade);
-        pix->view(vRect).fill(color);
-
-        swidth = GetInterfaceStringWidth(s, item.style);
-        swidth = uRect.left + ( uRect.right - uRect.left) / 2 - swidth / 2;
-        MoveTo( swidth, uRect.top + GetInterfaceFontAscent(item.style));
-        if (item.item.plainButton.status == kDimmed)
         {
-            SetTranslateColorShadeFore(item.color, VERY_DARK);
-            GetRGBTranslateColorShade(&color, item.color, VERY_DARK);
-        }
+            if (item.item.plainButton.status == kDimmed)
+                shade = VERY_DARK;
+            else shade = LIGHT;
+            String s;
+            GetKeyNumName(item.item.plainButton.key, &s);
+            swidth = GetInterfaceFontWidth(item.style) * kMaxKeyNameLength;
 
-        else
-        {
-            SetTranslateColorShadeFore(item.color, DARKEST);
-            GetRGBTranslateColorShade(&color, item.color, DARKEST);
-        }
+            uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
+                    tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 1,
+                    tRect.bottom - kInterfaceContentBuffer + 1);
+            mDrawPuffUpRect(uRect, item.color, shade, pix);
 
-        DrawInterfaceString(s, item.style, pix, color);
+            if (item.item.plainButton.status == kIH_Hilite)
+                shade = LIGHT;
+            else shade = DARK;//DARKEST;
+            vRect = Rect(
+                    tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 2,
+                    tRect.top + kInterfaceContentBuffer,
+                    tRect.right - kInterfaceContentBuffer + 1,
+                    tRect.bottom - kInterfaceContentBuffer + 1);
+            SetTranslateColorShadeFore(item.color, shade);
+            GetRGBTranslateColorShade(&color, item.color, shade);
+            pix->view(vRect).fill(color);
+
+            swidth = GetInterfaceStringWidth(s, item.style);
+            swidth = uRect.left + ( uRect.right - uRect.left) / 2 - swidth / 2;
+            MoveTo( swidth, uRect.top + GetInterfaceFontAscent(item.style));
+            if (item.item.plainButton.status == kDimmed)
+            {
+                SetTranslateColorShadeFore(item.color, VERY_DARK);
+                GetRGBTranslateColorShade(&color, item.color, VERY_DARK);
+            }
+
+            else
+            {
+                SetTranslateColorShadeFore(item.color, DARKEST);
+                GetRGBTranslateColorShade(&color, item.color, DARKEST);
+            }
+
+            DrawInterfaceString(s, item.style, pix, color);
+        }
 
         // draw the button title
+        {
+            if (item.item.plainButton.status == kIH_Hilite)
+            {
+                SetTranslateColorShadeFore(item.color, DARKEST);
+                GetRGBTranslateColorShade(&color, item.color, DARKEST);
+            } else if (item.item.plainButton.status == kDimmed)
+            {
+                SetTranslateColorShadeFore(item.color, DARKEST + kSlightlyLighterColor);
+                GetRGBTranslateColorShade(&color, item.color, DARKEST + kSlightlyLighterColor);
+            }
+            else
+            {
+                SetTranslateColorShadeFore(item.color, LIGHTER);
+                GetRGBTranslateColorShade(&color, item.color, LIGHTER);
+            }
 
-        if (item.item.plainButton.status == kIH_Hilite)
-        {
-            SetTranslateColorShadeFore(item.color, DARKEST);
-            GetRGBTranslateColorShade(&color, item.color, DARKEST);
-        } else if (item.item.plainButton.status == kDimmed)
-        {
-            SetTranslateColorShadeFore(item.color, DARKEST + kSlightlyLighterColor);
-            GetRGBTranslateColorShade(&color, item.color, DARKEST + kSlightlyLighterColor);
+            StringList strings;
+            strings.load(item.item.plainButton.label.stringID);
+            StringPiece s = strings.at(item.item.plainButton.label.stringNumber - 1);
+            swidth = GetInterfaceStringWidth(s, item.style);
+            swidth = uRect.right + ( tRect.right - uRect.right) / 2 - swidth / 2;
+            sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
+            MoveTo( swidth, sheight);
+            DrawInterfaceString(s, item.style, pix, color);
         }
-        else
-        {
-            SetTranslateColorShadeFore(item.color, LIGHTER);
-            GetRGBTranslateColorShade(&color, item.color, LIGHTER);
-        }
-        GetIndString(s, item.item.plainButton.label.stringID,
-                    item.item.plainButton.label.stringNumber);
-        swidth = GetInterfaceStringWidth(s, item.style);
-        swidth = uRect.right + ( tRect.right - uRect.right) / 2 - swidth / 2;
-        sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
-        MoveTo( swidth, sheight);
-        DrawInterfaceString(s, item.style, pix, color);
     }
 
     SetTranslateColorFore( BLACK);
@@ -565,7 +572,6 @@ void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
 void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix) {
     Rect            tRect, uRect, vRect;
     short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
-    Str255          s;
     unsigned char   shade;
     RgbColor        color;
 
@@ -725,8 +731,10 @@ void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix)
             SetTranslateColorShadeFore( item.color, VERY_LIGHT);
             GetRGBTranslateColorShade(&color, item.color, VERY_LIGHT);
         }
-        GetIndString( s, item.item.radioButton.label.stringID,
-                    item.item.radioButton.label.stringNumber);
+
+        StringList strings;
+        strings.load(item.item.radioButton.label.stringID);
+        StringPiece s = strings.at(item.item.radioButton.label.stringNumber - 1);
         swidth = GetInterfaceStringWidth( s, item.style);
         swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
         sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
@@ -746,7 +754,8 @@ void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix)
         {
             shade = MEDIUM + kLighterColor;
         }
-        GetKeyNumName( s, item.item.radioButton.key);
+        String s;
+        GetKeyNumName(item.item.radioButton.key, &s);
         swidth = GetInterfaceFontWidth( item.style) * kMaxKeyNameLength;
 
         uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
@@ -813,13 +822,16 @@ void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix)
             SetTranslateColorShadeFore( item.color, VERY_LIGHT);
             GetRGBTranslateColorShade(&color, item.color, VERY_LIGHT);
         }
-        GetIndString( s, item.item.radioButton.label.stringID,
-                    item.item.radioButton.label.stringNumber);
-        swidth = GetInterfaceStringWidth( s, item.style);
-        swidth = uRect.right + ( tRect.right - uRect.right) / 2 - swidth / 2;
-        sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
-        MoveTo( swidth, sheight);
-        DrawInterfaceString(s, item.style, pix, color);
+        {
+            StringList strings;
+            strings.load(item.item.radioButton.label.stringID);
+            StringPiece s = strings.at(item.item.radioButton.label.stringNumber - 1);
+            swidth = GetInterfaceStringWidth( s, item.style);
+            swidth = uRect.right + ( tRect.right - uRect.right) / 2 - swidth / 2;
+            sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
+            MoveTo( swidth, sheight);
+            DrawInterfaceString(s, item.style, pix, color);
+        }
     }
 
     SetTranslateColorFore( BLACK);
@@ -829,7 +841,6 @@ void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix)
 void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix) {
     Rect            tRect, uRect, vRect, wRect;
     short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
-    Str255          s;
     unsigned char   shade;
     RgbColor        color;
 
@@ -947,8 +958,9 @@ void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix) 
         SetTranslateColorShadeFore( item.color, LIGHT);
         GetRGBTranslateColorShade(&color, item.color, LIGHT);
     }
-    GetIndString( s, item.item.radioButton.label.stringID,
-                item.item.radioButton.label.stringNumber);
+    StringList strings;
+    strings.load(item.item.radioButton.label.stringID);
+    StringPiece s = strings.at(item.item.radioButton.label.stringNumber - 1);
     swidth = GetInterfaceStringWidth( s, item.style);
     swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
     sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
@@ -961,7 +973,6 @@ void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix) 
 void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix) {
     Rect            tRect, uRect, vRect, wRect;
     short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
-    Str255          s;
     unsigned char   shade;
     RgbColor        color;
 
@@ -1069,8 +1080,10 @@ void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix) {
         SetTranslateColorShadeFore( item.color, LIGHT);
         GetRGBTranslateColorShade(&color, item.color, LIGHT);
     }
-    GetIndString( s, item.item.checkboxButton.label.stringID,
-                item.item.checkboxButton.label.stringNumber);
+
+    StringList strings;
+    strings.load(item.item.checkboxButton.label.stringID);
+    StringPiece s = strings.at(item.item.checkboxButton.label.stringNumber - 1);
     swidth = GetInterfaceStringWidth( s, item.style);
     swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
     sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
@@ -1083,7 +1096,6 @@ void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix) {
 void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
     Rect            tRect, uRect;
     short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
-    Str255          s;
     unsigned char   shade;
     RgbColor        color;
 
@@ -1107,7 +1119,9 @@ void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
 
     // draw the string
 
-    GetIndString( s, item.item.labeledRect.label.stringID, item.item.labeledRect.label.stringNumber);
+    StringList strings;
+    strings.load(item.item.labeledRect.label.stringID);
+    StringPiece s = strings.at(item.item.labeledRect.label.stringNumber - 1);
     swidth = GetInterfaceStringWidth( s, item.style) + kInterfaceTextHBuffer * 2;
     swidth = ( tRect.right - tRect.left) - swidth;
     sheight = GetInterfaceFontHeight( item.style) + kInterfaceTextVBuffer * 2;
@@ -1193,7 +1207,6 @@ void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
 void DrawPlayerInterfaceList(const interfaceItemType& item, PixMap* pix) {
     Rect            tRect, uRect;
     short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
-    Str255          s;
     RgnHandle       clipRgn = nil;
     RgbColor        color;
 
@@ -1241,7 +1254,9 @@ void DrawPlayerInterfaceList(const interfaceItemType& item, PixMap* pix) {
     SetTranslateColorShadeFore( item.color, LIGHT);
     GetRGBTranslateColorShade(&color, item.color, LIGHT);
 
-    GetIndString( s, item.item.listRect.label.stringID, item.item.listRect.label.stringNumber);
+    StringList strings;
+    strings.load(item.item.listRect.label.stringID);
+    StringPiece s = strings.at(item.item.listRect.label.stringNumber - 1);
     swidth = GetInterfaceStringWidth( s, item.style) + kInterfaceTextHBuffer * 2;
     sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer * 2;
     MoveTo( tRect.left + kInterfaceTextHBuffer, tRect.top + sheight - kInterfaceTextVBuffer);
@@ -1357,7 +1372,7 @@ void DrawPlayerInterfaceList(const interfaceItemType& item, PixMap* pix) {
                 GetRGBTranslateColorShade(&color, item.color, LIGHT);
             }
             MoveTo( tRect.left, vcenter);
-            (*(item.item.listRect.getItemString))( swidth, s);
+            StringPiece s = (*(item.item.listRect.getItemString))( swidth);
             DrawInterfaceString(s, item.style, pix, color);
             swidth++;
         }
@@ -1387,7 +1402,6 @@ void DrawPlayerInterfaceList(const interfaceItemType& item, PixMap* pix) {
 
 void DrawPlayerInterfaceListEntry(
         const interfaceItemType& item, short whichEntry, PixMap* pix) {
-    Str255          s;
     RgnHandle       clipRgn = nil;
     Rect            tRect, uRect;
     short           swidth, vcenter;
@@ -1425,7 +1439,7 @@ void DrawPlayerInterfaceListEntry(
                 GetRGBTranslateColorShade(&color, item.color, LIGHT);
             }
             MoveTo( tRect.left, vcenter);
-            (*(item.item.listRect.getItemString))(swidth, s);
+            StringPiece s = (*(item.item.listRect.getItemString))(swidth);
             DrawInterfaceString(s, item.style, pix, color);
             swidth++;
         }
@@ -1856,11 +1870,11 @@ void GetAnyInterfaceItemContentBounds(const interfaceItemType& item, Rect *bound
     *bounds = item.bounds;
 }
 
-short GetInterfaceStringWidth(unsigned char* s, interfaceStyleType style) {
+short GetInterfaceStringWidth(const StringPiece& s, interfaceStyleType style) {
     long            width, height;
 
     SetInterfaceLargeUpperFont( style);
-    mGetDirectStringDimensions(PStringPiece(s), width, height);
+    mGetDirectStringDimensions(s, width, height);
 
     return ( width);
 }
@@ -1891,12 +1905,12 @@ short GetInterfaceFontAscent( interfaceStyleType style) {
 //  Relies on roman alphabet for upper/lower casing.  NOT WORLD-READY!
 
 void DrawInterfaceString(
-        unsigned char* s, interfaceStyleType style, PixMap* pix, const RgbColor& color) {
+        const StringPiece& s, interfaceStyleType style, PixMap* pix, const RgbColor& color) {
     Rect    clipRect;
 
     clipRect = pix->bounds();
     SetInterfaceLargeUpperFont( style);
-    DrawDirectTextStringClipped(PStringPiece(s), color, pix, clipRect, 0, 0);
+    DrawDirectTextStringClipped(s, color, pix, clipRect, 0, 0);
 }
 
 void SetInterfaceLargeUpperFont(interfaceStyleType style) {

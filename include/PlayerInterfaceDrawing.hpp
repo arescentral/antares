@@ -71,13 +71,13 @@ void DrawAnyInterfaceItem(const interfaceItemType& item, PixMap* pix);
 void GetAnyInterfaceItemGraphicBounds(const interfaceItemType& item, Rect* rect);
 void GetAnyInterfaceItemContentBounds(const interfaceItemType& item, Rect* rect);
 
-short GetInterfaceStringWidth(unsigned char* s, interfaceStyleType style);
+short GetInterfaceStringWidth(const sfz::StringPiece& s, interfaceStyleType style);
 short GetInterfaceFontHeight(interfaceStyleType style);
 short GetInterfaceFontAscent(interfaceStyleType style);
 short GetInterfaceFontWidth(interfaceStyleType style);
 
 void DrawInterfaceString(
-        unsigned char* s, interfaceStyleType style, PixMap* pix, const RgbColor& color);
+        const sfz::StringPiece& s, interfaceStyleType style, PixMap* pix, const RgbColor& color);
 
 void SetInterfaceLargeUpperFont(interfaceStyleType style);
 void SetInterfaceLargeLowerFont(interfaceStyleType style);

@@ -675,7 +675,13 @@ void MakeMiniScreenFromIndString( short whichString)
                     line->whichButton = kInLineButton;
                     line->hiliteLeft = mRect.left + kMiniScreenLeftBuffer + gDirectText->logicalWidth * (charNum - 1);
 
-                    GetKeyNumName( keyname, GetKeyNumFromKeyMap( globals()->gKeyControl[kCompAcceptKeyNum]));
+                    {
+                        sfz::String key_name;
+                        GetKeyNumName(
+                                GetKeyNumFromKeyMap( globals()->gKeyControl[kCompAcceptKeyNum]),
+                                &key_name);
+                        string_to_pstring(key_name, keyname);
+                    }
                     keyc = keyname;
                     keyNameLen = *keyc;
                     keyc++;
@@ -723,7 +729,13 @@ void MakeMiniScreenFromIndString( short whichString)
                     line->whichButton = kOutLineButton;
                     line->hiliteLeft = mRect.left + kMiniScreenLeftBuffer + gDirectText->logicalWidth * (charNum - 1);
 
-                    GetKeyNumName( keyname, GetKeyNumFromKeyMap( globals()->gKeyControl[kCompCancelKeyNum]));
+                    {
+                        sfz::String key_name;
+                        GetKeyNumName(
+                                GetKeyNumFromKeyMap( globals()->gKeyControl[kCompCancelKeyNum]),
+                                &key_name);
+                        string_to_pstring(key_name, keyname);
+                    }
                     keyc = keyname;
                     keyNameLen = *keyc;
                     keyc++;

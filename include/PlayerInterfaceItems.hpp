@@ -24,6 +24,7 @@
 #include "NateDraw.hpp"
 
 namespace sfz { class BinaryReader; }
+namespace sfz { class StringPiece; }
 
 namespace antares {
 
@@ -75,7 +76,7 @@ struct interfaceLabeledRectType {
 struct interfaceListType {
     interfaceLabelType          label;
     short                       (*getListLength)( void);
-    void                        (*getItemString)(short, unsigned char*);
+    sfz::StringPiece            (*getItemString)(short);
     bool                     (*itemHilited)( short, bool);
     short                       topItem;
 

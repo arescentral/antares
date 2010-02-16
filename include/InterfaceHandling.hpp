@@ -56,10 +56,6 @@ void SwitchAnyRadioOrCheckbox( short, bool);
 bool GetAnyRadioOrCheckboxOn( short);
 void RefreshInterfaceItem( short);
 void RefreshInterfaceListEntry( short, short);
-void SetInterfaceListCallback(  short       whichItem,
-                                short       (*getListLength)( void),
-                                void        (*getItemString)(short, unsigned char*),
-                                bool     (*itemHilited)( short, bool));
 void SetButtonKeyNum( short, short);
 short GetButtonKeyNum( short);
 
