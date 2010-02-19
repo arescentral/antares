@@ -20,6 +20,7 @@ ALL_TEST_CASES = {
     'space-race': ['demo', '--level=23'],
     'the-stars-have-ears': ['demo', '--level=0'],
     'while-the-iron-is-hot': ['demo', '--level=5'],
+    'options': ['options'],
     'object-data': ['object-data'],
     'build-pix': ['build-pix'],
 }

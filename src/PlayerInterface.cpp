@@ -835,6 +835,7 @@ void DoOptionsInterface( void)
     Preferences*    prefsData = globals()->gPreferencesData.get();
     Rect                    volumeRect;
 
+    VideoDriver::driver()->set_game_state(OPTIONS_INTERFACE);
     BlackenWindow();
 
     FlushEvents(everyEvent, 0);

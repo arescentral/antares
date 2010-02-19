@@ -35,6 +35,7 @@
 #include "PlayerInterface.hpp"
 #include "SoundFX.hpp"
 #include "StringHandling.hpp"
+#include "VideoDriver.hpp"
 
 using rezin::mac_roman_encoding;
 using sfz::BytesPiece;
@@ -211,6 +212,7 @@ bool Key_Setup_Screen_Do( void)
     long                    lastFlashTime = 0;
     interfaceItemType       *anItem;
 
+    VideoDriver::driver()->set_game_state(KEY_CONTROL_INTERFACE);
     BlackenOffscreen();
 
     FlushEvents(everyEvent, 0);

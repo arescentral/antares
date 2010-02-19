@@ -63,7 +63,9 @@ void usage(const StringPiece& program_name) {
             "    main-screen        dumps the main screen, then exits\n"
             "    mission-briefing   dumps the mission briefing screens for <level>\n"
             "    demo               runs the demo for <level>\n"
-            "    object-data        generates all object data strings\n",
+            "    options            dumps the options and key control screens\n"
+            "    object-data        generates all object data strings\n"
+            "    build-pix          generates all scrolling text images\n",
             program_name);
     exit(1);
 }
@@ -73,6 +75,7 @@ enum Test {
     TEST_MAIN_SCREEN,
     TEST_MISSION_BRIEFING,
     TEST_DEMO,
+    TEST_OPTIONS,
     TEST_OBJECT_DATA,
     TEST_BUILD_PIX,
 };
@@ -84,6 +87,8 @@ Test string_to_test(const char* string) {
         return TEST_MISSION_BRIEFING;
     } else if (strcmp(string, "demo") == 0) {
         return TEST_DEMO;
+    } else if (strcmp(string, "options") == 0) {
+        return TEST_OPTIONS;
     } else if (strcmp(string, "object-data") == 0) {
         return TEST_OBJECT_DATA;
     } else if (strcmp(string, "build-pix") == 0) {
@@ -170,6 +175,11 @@ void TestMain(int argc, char* const* argv) {
             SoundDriver::set_driver(new LogSoundDriver(out));
         }
         VideoDriver::set_driver(new DemoVideoDriver(output_dir, level));
+        break;
+
+      case TEST_OPTIONS:
+        SoundDriver::set_driver(new NullSoundDriver);
+        VideoDriver::set_driver(new OptionsVideoDriver(output_dir));
         break;
 
       case TEST_OBJECT_DATA:

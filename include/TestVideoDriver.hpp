@@ -87,6 +87,20 @@ class DemoVideoDriver : public TestingVideoDriver {
     bool _key_down;
 };
 
+class OptionsVideoDriver : public TestingVideoDriver {
+  public:
+    OptionsVideoDriver(const sfz::StringPiece& output_dir);
+
+    virtual bool wait_next_event(EventRecord* evt, double);
+    virtual int get_demo_scenario();
+    virtual bool button();
+    virtual Point get_mouse();
+
+  private:
+    int _key_tab;
+    bool _key_down;
+};
+
 class ObjectDataVideoDriver : public TestingVideoDriver {
   public:
     ObjectDataVideoDriver(const sfz::StringPiece& output_dir);

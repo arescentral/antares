@@ -252,6 +252,93 @@ void DemoVideoDriver::main_loop_iteration_complete(uint32_t game_time) {
     }
 }
 
+OptionsVideoDriver::OptionsVideoDriver(const StringPiece& output_dir)
+        : TestingVideoDriver(output_dir),
+          _key_tab(0),
+          _key_down(false) { }
+
+bool OptionsVideoDriver::wait_next_event(EventRecord* evt, double) {
+    switch (state()) {
+      case MAIN_SCREEN_INTERFACE:
+        {
+            if (_key_down) {
+                evt->what = keyUp;
+                _key_down = false;
+            } else {
+                evt->what = autoKey;
+                _key_down = true;
+            }
+            if (_key_tab >= 5) {
+                evt->message = 0x0c00;  // Q
+            } else {
+                evt->message = 0x1f00;  // O
+            }
+        }
+        return true;
+
+      case OPTIONS_INTERFACE:
+        {
+            if (_key_down) {
+                evt->what = keyUp;
+                _key_down = false;
+            } else {
+                if (!output_dir().empty()) {
+                    String out(output_dir());
+                    out.append("/options.png", ascii_encoding());
+                    DumpTo(out);
+                }
+                evt->what = autoKey;
+                _key_down = true;
+            }
+            evt->message = 0x2800;  // K
+        }
+        return true;
+
+      case KEY_CONTROL_INTERFACE:
+        {
+            if (_key_down) {
+                evt->what = mouseUp;
+                _key_down = false;
+            } else {
+                if (!output_dir().empty()) {
+                    String out(output_dir());
+                    format(&out, "/key-control-{0}.png", _key_tab);
+                    DumpTo(out);
+                }
+                ++_key_tab;
+                evt->what = mouseDown;
+                _key_down = true;
+            }
+            evt->where = get_mouse();
+        }
+        return true;
+
+      default:
+        return false;
+    };
+}
+
+bool OptionsVideoDriver::button() {
+    if (_key_tab == 5) {
+        _key_down = !_key_down;
+        return !_key_down;
+    } else {
+        return false;
+    }
+}
+
+Point OptionsVideoDriver::get_mouse() {
+    if (_key_tab < 5) {
+        return Point(100 * (1 + _key_tab), 50);
+    } else if (_key_tab == 5) {
+        return Point(550, 430);
+    } else {
+        throw Exception("_key_tab == {0}", _key_tab);
+    }
+}
+
+int OptionsVideoDriver::get_demo_scenario() { return -1; }
+
 ObjectDataVideoDriver::ObjectDataVideoDriver(const StringPiece& output_dir)
         : TestingVideoDriver(output_dir),
           _key_down(false) { }
