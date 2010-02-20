@@ -18,6 +18,7 @@
 #include "InterfaceScreen.hpp"
 
 #include "sfz/BinaryReader.hpp"
+#include "sfz/Exception.hpp"
 #include "ColorTranslation.hpp"
 #include "Error.hpp"
 #include "FakeDrawing.hpp"
@@ -28,6 +29,8 @@
 #include "Time.hpp"
 
 using sfz::BytesBinaryReader;
+using sfz::Exception;
+using std::vector;
 
 namespace antares {
 
@@ -37,7 +40,6 @@ extern PixMap* gRealWorld;
 
 InterfaceScreen::InterfaceScreen(int id, const Rect& bounds, bool full_screen)
         : _state(NORMAL),
-          _id(id),
           _bounds(bounds),
           _full_screen(full_screen),
           _last_event(now_secs()),
@@ -45,8 +47,8 @@ InterfaceScreen::InterfaceScreen(int id, const Rect& bounds, bool full_screen)
           _pix(new ArrayPixMap(bounds.width(), bounds.height())) {
     Resource rsrc('intr', id);
     BytesBinaryReader bin(rsrc.data());
-    const int offset_x = (bounds.width() / 2) - 320;
-    const int offset_y = (bounds.height() / 2) - 240;
+    const int offset_x = (_bounds.width() / 2) - 320;
+    const int offset_y = (_bounds.height() / 2) - 240;
     while (!bin.done()) {
         _items.push_back(interfaceItemType());
         interfaceItemType* const item = &_items.back();
@@ -77,8 +79,7 @@ void InterfaceScreen::draw() const {
         }
     }
     _pix->fill(RgbColor::kBlack);
-    for (std::vector<interfaceItemType>::const_iterator it = _items.begin(); it != _items.end();
-            ++it) {
+    for (vector<interfaceItemType>::const_iterator it = _items.begin(); it != _items.end(); ++it) {
         DrawAnyInterfaceItem(*it, _pix.get());
     }
     gRealWorld->view(_bounds).view(copy_area).copy(_pix->view(copy_area));
@@ -136,9 +137,6 @@ bool InterfaceScreen::mouse_up(int button, const Point& where) {
         item->set_status(kActive);
         draw();
         if (bounds.contains(where)) {
-            if (item->kind == kTabBoxButton) {
-                item->item.radioButton.on = true;
-            }
             handle_button(hit_item);
         }
     }
@@ -196,6 +194,47 @@ double InterfaceScreen::last_event() const {
 
 void InterfaceScreen::adjust_interface() { }
 
+void InterfaceScreen::truncate(size_t size) {
+    if (size > _items.size()) {
+        throw Exception("");
+    }
+    _items.resize(size);
+}
+
+void InterfaceScreen::extend(int id, size_t within) {
+    if ((within < 0) || (size() <= within)) {
+        throw Exception("interfaces must be extended within existing elements");
+    }
+    vector<interfaceItemType> new_items;
+
+    Resource rsrc('intr', id);
+    BytesBinaryReader bin(rsrc.data());
+    Rect all_bounds;
+    while (!bin.done()) {
+        new_items.push_back(interfaceItemType());
+        interfaceItemType* const item = &new_items.back();
+        bin.read(item);
+        if (all_bounds.width() == 0) {
+            all_bounds = item->bounds;
+        } else {
+            all_bounds.enlarge_to(item->bounds);
+        }
+    }
+
+    Rect centered_bounds(all_bounds);
+    centered_bounds.center_in(_items[within].bounds);
+    const int off_x = centered_bounds.left - all_bounds.left;
+    const int off_y = centered_bounds.top - all_bounds.top;
+    for (vector<interfaceItemType>::iterator it = new_items.begin(); it != new_items.end(); ++it) {
+        it->bounds.offset(off_x, off_y);
+    }
+    _items.insert(_items.end(), new_items.begin(), new_items.end());
+}
+
+size_t InterfaceScreen::size() const {
+    return _items.size();
+}
+
 const interfaceItemType& InterfaceScreen::item(int i) const {
     return _items[i];
 }
@@ -209,7 +248,7 @@ PixMap* InterfaceScreen::pix() const {
 }
 
 void InterfaceScreen::offset(int offset_x, int offset_y) {
-    for (std::vector<interfaceItemType>::iterator it = _items.begin(); it != _items.end(); ++it) {
+    for (vector<interfaceItemType>::iterator it = _items.begin(); it != _items.end(); ++it) {
         it->bounds.offset(offset_x, offset_y);
     }
 }

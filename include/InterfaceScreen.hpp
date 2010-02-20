@@ -47,6 +47,10 @@ class InterfaceScreen : public Card {
     virtual void handle_button(int button) = 0;
     virtual void draw() const;
 
+    void truncate(size_t size);
+    void extend(int id, size_t within);
+
+    size_t size() const;
     const interfaceItemType& item(int index) const;
     interfaceItemType* mutable_item(int index);
     PixMap* pix() const;
@@ -60,7 +64,6 @@ class InterfaceScreen : public Card {
     };
     State _state;
 
-    const int _id;
     const Rect _bounds;
     const bool _full_screen;
     double _last_event;

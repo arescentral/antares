@@ -18,6 +18,8 @@
 #ifndef ANTARES_OPTIONS_SCREEN_HPP_
 #define ANTARES_OPTIONS_SCREEN_HPP_
 
+#include <utility>
+#include <vector>
 #include "sfz/SmartPtr.hpp"
 #include "InterfaceScreen.hpp"
 #include "AresPreferences.hpp"
@@ -73,10 +75,73 @@ class SoundControlScreen : public InterfaceScreen {
         VOLUME_BOX = 13,
     };
 
+    OptionsScreen::State button_state(int button);
+
     OptionsScreen::State* const _state;
     Preferences* const _preferences;
 
     DISALLOW_COPY_AND_ASSIGN(SoundControlScreen);
+};
+
+class KeyControlScreen : public InterfaceScreen {
+  public:
+    KeyControlScreen(OptionsScreen::State* state, Preferences* preferences);
+    ~KeyControlScreen();
+
+    virtual bool key_down(int key);
+    virtual bool key_up(int key);
+    virtual void become_front();
+
+    virtual double next_timer();
+    virtual void fire_timer();
+
+  protected:
+    virtual void adjust_interface();
+    virtual void handle_button(int button);
+    virtual void draw() const;
+
+  private:
+    enum Item {
+        CANCEL = 0,
+        DONE = 1,
+        SOUND_CONTROL = 2,
+
+        SHIP_TAB = 3,
+        COMMAND_TAB = 4,
+        SHORTCUT_TAB = 5,
+        UTILITY_TAB = 6,
+        HOT_KEY_TAB = 7,
+
+        CONFLICT_TEXT = 10,
+        TAB_BOX = 8,
+    };
+
+    enum Tab {
+        SHIP,
+        COMMAND,
+        SHORTCUT,
+        UTILITY,
+        HOT_KEY,
+    };
+
+    OptionsScreen::State button_state(int button);
+    Tab button_tab(int button);
+    void set_tab(Tab tab);
+    void update_conflicts();
+    void flash_on(size_t key);
+
+    OptionsScreen::State* const _state;
+    Preferences* const _preferences;
+
+    Tab _tab;
+    const size_t _key_start;
+    size_t _selected_key;
+    std::vector<std::pair<size_t, size_t> > _conflicts;
+
+    double _next_flash;
+    bool _flashed_on;
+
+    DISALLOW_COPY_AND_ASSIGN(KeyControlScreen);
 };
 
 }  // namespace antares
