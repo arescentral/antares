@@ -46,6 +46,33 @@
             ],
         },
         {
+            'target_name': 'Antares',
+            'type': 'executable',
+            'mac_bundle': 1,
+            'sources': [
+                'src/AntaresController.mm',
+                'src/CocoaMain.mm',
+                'src/CocoaVideoDriver.mm',
+            ],
+            'dependencies': [
+                'libAntares',
+            ],
+            'xcode_settings': {
+                'INFOPLIST_FILE': 'resources/Antares-Info.plist',
+            },
+            'mac_bundle_resources': [
+                'resources/Antares.icns',
+                'resources/MainMenu.nib',
+                'data',
+            ],
+            'link_settings': {
+                'libraries': [
+                    '$(SDKROOT)/System/Library/Frameworks/Cocoa.framework',
+                    '$(SDKROOT)/System/Library/Frameworks/OpenGL.framework',
+                ],
+            },
+        },
+        {
             'target_name': 'libAntares',
             'type': '<(library)',
             'sources': [

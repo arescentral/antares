@@ -43,7 +43,9 @@ typedef long Size;
 typedef unsigned char* Ptr;
 typedef Ptr* Handle;
 
+#ifndef nil
 #define nil NULL
+#endif
 
 typedef unsigned char Str255[256];
 typedef unsigned char Str31[32];
@@ -59,7 +61,7 @@ STUB1(GlobalToLocal, void(Point*));
 class RgbColor;
 void Index2Color(long index, RgbColor* color);
 
-typedef int KeyMap[4];
+typedef uint32_t KeyMap[4];
 void GetKeys(KeyMap keys);
 
 struct EventRecord {
