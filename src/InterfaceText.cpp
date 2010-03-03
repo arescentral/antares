@@ -92,9 +92,13 @@ InterfaceText::InterfaceText(
                         // TODO(sfiera): save the picture somewhere so we only have to load it once
                         // here, and not additionally each time we draw it.
                         inline_pict.id = id;
-                        inline_pict.bounds = Picture(id).bounds();
-                        _inline_picts.push_back(inline_pict);
-                        _chars.push_back(InterfaceChar(_inline_picts.size() - 1, PICTURE));
+                        // TODO(sfiera): report an error if the picture is not loadable, instead of
+                        // silently ignoring it.
+                        try {
+                            inline_pict.bounds = Picture(id).bounds();
+                            _inline_picts.push_back(inline_pict);
+                            _chars.push_back(InterfaceChar(_inline_picts.size() - 1, PICTURE));
+                        } catch (sfz::Exception& e) { }
                         found_code = true;
                         i = j;
                         break;
