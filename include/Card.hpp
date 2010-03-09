@@ -93,21 +93,19 @@ class Card {
     //
     // @param [in] button   The button that was pressed.  Is in [0, 1, 2].
     // @param [in] loc      The location of the press, relative to the top left of the screen.
-    // @returns             true if this Card handled the event, false otherwise.
-    virtual bool mouse_down(int button, const Point& loc);
+    virtual void mouse_down(int button, const Point& loc);
 
     // Called when the numbered button is released.
     //
-    // Takes the same parameters as `mouse_down()` and returns the same values.
-    virtual bool mouse_up(int button, const Point& loc);
+    // Takes the same parameters as `mouse_down()`.
+    virtual void mouse_up(int button, const Point& loc);
 
     // Called when the mouse is moved.
     //
     // This method is invoked regardless of whether any mouse buttons are pressed.
     //
     // @param [in] loc      The new location of the mouse.
-    // @returns             true if this Card handled the event, false otherwise.
-    virtual bool mouse_moved(const Point& loc);
+    virtual void mouse_moved(const Point& loc);
 
     // Key-related methods.
     //
@@ -133,13 +131,12 @@ class Card {
     // documentation/mac/pdf/MacintoshToolboxEssentials.pdf
     //
     // @param [in] key      The key-code that was pressed.
-    // @returns             true if this Card handled the event, false otherwise.
-    virtual bool key_down(int key);
+    virtual void key_down(int key);
 
     // Called when a key is released.
     //
-    // Takes the same parameters as `key_down()` and returns the same values.
-    virtual bool key_up(int key);
+    // Takes the same parameters as `key_down()`.
+    virtual void key_up(int key);
 
     // Timer-related methods.
     //
@@ -178,6 +175,17 @@ class Card {
     // @returns             The stack which contains this object.
     CardStack* stack() const;
 
+  protected:
+    // Returns the Card below this card.
+    //
+    // If this card is the bottom-most card, then returns NULL.  For any other card, returns a
+    // non-NULL card which represents the next card down on the stack.  In the implementation of
+    // the event methods above, it may be useful to use `next()` to forward the call down the
+    // stack.
+    //
+    // @returns             The Card below this one.
+    Card* next() const;
+
   private:
     // CardStack needs access to `set_stack()`.
     friend class CardStack;
@@ -194,6 +202,10 @@ class Card {
 
     // The containing stack.  Initially NULL and set by `set_stack()`.
     CardStack* _stack;
+
+    // The next card down on the stack.  Is NULL for the bottom-most card, and non-NULL for every
+    // card above it.
+    Card* _next;
 };
 
 }  // namespace antares

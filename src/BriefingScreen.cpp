@@ -92,11 +92,11 @@ void BriefingScreen::become_front() {
     }
 }
 
-bool BriefingScreen::key_down(int key) {
+void BriefingScreen::key_down(int key) {
     if (key == 0x3500) {
         *_cancelled = true;
         stack()->pop(this);
-        return true;
+        return;
     } else {
         return InterfaceScreen::key_down(key);
     }

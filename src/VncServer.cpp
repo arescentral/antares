@@ -837,12 +837,14 @@ int VncVideoDriver::ticks() {
 void VncVideoDriver::loop(CardStack* stack) {
     while (!stack->empty()) {
         EventRecord evt;
-        double at;
-        Card* card = stack->next_event(&at);
+        double at = stack->top()->next_timer();
+        if (at == 0.0) {
+            at = std::numeric_limits<double>::infinity();
+        }
         if (wait_next_event(&evt, at - now_secs())) {
             stack->send(evt);
-        } else if (card) {
-            card->fire_timer();
+        } else if (at != std::numeric_limits<double>::infinity()) {
+            stack->top()->fire_timer();
         }
     }
 }

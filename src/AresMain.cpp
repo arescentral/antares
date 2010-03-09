@@ -213,12 +213,7 @@ class GamePlay : public Card {
     virtual double next_timer();
     virtual void fire_timer();
 
-    virtual bool mouse_down(int button, const Point& loc);
-    virtual bool mouse_up(int button, const Point& loc);
-    virtual bool mouse_moved(int button);
-
-    virtual bool key_down(int key);
-    virtual bool key_up(int key);
+    virtual void key_down(int key);
 
   private:
     enum State {
@@ -440,11 +435,10 @@ class PauseScreen : public Card {
         }
     }
 
-    virtual bool key_up(int key) {
+    virtual void key_up(int key) {
         if (key == 0x3900) {
             stack()->pop(this);
         }
-        return true;
     }
 
     virtual double next_timer() {
@@ -768,24 +762,7 @@ void GamePlay::fire_timer() {
     }
 }
 
-bool GamePlay::mouse_down(int button, const Point& loc) {
-    static_cast<void>(button);
-    static_cast<void>(loc);
-    return true;
-}
-
-bool GamePlay::mouse_up(int button, const Point& loc) {
-    static_cast<void>(button);
-    static_cast<void>(loc);
-    return true;
-}
-
-bool GamePlay::mouse_moved(int button) {
-    static_cast<void>(button);
-    return true;
-}
-
-bool GamePlay::key_down(int key) {
+void GamePlay::key_down(int key) {
     if (globals()->gOptions & kOptionReplay) {
         switch (key) {
           case 0x3900:  // Caps lock.
@@ -795,7 +772,7 @@ bool GamePlay::key_down(int key) {
           default:
             *_game_result = QUIT_GAME;
             globals()->gGameOver = 1;
-            return true;
+            return;
         }
     }
 
@@ -817,13 +794,6 @@ bool GamePlay::key_down(int key) {
         stack()->push(new HelpScreen);
         break;
     }
-
-    return true;
-}
-
-bool GamePlay::key_up(int key) {
-    static_cast<void>(key);
-    return true;
 }
 
 void Pause( long time)

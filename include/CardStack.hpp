@@ -18,8 +18,6 @@
 #ifndef ANTARES_CARD_STACK_HPP_
 #define ANTARES_CARD_STACK_HPP_
 
-#include <vector>
-
 namespace antares {
 
 class Card;
@@ -62,7 +60,7 @@ class CardStack {
     void pop(Card* card);
 
     // @returns             The top-most card on the stack.
-    const Card* top() const;
+    Card* top() const;
 
     // Dispatches an event to the appropriate Card on the stack.
     //
@@ -76,16 +74,9 @@ class CardStack {
     // @param [in] evt      A record containing the event to dispatch and its parameters.
     void send(const EventRecord& evt);
 
-    // Figures out which Card should have its timer fired next, and returns that card.  The time at
-    // which the timer should be fired is placed into `at`.
-    //
-    // @param [out] at      The time at which to fire the timer.
-    // @returns             The Card whose timer should be fired.
-    Card* next_event(double* at);
-
   private:
-    // The stack of cards.  The back/bottom is at index 0, and the top at `size() - 1`.
-    std::vector<Card*> _list;
+    // A linked list of cards.  The card here is on top.
+    Card* _top;
 };
 
 }  // namespace antares

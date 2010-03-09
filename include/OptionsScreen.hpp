@@ -88,9 +88,10 @@ class KeyControlScreen : public InterfaceScreen {
     KeyControlScreen(OptionsScreen::State* state, Preferences* preferences);
     ~KeyControlScreen();
 
-    virtual bool key_down(int key);
-    virtual bool key_up(int key);
     virtual void become_front();
+
+    virtual void key_down(int key);
+    virtual void key_up(int key);
 
     virtual double next_timer();
     virtual void fire_timer();

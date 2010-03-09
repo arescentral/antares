@@ -245,7 +245,12 @@ KeyControlScreen::KeyControlScreen(OptionsScreen::State* state, Preferences* pre
 
 KeyControlScreen::~KeyControlScreen() { }
 
-bool KeyControlScreen::key_down(int key) {
+void KeyControlScreen::become_front() {
+    InterfaceScreen::become_front();
+    VideoDriver::driver()->set_game_state(KEY_CONTROL_INTERFACE);
+}
+
+void KeyControlScreen::key_down(int key) {
     if (_selected_key >= 0) {
         key = (key >> 8) & 0xFF;
         if ((key == 53) || (key == 36) || (key == 57)) {  // ESC, RTRN, CAPS.
@@ -259,12 +264,10 @@ bool KeyControlScreen::key_down(int key) {
         adjust_interface();
         draw();
     }
-    return true;
 }
 
-bool KeyControlScreen::key_up(int key) {
+void KeyControlScreen::key_up(int key) {
     static_cast<void>(key);
-    return true;
 }
 
 double KeyControlScreen::next_timer() {
@@ -279,11 +282,6 @@ void KeyControlScreen::fire_timer() {
     }
     adjust_interface();
     draw();
-}
-
-void KeyControlScreen::become_front() {
-    InterfaceScreen::become_front();
-    VideoDriver::driver()->set_game_state(KEY_CONTROL_INTERFACE);
 }
 
 void KeyControlScreen::adjust_interface() {

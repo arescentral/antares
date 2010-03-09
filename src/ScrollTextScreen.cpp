@@ -72,17 +72,15 @@ void ScrollTextScreen::resign_front() {
     }
 }
 
-bool ScrollTextScreen::mouse_down(int button, const Point& where) {
-    (void)button;
-    (void)where;
+void ScrollTextScreen::mouse_down(int button, const Point& where) {
+    static_cast<void>(button);
+    static_cast<void>(where);
     stack()->pop(this);
-    return true;
 }
 
-bool ScrollTextScreen::key_down(int key) {
-    (void)key;
+void ScrollTextScreen::key_down(int key) {
+    static_cast<void>(key);
     stack()->pop(this);
-    return true;
 }
 
 double ScrollTextScreen::next_timer() {

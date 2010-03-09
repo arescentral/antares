@@ -18,12 +18,14 @@
 #include "Card.hpp"
 
 #include <stdlib.h>
+#include "CardStack.hpp"
 #include "Error.hpp"
 
 namespace antares {
 
 Card::Card()
-        : _stack(NULL) { }
+        : _stack(NULL),
+          _next(NULL) { }
 
 Card::~Card() { }
 
@@ -31,31 +33,26 @@ void Card::become_front() { }
 
 void Card::resign_front() { }
 
-bool Card::mouse_down(int button, const Point& loc) {
+void Card::mouse_down(int button, const Point& loc) {
     static_cast<void>(button);
     static_cast<void>(loc);
-    return false;
 }
 
-bool Card::mouse_up(int button, const Point& loc) {
+void Card::mouse_up(int button, const Point& loc) {
     static_cast<void>(button);
     static_cast<void>(loc);
-    return false;
 }
 
-bool Card::mouse_moved(const Point& loc) {
+void Card::mouse_moved(const Point& loc) {
     static_cast<void>(loc);
-    return false;
 }
 
-bool Card::key_down(int key) {
+void Card::key_down(int key) {
     static_cast<void>(key);
-    return false;
 }
 
-bool Card::key_up(int key) {
+void Card::key_up(int key) {
     static_cast<void>(key);
-    return false;
 }
 
 double Card::next_timer() {
@@ -68,10 +65,15 @@ CardStack* Card::stack() const {
     return _stack;
 }
 
+Card* Card::next() const {
+    return _next;
+}
+
 void Card::set_stack(CardStack* stack) {
     // Can add or remove from stack, not move between.
     check(_stack == NULL, "Card is already on a stack");
     _stack = stack;
+    _next = stack->top();
 }
 
 }  // namespace antares

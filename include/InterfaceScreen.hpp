@@ -35,11 +35,11 @@ class InterfaceScreen : public Card {
 
     virtual void become_front();
 
-    virtual bool mouse_down(int button, const Point& where);
-    virtual bool mouse_up(int button, const Point& where);
-    virtual bool mouse_moved(int button, const Point& where);
-    virtual bool key_down(int key);
-    virtual bool key_up(int key);
+    virtual void mouse_down(int button, const Point& where);
+    virtual void mouse_up(int button, const Point& where);
+    virtual void mouse_moved(int button, const Point& where);
+    virtual void key_down(int key);
+    virtual void key_up(int key);
 
   protected:
     double last_event() const;

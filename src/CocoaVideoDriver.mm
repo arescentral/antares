@@ -330,13 +330,15 @@ void CocoaVideoDriver::loop(CardStack* stack) {
         [context flushBuffer];
 
         EventRecord evt;
-        double at;
+        double at = stack->top()->next_timer();
         double now = now_secs();
-        Card* card = stack->next_event(&at);
+        if (at == 0.0) {
+            at = std::numeric_limits<double>::infinity();
+        }
         if (wait_next_event(&evt, at - now)) {
             stack->send(evt);
-        } else if (card) {
-            card->fire_timer();
+        } else if (at != std::numeric_limits<double>::infinity()) {
+            stack->top()->fire_timer();
         }
 
         [pool release];

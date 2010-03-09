@@ -34,8 +34,8 @@ class ScrollTextScreen : public Card {
     virtual void become_front();
     virtual void resign_front();
 
-    virtual bool mouse_down(int button, const Point& where);
-    virtual bool key_down(int key);
+    virtual void mouse_down(int button, const Point& where);
+    virtual void key_down(int key);
 
     virtual double next_timer();
     virtual void fire_timer();

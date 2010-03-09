@@ -85,9 +85,9 @@ void InterfaceScreen::draw() const {
     gRealWorld->view(_bounds).view(copy_area).copy(_pix->view(copy_area));
 }
 
-bool InterfaceScreen::mouse_down(int button, const Point& where) {
+void InterfaceScreen::mouse_down(int button, const Point& where) {
     if (button != 0) {
-        return true;
+        return;
     }
     for (size_t i = 0; i < _items.size(); ++i) {
         interfaceItemType* const item = &_items[i];
@@ -104,10 +104,10 @@ bool InterfaceScreen::mouse_down(int button, const Point& where) {
                 draw();
                 // play kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound.
                 _hit_item = i;
-                return true;
+                return;
 
               case kLabeledRect:
-                return true;
+                return;
 
               case kListRect:
                 fail("kListRect not yet handled");
@@ -117,12 +117,12 @@ bool InterfaceScreen::mouse_down(int button, const Point& where) {
             }
         }
     }
-    return true;
+    return;
 }
 
-bool InterfaceScreen::mouse_up(int button, const Point& where) {
+void InterfaceScreen::mouse_up(int button, const Point& where) {
     if (button != 0) {
-        return true;
+        return;
     }
     if (_state == MOUSE_DOWN) {
         // Save _hit_item and set it to 0 before calling handle_button(), as calling
@@ -140,16 +140,15 @@ bool InterfaceScreen::mouse_up(int button, const Point& where) {
             handle_button(hit_item);
         }
     }
-    return true;
+    return;
 }
 
-bool InterfaceScreen::mouse_moved(int button, const Point& where) {
-    (void)button;
-    (void)where;
-    return true;
+void InterfaceScreen::mouse_moved(int button, const Point& where) {
+    static_cast<void>(button);
+    static_cast<void>(where);
 }
 
-bool InterfaceScreen::key_down(int key) {
+void InterfaceScreen::key_down(int key) {
     const int32_t key_code = ((key & keyCodeMask) >> 8) + 1;
     if (key_code > 0) {
         for (size_t i = 0; i < _items.size(); ++i) {
@@ -160,16 +159,15 @@ bool InterfaceScreen::key_down(int key) {
                 draw();
                 // play kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound.
                 _hit_item = i;
-                return true;
+                return;
             }
         }
     }
-    return true;
 }
 
-bool InterfaceScreen::key_up(int key) {
+void InterfaceScreen::key_up(int key) {
     // TODO(sfiera): verify that the same key that was pressed was released.
-    (void)key;
+    static_cast<void>(key);
     if (_state == KEY_DOWN) {
         // Save _hit_item and set it to 0 before calling handle_button(), as calling
         // handle_button() can result in the deletion of `this`.
@@ -185,7 +183,6 @@ bool InterfaceScreen::key_up(int key) {
         draw();
         handle_button(hit_item);
     }
-    return true;
 }
 
 double InterfaceScreen::last_event() const {

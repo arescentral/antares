@@ -285,14 +285,13 @@ void ColorFade::resign_front() {
     gActiveWorld->set_transition_fraction(0.0);
 }
 
-bool ColorFade::mouse_down(int button, const Point& loc) {
-    (void)button;
-    (void)loc;
+void ColorFade::mouse_down(int button, const Point& loc) {
+    static_cast<void>(button);
+    static_cast<void>(loc);
     if (_allow_skip) {
         *_skipped = true;
         stack()->pop(this);
     }
-    return true;
 }
 
 double ColorFade::next_timer() {
@@ -353,16 +352,15 @@ void PictFade::resign_front() {
     }
 }
 
-bool PictFade::mouse_down(int button, const Point& loc) {
-    (void)button;
-    (void)loc;
+void PictFade::mouse_down(int button, const Point& loc) {
+    static_cast<void>(button);
+    static_cast<void>(loc);
     *_skipped = true;
     if (this->skip()) {
         stack()->pop(this);
     } else {
         wane();
     }
-    return true;
 }
 
 double PictFade::next_timer() {

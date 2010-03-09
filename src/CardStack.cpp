@@ -18,84 +18,70 @@
 #include "CardStack.hpp"
 
 #include <algorithm>
+#include "sfz/Exception.hpp"
 #include "Base.h"
 #include "Card.hpp"
-#include "Error.hpp"
+
+using sfz::Exception;
 
 namespace antares {
 
-CardStack::CardStack(Card* top) {
+CardStack::CardStack(Card* top)
+        : _top(NULL) {
     push(top);
 }
 
 bool CardStack::empty() const {
-    return _list.empty();
+    return _top == NULL;
 }
 
 void CardStack::push(Card* card) {
-    if (!_list.empty()) {
-        _list.back()->resign_front();
+    if (!empty()) {
+        _top->resign_front();
     }
-    _list.push_back(card);
     card->set_stack(this);
+    _top = card;
     card->become_front();
 }
 
 void CardStack::pop(Card* card) {
-    if (card != _list.back()) {
-        fail("tried to pop card %p when not frontmost", card);
+    if (card != _top) {
+        throw Exception("tried to pop card {0} when not frontmost", card);
     }
     card->resign_front();
+    _top = card->next();
     delete card;
-    _list.pop_back();
-    if (!_list.empty()) {
-        _list.back()->become_front();
+    if (!empty()) {
+        _top->become_front();
     }
 }
 
-const Card* CardStack::top() const {
-    return _list.back();
+Card* CardStack::top() const {
+    return _top;
 }
 
 void CardStack::send(const EventRecord& evt) {
-    for (std::vector<Card*>::reverse_iterator it = _list.rbegin(); it != _list.rend(); ++it) {
-        switch (evt.what) {
-          case mouseDown:
-            if ((*it)->mouse_down(0, evt.where)) {
-                return;
-            }
-            break;
-          case mouseUp:
-            if ((*it)->mouse_up(0, evt.where)) {
-                return;
-            }
-            break;
-          case autoKey:
-          case keyDown:
-            if ((*it)->key_down(evt.message)) {
-                return;
-            }
-            break;
-          case keyUp:
-            if ((*it)->key_up(evt.message)) {
-                return;
-            }
-            break;
-        }
+    if (empty()) {
+        throw Exception("tried to sent event to empty stack");
     }
-}
+    switch (evt.what) {
+      case mouseDown:
+        _top->mouse_down(0, evt.where);
+        break;
 
-Card* CardStack::next_event(double* at) {
-    *at = std::numeric_limits<double>::infinity();
-    Card* result = NULL;
-    for (std::vector<Card*>::iterator it = _list.begin(); it != _list.end(); ++it) {
-        double card_at = (*it)->next_timer();
-        if (card_at > 0.0 && card_at < *at) {
-            *at = card_at;
-            result = *it;
-        }
+      case mouseUp:
+        _top->mouse_up(0, evt.where);
+        break;
+
+      case autoKey:
+      case keyDown:
+        _top->key_down(evt.message);
+        break;
+
+      case keyUp:
+        _top->key_up(evt.message);
+        break;
     }
-    return result;
 }
 
 }  // namespace antares

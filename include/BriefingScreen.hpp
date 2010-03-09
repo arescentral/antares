@@ -30,7 +30,7 @@ class BriefingScreen : public InterfaceScreen {
 
     virtual void become_front();
 
-    virtual bool key_down(int key);
+    virtual void key_down(int key);
 
   protected:
     virtual void adjust_interface();
