@@ -2504,7 +2504,7 @@ void Replace_KeyCode_Strings_With_Actual_Key_Names(String* text, short resID, si
 
     for (int i = 0; i < kKeyExtendedControlNum; ++i) {
         const StringPiece& search = keys.at(i);
-        String replace(values.at(GetKeyNumFromKeyMap(globals()->gKeyControl[i] - 1)));
+        String replace(values.at(globals()->gPreferencesData->keyMap[i] - 1));
         if (replace.size() < padTo) {
             replace.resize(padTo, ' ');
         }

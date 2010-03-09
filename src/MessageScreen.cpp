@@ -37,6 +37,7 @@
 #include "ScreenLabel.hpp"
 #include "SpriteHandling.hpp"
 #include "StringHandling.hpp"
+#include "StringList.hpp"
 
 using rezin::mac_roman_encoding;
 using sfz::Bytes;
@@ -1365,14 +1366,11 @@ void DrawRetroTextCharInRect(
 //  nnn... are digits specifying value (distance from top, or initial object #)
 //
 void MessageLabel_Set_Special(short id, const StringPiece& text) {
-    unsigned char    whichType;
-    size_t charNum = 0;
-    long    value = 0, safetyCount;
-    Str255  s;
-    Point   attachPoint;
+    char whichType;
+    long value = 0;
+    Point attachPoint;
     bool hintLine = false;
 
-    s[0] = 0;
     StringPiece::const_iterator it = text.begin();
 
     // if not legal, bail
@@ -1381,105 +1379,80 @@ void MessageLabel_Set_Special(short id, const StringPiece& text) {
     }
 
     ++it;
-    charNum++;
 
     whichType = *it;
     ++it;
-    charNum++;
-    safetyCount = 0;
-    while ((*it != '#') && (charNum < text.size()) && ( safetyCount < 10)) // arbitrary safety net
-    {
+    while ((it != text.end()) && (*it != '#')) {
         value *= 10;
         value += *it - '0';
         ++it;
-        charNum++;
-        safetyCount++;
     }
 
     ++it;
-    charNum++;
-    if (*it == '#') // also a hint line attached
-    {
+    if (*it == '#') {  // also a hint line attached
         hintLine = true;
         ++it;
-        charNum++;
         // h coord
-        safetyCount = 0;
-        while ((*it != ',') && (charNum < text.size()) && ( safetyCount < 10)) // arbitrary safety net
-        {
+        while ((it != text.end()) && (*it != ',')) {
             attachPoint.h *= 10;
             attachPoint.h += *it - '0';
             ++it;
-            charNum++;
-            safetyCount++;
         }
 
         ++it;
-        charNum++;
 
-        safetyCount = 0;
-        while ((*it != '#') && (charNum < text.size()) && ( safetyCount < 10)) // arbitrary safety net
-        {
+        while ((it != text.end()) && (*it != '#')) {
             attachPoint.v *= 10;
             attachPoint.v += *it - '0';
             ++it;
-            charNum++;
-            safetyCount++;
         }
         attachPoint.v += globals()->gInstrumentTop;
-        if ( attachPoint.h >= (kSmallScreenWidth - kRightPanelWidth))
-        {
+        if (attachPoint.h >= (kSmallScreenWidth - kRightPanelWidth)) {
             attachPoint.h = (attachPoint.h - (kSmallScreenWidth - kRightPanelWidth)) +
                 globals()->gRightPanelLeftEdge;
         }
         ++it;
-        charNum++;
     }
 
-    while ((charNum < text.size()) && (s[0] < 255))
-    {
-        s[0] += 1;
-        s[s[0]] = *it;
+    String message;
+    while (it != text.end()) {
+        message.append(1, *it);
         ++it;
-        charNum++;
     }
-    SetScreenLabelString( id, s);
-    SetScreenLabelKeepOnScreenAnyway( id, true);
-    switch( whichType)
-    {
-        case 'R':
-            SetScreenLabelOffset( id, 0, 0);
 
-            SetScreenLabelPosition( id, globals()->gRightPanelLeftEdge -
-                (GetScreenLabelWidth( id)+10), globals()->gInstrumentTop +
-                value);
-            break;
+    Str255 s;
+    string_to_pstring(message, s);
+    SetScreenLabelString(id, s);
+    SetScreenLabelKeepOnScreenAnyway(id, true);
 
-        case 'L':
-            SetScreenLabelOffset( id, 0, 0);
+    switch (whichType) {
+      case 'R':
+        SetScreenLabelOffset(id, 0, 0);
+        SetScreenLabelPosition(
+                id, globals()->gRightPanelLeftEdge - (GetScreenLabelWidth(id)+10),
+                globals()->gInstrumentTop + value);
+        break;
 
-            SetScreenLabelPosition( id, 138, globals()->gInstrumentTop +
-                value);
-            break;
+      case 'L':
+        SetScreenLabelOffset(id, 0, 0);
+        SetScreenLabelPosition(id, 138, globals()->gInstrumentTop + value);
+        break;
 
-        case 'O':
-            {
-                spaceObjectType         *o;
-                scenarioInitialType     *initial;
+      case 'O':
+        {
+            spaceObjectType         *o;
+            scenarioInitialType     *initial;
 
-                mGetRealObjectFromInitial( o, initial, value);
+            mGetRealObjectFromInitial(o, initial, value);
+            SetScreenLabelOffset(id, -(GetScreenLabelWidth(id)/2), 64);
+            SetScreenLabelObject(id, o);
 
-                SetScreenLabelOffset( id, -(GetScreenLabelWidth( id)/2), 64);
-
-                SetScreenLabelObject( id, o);
-
-                hintLine = true;
-            }
-            break;
-
+            hintLine = true;
+        }
+        break;
     }
     attachPoint.v -= 2;
-    SetScreenLabelAttachedHintLine( id, hintLine, attachPoint);
+    SetScreenLabelAttachedHintLine(id, hintLine, attachPoint);
 }
 
 }  // namespace antares
