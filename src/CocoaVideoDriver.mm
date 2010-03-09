@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <strings.h>
+#include <algorithm>
 #include <Cocoa/Cocoa.h>
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
@@ -31,6 +32,7 @@
 #include "Time.hpp"
 
 using sfz::Exception;
+using std::min;
 
 namespace antares {
 
@@ -42,10 +44,17 @@ int64_t usecs() {
     return tv.tv_sec * 1000000ll + tv.tv_usec;
 }
 
-Point translate_coords(NSPoint input) {
-    const double width = CGDisplayPixelsWide(kCGDirectMainDisplay);
-    const double height = CGDisplayPixelsHigh(kCGDirectMainDisplay);
-    return Point(round(input.x / width * 640), 479 - round(input.y / height * 480));
+bool translate_coords(
+        const NSPoint& input, const Rect& bounds, const Rect& game_area, Point* output) {
+    if (!bounds.contains(Point(input.x, input.y))) {
+        return false;
+    }
+    double x_scale = static_cast<double>(game_area.width()) / bounds.width();
+    double y_scale = static_cast<double>(game_area.height()) / bounds.height();
+    *output = Point(
+            round((input.x - bounds.left) * x_scale),
+            game_area.height() - 1 - round((input.y - bounds.top) * y_scale));
+    return true;
 }
 
 void set_key(KeyMap map, int key, bool down) {
@@ -147,16 +156,26 @@ void CocoaVideoDriver::enqueue_events(id until) {
     if (event) {
         switch ([event type]) {
           case NSLeftMouseDown:
-            mouse_down(0, translate_coords([event locationInWindow]));
+            {
+                Point p;
+                if (translate_coords([event locationInWindow], _bounds, _game_area, &p)) {
+                    mouse_down(0, p);
+                }
+            }
             break;
 
           case NSLeftMouseUp:
-            mouse_up(0, translate_coords([event locationInWindow]));
+            {
+                Point p;
+                if (translate_coords([event locationInWindow], _bounds, _game_area, &p)) {
+                    mouse_up(0, p);
+                }
+            }
             break;
 
           case NSMouseMoved:
           case NSLeftMouseDragged:
-            _mouse = translate_coords([event locationInWindow]);
+            translate_coords([event locationInWindow], _bounds, _game_area, &_mouse);
             break;
 
           case NSKeyDown:
@@ -267,20 +286,27 @@ void CocoaVideoDriver::loop(CardStack* stack) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glTextureRangeAPPLE(GL_TEXTURE_RECTANGLE_EXT, 0, NULL);
-    glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
-    int width = gRealWorld->bounds().width();
-    int height = gRealWorld->bounds().height();
+    _game_area = gRealWorld->bounds();
+    const Rect screen(
+            0, 0, CGDisplayPixelsWide(kCGDirectMainDisplay),
+            CGDisplayPixelsHigh(kCGDirectMainDisplay));
+    _bounds = screen;
+    _bounds.right = min(
+            _bounds.right, _bounds.height() * _game_area.width() / _game_area.height());
+    _bounds.bottom = min(
+            _bounds.bottom, _bounds.width() * _game_area.height() / _game_area.width());
+    _bounds.center_in(screen);
 
     while (!stack->empty()) {
         NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 
         glClear(GL_COLOR_BUFFER_BIT);
         glLoadIdentity();
+        glViewport(_bounds.left, _bounds.top, _bounds.width(), _bounds.height());
         glMatrixMode(GL_PROJECTION);
         glPushMatrix();
         glMatrixMode(GL_MODELVIEW);
@@ -290,24 +316,24 @@ void CocoaVideoDriver::loop(CardStack* stack) {
         glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 1);
 #if defined(__LITTLE_ENDIAN__)
         glTexImage2D(
-                GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA, width, height, 0, GL_BGRA,
-                GL_UNSIGNED_INT_8_8_8_8, gRealWorld->bytes());
+                GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA, _game_area.width(), _game_area.height(), 0,
+                GL_BGRA, GL_UNSIGNED_INT_8_8_8_8, gRealWorld->bytes());
 #elif defined(__BIG_ENDIAN__)
         glTexImage2D(
-                GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA, width, height, 0, GL_BGRA,
-                GL_UNSIGNED_INT_8_8_8_8_REV, gRealWorld->bytes());
+                GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA, _game_area.width(), _game_area.height(), 0,
+                GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, gRealWorld->bytes());
 #else
 #error "Couldn't determine endianness of platform"
 #endif
 
         glBegin(GL_QUADS);
-        glTexCoord2f(width, 0);
+        glTexCoord2f(_game_area.width(), 0);
         glVertex2f(1, 1);
         glTexCoord2f(0, 0);
         glVertex2f(-1, 1);
-        glTexCoord2f(0, height);
+        glTexCoord2f(0, _game_area.height());
         glVertex2f(-1, -1);
-        glTexCoord2f(width, height);
+        glTexCoord2f(_game_area.width(), _game_area.height());
         glVertex2f(1, -1);
         glEnd();
 

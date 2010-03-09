@@ -21,6 +21,7 @@
 #include <queue>
 #include "sfz/Macros.hpp"
 #include "Base.h"
+#include "Geometry.hpp"
 #include "VideoDriver.hpp"
 
 namespace antares {
@@ -57,6 +58,9 @@ class CocoaVideoDriver : public VideoDriver {
     int _last_modifiers;
     KeyMap _keys;
     std::queue<EventRecord> _event_queue;
+
+    Rect _bounds;
+    Rect _game_area;
 
     DISALLOW_COPY_AND_ASSIGN(CocoaVideoDriver);
 };
