@@ -29,6 +29,7 @@
 #include "Casts.hpp"
 #include "ColorTable.hpp"
 #include "Error.hpp"
+#include "Event.hpp"
 #include "FakeDrawing.hpp"
 #include "Threading.hpp"
 #include "Time.hpp"
@@ -521,8 +522,6 @@ bool VncVideoDriver::vnc_poll(int64_t timeout) {
     bool unchanged = false;
 
     do {
-        scoped_ptr<EventRecord> evt(new EventRecord);
-
         timeout = std::max(0ll, stop_time - usecs());
         timeval tv;
         tv.tv_sec = timeout / 1000000ll;
@@ -615,17 +614,11 @@ bool VncVideoDriver::vnc_poll(int64_t timeout) {
                     }
 
                     if (msg.down_flag) {
-                        evt->what = autoKey;
+                        _event_queue.push(new KeyDownEvent(_key_map[msg.key]));
                     } else {
-                        evt->what = keyUp;
+                        _event_queue.push(new KeyUpEvent(_key_map[msg.key]));
                     }
-                    evt->message = _key_map[msg.key] << 8;
-                    _event_queue.push(evt.release());
-
-                    evt.reset(new EventRecord);
-                    evt->what = keyUp;
-                    evt->message = _key_map[msg.key] << 8;
-                    _event_queue.push(evt.release());
+                    // _event_queue.push(new KeyUpEvent(_key_map[msg.key]));
                 }
                 break;
 
@@ -635,15 +628,12 @@ bool VncVideoDriver::vnc_poll(int64_t timeout) {
                     _in->read(&msg);
 
                     if (_button != implicit_cast<bool>(msg.button_mask & 0x1)) {
+                        Point where(msg.x_position, msg.y_position);
                         if (_button) {
-                            evt->what = mouseUp;
+                            _event_queue.push(new MouseUpEvent(0, where));
                         } else {
-                            evt->what = mouseDown;
+                            _event_queue.push(new MouseDownEvent(0, where));
                         }
-                        evt->where.h = msg.x_position;
-                        evt->where.v = msg.y_position;
-                        print(1, "enqueueing {0}\n", evt->what);
-                        _event_queue.push(evt.release());
                     }
 
                     _button = msg.button_mask & 0x1;
@@ -792,17 +782,14 @@ VncVideoDriver::VncVideoDriver(int port)
     _key_map[65470] = 0x7A;  // F1
 }
 
-void VncVideoDriver::send_event(EventRecord) { }
-
-bool VncVideoDriver::wait_next_event(EventRecord* evt, double sleep) {
+Event* VncVideoDriver::wait_next_event(double sleep) {
     vnc_poll(sleep * 1000000ll);
     if (_event_queue.empty()) {
         return false;
     } else {
-        *evt = *_event_queue.front();
-        delete _event_queue.front();
+        Event* event = _event_queue.front();
         _event_queue.pop();
-        return true;
+        return event;
     }
 }
 
@@ -836,13 +823,13 @@ int VncVideoDriver::ticks() {
 
 void VncVideoDriver::loop(CardStack* stack) {
     while (!stack->empty()) {
-        EventRecord evt;
         double at = stack->top()->next_timer();
         if (at == 0.0) {
             at = std::numeric_limits<double>::infinity();
         }
-        if (wait_next_event(&evt, at - now_secs())) {
-            stack->send(evt);
+        scoped_ptr<Event> event(wait_next_event(at - now_secs()));
+        if (event.get()) {
+            event->send(stack->top());
         } else if (at != std::numeric_limits<double>::infinity()) {
             stack->top()->fire_timer();
         }

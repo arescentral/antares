@@ -49,7 +49,7 @@ class ColorFade : public Card {
     virtual void become_front();
     virtual void resign_front();
 
-    virtual void mouse_down(int button, const Point& loc);
+    virtual void mouse_down(const MouseDownEvent& event);
     virtual double next_timer();
     virtual void fire_timer();
 
@@ -74,7 +74,7 @@ class PictFade : public Card {
     virtual void become_front();
     virtual void resign_front();
 
-    virtual void mouse_down(int button, const Point& loc);
+    virtual void mouse_down(const MouseDownEvent& event);
     virtual double next_timer();
     virtual void fire_timer();
 

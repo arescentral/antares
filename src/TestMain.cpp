@@ -29,6 +29,7 @@
 
 #include "AresMain.hpp"
 #include "AresPreferences.hpp"
+#include "CardStack.hpp"
 #include "Error.hpp"
 #include "FakeDrawing.hpp"
 #include "FakeSounds.hpp"

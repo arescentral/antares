@@ -24,14 +24,17 @@
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
 #include "sfz/Exception.hpp"
+#include "sfz/SmartPtr.hpp"
 #include "Base.h"
 #include "Card.hpp"
 #include "CardStack.hpp"
+#include "Event.hpp"
 #include "FakeDrawing.hpp"
 #include "Geometry.hpp"
 #include "Time.hpp"
 
 using sfz::Exception;
+using sfz::scoped_ptr;
 using std::min;
 
 namespace antares {
@@ -76,46 +79,26 @@ CocoaVideoDriver::CocoaVideoDriver()
     bzero(_keys, sizeof(uint32_t[4]));
 }
 
-void CocoaVideoDriver::send_event(EventRecord) {
-    throw Exception("CocoaVideoDriver::send_event() called");
-}
-
 void CocoaVideoDriver::mouse_down(int button, const Point& where) {
     _button = true;
     _mouse = where;
-
-    EventRecord evt;
-    evt.what = mouseDown;
-    evt.where = _mouse;
-    _event_queue.push(evt);
+    _event_queue.push(new MouseDownEvent(button, where));
 }
 
 void CocoaVideoDriver::mouse_up(int button, const Point& where) {
     _button = false;
     _mouse = where;
-
-    EventRecord evt;
-    evt.what = mouseUp;
-    evt.where = _mouse;
-    _event_queue.push(evt);
+    _event_queue.push(new MouseUpEvent(button, where));
 }
 
 void CocoaVideoDriver::key_down(int key_code) {
     set_key(_keys, key_code, true);
-
-    EventRecord evt;
-    evt.what = autoKey;
-    evt.message = key_code << 8;
-    _event_queue.push(evt);
+    _event_queue.push(new KeyDownEvent(key_code));
 }
 
 void CocoaVideoDriver::key_up(int key_code) {
     set_key(_keys, key_code, false);
-
-    EventRecord evt;
-    evt.what = keyUp;
-    evt.message = key_code << 8;
-    _event_queue.push(evt);
+    _event_queue.push(new KeyUpEvent(key_code));
 }
 
 void CocoaVideoDriver::flags_changed(int flags) {
@@ -134,16 +117,11 @@ void CocoaVideoDriver::flags_changed(int flags) {
 
     for (int i = 0; i < modifier_flag_count; ++i) {
         if ((_last_modifiers ^ flags) & modifier_flags[i].bit) {
-            EventRecord evt;
-            evt.message = modifier_flags[i].code << 8;
             if (flags & modifier_flags[i].bit) {
-                evt.what = autoKey;
-                set_key(_keys, modifier_flags[i].code, true);
+                key_down(modifier_flags[i].code);
             } else {
-                evt.what = keyUp;
-                set_key(_keys, modifier_flags[i].code, false);
+                key_up(modifier_flags[i].code);
             }
-            _event_queue.push(evt);
         }
     }
     _last_modifiers = flags;
@@ -196,24 +174,24 @@ void CocoaVideoDriver::enqueue_events(id until) {
     }
 }
 
-bool CocoaVideoDriver::wait_next_event(EventRecord* evt, double sleep) {
+Event* CocoaVideoDriver::wait_next_event(double sleep) {
     if (!_event_queue.empty()) {
-        *evt = _event_queue.front();
+        Event* event = _event_queue.front();
         _event_queue.pop();
-        return true;
+        return event;
     }
 
     NSDate* until = [NSDate dateWithTimeIntervalSinceNow:sleep];
     while ([until timeIntervalSinceNow] > 0) {
         enqueue_events(until);
         if (!_event_queue.empty()) {
-            *evt = _event_queue.front();
+            Event* event = _event_queue.front();
             _event_queue.pop();
-            return true;
+            return event;
         }
     };
 
-    return false;
+    return NULL;
 }
 
 bool CocoaVideoDriver::button() {
@@ -355,14 +333,14 @@ void CocoaVideoDriver::loop(CardStack* stack) {
         glFinish();
         [context flushBuffer];
 
-        EventRecord evt;
         double at = stack->top()->next_timer();
         double now = now_secs();
         if (at == 0.0) {
             at = std::numeric_limits<double>::infinity();
         }
-        if (wait_next_event(&evt, at - now)) {
-            stack->send(evt);
+        scoped_ptr<Event> event(wait_next_event(at - now));
+        if (event.get()) {
+            event->send(stack->top());
         } else if (at != std::numeric_limits<double>::infinity()) {
             stack->top()->fire_timer();
         }

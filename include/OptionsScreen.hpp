@@ -90,8 +90,8 @@ class KeyControlScreen : public InterfaceScreen {
 
     virtual void become_front();
 
-    virtual void key_down(int key);
-    virtual void key_up(int key);
+    virtual void key_down(const KeyDownEvent& event);
+    virtual void key_up(const KeyUpEvent& event);
 
     virtual double next_timer();
     virtual void fire_timer();

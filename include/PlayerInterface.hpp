@@ -86,7 +86,6 @@ long UpdateMissionBriefPoint( interfaceItemType *, long, long, coordPointType *,
 void ShowObjectData( Point, short, Rect *);
 void CreateObjectDataText(sfz::String* text, short id);
 void CreateWeaponDataText(sfz::String* text, long whichWeapon, const sfz::StringPiece& weaponName);
-void HandleOSEvent( EventRecord *);
 void Replace_KeyCode_Strings_With_Actual_Key_Names(sfz::String* text, short resID, size_t padTo);
 
 }  // namespace antares

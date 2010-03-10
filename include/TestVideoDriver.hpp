@@ -19,16 +19,17 @@
 #define ANTARES_TEST_VIDEO_DRIVER_HPP_
 
 #include "sfz/String.hpp"
-#include "CardStack.hpp"
 #include "VideoDriver.hpp"
 
 namespace antares {
+
+class CardStack;
+class Event;
 
 class TestingVideoDriver : public VideoDriver {
   public:
     TestingVideoDriver(const sfz::StringPiece& output_dir);
 
-    virtual void send_event(EventRecord);
     virtual bool button();
     virtual Point get_mouse();
     virtual void get_keys(KeyMap keys);
@@ -41,6 +42,7 @@ class TestingVideoDriver : public VideoDriver {
   protected:
     GameState state() const;
     sfz::StringPiece output_dir() const;
+    virtual Event* wait_next_event(double) = 0;
 
   private:
     int _current_time;
@@ -52,7 +54,7 @@ class MainScreenVideoDriver : public TestingVideoDriver {
   public:
     MainScreenVideoDriver(const sfz::StringPiece& output_dir);
 
-    virtual bool wait_next_event(EventRecord*, double);
+    virtual Event* wait_next_event(double);
     virtual int get_demo_scenario();
 
   public:
@@ -63,9 +65,8 @@ class MissionBriefingVideoDriver : public TestingVideoDriver {
   public:
     MissionBriefingVideoDriver(const sfz::StringPiece& output_dir, int level);
 
-    virtual bool wait_next_event(EventRecord* evt, double);
+    virtual Event* wait_next_event(double);
     virtual int get_demo_scenario();
-    virtual void get_keys(KeyMap keys);
 
   private:
     const int _level;
@@ -77,7 +78,7 @@ class DemoVideoDriver : public TestingVideoDriver {
   public:
     DemoVideoDriver(const sfz::StringPiece& output_dir, int level);
 
-    virtual bool wait_next_event(EventRecord*, double);
+    virtual Event* wait_next_event(double);
     virtual int get_demo_scenario();
     virtual void main_loop_iteration_complete(uint32_t game_time);
 
@@ -91,9 +92,8 @@ class OptionsVideoDriver : public TestingVideoDriver {
   public:
     OptionsVideoDriver(const sfz::StringPiece& output_dir);
 
-    virtual bool wait_next_event(EventRecord* evt, double);
+    virtual Event* wait_next_event(double);
     virtual int get_demo_scenario();
-    virtual bool button();
     virtual Point get_mouse();
 
   private:
@@ -105,7 +105,7 @@ class ObjectDataVideoDriver : public TestingVideoDriver {
   public:
     ObjectDataVideoDriver(const sfz::StringPiece& output_dir);
 
-    virtual bool wait_next_event(EventRecord*, double);
+    virtual Event* wait_next_event(double);
     virtual int get_demo_scenario();
 
   public:
@@ -116,7 +116,7 @@ class BuildPixVideoDriver : public TestingVideoDriver {
   public:
     BuildPixVideoDriver(const sfz::StringPiece& output_dir);
 
-    virtual bool wait_next_event(EventRecord*, double);
+    virtual Event* wait_next_event(double);
     virtual int get_demo_scenario();
 
   public:

@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include <limits>
 #include "Base.h"
+#include "Geometry.hpp"
 
 namespace antares {
 
@@ -40,8 +41,6 @@ enum GameState {
 class VideoDriver {
   public:
     virtual ~VideoDriver() { }
-    virtual void send_event(EventRecord evt) = 0;
-    virtual bool wait_next_event(EventRecord* evt, double sleep) = 0;
     virtual bool button() = 0;
     virtual Point get_mouse() = 0;
     virtual void get_keys(KeyMap k) = 0;

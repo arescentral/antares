@@ -15,49 +15,38 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "CardStack.hpp"
-
-#include <algorithm>
-#include "sfz/Exception.hpp"
-#include "Base.h"
-#include "Card.hpp"
-
-using sfz::Exception;
+#include "Event.hpp"
 
 namespace antares {
 
-CardStack::CardStack(Card* top)
-        : _top(NULL) {
-    push(top);
+Event::~Event() { }
+
+void KeyDownEvent::send(EventReceiver* receiver) const {
+    receiver->key_down(*this);
 }
 
-bool CardStack::empty() const {
-    return _top == NULL;
+void KeyUpEvent::send(EventReceiver* receiver) const {
+    receiver->key_up(*this);
 }
 
-void CardStack::push(Card* card) {
-    if (!empty()) {
-        _top->resign_front();
-    }
-    card->set_stack(this);
-    _top = card;
-    card->become_front();
+void MouseDownEvent::send(EventReceiver* receiver) const {
+    receiver->mouse_down(*this);
 }
 
-void CardStack::pop(Card* card) {
-    if (card != _top) {
-        throw Exception("tried to pop card {0} when not frontmost", card);
-    }
-    card->resign_front();
-    _top = card->next();
-    delete card;
-    if (!empty()) {
-        _top->become_front();
-    }
+void MouseUpEvent::send(EventReceiver* receiver) const {
+    receiver->mouse_up(*this);
 }
 
-Card* CardStack::top() const {
-    return _top;
+void MouseMoveEvent::send(EventReceiver* receiver) const {
+    receiver->mouse_move(*this);
 }
+
+EventReceiver::~EventReceiver() { }
+
+void EventReceiver::key_down(const KeyDownEvent& event) { }
+void EventReceiver::key_up(const KeyUpEvent& event) { }
+void EventReceiver::mouse_down(const MouseDownEvent& event) { }
+void EventReceiver::mouse_up(const MouseUpEvent& event) { }
+void EventReceiver::mouse_move(const MouseMoveEvent& event) { }
 
 }  // namespace antares

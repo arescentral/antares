@@ -197,14 +197,13 @@ void DebriefingScreen::become_front() {
 void DebriefingScreen::resign_front() {
 }
 
-void DebriefingScreen::mouse_down(int button, const Point& where) {
-    static_cast<void>(button);
-    static_cast<void>(where);
+void DebriefingScreen::mouse_down(const MouseDownEvent& event) {
+    static_cast<void>(event);
     stack()->pop(this);
 }
 
-void DebriefingScreen::key_down(int key) {
-    static_cast<void>(key);
+void DebriefingScreen::key_down(const KeyDownEvent& event) {
+    static_cast<void>(event);
     stack()->pop(this);
 }
 

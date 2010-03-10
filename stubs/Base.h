@@ -64,25 +64,11 @@ void Index2Color(long index, RgbColor* color);
 typedef uint32_t KeyMap[4];
 void GetKeys(KeyMap keys);
 
-struct EventRecord {
-    EventRecord()
-            : what(nullEvent),
-              message(0),
-              where(0, 0),
-              modifiers(0) { }
-
-    int what;
-    int message;
-    Point where;
-    int modifiers;
-};
-
 struct Rgn { };
 typedef Rgn* RgnPtr;
 typedef Rgn** RgnHandle;
 
 STUB2(FlushEvents, void(int mask, int));
-bool WaitNextEvent(long mask, EventRecord* evt, unsigned long sleep, Rgn** mouseRgn);
 
 // Gets STR# from resource fork
 void GetIndString(unsigned char* result, int id, int index);

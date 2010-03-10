@@ -250,9 +250,9 @@ void KeyControlScreen::become_front() {
     VideoDriver::driver()->set_game_state(KEY_CONTROL_INTERFACE);
 }
 
-void KeyControlScreen::key_down(int key) {
+void KeyControlScreen::key_down(const KeyDownEvent& event) {
     if (_selected_key >= 0) {
-        key = (key >> 8) & 0xFF;
+        uint32_t key = event.key();
         if ((key == 53) || (key == 36) || (key == 57)) {  // ESC, RTRN, CAPS.
             // beep angrily.
             _selected_key = -1;
@@ -266,8 +266,8 @@ void KeyControlScreen::key_down(int key) {
     }
 }
 
-void KeyControlScreen::key_up(int key) {
-    static_cast<void>(key);
+void KeyControlScreen::key_up(const KeyUpEvent& event) {
+    static_cast<void>(event);
 }
 
 double KeyControlScreen::next_timer() {

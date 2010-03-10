@@ -18,7 +18,7 @@
 #ifndef ANTARES_CARD_HPP_
 #define ANTARES_CARD_HPP_
 
-#include "Geometry.hpp"
+#include "Event.hpp"
 
 namespace antares {
 
@@ -43,7 +43,7 @@ class CardStack;
 // In the future, it is planned that two methods will be added to Card for drawing the user
 // interface, `draw()` and `opaque()`.  These will allow Cards to display content on-demand instead
 // of indirectly displaying content by updating gRealWorld.
-class Card {
+class Card : public EventReceiver {
   public:
     Card();
     virtual ~Card();
@@ -69,74 +69,6 @@ class Card {
     // after `resign_front()`, so in the future, we may choose to call `resign_front()` only in the
     // latter case.
     virtual void resign_front();
-
-    // Mouse-related methods.
-    //
-    // There are three mouse-related methods, `mouse_down()`, `mouse_up()`, and `mouse_moved()`.
-    // In the future, we expect to add methods for the scroll wheel, at a minimum.  Between
-    // successive calls to `mouse_down()` and `mouse_up()`, we assume that the mouse button is
-    // down, and that `mouse_moved()` events correspond to mouse drags; and outside of them, we
-    // assume that the mouse button is up.  That may not be strictly true (e.g., if we switch
-    // between apps), but we're willing to tolerate bugs which depend on this behavior for the time
-    // being.
-
-    // Called when the numbered button is pressed.
-    //
-    // Buttons are numbered from 0 to 2, for the primary, secondary, and tertiary buttons (normally
-    // the left, right, and middle buttons).  On some systems, the scroll wheel is implemented as
-    // additional buttons above these, but when we support the scroll wheel, we will probably
-    // choose to implement it in terms of additional methods instead.
-    //
-    // At present, we only really deal with the first mouse button, as an artifact of Ares' origins
-    // on the classic MacOS.  There are plenty of desirable features one could expect from multiple
-    // mouse buttons, though.
-    //
-    // @param [in] button   The button that was pressed.  Is in [0, 1, 2].
-    // @param [in] loc      The location of the press, relative to the top left of the screen.
-    virtual void mouse_down(int button, const Point& loc);
-
-    // Called when the numbered button is released.
-    //
-    // Takes the same parameters as `mouse_down()`.
-    virtual void mouse_up(int button, const Point& loc);
-
-    // Called when the mouse is moved.
-    //
-    // This method is invoked regardless of whether any mouse buttons are pressed.
-    //
-    // @param [in] loc      The new location of the mouse.
-    virtual void mouse_moved(const Point& loc);
-
-    // Key-related methods.
-    //
-    // There are two key-related methods, `key_up()` and `key_down()`.  Between successive calls to
-    // the two, we assume that the key is down, and outside of them, we assume that the key is up.
-    // That may not be strictly true (e.g., if we switch between apps) but we're willing to
-    // tolerate bugs which depend on this behavior for the time being.
-
-    // Called when a key is pressed.
-    //
-    // The value provided in `key` is an ADB key-code, and is a horrible artifact of Ares' origins
-    // on the classic MacOS.  For the time being, this means we are not tolerant of non-US keyboard
-    // layouts, although it remains relatively easy to implement within Cocoa.
-    //
-    // We will eventually want to use a more cross-platform/international/sane numbering of keys,
-    // such as perhaps the Cocoa numbering scheme, which uses part of the Unicode E000-F8FF
-    // "private use area" to represent non-literal characters such as arrows.  It doesn't, however,
-    // seem to include modifier keys, so maybe xkeysyms would be better, even though it collides
-    // with Unicode.
-    //
-    // Currently, the best documentation of ADB key-codes is on page 2-43 of "Macintosh Toolbox
-    // Essentials", a PDF of which is available at http://developer.apple.com/legacy/mac/library/
-    // documentation/mac/pdf/MacintoshToolboxEssentials.pdf
-    //
-    // @param [in] key      The key-code that was pressed.
-    virtual void key_down(int key);
-
-    // Called when a key is released.
-    //
-    // Takes the same parameters as `key_down()`.
-    virtual void key_up(int key);
 
     // Timer-related methods.
     //

@@ -26,11 +26,11 @@
 
 namespace antares {
 
+class Event;
+
 class CocoaVideoDriver : public VideoDriver {
   public:
     CocoaVideoDriver();
-    virtual void send_event(EventRecord evt);
-    virtual bool wait_next_event(EventRecord* evt, double sleep);
     virtual bool button();
     virtual Point get_mouse();
     virtual void get_keys(KeyMap k);
@@ -43,6 +43,7 @@ class CocoaVideoDriver : public VideoDriver {
     virtual void loop(CardStack* stack);
 
   private:
+    Event* wait_next_event(double sleep);
     void enqueue_events(id until);
 
     void mouse_down(int button, const Point& where);
@@ -57,7 +58,7 @@ class CocoaVideoDriver : public VideoDriver {
     Point _mouse;
     int _last_modifiers;
     KeyMap _keys;
-    std::queue<EventRecord> _event_queue;
+    std::queue<Event*> _event_queue;
 
     Rect _bounds;
     Rect _game_area;

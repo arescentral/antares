@@ -72,14 +72,13 @@ void ScrollTextScreen::resign_front() {
     }
 }
 
-void ScrollTextScreen::mouse_down(int button, const Point& where) {
-    static_cast<void>(button);
-    static_cast<void>(where);
+void ScrollTextScreen::mouse_down(const MouseDownEvent& event) {
+    static_cast<void>(event);
     stack()->pop(this);
 }
 
-void ScrollTextScreen::key_down(int key) {
-    static_cast<void>(key);
+void ScrollTextScreen::key_down(const KeyDownEvent& event) {
+    static_cast<void>(event);
     stack()->pop(this);
 }
 

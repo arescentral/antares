@@ -18,8 +18,10 @@
 #include "Card.hpp"
 
 #include <stdlib.h>
+#include "sfz/Exception.hpp"
 #include "CardStack.hpp"
-#include "Error.hpp"
+
+using sfz::Exception;
 
 namespace antares {
 
@@ -32,28 +34,6 @@ Card::~Card() { }
 void Card::become_front() { }
 
 void Card::resign_front() { }
-
-void Card::mouse_down(int button, const Point& loc) {
-    static_cast<void>(button);
-    static_cast<void>(loc);
-}
-
-void Card::mouse_up(int button, const Point& loc) {
-    static_cast<void>(button);
-    static_cast<void>(loc);
-}
-
-void Card::mouse_moved(const Point& loc) {
-    static_cast<void>(loc);
-}
-
-void Card::key_down(int key) {
-    static_cast<void>(key);
-}
-
-void Card::key_up(int key) {
-    static_cast<void>(key);
-}
 
 double Card::next_timer() {
     return 0.0;
@@ -71,7 +51,9 @@ Card* Card::next() const {
 
 void Card::set_stack(CardStack* stack) {
     // Can add or remove from stack, not move between.
-    check(_stack == NULL, "Card is already on a stack");
+    if (_stack != NULL) {
+        throw Exception("Card is already on a stack");
+    }
     _stack = stack;
     _next = stack->top();
 }

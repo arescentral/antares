@@ -23,13 +23,13 @@
 #include "VideoDriver.hpp"
 #include "sfz/ScopedFd.hpp"
 
+class Event;
+
 namespace antares {
 
 class VncVideoDriver : public VideoDriver {
   public:
     VncVideoDriver(int port);
-    virtual void send_event(EventRecord evt);
-    virtual bool wait_next_event(EventRecord* evt, double sleep);
     virtual bool button();
     virtual Point get_mouse();
     virtual void get_keys(KeyMap k);
@@ -43,13 +43,14 @@ class VncVideoDriver : public VideoDriver {
 
   private:
     bool vnc_poll(int64_t timeout);
+    Event* wait_next_event(double sleep);
 
     const int64_t _start_time;
     sfz::ScopedFd _listen;
     sfz::ScopedFd _socket;
     bool _button;
     Point _mouse;
-    std::queue<EventRecord*> _event_queue;
+    std::queue<Event*> _event_queue;
     std::map<int, int> _key_map;
 
     sfz::scoped_ptr<sfz::BinaryReader> _in;

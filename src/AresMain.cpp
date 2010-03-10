@@ -213,7 +213,7 @@ class GamePlay : public Card {
     virtual double next_timer();
     virtual void fire_timer();
 
-    virtual void key_down(int key);
+    virtual void key_down(const KeyDownEvent& event);
 
   private:
     enum State {
@@ -435,8 +435,8 @@ class PauseScreen : public Card {
         }
     }
 
-    virtual void key_up(int key) {
-        if (key == 0x3900) {
+    virtual void key_up(const KeyUpEvent& event) {
+        if (event.key() == 0x3900) {
             stack()->pop(this);
         }
     }
@@ -762,10 +762,10 @@ void GamePlay::fire_timer() {
     }
 }
 
-void GamePlay::key_down(int key) {
+void GamePlay::key_down(const KeyDownEvent& event) {
     if (globals()->gOptions & kOptionReplay) {
-        switch (key) {
-          case 0x3900:  // Caps lock.
+        switch (event.key()) {
+          case 0x39:  // Caps lock.
             // TODO(sfiera): also F6.
             break;
 
@@ -776,8 +776,8 @@ void GamePlay::key_down(int key) {
         }
     }
 
-    switch (key) {
-      case 0x3500:
+    switch (event.key()) {
+      case 0x35:
         {
             _state = PLAY_AGAIN;
             _player_paused = true;
@@ -786,7 +786,7 @@ void GamePlay::key_down(int key) {
         }
         break;
 
-      case 0x7A00:
+      case 0x7A:
         // Help key is hard-coded to F1 at the moment.
         // TODO(sfiera): use the help key configured in preferences.
         _state = HELP;

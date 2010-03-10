@@ -85,15 +85,15 @@ void InterfaceScreen::draw() const {
     gRealWorld->view(_bounds).view(copy_area).copy(_pix->view(copy_area));
 }
 
-void InterfaceScreen::mouse_down(int button, const Point& where) {
-    if (button != 0) {
+void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
+    if (event.button() != 0) {
         return;
     }
     for (size_t i = 0; i < _items.size(); ++i) {
         interfaceItemType* const item = &_items[i];
         Rect bounds;
         GetAnyInterfaceItemGraphicBounds(*item, &bounds);
-        if (item->status() != kDimmed && bounds.contains(where)) {
+        if (item->status() != kDimmed && bounds.contains(event.where())) {
             switch (item->kind) {
               case kPlainButton:
               case kCheckboxButton:
@@ -120,8 +120,8 @@ void InterfaceScreen::mouse_down(int button, const Point& where) {
     return;
 }
 
-void InterfaceScreen::mouse_up(int button, const Point& where) {
-    if (button != 0) {
+void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
+    if (event.button() != 0) {
         return;
     }
     if (_state == MOUSE_DOWN) {
@@ -136,38 +136,36 @@ void InterfaceScreen::mouse_up(int button, const Point& where) {
         GetAnyInterfaceItemGraphicBounds(*item, &bounds);
         item->set_status(kActive);
         draw();
-        if (bounds.contains(where)) {
+        if (bounds.contains(event.where())) {
             handle_button(hit_item);
         }
     }
     return;
 }
 
-void InterfaceScreen::mouse_moved(int button, const Point& where) {
-    static_cast<void>(button);
-    static_cast<void>(where);
+void InterfaceScreen::mouse_move(const MouseMoveEvent& event) {
+    // TODO(sfiera): highlight and un-highlight clicked button as dragged in and out.
+    static_cast<void>(event);
 }
 
-void InterfaceScreen::key_down(int key) {
-    const int32_t key_code = ((key & keyCodeMask) >> 8) + 1;
-    if (key_code > 0) {
-        for (size_t i = 0; i < _items.size(); ++i) {
-            interfaceItemType* const item = &_items[i];
-            if (item->status() != kDimmed && item->key() == key_code) {
-                _state = KEY_DOWN;
-                item->set_status(kIH_Hilite);
-                draw();
-                // play kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound.
-                _hit_item = i;
-                return;
-            }
+void InterfaceScreen::key_down(const KeyDownEvent& event) {
+    const int32_t key_code = event.key() + 1;
+    for (size_t i = 0; i < _items.size(); ++i) {
+        interfaceItemType* const item = &_items[i];
+        if (item->status() != kDimmed && item->key() == key_code) {
+            _state = KEY_DOWN;
+            item->set_status(kIH_Hilite);
+            draw();
+            // play kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound.
+            _hit_item = i;
+            return;
         }
     }
 }
 
-void InterfaceScreen::key_up(int key) {
+void InterfaceScreen::key_up(const KeyUpEvent& event) {
     // TODO(sfiera): verify that the same key that was pressed was released.
-    static_cast<void>(key);
+    static_cast<void>(event);
     if (_state == KEY_DOWN) {
         // Save _hit_item and set it to 0 before calling handle_button(), as calling
         // handle_button() can result in the deletion of `this`.

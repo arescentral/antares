@@ -30,7 +30,9 @@
 #include "AresPreferences.hpp"
 #include "BuildPix.hpp"
 #include "Card.hpp"
+#include "CardStack.hpp"
 #include "Error.hpp"
+#include "Event.hpp"
 #include "FakeDrawing.hpp"
 #include "Fakes.hpp"
 #include "File.hpp"
@@ -53,12 +55,24 @@ using sfz::scoped_ptr;
 
 namespace antares {
 
+namespace {
+
+enum Keys {
+    KEY_K = 0x28,
+    KEY_O = 0x1f,
+    KEY_S = 0x01,
+    KEY_Q = 0x0c,
+    KEY_RETURN = 0x24,
+    KEY_ESCAPE = 0x35,
+    KEY_RIGHT = 0x7C,
+};
+
+}  // namespace
+
 TestingVideoDriver::TestingVideoDriver(const StringPiece& output_dir)
         : _current_time(0),
           _state(UNKNOWN),
           _output_dir(output_dir) { }
-
-void TestingVideoDriver::send_event(EventRecord) { }
 
 bool TestingVideoDriver::button() { return false; }
 
@@ -86,13 +100,13 @@ void TestingVideoDriver::set_game_state(GameState state) {
 
 void TestingVideoDriver::loop(CardStack* stack) {
     while (!stack->empty()) {
-        EventRecord evt;
         double at = stack->top()->next_timer();
         if (at == 0.0) {
             at = std::numeric_limits<double>::infinity();
         }
-        if (wait_next_event(&evt, at - now_secs())) {
-            stack->send(evt);
+        scoped_ptr<Event> event(wait_next_event(at - now_secs()));
+        if (event.get()) {
+            event->send(stack->top());
         } else if (at != std::numeric_limits<double>::infinity()) {
             stack->top()->fire_timer();
         }
@@ -109,25 +123,22 @@ MainScreenVideoDriver::MainScreenVideoDriver(const StringPiece& output_dir)
         : TestingVideoDriver(output_dir),
           _key_down(false) { }
 
-bool MainScreenVideoDriver::wait_next_event(EventRecord* evt, double) {
+Event* MainScreenVideoDriver::wait_next_event(double) {
     if (state() == MAIN_SCREEN_INTERFACE) {
         if (_key_down) {
-            evt->what = keyUp;
             _key_down = false;
+            return new KeyUpEvent(KEY_Q);
         } else {
             if (!output_dir().empty()) {
                 String out(output_dir());
                 out.append("/main-screen.png", ascii_encoding());
                 DumpTo(out);
             }
-            evt->what = autoKey;
             _key_down = true;
+            return new KeyDownEvent(KEY_Q);
         }
-        evt->message = 0x0C00;  // Q
-        return true;
-    } else {
-        return false;
     }
+    return NULL;
 }
 
 int MainScreenVideoDriver::get_demo_scenario() { return -1; }
@@ -138,47 +149,46 @@ MissionBriefingVideoDriver::MissionBriefingVideoDriver(const StringPiece& output
           _briefing_num(0),
           _key_down(false) { }
 
-bool MissionBriefingVideoDriver::wait_next_event(EventRecord* evt, double) {
+Event* MissionBriefingVideoDriver::wait_next_event(double) {
+    scoped_ptr<Event> event;
     switch (state()) {
       case MAIN_SCREEN_INTERFACE:
         {
-            if (_key_down) {
-                evt->what = keyUp;
-                _key_down = false;
-            } else {
-                evt->what = autoKey;
-                _key_down = true;
-            }
-            if (_briefing_num >= 9) {
-                evt->message = 0x0C00;  // Q
-            } else {
-                evt->message = 0x0100;  // S
-            }
             Ledger::ledger()->unlock_chapter(_level);
+            uint32_t key = (_briefing_num >= 9) ? KEY_Q : KEY_S;
+            if (_key_down) {
+                _key_down = false;
+                return new KeyUpEvent(key);
+            } else {
+                _key_down = true;
+                return new KeyDownEvent(key);
+            }
         }
-        return true;
+        break;
+
       case SELECT_LEVEL_INTERFACE:
         {
             if (_key_down) {
-                evt->what = keyUp;
                 _key_down = false;
+                return new KeyUpEvent(KEY_RETURN);
             } else {
                 if (!output_dir().empty()) {
                     String out(output_dir());
                     out.append("/select-level.png", ascii_encoding());
                     DumpTo(out);
                 }
-                evt->what = autoKey;
                 _key_down = true;
+                return new KeyDownEvent(KEY_RETURN);
             }
-            evt->message = 0x2400;  // RTRN
         }
-        return true;
+        break;
+
       case MISSION_INTERFACE:
         {
+            uint32_t key = (_briefing_num >= 8) ? KEY_ESCAPE : KEY_RIGHT;
             if (_key_down) {
-                evt->what = keyUp;
                 _key_down = false;
+                return new KeyUpEvent(key);
             } else {
                 if (!output_dir().empty()) {
                     String out(output_dir());
@@ -186,29 +196,19 @@ bool MissionBriefingVideoDriver::wait_next_event(EventRecord* evt, double) {
                     DumpTo(out);
                 }
                 ++_briefing_num;
-                evt->what = autoKey;
                 _key_down = true;
-            }
-            if (_briefing_num >= 9) {
-                evt->message = 0x3500;  // ESC
-            } else {
-                evt->message = 0x7C00;  // RGHT
+                return new KeyDownEvent(key);
             }
         }
-        return true;
+        break;
+
       default:
-        return false;
+        break;
     };
+    return NULL;
 }
 
 int MissionBriefingVideoDriver::get_demo_scenario() { return -1; }
-
-void MissionBriefingVideoDriver::get_keys(KeyMap keys) {
-    TestingVideoDriver::get_keys(keys);
-    if (state() == MISSION_INTERFACE && _briefing_num >= 9 && keyDown) {
-        keys[1] |= (0x01 << 13);
-    }
-}
 
 DemoVideoDriver::DemoVideoDriver(const StringPiece& output_dir, int level)
         : TestingVideoDriver(output_dir),
@@ -220,20 +220,17 @@ DemoVideoDriver::DemoVideoDriver(const StringPiece& output_dir, int level)
     }
 }
 
-bool DemoVideoDriver::wait_next_event(EventRecord* evt, double) {
+Event* DemoVideoDriver::wait_next_event(double) {
     if (_started_replay && state() == MAIN_SCREEN_INTERFACE) {
         if (_key_down) {
-            evt->what = keyUp;
             _key_down = false;
+            return new KeyUpEvent(KEY_Q);
         } else {
-            evt->what = autoKey;
             _key_down = true;
+            return new KeyDownEvent(KEY_Q);
         }
-        evt->message = 0x0C00;  // Q
-        return true;
-    } else {
-        return false;
     }
+    return NULL;
 }
 
 int DemoVideoDriver::get_demo_scenario() {
@@ -260,48 +257,43 @@ OptionsVideoDriver::OptionsVideoDriver(const StringPiece& output_dir)
           _key_tab(0),
           _key_down(false) { }
 
-bool OptionsVideoDriver::wait_next_event(EventRecord* evt, double) {
+Event* OptionsVideoDriver::wait_next_event(double) {
     switch (state()) {
       case MAIN_SCREEN_INTERFACE:
         {
+            uint32_t key = (_key_tab >= 5) ? KEY_Q : KEY_O;
             if (_key_down) {
-                evt->what = keyUp;
                 _key_down = false;
+                return new KeyUpEvent(key);
             } else {
-                evt->what = autoKey;
                 _key_down = true;
-            }
-            if (_key_tab >= 5) {
-                evt->message = 0x0c00;  // Q
-            } else {
-                evt->message = 0x1f00;  // O
+                return new KeyDownEvent(key);
             }
         }
-        return true;
+        break;
 
       case OPTIONS_INTERFACE:
         {
             if (_key_down) {
-                evt->what = keyUp;
                 _key_down = false;
+                return new KeyUpEvent(KEY_K);
             } else {
                 if (!output_dir().empty()) {
                     String out(output_dir());
                     out.append("/options.png", ascii_encoding());
                     DumpTo(out);
                 }
-                evt->what = autoKey;
                 _key_down = true;
+                return new KeyDownEvent(KEY_K);
             }
-            evt->message = 0x2800;  // K
         }
-        return true;
+        break;
 
       case KEY_CONTROL_INTERFACE:
         {
             if (_key_down) {
-                evt->what = mouseUp;
                 _key_down = false;
+                return new MouseUpEvent(0, get_mouse());
             } else {
                 if (!output_dir().empty()) {
                     String out(output_dir());
@@ -309,25 +301,16 @@ bool OptionsVideoDriver::wait_next_event(EventRecord* evt, double) {
                     DumpTo(out);
                 }
                 ++_key_tab;
-                evt->what = mouseDown;
                 _key_down = true;
+                return new MouseDownEvent(0, get_mouse());
             }
-            evt->where = get_mouse();
         }
-        return true;
+        break;
 
       default:
-        return false;
+        break;
     };
-}
-
-bool OptionsVideoDriver::button() {
-    if (_key_tab == 5) {
-        _key_down = !_key_down;
-        return !_key_down;
-    } else {
-        return false;
-    }
+    return NULL;
 }
 
 Point OptionsVideoDriver::get_mouse() {
@@ -346,11 +329,11 @@ ObjectDataVideoDriver::ObjectDataVideoDriver(const StringPiece& output_dir)
         : TestingVideoDriver(output_dir),
           _key_down(false) { }
 
-bool ObjectDataVideoDriver::wait_next_event(EventRecord* evt, double) {
+Event* ObjectDataVideoDriver::wait_next_event(double) {
     if (state() == MAIN_SCREEN_INTERFACE) {
         if (_key_down) {
-            evt->what = keyUp;
             _key_down = false;
+            return new KeyUpEvent(KEY_Q);
         } else {
             if (!output_dir().empty()) {
                 for (int i = 0; i < globals()->maxBaseObject; ++i) {
@@ -371,14 +354,11 @@ bool ObjectDataVideoDriver::wait_next_event(EventRecord* evt, double) {
                     print(fd.get(), "{0}", data);
                 }
             }
-            evt->what = autoKey;
             _key_down = true;
+            return new KeyDownEvent(KEY_Q);
         }
-        evt->message = 0x0C00;  // Q
-        return true;
-    } else {
-        return false;
     }
+    return NULL;
 }
 
 int ObjectDataVideoDriver::get_demo_scenario() { return -1; }
@@ -387,11 +367,11 @@ BuildPixVideoDriver::BuildPixVideoDriver(const StringPiece& output_dir)
         : TestingVideoDriver(output_dir),
           _key_down(false) { }
 
-bool BuildPixVideoDriver::wait_next_event(EventRecord* evt, double) {
+Event* BuildPixVideoDriver::wait_next_event(double) {
     if (state() == MAIN_SCREEN_INTERFACE) {
         if (_key_down) {
-            evt->what = keyUp;
             _key_down = false;
+            return new KeyUpEvent(KEY_Q);
         } else {
             if (!output_dir().empty()) {
                 const int text_count = 13;
@@ -416,14 +396,11 @@ bool BuildPixVideoDriver::wait_next_event(EventRecord* evt, double) {
                     write(fd.get(), data.data(), data.size());
                 }
             }
-            evt->what = autoKey;
             _key_down = true;
+            return new KeyDownEvent(KEY_Q);
         }
-        evt->message = 0x0C00;  // Q
-        return true;
-    } else {
-        return false;
     }
+    return NULL;
 }
 
 int BuildPixVideoDriver::get_demo_scenario() { return -1; }

@@ -21,7 +21,6 @@
 namespace antares {
 
 class Card;
-class EventRecord;
 
 // A stack of Card objects that constitutes an application.
 //
@@ -61,18 +60,6 @@ class CardStack {
 
     // @returns             The top-most card on the stack.
     Card* top() const;
-
-    // Dispatches an event to the appropriate Card on the stack.
-    //
-    // Given an EventRecord which can be mapped to some event method of `Card`, tries dispatching
-    // the appropriate method to each Card on the stack, working from the top down until a Card
-    // claims to have handled it (represented by returning true from the event method).
-    //
-    // The use of this method is largely considered a legacy at this point, but will continue until
-    // WaitNextEvent() is fully excised from the code and EventRecord can be removed with it.
-    //
-    // @param [in] evt      A record containing the event to dispatch and its parameters.
-    void send(const EventRecord& evt);
 
   private:
     // A linked list of cards.  The card here is on top.
