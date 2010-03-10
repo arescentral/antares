@@ -29,6 +29,7 @@
             'target_name': 'AntaresTest',
             'type': 'executable',
             'sources': [
+                'src/TestVideoDriver.cpp',
                 'src/TestMain.cpp',
             ],
             'dependencies': [
@@ -39,6 +40,7 @@
             'target_name': 'AntaresVnc',
             'type': 'executable',
             'sources': [
+                'src/VncServer.cpp',
                 'src/VncMain.cpp',
             ],
             'dependencies': [
@@ -149,11 +151,9 @@
                 'src/StringHandling.cpp',
                 'src/StringList.cpp',
                 'src/StringNumerics.cpp',
-                'src/TestVideoDriver.cpp',
                 'src/Time.cpp',
                 'src/Transitions.cpp',
                 'src/VideoDriver.cpp',
-                'src/VncServer.cpp',
             ],
             'dependencies': [
                 'lib/libpng/libpng.gyp:libpng',
