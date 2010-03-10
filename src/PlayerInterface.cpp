@@ -317,9 +317,7 @@ extern PixMap*                  gActiveWorld;
 extern PixMap*                  gOffWorld;
 extern PixMap*                  gSaveWorld;
 
-bool IsKeyReserved( KeyMap, bool);
-void BlackenOffscreen( void);
-void Pause( long);
+void BlackenWindow();
 
 void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
     int                     error;
@@ -340,7 +338,7 @@ void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
         CloseInterface();
 
 // it is assumed that we're "recovering" from a fade-out
-        AutoFadeFrom( 10, false);
+        // AutoFadeFrom( 10, false);
 
         DrawInRealWorld();
         mSetDirectFont( kTitleFontNum);
@@ -451,7 +449,7 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
         tRect = Rect(contentRect->left, contentRect->top, contentRect->right, contentRect->bottom);
         CopyOffWorldToRealWorld(tRect);
         if (tRect.left >= tRect.right - 2) {
-            AutoFadeTo( 10, RgbColor::kBlack, false);
+            // AutoFadeTo( 10, RgbColor::kBlack, false);
         }
     }
 }
@@ -706,85 +704,6 @@ void StopPauseIndicator(const StringPiece& pauseString) {
 }
 
 
-void DrawInterfaceOneAtATime( void)
-
-{
-        DrawAllItemsOfKind( kPictureRect, false, true, true);
-        DrawAllItemsOfKind( kLabeledRect, true, false, false);
-        DrawAllItemsOfKind( kTabBox, true, false, false);
-        DrawAllItemsOfKind( kTabBoxButton, true, false, false);
-        DrawAllItemsOfKind( kPlainRect, true, false, false);
-        DrawAllItemsOfKind( kCheckboxButton, true, false, false);
-        DrawAllItemsOfKind( kRadioButton, true, false, false);
-        DrawAllItemsOfKind( kPlainButton, true, false, false);
-        DrawAllItemsOfKind( kTextRect, true, false, false);
-}
-
-void SetOptionCheckboxes( unsigned long options)
-
-{
-    SwitchAnyRadioOrCheckbox( kOptionGameMusicButton, ((options & kOptionMusicPlay) ? (true):(false)));
-    SwitchAnyRadioOrCheckbox( kOptionIdleMusicButton, ((options & kOptionMusicIdle) ? (true):(false)));
-    SwitchAnyRadioOrCheckbox( kOptionSpeechOnButton, ((options & kOptionSpeechOn) ? (true):(false)));
-//  SwitchAnyRadioOrCheckbox( kOptionQuickDrawButton, options & kOptionQDOnly);
-//  SwitchAnyRadioOrCheckbox( kOptionRowSkipButton, options & kOptionRowSkip);
-//  SwitchAnyRadioOrCheckbox( kOptionBlackgroundButton, options & kOptionBlackground);
-//  SwitchAnyRadioOrCheckbox( kOptionNoScaleUpButton, options & kOptionNoScaleUp);
-//  SwitchAnyRadioOrCheckbox( kOptionScreenSmallButton, options & kOptionScreenSmall);
-//  SwitchAnyRadioOrCheckbox( kOptionScreenMediumButton, options & kOptionScreenMedium);
-//  SwitchAnyRadioOrCheckbox( kOptionScreenLargeButton, options & kOptionScreenLarge);
-}
-
-void DrawOptionVolumeLevel( Rect *bounds, long level)
-{
-    long        notchWidth = (( bounds->right - bounds->left) / ( kMaxVolumePreference)),
-                notchHeight = (( bounds->bottom - bounds->top) - 4), count, shade;
-
-    Rect        notchBounds, tRect, graphicRect;
-
-    notchBounds.left = bounds->left + ((( bounds->right - bounds->left) / 2) -
-        (( notchWidth * (kMaxVolumePreference))/ 2));
-    notchBounds.top = bounds->top + 2;
-    notchBounds.bottom = notchBounds.top + notchHeight;
-    notchBounds.right = notchBounds.left + (( notchWidth * (kMaxVolumePreference))/ 2);
-
-    DrawInOffWorld();
-
-    tRect = Rect(notchBounds.left, notchBounds.top,
-          notchBounds.left + notchWidth - 2,
-        notchBounds.bottom);
-
-    shade = 2;
-    for ( count = 0; count < level; count++)
-    {
-        SetTranslateColorShadeFore( kOptionVolumeColor, shade);
-        graphicRect = tRect;
-        graphicRect.inset(2, 6);
-        graphicRect.center_in(tRect);
-        RgbColor color;
-        GetRGBTranslateColorShade(&color, kOptionVolumeColor, shade);
-        gActiveWorld->view(graphicRect).fill(color);
-        tRect.left += notchWidth;
-        tRect.right = tRect.left + notchWidth - 2;
-        shade += 2;
-    }
-
-    NormalizeColors();
-    for ( count = level; count < ( kMaxVolumePreference); count++)
-    {
-        graphicRect = tRect;
-        graphicRect.inset(2, 6);
-        graphicRect.center_in(tRect);
-        gActiveWorld->view(graphicRect).fill(RgbColor::kBlack);
-        tRect.left += notchWidth;
-        tRect.right = tRect.left + notchWidth - 2;
-    }
-
-    DrawInRealWorld();
-    NormalizeColors();
-    CopyOffWorldToRealWorld(*bounds);
-}
-
 //
 // BothCommandAndQ:
 //  returns true if both the command and q keys are set by player. If this is
@@ -805,57 +724,6 @@ bool BothCommandAndQ( void)
     if (( q) && ( command)) return ( true);
     else return( false);
 }
-
-bool IsKeyReserved( KeyMap keyMap, bool alternateFKey)
-{
-#pragma unused( alternateFKey)
-
-    // not related to fkey
-    if ( mPauseKey( keyMap)) return( true);
-    if ( mEnterTextKey( keyMap)) return( true);
-    if ( mRestartResumeKey( keyMap)) return( true);
-    return( false);
-}
-
-void DrawKeyControlPicture( long whichKey)
-{
-    Rect    tRect, newRect;
-    scoped_ptr<Picture> thePict;
-
-    GetAnyInterfaceItemContentBounds(*GetAnyInterfaceItemPtr(kKeyIllustrationBox), &tRect);
-
-    DrawInOffWorld();
-
-    thePict.reset(new Picture(kKeyIllustrationPictID));
-    if (thePict.get() != nil) {
-        newRect = thePict->bounds();
-        newRect.center_in(tRect);
-        CopyBits(thePict.get(), gActiveWorld, thePict->bounds(), newRect);
-    }
-    if ( whichKey >= kSelectFriendKeyNum)
-    {
-        if ( whichKey < kCompUpKeyNum)
-        {
-            whichKey = kSelectFriendKeyNum;
-        } else
-        {
-            whichKey = kSelectFriendKeyNum + 1;
-        }
-    }
-
-    thePict.reset(new Picture(kKeyIllustrationPictID + 1 + whichKey));
-    if (thePict.get() != nil) {
-        newRect = thePict->bounds();
-        newRect.center_in(tRect);
-        CopyBits(thePict.get(), gActiveWorld, thePict->bounds(), newRect);
-    }
-    thePict.reset();
-
-    DrawInRealWorld();
-    CopyOffWorldToRealWorld(tRect);
-
-}
-
 
 netResultType StartNetworkGameSetup( void)
 
@@ -954,22 +822,6 @@ netResultType StartNetworkGameSetup( void)
 #else
     return( kCancel);
 #endif NETSPROCKET_AVAILABLE
-}
-
-void DrawStringInInterfaceItem( long whichItem, const StringPiece& string)
-{
-    Rect                tRect;
-    interfaceItemType   *anItem;
-
-    DrawInOffWorld();
-    DefaultColors();
-    GetAnyInterfaceItemContentBounds(*GetAnyInterfaceItemPtr( whichItem), &tRect);
-
-    gActiveWorld->view(tRect).fill(RgbColor::kBlack);
-    anItem = GetAnyInterfaceItemPtr( whichItem);
-    DrawInterfaceTextInRect(tRect, string, anItem->style, anItem->color, gOffWorld, nil);
-    DrawInRealWorld();
-    CopyOffWorldToRealWorld(tRect);
 }
 
 netResultType ClientWaitInterface( void)
@@ -1288,81 +1140,6 @@ void BlackenWindow( void)
     DrawInRealWorld();
     DefaultColors();
     gActiveWorld->view(tRect).fill(RgbColor::kBlack);
-}
-
-void BlackenOffscreen( void)
-
-{
-    Rect    tRect;
-
-    tRect = Rect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-    DrawInSaveWorld();
-    DefaultColors();
-    gActiveWorld->view(tRect).fill(RgbColor::kBlack);
-    DrawInOffWorld();
-    DefaultColors();
-    gActiveWorld->view(tRect).fill(RgbColor::kBlack);
-    DrawInRealWorld();
-    DefaultColors();
-}
-
-
-bool IsThisInGameHilited( short which, bool set)
-
-{
-#pragma unused( which, set)
-    return ( false);
-}
-
-void DrawLevelNameInBox(unsigned char* name, long fontNum, short descriptionTextID,
-    long itemNum) {
-    Rect                clipRect;
-    Rect                    tRect;
-    unsigned char           *strPtr;
-    retroTextSpecType       retroTextSpec;
-    interfaceItemType       *anItem;
-    long                    height;
-
-    anItem = GetAnyInterfaceItemPtr( itemNum);
-    strPtr = name + 1;
-
-    check(descriptionTextID <= 0, "descriptionTextID is not supported");
-
-    retroTextSpec.textLength = name[0];
-    retroTextSpec.text.reset(new String);
-    retroTextSpec.text->assign(
-            BytesPiece(reinterpret_cast<const uint8_t*>(name + 1), *name),
-            mac_roman_encoding());
-
-    retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
-    retroTextSpec.tabSize =220;
-    GetRGBTranslateColorShade(&retroTextSpec.color, AQUA, VERY_LIGHT);
-    GetRGBTranslateColorShade(&retroTextSpec.backColor, AQUA, DARKEST);
-    retroTextSpec.backColor = RgbColor::kBlack;
-    retroTextSpec.originalColor = retroTextSpec.nextColor = retroTextSpec.color;
-    retroTextSpec.originalBackColor = retroTextSpec.nextBackColor = retroTextSpec.backColor;
-    retroTextSpec.topBuffer = 2;
-    retroTextSpec.bottomBuffer = 0;
-
-    mSetDirectFont( fontNum);
-    height = DetermineDirectTextHeightInWidth( &retroTextSpec, anItem->bounds.right - anItem->bounds.left);
-
-    retroTextSpec.xpos = anItem->bounds.left;
-    retroTextSpec.ypos = anItem->bounds.left + mDirectFontAscent();
-
-//  clipRect.left = 0;
-//  clipRect.right = clipRect.left + WORLD_WIDTH;
-//  clipRect.top = 0;
-//  clipRect.bottom = clipRect.top + WORLD_HEIGHT;
-    clipRect = anItem->bounds;
-    tRect = anItem->bounds;
-    DrawInOffWorld();
-    DefaultColors();
-    gActiveWorld->view(tRect).fill(RgbColor::kBlack);
-    DrawInRealWorld();
-    DrawDirectTextInRect( &retroTextSpec, anItem->bounds, clipRect, gOffWorld, 0,0);
-    CopyOffWorldToRealWorld(tRect);
-    retroTextSpec.text.reset();
 }
 
 long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint, long whichScenario,

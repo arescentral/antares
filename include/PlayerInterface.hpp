@@ -52,35 +52,22 @@ enum PlayAgainResult {
 
 void DoLoadingInterface(Rect*, unsigned char*);
 void UpdateLoadingInterface( long, long, Rect *);
-PlayAgainResult DoPlayAgain(bool allow_resume, bool allow_skip);
 void DoNetSettings( void);
-void DoHelpScreen( void);
 void StartPauseIndicator(const sfz::StringPiece& pauseString, unsigned char);
 void StopPauseIndicator(const sfz::StringPiece& pauseString);
-void DrawInterfaceOneAtATime( void);
-void DoOptionsInterface( void);
-void SetOptionCheckboxes( unsigned long);
-void DrawOptionVolumeLevel( Rect *, long);
-bool DoKeyInterface( void);
-void DrawKeyControlPicture( long);
 bool BothCommandAndQ( void);
 netResultType StartNetworkGameSetup( void);
 netResultType HostAcceptClientInterface( void);
 netResultType ClientNetworkGameSetup( void);
-void DrawStringInInterfaceItem(long which_item, const sfz::StringPiece& string);
 netResultType ClientWaitInterface( void);
 netResultType HostBeginGame( void);
 netResultType ClientBeginGame( void);
-void BlackenWindow( void);
 short GetClientListLength( void);
 void GetClientListName(short, unsigned char*);
 bool IsThisClientHilited( short, bool);
 short GetInGameListLength( void);
 void GetInGameListName(short, unsigned char*);
-bool IsThisInGameHilited( short, bool);
 long DoNetLevelInterface( void);
-void DrawLevelNameInBox(unsigned char*, long, short, long);
-bool DoMissionInterface( long);
 long UpdateMissionBriefPoint( interfaceItemType *, long, long, coordPointType *, long, long,
         Rect *, Rect *, inlinePictType *);
 void ShowObjectData( Point, short, Rect *);

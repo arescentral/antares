@@ -56,8 +56,6 @@ typedef FourCharCode ResType;
 
 ////////////////////////////
 
-STUB1(GlobalToLocal, void(Point*));
-
 class RgbColor;
 void Index2Color(long index, RgbColor* color);
 

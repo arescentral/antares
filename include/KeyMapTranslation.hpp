@@ -68,29 +68,16 @@ inline bool mEscKey(KeyMap km)        { return (km[1] >> 13) & 0x01; }  // esc k
 inline bool mQKey(KeyMap km)          { return (km[0] >> 20) & 0x01; }   // Q for Quitting
 inline bool mCommandKey(KeyMap km)    { return (km[1] >> 15) & 0x01; }   // command key
 inline bool mLeftArrowKey(KeyMap km)  { return (km[3] >> 3) & 0x01; }   // left arrow/backspace
-#define mAnythingButReturn
+
 #define kModifierKeyMask    (0x0008 | 0x8000 | 0x0004 | 0x0001 | 0x0002) // applies only to keyMap[1]
 
 void GetKeyMapFromKeyNum( short, KeyMap);
 short GetKeyNumFromKeyMap( KeyMap);
-bool DoesKeyMapContainKeyNum( KeyMap, short);
-void WaitForAnyEvent( void);
-bool TimedWaitForAnyEvent( long);
-bool AnyEvent( void);
-bool ControlKey( void);
 bool CommandKey( void);
-bool OptionKey( void);
-bool ShiftKey( void);
-bool EscapeKey( void);
-bool PeriodKey( void);
-bool QKey( void);
-bool AnyCancelKeys( void);
 void GetKeyNumName(short key_num, sfz::String* out);
 bool AnyRealKeyDown( void);
-bool AnyModifierKeyDown( void);
 bool AnyKeyButThisOne( KeyMap, long, long);
 long GetAsciiFromKeyMap( KeyMap, KeyMap);
-long GetAsciiFromKeyNum( short);
 
 }  // namespace antares
 

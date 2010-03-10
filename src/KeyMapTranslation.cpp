@@ -28,9 +28,7 @@ namespace antares {
 
 unsigned long   gKeyTranslateState = 0;
 
-void GetKeyMapFromKeyNum( short keyNum, KeyMap keyMap)
-
-{
+void GetKeyMapFromKeyNum( short keyNum, KeyMap keyMap) {
     short       wmap, wbit, fixbit;
 
     keyNum--;
@@ -51,9 +49,7 @@ void GetKeyMapFromKeyNum( short keyNum, KeyMap keyMap)
 #endif TARGET_OS_MAC
 }
 
-short GetKeyNumFromKeyMap( KeyMap keyMap)
-
-{
+short GetKeyNumFromKeyMap( KeyMap keyMap) {
     int         i, j, wmap = 0, wbit = 0, fixbit, keyispressed = 0;
 
     for ( i = 0; i < 4; i++)
@@ -81,82 +77,7 @@ short GetKeyNumFromKeyMap( KeyMap keyMap)
     else return (0);
 }
 
-bool DoesKeyMapContainKeyNum( KeyMap smap, short keyNum)
-{
-    KeyMap  dmap;
-    short   i;
-
-    GetKeyMapFromKeyNum( keyNum, dmap);
-    for ( i = 0; i < 4; i++)
-    {
-#if TARGET_OS_MAC
-        if ( (smap[i] & dmap[i]) != dmap[i]) return( false);
-#else
-        if ( (smap[i].bigEndianValue & dmap[i].bigEndianValue) != dmap[i].bigEndianValue) return( false);
-#endif TARGET_OS_MAC
-    }
-    return( true);
-}
-
-void WaitForAnyEvent( void)
-
-{
-    KeyMap  keyMap;
-
-    do
-    {
-        GetKeys(keyMap);
-    } while (( !Button()) && ( !AnyRealKeyDown()));
-    do {} while ( AnyEvent());
-    FlushEvents(everyEvent, 0);
-}
-
-bool TimedWaitForAnyEvent( long time)
-
-{
-    long    starttime = TickCount();
-    KeyMap  keyMap;
-    bool result = false;
-
-    do
-    {
-        GetKeys(keyMap);
-    } while (( !Button()) && ( !AnyRealKeyDown()) && (( TickCount() - starttime) < time));
-    if ( (Button()) || ( AnyRealKeyDown()))
-    {
-        do {} while ( AnyEvent());
-        result = true;
-    }
-    FlushEvents(everyEvent, 0);
-    return( result);
-}
-
-bool AnyEvent( void)
-
-{
-    KeyMap  keyMap;
-
-    GetKeys(keyMap);
-    if (( Button()) || (AnyRealKeyDown())) return ( true);
-    return( false);
-}
-
-bool ControlKey( void)
-
-{
-    KeyMap  keyMap;
-
-    GetKeys( keyMap);
-#if TARGET_OS_MAC
-    return( (keyMap[1] >> 3) & 0x01 );
-#else
-    return( (EndianU32_BtoN(keyMap[1].bigEndianValue) >> 3) & 0x01 );
-#endif TARGET_OS_MAC
-}
-
-bool CommandKey( void)
-
-{
+bool CommandKey() {
     KeyMap  keyMap;
 
     GetKeys( keyMap);
@@ -167,69 +88,6 @@ bool CommandKey( void)
 #endif TARGET_OS_MAC
 }
 
-bool OptionKey( void)
-
-{
-    KeyMap  keyMap;
-
-    GetKeys( keyMap);
-#if TARGET_OS_MAC
-    return( (keyMap[1] >> 2) & 0x01 );
-#else
-    return( (EndianU32_BtoN(keyMap[1].bigEndianValue) >> 2) & 0x01 );
-#endif TARGET_OS_MAC
-}
-
-bool ShiftKey( void)
-
-{
-    KeyMap  keyMap;
-
-    GetKeys( keyMap);
-#if TARGET_OS_MAC
-    return( keyMap[1] & 0x01 );
-#else
-    return( EndianU32_BtoN(keyMap[1].bigEndianValue) & 0x01 );
-#endif TARGET_OS_MAC
-}
-
-bool EscapeKey( void)
-{
-    KeyMap  keyMap;
-
-    GetKeys( keyMap);
-#if TARGET_OS_MAC
-    return( (keyMap[1] >> 13) & 0x01);
-#else
-    return( EndianU32_BtoN(keyMap[1].bigEndianValue) & 0x01 );
-#endif TARGET_OS_MAC
-}
-
-bool PeriodKey( void)
-{
-    KeyMap  keyMap;
-
-    GetKeys( keyMap);
-#if TARGET_OS_MAC
-    return( (keyMap[1] >> 23) & 0x01);
-#else
-    return( (EndianU32_BtoN(keyMap[1].bigEndianValue) >> 23) & 0x01);
-#endif TARGET_OS_MAC
-}
-
-bool QKey( void)
-{
-    KeyMap  keyMap;
-
-    GetKeys( keyMap);
-    return (mQKey( keyMap));
-}
-
-bool AnyCancelKeys( void)
-{
-    return( EscapeKey() || (CommandKey() && ( PeriodKey() || QKey())));
-}
-
 void GetKeyNumName(short key_num, sfz::String* out) {
     StringList strings;
     strings.load(kKeyMapNameID);
@@ -238,9 +96,7 @@ void GetKeyNumName(short key_num, sfz::String* out) {
 
 // returns true if any keys OTHER THAN POWER ON AND CAPS LOCK are down
 
-bool AnyRealKeyDown( void)
-
-{
+bool AnyRealKeyDown() {
     KeyMap  keyMap;
 
     GetKeys( keyMap);
@@ -261,18 +117,7 @@ bool AnyRealKeyDown( void)
     else return ( false);
 }
 
-bool AnyModifierKeyDown( void) // checks for shift, option, command, control
-{
-    if ( ControlKey()) return true;
-    if ( OptionKey()) return true;
-    if ( ShiftKey()) return true;
-    if ( CommandKey()) return true;
-
-    return false;
-}
-
-bool AnyKeyButThisOne( KeyMap keyMap, long whichWord, long whichBit)
-{
+bool AnyKeyButThisOne( KeyMap keyMap, long whichWord, long whichBit) {
     long    i;
 
     for ( i = 0; i < 4; i++)
@@ -297,17 +142,16 @@ bool AnyKeyButThisOne( KeyMap keyMap, long whichWord, long whichBit)
     return false;
 }
 
-long GetAsciiFromKeyMap( KeyMap sourceKeyMap, KeyMap previousKeyMap)
-{
+long GetAsciiFromKeyMap( KeyMap sourceKeyMap, KeyMap previousKeyMap) {
     short           whichKeyCode = 0, modifiers = 0, count;
     long            result;
     Ptr             KCHRPtr;
     KeyMap          keyMap;
 
+#if TARGET_OS_MAC
     if ( previousKeyMap == nil)
     {
         for ( count = 0; count < 4; count++)
-#if TARGET_OS_MAC
             keyMap[count] = sourceKeyMap[count];
     } else
     {
@@ -347,6 +191,9 @@ long GetAsciiFromKeyMap( KeyMap sourceKeyMap, KeyMap previousKeyMap)
     }
 
 #else
+    if ( previousKeyMap == nil)
+    {
+        for ( count = 0; count < 4; count++)
             keyMap[count].bigEndianValue = sourceKeyMap[count].bigEndianValue;
     } else
     {
@@ -391,14 +238,6 @@ long GetAsciiFromKeyMap( KeyMap sourceKeyMap, KeyMap previousKeyMap)
     result = KeyTranslate( KCHRPtr, whichKeyCode, &gKeyTranslateState);
 
     return( result);
-}
-
-long GetAsciiFromKeyNum( short keyNum)
-{
-    Ptr             KCHRPtr;
-
-    KCHRPtr = reinterpret_cast<Ptr>(GetScriptManagerVariable( smKCHRCache));
-    return ( KeyTranslate( KCHRPtr, keyNum - 1, &gKeyTranslateState));
 }
 
 }  // namespace antares
