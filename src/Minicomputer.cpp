@@ -274,8 +274,7 @@ void MiniScreenCleanup() {
 void SetMiniScreenStatusStrList(short strID) {
     DisposeMiniScreenStatusStrList();
     if (strID > 0) {
-        globals()->gMissionStatusStrList.reset(new StringList);
-        globals()->gMissionStatusStrList->load(strID);
+        globals()->gMissionStatusStrList.reset(new StringList(strID));
     }
 }
 

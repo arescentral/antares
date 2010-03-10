@@ -1461,10 +1461,8 @@ void CreateObjectDataText(String* text, short id) {
 
     const baseObjectType& baseObject = gBaseObjectData.get()[id];
 
-    StringList keys;
-    StringList values;
-    keys.load(kShipDataKeyStringID);
-    values.load(kShipDataNameID);
+    StringList keys(kShipDataKeyStringID);
+    StringList values(kShipDataNameID);
 
     // *** Replace place-holders in text with real data, using the fabulous Munger routine
     // an object or a ship?
@@ -1478,8 +1476,7 @@ void CreateObjectDataText(String* text, short id) {
 
     // ship name
     {
-        StringList names;
-        names.load(5000);
+        StringList names(5000);
         const StringPiece& name = names.at(id);
         Munger(&data, 0, keys.at(kShipTypeStringNum), name);
     }
@@ -1548,18 +1545,15 @@ void CreateWeaponDataText(String* text, long whichWeapon, const StringPiece& wea
         }
     }
 
-    StringList keys;
-    StringList values;
-    keys.load(kShipDataKeyStringID);
-    values.load(kShipDataNameID);
+    StringList keys(kShipDataKeyStringID);
+    StringList values(kShipDataNameID);
 
     // weapon name #
     Munger(&data, 0, keys.at(kWeaponNumberStringNum), weaponName);
 
     // weapon name
     {
-        StringList names;
-        names.load(5000);
+        StringList names(5000);
         const StringPiece& name = names.at(whichWeapon);
         Munger(&data, 0, keys.at(kWeaponNameStringNum), name);
     }
@@ -1598,10 +1592,8 @@ void CreateWeaponDataText(String* text, long whichWeapon, const StringPiece& wea
 #define kScrollText_Buffer  10
 
 void Replace_KeyCode_Strings_With_Actual_Key_Names(String* text, short resID, size_t padTo) {
-    StringList keys;
-    StringList values;
-    keys.load(kHelpScreenKeyStringID);
-    values.load(resID);
+    StringList keys(kHelpScreenKeyStringID);
+    StringList values(resID);
 
     for (int i = 0; i < kKeyExtendedControlNum; ++i) {
         const StringPiece& search = keys.at(i);

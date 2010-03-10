@@ -363,10 +363,8 @@ void KeyControlScreen::draw() const {
         const size_t key_one = _conflicts[0].first;
         const size_t key_two = _conflicts[0].second;
         String text;
-        StringList tabs;
-        StringList keys;
-        tabs.load(2009);
-        keys.load(2005);
+        StringList tabs(2009);
+        StringList keys(2005);
 
         // TODO(sfiera): permit localization.
         format(&text, "{0}: {1} conflicts with {2}: {3}",

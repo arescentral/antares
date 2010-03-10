@@ -19,22 +19,25 @@
 #define ANTARES_STRING_LIST_HPP_
 
 #include <vector>
+#include "sfz/Macros.hpp"
 #include "sfz/String.hpp"
 
 namespace antares {
 
 class StringList {
   public:
+    StringList(int id);
     ~StringList();
 
     void clear();
-    void load(int id);
     ssize_t index_of(const sfz::StringPiece& result) const;
     size_t size() const;
     const sfz::String& at(size_t index) const;
 
   private:
     std::vector<sfz::String*> _strings;
+
+    DISALLOW_COPY_AND_ASSIGN(StringList);
 };
 
 void string_to_pstring(const sfz::String& src, unsigned char* dest);

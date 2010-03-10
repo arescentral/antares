@@ -89,8 +89,7 @@ bool CommandKey() {
 }
 
 void GetKeyNumName(short key_num, sfz::String* out) {
-    StringList strings;
-    strings.load(kKeyMapNameID);
+    StringList strings(kKeyMapNameID);
     out->assign(strings.at(key_num - 1));
 }
 

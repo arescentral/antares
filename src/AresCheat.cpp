@@ -56,8 +56,7 @@ void CheatFeedback( short, bool, long);
 void CheatFeedbackPlus(short, bool, long, unsigned char*);
 
 void AresCheatInit() {
-    globals()->gAresCheatStrings.reset(new StringList);
-    globals()->gAresCheatStrings->load(kCheatStringListID);
+    globals()->gAresCheatStrings.reset(new StringList(kCheatStringListID));
 }
 
 void CleanupAresCheat() {

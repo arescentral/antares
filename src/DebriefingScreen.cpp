@@ -114,8 +114,7 @@ RetroText* score_text(
     Resource rsrc('TEXT', 6000);
     String text(rsrc.data(), mac_roman_encoding());
 
-    StringList strings;
-    strings.load(6000);
+    StringList strings(6000);
 
     const int your_mins = your_length / 60;
     const int your_secs = your_length % 60;
@@ -132,8 +131,7 @@ RetroText* score_text(
         format(&secs_string, ":{0}", dec(par_secs, 2));
         string_replace(&text, strings.at(3), secs_string);
     } else {
-        StringList data_strings;
-        data_strings.load(6002);
+        StringList data_strings(6002);
         string_replace(&text, strings.at(2), data_strings.at(8));  // = "N/A"
         string_replace(&text, strings.at(3), "");
     }

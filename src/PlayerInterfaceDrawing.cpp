@@ -484,8 +484,7 @@ void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
             SetTranslateColorShadeFore(item.color, LIGHTER);
             GetRGBTranslateColorShade(&color, item.color, LIGHTER);
         }
-        StringList strings;
-        strings.load(item.item.plainButton.label.stringID);
+        StringList strings(item.item.plainButton.label.stringID);
         StringPiece s = strings.at(item.item.plainButton.label.stringNumber - 1);
         swidth = GetInterfaceStringWidth(s, item.style);
         swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
@@ -555,8 +554,7 @@ void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
                 GetRGBTranslateColorShade(&color, item.color, LIGHTER);
             }
 
-            StringList strings;
-            strings.load(item.item.plainButton.label.stringID);
+            StringList strings(item.item.plainButton.label.stringID);
             StringPiece s = strings.at(item.item.plainButton.label.stringNumber - 1);
             swidth = GetInterfaceStringWidth(s, item.style);
             swidth = uRect.right + ( tRect.right - uRect.right) / 2 - swidth / 2;
@@ -732,8 +730,7 @@ void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix)
             GetRGBTranslateColorShade(&color, item.color, VERY_LIGHT);
         }
 
-        StringList strings;
-        strings.load(item.item.radioButton.label.stringID);
+        StringList strings(item.item.radioButton.label.stringID);
         StringPiece s = strings.at(item.item.radioButton.label.stringNumber - 1);
         swidth = GetInterfaceStringWidth( s, item.style);
         swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
@@ -823,8 +820,7 @@ void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix)
             GetRGBTranslateColorShade(&color, item.color, VERY_LIGHT);
         }
         {
-            StringList strings;
-            strings.load(item.item.radioButton.label.stringID);
+            StringList strings(item.item.radioButton.label.stringID);
             StringPiece s = strings.at(item.item.radioButton.label.stringNumber - 1);
             swidth = GetInterfaceStringWidth( s, item.style);
             swidth = uRect.right + ( tRect.right - uRect.right) / 2 - swidth / 2;
@@ -958,8 +954,7 @@ void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix) 
         SetTranslateColorShadeFore( item.color, LIGHT);
         GetRGBTranslateColorShade(&color, item.color, LIGHT);
     }
-    StringList strings;
-    strings.load(item.item.radioButton.label.stringID);
+    StringList strings(item.item.radioButton.label.stringID);
     StringPiece s = strings.at(item.item.radioButton.label.stringNumber - 1);
     swidth = GetInterfaceStringWidth( s, item.style);
     swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
@@ -1081,8 +1076,7 @@ void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix) {
         GetRGBTranslateColorShade(&color, item.color, LIGHT);
     }
 
-    StringList strings;
-    strings.load(item.item.checkboxButton.label.stringID);
+    StringList strings(item.item.checkboxButton.label.stringID);
     StringPiece s = strings.at(item.item.checkboxButton.label.stringNumber - 1);
     swidth = GetInterfaceStringWidth( s, item.style);
     swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
@@ -1119,8 +1113,7 @@ void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
 
     // draw the string
 
-    StringList strings;
-    strings.load(item.item.labeledRect.label.stringID);
+    StringList strings(item.item.labeledRect.label.stringID);
     StringPiece s = strings.at(item.item.labeledRect.label.stringNumber - 1);
     swidth = GetInterfaceStringWidth( s, item.style) + kInterfaceTextHBuffer * 2;
     swidth = ( tRect.right - tRect.left) - swidth;
@@ -1254,8 +1247,7 @@ void DrawPlayerInterfaceList(const interfaceItemType& item, PixMap* pix) {
     SetTranslateColorShadeFore( item.color, LIGHT);
     GetRGBTranslateColorShade(&color, item.color, LIGHT);
 
-    StringList strings;
-    strings.load(item.item.listRect.label.stringID);
+    StringList strings(item.item.listRect.label.stringID);
     StringPiece s = strings.at(item.item.listRect.label.stringNumber - 1);
     swidth = GetInterfaceStringWidth( s, item.style) + kInterfaceTextHBuffer * 2;
     sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer * 2;

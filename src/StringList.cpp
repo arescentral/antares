@@ -36,20 +36,7 @@ using sfz::quote;
 
 namespace antares {
 
-StringList::~StringList() {
-    clear();
-}
-
-void StringList::clear() {
-    // TODO(sfiera): make exception-safe.
-    foreach (it, _strings) {
-        delete *it;
-    }
-    _strings.clear();
-}
-
-void StringList::load(int id) {
-    clear();
+StringList::StringList(int id) {
     Resource rsrc('STR#', id);
     BytesBinaryReader bin(rsrc.data().substr(0, 2));
     uint16_t size;
@@ -61,6 +48,18 @@ void StringList::load(int id) {
         _strings.push_back(new String(data.substr(0, len), mac_roman_encoding()));
         data = data.substr(len);
     }
+}
+
+StringList::~StringList() {
+    clear();
+}
+
+void StringList::clear() {
+    // TODO(sfiera): make exception-safe.
+    foreach (it, _strings) {
+        delete *it;
+    }
+    _strings.clear();
 }
 
 ssize_t StringList::index_of(const StringPiece& result) const {

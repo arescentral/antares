@@ -44,8 +44,7 @@ const int kLoadingScreenResID = 6001;
 const int kLevelNameID = 4600;
 
 void get_chapter_name(sfz::String* out, scenarioType* scenario) {
-    StringList strings;
-    strings.load(kLevelNameID);
+    StringList strings(kLevelNameID);
     out->assign(strings.at(scenario->levelNameStrNum));
 }
 

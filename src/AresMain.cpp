@@ -418,8 +418,7 @@ class PauseScreen : public Card {
     PauseScreen()
             : _visible(false),
               _next_switch(0.0) {
-        StringList list;
-        list.load(3100);
+        StringList list(3100);
         _text.assign(list.at(10));
     }
 
