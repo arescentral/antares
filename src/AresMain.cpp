@@ -18,6 +18,8 @@
 #include "AresMain.hpp"
 
 #include <math.h>
+#include <algorithm>
+
 #include "Quickdraw.h"
 
 #include "Admiral.hpp"
@@ -91,6 +93,8 @@
 using sfz::String;
 using sfz::scoped_ptr;
 using sfz::scoped_array;
+using std::min;
+using std::max;
 
 namespace antares {
 
@@ -171,11 +175,8 @@ class Master : public Card {
 
           case TITLE_SCREEN_PICT:
             _state = INTRO_SCROLL;
-            if (!(globals()->gOptions & kOptionHaveSeenIntro)) {
-                stack()->push(new ScrollTextScreen(5600, 450, 15.0));
-                globals()->gOptions |= kOptionHaveSeenIntro;
-                SaveOptionsPreferences();
-            }
+            // TODO(sfiera): prevent the intro screen from displaying on subsequent launches.
+            stack()->push(new ScrollTextScreen(5600, 450, 15.0));
             break;
 
           case INTRO_SCROLL:
@@ -206,7 +207,7 @@ class Master : public Card {
 
 class GamePlay : public Card {
   public:
-    GamePlay(GameResult* game_result, long* seconds);
+    GamePlay(bool replay, GameResult* game_result, long* seconds);
 
     virtual void become_front();
 
@@ -224,6 +225,7 @@ class GamePlay : public Card {
     };
     State _state;
 
+    const bool _replay;
     GameResult* const _game_result;
     long* const _seconds;
     const Rect _play_area;
@@ -254,9 +256,6 @@ Card* AresInit() {
 
     globals()->gPreferencesData.reset(new Preferences);
 
-    // Disable networking.
-    globals()->gOptions &= ~kOptionNetworkAvailable;
-
     GetDateTime( reinterpret_cast<unsigned long *>(&gRandomSeed));
 
     theClut.reset(new ColorTable(256));
@@ -280,7 +279,7 @@ Card* AresInit() {
 
     InterfaceHandlingInit();
 
-    if (globals()->gOptions & kOptionMusicIdle) {
+    if (globals()->gPreferencesData->play_idle_music()) {
         LoadSong( kTitleSongID);
         SetSongVolume( kMaxMusicVolume);
         PlaySong();
@@ -303,9 +302,10 @@ Card* AresInit() {
     return new Master;
 }
 
-MainPlay::MainPlay(int scenario, GameResult* game_result, long* game_length)
+MainPlay::MainPlay(int scenario, bool replay, GameResult* game_result, long* game_length)
         : _state(NEW),
           _scenario(scenario),
+          _replay(replay),
           _cancelled(false),
           _game_result(game_result),
           _game_length(game_length) { }
@@ -328,7 +328,7 @@ void MainPlay::become_front() {
             RemoveAllSpaceObjects();
             globals()->gGameOver = 0;
 
-            if (globals()->gOptions & kOptionMusicIdle) {
+            if (globals()->gPreferencesData->play_idle_music()) {
                 LoadSong(3000);
                 SetSongVolume( kMaxMusicVolume);
                 PlaySong();
@@ -340,7 +340,7 @@ void MainPlay::become_front() {
                 stack()->pop(this);
                 return;
             }
-            if (!(globals()->gOptions & kOptionReplay)) {
+            if (!_replay) {
                 stack()->push(new BriefingScreen(_scenario, &_cancelled));
                 break;
             }
@@ -359,14 +359,14 @@ void MainPlay::become_front() {
             }
 
             _state = PLAYING;
-            if (globals()->gOptions & kOptionMusicIdle) {
+            if (globals()->gPreferencesData->play_idle_music()) {
                 StopAndUnloadSong();
             }
 
             ResetInstruments();
             DrawInstrumentPanel();
 
-            if (globals()->gOptions & kOptionMusicPlay) {
+            if (globals()->gPreferencesData->play_music_in_game()) {
                 LoadSong(gThisScenario->songID);
                 SetSongVolume(kMusicVolume);
                 PlaySong();
@@ -375,14 +375,14 @@ void MainPlay::become_front() {
             globals()->gGameStartTime = TickCount();// - defecit;
 
             VideoDriver::driver()->set_game_state(PLAY_GAME);
-            stack()->push(new GamePlay(_game_result, _game_length));
+            stack()->push(new GamePlay(_replay, _game_result, _game_length));
         }
         break;
 
       case PLAYING:
         {
             VideoDriver::driver()->set_game_state(DONE_GAME);
-            if (globals()->gOptions & kOptionMusicPlay) {
+            if (globals()->gPreferencesData->play_music_in_game()) {
                 StopAndUnloadSong();
             }
             stack()->pop(this);
@@ -391,8 +391,9 @@ void MainPlay::become_front() {
     }
 }
 
-GamePlay::GamePlay(GameResult* game_result, long* seconds)
+GamePlay::GamePlay(bool replay, GameResult* game_result, long* seconds)
         : _state(PLAYING),
+          _replay(replay),
           _game_result(game_result),
           _seconds(seconds),
           _play_area(CLIP_LEFT, CLIP_TOP, CLIP_RIGHT, CLIP_BOTTOM),
@@ -540,10 +541,7 @@ void GamePlay::fire_timer() {
     thisTime -= globals()->gLastTime;
     newGameTime = (thisTime / kTimeUnit) + _scenario_start_time;
 
-    if (((globals()->gOptions & kOptionSubstituteFKeys)
-                ? mNOFFastMotionKey(_key_map)
-                : mFastMotionKey(_key_map)) &&
-            !_entering_message) {
+    if ((mNOFFastMotionKey(_key_map)) && !_entering_message) {
         newGameTime = globals()->gGameTime + 12;
         thisTime = (newGameTime - _scenario_start_time) * kTimeUnit;
         globals()->gLastTime = scrapTime - thisTime;
@@ -603,7 +601,7 @@ void GamePlay::fire_timer() {
             AdmiralThink();
             ExecuteActionQueue( kDecideEveryCycles);
 
-            if (globals()->gOptions & kOptionReplay) {
+            if (_replay) {
                 uint32_t keys;
                 if (!globals()->gInputSource->next(&keys)) {
                     globals()->gGameOver = 1;
@@ -625,19 +623,17 @@ void GamePlay::fire_timer() {
             }
 
             if (Button()) {
-                if (globals()->gOptions & kOptionReplay) {
+                if (_replay) {
                     *_game_result = QUIT_GAME;
                     globals()->gGameOver = 1;
                 } else {
                     if (!_mouse_down) {
-                        if (!(globals()->gOptions & ( kOptionAutoPlay | kOptionReplay))) {
-                            if (((globals()->gGameTime - _last_click_time)) <= now_secs()) {
-                                InstrumentsHandleDoubleClick();
-                                _last_click_time -= now_secs();
-                            } else {
-                                InstrumentsHandleClick();
-                                _last_click_time = globals()->gGameTime;
-                            }
+                        if (((globals()->gGameTime - _last_click_time)) <= now_secs()) {
+                            InstrumentsHandleDoubleClick();
+                            _last_click_time -= now_secs();
+                        } else {
+                            InstrumentsHandleClick();
+                            _last_click_time = globals()->gGameTime;
                         }
                         _mouse_down = true;
                     } else {
@@ -678,32 +674,30 @@ void GamePlay::fire_timer() {
         return;
     }
 
-    if (!(globals()->gOptions & kOptionReplay)
+    if (!_replay
             && mVolumeDownKey(_key_map)
             && !mVolumeDownKey(_last_key_map)) {
-        if ( globals()->gSoundVolume > 0) {
-            globals()->gSoundVolume--;
-        }
-        if ( globals()->gOptions & kOptionMusicPlay) {
+        globals()->gPreferencesData->set_volume(
+                max(0, globals()->gPreferencesData->volume() - 1));
+        if ( globals()->gPreferencesData->play_music_in_game()) {
             SetSongVolume(kMusicVolume);
         }
     }
 
-    if (!(globals()->gOptions & kOptionReplay)
+    if (!_replay
             && mVolumeUpKey( _key_map)
             && !mVolumeUpKey(_last_key_map)) {
-        if (globals()->gSoundVolume < kMaxVolumePreference) {
-            globals()->gSoundVolume++;
-        }
-        if (globals()->gOptions & kOptionMusicPlay) {
+        globals()->gPreferencesData->set_volume(
+                min(kMaxVolumePreference, globals()->gPreferencesData->volume() + 1));
+        if (globals()->gPreferencesData->play_music_in_game()) {
             SetSongVolume( kMusicVolume);
         }
     }
 
-    if (!(globals()->gOptions & kOptionReplay)
+    if (!_replay
             && mActionMusicKey(_key_map)
             && !mActionMusicKey(_last_key_map)) {
-        if (globals()->gOptions & kOptionMusicPlay) {
+        if (globals()->gPreferencesData->play_music_in_game()) {
             ToggleSong();
         }
     }
@@ -762,7 +756,7 @@ void GamePlay::fire_timer() {
 }
 
 void GamePlay::key_down(const KeyDownEvent& event) {
-    if (globals()->gOptions & kOptionReplay) {
+    if (_replay) {
         switch (event.key()) {
           case 0x39:  // Caps lock.
             // TODO(sfiera): also F6.

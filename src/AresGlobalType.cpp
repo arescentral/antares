@@ -55,7 +55,6 @@ aresGlobalType::aresGlobalType() {
     gFrameCount = 0;
     gGameOver = 1;
     gPreferenceRefNum = 0;
-    gOptions = kDefaultOptions;
     gWarpStars = false;
     gLastClipBottom = 0;
     gScrollStarNumber = -1;
@@ -93,7 +92,6 @@ aresGlobalType::aresGlobalType() {
     gColorAnimationInSpeed = -1;
     gColorAnimationOutSpeed = -1;
     gLastSoundTime = 0;
-    gSoundVolume = 0;
     gSoundFileRefID = 0;
     gLastSelectedBuildPrice = 0;
     gAutoPilotOff = true;

@@ -492,13 +492,16 @@ void DrawCurrentLongMessage( long timePass)
     if (( tmessage->currentResID != tmessage->lastResID) ||
         ( tmessage->newStringMessage))
     {
+        // TODO(sfiera): figure out what this meant.
+        //
         // we check scenario conditions here for ambrosia tutorial
         // but not during net game -- other players wouldn't care what message
         // we were looking at
-        if ( !(globals()->gOptions & kOptionNetworkOn))
-        {
+        //
+        // if ( !(globals()->gOptions & kOptionNetworkOn))
+        // {
             CheckScenarioConditions( 0);
-        }
+        // }
 
         if (tmessage->lastResID >= 0)
         {

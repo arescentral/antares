@@ -20,6 +20,7 @@
 #include <fcntl.h>
 #include "sfz/Exception.hpp"
 #include "sfz/Format.hpp"
+#include "AresPreferences.hpp"
 #include "Error.hpp"
 #include "Fakes.hpp"
 #include "File.hpp"
@@ -105,7 +106,7 @@ LogSoundDriver::LogSoundDriver(const StringPiece& path)
 }
 
 SndChannel* LogSoundDriver::new_channel() {
-    globals()->gSoundVolume = 8;
+    globals()->gPreferencesData->set_volume(8);
     return new LogSndChannel(++_last_id, _sound_log.get());
 }
 

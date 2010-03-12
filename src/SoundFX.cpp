@@ -19,6 +19,7 @@
 
 #include "sfz/Exception.hpp"
 #include "AresGlobalType.hpp"
+#include "AresPreferences.hpp"
 #include "FakeSounds.hpp"
 #include "MathMacros.hpp"
 #include "MathSpecial.hpp"
@@ -72,8 +73,9 @@ void InitSoundFX() {
 void PlayVolumeSound(
         short whichSoundID, short amplitude, short persistence, soundPriorityType priority) {
     short oldestSoundTime = -kLongPersistence, whichChannel = -1;
+    const int global_volume = globals()->gPreferencesData->volume();
 
-    if ((globals()->gSoundVolume > 0) && (amplitude > 0)) {
+    if ((global_volume > 0) && (amplitude > 0)) {
         int timeDif = TickCount() - globals()->gLastSoundTime;
         for (int count = 0; count < kMaxChannelNum; count++) {
             globals()->gChannel[count].soundAge += timeDif;
@@ -146,7 +148,7 @@ void PlayVolumeSound(
 
             globals()->gChannel[whichChannel].channelPtr->quiet();
 
-            int newvol = (amplitude * globals()->gSoundVolume) >> 3;
+            int newvol = (amplitude * global_volume) >> 3;
 
             globals()->gChannel[whichChannel].channelPtr->amp(newvol);
             globals()->gChannel[whichChannel].channelPtr->play(

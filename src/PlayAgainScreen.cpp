@@ -71,9 +71,8 @@ void PlayAgainScreen::resign_front() {
 }
 
 void PlayAgainScreen::adjust_interface() {
-    if (globals()->gOptions & kOptionNetworkOn) {
-        mutable_item(RESTART)->set_status(kDimmed);
-    }
+    // TODO(sfiera): disable if networked.
+    mutable_item(RESTART)->set_status(kActive);
 }
 
 void PlayAgainScreen::handle_button(int button) {

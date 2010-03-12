@@ -44,13 +44,12 @@ void ReplayGame::become_front() {
     switch (_state) {
       case NEW:
         _state = PLAYING;
-        globals()->gOptions |= kOptionReplay;
         globals()->gInputSource.reset(new ReplayInputSource(kReplayResId + _scenario));
         _saved_seed = gRandomSeed;
         gRandomSeed = globals()->gInputSource->random_seed();
         _game_result = NO_GAME;
         _game_length = 0;
-        stack()->push(new MainPlay(_scenario, &_game_result, &_game_length));
+        stack()->push(new MainPlay(_scenario, true, &_game_result, &_game_length));
         break;
 
       case PLAYING:
@@ -61,7 +60,6 @@ void ReplayGame::become_front() {
       case QUIT:
         gRandomSeed = _saved_seed;
         globals()->gInputSource.reset();
-        globals()->gOptions &= ~kOptionReplay;
         stack()->pop(this);
         break;
     }

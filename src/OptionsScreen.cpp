@@ -17,6 +17,7 @@
 
 #include "OptionsScreen.hpp"
 
+#include <algorithm>
 #include <set>
 #include "sfz/Exception.hpp"
 #include "AresMain.hpp"
@@ -41,6 +42,8 @@ using sfz::Exception;
 using sfz::String;
 using sfz::format;
 using std::make_pair;
+using std::max;
+using std::min;
 using std::pair;
 using std::set;
 using std::vector;
@@ -65,7 +68,7 @@ void OptionsScreen::become_front() {
 
       case ACCEPT:
         for (int i = 0; i < kKeyExtendedControlNum; ++i) {
-            GetKeyMapFromKeyNum(_preferences->keyMap[i], globals()->gKeyControl[i]);
+            GetKeyMapFromKeyNum(_preferences->key(i), globals()->gKeyControl[i]);
         }
         globals()->gPreferencesData.reset(_preferences.release());
         stack()->pop(this);
@@ -96,23 +99,23 @@ void SoundControlScreen::become_front() {
 }
 
 void SoundControlScreen::adjust_interface() {
-    mutable_item(IDLE_MUSIC)->item.checkboxButton.on = _preferences->options & kOptionMusicIdle;
-    mutable_item(GAME_MUSIC)->item.checkboxButton.on = _preferences->options & kOptionMusicPlay;
-    mutable_item(SPEECH_ON)->item.checkboxButton.on = _preferences->options & kOptionSpeechOn;
+    mutable_item(IDLE_MUSIC)->item.checkboxButton.on = _preferences->play_idle_music();
+    mutable_item(GAME_MUSIC)->item.checkboxButton.on = _preferences->play_music_in_game();
+    mutable_item(SPEECH_ON)->item.checkboxButton.on = _preferences->speech_on();
 
-    if (globals()->gOptions & kOptionSpeechAvailable) {
+    if (false) {  // TODO(sfiera): if speech available.
         mutable_item(SPEECH_ON)->set_status(kActive);
     } else {
         mutable_item(SPEECH_ON)->set_status(kDimmed);
     }
 
-    if (_preferences->volume > 0) {
+    if (_preferences->volume() > 0) {
         mutable_item(VOLUME_DOWN)->set_status(kActive);
     } else {
         mutable_item(VOLUME_DOWN)->set_status(kDimmed);
     }
 
-    if (_preferences->volume < kMaxVolumePreference) {
+    if (_preferences->volume() < kMaxVolumePreference) {
         mutable_item(VOLUME_UP)->set_status(kActive);
     } else {
         mutable_item(VOLUME_UP)->set_status(kDimmed);
@@ -122,36 +125,32 @@ void SoundControlScreen::adjust_interface() {
 void SoundControlScreen::handle_button(int button) {
     switch (button) {
       case GAME_MUSIC:
-        _preferences->options ^= kOptionMusicPlay;
+        _preferences->set_play_music_in_game(!item(GAME_MUSIC).item.checkboxButton.on);
         adjust_interface();
         draw();
         break;
 
       case IDLE_MUSIC:
-        _preferences->options ^= kOptionMusicIdle;
+        _preferences->set_play_idle_music(!item(IDLE_MUSIC).item.checkboxButton.on);
         // TODO(sfiera): switch music on or off.
         adjust_interface();
         draw();
         break;
 
       case SPEECH_ON:
-        _preferences->options ^= kOptionSpeechOn;
+        _preferences->set_speech_on(!item(SPEECH_ON).item.checkboxButton.on);
         adjust_interface();
         draw();
         break;
 
       case VOLUME_DOWN:
-        if (_preferences->volume > 0) {
-            --_preferences->volume;
-        }
+        _preferences->set_volume(max(0, _preferences->volume() - 1));
         adjust_interface();
         draw();
         break;
 
       case VOLUME_UP:
-        if (_preferences->volume < kMaxVolumePreference) {
-            ++_preferences->volume;
-        }
+        _preferences->set_volume(min(kMaxVolumePreference, _preferences->volume() + 1));
         adjust_interface();
         draw();
         break;
@@ -171,7 +170,7 @@ void SoundControlScreen::handle_button(int button) {
 void SoundControlScreen::draw() const {
     InterfaceScreen::draw();
 
-    const int volume = _preferences->volume;
+    const int volume = _preferences->volume();
     Rect bounds = item(VOLUME_BOX).bounds;
 
     const int notch_width = bounds.width() / kMaxVolumePreference;
@@ -257,7 +256,7 @@ void KeyControlScreen::key_down(const KeyDownEvent& event) {
             // beep angrily.
             _selected_key = -1;
         } else {
-            _preferences->keyMap[_selected_key] = key + 1;
+            _preferences->set_key(_selected_key, key + 1);
             _selected_key = -1;  // TODO(sfiera): select next key.
         }
         update_conflicts();
@@ -291,7 +290,7 @@ void KeyControlScreen::adjust_interface() {
 
     for (size_t i = _key_start; i < size(); ++i) {
         size_t key = kKeyIndices[_tab] + i - _key_start;
-        int key_num = _preferences->keyMap[key];
+        int key_num = _preferences->key(key);
         mutable_item(i)->item.plainButton.key = key_num;
         if (key == _selected_key) {
             mutable_item(i)->set_status(kIH_Hilite);
@@ -418,7 +417,7 @@ void KeyControlScreen::update_conflicts() {
     vector<pair<size_t, size_t> > new_conflicts;
     for (size_t i = 0; i < kKeyExtendedControlNum; ++i) {
         for (size_t j = i + 1; j < kKeyExtendedControlNum; ++j) {
-            if (_preferences->keyMap[i] == _preferences->keyMap[j]) {
+            if (_preferences->key(i) == _preferences->key(j)) {
                 new_conflicts.push_back(make_pair(i, j));
             }
         }

@@ -49,6 +49,8 @@ using sfz::scoped_array;
 
 namespace antares {
 
+#define NETWORK_ON false
+
 #define kSendMessageVOffset     20
 
 
@@ -174,7 +176,7 @@ bool PlayerShipGetKeys(long timePass, unsigned long theKeys, bool *enterMessage)
                 CutCharsFromAnyCharPString(message, 0, 1);
                 int cheat = GetCheatNumFromString(message);
                 if (cheat > 0) {
-                    if (globals()->gOptions & kOptionNetworkOn) {
+                    if (NETWORK_ON) {
 #ifdef NETSPROCKET_AVAILABLE
                         SendCheatMessage(cheat);
 #endif  // NETSPROCKET_AVAILABLE
@@ -268,10 +270,9 @@ bool PlayerShipGetKeys(long timePass, unsigned long theKeys, bool *enterMessage)
     }
 
     if (!*enterMessage) {
-        if ((!(globals()->gOptions & kOptionSubstituteFKeys))
-                && (mTransferKey(keyMap))
+        if ((mTransferKey(keyMap))
                 && (!(mTransferKey(globals()->gLastKeyMap)))) {
-            if (!(globals()->gOptions & kOptionNetworkOn)) {
+            if (!NETWORK_ON) {
                 MiniComputerExecute(
                         3, 1, globals()->gPlayerAdmiralNumber);
             } else {
@@ -367,7 +368,7 @@ bool PlayerShipGetKeys(long timePass, unsigned long theKeys, bool *enterMessage)
         if (globals()->gDestKeyTime > 45) {
             if ((theShip->attributes & kCanBeDestination)
                     && (!globals()->destKeyUsedForSelection)) {
-                if (!(globals()->gOptions & kOptionNetworkOn)) {
+                if (!NETWORK_ON) {
                     SetPlayerSelectShip(globals()->gPlayerShipNumber, true,
                             globals()->gPlayerAdmiralNumber);
                 } else {
@@ -432,7 +433,7 @@ bool PlayerShipGetKeys(long timePass, unsigned long theKeys, bool *enterMessage)
                     bool is_target = (globals()->gTheseKeys & kDestinationKey)
                         || (selectShip->owner != globals()->gPlayerAdmiralNumber)
                         || (globals()->hotKey_target);
-                    if (!(globals()->gOptions & kOptionNetworkOn)) {
+                    if (!NETWORK_ON) {
                         SetPlayerSelectShip(
                                 globals()->hotKey[hot_key].objectNum,
                                 is_target,
@@ -516,7 +517,7 @@ bool PlayerShipGetKeys(long timePass, unsigned long theKeys, bool *enterMessage)
         if (selectShipNum >= 0) {
             if ((globals()->gTheseKeys & kDestinationKey)
                     || (globals()->gTheseKeys & kSelectFoeKey)) {
-                if (!(globals()->gOptions & kOptionNetworkOn)) {
+                if (!NETWORK_ON) {
                     SetPlayerSelectShip(selectShipNum, true, globals()->gPlayerAdmiralNumber);
                 } else {
 #ifdef NETSPROCKET_AVAILABLE
@@ -527,7 +528,7 @@ bool PlayerShipGetKeys(long timePass, unsigned long theKeys, bool *enterMessage)
 #endif  // NETSPROCKET_AVAILABLE
                 }
             } else {
-                if (!(globals()->gOptions & kOptionNetworkOn)) {
+                if (!NETWORK_ON) {
                     SetPlayerSelectShip(selectShipNum, false, globals()->gPlayerAdmiralNumber);
                 } else {
 #ifdef NETSPROCKET_AVAILABLE
@@ -629,7 +630,7 @@ void PlayerShipHandleClick( Point where)
 
                     SetObjectDestination( theShip, nil);
                     */
-                    if ( !(globals()->gOptions & kOptionNetworkOn))
+                    if ( !NETWORK_ON)
                     {
                         SetPlayerSelectShip( selectShipNum, true, globals()->gPlayerAdmiralNumber);
                     } else
@@ -666,7 +667,7 @@ void PlayerShipHandleClick( Point where)
                         SetScreenLabelString( globals()->gSelectionLabel, (anyCharType *)s);
                     }
                     */
-                    if ( !(globals()->gOptions & kOptionNetworkOn))
+                    if ( !NETWORK_ON)
                     {
                         SetPlayerSelectShip( selectShipNum, false, globals()->gPlayerAdmiralNumber);
                     } else

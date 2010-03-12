@@ -51,6 +51,8 @@ using sfz::scoped_array;
 
 namespace antares {
 
+#define NETWORK_ON false
+
 #define kScenarioError          "\pSCNR"
 
 #define kOwnerMayChangeFlag         0x80000000
@@ -198,7 +200,7 @@ bool ConstructScenario( long which)
     gAbsoluteScale = kTimesTwoScale; //SCALE_SCALE;
     globals()->gSynchValue = 0;
 
-    if ( globals()->gOptions & kOptionNetworkOn)
+    if (NETWORK_ON)
     {
 #ifdef NETSPROCKET_AVAILABLE
         if ( IAmHosting())
@@ -255,7 +257,7 @@ bool ConstructScenario( long which)
 
     for ( count = 0; count < gThisScenario->playerNum; count++)
     {
-        if ( globals()->gOptions & kOptionNetworkOn)
+        if (NETWORK_ON)
         {
 #ifdef NETSPROCKET_AVAILABLE
             if ( gThisScenario->player[count].playerType == kComputerPlayer)
@@ -295,21 +297,11 @@ bool ConstructScenario( long which)
         {
             if ( gThisScenario->player[count].playerType == kSingleHumanPlayer)
             {
-                if ( globals()->gOptions & kOptionAutoPlay)
-                {
-                    gThisScenario->player[count].admiralNumber = MakeNewAdmiral( kNoShip, kNoDestinationObject, kNoDestinationType,
-                                                kAIsComputer, gThisScenario->player[count].playerRace,
-                                                gThisScenario->player[count].nameResID,
-                                                gThisScenario->player[count].nameStrNum, gThisScenario->player[count].earningPower);
-                    PayAdmiral( gThisScenario->player[count].admiralNumber, mLongToFixed( 5000));
-                } else
-                {
-                    gThisScenario->player[count].admiralNumber = MakeNewAdmiral( kNoShip, kNoDestinationObject, kNoDestinationType,
-                                                kAIsHuman, gThisScenario->player[count].playerRace,
-                                                gThisScenario->player[count].nameResID,
-                                                gThisScenario->player[count].nameStrNum, gThisScenario->player[count].earningPower);
-                    PayAdmiral( gThisScenario->player[count].admiralNumber, mLongToFixed( 5000));
-                }
+                gThisScenario->player[count].admiralNumber = MakeNewAdmiral( kNoShip, kNoDestinationObject, kNoDestinationType,
+                        kAIsHuman, gThisScenario->player[count].playerRace,
+                        gThisScenario->player[count].nameResID,
+                        gThisScenario->player[count].nameStrNum, gThisScenario->player[count].earningPower);
+                PayAdmiral( gThisScenario->player[count].admiralNumber, mLongToFixed( 5000));
                 globals()->gPlayerAdmiralNumber = gThisScenario->player[count].admiralNumber;
                 mWriteDebugString("\pSETADM#:");
                 WriteDebugLong( globals()->gPlayerAdmiralNumber);
@@ -371,7 +363,7 @@ bool ConstructScenario( long which)
         UpdateLoadingInterface( currentStep, stepNumber, &loadingRect);
         // get the base object equiv
         baseObject = mGetBaseObjectPtr( initial->type);
-        if ((globals()->gOptions & kOptionNetworkOn) && (GetAdmiralRace( initial->owner) >= 0) &&
+        if (NETWORK_ON && (GetAdmiralRace( initial->owner) >= 0) &&
             ( !(initial->attributes & kFixedRace)))
         {
             baseClass = baseObject->baseClass;
@@ -482,7 +474,7 @@ bool ConstructScenario( long which)
         // get the base object equiv
         type = initial->type;
         baseObject = mGetBaseObjectPtr( type);
-        if ((globals()->gOptions & kOptionNetworkOn) && (GetAdmiralRace( initial->owner) >= 0) &&
+        if (NETWORK_ON && (GetAdmiralRace( initial->owner) >= 0) &&
             ( !(initial->attributes & kFixedRace)))
         {
             baseClass = baseObject->baseClass;
@@ -619,17 +611,11 @@ bool ConstructScenario( long which)
                     if ( owner == globals()->gPlayerAdmiralNumber)
                     {
                         //specialAttributes &= (~( kCanThink | kCanEngage | kCanEvade | kHasDirectionGoal));
-                        if ( globals()->gOptions & kOptionAutoPlay)
-                        {
-        //                  specialAttributes |= kIsPlayerShip;
-                        } else
-                        {
-                            specialAttributes |= kIsHumanControlled;// | kIsPlayerShip;
-                        }
+                        specialAttributes |= kIsHumanControlled;// | kIsPlayerShip;
                     } else
                     {
     //                  specialAttributes &= ~kIsPlayerShip;
-                        if ( globals()->gOptions & kOptionNetworkOn)
+                        if (NETWORK_ON)
                         {
                             specialAttributes |= kIsRemote;
                         } else
@@ -645,7 +631,7 @@ bool ConstructScenario( long which)
 
 
             type = initial->type;
-            if ((globals()->gOptions & kOptionNetworkOn) && (GetAdmiralRace( initial->owner) >= 0) &&
+            if (NETWORK_ON && (GetAdmiralRace( initial->owner) >= 0) &&
                 ( !(initial->attributes & kFixedRace)))
             {
                 baseObject = mGetBaseObjectPtr( type);
@@ -692,7 +678,7 @@ bool ConstructScenario( long which)
                     ResetPlayerShip( newShipNum);
                 } else
                 {
-                    if ( globals()->gOptions & kOptionNetworkOn)
+                    if (NETWORK_ON)
                     {
                         anObject->attributes |= kIsRemote;
                     }
@@ -760,7 +746,7 @@ bool ConstructScenario( long which)
 
     mWriteDebugString("\pPlayerAdmiral");
     WriteDebugLong( globals()->gPlayerAdmiralNumber);
-    if ( globals()->gOptions & kOptionNetworkOn)
+    if (NETWORK_ON)
     {
         for ( c2 = 0; c2 < gThisScenario->playerNum; c2++)
         {
@@ -1574,16 +1560,10 @@ void UnhideInitialObject( long whichInitial)
                     if ( owner == globals()->gPlayerAdmiralNumber)
                     {
     //                  specialAttributes &= (~( kCanThink | kCanEngage | kCanEvade | kHasDirectionGoal));
-                        if ( globals()->gOptions & kOptionAutoPlay)
-                        {
-        //                  specialAttributes |= kIsPlayerShip;
-                        } else
-                        {
-                            specialAttributes |= kIsHumanControlled;// | kIsPlayerShip;
-                        }
+                        specialAttributes |= kIsHumanControlled;// | kIsPlayerShip;
                     } else
                     {
-                        if ( globals()->gOptions & kOptionNetworkOn)
+                        if (NETWORK_ON)
                             specialAttributes |= kIsRemote;
                         else
                             specialAttributes &= ~kIsPlayerShip;
@@ -1596,7 +1576,7 @@ void UnhideInitialObject( long whichInitial)
 
 
             type = initial->type;
-            if ((globals()->gOptions & kOptionNetworkOn) && (GetAdmiralRace( initial->owner) >= 0) &&
+            if (NETWORK_ON && (GetAdmiralRace( initial->owner) >= 0) &&
                 ( !(initial->attributes & kFixedRace)))
             {
                 baseObject = mGetBaseObjectPtr( type);

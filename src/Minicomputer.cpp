@@ -1774,12 +1774,10 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
 void MiniComputerDoAccept( void)
 
 {
-    if (!(globals()->gOptions & kOptionNetworkOn))
-    {
+    if (true) {  // TODO(sfiera): if non-networked.
         MiniComputerExecute( globals()->gMiniScreenData.currentScreen,
             globals()->gMiniScreenData.selectLine, globals()->gPlayerAdmiralNumber);
-    } else
-    {
+    } else {
 #ifdef NETSPROCKET_AVAILABLE
         if ( !SendMenuMessage( globals()->gGameTime + gNetLatency, globals()->gMiniScreenData.currentScreen,
             globals()->gMiniScreenData.selectLine))

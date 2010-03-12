@@ -44,19 +44,11 @@ extern PixMap* gSaveWorld;
 namespace {
 
 int interface_id() {
-    if (globals()->gOptions & kOptionSubstituteFKeys) {
-        return 5015;
-    } else {
-        return 5012;
-    }
+    return 5012;
 }
 
 int text_id() {
-    if (globals()->gOptions & kOptionSubstituteFKeys) {
-        return 6005;
-    } else {
-        return 6002;
-    }
+    return 6002;
 }
 
 }  // namespace

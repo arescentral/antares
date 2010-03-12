@@ -18,6 +18,7 @@
 #include "ScrollTextScreen.hpp"
 
 #include "AresGlobalType.hpp"
+#include "AresPreferences.hpp"
 #include "BuildPix.hpp"
 #include "CardStack.hpp"
 #include "FakeDrawing.hpp"
@@ -49,7 +50,7 @@ ScrollTextScreen::ScrollTextScreen(int text_id, int width, double speed, int son
 
 void ScrollTextScreen::become_front() {
     // If a song was requested, play it.
-    if (_play_song && (globals()->gOptions & kOptionMusicIdle)) {
+    if (_play_song && globals()->gPreferencesData->play_idle_music()) {
         if (SongIsPlaying()) {
             StopAndUnloadSong();
         }

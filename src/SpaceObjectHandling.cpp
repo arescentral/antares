@@ -2064,12 +2064,11 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     break;
 
                 case kDisplayMessage:
-                    if ( !(globals()->gOptions & kOptionAutoPlay))
-                    {
-                        StartLongMessage( action->argument.displayMessage.resID, action->argument.displayMessage.resID +
-                            action->argument.displayMessage.pageNum - 1);
-                        checkConditions = true;
-                    }
+                    StartLongMessage(
+                            action->argument.displayMessage.resID,
+                            (action->argument.displayMessage.resID +
+                             action->argument.displayMessage.pageNum - 1));
+                    checkConditions = true;
 
                     break;
 

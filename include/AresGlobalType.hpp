@@ -122,7 +122,6 @@ struct aresGlobalType {
     sfz::scoped_array<destBalanceType>   gDestBalanceData;
     KeyMap          gKeyControl[kKeyExtendedControlNum];
     short           gPreferenceRefNum;
-    unsigned long   gOptions;
     sfz::scoped_array<raceType>           gRaceData;
     sfz::scoped_array<scrollStarType>    gScrollStarData;
     bool         gWarpStars;
@@ -188,7 +187,6 @@ struct aresGlobalType {
     smartSoundHandle    gSound[kSoundNum];
     smartSoundChannel   gChannel[kMaxChannelNum];
     long            gLastSoundTime;         // = 0
-    long            gSoundVolume;           // = 0;
     short           gSoundFileRefID;        // = 0;
     sfz::scoped_ptr<StringList>        gAresCheatStrings;
     KeyMap*         gKeyMapBuffer;          // = NewPtr( sizeof (KeyMap) * (long)kKeyMapBufferNum;

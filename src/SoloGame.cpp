@@ -76,7 +76,7 @@ void SoloGame::become_front() {
         _state = PLAYING;
         _game_result = NO_GAME;
         _game_length = 0;
-        stack()->push(new MainPlay(_scenario, &_game_result, &_game_length));
+        stack()->push(new MainPlay(_scenario, false, &_game_result, &_game_length));
         break;
 
       case PLAYING:
@@ -185,7 +185,7 @@ void SoloGame::debriefing_done() {
 }
 
 void SoloGame::epilogue_done() {
-    if (globals()->gOptions & kOptionMusicIdle) {
+    if (globals()->gPreferencesData->play_idle_music()) {
         gRealWorld->fill(RgbColor::kBlack);
         StopAndUnloadSong();
     }

@@ -36,56 +36,46 @@ struct serialNumberType {
     void read(sfz::BinaryReader* bin);
 };
 
-struct Preferences {
+class Preferences {
+  public:
     Preferences();
     ~Preferences();
 
-    int32_t             version;
-    int16_t             keyMap[kKeyControlDataNum];
-    serialNumberType    serialNumber;
-    uint32_t            options;
-    int16_t             volume;
-    uint16_t            minutesPlayed;
-    uint16_t            kills;
-    uint16_t            losses;
-    int16_t             race;
-    int16_t             enemyColor;
-    int32_t             reserved4;
-    Str31               playerName;
-    Str31               gameName;
-    int32_t             resendDelay;
-    int32_t             registeredSetting;
-    uint32_t            registeredFlags;
-    uint32_t            protocolFlags;
-    int16_t             netLevel;
-    int16_t             netLatency;
+    uint32_t key(size_t index) const;
+    bool play_idle_music() const;
+    bool play_music_in_game() const;
+    bool speech_on() const;
+    int volume() const;
+
+    void set_key(size_t index, uint32_t key);
+    void set_play_idle_music(bool on);
+    void set_play_music_in_game(bool on);
+    void set_speech_on(bool on);
+    void set_volume(int volume);
 
     size_t load_data(const char* data, size_t len);
-};
 
-struct startingLevelPreferenceType {
-    long                version;
-    long                startingLevel;
-    unsigned long       levelDone_bit_0_31;
-    unsigned long       levelDone_bit_32_63;
-    unsigned long       scenarioVersion;
-    unsigned long       unused_1;
-    unsigned long       unused_2;
-    unsigned long       unused_3;
-    unsigned long       unused_4;
-    unsigned long       unused_5;
-    unsigned long       unused_6;
-    unsigned long       unused_7;
-    unsigned long       unused_8;
+  private:
+    int32_t             _version;
+    int16_t             _key_map[kKeyControlDataNum];
+    serialNumberType    _serial_number;
+    uint32_t            _options;
+    int16_t             _volume;
+    uint16_t            _minutes_played;
+    uint16_t            _kills;
+    uint16_t            _losses;
+    int16_t             _race;
+    int16_t             _enemy_color;
+    int32_t             _reserved4;
+    Str31               _player_name;
+    Str31               _game_name;
+    int32_t             _resend_delay;
+    int32_t             _registered_setting;
+    uint32_t            _registered_flags;
+    uint32_t            _protocol_flags;
+    int16_t             _net_level;
+    int16_t             _net_latency;
 };
-
-int SaveKeyControlPreferences( void);
-short SaveOptionsPreferences( void);
-short SaveAllPreferences( void);
-void GetNetPreferences(unsigned char*, unsigned char*, unsigned long *, long *, long *, unsigned long *,
-    short *, unsigned short *, unsigned short *, unsigned short *, short *, short *, short *);
-OSErr SaveNetPreferences(unsigned char*, unsigned char*, unsigned long, long, long, unsigned long,
-    short, unsigned short, unsigned short, unsigned short, short, short, short);
 
 }  // namespace antares
 

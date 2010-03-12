@@ -39,7 +39,7 @@ void Pause();
 
 class MainPlay : public Card {
   public:
-    MainPlay(int scenario, GameResult* game_result, long* game_length);
+    MainPlay(int scenario, bool replay, GameResult* game_result, long* game_length);
 
     virtual void become_front();
 
@@ -54,6 +54,7 @@ class MainPlay : public Card {
     State _state;
 
     int _scenario;
+    const bool _replay;
     bool _cancelled;
     GameResult* _game_result;
     long* _game_length;

@@ -105,12 +105,11 @@ void MainScreen::fire_timer() {
 }
 
 void MainScreen::adjust_interface() {
-    if (!(globals()->gOptions & kOptionNetworkAvailable)) {
-        mutable_item(START_NETWORK_GAME)->set_status(kDimmed);
-    }
-    if (globals()->gOptions & kOptionNoSinglePlayer) {
-        mutable_item(START_NEW_GAME)->set_status(kDimmed);
-    }
+    // TODO(sfiera): switch on whether or not network games are available.
+    mutable_item(START_NETWORK_GAME)->set_status(kDimmed);
+
+    // TODO(sfiera): switch on whether or not there is a single-player campaign.
+    mutable_item(START_NEW_GAME)->set_status(kActive);
 }
 
 void MainScreen::handle_button(int button) {
@@ -129,7 +128,6 @@ void MainScreen::handle_button(int button) {
         break;
 
       case START_NEW_GAME:
-        globals()->gOptions &= ~kOptionReplay;
         stack()->push(new SoloGame);
         break;
 

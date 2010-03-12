@@ -35,61 +35,80 @@ Preferences::Preferences() {
     Resource rsrc('ArPr', 1000);
     BytesBinaryReader bin(rsrc.data());
 
-    bin.read(&version);
-    bin.read(keyMap, kKeyControlDataNum);
-    bin.read(&serialNumber);
-    bin.read(&options);
+    bin.read(&_version);
+    bin.read(_key_map, kKeyControlDataNum);
+    bin.read(&_serial_number);
+    bin.read(&_options);
     bin.discard(4);
-    bin.read(&volume);
-    bin.read(&minutesPlayed);
-    bin.read(&kills);
-    bin.read(&losses);
-    bin.read(&race);
-    bin.read(&enemyColor);
+    bin.read(&_volume);
+    bin.read(&_minutes_played);
+    bin.read(&_kills);
+    bin.read(&_losses);
+    bin.read(&_race);
+    bin.read(&_enemy_color);
     bin.discard(4);
-    bin.read(playerName, 32);
-    bin.read(gameName, 32);
-    bin.read(&resendDelay);
-    bin.read(&registeredSetting);
-    bin.read(&registeredFlags);
-    bin.read(&protocolFlags);
-    bin.read(&netLevel);
-    bin.read(&netLatency);
+    bin.read(_player_name, 32);
+    bin.read(_game_name, 32);
+    bin.read(&_resend_delay);
+    bin.read(&_registered_setting);
+    bin.read(&_registered_flags);
+    bin.read(&_protocol_flags);
+    bin.read(&_net_level);
+    bin.read(&_net_latency);
 
     // we must have existing prefs by now
     // translate key data to be more readable
     for (int i = 0; i < kKeyExtendedControlNum; i++) {
-        GetKeyMapFromKeyNum(keyMap[i], globals()->gKeyControl[i]);
+        GetKeyMapFromKeyNum(_key_map[i], globals()->gKeyControl[i]);
     }
-    globals()->gOptions = (
-            (options & ~(kCarryOverOptionMask)) |
-            (globals()->gOptions & kCarryOverOptionMask));
-    globals()->gSoundVolume = volume;
 }
 
 Preferences::~Preferences() { }
 
-int SaveKeyControlPreferences() {
-    Preferences *prefsData = globals()->gPreferencesData.get();
-    for (int i = 0; i < kKeyExtendedControlNum; i++) {
-         prefsData->keyMap[i] = GetKeyNumFromKeyMap(globals()->gKeyControl[i]);
+uint32_t Preferences::key(size_t index) const {
+    return _key_map[index];
+}
+
+bool Preferences::play_idle_music() const {
+    return _options & kOptionMusicIdle;
+}
+
+bool Preferences::play_music_in_game() const {
+    return _options & kOptionMusicPlay;
+}
+
+bool Preferences::speech_on() const {
+    return _options & kOptionSpeechOn;
+}
+
+int Preferences::volume() const {
+    return _volume;
+}
+
+void Preferences::set_key(size_t index, uint32_t key) {
+    _key_map[index] = key;
+}
+
+void Preferences::set_play_idle_music(bool on) {
+    if (play_idle_music() != on) {
+        _options ^= kOptionMusicIdle;
     }
-    return kNoError;
 }
 
-short SaveOptionsPreferences() {
-    Preferences *prefsData = globals()->gPreferencesData.get();
-    prefsData->options = globals()->gOptions;
-    return kNoError;
+void Preferences::set_play_music_in_game(bool on) {
+    if (play_music_in_game() != on) {
+        _options ^= kOptionMusicPlay;
+    }
 }
 
-short SaveAllPreferences() {
-    Preferences *prefsData = globals()->gPreferencesData.get();
+void Preferences::set_speech_on(bool on) {
+    if (speech_on() != on) {
+        _options ^= kOptionSpeechOn;
+    }
+}
 
-    globals()->gOptions = ((prefsData->options & ~(kCarryOverOptionMask)) |
-                ( globals()->gOptions & kCarryOverOptionMask));
-    globals()->gSoundVolume = prefsData->volume;
-    return ( kNoError );
+void Preferences::set_volume(int volume) {
+    _volume = volume;
 }
 
 void serialNumberType::read(BinaryReader* bin) {
