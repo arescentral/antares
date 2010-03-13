@@ -17,6 +17,7 @@
 
 #include "ScreenLabel.hpp"
 
+#include "sfz/String.hpp"
 #include "Admiral.hpp"            // hack for checking strength
 #include "AresGlobalType.hpp"
 #include "ColorTranslation.hpp"

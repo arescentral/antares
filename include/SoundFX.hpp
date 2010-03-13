@@ -18,22 +18,8 @@
 #ifndef ANTARES_SOUND_FX_HPP_
 #define ANTARES_SOUND_FX_HPP_
 
-// SOUND FX.H
-
-#include "Base.h"
-#include "Sound.h"
-
+#include <stdint.h>
 #include "MathSpecial.hpp"
-#include "FakeSounds.hpp"
-
-//#ifdef powerc
-//#define kAllowSoundSprocket
-//#endif
-
-#ifdef kAllowSoundSprocket
-#include <SoundSprocket.h>
-#include <SoundComponents.h>
-#endif
 
 namespace antares {
 
@@ -75,6 +61,9 @@ namespace antares {
 #define kWarpFour               529
 #define kTeletype               535
 
+struct SndChannel;
+struct Sound;
+struct spaceObjectType;
 
 enum soundPriorityType {
     kNoSound = 0,
@@ -90,11 +79,7 @@ struct smartSoundChannel {
     long                soundAge;
     short               soundVolume;
     soundPriorityType   soundPriority;
-    SndChannelPtr       channelPtr;
-    bool             useSoundSprocket;
-#ifdef kAllowSoundSprocket
-    SSpSourceReference  source;
-#endif
+    SndChannel*         channelPtr;
 };
 
 struct smartSoundHandle {
@@ -103,22 +88,23 @@ struct smartSoundHandle {
     bool             keepMe;
 };
 
-int InitSoundFX( void);
-void SetListenerLocation( long, long);
-void SetAllSoundsNoKeep( void);
-void KeepSound( short);
-void RemoveAllUnusedSounds( void);
-void ResetAllSounds( void);
-short AddSound( short);
-void PlayVolumeSound( short, short, short, soundPriorityType);
-void PlayLocalizedSound( unsigned long, unsigned long, unsigned long, unsigned long, smallFixedType, smallFixedType, short, short, short, soundPriorityType);
-void SoundFXCleanup( void);
+void InitSoundFX();
+void SetAllSoundsNoKeep();
+void KeepSound(int sound_id);
+int AddSound(int sound_id);
+void RemoveAllUnusedSounds();
+void ResetAllSounds();
+void PlayVolumeSound(
+        short whichSoundID, short amplitude, short persistence, soundPriorityType priority);
+void PlayLocalizedSound(
+        unsigned long sx, unsigned long sy, unsigned long dx, unsigned long dy,
+        smallFixedType hvel, smallFixedType vvel, short whichSoundID, short amplitude,
+        short persistence, soundPriorityType priority);
+void SoundFXCleanup();
 
-struct spaceObjectType;
 void mPlayDistanceSound(
-        long& mdistance, long mvolume, spaceObjectType* mobjectptr, long msoundid,
-        long msoundpersistence, soundPriorityType msoundpriority, unsigned long& mul1,
-        unsigned long& mul2, spaceObjectType*& mplayerobjectptr);
+        long mvolume, spaceObjectType* mobjectptr, long msoundid, long msoundpersistence,
+        soundPriorityType msoundpriority);
 
 }  // namespace antares
 

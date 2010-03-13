@@ -20,7 +20,6 @@
 #include "sfz/BinaryReader.hpp"
 #include "ColorTranslation.hpp"
 #include "Resource.hpp"
-#include "Sound.h"
 
 using sfz::BinaryReader;
 using sfz::BytesBinaryReader;

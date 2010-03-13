@@ -1355,9 +1355,8 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
 
 unsigned long ThinkObjectWarpInPresence( spaceObjectType *anObject)
 {
-    unsigned long   keysDown = anObject->keysDown & kSpecialKeyMask, distance, dcalc;
-    long            longscrap, difference;
-    spaceObjectType *targetObject;  // just for scrap
+    unsigned long   keysDown = anObject->keysDown & kSpecialKeyMask;
+    long            longscrap;
     fixedPointType  newVel;
 
     if (( !(anObject->attributes & kRemoteOrHuman)) ||
@@ -1370,25 +1369,25 @@ unsigned long ThinkObjectWarpInPresence( spaceObjectType *anObject)
     if ( !(anObject->presenceData & 0x10000000))
     {
         longscrap = kMaxSoundVolume;
-        mPlayDistanceSound( difference, longscrap, anObject, kWarpOne, kMediumPersistence, kPrioritySound, distance, dcalc, targetObject);
+        mPlayDistanceSound(longscrap, anObject, kWarpOne, kMediumPersistence, kPrioritySound);
         anObject->presenceData |= 0x10000000;
     } else if (( !(anObject->presenceData & 0x20000000)) &&
         (( anObject->presenceData & 0x000000ff) > 25))
     {
         longscrap = kMaxSoundVolume;
-        mPlayDistanceSound( difference, longscrap, anObject, kWarpTwo, kMediumPersistence, kPrioritySound, distance, dcalc, targetObject);
+        mPlayDistanceSound(longscrap, anObject, kWarpTwo, kMediumPersistence, kPrioritySound);
         anObject->presenceData |= 0x20000000;
     } if (( !(anObject->presenceData & 0x40000000)) &&
         (( anObject->presenceData & 0x000000ff) > 50))
     {
         longscrap = kMaxSoundVolume;
-        mPlayDistanceSound( difference, longscrap, anObject, kWarpThree, kMediumPersistence, kPrioritySound, distance, dcalc, targetObject);
+        mPlayDistanceSound(longscrap, anObject, kWarpThree, kMediumPersistence, kPrioritySound);
         anObject->presenceData |= 0x40000000;
     } if (( !(anObject->presenceData & 0x80000000)) &&
         (( anObject->presenceData & 0x000000ff) > 75))
     {
         longscrap = kMaxSoundVolume;
-        mPlayDistanceSound( difference, longscrap, anObject, kWarpFour, kMediumPersistence, kPrioritySound, distance, dcalc, targetObject);
+        mPlayDistanceSound(longscrap, anObject, kWarpFour, kMediumPersistence, kPrioritySound);
         anObject->presenceData |= 0x80000000;
     }
 

@@ -20,7 +20,6 @@
 #include <fcntl.h>
 #include "sfz/Exception.hpp"
 #include "sfz/Format.hpp"
-#include "Sound.h"
 #include "Error.hpp"
 #include "Fakes.hpp"
 #include "File.hpp"
@@ -38,7 +37,53 @@ namespace {
 
 scoped_ptr<SoundDriver> sound_driver;
 
+class NullSndChannel : public SndChannel {
+  public:
+    virtual void play(Sound* sound) {
+        static_cast<void>(sound);
+    }
+
+    virtual void amp(uint8_t volume) {
+        static_cast<void>(volume);
+    }
+
+    virtual void quiet() { }
+};
+
+class LogSndChannel : public SndChannel {
+  public:
+    LogSndChannel(int id, int fd)
+        : _id(id),
+          _fd(fd) { }
+
+    virtual void play(Sound* sound) {
+        if (globals()->gGameTime > 0) {
+            print(_fd, "play\t{0}\t{1}\t{2}\n", _id, globals()->gGameTime, sound->id);
+        }
+    }
+
+    virtual void amp(uint8_t volume) {
+        if (globals()->gGameTime > 0) {
+            print(_fd, "amp\t{0}\t{1}\t{2}\n", _id, globals()->gGameTime, volume);
+        }
+    }
+
+    virtual void quiet() {
+        if (globals()->gGameTime > 0) {
+            print(_fd, "quiet\t{0}\t{1}\n", _id, globals()->gGameTime);
+        }
+    }
+
+  private:
+    int _id;
+    int _fd;
+};
+
 }  // namespace
+
+SoundDriver* SoundDriver::driver() {
+    return sound_driver.get();
+}
 
 void SoundDriver::set_driver(SoundDriver* driver) {
     if (!driver) {
@@ -47,78 +92,21 @@ void SoundDriver::set_driver(SoundDriver* driver) {
     sound_driver.reset(driver);
 }
 
-void NullSoundDriver::play(int32_t, int32_t) { }
-void NullSoundDriver::amp(int32_t, uint8_t) { }
-void NullSoundDriver::quiet(int32_t) { }
+SndChannel* NullSoundDriver::new_channel() {
+    return new NullSndChannel();
+}
 
 LogSoundDriver::LogSoundDriver(const StringPiece& path)
-        : _sound_log(open_path(path, O_CREAT | O_WRONLY, 0644)) {
+        : _sound_log(open_path(path, O_CREAT | O_WRONLY, 0644)),
+          _last_id(-1) {
     if (_sound_log.get() < 0) {
         throw Exception("Couldn't open sound log");
     }
 }
 
-void LogSoundDriver::play(int32_t channel, int32_t id) {
-    if (globals()->gGameTime > 0) {
-        print(_sound_log.get(), "play\t{0}\t{1}\t{2}\n", channel, globals()->gGameTime, id);
-    }
-}
-
-void LogSoundDriver::amp(int32_t channel, uint8_t volume) {
-    if (globals()->gGameTime > 0) {
-        print(_sound_log.get(), "amp\t{0}\t{1}\t{2}\n", channel, globals()->gGameTime, volume);
-    }
-}
-
-void LogSoundDriver::quiet(int32_t channel) {
-    if (globals()->gGameTime > 0) {
-        print(_sound_log.get(), "quiet\t{0}\t{1}\n", channel, globals()->gGameTime);
-    }
-}
-
-static int last_id = -1;
-struct SndChannel {
-    SndChannel()
-        : id(++last_id) { }
-    int id;
-};
-
-OSErr SndNewChannel(SndChannel** chan, long, long, void*) {
+SndChannel* LogSoundDriver::new_channel() {
     globals()->gSoundVolume = 8;
-    *chan = new SndChannel;
-    return noErr;
-}
-
-OSErr SndDisposeChannel(SndChannel* chan, bool) {
-    delete chan;
-    return noErr;
-}
-
-OSErr SndDoImmediate(SndChannel* chan, SndCommand* cmd) {
-    switch (cmd->cmd) {
-      case ampCmd:
-        sound_driver->amp(chan->id, cmd->param1);
-        break;
-      case quietCmd:
-        sound_driver->quiet(chan->id);
-        break;
-      default:
-        break;
-    }
-    return noErr;
-}
-
-OSErr SndDoCommand(SndChannel* chan, SndCommand* cmd, bool) {
-    return SndDoImmediate(chan, cmd);
-}
-
-OSErr SndPlay(SndChannel* channel, Sound* sound, bool) {
-    sound_driver->play(channel->id, sound->id);
-    return noErr;
-}
-
-Sound* GetSound(int id) {
-    return new Sound(id);
+    return new LogSndChannel(++_last_id, _sound_log.get());
 }
 
 }  // namespace antares

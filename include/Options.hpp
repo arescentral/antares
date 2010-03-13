@@ -47,16 +47,14 @@ namespace antares {
 #define kOption22                       0x00200000
 #define kOption23                       0x00400000
 #define kOption24                       0x00800000
-#define kOptionSoundAvailable           0x01000000
 #define kOptionNetworkAvailable         0x02000000
 #define kOptionSpeechAvailable          0x04000000
-#define kOptionSoundSprocketOn          0x08000000
 #define kOptionNetworkOn                0x10000000
 #define kOptionMusicDriver              0x20000000
 #define kOptionQuicktime                0x40000000
 #define kOptionInBackground             0x80000000
 
-#define kCarryOverOptionMask            (kOptionMusicDriver | kOptionQuicktime | kOptionSoundSprocketOn | kOptionSpeechAvailable | kOptionNetworkAvailable | kOptionNoSinglePlayer | kOptionSoundAvailable | kOptionUseSystemHideMenuBar)
+#define kCarryOverOptionMask            (kOptionMusicDriver | kOptionQuicktime | kOptionSpeechAvailable | kOptionNetworkAvailable | kOptionNoSinglePlayer | kOptionUseSystemHideMenuBar)
 
 }  // namespace antares
 

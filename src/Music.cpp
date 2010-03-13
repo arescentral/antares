@@ -18,7 +18,6 @@
 #include "Music.hpp"
 
 #include "Error.hpp"
-#include "Sound.h"
 #include "SoundFX.hpp"
 
 namespace antares {

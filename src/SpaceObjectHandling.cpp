@@ -1208,14 +1208,13 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 
 {
 
-    spaceObjectType *anObject, *playerPtr, *originalSObject = sObject,
-                    *originalDObject = dObject;
+    spaceObjectType *anObject, *originalSObject = sObject, *originalDObject = dObject;
     baseObjectType  *baseObject;
     objectActionType    *action = gObjectActionData.get() + whichAction;
     short           end, angle;
     fixedPointType  fpoint, newVel;
-    long            l, distance;
-    unsigned long   m, ul1, ul2;
+    long            l;
+    unsigned long   ul1;
     smallFixedType  f, f2;
     coordPointType  newLocation;
     Point           location;
@@ -1427,7 +1426,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     }
                     if ( !action->argument.playSound.absolute)
                     {
-                        mPlayDistanceSound( distance, l, anObject, angle, action->argument.playSound.persistence, static_cast<soundPriorityType>(action->argument.playSound.priority), m, ul2, playerPtr);
+                        mPlayDistanceSound(l, anObject, angle, action->argument.playSound.persistence, static_cast<soundPriorityType>(action->argument.playSound.priority));
                     } else
                     {
                         PlayVolumeSound( angle, l,
@@ -2643,20 +2642,17 @@ void AlterObjectOccupation( spaceObjectType *anObject, long owner, long howMuch,
 void AlterObjectCloakState( spaceObjectType *anObject, bool cloak)
 {
     long            longscrap = kMaxSoundVolume;
-    long            difference;
-    unsigned long   ul1, ul2;
-    spaceObjectType *playerPtr;
 
     if ( (cloak) && ( anObject->cloakState == 0))
     {
         anObject->cloakState = 1;
-        mPlayDistanceSound( difference, longscrap, anObject, kCloakOn, kMediumPersistence, kPrioritySound, ul1, ul2, playerPtr);
+        mPlayDistanceSound(longscrap, anObject, kCloakOn, kMediumPersistence, kPrioritySound);
 
     } else if (((!(cloak)) || ( anObject->attributes & kRemoteOrHuman)) &&
             ( anObject->cloakState >= 250))
     {
         anObject->cloakState = kCloakOffStateMax;
-        mPlayDistanceSound( difference, longscrap, anObject, kCloakOff, kMediumPersistence, kPrioritySound, ul1, ul2, playerPtr);
+        mPlayDistanceSound(longscrap, anObject, kCloakOff, kMediumPersistence, kPrioritySound);
     }
 }
 

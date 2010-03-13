@@ -24,32 +24,16 @@
 
 namespace antares {
 
+class SndChannel;
+
 class SoundDriver {
   public:
     virtual ~SoundDriver() { }
-    virtual void play(int32_t channel, int32_t id) = 0;
-    virtual void amp(int32_t channel, uint8_t volume) = 0;
-    virtual void quiet(int32_t channel) = 0;
 
+    virtual SndChannel* new_channel() = 0;
+
+    static SoundDriver* driver();
     static void set_driver(SoundDriver* driver);
-};
-
-class NullSoundDriver : public SoundDriver {
-  public:
-    virtual void play(int32_t, int32_t);
-    virtual void amp(int32_t, uint8_t);
-    virtual void quiet(int32_t);
-};
-
-class LogSoundDriver : public SoundDriver {
-  public:
-    LogSoundDriver(const sfz::StringPiece& path);
-    virtual void play(int32_t channel, int32_t id);
-    virtual void amp(int32_t channel, uint8_t volume);
-    virtual void quiet(int32_t channel);
-
-  private:
-    sfz::ScopedFd _sound_log;
 };
 
 struct Sound {
@@ -58,10 +42,29 @@ struct Sound {
     int id;
 };
 
-struct SndChannel;
+class SndChannel {
+  public:
+    virtual ~SndChannel() { }
 
-Sound* GetSound(int id);
-OSErr SndPlay(SndChannel* channel, Sound* sound, bool);
+    virtual void play(Sound* sound) = 0;
+    virtual void amp(uint8_t volume) = 0;
+    virtual void quiet() = 0;
+};
+
+class NullSoundDriver : public SoundDriver {
+  public:
+    virtual SndChannel* new_channel();
+};
+
+class LogSoundDriver : public SoundDriver {
+  public:
+    LogSoundDriver(const sfz::StringPiece& path);
+    virtual SndChannel* new_channel();
+
+  private:
+    sfz::ScopedFd _sound_log;
+    int _last_id;
+};
 
 }  // namespace antares
 

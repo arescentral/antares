@@ -21,6 +21,7 @@
 #include "AresPreferences.hpp"
 #include "Beam.hpp"
 #include "ColorTable.hpp"
+#include "FakeSounds.hpp"
 #include "InputSource.hpp"
 #include "MessageScreen.hpp"
 #include "Minicomputer.hpp"
