@@ -710,19 +710,17 @@ void StopPauseIndicator(const StringPiece& pauseString) {
 //  true, then command-q for quit during a game should be disabled.
 //
 
-bool BothCommandAndQ( void)
-{
-    bool command = false, q = false;
-    short   b;
+bool BothCommandAndQ() {
+    bool command = false;
+    bool q = false;
 
-    for ( b = 0; b < kKeyExtendedControlNum; b++)
-    {
-        if ( mQKey( globals()->gKeyControl[b])) q = true;
-        if ( mCommandKey( globals()->gKeyControl[b])) command = true;
+    for (int i = 0; i < kKeyExtendedControlNum; i++) {
+        uint32_t key = globals()->gPreferencesData->key(i);
+        q |= (key == Keys::Q);
+        command |= (key == Keys::COMMAND);
     }
 
-    if (( q) && ( command)) return ( true);
-    else return( false);
+    return command && q;
 }
 
 netResultType StartNetworkGameSetup( void)

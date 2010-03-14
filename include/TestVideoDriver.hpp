@@ -32,7 +32,7 @@ class TestingVideoDriver : public VideoDriver {
 
     virtual bool button();
     virtual Point get_mouse();
-    virtual void get_keys(KeyMap keys);
+    virtual void get_keys(KeyMap* keys);
     virtual int ticks();
     virtual void main_loop_iteration_complete(uint32_t);
     virtual void set_game_state(GameState state);

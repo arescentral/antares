@@ -48,7 +48,7 @@ bool Button() {
     return VideoDriver::driver()->button();
 }
 
-void GetKeys(KeyMap keys) {
+void GetKeys(KeyMap* keys) {
     VideoDriver::driver()->get_keys(keys);
 }
 

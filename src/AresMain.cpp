@@ -408,9 +408,6 @@ GamePlay::GamePlay(bool replay, GameResult* game_result, long* seconds)
           _scenario_check_time(0) {
     globals()->gLastKeys = globals()->gTheseKeys = 0;
 
-    bzero(_key_map, sizeof(_key_map));
-    bzero(_last_key_map, sizeof(_key_map));
-
     globals()->gFrameCount = 0;
 }
 
@@ -657,15 +654,9 @@ void GamePlay::fire_timer() {
     }
 
     bool newKeyMap = false;
-    for (int l1 = 0; l1 < 4; l1++) {
-        _last_key_map[l1] = _key_map[l1];
-    }
-    GetKeys(_key_map);
-    for (int l1 = 0; l1 < 4; l1++) {
-        if (_last_key_map[l1] != _key_map[l1]) {
-            newKeyMap = true;
-        }
-    }
+    _last_key_map.copy(_key_map);
+    GetKeys(&_key_map);
+    newKeyMap = (_last_key_map != _key_map);
 
     if (mPauseKey(_key_map)) {
         _state = PAUSED;
@@ -685,7 +676,7 @@ void GamePlay::fire_timer() {
     }
 
     if (!_replay
-            && mVolumeUpKey( _key_map)
+            && mVolumeUpKey(_key_map)
             && !mVolumeUpKey(_last_key_map)) {
         globals()->gPreferencesData->set_volume(
                 min(kMaxVolumePreference, globals()->gPreferencesData->volume() + 1));

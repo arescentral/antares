@@ -26,6 +26,7 @@
 namespace antares {
 
 class CardStack;
+class KeyMap;
 
 enum GameState {
     UNKNOWN,
@@ -43,7 +44,7 @@ class VideoDriver {
     virtual ~VideoDriver() { }
     virtual bool button() = 0;
     virtual Point get_mouse() = 0;
-    virtual void get_keys(KeyMap k) = 0;
+    virtual void get_keys(KeyMap* k) = 0;
 
     virtual void set_game_state(GameState state) = 0;
     virtual int get_demo_scenario() = 0;

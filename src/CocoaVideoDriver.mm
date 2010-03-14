@@ -60,24 +60,12 @@ bool translate_coords(
     return true;
 }
 
-void set_key(KeyMap map, int key, bool down) {
-    uint32_t* byte = map + (key / 32);
-    uint32_t mask = OSSwapInt32(1 << (key % 32));
-    if (down) {
-        *byte |= mask;
-    } else {
-        *byte &= ~mask;
-    }
-}
-
 }  // namespace
 
 CocoaVideoDriver::CocoaVideoDriver()
         : _start_time(usecs()),
           _button(false),
-          _mouse() {
-    bzero(_keys, sizeof(uint32_t[4]));
-}
+          _mouse() { }
 
 void CocoaVideoDriver::mouse_down(int button, const Point& where) {
     _button = true;
@@ -92,12 +80,12 @@ void CocoaVideoDriver::mouse_up(int button, const Point& where) {
 }
 
 void CocoaVideoDriver::key_down(int key_code) {
-    set_key(_keys, key_code, true);
+    _keys.set(key_code, true);
     _event_queue.push(new KeyDownEvent(key_code));
 }
 
 void CocoaVideoDriver::key_up(int key_code) {
-    set_key(_keys, key_code, false);
+    _keys.set(key_code, false);
     _event_queue.push(new KeyUpEvent(key_code));
 }
 
@@ -108,11 +96,11 @@ void CocoaVideoDriver::flags_changed(int flags) {
     };
     static const int modifier_flag_count = 5;
     static const ModifierFlag modifier_flags[modifier_flag_count] = {
-        {NSAlphaShiftKeyMask, 0x39},  // caps lock.
-        {NSShiftKeyMask,      0x38},
-        {NSControlKeyMask,    0x3B},
-        {NSAlternateKeyMask,  0x3A},
-        {NSCommandKeyMask,    0x37},
+        {NSAlphaShiftKeyMask, Keys::CAPS_LOCK},  // caps lock.
+        {NSShiftKeyMask,      Keys::SHIFT},
+        {NSControlKeyMask,    Keys::CONTROL},
+        {NSAlternateKeyMask,  Keys::OPTION},
+        {NSCommandKeyMask,    Keys::COMMAND},
     };
 
     for (int i = 0; i < modifier_flag_count; ++i) {
@@ -202,8 +190,8 @@ Point CocoaVideoDriver::get_mouse() {
     return _mouse;
 }
 
-void CocoaVideoDriver::get_keys(KeyMap keys) {
-    memcpy(keys, _keys, sizeof(KeyMap));
+void CocoaVideoDriver::get_keys(KeyMap* keys) {
+    keys->copy(_keys);
 }
 
 void CocoaVideoDriver::set_game_state(GameState state) {

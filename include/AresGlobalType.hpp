@@ -26,6 +26,7 @@
 
 #include "AnyChar.hpp"
 #include "ColorTable.hpp"
+#include "KeyMapTranslation.hpp"
 #include "NateDraw.hpp"
 #include "ScenarioData.hpp"
 #include "SoundFX.hpp"
@@ -120,7 +121,6 @@ struct aresGlobalType {
     long            gGameOver;
     sfz::scoped_array<admiralType>       gAdmiralData;
     sfz::scoped_array<destBalanceType>   gDestBalanceData;
-    KeyMap          gKeyControl[kKeyExtendedControlNum];
     short           gPreferenceRefNum;
     sfz::scoped_array<raceType>           gRaceData;
     sfz::scoped_array<scrollStarType>    gScrollStarData;

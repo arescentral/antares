@@ -19,6 +19,7 @@
 
 #include "PlayerShip.hpp"
 
+#include "sfz/Exception.hpp"
 #include "Admiral.hpp"
 #include "AresCheat.hpp"
 #include "AresGlobalType.hpp"
@@ -45,6 +46,7 @@
 #include "StringHandling.hpp"
 #include "UniverseUnit.hpp"
 
+using sfz::Exception;
 using sfz::scoped_array;
 
 namespace antares {
@@ -75,11 +77,8 @@ void StartPlayerShip( long owner, short type)
 #pragma unused( owner, type)
 }
 
-void ResetPlayerShip( long which)
-
-{
+void ResetPlayerShip(long which) {
     unsigned char   nilLabel = 0;
-    long            h;
 
     WriteDebugLine("\pPLAYER:");
     WriteDebugLong( which);
@@ -92,21 +91,12 @@ void ResetPlayerShip( long which)
     globals()->gLastKeys = globals()->gTheseKeys = 0;
     globals()->gAutoPilotOff = true;
     globals()->keyMask = 0;
-    for ( h = 0; h < 4; h++)
-    {
-#if TARGET_OS_MAC
-        globals()->gLastKeyMap[h] = 0;
-        globals()->gLastMessageKeyMap[h] = 0;
-#else
-        globals()->gLastKeyMap[h].bigEndianValue = 0;
-        globals()->gLastMessageKeyMap[h].bigEndianValue = 0;
-#endif TARGET_OS_MAC
-    }
+    globals()->gLastKeyMap.clear();
+    globals()->gLastMessageKeyMap.clear();
     globals()->gZoomMode = kNearestFoeZoom;
     globals()->gKeyMapBufferTop = globals()->gKeyMapBufferBottom = 0;
 
-    for ( h = 0; h < kHotKeyNum; h++)
-    {
+    for (int h = 0; h < kHotKeyNum; h++) {
         globals()->hotKey[h].objectNum = -1;
         globals()->hotKey[h].objectID = -1;
     }
@@ -133,12 +123,8 @@ bool PlayerShipGetKeys(long timePass, unsigned long theKeys, bool *enterMessage)
         return everPaused;
     }
 
-    GetKeys(keyMap);
-    for (int i = 0; i < 4; ++i) {
-        if (globals()->gLastKeyMap[i] != keyMap[i]) {
-            newKeys = true;
-        }
-    }
+    GetKeys(&keyMap);
+    newKeys = (globals()->gLastKeyMap != keyMap);
 
     globals()->gLastKeys = globals()->gTheseKeys;
 
@@ -146,10 +132,8 @@ bool PlayerShipGetKeys(long timePass, unsigned long theKeys, bool *enterMessage)
         globals()->gTheseKeys = 0;
 
         for (int i = 0; i < kKeyControlNum; ++i) {
-            for (int j = 0; j < 4; ++j) {
-                if (keyMap[j] & globals()->gKeyControl[i][j]) {
-                    globals()->gTheseKeys |= (0x01 << i) & ~globals()->keyMask;
-                }
+            if (keyMap.get(globals()->gPreferencesData->key(i) - 1)) {
+                globals()->gTheseKeys |= (0x01 << i) & ~globals()->keyMask;
             }
         }
     } else {
@@ -170,7 +154,7 @@ bool PlayerShipGetKeys(long timePass, unsigned long theKeys, bool *enterMessage)
             if (mGetAnyCharPStringLength(message) == 0) {
                 CopyAnyCharPString(message, "\p<>");
             }
-            if ((mReturnKey(*bufMap)) && (!AnyKeyButThisOne(*bufMap, 1, 28))) {
+            if ((mReturnKey(*bufMap)) && (!AnyKeyButThisOne(*bufMap, Keys::RETURN))) {
                 *enterMessage = false;
                 CutCharsFromAnyCharPString(message, mGetAnyCharPStringLength(message) - 1, 1);
                 CutCharsFromAnyCharPString(message, 0, 1);
@@ -218,8 +202,7 @@ bool PlayerShipGetKeys(long timePass, unsigned long theKeys, bool *enterMessage)
                     if (message[0] < 120)
                     {
                         s[0] = 1;
-                        s[1] = GetAsciiFromKeyMap(*bufMap,
-                            globals()->gLastMessageKeyMap);
+                        s[1] = GetAsciiFromKeyMap(*bufMap, globals()->gLastMessageKeyMap);
                         if (s[1])
                         {
                             InsertAnyCharPStringInPString(message, s,
@@ -241,9 +224,7 @@ bool PlayerShipGetKeys(long timePass, unsigned long theKeys, bool *enterMessage)
             if ((mReturnKey(*bufMap)) && (!(globals()->keyMask & kReturnKeyMask)))
                 *enterMessage = true;
         }
-        for (int i = 0; i < 4; ++i) {
-            globals()->gLastMessageKeyMap[i] = (*bufMap)[i];
-        }
+        globals()->gLastMessageKeyMap.copy(*bufMap);
     }
 
     // TERRIBLE HACK:
@@ -573,9 +554,7 @@ bool PlayerShipGetKeys(long timePass, unsigned long theKeys, bool *enterMessage)
         theShip->keysDown &= ~kWarpKey;
     }
 
-    for (int i = 0; i < 4; i++) {
-        globals()->gLastKeyMap[i] = keyMap[i];
-    }
+    globals()->gLastKeyMap.copy(keyMap);
     return everPaused;
 }
 
@@ -930,30 +909,19 @@ void PlayerShipBodyExpire( spaceObjectType *theShip, bool sourceIsBody)
     }
 }
 
-void HandleTextMessageKeys( KeyMap keyMap, KeyMap lastKeyMap,
-    bool *enterMessage)
-{
+void HandleTextMessageKeys(const KeyMap& keyMap, const KeyMap& lastKeyMap, bool *enterMessage) {
     bool         newKeys = false, anyKeys = false;
-    short           h;
     KeyMap          *bufferMap;
 
-    for ( h = 0; h < 4; h++)
-    {
-#if TARGET_OS_MAC
-        if ( lastKeyMap[h] != keyMap[h]) newKeys = true;
-        if ( keyMap[h] != 0) anyKeys = true;
-#else
-        if ( lastKeyMap[h].bigEndianValue != keyMap[h].bigEndianValue) newKeys = true;
-        if ( keyMap[h].bigEndianValue != 0) anyKeys = true;
-#endif TARGET_OS_MAC
-    }
+    newKeys = (lastKeyMap != keyMap);
+    anyKeys = keyMap.any();
+
     if ( newKeys)
     {
         if (( *enterMessage) && anyKeys)
             PlayVolumeSound(  kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
         bufferMap = globals()->gKeyMapBuffer + globals()->gKeyMapBufferTop;
-        for ( h = 0; h < 4; h++)
-            (*bufferMap)[h] = keyMap[h];
+        bufferMap->copy(keyMap);
         if ( mReturnKey( keyMap))
         {
             if ( *enterMessage) *enterMessage = false;
@@ -986,15 +954,18 @@ long HotKey_GetFromObject( spaceObjectType *object)
 }
 
 unsigned char* HotKey_AppendString(spaceObjectType *object, unsigned char* s) {
-    long    h = HotKey_GetFromObject( object), keyNum;
-    Str255  keyName;
+    int h = HotKey_GetFromObject( object);
+    if (h < 0) {
+        return s;
+    }
 
-    if ( h < 0) return s;
-    keyNum = GetKeyNumFromKeyMap(
-        globals()->gKeyControl[h + kFirstHotKeyNum]);
-    if ( keyNum < 0) return s;
+    int keyNum = globals()->gPreferencesData->key(h + kFirstHotKeyNum);
+    if (keyNum < 0) {
+        return s;
+    }
 
-    GetIndString( keyName, kKeyMapNameLongID, keyNum);
+    Str255 keyName;
+    GetIndString( keyName, KEY_LONG_NAMES, keyNum);
     ConcatenatePString( s, "\p < ");
     ConcatenatePString( s, keyName);
     ConcatenatePString( s, "\p >");

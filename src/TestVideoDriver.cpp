@@ -55,20 +55,6 @@ using sfz::scoped_ptr;
 
 namespace antares {
 
-namespace {
-
-enum Keys {
-    KEY_K = 0x28,
-    KEY_O = 0x1f,
-    KEY_S = 0x01,
-    KEY_Q = 0x0c,
-    KEY_RETURN = 0x24,
-    KEY_ESCAPE = 0x35,
-    KEY_RIGHT = 0x7C,
-};
-
-}  // namespace
-
 TestingVideoDriver::TestingVideoDriver(const StringPiece& output_dir)
         : _current_time(0),
           _state(UNKNOWN),
@@ -80,7 +66,9 @@ Point TestingVideoDriver::get_mouse() {
     return Point(320, 240);
 }
 
-void TestingVideoDriver::get_keys(KeyMap keys) { bzero(keys, sizeof(KeyMap)); }
+void TestingVideoDriver::get_keys(KeyMap* keys) {
+    keys->clear();
+}
 
 int TestingVideoDriver::ticks() {
     if (_state == PLAY_GAME) {
@@ -127,7 +115,7 @@ Event* MainScreenVideoDriver::wait_next_event(double) {
     if (state() == MAIN_SCREEN_INTERFACE) {
         if (_key_down) {
             _key_down = false;
-            return new KeyUpEvent(KEY_Q);
+            return new KeyUpEvent(Keys::Q);
         } else {
             if (!output_dir().empty()) {
                 String out(output_dir());
@@ -135,7 +123,7 @@ Event* MainScreenVideoDriver::wait_next_event(double) {
                 DumpTo(out);
             }
             _key_down = true;
-            return new KeyDownEvent(KEY_Q);
+            return new KeyDownEvent(Keys::Q);
         }
     }
     return NULL;
@@ -155,7 +143,7 @@ Event* MissionBriefingVideoDriver::wait_next_event(double) {
       case MAIN_SCREEN_INTERFACE:
         {
             Ledger::ledger()->unlock_chapter(_level);
-            uint32_t key = (_briefing_num >= 9) ? KEY_Q : KEY_S;
+            uint32_t key = (_briefing_num >= 9) ? Keys::Q : Keys::S;
             if (_key_down) {
                 _key_down = false;
                 return new KeyUpEvent(key);
@@ -170,7 +158,7 @@ Event* MissionBriefingVideoDriver::wait_next_event(double) {
         {
             if (_key_down) {
                 _key_down = false;
-                return new KeyUpEvent(KEY_RETURN);
+                return new KeyUpEvent(Keys::RETURN);
             } else {
                 if (!output_dir().empty()) {
                     String out(output_dir());
@@ -178,14 +166,14 @@ Event* MissionBriefingVideoDriver::wait_next_event(double) {
                     DumpTo(out);
                 }
                 _key_down = true;
-                return new KeyDownEvent(KEY_RETURN);
+                return new KeyDownEvent(Keys::RETURN);
             }
         }
         break;
 
       case MISSION_INTERFACE:
         {
-            uint32_t key = (_briefing_num >= 8) ? KEY_ESCAPE : KEY_RIGHT;
+            uint32_t key = (_briefing_num >= 8) ? Keys::ESCAPE : Keys::RIGHT_ARROW;
             if (_key_down) {
                 _key_down = false;
                 return new KeyUpEvent(key);
@@ -224,10 +212,10 @@ Event* DemoVideoDriver::wait_next_event(double) {
     if (_started_replay && state() == MAIN_SCREEN_INTERFACE) {
         if (_key_down) {
             _key_down = false;
-            return new KeyUpEvent(KEY_Q);
+            return new KeyUpEvent(Keys::Q);
         } else {
             _key_down = true;
-            return new KeyDownEvent(KEY_Q);
+            return new KeyDownEvent(Keys::Q);
         }
     }
     return NULL;
@@ -261,7 +249,7 @@ Event* OptionsVideoDriver::wait_next_event(double) {
     switch (state()) {
       case MAIN_SCREEN_INTERFACE:
         {
-            uint32_t key = (_key_tab >= 5) ? KEY_Q : KEY_O;
+            uint32_t key = (_key_tab >= 5) ? Keys::Q : Keys::O;
             if (_key_down) {
                 _key_down = false;
                 return new KeyUpEvent(key);
@@ -276,7 +264,7 @@ Event* OptionsVideoDriver::wait_next_event(double) {
         {
             if (_key_down) {
                 _key_down = false;
-                return new KeyUpEvent(KEY_K);
+                return new KeyUpEvent(Keys::K);
             } else {
                 if (!output_dir().empty()) {
                     String out(output_dir());
@@ -284,7 +272,7 @@ Event* OptionsVideoDriver::wait_next_event(double) {
                     DumpTo(out);
                 }
                 _key_down = true;
-                return new KeyDownEvent(KEY_K);
+                return new KeyDownEvent(Keys::K);
             }
         }
         break;
@@ -333,7 +321,7 @@ Event* ObjectDataVideoDriver::wait_next_event(double) {
     if (state() == MAIN_SCREEN_INTERFACE) {
         if (_key_down) {
             _key_down = false;
-            return new KeyUpEvent(KEY_Q);
+            return new KeyUpEvent(Keys::Q);
         } else {
             if (!output_dir().empty()) {
                 for (int i = 0; i < globals()->maxBaseObject; ++i) {
@@ -355,7 +343,7 @@ Event* ObjectDataVideoDriver::wait_next_event(double) {
                 }
             }
             _key_down = true;
-            return new KeyDownEvent(KEY_Q);
+            return new KeyDownEvent(Keys::Q);
         }
     }
     return NULL;
@@ -371,7 +359,7 @@ Event* BuildPixVideoDriver::wait_next_event(double) {
     if (state() == MAIN_SCREEN_INTERFACE) {
         if (_key_down) {
             _key_down = false;
-            return new KeyUpEvent(KEY_Q);
+            return new KeyUpEvent(Keys::Q);
         } else {
             if (!output_dir().empty()) {
                 const int text_count = 13;
@@ -397,7 +385,7 @@ Event* BuildPixVideoDriver::wait_next_event(double) {
                 }
             }
             _key_down = true;
-            return new KeyDownEvent(KEY_Q);
+            return new KeyDownEvent(Keys::Q);
         }
     }
     return NULL;

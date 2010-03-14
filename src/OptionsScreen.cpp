@@ -67,9 +67,6 @@ void OptionsScreen::become_front() {
         break;
 
       case ACCEPT:
-        for (int i = 0; i < kKeyExtendedControlNum; ++i) {
-            GetKeyMapFromKeyNum(_preferences->key(i), globals()->gKeyControl[i]);
-        }
         globals()->gPreferencesData.reset(_preferences.release());
         stack()->pop(this);
         break;

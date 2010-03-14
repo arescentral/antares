@@ -741,45 +741,45 @@ VncVideoDriver::VncVideoDriver(int port)
     }
     vnc_poll(0);
 
-    _key_map['a'] = 0x00;
-    _key_map['b'] = 0x0B;
-    _key_map['c'] = 0x08;
-    _key_map['d'] = 0x02;
-    _key_map['e'] = 0x0E;
-    _key_map['f'] = 0x03;
-    _key_map['g'] = 0x05;
-    _key_map['h'] = 0x04;
-    _key_map['i'] = 0x22;
-    _key_map['j'] = 0x26;
-    _key_map['k'] = 0x28;
-    _key_map['l'] = 0x25;
-    _key_map['m'] = 0x2E;
-    _key_map['n'] = 0x2D;
-    _key_map['o'] = 0x1F;
-    _key_map['p'] = 0x23;
-    _key_map['q'] = 0x0C;
-    _key_map['r'] = 0x0F;
-    _key_map['s'] = 0x01;
-    _key_map['t'] = 0x11;
-    _key_map['u'] = 0x20;
-    _key_map['v'] = 0x09;
-    _key_map['w'] = 0x0D;
-    _key_map['x'] = 0x07;
-    _key_map['y'] = 0x10;
-    _key_map['z'] = 0x06;
-    _key_map[' '] = 0x31;
+    _key_map['a'] = Keys::A;
+    _key_map['b'] = Keys::B;
+    _key_map['c'] = Keys::C;
+    _key_map['d'] = Keys::D;
+    _key_map['e'] = Keys::E;
+    _key_map['f'] = Keys::F;
+    _key_map['g'] = Keys::G;
+    _key_map['h'] = Keys::H;
+    _key_map['i'] = Keys::I;
+    _key_map['j'] = Keys::J;
+    _key_map['k'] = Keys::K;
+    _key_map['l'] = Keys::L;
+    _key_map['m'] = Keys::M;
+    _key_map['n'] = Keys::N;
+    _key_map['o'] = Keys::O;
+    _key_map['p'] = Keys::P;
+    _key_map['q'] = Keys::Q;
+    _key_map['r'] = Keys::R;
+    _key_map['s'] = Keys::S;
+    _key_map['t'] = Keys::T;
+    _key_map['u'] = Keys::U;
+    _key_map['v'] = Keys::V;
+    _key_map['w'] = Keys::W;
+    _key_map['x'] = Keys::X;
+    _key_map['y'] = Keys::Y;
+    _key_map['z'] = Keys::Z;
+    _key_map[' '] = Keys::SPACE;
 
-    _key_map[65509] = 0x39;  // CAPS
-    _key_map[65289] = 0x30;  // TAB
-    _key_map[65307] = 0x35;  // ESC
-    _key_map[65293] = 0x24;  // RET
+    _key_map[0xffe5] = Keys::CAPS_LOCK;
+    _key_map[0xff09] = Keys::TAB;
+    _key_map[0xff1b] = Keys::ESCAPE;
+    _key_map[0xff0d] = Keys::RETURN;
 
-    _key_map[65361] = 0x7B;  // LEFT
-    _key_map[65362] = 0x7E;  // UP
-    _key_map[65363] = 0x7C;  // RGHT
-    _key_map[65364] = 0x7D;  // DOWN
+    _key_map[0xff51] = Keys::LEFT_ARROW;
+    _key_map[0xff52] = Keys::UP_ARROW;
+    _key_map[0xff53] = Keys::RIGHT_ARROW;
+    _key_map[0xff54] = Keys::DOWN_ARROW;
 
-    _key_map[65470] = 0x7A;  // F1
+    _key_map[0xffbe] = Keys::F1;
 }
 
 Event* VncVideoDriver::wait_next_event(double sleep) {
@@ -803,9 +803,9 @@ Point VncVideoDriver::get_mouse() {
     return _mouse;
 }
 
-void VncVideoDriver::get_keys(KeyMap keys) {
+void VncVideoDriver::get_keys(KeyMap* keys) {
     vnc_poll(0);
-    bzero(keys, sizeof(KeyMap));
+    keys->clear();
 }
 
 void VncVideoDriver::set_game_state(GameState) { }

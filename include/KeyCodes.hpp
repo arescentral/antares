@@ -18,6 +18,7 @@
 #ifndef ANTARES_KEY_CODES_HPP_
 #define ANTARES_KEY_CODES_HPP_
 
+#include "AresPreferences.hpp"
 #include "KeyMapTranslation.hpp"
 
 namespace antares {
@@ -125,11 +126,8 @@ namespace antares {
 #define kWeaponKeyMask              (kOneKey | kTwoKey | kEnterKey)
 #define kMiscKeyMask                (~(kMotionKeyMask | kWeaponKeyMask | kSpecialKeyMask))
 
-inline bool mCheckKeyMap(KeyMap mKeyMap, int mki) {
-    return (globals()->gKeyControl[mki][0] & (mKeyMap[0]))
-        || (globals()->gKeyControl[mki][1] & (mKeyMap[1]))
-        || (globals()->gKeyControl[mki][2] & (mKeyMap[2]))
-        || (globals()->gKeyControl[mki][3] & (mKeyMap[3]));
+inline bool mCheckKeyMap(const KeyMap& mKeyMap, int mki) {
+    return mKeyMap.get(globals()->gPreferencesData->key(mki) - 1);
 }
 
 //#define   mHelpKey                mF1Key
@@ -147,43 +145,43 @@ inline bool mCheckKeyMap(KeyMap mKeyMap, int mki) {
 //#define   mScaleHostileKey        mF13Key
 //#define   mScaleObjectKey         mF14Key
 //#define   mScaleAllKey            mF15Key
-inline bool mHelpKey(KeyMap km)             { return mCheckKeyMap(km, kHelpKeyNum); }
-inline bool mVolumeDownKey(KeyMap km)       { return mCheckKeyMap(km, kVolumeDownKeyNum); }
-inline bool mVolumeUpKey(KeyMap km)         { return mCheckKeyMap(km, kVolumeUpKeyNum); }
-inline bool mActionMusicKey(KeyMap km)      { return mCheckKeyMap(km, kActionMusicKeyNum); }
-inline bool mNetSettingsKey(KeyMap km)      { return mCheckKeyMap(km, kNetSettingsKeyNum); }
-inline bool mMessageNextKey(KeyMap km)      { return mCheckKeyMap(km, kMessageNextKeyNum); }
+inline bool mHelpKey(const KeyMap& km)             { return mCheckKeyMap(km, kHelpKeyNum); }
+inline bool mVolumeDownKey(const KeyMap& km)       { return mCheckKeyMap(km, kVolumeDownKeyNum); }
+inline bool mVolumeUpKey(const KeyMap& km)         { return mCheckKeyMap(km, kVolumeUpKeyNum); }
+inline bool mActionMusicKey(const KeyMap& km)      { return mCheckKeyMap(km, kActionMusicKeyNum); }
+inline bool mNetSettingsKey(const KeyMap& km)      { return mCheckKeyMap(km, kNetSettingsKeyNum); }
+inline bool mMessageNextKey(const KeyMap& km)      { return mCheckKeyMap(km, kMessageNextKeyNum); }
 
-inline bool mTransferKey(KeyMap km)         { return mCheckKeyMap(km, kTransferKeyNum); }
-inline bool mFastMotionKey(KeyMap km)       { return mCheckKeyMap(km, kFastMotionKeyNum); }
+inline bool mTransferKey(const KeyMap& km)         { return mCheckKeyMap(km, kTransferKeyNum); }
+inline bool mFastMotionKey(const KeyMap& km)       { return mCheckKeyMap(km, kFastMotionKeyNum); }
 
-inline bool mScale121Key(KeyMap km)         { return mCheckKeyMap(km, kScale121KeyNum); }
-inline bool mScale122Key(KeyMap km)         { return mCheckKeyMap(km, kScale122KeyNum); }
-inline bool mScale124Key(KeyMap km)         { return mCheckKeyMap(km, kScale124KeyNum); }
-inline bool mScale1216Key(KeyMap km)        { return mCheckKeyMap(km, kScale1216KeyNum); }
-inline bool mScaleHostileKey(KeyMap km)     { return mCheckKeyMap(km, kScaleHostileKeyNum); }
-inline bool mScaleObjectKey(KeyMap km)      { return mCheckKeyMap(km, kScaleObjectKeyNum); }
-inline bool mScaleAllKey(KeyMap km)         { return mCheckKeyMap(km, kScaleAllKeyNum); }
+inline bool mScale121Key(const KeyMap& km)         { return mCheckKeyMap(km, kScale121KeyNum); }
+inline bool mScale122Key(const KeyMap& km)         { return mCheckKeyMap(km, kScale122KeyNum); }
+inline bool mScale124Key(const KeyMap& km)         { return mCheckKeyMap(km, kScale124KeyNum); }
+inline bool mScale1216Key(const KeyMap& km)        { return mCheckKeyMap(km, kScale1216KeyNum); }
+inline bool mScaleHostileKey(const KeyMap& km)     { return mCheckKeyMap(km, kScaleHostileKeyNum); }
+inline bool mScaleObjectKey(const KeyMap& km)      { return mCheckKeyMap(km, kScaleObjectKeyNum); }
+inline bool mScaleAllKey(const KeyMap& km)         { return mCheckKeyMap(km, kScaleAllKeyNum); }
 
-inline bool mNOFHelpKey(KeyMap km)          { return mCheckKeyMap(km, kHelpKeyNum); }
-inline bool mNOFVolumeDownKey(KeyMap km)    { return mCheckKeyMap(km, kVolumeDownKeyNum); }
-inline bool mNOFVolumeUpKey(KeyMap km)      { return mCheckKeyMap(km, kVolumeUpKeyNum); }
-inline bool mNOFNetSettingsKey(KeyMap km)   { return mCheckKeyMap(km, kNetSettingsKeyNum); }
+inline bool mNOFHelpKey(const KeyMap& km)          { return mCheckKeyMap(km, kHelpKeyNum); }
+inline bool mNOFVolumeDownKey(const KeyMap& km)    { return mCheckKeyMap(km, kVolumeDownKeyNum); }
+inline bool mNOFVolumeUpKey(const KeyMap& km)      { return mCheckKeyMap(km, kVolumeUpKeyNum); }
+inline bool mNOFNetSettingsKey(const KeyMap& km)   { return mCheckKeyMap(km, kNetSettingsKeyNum); }
 
-inline bool mNOFFastMotionKey(KeyMap km)    { return mCheckKeyMap(km, kFastMotionKeyNum); }
+inline bool mNOFFastMotionKey(const KeyMap& km)    { return mCheckKeyMap(km, kFastMotionKeyNum); }
 
-inline bool mNOFScale121Key(KeyMap km)      { return mCheckKeyMap(km, kScale121KeyNum); }
-inline bool mNOFScale122Key(KeyMap km)      { return mCheckKeyMap(km, kScale122KeyNum); }
-inline bool mNOFScale124Key(KeyMap km)      { return mCheckKeyMap(km, kScale124KeyNum); }
-inline bool mNOFScaleHostileKey(KeyMap km)  { return mCheckKeyMap(km, kScaleHostileKeyNum); }
-inline bool mNOFScaleObjectKey(KeyMap km)   { return mCheckKeyMap(km, kScaleObjectKeyNum); }
-inline bool mNOFScaleAllKey(KeyMap km)      { return mCheckKeyMap(km, kScaleAllKeyNum); }
+inline bool mNOFScale121Key(const KeyMap& km)      { return mCheckKeyMap(km, kScale121KeyNum); }
+inline bool mNOFScale122Key(const KeyMap& km)      { return mCheckKeyMap(km, kScale122KeyNum); }
+inline bool mNOFScale124Key(const KeyMap& km)      { return mCheckKeyMap(km, kScale124KeyNum); }
+inline bool mNOFScaleHostileKey(const KeyMap& km)  { return mCheckKeyMap(km, kScaleHostileKeyNum); }
+inline bool mNOFScaleObjectKey(const KeyMap& km)   { return mCheckKeyMap(km, kScaleObjectKeyNum); }
+inline bool mNOFScaleAllKey(const KeyMap& km)      { return mCheckKeyMap(km, kScaleAllKeyNum); }
 
 #define mPauseKey               mCapsLockKey
 #define mEnterTextKey           mReturnKey
-inline bool mQuitKey1(KeyMap km)            { return mQKey(km); }
-inline bool mQuitKey2(KeyMap km)            { return mCommandKey(km); }
-inline bool mQuitKeys(KeyMap km)            { return mQuitKey1(km) && mQuitKey2(km); }
+inline bool mQuitKey1(const KeyMap& km)            { return mQKey(km); }
+inline bool mQuitKey2(const KeyMap& km)            { return mCommandKey(km); }
+inline bool mQuitKeys(const KeyMap& km)            { return mQuitKey1(km) && mQuitKey2(km); }
 #define mRestartResumeKey       mEscKey
 
 //#define   mNOFHelpKey             m1Key

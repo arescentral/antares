@@ -55,12 +55,6 @@ Preferences::Preferences() {
     bin.read(&_protocol_flags);
     bin.read(&_net_level);
     bin.read(&_net_latency);
-
-    // we must have existing prefs by now
-    // translate key data to be more readable
-    for (int i = 0; i < kKeyExtendedControlNum; i++) {
-        GetKeyMapFromKeyNum(_key_map[i], globals()->gKeyControl[i]);
-    }
 }
 
 Preferences::~Preferences() { }

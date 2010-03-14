@@ -15,228 +15,148 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-// Key Map Translation.c
-
 #include "KeyMapTranslation.hpp"
 
+#include <strings.h>
 #include "Error.hpp"
 #include "StringList.hpp"
 
 namespace antares {
 
-#define kKeyMapError            "\pKEYM"
-
-unsigned long   gKeyTranslateState = 0;
-
-void GetKeyMapFromKeyNum( short keyNum, KeyMap keyMap) {
-    short       wmap, wbit, fixbit;
-
-    keyNum--;
-    for ( wmap = 0; wmap < 4; wmap++)
-#if TARGET_OS_MAC
-        keyMap[wmap] = 0;
-#else
-        keyMap[wmap].bigEndianValue = 0;
-#endif TARGET_OS_MAC
-    wbit = keyNum % 32;
-    wmap = keyNum / 32;
-    fixbit = wbit;
-    wbit = 32 - ((fixbit / 8) * 8 + (8 - (fixbit % 8)));
-#if TARGET_OS_MAC
-    keyMap[wmap] = 0x00000001ul << wbit;
-#else
-    keyMap[wmap].bigEndianValue = EndianU32_NtoB((unsigned long)0x00000001 << (unsigned long)wbit);
-#endif TARGET_OS_MAC
+KeyMap::KeyMap() {
+    clear();
 }
 
-short GetKeyNumFromKeyMap( KeyMap keyMap) {
-    int         i, j, wmap = 0, wbit = 0, fixbit, keyispressed = 0;
+bool KeyMap::get(size_t index) const {
+    return _data[index >> 3] & (1 << (index & 0x7));
+}
 
-    for ( i = 0; i < 4; i++)
-    {
-        for ( j = 0; j < 32; j++)
-        {
-#if TARGET_OS_MAC
-            if ((keyMap[i] >> j) & 0x00000001ul)
-#else
-            if ((EndianU32_BtoN(keyMap[i].bigEndianValue) >> (unsigned long)j) & (unsigned long)0x00000001)
-#endif TARGET_OS_MAC
-            {
-                wmap = i;
-                wbit = j;
-                i = 4;
-                j = 32;
-                keyispressed = 1;
-            }
+void KeyMap::set(size_t index, bool value) {
+    if (get(index) != value) {
+        _data[index >> 3] ^= (1 << (index & 0x7));
+    }
+}
+
+bool KeyMap::any() const {
+    const Data zero = { };
+    return memcmp(_data, zero, kDataSize) == 0;
+}
+
+bool KeyMap::equals(const KeyMap& other) const {
+    return memcmp(_data, other._data, kDataSize) == 0;
+}
+
+void KeyMap::copy(const KeyMap& other) {
+    memcpy(_data, other._data, kDataSize);
+}
+
+void KeyMap::clear() {
+    bzero(_data, kDataSize);
+}
+
+bool operator==(const KeyMap& a, const KeyMap& b) {
+    return a.equals(b);
+}
+
+bool operator!=(const KeyMap& a, const KeyMap& b) {
+    return !a.equals(b);
+}
+
+void GetKeyMapFromKeyNum(int key_num, KeyMap* key_map) {
+    key_map->clear();
+    key_map->set(key_num, true);
+}
+
+int GetKeyNumFromKeyMap(const KeyMap& key_map) {
+    for (int i = 0; i < 128; ++i) {
+        if (key_map.get(i)) {
+            return i + 1;
         }
     }
-    fixbit = wbit;
-    wbit = 32 - ((fixbit / 8) * 8 + (8 - (fixbit % 8)));
-    if ( keyispressed)
-      return( 1 + wmap * 32 + wbit);
-    else return (0);
+    return 0;
 }
 
 bool CommandKey() {
-    KeyMap  keyMap;
-
-    GetKeys( keyMap);
-#if TARGET_OS_MAC
-    return( (keyMap[1] >> 15) & 0x01 );
-#else
-    return( (EndianU32_BtoN(keyMap[1].bigEndianValue) >> 15) & 0x01 );
-#endif TARGET_OS_MAC
+    KeyMap key_map;
+    GetKeys(&key_map);
+    return key_map.get(Keys::COMMAND);
 }
 
-void GetKeyNumName(short key_num, sfz::String* out) {
-    StringList strings(kKeyMapNameID);
+void GetKeyNumName(int key_num, sfz::String* out) {
+    StringList strings(KEY_NAMES);
     out->assign(strings.at(key_num - 1));
 }
 
 // returns true if any keys OTHER THAN POWER ON AND CAPS LOCK are down
 
 bool AnyRealKeyDown() {
-    KeyMap  keyMap;
+    KeyMap key_map;
+    GetKeys(&key_map);
 
-    GetKeys( keyMap);
+    key_map.set(Keys::POWER, false);
+    key_map.set(Keys::CAPS_LOCK, false);
 
-#if TARGET_OS_MAC
-    keyMap[3] &= ~0x80; // mask out power key
-    keyMap[1] &= ~0x02; // mask out caps lock key
-
-    if (( keyMap[0]) || ( keyMap[1]) || ( keyMap[2]) ||
-        ( keyMap[3])) return ( true);
-#else
-    keyMap[3].bigEndianValue &= EndianU32_NtoB(~0x80);  // mask out power key
-    keyMap[1].bigEndianValue &= EndianU32_NtoB(~0x02);  // mask out caps lock key
-
-    if (( keyMap[0].bigEndianValue) || ( keyMap[1].bigEndianValue) || ( keyMap[2].bigEndianValue) ||
-        ( keyMap[3].bigEndianValue)) return ( true);
-#endif TARGET_OS_MAC
-    else return ( false);
+    return key_map.any();
 }
 
-bool AnyKeyButThisOne( KeyMap keyMap, long whichWord, long whichBit) {
-    long    i;
-
-    for ( i = 0; i < 4; i++)
-    {
-        if ( i != whichWord)
-        {
-#if TARGET_OS_MAC
-            if ( keyMap[i] != 0) return true;
-#else
-            if ( keyMap[i].bigEndianValue != 0) return true;
-#endif TARGET_OS_MAC
-        } else
-        {
-#if TARGET_OS_MAC
-            if ( (keyMap[i] & ~(0x00000001 << whichBit)) != 0) return true;
-#else
-            if ( (EndianU32_BtoN(keyMap[i].bigEndianValue) & ~(0x00000001 << whichBit)) != 0) return true;
-#endif TARGET_OS_MAC
-        }
-    }
-
-    return false;
+bool AnyKeyButThisOne(const KeyMap& key_map, int key_num) {
+    KeyMap others;
+    others.copy(key_map);
+    others.set(key_num, false);
+    return others.any();
 }
 
-long GetAsciiFromKeyMap( KeyMap sourceKeyMap, KeyMap previousKeyMap) {
+long GetAsciiFromKeyMap(const KeyMap& sourceKeyMap, const KeyMap& previousKeyMap) {
+    // TODO(sfiera): write a new implementation of this method.
+    static_cast<void>(sourceKeyMap);
+    static_cast<void>(previousKeyMap);
+    return 0;
+    /*
     short           whichKeyCode = 0, modifiers = 0, count;
     long            result;
     Ptr             KCHRPtr;
     KeyMap          keyMap;
 
-#if TARGET_OS_MAC
-    if ( previousKeyMap == nil)
-    {
+    if ( previousKeyMap == nil) {
         for ( count = 0; count < 4; count++)
             keyMap[count] = sourceKeyMap[count];
-    } else
-    {
+    } else {
         keyMap[0] = sourceKeyMap[0] & (~previousKeyMap[0]);
         keyMap[1] = sourceKeyMap[1] & ((~previousKeyMap[1]) | kModifierKeyMask);
         keyMap[2] = sourceKeyMap[2] & (~previousKeyMap[2]);
         keyMap[3] = sourceKeyMap[3] & (~previousKeyMap[3]);
     }
 
-    if ( keyMap[1] & 0x0008)
-    {
+    if ( keyMap[1] & 0x0008) {
         keyMap[1] &= ~0x0008;
     }   // turn off control key
 
-    if ( keyMap[1] & 0x8000)
-    {
+    if ( keyMap[1] & 0x8000) {
         modifiers |= cmdKey;
         keyMap[1] &= ~0x8000;   // turn off command key
     }
 
-    if ( keyMap[1] & 0x0004)
-    {
+    if ( keyMap[1] & 0x0004) {
         modifiers |= optionKey;
         keyMap[1] &= ~0x0004;   // turn off option key
     }
 
-    if ( keyMap[1] & 0x0001)
-    {
+    if ( keyMap[1] & 0x0001) {
         modifiers |= shiftKey;
         keyMap[1] &= ~0x0001;   // turn off shift key
     }
 
-    if ( keyMap[1] & 0x0002)
-    {
+    if ( keyMap[1] & 0x0002) {
         modifiers |= alphaLock;
         keyMap[1] &= 0x0002;    // turn caps lock key
     }
 
-#else
-    if ( previousKeyMap == nil)
-    {
-        for ( count = 0; count < 4; count++)
-            keyMap[count].bigEndianValue = sourceKeyMap[count].bigEndianValue;
-    } else
-    {
-        keyMap[0].bigEndianValue = sourceKeyMap[0].bigEndianValue & (~previousKeyMap[0].bigEndianValue);
-        keyMap[1].bigEndianValue = sourceKeyMap[1].bigEndianValue & ((~previousKeyMap[1].bigEndianValue) | EndianU32_NtoB(kModifierKeyMask));
-        keyMap[2].bigEndianValue = sourceKeyMap[2].bigEndianValue & (~previousKeyMap[2].bigEndianValue);
-        keyMap[3].bigEndianValue = sourceKeyMap[3].bigEndianValue & (~previousKeyMap[3].bigEndianValue);
-    }
-
-    if ( keyMap[1].bigEndianValue & EndianU32_NtoB(0x0008))
-    {
-        keyMap[1].bigEndianValue &= EndianU32_NtoB(~0x0008);
-    }   // turn off control key
-
-    if ( keyMap[1].bigEndianValue & EndianU32_NtoB(0x8000))
-    {
-        modifiers |= cmdKey;
-        keyMap[1].bigEndianValue &= EndianU32_NtoB(~0x8000);    // turn off command key
-    }
-
-    if ( keyMap[1].bigEndianValue & EndianU32_NtoB(0x0004))
-    {
-        modifiers |= optionKey;
-        keyMap[1].bigEndianValue &= EndianU32_NtoB(~0x0004);    // turn off option key
-    }
-
-    if ( keyMap[1].bigEndianValue & EndianU32_NtoB(0x0001))
-    {
-        modifiers |= shiftKey;
-        keyMap[1].bigEndianValue &= EndianU32_NtoB(~0x0001);    // turn off shift key
-    }
-
-    if ( keyMap[1].bigEndianValue & EndianU32_NtoB(0x0002))
-    {
-        modifiers |= alphaLock;
-        keyMap[1].bigEndianValue &= EndianU32_NtoB(0x0002); // turn caps lock key
-    }
-
-#endif TARGET_OS_MAC
     whichKeyCode = (GetKeyNumFromKeyMap( keyMap) - 1) | modifiers;
     KCHRPtr = reinterpret_cast<Ptr>(GetScriptManagerVariable( smKCHRCache));
     result = KeyTranslate( KCHRPtr, whichKeyCode, &gKeyTranslateState);
 
-    return( result);
+    return result;
+    */
 }
 
 }  // namespace antares

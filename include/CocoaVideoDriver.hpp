@@ -22,6 +22,7 @@
 #include "sfz/Macros.hpp"
 #include "Base.h"
 #include "Geometry.hpp"
+#include "KeyMapTranslation.hpp"
 #include "VideoDriver.hpp"
 
 namespace antares {
@@ -33,7 +34,7 @@ class CocoaVideoDriver : public VideoDriver {
     CocoaVideoDriver();
     virtual bool button();
     virtual Point get_mouse();
-    virtual void get_keys(KeyMap k);
+    virtual void get_keys(KeyMap* k);
 
     virtual void set_game_state(GameState state);
     virtual int get_demo_scenario();

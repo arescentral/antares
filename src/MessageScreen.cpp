@@ -432,7 +432,7 @@ void ClipToCurrentLongMessage( void)
             {
                 Resource rsrc('TEXT', tmessage->currentResID);
                 textData.reset(new String(rsrc.data(), mac_roman_encoding()));
-                Replace_KeyCode_Strings_With_Actual_Key_Names(textData.get(), kKeyMapNameLongID, 0);
+                Replace_KeyCode_Strings_With_Actual_Key_Names(textData.get(), KEY_LONG_NAMES, 0);
                 if (textData->at(0) == '#') {
                     tmessage->labelMessage = true;
                 }

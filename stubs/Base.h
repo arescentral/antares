@@ -59,9 +59,6 @@ typedef FourCharCode ResType;
 class RgbColor;
 void Index2Color(long index, RgbColor* color);
 
-typedef uint32_t KeyMap[4];
-void GetKeys(KeyMap keys);
-
 struct Rgn { };
 typedef Rgn* RgnPtr;
 typedef Rgn** RgnHandle;
@@ -92,9 +89,6 @@ long AngleFromSlope(Fixed slope);
 long Random();
 
 void StringToNum(unsigned char* string, long* value);
-
-STUB1(GetScriptManagerVariable, Ptr(int cache), NULL);
-STUB3(KeyTranslate, long(Ptr kchr, short keyCode, unsigned long* keyTranslateState), 0);
 
 }  // namespace antares
 

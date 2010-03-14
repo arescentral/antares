@@ -376,7 +376,7 @@ short InterfaceKeyDown(long message) {
             mPlayButtonDown;
             KeyMap key_map;
             do {
-                GetKeys(key_map);
+                GetKeys(&key_map);
             } while (GetKeyNumFromKeyMap(key_map) == button_key);
             SetStatusOfAnyInterfaceItem(hit_number, kActive, false);
 

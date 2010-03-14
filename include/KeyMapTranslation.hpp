@@ -1,16 +1,16 @@
 // Ares, a tactical space combat game.
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// 
+//
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
 // as published by the Free Software Foundation; either version 2
 // of the License, or (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -18,66 +18,165 @@
 #ifndef ANTARES_KEY_MAP_TRANSLATION_HPP_
 #define ANTARES_KEY_MAP_TRANSLATION_HPP_
 
-#include "Base.h"
+#include <stdint.h>
+#include "sfz/Macros.hpp"
 #include "sfz/String.hpp"
 
 namespace antares {
 
-#define kKeyMapNameID           1000
-#define kKeyMapNameLongID       1002
+class KeyMap {
+  public:
+    KeyMap();
 
-#define kKeyNameLength      4
+    bool get(size_t index) const;
+    void set(size_t index, bool value);
 
-inline bool mF1Key(KeyMap km)         { return (km[3] >> 2) & 0x01; }       // F1
-inline bool mF2Key(KeyMap km)         { return km[3] & 0x01; }          // F2
-inline bool mF3Key(KeyMap km)         { return (km[3] >> 27) & 0x01; }  // F3
-inline bool mF4Key(KeyMap km)         { return (km[3] >> 14) & 0x01; }  // F4
+    bool any() const;
+    bool equals(const KeyMap& other) const;
+    void copy(const KeyMap& other);
+    void clear();
 
-inline bool mF5Key(KeyMap km)         { return (km[3] >> 24) & 0x01; }  // F5
-inline bool mF6Key(KeyMap km)         { return (km[3] >> 25) & 0x01; }  // F6
-inline bool mF7Key(KeyMap km)         { return (km[3] >> 26) & 0x01; }  // F7
-inline bool mF8Key(KeyMap km)         { return (km[3] >> 28) & 0x01; }  // F8
+  private:
+    typedef uint8_t Data[16];
+    static const size_t kDataSize = sizeof(Data);
 
-inline bool mF9Key(KeyMap km)         { return (km[3] >> 29) & 0x01; }  // F9
-inline bool mF10Key(KeyMap km)        { return (km[3] >> 21) & 0x01; }  // F10
-inline bool mF11Key(KeyMap km)        { return (km[3] >> 31) & 0x01; }  // F11
-inline bool mF12Key(KeyMap km)        { return (km[3] >> 23) & 0x01; }  // F12
+    Data _data;
 
-inline bool mF13Key(KeyMap km)        { return (km[3] >> 17) & 0x01; }  // F13
-inline bool mF14Key(KeyMap km)        { return (km[3] >> 19) & 0x01; }  // F14
-inline bool mF15Key(KeyMap km)        { return (km[3] >> 9) & 0x01; }       // F15
+    DISALLOW_COPY_AND_ASSIGN(KeyMap);
+};
 
-inline bool m1Key(KeyMap km)          { return (km[0] >> 10) & 0x01; }      // 1
-inline bool m2Key(KeyMap km)          { return (km[0] >> 11) & 0x01; }  // 2
-inline bool m3Key(KeyMap km)          { return (km[0] >> 12) & 0x01; }  // 3
-inline bool m4Key(KeyMap km)          { return (km[0] >> 13) & 0x01; }  // 4
-inline bool m5Key(KeyMap km)          { return (km[0] >> 15) & 0x01; }  // 5
-inline bool m6Key(KeyMap km)          { return (km[0] >> 14) & 0x01; }  // 6
-inline bool m7Key(KeyMap km)          { return (km[0] >> 2) & 0x01; }   // 7
-inline bool m8Key(KeyMap km)          { return (km[0] >> 4) & 0x01; }   // 8
-inline bool m9Key(KeyMap km)          { return (km[0] >> 1) & 0x01; }   // 9
-inline bool m0Key(KeyMap km)          { return (km[0] >> 5) & 0x01; }   // 0
-inline bool mMinusKey(KeyMap km)      { return (km[0] >> 3) & 0x01; }   // -
-inline bool mPlusKey(KeyMap km)       { return (km[0] & 0x01); }         // +
+bool operator==(const KeyMap& a, const KeyMap& b);
+bool operator!=(const KeyMap& a, const KeyMap& b);
 
+void GetKeys(KeyMap* keys);
 
-inline bool mDeleteKey(KeyMap km)     { return (km[1] >> 11) & 0x01; }  // delete
-inline bool mCapsLockKey(KeyMap km)   { return (km[1] >> 1) & 0x01; }   // CAPS-LOCK
-inline bool mReturnKey(KeyMap km)     { return (km[1] >> 28) & 0x01; }  // return
-inline bool mEscKey(KeyMap km)        { return (km[1] >> 13) & 0x01; }  // esc key
-inline bool mQKey(KeyMap km)          { return (km[0] >> 20) & 0x01; }   // Q for Quitting
-inline bool mCommandKey(KeyMap km)    { return (km[1] >> 15) & 0x01; }   // command key
-inline bool mLeftArrowKey(KeyMap km)  { return (km[3] >> 3) & 0x01; }   // left arrow/backspace
+struct Keys {
+    enum Key {
+        // Letters, A-Z.
+        A           = 0x00,
+        B           = 0x0b,
+        C           = 0x08,
+        D           = 0x02,
+        E           = 0x0e,
+        F           = 0x03,
+        G           = 0x05,
+        H           = 0x04,
+        I           = 0x22,
+        J           = 0x26,
+        K           = 0x28,
+        L           = 0x25,
+        M           = 0x2e,
+        N           = 0x2d,
+        O           = 0x1f,
+        P           = 0x23,
+        Q           = 0x0c,
+        R           = 0x0f,
+        S           = 0x01,
+        T           = 0x11,
+        U           = 0x20,
+        V           = 0x09,
+        W           = 0x0d,
+        X           = 0x07,
+        Y           = 0x10,
+        Z           = 0x06,
 
-#define kModifierKeyMask    (0x0008 | 0x8000 | 0x0004 | 0x0001 | 0x0002) // applies only to keyMap[1]
+        // Numbers, 0-9.
+        K0          = 0x1d,
+        K1          = 0x12,
+        K2          = 0x13,
+        K3          = 0x14,
+        K4          = 0x15,
+        K5          = 0x17,
+        K6          = 0x16,
+        K7          = 0x1a,
+        K8          = 0x1c,
+        K9          = 0x19,
 
-void GetKeyMapFromKeyNum( short, KeyMap);
-short GetKeyNumFromKeyMap( KeyMap);
+        MINUS       = 0x18,
+        PLUS        = 0x1b,
+
+        SPACE       = 0x31,
+        TAB         = 0x30,
+        RETURN      = 0x24,
+        BACKSPACE   = 0x33,
+        ESCAPE      = 0x35,
+
+        // Modifier keys.
+        COMMAND     = 0x37,
+        SHIFT       = 0x38,
+        CAPS_LOCK   = 0x39,
+        OPTION      = 0x3a,
+        CONTROL     = 0x3b,
+
+        // Arrow keys.
+        LEFT_ARROW  = 0x7b,
+        RIGHT_ARROW = 0x7c,
+        UP_ARROW    = 0x7e,
+        DOWN_ARROW  = 0x7d,
+
+        // Keys above arrow keys.
+        DELETE      = 0x75,
+        PAGE_DOWN   = 0x77,
+        END         = 0x79,
+        HELP        = 0x72,
+        PAGE_UP     = 0x73,
+        HOME        = 0x74,
+
+        // Numeric keypad, numbers 0-9.
+        N0          = 0x52,
+        N1          = 0x53,
+        N2          = 0x54,
+        N3          = 0x55,
+        N4          = 0x56,
+        N5          = 0x57,
+        N6          = 0x58,
+        N7          = 0x59,
+        N8          = 0x5b,
+        N9          = 0x5c,
+
+        // Function keys.
+        F1          = 0x7a,
+        F2          = 0x78,
+        F3          = 0x63,
+        F4          = 0x76,
+        F5          = 0x60,
+        F6          = 0x61,
+        F7          = 0x62,
+        F8          = 0x64,
+        F9          = 0x65,
+        F10         = 0x6d,
+        F11         = 0x67,
+        F12         = 0x6f,
+        F13         = 0x69,
+        F14         = 0x6b,
+        F15         = 0x71,
+
+        // Miscellaneous.
+        POWER       = 0x7f,
+    };
+};
+
+enum {
+    KEY_NAMES = 1000,
+    KEY_LONG_NAMES = 1002,
+};
+const int kKeyNameLength = 4;
+
+inline bool mDeleteKey(const KeyMap& km)     { return km.get(Keys::BACKSPACE); }
+inline bool mCapsLockKey(const KeyMap& km)   { return km.get(Keys::CAPS_LOCK); }
+inline bool mReturnKey(const KeyMap& km)     { return km.get(Keys::RETURN); }
+inline bool mEscKey(const KeyMap& km)        { return km.get(Keys::ESCAPE); }
+inline bool mQKey(const KeyMap& km)          { return km.get(Keys::Q); }
+inline bool mCommandKey(const KeyMap& km)    { return km.get(Keys::COMMAND); }
+inline bool mLeftArrowKey(const KeyMap& km)  { return km.get(Keys::LEFT_ARROW); }
+
+void GetKeyMapFromKeyNum(int key_num, KeyMap* key_map);
+int GetKeyNumFromKeyMap(const KeyMap& key_map);
 bool CommandKey( void);
-void GetKeyNumName(short key_num, sfz::String* out);
-bool AnyRealKeyDown( void);
-bool AnyKeyButThisOne( KeyMap, long, long);
-long GetAsciiFromKeyMap( KeyMap, KeyMap);
+void GetKeyNumName(int key_num, sfz::String* out);
+bool AnyRealKeyDown();
+bool AnyKeyButThisOne(const KeyMap& key_map, int key_num);
+long GetAsciiFromKeyMap(const KeyMap&, const KeyMap&);
 
 }  // namespace antares
 

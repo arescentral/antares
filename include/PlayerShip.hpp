@@ -40,7 +40,7 @@ void TogglePlayerAutoPilot( spaceObjectType *);
 bool IsPlayerShipOnAutoPilot( void);
 void PlayerShipGiveCommand( long);
 void PlayerShipBodyExpire( spaceObjectType *, bool);
-void HandleTextMessageKeys( KeyMap, KeyMap, bool *);
+void HandleTextMessageKeys(const KeyMap&, const KeyMap&, bool *);
 
 }  // namespace antares
 
