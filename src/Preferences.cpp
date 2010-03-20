@@ -18,6 +18,7 @@
 #include "Preferences.hpp"
 
 #include "sfz/BinaryReader.hpp"
+#include "sfz/Exception.hpp"
 #include "AresGlobalType.hpp"
 #include "Error.hpp"
 #include "KeyMapTranslation.hpp"
@@ -26,8 +27,26 @@
 
 using sfz::BinaryReader;
 using sfz::BytesBinaryReader;
+using sfz::Exception;
+using sfz::scoped_ptr;
 
 namespace antares {
+
+scoped_ptr<Preferences> Preferences::_preferences;
+
+Preferences* Preferences::preferences() {
+    if (_preferences.get() == NULL) {
+        throw Exception("Called Preferences::preferences() before Preferences::set_preferences()");
+    }
+    return _preferences.get();
+}
+
+void Preferences::set_preferences(Preferences* preferences) {
+    if (preferences == NULL) {
+        throw Exception("Called Preferences::set_preferences(NULL)");
+    }
+    _preferences.reset(preferences);
+}
 
 Preferences::Preferences() {
     Resource rsrc('ArPr', 1000);
@@ -56,6 +75,16 @@ Preferences::Preferences() {
 }
 
 Preferences::~Preferences() { }
+
+void Preferences::copy(const Preferences& preferences) {
+    for (size_t i = 0; i < kKeyControlDataNum; ++i) {
+        set_key(i, preferences.key(i));
+    }
+    set_play_idle_music(preferences.play_idle_music());
+    set_play_music_in_game(preferences.play_music_in_game());
+    set_speech_on(preferences.speech_on());
+    set_volume(preferences.volume());
+}
 
 uint32_t Preferences::key(size_t index) const {
     return _key_map[index];

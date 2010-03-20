@@ -254,7 +254,7 @@ Card* AresInit() {
     gPlayScreenWidth = CLIP_RIGHT - CLIP_LEFT;
     gPlayScreenHeight = CLIP_BOTTOM - CLIP_TOP;
 
-    globals()->gPreferencesData.reset(new Preferences);
+    Preferences::set_preferences(new Preferences);
 
     GetDateTime( reinterpret_cast<unsigned long *>(&gRandomSeed));
 
@@ -279,7 +279,7 @@ Card* AresInit() {
 
     InterfaceHandlingInit();
 
-    if (globals()->gPreferencesData->play_idle_music()) {
+    if (Preferences::preferences()->play_idle_music()) {
         LoadSong( kTitleSongID);
         SetSongVolume( kMaxMusicVolume);
         PlaySong();
@@ -328,7 +328,7 @@ void MainPlay::become_front() {
             RemoveAllSpaceObjects();
             globals()->gGameOver = 0;
 
-            if (globals()->gPreferencesData->play_idle_music()) {
+            if (Preferences::preferences()->play_idle_music()) {
                 LoadSong(3000);
                 SetSongVolume( kMaxMusicVolume);
                 PlaySong();
@@ -359,14 +359,14 @@ void MainPlay::become_front() {
             }
 
             _state = PLAYING;
-            if (globals()->gPreferencesData->play_idle_music()) {
+            if (Preferences::preferences()->play_idle_music()) {
                 StopAndUnloadSong();
             }
 
             ResetInstruments();
             DrawInstrumentPanel();
 
-            if (globals()->gPreferencesData->play_music_in_game()) {
+            if (Preferences::preferences()->play_music_in_game()) {
                 LoadSong(gThisScenario->songID);
                 SetSongVolume(kMusicVolume);
                 PlaySong();
@@ -382,7 +382,7 @@ void MainPlay::become_front() {
       case PLAYING:
         {
             VideoDriver::driver()->set_game_state(DONE_GAME);
-            if (globals()->gPreferencesData->play_music_in_game()) {
+            if (Preferences::preferences()->play_music_in_game()) {
                 StopAndUnloadSong();
             }
             stack()->pop(this);
@@ -668,9 +668,9 @@ void GamePlay::fire_timer() {
     if (!_replay
             && mVolumeDownKey(_key_map)
             && !mVolumeDownKey(_last_key_map)) {
-        globals()->gPreferencesData->set_volume(
-                max(0, globals()->gPreferencesData->volume() - 1));
-        if ( globals()->gPreferencesData->play_music_in_game()) {
+        Preferences::preferences()->set_volume(
+                max(0, Preferences::preferences()->volume() - 1));
+        if (Preferences::preferences()->play_music_in_game()) {
             SetSongVolume(kMusicVolume);
         }
     }
@@ -678,9 +678,9 @@ void GamePlay::fire_timer() {
     if (!_replay
             && mVolumeUpKey(_key_map)
             && !mVolumeUpKey(_last_key_map)) {
-        globals()->gPreferencesData->set_volume(
-                min(kMaxVolumePreference, globals()->gPreferencesData->volume() + 1));
-        if (globals()->gPreferencesData->play_music_in_game()) {
+        Preferences::preferences()->set_volume(
+                min(kMaxVolumePreference, Preferences::preferences()->volume() + 1));
+        if (Preferences::preferences()->play_music_in_game()) {
             SetSongVolume( kMusicVolume);
         }
     }
@@ -688,7 +688,7 @@ void GamePlay::fire_timer() {
     if (!_replay
             && mActionMusicKey(_key_map)
             && !mActionMusicKey(_last_key_map)) {
-        if (globals()->gPreferencesData->play_music_in_game()) {
+        if (Preferences::preferences()->play_music_in_game()) {
             ToggleSong();
         }
     }

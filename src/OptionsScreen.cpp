@@ -54,7 +54,7 @@ extern PixMap* gRealWorld;
 
 OptionsScreen::OptionsScreen()
     : _state(SOUND_CONTROL),
-      _preferences(new Preferences(*globals()->gPreferencesData)) { }
+      _preferences(new Preferences(*Preferences::preferences())) { }
 
 void OptionsScreen::become_front() {
     switch (_state) {
@@ -67,7 +67,7 @@ void OptionsScreen::become_front() {
         break;
 
       case ACCEPT:
-        globals()->gPreferencesData.reset(_preferences.release());
+        Preferences::preferences()->copy(*_preferences);
         stack()->pop(this);
         break;
 

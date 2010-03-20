@@ -185,7 +185,7 @@ void SoloGame::debriefing_done() {
 }
 
 void SoloGame::epilogue_done() {
-    if (globals()->gPreferencesData->play_idle_music()) {
+    if (Preferences::preferences()->play_idle_music()) {
         gRealWorld->fill(RgbColor::kBlack);
         StopAndUnloadSong();
     }

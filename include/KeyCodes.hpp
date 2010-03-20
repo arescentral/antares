@@ -127,7 +127,7 @@ namespace antares {
 #define kMiscKeyMask                (~(kMotionKeyMask | kWeaponKeyMask | kSpecialKeyMask))
 
 inline bool mCheckKeyMap(const KeyMap& mKeyMap, int mki) {
-    return mKeyMap.get(globals()->gPreferencesData->key(mki) - 1);
+    return mKeyMap.get(Preferences::preferences()->key(mki) - 1);
 }
 
 //#define   mHelpKey                mF1Key

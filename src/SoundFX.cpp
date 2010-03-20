@@ -73,7 +73,7 @@ void InitSoundFX() {
 void PlayVolumeSound(
         short whichSoundID, short amplitude, short persistence, soundPriorityType priority) {
     short oldestSoundTime = -kLongPersistence, whichChannel = -1;
-    const int global_volume = globals()->gPreferencesData->volume();
+    const int global_volume = Preferences::preferences()->volume();
 
     if ((global_volume > 0) && (amplitude > 0)) {
         int timeDif = TickCount() - globals()->gLastSoundTime;

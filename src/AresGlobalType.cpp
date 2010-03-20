@@ -26,7 +26,6 @@
 #include "Minicomputer.hpp"
 #include "Motion.hpp"
 #include "Options.hpp"
-#include "Preferences.hpp"
 #include "ScreenLabel.hpp"
 #include "ScrollStars.hpp"
 #include "SpriteHandling.hpp"
@@ -54,7 +53,6 @@ aresGlobalType::aresGlobalType() {
     gForceDemoLevel = 1;
     gFrameCount = 0;
     gGameOver = 1;
-    gPreferenceRefNum = 0;
     gWarpStars = false;
     gLastClipBottom = 0;
     gScrollStarNumber = -1;

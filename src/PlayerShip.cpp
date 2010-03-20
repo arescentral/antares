@@ -132,7 +132,7 @@ bool PlayerShipGetKeys(long timePass, unsigned long theKeys, bool *enterMessage)
         globals()->gTheseKeys = 0;
 
         for (int i = 0; i < kKeyControlNum; ++i) {
-            if (keyMap.get(globals()->gPreferencesData->key(i) - 1)) {
+            if (keyMap.get(Preferences::preferences()->key(i) - 1)) {
                 globals()->gTheseKeys |= (0x01 << i) & ~globals()->keyMask;
             }
         }
@@ -959,7 +959,7 @@ unsigned char* HotKey_AppendString(spaceObjectType *object, unsigned char* s) {
         return s;
     }
 
-    int keyNum = globals()->gPreferencesData->key(h + kFirstHotKeyNum);
+    int keyNum = Preferences::preferences()->key(h + kFirstHotKeyNum);
     if (keyNum < 0) {
         return s;
     }

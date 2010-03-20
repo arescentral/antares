@@ -677,8 +677,7 @@ void MakeMiniScreenFromIndString( short whichString)
                     {
                         sfz::String key_name;
                         GetKeyNumName(
-                                globals()->gPreferencesData->key(kCompAcceptKeyNum),
-                                &key_name);
+                                Preferences::preferences()->key(kCompAcceptKeyNum), &key_name);
                         string_to_pstring(key_name, keyname);
                     }
                     keyc = keyname;
@@ -731,8 +730,7 @@ void MakeMiniScreenFromIndString( short whichString)
                     {
                         sfz::String key_name;
                         GetKeyNumName(
-                                globals()->gPreferencesData->key(kCompCancelKeyNum),
-                                &key_name);
+                                Preferences::preferences()->key(kCompCancelKeyNum), &key_name);
                         string_to_pstring(key_name, keyname);
                     }
                     keyc = keyname;

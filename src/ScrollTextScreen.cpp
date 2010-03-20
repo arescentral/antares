@@ -50,7 +50,7 @@ ScrollTextScreen::ScrollTextScreen(int text_id, int width, double speed, int son
 
 void ScrollTextScreen::become_front() {
     // If a song was requested, play it.
-    if (_play_song && globals()->gPreferencesData->play_idle_music()) {
+    if (_play_song && Preferences::preferences()->play_idle_music()) {
         if (SongIsPlaying()) {
             StopAndUnloadSong();
         }

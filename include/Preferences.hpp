@@ -18,6 +18,7 @@
 #ifndef ANTARES_PREFERENCES_HPP_
 #define ANTARES_PREFERENCES_HPP_
 
+#include "sfz/SmartPtr.hpp"
 #include "Base.h"
 
 namespace sfz { class BinaryReader; }
@@ -38,8 +39,13 @@ struct serialNumberType {
 
 class Preferences {
   public:
+    static Preferences* preferences();
+    static void set_preferences(Preferences* preferences);
+
     Preferences();
     ~Preferences();
+
+    void copy(const Preferences& preferences);
 
     uint32_t key(size_t index) const;
     bool play_idle_music() const;
@@ -56,6 +62,8 @@ class Preferences {
     size_t load_data(const char* data, size_t len);
 
   private:
+    static sfz::scoped_ptr<Preferences> _preferences;
+
     int32_t             _version;
     int16_t             _key_map[kKeyControlDataNum];
     serialNumberType    _serial_number;
