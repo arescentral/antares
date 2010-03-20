@@ -20,10 +20,10 @@
 #include <fcntl.h>
 #include "sfz/Exception.hpp"
 #include "sfz/Format.hpp"
-#include "AresPreferences.hpp"
 #include "Error.hpp"
 #include "Fakes.hpp"
 #include "File.hpp"
+#include "Preferences.hpp"
 
 using sfz::Bytes;
 using sfz::Exception;

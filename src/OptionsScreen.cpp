@@ -21,7 +21,6 @@
 #include <set>
 #include "sfz/Exception.hpp"
 #include "AresMain.hpp"
-#include "AresPreferences.hpp"
 #include "CardStack.hpp"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
@@ -32,6 +31,7 @@
 #include "Options.hpp"
 #include "PlayerInterface.hpp"
 #include "PlayerInterfaceItems.hpp"
+#include "Preferences.hpp"
 #include "RetroText.hpp"
 #include "ScenarioMaker.hpp"
 #include "StringList.hpp"

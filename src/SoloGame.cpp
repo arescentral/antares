@@ -19,7 +19,6 @@
 
 #include "Admiral.hpp"
 #include "AresGlobalType.hpp"
-#include "AresPreferences.hpp"
 #include "AresMain.hpp"
 #include "CardStack.hpp"
 #include "ColorTranslation.hpp"
@@ -31,6 +30,7 @@
 #include "SelectLevelScreen.hpp"
 #include "Music.hpp"
 #include "Options.hpp"
+#include "Preferences.hpp"
 #include "ScrollTextScreen.hpp"
 #include "Transitions.hpp"
 

@@ -22,7 +22,7 @@
 #include <vector>
 #include "sfz/SmartPtr.hpp"
 #include "InterfaceScreen.hpp"
-#include "AresPreferences.hpp"
+#include "Preferences.hpp"
 
 namespace antares {
 

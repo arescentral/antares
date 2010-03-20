@@ -15,8 +15,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_ARES_PREFERENCES_HPP_
-#define ANTARES_ARES_PREFERENCES_HPP_
+#ifndef ANTARES_PREFERENCES_HPP_
+#define ANTARES_PREFERENCES_HPP_
 
 #include "Base.h"
 
@@ -79,4 +79,4 @@ class Preferences {
 
 }  // namespace antares
 
-#endif // ANTARES_ARES_PREFERENCES_HPP_
+#endif // ANTARES_PREFERENCES_HPP_

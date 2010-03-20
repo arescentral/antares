@@ -18,12 +18,12 @@
 #include "LoadingScreen.hpp"
 
 #include "AresMain.hpp"
-#include "AresPreferences.hpp"
 #include "CardStack.hpp"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
 #include "OffscreenGWorld.hpp"
 #include "PlayerInterface.hpp"
+#include "Preferences.hpp"
 #include "RetroText.hpp"
 #include "ScenarioMaker.hpp"
 #include "StringList.hpp"

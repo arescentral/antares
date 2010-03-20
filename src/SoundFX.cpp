@@ -19,11 +19,11 @@
 
 #include "sfz/Exception.hpp"
 #include "AresGlobalType.hpp"
-#include "AresPreferences.hpp"
 #include "FakeSounds.hpp"
 #include "MathMacros.hpp"
 #include "MathSpecial.hpp"
 #include "Options.hpp"
+#include "Preferences.hpp"
 #include "SpaceObject.hpp"
 #include "UniverseUnit.hpp"
 

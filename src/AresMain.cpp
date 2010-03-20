@@ -25,9 +25,9 @@
 #include "Admiral.hpp"
 #include "AresCheat.hpp"
 #include "AresGlobalType.hpp"
-#include "AresPreferences.hpp"
 
 #include "Beam.hpp"
+#include "BriefingScreen.hpp"
 
 #include "Card.hpp"
 #include "CardStack.hpp"
@@ -55,7 +55,6 @@
 #include "MathSpecial.hpp"
 #include "MessageScreen.hpp"
 #include "Minicomputer.hpp"
-#include "BriefingScreen.hpp"
 #include "Motion.hpp"
 #include "Music.hpp"
 
@@ -69,6 +68,7 @@
 #include "PlayAgainScreen.hpp"
 #include "PlayerInterface.hpp"
 #include "PlayerShip.hpp"
+#include "Preferences.hpp"
 
 #include "Randomize.hpp"
 #include "Rotation.hpp"

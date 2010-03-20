@@ -18,7 +18,6 @@
 #include "AresGlobalType.hpp"
 
 #include "Admiral.hpp"
-#include "AresPreferences.hpp"
 #include "Beam.hpp"
 #include "ColorTable.hpp"
 #include "FakeSounds.hpp"
@@ -27,6 +26,7 @@
 #include "Minicomputer.hpp"
 #include "Motion.hpp"
 #include "Options.hpp"
+#include "Preferences.hpp"
 #include "ScreenLabel.hpp"
 #include "ScrollStars.hpp"
 #include "SpriteHandling.hpp"

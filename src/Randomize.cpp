@@ -20,9 +20,9 @@
 #include "Randomize.hpp"
 
 #include "AresGlobalType.hpp"
-#include "AresPreferences.hpp"
 #include "Debug.hpp"
 #include "Error.hpp"
+#include "Preferences.hpp"
 #include "StringHandling.hpp"
 #include "StringNumerics.hpp"
 

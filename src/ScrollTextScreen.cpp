@@ -18,12 +18,12 @@
 #include "ScrollTextScreen.hpp"
 
 #include "AresGlobalType.hpp"
-#include "AresPreferences.hpp"
 #include "BuildPix.hpp"
 #include "CardStack.hpp"
 #include "FakeDrawing.hpp"
 #include "Music.hpp"
 #include "Options.hpp"
+#include "Preferences.hpp"
 #include "Time.hpp"
 
 namespace antares {

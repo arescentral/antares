@@ -27,7 +27,6 @@
 #include "sfz/PosixFormatter.hpp"
 #include "sfz/ScopedFd.hpp"
 #include "sfz/SmartPtr.hpp"
-#include "AresPreferences.hpp"
 #include "BuildPix.hpp"
 #include "Card.hpp"
 #include "CardStack.hpp"
@@ -38,6 +37,7 @@
 #include "File.hpp"
 #include "Ledger.hpp"
 #include "PlayerInterface.hpp"
+#include "Preferences.hpp"
 #include "SpaceObject.hpp"
 #include "Time.hpp"
 

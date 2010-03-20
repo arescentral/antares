@@ -28,7 +28,6 @@
 #include "sfz/StringUtilities.hpp"
 
 #include "AresMain.hpp"
-#include "AresPreferences.hpp"
 #include "CardStack.hpp"
 #include "Error.hpp"
 #include "FakeDrawing.hpp"
@@ -37,6 +36,7 @@
 #include "ImageDriver.hpp"
 #include "Ledger.hpp"
 #include "LibpngImageDriver.hpp"
+#include "Preferences.hpp"
 #include "TestVideoDriver.hpp"
 #include "Threading.hpp"
 #include "VideoDriver.hpp"

@@ -18,8 +18,8 @@
 #ifndef ANTARES_KEY_CODES_HPP_
 #define ANTARES_KEY_CODES_HPP_
 
-#include "AresPreferences.hpp"
 #include "KeyMapTranslation.hpp"
+#include "Preferences.hpp"
 
 namespace antares {
 
