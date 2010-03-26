@@ -38,6 +38,7 @@
 #include "Ledger.hpp"
 #include "PlayerInterface.hpp"
 #include "Preferences.hpp"
+#include "PrefsDriver.hpp"
 #include "SpaceObject.hpp"
 #include "Time.hpp"
 
@@ -55,10 +56,34 @@ using sfz::scoped_ptr;
 
 namespace antares {
 
+namespace {
+
+class TestPrefsDriver : public PrefsDriver {
+  public:
+    TestPrefsDriver() { }
+
+    virtual void load(Preferences* preferences) {
+        preferences->copy(_saved);
+    }
+
+    virtual void save(const Preferences& preferences) {
+        _saved.copy(preferences);
+    }
+
+  private:
+    Preferences _saved;
+
+    DISALLOW_COPY_AND_ASSIGN(TestPrefsDriver);
+};
+
+}  // namespace
+
 TestingVideoDriver::TestingVideoDriver(const StringPiece& output_dir)
         : _current_time(0),
           _state(UNKNOWN),
-          _output_dir(output_dir) { }
+          _output_dir(output_dir) {
+    PrefsDriver::set_driver(new TestPrefsDriver);
+}
 
 bool TestingVideoDriver::button() { return false; }
 
@@ -206,6 +231,9 @@ DemoVideoDriver::DemoVideoDriver(const StringPiece& output_dir, int level)
     if (level != 0 && level != 5 && level != 23) {
         fail("Only have demos of levels 0, 5, and 23; not %d.", level);
     }
+    Preferences preferences;
+    preferences.set_volume(8);
+    PrefsDriver::driver()->save(preferences);
 }
 
 Event* DemoVideoDriver::wait_next_event(double) {

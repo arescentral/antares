@@ -23,12 +23,14 @@
 #include "sfz/String.hpp"
 #include "AresMain.hpp"
 #include "CardStack.hpp"
+#include "CocoaPrefsDriver.hpp"
 #include "CocoaVideoDriver.hpp"
 #include "FakeDrawing.hpp"
 #include "FakeSounds.hpp"
 #include "ImageDriver.hpp"
 #include "Ledger.hpp"
 #include "LibpngImageDriver.hpp"
+#include "PrefsDriver.hpp"
 #include "VideoDriver.hpp"
 
 using sfz::Bytes;
@@ -40,6 +42,7 @@ using sfz::utf8_encoding;
 using antares::AresInit;
 using antares::FakeDrawingInit;
 using antares::CardStack;
+using antares::CocoaPrefsDriver;
 using antares::CocoaVideoDriver;
 using antares::DirectoryLedger;
 using antares::ImageDriver;
@@ -47,6 +50,7 @@ using antares::Ledger;
 using antares::LibpngImageDriver;
 using antares::NullLedger;
 using antares::NullSoundDriver;
+using antares::PrefsDriver;
 using antares::SoundDriver;
 using antares::VideoDriver;
 
@@ -58,6 +62,7 @@ using antares::VideoDriver;
     ImageDriver::set_driver(new LibpngImageDriver);
     VideoDriver::set_driver(new CocoaVideoDriver);
     SoundDriver::set_driver(new NullSoundDriver);
+    PrefsDriver::set_driver(new CocoaPrefsDriver);
 
     if (getenv("HOME") == NULL) {
         Ledger::set_ledger(new NullLedger);

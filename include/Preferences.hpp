@@ -45,6 +45,7 @@ class Preferences {
     Preferences();
     ~Preferences();
 
+    void reset();
     void copy(const Preferences& preferences);
 
     uint32_t key(size_t index) const;

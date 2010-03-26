@@ -106,7 +106,6 @@ LogSoundDriver::LogSoundDriver(const StringPiece& path)
 }
 
 SndChannel* LogSoundDriver::new_channel() {
-    Preferences::preferences()->set_volume(8);
     return new LogSndChannel(++_last_id, _sound_log.get());
 }
 

@@ -32,6 +32,7 @@
 #include "PlayerInterface.hpp"
 #include "PlayerInterfaceItems.hpp"
 #include "Preferences.hpp"
+#include "PrefsDriver.hpp"
 #include "RetroText.hpp"
 #include "ScenarioMaker.hpp"
 #include "StringList.hpp"
@@ -54,24 +55,25 @@ extern PixMap* gRealWorld;
 
 OptionsScreen::OptionsScreen()
     : _state(SOUND_CONTROL),
-      _preferences(new Preferences(*Preferences::preferences())) { }
+      _preferences(Preferences::preferences()) { }
 
 void OptionsScreen::become_front() {
     switch (_state) {
       case SOUND_CONTROL:
-        stack()->push(new SoundControlScreen(&_state, _preferences.get()));
+        stack()->push(new SoundControlScreen(&_state, _preferences));
         break;
 
       case KEY_CONTROL:
-        stack()->push(new KeyControlScreen(&_state, _preferences.get()));
+        stack()->push(new KeyControlScreen(&_state, _preferences));
         break;
 
       case ACCEPT:
-        Preferences::preferences()->copy(*_preferences);
+        PrefsDriver::driver()->save(*_preferences);
         stack()->pop(this);
         break;
 
       case CANCEL:
+        PrefsDriver::driver()->load(_preferences);
         stack()->pop(this);
         break;
     }

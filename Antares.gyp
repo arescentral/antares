@@ -55,6 +55,7 @@
                 'src/AntaresController.mm',
                 'src/CocoaMain.mm',
                 'src/CocoaVideoDriver.mm',
+                'src/CocoaPrefsDriver.mm',
             ],
             'dependencies': [
                 'libAntares',
@@ -131,6 +132,7 @@
                 'src/PlayerInterfaceDrawing.cpp',
                 'src/PlayerShip.cpp',
                 'src/Preferences.cpp',
+                'src/PrefsDriver.cpp',
                 'src/Races.cpp',
                 'src/Randomize.cpp',
                 'src/ReplayGame.cpp',

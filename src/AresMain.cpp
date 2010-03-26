@@ -69,6 +69,7 @@
 #include "PlayerInterface.hpp"
 #include "PlayerShip.hpp"
 #include "Preferences.hpp"
+#include "PrefsDriver.hpp"
 
 #include "Randomize.hpp"
 #include "Rotation.hpp"
@@ -255,6 +256,7 @@ Card* AresInit() {
     gPlayScreenHeight = CLIP_BOTTOM - CLIP_TOP;
 
     Preferences::set_preferences(new Preferences);
+    PrefsDriver::driver()->load(Preferences::preferences());
 
     GetDateTime( reinterpret_cast<unsigned long *>(&gRandomSeed));
 

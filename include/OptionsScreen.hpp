@@ -20,7 +20,6 @@
 
 #include <utility>
 #include <vector>
-#include "sfz/SmartPtr.hpp"
 #include "InterfaceScreen.hpp"
 #include "Preferences.hpp"
 
@@ -40,7 +39,7 @@ class OptionsScreen : public Card {
 
   private:
     State _state;
-    sfz::scoped_ptr<Preferences> _preferences;
+    Preferences* _preferences;
 };
 
 class SoundControlScreen : public InterfaceScreen {

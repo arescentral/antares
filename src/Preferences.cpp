@@ -49,6 +49,12 @@ void Preferences::set_preferences(Preferences* preferences) {
 }
 
 Preferences::Preferences() {
+    reset();
+}
+
+Preferences::~Preferences() { }
+
+void Preferences::reset() {
     Resource rsrc('ArPr', 1000);
     BytesBinaryReader bin(rsrc.data());
 
@@ -73,8 +79,6 @@ Preferences::Preferences() {
     bin.read(&_net_level);
     bin.read(&_net_latency);
 }
-
-Preferences::~Preferences() { }
 
 void Preferences::copy(const Preferences& preferences) {
     for (size_t i = 0; i < kKeyControlDataNum; ++i) {
