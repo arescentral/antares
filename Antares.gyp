@@ -37,17 +37,6 @@
             ],
         },
         {
-            'target_name': 'AntaresVnc',
-            'type': 'executable',
-            'sources': [
-                'src/VncServer.cpp',
-                'src/VncMain.cpp',
-            ],
-            'dependencies': [
-                'libAntares',
-            ],
-        },
-        {
             'target_name': 'Antares',
             'type': 'executable',
             'mac_bundle': 1,

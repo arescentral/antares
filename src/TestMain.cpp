@@ -40,7 +40,6 @@
 #include "TestVideoDriver.hpp"
 #include "Threading.hpp"
 #include "VideoDriver.hpp"
-#include "VncServer.hpp"
 
 using sfz::Exception;
 using sfz::String;
