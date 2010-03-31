@@ -56,10 +56,9 @@ BriefingScreen::BriefingScreen(int scenario, bool* cancelled)
     for (int i = 0; i < 500; ++i) {
         RgbColor star_color;
         GetRGBTranslateColorShade(&star_color, GRAY, Randomize(kVisibleShadeNum) + DARKEST);
-        gSaveWorld->set(
-                map_rect.left + Randomize(map_rect.width()),
-                map_rect.top + Randomize(map_rect.height()),
-                star_color);
+        const int x = map_rect.left + Randomize(map_rect.width());
+        const int y = map_rect.top + Randomize(map_rect.height());
+        gSaveWorld->set(x, y, star_color);
     }
     gOffWorld->view(map_rect).copy(gSaveWorld->view(map_rect));
     gRealWorld->view(map_rect).copy(gSaveWorld->view(map_rect));

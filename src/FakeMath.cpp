@@ -21,6 +21,7 @@
 #include "Base.h"
 
 #include "Casts.hpp"
+#include "Randomize.hpp"
 
 namespace antares {
 
@@ -28,13 +29,10 @@ void WideMultiply(long a, long b, int64_t* c) {
     *c = implicit_cast<int64_t>(a) * implicit_cast<int64_t>(b);
 }
 
+int32_t global_seed = 0x84744901;
+
 long Random() {
-    static bool seeded = false;
-    if (!seeded) {
-        srand(0x84744901);
-        seeded = true;
-    }
-    return rand() & 0x7FFF;
+    return XRandomSeeded(0x8000, &global_seed);
 }
 
 struct AngleFromSlopeData {
