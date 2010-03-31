@@ -1227,7 +1227,7 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
     Rect            lRect, clipRect;
     Rect                mRect;
     bool             update = false;
-    unsigned char       digit[3], *digitp;
+    unsigned char       digit[4], *digitp;
     long                scratch;
 
     mSetDirectFont( kComputerFontNum);
