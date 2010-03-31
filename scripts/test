@@ -14,17 +14,27 @@ import termios
 import time
 
 
-ALL_TEST_CASES = {
-    'main-screen': ['main-screen'],
-    'mission-briefing': ['mission-briefing', '--level=22'],
-    'space-race': ['demo', '--level=23'],
-    'the-stars-have-ears': ['demo', '--level=0'],
-    'while-the-iron-is-hot': ['demo', '--level=5'],
-    'options': ['options'],
-    'object-data': ['object-data'],
-    'build-pix': ['build-pix'],
-}
+BINARY = './build/Default/AntaresTest'
+ARCHES = ['i386', 'ppc']
 SCRIPT_NAME = os.path.basename(sys.argv[0])
+
+def per_arch(cases):
+    result = {}
+    for arch in ARCHES:
+        for key, value in cases.iteritems():
+            result['%s/%s' % (key, arch)] = ['arch', '-%s' % arch] + value
+    return result
+
+ALL_TEST_CASES = per_arch({
+    'main-screen': [BINARY, 'main-screen'],
+    'mission-briefing': [BINARY, 'mission-briefing', '--level=22'],
+    'space-race': [BINARY, 'demo', '--level=23'],
+    'the-stars-have-ears': [BINARY, 'demo', '--level=0'],
+    'while-the-iron-is-hot': [BINARY, 'demo', '--level=5'],
+    'options': [BINARY, 'options'],
+    'object-data': [BINARY, 'object-data'],
+    'build-pix': [BINARY, 'build-pix'],
+})
 
 def usage():
     sys.stderr.write(
@@ -45,7 +55,7 @@ def error_and_usage(description):
 def main(argv):
     try:
         try:
-            opts, args = getopt.getopt(sys.argv[1:], 'a', [ 'all' ])
+            opts, args = getopt.getopt(sys.argv[1:], 'a', ['all'])
         except getopt.GetoptError, e:
             error_and_usage(str(e))
 
@@ -120,7 +130,7 @@ class TestCase(object):
             print('Running Antares...')
             with Timed():
                 antares = subprocess.Popen(
-                        ['./build/Default/AntaresTest'] + self.args + ['--output=%s' % dir],
+                        self.args + ['--output=%s' % dir],
                         stderr=subprocess.PIPE)
                 stdout, stderr = antares.communicate()
 
@@ -132,7 +142,7 @@ class TestCase(object):
             print('Diffing results...')
             with Timed():
                 diff = subprocess.Popen(
-                        ['diff', '-ru', 'test/%s' % self.name, dir],
+                        ['diff', '-ru', 'test/%s' % self.name.split('/')[0], dir],
                         stdout=subprocess.PIPE)
                 stdout, stderr = diff.communicate()
                 self.output += stdout
