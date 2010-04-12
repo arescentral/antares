@@ -94,12 +94,12 @@ void DirectoryLedger::load() {
         return;
     }
 
-    StringPiece data(file->data(), utf8_encoding());
+    String data(file->data(), utf8_encoding());
 
     // This is not a real JSON parser, but it plays on on the Interstellar News Network.  It simply
     // finds all integers in the file, which is fine for now.  The only numerical data we currently
     // write to the ledger is the chapter numbers, and all chapter numbers are integers.
-    foreach (it, data) {
+    foreach (it, StringPiece(data)) {
         String number;
         while ('0' <= *it && *it <= '9') {
             number.append(1, *it);

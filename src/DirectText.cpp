@@ -30,6 +30,7 @@
 using rezin::mac_roman_encoding;
 using sfz::Bytes;
 using sfz::BytesBinaryReader;
+using sfz::String;
 using sfz::StringPiece;
 using sfz::scoped_ptr;
 
@@ -43,7 +44,8 @@ namespace {
 
 uint8_t to_mac_roman(uint32_t code) {
     Bytes bytes;
-    mac_roman_encoding().encode(code, &bytes);
+    String string(1, code);
+    mac_roman_encoding().encode(string, &bytes);
     return bytes.at(0);
 }
 

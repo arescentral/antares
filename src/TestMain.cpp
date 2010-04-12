@@ -99,7 +99,7 @@ Test string_to_test(const char* string) {
 }
 
 void TestMain(int argc, char* const* argv) {
-    StringPiece program_name(argv[0], utf8_encoding());
+    String program_name(argv[0], utf8_encoding());
     int level = -1;
     String output_dir;
     option longopts[] = {
@@ -120,7 +120,7 @@ void TestMain(int argc, char* const* argv) {
         switch (ch) {
           case 'l':
             {
-                StringPiece opt(optarg, utf8_encoding());
+                String opt(optarg, utf8_encoding());
                 if (!string_to_int32_t(opt, &level)) {
                     throw Exception("invalid level {0}", quote(opt));
                 }

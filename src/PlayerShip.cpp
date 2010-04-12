@@ -19,6 +19,7 @@
 
 #include "PlayerShip.hpp"
 
+#include "rezin/MacRoman.hpp"
 #include "sfz/Exception.hpp"
 #include "Admiral.hpp"
 #include "AresCheat.hpp"
@@ -46,7 +47,9 @@
 #include "StringHandling.hpp"
 #include "UniverseUnit.hpp"
 
+using rezin::mac_roman_encoding;
 using sfz::Exception;
+using sfz::String;
 using sfz::scoped_array;
 
 namespace antares {
@@ -210,7 +213,8 @@ bool PlayerShipGetKeys(long timePass, unsigned long theKeys, bool *enterMessage)
                         }
                     }
                 }
-                mGetDirectStringDimensions(PStringPiece(message), width, height);
+                String text(PStringBytes(message), mac_roman_encoding());
+                mGetDirectStringDimensions(text, width, height);
                 strlen = CLIP_LEFT + (((CLIP_RIGHT - CLIP_LEFT) / 2) - (width / 2));
                 if ((strlen + width) > (CLIP_RIGHT))
                 {

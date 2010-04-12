@@ -412,7 +412,10 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
         GetIndString( string, 2004, 33);
 
         mSetDirectFont( kButtonFontNum);
-        mGetDirectStringDimensions(PStringPiece(string), width, height);
+        {
+            String text(PStringBytes(string), mac_roman_encoding());
+            mGetDirectStringDimensions(text, width, height);
+        }
 
         clipRect = *contentRect;
         tRect = Rect(0, 0, width, height);
@@ -420,7 +423,10 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
 
         GetRGBTranslateColorShade(&color, kLoadingScreenColor, LIGHTER);
         MoveTo( tRect.left, tRect.top + mDirectFontAscent());
-        DrawDirectTextStringClipped(PStringPiece(string), color, gOffWorld, clipRect, 0, 0);
+        {
+            String text(PStringBytes(string), mac_roman_encoding());
+            DrawDirectTextStringClipped(text, color, gOffWorld, clipRect, 0, 0);
+        }
 
 
         DrawInRealWorld();

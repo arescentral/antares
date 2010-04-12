@@ -22,14 +22,22 @@
 
 using sfz::Bytes;
 using sfz::Exception;
+using sfz::String;
 using sfz::StringPiece;
 using sfz::ascii_encoding;
 using sfz::utf8_encoding;
 
 namespace antares {
 
+namespace {
+
+const static String kSlash("/", ascii_encoding());
+const static String kDot(".", ascii_encoding());
+
+}  // namespace
+
 StringPiece BaseName(const StringPiece& path) {
-    if (path == StringPiece("/", ascii_encoding())) {
+    if (path == kSlash) {
         return path;
     }
     size_t pos = path.rfind('/', path.size() - 1);
@@ -45,9 +53,9 @@ StringPiece BaseName(const StringPiece& path) {
 StringPiece DirName(const StringPiece& path) {
     size_t pos = path.rfind('/', path.size() - 1);
     if (pos == 0) {
-        return StringPiece("/", ascii_encoding());
+        return kSlash;
     } else if (pos == StringPiece::kNone) {
-        return StringPiece(".", ascii_encoding());
+        return kDot;
     } else if (pos == path.size() - 1) {
         return DirName(path.substr(0, path.size() - 1));
     } else {

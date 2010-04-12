@@ -17,6 +17,7 @@
 
 #include "ScreenLabel.hpp"
 
+#include "rezin/MacRoman.hpp"
 #include "sfz/String.hpp"
 #include "Admiral.hpp"            // hack for checking strength
 #include "AresGlobalType.hpp"
@@ -29,6 +30,9 @@
 #include "OffscreenGWorld.hpp"
 #include "SpriteCursor.hpp"  // for hint line
 #include "StringHandling.hpp"
+
+using rezin::mac_roman_encoding;
+using sfz::String;
 
 namespace antares {
 
@@ -283,14 +287,14 @@ void DrawAllLabels( void)
                     {
                         String_Get_Nth_Line( s, label->label, j);
                         MoveTo( label->where.h+1+kLabelInnerSpace, y+1);
+                        String text(PStringBytes(s), mac_roman_encoding());
                         DrawDirectTextStringClipped(
-                                PStringPiece(s), RgbColor::kBlack, gOffWorld, clipRect, 0, 0);
+                                text, RgbColor::kBlack, gOffWorld, clipRect, 0, 0);
                         MoveTo( label->where.h-1+kLabelInnerSpace, y-1);
                         DrawDirectTextStringClipped(
-                                PStringPiece(s), RgbColor::kBlack, gOffWorld, clipRect, 0, 0);
+                                text, RgbColor::kBlack, gOffWorld, clipRect, 0, 0);
                         MoveTo( label->where.h+kLabelInnerSpace, y);
-                        DrawDirectTextStringClipped(
-                                PStringPiece(s), color, gOffWorld, clipRect, 0, 0);
+                        DrawDirectTextStringClipped(text, color, gOffWorld, clipRect, 0, 0);
                         y += label->lineHeight;
                     }
 
@@ -300,13 +304,12 @@ void DrawAllLabels( void)
                     GetRGBTranslateColorShade(&color, label->color, VERY_LIGHT);
                     MoveTo( label->where.h+1+kLabelInnerSpace, label->where.v +
                         gDirectText->ascent +1 + kLabelInnerSpace);
+                    String text(PStringBytes(label->label), mac_roman_encoding());
                     DrawDirectTextStringClipped(
-                            PStringPiece(label->label), RgbColor::kBlack, gOffWorld, clipRect, 0,
-                            0);
+                            text, RgbColor::kBlack, gOffWorld, clipRect, 0, 0);
                     MoveTo( label->where.h + kLabelInnerSpace,
                         label->where.v + gDirectText->ascent + kLabelInnerSpace);
-                    DrawDirectTextStringClipped(
-                            PStringPiece(label->label), color, gOffWorld, clipRect, 0, 0);
+                    DrawDirectTextStringClipped(text, color, gOffWorld, clipRect, 0, 0);
                 }
                 label->label[0] = originalLength;
 
@@ -689,7 +692,8 @@ void RecalcScreenLabelSize( long which) // do this if you mess with its string
             for ( i = 1; i <= lineNum; i++)
             {
                 String_Get_Nth_Line( tString, label->label, i);
-                mGetDirectStringDimensions(PStringPiece(tString), label->width, label->height);
+                String text(PStringBytes(tString), mac_roman_encoding());
+                mGetDirectStringDimensions(text, label->width, label->height);
                 label->width += kLabelTotalInnerSpace;
                 if ( label->width > maxWidth)
                     maxWidth = label->width;
@@ -701,7 +705,8 @@ void RecalcScreenLabelSize( long which) // do this if you mess with its string
         } else
         {
             label->lineNum = 1;
-            mGetDirectStringDimensions(PStringPiece(label->label), label->width, label->height);
+            String text(PStringBytes(label->label), mac_roman_encoding());
+            mGetDirectStringDimensions(text, label->width, label->height);
             label->width += kLabelTotalInnerSpace;
             label->lineHeight = label->height;
             label->height += kLabelTotalInnerSpace;

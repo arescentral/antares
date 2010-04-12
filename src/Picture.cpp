@@ -29,7 +29,7 @@
 using sfz::BytesBinaryReader;
 using sfz::Exception;
 using sfz::MappedFile;
-using sfz::StringPiece;
+using sfz::String;
 using sfz::utf8_encoding;
 
 namespace antares {
@@ -59,7 +59,8 @@ Picture::Picture(int32_t id)
         throw Exception("PICT {0} not found", id);
     }
 
-    MappedFile file(StringPiece(g.gl_pathv[0], utf8_encoding()));
+    String path(g.gl_pathv[0], utf8_encoding());
+    MappedFile file(path);
     BytesBinaryReader bin(file.data());
     ImageDriver::driver()->read(&bin, this);
 }

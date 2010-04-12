@@ -26,7 +26,6 @@ using sfz::BytesPiece;
 using sfz::Exception;
 using sfz::MappedFile;
 using sfz::String;
-using sfz::StringPiece;
 using sfz::utf8_encoding;
 
 namespace antares {
@@ -58,7 +57,8 @@ void glob_for_resource(uint32_t code, int id, String* out) {
         throw Exception("{0} {1} not found", code_chars + 0, id);
     }
 
-    out->append(StringPiece(g.gl_pathv[0], utf8_encoding()));
+    String path(g.gl_pathv[0], utf8_encoding());
+    out->append(path);
 }
 
 }  // namespace

@@ -33,7 +33,7 @@
 
 using rezin::mac_roman_encoding;
 using sfz::BytesPiece;
-using sfz::StringPiece;
+using sfz::String;
 
 namespace antares {
 
@@ -117,7 +117,7 @@ void SelectLevelScreen::draw_level_name(unsigned char* name, long fontNum, long 
     const interfaceItemType& i = item(itemNum);
     RgbColor color;
     GetRGBTranslateColorShade(&color, AQUA, VERY_LIGHT);
-    StringPiece text(
+    String text(
             BytesPiece(reinterpret_cast<const uint8_t*>(name + 1), name[0]),
             mac_roman_encoding());
     RetroText retro(text, fontNum, color, RgbColor::kBlack);
