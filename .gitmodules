@@ -4,15 +4,15 @@
 [submodule "test"]
 	path = test
 	url = git://git.sfiera.net/AntaresPngTestData
-[submodule "lib/libsfz"]
-	path = lib/libsfz
+[submodule "ext/libsfz"]
+	path = ext/libsfz
 	url = git://git.sfiera.net/libsfz
-[submodule "lib/libpng"]
-	path = lib/libpng
-	url = git://git.sfiera.net/libpng
-[submodule "lib/librezin"]
-	path = lib/librezin
-	url = git://git.sfiera.net/librezin
-[submodule "lib/librgos"]
-	path = lib/librgos
+[submodule "ext/librgos"]
+	path = ext/librgos
 	url = git://git.sfiera.net/librgos
+[submodule "ext/librezin"]
+	path = ext/librezin
+	url = git://git.sfiera.net/librezin
+[submodule "ext/libpng"]
+	path = ext/libpng
+	url = git://git.sfiera.net/libpng
