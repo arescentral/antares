@@ -6,13 +6,13 @@
 	url = git://git.sfiera.net/AntaresPngTestData
 [submodule "ext/libsfz"]
 	path = ext/libsfz
-	url = git://git.sfiera.net/libsfz
+	url = git://github.com/sfiera/libsfz.git
 [submodule "ext/librgos"]
 	path = ext/librgos
-	url = git://git.sfiera.net/librgos
+	url = git://github.com/sfiera/librgos.git
 [submodule "ext/librezin"]
 	path = ext/librezin
-	url = git://git.sfiera.net/librezin
+	url = git://github.com/sfiera/librezin.git
 [submodule "ext/libpng"]
 	path = ext/libpng
-	url = git://git.sfiera.net/libpng
+	url = git://github.com/sfiera/libpng.git
