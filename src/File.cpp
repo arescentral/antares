@@ -92,4 +92,18 @@ int open_path(const StringPiece& path, int oflag, mode_t mode) {
     return open(reinterpret_cast<const char*>(path_bytes.data()), oflag, mode);
 }
 
+bool read_all(int fd, Bytes* out) {
+    uint8_t data[1024];
+    while (true) {
+        ssize_t size = read(fd, data, 1024);
+        if (size < 0) {
+            return false;
+        } else if (size == 0) {
+            return true;
+        } else {
+            out->append(data, size);
+        }
+    }
+}
+
 }  // namespace antares

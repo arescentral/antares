@@ -37,6 +37,21 @@
             ],
         },
         {
+            'target_name': 'BuildPixTest',
+            'type': 'executable',
+            'include_dirs': [
+                '<(DEPTH)/ext/googletest/include',
+                '<(DEPTH)/ext/googlemock/include',
+            ],
+            'sources': [
+                'src/BuildPixMain.cpp',
+            ],
+            'dependencies': [
+                'libAntares',
+                '<(DEPTH)/ext/googlemock/googlemock.gyp:gmock_main',
+            ],
+        },
+        {
             'target_name': 'Antares',
             'type': 'executable',
             'mac_bundle': 1,

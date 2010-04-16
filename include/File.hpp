@@ -21,6 +21,8 @@
 #include <sys/stat.h>
 #include "sfz/String.hpp"
 
+namespace sfz { class Bytes; }
+
 namespace antares {
 
 bool IsDir(const sfz::StringPiece& path);
@@ -30,6 +32,8 @@ sfz::StringPiece BaseName(const sfz::StringPiece& path);
 sfz::StringPiece DirName(const sfz::StringPiece& path);
 
 int open_path(const sfz::StringPiece& path, int oflag, mode_t mode = 0644);
+
+bool read_all(int fd, sfz::Bytes* out);
 
 }  // namespace antares
 
