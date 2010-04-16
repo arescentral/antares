@@ -16,3 +16,9 @@
 [submodule "ext/libpng"]
 	path = ext/libpng
 	url = git://github.com/sfiera/libpng.git
+[submodule "ext/googletest"]
+	path = ext/googletest
+	url = git://github.com/sfiera/googletest.git
+[submodule "ext/googlemock"]
+	path = ext/googlemock
+	url = git://github.com/sfiera/googlemock.git
