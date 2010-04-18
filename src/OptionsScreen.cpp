@@ -250,13 +250,19 @@ void KeyControlScreen::become_front() {
 
 void KeyControlScreen::key_down(const KeyDownEvent& event) {
     if (_selected_key >= 0) {
-        uint32_t key = event.key();
-        if ((key == 53) || (key == 36) || (key == 57)) {  // ESC, RTRN, CAPS.
-            // beep angrily.
+        switch (event.key()) {
+          case Keys::ESCAPE:
+          case Keys::RETURN:
+          case Keys::CAPS_LOCK:
+            // TODO(sfiera): beep angrily.
             _selected_key = -1;
-        } else {
-            _preferences->set_key(_selected_key, key + 1);
-            _selected_key = -1;  // TODO(sfiera): select next key.
+            break;
+
+          default:
+            _preferences->set_key(_selected_key, event.key() + 1);
+            _selected_key = -1;
+            // TODO(sfiera): select next key.
+            break;
         }
         update_conflicts();
         adjust_interface();

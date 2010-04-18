@@ -751,7 +751,7 @@ void GamePlay::fire_timer() {
 void GamePlay::key_down(const KeyDownEvent& event) {
     if (_replay) {
         switch (event.key()) {
-          case 0x39:  // Caps lock.
+          case Keys::CAPS_LOCK:
             // TODO(sfiera): also F6.
             break;
 
@@ -763,7 +763,7 @@ void GamePlay::key_down(const KeyDownEvent& event) {
     }
 
     switch (event.key()) {
-      case 0x35:
+      case Keys::ESCAPE:
         {
             _state = PLAY_AGAIN;
             _player_paused = true;
@@ -772,7 +772,7 @@ void GamePlay::key_down(const KeyDownEvent& event) {
         }
         break;
 
-      case 0x7A:
+      case Keys::F1:
         // Help key is hard-coded to F1 at the moment.
         // TODO(sfiera): use the help key configured in preferences.
         _state = HELP;

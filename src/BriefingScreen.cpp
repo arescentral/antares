@@ -92,7 +92,7 @@ void BriefingScreen::become_front() {
 }
 
 void BriefingScreen::key_down(const KeyDownEvent& event) {
-    if (event.key() == 0x35) {
+    if (event.key() == Keys::ESCAPE) {
         *_cancelled = true;
         stack()->pop(this);
         return;
