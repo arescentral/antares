@@ -435,7 +435,7 @@ class PauseScreen : public Card {
     }
 
     virtual void key_up(const KeyUpEvent& event) {
-        if (event.key() == 0x3900) {
+        if (event.key() == Keys::CAPS_LOCK) {
             stack()->pop(this);
         }
     }
