@@ -118,7 +118,6 @@
                 'src/KeyMapTranslation.cpp',
                 'src/Ledger.cpp',
                 'src/LibpngImageDriver.cpp',
-                'src/LoadingScreen.cpp',
                 'src/MainScreen.cpp',
                 'src/MathSpecial.cpp',
                 'src/MessageScreen.cpp',
