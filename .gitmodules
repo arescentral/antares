@@ -22,3 +22,9 @@
 [submodule "ext/googlemock"]
 	path = ext/googlemock
 	url = git://github.com/sfiera/googlemock.git
+[submodule "ext/libzip"]
+	path = ext/libzip
+	url = git://github.com/sfiera/libzip.git
+[submodule "ext/libzipxx"]
+	path = ext/libzipxx
+	url = git://github.com/sfiera/libzipxx.git
