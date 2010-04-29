@@ -41,7 +41,7 @@ StringPiece BaseName(const StringPiece& path) {
         return path;
     }
     size_t pos = path.rfind('/', path.size() - 1);
-    if (pos == StringPiece::kNone) {
+    if (pos == StringPiece::npos) {
         return path;
     } else if (pos == path.size() - 1) {
         return BaseName(path.substr(0, path.size() - 1));
@@ -54,7 +54,7 @@ StringPiece DirName(const StringPiece& path) {
     size_t pos = path.rfind('/', path.size() - 1);
     if (pos == 0) {
         return kSlash;
-    } else if (pos == StringPiece::kNone) {
+    } else if (pos == StringPiece::npos) {
         return kDot;
     } else if (pos == path.size() - 1) {
         return DirName(path.substr(0, path.size() - 1));

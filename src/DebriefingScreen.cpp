@@ -49,7 +49,7 @@ const int kTextWidth = 300;
 
 void string_replace(String* s, const String& in, const FormatItem& out) {
     size_t index = s->find(in);
-    while (index != String::kNone) {
+    while (index != String::npos) {
         String out_string;
         out.print_to(&out_string);
         s->replace(index, in.size(), out_string);

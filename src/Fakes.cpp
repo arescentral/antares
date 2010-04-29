@@ -69,7 +69,7 @@ void StringToNum(unsigned char* p_str, long* value) {
 
 int Munger(String* data, int pos, const StringPiece& search, const FormatItem& replace) {
     size_t at = data->find(search, pos);
-    if (at != String::kNone) {
+    if (at != String::npos) {
         String replace_string;
         replace.print_to(&replace_string);
         data->replace(at, search.size(), replace_string);
