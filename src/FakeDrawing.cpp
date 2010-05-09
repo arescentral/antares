@@ -21,16 +21,16 @@
 #include <algorithm>
 #include <limits>
 
-#include "sfz/BinaryWriter.hpp"
+#include "sfz/WriteItem.hpp"
 #include "ColorTable.hpp"
 #include "Error.hpp"
 #include "Fakes.hpp"
 #include "File.hpp"
 
 using sfz::Bytes;
-using sfz::BytesBinaryWriter;
 using sfz::scoped_ptr;
 using sfz::utf8_encoding;
+using sfz::write;
 
 namespace antares {
 
@@ -44,7 +44,7 @@ scoped_ptr<ColorTable> colors;
 
 void DumpTo(const sfz::StringPiece& path) {
     Bytes contents;
-    BytesBinaryWriter(&contents).write(*gRealWorld);
+    write(&contents, *gRealWorld);
 
     MakeDirs(DirName(path), 0755);
     int fd = open_path(path, O_WRONLY | O_CREAT, 0644);

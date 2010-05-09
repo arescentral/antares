@@ -19,28 +19,30 @@
 
 #include "Races.hpp"
 
-#include "sfz/BinaryReader.hpp"
+#include "sfz/Bytes.hpp"
+#include "sfz/ReadSource.hpp"
 #include "AresGlobalType.hpp"
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "Resource.hpp"
 
-using sfz::BinaryReader;
-using sfz::BytesBinaryReader;
+using sfz::BytesPiece;
+using sfz::ReadSource;
+using sfz::read;
 
 namespace antares {
 
 short InitRaces() {
     if (globals()->gRaceData.get() == nil) {
         Resource rsrc('race', kRaceResID);
-        BytesBinaryReader bin(rsrc.data());
+        BytesPiece in(rsrc.data());
         size_t count = rsrc.data().size() / raceType::byte_size;
         check(count == kRaceNum, "got unexpected number of races");
         globals()->gRaceData.reset(new raceType[count]);
         for (size_t i = 0; i < count; ++i) {
-            bin.read(globals()->gRaceData.get() + i);
+            read(&in, globals()->gRaceData.get() + i);
         }
-        check(bin.done(), "didn't consume all of race data");
+        check(in.empty(), "didn't consume all of race data");
     }
 
     return( kNoError);
@@ -164,12 +166,12 @@ unsigned char GetApparentColorFromRace( short raceNum)
     }
 }
 
-void raceType::read(BinaryReader* bin) {
-    bin->read(&id);
-    bin->read(&apparentColor);
-    bin->discard(1);
-    bin->read(&illegalColors);
-    bin->read(&advantage);
+void read_from(ReadSource in, raceType* race) {
+    read(in, &race->id);
+    read(in, &race->apparentColor);
+    in.shift(1);
+    read(in, &race->illegalColors);
+    read(in, &race->advantage);
 }
 
 }  // namespace antares

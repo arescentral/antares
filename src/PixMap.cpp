@@ -18,8 +18,7 @@
 #include "PixMap.hpp"
 
 #include <algorithm>
-#include "sfz/BinaryReader.hpp"
-#include "sfz/BinaryWriter.hpp"
+#include "sfz/WriteItem.hpp"
 #include "sfz/Exception.hpp"
 #include "Quickdraw.h"
 #include "Casts.hpp"
@@ -27,10 +26,10 @@
 #include "Error.hpp"
 #include "ImageDriver.hpp"
 
-using sfz::BinaryReader;
-using sfz::BinaryWriter;
 using sfz::Exception;
+using sfz::WriteTarget;
 using sfz::scoped_array;
+using sfz::write;
 
 namespace antares {
 
@@ -73,25 +72,25 @@ void PixMap::copy(const PixMap& pix) {
     }
 }
 
-void PixMap::write(BinaryWriter* bin) const {
-    double f = transition_fraction();
+void write_to(WriteTarget out, const PixMap& image) {
+    double f = image.transition_fraction();
     if (f == 0.0) {
-        ImageDriver::driver()->write(bin, *this);
+        ImageDriver::driver()->write(out, image);
     } else {
-        ArrayPixMap pix(bounds().width(), bounds().height());
+        ArrayPixMap shaded(image.bounds().width(), image.bounds().height());
         double g = 1.0 - f;
-        const RgbColor& to = transition_to();
-        for (int y = 0; y < bounds().height(); ++y) {
-            const RgbColor* src = row(y);
-            RgbColor* dst = pix.mutable_row(y);
-            for (int x = 0; x < bounds().width(); ++x) {
+        const RgbColor& to = image.transition_to();
+        for (int y = 0; y < image.bounds().height(); ++y) {
+            const RgbColor* src = image.row(y);
+            RgbColor* dst = shaded.mutable_row(y);
+            for (int x = 0; x < image.bounds().width(); ++x) {
                 dst[x].alpha = 0xFF;
                 dst[x].red = to.red * f + src[x].red * g;
                 dst[x].green = to.green * f + src[x].green * g;
                 dst[x].blue = to.blue * f + src[x].blue * g;
             }
         }
-        pix.write(bin);
+        write(out, shaded);
     }
 }
 
@@ -110,20 +109,6 @@ void ArrayPixMap::resize(const Rect& new_bounds) {
     CopyBits(this, &new_pix_map, transfer, transfer);
     _bounds = new_bounds;
     _bytes.swap(&new_pix_map._bytes);
-}
-
-void ArrayPixMap::read(BinaryReader* bin) {
-    Rect bounds(0, 0, 0, 0);
-    bin->read(&bounds.right);
-    bin->read(&bounds.bottom);
-    resize(bounds);
-
-    bin->read(_colors.get());
-    scoped_array<uint8_t> bytes(new uint8_t[bounds.area()]);
-    bin->read(bytes.get(), bounds.right * bounds.bottom);
-    for (int i = 0; i < bounds.area(); ++i) {
-        _bytes.get()[i] = _colors->color(bytes.get()[i]);
-    }
 }
 
 const Rect& ArrayPixMap::bounds() const {

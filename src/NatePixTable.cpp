@@ -17,12 +17,13 @@
 
 #include "NatePixTable.hpp"
 
-#include "sfz/BinaryReader.hpp"
+#include "sfz/ReadItem.hpp"
 #include "ColorTranslation.hpp"
 #include "Resource.hpp"
 
-using sfz::BinaryReader;
-using sfz::BytesBinaryReader;
+using sfz::BytesPiece;
+using sfz::ReadSource;
+using sfz::read;
 
 namespace antares {
 
@@ -47,14 +48,14 @@ class natePixEntryType {
     uint8_t* data() const { return _data; }
     RgbColor* pixels() const { return _pixels; }
 
-    void read(BinaryReader* bin) {
-        bin->read(&_width);
-        bin->read(&_height);
-        bin->read(&_h_offset);
-        bin->read(&_v_offset);
+    void read_from(ReadSource in) {
+        read(in, &_width);
+        read(in, &_height);
+        read(in, &_h_offset);
+        read(in, &_v_offset);
         _data = new uint8_t[_width * _height];
         _pixels = new RgbColor[_width * _height];
-        bin->read(_data, _width * _height);
+        read(in, _data, _width * _height);
 
         ColorTable table(256);
         for (int i = 0; i < _width * _height; ++i) {
@@ -83,29 +84,30 @@ class natePixEntryType {
 
     DISALLOW_COPY_AND_ASSIGN(natePixEntryType);
 };
+void read_from(ReadSource in, natePixEntryType* pix) { pix->read_from(in); }
 
 natePixType::natePixType() { }
 
 natePixType::natePixType(int id) {
     Resource rsrc('SMIV', id);
-    BytesBinaryReader bin(rsrc.data());
+    BytesPiece in(rsrc.data());
 
     uint32_t size;
     int32_t pixnum;
-    bin.read(&size);
-    bin.read(&pixnum);
+    read(&in, &size);
+    read(&in, &pixnum);
 
     std::vector<uint32_t> offsets;
     for (int i = 0; i < pixnum; ++i) {
         uint32_t offset;
-        bin.read(&offset);
+        read(&in, &offset);
         offsets.push_back(offset);
     }
 
     for (int i = 0; i < pixnum; ++i) {
-        BytesBinaryReader bin(rsrc.data().substr(offsets[i]));
+        BytesPiece entry(rsrc.data().substr(offsets[i]));
         _entries.push_back(new natePixEntryType);
-        bin.read(_entries.back());
+        read(&entry, _entries.back());
     }
 }
 

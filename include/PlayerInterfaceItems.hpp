@@ -20,10 +20,10 @@
 
 // Player Interface Items.h
 
+#include "sfz/ReadSource.hpp"
 #include "AnyChar.hpp"
 #include "NateDraw.hpp"
 
-namespace sfz { class BinaryReader; }
 namespace sfz { class StringPiece; }
 
 namespace antares {
@@ -59,9 +59,8 @@ typedef uint8_t interfaceStyleType;
 struct interfaceLabelType {
     short               stringID;
     short               stringNumber;
-
-    void read(sfz::BinaryReader* bin);
 };
+void read_from(sfz::ReadSource in, interfaceLabelType* label);
 
 struct interfaceLabeledRectType {
     interfaceLabelType  label;
@@ -69,9 +68,8 @@ struct interfaceLabeledRectType {
     uint32_t             unused;
     bool                editable;
     // bool             editable;
-
-    void read(sfz::BinaryReader* bin);
 };
+void read_from(sfz::ReadSource in, interfaceLabeledRectType* labeled_rect);
 
 struct interfaceListType {
     interfaceLabelType          label;
@@ -79,31 +77,27 @@ struct interfaceListType {
     sfz::StringPiece            (*getItemString)(short);
     bool                     (*itemHilited)( short, bool);
     short                       topItem;
-
-    void read(sfz::BinaryReader* bin);
 };
+void read_from(sfz::ReadSource in, interfaceListType* list);
 
 struct interfaceTextRectType {
     short               textID;
     uint8_t             visibleBounds;
     // bool             visibleBounds;
-
-    void read(sfz::BinaryReader* bin);
 };
+void read_from(sfz::ReadSource in, interfaceTextRectType* text_rect);
 
 struct interfaceTabBoxType {
     short               topRightBorderSize;
-
-    void read(sfz::BinaryReader* bin);
 };
+void read_from(sfz::ReadSource in, interfaceTabBoxType* tab_box);
 
 struct interfacePictureRectType {
     short               pictureID;
     uint8_t             visibleBounds;
     // bool             visibleBounds;
-
-    void read(sfz::BinaryReader* bin);
 };
+void read_from(sfz::ReadSource in, interfacePictureRectType* picture_rect);
 
 struct interfaceButtonType {
     interfaceLabelType          label;
@@ -111,9 +105,8 @@ struct interfaceButtonType {
     uint8_t                     defaultButton;
     // bool                     defaultButton;
     interfaceItemStatusType     status;
-
-    void read(sfz::BinaryReader* bin);
 };
+void read_from(sfz::ReadSource in, interfaceButtonType* button);
 
 struct interfaceRadioType {
     interfaceLabelType          label;
@@ -121,9 +114,8 @@ struct interfaceRadioType {
     uint8_t                     on;
     // bool                     on;
     interfaceItemStatusType     status;
-
-    void read(sfz::BinaryReader* bin);
 }; // also tab box button type
+void read_from(sfz::ReadSource in, interfaceRadioType* radio);
 
 struct interfaceCheckboxType {
     interfaceLabelType          label;
@@ -131,9 +123,8 @@ struct interfaceCheckboxType {
     uint8_t                     on;
     // bool                     on;
     interfaceItemStatusType     status;
-
-    void read(sfz::BinaryReader* bin);
 };
+void read_from(sfz::ReadSource in, interfaceCheckboxType* checkbox);
 
 struct interfaceItemType {
     Rect            bounds;
@@ -157,9 +148,8 @@ struct interfaceItemType {
     void set_status(interfaceItemStatusType status);
     int key() const;
     void set_key(int key);
-
-    void read(sfz::BinaryReader* bin);
 };
+void read_from(sfz::ReadSource in, interfaceItemType* item);
 
 }  // namespace antares
 

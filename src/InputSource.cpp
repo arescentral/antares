@@ -17,16 +17,20 @@
 
 #include "InputSource.hpp"
 
+#include "sfz/ReadItem.hpp"
+
+using sfz::read;
+
 namespace antares {
 
 InputSource::~InputSource() { }
 
 ReplayInputSource::ReplayInputSource(int32_t id)
         : _resource('NLRP', id),
-          _bin(_resource.data()) {
-    _bin.read(&_random_seed);
-    _bin.read(&_turn_num);
-    _bin.read(&_keys);
+          _bytes(_resource.data()) {
+    read(&_bytes, &_random_seed);
+    read(&_bytes, &_turn_num);
+    read(&_bytes, &_keys);
 }
 
 uint32_t ReplayInputSource::random_seed() const {
@@ -35,12 +39,12 @@ uint32_t ReplayInputSource::random_seed() const {
 
 bool ReplayInputSource::next(uint32_t* key_map) {
     while (_turn_num == 0) {
-        if (_bin.done()) {
+        if (_bytes.empty()) {
             bzero(key_map, sizeof(uint32_t));
             return false;
         }
-        _bin.read(&_turn_num);
-        _bin.read(&_keys);
+        read(&_bytes, &_turn_num);
+        read(&_bytes, &_keys);
         ++_turn_num;
     }
     --_turn_num;

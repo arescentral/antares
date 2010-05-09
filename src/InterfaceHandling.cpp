@@ -25,7 +25,7 @@
 #include "InterfaceHandling.hpp"
 
 #include <vector>
-#include "sfz/BinaryReader.hpp"
+#include "sfz/ReadItem.hpp"
 #include "AnyChar.hpp"
 #include "AresGlobalType.hpp"
 #include "ColorTranslation.hpp"
@@ -38,9 +38,9 @@
 #include "Resource.hpp"
 #include "SoundFX.hpp"              // for button on/off
 
-using sfz::BinaryReader;
-using sfz::BytesBinaryReader;
 using sfz::BytesPiece;
+using sfz::ReadSource;
+using sfz::read;
 
 namespace antares {
 
@@ -82,13 +82,13 @@ void InterfaceHandlingCleanup() {
 
 int OpenInterface(short resID) {
     Resource rsrc(kInterfaceResourceType, resID);
-    BytesBinaryReader bin(rsrc.data());
+    BytesPiece in(rsrc.data());
 
     gInterfaceItemData.clear();
-    while (!bin.done()) {
+    while (!in.empty()) {
         gInterfaceItemData.push_back(interfaceItemType());
         interfaceItemType* const item = &gInterfaceItemData.back();
-        bin.read(item);
+        read(&in, item);
         item->bounds.left += gInterfaceScreenHBuffer;
         item->bounds.right += gInterfaceScreenHBuffer;
         item->bounds.top += gInterfaceScreenVBuffer;
@@ -105,10 +105,10 @@ long AppendInterface(short resID, long relative_number, bool center) {
     const int32_t original_number = gInterfaceItemData.size();
 
     Resource rsrc(kInterfaceResourceType, resID);
-    BytesBinaryReader bin(rsrc.data());
-    while (!bin.done()) {
+    BytesPiece in(rsrc.data());
+    while (!in.empty()) {
         gInterfaceItemData.push_back(interfaceItemType());
-        bin.read(&gInterfaceItemData.back());
+        read(&in, &gInterfaceItemData.back());
     }
 
     Rect bounds = gInterfaceItemData[relative_number].bounds;
@@ -643,50 +643,50 @@ void SetInterfaceTextBoxText( short resID) {
     static_cast<void>(resID);
 }
 
-void interfaceItemType::read(BinaryReader* bin) {
+void read_from(ReadSource in, interfaceItemType* item) {
     uint8_t section[22];
 
-    bin->read(&bounds);
-    bin->read(section, 22);
-    bin->read(&color);
-    bin->read(&kind);
-    bin->read(&style);
-    bin->discard(1);
+    read(in, &item->bounds);
+    read(in, section, 22);
+    read(in, &item->color);
+    read(in, &item->kind);
+    read(in, &item->style);
+    in.shift(1);
 
-    BytesBinaryReader sub(BytesPiece(section, 22));
-    switch (kind) {
+    BytesPiece sub(section, 22);
+    switch (item->kind) {
       case kPlainRect:
       case kPictureRect:
-        sub.read(&item.pictureRect);
+        read(&sub, &item->item.pictureRect);
         break;
 
       case kLabeledRect:
-        sub.read(&item.labeledRect);
+        read(&sub, &item->item.labeledRect);
         break;
 
       case kListRect:
-        sub.read(&item.listRect);
+        read(&sub, &item->item.listRect);
         break;
 
       case kTextRect:
-        sub.read(&item.textRect);
+        read(&sub, &item->item.textRect);
         break;
 
       case kPlainButton:
-        sub.read(&item.plainButton);
+        read(&sub, &item->item.plainButton);
         break;
 
       case kRadioButton:
       case kTabBoxButton:
-        sub.read(&item.radioButton);
+        read(&sub, &item->item.radioButton);
         break;
 
       case kCheckboxButton:
-        sub.read(&item.checkboxButton);
+        read(&sub, &item->item.checkboxButton);
         break;
 
       case kTabBox:
-        sub.read(&item.tabBox);
+        read(&sub, &item->item.tabBox);
         break;
 
       case kTabBoxTop:
@@ -759,61 +759,61 @@ void interfaceItemType::set_key(int key) {
     }
 }
 
-void interfaceLabelType::read(BinaryReader* bin) {
-    bin->read(&stringID);
-    bin->read(&stringNumber);
+void read_from(ReadSource in, interfaceLabelType* label) {
+    read(in, &label->stringID);
+    read(in, &label->stringNumber);
 }
 
-void interfaceLabeledRectType::read(BinaryReader* bin) {
-    bin->read(&label);
-    bin->read(&color);
-    bin->discard(5);
-    bin->read(&editable);
+void read_from(ReadSource in, interfaceLabeledRectType* labeled_rect) {
+    read(in, &labeled_rect->label);
+    read(in, &labeled_rect->color);
+    in.shift(5);
+    read(in, &labeled_rect->editable);
 }
 
-void interfaceListType::read(BinaryReader* bin) {
-    bin->read(&label);
-    bin->discard(12);
-    bin->read(&topItem);
+void read_from(ReadSource in, interfaceListType* list) {
+    read(in, &list->label);
+    in.shift(12);
+    read(in, &list->topItem);
 
-    getListLength = NULL;
-    getItemString = NULL;
-    itemHilited = NULL;
+    list->getListLength = NULL;
+    list->getItemString = NULL;
+    list->itemHilited = NULL;
 }
 
-void interfaceTextRectType::read(BinaryReader* bin) {
-    bin->read(&textID);
-    bin->read(&visibleBounds);
+void read_from(ReadSource in, interfaceTextRectType* text_rect) {
+    read(in, &text_rect->textID);
+    read(in, &text_rect->visibleBounds);
 }
 
-void interfaceButtonType::read(BinaryReader* bin) {
-    bin->read(&label);
-    bin->read(&key);
-    bin->read(&defaultButton);
-    bin->read(&status);
+void read_from(ReadSource in, interfaceButtonType* button) {
+    read(in, &button->label);
+    read(in, &button->key);
+    read(in, &button->defaultButton);
+    read(in, &button->status);
 }
 
-void interfaceRadioType::read(BinaryReader* bin) {
-    bin->read(&label);
-    bin->read(&key);
-    bin->read(&on);
-    bin->read(&status);
+void read_from(ReadSource in, interfaceRadioType* radio) {
+    read(in, &radio->label);
+    read(in, &radio->key);
+    read(in, &radio->on);
+    read(in, &radio->status);
 }
 
-void interfaceCheckboxType::read(BinaryReader* bin) {
-    bin->read(&label);
-    bin->read(&key);
-    bin->read(&on);
-    bin->read(&status);
+void read_from(ReadSource in, interfaceCheckboxType* checkbox) {
+    read(in, &checkbox->label);
+    read(in, &checkbox->key);
+    read(in, &checkbox->on);
+    read(in, &checkbox->status);
 }
 
-void interfacePictureRectType::read(BinaryReader* bin) {
-    bin->read(&pictureID);
-    bin->read(&visibleBounds);
+void read_from(ReadSource in, interfacePictureRectType* picture_rect) {
+    read(in, &picture_rect->pictureID);
+    read(in, &picture_rect->visibleBounds);
 }
 
-void interfaceTabBoxType::read(BinaryReader* bin) {
-    bin->read(&topRightBorderSize);
+void read_from(sfz::ReadSource in, interfaceTabBoxType* tab_box) {
+    read(in, &tab_box->topRightBorderSize);
 }
 
 }  // namespace antares

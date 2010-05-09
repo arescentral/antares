@@ -19,7 +19,7 @@
 #define ANTARES_INPUT_SOURCE_HPP_
 
 #include <stdint.h>
-#include "sfz/BinaryReader.hpp"
+#include "sfz/Bytes.hpp"
 #include "sfz/Macros.hpp"
 #include "Resource.hpp"
 
@@ -42,7 +42,7 @@ class ReplayInputSource : public InputSource {
 
   private:
     Resource _resource;
-    sfz::BytesBinaryReader _bin;
+    sfz::BytesPiece _bytes;
 
     uint32_t _random_seed;
     uint32_t _turn_num;

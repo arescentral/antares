@@ -18,11 +18,10 @@
 #include "Geometry.hpp"
 
 #include <algorithm>
-#include "sfz/BinaryReader.hpp"
-#include "sfz/BinaryWriter.hpp"
+#include "sfz/ReadItem.hpp"
 
-using sfz::BinaryReader;
-using sfz::BinaryWriter;
+using sfz::ReadSource;
+using sfz::read;
 
 namespace antares {
 
@@ -41,9 +40,9 @@ void Point::clamp_to(const Rect& rect) {
     v = std::min(v, rect.bottom - 1);
 }
 
-void Point::read(BinaryReader* bin) {
-    bin->read(&h);
-    bin->read(&v);
+void read_from(ReadSource in, Point* p) {
+    read(in, &p->h);
+    read(in, &p->v);
 }
 
 Rect::Rect()
@@ -119,11 +118,11 @@ void Rect::enlarge_to(const Rect& r) {
     bottom = std::max(bottom, r.bottom);
 }
 
-void Rect::read(BinaryReader* bin) {
-    bin->read(&left);
-    bin->read(&top);
-    bin->read(&right);
-    bin->read(&bottom);
+void read_from(ReadSource in, Rect* r) {
+    read(in, &r->left);
+    read(in, &r->top);
+    read(in, &r->right);
+    read(in, &r->bottom);
 }
 
 }  // namespace antares

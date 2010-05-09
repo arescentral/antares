@@ -17,7 +17,6 @@
 
 #include "Preferences.hpp"
 
-#include "sfz/BinaryReader.hpp"
 #include "sfz/Exception.hpp"
 #include "AresGlobalType.hpp"
 #include "Error.hpp"
@@ -25,9 +24,10 @@
 #include "Options.hpp"
 #include "Resource.hpp"
 
-using sfz::BinaryReader;
-using sfz::BytesBinaryReader;
+using sfz::BytesPiece;
+using sfz::ReadSource;
 using sfz::Exception;
+using sfz::read;
 using sfz::scoped_ptr;
 
 namespace antares {
@@ -56,28 +56,28 @@ Preferences::~Preferences() { }
 
 void Preferences::reset() {
     Resource rsrc('ArPr', 1000);
-    BytesBinaryReader bin(rsrc.data());
+    BytesPiece in(rsrc.data());
 
-    bin.read(&_version);
-    bin.read(_key_map, kKeyControlDataNum);
-    bin.read(&_serial_number);
-    bin.read(&_options);
-    bin.discard(4);
-    bin.read(&_volume);
-    bin.read(&_minutes_played);
-    bin.read(&_kills);
-    bin.read(&_losses);
-    bin.read(&_race);
-    bin.read(&_enemy_color);
-    bin.discard(4);
-    bin.read(_player_name, 32);
-    bin.read(_game_name, 32);
-    bin.read(&_resend_delay);
-    bin.read(&_registered_setting);
-    bin.read(&_registered_flags);
-    bin.read(&_protocol_flags);
-    bin.read(&_net_level);
-    bin.read(&_net_latency);
+    read(&in, &_version);
+    read(&in, _key_map, kKeyControlDataNum);
+    read(&in, &_serial_number);
+    read(&in, &_options);
+    in.shift(4);
+    read(&in, &_volume);
+    read(&in, &_minutes_played);
+    read(&in, &_kills);
+    read(&in, &_losses);
+    read(&in, &_race);
+    read(&in, &_enemy_color);
+    in.shift(4);
+    read(&in, _player_name, 32);
+    read(&in, _game_name, 32);
+    read(&in, &_resend_delay);
+    read(&in, &_registered_setting);
+    read(&in, &_registered_flags);
+    read(&in, &_protocol_flags);
+    read(&in, &_net_level);
+    read(&in, &_net_latency);
 }
 
 void Preferences::copy(const Preferences& preferences) {
@@ -136,9 +136,9 @@ void Preferences::set_volume(int volume) {
     _volume = volume;
 }
 
-void serialNumberType::read(BinaryReader* bin) {
-    bin->read(name, 76);
-    bin->read(number, kDigitNumber);
+void read_from(ReadSource in, serialNumberType* serial) {
+    read(&in, serial->name, 76);
+    read(&in, serial->number, kDigitNumber);
 }
 
 }  // namespace antares

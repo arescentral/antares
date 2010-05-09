@@ -21,8 +21,6 @@
 #include "sfz/SmartPtr.hpp"
 #include "Base.h"
 
-namespace sfz { class BinaryReader; }
-
 namespace antares {
 
 #define kUsePublicCopyProtection
@@ -33,9 +31,8 @@ static const int kDigitNumber = 8;
 struct serialNumberType {
     unsigned char name[76];
     char number[kDigitNumber];
-
-    void read(sfz::BinaryReader* bin);
 };
+void read_from(sfz::ReadSource in, serialNumberType* serial);
 
 class Preferences {
   public:

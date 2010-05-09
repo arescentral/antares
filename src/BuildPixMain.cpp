@@ -18,7 +18,6 @@
 #include <fcntl.h>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include "sfz/BinaryWriter.hpp"
 #include "sfz/Exception.hpp"
 #include "sfz/Foreach.hpp"
 #include "sfz/Format.hpp"
@@ -28,6 +27,7 @@
 #include "sfz/ScopedFd.hpp"
 #include "sfz/SmartPtr.hpp"
 #include "sfz/String.hpp"
+#include "sfz/WriteItem.hpp"
 #include "BuildPix.hpp"
 #include "ColorTable.hpp"
 #include "ColorTranslation.hpp"
@@ -39,7 +39,6 @@
 #include "PixMap.hpp"
 
 using sfz::Bytes;
-using sfz::BytesBinaryWriter;
 using sfz::BytesPiece;
 using sfz::Exception;
 using sfz::ScopedFd;
@@ -51,6 +50,7 @@ using sfz::range;
 using sfz::scoped_ptr;
 using std::make_pair;
 using std::pair;
+using sfz::write;
 using testing::Eq;
 using testing::ExplainMatchResult;
 using testing::Ge;
@@ -143,7 +143,7 @@ TEST_P(BuildPixTypedTest, BuildPix) {
         scoped_ptr<PixMap> pix(build_pix(_id, _width));
         ASSERT_THAT(pix.get(), NotNull());
         Bytes bytes;
-        BytesBinaryWriter(&bytes).write(*pix);
+        write(&bytes, *pix);
         actual = Base64(bytes, "image/png");
     }
 

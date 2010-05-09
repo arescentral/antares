@@ -18,12 +18,14 @@
 #include "ColorTable.hpp"
 
 #include <stdint.h>
-#include "sfz/BinaryReader.hpp"
-#include "sfz/BinaryWriter.hpp"
+#include "sfz/ReadItem.hpp"
+#include "sfz/WriteItem.hpp"
 #include "Base.h"
 
-using sfz::BinaryReader;
-using sfz::BinaryWriter;
+using sfz::ReadSource;
+using sfz::WriteTarget;
+using sfz::read;
+using sfz::write;
 
 namespace antares {
 
@@ -308,24 +310,24 @@ RgbColor::RgbColor(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue)
           green(green),
           blue(blue) { }
 
-void RgbColor::read(BinaryReader* bin) {
-    bin->discard(2);
-    bin->read(&red);
-    bin->discard(3);
-    bin->read(&green);
-    bin->discard(3);
-    bin->read(&blue);
-    bin->discard(1);
+void read_from(ReadSource in, RgbColor* color) {
+    in.shift(2);
+    read(in, &color->red);
+    in.shift(3);
+    read(in, &color->green);
+    in.shift(3);
+    read(in, &color->blue);
+    in.shift(1);
 }
 
-void RgbColor::write(BinaryWriter* bin) const {
-    bin->pad(2);
-    bin->write(red);
-    bin->pad(3);
-    bin->write(green);
-    bin->pad(3);
-    bin->write(blue);
-    bin->pad(1);
+void write_to(WriteTarget out, const RgbColor& color) {
+    out.append(2, '\0');
+    write(out, color.red);
+    out.append(3, '\0');
+    write(out, color.green);
+    out.append(3, '\0');
+    write(out, color.blue);
+    out.append(1, '\0');
 }
 
 ColorTable::ColorTable(int32_t id) {
@@ -364,19 +366,21 @@ void ColorTable::transition_between(
     }
 }
 
-void ColorTable::read(BinaryReader* bin) {
+void read_from(sfz::ReadSource in, ColorTable* table) {
     for (int i = 0; i < 256; ++i) {
         uint32_t index;
-        bin->read(&index);
-        bin->read(&_colors[i]);
+        RgbColor color;
+        read(in, &index);
+        read(in, &color);
+        table->set_color(i, color);
     }
 }
 
-void ColorTable::write(BinaryWriter* bin) const {
+void write_to(sfz::WriteTarget out, const ColorTable& table) {
     for (int i = 0; i < 256; ++i) {
         uint32_t index = i;
-        bin->write(index);
-        bin->write(_colors[i]);
+        write(out, index);
+        write(out, table.color(i));
     }
 }
 

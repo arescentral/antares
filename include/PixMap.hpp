@@ -19,10 +19,9 @@
 #define ANTARES_PIX_MAP_HPP_
 
 #include "sfz/SmartPtr.hpp"
+#include "sfz/ReadItem.hpp"
+#include "sfz/WriteItem.hpp"
 #include "Geometry.hpp"
-
-namespace sfz { class BinaryReader; }
-namespace sfz { class BinaryWriter; }
 
 namespace antares {
 
@@ -34,9 +33,8 @@ class RgbColor;
 // Defines an interface for objects which store pixel data, as well as some utility methods for
 // manipulating the pixels.
 //
-// PixMap objects can be written to BinaryWriter objects, but not read back in, as that would
+// PixMap objects can be written to WriteTarget objects, but not read back in, as that would
 // potentially require resizing the PixMap, which is not a required part of the interface.
-// However, ArrayPixMap provides both a `read()` and a `resize()` method.
 class PixMap {
   public:
     virtual ~PixMap();
@@ -131,13 +129,6 @@ class PixMap {
     // @throws Exception if `this->bounds()` and `pix.bounds()` are not equal.
     virtual void copy(const PixMap& pix);
 
-    // Serializes this PixMap to a BinaryWriter.
-    //
-    // The format exported by this method is a custom binary format, but can be read by
-    // `ArrayPixMap::read()`.  Additionally, there is a script provided as scripts/bintopng which
-    // can convert the format to PNG images.
-    virtual void write(sfz::BinaryWriter* bin) const;
-
     // See class documentation below.
     class View;
 
@@ -150,6 +141,11 @@ class PixMap {
     // @param [in] bounds   the region to make a view of.  Must be enclosed by `this->bounds()`.
     View view(const Rect& bounds);
 };
+
+// Serializes a PixMap to a WriteTarget.
+//
+// The current ImageDriver is used to serialize the image.
+void write_to(sfz::WriteTarget out, const PixMap& image);
 
 // PixMap subclass which provides its own storage.
 //
@@ -176,11 +172,6 @@ class ArrayPixMap : public PixMap {
     //
     // @param [in] new_bounds a rect with the desired size of `bounds()` after resizing.
     void resize(const Rect& new_bounds);
-
-    // Reads in pixel data via a BinaryReader.
-    //
-    // @param [in,out] bin  used to read binary data.
-    void read(sfz::BinaryReader* bin);
 
     // Implementations of the core PixMap methods.
     virtual const Rect& bounds() const;

@@ -17,7 +17,6 @@
 
 #include "InterfaceScreen.hpp"
 
-#include "sfz/BinaryReader.hpp"
 #include "sfz/Exception.hpp"
 #include "ColorTranslation.hpp"
 #include "Error.hpp"
@@ -28,8 +27,9 @@
 #include "Resource.hpp"
 #include "Time.hpp"
 
-using sfz::BytesBinaryReader;
+using sfz::BytesPiece;
 using sfz::Exception;
+using sfz::read;
 using std::vector;
 
 namespace antares {
@@ -46,13 +46,13 @@ InterfaceScreen::InterfaceScreen(int id, const Rect& bounds, bool full_screen)
           _hit_item(0),
           _pix(new ArrayPixMap(bounds.width(), bounds.height())) {
     Resource rsrc('intr', id);
-    BytesBinaryReader bin(rsrc.data());
+    BytesPiece in(rsrc.data());
     const int offset_x = (_bounds.width() / 2) - 320;
     const int offset_y = (_bounds.height() / 2) - 240;
-    while (!bin.done()) {
+    while (!in.empty()) {
         _items.push_back(interfaceItemType());
         interfaceItemType* const item = &_items.back();
-        bin.read(item);
+        read(&in, item);
         item->bounds.offset(offset_x, offset_y);
     }
 }
@@ -203,12 +203,12 @@ void InterfaceScreen::extend(int id, size_t within) {
     vector<interfaceItemType> new_items;
 
     Resource rsrc('intr', id);
-    BytesBinaryReader bin(rsrc.data());
+    BytesPiece in(rsrc.data());
     Rect all_bounds;
-    while (!bin.done()) {
+    while (!in.empty()) {
         new_items.push_back(interfaceItemType());
         interfaceItemType* const item = &new_items.back();
-        bin.read(item);
+        read(&in, item);
         if (all_bounds.width() == 0) {
             all_bounds = item->bounds;
         } else {

@@ -30,7 +30,7 @@
 #include "Threading.hpp"
 #include "VideoDriver.hpp"
 
-using sfz::FormatItem;
+using sfz::PrintItem;
 using sfz::String;
 using sfz::StringPiece;
 
@@ -67,7 +67,7 @@ void StringToNum(unsigned char* p_str, long* value) {
     check(end == c_str + len, "couldn't interpret '%s' as an integer", c_str);
 }
 
-int Munger(String* data, int pos, const StringPiece& search, const FormatItem& replace) {
+int Munger(String* data, int pos, const StringPiece& search, const PrintItem& replace) {
     size_t at = data->find(search, pos);
     if (at != String::npos) {
         String replace_string;

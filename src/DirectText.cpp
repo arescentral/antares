@@ -19,7 +19,7 @@
 
 #include <algorithm>
 #include "rezin/MacRoman.hpp"
-#include "sfz/BinaryReader.hpp"
+#include "sfz/ReadItem.hpp"
 #include "sfz/String.hpp"
 #include "Base.h"
 
@@ -29,9 +29,10 @@
 
 using rezin::mac_roman_encoding;
 using sfz::Bytes;
-using sfz::BytesBinaryReader;
+using sfz::BytesPiece;
 using sfz::String;
 using sfz::StringPiece;
+using sfz::read;
 using sfz::scoped_ptr;
 
 namespace antares {
@@ -53,15 +54,15 @@ uint8_t to_mac_roman(uint32_t code) {
 
 directTextType::directTextType(int32_t id) {
     Resource defn_rsrc(kDTextDescriptResType, id);
-    BytesBinaryReader bin(defn_rsrc.data());
+    BytesPiece in(defn_rsrc.data());
 
-    bin.discard(4);
-    bin.read(&resID);
-    bin.discard(2);
-    bin.read(&logicalWidth);
-    bin.read(&physicalWidth);
-    bin.read(&height);
-    bin.read(&ascent);
+    in.shift(4);
+    read(&in, &resID);
+    in.shift(2);
+    read(&in, &logicalWidth);
+    read(&in, &physicalWidth);
+    read(&in, &height);
+    read(&in, &ascent);
 
     Resource data_rsrc(kDTextFontMapResType, resID);
     charSet.assign(data_rsrc.data());

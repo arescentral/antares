@@ -18,12 +18,17 @@
 #ifndef ANTARES_STRING_NUMERICS_HPP_
 #define ANTARES_STRING_NUMERICS_HPP_
 
-#include "sfz/Format.hpp"
+#include "sfz/PrintTarget.hpp"
 #include "MathSpecial.hpp"
 
 namespace antares {
 
-sfz::FormatItem small_fixed(smallFixedType value);
+struct SmallFixed {
+    smallFixedType value;
+    explicit SmallFixed(smallFixedType v) : value(v) { }
+};
+SmallFixed small_fixed(smallFixedType value);
+void print_to(sfz::PrintTarget out, const SmallFixed& fixed);
 
 void SmallFixedToString( smallFixedType, Str255);
 smallFixedType StringToSmallFixed( Str255);

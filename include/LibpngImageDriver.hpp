@@ -19,6 +19,8 @@
 #define ANTARES_LIBPNG_IMAGE_DRIVER_HPP_
 
 #include "sfz/Macros.hpp"
+#include "sfz/ReadSource.hpp"
+#include "sfz/WriteTarget.hpp"
 #include "ImageDriver.hpp"
 
 namespace antares {
@@ -26,8 +28,8 @@ namespace antares {
 class LibpngImageDriver : public ImageDriver {
   public:
     LibpngImageDriver();
-    virtual void read(sfz::BinaryReader* bin, ArrayPixMap* pix);
-    virtual void write(sfz::BinaryWriter* bin, const PixMap& pix);
+    virtual void read(sfz::ReadSource, ArrayPixMap* pix);
+    virtual void write(sfz::WriteTarget, const PixMap& pix);
 
   private:
     DISALLOW_COPY_AND_ASSIGN(LibpngImageDriver);

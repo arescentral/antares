@@ -21,10 +21,9 @@
 #include <stdint.h>
 #include <vector>
 #include "sfz/Macros.hpp"
+#include "sfz/ReadSource.hpp"
+#include "sfz/WriteTarget.hpp"
 #include "Base.h"
-
-namespace sfz { class BinaryReader; }
-namespace sfz { class BinaryWriter; }
 
 namespace antares {
 
@@ -42,10 +41,10 @@ class RgbColor {
     uint8_t red;
     uint8_t green;
     uint8_t blue;
-
-    void read(sfz::BinaryReader* bin);
-    void write(sfz::BinaryWriter* bin) const;
 };
+
+void read_from(sfz::ReadSource in, RgbColor* color);
+void write_to(sfz::WriteTarget out, const RgbColor& color);
 
 inline bool operator==(const RgbColor& lhs, const RgbColor& rhs) {
     return memcmp(&lhs, &rhs, sizeof(RgbColor)) == 0;
@@ -68,14 +67,14 @@ class ColorTable {
 
     void transition_between(const ColorTable& source, const RgbColor& dest, double fraction);
 
-    void read(sfz::BinaryReader* bin);
-    void write(sfz::BinaryWriter* bin) const;
-
   private:
     std::vector<RgbColor> _colors;
 
     DISALLOW_COPY_AND_ASSIGN(ColorTable);
 };
+
+void read_from(sfz::ReadSource in, ColorTable* table);
+void write_to(sfz::WriteTarget out, const ColorTable& table);
 
 }  // namespace antares
 

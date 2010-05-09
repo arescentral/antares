@@ -19,6 +19,7 @@
 #define ANTARES_SCENARIO_DATA_HPP_
 
 #include "Base.h"
+#include "sfz/ReadSource.hpp"
 
 namespace antares {
 
@@ -44,9 +45,8 @@ struct scenarioInfoType {
     uint32_t        requiresAresVersion;
     uint32_t        flags;
     uint32_t        checkSum;
-
-    void read(sfz::BinaryReader* bin);
 };
+void read_from(sfz::ReadSource in, scenarioInfoType* scenario_info);
 
 }  // namespace antares
 

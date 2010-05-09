@@ -19,11 +19,11 @@
 
 // Special Math Functions
 
+#include "sfz/ReadItem.hpp"
 #include "MathSpecial.hpp"
 
-#include "sfz/BinaryReader.hpp"
-
-using sfz::BinaryReader;
+using sfz::ReadSource;
+using sfz::read;
 
 namespace antares {
 
@@ -238,9 +238,9 @@ label3:
     return result;
 }
 
-void fixedPointType::read(BinaryReader* bin) {
-    bin->read(&h);
-    bin->read(&v);
+void read_from(ReadSource in, fixedPointType* point) {
+    read(in, &point->h);
+    read(in, &point->v);
 }
 
 }  // namespace antares

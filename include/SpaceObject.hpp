@@ -28,8 +28,6 @@
 #include "SoundFX.hpp"
 #include "SpriteHandling.hpp"
 
-namespace sfz { class BinaryReader; }
-
 namespace antares {
 
 #define kMaxSpaceObject     250
@@ -360,8 +358,6 @@ union argumentType {
         uint8_t                 velocityRelative;   // is velocity relative to creator?
         uint8_t                 directionRelative;  // determines initial heading
         int32_t                 randomDistance;     // if not 0, then object will be created in random direction from 0 to this away
-
-        void read(sfz::BinaryReader* bin);
     };
     CreateObject createObject;
 
@@ -374,8 +370,6 @@ union argumentType {
         int32_t                 volumeRange;
         int32_t                 idMinimum;
         int32_t                 idRange;
-
-        void read(sfz::BinaryReader* bin);
     };
     PlaySound playSound;
 
@@ -385,8 +379,6 @@ union argumentType {
         uint8_t                 relative;
         int32_t                 minimum;
         int32_t                 range;
-
-        void read(sfz::BinaryReader* bin);
     };
     AlterObject alterObject;
 
@@ -396,32 +388,24 @@ union argumentType {
         int32_t                 speed;
         smallFixedType          velocityRange;
         uint8_t                 color;
-
-        void read(sfz::BinaryReader* bin);
     };
     MakeSparks makeSparks;
 
     // release energy
     struct ReleaseEnergy {
         smallFixedType          percent;
-
-        void read(sfz::BinaryReader* bin);
     };
     ReleaseEnergy releaseEnergy;
 
     // land at
     struct LandAt {
         int32_t                 landingSpeed;
-
-        void read(sfz::BinaryReader* bin);
     };
     LandAt landAt;
 
     // enter warp
     struct EnterWarp {
         smallFixedType          warpSpeed;
-
-        void read(sfz::BinaryReader* bin);
     };
     EnterWarp enterWarp;
 
@@ -429,8 +413,6 @@ union argumentType {
     struct DisplayMessage {
         int16_t                 resID;
         int16_t                 pageNum;
-
-        void read(sfz::BinaryReader* bin);
     };
     DisplayMessage displayMessage;
 
@@ -439,8 +421,6 @@ union argumentType {
         int32_t                 whichPlayer;    // in scenario's terms; -1 = owner of executor of action
         int32_t                 whichScore;     // each player can have many "scores"
         int32_t                 amount;
-
-        void read(sfz::BinaryReader* bin);
     };
     ChangeScore changeScore;
 
@@ -449,16 +429,12 @@ union argumentType {
         int32_t                 whichPlayer;    // in scenario's terms; -1 = owner of executor of action
         int32_t                 nextLevel;      // -1 = none
         int32_t                 textID;         // id of "debriefing" text
-
-        void read(sfz::BinaryReader* bin);
     };
     DeclareWinner declareWinner;
 
     // killObject: cause object to expire
     struct KillObject {
         dieVerbIDType           dieType;
-
-        void read(sfz::BinaryReader* bin);
     };
     KillObject killObject;
 
@@ -467,42 +443,48 @@ union argumentType {
         int32_t                 length;         // length of color flash
         uint8_t                 color;          // color of flash
         uint8_t                 shade;          // brightness of flash
-
-        void read(sfz::BinaryReader* bin);
     };
     ColorFlash colorFlash;
 
     // keys: disable or enable keys/ for tutorial
     struct Keys {
         uint32_t                keyMask;
-
-        void read(sfz::BinaryReader* bin);
     };
     Keys keys;
 
     // zoomLevel; manually set zoom level
     struct Zoom {
         int32_t                 zoomLevel;
-
-        void read(sfz::BinaryReader* bin);
     };
     Zoom zoom;
 
     struct ComputerSelect {
         int32_t                 screenNumber;
         int32_t                 lineNumber;
-
-        void read(sfz::BinaryReader* bin);
     };
     ComputerSelect computerSelect;
 
     struct AssumeInitial {
         int32_t                 whichInitialObject;
-
-        void read(sfz::BinaryReader* bin);
     };
     AssumeInitial assumeInitial;
 };
+void read_from(sfz::ReadSource in, argumentType::CreateObject* argument);
+void read_from(sfz::ReadSource in, argumentType::PlaySound* argument);
+void read_from(sfz::ReadSource in, argumentType::AlterObject* argument);
+void read_from(sfz::ReadSource in, argumentType::MakeSparks* argument);
+void read_from(sfz::ReadSource in, argumentType::ReleaseEnergy* argument);
+void read_from(sfz::ReadSource in, argumentType::LandAt* argument);
+void read_from(sfz::ReadSource in, argumentType::EnterWarp* argument);
+void read_from(sfz::ReadSource in, argumentType::DisplayMessage* argument);
+void read_from(sfz::ReadSource in, argumentType::ChangeScore* argument);
+void read_from(sfz::ReadSource in, argumentType::DeclareWinner* argument);
+void read_from(sfz::ReadSource in, argumentType::KillObject* argument);
+void read_from(sfz::ReadSource in, argumentType::ColorFlash* argument);
+void read_from(sfz::ReadSource in, argumentType::Keys* argument);
+void read_from(sfz::ReadSource in, argumentType::Zoom* argument);
+void read_from(sfz::ReadSource in, argumentType::ComputerSelect* argument);
+void read_from(sfz::ReadSource in, argumentType::AssumeInitial* argument);
 
 struct objectActionType {
     objectVerbIDType            verb;                   // what is this verb?
@@ -518,8 +500,8 @@ struct objectActionType {
     argumentType                argument;
 
     static const size_t byte_size = 48;
-    void read(sfz::BinaryReader* bin);
 };
+void read_from(sfz::ReadSource in, objectActionType* action);
 
 typedef uint8_t beamKindType;
 enum beamKindEnum {
@@ -565,8 +547,6 @@ union objectFrameType {
         int32_t                 rotRes;             // ROT_POS / rotRes = # of discrete shapes
         smallFixedType          maxTurnRate;        // max rate at which object can turn
         smallFixedType          turnAcceleration;   // rate at which object reaches maxTurnRate
-
-        void read(sfz::BinaryReader* bin);
     };
     Rotation rotation;
 
@@ -583,8 +563,6 @@ union objectFrameType {
 
         int32_t                 frameShape;         // starting shape #
         int32_t                 frameShapeRange;    // random addition to starting shape #
-
-        void read(sfz::BinaryReader* bin);
     };
     Animation animation;
 
@@ -594,8 +572,6 @@ union objectFrameType {
         beamKindType            kind;
         int32_t                 accuracy;           // for non-normal beams, how accurate
         int32_t                 range;
-
-        void read(sfz::BinaryReader* bin);
     };
     Beam beam;
 
@@ -608,11 +584,13 @@ union objectFrameType {
         int32_t                 range;              // range (= age * max velocity)
         int32_t                 inverseSpeed;       // for AI = 1/max velocity
         int32_t                 restockCost;        // energy to make new ammo
-
-        void read(sfz::BinaryReader* bin);
     };
     Weapon weapon;
 };
+void read_from(sfz::ReadSource in, objectFrameType::Rotation* rotation);
+void read_from(sfz::ReadSource in, objectFrameType::Animation* animation);
+void read_from(sfz::ReadSource in, objectFrameType::Beam* beam);
+void read_from(sfz::ReadSource in, objectFrameType::Weapon* weapon);
 
 struct baseObjectType {
     uint32_t                attributes;                 // initial attributes (see flags)
@@ -703,8 +681,8 @@ struct baseObjectType {
     int32_t             internalFlags;
 
     static const int byte_size = 318;
-    void read(sfz::BinaryReader* bin);
 };
+void read_from(sfz::ReadSource in, baseObjectType* object);
 
 enum dutyType {
     eNoDuty =           0,

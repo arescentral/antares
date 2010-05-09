@@ -22,9 +22,8 @@
 
 #include "Base.h"
 
+#include "sfz/ReadSource.hpp"
 #include "Casts.hpp"
-
-namespace sfz { class BinaryReader; }
 
 namespace antares {
 
@@ -79,10 +78,8 @@ typedef int32_t smallFixedType;    // distinct from Mac OS's Fixed type
 struct fixedPointType {
     smallFixedType      h;
     smallFixedType      v;
-
-    void read(sfz::BinaryReader* bin);
 };
-
+void read_from(sfz::ReadSource in, fixedPointType* point);
 
 uint32_t lsqrt(uint32_t);
 

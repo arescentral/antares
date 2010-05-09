@@ -17,85 +17,85 @@
 
 #include "ScenarioData.hpp"
 
-#include "sfz/BinaryReader.hpp"
+#include "sfz/ReadItem.hpp"
 #include "Scenario.hpp"
 
-using sfz::BinaryReader;
-using sfz::BytesBinaryReader;
 using sfz::BytesPiece;
+using sfz::ReadSource;
+using sfz::read;
 
 namespace antares {
 
-void scenarioInfoType::read(BinaryReader* bin) {
-    bin->read(&warpInFlareID);
-    bin->read(&warpOutFlareID);
-    bin->read(&playerBodyID);
-    bin->read(&energyBlobID);
-    bin->read(downloadURLString, 256);
-    bin->read(titleString, 256);
-    bin->read(authorNameString, 256);
-    bin->read(authorURLString, 256);
-    bin->read(&version);
-    bin->read(&requiresAresVersion);
-    bin->read(&flags);
-    bin->read(&checkSum);
+void read_from(ReadSource in, scenarioInfoType* scenario_info) {
+    read(in, &scenario_info->warpInFlareID);
+    read(in, &scenario_info->warpOutFlareID);
+    read(in, &scenario_info->playerBodyID);
+    read(in, &scenario_info->energyBlobID);
+    read(in, scenario_info->downloadURLString, 256);
+    read(in, scenario_info->titleString, 256);
+    read(in, scenario_info->authorNameString, 256);
+    read(in, scenario_info->authorURLString, 256);
+    read(in, &scenario_info->version);
+    read(in, &scenario_info->requiresAresVersion);
+    read(in, &scenario_info->flags);
+    read(in, &scenario_info->checkSum);
 }
 
-void scenarioType::read(BinaryReader* bin) {
-    bin->read(&netRaceFlags);
-    bin->read(&playerNum);
-    bin->read(player, kScenarioPlayerNum);
-    bin->read(&scoreStringResID);
-    bin->read(&initialFirst);
-    bin->read(&prologueID);
-    bin->read(&initialNum);
-    bin->read(&songID);
-    bin->read(&conditionFirst);
-    bin->read(&epilogueID);
-    bin->read(&conditionNum);
-    bin->read(&starMapH);
-    bin->read(&briefPointFirst);
-    bin->read(&starMapV);
-    bin->read(&briefPointNum);
-    bin->read(&parTime);
-    bin->discard(2);
-    bin->read(&parKills);
-    bin->read(&levelNameStrNum);
-    bin->read(&parKillRatio);
-    bin->read(&parLosses);
-    bin->read(&startTime);
+void read_from(ReadSource in, scenarioType* scenario) {
+    read(in, &scenario->netRaceFlags);
+    read(in, &scenario->playerNum);
+    read(in, scenario->player, kScenarioPlayerNum);
+    read(in, &scenario->scoreStringResID);
+    read(in, &scenario->initialFirst);
+    read(in, &scenario->prologueID);
+    read(in, &scenario->initialNum);
+    read(in, &scenario->songID);
+    read(in, &scenario->conditionFirst);
+    read(in, &scenario->epilogueID);
+    read(in, &scenario->conditionNum);
+    read(in, &scenario->starMapH);
+    read(in, &scenario->briefPointFirst);
+    read(in, &scenario->starMapV);
+    read(in, &scenario->briefPointNum);
+    read(in, &scenario->parTime);
+    in.shift(2);
+    read(in, &scenario->parKills);
+    read(in, &scenario->levelNameStrNum);
+    read(in, &scenario->parKillRatio);
+    read(in, &scenario->parLosses);
+    read(in, &scenario->startTime);
 }
 
-void scenarioPlayerType::read(BinaryReader* bin) {
-    bin->read(&playerType);
-    bin->read(&playerRace);
-    bin->read(&nameResID);
-    bin->read(&nameStrNum);
-    bin->read(&admiralNumber);
-    bin->read(&earningPower);
-    bin->read(&netRaceFlags);
-    bin->discard(2);
+void read_from(ReadSource in, scenarioPlayerType* scenario_player) {
+    read(in, &scenario_player->playerType);
+    read(in, &scenario_player->playerRace);
+    read(in, &scenario_player->nameResID);
+    read(in, &scenario_player->nameStrNum);
+    read(in, &scenario_player->admiralNumber);
+    read(in, &scenario_player->earningPower);
+    read(in, &scenario_player->netRaceFlags);
+    in.shift(2);
 }
 
-void scenarioConditionType::read(BinaryReader* bin) {
+void read_from(ReadSource in, scenarioConditionType* scenario_condition) {
     uint8_t section[12];
 
-    bin->read(&condition);
-    bin->discard(1);
-    bin->read(section, 12);
-    bin->read(&subjectObject);
-    bin->read(&directObject);
-    bin->read(&startVerb);
-    bin->read(&verbNum);
-    bin->read(&flags);
-    bin->read(&direction);
+    read(in, &scenario_condition->condition);
+    in.shift(1);
+    read(in, section, 12);
+    read(in, &scenario_condition->subjectObject);
+    read(in, &scenario_condition->directObject);
+    read(in, &scenario_condition->startVerb);
+    read(in, &scenario_condition->verbNum);
+    read(in, &scenario_condition->flags);
+    read(in, &scenario_condition->direction);
 
-    BytesBinaryReader sub(BytesPiece(section, 12));
-    switch (condition) {
+    BytesPiece sub(section, 12);
+    switch (scenario_condition->condition) {
       case kCounterCondition:
       case kCounterGreaterCondition:
       case kCounterNotCondition:
-        sub.read(&conditionArgument.counter);
+        read(&sub, &scenario_condition->conditionArgument.counter);
         break;
 
       case kDestructionCondition:
@@ -104,79 +104,79 @@ void scenarioConditionType::read(BinaryReader* bin) {
       case kVelocityLessThanEqualToCondition:
       case kNoShipsLeftCondition:
       case kZoomLevelCondition:
-        sub.read(&conditionArgument.longValue);
+        read(&sub, &scenario_condition->conditionArgument.longValue);
         break;
 
       case kProximityCondition:
       case kDistanceGreaterCondition:
-        sub.read(&conditionArgument.unsignedLongValue);
+        read(&sub, &scenario_condition->conditionArgument.unsignedLongValue);
         break;
 
       case kCurrentMessageCondition:
       case kCurrentComputerCondition:
-        sub.read(&conditionArgument.location);
+        read(&sub, &scenario_condition->conditionArgument.location);
         break;
     }
 }
 
-void counterArgumentType::read(BinaryReader* bin) {
-    bin->read(&whichPlayer);
-    bin->read(&whichCounter);
-    bin->read(&amount);
+void read_from(ReadSource in, counterArgumentType* counter_argument) {
+    read(in, &counter_argument->whichPlayer);
+    read(in, &counter_argument->whichCounter);
+    read(in, &counter_argument->amount);
 }
 
-void briefPointType::read(BinaryReader* bin) {
+void read_from(ReadSource in, briefPointType* brief_point) {
     uint8_t section[8];
 
-    bin->read(&briefPointKind);
-    bin->discard(1);
-    bin->read(section, 8);
-    bin->read(&range);
-    bin->read(&titleResID);
-    bin->read(&titleNum);
-    bin->read(&contentResID);
+    read(in, &brief_point->briefPointKind);
+    in.shift(1);
+    read(in, section, 8);
+    read(in, &brief_point->range);
+    read(in, &brief_point->titleResID);
+    read(in, &brief_point->titleNum);
+    read(in, &brief_point->contentResID);
 
-    BytesBinaryReader sub(BytesPiece(section, 8));
-    switch (briefPointKind) {
+    BytesPiece sub(section, 8);
+    switch (brief_point->briefPointKind) {
       case kNoPointKind:
       case kBriefFreestandingKind:
         break;
 
       case kBriefObjectKind:
-        sub.read(&briefPointData.objectBriefType);
+        read(&sub, &brief_point->briefPointData.objectBriefType);
         break;
 
       case kBriefAbsoluteKind:
-        sub.read(&briefPointData.absoluteBriefType);
+        read(&sub, &brief_point->briefPointData.absoluteBriefType);
         break;
     }
 }
 
-void briefPointType::ObjectBrief::read(BinaryReader* bin) {
-    bin->read(&objectNum);
-    bin->read(&objectVisible);
+void read_from(ReadSource in, briefPointType::ObjectBrief* object_brief) {
+    read(in, &object_brief->objectNum);
+    read(in, &object_brief->objectVisible);
 }
 
-void briefPointType::AbsoluteBrief::read(BinaryReader* bin) {
-    bin->read(&location);
+void read_from(ReadSource in, briefPointType::AbsoluteBrief* absolute_brief) {
+    read(in, &absolute_brief->location);
 }
 
-void scenarioInitialType::read(BinaryReader* bin) {
-    bin->read(&type);
-    bin->read(&owner);
-    bin->read(&realObjectNumber);
-    bin->read(&realObjectID);
-    bin->read(&location);
-    bin->read(&earning);
-    bin->read(&distanceRange);
-    bin->read(&rotationMinimum);
-    bin->read(&rotationRange);
-    bin->read(&spriteIDOverride);
-    bin->read(canBuild, kMaxTypeBaseCanBuild);
-    bin->read(&initialDestination);
-    bin->read(&nameResID);
-    bin->read(&nameStrNum);
-    bin->read(&attributes);
+void read_from(ReadSource in, scenarioInitialType* scenario_initial) {
+    read(in, &scenario_initial->type);
+    read(in, &scenario_initial->owner);
+    read(in, &scenario_initial->realObjectNumber);
+    read(in, &scenario_initial->realObjectID);
+    read(in, &scenario_initial->location);
+    read(in, &scenario_initial->earning);
+    read(in, &scenario_initial->distanceRange);
+    read(in, &scenario_initial->rotationMinimum);
+    read(in, &scenario_initial->rotationRange);
+    read(in, &scenario_initial->spriteIDOverride);
+    read(in, scenario_initial->canBuild, kMaxTypeBaseCanBuild);
+    read(in, &scenario_initial->initialDestination);
+    read(in, &scenario_initial->nameResID);
+    read(in, &scenario_initial->nameStrNum);
+    read(in, &scenario_initial->attributes);
 }
 
 }  // namespace antares

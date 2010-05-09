@@ -18,35 +18,34 @@
 #include "StringList.hpp"
 
 #include "rezin/MacRoman.hpp"
-#include "sfz/BinaryReader.hpp"
 #include "sfz/Exception.hpp"
 #include "sfz/Foreach.hpp"
 #include "sfz/Formatter.hpp"
+#include "sfz/ReadItem.hpp"
 #include "Error.hpp"
 #include "Resource.hpp"
 
 using rezin::mac_roman_encoding;
 using sfz::Bytes;
 using sfz::BytesPiece;
-using sfz::BytesBinaryReader;
 using sfz::Exception;
 using sfz::String;
 using sfz::StringPiece;
 using sfz::quote;
+using sfz::read;
 
 namespace antares {
 
 StringList::StringList(int id) {
     Resource rsrc('STR#', id);
-    BytesBinaryReader bin(rsrc.data().substr(0, 2));
+    BytesPiece in(rsrc.data());
     uint16_t size;
-    bin.read(&size);
-    BytesPiece data = BytesPiece(rsrc.data()).substr(2);
+    read(&in, &size);
     for (size_t i = 0; i < size; ++i) {
-        uint8_t len = data.at(0);
-        data = data.substr(1);
-        _strings.push_back(new String(data.substr(0, len), mac_roman_encoding()));
-        data = data.substr(len);
+        uint8_t len;
+        read(&in, &len);
+        _strings.push_back(new String(in.substr(0, len), mac_roman_encoding()));
+        in = in.substr(len);
     }
 }
 

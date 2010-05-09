@@ -18,7 +18,9 @@
 #include "DebriefingScreen.hpp"
 
 #include "rezin/MacRoman.hpp"
+#include "sfz/Format.hpp"
 #include "sfz/Formatter.hpp"
+#include "sfz/PrintItem.hpp"
 #include "CardStack.hpp"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
@@ -33,7 +35,7 @@
 using rezin::mac_roman_encoding;
 using sfz::Bytes;
 using sfz::String;
-using sfz::FormatItem;
+using sfz::PrintItem;
 using sfz::dec;
 
 namespace antares {
@@ -47,7 +49,7 @@ const double kTypingDelay = 1.0 / 20.0;
 const int kScoreTableHeight = 120;
 const int kTextWidth = 300;
 
-void string_replace(String* s, const String& in, const FormatItem& out) {
+void string_replace(String* s, const String& in, const PrintItem& out) {
     size_t index = s->find(in);
     while (index != String::npos) {
         String out_string;

@@ -19,7 +19,6 @@
 
 #include <fcntl.h>
 #include <limits>
-#include "sfz/BinaryWriter.hpp"
 #include "sfz/Bytes.hpp"
 #include "sfz/Exception.hpp"
 #include "sfz/Format.hpp"
@@ -27,6 +26,7 @@
 #include "sfz/PosixFormatter.hpp"
 #include "sfz/ScopedFd.hpp"
 #include "sfz/SmartPtr.hpp"
+#include "sfz/WriteItem.hpp"
 #include "BuildPix.hpp"
 #include "Card.hpp"
 #include "CardStack.hpp"
@@ -43,7 +43,6 @@
 #include "Time.hpp"
 
 using sfz::Bytes;
-using sfz::BytesBinaryWriter;
 using sfz::Exception;
 using sfz::ScopedFd;
 using sfz::String;
@@ -53,6 +52,7 @@ using sfz::dec;
 using sfz::format;
 using sfz::posix_strerror;
 using sfz::scoped_ptr;
+using sfz::write;
 
 namespace antares {
 
@@ -408,8 +408,8 @@ Event* BuildPixVideoDriver::wait_next_event(double) {
                     }
 
                     Bytes data;
-                    BytesBinaryWriter(&data).write(*pix);
-                    write(fd.get(), data.data(), data.size());
+                    write(&data, *pix);
+                    ::write(fd.get(), data.data(), data.size());
                 }
             }
             _key_down = true;

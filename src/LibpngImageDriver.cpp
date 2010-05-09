@@ -18,26 +18,28 @@
 #include "LibpngImageDriver.hpp"
 
 #include <png.h>
-#include "sfz/BinaryReader.hpp"
-#include "sfz/BinaryWriter.hpp"
+#include "sfz/ReadItem.hpp"
+#include "sfz/WriteItem.hpp"
 #include "Error.hpp"
 #include "FakeDrawing.hpp"
 
-using sfz::BinaryReader;
-using sfz::BinaryWriter;
+using sfz::ReadSource;
+using sfz::WriteTarget;
+using sfz::read;
+using sfz::write;
 
 namespace antares {
 
 namespace {
 
 void png_read_data(png_struct* png, png_byte* data, png_size_t length) {
-    BinaryReader* bin = reinterpret_cast<BinaryReader*>(png_get_io_ptr(png));
-    bin->read(data, length);
+    ReadSource* in = reinterpret_cast<ReadSource*>(png_get_io_ptr(png));
+    read(*in, data, length);
 }
 
 void png_write_data(png_struct* png, png_byte* data, png_size_t length) {
-    BinaryWriter* bin = reinterpret_cast<BinaryWriter*>(png_get_io_ptr(png));
-    bin->write(data, length);
+    WriteTarget* out = reinterpret_cast<WriteTarget*>(png_get_io_ptr(png));
+    write(*out, data, length);
 }
 
 void png_flush_data(png_struct*) { }
@@ -46,9 +48,9 @@ void png_flush_data(png_struct*) { }
 
 LibpngImageDriver::LibpngImageDriver() { }
 
-void LibpngImageDriver::read(BinaryReader* bin, ArrayPixMap* pix) {
+void LibpngImageDriver::read(ReadSource in, ArrayPixMap* pix) {
     png_byte sig[8];
-    bin->read(sig, 8);
+    sfz::read(in, sig, 8);
     if (png_sig_cmp(sig, 0, 8) != 0) {
         fail("invalid png signature");
     }
@@ -70,7 +72,7 @@ void LibpngImageDriver::read(BinaryReader* bin, ArrayPixMap* pix) {
     }
 
     png_set_sig_bytes(png, 8);
-    png_set_read_fn(png, bin, png_read_data);
+    png_set_read_fn(png, &in, png_read_data);
     png_read_info(png, info);
 
     png_uint_32 width;
@@ -110,7 +112,7 @@ void LibpngImageDriver::read(BinaryReader* bin, ArrayPixMap* pix) {
     }
 }
 
-void LibpngImageDriver::write(BinaryWriter* bin, const PixMap& pix) {
+void LibpngImageDriver::write(WriteTarget out, const PixMap& pix) {
     png_struct* png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if (!png) {
         fail("couldn't create png_struct");
@@ -127,7 +129,7 @@ void LibpngImageDriver::write(BinaryWriter* bin, const PixMap& pix) {
         fail("reading png failed");
     }
 
-    png_set_write_fn(png, bin, png_write_data, png_flush_data);
+    png_set_write_fn(png, &out, png_write_data, png_flush_data);
     png_set_IHDR(
             png, info, pix.bounds().width(), pix.bounds().height(), 8, PNG_COLOR_TYPE_RGBA, NULL,
             NULL, NULL);

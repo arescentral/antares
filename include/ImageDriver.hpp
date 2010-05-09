@@ -18,8 +18,8 @@
 #ifndef ANTARES_IMAGE_DRIVER_HPP_
 #define ANTARES_IMAGE_DRIVER_HPP_
 
-namespace sfz { class BinaryReader; }
-namespace sfz { class BinaryWriter; }
+#include "sfz/ReadSource.hpp"
+#include "sfz/WriteTarget.hpp"
 
 namespace antares {
 
@@ -30,8 +30,8 @@ class ImageDriver {
   public:
     virtual ~ImageDriver();
 
-    virtual void read(sfz::BinaryReader* bin, ArrayPixMap* pix) = 0;
-    virtual void write(sfz::BinaryWriter* bin, const PixMap& pix) = 0;
+    virtual void read(sfz::ReadSource in, ArrayPixMap* pix) = 0;
+    virtual void write(sfz::WriteTarget out, const PixMap& pix) = 0;
 
     static ImageDriver* driver();
     static void set_driver(ImageDriver* driver);

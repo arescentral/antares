@@ -19,7 +19,7 @@
 
 #include "SpaceObjectHandling.hpp"
 
-#include "sfz/BinaryReader.hpp"
+#include "sfz/ReadItem.hpp"
 #include "Admiral.hpp"
 #include "AresGlobalType.hpp"
 #include "Beam.hpp"
@@ -44,9 +44,9 @@
 #include "Transitions.hpp"
 #include "UniverseUnit.hpp"
 
-using sfz::BinaryReader;
-using sfz::BytesBinaryReader;
 using sfz::BytesPiece;
+using sfz::ReadSource;
+using sfz::read;
 using sfz::scoped_array;
 
 namespace antares {
@@ -103,27 +103,27 @@ int SpaceObjectHandlingInit() {
     gSpaceObjectData.reset(new spaceObjectType[kMaxSpaceObject]);
     if (gBaseObjectData.get() == nil) {
         Resource rsrc('bsob', kBaseObjectResID);
-        BytesBinaryReader bin(rsrc.data());
+        BytesPiece in(rsrc.data());
         size_t count = rsrc.data().size() / baseObjectType::byte_size;
         globals()->maxBaseObject = count;
         gBaseObjectData.reset(new baseObjectType[count]);
         for (size_t i = 0; i < count; ++i) {
-            bin.read(gBaseObjectData.get() + i);
+            read(&in, gBaseObjectData.get() + i);
         }
-        check(bin.done(), "didn't consume all of base object data");
+        check(in.empty(), "didn't consume all of base object data");
         correctBaseObjectColor = true;
     }
 
     if (gObjectActionData.get() == nil) {
         Resource rsrc('obac', kObjectActionResID);
-        BytesBinaryReader bin(rsrc.data());
+        BytesPiece in(rsrc.data());
         size_t count = rsrc.data().size() / objectActionType::byte_size;
         globals()->maxObjectAction = count;
         gObjectActionData.reset(new objectActionType[count]);
         for (size_t i = 0; i < count; ++i) {
-            bin.read(gObjectActionData.get() + i);
+            read(&in, gObjectActionData.get() + i);
         }
-        check(bin.done(), "didn't consume all of object action data");
+        check(in.empty(), "didn't consume all of object action data");
     }
 
     gActionQueueData.reset(new actionQueueType[kActionQueueLength]);
@@ -2862,22 +2862,22 @@ void Translate_Coord_To_Scenario_Rotation( long h, long v, coordPointType *coord
     coord->v += lscrap;
 }
 
-void objectActionType::read(BinaryReader* bin) {
+void read_from(ReadSource in, objectActionType* action) {
     uint8_t section[24];
 
-    bin->read(&verb);
-    bin->read(&reflexive);
-    bin->read(&inclusiveFilter);
-    bin->read(&exclusiveFilter);
-    bin->read(&owner);
-    bin->read(&delay);
-    bin->read(&initialSubjectOverride);
-    bin->read(&initialDirectOverride);
-    bin->discard(4);
-    bin->read(section, 24);
+    read(in, &action->verb);
+    read(in, &action->reflexive);
+    read(in, &action->inclusiveFilter);
+    read(in, &action->exclusiveFilter);
+    read(in, &action->owner);
+    read(in, &action->delay);
+    read(in, &action->initialSubjectOverride);
+    read(in, &action->initialDirectOverride);
+    in.shift(4);
+    read(in, section, 24);
 
-    BytesBinaryReader sub(BytesPiece(section, 24));
-    switch (verb) {
+    BytesPiece sub(BytesPiece(section, 24));
+    switch (action->verb) {
       case kNoAction:
       case kSetDestination:
       case kActivateSpecial:
@@ -2888,292 +2888,292 @@ void objectActionType::read(BinaryReader* bin) {
 
       case kCreateObject:
       case kCreateObjectSetDest:
-        sub.read(&argument.createObject);
+        read(&sub, &action->argument.createObject);
         break;
 
       case kPlaySound:
-        sub.read(&argument.playSound);
+        read(&sub, &action->argument.playSound);
         break;
 
       case kAlter:
-        sub.read(&argument.alterObject);
+        read(&sub, &action->argument.alterObject);
         break;
 
       case kMakeSparks:
-        sub.read(&argument.makeSparks);
+        read(&sub, &action->argument.makeSparks);
         break;
 
       case kReleaseEnergy:
-        sub.read(&argument.releaseEnergy);
+        read(&sub, &action->argument.releaseEnergy);
         break;
 
       case kLandAt:
-        sub.read(&argument.landAt);
+        read(&sub, &action->argument.landAt);
         break;
 
       case kEnterWarp:
-        sub.read(&argument.enterWarp);
+        read(&sub, &action->argument.enterWarp);
         break;
 
       case kDisplayMessage:
-        sub.read(&argument.displayMessage);
+        read(&sub, &action->argument.displayMessage);
         break;
 
       case kChangeScore:
-        sub.read(&argument.changeScore);
+        read(&sub, &action->argument.changeScore);
         break;
 
       case kDeclareWinner:
-        sub.read(&argument.declareWinner);
+        read(&sub, &action->argument.declareWinner);
         break;
 
       case kDie:
-        sub.read(&argument.killObject);
+        read(&sub, &action->argument.killObject);
         break;
 
       case kColorFlash:
-        sub.read(&argument.colorFlash);
+        read(&sub, &action->argument.colorFlash);
         break;
 
       case kDisableKeys:
       case kEnableKeys:
-        sub.read(&argument.keys);
+        read(&sub, &action->argument.keys);
         break;
 
       case kSetZoom:
-        sub.read(&argument.zoom);
+        read(&sub, &action->argument.zoom);
         break;
 
       case kComputerSelect:
-        sub.read(&argument.computerSelect);
+        read(&sub, &action->argument.computerSelect);
         break;
 
       case kAssumeInitialObject:
-        sub.read(&argument.assumeInitial);
+        read(&sub, &action->argument.assumeInitial);
         break;
     }
 }
 
-void argumentType::CreateObject::read(BinaryReader* bin) {
-    bin->read(&whichBaseType);
-    bin->read(&howManyMinimum);
-    bin->read(&howManyRange);
-    bin->read(&velocityRelative);
-    bin->read(&directionRelative);
-    bin->read(&randomDistance);
+void read_from(ReadSource in, argumentType::CreateObject* argument) {
+    read(in, &argument->whichBaseType);
+    read(in, &argument->howManyMinimum);
+    read(in, &argument->howManyRange);
+    read(in, &argument->velocityRelative);
+    read(in, &argument->directionRelative);
+    read(in, &argument->randomDistance);
 }
 
-void argumentType::PlaySound::read(BinaryReader* bin) {
-    bin->read(&priority);
-    bin->discard(1);
-    bin->read(&persistence);
-    bin->read(&absolute);
-    bin->discard(1);
-    bin->read(&volumeMinimum);
-    bin->read(&volumeRange);
-    bin->read(&idMinimum);
-    bin->read(&idRange);
+void read_from(ReadSource in, argumentType::PlaySound* argument) {
+    read(in, &argument->priority);
+    in.shift(1);
+    read(in, &argument->persistence);
+    read(in, &argument->absolute);
+    in.shift(1);
+    read(in, &argument->volumeMinimum);
+    read(in, &argument->volumeRange);
+    read(in, &argument->idMinimum);
+    read(in, &argument->idRange);
 }
 
-void argumentType::AlterObject::read(BinaryReader* bin) {
-    bin->read(&alterType);
-    bin->read(&relative);
-    bin->read(&minimum);
-    bin->read(&range);
+void read_from(ReadSource in, argumentType::AlterObject* argument) {
+    read(in, &argument->alterType);
+    read(in, &argument->relative);
+    read(in, &argument->minimum);
+    read(in, &argument->range);
 }
 
-void argumentType::MakeSparks::read(BinaryReader* bin) {
-    bin->read(&howMany);
-    bin->read(&speed);
-    bin->read(&velocityRange);
-    bin->read(&color);
+void read_from(ReadSource in, argumentType::MakeSparks* argument) {
+    read(in, &argument->howMany);
+    read(in, &argument->speed);
+    read(in, &argument->velocityRange);
+    read(in, &argument->color);
 }
 
-void argumentType::ReleaseEnergy::read(BinaryReader* bin) {
-    bin->read(&percent);
+void read_from(ReadSource in, argumentType::ReleaseEnergy* argument) {
+    read(in, &argument->percent);
 }
 
-void argumentType::LandAt::read(BinaryReader* bin) {
-    bin->read(&landingSpeed);
+void read_from(ReadSource in, argumentType::LandAt* argument) {
+    read(in, &argument->landingSpeed);
 }
 
-void argumentType::EnterWarp::read(BinaryReader* bin) {
-    bin->read(&warpSpeed);
+void read_from(ReadSource in, argumentType::EnterWarp* argument) {
+    read(in, &argument->warpSpeed);
 }
 
-void argumentType::DisplayMessage::read(BinaryReader* bin) {
-    bin->read(&resID);
-    bin->read(&pageNum);
+void read_from(ReadSource in, argumentType::DisplayMessage* argument) {
+    read(in, &argument->resID);
+    read(in, &argument->pageNum);
 }
 
-void argumentType::ChangeScore::read(BinaryReader* bin) {
-    bin->read(&whichPlayer);
-    bin->read(&whichScore);
-    bin->read(&amount);
+void read_from(ReadSource in, argumentType::ChangeScore* argument) {
+    read(in, &argument->whichPlayer);
+    read(in, &argument->whichScore);
+    read(in, &argument->amount);
 }
 
-void argumentType::DeclareWinner::read(BinaryReader* bin) {
-    bin->read(&whichPlayer);
-    bin->read(&nextLevel);
-    bin->read(&textID);
+void read_from(ReadSource in, argumentType::DeclareWinner* argument) {
+    read(in, &argument->whichPlayer);
+    read(in, &argument->nextLevel);
+    read(in, &argument->textID);
 }
 
-void argumentType::KillObject::read(BinaryReader* bin) {
-    bin->read(&dieType);
+void read_from(ReadSource in, argumentType::KillObject* argument) {
+    read(in, &argument->dieType);
 }
 
-void argumentType::ColorFlash::read(BinaryReader* bin) {
-    bin->read(&length);
-    bin->read(&color);
-    bin->read(&shade);
+void read_from(ReadSource in, argumentType::ColorFlash* argument) {
+    read(in, &argument->length);
+    read(in, &argument->color);
+    read(in, &argument->shade);
 }
 
-void argumentType::Keys::read(BinaryReader* bin) {
-    bin->read(&keyMask);
+void read_from(ReadSource in, argumentType::Keys* argument) {
+    read(in, &argument->keyMask);
 }
 
-void argumentType::Zoom::read(BinaryReader* bin) {
-    bin->read(&zoomLevel);
+void read_from(ReadSource in, argumentType::Zoom* argument) {
+    read(in, &argument->zoomLevel);
 }
 
-void argumentType::ComputerSelect::read(BinaryReader* bin) {
-    bin->read(&screenNumber);
-    bin->read(&lineNumber);
+void read_from(ReadSource in, argumentType::ComputerSelect* argument) {
+    read(in, &argument->screenNumber);
+    read(in, &argument->lineNumber);
 }
 
-void argumentType::AssumeInitial::read(BinaryReader* bin) {
-    bin->read(&whichInitialObject);
+void read_from(ReadSource in, argumentType::AssumeInitial* argument) {
+    read(in, &argument->whichInitialObject);
 }
 
-void baseObjectType::read(BinaryReader* bin) {
+void read_from(ReadSource in, baseObjectType* object) {
     uint8_t section[32];
 
-    bin->read(&attributes);
-    bin->read(&baseClass);
-    bin->read(&baseRace);
-    bin->read(&price);
+    read(in, &object->attributes);
+    read(in, &object->baseClass);
+    read(in, &object->baseRace);
+    read(in, &object->price);
 
-    bin->read(&offenseValue);
-    bin->read(&destinationClass);
+    read(in, &object->offenseValue);
+    read(in, &object->destinationClass);
 
-    bin->read(&maxVelocity);
-    bin->read(&warpSpeed);
-    bin->read(&warpOutDistance);
+    read(in, &object->maxVelocity);
+    read(in, &object->warpSpeed);
+    read(in, &object->warpOutDistance);
 
-    bin->read(&initialVelocity);
-    bin->read(&initialVelocityRange);
+    read(in, &object->initialVelocity);
+    read(in, &object->initialVelocityRange);
 
-    bin->read(&mass);
-    bin->read(&maxThrust);
+    read(in, &object->mass);
+    read(in, &object->maxThrust);
 
-    bin->read(&health);
-    bin->read(&damage);
-    bin->read(&energy);
+    read(in, &object->health);
+    read(in, &object->damage);
+    read(in, &object->energy);
 
-    bin->read(&initialAge);
-    bin->read(&initialAgeRange);
+    read(in, &object->initialAge);
+    read(in, &object->initialAgeRange);
 
-    bin->read(&naturalScale);
+    read(in, &object->naturalScale);
 
-    bin->read(&pixLayer);
-    bin->read(&pixResID);
-    bin->read(&tinySize);
-    bin->read(&shieldColor);
-    bin->discard(1);
+    read(in, &object->pixLayer);
+    read(in, &object->pixResID);
+    read(in, &object->tinySize);
+    read(in, &object->shieldColor);
+    in.shift(1);
 
-    bin->read(&initialDirection);
-    bin->read(&initialDirectionRange);
+    read(in, &object->initialDirection);
+    read(in, &object->initialDirectionRange);
 
-    bin->read(&pulse);
-    bin->read(&beam);
-    bin->read(&special);
+    read(in, &object->pulse);
+    read(in, &object->beam);
+    read(in, &object->special);
 
-    bin->read(&pulsePositionNum);
-    bin->read(&beamPositionNum);
-    bin->read(&specialPositionNum);
+    read(in, &object->pulsePositionNum);
+    read(in, &object->beamPositionNum);
+    read(in, &object->specialPositionNum);
 
-    bin->read(pulsePosition, kMaxWeaponPosition);
-    bin->read(beamPosition, kMaxWeaponPosition);
-    bin->read(specialPosition, kMaxWeaponPosition);
+    read(in, object->pulsePosition, kMaxWeaponPosition);
+    read(in, object->beamPosition, kMaxWeaponPosition);
+    read(in, object->specialPosition, kMaxWeaponPosition);
 
-    bin->read(&friendDefecit);
-    bin->read(&dangerThreshold);
-    bin->read(&specialDirection);
+    read(in, &object->friendDefecit);
+    read(in, &object->dangerThreshold);
+    read(in, &object->specialDirection);
 
-    bin->read(&arriveActionDistance);
+    read(in, &object->arriveActionDistance);
 
-    bin->read(&destroyAction);
-    bin->read(&destroyActionNum);
-    bin->read(&expireAction);
-    bin->read(&expireActionNum);
-    bin->read(&createAction);
-    bin->read(&createActionNum);
-    bin->read(&collideAction);
-    bin->read(&collideActionNum);
-    bin->read(&activateAction);
-    bin->read(&activateActionNum);
-    bin->read(&arriveAction);
-    bin->read(&arriveActionNum);
+    read(in, &object->destroyAction);
+    read(in, &object->destroyActionNum);
+    read(in, &object->expireAction);
+    read(in, &object->expireActionNum);
+    read(in, &object->createAction);
+    read(in, &object->createActionNum);
+    read(in, &object->collideAction);
+    read(in, &object->collideActionNum);
+    read(in, &object->activateAction);
+    read(in, &object->activateActionNum);
+    read(in, &object->arriveAction);
+    read(in, &object->arriveActionNum);
 
-    bin->read(section, 32);
+    read(in, section, 32);
 
-    bin->read(&buildFlags);
-    bin->read(&orderFlags);
-    bin->read(&buildRatio);
-    bin->read(&buildTime);
-    bin->read(&skillNum);
-    bin->read(&skillDen);
-    bin->read(&skillNumAdj);
-    bin->read(&skillDenAdj);
-    bin->read(&pictPortraitResID);
-    bin->discard(6);
-    bin->read(&internalFlags);
+    read(in, &object->buildFlags);
+    read(in, &object->orderFlags);
+    read(in, &object->buildRatio);
+    read(in, &object->buildTime);
+    read(in, &object->skillNum);
+    read(in, &object->skillDen);
+    read(in, &object->skillNumAdj);
+    read(in, &object->skillDenAdj);
+    read(in, &object->pictPortraitResID);
+    in.shift(6);
+    read(in, &object->internalFlags);
 
-    BytesBinaryReader sub(BytesPiece(section, 32));
-    if (attributes & kShapeFromDirection) {
-        sub.read(&frame.rotation);
-    } else if (attributes & kIsSelfAnimated) {
-        sub.read(&frame.animation);
-    } else if (attributes & kIsBeam) {
-        sub.read(&frame.beam);
+    BytesPiece sub(BytesPiece(section, 32));
+    if (object->attributes & kShapeFromDirection) {
+        read(&sub, &object->frame.rotation);
+    } else if (object->attributes & kIsSelfAnimated) {
+        read(&sub, &object->frame.animation);
+    } else if (object->attributes & kIsBeam) {
+        read(&sub, &object->frame.beam);
     } else {
-        sub.read(&frame.weapon);
+        read(&sub, &object->frame.weapon);
     }
 }
 
-void objectFrameType::Rotation::read(BinaryReader* bin) {
-    bin->read(&shapeOffset);
-    bin->read(&rotRes);
-    bin->read(&maxTurnRate);
-    bin->read(&turnAcceleration);
+void read_from(ReadSource in, objectFrameType::Rotation* rotation) {
+    read(in, &rotation->shapeOffset);
+    read(in, &rotation->rotRes);
+    read(in, &rotation->maxTurnRate);
+    read(in, &rotation->turnAcceleration);
 }
 
-void objectFrameType::Animation::read(BinaryReader* bin) {
-    bin->read(&firstShape);
-    bin->read(&lastShape);
-    bin->read(&frameDirection);
-    bin->read(&frameDirectionRange);
-    bin->read(&frameSpeed);
-    bin->read(&frameSpeedRange);
-    bin->read(&frameShape);
-    bin->read(&frameShapeRange);
+void read_from(ReadSource in, objectFrameType::Animation* animation) {
+    read(in, &animation->firstShape);
+    read(in, &animation->lastShape);
+    read(in, &animation->frameDirection);
+    read(in, &animation->frameDirectionRange);
+    read(in, &animation->frameSpeed);
+    read(in, &animation->frameSpeedRange);
+    read(in, &animation->frameShape);
+    read(in, &animation->frameShapeRange);
 }
 
-void objectFrameType::Beam::read(BinaryReader* bin) {
-    bin->read(&color);
-    bin->read(&kind);
-    bin->read(&accuracy);
-    bin->read(&range);
+void read_from(ReadSource in, objectFrameType::Beam* beam) {
+    read(in, &beam->color);
+    read(in, &beam->kind);
+    read(in, &beam->accuracy);
+    read(in, &beam->range);
 }
 
-void objectFrameType::Weapon::read(BinaryReader* bin) {
-    bin->read(&usage);
-    bin->read(&energyCost);
-    bin->read(&fireTime);
-    bin->read(&ammo);
-    bin->read(&range);
-    bin->read(&inverseSpeed);
-    bin->read(&restockCost);
+void read_from(ReadSource in, objectFrameType::Weapon* weapon) {
+    read(in, &weapon->usage);
+    read(in, &weapon->energyCost);
+    read(in, &weapon->fireTime);
+    read(in, &weapon->ammo);
+    read(in, &weapon->range);
+    read(in, &weapon->inverseSpeed);
+    read(in, &weapon->restockCost);
 }
 
 }  // namespace antares

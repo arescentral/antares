@@ -19,8 +19,7 @@
 #define ANTARES_GEOMETRY_HPP_
 
 #include <stdint.h>
-
-namespace sfz { class BinaryReader; }
+#include "sfz/ReadSource.hpp"
 
 namespace antares {
 
@@ -42,12 +41,9 @@ struct Point {
     // Move the point to the nearest point within `rect`.
     // @param [in] rect     The rectangle to clamp to.
     void clamp_to(const Rect& rect);
-
-    // Reads in the point via a BinaryReader.
-    //
-    // @param [in,out] bin  Used to read binary data.
-    void read(sfz::BinaryReader* bin);
 };
+
+void read_from(sfz::ReadSource in, Point* p);
 
 // A rectangle in two-dimensional space.
 //
@@ -143,12 +139,9 @@ struct Rect {
     //
     // @param [in] r        The Rect to enlarge this one around.
     void enlarge_to(const Rect& r);
-
-    // Reads in the rect via a BinaryReader.
-    //
-    // @param [in,out] bin  used to read binary data.
-    void read(sfz::BinaryReader* bin);
 };
+
+void read_from(sfz::ReadSource in, Rect* r);
 
 }  // namespace antares
 

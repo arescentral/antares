@@ -17,7 +17,7 @@
 
 #include "ScenarioMaker.hpp"
 
-#include "sfz/BinaryReader.hpp"
+#include "sfz/ReadItem.hpp"
 #include "Admiral.hpp"
 #include "AresGlobalType.hpp"
 #include "Beam.hpp"
@@ -45,8 +45,8 @@
 #include "TimeUnit.hpp"
 #include "UniverseUnit.hpp"
 
-using sfz::BinaryReader;
-using sfz::BytesBinaryReader;
+using sfz::BytesPiece;
+using sfz::read;
 using sfz::scoped_array;
 
 namespace antares {
@@ -99,57 +99,57 @@ short ScenarioMakerInit( void)
 
     {
         Resource rsrc('nlAG', 128);
-        BytesBinaryReader bin(rsrc.data());
-        bin.read(&globals()->scenarioFileInfo);
-        check(bin.done(), "didn't consume all of scenario file info data");
+        BytesPiece in(rsrc.data());
+        read(&in, &globals()->scenarioFileInfo);
+        check(in.empty(), "didn't consume all of scenario file info data");
     }
 
     if (globals()->gScenarioData.get() == nil) {
         Resource rsrc('snro', kScenarioResID);
-        BytesBinaryReader bin(rsrc.data());
+        BytesPiece in(rsrc.data());
         size_t count = rsrc.data().size() / scenarioType::byte_size;
         globals()->scenarioNum = count;
         globals()->gScenarioData.reset(new scenarioType[count]);
         for (size_t i = 0; i < count; ++i) {
-            bin.read(globals()->gScenarioData.get() + i);
+            read(&in, globals()->gScenarioData.get() + i);
         }
-        check(bin.done(), "didn't consume all of scenario data");
+        check(in.empty(), "didn't consume all of scenario data");
     }
 
     if (globals()->gScenarioInitialData.get() == nil) {
         Resource rsrc('snit', kScenarioInitialResID);
-        BytesBinaryReader bin(rsrc.data());
+        BytesPiece in(rsrc.data());
         size_t count = rsrc.data().size() / scenarioInitialType::byte_size;
         globals()->maxScenarioInitial = count;
         globals()->gScenarioInitialData.reset(new scenarioInitialType[count]);
         for (size_t i = 0; i < count; ++i) {
-            bin.read(globals()->gScenarioInitialData.get() + i);
+            read(&in, globals()->gScenarioInitialData.get() + i);
         }
-        check(bin.done(), "didn't consume all of initial object data");
+        check(in.empty(), "didn't consume all of initial object data");
     }
 
     if (globals()->gScenarioConditionData.get() == nil) {
         Resource rsrc('sncd', kScenarioConditionResID);
-        BytesBinaryReader bin(rsrc.data());
+        BytesPiece in(rsrc.data());
         size_t count = rsrc.data().size() / scenarioConditionType::byte_size;
         globals()->maxScenarioCondition = count;
         globals()->gScenarioConditionData.reset(new scenarioConditionType[count]);
         for (size_t i = 0; i < count; ++i) {
-            bin.read(globals()->gScenarioConditionData.get() + i);
+            read(&in, globals()->gScenarioConditionData.get() + i);
         }
-        check(bin.done(), "didn't consume all of condition data");
+        check(in.empty(), "didn't consume all of condition data");
     }
 
     if (globals()->gScenarioBriefData.get() == nil) {
         Resource rsrc('snbf', kScenarioBriefResID);
-        BytesBinaryReader bin(rsrc.data());
+        BytesPiece in(rsrc.data());
         size_t count = rsrc.data().size() / briefPointType::byte_size;
         globals()->maxScenarioBrief = count;
         globals()->gScenarioBriefData.reset(new briefPointType[count]);
         for (size_t i = 0; i < count; ++i) {
-            bin.read(globals()->gScenarioBriefData.get() + i);
+            read(&in, globals()->gScenarioBriefData.get() + i);
         }
-        check(bin.done(), "didn't consume all of briefing data");
+        check(in.empty(), "didn't consume all of briefing data");
     }
 
     return ( InitRaces());
