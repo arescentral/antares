@@ -45,7 +45,7 @@ InterfaceScreen::InterfaceScreen(int id, const Rect& bounds, bool full_screen)
           _last_event(now_secs()),
           _hit_item(0),
           _pix(new ArrayPixMap(bounds.width(), bounds.height())) {
-    Resource rsrc('intr', id);
+    Resource rsrc("interfaces", "intr", id);
     BytesPiece in(rsrc.data());
     const int offset_x = (_bounds.width() / 2) - 320;
     const int offset_y = (_bounds.height() / 2) - 240;
@@ -202,7 +202,7 @@ void InterfaceScreen::extend(int id, size_t within) {
     }
     vector<interfaceItemType> new_items;
 
-    Resource rsrc('intr', id);
+    Resource rsrc("interfaces", "intr", id);
     BytesPiece in(rsrc.data());
     Rect all_bounds;
     while (!in.empty()) {

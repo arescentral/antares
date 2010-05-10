@@ -61,7 +61,7 @@ HelpScreen::HelpScreen()
     // TODO(sfiera): top and bottom buffer of 1, not just top buffer of 2.
     offset((gRealWorld->bounds().width() / 2) - ((CLIP_RIGHT - CLIP_LEFT) / 2), 2);
 
-    Resource rsrc('TEXT', text_id());
+    Resource rsrc("text", "txt", text_id());
     String text(rsrc.data(), mac_roman_encoding());
     RgbColor fore;
     RgbColor back;

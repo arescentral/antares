@@ -37,7 +37,7 @@ using sfz::read;
 namespace antares {
 
 StringList::StringList(int id) {
-    Resource rsrc('STR#', id);
+    Resource rsrc("strings", "STR#", id);
     BytesPiece in(rsrc.data());
     uint16_t size;
     read(&in, &size);

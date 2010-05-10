@@ -89,7 +89,7 @@ void read_from(ReadSource in, natePixEntryType* pix) { pix->read_from(in); }
 natePixType::natePixType() { }
 
 natePixType::natePixType(int id) {
-    Resource rsrc('SMIV', id);
+    Resource rsrc("sprites", "SMIV", id);
     BytesPiece in(rsrc.data());
 
     uint32_t size;

@@ -20,7 +20,6 @@
 
 #include <stdint.h>
 #include "sfz/Macros.hpp"
-#include "Base.h"
 #include "PixMap.hpp"
 
 namespace antares {

@@ -70,7 +70,6 @@
             'mac_bundle_resources': [
                 'resources/Antares.icns',
                 'resources/MainMenu.nib',
-                'data',
             ],
             'link_settings': {
                 'libraries': [

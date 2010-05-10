@@ -113,7 +113,7 @@ int score(
 RetroText* score_text(
         int your_length, int par_length, int your_loss, int par_loss, int your_kill,
         int par_kill) {
-    Resource rsrc('TEXT', 6000);
+    Resource rsrc("text", "txt", 6000);
     String text(rsrc.data(), mac_roman_encoding());
 
     StringList strings(6000);
@@ -230,7 +230,7 @@ void DebriefingScreen::fire_timer() {
 }
 
 void DebriefingScreen::initialize(int text_id, bool do_score) {
-    Resource rsrc('TEXT', text_id);
+    Resource rsrc("text", "txt", text_id);
     _message.assign(rsrc.data(), mac_roman_encoding());
 
     int text_height = GetInterfaceTextHeightFromWidth(_message, kLarge, kTextWidth);

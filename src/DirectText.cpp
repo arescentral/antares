@@ -53,7 +53,7 @@ uint8_t to_mac_roman(uint32_t code) {
 }  // namespace
 
 directTextType::directTextType(int32_t id) {
-    Resource defn_rsrc(kDTextDescriptResType, id);
+    Resource defn_rsrc("font-descriptions", "nlFD", id);
     BytesPiece in(defn_rsrc.data());
 
     in.shift(4);
@@ -64,7 +64,7 @@ directTextType::directTextType(int32_t id) {
     read(&in, &height);
     read(&in, &ascent);
 
-    Resource data_rsrc(kDTextFontMapResType, resID);
+    Resource data_rsrc("font-bitmaps", "nlFM", resID);
     charSet.assign(data_rsrc.data());
 }
 

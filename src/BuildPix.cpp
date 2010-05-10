@@ -110,7 +110,7 @@ class PixBuilder {
 PixMap* build_pix(int text_id, int width) {
     scoped_ptr<ArrayPixMap> pix(new ArrayPixMap(width, 0));
     PixBuilder build(pix.get());
-    Resource text('TEXT', text_id);
+    Resource text("text", "txt", text_id);
 
     vector<StringKey> lines;
     BytesPiece data = text.data();

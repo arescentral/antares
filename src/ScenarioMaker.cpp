@@ -98,14 +98,14 @@ short ScenarioMakerInit( void)
 //      UseResFile( globals()->externalFileRefNum);
 
     {
-        Resource rsrc('nlAG', 128);
+        Resource rsrc("scenario-info", "nlAG", 128);
         BytesPiece in(rsrc.data());
         read(&in, &globals()->scenarioFileInfo);
         check(in.empty(), "didn't consume all of scenario file info data");
     }
 
     if (globals()->gScenarioData.get() == nil) {
-        Resource rsrc('snro', kScenarioResID);
+        Resource rsrc("scenarios", "snro", kScenarioResID);
         BytesPiece in(rsrc.data());
         size_t count = rsrc.data().size() / scenarioType::byte_size;
         globals()->scenarioNum = count;
@@ -117,7 +117,7 @@ short ScenarioMakerInit( void)
     }
 
     if (globals()->gScenarioInitialData.get() == nil) {
-        Resource rsrc('snit', kScenarioInitialResID);
+        Resource rsrc("scenario-initial-objects", "snit", kScenarioInitialResID);
         BytesPiece in(rsrc.data());
         size_t count = rsrc.data().size() / scenarioInitialType::byte_size;
         globals()->maxScenarioInitial = count;
@@ -129,7 +129,7 @@ short ScenarioMakerInit( void)
     }
 
     if (globals()->gScenarioConditionData.get() == nil) {
-        Resource rsrc('sncd', kScenarioConditionResID);
+        Resource rsrc("scenario-conditions", "sncd", kScenarioConditionResID);
         BytesPiece in(rsrc.data());
         size_t count = rsrc.data().size() / scenarioConditionType::byte_size;
         globals()->maxScenarioCondition = count;
@@ -141,7 +141,7 @@ short ScenarioMakerInit( void)
     }
 
     if (globals()->gScenarioBriefData.get() == nil) {
-        Resource rsrc('snbf', kScenarioBriefResID);
+        Resource rsrc("scenario-briefing-points", "snbf", kScenarioBriefResID);
         BytesPiece in(rsrc.data());
         size_t count = rsrc.data().size() / briefPointType::byte_size;
         globals()->maxScenarioBrief = count;

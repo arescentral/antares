@@ -1179,7 +1179,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
                                  &hiliteBounds, corner, scale, 16, 32, bounds);
 
         // TODO(sfiera): catch exception.
-        Resource rsrc('TEXT', contentID);
+        Resource rsrc("text", "txt", contentID);
         textData.reset(new String(rsrc.data(), mac_roman_encoding()));
         if (textData.get() != nil) {
             textlength = length = textData->size();
@@ -1460,7 +1460,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
 }
 
 void CreateObjectDataText(String* text, short id) {
-    Resource rsrc('TEXT', kShipDataTextID);
+    Resource rsrc("text", "txt", kShipDataTextID);
     String data(rsrc.data(), mac_roman_encoding());
 
     const baseObjectType& baseObject = gBaseObjectData.get()[id];
@@ -1525,7 +1525,7 @@ void CreateWeaponDataText(String* text, long whichWeapon, const StringPiece& wea
     weaponObject = gBaseObjectData.get() + whichWeapon;
 
     // TODO(sfiera): catch exception.
-    Resource rsrc('TEXT', kWeaponDataTextID);
+    Resource rsrc("text", "txt", kWeaponDataTextID);
     String data(rsrc.data(), mac_roman_encoding());
     // damage; this is tricky--we have to guess by walking through activate actions,
     //  and for all the createObject actions, see which creates the most damaging

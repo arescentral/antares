@@ -21,15 +21,15 @@
 #include <stdint.h>
 #include "sfz/Bytes.hpp"
 #include "sfz/SmartPtr.hpp"
+#include "sfz/String.hpp"
 
-namespace sfz { class BytesPiece; }
 namespace sfz { class MappedFile; }
 
 namespace antares {
 
 class Resource {
   public:
-    Resource(uint32_t code, int id);
+    Resource(const sfz::StringPiece& type, const sfz::StringPiece& extension, int id);
     ~Resource();
 
     sfz::BytesPiece data() const;

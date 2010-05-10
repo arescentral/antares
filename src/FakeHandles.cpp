@@ -31,7 +31,7 @@ void GetIndString(unsigned char* result, int id, int index) {
         *result = '\0';
         return;
     }
-    Resource rsrc('STR#', id);
+    Resource rsrc("strings", "STR#", id);
     BytesPiece in(rsrc.data());
     uint16_t count;
     read(&in, &count);

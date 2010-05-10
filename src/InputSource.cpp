@@ -26,7 +26,7 @@ namespace antares {
 InputSource::~InputSource() { }
 
 ReplayInputSource::ReplayInputSource(int32_t id)
-        : _resource('NLRP', id),
+        : _resource("replays", "NLRP", id),
           _bytes(_resource.data()) {
     read(&_bytes, &_random_seed);
     read(&_bytes, &_turn_num);

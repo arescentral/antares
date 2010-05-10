@@ -102,7 +102,7 @@ int SpaceObjectHandlingInit() {
 
     gSpaceObjectData.reset(new spaceObjectType[kMaxSpaceObject]);
     if (gBaseObjectData.get() == nil) {
-        Resource rsrc('bsob', kBaseObjectResID);
+        Resource rsrc("objects", "bsob", kBaseObjectResID);
         BytesPiece in(rsrc.data());
         size_t count = rsrc.data().size() / baseObjectType::byte_size;
         globals()->maxBaseObject = count;
@@ -115,7 +115,7 @@ int SpaceObjectHandlingInit() {
     }
 
     if (gObjectActionData.get() == nil) {
-        Resource rsrc('obac', kObjectActionResID);
+        Resource rsrc("object-actions", "obac", kObjectActionResID);
         BytesPiece in(rsrc.data());
         size_t count = rsrc.data().size() / objectActionType::byte_size;
         globals()->maxObjectAction = count;

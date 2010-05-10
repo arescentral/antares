@@ -17,52 +17,17 @@
 
 #include "Picture.hpp"
 
-#include <glob.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include "sfz/Exception.hpp"
-#include "sfz/MappedFile.hpp"
-#include "sfz/ReadItem.hpp"
-#include "Error.hpp"
 #include "ImageDriver.hpp"
+#include "Resource.hpp"
 
 using sfz::BytesPiece;
-using sfz::Exception;
-using sfz::MappedFile;
-using sfz::String;
-using sfz::read;
-using sfz::utf8_encoding;
 
 namespace antares {
 
-namespace {
-
-struct FreedGlob : public glob_t {
-    ~FreedGlob() {
-        globfree(this);
-    }
-};
-
-}  // namespace
-
 Picture::Picture(int32_t id)
         : ArrayPixMap(0, 0) {
-    char fileglob[64];
-    FreedGlob g;
-    g.gl_offs = 0;
-
-    sprintf(fileglob, "data/derived/Pictures/%d.png", id);
-    glob(fileglob, 0, NULL, &g);
-    sprintf(fileglob, "data/derived/Pictures/%d *.png", id);
-    glob(fileglob, GLOB_APPEND, NULL, &g);
-
-    if (g.gl_pathc != 1) {
-        throw Exception("PICT {0} not found", id);
-    }
-
-    String path(g.gl_pathv[0], utf8_encoding());
-    MappedFile file(path);
-    BytesPiece in(file.data());
+    Resource rsrc("pictures", "png", id);
+    BytesPiece in(rsrc.data());
     ImageDriver::driver()->read(&in, this);
 }
 

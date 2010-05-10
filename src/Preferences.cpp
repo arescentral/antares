@@ -55,7 +55,7 @@ Preferences::Preferences() {
 Preferences::~Preferences() { }
 
 void Preferences::reset() {
-    Resource rsrc('ArPr', 1000);
+    Resource rsrc("preferences", "ArPr", 1000);
     BytesPiece in(rsrc.data());
 
     read(&in, &_version);

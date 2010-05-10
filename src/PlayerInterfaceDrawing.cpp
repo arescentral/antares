@@ -1652,7 +1652,7 @@ void GetPlayerListPageDownRect(const interfaceItemType& item, Rect *dRect) {
 }
 
 void DrawInterfaceTextRect(const interfaceItemType& item, PixMap* pix) {
-    Resource rsrc('TEXT', item.item.textRect.textID);
+    Resource rsrc("text", "txt", item.item.textRect.textID);
     String data(rsrc.data(), mac_roman_encoding());
     DrawInterfaceTextInRect(item.bounds, data, item.style, item.color, pix, NULL);
 }

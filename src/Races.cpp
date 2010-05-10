@@ -34,7 +34,7 @@ namespace antares {
 
 short InitRaces() {
     if (globals()->gRaceData.get() == nil) {
-        Resource rsrc('race', kRaceResID);
+        Resource rsrc("races", "race", kRaceResID);
         BytesPiece in(rsrc.data());
         size_t count = rsrc.data().size() / raceType::byte_size;
         check(count == kRaceNum, "got unexpected number of races");

@@ -49,8 +49,6 @@ namespace antares {
 #define kInterfaceError         "\pINTF"
 #define kInterfaceResFileName   "\p:Ares Data Folder:Ares Interfaces"
 
-#define kInterfaceResourceType  'intr'
-
 #define kClickLoopInfo          ( kRegisterBased | RESULT_SIZE( SIZE_CODE ( sizeof ( bool))) | REGISTER_RESULT_LOCATION( kRegisterD0))
 
 #define kTargetScreenWidth      640
@@ -81,7 +79,7 @@ void InterfaceHandlingCleanup() {
 }
 
 int OpenInterface(short resID) {
-    Resource rsrc(kInterfaceResourceType, resID);
+    Resource rsrc("interfaces", "intr", resID);
     BytesPiece in(rsrc.data());
 
     gInterfaceItemData.clear();
@@ -104,7 +102,7 @@ long AppendInterface(short resID, long relative_number, bool center) {
     check(relative_number >= 0, "interfaces must be appended within existing elements");
     const int32_t original_number = gInterfaceItemData.size();
 
-    Resource rsrc(kInterfaceResourceType, resID);
+    Resource rsrc("interfaces", "intr", resID);
     BytesPiece in(rsrc.data());
     while (!in.empty()) {
         gInterfaceItemData.push_back(interfaceItemType());
