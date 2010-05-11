@@ -134,6 +134,16 @@ struct Keys {
         N8          = 0x5b,
         N9          = 0x5c,
 
+        // Numeric keypad, non-numbers.
+        N_PERIOD    = 0x41,
+        N_TIMES     = 0x43,
+        N_PLUS      = 0x45,
+        N_CLEAR     = 0x47,
+        N_DIVIDE    = 0x4b,
+        N_MINUS     = 0x4e,
+        N_ENTER     = 0x4c,
+        N_EQUALS    = 0x51,
+
         // Function keys.
         F1          = 0x7a,
         F2          = 0x78,

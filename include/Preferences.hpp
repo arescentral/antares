@@ -25,15 +25,6 @@ namespace antares {
 
 #define kUsePublicCopyProtection
 
-#define kKeyControlDataNum  80
-
-static const int kDigitNumber = 8;
-struct serialNumberType {
-    unsigned char name[76];
-    char number[kDigitNumber];
-};
-void read_from(sfz::ReadSource in, serialNumberType* serial);
-
 class Preferences {
   public:
     static Preferences* preferences();
@@ -62,25 +53,9 @@ class Preferences {
   private:
     static sfz::scoped_ptr<Preferences> _preferences;
 
-    int32_t             _version;
-    int16_t             _key_map[kKeyControlDataNum];
-    serialNumberType    _serial_number;
+    int16_t             _key_map[44];
     uint32_t            _options;
     int16_t             _volume;
-    uint16_t            _minutes_played;
-    uint16_t            _kills;
-    uint16_t            _losses;
-    int16_t             _race;
-    int16_t             _enemy_color;
-    int32_t             _reserved4;
-    Str31               _player_name;
-    Str31               _game_name;
-    int32_t             _resend_delay;
-    int32_t             _registered_setting;
-    uint32_t            _registered_flags;
-    uint32_t            _protocol_flags;
-    int16_t             _net_level;
-    int16_t             _net_latency;
 };
 
 }  // namespace antares

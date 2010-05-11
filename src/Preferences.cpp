@@ -20,6 +20,7 @@
 #include "sfz/Exception.hpp"
 #include "AresGlobalType.hpp"
 #include "Error.hpp"
+#include "KeyCodes.hpp"
 #include "KeyMapTranslation.hpp"
 #include "Options.hpp"
 #include "Resource.hpp"
@@ -55,33 +56,66 @@ Preferences::Preferences() {
 Preferences::~Preferences() { }
 
 void Preferences::reset() {
-    Resource rsrc("preferences", "ArPr", 1000);
-    BytesPiece in(rsrc.data());
+    set_key(kUpKeyNum,              1 + Keys::N8);
+    set_key(kDownKeyNum,            1 + Keys::N5);
+    set_key(kLeftKeyNum,            1 + Keys::N4);
+    set_key(kRightKeyNum,           1 + Keys::N6);
+    set_key(kOneKeyNum,             1 + Keys::OPTION);
+    set_key(kTwoKeyNum,             1 + Keys::COMMAND);
+    set_key(kEnterKeyNum,           1 + Keys::SPACE);
+    set_key(kWarpKeyNum,            1 + Keys::TAB);
 
-    read(&in, &_version);
-    read(&in, _key_map, kKeyControlDataNum);
-    read(&in, &_serial_number);
-    read(&in, &_options);
-    in.shift(4);
-    read(&in, &_volume);
-    read(&in, &_minutes_played);
-    read(&in, &_kills);
-    read(&in, &_losses);
-    read(&in, &_race);
-    read(&in, &_enemy_color);
-    in.shift(4);
-    read(&in, _player_name, 32);
-    read(&in, _game_name, 32);
-    read(&in, &_resend_delay);
-    read(&in, &_registered_setting);
-    read(&in, &_registered_flags);
-    read(&in, &_protocol_flags);
-    read(&in, &_net_level);
-    read(&in, &_net_latency);
+    set_key(kSelectFriendKeyNum,    1 + Keys::N_CLEAR);
+    set_key(kSelectFoeKeyNum,       1 + Keys::N_EQUALS);
+    set_key(kSelectBaseKeyNum,      1 + Keys::N_DIVIDE);
+    set_key(kDestinationKeyNum,     1 + Keys::SHIFT);
+    set_key(kOrderKeyNum,           1 + Keys::CONTROL);
+
+    set_key(kZoomInKeyNum,          1 + Keys::N_PLUS);
+    set_key(kZoomOutKeyNum,         1 + Keys::N_MINUS);
+
+    set_key(kCompUpKeyNum,          1 + Keys::UP_ARROW);
+    set_key(kCompDownKeyNum,        1 + Keys::DOWN_ARROW);
+    set_key(kCompAcceptKeyNum,      1 + Keys::RIGHT_ARROW);
+    set_key(kCompCancelKeyNum,      1 + Keys::LEFT_ARROW);
+
+    set_key(kTransferKeyNum,        1 + Keys::F8);
+    set_key(kScale121KeyNum,        1 + Keys::F9);
+    set_key(kScale122KeyNum,        1 + Keys::F10);
+    set_key(kScale124KeyNum,        1 + Keys::F11);
+    set_key(kScale1216KeyNum,       1 + Keys::F12);
+    set_key(kScaleHostileKeyNum,    1 + Keys::HELP);
+    set_key(kScaleObjectKeyNum,     1 + Keys::PAGE_UP);
+    set_key(kScaleAllKeyNum,        1 + Keys::HOME);
+
+    set_key(kMessageNextKeyNum,     1 + Keys::BACKSPACE);
+    set_key(kHelpKeyNum,            1 + Keys::F1);
+    set_key(kVolumeDownKeyNum,      1 + Keys::F2);
+    set_key(kVolumeUpKeyNum,        1 + Keys::F3);
+    set_key(kActionMusicKeyNum,     1 + Keys::F4);
+    set_key(kNetSettingsKeyNum,     1 + Keys::F5);
+    set_key(kFastMotionKeyNum,      1 + Keys::F6);
+
+    set_key(kFirstHotKeyNum + 0,    1 + Keys::K1);
+    set_key(kFirstHotKeyNum + 1,    1 + Keys::K2);
+    set_key(kFirstHotKeyNum + 2,    1 + Keys::K3);
+    set_key(kFirstHotKeyNum + 3,    1 + Keys::K4);
+    set_key(kFirstHotKeyNum + 4,    1 + Keys::K5);
+    set_key(kFirstHotKeyNum + 5,    1 + Keys::K6);
+    set_key(kFirstHotKeyNum + 6,    1 + Keys::K7);
+    set_key(kFirstHotKeyNum + 7,    1 + Keys::K8);
+    set_key(kFirstHotKeyNum + 8,    1 + Keys::K9);
+    set_key(kFirstHotKeyNum + 9,    1 + Keys::K0);
+
+    set_play_idle_music(true);
+    set_play_music_in_game(false);
+    set_speech_on(false);
+
+    set_volume(7);
 }
 
 void Preferences::copy(const Preferences& preferences) {
-    for (size_t i = 0; i < kKeyControlDataNum; ++i) {
+    for (size_t i = 0; i < KEY_COUNT; ++i) {
         set_key(i, preferences.key(i));
     }
     set_play_idle_music(preferences.play_idle_music());
@@ -134,11 +168,6 @@ void Preferences::set_speech_on(bool on) {
 
 void Preferences::set_volume(int volume) {
     _volume = volume;
-}
-
-void read_from(ReadSource in, serialNumberType* serial) {
-    read(&in, serial->name, 76);
-    read(&in, serial->number, kDigitNumber);
 }
 
 }  // namespace antares
