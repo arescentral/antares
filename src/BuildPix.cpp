@@ -18,12 +18,7 @@
 #include "BuildPix.hpp"
 
 #include <vector>
-#include "rezin/MacRoman.hpp"
-#include "sfz/Bytes.hpp"
-#include "sfz/Exception.hpp"
-#include "sfz/SmartPtr.hpp"
-#include "sfz/String.hpp"
-#include "sfz/StringUtilities.hpp"
+#include "sfz/sfz.hpp"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
 #include "Error.hpp"
@@ -31,15 +26,17 @@
 #include "Resource.hpp"
 #include "RetroText.hpp"
 
-using rezin::mac_roman_encoding;
 using sfz::BytesPiece;
 using sfz::Exception;
 using sfz::String;
 using sfz::StringKey;
 using sfz::StringPiece;
+using sfz::format;
 using sfz::scoped_ptr;
 using sfz::string_to_int32_t;
 using std::vector;
+
+namespace macroman = sfz::macroman;
 
 namespace antares {
 
@@ -119,19 +116,19 @@ PixMap* build_pix(int text_id, int width) {
     bool in_section_header = (start + 2 <= end) && (memcmp(start, "#+", 2) == 0);
     for (const uint8_t* p = start; p != end; ++p) {
         if (p + 3 <= end && memcmp(p, "\r#+", 3) == 0) {
-            StringKey line(data.substr(start - data.data(), p - start), mac_roman_encoding());
+            String line(macroman::decode(data.substr(start - data.data(), p - start)));
             lines.push_back(line);
             start = p + 1;
             in_section_header = true;
         } else if (in_section_header && (*p == '\r')) {
-            StringKey line(data.substr(start - data.data(), p - start), mac_roman_encoding());
+            String line(macroman::decode(data.substr(start - data.data(), p - start)));
             lines.push_back(line);
             start = p + 1;
             in_section_header = false;
         }
     }
     if (start != end) {
-        StringKey line(data.substr(start - data.data(), end - start), mac_roman_encoding());
+        String line(macroman::decode(data.substr(start - data.data(), end - start)));
         lines.push_back(line);
     }
 
@@ -141,13 +138,13 @@ PixMap* build_pix(int text_id, int width) {
                 if (it->at(2) == 'B') {
                     int32_t id;
                     if (!string_to_int32_t(StringPiece(*it).substr(3), &id)) {
-                        throw Exception("malformed header line {0}", *it);
+                        throw Exception(format("malformed header line {0}", *it));
                     }
                     build.set_background(id);
                 } else {
                     int32_t id;
                     if (!string_to_int32_t(StringPiece(*it).substr(2), &id)) {
-                        throw Exception("malformed header line {0}", *it);
+                        throw Exception(format("malformed header line {0}", *it));
                     }
                     build.add_picture(id);
                 }

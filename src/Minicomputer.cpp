@@ -20,7 +20,7 @@
 
 #include "Minicomputer.hpp"
 
-#include "rezin/MacRoman.hpp"
+#include "sfz/sfz.hpp"
 #include "Admiral.hpp"
 #include "AnyChar.hpp"
 #include "AresGlobalType.hpp"
@@ -45,9 +45,10 @@
 #include "StringList.hpp"
 #include "StringNumerics.hpp"
 
-using rezin::mac_roman_encoding;
 using sfz::String;
 using sfz::scoped_array;
+
+namespace macroman = sfz::macroman;
 
 namespace antares {
 
@@ -457,7 +458,7 @@ void DrawMiniScreen( void)
         }
         MoveTo( mRect.left + kMiniScreenLeftBuffer, mRect.top + (count + lineCorrect) * ((
             gDirectText->height) /* * 2 */) + gDirectText->ascent /* * 2 */);
-        String text(PStringBytes(c->string), mac_roman_encoding());
+        String text(macroman::decode(PStringBytes(c->string)));
         DrawDirectTextStringClipped(text, textcolor, gOffWorld, lRect, 0, 0);
         c++;
     }
@@ -572,7 +573,7 @@ void DrawAndShowMiniScreenLine( long whichLine)
     MoveTo( lRect.left + kMiniScreenLeftBuffer, lRect.top + (whichLine + lineCorrect) * ((
         gDirectText->height) /* * 2 */) + gDirectText->ascent /* * 2 */);
 
-    String text(PStringBytes(c->string), mac_roman_encoding());
+    String text(macroman::decode(PStringBytes(c->string)));
     DrawDirectTextStringClipped(text, textcolor, gOffWorld, lRect, 0, 0);
     NormalizeColors();
     DrawInRealWorld();
@@ -1269,7 +1270,7 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
 
             MoveTo( lRect.left + kMiniAmmoTextHBuffer, lRect.bottom-1/*lRect.top + gDirectText->ascent*/);
 
-            String text(PStringBytes(digit), mac_roman_encoding());
+            String text(macroman::decode(PStringBytes(digit)));
             DrawDirectTextStringClipped(text, lightcolor, gOffWorld, clipRect, 0, 0);
         }
 
@@ -1303,7 +1304,7 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
 
             MoveTo( lRect.left + kMiniAmmoTextHBuffer, lRect.bottom-1/*lRect.top + gDirectText->ascent*/);
 
-            String text(PStringBytes(digit), mac_roman_encoding());
+            String text(macroman::decode(PStringBytes(digit)));
             DrawDirectTextStringClipped(text, lightcolor, gOffWorld, clipRect, 0, 0);
         }
         update = true;
@@ -1336,7 +1337,7 @@ void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
 
             MoveTo( lRect.left + kMiniAmmoTextHBuffer, lRect.bottom-1/*lRect.top + gDirectText->ascent*/);
 
-            String text(PStringBytes(digit), mac_roman_encoding());
+            String text(macroman::decode(PStringBytes(digit)));
             DrawDirectTextStringClipped(text, lightcolor, gOffWorld, clipRect, 0, 0);
         }
         update = true;
@@ -1399,7 +1400,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         MoveTo( lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent);
         GetIndString( s, kMiniDataStringID, whichString);
 
-        String text(PStringBytes(s), mac_roman_encoding());
+        String text(macroman::decode(PStringBytes(s)));
         DrawDirectTextStringClipped(text, RgbColor::kBlack, gOffWorld, clipRect, 0, 0);
         uRect = lRect;
         uRect = clipRect;
@@ -1415,9 +1416,8 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
             // move to the 1st line in the selection miniscreen
             MoveTo( lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent);
 
-            String text(
-                    PStringBytes(GetDestBalanceName(newObject->destinationObject)),
-                    mac_roman_encoding());
+            String text(macroman::decode(
+                    PStringBytes(GetDestBalanceName(newObject->destinationObject))));
             DrawDirectTextStringClipped(text, color, gOffWorld, clipRect, 0, 0);
             if ( uRect.left == -1)
             {
@@ -1444,7 +1444,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
                 MoveTo( lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent);
 
                 // write the name
-                String text(PStringBytes(s), mac_roman_encoding());
+                String text(macroman::decode(PStringBytes(s)));
                 DrawDirectTextStringClipped(text, color, gOffWorld, clipRect, 0, 0);
             }
 
@@ -1647,7 +1647,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         if ( newObject->beamType >= 0)
         {
             GetIndString(s, kSpaceObjectShortNameResID, newObject->beamType + 1);
-            String text(PStringBytes(s), mac_roman_encoding());
+            String text(macroman::decode(PStringBytes(s)));
             DrawDirectTextStringClipped(text, color, gOffWorld, clipRect, 0, 0);
         }
 
@@ -1676,7 +1676,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         if ( newObject->pulseType >= 0)
         {
             GetIndString(s, kSpaceObjectShortNameResID, newObject->pulseType + 1);
-            String text(PStringBytes(s), mac_roman_encoding());
+            String text(macroman::decode(PStringBytes(s)));
             DrawDirectTextStringClipped(text, color, gOffWorld, clipRect, 0, 0);
         }
 
@@ -1705,7 +1705,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         if ( newObject->specialType >= 0)
         {
             GetIndString(s, kSpaceObjectShortNameResID, newObject->specialType + 1);
-            String text(PStringBytes(s), mac_roman_encoding());
+            String text(macroman::decode(PStringBytes(s)));
             DrawDirectTextStringClipped(text, color, gOffWorld, clipRect, 0, 0);
         }
 
@@ -1745,14 +1745,13 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
 
                 if ( dObject->attributes & kIsDestination)
                 {
-                    String text(
-                            PStringBytes(GetDestBalanceName(dObject->destinationObject)),
-                            mac_roman_encoding());
+                    String text(macroman::decode(
+                            PStringBytes(GetDestBalanceName(dObject->destinationObject))));
                     DrawDirectTextStringClipped(text, color, gOffWorld, clipRect, 0, 0);
                 } else
                 {
                     GetIndString( s, kSpaceObjectNameResID, dObject->whichBaseObject + 1);
-                    String text(PStringBytes(s), mac_roman_encoding());
+                    String text(macroman::decode(PStringBytes(s)));
                     DrawDirectTextStringClipped(text, color, gOffWorld, clipRect, 0, 0);
                 }
             }

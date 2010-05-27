@@ -15,32 +15,30 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "Resource.hpp"
+#ifndef ANTARES_DATA_EXTRACTOR_HPP_
+#define ANTARES_DATA_EXTRACTOR_HPP_
 
-#include <stdio.h>
 #include "sfz/sfz.hpp"
-
-using sfz::BytesPiece;
-using sfz::MappedFile;
-using sfz::String;
-using sfz::StringPiece;
-using sfz::format;
-
-namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-Resource::Resource(const StringPiece& type, const StringPiece& extension, int id) {
-    String path(format(
-                "{0}/Library/Application Support/Antares/Scenarios/com.biggerplanet.ares"
-                "/{1}/{2}.{3}", utf8::decode(getenv("HOME")), type, id, extension));
-    _file.reset(new MappedFile(path));
-}
+class DataExtractor {
+  public:
+    DataExtractor(const sfz::StringPiece& downloads_dir, const sfz::StringPiece& output_dir);
 
-Resource::~Resource() { }
+    bool current() const;
+    void extract(sfz::PrintTarget status) const;
 
-BytesPiece Resource::data() const {
-    return _file->data();
-}
+  private:
+    void download(sfz::PrintTarget status, const sfz::StringPiece& file,
+            const sfz::Sha1::Digest& digest) const;
+    void extract_original(sfz::PrintTarget status, const sfz::StringPiece& zip) const;
+    void extract_supplemental(sfz::PrintTarget status, const sfz::StringPiece& zip) const;
+
+    const sfz::String _downloads_dir;
+    const sfz::String _output_dir;
+};
 
 }  // namespace antares
+
+#endif  // ANTARES_DATA_EXTRACTOR_HPP_

@@ -17,10 +17,7 @@
 
 #include "DebriefingScreen.hpp"
 
-#include "rezin/MacRoman.hpp"
-#include "sfz/Format.hpp"
-#include "sfz/Formatter.hpp"
-#include "sfz/PrintItem.hpp"
+#include "sfz/sfz.hpp"
 #include "CardStack.hpp"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
@@ -32,11 +29,12 @@
 #include "StringList.hpp"
 #include "Time.hpp"
 
-using rezin::mac_roman_encoding;
 using sfz::Bytes;
 using sfz::String;
 using sfz::PrintItem;
 using sfz::dec;
+
+namespace macroman = sfz::macroman;
 
 namespace antares {
 
@@ -114,7 +112,7 @@ RetroText* score_text(
         int your_length, int par_length, int your_loss, int par_loss, int your_kill,
         int par_kill) {
     Resource rsrc("text", "txt", 6000);
-    String text(rsrc.data(), mac_roman_encoding());
+    String text(macroman::decode(rsrc.data()));
 
     StringList strings(6000);
 
@@ -130,7 +128,7 @@ RetroText* score_text(
     if (par_length > 0) {
         string_replace(&text, strings.at(2), par_mins);
         String secs_string;
-        format(&secs_string, ":{0}", dec(par_secs, 2));
+        print(&secs_string, format(":{0}", dec(par_secs, 2)));
         string_replace(&text, strings.at(3), secs_string);
     } else {
         StringList data_strings(6002);
@@ -231,7 +229,7 @@ void DebriefingScreen::fire_timer() {
 
 void DebriefingScreen::initialize(int text_id, bool do_score) {
     Resource rsrc("text", "txt", text_id);
-    _message.assign(rsrc.data(), mac_roman_encoding());
+    _message.assign(macroman::decode(rsrc.data()));
 
     int text_height = GetInterfaceTextHeightFromWidth(_message, kLarge, kTextWidth);
     Rect text_bounds(0, 0, kTextWidth, text_height);

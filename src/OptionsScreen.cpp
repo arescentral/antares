@@ -19,7 +19,7 @@
 
 #include <algorithm>
 #include <set>
-#include "sfz/Exception.hpp"
+#include "sfz/sfz.hpp"
 #include "AresMain.hpp"
 #include "CardStack.hpp"
 #include "ColorTranslation.hpp"
@@ -42,6 +42,7 @@
 using sfz::Exception;
 using sfz::String;
 using sfz::format;
+using sfz::print;
 using std::make_pair;
 using std::max;
 using std::min;
@@ -203,7 +204,7 @@ OptionsScreen::State SoundControlScreen::button_state(int button) {
       case KEY_CONTROL:
         return OptionsScreen::KEY_CONTROL;
       default:
-        throw Exception("unknown sound control button {0}", button);
+        throw Exception(format("unknown sound control button {0}", button));
     }
 }
 
@@ -353,7 +354,7 @@ void KeyControlScreen::handle_button(int button) {
                 adjust_interface();
                 draw();
             } else {
-                throw Exception("Got unknown button {0}.", button);
+                throw Exception(format("Got unknown button {0}.", button));
             }
         }
         break;
@@ -371,9 +372,9 @@ void KeyControlScreen::draw() const {
         StringList keys(2005);
 
         // TODO(sfiera): permit localization.
-        format(&text, "{0}: {1} conflicts with {2}: {3}",
+        print(&text, format("{0}: {1} conflicts with {2}: {3}",
                 tabs.at(get_tab_num(key_one)), keys.at(key_one),
-                tabs.at(get_tab_num(key_two)), keys.at(key_two));
+                tabs.at(get_tab_num(key_two)), keys.at(key_two)));
         const interfaceItemType& box = item(CONFLICT_TEXT);
         DrawInterfaceTextInRect(box.bounds, text, box.style, box.color, pix(), NULL);
     }
@@ -390,7 +391,7 @@ OptionsScreen::State KeyControlScreen::button_state(int button) {
       case SOUND_CONTROL:
         return OptionsScreen::SOUND_CONTROL;
       default:
-        throw Exception("unknown key control button {0}", button);
+        throw Exception(format("unknown key control button {0}", button));
     }
 }
 
@@ -407,7 +408,7 @@ KeyControlScreen::Tab KeyControlScreen::button_tab(int button) {
       case HOT_KEY_TAB:
         return HOT_KEY;
       default:
-        throw Exception("unknown key control tab {0}", button);
+        throw Exception(format("unknown key control tab {0}", button));
     }
 }
 

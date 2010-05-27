@@ -19,9 +19,7 @@
 
 #include "AresCheat.hpp"
 
-#include "rezin/MacRoman.hpp"
-#include "sfz/Bytes.hpp"
-#include "sfz/String.hpp"
+#include "sfz/sfz.hpp"
 #include "Admiral.hpp"
 #include "AresGlobalType.hpp"
 #include "Debug.hpp"
@@ -31,9 +29,10 @@
 #include "StringList.hpp"
 #include "StringNumerics.hpp"
 
-using rezin::mac_roman_encoding;
 using sfz::BytesPiece;
 using sfz::String;
+
+namespace macroman = sfz::macroman;
 
 namespace antares {
 
@@ -76,9 +75,7 @@ short GetCheatNumFromString(unsigned char* s)
         codeString[strLen] = s[strLen] + kCheatCodeValue;
         strLen--;
     }
-    String string(
-            BytesPiece(reinterpret_cast<const uint8_t*>(codeString + 1), *codeString),
-            mac_roman_encoding());
+    String string(macroman::decode(PStringBytes(codeString)));
     return globals()->gAresCheatStrings.get()->index_of(string) + 1;
 }
 

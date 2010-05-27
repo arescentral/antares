@@ -25,7 +25,6 @@
 #include "Error.hpp"
 #include "FakeDrawing.hpp"
 #include "FakeSounds.hpp"
-#include "File.hpp"
 #include "Preferences.hpp"
 #include "Threading.hpp"
 #include "VideoDriver.hpp"

@@ -18,9 +18,7 @@
 #include "AntaresController.h"
 
 #include <stdlib.h>
-#include "sfz/Bytes.hpp"
-#include "sfz/Exception.hpp"
-#include "sfz/String.hpp"
+#include "sfz/sfz.hpp"
 #include "AresMain.hpp"
 #include "CardStack.hpp"
 #include "CocoaPrefsDriver.hpp"
@@ -33,12 +31,9 @@
 #include "PrefsDriver.hpp"
 #include "VideoDriver.hpp"
 
-using sfz::Bytes;
+using sfz::CString;
 using sfz::Exception;
 using sfz::String;
-using sfz::StringPiece;
-using sfz::ascii_encoding;
-using sfz::utf8_encoding;
 using antares::AresInit;
 using antares::FakeDrawingInit;
 using antares::CardStack;
@@ -54,6 +49,8 @@ using antares::PrefsDriver;
 using antares::SoundDriver;
 using antares::VideoDriver;
 
+namespace utf8 = sfz::utf8;
+
 @implementation AntaresController
 
 - (void)applicationWillFinishLaunching:(NSNotification*)aNotification {
@@ -67,8 +64,8 @@ using antares::VideoDriver;
     if (getenv("HOME") == NULL) {
         Ledger::set_ledger(new NullLedger);
     } else {
-        String directory(getenv("HOME"), utf8_encoding());
-        directory.append("/Library/Application Support/Antares", ascii_encoding());
+        String directory(format(
+                "{0}/Library/Application Support/Antares", utf8::decode(getenv("HOME"))));
         Ledger::set_ledger(new DirectoryLedger(directory));
     }
 
@@ -76,11 +73,8 @@ using antares::VideoDriver;
     try {
         VideoDriver::driver()->loop(_stack);
     } catch (Exception& e) {
-        String string;
-        e.print_to(&string);
-        Bytes bytes(string, utf8_encoding());
-        bytes.resize(bytes.size() + 1);
-        NSLog(@"sfz::Exception: %s", reinterpret_cast<const char*>(bytes.data()));
+        CString c_str(e.message());
+        NSLog(@"sfz::Exception: %s", c_str.data());
     }
     [NSApp terminate:self];
 }

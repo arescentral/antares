@@ -17,7 +17,7 @@
 
 #include "ScenarioData.hpp"
 
-#include "sfz/ReadItem.hpp"
+#include "sfz/sfz.hpp"
 #include "Scenario.hpp"
 
 using sfz::BytesPiece;

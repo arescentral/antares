@@ -19,7 +19,7 @@
 #define ANTARES_SCENARIO_DATA_HPP_
 
 #include "Base.h"
-#include "sfz/ReadSource.hpp"
+#include "sfz/sfz.hpp"
 
 namespace antares {
 

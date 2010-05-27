@@ -7,6 +7,8 @@
             '<(DEPTH)/ext/librezin/include',
             '<(DEPTH)/ext/librgos/include',
             '<(DEPTH)/ext/libsfz/include',
+            '<(DEPTH)/ext/libzip/include',
+            '<(DEPTH)/ext/libzipxx/include',
         ],
         'xcode_settings': {
             'GCC_TREAT_WARNINGS_AS_ERRORS': 'YES',
@@ -52,6 +54,16 @@
             ],
         },
         {
+            'target_name': 'extract-data',
+            'type': 'executable',
+            'sources': [
+                'src/ExtractDataMain.cpp',
+            ],
+            'dependencies': [
+                'libAntaresExtract',
+            ],
+        },
+        {
             'target_name': 'Antares',
             'type': 'executable',
             'mac_bundle': 1,
@@ -60,6 +72,7 @@
                 'src/CocoaMain.mm',
                 'src/CocoaVideoDriver.mm',
                 'src/CocoaPrefsDriver.mm',
+                'src/FoundationHttpDriver.mm',
             ],
             'dependencies': [
                 'libAntares',
@@ -105,9 +118,9 @@
                 'src/FakeMath.cpp',
                 'src/FakeSounds.cpp',
                 'src/Fakes.cpp',
-                'src/File.cpp',
                 'src/Geometry.cpp',
                 'src/HelpScreen.cpp',
+                'src/HttpDriver.cpp',
                 'src/ImageDriver.cpp',
                 'src/InputSource.cpp',
                 'src/Instruments.cpp',
@@ -161,10 +174,30 @@
             ],
             'dependencies': [
                 '<(DEPTH)/ext/libpng/libpng.gyp:libpng',
-                '<(DEPTH)/ext/librezin/librezin.gyp:librezin',
                 '<(DEPTH)/ext/librgos/librgos.gyp:librgos',
                 '<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz',
             ],
+        },
+        {
+            'target_name': 'libAntaresExtract',
+            'type': '<(library)',
+            'sources': [
+                'src/DataExtractor.cpp',
+                'src/FoundationHttpDriver.mm',
+            ],
+            'dependencies': [
+                'libAntares',
+                '<(DEPTH)/ext/libpng/libpng.gyp:libpng',
+                '<(DEPTH)/ext/librezin/librezin.gyp:librezin',
+                '<(DEPTH)/ext/librgos/librgos.gyp:librgos',
+                '<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz',
+                '<(DEPTH)/ext/libzipxx/libzipxx.gyp:libzipxx',
+            ],
+            'link_settings': {
+                'libraries': [
+                    '$(SDKROOT)/System/Library/Frameworks/Cocoa.framework',
+                ],
+            },
         },
     ],
 }

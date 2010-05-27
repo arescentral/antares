@@ -20,8 +20,7 @@
 
 // Message Screen.h
 
-#include "sfz/SmartPtr.hpp"
-#include "sfz/String.hpp"
+#include "sfz/sfz.hpp"
 #include "AnyChar.hpp"
 #include "ColorTable.hpp"
 #include "NateDraw.hpp"

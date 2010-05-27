@@ -19,18 +19,16 @@
 
 #include <algorithm>
 #include <limits>
-#include "rezin/MacRoman.hpp"
-#include "sfz/Bytes.hpp"
-#include "sfz/Exception.hpp"
+#include "sfz/sfz.hpp"
 #include "Quickdraw.h"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
 
-using rezin::mac_roman_encoding;
 using sfz::Bytes;
 using sfz::Exception;
 using sfz::String;
 using sfz::StringPiece;
+using sfz::format;
 
 namespace antares {
 
@@ -50,7 +48,7 @@ int hex_digit(uint32_t c) {
     } else if ('a' <= c && c <= 'z') {
         return c - 'a' + 10;
     }
-    throw Exception("{0} is not a valid hex digit", c);
+    throw Exception(format("{0} is not a valid hex digit", c));
 }
 
 }  // namespace
@@ -78,7 +76,7 @@ RetroText::RetroText(const StringPiece& text, int font, RgbColor fore_color, Rgb
 
           case '\\':
             if (i + 1 >= text.size()) {
-                throw Exception("not enough input for special code.");
+                throw Exception(format("not enough input for special code."));
             }
             ++i;
             switch (text.at(i)) {
@@ -88,7 +86,7 @@ RetroText::RetroText(const StringPiece& text, int font, RgbColor fore_color, Rgb
 
               case 'f':
                 if (i + 2 >= text.size()) {
-                    throw Exception("not enough input for foreground code.");
+                    throw Exception(format("not enough input for foreground code."));
                 }
                 GetRGBTranslateColorShade(
                         &fore_color, hex_digit(text.at(i + 1)), hex_digit(text.at(i + 2)));
@@ -97,7 +95,7 @@ RetroText::RetroText(const StringPiece& text, int font, RgbColor fore_color, Rgb
 
               case 'b':
                 if (i + 2 >= text.size()) {
-                    throw Exception("not enough input for foreground code.");
+                    throw Exception(format("not enough input for foreground code."));
                 }
                 GetRGBTranslateColorShade(
                         &back_color, hex_digit(text.at(i + 1)), hex_digit(text.at(i + 2)));
@@ -118,7 +116,7 @@ RetroText::RetroText(const StringPiece& text, int font, RgbColor fore_color, Rgb
                 break;
 
               default:
-                throw Exception("found bad special character {0}.", text.at(i));
+                throw Exception(format("found bad special character {0}.", text.at(i)));
             }
             break;
 

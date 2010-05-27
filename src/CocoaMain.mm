@@ -16,13 +16,6 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #import <Cocoa/Cocoa.h>
-#import "sfz/Bytes.hpp"
-#import "sfz/Exception.hpp"
-#import "sfz/Format.hpp"
-
-using sfz::Bytes;
-using sfz::String;
-using sfz::utf8_encoding;
 
 int main(int argc, const char* argv[]) {
     return NSApplicationMain(argc, argv);

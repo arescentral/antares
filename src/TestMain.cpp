@@ -21,18 +21,13 @@
 #include <getopt.h>
 #include <queue>
 
-#include "sfz/Exception.hpp"
-#include "sfz/Format.hpp"
-#include "sfz/Formatter.hpp"
-#include "sfz/String.hpp"
-#include "sfz/StringUtilities.hpp"
+#include "sfz/sfz.hpp"
 
 #include "AresMain.hpp"
 #include "CardStack.hpp"
 #include "Error.hpp"
 #include "FakeDrawing.hpp"
 #include "FakeSounds.hpp"
-#include "File.hpp"
 #include "ImageDriver.hpp"
 #include "Ledger.hpp"
 #include "LibpngImageDriver.hpp"
@@ -41,32 +36,35 @@
 #include "Threading.hpp"
 #include "VideoDriver.hpp"
 
+using sfz::Bytes;
 using sfz::Exception;
+using sfz::Rune;
 using sfz::String;
 using sfz::StringPiece;
-using sfz::ascii_encoding;
+using sfz::makedirs;
 using sfz::print;
 using sfz::quote;
 using sfz::string_to_int32_t;
-using sfz::utf8_encoding;
+
+namespace io = sfz::io;
+namespace utf8 = sfz::utf8;
 
 namespace antares {
 
 void usage(const StringPiece& program_name) {
-    print(
-            2,
-            "usage: {0} <test> [<options>]\n"
-            "options:\n"
-            "    -l|--level=<int>   choose a level to use in the given mode\n"
-            "    -o|--output=<dir>  directory to save dumps to\n"
-            "tests:\n"
-            "    main-screen        dumps the main screen, then exits\n"
-            "    mission-briefing   dumps the mission briefing screens for <level>\n"
-            "    demo               runs the demo for <level>\n"
-            "    options            dumps the options and key control screens\n"
-            "    object-data        generates all object data strings\n"
-            "    build-pix          generates all scrolling text images\n",
-            program_name);
+    print(io::err, format(
+                "usage: {0} <test> [<options>]\n"
+                "options:\n"
+                "    -l|--level=<int>   choose a level to use in the given mode\n"
+                "    -o|--output=<dir>  directory to save dumps to\n"
+                "tests:\n"
+                "    main-screen        dumps the main screen, then exits\n"
+                "    mission-briefing   dumps the mission briefing screens for <level>\n"
+                "    demo               runs the demo for <level>\n"
+                "    options            dumps the options and key control screens\n"
+                "    object-data        generates all object data strings\n"
+                "    build-pix          generates all scrolling text images\n",
+                program_name));
     exit(1);
 }
 
@@ -99,7 +97,7 @@ Test string_to_test(const char* string) {
 }
 
 void TestMain(int argc, char* const* argv) {
-    String program_name(argv[0], utf8_encoding());
+    String program_name(utf8::decode(argv[0]));
     int level = -1;
     String output_dir;
     option longopts[] = {
@@ -120,23 +118,23 @@ void TestMain(int argc, char* const* argv) {
         switch (ch) {
           case 'l':
             {
-                String opt(optarg, utf8_encoding());
+                String opt(utf8::decode(optarg));
                 if (!string_to_int32_t(opt, &level)) {
-                    throw Exception("invalid level {0}", quote(opt));
+                    throw Exception(format("invalid level {0}", quote(opt)));
                 }
             }
             break;
 
           case 'o':
             if (!*optarg) {
-                print(2, "{0}: --output-dir must not be empty\n", program_name);
+                print(io::err, format("{0}: --output-dir must not be empty\n", program_name));
                 usage(program_name);
             }
-            output_dir.assign(optarg, utf8_encoding());
+            output_dir.assign(utf8::decode(optarg));
             break;
 
           default:
-            print(2, "{0}: unknown argument {1}\n", program_name, argv[optind]);
+            print(io::err, format("{0}: unknown argument {1}\n", program_name, argv[optind]));
             usage(program_name);
             break;
         }
@@ -145,12 +143,12 @@ void TestMain(int argc, char* const* argv) {
     argc -= optind;
     argv += optind;
     if (argc != 0) {
-        print(2, "{0}: too many arguments\n", program_name);
+        print(io::err, format("{0}: too many arguments\n", program_name));
         usage(program_name);
     }
 
     if (!output_dir.empty()) {
-        MakeDirs(output_dir, 0755);
+        makedirs(output_dir, 0755);
     }
 
     FakeDrawingInit(640, 480);
@@ -170,8 +168,7 @@ void TestMain(int argc, char* const* argv) {
         if (output_dir.empty()) {
             SoundDriver::set_driver(new NullSoundDriver);
         } else {
-            String out(output_dir);
-            out.append("/sound.log", ascii_encoding());
+            String out(format("{0}/sound.log", output_dir));
             SoundDriver::set_driver(new LogSoundDriver(out));
         }
         VideoDriver::set_driver(new DemoVideoDriver(output_dir, level));

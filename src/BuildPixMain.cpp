@@ -18,22 +18,12 @@
 #include <fcntl.h>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include "sfz/Exception.hpp"
-#include "sfz/Foreach.hpp"
-#include "sfz/Format.hpp"
-#include "sfz/Formatter.hpp"
-#include "sfz/PosixFormatter.hpp"
-#include "sfz/Range.hpp"
-#include "sfz/ScopedFd.hpp"
-#include "sfz/SmartPtr.hpp"
-#include "sfz/String.hpp"
-#include "sfz/WriteItem.hpp"
+#include "sfz/sfz.hpp"
 #include "BuildPix.hpp"
 #include "ColorTable.hpp"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
 #include "FakeDrawing.hpp"
-#include "File.hpp"
 #include "ImageDriver.hpp"
 #include "LibpngImageDriver.hpp"
 #include "PixMap.hpp"
@@ -41,6 +31,7 @@
 using sfz::Bytes;
 using sfz::BytesPiece;
 using sfz::Exception;
+using sfz::MappedFile;
 using sfz::ScopedFd;
 using sfz::String;
 using sfz::dec;
@@ -129,13 +120,9 @@ class BuildPixTypedTest : public TestWithParam<pair<int, int> > {
 TEST_P(BuildPixTypedTest, BuildPix) {
     std::string expected;
     {
-        String path;
-        format(&path, "test/build-pix/{0}.png", dec(_id, 5));
-        ScopedFd fd(open_path(path, O_RDONLY));
-        Bytes bytes;
-        ASSERT_THAT(fd.get(), Ge(0));
-        ASSERT_THAT(read_all(fd.get(), &bytes), Eq(true));
-        expected = Base64(bytes, "image/png");
+        String path(format("test/build-pix/{0}.png", dec(_id, 5)));
+        MappedFile file(path);
+        expected = Base64(file.data(), "image/png");
     }
 
     std::string actual;

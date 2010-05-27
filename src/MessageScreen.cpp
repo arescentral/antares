@@ -20,7 +20,6 @@
 
 #include "MessageScreen.hpp"
 
-#include "rezin/MacRoman.hpp"
 #include "AnyChar.hpp"
 #include "AresGlobalType.hpp"
 #include "ColorTranslation.hpp"
@@ -39,12 +38,13 @@
 #include "StringHandling.hpp"
 #include "StringList.hpp"
 
-using rezin::mac_roman_encoding;
 using sfz::Bytes;
 using sfz::BytesPiece;
 using sfz::String;
 using sfz::StringPiece;
 using sfz::scoped_ptr;
+
+namespace macroman = sfz::macroman;
 
 namespace antares {
 
@@ -128,9 +128,9 @@ extern PixMap*          gOffWorld;
 
 namespace {
 
-int mac_roman_char_width(char ch) {
-    BytesPiece bytes(reinterpret_cast<uint8_t*>(&ch), 1);
-    String str(bytes, mac_roman_encoding());
+int mac_roman_char_width(uint8_t ch) {
+    BytesPiece bytes(&ch, 1);
+    String str(macroman::decode(bytes));
     uint8_t width;
     mDirectCharWidth(width, str.at(0));
     return width;
@@ -425,13 +425,13 @@ void ClipToCurrentLongMessage( void)
             {
                 textData.reset(new String);
                 if (textData.get() != nil) {
-                    textData->append(PStringBytes(tmessage->stringMessage), mac_roman_encoding());
+                    textData->append(macroman::decode(PStringBytes(tmessage->stringMessage)));
                 }
                 tmessage->labelMessage = false;
             } else
             {
                 Resource rsrc("text", "txt", tmessage->currentResID);
-                textData.reset(new String(rsrc.data(), mac_roman_encoding()));
+                textData.reset(new String(macroman::decode(rsrc.data())));
                 Replace_KeyCode_Strings_With_Actual_Key_Names(textData.get(), KEY_LONG_NAMES, 0);
                 if (textData->at(0) == '#') {
                     tmessage->labelMessage = true;
@@ -867,7 +867,7 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
     long            charNum = 0, height = mDirectFontHeight(), x = 0, oldx = 0, oldCharNum, wordLen,
                     *lineLengthList = retroTextSpec->lineLength;
     unsigned char   wrapState; // 0 = none, 1 = once, 2 = more than once
-    Bytes bytes(*retroTextSpec->text, mac_roman_encoding());
+    Bytes bytes(macroman::encode(*retroTextSpec->text));
     const uint8_t*  thisChar = bytes.data();
 
     *lineLengthList = 0;
@@ -983,7 +983,7 @@ void DrawDirectTextInRect(
                     oldx = 0, oldCharNum, wordLen;
     unsigned char   wrapState; // 0 = none, 1 = once, 2 = more than once
     RgbColor        tempColor;
-    Bytes bytes(*retroTextSpec->text, mac_roman_encoding());
+    Bytes bytes(macroman::encode(*retroTextSpec->text));
     const uint8_t*  thisChar = bytes.data();
     unsigned char   *thisWordChar, thisWord[255];
     Rect        backRect, lineRect;
@@ -1053,7 +1053,7 @@ void DrawDirectTextInRect(
                     backRect.right = x;
                     MoveTo( oldx, y);
                     {
-                        String text(PStringBytes(thisWord), mac_roman_encoding());
+                        String text(macroman::decode(PStringBytes(thisWord)));
                         DrawDirectTextStringClipped(
                                 text, retroTextSpec->color, destMap, clipRect, portLeft, portTop);
                     }
@@ -1151,7 +1151,7 @@ void DrawDirectTextInRect(
             DrawNateRectClipped(destMap, &backRect, clipRect, (portLeft << 2),
                 portTop, retroTextSpec->backColor);
             MoveTo( oldx, y);
-            String text(PStringBytes(thisWord), mac_roman_encoding());
+            String text(macroman::decode(PStringBytes(thisWord)));
             DrawDirectTextStringClipped(
                     text, retroTextSpec->color, destMap, clipRect, portLeft, portTop);
         }
@@ -1161,7 +1161,7 @@ void DrawDirectTextInRect(
 void DrawRetroTextCharInRect(
         retroTextSpecType *retroTextSpec, long charsToDo, const Rect& bounds, const Rect& clipRect,
         PixMap *destMap, long portLeft, long portTop) {
-    Bytes bytes(*retroTextSpec->text, mac_roman_encoding());
+    Bytes bytes(macroman::encode(*retroTextSpec->text));
     const uint8_t* thisChar = bytes.data();
     unsigned char   thisWord[kMaxRetroSize];
     Rect        cursorRect, lineRect, tlRect;
@@ -1230,7 +1230,7 @@ void DrawRetroTextCharInRect(
                     cursorRect.right = retroTextSpec->xpos;
                     MoveTo( oldx, retroTextSpec->ypos);
                     {
-                        String text(PStringBytes(thisWord), mac_roman_encoding());
+                        String text(macroman::decode(PStringBytes(thisWord)));
                         DrawDirectTextStringClipped(
                                 text,
                                 ((retroTextSpec->color == RgbColor::kWhite)
@@ -1314,7 +1314,7 @@ void DrawRetroTextCharInRect(
             if ( retroTextSpec->backColor != RgbColor::kWhite)
                 DrawNateRectClipped(destMap, &tlRect, clipRect, (portLeft << 2), portTop,
                     retroTextSpec->backColor);
-            String text(PStringBytes(thisWord), mac_roman_encoding());
+            String text(macroman::decode(PStringBytes(thisWord)));
             DrawDirectTextStringClipped(
                     text,
                     ((retroTextSpec->color == RgbColor::kWhite)

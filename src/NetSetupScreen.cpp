@@ -18,7 +18,6 @@
 #include "NetSetupScreen.hpp"
 
 #include "AmbrosiaSerial.h"
-#include "AresExternalFile.hpp"
 #include "AresGlobalType.hpp"
 #include "AresMain.hpp"
 #include "AresResFile.hpp"

@@ -27,7 +27,8 @@ using sfz::BytesPiece;
 using sfz::PrintTarget;
 using sfz::String;
 using sfz::StringPiece;
-using sfz::ascii_encoding;
+
+namespace ascii = sfz::ascii;
 
 namespace antares {
 
@@ -38,7 +39,7 @@ SmallFixed small_fixed(smallFixedType value) {
 void print_to(PrintTarget out, const SmallFixed& fixed) {
     Str255 s;
     SmallFixedToString(fixed.value, s);
-    out.append(BytesPiece(reinterpret_cast<const uint8_t*>(s + 1), *s), ascii_encoding());
+    print_to(out, ascii::decode(PStringBytes(s)));
 }
 
 void SmallFixedToString( smallFixedType f, Str255 s)

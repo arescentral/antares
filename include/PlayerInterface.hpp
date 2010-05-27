@@ -18,11 +18,9 @@
 #ifndef ANTARES_PLAYER_INTERFACE_HPP_
 #define ANTARES_PLAYER_INTERFACE_HPP_
 
+#include "sfz/sfz.hpp"
 #include "PlayerInterfaceDrawing.hpp"
 #include "PlayerInterfaceItems.hpp"
-
-namespace sfz { class String; }
-namespace sfz { class StringPiece; }
 
 namespace antares {
 

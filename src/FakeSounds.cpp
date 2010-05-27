@@ -18,19 +18,21 @@
 #include "FakeSounds.hpp"
 
 #include <fcntl.h>
-#include "sfz/Exception.hpp"
-#include "sfz/Format.hpp"
+#include "sfz/sfz.hpp"
 #include "Error.hpp"
 #include "Fakes.hpp"
-#include "File.hpp"
 #include "Preferences.hpp"
 
 using sfz::Bytes;
 using sfz::Exception;
+using sfz::ScopedFd;
+using sfz::String;
 using sfz::StringPiece;
-using sfz::print;
+using sfz::format;
+using sfz::write;
 using sfz::scoped_ptr;
-using sfz::utf8_encoding;
+
+namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -53,31 +55,34 @@ class NullSndChannel : public SndChannel {
 
 class LogSndChannel : public SndChannel {
   public:
-    LogSndChannel(int id, int fd)
+    LogSndChannel(int id, ScopedFd* fd)
         : _id(id),
           _fd(fd) { }
 
     virtual void play(Sound* sound) {
         if (globals()->gGameTime > 0) {
-            print(_fd, "play\t{0}\t{1}\t{2}\n", _id, globals()->gGameTime, sound->id);
+            String line(format("play\t{0}\t{1}\t{2}\n", _id, globals()->gGameTime, sound->id));
+            write(_fd, utf8::encode(line));
         }
     }
 
     virtual void amp(uint8_t volume) {
         if (globals()->gGameTime > 0) {
-            print(_fd, "amp\t{0}\t{1}\t{2}\n", _id, globals()->gGameTime, volume);
+            String line(format("amp\t{0}\t{1}\t{2}\n", _id, globals()->gGameTime, volume));
+            write(_fd, utf8::encode(line));
         }
     }
 
     virtual void quiet() {
         if (globals()->gGameTime > 0) {
-            print(_fd, "quiet\t{0}\t{1}\n", _id, globals()->gGameTime);
+            String line(format("quiet\t{0}\t{1}\n", _id, globals()->gGameTime));
+            write(_fd, utf8::encode(line));
         }
     }
 
   private:
     int _id;
-    int _fd;
+    ScopedFd* const _fd;
 };
 
 }  // namespace
@@ -98,7 +103,7 @@ SndChannel* NullSoundDriver::new_channel() {
 }
 
 LogSoundDriver::LogSoundDriver(const StringPiece& path)
-        : _sound_log(open_path(path, O_CREAT | O_WRONLY, 0644)),
+        : _sound_log(open(path, O_CREAT | O_WRONLY, 0644)),
           _last_id(-1) {
     if (_sound_log.get() < 0) {
         throw Exception("Couldn't open sound log");
@@ -106,7 +111,7 @@ LogSoundDriver::LogSoundDriver(const StringPiece& path)
 }
 
 SndChannel* LogSoundDriver::new_channel() {
-    return new LogSndChannel(++_last_id, _sound_log.get());
+    return new LogSndChannel(++_last_id, &_sound_log);
 }
 
 }  // namespace antares

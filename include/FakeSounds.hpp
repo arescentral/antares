@@ -18,8 +18,7 @@
 #ifndef ANTARES_FAKE_SOUNDS_HPP_
 #define ANTARES_FAKE_SOUNDS_HPP_
 
-#include "sfz/String.hpp"
-#include "sfz/ScopedFd.hpp"
+#include "sfz/sfz.hpp"
 #include "Base.h"
 
 namespace antares {

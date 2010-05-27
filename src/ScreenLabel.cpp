@@ -17,8 +17,7 @@
 
 #include "ScreenLabel.hpp"
 
-#include "rezin/MacRoman.hpp"
-#include "sfz/String.hpp"
+#include "sfz/sfz.hpp"
 #include "Admiral.hpp"            // hack for checking strength
 #include "AresGlobalType.hpp"
 #include "ColorTranslation.hpp"
@@ -31,8 +30,9 @@
 #include "SpriteCursor.hpp"  // for hint line
 #include "StringHandling.hpp"
 
-using rezin::mac_roman_encoding;
 using sfz::String;
+
+namespace macroman = sfz::macroman;
 
 namespace antares {
 
@@ -287,7 +287,7 @@ void DrawAllLabels( void)
                     {
                         String_Get_Nth_Line( s, label->label, j);
                         MoveTo( label->where.h+1+kLabelInnerSpace, y+1);
-                        String text(PStringBytes(s), mac_roman_encoding());
+                        String text(macroman::decode(PStringBytes(s)));
                         DrawDirectTextStringClipped(
                                 text, RgbColor::kBlack, gOffWorld, clipRect, 0, 0);
                         MoveTo( label->where.h-1+kLabelInnerSpace, y-1);
@@ -304,7 +304,7 @@ void DrawAllLabels( void)
                     GetRGBTranslateColorShade(&color, label->color, VERY_LIGHT);
                     MoveTo( label->where.h+1+kLabelInnerSpace, label->where.v +
                         gDirectText->ascent +1 + kLabelInnerSpace);
-                    String text(PStringBytes(label->label), mac_roman_encoding());
+                    String text(macroman::decode(PStringBytes(label->label)));
                     DrawDirectTextStringClipped(
                             text, RgbColor::kBlack, gOffWorld, clipRect, 0, 0);
                     MoveTo( label->where.h + kLabelInnerSpace,
@@ -692,7 +692,7 @@ void RecalcScreenLabelSize( long which) // do this if you mess with its string
             for ( i = 1; i <= lineNum; i++)
             {
                 String_Get_Nth_Line( tString, label->label, i);
-                String text(PStringBytes(tString), mac_roman_encoding());
+                String text(macroman::decode(PStringBytes(tString)));
                 mGetDirectStringDimensions(text, label->width, label->height);
                 label->width += kLabelTotalInnerSpace;
                 if ( label->width > maxWidth)
@@ -705,7 +705,7 @@ void RecalcScreenLabelSize( long which) // do this if you mess with its string
         } else
         {
             label->lineNum = 1;
-            String text(PStringBytes(label->label), mac_roman_encoding());
+            String text(macroman::decode(PStringBytes(label->label)));
             mGetDirectStringDimensions(text, label->width, label->height);
             label->width += kLabelTotalInnerSpace;
             label->lineHeight = label->height;

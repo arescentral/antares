@@ -19,21 +19,17 @@
 
 #include <algorithm>
 #include <limits>
-#include "rezin/MacRoman.hpp"
-#include "sfz/Bytes.hpp"
-#include "sfz/Exception.hpp"
-#include "sfz/String.hpp"
-#include "sfz/StringUtilities.hpp"
+#include "sfz/sfz.hpp"
 #include "Quickdraw.h"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
 #include "Picture.hpp"
 
-using rezin::mac_roman_encoding;
 using sfz::Bytes;
 using sfz::Exception;
 using sfz::String;
 using sfz::StringPiece;
+using sfz::format;
 using sfz::string_to_int32_t;
 
 namespace antares {
@@ -53,7 +49,7 @@ int font_for_style(interfaceStyleType style) {
       case kSmall:
         return kButtonSmallFontNum;
     }
-    throw Exception("invalid style {0}", style);
+    throw Exception(format("invalid style {0}", style));
 }
 
 }  // namespace
@@ -76,10 +72,10 @@ InterfaceText::InterfaceText(
             {
                 bool found_code = false;
                 if (i + 1 >= text.size()) {
-                    throw Exception("not enough input for inline code.");
+                    throw Exception(format("not enough input for inline code."));
                 }
                 if (text.at(i + 1) != 'P') {
-                    throw Exception("found bad inline pict code {0}", text.at(i));
+                    throw Exception(format("found bad inline pict code {0}", text.at(i)));
                 }
                 String id_string;
                 for (size_t j = i + 2; j < text.size(); ++j) {
@@ -87,7 +83,7 @@ InterfaceText::InterfaceText(
                         inlinePictType inline_pict;
                         int32_t id;
                         if (!string_to_int32_t(id_string, &id, 10)) {
-                            throw Exception("invalid numeric literal {0}", id_string);
+                            throw Exception(format("invalid numeric literal {0}", id_string));
                         }
                         // TODO(sfiera): save the picture somewhere so we only have to load it once
                         // here, and not additionally each time we draw it.
@@ -106,7 +102,7 @@ InterfaceText::InterfaceText(
                     id_string.append(1, text.at(j));
                 }
                 if (!found_code) {
-                    throw Exception("malformed inline code");
+                    throw Exception(format("malformed inline code"));
                 }
             }
             break;

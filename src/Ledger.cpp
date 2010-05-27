@@ -19,24 +19,22 @@
 
 #include <fcntl.h>
 #include <unistd.h>
-#include "sfz/Exception.hpp"
-#include "sfz/Foreach.hpp"
-#include "sfz/Format.hpp"
-#include "sfz/MappedFile.hpp"
-#include "sfz/StringUtilities.hpp"
-#include "File.hpp"
+#include "sfz/sfz.hpp"
 
 using sfz::Bytes;
 using sfz::Exception;
 using sfz::MappedFile;
+using sfz::ScopedFd;
 using sfz::String;
 using sfz::StringPiece;
-using sfz::ascii_encoding;
-using sfz::format;
+using sfz::makedirs;
 using sfz::print;
 using sfz::scoped_ptr;
 using sfz::string_to_int32_t;
-using sfz::utf8_encoding;
+using sfz::write;
+
+namespace path = sfz::path;
+namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -84,7 +82,7 @@ void DirectoryLedger::unlocked_chapters(std::vector<int>* chapters) {
 
 void DirectoryLedger::load() {
     String path(_directory);
-    path.append("/com.biggerplanet.ares.json", ascii_encoding());
+    path.append("/com.biggerplanet.ares.json");
     _chapters.clear();
     scoped_ptr<MappedFile> file;
     try {
@@ -94,7 +92,7 @@ void DirectoryLedger::load() {
         return;
     }
 
-    String data(file->data(), utf8_encoding());
+    String data(utf8::decode(file->data()));
 
     // This is not a real JSON parser, but it plays on on the Interstellar News Network.  It simply
     // finds all integers in the file, which is fine for now.  The only numerical data we currently
@@ -114,25 +112,24 @@ void DirectoryLedger::load() {
 
 void DirectoryLedger::save() {
     String path(_directory);
-    path.append("/com.biggerplanet.ares.json", ascii_encoding());
+    path.append("/com.biggerplanet.ares.json");
 
     String contents;
-    contents.append("{\n", ascii_encoding());
-    contents.append("  \"unlocked-levels\": [", ascii_encoding());
+    contents.append("{\n");
+    contents.append("  \"unlocked-levels\": [");
     for (std::set<int>::const_iterator it = _chapters.begin(); it != _chapters.end(); ++it) {
-        if (it == _chapters.begin()) {
-            format(&contents, "{0}", *it);
-        } else {
-            format(&contents, ", {0}", *it);
+        if (it != _chapters.begin()) {
+            print(&contents, ", ");
         }
+        print(&contents, *it);
     }
-    contents.append("]\n", ascii_encoding());
-    contents.append("}\n", ascii_encoding());
+    contents.append("]\n");
+    contents.append("}\n");
 
-    MakeDirs(DirName(path), 0755);
-    int fd = open_path(path, O_WRONLY | O_CREAT, 0644);
-    print(fd, "{0}", contents);
-    close(fd);
+    makedirs(path::dirname(path), 0755);
+    ScopedFd fd(open(path, O_WRONLY | O_CREAT, 0644));
+    Bytes bytes(utf8::encode(contents));
+    write(&fd, bytes);
 }
 
 }  // namespace antares

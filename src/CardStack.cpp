@@ -18,11 +18,12 @@
 #include "CardStack.hpp"
 
 #include <algorithm>
-#include "sfz/Exception.hpp"
+#include "sfz/sfz.hpp"
 #include "Base.h"
 #include "Card.hpp"
 
 using sfz::Exception;
+using sfz::format;
 
 namespace antares {
 
@@ -46,7 +47,7 @@ void CardStack::push(Card* card) {
 
 void CardStack::pop(Card* card) {
     if (card != _top) {
-        throw Exception("tried to pop card {0} when not frontmost", card);
+        throw Exception(format("tried to pop card {0} when not frontmost", card));
     }
     card->resign_front();
     _top = card->next();

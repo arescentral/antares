@@ -19,14 +19,7 @@
 
 #include <fcntl.h>
 #include <limits>
-#include "sfz/Bytes.hpp"
-#include "sfz/Exception.hpp"
-#include "sfz/Format.hpp"
-#include "sfz/Formatter.hpp"
-#include "sfz/PosixFormatter.hpp"
-#include "sfz/ScopedFd.hpp"
-#include "sfz/SmartPtr.hpp"
-#include "sfz/WriteItem.hpp"
+#include "sfz/sfz.hpp"
 #include "BuildPix.hpp"
 #include "Card.hpp"
 #include "CardStack.hpp"
@@ -34,7 +27,6 @@
 #include "Event.hpp"
 #include "FakeDrawing.hpp"
 #include "Fakes.hpp"
-#include "File.hpp"
 #include "Ledger.hpp"
 #include "PlayerInterface.hpp"
 #include "Preferences.hpp"
@@ -47,12 +39,14 @@ using sfz::Exception;
 using sfz::ScopedFd;
 using sfz::String;
 using sfz::StringPiece;
-using sfz::ascii_encoding;
 using sfz::dec;
 using sfz::format;
+using sfz::open;
 using sfz::posix_strerror;
 using sfz::scoped_ptr;
 using sfz::write;
+
+namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -143,8 +137,7 @@ Event* MainScreenVideoDriver::wait_next_event(double) {
             return new KeyUpEvent(Keys::Q);
         } else {
             if (!output_dir().empty()) {
-                String out(output_dir());
-                out.append("/main-screen.png", ascii_encoding());
+                String out(format("{0}/main-screen.png", output_dir()));
                 DumpTo(out);
             }
             _key_down = true;
@@ -186,8 +179,7 @@ Event* MissionBriefingVideoDriver::wait_next_event(double) {
                 return new KeyUpEvent(Keys::RETURN);
             } else {
                 if (!output_dir().empty()) {
-                    String out(output_dir());
-                    out.append("/select-level.png", ascii_encoding());
+                    String out(format("{0}/select-level.png", output_dir()));
                     DumpTo(out);
                 }
                 _key_down = true;
@@ -204,8 +196,7 @@ Event* MissionBriefingVideoDriver::wait_next_event(double) {
                 return new KeyUpEvent(key);
             } else {
                 if (!output_dir().empty()) {
-                    String out(output_dir());
-                    format(&out, "/mission-{0}.png", _briefing_num);
+                    String out(format("{0}/mission-{1}.png", output_dir(), _briefing_num));
                     DumpTo(out);
                 }
                 ++_briefing_num;
@@ -261,8 +252,8 @@ void DemoVideoDriver::main_loop_iteration_complete(uint32_t game_time) {
         uint32_t seconds = game_time / 60;
         sprintf(path, "/screens/%03um%02u.png", seconds / 60, seconds % 60);
         if (!output_dir().empty()) {
-            String out(output_dir());
-            format(&out, "/screens/{0}m{1}.png", dec(seconds / 60, 3), dec(seconds % 60, 2));
+            String out(format("{0}/screens/{1}m{2}.png",
+                        output_dir(), dec(seconds / 60, 3), dec(seconds % 60, 2)));
             DumpTo(out);
         }
     }
@@ -295,8 +286,7 @@ Event* OptionsVideoDriver::wait_next_event(double) {
                 return new KeyUpEvent(Keys::K);
             } else {
                 if (!output_dir().empty()) {
-                    String out(output_dir());
-                    out.append("/options.png", ascii_encoding());
+                    String out(format("{0}/options.png", output_dir()));
                     DumpTo(out);
                 }
                 _key_down = true;
@@ -312,8 +302,7 @@ Event* OptionsVideoDriver::wait_next_event(double) {
                 return new MouseUpEvent(0, get_mouse());
             } else {
                 if (!output_dir().empty()) {
-                    String out(output_dir());
-                    format(&out, "/key-control-{0}.png", _key_tab);
+                    String out(format("{0}/key-control-{1}.png", output_dir(), _key_tab));
                     DumpTo(out);
                 }
                 ++_key_tab;
@@ -335,7 +324,7 @@ Point OptionsVideoDriver::get_mouse() {
     } else if (_key_tab == 5) {
         return Point(550, 430);
     } else {
-        throw Exception("_key_tab == {0}", _key_tab);
+        throw Exception(format("_key_tab == {0}", _key_tab));
     }
 }
 
@@ -358,16 +347,12 @@ Event* ObjectDataVideoDriver::wait_next_event(double) {
                         continue;
                     }
 
-                    String path;
-                    format(&path, "{0}/{1}.txt", output_dir(), dec(pict_id, 5));
-                    ScopedFd fd(open_path(path, O_WRONLY | O_CREAT, 0644));
-                    if (fd.get() < 0) {
-                        throw Exception("open: {0}: {1}", path, posix_strerror());
-                    }
+                    String path(format("{0}/{1}.txt", output_dir(), dec(pict_id, 5)));
+                    ScopedFd fd(open(path, O_WRONLY | O_CREAT, 0644));
 
                     String data;
                     CreateObjectDataText(&data, i);
-                    print(fd.get(), "{0}", data);
+                    write(&fd, utf8::encode(data));
                 }
             }
             _key_down = true;
@@ -400,12 +385,8 @@ Event* BuildPixVideoDriver::wait_next_event(double) {
                 for (int i = 0; i < text_count; ++i) {
                     scoped_ptr<PixMap> pix(build_pix(text[i], width[i]));
 
-                    String path;
-                    format(&path, "{0}/{1}.png", output_dir(), dec(text[i], 5));
-                    ScopedFd fd(open_path(path, O_WRONLY | O_CREAT, 0644));
-                    if (fd.get() < 0) {
-                        throw Exception("open: {0}: {1}", path, posix_strerror());
-                    }
+                    String path(format("{0}/{1}.png", output_dir(), dec(text[i], 5)));
+                    ScopedFd fd(open(path, O_WRONLY | O_CREAT, 0644));
 
                     Bytes data;
                     write(&data, *pix);

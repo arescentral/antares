@@ -15,26 +15,20 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_FILE_HPP_
-#define ANTARES_FILE_HPP_
+#ifndef ANTARES_FOUNDATION_HTTP_DRIVER_HPP_
+#define ANTARES_FOUNDATION_HTTP_DRIVER_HPP_
 
-#include <sys/stat.h>
-#include "sfz/String.hpp"
-
-namespace sfz { class Bytes; }
+#include "HttpDriver.hpp"
 
 namespace antares {
 
-bool IsDir(const sfz::StringPiece& path);
-void Mkdir(const sfz::StringPiece& path, mode_t mode);
-void MakeDirs(const sfz::StringPiece& path, mode_t mode);
-sfz::StringPiece BaseName(const sfz::StringPiece& path);
-sfz::StringPiece DirName(const sfz::StringPiece& path);
+class FoundationHttpDriver : public HttpDriver {
+  public:
+    virtual void get(const sfz::StringPiece& url, sfz::WriteTarget out);
 
-int open_path(const sfz::StringPiece& path, int oflag, mode_t mode = 0644);
-
-bool read_all(int fd, sfz::Bytes* out);
+  private:
+};
 
 }  // namespace antares
 
-#endif  // ANTARES_FILE_HPP_
+#endif  // ANTARES_FOUNDATION_HTTP_DRIVER_HPP_

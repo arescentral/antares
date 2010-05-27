@@ -15,32 +15,22 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "Resource.hpp"
+#include "HttpDriver.hpp"
 
-#include <stdio.h>
-#include "sfz/sfz.hpp"
-
-using sfz::BytesPiece;
-using sfz::MappedFile;
-using sfz::String;
-using sfz::StringPiece;
-using sfz::format;
-
-namespace utf8 = sfz::utf8;
+#include <cstdlib>
 
 namespace antares {
 
-Resource::Resource(const StringPiece& type, const StringPiece& extension, int id) {
-    String path(format(
-                "{0}/Library/Application Support/Antares/Scenarios/com.biggerplanet.ares"
-                "/{1}/{2}.{3}", utf8::decode(getenv("HOME")), type, id, extension));
-    _file.reset(new MappedFile(path));
+HttpDriver* HttpDriver::_driver = NULL;
+
+HttpDriver::~HttpDriver() { }
+
+HttpDriver* HttpDriver::driver() {
+    return _driver;
 }
 
-Resource::~Resource() { }
-
-BytesPiece Resource::data() const {
-    return _file->data();
+void HttpDriver::set_driver(HttpDriver* driver) {
+    _driver = driver;
 }
 
 }  // namespace antares

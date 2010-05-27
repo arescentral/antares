@@ -21,16 +21,18 @@
 #include <algorithm>
 #include <limits>
 
-#include "sfz/WriteItem.hpp"
+#include "sfz/sfz.hpp"
 #include "ColorTable.hpp"
 #include "Error.hpp"
 #include "Fakes.hpp"
-#include "File.hpp"
 
 using sfz::Bytes;
+using sfz::makedirs;
+using sfz::open;
 using sfz::scoped_ptr;
-using sfz::utf8_encoding;
 using sfz::write;
+
+namespace path = sfz::path;
 
 namespace antares {
 
@@ -46,8 +48,8 @@ void DumpTo(const sfz::StringPiece& path) {
     Bytes contents;
     write(&contents, *gRealWorld);
 
-    MakeDirs(DirName(path), 0755);
-    int fd = open_path(path, O_WRONLY | O_CREAT, 0644);
+    makedirs(path::dirname(path), 0755);
+    int fd = open(path, O_WRONLY | O_CREAT, 0644);
     write(fd, contents.data(), contents.size());
     close(fd);
 }

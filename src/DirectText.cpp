@@ -18,22 +18,21 @@
 #include "DirectText.hpp"
 
 #include <algorithm>
-#include "rezin/MacRoman.hpp"
-#include "sfz/ReadItem.hpp"
-#include "sfz/String.hpp"
+#include "sfz/sfz.hpp"
 #include "Base.h"
 
 #include "ColorTable.hpp"
 #include "Error.hpp"
 #include "Resource.hpp"
 
-using rezin::mac_roman_encoding;
 using sfz::Bytes;
 using sfz::BytesPiece;
 using sfz::String;
 using sfz::StringPiece;
 using sfz::read;
 using sfz::scoped_ptr;
+
+namespace macroman = sfz::macroman;
 
 namespace antares {
 
@@ -44,9 +43,8 @@ scoped_ptr<directTextType>* gDirectTextData;
 namespace {
 
 uint8_t to_mac_roman(uint32_t code) {
-    Bytes bytes;
     String string(1, code);
-    mac_roman_encoding().encode(string, &bytes);
+    Bytes bytes(macroman::encode(string));
     return bytes.at(0);
 }
 

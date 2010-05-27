@@ -20,8 +20,7 @@
 
 #include <set>
 #include <vector>
-#include "sfz/Macros.hpp"
-#include "sfz/String.hpp"
+#include "sfz/sfz.hpp"
 
 namespace antares {
 

@@ -17,7 +17,7 @@
 
 #include "SelectLevelScreen.hpp"
 
-#include "rezin/MacRoman.hpp"
+#include "sfz/sfz.hpp"
 #include "AresMain.hpp"
 #include "CardStack.hpp"
 #include "ColorTranslation.hpp"
@@ -29,11 +29,13 @@
 #include "PlayerInterface.hpp"
 #include "RetroText.hpp"
 #include "ScenarioMaker.hpp"
+#include "StringHandling.hpp"
 #include "VideoDriver.hpp"
 
-using rezin::mac_roman_encoding;
 using sfz::BytesPiece;
 using sfz::String;
+
+namespace macroman = sfz::macroman;
 
 namespace antares {
 
@@ -117,9 +119,7 @@ void SelectLevelScreen::draw_level_name(unsigned char* name, long fontNum, long 
     const interfaceItemType& i = item(itemNum);
     RgbColor color;
     GetRGBTranslateColorShade(&color, AQUA, VERY_LIGHT);
-    String text(
-            BytesPiece(reinterpret_cast<const uint8_t*>(name + 1), name[0]),
-            mac_roman_encoding());
+    String text(macroman::decode(PStringBytes(name)));
     RetroText retro(text, fontNum, color, RgbColor::kBlack);
     retro.wrap_to(440, 2);
 

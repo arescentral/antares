@@ -19,11 +19,7 @@
 #define ANTARES_RESOURCE_HPP_
 
 #include <stdint.h>
-#include "sfz/Bytes.hpp"
-#include "sfz/SmartPtr.hpp"
-#include "sfz/String.hpp"
-
-namespace sfz { class MappedFile; }
+#include "sfz/sfz.hpp"
 
 namespace antares {
 

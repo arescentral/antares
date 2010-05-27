@@ -19,9 +19,7 @@
 
 #include "Quickdraw.h"
 
-#include "rezin/MacRoman.hpp"
-#include "sfz/Exception.hpp"
-#include "sfz/String.hpp"
+#include "sfz/sfz.hpp"
 #include "ColorTranslation.hpp"
 #include "Debug.hpp"
 #include "DirectText.hpp"
@@ -36,12 +34,13 @@
 #include "StringList.hpp"
 #include "StringNumerics.hpp"
 
-using rezin::mac_roman_encoding;
 using sfz::BytesPiece;
 using sfz::Exception;
 using sfz::String;
 using sfz::StringPiece;
 using sfz::scoped_ptr;
+
+namespace macroman = sfz::macroman;
 
 namespace antares {
 
@@ -1653,7 +1652,7 @@ void GetPlayerListPageDownRect(const interfaceItemType& item, Rect *dRect) {
 
 void DrawInterfaceTextRect(const interfaceItemType& item, PixMap* pix) {
     Resource rsrc("text", "txt", item.item.textRect.textID);
-    String data(rsrc.data(), mac_roman_encoding());
+    String data(macroman::decode(rsrc.data()));
     DrawInterfaceTextInRect(item.bounds, data, item.style, item.color, pix, NULL);
 }
 

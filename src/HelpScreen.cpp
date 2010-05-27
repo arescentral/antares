@@ -17,7 +17,6 @@
 
 #include "HelpScreen.hpp"
 
-#include "rezin/MacRoman.hpp"
 #include "AresGlobalType.hpp"
 #include "CardStack.hpp"
 #include "ColorTranslation.hpp"
@@ -31,9 +30,10 @@
 #include "RetroText.hpp"
 #include "Resource.hpp"
 
-using rezin::mac_roman_encoding;
 using sfz::Bytes;
 using sfz::String;
+
+namespace macroman = sfz::macroman;
 
 namespace antares {
 
@@ -62,7 +62,7 @@ HelpScreen::HelpScreen()
     offset((gRealWorld->bounds().width() / 2) - ((CLIP_RIGHT - CLIP_LEFT) / 2), 2);
 
     Resource rsrc("text", "txt", text_id());
-    String text(rsrc.data(), mac_roman_encoding());
+    String text(macroman::decode(rsrc.data()));
     RgbColor fore;
     RgbColor back;
     GetRGBTranslateColorShade(&fore, RED, VERY_LIGHT);

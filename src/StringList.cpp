@@ -17,22 +17,20 @@
 
 #include "StringList.hpp"
 
-#include "rezin/MacRoman.hpp"
-#include "sfz/Exception.hpp"
-#include "sfz/Foreach.hpp"
-#include "sfz/Formatter.hpp"
-#include "sfz/ReadItem.hpp"
+#include "sfz/sfz.hpp"
 #include "Error.hpp"
 #include "Resource.hpp"
 
-using rezin::mac_roman_encoding;
 using sfz::Bytes;
 using sfz::BytesPiece;
 using sfz::Exception;
 using sfz::String;
 using sfz::StringPiece;
+using sfz::format;
 using sfz::quote;
 using sfz::read;
+
+namespace macroman = sfz::macroman;
 
 namespace antares {
 
@@ -44,7 +42,7 @@ StringList::StringList(int id) {
     for (size_t i = 0; i < size; ++i) {
         uint8_t len;
         read(&in, &len);
-        _strings.push_back(new String(in.substr(0, len), mac_roman_encoding()));
+        _strings.push_back(new String(macroman::decode(in.substr(0, len))));
         in = in.substr(len);
     }
 }
@@ -79,9 +77,9 @@ const String& StringList::at(size_t index) const {
 }
 
 void string_to_pstring(const String& src, unsigned char* dst) {
-    Bytes src_bytes(src, mac_roman_encoding());
+    Bytes src_bytes(macroman::encode(src));
     if (src_bytes.size() > 254) {
-        throw Exception("{0} is too long to convert to a pstring", quote(src));
+        throw Exception(format("{0} is too long to convert to a pstring", quote(src)));
     }
     *dst = src_bytes.size();
     memcpy(dst + 1, src_bytes.data(), src_bytes.size());

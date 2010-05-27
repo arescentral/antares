@@ -21,7 +21,7 @@
 
 #include "PlayerInterface.hpp"
 
-#include "rezin/MacRoman.hpp"
+#include "sfz/sfz.hpp"
 #include "AresGlobalType.hpp"
 #include "AresMain.hpp"
 #include "BriefingRenderer.hpp"
@@ -53,12 +53,13 @@
 #include "Transitions.hpp"
 #include "VideoDriver.hpp"
 
-using rezin::mac_roman_encoding;
 using sfz::BytesPiece;
 using sfz::String;
 using sfz::StringPiece;
 using sfz::scoped_ptr;
 using sfz::scoped_array;
+
+namespace macroman = sfz::macroman;
 
 namespace antares {
 
@@ -353,9 +354,8 @@ void DoLoadingInterface(Rect *contentRect, unsigned char* levelName) {
         retroTextSpec.textLength = *levelName;
         retroTextSpec.text.reset(new String);
         for (int i = 0; i < retroTextSpec.textLength; ++i) {
-            retroTextSpec.text->append(
-                    BytesPiece(reinterpret_cast<const uint8_t*>(levelName + 1), *levelName),
-                    mac_roman_encoding());
+            retroTextSpec.text->append(macroman::decode(
+                    BytesPiece(reinterpret_cast<const uint8_t*>(levelName + 1), *levelName)));
         }
 
         retroTextSpec.thisPosition = retroTextSpec.linePosition = retroTextSpec.lineCount = 0;
@@ -413,7 +413,7 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
 
         mSetDirectFont( kButtonFontNum);
         {
-            String text(PStringBytes(string), mac_roman_encoding());
+            String text(macroman::decode(PStringBytes(string)));
             mGetDirectStringDimensions(text, width, height);
         }
 
@@ -424,7 +424,7 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
         GetRGBTranslateColorShade(&color, kLoadingScreenColor, LIGHTER);
         MoveTo( tRect.left, tRect.top + mDirectFontAscent());
         {
-            String text(PStringBytes(string), mac_roman_encoding());
+            String text(macroman::decode(PStringBytes(string)));
             DrawDirectTextStringClipped(text, color, gOffWorld, clipRect, 0, 0);
         }
 
@@ -1180,7 +1180,7 @@ long UpdateMissionBriefPoint( interfaceItemType *dataItem, long whichBriefPoint,
 
         // TODO(sfiera): catch exception.
         Resource rsrc("text", "txt", contentID);
-        textData.reset(new String(rsrc.data(), mac_roman_encoding()));
+        textData.reset(new String(macroman::decode(rsrc.data())));
         if (textData.get() != nil) {
             textlength = length = textData->size();
             textHeight = GetInterfaceTextHeightFromWidth(
@@ -1461,7 +1461,7 @@ void ShowObjectData( Point where, short pictID, Rect *clipRect)
 
 void CreateObjectDataText(String* text, short id) {
     Resource rsrc("text", "txt", kShipDataTextID);
-    String data(rsrc.data(), mac_roman_encoding());
+    String data(macroman::decode(rsrc.data()));
 
     const baseObjectType& baseObject = gBaseObjectData.get()[id];
 
@@ -1526,7 +1526,7 @@ void CreateWeaponDataText(String* text, long whichWeapon, const StringPiece& wea
 
     // TODO(sfiera): catch exception.
     Resource rsrc("text", "txt", kWeaponDataTextID);
-    String data(rsrc.data(), mac_roman_encoding());
+    String data(macroman::decode(rsrc.data()));
     // damage; this is tricky--we have to guess by walking through activate actions,
     //  and for all the createObject actions, see which creates the most damaging
     //  object.  We calc this first so we can use isGuided

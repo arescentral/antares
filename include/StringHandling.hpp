@@ -18,7 +18,7 @@
 #ifndef ANTARES_STRING_HANDLING_HPP_
 #define ANTARES_STRING_HANDLING_HPP_
 
-namespace sfz { class BytesPiece; }
+#include "sfz/sfz.hpp"
 
 namespace antares {
 
