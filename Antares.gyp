@@ -4,7 +4,7 @@
             'include',
             'stubs',
             '<(DEPTH)/ext/libpng',
-            '<(DEPTH)/ext/librezin/include',
+            '<(DEPTH)/ext/rezin/include',
             '<(DEPTH)/ext/librgos/include',
             '<(DEPTH)/ext/libsfz/include',
             '<(DEPTH)/ext/libzip/include',
@@ -188,7 +188,7 @@
             'dependencies': [
                 'libAntares',
                 '<(DEPTH)/ext/libpng/libpng.gyp:libpng',
-                '<(DEPTH)/ext/librezin/librezin.gyp:librezin',
+                '<(DEPTH)/ext/rezin/rezin.gyp:librezin',
                 '<(DEPTH)/ext/librgos/librgos.gyp:librgos',
                 '<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz',
                 '<(DEPTH)/ext/libzipxx/libzipxx.gyp:libzipxx',

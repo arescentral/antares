@@ -7,9 +7,6 @@
 [submodule "ext/librgos"]
 	path = ext/librgos
 	url = git://github.com/sfiera/librgos.git
-[submodule "ext/librezin"]
-	path = ext/librezin
-	url = git://github.com/sfiera/librezin.git
 [submodule "ext/libpng"]
 	path = ext/libpng
 	url = git://github.com/sfiera/libpng.git
@@ -25,3 +22,6 @@
 [submodule "ext/libzipxx"]
 	path = ext/libzipxx
 	url = git://github.com/sfiera/libzipxx.git
+[submodule "ext/rezin"]
+	path = ext/rezin
+	url = git://github.com/sfiera/rezin.git
