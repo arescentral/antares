@@ -30,8 +30,8 @@ class DataExtractor {
     void extract(sfz::PrintTarget status) const;
 
   private:
-    void download(sfz::PrintTarget status, const sfz::StringPiece& file,
-            const sfz::Sha1::Digest& digest) const;
+    void download(sfz::PrintTarget status, const sfz::StringPiece& base,
+            const sfz::StringPiece& file, const sfz::Sha1::Digest& digest) const;
     void extract_original(sfz::PrintTarget status, const sfz::StringPiece& zip) const;
     void extract_supplemental(sfz::PrintTarget status, const sfz::StringPiece& zip) const;
 

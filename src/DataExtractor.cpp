@@ -128,7 +128,8 @@ const struct ResourceFile {
     },
 };
 
-const StringPiece kDownloadBase("http://antares.sfiera.net/downloads");
+const char kOriginalDownloadBase[] = "http://antares.sfiera.net/downloads";
+const char kSupplementalDownloadBase[] = "http://github.com/downloads/sfiera/antares-data";
 
 }  // namespace
 
@@ -145,13 +146,13 @@ bool DataExtractor::current() const {
 }
 
 void DataExtractor::extract(PrintTarget status) const {
-    download(status, "Ares-1.2.0.zip",
+    download(status, kOriginalDownloadBase, "Ares-1.2.0.zip",
             (Sha1::Digest){{0x246c393c, 0xa598af68, 0xa58cfdd1, 0x8e1601c1, 0xf4f30931}});
-    download(status, "Antares-Music-0.3.0.zip",
+    download(status, kSupplementalDownloadBase, "Antares-Music-0.3.0.zip",
             (Sha1::Digest){{0x9a1ceb4e, 0x2e0d4e7d, 0x61ed9934, 0x1274355e, 0xd8238bc4}});
-    download(status, "Antares-Pictures-0.3.0.zip",
+    download(status, kSupplementalDownloadBase, "Antares-Pictures-0.3.0.zip",
             (Sha1::Digest){{0x2c7961df, 0xb68c1b2b, 0xafbf83b9, 0xf27a4f62, 0x13ca8189}});
-    download(status, "Antares-Text-0.3.0.zip",
+    download(status, kSupplementalDownloadBase, "Antares-Text-0.3.0.zip",
             (Sha1::Digest){{0x2b5f3d50, 0xcc243db1, 0x35173461, 0x819f5e1b, 0xabde1519}});
 
     rmtree(_output_dir);
@@ -161,7 +162,7 @@ void DataExtractor::extract(PrintTarget status) const {
     extract_supplemental(status, "Antares-Text-0.3.0.zip");
 }
 
-void DataExtractor::download(PrintTarget status, const StringPiece& file,
+void DataExtractor::download(PrintTarget status, const StringPiece& base, const StringPiece& file,
         const Sha1::Digest& expected_digest) const {
     String full_path(format("{0}/{1}", _downloads_dir, file));
 
@@ -180,7 +181,7 @@ void DataExtractor::download(PrintTarget status, const StringPiece& file,
         rmtree(full_path);
     }
 
-    String url(format("{0}/{1}", kDownloadBase, file));
+    String url(format("{0}/{1}", base, file));
     print(status, format("downloading {0}\n", url));
 
     // Download the file from `url`.  Check its digest when it has been downloaded; if it is not
