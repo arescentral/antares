@@ -22,8 +22,10 @@
 
 using sfz::Bytes;
 using sfz::BytesPiece;
+using sfz::Exception;
 using sfz::StringPiece;
 using sfz::WriteTarget;
+using sfz::format;
 
 namespace utf8 = sfz::utf8;
 
@@ -60,7 +62,11 @@ void FoundationHttpDriver::get(const StringPiece& url, WriteTarget out) {
         initWithBytes:utf8.data() length:utf8.size() encoding:NSUTF8StringEncoding] autorelease];
     NSURL* nsurl = [NSURL URLWithString:url_string];
     NSData* data = [NSData dataWithContentsOfURL:nsurl];
-    out.append([data bytesPiece]);
+    if (data) {
+        out.append([data bytesPiece]);
+    } else {
+        throw Exception(format("Couldn't load requested url {0}", url));
+    }
 }
 
 }  // namespace antares
