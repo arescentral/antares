@@ -15,43 +15,29 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "FoundationHttpDriver.hpp"
+#ifndef ANTARES_COCOA_ADDITIONS_HPP_
+#define ANTARES_COCOA_ADDITIONS_HPP_
 
 #include <Cocoa/Cocoa.h>
 #include "sfz/sfz.hpp"
-#include "CocoaAdditions.hpp"
-
-using antares::Scoped;
-using sfz::Bytes;
-using sfz::BytesPiece;
-using sfz::Exception;
-using sfz::StringPiece;
-using sfz::WriteTarget;
-using sfz::format;
-
-namespace utf8 = sfz::utf8;
-
-@interface NSData (SfzAdditions)
-- (BytesPiece) bytesPiece;
-@end
-
-@implementation NSData (SfzAdditions)
-- (BytesPiece) bytesPiece {
-    return BytesPiece(reinterpret_cast<const uint8_t*>([self bytes]), [self length]);
-}
-@end
 
 namespace antares {
 
-void FoundationHttpDriver::get(const StringPiece& url, WriteTarget out) {
-    Scoped<NSAutoreleasePool> pool([[NSAutoreleasePool alloc] init]);
-    NSURL* nsurl = [NSURL URLWithString:[new_nsstring_from(url) autorelease]];
-    NSData* data = [NSData dataWithContentsOfURL:nsurl];
-    if (data) {
-        out.append([data bytesPiece]);
-    } else {
-        throw Exception(format("Couldn't load requested url {0}", url));
-    }
-}
+template <typename T>
+class Scoped {
+  public:
+    Scoped(T* object) : _object(object) { }
+    ~Scoped() { [_object release]; }
+    T* get() const { return _object; }
+
+  private:
+    T* _object;
+
+    DISALLOW_COPY_AND_ASSIGN(Scoped);
+};
+
+NSString* new_nsstring_from(const sfz::PrintItem& item);
 
 }  // namespace antares
+
+#endif  // ANTARES_COCOA_ADDITIONS_HPP_

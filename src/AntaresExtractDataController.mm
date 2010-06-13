@@ -18,9 +18,12 @@
 #include "AntaresExtractDataController.h"
 
 #include "sfz/sfz.hpp"
+#include "CocoaAdditions.hpp"
 #include "DataExtractor.hpp"
 
 using antares::DataExtractor;
+using antares::Scoped;
+using antares::new_nsstring_from;
 using sfz::Bytes;
 using sfz::Exception;
 using sfz::Rune;
@@ -29,46 +32,9 @@ using sfz::StringPiece;
 using sfz::format;
 using sfz::print;
 
-namespace io = sfz::io;
 namespace utf8 = sfz::utf8;
 
-#define VERIFYING @"Verifying scenario data..."
-#define EXTRACTING @"Extracting scenario data..."
-
 namespace {
-
-class NSLogTarget {
-  public:
-    NSLogTarget() { }
-    void append(const char* string) { _buffer.append(string); flush(); }
-    void append(const String& string) { _buffer.append(string); flush(); }
-    void append(const StringPiece& string) { _buffer.append(string); flush(); }
-    void append(size_t num, Rune rune) { _buffer.append(num, rune); flush(); }
-  private:
-    void flush() {
-        while (_buffer.find('\n') != String::npos) {
-            size_t split = _buffer.find('\n');
-            Bytes encoded(utf8::encode(_buffer.substr(0, split)));
-            _buffer.assign(_buffer.substr(split + 1));
-            NSString* nsstring = [[NSString alloc] initWithBytes:encoded.data()
-                length:encoded.size() encoding:NSUTF8StringEncoding];
-            NSLog(@"%@", nsstring);
-        }
-    }
-    String _buffer;
-    DISALLOW_COPY_AND_ASSIGN(NSLogTarget);
-};
-NSLogTarget nslog;
-
-template <typename T>
-class Scoped {
-  public:
-    Scoped(T* t) : _t(t) { }
-    ~Scoped() { [_t release]; }
-    T* get() const { return _t; }
-  private:
-    T* _t;
-};
 
 class LabelSetter : public DataExtractor::Observer {
   public:
@@ -77,11 +43,8 @@ class LabelSetter : public DataExtractor::Observer {
 
     virtual void status(const sfz::StringPiece& status) {
         Scoped<NSAutoreleasePool> pool([[NSAutoreleasePool alloc] init]);
-        Bytes utf8(utf8::encode(status));
-        NSString* label = [[NSString alloc] initWithBytes:utf8.data() length:utf8.size()
-            encoding:NSUTF8StringEncoding];
-        [_controller performSelectorOnMainThread:@selector(setAndReleaseLabel:) withObject:label
-            waitUntilDone:NO];
+        [_controller performSelectorOnMainThread:@selector(setAndReleaseLabel:)
+            withObject:new_nsstring_from(status) waitUntilDone:NO];
     }
 
   private:
@@ -106,8 +69,7 @@ class LabelSetter : public DataExtractor::Observer {
 }
 
 - (void)awakeFromNib {
-    NSString* label = NSLocalizedStringFromTable(VERIFYING, @"ExtractData", VERIFYING);
-    [_status_field setStringValue:label];
+    [_status_field setStringValue:@"Verifying scenario data..."];
     [_progress_bar startAnimation:self];
     [_window center];
     [_window makeKeyAndOrderFront:self];

@@ -15,43 +15,21 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "FoundationHttpDriver.hpp"
-
-#include <Cocoa/Cocoa.h>
-#include "sfz/sfz.hpp"
 #include "CocoaAdditions.hpp"
 
-using antares::Scoped;
 using sfz::Bytes;
-using sfz::BytesPiece;
-using sfz::Exception;
-using sfz::StringPiece;
-using sfz::WriteTarget;
-using sfz::format;
+using sfz::String;
+using sfz::PrintItem;
 
 namespace utf8 = sfz::utf8;
 
-@interface NSData (SfzAdditions)
-- (BytesPiece) bytesPiece;
-@end
-
-@implementation NSData (SfzAdditions)
-- (BytesPiece) bytesPiece {
-    return BytesPiece(reinterpret_cast<const uint8_t*>([self bytes]), [self length]);
-}
-@end
-
 namespace antares {
 
-void FoundationHttpDriver::get(const StringPiece& url, WriteTarget out) {
-    Scoped<NSAutoreleasePool> pool([[NSAutoreleasePool alloc] init]);
-    NSURL* nsurl = [NSURL URLWithString:[new_nsstring_from(url) autorelease]];
-    NSData* data = [NSData dataWithContentsOfURL:nsurl];
-    if (data) {
-        out.append([data bytesPiece]);
-    } else {
-        throw Exception(format("Couldn't load requested url {0}", url));
-    }
+NSString* new_nsstring_from(const PrintItem& item) {
+    String string(item);
+    Bytes utf8(utf8::encode(string));
+    return [[NSString alloc] initWithBytes:utf8.data() length:utf8.size()
+        encoding:NSUTF8StringEncoding];
 }
 
 }  // namespace antares

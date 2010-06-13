@@ -57,7 +57,9 @@
             'target_name': 'extract-data',
             'type': 'executable',
             'sources': [
+                'src/CocoaAdditions.mm',
                 'src/ExtractDataMain.cpp',
+                'src/FoundationHttpDriver.mm',
             ],
             'dependencies': [
                 'libAntaresExtract',
@@ -70,6 +72,7 @@
             'sources': [
                 'src/AntaresController.mm',
                 'src/AntaresExtractDataController.mm',
+                'src/CocoaAdditions.mm',
                 'src/CocoaMain.mm',
                 'src/CocoaVideoDriver.mm',
                 'src/CocoaPrefsDriver.mm',
@@ -186,7 +189,6 @@
             'type': '<(library)',
             'sources': [
                 'src/DataExtractor.cpp',
-                'src/FoundationHttpDriver.mm',
             ],
             'dependencies': [
                 'libAntares',
