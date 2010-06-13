@@ -70,6 +70,24 @@ class Scoped {
     T* _t;
 };
 
+class LabelSetter : public DataExtractor::Observer {
+  public:
+    LabelSetter(AntaresExtractDataController* controller)
+        : _controller(controller) { }
+
+    virtual void status(const sfz::StringPiece& status) {
+        Scoped<NSAutoreleasePool> pool([[NSAutoreleasePool alloc] init]);
+        Bytes utf8(utf8::encode(status));
+        NSString* label = [[NSString alloc] initWithBytes:utf8.data() length:utf8.size()
+            encoding:NSUTF8StringEncoding];
+        [_controller performSelectorOnMainThread:@selector(setAndReleaseLabel:) withObject:label
+            waitUntilDone:NO];
+    }
+
+  private:
+    AntaresExtractDataController* _controller;
+};
+
 }  // namespace
 
 @implementation AntaresExtractDataController
@@ -96,9 +114,9 @@ class Scoped {
     [NSThread detachNewThreadSelector:@selector(doWork) toTarget:self withObject:nil];
 }
 
-- (void)extracting {
-    NSString* label = NSLocalizedStringFromTable(EXTRACTING, @"ExtractData", EXTRACTING);
+- (void)setAndReleaseLabel:(NSString*)label {
     [_status_field setStringValue:label];
+    [label release];
 }
 
 - (void)done {
@@ -117,8 +135,8 @@ class Scoped {
 
     DataExtractor extractor(source, dest);
     if (!extractor.current()) {
-        [self performSelectorOnMainThread:@selector(extracting) withObject:nil waitUntilDone:NO];
-        extractor.extract(&nslog);
+        LabelSetter label_setter(self);
+        extractor.extract(&label_setter);
     }
     [self performSelectorOnMainThread:@selector(done) withObject:nil waitUntilDone:NO];
 }

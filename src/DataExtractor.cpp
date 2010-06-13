@@ -34,7 +34,6 @@ using sfz::Bytes;
 using sfz::BytesPiece;
 using sfz::Exception;
 using sfz::MappedFile;
-using sfz::PrintTarget;
 using sfz::ScopedFd;
 using sfz::Sha1;
 using sfz::String;
@@ -133,6 +132,8 @@ const char kSupplementalDownloadBase[] = "http://github.com/downloads/sfiera/ant
 
 }  // namespace
 
+DataExtractor::Observer::~Observer() { }
+
 DataExtractor::DataExtractor(const StringPiece& downloads_dir, const StringPiece& output_dir)
     : _downloads_dir(downloads_dir),
       _output_dir(output_dir) { }
@@ -145,24 +146,24 @@ bool DataExtractor::current() const {
     return false;
 }
 
-void DataExtractor::extract(PrintTarget status) const {
-    download(status, kOriginalDownloadBase, "Ares-1.2.0.zip",
+void DataExtractor::extract(Observer* observer) const {
+    download(observer, kOriginalDownloadBase, "Ares-1.2.0.zip",
             (Sha1::Digest){{0x246c393c, 0xa598af68, 0xa58cfdd1, 0x8e1601c1, 0xf4f30931}});
-    download(status, kSupplementalDownloadBase, "Antares-Music-0.3.0.zip",
+    download(observer, kSupplementalDownloadBase, "Antares-Music-0.3.0.zip",
             (Sha1::Digest){{0x9a1ceb4e, 0x2e0d4e7d, 0x61ed9934, 0x1274355e, 0xd8238bc4}});
-    download(status, kSupplementalDownloadBase, "Antares-Pictures-0.3.0.zip",
+    download(observer, kSupplementalDownloadBase, "Antares-Pictures-0.3.0.zip",
             (Sha1::Digest){{0x2c7961df, 0xb68c1b2b, 0xafbf83b9, 0xf27a4f62, 0x13ca8189}});
-    download(status, kSupplementalDownloadBase, "Antares-Text-0.3.0.zip",
+    download(observer, kSupplementalDownloadBase, "Antares-Text-0.3.0.zip",
             (Sha1::Digest){{0x2b5f3d50, 0xcc243db1, 0x35173461, 0x819f5e1b, 0xabde1519}});
 
     rmtree(_output_dir);
-    extract_original(status, "Ares-1.2.0.zip");
-    extract_supplemental(status, "Antares-Music-0.3.0.zip");
-    extract_supplemental(status, "Antares-Pictures-0.3.0.zip");
-    extract_supplemental(status, "Antares-Text-0.3.0.zip");
+    extract_original(observer, "Ares-1.2.0.zip");
+    extract_supplemental(observer, "Antares-Music-0.3.0.zip");
+    extract_supplemental(observer, "Antares-Pictures-0.3.0.zip");
+    extract_supplemental(observer, "Antares-Text-0.3.0.zip");
 }
 
-void DataExtractor::download(PrintTarget status, const StringPiece& base, const StringPiece& file,
+void DataExtractor::download(Observer* observer, const StringPiece& base, const StringPiece& file,
         const Sha1::Digest& expected_digest) const {
     String full_path(format("{0}/{1}", _downloads_dir, file));
 
@@ -182,7 +183,9 @@ void DataExtractor::download(PrintTarget status, const StringPiece& base, const 
     }
 
     String url(format("{0}/{1}", base, file));
-    print(status, format("downloading {0}\n", url));
+
+    String status(format("Downloading {0}...", file));
+    observer->status(status);
 
     // Download the file from `url`.  Check its digest when it has been downloaded; if it is not
     // the right file, then throw an exception without writing it to disk.  Otherwise, write it to
@@ -202,12 +205,13 @@ void DataExtractor::download(PrintTarget status, const StringPiece& base, const 
     write(&fd, download.data(), download.size());
 }
 
-void DataExtractor::extract_original(PrintTarget status, const StringPiece& file) const {
+void DataExtractor::extract_original(Observer* observer, const StringPiece& file) const {
+    String status(format("Extracting {0}...", file));
+    observer->status(status);
     String full_path(format("{0}/{1}", _downloads_dir, file));
     ZipArchive archive(full_path, 0);
     foreach (it, array_range(kResourceFiles)) {
         String path(utf8::decode(it->path));
-        print(status, format("extracting data from {0},{1}\n", file, path));
         ZipFileReader file(&archive, path);
         AppleDouble apple_double(file.data());
         ResourceFork rsrc(apple_double.at(AppleDouble::RESOURCE_FORK));
@@ -231,8 +235,9 @@ void DataExtractor::extract_original(PrintTarget status, const StringPiece& file
     }
 }
 
-void DataExtractor::extract_supplemental(PrintTarget status, const StringPiece& file) const {
-    print(status, format("extracting data from {0}\n", file));
+void DataExtractor::extract_supplemental(Observer* observer, const StringPiece& file) const {
+    String status(format("Extracting {0}...", file));
+    observer->status(status);
     String full_path(format("{0}/{1}", _downloads_dir, file));
     ZipArchive archive(full_path, 0);
 

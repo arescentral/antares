@@ -24,16 +24,21 @@ namespace antares {
 
 class DataExtractor {
   public:
+    struct Observer {
+        virtual ~Observer();
+        virtual void status(const sfz::StringPiece& status) = 0;
+    };
+
     DataExtractor(const sfz::StringPiece& downloads_dir, const sfz::StringPiece& output_dir);
 
     bool current() const;
-    void extract(sfz::PrintTarget status) const;
+    void extract(Observer* observer) const;
 
   private:
-    void download(sfz::PrintTarget status, const sfz::StringPiece& base,
+    void download(Observer* observer, const sfz::StringPiece& base,
             const sfz::StringPiece& file, const sfz::Sha1::Digest& digest) const;
-    void extract_original(sfz::PrintTarget status, const sfz::StringPiece& zip) const;
-    void extract_supplemental(sfz::PrintTarget status, const sfz::StringPiece& zip) const;
+    void extract_original(Observer* observer, const sfz::StringPiece& zip) const;
+    void extract_supplemental(Observer* observer, const sfz::StringPiece& zip) const;
 
     const sfz::String _downloads_dir;
     const sfz::String _output_dir;

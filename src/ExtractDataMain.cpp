@@ -36,6 +36,13 @@ void usage(const StringPiece& program_name) {
     exit(1);
 }
 
+class PrintStatusObserver : public DataExtractor::Observer {
+  public:
+    virtual void status(const sfz::StringPiece& status) {
+        print(io::err, format("{0}\n", status));
+    }
+};
+
 void ExtractDataMain(int argc, char* const* argv) {
     String program_name(utf8::decode(argv[0]));
 
@@ -52,7 +59,8 @@ void ExtractDataMain(int argc, char* const* argv) {
         print(io::err, format("{0} is up-to-date!\n", dest));
     } else {
         print(io::err, format("Extracting to {0}...\n", dest));
-        extractor.extract(io::err);
+        PrintStatusObserver observer;
+        extractor.extract(&observer);
         print(io::err, StringPiece("done.\n"));
     }
 }
