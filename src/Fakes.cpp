@@ -24,8 +24,8 @@
 #include "AresMain.hpp"
 #include "Error.hpp"
 #include "FakeDrawing.hpp"
-#include "FakeSounds.hpp"
 #include "Preferences.hpp"
+#include "SoundDriver.hpp"
 #include "Threading.hpp"
 #include "VideoDriver.hpp"
 

@@ -25,12 +25,12 @@
 #include "CocoaPrefsDriver.hpp"
 #include "CocoaVideoDriver.hpp"
 #include "FakeDrawing.hpp"
-#include "FakeSounds.hpp"
 #include "FoundationHttpDriver.hpp"
 #include "ImageDriver.hpp"
 #include "Ledger.hpp"
 #include "LibpngImageDriver.hpp"
 #include "PrefsDriver.hpp"
+#include "SoundDriver.hpp"
 #include "VideoDriver.hpp"
 
 using sfz::CString;

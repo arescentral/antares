@@ -15,11 +15,10 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef ANTARES_FAKE_SOUNDS_HPP_
-#define ANTARES_FAKE_SOUNDS_HPP_
+#ifndef ANTARES_SOUND_DRIVER_HPP_
+#define ANTARES_SOUND_DRIVER_HPP_
 
 #include "sfz/sfz.hpp"
-#include "Base.h"
 
 namespace antares {
 
@@ -67,4 +66,4 @@ class LogSoundDriver : public SoundDriver {
 
 }  // namespace antares
 
-#endif  // ANTARES_FAKE_SOUNDS_HPP_
+#endif  // ANTARES_SOUND_DRIVER_HPP_

@@ -15,13 +15,11 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "FakeSounds.hpp"
+#include "SoundDriver.hpp"
 
 #include <fcntl.h>
 #include "sfz/sfz.hpp"
-#include "Error.hpp"
-#include "Fakes.hpp"
-#include "Preferences.hpp"
+#include "AresGlobalType.hpp"
 
 using sfz::Bytes;
 using sfz::Exception;

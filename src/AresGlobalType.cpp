@@ -20,7 +20,6 @@
 #include "Admiral.hpp"
 #include "Beam.hpp"
 #include "ColorTable.hpp"
-#include "FakeSounds.hpp"
 #include "InputSource.hpp"
 #include "MessageScreen.hpp"
 #include "Minicomputer.hpp"
@@ -28,6 +27,7 @@
 #include "Options.hpp"
 #include "ScreenLabel.hpp"
 #include "ScrollStars.hpp"
+#include "SoundDriver.hpp"
 #include "SpriteHandling.hpp"
 #include "StringList.hpp"
 

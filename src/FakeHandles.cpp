@@ -17,9 +17,9 @@
 
 #include "sfz/ReadItem.hpp"
 #include "Error.hpp"
-#include "FakeSounds.hpp"
 #include "Fakes.hpp"
 #include "Resource.hpp"
+#include "SoundDriver.hpp"
 
 using sfz::BytesPiece;
 using sfz::read;
