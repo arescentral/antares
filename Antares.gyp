@@ -69,6 +69,7 @@
             'mac_bundle': 1,
             'sources': [
                 'src/AntaresController.mm',
+                'src/AntaresExtractDataController.mm',
                 'src/CocoaMain.mm',
                 'src/CocoaVideoDriver.mm',
                 'src/CocoaPrefsDriver.mm',
@@ -76,12 +77,14 @@
             ],
             'dependencies': [
                 'libAntares',
+                'libAntaresExtract',
             ],
             'xcode_settings': {
                 'INFOPLIST_FILE': 'resources/Antares-Info.plist',
             },
             'mac_bundle_resources': [
                 'resources/Antares.icns',
+                'resources/ExtractData.nib',
                 'resources/MainMenu.nib',
             ],
             'link_settings': {

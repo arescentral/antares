@@ -20,11 +20,13 @@
 #include <stdlib.h>
 #include "sfz/sfz.hpp"
 #include "AresMain.hpp"
+#include "AntaresExtractDataController.h"
 #include "CardStack.hpp"
 #include "CocoaPrefsDriver.hpp"
 #include "CocoaVideoDriver.hpp"
 #include "FakeDrawing.hpp"
 #include "FakeSounds.hpp"
+#include "FoundationHttpDriver.hpp"
 #include "ImageDriver.hpp"
 #include "Ledger.hpp"
 #include "LibpngImageDriver.hpp"
@@ -40,6 +42,8 @@ using antares::CardStack;
 using antares::CocoaPrefsDriver;
 using antares::CocoaVideoDriver;
 using antares::DirectoryLedger;
+using antares::FoundationHttpDriver;
+using antares::HttpDriver;
 using antares::ImageDriver;
 using antares::Ledger;
 using antares::LibpngImageDriver;
@@ -54,24 +58,33 @@ namespace utf8 = sfz::utf8;
 @implementation AntaresController
 
 - (void)applicationWillFinishLaunching:(NSNotification*)aNotification {
-    chdir([[[NSBundle mainBundle] resourcePath] UTF8String]);
+    if (getenv("HOME") == NULL) {
+        NSLog(@"Couldn't get $HOME");
+        exit(1);
+    }
+    const String home(utf8::decode(getenv("HOME")));
+
     FakeDrawingInit(640, 480);
     ImageDriver::set_driver(new LibpngImageDriver);
     VideoDriver::set_driver(new CocoaVideoDriver);
     SoundDriver::set_driver(new NullSoundDriver);
     PrefsDriver::set_driver(new CocoaPrefsDriver);
+    HttpDriver::set_driver(new FoundationHttpDriver);
+    const String ledger_directory(format("{0}/Library/Application Support/Antares", home));
+    Ledger::set_ledger(new DirectoryLedger(ledger_directory));
 
-    if (getenv("HOME") == NULL) {
-        Ledger::set_ledger(new NullLedger);
-    } else {
-        String directory(format(
-                "{0}/Library/Application Support/Antares", utf8::decode(getenv("HOME"))));
-        Ledger::set_ledger(new DirectoryLedger(directory));
+    AntaresExtractDataController* extract = [[[AntaresExtractDataController alloc]
+        initWithTarget:self selector:@selector(run:)] autorelease];
+    if (!extract) {
+        NSLog(@"Failed to create AntaresExtractDataController");
+        exit(1);
     }
+}
 
-    _stack = new CardStack(AresInit());
+- (void)run:(id)sender {
     try {
-        VideoDriver::driver()->loop(_stack);
+        antares::CardStack* stack = new CardStack(AresInit());
+        VideoDriver::driver()->loop(stack);
     } catch (Exception& e) {
         CString c_str(e.message());
         NSLog(@"sfz::Exception: %s", c_str.data());
