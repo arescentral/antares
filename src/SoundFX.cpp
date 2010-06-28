@@ -224,7 +224,7 @@ int AddSound(int soundID) {
             throw Exception("Can't manage any more sounds");
         }
 
-        globals()->gSound[whichSound].soundHandle.reset(new Sound(soundID));
+        globals()->gSound[whichSound].soundHandle.reset(SoundDriver::driver()->new_sound(soundID));
         globals()->gSound[whichSound].id = soundID;
     }
     return whichSound;

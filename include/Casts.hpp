@@ -18,11 +18,23 @@
 #ifndef ANTARES_CASTS_HPP_
 #define ANTARES_CASTS_HPP_
 
+#include <cstddef>
+
 namespace antares {
 
-template <typename T, typename U>
-T implicit_cast(const U& u) {
-    return u;
+template <typename To, typename From>
+To implicit_cast(const From& from) {
+    return from;
+}
+
+template <typename Derived, typename Base>
+Derived down_cast(const Base& base) {
+    if (false) {
+        Derived* d = NULL;
+        Base* b = d;
+        static_cast<void>(b);
+    }
+    return reinterpret_cast<Derived>(base);
 }
 
 }  // namespace antares

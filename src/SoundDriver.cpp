@@ -20,6 +20,7 @@
 #include <fcntl.h>
 #include "sfz/sfz.hpp"
 #include "AresGlobalType.hpp"
+#include "Casts.hpp"
 
 using sfz::Bytes;
 using sfz::Exception;
@@ -59,7 +60,7 @@ class LogSndChannel : public SndChannel {
 
     virtual void play(Sound* sound) {
         if (globals()->gGameTime > 0) {
-            String line(format("play\t{0}\t{1}\t{2}\n", _id, globals()->gGameTime, sound->id));
+            String line(format("play\t{0}\t{1}\t{2}\n", _id, globals()->gGameTime, sound->id()));
             write(_fd, utf8::encode(line));
         }
     }
@@ -100,6 +101,10 @@ SndChannel* NullSoundDriver::new_channel() {
     return new NullSndChannel();
 }
 
+Sound* NullSoundDriver::new_sound(int id) {
+    return new Sound(id);
+}
+
 LogSoundDriver::LogSoundDriver(const StringPiece& path)
         : _sound_log(open(path, O_CREAT | O_WRONLY, 0644)),
           _last_id(-1) {
@@ -110,6 +115,10 @@ LogSoundDriver::LogSoundDriver(const StringPiece& path)
 
 SndChannel* LogSoundDriver::new_channel() {
     return new LogSndChannel(++_last_id, &_sound_log);
+}
+
+Sound* LogSoundDriver::new_sound(int id) {
+    return new Sound(id);
 }
 
 }  // namespace antares

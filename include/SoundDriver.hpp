@@ -23,21 +23,30 @@
 namespace antares {
 
 class SndChannel;
+class Sound;
 
 class SoundDriver {
   public:
     virtual ~SoundDriver() { }
 
     virtual SndChannel* new_channel() = 0;
+    virtual Sound* new_sound(int id) = 0;
 
     static SoundDriver* driver();
     static void set_driver(SoundDriver* driver);
 };
 
-struct Sound {
-    Sound(int id) : id(id) { }
+class Sound {
+  public:
+    Sound(int id) : _id(id) { }
+    virtual ~Sound() { }
 
-    int id;
+    int id() const { return _id; }
+
+  private:
+    int _id;
+
+    DISALLOW_COPY_AND_ASSIGN(Sound);
 };
 
 class SndChannel {
@@ -52,12 +61,14 @@ class SndChannel {
 class NullSoundDriver : public SoundDriver {
   public:
     virtual SndChannel* new_channel();
+    virtual Sound* new_sound(int id);
 };
 
 class LogSoundDriver : public SoundDriver {
   public:
     LogSoundDriver(const sfz::StringPiece& path);
     virtual SndChannel* new_channel();
+    virtual Sound* new_sound(int id);
 
   private:
     sfz::ScopedFd _sound_log;
