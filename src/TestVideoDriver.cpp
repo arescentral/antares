@@ -19,7 +19,7 @@
 
 #include <fcntl.h>
 #include <limits>
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "BuildPix.hpp"
 #include "Card.hpp"
 #include "CardStack.hpp"

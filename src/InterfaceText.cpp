@@ -19,7 +19,7 @@
 
 #include <algorithm>
 #include <limits>
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "Quickdraw.h"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"
@@ -30,7 +30,7 @@ using sfz::Exception;
 using sfz::String;
 using sfz::StringPiece;
 using sfz::format;
-using sfz::string_to_int32_t;
+using sfz::string_to_int;
 
 namespace antares {
 
@@ -82,7 +82,7 @@ InterfaceText::InterfaceText(
                     if (text.at(j) == '^') {
                         inlinePictType inline_pict;
                         int32_t id;
-                        if (!string_to_int32_t(id_string, &id, 10)) {
+                        if (!string_to_int(id_string, &id, 10)) {
                             throw Exception(format("invalid numeric literal {0}", id_string));
                         }
                         // TODO(sfiera): save the picture somewhere so we only have to load it once

@@ -22,7 +22,7 @@
 
 #include "Base.h"
 
-#include "sfz/ReadSource.hpp"
+#include <sfz/sfz.hpp>
 #include "Casts.hpp"
 
 namespace antares {

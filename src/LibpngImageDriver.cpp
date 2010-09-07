@@ -18,8 +18,7 @@
 #include "LibpngImageDriver.hpp"
 
 #include <png.h>
-#include "sfz/ReadItem.hpp"
-#include "sfz/WriteItem.hpp"
+#include <sfz/sfz.hpp>
 #include "Error.hpp"
 #include "FakeDrawing.hpp"
 

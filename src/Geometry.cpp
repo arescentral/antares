@@ -18,7 +18,7 @@
 #include "Geometry.hpp"
 
 #include <algorithm>
-#include "sfz/ReadItem.hpp"
+#include <sfz/sfz.hpp>
 
 using sfz::ReadSource;
 using sfz::read;

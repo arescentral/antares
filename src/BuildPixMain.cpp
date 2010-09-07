@@ -16,9 +16,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <fcntl.h>
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
-#include "sfz/sfz.hpp"
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
+#include <sfz/sfz.hpp>
 #include "BuildPix.hpp"
 #include "ColorTable.hpp"
 #include "ColorTranslation.hpp"

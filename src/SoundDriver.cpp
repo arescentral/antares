@@ -18,7 +18,7 @@
 #include "SoundDriver.hpp"
 
 #include <fcntl.h>
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "AresGlobalType.hpp"
 #include "Casts.hpp"
 

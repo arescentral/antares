@@ -20,7 +20,7 @@
 
 #include "Minicomputer.hpp"
 
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "Admiral.hpp"
 #include "AnyChar.hpp"
 #include "AresGlobalType.hpp"

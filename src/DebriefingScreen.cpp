@@ -17,7 +17,7 @@
 
 #include "DebriefingScreen.hpp"
 
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "CardStack.hpp"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"

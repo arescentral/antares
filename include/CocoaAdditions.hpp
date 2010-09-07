@@ -19,7 +19,7 @@
 #define ANTARES_COCOA_ADDITIONS_HPP_
 
 #include <Cocoa/Cocoa.h>
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 
 namespace antares {
 

@@ -20,7 +20,7 @@
 
 // Message Screen.h
 
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "AnyChar.hpp"
 #include "ColorTable.hpp"
 #include "NateDraw.hpp"

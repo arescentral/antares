@@ -17,7 +17,7 @@
 
 #include "Preferences.hpp"
 
-#include "sfz/Exception.hpp"
+#include <sfz/Exception.hpp>
 #include "AresGlobalType.hpp"
 #include "Error.hpp"
 #include "KeyCodes.hpp"

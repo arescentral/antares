@@ -18,10 +18,10 @@
 #include "DataExtractor.hpp"
 
 #include <fcntl.h>
-#include "rezin/rezin.hpp"
-#include "rgos/rgos.hpp"
-#include "sfz/sfz.hpp"
-#include "zipxx/zipxx.hpp"
+#include <rezin/rezin.hpp>
+#include <rgos/rgos.hpp>
+#include <sfz/sfz.hpp>
+#include <zipxx/zipxx.hpp>
 #include "HttpDriver.hpp"
 
 using rezin::AppleDouble;
@@ -65,8 +65,7 @@ void verbatim(const BytesPiece& data, WriteTarget out) {
 void convert_snd(const BytesPiece& data, WriteTarget out) {
     Json snd = read_snd(data);
     Bytes bytes;
-    write_aiff(snd, &bytes);
-    write(out, data);
+    write_aiff(out, snd);
 }
 
 
@@ -210,11 +209,15 @@ void DataExtractor::extract_original(Observer* observer, const StringPiece& file
     observer->status(status);
     String full_path(format("{0}/{1}", _downloads_dir, file));
     ZipArchive archive(full_path, 0);
+
+    rezin::Options options;
+    options.set_line_ending(rezin::Options::CR);
+
     foreach (it, array_range(kResourceFiles)) {
         String path(utf8::decode(it->path));
         ZipFileReader file(&archive, path);
         AppleDouble apple_double(file.data());
-        ResourceFork rsrc(apple_double.at(AppleDouble::RESOURCE_FORK));
+        ResourceFork rsrc(apple_double.at(AppleDouble::RESOURCE_FORK), options);
 
         foreach (it, array_range(it->resources)) {
             if (!it->resource) {

@@ -19,7 +19,7 @@
 #define ANTARES_STRING_LIST_HPP_
 
 #include <vector>
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 
 namespace antares {
 

@@ -17,7 +17,7 @@
 
 #include "SelectLevelScreen.hpp"
 
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "AresMain.hpp"
 #include "CardStack.hpp"
 #include "ColorTranslation.hpp"

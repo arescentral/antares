@@ -19,7 +19,7 @@
 #define ANTARES_INTERFACE_SCREEN_HPP_
 
 #include <vector>
-#include "sfz/SmartPtr.hpp"
+#include <sfz/sfz.hpp>
 #include "Card.hpp"
 #include "Geometry.hpp"
 #include "PlayerInterfaceItems.hpp"

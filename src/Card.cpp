@@ -18,7 +18,7 @@
 #include "Card.hpp"
 
 #include <stdlib.h>
-#include "sfz/Exception.hpp"
+#include <sfz/sfz.hpp>
 #include "CardStack.hpp"
 
 using sfz::Exception;

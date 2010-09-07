@@ -18,8 +18,7 @@
 #include "PixMap.hpp"
 
 #include <algorithm>
-#include "sfz/WriteItem.hpp"
-#include "sfz/Exception.hpp"
+#include <sfz/sfz.hpp>
 #include "Quickdraw.h"
 #include "Casts.hpp"
 #include "ColorTable.hpp"

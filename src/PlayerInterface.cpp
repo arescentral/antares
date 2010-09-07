@@ -21,7 +21,7 @@
 
 #include "PlayerInterface.hpp"
 
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "AresGlobalType.hpp"
 #include "AresMain.hpp"
 #include "BriefingRenderer.hpp"

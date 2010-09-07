@@ -18,7 +18,7 @@
 #include "Resource.hpp"
 
 #include <stdio.h>
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 
 using sfz::BytesPiece;
 using sfz::MappedFile;

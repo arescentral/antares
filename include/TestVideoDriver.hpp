@@ -18,7 +18,7 @@
 #ifndef ANTARES_TEST_VIDEO_DRIVER_HPP_
 #define ANTARES_TEST_VIDEO_DRIVER_HPP_
 
-#include "sfz/String.hpp"
+#include <sfz/sfz.hpp>
 #include "VideoDriver.hpp"
 
 namespace antares {

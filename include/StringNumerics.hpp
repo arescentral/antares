@@ -18,7 +18,7 @@
 #ifndef ANTARES_STRING_NUMERICS_HPP_
 #define ANTARES_STRING_NUMERICS_HPP_
 
-#include "sfz/PrintTarget.hpp"
+#include <sfz/sfz.hpp>
 #include "MathSpecial.hpp"
 
 namespace antares {

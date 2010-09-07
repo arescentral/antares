@@ -18,9 +18,7 @@
 #ifndef ANTARES_LIBPNG_IMAGE_DRIVER_HPP_
 #define ANTARES_LIBPNG_IMAGE_DRIVER_HPP_
 
-#include "sfz/Macros.hpp"
-#include "sfz/ReadSource.hpp"
-#include "sfz/WriteTarget.hpp"
+#include <sfz/sfz.hpp>
 #include "ImageDriver.hpp"
 
 namespace antares {

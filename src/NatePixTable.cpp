@@ -17,7 +17,7 @@
 
 #include "NatePixTable.hpp"
 
-#include "sfz/ReadItem.hpp"
+#include <sfz/sfz.hpp>
 #include "ColorTranslation.hpp"
 #include "Resource.hpp"
 

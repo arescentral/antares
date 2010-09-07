@@ -19,8 +19,8 @@
 
 #include "Races.hpp"
 
-#include "sfz/Bytes.hpp"
-#include "sfz/ReadSource.hpp"
+#include <sfz/Bytes.hpp>
+#include <sfz/ReadSource.hpp>
 #include "AresGlobalType.hpp"
 #include "Debug.hpp"
 #include "Error.hpp"

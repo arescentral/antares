@@ -18,8 +18,7 @@
 #include "ColorTable.hpp"
 
 #include <stdint.h>
-#include "sfz/ReadItem.hpp"
-#include "sfz/WriteItem.hpp"
+#include <sfz/sfz.hpp>
 #include "Base.h"
 
 using sfz::ReadSource;

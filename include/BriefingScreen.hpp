@@ -18,7 +18,7 @@
 #ifndef ANTARES_BRIEFING_SCREEN_HPP_
 #define ANTARES_BRIEFING_SCREEN_HPP_
 
-#include "sfz/Macros.hpp"
+#include <sfz/sfz.hpp>
 #include "InterfaceScreen.hpp"
 
 namespace antares {

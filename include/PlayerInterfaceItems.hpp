@@ -20,7 +20,7 @@
 
 // Player Interface Items.h
 
-#include "sfz/ReadSource.hpp"
+#include <sfz/ReadSource.hpp>
 #include "AnyChar.hpp"
 #include "NateDraw.hpp"
 

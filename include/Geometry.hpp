@@ -19,7 +19,7 @@
 #define ANTARES_GEOMETRY_HPP_
 
 #include <stdint.h>
-#include "sfz/ReadSource.hpp"
+#include <sfz/sfz.hpp>
 
 namespace antares {
 

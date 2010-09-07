@@ -17,7 +17,7 @@
 
 #include "InputSource.hpp"
 
-#include "sfz/ReadItem.hpp"
+#include <sfz/sfz.hpp>
 
 using sfz::read;
 

@@ -20,7 +20,7 @@
 
 // Direct Text.h
 
-#include "sfz/Bytes.hpp"
+#include <sfz/sfz.hpp>
 #include "AnyChar.hpp"
 #include "Casts.hpp"
 #include "SpriteHandling.hpp"

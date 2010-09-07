@@ -18,8 +18,7 @@
 #ifndef ANTARES_IMAGE_DRIVER_HPP_
 #define ANTARES_IMAGE_DRIVER_HPP_
 
-#include "sfz/ReadSource.hpp"
-#include "sfz/WriteTarget.hpp"
+#include <sfz/sfz.hpp>
 
 namespace antares {
 

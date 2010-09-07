@@ -19,7 +19,7 @@
 
 #include "PlayerShip.hpp"
 
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "Admiral.hpp"
 #include "AresCheat.hpp"
 #include "AresGlobalType.hpp"

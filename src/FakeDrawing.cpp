@@ -21,7 +21,7 @@
 #include <algorithm>
 #include <limits>
 
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "ColorTable.hpp"
 #include "Error.hpp"
 #include "Fakes.hpp"

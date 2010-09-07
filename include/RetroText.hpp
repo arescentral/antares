@@ -19,7 +19,7 @@
 #define ANTARES_RETRO_TEXT_HPP_
 
 #include <vector>
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "ColorTable.hpp"
 #include "Geometry.hpp"
 

@@ -18,7 +18,7 @@
 #ifndef ANTARES_DATA_EXTRACTOR_HPP_
 #define ANTARES_DATA_EXTRACTOR_HPP_
 
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 
 namespace antares {
 

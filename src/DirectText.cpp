@@ -18,7 +18,7 @@
 #include "DirectText.hpp"
 
 #include <algorithm>
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "Base.h"
 
 #include "ColorTable.hpp"

@@ -17,7 +17,7 @@
 
 #include "StringList.hpp"
 
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "Error.hpp"
 #include "Resource.hpp"
 

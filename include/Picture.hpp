@@ -19,7 +19,7 @@
 #define ANTARES_PICTURE_HPP_
 
 #include <stdint.h>
-#include "sfz/Macros.hpp"
+#include <sfz/sfz.hpp>
 #include "PixMap.hpp"
 
 namespace antares {

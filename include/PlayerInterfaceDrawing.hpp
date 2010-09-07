@@ -18,7 +18,7 @@
 #ifndef ANTARES_PLAYER_INTERFACE_DRAWING_HPP_
 #define ANTARES_PLAYER_INTERFACE_DRAWING_HPP_
 
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "AnyChar.hpp"
 #include "PlayerInterfaceItems.hpp"
 

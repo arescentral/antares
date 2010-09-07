@@ -20,7 +20,7 @@
 
 #include <set>
 #include <vector>
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 
 namespace antares {
 

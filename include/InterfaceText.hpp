@@ -19,7 +19,7 @@
 #define ANTARES_INTERFACE_TEXT_HPP_
 
 #include <vector>
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "ColorTable.hpp"
 #include "Geometry.hpp"
 #include "PlayerInterfaceDrawing.hpp"

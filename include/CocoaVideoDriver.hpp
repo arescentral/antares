@@ -19,7 +19,7 @@
 #define ANTARES_COCOA_VIDEO_DRIVER_HPP_
 
 #include <queue>
-#include "sfz/Macros.hpp"
+#include <sfz/Macros.hpp>
 #include "Base.h"
 #include "Geometry.hpp"
 #include "KeyMapTranslation.hpp"

@@ -18,7 +18,7 @@
 #ifndef ANTARES_REPLAY_GAME_HPP_
 #define ANTARES_REPLAY_GAME_HPP_
 
-#include "sfz/Macros.hpp"
+#include <sfz/Macros.hpp>
 #include "AresMain.hpp"
 #include "Card.hpp"
 

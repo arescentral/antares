@@ -19,7 +19,7 @@
 
 #include <algorithm>
 #include <limits>
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "Quickdraw.h"
 #include "ColorTranslation.hpp"
 #include "DirectText.hpp"

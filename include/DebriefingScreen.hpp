@@ -18,7 +18,7 @@
 #ifndef ANTARES_DEBRIEFING_SCREEN_HPP_
 #define ANTARES_DEBRIEFING_SCREEN_HPP_
 
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "Card.hpp"
 
 namespace antares {

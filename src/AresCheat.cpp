@@ -19,7 +19,7 @@
 
 #include "AresCheat.hpp"
 
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "Admiral.hpp"
 #include "AresGlobalType.hpp"
 #include "Debug.hpp"

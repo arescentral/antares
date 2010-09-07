@@ -19,8 +19,7 @@
 #define ANTARES_INPUT_SOURCE_HPP_
 
 #include <stdint.h>
-#include "sfz/Bytes.hpp"
-#include "sfz/Macros.hpp"
+#include <sfz/sfz.hpp>
 #include "Resource.hpp"
 
 namespace antares {

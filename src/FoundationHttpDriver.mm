@@ -18,7 +18,7 @@
 #include "FoundationHttpDriver.hpp"
 
 #include <Cocoa/Cocoa.h>
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "CocoaAdditions.hpp"
 
 using antares::Scoped;

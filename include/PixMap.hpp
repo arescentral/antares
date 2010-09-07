@@ -18,9 +18,7 @@
 #ifndef ANTARES_PIX_MAP_HPP_
 #define ANTARES_PIX_MAP_HPP_
 
-#include "sfz/SmartPtr.hpp"
-#include "sfz/ReadItem.hpp"
-#include "sfz/WriteItem.hpp"
+#include <sfz/sfz.hpp>
 #include "Geometry.hpp"
 
 namespace antares {

@@ -21,7 +21,7 @@
 #include <getopt.h>
 #include <queue>
 
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 
 #include "AresMain.hpp"
 #include "CardStack.hpp"
@@ -44,7 +44,7 @@ using sfz::StringPiece;
 using sfz::makedirs;
 using sfz::print;
 using sfz::quote;
-using sfz::string_to_int32_t;
+using sfz::string_to_int;
 
 namespace io = sfz::io;
 namespace utf8 = sfz::utf8;
@@ -119,7 +119,7 @@ void TestMain(int argc, char* const* argv) {
           case 'l':
             {
                 String opt(utf8::decode(optarg));
-                if (!string_to_int32_t(opt, &level)) {
+                if (!string_to_int(opt, &level)) {
                     throw Exception(format("invalid level {0}", quote(opt)));
                 }
             }

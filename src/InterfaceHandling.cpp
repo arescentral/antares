@@ -25,7 +25,7 @@
 #include "InterfaceHandling.hpp"
 
 #include <vector>
-#include "sfz/ReadItem.hpp"
+#include <sfz/sfz.hpp>
 #include "AnyChar.hpp"
 #include "AresGlobalType.hpp"
 #include "ColorTranslation.hpp"

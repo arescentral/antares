@@ -19,8 +19,7 @@
 #define ANTARES_FAKES_HPP_
 
 #include <stdint.h>
-#include "sfz/PrintItem.hpp"
-#include "sfz/String.hpp"
+#include <sfz/sfz.hpp>
 #include "Base.h"
 #include "AresGlobalType.hpp"
 

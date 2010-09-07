@@ -19,8 +19,7 @@
 #define ANTARES_KEY_MAP_TRANSLATION_HPP_
 
 #include <stdint.h>
-#include "sfz/Macros.hpp"
-#include "sfz/String.hpp"
+#include <sfz/sfz.hpp>
 
 namespace antares {
 

@@ -17,7 +17,7 @@
 
 #include "InterfaceScreen.hpp"
 
-#include "sfz/Exception.hpp"
+#include <sfz/sfz.hpp>
 #include "ColorTranslation.hpp"
 #include "Error.hpp"
 #include "FakeDrawing.hpp"

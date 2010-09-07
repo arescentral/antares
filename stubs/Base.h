@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <sys/time.h>
-#include "sfz/SmartPtr.hpp"
+#include <sfz/sfz.hpp>
 #include "Stub.h"
 #include "Geometry.hpp"
 

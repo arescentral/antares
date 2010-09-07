@@ -18,7 +18,7 @@
 #ifndef ANTARES_PREFERENCES_HPP_
 #define ANTARES_PREFERENCES_HPP_
 
-#include "sfz/SmartPtr.hpp"
+#include <sfz/SmartPtr.hpp>
 #include "Base.h"
 
 namespace antares {

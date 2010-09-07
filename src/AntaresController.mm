@@ -18,7 +18,7 @@
 #include "AntaresController.h"
 
 #include <stdlib.h>
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "AresMain.hpp"
 #include "AntaresExtractDataController.h"
 #include "CardStack.hpp"

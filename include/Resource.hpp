@@ -19,7 +19,7 @@
 #define ANTARES_RESOURCE_HPP_
 
 #include <stdint.h>
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 
 namespace antares {
 

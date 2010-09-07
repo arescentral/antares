@@ -19,7 +19,7 @@
 
 #include "Rotation.hpp"
 
-#include "sfz/ReadItem.hpp"
+#include <sfz/sfz.hpp>
 #include "Debug.hpp"
 #include "Error.hpp"
 #include "MathMacros.hpp"

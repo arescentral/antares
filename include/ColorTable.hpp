@@ -20,9 +20,7 @@
 
 #include <stdint.h>
 #include <vector>
-#include "sfz/Macros.hpp"
-#include "sfz/ReadSource.hpp"
-#include "sfz/WriteTarget.hpp"
+#include <sfz/sfz.hpp>
 #include "Base.h"
 
 namespace antares {

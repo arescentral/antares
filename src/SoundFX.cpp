@@ -17,7 +17,7 @@
 
 #include "SoundFX.hpp"
 
-#include "sfz/Exception.hpp"
+#include <sfz/sfz.hpp>
 #include "AresGlobalType.hpp"
 #include "MathMacros.hpp"
 #include "MathSpecial.hpp"

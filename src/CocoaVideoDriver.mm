@@ -23,8 +23,7 @@
 #include <Cocoa/Cocoa.h>
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
-#include "sfz/Exception.hpp"
-#include "sfz/SmartPtr.hpp"
+#include <sfz/sfz.hpp>
 #include "Base.h"
 #include "Card.hpp"
 #include "CardStack.hpp"

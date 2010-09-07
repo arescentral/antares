@@ -17,8 +17,7 @@
 
 #include "StringHandling.hpp"
 
-#include "sfz/Bytes.hpp"
-#include "sfz/String.hpp"
+#include <sfz/sfz.hpp>
 
 using sfz::BytesPiece;
 

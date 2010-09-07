@@ -19,7 +19,7 @@
 
 #include <fcntl.h>
 #include <unistd.h>
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 
 using sfz::Bytes;
 using sfz::Exception;
@@ -30,7 +30,7 @@ using sfz::StringPiece;
 using sfz::makedirs;
 using sfz::print;
 using sfz::scoped_ptr;
-using sfz::string_to_int32_t;
+using sfz::string_to_int;
 using sfz::write;
 
 namespace path = sfz::path;
@@ -104,7 +104,7 @@ void DirectoryLedger::load() {
             ++it;
         }
         int32_t chapter;
-        if (number.size() > 0 && string_to_int32_t(number, &chapter)) {
+        if (number.size() > 0 && string_to_int(number, &chapter)) {
             _chapters.insert(chapter);
         }
     }

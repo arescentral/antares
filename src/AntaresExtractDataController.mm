@@ -17,7 +17,7 @@
 
 #include "AntaresExtractDataController.h"
 
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "CocoaAdditions.hpp"
 #include "DataExtractor.hpp"
 

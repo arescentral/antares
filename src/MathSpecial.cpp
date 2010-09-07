@@ -19,7 +19,7 @@
 
 // Special Math Functions
 
-#include "sfz/ReadItem.hpp"
+#include <sfz/sfz.hpp>
 #include "MathSpecial.hpp"
 
 using sfz::ReadSource;

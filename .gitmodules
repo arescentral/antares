@@ -25,3 +25,9 @@
 [submodule "ext/rezin"]
 	path = ext/rezin
 	url = git://github.com/sfiera/rezin.git
+[submodule "ext/gyp"]
+	path = ext/gyp
+	url = git://github.com/sfiera/gyp.git
+[submodule "ext/gyputil"]
+	path = ext/gyputil
+	url = git://github.com/sfiera/gyputil.git

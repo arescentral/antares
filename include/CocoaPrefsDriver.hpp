@@ -18,7 +18,7 @@
 #ifndef ANTARES_COCOA_PREFS_DRIVER_HPP_
 #define ANTARES_COCOA_PREFS_DRIVER_HPP_
 
-#include "sfz/Macros.hpp"
+#include <sfz/sfz.hpp>
 #include "PrefsDriver.hpp"
 
 namespace antares {

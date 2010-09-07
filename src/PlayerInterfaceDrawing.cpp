@@ -19,7 +19,7 @@
 
 #include "Quickdraw.h"
 
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "ColorTranslation.hpp"
 #include "Debug.hpp"
 #include "DirectText.hpp"

@@ -18,7 +18,7 @@
 #include "CardStack.hpp"
 
 #include <algorithm>
-#include "sfz/sfz.hpp"
+#include <sfz/sfz.hpp>
 #include "Base.h"
 #include "Card.hpp"
 

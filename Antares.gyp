@@ -1,30 +1,16 @@
 {
     'target_defaults': {
-        'include_dirs': [
-            'include',
-            'stubs',
-            '<(DEPTH)/ext/libpng',
-            '<(DEPTH)/ext/rezin/include',
-            '<(DEPTH)/ext/librgos/include',
-            '<(DEPTH)/ext/libsfz/include',
-            '<(DEPTH)/ext/libzip/include',
-            '<(DEPTH)/ext/libzipxx/include',
+        'conditions': [
+            ['OS=="mac"', {
+                'xcode_settings': {
+                    'GCC_PREPROCESSOR_DEFINITIONS': [
+                        'TARGET_OS_MAC',
+                        'powerc',
+                    ],
+                    'ARCHS': 'ppc i386',
+                },
+            }],
         ],
-        'xcode_settings': {
-            'GCC_TREAT_WARNINGS_AS_ERRORS': 'YES',
-            'GCC_SYMBOLS_PRIVATE_EXTERN': 'YES',
-            'SDKROOT': 'macosx10.4',
-            'GCC_VERSION': '4.0',
-            'GCC_PREPROCESSOR_DEFINITIONS': [
-                'TARGET_OS_MAC',
-                'powerc',
-            ],
-            'ARCHS': 'ppc i386',
-            'WARNING_CFLAGS': [
-                '-Wall',
-                '-Wendif-labels',
-            ],
-        },
     },
     'targets': [
         {
@@ -41,10 +27,6 @@
         {
             'target_name': 'BuildPixTest',
             'type': 'executable',
-            'include_dirs': [
-                '<(DEPTH)/ext/googletest/include',
-                '<(DEPTH)/ext/googlemock/include',
-            ],
             'sources': [
                 'src/BuildPixMain.cpp',
             ],
@@ -178,7 +160,22 @@
                 'src/Transitions.cpp',
                 'src/VideoDriver.cpp',
             ],
+            'include_dirs': [
+                'include',
+                'stubs',
+            ],
             'dependencies': [
+                '<(DEPTH)/ext/libpng/libpng.gyp:libpng',
+                '<(DEPTH)/ext/librgos/librgos.gyp:librgos',
+                '<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz',
+            ],
+            'direct_dependent_settings': {
+                'include_dirs': [
+                    'include',
+                    'stubs',
+                ],
+            },
+            'export_dependent_settings': [
                 '<(DEPTH)/ext/libpng/libpng.gyp:libpng',
                 '<(DEPTH)/ext/librgos/librgos.gyp:librgos',
                 '<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz',
@@ -191,6 +188,14 @@
                 'src/DataExtractor.cpp',
             ],
             'dependencies': [
+                'libAntares',
+                '<(DEPTH)/ext/libpng/libpng.gyp:libpng',
+                '<(DEPTH)/ext/rezin/rezin.gyp:librezin',
+                '<(DEPTH)/ext/librgos/librgos.gyp:librgos',
+                '<(DEPTH)/ext/libsfz/libsfz.gyp:libsfz',
+                '<(DEPTH)/ext/libzipxx/libzipxx.gyp:libzipxx',
+            ],
+            'export_dependent_settings': [
                 'libAntares',
                 '<(DEPTH)/ext/libpng/libpng.gyp:libpng',
                 '<(DEPTH)/ext/rezin/rezin.gyp:librezin',

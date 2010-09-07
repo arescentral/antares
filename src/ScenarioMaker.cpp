@@ -17,7 +17,7 @@
 
 #include "ScenarioMaker.hpp"
 
-#include "sfz/ReadItem.hpp"
+#include <sfz/sfz.hpp>
 #include "Admiral.hpp"
 #include "AresGlobalType.hpp"
 #include "Beam.hpp"

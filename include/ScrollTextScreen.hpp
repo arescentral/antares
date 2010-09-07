@@ -18,7 +18,7 @@
 #ifndef ANTARES_SCROLL_TEXT_HPP_
 #define ANTARES_SCROLL_TEXT_HPP_
 
-#include "sfz/SmartPtr.hpp"
+#include <sfz/sfz.hpp>
 #include "Card.hpp"
 #include "Geometry.hpp"
 

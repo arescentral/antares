@@ -20,7 +20,7 @@
 
 // Ares Global Type.h
 
-#include "sfz/SmartPtr.hpp"
+#include <sfz/sfz.hpp>
 #include "Base.h"
 #include "Quickdraw.h"
 
