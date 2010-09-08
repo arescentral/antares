@@ -140,7 +140,7 @@ DataExtractor::DataExtractor(const StringPiece& downloads_dir, const StringPiece
 bool DataExtractor::current() const {
     if (path::isdir(_output_dir)) {
         return (tree_digest(_output_dir) ==
-                (Sha1::Digest){{0xc81b97ec, 0xebcf7db2, 0x29176dbb, 0x29073d03, 0xd7bc12e7}});
+                (Sha1::Digest){{0x2fd4c069, 0x2a4013e1, 0x7adb1326, 0xeb710ff1, 0x96f5c12f}});
     }
     return false;
 }
