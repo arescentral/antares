@@ -37,32 +37,6 @@ STUB1(LoadSong, void( short));
 STUB0(GetSongVolume, long(), 0);
 STUB1(SetSongVolume, void( long));
 
-STUB2(DoConversionS3M, void( Str255, short));
-
-STUB2(pStrcat, unsigned char *(unsigned char *, unsigned char *), NULL);
-STUB2(DoExp1to3, Handle( Handle, unsigned long), NULL);
-STUB2(DoExp1to6, Handle( Handle, unsigned long), NULL);
-STUB2(SndToHandle, Handle( Handle, short   *), NULL);
-
-#if 0
-int MusicInit( void);
-void MusicCleanup( void);
-void PlaySong( void);
-void ToggleSong( void);
-bool SongIsPlaying( void);
-void StopAndUnloadSong( void);
-void LoadSong( short);
-long GetSongVolume( void);
-void SetSongVolume( long);
-
-void DoConversionS3M( Str255, short);
-
-unsigned char *pStrcat(unsigned char *, unsigned char *);
-Handle DoExp1to3( Handle, unsigned long);
-Handle DoExp1to6( Handle, unsigned long);
-Handle SndToHandle( Handle, short   *);
-#endif
-
 }  // namespace antares
 
 #endif // ANTARES_MUSIC_HPP_
