@@ -29,8 +29,8 @@
 #include "ImageDriver.hpp"
 #include "Ledger.hpp"
 #include "LibpngImageDriver.hpp"
+#include "OpenAlSoundDriver.hpp"
 #include "PrefsDriver.hpp"
-#include "SoundDriver.hpp"
 #include "VideoDriver.hpp"
 
 using sfz::CString;
@@ -48,7 +48,7 @@ using antares::ImageDriver;
 using antares::Ledger;
 using antares::LibpngImageDriver;
 using antares::NullLedger;
-using antares::NullSoundDriver;
+using antares::OpenAlSoundDriver;
 using antares::PrefsDriver;
 using antares::SoundDriver;
 using antares::VideoDriver;
@@ -67,7 +67,7 @@ namespace utf8 = sfz::utf8;
     FakeDrawingInit(640, 480);
     ImageDriver::set_driver(new LibpngImageDriver);
     VideoDriver::set_driver(new CocoaVideoDriver);
-    SoundDriver::set_driver(new NullSoundDriver);
+    SoundDriver::set_driver(new OpenAlSoundDriver);
     PrefsDriver::set_driver(new CocoaPrefsDriver);
     HttpDriver::set_driver(new FoundationHttpDriver);
     const String ledger_directory(format("{0}/Library/Application Support/Antares", home));

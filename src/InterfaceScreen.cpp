@@ -102,7 +102,8 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
                 _state = MOUSE_DOWN;
                 item->set_status(kIH_Hilite);
                 draw();
-                // play kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound.
+                PlayVolumeSound(kComputerBeep1, kMediumLoudVolume, kShortPersistence,
+                        kMustPlaySound);
                 _hit_item = i;
                 return;
 
@@ -156,7 +157,7 @@ void InterfaceScreen::key_down(const KeyDownEvent& event) {
             _state = KEY_DOWN;
             item->set_status(kIH_Hilite);
             draw();
-            // play kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound.
+            PlayVolumeSound(kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
             _hit_item = i;
             return;
         }

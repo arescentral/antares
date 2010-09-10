@@ -59,6 +59,7 @@
                 'src/CocoaVideoDriver.mm',
                 'src/CocoaPrefsDriver.mm',
                 'src/FoundationHttpDriver.mm',
+                'src/OpenAlSoundDriver.cpp',
             ],
             'dependencies': [
                 'libAntares',
@@ -74,8 +75,10 @@
             ],
             'link_settings': {
                 'libraries': [
+                    '$(SDKROOT)/System/Library/Frameworks/AudioToolbox.framework',
                     '$(SDKROOT)/System/Library/Frameworks/Cocoa.framework',
                     '$(SDKROOT)/System/Library/Frameworks/OpenGL.framework',
+                    '$(SDKROOT)/System/Library/Frameworks/OpenAL.framework',
                 ],
             },
         },
