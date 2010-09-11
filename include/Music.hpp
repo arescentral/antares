@@ -27,15 +27,15 @@ namespace antares {
 #define kMusicVolume        54
 #define kMaxMusicVolume     64
 
-STUB0(MusicInit, int(), 0);
-STUB0(MusicCleanup, void());
-STUB0(PlaySong, void());
-STUB0(ToggleSong, void());
-STUB0(SongIsPlaying, bool(), false);
-STUB0(StopAndUnloadSong, void());
-STUB1(LoadSong, void( short));
-STUB0(GetSongVolume, long(), 0);
-STUB1(SetSongVolume, void( long));
+void MusicInit();
+void MusicCleanup();
+void PlaySong();
+void ToggleSong();
+bool SongIsPlaying();
+void StopAndUnloadSong();
+void LoadSong(int id);
+int GetSongVolume();
+void SetSongVolume(int volume);
 
 }  // namespace antares
 

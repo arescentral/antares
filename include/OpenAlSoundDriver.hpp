@@ -32,6 +32,7 @@ class OpenAlSoundDriver : public SoundDriver {
 
     virtual SndChannel* new_channel();
     virtual Sound* new_sound(int id);
+    virtual Sound* new_song(int id);
 
   private:
     ALCcontext* _context;

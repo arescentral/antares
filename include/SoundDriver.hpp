@@ -31,6 +31,7 @@ class SoundDriver {
 
     virtual SndChannel* new_channel() = 0;
     virtual Sound* new_sound(int id) = 0;
+    virtual Sound* new_song(int id) = 0;
 
     static SoundDriver* driver();
     static void set_driver(SoundDriver* driver);
@@ -54,6 +55,7 @@ class SndChannel {
     virtual ~SndChannel() { }
 
     virtual void play(Sound* sound) = 0;
+    virtual void loop(Sound* sound) = 0;
     virtual void amp(uint8_t volume) = 0;
     virtual void quiet() = 0;
 };
@@ -62,6 +64,7 @@ class NullSoundDriver : public SoundDriver {
   public:
     virtual SndChannel* new_channel();
     virtual Sound* new_sound(int id);
+    virtual Sound* new_song(int id);
 };
 
 class LogSoundDriver : public SoundDriver {
@@ -69,6 +72,7 @@ class LogSoundDriver : public SoundDriver {
     LogSoundDriver(const sfz::StringPiece& path);
     virtual SndChannel* new_channel();
     virtual Sound* new_sound(int id);
+    virtual Sound* new_song(int id);
 
   private:
     sfz::ScopedFd _sound_log;

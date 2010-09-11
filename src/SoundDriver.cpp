@@ -45,6 +45,10 @@ class NullSndChannel : public SndChannel {
         static_cast<void>(sound);
     }
 
+    virtual void loop(Sound* sound) {
+        static_cast<void>(sound);
+    }
+
     virtual void amp(uint8_t volume) {
         static_cast<void>(volume);
     }
@@ -59,21 +63,25 @@ class LogSndChannel : public SndChannel {
           _fd(fd) { }
 
     virtual void play(Sound* sound) {
-        if (globals()->gGameTime > 0) {
+        if ((globals()->gGameTime > 0) && (globals()->gGameOver <= 0)) {
             String line(format("play\t{0}\t{1}\t{2}\n", _id, globals()->gGameTime, sound->id()));
             write(_fd, utf8::encode(line));
         }
     }
 
+    virtual void loop(Sound* sound) {
+        static_cast<void>(sound);
+    }
+
     virtual void amp(uint8_t volume) {
-        if (globals()->gGameTime > 0) {
+        if ((globals()->gGameTime > 0) && (globals()->gGameOver <= 0)) {
             String line(format("amp\t{0}\t{1}\t{2}\n", _id, globals()->gGameTime, volume));
             write(_fd, utf8::encode(line));
         }
     }
 
     virtual void quiet() {
-        if (globals()->gGameTime > 0) {
+        if ((globals()->gGameTime > 0) && (globals()->gGameOver <= 0)) {
             String line(format("quiet\t{0}\t{1}\n", _id, globals()->gGameTime));
             write(_fd, utf8::encode(line));
         }
@@ -105,6 +113,10 @@ Sound* NullSoundDriver::new_sound(int id) {
     return new Sound(id);
 }
 
+Sound* NullSoundDriver::new_song(int id) {
+    return new Sound(id);
+}
+
 LogSoundDriver::LogSoundDriver(const StringPiece& path)
         : _sound_log(open(path, O_CREAT | O_WRONLY, 0644)),
           _last_id(-1) {
@@ -118,6 +130,10 @@ SndChannel* LogSoundDriver::new_channel() {
 }
 
 Sound* LogSoundDriver::new_sound(int id) {
+    return new Sound(id);
+}
+
+Sound* LogSoundDriver::new_song(int id) {
     return new Sound(id);
 }
 

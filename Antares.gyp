@@ -125,6 +125,7 @@
                 'src/MessageScreen.cpp',
                 'src/Minicomputer.cpp',
                 'src/Motion.cpp',
+                'src/Music.cpp',
                 'src/NateDraw.cpp',
                 'src/NatePixTable.cpp',
                 'src/NonPlayerShip.cpp',

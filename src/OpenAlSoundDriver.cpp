@@ -203,6 +203,7 @@ class OpenAlSound : public Sound {
 
     ~OpenAlSound() {
         alDeleteBuffers(1, &_buffer);
+        alGetError();  // discard.
     }
 
     void buffer(const AudioFile& audio_file) {
@@ -211,6 +212,7 @@ class OpenAlSound : public Sound {
         ALsizei frequency;
         audio_file.convert(&data, &format, &frequency);
         alBufferData(_buffer, format, data.data(), data.size(), frequency);
+        check_al_error("alBufferData");
     }
 
     ALuint buffer() const { return _buffer; }
@@ -232,26 +234,43 @@ class OpenAlSndChannel : public SndChannel {
   public:
     OpenAlSndChannel() {
         alGenSources(1, &_source);
+        check_al_error("alGenSources");
         alSourcef(_source, AL_PITCH, 1.0f);
         alSourcef(_source, AL_GAIN, 1.0f);
-        alSourcei(_source, AL_LOOPING, AL_FALSE);
+        check_al_error("alSourcef");
     }
 
     ~OpenAlSndChannel() {
         alDeleteSources(1, &_source);
+        alGetError();  // discard.
     }
 
     virtual void play(Sound* sound) {
+        alSourcei(_source, AL_LOOPING, AL_FALSE);
+        check_al_error("alSourcei");
         alSourcei(_source, AL_BUFFER, sound->id());
+        check_al_error("alSourcei");
         alSourcePlay(_source);
+        check_al_error("alSourcePlay");
+    }
+
+    virtual void loop(Sound* sound) {
+        alSourcei(_source, AL_LOOPING, AL_TRUE);
+        check_al_error("alSourcei");
+        alSourcei(_source, AL_BUFFER, sound->id());
+        check_al_error("alSourcei");
+        alSourcePlay(_source);
+        check_al_error("alSourcePlay");
     }
 
     virtual void amp(uint8_t volume) {
         alSourcef(_source, AL_GAIN, volume / 256.0f);
+        check_al_error("alSourcef");
     }
 
     virtual void quiet() {
         alSourceStop(_source);
+        check_al_error("alSourceStop");
     }
 
   private:
@@ -282,6 +301,14 @@ SndChannel* OpenAlSoundDriver::new_channel() {
 Sound* OpenAlSoundDriver::new_sound(int id) {
     scoped_ptr<OpenAlSound> sound(new OpenAlSound);
     Resource rsrc("sounds", "aiff", id);
+    AudioFile audio_file(rsrc.data());
+    sound->buffer(audio_file);
+    return sound.release();
+}
+
+Sound* OpenAlSoundDriver::new_song(int id) {
+    scoped_ptr<OpenAlSound> sound(new OpenAlSound);
+    Resource rsrc("music", "mp3", id);
     AudioFile audio_file(rsrc.data());
     sound->buffer(audio_file);
     return sound.release();

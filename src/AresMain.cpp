@@ -273,19 +273,11 @@ Card* AresInit() {
     gActiveWorld->fill(RgbColor::kBlack);
     ResetTransitions();
 
-    MusicInit();
-
     RotationInit();
     NormalizeColors();
     DrawInRealWorld();
 
     InterfaceHandlingInit();
-
-    if (Preferences::preferences()->play_idle_music()) {
-        LoadSong( kTitleSongID);
-        SetSongVolume( kMaxMusicVolume);
-        PlaySong();
-    }
 
     InitDirectText();
     ScreenLabelInit();
@@ -297,9 +289,16 @@ Card* AresInit() {
     ScenarioMakerInit();
     SpaceObjectHandlingInit();  // MUST be after ScenarioMakerInit()
     InitSoundFX();
+    MusicInit();
     InitMotion();
     AdmiralInit();
     InitBeams();
+
+    if (Preferences::preferences()->play_idle_music()) {
+        LoadSong( kTitleSongID);
+        SetSongVolume( kMaxMusicVolume);
+        PlaySong();
+    }
 
     return new Master;
 }
@@ -354,6 +353,10 @@ void MainPlay::become_front() {
 
       case BRIEFING:
         {
+            if (Preferences::preferences()->play_idle_music()) {
+                StopAndUnloadSong();
+            }
+
             if (_cancelled) {
                 *_game_result = QUIT_GAME;
                 stack()->pop(this);
@@ -361,9 +364,6 @@ void MainPlay::become_front() {
             }
 
             _state = PLAYING;
-            if (Preferences::preferences()->play_idle_music()) {
-                StopAndUnloadSong();
-            }
 
             ResetInstruments();
             DrawInstrumentPanel();

@@ -25,6 +25,7 @@
 #include "FakeDrawing.hpp"
 #include "Fakes.hpp"
 #include "InterfaceHandling.hpp"
+#include "Music.hpp"
 #include "Options.hpp"
 #include "OptionsScreen.hpp"
 #include "PlayerInterface.hpp"
@@ -90,6 +91,10 @@ MainScreen::~MainScreen() { }
 void MainScreen::become_front() {
     InterfaceScreen::become_front();
     VideoDriver::driver()->set_game_state(MAIN_SCREEN_INTERFACE);
+    if (!SongIsPlaying()) {
+        LoadSong(kTitleSongID);
+        PlaySong();
+    }
 }
 
 double MainScreen::next_timer() {
