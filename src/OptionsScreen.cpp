@@ -27,6 +27,7 @@
 #include "Error.hpp"
 #include "KeyMapTranslation.hpp"
 #include "Ledger.hpp"
+#include "Music.hpp"
 #include "OffscreenGWorld.hpp"
 #include "Options.hpp"
 #include "PlayerInterface.hpp"
@@ -145,12 +146,14 @@ void SoundControlScreen::handle_button(int button) {
 
       case VOLUME_DOWN:
         _preferences->set_volume(max(0, _preferences->volume() - 1));
+        SetSongVolume(kMusicVolume);
         adjust_interface();
         draw();
         break;
 
       case VOLUME_UP:
         _preferences->set_volume(min(kMaxVolumePreference, _preferences->volume() + 1));
+        SetSongVolume(kMusicVolume);
         adjust_interface();
         draw();
         break;

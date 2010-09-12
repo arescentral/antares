@@ -93,6 +93,7 @@ void MainScreen::become_front() {
     VideoDriver::driver()->set_game_state(MAIN_SCREEN_INTERFACE);
     if (!SongIsPlaying()) {
         LoadSong(kTitleSongID);
+        SetSongVolume(kMaxMusicVolume);
         PlaySong();
     }
 }

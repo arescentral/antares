@@ -18,14 +18,12 @@
 #ifndef ANTARES_MUSIC_HPP_
 #define ANTARES_MUSIC_HPP_
 
-// Music.h
-
 namespace antares {
 
-#define kTitleSongID        4001
-#define kPlaySongID         4000
-#define kMusicVolume        54
-#define kMaxMusicVolume     64
+const int kTitleSongID = 4001;  // Doomtroopers, Unite!
+
+const double kMusicVolume = 0.84375;  // In-game music volume.
+const double kMaxMusicVolume = 1.0;   // Idle music volume.
 
 void MusicInit();
 void MusicCleanup();
@@ -34,8 +32,7 @@ void ToggleSong();
 bool SongIsPlaying();
 void StopAndUnloadSong();
 void LoadSong(int id);
-int GetSongVolume();
-void SetSongVolume(int volume);
+void SetSongVolume(double volume);
 
 }  // namespace antares
 

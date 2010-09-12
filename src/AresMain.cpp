@@ -683,7 +683,7 @@ void GamePlay::fire_timer() {
         Preferences::preferences()->set_volume(
                 min(kMaxVolumePreference, Preferences::preferences()->volume() + 1));
         if (Preferences::preferences()->play_music_in_game()) {
-            SetSongVolume( kMusicVolume);
+            SetSongVolume(kMusicVolume);
         }
     }
 

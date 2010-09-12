@@ -17,6 +17,7 @@
 
 #include "Music.hpp"
 
+#include "Preferences.hpp"
 #include "SoundDriver.hpp"
 
 using sfz::scoped_ptr;
@@ -76,13 +77,8 @@ void LoadSong(int id) {
     song.reset(SoundDriver::driver()->new_song(id));
 }
 
-int GetSongVolume() {
-    // TODO(sfiera): implement.
-    return kMaxMusicVolume;
-}
-
-void SetSongVolume(int volume) {
-    // TODO(sfiera): implement.
+void SetSongVolume(double volume) {
+    channel->amp(31.875 * Preferences::preferences()->volume() * volume);
 }
 
 }  // namespace antares
