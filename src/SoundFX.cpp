@@ -73,9 +73,8 @@ void InitSoundFX() {
 void PlayVolumeSound(
         short whichSoundID, short amplitude, short persistence, soundPriorityType priority) {
     short oldestSoundTime = -kLongPersistence, whichChannel = -1;
-    const int global_volume = Preferences::preferences()->volume();
-
-    if ((global_volume > 0) && (amplitude > 0)) {
+    // TODO(sfiera): don't play sound at all if the game is muted.
+    if (amplitude > 0) {
         int timeDif = TickCount() - globals()->gLastSoundTime;
         for (int count = 0; count < kMaxChannelNum; count++) {
             globals()->gChannel[count].soundAge += timeDif;
@@ -148,9 +147,7 @@ void PlayVolumeSound(
 
             globals()->gChannel[whichChannel].channelPtr->quiet();
 
-            int newvol = (amplitude * global_volume) >> 3;
-
-            globals()->gChannel[whichChannel].channelPtr->amp(newvol);
+            globals()->gChannel[whichChannel].channelPtr->amp(amplitude);
             globals()->gChannel[whichChannel].channelPtr->play(
                     globals()->gSound[whichSound].soundHandle.get());
         }

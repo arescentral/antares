@@ -222,9 +222,6 @@ DemoVideoDriver::DemoVideoDriver(const StringPiece& output_dir, int level)
     if (level != 0 && level != 5 && level != 23) {
         fail("Only have demos of levels 0, 5, and 23; not %d.", level);
     }
-    Preferences preferences;
-    preferences.set_volume(8);
-    PrefsDriver::driver()->save(preferences);
 }
 
 Event* DemoVideoDriver::wait_next_event(double) {

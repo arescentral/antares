@@ -17,6 +17,7 @@
 
 #include "Preferences.hpp"
 
+#include <algorithm>
 #include <sfz/Exception.hpp>
 #include "AresGlobalType.hpp"
 #include "Error.hpp"
@@ -30,8 +31,19 @@ using sfz::ReadSource;
 using sfz::Exception;
 using sfz::read;
 using sfz::scoped_ptr;
+using std::min;
+using std::max;
 
 namespace antares {
+
+namespace {
+
+template <typename T>
+T clamp(T value, T lower, T upper) {
+    return min(upper, max(lower, value));
+}
+
+}  // namespace
 
 scoped_ptr<Preferences> Preferences::_preferences;
 
@@ -167,7 +179,7 @@ void Preferences::set_speech_on(bool on) {
 }
 
 void Preferences::set_volume(int volume) {
-    _volume = volume;
+    _volume = clamp(volume, 0, 8);
 }
 
 }  // namespace antares

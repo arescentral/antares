@@ -36,6 +36,7 @@
 #include "PrefsDriver.hpp"
 #include "RetroText.hpp"
 #include "ScenarioMaker.hpp"
+#include "SoundDriver.hpp"
 #include "StringList.hpp"
 #include "Time.hpp"
 #include "VideoDriver.hpp"
@@ -76,6 +77,7 @@ void OptionsScreen::become_front() {
 
       case CANCEL:
         PrefsDriver::driver()->load(_preferences);
+        SoundDriver::driver()->set_global_volume(_preferences->volume());
         stack()->pop(this);
         break;
     }
@@ -145,15 +147,15 @@ void SoundControlScreen::handle_button(int button) {
         break;
 
       case VOLUME_DOWN:
-        _preferences->set_volume(max(0, _preferences->volume() - 1));
-        SetSongVolume(kMusicVolume);
+        _preferences->set_volume(_preferences->volume() - 1);
+        SoundDriver::driver()->set_global_volume(_preferences->volume());
         adjust_interface();
         draw();
         break;
 
       case VOLUME_UP:
-        _preferences->set_volume(min(kMaxVolumePreference, _preferences->volume() + 1));
-        SetSongVolume(kMusicVolume);
+        _preferences->set_volume(_preferences->volume() + 1);
+        SoundDriver::driver()->set_global_volume(_preferences->volume());
         adjust_interface();
         draw();
         break;

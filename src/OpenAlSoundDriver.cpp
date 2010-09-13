@@ -314,4 +314,8 @@ Sound* OpenAlSoundDriver::new_song(int id) {
     return sound.release();
 }
 
+void OpenAlSoundDriver::set_global_volume(uint8_t volume) {
+    alListenerf(AL_GAIN, volume / 8.0);
+}
+
 }  // namespace antares

@@ -79,6 +79,7 @@
 #include "ScrollStars.hpp"
 #include "ScrollTextScreen.hpp"
 #include "SoundFX.hpp"
+#include "SoundDriver.hpp"
 #include "SpaceObjectHandling.hpp"
 #include "SpriteCursor.hpp"
 #include "SpriteHandling.hpp"
@@ -257,6 +258,7 @@ Card* AresInit() {
 
     Preferences::set_preferences(new Preferences);
     PrefsDriver::driver()->load(Preferences::preferences());
+    SoundDriver::driver()->set_global_volume(Preferences::preferences()->volume());
 
     GetDateTime( reinterpret_cast<unsigned long *>(&gRandomSeed));
 
@@ -667,29 +669,17 @@ void GamePlay::fire_timer() {
         return;
     }
 
-    if (!_replay
-            && mVolumeDownKey(_key_map)
-            && !mVolumeDownKey(_last_key_map)) {
-        Preferences::preferences()->set_volume(
-                max(0, Preferences::preferences()->volume() - 1));
-        if (Preferences::preferences()->play_music_in_game()) {
-            SetSongVolume(kMusicVolume);
-        }
+    if (!_replay && mVolumeDownKey(_key_map) && !mVolumeDownKey(_last_key_map)) {
+        Preferences::preferences()->set_volume(Preferences::preferences()->volume() - 1);
+        SoundDriver::driver()->set_global_volume(Preferences::preferences()->volume());
     }
 
-    if (!_replay
-            && mVolumeUpKey(_key_map)
-            && !mVolumeUpKey(_last_key_map)) {
-        Preferences::preferences()->set_volume(
-                min(kMaxVolumePreference, Preferences::preferences()->volume() + 1));
-        if (Preferences::preferences()->play_music_in_game()) {
-            SetSongVolume(kMusicVolume);
-        }
+    if (!_replay && mVolumeUpKey(_key_map) && !mVolumeUpKey(_last_key_map)) {
+        Preferences::preferences()->set_volume(Preferences::preferences()->volume() + 1);
+        SoundDriver::driver()->set_global_volume(Preferences::preferences()->volume());
     }
 
-    if (!_replay
-            && mActionMusicKey(_key_map)
-            && !mActionMusicKey(_last_key_map)) {
+    if (!_replay && mActionMusicKey(_key_map) && !mActionMusicKey(_last_key_map)) {
         if (Preferences::preferences()->play_music_in_game()) {
             ToggleSong();
         }

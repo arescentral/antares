@@ -117,6 +117,10 @@ Sound* NullSoundDriver::new_song(int id) {
     return new Sound(id);
 }
 
+void NullSoundDriver::set_global_volume(uint8_t volume) {
+    static_cast<void>(volume);
+}
+
 LogSoundDriver::LogSoundDriver(const StringPiece& path)
         : _sound_log(open(path, O_CREAT | O_WRONLY, 0644)),
           _last_id(-1) {
@@ -135,6 +139,10 @@ Sound* LogSoundDriver::new_sound(int id) {
 
 Sound* LogSoundDriver::new_song(int id) {
     return new Sound(id);
+}
+
+void LogSoundDriver::set_global_volume(uint8_t volume) {
+    static_cast<void>(volume);
 }
 
 }  // namespace antares

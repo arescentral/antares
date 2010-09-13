@@ -78,7 +78,7 @@ void LoadSong(int id) {
 }
 
 void SetSongVolume(double volume) {
-    channel->amp(31.875 * Preferences::preferences()->volume() * volume);
+    channel->amp(255 * volume);
 }
 
 }  // namespace antares
