@@ -89,6 +89,7 @@ spaceObjectType* gRootObject = nil;
 long gRootObjectNumber = -1;
 actionQueueType* gFirstActionQueue = nil;
 long gFirstActionQueueNumber = -1;
+spaceObjectType kZeroObject;
 
 scoped_array<spaceObjectType> gSpaceObjectData;
 scoped_array<baseObjectType> gBaseObjectData;
@@ -1256,8 +1257,24 @@ void ExecuteObjectActions( long whichAction, long actionNum,
         if (( action->reflexive) || ( anObject == nil)) anObject = sObject;
 
         OKtoExecute = false;
-        if ( anObject == nil || dObject == nil)
-        {
+        if (dObject == NULL) {
+            // This is a workaround for a bug which manifests itself for example in the
+            // implementation of "Hold Position".  When an object is instructed to hold position,
+            // it gains its own location as its destination, triggering its arrive action, but its
+            // target is nulled out.
+            //
+            // Arrive actions are typically only specified on objects with non-zero order flags (so
+            // that a transport won't attempt to land on a bunker station, for example).  So, back
+            // when Ares ran without protected memory, and NULL pointed to a zeroed-out area of the
+            // address space, the flags would prevent the arrive action from triggering.
+            //
+            // It's not correct to always inhibit the action here, because the arrive action should
+            // be triggered when the anObject doesn't have flags.  But we need to prevent it in the
+            // case of transports somehow, so we emulate the old behavior of pointing to a
+            // zeroed-out object.
+            dObject = &kZeroObject;
+        }
+        if (anObject == nil) {
             OKtoExecute = true;
         } else if ( ( action->owner == 0) ||
                     (
