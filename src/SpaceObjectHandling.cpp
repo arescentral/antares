@@ -1657,8 +1657,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                             {
                                 // active (non-reflexive) altering of velocity means a PUSH, just like
                                 //  two objects colliding.  Negative velocity = slow down
-                                if ( dObject != nil)
-                                {
+                                if ((dObject != nil) && (dObject != &kZeroObject)) {
                                     if ( action->argument.alterObject.relative)
                                     {
                                         if (( dObject->baseType->mass > 0) &&
@@ -1816,7 +1815,8 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 
                         case kAlterBaseType:
                             WriteDebugLine("\pAlterBase!");
-                            if ( (action->reflexive) || ( dObject != nil))
+                            if ((action->reflexive)
+                                    || ((dObject != nil) && (dObject != &kZeroObject)))
                             ChangeObjectBaseType( anObject, action->argument.alterObject.minimum, -1,
                                 action->argument.alterObject.relative);
                             break;
@@ -1831,7 +1831,8 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                 // if it's relative AND reflexive, we take the direct
                                 // object's owner, since relative & reflexive would
                                 // do nothing.
-                                if (( action->reflexive) && ( dObject != nil))
+                                if ((action->reflexive) && (dObject != nil)
+                                        && (dObject != &kZeroObject))
                                     AlterObjectOwner( anObject, dObject->owner, true);
                                 else
                                     AlterObjectOwner( anObject, sObject->owner, true);
@@ -1910,12 +1911,10 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                         case kAlterLocation:
                             if ( action->argument.alterObject.relative)
                             {
-                                if ( dObject == nil)
-                                {
+                                if ((dObject == nil) && (dObject != &kZeroObject)) {
                                     newLocation.h = sObject->location.h;
                                     newLocation.v = sObject->location.v;
-                                } else
-                                {
+                                } else {
                                     newLocation.h = dObject->location.h;
                                     newLocation.v = dObject->location.v;
                                 }
