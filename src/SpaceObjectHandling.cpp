@@ -89,6 +89,8 @@ spaceObjectType* gRootObject = nil;
 long gRootObjectNumber = -1;
 actionQueueType* gFirstActionQueue = nil;
 long gFirstActionQueueNumber = -1;
+baseObjectType kZeroBaseObject;
+spaceObjectType kZeroSpaceObject = {0, &kZeroBaseObject};
 
 scoped_array<spaceObjectType> gSpaceObjectData;
 scoped_array<baseObjectType> gBaseObjectData;
@@ -1256,8 +1258,24 @@ void ExecuteObjectActions( long whichAction, long actionNum,
         if (( action->reflexive) || ( anObject == nil)) anObject = sObject;
 
         OKtoExecute = false;
-        if ( anObject == nil || dObject == nil)
-        {
+        if (dObject == NULL) {
+            // This is a workaround for a bug which manifests itself for example in the
+            // implementation of "Hold Position".  When an object is instructed to hold position,
+            // it gains its own location as its destination, triggering its arrive action, but its
+            // target is nulled out.
+            //
+            // Arrive actions are typically only specified on objects with non-zero order flags (so
+            // that a transport won't attempt to land on a bunker station, for example).  So, back
+            // when Ares ran without protected memory, and NULL pointed to a zeroed-out area of the
+            // address space, the flags would prevent the arrive action from triggering.
+            //
+            // It's not correct to always inhibit the action here, because the arrive action should
+            // be triggered when the anObject doesn't have flags.  But we need to prevent it in the
+            // case of transports somehow, so we emulate the old behavior of pointing to a
+            // zeroed-out object.
+            dObject = &kZeroSpaceObject;
+        }
+        if (anObject == nil) {
             OKtoExecute = true;
         } else if ( ( action->owner == 0) ||
                     (
@@ -1640,8 +1658,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                             {
                                 // active (non-reflexive) altering of velocity means a PUSH, just like
                                 //  two objects colliding.  Negative velocity = slow down
-                                if ( dObject != nil)
-                                {
+                                if ((dObject != nil) && (dObject != &kZeroSpaceObject)) {
                                     if ( action->argument.alterObject.relative)
                                     {
                                         if (( dObject->baseType->mass > 0) &&
@@ -1799,7 +1816,8 @@ void ExecuteObjectActions( long whichAction, long actionNum,
 
                         case kAlterBaseType:
                             WriteDebugLine("\pAlterBase!");
-                            if ( (action->reflexive) || ( dObject != nil))
+                            if ((action->reflexive)
+                                    || ((dObject != nil) && (dObject != &kZeroSpaceObject)))
                             ChangeObjectBaseType( anObject, action->argument.alterObject.minimum, -1,
                                 action->argument.alterObject.relative);
                             break;
@@ -1814,7 +1832,8 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                 // if it's relative AND reflexive, we take the direct
                                 // object's owner, since relative & reflexive would
                                 // do nothing.
-                                if (( action->reflexive) && ( dObject != nil))
+                                if ((action->reflexive) && (dObject != nil)
+                                        && (dObject != &kZeroSpaceObject))
                                     AlterObjectOwner( anObject, dObject->owner, true);
                                 else
                                     AlterObjectOwner( anObject, sObject->owner, true);
@@ -1893,12 +1912,10 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                         case kAlterLocation:
                             if ( action->argument.alterObject.relative)
                             {
-                                if ( dObject == nil)
-                                {
+                                if ((dObject == nil) && (dObject != &kZeroSpaceObject)) {
                                     newLocation.h = sObject->location.h;
                                     newLocation.v = sObject->location.v;
-                                } else
-                                {
+                                } else {
                                     newLocation.h = dObject->location.h;
                                     newLocation.v = dObject->location.v;
                                 }
