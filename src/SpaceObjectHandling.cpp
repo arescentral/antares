@@ -89,7 +89,8 @@ spaceObjectType* gRootObject = nil;
 long gRootObjectNumber = -1;
 actionQueueType* gFirstActionQueue = nil;
 long gFirstActionQueueNumber = -1;
-spaceObjectType kZeroObject;
+baseObjectType kZeroBaseObject;
+spaceObjectType kZeroSpaceObject = {0, &kZeroBaseObject};
 
 scoped_array<spaceObjectType> gSpaceObjectData;
 scoped_array<baseObjectType> gBaseObjectData;
@@ -1272,7 +1273,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
             // be triggered when the anObject doesn't have flags.  But we need to prevent it in the
             // case of transports somehow, so we emulate the old behavior of pointing to a
             // zeroed-out object.
-            dObject = &kZeroObject;
+            dObject = &kZeroSpaceObject;
         }
         if (anObject == nil) {
             OKtoExecute = true;
@@ -1657,7 +1658,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                             {
                                 // active (non-reflexive) altering of velocity means a PUSH, just like
                                 //  two objects colliding.  Negative velocity = slow down
-                                if ((dObject != nil) && (dObject != &kZeroObject)) {
+                                if ((dObject != nil) && (dObject != &kZeroSpaceObject)) {
                                     if ( action->argument.alterObject.relative)
                                     {
                                         if (( dObject->baseType->mass > 0) &&
@@ -1816,7 +1817,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                         case kAlterBaseType:
                             WriteDebugLine("\pAlterBase!");
                             if ((action->reflexive)
-                                    || ((dObject != nil) && (dObject != &kZeroObject)))
+                                    || ((dObject != nil) && (dObject != &kZeroSpaceObject)))
                             ChangeObjectBaseType( anObject, action->argument.alterObject.minimum, -1,
                                 action->argument.alterObject.relative);
                             break;
@@ -1832,7 +1833,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                 // object's owner, since relative & reflexive would
                                 // do nothing.
                                 if ((action->reflexive) && (dObject != nil)
-                                        && (dObject != &kZeroObject))
+                                        && (dObject != &kZeroSpaceObject))
                                     AlterObjectOwner( anObject, dObject->owner, true);
                                 else
                                     AlterObjectOwner( anObject, sObject->owner, true);
@@ -1911,7 +1912,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                         case kAlterLocation:
                             if ( action->argument.alterObject.relative)
                             {
-                                if ((dObject == nil) && (dObject != &kZeroObject)) {
+                                if ((dObject == nil) && (dObject != &kZeroSpaceObject)) {
                                     newLocation.h = sObject->location.h;
                                     newLocation.v = sObject->location.v;
                                 } else {
