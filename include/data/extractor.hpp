@@ -1,0 +1,52 @@
+// Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
+// Copyright (C) 2008-2011 Ares Central
+//
+// This file is part of Antares, a tactical space combat game.
+//
+// Antares is free software: you can redistribute it and/or modify it
+// under the terms of the Lesser GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Antares is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this program.  If not, see
+// <http://www.gnu.org/licenses/>.
+
+#ifndef ANTARES_DATA_EXTRACTOR_HPP_
+#define ANTARES_DATA_EXTRACTOR_HPP_
+
+#include <sfz/sfz.hpp>
+
+namespace antares {
+
+class DataExtractor {
+  public:
+    struct Observer {
+        virtual ~Observer();
+        virtual void status(const sfz::StringSlice& status) = 0;
+    };
+
+    DataExtractor(const sfz::StringSlice& downloads_dir, const sfz::StringSlice& output_dir);
+
+    bool current() const;
+    void extract(Observer* observer) const;
+
+  private:
+    void download(Observer* observer, const sfz::StringSlice& base,
+            const sfz::StringSlice& name, const sfz::StringSlice& version,
+            const sfz::Sha1::Digest& digest) const;
+    void extract_original(Observer* observer, const sfz::StringSlice& zip) const;
+    void extract_supplemental(Observer* observer, const sfz::StringSlice& zip) const;
+
+    const sfz::String _downloads_dir;
+    const sfz::String _output_dir;
+};
+
+}  // namespace antares
+
+#endif  // ANTARES_DATA_EXTRACTOR_HPP_

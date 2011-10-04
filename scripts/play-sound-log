@@ -1,0 +1,105 @@
+#!/usr/bin/env python
+
+"""Plays a sound log back into an AIFF file.
+
+usage: play-sound-log replay/sound.log seconds out.aiff
+"""
+
+import os
+import pipes
+import subprocess
+import sys
+import tempfile
+
+_, infile, length, outfile = sys.argv
+
+SCENARIO_DIR = os.path.expanduser(
+        "~/Library/Application Support/Antares/Scenarios/com.biggerplanet.ares")
+
+FORMAT = [
+    "-t", "raw",
+    "-e", "signed-integer",
+    "-b", "16",
+    "-c", "2",
+    "-r", "44100",
+]
+
+def call_logged(args, **kwds):
+    sys.stderr.write("%s\n" % " ".join([pipes.quote(x) for x in args]))
+    assert subprocess.call(args, **kwds) == 0
+
+def duration(ticks):
+    return "%f" % (ticks / 60.0)
+
+class Channel(object):
+
+    def __init__(self):
+        self.out = tempfile.NamedTemporaryFile(suffix=".s16")
+        self.sound = None
+        self.volume = 255
+        self.loop = False
+        self.start = 0
+
+    def play(self, ticks):
+        if ticks == self.start:
+            return
+
+        sys.stderr.write("%6d %s\n" % (self.start, self.sound))
+        args = ["sox"]
+        files = {"stdout": self.out}
+        sound = None
+        if self.sound is not None:
+            sound_args = ["sox", SCENARIO_DIR + self.sound] + FORMAT + ["-"]
+            if self.loop:
+                sound_args += ["repeat", "50"]
+            sound = subprocess.Popen(
+                    sound_args,
+                    stdout=subprocess.PIPE, stderr=open("/dev/null", "w"))
+            files["stdin"] = sound.stdout
+            args += FORMAT + ["-"]
+        args += FORMAT[2:] + ["-n"]
+        args += FORMAT + ["-"]
+        args += ["vol", str(self.volume / 255.0), "amplitude"]
+        args += ["trim", "0", duration(ticks - self.start)]
+        assert subprocess.call(args, **files) == 0, repr(args)
+        if sound is not None:
+            sound.communicate()
+
+commands = []
+with open(infile) as log:
+    for line in log:
+        commands.append(line.strip().split("\t"))
+length = int(length)
+
+channels = []
+sox = []
+for i in xrange(4):
+    commands.append(["quiet", i, length])
+    channels.append(Channel())
+
+for command in commands:
+    command, channel, ticks, params = command[:3] + [command[3:]]
+    ticks = int(ticks)
+    channel = channels[int(channel)]
+    if command == "quiet":
+        channel.play(ticks)
+        channel.sound = None
+        channel.start = ticks
+    elif command == "amp":
+        channel.volume = int(params[0])
+    elif command == "play":
+        channel.start = ticks
+        channel.sound = params[0]
+        channel.loop = False
+    elif command == "loop":
+        channel.start = ticks
+        channel.sound = params[0]
+        channel.loop = True
+    else:
+        raise AssertionError(command)
+
+mix_args = ["sox", "--combine", "mix"]
+for channel in channels:
+    mix_args += FORMAT + [channel.out.name]
+mix_args += [outfile]
+assert subprocess.call(mix_args) == 0

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -e
+
+python ext/waf-sfiera/waf configure "$@"

@@ -1,0 +1,103 @@
+digraph G {
+    fontname = "Inconsolata";
+    node [fontname="Inconsolata", shape="box"];
+    edge [fontname="Inconsolata"];
+
+    start [shape="none", label="Start"];
+    publisher [label="Ambrosia Software"];
+    developer [label="A Game by Nathan Lamont"];
+    splash [label="ARES"];
+    intro [label="Introduction", style="rounded"];
+    start -> publisher -> developer -> splash -> intro [penwidth="5"];
+    intro -> main;
+
+    main [shape="record", label="{Main Screen|{<s>S|<n>N|<r>R|<d>D|<o>O|<a>A|<q>Q}}"];
+
+    select_level [shape="record", label="{Select Level|{LEFT|RGHT|<rtrn>RTRN|<esc>ESC}}"];
+    select_level_cancel [label="Main Screen", style="dotted"];
+    main:s -> select_level;
+    select_level:rtrn -> prologue [penwidth="5"];
+    select_level:esc -> select_level_cancel;
+
+    prologue [label="Prologue", style="rounded"];
+    loading_single [label="Loading"];
+    briefing [shape="record" label="{Mission Briefing|{LEFT|RGHT|<rtrn>RTRN|<esc>ESC}}"];
+    briefing_cancel [label="Main Screen", style="dotted"];
+    prologue -> loading_single [penwidth="5"];
+    loading_single -> briefing;
+    briefing:rtrn -> game;
+    briefing:esc -> briefing_cancel;
+
+    game [shape="record", label="{Play Game|{<caps>CAPS|<esc>ESC|<lose>lose|<win>win}}"];
+    game:caps -> paused;
+    game:esc -> escape;
+    game:lose -> lose;
+    game:win -> win;
+
+    paused [shape="record", label="{Paused|<caps>CAPS}"];
+    paused:caps -> unpause;
+
+    escape [shape="record", label="{Escape|{<esc>ESC|<rtrn>RTRN|<s>S|<q>Q}}"];
+    escape:esc -> unpause;
+    escape:rtrn -> restart_level [penwidth="5"];
+    escape:s -> win;
+    escape:q -> game_done;
+
+    unpause [label="Unpause", shape="none"];
+    unpause -> game;
+
+    lose [label="Lose Screen"];
+    lose -> play_again;
+
+    play_again [shape="record", label="{Play Again|{<rtrn>RTRN|<q>Q}}"];
+    play_again:rtrn -> restart_level [penwidth="5"];
+    play_again:q -> game_done;
+
+    win [label="Win Screen"];
+    epilogue [label="Epilogue", style="rounded"];
+    win -> epilogue [penwidth="5"];
+    epilogue -> next_level;
+    epilogue -> game_done;
+
+    main:n -> net_game;
+    net_game [label="Net Game", color="gray", fontcolor="gray"];
+
+    replay_intro [label="Replay Intro", style="rounded"];
+    main:r -> replay_intro [dir="both"];
+
+    loading_demo [label="Loading"];
+    replay [label="Replay"];
+    replay_done [label="Main Screen", style="dotted"];
+    main:d -> loading_demo [penwidth="5"];
+    loading_demo -> replay -> replay_done;
+
+    sound [shape="record", label="{Sound Options|{<rtrn>RTRN|<esc>ESC|<k>K}}"];
+    main:o -> sound;
+    sound:rtrn -> save_options;
+    sound:esc -> revert_options;
+    sound:k -> keys [dir="both"];
+
+    keys [shape="record", label="{Key Options|{<save>save|<cancel>cancel}}"];
+    keys:save -> save_options;
+    keys:cancel -> revert_options;
+
+    save_options [label="Save", shape="none"];
+    revert_options [label="Revert", shape="none"];
+    options_done [label="Main Screen", style="dotted"];
+    save_options -> options_done;
+    revert_options -> options_done;
+
+    about [label="About", style="rounded"];
+    main:a -> about [dir="both"];
+
+    quit [shape="none", label="Quit"];
+    main:q -> quit;
+
+    restart_level [label="Restart Level", shape="none"];
+    restart_level -> loading_single;
+
+    next_level [label="Next Level", shape="none"];
+    next_level -> prologue;
+
+    game_done [label="Main Screen", style="dotted"];
+}
