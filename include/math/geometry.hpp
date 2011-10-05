@@ -114,6 +114,9 @@ struct Rect {
     // @returns             The origin of the rectangle, ``(left, top)``.
     Point origin() const;
 
+    // @returns             The center of the rectangle, ``((left - right)/2, (top + bottom)/2)``.
+    Point center() const;
+
     // @returns             The size of the rectangle, ``(width, height)``.
     Size size() const;
 
