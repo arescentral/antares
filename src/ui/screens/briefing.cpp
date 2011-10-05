@@ -163,10 +163,22 @@ void BriefingScreen::build_star_map() {
     pix.copy(pict.view(pix_bounds));
     pix_bounds.offset(0, -2);
 
-    const Point star = _scenario->star_map_point();
-    Rect star_rect(star.h, star.v, star.h, star.v);
+    Rect star_rect(_scenario->star_map_point(), Size(0, 0));
     star_rect.inset(-kMissionStarPointWidth, -kMissionStarPointHeight);
     RgbColor gold = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
+
+    // Move `star_rect` so that it is inside of `pix_bounds`.
+    if (star_rect.left < pix_bounds.left) {
+        star_rect.offset(pix_bounds.left - star_rect.left, 0);
+    } else if (star_rect.right > pix_bounds.right) {
+        star_rect.offset(pix_bounds.right - star_rect.right, 0);
+    }
+    if (star_rect.top < pix_bounds.top) {
+        star_rect.offset(0, pix_bounds.top - star_rect.top);
+    } else if (star_rect.bottom > pix_bounds.bottom) {
+        star_rect.offset(0, pix_bounds.bottom - star_rect.bottom);
+    }
+    const Point star = star_rect.center();
 
     DrawNateVBracket(&pix, star_rect, pix_bounds, gold);
     DrawNateLine(&pix, pix_bounds, star.h, pix_bounds.top, star.h, star_rect.top, gold);
