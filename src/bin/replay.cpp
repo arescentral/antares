@@ -54,6 +54,7 @@ using sfz::String;
 using sfz::StringSlice;
 using sfz::args::store;
 using sfz::format;
+using sfz::make_linked_ptr;
 using sfz::mkdir;
 using sfz::scoped_ptr;
 namespace args = sfz::args;
@@ -192,7 +193,7 @@ void main(int argc, char** argv) {
 
     scoped_ptr<OffscreenVideoDriver> video(new OffscreenVideoDriver(
                 Preferences::preferences()->screen_size(), output_dir));
-    video->schedule_event(new MouseMoveEvent(Point(320, 240)), 0);
+    video->schedule_event(make_linked_ptr(new MouseMoveEvent(0, Point(320, 240))));
     // TODO(sfiera): add recurring snapshots to OffscreenVideoDriver.
     for (int64_t i = 1; i < 72000; i += interval) {
         video->schedule_snapshot(i);

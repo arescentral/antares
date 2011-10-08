@@ -43,6 +43,8 @@ using sfz::String;
 using sfz::WriteTarget;
 using sfz::dec;
 using sfz::format;
+using sfz::linked_ptr;
+using sfz::make_linked_ptr;
 using sfz::range;
 using sfz::scoped_array;
 using std::greater;
@@ -127,13 +129,13 @@ void OffscreenVideoDriver::loop(Card* initial) {
         int64_t at_usecs;
         const bool has_timer = loop.top()->next_timer(at_usecs);
         const int64_t at_ticks = at_usecs * 60 / 1000000;
-        if (!_event_heap.empty() && (!has_timer || (_event_heap.front().at() <= at_ticks))) {
-            ScheduledEvent event = _event_heap.front();
+        if (!_event_heap.empty() && (!has_timer || (_event_heap.front()->at() <= at_ticks))) {
+            linked_ptr<Event> event = _event_heap.front();
             pop_heap(_event_heap.begin(), _event_heap.end(), is_later);
             _event_heap.pop_back();
-            advance_tick_count(&loop, buffer, event.at());
-            event.send(&_event_tracker);
-            event.send(loop.top());
+            advance_tick_count(&loop, buffer, event->at());
+            event->send(&_event_tracker);
+            event->send(loop.top());
         } else {
             if (!has_timer) {
                 throw Exception("Event heap empty and timer not set to fire.");
@@ -149,20 +151,20 @@ void OffscreenVideoDriver::schedule_snapshot(int64_t at) {
     push_heap(_snapshot_times.begin(), _snapshot_times.end(), greater<int64_t>());
 }
 
-void OffscreenVideoDriver::schedule_event(Event* event, int64_t at) {
-    _event_heap.push_back(ScheduledEvent(event, at));
+void OffscreenVideoDriver::schedule_event(linked_ptr<Event> event) {
+    _event_heap.push_back(event);
     push_heap(_event_heap.begin(), _event_heap.end(), is_later);
 }
 
 void OffscreenVideoDriver::schedule_key(int32_t key, int64_t down, int64_t up) {
-    schedule_event(new KeyDownEvent(key), down);
-    schedule_event(new KeyUpEvent(key), up);
+    schedule_event(make_linked_ptr(new KeyDownEvent(down, key)));
+    schedule_event(make_linked_ptr(new KeyUpEvent(up, key)));
 }
 
 void OffscreenVideoDriver::schedule_mouse(
         int button, const Point& where, int64_t down, int64_t up) {
-    schedule_event(new MouseDownEvent(button, where), down);
-    schedule_event(new MouseUpEvent(button, where), up);
+    schedule_event(make_linked_ptr(new MouseDownEvent(down, button, where)));
+    schedule_event(make_linked_ptr(new MouseUpEvent(up, button, where)));
 }
 
 void OffscreenVideoDriver::advance_tick_count(
@@ -188,20 +190,8 @@ bool OffscreenVideoDriver::have_snapshots_before(int64_t ticks) const {
     return !_snapshot_times.empty() && (_snapshot_times.front() < ticks);
 }
 
-OffscreenVideoDriver::ScheduledEvent::ScheduledEvent(Event* event, int64_t at):
-        _event(event),
-        _at(at) { }
-
-int64_t OffscreenVideoDriver::ScheduledEvent::at() const {
-    return _at;
-}
-
-void OffscreenVideoDriver::ScheduledEvent::send(EventReceiver* receiver) const {
-    _event->send(receiver);
-}
-
-bool OffscreenVideoDriver::is_later(const ScheduledEvent& x, const ScheduledEvent& y) {
-    return x.at() > y.at();
+bool OffscreenVideoDriver::is_later(const linked_ptr<Event>& x, const linked_ptr<Event>& y) {
+    return x->at() > y->at();
 }
 
 }  // namespace antares

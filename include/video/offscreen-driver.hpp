@@ -52,7 +52,7 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
     virtual void loop(Card* initial);
 
     void schedule_snapshot(int64_t at);
-    void schedule_event(Event* event, int64_t at);
+    void schedule_event(sfz::linked_ptr<Event> event);
     void schedule_key(int32_t key, int64_t down, int64_t up);
     void schedule_mouse(int button, const Point& where, int64_t down, int64_t up);
 
@@ -69,19 +69,8 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
 
     EventTracker _event_tracker;
 
-    class ScheduledEvent {
-      public:
-        ScheduledEvent(Event* event, int64_t at);
-
-        int64_t at() const;
-        void send(EventReceiver* receiver) const;
-
-      private:
-        sfz::linked_ptr<Event> _event;
-        int64_t _at;
-    };
-    static bool is_later(const ScheduledEvent& x, const ScheduledEvent& y);
-    std::vector<ScheduledEvent> _event_heap;
+    static bool is_later(const sfz::linked_ptr<Event>& x, const sfz::linked_ptr<Event>& y);
+    std::vector<sfz::linked_ptr<Event> > _event_heap;
 
     std::vector<int64_t> _snapshot_times;
 

@@ -82,27 +82,27 @@ int64_t usecs() {
 
 void enqueue_mouse_down(int button, int32_t x, int32_t y, void* userdata) {
     queue<Event*>* q = reinterpret_cast<queue<Event*>*>(userdata);
-    q->push(new MouseDownEvent(button, Point(x, y)));
+    q->push(new MouseDownEvent(now_usecs(), button, Point(x, y)));
 }
 
 void enqueue_mouse_up(int button, int32_t x, int32_t y, void* userdata) {
     queue<Event*>* q = reinterpret_cast<queue<Event*>*>(userdata);
-    q->push(new MouseUpEvent(button, Point(x, y)));
+    q->push(new MouseUpEvent(now_usecs(), button, Point(x, y)));
 }
 
 void enqueue_mouse_move(int32_t x, int32_t y, void* userdata) {
     queue<Event*>* q = reinterpret_cast<queue<Event*>*>(userdata);
-    q->push(new MouseMoveEvent(Point(x, y)));
+    q->push(new MouseMoveEvent(now_usecs(), Point(x, y)));
 }
 
 void enqueue_key_down(int32_t key, void* userdata) {
     queue<Event*>* q = reinterpret_cast<queue<Event*>*>(userdata);
-    q->push(new KeyDownEvent(key));
+    q->push(new KeyDownEvent(now_usecs(), key));
 }
 
 void enqueue_key_up(int32_t key, void* userdata) {
     queue<Event*>* q = reinterpret_cast<queue<Event*>*>(userdata);
-    q->push(new KeyUpEvent(key));
+    q->push(new KeyUpEvent(now_usecs(), key));
 }
 
 }  // namespace
@@ -124,25 +124,25 @@ CocoaVideoDriver::CocoaVideoDriver(Size screen_size)
             _translator.c_obj(), enqueue_key_up, &_event_queue);
 }
 
-Event* CocoaVideoDriver::wait_next_event(int64_t sleep) {
-    if (!_event_queue.empty()) {
-        Event* event = _event_queue.front();
+bool CocoaVideoDriver::wait_next_event(int64_t until, scoped_ptr<Event>& event) {
+    while (!_event_queue.empty() && _event_queue.front()->at() < until) {
+        event.reset(_event_queue.front());
         _event_queue.pop();
-        return event;
+        return true;
     }
+    until += _start_time;
 
-    int64_t until = usecs() + sleep;
     antares_event_translator_enqueue(_translator.c_obj(), until);
     while (until > usecs()) {
         if (!_event_queue.empty()) {
-            Event* event = _event_queue.front();
+            event.reset(_event_queue.front());
             _event_queue.pop();
-            return event;
+            return true;
         }
         antares_event_translator_enqueue(_translator.c_obj(), until);
     }
 
-    return NULL;
+    return false;
 }
 
 bool CocoaVideoDriver::button() {
@@ -206,19 +206,23 @@ void CocoaVideoDriver::loop(Card* initial) {
         main_loop.draw();
         CGLFlushDrawable(context.c_obj());
 
+        scoped_ptr<Event> event;
+        int64_t now = now_usecs();
+        while (wait_next_event(now, event)) {
+            event->send(&_event_tracker);
+            event->send(main_loop.top());
+        }
+
         int64_t at;
         if (main_loop.top()->next_timer(at)) {
-            int64_t now = now_usecs();
-            scoped_ptr<Event> event(wait_next_event(at - now));
-            if (event.get()) {
+            if (wait_next_event(at, event)) {
                 event->send(&_event_tracker);
                 event->send(main_loop.top());
             } else {
                 main_loop.top()->fire_timer();
             }
         } else {
-            scoped_ptr<Event> event(wait_next_event(std::numeric_limits<int64_t>::max()));
-            if (event.get()) {
+            if (wait_next_event(std::numeric_limits<int64_t>::max(), event)) {
                 event->send(&_event_tracker);
                 event->send(main_loop.top());
             }

@@ -39,6 +39,7 @@ using sfz::StringSlice;
 using sfz::args::help;
 using sfz::args::store;
 using sfz::makedirs;
+using sfz::make_linked_ptr;
 using sfz::print;
 using sfz::quote;
 using sfz::scoped_ptr;
@@ -176,7 +177,7 @@ void options(OffscreenVideoDriver& driver) {
 void demo(OffscreenVideoDriver& driver, int demo, int64_t duration_ticks) {
     driver.set_demo_scenario(demo);
 
-    driver.schedule_event(new MouseMoveEvent(Point(320, 240)), 0);
+    driver.schedule_event(make_linked_ptr(new MouseMoveEvent(0, Point(320, 240))));
 
     // Ego Pict fades in and out.
     driver.schedule_snapshot(50);
@@ -270,7 +271,7 @@ void mission_briefing(OffscreenVideoDriver& driver, Ledger& ledger) {
 void pause(OffscreenVideoDriver& driver) {
     driver.set_demo_scenario(623);
 
-    driver.schedule_event(new MouseMoveEvent(Point(320, 240)), 0);
+    driver.schedule_event(make_linked_ptr(new MouseMoveEvent(0, Point(320, 240))));
 
     // Intro is skipped.  Main Screen fades out after 30 seconds.
     driver.schedule_key(Keys::Q, 1798, 1799);
