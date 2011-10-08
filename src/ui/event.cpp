@@ -19,9 +19,18 @@
 
 #include "ui/event.hpp"
 
+#include "game/time.hpp"
+
 namespace antares {
 
+Event::Event(int64_t at):
+        _at(at) { }
+
 Event::~Event() { }
+
+int64_t Event::at() const {
+    return _at;
+}
 
 void KeyDownEvent::send(EventReceiver* receiver) const {
     receiver->key_down(*this);

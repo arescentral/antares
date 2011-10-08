@@ -50,7 +50,7 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     virtual void loop(Card* initial);
 
   private:
-    Event* wait_next_event(int64_t sleep);
+    bool wait_next_event(int64_t until, sfz::scoped_ptr<Event>& event);
     void enqueue_events(int64_t until);
 
     int64_t _start_time;

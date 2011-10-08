@@ -21,6 +21,7 @@
 #define ANTARES_UI_EVENT_HPP_
 
 #include <stdint.h>
+#include <sfz/sfz.hpp>
 
 #include "math/geometry.hpp"
 
@@ -31,10 +32,18 @@ class EventReceiver;
 // Superclass for all events.
 class Event {
   public:
+    Event(int64_t at);
     virtual ~Event();
+
+    int64_t at() const;
 
     // Calls receiver->m(*this), for the appropriate EventReceiver method 'm'.
     virtual void send(EventReceiver* receiver) const = 0;
+
+  private:
+    const int64_t _at;
+
+    DISALLOW_COPY_AND_ASSIGN(Event);
 };
 
 // Superclass for events involving the keyboard (press, release).
@@ -53,7 +62,7 @@ class Event {
 // documentation/mac/pdf/MacintoshToolboxEssentials.pdf
 class KeyEvent : public Event {
   public:
-    KeyEvent(uint32_t key) : _key(key) { }
+    KeyEvent(int64_t at, uint32_t key): Event(at), _key(key) { }
     uint32_t key() const { return _key; }
   private:
     uint32_t _key;
@@ -65,7 +74,7 @@ class KeyEvent : public Event {
 //  * key(): the key that was pressed, as described in KeyEvent.
 class KeyDownEvent : public KeyEvent {
   public:
-    KeyDownEvent(uint32_t key) : KeyEvent(key) { }
+    KeyDownEvent(int64_t at, uint32_t key): KeyEvent(at, key) { }
     virtual void send(EventReceiver* receiver) const;
 };
 
@@ -75,7 +84,7 @@ class KeyDownEvent : public KeyEvent {
 //  * key(): the key that was released, as described in KeyEvent.
 class KeyUpEvent : public KeyEvent {
   public:
-    KeyUpEvent(uint32_t key) : KeyEvent(key) { }
+    KeyUpEvent(int64_t at, uint32_t key): KeyEvent(at, key) { }
     virtual void send(EventReceiver* receiver) const;
 };
 
@@ -85,7 +94,7 @@ class KeyUpEvent : public KeyEvent {
 // corner of the screen.
 class MouseEvent : public Event {
   public:
-    MouseEvent(const Point& where) : _where(where) { }
+    MouseEvent(int64_t at, const Point& where): Event(at), _where(where) { }
     const Point& where() const { return _where; }
   private:
     Point _where;
@@ -103,7 +112,9 @@ class MouseEvent : public Event {
 // buttons, though.
 class MouseButtonEvent : public MouseEvent {
   public:
-    MouseButtonEvent(int button, const Point& where) : MouseEvent(where), _button(button) { }
+    MouseButtonEvent(int64_t at, int button, const Point& where):
+            MouseEvent(at, where),
+            _button(button) { }
     int button() const { return _button; }
   private:
     int _button;
@@ -116,7 +127,8 @@ class MouseButtonEvent : public MouseEvent {
 //  * where(): the location of the mouse press, as described in MouseEvent.
 class MouseDownEvent : public MouseButtonEvent {
   public:
-    MouseDownEvent(int button, const Point& where) : MouseButtonEvent(button, where) { }
+    MouseDownEvent(int64_t at, int button, const Point& where):
+            MouseButtonEvent(at, button, where) { }
     virtual void send(EventReceiver* receiver) const;
 };
 
@@ -127,7 +139,8 @@ class MouseDownEvent : public MouseButtonEvent {
 //  * where(): the location of the mouse release, as described in MouseEvent.
 class MouseUpEvent : public MouseButtonEvent {
   public:
-    MouseUpEvent(int button, const Point& where) : MouseButtonEvent(button, where) { }
+    MouseUpEvent(int64_t at, int button, const Point& where):
+            MouseButtonEvent(at, button, where) { }
     virtual void send(EventReceiver* receiver) const;
 };
 
@@ -137,7 +150,7 @@ class MouseUpEvent : public MouseButtonEvent {
 //  * where(): the new location of the mouse pointer.
 class MouseMoveEvent : public MouseEvent {
   public:
-    MouseMoveEvent(const Point& where) : MouseEvent(where) { }
+    MouseMoveEvent(int64_t at, const Point& where): MouseEvent(at, where) { }
     virtual void send(EventReceiver* receiver) const;
 };
 
