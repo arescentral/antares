@@ -36,16 +36,27 @@ enum {
     kButtonSmallFontNum     = 5,
 };
 
-struct directTextType {
+class directTextType {
+  public:
     directTextType(int32_t id);
     ~directTextType();
 
-    sfz::Bytes charSet;
+    uint8_t char_width(sfz::Rune mchar) const;
+
+    void draw(
+            Point origin, sfz::StringSlice string, RgbColor color, PixMap* pix,
+            const Rect& clip) const;
+
     int16_t resID;
     int32_t logicalWidth;
     int32_t physicalWidth;
     int32_t height;
     int32_t ascent;
+
+  private:
+    sfz::Bytes charSet;
+
+    DISALLOW_COPY_AND_ASSIGN(directTextType);
 };
 
 extern directTextType* gDirectText;

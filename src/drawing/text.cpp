@@ -27,6 +27,7 @@
 
 using sfz::Bytes;
 using sfz::BytesSlice;
+using sfz::Rune;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::read;
@@ -79,6 +80,66 @@ directTextType::directTextType(int32_t id) {
 
 directTextType::~directTextType() { }
 
+void directTextType::draw(
+        Point origin, sfz::StringSlice string, RgbColor color, PixMap* pix,
+        const Rect& clip) const {
+    // move the pen to the resulting location
+    origin.v -= ascent;
+
+    // Top and bottom boundaries of where we draw.
+    int topEdge = std::max(0, clip.top - origin.v);
+    int bottomEdge = height - std::max(0, origin.v + height - clip.bottom + 1);
+
+    int rowBytes = pix->row_bytes();
+
+    // set hchar = place holder for start of each char we draw
+    RgbColor* hchar = pix->mutable_bytes() + (origin.v + topEdge) * rowBytes + origin.h;
+
+    for (size_t i = 0; i < string.size(); ++i) {
+        const uint8_t* sbyte = charSet.data()
+            + height * physicalWidth * to_mac_roman(string.at(i))
+            + to_mac_roman(string.at(i));
+
+        int width = *sbyte;
+        ++sbyte;
+
+        if ((origin.h + width >= clip.left) || (origin.h < clip.right)) {
+            // Left and right boundaries of where we draw.
+            int leftEdge = std::max(0, clip.left - origin.h);
+            int rightEdge = width - std::max(0, origin.h + width - clip.right);
+
+            // skip over the clipped top rows
+            sbyte += topEdge * physicalWidth;
+
+            // dbyte = destination pixel
+            RgbColor* dbyte = hchar;
+
+            // repeat for every unclipped row
+            for (int y = topEdge; y < bottomEdge; ++y) {
+                // repeat for every byte of data
+                for (int x = leftEdge; x < rightEdge; ++x) {
+                    int byte = x / 8;
+                    int bit = 0x80 >> (x & 0x7);
+                    if (sbyte[byte] & bit) {
+                        dbyte[x] = color;
+                    }
+                }
+                sbyte += physicalWidth;
+                dbyte += rowBytes;
+            }
+        }
+        // else (not on screen) just increase the current character
+
+        // for every char clipped or no:
+        // increase our character pixel starting point by width of this character
+        hchar += width;
+
+        // increase our hposition (our position in pixels)
+        origin.h += width;
+    }
+    MoveTo(origin.h, origin.v + ascent);
+}
+
 void InitDirectText() {
     gDirectTextData = new scoped_ptr<directTextType>[kDirectFontNum];
     gDirectTextData[0].reset(new directTextType(kTacticalFontResID));
@@ -96,11 +157,14 @@ void DirectTextCleanup() {
     delete[] gDirectTextData;
 }
 
+uint8_t directTextType::char_width(Rune mchar) const {
+    const uint8_t* widptr =
+        charSet.data() + height * physicalWidth * to_mac_roman(mchar) + to_mac_roman(mchar);
+    return *widptr;
+}
+
 void mDirectCharWidth(unsigned char& width, uint32_t mchar) {
-    const uint8_t* widptr = gDirectText->charSet.data()
-        + gDirectText->height * gDirectText->physicalWidth * to_mac_roman(mchar)
-        + to_mac_roman(mchar);
-    width = *widptr;
+    width = gDirectText->char_width(mchar);
 }
 
 void mSetDirectFont(long whichFont) {
@@ -120,71 +184,13 @@ void mGetDirectStringDimensions(const StringSlice& string, long& width, long& he
     height = gDirectText->height;
     width = 0;
     for (size_t i = 0; i < string.size(); ++i) {
-        const uint8_t* widptr = gDirectText->charSet.data()
-            + gDirectText->height * gDirectText->physicalWidth * to_mac_roman(string.at(i))
-            + to_mac_roman(string.at(i));
-        width += *widptr;
+        width += gDirectText->char_width(string.at(i));
     }
 }
 
 void DrawDirectTextStringClipped(
         Point origin, StringSlice string, RgbColor color, PixMap* pix, const Rect& clip) {
-    // move the pen to the resulting location
-    origin.v -= gDirectText->ascent;
-
-    // Top and bottom boundaries of where we draw.
-    int topEdge = std::max(0, clip.top - origin.v);
-    int bottomEdge = gDirectText->height - std::max(
-            0, origin.v + gDirectText->height - clip.bottom + 1);
-
-    int rowBytes = pix->row_bytes();
-
-    // set hchar = place holder for start of each char we draw
-    RgbColor* hchar = pix->mutable_bytes() + (origin.v + topEdge) * rowBytes + origin.h;
-
-    for (size_t i = 0; i < string.size(); ++i) {
-        const uint8_t* sbyte = gDirectText->charSet.data()
-            + gDirectText->height * gDirectText->physicalWidth * to_mac_roman(string.at(i))
-            + to_mac_roman(string.at(i));
-
-        int width = *sbyte;
-        ++sbyte;
-
-        if ((origin.h + width >= clip.left) || (origin.h < clip.right)) {
-            // Left and right boundaries of where we draw.
-            int leftEdge = std::max(0, clip.left - origin.h);
-            int rightEdge = width - std::max(0, origin.h + width - clip.right);
-
-            // skip over the clipped top rows
-            sbyte += topEdge * gDirectText->physicalWidth;
-
-            // dbyte = destination pixel
-            RgbColor* dbyte = hchar;
-
-            // repeat for every unclipped row
-            for (int y = topEdge; y < bottomEdge; ++y) {
-                // repeat for every byte of data
-                for (int x = leftEdge; x < rightEdge; ++x) {
-                    int byte = x / 8;
-                    int bit = 0x80 >> (x & 0x7);
-                    if (sbyte[byte] & bit) {
-                        dbyte[x] = color;
-                    }
-                }
-                sbyte += gDirectText->physicalWidth;
-                dbyte += rowBytes;
-            }
-        }
-        // else (not on screen) just increase the current character
-
-        // for every char clipped or no:
-        // increase our character pixel starting point by width of this character
-        hchar += width;
-
-        // increase our hposition (our position in pixels)
-        origin.h += width;
-    }
-    MoveTo(origin.h, origin.v + gDirectText->ascent);
+    gDirectText->draw(origin, string, color, pix, clip);
 }
 
 }  // namespace antares
