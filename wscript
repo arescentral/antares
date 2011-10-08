@@ -1,7 +1,7 @@
 # -*- mode: python -*-
 
 APPNAME = "Antares"
-VERSION = "0.4.0"
+VERSION = "0.4.1"
 
 WARNINGS = ["-Wall", "-Werror", "-Wno-sign-compare"]
 
