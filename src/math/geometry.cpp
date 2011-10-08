@@ -116,6 +116,10 @@ Point Rect::origin() const {
     return Point(left, top);
 }
 
+Point Rect::center() const {
+    return Point((left + right) / 2, (top + bottom) / 2);
+}
+
 Size Rect::size() const {
     return Size(width(), height());
 }
