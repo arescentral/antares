@@ -699,6 +699,11 @@ void SetPlayerSelectShip( long whichShip, bool target, long admiralNumber)
 void ChangePlayerShipNumber( long whichAdmiral, long newShipNumber)
 {
     spaceObjectType *anObject = GetAdmiralFlagship( whichAdmiral);
+    if (anObject == NULL) {
+        throw Exception(format(
+                    "whichAdmiral: {0}, newShipNumber: {1}",
+                    whichAdmiral, newShipNumber));
+    }
 
     if ( whichAdmiral == globals()->gPlayerAdmiralNumber)
     {
@@ -711,6 +716,11 @@ void ChangePlayerShipNumber( long whichAdmiral, long newShipNumber)
 
 
         anObject = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
+        if (anObject == NULL) {
+            throw Exception(format(
+                        "whichAdmiral: {0}, newShipNumber: {1}, gPlayerShipNumber: {2}",
+                        whichAdmiral, newShipNumber, globals()->gPlayerShipNumber));
+        }
 
 //      if ( !(globals()->gActiveCheats[whichAdmiral] & kAutoPlayBit))
             anObject->attributes |= (kIsHumanControlled) | (kIsPlayerShip);
