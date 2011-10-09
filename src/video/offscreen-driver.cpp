@@ -176,7 +176,7 @@ void OffscreenVideoDriver::advance_tick_count(
             String dir(format("{0}/screens", *_output_dir));
             makedirs(dir, 0755);
             String path(format("{0}/{1}.png", dir, dec(_ticks, 6)));
-            ScopedFd file(open(path, O_WRONLY | O_CREAT, 0644));
+            ScopedFd file(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
             write(file, buffer);
 
             pop_heap(_snapshot_times.begin(), _snapshot_times.end(), greater<int64_t>());
