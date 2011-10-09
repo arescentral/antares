@@ -53,7 +53,7 @@ class PixBuilder {
         scoped_ptr<PixMap> pix(build_pix(id, width));
         if (_output_dir.has() && (pix.get() != NULL)) {
             const String path(format("{0}/{1}.png", *_output_dir, dec(id, 5)));
-            ScopedFd fd(open(path, O_WRONLY | O_CREAT, 0644));
+            ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
             write(fd, *pix);
         }
     }

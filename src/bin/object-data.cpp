@@ -54,7 +54,7 @@ class ObjectDataBuilder {
         CreateObjectDataText(&data, id);
         if (_output_dir.has()) {
             String path(format("{0}/{1}.txt", *_output_dir, dec(pict_id, 5)));
-            ScopedFd fd(open(path, O_WRONLY | O_CREAT, 0644));
+            ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
             write(fd, utf8::encode(data));
         }
     }
