@@ -24,12 +24,16 @@
 
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
+#include "game/globals.hpp"
+#include "video/driver.hpp"
 
 using sfz::Bytes;
 using sfz::BytesSlice;
 using sfz::Rune;
 using sfz::String;
 using sfz::StringSlice;
+using sfz::format;
+using sfz::hex;
 using sfz::read;
 using sfz::scoped_ptr;
 
@@ -54,10 +58,16 @@ enum {
     kButtonSmallFontResID   = 5005,
 };
 
-uint8_t to_mac_roman(uint32_t code) {
+uint8_t to_mac_roman(Rune code) {
     String string(1, code);
     Bytes bytes(macroman::encode(string));
     return bytes.at(0);
+}
+
+Rune from_mac_roman(uint8_t byte) {
+    BytesSlice bytes(&byte, 1);
+    String string(macroman::decode(bytes));
+    return string.at(0);
 }
 
 }  // namespace
@@ -76,6 +86,18 @@ directTextType::directTextType(int32_t id) {
 
     Resource data_rsrc("font-bitmaps", "nlFM", resID);
     charSet.assign(data_rsrc.data());
+
+    if (VideoDriver::driver()) {
+        _sprites.reset(new scoped_ptr<Sprite>[256]);
+        for (int i = 0; i < 256; i++) {
+            ArrayPixMap pix(char_width(i), height + 1);
+            pix.fill(RgbColor::kClear);
+            String s(1, from_mac_roman(i));
+            draw(Point(0, ascent), s, RgbColor::kWhite, &pix, pix.size().as_rect());
+            _sprites[i].reset(VideoDriver::driver()->new_sprite(
+                        format("/font/{0}/{1}", id, hex(i, 2)), pix));
+        }
+    }
 }
 
 directTextType::~directTextType() { }
@@ -138,6 +160,24 @@ void directTextType::draw(
         origin.h += width;
     }
     MoveTo(origin.h, origin.v + ascent);
+}
+
+void directTextType::draw_sprite(Point origin, sfz::StringSlice string, RgbColor color) const {
+    // TODO(sfiera): using stencils is a rather inefficient way of doing
+    // this, compared to using GL colors to tint the sprite.  However,
+    // we already have the code to do it with stencils, and don't yet
+    // have tinting.  If we do (and we probably will) then we should
+    // switch to using that here instead.
+    Stencil stencil(VideoDriver::driver());
+    stencil.set_threshold(1);
+    origin.offset(0, -ascent);
+    for (size_t i = 0; i < string.size(); ++i) {
+        uint8_t byte = to_mac_roman(string.at(i));
+        _sprites[byte]->draw(origin.h, origin.v);
+        origin.offset(char_width(string.at(i)), 0);
+    }
+    stencil.apply();
+    VideoDriver::driver()->fill_rect(world, color);
 }
 
 void InitDirectText() {

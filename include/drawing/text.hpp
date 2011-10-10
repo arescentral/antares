@@ -47,6 +47,8 @@ class directTextType {
             Point origin, sfz::StringSlice string, RgbColor color, PixMap* pix,
             const Rect& clip) const;
 
+    void draw_sprite(Point origin, sfz::StringSlice string, RgbColor color) const;
+
     int16_t resID;
     int32_t logicalWidth;
     int32_t physicalWidth;
@@ -55,6 +57,7 @@ class directTextType {
 
   private:
     sfz::Bytes charSet;
+    sfz::scoped_array<sfz::scoped_ptr<Sprite> > _sprites;
 
     DISALLOW_COPY_AND_ASSIGN(directTextType);
 };

@@ -375,9 +375,9 @@ void GamePlay::draw() const {
         draw_sector_lines();
         draw_beams();
         draw_sprites();
+        draw_labels();
     }
 
-    draw_labels();
     draw_site();
     draw_cursor();
     draw_hint_line();
