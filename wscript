@@ -34,10 +34,16 @@ def configure(cnf):
 def build(bld):
     common(bld)
 
+    bld(
+        rule="${SRC} %s %s ${TGT}" % (VERSION, bld.options.sdk),
+        source="scripts/generate-info-plist.py",
+        target="antares/Info.plist",
+    )
+
     bld.program(
         target="antares/Antares",
         mac_app=True,
-        mac_plist="resources/Antares-Info.plist",
+        mac_plist="antares/Info.plist",
         mac_resources=[
             "resources/Antares.icns",
             "resources/ExtractData.nib",
