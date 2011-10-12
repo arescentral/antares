@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+
+import sys
+
+PLIST_TEMPLATE = """\
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -19,9 +24,9 @@
     <key>CFBundleSignature</key>
     <string>????</string>
     <key>CFBundleShortVersionString</key>
-    <string>0.4.2</string>
+    <string>%(antares-version)s</string>
     <key>LSMinimumSystemVersion</key>
-    <string>10.4</string>
+    <string>%(system-version)s</string>
     <key>CFBundleVersion</key>
     <string>1</string>
     <key>NSMainNibFile</key>
@@ -30,4 +35,12 @@
     <string>NSApplication</string>
 </dict>
 </plist>
+"""
 
+_, antares_version, system_version, out = sys.argv
+with open(out, "w") as f:
+    f.write(
+        PLIST_TEMPLATE % {
+            "antares-version": antares_version,
+            "system-version": system_version,
+        })
