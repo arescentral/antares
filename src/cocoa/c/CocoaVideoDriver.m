@@ -75,6 +75,17 @@ void antares_event_translator_destroy(AntaresEventTranslator* translator) {
     free(translator);
 }
 
+void antares_get_mouse_location(AntaresEventTranslator* translator, int32_t* x, int32_t* y) {
+    NSPoint location = translate_coords(translator, [NSEvent mouseLocation]);
+    *x = location.x;
+    *y = location.y;
+}
+
+void antares_get_mouse_button(AntaresEventTranslator* translator, int32_t* button) {
+    *button = CGEventSourceButtonState(
+            kCGEventSourceStateCombinedSessionState, kCGMouseButtonLeft);
+}
+
 void antares_event_translator_set_mouse_down_callback(
         AntaresEventTranslator* translator,
         void (*callback)(int button, int32_t x, int32_t y, void* userdata), void* userdata) {
