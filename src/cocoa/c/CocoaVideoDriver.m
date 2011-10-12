@@ -171,13 +171,15 @@ void antares_event_translator_enqueue(AntaresEventTranslator* translator, int64_
 
           case NSKeyDown:
             if (![event isARepeat]) {
-                translator->key_down_callback([event keyCode], translator->key_down_userdata);
+                translator->key_down_callback(
+                        [event keyCode] & 0xffff, translator->key_down_userdata);
             }
             break;
 
           case NSKeyUp:
             if (![event isARepeat]) {
-                translator->key_up_callback([event keyCode], translator->key_up_userdata);
+                translator->key_up_callback(
+                        [event keyCode] & 0xffff, translator->key_up_userdata);
             }
             break;
 
