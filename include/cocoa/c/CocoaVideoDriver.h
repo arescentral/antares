@@ -35,6 +35,9 @@ AntaresEventTranslator* antares_event_translator_create(
         int32_t screen_width, int32_t screen_height);
 void antares_event_translator_destroy(AntaresEventTranslator* translator);
 
+void antares_get_mouse_location(AntaresEventTranslator* translator, int32_t* x, int32_t* y);
+void antares_get_mouse_button(AntaresEventTranslator* translator, int32_t* button);
+
 void antares_event_translator_set_mouse_down_callback(
         AntaresEventTranslator* translator,
         void (*callback)(int button, int32_t x, int32_t y, void* userdata), void* userdata);

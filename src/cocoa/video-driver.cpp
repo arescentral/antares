@@ -146,11 +146,15 @@ bool CocoaVideoDriver::wait_next_event(int64_t until, scoped_ptr<Event>& event) 
 }
 
 bool CocoaVideoDriver::button() {
-    return _event_tracker.button();
+    int32_t button;
+    antares_get_mouse_button(_translator.c_obj(), &button);
+    return button;
 }
 
 Point CocoaVideoDriver::get_mouse() {
-    return _event_tracker.mouse();
+    Point p;
+    antares_get_mouse_location(_translator.c_obj(), &p.h, &p.v);
+    return p;
 }
 
 void CocoaVideoDriver::get_keys(KeyMap* keys) {
