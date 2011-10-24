@@ -62,9 +62,10 @@ namespace antares {
 
 namespace {
 
-void verbatim(int16_t id, BytesSlice data, WriteTarget out) {
+bool verbatim(int16_t id, BytesSlice data, WriteTarget out) {
     static_cast<void>(id);
     write(out, data);
+    return true;
 }
 
 enum {
@@ -85,7 +86,7 @@ int32_t nlrp_chapter(int16_t id) {
     throw Exception(format("invalid replay ID {0}", id));
 }
 
-void convert_nlrp(int16_t id, BytesSlice data, WriteTarget out) {
+bool convert_nlrp(int16_t id, BytesSlice data, WriteTarget out) {
     ReplayData replay;
     replay.chapter_id = nlrp_chapter(id);
     read(data, replay.global_seed);
@@ -113,12 +114,24 @@ void convert_nlrp(int16_t id, BytesSlice data, WriteTarget out) {
     }
 
     write(out, replay);
+    return true;
 }
 
-void convert_snd(int16_t id, BytesSlice data, WriteTarget out) {
+bool convert_pict(int16_t id, BytesSlice data, WriteTarget out) {
+    static_cast<void>(id);
+    rezin::Picture pict(data);
+    if ((pict.version() == 2) && (pict.is_raster())) {
+        write(out, png(pict));
+        return true;
+    }
+    return false;
+}
+
+bool convert_snd(int16_t id, BytesSlice data, WriteTarget out) {
     static_cast<void>(id);
     Sound snd(data);
     write(out, aiff(snd));
+    return true;
 }
 
 const struct ResourceFile {
@@ -127,12 +140,13 @@ const struct ResourceFile {
         const char* resource;
         const char* output_directory;
         const char* output_extension;
-        void (*convert)(int16_t id, BytesSlice data, WriteTarget out);
+        bool (*convert)(int16_t id, BytesSlice data, WriteTarget out);
     } resources[16];
 } kResourceFiles[] = {
     {
         "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Interfaces",
         {
+            { "PICT",  "pictures",           "png",   convert_pict },
             { "STR#",  "strings",            "STR#",  verbatim },
             { "TEXT",  "text",               "txt",   verbatim },
             { "intr",  "interfaces",         "intr",  verbatim },
@@ -143,6 +157,7 @@ const struct ResourceFile {
     {
         "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Scenarios",
         {
+            { "PICT",  "pictures",                  "png",   convert_pict },
             { "STR#",  "strings",                   "STR#",  verbatim },
             { "TEXT",  "text",                      "txt",   verbatim },
             { "bsob",  "objects",                   "bsob",  verbatim },
@@ -170,6 +185,7 @@ const struct ResourceFile {
     {
         "__MACOSX/Ares 1.2.0 ƒ/._Ares",
         {
+            { "PICT",  "pictures",        "png",   convert_pict },
             { "NLRP",  "replays",         "NLRP",  convert_nlrp },
             { "STR#",  "strings",         "STR#",  verbatim },
             { "TEXT",  "text",            "txt",   verbatim },
@@ -191,7 +207,7 @@ DataExtractor::DataExtractor(const StringSlice& downloads_dir, const StringSlice
 bool DataExtractor::current() const {
     if (path::isdir(_output_dir)) {
         return (tree_digest(_output_dir) ==
-                (Sha1::Digest){{0x527ff39c, 0xbfcf0942, 0xd8abbc6d, 0xa129b5a9, 0x148e5475}});
+                (Sha1::Digest){{0x52f8c220, 0x280ea674, 0x25384e5b, 0x833ecffe, 0xa0d792c4}});
     }
     return false;
 }
@@ -201,15 +217,12 @@ void DataExtractor::extract(Observer* observer) const {
             (Sha1::Digest){{0x246c393c, 0xa598af68, 0xa58cfdd1, 0x8e1601c1, 0xf4f30931}});
     download(observer, kDownloadBase, "Antares-Music", "0.3.0",
             (Sha1::Digest){{0x9a1ceb4e, 0x2e0d4e7d, 0x61ed9934, 0x1274355e, 0xd8238bc4}});
-    download(observer, kDownloadBase, "Antares-Pictures", "0.3.0",
-            (Sha1::Digest){{0x2c7961df, 0xb68c1b2b, 0xafbf83b9, 0xf27a4f62, 0x13ca8189}});
     download(observer, kDownloadBase, "Antares-Text", "0.3.0",
             (Sha1::Digest){{0x2b5f3d50, 0xcc243db1, 0x35173461, 0x819f5e1b, 0xabde1519}});
 
     rmtree(_output_dir);
     extract_original(observer, "Ares-1.2.0.zip");
     extract_supplemental(observer, "Antares-Music-0.3.0.zip");
-    extract_supplemental(observer, "Antares-Pictures-0.3.0.zip");
     extract_supplemental(observer, "Antares-Text-0.3.0.zip");
 }
 
@@ -278,13 +291,14 @@ void DataExtractor::extract_original(Observer* observer, const StringSlice& file
             const ResourceType& type = rsrc.at(conversion.resource);
             SFZ_FOREACH(const ResourceEntry& entry, type, {
                 Bytes data;
-                conversion.convert(entry.id(), entry.data(), data);
-                String output(format("{0}/{1}/{2}.{3}",
-                            _output_dir, conversion.output_directory, entry.id(),
-                            conversion.output_extension));
-                makedirs(path::dirname(output), 0755);
-                ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-                write(fd, data.data(), data.size());
+                if (conversion.convert(entry.id(), entry.data(), data)) {
+                    String output(format("{0}/{1}/{2}.{3}",
+                                _output_dir, conversion.output_directory, entry.id(),
+                                conversion.output_extension));
+                    makedirs(path::dirname(output), 0755);
+                    ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
+                    write(fd, data.data(), data.size());
+                }
             });
         });
     });
