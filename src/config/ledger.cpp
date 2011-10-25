@@ -188,7 +188,7 @@ void DirectoryLedger::save() {
     String contents(pretty_print(json));
 
     makedirs(path::dirname(path), 0755);
-    ScopedFd fd(open(path, O_WRONLY | O_CREAT, 0644));
+    ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
     Bytes bytes(utf8::encode(contents));
     write(fd, bytes);
 }
