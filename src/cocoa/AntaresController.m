@@ -22,6 +22,7 @@
 #include <stdlib.h>
 
 #include "cocoa/AntaresExtractDataController.h"
+#include "cocoa/AntaresSettingsController.h"
 #include "cocoa/c/AntaresController.h"
 
 @implementation AntaresController
@@ -34,15 +35,24 @@
         exit(1);
     }
 
+    AntaresSettingsController* settings = [[[AntaresSettingsController alloc]
+        initWithTarget:self selector:@selector(settingsDone:)] autorelease];
+    if (!settings) {
+        NSLog(@"Failed to create AntaresSettingsController");
+        exit(1);
+    }
+}
+
+- (void)settingsDone:(id)sender {
     AntaresExtractDataController* extract = [[[AntaresExtractDataController alloc]
-        initWithTarget:self selector:@selector(run:)] autorelease];
+        initWithTarget:self selector:@selector(extractDone:)] autorelease];
     if (!extract) {
         NSLog(@"Failed to create AntaresExtractDataController");
         exit(1);
     }
 }
 
-- (void)run:(id)sender {
+- (void)extractDone:(id)sender {
     CFStringRef error_message;
     if (!antares_controller_loop(&error_message)) {
         NSLog(@"%@", error_message);
