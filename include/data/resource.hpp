@@ -34,6 +34,8 @@ class Resource {
     sfz::BytesSlice data() const;
 
   private:
+    void init(const sfz::StringSlice& resource_path);
+
     sfz::scoped_ptr<sfz::MappedFile> _file;
 };
 

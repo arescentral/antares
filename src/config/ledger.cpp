@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <cmath>
 #include <sfz/sfz.hpp>
+#include "config/preferences.hpp"
 
 using sfz::Bytes;
 using sfz::Exception;
@@ -34,6 +35,7 @@ using sfz::ScopedFd;
 using sfz::String;
 using sfz::StringMap;
 using sfz::StringSlice;
+using sfz::format;
 using sfz::makedirs;
 using sfz::print;
 using sfz::range;
@@ -153,8 +155,8 @@ class DirectoryLedger::Visitor : public JsonVisitor {
 };
 
 void DirectoryLedger::load() {
-    String path(_directory);
-    print(path, "/com.biggerplanet.ares.json");
+    const StringSlice scenario_id = Preferences::preferences()->scenario_identifier();
+    const String path(format("{0}/{1}.json", _directory, scenario_id));
     _chapters.clear();
     scoped_ptr<MappedFile> file;
     try {
@@ -175,8 +177,8 @@ void DirectoryLedger::load() {
 }
 
 void DirectoryLedger::save() {
-    String path(_directory);
-    print(path, "/com.biggerplanet.ares.json");
+    const StringSlice scenario_id = Preferences::preferences()->scenario_identifier();
+    const String path(format("{0}/{1}.json", _directory, scenario_id));
 
     vector<Json> unlocked_levels;
     for (std::set<int>::const_iterator it = _chapters.begin(); it != _chapters.end(); ++it) {
