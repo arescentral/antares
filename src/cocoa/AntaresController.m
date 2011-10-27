@@ -28,13 +28,6 @@
 @implementation AntaresController
 
 - (void)applicationWillFinishLaunching:(NSNotification*)aNotification {
-    CFStringRef error_message;
-    if (!antares_controller_set_drivers(&error_message)) {
-        NSLog(@"%@", error_message);
-        CFRelease(error_message);
-        exit(1);
-    }
-
     AntaresSettingsController* settings = [[[AntaresSettingsController alloc]
         initWithTarget:self selector:@selector(settingsDone:)] autorelease];
     if (!settings) {
@@ -44,6 +37,13 @@
 }
 
 - (void)settingsDone:(id)sender {
+    CFStringRef error_message;
+    if (!antares_controller_set_drivers(&error_message)) {
+        NSLog(@"%@", error_message);
+        CFRelease(error_message);
+        exit(1);
+    }
+
     AntaresExtractDataController* extract = [[[AntaresExtractDataController alloc]
         initWithTarget:self selector:@selector(extractDone:)] autorelease];
     if (!extract) {
