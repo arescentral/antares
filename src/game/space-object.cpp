@@ -1212,9 +1212,12 @@ void ExecuteObjectActions( long whichAction, long actionNum,
         if (sObject == NULL) {
             sObject = &kZeroSpaceObject;
         }
+        if (anObject == NULL) {
+        }
 
         if (anObject == NULL) {
             OKtoExecute = true;
+            anObject = &kZeroSpaceObject;
         } else if ( ( action->owner == 0) ||
                     (
                         (
@@ -1776,8 +1779,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                         case kAlterAbsoluteCash:
                             if ( action->argument.alterObject.relative)
                             {
-                                if ( anObject != NULL)
-                                {
+                                if (anObject != &kZeroSpaceObject) {
                                     PayAdmiralAbsolute( anObject->owner, action->argument.alterObject.minimum);
                                 }
                             } else
@@ -1949,7 +1951,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     break;
 
                 case kChangeScore:
-                    if (( action->argument.changeScore.whichPlayer == -1) && ( anObject != NULL))
+                    if (( action->argument.changeScore.whichPlayer == -1) && (anObject != &kZeroSpaceObject))
                         l = anObject->owner;
                     else
                     {
@@ -1963,7 +1965,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     break;
 
                 case kDeclareWinner:
-                    if (( action->argument.declareWinner.whichPlayer == -1) && ( anObject != NULL))
+                    if (( action->argument.declareWinner.whichPlayer == -1) && (anObject != &kZeroSpaceObject))
                         l = anObject->owner;
                     else
                     {
