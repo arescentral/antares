@@ -26,6 +26,7 @@
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
 
+using sfz::String;
 using sfz::StringSlice;
 using sfz::range;
 using std::min;
@@ -42,6 +43,7 @@ const char kSpeechOnPreference[]        = "SpeechOn";
 const char kVolumePreference[]          = "Volume";
 const char kScreenWidthPreference[]     = "ScreenWidth";
 const char kScreenHeightPreference[]    = "ScreenHeight";
+const char kScenarioPreference[]        = "Scenario";
 
 template <typename T>
 T clamp(T value, T min, T max) {
@@ -126,6 +128,12 @@ void CoreFoundationPrefsDriver::load(Preferences* preferences) {
         screen_size.height = int_value;
     }
     preferences->set_screen_size(screen_size);
+
+    cf::String string_value;
+    if (cf::get_preference(kScenarioPreference, string_value)) {
+        String id(string_value);
+        preferences->set_scenario_identifier(id);
+    }
 }
 
 void CoreFoundationPrefsDriver::save(const Preferences& preferences) {
@@ -155,6 +163,9 @@ void CoreFoundationPrefsDriver::save(const Preferences& preferences) {
     cf::Number screen_height(CFNumberCreate(NULL, kCFNumberSInt32Type, &screen_size.height));
     cf::set_preference(kScreenWidthPreference, screen_width);
     cf::set_preference(kScreenHeightPreference, screen_height);
+
+    cf::String scenario(preferences.scenario_identifier());
+    cf::set_preference(kScenarioPreference, scenario);
 
     CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication);
 }
