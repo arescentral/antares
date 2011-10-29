@@ -48,10 +48,12 @@ def build(bld):
             "resources/Antares.icns",
             "resources/ExtractData.nib",
             "resources/MainMenu.nib",
+            "resources/Settings.nib",
         ],
         source=[
             "src/cocoa/AntaresController.m",
             "src/cocoa/AntaresExtractDataController.m",
+            "src/cocoa/AntaresSettingsController.m",
             "src/cocoa/main.m",
             "src/cocoa/video-driver.cpp",
             "src/cocoa/core-foundation.cpp",
@@ -60,6 +62,7 @@ def build(bld):
             "src/cocoa/c/AntaresController.cpp",
             "src/cocoa/c/CocoaVideoDriver.m",
             "src/cocoa/c/DataExtractor.cpp",
+            "src/cocoa/c/scenario-list.cpp",
         ],
         cflags=WARNINGS,
         cxxflags=WARNINGS,
@@ -110,6 +113,13 @@ def build(bld):
         target="antares/build-pix",
         platform="darwin",
         arch="i386 ppc",
+    )
+
+    bld.program(
+        target="antares/ls-scenarios",
+        source="src/bin/ls-scenarios.cpp",
+        cxxflags=WARNINGS,
+        use="antares/libantares",
     )
 
     bld.program(
@@ -197,6 +207,7 @@ def build(bld):
             "src/data/replay.cpp",
             "src/data/resource.cpp",
             "src/data/scenario.cpp",
+            "src/data/scenario-list.cpp",
             "src/data/space-object.cpp",
             "src/data/string-list.cpp",
         ],
