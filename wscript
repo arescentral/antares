@@ -62,6 +62,7 @@ def build(bld):
             "src/cocoa/c/AntaresController.cpp",
             "src/cocoa/c/CocoaVideoDriver.m",
             "src/cocoa/c/DataExtractor.cpp",
+            "src/cocoa/c/scenario-list.cpp",
         ],
         cflags=WARNINGS,
         cxxflags=WARNINGS,

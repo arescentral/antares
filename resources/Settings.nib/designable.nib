@@ -12,7 +12,7 @@
 		</object>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
-			<integer value="40"/>
+			<integer value="2"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -201,7 +201,7 @@
 								<object class="NSTabViewItem" id="49130043">
 									<string key="NSIdentifier">1</string>
 									<object class="NSView" key="NSView" id="643474338">
-										<nil key="NSNextResponder"/>
+										<reference key="NSNextResponder" ref="283906454"/>
 										<int key="NSvFlags">256</int>
 										<object class="NSMutableArray" key="NSSubviews">
 											<bool key="EncodedWithXMLCoder">YES</bool>
@@ -212,7 +212,7 @@
 												<reference key="NSSuperview" ref="643474338"/>
 												<bool key="NSEnabled">YES</bool>
 												<object class="NSPopUpButtonCell" key="NSCell" id="715681719">
-													<int key="NSCellFlags">-1539178944</int>
+													<int key="NSCellFlags">-2076049856</int>
 													<int key="NSCellFlags2">2048</int>
 													<reference key="NSSupport" ref="84977869"/>
 													<reference key="NSControlView" ref="8570627"/>
@@ -366,6 +366,7 @@
 											</object>
 										</object>
 										<string key="NSFrame">{{10, 33}, {253, 120}}</string>
+										<reference key="NSSuperview" ref="283906454"/>
 									</object>
 									<string key="NSLabel">Scenario</string>
 									<reference key="NSColor" ref="1007945415"/>
@@ -374,7 +375,7 @@
 								<object class="NSTabViewItem" id="529771592">
 									<string key="NSIdentifier">2</string>
 									<object class="NSView" key="NSView" id="420028710">
-										<reference key="NSNextResponder" ref="283906454"/>
+										<nil key="NSNextResponder"/>
 										<int key="NSvFlags">256</int>
 										<object class="NSMutableArray" key="NSSubviews">
 											<bool key="EncodedWithXMLCoder">YES</bool>
@@ -461,21 +462,20 @@
 											</object>
 										</object>
 										<string key="NSFrame">{{10, 33}, {253, 120}}</string>
-										<reference key="NSSuperview" ref="283906454"/>
 									</object>
 									<string key="NSLabel">Video</string>
 									<reference key="NSColor" ref="1007945415"/>
 									<reference key="NSTabView" ref="283906454"/>
 								</object>
 							</object>
-							<reference key="NSSelectedTabViewItem" ref="529771592"/>
+							<reference key="NSSelectedTabViewItem" ref="49130043"/>
 							<reference key="NSFont" ref="84977869"/>
 							<int key="NSTvFlags">0</int>
 							<bool key="NSAllowTruncatedLabels">YES</bool>
 							<bool key="NSDrawsBackground">YES</bool>
 							<object class="NSMutableArray" key="NSSubviews">
 								<bool key="EncodedWithXMLCoder">YES</bool>
-								<reference ref="420028710"/>
+								<reference ref="643474338"/>
 							</object>
 						</object>
 					</object>
@@ -1013,9 +1013,9 @@
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{333, 727}, {299, 418}}</string>
+					<string>{{425, 727}, {299, 418}}</string>
 					<string>com.apple.InterfaceBuilder.CocoaPlugin</string>
-					<string>{{333, 727}, {299, 418}}</string>
+					<string>{{425, 727}, {299, 418}}</string>
 					<integer value="1"/>
 					<string>{196, 240}</string>
 					<string>{{357, 418}, {480, 270}}</string>

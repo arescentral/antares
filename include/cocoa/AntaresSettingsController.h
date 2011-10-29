@@ -26,6 +26,9 @@
     id _target;
     SEL _selector;
 
+    NSURL* _download_url;
+    NSURL* _author_url;
+
     IBOutlet NSWindow* _window;
     IBOutlet NSButton* _no_show_again_checkbox;
 
