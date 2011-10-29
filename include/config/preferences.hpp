@@ -32,6 +32,8 @@ class Preferences {
     static void set_preferences(Preferences* preferences);
 
     Preferences();
+    Preferences(const Preferences& other);
+    Preferences& operator=(const Preferences& other);
     ~Preferences();
 
     void reset();
@@ -43,6 +45,7 @@ class Preferences {
     bool speech_on() const;
     int volume() const;
     Size screen_size() const;
+    sfz::StringSlice scenario_identifier() const;
 
     void set_key(size_t index, uint32_t key);
     void set_play_idle_music(bool on);
@@ -50,6 +53,7 @@ class Preferences {
     void set_speech_on(bool on);
     void set_volume(int volume);
     void set_screen_size(Size size);
+    void set_scenario_identifier(sfz::StringSlice id);
 
   private:
     static sfz::scoped_ptr<Preferences> _preferences;
@@ -60,6 +64,7 @@ class Preferences {
     bool                _speech_on;
     int16_t             _volume;
     Size                _screen_size;
+    sfz::String         _scenario_identifier;
 };
 
 class PrefsDriver {

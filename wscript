@@ -67,7 +67,7 @@ def build(bld):
         cxxflags=WARNINGS,
         arch="i386 ppc",
         use=[
-            "antares/libAntares",
+            "antares/libantares",
             "antares/system/cocoa",
             "antares/system/carbon",
         ],
@@ -83,7 +83,7 @@ def build(bld):
         use=[
             "antares/system/opengl",
             "antares/opengl",
-            "antares/libAntares",
+            "antares/libantares",
         ],
     )
 
@@ -97,7 +97,7 @@ def build(bld):
         use=[
             "antares/system/opengl",
             "antares/opengl",
-            "antares/libAntares",
+            "antares/libantares",
         ],
     )
 
@@ -105,7 +105,7 @@ def build(bld):
         target="antares/build-pix",
         source="src/bin/build-pix.cpp",
         cxxflags=WARNINGS,
-        use="antares/libAntares",
+        use="antares/libantares",
     )
 
     bld.platform(
@@ -115,10 +115,17 @@ def build(bld):
     )
 
     bld.program(
+        target="antares/ls-scenarios",
+        source="src/bin/ls-scenarios.cpp",
+        cxxflags=WARNINGS,
+        use="antares/libantares",
+    )
+
+    bld.program(
         target="antares/object-data",
         source="src/bin/object-data.cpp",
         cxxflags=WARNINGS,
-        use="antares/libAntares",
+        use="antares/libantares",
     )
 
     bld.platform(
@@ -134,7 +141,7 @@ def build(bld):
         ],
         cxxflags=WARNINGS,
         use=[
-            "antares/libAntares",
+            "antares/libantares",
         ],
     )
 
@@ -156,12 +163,42 @@ def build(bld):
         use="antares/system/core-foundation",
     )
 
+    bld(
+        target="antares/libantares",
+        use=[
+            "antares/libantares-config",
+            "antares/libantares-data",
+            "antares/libantares-drawing",
+            "antares/libantares-game",
+            "antares/libantares-math",
+            "antares/libantares-sound",
+            "antares/libantares-ui",
+            "antares/libantares-video",
+        ],
+    )
+
     bld.stlib(
-        target="antares/libAntares",
+        target="antares/libantares-config",
         source=[
             "src/config/keys.cpp",
             "src/config/ledger.cpp",
             "src/config/preferences.cpp",
+        ],
+        cxxflags=WARNINGS,
+        includes="./include",
+        export_includes="./include",
+        use="libsfz/libsfz",
+    )
+
+    bld.platform(
+        target="antares/libantares-config",
+        platform="darwin",
+        arch="i386 ppc",
+    )
+
+    bld.stlib(
+        target="antares/libantares-data",
+        source=[
             "src/data/extractor.cpp",
             "src/data/interface.cpp",
             "src/data/picture.cpp",
@@ -169,8 +206,30 @@ def build(bld):
             "src/data/replay.cpp",
             "src/data/resource.cpp",
             "src/data/scenario.cpp",
+            "src/data/scenario-list.cpp",
             "src/data/space-object.cpp",
             "src/data/string-list.cpp",
+        ],
+        cxxflags=WARNINGS,
+        includes="./include",
+        export_includes="./include",
+        use=[
+            "libpng/libpng",
+            "libsfz/libsfz",
+            "rezin/librezin",
+            "zipxx/libzipxx",
+        ],
+    )
+
+    bld.platform(
+        target="antares/libantares-data",
+        platform="darwin",
+        arch="i386 ppc",
+    )
+
+    bld.stlib(
+        target="antares/libantares-drawing",
+        source=[
             "src/drawing/briefing.cpp",
             "src/drawing/build-pix.cpp",
             "src/drawing/color.cpp",
@@ -184,6 +243,25 @@ def build(bld):
             "src/drawing/shapes.cpp",
             "src/drawing/sprite-handling.cpp",
             "src/drawing/text.cpp",
+        ],
+        cxxflags=WARNINGS,
+        includes="./include",
+        export_includes="./include",
+        use=[
+            "libpng/libpng",
+            "libsfz/libsfz",
+        ],
+    )
+
+    bld.platform(
+        target="antares/libantares-drawing",
+        platform="darwin",
+        arch="i386 ppc",
+    )
+
+    bld.stlib(
+        target="antares/libantares-game",
+        source=[
             "src/game/admiral.cpp",
             "src/game/beam.cpp",
             "src/game/cheat.cpp",
@@ -202,14 +280,67 @@ def build(bld):
             "src/game/space-object.cpp",
             "src/game/starfield.cpp",
             "src/game/time.cpp",
+        ],
+        cxxflags=WARNINGS,
+        includes="./include",
+        export_includes="./include",
+        use="libsfz/libsfz",
+    )
+
+    bld.platform(
+        target="antares/libantares-game",
+        platform="darwin",
+        arch="i386 ppc",
+    )
+
+    bld.stlib(
+        target="antares/libantares-math",
+        source=[
             "src/math/fixed.cpp",
             "src/math/geometry.cpp",
             "src/math/random.cpp",
             "src/math/rotation.cpp",
             "src/math/special.cpp",
+        ],
+        cxxflags=WARNINGS,
+        includes="./include",
+        export_includes="./include",
+        use="libsfz/libsfz",
+    )
+
+    bld.platform(
+        target="antares/libantares-math",
+        platform="darwin",
+        arch="i386 ppc",
+    )
+
+    bld.stlib(
+        target="antares/libantares-sound",
+        source=[
             "src/sound/driver.cpp",
             "src/sound/fx.cpp",
             "src/sound/music.cpp",
+        ],
+        cxxflags=WARNINGS,
+        includes="./include",
+        export_includes="./include",
+        use="libsfz/libsfz",
+    )
+
+    bld.platform(
+        target="antares/libantares-sound",
+        platform="darwin",
+        source="src/sound/openal-driver.cpp",
+        arch="i386 ppc",
+        use=[
+            "antares/system/audio-toolbox",
+            "antares/system/openal",
+        ],
+    )
+
+    bld.stlib(
+        target="antares/libantares-ui",
+        source=[
             "src/ui/card.cpp",
             "src/ui/event.cpp",
             "src/ui/event-tracker.cpp",
@@ -226,6 +357,22 @@ def build(bld):
             "src/ui/screens/play-again.cpp",
             "src/ui/screens/scroll-text.cpp",
             "src/ui/screens/select-level.cpp",
+        ],
+        cxxflags=WARNINGS,
+        includes="./include",
+        export_includes="./include",
+        use="libsfz/libsfz",
+    )
+
+    bld.platform(
+        target="antares/libantares-ui",
+        platform="darwin",
+        arch="i386 ppc",
+    )
+
+    bld.stlib(
+        target="antares/libantares-video",
+        source=[
             "src/video/driver.cpp",
             "src/video/transitions.cpp",
         ],
@@ -235,26 +382,18 @@ def build(bld):
         use=[
             "libpng/libpng",
             "libsfz/libsfz",
-            "rezin/librezin",
-            "zipxx/libzipxx",
         ],
     )
 
     bld.platform(
-        target="antares/libAntares",
+        target="antares/libantares-video",
         platform="darwin",
         source=[
             "src/cocoa/core-opengl.cpp",
-            "src/sound/openal-driver.cpp",
             "src/video/opengl-driver.cpp",
         ],
         arch="i386 ppc",
-        use=[
-            "antares/system/audio-toolbox",
-            "antares/system/openal",
-            "antares/system/opengl",
-            "libsfz/libsfz",
-        ],
+        use="antares/system/opengl",
     )
 
     bld.antares_test(

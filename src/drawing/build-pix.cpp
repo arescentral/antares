@@ -146,15 +146,17 @@ PixMap* build_pix(int text_id, int width) {
         if ((*it)->size() >= 2 && (*it)->at(0) == '#' && (*it)->at(1) == '+') {
             if ((*it)->size() > 2) {
                 if ((*it)->at(2) == 'B') {
-                    int32_t id;
-                    if (!string_to_int(StringSlice(**it).slice(3), id)) {
-                        throw Exception(format("malformed header line {0}", **it));
+                    int32_t id = 2005;
+                    if ((*it)->size() > 3) {
+                        if (!string_to_int((*it)->slice(3), id)) {
+                            throw Exception(format("malformed header line {0}", quote(**it)));
+                        }
                     }
                     build.set_background(id);
                 } else {
                     int32_t id;
-                    if (!string_to_int(StringSlice(**it).slice(2), id)) {
-                        throw Exception(format("malformed header line {0}", **it));
+                    if (!string_to_int((*it)->slice(2), id)) {
+                        throw Exception(format("malformed header line {0}", quote(**it)));
                     }
                     build.add_picture(id);
                 }
