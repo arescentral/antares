@@ -113,6 +113,13 @@ def build(bld):
     )
 
     bld.program(
+        target="antares/ls-scenarios",
+        source="src/bin/ls-scenarios.cpp",
+        cxxflags=WARNINGS,
+        use="antares/libantares",
+    )
+
+    bld.program(
         target="antares/object-data",
         source="src/bin/object-data.cpp",
         cxxflags=WARNINGS,
@@ -197,6 +204,7 @@ def build(bld):
             "src/data/replay.cpp",
             "src/data/resource.cpp",
             "src/data/scenario.cpp",
+            "src/data/scenario-list.cpp",
             "src/data/space-object.cpp",
             "src/data/string-list.cpp",
         ],
