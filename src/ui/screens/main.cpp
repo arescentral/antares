@@ -45,6 +45,15 @@ const int kMainScreenResID = 5000;
 const int64_t kMainDemoTimeOutTime = 30e6;
 const int kTitleTextScrollWidth = 450;
 
+int demo() {
+    int id = VideoDriver::driver()->get_demo_scenario();
+    if (id >= 0) {
+        return id;
+    }
+    int ids[] = { 600, 605, 623 };
+    return ids[rand() % 3];
+}
+
 class MainScreenTimeOut : public Card {
   public:
     MainScreenTimeOut()
@@ -62,7 +71,7 @@ class MainScreenTimeOut : public Card {
 
           case REPLAY_INTRO:
             _state = DEMO;
-            stack()->push(new ReplayGame(VideoDriver::driver()->get_demo_scenario()));
+            stack()->push(new ReplayGame(demo()));
             break;
 
           case DEMO:
@@ -122,7 +131,7 @@ void MainScreen::handle_button(int button) {
         break;
 
       case DEMO:
-        stack()->push(new ReplayGame(VideoDriver::driver()->get_demo_scenario()));
+        stack()->push(new ReplayGame(demo()));
         break;
 
       case REPLAY_INTRO:
