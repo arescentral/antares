@@ -21,6 +21,7 @@
 #include <getopt.h>
 #include <sfz/sfz.hpp>
 
+#include "config/preferences.hpp"
 #include "data/space-object.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
@@ -85,6 +86,7 @@ int main(int argc, char** argv) {
         makedirs(*output_dir, 0755);
     }
 
+    Preferences::set_preferences(new Preferences);
     InitDirectText();
     init_globals();
     SpaceObjectHandlingInit();
