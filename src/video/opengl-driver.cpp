@@ -120,8 +120,7 @@ void OpenGlVideoDriver::set_game_state(GameState state) {
 }
 
 int OpenGlVideoDriver::get_demo_scenario() {
-    int levels[] = { 600, 605, 623 };
-    return levels[rand() % 3];
+    return -1;
 }
 
 void OpenGlVideoDriver::main_loop_iteration_complete(uint32_t) { }

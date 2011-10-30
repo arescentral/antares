@@ -205,6 +205,7 @@ def build(bld):
             "src/data/picture.cpp",
             "src/data/races.cpp",
             "src/data/replay.cpp",
+            "src/data/replay-list.cpp",
             "src/data/resource.cpp",
             "src/data/scenario.cpp",
             "src/data/scenario-list.cpp",
