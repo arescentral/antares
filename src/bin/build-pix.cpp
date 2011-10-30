@@ -21,6 +21,7 @@
 #include <getopt.h>
 #include <sfz/sfz.hpp>
 
+#include "config/preferences.hpp"
 #include "drawing/build-pix.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
@@ -83,6 +84,7 @@ int main(int argc, char* const* argv) {
         makedirs(*output_dir, 0755);
     }
 
+    Preferences::set_preferences(new Preferences);
     InitDirectText();
 
     PixBuilder builder(output_dir);
