@@ -20,6 +20,7 @@
 #include "ui/screens/main.hpp"
 
 #include "config/preferences.hpp"
+#include "data/replay-list.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/main.hpp"
@@ -45,50 +46,6 @@ const int kMainScreenResID = 5000;
 const int64_t kMainDemoTimeOutTime = 30e6;
 const int kTitleTextScrollWidth = 450;
 
-int demo() {
-    int id = VideoDriver::driver()->get_demo_scenario();
-    if (id >= 0) {
-        return id;
-    }
-    int ids[] = { 600, 605, 623 };
-    return ids[rand() % 3];
-}
-
-class MainScreenTimeOut : public Card {
-  public:
-    MainScreenTimeOut()
-            : _state(NEW) { }
-
-    virtual void become_front() {
-        switch (_state) {
-          case NEW:
-            if (Randomize(4) == 2) {
-                _state = REPLAY_INTRO;
-                stack()->push(new ScrollTextScreen(5600, kTitleTextScrollWidth, 15.0));
-                break;
-            }
-            // else fall through
-
-          case REPLAY_INTRO:
-            _state = DEMO;
-            stack()->push(new ReplayGame(demo()));
-            break;
-
-          case DEMO:
-            stack()->pop(this);
-            break;
-        }
-    }
-
-  private:
-    enum State {
-        NEW,
-        REPLAY_INTRO,
-        DEMO,
-    };
-    State _state;
-};
-
 }  // namespace
 
 MainScreen::MainScreen()
@@ -112,7 +69,21 @@ bool MainScreen::next_timer(int64_t& time) {
 }
 
 void MainScreen::fire_timer() {
-    stack()->push(new MainScreenTimeOut);
+    Randomize(1);
+
+    int id = VideoDriver::driver()->get_demo_scenario();
+    if (id >= 0) {
+        stack()->push(new ReplayGame(id));
+        return;
+    }
+
+    ReplayList replays;
+    size_t demo = rand() % (replays.size() + 1);
+    if (demo == replays.size()) {
+        stack()->push(new ScrollTextScreen(5600, kTitleTextScrollWidth, 15.0));
+    } else {
+        stack()->push(new ReplayGame(replays.at(demo)));
+    }
 }
 
 void MainScreen::adjust_interface() {
@@ -121,6 +92,11 @@ void MainScreen::adjust_interface() {
 
     // TODO(sfiera): switch on whether or not there is a single-player campaign.
     mutable_item(START_NEW_GAME)->set_status(kActive);
+
+    ReplayList replays;
+    if (replays.size() == 0) {
+        mutable_item(DEMO)->set_status(kDimmed);
+    }
 }
 
 void MainScreen::handle_button(int button) {
@@ -131,7 +107,10 @@ void MainScreen::handle_button(int button) {
         break;
 
       case DEMO:
-        stack()->push(new ReplayGame(demo()));
+        {
+            ReplayList replays;
+            stack()->push(new ReplayGame(replays.at(rand() % replays.size())));
+        }
         break;
 
       case REPLAY_INTRO:
