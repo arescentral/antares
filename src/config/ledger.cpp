@@ -156,7 +156,12 @@ class DirectoryLedger::Visitor : public JsonVisitor {
 
 void DirectoryLedger::load() {
     const StringSlice scenario_id = Preferences::preferences()->scenario_identifier();
-    const String path(format("{0}/{1}.json", _directory, scenario_id));
+    String path(format("{0}/Registry/{1}/ledger.json", _directory, scenario_id));
+
+    if (!path::isfile(path) && (scenario_id == "com.biggerplanet.ares")) {
+        path.assign(format("{0}/{1}.json", _directory, scenario_id));
+    }
+
     _chapters.clear();
     scoped_ptr<MappedFile> file;
     try {
@@ -178,7 +183,7 @@ void DirectoryLedger::load() {
 
 void DirectoryLedger::save() {
     const StringSlice scenario_id = Preferences::preferences()->scenario_identifier();
-    const String path(format("{0}/{1}.json", _directory, scenario_id));
+    const String path(format("{0}/Registry/{1}/ledger.json", _directory, scenario_id));
 
     vector<Json> unlocked_levels;
     for (std::set<int>::const_iterator it = _chapters.begin(); it != _chapters.end(); ++it) {
