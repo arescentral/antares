@@ -40,6 +40,7 @@ class DataExtractor {
     void download(Observer* observer, const sfz::StringSlice& base,
             const sfz::StringSlice& name, const sfz::StringSlice& version,
             const sfz::Sha1::Digest& digest) const;
+    void write_version() const;
     void extract_original(Observer* observer, const sfz::StringSlice& zip) const;
     void extract_supplemental(Observer* observer, const sfz::StringSlice& zip) const;
 

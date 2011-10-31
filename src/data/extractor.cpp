@@ -195,6 +195,7 @@ const struct ResourceFile {
 };
 
 const char kDownloadBase[] = "http://downloads.arescentral.org";
+const char kVersion[] = "3\n";
 
 }  // namespace
 
@@ -205,12 +206,14 @@ DataExtractor::DataExtractor(const StringSlice& downloads_dir, const StringSlice
       _output_dir(output_dir) { }
 
 bool DataExtractor::current() const {
-    String scenario_dir(format("{0}/com.biggerplanet.ares", _output_dir));
-    if (path::isdir(scenario_dir)) {
-        return (tree_digest(scenario_dir) ==
-                (Sha1::Digest){{0x52f8c220, 0x280ea674, 0x25384e5b, 0x833ecffe, 0xa0d792c4}});
+    String path(format("{0}/com.biggerplanet.ares/version", _output_dir));
+    BytesSlice version(kVersion);
+    try {
+        MappedFile file(path);
+        return file.data() == version;
+    } catch (Exception& e) {
+        return false;
     }
-    return false;
 }
 
 void DataExtractor::extract(Observer* observer) const {
@@ -223,6 +226,7 @@ void DataExtractor::extract(Observer* observer) const {
 
     String scenario_dir(format("{0}/com.biggerplanet.ares", _output_dir));
     rmtree(scenario_dir);
+    write_version();
     extract_original(observer, "Ares-1.2.0.zip");
     extract_supplemental(observer, "Antares-Music-0.3.0.zip");
     extract_supplemental(observer, "Antares-Text-0.3.0.zip");
@@ -268,6 +272,14 @@ void DataExtractor::download(Observer* observer, const StringSlice& base, const 
     makedirs(path::dirname(full_path), 0755);
     ScopedFd fd(open(full_path, O_WRONLY | O_CREAT | O_EXCL, 0644));
     write(fd, download.data(), download.size());
+}
+
+void DataExtractor::write_version() const {
+    String path(format("{0}/com.biggerplanet.ares/version", _output_dir));
+    makedirs(path::dirname(path), 0755);
+    ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
+    BytesSlice version(kVersion);
+    write(fd, version);
 }
 
 void DataExtractor::extract_original(Observer* observer, const StringSlice& file) const {
