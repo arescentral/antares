@@ -70,10 +70,9 @@ static void set_label(const char* status, void* userdata) {
         stringByAppendingPathComponent:@"Antares"];
     NSString* downloads = [antares stringByAppendingPathComponent:@"Downloads"];
     NSString* scenarios = [antares stringByAppendingPathComponent:@"Scenarios"];
-    NSString* ares_scenario = [scenarios stringByAppendingPathComponent:@"com.biggerplanet.ares"];
 
     AntaresDataExtractor* extractor = antares_data_extractor_create(
-            [downloads UTF8String], [ares_scenario UTF8String]);
+            [downloads UTF8String], [scenarios UTF8String]);
     if (!antares_data_extractor_current(extractor)) {
         antares_data_extractor_extract(extractor, set_label, self);
     }

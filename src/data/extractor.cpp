@@ -205,8 +205,9 @@ DataExtractor::DataExtractor(const StringSlice& downloads_dir, const StringSlice
       _output_dir(output_dir) { }
 
 bool DataExtractor::current() const {
-    if (path::isdir(_output_dir)) {
-        return (tree_digest(_output_dir) ==
+    String scenario_dir(format("{0}/com.biggerplanet.ares", _output_dir));
+    if (path::isdir(scenario_dir)) {
+        return (tree_digest(scenario_dir) ==
                 (Sha1::Digest){{0x52f8c220, 0x280ea674, 0x25384e5b, 0x833ecffe, 0xa0d792c4}});
     }
     return false;
@@ -220,7 +221,8 @@ void DataExtractor::extract(Observer* observer) const {
     download(observer, kDownloadBase, "Antares-Text", "0.3.0",
             (Sha1::Digest){{0x2b5f3d50, 0xcc243db1, 0x35173461, 0x819f5e1b, 0xabde1519}});
 
-    rmtree(_output_dir);
+    String scenario_dir(format("{0}/com.biggerplanet.ares", _output_dir));
+    rmtree(scenario_dir);
     extract_original(observer, "Ares-1.2.0.zip");
     extract_supplemental(observer, "Antares-Music-0.3.0.zip");
     extract_supplemental(observer, "Antares-Text-0.3.0.zip");
@@ -292,7 +294,7 @@ void DataExtractor::extract_original(Observer* observer, const StringSlice& file
             SFZ_FOREACH(const ResourceEntry& entry, type, {
                 Bytes data;
                 if (conversion.convert(entry.id(), entry.data(), data)) {
-                    String output(format("{0}/{1}/{2}.{3}",
+                    String output(format("{0}/com.biggerplanet.ares/{1}/{2}.{3}",
                                 _output_dir, conversion.output_directory, entry.id(),
                                 conversion.output_extension));
                     makedirs(path::dirname(output), 0755);
@@ -329,7 +331,8 @@ void DataExtractor::extract_supplemental(Observer* observer, const StringSlice& 
             continue;
         }
 
-        String output(format("{0}/{1}", _output_dir, file.path().slice(slash + 1)));
+        String output(format("{0}/com.biggerplanet.ares/{1}",
+                _output_dir, file.path().slice(slash + 1)));
         makedirs(path::dirname(output), 0755);
         ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
         write(fd, file.data());
