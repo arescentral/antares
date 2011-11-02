@@ -48,12 +48,10 @@ def build(bld):
             "resources/Antares.icns",
             "resources/ExtractData.nib",
             "resources/MainMenu.nib",
-            "resources/Settings.nib",
         ],
         source=[
             "src/cocoa/AntaresController.m",
             "src/cocoa/AntaresExtractDataController.m",
-            "src/cocoa/AntaresSettingsController.m",
             "src/cocoa/main.m",
             "src/cocoa/video-driver.cpp",
             "src/cocoa/core-foundation.cpp",

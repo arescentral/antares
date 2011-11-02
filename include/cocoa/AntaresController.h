@@ -23,9 +23,25 @@
 #include <Cocoa/Cocoa.h>
 
 @interface AntaresController : NSObject {
+    NSURL* _download_url;
+    NSURL* _author_url;
+
+    IBOutlet NSWindow* _window;
+    IBOutlet NSButton* _no_show_again_checkbox;
+
+    IBOutlet NSPopUpButton* _scenario_list;
+    IBOutlet NSButton* _scenario_button;
+    IBOutlet NSButton* _author_button;
+    IBOutlet NSTextField* _version_label;
+
+    IBOutlet NSPopUpButton* _resolution_list;
+    IBOutlet NSButton* _window_checkbox;
 }
 
-- (void)applicationWillFinishLaunching:(NSNotification*)aNotification;
+- (IBAction)openScenarioURL:(id)sender;
+- (IBAction)openAuthorURL:(id)sender;
+
+- (IBAction)settingsDone:(id)sender;
 
 @end
 
