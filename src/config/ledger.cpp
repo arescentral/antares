@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <cmath>
 #include <sfz/sfz.hpp>
+#include "config/preferences.hpp"
 
 using sfz::Bytes;
 using sfz::Exception;
@@ -34,6 +35,7 @@ using sfz::ScopedFd;
 using sfz::String;
 using sfz::StringMap;
 using sfz::StringSlice;
+using sfz::format;
 using sfz::makedirs;
 using sfz::print;
 using sfz::range;
@@ -153,8 +155,13 @@ class DirectoryLedger::Visitor : public JsonVisitor {
 };
 
 void DirectoryLedger::load() {
-    String path(_directory);
-    print(path, "/com.biggerplanet.ares.json");
+    const StringSlice scenario_id = Preferences::preferences()->scenario_identifier();
+    String path(format("{0}/Registry/{1}/ledger.json", _directory, scenario_id));
+
+    if (!path::isfile(path) && (scenario_id == "com.biggerplanet.ares")) {
+        path.assign(format("{0}/{1}.json", _directory, scenario_id));
+    }
+
     _chapters.clear();
     scoped_ptr<MappedFile> file;
     try {
@@ -175,8 +182,8 @@ void DirectoryLedger::load() {
 }
 
 void DirectoryLedger::save() {
-    String path(_directory);
-    print(path, "/com.biggerplanet.ares.json");
+    const StringSlice scenario_id = Preferences::preferences()->scenario_identifier();
+    const String path(format("{0}/Registry/{1}/ledger.json", _directory, scenario_id));
 
     vector<Json> unlocked_levels;
     for (std::set<int>::const_iterator it = _chapters.begin(); it != _chapters.end(); ++it) {
@@ -188,7 +195,7 @@ void DirectoryLedger::save() {
     String contents(pretty_print(json));
 
     makedirs(path::dirname(path), 0755);
-    ScopedFd fd(open(path, O_WRONLY | O_CREAT, 0644));
+    ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
     Bytes bytes(utf8::encode(contents));
     write(fd, bytes);
 }

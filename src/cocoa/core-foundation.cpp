@@ -85,6 +85,12 @@ String::String(type c_obj):
 String::String(const sfz::StringSlice& string):
     Object<CFStringRef>(create_string(string)) { }
 
+void print_to(sfz::PrintTarget out, const String& string) {
+    cf::Data encoded(CFStringCreateExternalRepresentation(
+                NULL, string.c_obj(), kCFStringEncodingUTF8, '?'));
+    print(out, utf8::decode(encoded.data()));
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Array
 
@@ -117,6 +123,10 @@ Data::Data(type c_obj):
 
 sfz::BytesSlice Data::data() const {
     return sfz::BytesSlice(CFDataGetBytePtr(c_obj()), CFDataGetLength(c_obj()));
+}
+
+void write_to(sfz::WriteTarget out, const Data& data) {
+    write(out, data.data());
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

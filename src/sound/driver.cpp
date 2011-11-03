@@ -170,7 +170,7 @@ class LogSoundDriver::LogSound : public Sound {
 };
 
 LogSoundDriver::LogSoundDriver(const StringSlice& path):
-        _sound_log(open(path, O_CREAT | O_WRONLY, 0644)),
+        _sound_log(open(path, O_CREAT | O_WRONLY | O_TRUNC, 0644)),
         _last_id(-1),
         _active_channel(NULL) { }
 

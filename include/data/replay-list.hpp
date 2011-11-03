@@ -17,28 +17,26 @@
 // License along with this program.  If not, see
 // <http://www.gnu.org/licenses/>.
 
-#ifndef ANTARES_DATA_RESOURCE_HPP_
-#define ANTARES_DATA_RESOURCE_HPP_
+#ifndef ANTARES_DATA_REPLAY_LIST_HPP_
+#define ANTARES_DATA_REPLAY_LIST_HPP_
 
-#include <stdint.h>
+#include <vector>
 #include <sfz/sfz.hpp>
 
 namespace antares {
 
-class Resource {
+class ReplayList {
   public:
-    Resource(const sfz::StringSlice& type, const sfz::StringSlice& extension, int id);
-    Resource(const sfz::PrintItem& resource_path);
-    ~Resource();
-
-    sfz::BytesSlice data() const;
+    ReplayList();
+    size_t size() const;
+    int16_t at(size_t index) const;
 
   private:
-    void init(const sfz::StringSlice& resource_path);
+    std::vector<int16_t> _replays;
 
-    sfz::scoped_ptr<sfz::MappedFile> _file;
+    DISALLOW_COPY_AND_ASSIGN(ReplayList);
 };
 
 }  // namespace antares
 
-#endif // ANTARES_DATA_RESOURCE_HPP_
+#endif // ANTARES_DATA_REPLAY_LIST_HPP_

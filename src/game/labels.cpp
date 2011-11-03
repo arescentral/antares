@@ -149,7 +149,7 @@ void draw_labels() {
         // label->where is changed between update_all_label_contents() and draw time, but the rect
         // remains unchanged.  Since that function used to do this drawing, the rect's corner is
         // the original location we drew at.
-        const Point at(label->thisRect.left, label->thisRect.top);
+        Point at(label->thisRect.left, label->thisRect.top);
 
         if (!label->active
                 || label->killMe
@@ -168,29 +168,26 @@ void draw_labels() {
         ArrayPixMap pix(label->thisRect.width(), label->thisRect.height());
         pix.fill(RgbColor::kClear);
         DrawNateRectVScan(&pix, pix.size().as_rect(), dark, (at.h ^ at.v) & 0x1);
-        int x = kLabelInnerSpace;
-        int y = kLabelInnerSpace + gDirectText->ascent;
-        if (label->lineNum > 1) {
-            for (int j = 1; j <= label->lineNum; j++) {
-                StringSlice line = String_Get_Nth_Line(text, j);
-
-                DrawDirectTextStringClipped(
-                        Point(x + 1, y + 1), line, RgbColor::kBlack, &pix, pix.size().as_rect());
-                DrawDirectTextStringClipped(
-                        Point(x - 1, y - 1), line, RgbColor::kBlack, &pix, pix.size().as_rect());
-                DrawDirectTextStringClipped(Point(x, y), line, light, &pix, pix.size().as_rect());
-
-                y += label->lineHeight;
-            }
-        } else {
-            DrawDirectTextStringClipped(
-                    Point(x + 1, y + 1), text, RgbColor::kBlack, &pix, pix.size().as_rect());
-            DrawDirectTextStringClipped(Point(x, y), text, light, &pix, pix.size().as_rect());
-        }
 
         scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite(
                     format("/x/screen_label: {0}", quote(text)), pix));
         sprite->draw(at.h, at.v);
+        at.offset(kLabelInnerSpace, kLabelInnerSpace + gDirectText->ascent);
+
+        if (label->lineNum > 1) {
+            for (int j = 1; j <= label->lineNum; j++) {
+                StringSlice line = String_Get_Nth_Line(text, j);
+
+                gDirectText->draw_sprite(Point(at.h + 1, at.v + 1), line, RgbColor::kBlack);
+                gDirectText->draw_sprite(Point(at.h - 1, at.v - 1), line, RgbColor::kBlack);
+                gDirectText->draw_sprite(at, line, light);
+
+                at.offset(0, label->lineHeight);
+            }
+        } else {
+            gDirectText->draw_sprite(Point(at.h + 1, at.v + 1), text, RgbColor::kBlack);
+            gDirectText->draw_sprite(at, text, light);
+        }
     }
 }
 

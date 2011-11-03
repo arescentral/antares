@@ -17,28 +17,37 @@
 // License along with this program.  If not, see
 // <http://www.gnu.org/licenses/>.
 
-#ifndef ANTARES_DATA_RESOURCE_HPP_
-#define ANTARES_DATA_RESOURCE_HPP_
-
-#include <stdint.h>
 #include <sfz/sfz.hpp>
+
+#include "data/scenario-list.hpp"
+
+using sfz::format;
+using sfz::print;
+
+namespace io = sfz::io;
 
 namespace antares {
 
-class Resource {
-  public:
-    Resource(const sfz::StringSlice& type, const sfz::StringSlice& extension, int id);
-    Resource(const sfz::PrintItem& resource_path);
-    ~Resource();
+void main(int argc, char* const* argv) {
+    if (argc != 1) {
+        print(io::err, "usage: ls-scenarios\n");
+        exit(1);
+    }
 
-    sfz::BytesSlice data() const;
-
-  private:
-    void init(const sfz::StringSlice& resource_path);
-
-    sfz::scoped_ptr<sfz::MappedFile> _file;
-};
+    ScenarioList list;
+    for (size_t i = 0; i < list.size(); ++i) {
+        print(io::out, format("{0}:\n", list.at(i).identifier));
+        print(io::out, format("    title: {0}\n", list.at(i).title));
+        print(io::out, format("    download url: {0}\n", list.at(i).download_url));
+        print(io::out, format("    author: {0}\n", list.at(i).author));
+        print(io::out, format("    author url: {0}\n", list.at(i).author_url));
+        print(io::out, format("    version: {0}\n", list.at(i).version));
+    }
+}
 
 }  // namespace antares
 
-#endif // ANTARES_DATA_RESOURCE_HPP_
+int main(int argc, char* const* argv) {
+    antares::main(argc, argv);
+    return 0;
+}

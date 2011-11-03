@@ -23,6 +23,7 @@
 #include "net/http.hpp"
 
 using sfz::Exception;
+using sfz::Optional;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::print;
@@ -47,12 +48,15 @@ void ExtractDataMain(int argc, char* const* argv) {
 
     String source;
     String dest;
+    Optional<String> plugin;
     parser.add_argument("source", store(source))
         .help("directory in which to store or expect zip files")
         .required();
     parser.add_argument("dest", store(dest))
         .help("place output in this directory")
         .required();
+    parser.add_argument("plugin", store(plugin))
+        .help("a plugin to install (default: install factory scenario)");
     parser.add_argument("-h", "--help", help(parser, 0))
         .help("display this help screen");
 
@@ -64,6 +68,9 @@ void ExtractDataMain(int argc, char* const* argv) {
         }
 
         DataExtractor extractor(source, dest);
+        if (plugin.has()) {
+            extractor.set_plugin_file(*plugin);
+        }
 
         if (extractor.current()) {
             print(io::err, format("{0} is up-to-date!\n", dest));

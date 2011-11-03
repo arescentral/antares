@@ -24,11 +24,16 @@
 
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
+#include "game/globals.hpp"
+#include "video/driver.hpp"
 
 using sfz::Bytes;
 using sfz::BytesSlice;
+using sfz::Rune;
 using sfz::String;
 using sfz::StringSlice;
+using sfz::format;
+using sfz::hex;
 using sfz::read;
 using sfz::scoped_ptr;
 
@@ -53,10 +58,16 @@ enum {
     kButtonSmallFontResID   = 5005,
 };
 
-uint8_t to_mac_roman(uint32_t code) {
+uint8_t to_mac_roman(Rune code) {
     String string(1, code);
     Bytes bytes(macroman::encode(string));
     return bytes.at(0);
+}
+
+Rune from_mac_roman(uint8_t byte) {
+    BytesSlice bytes(&byte, 1);
+    String string(macroman::decode(bytes));
+    return string.at(0);
 }
 
 }  // namespace
@@ -75,9 +86,99 @@ directTextType::directTextType(int32_t id) {
 
     Resource data_rsrc("font-bitmaps", "nlFM", resID);
     charSet.assign(data_rsrc.data());
+
+    if (VideoDriver::driver()) {
+        _sprites.reset(new scoped_ptr<Sprite>[256]);
+        for (int i = 0; i < 256; i++) {
+            ArrayPixMap pix(char_width(i), height + 1);
+            pix.fill(RgbColor::kClear);
+            String s(1, from_mac_roman(i));
+            draw(Point(0, ascent), s, RgbColor::kWhite, &pix, pix.size().as_rect());
+            _sprites[i].reset(VideoDriver::driver()->new_sprite(
+                        format("/font/{0}/{1}", id, hex(i, 2)), pix));
+        }
+    }
 }
 
 directTextType::~directTextType() { }
+
+void directTextType::draw(
+        Point origin, sfz::StringSlice string, RgbColor color, PixMap* pix,
+        const Rect& clip) const {
+    // move the pen to the resulting location
+    origin.v -= ascent;
+
+    // Top and bottom boundaries of where we draw.
+    int topEdge = std::max(0, clip.top - origin.v);
+    int bottomEdge = height - std::max(0, origin.v + height - clip.bottom + 1);
+
+    int rowBytes = pix->row_bytes();
+
+    // set hchar = place holder for start of each char we draw
+    RgbColor* hchar = pix->mutable_bytes() + (origin.v + topEdge) * rowBytes + origin.h;
+
+    for (size_t i = 0; i < string.size(); ++i) {
+        const uint8_t* sbyte = charSet.data()
+            + height * physicalWidth * to_mac_roman(string.at(i))
+            + to_mac_roman(string.at(i));
+
+        int width = *sbyte;
+        ++sbyte;
+
+        if ((origin.h + width >= clip.left) || (origin.h < clip.right)) {
+            // Left and right boundaries of where we draw.
+            int leftEdge = std::max(0, clip.left - origin.h);
+            int rightEdge = width - std::max(0, origin.h + width - clip.right);
+
+            // skip over the clipped top rows
+            sbyte += topEdge * physicalWidth;
+
+            // dbyte = destination pixel
+            RgbColor* dbyte = hchar;
+
+            // repeat for every unclipped row
+            for (int y = topEdge; y < bottomEdge; ++y) {
+                // repeat for every byte of data
+                for (int x = leftEdge; x < rightEdge; ++x) {
+                    int byte = x / 8;
+                    int bit = 0x80 >> (x & 0x7);
+                    if (sbyte[byte] & bit) {
+                        dbyte[x] = color;
+                    }
+                }
+                sbyte += physicalWidth;
+                dbyte += rowBytes;
+            }
+        }
+        // else (not on screen) just increase the current character
+
+        // for every char clipped or no:
+        // increase our character pixel starting point by width of this character
+        hchar += width;
+
+        // increase our hposition (our position in pixels)
+        origin.h += width;
+    }
+    MoveTo(origin.h, origin.v + ascent);
+}
+
+void directTextType::draw_sprite(Point origin, sfz::StringSlice string, RgbColor color) const {
+    // TODO(sfiera): using stencils is a rather inefficient way of doing
+    // this, compared to using GL colors to tint the sprite.  However,
+    // we already have the code to do it with stencils, and don't yet
+    // have tinting.  If we do (and we probably will) then we should
+    // switch to using that here instead.
+    Stencil stencil(VideoDriver::driver());
+    stencil.set_threshold(1);
+    origin.offset(0, -ascent);
+    for (size_t i = 0; i < string.size(); ++i) {
+        uint8_t byte = to_mac_roman(string.at(i));
+        _sprites[byte]->draw(origin.h, origin.v);
+        origin.offset(char_width(string.at(i)), 0);
+    }
+    stencil.apply();
+    VideoDriver::driver()->fill_rect(world, color);
+}
 
 void InitDirectText() {
     gDirectTextData = new scoped_ptr<directTextType>[kDirectFontNum];
@@ -96,11 +197,14 @@ void DirectTextCleanup() {
     delete[] gDirectTextData;
 }
 
+uint8_t directTextType::char_width(Rune mchar) const {
+    const uint8_t* widptr =
+        charSet.data() + height * physicalWidth * to_mac_roman(mchar) + to_mac_roman(mchar);
+    return *widptr;
+}
+
 void mDirectCharWidth(unsigned char& width, uint32_t mchar) {
-    const uint8_t* widptr = gDirectText->charSet.data()
-        + gDirectText->height * gDirectText->physicalWidth * to_mac_roman(mchar)
-        + to_mac_roman(mchar);
-    width = *widptr;
+    width = gDirectText->char_width(mchar);
 }
 
 void mSetDirectFont(long whichFont) {
@@ -120,71 +224,13 @@ void mGetDirectStringDimensions(const StringSlice& string, long& width, long& he
     height = gDirectText->height;
     width = 0;
     for (size_t i = 0; i < string.size(); ++i) {
-        const uint8_t* widptr = gDirectText->charSet.data()
-            + gDirectText->height * gDirectText->physicalWidth * to_mac_roman(string.at(i))
-            + to_mac_roman(string.at(i));
-        width += *widptr;
+        width += gDirectText->char_width(string.at(i));
     }
 }
 
 void DrawDirectTextStringClipped(
         Point origin, StringSlice string, RgbColor color, PixMap* pix, const Rect& clip) {
-    // move the pen to the resulting location
-    origin.v -= gDirectText->ascent;
-
-    // Top and bottom boundaries of where we draw.
-    int topEdge = std::max(0, clip.top - origin.v);
-    int bottomEdge = gDirectText->height - std::max(
-            0, origin.v + gDirectText->height - clip.bottom + 1);
-
-    int rowBytes = pix->row_bytes();
-
-    // set hchar = place holder for start of each char we draw
-    RgbColor* hchar = pix->mutable_bytes() + (origin.v + topEdge) * rowBytes + origin.h;
-
-    for (size_t i = 0; i < string.size(); ++i) {
-        const uint8_t* sbyte = gDirectText->charSet.data()
-            + gDirectText->height * gDirectText->physicalWidth * to_mac_roman(string.at(i))
-            + to_mac_roman(string.at(i));
-
-        int width = *sbyte;
-        ++sbyte;
-
-        if ((origin.h + width >= clip.left) || (origin.h < clip.right)) {
-            // Left and right boundaries of where we draw.
-            int leftEdge = std::max(0, clip.left - origin.h);
-            int rightEdge = width - std::max(0, origin.h + width - clip.right);
-
-            // skip over the clipped top rows
-            sbyte += topEdge * gDirectText->physicalWidth;
-
-            // dbyte = destination pixel
-            RgbColor* dbyte = hchar;
-
-            // repeat for every unclipped row
-            for (int y = topEdge; y < bottomEdge; ++y) {
-                // repeat for every byte of data
-                for (int x = leftEdge; x < rightEdge; ++x) {
-                    int byte = x / 8;
-                    int bit = 0x80 >> (x & 0x7);
-                    if (sbyte[byte] & bit) {
-                        dbyte[x] = color;
-                    }
-                }
-                sbyte += gDirectText->physicalWidth;
-                dbyte += rowBytes;
-            }
-        }
-        // else (not on screen) just increase the current character
-
-        // for every char clipped or no:
-        // increase our character pixel starting point by width of this character
-        hchar += width;
-
-        // increase our hposition (our position in pixels)
-        origin.h += width;
-    }
-    MoveTo(origin.h, origin.v + gDirectText->ascent);
+    gDirectText->draw(origin, string, color, pix, clip);
 }
 
 }  // namespace antares

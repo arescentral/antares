@@ -27,12 +27,13 @@
 #include "game/globals.hpp"
 
 using sfz::BytesSlice;
-using sfz::ReadSource;
 using sfz::Exception;
+using sfz::ReadSource;
+using sfz::StringSlice;
 using sfz::read;
 using sfz::scoped_ptr;
-using std::min;
 using std::max;
+using std::min;
 
 namespace antares {
 
@@ -63,6 +64,15 @@ void Preferences::set_preferences(Preferences* preferences) {
 
 Preferences::Preferences() {
     reset();
+}
+
+Preferences::Preferences(const Preferences& other) {
+    copy(other);
+}
+
+Preferences& Preferences::operator=(const Preferences& other) {
+    copy(other);
+    return *this;
 }
 
 Preferences::~Preferences() { }
@@ -126,6 +136,8 @@ void Preferences::reset() {
     set_volume(7);
 
     set_screen_size(Size(640, 480));
+
+    _scenario_identifier.assign("com.biggerplanet.ares");
 }
 
 void Preferences::copy(const Preferences& preferences) {
@@ -136,6 +148,8 @@ void Preferences::copy(const Preferences& preferences) {
     set_play_music_in_game(preferences.play_music_in_game());
     set_speech_on(preferences.speech_on());
     set_volume(preferences.volume());
+    set_screen_size(preferences.screen_size());
+    set_scenario_identifier(preferences.scenario_identifier());
 }
 
 uint32_t Preferences::key(size_t index) const {
@@ -162,6 +176,10 @@ Size Preferences::screen_size() const {
     return _screen_size;
 }
 
+StringSlice Preferences::scenario_identifier() const {
+    return _scenario_identifier;
+}
+
 void Preferences::set_key(size_t index, uint32_t key) {
     _key_map[index] = key;
 }
@@ -184,6 +202,10 @@ void Preferences::set_volume(int volume) {
 
 void Preferences::set_screen_size(Size size) {
     _screen_size = size;
+}
+
+void Preferences::set_scenario_identifier(StringSlice id) {
+    _scenario_identifier.assign(id);
 }
 
 PrefsDriver* PrefsDriver::_driver = NULL;

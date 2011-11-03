@@ -17,28 +17,40 @@
 // License along with this program.  If not, see
 // <http://www.gnu.org/licenses/>.
 
-#ifndef ANTARES_DATA_RESOURCE_HPP_
-#define ANTARES_DATA_RESOURCE_HPP_
+#ifndef ANTARES_DATA_SCENARIO_LIST_HPP_
+#define ANTARES_DATA_SCENARIO_LIST_HPP_
 
-#include <stdint.h>
+#include <vector>
 #include <sfz/sfz.hpp>
 
 namespace antares {
 
-class Resource {
-  public:
-    Resource(const sfz::StringSlice& type, const sfz::StringSlice& extension, int id);
-    Resource(const sfz::PrintItem& resource_path);
-    ~Resource();
+struct Version {
+    std::vector<int> components;
+};
+void print_to(sfz::PrintTarget out, const Version& v);
 
-    sfz::BytesSlice data() const;
+class ScenarioList {
+  public:
+    struct Entry {
+        sfz::String identifier;
+        sfz::String title;
+        sfz::String download_url;
+        sfz::String author;
+        sfz::String author_url;
+        Version version;
+    };
+
+    ScenarioList();
+    size_t size() const;
+    const Entry& at(size_t index) const;
 
   private:
-    void init(const sfz::StringSlice& resource_path);
+    std::vector<sfz::linked_ptr<Entry> > _scenarios;
 
-    sfz::scoped_ptr<sfz::MappedFile> _file;
+    DISALLOW_COPY_AND_ASSIGN(ScenarioList);
 };
 
 }  // namespace antares
 
-#endif // ANTARES_DATA_RESOURCE_HPP_
+#endif // ANTARES_DATA_SCENARIO_LIST_HPP_

@@ -21,35 +21,63 @@
 
 #include <stdio.h>
 #include <sfz/sfz.hpp>
+#include "config/preferences.hpp"
 
 using sfz::BytesSlice;
+using sfz::Exception;
 using sfz::MappedFile;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
 
+namespace path = sfz::path;
 namespace utf8 = sfz::utf8;
 
 namespace antares {
 
+namespace {
+
+const char kAres[] = "com.biggerplanet.ares";
+
+}  // namespace
+
 Resource::Resource(const StringSlice& type, const StringSlice& extension, int id) {
-    String path(format(
-                "{0}/Library/Application Support/Antares/Scenarios/com.biggerplanet.ares"
-                "/{1}/{2}.{3}", utf8::decode(getenv("HOME")), type, id, extension));
-    _file.reset(new MappedFile(path));
+    const String resource_path(format("{0}/{1}.{2}", type, id, extension));
+    init(resource_path);
 }
 
 Resource::Resource(const sfz::PrintItem& resource_path) {
-    String path(format(
-                "{0}/Library/Application Support/Antares/Scenarios/com.biggerplanet.ares{1}",
-                utf8::decode(getenv("HOME")), resource_path));
-    _file.reset(new MappedFile(path));
+    const String resource_path_string(resource_path);
+    init(resource_path_string);
 }
 
 Resource::~Resource() { }
 
 BytesSlice Resource::data() const {
     return _file->data();
+}
+
+void Resource::init(const sfz::StringSlice& resource_path) {
+    const StringSlice scenario_id = Preferences::preferences()->scenario_identifier();
+    const String home(utf8::decode(getenv("HOME")));
+    const String base(format("{0}/Library/Application Support/Antares/Scenarios", home));
+    String p;
+
+    if (scenario_id != kAres) {
+        p.assign(format("{0}/{1}/{2}", base, scenario_id, resource_path));
+        if (path::isfile(p)) {
+            _file.reset(new MappedFile(p));
+            return;
+        }
+    }
+
+    p.assign(format("{0}/{1}/{2}", base, kAres, resource_path));
+    if (path::isfile(p)) {
+        _file.reset(new MappedFile(p));
+        return;
+    }
+
+    throw Exception(format("couldn't find resource {0}", quote(resource_path)));
 }
 
 }  // namespace antares

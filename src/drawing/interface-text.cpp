@@ -76,7 +76,7 @@ InterfaceText::InterfaceText(
                 if (i + 1 >= text.size()) {
                     throw Exception(format("not enough input for inline code."));
                 }
-                if (text.at(i + 1) != 'P') {
+                if ((text.at(i + 1) != 'P') && (text.at(i + 1) != 'p')) {
                     throw Exception(format("found bad inline pict code {0}", text.at(i)));
                 }
                 String id_string;

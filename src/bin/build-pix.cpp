@@ -21,6 +21,7 @@
 #include <getopt.h>
 #include <sfz/sfz.hpp>
 
+#include "config/preferences.hpp"
 #include "drawing/build-pix.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
@@ -53,7 +54,7 @@ class PixBuilder {
         scoped_ptr<PixMap> pix(build_pix(id, width));
         if (_output_dir.has() && (pix.get() != NULL)) {
             const String path(format("{0}/{1}.png", *_output_dir, dec(id, 5)));
-            ScopedFd fd(open(path, O_WRONLY | O_CREAT, 0644));
+            ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
             write(fd, *pix);
         }
     }
@@ -83,6 +84,7 @@ int main(int argc, char* const* argv) {
         makedirs(*output_dir, 0755);
     }
 
+    Preferences::set_preferences(new Preferences);
     InitDirectText();
 
     PixBuilder builder(output_dir);
