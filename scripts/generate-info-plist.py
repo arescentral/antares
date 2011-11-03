@@ -9,6 +9,25 @@ PLIST_TEMPLATE = """\
 <dict>
     <key>CFBundleDevelopmentRegion</key>
     <string>English</string>
+    <key>CFBundleDocumentTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeExtensions</key>
+            <array>
+                <string>antaresplugin</string>
+            </array>
+            <key>CFBundleTypeName</key>
+            <string>Antares Plugin</string>
+            <key>CFBundleTypeRole</key>
+            <string>Viewer</string>
+            <key>LSHandlerRank</key>
+            <string>Owner</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>org.arescentral.antares.plugin</string>
+            </array>
+        </dict>
+    </array>
     <key>CFBundleExecutable</key>
     <string>Antares</string>
     <key>CFBundleIconFile</key>

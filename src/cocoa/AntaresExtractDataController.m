@@ -30,12 +30,29 @@ static void set_label(const char* status, void* userdata) {
 
 @implementation AntaresExtractDataController
 
-- (id)initWithTarget:(id)target selector:(SEL)selector {
+- (id)initWithTarget:(id)target selector:(SEL)selector path:(NSString*)path {
     if (!(self = [super init])) {
         return NULL;
     }
     _target = target;
     _selector = selector;
+    _path = path;
+    _scenario = nil;
+    if (![NSBundle loadNibNamed:@"ExtractData" owner:self]) {
+        [self release];
+        return nil;
+    }
+    return self;
+}
+
+- (id)initWithTarget:(id)target selector:(SEL)selector scenario:(NSString*)scenario {
+    if (!(self = [super init])) {
+        return NULL;
+    }
+    _target = target;
+    _selector = selector;
+    _path = nil;
+    _scenario = scenario;
     if (![NSBundle loadNibNamed:@"ExtractData" owner:self]) {
         [self release];
         return nil;
@@ -59,7 +76,6 @@ static void set_label(const char* status, void* userdata) {
 - (void)done {
     [_window close];
     [_target performSelector:_selector withObject:self];
-    [self release];
 }
 
 - (void)doWork {
@@ -70,10 +86,14 @@ static void set_label(const char* status, void* userdata) {
         stringByAppendingPathComponent:@"Antares"];
     NSString* downloads = [antares stringByAppendingPathComponent:@"Downloads"];
     NSString* scenarios = [antares stringByAppendingPathComponent:@"Scenarios"];
-    NSString* ares_scenario = [scenarios stringByAppendingPathComponent:@"com.biggerplanet.ares"];
 
     AntaresDataExtractor* extractor = antares_data_extractor_create(
-            [downloads UTF8String], [ares_scenario UTF8String]);
+            [downloads UTF8String], [scenarios UTF8String]);
+    if (_path) {
+        antares_data_extractor_set_plugin_file(extractor, [_path UTF8String]);
+    } else {
+        antares_data_extractor_set_scenario(extractor, [_scenario UTF8String]);
+    }
     if (!antares_data_extractor_current(extractor)) {
         antares_data_extractor_extract(extractor, set_label, self);
     }

@@ -49,6 +49,18 @@ extern "C" void antares_data_extractor_destroy(AntaresDataExtractor* extractor) 
     delete extractor;
 }
 
+extern "C" void antares_data_extractor_set_scenario(
+        AntaresDataExtractor* extractor, const char* scenario) {
+    const String scenario_string(utf8::decode(scenario));
+    extractor->cxx_obj.set_scenario(scenario_string);
+}
+
+extern "C" void antares_data_extractor_set_plugin_file(
+        AntaresDataExtractor* extractor, const char* path) {
+    const String path_string(utf8::decode(path));
+    extractor->cxx_obj.set_plugin_file(path_string);
+}
+
 extern "C" int antares_data_extractor_current(AntaresDataExtractor* extractor) {
     return extractor->cxx_obj.current();
 }

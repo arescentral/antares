@@ -79,6 +79,16 @@ static NSURL* url(const char* utf8_bytes) {
 
 @implementation AntaresController
 
+- (void)application:(NSApplication*)app openFile:(NSString*)filename {
+    [_window orderOut:self];
+    AntaresExtractDataController* extract = [[[AntaresExtractDataController alloc]
+        initWithTarget:self selector:@selector(installDone:) path:filename] autorelease];
+    if (!extract) {
+        NSLog(@"Failed to create AntaresExtractDataController");
+        exit(1);
+    }
+}
+
 - (void)setResolutionFrom:(NSMenuItem*)sender {
     // Assumes that the sender's representedObject is a display mode
     // dictionary, as set below.  Updates user defaults with the width
@@ -256,12 +266,19 @@ static NSURL* url(const char* utf8_bytes) {
         exit(1);
     }
 
+    NSString* scenario = [[NSUserDefaults standardUserDefaults] stringForKey:kScenario];
     AntaresExtractDataController* extract = [[[AntaresExtractDataController alloc]
-        initWithTarget:self selector:@selector(extractDone:)] autorelease];
+        initWithTarget:self selector:@selector(extractDone:) scenario:scenario] autorelease];
     if (!extract) {
         NSLog(@"Failed to create AntaresExtractDataController");
         exit(1);
     }
+}
+
+- (void)installDone:(id)sender {
+    [self updateScenarioList];
+    [_window center];
+    [_window makeKeyAndOrderFront:self];
 }
 
 - (void)extractDone:(id)sender {

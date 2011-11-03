@@ -25,12 +25,16 @@
 @interface AntaresExtractDataController : NSObject {
     id _target;
     SEL _selector;
+    NSString* _path;
+    NSString* _scenario;
+
     IBOutlet NSWindow* _window;
     IBOutlet NSProgressIndicator* _progress_bar;
     IBOutlet NSTextField* _status_field;
 }
 
-- (id)initWithTarget:(id)target selector:(SEL)selector;
+- (id)initWithTarget:(id)target selector:(SEL)selector path:(NSString*)path;
+- (id)initWithTarget:(id)target selector:(SEL)selector scenario:(NSString*)scenario;
 
 @end
 
