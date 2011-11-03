@@ -275,12 +275,15 @@ void DataExtractor::set_plugin_file(StringSlice path) {
     // extract_scenario() will expect it later.
     String out_path(format("{0}/{1}.antaresplugin", _downloads_dir, found_scenario));
     if (path != out_path) {
+        makedirs(path::dirname(out_path), 0755);
         MappedFile file(path);
         ScopedFd fd(open(out_path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
         write(fd, file.data());
     }
     String scenario_dir(format("{0}/{1}", _output_dir, found_scenario));
-    rmtree(scenario_dir);
+    if (path::exists(scenario_dir)) {
+        rmtree(scenario_dir);
+    }
 
     swap(_scenario, found_scenario);
 }
