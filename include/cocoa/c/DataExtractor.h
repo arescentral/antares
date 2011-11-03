@@ -27,7 +27,7 @@ extern "C" {
 typedef struct AntaresDataExtractor AntaresDataExtractor;
 
 AntaresDataExtractor* antares_data_extractor_create(
-        const char* downloads_dir, const char* output_dir, const char* scenario);
+        const char* downloads_dir, const char* output_dir);
 void antares_data_extractor_destroy(AntaresDataExtractor* extractor);
 int antares_data_extractor_set_scenario(AntaresDataExtractor* extractor, const char* scenario);
 int antares_data_extractor_set_plugin_file(AntaresDataExtractor* extractor, const char* path);
