@@ -151,6 +151,7 @@ static void flags_changed(AntaresEventTranslator* translator, int32_t flags) {
 }
 
 void antares_event_translator_enqueue(AntaresEventTranslator* translator, int64_t until) {
+    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
     NSDate* date = [NSDate dateWithTimeIntervalSince1970:(until * 1e-6)];
     NSEvent* event =
         [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:date inMode:NSDefaultRunLoopMode
@@ -202,4 +203,5 @@ void antares_event_translator_enqueue(AntaresEventTranslator* translator, int64_
             break;
         }
     }
+    [pool drain];
 }
