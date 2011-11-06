@@ -21,6 +21,8 @@
 
 #include "cocoa/c/DataExtractor.h"
 
+static const NSString *kAthenaMayPerformCleanupNotificationName = @"AthenaMayCleanAntaresData";
+
 static void set_label(const char* status, void* userdata) {
     AntaresExtractDataController* controller = userdata;
     NSString* label = [[NSString alloc] initWithUTF8String:status];
@@ -82,6 +84,7 @@ static void set_label(const char* status, void* userdata) {
 
 - (void)done {
     [_window close];
+    [[NSDistributedNotificationCenter defaultCenter] postNotificationName:@"AthenaMayCleanAntaresData" object:_path userInfo:nil deliverImmediately:YES];
     [_target performSelector:_selector withObject:self];
 }
 
