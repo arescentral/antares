@@ -37,7 +37,7 @@ class AntaresTestCase(object):
             antares.communicate()
             assert antares.returncode == 0, "Antares failed"
 
-            diff_command = ["diff", "-ru", self.expected.abspath(), dir]
+            diff_command = ["diff", "-ru", "-x.*", self.expected.abspath(), dir]
             tst.to_log(diff_command)
             diff = subprocess.Popen(diff_command, stdout=log, stderr=log)
             diff.communicate()
