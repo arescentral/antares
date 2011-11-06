@@ -34,9 +34,9 @@ static void set_label(const char* status, void* userdata) {
     if (!(self = [super init])) {
         return NULL;
     }
-    _target = target;
+    _target = [target retain];
     _selector = selector;
-    _path = path;
+    _path = [path retain];
     _scenario = nil;
     if (![NSBundle loadNibNamed:@"ExtractData" owner:self]) {
         [self release];
@@ -49,15 +49,22 @@ static void set_label(const char* status, void* userdata) {
     if (!(self = [super init])) {
         return NULL;
     }
-    _target = target;
+    _target = [target retain];
     _selector = selector;
     _path = nil;
-    _scenario = scenario;
+    _scenario = [scenario retain];
     if (![NSBundle loadNibNamed:@"ExtractData" owner:self]) {
         [self release];
         return nil;
     }
     return self;
+}
+
+- (void)dealloc {
+    [_target release];
+    [_path release];
+    [_scenario release];
+    [super dealloc];
 }
 
 - (void)awakeFromNib {

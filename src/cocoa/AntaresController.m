@@ -178,9 +178,9 @@ static NSURL* url(const char* utf8_bytes) {
     NSString* version = [[sender representedObject] objectForKey:kVersion];
 
     [_scenario_button setTitle:title];
-    _download_url = [[sender representedObject] objectForKey:kDownloadURL];
+    _download_url = [[[sender representedObject] objectForKey:kDownloadURL] retain];
     [_author_button setTitle:author];
-    _author_url = [[sender representedObject] objectForKey:kAuthorURL];
+    _author_url = [[[sender representedObject] objectForKey:kAuthorURL] retain];
     [_version_label setStringValue:version];
 
     [[NSUserDefaults standardUserDefaults] setObject:identifier forKey:kScenario];
@@ -289,6 +289,12 @@ static NSURL* url(const char* utf8_bytes) {
         exit(1);
     }
     [NSApp terminate:self];
+}
+
+- (void)dealloc {
+    [_download_url release];
+    [_author_url release];
+    [super dealloc];
 }
 
 @end
