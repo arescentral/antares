@@ -86,6 +86,12 @@ def build(bld):
         ],
     )
 
+    bld.platform(
+        target="antares/offscreen",
+        platform="darwin",
+        arch="i386 ppc",
+    )
+
     bld.program(
         target="antares/replay",
         source=[
@@ -98,6 +104,12 @@ def build(bld):
             "antares/opengl",
             "antares/libantares",
         ],
+    )
+
+    bld.platform(
+        target="antares/replay",
+        platform="darwin",
+        arch="i386 ppc",
     )
 
     bld.program(
@@ -118,6 +130,12 @@ def build(bld):
         source="src/bin/ls-scenarios.cpp",
         cxxflags=WARNINGS,
         use="antares/libantares",
+    )
+
+    bld.platform(
+        target="antares/ls-scenarios",
+        platform="darwin",
+        arch="i386 ppc",
     )
 
     bld.program(
@@ -142,13 +160,6 @@ def build(bld):
         use=[
             "antares/libantares",
         ],
-    )
-
-    bld.program(
-        target="antares/hash-data",
-        source="src/bin/hash-data.cpp",
-        cxxflags=WARNINGS,
-        use="libsfz/libsfz",
     )
 
     bld.platform(
