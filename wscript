@@ -162,19 +162,6 @@ def build(bld):
         ],
     )
 
-    bld.program(
-        target="antares/hash-data",
-        source="src/bin/hash-data.cpp",
-        cxxflags=WARNINGS,
-        use="libsfz/libsfz",
-    )
-
-    bld.platform(
-        target="antares/hash-data",
-        platform="darwin",
-        arch="x86_64 i386 ppc",
-    )
-
     bld.platform(
         target="antares/extract-data",
         source=[
