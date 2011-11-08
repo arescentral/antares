@@ -58,9 +58,6 @@ const int32_t kScreenHeight = 480;
 void usage(const StringSlice& program_name);
 void main_screen(OffscreenVideoDriver& driver);
 void options(OffscreenVideoDriver& driver);
-void the_stars_have_ears(OffscreenVideoDriver& driver);
-void while_the_iron_is_hot(OffscreenVideoDriver& driver);
-void space_race(OffscreenVideoDriver& driver);
 void mission_briefing(OffscreenVideoDriver& driver, Ledger& ledger);
 void pause(OffscreenVideoDriver& driver);
 
@@ -172,66 +169,6 @@ void options(OffscreenVideoDriver& driver) {
     driver.schedule_key(Keys::Q, 1800, 1860);
     driver.schedule_snapshot(1800);
     driver.schedule_snapshot(1860);
-}
-
-void demo(OffscreenVideoDriver& driver, int demo, int64_t duration_ticks) {
-    driver.set_demo_scenario(demo);
-
-    driver.schedule_event(make_linked_ptr(new MouseMoveEvent(0, Point(320, 240))));
-
-    // Ego Pict fades in and out.
-    driver.schedule_snapshot(50);
-    driver.schedule_snapshot(100);
-    driver.schedule_snapshot(150);
-    driver.schedule_snapshot(180);
-    driver.schedule_snapshot(230);
-
-    // Intermission (black).
-    driver.schedule_snapshot(280);
-
-    // Title Screen fades in and out.
-    driver.schedule_snapshot(330);
-    driver.schedule_snapshot(380);
-    driver.schedule_snapshot(530);
-    driver.schedule_snapshot(680);
-    driver.schedule_snapshot(730);
-
-    // Intermission (black).
-    driver.schedule_snapshot(780);
-
-    // Introduction scrolls by.
-    for (int64_t i = 840; i < 3600; i += 60) {
-        driver.schedule_snapshot(i);
-    }
-
-    // Intro is skipped.  Main Screen fades out after 30 seconds.
-    driver.schedule_key(Keys::Q, 3599, 3600);
-    driver.schedule_snapshot(3598);
-    driver.schedule_snapshot(3599);
-    driver.schedule_snapshot(5400);
-    driver.schedule_snapshot(5430);
-
-    // Demo plays.
-    duration_ticks += 5460;  // Compensate for picts, intro.
-    for (int64_t i = 5460; i < duration_ticks; i += 60) {
-        driver.schedule_snapshot(i);
-    }
-
-    // Quit game.
-    driver.schedule_key(Keys::Q, duration_ticks, duration_ticks + 60);
-    driver.schedule_snapshot(duration_ticks);
-}
-
-void the_stars_have_ears(OffscreenVideoDriver& driver) {
-    demo(driver, 600, 8400);  // 2:20
-}
-
-void while_the_iron_is_hot(OffscreenVideoDriver& driver) {
-    demo(driver, 605, 12000);  // 3:20
-}
-
-void space_race(OffscreenVideoDriver& driver) {
-    demo(driver, 623, 10200);  // 2:50
 }
 
 void mission_briefing(OffscreenVideoDriver& driver, Ledger& ledger) {
