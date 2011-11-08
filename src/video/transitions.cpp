@@ -48,10 +48,9 @@ void Transitions::start_boolean(int32_t in_speed, int32_t out_speed, uint8_t goa
     _step = kStartAnimation;
     _in_speed = in_speed;
     _out_speed = out_speed;
-    const RgbColor goal = GetRGBTranslateColor(GetRetroIndex(goal_color));
-    VideoDriver::driver()->set_transition_to(goal);
+    _color = GetRGBTranslateColor(GetRetroIndex(goal_color));
+    _color.alpha = 127;
     if (!_active) {
-        VideoDriver::driver()->set_transition_fraction(0.5);
         _active = true;
     }
 }
@@ -63,9 +62,14 @@ void Transitions::update_boolean(int32_t time_passed) {
         } else if ((_step + _out_speed * time_passed) < kEndAnimation) {
             _step += _out_speed * time_passed;
         } else {
-            VideoDriver::driver()->set_transition_fraction(0.0);
             _active = false;
         }
+    }
+}
+
+void Transitions::draw() const {
+    if (_active) {
+        VideoDriver::driver()->fill_rect(world, _color);
     }
 }
 

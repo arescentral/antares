@@ -374,6 +374,7 @@ void GamePlay::draw() const {
     draw_site();
     draw_cursor();
     draw_hint_line();
+    globals()->transitions.draw();
 }
 
 bool GamePlay::next_timer(int64_t& time) {
