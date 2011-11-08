@@ -55,7 +55,6 @@ MainScreen::~MainScreen() { }
 
 void MainScreen::become_front() {
     InterfaceScreen::become_front();
-    VideoDriver::driver()->set_game_state(MAIN_SCREEN_INTERFACE);
     if (Preferences::preferences()->play_idle_music() && !SongIsPlaying()) {
         LoadSong(kTitleSongID);
         SetSongVolume(kMaxMusicVolume);

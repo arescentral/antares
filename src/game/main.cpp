@@ -178,14 +178,12 @@ void MainPlay::become_front() {
             }
             globals()->gLastTime = now_usecs();
 
-            VideoDriver::driver()->set_game_state(PLAY_GAME);
             stack()->push(new GamePlay(_replay, _game_result));
         }
         break;
 
       case PLAYING:
         {
-            VideoDriver::driver()->set_game_state(DONE_GAME);
             if (Preferences::preferences()->play_music_in_game()) {
                 StopAndUnloadSong();
             }
@@ -221,14 +219,9 @@ class PauseScreen : public Card {
     }
 
     virtual void become_front() {
-        VideoDriver::driver()->set_game_state(GAME_PAUSED);
         // TODO(sfiera): cancel any active transition.
         PlayVolumeSound(kComputerBeep4, kMaxSoundVolume, kShortPersistence, kMustPlaySound);
         show_hide();
-    }
-
-    virtual void resign_front() {
-        VideoDriver::driver()->set_game_state(PLAY_GAME);
     }
 
     virtual void key_up(const KeyUpEvent& event) {

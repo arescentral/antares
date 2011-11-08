@@ -36,7 +36,6 @@ class OpenGlVideoDriver : public VideoDriver {
   public:
     OpenGlVideoDriver(Size screen_size);
 
-    virtual void set_game_state(GameState state);
     virtual int get_demo_scenario();
 
     virtual Sprite* new_sprite(sfz::PrintItem name, const PixMap& content);

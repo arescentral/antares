@@ -90,11 +90,6 @@ SoundControlScreen::SoundControlScreen(OptionsScreen::State* state, Preferences*
 
 SoundControlScreen::~SoundControlScreen() { }
 
-void SoundControlScreen::become_front() {
-    InterfaceScreen::become_front();
-    VideoDriver::driver()->set_game_state(OPTIONS_INTERFACE);
-}
-
 void SoundControlScreen::adjust_interface() {
     mutable_item(IDLE_MUSIC)->item.checkboxButton.on = _preferences->play_idle_music();
     mutable_item(GAME_MUSIC)->item.checkboxButton.on = _preferences->play_music_in_game();
@@ -236,11 +231,6 @@ KeyControlScreen::KeyControlScreen(OptionsScreen::State* state, Preferences* pre
 }
 
 KeyControlScreen::~KeyControlScreen() { }
-
-void KeyControlScreen::become_front() {
-    InterfaceScreen::become_front();
-    VideoDriver::driver()->set_game_state(KEY_CONTROL_INTERFACE);
-}
 
 void KeyControlScreen::key_down(const KeyDownEvent& event) {
     if (_selected_key >= 0) {

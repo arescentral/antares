@@ -52,7 +52,6 @@ class VideoDriver {
     virtual Point get_mouse() = 0;
     virtual void get_keys(KeyMap* k) = 0;
 
-    virtual void set_game_state(GameState state) = 0;
     virtual int get_demo_scenario() = 0;
     virtual int ticks() = 0;
     virtual int64_t double_click_interval_usecs() = 0;

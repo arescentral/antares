@@ -116,9 +116,6 @@ OpenGlVideoDriver::OpenGlVideoDriver(Size screen_size)
           _transition_color(RgbColor::kBlack),
           _stencil_height(0) { }
 
-void OpenGlVideoDriver::set_game_state(GameState state) {
-}
-
 int OpenGlVideoDriver::get_demo_scenario() {
     return -1;
 }

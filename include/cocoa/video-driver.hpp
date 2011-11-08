@@ -42,7 +42,6 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     virtual Point get_mouse();
     virtual void get_keys(KeyMap* k);
 
-    virtual void set_game_state(GameState state);
     virtual int ticks();
     virtual int64_t double_click_interval_usecs();
 
