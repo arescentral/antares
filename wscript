@@ -42,6 +42,7 @@ def build(bld):
 
     bld.program(
         target="antares/Antares",
+        features="universal32",
         mac_app=True,
         mac_plist="antares/Info.plist",
         mac_resources=[
@@ -64,7 +65,6 @@ def build(bld):
         ],
         cflags=WARNINGS,
         cxxflags=WARNINGS,
-        arch="i386 ppc",
         use=[
             "antares/libantares",
             "antares/system/cocoa",
@@ -74,6 +74,7 @@ def build(bld):
 
     bld.program(
         target="antares/offscreen",
+        features="universal32",
         source=[
             "src/bin/offscreen.cpp",
             "src/video/offscreen-driver.cpp",
@@ -86,14 +87,9 @@ def build(bld):
         ],
     )
 
-    bld.platform(
-        target="antares/offscreen",
-        platform="darwin",
-        arch="i386 ppc",
-    )
-
     bld.program(
         target="antares/replay",
+        features="universal32",
         source=[
             "src/bin/replay.cpp",
             "src/video/offscreen-driver.cpp",
@@ -106,53 +102,33 @@ def build(bld):
         ],
     )
 
-    bld.platform(
-        target="antares/replay",
-        platform="darwin",
-        arch="i386 ppc",
-    )
-
     bld.program(
         target="antares/build-pix",
+        features="universal32",
         source="src/bin/build-pix.cpp",
         cxxflags=WARNINGS,
         use="antares/libantares",
     )
 
-    bld.platform(
-        target="antares/build-pix",
-        platform="darwin",
-        arch="i386 ppc",
-    )
-
     bld.program(
         target="antares/ls-scenarios",
+        features="universal32",
         source="src/bin/ls-scenarios.cpp",
         cxxflags=WARNINGS,
         use="antares/libantares",
     )
 
-    bld.platform(
-        target="antares/ls-scenarios",
-        platform="darwin",
-        arch="i386 ppc",
-    )
-
     bld.program(
         target="antares/object-data",
+        features="universal32",
         source="src/bin/object-data.cpp",
         cxxflags=WARNINGS,
         use="antares/libantares",
     )
 
-    bld.platform(
-        target="antares/object-data",
-        platform="darwin",
-        arch="i386 ppc",
-    )
-
     bld.program(
         target="antares/extract-data",
+        features="universal32",
         source=[
             "src/bin/extract-data.cpp",
         ],
@@ -169,7 +145,6 @@ def build(bld):
             "src/cocoa/http.cpp",
         ],
         platform="darwin",
-        arch="i386 ppc",
         use="antares/system/core-foundation",
     )
 
@@ -189,6 +164,7 @@ def build(bld):
 
     bld.stlib(
         target="antares/libantares-config",
+        features="universal32",
         source=[
             "src/config/keys.cpp",
             "src/config/ledger.cpp",
@@ -200,14 +176,9 @@ def build(bld):
         use="libsfz/libsfz",
     )
 
-    bld.platform(
-        target="antares/libantares-config",
-        platform="darwin",
-        arch="i386 ppc",
-    )
-
     bld.stlib(
         target="antares/libantares-data",
+        features="universal32",
         source=[
             "src/data/extractor.cpp",
             "src/data/interface.cpp",
@@ -232,14 +203,9 @@ def build(bld):
         ],
     )
 
-    bld.platform(
-        target="antares/libantares-data",
-        platform="darwin",
-        arch="i386 ppc",
-    )
-
     bld.stlib(
         target="antares/libantares-drawing",
+        features="universal32",
         source=[
             "src/drawing/briefing.cpp",
             "src/drawing/build-pix.cpp",
@@ -264,14 +230,9 @@ def build(bld):
         ],
     )
 
-    bld.platform(
-        target="antares/libantares-drawing",
-        platform="darwin",
-        arch="i386 ppc",
-    )
-
     bld.stlib(
         target="antares/libantares-game",
+        features="universal32",
         source=[
             "src/game/admiral.cpp",
             "src/game/beam.cpp",
@@ -298,14 +259,9 @@ def build(bld):
         use="libsfz/libsfz",
     )
 
-    bld.platform(
-        target="antares/libantares-game",
-        platform="darwin",
-        arch="i386 ppc",
-    )
-
     bld.stlib(
         target="antares/libantares-math",
+        features="universal32",
         source=[
             "src/math/fixed.cpp",
             "src/math/geometry.cpp",
@@ -319,14 +275,9 @@ def build(bld):
         use="libsfz/libsfz",
     )
 
-    bld.platform(
-        target="antares/libantares-math",
-        platform="darwin",
-        arch="i386 ppc",
-    )
-
     bld.stlib(
         target="antares/libantares-sound",
+        features="universal32",
         source=[
             "src/sound/driver.cpp",
             "src/sound/fx.cpp",
@@ -342,7 +293,6 @@ def build(bld):
         target="antares/libantares-sound",
         platform="darwin",
         source="src/sound/openal-driver.cpp",
-        arch="i386 ppc",
         use=[
             "antares/system/audio-toolbox",
             "antares/system/openal",
@@ -351,6 +301,7 @@ def build(bld):
 
     bld.stlib(
         target="antares/libantares-ui",
+        features="universal32",
         source=[
             "src/ui/card.cpp",
             "src/ui/event.cpp",
@@ -375,14 +326,9 @@ def build(bld):
         use="libsfz/libsfz",
     )
 
-    bld.platform(
-        target="antares/libantares-ui",
-        platform="darwin",
-        arch="i386 ppc",
-    )
-
     bld.stlib(
         target="antares/libantares-video",
+        features="universal32",
         source=[
             "src/video/driver.cpp",
             "src/video/transitions.cpp",
@@ -403,7 +349,6 @@ def build(bld):
             "src/cocoa/core-opengl.cpp",
             "src/video/opengl-driver.cpp",
         ],
-        arch="i386 ppc",
         use="antares/system/opengl",
     )
 
