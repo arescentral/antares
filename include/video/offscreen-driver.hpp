@@ -41,9 +41,6 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
     virtual Point get_mouse() { return _event_tracker.mouse(); }
     virtual void get_keys(KeyMap* k) { k->copy(_event_tracker.keys()); }
 
-    void set_demo_scenario(int demo);
-    virtual int get_demo_scenario();
-
     virtual int ticks() { return _ticks; }
     virtual int64_t double_click_interval_usecs() { return 0.5; }
 
@@ -61,7 +58,6 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
     void advance_tick_count(MainLoop* loop, const SnapshotBuffer& buffer, int64_t ticks);
     bool have_snapshots_before(int64_t ticks) const;
 
-    int _demo;
     const sfz::Optional<sfz::String> _output_dir;
     int64_t _ticks;
 

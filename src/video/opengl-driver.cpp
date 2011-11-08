@@ -116,10 +116,6 @@ OpenGlVideoDriver::OpenGlVideoDriver(Size screen_size)
           _transition_color(RgbColor::kBlack),
           _stencil_height(0) { }
 
-int OpenGlVideoDriver::get_demo_scenario() {
-    return -1;
-}
-
 Sprite* OpenGlVideoDriver::new_sprite(PrintItem name, const PixMap& content) {
     return new OpenGlSprite(name, content);
 }

@@ -206,8 +206,6 @@ void mission_briefing(OffscreenVideoDriver& driver, Ledger& ledger) {
 }
 
 void pause(OffscreenVideoDriver& driver) {
-    driver.set_demo_scenario(623);
-
     driver.schedule_event(make_linked_ptr(new MouseMoveEvent(0, Point(320, 240))));
 
     // Skip the intro.  Start the first tutorial and skip the prologue.

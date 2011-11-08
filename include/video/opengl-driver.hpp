@@ -36,8 +36,6 @@ class OpenGlVideoDriver : public VideoDriver {
   public:
     OpenGlVideoDriver(Size screen_size);
 
-    virtual int get_demo_scenario();
-
     virtual Sprite* new_sprite(sfz::PrintItem name, const PixMap& content);
     virtual void fill_rect(const Rect& rect, const RgbColor& color);
     virtual void draw_point(const Point& at, const RgbColor& color);

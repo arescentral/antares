@@ -93,18 +93,9 @@ void write_to(const WriteTarget& out, const OffscreenVideoDriver::SnapshotBuffer
 OffscreenVideoDriver::OffscreenVideoDriver(
         Size screen_size, const Optional<String>& output_dir):
         OpenGlVideoDriver(screen_size),
-        _demo(0),
         _output_dir(output_dir),
         _ticks(0),
         _event_tracker(true) { }
-
-void OffscreenVideoDriver::set_demo_scenario(int demo) {
-    _demo = demo;
-}
-
-int OffscreenVideoDriver::get_demo_scenario() {
-    return _demo;
-}
 
 void OffscreenVideoDriver::loop(Card* initial) {
     CGLPixelFormatAttribute attrs[] = {
