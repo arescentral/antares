@@ -554,8 +554,6 @@ void GamePlay::fire_timer() {
     UpdateRadar(unitsDone);
     globals()->transitions.update_boolean(unitsDone);
 
-    VideoDriver::driver()->main_loop_iteration_complete(globals()->gGameTime);
-
     if (globals()->gGameOver > 0) {
         thisTime = now_usecs();
         thisTime -= globals()->gLastTime;

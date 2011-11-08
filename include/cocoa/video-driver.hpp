@@ -43,7 +43,6 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     virtual void get_keys(KeyMap* k);
 
     virtual void set_game_state(GameState state);
-    virtual void main_loop_iteration_complete(uint32_t game_time);
     virtual int ticks();
     virtual int64_t double_click_interval_usecs();
 

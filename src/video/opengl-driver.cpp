@@ -123,8 +123,6 @@ int OpenGlVideoDriver::get_demo_scenario() {
     return -1;
 }
 
-void OpenGlVideoDriver::main_loop_iteration_complete(uint32_t) { }
-
 Sprite* OpenGlVideoDriver::new_sprite(PrintItem name, const PixMap& content) {
     return new OpenGlSprite(name, content);
 }

@@ -38,7 +38,6 @@ class OpenGlVideoDriver : public VideoDriver {
 
     virtual void set_game_state(GameState state);
     virtual int get_demo_scenario();
-    virtual void main_loop_iteration_complete(uint32_t game_time);
 
     virtual Sprite* new_sprite(sfz::PrintItem name, const PixMap& content);
     virtual void fill_rect(const Rect& rect, const RgbColor& color);

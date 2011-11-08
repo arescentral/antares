@@ -45,7 +45,6 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
     virtual int get_demo_scenario();
 
     virtual void set_game_state(GameState state) { }
-    virtual void main_loop_iteration_complete(uint32_t game_time) { }
     virtual int ticks() { return _ticks; }
     virtual int64_t double_click_interval_usecs() { return 0.5; }
 
