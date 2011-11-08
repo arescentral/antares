@@ -59,8 +59,6 @@ class VideoDriver {
     virtual void fill_rect(const Rect& rect, const RgbColor& color) = 0;
     virtual void draw_point(const Point& at, const RgbColor& color) = 0;
     virtual void draw_line(const Point& from, const Point& to, const RgbColor& color) = 0;
-    virtual void set_transition_fraction(double fraction) = 0;
-    virtual void set_transition_to(const RgbColor& color) = 0;
 
     virtual void start_stencil() = 0;
     virtual void set_stencil_threshold(uint8_t alpha) = 0;

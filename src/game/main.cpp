@@ -553,7 +553,6 @@ void GamePlay::fire_timer() {
         thisTime -= globals()->gLastTime;
         newGameTime = thisTime / 1000000; // divide by a million to get seconds
         _seconds = newGameTime;
-        VideoDriver::driver()->set_transition_fraction(0.0);
 
         if (*_game_result == NO_GAME) {
             if (globals()->gScenarioWinner.player == globals()->gPlayerAdmiralNumber) {
