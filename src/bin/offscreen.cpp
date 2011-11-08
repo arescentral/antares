@@ -210,29 +210,43 @@ void pause(OffscreenVideoDriver& driver) {
 
     driver.schedule_event(make_linked_ptr(new MouseMoveEvent(0, Point(320, 240))));
 
-    // Intro is skipped.  Main Screen fades out after 30 seconds.
+    // Skip the intro.  Start the first tutorial and skip the prologue.
     driver.schedule_key(Keys::Q, 1798, 1799);
-    driver.schedule_snapshot(1799);
-    driver.schedule_snapshot(3599);
-    driver.schedule_snapshot(3629);
+    driver.schedule_key(Keys::S, 1858, 1859);
+    driver.schedule_key(Keys::RETURN, 1917, 1918);
+    driver.schedule_snapshot(1917);
+    driver.schedule_snapshot(1947);
+    driver.schedule_snapshot(1977);
+    driver.schedule_key(Keys::RETURN, 1978, 1979);
 
-    driver.schedule_key(Keys::CAPS_LOCK, 3660, 3780);
-    driver.schedule_snapshot(3660);
-    driver.schedule_snapshot(3680);
-    driver.schedule_snapshot(3700);
-    driver.schedule_snapshot(3720);
-    driver.schedule_snapshot(3740);
-    driver.schedule_snapshot(3760);
-    driver.schedule_snapshot(3780);
+    driver.schedule_snapshot(1980);
+    driver.schedule_snapshot(2000);
 
-    driver.schedule_key(Keys::Q, 3840, 3900);
-    driver.schedule_snapshot(3840);
-    driver.schedule_snapshot(3900);
+    driver.schedule_key(Keys::CAPS_LOCK, 2020, 2140);
+    driver.schedule_snapshot(2020);
+    driver.schedule_snapshot(2040);
+    driver.schedule_snapshot(2060);
+    driver.schedule_snapshot(2080);
+    driver.schedule_snapshot(2100);
+    driver.schedule_snapshot(2120);
+    driver.schedule_snapshot(2140);
+
+    driver.schedule_snapshot(2160);
+    driver.schedule_snapshot(2180);
+
+    // Exit play.
+    driver.schedule_key(Keys::ESCAPE, 2200, 2260);
+    driver.schedule_snapshot(2200);
+    driver.schedule_snapshot(2260);
+
+    driver.schedule_key(Keys::Q, 2320, 2380);
+    driver.schedule_snapshot(2320);
+    driver.schedule_snapshot(2380);
 
     // Quit game.
-    driver.schedule_key(Keys::Q, 3960, 4020);
-    driver.schedule_snapshot(3960);
-    driver.schedule_snapshot(4020);
+    driver.schedule_key(Keys::Q, 2440, 2500);
+    driver.schedule_snapshot(2440);
+    driver.schedule_snapshot(2500);
 }
 
 }  // namespace
