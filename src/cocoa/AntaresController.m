@@ -77,8 +77,14 @@ static NSURL* url(const char* utf8_bytes) {
     return [NSURL URLWithString:str(utf8_bytes)];
 }
 
-@implementation AntaresController
+@interface AntaresController (Private)
+- (NSURL*)authorURL;
+- (void)setAuthorURL:(NSURL*)authorURL;
+- (NSURL*)downloadURL;
+- (void)setDownloadURL:(NSURL*)downloadURL;
+@end
 
+@implementation AntaresController
 - (void)application:(NSApplication*)app openFile:(NSString*)filename {
     [_window orderOut:self];
     AntaresExtractDataController* extract = [[[AntaresExtractDataController alloc]
@@ -178,9 +184,9 @@ static NSURL* url(const char* utf8_bytes) {
     NSString* version = [[sender representedObject] objectForKey:kVersion];
 
     [_scenario_button setTitle:title];
-    _download_url = [[[sender representedObject] objectForKey:kDownloadURL] retain];
+    [self setDownloadURL:[[sender representedObject] objectForKey:kDownloadURL]];
     [_author_button setTitle:author];
-    _author_url = [[[sender representedObject] objectForKey:kAuthorURL] retain];
+    [self setAuthorURL:[[sender representedObject] objectForKey:kAuthorURL]];
     [_version_label setStringValue:version];
 
     [[NSUserDefaults standardUserDefaults] setObject:identifier forKey:kScenario];
@@ -297,4 +303,31 @@ static NSURL* url(const char* utf8_bytes) {
     [super dealloc];
 }
 
+- (NSURL*)authorURL {
+    @synchronized (self) {
+        return [[_author_url retain] autorelease];
+    }
+}
+
+- (void)setAuthorURL:(NSURL*)authorURL {
+    @synchronized (self) {
+        [authorURL retain];
+        [_author_url release];
+        _author_url = authorURL;
+    }
+}
+
+- (NSURL*)downloadURL {
+    @synchronized (self) {
+        return [[_download_url retain] autorelease];
+    }
+}
+
+- (void)setDownloadURL:(NSURL*)downloadURL {
+    @synchronized (self) {
+        [downloadURL retain];
+        [_download_url release];
+        _download_url = downloadURL;
+    }
+}
 @end
