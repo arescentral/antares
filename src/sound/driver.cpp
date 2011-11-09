@@ -48,12 +48,19 @@ SoundDriver* sound_driver = NULL;
 
 }  // namespace
 
-SoundDriver* SoundDriver::driver() {
-    return sound_driver;
+SoundDriver::SoundDriver() {
+    if (antares::sound_driver) {
+        throw Exception("SoundDriver is a singleton");
+    }
+    antares::sound_driver = this;
 }
 
-void SoundDriver::set_driver(SoundDriver* driver) {
-    sound_driver = driver;
+SoundDriver::~SoundDriver() {
+    antares::sound_driver = NULL;
+}
+
+SoundDriver* SoundDriver::driver() {
+    return sound_driver;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

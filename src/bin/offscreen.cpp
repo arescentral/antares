@@ -102,7 +102,6 @@ void main(int argc, char* const* argv) {
         print(io::err, format("no such script {0}\n", quote(script)));
         exit(1);
     }
-    VideoDriver::set_driver(&video);
 
     scoped_ptr<SoundDriver> sound;
     if (output_dir.has()) {
@@ -111,7 +110,6 @@ void main(int argc, char* const* argv) {
     } else {
         sound.reset(new NullSoundDriver);
     }
-    SoundDriver::set_driver(sound.get());
     Ledger::set_ledger(ledger.release());
 
     video.loop(AresInit());

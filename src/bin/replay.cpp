@@ -198,7 +198,6 @@ void main(int argc, char** argv) {
     for (int64_t i = 1; i < 72000; i += interval) {
         video.schedule_snapshot(i);
     }
-    VideoDriver::set_driver(&video);
 
     scoped_ptr<SoundDriver> sound;
     if (output_dir.has()) {
@@ -207,7 +206,6 @@ void main(int argc, char** argv) {
     } else {
         sound.reset(new NullSoundDriver);
     }
-    SoundDriver::set_driver(sound.get());
     Ledger::set_ledger(new NullLedger);
 
     MappedFile replay_file(replay_path);

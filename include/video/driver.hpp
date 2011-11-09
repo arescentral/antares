@@ -47,7 +47,8 @@ enum GameState {
 
 class VideoDriver {
   public:
-    virtual ~VideoDriver() { }
+    VideoDriver();
+    virtual ~VideoDriver();
     virtual bool button() = 0;
     virtual Point get_mouse() = 0;
     virtual void get_keys(KeyMap* k) = 0;
@@ -66,7 +67,6 @@ class VideoDriver {
     virtual void end_stencil() = 0;
 
     static VideoDriver* driver();
-    static void set_driver(VideoDriver* mode);
 };
 
 class Stencil {
