@@ -45,7 +45,7 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     virtual int ticks();
     virtual int64_t double_click_interval_usecs();
 
-    virtual void loop(Card* initial);
+    void loop(Card* initial);
 
   private:
     bool wait_next_event(int64_t until, sfz::scoped_ptr<Event>& event);

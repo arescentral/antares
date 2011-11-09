@@ -65,9 +65,6 @@ class VideoDriver {
     virtual void apply_stencil() = 0;
     virtual void end_stencil() = 0;
 
-    // Event loop interface.  Should eventually be its own class.
-    virtual void loop(Card* initial) = 0;
-
     static VideoDriver* driver();
     static void set_driver(VideoDriver* mode);
 };

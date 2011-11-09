@@ -44,7 +44,7 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
     virtual int ticks() { return _ticks; }
     virtual int64_t double_click_interval_usecs() { return 0.5; }
 
-    virtual void loop(Card* initial);
+    void loop(Card* initial);
 
     void schedule_snapshot(int64_t at);
     void schedule_event(sfz::linked_ptr<Event> event);
