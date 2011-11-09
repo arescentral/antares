@@ -64,12 +64,13 @@ struct AntaresDrivers {
     Prefs prefs;
 
     CocoaVideoDriver video;
+    OpenAlSoundDriver sound;
 
     AntaresDrivers(StringSlice home):
             prefs(home),
             video(Preferences::preferences()->screen_size()) {
         VideoDriver::set_driver(&video);
-        SoundDriver::set_driver(new OpenAlSoundDriver);
+        SoundDriver::set_driver(&sound);
         const String ledger_directory(format("{0}/Library/Application Support/Antares", home));
         Ledger::set_ledger(new DirectoryLedger(ledger_directory));
     }

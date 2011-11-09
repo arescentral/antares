@@ -200,12 +200,14 @@ void main(int argc, char** argv) {
     }
     VideoDriver::set_driver(&video);
 
+    scoped_ptr<SoundDriver> sound;
     if (output_dir.has()) {
         String out(format("{0}/sound.log", *output_dir));
-        SoundDriver::set_driver(new LogSoundDriver(out));
+        sound.reset(new LogSoundDriver(out));
     } else {
-        SoundDriver::set_driver(new NullSoundDriver);
+        sound.reset(new NullSoundDriver);
     }
+    SoundDriver::set_driver(sound.get());
     Ledger::set_ledger(new NullLedger);
 
     MappedFile replay_file(replay_path);

@@ -44,19 +44,16 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // SoundDriver
 
-scoped_ptr<SoundDriver> sound_driver;
+SoundDriver* sound_driver = NULL;
 
 }  // namespace
 
 SoundDriver* SoundDriver::driver() {
-    return sound_driver.get();
+    return sound_driver;
 }
 
 void SoundDriver::set_driver(SoundDriver* driver) {
-    if (!driver) {
-        throw Exception("tried to set NULL SoundDriver");
-    }
-    sound_driver.reset(driver);
+    sound_driver = driver;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
