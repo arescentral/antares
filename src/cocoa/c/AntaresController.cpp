@@ -54,20 +54,11 @@ using antares::world;
 namespace utf8 = sfz::utf8;
 
 struct AntaresDrivers {
-    struct Prefs {
-        Prefs(StringSlice home) {
-            Preferences::set_preferences(new Preferences);
-            PrefsDriver::set_driver(new CoreFoundationPrefsDriver);
-            PrefsDriver::driver()->load(Preferences::preferences());
-        }
-    };
-    Prefs prefs;
-
+    CoreFoundationPrefsDriver prefs;
     CocoaVideoDriver video;
     OpenAlSoundDriver sound;
 
     AntaresDrivers(StringSlice home):
-            prefs(home),
             video(Preferences::preferences()->screen_size()) {
         VideoDriver::set_driver(&video);
         SoundDriver::set_driver(&sound);

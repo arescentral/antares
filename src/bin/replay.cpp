@@ -186,10 +186,10 @@ void main(int argc, char** argv) {
         makedirs(*output_dir, 0755);
     }
 
-    Preferences::set_preferences(new Preferences);
-    Preferences::preferences()->set_screen_size(Size(width, height));
-    Preferences::preferences()->set_play_music_in_game(true);
-    PrefsDriver::set_driver(new NullPrefsDriver);
+    Preferences preferences;
+    preferences.set_screen_size(Size(width, height));
+    preferences.set_play_music_in_game(true);
+    NullPrefsDriver prefs(preferences);
 
     OffscreenVideoDriver video(
             Preferences::preferences()->screen_size(), output_dir);

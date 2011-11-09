@@ -44,22 +44,18 @@ T clamp(T value, T lower, T upper) {
     return min(upper, max(lower, value));
 }
 
+Preferences* preferences = NULL;
+
+PrefsDriver* prefs_driver = NULL;
+
 }  // namespace
 
-scoped_ptr<Preferences> Preferences::_preferences;
-
 Preferences* Preferences::preferences() {
-    if (_preferences.get() == NULL) {
-        throw Exception("Called Preferences::preferences() before Preferences::set_preferences()");
+    if (antares::preferences == NULL) {
+        antares::preferences = new Preferences;
+        PrefsDriver::driver()->load(antares::preferences);
     }
-    return _preferences.get();
-}
-
-void Preferences::set_preferences(Preferences* preferences) {
-    if (preferences == NULL) {
-        throw Exception("Called Preferences::set_preferences(NULL)");
-    }
-    _preferences.reset(preferences);
+    return antares::preferences;
 }
 
 Preferences::Preferences() {
@@ -208,17 +204,25 @@ void Preferences::set_scenario_identifier(StringSlice id) {
     _scenario_identifier.assign(id);
 }
 
-PrefsDriver* PrefsDriver::_driver = NULL;
+PrefsDriver::PrefsDriver() {
+    if (antares::prefs_driver) {
+        throw Exception("PrefsDriver is a singleton");
+    }
+    antares::prefs_driver = this;
+}
 
-PrefsDriver::~PrefsDriver() { }
+PrefsDriver::~PrefsDriver() {
+    antares::prefs_driver = NULL;
+}
 
 PrefsDriver* PrefsDriver::driver() {
-    return _driver;
+    return prefs_driver;
 }
 
-void PrefsDriver::set_driver(PrefsDriver* driver) {
-    _driver = driver;
-}
+NullPrefsDriver::NullPrefsDriver() { }
+
+NullPrefsDriver::NullPrefsDriver(Preferences defaults):
+        _saved(defaults) { }
 
 void NullPrefsDriver::load(Preferences* preferences) {
     *preferences = _saved;

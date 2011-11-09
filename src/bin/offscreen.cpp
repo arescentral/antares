@@ -86,8 +86,7 @@ void main(int argc, char* const* argv) {
         makedirs(*output_dir, 0755);
     }
 
-    Preferences::set_preferences(new Preferences);
-    PrefsDriver::set_driver(new NullPrefsDriver);
+    NullPrefsDriver prefs;
     OffscreenVideoDriver video(
             Preferences::preferences()->screen_size(), output_dir);
     scoped_ptr<Ledger> ledger(new NullLedger);
