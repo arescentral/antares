@@ -206,7 +206,7 @@ void main(int argc, char** argv) {
     } else {
         sound.reset(new NullSoundDriver);
     }
-    Ledger::set_ledger(new NullLedger);
+    NullLedger ledger;
 
     MappedFile replay_file(replay_path);
     video.loop(new ReplayMaster(replay_file.data()));

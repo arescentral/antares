@@ -89,13 +89,13 @@ void main(int argc, char* const* argv) {
     NullPrefsDriver prefs;
     OffscreenVideoDriver video(
             Preferences::preferences()->screen_size(), output_dir);
-    scoped_ptr<Ledger> ledger(new NullLedger);
+    NullLedger ledger;
     if (script == "main-screen") {
         main_screen(video);
     } else if (script == "options") {
         options(video);
     } else if (script == "mission-briefing") {
-        mission_briefing(video, *ledger);
+        mission_briefing(video, ledger);
     } else if (script == "pause") {
         pause(video);
     } else {
@@ -110,7 +110,6 @@ void main(int argc, char* const* argv) {
     } else {
         sound.reset(new NullSoundDriver);
     }
-    Ledger::set_ledger(ledger.release());
 
     video.loop(AresInit());
 }

@@ -57,12 +57,11 @@ struct AntaresDrivers {
     CoreFoundationPrefsDriver prefs;
     CocoaVideoDriver video;
     OpenAlSoundDriver sound;
+    DirectoryLedger ledger;
 
     AntaresDrivers(StringSlice home):
-            video(Preferences::preferences()->screen_size()) {
-        const String ledger_directory(format("{0}/Library/Application Support/Antares", home));
-        Ledger::set_ledger(new DirectoryLedger(ledger_directory));
-    }
+            video(Preferences::preferences()->screen_size()),
+            ledger(format("{0}/Library/Application Support/Antares", home)) { }
 };
 
 namespace antares {
