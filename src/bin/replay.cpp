@@ -191,14 +191,14 @@ void main(int argc, char** argv) {
     Preferences::preferences()->set_play_music_in_game(true);
     PrefsDriver::set_driver(new NullPrefsDriver);
 
-    scoped_ptr<OffscreenVideoDriver> video(new OffscreenVideoDriver(
-                Preferences::preferences()->screen_size(), output_dir));
-    video->schedule_event(make_linked_ptr(new MouseMoveEvent(0, Point(320, 240))));
+    OffscreenVideoDriver video(
+            Preferences::preferences()->screen_size(), output_dir);
+    video.schedule_event(make_linked_ptr(new MouseMoveEvent(0, Point(320, 240))));
     // TODO(sfiera): add recurring snapshots to OffscreenVideoDriver.
     for (int64_t i = 1; i < 72000; i += interval) {
-        video->schedule_snapshot(i);
+        video.schedule_snapshot(i);
     }
-    VideoDriver::set_driver(video.release());
+    VideoDriver::set_driver(&video);
 
     if (output_dir.has()) {
         String out(format("{0}/sound.log", *output_dir));
@@ -209,7 +209,7 @@ void main(int argc, char** argv) {
     Ledger::set_ledger(new NullLedger);
 
     MappedFile replay_file(replay_path);
-    VideoDriver::driver()->loop(new ReplayMaster(replay_file.data()));
+    video.loop(new ReplayMaster(replay_file.data()));
 }
 
 }  // namespace antares

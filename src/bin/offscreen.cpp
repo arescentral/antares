@@ -88,22 +88,22 @@ void main(int argc, char* const* argv) {
 
     Preferences::set_preferences(new Preferences);
     PrefsDriver::set_driver(new NullPrefsDriver);
-    scoped_ptr<OffscreenVideoDriver> video(new OffscreenVideoDriver(
-                Preferences::preferences()->screen_size(), output_dir));
+    OffscreenVideoDriver video(
+            Preferences::preferences()->screen_size(), output_dir);
     scoped_ptr<Ledger> ledger(new NullLedger);
     if (script == "main-screen") {
-        main_screen(*video);
+        main_screen(video);
     } else if (script == "options") {
-        options(*video);
+        options(video);
     } else if (script == "mission-briefing") {
-        mission_briefing(*video, *ledger);
+        mission_briefing(video, *ledger);
     } else if (script == "pause") {
-        pause(*video);
+        pause(video);
     } else {
         print(io::err, format("no such script {0}\n", quote(script)));
         exit(1);
     }
-    VideoDriver::set_driver(video.release());
+    VideoDriver::set_driver(&video);
 
     if (output_dir.has()) {
         String out(format("{0}/sound.log", *output_dir));
@@ -113,7 +113,7 @@ void main(int argc, char* const* argv) {
     }
     Ledger::set_ledger(ledger.release());
 
-    VideoDriver::driver()->loop(AresInit());
+    video.loop(AresInit());
 }
 
 void usage(const StringSlice& program_name) {
