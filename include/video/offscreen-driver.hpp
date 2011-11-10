@@ -52,10 +52,9 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
     void schedule_mouse(int button, const Point& where, int64_t down, int64_t up);
 
   private:
-    class SnapshotBuffer;
-    friend void write_to(const sfz::WriteTarget& out, const SnapshotBuffer& buffer);
+    class MainLoop;
 
-    void advance_tick_count(MainLoop* loop, const SnapshotBuffer& buffer, int64_t ticks);
+    void advance_tick_count(MainLoop* loop, int64_t ticks);
     bool have_snapshots_before(int64_t ticks) const;
 
     const sfz::Optional<sfz::String> _output_dir;

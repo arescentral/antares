@@ -40,6 +40,7 @@ using sfz::Exception;
 using sfz::Optional;
 using sfz::ScopedFd;
 using sfz::String;
+using sfz::StringSlice;
 using sfz::WriteTarget;
 using sfz::dec;
 using sfz::format;
@@ -53,7 +54,9 @@ namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-class OffscreenVideoDriver::SnapshotBuffer {
+namespace {
+
+class SnapshotBuffer {
   public:
     SnapshotBuffer(Size screen_size, int32_t bytes_per_pixel):
             _screen_size(screen_size),
@@ -86,9 +89,57 @@ class OffscreenVideoDriver::SnapshotBuffer {
     scoped_array<uint8_t> _data;
 };
 
-void write_to(const WriteTarget& out, const OffscreenVideoDriver::SnapshotBuffer& buffer) {
+void write_to(const WriteTarget& out, const SnapshotBuffer& buffer) {
     buffer.write_to(out);
 }
+
+static const CGLPixelFormatAttribute kAttrs[] = {
+    kCGLPFAColorSize, static_cast<CGLPixelFormatAttribute>(24),
+    kCGLPFAStencilSize, static_cast<CGLPixelFormatAttribute>(8),
+    // kCGLPFAAccelerated,
+    kCGLPFAOffScreen,
+    kCGLPFARemotePBuffer,
+    static_cast<CGLPixelFormatAttribute>(0),
+};
+
+}  // namespace
+
+class OffscreenVideoDriver::MainLoop {
+  public:
+    MainLoop(const OffscreenVideoDriver& driver, Card* initial):
+            _pix(kAttrs),
+            _context(_pix.c_obj(), NULL),
+            _buffer(Preferences::preferences()->screen_size(), 4),
+            _setup(_context, _buffer),
+            _loop(driver, initial) {
+    }
+
+    void snapshot(StringSlice output_dir, int64_t ticks) {
+        String dir(format("{0}/screens", output_dir));
+        makedirs(dir, 0755);
+        String path(format("{0}/{1}.png", dir, dec(ticks, 6)));
+        ScopedFd file(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
+        write(file, _buffer);
+    }
+
+    bool done() { return _loop.done(); }
+    void draw() { _loop.draw(); }
+    Card* top() const { return _loop.top(); }
+
+  private:
+    cgl::PixelFormat _pix;
+    cgl::Context _context;
+    SnapshotBuffer _buffer;
+    struct Setup {
+        Setup(cgl::Context& context, SnapshotBuffer& buffer) {
+            cgl::check(CGLSetCurrentContext(context.c_obj()));
+            cgl::check(CGLSetOffScreen(context.c_obj(), buffer.width(), buffer.height(),
+                        buffer.row_bytes(), buffer.mutable_data()));
+        }
+    };
+    Setup _setup;
+    OpenGlVideoDriver::MainLoop _loop;
+};
 
 OffscreenVideoDriver::OffscreenVideoDriver(
         Size screen_size, const Optional<String>& output_dir):
@@ -98,23 +149,6 @@ OffscreenVideoDriver::OffscreenVideoDriver(
         _event_tracker(true) { }
 
 void OffscreenVideoDriver::loop(Card* initial) {
-    CGLPixelFormatAttribute attrs[] = {
-        kCGLPFAColorSize, static_cast<CGLPixelFormatAttribute>(24),
-        kCGLPFAStencilSize, static_cast<CGLPixelFormatAttribute>(8),
-        // kCGLPFAAccelerated,
-        kCGLPFAOffScreen,
-        kCGLPFARemotePBuffer,
-        static_cast<CGLPixelFormatAttribute>(0),
-    };
-
-    cgl::PixelFormat pix(attrs);
-    cgl::Context context(pix.c_obj(), NULL);
-    cgl::check(CGLSetCurrentContext(context.c_obj()));
-
-    SnapshotBuffer buffer(Preferences::preferences()->screen_size(), 4);
-    cgl::check(CGLSetOffScreen(context.c_obj(), buffer.width(), buffer.height(),
-                buffer.row_bytes(), buffer.mutable_data()));
-
     MainLoop loop(*this, initial);
     while (!loop.done()) {
         int64_t at_usecs;
@@ -124,14 +158,14 @@ void OffscreenVideoDriver::loop(Card* initial) {
             linked_ptr<Event> event = _event_heap.front();
             pop_heap(_event_heap.begin(), _event_heap.end(), is_later);
             _event_heap.pop_back();
-            advance_tick_count(&loop, buffer, event->at());
+            advance_tick_count(&loop, event->at());
             event->send(&_event_tracker);
             event->send(loop.top());
         } else {
             if (!has_timer) {
                 throw Exception("Event heap empty and timer not set to fire.");
             }
-            advance_tick_count(&loop, buffer, max(_ticks + 1, at_ticks));
+            advance_tick_count(&loop, max(_ticks + 1, at_ticks));
             loop.top()->fire_timer();
         }
     }
@@ -158,18 +192,12 @@ void OffscreenVideoDriver::schedule_mouse(
     schedule_event(make_linked_ptr(new MouseUpEvent(up, button, where)));
 }
 
-void OffscreenVideoDriver::advance_tick_count(
-        MainLoop* loop, const SnapshotBuffer& buffer, int64_t ticks) {
+void OffscreenVideoDriver::advance_tick_count(MainLoop* loop, int64_t ticks) {
     if (_output_dir.has() && have_snapshots_before(ticks)) {
         loop->draw();
         while (have_snapshots_before(ticks)) {
             _ticks = _snapshot_times.front();
-            String dir(format("{0}/screens", *_output_dir));
-            makedirs(dir, 0755);
-            String path(format("{0}/{1}.png", dir, dec(_ticks, 6)));
-            ScopedFd file(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-            write(file, buffer);
-
+            loop->snapshot(*_output_dir, _ticks);
             pop_heap(_snapshot_times.begin(), _snapshot_times.end(), greater<int64_t>());
             _snapshot_times.pop_back();
         }
