@@ -42,7 +42,7 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
     virtual void get_keys(KeyMap* k) { k->copy(_event_tracker.keys()); }
 
     virtual int ticks() { return _ticks; }
-    virtual int64_t double_click_interval_usecs() { return 0.5; }
+    virtual int64_t double_click_interval_usecs() { return 0.5e6; }
 
     void loop(Card* initial);
 
