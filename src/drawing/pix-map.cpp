@@ -93,9 +93,13 @@ void PixMap::composite(const PixMap& pix) {
     }
 }
 
-ArrayPixMap::ArrayPixMap(int32_t width, int32_t height)
-        : _size(width, height),
-          _bytes(new RgbColor[width * height]) { }
+ArrayPixMap::ArrayPixMap(int32_t width, int32_t height):
+        _size(width, height),
+        _bytes(new RgbColor[width * height]) { }
+
+ArrayPixMap::ArrayPixMap(Size size):
+        _size(size),
+        _bytes(new RgbColor[_size.width * _size.height]) { }
 
 ArrayPixMap::~ArrayPixMap() { }
 

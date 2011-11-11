@@ -152,6 +152,7 @@ class ArrayPixMap : public PixMap {
     //
     // @param [in] size     the desired size of the PixMap.
     ArrayPixMap(int32_t width, int32_t height);
+    ArrayPixMap(Size size);
 
     // Deletes memory associated with the PixMap.
     ~ArrayPixMap();

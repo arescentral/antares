@@ -56,9 +56,22 @@ class OpenGlSprite : public Sprite {
 #else
 #error "Couldn't determine endianness of platform"
 #endif
-        glTexImage2D(
-                GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA, _size.width, _size.height,
-                0, GL_BGRA, type, image.bytes());
+        // OpenGL does not have a notion of row_bytes separate from
+        // width.  If they are equal for the input image, pass the data
+        // from the source image directly to OpenGL, as an optimization.
+        // Otherwise, create an ArrayPixMap from it, which always has
+        // this invariant.
+        if (image.row_bytes() == image.size().width) {
+            glTexImage2D(
+                    GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA, _size.width, _size.height,
+                    0, GL_BGRA, type, image.bytes());
+        } else {
+            ArrayPixMap copy(image.size());
+            copy.copy(image);
+            glTexImage2D(
+                    GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA, _size.width, _size.height,
+                    0, GL_BGRA, type, copy.bytes());
+        }
     }
 
     virtual StringSlice name() const {
