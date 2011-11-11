@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
         makedirs(*output_dir, 0755);
     }
 
-    Preferences::set_preferences(new Preferences);
+    NullPrefsDriver prefs;
     InitDirectText();
     init_globals();
     SpaceObjectHandlingInit();

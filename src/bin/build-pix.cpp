@@ -84,7 +84,7 @@ int main(int argc, char* const* argv) {
         makedirs(*output_dir, 0755);
     }
 
-    Preferences::set_preferences(new Preferences);
+    NullPrefsDriver prefs;
     InitDirectText();
 
     PixBuilder builder(output_dir);

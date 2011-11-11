@@ -78,7 +78,6 @@ void BriefingScreen::become_front() {
         stack()->pop(this);
     } else {
         InterfaceScreen::become_front();
-        VideoDriver::driver()->set_game_state(MISSION_INTERFACE);
     }
 }
 
@@ -126,7 +125,6 @@ void BriefingScreen::adjust_interface() {
 void BriefingScreen::handle_button(int button) {
     switch (button) {
       case DONE:
-        VideoDriver::driver()->set_game_state(UNKNOWN);
         stack()->pop(this);
         break;
 

@@ -28,10 +28,10 @@ namespace antares {
 
 class Ledger {
   public:
+    Ledger();
     virtual ~Ledger();
 
     static Ledger* ledger();
-    static void set_ledger(Ledger* ledger);
 
     virtual void unlock_chapter(int chapter) = 0;
     virtual void unlocked_chapters(std::vector<int>* chapters) = 0;
@@ -51,7 +51,7 @@ class NullLedger : public Ledger {
 
 class DirectoryLedger : public Ledger {
   public:
-    DirectoryLedger(const sfz::String& directory);
+    DirectoryLedger(sfz::PrintItem directory);
     virtual void unlock_chapter(int chapter);
     virtual void unlocked_chapters(std::vector<int>* chapters);
 

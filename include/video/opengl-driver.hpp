@@ -36,16 +36,10 @@ class OpenGlVideoDriver : public VideoDriver {
   public:
     OpenGlVideoDriver(Size screen_size);
 
-    virtual void set_game_state(GameState state);
-    virtual int get_demo_scenario();
-    virtual void main_loop_iteration_complete(uint32_t game_time);
-
     virtual Sprite* new_sprite(sfz::PrintItem name, const PixMap& content);
     virtual void fill_rect(const Rect& rect, const RgbColor& color);
     virtual void draw_point(const Point& at, const RgbColor& color);
     virtual void draw_line(const Point& from, const Point& to, const RgbColor& color);
-    virtual void set_transition_fraction(double fraction);
-    virtual void set_transition_to(const RgbColor& color);
 
     virtual void start_stencil();
     virtual void set_stencil_threshold(uint8_t alpha);
@@ -81,9 +75,6 @@ class OpenGlVideoDriver : public VideoDriver {
     void normalize_stencil();
 
     const Size _screen_size;
-
-    double _transition_fraction;
-    RgbColor _transition_color;
 
     int8_t _stencil_height;
 

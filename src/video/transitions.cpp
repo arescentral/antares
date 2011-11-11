@@ -48,10 +48,9 @@ void Transitions::start_boolean(int32_t in_speed, int32_t out_speed, uint8_t goa
     _step = kStartAnimation;
     _in_speed = in_speed;
     _out_speed = out_speed;
-    const RgbColor goal = GetRGBTranslateColor(GetRetroIndex(goal_color));
-    VideoDriver::driver()->set_transition_to(goal);
+    _color = GetRGBTranslateColor(GetRetroIndex(goal_color));
+    _color.alpha = 127;
     if (!_active) {
-        VideoDriver::driver()->set_transition_fraction(0.5);
         _active = true;
     }
 }
@@ -63,9 +62,14 @@ void Transitions::update_boolean(int32_t time_passed) {
         } else if ((_step + _out_speed * time_passed) < kEndAnimation) {
             _step += _out_speed * time_passed;
         } else {
-            VideoDriver::driver()->set_transition_fraction(0.0);
             _active = false;
         }
+    }
+}
+
+void Transitions::draw() const {
+    if (_active) {
+        VideoDriver::driver()->fill_rect(world, _color);
     }
 }
 
@@ -82,13 +86,6 @@ ColorFade::ColorFade(
 void ColorFade::become_front() {
     _start = now_usecs();
     _next_event = _start + kTimeUnit;
-    VideoDriver::driver()->set_transition_to(_color);
-    VideoDriver::driver()->set_transition_fraction(_direction);
-}
-
-void ColorFade::resign_front() {
-    VideoDriver::driver()->set_transition_to(_color);
-    VideoDriver::driver()->set_transition_fraction(0.0);
 }
 
 void ColorFade::mouse_down(const MouseDownEvent& event) {
@@ -110,19 +107,22 @@ void ColorFade::fire_timer() {
         _next_event += kTimeUnit;
     }
     double fraction = static_cast<double>(now - _start) / _duration;
-    if (fraction < 1.0) {
-        if (_direction == TO_COLOR) {
-            VideoDriver::driver()->set_transition_fraction(fraction);
-        } else {
-            VideoDriver::driver()->set_transition_fraction(1.0 - fraction);
-        }
-    } else {
+    if (fraction >= 1.0) {
         stack()->pop(this);
     }
 }
 
 void ColorFade::draw() const {
     next()->draw();
+    int64_t now = now_usecs();
+    double fraction = static_cast<double>(now - _start) / _duration;
+    RgbColor fill_color = _color;
+    if (_direction == TO_COLOR) {
+        fill_color.alpha = 0xff * fraction;
+    } else {
+        fill_color.alpha = 0xff * (1.0 - fraction);
+    }
+    VideoDriver::driver()->fill_rect(world, fill_color);
 }
 
 PictFade::PictFade(int pict_id, bool* skipped)
@@ -155,12 +155,6 @@ void PictFade::become_front() {
 
       default:
         break;
-    }
-}
-
-void PictFade::resign_front() {
-    if (_state == NEW) {
-        VideoDriver::driver()->set_transition_fraction(0.0);
     }
 }
 

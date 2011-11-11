@@ -161,11 +161,6 @@ void CocoaVideoDriver::get_keys(KeyMap* keys) {
     keys->copy(_event_tracker.keys());
 }
 
-void CocoaVideoDriver::set_game_state(GameState state) {
-}
-
-void CocoaVideoDriver::main_loop_iteration_complete(uint32_t) { }
-
 int CocoaVideoDriver::ticks() {
     return (usecs() - _start_time) * 60 / 1000000;
 }

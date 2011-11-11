@@ -41,15 +41,10 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
     virtual Point get_mouse() { return _event_tracker.mouse(); }
     virtual void get_keys(KeyMap* k) { k->copy(_event_tracker.keys()); }
 
-    void set_demo_scenario(int demo);
-    virtual int get_demo_scenario();
-
-    virtual void set_game_state(GameState state) { }
-    virtual void main_loop_iteration_complete(uint32_t game_time) { }
     virtual int ticks() { return _ticks; }
-    virtual int64_t double_click_interval_usecs() { return 0.5; }
+    virtual int64_t double_click_interval_usecs() { return 0.5e6; }
 
-    virtual void loop(Card* initial);
+    void loop(Card* initial);
 
     void schedule_snapshot(int64_t at);
     void schedule_event(sfz::linked_ptr<Event> event);
@@ -57,13 +52,11 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
     void schedule_mouse(int button, const Point& where, int64_t down, int64_t up);
 
   private:
-    class SnapshotBuffer;
-    friend void write_to(const sfz::WriteTarget& out, const SnapshotBuffer& buffer);
+    class MainLoop;
 
-    void advance_tick_count(MainLoop* loop, const SnapshotBuffer& buffer, int64_t ticks);
+    void advance_tick_count(MainLoop* loop, int64_t ticks);
     bool have_snapshots_before(int64_t ticks) const;
 
-    int _demo;
     const sfz::Optional<sfz::String> _output_dir;
     int64_t _ticks;
 

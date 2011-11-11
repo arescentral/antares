@@ -55,7 +55,6 @@ MainScreen::~MainScreen() { }
 
 void MainScreen::become_front() {
     InterfaceScreen::become_front();
-    VideoDriver::driver()->set_game_state(MAIN_SCREEN_INTERFACE);
     if (Preferences::preferences()->play_idle_music() && !SongIsPlaying()) {
         LoadSong(kTitleSongID);
         SetSongVolume(kMaxMusicVolume);
@@ -70,13 +69,6 @@ bool MainScreen::next_timer(int64_t& time) {
 
 void MainScreen::fire_timer() {
     Randomize(1);
-
-    int id = VideoDriver::driver()->get_demo_scenario();
-    if (id >= 0) {
-        stack()->push(new ReplayGame(id));
-        return;
-    }
-
     ReplayList replays;
     size_t demo = rand() % (replays.size() + 1);
     if (demo == replays.size()) {

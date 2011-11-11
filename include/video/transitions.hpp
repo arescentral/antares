@@ -36,12 +36,14 @@ class Transitions {
 
     void start_boolean(int32_t in_speed, int32_t out_speed, uint8_t goal_color);
     void update_boolean(int32_t time_passed);
+    void draw() const;
 
   private:
     bool _active;
     int32_t _step;
     int32_t _in_speed;
     int32_t _out_speed;
+    RgbColor _color;
 
     DISALLOW_COPY_AND_ASSIGN(Transitions);
 };
@@ -57,7 +59,6 @@ class ColorFade : public Card {
             bool* skipped);
 
     virtual void become_front();
-    virtual void resign_front();
 
     virtual void mouse_down(const MouseDownEvent& event);
     virtual bool next_timer(int64_t& time);
@@ -85,7 +86,6 @@ class PictFade : public Card {
     ~PictFade();
 
     virtual void become_front();
-    virtual void resign_front();
 
     virtual void mouse_down(const MouseDownEvent& event);
     virtual bool next_timer(int64_t& time);

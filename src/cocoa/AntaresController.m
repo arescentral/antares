@@ -266,7 +266,8 @@ static NSURL* url(const char* utf8_bytes) {
     [_window close];
 
     CFStringRef error_message;
-    if (!antares_controller_set_drivers(&error_message)) {
+    drivers = antares_controller_create_drivers(&error_message);
+    if (!drivers) {
         NSLog(@"%@", error_message);
         CFRelease(error_message);
         exit(1);
@@ -289,11 +290,12 @@ static NSURL* url(const char* utf8_bytes) {
 
 - (void)extractDone:(id)sender {
     CFStringRef error_message;
-    if (!antares_controller_loop(&error_message)) {
+    if (!antares_controller_loop(drivers, &error_message)) {
         NSLog(@"%@", error_message);
         CFRelease(error_message);
         exit(1);
     }
+    antares_controller_destroy_drivers(drivers);
     [NSApp terminate:self];
 }
 

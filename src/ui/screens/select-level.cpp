@@ -67,7 +67,6 @@ void SelectLevelScreen::become_front() {
     switch (_state) {
       case SELECTING:
         InterfaceScreen::become_front();
-        VideoDriver::driver()->set_game_state(SELECT_LEVEL_INTERFACE);
         break;
 
       case FADING_OUT:
@@ -94,7 +93,6 @@ void SelectLevelScreen::handle_button(int button) {
       case OK:
         _state = FADING_OUT;
         *_cancelled = false;
-        VideoDriver::driver()->set_game_state(UNKNOWN);
         stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::kBlack, 1e6, false, NULL));
         break;
 

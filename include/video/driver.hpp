@@ -47,14 +47,12 @@ enum GameState {
 
 class VideoDriver {
   public:
-    virtual ~VideoDriver() { }
+    VideoDriver();
+    virtual ~VideoDriver();
     virtual bool button() = 0;
     virtual Point get_mouse() = 0;
     virtual void get_keys(KeyMap* k) = 0;
 
-    virtual void set_game_state(GameState state) = 0;
-    virtual int get_demo_scenario() = 0;
-    virtual void main_loop_iteration_complete(uint32_t game_time) = 0;
     virtual int ticks() = 0;
     virtual int64_t double_click_interval_usecs() = 0;
 
@@ -62,19 +60,13 @@ class VideoDriver {
     virtual void fill_rect(const Rect& rect, const RgbColor& color) = 0;
     virtual void draw_point(const Point& at, const RgbColor& color) = 0;
     virtual void draw_line(const Point& from, const Point& to, const RgbColor& color) = 0;
-    virtual void set_transition_fraction(double fraction) = 0;
-    virtual void set_transition_to(const RgbColor& color) = 0;
 
     virtual void start_stencil() = 0;
     virtual void set_stencil_threshold(uint8_t alpha) = 0;
     virtual void apply_stencil() = 0;
     virtual void end_stencil() = 0;
 
-    // Event loop interface.  Should eventually be its own class.
-    virtual void loop(Card* initial) = 0;
-
     static VideoDriver* driver();
-    static void set_driver(VideoDriver* mode);
 };
 
 class Stencil {

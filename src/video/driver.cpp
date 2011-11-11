@@ -21,22 +21,29 @@
 
 #include <sfz/sfz.hpp>
 
-using sfz::scoped_ptr;
+using sfz::Exception;
 
 namespace antares {
 
 namespace {
 
-scoped_ptr<VideoDriver> video_driver;
+VideoDriver* video_driver = NULL;
 
 }  // namespace
 
-VideoDriver* VideoDriver::driver() {
-    return antares::video_driver.get();
+VideoDriver::VideoDriver() {
+    if (video_driver) {
+        throw Exception("VideoDriver is a singleton");
+    }
+    antares::video_driver = this;
 }
 
-void VideoDriver::set_driver(VideoDriver* video_driver) {
-    antares::video_driver.reset(video_driver);
+VideoDriver::~VideoDriver() {
+    antares::video_driver = NULL;
+}
+
+VideoDriver* VideoDriver::driver() {
+    return antares::video_driver;
 }
 
 Stencil::Stencil(VideoDriver* driver):

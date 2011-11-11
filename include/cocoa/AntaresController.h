@@ -23,6 +23,8 @@
 #include <Cocoa/Cocoa.h>
 
 @interface AntaresController : NSObject {
+    struct AntaresDrivers* drivers;
+
     NSURL* _download_url;
     NSURL* _author_url;
 

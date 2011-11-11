@@ -58,9 +58,6 @@ const int32_t kScreenHeight = 480;
 void usage(const StringSlice& program_name);
 void main_screen(OffscreenVideoDriver& driver);
 void options(OffscreenVideoDriver& driver);
-void the_stars_have_ears(OffscreenVideoDriver& driver);
-void while_the_iron_is_hot(OffscreenVideoDriver& driver);
-void space_race(OffscreenVideoDriver& driver);
 void mission_briefing(OffscreenVideoDriver& driver, Ledger& ledger);
 void pause(OffscreenVideoDriver& driver);
 
@@ -89,34 +86,32 @@ void main(int argc, char* const* argv) {
         makedirs(*output_dir, 0755);
     }
 
-    Preferences::set_preferences(new Preferences);
-    PrefsDriver::set_driver(new NullPrefsDriver);
-    scoped_ptr<OffscreenVideoDriver> video(new OffscreenVideoDriver(
-                Preferences::preferences()->screen_size(), output_dir));
-    scoped_ptr<Ledger> ledger(new NullLedger);
+    NullPrefsDriver prefs;
+    OffscreenVideoDriver video(
+            Preferences::preferences()->screen_size(), output_dir);
+    NullLedger ledger;
     if (script == "main-screen") {
-        main_screen(*video);
+        main_screen(video);
     } else if (script == "options") {
-        options(*video);
+        options(video);
     } else if (script == "mission-briefing") {
-        mission_briefing(*video, *ledger);
+        mission_briefing(video, ledger);
     } else if (script == "pause") {
-        pause(*video);
+        pause(video);
     } else {
         print(io::err, format("no such script {0}\n", quote(script)));
         exit(1);
     }
-    VideoDriver::set_driver(video.release());
 
+    scoped_ptr<SoundDriver> sound;
     if (output_dir.has()) {
         String out(format("{0}/sound.log", *output_dir));
-        SoundDriver::set_driver(new LogSoundDriver(out));
+        sound.reset(new LogSoundDriver(out));
     } else {
-        SoundDriver::set_driver(new NullSoundDriver);
+        sound.reset(new NullSoundDriver);
     }
-    Ledger::set_ledger(ledger.release());
 
-    VideoDriver::driver()->loop(AresInit());
+    video.loop(AresInit());
 }
 
 void usage(const StringSlice& program_name) {
@@ -174,66 +169,6 @@ void options(OffscreenVideoDriver& driver) {
     driver.schedule_snapshot(1860);
 }
 
-void demo(OffscreenVideoDriver& driver, int demo, int64_t duration_ticks) {
-    driver.set_demo_scenario(demo);
-
-    driver.schedule_event(make_linked_ptr(new MouseMoveEvent(0, Point(320, 240))));
-
-    // Ego Pict fades in and out.
-    driver.schedule_snapshot(50);
-    driver.schedule_snapshot(100);
-    driver.schedule_snapshot(150);
-    driver.schedule_snapshot(180);
-    driver.schedule_snapshot(230);
-
-    // Intermission (black).
-    driver.schedule_snapshot(280);
-
-    // Title Screen fades in and out.
-    driver.schedule_snapshot(330);
-    driver.schedule_snapshot(380);
-    driver.schedule_snapshot(530);
-    driver.schedule_snapshot(680);
-    driver.schedule_snapshot(730);
-
-    // Intermission (black).
-    driver.schedule_snapshot(780);
-
-    // Introduction scrolls by.
-    for (int64_t i = 840; i < 3600; i += 60) {
-        driver.schedule_snapshot(i);
-    }
-
-    // Intro is skipped.  Main Screen fades out after 30 seconds.
-    driver.schedule_key(Keys::Q, 3599, 3600);
-    driver.schedule_snapshot(3598);
-    driver.schedule_snapshot(3599);
-    driver.schedule_snapshot(5400);
-    driver.schedule_snapshot(5430);
-
-    // Demo plays.
-    duration_ticks += 5460;  // Compensate for picts, intro.
-    for (int64_t i = 5460; i < duration_ticks; i += 60) {
-        driver.schedule_snapshot(i);
-    }
-
-    // Quit game.
-    driver.schedule_key(Keys::Q, duration_ticks, duration_ticks + 60);
-    driver.schedule_snapshot(duration_ticks);
-}
-
-void the_stars_have_ears(OffscreenVideoDriver& driver) {
-    demo(driver, 600, 8400);  // 2:20
-}
-
-void while_the_iron_is_hot(OffscreenVideoDriver& driver) {
-    demo(driver, 605, 12000);  // 3:20
-}
-
-void space_race(OffscreenVideoDriver& driver) {
-    demo(driver, 623, 10200);  // 2:50
-}
-
 void mission_briefing(OffscreenVideoDriver& driver, Ledger& ledger) {
     ledger.unlock_chapter(22);
 
@@ -269,33 +204,45 @@ void mission_briefing(OffscreenVideoDriver& driver, Ledger& ledger) {
 }
 
 void pause(OffscreenVideoDriver& driver) {
-    driver.set_demo_scenario(623);
-
     driver.schedule_event(make_linked_ptr(new MouseMoveEvent(0, Point(320, 240))));
 
-    // Intro is skipped.  Main Screen fades out after 30 seconds.
+    // Skip the intro.  Start the first tutorial and skip the prologue.
     driver.schedule_key(Keys::Q, 1798, 1799);
-    driver.schedule_snapshot(1799);
-    driver.schedule_snapshot(3599);
-    driver.schedule_snapshot(3629);
+    driver.schedule_key(Keys::S, 1858, 1859);
+    driver.schedule_key(Keys::RETURN, 1917, 1918);
+    driver.schedule_snapshot(1917);
+    driver.schedule_snapshot(1947);
+    driver.schedule_snapshot(1977);
+    driver.schedule_key(Keys::RETURN, 1978, 1979);
 
-    driver.schedule_key(Keys::CAPS_LOCK, 3660, 3780);
-    driver.schedule_snapshot(3660);
-    driver.schedule_snapshot(3680);
-    driver.schedule_snapshot(3700);
-    driver.schedule_snapshot(3720);
-    driver.schedule_snapshot(3740);
-    driver.schedule_snapshot(3760);
-    driver.schedule_snapshot(3780);
+    driver.schedule_snapshot(1980);
+    driver.schedule_snapshot(2000);
 
-    driver.schedule_key(Keys::Q, 3840, 3900);
-    driver.schedule_snapshot(3840);
-    driver.schedule_snapshot(3900);
+    driver.schedule_key(Keys::CAPS_LOCK, 2020, 2140);
+    driver.schedule_snapshot(2020);
+    driver.schedule_snapshot(2040);
+    driver.schedule_snapshot(2060);
+    driver.schedule_snapshot(2080);
+    driver.schedule_snapshot(2100);
+    driver.schedule_snapshot(2120);
+    driver.schedule_snapshot(2140);
+
+    driver.schedule_snapshot(2160);
+    driver.schedule_snapshot(2180);
+
+    // Exit play.
+    driver.schedule_key(Keys::ESCAPE, 2200, 2260);
+    driver.schedule_snapshot(2200);
+    driver.schedule_snapshot(2260);
+
+    driver.schedule_key(Keys::Q, 2320, 2380);
+    driver.schedule_snapshot(2320);
+    driver.schedule_snapshot(2380);
 
     // Quit game.
-    driver.schedule_key(Keys::Q, 3960, 4020);
-    driver.schedule_snapshot(3960);
-    driver.schedule_snapshot(4020);
+    driver.schedule_key(Keys::Q, 2440, 2500);
+    driver.schedule_snapshot(2440);
+    driver.schedule_snapshot(2500);
 }
 
 }  // namespace

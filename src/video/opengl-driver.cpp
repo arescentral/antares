@@ -112,18 +112,7 @@ class OpenGlSprite : public Sprite {
 
 OpenGlVideoDriver::OpenGlVideoDriver(Size screen_size)
         : _screen_size(screen_size),
-          _transition_fraction(0.0),
-          _transition_color(RgbColor::kBlack),
           _stencil_height(0) { }
-
-void OpenGlVideoDriver::set_game_state(GameState state) {
-}
-
-int OpenGlVideoDriver::get_demo_scenario() {
-    return -1;
-}
-
-void OpenGlVideoDriver::main_loop_iteration_complete(uint32_t) { }
 
 Sprite* OpenGlVideoDriver::new_sprite(PrintItem name, const PixMap& content) {
     return new OpenGlSprite(name, content);
@@ -213,14 +202,6 @@ void OpenGlVideoDriver::draw_line(const Point& from, const Point& to, const RgbC
     glEnd();
 }
 
-void OpenGlVideoDriver::set_transition_fraction(double fraction) {
-    _transition_fraction = fraction;
-}
-
-void OpenGlVideoDriver::set_transition_to(const RgbColor& color) {
-    _transition_color = color;
-}
-
 void OpenGlVideoDriver::start_stencil() {
     glColorMask(0, 0, 0, 0);
     glAlphaFunc(GL_GREATER, 0);
@@ -303,17 +284,6 @@ void OpenGlVideoDriver::MainLoop::draw() {
     glPopMatrix();
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
-
-    glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
-    glColor4ub(
-            _driver._transition_color.red, _driver._transition_color.green,
-            _driver._transition_color.blue, 0xff * _driver._transition_fraction);
-    glBegin(GL_QUADS);
-    glVertex2f(1, 1);
-    glVertex2f(-1, 1);
-    glVertex2f(-1, -1);
-    glVertex2f(1, -1);
-    glEnd();
 
     glFinish();
 }

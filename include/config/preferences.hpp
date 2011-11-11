@@ -29,7 +29,6 @@ namespace antares {
 class Preferences {
   public:
     static Preferences* preferences();
-    static void set_preferences(Preferences* preferences);
 
     Preferences();
     Preferences(const Preferences& other);
@@ -69,20 +68,20 @@ class Preferences {
 
 class PrefsDriver {
   public:
+    PrefsDriver();
     virtual ~PrefsDriver();
 
     virtual void load(Preferences* preferences) = 0;
     virtual void save(const Preferences& preferences) = 0;
 
     static PrefsDriver* driver();
-    static void set_driver(PrefsDriver* driver);
-
-  private:
-    static PrefsDriver* _driver;
 };
 
 class NullPrefsDriver : public PrefsDriver {
   public:
+    NullPrefsDriver();
+    NullPrefsDriver(Preferences defaults);
+
     virtual void load(Preferences* preferences);
     virtual void save(const Preferences& preferences);
 

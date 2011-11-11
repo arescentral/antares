@@ -50,8 +50,6 @@ class SoundControlScreen : public InterfaceScreen {
     SoundControlScreen(OptionsScreen::State* state, Preferences* preferences);
     ~SoundControlScreen();
 
-    virtual void become_front();
-
     virtual void draw() const;
 
   protected:
@@ -90,8 +88,6 @@ class KeyControlScreen : public InterfaceScreen {
   public:
     KeyControlScreen(OptionsScreen::State* state, Preferences* preferences);
     ~KeyControlScreen();
-
-    virtual void become_front();
 
     virtual void key_down(const KeyDownEvent& event);
     virtual void key_up(const KeyUpEvent& event);

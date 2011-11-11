@@ -51,15 +51,14 @@ class SoundChannel {
 
 class SoundDriver {
   public:
-    SoundDriver() { }
-    virtual ~SoundDriver() { }
+    SoundDriver();
+    virtual ~SoundDriver();
 
     virtual void open_channel(sfz::scoped_ptr<SoundChannel>& channel) = 0;
     virtual void open_sound(sfz::PrintItem path, sfz::scoped_ptr<Sound>& sound) = 0;
     virtual void set_global_volume(uint8_t volume) = 0;
 
     static SoundDriver* driver();
-    static void set_driver(SoundDriver* driver);
 
   private:
     DISALLOW_COPY_AND_ASSIGN(SoundDriver);
