@@ -204,12 +204,16 @@ void DebriefingScreen::draw() const {
 
 void DebriefingScreen::mouse_down(const MouseDownEvent& event) {
     static_cast<void>(event);
-    stack()->pop(this);
+    if (_state == DONE) {
+        stack()->pop(this);
+    }
 }
 
 void DebriefingScreen::key_down(const KeyDownEvent& event) {
     static_cast<void>(event);
-    stack()->pop(this);
+    if (_state == DONE) {
+        stack()->pop(this);
+    }
 }
 
 bool DebriefingScreen::next_timer(int64_t& time) {
