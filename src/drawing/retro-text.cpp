@@ -25,6 +25,7 @@
 
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
+#include "video/driver.hpp"
 
 using sfz::Bytes;
 using sfz::Exception;
@@ -202,9 +203,53 @@ int RetroText::auto_width() const {
     return _auto_width;
 }
 
+void RetroText::draw(const Rect& bounds) const {
+    for (size_t i = 0; i < _chars.size(); ++i) {
+        draw_char(bounds, i);
+    }
+}
+
 void RetroText::draw(PixMap* pix, const Rect& bounds) const {
     for (size_t i = 0; i < _chars.size(); ++i) {
         draw_char(pix, bounds, i);
+    }
+}
+
+void RetroText::draw_char(const Rect& bounds, int index) const {
+    mSetDirectFont(_font);
+    const int line_height = mDirectFontHeight() + _line_spacing;
+    const int char_adjust = mDirectFontAscent() + _line_spacing;
+    const RetroChar& ch = _chars[index];
+    Point corner(bounds.left + ch.h, bounds.top + ch.v);
+    switch (ch.special) {
+      case NONE:
+      case WORD_BREAK:
+        {
+            if (ch.back_color != RgbColor::kBlack) {
+                Rect char_rect(0, 0, char_width(ch.character), line_height);
+                char_rect.offset(corner.h, corner.v);
+                VideoDriver::driver()->fill_rect(char_rect, ch.back_color);
+            }
+            String str(1, ch.character);
+            gDirectText->draw_sprite(Point(corner.h, corner.v + char_adjust), str, ch.fore_color);
+        }
+        break;
+
+      case TAB:
+        if (ch.back_color != RgbColor::kBlack) {
+            Rect tab_rect(0, 0, tab_width() - (ch.h % tab_width()), line_height);
+            tab_rect.offset(corner.h, corner.v);
+            VideoDriver::driver()->fill_rect(tab_rect, ch.back_color);
+        }
+        break;
+
+      case LINE_BREAK:
+        if (ch.back_color != RgbColor::kBlack) {
+            Rect line_rect(0, 0, bounds.width() - ch.h, line_height);
+            line_rect.offset(corner.h, corner.v);
+            VideoDriver::driver()->fill_rect(line_rect, ch.back_color);
+        }
+        break;
     }
 }
 
