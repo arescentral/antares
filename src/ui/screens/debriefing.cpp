@@ -159,6 +159,7 @@ DebriefingScreen::DebriefingScreen(int text_id)
           _next_update(0),
           _typed_chars(0) {
     initialize(text_id, false);
+    _sprite.reset(VideoDriver::driver()->new_sprite("/x/debriefing_screen", *_pix));
 }
 
 DebriefingScreen::DebriefingScreen(
@@ -183,6 +184,9 @@ DebriefingScreen::DebriefingScreen(
     Rect bracket_bounds = _score_bounds;
     bracket_bounds.inset(-2, -2);
     DrawNateVBracket(_pix.get(), bracket_bounds, _pix->size().as_rect(), bracket_color);
+    _sprite.reset(VideoDriver::driver()->new_sprite("/x/debriefing_screen", *_pix));
+
+    _score_bounds.offset(_pix_bounds.left, _pix_bounds.top);
 }
 
 void DebriefingScreen::become_front() {
@@ -200,6 +204,9 @@ void DebriefingScreen::resign_front() {
 void DebriefingScreen::draw() const {
     next()->draw();
     _sprite->draw(_pix_bounds.left, _pix_bounds.top);
+    for (int i = 0; i < _typed_chars; ++i) {
+        _score->draw_char(_score_bounds, i);
+    }
 }
 
 void DebriefingScreen::mouse_down(const MouseDownEvent& event) {
@@ -232,7 +239,6 @@ void DebriefingScreen::fire_timer() {
     int64_t now = now_usecs();
     while (_next_update <= now) {
         if (_typed_chars < _score->size()) {
-            _score->draw_char(_pix.get(), _score_bounds, _typed_chars);
             _next_update += kTypingDelay;
             ++_typed_chars;
         } else {
@@ -241,7 +247,6 @@ void DebriefingScreen::fire_timer() {
             break;
         }
     }
-    _sprite.reset(VideoDriver::driver()->new_sprite("/x/debriefing_screen/1", *_pix));
 }
 
 void DebriefingScreen::initialize(int text_id, bool do_score) {
@@ -262,7 +267,6 @@ void DebriefingScreen::initialize(int text_id, bool do_score) {
 
     DrawAnyInterfaceItem(interface_item(_message_bounds), _pix.get());
     DrawInterfaceTextInRect(_message_bounds, _message, kLarge, GOLD, _pix.get(), NULL);
-    _sprite.reset(VideoDriver::driver()->new_sprite("/x/debriefing_screen/2", *_pix));
 }
 
 void print_to(sfz::PrintTarget out, DebriefingScreen::State state) {
