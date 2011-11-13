@@ -355,22 +355,14 @@ void GamePlay::become_front() {
 }
 
 void GamePlay::draw() const {
-    scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite("/x/real_world", *gRealWorld));
-    sprite->draw(0, 0);
+    globals()->starfield.draw();
+    draw_sector_lines();
+    draw_beams();
+    draw_sprites();
+    draw_labels();
 
-    {
-        Rect clip = viewport;
-        Stencil stencil(VideoDriver::driver());
-        VideoDriver::driver()->fill_rect(clip, RgbColor::kWhite);
-        stencil.apply();
-
-        globals()->starfield.draw();
-        draw_sector_lines();
-        draw_beams();
-        draw_sprites();
-        draw_labels();
-    }
-
+    draw_instruments();
+    draw_message();
     draw_site();
     draw_cursor();
     draw_hint_line();

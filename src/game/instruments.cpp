@@ -531,6 +531,25 @@ void DrawInstrumentPanel() {
     UpdateRadar(100);
 }
 
+void draw_instruments() {
+    Rect left_rect(world.left, world.top, viewport.left, world.bottom);
+    Rect right_rect(viewport.right, world.top, world.right, world.bottom);
+    VideoDriver::driver()->fill_rect(left_rect, RgbColor::kBlack);
+    VideoDriver::driver()->fill_rect(right_rect, RgbColor::kBlack);
+
+    if (world.height() > 768) {
+        left_rect.inset(0, (world.height() - 768) / 2);
+        right_rect.inset(0, (world.height() - 768) / 2);
+    }
+
+    scoped_ptr<Sprite> left_instruments(VideoDriver::driver()->new_sprite(
+                "/x/left_instruments", gRealWorld->view(left_rect)));
+    scoped_ptr<Sprite> right_instruments(VideoDriver::driver()->new_sprite(
+                "/x/right_instruments", gRealWorld->view(right_rect)));
+    left_instruments->draw(left_rect);
+    right_instruments->draw(right_rect);
+}
+
 void EraseSite() {
     globals()->old_cursor_coord = globals()->cursor_coord;
 }
