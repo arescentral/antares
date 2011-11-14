@@ -630,14 +630,4 @@ void GamePlay::key_down(const KeyDownEvent& event) {
     }
 }
 
-void Pause( long time)
-
-{
-    long    starttime = VideoDriver::driver()->ticks();
-
-    while (( VideoDriver::driver()->ticks() - starttime) < time) {
-        // DO NOTHING
-    }
-}
-
 }  // namespace antares

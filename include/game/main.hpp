@@ -34,7 +34,6 @@ enum GameResult {
 };
 
 Card* AresInit();
-void Pause();
 
 class MainPlay : public Card {
   public:
