@@ -25,7 +25,7 @@
 namespace antares {
 
 int64_t now_usecs() {
-    return kTimeUnit * VideoDriver::driver()->ticks();
+    return VideoDriver::driver()->usecs();
 }
 
 }  // namespace antares

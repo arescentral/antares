@@ -109,7 +109,7 @@ void enqueue_key_up(int32_t key, void* userdata) {
 
 CocoaVideoDriver::CocoaVideoDriver(Size screen_size)
         : OpenGlVideoDriver(screen_size),
-          _start_time(usecs()),
+          _start_time(antares::usecs()),
           _translator(screen_size.width, screen_size.height),
           _event_tracker(false) {
     antares_event_translator_set_mouse_down_callback(
@@ -133,7 +133,7 @@ bool CocoaVideoDriver::wait_next_event(int64_t until, scoped_ptr<Event>& event) 
     until += _start_time;
 
     antares_event_translator_enqueue(_translator.c_obj(), until);
-    while (until > usecs()) {
+    while (until > antares::usecs()) {
         if (!_event_queue.empty()) {
             event.reset(_event_queue.front());
             _event_queue.pop();
@@ -162,7 +162,11 @@ void CocoaVideoDriver::get_keys(KeyMap* keys) {
 }
 
 int CocoaVideoDriver::ticks() {
-    return (usecs() - _start_time) * 60 / 1000000;
+    return usecs() * 60 / 1000000;
+}
+
+int CocoaVideoDriver::usecs() {
+    return antares::usecs() - _start_time;
 }
 
 int64_t CocoaVideoDriver::double_click_interval_usecs() {
