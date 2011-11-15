@@ -398,11 +398,11 @@ void GamePlay::fire_timer() {
     thisTime = now_usecs();
     scrapTime = thisTime;
     thisTime -= globals()->gLastTime;
-    newGameTime = (thisTime / kTimeUnit) + _scenario_start_time;
+    newGameTime = usecs_to_ticks(thisTime) + _scenario_start_time;
 
     if ((mNOFFastMotionKey(_key_map)) && !_entering_message) {
         newGameTime = globals()->gGameTime + 12;
-        thisTime = (newGameTime - _scenario_start_time) * kTimeUnit;
+        thisTime = ticks_to_usecs(newGameTime - _scenario_start_time);
         globals()->gLastTime = scrapTime - thisTime;
     }
 
@@ -421,7 +421,7 @@ void GamePlay::fire_timer() {
         _player_paused = false;
         unitsDone = unitsPassed = 0;
         newGameTime = globals()->gGameTime;
-        thisTime = (newGameTime - _scenario_start_time) * kTimeUnit;
+        thisTime = ticks_to_usecs(newGameTime - _scenario_start_time);
         globals()->gLastTime = scrapTime - thisTime;
     }
 
@@ -468,8 +468,8 @@ void GamePlay::fire_timer() {
                     globals()->gGameOver = 1;
                 } else {
                     if (!_mouse_down) {
-                        int double_click_interval_ticks
-                            = VideoDriver::driver()->double_click_interval_usecs() / kTimeUnit;
+                        int double_click_interval_ticks = usecs_to_ticks(
+                                VideoDriver::driver()->double_click_interval_usecs());
                         if ((globals()->gGameTime - _last_click_time)
                                 <= double_click_interval_ticks) {
                             InstrumentsHandleDoubleClick();
