@@ -400,12 +400,12 @@ void GamePlay::fire_timer() {
     int64_t newGameTime = thisTime + _scenario_start_time;
 
     if ((mNOFFastMotionKey(_key_map)) && !_entering_message) {
-        newGameTime = ticks_to_usecs(globals()->gGameTime + 12);
+        newGameTime = globals()->gGameTime + 12 * kTimeUnit;
         thisTime = newGameTime - _scenario_start_time;
         globals()->gLastTime = scrapTime - thisTime;
     }
 
-    int unitsPassed = usecs_to_ticks(newGameTime) - globals()->gGameTime;
+    int unitsPassed = usecs_to_ticks(newGameTime - globals()->gGameTime);
     int unitsDone = unitsPassed;
 
     if (unitsPassed <= 0) {
@@ -419,7 +419,7 @@ void GamePlay::fire_timer() {
     if (_player_paused) {
         _player_paused = false;
         unitsDone = unitsPassed = 0;
-        newGameTime = ticks_to_usecs(globals()->gGameTime);
+        newGameTime = globals()->gGameTime;
         thisTime = newGameTime - _scenario_start_time;
         globals()->gLastTime = scrapTime - thisTime;
     }
@@ -446,7 +446,7 @@ void GamePlay::fire_timer() {
             MoveSpaceObjects(gSpaceObjectData.get(), kMaxSpaceObject, unitsToDo);
         }
 
-        globals()->gGameTime += unitsToDo;
+        globals()->gGameTime += unitsToDo * kTimeUnit;
 
         if ( _decide_cycle == kDecideEveryCycles) {
             // everything in here gets executed once every kDecideEveryCycles
@@ -469,13 +469,12 @@ void GamePlay::fire_timer() {
                     if (!_mouse_down) {
                         int64_t double_click_interval
                             = VideoDriver::driver()->double_click_interval_usecs();
-                        if ((ticks_to_usecs(globals()->gGameTime) - _last_click_time)
-                                <= double_click_interval) {
+                        if ((globals()->gGameTime - _last_click_time) <= double_click_interval) {
                             InstrumentsHandleDoubleClick();
                             _last_click_time -= double_click_interval;
                         } else {
                             InstrumentsHandleClick();
-                            _last_click_time = ticks_to_usecs(globals()->gGameTime);
+                            _last_click_time = globals()->gGameTime;
                         }
                         _mouse_down = true;
                     } else {

@@ -1094,7 +1094,7 @@ bool ConstructScenario(const Scenario* scenario) {
     c2 = 0;
     const int64_t start_time = (gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple;
     for (int64_t t = 0; t < start_time; t += kTimeUnit) {
-        globals()->gGameTime = usecs_to_ticks(t);
+        globals()->gGameTime = t;
         MoveSpaceObjects( gSpaceObjectData.get(), kMaxSpaceObject,
                     kDecideEveryCycles);
         NonplayerShipThink( kDecideEveryCycles);
@@ -1115,7 +1115,7 @@ bool ConstructScenario(const Scenario* scenario) {
             UpdateLoadingInterface( currentStep, stepNumber, &loadingRect);
         }
     }
-    globals()->gGameTime = usecs_to_ticks(start_time);
+    globals()->gGameTime = start_time;
 
     return( true);
 }
@@ -1186,8 +1186,8 @@ void CheckScenarioConditions(int32_t timePass) {
                         break;
 
                     case kTimeCondition:
-                        if ( globals()->gGameTime >= condition->conditionArgument.longValue)
-                        {
+                        if (globals()->gGameTime >=
+                                ticks_to_usecs(condition->conditionArgument.longValue)) {
                             conditionTrue = true;
                         }
                         break;

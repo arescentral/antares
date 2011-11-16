@@ -477,7 +477,7 @@ static StringSlice String_Get_Nth_Line(const StringSlice& source, long nth) {
 }
 
 static void Auto_Animate_Line( Point *source, Point *dest) {
-    switch ((globals()->gGameTime >> 3) & 0x03) {
+    switch ((usecs_to_ticks(globals()->gGameTime) >> 3) & 0x03) {
         case 0:
             dest->h = source->h + ((dest->h - source->h) >> 2);
             dest->v = source->v + ((dest->v - source->v) >> 2);

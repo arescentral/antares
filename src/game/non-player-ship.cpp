@@ -103,7 +103,7 @@ void NonplayerShipThink( long timePass)
     short           h;
     Fixed           fcos, fsin;
     RgbColor        friendSick, foeSick, neutralSick;
-    unsigned long   sickCount = globals()->gGameTime / 9;
+    unsigned long   sickCount = usecs_to_ticks(globals()->gGameTime) / 9;
 
     globals()->gSynchValue = gRandomSeed;
     sickCount &= 0x00000003;

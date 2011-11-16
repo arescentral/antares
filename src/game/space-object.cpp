@@ -1023,7 +1023,6 @@ void AddActionToQueue( objectActionType *action, long actionNumber, long actionT
     }
 
     if ( queueNumber == kActionQueueLength) return;
-//  delayTime += globals()->gGameTime;
     actionQueue->action = action;
     actionQueue->actionNum = actionNumber;
     actionQueue->scheduledTime = delayTime;
@@ -1100,7 +1099,6 @@ void ExecuteActionQueue( long unitsToDo)
     while (( gFirstActionQueue != NULL) &&
         ( gFirstActionQueue->action != NULL) &&
         ( gFirstActionQueue->scheduledTime <= 0))
-//      ( gFirstActionQueue->scheduledTime <= globals()->gGameTime))
     {
         subjectid = -1;
         directid = -1;
