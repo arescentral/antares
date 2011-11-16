@@ -397,15 +397,15 @@ void GamePlay::fire_timer() {
     thisTime = now_usecs();
     scrapTime = thisTime;
     thisTime -= globals()->gLastTime;
-    int64_t newGameTime = usecs_to_ticks(thisTime + _scenario_start_time);
+    int64_t newGameTime = thisTime + _scenario_start_time;
 
     if ((mNOFFastMotionKey(_key_map)) && !_entering_message) {
-        newGameTime = globals()->gGameTime + 12;
-        thisTime = ticks_to_usecs(newGameTime) - _scenario_start_time;
+        newGameTime = ticks_to_usecs(globals()->gGameTime + 12);
+        thisTime = newGameTime - _scenario_start_time;
         globals()->gLastTime = scrapTime - thisTime;
     }
 
-    int unitsPassed = newGameTime - globals()->gGameTime;
+    int unitsPassed = usecs_to_ticks(newGameTime) - globals()->gGameTime;
     int unitsDone = unitsPassed;
 
     if (unitsPassed <= 0) {
@@ -419,8 +419,8 @@ void GamePlay::fire_timer() {
     if (_player_paused) {
         _player_paused = false;
         unitsDone = unitsPassed = 0;
-        newGameTime = globals()->gGameTime;
-        thisTime = ticks_to_usecs(newGameTime) - _scenario_start_time;
+        newGameTime = ticks_to_usecs(globals()->gGameTime);
+        thisTime = newGameTime - _scenario_start_time;
         globals()->gLastTime = scrapTime - thisTime;
     }
 
