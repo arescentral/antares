@@ -115,6 +115,7 @@ void DrawMessageScreen(int32_t by_units);
 void SetStatusString(const sfz::StringSlice& status, unsigned char color);
 long DetermineDirectTextHeightInWidth( retroTextSpecType *, long);
 void DrawRetroTextCharInRect( retroTextSpecType *, long, const Rect&, const Rect&, PixMap *);
+void draw_message();
 
 }  // namespace antares
 

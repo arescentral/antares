@@ -131,16 +131,12 @@ void SelectLevelScreen::draw_level_name() const {
     const String chapter_name((*_scenario)->name());
 
     const interfaceItemType& i = item(NAME);
-    ArrayPixMap pix(i.bounds.width(), i.bounds.height());
 
     RgbColor color = GetRGBTranslateColorShade(AQUA, VERY_LIGHT);
     RetroText retro(chapter_name, kTitleFontNum, color, RgbColor::kBlack);
     retro.wrap_to(440, 2);
 
-    pix.fill(RgbColor::kBlack);
-    retro.draw(&pix, pix.size().as_rect());
-    scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite("/x/level_name", pix));
-    sprite->draw(i.bounds.left, i.bounds.top);
+    retro.draw(i.bounds);
 }
 
 }  // namespace antares

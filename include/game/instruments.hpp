@@ -33,6 +33,7 @@ void UpdateMoney();
 void InstrumentCleanup();
 void ResetInstruments();
 void DrawInstrumentPanel();
+void draw_instruments();
 void EraseSite();
 void update_site();
 void draw_site();

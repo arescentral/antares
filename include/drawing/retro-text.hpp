@@ -45,7 +45,9 @@ class RetroText {
     int height() const;
     int auto_width() const;
 
+    void draw(const Rect& bounds) const;
     void draw(PixMap* pix, const Rect& bounds) const;
+    void draw_char(const Rect& bounds, int index) const;
     void draw_char(PixMap* pix, const Rect& bounds, int index) const;
 
   private:

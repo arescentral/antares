@@ -31,6 +31,7 @@
 #include "game/labels.hpp"
 #include "game/scenario-maker.hpp"
 #include "ui/interface-handling.hpp"
+#include "video/driver.hpp"
 
 using sfz::Bytes;
 using sfz::BytesSlice;
@@ -964,6 +965,16 @@ void MessageLabel_Set_Special(short id, const StringSlice& text) {
     }
     attachPoint.v -= 2;
     SetScreenLabelAttachedHintLine(id, hintLine, attachPoint);
+}
+
+void draw_message() {
+    if (viewport.bottom == play_screen.bottom) {
+        return;
+    }
+    Rect message_rect(viewport.left, viewport.bottom, viewport.right, play_screen.bottom);
+    scoped_ptr<Sprite> message(VideoDriver::driver()->new_sprite(
+                "/x/message", gRealWorld->view(message_rect)));
+    message->draw(message_rect);
 }
 
 }  // namespace antares
