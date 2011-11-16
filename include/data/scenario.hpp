@@ -25,6 +25,7 @@
 #include "drawing/shapes.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
+#include "math/units.hpp"
 
 namespace antares {
 
@@ -49,7 +50,7 @@ const int32_t kScenarioAngleShift = 8;
 
 const int32_t kScenarioNoOwner = -1;
 
-const int32_t kScenarioTimeMultiple = 20;
+const int32_t kScenarioTimeMultiple = 20 * kTimeUnit;
 
 const int16_t kScenario_StartTimeMask   = 0x7fff;
 const int16_t kScenario_IsTraining_Bit  = 0x8000;

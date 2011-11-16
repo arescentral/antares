@@ -1092,9 +1092,9 @@ bool ConstructScenario(const Scenario* scenario) {
     ClearMessage();
 
     c2 = 0;
-    for ( count = 0; count < ((gThisScenario->startTime & kScenario_StartTimeMask) * 20); count++)
-    {
-        globals()->gGameTime = count;
+    const int64_t start_time = (gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple;
+    for (int64_t t = 0; t < start_time; t += kTimeUnit) {
+        globals()->gGameTime = usecs_to_ticks(t);
         MoveSpaceObjects( gSpaceObjectData.get(), kMaxSpaceObject,
                     kDecideEveryCycles);
         NonplayerShipThink( kDecideEveryCycles);
@@ -1109,13 +1109,13 @@ bool ConstructScenario(const Scenario* scenario) {
         }
         CullSprites();
         CullBeams();
-        if ((count % kScenarioTimeMultiple) == 0)
+        if ((t % kScenarioTimeMultiple) == 0)
         {
             currentStep++;
             UpdateLoadingInterface( currentStep, stepNumber, &loadingRect);
         }
     }
-    globals()->gGameTime = (gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple;
+    globals()->gGameTime = usecs_to_ticks(start_time);
 
     return( true);
 }
