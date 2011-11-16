@@ -1092,9 +1092,11 @@ bool ConstructScenario(const Scenario* scenario) {
     ClearMessage();
 
     c2 = 0;
-    const int64_t start_time = (gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple;
-    for (int64_t t = 0; t < start_time; t += kTimeUnit) {
-        globals()->gGameTime = t;
+    const int64_t start_ticks
+        = (gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple;
+    const int64_t start_time = add_ticks(0, start_ticks);
+    for (int64_t i = 0; i < start_ticks; ++i) {
+        globals()->gGameTime = add_ticks(globals()->gGameTime, 1);
         MoveSpaceObjects( gSpaceObjectData.get(), kMaxSpaceObject,
                     kDecideEveryCycles);
         NonplayerShipThink( kDecideEveryCycles);
@@ -1109,7 +1111,7 @@ bool ConstructScenario(const Scenario* scenario) {
         }
         CullSprites();
         CullBeams();
-        if ((t % kScenarioTimeMultiple) == 0)
+        if ((i % kScenarioTimeMultiple) == 0)
         {
             currentStep++;
             UpdateLoadingInterface( currentStep, stepNumber, &loadingRect);

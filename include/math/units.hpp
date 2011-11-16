@@ -31,6 +31,7 @@ const uint64_t kTimeUnit = 16667;
 
 inline int64_t ticks_to_usecs(int64_t ticks) { return ticks * kTimeUnit; }
 inline int64_t usecs_to_ticks(int64_t usecs) { return usecs / kTimeUnit; }
+inline int64_t add_ticks(int64_t usecs, int ticks) { return usecs + (ticks * kTimeUnit); }
 
 // max number of time units to move by at once
 const int32_t kMaxTimePerCycle = 3;

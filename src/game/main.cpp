@@ -197,11 +197,13 @@ GamePlay::GamePlay(bool replay, GameResult* game_result)
         : _state(PLAYING),
           _replay(replay),
           _game_result(game_result),
-          _next_timer(now_usecs() + kTimeUnit),
+          _next_timer(add_ticks(now_usecs(), 1)),
           _seconds(0),
           _play_area(viewport.left, viewport.top, viewport.right, viewport.bottom),
-          _scenario_start_time(
-                  (gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple),
+          _scenario_start_time(add_ticks(
+                      0,
+                      (gThisScenario->startTime & kScenario_StartTimeMask)
+                      * kScenarioTimeMultiple)),
           _command_and_q(BothCommandAndQ()),
           _mouse_down(false),
           _entering_message(false),
@@ -391,7 +393,7 @@ void GamePlay::fire_timer() {
     const Rect clip_rect = viewport;
 
     while (_next_timer < now_usecs()) {
-        _next_timer += kTimeUnit;
+        _next_timer = add_ticks(_next_timer, 1);
     }
 
     thisTime = now_usecs();
@@ -400,7 +402,7 @@ void GamePlay::fire_timer() {
     int64_t newGameTime = thisTime + _scenario_start_time;
 
     if ((mNOFFastMotionKey(_key_map)) && !_entering_message) {
-        newGameTime = globals()->gGameTime + 12 * kTimeUnit;
+        newGameTime = add_ticks(globals()->gGameTime, 12);
         thisTime = newGameTime - _scenario_start_time;
         globals()->gLastTime = scrapTime - thisTime;
     }
@@ -446,7 +448,7 @@ void GamePlay::fire_timer() {
             MoveSpaceObjects(gSpaceObjectData.get(), kMaxSpaceObject, unitsToDo);
         }
 
-        globals()->gGameTime += unitsToDo * kTimeUnit;
+        globals()->gGameTime = add_ticks(globals()->gGameTime, unitsToDo);
 
         if ( _decide_cycle == kDecideEveryCycles) {
             // everything in here gets executed once every kDecideEveryCycles
