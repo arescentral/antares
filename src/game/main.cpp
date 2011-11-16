@@ -108,7 +108,7 @@ class GamePlay : public Card {
     KeyMap _key_map;
     KeyMap _last_key_map;
     uint32_t _decide_cycle;
-    int _last_click_time;
+    int64_t _last_click_time;
     int _scenario_check_time;
     PlayAgainScreen::Item _play_again;
 };
@@ -467,15 +467,15 @@ void GamePlay::fire_timer() {
                     globals()->gGameOver = 1;
                 } else {
                     if (!_mouse_down) {
-                        int double_click_interval_ticks = usecs_to_ticks(
-                                VideoDriver::driver()->double_click_interval_usecs());
-                        if ((globals()->gGameTime - _last_click_time)
-                                <= double_click_interval_ticks) {
+                        int64_t double_click_interval
+                            = VideoDriver::driver()->double_click_interval_usecs();
+                        if ((ticks_to_usecs(globals()->gGameTime) - _last_click_time)
+                                <= double_click_interval) {
                             InstrumentsHandleDoubleClick();
-                            _last_click_time -= double_click_interval_ticks;
+                            _last_click_time -= double_click_interval;
                         } else {
                             InstrumentsHandleClick();
-                            _last_click_time = globals()->gGameTime;
+                            _last_click_time = ticks_to_usecs(globals()->gGameTime);
                         }
                         _mouse_down = true;
                     } else {
