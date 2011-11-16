@@ -388,7 +388,6 @@ bool GamePlay::next_timer(int64_t& time) {
 void GamePlay::fire_timer() {
     uint64_t thisTime;
     uint64_t scrapTime;
-    int newGameTime;
     const Rect clip_rect = viewport;
 
     while (_next_timer < now_usecs()) {
@@ -398,7 +397,7 @@ void GamePlay::fire_timer() {
     thisTime = now_usecs();
     scrapTime = thisTime;
     thisTime -= globals()->gLastTime;
-    newGameTime = usecs_to_ticks(thisTime + _scenario_start_time);
+    int64_t newGameTime = usecs_to_ticks(thisTime + _scenario_start_time);
 
     if ((mNOFFastMotionKey(_key_map)) && !_entering_message) {
         newGameTime = globals()->gGameTime + 12;
@@ -551,8 +550,7 @@ void GamePlay::fire_timer() {
     if (globals()->gGameOver > 0) {
         thisTime = now_usecs();
         thisTime -= globals()->gLastTime;
-        newGameTime = thisTime / 1000000; // divide by a million to get seconds
-        _seconds = newGameTime;
+        _seconds = thisTime / 1000000; // divide by a million to get seconds
 
         if (*_game_result == NO_GAME) {
             if (globals()->gScenarioWinner.player == globals()->gPlayerAdmiralNumber) {
