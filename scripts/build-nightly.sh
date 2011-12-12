@@ -20,6 +20,7 @@ grep >/dev/null '^APPNAME = "Antares"$' wscript
 # the "develop" branch.  Remove untracked files.
 $GIT checkout develop
 $GIT reset --hard develop
+$GIT pull
 $GIT submodule init
 $GIT submodule update
 $GIT clean -f
