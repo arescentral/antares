@@ -11,7 +11,7 @@ cd $ANTARES
 # Allow paths to utilities to be provided; use /usr/bin as default.
 GIT=${GIT-/usr/bin/git}
 ZIP=${ZIP-/usr/bin/zip}
-SCP=${SCP-/usr/bin/scp}
+GSUTIL=${GSUTIL-/usr/bin/gsutil}
 
 # Before we start messing with the repo, make sure it's the right one.
 grep >/dev/null '^APPNAME = "Antares"$' wscript
@@ -40,5 +40,5 @@ rm -f Antares-nightly.zip
 $ZIP -r Antares-nightly.zip Antares.app
 
 # Copy to downloads.arescentral.org.
-$SCP Antares-nightly.zip arescentral-downloads:Antares/
+$GSUTIL cp Antares-nightly.zip gs://downloads.arescentral.org/Antares/Antares-nightly.zip
 echo "done"
