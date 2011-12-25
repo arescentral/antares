@@ -631,26 +631,25 @@ void draw_sprites() {
                     ArrayPixMap pix(sprite_rect.width(), sprite_rect.height());
                     pix.fill(RgbColor::kClear);
                     StringSlice shape_name;
-                    const RgbColor& color = aSprite->tinyColor;
                     switch (aSprite->tinySize & kBlipTypeMask) {
                       case kTriangleUpBlip:
-                        DrawNateTriangleUpClipped(&pix, color);
+                        DrawNateTriangleUpClipped(&pix, RgbColor::kWhite);
                         shape_name = "triangle";
                         break;
 
                       case kFramedSquareBlip:
                       case kSolidSquareBlip:
-                        pix.fill(color);
+                        pix.fill(RgbColor::kWhite);
                         shape_name = "square";
                         break;
 
                       case kPlusBlip:
-                        DrawNatePlusClipped(&pix, color);
+                        DrawNatePlusClipped(&pix, RgbColor::kWhite);
                         shape_name = "plus";
                         break;
 
                       case kDiamondBlip:
-                        DrawNateDiamondClipped(&pix, color);
+                        DrawNateDiamondClipped(&pix, RgbColor::kWhite);
                         shape_name = "diamond";
                         break;
 
@@ -659,9 +658,9 @@ void draw_sprites() {
                     }
                     if (!shape_name.empty()) {
                         scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite(
-                                    format("/x/{0}/{1}: {2}", shape_name, tinySize, color),
+                                    format("/x/{0}/{1}", shape_name, tinySize),
                                     pix));
-                        sprite->draw(sprite_rect.left, sprite_rect.top);
+                        sprite->draw(sprite_rect.left, sprite_rect.top, aSprite->tinyColor);
                     }
                 }
             });
