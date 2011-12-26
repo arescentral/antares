@@ -38,7 +38,7 @@ using sfz::format;
 using sfz::range;
 using sfz::scoped_array;
 using sfz::scoped_ptr;
-using std::accumulate;
+using std::map;
 
 namespace antares {
 
@@ -57,6 +57,8 @@ const uint32_t kFramedSquareBlip    = 0x00000040;
 const uint32_t kBlipSizeMask        = 0x0000000f;
 const uint32_t kBlipTypeMask        = 0x000000f0;
 
+map<uint8_t, Sprite*> tiny_sprites;
+
 template <typename T>
 void zero(T* t) {
     *t = T();
@@ -65,6 +67,48 @@ void zero(T* t) {
 template <typename T>
 Range<T*> slice(T* array, size_t start, size_t end) {
     return Range<T*>(array + start, array + end);
+}
+
+Sprite* make_tiny_sprite(uint8_t id) {
+    uint8_t size = id & kBlipSizeMask;
+    uint8_t type = id & kBlipTypeMask;
+    if (size <= 0) {
+        return NULL;
+    }
+    if (tiny_sprites.find(id) == tiny_sprites.end()) {
+        ArrayPixMap pix(size * 2, size * 2);
+        pix.fill(RgbColor::kClear);
+        StringSlice shape_name;
+        switch (type) {
+          case kTriangleUpBlip:
+            DrawNateTriangleUpClipped(&pix, RgbColor::kWhite);
+            shape_name = "triangle";
+            break;
+
+          case kFramedSquareBlip:
+          case kSolidSquareBlip:
+            pix.fill(RgbColor::kWhite);
+            shape_name = "square";
+            break;
+
+          case kPlusBlip:
+            DrawNatePlusClipped(&pix, RgbColor::kWhite);
+            shape_name = "plus";
+            break;
+
+          case kDiamondBlip:
+            DrawNateDiamondClipped(&pix, RgbColor::kWhite);
+            shape_name = "diamond";
+            break;
+
+          default:
+            return NULL;
+        }
+        tiny_sprites[id] = VideoDriver::driver()->new_sprite(
+                format("/x/{0}/{1}", shape_name, size),
+                pix);
+    }
+    return tiny_sprites[id];
 }
 
 }  // namespace
@@ -122,7 +166,8 @@ spriteType::spriteType()
           styleColor(RgbColor::kWhite),
           styleData(0),
           whichLayer(kNoSpriteLayer),
-          killMe(false) { }
+          killMe(false),
+          tiny_sprite(NULL) { }
 
 void ResetAllSprites() {
     SFZ_FOREACH(int i, range(kMaxSpriteNum), {
@@ -210,6 +255,7 @@ spriteType *AddSprite(
             sprite->whichLayer = layer;
             sprite->tinySize = size;
             sprite->tinyColor = color;
+            sprite->tiny_sprite = make_tiny_sprite(size);
             sprite->killMe = false;
             sprite->style = spriteNormal;
             sprite->styleColor = RgbColor::kWhite;
@@ -624,44 +670,11 @@ void draw_sprites() {
                         && !aSprite->killMe
                         && (aSprite->tinyColor != kNoTinyColor)
                         && tinySize
+                        && (aSprite->tiny_sprite != NULL)
                         && (aSprite->whichLayer == layer)) {
-                    Rect sprite_rect(
-                            aSprite->where.h - tinySize, aSprite->where.v - tinySize,
-                            aSprite->where.h + tinySize, aSprite->where.v + tinySize);
-                    ArrayPixMap pix(sprite_rect.width(), sprite_rect.height());
-                    pix.fill(RgbColor::kClear);
-                    StringSlice shape_name;
-                    switch (aSprite->tinySize & kBlipTypeMask) {
-                      case kTriangleUpBlip:
-                        DrawNateTriangleUpClipped(&pix, RgbColor::kWhite);
-                        shape_name = "triangle";
-                        break;
-
-                      case kFramedSquareBlip:
-                      case kSolidSquareBlip:
-                        pix.fill(RgbColor::kWhite);
-                        shape_name = "square";
-                        break;
-
-                      case kPlusBlip:
-                        DrawNatePlusClipped(&pix, RgbColor::kWhite);
-                        shape_name = "plus";
-                        break;
-
-                      case kDiamondBlip:
-                        DrawNateDiamondClipped(&pix, RgbColor::kWhite);
-                        shape_name = "diamond";
-                        break;
-
-                      default:
-                        break;
-                    }
-                    if (!shape_name.empty()) {
-                        scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite(
-                                    format("/x/{0}/{1}", shape_name, tinySize),
-                                    pix));
-                        sprite->draw(sprite_rect.left, sprite_rect.top, aSprite->tinyColor);
-                    }
+                    aSprite->tiny_sprite->draw(
+                        aSprite->where.h - tinySize, aSprite->where.v - tinySize,
+                        aSprite->tinyColor);
                 }
             });
         });
