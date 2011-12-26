@@ -78,9 +78,11 @@ void InterfaceScreen::draw() const {
         }
     }
 
+    copy_area.offset(_bounds.left, _bounds.top);
+    VideoDriver::driver()->fill_rect(copy_area, RgbColor::kBlack);
+
     ArrayPixMap pix(_bounds.width(), _bounds.height());
     pix.fill(RgbColor::kClear);
-    pix.view(copy_area).fill(RgbColor::kBlack);
     for (vector<interfaceItemType>::const_iterator it = _items.begin(); it != _items.end(); ++it) {
         DrawAnyInterfaceItem(*it, &pix);
     }
