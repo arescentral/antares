@@ -330,16 +330,8 @@ void DrawCurrentLongMessage(int32_t time_pass) {
             CheckScenarioConditions( 0);
         // }
 
-        if (tmessage->lastResID >= 0) {
-            if (tmessage->lastLabelMessage) {
-                SetScreenLabelAge( tmessage->labelMessageID, 1);
-            } else {
-                lRect = Rect(viewport.left, play_screen.bottom - tmessage->textHeight,
-                        viewport.right, play_screen.bottom);
-                cRect = lRect;
-                DrawNateRect(gOffWorld, &cRect, RgbColor::kBlack);
-                tRect = lRect;
-            }
+        if ((tmessage->lastResID >= 0) && (tmessage->lastLabelMessage)) {
+            SetScreenLabelAge(tmessage->labelMessageID, 1);
         }
 
         // draw in offscreen world
@@ -352,14 +344,6 @@ void DrawCurrentLongMessage(int32_t time_pass) {
                     cRect = lRect;
                     DrawNateRect(gOffWorld, &cRect, color);
                     tRect = lRect;
-                    color = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
-                    DrawNateLine(
-                            gOffWorld, cRect, cRect.left, cRect.top, cRect.right - 1, cRect.top,
-                            color);
-                    DrawNateLine(
-                            gOffWorld,
-                            cRect, cRect.left, cRect.bottom - 1, cRect.right - 1, cRect.bottom - 1,
-                            color);
                 } else {
                     SetScreenLabelAge(tmessage->labelMessageID, 0);
 
@@ -369,13 +353,6 @@ void DrawCurrentLongMessage(int32_t time_pass) {
                     }
                 }
             }
-        } else if (!tmessage->labelMessage) {
-            lRect = Rect(
-                    viewport.left, play_screen.bottom - tmessage->textHeight, viewport.right,
-                    play_screen.bottom);
-            cRect = lRect;
-            DrawNateRect(gOffWorld, &cRect, RgbColor::kBlack);
-            tRect = lRect;
         }
         if ((tmessage->stage == kShowStage) || (tmessage->currentResID < 0)) {
             tmessage->lastResID = tmessage->currentResID;
@@ -957,10 +934,17 @@ void draw_message() {
     if (viewport.bottom == play_screen.bottom) {
         return;
     }
-    Rect message_rect(viewport.left, viewport.bottom, viewport.right, play_screen.bottom);
+
+    const RgbColor& dark_blue = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
+    const RgbColor& light_blue = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
+    Rect message_bounds(play_screen.left, viewport.bottom, play_screen.right, play_screen.bottom);
+    VideoDriver::driver()->fill_rect(message_bounds, light_blue);
+    message_bounds.inset(0, 1);
+    VideoDriver::driver()->fill_rect(message_bounds, dark_blue);
+
     scoped_ptr<Sprite> message(VideoDriver::driver()->new_sprite(
-                "/x/message", gRealWorld->view(message_rect)));
-    message->draw(message_rect);
+                "/x/message", gRealWorld->view(message_bounds)));
+    message->draw(message_bounds);
 }
 
 }  // namespace antares
