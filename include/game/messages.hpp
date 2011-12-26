@@ -106,7 +106,7 @@ void ClearMessage( void);
 void AddMessage(const sfz::PrintItem& message);
 void StartLongMessage( short, short);
 void ClipToCurrentLongMessage( void);
-void DrawCurrentLongMessage( long);
+void DrawCurrentLongMessage(int32_t time_pass);
 void EndLongMessage( void);
 void AdvanceCurrentLongMessage( void);
 void PreviousCurrentLongMessage( void);

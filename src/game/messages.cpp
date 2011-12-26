@@ -309,19 +309,16 @@ void ClipToCurrentLongMessage( void)
     }
 }
 
-void DrawCurrentLongMessage( long timePass)
-
-{
+void DrawCurrentLongMessage(int32_t time_pass) {
     Rect            tRect, uRect;
-    Rect        lRect, cRect;
+    Rect            lRect, cRect;
     short           i;
     longMessageType *tmessage;
     RgbColor        color;
 
     tmessage = globals()->gLongMessageData.get();
-    if (( tmessage->currentResID != tmessage->lastResID) ||
-        ( tmessage->newStringMessage))
-    {
+    if ((tmessage->currentResID != tmessage->lastResID)
+            || (tmessage->newStringMessage)) {
         // TODO(sfiera): figure out what this meant.
         //
         // we check scenario conditions here for ambrosia tutorial
@@ -333,13 +330,10 @@ void DrawCurrentLongMessage( long timePass)
             CheckScenarioConditions( 0);
         // }
 
-        if (tmessage->lastResID >= 0)
-        {
-            if ( tmessage->lastLabelMessage)
-            {
+        if (tmessage->lastResID >= 0) {
+            if (tmessage->lastLabelMessage) {
                 SetScreenLabelAge( tmessage->labelMessageID, 1);
-            } else
-            {
+            } else {
                 lRect = Rect(viewport.left, play_screen.bottom - tmessage->textHeight,
                         viewport.right, play_screen.bottom);
                 cRect = lRect;
@@ -349,27 +343,25 @@ void DrawCurrentLongMessage( long timePass)
         }
 
         // draw in offscreen world
-        if (( tmessage->currentResID >= 0) && ( tmessage->stage == kShowStage))
-        {
+        if ((tmessage->currentResID >= 0) && ( tmessage->stage == kShowStage)) {
             if (tmessage->retroTextSpec.text.get() != NULL) {
-                if ( !tmessage->labelMessage)
-                {
-                    lRect = Rect(viewport.left, viewport.bottom, viewport.right,
-                            play_screen.bottom);
+                if (!tmessage->labelMessage) {
+                    lRect = Rect(
+                            viewport.left, viewport.bottom, viewport.right, play_screen.bottom);
                     color = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
                     cRect = lRect;
                     DrawNateRect(gOffWorld, &cRect, color);
                     tRect = lRect;
                     color = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
-    //              DrawDirectTextInRect( (anyCharType *)*tmessage->retroTextSpec.text, tmessage->retroTextSpec.textLength,
-    //                      &lRect, *offPixBase, 0, 0, 0);
-                    DrawNateLine(gOffWorld, cRect, cRect.left, cRect.top, cRect.right - 1,
-                        cRect.top, color);
-                    DrawNateLine(gOffWorld, cRect, cRect.left, cRect.bottom - 1, cRect.right - 1,
-                        cRect.bottom - 1, color);
-                } else
-                {
-                    SetScreenLabelAge( tmessage->labelMessageID, 0);
+                    DrawNateLine(
+                            gOffWorld, cRect, cRect.left, cRect.top, cRect.right - 1, cRect.top,
+                            color);
+                    DrawNateLine(
+                            gOffWorld,
+                            cRect, cRect.left, cRect.bottom - 1, cRect.right - 1, cRect.bottom - 1,
+                            color);
+                } else {
+                    SetScreenLabelAge(tmessage->labelMessageID, 0);
 
                     if (tmessage->retroTextSpec.text.get()) {
                         MessageLabel_Set_Special( tmessage->labelMessageID,
@@ -377,48 +369,44 @@ void DrawCurrentLongMessage( long timePass)
                     }
                 }
             }
-        } else if ( !tmessage->labelMessage)
-        {
-            lRect = Rect(viewport.left, play_screen.bottom - tmessage->textHeight, viewport.right,
+        } else if (!tmessage->labelMessage) {
+            lRect = Rect(
+                    viewport.left, play_screen.bottom - tmessage->textHeight, viewport.right,
                     play_screen.bottom);
             cRect = lRect;
             DrawNateRect(gOffWorld, &cRect, RgbColor::kBlack);
             tRect = lRect;
         }
-        if (( tmessage->stage == kShowStage) || (  tmessage->currentResID < 0))
-        {
+        if ((tmessage->stage == kShowStage) || (tmessage->currentResID < 0)) {
             tmessage->lastResID = tmessage->currentResID;
             tmessage->lastLabelMessage = tmessage->labelMessage;
             tmessage->newStringMessage = false;
         }
-    } else
-    {
+    } else {
         if ((tmessage->labelMessage) && (tmessage->retroTextSpec.text.get() != NULL)) {
             tmessage->retroTextSpec.text.reset();
-        } else if ((tmessage->currentResID >= 0) && (tmessage->retroTextSpec.text.get() != NULL) &&
-            ( tmessage->retroTextSpec.thisPosition < tmessage->retroTextSpec.textLength) && ( tmessage->stage == kShowStage))
-        {
-            tmessage->charDelayCount += timePass;
-            if ( tmessage->charDelayCount > 0)
-            {
+        } else if ((tmessage->currentResID >= 0)
+                && (tmessage->retroTextSpec.text.get() != NULL)
+                && (tmessage->retroTextSpec.thisPosition < tmessage->retroTextSpec.textLength)
+                && (tmessage->stage == kShowStage)) {
+            tmessage->charDelayCount += time_pass;
+            if (tmessage->charDelayCount > 0) {
                 mSetDirectFont( kLongMessageFontNum);
                 lRect = Rect(viewport.left, viewport.bottom, viewport.right, play_screen.bottom);
-                PlayVolumeSound(  kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
-                while ( tmessage->charDelayCount > 0)
-                {
+                PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
+                while (tmessage->charDelayCount > 0) {
                     i = 3;
 
-                    if ((tmessage->retroTextSpec.text.get() != NULL) &&
-                        ( tmessage->retroTextSpec.thisPosition < tmessage->retroTextSpec.textLength))
-                    {
-
+                    if ((tmessage->retroTextSpec.text.get() != NULL)
+                            && (tmessage->retroTextSpec.thisPosition <
+                                tmessage->retroTextSpec.textLength)) {
                         tRect.left = tmessage->retroTextSpec.xpos;
-                        tRect.top = tmessage->retroTextSpec.ypos -
-                            (mDirectFontAscent()  + tmessage->retroTextSpec.topBuffer);
+                        tRect.top = tmessage->retroTextSpec.ypos
+                            - (mDirectFontAscent()  + tmessage->retroTextSpec.topBuffer);
                         tRect.right = tRect.left + gDirectText->logicalWidth;
-                        tRect.bottom = tRect.top + mDirectFontHeight() +
-                            tmessage->retroTextSpec.topBuffer +
-                            tmessage->retroTextSpec.bottomBuffer;
+                        tRect.bottom = tRect.top + mDirectFontHeight()
+                            + tmessage->retroTextSpec.topBuffer
+                            + tmessage->retroTextSpec.bottomBuffer;
 
                         lRect.left += kHBuffer;
                         lRect.right -= kHBuffer;
@@ -430,21 +418,19 @@ void DrawCurrentLongMessage( long timePass)
                         lRect.right += kHBuffer;
 
                         uRect.left = tmessage->retroTextSpec.xpos;
-                        uRect.top = tmessage->retroTextSpec.ypos -
-                            (mDirectFontAscent()  + tmessage->retroTextSpec.topBuffer);
+                        uRect.top = tmessage->retroTextSpec.ypos
+                            - (mDirectFontAscent() + tmessage->retroTextSpec.topBuffer);
                         uRect.right = uRect.left + gDirectText->logicalWidth;
-                        uRect.bottom = uRect.top + mDirectFontHeight() +
-                            tmessage->retroTextSpec.topBuffer +
-                                tmessage->retroTextSpec.bottomBuffer;
-                        if ( uRect.left <= tRect.left)
-                        {
+                        uRect.bottom = uRect.top + mDirectFontHeight()
+                            + tmessage->retroTextSpec.topBuffer
+                            + tmessage->retroTextSpec.bottomBuffer;
+                        if (uRect.left <= tRect.left) {
                             uRect.right = lRect.right;
                             uRect.left = lRect.left;
                         }
                         tRect.enlarge_to(uRect);
-                        if ( tmessage->retroTextSpec.thisPosition >
-                            tmessage->retroTextSpec.textLength)
-                        {
+                        if (tmessage->retroTextSpec.thisPosition
+                                > tmessage->retroTextSpec.textLength) {
                             tmessage->retroTextSpec.text.reset();
                         }
                     }
