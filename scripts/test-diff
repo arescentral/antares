@@ -1,94 +1,20 @@
-#!/usr/bin/env python
+#!/bin/bash
 
-import PIL.Image
-import difflib
-import mimetypes
-import os
-import sys
-
-failed = False
-
-differs = {}
-
-def fail(message):
-    sys.stderr.write("%s\n" % message)
-    failed = True
-
-def diff(x, y, out):
-    if os.path.isdir(x) != os.path.isdir(y):
-        fail("types differ: %s and %s" % (x, y))
-    elif os.path.isdir(x):
-        os.mkdir(out)
-        x_files = set(os.listdir(x))
-        y_files = set(os.listdir(y))
-        x_only_files = x_files - y_files
-        both_files = x_files & y_files
-        y_only_files = y_files - x_files
-        files = sorted(
-                [(f, "-") for f in x_only_files] +
-                [(f, " ") for f in both_files] +
-                [(f, "+") for f in y_only_files])
-        for f, mode in files:
-            if mode == "-":
-                fail("Only in %s: %s" % (x, f))
-            elif mode == "+":
-                fail("Only in %s: %s" % (y, f))
-            else:
-                diff(os.path.join(x, f), os.path.join(y, f), os.path.join(out, f))
-    else:
-        mime_type, encoding = mimetypes.guess_type(x)
-        differs[mime_type](x, y, out)
-
-
-def text_diff(x, y, out):
-    with open(x) as f:
-        x_content = f.read()
-    with open(y) as f:
-        y_content = f.read()
-    if x_content != y_content:
-        fail("files differ: %s and %s" % (x, y))
-        s = "\n".join(difflib.unified_diff(x_content, y_content, x, y))
-        with open(out, "w") as f:
-            f.write(s)
-differs["text/plain"] = text_diff
-
-
-def whiten(r, g, b, a):
-    r = 255 - ((255 - r) / 4)
-    g = 255 - ((255 - g) / 4)
-    b = 255 - ((255 - b) / 4)
-    return r, g, b, a
-
-
-def redden(r, g, b, a):
-    r = 255 - ((255 - r) / 2)
-    g = g / 2
-    b = b / 2
-    return r, g, b, a
-
-
-def image_diff(x, y, out):
-    x_im = PIL.Image.open(x).convert("RGBA")
-    y_im = PIL.Image.open(y).convert("RGBA")
-    if x_im.size != y_im.size:
-        fail("image sizes differ: %s and %s" % (x, y))
-        return
-
-    if list(x_im.getdata()) != list(y_im.getdata()):
-        fail("images differ: %s and %s" % (x, y))
-        out_data = []
-        for x_pixel, y_pixel in zip(x_im.getdata(), y_im.getdata()):
-            if x_pixel == y_pixel:
-                out_data.append(whiten(*x_pixel))
-            else:
-                out_data.append(redden(*y_pixel))
-        out_im = PIL.Image.new(x_im.mode, x_im.size)
-        out_im.putdata(out_data)
-        out_im.save(out)
-differs["image/png"] = image_diff
-
-
-_, x, y, out = sys.argv
-diff(x, y, out)
-if failed:
-    sys.exit(1)
+if [ "$#" != 3 ]; then
+    echo 1>&2 "usage: $0 A B OUT"
+    exit 64
+fi
+IFS=""
+diff -rq "$1" "$2" | while read LINE; do
+    A="${${LINE#Files }% and *}"
+    B="${${LINE#* and }% differ}"
+    C="$3${A#$1}"
+    mkdir -p "$(dirname $C)"
+    if [ "${A%.png}" != "$A" ]; then
+        echo "Images $A and $B differ"
+        compare "$A" "$B" "$C"
+    else
+        echo "Files $A and $B differ"
+        diff -u "$A" "$B" > "$C"
+    fi
+done
