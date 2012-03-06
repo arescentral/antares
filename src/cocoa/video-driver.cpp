@@ -26,6 +26,7 @@
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
 #include <sfz/sfz.hpp>
+#include <sys/time.h>
 
 #include "cocoa/c/CocoaVideoDriver.h"
 #include "cocoa/core-opengl.hpp"

@@ -3,7 +3,7 @@
 APPNAME = "Antares"
 VERSION = "0.5.1"
 
-WARNINGS = ["-Wall", "-Werror", "-Wno-sign-compare"]
+WARNINGS = ["-Wall", "-Werror", "-Wno-sign-compare", "-Wno-deprecated-declarations"]
 
 def common(ctx):
     ctx.default_sdk = "10.4"
