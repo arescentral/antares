@@ -30,6 +30,8 @@
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
 
+#include "game/time.hpp"
+
 using sfz::Exception;
 using sfz::PrintItem;
 using sfz::String;
@@ -78,17 +80,17 @@ class OpenGlSprite : public Sprite {
         return _name;
     }
 
-    virtual void draw(int32_t x, int32_t y) const {
+    virtual void draw(int32_t x, int32_t y, const RgbColor& color) const {
         const int32_t w = _size.width;
         const int32_t h = _size.height;
-        draw(Rect(x, y, x + w, y + h));
+        draw(Rect(x, y, x + w, y + h), color);
     }
 
-    virtual void draw(const Rect& draw_rect) const {
+    virtual void draw(const Rect& draw_rect, const RgbColor& color) const {
         const int32_t w = _size.width;
         const int32_t h = _size.height;
         glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
-        glColor4f(1, 1, 1, 1);
+        glColor4ub(color.red, color.green, color.blue, color.alpha);
         glBegin(GL_QUADS);
         glTexCoord2f(0, 0);
         glVertex2f(draw_rect.left, draw_rect.top);
