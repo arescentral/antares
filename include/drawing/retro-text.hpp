@@ -50,12 +50,16 @@ class RetroText {
     void draw_char(const Rect& bounds, int index) const;
     void draw_char(PixMap* pix, const Rect& bounds, int index) const;
 
+    void draw_cursor(PixMap* pix, const Rect& bounds, int index) const;
+    void erase_cursor(PixMap* pix, const Rect& bounds, int index) const;
+
   private:
     enum SpecialChar {
         NONE,
         TAB,
         WORD_BREAK,
         LINE_BREAK,
+        DELAY,
     };
 
     struct RetroChar {
@@ -71,8 +75,11 @@ class RetroText {
         int v;
     };
 
+    void color_cursor(PixMap* pix, const Rect& bounds, int index, const RgbColor& color) const;
     int move_word_down(int index, int v);
 
+    RgbColor _original_fore_color;
+    RgbColor _original_back_color;
     std::vector<RetroChar> _chars;
     int _tab_width;
     int _width;

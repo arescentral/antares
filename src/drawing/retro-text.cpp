@@ -56,9 +56,11 @@ int hex_digit(uint32_t c) {
 
 }  // namespace
 
-RetroText::RetroText(const StringSlice& text, int font, RgbColor fore_color, RgbColor back_color)
-        : _tab_width(0),
-          _font(font) {
+RetroText::RetroText(const StringSlice& text, int font, RgbColor fore_color, RgbColor back_color):
+        _original_fore_color(fore_color),
+        _original_back_color(back_color),
+        _tab_width(0),
+        _font(font) {
     const RgbColor original_fore_color = fore_color;
     const RgbColor original_back_color = back_color;
 
@@ -85,6 +87,8 @@ RetroText::RetroText(const StringSlice& text, int font, RgbColor fore_color, Rgb
             switch (text.at(i)) {
               case 'i':
                 std::swap(fore_color, back_color);
+                _chars.push_back(RetroChar('\\', DELAY, fore_color, back_color));
+                _chars.push_back(RetroChar('i', DELAY, fore_color, back_color));
                 break;
 
               case 'f':
@@ -108,10 +112,12 @@ RetroText::RetroText(const StringSlice& text, int font, RgbColor fore_color, Rgb
               case 'r':
                 fore_color = original_fore_color;
                 back_color = original_back_color;
+                _chars.push_back(RetroChar('\\', DELAY, fore_color, back_color));
+                _chars.push_back(RetroChar('r', DELAY, fore_color, back_color));
                 break;
 
               case 't':
-                _chars.push_back(RetroChar('\t', TAB, fore_color, back_color));
+                _chars.push_back(RetroChar('\\', TAB, fore_color, back_color));
                 break;
 
               case '\\':
@@ -173,6 +179,9 @@ void RetroText::wrap_to(int width, int line_spacing) {
 
           case WORD_BREAK:
             h += char_width(_chars[i].character);
+            break;
+
+          case DELAY:
             break;
         }
     }
@@ -250,6 +259,9 @@ void RetroText::draw_char(const Rect& bounds, int index) const {
             VideoDriver::driver()->fill_rect(line_rect, ch.back_color);
         }
         break;
+
+      case DELAY:
+        break;
     }
 }
 
@@ -289,6 +301,31 @@ void RetroText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
             DrawNateRect(pix, &line_rect, ch.back_color);
         }
         break;
+
+      case DELAY:
+        break;
+    }
+}
+
+void RetroText::draw_cursor(PixMap* pix, const Rect& bounds, int index) const {
+    color_cursor(pix, bounds, index, _original_fore_color);
+}
+
+void RetroText::erase_cursor(PixMap* pix, const Rect& bounds, int index) const {
+    color_cursor(pix, bounds, index, _original_back_color);
+}
+
+void RetroText::color_cursor(
+        PixMap* pix, const Rect& bounds, int index, const RgbColor& color) const {
+    mSetDirectFont(_font);
+    const int line_height = mDirectFontHeight() + _line_spacing;
+    const RetroChar& ch = _chars[index];
+    Point corner(bounds.left + ch.h, bounds.top + ch.v);
+    Rect char_rect(0, 0, gDirectText->logicalWidth, line_height);
+    char_rect.offset(corner.h, corner.v);
+    char_rect.clip_to(bounds);
+    if ((char_rect.width() > 0) && (char_rect.height() > 0)) {
+        DrawNateRect(pix, &char_rect, color);
     }
 }
 
@@ -300,6 +337,7 @@ int RetroText::move_word_down(int index, int v) {
 
           case WORD_BREAK:
           case TAB:
+          case DELAY:
             {
                 if (_chars[i + 1].h == 0) {
                     return 0;

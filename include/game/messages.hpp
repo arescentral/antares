@@ -24,6 +24,7 @@
 #include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
+#include "drawing/retro-text.hpp"
 #include "drawing/shapes.hpp"
 #include "math/geometry.hpp"
 
@@ -90,7 +91,10 @@ struct longMessageType {
     sfz::String             stringMessage;
     sfz::String             lastStringMessage;
     bool                 newStringMessage;
-    retroTextSpecType       retroTextSpec;
+    sfz::String             text;
+    sfz::scoped_ptr<RetroText> retro_text;
+    Point                   retro_origin;
+    int32_t                 at_char;
     bool                 labelMessage;
     bool                 lastLabelMessage;
     short                   labelMessageID;

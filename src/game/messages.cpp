@@ -143,16 +143,12 @@ void InitMessageScreen() {
     tmessage->time = 0;
     tmessage->stage = kNoStage;
     tmessage->textHeight = 0;
-    tmessage->retroTextSpec.text.reset();
-    tmessage->retroTextSpec.textLength = 0;
-    tmessage->retroTextSpec.thisPosition = 0;
+    tmessage->retro_text.reset();
     tmessage->charDelayCount = 0;
     tmessage->pictBounds.left = tmessage->pictBounds.right= 0;
     tmessage->pictCurrentLeft = 0;
     tmessage->pictCurrentTop = 0;
     tmessage->pictID = -1;
-    tmessage->retroTextSpec.topBuffer = kMessageCharTopBuffer;
-    tmessage->retroTextSpec.bottomBuffer = kMessageCharBottomBuffer;
     tmessage->stringMessage.clear();
     tmessage->lastStringMessage.clear();
     tmessage->newStringMessage = false;
@@ -188,7 +184,7 @@ void ClearMessage( void) {
     tmessage->newStringMessage = false;
     tmessage->labelMessage = false;
     tmessage->lastLabelMessage = false;
-    tmessage->retroTextSpec.text.reset();
+    tmessage->retro_text.reset();
     viewport.bottom = play_screen.bottom;
     tmessage->labelMessageID = AddScreenLabel(0, 0, 0, 0, NULL, false, SKY_BLUE);
     SetScreenLabelKeepOnScreenAnyway( tmessage->labelMessageID, true);
@@ -221,11 +217,7 @@ void StartLongMessage( short startResID, short endResID)
         tmessage->time = 0;
         tmessage->stage = kStartStage;
         tmessage->textHeight = 0;
-        tmessage->retroTextSpec.text.reset();
-        tmessage->retroTextSpec.textLength = 0;
-        tmessage->retroTextSpec.thisPosition = 0;
-        tmessage->retroTextSpec.topBuffer = kMessageCharTopBuffer;
-        tmessage->retroTextSpec.bottomBuffer = kMessageCharBottomBuffer;
+        tmessage->retro_text.reset();
         tmessage->charDelayCount = 0;
         tmessage->pictBounds.left = tmessage->pictBounds.right= 0;
         // tmessage->pictDelayCount;
@@ -271,20 +263,31 @@ void ClipToCurrentLongMessage( void)
                 else tmessage->labelMessage = false;
 
             }
-            if (textData.get() != NULL)
-            {
-                mSetDirectFont( kLongMessageFontNum);
-                tmessage->retroTextSpec.text.reset(textData.release());
-                tmessage->retroTextSpec.textLength = tmessage->retroTextSpec.text->size();
-                tmessage->textHeight = DetermineDirectTextHeightInWidth(
-                        &tmessage->retroTextSpec, viewport.width() - kHBuffer);
+            if (textData.get() != NULL) {
+                const RgbColor& light_blue = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
+                const RgbColor& dark_blue = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
+                mSetDirectFont(kLongMessageFontNum);
+                tmessage->text.assign(*textData);
+                tmessage->retro_text.reset(
+                        new RetroText(*textData, kLongMessageFontNum, light_blue, dark_blue));
+                tmessage->retro_text->set_tab_width(60);
+                tmessage->retro_text->wrap_to(
+                        viewport.width() - kHBuffer - gDirectText->logicalWidth, 0);
+                tmessage->textHeight = tmessage->retro_text->height();
                 tmessage->textHeight += kLongMessageVPadDouble;
+                tmessage->retro_origin = Point(
+                        viewport.left + kHBuffer,
+                        viewport.bottom + mDirectFontAscent() + kLongMessageVPad);
+                tmessage->at_char = 0;
 
-                if ( tmessage->labelMessage == false)
+                if (tmessage->labelMessage == false) {
                     viewport.bottom = play_screen.bottom - tmessage->textHeight;
-                else
+                } else {
                     viewport.bottom = play_screen.bottom;
+                }
+                tmessage->stage = kShowStage;
 
+                /*
                 tmessage->retroTextSpec.topBuffer = kMessageCharTopBuffer;
                 tmessage->retroTextSpec.bottomBuffer = kMessageCharBottomBuffer;
                 tmessage->retroTextSpec.thisPosition = 0;
@@ -292,7 +295,6 @@ void ClipToCurrentLongMessage( void)
                 tmessage->retroTextSpec.linePosition = 0;
                 tmessage->retroTextSpec.xpos = viewport.left + kHBuffer;
                 tmessage->retroTextSpec.ypos = viewport.bottom + mDirectFontAscent() + kLongMessageVPad + tmessage->retroTextSpec.topBuffer;
-                tmessage->stage = kShowStage;
                 tmessage->retroTextSpec.tabSize = 60;
                 tmessage->retroTextSpec.color = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
                 tmessage->retroTextSpec.backColor = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
@@ -300,9 +302,9 @@ void ClipToCurrentLongMessage( void)
                 tmessage->retroTextSpec.nextBackColor = tmessage->retroTextSpec.backColor;
                 tmessage->retroTextSpec.originalColor = tmessage->retroTextSpec.color;
                 tmessage->retroTextSpec.originalBackColor = tmessage->retroTextSpec.backColor;
+                */
             }
-        } else
-        {
+        } else {
             viewport.bottom = play_screen.bottom;
             tmessage->stage = kClipStage;
         }
@@ -312,7 +314,6 @@ void ClipToCurrentLongMessage( void)
 void DrawCurrentLongMessage(int32_t time_pass) {
     Rect            tRect, uRect;
     Rect            lRect, cRect;
-    short           i;
     longMessageType *tmessage;
     RgbColor        color;
 
@@ -336,7 +337,7 @@ void DrawCurrentLongMessage(int32_t time_pass) {
 
         // draw in offscreen world
         if ((tmessage->currentResID >= 0) && ( tmessage->stage == kShowStage)) {
-            if (tmessage->retroTextSpec.text.get() != NULL) {
+            if (tmessage->retro_text.get() != NULL) {
                 if (!tmessage->labelMessage) {
                     lRect = Rect(
                             viewport.left, viewport.bottom, viewport.right, play_screen.bottom);
@@ -347,9 +348,8 @@ void DrawCurrentLongMessage(int32_t time_pass) {
                 } else {
                     SetScreenLabelAge(tmessage->labelMessageID, 0);
 
-                    if (tmessage->retroTextSpec.text.get()) {
-                        MessageLabel_Set_Special( tmessage->labelMessageID,
-                                *tmessage->retroTextSpec.text);
+                    if (tmessage->retro_text.get() != NULL) {
+                        MessageLabel_Set_Special(tmessage->labelMessageID, tmessage->text);
                     }
                 }
             }
@@ -359,61 +359,33 @@ void DrawCurrentLongMessage(int32_t time_pass) {
             tmessage->lastLabelMessage = tmessage->labelMessage;
             tmessage->newStringMessage = false;
         }
-    } else {
-        if ((tmessage->labelMessage) && (tmessage->retroTextSpec.text.get() != NULL)) {
-            tmessage->retroTextSpec.text.reset();
-        } else if ((tmessage->currentResID >= 0)
-                && (tmessage->retroTextSpec.text.get() != NULL)
-                && (tmessage->retroTextSpec.thisPosition < tmessage->retroTextSpec.textLength)
-                && (tmessage->stage == kShowStage)) {
-            tmessage->charDelayCount += time_pass;
-            if (tmessage->charDelayCount > 0) {
-                mSetDirectFont( kLongMessageFontNum);
-                lRect = Rect(viewport.left, viewport.bottom, viewport.right, play_screen.bottom);
-                PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
-                while (tmessage->charDelayCount > 0) {
-                    i = 3;
-
-                    if ((tmessage->retroTextSpec.text.get() != NULL)
-                            && (tmessage->retroTextSpec.thisPosition <
-                                tmessage->retroTextSpec.textLength)) {
-                        tRect.left = tmessage->retroTextSpec.xpos;
-                        tRect.top = tmessage->retroTextSpec.ypos
-                            - (mDirectFontAscent()  + tmessage->retroTextSpec.topBuffer);
-                        tRect.right = tRect.left + gDirectText->logicalWidth;
-                        tRect.bottom = tRect.top + mDirectFontHeight()
-                            + tmessage->retroTextSpec.topBuffer
-                            + tmessage->retroTextSpec.bottomBuffer;
-
-                        lRect.left += kHBuffer;
-                        lRect.right -= kHBuffer;
-
-                        DrawRetroTextCharInRect( &(tmessage->retroTextSpec),
-                            3, lRect, lRect, gOffWorld);
-
-                        lRect.left -= kHBuffer;
-                        lRect.right += kHBuffer;
-
-                        uRect.left = tmessage->retroTextSpec.xpos;
-                        uRect.top = tmessage->retroTextSpec.ypos
-                            - (mDirectFontAscent() + tmessage->retroTextSpec.topBuffer);
-                        uRect.right = uRect.left + gDirectText->logicalWidth;
-                        uRect.bottom = uRect.top + mDirectFontHeight()
-                            + tmessage->retroTextSpec.topBuffer
-                            + tmessage->retroTextSpec.bottomBuffer;
-                        if (uRect.left <= tRect.left) {
-                            uRect.right = lRect.right;
-                            uRect.left = lRect.left;
-                        }
-                        tRect.enlarge_to(uRect);
-                        if (tmessage->retroTextSpec.thisPosition
-                                > tmessage->retroTextSpec.textLength) {
-                            tmessage->retroTextSpec.text.reset();
-                        }
-                    }
-                    tmessage->charDelayCount -= 3;
-                }
+    } else if ((tmessage->currentResID >= 0)
+            && (tmessage->retro_text.get() != NULL)
+            && (tmessage->at_char < tmessage->retro_text->size())
+            && (tmessage->stage == kShowStage)
+            && !tmessage->labelMessage) {
+        time_pass = std::min(time_pass, tmessage->retro_text->size() - tmessage->at_char);
+        // Play teletype sound at least once every 3 ticks.
+        tmessage->charDelayCount += time_pass;
+        if (tmessage->charDelayCount > 0) {
+            mSetDirectFont( kLongMessageFontNum);
+            PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
+            while (tmessage->charDelayCount > 0) {
+                tmessage->charDelayCount -= 3;
             }
+        }
+        // Display one additional char per tick.
+        Rect bounds(viewport.left, viewport.bottom, viewport.right, play_screen.bottom);
+        bounds.inset(kHBuffer, 0);
+        bounds.top += kLongMessageVPad;
+        for (int i = 0; i < time_pass; ++i) {
+            tmessage->retro_text->erase_cursor(gOffWorld, bounds, tmessage->at_char);
+            tmessage->retro_text->draw_char(gOffWorld, bounds, tmessage->at_char);
+            ++tmessage->at_char;
+        }
+        // The final char is a newline; don't display a cursor rect for it.
+        if (tmessage->at_char < (tmessage->retro_text->size() - 1)) {
+            tmessage->retro_text->draw_cursor(gOffWorld, bounds, tmessage->at_char);
         }
     }
 }
@@ -430,7 +402,7 @@ void EndLongMessage( void)
     tmessage->endResID = -1;
     tmessage->currentResID = -1;
     tmessage->stage = kStartStage;
-    tmessage->retroTextSpec.text.reset();
+    tmessage->retro_text.reset();
     tmessage->lastStringMessage.assign(tmessage->stringMessage);
 }
 
