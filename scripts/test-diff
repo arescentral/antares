@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/zsh
 
 if [ "$#" != 3 ]; then
     echo 1>&2 "usage: $0 A B OUT"
