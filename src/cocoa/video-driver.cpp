@@ -30,6 +30,8 @@
 
 #include "cocoa/c/CocoaVideoDriver.h"
 #include "cocoa/core-opengl.hpp"
+#include "cocoa/fullscreen.hpp"
+#include "cocoa/windowed.hpp"
 #include "game/time.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
@@ -43,37 +45,6 @@ using std::queue;
 namespace antares {
 
 namespace {
-
-namespace cg {
-
-class DisplayCapturer {
-  public:
-    DisplayCapturer() {
-        CGDisplayErr err = CGCaptureAllDisplays();
-        if (err != CGDisplayNoErr) {
-            throw Exception("CGCaptureAllDisplays() failed");
-            return;
-        }
-    }
-
-    ~DisplayCapturer() {
-        CGReleaseAllDisplays();
-    }
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(DisplayCapturer);
-};
-
-}  // namespace cg
-
-class MenuBarHider {
-  public:
-    MenuBarHider() { antares_menu_bar_hide(); }
-    ~MenuBarHider() { antares_menu_bar_show(); }
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(MenuBarHider);
-};
 
 int64_t usecs() {
     timeval tv;
@@ -108,8 +79,9 @@ void enqueue_key_up(int32_t key, void* userdata) {
 
 }  // namespace
 
-CocoaVideoDriver::CocoaVideoDriver(Size screen_size)
+CocoaVideoDriver::CocoaVideoDriver(bool fullscreen, Size screen_size)
         : OpenGlVideoDriver(screen_size),
+          _fullscreen(fullscreen),
           _start_time(usecs()),
           _translator(screen_size.width, screen_size.height),
           _event_tracker(false) {
@@ -184,20 +156,13 @@ void CocoaVideoDriver::loop(Card* initial) {
 
     cgl::PixelFormat pixel_format(attrs);
     cgl::Context context(pixel_format.c_obj(), NULL);
-    cg::DisplayCapturer capturer;
-
-    // TODO(sfiera): control the resolution of the OpenGL context by setting the resolution of
-    // the backing store, rather than the screen.  Setting the backing store's resolution
-    // independently appears to have only been supported since 10.6, and since we currently
-    // target 10.4, we need to control the screen resolution directly for the time being.
-    CGDisplaySwitchToMode(kCGDirectMainDisplay, CGDisplayBestModeForParameters(
-                kCGDirectMainDisplay, 32, screen_size().width, screen_size().height,
-                NULL));
-
-    cgl::check(CGLSetFullScreen(context.c_obj()));
-    cgl::check(CGLSetCurrentContext(context.c_obj()));
-    MenuBarHider hider;
-
+    scoped_ptr<CocoaFullscreen> fullscreen;
+    scoped_ptr<CocoaWindowed> windowed;
+    if (_fullscreen) {
+        fullscreen.reset(new CocoaFullscreen(context, screen_size()));
+    } else {
+        windowed.reset(new CocoaWindowed(pixel_format, context, screen_size()));
+    }
     GLint swap_interval = 1;
     CGLSetParameter(context.c_obj(), kCGLCPSwapInterval, &swap_interval);
 

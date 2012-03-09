@@ -21,6 +21,8 @@
 #define ANTARES_COCOA_C_COCOA_VIDEO_DRIVER_H_
 
 #include <stdint.h>
+#include <OpenGL/OpenGL.h>
+#include <OpenGL/gl.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,6 +57,12 @@ void antares_event_translator_set_key_up_callback(
         void (*callback)(int32_t key, void* userdata), void* userdata);
 
 void antares_event_translator_enqueue(AntaresEventTranslator* translator, int64_t until);
+
+typedef struct AntaresWindow AntaresWindow;
+AntaresWindow* antares_window_create(
+        CGLPixelFormatObj pixel_format, CGLContextObj context,
+        int32_t screen_width, int32_t screen_height);
+void antares_window_destroy(AntaresWindow* window);
 
 #ifdef __cplusplus
 }  // extern "C"

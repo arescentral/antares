@@ -205,3 +205,38 @@ void antares_event_translator_enqueue(AntaresEventTranslator* translator, int64_
     }
     [pool drain];
 }
+
+struct AntaresWindow {
+    NSOpenGLPixelFormat* pixel_format;
+    NSOpenGLContext* context;
+    NSOpenGLView* view;
+    NSWindow* window;
+};
+
+AntaresWindow* antares_window_create(
+        CGLPixelFormatObj pixel_format, CGLContextObj context,
+        int32_t screen_width, int32_t screen_height) {
+    AntaresWindow* window = malloc(sizeof(AntaresWindow));
+    window->pixel_format = [[NSOpenGLPixelFormat alloc] initWithCGLPixelFormatObj:pixel_format];
+    window->context = [[NSOpenGLContext alloc] initWithCGLContextObj:context];
+    NSRect screen_rect = NSMakeRect(0, 0, screen_width, screen_height);
+    window->view = [[NSOpenGLView alloc] initWithFrame:screen_rect
+        pixelFormat:window->pixel_format];
+    [window->view setOpenGLContext:window->context];
+    window->window = [[NSWindow alloc] initWithContentRect:screen_rect
+        styleMask:(NSTitledWindowMask | NSMiniaturizableWindowMask)
+        backing:NSBackingStoreBuffered
+        defer:NO];
+    [window->window setContentView:window->view];
+    [window->window makeKeyAndOrderFront:NSApp];
+    [window->window center];
+    return window;
+}
+
+void antares_window_destroy(AntaresWindow* window) {
+    [window->window release];
+    [window->view release];
+    [window->context release];
+    [window->pixel_format release];
+    free(window);
+}

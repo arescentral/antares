@@ -28,6 +28,7 @@
 #define kScreenWidth @"ScreenWidth"
 #define kScreenHeight @"ScreenHeight"
 #define kScenario @"Scenario"
+#define kFullscreen @"Fullscreen"
 
 #define kIdentifier @"Identifier"
 #define kTitle @"Title"
@@ -250,6 +251,11 @@ static NSURL* url(const char* utf8_bytes) {
 - (void)awakeFromNib {
     [self updateResolutionList];
     [self updateScenarioList];
+    bool windowed = 
+        [[NSUserDefaults standardUserDefaults] objectForKey:kFullscreen]
+        && ![[NSUserDefaults standardUserDefaults] boolForKey:kFullscreen];
+    [_window_checkbox setIntValue:windowed];
+    [self setWindowedFrom:_window_checkbox];
     [_window center];
     [_window makeKeyAndOrderFront:self];
 }
@@ -260,6 +266,11 @@ static NSURL* url(const char* utf8_bytes) {
 
 - (IBAction)openAuthorURL:(id)sender {
     [[NSWorkspace sharedWorkspace] openURL:_author_url];
+}
+
+- (IBAction)setWindowedFrom:(id)sender {
+    bool fullscreen = ![sender intValue];
+    [[NSUserDefaults standardUserDefaults] setBool:fullscreen forKey:kFullscreen];
 }
 
 - (IBAction)settingsDone:(id)sender {
