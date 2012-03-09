@@ -338,14 +338,7 @@ void DrawCurrentLongMessage(int32_t time_pass) {
         // draw in offscreen world
         if ((tmessage->currentResID >= 0) && ( tmessage->stage == kShowStage)) {
             if (tmessage->retro_text.get() != NULL) {
-                if (!tmessage->labelMessage) {
-                    lRect = Rect(
-                            viewport.left, viewport.bottom, viewport.right, play_screen.bottom);
-                    color = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
-                    cRect = lRect;
-                    DrawNateRect(gOffWorld, &cRect, color);
-                    tRect = lRect;
-                } else {
+                if (tmessage->labelMessage) {
                     SetScreenLabelAge(tmessage->labelMessageID, 0);
 
                     if (tmessage->retro_text.get() != NULL) {
@@ -374,19 +367,7 @@ void DrawCurrentLongMessage(int32_t time_pass) {
                 tmessage->charDelayCount -= 3;
             }
         }
-        // Display one additional char per tick.
-        Rect bounds(viewport.left, viewport.bottom, viewport.right, play_screen.bottom);
-        bounds.inset(kHBuffer, 0);
-        bounds.top += kLongMessageVPad;
-        for (int i = 0; i < time_pass; ++i) {
-            tmessage->retro_text->erase_cursor(gOffWorld, bounds, tmessage->at_char);
-            tmessage->retro_text->draw_char(gOffWorld, bounds, tmessage->at_char);
-            ++tmessage->at_char;
-        }
-        // The final char is a newline; don't display a cursor rect for it.
-        if (tmessage->at_char < (tmessage->retro_text->size() - 1)) {
-            tmessage->retro_text->draw_cursor(gOffWorld, bounds, tmessage->at_char);
-        }
+        tmessage->at_char += time_pass;
     }
 }
 
@@ -914,9 +895,18 @@ void draw_message() {
     message_bounds.inset(0, 1);
     VideoDriver::driver()->fill_rect(message_bounds, dark_blue);
 
-    scoped_ptr<Sprite> message(VideoDriver::driver()->new_sprite(
-                "/x/message", gRealWorld->view(message_bounds)));
-    message->draw(message_bounds);
+    longMessageType *tmessage = globals()->gLongMessageData.get();
+
+    Rect bounds(viewport.left, viewport.bottom, viewport.right, play_screen.bottom);
+    bounds.inset(kHBuffer, 0);
+    bounds.top += kLongMessageVPad;
+    for (int i = 0; i < tmessage->at_char; ++i) {
+        tmessage->retro_text->draw_char(bounds, i);
+    }
+    // The final char is a newline; don't display a cursor rect for it.
+    if ((0 < tmessage->at_char) && (tmessage->at_char < (tmessage->retro_text->size() - 1))) {
+        tmessage->retro_text->draw_cursor(bounds, tmessage->at_char);
+    }
 }
 
 }  // namespace antares

@@ -307,16 +307,11 @@ void RetroText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
     }
 }
 
-void RetroText::draw_cursor(PixMap* pix, const Rect& bounds, int index) const {
-    color_cursor(pix, bounds, index, _original_fore_color);
+void RetroText::draw_cursor(const Rect& bounds, int index) const {
+    color_cursor(bounds, index, _original_fore_color);
 }
 
-void RetroText::erase_cursor(PixMap* pix, const Rect& bounds, int index) const {
-    color_cursor(pix, bounds, index, _original_back_color);
-}
-
-void RetroText::color_cursor(
-        PixMap* pix, const Rect& bounds, int index, const RgbColor& color) const {
+void RetroText::color_cursor(const Rect& bounds, int index, const RgbColor& color) const {
     mSetDirectFont(_font);
     const int line_height = mDirectFontHeight() + _line_spacing;
     const RetroChar& ch = _chars[index];
@@ -325,7 +320,7 @@ void RetroText::color_cursor(
     char_rect.offset(corner.h, corner.v);
     char_rect.clip_to(bounds);
     if ((char_rect.width() > 0) && (char_rect.height() > 0)) {
-        DrawNateRect(pix, &char_rect, color);
+        VideoDriver::driver()->fill_rect(char_rect, color);
     }
 }
 

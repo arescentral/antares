@@ -50,8 +50,7 @@ class RetroText {
     void draw_char(const Rect& bounds, int index) const;
     void draw_char(PixMap* pix, const Rect& bounds, int index) const;
 
-    void draw_cursor(PixMap* pix, const Rect& bounds, int index) const;
-    void erase_cursor(PixMap* pix, const Rect& bounds, int index) const;
+    void draw_cursor(const Rect& bounds, int index) const;
 
   private:
     enum SpecialChar {
@@ -75,7 +74,7 @@ class RetroText {
         int v;
     };
 
-    void color_cursor(PixMap* pix, const Rect& bounds, int index, const RgbColor& color) const;
+    void color_cursor(const Rect& bounds, int index, const RgbColor& color) const;
     int move_word_down(int index, int v);
 
     RgbColor _original_fore_color;
