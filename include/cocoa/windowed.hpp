@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 Ares Central
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -17,50 +17,31 @@
 // License along with this program.  If not, see
 // <http://www.gnu.org/licenses/>.
 
-#ifndef ANTARES_COCOA_CORE_OPENGL_HPP_
-#define ANTARES_COCOA_CORE_OPENGL_HPP_
+#ifndef ANTARES_COCOA_WINDOWED_HPP_
+#define ANTARES_COCOA_WINDOWED_HPP_
 
-#include <OpenGL/OpenGL.h>
-#include <OpenGL/gl.h>
 #include <sfz/sfz.hpp>
+
+#include "cocoa/c/CocoaVideoDriver.h"
+#include "math/geometry.hpp"
 
 namespace antares {
 namespace cgl {
-
-#ifdef check
-#undef check
-#endif
-void check(CGLError error);
-
-class PixelFormat {
-  public:
-    PixelFormat(const CGLPixelFormatAttribute* attrs);
-    ~PixelFormat();
-
-    CGLPixelFormatObj c_obj() const;
-    GLint npix() const;
-
-  private:
-    CGLPixelFormatObj _pixel_format;
-    GLint _npix;
-
-    DISALLOW_COPY_AND_ASSIGN(PixelFormat);
-};
-
-class Context {
-  public:
-    Context(CGLPixelFormatObj pix, CGLContextObj share);
-
-    ~Context();
-    CGLContextObj c_obj() const;
-
-  private:
-    CGLContextObj _context;
-
-    DISALLOW_COPY_AND_ASSIGN(Context);
-};
-
+class Context;
+class PixelFormat;
 }  // namespace cgl
+
+class CocoaWindowed {
+  public:
+    CocoaWindowed(
+        const cgl::PixelFormat& pixel_format, const cgl::Context& context, Size screen_size);
+    ~CocoaWindowed();
+
+  private:
+    AntaresWindow* _window;
+    DISALLOW_COPY_AND_ASSIGN(CocoaWindowed);
+};
+
 }  // namespace antares
 
-#endif  // ANTARES_COCOA_CORE_OPENGL_HPP_
+#endif  // ANTARES_COCOA_WINDOWED_HPP_

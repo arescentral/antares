@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 Ares Central
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -17,50 +17,42 @@
 // License along with this program.  If not, see
 // <http://www.gnu.org/licenses/>.
 
-#ifndef ANTARES_COCOA_CORE_OPENGL_HPP_
-#define ANTARES_COCOA_CORE_OPENGL_HPP_
+#ifndef ANTARES_COCOA_FULLSCREEN_HPP_
+#define ANTARES_COCOA_FULLSCREEN_HPP_
 
-#include <OpenGL/OpenGL.h>
-#include <OpenGL/gl.h>
 #include <sfz/sfz.hpp>
+
+#include "math/geometry.hpp"
 
 namespace antares {
 namespace cgl {
-
-#ifdef check
-#undef check
-#endif
-void check(CGLError error);
-
-class PixelFormat {
-  public:
-    PixelFormat(const CGLPixelFormatAttribute* attrs);
-    ~PixelFormat();
-
-    CGLPixelFormatObj c_obj() const;
-    GLint npix() const;
-
-  private:
-    CGLPixelFormatObj _pixel_format;
-    GLint _npix;
-
-    DISALLOW_COPY_AND_ASSIGN(PixelFormat);
-};
-
-class Context {
-  public:
-    Context(CGLPixelFormatObj pix, CGLContextObj share);
-
-    ~Context();
-    CGLContextObj c_obj() const;
-
-  private:
-    CGLContextObj _context;
-
-    DISALLOW_COPY_AND_ASSIGN(Context);
-};
-
+class Context;
 }  // namespace cgl
+
+class CocoaFullscreen {
+  public:
+    CocoaFullscreen(const cgl::Context& context, Size screen_size);
+    ~CocoaFullscreen();
+
+  private:
+    struct DisplayCapturer {
+        DisplayCapturer(Size screen_size);
+        ~DisplayCapturer();
+    };
+    DisplayCapturer _capturer;
+    struct SetFullscreen {
+        SetFullscreen(const cgl::Context& context);
+    };
+    SetFullscreen _set_fullscreen;
+    struct MenuBarHider {
+        MenuBarHider();
+        ~MenuBarHider();
+    };
+    MenuBarHider _menu_bar_hider;
+
+    DISALLOW_COPY_AND_ASSIGN(CocoaFullscreen);
+};
+
 }  // namespace antares
 
-#endif  // ANTARES_COCOA_CORE_OPENGL_HPP_
+#endif  // ANTARES_COCOA_FULLSCREEN_HPP_

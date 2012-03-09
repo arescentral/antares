@@ -349,7 +349,9 @@ def build(bld):
         platform="darwin",
         source=[
             "src/cocoa/core-opengl.cpp",
+            "src/cocoa/fullscreen.cpp",
             "src/video/opengl-driver.cpp",
+            "src/cocoa/windowed.cpp",
         ],
         use="antares/system/opengl",
     )
