@@ -80,6 +80,7 @@ struct spriteType {
     short           whichLayer;
     RgbColor        tinyColor;
     bool            killMe;
+    Sprite*         tiny_sprite;
 
     spriteType();
 };

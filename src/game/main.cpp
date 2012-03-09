@@ -59,6 +59,7 @@
 #include "video/driver.hpp"
 
 using sfz::Exception;
+using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
 using sfz::scoped_ptr;
@@ -212,10 +213,20 @@ GamePlay::GamePlay(bool replay, GameResult* game_result)
 
 class PauseScreen : public Card {
   public:
-    PauseScreen()
-            : _visible(false),
-              _next_switch(0) {
-        build_image();
+    PauseScreen():
+            _visible(false),
+            _next_switch(0) {
+        const StringList list(3100);
+        _pause_string.assign(list.at(10));
+        mSetDirectFont(kTitleFontNum);
+        long width, height;
+        mGetDirectStringDimensions(_pause_string, width, height);
+        Rect bounds(0, 0, width, height);
+        bounds.center_in(play_screen);
+        _text_origin = Point(bounds.left, bounds.top + mDirectFontAscent());
+
+        bounds.inset(-4, -4);
+        _bracket_bounds = bounds;
     }
 
     virtual void become_front() {
@@ -242,9 +253,19 @@ class PauseScreen : public Card {
     virtual void draw() const {
         next()->draw();
         if (_visible) {
-            Rect pause_area = _pause_indicator->size().as_rect();
-            pause_area.center_in(play_screen);
-            _pause_indicator->draw(pause_area.left, pause_area.top);
+            const RgbColor& light_green = GetRGBTranslateColorShade(GREEN, LIGHTER);
+            const RgbColor& dark_green = GetRGBTranslateColorShade(GREEN, DARKER);
+
+            for (int32_t y = _bracket_bounds.top + 2; y < _bracket_bounds.bottom; y += 2) {
+                VideoDriver::driver()->draw_line(
+                        Point(_bracket_bounds.left, y),
+                        Point(_bracket_bounds.right - 1, y),
+                        dark_green);
+            }
+            draw_vbracket(_bracket_bounds, light_green);
+
+            mSetDirectFont(kTitleFontNum);
+            gDirectText->draw_sprite(_text_origin, _pause_string, light_green);
         }
     }
 
@@ -254,40 +275,11 @@ class PauseScreen : public Card {
         _next_switch = now_usecs() + (1000000 / 3);
     }
 
-    void build_image() {
-        const StringList list(3100);
-        const StringSlice pause_string(list.at(10));
-
-        long width;
-        long height;
-        mSetDirectFont(kTitleFontNum);
-        mGetDirectStringDimensions(pause_string, width, height);
-        width += 8;
-        height += 8;
-
-        ArrayPixMap image(width, height);
-        image.fill(RgbColor::kClear);
-
-        const RgbColor darker = GetRGBTranslateColorShade(GREEN, DARKER);
-        for (int row = 2; row < height; row += 2) {
-            DrawNateLine(&image, image.size().as_rect(), 0, row, width - 1, row, darker);
-        }
-
-        const RgbColor lighter = GetRGBTranslateColorShade(GREEN, LIGHTER);
-        DrawNateVBracket(&image, image.size().as_rect(), image.size().as_rect(), lighter);
-
-        Rect text_area = image.size().as_rect();
-        text_area.inset(4, 4);
-        DrawDirectTextStringClipped(
-                Point(text_area.left, text_area.top + mDirectFontAscent()), pause_string, lighter,
-                &image, text_area);
-
-        _pause_indicator.reset(VideoDriver::driver()->new_sprite("/x/pause_indicator", image));
-    }
-
-    scoped_ptr<Sprite> _pause_indicator;
     bool _visible;
     int64_t _next_switch;
+    String _pause_string;
+    Point _text_origin;
+    Rect _bracket_bounds;
 
     DISALLOW_COPY_AND_ASSIGN(PauseScreen);
 };

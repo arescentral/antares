@@ -47,6 +47,7 @@ void DrawNateTriangleUpClipped(PixMap* destPix, const RgbColor& color);
 void DrawNatePlusClipped(PixMap* destPix, const RgbColor& color);
 void DrawNateDiamondClipped(PixMap* destPix, const RgbColor& color);
 void DrawNateVBracket(PixMap *, const Rect&, const Rect&, const RgbColor& color);
+void draw_vbracket(const Rect& rect, const RgbColor& color);
 void DrawNateShadedRect(
         PixMap *, Rect *, const Rect&,
         const RgbColor& fill_color, const RgbColor& light_color, const RgbColor& dark_color);

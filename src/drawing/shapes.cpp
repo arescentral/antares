@@ -25,6 +25,7 @@
 #include "drawing/pix-map.hpp"
 #include "lang/casts.hpp"
 #include "math/macros.hpp"
+#include "video/driver.hpp"
 
 using sfz::Exception;
 
@@ -357,6 +358,21 @@ void DrawNateVBracket(
 
     destPix->set(destRect.left, destRect.bottom - 2, color);
     destPix->set(destRect.right - 1, destRect.bottom - 2, color);
+}
+
+void draw_vbracket(const Rect& rect, const RgbColor& color) {
+    Point ul(rect.left, rect.top);
+    Point ur(rect.right - 1, rect.top);
+    Point ll(rect.left, rect.bottom - 1);
+    Point lr(rect.right - 1, rect.bottom - 1);
+
+    VideoDriver::driver()->draw_line(ul, ur, color);
+    VideoDriver::driver()->draw_line(ul, Point(ul.h, ul.v + 1), color);
+    VideoDriver::driver()->draw_line(ur, Point(ur.h, ur.v + 1), color);
+
+    VideoDriver::driver()->draw_line(ll, lr, color);
+    VideoDriver::driver()->draw_line(ll, Point(ll.h, ll.v - 1), color);
+    VideoDriver::driver()->draw_line(lr, Point(lr.h, lr.v - 1), color);
 }
 
 void DrawNateShadedRect(
