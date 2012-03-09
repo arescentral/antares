@@ -42,6 +42,7 @@
 
 - (IBAction)openScenarioURL:(id)sender;
 - (IBAction)openAuthorURL:(id)sender;
+- (IBAction)setWindowedFrom:(id)sender;
 
 - (IBAction)settingsDone:(id)sender;
 

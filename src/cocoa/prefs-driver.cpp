@@ -41,6 +41,7 @@ const char kIdleMusicPreference[]       = "PlayIdleMusic";
 const char kGameMusicPreference[]       = "PlayGameMusic";
 const char kSpeechOnPreference[]        = "SpeechOn";
 const char kVolumePreference[]          = "Volume";
+const char kFullscreenPreference[]      = "Fullscreen";
 const char kScreenWidthPreference[]     = "ScreenWidth";
 const char kScreenHeightPreference[]    = "ScreenHeight";
 const char kScenarioPreference[]        = "Scenario";
@@ -109,6 +110,9 @@ void CoreFoundationPrefsDriver::load(Preferences* preferences) {
     if (cf::get_preference(kSpeechOnPreference, bool_value)) {
         preferences->set_speech_on(bool_value.c_obj() == kCFBooleanTrue);
     }
+    if (cf::get_preference(kFullscreenPreference, bool_value)) {
+        preferences->set_fullscreen(bool_value.c_obj() == kCFBooleanTrue);
+    }
 
     cf::Number number_value;
     double double_value;
@@ -153,6 +157,9 @@ void CoreFoundationPrefsDriver::save(const Preferences& preferences) {
 
     cf::Boolean speech_on(preferences.speech_on());
     cf::set_preference(kSpeechOnPreference, speech_on);
+
+    cf::Boolean fullscreen(preferences.fullscreen());
+    cf::set_preference(kFullscreenPreference, fullscreen);
 
     double volume_double = 0.125 * preferences.volume();
     cf::Number volume(CFNumberCreate(NULL, kCFNumberDoubleType, &volume_double));

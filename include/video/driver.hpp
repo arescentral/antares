@@ -23,6 +23,7 @@
 #include <stdint.h>
 #include <sfz/sfz.hpp>
 
+#include "drawing/color.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {
@@ -30,7 +31,6 @@ namespace antares {
 class Card;
 class KeyMap;
 class PixMap;
-class RgbColor;
 class Sprite;
 
 enum GameState {
@@ -88,8 +88,8 @@ class Sprite {
   public:
     virtual ~Sprite();
     virtual sfz::StringSlice name() const = 0;
-    virtual void draw(int32_t x, int32_t y) const = 0;
-    virtual void draw(const Rect& draw_rect) const = 0;
+    virtual void draw(int32_t x, int32_t y, const RgbColor& = RgbColor::kWhite) const = 0;
+    virtual void draw(const Rect& draw_rect, const RgbColor& = RgbColor::kWhite) const = 0;
     virtual const Size& size() const = 0;
 };
 

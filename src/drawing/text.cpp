@@ -163,21 +163,12 @@ void directTextType::draw(
 }
 
 void directTextType::draw_sprite(Point origin, sfz::StringSlice string, RgbColor color) const {
-    // TODO(sfiera): using stencils is a rather inefficient way of doing
-    // this, compared to using GL colors to tint the sprite.  However,
-    // we already have the code to do it with stencils, and don't yet
-    // have tinting.  If we do (and we probably will) then we should
-    // switch to using that here instead.
-    Stencil stencil(VideoDriver::driver());
-    stencil.set_threshold(1);
     origin.offset(0, -ascent);
     for (size_t i = 0; i < string.size(); ++i) {
         uint8_t byte = to_mac_roman(string.at(i));
-        _sprites[byte]->draw(origin.h, origin.v);
+        _sprites[byte]->draw(origin.h, origin.v, color);
         origin.offset(char_width(string.at(i)), 0);
     }
-    stencil.apply();
-    VideoDriver::driver()->fill_rect(world, color);
 }
 
 void InitDirectText() {

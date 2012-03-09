@@ -131,6 +131,7 @@ void Preferences::reset() {
 
     set_volume(7);
 
+    set_fullscreen(true);
     set_screen_size(Size(640, 480));
 
     _scenario_identifier.assign("com.biggerplanet.ares");
@@ -144,6 +145,7 @@ void Preferences::copy(const Preferences& preferences) {
     set_play_music_in_game(preferences.play_music_in_game());
     set_speech_on(preferences.speech_on());
     set_volume(preferences.volume());
+    set_fullscreen(preferences.fullscreen());
     set_screen_size(preferences.screen_size());
     set_scenario_identifier(preferences.scenario_identifier());
 }
@@ -166,6 +168,10 @@ bool Preferences::speech_on() const {
 
 int Preferences::volume() const {
     return _volume;
+}
+
+bool Preferences::fullscreen() const {
+    return _fullscreen;
 }
 
 Size Preferences::screen_size() const {
@@ -194,6 +200,10 @@ void Preferences::set_speech_on(bool on) {
 
 void Preferences::set_volume(int volume) {
     _volume = clamp(volume, 0, 8);
+}
+
+void Preferences::set_fullscreen(bool fullscreen) {
+    _fullscreen = fullscreen;
 }
 
 void Preferences::set_screen_size(Size size) {

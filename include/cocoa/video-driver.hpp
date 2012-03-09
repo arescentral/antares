@@ -37,7 +37,7 @@ class Event;
 
 class CocoaVideoDriver : public OpenGlVideoDriver {
   public:
-    CocoaVideoDriver(Size screen_size);
+    CocoaVideoDriver(bool fullscreen, Size screen_size);
     virtual bool button();
     virtual Point get_mouse();
     virtual void get_keys(KeyMap* k);
@@ -52,6 +52,7 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     bool wait_next_event(int64_t until, sfz::scoped_ptr<Event>& event);
     void enqueue_events(int64_t until);
 
+    const bool _fullscreen;
     int64_t _start_time;
 
     class EventTranslator {

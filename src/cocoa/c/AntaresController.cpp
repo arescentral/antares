@@ -60,7 +60,9 @@ struct AntaresDrivers {
     DirectoryLedger ledger;
 
     AntaresDrivers(StringSlice home):
-            video(Preferences::preferences()->screen_size()),
+            video(
+                    Preferences::preferences()->fullscreen(),
+                    Preferences::preferences()->screen_size()),
             ledger(format("{0}/Library/Application Support/Antares", home)) { }
 };
 

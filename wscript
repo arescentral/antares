@@ -3,9 +3,11 @@
 APPNAME = "Antares"
 VERSION = "0.5.1"
 
-WARNINGS = ["-Wall", "-Werror", "-Wno-sign-compare"]
+WARNINGS = ["-Wall", "-Werror", "-Wno-sign-compare", "-Wno-deprecated-declarations"]
 
 def common(ctx):
+    ctx.default_sdk = "10.4"
+    ctx.default_compiler = "gcc"
     ctx.load("compiler_c compiler_cxx")
     ctx.load("core externals", tooldir="ext/waf-sfiera")
     ctx.load("antares_test", tooldir="tools")
@@ -347,7 +349,9 @@ def build(bld):
         platform="darwin",
         source=[
             "src/cocoa/core-opengl.cpp",
+            "src/cocoa/fullscreen.cpp",
             "src/video/opengl-driver.cpp",
+            "src/cocoa/windowed.cpp",
         ],
         use="antares/system/opengl",
     )
