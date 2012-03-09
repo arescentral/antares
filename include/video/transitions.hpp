@@ -61,6 +61,7 @@ class ColorFade : public Card {
     virtual void become_front();
 
     virtual void mouse_down(const MouseDownEvent& event);
+    virtual void key_down(const KeyDownEvent& event);
     virtual bool next_timer(int64_t& time);
     virtual void fire_timer();
 
@@ -88,6 +89,7 @@ class PictFade : public Card {
     virtual void become_front();
 
     virtual void mouse_down(const MouseDownEvent& event);
+    virtual void key_down(const KeyDownEvent& event);
     virtual bool next_timer(int64_t& time);
     virtual void fire_timer();
 
