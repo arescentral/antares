@@ -32,7 +32,7 @@ sed -i '' 's/^VERSION = "\(.*\)"$/VERSION = "\1-nightly"/' wscript
 
 # Build Antares.  Note that we don't make any attempt to clean the
 # working directory before we build.
-./configure -m opt
+./configure -m opt "$@"
 ./waf
 
 # Zip the product of the build.
