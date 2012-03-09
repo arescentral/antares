@@ -96,6 +96,14 @@ void ColorFade::mouse_down(const MouseDownEvent& event) {
     }
 }
 
+void ColorFade::key_down(const KeyDownEvent& event) {
+    static_cast<void>(event);
+    if (_allow_skip) {
+        *_skipped = true;
+        stack()->pop(this);
+    }
+}
+
 bool ColorFade::next_timer(int64_t& time) {
     time = _next_event;
     return true;
@@ -159,6 +167,16 @@ void PictFade::become_front() {
 }
 
 void PictFade::mouse_down(const MouseDownEvent& event) {
+    static_cast<void>(event);
+    *_skipped = true;
+    if (this->skip()) {
+        stack()->pop(this);
+    } else {
+        wane();
+    }
+}
+
+void PictFade::key_down(const KeyDownEvent& event) {
     static_cast<void>(event);
     *_skipped = true;
     if (this->skip()) {

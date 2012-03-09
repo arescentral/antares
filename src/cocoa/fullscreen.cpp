@@ -32,6 +32,13 @@ using sfz::Exception;
 namespace antares {
 
 CocoaFullscreen::DisplayCapturer::DisplayCapturer(Size screen_size) {
+    CGDisplayFadeReservationToken token;
+    if (CGAcquireDisplayFadeReservation(1.0, &token) == kCGErrorSuccess) {
+        CGDisplayFade(
+                token, 1.0, kCGDisplayBlendNormal, kCGDisplayBlendSolidColor,
+                0, 0, 0, true);
+    }
+
     CGDisplayErr err = CGCaptureAllDisplays();
     if (err != CGDisplayNoErr) {
         throw Exception("CGCaptureAllDisplays() failed");
@@ -50,6 +57,12 @@ CocoaFullscreen::DisplayCapturer::DisplayCapturer(Size screen_size) {
 }
 
 CocoaFullscreen::DisplayCapturer::~DisplayCapturer() {
+    CGDisplayFadeReservationToken token;
+    if (CGAcquireDisplayFadeReservation(1.0, &token) == kCGErrorSuccess) {
+        CGDisplayFade(
+                token, 1.0, kCGDisplayBlendSolidColor, kCGDisplayBlendNormal,
+                0, 0, 0, false);
+    }
     CGReleaseAllDisplays();
 }
 
