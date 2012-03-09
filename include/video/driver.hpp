@@ -54,6 +54,7 @@ class VideoDriver {
     virtual void get_keys(KeyMap* k) = 0;
 
     virtual int ticks() = 0;
+    virtual int usecs() = 0;
     virtual int64_t double_click_interval_usecs() = 0;
 
     virtual Sprite* new_sprite(sfz::PrintItem name, const PixMap& content) = 0;

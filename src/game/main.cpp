@@ -109,7 +109,7 @@ class GamePlay : public Card {
     KeyMap _key_map;
     KeyMap _last_key_map;
     uint32_t _decide_cycle;
-    int _last_click_time;
+    int64_t _last_click_time;
     int _scenario_check_time;
     PlayAgainScreen::Item _play_again;
 };
@@ -198,11 +198,13 @@ GamePlay::GamePlay(bool replay, GameResult* game_result)
         : _state(PLAYING),
           _replay(replay),
           _game_result(game_result),
-          _next_timer(now_usecs() + kTimeUnit),
+          _next_timer(add_ticks(now_usecs(), 1)),
           _seconds(0),
           _play_area(viewport.left, viewport.top, viewport.right, viewport.bottom),
-          _scenario_start_time(
-                  (gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple),
+          _scenario_start_time(add_ticks(
+                      0,
+                      (gThisScenario->startTime & kScenario_StartTimeMask)
+                      * kScenarioTimeMultiple)),
           _command_and_q(BothCommandAndQ()),
           _mouse_down(false),
           _entering_message(false),
@@ -372,25 +374,24 @@ bool GamePlay::next_timer(int64_t& time) {
 void GamePlay::fire_timer() {
     uint64_t thisTime;
     uint64_t scrapTime;
-    int newGameTime;
     const Rect clip_rect = viewport;
 
     while (_next_timer < now_usecs()) {
-        _next_timer += kTimeUnit;
+        _next_timer = add_ticks(_next_timer, 1);
     }
 
     thisTime = now_usecs();
     scrapTime = thisTime;
     thisTime -= globals()->gLastTime;
-    newGameTime = (thisTime / kTimeUnit) + _scenario_start_time;
+    int64_t newGameTime = thisTime + _scenario_start_time;
 
     if ((mNOFFastMotionKey(_key_map)) && !_entering_message) {
-        newGameTime = globals()->gGameTime + 12;
-        thisTime = (newGameTime - _scenario_start_time) * kTimeUnit;
+        newGameTime = add_ticks(globals()->gGameTime, 12);
+        thisTime = newGameTime - _scenario_start_time;
         globals()->gLastTime = scrapTime - thisTime;
     }
 
-    int unitsPassed = newGameTime - globals()->gGameTime;
+    int unitsPassed = usecs_to_ticks(newGameTime - globals()->gGameTime);
     int unitsDone = unitsPassed;
 
     if (unitsPassed <= 0) {
@@ -405,7 +406,7 @@ void GamePlay::fire_timer() {
         _player_paused = false;
         unitsDone = unitsPassed = 0;
         newGameTime = globals()->gGameTime;
-        thisTime = (newGameTime - _scenario_start_time) * kTimeUnit;
+        thisTime = newGameTime - _scenario_start_time;
         globals()->gLastTime = scrapTime - thisTime;
     }
 
@@ -431,7 +432,7 @@ void GamePlay::fire_timer() {
             MoveSpaceObjects(gSpaceObjectData.get(), kMaxSpaceObject, unitsToDo);
         }
 
-        globals()->gGameTime += unitsToDo;
+        globals()->gGameTime = add_ticks(globals()->gGameTime, unitsToDo);
 
         if ( _decide_cycle == kDecideEveryCycles) {
             // everything in here gets executed once every kDecideEveryCycles
@@ -452,12 +453,11 @@ void GamePlay::fire_timer() {
                     globals()->gGameOver = 1;
                 } else {
                     if (!_mouse_down) {
-                        int double_click_interval_ticks
-                            = VideoDriver::driver()->double_click_interval_usecs() / kTimeUnit;
-                        if ((globals()->gGameTime - _last_click_time)
-                                <= double_click_interval_ticks) {
+                        int64_t double_click_interval
+                            = VideoDriver::driver()->double_click_interval_usecs();
+                        if ((globals()->gGameTime - _last_click_time) <= double_click_interval) {
                             InstrumentsHandleDoubleClick();
-                            _last_click_time -= double_click_interval_ticks;
+                            _last_click_time -= double_click_interval;
                         } else {
                             InstrumentsHandleClick();
                             _last_click_time = globals()->gGameTime;
@@ -535,8 +535,7 @@ void GamePlay::fire_timer() {
     if (globals()->gGameOver > 0) {
         thisTime = now_usecs();
         thisTime -= globals()->gLastTime;
-        newGameTime = thisTime / 1000000; // divide by a million to get seconds
-        _seconds = newGameTime;
+        _seconds = thisTime / 1000000; // divide by a million to get seconds
 
         if (*_game_result == NO_GAME) {
             if (globals()->gScenarioWinner.player == globals()->gPlayerAdmiralNumber) {
@@ -611,16 +610,6 @@ void GamePlay::key_down(const KeyDownEvent& event) {
         _player_paused = true;
         stack()->push(new HelpScreen);
         break;
-    }
-}
-
-void Pause( long time)
-
-{
-    long    starttime = VideoDriver::driver()->ticks();
-
-    while (( VideoDriver::driver()->ticks() - starttime) < time) {
-        // DO NOTHING
     }
 }
 

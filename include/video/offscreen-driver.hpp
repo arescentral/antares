@@ -26,6 +26,7 @@
 
 #include "config/keys.hpp"
 #include "math/geometry.hpp"
+#include "math/units.hpp"
 #include "ui/card.hpp"
 #include "ui/event-tracker.hpp"
 #include "ui/event.hpp"
@@ -42,6 +43,7 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
     virtual void get_keys(KeyMap* k) { k->copy(_event_tracker.keys()); }
 
     virtual int ticks() { return _ticks; }
+    virtual int usecs() { return ticks_to_usecs(_ticks); }
     virtual int64_t double_click_interval_usecs() { return 0.5e6; }
 
     void loop(Card* initial);

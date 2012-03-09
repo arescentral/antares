@@ -101,7 +101,7 @@ struct aresGlobalType {
     sfz::scoped_ptr<InputSource> gInputSource;
     long            gGameOver;
     sfz::scoped_array<admiralType>       gAdmiralData;
-    long            gGameTime;
+    int64_t         gGameTime;
     uint64_t        gLastTime;
     long            gClosestObject;
     long            gFarthestObject;

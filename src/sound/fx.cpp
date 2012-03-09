@@ -71,10 +71,10 @@ void InitSoundFX() {
 
 void PlayVolumeSound(
         short whichSoundID, uint8_t amplitude, short persistence, soundPriorityType priority) {
-    short oldestSoundTime = -kLongPersistence, whichChannel = -1;
+    int32_t oldestSoundTime = -ticks_to_usecs(kLongPersistence), whichChannel = -1;
     // TODO(sfiera): don't play sound at all if the game is muted.
     if (amplitude > 0) {
-        int timeDif = VideoDriver::driver()->ticks() - globals()->gLastSoundTime;
+        int timeDif = VideoDriver::driver()->usecs() - globals()->gLastSoundTime;
         for (int count = 0; count < kMaxChannelNum; count++) {
             globals()->gChannel[count].soundAge += timeDif;
         }
@@ -128,7 +128,7 @@ void PlayVolumeSound(
 
         // we're not checking for importance
 
-        globals()->gLastSoundTime = VideoDriver::driver()->ticks();
+        globals()->gLastSoundTime = VideoDriver::driver()->usecs();
 
         int whichSound = 0;
         while ((globals()->gSound[whichSound].id != whichSoundID) && (whichSound < kSoundNum)) {
@@ -140,7 +140,7 @@ void PlayVolumeSound(
 
         if (whichChannel >= 0) {
             globals()->gChannel[whichChannel].whichSound = whichSoundID;
-            globals()->gChannel[whichChannel].soundAge = -persistence;
+            globals()->gChannel[whichChannel].soundAge = -ticks_to_usecs(persistence);
             globals()->gChannel[whichChannel].soundPriority = priority;
             globals()->gChannel[whichChannel].soundVolume = amplitude;
 

@@ -85,7 +85,7 @@ ColorFade::ColorFade(
 
 void ColorFade::become_front() {
     _start = now_usecs();
-    _next_event = _start + kTimeUnit;
+    _next_event = add_ticks(_start, 1);
 }
 
 void ColorFade::mouse_down(const MouseDownEvent& event) {
@@ -104,7 +104,7 @@ bool ColorFade::next_timer(int64_t& time) {
 void ColorFade::fire_timer() {
     int64_t now = now_usecs();
     while (_next_event < now) {
-        _next_event += kTimeUnit;
+        _next_event = add_ticks(_next_event, 1);
     }
     double fraction = static_cast<double>(now - _start) / _duration;
     if (fraction >= 1.0) {

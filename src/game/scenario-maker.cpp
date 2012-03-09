@@ -1092,9 +1092,11 @@ bool ConstructScenario(const Scenario* scenario) {
     ClearMessage();
 
     c2 = 0;
-    for ( count = 0; count < ((gThisScenario->startTime & kScenario_StartTimeMask) * 20); count++)
-    {
-        globals()->gGameTime = count;
+    const int64_t start_ticks
+        = (gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple;
+    const int64_t start_time = add_ticks(0, start_ticks);
+    for (int64_t i = 0; i < start_ticks; ++i) {
+        globals()->gGameTime = add_ticks(globals()->gGameTime, 1);
         MoveSpaceObjects( gSpaceObjectData.get(), kMaxSpaceObject,
                     kDecideEveryCycles);
         NonplayerShipThink( kDecideEveryCycles);
@@ -1109,13 +1111,13 @@ bool ConstructScenario(const Scenario* scenario) {
         }
         CullSprites();
         CullBeams();
-        if ((count % kScenarioTimeMultiple) == 0)
+        if ((i % kScenarioTimeMultiple) == 0)
         {
             currentStep++;
             UpdateLoadingInterface( currentStep, stepNumber, &loadingRect);
         }
     }
-    globals()->gGameTime = (gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple;
+    globals()->gGameTime = start_time;
 
     return( true);
 }
@@ -1186,8 +1188,8 @@ void CheckScenarioConditions(int32_t timePass) {
                         break;
 
                     case kTimeCondition:
-                        if ( globals()->gGameTime >= condition->conditionArgument.longValue)
-                        {
+                        if (globals()->gGameTime >=
+                                ticks_to_usecs(condition->conditionArgument.longValue)) {
                             conditionTrue = true;
                         }
                         break;

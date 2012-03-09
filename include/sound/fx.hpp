@@ -72,7 +72,7 @@ enum soundPriorityType {
 
 struct smartSoundChannel {
     long                whichSound;
-    long                soundAge;
+    int32_t             soundAge;
     short               soundVolume;
     soundPriorityType   soundPriority;
     sfz::scoped_ptr<SoundChannel> channelPtr;

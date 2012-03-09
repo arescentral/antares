@@ -25,6 +25,7 @@
 #include "drawing/shapes.hpp"
 #include "math/fixed.hpp"
 #include "math/geometry.hpp"
+#include "math/units.hpp"
 
 namespace antares {
 
