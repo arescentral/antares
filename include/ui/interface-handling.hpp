@@ -20,6 +20,7 @@
 #ifndef ANTARES_UI_INTERFACE_HANDLING_HPP_
 #define ANTARES_UI_INTERFACE_HANDLING_HPP_
 
+#include <vector>
 #include <sfz/sfz.hpp>
 
 #include "data/interface.hpp"
@@ -104,7 +105,7 @@ void GetInGameListName(short, unsigned char*);
 long DoNetLevelInterface( void);
 void UpdateMissionBriefPoint(
         interfaceItemType *dataItem, long whichBriefPoint, const Scenario* scenario,
-        coordPointType *corner, long scale, Rect *bounds, inlinePictType *inlinePict,
+        coordPointType *corner, long scale, Rect *bounds, std::vector<inlinePictType>& inlinePict,
         PixMap* pix);
 void ShowObjectData( Point, short, Rect *);
 void CreateObjectDataText(sfz::String* text, short id);

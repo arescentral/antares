@@ -36,6 +36,7 @@ using sfz::Exception;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::scoped_ptr;
+using std::vector;
 
 namespace macroman = sfz::macroman;
 
@@ -1131,28 +1132,17 @@ void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
 void DrawInterfaceTextRect(const interfaceItemType& item, PixMap* pix) {
     Resource rsrc("text", "txt", item.item.textRect.textID);
     String data(macroman::decode(rsrc.data()));
-    DrawInterfaceTextInRect(item.bounds, data, item.style, item.color, pix, NULL);
+    vector<inlinePictType> inlinePict;
+    DrawInterfaceTextInRect(item.bounds, data, item.style, item.color, pix, inlinePict);
 }
 
 void DrawInterfaceTextInRect(
         const Rect& tRect, const StringSlice& text, interfaceStyleType style,
-        unsigned char textcolor, PixMap* pix, inlinePictType* inlinePict) {
-    RgbColor color;
-    color = GetRGBTranslateColorShade(textcolor, VERY_LIGHT);
+        unsigned char textcolor, PixMap* pix, vector<inlinePictType>& inlinePict) {
+    RgbColor color = GetRGBTranslateColorShade(textcolor, VERY_LIGHT);
     InterfaceText interface_text(text, style, color);
     interface_text.wrap_to(tRect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer);
-
-    if (inlinePict != NULL) {
-        for (size_t i = 0; i < kMaxInlinePictNum; ++i) {
-            if (i < interface_text.inline_picts().size()) {
-                inlinePict[i] = interface_text.inline_picts()[i];
-            } else {
-                inlinePict[i].id = -1;
-                inlinePict[i].bounds = Rect(0, 0, 0, 0);
-            }
-        }
-    }
-
+    inlinePict = interface_text.inline_picts();
     interface_text.draw(pix, tRect);
 }
 

@@ -19,6 +19,7 @@
 
 #include "ui/screens/debriefing.hpp"
 
+#include <vector>
 #include <sfz/sfz.hpp>
 
 #include "data/resource.hpp"
@@ -39,6 +40,7 @@ using sfz::String;
 using sfz::PrintItem;
 using sfz::dec;
 using sfz::format;
+using std::vector;
 
 namespace macroman = sfz::macroman;
 
@@ -266,7 +268,8 @@ void DebriefingScreen::initialize(int text_id, bool do_score) {
     _pix.reset(new ArrayPixMap(_pix_bounds.width(), _pix_bounds.height()));
 
     DrawAnyInterfaceItem(interface_item(_message_bounds), _pix.get());
-    DrawInterfaceTextInRect(_message_bounds, _message, kLarge, GOLD, _pix.get(), NULL);
+    vector<inlinePictType> inline_pict;
+    DrawInterfaceTextInRect(_message_bounds, _message, kLarge, GOLD, _pix.get(), inline_pict);
 }
 
 void print_to(sfz::PrintTarget out, DebriefingScreen::State state) {

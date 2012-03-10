@@ -65,6 +65,7 @@ using sfz::StringSlice;
 using sfz::read;
 using sfz::scoped_array;
 using sfz::scoped_ptr;
+using std::vector;
 
 namespace macroman = sfz::macroman;
 
@@ -1413,7 +1414,7 @@ void BlackenWindow( void)
 
 void UpdateMissionBriefPoint(
         interfaceItemType *dataItem, long whichBriefPoint, const Scenario* scenario,
-        coordPointType *corner, long scale, Rect *bounds, inlinePictType *inlinePict,
+        coordPointType *corner, long scale, Rect *bounds, vector<inlinePictType>& inlinePict,
         PixMap* pix) {
     if (whichBriefPoint < kMissionBriefPointOffset) {
         // No longer handled here.

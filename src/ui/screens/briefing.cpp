@@ -33,6 +33,7 @@
 
 using sfz::Exception;
 using sfz::format;
+using std::vector;
 
 namespace antares {
 
@@ -216,7 +217,7 @@ void BriefingScreen::build_brief_point() {
         Rect map_rect = item(MAP_RECT).bounds;
         GetScenarioFullScaleAndCorner(_scenario, 0, &corner, &scale, &map_rect);
 
-        inlinePictType inline_pict[kMaxInlinePictNum];
+        vector<inlinePictType> inline_pict;
 
         ArrayPixMap pix(world.width(), world.height());
         pix.fill(RgbColor::kClear);

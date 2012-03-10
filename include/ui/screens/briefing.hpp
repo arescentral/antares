@@ -20,6 +20,7 @@
 #ifndef ANTARES_UI_SCREENS_BRIEFING_HPP_
 #define ANTARES_UI_SCREENS_BRIEFING_HPP_
 
+#include <vector>
 #include <sfz/sfz.hpp>
 
 #include "math/geometry.hpp"

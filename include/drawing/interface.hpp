@@ -20,6 +20,7 @@
 #ifndef ANTARES_DRAWING_INTERFACE_HPP_
 #define ANTARES_DRAWING_INTERFACE_HPP_
 
+#include <vector>
 #include <sfz/sfz.hpp>
 
 #include "data/interface.hpp"
@@ -28,8 +29,6 @@ namespace antares {
 
 const int32_t kInterfaceTextVBuffer = 2;
 const int32_t kInterfaceTextHBuffer = 3;
-
-const size_t kMaxInlinePictNum = 8;  // max # of inline picts it'll keep track of
 
 // the inline pictType struct is for keeping track of picts included in my text boxes.
 struct inlinePictType {
@@ -51,7 +50,7 @@ void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix);
 void DrawInterfaceTextRect(const interfaceItemType& item, PixMap* pix);
 void DrawInterfaceTextInRect(
         const Rect& rect, const sfz::StringSlice& text, interfaceStyleType style,
-        unsigned char textcolor, PixMap* pix, inlinePictType* inlinePict);
+        unsigned char textcolor, PixMap* pix, std::vector<inlinePictType>& inlinePict);
 
 short GetInterfaceTextHeightFromWidth(
         const sfz::StringSlice& text, interfaceStyleType style, short width);
