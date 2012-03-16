@@ -317,6 +317,7 @@ def build(bld):
             "src/ui/screens/debriefing.cpp",
             "src/ui/screens/help.cpp",
             "src/ui/screens/main.cpp",
+            "src/ui/screens/object-data.cpp",
             "src/ui/screens/options.cpp",
             "src/ui/screens/play-again.cpp",
             "src/ui/screens/scroll-text.cpp",

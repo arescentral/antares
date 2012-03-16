@@ -1143,6 +1143,9 @@ void DrawInterfaceTextInRect(
     InterfaceText interface_text(text, style, color);
     interface_text.wrap_to(tRect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer);
     inlinePict = interface_text.inline_picts();
+    for (int i = 0; i < inlinePict.size(); ++i) {
+        inlinePict[i].bounds.offset(tRect.left, tRect.top);
+    }
     interface_text.draw(pix, tRect);
 }
 

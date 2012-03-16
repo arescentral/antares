@@ -24,6 +24,7 @@
 #include <sfz/sfz.hpp>
 
 #include "math/geometry.hpp"
+#include "drawing/interface.hpp"
 #include "ui/interface-screen.hpp"
 
 namespace antares {
@@ -39,6 +40,7 @@ class BriefingScreen : public InterfaceScreen {
     virtual void become_front();
     virtual void draw() const;
 
+    virtual void mouse_down(const MouseDownEvent& event);
     virtual void key_down(const KeyDownEvent& event);
 
   protected:
@@ -60,6 +62,8 @@ class BriefingScreen : public InterfaceScreen {
     void build_system_map();
     void build_brief_point();
 
+    void show_object_data_key(int index, int key);
+
     const Scenario* const _scenario;
     bool* const _cancelled;
     int _briefing_point;
@@ -70,6 +74,7 @@ class BriefingScreen : public InterfaceScreen {
     sfz::scoped_ptr<Sprite> _star_map;
     sfz::scoped_ptr<Sprite> _system_map;
     sfz::scoped_ptr<Sprite> _brief_point;
+    std::vector<inlinePictType> _inline_pict;
 
     DISALLOW_COPY_AND_ASSIGN(BriefingScreen);
 };

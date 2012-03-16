@@ -1,0 +1,56 @@
+// Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
+// Copyright (C) 2008-2011 Ares Central
+//
+// This file is part of Antares, a tactical space combat game.
+//
+// Antares is free software: you can redistribute it and/or modify it
+// under the terms of the Lesser GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Antares is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this program.  If not, see
+// <http://www.gnu.org/licenses/>.
+
+#ifndef ANTARES_UI_SCREENS_OBJECT_DATA_HPP_
+#define ANTARES_UI_SCREENS_OBJECT_DATA_HPP_
+
+#include <sfz/sfz.hpp>
+
+#include "math/geometry.hpp"
+#include "ui/card.hpp"
+#include "ui/event.hpp"
+
+namespace antares {
+
+class RetroText;
+
+class ObjectDataScreen : public Card {
+  public:
+    enum Trigger { MOUSE, KEY };
+
+    ObjectDataScreen(Point origin, int32_t object_id, Trigger trigger, int which);
+    ~ObjectDataScreen();
+
+    virtual void mouse_up(const MouseUpEvent& event);
+    virtual void key_up(const KeyUpEvent& event);
+
+    virtual void draw() const;
+
+  private:
+    const Trigger _trigger;
+    const int _which;
+    Rect _bounds;
+    sfz::scoped_ptr<RetroText> _text;
+
+    DISALLOW_COPY_AND_ASSIGN(ObjectDataScreen);
+};
+
+}  // namespace antares
+
+#endif  // ANTARES_UI_SCREENS_OBJECT_DATA_HPP_
