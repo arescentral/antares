@@ -29,10 +29,13 @@
 #include "math/random.hpp"
 #include "ui/card.hpp"
 #include "ui/interface-handling.hpp"
+#include "ui/screens/object-data.hpp"
 #include "video/driver.hpp"
 
 using sfz::Exception;
+using sfz::String;
 using sfz::format;
+using std::vector;
 
 namespace antares {
 
@@ -99,13 +102,41 @@ void BriefingScreen::draw() const {
     }
 }
 
+void BriefingScreen::mouse_down(const MouseDownEvent& event) {
+    for (size_t i = 0; i < _inline_pict.size(); ++i) {
+        if (_inline_pict[i].bounds.contains(event.where())) {
+            const int pict_id = _inline_pict[i].id;
+            for (int i = 0; i < globals()->maxBaseObject; ++i) {
+                if (gBaseObjectData[i].pictPortraitResID == pict_id) {
+                    stack()->push(new ObjectDataScreen(
+                                event.where(), i, ObjectDataScreen::MOUSE, event.button()));
+                    return;
+                }
+            }
+        }
+    }
+}
+
 void BriefingScreen::key_down(const KeyDownEvent& event) {
-    if (event.key() == Keys::ESCAPE) {
-        *_cancelled = true;
-        stack()->pop(this);
+    switch (event.key()) {
+        case Keys::ESCAPE: {
+            *_cancelled = true;
+            stack()->pop(this);
+        }
         return;
-    } else {
-        return InterfaceScreen::key_down(event);
+        case Keys::K1: return show_object_data_key(0, event.key());
+        case Keys::K2: return show_object_data_key(1, event.key());
+        case Keys::K3: return show_object_data_key(2, event.key());
+        case Keys::K4: return show_object_data_key(3, event.key());
+        case Keys::K5: return show_object_data_key(4, event.key());
+        case Keys::K6: return show_object_data_key(5, event.key());
+        case Keys::K7: return show_object_data_key(6, event.key());
+        case Keys::K8: return show_object_data_key(7, event.key());
+        case Keys::K9: return show_object_data_key(8, event.key());
+        case Keys::K0: return show_object_data_key(9, event.key());
+        default: {
+            return InterfaceScreen::key_down(event);
+        }
     }
 }
 
@@ -216,7 +247,7 @@ void BriefingScreen::build_brief_point() {
         Rect map_rect = item(MAP_RECT).bounds;
         GetScenarioFullScaleAndCorner(_scenario, 0, &corner, &scale, &map_rect);
 
-        inlinePictType inline_pict[kMaxInlinePictNum];
+        vector<inlinePictType> inline_pict;
 
         ArrayPixMap pix(world.width(), world.height());
         pix.fill(RgbColor::kClear);
@@ -224,8 +255,22 @@ void BriefingScreen::build_brief_point() {
                 &map_rect, inline_pict, &pix);
         _brief_point.reset(VideoDriver::driver()->new_sprite(
                     format("/x/brief_point/{0}", _briefing_point), pix));
+        swap(inline_pict, _inline_pict);
     } else {
         _brief_point.reset();
+    }
+}
+
+void BriefingScreen::show_object_data_key(int index, int key) {
+    if (index < _inline_pict.size()) {
+        const int pict_id = _inline_pict[index].id;
+        const Point origin = _inline_pict[index].bounds.center();
+        for (int i = 0; i < globals()->maxBaseObject; ++i) {
+            if (gBaseObjectData[i].pictPortraitResID == pict_id) {
+                stack()->push(new ObjectDataScreen(origin, i, ObjectDataScreen::KEY, key));
+                return;
+            }
+        }
     }
 }
 
