@@ -37,6 +37,11 @@ class ObjectDataScreen : public Card {
     ObjectDataScreen(Point origin, int32_t object_id, Trigger trigger, int which);
     ~ObjectDataScreen();
 
+    virtual void become_front();
+
+    virtual bool next_timer(int64_t& time);
+    virtual void fire_timer();
+
     virtual void mouse_up(const MouseUpEvent& event);
     virtual void key_up(const KeyUpEvent& event);
 
@@ -45,6 +50,13 @@ class ObjectDataScreen : public Card {
   private:
     const Trigger _trigger;
     const int _which;
+
+    enum State { TYPING, DONE };
+    State _state;
+    int64_t _next_update;
+    int64_t _next_sound;
+    int _typed_chars;
+
     Rect _bounds;
     sfz::scoped_ptr<RetroText> _text;
 

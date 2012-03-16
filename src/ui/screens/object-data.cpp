@@ -22,6 +22,7 @@
 #include "drawing/retro-text.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
+#include "game/time.hpp"
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 
@@ -37,6 +38,7 @@ namespace antares {
 namespace {
 
 const int32_t kShipDataWidth = 240;
+const int64_t kTypingDelay = 1e6 / 60;
 
 Rect object_data_bounds(Point origin, Size size) {
     Rect bounds(Point(0, 0), size);
@@ -62,7 +64,8 @@ Rect object_data_bounds(Point origin, Size size) {
 
 ObjectDataScreen::ObjectDataScreen(Point origin, int32_t object_id, Trigger trigger, int which):
         _trigger(trigger),
-        _which(which) {
+        _which(which),
+        _state(TYPING) {
     String text;
     CreateObjectDataText(&text, object_id);
     _text.reset(new RetroText(
@@ -74,6 +77,42 @@ ObjectDataScreen::ObjectDataScreen(Point origin, int32_t object_id, Trigger trig
 }
 
 ObjectDataScreen::~ObjectDataScreen() { }
+
+void ObjectDataScreen::become_front() {
+    _state = TYPING;
+    _typed_chars = 0;
+    _next_update = now_usecs() + kTypingDelay;
+    _next_sound = _next_update;
+}
+
+bool ObjectDataScreen::next_timer(int64_t& time) {
+    if (_state == TYPING) {
+        time = _next_update;
+        return true;
+    }
+    return false;
+}
+
+void ObjectDataScreen::fire_timer() {
+    int64_t now = now_usecs();
+    if (_next_sound <= now) {
+        PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
+        _next_sound += 3 * kTypingDelay;
+        while (_next_sound <= now) {
+            _next_sound += kTypingDelay;
+        }
+    }
+    while (_next_update <= now) {
+        if (_typed_chars < _text->size()) {
+            _next_update += kTypingDelay;
+            ++_typed_chars;
+        } else {
+            _next_update = 0;
+            _state = DONE;
+            break;
+        }
+    }
+}
 
 void ObjectDataScreen::mouse_up(const MouseUpEvent& event) {
     if ((_trigger == MOUSE) && (event.button() == _which)) {
@@ -95,7 +134,12 @@ void ObjectDataScreen::draw() const {
     VideoDriver::driver()->fill_rect(outside, light_green);
     outside.inset(1, 1);
     VideoDriver::driver()->fill_rect(outside, RgbColor::kBlack);
-    _text->draw(_bounds);
+    for (int i = 0; i < _typed_chars; ++i) {
+        _text->draw_char(_bounds, i);
+    }
+    if (_typed_chars < _text->size()) {
+        _text->draw_cursor(_bounds, _typed_chars);
+    }
 }
 
 }  // namespace antares
