@@ -29,7 +29,6 @@ const int32_t kMiniBuildTimeHeight = 25;
 
 void InstrumentInit();
 void UpdateRadar(int32_t);
-void UpdateMoney();
 void InstrumentCleanup();
 void ResetInstruments();
 void DrawInstrumentPanel();

@@ -152,6 +152,7 @@ T clamp(T value, T min, T max) {
 }  // namespace
 
 static void draw_bar_indicator(int16_t, int32_t, int32_t);
+static void draw_money();
 
 void InstrumentInit() {
     globals()->gInstrumentTop = (world.height() / 2) - ( kPanelHeight / 2);
@@ -392,12 +393,10 @@ void UpdateRadar(int32_t unitsDone) {
     absolute_scale >>= kScaleListShift;
 
     gAbsoluteScale = absolute_scale;
-
-    UpdateMoney();
 }
 
 // SHOW ME THE MONEY
-void UpdateMoney() {
+static void draw_money() {
     const admiralType* const admiral = mGetAdmiralPtr(globals()->gPlayerAdmiralNumber);
     const int cash = clamp(admiral->cash, 0, kMaxMoneyValue - 1);
     globals()->gBarIndicator[kFineMoneyBar].thisValue
@@ -447,18 +446,18 @@ void UpdateMoney() {
         for (int i = 0; i < kFineMoneyBarNum; ++i) {
             if (i < first_threshold) {
                 if ((i % 5) != 0) {
-                    gOffWorld->view(box).fill(first_color_minor);
+                    VideoDriver::driver()->fill_rect(box, first_color_minor);
                 } else {
-                    gOffWorld->view(box).fill(first_color_major);
+                    VideoDriver::driver()->fill_rect(box, first_color_major);
                 }
             } else if (i < second_threshold) {
                 if ((i % 5) != 0) {
-                    gOffWorld->view(box).fill(second_color_minor);
+                    VideoDriver::driver()->fill_rect(box, second_color_minor);
                 } else {
-                    gOffWorld->view(box).fill(second_color_major);
+                    VideoDriver::driver()->fill_rect(box, second_color_major);
                 }
             } else {
-                gOffWorld->view(box).fill(third_color);
+                VideoDriver::driver()->fill_rect(box, third_color);
             }
             box.offset(0, kFineMoneyBarHeight);
         }
@@ -478,9 +477,9 @@ void UpdateMoney() {
         const RgbColor dark = GetRGBTranslateColorShade(kGrossMoneyColor, VERY_DARK);
         for (int i = 0; i < kGrossMoneyBarNum; ++i) {
             if (i < gross->thisValue) {
-                gOffWorld->view(box).fill(light);
+                VideoDriver::driver()->fill_rect(box, light);
             } else {
-                gOffWorld->view(box).fill(dark);
+                VideoDriver::driver()->fill_rect(box, dark);
             }
             box.offset(0, kGrossMoneyBarHeight);
         }
@@ -549,6 +548,7 @@ void draw_instruments() {
     draw_bar_indicator(kShieldBar, gScrollStarObject->health, base->health);
     draw_bar_indicator(kEnergyBar, gScrollStarObject->energy, base->energy);
     draw_bar_indicator(kBatteryBar, gScrollStarObject->battery, base->energy * 5);
+    draw_money();
 }
 
 void EraseSite() {
