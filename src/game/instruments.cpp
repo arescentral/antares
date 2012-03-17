@@ -41,6 +41,7 @@
 #include "math/units.hpp"
 #include "video/driver.hpp"
 
+using sfz::format;
 using sfz::range;
 using sfz::scoped_array;
 using sfz::scoped_ptr;
@@ -124,6 +125,8 @@ coordPointType          gLastGlobalCorner;
 
 namespace {
 
+scoped_ptr<Sprite> left_instrument_sprite;
+scoped_ptr<Sprite> right_instrument_sprite;
 scoped_array<Point> gRadarBlipData;
 scoped_array<int32_t> gScaleList;
 scoped_array<int32_t> gSectorLineData;
@@ -494,34 +497,17 @@ void DrawInstrumentPanel() {
     tRect = world;
     gOffWorld->view(tRect).fill(RgbColor::kBlack);
 
-    {
-        Picture left_instruments(kInstLeftPictID);
-        const int32_t width = viewport.left;
-        const int32_t height = min(left_instruments.size().height, world.height());
+    Picture left_instrument_pict(kInstLeftPictID);
+    left_instrument_sprite.reset(VideoDriver::driver()->new_sprite(
+                format("/pictures/{0}.png", kInstLeftPictID), left_instrument_pict));
 
-        Rect source_rect(0, 0, width, height);
-        source_rect.center_in(left_instruments.size().as_rect());
-        Rect dest_rect(0, 0, width, height);
-        dest_rect.center_in(Rect(0, 0, width, world.height()));
+    Picture right_instrument_pict(kInstRightPictID);
+    right_instrument_sprite.reset(VideoDriver::driver()->new_sprite(
+                format("/pictures/{0}.png", kInstRightPictID), right_instrument_pict));
 
-        gOffWorld->view(dest_rect).copy(left_instruments.view(source_rect));
-    }
+    gRealWorld->fill(RgbColor::kClear);
+    gOffWorld->fill(RgbColor::kClear);
 
-    {
-        Picture right_instruments(kInstRightPictID);
-        const int32_t width = right_instruments.size().width;
-        const int32_t height = min(right_instruments.size().height, world.height());
-
-        Rect source_rect(world.width() - width, 0, world.width(), height);
-        source_rect.center_in(right_instruments.size().as_rect());
-        Rect dest_rect(world.width() - width, 0, world.width(), height);
-        dest_rect.center_in(Rect(world.width() - width, 0, world.width(), world.height()));
-
-        gOffWorld->view(dest_rect).copy(right_instruments.view(source_rect));
-    }
-
-    tRect = world;
-    copy_world(*gRealWorld, *gOffWorld, tRect);
     MakeMiniScreenFromIndString(1);
     DrawMiniScreen();
     ResetInstruments();
@@ -534,14 +520,26 @@ void DrawInstrumentPanel() {
 void draw_instruments() {
     Rect left_rect(world.left, world.top, viewport.left, world.bottom);
     Rect right_rect(viewport.right, world.top, world.right, world.bottom);
-    VideoDriver::driver()->fill_rect(left_rect, RgbColor::kBlack);
-    VideoDriver::driver()->fill_rect(right_rect, RgbColor::kBlack);
 
     if (world.height() > 768) {
         left_rect.inset(0, (world.height() - 768) / 2);
         right_rect.inset(0, (world.height() - 768) / 2);
     }
 
+    {
+        Stencil stencil(VideoDriver::driver());
+        VideoDriver::driver()->fill_rect(left_rect, RgbColor::kWhite);
+        VideoDriver::driver()->fill_rect(right_rect, RgbColor::kWhite);
+        stencil.apply();
+
+        Rect left_instrument_bounds(Point(0, 0), left_instrument_sprite->size());
+        left_instrument_bounds.center_in(left_rect);
+        Rect right_instrument_bounds(Point(0, 0), right_instrument_sprite->size());
+        right_instrument_bounds.center_in(right_rect);
+
+        left_instrument_sprite->draw(left_instrument_bounds.left, left_instrument_bounds.top);
+        right_instrument_sprite->draw(right_instrument_bounds.left, right_instrument_bounds.top);
+    }
     scoped_ptr<Sprite> left_instruments(VideoDriver::driver()->new_sprite(
                 "/x/left_instruments", gRealWorld->view(left_rect)));
     scoped_ptr<Sprite> right_instruments(VideoDriver::driver()->new_sprite(
