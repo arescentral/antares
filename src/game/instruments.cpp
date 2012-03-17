@@ -151,6 +151,8 @@ T clamp(T value, T min, T max) {
 
 }  // namespace
 
+static void draw_bar_indicator(int16_t, int32_t, int32_t);
+
 void InstrumentInit() {
     globals()->gInstrumentTop = (world.height() / 2) - ( kPanelHeight / 2);
 
@@ -391,10 +393,6 @@ void UpdateRadar(int32_t unitsDone) {
 
     gAbsoluteScale = absolute_scale;
 
-    baseObjectType* base = gScrollStarObject->baseType;
-    UpdateBarIndicator(kShieldBar, gScrollStarObject->health, base->health, gRealWorld);
-    UpdateBarIndicator(kEnergyBar, gScrollStarObject->energy, base->energy, gRealWorld);
-    UpdateBarIndicator(kBatteryBar, gScrollStarObject->battery, base->energy * 5, gRealWorld);
     UpdateMoney();
 }
 
@@ -546,6 +544,11 @@ void draw_instruments() {
                 "/x/right_instruments", gRealWorld->view(right_rect)));
     left_instruments->draw(left_rect);
     right_instruments->draw(right_rect);
+
+    baseObjectType* base = gScrollStarObject->baseType;
+    draw_bar_indicator(kShieldBar, gScrollStarObject->health, base->health);
+    draw_bar_indicator(kEnergyBar, gScrollStarObject->energy, base->energy);
+    draw_bar_indicator(kBatteryBar, gScrollStarObject->battery, base->energy * 5);
 }
 
 void EraseSite() {
@@ -932,57 +935,51 @@ void GetArbitrarySingleSectorBounds(coordPointType *corner, coordPointType *loca
     }
 }
 
-void UpdateBarIndicator(int16_t which, int32_t value, int32_t max, PixMap* pixMap) {
-    int32_t         graphicValue;
-    Rect        tRect, clipRect;
+static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
+    if (value > max) {
+        value = max;
+    }
+
+    int32_t graphicValue;
+    globals()->gBarIndicator[which].lastValue = globals()->gBarIndicator[which].thisValue;
+    if (max > 0) {
+        graphicValue = (kBarIndicatorHeight * value) / max;
+        if (graphicValue < 0) {
+            graphicValue = 0;
+        } else if (graphicValue > kBarIndicatorHeight) {
+            graphicValue = kBarIndicatorHeight;
+        }
+    } else {
+        graphicValue = 0;
+    }
+
     RgbColor        color, lightColor, darkColor;
     Rect            rrect;
 
-    if ( value > max) value = max;
-
-    if ( value != globals()->gBarIndicator[ which].thisValue)
-    {
-        globals()->gBarIndicator[ which].lastValue = globals()->gBarIndicator[ which].thisValue;
-        if ( max > 0)
-        {
-            graphicValue = kBarIndicatorHeight * value;
-            graphicValue /= max;
-            if ( graphicValue < 0) graphicValue = 0;
-            if ( graphicValue > kBarIndicatorHeight) graphicValue = kBarIndicatorHeight;
-        } else graphicValue = 0;
-
-
-        tRect.left = kBarIndicatorLeft + play_screen.right;
-        tRect.right =  tRect.left + kBarIndicatorWidth;
-        tRect.top = globals()->gBarIndicator[ which].top,
-        tRect.bottom = tRect.top + kBarIndicatorHeight - graphicValue;
-        clipRect.left = play_screen.right;
-        clipRect.top = globals()->gInstrumentTop;
-        clipRect.right = clipRect.left + kRightPanelWidth;
-        clipRect.bottom = clipRect.top + kPanelHeight;
-
-        if (graphicValue < kBarIndicatorHeight) {
-            color = GetRGBTranslateColorShade(globals()->gBarIndicator[which].color, DARK);
-            lightColor = GetRGBTranslateColorShade(globals()->gBarIndicator[which].color, MEDIUM);
-            darkColor = GetRGBTranslateColorShade(globals()->gBarIndicator[which].color, DARKER);
-            DrawNateShadedRect(pixMap, &tRect, clipRect, color, lightColor, darkColor);
-        }
-
-        if ( graphicValue > 0)
-        {
-            tRect.top = tRect.bottom;//tRect.bottom - graphicValue;
-            tRect.bottom = globals()->gBarIndicator[which].top + kBarIndicatorHeight;
-            color = GetRGBTranslateColorShade(globals()->gBarIndicator[which].color, LIGHTER);
-            lightColor = GetRGBTranslateColorShade(globals()->gBarIndicator[which].color, VERY_LIGHT);
-            darkColor = GetRGBTranslateColorShade(globals()->gBarIndicator[which].color, MEDIUM);
-            DrawNateShadedRect(pixMap, &tRect, clipRect, color, lightColor, darkColor);
-        }
-        rrect = Rect(tRect.left, globals()->gBarIndicator[ which].top,
-            tRect.right, globals()->gBarIndicator[ which].top + kBarIndicatorHeight);
-        copy_world(*gOffWorld, *gRealWorld, rrect);
-
-        globals()->gBarIndicator[ which].thisValue = value;
+    int8_t hue = globals()->gBarIndicator[which].color;
+    Rect bar(0, 0, kBarIndicatorWidth, kBarIndicatorHeight);
+    bar.offset(
+            kBarIndicatorLeft + play_screen.right,
+            globals()->gBarIndicator[which].top);
+    if (graphicValue < kBarIndicatorHeight) {
+        Rect top_bar = bar;
+        top_bar.bottom = top_bar.bottom - graphicValue;
+        const RgbColor fill_color = GetRGBTranslateColorShade(hue, DARK);
+        const RgbColor light_color = GetRGBTranslateColorShade(hue, MEDIUM);
+        const RgbColor dark_color = GetRGBTranslateColorShade(hue, DARKER);
+        draw_shaded_rect(top_bar, fill_color, light_color, dark_color);
     }
+
+    if (graphicValue > 0) {
+        Rect bottom_bar = bar;
+        bottom_bar.top = bottom_bar.bottom - graphicValue;
+        const RgbColor fill_color = GetRGBTranslateColorShade(hue, LIGHTER);
+        const RgbColor light_color = GetRGBTranslateColorShade(hue, VERY_LIGHT);
+        const RgbColor dark_color = GetRGBTranslateColorShade(hue, MEDIUM);
+        draw_shaded_rect(bottom_bar, fill_color, light_color, dark_color);
+    }
+
+    globals()->gBarIndicator[which].thisValue = value;
 }
 
 void DrawBuildTimeBar(int32_t value) {

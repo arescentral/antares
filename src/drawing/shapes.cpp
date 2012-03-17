@@ -396,7 +396,29 @@ void DrawNateShadedRect(
     tRect.top++;
 
     DrawNateRectClipped( destPix, &tRect, clipRect, fillcolor);
+}
 
+void draw_shaded_rect(
+        Rect rect,
+        const RgbColor& fill_color, const RgbColor& light_color, const RgbColor& dark_color) {
+    rect.right--;
+    rect.bottom--;
+
+    VideoDriver::driver()->draw_line(
+            Point(rect.left, rect.bottom), Point(rect.left, rect.top), light_color);
+    VideoDriver::driver()->draw_line(
+        Point(rect.left, rect.top), Point(rect.right, rect.top), light_color);
+
+    VideoDriver::driver()->draw_line(
+        Point(rect.right, rect.top), Point(rect.right, rect.bottom), dark_color);
+    VideoDriver::driver()->draw_line(
+        Point(rect.right, rect.bottom), Point(rect.left, rect.bottom), dark_color);
+    rect.left++;
+    rect.top++;
+
+    if ((rect.height() > 0) && (rect.width() > 0)) {
+        VideoDriver::driver()->fill_rect(rect, fill_color);
+    }
 }
 
 //
