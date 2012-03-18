@@ -29,7 +29,6 @@ const int32_t kMiniBuildTimeHeight = 25;
 
 void InstrumentInit();
 void UpdateRadar(int32_t);
-void UpdateMoney();
 void InstrumentCleanup();
 void ResetInstruments();
 void DrawInstrumentPanel();
@@ -46,8 +45,6 @@ void InstrumentsHandleMouseStillDown();
 void DrawArbitrarySectorLines(coordPointType *, int32_t, int32_t, Rect *, PixMap*);
 void GetArbitrarySingleSectorBounds(coordPointType*, coordPointType*, int32_t, int32_t, Rect*,
         Rect*);
-void UpdateBarIndicator(int16_t, int32_t, int32_t, PixMap*);
-void DrawBuildTimeBar(int32_t);
 
 }  // namespace antares
 
