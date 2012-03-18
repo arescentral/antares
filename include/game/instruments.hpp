@@ -45,7 +45,6 @@ void InstrumentsHandleMouseStillDown();
 void DrawArbitrarySectorLines(coordPointType *, int32_t, int32_t, Rect *, PixMap*);
 void GetArbitrarySingleSectorBounds(coordPointType*, coordPointType*, int32_t, int32_t, Rect*,
         Rect*);
-void DrawBuildTimeBar(int32_t);
 
 }  // namespace antares
 

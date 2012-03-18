@@ -258,7 +258,7 @@ void MiniScreenInit() {
     globals()->gMiniScreenData.selectLine = kMiniScreenNoLineSelected;
     globals()->gMiniScreenData.currentScreen = kMainMiniScreen;
     globals()->gMiniScreenData.pollTime = 0;
-    globals()->gMiniScreenData.buildTimeBarValue = 0;
+    globals()->gMiniScreenData.buildTimeBarValue = -1;
     globals()->gMiniScreenData.clickLine = kMiniScreenNoLineSelected;
 
     globals()->gMiniScreenData.lineData.reset(new miniScreenLineType[kMiniScreenTrueLineNum]);
@@ -335,7 +335,7 @@ void ClearMiniObjectData( void)
     o->attributes = 0;
     o->baseType = NULL;
 
-    globals()->gMiniScreenData.buildTimeBarValue = 0;
+    globals()->gMiniScreenData.buildTimeBarValue = -1;
     globals()->gMiniScreenData.pollTime = 0;
 }
 
@@ -904,20 +904,18 @@ void MiniComputerHandleNull( long unitsToDo)
         }
         UpdateMiniShipData( myObject, &newObject, SKY_BLUE, kMiniTargetTop, kMiniTargetObjectNum + 1);
 
-        count = GetAdmiralBuildAtObject( globals()->gPlayerAdmiralNumber);
-        if ( count >= 0)
-        {
-            buildAtObject = mGetDestObjectBalancePtr( GetAdmiralBuildAtObject( globals()->gPlayerAdmiralNumber));
-            count = buildAtObject->buildTime * kMiniBuildTimeHeight;
-            if ( buildAtObject->totalBuildTime > 0)
-            {
-                count /= buildAtObject->totalBuildTime;
-            } else count = 0;
-        } else count = 0;
-        if ( count != globals()->gMiniScreenData.buildTimeBarValue)
-        {
-            globals()->gMiniScreenData.buildTimeBarValue = count;
-            DrawBuildTimeBar( globals()->gMiniScreenData.buildTimeBarValue);
+        int build_at = GetAdmiralBuildAtObject(globals()->gPlayerAdmiralNumber);
+        if (build_at >= 0) {
+            buildAtObject = mGetDestObjectBalancePtr(build_at);
+            if (buildAtObject->totalBuildTime > 0) {
+                int progress = buildAtObject->buildTime * kMiniBuildTimeHeight;
+                progress /= buildAtObject->totalBuildTime;
+                globals()->gMiniScreenData.buildTimeBarValue = progress;
+            } else {
+                globals()->gMiniScreenData.buildTimeBarValue = 0;
+            }
+        } else {
+            globals()->gMiniScreenData.buildTimeBarValue = -1;
         }
     }
     if ( globals()->gPlayerShipNumber >= 0)

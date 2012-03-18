@@ -153,6 +153,7 @@ T clamp(T value, T min, T max) {
 
 static void draw_bar_indicator(int16_t, int32_t, int32_t);
 static void draw_money();
+static void draw_build_time_bar(int32_t value);
 
 void InstrumentInit() {
     globals()->gInstrumentTop = (world.height() / 2) - ( kPanelHeight / 2);
@@ -539,15 +540,13 @@ void draw_instruments() {
     }
     scoped_ptr<Sprite> left_instruments(VideoDriver::driver()->new_sprite(
                 "/x/left_instruments", gRealWorld->view(left_rect)));
-    scoped_ptr<Sprite> right_instruments(VideoDriver::driver()->new_sprite(
-                "/x/right_instruments", gRealWorld->view(right_rect)));
     left_instruments->draw(left_rect);
-    right_instruments->draw(right_rect);
 
     baseObjectType* base = gScrollStarObject->baseType;
     draw_bar_indicator(kShieldBar, gScrollStarObject->health, base->health);
     draw_bar_indicator(kEnergyBar, gScrollStarObject->energy, base->energy);
     draw_bar_indicator(kBatteryBar, gScrollStarObject->battery, base->energy * 5);
+    draw_build_time_bar(globals()->gMiniScreenData.buildTimeBarValue);
     draw_money();
 }
 
@@ -982,9 +981,9 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
     globals()->gBarIndicator[which].thisValue = value;
 }
 
-void DrawBuildTimeBar(int32_t value) {
+void draw_build_time_bar(int32_t value) {
     if (value < 0) {
-        value = 0;
+        return;
     }
     value = kMiniBuildTimeHeight - value;
 
@@ -992,7 +991,7 @@ void DrawBuildTimeBar(int32_t value) {
 
     {
         const RgbColor color = GetRGBTranslateColorShade(PALE_PURPLE, MEDIUM);
-        DrawNateVBracket(gOffWorld, clip, clip, color);
+        draw_vbracket(clip, color);
     }
 
     Rect bar = clip;
@@ -1000,13 +999,13 @@ void DrawBuildTimeBar(int32_t value) {
 
     {
         const RgbColor color = GetRGBTranslateColorShade(PALE_PURPLE, DARK);
-        DrawNateRect(gOffWorld, &bar, color);
+        VideoDriver::driver()->fill_rect(bar, color);
     }
 
     if (value > 0) {
         bar.top += value;
         const RgbColor color = GetRGBTranslateColorShade(PALE_PURPLE, LIGHT);
-        DrawNateRect(gOffWorld, &bar, color);
+        VideoDriver::driver()->fill_rect(bar, color);
     }
 }
 
