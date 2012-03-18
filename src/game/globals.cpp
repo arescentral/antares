@@ -71,7 +71,6 @@ aresGlobalType::aresGlobalType() {
     gMessageLabelNum = -1;
     gStatusLabelNum = -1;
     gLastSoundTime = 0;
-    gLastSelectedBuildPrice = 0;
     gAutoPilotOff = true;
     levelNum = 31;
     keyMask = 0;

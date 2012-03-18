@@ -216,7 +216,7 @@ void ResetInstruments() {
 
     for ( i = 0; i < kBarIndicatorNum; i++)
     {
-        globals()->gBarIndicator[i].lastValue = globals()->gBarIndicator[i].thisValue = -1;
+        globals()->gBarIndicator[i].thisValue = -1;
     }
     // the shield bar
     globals()->gBarIndicator[kShieldBar].top = 359 + globals()->gInstrumentTop;
@@ -429,86 +429,79 @@ static void draw_money() {
         = (cash % kFineMoneyBarMod) / kFineMoneyBarValue;
     const int price = MiniComputerGetPriceOfCurrentSelection() / kFineMoneyBarValue;
 
-    if ((globals()->gBarIndicator[kFineMoneyBar].thisValue !=
-                globals()->gBarIndicator[kFineMoneyBar].lastValue) ||
-            (price != globals()->gLastSelectedBuildPrice)) {
-        Rect box(0, 0, kFineMoneyBarWidth, kFineMoneyBarHeight - 1);
-        box.offset(kFineMoneyLeft + kFineMoneyHBuffer + play_screen.right,
-                kFineMoneyTop + globals()->gInstrumentTop + kFineMoneyVBuffer);
+    Rect box(0, 0, kFineMoneyBarWidth, kFineMoneyBarHeight - 1);
+    box.offset(kFineMoneyLeft + kFineMoneyHBuffer + play_screen.right,
+            kFineMoneyTop + globals()->gInstrumentTop + kFineMoneyVBuffer);
 
-        // First section of the money bar: when we can afford the current selection, displays the
-        // money which will remain after it is purchased.  When we cannot, displays the money we
-        // currently have.
-        int first_threshold;
-        RgbColor first_color_major;
-        RgbColor first_color_minor;
+    // First section of the money bar: when we can afford the current selection, displays the
+    // money which will remain after it is purchased.  When we cannot, displays the money we
+    // currently have.
+    int first_threshold;
+    RgbColor first_color_major;
+    RgbColor first_color_minor;
 
-        // Second section of the money bar: when we can afford the current selection, displays the
-        // amount which will be deducted after it is purchased.  When we cannot, displays the
-        // amount of additional money which we need to amass before it can be purchased.
-        int second_threshold;
-        RgbColor second_color_major;
-        RgbColor second_color_minor;
+    // Second section of the money bar: when we can afford the current selection, displays the
+    // amount which will be deducted after it is purchased.  When we cannot, displays the
+    // amount of additional money which we need to amass before it can be purchased.
+    int second_threshold;
+    RgbColor second_color_major;
+    RgbColor second_color_minor;
 
-        // Third section: money we don't have and don't need for the current selection.
-        RgbColor third_color = GetRGBTranslateColorShade(kFineMoneyColor, VERY_DARK);
+    // Third section: money we don't have and don't need for the current selection.
+    RgbColor third_color = GetRGBTranslateColorShade(kFineMoneyColor, VERY_DARK);
 
-        if (globals()->gBarIndicator[kFineMoneyBar].thisValue < price) {
-            first_color_major = GetRGBTranslateColorShade(kFineMoneyColor, VERY_LIGHT);
-            first_color_minor = GetRGBTranslateColorShade(kFineMoneyColor, LIGHT);
-            second_color_major = GetRGBTranslateColorShade(kFineMoneyNeedColor, MEDIUM);
-            second_color_minor = GetRGBTranslateColorShade(kFineMoneyNeedColor, DARK);
-            first_threshold = globals()->gBarIndicator[kFineMoneyBar].thisValue;
-            second_threshold = price;
-        } else {
-            first_color_major = GetRGBTranslateColorShade(kFineMoneyColor, VERY_LIGHT);
-            first_color_minor = GetRGBTranslateColorShade(kFineMoneyColor, LIGHT);
-            second_color_major = GetRGBTranslateColorShade(kFineMoneyUseColor, VERY_LIGHT);
-            second_color_minor = GetRGBTranslateColorShade(kFineMoneyUseColor, LIGHT);
-            first_threshold = globals()->gBarIndicator[kFineMoneyBar].thisValue - price;
-            second_threshold = globals()->gBarIndicator[kFineMoneyBar].thisValue;
-        }
-
-        for (int i = 0; i < kFineMoneyBarNum; ++i) {
-            if (i < first_threshold) {
-                if ((i % 5) != 0) {
-                    VideoDriver::driver()->fill_rect(box, first_color_minor);
-                } else {
-                    VideoDriver::driver()->fill_rect(box, first_color_major);
-                }
-            } else if (i < second_threshold) {
-                if ((i % 5) != 0) {
-                    VideoDriver::driver()->fill_rect(box, second_color_minor);
-                } else {
-                    VideoDriver::driver()->fill_rect(box, second_color_major);
-                }
-            } else {
-                VideoDriver::driver()->fill_rect(box, third_color);
-            }
-            box.offset(0, kFineMoneyBarHeight);
-        }
-        globals()->gBarIndicator[kFineMoneyBar].thisValue = second_threshold;
+    if (globals()->gBarIndicator[kFineMoneyBar].thisValue < price) {
+        first_color_major = GetRGBTranslateColorShade(kFineMoneyColor, VERY_LIGHT);
+        first_color_minor = GetRGBTranslateColorShade(kFineMoneyColor, LIGHT);
+        second_color_major = GetRGBTranslateColorShade(kFineMoneyNeedColor, MEDIUM);
+        second_color_minor = GetRGBTranslateColorShade(kFineMoneyNeedColor, DARK);
+        first_threshold = globals()->gBarIndicator[kFineMoneyBar].thisValue;
+        second_threshold = price;
+    } else {
+        first_color_major = GetRGBTranslateColorShade(kFineMoneyColor, VERY_LIGHT);
+        first_color_minor = GetRGBTranslateColorShade(kFineMoneyColor, LIGHT);
+        second_color_major = GetRGBTranslateColorShade(kFineMoneyUseColor, VERY_LIGHT);
+        second_color_minor = GetRGBTranslateColorShade(kFineMoneyUseColor, LIGHT);
+        first_threshold = globals()->gBarIndicator[kFineMoneyBar].thisValue - price;
+        second_threshold = globals()->gBarIndicator[kFineMoneyBar].thisValue;
     }
 
-    globals()->gLastSelectedBuildPrice = price;
+    for (int i = 0; i < kFineMoneyBarNum; ++i) {
+        if (i < first_threshold) {
+            if ((i % 5) != 0) {
+                VideoDriver::driver()->fill_rect(box, first_color_minor);
+            } else {
+                VideoDriver::driver()->fill_rect(box, first_color_major);
+            }
+        } else if (i < second_threshold) {
+            if ((i % 5) != 0) {
+                VideoDriver::driver()->fill_rect(box, second_color_minor);
+            } else {
+                VideoDriver::driver()->fill_rect(box, second_color_major);
+            }
+        } else {
+            VideoDriver::driver()->fill_rect(box, third_color);
+        }
+        box.offset(0, kFineMoneyBarHeight);
+    }
+    globals()->gBarIndicator[kFineMoneyBar].thisValue = second_threshold;
 
     barIndicatorType* gross = globals()->gBarIndicator + kGrossMoneyBar;
     gross->thisValue = (admiral->cash / kGrossMoneyBarValue);
-    if (gross->thisValue != gross->lastValue) {
-        Rect box(0, 0, kGrossMoneyBarWidth, kGrossMoneyBarHeight - 1);
-        box.offset(play_screen.right + kGrossMoneyLeft + kGrossMoneyHBuffer,
-                kGrossMoneyTop + globals()->gInstrumentTop + kGrossMoneyVBuffer);
 
-        const RgbColor light = GetRGBTranslateColorShade(kGrossMoneyColor, VERY_LIGHT);
-        const RgbColor dark = GetRGBTranslateColorShade(kGrossMoneyColor, VERY_DARK);
-        for (int i = 0; i < kGrossMoneyBarNum; ++i) {
-            if (i < gross->thisValue) {
-                VideoDriver::driver()->fill_rect(box, light);
-            } else {
-                VideoDriver::driver()->fill_rect(box, dark);
-            }
-            box.offset(0, kGrossMoneyBarHeight);
+    box = Rect(0, 0, kGrossMoneyBarWidth, kGrossMoneyBarHeight - 1);
+    box.offset(play_screen.right + kGrossMoneyLeft + kGrossMoneyHBuffer,
+            kGrossMoneyTop + globals()->gInstrumentTop + kGrossMoneyVBuffer);
+
+    const RgbColor light = GetRGBTranslateColorShade(kGrossMoneyColor, VERY_LIGHT);
+    const RgbColor dark = GetRGBTranslateColorShade(kGrossMoneyColor, VERY_DARK);
+    for (int i = 0; i < kGrossMoneyBarNum; ++i) {
+        if (i < gross->thisValue) {
+            VideoDriver::driver()->fill_rect(box, light);
+        } else {
+            VideoDriver::driver()->fill_rect(box, dark);
         }
+        box.offset(0, kGrossMoneyBarHeight);
     }
 }
 
@@ -941,7 +934,7 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
     }
 
     int32_t graphicValue;
-    globals()->gBarIndicator[which].lastValue = globals()->gBarIndicator[which].thisValue;
+    globals()->gBarIndicator[which].thisValue;
     if (max > 0) {
         graphicValue = (kBarIndicatorHeight * value) / max;
         if (graphicValue < 0) {

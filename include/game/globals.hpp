@@ -54,7 +54,6 @@ enum ZoomType {
 struct barIndicatorType {
     short           top;
     long            thisValue;
-    long            lastValue;
     unsigned char   color;
     bool         automatic;      // if it's automatic, it is redrawn automatically
 };
@@ -144,7 +143,6 @@ struct aresGlobalType {
     KeyMap          gLastMessageKeyMap;
     unsigned long   gSerialNumerator;
     unsigned long   gSerialDenominator;
-    long            gLastSelectedBuildPrice;
     bool         gAutoPilotOff;          // hack for turning off auto in netgame
     long            levelNum;
     unsigned long   keyMask;
