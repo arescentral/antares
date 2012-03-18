@@ -162,6 +162,32 @@ void InstrumentInit() {
     gSectorLineData.reset(new int32_t[kMaxSectorLine * 4]);
     ResetInstruments();
 
+    // Initialize and crop left and right instrument picts.
+    {
+        Picture pict(kInstLeftPictID);
+        ArrayPixMap pix_map(128, min(world.height(), pict.size().height));
+        Rect from(Point(0, 0), pix_map.size());
+        Rect to(Point(0, 0), pix_map.size());
+        if (pict.size().height > world.height()) {
+            from.offset(0, (pict.size().height - world.height()) / 2);
+        }
+        pix_map.view(to).copy(pict.view(from));
+        left_instrument_sprite.reset(VideoDriver::driver()->new_sprite(
+                    format("/pictures/{0}.png", kInstLeftPictID), pix_map));
+    }
+    {
+        Picture pict(kInstRightPictID);
+        ArrayPixMap pix_map(32, min(world.height(), pict.size().height));
+        Rect from(Point(0, 0), pix_map.size());
+        Rect to(Point(0, 0), pix_map.size());
+        if (pict.size().height > world.height()) {
+            from.offset(0, (pict.size().height - world.height()) / 2);
+        }
+        pix_map.view(to).copy(pict.view(from));
+        right_instrument_sprite.reset(VideoDriver::driver()->new_sprite(
+                    format("/pictures/{0}.png", kInstRightPictID), pix_map));
+    }
+
     MiniScreenInit();
 }
 
@@ -487,20 +513,7 @@ static void draw_money() {
 }
 
 void DrawInstrumentPanel() {
-    scoped_ptr<Picture> pict;
-    Rect            tRect;
-
     globals()->gZoomMode = kNearestFoeZoom;
-    tRect = world;
-    gOffWorld->view(tRect).fill(RgbColor::kBlack);
-
-    Picture left_instrument_pict(kInstLeftPictID);
-    left_instrument_sprite.reset(VideoDriver::driver()->new_sprite(
-                format("/pictures/{0}.png", kInstLeftPictID), left_instrument_pict));
-
-    Picture right_instrument_pict(kInstRightPictID);
-    right_instrument_sprite.reset(VideoDriver::driver()->new_sprite(
-                format("/pictures/{0}.png", kInstRightPictID), right_instrument_pict));
 
     gRealWorld->fill(RgbColor::kClear);
     gOffWorld->fill(RgbColor::kClear);
@@ -523,20 +536,9 @@ void draw_instruments() {
         right_rect.inset(0, (world.height() - 768) / 2);
     }
 
-    {
-        Stencil stencil(VideoDriver::driver());
-        VideoDriver::driver()->fill_rect(left_rect, RgbColor::kWhite);
-        VideoDriver::driver()->fill_rect(right_rect, RgbColor::kWhite);
-        stencil.apply();
+    left_instrument_sprite->draw(left_rect.left, left_rect.top);
+    right_instrument_sprite->draw(right_rect.left, right_rect.top);
 
-        Rect left_instrument_bounds(Point(0, 0), left_instrument_sprite->size());
-        left_instrument_bounds.center_in(left_rect);
-        Rect right_instrument_bounds(Point(0, 0), right_instrument_sprite->size());
-        right_instrument_bounds.center_in(right_rect);
-
-        left_instrument_sprite->draw(left_instrument_bounds.left, left_instrument_bounds.top);
-        right_instrument_sprite->draw(right_instrument_bounds.left, right_instrument_bounds.top);
-    }
     scoped_ptr<Sprite> left_instruments(VideoDriver::driver()->new_sprite(
                 "/x/left_instruments", gRealWorld->view(left_rect)));
     left_instruments->draw(left_rect);
