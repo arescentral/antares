@@ -918,27 +918,6 @@ void MiniComputerHandleNull( long unitsToDo)
             globals()->gMiniScreenData.buildTimeBarValue = -1;
         }
     }
-    if ( globals()->gPlayerShipNumber >= 0)
-    {
-        myObject = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
-        if ( myObject->active)
-        {
-            UpdatePlayerAmmo(
-                (myObject->pulseType >= 0) ?
-                    (( myObject->pulseBase->frame.weapon.ammo > 0) ?
-                        ( myObject->pulseAmmo):(-1)):
-                    (-1),
-                (myObject->beamType >= 0) ?
-                    (( myObject->beamBase->frame.weapon.ammo > 0) ?
-                        ( myObject->beamAmmo):(-1)):
-                    (-1),
-                (myObject->specialType >= 0) ?
-                    (( myObject->specialBase->frame.weapon.ammo > 0) ?
-                        ( myObject->specialAmmo):(-1)):
-                    (-1)
-                );
-        }
-    }
 }
 
 
@@ -1037,8 +1016,7 @@ void UpdateMiniScreenLines( void)
     }
 }
 
-static void update_ammo_in_rect(int32_t value, int8_t hue, const Rect& rect) {
-    gOffWorld->view(rect).fill(RgbColor::kClear);
+static void draw_player_ammo_in_rect(int32_t value, int8_t hue, const Rect& rect) {
     if (value >= 0) {
         const RgbColor text_color = GetRGBTranslateColorShade(hue, VERY_LIGHT);
         const char digits[] = {
@@ -1048,23 +1026,22 @@ static void update_ammo_in_rect(int32_t value, int8_t hue, const Rect& rect) {
             '\0',
         };
         Point origin(rect.left + kMiniAmmoTextHBuffer, rect.bottom - 1);
-        DrawDirectTextStringClipped(origin, digits, text_color, gOffWorld, rect);
+        gDirectText->draw_sprite(origin, digits, text_color);
     }
-    gRealWorld->view(rect).copy(gOffWorld->view(rect));
 }
 
-void UpdatePlayerAmmo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) {
+void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) {
     mSetDirectFont(kComputerFontNum);
 
     Rect clip(0, kMiniAmmoTop, kMiniAmmoSingleWidth, kMiniAmmoBottom);
     clip.offset(0, globals()->gInstrumentTop);
 
     clip.offset(kMiniAmmoLeftOne - clip.left, 0);
-    update_ammo_in_rect(ammo_one, RED, clip);
+    draw_player_ammo_in_rect(ammo_one, RED, clip);
     clip.offset(kMiniAmmoLeftTwo - clip.left, 0);
-    update_ammo_in_rect(ammo_two, PALE_GREEN, clip);
+    draw_player_ammo_in_rect(ammo_two, PALE_GREEN, clip);
     clip.offset(kMiniAmmoLeftSpecial - clip.left, 0);
-    update_ammo_in_rect(ammo_special, ORANGE, clip);
+    draw_player_ammo_in_rect(ammo_special, ORANGE, clip);
 }
 
 void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject, unsigned char headerColor,

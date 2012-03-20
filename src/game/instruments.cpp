@@ -516,7 +516,6 @@ void DrawInstrumentPanel() {
     ResetInstruments();
     ClearMiniObjectData();
     ShowWholeMiniScreen();
-    UpdatePlayerAmmo(-1, -1, -1);
     UpdateRadar(100);
 }
 
@@ -535,6 +534,22 @@ void draw_instruments() {
     scoped_ptr<Sprite> left_instruments(VideoDriver::driver()->new_sprite(
                 "/x/left_instruments", gRealWorld->view(left_rect)));
     left_instruments->draw(left_rect);
+
+    if (globals()->gPlayerShipNumber >= 0) {
+        spaceObjectType* player = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
+        if (player->active) {
+            draw_player_ammo(
+                ((player->pulseType >= 0) && (player->pulseBase->frame.weapon.ammo > 0))
+                ? player->pulseAmmo
+                : -1,
+                ((player->beamType >= 0) && (player->beamBase->frame.weapon.ammo > 0))
+                ? player->beamAmmo
+                : -1,
+                ((player->specialType >= 0) && (player->specialBase->frame.weapon.ammo > 0))
+                ? player->specialAmmo
+                : -1);
+        }
+    }
 
     baseObjectType* base = gScrollStarObject->baseType;
     draw_bar_indicator(kShieldBar, gScrollStarObject->health, base->health);
