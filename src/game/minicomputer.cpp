@@ -42,6 +42,7 @@ using sfz::Bytes;
 using sfz::Rune;
 using sfz::String;
 using sfz::StringSlice;
+using sfz::bin;
 using sfz::scoped_array;
 using sfz::string_to_int;
 
@@ -1036,111 +1037,35 @@ void UpdateMiniScreenLines( void)
     }
 }
 
-void UpdatePlayerAmmo( long thisOne, long thisTwo, long thisSpecial)
-
-{
-    static long         lastOne = -1, lastTwo = -1, lastSpecial = -1;
-    RgbColor            lightcolor;
-    Rect            lRect, clipRect;
-    Rect                mRect;
-    bool             update = false;
-
-    mSetDirectFont( kComputerFontNum);
-
-    clipRect.left = kMiniScreenLeft;
-    lRect.top = clipRect.top = kMiniAmmoTop + globals()->gInstrumentTop;
-    clipRect.right = kMiniScreenRight;
-    lRect.bottom = clipRect.bottom = kMiniAmmoBottom + globals()->gInstrumentTop;
-
-    if ( thisOne != lastOne)
-    {
-        lightcolor = GetRGBTranslateColorShade(RED, VERY_LIGHT);
-
-        lRect.left = kMiniAmmoLeftOne;
-        lRect.right = lRect.left + kMiniAmmoSingleWidth;
-
-        DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
-
-        if (thisOne >= 0) {
-            const char digits[] = {
-                '0' + ((thisOne % 1000) / 100),
-                '0' + ((thisOne % 100) / 10),
-                '0' + ((thisOne % 10) / 1),
-                '\0'
-            };
-
-            DrawDirectTextStringClipped(
-                    Point(lRect.left + kMiniAmmoTextHBuffer, lRect.bottom - 1), digits, lightcolor,
-                    gOffWorld, clipRect);
-        }
-
-        update = true;
+static void update_ammo_in_rect(int32_t value, int8_t hue, const Rect& rect) {
+    gOffWorld->view(rect).fill(RgbColor::kClear);
+    if (value >= 0) {
+        const RgbColor text_color = GetRGBTranslateColorShade(hue, VERY_LIGHT);
+        const char digits[] = {
+            ((value % 1000) / 100) + '0',
+            ((value % 100) / 10) + '0',
+            (value % 10) + '0',
+            '\0',
+        };
+        Point origin(rect.left + kMiniAmmoTextHBuffer, rect.bottom - 1);
+        DrawDirectTextStringClipped(origin, digits, text_color, gOffWorld, rect);
     }
-
-    if ( thisTwo != lastTwo)
-    {
-        lightcolor = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
-
-        lRect.left = kMiniAmmoLeftTwo;
-        lRect.right = lRect.left + kMiniAmmoSingleWidth;
-
-        DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
-
-        if (thisTwo >= 0) {
-            const char digits[] = {
-                '0' + ((thisTwo % 1000) / 100),
-                '0' + ((thisTwo % 100) / 10),
-                '0' + ((thisTwo % 10) / 1),
-                '\0'
-            };
-
-            DrawDirectTextStringClipped(
-                    Point(lRect.left + kMiniAmmoTextHBuffer, lRect.bottom - 1), digits, lightcolor,
-                    gOffWorld, clipRect);
-        }
-        update = true;
-    }
-
-    if ( thisSpecial != lastSpecial)
-    {
-        lightcolor = GetRGBTranslateColorShade(ORANGE, VERY_LIGHT);
-
-        lRect.left = kMiniAmmoLeftSpecial;
-        lRect.right = lRect.left + kMiniAmmoSingleWidth;
-
-        DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
-
-        if (thisSpecial >= 0) {
-            const char digits[] = {
-                '0' + ((thisSpecial % 1000) / 100),
-                '0' + ((thisSpecial % 100) / 10),
-                '0' + ((thisSpecial % 10) / 1),
-                '\0'
-            };
-
-            DrawDirectTextStringClipped(
-                    Point(lRect.left + kMiniAmmoTextHBuffer, lRect.bottom - 1), digits, lightcolor,
-                    gOffWorld, clipRect);
-        }
-        update = true;
-    }
-
-    if ( update)
-    {
-        mRect.left = clipRect.left;
-        mRect.right = clipRect.right;
-        mRect.top = clipRect.top;
-        mRect.bottom = clipRect.bottom;
-
-        // copy the dirty rect
-        copy_world(*gRealWorld, *gOffWorld, mRect);
-    }
-
-    lastOne = thisOne;
-    lastTwo = thisTwo;
-    lastSpecial = thisSpecial;
+    gRealWorld->view(rect).copy(gOffWorld->view(rect));
 }
 
+void UpdatePlayerAmmo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) {
+    mSetDirectFont(kComputerFontNum);
+
+    Rect clip(0, kMiniAmmoTop, kMiniAmmoSingleWidth, kMiniAmmoBottom);
+    clip.offset(0, globals()->gInstrumentTop);
+
+    clip.offset(kMiniAmmoLeftOne - clip.left, 0);
+    update_ammo_in_rect(ammo_one, RED, clip);
+    clip.offset(kMiniAmmoLeftTwo - clip.left, 0);
+    update_ammo_in_rect(ammo_two, PALE_GREEN, clip);
+    clip.offset(kMiniAmmoLeftSpecial - clip.left, 0);
+    update_ammo_in_rect(ammo_special, ORANGE, clip);
+}
 
 void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject, unsigned char headerColor,
                     short screenTop, short whichString)

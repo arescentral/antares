@@ -69,7 +69,7 @@ void MiniComputerHandleKeys( unsigned long, unsigned long);
 void MiniComputerHandleNull( long);
 long MiniComputerGetPriceOfCurrentSelection( void);
 void UpdateMiniScreenLines( void);
-void UpdatePlayerAmmo(long, long, long);
+void UpdatePlayerAmmo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special);
 void UpdateMiniShipData( spaceObjectType *, spaceObjectType *, unsigned char, short, short);
 void MiniComputerDoAccept( void);
 void MiniComputerExecute( long, long, long);
