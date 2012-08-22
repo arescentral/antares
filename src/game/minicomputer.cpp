@@ -37,6 +37,7 @@
 #include "game/starfield.hpp"
 #include "math/fixed.hpp"
 #include "sound/fx.hpp"
+#include "video/driver.hpp"
 
 using sfz::Bytes;
 using sfz::Rune;
@@ -339,9 +340,7 @@ void ClearMiniObjectData( void)
     globals()->gMiniScreenData.pollTime = 0;
 }
 
-void DrawMiniScreen( void)
-
-{
+void draw_mini_screen() {
     Rect                mRect;
     Rect            lRect, cRect;
     miniScreenLineType  *c;
@@ -355,7 +354,7 @@ void DrawMiniScreen( void)
                 kMiniScreenBottom + globals()->gInstrumentTop);
     color = GetRGBTranslateColorShade(kMiniScreenColor, DARKEST);
     cRect = lRect;
-    DrawNateRect(gOffWorld, &cRect, color);
+    VideoDriver::driver()->fill_rect(cRect, color);
 
     mRect.left = kMiniScreenLeft;
     mRect.top = kMiniScreenTop + globals()->gInstrumentTop;
@@ -372,20 +371,20 @@ void DrawMiniScreen( void)
             lRect.top = mRect.top = kButBoxTop + globals()->gInstrumentTop;
             lRect.right = mRect.right = kButBoxRight;
             lRect.bottom = mRect.bottom = kButBoxBottom + globals()->gInstrumentTop;
-            color = GetRGBTranslateColorShade(kMiniScreenColor, DARKEST);
+            color = GetRGBTranslateColorShade(kMiniButColor, DARKEST);
             cRect = lRect;
-            DrawNateRect(gOffWorld, &cRect, color);
+            VideoDriver::driver()->fill_rect(cRect, color);
             lineCorrect = -kMiniScreenCharHeight;
             lineColor = kMiniButColor;
         }
 
         if ( c->underline)
         {
-            MoveTo( mRect.left, mRect.top + (count + lineCorrect) * ((
-                gDirectText->height)/* * 2*/) + gDirectText->ascent/* * 2*/);
             const RgbColor color = GetRGBTranslateColorShade(lineColor, MEDIUM);
-            MacLineTo(gOffWorld, mRect.right - 1, mRect.top + (count + lineCorrect) * ((
-                gDirectText->height) /* * 2 */) + gDirectText->ascent /* * 2 */, color);
+            int32_t y = mRect.top + (count + lineCorrect) * gDirectText->height
+                      + gDirectText->ascent;
+            VideoDriver::driver()->draw_line(
+                    Point(mRect.left, y), Point(mRect.right - 2, y), color);
         }
 
         if ( c->hiliteLeft < c->hiliteRight)
@@ -407,7 +406,7 @@ void DrawMiniScreen( void)
                         color = GetRGBTranslateColorShade(lineColor, DARK);
                         lightcolor = GetRGBTranslateColorShade(lineColor, MEDIUM);
                         darkcolor = GetRGBTranslateColorShade(lineColor, DARKER);
-                        DrawNateShadedRect(gOffWorld, &cRect, lRect, color, lightcolor, darkcolor);
+                        draw_shaded_rect(cRect, color, lightcolor, darkcolor);
                     }
                     break;
 
@@ -420,7 +419,7 @@ void DrawMiniScreen( void)
                     color = GetRGBTranslateColorShade(lineColor, MEDIUM);
                     lightcolor = GetRGBTranslateColorShade(lineColor, LIGHT);
                     darkcolor = GetRGBTranslateColorShade(lineColor, DARK);
-                    DrawNateShadedRect(gOffWorld, &cRect, lRect, color, lightcolor, darkcolor);
+                    draw_shaded_rect(cRect, color, lightcolor, darkcolor);
                     break;
 
                 case buttonOnLineKind:
@@ -432,7 +431,7 @@ void DrawMiniScreen( void)
                     color = GetRGBTranslateColorShade(lineColor, LIGHT);
                     lightcolor = GetRGBTranslateColorShade(lineColor, VERY_LIGHT);
                     darkcolor = GetRGBTranslateColorShade(lineColor, MEDIUM);
-                    DrawNateShadedRect(gOffWorld, &cRect, lRect, color, lightcolor, darkcolor);
+                    draw_shaded_rect(cRect, color, lightcolor, darkcolor);
                     textcolor = RgbColor::kBlack;
                     break;
 
@@ -444,142 +443,13 @@ void DrawMiniScreen( void)
             else
                 textcolor = GetRGBTranslateColorShade(lineColor, VERY_LIGHT);
         }
-        DrawDirectTextStringClipped(
+        gDirectText->draw_sprite(
                 Point(
                     mRect.left + kMiniScreenLeftBuffer,
                     mRect.top + (count + lineCorrect) * gDirectText->height + gDirectText->ascent),
-                c->string, textcolor, gOffWorld, lRect);
+                c->string, textcolor);
         c++;
     }
-}
-
-void DrawAndShowMiniScreenLine( long whichLine)
-
-{
-    Rect                tRect;
-    Rect            lRect, cRect;
-    miniScreenLineType  *c;
-    RgbColor            color, lightcolor, darkcolor, textcolor;
-    unsigned char lineColor = kMiniScreenColor;
-    long                lineCorrect = 0;
-
-    if ( whichLine < 0) return;
-
-    mSetDirectFont( kComputerFontNum);
-
-    if ( whichLine < kMiniScreenCharHeight)
-    {
-        lRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
-                    kMiniScreenBottom + globals()->gInstrumentTop);
-        cRect = lRect;
-        cRect.top = lRect.top + whichLine * gDirectText->height;
-        cRect.bottom = cRect.top + gDirectText->height;
-    } else
-    {
-        lRect = Rect(kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
-                    kButBoxBottom + globals()->gInstrumentTop);
-        lineCorrect = -kMiniScreenCharHeight;
-        lineColor = kMiniButColor;
-        cRect = lRect;
-        cRect.top = lRect.top + (whichLine - kMiniScreenCharHeight) * gDirectText->height;
-        cRect.bottom = cRect.top + gDirectText->height;
-    }
-
-    color = GetRGBTranslateColorShade(lineColor, DARKEST);
-    DrawNateRect(gOffWorld, &cRect, color);
-
-    c = globals()->gMiniScreenData.lineData.get() + whichLine;
-
-    if ( c->underline)
-    {
-        MoveTo( lRect.left, lRect.top + (whichLine + lineCorrect) * ((
-            gDirectText->height) /* * 2 */) + gDirectText->ascent /* * 2 */);
-        const RgbColor color = GetRGBTranslateColorShade( lineColor, MEDIUM);
-        MacLineTo(gOffWorld, lRect.right - 1, lRect.top + (whichLine + lineCorrect) * ((
-            gDirectText->height) /* * 2 */) + gDirectText->ascent /* * 2 */, color);
-    }
-
-    if ( c->hiliteLeft < c->hiliteRight)
-    {
-        if ( c->selectable == selectDim)
-            textcolor = GetRGBTranslateColorShade(lineColor, VERY_DARK);
-        else
-            textcolor = GetRGBTranslateColorShade(lineColor, VERY_LIGHT);
-        switch( c->lineKind)
-        {
-            case plainLineKind:
-                    if ( c->hiliteRight > c->hiliteLeft)
-                    {
-                        cRect.left = c->hiliteLeft;
-                        cRect.top = lRect.top + (( whichLine + lineCorrect) * ( gDirectText->height /* * 2 */));
-                        cRect.right = c->hiliteRight;
-                        cRect.bottom = cRect.top + gDirectText->height /* * 2 */;
-//                      color = GetTranslateColorShade( lineColor, DARK);
-                        color = GetRGBTranslateColorShade(lineColor, DARK);
-                        lightcolor = GetRGBTranslateColorShade(lineColor, MEDIUM);
-                        darkcolor = GetRGBTranslateColorShade(lineColor, DARKER);
-                        DrawNateShadedRect(gOffWorld, &cRect, lRect, color, lightcolor, darkcolor);
-                    }
-                break;
-
-            case buttonOffLineKind:
-                cRect.left = c->hiliteLeft - 2;
-                cRect.top = lRect.top + (( whichLine + lineCorrect) * ( gDirectText->height /* * 2 */));
-                cRect.right = c->hiliteRight + 2;
-                cRect.bottom = cRect.top + gDirectText->height /* * 2 */;
-
-                color = GetRGBTranslateColorShade(lineColor, MEDIUM);
-                lightcolor = GetRGBTranslateColorShade(lineColor, LIGHT);
-                darkcolor = GetRGBTranslateColorShade(lineColor, DARK);
-                DrawNateShadedRect(gOffWorld, &cRect, lRect, color, lightcolor, darkcolor);
-                break;
-
-            case buttonOnLineKind:
-                cRect.left = c->hiliteLeft - 2;
-                cRect.top = lRect.top + (( whichLine + lineCorrect) * ( gDirectText->height /* * 2 */));
-                cRect.right = lRect.right; //c->hiliteRight + 2;
-                cRect.bottom = cRect.top + gDirectText->height /* * 2 */;
-
-                color = GetRGBTranslateColorShade(lineColor, LIGHT);
-                lightcolor = GetRGBTranslateColorShade(lineColor, VERY_LIGHT);
-                darkcolor = GetRGBTranslateColorShade(lineColor, MEDIUM);
-                DrawNateShadedRect(gOffWorld, &cRect, lRect, color, lightcolor, darkcolor);
-                textcolor = RgbColor::kBlack;
-                break;
-        }
-    } else
-    {
-        if ( c->selectable == selectDim)
-            textcolor = GetRGBTranslateColorShade(lineColor, MEDIUM);
-        else
-            textcolor = GetRGBTranslateColorShade(lineColor, VERY_LIGHT);
-    }
-
-
-    DrawDirectTextStringClipped(
-            Point(
-                lRect.left + kMiniScreenLeftBuffer,
-                lRect.top + (whichLine + lineCorrect) * gDirectText->height + gDirectText->ascent),
-            c->string, textcolor, gOffWorld, lRect);
-
-    tRect.left = lRect.left;
-    tRect.right = kMiniScreenRight;
-    tRect.top = lRect.top + (( whichLine + lineCorrect) * ( gDirectText->height /* * 2 */));
-    tRect.bottom = tRect.top + gDirectText->height/* * 2 */;
-    copy_world(*gRealWorld, *gOffWorld, tRect);
-}
-
-void ShowWholeMiniScreen( void)
-
-{
-    Rect                tRect;
-
-    tRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
-                kMiniScreenBottom + globals()->gInstrumentTop);
-    copy_world(*gRealWorld, *gOffWorld, tRect);
-    tRect = Rect(kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
-                kButBoxBottom + globals()->gInstrumentTop);
-    copy_world(*gRealWorld, *gOffWorld, tRect);
 }
 
 void MakeMiniScreenFromIndString(short whichString) {
@@ -716,13 +586,10 @@ void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)
             if (( theseKeys & kCompAcceptKey) && ( line->lineKind != buttonOnLineKind))
             {
                 line->lineKind = buttonOnLineKind;
-                DrawAndShowMiniScreenLine( count);
                 mPlayBeep3();
             } else if ((!( theseKeys & kCompAcceptKey)) && ( line->lineKind != buttonOffLineKind))
             {
                 line->lineKind = buttonOffLineKind;
-                DrawAndShowMiniScreenLine( count);
-
                 MiniComputerDoAccept();
             }
         }
@@ -755,13 +622,10 @@ void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)
             if (( theseKeys & kCompCancelKey) && ( line->lineKind != buttonOnLineKind))
             {
                 line->lineKind = buttonOnLineKind;
-                DrawAndShowMiniScreenLine( count);
                 mPlayBeep3();
             } else if ((!( theseKeys & kCompCancelKey)) && ( line->lineKind != buttonOffLineKind))
             {
                 line->lineKind = buttonOffLineKind;
-                DrawAndShowMiniScreenLine( count);
-
                 MiniComputerDoCancel();
             }
         }
@@ -795,11 +659,6 @@ void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)
 
         line->hiliteLeft = mRect.left;
         line->hiliteRight = mRect.right;
-        if ( scrap != globals()->gMiniScreenData.selectLine)
-        {
-            DrawAndShowMiniScreenLine( globals()->gMiniScreenData.selectLine);
-            DrawAndShowMiniScreenLine( scrap);
-        }
     }
 
     if (( theseKeys & kCompDownKey) && ( !(lastKeys & kCompDownKey)) && ( globals()->gMiniScreenData.selectLine !=
@@ -831,11 +690,6 @@ void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)
 
         line->hiliteLeft = mRect.left;
         line->hiliteRight = mRect.right;
-        if ( scrap != globals()->gMiniScreenData.selectLine)
-        {
-            DrawAndShowMiniScreenLine( globals()->gMiniScreenData.selectLine);
-            DrawAndShowMiniScreenLine( scrap);
-        }
     }
 
 
@@ -952,8 +806,6 @@ void UpdateMiniScreenLines( void)
                         kMiniScreenNoLineSelected;
                 }
                 MiniComputerSetBuildStrings();
-                DrawMiniScreen();
-                ShowWholeMiniScreen();
             } else if ( GetAdmiralBuildAtObject( globals()->gPlayerAdmiralNumber)
                 >= 0)
             {
@@ -970,7 +822,6 @@ void UpdateMiniScreenLines( void)
                             if ( line->selectable != selectDim)
                             {
                                 line->selectable = selectDim;
-                                DrawAndShowMiniScreenLine( lineNum);
                             }
                         } else
                         {
@@ -985,7 +836,6 @@ void UpdateMiniScreenLines( void)
                                     line->hiliteRight = mRect.right;
                                 }
                                 line->selectable = selectable;
-                                DrawAndShowMiniScreenLine( lineNum);
                             }
                         }
                     }
@@ -1008,7 +858,6 @@ void UpdateMiniScreenLines( void)
                 {
                     line->value = lineNum;
                     MiniComputerMakeStatusString(count, line->string);
-                    DrawAndShowMiniScreenLine( count);
                 }
 
             }
@@ -1471,27 +1320,19 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                     case kMainMiniBuild:
                         MakeMiniScreenFromIndString( kBuildMiniScreen);
                         MiniComputerSetBuildStrings();
-                        DrawMiniScreen();
-                        ShowWholeMiniScreen();
                         break;
 
                     case kMainMiniSpecial:
                         MakeMiniScreenFromIndString( kSpecialMiniScreen);
-                        DrawMiniScreen();
-                        ShowWholeMiniScreen();
                         break;
 
                     case kMainMiniMessage:
                         MakeMiniScreenFromIndString( kMessageMiniScreen);
-                        DrawMiniScreen();
-                        ShowWholeMiniScreen();
                         break;
 
                     case kMainMiniStatus:
                         MakeMiniScreenFromIndString( kStatusMiniScreen);
                         MiniComputerSetStatusStrings();
-                        DrawMiniScreen();
-                        ShowWholeMiniScreen();
                         break;
 
                     default:
@@ -1659,8 +1500,6 @@ void MiniComputerDoCancel( void)
         case kMessageMiniScreen:
         case kStatusMiniScreen:
             MakeMiniScreenFromIndString( kMainMiniScreen);
-            DrawMiniScreen();
-            ShowWholeMiniScreen();
 
             break;
 
@@ -2029,7 +1868,6 @@ void MiniComputerHandleClick( Point where)
             if ( line->lineKind != buttonOnLineKind)
             {
                 line->lineKind = buttonOnLineKind;
-                DrawAndShowMiniScreenLine( lineNum);
                 mPlayBeep3();
             }
             if ( outLineButtonLine >= 0)
@@ -2039,7 +1877,6 @@ void MiniComputerHandleClick( Point where)
                 if ( line->lineKind != buttonOffLineKind)
                 {
                     line->lineKind = buttonOffLineKind;
-                    DrawAndShowMiniScreenLine( outLineButtonLine);
                 }
             }
         } else if ( line->whichButton == kOutLineButton)
@@ -2047,7 +1884,6 @@ void MiniComputerHandleClick( Point where)
             if ( line->lineKind != buttonOnLineKind)
             {
                 line->lineKind = buttonOnLineKind;
-                DrawAndShowMiniScreenLine( lineNum);
                 mPlayBeep3();
             }
             if ( inLineButtonLine >= 0)
@@ -2056,7 +1892,6 @@ void MiniComputerHandleClick( Point where)
                 if ( line->lineKind != buttonOffLineKind)
                 {
                     line->lineKind = buttonOffLineKind;
-                    DrawAndShowMiniScreenLine( inLineButtonLine);
                 }
             }
         }
@@ -2070,7 +1905,6 @@ void MiniComputerHandleClick( Point where)
             if ( line->lineKind != buttonOffLineKind)
             {
                 line->lineKind = buttonOffLineKind;
-                DrawAndShowMiniScreenLine( inLineButtonLine);
             }
         }
         if ( outLineButtonLine >= 0)
@@ -2079,7 +1913,6 @@ void MiniComputerHandleClick( Point where)
             if ( line->lineKind != buttonOffLineKind)
             {
                 line->lineKind = buttonOffLineKind;
-                DrawAndShowMiniScreenLine( outLineButtonLine);
             }
         }
 
@@ -2094,7 +1927,6 @@ void MiniComputerHandleClick( Point where)
                 line = globals()->gMiniScreenData.lineData.get() +
                     globals()->gMiniScreenData.selectLine;
                 line->hiliteLeft = line->hiliteRight = 0;
-                DrawAndShowMiniScreenLine( globals()->gMiniScreenData.selectLine);
             }
 
             lineNum = mGetLineNumFromV( where.v);
@@ -2108,7 +1940,6 @@ void MiniComputerHandleClick( Point where)
                     globals()->gMiniScreenData.selectLine;
                 line->hiliteLeft = mRect.left;
                 line->hiliteRight = mRect.right;
-                DrawAndShowMiniScreenLine( globals()->gMiniScreenData.selectLine);
             }
         } else globals()->gMiniScreenData.clickLine = kMiniScreenNoLineSelected;
     }
@@ -2144,7 +1975,6 @@ void MiniComputerHandleDoubleClick( Point where)
             if ( line->lineKind != buttonOnLineKind)
             {
                 line->lineKind = buttonOnLineKind;
-                DrawAndShowMiniScreenLine( lineNum);
                 mPlayBeep3();
             }
             if ( outLineButtonLine >= 0)
@@ -2153,7 +1983,6 @@ void MiniComputerHandleDoubleClick( Point where)
                 if ( line->lineKind != buttonOffLineKind)
                 {
                     line->lineKind = buttonOffLineKind;
-                    DrawAndShowMiniScreenLine( outLineButtonLine);
                 }
             }
         } else if ( line->whichButton == kOutLineButton)
@@ -2161,7 +1990,6 @@ void MiniComputerHandleDoubleClick( Point where)
             if ( line->lineKind != buttonOnLineKind)
             {
                 line->lineKind = buttonOnLineKind;
-                DrawAndShowMiniScreenLine( lineNum);
                 mPlayBeep3();
             }
             if ( inLineButtonLine >= 0)
@@ -2170,7 +1998,6 @@ void MiniComputerHandleDoubleClick( Point where)
                 if ( line->lineKind != buttonOffLineKind)
                 {
                     line->lineKind = buttonOffLineKind;
-                    DrawAndShowMiniScreenLine( inLineButtonLine);
                 }
             }
         }
@@ -2184,7 +2011,6 @@ void MiniComputerHandleDoubleClick( Point where)
             if ( line->lineKind != buttonOffLineKind)
             {
                 line->lineKind = buttonOffLineKind;
-                DrawAndShowMiniScreenLine( inLineButtonLine);
             }
         }
         if ( outLineButtonLine >= 0)
@@ -2193,7 +2019,6 @@ void MiniComputerHandleDoubleClick( Point where)
             if ( line->lineKind != buttonOffLineKind)
             {
                 line->lineKind = buttonOffLineKind;
-                DrawAndShowMiniScreenLine( outLineButtonLine);
             }
         }
 
@@ -2214,7 +2039,6 @@ void MiniComputerHandleDoubleClick( Point where)
                 {
                     line = globals()->gMiniScreenData.lineData.get() + globals()->gMiniScreenData.selectLine;
                     line->hiliteLeft = line->hiliteRight = 0;
-                    DrawAndShowMiniScreenLine( globals()->gMiniScreenData.selectLine);
                 }
 
                 lineNum = mGetLineNumFromV( where.v);
@@ -2226,7 +2050,6 @@ void MiniComputerHandleDoubleClick( Point where)
                     line = globals()->gMiniScreenData.lineData.get() + globals()->gMiniScreenData.selectLine;
                     line->hiliteLeft = mRect.left;
                     line->hiliteRight = mRect.right;
-                    DrawAndShowMiniScreenLine( globals()->gMiniScreenData.selectLine);
                 }
             }
         }
@@ -2263,7 +2086,6 @@ void MiniComputerHandleMouseUp( Point where)
             if ( line->lineKind == buttonOnLineKind)
             {
                 line->lineKind = buttonOffLineKind;
-                DrawAndShowMiniScreenLine( lineNum);
                 MiniComputerDoAccept();
             }
         } else if ( line->whichButton == kOutLineButton)
@@ -2271,7 +2093,6 @@ void MiniComputerHandleMouseUp( Point where)
             if ( line->lineKind == buttonOnLineKind)
             {
                 line->lineKind = buttonOffLineKind;
-                DrawAndShowMiniScreenLine( lineNum);
                 MiniComputerDoCancel();
             }
         }
@@ -2309,7 +2130,6 @@ void MiniComputerHandleMouseStillDown( Point where)
             if ( line->lineKind != buttonOnLineKind)
             {
                 line->lineKind = buttonOnLineKind;
-                DrawAndShowMiniScreenLine( lineNum);
             }
         } else if (( line->whichButton == kOutLineButton) &&
             ( lineNum == globals()->gMiniScreenData.clickLine))
@@ -2317,7 +2137,6 @@ void MiniComputerHandleMouseStillDown( Point where)
             if ( line->lineKind != buttonOnLineKind)
             {
                 line->lineKind = buttonOnLineKind;
-                DrawAndShowMiniScreenLine( lineNum);
             }
         } else ( lineNum = -1);
     } else lineNum = -1;
@@ -2328,13 +2147,11 @@ void MiniComputerHandleMouseStillDown( Point where)
         if ( line->lineKind == buttonOnLineKind)
         {
             line->lineKind = buttonOffLineKind;
-            DrawAndShowMiniScreenLine( inLineButtonLine);
         }
         line = globals()->gMiniScreenData.lineData.get() + outLineButtonLine;
         if ( line->lineKind == buttonOnLineKind)
         {
             line->lineKind = buttonOffLineKind;
-            DrawAndShowMiniScreenLine( outLineButtonLine);
         }
     }
 }
@@ -2349,33 +2166,23 @@ void MiniComputer_SetScreenAndLineHack( long whichScreen, long whichLine)
         case kBuildMiniScreen:
             MakeMiniScreenFromIndString( kBuildMiniScreen);
             MiniComputerSetBuildStrings();
-            DrawMiniScreen();
-            ShowWholeMiniScreen();
             break;
 
         case kSpecialMiniScreen:
             MakeMiniScreenFromIndString( kSpecialMiniScreen);
-            DrawMiniScreen();
-            ShowWholeMiniScreen();
             break;
 
         case kMessageMiniScreen:
             MakeMiniScreenFromIndString( kMessageMiniScreen);
-            DrawMiniScreen();
-            ShowWholeMiniScreen();
             break;
 
         case kStatusMiniScreen:
             MakeMiniScreenFromIndString( kStatusMiniScreen);
             MiniComputerSetStatusStrings();
-            DrawMiniScreen();
-            ShowWholeMiniScreen();
             break;
 
         default:
             MakeMiniScreenFromIndString( kMainMiniScreen);
-            DrawMiniScreen();
-            ShowWholeMiniScreen();
             break;
     }
 

@@ -512,10 +512,8 @@ void DrawInstrumentPanel() {
     gOffWorld->fill(RgbColor::kClear);
 
     MakeMiniScreenFromIndString(1);
-    DrawMiniScreen();
     ResetInstruments();
     ClearMiniObjectData();
-    ShowWholeMiniScreen();
     UpdateRadar(100);
 }
 
@@ -557,6 +555,7 @@ void draw_instruments() {
     draw_bar_indicator(kBatteryBar, gScrollStarObject->battery, base->energy * 5);
     draw_build_time_bar(globals()->gMiniScreenData.buildTimeBarValue);
     draw_money();
+    draw_mini_screen();
 }
 
 void EraseSite() {
