@@ -18,6 +18,7 @@
 
 #include "game/minicomputer.hpp"
 
+#include <algorithm>
 #include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
@@ -46,6 +47,7 @@ using sfz::StringSlice;
 using sfz::bin;
 using sfz::scoped_array;
 using sfz::string_to_int;
+using std::max;
 
 namespace macroman = sfz::macroman;
 
@@ -450,6 +452,9 @@ void draw_mini_screen() {
                 c->string, textcolor);
         c++;
     }
+
+    draw_mini_ship_data(*mGetMiniObjectPtr(kMiniSelectObjectNum), YELLOW, kMiniSelectTop, kMiniSelectObjectNum + 1);
+    draw_mini_ship_data(*mGetMiniObjectPtr(kMiniTargetObjectNum), SKY_BLUE, kMiniTargetTop, kMiniTargetObjectNum + 1);
 }
 
 void MakeMiniScreenFromIndString(short whichString) {
@@ -733,7 +738,6 @@ void MiniComputerHandleNull( long unitsToDo)
             newObject.baseType = NULL;
         }
         mCopyMiniSpaceObject(*myObject, newObject);
-        UpdateMiniShipData(*mGetMiniObjectPtr(kMiniSelectObjectNum), YELLOW, kMiniSelectTop, kMiniSelectObjectNum + 1);
 
         myObject = mGetMiniObjectPtr( kMiniTargetObjectNum);
         count = GetAdmiralDestinationObject( globals()->gPlayerAdmiralNumber);
@@ -758,7 +762,6 @@ void MiniComputerHandleNull( long unitsToDo)
             newObject.baseType = NULL;
         }
         mCopyMiniSpaceObject(*myObject, newObject);
-        UpdateMiniShipData(*mGetMiniObjectPtr(kMiniTargetObjectNum), SKY_BLUE, kMiniTargetTop, kMiniTargetObjectNum + 1);
 
         int build_at = GetAdmiralBuildAtObject(globals()->gPlayerAdmiralNumber);
         if (build_at >= 0) {
@@ -895,15 +898,13 @@ void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) 
     draw_player_ammo_in_rect(ammo_special, ORANGE, clip);
 }
 
-void UpdateMiniShipData(
+void draw_mini_ship_data(
         const spaceObjectType& newObject, unsigned char headerColor,
         short screenTop, short whichString) {
     RgbColor            color, lightcolor, darkcolor;
-    coordPointType      coord;
-    Point               where;
     short               whichShape;
     spaceObjectType     *dObject = NULL;
-    long                tlong, thisScale;
+    long                tlong;
     Rect                mRect;
     Rect            lRect, dRect, spriteRect, uRect, clipRect;
 
@@ -917,33 +918,33 @@ void UpdateMiniShipData(
     uRect.left = uRect.top = uRect.bottom = -1;
 
     lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, 0, 0, kMiniScreenWidth);
-    DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
+    VideoDriver::driver()->fill_rect(lRect, RgbColor::kBlack);
     color = GetRGBTranslateColorShade(headerColor, LIGHT);
     lightcolor = GetRGBTranslateColorShade(headerColor, VERY_LIGHT);
     darkcolor = GetRGBTranslateColorShade(headerColor, MEDIUM);
 
-    DrawNateShadedRect(gOffWorld, &lRect, clipRect, color, lightcolor, darkcolor);
+    draw_shaded_rect(lRect, color, lightcolor, darkcolor);
 
     String text(StringList(kMiniDataStringID).at(whichString - 1));
-    DrawDirectTextStringClipped(
+    gDirectText->draw_sprite(
             Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent),
-            text, RgbColor::kBlack, gOffWorld, clipRect);
+            text, RgbColor::kBlack);
     uRect = lRect;
     uRect = clipRect;
 
     if ( newObject.attributes & kIsDestination)
     {
         lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth);
-        DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
+        VideoDriver::driver()->fill_rect(lRect, RgbColor::kBlack);
 
         // get the color for writing the name
         color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
         // move to the 1st line in the selection miniscreen
         String text(GetDestBalanceName(newObject.destinationObject));
-        DrawDirectTextStringClipped(
+        gDirectText->draw_sprite(
                 Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent),
-                text, color, gOffWorld, clipRect);
+                text, color);
         if ( uRect.left == -1)
         {
             uRect = lRect;
@@ -953,7 +954,7 @@ void UpdateMiniShipData(
         }
     } else {
         lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth);
-        DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
+        VideoDriver::driver()->fill_rect(lRect, RgbColor::kBlack);
 
         if ( newObject.whichBaseObject >= 0)
         {
@@ -962,9 +963,9 @@ void UpdateMiniShipData(
 
             // move to the 1st line in the selection miniscreen, write the name
             String text(StringList(kSpaceObjectShortNameResID).at(newObject.whichBaseObject));
-            DrawDirectTextStringClipped(
+            gDirectText->draw_sprite(
                     Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent),
-                    text, color, gOffWorld, clipRect);
+                    text, color);
         }
 
         if ( uRect.left == -1)
@@ -984,7 +985,7 @@ void UpdateMiniShipData(
 
     // erase the area
 
-    DrawNateRect(gOffWorld, &dRect, RgbColor::kBlack);
+    VideoDriver::driver()->fill_rect(dRect, RgbColor::kBlack);
 
     if (( newObject.whichBaseObject >= 0) && ( newObject.pixResID >= 0))
     {
@@ -1000,45 +1001,20 @@ void UpdateMiniShipData(
             // get the picture data
             const NatePixTable::Frame& frame = pixTable->at(whichShape);
 
-            // calculate the correct size
+            Rect rect(0, 0, frame.width(), frame.height());
+            int32_t max_dimension = max(frame.width(), frame.height());
+            if (max_dimension > kMiniIconHeight) {
+                rect.right = (rect.right * (kMiniIconHeight - 4)) / max_dimension;
+                rect.bottom = (rect.bottom * (kMiniIconHeight - 4)) / max_dimension;
+            }
+            rect.center_in(dRect);
 
-            tlong = (kMiniIconHeight - 2) * SCALE_SCALE;
-            tlong /= frame.height();
-            thisScale = (kMiniIconWidth - 2) * SCALE_SCALE;
-            thisScale /= frame.width();
-
-            if ( tlong < thisScale) thisScale = tlong;
-            if ( thisScale > SCALE_SCALE) thisScale = SCALE_SCALE;
-
-            // calculate the correct position
-
-            coord.h = frame.center().h;
-            coord.h *= thisScale;
-            coord.h >>= SHIFT_SCALE;
-            tlong = frame.width();
-            tlong *= thisScale;
-            tlong >>= SHIFT_SCALE;
-            where.h = ( kMiniIconWidth / 2) - ( tlong / 2);
-            where.h += dRect.left + coord.h;
-
-            coord.v = frame.center().v;
-            coord.v *= thisScale;
-            coord.v >>= SHIFT_SCALE;
-            tlong = frame.height();
-            tlong *= thisScale;
-            tlong >>= SHIFT_SCALE;
-            where.v = ( kMiniIconHeight / 2) - ( tlong / 2);
-            where.v += dRect.top + coord.v;
-
-
-            // draw the sprite
-
-            OptScaleSpritePixInPixMap(frame, where, thisScale, &spriteRect, dRect, gOffWorld);
+            frame.sprite().draw(rect);
         }
     }
 
     color = GetRGBTranslateColorShade(PALE_GREEN, MEDIUM);
-    DrawNateVBracket(gOffWorld, dRect, clipRect, color);
+    draw_vbracket(dRect, color);
 
     if ( uRect.left == -1)
     {
@@ -1056,7 +1032,7 @@ void UpdateMiniShipData(
 
     // erase the area
 
-    DrawNateRect(gOffWorld, &dRect, RgbColor::kBlack);
+    VideoDriver::driver()->fill_rect(dRect, RgbColor::kBlack);
 
     if ( newObject.baseType != NULL)
     {
@@ -1071,15 +1047,15 @@ void UpdateMiniShipData(
             lRect.top = dRect.top + 2;
             lRect.right = dRect.right - 2;
             lRect.bottom = dRect.bottom - 2 - tlong;
-            DrawNateRect(gOffWorld, &lRect, color);
+            VideoDriver::driver()->fill_rect(lRect, color);
 
             color = GetRGBTranslateColorShade(SKY_BLUE, LIGHT);
             lRect.top = dRect.bottom - 2 - tlong;
             lRect.bottom = dRect.bottom - 2;
-            DrawNateRect(gOffWorld, &lRect, color);
+            VideoDriver::driver()->fill_rect(lRect, color);
 
             color = GetRGBTranslateColorShade(SKY_BLUE, MEDIUM);
-            DrawNateVBracket(gOffWorld, dRect, clipRect, color);
+            draw_vbracket(dRect, color);
         }
     }
 
@@ -1100,7 +1076,7 @@ void UpdateMiniShipData(
 
     // erase the area
 
-    DrawNateRect(gOffWorld, &dRect, RgbColor::kBlack);
+    VideoDriver::driver()->fill_rect(dRect, RgbColor::kBlack);
 
     if ( newObject.baseType != NULL)
     {
@@ -1115,15 +1091,15 @@ void UpdateMiniShipData(
             lRect.top = dRect.top + 2;
             lRect.right = dRect.right - 2;
             lRect.bottom = dRect.bottom - 2 - tlong;
-            DrawNateRect(gOffWorld, &lRect, color);
+            VideoDriver::driver()->fill_rect(lRect, color);
 
             color = GetRGBTranslateColorShade(YELLOW, LIGHT);
             lRect.top = dRect.bottom - 2 - tlong;
             lRect.bottom = dRect.bottom - 2;
-            DrawNateRect(gOffWorld, &lRect, color);
+            VideoDriver::driver()->fill_rect(lRect, color);
 
             color = GetRGBTranslateColorShade(YELLOW, MEDIUM);
-            DrawNateVBracket(gOffWorld, dRect, clipRect, color);
+            draw_vbracket(dRect, color);
         }
     }
 
@@ -1137,7 +1113,7 @@ void UpdateMiniShipData(
     }
 
     lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
-    DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
+    VideoDriver::driver()->fill_rect(lRect, RgbColor::kBlack);
 
     // get the color for writing the name
     color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
@@ -1146,9 +1122,8 @@ void UpdateMiniShipData(
     if ( newObject.beamType >= 0)
     {
         String text(StringList(kSpaceObjectShortNameResID).at(newObject.beamType));
-        DrawDirectTextStringClipped(
-                Point(lRect.left, lRect.top + gDirectText->ascent), text, color, gOffWorld,
-                clipRect);
+        gDirectText->draw_sprite(
+                Point(lRect.left, lRect.top + gDirectText->ascent), text, color);
     }
 
     if ( uRect.left == -1)
@@ -1161,7 +1136,7 @@ void UpdateMiniShipData(
     }
 
     lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
-    DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
+    VideoDriver::driver()->fill_rect(lRect, RgbColor::kBlack);
 
     // get the color for writing the name
     color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
@@ -1170,9 +1145,8 @@ void UpdateMiniShipData(
     if ( newObject.pulseType >= 0)
     {
         String text(StringList(kSpaceObjectShortNameResID).at(newObject.pulseType));
-        DrawDirectTextStringClipped(
-                Point(lRect.left, lRect.top + gDirectText->ascent), text, color, gOffWorld,
-                clipRect);
+        gDirectText->draw_sprite(
+                Point(lRect.left, lRect.top + gDirectText->ascent), text, color);
     }
 
     if ( uRect.left == -1)
@@ -1187,7 +1161,7 @@ void UpdateMiniShipData(
     // Don't show special weapons of destination objects.
     if (!(newObject.attributes & kIsDestination)) {
         lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
-        DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
+        VideoDriver::driver()->fill_rect(lRect, RgbColor::kBlack);
 
         // get the color for writing the name
         color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
@@ -1196,9 +1170,8 @@ void UpdateMiniShipData(
         if ( newObject.specialType >= 0)
         {
             String text(StringList(kSpaceObjectShortNameResID).at(newObject.specialType));
-            DrawDirectTextStringClipped(
-                    Point(lRect.left, lRect.top + gDirectText->ascent), text, color, gOffWorld,
-                    clipRect);
+            gDirectText->draw_sprite(
+                    Point(lRect.left, lRect.top + gDirectText->ascent), text, color);
         }
 
         if ( uRect.left == -1)
@@ -1212,7 +1185,7 @@ void UpdateMiniShipData(
     }
 
     lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniDestLineNum, 0, kMiniScreenWidth);
-    DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
+    VideoDriver::driver()->fill_rect(lRect, RgbColor::kBlack);
 
     // write the name
     if ( newObject.destinationObject >= 0)
@@ -1233,15 +1206,13 @@ void UpdateMiniShipData(
             if ( dObject->attributes & kIsDestination)
             {
                 String text(GetDestBalanceName(dObject->destinationObject));
-                DrawDirectTextStringClipped(
-                        Point(lRect.left, lRect.top + gDirectText->ascent), text, color,
-                        gOffWorld, clipRect);
+                gDirectText->draw_sprite(
+                        Point(lRect.left, lRect.top + gDirectText->ascent), text, color);
             } else
             {
                 String text(StringList(kSpaceObjectNameResID).at(dObject->whichBaseObject));
-                DrawDirectTextStringClipped(
-                        Point(lRect.left, lRect.top + gDirectText->ascent), text, color,
-                        gOffWorld, clipRect);
+                gDirectText->draw_sprite(
+                        Point(lRect.left, lRect.top + gDirectText->ascent), text, color);
             }
         }
     }
@@ -1259,9 +1230,6 @@ void UpdateMiniShipData(
     mRect.right = uRect.right;
     mRect.top = uRect.top;
     mRect.bottom = uRect.bottom;
-
-    // copy the dirty rect
-    copy_world(*gRealWorld, *gOffWorld, mRect);
 }
 
 void MiniComputerDoAccept( void)
