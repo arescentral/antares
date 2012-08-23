@@ -421,6 +421,16 @@ void UpdateRadar(int32_t unitsDone) {
     gAbsoluteScale = absolute_scale;
 }
 
+void draw_radar() {
+    Rect bounds(kRadarLeft, kRadarTop, kRadarRight, kRadarBottom);
+    bounds.offset(0, globals()->gInstrumentTop);
+    bounds.inset(1, 1);
+
+    scoped_ptr<Sprite> radar(VideoDriver::driver()->new_sprite(
+                "/x/radar", gRealWorld->view(bounds)));
+    radar->draw(bounds);
+}
+
 // SHOW ME THE MONEY
 static void draw_money() {
     const admiralType* const admiral = mGetAdmiralPtr(globals()->gPlayerAdmiralNumber);
@@ -529,10 +539,6 @@ void draw_instruments() {
     left_instrument_sprite->draw(left_rect.left, left_rect.top);
     right_instrument_sprite->draw(right_rect.left, right_rect.top);
 
-    scoped_ptr<Sprite> left_instruments(VideoDriver::driver()->new_sprite(
-                "/x/left_instruments", gRealWorld->view(left_rect)));
-    left_instruments->draw(left_rect);
-
     if (globals()->gPlayerShipNumber >= 0) {
         spaceObjectType* player = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
         if (player->active) {
@@ -555,6 +561,7 @@ void draw_instruments() {
     draw_bar_indicator(kBatteryBar, gScrollStarObject->battery, base->energy * 5);
     draw_build_time_bar(globals()->gMiniScreenData.buildTimeBarValue);
     draw_money();
+    draw_radar();
     draw_mini_screen();
 }
 
