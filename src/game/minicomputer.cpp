@@ -915,367 +915,340 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
 
     uRect.left = uRect.top = uRect.bottom = -1;
 
-    if ( oldObject->id != newObject->id)
+    lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, 0, 0, kMiniScreenWidth);
+    DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
+    color = GetRGBTranslateColorShade(headerColor, LIGHT);
+    lightcolor = GetRGBTranslateColorShade(headerColor, VERY_LIGHT);
+    darkcolor = GetRGBTranslateColorShade(headerColor, MEDIUM);
+
+    DrawNateShadedRect(gOffWorld, &lRect, clipRect, color, lightcolor, darkcolor);
+
+    String text(StringList(kMiniDataStringID).at(whichString - 1));
+    DrawDirectTextStringClipped(
+            Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent),
+            text, RgbColor::kBlack, gOffWorld, clipRect);
+    uRect = lRect;
+    uRect = clipRect;
+
+    if ( newObject->attributes & kIsDestination)
     {
-
-        lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, 0, 0, kMiniScreenWidth);
+        lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth);
         DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
-        color = GetRGBTranslateColorShade(headerColor, LIGHT);
-        lightcolor = GetRGBTranslateColorShade(headerColor, VERY_LIGHT);
-        darkcolor = GetRGBTranslateColorShade(headerColor, MEDIUM);
 
-        DrawNateShadedRect(gOffWorld, &lRect, clipRect, color, lightcolor, darkcolor);
+        // get the color for writing the name
+        color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
-        String text(StringList(kMiniDataStringID).at(whichString - 1));
+        // move to the 1st line in the selection miniscreen
+        String text(GetDestBalanceName(newObject->destinationObject));
         DrawDirectTextStringClipped(
                 Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent),
-                text, RgbColor::kBlack, gOffWorld, clipRect);
-        uRect = lRect;
-        uRect = clipRect;
-
-        if ( newObject->attributes & kIsDestination)
+                text, color, gOffWorld, clipRect);
+        if ( uRect.left == -1)
         {
-            lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth);
-            DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
+            uRect = lRect;
+        } else
+        {
+            uRect.enlarge_to(lRect);
+        }
+    } else {
+        lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth);
+        DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
 
+        if ( newObject->whichBaseObject >= 0)
+        {
             // get the color for writing the name
             color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
-            // move to the 1st line in the selection miniscreen
-            String text(GetDestBalanceName(newObject->destinationObject));
+            // move to the 1st line in the selection miniscreen, write the name
+            String text(StringList(kSpaceObjectShortNameResID).at(newObject->whichBaseObject));
             DrawDirectTextStringClipped(
                     Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent),
                     text, color, gOffWorld, clipRect);
-            if ( uRect.left == -1)
+        }
+
+        if ( uRect.left == -1)
+        {
+            uRect = lRect;
+        } else
+        {
+            uRect.enlarge_to(lRect);
+        }
+    }
+    // set the rect for drawing the "icon" of the object type
+
+    dRect.left = kMiniIconLeft;
+    dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
+    dRect.right = kMiniScreenLeft + kMiniIconWidth;
+    dRect.bottom = dRect.top + kMiniIconHeight;
+
+    // erase the area
+
+    DrawNateRect(gOffWorld, &dRect, RgbColor::kBlack);
+
+    if (( newObject->whichBaseObject >= 0) && ( newObject->pixResID >= 0))
+    {
+        NatePixTable* pixTable = GetPixTable( newObject->pixResID);
+
+        if (pixTable != NULL) {
+            if (newObject->attributes & kIsSelfAnimated) {
+                whichShape = more_evil_fixed_to_long(newObject->baseType->frame.animation.firstShape);
+            } else {
+                whichShape = 0;
+            }
+
+            // get the picture data
+            const NatePixTable::Frame& frame = pixTable->at(whichShape);
+
+            // calculate the correct size
+
+            tlong = (kMiniIconHeight - 2) * SCALE_SCALE;
+            tlong /= frame.height();
+            thisScale = (kMiniIconWidth - 2) * SCALE_SCALE;
+            thisScale /= frame.width();
+
+            if ( tlong < thisScale) thisScale = tlong;
+            if ( thisScale > SCALE_SCALE) thisScale = SCALE_SCALE;
+
+            // calculate the correct position
+
+            coord.h = frame.center().h;
+            coord.h *= thisScale;
+            coord.h >>= SHIFT_SCALE;
+            tlong = frame.width();
+            tlong *= thisScale;
+            tlong >>= SHIFT_SCALE;
+            where.h = ( kMiniIconWidth / 2) - ( tlong / 2);
+            where.h += dRect.left + coord.h;
+
+            coord.v = frame.center().v;
+            coord.v *= thisScale;
+            coord.v >>= SHIFT_SCALE;
+            tlong = frame.height();
+            tlong *= thisScale;
+            tlong >>= SHIFT_SCALE;
+            where.v = ( kMiniIconHeight / 2) - ( tlong / 2);
+            where.v += dRect.top + coord.v;
+
+
+            // draw the sprite
+
+            OptScaleSpritePixInPixMap(frame, where, thisScale, &spriteRect, dRect, gOffWorld);
+        }
+    }
+
+    color = GetRGBTranslateColorShade(PALE_GREEN, MEDIUM);
+    DrawNateVBracket(gOffWorld, dRect, clipRect, color);
+
+    if ( uRect.left == -1)
+    {
+        uRect = dRect;
+    }
+    else
+    {
+        uRect.enlarge_to(dRect);
+    }
+
+    dRect.left = kMiniHealthLeft;
+    dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
+    dRect.right = dRect.left + kMiniBarWidth;
+    dRect.bottom = dRect.top + kMiniIconHeight;
+
+    // erase the area
+
+    DrawNateRect(gOffWorld, &dRect, RgbColor::kBlack);
+
+    if ( newObject->baseType != NULL)
+    {
+        if (( newObject->baseType->health > 0) && ( newObject->health > 0))
+        {
+            tlong = newObject->health * kMiniBarHeight;
+            tlong /= newObject->baseType->health;
+
+            color = GetRGBTranslateColorShade(SKY_BLUE, DARK);
+
+            lRect.left = dRect.left + 2;
+            lRect.top = dRect.top + 2;
+            lRect.right = dRect.right - 2;
+            lRect.bottom = dRect.bottom - 2 - tlong;
+            DrawNateRect(gOffWorld, &lRect, color);
+
+            color = GetRGBTranslateColorShade(SKY_BLUE, LIGHT);
+            lRect.top = dRect.bottom - 2 - tlong;
+            lRect.bottom = dRect.bottom - 2;
+            DrawNateRect(gOffWorld, &lRect, color);
+
+            color = GetRGBTranslateColorShade(SKY_BLUE, MEDIUM);
+            DrawNateVBracket(gOffWorld, dRect, clipRect, color);
+        }
+    }
+
+
+    if ( uRect.left == -1)
+    {
+        uRect = dRect;
+    }
+    else
+    {
+        uRect.enlarge_to(dRect);
+    }
+
+    dRect.left = kMiniEnergyLeft;
+    dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
+    dRect.right = dRect.left + kMiniBarWidth;
+    dRect.bottom = dRect.top + kMiniIconHeight;
+
+    // erase the area
+
+    DrawNateRect(gOffWorld, &dRect, RgbColor::kBlack);
+
+    if ( newObject->baseType != NULL)
+    {
+        if (( newObject->baseType->energy > 0) && ( newObject->energy > 0))
+        {
+            tlong = newObject->energy * kMiniBarHeight;
+            tlong /= newObject->baseType->energy;
+
+            color = GetRGBTranslateColorShade(YELLOW, DARK);
+
+            lRect.left = dRect.left + 2;
+            lRect.top = dRect.top + 2;
+            lRect.right = dRect.right - 2;
+            lRect.bottom = dRect.bottom - 2 - tlong;
+            DrawNateRect(gOffWorld, &lRect, color);
+
+            color = GetRGBTranslateColorShade(YELLOW, LIGHT);
+            lRect.top = dRect.bottom - 2 - tlong;
+            lRect.bottom = dRect.bottom - 2;
+            DrawNateRect(gOffWorld, &lRect, color);
+
+            color = GetRGBTranslateColorShade(YELLOW, MEDIUM);
+            DrawNateVBracket(gOffWorld, dRect, clipRect, color);
+        }
+    }
+
+    if ( uRect.left == -1)
+    {
+        uRect = dRect;
+    }
+    else
+    {
+        uRect.enlarge_to(dRect);
+    }
+
+    lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
+    DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
+
+    // get the color for writing the name
+    color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
+
+    // move to the 1st line in the selection miniscreen, write the name
+    if ( newObject->beamType >= 0)
+    {
+        String text(StringList(kSpaceObjectShortNameResID).at(newObject->beamType));
+        DrawDirectTextStringClipped(
+                Point(lRect.left, lRect.top + gDirectText->ascent), text, color, gOffWorld,
+                clipRect);
+    }
+
+    if ( uRect.left == -1)
+    {
+        uRect = lRect;
+    }
+    else
+    {
+        uRect.enlarge_to(lRect);
+    }
+
+    lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
+    DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
+
+    // get the color for writing the name
+    color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
+
+    // move to the 1st line in the selection miniscreen, write the name
+    if ( newObject->pulseType >= 0)
+    {
+        String text(StringList(kSpaceObjectShortNameResID).at(newObject->pulseType));
+        DrawDirectTextStringClipped(
+                Point(lRect.left, lRect.top + gDirectText->ascent), text, color, gOffWorld,
+                clipRect);
+    }
+
+    if ( uRect.left == -1)
+    {
+        uRect = lRect;
+    }
+    else
+    {
+        uRect.enlarge_to(lRect);
+    }
+
+    lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
+    DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
+
+    // get the color for writing the name
+    color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
+
+    // move to the 1st line in the selection miniscreen, write the name
+    if ( newObject->specialType >= 0)
+    {
+        String text(StringList(kSpaceObjectShortNameResID).at(newObject->specialType));
+        DrawDirectTextStringClipped(
+                Point(lRect.left, lRect.top + gDirectText->ascent), text, color, gOffWorld,
+                clipRect);
+    }
+
+    if ( uRect.left == -1)
+    {
+        uRect = lRect;
+    }
+    else
+    {
+        uRect.enlarge_to(lRect);
+    }
+
+    lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniDestLineNum, 0, kMiniScreenWidth);
+    DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
+
+    // write the name
+    if ( newObject->destinationObject >= 0)
+    {
+        if ( newObject->destObjectPtr != NULL)
+        {
+            dObject = newObject->destObjectPtr;
+
+            // get the color for writing the name
+            if ( dObject->owner == globals()->gPlayerAdmiralNumber)
             {
-                uRect = lRect;
+                color = GetRGBTranslateColorShade(GREEN, VERY_LIGHT);
             } else
             {
-                uRect.enlarge_to(lRect);
+                color = GetRGBTranslateColorShade(RED, VERY_LIGHT);
             }
-        } else if ( oldObject->whichBaseObject != newObject->whichBaseObject)
-        {
-            lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth);
-            DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
 
-            if ( newObject->whichBaseObject >= 0)
+            if ( dObject->attributes & kIsDestination)
             {
-                // get the color for writing the name
-                color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
-
-                // move to the 1st line in the selection miniscreen, write the name
-                String text(StringList(kSpaceObjectShortNameResID).at(newObject->whichBaseObject));
+                String text(GetDestBalanceName(dObject->destinationObject));
                 DrawDirectTextStringClipped(
-                        Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent),
-                        text, color, gOffWorld, clipRect);
-            }
-
-            if ( uRect.left == -1)
-            {
-                uRect = lRect;
+                        Point(lRect.left, lRect.top + gDirectText->ascent), text, color,
+                        gOffWorld, clipRect);
             } else
             {
-                uRect.enlarge_to(lRect);
+                String text(StringList(kSpaceObjectNameResID).at(dObject->whichBaseObject));
+                DrawDirectTextStringClipped(
+                        Point(lRect.left, lRect.top + gDirectText->ascent), text, color,
+                        gOffWorld, clipRect);
             }
         }
     }
-        // set the rect for drawing the "icon" of the object type
 
-    if ( oldObject->pixResID != newObject->pixResID)
+    if ( uRect.left == -1)
     {
-        dRect.left = kMiniIconLeft;
-        dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
-        dRect.right = kMiniScreenLeft + kMiniIconWidth;
-        dRect.bottom = dRect.top + kMiniIconHeight;
-
-        // erase the area
-
-        DrawNateRect(gOffWorld, &dRect, RgbColor::kBlack);
-
-        if (( newObject->whichBaseObject >= 0) && ( newObject->pixResID >= 0))
-        {
-            NatePixTable* pixTable = GetPixTable( newObject->pixResID);
-
-            if (pixTable != NULL) {
-                if (newObject->attributes & kIsSelfAnimated) {
-                    whichShape = more_evil_fixed_to_long(newObject->baseType->frame.animation.firstShape);
-                } else {
-                    whichShape = 0;
-                }
-
-                // get the picture data
-                const NatePixTable::Frame& frame = pixTable->at(whichShape);
-
-                // calculate the correct size
-
-                tlong = (kMiniIconHeight - 2) * SCALE_SCALE;
-                tlong /= frame.height();
-                thisScale = (kMiniIconWidth - 2) * SCALE_SCALE;
-                thisScale /= frame.width();
-
-                if ( tlong < thisScale) thisScale = tlong;
-                if ( thisScale > SCALE_SCALE) thisScale = SCALE_SCALE;
-
-                // calculate the correct position
-
-                coord.h = frame.center().h;
-                coord.h *= thisScale;
-                coord.h >>= SHIFT_SCALE;
-                tlong = frame.width();
-                tlong *= thisScale;
-                tlong >>= SHIFT_SCALE;
-                where.h = ( kMiniIconWidth / 2) - ( tlong / 2);
-                where.h += dRect.left + coord.h;
-
-                coord.v = frame.center().v;
-                coord.v *= thisScale;
-                coord.v >>= SHIFT_SCALE;
-                tlong = frame.height();
-                tlong *= thisScale;
-                tlong >>= SHIFT_SCALE;
-                where.v = ( kMiniIconHeight / 2) - ( tlong / 2);
-                where.v += dRect.top + coord.v;
-
-
-                // draw the sprite
-
-                OptScaleSpritePixInPixMap(frame, where, thisScale, &spriteRect, dRect, gOffWorld);
-            }
-        }
-
-        color = GetRGBTranslateColorShade(PALE_GREEN, MEDIUM);
-        DrawNateVBracket(gOffWorld, dRect, clipRect, color);
-
-        if ( uRect.left == -1)
-        {
-            uRect = dRect;
-        }
-        else
-        {
-            uRect.enlarge_to(dRect);
-        }
+        uRect = lRect;
     }
-
-    if ( oldObject->health != newObject->health)
+    else
     {
-        dRect.left = kMiniHealthLeft;
-        dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
-        dRect.right = dRect.left + kMiniBarWidth;
-        dRect.bottom = dRect.top + kMiniIconHeight;
-
-        // erase the area
-
-        DrawNateRect(gOffWorld, &dRect, RgbColor::kBlack);
-
-        if ( newObject->baseType != NULL)
-        {
-            if (( newObject->baseType->health > 0) && ( newObject->health > 0))
-            {
-                tlong = newObject->health * kMiniBarHeight;
-                tlong /= newObject->baseType->health;
-
-                color = GetRGBTranslateColorShade(SKY_BLUE, DARK);
-
-                lRect.left = dRect.left + 2;
-                lRect.top = dRect.top + 2;
-                lRect.right = dRect.right - 2;
-                lRect.bottom = dRect.bottom - 2 - tlong;
-                DrawNateRect(gOffWorld, &lRect, color);
-
-                color = GetRGBTranslateColorShade(SKY_BLUE, LIGHT);
-                lRect.top = dRect.bottom - 2 - tlong;
-                lRect.bottom = dRect.bottom - 2;
-                DrawNateRect(gOffWorld, &lRect, color);
-
-                color = GetRGBTranslateColorShade(SKY_BLUE, MEDIUM);
-                DrawNateVBracket(gOffWorld, dRect, clipRect, color);
-            }
-        }
-
-
-        if ( uRect.left == -1)
-        {
-            uRect = dRect;
-        }
-        else
-        {
-            uRect.enlarge_to(dRect);
-        }
-
-    }
-
-    if (oldObject->energy != newObject->energy)
-    {
-        dRect.left = kMiniEnergyLeft;
-        dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
-        dRect.right = dRect.left + kMiniBarWidth;
-        dRect.bottom = dRect.top + kMiniIconHeight;
-
-        // erase the area
-
-        DrawNateRect(gOffWorld, &dRect, RgbColor::kBlack);
-
-        if ( newObject->baseType != NULL)
-        {
-            if (( newObject->baseType->energy > 0) && ( newObject->energy > 0))
-            {
-                tlong = newObject->energy * kMiniBarHeight;
-                tlong /= newObject->baseType->energy;
-
-                color = GetRGBTranslateColorShade(YELLOW, DARK);
-
-                lRect.left = dRect.left + 2;
-                lRect.top = dRect.top + 2;
-                lRect.right = dRect.right - 2;
-                lRect.bottom = dRect.bottom - 2 - tlong;
-                DrawNateRect(gOffWorld, &lRect, color);
-
-                color = GetRGBTranslateColorShade(YELLOW, LIGHT);
-                lRect.top = dRect.bottom - 2 - tlong;
-                lRect.bottom = dRect.bottom - 2;
-                DrawNateRect(gOffWorld, &lRect, color);
-
-                color = GetRGBTranslateColorShade(YELLOW, MEDIUM);
-                DrawNateVBracket(gOffWorld, dRect, clipRect, color);
-            }
-        }
-
-        if ( uRect.left == -1)
-        {
-            uRect = dRect;
-        }
-        else
-        {
-            uRect.enlarge_to(dRect);
-        }
-    }
-
-    if ( oldObject->beamType != newObject->beamType)
-    {
-        lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
-        DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
-
-        // get the color for writing the name
-        color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
-
-        // move to the 1st line in the selection miniscreen, write the name
-        if ( newObject->beamType >= 0)
-        {
-            String text(StringList(kSpaceObjectShortNameResID).at(newObject->beamType));
-            DrawDirectTextStringClipped(
-                    Point(lRect.left, lRect.top + gDirectText->ascent), text, color, gOffWorld,
-                    clipRect);
-        }
-
-        if ( uRect.left == -1)
-        {
-            uRect = lRect;
-        }
-        else
-        {
-            uRect.enlarge_to(lRect);
-        }
-    }
-
-    if ( oldObject->pulseType != newObject->pulseType)
-    {
-        lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
-        DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
-
-        // get the color for writing the name
-        color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
-
-        // move to the 1st line in the selection miniscreen, write the name
-        if ( newObject->pulseType >= 0)
-        {
-            String text(StringList(kSpaceObjectShortNameResID).at(newObject->pulseType));
-            DrawDirectTextStringClipped(
-                    Point(lRect.left, lRect.top + gDirectText->ascent), text, color, gOffWorld,
-                    clipRect);
-        }
-
-        if ( uRect.left == -1)
-        {
-            uRect = lRect;
-        }
-        else
-        {
-            uRect.enlarge_to(lRect);
-        }
-    }
-
-    if (( oldObject->specialType != newObject->specialType) && ( ! (newObject->attributes & kIsDestination)))
-    {
-        lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
-        DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
-
-        // get the color for writing the name
-        color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
-
-        // move to the 1st line in the selection miniscreen, write the name
-        if ( newObject->specialType >= 0)
-        {
-            String text(StringList(kSpaceObjectShortNameResID).at(newObject->specialType));
-            DrawDirectTextStringClipped(
-                    Point(lRect.left, lRect.top + gDirectText->ascent), text, color, gOffWorld,
-                    clipRect);
-        }
-
-        if ( uRect.left == -1)
-        {
-            uRect = lRect;
-        }
-        else
-        {
-            uRect.enlarge_to(lRect);
-        }
-    }
-
-    if ( oldObject->destinationObject != newObject->destinationObject)
-    {
-        lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniDestLineNum, 0, kMiniScreenWidth);
-        DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
-
-        // write the name
-        if ( newObject->destinationObject >= 0)
-        {
-            if ( newObject->destObjectPtr != NULL)
-            {
-                dObject = newObject->destObjectPtr;
-
-                // get the color for writing the name
-                if ( dObject->owner == globals()->gPlayerAdmiralNumber)
-                {
-                    color = GetRGBTranslateColorShade(GREEN, VERY_LIGHT);
-                } else
-                {
-                    color = GetRGBTranslateColorShade(RED, VERY_LIGHT);
-                }
-
-                if ( dObject->attributes & kIsDestination)
-                {
-                    String text(GetDestBalanceName(dObject->destinationObject));
-                    DrawDirectTextStringClipped(
-                            Point(lRect.left, lRect.top + gDirectText->ascent), text, color,
-                            gOffWorld, clipRect);
-                } else
-                {
-                    String text(StringList(kSpaceObjectNameResID).at(dObject->whichBaseObject));
-                    DrawDirectTextStringClipped(
-                            Point(lRect.left, lRect.top + gDirectText->ascent), text, color,
-                            gOffWorld, clipRect);
-                }
-            }
-        }
-
-        if ( uRect.left == -1)
-        {
-            uRect = lRect;
-        }
-        else
-        {
-            uRect.enlarge_to(lRect);
-        }
+        uRect.enlarge_to(lRect);
     }
 
     mRect.left = uRect.left;
