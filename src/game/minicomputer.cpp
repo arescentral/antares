@@ -1183,28 +1183,31 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         uRect.enlarge_to(lRect);
     }
 
-    lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
-    DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
+    // Don't show special weapons of destination objects.
+    if (!(newObject->attributes & kIsDestination)) {
+        lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
+        DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
 
-    // get the color for writing the name
-    color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
+        // get the color for writing the name
+        color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
-    // move to the 1st line in the selection miniscreen, write the name
-    if ( newObject->specialType >= 0)
-    {
-        String text(StringList(kSpaceObjectShortNameResID).at(newObject->specialType));
-        DrawDirectTextStringClipped(
-                Point(lRect.left, lRect.top + gDirectText->ascent), text, color, gOffWorld,
-                clipRect);
-    }
+        // move to the 1st line in the selection miniscreen, write the name
+        if ( newObject->specialType >= 0)
+        {
+            String text(StringList(kSpaceObjectShortNameResID).at(newObject->specialType));
+            DrawDirectTextStringClipped(
+                    Point(lRect.left, lRect.top + gDirectText->ascent), text, color, gOffWorld,
+                    clipRect);
+        }
 
-    if ( uRect.left == -1)
-    {
-        uRect = lRect;
-    }
-    else
-    {
-        uRect.enlarge_to(lRect);
+        if ( uRect.left == -1)
+        {
+            uRect = lRect;
+        }
+        else
+        {
+            uRect.enlarge_to(lRect);
+        }
     }
 
     lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniDestLineNum, 0, kMiniScreenWidth);
