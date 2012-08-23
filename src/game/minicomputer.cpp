@@ -197,13 +197,13 @@ const int32_t MiniIconMacLineTop() {
     return (gDirectText->height * 2);
 }
 
-inline void mBlackMiniScreenLine(
-        long mtop, long mlinenum, long mleft, long mright, Rect& mbounds, PixMap* mpixbase) {
+Rect mini_screen_line_bounds(long mtop, long mlinenum, long mleft, long mright) {
+    Rect mbounds;
     mbounds.left = kMiniScreenLeft + mleft;
     mbounds.top = mtop + mlinenum * mDirectFontHeight();
     mbounds.right = kMiniScreenLeft + mright;
     mbounds.bottom = mbounds.top + mDirectFontHeight();
-    DrawNateRect(mpixbase, &mbounds, RgbColor::kBlack);
+    return mbounds;
 }
 
 inline long mGetLineNumFromV(long mV) {
@@ -918,7 +918,8 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     if ( oldObject->id != newObject->id)
     {
 
-        mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, 0, 0, kMiniScreenWidth, lRect, gOffWorld);
+        lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, 0, 0, kMiniScreenWidth);
+        DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
         color = GetRGBTranslateColorShade(headerColor, LIGHT);
         lightcolor = GetRGBTranslateColorShade(headerColor, VERY_LIGHT);
         darkcolor = GetRGBTranslateColorShade(headerColor, MEDIUM);
@@ -934,8 +935,8 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
 
         if ( newObject->attributes & kIsDestination)
         {
-            // blacken the line for the object type name
-            mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth, lRect, gOffWorld);
+            lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth);
+            DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
 
             // get the color for writing the name
             color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
@@ -954,9 +955,8 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
             }
         } else if ( oldObject->whichBaseObject != newObject->whichBaseObject)
         {
-
-            // blacken the line for the object type name
-            mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth, lRect, gOffWorld);
+            lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth);
+            DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
 
             if ( newObject->whichBaseObject >= 0)
             {
@@ -1152,8 +1152,8 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
 
     if ( oldObject->beamType != newObject->beamType)
     {
-        // blacken the line for the weapon1 name
-        mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, gOffWorld);
+        lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
+        DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
 
         // get the color for writing the name
         color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
@@ -1179,8 +1179,8 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
 
     if ( oldObject->pulseType != newObject->pulseType)
     {
-        // blacken the line for the weapon1 name
-        mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, gOffWorld);
+        lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
+        DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
 
         // get the color for writing the name
         color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
@@ -1206,8 +1206,8 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
 
     if (( oldObject->specialType != newObject->specialType) && ( ! (newObject->attributes & kIsDestination)))
     {
-        // blacken the line for the weapon1 name
-        mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth, lRect, gOffWorld);
+        lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
+        DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
 
         // get the color for writing the name
         color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
@@ -1233,8 +1233,8 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
 
     if ( oldObject->destinationObject != newObject->destinationObject)
     {
-        // blacken the line for the weapon1 name
-        mBlackMiniScreenLine( screenTop + globals()->gInstrumentTop, kMiniDestLineNum, 0, kMiniScreenWidth, lRect, gOffWorld);
+        lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniDestLineNum, 0, kMiniScreenWidth);
+        DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
 
         // write the name
         if ( newObject->destinationObject >= 0)
