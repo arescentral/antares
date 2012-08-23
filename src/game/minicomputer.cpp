@@ -732,7 +732,8 @@ void MiniComputerHandleNull( long unitsToDo)
             newObject.attributes = 0;
             newObject.baseType = NULL;
         }
-        UpdateMiniShipData( myObject, &newObject, YELLOW, kMiniSelectTop, kMiniSelectObjectNum + 1);
+        mCopyMiniSpaceObject(*myObject, newObject);
+        UpdateMiniShipData(*mGetMiniObjectPtr(kMiniSelectObjectNum), YELLOW, kMiniSelectTop, kMiniSelectObjectNum + 1);
 
         myObject = mGetMiniObjectPtr( kMiniTargetObjectNum);
         count = GetAdmiralDestinationObject( globals()->gPlayerAdmiralNumber);
@@ -756,7 +757,8 @@ void MiniComputerHandleNull( long unitsToDo)
             newObject.attributes = 0;
             newObject.baseType = NULL;
         }
-        UpdateMiniShipData( myObject, &newObject, SKY_BLUE, kMiniTargetTop, kMiniTargetObjectNum + 1);
+        mCopyMiniSpaceObject(*myObject, newObject);
+        UpdateMiniShipData(*mGetMiniObjectPtr(kMiniTargetObjectNum), SKY_BLUE, kMiniTargetTop, kMiniTargetObjectNum + 1);
 
         int build_at = GetAdmiralBuildAtObject(globals()->gPlayerAdmiralNumber);
         if (build_at >= 0) {
@@ -893,10 +895,9 @@ void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) 
     draw_player_ammo_in_rect(ammo_special, ORANGE, clip);
 }
 
-void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject, unsigned char headerColor,
-                    short screenTop, short whichString)
-
-{
+void UpdateMiniShipData(
+        const spaceObjectType& newObject, unsigned char headerColor,
+        short screenTop, short whichString) {
     RgbColor            color, lightcolor, darkcolor;
     coordPointType      coord;
     Point               where;
@@ -930,7 +931,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     uRect = lRect;
     uRect = clipRect;
 
-    if ( newObject->attributes & kIsDestination)
+    if ( newObject.attributes & kIsDestination)
     {
         lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth);
         DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
@@ -939,7 +940,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
         // move to the 1st line in the selection miniscreen
-        String text(GetDestBalanceName(newObject->destinationObject));
+        String text(GetDestBalanceName(newObject.destinationObject));
         DrawDirectTextStringClipped(
                 Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent),
                 text, color, gOffWorld, clipRect);
@@ -954,13 +955,13 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth);
         DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
 
-        if ( newObject->whichBaseObject >= 0)
+        if ( newObject.whichBaseObject >= 0)
         {
             // get the color for writing the name
             color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
             // move to the 1st line in the selection miniscreen, write the name
-            String text(StringList(kSpaceObjectShortNameResID).at(newObject->whichBaseObject));
+            String text(StringList(kSpaceObjectShortNameResID).at(newObject.whichBaseObject));
             DrawDirectTextStringClipped(
                     Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent),
                     text, color, gOffWorld, clipRect);
@@ -985,13 +986,13 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
 
     DrawNateRect(gOffWorld, &dRect, RgbColor::kBlack);
 
-    if (( newObject->whichBaseObject >= 0) && ( newObject->pixResID >= 0))
+    if (( newObject.whichBaseObject >= 0) && ( newObject.pixResID >= 0))
     {
-        NatePixTable* pixTable = GetPixTable( newObject->pixResID);
+        NatePixTable* pixTable = GetPixTable( newObject.pixResID);
 
         if (pixTable != NULL) {
-            if (newObject->attributes & kIsSelfAnimated) {
-                whichShape = more_evil_fixed_to_long(newObject->baseType->frame.animation.firstShape);
+            if (newObject.attributes & kIsSelfAnimated) {
+                whichShape = more_evil_fixed_to_long(newObject.baseType->frame.animation.firstShape);
             } else {
                 whichShape = 0;
             }
@@ -1057,12 +1058,12 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
 
     DrawNateRect(gOffWorld, &dRect, RgbColor::kBlack);
 
-    if ( newObject->baseType != NULL)
+    if ( newObject.baseType != NULL)
     {
-        if (( newObject->baseType->health > 0) && ( newObject->health > 0))
+        if (( newObject.baseType->health > 0) && ( newObject.health > 0))
         {
-            tlong = newObject->health * kMiniBarHeight;
-            tlong /= newObject->baseType->health;
+            tlong = newObject.health * kMiniBarHeight;
+            tlong /= newObject.baseType->health;
 
             color = GetRGBTranslateColorShade(SKY_BLUE, DARK);
 
@@ -1101,12 +1102,12 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
 
     DrawNateRect(gOffWorld, &dRect, RgbColor::kBlack);
 
-    if ( newObject->baseType != NULL)
+    if ( newObject.baseType != NULL)
     {
-        if (( newObject->baseType->energy > 0) && ( newObject->energy > 0))
+        if (( newObject.baseType->energy > 0) && ( newObject.energy > 0))
         {
-            tlong = newObject->energy * kMiniBarHeight;
-            tlong /= newObject->baseType->energy;
+            tlong = newObject.energy * kMiniBarHeight;
+            tlong /= newObject.baseType->energy;
 
             color = GetRGBTranslateColorShade(YELLOW, DARK);
 
@@ -1142,9 +1143,9 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
     // move to the 1st line in the selection miniscreen, write the name
-    if ( newObject->beamType >= 0)
+    if ( newObject.beamType >= 0)
     {
-        String text(StringList(kSpaceObjectShortNameResID).at(newObject->beamType));
+        String text(StringList(kSpaceObjectShortNameResID).at(newObject.beamType));
         DrawDirectTextStringClipped(
                 Point(lRect.left, lRect.top + gDirectText->ascent), text, color, gOffWorld,
                 clipRect);
@@ -1166,9 +1167,9 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
     // move to the 1st line in the selection miniscreen, write the name
-    if ( newObject->pulseType >= 0)
+    if ( newObject.pulseType >= 0)
     {
-        String text(StringList(kSpaceObjectShortNameResID).at(newObject->pulseType));
+        String text(StringList(kSpaceObjectShortNameResID).at(newObject.pulseType));
         DrawDirectTextStringClipped(
                 Point(lRect.left, lRect.top + gDirectText->ascent), text, color, gOffWorld,
                 clipRect);
@@ -1184,7 +1185,7 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     }
 
     // Don't show special weapons of destination objects.
-    if (!(newObject->attributes & kIsDestination)) {
+    if (!(newObject.attributes & kIsDestination)) {
         lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
         DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
 
@@ -1192,9 +1193,9 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
         color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
         // move to the 1st line in the selection miniscreen, write the name
-        if ( newObject->specialType >= 0)
+        if ( newObject.specialType >= 0)
         {
-            String text(StringList(kSpaceObjectShortNameResID).at(newObject->specialType));
+            String text(StringList(kSpaceObjectShortNameResID).at(newObject.specialType));
             DrawDirectTextStringClipped(
                     Point(lRect.left, lRect.top + gDirectText->ascent), text, color, gOffWorld,
                     clipRect);
@@ -1214,11 +1215,11 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
     DrawNateRect(gOffWorld, &lRect, RgbColor::kBlack);
 
     // write the name
-    if ( newObject->destinationObject >= 0)
+    if ( newObject.destinationObject >= 0)
     {
-        if ( newObject->destObjectPtr != NULL)
+        if ( newObject.destObjectPtr != NULL)
         {
-            dObject = newObject->destObjectPtr;
+            dObject = newObject.destObjectPtr;
 
             // get the color for writing the name
             if ( dObject->owner == globals()->gPlayerAdmiralNumber)
@@ -1261,8 +1262,6 @@ void UpdateMiniShipData( spaceObjectType *oldObject, spaceObjectType *newObject,
 
     // copy the dirty rect
     copy_world(*gRealWorld, *gOffWorld, mRect);
-
-    mCopyMiniSpaceObject( *oldObject, *newObject);
 }
 
 void MiniComputerDoAccept( void)
