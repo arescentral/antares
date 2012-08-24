@@ -249,13 +249,12 @@ void ResetInstruments() {
 }
 
 void UpdateRadar(int32_t unitsDone) {
-    bool radar_is_functioning;
     if (gScrollStarObject == NULL) {
-        radar_is_functioning = false;
+        globals()->radar_is_functioning = false;
     } else if (gScrollStarObject->offlineTime <= 0) {
-        radar_is_functioning = true;
+        globals()->radar_is_functioning = true;
     } else {
-        radar_is_functioning = (Randomize(gScrollStarObject->offlineTime) < 5);
+        globals()->radar_is_functioning = (Randomize(gScrollStarObject->offlineTime) < 5);
     }
 
     if (unitsDone < 0) {
@@ -264,22 +263,6 @@ void UpdateRadar(int32_t unitsDone) {
     globals()->gRadarCount -= unitsDone;
     if (globals()->gMouseActive) {
         globals()->gMouseTimeout += unitsDone;
-    }
-
-    RgbColor color;
-    if (globals()->gRadarCount <= 0) {
-        color = GetRGBTranslateColorShade(kRadarColor, VERY_DARK);
-    } else {
-        color = GetRGBTranslateColorShade(kRadarColor, ((kRadarColorSteps * globals()->gRadarCount) / globals()->gRadarSpeed) + 1);
-    }
-
-    if (radar_is_functioning) {
-        for (int rcount = 0; rcount < kRadarBlipNum; rcount++) {
-            Point* lp = gRadarBlipData.get() + rcount;
-            if (lp->h >= 0) {
-                gRealWorld->set(lp->h, lp->v, color);
-            }
-        }
     }
 
     if ((gScrollStarObject == NULL) || !gScrollStarObject->active) {
@@ -294,7 +277,7 @@ void UpdateRadar(int32_t unitsDone) {
     const RgbColor darkest = GetRGBTranslateColorShade(kRadarColor, DARKEST);
     const RgbColor very_dark = GetRGBTranslateColorShade(kRadarColor, VERY_DARK);
 
-    if (radar_is_functioning) {
+    if (globals()->radar_is_functioning) {
         if (globals()->gRadarCount <= 0) {
             Rect radar = bounds;
             FrameRect(gOffWorld, radar, very_light);
@@ -429,6 +412,22 @@ void draw_radar() {
     scoped_ptr<Sprite> radar(VideoDriver::driver()->new_sprite(
                 "/x/radar", gRealWorld->view(bounds)));
     radar->draw(bounds);
+
+    if (globals()->radar_is_functioning) {
+        RgbColor color;
+        if (globals()->gRadarCount <= 0) {
+            color = GetRGBTranslateColorShade(kRadarColor, VERY_DARK);
+        } else {
+            color = GetRGBTranslateColorShade(kRadarColor, ((kRadarColorSteps * globals()->gRadarCount) / globals()->gRadarSpeed) + 1);
+        }
+
+        for (int rcount = 0; rcount < kRadarBlipNum; rcount++) {
+            Point* lp = gRadarBlipData.get() + rcount;
+            if (lp->h >= 0) {
+                VideoDriver::driver()->draw_point(*lp, color);
+            }
+        }
+    }
 }
 
 // SHOW ME THE MONEY

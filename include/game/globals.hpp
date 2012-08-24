@@ -117,6 +117,7 @@ struct aresGlobalType {
     int32_t         gRadarCount;            // = 0;
     int32_t         gRadarSpeed;            // = 30;
     int32_t         gRadarRange;            // kRadarSize * 50;
+    bool            radar_is_functioning;
     int32_t         gWhichScaleNum;         // = 0;
     int32_t         gLastScale;             // = SCALE_SCALE;
     int32_t         gInstrumentTop;         // = 0;

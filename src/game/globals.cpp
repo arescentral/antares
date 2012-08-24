@@ -62,6 +62,7 @@ aresGlobalType::aresGlobalType() {
     gRadarCount = 0;
     gRadarSpeed = 30;
     gRadarRange = kRadarSize * 50;
+    radar_is_functioning = false;
     gWhichScaleNum = 0;
     gLastScale = SCALE_SCALE;
     gInstrumentTop = 0;
