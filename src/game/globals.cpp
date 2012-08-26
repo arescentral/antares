@@ -62,6 +62,7 @@ aresGlobalType::aresGlobalType() {
     gRadarCount = 0;
     gRadarSpeed = 30;
     gRadarRange = kRadarSize * 50;
+    radar_is_functioning = false;
     gWhichScaleNum = 0;
     gLastScale = SCALE_SCALE;
     gInstrumentTop = 0;
@@ -71,7 +72,6 @@ aresGlobalType::aresGlobalType() {
     gMessageLabelNum = -1;
     gStatusLabelNum = -1;
     gLastSoundTime = 0;
-    gLastSelectedBuildPrice = 0;
     gAutoPilotOff = true;
     levelNum = 31;
     keyMask = 0;

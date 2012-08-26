@@ -54,7 +54,6 @@ enum ZoomType {
 struct barIndicatorType {
     short           top;
     long            thisValue;
-    long            lastValue;
     unsigned char   color;
     bool         automatic;      // if it's automatic, it is redrawn automatically
 };
@@ -118,6 +117,7 @@ struct aresGlobalType {
     int32_t         gRadarCount;            // = 0;
     int32_t         gRadarSpeed;            // = 30;
     int32_t         gRadarRange;            // kRadarSize * 50;
+    bool            radar_is_functioning;
     int32_t         gWhichScaleNum;         // = 0;
     int32_t         gLastScale;             // = SCALE_SCALE;
     int32_t         gInstrumentTop;         // = 0;
@@ -144,7 +144,6 @@ struct aresGlobalType {
     KeyMap          gLastMessageKeyMap;
     unsigned long   gSerialNumerator;
     unsigned long   gSerialDenominator;
-    long            gLastSelectedBuildPrice;
     bool         gAutoPilotOff;          // hack for turning off auto in netgame
     long            levelNum;
     unsigned long   keyMask;

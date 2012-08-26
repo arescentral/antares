@@ -61,16 +61,16 @@ void SetMiniScreenStatusStrList( short);
 void DisposeMiniScreenStatusStrList( void);
 void ClearMiniScreenLines( void);
 void ClearMiniObjectData( void);
-void DrawMiniScreen( void);
-void DrawAndShowMiniScreenLine( long);
-void ShowWholeMiniScreen( void);
+void draw_mini_screen();
 void MakeMiniScreenFromIndString( short);
 void MiniComputerHandleKeys( unsigned long, unsigned long);
 void MiniComputerHandleNull( long);
 long MiniComputerGetPriceOfCurrentSelection( void);
 void UpdateMiniScreenLines( void);
-void UpdatePlayerAmmo(long, long, long);
-void UpdateMiniShipData( spaceObjectType *, spaceObjectType *, unsigned char, short, short);
+void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special);
+void draw_mini_ship_data(
+        const spaceObjectType& newObject, unsigned char headerColor,
+        short screenTop, short whichString);
 void MiniComputerDoAccept( void);
 void MiniComputerExecute( long, long, long);
 void MiniComputerDoCancel( void);
