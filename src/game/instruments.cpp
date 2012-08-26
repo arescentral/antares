@@ -405,10 +405,6 @@ void draw_radar() {
     bounds.offset(0, globals()->gInstrumentTop);
     bounds.inset(1, 1);
 
-    scoped_ptr<Sprite> radar(VideoDriver::driver()->new_sprite(
-                "/x/radar", gRealWorld->view(bounds)));
-    radar->draw(bounds);
-
     const RgbColor very_light = GetRGBTranslateColorShade(kRadarColor, VERY_LIGHT);
     const RgbColor darkest = GetRGBTranslateColorShade(kRadarColor, DARKEST);
     const RgbColor very_dark = GetRGBTranslateColorShade(kRadarColor, VERY_DARK);
