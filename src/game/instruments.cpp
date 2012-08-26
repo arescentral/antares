@@ -130,6 +130,7 @@ scoped_array<Point> gRadarBlipData;
 scoped_array<int32_t> gScaleList;
 scoped_array<int32_t> gSectorLineData;
 bool should_draw_sector_lines = false;
+Rect view_range;
 
 struct SiteData {
     Point a, b, c;
@@ -280,17 +281,14 @@ void UpdateRadar(int32_t unitsDone) {
     if (globals()->radar_is_functioning) {
         if (globals()->gRadarCount <= 0) {
             Rect radar = bounds;
-            FrameRect(gOffWorld, radar, very_light);
             radar.inset(1, 1);
-            gOffWorld->view(radar).fill(darkest);
 
             int32_t dx = gScrollStarObject->location.h - gGlobalCorner.h;
             dx = dx * kRadarSize / globals()->gRadarRange;
-            Rect view_range(-dx, -dx, dx, dx);
+            view_range = Rect(-dx, -dx, dx, dx);
             view_range.center_in(bounds);
             view_range.offset(1, 1);
             view_range.clip_to(radar);
-            gOffWorld->view(view_range).fill(very_dark);
 
             for (int i = 0; i < kRadarBlipNum; ++i) {
                 Point* lp = gRadarBlipData.get() + i;
@@ -326,8 +324,6 @@ void UpdateRadar(int32_t unitsDone) {
                 }
             }
         }
-    } else {
-        gRealWorld->view(bounds).fill(darkest);
     }
 
     uint32_t bestScale = MIN_SCALE;
@@ -413,10 +409,21 @@ void draw_radar() {
                 "/x/radar", gRealWorld->view(bounds)));
     radar->draw(bounds);
 
+    const RgbColor very_light = GetRGBTranslateColorShade(kRadarColor, VERY_LIGHT);
+    const RgbColor darkest = GetRGBTranslateColorShade(kRadarColor, DARKEST);
+    const RgbColor very_dark = GetRGBTranslateColorShade(kRadarColor, VERY_DARK);
     if (globals()->radar_is_functioning) {
+        Rect radar = bounds;
+        VideoDriver::driver()->fill_rect(radar, very_light);
+        radar.inset(1, 1);
+        VideoDriver::driver()->fill_rect(radar, darkest);
+        if ((view_range.width() > 0) && (view_range.height() > 0)) {
+            VideoDriver::driver()->fill_rect(view_range, very_dark);
+        }
+
         RgbColor color;
         if (globals()->gRadarCount <= 0) {
-            color = GetRGBTranslateColorShade(kRadarColor, VERY_DARK);
+            color = very_dark;
         } else {
             color = GetRGBTranslateColorShade(kRadarColor, ((kRadarColorSteps * globals()->gRadarCount) / globals()->gRadarSpeed) + 1);
         }
@@ -427,6 +434,8 @@ void draw_radar() {
                 VideoDriver::driver()->draw_point(*lp, color);
             }
         }
+    } else {
+        VideoDriver::driver()->fill_rect(bounds, darkest);
     }
 }
 
