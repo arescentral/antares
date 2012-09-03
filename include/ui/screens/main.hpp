@@ -21,7 +21,7 @@
 
 #include <sfz/sfz.hpp>
 
-#include "ui/interface-screen.hpp"
+#include "ui/screen.hpp"
 
 namespace antares {
 

@@ -24,7 +24,7 @@
 
 #include "math/geometry.hpp"
 #include "drawing/interface.hpp"
-#include "ui/interface-screen.hpp"
+#include "ui/screen.hpp"
 
 namespace antares {
 

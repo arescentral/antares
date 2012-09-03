@@ -312,7 +312,7 @@ def build(bld):
             "src/ui/flows/replay-game.cpp",
             "src/ui/flows/solo-game.cpp",
             "src/ui/interface-handling.cpp",
-            "src/ui/interface-screen.cpp",
+            "src/ui/screen.cpp",
             "src/ui/screens/briefing.cpp",
             "src/ui/screens/debriefing.cpp",
             "src/ui/screens/help.cpp",

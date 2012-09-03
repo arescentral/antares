@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "ui/interface-screen.hpp"
+#include "ui/screen.hpp"
 
 #include <sfz/sfz.hpp>
 
