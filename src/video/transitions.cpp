@@ -123,6 +123,9 @@ void ColorFade::draw() const {
     next()->draw();
     int64_t now = now_usecs();
     double fraction = static_cast<double>(now - _start) / _duration;
+    if (fraction > 1.0) {
+        fraction = 1.0;
+    }
     RgbColor fill_color = _color;
     if (_direction == TO_COLOR) {
         fill_color.alpha = 0xff * fraction;
