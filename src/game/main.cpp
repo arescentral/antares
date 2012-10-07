@@ -54,6 +54,7 @@
 #include "ui/screens/briefing.hpp"
 #include "ui/screens/debriefing.hpp"
 #include "ui/screens/help.hpp"
+#include "ui/screens/loading.hpp"
 #include "ui/screens/play-again.hpp"
 #include "video/driver.hpp"
 
@@ -117,12 +118,15 @@ Card* AresInit() {
     return new Master;
 }
 
-MainPlay::MainPlay(const Scenario* scenario, bool replay, GameResult* game_result)
-        : _state(NEW),
-          _scenario(scenario),
-          _replay(replay),
-          _cancelled(false),
-          _game_result(game_result) { }
+MainPlay::MainPlay(
+        const Scenario* scenario, bool replay, bool show_loading_screen,
+        GameResult* game_result):
+    _state(NEW),
+    _scenario(scenario),
+    _replay(replay),
+    _show_loading_screen(show_loading_screen),
+    _cancelled(false),
+    _game_result(game_result) { }
 
 void MainPlay::become_front() {
     switch (_state) {
@@ -138,20 +142,34 @@ void MainPlay::become_front() {
                 PlaySong();
             }
 
-            // TODO(sfiera): implement as a Card.
-            if (!ConstructScenario(_scenario)) {
-                *_game_result = QUIT_GAME;
-                stack()->pop(this);
-                return;
-            }
-            if (!_replay) {
-                stack()->push(new BriefingScreen(_scenario, &_cancelled));
+            if (_show_loading_screen) {
+                stack()->push(new LoadingScreen(_scenario, &_cancelled));
                 break;
+            } else {
+                int32_t max;
+                int32_t current = 0;
+                if (!ConstructScenario(_scenario, &current, &max)) {
+                    *_game_result = QUIT_GAME;
+                    stack()->pop(this);
+                    return;
+                }
             }
         }
         // fall through.
 
       case LOADING:
+        {
+            if (_cancelled) {
+                *_game_result = QUIT_GAME;
+                stack()->pop(this);
+                return;
+            }
+            if (!_replay) {
+                _state = BRIEFING;
+                stack()->push(new BriefingScreen(_scenario, &_cancelled));
+                break;
+            }
+        }
         // fall through
 
       case BRIEFING:

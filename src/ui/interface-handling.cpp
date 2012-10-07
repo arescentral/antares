@@ -94,9 +94,6 @@ const int32_t kMissionDataHiliteColor   = GOLD;
 const int32_t kMissionLineHJog          = 10;
 const int32_t kMissionBriefPointOffset  = 2;
 
-const int16_t kLoadingScreenID      = 6001;
-const uint8_t kLoadingScreenColor   = PALE_GREEN;
-
 const int16_t kShipDataTextID       = 6001;
 const int16_t kShipDataKeyStringID  = 6001;
 const int16_t kShipDataNameID       = 6002;
@@ -705,6 +702,7 @@ void SetInterfaceTextBoxText( short resID) {
 
 void BlackenWindow();
 
+/*
 void DoLoadingInterface(Rect *contentRect, StringSlice level_name) {
     RgbColor color;
     Rect                lRect, clipRect, boundsRect;
@@ -814,6 +812,7 @@ void UpdateLoadingInterface( long value, long total, Rect *contentRect)
         }
     }
 }
+*/
 
 void DoNetSettings( void)
 

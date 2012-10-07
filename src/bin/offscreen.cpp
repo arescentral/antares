@@ -206,13 +206,17 @@ void pause(OffscreenVideoDriver& driver) {
     driver.schedule_event(make_linked_ptr(new MouseMoveEvent(0, Point(320, 240))));
 
     // Skip the intro.  Start the first tutorial and skip the prologue.
-    driver.schedule_key(Keys::Q, 1798, 1799);
-    driver.schedule_key(Keys::S, 1858, 1859);
-    driver.schedule_key(Keys::RETURN, 1917, 1918);
-    driver.schedule_snapshot(1917);
-    driver.schedule_snapshot(1947);
+    driver.schedule_key(Keys::Q, 1756, 1757);
+    driver.schedule_key(Keys::S, 1816, 1817);
+    driver.schedule_key(Keys::RETURN, 1875, 1876);
+    driver.schedule_snapshot(1875);
+    driver.schedule_snapshot(1905);
+    driver.schedule_snapshot(1935);
+    driver.schedule_key(Keys::RETURN, 1936, 1937);
+
+    driver.schedule_snapshot(1937);
+    driver.schedule_snapshot(1957);
     driver.schedule_snapshot(1977);
-    driver.schedule_key(Keys::RETURN, 1978, 1979);
 
     driver.schedule_snapshot(1980);
     driver.schedule_snapshot(2000);

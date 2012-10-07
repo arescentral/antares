@@ -45,7 +45,7 @@ Scenario* mGetScenario(int32_t num);
 int32_t mGetRealAdmiralNum(int32_t mplayernum);
 
 void ScenarioMakerInit();
-bool ConstructScenario(const Scenario* scenario);
+bool ConstructScenario(const Scenario* scenario, int32_t* current, int32_t* max);
 void DeclareWinner(int32_t whichPlayer, int32_t nextLevel, int32_t textID);
 void CheckScenarioConditions(int32_t timePass);
 int32_t GetRealAdmiralNumber(int32_t whichAdmiral);

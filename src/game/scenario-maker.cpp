@@ -530,10 +530,7 @@ void ScenarioMakerInit() {
     InitRaces();
 }
 
-bool ConstructScenario(const Scenario* scenario) {
-    Rect                    loadingRect;
-    long                    stepNumber, currentStep = 0;
-
+bool ConstructScenario(const Scenario* scenario, int32_t* current, int32_t* max) {
     ResetAllSpaceObjects();
     ResetActionQueueData();
     ResetBeams();
@@ -649,11 +646,7 @@ bool ConstructScenario(const Scenario* scenario) {
     SetAllSoundsNoKeep();
     SetAllPixTablesNoKeep();
 
-    stepNumber = gThisScenario->initialNum * 4L + (gThisScenario->startTime & kScenario_StartTimeMask); // for each run through the initial num
-    StringList strings(kLevelNameID);
-    StringSlice level_name = strings.at(gThisScenario->levelNameStrNum - 1);
-    DoLoadingInterface(&loadingRect, level_name);
-    UpdateLoadingInterface(currentStep, stepNumber, &loadingRect);
+    *max = gThisScenario->initialNum * 4L + (gThisScenario->startTime & kScenario_StartTimeMask); // for each run through the initial num
 
     // for each initial object
 
@@ -691,8 +684,7 @@ bool ConstructScenario(const Scenario* scenario) {
 
     for (int i = 0; i < gThisScenario->initialNum; i++) {
         Scenario::InitialObject* initial = gThisScenario->initial(i);
-        currentStep++;
-        UpdateLoadingInterface(currentStep, stepNumber, &loadingRect);
+        (*current)++;
         // get the base object equiv
         baseObjectType* baseObject = mGetBaseObjectPtr(initial->type);
         if (NETWORK_ON && (GetAdmiralRace(initial->owner) >= 0)
@@ -774,8 +766,7 @@ bool ConstructScenario(const Scenario* scenario) {
     }
 
     for (int i = 0; i < gThisScenario->initialNum; i++) {
-        currentStep++;
-        UpdateLoadingInterface(currentStep, stepNumber, &loadingRect);
+        (*current)++;
 
         Scenario::InitialObject* initial = gThisScenario->initial(i);
 
@@ -878,8 +869,7 @@ bool ConstructScenario(const Scenario* scenario) {
     {
         Scenario::InitialObject* initial = gThisScenario->initial(0);
         for (int i = 0; i < gThisScenario->initialNum; i++) {
-            currentStep++;
-            UpdateLoadingInterface(currentStep, stepNumber, &loadingRect);
+            (*current)++;
 
             if (!(initial->attributes & kInitiallyHidden)) {
                 coordPointType coord;
@@ -965,8 +955,7 @@ bool ConstructScenario(const Scenario* scenario) {
 
     // double back and set up any defined initial destinations
     for (int i = 0; i < gThisScenario->initialNum; i++) {
-        currentStep++;
-        UpdateLoadingInterface(currentStep, stepNumber, &loadingRect);
+        (*current)++;
 
         Scenario::InitialObject* initial = gThisScenario->initial(i);
         // if the initial object has an initial destination
@@ -1044,8 +1033,7 @@ bool ConstructScenario(const Scenario* scenario) {
         CullSprites();
         CullBeams();
         if ((i % kScenarioTimeMultiple) == 0) {
-            currentStep++;
-            UpdateLoadingInterface(currentStep, stepNumber, &loadingRect);
+            (*current)++;
         }
     }
     globals()->gGameTime = start_time;

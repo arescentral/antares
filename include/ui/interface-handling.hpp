@@ -86,8 +86,6 @@ void RefreshInterfaceListEntry( short, short);
 void SetButtonKeyNum( short, short);
 short GetButtonKeyNum( short);
 
-void DoLoadingInterface(Rect* contentRect, sfz::StringSlice level_name);
-void UpdateLoadingInterface( long, long, Rect *);
 void DoNetSettings( void);
 bool BothCommandAndQ( void);
 netResultType StartNetworkGameSetup( void);
