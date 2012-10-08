@@ -148,10 +148,13 @@ void MainPlay::become_front() {
             } else {
                 int32_t max;
                 int32_t current = 0;
-                if (!ConstructScenario(_scenario, &current, &max)) {
+                if (!start_construct_scenario(_scenario, &max)) {
                     *_game_result = QUIT_GAME;
                     stack()->pop(this);
                     return;
+                }
+                while (current < max) {
+                    construct_scenario(_scenario, &current);
                 }
             }
         }

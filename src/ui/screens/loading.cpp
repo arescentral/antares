@@ -26,6 +26,7 @@
 #include "drawing/text.hpp"
 #include "game/scenario-maker.hpp"
 #include "game/time.hpp"
+#include "video/driver.hpp"
 
 namespace antares {
 
@@ -64,7 +65,8 @@ bool LoadingScreen::next_timer(int64_t& time) {
         time = _next_update;
         return true;
       case LOADING:
-        break;
+        time = 0;
+        return true;
     }
     return false;
 }
@@ -75,8 +77,10 @@ void LoadingScreen::fire_timer() {
         while (_next_update < now_usecs()) {
             if (_chars_typed >= _name_text->size()) {
                 _state = LOADING;
-                ConstructScenario(_scenario, &_current, &_max);
-                _state = DONE;
+                if (!start_construct_scenario(_scenario, &_max)) {
+                    *_cancelled = true;
+                    stack()->pop(this);
+                }
                 return;
             }
             if ((_chars_typed % 3) == 0) {
@@ -88,6 +92,15 @@ void LoadingScreen::fire_timer() {
         break;
 
       case LOADING:
+        _next_update = now_usecs() + kTypingDelay;
+        while (now_usecs() < _next_update) {
+            if (_current < _max) {
+                construct_scenario(_scenario, &_current);
+            } else {
+                _state = DONE;
+                return;
+            }
+        }
         break;
 
       case DONE:
@@ -114,6 +127,13 @@ void LoadingScreen::draw() const {
     if (_chars_typed < _name_text->size()) {
         _name_text->draw_cursor(bounds, _chars_typed);
     }
+
+    const RgbColor& light = GetRGBTranslateColorShade(kLoadingScreenColor, LIGHT);
+    const RgbColor& dark = GetRGBTranslateColorShade(kLoadingScreenColor, DARK);
+    Rect bar = item(0).bounds;
+    VideoDriver::driver()->fill_rect(bar, dark);
+    bar.right = bar.left + (bar.width() * _current / _max);
+    VideoDriver::driver()->fill_rect(bar, light);
 }
 
 }  // namespace antares
