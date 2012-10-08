@@ -24,7 +24,7 @@
 #include <sfz/sfz.hpp>
 
 #include "drawing/retro-text.hpp"
-#include "ui/interface-screen.hpp"
+#include "ui/screen.hpp"
 
 namespace antares {
 
