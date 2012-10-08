@@ -35,8 +35,6 @@ struct inlinePictType {
     short id;
 };
 
-void DrawPlayerInterfacePlainRect(
-        const Rect& rect, uint8_t color, interfaceStyleType style, PixMap* pix);
 void DrawPlayerInterfaceTabBox(
         const Rect& rect, uint8_t color, interfaceStyleType style, PixMap* pix,
         int top_right_border_size);

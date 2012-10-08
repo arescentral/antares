@@ -92,7 +92,12 @@ void InterfaceScreen::draw() const {
     sprite->draw(_bounds.left, _bounds.top);
 
     for (vector<interfaceItemType>::const_iterator it = _items.begin(); it != _items.end(); ++it) {
-        draw_interface_item(*it);
+        interfaceItemType copy = *it;
+        copy.bounds.left += _bounds.left;
+        copy.bounds.top += _bounds.top;
+        copy.bounds.right += _bounds.left;
+        copy.bounds.bottom += _bounds.top;
+        draw_interface_item(copy);
     }
 }
 
