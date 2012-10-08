@@ -90,6 +90,10 @@ void InterfaceScreen::draw() const {
     // only create the sprite from `copy_area`.
     scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite("/x/interface_screen", pix));
     sprite->draw(_bounds.left, _bounds.top);
+
+    for (vector<interfaceItemType>::const_iterator it = _items.begin(); it != _items.end(); ++it) {
+        draw_interface_item(*it);
+    }
 }
 
 void InterfaceScreen::mouse_down(const MouseDownEvent& event) {

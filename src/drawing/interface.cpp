@@ -29,11 +29,13 @@
 #include "drawing/interface-text.hpp"
 #include "drawing/shapes.hpp"
 #include "drawing/text.hpp"
+#include "video/driver.hpp"
 
 using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::String;
 using sfz::StringSlice;
+using sfz::format;
 using sfz::scoped_ptr;
 using std::vector;
 
@@ -1155,34 +1157,14 @@ short GetInterfaceTextHeightFromWidth(
     return interface_text.height();
 }
 
-void DrawInterfacePictureRect(const interfaceItemType& item, PixMap* pix) {
-    if (item.item.pictureRect.visibleBounds) {
-        DrawPlayerInterfacePlainRect(item.bounds, item.color, item.style, pix);
-    }
-
+void draw_interface_picture_rect(const interfaceItemType& item) {
     Picture pict(item.item.pictureRect.pictureID);
     Rect from = pict.size().as_rect();
     Rect to = pict.size().as_rect();
     to.offset(item.bounds.left, item.bounds.top);
-
-    if (to.left < 0) {
-        from.left -= to.left;
-        to.left -= to.left;
-    }
-    if (to.top < 0) {
-        from.top -= to.top;
-        to.top -= to.top;
-    }
-    if (to.right >= pix->size().width) {
-        from.right += (pix->size().width - to.right);
-        to.right += (pix->size().width - to.right);
-    }
-    if (to.bottom >= pix->size().height) {
-        from.bottom += (pix->size().height - to.bottom);
-        to.bottom += (pix->size().height - to.bottom);
-    }
-
-    pix->view(to).copy(pict.view(from));
+    scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite(
+            format("/pict/{0}", item.item.pictureRect.pictureID), pict));
+    sprite->draw(item.bounds.left, item.bounds.top);
 }
 
 void DrawAnyInterfaceItem(const interfaceItemType& item, PixMap* pix) {
@@ -1227,9 +1209,43 @@ void DrawAnyInterfaceItem(const interfaceItemType& item, PixMap* pix) {
             break;
 
         case kPictureRect:
-            DrawInterfacePictureRect(item, pix);
+        default:
+            break;
+    }
+}
+
+void draw_interface_item(const interfaceItemType& item) {
+    switch (item.kind) {
+        case kTabBox:
             break;
 
+        case kLabeledRect:
+            break;
+
+        case kListRect:
+            throw Exception("Interface type list is no longer supported");
+            break;
+
+        case kTextRect:
+            break;
+
+        case kPlainButton:
+            break;
+
+        case kRadioButton:
+            break;
+
+        case kTabBoxButton:
+            break;
+
+        case kCheckboxButton:
+            break;
+
+        case kPictureRect:
+            draw_interface_picture_rect(item);
+            break;
+
+        case kPlainRect:
         default:
             break;
     }

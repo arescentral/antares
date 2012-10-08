@@ -53,8 +53,8 @@ void DrawInterfaceTextInRect(
 
 short GetInterfaceTextHeightFromWidth(
         const sfz::StringSlice& text, interfaceStyleType style, short width);
-void DrawInterfacePictureRect(const interfaceItemType& item, PixMap* pix);
 void DrawAnyInterfaceItem(const interfaceItemType& item, PixMap* pix);
+void draw_interface_item(const interfaceItemType& item);
 
 void GetAnyInterfaceItemGraphicBounds(const interfaceItemType& item, Rect* rect);
 void GetAnyInterfaceItemContentBounds(const interfaceItemType& item, Rect* rect);
