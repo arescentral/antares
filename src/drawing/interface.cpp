@@ -85,6 +85,12 @@ void DrawInterfaceString(
     DrawDirectTextStringClipped(p, s, color, pix, pix->size().as_rect());
 }
 
+void DrawInterfaceString(
+        Point p, StringSlice s, interfaceStyleType style, const RgbColor& color) {
+    SetInterfaceLargeUpperFont(style);
+    gDirectText->draw_sprite(p, s, color);
+}
+
 void FrameOval(PixMap* pix, Rect rect, RgbColor color) {
     throw Exception("FrameOval() not implemented");
 }
@@ -486,7 +492,9 @@ void DrawPlayerInterfaceTabBox(
     mDrawPuffUpRect( uRect, color, VERY_DARK, pix);
 }
 
-void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
+namespace {
+
+void draw_button(const interfaceItemType& item) {
     Rect            tRect, uRect, vRect;
     short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     unsigned char   shade;
@@ -514,10 +522,10 @@ void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
         shade = MEDIUM;
     }
 
-    mDrawPuffUpTopBorder( tRect, uRect, item.color, shade, thisHBorder, pix);
+    mDrawPuffUpTopBorder(tRect, item.color, shade, thisHBorder);
     // bottom border
 
-    mDrawPuffUpBottomBorder( tRect, uRect, item.color, shade, thisHBorder, pix);
+    mDrawPuffUpBottomBorder(tRect, item.color, shade, thisHBorder);
 
     // side border top
 
@@ -529,16 +537,16 @@ void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
             tRect.bottom - kInterfaceHTop + 1);
     if (item.item.plainButton.status == kIH_Hilite) {
         shade = LIGHT;
-        mDrawPuffUpRect( uRect, item.color, shade, pix);
-        mDrawPuffUpRect( vRect, item.color, shade, pix);
+        mDrawPuffUpRect(uRect, item.color, shade);
+        mDrawPuffUpRect(vRect, item.color, shade);
     } else {
         if (item.item.plainButton.status == kDimmed) {
             shade = VERY_DARK;
         } else {
             shade = MEDIUM + kSlightlyLighterColor;
         }
-        mDrawPuffUpRect( uRect, item.color, shade, pix);
-        mDrawPuffUpRect( vRect, item.color, shade, pix);
+        mDrawPuffUpRect(uRect, item.color, shade);
+        mDrawPuffUpRect(vRect, item.color, shade);
     }
 
 
@@ -557,7 +565,7 @@ void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
                         tRect.bottom - kInterfaceContentBuffer + 1);
 
         color = GetRGBTranslateColorShade(item.color, shade);
-        pix->view(uRect).fill(color);
+        VideoDriver::driver()->fill_rect(uRect, color);
 
         if (item.item.plainButton.status == kIH_Hilite) {
             color = GetRGBTranslateColorShade(item.color, DARKEST);
@@ -571,7 +579,7 @@ void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
         swidth = GetInterfaceStringWidth(s, item.style);
         swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
         sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
-        DrawInterfaceString(Point(swidth, sheight), s, item.style, pix, color);
+        DrawInterfaceString(Point(swidth, sheight), s, item.style, color);
     } else
     {
         // draw the key code
@@ -586,7 +594,7 @@ void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
             uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                     tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 1,
                     tRect.bottom - kInterfaceContentBuffer + 1);
-            mDrawPuffUpRect(uRect, item.color, shade, pix);
+            mDrawPuffUpRect(uRect, item.color, shade);
 
             if (item.item.plainButton.status == kIH_Hilite)
                 shade = LIGHT;
@@ -597,7 +605,7 @@ void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
                     tRect.right - kInterfaceContentBuffer + 1,
                     tRect.bottom - kInterfaceContentBuffer + 1);
             color = GetRGBTranslateColorShade(item.color, shade);
-            pix->view(vRect).fill(color);
+            VideoDriver::driver()->fill_rect(vRect, color);
 
             swidth = GetInterfaceStringWidth(s, item.style);
             swidth = uRect.left + ( uRect.right - uRect.left) / 2 - swidth / 2;
@@ -609,7 +617,7 @@ void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
 
             DrawInterfaceString(
                     Point(swidth, uRect.top + GetInterfaceFontAscent(item.style)), s, item.style,
-                    pix, color);
+                    color);
         }
 
         // draw the button title
@@ -627,10 +635,12 @@ void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix) {
             swidth = GetInterfaceStringWidth(s, item.style);
             swidth = uRect.right + ( tRect.right - uRect.right) / 2 - swidth / 2;
             sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
-            DrawInterfaceString(Point(swidth, sheight), s, item.style, pix, color);
+            DrawInterfaceString(Point(swidth, sheight), s, item.style, color);
         }
     }
 }
+
+}  // namespace
 
 void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix) {
     Rect            tRect, uRect, vRect;
@@ -1260,10 +1270,6 @@ void DrawAnyInterfaceItem(const interfaceItemType& item, PixMap* pix) {
              DrawInterfaceTextRect(item, pix);
             break;
 
-        case kPlainButton:
-            DrawPlayerInterfaceButton(item, pix);
-            break;
-
         case kRadioButton:
             DrawPlayerInterfaceRadioButton(item, pix);
             break;
@@ -1277,6 +1283,7 @@ void DrawAnyInterfaceItem(const interfaceItemType& item, PixMap* pix) {
             break;
 
         case kPlainRect:
+        case kPlainButton:
         case kPictureRect:
         default:
             break;
@@ -1305,6 +1312,7 @@ void draw_interface_item(const interfaceItemType& item) {
             break;
 
         case kPlainButton:
+            draw_button(item);
             break;
 
         case kRadioButton:

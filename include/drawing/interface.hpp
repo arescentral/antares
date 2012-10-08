@@ -38,7 +38,6 @@ struct inlinePictType {
 void DrawPlayerInterfaceTabBox(
         const Rect& rect, uint8_t color, interfaceStyleType style, PixMap* pix,
         int top_right_border_size);
-void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix);
 void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix);
 void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix);
 void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix);
