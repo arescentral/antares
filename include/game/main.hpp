@@ -36,7 +36,9 @@ Card* AresInit();
 
 class MainPlay : public Card {
   public:
-    MainPlay(const Scenario* scenario, bool replay, GameResult* game_result);
+    MainPlay(
+            const Scenario* scenario, bool replay, bool show_loading_screen,
+            GameResult* game_result);
 
     virtual void become_front();
 
@@ -51,6 +53,7 @@ class MainPlay : public Card {
 
     const Scenario* _scenario;
     const bool _replay;
+    const bool _show_loading_screen;
     bool _cancelled;
     GameResult* _game_result;
 };
