@@ -123,7 +123,6 @@ void ReplayMaster::init() {
     CreateOffscreenWorld();
     InitSpriteCursor();
     RotationInit();
-    InterfaceHandlingInit();
     InitDirectText();
     ScreenLabelInit();
     InitMessageScreen();

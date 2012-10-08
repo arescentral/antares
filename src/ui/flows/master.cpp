@@ -139,8 +139,6 @@ void Master::init() {
 
     RotationInit();
 
-    InterfaceHandlingInit();
-
     InitDirectText();
     ScreenLabelInit();
     InitMessageScreen();
