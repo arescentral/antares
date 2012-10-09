@@ -80,17 +80,6 @@ void InterfaceScreen::draw() const {
     copy_area.offset(_bounds.left, _bounds.top);
     VideoDriver::driver()->fill_rect(copy_area, RgbColor::kBlack);
 
-    ArrayPixMap pix(_bounds.width(), _bounds.height());
-    pix.fill(RgbColor::kClear);
-    for (vector<interfaceItemType>::const_iterator it = _items.begin(); it != _items.end(); ++it) {
-        DrawAnyInterfaceItem(*it, &pix);
-    }
-
-    // TODO(sfiera): support creating sprites from subviews; then we can change this so that we
-    // only create the sprite from `copy_area`.
-    scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite("/x/interface_screen", pix));
-    sprite->draw(_bounds.left, _bounds.top);
-
     for (vector<interfaceItemType>::const_iterator it = _items.begin(); it != _items.end(); ++it) {
         interfaceItemType copy = *it;
         copy.bounds.left += _bounds.left;

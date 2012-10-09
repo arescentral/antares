@@ -208,6 +208,9 @@ void DebriefingScreen::draw() const {
     for (int i = 0; i < _typed_chars; ++i) {
         _score->draw_char(_score_bounds, i);
     }
+    Rect interface_bounds = _message_bounds;
+    interface_bounds.offset(_pix_bounds.left, _pix_bounds.top);
+    draw_interface_item(interface_item(interface_bounds));
 }
 
 void DebriefingScreen::mouse_down(const MouseDownEvent& event) {
@@ -266,7 +269,6 @@ void DebriefingScreen::initialize(int text_id, bool do_score) {
     _message_bounds.offset(-_pix_bounds.left, -_pix_bounds.top);
     _pix.reset(new ArrayPixMap(_pix_bounds.width(), _pix_bounds.height()));
 
-    DrawAnyInterfaceItem(interface_item(_message_bounds), _pix.get());
     vector<inlinePictType> inline_pict;
     DrawInterfaceTextInRect(_message_bounds, _message, kLarge, GOLD, _pix.get(), inline_pict);
 }

@@ -1309,26 +1309,6 @@ void draw_interface_picture_rect(const interfaceItemType& item) {
     sprite->draw(item.bounds.left, item.bounds.top);
 }
 
-void DrawAnyInterfaceItem(const interfaceItemType& item, PixMap* pix) {
-    switch (item.kind) {
-        case kListRect:
-            throw Exception("Interface type list is no longer supported");
-            break;
-
-        case kPlainRect:
-        case kLabeledRect:
-        case kTabBox:
-        case kTabBoxButton:
-        case kPlainButton:
-        case kRadioButton:
-        case kCheckboxButton:
-        case kTextRect:
-        case kPictureRect:
-        default:
-            break;
-    }
-}
-
 void draw_interface_item(const interfaceItemType& item) {
     switch (item.kind) {
         case kPlainRect:

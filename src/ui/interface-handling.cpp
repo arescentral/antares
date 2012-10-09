@@ -251,7 +251,6 @@ void UpdateMissionBriefPoint(
     Rect newRect;
     GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
     pix->view(newRect).fill(RgbColor::kBlack);
-    DrawAnyInterfaceItem(*dataItem, pix);
 
     newRect = dataItem->bounds;
     DrawInterfaceTextInRect(newRect, text, dataItem->style, dataItem->color, pix, inlinePict);
