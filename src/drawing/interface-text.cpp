@@ -25,12 +25,14 @@
 #include "data/picture.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
+#include "video/driver.hpp"
 
 using sfz::Bytes;
 using sfz::Exception;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
+using sfz::scoped_ptr;
 using sfz::string_to_int;
 
 namespace antares {
@@ -183,10 +185,46 @@ const std::vector<inlinePictType>& InterfaceText::inline_picts() const {
     return _inline_picts;
 }
 
+void InterfaceText::draw(const Rect& bounds) const {
+    mSetDirectFont(_font);
+    for (size_t i = 0; i < _chars.size(); ++i) {
+        draw_char(bounds, i);
+    }
+}
+
 void InterfaceText::draw(PixMap* pix, const Rect& bounds) const {
     mSetDirectFont(_font);
     for (size_t i = 0; i < _chars.size(); ++i) {
         draw_char(pix, bounds, i);
+    }
+}
+
+void InterfaceText::draw_char(const Rect& bounds, int index) const {
+    const int char_adjust = mDirectFontAscent();
+    const InterfaceChar& ch = _chars[index];
+    Point corner(bounds.left + ch.h, bounds.top + ch.v);
+
+    switch (ch.special) {
+      case NONE:
+      case WORD_BREAK:
+        {
+            String str(1, ch.character);
+            gDirectText->draw_sprite(Point(corner.h, corner.v + char_adjust), str, _color);
+        }
+        break;
+
+      case LINE_BREAK:
+        break;
+
+      case PICTURE:
+        {
+            const inlinePictType& inline_pict = _inline_picts[ch.character];
+            Picture pict(inline_pict.id);
+            scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite(
+                        format("/pict/{0}"), pict));
+            sprite->draw(bounds.left, bounds.top);
+        }
+        break;
     }
 }
 

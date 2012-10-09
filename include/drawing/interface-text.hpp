@@ -43,7 +43,9 @@ class InterfaceText {
     int height() const;
     const std::vector<inlinePictType>& inline_picts() const;
 
+    void draw(const Rect& bounds) const;
     void draw(PixMap* pix, const Rect& bounds) const;
+    void draw_char(const Rect& bounds, int index) const;
     void draw_char(PixMap* pix, const Rect& bounds, int index) const;
 
   private:

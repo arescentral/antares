@@ -1214,11 +1214,28 @@ void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
     mDrawPuffUpRect( uRect, item.color, VERY_DARK, pix);
 }
 
-void DrawInterfaceTextRect(const interfaceItemType& item, PixMap* pix) {
+namespace {
+
+void draw_text_rect(const interfaceItemType& item) {
     Resource rsrc("text", "txt", item.item.textRect.textID);
     String data(macroman::decode(rsrc.data()));
     vector<inlinePictType> inlinePict;
-    DrawInterfaceTextInRect(item.bounds, data, item.style, item.color, pix, inlinePict);
+    draw_text_in_rect(item.bounds, data, item.style, item.color, inlinePict);
+}
+
+}  // namespace
+
+void draw_text_in_rect(
+        const Rect& tRect, const StringSlice& text, interfaceStyleType style,
+        unsigned char textcolor, vector<inlinePictType>& inlinePict) {
+    RgbColor color = GetRGBTranslateColorShade(textcolor, VERY_LIGHT);
+    InterfaceText interface_text(text, style, color);
+    interface_text.wrap_to(tRect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer);
+    inlinePict = interface_text.inline_picts();
+    for (int i = 0; i < inlinePict.size(); ++i) {
+        inlinePict[i].bounds.offset(tRect.left, tRect.top);
+    }
+    interface_text.draw(tRect);
 }
 
 void DrawInterfaceTextInRect(
@@ -1264,16 +1281,13 @@ void DrawAnyInterfaceItem(const interfaceItemType& item, PixMap* pix) {
             throw Exception("Interface type list is no longer supported");
             break;
 
-        case kTextRect:
-             DrawInterfaceTextRect(item, pix);
-            break;
-
         case kPlainRect:
         case kTabBox:
         case kTabBoxButton:
         case kPlainButton:
         case kRadioButton:
         case kCheckboxButton:
+        case kTextRect:
         case kPictureRect:
         default:
             break;
@@ -1300,6 +1314,7 @@ void draw_interface_item(const interfaceItemType& item) {
             break;
 
         case kTextRect:
+            draw_text_rect(item);
             break;
 
         case kPlainButton:
