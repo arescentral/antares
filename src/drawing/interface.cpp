@@ -856,8 +856,7 @@ void draw_tab_box_button(const interfaceItemType& item) {
     }
 }
 
-}  // namespace
-
+/*
 void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix) {
     Rect            tRect, uRect, vRect, wRect;
     short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
@@ -896,10 +895,10 @@ void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix) 
     uRect = Rect(tRect.left - thisHBorder - kCheckIndicatorHOffset - 2,
             tRect.top + kInterfaceHTop,
             tRect.left + 1,
-            /*tRect.top + vcenter - kInterfaceVLipHeight + 1*/
+            *//*tRect.top + vcenter - kInterfaceVLipHeight + 1*//*
             tRect.bottom - kInterfaceHTop + 1);
     vRect = Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
-            /*tRect.top + vcenter - kInterfaceVLipHeight + 1*/
+            *//*tRect.top + vcenter - kInterfaceVLipHeight + 1*//*
             tRect.bottom - kInterfaceHTop + 1);
 
     if ( item.item.radioButton.status == kIH_Hilite)
@@ -981,6 +980,9 @@ void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix) 
     sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
     DrawInterfaceString(Point(swidth, sheight), s, item.style, pix, color);
 }
+*/
+
+}  // namespace
 
 void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix) {
     Rect            tRect, uRect, vRect, wRect;
@@ -1252,10 +1254,6 @@ void DrawAnyInterfaceItem(const interfaceItemType& item, PixMap* pix) {
              DrawInterfaceTextRect(item, pix);
             break;
 
-        case kRadioButton:
-            DrawPlayerInterfaceRadioButton(item, pix);
-            break;
-
         case kCheckboxButton:
             DrawPlayerInterfaceCheckBox(item, pix);
             break;
@@ -1264,6 +1262,7 @@ void DrawAnyInterfaceItem(const interfaceItemType& item, PixMap* pix) {
         case kTabBox:
         case kTabBoxButton:
         case kPlainButton:
+        case kRadioButton:
         case kPictureRect:
         default:
             break;
@@ -1297,6 +1296,7 @@ void draw_interface_item(const interfaceItemType& item) {
             break;
 
         case kRadioButton:
+            throw Exception("Interface type radio button is no longer supported");
             break;
 
         case kTabBoxButton:

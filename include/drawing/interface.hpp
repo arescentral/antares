@@ -35,7 +35,6 @@ struct inlinePictType {
     short id;
 };
 
-void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix);
 void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix);
 void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix);
 
