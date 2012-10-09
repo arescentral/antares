@@ -157,6 +157,20 @@ inline void mDrawPuffUpOval(Rect& mrect, uint8_t mcolor, int mshade, PixMap* pix
     PaintOval(pix, mrect, color);
 }
 
+inline void mDrawPuffDownRect(Rect r, uint8_t mcolor, int mshade) {
+    VideoDriver::driver()->fill_rect(r, RgbColor::kBlack);
+    const RgbColor darker = GetRGBTranslateColorShade(mcolor, mshade + kDarkerColor);
+    VideoDriver::driver()->fill_rect(
+            Rect(r.left - 1, r.top - 1, r.left, r.bottom + 1), darker);
+    VideoDriver::driver()->fill_rect(
+            Rect(r.left - 1, r.top - 1, r.right, r.top), darker);
+    const RgbColor lighter = GetRGBTranslateColorShade(mcolor, mshade + kLighterColor);
+    VideoDriver::driver()->fill_rect(
+            Rect(r.right, r.top - 1, r.right + 1, r.bottom + 1), lighter);
+    VideoDriver::driver()->fill_rect(
+            Rect(r.left, r.bottom, r.right + 1, r.bottom + 1), lighter);
+}
+
 inline void mDrawPuffDownRect(Rect& mrect, uint8_t mcolor, int mshade, PixMap* pix) {
     pix->view(mrect).fill(RgbColor::kBlack);
     const RgbColor darker = GetRGBTranslateColorShade(mcolor, mshade + kDarkerColor);
@@ -982,9 +996,7 @@ void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix) 
 }
 */
 
-}  // namespace
-
-void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix) {
+void draw_checkbox(const interfaceItemType& item) {
     Rect            tRect, uRect, vRect, wRect;
     short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     unsigned char   shade;
@@ -1004,10 +1016,10 @@ void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix) {
         shade = VERY_DARK;
     else shade = MEDIUM;
 
-    mDrawPuffUpTopBorder( tRect, uRect, item.color, shade, thisHBorder, pix);
+    mDrawPuffUpTopBorder(tRect, item.color, shade, thisHBorder);
     // bottom border
 
-    mDrawPuffUpBottomBorder( tRect, uRect, item.color, shade, thisHBorder, pix);
+    mDrawPuffUpBottomBorder(tRect, item.color, shade, thisHBorder);
 
     // side border top
 
@@ -1030,27 +1042,27 @@ void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix) {
 
     if (item.item.checkboxButton.status == kIH_Hilite) {
         shade = LIGHT;
-        mDrawPuffUpRect( uRect, item.color, shade, pix);
-        mDrawPuffUpRect( vRect, item.color, shade, pix);
-        mDrawPuffUpRect( wRect, item.color, shade, pix);
+        mDrawPuffUpRect(uRect, item.color, shade);
+        mDrawPuffUpRect(vRect, item.color, shade);
+        mDrawPuffUpRect(wRect, item.color, shade);
         wRect.inset(3, 3);
-        mDrawPuffDownRect( wRect, item.color, shade, pix);
+        mDrawPuffDownRect(wRect, item.color, shade);
         wRect.inset(1, 1);
         if ( !item.item.checkboxButton.on) {
             color = RgbColor::kBlack;
         } else {
             color = GetRGBTranslateColorShade(item.color, VERY_LIGHT);
         }
-        pix->view(wRect).fill(color);
+        VideoDriver::driver()->fill_rect(wRect, color);
     } else {
         if ( item.item.checkboxButton.status == kDimmed)
             shade = VERY_DARK;
         else shade = MEDIUM + kSlightlyLighterColor;
-        mDrawPuffUpRect( uRect, item.color, shade, pix);
-        mDrawPuffUpRect( vRect, item.color, shade, pix);
-        mDrawPuffUpRect( wRect, item.color, shade, pix);
+        mDrawPuffUpRect( uRect, item.color, shade);
+        mDrawPuffUpRect( vRect, item.color, shade);
+        mDrawPuffUpRect( wRect, item.color, shade);
         wRect.inset(3, 3);
-        mDrawPuffDownRect( wRect, item.color, shade, pix);
+        mDrawPuffDownRect( wRect, item.color, shade);
         wRect.inset(1, 1);
         if (!item.item.checkboxButton.on) {
             color = RgbColor::kBlack;
@@ -1059,7 +1071,7 @@ void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix) {
         } else {
             color = GetRGBTranslateColorShade(item.color, MEDIUM);
         }
-        pix->view(wRect).fill(color);
+        VideoDriver::driver()->fill_rect(wRect, color);
     }
 
     uRect = Rect(tRect.left +  kInterfaceContentBuffer,
@@ -1074,7 +1086,7 @@ void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix) {
                     tRect.right - kInterfaceContentBuffer + 1,
                     tRect.bottom - kInterfaceContentBuffer + 1);
     color = GetRGBTranslateColorShade(item.color, shade);
-    pix->view(uRect).fill(color);
+    VideoDriver::driver()->fill_rect(uRect, color);
 
     if (item.item.checkboxButton.status == kIH_Hilite) {
         color = GetRGBTranslateColorShade(item.color, DARKEST);
@@ -1089,8 +1101,10 @@ void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix) {
     swidth = GetInterfaceStringWidth( s, item.style);
     swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
     sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
-    DrawInterfaceString(Point(swidth, sheight), s, item.style, pix, color);
+    DrawInterfaceString(Point(swidth, sheight), s, item.style, color);
 }
+
+}  // namespace
 
 void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
     Rect            tRect, uRect;
@@ -1254,15 +1268,12 @@ void DrawAnyInterfaceItem(const interfaceItemType& item, PixMap* pix) {
              DrawInterfaceTextRect(item, pix);
             break;
 
-        case kCheckboxButton:
-            DrawPlayerInterfaceCheckBox(item, pix);
-            break;
-
         case kPlainRect:
         case kTabBox:
         case kTabBoxButton:
         case kPlainButton:
         case kRadioButton:
+        case kCheckboxButton:
         case kPictureRect:
         default:
             break;
@@ -1304,6 +1315,7 @@ void draw_interface_item(const interfaceItemType& item) {
             break;
 
         case kCheckboxButton:
+            draw_checkbox(item);
             break;
 
         case kPictureRect:
