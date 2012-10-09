@@ -332,6 +332,49 @@ inline void mDrawPuffUpBottomBorder(Rect& mrect, Rect& mtrect, uint8_t mcolor, i
             mrect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight, darker);
 }
 
+inline void mDrawPuffUpTBorder(Rect r, uint8_t mcolor, int mshade, int msheight, int h_border) {
+    ++r.right;
+    ++r.bottom;
+
+    const RgbColor color = GetRGBTranslateColorShade(mcolor, mshade);
+    VideoDriver::driver()->fill_rect(Rect(
+                r.left - h_border, r.top + msheight, r.left + 1,
+                r.top + msheight + kLabelBottomHeight + 1), color);
+    VideoDriver::driver()->fill_rect(Rect(
+                r.right - 1, r.top + msheight, r.right + h_border,
+                r.top + msheight + kLabelBottomHeight + 1), color);
+    VideoDriver::driver()->fill_rect(Rect(
+                r.left, r.top + msheight + kInterfaceVLipHeight, r.right,
+                r.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight + 1), color);
+
+    const RgbColor lighter = GetRGBTranslateColorShade(mcolor, mshade + kLighterColor);
+    VideoDriver::driver()->fill_rect(Rect(
+                r.left - h_border, r.top + msheight, r.left - h_border + 1,
+                r.top + msheight + kLabelBottomHeight + 1), lighter);
+    VideoDriver::driver()->fill_rect(Rect(
+                r.left - h_border, r.top + msheight, r.left + 1, r.top + msheight + 1), lighter);
+    VideoDriver::driver()->fill_rect(Rect(
+                r.left, r.top + msheight + kInterfaceVLipHeight, r.right,
+                r.top + msheight + kInterfaceVLipHeight + 1), lighter);
+    VideoDriver::driver()->fill_rect(Rect(
+                r.right - 1, r.top + msheight, r.right + h_border - 1,
+                r.top + msheight + 1), lighter);
+
+    const RgbColor darker = GetRGBTranslateColorShade(mcolor, mshade + kDarkerColor);
+    VideoDriver::driver()->fill_rect(Rect(
+                r.left - h_border + 1, r.top + msheight + kLabelBottomHeight, r.left + 1,
+                r.top + msheight + kLabelBottomHeight + 1), darker);
+    VideoDriver::driver()->fill_rect(Rect(
+                r.left, r.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight, r.right,
+                r.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight + 1), darker);
+    VideoDriver::driver()->fill_rect(Rect(
+                r.right - 1, r.top + msheight + kLabelBottomHeight, r.right + h_border,
+                r.top + msheight + kLabelBottomHeight + 1), darker);
+    VideoDriver::driver()->fill_rect(Rect(
+                r.right + h_border - 1, r.top + msheight, r.right + h_border,
+                r.top + msheight + kLabelBottomHeight + 1), darker);
+}
+
 inline void mDrawPuffUpTBorder(Rect& mrect, Rect& mtrect, uint8_t mcolor, int mshade, int msheight, int mthisHBorder, PixMap* pix) {
     const RgbColor color = GetRGBTranslateColorShade(mcolor, mshade);
     mtrect = Rect(mrect.left - mthisHBorder,
@@ -1104,9 +1147,7 @@ void draw_checkbox(const interfaceItemType& item) {
     DrawInterfaceString(Point(swidth, sheight), s, item.style, color);
 }
 
-}  // namespace
-
-void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
+void draw_labeled_box(const interfaceItemType& item) {
     Rect            tRect, uRect;
     short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     unsigned char   shade;
@@ -1124,11 +1165,10 @@ void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
 
     shade = DARK;
 
-    mDrawPuffUpTopBorder( tRect, uRect, item.color, shade, thisHBorder, pix);
+    mDrawPuffUpTopBorder(tRect, item.color, shade, thisHBorder);
     // bottom border
 
-    mDrawPuffUpBottomBorder( tRect, uRect, item.color, shade, thisHBorder, pix);
-
+    mDrawPuffUpBottomBorder(tRect, item.color, shade, thisHBorder);
 
     // draw the string
 
@@ -1143,7 +1183,7 @@ void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
         tRect.right - swidth - kInterfaceTextHBuffer + 1,
         tRect.top + sheight - kInterfaceHTop);
     color = GetRGBTranslateColorShade(item.color, VERY_DARK);
-    pix->view(uRect).fill(color);
+    VideoDriver::driver()->fill_rect(uRect, color);
 
     color = GetRGBTranslateColorShade(item.color, LIGHT);
 
@@ -1151,7 +1191,7 @@ void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
             Point(
                 tRect.left + kInterfaceTextHBuffer,
                 tRect.top + GetInterfaceFontAscent( item.style) + kInterfaceTextVBuffer),
-            s, item.style, pix, color);
+            s, item.style, color);
 
     // string left border
 
@@ -1161,7 +1201,7 @@ void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
     uRect = Rect(tRect.left - thisHBorder,
             tRect.top + kInterfaceHTop,
             tRect.left + 1, tRect.top + sheight - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, item.color, shade, pix);
+    mDrawPuffUpRect( uRect, item.color, shade);
 
     // string right border
 
@@ -1170,16 +1210,16 @@ void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
         tRect.top + kInterfaceHTop,
         tRect.right - 2,
         tRect.top + sheight - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, item.color, shade, pix);
+    mDrawPuffUpRect( uRect, item.color, shade);
     uRect = Rect(tRect.right,
         tRect.top + kInterfaceHTop,
         tRect.right + thisHBorder + 1,
         tRect.top + sheight - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, item.color, shade, pix);
+    mDrawPuffUpRect( uRect, item.color, shade);
 
     // string bottom border
 
-    mDrawPuffUpTBorder( tRect, uRect, item.color, DARK, sheight, thisHBorder, pix);
+    mDrawPuffUpTBorder(tRect, item.color, DARK, sheight, thisHBorder);
 
     // main part left border
 
@@ -1191,13 +1231,13 @@ void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
         tRect.top + kInterfaceHTop,
         tRect.left + 1,
         tRect.top + vcenter - kInterfaceVLipHeight + 1);
-    mDrawPuffUpRect( uRect, item.color, DARKER, pix);
+    mDrawPuffUpRect( uRect, item.color, DARKER);
 
     uRect = Rect(tRect.left - thisHBorder,
         tRect.bottom - vcenter + kInterfaceVLipHeight,
         tRect.left + 1,
         tRect.bottom - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, item.color, VERY_DARK, pix);
+    mDrawPuffUpRect( uRect, item.color, VERY_DARK);
 
     // right border
 
@@ -1205,16 +1245,14 @@ void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix) {
         tRect.top + kInterfaceHTop,
         tRect.right + thisHBorder + 1,
         tRect.top + vcenter - kInterfaceVLipHeight + 1);
-    mDrawPuffUpRect( uRect, item.color, DARKER, pix);
+    mDrawPuffUpRect( uRect, item.color, DARKER);
 
     uRect = Rect(tRect.right,
         tRect.bottom - vcenter + kInterfaceVLipHeight,
         tRect.right + thisHBorder + 1,
         tRect.bottom - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, item.color, VERY_DARK, pix);
+    mDrawPuffUpRect( uRect, item.color, VERY_DARK);
 }
-
-namespace {
 
 void draw_text_rect(const interfaceItemType& item) {
     Resource rsrc("text", "txt", item.item.textRect.textID);
@@ -1273,15 +1311,12 @@ void draw_interface_picture_rect(const interfaceItemType& item) {
 
 void DrawAnyInterfaceItem(const interfaceItemType& item, PixMap* pix) {
     switch (item.kind) {
-        case kLabeledRect:
-            DrawPlayerInterfaceLabeledBox(item, pix);
-            break;
-
         case kListRect:
             throw Exception("Interface type list is no longer supported");
             break;
 
         case kPlainRect:
+        case kLabeledRect:
         case kTabBox:
         case kTabBoxButton:
         case kPlainButton:
@@ -1307,6 +1342,7 @@ void draw_interface_item(const interfaceItemType& item) {
             break;
 
         case kLabeledRect:
+            draw_labeled_box(item);
             break;
 
         case kListRect:

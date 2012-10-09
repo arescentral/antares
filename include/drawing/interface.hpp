@@ -35,8 +35,6 @@ struct inlinePictType {
     short id;
 };
 
-void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix);
-
 void draw_text_in_rect(
         const Rect& tRect, const sfz::StringSlice& text, interfaceStyleType style,
         unsigned char textcolor, std::vector<inlinePictType>& inlinePict);

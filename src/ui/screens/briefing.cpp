@@ -97,6 +97,7 @@ void BriefingScreen::draw() const {
       default:
         _system_map->draw(_bounds.left, _bounds.top);
         _brief_point->draw(0, 0);
+        draw_interface_item(_data_item);
         break;
     }
 }
