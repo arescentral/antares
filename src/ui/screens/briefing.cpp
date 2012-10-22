@@ -212,10 +212,11 @@ void BriefingScreen::build_star_map() {
     const Point star = star_rect.center();
 
     DrawNateVBracket(&pix, star_rect, pix_bounds, gold);
-    DrawNateLine(&pix, pix_bounds, star.h, pix_bounds.top, star.h, star_rect.top, gold);
-    DrawNateLine(&pix, pix_bounds, star.h, star_rect.bottom, star.h, pix_bounds.bottom, gold);
-    DrawNateLine(&pix, pix_bounds, pix_bounds.left, star.v, star_rect.left, star.v, gold);
-    DrawNateLine(&pix, pix_bounds, star_rect.right, star.v, pix_bounds.right, star.v, gold);
+    // TODO(sfiera): make left and right match.
+    pix.view(Rect(star.h, pix_bounds.top, star.h + 1, star_rect.top)).fill(gold);
+    pix.view(Rect(star.h, star_rect.bottom, star.h + 1, pix_bounds.bottom)).fill(gold);
+    pix.view(Rect(pix_bounds.left, star.v, star_rect.left + 1, star.v + 1)).fill(gold);
+    pix.view(Rect(star_rect.right, star.v, pix_bounds.right, star.v + 1)).fill(gold);
 
     _star_map.reset(VideoDriver::driver()->new_sprite("/x/star_map", pix));
 }

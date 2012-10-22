@@ -53,8 +53,6 @@ void DrawNateShadedRect(
 void draw_shaded_rect(
         Rect rect,
         const RgbColor& fill_color, const RgbColor& light_color, const RgbColor& dark_color);
-void DrawNateLine(PixMap *, const Rect&, long, long, long, long, const RgbColor& color);
-void CopyNateLine( PixMap *, PixMap *, const Rect&, long, long, long, long);
 
 }  // namespace antares
 

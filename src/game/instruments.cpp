@@ -820,7 +820,7 @@ void DrawArbitrarySectorLines(coordPointType *corner, int32_t scale, int32_t min
             color = GetRGBTranslateColorShade(BLUE, DARKER);
         }
 
-        DrawNateLine( pixBase, clipRect, x, bounds->top, x, bounds->bottom, color);
+        pixBase->view(Rect(x, bounds->top, x + 1, bounds->bottom)).fill(color);
         division += level;
         division &= 0x0000000f;
         x += h;
@@ -850,7 +850,7 @@ void DrawArbitrarySectorLines(coordPointType *corner, int32_t scale, int32_t min
             color = GetRGBTranslateColorShade(BLUE, DARKER);
         }
 
-        DrawNateLine( pixBase, clipRect, bounds->left, x, bounds->right, x, color);
+        pixBase->view(Rect(bounds->left, x, bounds->right, x + 1)).fill(color);
 
         division += level;
         division &= 0x0000000f;
