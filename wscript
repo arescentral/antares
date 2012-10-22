@@ -215,7 +215,6 @@ def build(bld):
             "src/drawing/interface.cpp",
             "src/drawing/interface-text.cpp",
             "src/drawing/libpng-pix-map.cpp",
-            "src/drawing/offscreen-gworld.cpp",
             "src/drawing/pix-map.cpp",
             "src/drawing/pix-table.cpp",
             "src/drawing/retro-text.cpp",

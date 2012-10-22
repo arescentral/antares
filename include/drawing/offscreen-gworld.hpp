@@ -34,8 +34,6 @@ const int32_t kPanelHeight          = 480;
 
 const int32_t kSmallScreenWidth     = 640;
 
-extern PixMap* gRealWorld;
-
 }  // namespace antares
 
 #endif // ANTARES_DRAWING_OFFSCREEN_GWORLD_HPP_

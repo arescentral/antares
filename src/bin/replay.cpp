@@ -118,8 +118,6 @@ void ReplayMaster::init() {
         world.right - kRightPanelWidth, world.bottom);
     viewport = play_screen;
 
-    gRealWorld = new ArrayPixMap(world.width(), world.height());
-    gRealWorld->fill(RgbColor::kBlack);
     InitSpriteCursor();
     RotationInit();
     InitDirectText();
