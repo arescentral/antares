@@ -128,18 +128,11 @@ void Master::init() {
 
     // TODO(sfiera): set gRandomSeed.
 
-    gRealWorld = new ArrayPixMap(world.width(), world.height());
-    CreateOffscreenWorld();
-
     InitSpriteCursor();
 
     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
 
-    gRealWorld->fill(RgbColor::kBlack);
-
     RotationInit();
-
-    InterfaceHandlingInit();
 
     InitDirectText();
     ScreenLabelInit();

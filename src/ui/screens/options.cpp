@@ -357,9 +357,7 @@ void KeyControlScreen::draw() const {
         const interfaceItemType& box = item(CONFLICT_TEXT);
         ArrayPixMap pix(box.bounds.width(), box.bounds.height());
         vector<inlinePictType> pict;
-        DrawInterfaceTextInRect(pix.size().as_rect(), text, box.style, box.color, &pix, pict);
-        scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite("/x/key_control_screen", pix));
-        sprite->draw(box.bounds.left, box.bounds.top);
+        draw_text_in_rect(box.bounds, text, box.style, box.color, pict);
     }
 }
 

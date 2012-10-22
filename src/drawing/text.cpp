@@ -89,7 +89,7 @@ directTextType::directTextType(int32_t id) {
     if (VideoDriver::driver()) {
         _sprites.reset(new scoped_ptr<Sprite>[256]);
         for (int i = 0; i < 256; i++) {
-            ArrayPixMap pix(char_width(i), height + 1);
+            ArrayPixMap pix(physicalWidth * 8, height + 1);
             pix.fill(RgbColor::kClear);
             String s(1, from_mac_roman(i));
             draw(Point(0, ascent), s, RgbColor::kWhite, &pix, pix.size().as_rect());

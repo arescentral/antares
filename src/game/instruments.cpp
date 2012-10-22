@@ -522,9 +522,6 @@ static void draw_money() {
 void DrawInstrumentPanel() {
     globals()->gZoomMode = kNearestFoeZoom;
 
-    gRealWorld->fill(RgbColor::kClear);
-    gOffWorld->fill(RgbColor::kClear);
-
     MakeMiniScreenFromIndString(1);
     ResetInstruments();
     ClearMiniObjectData();

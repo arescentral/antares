@@ -35,34 +35,15 @@ struct inlinePictType {
     short id;
 };
 
-void DrawPlayerInterfacePlainRect(
-        const Rect& rect, uint8_t color, interfaceStyleType style, PixMap* pix);
-void DrawPlayerInterfaceTabBox(
-        const Rect& rect, uint8_t color, interfaceStyleType style, PixMap* pix,
-        int top_right_border_size);
-void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix);
-void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix);
-void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix);
-void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix);
-void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix);
-
-void DrawInterfaceTextRect(const interfaceItemType& item, PixMap* pix);
-void DrawInterfaceTextInRect(
-        const Rect& rect, const sfz::StringSlice& text, interfaceStyleType style,
-        unsigned char textcolor, PixMap* pix, std::vector<inlinePictType>& inlinePict);
+void draw_text_in_rect(
+        const Rect& tRect, const sfz::StringSlice& text, interfaceStyleType style,
+        unsigned char textcolor, std::vector<inlinePictType>& inlinePict);
 
 short GetInterfaceTextHeightFromWidth(
         const sfz::StringSlice& text, interfaceStyleType style, short width);
-void DrawInterfacePictureRect(const interfaceItemType& item, PixMap* pix);
-void DrawAnyInterfaceItem(const interfaceItemType& item, PixMap* pix);
+void draw_interface_item(const interfaceItemType& item);
 
 void GetAnyInterfaceItemGraphicBounds(const interfaceItemType& item, Rect* rect);
-void GetAnyInterfaceItemContentBounds(const interfaceItemType& item, Rect* rect);
-
-short GetInterfaceStringWidth(const sfz::StringSlice& s, interfaceStyleType style);
-short GetInterfaceFontHeight(interfaceStyleType style);
-short GetInterfaceFontAscent(interfaceStyleType style);
-short GetInterfaceFontWidth(interfaceStyleType style);
 
 }  // namespace antares
 

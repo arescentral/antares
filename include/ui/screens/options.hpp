@@ -23,7 +23,7 @@
 #include <vector>
 
 #include "config/preferences.hpp"
-#include "ui/interface-screen.hpp"
+#include "ui/screen.hpp"
 
 namespace antares {
 

@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "ui/interface-screen.hpp"
+#include "ui/screen.hpp"
 
 #include <sfz/sfz.hpp>
 
@@ -80,16 +80,14 @@ void InterfaceScreen::draw() const {
     copy_area.offset(_bounds.left, _bounds.top);
     VideoDriver::driver()->fill_rect(copy_area, RgbColor::kBlack);
 
-    ArrayPixMap pix(_bounds.width(), _bounds.height());
-    pix.fill(RgbColor::kClear);
     for (vector<interfaceItemType>::const_iterator it = _items.begin(); it != _items.end(); ++it) {
-        DrawAnyInterfaceItem(*it, &pix);
+        interfaceItemType copy = *it;
+        copy.bounds.left += _bounds.left;
+        copy.bounds.top += _bounds.top;
+        copy.bounds.right += _bounds.left;
+        copy.bounds.bottom += _bounds.top;
+        draw_interface_item(copy);
     }
-
-    // TODO(sfiera): support creating sprites from subviews; then we can change this so that we
-    // only create the sprite from `copy_area`.
-    scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite("/x/interface_screen", pix));
-    sprite->draw(_bounds.left, _bounds.top);
 }
 
 void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
