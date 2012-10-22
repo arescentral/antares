@@ -418,7 +418,6 @@ void GamePlay::fire_timer() {
         return;
     }
 
-    gOffWorld->view(clip_rect).fill(RgbColor::kBlack);
     globals()->starfield.prepare_to_move();
     EraseSite();
 
@@ -546,7 +545,6 @@ void GamePlay::fire_timer() {
     ShowAllLabels();
     ShowAllBeams();
     globals()->starfield.show();
-    copy_world(*gRealWorld, *gOffWorld, world);
 
     DrawMessageScreen(unitsDone);
     UpdateRadar(unitsDone);

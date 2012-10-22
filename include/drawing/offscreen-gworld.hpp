@@ -35,10 +35,6 @@ const int32_t kPanelHeight          = 480;
 const int32_t kSmallScreenWidth     = 640;
 
 extern PixMap* gRealWorld;
-extern PixMap* gOffWorld;
-
-void CreateOffscreenWorld();
-void copy_world(PixMap& to, PixMap& from, Rect bounds);
 
 }  // namespace antares
 

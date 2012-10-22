@@ -120,7 +120,6 @@ void ReplayMaster::init() {
 
     gRealWorld = new ArrayPixMap(world.width(), world.height());
     gRealWorld->fill(RgbColor::kBlack);
-    CreateOffscreenWorld();
     InitSpriteCursor();
     RotationInit();
     InitDirectText();

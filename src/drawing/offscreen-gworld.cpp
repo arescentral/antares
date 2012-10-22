@@ -24,18 +24,6 @@
 
 namespace antares {
 
-PixMap*         gOffWorld;
 PixMap*         gRealWorld;
-
-void CreateOffscreenWorld() {
-    const Size size = gRealWorld->size();
-    gOffWorld = new ArrayPixMap(size.width, size.height);
-    gOffWorld->fill(RgbColor::kBlack);
-}
-
-void copy_world(PixMap& to, PixMap& from, Rect bounds) {
-    bounds.clip_to(to.size().as_rect());
-    to.view(bounds).copy(from.view(bounds));
-}
 
 }  // namespace antares

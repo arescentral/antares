@@ -129,7 +129,6 @@ void Master::init() {
     // TODO(sfiera): set gRandomSeed.
 
     gRealWorld = new ArrayPixMap(world.width(), world.height());
-    CreateOffscreenWorld();
 
     InitSpriteCursor();
 
