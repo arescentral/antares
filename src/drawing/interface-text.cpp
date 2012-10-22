@@ -202,12 +202,13 @@ void InterfaceText::draw(PixMap* pix, const Rect& bounds) const {
 void InterfaceText::draw_char(const Rect& bounds, int index) const {
     const int char_adjust = mDirectFontAscent();
     const InterfaceChar& ch = _chars[index];
-    Point corner(bounds.left + ch.h, bounds.top + ch.v);
+    Point corner(bounds.left, bounds.top);
 
     switch (ch.special) {
       case NONE:
       case WORD_BREAK:
         {
+            corner.offset(ch.h, ch.v);
             String str(1, ch.character);
             gDirectText->draw_sprite(Point(corner.h, corner.v + char_adjust), str, _color);
         }
@@ -219,10 +220,11 @@ void InterfaceText::draw_char(const Rect& bounds, int index) const {
       case PICTURE:
         {
             const inlinePictType& inline_pict = _inline_picts[ch.character];
+            corner.offset(inline_pict.bounds.left, inline_pict.bounds.top);
             Picture pict(inline_pict.id);
             scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite(
                         format("/pict/{0}"), pict));
-            sprite->draw(bounds.left, bounds.top);
+            sprite->draw(corner.h, corner.v);
         }
         break;
     }

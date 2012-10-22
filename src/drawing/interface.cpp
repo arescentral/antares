@@ -1276,19 +1276,6 @@ void draw_text_in_rect(
     interface_text.draw(tRect);
 }
 
-void DrawInterfaceTextInRect(
-        const Rect& tRect, const StringSlice& text, interfaceStyleType style,
-        unsigned char textcolor, PixMap* pix, vector<inlinePictType>& inlinePict) {
-    RgbColor color = GetRGBTranslateColorShade(textcolor, VERY_LIGHT);
-    InterfaceText interface_text(text, style, color);
-    interface_text.wrap_to(tRect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer);
-    inlinePict = interface_text.inline_picts();
-    for (int i = 0; i < inlinePict.size(); ++i) {
-        inlinePict[i].bounds.offset(tRect.left, tRect.top);
-    }
-    interface_text.draw(pix, tRect);
-}
-
 short GetInterfaceTextHeightFromWidth(
         const StringSlice& text, interfaceStyleType style, short boundsWidth) {
     InterfaceText interface_text(text, style, RgbColor::kBlack);

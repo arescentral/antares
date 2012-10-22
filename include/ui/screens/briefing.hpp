@@ -74,6 +74,7 @@ class BriefingScreen : public InterfaceScreen {
     sfz::scoped_ptr<Sprite> _system_map;
     sfz::scoped_ptr<Sprite> _brief_point;
     std::vector<inlinePictType> _inline_pict;
+    sfz::String _text;
 
     DISALLOW_COPY_AND_ASSIGN(BriefingScreen);
 };

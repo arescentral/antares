@@ -40,7 +40,7 @@ bool BothCommandAndQ( void);
 void UpdateMissionBriefPoint(
         interfaceItemType *dataItem, long whichBriefPoint, const Scenario* scenario,
         coordPointType *corner, long scale, Rect *bounds, std::vector<inlinePictType>& inlinePict,
-        PixMap* pix);
+        PixMap* pix, sfz::String& text);
 void CreateObjectDataText(sfz::String* text, short id);
 void Replace_KeyCode_Strings_With_Actual_Key_Names(sfz::String* text, short resID, size_t padTo);
 

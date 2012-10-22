@@ -98,6 +98,8 @@ void BriefingScreen::draw() const {
         _system_map->draw(_bounds.left, _bounds.top);
         _brief_point->draw(0, 0);
         draw_interface_item(_data_item);
+        vector<inlinePictType> unused;
+        draw_text_in_rect(_data_item.bounds, _text, _data_item.style, _data_item.color, unused);
         break;
     }
 }
@@ -252,7 +254,7 @@ void BriefingScreen::build_brief_point() {
         ArrayPixMap pix(world.width(), world.height());
         pix.fill(RgbColor::kClear);
         UpdateMissionBriefPoint(&_data_item, _briefing_point, _scenario, &corner, scale,
-                &map_rect, inline_pict, &pix);
+                &map_rect, inline_pict, &pix, _text);
         _brief_point.reset(VideoDriver::driver()->new_sprite(
                     format("/x/brief_point/{0}", _briefing_point), pix));
         swap(inline_pict, _inline_pict);

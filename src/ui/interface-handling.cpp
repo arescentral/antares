@@ -165,7 +165,7 @@ bool BothCommandAndQ() {
 void UpdateMissionBriefPoint(
         interfaceItemType *dataItem, long whichBriefPoint, const Scenario* scenario,
         coordPointType *corner, long scale, Rect *bounds, vector<inlinePictType>& inlinePict,
-        PixMap* pix) {
+        PixMap* pix, String& text) {
     if (whichBriefPoint < kMissionBriefPointOffset) {
         // No longer handled here.
         return;
@@ -181,7 +181,7 @@ void UpdateMissionBriefPoint(
 
     // TODO(sfiera): catch exception.
     Resource rsrc("text", "txt", contentID);
-    String text(macroman::decode(rsrc.data()));
+    text.assign(macroman::decode(rsrc.data()));
     short textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
     if (hiliteBounds.left == hiliteBounds.right) {
         dataItem->bounds.left = (bounds->right - bounds->left) / 2 - (kMissionDataWidth / 2) + bounds->left;
@@ -251,9 +251,6 @@ void UpdateMissionBriefPoint(
     Rect newRect;
     GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
     pix->view(newRect).fill(RgbColor::kBlack);
-
-    newRect = dataItem->bounds;
-    DrawInterfaceTextInRect(newRect, text, dataItem->style, dataItem->color, pix, inlinePict);
 }
 
 void CreateObjectDataText(String* text, short id) {

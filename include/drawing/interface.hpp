@@ -38,9 +38,6 @@ struct inlinePictType {
 void draw_text_in_rect(
         const Rect& tRect, const sfz::StringSlice& text, interfaceStyleType style,
         unsigned char textcolor, std::vector<inlinePictType>& inlinePict);
-void DrawInterfaceTextInRect(
-        const Rect& rect, const sfz::StringSlice& text, interfaceStyleType style,
-        unsigned char textcolor, PixMap* pix, std::vector<inlinePictType>& inlinePict);
 
 short GetInterfaceTextHeightFromWidth(
         const sfz::StringSlice& text, interfaceStyleType style, short width);
