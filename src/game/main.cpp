@@ -245,7 +245,7 @@ class PauseScreen : public Card {
         mGetDirectStringDimensions(_pause_string, width, height);
         Rect bounds(0, 0, width, height);
         bounds.center_in(play_screen);
-        _text_origin = Point(bounds.left, bounds.top + mDirectFontAscent());
+        _text_origin = Point(bounds.left, bounds.top + title_font->ascent);
 
         bounds.inset(-4, -4);
         _bracket_bounds = bounds;

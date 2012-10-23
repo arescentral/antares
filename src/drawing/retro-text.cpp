@@ -162,7 +162,7 @@ void RetroText::wrap_to(int width, int line_spacing) {
           case NONE:
             h += char_width(_chars[i].character);
             if (h > _width) {
-                v += mDirectFontHeight() + _line_spacing;
+                v += _font->height + _line_spacing;
                 h = move_word_down(i, v);
             }
             _auto_width = std::max(_auto_width, h);
@@ -175,7 +175,7 @@ void RetroText::wrap_to(int width, int line_spacing) {
 
           case LINE_BREAK:
             h = 0;
-            v += mDirectFontHeight() + _line_spacing;
+            v += _font->height + _line_spacing;
             break;
 
           case WORD_BREAK:
@@ -227,8 +227,8 @@ void RetroText::draw(PixMap* pix, const Rect& bounds) const {
 
 void RetroText::draw_char(const Rect& bounds, int index) const {
     mSetDirectFont(_font);
-    const int line_height = mDirectFontHeight() + _line_spacing;
-    const int char_adjust = mDirectFontAscent() + _line_spacing;
+    const int line_height = _font->height + _line_spacing;
+    const int char_adjust = _font->ascent + _line_spacing;
     const RetroChar& ch = _chars[index];
     Point corner(bounds.left + ch.h, bounds.top + ch.v);
     switch (ch.special) {
@@ -268,8 +268,8 @@ void RetroText::draw_char(const Rect& bounds, int index) const {
 
 void RetroText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
     mSetDirectFont(_font);
-    const int line_height = mDirectFontHeight() + _line_spacing;
-    const int char_adjust = mDirectFontAscent() + _line_spacing;
+    const int line_height = _font->height + _line_spacing;
+    const int char_adjust = _font->ascent + _line_spacing;
     const RetroChar& ch = _chars[index];
     Point corner(bounds.left + ch.h, bounds.top + ch.v);
     switch (ch.special) {
@@ -314,7 +314,7 @@ void RetroText::draw_cursor(const Rect& bounds, int index) const {
 
 void RetroText::color_cursor(const Rect& bounds, int index, const RgbColor& color) const {
     mSetDirectFont(_font);
-    const int line_height = mDirectFontHeight() + _line_spacing;
+    const int line_height = _font->height + _line_spacing;
     const RetroChar& ch = _chars[index];
     Point corner(bounds.left + ch.h, bounds.top + ch.v);
     Rect char_rect(0, 0, gDirectText->logicalWidth, line_height);

@@ -66,8 +66,6 @@ void DirectTextCleanup();
 
 void mDirectCharWidth(unsigned char& mwidth, uint32_t mchar);
 void mSetDirectFont(const directTextType* font);
-int mDirectFontHeight();
-int mDirectFontAscent();
 void mGetDirectStringDimensions(const sfz::StringSlice& string, long& width, long& height);
 void DrawDirectTextStringClipped(
         Point origin, sfz::StringSlice string, RgbColor color, PixMap* pix, const Rect& clip);

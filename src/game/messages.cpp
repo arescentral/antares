@@ -274,7 +274,7 @@ void ClipToCurrentLongMessage( void)
                 tmessage->textHeight += kLongMessageVPadDouble;
                 tmessage->retro_origin = Point(
                         viewport.left + kHBuffer,
-                        viewport.bottom + mDirectFontAscent() + kLongMessageVPad);
+                        viewport.bottom + tactical_font->ascent + kLongMessageVPad);
                 tmessage->at_char = 0;
 
                 if (tmessage->labelMessage == false) {
@@ -476,7 +476,7 @@ void SetStatusString(const StringSlice& status, unsigned char color) {
 long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long inWidth)
 
 {
-    long            charNum = 0, height = mDirectFontHeight(), x = 0, oldx = 0, oldCharNum, wordLen,
+    long            charNum = 0, height = gDirectText->height, x = 0, oldx = 0, oldCharNum, wordLen,
                     *lineLengthList = retroTextSpec->lineLength;
     unsigned char   wrapState; // 0 = none, 1 = once, 2 = more than once
     Bytes bytes(macroman::encode(*retroTextSpec->text));
@@ -490,7 +490,7 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
         if ( *thisChar == kReturnChar)
         {
             if ( x > retroTextSpec->autoWidth) retroTextSpec->autoWidth = x;
-            height += mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
+            height += gDirectText->height + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
             x = 0;
             thisChar++;
             charNum++;
@@ -561,7 +561,7 @@ long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long in
                         if ( oldx > retroTextSpec->autoWidth) retroTextSpec->autoWidth = oldx;
                         x = x - oldx;
                         oldx = 0;
-                        height += mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
+                        height += gDirectText->height + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
                     } else
                     {
                         wrapState = 2;

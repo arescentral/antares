@@ -202,14 +202,14 @@ const int32_t MiniIconMacLineTop() {
 Rect mini_screen_line_bounds(long mtop, long mlinenum, long mleft, long mright) {
     Rect mbounds;
     mbounds.left = kMiniScreenLeft + mleft;
-    mbounds.top = mtop + mlinenum * mDirectFontHeight();
+    mbounds.top = mtop + mlinenum * gDirectText->height;
     mbounds.right = kMiniScreenLeft + mright;
-    mbounds.bottom = mbounds.top + mDirectFontHeight();
+    mbounds.bottom = mbounds.top + gDirectText->height;
     return mbounds;
 }
 
 inline long mGetLineNumFromV(long mV) {
-    return (((mV) - (kMiniScreenTop + globals()->gInstrumentTop)) / mDirectFontHeight());
+    return (((mV) - (kMiniScreenTop + globals()->gInstrumentTop)) / gDirectText->height);
 }
 
 // for copying the fields of a space object relevant to the miniscreens:

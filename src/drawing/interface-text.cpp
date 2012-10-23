@@ -140,14 +140,14 @@ void InterfaceText::wrap_to(int width, int h_buffer, int v_buffer) {
           case NONE:
             h += char_width(_chars[i].character);
             if (h >= wrap_distance) {
-                v += mDirectFontHeight() + _v_buffer;
+                v += _font->height + _v_buffer;
                 h = move_word_down(i, v);
             }
             break;
 
           case LINE_BREAK:
             h = _h_buffer;
-            v += mDirectFontHeight() + _v_buffer;
+            v += _font->height + _v_buffer;
             break;
 
           case WORD_BREAK:
@@ -158,13 +158,13 @@ void InterfaceText::wrap_to(int width, int h_buffer, int v_buffer) {
             {
                 inlinePictType* pict = &_inline_picts[_chars[i].character];
                 if (h != _h_buffer) {
-                    v += mDirectFontHeight() + _v_buffer;
+                    v += _font->height + _v_buffer;
                 }
                 h = _h_buffer;
                 pict->bounds.offset(0, v - pict->bounds.top);
                 v += pict->bounds.height() + _v_buffer + 3;
                 if (_chars[i + 1].special == LINE_BREAK) {
-                    v -= (mDirectFontHeight() + _v_buffer);
+                    v -= (_font->height + _v_buffer);
                 }
             }
             break;
@@ -200,7 +200,7 @@ void InterfaceText::draw(PixMap* pix, const Rect& bounds) const {
 }
 
 void InterfaceText::draw_char(const Rect& bounds, int index) const {
-    const int char_adjust = mDirectFontAscent();
+    const int char_adjust = _font->ascent;
     const InterfaceChar& ch = _chars[index];
     Point corner(bounds.left, bounds.top);
 
@@ -231,7 +231,7 @@ void InterfaceText::draw_char(const Rect& bounds, int index) const {
 }
 
 void InterfaceText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
-    const int char_adjust = mDirectFontAscent();
+    const int char_adjust = _font->ascent;
     const InterfaceChar& ch = _chars[index];
     Point corner(bounds.left + ch.h, bounds.top + ch.v);
 

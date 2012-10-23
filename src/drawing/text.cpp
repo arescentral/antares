@@ -209,14 +209,6 @@ void mSetDirectFont(const directTextType* font) {
     gDirectText = font;
 }
 
-int mDirectFontHeight() {
-    return gDirectText->height;
-}
-
-int mDirectFontAscent() {
-    return gDirectText->ascent;
-}
-
 void mGetDirectStringDimensions(const StringSlice& string, long& width, long& height) {
     height = gDirectText->height;
     width = 0;
