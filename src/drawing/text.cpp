@@ -201,10 +201,6 @@ uint8_t directTextType::char_width(Rune mchar) const {
     return *widptr;
 }
 
-void mDirectCharWidth(unsigned char& width, uint32_t mchar) {
-    width = gDirectText->char_width(mchar);
-}
-
 void mSetDirectFont(const directTextType* font) {
     gDirectText = font;
 }

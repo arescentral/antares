@@ -39,12 +39,6 @@ namespace antares {
 
 namespace {
 
-int char_width(uint32_t ch) {
-    uint8_t w;
-    mDirectCharWidth(w, ch);
-    return w;
-}
-
 const directTextType* font_for_style(interfaceStyleType style) {
     switch (style) {
       case kLarge:
@@ -138,7 +132,7 @@ void InterfaceText::wrap_to(int width, int h_buffer, int v_buffer) {
         _chars[i].v = v;
         switch (_chars[i].special) {
           case NONE:
-            h += char_width(_chars[i].character);
+            h += _font->char_width(_chars[i].character);
             if (h >= wrap_distance) {
                 v += _font->height + _v_buffer;
                 h = move_word_down(i, v);
@@ -151,7 +145,7 @@ void InterfaceText::wrap_to(int width, int h_buffer, int v_buffer) {
             break;
 
           case WORD_BREAK:
-            h += char_width(_chars[i].character);
+            h += _font->char_width(_chars[i].character);
             break;
 
           case PICTURE:
@@ -277,7 +271,7 @@ int InterfaceText::move_word_down(int index, int v) {
                 for (int j = i + 1; j <= index; ++j) {
                     _chars[j].h = h;
                     _chars[j].v = v;
-                    h += char_width(_chars[j].character);
+                    h += _font->char_width(_chars[j].character);
                 }
                 return h;
             }

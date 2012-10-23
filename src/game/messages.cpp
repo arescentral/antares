@@ -99,9 +99,7 @@ namespace {
 int mac_roman_char_width(uint8_t ch) {
     BytesSlice bytes(&ch, 1);
     String str(macroman::decode(bytes));
-    uint8_t width;
-    mDirectCharWidth(width, str.at(0));
-    return width;
+    return gDirectText->char_width(str.at(0));
 }
 
 template <typename T>

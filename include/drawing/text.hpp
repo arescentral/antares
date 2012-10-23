@@ -64,7 +64,6 @@ extern const directTextType* small_button_font;
 void InitDirectText();
 void DirectTextCleanup();
 
-void mDirectCharWidth(unsigned char& mwidth, uint32_t mchar);
 void mSetDirectFont(const directTextType* font);
 void mGetDirectStringDimensions(const sfz::StringSlice& string, long& width, long& height);
 void DrawDirectTextStringClipped(

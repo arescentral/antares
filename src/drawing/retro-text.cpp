@@ -36,12 +36,6 @@ namespace antares {
 
 namespace {
 
-int char_width(uint32_t ch) {
-    uint8_t w;
-    mDirectCharWidth(w, ch);
-    return w;
-}
-
 int hex_digit(uint32_t c) {
     if ('0' <= c && c <= '9') {
         return c - '0';
@@ -160,7 +154,7 @@ void RetroText::wrap_to(int width, int line_spacing) {
         _chars[i].v = v;
         switch (_chars[i].special) {
           case NONE:
-            h += char_width(_chars[i].character);
+            h += _font->char_width(_chars[i].character);
             if (h > _width) {
                 v += _font->height + _line_spacing;
                 h = move_word_down(i, v);
@@ -179,7 +173,7 @@ void RetroText::wrap_to(int width, int line_spacing) {
             break;
 
           case WORD_BREAK:
-            h += char_width(_chars[i].character);
+            h += _font->char_width(_chars[i].character);
             break;
 
           case DELAY:
@@ -236,7 +230,7 @@ void RetroText::draw_char(const Rect& bounds, int index) const {
       case WORD_BREAK:
         {
             if (ch.back_color != RgbColor::kBlack) {
-                Rect char_rect(0, 0, char_width(ch.character), line_height);
+                Rect char_rect(0, 0, _font->char_width(ch.character), line_height);
                 char_rect.offset(corner.h, corner.v);
                 VideoDriver::driver()->fill_rect(char_rect, ch.back_color);
             }
@@ -277,7 +271,7 @@ void RetroText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
       case WORD_BREAK:
         {
             if (ch.back_color != RgbColor::kBlack) {
-                Rect char_rect(0, 0, char_width(ch.character), line_height);
+                Rect char_rect(0, 0, _font->char_width(ch.character), line_height);
                 char_rect.offset(corner.h, corner.v);
                 pix->view(char_rect).fill(ch.back_color);
             }
@@ -343,7 +337,7 @@ int RetroText::move_word_down(int index, int v) {
                 for (int j = i + 1; j <= index; ++j) {
                     _chars[j].h = h;
                     _chars[j].v = v;
-                    h += char_width(_chars[j].character);
+                    h += _font->char_width(_chars[j].character);
                 }
                 return h;
             }
