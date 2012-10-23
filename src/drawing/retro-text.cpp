@@ -55,7 +55,9 @@ int hex_digit(uint32_t c) {
 
 }  // namespace
 
-RetroText::RetroText(const StringSlice& text, int font, RgbColor fore_color, RgbColor back_color):
+RetroText::RetroText(
+        const StringSlice& text, const directTextType* font,
+        RgbColor fore_color, RgbColor back_color):
         _original_fore_color(fore_color),
         _original_back_color(back_color),
         _tab_width(0),

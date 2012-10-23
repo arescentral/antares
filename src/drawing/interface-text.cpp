@@ -45,12 +45,12 @@ int char_width(uint32_t ch) {
     return w;
 }
 
-int font_for_style(interfaceStyleType style) {
+const directTextType* font_for_style(interfaceStyleType style) {
     switch (style) {
       case kLarge:
-        return kButtonFontNum;
+        return button_font;
       case kSmall:
-        return kButtonSmallFontNum;
+        return small_button_font;
     }
     throw Exception(format("invalid style {0}", style));
 }

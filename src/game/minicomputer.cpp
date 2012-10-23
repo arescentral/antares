@@ -350,7 +350,7 @@ void draw_mini_screen() {
     unsigned char lineColor = kMiniScreenColor;
     long                count, lineCorrect = 0;
 
-    mSetDirectFont( kComputerFontNum);
+    mSetDirectFont(computer_font);
 
     lRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
                 kMiniScreenBottom + globals()->gInstrumentTop);
@@ -458,7 +458,7 @@ void draw_mini_screen() {
 }
 
 void MakeMiniScreenFromIndString(short whichString) {
-    mSetDirectFont(kComputerFontNum);
+    mSetDirectFont(computer_font);
 
     Rect mRect(kMiniScreenLeft, kMiniScreenTop, kMiniScreenRight, kMiniScreenBottom);
     mRect.offset(0, globals()->gInstrumentTop);
@@ -885,7 +885,7 @@ static void draw_player_ammo_in_rect(int32_t value, int8_t hue, const Rect& rect
 }
 
 void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) {
-    mSetDirectFont(kComputerFontNum);
+    mSetDirectFont(computer_font);
 
     Rect clip(0, kMiniAmmoTop, kMiniAmmoSingleWidth, kMiniAmmoBottom);
     clip.offset(0, globals()->gInstrumentTop);
@@ -913,7 +913,7 @@ void draw_mini_ship_data(
     clipRect.right = kMiniScreenRight;
     clipRect.bottom = clipRect.top + 64;
 
-    mSetDirectFont( kComputerFontNum);
+    mSetDirectFont(computer_font);
 
     uRect.left = uRect.top = uRect.bottom = -1;
 
@@ -1787,7 +1787,7 @@ void MiniComputerHandleClick( Point where)
     long        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
     miniScreenLineType  *line;
 
-    mSetDirectFont( kComputerFontNum);
+    mSetDirectFont(computer_font);
     line = globals()->gMiniScreenData.lineData.get();
     scrap = 0;
     while ( scrap < kMiniScreenTrueLineNum)
@@ -1895,7 +1895,7 @@ void MiniComputerHandleDoubleClick( Point where)
     long        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
     miniScreenLineType  *line;
 
-    mSetDirectFont( kComputerFontNum);
+    mSetDirectFont(computer_font);
     line = globals()->gMiniScreenData.lineData.get();
     scrap = 0;
     while ( scrap < kMiniScreenTrueLineNum)
@@ -2006,7 +2006,7 @@ void MiniComputerHandleMouseUp( Point where)
     long        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
     miniScreenLineType  *line;
 
-    mSetDirectFont( kComputerFontNum);
+    mSetDirectFont(computer_font);
     line = globals()->gMiniScreenData.lineData.get();
     scrap = 0;
     while ( scrap < kMiniScreenTrueLineNum)
@@ -2049,7 +2049,7 @@ void MiniComputerHandleMouseStillDown( Point where)
     long        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
     miniScreenLineType  *line;
 
-    mSetDirectFont( kComputerFontNum);
+    mSetDirectFont(computer_font);
     line = globals()->gMiniScreenData.lineData.get();
     scrap = 0;
     while ( scrap < kMiniScreenTrueLineNum)
@@ -2129,7 +2129,7 @@ void MiniComputer_SetScreenAndLineHack( long whichScreen, long whichLine)
             break;
     }
 
-    mSetDirectFont( kComputerFontNum);
+    mSetDirectFont(computer_font);
     w.v = (whichLine * gDirectText->height) + ( kMiniScreenTop +
                     globals()->gInstrumentTop);
     w.h = kMiniScreenLeft + 5;

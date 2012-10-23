@@ -26,15 +26,6 @@
 
 namespace antares {
 
-enum {
-    kTacticalFontNum        = 0,
-    kComputerFontNum        = 1,
-    kButtonFontNum          = 2,
-    kMessageFontNum         = 3,
-    kTitleFontNum           = 4,
-    kButtonSmallFontNum     = 5,
-};
-
 class directTextType {
   public:
     directTextType(int32_t id);
@@ -61,20 +52,20 @@ class directTextType {
     DISALLOW_COPY_AND_ASSIGN(directTextType);
 };
 
-extern directTextType* gDirectText;
+extern const directTextType* gDirectText;
 
-extern directTextType* tactical_font;
-extern directTextType* computer_font;
-extern directTextType* button_font;
-extern directTextType* message_font;
-extern directTextType* title_font;
-extern directTextType* small_button_font;
+extern const directTextType* tactical_font;
+extern const directTextType* computer_font;
+extern const directTextType* button_font;
+extern const directTextType* message_font;
+extern const directTextType* title_font;
+extern const directTextType* small_button_font;
 
 void InitDirectText();
 void DirectTextCleanup();
 
 void mDirectCharWidth(unsigned char& mwidth, uint32_t mchar);
-void mSetDirectFont(long mwhichFont);
+void mSetDirectFont(const directTextType* font);
 int mDirectFontHeight();
 int mDirectFontAscent();
 void mGetDirectStringDimensions(const sfz::StringSlice& string, long& width, long& height);

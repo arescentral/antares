@@ -68,7 +68,7 @@ class PixBuilder {
     void add_text(const StringSlice& text) {
         RgbColor red;
         red = GetRGBTranslateColorShade(RED, VERY_LIGHT);
-        RetroText retro(text, kTitleFontNum, red, RgbColor::kBlack);
+        RetroText retro(text, title_font, red, RgbColor::kBlack);
         retro.wrap_to(_pix->size().width - 12, 2);
 
         Rect dest(0, 0, _pix->size().width, retro.height());

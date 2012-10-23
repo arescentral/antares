@@ -67,15 +67,15 @@ Rune from_mac_roman(uint8_t byte) {
 
 }  // namespace
 
-directTextType* gDirectText = NULL;
+const directTextType* gDirectText = NULL;
 
-directTextType* gDirectTextData[kDirectFontNum];
-directTextType* tactical_font;
-directTextType* computer_font;
-directTextType* button_font;
-directTextType* message_font;
-directTextType* title_font;
-directTextType* small_button_font;
+const directTextType* gDirectTextData[kDirectFontNum];
+const directTextType* tactical_font;
+const directTextType* computer_font;
+const directTextType* button_font;
+const directTextType* message_font;
+const directTextType* title_font;
+const directTextType* small_button_font;
 
 directTextType::directTextType(int32_t id) {
     Resource defn_rsrc("font-descriptions", "nlFD", id);
@@ -183,7 +183,7 @@ void InitDirectText() {
     gDirectTextData[4] = title_font = new directTextType(kTitleFontResID);
     gDirectTextData[5] = small_button_font = new directTextType(kButtonSmallFontResID);
 
-    mSetDirectFont(0);
+    mSetDirectFont(tactical_font);
 }
 
 void DirectTextCleanup() {
@@ -205,8 +205,8 @@ void mDirectCharWidth(unsigned char& width, uint32_t mchar) {
     width = gDirectText->char_width(mchar);
 }
 
-void mSetDirectFont(long whichFont) {
-    gDirectText = gDirectTextData[whichFont];
+void mSetDirectFont(const directTextType* font) {
+    gDirectText = font;
 }
 
 int mDirectFontHeight() {

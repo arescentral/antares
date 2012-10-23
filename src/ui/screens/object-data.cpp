@@ -68,7 +68,7 @@ ObjectDataScreen::ObjectDataScreen(Point origin, int32_t object_id, Trigger trig
     String text;
     CreateObjectDataText(&text, object_id);
     _text.reset(new RetroText(
-                text, kButtonFontNum,
+                text, button_font,
                 GetRGBTranslateColorShade(GREEN, VERY_LIGHT),
                 GetRGBTranslateColorShade(GREEN, DARKEST)));
     _text->wrap_to(kShipDataWidth, 0);

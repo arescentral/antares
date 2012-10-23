@@ -139,7 +139,7 @@ void RemoveScreenLabel(long which) {
 }
 
 void draw_labels() {
-    mSetDirectFont(kTacticalFontNum);
+    mSetDirectFont(tactical_font);
 
     for (int i = 0; i < kMaxLabelNum; ++i) {
         screenLabelType* const label = globals()->gScreenLabelData.get() + i;
@@ -192,7 +192,7 @@ void draw_labels() {
 
 void update_all_label_contents(int32_t units_done) {
     Rect clip = viewport;
-    mSetDirectFont(kTacticalFontNum);
+    mSetDirectFont(tactical_font);
 
     for (int i = 0; i < kMaxLabelNum; ++i) {
         screenLabelType* const label = globals()->gScreenLabelData.get() + i;
@@ -422,7 +422,7 @@ String* GetScreenLabelStringPtr( long which) {
 
 // do this if you mess with its string
 void RecalcScreenLabelSize(long which) {
-    mSetDirectFont(kTacticalFontNum);
+    mSetDirectFont(tactical_font);
 
     screenLabelType *label = globals()->gScreenLabelData.get() + which;
     int lineNum = String_Count_Lines(label->text);

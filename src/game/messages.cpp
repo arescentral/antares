@@ -82,8 +82,6 @@ const uint8_t kCodeBackColorChar        = 'b';
 
 const int16_t kStringMessageID          = 1;
 
-const int16_t kLongMessageFontNum       = kTacticalFontNum;
-
 const int32_t kHBuffer                  = 4;
 
 inline int mHexDigitValue(char c) {
@@ -265,10 +263,10 @@ void ClipToCurrentLongMessage( void)
             if (textData.get() != NULL) {
                 const RgbColor& light_blue = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
                 const RgbColor& dark_blue = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
-                mSetDirectFont(kLongMessageFontNum);
+                mSetDirectFont(tactical_font);
                 tmessage->text.assign(*textData);
                 tmessage->retro_text.reset(
-                        new RetroText(*textData, kLongMessageFontNum, light_blue, dark_blue));
+                        new RetroText(*textData, tactical_font, light_blue, dark_blue));
                 tmessage->retro_text->set_tab_width(60);
                 tmessage->retro_text->wrap_to(
                         viewport.width() - kHBuffer - gDirectText->logicalWidth, 0);
@@ -360,7 +358,7 @@ void DrawCurrentLongMessage(int32_t time_pass) {
         // Play teletype sound at least once every 3 ticks.
         tmessage->charDelayCount += time_pass;
         if (tmessage->charDelayCount > 0) {
-            mSetDirectFont( kLongMessageFontNum);
+            mSetDirectFont(tactical_font);
             PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
             while (tmessage->charDelayCount > 0) {
                 tmessage->charDelayCount -= 3;
@@ -447,7 +445,7 @@ void DrawMessageScreen(int32_t by_units) {
         globals()->gMessageData.pop();
     }
 
-    mSetDirectFont( kTacticalFontNum);
+    mSetDirectFont(tactical_font);
 
     if (!globals()->gMessageData.empty()) {
         const String& message = *globals()->gMessageData.front();

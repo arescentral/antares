@@ -65,17 +65,17 @@ const int32_t kMaxKeyNameLength         = 4;  // how many chars can be in name o
 
 void SetInterfaceLargeUpperFont(interfaceStyleType style) {
     if ( style == kSmall) {
-        mSetDirectFont( kButtonSmallFontNum);
+        mSetDirectFont(small_button_font);
     } else {
-        mSetDirectFont( kButtonFontNum);
+        mSetDirectFont(button_font);
     }
 }
 
 void SetInterfaceLargeLowerFont(interfaceStyleType style) {
     if ( style == kSmall) {
-        mSetDirectFont( kButtonSmallFontNum);
+        mSetDirectFont(small_button_font);
     } else {
-        mSetDirectFont( kButtonFontNum);
+        mSetDirectFont(button_font);
     }
 }
 
