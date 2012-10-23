@@ -64,6 +64,8 @@ using sfz::StringSlice;
 using sfz::read;
 using sfz::scoped_array;
 using sfz::scoped_ptr;
+using std::min;
+using std::max;
 using std::vector;
 
 namespace macroman = sfz::macroman;
@@ -227,23 +229,37 @@ void UpdateMissionBriefPoint(
         Rect newRect;
         GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
         if (dataItem->bounds.right < hiliteBounds.left) {
-            MoveTo(hiliteBounds.left, hiliteBounds.top);
-            MacLineTo(pix, newRect.right + kMissionLineHJog, hiliteBounds.top, color);
-            MacLineTo(pix, newRect.right + kMissionLineHJog, newRect.top, color);
-            MacLineTo(pix, newRect.right + 1, newRect.top, color);
-            MoveTo(hiliteBounds.left, hiliteBounds.bottom - 1);
-            MacLineTo(pix, newRect.right + kMissionLineHJog, hiliteBounds.bottom - 1, color);
-            MacLineTo(pix, newRect.right + kMissionLineHJog, newRect.bottom - 1, color);
-            MacLineTo(pix, newRect.right + 1, newRect.bottom - 1, color);
+            Point p1(hiliteBounds.left, hiliteBounds.top);
+            Point p2(newRect.right + kMissionLineHJog, hiliteBounds.top);
+            Point p3(newRect.right + kMissionLineHJog, newRect.top);
+            Point p4(newRect.right + 2, newRect.top);
+            pix->view(Rect(min(p1.h, p2.h), p2.v, max(p1.h, p2.h) + 1, p1.v + 1)).fill(color);
+            pix->view(Rect(p3.h, p3.v, p2.h + 1, p2.v + 1)).fill(color);
+            pix->view(Rect(p4.h, p4.v, p3.h + 1, p3.v + 1)).fill(color);
+
+            Point p5(hiliteBounds.left, hiliteBounds.bottom - 1);
+            Point p6(newRect.right + kMissionLineHJog, hiliteBounds.bottom - 1);
+            Point p7(newRect.right + kMissionLineHJog, newRect.bottom - 1);
+            Point p8(newRect.right + 2, newRect.bottom - 1);
+            pix->view(Rect(min(p5.h, p6.h), p5.v, max(p5.h, p6.h) + 1, p6.v + 1)).fill(color);
+            pix->view(Rect(p6.h, p6.v, p7.h + 1, p7.v + 1)).fill(color);
+            pix->view(Rect(p8.h, p8.v, p7.h + 1, p7.v + 1)).fill(color);
         } else {
-            MoveTo(hiliteBounds.right, hiliteBounds.top);
-            MacLineTo(pix, newRect.left - kMissionLineHJog, hiliteBounds.top, color);
-            MacLineTo(pix, newRect.left - kMissionLineHJog, newRect.top, color);
-            MacLineTo(pix, newRect.left - 2, newRect.top, color);
-            MoveTo(hiliteBounds.right, hiliteBounds.bottom - 1);
-            MacLineTo(pix, newRect.left - kMissionLineHJog, hiliteBounds.bottom - 1, color);
-            MacLineTo(pix, newRect.left - kMissionLineHJog, newRect.bottom - 1, color);
-            MacLineTo(pix, newRect.left - 2, newRect.bottom - 1, color);
+            Point p1(hiliteBounds.right, hiliteBounds.top);
+            Point p2(newRect.left - kMissionLineHJog, hiliteBounds.top);
+            Point p3(newRect.left - kMissionLineHJog, newRect.top);
+            Point p4(newRect.left - 3, newRect.top);
+            pix->view(Rect(min(p1.h, p2.h), p2.v, max(p1.h, p2.h) + 1, p1.v + 1)).fill(color);
+            pix->view(Rect(p3.h, p3.v, p2.h + 1, p2.v + 1)).fill(color);
+            pix->view(Rect(p3.h, p3.v, p4.h + 1, p4.v + 1)).fill(color);
+
+            Point p5(hiliteBounds.right, hiliteBounds.bottom - 1);
+            Point p6(newRect.left - kMissionLineHJog, hiliteBounds.bottom - 1);
+            Point p7(newRect.left - kMissionLineHJog, newRect.bottom - 1);
+            Point p8(newRect.left - 3, newRect.bottom - 1);
+            pix->view(Rect(min(p5.h, p6.h), p6.v, max(p5.h, p6.h) + 1, p5.v + 1)).fill(color);
+            pix->view(Rect(p6.h, p6.v, p7.h + 1, p7.v + 1)).fill(color);
+            pix->view(Rect(p7.h, p7.v, p8.h + 1, p8.v + 1)).fill(color);
         }
     }
     dataItem->item.labeledRect.label.stringID = headerID;

@@ -158,7 +158,6 @@ void directTextType::draw(
         // increase our hposition (our position in pixels)
         origin.h += width;
     }
-    MoveTo(origin.h, origin.v + ascent);
 }
 
 void directTextType::draw_sprite(Point origin, sfz::StringSlice string, RgbColor color) const {

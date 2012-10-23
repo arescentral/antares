@@ -137,18 +137,6 @@ void DrawLine(PixMap* pix, const Point& from, const Point& to, const RgbColor& c
     }
 }
 
-Point currentPen;
-
-void MoveTo(int x, int y) {
-    currentPen.h = x;
-    currentPen.v = y;
-}
-
-void MacLineTo(PixMap* pix, int h, int v, const RgbColor& color) {
-    DrawLine(pix, currentPen, Point(h, v), color);
-    MoveTo(h, v);
-}
-
 void FrameRect(PixMap* pix, const Rect& r, const RgbColor& color) {
     DrawLine(pix, Point(r.left, r.top), Point(r.left, r.bottom - 1), color);
     DrawLine(pix, Point(r.left, r.bottom - 1), Point(r.right - 1, r.bottom - 1), color);

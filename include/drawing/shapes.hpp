@@ -35,8 +35,6 @@ struct coordPointType {
 inline bool operator==(coordPointType x, coordPointType y) { return (x.h == y.h) && (x.v == y.v); }
 inline bool operator!=(coordPointType x, coordPointType y) { return !(x == y); }
 
-void MacLineTo(PixMap* pix, int x, int y, const RgbColor& color);
-void MoveTo(int x, int y);
 void FrameRect(PixMap* pix, const Rect& rect, const RgbColor& color);
 void DrawNateRect( PixMap *, Rect *, const RgbColor& color);
 void DrawNateRectVScan(PixMap* pix, Rect bounds, const RgbColor& color, bool invert);
