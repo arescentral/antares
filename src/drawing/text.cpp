@@ -213,9 +213,4 @@ void mGetDirectStringDimensions(const StringSlice& string, long& width, long& he
     }
 }
 
-void DrawDirectTextStringClipped(
-        Point origin, StringSlice string, RgbColor color, PixMap* pix, const Rect& clip) {
-    gDirectText->draw(origin, string, color, pix, clip);
-}
-
 }  // namespace antares

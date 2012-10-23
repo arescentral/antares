@@ -234,8 +234,7 @@ void InterfaceText::draw_char(PixMap* pix, const Rect& bounds, int index) const 
       case WORD_BREAK:
         {
             String str(1, ch.character);
-            DrawDirectTextStringClipped(
-                    Point(corner.h, corner.v + char_adjust), str, _color, pix, bounds);
+            _font->draw(Point(corner.h, corner.v + char_adjust), str, _color, pix, bounds);
         }
         break;
 

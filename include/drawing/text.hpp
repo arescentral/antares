@@ -66,8 +66,6 @@ void DirectTextCleanup();
 
 void mSetDirectFont(const directTextType* font);
 void mGetDirectStringDimensions(const sfz::StringSlice& string, long& width, long& height);
-void DrawDirectTextStringClipped(
-        Point origin, sfz::StringSlice string, RgbColor color, PixMap* pix, const Rect& clip);
 
 }  // namespace antares
 
