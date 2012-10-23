@@ -40,13 +40,9 @@ namespace macroman = sfz::macroman;
 
 namespace antares {
 
-directTextType* gDirectText = NULL;
-long gWhichDirectText = 0;
-scoped_ptr<directTextType>* gDirectTextData;
-
 namespace {
 
-const int kDirectFontNum = 6;
+static const int kDirectFontNum = 6;
 
 enum {
     kTacticalFontResID      = 5000,
@@ -70,6 +66,16 @@ Rune from_mac_roman(uint8_t byte) {
 }
 
 }  // namespace
+
+directTextType* gDirectText = NULL;
+
+directTextType* gDirectTextData[kDirectFontNum];
+directTextType* tactical_font;
+directTextType* computer_font;
+directTextType* button_font;
+directTextType* message_font;
+directTextType* title_font;
+directTextType* small_button_font;
 
 directTextType::directTextType(int32_t id) {
     Resource defn_rsrc("font-descriptions", "nlFD", id);
@@ -170,20 +176,23 @@ void directTextType::draw_sprite(Point origin, sfz::StringSlice string, RgbColor
 }
 
 void InitDirectText() {
-    gDirectTextData = new scoped_ptr<directTextType>[kDirectFontNum];
-    gDirectTextData[0].reset(new directTextType(kTacticalFontResID));
-    gDirectTextData[1].reset(new directTextType(kComputerFontResID));
-    gDirectTextData[2].reset(new directTextType(kButtonFontResID));
-    gDirectTextData[3].reset(new directTextType(kMessageFontResID));
-    gDirectTextData[4].reset(new directTextType(kTitleFontResID));
-    gDirectTextData[5].reset(new directTextType(kButtonSmallFontResID));
+    gDirectTextData[0] = tactical_font = new directTextType(kTacticalFontResID);
+    gDirectTextData[1] = computer_font = new directTextType(kComputerFontResID);
+    gDirectTextData[2] = button_font = new directTextType(kButtonFontResID);
+    gDirectTextData[3] = message_font = new directTextType(kMessageFontResID);
+    gDirectTextData[4] = title_font = new directTextType(kTitleFontResID);
+    gDirectTextData[5] = small_button_font = new directTextType(kButtonSmallFontResID);
 
-    gDirectText = gDirectTextData[0].get();
-    gWhichDirectText = 0;
+    mSetDirectFont(0);
 }
 
 void DirectTextCleanup() {
-    delete[] gDirectTextData;
+    delete tactical_font;
+    delete computer_font;
+    delete button_font;
+    delete message_font;
+    delete title_font;
+    delete small_button_font;
 }
 
 uint8_t directTextType::char_width(Rune mchar) const {
@@ -197,8 +206,7 @@ void mDirectCharWidth(unsigned char& width, uint32_t mchar) {
 }
 
 void mSetDirectFont(long whichFont) {
-    gWhichDirectText = whichFont;
-    gDirectText = gDirectTextData[gWhichDirectText].get();
+    gDirectText = gDirectTextData[whichFont];
 }
 
 int mDirectFontHeight() {

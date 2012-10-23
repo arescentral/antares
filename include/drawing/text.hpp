@@ -63,6 +63,13 @@ class directTextType {
 
 extern directTextType* gDirectText;
 
+extern directTextType* tactical_font;
+extern directTextType* computer_font;
+extern directTextType* button_font;
+extern directTextType* message_font;
+extern directTextType* title_font;
+extern directTextType* small_button_font;
+
 void InitDirectText();
 void DirectTextCleanup();
 
