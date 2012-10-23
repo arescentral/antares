@@ -178,17 +178,6 @@ void DrawNateRectVScan(PixMap* pix, Rect bounds, const RgbColor& color, bool inv
     }
 }
 
-void DrawNateRectClipped(
-        PixMap* destPix, Rect* destRect, const Rect& clipRect, const RgbColor& color) {
-    if (!intersects(*destRect, from_origin(destPix->size().as_rect()))) {
-        destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
-        return;
-    }
-    clip_rect(destRect, clipRect);
-
-    DrawNateRect(destPix, destRect, color);
-}
-
 // must be square
 void DrawNateTriangleUpClipped(PixMap *destPix, const RgbColor& color) {
     long count;
@@ -360,25 +349,6 @@ void draw_vbracket(const Rect& rect, const RgbColor& color) {
     VideoDriver::driver()->draw_line(ll, lr, color);
     VideoDriver::driver()->draw_line(ll, Point(ll.h, ll.v - 1), color);
     VideoDriver::driver()->draw_line(lr, Point(lr.h, lr.v - 1), color);
-}
-
-void DrawNateShadedRect(
-        PixMap *destPix, Rect *destRect, const Rect& clipRect,
-        const RgbColor& fillcolor, const RgbColor& lightcolor, const RgbColor& darkcolor) {
-    Rect    tRect = *destRect;
-
-    destPix->view(Rect(tRect.left, tRect.top, tRect.left + 1, tRect.bottom)).fill(lightcolor);
-    destPix->view(Rect(tRect.left, tRect.top, tRect.right, tRect.top + 1)).fill(lightcolor);
-
-    destPix->view(Rect(tRect.right - 1, tRect.top, tRect.right, tRect.bottom)).fill(darkcolor);
-    destPix->view(Rect(tRect.left, tRect.bottom - 1, tRect.right, tRect.bottom)).fill(darkcolor);
-
-    tRect.right--;
-    tRect.bottom--;
-    tRect.left++;
-    tRect.top++;
-
-    DrawNateRectClipped( destPix, &tRect, clipRect, fillcolor);
 }
 
 void draw_shaded_rect(
