@@ -277,7 +277,7 @@ void RetroText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
             if (ch.back_color != RgbColor::kBlack) {
                 Rect char_rect(0, 0, char_width(ch.character), line_height);
                 char_rect.offset(corner.h, corner.v);
-                DrawNateRect(pix, &char_rect, ch.back_color);
+                pix->view(char_rect).fill(ch.back_color);
             }
             String str(1, ch.character);
             DrawDirectTextStringClipped(
@@ -289,7 +289,7 @@ void RetroText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
         if (ch.back_color != RgbColor::kBlack) {
             Rect tab_rect(0, 0, tab_width() - (ch.h % tab_width()), line_height);
             tab_rect.offset(corner.h, corner.v);
-            DrawNateRect(pix, &tab_rect, ch.back_color);
+            pix->view(tab_rect).fill(ch.back_color);
         }
         break;
 
@@ -297,7 +297,7 @@ void RetroText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
         if (ch.back_color != RgbColor::kBlack) {
             Rect line_rect(0, 0, bounds.width() - ch.h, line_height);
             line_rect.offset(corner.h, corner.v);
-            DrawNateRect(pix, &line_rect, ch.back_color);
+            pix->view(line_rect).fill(ch.back_color);
         }
         break;
 

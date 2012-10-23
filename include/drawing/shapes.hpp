@@ -36,7 +36,6 @@ inline bool operator==(coordPointType x, coordPointType y) { return (x.h == y.h)
 inline bool operator!=(coordPointType x, coordPointType y) { return !(x == y); }
 
 void FrameRect(PixMap* pix, const Rect& rect, const RgbColor& color);
-void DrawNateRect( PixMap *, Rect *, const RgbColor& color);
 void DrawNateRectVScan(PixMap* pix, Rect bounds, const RgbColor& color, bool invert);
 
 void DrawNateTriangleUpClipped(PixMap* destPix, const RgbColor& color);

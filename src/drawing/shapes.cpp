@@ -144,24 +144,6 @@ void FrameRect(PixMap* pix, const Rect& r, const RgbColor& color) {
     DrawLine(pix, Point(r.right - 1, r.top), Point(r.left, r.top), color);
 }
 
-// DrawNateRect: Direct-draws a rectangle
-// CLIPS to destPix->bounds().
-
-void DrawNateRect(PixMap* destPix, Rect* destRect, const RgbColor& color) {
-    if (!intersects(*destRect, from_origin(destPix->size().as_rect()))) {
-        destRect->left = destRect->right = destRect->top = destRect->bottom = 0;
-        return;
-    }
-    clip_rect(destRect, from_origin(destPix->size().as_rect()));
-
-    int32_t width = destRect->right - destRect->left;
-    if (width < 0) {
-        return;
-    }
-
-    destPix->view(*destRect).fill(color);
-}
-
 void DrawNateRectVScan(PixMap* pix, Rect bounds, const RgbColor& color, bool invert) {
     clip_rect(&bounds, from_origin(pix->size().as_rect()));
     if (bounds.width() < 0 || bounds.height() < 0) {
