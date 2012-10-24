@@ -176,7 +176,7 @@ DebriefingScreen::DebriefingScreen(
 
     _score.reset(score_text(your_length, par_length, your_loss, par_loss, your_kill, par_kill)),
     _score->set_tab_width(60);
-    _score->wrap_to(_message_bounds.width(), 2);
+    _score->wrap_to(_message_bounds.width(), 0, 2);
     _score_bounds = Rect(0, 0, _score->auto_width(), _score->height());
     _score_bounds.center_in(score_area);
 

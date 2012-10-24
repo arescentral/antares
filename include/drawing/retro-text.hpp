@@ -39,7 +39,7 @@ class RetroText {
     ~RetroText();
 
     void set_tab_width(int tab_width);
-    void wrap_to(int width, int line_spacing);
+    void wrap_to(int width, int side_margin, int line_spacing);
 
     int size() const;
     int tab_width() const;
@@ -85,6 +85,7 @@ class RetroText {
     int _width;
     int _height;
     int _auto_width;
+    int _side_margin;
     int _line_spacing;
     const Font* const _font;
 

@@ -105,14 +105,15 @@ InterfaceText::InterfaceText(
 InterfaceText::~InterfaceText() {
 }
 
-void InterfaceText::wrap_to(int width, int h_buffer, int v_buffer) {
+void InterfaceText::wrap_to(int width, int side_margin, int line_spacing) {
     _width = width;
-    _h_buffer = h_buffer;
-    _v_buffer = v_buffer;
-    int h = _h_buffer;
+    _side_margin = side_margin;
+    _line_spacing = line_spacing;
+    _auto_width = 0;
+    int h = _side_margin;
     int v = 0;
 
-    int wrap_distance = width - h_buffer;
+    int wrap_distance = width - side_margin;
 
     for (size_t i = 0; i < _chars.size(); ++i) {
         _chars[i].h = h;
@@ -121,14 +122,15 @@ void InterfaceText::wrap_to(int width, int h_buffer, int v_buffer) {
           case NONE:
             h += _font->char_width(_chars[i].character);
             if (h >= wrap_distance) {
-                v += _font->height + _v_buffer;
+                v += _font->height + _line_spacing;
                 h = move_word_down(i, v);
             }
+            _auto_width = std::max(_auto_width, h);
             break;
 
           case LINE_BREAK:
-            h = _h_buffer;
-            v += _font->height + _v_buffer;
+            h = _side_margin;
+            v += _font->height + _line_spacing;
             break;
 
           case WORD_BREAK:
@@ -138,14 +140,14 @@ void InterfaceText::wrap_to(int width, int h_buffer, int v_buffer) {
           case PICTURE:
             {
                 inlinePictType* pict = &_inline_picts[_chars[i].character];
-                if (h != _h_buffer) {
-                    v += _font->height + _v_buffer;
+                if (h != _side_margin) {
+                    v += _font->height + _line_spacing;
                 }
-                h = _h_buffer;
+                h = _side_margin;
                 pict->bounds.offset(0, v - pict->bounds.top);
-                v += pict->bounds.height() + _v_buffer + 3;
+                v += pict->bounds.height() + _line_spacing + 3;
                 if (_chars[i + 1].special == LINE_BREAK) {
-                    v -= (_font->height + _v_buffer);
+                    v -= (_font->height + _line_spacing);
                 }
             }
             break;
@@ -180,7 +182,7 @@ void InterfaceText::draw(PixMap* pix, const Rect& bounds) const {
 
 void InterfaceText::draw_char(const Rect& bounds, int index) const {
     const int char_adjust = _font->ascent;
-    const int line_height = _font->height + _v_buffer;
+    const int line_height = _font->height + _line_spacing;
     const InterfaceChar& ch = _chars[index];
     Point corner(bounds.left, bounds.top);
 
@@ -222,7 +224,7 @@ void InterfaceText::draw_char(const Rect& bounds, int index) const {
 
 void InterfaceText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
     const int char_adjust = _font->ascent;
-    const int line_height = _font->height + _v_buffer;
+    const int line_height = _font->height + _line_spacing;
     const InterfaceChar& ch = _chars[index];
     Point corner(bounds.left + ch.h, bounds.top + ch.v);
 
@@ -265,15 +267,15 @@ int InterfaceText::move_word_down(int index, int v) {
         switch (_chars[i].special) {
           case LINE_BREAK:
           case PICTURE:
-            return _h_buffer;
+            return _side_margin;
 
           case WORD_BREAK:
             {
-                if (_chars[i + 1].h <= _h_buffer) {
-                    return _h_buffer;
+                if (_chars[i + 1].h <= _side_margin) {
+                    return _side_margin;
                 }
 
-                int h = _h_buffer;
+                int h = _side_margin;
                 for (int j = i + 1; j <= index; ++j) {
                     _chars[j].h = h;
                     _chars[j].v = v;
@@ -286,7 +288,7 @@ int InterfaceText::move_word_down(int index, int v) {
             break;
         }
     }
-    return _h_buffer;
+    return _side_margin;
 }
 
 InterfaceText::InterfaceChar::InterfaceChar(

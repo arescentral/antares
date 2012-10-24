@@ -49,7 +49,7 @@ LoadingScreen::LoadingScreen(const Scenario* scenario, bool* cancelled):
                 strings.at(_scenario->levelNameStrNum - 1), title_font,
                 GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT), RgbColor::kBlack));
     _name_text->set_tab_width(220);
-    _name_text->wrap_to(640, 2);
+    _name_text->wrap_to(640, 0, 2);
 }
 
 LoadingScreen::~LoadingScreen() {

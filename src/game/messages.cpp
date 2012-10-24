@@ -266,7 +266,7 @@ void ClipToCurrentLongMessage( void)
                         new RetroText(*textData, tactical_font, light_blue, dark_blue));
                 tmessage->retro_text->set_tab_width(60);
                 tmessage->retro_text->wrap_to(
-                        viewport.width() - kHBuffer - tactical_font->logicalWidth, 0);
+                        viewport.width() - kHBuffer - tactical_font->logicalWidth + 1, 0, 0);
                 tmessage->textHeight = tmessage->retro_text->height();
                 tmessage->textHeight += kLongMessageVPadDouble;
                 tmessage->retro_origin = Point(

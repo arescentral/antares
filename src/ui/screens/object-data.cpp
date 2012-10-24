@@ -71,7 +71,7 @@ ObjectDataScreen::ObjectDataScreen(Point origin, int32_t object_id, Trigger trig
                 text, button_font,
                 GetRGBTranslateColorShade(GREEN, VERY_LIGHT),
                 GetRGBTranslateColorShade(GREEN, DARKEST)));
-    _text->wrap_to(kShipDataWidth, 0);
+    _text->wrap_to(kShipDataWidth, 0, 0);
     _bounds = object_data_bounds(origin, Size(_text->auto_width(), _text->height()));
 }
 

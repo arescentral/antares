@@ -130,7 +130,7 @@ RetroText::RetroText(
     }
     _chars.push_back(RetroChar('\r', LINE_BREAK, fore_color, back_color));
 
-    wrap_to(std::numeric_limits<int>::max(), 0);
+    wrap_to(std::numeric_limits<int>::max(), 0, 0);
 }
 
 RetroText::~RetroText() {
@@ -140,12 +140,15 @@ void RetroText::set_tab_width(int tab_width) {
     _tab_width = tab_width;
 }
 
-void RetroText::wrap_to(int width, int line_spacing) {
+void RetroText::wrap_to(int width, int side_margin, int line_spacing) {
     _width = width;
+    _side_margin = side_margin;
     _line_spacing = line_spacing;
     _auto_width = 0;
-    int h = 0;
+    int h = _side_margin;
     int v = 0;
+
+    int wrap_distance = width - side_margin;
 
     for (size_t i = 0; i < _chars.size(); ++i) {
         _chars[i].h = h;
@@ -153,7 +156,7 @@ void RetroText::wrap_to(int width, int line_spacing) {
         switch (_chars[i].special) {
           case NONE:
             h += _font->char_width(_chars[i].character);
-            if (h > _width) {
+            if (h >= wrap_distance) {
                 v += _font->height + _line_spacing;
                 h = move_word_down(i, v);
             }
@@ -166,7 +169,7 @@ void RetroText::wrap_to(int width, int line_spacing) {
             break;
 
           case LINE_BREAK:
-            h = 0;
+            h = _side_margin;
             v += _font->height + _line_spacing;
             break;
 
@@ -317,17 +320,17 @@ int RetroText::move_word_down(int index, int v) {
     for (int i = index; i >= 0; --i) {
         switch (_chars[i].special) {
           case LINE_BREAK:
-            return 0;
+            return _side_margin;
 
           case WORD_BREAK:
           case TAB:
           case DELAY:
             {
-                if (_chars[i + 1].h == 0) {
-                    return 0;
+                if (_chars[i + 1].h <= _side_margin) {
+                    return _side_margin;
                 }
 
-                int h = 0;
+                int h = _side_margin;
                 for (int j = i + 1; j <= index; ++j) {
                     _chars[j].h = h;
                     _chars[j].v = v;
@@ -340,7 +343,7 @@ int RetroText::move_word_down(int index, int v) {
             break;
         }
     }
-    return 0;
+    return _side_margin;
 }
 
 RetroText::RetroChar::RetroChar(

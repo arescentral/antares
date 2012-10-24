@@ -40,7 +40,7 @@ class InterfaceText {
             RgbColor fore_color, RgbColor back_color);
     ~InterfaceText();
 
-    void wrap_to(int width, int h_buffer, int v_buffer);
+    void wrap_to(int width, int side_margin, int line_spacing);
 
     int width() const;
     int height() const;
@@ -78,8 +78,9 @@ class InterfaceText {
     std::vector<inlinePictType> _inline_picts;
     int _width;
     int _height;
-    int _h_buffer;
-    int _v_buffer;
+    int _auto_width;
+    int _side_margin;
+    int _line_spacing;
     const Font* const _font;
 
     DISALLOW_COPY_AND_ASSIGN(InterfaceText);
