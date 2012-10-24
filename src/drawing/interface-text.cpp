@@ -41,6 +41,7 @@ namespace interface {
 StyledText::StyledText(
         const sfz::StringSlice& text, const Font* font,
         RgbColor fore_color, RgbColor back_color):
+        _tab_width(0),
         _font(font) {
     for (size_t i = 0; i < text.size(); ++i) {
         switch (text.at(i)) {
@@ -106,6 +107,10 @@ StyledText::StyledText(
 StyledText::~StyledText() {
 }
 
+void StyledText::set_tab_width(int tab_width) {
+    _tab_width = tab_width;
+}
+
 void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
     _width = width;
     _side_margin = side_margin;
@@ -126,6 +131,11 @@ void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
                 v += _font->height + _line_spacing;
                 h = move_word_down(i, v);
             }
+            _auto_width = std::max(_auto_width, h);
+            break;
+
+          case TAB:
+            h += tab_width() - (h % tab_width());
             _auto_width = std::max(_auto_width, h);
             break;
 
@@ -161,6 +171,14 @@ int StyledText::size() const {
     return _chars.size();
 }
 
+int StyledText::tab_width() const {
+    if (_tab_width > 0) {
+        return _tab_width;
+    } else {
+        return _width / 2;
+    }
+}
+
 int StyledText::width() const {
     return _width;
 }
@@ -190,8 +208,8 @@ void StyledText::draw(PixMap* pix, const Rect& bounds) const {
 }
 
 void StyledText::draw_char(const Rect& bounds, int index) const {
-    const int char_adjust = _font->ascent;
     const int line_height = _font->height + _line_spacing;
+    const int char_adjust = _font->ascent;
     const StyledChar& ch = _chars[index];
     Point corner(bounds.left, bounds.top);
 
@@ -207,6 +225,14 @@ void StyledText::draw_char(const Rect& bounds, int index) const {
             }
             String str(1, ch.character);
             _font->draw_sprite(Point(corner.h, corner.v + char_adjust), str, ch.fore_color);
+        }
+        break;
+
+      case TAB:
+        if (ch.back_color != RgbColor::kBlack) {
+            Rect tab_rect(0, 0, tab_width() - (ch.h % tab_width()), line_height);
+            tab_rect.offset(corner.h, corner.v);
+            VideoDriver::driver()->fill_rect(tab_rect, ch.back_color);
         }
         break;
 
@@ -233,8 +259,8 @@ void StyledText::draw_char(const Rect& bounds, int index) const {
 }
 
 void StyledText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
-    const int char_adjust = _font->ascent;
     const int line_height = _font->height + _line_spacing;
+    const int char_adjust = _font->ascent;
     const StyledChar& ch = _chars[index];
     Point corner(bounds.left + ch.h, bounds.top + ch.v);
 
@@ -249,6 +275,14 @@ void StyledText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
             }
             String str(1, ch.character);
             _font->draw(Point(corner.h, corner.v + char_adjust), str, ch.fore_color, pix, bounds);
+        }
+        break;
+
+      case TAB:
+        if (ch.back_color != RgbColor::kBlack) {
+            Rect tab_rect(0, 0, tab_width() - (ch.h % tab_width()), line_height);
+            tab_rect.offset(corner.h, corner.v);
+            pix->view(tab_rect).fill(ch.back_color);
         }
         break;
 
@@ -280,6 +314,7 @@ int StyledText::move_word_down(int index, int v) {
             return _side_margin;
 
           case WORD_BREAK:
+          case TAB:
             {
                 if (_chars[i + 1].h <= _side_margin) {
                     return _side_margin;

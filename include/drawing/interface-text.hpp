@@ -42,9 +42,11 @@ class StyledText {
             RgbColor fore_color, RgbColor back_color);
     ~StyledText();
 
+    void set_tab_width(int tab_width);
     void wrap_to(int width, int side_margin, int line_spacing);
 
     int size() const;
+    int tab_width() const;
     int width() const;
     int height() const;
     int auto_width() const;
@@ -58,6 +60,7 @@ class StyledText {
   private:
     enum SpecialChar {
         NONE,
+        TAB,
         WORD_BREAK,
         LINE_BREAK,
         PICTURE,
@@ -80,6 +83,7 @@ class StyledText {
 
     std::vector<StyledChar> _chars;
     std::vector<inlinePictType> _inline_picts;
+    int _tab_width;
     int _width;
     int _height;
     int _auto_width;

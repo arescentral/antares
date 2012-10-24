@@ -230,6 +230,7 @@ void StyledText::draw_char(const Rect& bounds, int index) const {
     const int char_adjust = _font->ascent + _line_spacing;
     const StyledChar& ch = _chars[index];
     Point corner(bounds.left, bounds.top);
+
     switch (ch.special) {
       case NONE:
       case WORD_BREAK:
@@ -272,6 +273,7 @@ void StyledText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
     const int char_adjust = _font->ascent + _line_spacing;
     const StyledChar& ch = _chars[index];
     Point corner(bounds.left + ch.h, bounds.top + ch.v);
+
     switch (ch.special) {
       case NONE:
       case WORD_BREAK:
