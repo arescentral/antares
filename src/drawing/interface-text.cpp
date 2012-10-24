@@ -180,6 +180,7 @@ void InterfaceText::draw(PixMap* pix, const Rect& bounds) const {
 
 void InterfaceText::draw_char(const Rect& bounds, int index) const {
     const int char_adjust = _font->ascent;
+    const int line_height = _font->height + _v_buffer;
     const InterfaceChar& ch = _chars[index];
     Point corner(bounds.left, bounds.top);
 
@@ -187,13 +188,15 @@ void InterfaceText::draw_char(const Rect& bounds, int index) const {
       case NONE:
       case WORD_BREAK:
         {
+            if (ch.back_color != RgbColor::kBlack) {
+                Rect char_rect(0, 0, _font->char_width(ch.character), line_height);
+                char_rect.offset(corner.h, corner.v);
+                VideoDriver::driver()->fill_rect(char_rect, ch.back_color);
+            }
             corner.offset(ch.h, ch.v);
             String str(1, ch.character);
             _font->draw_sprite(Point(corner.h, corner.v + char_adjust), str, ch.fore_color);
         }
-        break;
-
-      case LINE_BREAK:
         break;
 
       case PICTURE:
@@ -206,11 +209,20 @@ void InterfaceText::draw_char(const Rect& bounds, int index) const {
             sprite->draw(corner.h, corner.v);
         }
         break;
+
+      case LINE_BREAK:
+        if (ch.back_color != RgbColor::kBlack) {
+            Rect line_rect(0, 0, bounds.width() - ch.h, line_height);
+            line_rect.offset(corner.h, corner.v);
+            VideoDriver::driver()->fill_rect(line_rect, ch.back_color);
+        }
+        break;
     }
 }
 
 void InterfaceText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
     const int char_adjust = _font->ascent;
+    const int line_height = _font->height + _v_buffer;
     const InterfaceChar& ch = _chars[index];
     Point corner(bounds.left + ch.h, bounds.top + ch.v);
 
@@ -218,12 +230,14 @@ void InterfaceText::draw_char(PixMap* pix, const Rect& bounds, int index) const 
       case NONE:
       case WORD_BREAK:
         {
+            if (ch.back_color != RgbColor::kBlack) {
+                Rect char_rect(0, 0, _font->char_width(ch.character), line_height);
+                char_rect.offset(corner.h, corner.v);
+                pix->view(char_rect).fill(ch.back_color);
+            }
             String str(1, ch.character);
             _font->draw(Point(corner.h, corner.v + char_adjust), str, ch.fore_color, pix, bounds);
         }
-        break;
-
-      case LINE_BREAK:
         break;
 
       case PICTURE:
@@ -233,6 +247,14 @@ void InterfaceText::draw_char(PixMap* pix, const Rect& bounds, int index) const 
             pict_bounds.offset(bounds.left, bounds.top);
             Picture pict(inline_pict.id);
             pix->view(pict_bounds).copy(pict);
+        }
+        break;
+
+      case LINE_BREAK:
+        if (ch.back_color != RgbColor::kBlack) {
+            Rect line_rect(0, 0, bounds.width() - ch.h, line_height);
+            line_rect.offset(corner.h, corner.v);
+            pix->view(line_rect).fill(ch.back_color);
         }
         break;
     }
