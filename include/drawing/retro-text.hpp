@@ -79,8 +79,7 @@ class RetroText {
     void color_cursor(const Rect& bounds, int index, const RgbColor& color) const;
     int move_word_down(int index, int v);
 
-    RgbColor _original_fore_color;
-    RgbColor _original_back_color;
+    RgbColor _fore_color;
     std::vector<RetroChar> _chars;
     int _tab_width;
     int _width;

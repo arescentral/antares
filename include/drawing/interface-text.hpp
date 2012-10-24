@@ -35,7 +35,9 @@ class PixMap;
 
 class InterfaceText {
   public:
-    InterfaceText(const sfz::StringSlice& text, interfaceStyleType style, const RgbColor& color);
+    InterfaceText(
+            const sfz::StringSlice& text, const Font* font,
+            RgbColor fore_color, RgbColor back_color);
     ~InterfaceText();
 
     void wrap_to(int width, int h_buffer, int v_buffer);
@@ -58,17 +60,19 @@ class InterfaceText {
     };
 
     struct InterfaceChar {
-        InterfaceChar(uint32_t character, SpecialChar special);
+        InterfaceChar(
+                uint32_t character, SpecialChar special, const RgbColor& fore_color,
+                const RgbColor& back_color);
 
         uint32_t character;
         SpecialChar special;
+        RgbColor fore_color;
+        RgbColor back_color;
         int h;
         int v;
     };
 
     int move_word_down(int index, int v);
-
-    const RgbColor _color;
 
     std::vector<InterfaceChar> _chars;
     std::vector<inlinePictType> _inline_picts;

@@ -52,8 +52,7 @@ int hex_digit(uint32_t c) {
 RetroText::RetroText(
         const StringSlice& text, const Font* font,
         RgbColor fore_color, RgbColor back_color):
-        _original_fore_color(fore_color),
-        _original_back_color(back_color),
+        _fore_color(fore_color),
         _tab_width(0),
         _font(font) {
     const RgbColor original_fore_color = fore_color;
@@ -299,7 +298,7 @@ void RetroText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
 }
 
 void RetroText::draw_cursor(const Rect& bounds, int index) const {
-    color_cursor(bounds, index, _original_fore_color);
+    color_cursor(bounds, index, _fore_color);
 }
 
 void RetroText::color_cursor(const Rect& bounds, int index, const RgbColor& color) const {
@@ -346,12 +345,12 @@ int RetroText::move_word_down(int index, int v) {
 
 RetroText::RetroChar::RetroChar(
         uint32_t character, SpecialChar special, const RgbColor& fore_color,
-        const RgbColor& back_color)
-        : character(character),
-          special(special),
-          fore_color(fore_color),
-          back_color(back_color),
-          h(0),
-          v(0) { }
+        const RgbColor& back_color):
+        character(character),
+        special(special),
+        fore_color(fore_color),
+        back_color(back_color),
+        h(0),
+        v(0) { }
 
 }  // namespace antares

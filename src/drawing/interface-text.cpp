@@ -37,32 +37,18 @@ using sfz::string_to_int;
 
 namespace antares {
 
-namespace {
-
-const Font* font_for_style(interfaceStyleType style) {
-    switch (style) {
-      case kLarge:
-        return button_font;
-      case kSmall:
-        return small_button_font;
-    }
-    throw Exception(format("invalid style {0}", style));
-}
-
-}  // namespace
-
 InterfaceText::InterfaceText(
-        const StringSlice& text, interfaceStyleType style, const RgbColor& color)
-        : _color(color),
-          _font(font_for_style(style)) {
+        const sfz::StringSlice& text, const Font* font,
+        RgbColor fore_color, RgbColor back_color):
+        _font(font) {
     for (size_t i = 0; i < text.size(); ++i) {
         switch (text.at(i)) {
           case '\r':
-            _chars.push_back(InterfaceChar('\r', LINE_BREAK));
+            _chars.push_back(InterfaceChar('\r', LINE_BREAK, fore_color, back_color));
             break;
 
           case ' ':
-            _chars.push_back(InterfaceChar(' ', WORD_BREAK));
+            _chars.push_back(InterfaceChar(' ', WORD_BREAK, fore_color, back_color));
             break;
 
           case '^':
@@ -90,7 +76,9 @@ InterfaceText::InterfaceText(
                         try {
                             inline_pict.bounds = Picture(id).size().as_rect();
                             _inline_picts.push_back(inline_pict);
-                            _chars.push_back(InterfaceChar(_inline_picts.size() - 1, PICTURE));
+                            _chars.push_back(InterfaceChar(
+                                        _inline_picts.size() - 1, PICTURE, fore_color,
+                                        back_color));
                         } catch (sfz::Exception& e) { }
                         found_code = true;
                         i = j;
@@ -105,11 +93,11 @@ InterfaceText::InterfaceText(
             break;
 
           default:
-            _chars.push_back(InterfaceChar(text.at(i), NONE));
+            _chars.push_back(InterfaceChar(text.at(i), NONE, fore_color, back_color));
             break;
         }
     }
-    _chars.push_back(InterfaceChar('\r', LINE_BREAK));
+    _chars.push_back(InterfaceChar('\r', LINE_BREAK, fore_color, back_color));
 
     wrap_to(std::numeric_limits<int>::max(), 0, 0);
 }
@@ -201,7 +189,7 @@ void InterfaceText::draw_char(const Rect& bounds, int index) const {
         {
             corner.offset(ch.h, ch.v);
             String str(1, ch.character);
-            _font->draw_sprite(Point(corner.h, corner.v + char_adjust), str, _color);
+            _font->draw_sprite(Point(corner.h, corner.v + char_adjust), str, ch.fore_color);
         }
         break;
 
@@ -231,7 +219,7 @@ void InterfaceText::draw_char(PixMap* pix, const Rect& bounds, int index) const 
       case WORD_BREAK:
         {
             String str(1, ch.character);
-            _font->draw(Point(corner.h, corner.v + char_adjust), str, _color, pix, bounds);
+            _font->draw(Point(corner.h, corner.v + char_adjust), str, ch.fore_color, pix, bounds);
         }
         break;
 
@@ -279,10 +267,14 @@ int InterfaceText::move_word_down(int index, int v) {
     return _h_buffer;
 }
 
-InterfaceText::InterfaceChar::InterfaceChar(uint32_t character, SpecialChar special)
-        : character(character),
-          special(special),
-          h(0),
-          v(0) { }
+InterfaceText::InterfaceChar::InterfaceChar(
+        uint32_t character, SpecialChar special, const RgbColor& fore_color,
+        const RgbColor& back_color):
+        character(character),
+        special(special),
+        fore_color(fore_color),
+        back_color(back_color),
+        h(0),
+        v(0) { }
 
 }  // namespace antares
