@@ -52,7 +52,10 @@ HelpScreen::HelpScreen()
 
     RgbColor fore = GetRGBTranslateColorShade(RED, VERY_LIGHT);
     RgbColor back = GetRGBTranslateColorShade(RED, VERY_DARK);
-    retro::StyledText retro_text(text, computer_font, fore, back);
+    retro::StyledText retro_text(computer_font);
+    retro_text.set_fore_color(fore);
+    retro_text.set_back_color(back);
+    retro_text.set_text(text);
     retro_text.wrap_to(_bounds.width(), 0, 0);
 
     ArrayPixMap pix(_bounds.width(), _bounds.height());

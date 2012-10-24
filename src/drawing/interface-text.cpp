@@ -38,19 +38,36 @@ using sfz::string_to_int;
 namespace antares {
 namespace interface {
 
-StyledText::StyledText(
-        const sfz::StringSlice& text, const Font* font,
-        RgbColor fore_color, RgbColor back_color):
+StyledText::StyledText(const Font* font):
+        _fore_color(RgbColor::kWhite),
+        _back_color(RgbColor::kBlack),
         _tab_width(0),
-        _font(font) {
+        _font(font) { }
+
+StyledText::~StyledText() {
+}
+
+void StyledText::set_fore_color(RgbColor fore_color) {
+    _fore_color = fore_color;
+}
+
+void StyledText::set_back_color(RgbColor back_color) {
+    _back_color = back_color;
+}
+
+void StyledText::set_tab_width(int tab_width) {
+    _tab_width = tab_width;
+}
+
+void StyledText::set_text(sfz::StringSlice text) {
     for (size_t i = 0; i < text.size(); ++i) {
         switch (text.at(i)) {
           case '\r':
-            _chars.push_back(StyledChar('\r', LINE_BREAK, fore_color, back_color));
+            _chars.push_back(StyledChar('\r', LINE_BREAK, _fore_color, _back_color));
             break;
 
           case ' ':
-            _chars.push_back(StyledChar(' ', WORD_BREAK, fore_color, back_color));
+            _chars.push_back(StyledChar(' ', WORD_BREAK, _fore_color, _back_color));
             break;
 
           case '^':
@@ -79,8 +96,8 @@ StyledText::StyledText(
                             inline_pict.bounds = Picture(id).size().as_rect();
                             _inline_picts.push_back(inline_pict);
                             _chars.push_back(StyledChar(
-                                        _inline_picts.size() - 1, PICTURE, fore_color,
-                                        back_color));
+                                        _inline_picts.size() - 1, PICTURE, _fore_color,
+                                        _back_color));
                         } catch (sfz::Exception& e) { }
                         found_code = true;
                         i = j;
@@ -95,20 +112,13 @@ StyledText::StyledText(
             break;
 
           default:
-            _chars.push_back(StyledChar(text.at(i), NONE, fore_color, back_color));
+            _chars.push_back(StyledChar(text.at(i), NONE, _fore_color, _back_color));
             break;
         }
     }
-    _chars.push_back(StyledChar('\r', LINE_BREAK, fore_color, back_color));
+    _chars.push_back(StyledChar('\r', LINE_BREAK, _fore_color, _back_color));
 
     wrap_to(std::numeric_limits<int>::max(), 0, 0);
-}
-
-StyledText::~StyledText() {
-}
-
-void StyledText::set_tab_width(int tab_width) {
-    _tab_width = tab_width;
 }
 
 void StyledText::wrap_to(int width, int side_margin, int line_spacing) {

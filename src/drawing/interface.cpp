@@ -1088,7 +1088,9 @@ void draw_text_in_rect(
         const Rect& tRect, const StringSlice& text, interfaceStyleType style,
         unsigned char textcolor, vector<inlinePictType>& inlinePict) {
     RgbColor color = GetRGBTranslateColorShade(textcolor, VERY_LIGHT);
-    interface::StyledText interface_text(text, interface_font(style), color, RgbColor::kBlack);
+    interface::StyledText interface_text(interface_font(style));
+    interface_text.set_fore_color(color);
+    interface_text.set_text(text);
     interface_text.wrap_to(tRect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer);
     inlinePict = interface_text.inline_picts();
     for (int i = 0; i < inlinePict.size(); ++i) {
@@ -1099,7 +1101,8 @@ void draw_text_in_rect(
 
 short GetInterfaceTextHeightFromWidth(
         const StringSlice& text, interfaceStyleType style, short boundsWidth) {
-    interface::StyledText interface_text(text, interface_font(style), RgbColor::kBlack, RgbColor::kBlack);
+    interface::StyledText interface_text(interface_font(style));
+    interface_text.set_text(text);
     interface_text.wrap_to(boundsWidth, kInterfaceTextHBuffer, kInterfaceTextVBuffer);
     return interface_text.height();
 }

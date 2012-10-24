@@ -36,12 +36,13 @@ namespace retro {
 
 class StyledText {
   public:
-    StyledText(
-            const sfz::StringSlice& text, const Font* font,
-            RgbColor fore_color, RgbColor back_color);
+    StyledText(const Font* font);
     ~StyledText();
 
+    void set_fore_color(RgbColor fore_color);
+    void set_back_color(RgbColor back_color);
     void set_tab_width(int tab_width);
+    void set_text(sfz::StringSlice text);
     void wrap_to(int width, int side_margin, int line_spacing);
 
     int size() const;
@@ -84,6 +85,7 @@ class StyledText {
     int move_word_down(int index, int v);
 
     RgbColor _fore_color;
+    RgbColor _back_color;
     std::vector<StyledChar> _chars;
     std::vector<inlinePictType> _inline_picts;
     int _tab_width;

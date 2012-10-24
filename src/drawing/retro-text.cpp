@@ -50,14 +50,32 @@ int hex_digit(uint32_t c) {
 
 }  // namespace
 
-StyledText::StyledText(
-        const StringSlice& text, const Font* font,
-        RgbColor fore_color, RgbColor back_color):
-        _fore_color(fore_color),
+StyledText::StyledText(const Font* font):
+        _fore_color(RgbColor::kWhite),
+        _back_color(RgbColor::kBlack),
         _tab_width(0),
-        _font(font) {
-    const RgbColor original_fore_color = fore_color;
-    const RgbColor original_back_color = back_color;
+        _font(font) { }
+
+StyledText::~StyledText() {
+}
+
+void StyledText::set_fore_color(RgbColor fore_color) {
+    _fore_color = fore_color;
+}
+
+void StyledText::set_back_color(RgbColor back_color) {
+    _back_color = back_color;
+}
+
+void StyledText::set_tab_width(int tab_width) {
+    _tab_width = tab_width;
+}
+
+void StyledText::set_text(sfz::StringSlice text) {
+    const RgbColor original_fore_color = _fore_color;
+    const RgbColor original_back_color = _back_color;
+    RgbColor fore_color = _fore_color;
+    RgbColor back_color = _back_color;
 
     for (size_t i = 0; i < text.size(); ++i) {
         switch (text.at(i)) {
@@ -132,13 +150,6 @@ StyledText::StyledText(
     _chars.push_back(StyledChar('\r', LINE_BREAK, fore_color, back_color));
 
     wrap_to(std::numeric_limits<int>::max(), 0, 0);
-}
-
-StyledText::~StyledText() {
-}
-
-void StyledText::set_tab_width(int tab_width) {
-    _tab_width = tab_width;
 }
 
 void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
