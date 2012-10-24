@@ -29,7 +29,7 @@
 
 namespace antares {
 
-class directTextType;
+class Font;
 class Picture;
 class PixMap;
 
@@ -76,7 +76,7 @@ class InterfaceText {
     int _height;
     int _h_buffer;
     int _v_buffer;
-    const directTextType* const _font;
+    const Font* const _font;
 
     DISALLOW_COPY_AND_ASSIGN(InterfaceText);
 };

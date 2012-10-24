@@ -67,15 +67,15 @@ Rune from_mac_roman(uint8_t byte) {
 
 }  // namespace
 
-const directTextType* gDirectTextData[kDirectFontNum];
-const directTextType* tactical_font;
-const directTextType* computer_font;
-const directTextType* button_font;
-const directTextType* message_font;
-const directTextType* title_font;
-const directTextType* small_button_font;
+const Font* gDirectTextData[kDirectFontNum];
+const Font* tactical_font;
+const Font* computer_font;
+const Font* button_font;
+const Font* message_font;
+const Font* title_font;
+const Font* small_button_font;
 
-directTextType::directTextType(int32_t id) {
+Font::Font(int32_t id) {
     Resource defn_rsrc("font-descriptions", "nlFD", id);
     BytesSlice in(defn_rsrc.data());
 
@@ -103,9 +103,9 @@ directTextType::directTextType(int32_t id) {
     }
 }
 
-directTextType::~directTextType() { }
+Font::~Font() { }
 
-void directTextType::draw(
+void Font::draw(
         Point origin, sfz::StringSlice string, RgbColor color, PixMap* pix,
         const Rect& clip) const {
     // move the pen to the resulting location
@@ -164,7 +164,7 @@ void directTextType::draw(
     }
 }
 
-void directTextType::draw_sprite(Point origin, sfz::StringSlice string, RgbColor color) const {
+void Font::draw_sprite(Point origin, sfz::StringSlice string, RgbColor color) const {
     origin.offset(0, -ascent);
     for (size_t i = 0; i < string.size(); ++i) {
         uint8_t byte = to_mac_roman(string.at(i));
@@ -174,12 +174,12 @@ void directTextType::draw_sprite(Point origin, sfz::StringSlice string, RgbColor
 }
 
 void InitDirectText() {
-    gDirectTextData[0] = tactical_font = new directTextType(kTacticalFontResID);
-    gDirectTextData[1] = computer_font = new directTextType(kComputerFontResID);
-    gDirectTextData[2] = button_font = new directTextType(kButtonFontResID);
-    gDirectTextData[3] = message_font = new directTextType(kMessageFontResID);
-    gDirectTextData[4] = title_font = new directTextType(kTitleFontResID);
-    gDirectTextData[5] = small_button_font = new directTextType(kButtonSmallFontResID);
+    gDirectTextData[0] = tactical_font = new Font(kTacticalFontResID);
+    gDirectTextData[1] = computer_font = new Font(kComputerFontResID);
+    gDirectTextData[2] = button_font = new Font(kButtonFontResID);
+    gDirectTextData[3] = message_font = new Font(kMessageFontResID);
+    gDirectTextData[4] = title_font = new Font(kTitleFontResID);
+    gDirectTextData[5] = small_button_font = new Font(kButtonSmallFontResID);
 }
 
 void DirectTextCleanup() {
@@ -191,13 +191,13 @@ void DirectTextCleanup() {
     delete small_button_font;
 }
 
-uint8_t directTextType::char_width(Rune mchar) const {
+uint8_t Font::char_width(Rune mchar) const {
     const uint8_t* widptr =
         charSet.data() + height * physicalWidth * to_mac_roman(mchar) + to_mac_roman(mchar);
     return *widptr;
 }
 
-int32_t directTextType::string_width(sfz::StringSlice s) const {
+int32_t Font::string_width(sfz::StringSlice s) const {
     int32_t sum = 0;
     for (int i = 0; i < s.size(); ++i) {
         sum += char_width(s.at(i));

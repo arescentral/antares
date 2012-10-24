@@ -26,10 +26,10 @@
 
 namespace antares {
 
-class directTextType {
+class Font {
   public:
-    directTextType(int32_t id);
-    ~directTextType();
+    Font(int32_t id);
+    ~Font();
 
     uint8_t char_width(sfz::Rune mchar) const;
     int32_t string_width(sfz::StringSlice s) const;
@@ -50,15 +50,15 @@ class directTextType {
     sfz::Bytes charSet;
     sfz::scoped_array<sfz::scoped_ptr<Sprite> > _sprites;
 
-    DISALLOW_COPY_AND_ASSIGN(directTextType);
+    DISALLOW_COPY_AND_ASSIGN(Font);
 };
 
-extern const directTextType* tactical_font;
-extern const directTextType* computer_font;
-extern const directTextType* button_font;
-extern const directTextType* message_font;
-extern const directTextType* title_font;
-extern const directTextType* small_button_font;
+extern const Font* tactical_font;
+extern const Font* computer_font;
+extern const Font* button_font;
+extern const Font* message_font;
+extern const Font* title_font;
+extern const Font* small_button_font;
 
 void InitDirectText();
 void DirectTextCleanup();

@@ -39,7 +39,7 @@ namespace antares {
 
 namespace {
 
-const directTextType* font_for_style(interfaceStyleType style) {
+const Font* font_for_style(interfaceStyleType style) {
     switch (style) {
       case kLarge:
         return button_font;

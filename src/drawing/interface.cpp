@@ -63,7 +63,7 @@ const int32_t kMaxKeyNameLength         = 4;  // how many chars can be in name o
 // DrawInterfaceString:
 //  Relies on roman alphabet for upper/lower casing.  NOT WORLD-READY!
 
-const directTextType* interface_font(interfaceStyleType style) {
+const Font* interface_font(interfaceStyleType style) {
     if ( style == kSmall) {
         return small_button_font;
     } else {

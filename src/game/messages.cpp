@@ -96,7 +96,7 @@ inline int mHexDigitValue(char c) {
 
 namespace {
 
-int mac_roman_char_width(directTextType* font, uint8_t ch) {
+int mac_roman_char_width(Font* font, uint8_t ch) {
     BytesSlice bytes(&ch, 1);
     String str(macroman::decode(bytes));
     return font->char_width(str.at(0));

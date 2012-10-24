@@ -27,14 +27,14 @@
 
 namespace antares {
 
-class directTextType;
+class Font;
 class Picture;
 class PixMap;
 
 class RetroText {
   public:
     RetroText(
-            const sfz::StringSlice& text, const directTextType* font,
+            const sfz::StringSlice& text, const Font* font,
             RgbColor fore_color, RgbColor back_color);
     ~RetroText();
 
@@ -87,7 +87,7 @@ class RetroText {
     int _height;
     int _auto_width;
     int _line_spacing;
-    const directTextType* const _font;
+    const Font* const _font;
 
     DISALLOW_COPY_AND_ASSIGN(RetroText);
 };

@@ -50,7 +50,7 @@ int hex_digit(uint32_t c) {
 }  // namespace
 
 RetroText::RetroText(
-        const StringSlice& text, const directTextType* font,
+        const StringSlice& text, const Font* font,
         RgbColor fore_color, RgbColor back_color):
         _original_fore_color(fore_color),
         _original_back_color(back_color),
