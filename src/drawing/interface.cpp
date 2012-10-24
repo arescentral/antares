@@ -86,12 +86,8 @@ void DrawInterfaceString(
 }
 
 short GetInterfaceStringWidth(const StringSlice& s, interfaceStyleType style) {
-    long            width, height;
-
     SetInterfaceLargeUpperFont( style);
-    mGetDirectStringDimensions(s, width, height);
-
-    return ( width);
+    return gDirectText->string_width(s);
 }
 
 // GetInterfaceFontWidth:       -- NOT WORLD-READY! --

@@ -432,22 +432,19 @@ void RecalcScreenLabelSize(long which) {
         int maxWidth = 0;
         for (int i = 1; i <= lineNum; i++) {
             StringSlice text = String_Get_Nth_Line(label->text, i);
-            mGetDirectStringDimensions(text, label->width, label->height);
-            label->width += kLabelTotalInnerSpace;
-            if (label->width > maxWidth) {
-                maxWidth = label->width;
+            int32_t width = gDirectText->string_width(text);
+            if (width > maxWidth) {
+                maxWidth = width;
             }
         }
-        label->width = maxWidth;
-        label->lineHeight = label->height;
-        label->height = label->height * lineNum;
-        label->height += kLabelTotalInnerSpace;
+        label->width = maxWidth + kLabelTotalInnerSpace;
+        label->height = (gDirectText->height * lineNum) + kLabelTotalInnerSpace;
+        label->lineHeight = gDirectText->height;
     } else {
         label->lineNum = 1;
-        mGetDirectStringDimensions(label->text, label->width, label->height);
-        label->width += kLabelTotalInnerSpace;
-        label->lineHeight = label->height;
-        label->height += kLabelTotalInnerSpace;
+        label->width = gDirectText->string_width(label->text) + kLabelTotalInnerSpace;
+        label->height = gDirectText->height + kLabelTotalInnerSpace;
+        label->lineHeight = gDirectText->height;
     }
 }
 

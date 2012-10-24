@@ -32,6 +32,7 @@ class directTextType {
     ~directTextType();
 
     uint8_t char_width(sfz::Rune mchar) const;
+    int32_t string_width(sfz::StringSlice s) const;
 
     void draw(
             Point origin, sfz::StringSlice string, RgbColor color, PixMap* pix,
@@ -65,7 +66,6 @@ void InitDirectText();
 void DirectTextCleanup();
 
 void mSetDirectFont(const directTextType* font);
-void mGetDirectStringDimensions(const sfz::StringSlice& string, long& width, long& height);
 
 }  // namespace antares
 

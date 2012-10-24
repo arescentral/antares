@@ -201,16 +201,16 @@ uint8_t directTextType::char_width(Rune mchar) const {
     return *widptr;
 }
 
-void mSetDirectFont(const directTextType* font) {
-    gDirectText = font;
+int32_t directTextType::string_width(sfz::StringSlice s) const {
+    int32_t sum = 0;
+    for (int i = 0; i < s.size(); ++i) {
+        sum += char_width(s.at(i));
+    }
+    return sum;
 }
 
-void mGetDirectStringDimensions(const StringSlice& string, long& width, long& height) {
-    height = gDirectText->height;
-    width = 0;
-    for (size_t i = 0; i < string.size(); ++i) {
-        width += gDirectText->char_width(string.at(i));
-    }
+void mSetDirectFont(const directTextType* font) {
+    gDirectText = font;
 }
 
 }  // namespace antares
