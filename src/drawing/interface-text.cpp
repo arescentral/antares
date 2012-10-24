@@ -219,7 +219,7 @@ void StyledText::draw(PixMap* pix, const Rect& bounds) const {
 
 void StyledText::draw_char(const Rect& bounds, int index) const {
     const int line_height = _font->height + _line_spacing;
-    const int char_adjust = _font->ascent;
+    const int char_adjust = _font->ascent + _line_spacing;
     const StyledChar& ch = _chars[index];
     Point corner(bounds.left, bounds.top);
 
@@ -249,7 +249,7 @@ void StyledText::draw_char(const Rect& bounds, int index) const {
       case PICTURE:
         {
             const inlinePictType& inline_pict = _inline_picts[ch.character];
-            corner.offset(inline_pict.bounds.left, inline_pict.bounds.top);
+            corner.offset(inline_pict.bounds.left, inline_pict.bounds.top + _line_spacing);
             Picture pict(inline_pict.id);
             scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite(
                         format("/pict/{0}"), pict));
@@ -270,7 +270,7 @@ void StyledText::draw_char(const Rect& bounds, int index) const {
 
 void StyledText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
     const int line_height = _font->height + _line_spacing;
-    const int char_adjust = _font->ascent;
+    const int char_adjust = _font->ascent + _line_spacing;
     const StyledChar& ch = _chars[index];
     Point corner(bounds.left + ch.h, bounds.top + ch.v);
 
@@ -300,7 +300,7 @@ void StyledText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
         {
             const inlinePictType& inline_pict = _inline_picts[ch.character];
             Rect pict_bounds = inline_pict.bounds;
-            pict_bounds.offset(bounds.left, bounds.top);
+            pict_bounds.offset(bounds.left, bounds.top + _line_spacing);
             Picture pict(inline_pict.id);
             pix->view(pict_bounds).copy(pict);
         }

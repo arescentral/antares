@@ -1085,7 +1085,7 @@ void draw_text_rect(const interfaceItemType& item) {
 }  // namespace
 
 void draw_text_in_rect(
-        const Rect& tRect, const StringSlice& text, interfaceStyleType style,
+        Rect tRect, const StringSlice& text, interfaceStyleType style,
         unsigned char textcolor, vector<inlinePictType>& inlinePict) {
     RgbColor color = GetRGBTranslateColorShade(textcolor, VERY_LIGHT);
     interface::StyledText interface_text(interface_font(style));
@@ -1096,6 +1096,7 @@ void draw_text_in_rect(
     for (int i = 0; i < inlinePict.size(); ++i) {
         inlinePict[i].bounds.offset(tRect.left, tRect.top);
     }
+    tRect.offset(0, -kInterfaceTextVBuffer);
     interface_text.draw(tRect);
 }
 
