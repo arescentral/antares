@@ -157,12 +157,20 @@ void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
     _height = v;
 }
 
+int StyledText::size() const {
+    return _chars.size();
+}
+
 int StyledText::width() const {
     return _width;
 }
 
 int StyledText::height() const {
     return _height;
+}
+
+int StyledText::auto_width() const {
+    return _auto_width;
 }
 
 const std::vector<inlinePictType>& StyledText::inline_picts() const {

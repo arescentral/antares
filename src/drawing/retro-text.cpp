@@ -209,6 +209,10 @@ int StyledText::auto_width() const {
     return _auto_width;
 }
 
+const std::vector<inlinePictType>& StyledText::inline_picts() const {
+    return _inline_picts;
+}
+
 void StyledText::draw(const Rect& bounds) const {
     for (size_t i = 0; i < _chars.size(); ++i) {
         draw_char(bounds, i);

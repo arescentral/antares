@@ -23,6 +23,7 @@
 #include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
+#include "drawing/interface.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {
@@ -48,6 +49,7 @@ class StyledText {
     int width() const;
     int height() const;
     int auto_width() const;
+    const std::vector<inlinePictType>& inline_picts() const;
 
     void draw(const Rect& bounds) const;
     void draw(PixMap* pix, const Rect& bounds) const;
@@ -83,6 +85,7 @@ class StyledText {
 
     RgbColor _fore_color;
     std::vector<StyledChar> _chars;
+    std::vector<inlinePictType> _inline_picts;
     int _tab_width;
     int _width;
     int _height;

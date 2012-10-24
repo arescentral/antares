@@ -44,8 +44,10 @@ class StyledText {
 
     void wrap_to(int width, int side_margin, int line_spacing);
 
+    int size() const;
     int width() const;
     int height() const;
+    int auto_width() const;
     const std::vector<inlinePictType>& inline_picts() const;
 
     void draw(const Rect& bounds) const;
