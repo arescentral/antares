@@ -33,6 +33,7 @@ using sfz::StringSlice;
 using sfz::format;
 
 namespace antares {
+namespace retro {
 
 namespace {
 
@@ -49,7 +50,7 @@ int hex_digit(uint32_t c) {
 
 }  // namespace
 
-RetroText::RetroText(
+StyledText::StyledText(
         const StringSlice& text, const Font* font,
         RgbColor fore_color, RgbColor back_color):
         _fore_color(fore_color),
@@ -61,16 +62,16 @@ RetroText::RetroText(
     for (size_t i = 0; i < text.size(); ++i) {
         switch (text.at(i)) {
           case '\r':
-            _chars.push_back(RetroChar('\r', LINE_BREAK, fore_color, back_color));
+            _chars.push_back(StyledChar('\r', LINE_BREAK, fore_color, back_color));
             break;
 
           case '_':
             // TODO(sfiera): replace use of "_" with e.g. "\_".
-            _chars.push_back(RetroChar(' ', NONE, fore_color, back_color));
+            _chars.push_back(StyledChar(' ', NONE, fore_color, back_color));
             break;
 
           case ' ':
-            _chars.push_back(RetroChar(' ', WORD_BREAK, fore_color, back_color));
+            _chars.push_back(StyledChar(' ', WORD_BREAK, fore_color, back_color));
             break;
 
           case '\\':
@@ -81,8 +82,8 @@ RetroText::RetroText(
             switch (text.at(i)) {
               case 'i':
                 std::swap(fore_color, back_color);
-                _chars.push_back(RetroChar('\\', DELAY, fore_color, back_color));
-                _chars.push_back(RetroChar('i', DELAY, fore_color, back_color));
+                _chars.push_back(StyledChar('\\', DELAY, fore_color, back_color));
+                _chars.push_back(StyledChar('i', DELAY, fore_color, back_color));
                 break;
 
               case 'f':
@@ -106,16 +107,16 @@ RetroText::RetroText(
               case 'r':
                 fore_color = original_fore_color;
                 back_color = original_back_color;
-                _chars.push_back(RetroChar('\\', DELAY, fore_color, back_color));
-                _chars.push_back(RetroChar('r', DELAY, fore_color, back_color));
+                _chars.push_back(StyledChar('\\', DELAY, fore_color, back_color));
+                _chars.push_back(StyledChar('r', DELAY, fore_color, back_color));
                 break;
 
               case 't':
-                _chars.push_back(RetroChar('\\', TAB, fore_color, back_color));
+                _chars.push_back(StyledChar('\\', TAB, fore_color, back_color));
                 break;
 
               case '\\':
-                _chars.push_back(RetroChar('\\', NONE, fore_color, back_color));
+                _chars.push_back(StyledChar('\\', NONE, fore_color, back_color));
                 break;
 
               default:
@@ -124,23 +125,23 @@ RetroText::RetroText(
             break;
 
           default:
-            _chars.push_back(RetroChar(text.at(i), NONE, fore_color, back_color));
+            _chars.push_back(StyledChar(text.at(i), NONE, fore_color, back_color));
             break;
         }
     }
-    _chars.push_back(RetroChar('\r', LINE_BREAK, fore_color, back_color));
+    _chars.push_back(StyledChar('\r', LINE_BREAK, fore_color, back_color));
 
     wrap_to(std::numeric_limits<int>::max(), 0, 0);
 }
 
-RetroText::~RetroText() {
+StyledText::~StyledText() {
 }
 
-void RetroText::set_tab_width(int tab_width) {
+void StyledText::set_tab_width(int tab_width) {
     _tab_width = tab_width;
 }
 
-void RetroText::wrap_to(int width, int side_margin, int line_spacing) {
+void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
     _width = width;
     _side_margin = side_margin;
     _line_spacing = line_spacing;
@@ -184,11 +185,11 @@ void RetroText::wrap_to(int width, int side_margin, int line_spacing) {
     _height = v;
 }
 
-int RetroText::size() const {
+int StyledText::size() const {
     return _chars.size();
 }
 
-int RetroText::tab_width() const {
+int StyledText::tab_width() const {
     if (_tab_width > 0) {
         return _tab_width;
     } else {
@@ -196,39 +197,40 @@ int RetroText::tab_width() const {
     }
 }
 
-int RetroText::width() const {
+int StyledText::width() const {
     return _width;
 }
 
-int RetroText::height() const {
+int StyledText::height() const {
     return _height;
 }
 
-int RetroText::auto_width() const {
+int StyledText::auto_width() const {
     return _auto_width;
 }
 
-void RetroText::draw(const Rect& bounds) const {
+void StyledText::draw(const Rect& bounds) const {
     for (size_t i = 0; i < _chars.size(); ++i) {
         draw_char(bounds, i);
     }
 }
 
-void RetroText::draw(PixMap* pix, const Rect& bounds) const {
+void StyledText::draw(PixMap* pix, const Rect& bounds) const {
     for (size_t i = 0; i < _chars.size(); ++i) {
         draw_char(pix, bounds, i);
     }
 }
 
-void RetroText::draw_char(const Rect& bounds, int index) const {
+void StyledText::draw_char(const Rect& bounds, int index) const {
     const int line_height = _font->height + _line_spacing;
     const int char_adjust = _font->ascent + _line_spacing;
-    const RetroChar& ch = _chars[index];
-    Point corner(bounds.left + ch.h, bounds.top + ch.v);
+    const StyledChar& ch = _chars[index];
+    Point corner(bounds.left, bounds.top);
     switch (ch.special) {
       case NONE:
       case WORD_BREAK:
         {
+            corner.offset(ch.h, ch.v);
             if (ch.back_color != RgbColor::kBlack) {
                 Rect char_rect(0, 0, _font->char_width(ch.character), line_height);
                 char_rect.offset(corner.h, corner.v);
@@ -248,6 +250,7 @@ void RetroText::draw_char(const Rect& bounds, int index) const {
         break;
 
       case LINE_BREAK:
+        corner.offset(ch.h, ch.v);
         if (ch.back_color != RgbColor::kBlack) {
             Rect line_rect(0, 0, bounds.width() - ch.h, line_height);
             line_rect.offset(corner.h, corner.v);
@@ -260,10 +263,10 @@ void RetroText::draw_char(const Rect& bounds, int index) const {
     }
 }
 
-void RetroText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
+void StyledText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
     const int line_height = _font->height + _line_spacing;
     const int char_adjust = _font->ascent + _line_spacing;
-    const RetroChar& ch = _chars[index];
+    const StyledChar& ch = _chars[index];
     Point corner(bounds.left + ch.h, bounds.top + ch.v);
     switch (ch.special) {
       case NONE:
@@ -300,13 +303,13 @@ void RetroText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
     }
 }
 
-void RetroText::draw_cursor(const Rect& bounds, int index) const {
+void StyledText::draw_cursor(const Rect& bounds, int index) const {
     color_cursor(bounds, index, _fore_color);
 }
 
-void RetroText::color_cursor(const Rect& bounds, int index, const RgbColor& color) const {
+void StyledText::color_cursor(const Rect& bounds, int index, const RgbColor& color) const {
     const int line_height = _font->height + _line_spacing;
-    const RetroChar& ch = _chars[index];
+    const StyledChar& ch = _chars[index];
     Point corner(bounds.left + ch.h, bounds.top + ch.v);
     Rect char_rect(0, 0, _font->logicalWidth, line_height);
     char_rect.offset(corner.h, corner.v);
@@ -316,7 +319,7 @@ void RetroText::color_cursor(const Rect& bounds, int index, const RgbColor& colo
     }
 }
 
-int RetroText::move_word_down(int index, int v) {
+int StyledText::move_word_down(int index, int v) {
     for (int i = index; i >= 0; --i) {
         switch (_chars[i].special) {
           case LINE_BREAK:
@@ -346,7 +349,7 @@ int RetroText::move_word_down(int index, int v) {
     return _side_margin;
 }
 
-RetroText::RetroChar::RetroChar(
+StyledText::StyledChar::StyledChar(
         uint32_t character, SpecialChar special, const RgbColor& fore_color,
         const RgbColor& back_color):
         character(character),
@@ -356,4 +359,5 @@ RetroText::RetroChar::RetroChar(
         h(0),
         v(0) { }
 
+}  // namespace retro
 }  // namespace antares

@@ -33,12 +33,14 @@ class Font;
 class Picture;
 class PixMap;
 
-class InterfaceText {
+namespace interface {
+
+class StyledText {
   public:
-    InterfaceText(
+    StyledText(
             const sfz::StringSlice& text, const Font* font,
             RgbColor fore_color, RgbColor back_color);
-    ~InterfaceText();
+    ~StyledText();
 
     void wrap_to(int width, int side_margin, int line_spacing);
 
@@ -59,8 +61,8 @@ class InterfaceText {
         PICTURE,
     };
 
-    struct InterfaceChar {
-        InterfaceChar(
+    struct StyledChar {
+        StyledChar(
                 uint32_t character, SpecialChar special, const RgbColor& fore_color,
                 const RgbColor& back_color);
 
@@ -74,7 +76,7 @@ class InterfaceText {
 
     int move_word_down(int index, int v);
 
-    std::vector<InterfaceChar> _chars;
+    std::vector<StyledChar> _chars;
     std::vector<inlinePictType> _inline_picts;
     int _width;
     int _height;
@@ -83,9 +85,10 @@ class InterfaceText {
     int _line_spacing;
     const Font* const _font;
 
-    DISALLOW_COPY_AND_ASSIGN(InterfaceText);
+    DISALLOW_COPY_AND_ASSIGN(StyledText);
 };
 
+}  // namespace interface
 }  // namespace antares
 
 #endif  // ANTARES_DRAWING_INTERFACE_TEXT_HPP_

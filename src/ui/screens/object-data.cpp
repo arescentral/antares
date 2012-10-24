@@ -67,7 +67,7 @@ ObjectDataScreen::ObjectDataScreen(Point origin, int32_t object_id, Trigger trig
         _state(TYPING) {
     String text;
     CreateObjectDataText(&text, object_id);
-    _text.reset(new RetroText(
+    _text.reset(new retro::StyledText(
                 text, button_font,
                 GetRGBTranslateColorShade(GREEN, VERY_LIGHT),
                 GetRGBTranslateColorShade(GREEN, DARKEST)));

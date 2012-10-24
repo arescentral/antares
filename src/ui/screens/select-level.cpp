@@ -132,7 +132,7 @@ void SelectLevelScreen::draw_level_name() const {
     const interfaceItemType& i = item(NAME);
 
     RgbColor color = GetRGBTranslateColorShade(AQUA, VERY_LIGHT);
-    RetroText retro(chapter_name, title_font, color, RgbColor::kBlack);
+    retro::StyledText retro(chapter_name, title_font, color, RgbColor::kBlack);
     retro.wrap_to(440, 0, 2);
 
     retro.draw(i.bounds);

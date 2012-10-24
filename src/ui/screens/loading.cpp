@@ -45,7 +45,7 @@ LoadingScreen::LoadingScreen(const Scenario* scenario, bool* cancelled):
         _current(0),
         _max(1) {
     StringList strings(kLevelNameID);
-    _name_text.reset(new RetroText(
+    _name_text.reset(new retro::StyledText(
                 strings.at(_scenario->levelNameStrNum - 1), title_font,
                 GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT), RgbColor::kBlack));
     _name_text->set_tab_width(220);

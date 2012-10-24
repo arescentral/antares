@@ -112,7 +112,7 @@ int score(
     return score;
 }
 
-RetroText* score_text(
+retro::StyledText* score_text(
         int your_length, int par_length, int your_loss, int par_loss, int your_kill,
         int par_kill) {
     Resource rsrc("text", "txt", 6000);
@@ -150,7 +150,7 @@ RetroText* score_text(
     fore_color = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
     RgbColor back_color;
     back_color = GetRGBTranslateColorShade(GOLD, DARKEST);
-    return new RetroText(text, button_font, fore_color, back_color);
+    return new retro::StyledText(text, button_font, fore_color, back_color);
 }
 
 }  // namespace

@@ -31,12 +31,14 @@ class Font;
 class Picture;
 class PixMap;
 
-class RetroText {
+namespace retro {
+
+class StyledText {
   public:
-    RetroText(
+    StyledText(
             const sfz::StringSlice& text, const Font* font,
             RgbColor fore_color, RgbColor back_color);
-    ~RetroText();
+    ~StyledText();
 
     void set_tab_width(int tab_width);
     void wrap_to(int width, int side_margin, int line_spacing);
@@ -63,8 +65,8 @@ class RetroText {
         DELAY,
     };
 
-    struct RetroChar {
-        RetroChar(
+    struct StyledChar {
+        StyledChar(
                 uint32_t character, SpecialChar special, const RgbColor& fore_color,
                 const RgbColor& back_color);
 
@@ -80,7 +82,7 @@ class RetroText {
     int move_word_down(int index, int v);
 
     RgbColor _fore_color;
-    std::vector<RetroChar> _chars;
+    std::vector<StyledChar> _chars;
     int _tab_width;
     int _width;
     int _height;
@@ -89,9 +91,10 @@ class RetroText {
     int _line_spacing;
     const Font* const _font;
 
-    DISALLOW_COPY_AND_ASSIGN(RetroText);
+    DISALLOW_COPY_AND_ASSIGN(StyledText);
 };
 
+}  // namespace retro
 }  // namespace antares
 
 #endif  // ANTARES_DRAWING_RETRO_TEXT_HPP_

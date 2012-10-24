@@ -36,19 +36,20 @@ using sfz::scoped_ptr;
 using sfz::string_to_int;
 
 namespace antares {
+namespace interface {
 
-InterfaceText::InterfaceText(
+StyledText::StyledText(
         const sfz::StringSlice& text, const Font* font,
         RgbColor fore_color, RgbColor back_color):
         _font(font) {
     for (size_t i = 0; i < text.size(); ++i) {
         switch (text.at(i)) {
           case '\r':
-            _chars.push_back(InterfaceChar('\r', LINE_BREAK, fore_color, back_color));
+            _chars.push_back(StyledChar('\r', LINE_BREAK, fore_color, back_color));
             break;
 
           case ' ':
-            _chars.push_back(InterfaceChar(' ', WORD_BREAK, fore_color, back_color));
+            _chars.push_back(StyledChar(' ', WORD_BREAK, fore_color, back_color));
             break;
 
           case '^':
@@ -76,7 +77,7 @@ InterfaceText::InterfaceText(
                         try {
                             inline_pict.bounds = Picture(id).size().as_rect();
                             _inline_picts.push_back(inline_pict);
-                            _chars.push_back(InterfaceChar(
+                            _chars.push_back(StyledChar(
                                         _inline_picts.size() - 1, PICTURE, fore_color,
                                         back_color));
                         } catch (sfz::Exception& e) { }
@@ -93,19 +94,19 @@ InterfaceText::InterfaceText(
             break;
 
           default:
-            _chars.push_back(InterfaceChar(text.at(i), NONE, fore_color, back_color));
+            _chars.push_back(StyledChar(text.at(i), NONE, fore_color, back_color));
             break;
         }
     }
-    _chars.push_back(InterfaceChar('\r', LINE_BREAK, fore_color, back_color));
+    _chars.push_back(StyledChar('\r', LINE_BREAK, fore_color, back_color));
 
     wrap_to(std::numeric_limits<int>::max(), 0, 0);
 }
 
-InterfaceText::~InterfaceText() {
+StyledText::~StyledText() {
 }
 
-void InterfaceText::wrap_to(int width, int side_margin, int line_spacing) {
+void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
     _width = width;
     _side_margin = side_margin;
     _line_spacing = line_spacing;
@@ -156,46 +157,46 @@ void InterfaceText::wrap_to(int width, int side_margin, int line_spacing) {
     _height = v;
 }
 
-int InterfaceText::width() const {
+int StyledText::width() const {
     return _width;
 }
 
-int InterfaceText::height() const {
+int StyledText::height() const {
     return _height;
 }
 
-const std::vector<inlinePictType>& InterfaceText::inline_picts() const {
+const std::vector<inlinePictType>& StyledText::inline_picts() const {
     return _inline_picts;
 }
 
-void InterfaceText::draw(const Rect& bounds) const {
+void StyledText::draw(const Rect& bounds) const {
     for (size_t i = 0; i < _chars.size(); ++i) {
         draw_char(bounds, i);
     }
 }
 
-void InterfaceText::draw(PixMap* pix, const Rect& bounds) const {
+void StyledText::draw(PixMap* pix, const Rect& bounds) const {
     for (size_t i = 0; i < _chars.size(); ++i) {
         draw_char(pix, bounds, i);
     }
 }
 
-void InterfaceText::draw_char(const Rect& bounds, int index) const {
+void StyledText::draw_char(const Rect& bounds, int index) const {
     const int char_adjust = _font->ascent;
     const int line_height = _font->height + _line_spacing;
-    const InterfaceChar& ch = _chars[index];
+    const StyledChar& ch = _chars[index];
     Point corner(bounds.left, bounds.top);
 
     switch (ch.special) {
       case NONE:
       case WORD_BREAK:
         {
+            corner.offset(ch.h, ch.v);
             if (ch.back_color != RgbColor::kBlack) {
                 Rect char_rect(0, 0, _font->char_width(ch.character), line_height);
                 char_rect.offset(corner.h, corner.v);
                 VideoDriver::driver()->fill_rect(char_rect, ch.back_color);
             }
-            corner.offset(ch.h, ch.v);
             String str(1, ch.character);
             _font->draw_sprite(Point(corner.h, corner.v + char_adjust), str, ch.fore_color);
         }
@@ -213,6 +214,7 @@ void InterfaceText::draw_char(const Rect& bounds, int index) const {
         break;
 
       case LINE_BREAK:
+        corner.offset(ch.h, ch.v);
         if (ch.back_color != RgbColor::kBlack) {
             Rect line_rect(0, 0, bounds.width() - ch.h, line_height);
             line_rect.offset(corner.h, corner.v);
@@ -222,10 +224,10 @@ void InterfaceText::draw_char(const Rect& bounds, int index) const {
     }
 }
 
-void InterfaceText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
+void StyledText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
     const int char_adjust = _font->ascent;
     const int line_height = _font->height + _line_spacing;
-    const InterfaceChar& ch = _chars[index];
+    const StyledChar& ch = _chars[index];
     Point corner(bounds.left + ch.h, bounds.top + ch.v);
 
     switch (ch.special) {
@@ -262,7 +264,7 @@ void InterfaceText::draw_char(PixMap* pix, const Rect& bounds, int index) const 
     }
 }
 
-int InterfaceText::move_word_down(int index, int v) {
+int StyledText::move_word_down(int index, int v) {
     for (int i = index; i >= 0; --i) {
         switch (_chars[i].special) {
           case LINE_BREAK:
@@ -291,7 +293,7 @@ int InterfaceText::move_word_down(int index, int v) {
     return _side_margin;
 }
 
-InterfaceText::InterfaceChar::InterfaceChar(
+StyledText::StyledChar::StyledChar(
         uint32_t character, SpecialChar special, const RgbColor& fore_color,
         const RgbColor& back_color):
         character(character),
@@ -301,4 +303,5 @@ InterfaceText::InterfaceChar::InterfaceChar(
         h(0),
         v(0) { }
 
+}  // namespace interface
 }  // namespace antares
