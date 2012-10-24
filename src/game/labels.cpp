@@ -139,8 +139,6 @@ void RemoveScreenLabel(long which) {
 }
 
 void draw_labels() {
-    mSetDirectFont(tactical_font);
-
     for (int i = 0; i < kMaxLabelNum; ++i) {
         screenLabelType* const label = globals()->gScreenLabelData.get() + i;
 
@@ -171,29 +169,27 @@ void draw_labels() {
         scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite(
                     format("/x/screen_label: {0}", quote(text)), pix));
         sprite->draw(at.h, at.v);
-        at.offset(kLabelInnerSpace, kLabelInnerSpace + gDirectText->ascent);
+        at.offset(kLabelInnerSpace, kLabelInnerSpace + tactical_font->ascent);
 
         if (label->lineNum > 1) {
             for (int j = 1; j <= label->lineNum; j++) {
                 StringSlice line = String_Get_Nth_Line(text, j);
 
-                gDirectText->draw_sprite(Point(at.h + 1, at.v + 1), line, RgbColor::kBlack);
-                gDirectText->draw_sprite(Point(at.h - 1, at.v - 1), line, RgbColor::kBlack);
-                gDirectText->draw_sprite(at, line, light);
+                tactical_font->draw_sprite(Point(at.h + 1, at.v + 1), line, RgbColor::kBlack);
+                tactical_font->draw_sprite(Point(at.h - 1, at.v - 1), line, RgbColor::kBlack);
+                tactical_font->draw_sprite(at, line, light);
 
                 at.offset(0, label->lineHeight);
             }
         } else {
-            gDirectText->draw_sprite(Point(at.h + 1, at.v + 1), text, RgbColor::kBlack);
-            gDirectText->draw_sprite(at, text, light);
+            tactical_font->draw_sprite(Point(at.h + 1, at.v + 1), text, RgbColor::kBlack);
+            tactical_font->draw_sprite(at, text, light);
         }
     }
 }
 
 void update_all_label_contents(int32_t units_done) {
     Rect clip = viewport;
-    mSetDirectFont(tactical_font);
-
     for (int i = 0; i < kMaxLabelNum; ++i) {
         screenLabelType* const label = globals()->gScreenLabelData.get() + i;
         if (!label->active || label->killMe || (label->text.empty()) || !label->visible) {
@@ -422,8 +418,6 @@ String* GetScreenLabelStringPtr( long which) {
 
 // do this if you mess with its string
 void RecalcScreenLabelSize(long which) {
-    mSetDirectFont(tactical_font);
-
     screenLabelType *label = globals()->gScreenLabelData.get() + which;
     int lineNum = String_Count_Lines(label->text);
 
@@ -432,19 +426,19 @@ void RecalcScreenLabelSize(long which) {
         int maxWidth = 0;
         for (int i = 1; i <= lineNum; i++) {
             StringSlice text = String_Get_Nth_Line(label->text, i);
-            int32_t width = gDirectText->string_width(text);
+            int32_t width = tactical_font->string_width(text);
             if (width > maxWidth) {
                 maxWidth = width;
             }
         }
         label->width = maxWidth + kLabelTotalInnerSpace;
-        label->height = (gDirectText->height * lineNum) + kLabelTotalInnerSpace;
-        label->lineHeight = gDirectText->height;
+        label->height = (tactical_font->height * lineNum) + kLabelTotalInnerSpace;
+        label->lineHeight = tactical_font->height;
     } else {
         label->lineNum = 1;
-        label->width = gDirectText->string_width(label->text) + kLabelTotalInnerSpace;
-        label->height = gDirectText->height + kLabelTotalInnerSpace;
-        label->lineHeight = gDirectText->height;
+        label->width = tactical_font->string_width(label->text) + kLabelTotalInnerSpace;
+        label->height = tactical_font->height + kLabelTotalInnerSpace;
+        label->lineHeight = tactical_font->height;
     }
 }
 

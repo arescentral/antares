@@ -142,7 +142,6 @@ void RetroText::set_tab_width(int tab_width) {
 }
 
 void RetroText::wrap_to(int width, int line_spacing) {
-    mSetDirectFont(_font);
     _width = width;
     _line_spacing = line_spacing;
     _auto_width = 0;
@@ -220,7 +219,6 @@ void RetroText::draw(PixMap* pix, const Rect& bounds) const {
 }
 
 void RetroText::draw_char(const Rect& bounds, int index) const {
-    mSetDirectFont(_font);
     const int line_height = _font->height + _line_spacing;
     const int char_adjust = _font->ascent + _line_spacing;
     const RetroChar& ch = _chars[index];
@@ -235,7 +233,7 @@ void RetroText::draw_char(const Rect& bounds, int index) const {
                 VideoDriver::driver()->fill_rect(char_rect, ch.back_color);
             }
             String str(1, ch.character);
-            gDirectText->draw_sprite(Point(corner.h, corner.v + char_adjust), str, ch.fore_color);
+            _font->draw_sprite(Point(corner.h, corner.v + char_adjust), str, ch.fore_color);
         }
         break;
 
@@ -261,7 +259,6 @@ void RetroText::draw_char(const Rect& bounds, int index) const {
 }
 
 void RetroText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
-    mSetDirectFont(_font);
     const int line_height = _font->height + _line_spacing;
     const int char_adjust = _font->ascent + _line_spacing;
     const RetroChar& ch = _chars[index];
@@ -306,11 +303,10 @@ void RetroText::draw_cursor(const Rect& bounds, int index) const {
 }
 
 void RetroText::color_cursor(const Rect& bounds, int index, const RgbColor& color) const {
-    mSetDirectFont(_font);
     const int line_height = _font->height + _line_spacing;
     const RetroChar& ch = _chars[index];
     Point corner(bounds.left + ch.h, bounds.top + ch.v);
-    Rect char_rect(0, 0, gDirectText->logicalWidth, line_height);
+    Rect char_rect(0, 0, _font->logicalWidth, line_height);
     char_rect.offset(corner.h, corner.v);
     char_rect.clip_to(bounds);
     if ((char_rect.width() > 0) && (char_rect.height() > 0)) {

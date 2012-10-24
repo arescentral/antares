@@ -67,8 +67,6 @@ Rune from_mac_roman(uint8_t byte) {
 
 }  // namespace
 
-const directTextType* gDirectText = NULL;
-
 const directTextType* gDirectTextData[kDirectFontNum];
 const directTextType* tactical_font;
 const directTextType* computer_font;
@@ -182,8 +180,6 @@ void InitDirectText() {
     gDirectTextData[3] = message_font = new directTextType(kMessageFontResID);
     gDirectTextData[4] = title_font = new directTextType(kTitleFontResID);
     gDirectTextData[5] = small_button_font = new directTextType(kButtonSmallFontResID);
-
-    mSetDirectFont(tactical_font);
 }
 
 void DirectTextCleanup() {
@@ -207,10 +203,6 @@ int32_t directTextType::string_width(sfz::StringSlice s) const {
         sum += char_width(s.at(i));
     }
     return sum;
-}
-
-void mSetDirectFont(const directTextType* font) {
-    gDirectText = font;
 }
 
 }  // namespace antares

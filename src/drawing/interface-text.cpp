@@ -118,7 +118,6 @@ InterfaceText::~InterfaceText() {
 }
 
 void InterfaceText::wrap_to(int width, int h_buffer, int v_buffer) {
-    mSetDirectFont(_font);
     _width = width;
     _h_buffer = h_buffer;
     _v_buffer = v_buffer;
@@ -180,14 +179,12 @@ const std::vector<inlinePictType>& InterfaceText::inline_picts() const {
 }
 
 void InterfaceText::draw(const Rect& bounds) const {
-    mSetDirectFont(_font);
     for (size_t i = 0; i < _chars.size(); ++i) {
         draw_char(bounds, i);
     }
 }
 
 void InterfaceText::draw(PixMap* pix, const Rect& bounds) const {
-    mSetDirectFont(_font);
     for (size_t i = 0; i < _chars.size(); ++i) {
         draw_char(pix, bounds, i);
     }
@@ -204,7 +201,7 @@ void InterfaceText::draw_char(const Rect& bounds, int index) const {
         {
             corner.offset(ch.h, ch.v);
             String str(1, ch.character);
-            gDirectText->draw_sprite(Point(corner.h, corner.v + char_adjust), str, _color);
+            _font->draw_sprite(Point(corner.h, corner.v + char_adjust), str, _color);
         }
         break;
 

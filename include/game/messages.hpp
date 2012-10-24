@@ -116,7 +116,6 @@ void PreviousCurrentLongMessage( void);
 void ReplayLastLongMessage( void);
 void DrawMessageScreen(int32_t by_units);
 void SetStatusString(const sfz::StringSlice& status, unsigned char color);
-long DetermineDirectTextHeightInWidth( retroTextSpecType *, long);
 void draw_message();
 
 }  // namespace antares

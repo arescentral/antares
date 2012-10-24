@@ -96,10 +96,10 @@ inline int mHexDigitValue(char c) {
 
 namespace {
 
-int mac_roman_char_width(uint8_t ch) {
+int mac_roman_char_width(directTextType* font, uint8_t ch) {
     BytesSlice bytes(&ch, 1);
     String str(macroman::decode(bytes));
-    return gDirectText->char_width(str.at(0));
+    return font->char_width(str.at(0));
 }
 
 template <typename T>
@@ -261,13 +261,12 @@ void ClipToCurrentLongMessage( void)
             if (textData.get() != NULL) {
                 const RgbColor& light_blue = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
                 const RgbColor& dark_blue = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
-                mSetDirectFont(tactical_font);
                 tmessage->text.assign(*textData);
                 tmessage->retro_text.reset(
                         new RetroText(*textData, tactical_font, light_blue, dark_blue));
                 tmessage->retro_text->set_tab_width(60);
                 tmessage->retro_text->wrap_to(
-                        viewport.width() - kHBuffer - gDirectText->logicalWidth, 0);
+                        viewport.width() - kHBuffer - tactical_font->logicalWidth, 0);
                 tmessage->textHeight = tmessage->retro_text->height();
                 tmessage->textHeight += kLongMessageVPadDouble;
                 tmessage->retro_origin = Point(
@@ -356,7 +355,6 @@ void DrawCurrentLongMessage(int32_t time_pass) {
         // Play teletype sound at least once every 3 ticks.
         tmessage->charDelayCount += time_pass;
         if (tmessage->charDelayCount > 0) {
-            mSetDirectFont(tactical_font);
             PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
             while (tmessage->charDelayCount > 0) {
                 tmessage->charDelayCount -= 3;
@@ -443,8 +441,6 @@ void DrawMessageScreen(int32_t by_units) {
         globals()->gMessageData.pop();
     }
 
-    mSetDirectFont(tactical_font);
-
     if (!globals()->gMessageData.empty()) {
         const String& message = *globals()->gMessageData.front();
 
@@ -469,121 +465,6 @@ void SetStatusString(const StringSlice& status, unsigned char color) {
     SetScreenLabelColor(globals()->gStatusLabelNum, color);
     SetScreenLabelString(globals()->gStatusLabelNum, status);
     SetScreenLabelAge(globals()->gStatusLabelNum, kStatusLabelAge);
-}
-
-long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long inWidth)
-
-{
-    long            charNum = 0, height = gDirectText->height, x = 0, oldx = 0, oldCharNum, wordLen,
-                    *lineLengthList = retroTextSpec->lineLength;
-    unsigned char   wrapState; // 0 = none, 1 = once, 2 = more than once
-    Bytes bytes(macroman::encode(*retroTextSpec->text));
-    const uint8_t*  thisChar = bytes.data();
-
-    *lineLengthList = 0;
-    retroTextSpec->autoWidth = 0;
-    retroTextSpec->lineNumber = 1;
-    while ( charNum < retroTextSpec->textLength)
-    {
-        if ( *thisChar == kReturnChar)
-        {
-            if ( x > retroTextSpec->autoWidth) retroTextSpec->autoWidth = x;
-            height += gDirectText->height + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
-            x = 0;
-            thisChar++;
-            charNum++;
-            (*lineLengthList)++;
-            lineLengthList++;
-            *lineLengthList = 0;
-            retroTextSpec->lineNumber++;
-        } else if ( *thisChar == ' ')
-        {
-            do
-            {
-                x += mac_roman_char_width(' ');
-                thisChar++;
-                charNum++;
-                (*lineLengthList)++;
-            } while (( *thisChar == ' ')  && ( charNum < retroTextSpec->textLength));
-        } else if ( *thisChar == kCodeChar)
-        {
-            thisChar++;
-            charNum++;
-            (*lineLengthList)++;
-            switch( *thisChar)
-            {
-                case kCodeTabChar:
-                    wordLen = 0;
-                    oldx = 0;
-                    while ( oldx <= x)
-                    {
-                        oldx += retroTextSpec->tabSize;
-                        wordLen++;
-                    }
-                    x = 0 + retroTextSpec->tabSize * wordLen;
-                    break;
-
-                case kCodeForeColorChar:
-                case kCodeBackColorChar:
-                    thisChar++;
-                    charNum++;
-                    (*lineLengthList)++;
-                    thisChar++;
-                    charNum++;
-                    (*lineLengthList)++;
-                    break;
-
-                case kCodeChar:
-                    x += mac_roman_char_width(*thisChar);
-                    wordLen++;
-                    break;
-            }
-            thisChar++;
-            charNum++;
-            (*lineLengthList)++;
-        } else
-        {
-            oldx = x;
-            oldCharNum = charNum;
-            wordLen = 0;
-            wrapState = 0;
-            do
-            {
-                x += mac_roman_char_width(*thisChar);
-                wordLen++;
-                if ( x >= (inWidth - gDirectText->logicalWidth))
-                {
-                    if ( !wrapState)
-                    {
-                        wrapState = 1;
-                        if ( oldx > retroTextSpec->autoWidth) retroTextSpec->autoWidth = oldx;
-                        x = x - oldx;
-                        oldx = 0;
-                        height += gDirectText->height + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
-                    } else
-                    {
-                        wrapState = 2;
-                        wordLen--;
-                    }
-                }
-                thisChar++;
-                charNum++;
-            } while (( *thisChar != ' ') && ( *thisChar != kReturnChar) && ( wrapState < 2) &&
-                ( *thisChar != kCodeChar) && ( charNum < retroTextSpec->textLength));
-            if ( wrapState)
-            {
-                if ( x > retroTextSpec->autoWidth) retroTextSpec->autoWidth = x;
-                lineLengthList++;
-                *lineLengthList = 0;
-                retroTextSpec->lineNumber++;
-            }
-            *lineLengthList += wordLen;
-        }
-    }
-    if ( x > retroTextSpec->autoWidth) retroTextSpec->autoWidth = x;
-    retroTextSpec->autoWidth += 1;
-    retroTextSpec->autoHeight = height;
-    return ( height);
 }
 
 //

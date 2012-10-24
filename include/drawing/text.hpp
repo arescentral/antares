@@ -53,8 +53,6 @@ class directTextType {
     DISALLOW_COPY_AND_ASSIGN(directTextType);
 };
 
-extern const directTextType* gDirectText;
-
 extern const directTextType* tactical_font;
 extern const directTextType* computer_font;
 extern const directTextType* button_font;
@@ -64,8 +62,6 @@ extern const directTextType* small_button_font;
 
 void InitDirectText();
 void DirectTextCleanup();
-
-void mSetDirectFont(const directTextType* font);
 
 }  // namespace antares
 

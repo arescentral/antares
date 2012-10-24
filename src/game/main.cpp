@@ -240,7 +240,6 @@ class PauseScreen : public Card {
             _next_switch(0) {
         const StringList list(3100);
         _pause_string.assign(list.at(10));
-        mSetDirectFont(title_font);
         long width = title_font->string_width(_pause_string);
         Rect bounds(0, 0, width, title_font->height);
         bounds.center_in(play_screen);
@@ -285,8 +284,7 @@ class PauseScreen : public Card {
             }
             draw_vbracket(_bracket_bounds, light_green);
 
-            mSetDirectFont(title_font);
-            gDirectText->draw_sprite(_text_origin, _pause_string, light_green);
+            title_font->draw_sprite(_text_origin, _pause_string, light_green);
         }
     }
 

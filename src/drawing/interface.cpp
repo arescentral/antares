@@ -63,31 +63,21 @@ const int32_t kMaxKeyNameLength         = 4;  // how many chars can be in name o
 // DrawInterfaceString:
 //  Relies on roman alphabet for upper/lower casing.  NOT WORLD-READY!
 
-void SetInterfaceLargeUpperFont(interfaceStyleType style) {
+const directTextType* interface_font(interfaceStyleType style) {
     if ( style == kSmall) {
-        mSetDirectFont(small_button_font);
+        return small_button_font;
     } else {
-        mSetDirectFont(button_font);
-    }
-}
-
-void SetInterfaceLargeLowerFont(interfaceStyleType style) {
-    if ( style == kSmall) {
-        mSetDirectFont(small_button_font);
-    } else {
-        mSetDirectFont(button_font);
+        return button_font;
     }
 }
 
 void DrawInterfaceString(
         Point p, StringSlice s, interfaceStyleType style, const RgbColor& color) {
-    SetInterfaceLargeUpperFont(style);
-    gDirectText->draw_sprite(p, s, color);
+    interface_font(style)->draw_sprite(p, s, color);
 }
 
 short GetInterfaceStringWidth(const StringSlice& s, interfaceStyleType style) {
-    SetInterfaceLargeUpperFont( style);
-    return gDirectText->string_width(s);
+    return interface_font(style)->string_width(s);
 }
 
 // GetInterfaceFontWidth:       -- NOT WORLD-READY! --
@@ -98,18 +88,15 @@ short GetInterfaceStringWidth(const StringSlice& s, interfaceStyleType style) {
 //
 
 short GetInterfaceFontWidth(interfaceStyleType style) {
-    SetInterfaceLargeUpperFont(style);
-    return gDirectText->logicalWidth;
+    return interface_font(style)->logicalWidth;
 }
 
 short GetInterfaceFontHeight(interfaceStyleType style) {
-    SetInterfaceLargeUpperFont(style);
-    return gDirectText->height;
+    return interface_font(style)->height;
 }
 
 short GetInterfaceFontAscent( interfaceStyleType style) {
-    SetInterfaceLargeUpperFont(style);
-    return gDirectText->ascent;
+    return interface_font(style)->ascent;
 }
 
 enum inlineKindType {

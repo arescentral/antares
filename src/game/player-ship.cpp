@@ -219,7 +219,7 @@ bool PlayerShipGetKeys(int32_t timePass, InputSource& input_source, bool *enterM
                         }
                     }
                 }
-                width = gDirectText->string_width(*message);
+                width = tactical_font->string_width(*message);
                 strlen = viewport.left + ((viewport.width() / 2) - (width / 2));
                 if ((strlen + width) > (viewport.right))
                 {

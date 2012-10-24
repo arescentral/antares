@@ -196,20 +196,20 @@ void pad_to(String& s, size_t width) {
 }
 
 const int32_t MiniIconMacLineTop() {
-    return (gDirectText->height * 2);
+    return computer_font->height * 2;
 }
 
 Rect mini_screen_line_bounds(long mtop, long mlinenum, long mleft, long mright) {
     Rect mbounds;
     mbounds.left = kMiniScreenLeft + mleft;
-    mbounds.top = mtop + mlinenum * gDirectText->height;
+    mbounds.top = mtop + mlinenum * computer_font->height;
     mbounds.right = kMiniScreenLeft + mright;
-    mbounds.bottom = mbounds.top + gDirectText->height;
+    mbounds.bottom = mbounds.top + computer_font->height;
     return mbounds;
 }
 
 inline long mGetLineNumFromV(long mV) {
-    return (((mV) - (kMiniScreenTop + globals()->gInstrumentTop)) / gDirectText->height);
+    return (((mV) - (kMiniScreenTop + globals()->gInstrumentTop)) / computer_font->height);
 }
 
 // for copying the fields of a space object relevant to the miniscreens:
@@ -350,8 +350,6 @@ void draw_mini_screen() {
     unsigned char lineColor = kMiniScreenColor;
     long                count, lineCorrect = 0;
 
-    mSetDirectFont(computer_font);
-
     lRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
                 kMiniScreenBottom + globals()->gInstrumentTop);
     color = GetRGBTranslateColorShade(kMiniScreenColor, DARKEST);
@@ -383,8 +381,8 @@ void draw_mini_screen() {
         if ( c->underline)
         {
             const RgbColor color = GetRGBTranslateColorShade(lineColor, MEDIUM);
-            int32_t y = mRect.top + (count + lineCorrect) * gDirectText->height
-                      + gDirectText->ascent;
+            int32_t y = mRect.top + (count + lineCorrect) * computer_font->height
+                      + computer_font->ascent;
             VideoDriver::driver()->draw_line(
                     Point(mRect.left, y), Point(mRect.right - 2, y), color);
         }
@@ -401,9 +399,9 @@ void draw_mini_screen() {
                     if ( c->hiliteRight > c->hiliteLeft)
                     {
                         cRect.left = c->hiliteLeft;
-                        cRect.top = mRect.top + (( count + lineCorrect) * ( gDirectText->height /* * 2 */));
+                        cRect.top = mRect.top + (( count + lineCorrect) * ( computer_font->height /* * 2 */));
                         cRect.right = c->hiliteRight;
-                        cRect.bottom = cRect.top + gDirectText->height /* * 2 */;
+                        cRect.bottom = cRect.top + computer_font->height /* * 2 */;
 //                      color = GetTranslateColorShade( lineColor, DARK);
                         color = GetRGBTranslateColorShade(lineColor, DARK);
                         lightcolor = GetRGBTranslateColorShade(lineColor, MEDIUM);
@@ -414,9 +412,9 @@ void draw_mini_screen() {
 
                 case buttonOffLineKind:
                     cRect.left = c->hiliteLeft - 2;
-                    cRect.top = lRect.top + (( count + lineCorrect) * ( gDirectText->height /* * 2 */));
+                    cRect.top = lRect.top + (( count + lineCorrect) * ( computer_font->height /* * 2 */));
                     cRect.right = c->hiliteRight + 2;
-                    cRect.bottom = cRect.top + gDirectText->height /* * 2 */;
+                    cRect.bottom = cRect.top + computer_font->height /* * 2 */;
 
                     color = GetRGBTranslateColorShade(lineColor, MEDIUM);
                     lightcolor = GetRGBTranslateColorShade(lineColor, LIGHT);
@@ -426,9 +424,9 @@ void draw_mini_screen() {
 
                 case buttonOnLineKind:
                     cRect.left = c->hiliteLeft - 2;
-                    cRect.top = lRect.top + (( count + lineCorrect) * ( gDirectText->height /* * 2 */));
+                    cRect.top = lRect.top + (( count + lineCorrect) * ( computer_font->height /* * 2 */));
                     cRect.right = lRect.right; //c->hiliteRight + 2;
-                    cRect.bottom = cRect.top + gDirectText->height /* * 2 */;
+                    cRect.bottom = cRect.top + computer_font->height /* * 2 */;
 
                     color = GetRGBTranslateColorShade(lineColor, LIGHT);
                     lightcolor = GetRGBTranslateColorShade(lineColor, VERY_LIGHT);
@@ -445,10 +443,10 @@ void draw_mini_screen() {
             else
                 textcolor = GetRGBTranslateColorShade(lineColor, VERY_LIGHT);
         }
-        gDirectText->draw_sprite(
+        computer_font->draw_sprite(
                 Point(
                     mRect.left + kMiniScreenLeftBuffer,
-                    mRect.top + (count + lineCorrect) * gDirectText->height + gDirectText->ascent),
+                    mRect.top + (count + lineCorrect) * computer_font->height + computer_font->ascent),
                 c->string, textcolor);
         c++;
     }
@@ -458,8 +456,6 @@ void draw_mini_screen() {
 }
 
 void MakeMiniScreenFromIndString(short whichString) {
-    mSetDirectFont(computer_font);
-
     Rect mRect(kMiniScreenLeft, kMiniScreenTop, kMiniScreenRight, kMiniScreenBottom);
     mRect.offset(0, globals()->gInstrumentTop);
 
@@ -508,7 +504,7 @@ void MakeMiniScreenFromIndString(short whichString) {
                     line->whichButton = kInLineButton;
                     line->hiliteLeft
                         = mRect.left + kMiniScreenLeftBuffer
-                        + gDirectText->logicalWidth * line->string.size();
+                        + computer_font->logicalWidth * line->string.size();
 
                     sfz::String key_name;
                     GetKeyNumName(Preferences::preferences()->key(kCompAcceptKeyNum), &key_name);
@@ -517,7 +513,7 @@ void MakeMiniScreenFromIndString(short whichString) {
 
                     line->hiliteRight
                         = mRect.left + kMiniScreenLeftBuffer
-                        + gDirectText->logicalWidth * line->string.size() - 1;
+                        + computer_font->logicalWidth * line->string.size() - 1;
                 }
                 break;
 
@@ -527,7 +523,7 @@ void MakeMiniScreenFromIndString(short whichString) {
                     line->whichButton = kOutLineButton;
                     line->hiliteLeft
                         = mRect.left + kMiniScreenLeftBuffer
-                        + gDirectText->logicalWidth * line->string.size();
+                        + computer_font->logicalWidth * line->string.size();
 
                     sfz::String key_name;
                     GetKeyNumName(
@@ -537,7 +533,7 @@ void MakeMiniScreenFromIndString(short whichString) {
 
                     line->hiliteRight
                         = mRect.left + kMiniScreenLeftBuffer
-                        + gDirectText->logicalWidth * line->string.size() - 1;
+                        + computer_font->logicalWidth * line->string.size() - 1;
                 }
                 break;
 
@@ -880,13 +876,11 @@ static void draw_player_ammo_in_rect(int32_t value, int8_t hue, const Rect& rect
             '\0',
         };
         Point origin(rect.left + kMiniAmmoTextHBuffer, rect.bottom - 1);
-        gDirectText->draw_sprite(origin, digits, text_color);
+        computer_font->draw_sprite(origin, digits, text_color);
     }
 }
 
 void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) {
-    mSetDirectFont(computer_font);
-
     Rect clip(0, kMiniAmmoTop, kMiniAmmoSingleWidth, kMiniAmmoBottom);
     clip.offset(0, globals()->gInstrumentTop);
 
@@ -913,8 +907,6 @@ void draw_mini_ship_data(
     clipRect.right = kMiniScreenRight;
     clipRect.bottom = clipRect.top + 64;
 
-    mSetDirectFont(computer_font);
-
     uRect.left = uRect.top = uRect.bottom = -1;
 
     lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, 0, 0, kMiniScreenWidth);
@@ -926,8 +918,8 @@ void draw_mini_ship_data(
     draw_shaded_rect(lRect, color, lightcolor, darkcolor);
 
     String text(StringList(kMiniDataStringID).at(whichString - 1));
-    gDirectText->draw_sprite(
-            Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent),
+    computer_font->draw_sprite(
+            Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
             text, RgbColor::kBlack);
     uRect = lRect;
     uRect = clipRect;
@@ -942,8 +934,8 @@ void draw_mini_ship_data(
 
         // move to the 1st line in the selection miniscreen
         String text(GetDestBalanceName(newObject.destinationObject));
-        gDirectText->draw_sprite(
-                Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent),
+        computer_font->draw_sprite(
+                Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
                 text, color);
         if ( uRect.left == -1)
         {
@@ -963,8 +955,8 @@ void draw_mini_ship_data(
 
             // move to the 1st line in the selection miniscreen, write the name
             String text(StringList(kSpaceObjectShortNameResID).at(newObject.whichBaseObject));
-            gDirectText->draw_sprite(
-                    Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + gDirectText->ascent),
+            computer_font->draw_sprite(
+                    Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
                     text, color);
         }
 
@@ -1122,8 +1114,8 @@ void draw_mini_ship_data(
     if ( newObject.beamType >= 0)
     {
         String text(StringList(kSpaceObjectShortNameResID).at(newObject.beamType));
-        gDirectText->draw_sprite(
-                Point(lRect.left, lRect.top + gDirectText->ascent), text, color);
+        computer_font->draw_sprite(
+                Point(lRect.left, lRect.top + computer_font->ascent), text, color);
     }
 
     if ( uRect.left == -1)
@@ -1145,8 +1137,8 @@ void draw_mini_ship_data(
     if ( newObject.pulseType >= 0)
     {
         String text(StringList(kSpaceObjectShortNameResID).at(newObject.pulseType));
-        gDirectText->draw_sprite(
-                Point(lRect.left, lRect.top + gDirectText->ascent), text, color);
+        computer_font->draw_sprite(
+                Point(lRect.left, lRect.top + computer_font->ascent), text, color);
     }
 
     if ( uRect.left == -1)
@@ -1170,8 +1162,8 @@ void draw_mini_ship_data(
         if ( newObject.specialType >= 0)
         {
             String text(StringList(kSpaceObjectShortNameResID).at(newObject.specialType));
-            gDirectText->draw_sprite(
-                    Point(lRect.left, lRect.top + gDirectText->ascent), text, color);
+            computer_font->draw_sprite(
+                    Point(lRect.left, lRect.top + computer_font->ascent), text, color);
         }
 
         if ( uRect.left == -1)
@@ -1206,13 +1198,13 @@ void draw_mini_ship_data(
             if ( dObject->attributes & kIsDestination)
             {
                 String text(GetDestBalanceName(dObject->destinationObject));
-                gDirectText->draw_sprite(
-                        Point(lRect.left, lRect.top + gDirectText->ascent), text, color);
+                computer_font->draw_sprite(
+                        Point(lRect.left, lRect.top + computer_font->ascent), text, color);
             } else
             {
                 String text(StringList(kSpaceObjectNameResID).at(dObject->whichBaseObject));
-                gDirectText->draw_sprite(
-                        Point(lRect.left, lRect.top + gDirectText->ascent), text, color);
+                computer_font->draw_sprite(
+                        Point(lRect.left, lRect.top + computer_font->ascent), text, color);
             }
         }
     }
@@ -1787,7 +1779,6 @@ void MiniComputerHandleClick( Point where)
     long        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
     miniScreenLineType  *line;
 
-    mSetDirectFont(computer_font);
     line = globals()->gMiniScreenData.lineData.get();
     scrap = 0;
     while ( scrap < kMiniScreenTrueLineNum)
@@ -1803,7 +1794,7 @@ void MiniComputerHandleClick( Point where)
 
     // if click is in button screen
     if (mRect.contains(where)) {
-        lineNum = (( where.v - ( kButBoxTop + globals()->gInstrumentTop)) / gDirectText->height) + kMiniScreenCharHeight;
+        lineNum = (( where.v - ( kButBoxTop + globals()->gInstrumentTop)) / computer_font->height) + kMiniScreenCharHeight;
         globals()->gMiniScreenData.clickLine = lineNum;
         line = globals()->gMiniScreenData.lineData.get() + lineNum;
         if ( line->whichButton == kInLineButton)
@@ -1872,7 +1863,7 @@ void MiniComputerHandleClick( Point where)
                 line->hiliteLeft = line->hiliteRight = 0;
             }
 
-            lineNum = mGetLineNumFromV( where.v);
+            lineNum = mGetLineNumFromV(where.v);
             globals()->gMiniScreenData.clickLine = lineNum;
             line = globals()->gMiniScreenData.lineData.get() + lineNum;
             if (( line->selectable == selectable) || (line->selectable == selectDim))
@@ -1895,7 +1886,6 @@ void MiniComputerHandleDoubleClick( Point where)
     long        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
     miniScreenLineType  *line;
 
-    mSetDirectFont(computer_font);
     line = globals()->gMiniScreenData.lineData.get();
     scrap = 0;
     while ( scrap < kMiniScreenTrueLineNum)
@@ -1911,7 +1901,7 @@ void MiniComputerHandleDoubleClick( Point where)
 
     // if click is in button screen
     if (mRect.contains(where)) {
-        lineNum = (( where.v - ( kButBoxTop + globals()->gInstrumentTop)) / gDirectText->height) + kMiniScreenCharHeight;
+        lineNum = (( where.v - ( kButBoxTop + globals()->gInstrumentTop)) / computer_font->height) + kMiniScreenCharHeight;
         line = globals()->gMiniScreenData.lineData.get() + lineNum;
         if ( line->whichButton == kInLineButton)
         {
@@ -1970,7 +1960,7 @@ void MiniComputerHandleDoubleClick( Point where)
 
         // if click is in main menu screen
         if (mRect.contains(where)) {
-            lineNum = mGetLineNumFromV( where.v);
+            lineNum = mGetLineNumFromV(where.v);
             if ( lineNum == globals()->gMiniScreenData.selectLine)
             {
                 mPlayBeep3();
@@ -1984,7 +1974,7 @@ void MiniComputerHandleDoubleClick( Point where)
                     line->hiliteLeft = line->hiliteRight = 0;
                 }
 
-                lineNum = mGetLineNumFromV( where.v);
+                lineNum = mGetLineNumFromV(where.v);
                 line = globals()->gMiniScreenData.lineData.get() + lineNum;
                 if (( line->selectable == selectable) || (line->selectable == selectDim))
                 {
@@ -2006,7 +1996,6 @@ void MiniComputerHandleMouseUp( Point where)
     long        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
     miniScreenLineType  *line;
 
-    mSetDirectFont(computer_font);
     line = globals()->gMiniScreenData.lineData.get();
     scrap = 0;
     while ( scrap < kMiniScreenTrueLineNum)
@@ -2022,7 +2011,7 @@ void MiniComputerHandleMouseUp( Point where)
 
     // if click is in button screen
     if (mRect.contains(where)) {
-        lineNum = (( where.v - ( kButBoxTop + globals()->gInstrumentTop)) / gDirectText->height) + kMiniScreenCharHeight;
+        lineNum = (( where.v - ( kButBoxTop + globals()->gInstrumentTop)) / computer_font->height) + kMiniScreenCharHeight;
         line = globals()->gMiniScreenData.lineData.get() + lineNum;
         if ( line->whichButton == kInLineButton)
         {
@@ -2049,7 +2038,6 @@ void MiniComputerHandleMouseStillDown( Point where)
     long        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
     miniScreenLineType  *line;
 
-    mSetDirectFont(computer_font);
     line = globals()->gMiniScreenData.lineData.get();
     scrap = 0;
     while ( scrap < kMiniScreenTrueLineNum)
@@ -2065,7 +2053,7 @@ void MiniComputerHandleMouseStillDown( Point where)
 
     // if click is in button screen
     if (mRect.contains(where)) {
-        lineNum = (( where.v - ( kButBoxTop + globals()->gInstrumentTop)) / gDirectText->height) + kMiniScreenCharHeight;
+        lineNum = (( where.v - ( kButBoxTop + globals()->gInstrumentTop)) / computer_font->height) + kMiniScreenCharHeight;
         line = globals()->gMiniScreenData.lineData.get() + lineNum;
         if (( line->whichButton == kInLineButton) &&
             ( lineNum == globals()->gMiniScreenData.clickLine))
@@ -2129,8 +2117,7 @@ void MiniComputer_SetScreenAndLineHack( long whichScreen, long whichLine)
             break;
     }
 
-    mSetDirectFont(computer_font);
-    w.v = (whichLine * gDirectText->height) + ( kMiniScreenTop +
+    w.v = (whichLine * computer_font->height) + ( kMiniScreenTop +
                     globals()->gInstrumentTop);
     w.h = kMiniScreenLeft + 5;
     MiniComputerHandleClick( w);    // what an atrocious hack! oh well
