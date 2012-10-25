@@ -262,10 +262,10 @@ void ClipToCurrentLongMessage( void)
                 const RgbColor& light_blue = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
                 const RgbColor& dark_blue = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
                 tmessage->text.assign(*textData);
-                tmessage->retro_text.reset(new retro::StyledText(tactical_font));
+                tmessage->retro_text.reset(new StyledText(tactical_font));
                 tmessage->retro_text->set_fore_color(light_blue);
                 tmessage->retro_text->set_back_color(dark_blue);
-                tmessage->retro_text->set_text(*textData);
+                tmessage->retro_text->set_retro_text(*textData);
                 tmessage->retro_text->set_tab_width(60);
                 tmessage->retro_text->wrap_to(
                         viewport.width() - kHBuffer - tactical_font->logicalWidth + 1, 0, 0);

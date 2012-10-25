@@ -32,8 +32,6 @@ class Font;
 class Picture;
 class PixMap;
 
-namespace retro {
-
 class StyledText {
   public:
     StyledText(const Font* font);
@@ -42,7 +40,8 @@ class StyledText {
     void set_fore_color(RgbColor fore_color);
     void set_back_color(RgbColor back_color);
     void set_tab_width(int tab_width);
-    void set_text(sfz::StringSlice text);
+    void set_retro_text(sfz::StringSlice text);
+    void set_interface_text(sfz::StringSlice text);
     void wrap_to(int width, int side_margin, int line_spacing);
 
     int size() const;
@@ -65,6 +64,7 @@ class StyledText {
         TAB,
         WORD_BREAK,
         LINE_BREAK,
+        PICTURE,
         DELAY,
     };
 
@@ -99,7 +99,6 @@ class StyledText {
     DISALLOW_COPY_AND_ASSIGN(StyledText);
 };
 
-}  // namespace retro
 }  // namespace antares
 
 #endif  // ANTARES_DRAWING_RETRO_TEXT_HPP_

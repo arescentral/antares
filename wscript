@@ -213,7 +213,6 @@ def build(bld):
             "src/drawing/build-pix.cpp",
             "src/drawing/color.cpp",
             "src/drawing/interface.cpp",
-            "src/drawing/interface-text.cpp",
             "src/drawing/libpng-pix-map.cpp",
             "src/drawing/pix-map.cpp",
             "src/drawing/pix-table.cpp",

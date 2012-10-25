@@ -45,9 +45,9 @@ LoadingScreen::LoadingScreen(const Scenario* scenario, bool* cancelled):
         _current(0),
         _max(1) {
     StringList strings(kLevelNameID);
-    _name_text.reset(new retro::StyledText(title_font));
+    _name_text.reset(new StyledText(title_font));
     _name_text->set_fore_color(GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT));
-    _name_text->set_text(strings.at(_scenario->levelNameStrNum - 1));
+    _name_text->set_retro_text(strings.at(_scenario->levelNameStrNum - 1));
     _name_text->set_tab_width(220);
     _name_text->wrap_to(640, 0, 2);
 }

@@ -56,7 +56,7 @@ class ObjectDataScreen : public Card {
     int _typed_chars;
 
     Rect _bounds;
-    sfz::scoped_ptr<retro::StyledText> _text;
+    sfz::scoped_ptr<StyledText> _text;
 
     DISALLOW_COPY_AND_ASSIGN(ObjectDataScreen);
 };

@@ -22,6 +22,7 @@
 #include <limits>
 #include <sfz/sfz.hpp>
 
+#include "data/picture.hpp"
 #include "drawing/color.hpp"
 #include "drawing/text.hpp"
 #include "video/driver.hpp"
@@ -31,9 +32,9 @@ using sfz::Exception;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
+using sfz::scoped_ptr;
 
 namespace antares {
-namespace retro {
 
 namespace {
 
@@ -71,7 +72,7 @@ void StyledText::set_tab_width(int tab_width) {
     _tab_width = tab_width;
 }
 
-void StyledText::set_text(sfz::StringSlice text) {
+void StyledText::set_retro_text(sfz::StringSlice text) {
     const RgbColor original_fore_color = _fore_color;
     const RgbColor original_back_color = _back_color;
     RgbColor fore_color = _fore_color;
@@ -152,6 +153,68 @@ void StyledText::set_text(sfz::StringSlice text) {
     wrap_to(std::numeric_limits<int>::max(), 0, 0);
 }
 
+void StyledText::set_interface_text(sfz::StringSlice text) {
+    for (size_t i = 0; i < text.size(); ++i) {
+        switch (text.at(i)) {
+          case '\r':
+            _chars.push_back(StyledChar('\r', LINE_BREAK, _fore_color, _back_color));
+            break;
+
+          case ' ':
+            _chars.push_back(StyledChar(' ', WORD_BREAK, _fore_color, _back_color));
+            break;
+
+          case '^':
+            {
+                bool found_code = false;
+                if (i + 1 >= text.size()) {
+                    throw Exception(format("not enough input for inline code."));
+                }
+                if ((text.at(i + 1) != 'P') && (text.at(i + 1) != 'p')) {
+                    throw Exception(format("found bad inline pict code {0}", text.at(i)));
+                }
+                String id_string;
+                for (size_t j = i + 2; j < text.size(); ++j) {
+                    if (text.at(j) == '^') {
+                        inlinePictType inline_pict;
+                        int32_t id;
+                        if (!string_to_int(id_string, id, 10)) {
+                            throw Exception(format("invalid numeric literal {0}", id_string));
+                        }
+                        // TODO(sfiera): save the picture somewhere so we only have to load it once
+                        // here, and not additionally each time we draw it.
+                        inline_pict.id = id;
+                        // TODO(sfiera): report an error if the picture is not loadable, instead of
+                        // silently ignoring it.
+                        try {
+                            inline_pict.bounds = Picture(id).size().as_rect();
+                            _inline_picts.push_back(inline_pict);
+                            _chars.push_back(StyledChar(
+                                        _inline_picts.size() - 1, PICTURE, _fore_color,
+                                        _back_color));
+                        } catch (sfz::Exception& e) { }
+                        found_code = true;
+                        i = j;
+                        break;
+                    }
+                    id_string.push(1, text.at(j));
+                }
+                if (!found_code) {
+                    throw Exception(format("malformed inline code"));
+                }
+            }
+            break;
+
+          default:
+            _chars.push_back(StyledChar(text.at(i), NONE, _fore_color, _back_color));
+            break;
+        }
+    }
+    _chars.push_back(StyledChar('\r', LINE_BREAK, _fore_color, _back_color));
+
+    wrap_to(std::numeric_limits<int>::max(), 0, 0);
+}
+
 void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
     _width = width;
     _side_margin = side_margin;
@@ -187,6 +250,21 @@ void StyledText::wrap_to(int width, int side_margin, int line_spacing) {
 
           case WORD_BREAK:
             h += _font->char_width(_chars[i].character);
+            break;
+
+          case PICTURE:
+            {
+                inlinePictType* pict = &_inline_picts[_chars[i].character];
+                if (h != _side_margin) {
+                    v += _font->height + _line_spacing;
+                }
+                h = _side_margin;
+                pict->bounds.offset(0, v - pict->bounds.top);
+                v += pict->bounds.height() + _line_spacing + 3;
+                if (_chars[i + 1].special == LINE_BREAK) {
+                    v -= (_font->height + _line_spacing);
+                }
+            }
             break;
 
           case DELAY:
@@ -265,6 +343,17 @@ void StyledText::draw_char(const Rect& bounds, int index) const {
         }
         break;
 
+      case PICTURE:
+        {
+            const inlinePictType& inline_pict = _inline_picts[ch.character];
+            corner.offset(inline_pict.bounds.left, inline_pict.bounds.top + _line_spacing);
+            Picture pict(inline_pict.id);
+            scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite(
+                        format("/pict/{0}"), pict));
+            sprite->draw(corner.h, corner.v);
+        }
+        break;
+
       case LINE_BREAK:
         corner.offset(ch.h, ch.v);
         if (ch.back_color != RgbColor::kBlack) {
@@ -307,6 +396,16 @@ void StyledText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
         }
         break;
 
+      case PICTURE:
+        {
+            const inlinePictType& inline_pict = _inline_picts[ch.character];
+            Rect pict_bounds = inline_pict.bounds;
+            pict_bounds.offset(bounds.left, bounds.top + _line_spacing);
+            Picture pict(inline_pict.id);
+            pix->view(pict_bounds).copy(pict);
+        }
+        break;
+
       case LINE_BREAK:
         if (ch.back_color != RgbColor::kBlack) {
             Rect line_rect(0, 0, bounds.width() - ch.h, line_height);
@@ -340,6 +439,7 @@ int StyledText::move_word_down(int index, int v) {
     for (int i = index; i >= 0; --i) {
         switch (_chars[i].special) {
           case LINE_BREAK:
+          case PICTURE:
             return _side_margin;
 
           case WORD_BREAK:
@@ -376,5 +476,4 @@ StyledText::StyledChar::StyledChar(
         h(0),
         v(0) { }
 
-}  // namespace retro
 }  // namespace antares

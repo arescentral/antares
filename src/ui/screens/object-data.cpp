@@ -67,10 +67,10 @@ ObjectDataScreen::ObjectDataScreen(Point origin, int32_t object_id, Trigger trig
         _state(TYPING) {
     String text;
     CreateObjectDataText(&text, object_id);
-    _text.reset(new retro::StyledText(button_font));
+    _text.reset(new StyledText(button_font));
     _text->set_fore_color(GetRGBTranslateColorShade(GREEN, VERY_LIGHT));
     _text->set_back_color(GetRGBTranslateColorShade(GREEN, DARKEST));
-    _text->set_text(text);
+    _text->set_retro_text(text);
     _text->wrap_to(kShipDataWidth, 0, 0);
     _bounds = object_data_bounds(origin, Size(_text->auto_width(), _text->height()));
 }

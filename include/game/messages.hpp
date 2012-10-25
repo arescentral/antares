@@ -91,7 +91,7 @@ struct longMessageType {
     sfz::String             lastStringMessage;
     bool                 newStringMessage;
     sfz::String             text;
-    sfz::scoped_ptr<retro::StyledText> retro_text;
+    sfz::scoped_ptr<StyledText> retro_text;
     Point                   retro_origin;
     int32_t                 at_char;
     bool                 labelMessage;

@@ -115,7 +115,7 @@ int score(
 
 void build_score_text(
         int your_length, int par_length, int your_loss, int par_loss, int your_kill,
-        int par_kill, scoped_ptr<retro::StyledText>& result) {
+        int par_kill, scoped_ptr<StyledText>& result) {
     Resource rsrc("text", "txt", 6000);
     String text(macroman::decode(rsrc.data()));
 
@@ -152,10 +152,10 @@ void build_score_text(
     RgbColor back_color;
     back_color = GetRGBTranslateColorShade(GOLD, DARKEST);
 
-    result.reset(new retro::StyledText(button_font));
+    result.reset(new StyledText(button_font));
     result->set_fore_color(fore_color);
     result->set_back_color(back_color);
-    result->set_text(text);
+    result->set_retro_text(text);
 }
 
 }  // namespace
