@@ -38,18 +38,18 @@ void EventTracker::key_up(const KeyUpEvent& event) {
 }
 
 void EventTracker::mouse_down(const MouseDownEvent& event) {
-    if (_strict && _button) {
+    if (_strict && _button[event.button()]) {
         throw Exception("Received MouseDownEvent when mouse already down.");
     }
-    _button = true;
+    _button[event.button()] = true;
     _mouse = event.where();
 }
 
 void EventTracker::mouse_up(const MouseUpEvent& event) {
-    if (_strict && !_button) {
+    if (_strict && !_button[event.button()]) {
         throw Exception("Received MouseUpEvent when mouse already up.");
     }
-    _button = false;
+    _button[event.button()] = false;
     _mouse = event.where();
 }
 

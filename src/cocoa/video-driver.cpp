@@ -117,9 +117,9 @@ bool CocoaVideoDriver::wait_next_event(int64_t until, scoped_ptr<Event>& event) 
     return false;
 }
 
-bool CocoaVideoDriver::button() {
+bool CocoaVideoDriver::button(int which) {
     int32_t button;
-    antares_get_mouse_button(_translator.c_obj(), &button);
+    antares_get_mouse_button(_translator.c_obj(), &button, which);
     return button;
 }
 

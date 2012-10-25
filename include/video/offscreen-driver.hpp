@@ -37,7 +37,7 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
   public:
     OffscreenVideoDriver(Size screen_size, const sfz::Optional<sfz::String>& output_dir);
 
-    virtual bool button() { return _event_tracker.button(); }
+    virtual bool button(int which) { return _event_tracker.button(which); }
     virtual Point get_mouse() { return _event_tracker.mouse(); }
     virtual void get_keys(KeyMap* k) { k->copy(_event_tracker.keys()); }
 

@@ -569,61 +569,53 @@ bool PlayerShipGetKeys(int32_t timePass, InputSource& input_source, bool *enterM
     return true;
 }
 
-void PlayerShipHandleClick( Point where)
-
-{
+void PlayerShipHandleClick(Point where, int button) {
     spaceObjectType *theShip = NULL;
     long            selectShipNum;
     Rect            bounds;
 
-    if ( globals()->keyMask & kMouseMask) return;
+    if (globals()->keyMask & kMouseMask) {
+        return;
+    }
 
     gDestKeyTime = -1;
-    if ( globals()->gPlayerShipNumber >= 0)
-    {
+    if (globals()->gPlayerShipNumber >= 0) {
         theShip = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
-        if (( theShip->active) && ( theShip->attributes & kIsHumanControlled))
-        {
+        if ((theShip->active) && (theShip->attributes & kIsHumanControlled)) {
             bounds.left = where.h - kCursorBoundsSize;
             bounds.top = where.v - kCursorBoundsSize;
             bounds.right = where.h + kCursorBoundsSize;
             bounds.bottom = where.v + kCursorBoundsSize;
 
-            if ( theShip->keysDown & kDestinationKey)
-            {
-                selectShipNum = GetAdmiralDestinationObject( globals()->gPlayerAdmiralNumber);
+            if ((theShip->keysDown & kDestinationKey) || (button == 1)) {
+                selectShipNum = GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber);
 
-                selectShipNum = GetSpritePointSelectObject( &bounds, theShip, 0,
-                                                        kCanBeDestination | kIsDestination,//kCanThink | kIsDestination,
-                                                        0, selectShipNum, 0);
-                if ( selectShipNum >= 0)
-                {
-                    if ( !NETWORK_ON)
-                    {
-                        SetPlayerSelectShip( selectShipNum, true, globals()->gPlayerAdmiralNumber);
-                    } else
-                    {
+                selectShipNum = GetSpritePointSelectObject(
+                        &bounds, theShip, 0,
+                        kCanBeDestination | kIsDestination,//kCanThink | kIsDestination,
+                        0, selectShipNum, 0);
+                if (selectShipNum >= 0) {
+                    if (!NETWORK_ON) {
+                        SetPlayerSelectShip(selectShipNum, true, globals()->gPlayerAdmiralNumber);
+                    } else {
 #ifdef NETSPROCKET_AVAILABLE
-                        if ( !SendSelectMessage( globals()->gGameTime + gNetLatency, selectShipNum, true))
+                        if (!SendSelectMessage(globals()->gGameTime + gNetLatency, selectShipNum, true))
                             StopNetworking();
 #endif NETSPROCKET_AVAILABLE
                     }
                 }
-            } else
-            {
-                selectShipNum = GetAdmiralConsiderObject( globals()->gPlayerAdmiralNumber);
-                selectShipNum = GetSpritePointSelectObject( &bounds, theShip, 0,
-                                                        kCanThink | kCanAcceptBuild,
-                                                        0, selectShipNum, 1);
-                if ( selectShipNum >= 0)
-                {
-                    if ( !NETWORK_ON)
-                    {
-                        SetPlayerSelectShip( selectShipNum, false, globals()->gPlayerAdmiralNumber);
-                    } else
-                    {
+            } else {
+                selectShipNum = GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber);
+                selectShipNum = GetSpritePointSelectObject(
+                        &bounds, theShip, 0,
+                        kCanThink | kCanAcceptBuild,
+                        0, selectShipNum, 1);
+                if (selectShipNum >= 0) {
+                    if (!NETWORK_ON) {
+                        SetPlayerSelectShip(selectShipNum, false, globals()->gPlayerAdmiralNumber);
+                    } else {
 #ifdef NETSPROCKET_AVAILABLE
-                        if ( !SendSelectMessage( globals()->gGameTime + gNetLatency, selectShipNum, false))
+                        if (!SendSelectMessage(globals()->gGameTime + gNetLatency, selectShipNum, false))
                             StopNetworking();
 #endif NETSPROCKET_AVAILABLE
                     }

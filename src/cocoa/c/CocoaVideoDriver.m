@@ -80,9 +80,23 @@ void antares_get_mouse_location(AntaresEventTranslator* translator, int32_t* x, 
     *y = location.y;
 }
 
-void antares_get_mouse_button(AntaresEventTranslator* translator, int32_t* button) {
-    *button = CGEventSourceButtonState(
-            kCGEventSourceStateCombinedSessionState, kCGMouseButtonLeft);
+void antares_get_mouse_button(AntaresEventTranslator* translator, int32_t* button, int which) {
+    switch (which) {
+      case 0:
+        *button = CGEventSourceButtonState(
+                kCGEventSourceStateCombinedSessionState, kCGMouseButtonLeft);
+        break;
+
+      case 1:
+        *button = CGEventSourceButtonState(
+                kCGEventSourceStateCombinedSessionState, kCGMouseButtonRight);
+        break;
+
+      case 2:
+        *button = CGEventSourceButtonState(
+                kCGEventSourceStateCombinedSessionState, kCGMouseButtonCenter);
+        break;
+    }
 }
 
 void antares_event_translator_set_mouse_down_callback(
@@ -149,6 +163,37 @@ static void flags_changed(AntaresEventTranslator* translator, int32_t flags) {
     translator->last_flags = flags;
 }
 
+static int button_for(NSEvent* event) {
+    switch ([event type]) {
+      case NSLeftMouseDown:
+      case NSLeftMouseUp:
+        return 0;
+
+      case NSRightMouseDown:
+      case NSRightMouseUp:
+        return 1;
+
+      case NSOtherMouseDown:
+      case NSOtherMouseUp:
+        return 2;
+
+      default:
+        return -1;
+    }
+}
+
+static mouse_down(AntaresEventTranslator* translator, NSEvent* event) {
+    NSPoint where = translate_coords(translator, [event locationInWindow]);
+    int button = button_for(event);
+    translator->mouse_down_callback(button, where.x, where.y, translator->mouse_down_userdata);
+}
+
+static mouse_up(AntaresEventTranslator* translator, NSEvent* event) {
+    NSPoint where = translate_coords(translator, [event locationInWindow]);
+    int button = button_for(event);
+    translator->mouse_up_callback(button, where.x, where.y, translator->mouse_up_userdata);
+}
+
 void antares_event_translator_enqueue(AntaresEventTranslator* translator, int64_t until) {
     NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
     NSDate* date = [NSDate dateWithTimeIntervalSince1970:(until * 1e-6)];
@@ -158,22 +203,18 @@ void antares_event_translator_enqueue(AntaresEventTranslator* translator, int64_
     if (event) {
         switch ([event type]) {
           case NSLeftMouseDown:
-            {
-                NSPoint where = translate_coords(translator, [event locationInWindow]);
-                translator->mouse_down_callback(
-                        0, where.x, where.y, translator->mouse_down_userdata);
-            }
+          case NSRightMouseDown:
+            mouse_down(translator, event);
             break;
 
           case NSLeftMouseUp:
-            {
-                NSPoint where = translate_coords(translator, [event locationInWindow]);
-                translator->mouse_up_callback(0, where.x, where.y, translator->mouse_up_userdata);
-            }
+          case NSRightMouseUp:
+            mouse_up(translator, event);
             break;
 
           case NSMouseMoved:
           case NSLeftMouseDragged:
+          case NSRightMouseDragged:
             {
                 NSPoint where = translate_coords(translator, [event locationInWindow]);
                 translator->mouse_move_callback(where.x, where.y, translator->mouse_move_userdata);
