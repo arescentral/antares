@@ -21,7 +21,6 @@
 #include "config/keys.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "game/admiral.hpp"
 #include "game/globals.hpp"
 #include "game/labels.hpp"

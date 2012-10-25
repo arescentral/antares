@@ -18,7 +18,6 @@
 
 #include "ui/flows/master.hpp"
 
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/text.hpp"
 #include "game/admiral.hpp"
 #include "game/cheat.hpp"

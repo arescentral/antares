@@ -21,13 +21,12 @@
 
 #include <sfz/sfz.hpp>
 
+#include "drawing/styled-text.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
 #include "ui/event.hpp"
 
 namespace antares {
-
-class RetroText;
 
 class ObjectDataScreen : public Card {
   public:
@@ -57,7 +56,7 @@ class ObjectDataScreen : public Card {
     int _typed_chars;
 
     Rect _bounds;
-    sfz::scoped_ptr<RetroText> _text;
+    sfz::scoped_ptr<StyledText> _text;
 
     DISALLOW_COPY_AND_ASSIGN(ObjectDataScreen);
 };

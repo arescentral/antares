@@ -21,7 +21,6 @@
 #include <numeric>
 
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/pix-table.hpp"
 #include "drawing/shapes.hpp"
 #include "drawing/text.hpp"

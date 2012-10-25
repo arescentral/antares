@@ -23,8 +23,7 @@
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
-#include "drawing/retro-text.hpp"
+#include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/main.hpp"
@@ -132,8 +131,10 @@ void SelectLevelScreen::draw_level_name() const {
     const interfaceItemType& i = item(NAME);
 
     RgbColor color = GetRGBTranslateColorShade(AQUA, VERY_LIGHT);
-    RetroText retro(chapter_name, kTitleFontNum, color, RgbColor::kBlack);
-    retro.wrap_to(440, 2);
+    StyledText retro(title_font);
+    retro.set_fore_color(color);
+    retro.set_retro_text(chapter_name);
+    retro.wrap_to(440, 0, 2);
 
     retro.draw(i.bounds);
 }

@@ -21,12 +21,12 @@
 
 #include <sfz/sfz.hpp>
 
+#include "drawing/styled-text.hpp"
 #include "ui/card.hpp"
 
 namespace antares {
 
 class PixMap;
-class RetroText;
 class Sprite;
 
 class DebriefingScreen : public Card {
@@ -58,7 +58,7 @@ class DebriefingScreen : public Card {
     State _state;
 
     sfz::String _message;
-    sfz::scoped_ptr<RetroText> _score;
+    sfz::scoped_ptr<StyledText> _score;
     Rect _pix_bounds;
     Rect _message_bounds;
     Rect _score_bounds;

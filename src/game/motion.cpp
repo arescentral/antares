@@ -22,7 +22,6 @@
 
 #include "data/space-object.hpp"
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/pix-table.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "game/globals.hpp"

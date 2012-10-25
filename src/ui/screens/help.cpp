@@ -22,7 +22,7 @@
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
 #include "drawing/pix-map.hpp"
-#include "drawing/retro-text.hpp"
+#include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "ui/card.hpp"
@@ -52,8 +52,11 @@ HelpScreen::HelpScreen()
 
     RgbColor fore = GetRGBTranslateColorShade(RED, VERY_LIGHT);
     RgbColor back = GetRGBTranslateColorShade(RED, VERY_DARK);
-    RetroText retro_text(text, kComputerFontNum, fore, back);
-    retro_text.wrap_to(_bounds.width(), 0);
+    StyledText retro_text(computer_font);
+    retro_text.set_fore_color(fore);
+    retro_text.set_back_color(back);
+    retro_text.set_retro_text(text);
+    retro_text.wrap_to(_bounds.width(), 0, 0);
 
     ArrayPixMap pix(_bounds.width(), _bounds.height());
     pix.fill(RgbColor::kClear);

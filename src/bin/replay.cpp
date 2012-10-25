@@ -23,7 +23,6 @@
 #include "config/preferences.hpp"
 #include "data/replay.hpp"
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/pix-map.hpp"
 #include "drawing/text.hpp"
 #include "game/admiral.hpp"

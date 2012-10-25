@@ -137,7 +137,7 @@ bool PlayerShipGetKeys(int32_t timePass, InputSource& input_source, bool *enterM
     long            selectShipNum;
     unsigned long   distance, difference, dcalc, attributes, nonattributes;
     uint64_t        hugeDistance;
-    long            width, height, strlen;
+    long            width, strlen;
 
     gLastKeys = gTheseKeys;
     if (!input_source.next(keyMap)) {
@@ -219,7 +219,7 @@ bool PlayerShipGetKeys(int32_t timePass, InputSource& input_source, bool *enterM
                         }
                     }
                 }
-                mGetDirectStringDimensions(*message, width, height);
+                width = tactical_font->string_width(*message);
                 strlen = viewport.left + ((viewport.width() / 2) - (width / 2));
                 if ((strlen + width) > (viewport.right))
                 {

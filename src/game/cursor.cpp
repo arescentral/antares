@@ -21,7 +21,6 @@
 #include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/pix-table.hpp"
 #include "game/globals.hpp"
 #include "video/driver.hpp"

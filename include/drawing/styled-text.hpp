@@ -16,31 +16,39 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_DRAWING_INTERFACE_TEXT_HPP_
-#define ANTARES_DRAWING_INTERFACE_TEXT_HPP_
+#ifndef ANTARES_DRAWING_STYLED_TEXT_HPP_
+#define ANTARES_DRAWING_STYLED_TEXT_HPP_
 
 #include <vector>
 #include <sfz/sfz.hpp>
 
-#include "data/interface.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {
 
+class Font;
 class Picture;
 class PixMap;
 
-class InterfaceText {
+class StyledText {
   public:
-    InterfaceText(const sfz::StringSlice& text, interfaceStyleType style, const RgbColor& color);
-    ~InterfaceText();
+    StyledText(const Font* font);
+    ~StyledText();
 
-    void wrap_to(int width, int h_buffer, int v_buffer);
+    void set_fore_color(RgbColor fore_color);
+    void set_back_color(RgbColor back_color);
+    void set_tab_width(int tab_width);
+    void set_retro_text(sfz::StringSlice text);
+    void set_interface_text(sfz::StringSlice text);
+    void wrap_to(int width, int side_margin, int line_spacing);
 
+    int size() const;
+    int tab_width() const;
     int width() const;
     int height() const;
+    int auto_width() const;
     const std::vector<inlinePictType>& inline_picts() const;
 
     void draw(const Rect& bounds) const;
@@ -48,38 +56,49 @@ class InterfaceText {
     void draw_char(const Rect& bounds, int index) const;
     void draw_char(PixMap* pix, const Rect& bounds, int index) const;
 
+    void draw_cursor(const Rect& bounds, int index) const;
+
   private:
     enum SpecialChar {
         NONE,
+        TAB,
         WORD_BREAK,
         LINE_BREAK,
         PICTURE,
+        DELAY,
     };
 
-    struct InterfaceChar {
-        InterfaceChar(uint32_t character, SpecialChar special);
+    struct StyledChar {
+        StyledChar(
+                uint32_t character, SpecialChar special, const RgbColor& fore_color,
+                const RgbColor& back_color);
 
         uint32_t character;
         SpecialChar special;
+        RgbColor fore_color;
+        RgbColor back_color;
         int h;
         int v;
     };
 
+    void color_cursor(const Rect& bounds, int index, const RgbColor& color) const;
     int move_word_down(int index, int v);
 
-    const RgbColor _color;
-
-    std::vector<InterfaceChar> _chars;
+    RgbColor _fore_color;
+    RgbColor _back_color;
+    std::vector<StyledChar> _chars;
     std::vector<inlinePictType> _inline_picts;
+    int _tab_width;
     int _width;
     int _height;
-    int _h_buffer;
-    int _v_buffer;
-    const int _font;
+    int _auto_width;
+    int _side_margin;
+    int _line_spacing;
+    const Font* const _font;
 
-    DISALLOW_COPY_AND_ASSIGN(InterfaceText);
+    DISALLOW_COPY_AND_ASSIGN(StyledText);
 };
 
 }  // namespace antares
 
-#endif  // ANTARES_DRAWING_INTERFACE_TEXT_HPP_
+#endif  // ANTARES_DRAWING_STYLED_TEXT_HPP_

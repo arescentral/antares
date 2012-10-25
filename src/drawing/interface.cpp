@@ -26,7 +26,7 @@
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
-#include "drawing/interface-text.hpp"
+#include "drawing/styled-text.hpp"
 #include "drawing/shapes.hpp"
 #include "drawing/text.hpp"
 #include "video/driver.hpp"
@@ -63,35 +63,21 @@ const int32_t kMaxKeyNameLength         = 4;  // how many chars can be in name o
 // DrawInterfaceString:
 //  Relies on roman alphabet for upper/lower casing.  NOT WORLD-READY!
 
-void SetInterfaceLargeUpperFont(interfaceStyleType style) {
+const Font* interface_font(interfaceStyleType style) {
     if ( style == kSmall) {
-        mSetDirectFont( kButtonSmallFontNum);
+        return small_button_font;
     } else {
-        mSetDirectFont( kButtonFontNum);
-    }
-}
-
-void SetInterfaceLargeLowerFont(interfaceStyleType style) {
-    if ( style == kSmall) {
-        mSetDirectFont( kButtonSmallFontNum);
-    } else {
-        mSetDirectFont( kButtonFontNum);
+        return button_font;
     }
 }
 
 void DrawInterfaceString(
         Point p, StringSlice s, interfaceStyleType style, const RgbColor& color) {
-    SetInterfaceLargeUpperFont(style);
-    gDirectText->draw_sprite(p, s, color);
+    interface_font(style)->draw_sprite(p, s, color);
 }
 
 short GetInterfaceStringWidth(const StringSlice& s, interfaceStyleType style) {
-    long            width, height;
-
-    SetInterfaceLargeUpperFont( style);
-    mGetDirectStringDimensions(s, width, height);
-
-    return ( width);
+    return interface_font(style)->string_width(s);
 }
 
 // GetInterfaceFontWidth:       -- NOT WORLD-READY! --
@@ -102,18 +88,15 @@ short GetInterfaceStringWidth(const StringSlice& s, interfaceStyleType style) {
 //
 
 short GetInterfaceFontWidth(interfaceStyleType style) {
-    SetInterfaceLargeUpperFont(style);
-    return gDirectText->logicalWidth;
+    return interface_font(style)->logicalWidth;
 }
 
 short GetInterfaceFontHeight(interfaceStyleType style) {
-    SetInterfaceLargeUpperFont(style);
-    return gDirectText->height;
+    return interface_font(style)->height;
 }
 
 short GetInterfaceFontAscent( interfaceStyleType style) {
-    SetInterfaceLargeUpperFont(style);
-    return gDirectText->ascent;
+    return interface_font(style)->ascent;
 }
 
 enum inlineKindType {
@@ -1102,21 +1085,25 @@ void draw_text_rect(const interfaceItemType& item) {
 }  // namespace
 
 void draw_text_in_rect(
-        const Rect& tRect, const StringSlice& text, interfaceStyleType style,
+        Rect tRect, const StringSlice& text, interfaceStyleType style,
         unsigned char textcolor, vector<inlinePictType>& inlinePict) {
     RgbColor color = GetRGBTranslateColorShade(textcolor, VERY_LIGHT);
-    InterfaceText interface_text(text, style, color);
+    StyledText interface_text(interface_font(style));
+    interface_text.set_fore_color(color);
+    interface_text.set_interface_text(text);
     interface_text.wrap_to(tRect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer);
     inlinePict = interface_text.inline_picts();
     for (int i = 0; i < inlinePict.size(); ++i) {
         inlinePict[i].bounds.offset(tRect.left, tRect.top);
     }
+    tRect.offset(0, -kInterfaceTextVBuffer);
     interface_text.draw(tRect);
 }
 
 short GetInterfaceTextHeightFromWidth(
         const StringSlice& text, interfaceStyleType style, short boundsWidth) {
-    InterfaceText interface_text(text, style, RgbColor::kBlack);
+    StyledText interface_text(interface_font(style));
+    interface_text.set_interface_text(text);
     interface_text.wrap_to(boundsWidth, kInterfaceTextHBuffer, kInterfaceTextVBuffer);
     return interface_text.height();
 }

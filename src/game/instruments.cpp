@@ -23,7 +23,6 @@
 #include "data/picture.hpp"
 #include "data/space-object.hpp"
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/shapes.hpp"
 #include "game/admiral.hpp"
 #include "game/cursor.hpp"
@@ -48,6 +47,8 @@ using std::min;
 using std::max;
 
 namespace antares {
+
+const int32_t kPanelHeight      = 480;
 
 const int32_t kRadarBlipNum     = 50;
 const uint8_t kRadarColor     = GREEN;
@@ -820,7 +821,7 @@ void DrawArbitrarySectorLines(coordPointType *corner, int32_t scale, int32_t min
             color = GetRGBTranslateColorShade(BLUE, DARKER);
         }
 
-        DrawNateLine( pixBase, clipRect, x, bounds->top, x, bounds->bottom, color);
+        pixBase->view(Rect(x, bounds->top, x + 1, bounds->bottom)).fill(color);
         division += level;
         division &= 0x0000000f;
         x += h;
@@ -850,7 +851,7 @@ void DrawArbitrarySectorLines(coordPointType *corner, int32_t scale, int32_t min
             color = GetRGBTranslateColorShade(BLUE, DARKER);
         }
 
-        DrawNateLine( pixBase, clipRect, bounds->left, x, bounds->right, x, color);
+        pixBase->view(Rect(bounds->left, x, bounds->right, x + 1)).fill(color);
 
         division += level;
         division &= 0x0000000f;

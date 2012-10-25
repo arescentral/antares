@@ -25,7 +25,6 @@
 #include "config/preferences.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/shapes.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "drawing/text.hpp"
@@ -240,12 +239,10 @@ class PauseScreen : public Card {
             _next_switch(0) {
         const StringList list(3100);
         _pause_string.assign(list.at(10));
-        mSetDirectFont(kTitleFontNum);
-        long width, height;
-        mGetDirectStringDimensions(_pause_string, width, height);
-        Rect bounds(0, 0, width, height);
+        long width = title_font->string_width(_pause_string);
+        Rect bounds(0, 0, width, title_font->height);
         bounds.center_in(play_screen);
-        _text_origin = Point(bounds.left, bounds.top + mDirectFontAscent());
+        _text_origin = Point(bounds.left, bounds.top + title_font->ascent);
 
         bounds.inset(-4, -4);
         _bracket_bounds = bounds;
@@ -286,8 +283,7 @@ class PauseScreen : public Card {
             }
             draw_vbracket(_bracket_bounds, light_green);
 
-            mSetDirectFont(kTitleFontNum);
-            gDirectText->draw_sprite(_text_origin, _pause_string, light_green);
+            title_font->draw_sprite(_text_origin, _pause_string, light_green);
         }
     }
 

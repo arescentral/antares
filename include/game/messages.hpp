@@ -23,8 +23,8 @@
 #include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
-#include "drawing/retro-text.hpp"
 #include "drawing/shapes.hpp"
+#include "drawing/styled-text.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {
@@ -91,7 +91,7 @@ struct longMessageType {
     sfz::String             lastStringMessage;
     bool                 newStringMessage;
     sfz::String             text;
-    sfz::scoped_ptr<RetroText> retro_text;
+    sfz::scoped_ptr<StyledText> retro_text;
     Point                   retro_origin;
     int32_t                 at_char;
     bool                 labelMessage;
@@ -116,8 +116,6 @@ void PreviousCurrentLongMessage( void);
 void ReplayLastLongMessage( void);
 void DrawMessageScreen(int32_t by_units);
 void SetStatusString(const sfz::StringSlice& status, unsigned char color);
-long DetermineDirectTextHeightInWidth( retroTextSpecType *, long);
-void DrawRetroTextCharInRect( retroTextSpecType *, long, const Rect&, const Rect&, PixMap *);
 void draw_message();
 
 }  // namespace antares

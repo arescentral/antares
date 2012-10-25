@@ -35,26 +35,17 @@ struct coordPointType {
 inline bool operator==(coordPointType x, coordPointType y) { return (x.h == y.h) && (x.v == y.v); }
 inline bool operator!=(coordPointType x, coordPointType y) { return !(x == y); }
 
-void MacLineTo(PixMap* pix, int x, int y, const RgbColor& color);
-void MoveTo(int x, int y);
 void FrameRect(PixMap* pix, const Rect& rect, const RgbColor& color);
-void DrawNateRect( PixMap *, Rect *, const RgbColor& color);
 void DrawNateRectVScan(PixMap* pix, Rect bounds, const RgbColor& color, bool invert);
-void DrawNateRectClipped( PixMap *, Rect *, const Rect&, const RgbColor& color);
 
 void DrawNateTriangleUpClipped(PixMap* destPix, const RgbColor& color);
 void DrawNatePlusClipped(PixMap* destPix, const RgbColor& color);
 void DrawNateDiamondClipped(PixMap* destPix, const RgbColor& color);
 void DrawNateVBracket(PixMap *, const Rect&, const Rect&, const RgbColor& color);
 void draw_vbracket(const Rect& rect, const RgbColor& color);
-void DrawNateShadedRect(
-        PixMap *, Rect *, const Rect&,
-        const RgbColor& fill_color, const RgbColor& light_color, const RgbColor& dark_color);
 void draw_shaded_rect(
         Rect rect,
         const RgbColor& fill_color, const RgbColor& light_color, const RgbColor& dark_color);
-void DrawNateLine(PixMap *, const Rect&, long, long, long, long, const RgbColor& color);
-void CopyNateLine( PixMap *, PixMap *, const Rect&, long, long, long, long);
 
 }  // namespace antares
 

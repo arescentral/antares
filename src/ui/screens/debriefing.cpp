@@ -25,7 +25,7 @@
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
-#include "drawing/retro-text.hpp"
+#include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/time.hpp"
@@ -39,6 +39,7 @@ using sfz::String;
 using sfz::PrintItem;
 using sfz::dec;
 using sfz::format;
+using sfz::scoped_ptr;
 using std::vector;
 
 namespace macroman = sfz::macroman;
@@ -112,9 +113,9 @@ int score(
     return score;
 }
 
-RetroText* score_text(
+void build_score_text(
         int your_length, int par_length, int your_loss, int par_loss, int your_kill,
-        int par_kill) {
+        int par_kill, scoped_ptr<StyledText>& result) {
     Resource rsrc("text", "txt", 6000);
     String text(macroman::decode(rsrc.data()));
 
@@ -150,7 +151,11 @@ RetroText* score_text(
     fore_color = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
     RgbColor back_color;
     back_color = GetRGBTranslateColorShade(GOLD, DARKEST);
-    return new RetroText(text, kButtonFontNum, fore_color, back_color);
+
+    result.reset(new StyledText(button_font));
+    result->set_fore_color(fore_color);
+    result->set_back_color(back_color);
+    result->set_retro_text(text);
 }
 
 }  // namespace
@@ -174,9 +179,9 @@ DebriefingScreen::DebriefingScreen(
     Rect score_area = _message_bounds;
     score_area.top = score_area.bottom - kScoreTableHeight;
 
-    _score.reset(score_text(your_length, par_length, your_loss, par_loss, your_kill, par_kill)),
+    build_score_text(your_length, par_length, your_loss, par_loss, your_kill, par_kill, _score);
     _score->set_tab_width(60);
-    _score->wrap_to(_message_bounds.width(), 2);
+    _score->wrap_to(_message_bounds.width(), 0, 2);
     _score_bounds = Rect(0, 0, _score->auto_width(), _score->height());
     _score_bounds.center_in(score_area);
 
