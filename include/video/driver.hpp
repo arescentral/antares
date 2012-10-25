@@ -48,7 +48,7 @@ class VideoDriver {
   public:
     VideoDriver();
     virtual ~VideoDriver();
-    virtual bool button() = 0;
+    virtual bool button(int which) = 0;
     virtual Point get_mouse() = 0;
     virtual void get_keys(KeyMap* k) = 0;
 

@@ -462,7 +462,7 @@ void GamePlay::fire_timer() {
                 globals()->gGameOver = 1;
             }
 
-            if (VideoDriver::driver()->button()) {
+            if (VideoDriver::driver()->button(0)) {
                 if (_replay) {
                     *_game_result = QUIT_GAME;
                     globals()->gGameOver = 1;

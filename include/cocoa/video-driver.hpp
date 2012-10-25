@@ -37,7 +37,7 @@ class Event;
 class CocoaVideoDriver : public OpenGlVideoDriver {
   public:
     CocoaVideoDriver(bool fullscreen, Size screen_size);
-    virtual bool button();
+    virtual bool button(int which);
     virtual Point get_mouse();
     virtual void get_keys(KeyMap* k);
 
