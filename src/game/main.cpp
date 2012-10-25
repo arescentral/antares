@@ -551,7 +551,7 @@ void GamePlay::fire_timer() {
     update_beams();
     update_all_label_positions(unitsDone);
     update_all_label_contents(unitsDone);
-    update_site();
+    update_site(_replay);
 
     CullSprites();
     ShowAllLabels();

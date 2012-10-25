@@ -571,7 +571,7 @@ void EraseSite() {
     globals()->old_cursor_coord = globals()->cursor_coord;
 }
 
-void update_site() {
+void update_site(bool replay) {
     if (gScrollStarObject == NULL) {
         should_draw_site = false;
     } else if (gScrollStarObject->offlineTime <= 0) {
@@ -616,7 +616,11 @@ void update_site() {
         should_draw_site = false;
     }
 
-    // do the cursor, too
+    // Do the cursor, too, unless this is a replay.
+    if (replay) {
+        HideSpriteCursor();
+        return;
+    }
     Point cursor_coord = VideoDriver::driver()->get_mouse();
     MoveSpriteCursor(cursor_coord);
     HideSpriteCursor();
