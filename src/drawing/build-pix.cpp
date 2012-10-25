@@ -24,7 +24,7 @@
 #include "data/picture.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
-#include "drawing/retro-text.hpp"
+#include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 
 using sfz::BytesSlice;

@@ -16,7 +16,7 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "drawing/retro-text.hpp"
+#include "drawing/styled-text.hpp"
 
 #include <algorithm>
 #include <limits>

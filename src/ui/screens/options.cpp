@@ -28,7 +28,7 @@
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/offscreen-gworld.hpp"
-#include "drawing/retro-text.hpp"
+#include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/main.hpp"
 #include "game/scenario-maker.hpp"

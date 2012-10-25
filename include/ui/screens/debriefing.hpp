@@ -21,7 +21,7 @@
 
 #include <sfz/sfz.hpp>
 
-#include "drawing/retro-text.hpp"
+#include "drawing/styled-text.hpp"
 #include "ui/card.hpp"
 
 namespace antares {

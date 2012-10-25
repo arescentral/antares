@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_DRAWING_RETRO_TEXT_HPP_
-#define ANTARES_DRAWING_RETRO_TEXT_HPP_
+#ifndef ANTARES_DRAWING_STYLED_TEXT_HPP_
+#define ANTARES_DRAWING_STYLED_TEXT_HPP_
 
 #include <vector>
 #include <sfz/sfz.hpp>
@@ -101,4 +101,4 @@ class StyledText {
 
 }  // namespace antares
 
-#endif  // ANTARES_DRAWING_RETRO_TEXT_HPP_
+#endif  // ANTARES_DRAWING_STYLED_TEXT_HPP_

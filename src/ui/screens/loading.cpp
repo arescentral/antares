@@ -22,7 +22,7 @@
 #include <sfz/sfz.hpp>
 
 #include "data/string-list.hpp"
-#include "drawing/retro-text.hpp"
+#include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/scenario-maker.hpp"
 #include "game/time.hpp"

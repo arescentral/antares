@@ -25,7 +25,7 @@
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
-#include "drawing/retro-text.hpp"
+#include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/time.hpp"

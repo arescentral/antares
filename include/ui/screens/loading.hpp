@@ -23,7 +23,7 @@
 #include <vector>
 #include <sfz/sfz.hpp>
 
-#include "drawing/retro-text.hpp"
+#include "drawing/styled-text.hpp"
 #include "ui/screen.hpp"
 
 namespace antares {

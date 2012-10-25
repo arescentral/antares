@@ -22,7 +22,7 @@
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
 #include "drawing/pix-map.hpp"
-#include "drawing/retro-text.hpp"
+#include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "ui/card.hpp"
