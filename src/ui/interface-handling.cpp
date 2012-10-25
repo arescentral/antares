@@ -36,7 +36,6 @@
 #include "drawing/briefing.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/pix-map.hpp"
 #include "drawing/pix-table.hpp"
 #include "drawing/text.hpp"

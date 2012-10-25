@@ -23,7 +23,6 @@
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"

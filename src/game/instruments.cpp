@@ -23,7 +23,6 @@
 #include "data/picture.hpp"
 #include "data/space-object.hpp"
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/shapes.hpp"
 #include "game/admiral.hpp"
 #include "game/cursor.hpp"
@@ -48,6 +47,8 @@ using std::min;
 using std::max;
 
 namespace antares {
+
+const int32_t kPanelHeight      = 480;
 
 const int32_t kRadarBlipNum     = 50;
 const uint8_t kRadarColor     = GREEN;

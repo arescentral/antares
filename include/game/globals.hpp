@@ -38,6 +38,9 @@ const size_t kBarIndicatorNum              = 5;
 const size_t kKeyMapBufferNum              = 256;
 const size_t kHotKeyNum                    = 10;
 
+const int32_t kLeftPanelWidth       = 128;
+const int32_t kRightPanelWidth      = 32;
+const int32_t kSmallScreenWidth     = 640;
 const int32_t kRadarSize                = 110;
 
 enum ZoomType {

@@ -23,7 +23,6 @@
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"

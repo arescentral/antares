@@ -22,7 +22,6 @@
 #include "drawing/briefing.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "game/instruments.hpp"
 #include "game/scenario-maker.hpp"
 #include "math/random.hpp"
