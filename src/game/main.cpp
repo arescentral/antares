@@ -102,7 +102,8 @@ class GamePlay : public Card {
     const Rect _play_area;
     const int64_t _scenario_start_time;
     const bool _command_and_q;
-    bool _mouse_down;
+    bool _left_mouse_down;
+    bool _right_mouse_down;
     bool _entering_message;
     bool _player_paused;
     KeyMap _key_map;
@@ -225,7 +226,8 @@ GamePlay::GamePlay(bool replay, GameResult* game_result)
                       (gThisScenario->startTime & kScenario_StartTimeMask)
                       * kScenarioTimeMultiple)),
           _command_and_q(BothCommandAndQ()),
-          _mouse_down(false),
+          _left_mouse_down(false),
+          _right_mouse_down(false),
           _entering_message(false),
           _player_paused(false),
           _decide_cycle(0),
@@ -467,7 +469,7 @@ void GamePlay::fire_timer() {
                     *_game_result = QUIT_GAME;
                     globals()->gGameOver = 1;
                 } else {
-                    if (!_mouse_down) {
+                    if (!_left_mouse_down) {
                         int64_t double_click_interval
                             = VideoDriver::driver()->double_click_interval_usecs();
                         if ((globals()->gGameTime - _last_click_time) <= double_click_interval) {
@@ -477,14 +479,28 @@ void GamePlay::fire_timer() {
                             InstrumentsHandleClick();
                             _last_click_time = globals()->gGameTime;
                         }
-                        _mouse_down = true;
+                        _left_mouse_down = true;
                     } else {
                         InstrumentsHandleMouseStillDown();
                     }
                 }
-            } else if (_mouse_down) {
-                _mouse_down = false;
+            } else if (_left_mouse_down) {
+                _left_mouse_down = false;
                 InstrumentsHandleMouseUp();
+            }
+
+            if (VideoDriver::driver()->button(1)) {
+                if (_replay) {
+                    *_game_result = QUIT_GAME;
+                    globals()->gGameOver = 1;
+                } else {
+                    if (!_right_mouse_down) {
+                        PlayerShipHandleClick(globals()->cursor_coord, 1);
+                        _right_mouse_down = true;
+                    }
+                }
+            } else if (_right_mouse_down) {
+                _right_mouse_down = false;
             }
 
             CollideSpaceObjects(gSpaceObjectData.get(), kMaxSpaceObject);

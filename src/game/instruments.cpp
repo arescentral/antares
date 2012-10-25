@@ -745,7 +745,7 @@ void draw_sector_lines() {
 
 void InstrumentsHandleClick() {
     const Point where = globals()->cursor_coord;
-    PlayerShipHandleClick(where);
+    PlayerShipHandleClick(where, 0);
     MiniComputerHandleClick(where);
     if (!SpriteCursorVisible()) {
         globals()->gMouseActive = true;
@@ -755,7 +755,7 @@ void InstrumentsHandleClick() {
 
 void InstrumentsHandleDoubleClick() {
     const Point where = globals()->cursor_coord;
-    PlayerShipHandleClick(where);
+    PlayerShipHandleClick(where, 0);
     MiniComputerHandleDoubleClick(where);
     if (!SpriteCursorVisible()) {
         globals()->gMouseActive = true;
