@@ -33,7 +33,7 @@ void ResetInstruments();
 void DrawInstrumentPanel();
 void draw_instruments();
 void EraseSite();
-void update_site();
+void update_site(bool replay);
 void draw_site();
 void update_sector_lines();
 void draw_sector_lines();
