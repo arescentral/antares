@@ -45,17 +45,22 @@ class OpenGlVideoDriver : public VideoDriver {
     virtual void apply_stencil();
     virtual void end_stencil();
 
+    struct Uniforms {
+        int color_mode;
+        int sprite;
+    };
+
   protected:
     class MainLoop {
       public:
-        MainLoop(const OpenGlVideoDriver& driver, Card* initial);
+        MainLoop(OpenGlVideoDriver& driver, Card* initial);
         bool done();
         void draw();
         Card* top() const;
 
       private:
         struct Setup {
-            Setup();
+            Setup(OpenGlVideoDriver& driver);
         };
         const Setup _setup;
         const OpenGlVideoDriver& _driver;
@@ -76,6 +81,7 @@ class OpenGlVideoDriver : public VideoDriver {
     const Size _screen_size;
 
     int8_t _stencil_height;
+    Uniforms _uniforms;
 
     DISALLOW_COPY_AND_ASSIGN(OpenGlVideoDriver);
 };

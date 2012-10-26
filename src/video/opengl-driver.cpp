@@ -35,18 +35,63 @@ using sfz::Exception;
 using sfz::PrintItem;
 using sfz::String;
 using sfz::StringSlice;
+using sfz::format;
+using sfz::print;
 using std::min;
 using std::max;
+namespace io = sfz::io;
 
 namespace antares {
 
 namespace {
 
+static const char kStaticShaderColorModeUniform[] = "color_mode";
+static const char kStaticShaderSpriteUniform[] = "sprite";
+static const GLchar* kStaticShaderSource =
+    "#version 120\n"
+    "uniform int color_mode;\n"
+    "uniform sampler2DRect sprite;\n"
+    "\n"
+    "void main() {\n"
+    "    if (color_mode == 0) {\n"
+    "        gl_FragColor = gl_Color;\n"
+    "    } else {\n"
+    "        gl_FragColor = gl_Color * texture2DRect(sprite, gl_TexCoord[0].xy);\n"
+    "    }\n"
+    "}\n";
+
+void gl_check() {
+    int error = glGetError();
+    if (error != GL_NO_ERROR) {
+        throw Exception(error);
+    }
+}
+
+void gl_log(GLint object) {
+    GLint log_size;
+    if (glIsShader(object)) {
+        glGetShaderiv(object, GL_INFO_LOG_LENGTH, &log_size);
+    } else {
+        glGetProgramiv(object, GL_INFO_LOG_LENGTH, &log_size);
+    }
+    if (log_size == 0) {
+        return;
+    }
+    sfz::scoped_array<GLchar> log(new GLchar[log_size + 1]);
+    if (glIsShader(object)) {
+        glGetShaderInfoLog(object, log_size, &log_size, log.get());
+    } else {
+        glGetProgramInfoLog(object, log_size, &log_size, log.get());
+    }
+    print(io::err, format("object {0} log: {1}\n", object, (const char*)log.get()));
+}
+
 class OpenGlSprite : public Sprite {
   public:
-    OpenGlSprite(PrintItem name, const PixMap& image)
+    OpenGlSprite(PrintItem name, const PixMap& image, const OpenGlVideoDriver::Uniforms& uniforms)
             : _name(name),
-              _size(image.size()) {
+              _size(image.size()),
+              _uniforms(uniforms) {
         glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
         glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -88,16 +133,19 @@ class OpenGlSprite : public Sprite {
     virtual void draw(const Rect& draw_rect, const RgbColor& color) const {
         const int32_t w = _size.width;
         const int32_t h = _size.height;
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
         glColor4ub(color.red, color.green, color.blue, color.alpha);
+        glUniform1i(_uniforms.color_mode, 1);
+        glUniform1i(_uniforms.sprite, 0);
         glBegin(GL_QUADS);
-        glTexCoord2f(0, 0);
+        glMultiTexCoord2f(GL_TEXTURE0, 0, 0);
         glVertex2f(draw_rect.left, draw_rect.top);
-        glTexCoord2f(0, h);
+        glMultiTexCoord2f(GL_TEXTURE0, 0, h);
         glVertex2f(draw_rect.left, draw_rect.bottom);
-        glTexCoord2f(w, h);
+        glMultiTexCoord2f(GL_TEXTURE0, w, h);
         glVertex2f(draw_rect.right, draw_rect.bottom);
-        glTexCoord2f(w, 0);
+        glMultiTexCoord2f(GL_TEXTURE0, w, 0);
         glVertex2f(draw_rect.right, draw_rect.top);
         glEnd();
     }
@@ -118,6 +166,7 @@ class OpenGlSprite : public Sprite {
     const String _name;
     Texture _texture;
     Size _size;
+    const OpenGlVideoDriver::Uniforms& _uniforms;
 
     DISALLOW_COPY_AND_ASSIGN(OpenGlSprite);
 };
@@ -129,11 +178,11 @@ OpenGlVideoDriver::OpenGlVideoDriver(Size screen_size)
           _stencil_height(0) { }
 
 Sprite* OpenGlVideoDriver::new_sprite(PrintItem name, const PixMap& content) {
-    return new OpenGlSprite(name, content);
+    return new OpenGlSprite(name, content, _uniforms);
 }
 
 void OpenGlVideoDriver::fill_rect(const Rect& rect, const RgbColor& color) {
-    glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
+    glUniform1i(_uniforms.color_mode, 0);
     glColor4ub(color.red, color.green, color.blue, color.alpha);
     glBegin(GL_QUADS);
     glVertex2f(rect.right, rect.top);
@@ -144,7 +193,7 @@ void OpenGlVideoDriver::fill_rect(const Rect& rect, const RgbColor& color) {
 }
 
 void OpenGlVideoDriver::draw_point(const Point& at, const RgbColor& color) {
-    glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
+    glUniform1i(_uniforms.color_mode, 0);
     glColor4ub(color.red, color.green, color.blue, color.alpha);
     glBegin(GL_POINTS);
     glVertex2f(at.h + 0.5, at.v + 0.5);
@@ -152,7 +201,7 @@ void OpenGlVideoDriver::draw_point(const Point& at, const RgbColor& color) {
 }
 
 void OpenGlVideoDriver::draw_line(const Point& from, const Point& to, const RgbColor& color) {
-    glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 0);
+    glUniform1i(_uniforms.color_mode, 0);
 
     // Shortcut: when `from` == `to`, we can draw just a point.
     if (from == to) {
@@ -255,7 +304,7 @@ void OpenGlVideoDriver::normalize_stencil() {
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 }
 
-OpenGlVideoDriver::MainLoop::Setup::Setup() {
+OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glClearColor(0, 0, 0, 1);
     glDisable(GL_TEXTURE_2D);
@@ -270,9 +319,38 @@ OpenGlVideoDriver::MainLoop::Setup::Setup() {
     glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+
+    GLuint shader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(shader, 1, &kStaticShaderSource, NULL);
+    glCompileShader(shader);
+    GLint compiled;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+    if (compiled == GL_FALSE) {
+        gl_log(shader);
+        throw Exception("compilation failed");
+    }
+    gl_check();
+
+    GLuint program = glCreateProgram();
+    glAttachShader(program, shader);
+    glLinkProgram(program);
+    glValidateProgram(program);
+    GLint linked;
+    glGetProgramiv(program, GL_LINK_STATUS, &linked);
+    if (linked == GL_FALSE) {
+        gl_log(program);
+        throw Exception("linking failed");
+    }
+    gl_check();
+
+    driver._uniforms.color_mode = glGetUniformLocation(program, kStaticShaderColorModeUniform);
+    driver._uniforms.sprite = glGetUniformLocation(program, kStaticShaderSpriteUniform);
+    glUseProgram(program);
+    gl_check();
 }
 
-OpenGlVideoDriver::MainLoop::MainLoop(const OpenGlVideoDriver& driver, Card* initial):
+OpenGlVideoDriver::MainLoop::MainLoop(OpenGlVideoDriver& driver, Card* initial):
+        _setup(driver),
         _driver(driver),
         _stack(initial) { }
 
@@ -292,6 +370,9 @@ void OpenGlVideoDriver::MainLoop::draw() {
     glTranslatef(-1.0, 1.0, 0.0);
     glScalef(2.0, -2.0, 1.0);
     glScalef(1.0 / _driver._screen_size.width, 1.0 / _driver._screen_size.height, 1.0);
+
+    glUniform1i(_driver._uniforms.color_mode, 0);
+    gl_check();
 
     _stack.top()->draw();
 

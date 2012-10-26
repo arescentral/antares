@@ -168,6 +168,7 @@ void CocoaVideoDriver::loop(Card* initial) {
     }
     GLint swap_interval = 1;
     CGLSetParameter(context.c_obj(), kCGLCPSwapInterval, &swap_interval);
+    CGLSetCurrentContext(context.c_obj());
 
     MainLoop main_loop(*this, initial);
     while (!main_loop.done()) {

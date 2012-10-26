@@ -105,7 +105,7 @@ static const CGLPixelFormatAttribute kAttrs[] = {
 
 class OffscreenVideoDriver::MainLoop {
   public:
-    MainLoop(const OffscreenVideoDriver& driver, Card* initial):
+    MainLoop(OffscreenVideoDriver& driver, Card* initial):
             _pix(kAttrs),
             _context(_pix.c_obj(), NULL),
             _buffer(Preferences::preferences()->screen_size(), 4),
