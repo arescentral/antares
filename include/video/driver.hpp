@@ -61,26 +61,7 @@ class VideoDriver {
     virtual void draw_point(const Point& at, const RgbColor& color) = 0;
     virtual void draw_line(const Point& from, const Point& to, const RgbColor& color) = 0;
 
-    virtual void start_stencil() = 0;
-    virtual void set_stencil_threshold(uint8_t alpha) = 0;
-    virtual void apply_stencil() = 0;
-    virtual void end_stencil() = 0;
-
     static VideoDriver* driver();
-};
-
-class Stencil {
-  public:
-    Stencil(VideoDriver* driver);
-    ~Stencil();
-
-    void set_threshold(uint8_t alpha);
-    void apply();
-
-  private:
-    VideoDriver* _driver;
-
-    DISALLOW_COPY_AND_ASSIGN(Stencil);
 };
 
 class Sprite {

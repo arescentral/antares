@@ -94,7 +94,6 @@ void write_to(const WriteTarget& out, const SnapshotBuffer& buffer) {
 
 static const CGLPixelFormatAttribute kAttrs[] = {
     kCGLPFAColorSize, static_cast<CGLPixelFormatAttribute>(24),
-    kCGLPFAStencilSize, static_cast<CGLPixelFormatAttribute>(8),
     // kCGLPFAAccelerated,
     kCGLPFAOffScreen,
     kCGLPFARemotePBuffer,

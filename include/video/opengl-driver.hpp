@@ -40,11 +40,6 @@ class OpenGlVideoDriver : public VideoDriver {
     virtual void draw_point(const Point& at, const RgbColor& color);
     virtual void draw_line(const Point& from, const Point& to, const RgbColor& color);
 
-    virtual void start_stencil();
-    virtual void set_stencil_threshold(uint8_t alpha);
-    virtual void apply_stencil();
-    virtual void end_stencil();
-
     struct Uniforms {
         int color_mode;
         int sprite;
@@ -75,15 +70,8 @@ class OpenGlVideoDriver : public VideoDriver {
     Size screen_size() const { return _screen_size; }
 
   private:
-    // Clamps all bytes in the stencil buffer to [0, _stencil_height].  This is done whenever a
-    // transition is made from drawing the stencil buffer to drawing pixels, so that if another
-    // stenciling operation is pushed, incrementing bytes in the stencil buffer is guaranteed to
-    // yield new values.
-    void normalize_stencil();
-
     const Size _screen_size;
 
-    int8_t _stencil_height;
     Uniforms _uniforms;
 
     DISALLOW_COPY_AND_ASSIGN(OpenGlVideoDriver);

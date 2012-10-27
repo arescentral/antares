@@ -209,8 +209,7 @@ class OpenGlSprite : public Sprite {
 }  // namespace
 
 OpenGlVideoDriver::OpenGlVideoDriver(Size screen_size)
-        : _screen_size(screen_size),
-          _stencil_height(0) { }
+        : _screen_size(screen_size) { }
 
 Sprite* OpenGlVideoDriver::new_sprite(PrintItem name, const PixMap& content) {
     return new OpenGlSprite(name, content, _uniforms);
@@ -300,54 +299,13 @@ void OpenGlVideoDriver::draw_line(const Point& from, const Point& to, const RgbC
     glEnd();
 }
 
-void OpenGlVideoDriver::start_stencil() {
-    glColorMask(0, 0, 0, 0);
-    glAlphaFunc(GL_GREATER, 0);
-    glStencilFunc(GL_GEQUAL, _stencil_height, 0xff);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
-    ++_stencil_height;
-}
-
-void OpenGlVideoDriver::set_stencil_threshold(uint8_t alpha) {
-    glAlphaFunc(GL_GREATER, alpha / 256.0);
-}
-
-void OpenGlVideoDriver::apply_stencil() {
-    normalize_stencil();
-}
-
-void OpenGlVideoDriver::end_stencil() {
-    --_stencil_height;
-    normalize_stencil();
-}
-
-void OpenGlVideoDriver::normalize_stencil() {
-    glColorMask(0, 0, 0, 0);
-    glAlphaFunc(GL_ALWAYS, 0);
-    glStencilFunc(GL_LEQUAL, _stencil_height, 0xff);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-
-    glBegin(GL_QUADS);
-    glVertex2f(_screen_size.width, 0);
-    glVertex2f(0, 0);
-    glVertex2f(0, _screen_size.height);
-    glVertex2f(_screen_size.width, _screen_size.height);
-    glEnd();
-
-    glColorMask(1, 1, 1, 1);
-    glStencilFunc(GL_EQUAL, _stencil_height, 0xff);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-}
-
 OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glClearColor(0, 0, 0, 1);
     glDisable(GL_TEXTURE_2D);
     glEnable(GL_TEXTURE_RECTANGLE_EXT);
     glBindTexture(GL_TEXTURE_RECTANGLE_EXT, 1);
-    glEnable(GL_STENCIL_TEST);
     glEnable(GL_ALPHA_TEST);
-    glClearStencil(0);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glTextureRangeAPPLE(GL_TEXTURE_RECTANGLE_EXT, 0, NULL);
@@ -420,7 +378,7 @@ bool OpenGlVideoDriver::MainLoop::done() {
 }
 
 void OpenGlVideoDriver::MainLoop::draw() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
     glViewport(0, 0, _driver._screen_size.width, _driver._screen_size.height);
     glMatrixMode(GL_PROJECTION);

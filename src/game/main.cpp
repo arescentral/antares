@@ -373,10 +373,11 @@ void GamePlay::draw() const {
     draw_sprites();
     draw_labels();
 
-    draw_instruments();
     draw_message();
     draw_site();
     draw_cursor();
+    draw_instruments();
+    draw_sprite_cursor();
     draw_hint_line();
     globals()->transitions.draw();
 }

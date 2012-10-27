@@ -151,7 +151,6 @@ void CocoaVideoDriver::loop(Card* initial) {
                 CGDisplayIDToOpenGLDisplayMask(kCGDirectMainDisplay)),
         kCGLPFAFullScreen,
         kCGLPFAColorSize, static_cast<CGLPixelFormatAttribute>(24),
-        kCGLPFAStencilSize, static_cast<CGLPixelFormatAttribute>(8),
         kCGLPFADoubleBuffer,
         kCGLPFAAccelerated,
         static_cast<CGLPixelFormatAttribute>(0),
