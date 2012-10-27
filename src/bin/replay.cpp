@@ -186,12 +186,12 @@ void main(int argc, char** argv) {
     preferences.set_play_music_in_game(true);
     NullPrefsDriver prefs(preferences);
 
-    OffscreenVideoDriver video(
-            Preferences::preferences()->screen_size(), output_dir);
-    video.schedule_event(make_linked_ptr(new MouseMoveEvent(0, Point(320, 240))));
+    EventScheduler scheduler;
+    OffscreenVideoDriver video(Preferences::preferences()->screen_size(), scheduler, output_dir);
+    scheduler.schedule_event(make_linked_ptr(new MouseMoveEvent(0, Point(320, 240))));
     // TODO(sfiera): add recurring snapshots to OffscreenVideoDriver.
     for (int64_t i = 1; i < 72000; i += interval) {
-        video.schedule_snapshot(i);
+        scheduler.schedule_snapshot(i);
     }
 
     scoped_ptr<SoundDriver> sound;

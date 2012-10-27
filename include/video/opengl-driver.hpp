@@ -52,8 +52,8 @@ class OpenGlVideoDriver : public VideoDriver {
     class MainLoop {
       public:
         MainLoop(OpenGlVideoDriver& driver, Card* initial);
-        bool done();
         void draw();
+        bool done() const;
         Card* top() const;
 
       private:

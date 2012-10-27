@@ -19,54 +19,35 @@
 #ifndef ANTARES_VIDEO_OFFSCREEN_DRIVER_HPP_
 #define ANTARES_VIDEO_OFFSCREEN_DRIVER_HPP_
 
-#include <queue>
-#include <stack>
 #include <sfz/sfz.hpp>
 
 #include "config/keys.hpp"
-#include "math/geometry.hpp"
-#include "math/units.hpp"
-#include "ui/card.hpp"
-#include "ui/event-tracker.hpp"
-#include "ui/event.hpp"
+#include "ui/event-scheduler.hpp"
 #include "video/opengl-driver.hpp"
 
 namespace antares {
 
 class OffscreenVideoDriver : public OpenGlVideoDriver {
+    class MainLoop;
   public:
-    OffscreenVideoDriver(Size screen_size, const sfz::Optional<sfz::String>& output_dir);
+    OffscreenVideoDriver(
+            Size screen_size, EventScheduler& scheduler,
+            const sfz::Optional<sfz::String>& output_dir);
 
-    virtual bool button(int which) { return _event_tracker.button(which); }
-    virtual Point get_mouse() { return _event_tracker.mouse(); }
-    virtual void get_keys(KeyMap* k) { k->copy(_event_tracker.keys()); }
+    virtual bool button(int which) { return _scheduler.button(which); }
+    virtual Point get_mouse() { return _scheduler.get_mouse(); }
+    virtual void get_keys(KeyMap* k) { _scheduler.get_keys(k); }
 
-    virtual int ticks() const { return _ticks; }
-    virtual int usecs() const { return ticks_to_usecs(_ticks); }
+    virtual int ticks() const { return _scheduler.ticks(); }
+    virtual int usecs() const { return _scheduler.usecs(); }
     virtual int64_t double_click_interval_usecs() const { return 0.5e6; }
 
     void loop(Card* initial);
 
-    void schedule_snapshot(int64_t at);
-    void schedule_event(sfz::linked_ptr<Event> event);
-    void schedule_key(int32_t key, int64_t down, int64_t up);
-    void schedule_mouse(int button, const Point& where, int64_t down, int64_t up);
-
   private:
-    class MainLoop;
-
-    void advance_tick_count(MainLoop* loop, int64_t ticks);
-    bool have_snapshots_before(int64_t ticks) const;
-
     const sfz::Optional<sfz::String> _output_dir;
-    int64_t _ticks;
 
-    EventTracker _event_tracker;
-
-    static bool is_later(const sfz::linked_ptr<Event>& x, const sfz::linked_ptr<Event>& y);
-    std::vector<sfz::linked_ptr<Event> > _event_heap;
-
-    std::vector<int64_t> _snapshot_times;
+    EventScheduler& _scheduler;
 
     DISALLOW_COPY_AND_ASSIGN(OffscreenVideoDriver);
 };

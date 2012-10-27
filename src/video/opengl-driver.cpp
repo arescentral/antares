@@ -373,10 +373,6 @@ OpenGlVideoDriver::MainLoop::MainLoop(OpenGlVideoDriver& driver, Card* initial):
         _driver(driver),
         _stack(initial) { }
 
-bool OpenGlVideoDriver::MainLoop::done() {
-    return _stack.empty();
-}
-
 void OpenGlVideoDriver::MainLoop::draw() {
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
@@ -400,6 +396,10 @@ void OpenGlVideoDriver::MainLoop::draw() {
     glPopMatrix();
 
     glFinish();
+}
+
+bool OpenGlVideoDriver::MainLoop::done() const {
+    return _stack.empty();
 }
 
 Card* OpenGlVideoDriver::MainLoop::top() const {
