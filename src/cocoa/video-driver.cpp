@@ -133,15 +133,15 @@ void CocoaVideoDriver::get_keys(KeyMap* keys) {
     keys->copy(_event_tracker.keys());
 }
 
-int CocoaVideoDriver::ticks() {
+int CocoaVideoDriver::ticks() const {
     return usecs() * 60 / 1000000;
 }
 
-int CocoaVideoDriver::usecs() {
+int CocoaVideoDriver::usecs() const {
     return antares::usecs() - _start_time;
 }
 
-int64_t CocoaVideoDriver::double_click_interval_usecs() {
+int64_t CocoaVideoDriver::double_click_interval_usecs() const {
     return antares_double_click_interval_usecs();
 }
 

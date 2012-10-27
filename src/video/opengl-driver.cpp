@@ -27,6 +27,7 @@
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
 #include "math/geometry.hpp"
+#include "math/random.hpp"
 #include "ui/card.hpp"
 
 #include "game/time.hpp"
@@ -45,18 +46,37 @@ namespace antares {
 
 namespace {
 
-static const char kStaticShaderColorModeUniform[] = "color_mode";
-static const char kStaticShaderSpriteUniform[] = "sprite";
-static const GLchar* kStaticShaderSource =
+static const char kShaderColorModeUniform[] = "color_mode";
+static const char kShaderSpriteUniform[] = "sprite";
+static const char kShaderStaticImageUniform[] = "static_image";
+static const char kShaderStaticFractionUniform[] = "static_fraction";
+static const char kShaderTUniform[] = "t";
+static const GLchar* kShaderSource =
     "#version 120\n"
     "uniform int color_mode;\n"
     "uniform sampler2DRect sprite;\n"
+    "uniform sampler2D static_image;\n"
+    "uniform float static_fraction;\n"
+    "uniform int t;\n"
     "\n"
     "void main() {\n"
+    "    vec2 uv = gl_TexCoord[0].xy;\n"
+    "    vec4 sprite_color = texture2DRect(sprite, uv);\n"
     "    if (color_mode == 0) {\n"
     "        gl_FragColor = gl_Color;\n"
-    "    } else {\n"
-    "        gl_FragColor = gl_Color * texture2DRect(sprite, gl_TexCoord[0].xy);\n"
+    "    } else if (color_mode == 1) {\n"
+    "        gl_FragColor = sprite_color;\n"
+    "    } else if (color_mode == 2) {\n"
+    "        gl_FragColor = gl_Color * sprite_color;\n"
+    "    } else if (color_mode == 3) {\n"
+    "        vec2 uv2 = (gl_TexCoord[1].xy + vec2(mod(t / 256, 256), mod(t, 256))) * vec2(1.0/256, 1.0/256);\n"
+    "        vec4 static_color = texture2D(static_image, uv2);\n"
+    "        if (static_color.w <= static_fraction) {\n"
+    "            vec4 sprite_alpha = vec4(1, 1, 1, sprite_color.w);\n"
+    "            gl_FragColor = gl_Color * sprite_alpha;\n"
+    "        } else {\n"
+    "            gl_FragColor = sprite_color;\n"
+    "        }\n"
     "    }\n"
     "}\n";
 
@@ -124,30 +144,22 @@ class OpenGlSprite : public Sprite {
         return _name;
     }
 
-    virtual void draw(int32_t x, int32_t y, const RgbColor& color) const {
-        const int32_t w = _size.width;
-        const int32_t h = _size.height;
-        draw(Rect(x, y, x + w, y + h), color);
+    virtual void draw(const Rect& draw_rect) const {
+        glUniform1i(_uniforms.color_mode, 1);
+        draw_internal(draw_rect);
     }
 
-    virtual void draw(const Rect& draw_rect, const RgbColor& color) const {
-        const int32_t w = _size.width;
-        const int32_t h = _size.height;
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
+    virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const {
+        glColor4ub(tint.red, tint.green, tint.blue, 255);
+        glUniform1i(_uniforms.color_mode, 2);
+        draw_internal(draw_rect);
+    }
+
+    virtual void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const {
         glColor4ub(color.red, color.green, color.blue, color.alpha);
-        glUniform1i(_uniforms.color_mode, 1);
-        glUniform1i(_uniforms.sprite, 0);
-        glBegin(GL_QUADS);
-        glMultiTexCoord2f(GL_TEXTURE0, 0, 0);
-        glVertex2f(draw_rect.left, draw_rect.top);
-        glMultiTexCoord2f(GL_TEXTURE0, 0, h);
-        glVertex2f(draw_rect.left, draw_rect.bottom);
-        glMultiTexCoord2f(GL_TEXTURE0, w, h);
-        glVertex2f(draw_rect.right, draw_rect.bottom);
-        glMultiTexCoord2f(GL_TEXTURE0, w, 0);
-        glVertex2f(draw_rect.right, draw_rect.top);
-        glEnd();
+        glUniform1i(_uniforms.color_mode, 3);
+        glUniform1f(_uniforms.static_fraction, frac / 255.0);
+        draw_internal(draw_rect);
     }
 
     virtual const Size& size() const {
@@ -155,6 +167,29 @@ class OpenGlSprite : public Sprite {
     }
 
   private:
+    virtual void draw_internal(const Rect& draw_rect) const {
+        const int32_t w = _size.width;
+        const int32_t h = _size.height;
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
+        gl_check();
+        glBegin(GL_QUADS);
+        glMultiTexCoord2f(GL_TEXTURE0, 0, 0);
+        glMultiTexCoord2f(GL_TEXTURE1, 0, 0);
+        glVertex2f(draw_rect.left, draw_rect.top);
+        glMultiTexCoord2f(GL_TEXTURE0, 0, h);
+        glMultiTexCoord2f(GL_TEXTURE1, 0, draw_rect.height());
+        glVertex2f(draw_rect.left, draw_rect.bottom);
+        glMultiTexCoord2f(GL_TEXTURE0, w, h);
+        glMultiTexCoord2f(GL_TEXTURE1, draw_rect.width(), draw_rect.height());
+        glVertex2f(draw_rect.right, draw_rect.bottom);
+        glMultiTexCoord2f(GL_TEXTURE0, w, 0);
+        glMultiTexCoord2f(GL_TEXTURE1, draw_rect.width(), 0);
+        glVertex2f(draw_rect.right, draw_rect.top);
+        glEnd();
+        gl_check();
+    }
+
     struct Texture {
         Texture() { glGenTextures(1, &id); }
         ~Texture() { glDeleteTextures(1, &id); }
@@ -321,7 +356,7 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
     GLuint shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(shader, 1, &kStaticShaderSource, NULL);
+    glShaderSource(shader, 1, &kShaderSource, NULL);
     glCompileShader(shader);
     GLint compiled;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
@@ -343,9 +378,35 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     }
     gl_check();
 
-    driver._uniforms.color_mode = glGetUniformLocation(program, kStaticShaderColorModeUniform);
-    driver._uniforms.sprite = glGetUniformLocation(program, kStaticShaderSpriteUniform);
+    driver._uniforms.color_mode = glGetUniformLocation(program, kShaderColorModeUniform);
+    driver._uniforms.sprite = glGetUniformLocation(program, kShaderSpriteUniform);
+    driver._uniforms.static_image = glGetUniformLocation(program, kShaderStaticImageUniform);
+    driver._uniforms.static_fraction = glGetUniformLocation(program, kShaderStaticFractionUniform);
+    driver._uniforms.t = glGetUniformLocation(program, kShaderTUniform);
     glUseProgram(program);
+    gl_check();
+
+    GLuint static_texture;
+    glGenTextures(1, &static_texture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, static_texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    size_t size = 256;
+    sfz::scoped_array<uint8_t> static_data(new uint8_t[size * size * 2]);
+    int32_t static_index = 0;
+    uint8_t* p = static_data.get();
+    for (int i = 0; i < (size * size); ++i) {
+        *(p++) = 255;
+        *(p++) = XRandomSeeded(256, &static_index);
+    }
+    glTexImage2D(
+            GL_TEXTURE_2D, 0, GL_LUMINANCE_ALPHA, size, size, 0, GL_LUMINANCE_ALPHA,
+            GL_UNSIGNED_BYTE, static_data.get());
+    gl_check();
+
+    glUniform1i(driver._uniforms.sprite, 0);
+    glUniform1i(driver._uniforms.static_image, 1);
     gl_check();
 }
 
@@ -370,8 +431,8 @@ void OpenGlVideoDriver::MainLoop::draw() {
     glTranslatef(-1.0, 1.0, 0.0);
     glScalef(2.0, -2.0, 1.0);
     glScalef(1.0 / _driver._screen_size.width, 1.0 / _driver._screen_size.height, 1.0);
+    glUniform1i(_driver._uniforms.t, _driver.usecs());
 
-    glUniform1i(_driver._uniforms.color_mode, 0);
     gl_check();
 
     _stack.top()->draw();

@@ -41,9 +41,9 @@ class OffscreenVideoDriver : public OpenGlVideoDriver {
     virtual Point get_mouse() { return _event_tracker.mouse(); }
     virtual void get_keys(KeyMap* k) { k->copy(_event_tracker.keys()); }
 
-    virtual int ticks() { return _ticks; }
-    virtual int usecs() { return ticks_to_usecs(_ticks); }
-    virtual int64_t double_click_interval_usecs() { return 0.5e6; }
+    virtual int ticks() const { return _ticks; }
+    virtual int usecs() const { return ticks_to_usecs(_ticks); }
+    virtual int64_t double_click_interval_usecs() const { return 0.5e6; }
 
     void loop(Card* initial);
 

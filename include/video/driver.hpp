@@ -52,9 +52,9 @@ class VideoDriver {
     virtual Point get_mouse() = 0;
     virtual void get_keys(KeyMap* k) = 0;
 
-    virtual int ticks() = 0;
-    virtual int usecs() = 0;
-    virtual int64_t double_click_interval_usecs() = 0;
+    virtual int ticks() const = 0;
+    virtual int usecs() const = 0;
+    virtual int64_t double_click_interval_usecs() const = 0;
 
     virtual Sprite* new_sprite(sfz::PrintItem name, const PixMap& content) = 0;
     virtual void fill_rect(const Rect& rect, const RgbColor& color) = 0;
@@ -87,9 +87,25 @@ class Sprite {
   public:
     virtual ~Sprite();
     virtual sfz::StringSlice name() const = 0;
-    virtual void draw(int32_t x, int32_t y, const RgbColor& = RgbColor::kWhite) const = 0;
-    virtual void draw(const Rect& draw_rect, const RgbColor& = RgbColor::kWhite) const = 0;
+    virtual void draw(const Rect& draw_rect) const = 0;
+    virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const = 0;
+    virtual void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const = 0;
     virtual const Size& size() const = 0;
+
+    virtual void draw(int32_t x, int32_t y) const {
+        draw(rect(x, y));
+    }
+    virtual void draw_shaded(int32_t x, int32_t y, const RgbColor& tint) const {
+        draw_shaded(rect(x, y), tint);
+    }
+    virtual void draw_static(int32_t x, int32_t y, const RgbColor& color, uint8_t frac) const {
+        draw_static(rect(x, y), color, frac);
+    }
+
+  private:
+    Rect rect(int32_t x, int32_t y) const {
+        return Rect(x, y, x + size().width, y + size().height);
+    }
 };
 
 }  // namespace antares

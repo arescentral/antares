@@ -168,7 +168,7 @@ void Font::draw_sprite(Point origin, sfz::StringSlice string, RgbColor color) co
     origin.offset(0, -ascent);
     for (size_t i = 0; i < string.size(); ++i) {
         uint8_t byte = to_mac_roman(string.at(i));
-        _sprites[byte]->draw(origin.h, origin.v, color);
+        _sprites[byte]->draw_shaded(origin.h, origin.v, color);
         origin.offset(char_width(string.at(i)), 0);
     }
 }

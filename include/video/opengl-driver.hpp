@@ -48,6 +48,9 @@ class OpenGlVideoDriver : public VideoDriver {
     struct Uniforms {
         int color_mode;
         int sprite;
+        int static_image;
+        int static_fraction;
+        int t;
     };
 
   protected:

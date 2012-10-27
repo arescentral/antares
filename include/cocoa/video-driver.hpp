@@ -41,9 +41,9 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     virtual Point get_mouse();
     virtual void get_keys(KeyMap* k);
 
-    virtual int ticks();
-    virtual int usecs();
-    virtual int64_t double_click_interval_usecs();
+    virtual int ticks() const;
+    virtual int usecs() const;
+    virtual int64_t double_click_interval_usecs() const;
 
     void loop(Card* initial);
 
