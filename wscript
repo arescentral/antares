@@ -80,6 +80,7 @@ def build(bld):
         source=[
             "src/bin/offscreen.cpp",
             "src/video/offscreen-driver.cpp",
+            "src/video/text-driver.cpp",
         ],
         cxxflags=WARNINGS,
         use=[
@@ -95,6 +96,7 @@ def build(bld):
         source=[
             "src/bin/replay.cpp",
             "src/video/offscreen-driver.cpp",
+            "src/video/text-driver.cpp",
         ],
         cxxflags=WARNINGS,
         use=[

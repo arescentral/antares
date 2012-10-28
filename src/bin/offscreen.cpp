@@ -28,6 +28,7 @@
 #include "ui/card.hpp"
 #include "video/driver.hpp"
 #include "video/offscreen-driver.hpp"
+#include "video/text-driver.hpp"
 
 using sfz::Bytes;
 using sfz::Exception;
@@ -37,6 +38,7 @@ using sfz::String;
 using sfz::StringSlice;
 using sfz::args::help;
 using sfz::args::store;
+using sfz::args::store_const;
 using sfz::makedirs;
 using sfz::make_linked_ptr;
 using sfz::print;
@@ -70,8 +72,11 @@ void main(int argc, char* const* argv) {
         .help("the script to execute");
 
     Optional<String> output_dir;
+    bool text = false;
     parser.add_argument("-o", "--output", store(output_dir))
         .help("place output in this directory");
+    parser.add_argument("-t", "--text", store_const(text, true))
+        .help("produce text output");
     parser.add_argument("-h", "--help", help(parser, 0))
         .help("display this help screen");
 
@@ -87,7 +92,6 @@ void main(int argc, char* const* argv) {
 
     NullPrefsDriver prefs;
     EventScheduler scheduler;
-    OffscreenVideoDriver video(Preferences::preferences()->screen_size(), scheduler, output_dir);
     NullLedger ledger;
     if (script == "main-screen") {
         main_screen(scheduler);
@@ -110,7 +114,14 @@ void main(int argc, char* const* argv) {
         sound.reset(new NullSoundDriver);
     }
 
-    video.loop(AresInit());
+    Size screen_size = Preferences::preferences()->screen_size();
+    if (text) {
+        TextVideoDriver video(Preferences::preferences()->screen_size(), scheduler, output_dir);
+        video.loop(AresInit());
+    } else {
+        OffscreenVideoDriver video(Preferences::preferences()->screen_size(), scheduler, output_dir);
+        video.loop(AresInit());
+    }
 }
 
 void usage(const StringSlice& program_name) {
