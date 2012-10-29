@@ -98,15 +98,16 @@ struct AntaresEventTranslator {
 
 static NSPoint translate_coords(
         AntaresEventTranslator* translator, NSWindow* from_window, NSPoint input) {
-    if (from_window != translator->window->window) {
+    NSWindow* to_window = (translator->window != nil) ? translator->window->window : nil;
+    if (from_window != to_window) {
         if (from_window != nil) {
             input = [from_window convertBaseToScreen:input];
         }
-        if (translator->window != nil) {
-            input = [translator->window->window convertScreenToBase:input];
+        if (to_window != nil) {
+            input = [to_window convertScreenToBase:input];
         }
     }
-    return NSMakePoint(input.x, translator->window->screen_height - 1 - input.y);
+    return NSMakePoint(input.x, translator->screen_height - 1 - input.y);
 }
 
 AntaresEventTranslator* antares_event_translator_create(
