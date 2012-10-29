@@ -386,7 +386,7 @@ def build(bld):
     def replay_test(name):
         bld.antares_test(
             target="antares/replay/%s" % name,
-            rule="antares/replay",
+            rule="antares/replay --text",
             srcs="test/%s.NLRP" % name,
             expected="test/%s" % name,
         )
