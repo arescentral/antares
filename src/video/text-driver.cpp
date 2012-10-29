@@ -45,6 +45,7 @@ using sfz::dec;
 using sfz::format;
 using sfz::print;
 using sfz::write;
+using std::vector;
 namespace utf8 = sfz::utf8;
 
 namespace antares {
@@ -68,49 +69,57 @@ void print_to(PrintTarget target, HexColor color) {
     }
 }
 
-class TextSprite : public Sprite {
+}  // namespace
+
+class TextVideoDriver::Sprite : public antares::Sprite {
   public:
-    TextSprite(PrintItem name, String& log, Size size):
+    Sprite(PrintItem name, TextVideoDriver& driver, Size size):
             _name(name),
-            _log(log),
+            _driver(driver),
             _size(size) { }
 
     virtual StringSlice name() const { return _name; }
+
     virtual void draw(const Rect& draw_rect) const {
         if (!world.intersects(draw_rect)) {
             return;
         }
-        print(_log, format(
-                    "draw\t{0}\t{1}\t{2}\t{3}\t{4}\n",
-                    draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom, _name));
+        PrintItem args[] = {
+            draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
+            _name,
+        };
+        _driver.log("draw", args);
     }
+
     virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const {
         if (!world.intersects(draw_rect)) {
             return;
         }
-        print(_log, format(
-                    "tint\t{0}\t{1}\t{2}\t{3}\t{4}\t{5}\n",
-                    draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
-                    _name, hex(tint)));
+        PrintItem args[] = {
+            draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
+            hex(tint), _name,
+        };
+        _driver.log("tint", args);
     }
+
     virtual void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const {
         if (!world.intersects(draw_rect)) {
             return;
         }
-        print(_log, format(
-                    "static\t{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n",
-                    draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
-                    _name, frac, hex(color)));
+        PrintItem args[] = {
+            draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
+            hex(color), frac, _name,
+        };
+        _driver.log("static", args);
     }
+
     virtual const Size& size() const { return _size; }
 
   private:
     String _name;
-    String& _log;
+    TextVideoDriver& _driver;
     Size _size;
 };
-
-}  // namespace
 
 class TextVideoDriver::MainLoop : public EventScheduler::MainLoop {
   public:
@@ -151,36 +160,63 @@ TextVideoDriver::TextVideoDriver(
         _output_dir(output_dir) { }
 
 Sprite* TextVideoDriver::new_sprite(sfz::PrintItem name, const PixMap& content) {
-    return new TextSprite(name, _log, content.size());
+    return new Sprite(name, *this, content.size());
 }
 
 void TextVideoDriver::fill_rect(const Rect& rect, const RgbColor& color) {
-    print(_log, format(
-                "rect\t{0}\t{1}\t{2}\t{3}\t{4}\n",
-                rect.left, rect.top, rect.right, rect.bottom, hex(color)));
+    PrintItem args[] = {rect.left, rect.top, rect.right, rect.bottom, hex(color)};
+    log("rect", args);
 }
 
 void TextVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
-    print(_log, format(
-                "dither\t{0}\t{1}\t{2}\t{3}\t{4}\n",
-                rect.left, rect.top, rect.right, rect.bottom, hex(color)));
+    PrintItem args[] = {rect.left, rect.top, rect.right, rect.bottom, hex(color)};
+    log("dither", args);
 }
 
 void TextVideoDriver::draw_point(const Point& at, const RgbColor& color) {
-    print(_log, format(
-                "point\t{0}\t{1}\t{2}\n",
-                at.h, at.v, hex(color)));
+    PrintItem args[] = {at.h, at.v, hex(color)};
+    log("point", args);
 }
 
 void TextVideoDriver::draw_line(const Point& from, const Point& to, const RgbColor& color) {
-    print(_log, format(
-                "line\t{0}\t{1}\t{2}\t{3}\t{4}\n",
-                from.h, from.v, to.h, to.v, hex(color)));
+    PrintItem args[] = {from.h, from.v, to.h, to.v, hex(color)};
+    log("line", args);
 }
 
 void TextVideoDriver::loop(Card* initial) {
     MainLoop loop(*this, _output_dir, initial);
     _scheduler.loop(loop);
+}
+
+static void add_arg(String& log, StringSlice arg, vector<StringSlice>& args) {
+    size_t start = log.size();
+    log.push(arg);
+    args.push_back(log.slice(start));
+}
+
+template <int size>
+void TextVideoDriver::log(StringSlice command, PrintItem (&args)[size]) {
+    vector<StringSlice> this_args;
+    bool new_command = _last_args.empty() || (command != _last_args[0]);
+
+    if (new_command) {
+        add_arg(_log, command, this_args);
+    } else {
+        this_args.push_back(_last_args[0]);
+    }
+    for (size_t i = 0; i < size; ++i) {
+        _log.push("\t");
+        String s(args[i]);
+        if (new_command || (s != _last_args[i + 1])) {
+            add_arg(_log, s, this_args);
+        } else {
+            this_args.push_back(_last_args[i + 1]);
+        }
+    }
+    _log.push("\n");
+
+    using std::swap;
+    swap(this_args, _last_args);
 }
 
 }  // namespace antares
