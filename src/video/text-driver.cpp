@@ -113,6 +113,19 @@ class TextVideoDriver::Sprite : public antares::Sprite {
         _driver.log("static", args);
     }
 
+    virtual void draw_outlined(
+            const Rect& draw_rect, const RgbColor& outline_color,
+            const RgbColor& fill_color) const {
+        if (!world.intersects(draw_rect)) {
+            return;
+        }
+        PrintItem args[] = {
+            draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
+            hex(outline_color), hex(fill_color), _name,
+        };
+        _driver.log("outline", args);
+    }
+
     virtual const Size& size() const { return _size; }
 
   private:

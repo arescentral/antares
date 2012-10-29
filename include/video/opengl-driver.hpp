@@ -46,6 +46,8 @@ class OpenGlVideoDriver : public VideoDriver {
         int sprite;
         int static_image;
         int static_fraction;
+        int unit;
+        int outline_color;
         int t;
     };
 
