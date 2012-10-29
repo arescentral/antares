@@ -29,6 +29,7 @@
 #include "cocoa/core-opengl.hpp"
 #include "config/preferences.hpp"
 #include "drawing/pix-map.hpp"
+#include "game/globals.hpp"
 #include "game/time.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
@@ -76,17 +77,26 @@ class TextSprite : public Sprite {
 
     virtual StringSlice name() const { return _name; }
     virtual void draw(const Rect& draw_rect) const {
+        if (!world.intersects(draw_rect)) {
+            return;
+        }
         print(_log, format(
                     "draw\t{0}\t{1}\t{2}\t{3}\t{4}\n",
                     draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom, _name));
     }
     virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const {
+        if (!world.intersects(draw_rect)) {
+            return;
+        }
         print(_log, format(
                     "tint\t{0}\t{1}\t{2}\t{3}\t{4}\t{5}\n",
                     draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
                     _name, hex(tint)));
     }
     virtual void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const {
+        if (!world.intersects(draw_rect)) {
+            return;
+        }
         print(_log, format(
                     "static\t{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n",
                     draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
