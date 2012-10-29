@@ -40,7 +40,8 @@ const int32_t kEndAnimation = 255;
 
 }  // namespace
 
-Transitions::Transitions() { }
+Transitions::Transitions():
+        _active(false) { }
 Transitions::~Transitions() { }
 
 void Transitions::start_boolean(int32_t in_speed, int32_t out_speed, uint8_t goal_color) {
