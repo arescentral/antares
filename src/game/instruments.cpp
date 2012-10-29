@@ -646,11 +646,6 @@ void update_site(bool replay) {
 
 void draw_site() {
     if (should_draw_site) {
-        Stencil stencil(VideoDriver::driver());
-        Rect clip = viewport;
-        VideoDriver::driver()->fill_rect(clip, RgbColor::kWhite);
-        stencil.apply();
-
         const RgbColor light = GetRGBTranslateColorShade(PALE_GREEN, MEDIUM);
         const RgbColor dark = GetRGBTranslateColorShade(PALE_GREEN, DARKER + kSlightlyDarkerColor);
         VideoDriver::driver()->draw_line(site_data.a, site_data.b, light);

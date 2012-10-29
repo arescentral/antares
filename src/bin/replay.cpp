@@ -44,6 +44,7 @@
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 #include "video/offscreen-driver.hpp"
+#include "video/text-driver.hpp"
 
 using sfz::BytesSlice;
 using sfz::MappedFile;
@@ -51,6 +52,7 @@ using sfz::Optional;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::args::store;
+using sfz::args::store_const;
 using sfz::format;
 using sfz::make_linked_ptr;
 using sfz::mkdir;
@@ -134,13 +136,6 @@ void ReplayMaster::init() {
     InitBeams();
 }
 
-void demo(OffscreenVideoDriver& driver) {
-}
-
-void space_race(OffscreenVideoDriver& driver) {
-    demo(driver);  // 2:50
-}
-
 void usage(StringSlice program_name) {
     print(io::err, format("usage: {0} replay_path output_dir\n", program_name));
     exit(1);
@@ -161,12 +156,15 @@ void main(int argc, char** argv) {
     int interval = 60;
     int width = 640;
     int height = 480;
+    bool text = false;
     parser.add_argument("-i", "--interval", store(interval))
         .help("take one screenshot per this many ticks (default: 60)");
     parser.add_argument("-w", "--width", store(width))
         .help("screen width (default: 640)");
     parser.add_argument("-h", "--height", store(height))
         .help("screen height (default: 480)");
+    parser.add_argument("-t", "--text", store_const(text, true))
+        .help("produce text output");
 
     parser.add_argument("--help", help(parser, 0))
         .help("display this help screen");
@@ -186,12 +184,11 @@ void main(int argc, char** argv) {
     preferences.set_play_music_in_game(true);
     NullPrefsDriver prefs(preferences);
 
-    OffscreenVideoDriver video(
-            Preferences::preferences()->screen_size(), output_dir);
-    video.schedule_event(make_linked_ptr(new MouseMoveEvent(0, Point(320, 240))));
+    EventScheduler scheduler;
+    scheduler.schedule_event(make_linked_ptr(new MouseMoveEvent(0, Point(320, 240))));
     // TODO(sfiera): add recurring snapshots to OffscreenVideoDriver.
     for (int64_t i = 1; i < 72000; i += interval) {
-        video.schedule_snapshot(i);
+        scheduler.schedule_snapshot(i);
     }
 
     scoped_ptr<SoundDriver> sound;
@@ -203,8 +200,15 @@ void main(int argc, char** argv) {
     }
     NullLedger ledger;
 
+    Size screen_size = Preferences::preferences()->screen_size();
     MappedFile replay_file(replay_path);
-    video.loop(new ReplayMaster(replay_file.data()));
+    if (text) {
+        TextVideoDriver video(screen_size, scheduler, output_dir);
+        video.loop(new ReplayMaster(replay_file.data()));
+    } else {
+        OffscreenVideoDriver video(screen_size, scheduler, output_dir);
+        video.loop(new ReplayMaster(replay_file.data()));
+    }
 }
 
 }  // namespace antares

@@ -161,13 +161,7 @@ void draw_labels() {
         }
         const RgbColor light = GetRGBTranslateColorShade(label->color, VERY_LIGHT);
         const RgbColor dark = GetRGBTranslateColorShade(label->color, VERY_DARK);
-        ArrayPixMap pix(label->thisRect.width(), label->thisRect.height());
-        pix.fill(RgbColor::kClear);
-        DrawNateRectVScan(&pix, pix.size().as_rect(), dark, (at.h ^ at.v) & 0x1);
-
-        scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite(
-                    format("/x/screen_label: {0}", quote(text)), pix));
-        sprite->draw(at.h, at.v);
+        VideoDriver::driver()->dither_rect(label->thisRect, dark);
         at.offset(kLabelInnerSpace, kLabelInnerSpace + tactical_font->ascent);
 
         if (label->lineNum > 1) {

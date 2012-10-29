@@ -80,6 +80,7 @@ def build(bld):
         source=[
             "src/bin/offscreen.cpp",
             "src/video/offscreen-driver.cpp",
+            "src/video/text-driver.cpp",
         ],
         cxxflags=WARNINGS,
         use=[
@@ -95,6 +96,7 @@ def build(bld):
         source=[
             "src/bin/replay.cpp",
             "src/video/offscreen-driver.cpp",
+            "src/video/text-driver.cpp",
         ],
         cxxflags=WARNINGS,
         use=[
@@ -305,6 +307,7 @@ def build(bld):
         source=[
             "src/ui/card.cpp",
             "src/ui/event.cpp",
+            "src/ui/event-scheduler.cpp",
             "src/ui/event-tracker.cpp",
             "src/ui/flows/master.cpp",
             "src/ui/flows/replay-game.cpp",
@@ -383,7 +386,7 @@ def build(bld):
     def replay_test(name):
         bld.antares_test(
             target="antares/replay/%s" % name,
-            rule="antares/replay",
+            rule="antares/replay --text",
             srcs="test/%s.NLRP" % name,
             expected="test/%s" % name,
         )

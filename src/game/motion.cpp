@@ -553,7 +553,7 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                                 anObject->cloakState = kCloakOnStateMax;
                         }
                         anObject->sprite->style = spriteColor;
-                        anObject->sprite->styleColor = RgbColor::kBlack;
+                        anObject->sprite->styleColor = RgbColor::kClear;
                         anObject->sprite->styleData = anObject->cloakState;
                         if ( anObject->owner == globals()->gPlayerAdmiralNumber)
                             anObject->sprite->styleData -=
@@ -569,7 +569,7 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                         } else
                         {
                             anObject->sprite->style = spriteColor;
-                            anObject->sprite->styleColor = RgbColor::kBlack;
+                            anObject->sprite->styleColor = RgbColor::kClear;
                             anObject->sprite->styleData = -anObject->cloakState;
                             if ( anObject->owner == globals()->gPlayerAdmiralNumber)
                                 anObject->sprite->styleData -=

@@ -45,23 +45,6 @@ VideoDriver* VideoDriver::driver() {
     return antares::video_driver;
 }
 
-Stencil::Stencil(VideoDriver* driver):
-        _driver(driver) {
-    _driver->start_stencil();
-}
-
-void Stencil::set_threshold(uint8_t alpha) {
-    _driver->set_stencil_threshold(alpha);
-}
-
-void Stencil::apply() {
-    _driver->apply_stencil();
-}
-
-Stencil::~Stencil() {
-    _driver->end_stencil();
-}
-
 Sprite::~Sprite() { }
 
 }  // namespace antares
