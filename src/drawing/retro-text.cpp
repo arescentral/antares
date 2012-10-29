@@ -242,6 +242,7 @@ void StyledText::draw_char(const Rect& bounds, int index) const {
         break;
 
       case TAB:
+        corner.offset(ch.h, ch.v);
         if (ch.back_color != RgbColor::kBlack) {
             Rect tab_rect(0, 0, tab_width() - (ch.h % tab_width()), line_height);
             tab_rect.offset(corner.h, corner.v);
