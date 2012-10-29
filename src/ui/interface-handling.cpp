@@ -251,7 +251,7 @@ void UpdateMissionBriefPoint(
     Rect newRect;
     GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
     pix->view(newRect).fill(RgbColor::kBlack);
-    populate_inline_picts(newRect, text, dataItem->style, inlinePict);
+    populate_inline_picts(dataItem->bounds, text, dataItem->style, inlinePict);
 }
 
 void CreateObjectDataText(String* text, short id) {
