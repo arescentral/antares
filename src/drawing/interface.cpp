@@ -1103,7 +1103,8 @@ void draw_text_in_rect(
 void populate_inline_picts(
         Rect rect, StringSlice text, interfaceStyleType style,
         vector<inlinePictType>& inline_pict) {
-    InterfaceText interface_text(text, style, RgbColor::kBlack);
+    StyledText interface_text(interface_font(style));
+    interface_text.set_interface_text(text);
     interface_text.wrap_to(rect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer);
     inline_pict = interface_text.inline_picts();
     for (int i = 0; i < inline_pict.size(); ++i) {
