@@ -164,6 +164,7 @@ void CocoaVideoDriver::loop(Card* initial) {
         fullscreen.reset(new CocoaFullscreen(context, screen_size()));
     } else {
         windowed.reset(new CocoaWindowed(pixel_format, context, screen_size()));
+        antares_event_translator_set_window(_translator.c_obj(), windowed->window());
     }
     GLint swap_interval = 1;
     CGLSetParameter(context.c_obj(), kCGLCPSwapInterval, &swap_interval);

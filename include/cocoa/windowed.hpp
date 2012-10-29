@@ -36,6 +36,8 @@ class CocoaWindowed {
         const cgl::PixelFormat& pixel_format, const cgl::Context& context, Size screen_size);
     ~CocoaWindowed();
 
+    AntaresWindow* window() const { return _window; }
+
   private:
     AntaresWindow* _window;
     DISALLOW_COPY_AND_ASSIGN(CocoaWindowed);
