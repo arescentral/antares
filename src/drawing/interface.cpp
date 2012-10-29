@@ -26,7 +26,7 @@
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
-#include "drawing/interface-text.hpp"
+#include "drawing/styled-text.hpp"
 #include "drawing/shapes.hpp"
 #include "drawing/text.hpp"
 #include "video/driver.hpp"
@@ -63,40 +63,40 @@ const int32_t kMaxKeyNameLength         = 4;  // how many chars can be in name o
 // DrawInterfaceString:
 //  Relies on roman alphabet for upper/lower casing.  NOT WORLD-READY!
 
-void SetInterfaceLargeUpperFont(interfaceStyleType style) {
+const Font* interface_font(interfaceStyleType style) {
     if ( style == kSmall) {
-        mSetDirectFont( kButtonSmallFontNum);
+        return small_button_font;
     } else {
-        mSetDirectFont( kButtonFontNum);
+        return button_font;
     }
-}
-
-void SetInterfaceLargeLowerFont(interfaceStyleType style) {
-    if ( style == kSmall) {
-        mSetDirectFont( kButtonSmallFontNum);
-    } else {
-        mSetDirectFont( kButtonFontNum);
-    }
-}
-
-void DrawInterfaceString(
-        Point p, StringSlice s, interfaceStyleType style, PixMap* pix, const RgbColor& color) {
-    SetInterfaceLargeUpperFont(style);
-    DrawDirectTextStringClipped(p, s, color, pix, pix->size().as_rect());
 }
 
 void DrawInterfaceString(
         Point p, StringSlice s, interfaceStyleType style, const RgbColor& color) {
-    SetInterfaceLargeUpperFont(style);
-    gDirectText->draw_sprite(p, s, color);
+    interface_font(style)->draw_sprite(p, s, color);
 }
 
-void FrameOval(PixMap* pix, Rect rect, RgbColor color) {
-    throw Exception("FrameOval() not implemented");
+short GetInterfaceStringWidth(const StringSlice& s, interfaceStyleType style) {
+    return interface_font(style)->string_width(s);
 }
 
-void PaintOval(PixMap* pix, Rect rect, RgbColor color) {
-    throw Exception("PaintOval() not implemented");
+// GetInterfaceFontWidth:       -- NOT WORLD-READY! --
+//
+//  We're not using fontInfo.widMax because we know we're never going to use the ultra-wide
+//  characters like &oelig; and the like, and we're not using a mono-spaced font.  Therefore, we're
+//  using the width of 'R' which is about as wide as our normal letters get.
+//
+
+short GetInterfaceFontWidth(interfaceStyleType style) {
+    return interface_font(style)->logicalWidth;
+}
+
+short GetInterfaceFontHeight(interfaceStyleType style) {
+    return interface_font(style)->height;
+}
+
+short GetInterfaceFontAscent( interfaceStyleType style) {
+    return interface_font(style)->ascent;
 }
 
 enum inlineKindType {
@@ -116,47 +116,6 @@ inline void mDrawPuffUpRect(Rect r, uint8_t mcolor, int mshade) {
     VideoDriver::driver()->fill_rect(Rect(r.left + 1, r.bottom - 1, r.right, r.bottom), darker);
 }
 
-inline void mDrawPuffUpRect(Rect& mrect, uint8_t mcolor, int mshade, PixMap* pix) {
-    const RgbColor color = GetRGBTranslateColorShade(mcolor, mshade);
-    pix->view(mrect).fill(color);
-    const RgbColor lighter = GetRGBTranslateColorShade(mcolor, mshade + kLighterColor);
-    MoveTo(mrect.left, mrect.bottom - 1);
-    MacLineTo(pix, mrect.left, mrect.top, lighter);
-    MacLineTo(pix, mrect.right - 1, mrect.top, lighter);
-    const RgbColor darker = GetRGBTranslateColorShade(mcolor, mshade + kDarkerColor);
-    MacLineTo(pix, mrect.right - 1, mrect.bottom - 1, darker);
-    MacLineTo(pix, mrect.left, mrect.bottom - 1, darker);
-}
-
-inline void mDrawPuffUpOval(Rect& mrect, uint8_t mcolor, int mshade, PixMap* pix) {
-    const RgbColor darker = GetRGBTranslateColorShade(mcolor, mshade + kDarkerColor);
-    mrect.left++;
-    mrect.right++;
-    FrameOval(pix, mrect, darker);
-    mrect.left--;
-    mrect.right--;
-    mrect.top++;
-    mrect.bottom++;
-    FrameOval(pix, mrect, darker);
-    mrect.top--;
-    mrect.bottom--;
-
-    const RgbColor lighter = GetRGBTranslateColorShade(mcolor, mshade + kLighterColor);
-    mrect.left--;
-    mrect.right--;
-    FrameOval(pix, mrect, lighter);
-    mrect.left++;
-    mrect.right++;
-    mrect.top--;
-    mrect.bottom--;
-    FrameOval(pix, mrect, lighter);
-    mrect.top++;
-    mrect.bottom++;
-
-    const RgbColor color = GetRGBTranslateColorShade(mcolor, mshade);
-    PaintOval(pix, mrect, color);
-}
-
 inline void mDrawPuffDownRect(Rect r, uint8_t mcolor, int mshade) {
     VideoDriver::driver()->fill_rect(r, RgbColor::kBlack);
     const RgbColor darker = GetRGBTranslateColorShade(mcolor, mshade + kDarkerColor);
@@ -169,45 +128,6 @@ inline void mDrawPuffDownRect(Rect r, uint8_t mcolor, int mshade) {
             Rect(r.right, r.top - 1, r.right + 1, r.bottom + 1), lighter);
     VideoDriver::driver()->fill_rect(
             Rect(r.left, r.bottom, r.right + 1, r.bottom + 1), lighter);
-}
-
-inline void mDrawPuffDownRect(Rect& mrect, uint8_t mcolor, int mshade, PixMap* pix) {
-    pix->view(mrect).fill(RgbColor::kBlack);
-    const RgbColor darker = GetRGBTranslateColorShade(mcolor, mshade + kDarkerColor);
-    MoveTo(mrect.left - 1, mrect.bottom);
-    MacLineTo(pix, mrect.left - 1, mrect.top - 1, darker);
-    MacLineTo(pix, mrect.right, mrect.top - 1, darker);
-    const RgbColor lighter = GetRGBTranslateColorShade(mcolor, mshade + kLighterColor);
-    MacLineTo(pix, mrect.right, mrect.bottom, lighter);
-    MacLineTo(pix, mrect.left - 1, mrect.bottom, lighter);
-}
-
-inline void mDrawPuffDownOval(Rect& mrect, uint8_t mcolor, int mshade, PixMap* pix) {
-    const RgbColor lighter = GetRGBTranslateColorShade(mcolor, mshade + kLighterColor);
-    mrect.left++;
-    mrect.right++;
-    FrameOval(pix, mrect, lighter);
-    mrect.left--;
-    mrect.right--;
-    mrect.top++;
-    mrect.bottom++;
-    FrameOval(pix, mrect, lighter);
-    mrect.top--;
-    mrect.bottom--;
-
-    const RgbColor darker = GetRGBTranslateColorShade(mcolor, mshade + kDarkerColor);
-    mrect.left--;
-    mrect.right--;
-    FrameOval(pix, mrect, darker);
-    mrect.left++;
-    mrect.right++;
-    mrect.top--;
-    mrect.bottom--;
-    FrameOval(pix, mrect, darker);
-    mrect.top++;
-    mrect.bottom++;
-
-    PaintOval(pix, mrect, RgbColor::kBlack);
 }
 
 inline void mDrawPuffUpTopBorder(Rect r, uint8_t hue, int shade, int h_border) {
@@ -271,67 +191,6 @@ inline void mDrawPuffUpBottomBorder(Rect r, uint8_t hue, int shade, int h_border
             Rect(outer.right - 1, r.bottom - 1, outer.right, outer.bottom), darker);
 }
 
-inline void mDrawPuffUpTopBorder(Rect& mrect, Rect& mtrect, uint8_t mcolor, int mshade,
-        int mthisHBorder, PixMap* pix) {
-    const RgbColor color = GetRGBTranslateColorShade(mcolor, mshade);
-    mtrect = Rect(mrect.left - mthisHBorder,
-        mrect.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight,
-        mrect.left, mrect.top);
-    pix->view(mtrect).fill(color);
-    mtrect = Rect(mrect.right,
-        mrect.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight,
-        mrect.right + mthisHBorder, mrect.top);
-    pix->view(mtrect).fill(color);
-    mtrect = Rect(mrect.left,
-        mrect.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight,
-        mrect.right, mrect.top  - kInterfaceVLipHeight);
-    pix->view(mtrect).fill(color);
-    const RgbColor darker = GetRGBTranslateColorShade(mcolor, mshade + kDarkerColor);
-    MoveTo(mrect.left - mthisHBorder, mrect.top);
-    MacLineTo(pix, mrect.left, mrect.top, darker);
-    MacLineTo(pix, mrect.left, mrect.top - kInterfaceVLipHeight, darker);
-    MacLineTo(pix, mrect.right, mrect.top - kInterfaceVLipHeight, darker);
-    MacLineTo(pix, mrect.right, mrect.top, darker);
-    MacLineTo(pix, mrect.right + mthisHBorder, mrect.top, darker);
-    MacLineTo(pix, mrect.right + mthisHBorder,
-            mrect.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight, darker);
-    const RgbColor lighter = GetRGBTranslateColorShade(mcolor, mshade + kLighterColor);
-    MacLineTo(pix, mrect.left - mthisHBorder,
-            mrect.top - kInterfaceVEdgeHeight - kInterfaceVCornerHeight, lighter);
-    MacLineTo(pix, mrect.left - mthisHBorder, mrect.top, lighter);
-}
-
-inline void mDrawPuffUpBottomBorder(Rect& mrect, Rect& mtrect, uint8_t mcolor, int mshade,
-        int mthisHBorder, PixMap* pix) {
-    const RgbColor color = GetRGBTranslateColorShade(mcolor, mshade);
-    mtrect = Rect(mrect.left - mthisHBorder,
-        mrect.bottom,
-        mrect.left, mrect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
-    pix->view(mtrect).fill(color);
-    mtrect = Rect(mrect.right,
-        mrect.bottom,
-        mrect.right + mthisHBorder, mrect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
-    pix->view(mtrect).fill(color);
-    mtrect = Rect(mrect.left,
-        mrect.bottom + kInterfaceVLipHeight,
-        mrect.right, mrect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
-    pix->view(mtrect).fill(color);
-    const RgbColor lighter = GetRGBTranslateColorShade(mcolor, mshade + kLighterColor);
-    MoveTo(mrect.left - mthisHBorder,
-            mrect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight);
-    MacLineTo(pix, mrect.left - mthisHBorder, mrect.bottom, lighter);
-    MacLineTo(pix, mrect.left, mrect.bottom, lighter);
-    MacLineTo(pix, mrect.left, mrect.bottom + kInterfaceVLipHeight, lighter);
-    MacLineTo(pix, mrect.right, mrect.bottom + kInterfaceVLipHeight, lighter);
-    MacLineTo(pix, mrect.right, mrect.bottom, lighter);
-    MacLineTo(pix, mrect.right + mthisHBorder, mrect.bottom, lighter);
-    const RgbColor darker = GetRGBTranslateColorShade(mcolor, mshade + kDarkerColor);
-    MacLineTo(pix, mrect.right + mthisHBorder,
-            mrect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight, darker);
-    MacLineTo(pix, mrect.left - mthisHBorder,
-            mrect.bottom + kInterfaceVEdgeHeight + kInterfaceVCornerHeight, darker);
-}
-
 inline void mDrawPuffUpTBorder(Rect r, uint8_t mcolor, int mshade, int msheight, int h_border) {
     ++r.right;
     ++r.bottom;
@@ -373,44 +232,6 @@ inline void mDrawPuffUpTBorder(Rect r, uint8_t mcolor, int mshade, int msheight,
     VideoDriver::driver()->fill_rect(Rect(
                 r.right + h_border - 1, r.top + msheight, r.right + h_border,
                 r.top + msheight + kLabelBottomHeight + 1), darker);
-}
-
-inline void mDrawPuffUpTBorder(Rect& mrect, Rect& mtrect, uint8_t mcolor, int mshade, int msheight, int mthisHBorder, PixMap* pix) {
-    const RgbColor color = GetRGBTranslateColorShade(mcolor, mshade);
-    mtrect = Rect(mrect.left - mthisHBorder,
-        mrect.top + msheight,
-        mrect.left,
-        mrect.top + msheight + kLabelBottomHeight);
-    pix->view(mtrect).fill(color);
-    mtrect = Rect(mrect.right,
-        mrect.top + msheight,
-        mrect.right + mthisHBorder,
-        mrect.top + msheight + kLabelBottomHeight);
-    pix->view(mtrect).fill(color);
-    mtrect = Rect(mrect.left,
-        mrect.top + msheight + kInterfaceVLipHeight,
-        mrect.right,
-        mrect.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight);
-    pix->view(mtrect).fill(color);
-
-    const RgbColor lighter = GetRGBTranslateColorShade(mcolor, mshade + kLighterColor);
-    MoveTo(mrect.left - mthisHBorder, mrect.top + msheight + kLabelBottomHeight);
-    MacLineTo(pix, mrect.left - mthisHBorder, mrect.top + msheight, lighter);
-    MacLineTo(pix, mrect.left, mrect.top + msheight, lighter);
-    MacLineTo(pix, mrect.left, mrect.top + msheight + kInterfaceVLipHeight, lighter);
-    MacLineTo(pix, mrect.right, mrect.top + msheight + kInterfaceVLipHeight, lighter);
-    MacLineTo(pix, mrect.right, mrect.top + msheight, lighter);
-    MacLineTo(pix, mrect.right + mthisHBorder, mrect.top + msheight, lighter);
-
-    const RgbColor darker = GetRGBTranslateColorShade(mcolor, mshade + kDarkerColor);
-    MacLineTo(pix, mrect.right + mthisHBorder, mrect.top + msheight + kLabelBottomHeight, darker);
-    MacLineTo(pix, mrect.right, mrect.top + msheight + kLabelBottomHeight, darker);
-    MacLineTo(pix, mrect.right, mrect.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight,
-            darker);
-    MacLineTo(pix, mrect.left, mrect.top + msheight + kLabelBottomHeight - kInterfaceVLipHeight,
-            darker);
-    MacLineTo(pix, mrect.left, mrect.top + msheight + kLabelBottomHeight, darker);
-    MacLineTo(pix, mrect.left - mthisHBorder, mrect.top + msheight + kLabelBottomHeight, darker);
 }
 
 void draw_plain_rect(const Rect& rect, uint8_t color, interfaceStyleType style) {
@@ -1264,15 +1085,18 @@ void draw_text_rect(const interfaceItemType& item) {
 }  // namespace
 
 void draw_text_in_rect(
-        const Rect& tRect, const StringSlice& text, interfaceStyleType style,
+        Rect tRect, const StringSlice& text, interfaceStyleType style,
         unsigned char textcolor, vector<inlinePictType>& inlinePict) {
     RgbColor color = GetRGBTranslateColorShade(textcolor, VERY_LIGHT);
-    InterfaceText interface_text(text, style, color);
+    StyledText interface_text(interface_font(style));
+    interface_text.set_fore_color(color);
+    interface_text.set_interface_text(text);
     interface_text.wrap_to(tRect.width(), kInterfaceTextHBuffer, kInterfaceTextVBuffer);
     inlinePict = interface_text.inline_picts();
     for (int i = 0; i < inlinePict.size(); ++i) {
         inlinePict[i].bounds.offset(tRect.left, tRect.top);
     }
+    tRect.offset(0, -kInterfaceTextVBuffer);
     interface_text.draw(tRect);
 }
 
@@ -1289,7 +1113,8 @@ void populate_inline_picts(
 
 short GetInterfaceTextHeightFromWidth(
         const StringSlice& text, interfaceStyleType style, short boundsWidth) {
-    InterfaceText interface_text(text, style, RgbColor::kBlack);
+    StyledText interface_text(interface_font(style));
+    interface_text.set_interface_text(text);
     interface_text.wrap_to(boundsWidth, kInterfaceTextHBuffer, kInterfaceTextVBuffer);
     return interface_text.height();
 }
@@ -1450,41 +1275,6 @@ void GetAnyInterfaceItemGraphicBounds(const interfaceItemType& item, Rect *bound
         default:
             break;
     }
-}
-
-void GetAnyInterfaceItemContentBounds(const interfaceItemType& item, Rect *bounds) {
-    *bounds = item.bounds;
-}
-
-short GetInterfaceStringWidth(const StringSlice& s, interfaceStyleType style) {
-    long            width, height;
-
-    SetInterfaceLargeUpperFont( style);
-    mGetDirectStringDimensions(s, width, height);
-
-    return ( width);
-}
-
-// GetInterfaceFontWidth:       -- NOT WORLD-READY! --
-//
-//  We're not using fontInfo.widMax because we know we're never going to use the ultra-wide
-//  characters like &oelig; and the like, and we're not using a mono-spaced font.  Therefore, we're
-//  using the width of 'R' which is about as wide as our normal letters get.
-//
-
-short GetInterfaceFontWidth(interfaceStyleType style) {
-    SetInterfaceLargeUpperFont(style);
-    return gDirectText->logicalWidth;
-}
-
-short GetInterfaceFontHeight(interfaceStyleType style) {
-    SetInterfaceLargeUpperFont(style);
-    return gDirectText->height;
-}
-
-short GetInterfaceFontAscent( interfaceStyleType style) {
-    SetInterfaceLargeUpperFont(style);
-    return gDirectText->ascent;
 }
 
 }  // namespace antares

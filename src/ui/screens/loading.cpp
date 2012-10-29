@@ -22,7 +22,7 @@
 #include <sfz/sfz.hpp>
 
 #include "data/string-list.hpp"
-#include "drawing/retro-text.hpp"
+#include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/scenario-maker.hpp"
 #include "game/time.hpp"
@@ -45,11 +45,11 @@ LoadingScreen::LoadingScreen(const Scenario* scenario, bool* cancelled):
         _current(0),
         _max(1) {
     StringList strings(kLevelNameID);
-    _name_text.reset(new RetroText(
-                strings.at(_scenario->levelNameStrNum - 1), kTitleFontNum,
-                GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT), RgbColor::kBlack));
+    _name_text.reset(new StyledText(title_font));
+    _name_text->set_fore_color(GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT));
+    _name_text->set_retro_text(strings.at(_scenario->levelNameStrNum - 1));
     _name_text->set_tab_width(220);
-    _name_text->wrap_to(640, 2);
+    _name_text->wrap_to(640, 0, 2);
 }
 
 LoadingScreen::~LoadingScreen() {

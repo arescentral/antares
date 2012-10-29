@@ -23,7 +23,7 @@
 #include <vector>
 #include <sfz/sfz.hpp>
 
-#include "drawing/retro-text.hpp"
+#include "drawing/styled-text.hpp"
 #include "ui/screen.hpp"
 
 namespace antares {
@@ -56,7 +56,7 @@ class LoadingScreen : public InterfaceScreen {
     const Scenario* const _scenario;
     bool* const _cancelled;
 
-    sfz::scoped_ptr<RetroText> _name_text;
+    sfz::scoped_ptr<StyledText> _name_text;
     int64_t _next_update;
     int32_t _chars_typed;
 

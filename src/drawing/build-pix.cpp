@@ -24,7 +24,7 @@
 #include "data/picture.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
-#include "drawing/retro-text.hpp"
+#include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 
 using sfz::BytesSlice;
@@ -68,8 +68,10 @@ class PixBuilder {
     void add_text(const StringSlice& text) {
         RgbColor red;
         red = GetRGBTranslateColorShade(RED, VERY_LIGHT);
-        RetroText retro(text, kTitleFontNum, red, RgbColor::kBlack);
-        retro.wrap_to(_pix->size().width - 12, 2);
+        StyledText retro(title_font);
+        retro.set_fore_color(red);
+        retro.set_retro_text(text);
+        retro.wrap_to(_pix->size().width - 11, 0, 2);
 
         Rect dest(0, 0, _pix->size().width, retro.height());
         dest.offset(0, _pix->size().height);

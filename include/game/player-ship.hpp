@@ -27,7 +27,7 @@ class InputSource;
 
 void ResetPlayerShip( long);
 bool PlayerShipGetKeys(int32_t timePass, InputSource& input_source, bool *enterMessage);
-void PlayerShipHandleClick( Point);
+void PlayerShipHandleClick(Point where, int button);
 void SetPlayerSelectShip( long, bool, long);
 void ChangePlayerShipNumber( long, long);
 void TogglePlayerAutoPilot( spaceObjectType *);

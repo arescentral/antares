@@ -110,11 +110,11 @@ void ScrollTextScreen::fire_timer() {
 }
 
 void ScrollTextScreen::draw() const {
-    Stencil stencil(VideoDriver::driver());
-    VideoDriver::driver()->fill_rect(_clip, RgbColor::kWhite);
-    stencil.apply();
-
     _sprite->draw(_position.left, _position.top);
+    VideoDriver::driver()->fill_rect(
+            Rect(world.left, world.top, world.right, _clip.top), RgbColor::kBlack);
+    VideoDriver::driver()->fill_rect(
+            Rect(world.left, _clip.bottom, world.right, world.bottom), RgbColor::kBlack);
 }
 
 }  // namespace antares

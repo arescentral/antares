@@ -48,48 +48,46 @@ class VideoDriver {
   public:
     VideoDriver();
     virtual ~VideoDriver();
-    virtual bool button() = 0;
+    virtual bool button(int which) = 0;
     virtual Point get_mouse() = 0;
     virtual void get_keys(KeyMap* k) = 0;
 
-    virtual int ticks() = 0;
-    virtual int usecs() = 0;
-    virtual int64_t double_click_interval_usecs() = 0;
+    virtual int ticks() const = 0;
+    virtual int usecs() const = 0;
+    virtual int64_t double_click_interval_usecs() const = 0;
 
     virtual Sprite* new_sprite(sfz::PrintItem name, const PixMap& content) = 0;
     virtual void fill_rect(const Rect& rect, const RgbColor& color) = 0;
+    virtual void dither_rect(const Rect& rect, const RgbColor& color) = 0;
     virtual void draw_point(const Point& at, const RgbColor& color) = 0;
     virtual void draw_line(const Point& from, const Point& to, const RgbColor& color) = 0;
 
-    virtual void start_stencil() = 0;
-    virtual void set_stencil_threshold(uint8_t alpha) = 0;
-    virtual void apply_stencil() = 0;
-    virtual void end_stencil() = 0;
-
     static VideoDriver* driver();
-};
-
-class Stencil {
-  public:
-    Stencil(VideoDriver* driver);
-    ~Stencil();
-
-    void set_threshold(uint8_t alpha);
-    void apply();
-
-  private:
-    VideoDriver* _driver;
-
-    DISALLOW_COPY_AND_ASSIGN(Stencil);
 };
 
 class Sprite {
   public:
     virtual ~Sprite();
     virtual sfz::StringSlice name() const = 0;
-    virtual void draw(int32_t x, int32_t y, const RgbColor& = RgbColor::kWhite) const = 0;
-    virtual void draw(const Rect& draw_rect, const RgbColor& = RgbColor::kWhite) const = 0;
+    virtual void draw(const Rect& draw_rect) const = 0;
+    virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const = 0;
+    virtual void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const = 0;
     virtual const Size& size() const = 0;
+
+    virtual void draw(int32_t x, int32_t y) const {
+        draw(rect(x, y));
+    }
+    virtual void draw_shaded(int32_t x, int32_t y, const RgbColor& tint) const {
+        draw_shaded(rect(x, y), tint);
+    }
+    virtual void draw_static(int32_t x, int32_t y, const RgbColor& color, uint8_t frac) const {
+        draw_static(rect(x, y), color, frac);
+    }
+
+  private:
+    Rect rect(int32_t x, int32_t y) const {
+        return Rect(x, y, x + size().width, y + size().height);
+    }
 };
 
 }  // namespace antares

@@ -21,7 +21,6 @@
 #include <numeric>
 
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/pix-table.hpp"
 #include "drawing/shapes.hpp"
 #include "drawing/text.hpp"
@@ -116,19 +115,12 @@ struct pixTableType {
     sfz::scoped_ptr<NatePixTable>   resource;
     int                             resID;
     bool                            keepMe;
-    int16_t                         static_value;
 };
 pixTableType gPixTable[kMaxPixTableEntry];
 
 int32_t gAbsoluteScale = MIN_SCALE;
 scoped_array<spriteType> gSpriteTable;
 const RgbColor& kNoTinyColor = RgbColor::kBlack;
-
-const int32_t kStaticTableSize = 4000;
-const int32_t kStaticTileWidth = 16;
-const int32_t kStaticTileHeight = 16;
-const int32_t kStaticTileCount = 61;
-Sprite** gStaticTiles;
 
 bool PixelInSprite_IsOutside(
         const PixMap& pix, long x, long y, const int32_t* hmap, const int32_t* vmap);
@@ -139,23 +131,9 @@ void SpriteHandlingInit() {
     gSpriteTable.reset(new spriteType[kMaxSpriteNum]);
     ResetAllSprites();
 
-    uint8_t static_table[kStaticTableSize];
-    SFZ_FOREACH(int i, range(kStaticTableSize), {
-        static_table[i] = Randomize(256);
-    });
-
-    int static_index = 0;
-    gStaticTiles = new Sprite*[kStaticTileCount];
-    SFZ_FOREACH(Sprite** tile, slice(gStaticTiles, 0, kStaticTileCount), {
-        ArrayPixMap pix(kStaticTileWidth, kStaticTileHeight);
-        SFZ_FOREACH(int y, range(kStaticTileHeight), {
-            SFZ_FOREACH(int x, range(kStaticTileWidth), {
-                pix.set(x, y, RgbColor(static_table[static_index], 0xff, 0xff, 0xff));
-                static_index = (static_index + 223) % 3989;
-            });
-        });
-        *tile = VideoDriver::driver()->new_sprite("/x/static", pix);
-    });
+    for (int i = 0; i < 4000; ++i) {
+        Randomize(256);
+    }
 }
 
 spriteType::spriteType()
@@ -533,23 +511,6 @@ Rect DrawSpriteInPixMap(
     return draw_rect;
 }
 
-void draw_static(const Rect& draw_rect) {
-    const int32_t hsize = (draw_rect.width() + kStaticTileWidth - 1) / kStaticTileWidth;
-    const int32_t vsize = (draw_rect.height() + kStaticTileHeight - 1) / kStaticTileHeight;
-
-    int32_t static_index = Randomize(kStaticTileCount);
-    int32_t y = draw_rect.top;
-    SFZ_FOREACH(int32_t i, range(vsize), {
-        int32_t x = draw_rect.left;
-        SFZ_FOREACH(int32_t j, range(hsize), {
-            gStaticTiles[static_index]->draw(x, y);
-            static_index = (static_index + 1) % kStaticTileCount;
-            x += kStaticTileWidth;
-        });
-        y += kStaticTileHeight;
-    });
-}
-
 }  // namespace
 
 int32_t scale_by(int32_t value, int32_t scale) {
@@ -641,20 +602,9 @@ void draw_sprites() {
                         break;
 
                       case spriteColor:
-                        {
-                            Stencil stencil(VideoDriver::driver());
-                            frame.sprite().draw(draw_rect);
-                            stencil.apply();
-                            if (aSprite->styleColor != RgbColor::kBlack) {
-                                VideoDriver::driver()->fill_rect(draw_rect, aSprite->styleColor);
-                            }
-
-                            Stencil stencil2(VideoDriver::driver());
-                            stencil2.set_threshold(aSprite->styleData);
-                            draw_static(draw_rect);
-                            stencil2.apply();
-                            frame.sprite().draw(draw_rect);
-                        }
+                        Randomize(63);
+                        frame.sprite().draw_static(
+                                draw_rect, aSprite->styleColor, aSprite->styleData);
                         break;
                     }
                 }
@@ -671,7 +621,7 @@ void draw_sprites() {
                         && tinySize
                         && (aSprite->tiny_sprite != NULL)
                         && (aSprite->whichLayer == layer)) {
-                    aSprite->tiny_sprite->draw(
+                    aSprite->tiny_sprite->draw_shaded(
                         aSprite->where.h - tinySize, aSprite->where.v - tinySize,
                         aSprite->tinyColor);
                 }

@@ -21,7 +21,6 @@
 #include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/pix-table.hpp"
 #include "game/globals.hpp"
 #include "video/driver.hpp"
@@ -95,10 +94,6 @@ void ResetHintLine() {
 void draw_cursor() {
     if (globals()->gMouseActive) {
         const Rect clip_rect = viewport;
-        Stencil stencil(VideoDriver::driver());
-        VideoDriver::driver()->fill_rect(clip_rect, RgbColor::kWhite);
-        stencil.apply();
-
         Point where = globals()->cursor_coord;
         const RgbColor color = GetRGBTranslateColorShade(SKY_BLUE, MEDIUM);
         VideoDriver::driver()->draw_line(
@@ -114,7 +109,9 @@ void draw_cursor() {
                 Point((where.h + kCursorBoundsSize), where.v),
                 Point(clip_rect.right - 1, where.v), color);
     }
+}
 
+void draw_sprite_cursor() {
     if (gSpriteCursor->show) {
         Point where = gSpriteCursor->where;
         where.offset(-gSpriteCursor->sprite->at(0).center().h, -gSpriteCursor->sprite->at(0).center().v);

@@ -22,7 +22,6 @@
 
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/pix-map.hpp"
 #include "game/time.hpp"
 #include "sound/fx.hpp"

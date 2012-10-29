@@ -23,7 +23,6 @@
 #include "data/picture.hpp"
 #include "data/space-object.hpp"
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/shapes.hpp"
 #include "game/admiral.hpp"
 #include "game/cursor.hpp"
@@ -48,6 +47,8 @@ using std::min;
 using std::max;
 
 namespace antares {
+
+const int32_t kPanelHeight      = 480;
 
 const int32_t kRadarBlipNum     = 50;
 const uint8_t kRadarColor     = GREEN;
@@ -522,9 +523,6 @@ static void draw_money() {
 void DrawInstrumentPanel() {
     globals()->gZoomMode = kNearestFoeZoom;
 
-    gRealWorld->fill(RgbColor::kClear);
-    gOffWorld->fill(RgbColor::kClear);
-
     MakeMiniScreenFromIndString(1);
     ResetInstruments();
     ClearMiniObjectData();
@@ -573,7 +571,7 @@ void EraseSite() {
     globals()->old_cursor_coord = globals()->cursor_coord;
 }
 
-void update_site() {
+void update_site(bool replay) {
     if (gScrollStarObject == NULL) {
         should_draw_site = false;
     } else if (gScrollStarObject->offlineTime <= 0) {
@@ -618,7 +616,11 @@ void update_site() {
         should_draw_site = false;
     }
 
-    // do the cursor, too
+    // Do the cursor, too, unless this is a replay.
+    if (replay) {
+        HideSpriteCursor();
+        return;
+    }
     Point cursor_coord = VideoDriver::driver()->get_mouse();
     MoveSpriteCursor(cursor_coord);
     HideSpriteCursor();
@@ -644,11 +646,6 @@ void update_site() {
 
 void draw_site() {
     if (should_draw_site) {
-        Stencil stencil(VideoDriver::driver());
-        Rect clip = viewport;
-        VideoDriver::driver()->fill_rect(clip, RgbColor::kWhite);
-        stencil.apply();
-
         const RgbColor light = GetRGBTranslateColorShade(PALE_GREEN, MEDIUM);
         const RgbColor dark = GetRGBTranslateColorShade(PALE_GREEN, DARKER + kSlightlyDarkerColor);
         VideoDriver::driver()->draw_line(site_data.a, site_data.b, light);
@@ -747,7 +744,7 @@ void draw_sector_lines() {
 
 void InstrumentsHandleClick() {
     const Point where = globals()->cursor_coord;
-    PlayerShipHandleClick(where);
+    PlayerShipHandleClick(where, 0);
     MiniComputerHandleClick(where);
     if (!SpriteCursorVisible()) {
         globals()->gMouseActive = true;
@@ -757,7 +754,7 @@ void InstrumentsHandleClick() {
 
 void InstrumentsHandleDoubleClick() {
     const Point where = globals()->cursor_coord;
-    PlayerShipHandleClick(where);
+    PlayerShipHandleClick(where, 0);
     MiniComputerHandleDoubleClick(where);
     if (!SpriteCursorVisible()) {
         globals()->gMouseActive = true;
@@ -823,7 +820,7 @@ void DrawArbitrarySectorLines(coordPointType *corner, int32_t scale, int32_t min
             color = GetRGBTranslateColorShade(BLUE, DARKER);
         }
 
-        DrawNateLine( pixBase, clipRect, x, bounds->top, x, bounds->bottom, color);
+        pixBase->view(Rect(x, bounds->top, x + 1, bounds->bottom)).fill(color);
         division += level;
         division &= 0x0000000f;
         x += h;
@@ -853,7 +850,7 @@ void DrawArbitrarySectorLines(coordPointType *corner, int32_t scale, int32_t min
             color = GetRGBTranslateColorShade(BLUE, DARKER);
         }
 
-        DrawNateLine( pixBase, clipRect, bounds->left, x, bounds->right, x, color);
+        pixBase->view(Rect(bounds->left, x, bounds->right, x + 1)).fill(color);
 
         division += level;
         division &= 0x0000000f;

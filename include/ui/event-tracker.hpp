@@ -28,8 +28,9 @@ namespace antares {
 class EventTracker : public EventReceiver {
   public:
     EventTracker(bool strict):
-            _strict(strict),
-            _button(false) { }
+            _strict(strict) {
+        _button[0] = _button[1] = _button[2] = false;
+    }
 
     virtual void key_down(const KeyDownEvent& event);
     virtual void key_up(const KeyUpEvent& event);
@@ -37,13 +38,13 @@ class EventTracker : public EventReceiver {
     virtual void mouse_up(const MouseUpEvent& event);
     virtual void mouse_move(const MouseMoveEvent& event);
 
-    bool button() const { return _button; }
+    bool button(int which) const { return _button[which]; }
     const Point& mouse() const { return _mouse; }
     const KeyMap& keys() const { return _keys; }
 
   private:
     const bool _strict;
-    bool _button;
+    bool _button[3];
     Point _mouse;
     KeyMap _keys;
 

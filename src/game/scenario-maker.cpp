@@ -1038,6 +1038,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         const int64_t start_ticks
             = (gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple;
         const int64_t start_time = add_ticks(0, start_ticks);
+        globals()->gGameTime = 0;
         for (int64_t i = 0; i < start_ticks; ++i) {
             globals()->gGameTime = add_ticks(globals()->gGameTime, 1);
             MoveSpaceObjects(gSpaceObjectData.get(), kMaxSpaceObject,

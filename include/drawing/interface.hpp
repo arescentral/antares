@@ -36,7 +36,7 @@ struct inlinePictType {
 };
 
 void draw_text_in_rect(
-        const Rect& tRect, const sfz::StringSlice& text, interfaceStyleType style,
+        Rect tRect, const sfz::StringSlice& text, interfaceStyleType style,
         unsigned char textcolor, std::vector<inlinePictType>& inlinePict);
 void populate_inline_picts(
         Rect rect, sfz::StringSlice text, interfaceStyleType style,
@@ -47,12 +47,6 @@ short GetInterfaceTextHeightFromWidth(
 void draw_interface_item(const interfaceItemType& item);
 
 void GetAnyInterfaceItemGraphicBounds(const interfaceItemType& item, Rect* rect);
-void GetAnyInterfaceItemContentBounds(const interfaceItemType& item, Rect* rect);
-
-short GetInterfaceStringWidth(const sfz::StringSlice& s, interfaceStyleType style);
-short GetInterfaceFontHeight(interfaceStyleType style);
-short GetInterfaceFontAscent(interfaceStyleType style);
-short GetInterfaceFontWidth(interfaceStyleType style);
 
 }  // namespace antares
 

@@ -34,6 +34,45 @@ int64_t antares_double_click_interval_usecs() {
     // 10.6+: return [NSEvent doubleClickInterval] * 1e6;
 }
 
+struct AntaresWindow {
+    int32_t screen_width;
+    int32_t screen_height;
+    NSOpenGLPixelFormat* pixel_format;
+    NSOpenGLContext* context;
+    NSOpenGLView* view;
+    NSWindow* window;
+};
+
+AntaresWindow* antares_window_create(
+        CGLPixelFormatObj pixel_format, CGLContextObj context,
+        int32_t screen_width, int32_t screen_height) {
+    AntaresWindow* window = malloc(sizeof(AntaresWindow));
+    window->screen_width = screen_width;
+    window->screen_height = screen_height;
+    window->pixel_format = [[NSOpenGLPixelFormat alloc] initWithCGLPixelFormatObj:pixel_format];
+    window->context = [[NSOpenGLContext alloc] initWithCGLContextObj:context];
+    NSRect screen_rect = NSMakeRect(0, 0, screen_width, screen_height);
+    window->view = [[NSOpenGLView alloc] initWithFrame:screen_rect
+        pixelFormat:window->pixel_format];
+    [window->view setOpenGLContext:window->context];
+    window->window = [[NSWindow alloc] initWithContentRect:screen_rect
+        styleMask:(NSTitledWindowMask | NSMiniaturizableWindowMask)
+        backing:NSBackingStoreBuffered
+        defer:NO];
+    [window->window setContentView:window->view];
+    [window->window makeKeyAndOrderFront:NSApp];
+    [window->window center];
+    return window;
+}
+
+void antares_window_destroy(AntaresWindow* window) {
+    [window->window release];
+    [window->view release];
+    [window->context release];
+    [window->pixel_format release];
+    free(window);
+}
+
 struct AntaresEventTranslator {
     void (*mouse_down_callback)(int button, int32_t x, int32_t y, void* userdata);
     void* mouse_down_userdata;
@@ -52,12 +91,22 @@ struct AntaresEventTranslator {
 
     int32_t screen_width;
     int32_t screen_height;
+    AntaresWindow* window;
 
     int32_t last_flags;
 };
 
-static NSPoint translate_coords(AntaresEventTranslator* translator, NSPoint input) {
-    return NSMakePoint(input.x, translator->screen_height - 1 - input.y);
+static NSPoint translate_coords(
+        AntaresEventTranslator* translator, NSWindow* from_window, NSPoint input) {
+    if (from_window != translator->window->window) {
+        if (from_window != nil) {
+            input = [from_window convertBaseToScreen:input];
+        }
+        if (translator->window != nil) {
+            input = [translator->window->window convertScreenToBase:input];
+        }
+    }
+    return NSMakePoint(input.x, translator->window->screen_height - 1 - input.y);
 }
 
 AntaresEventTranslator* antares_event_translator_create(
@@ -66,6 +115,7 @@ AntaresEventTranslator* antares_event_translator_create(
     memset(translator, 0, sizeof(AntaresEventTranslator));
     translator->screen_width = screen_width;
     translator->screen_height = screen_height;
+    translator->window = nil;
     translator->last_flags = 0;
     return translator;
 }
@@ -74,15 +124,34 @@ void antares_event_translator_destroy(AntaresEventTranslator* translator) {
     free(translator);
 }
 
+void antares_event_translator_set_window(
+        AntaresEventTranslator* translator, AntaresWindow* window) {
+    translator->window = window;
+}
+
 void antares_get_mouse_location(AntaresEventTranslator* translator, int32_t* x, int32_t* y) {
-    NSPoint location = translate_coords(translator, [NSEvent mouseLocation]);
+    NSPoint location = translate_coords(translator, nil, [NSEvent mouseLocation]);
     *x = location.x;
     *y = location.y;
 }
 
-void antares_get_mouse_button(AntaresEventTranslator* translator, int32_t* button) {
-    *button = CGEventSourceButtonState(
-            kCGEventSourceStateCombinedSessionState, kCGMouseButtonLeft);
+void antares_get_mouse_button(AntaresEventTranslator* translator, int32_t* button, int which) {
+    switch (which) {
+      case 0:
+        *button = CGEventSourceButtonState(
+                kCGEventSourceStateCombinedSessionState, kCGMouseButtonLeft);
+        break;
+
+      case 1:
+        *button = CGEventSourceButtonState(
+                kCGEventSourceStateCombinedSessionState, kCGMouseButtonRight);
+        break;
+
+      case 2:
+        *button = CGEventSourceButtonState(
+                kCGEventSourceStateCombinedSessionState, kCGMouseButtonCenter);
+        break;
+    }
 }
 
 void antares_event_translator_set_mouse_down_callback(
@@ -149,6 +218,37 @@ static void flags_changed(AntaresEventTranslator* translator, int32_t flags) {
     translator->last_flags = flags;
 }
 
+static int button_for(NSEvent* event) {
+    switch ([event type]) {
+      case NSLeftMouseDown:
+      case NSLeftMouseUp:
+        return 0;
+
+      case NSRightMouseDown:
+      case NSRightMouseUp:
+        return 1;
+
+      case NSOtherMouseDown:
+      case NSOtherMouseUp:
+        return 2;
+
+      default:
+        return -1;
+    }
+}
+
+static mouse_down(AntaresEventTranslator* translator, NSEvent* event) {
+    NSPoint where = translate_coords(translator, [event window], [event locationInWindow]);
+    int button = button_for(event);
+    translator->mouse_down_callback(button, where.x, where.y, translator->mouse_down_userdata);
+}
+
+static mouse_up(AntaresEventTranslator* translator, NSEvent* event) {
+    NSPoint where = translate_coords(translator, [event window], [event locationInWindow]);
+    int button = button_for(event);
+    translator->mouse_up_callback(button, where.x, where.y, translator->mouse_up_userdata);
+}
+
 void antares_event_translator_enqueue(AntaresEventTranslator* translator, int64_t until) {
     NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
     NSDate* date = [NSDate dateWithTimeIntervalSince1970:(until * 1e-6)];
@@ -158,24 +258,21 @@ void antares_event_translator_enqueue(AntaresEventTranslator* translator, int64_
     if (event) {
         switch ([event type]) {
           case NSLeftMouseDown:
-            {
-                NSPoint where = translate_coords(translator, [event locationInWindow]);
-                translator->mouse_down_callback(
-                        0, where.x, where.y, translator->mouse_down_userdata);
-            }
+          case NSRightMouseDown:
+            mouse_down(translator, event);
             break;
 
           case NSLeftMouseUp:
-            {
-                NSPoint where = translate_coords(translator, [event locationInWindow]);
-                translator->mouse_up_callback(0, where.x, where.y, translator->mouse_up_userdata);
-            }
+          case NSRightMouseUp:
+            mouse_up(translator, event);
             break;
 
           case NSMouseMoved:
           case NSLeftMouseDragged:
+          case NSRightMouseDragged:
             {
-                NSPoint where = translate_coords(translator, [event locationInWindow]);
+                NSPoint where = translate_coords(
+                        translator, [event window], [event locationInWindow]);
                 translator->mouse_move_callback(where.x, where.y, translator->mouse_move_userdata);
             }
             break;
@@ -203,39 +300,4 @@ void antares_event_translator_enqueue(AntaresEventTranslator* translator, int64_
         }
     }
     [pool drain];
-}
-
-struct AntaresWindow {
-    NSOpenGLPixelFormat* pixel_format;
-    NSOpenGLContext* context;
-    NSOpenGLView* view;
-    NSWindow* window;
-};
-
-AntaresWindow* antares_window_create(
-        CGLPixelFormatObj pixel_format, CGLContextObj context,
-        int32_t screen_width, int32_t screen_height) {
-    AntaresWindow* window = malloc(sizeof(AntaresWindow));
-    window->pixel_format = [[NSOpenGLPixelFormat alloc] initWithCGLPixelFormatObj:pixel_format];
-    window->context = [[NSOpenGLContext alloc] initWithCGLContextObj:context];
-    NSRect screen_rect = NSMakeRect(0, 0, screen_width, screen_height);
-    window->view = [[NSOpenGLView alloc] initWithFrame:screen_rect
-        pixelFormat:window->pixel_format];
-    [window->view setOpenGLContext:window->context];
-    window->window = [[NSWindow alloc] initWithContentRect:screen_rect
-        styleMask:(NSTitledWindowMask | NSMiniaturizableWindowMask)
-        backing:NSBackingStoreBuffered
-        defer:NO];
-    [window->window setContentView:window->view];
-    [window->window makeKeyAndOrderFront:NSApp];
-    [window->window center];
-    return window;
-}
-
-void antares_window_destroy(AntaresWindow* window) {
-    [window->window release];
-    [window->view release];
-    [window->context release];
-    [window->pixel_format release];
-    free(window);
 }

@@ -25,7 +25,6 @@
 #include "config/preferences.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/shapes.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "drawing/text.hpp"
@@ -103,7 +102,8 @@ class GamePlay : public Card {
     const Rect _play_area;
     const int64_t _scenario_start_time;
     const bool _command_and_q;
-    bool _mouse_down;
+    bool _left_mouse_down;
+    bool _right_mouse_down;
     bool _entering_message;
     bool _player_paused;
     KeyMap _key_map;
@@ -226,7 +226,8 @@ GamePlay::GamePlay(bool replay, GameResult* game_result)
                       (gThisScenario->startTime & kScenario_StartTimeMask)
                       * kScenarioTimeMultiple)),
           _command_and_q(BothCommandAndQ()),
-          _mouse_down(false),
+          _left_mouse_down(false),
+          _right_mouse_down(false),
           _entering_message(false),
           _player_paused(false),
           _decide_cycle(0),
@@ -240,12 +241,10 @@ class PauseScreen : public Card {
             _next_switch(0) {
         const StringList list(3100);
         _pause_string.assign(list.at(10));
-        mSetDirectFont(kTitleFontNum);
-        long width, height;
-        mGetDirectStringDimensions(_pause_string, width, height);
-        Rect bounds(0, 0, width, height);
+        long width = title_font->string_width(_pause_string);
+        Rect bounds(0, 0, width, title_font->height);
         bounds.center_in(play_screen);
-        _text_origin = Point(bounds.left, bounds.top + mDirectFontAscent());
+        _text_origin = Point(bounds.left, bounds.top + title_font->ascent);
 
         bounds.inset(-4, -4);
         _bracket_bounds = bounds;
@@ -286,8 +285,7 @@ class PauseScreen : public Card {
             }
             draw_vbracket(_bracket_bounds, light_green);
 
-            mSetDirectFont(kTitleFontNum);
-            gDirectText->draw_sprite(_text_origin, _pause_string, light_green);
+            title_font->draw_sprite(_text_origin, _pause_string, light_green);
         }
     }
 
@@ -375,10 +373,11 @@ void GamePlay::draw() const {
     draw_sprites();
     draw_labels();
 
-    draw_instruments();
     draw_message();
     draw_site();
     draw_cursor();
+    draw_instruments();
+    draw_sprite_cursor();
     draw_hint_line();
     globals()->transitions.draw();
 }
@@ -418,7 +417,6 @@ void GamePlay::fire_timer() {
         return;
     }
 
-    gOffWorld->view(clip_rect).fill(RgbColor::kBlack);
     globals()->starfield.prepare_to_move();
     EraseSite();
 
@@ -467,12 +465,12 @@ void GamePlay::fire_timer() {
                 globals()->gGameOver = 1;
             }
 
-            if (VideoDriver::driver()->button()) {
+            if (VideoDriver::driver()->button(0)) {
                 if (_replay) {
                     *_game_result = QUIT_GAME;
                     globals()->gGameOver = 1;
                 } else {
-                    if (!_mouse_down) {
+                    if (!_left_mouse_down) {
                         int64_t double_click_interval
                             = VideoDriver::driver()->double_click_interval_usecs();
                         if ((globals()->gGameTime - _last_click_time) <= double_click_interval) {
@@ -482,14 +480,28 @@ void GamePlay::fire_timer() {
                             InstrumentsHandleClick();
                             _last_click_time = globals()->gGameTime;
                         }
-                        _mouse_down = true;
+                        _left_mouse_down = true;
                     } else {
                         InstrumentsHandleMouseStillDown();
                     }
                 }
-            } else if (_mouse_down) {
-                _mouse_down = false;
+            } else if (_left_mouse_down) {
+                _left_mouse_down = false;
                 InstrumentsHandleMouseUp();
+            }
+
+            if (VideoDriver::driver()->button(1)) {
+                if (_replay) {
+                    *_game_result = QUIT_GAME;
+                    globals()->gGameOver = 1;
+                } else {
+                    if (!_right_mouse_down) {
+                        PlayerShipHandleClick(globals()->cursor_coord, 1);
+                        _right_mouse_down = true;
+                    }
+                }
+            } else if (_right_mouse_down) {
+                _right_mouse_down = false;
             }
 
             CollideSpaceObjects(gSpaceObjectData.get(), kMaxSpaceObject);
@@ -540,13 +552,12 @@ void GamePlay::fire_timer() {
     update_beams();
     update_all_label_positions(unitsDone);
     update_all_label_contents(unitsDone);
-    update_site();
+    update_site(_replay);
 
     CullSprites();
     ShowAllLabels();
     ShowAllBeams();
     globals()->starfield.show();
-    copy_world(*gRealWorld, *gOffWorld, world);
 
     DrawMessageScreen(unitsDone);
     UpdateRadar(unitsDone);

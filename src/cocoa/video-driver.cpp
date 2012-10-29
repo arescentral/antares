@@ -117,9 +117,9 @@ bool CocoaVideoDriver::wait_next_event(int64_t until, scoped_ptr<Event>& event) 
     return false;
 }
 
-bool CocoaVideoDriver::button() {
+bool CocoaVideoDriver::button(int which) {
     int32_t button;
-    antares_get_mouse_button(_translator.c_obj(), &button);
+    antares_get_mouse_button(_translator.c_obj(), &button, which);
     return button;
 }
 
@@ -133,15 +133,15 @@ void CocoaVideoDriver::get_keys(KeyMap* keys) {
     keys->copy(_event_tracker.keys());
 }
 
-int CocoaVideoDriver::ticks() {
+int CocoaVideoDriver::ticks() const {
     return usecs() * 60 / 1000000;
 }
 
-int CocoaVideoDriver::usecs() {
+int CocoaVideoDriver::usecs() const {
     return antares::usecs() - _start_time;
 }
 
-int64_t CocoaVideoDriver::double_click_interval_usecs() {
+int64_t CocoaVideoDriver::double_click_interval_usecs() const {
     return antares_double_click_interval_usecs();
 }
 
@@ -151,7 +151,6 @@ void CocoaVideoDriver::loop(Card* initial) {
                 CGDisplayIDToOpenGLDisplayMask(kCGDirectMainDisplay)),
         kCGLPFAFullScreen,
         kCGLPFAColorSize, static_cast<CGLPixelFormatAttribute>(24),
-        kCGLPFAStencilSize, static_cast<CGLPixelFormatAttribute>(8),
         kCGLPFADoubleBuffer,
         kCGLPFAAccelerated,
         static_cast<CGLPixelFormatAttribute>(0),
@@ -165,9 +164,11 @@ void CocoaVideoDriver::loop(Card* initial) {
         fullscreen.reset(new CocoaFullscreen(context, screen_size()));
     } else {
         windowed.reset(new CocoaWindowed(pixel_format, context, screen_size()));
+        antares_event_translator_set_window(_translator.c_obj(), windowed->window());
     }
     GLint swap_interval = 1;
     CGLSetParameter(context.c_obj(), kCGLCPSwapInterval, &swap_interval);
+    CGLSetCurrentContext(context.c_obj());
 
     MainLoop main_loop(*this, initial);
     while (!main_loop.done()) {

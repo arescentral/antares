@@ -54,6 +54,7 @@ void HideHintLine();
 void ResetHintLine();
 
 void draw_cursor();
+void draw_sprite_cursor();
 void draw_hint_line();
 
 }  // namespace antares

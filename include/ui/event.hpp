@@ -105,10 +105,6 @@ class MouseEvent : public Event {
 // left, right, and middle buttons).  On some systems, the scroll wheel is implemented as
 // additional buttons above these, but when we support the scroll wheel, we will probably choose to
 // implement it in terms of separate events instead.
-//
-// At present, we only really deal with the first mouse button, as an artifact of Ares' origins on
-// the classic MacOS.  There are plenty of desirable features one could expect from multiple mouse
-// buttons, though.
 class MouseButtonEvent : public MouseEvent {
   public:
     MouseButtonEvent(int64_t at, int button, const Point& where):

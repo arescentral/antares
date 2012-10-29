@@ -23,7 +23,6 @@
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
@@ -82,8 +81,6 @@ const uint8_t kCodeBackColorChar        = 'b';
 
 const int16_t kStringMessageID          = 1;
 
-const int16_t kLongMessageFontNum       = kTacticalFontNum;
-
 const int32_t kHBuffer                  = 4;
 
 inline int mHexDigitValue(char c) {
@@ -98,12 +95,10 @@ inline int mHexDigitValue(char c) {
 
 namespace {
 
-int mac_roman_char_width(uint8_t ch) {
+int mac_roman_char_width(Font* font, uint8_t ch) {
     BytesSlice bytes(&ch, 1);
     String str(macroman::decode(bytes));
-    uint8_t width;
-    mDirectCharWidth(width, str.at(0));
-    return width;
+    return font->char_width(str.at(0));
 }
 
 template <typename T>
@@ -265,18 +260,19 @@ void ClipToCurrentLongMessage( void)
             if (textData.get() != NULL) {
                 const RgbColor& light_blue = GetRGBTranslateColorShade(SKY_BLUE, VERY_LIGHT);
                 const RgbColor& dark_blue = GetRGBTranslateColorShade(SKY_BLUE, DARKEST);
-                mSetDirectFont(kLongMessageFontNum);
                 tmessage->text.assign(*textData);
-                tmessage->retro_text.reset(
-                        new RetroText(*textData, kLongMessageFontNum, light_blue, dark_blue));
+                tmessage->retro_text.reset(new StyledText(tactical_font));
+                tmessage->retro_text->set_fore_color(light_blue);
+                tmessage->retro_text->set_back_color(dark_blue);
+                tmessage->retro_text->set_retro_text(*textData);
                 tmessage->retro_text->set_tab_width(60);
                 tmessage->retro_text->wrap_to(
-                        viewport.width() - kHBuffer - gDirectText->logicalWidth, 0);
+                        viewport.width() - kHBuffer - tactical_font->logicalWidth + 1, 0, 0);
                 tmessage->textHeight = tmessage->retro_text->height();
                 tmessage->textHeight += kLongMessageVPadDouble;
                 tmessage->retro_origin = Point(
                         viewport.left + kHBuffer,
-                        viewport.bottom + mDirectFontAscent() + kLongMessageVPad);
+                        viewport.bottom + tactical_font->ascent + kLongMessageVPad);
                 tmessage->at_char = 0;
 
                 if (tmessage->labelMessage == false) {
@@ -360,7 +356,6 @@ void DrawCurrentLongMessage(int32_t time_pass) {
         // Play teletype sound at least once every 3 ticks.
         tmessage->charDelayCount += time_pass;
         if (tmessage->charDelayCount > 0) {
-            mSetDirectFont( kLongMessageFontNum);
             PlayVolumeSound(kTeletype, kMediumLowVolume, kShortPersistence, kLowPrioritySound);
             while (tmessage->charDelayCount > 0) {
                 tmessage->charDelayCount -= 3;
@@ -447,8 +442,6 @@ void DrawMessageScreen(int32_t by_units) {
         globals()->gMessageData.pop();
     }
 
-    mSetDirectFont( kTacticalFontNum);
-
     if (!globals()->gMessageData.empty()) {
         const String& message = *globals()->gMessageData.front();
 
@@ -473,315 +466,6 @@ void SetStatusString(const StringSlice& status, unsigned char color) {
     SetScreenLabelColor(globals()->gStatusLabelNum, color);
     SetScreenLabelString(globals()->gStatusLabelNum, status);
     SetScreenLabelAge(globals()->gStatusLabelNum, kStatusLabelAge);
-}
-
-long DetermineDirectTextHeightInWidth( retroTextSpecType *retroTextSpec, long inWidth)
-
-{
-    long            charNum = 0, height = mDirectFontHeight(), x = 0, oldx = 0, oldCharNum, wordLen,
-                    *lineLengthList = retroTextSpec->lineLength;
-    unsigned char   wrapState; // 0 = none, 1 = once, 2 = more than once
-    Bytes bytes(macroman::encode(*retroTextSpec->text));
-    const uint8_t*  thisChar = bytes.data();
-
-    *lineLengthList = 0;
-    retroTextSpec->autoWidth = 0;
-    retroTextSpec->lineNumber = 1;
-    while ( charNum < retroTextSpec->textLength)
-    {
-        if ( *thisChar == kReturnChar)
-        {
-            if ( x > retroTextSpec->autoWidth) retroTextSpec->autoWidth = x;
-            height += mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
-            x = 0;
-            thisChar++;
-            charNum++;
-            (*lineLengthList)++;
-            lineLengthList++;
-            *lineLengthList = 0;
-            retroTextSpec->lineNumber++;
-        } else if ( *thisChar == ' ')
-        {
-            do
-            {
-                x += mac_roman_char_width(' ');
-                thisChar++;
-                charNum++;
-                (*lineLengthList)++;
-            } while (( *thisChar == ' ')  && ( charNum < retroTextSpec->textLength));
-        } else if ( *thisChar == kCodeChar)
-        {
-            thisChar++;
-            charNum++;
-            (*lineLengthList)++;
-            switch( *thisChar)
-            {
-                case kCodeTabChar:
-                    wordLen = 0;
-                    oldx = 0;
-                    while ( oldx <= x)
-                    {
-                        oldx += retroTextSpec->tabSize;
-                        wordLen++;
-                    }
-                    x = 0 + retroTextSpec->tabSize * wordLen;
-                    break;
-
-                case kCodeForeColorChar:
-                case kCodeBackColorChar:
-                    thisChar++;
-                    charNum++;
-                    (*lineLengthList)++;
-                    thisChar++;
-                    charNum++;
-                    (*lineLengthList)++;
-                    break;
-
-                case kCodeChar:
-                    x += mac_roman_char_width(*thisChar);
-                    wordLen++;
-                    break;
-            }
-            thisChar++;
-            charNum++;
-            (*lineLengthList)++;
-        } else
-        {
-            oldx = x;
-            oldCharNum = charNum;
-            wordLen = 0;
-            wrapState = 0;
-            do
-            {
-                x += mac_roman_char_width(*thisChar);
-                wordLen++;
-                if ( x >= (inWidth - gDirectText->logicalWidth))
-                {
-                    if ( !wrapState)
-                    {
-                        wrapState = 1;
-                        if ( oldx > retroTextSpec->autoWidth) retroTextSpec->autoWidth = oldx;
-                        x = x - oldx;
-                        oldx = 0;
-                        height += mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
-                    } else
-                    {
-                        wrapState = 2;
-                        wordLen--;
-                    }
-                }
-                thisChar++;
-                charNum++;
-            } while (( *thisChar != ' ') && ( *thisChar != kReturnChar) && ( wrapState < 2) &&
-                ( *thisChar != kCodeChar) && ( charNum < retroTextSpec->textLength));
-            if ( wrapState)
-            {
-                if ( x > retroTextSpec->autoWidth) retroTextSpec->autoWidth = x;
-                lineLengthList++;
-                *lineLengthList = 0;
-                retroTextSpec->lineNumber++;
-            }
-            *lineLengthList += wordLen;
-        }
-    }
-    if ( x > retroTextSpec->autoWidth) retroTextSpec->autoWidth = x;
-    retroTextSpec->autoWidth += 1;
-    retroTextSpec->autoHeight = height;
-    return ( height);
-}
-
-void DrawRetroTextCharInRect(
-        retroTextSpecType *retroTextSpec, long charsToDo, const Rect& bounds, const Rect& clipRect,
-        PixMap *destMap) {
-    Bytes bytes(macroman::encode(*retroTextSpec->text));
-    const uint8_t* thisChar = bytes.data();
-    Rect        cursorRect, lineRect, tlRect;
-    long            oldx, wordLen, *lineLength = &(retroTextSpec->lineLength[retroTextSpec->lineCount]);
-    unsigned char   calcColor, calcShade;
-    RgbColor tempColor;
-    bool         drawCursor = ( charsToDo > 0);
-
-    cursorRect.left = retroTextSpec->xpos;
-    cursorRect.top = retroTextSpec->ypos -
-        (mDirectFontAscent()  + retroTextSpec->topBuffer);
-    cursorRect.right = cursorRect.left + gDirectText->logicalWidth;
-    cursorRect.bottom = cursorRect.top + mDirectFontHeight() +
-        retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
-    tlRect = cursorRect;
-    tlRect.clip_to(bounds);
-    if ( retroTextSpec->originalBackColor != RgbColor::kWhite)
-        DrawNateRectClipped(destMap, &tlRect, clipRect, retroTextSpec->originalBackColor);
-
-    if ( charsToDo <= 0) charsToDo = retroTextSpec->lineLength[retroTextSpec->lineCount];
-
-    while (( charsToDo > 0) && ( retroTextSpec->thisPosition <
-        retroTextSpec->textLength))
-    {
-        thisChar = bytes.data() + retroTextSpec->thisPosition;
-        if ( *thisChar == kCodeChar)
-        {
-            thisChar++;
-            charsToDo--;
-            (retroTextSpec->thisPosition)++;
-            (retroTextSpec->linePosition)++;
-            switch( *thisChar)
-            {
-                case kCodeTabChar:
-                    wordLen = 0;
-                    oldx = bounds.left;
-                    cursorRect.left = retroTextSpec->xpos;
-                    while ( oldx <= retroTextSpec->xpos)
-                    {
-                        oldx += retroTextSpec->tabSize;
-                        wordLen++;
-                    }
-                    retroTextSpec->xpos = bounds.left + retroTextSpec->tabSize *
-                        wordLen;
-                    cursorRect.right = retroTextSpec->xpos;
-                    tlRect = cursorRect;
-                    tlRect.clip_to(bounds);
-                    if ( retroTextSpec->backColor != RgbColor::kWhite)
-                        DrawNateRectClipped(destMap, &tlRect, clipRect, retroTextSpec->backColor);
-                    break;
-
-                case kCodeChar:
-                    oldx = cursorRect.left = retroTextSpec->xpos;
-                    cursorRect.top = retroTextSpec->ypos - (mDirectFontAscent() + retroTextSpec->topBuffer);
-                    cursorRect.bottom = cursorRect.top + mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
-                    retroTextSpec->xpos += mac_roman_char_width(*thisChar);
-                    tlRect = cursorRect;
-                    tlRect.clip_to(bounds);
-                    if ( retroTextSpec->backColor != RgbColor::kWhite)
-                        DrawNateRectClipped(destMap, &tlRect, clipRect, retroTextSpec->backColor);
-                    cursorRect.right = retroTextSpec->xpos;
-                    {
-                        const char text[] = {'\\', '\0'};
-                        DrawDirectTextStringClipped(
-                                Point(oldx, retroTextSpec->ypos), text,
-                                ((retroTextSpec->color == RgbColor::kWhite)
-                                    ? (RgbColor::kBlack) : (retroTextSpec->color)),
-                                destMap, clipRect);
-                    }
-                    break;
-
-                case kCodeInvertChar:
-                    tempColor = retroTextSpec->color;
-                    retroTextSpec->nextColor = retroTextSpec->backColor;
-                    retroTextSpec->nextBackColor = tempColor;
-                    break;
-
-                case kCodeForeColorChar:
-                    thisChar++;
-                    charsToDo--;
-                    (retroTextSpec->thisPosition)++;
-                    (retroTextSpec->linePosition)++;
-                    calcColor = mHexDigitValue(*thisChar);
-                    thisChar++;
-                    charsToDo--;
-                    (retroTextSpec->thisPosition)++;
-                    (retroTextSpec->linePosition)++;
-                    calcShade = mHexDigitValue(*thisChar);
-                    retroTextSpec->nextColor = GetRGBTranslateColorShade(calcColor, calcShade);
-                    break;
-
-                case kCodeBackColorChar:
-                    thisChar++;
-                    charsToDo--;
-                    (retroTextSpec->thisPosition)++;
-                    (retroTextSpec->linePosition)++;
-                    calcColor = mHexDigitValue(*thisChar);
-                    thisChar++;
-                    charsToDo--;
-                    (retroTextSpec->thisPosition)++;
-                    (retroTextSpec->linePosition)++;
-                    calcShade = mHexDigitValue(*thisChar);
-                    if (( calcColor) && (calcShade == 0))
-                    {
-                        retroTextSpec->nextBackColor = RgbColor::kBlack;
-                    } else
-                    {
-                        retroTextSpec->nextBackColor = GetRGBTranslateColorShade(calcColor, calcShade);
-                    }
-                    break;
-
-                case kCodeRevertChar:
-                    retroTextSpec->nextColor = retroTextSpec->originalColor;
-                    retroTextSpec->nextBackColor = retroTextSpec->originalBackColor;
-                    break;
-            }
-            thisChar++;
-            charsToDo--;
-            (retroTextSpec->thisPosition)++;
-            (retroTextSpec->linePosition)++;
-        } else if ( *thisChar == kReturnChar)
-        {
-            thisChar++;
-            (retroTextSpec->thisPosition)++;
-            (retroTextSpec->linePosition)++;
-            charsToDo--;
-        } else
-        {
-            char bytes[] = {*thisChar, '\0'};
-            if (bytes[0] == '_') {
-                bytes[0] = ' ';
-            }
-
-            retroTextSpec->color = retroTextSpec->nextColor;
-            retroTextSpec->backColor = retroTextSpec->nextBackColor;
-            cursorRect.left = retroTextSpec->xpos;
-            int32_t oldx = retroTextSpec->xpos;
-            int32_t y = retroTextSpec->ypos;
-            retroTextSpec->xpos += mac_roman_char_width(*thisChar);
-            cursorRect.right = retroTextSpec->xpos;
-            tlRect = cursorRect;
-            tlRect.clip_to(bounds);
-            if ( retroTextSpec->backColor != RgbColor::kWhite)
-                DrawNateRectClipped(destMap, &tlRect, clipRect, retroTextSpec->backColor);
-            String text(macroman::decode(bytes));
-            DrawDirectTextStringClipped(
-                    Point(oldx, y), text,
-                    ((retroTextSpec->color == RgbColor::kWhite)
-                        ? (RgbColor::kBlack) : (retroTextSpec->color)),
-                    destMap, clipRect);
-            (retroTextSpec->thisPosition)++;
-            (retroTextSpec->linePosition)++;
-            charsToDo--;
-        }
-        if ( retroTextSpec->linePosition >= *lineLength)
-        {
-            lineRect.left = retroTextSpec->xpos;
-            lineRect.right = bounds.right;
-            lineRect.top = cursorRect.top;
-            lineRect.bottom = cursorRect.bottom;
-            tlRect = lineRect;
-            tlRect.clip_to(bounds);
-            if ( retroTextSpec->backColor != RgbColor::kWhite)
-                DrawNateRectClipped(destMap, &tlRect, clipRect, retroTextSpec->backColor);
-
-            retroTextSpec->linePosition = 0;
-            retroTextSpec->ypos += mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
-            retroTextSpec->xpos = bounds.left;
-            (retroTextSpec->lineCount)++;
-            lineLength++;
-            cursorRect.top = retroTextSpec->ypos - (mDirectFontAscent() + retroTextSpec->topBuffer);
-            cursorRect.bottom = cursorRect.top + mDirectFontHeight() + retroTextSpec->topBuffer + retroTextSpec->bottomBuffer;
-        } else
-        {
-        }
-
-    }
-    if ( retroTextSpec->thisPosition < retroTextSpec->textLength)
-    {
-        cursorRect.left = retroTextSpec->xpos;
-        cursorRect.right = cursorRect.left + gDirectText->logicalWidth;
-        if ( drawCursor)
-        {
-            tlRect = cursorRect;
-            tlRect.clip_to(bounds);
-            if ( retroTextSpec->backColor != RgbColor::kWhite)
-                DrawNateRectClipped(destMap, &tlRect, clipRect, retroTextSpec->originalColor);
-        }
-    }
 }
 
 //

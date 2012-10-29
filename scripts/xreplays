@@ -1,0 +1,3 @@
+#!/bin/zsh
+
+ls test/*.NLRP | sed 's,test/\(.*\)\.NLRP,\1,' | xargs $@
