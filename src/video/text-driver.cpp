@@ -150,6 +150,12 @@ void TextVideoDriver::fill_rect(const Rect& rect, const RgbColor& color) {
                 rect.left, rect.top, rect.right, rect.bottom, hex(color)));
 }
 
+void TextVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
+    print(_log, format(
+                "dither\t{0}\t{1}\t{2}\t{3}\t{4}\n",
+                rect.left, rect.top, rect.right, rect.bottom, hex(color)));
+}
+
 void TextVideoDriver::draw_point(const Point& at, const RgbColor& color) {
     print(_log, format(
                 "point\t{0}\t{1}\t{2}\n",

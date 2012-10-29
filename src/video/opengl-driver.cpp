@@ -65,10 +65,16 @@ static const GLchar* kShaderSource =
     "    if (color_mode == 0) {\n"
     "        gl_FragColor = gl_Color;\n"
     "    } else if (color_mode == 1) {\n"
-    "        gl_FragColor = sprite_color;\n"
+    "        if (mod(floor(gl_TexCoord[1].s) + floor(gl_TexCoord[1].t), 2) == 1) {\n"
+    "            gl_FragColor = gl_Color;\n"
+    "        } else {\n"
+    "            gl_FragColor = vec4(0, 0, 0, 0);\n"
+    "        }\n"
     "    } else if (color_mode == 2) {\n"
-    "        gl_FragColor = gl_Color * sprite_color;\n"
+    "        gl_FragColor = sprite_color;\n"
     "    } else if (color_mode == 3) {\n"
+    "        gl_FragColor = gl_Color * sprite_color;\n"
+    "    } else if (color_mode == 4) {\n"
     "        vec2 uv2 = (gl_TexCoord[1].xy + vec2(mod(t / 256, 256), mod(t, 256))) * vec2(1.0/256, 1.0/256);\n"
     "        vec4 static_color = texture2D(static_image, uv2);\n"
     "        if (static_color.w <= static_fraction) {\n"
@@ -145,19 +151,19 @@ class OpenGlSprite : public Sprite {
     }
 
     virtual void draw(const Rect& draw_rect) const {
-        glUniform1i(_uniforms.color_mode, 1);
+        glUniform1i(_uniforms.color_mode, 2);
         draw_internal(draw_rect);
     }
 
     virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const {
         glColor4ub(tint.red, tint.green, tint.blue, 255);
-        glUniform1i(_uniforms.color_mode, 2);
+        glUniform1i(_uniforms.color_mode, 3);
         draw_internal(draw_rect);
     }
 
     virtual void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const {
         glColor4ub(color.red, color.green, color.blue, color.alpha);
-        glUniform1i(_uniforms.color_mode, 3);
+        glUniform1i(_uniforms.color_mode, 4);
         glUniform1f(_uniforms.static_fraction, frac / 255.0);
         draw_internal(draw_rect);
     }
@@ -175,16 +181,16 @@ class OpenGlSprite : public Sprite {
         gl_check();
         glBegin(GL_QUADS);
         glMultiTexCoord2f(GL_TEXTURE0, 0, 0);
-        glMultiTexCoord2f(GL_TEXTURE1, 0, 0);
+        glMultiTexCoord2f(GL_TEXTURE1, draw_rect.left, draw_rect.top);
         glVertex2f(draw_rect.left, draw_rect.top);
         glMultiTexCoord2f(GL_TEXTURE0, 0, h);
-        glMultiTexCoord2f(GL_TEXTURE1, 0, draw_rect.height());
+        glMultiTexCoord2f(GL_TEXTURE1, draw_rect.left, draw_rect.bottom);
         glVertex2f(draw_rect.left, draw_rect.bottom);
         glMultiTexCoord2f(GL_TEXTURE0, w, h);
-        glMultiTexCoord2f(GL_TEXTURE1, draw_rect.width(), draw_rect.height());
+        glMultiTexCoord2f(GL_TEXTURE1, draw_rect.right, draw_rect.bottom);
         glVertex2f(draw_rect.right, draw_rect.bottom);
         glMultiTexCoord2f(GL_TEXTURE0, w, 0);
-        glMultiTexCoord2f(GL_TEXTURE1, draw_rect.width(), 0);
+        glMultiTexCoord2f(GL_TEXTURE1, draw_rect.right, draw_rect.top);
         glVertex2f(draw_rect.right, draw_rect.top);
         glEnd();
         gl_check();
@@ -222,6 +228,21 @@ void OpenGlVideoDriver::fill_rect(const Rect& rect, const RgbColor& color) {
     glVertex2f(rect.right, rect.top);
     glVertex2f(rect.left, rect.top);
     glVertex2f(rect.left, rect.bottom);
+    glVertex2f(rect.right, rect.bottom);
+    glEnd();
+}
+
+void OpenGlVideoDriver::dither_rect(const Rect& rect, const RgbColor& color) {
+    glUniform1i(_uniforms.color_mode, 1);
+    glColor4ub(color.red, color.green, color.blue, color.alpha);
+    glBegin(GL_QUADS);
+    glMultiTexCoord2f(GL_TEXTURE1, rect.right, rect.top);
+    glVertex2f(rect.right, rect.top);
+    glMultiTexCoord2f(GL_TEXTURE1, rect.left, rect.top);
+    glVertex2f(rect.left, rect.top);
+    glMultiTexCoord2f(GL_TEXTURE1, rect.left, rect.bottom);
+    glVertex2f(rect.left, rect.bottom);
+    glMultiTexCoord2f(GL_TEXTURE1, rect.right, rect.bottom);
     glVertex2f(rect.right, rect.bottom);
     glEnd();
 }

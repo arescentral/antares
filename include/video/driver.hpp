@@ -58,6 +58,7 @@ class VideoDriver {
 
     virtual Sprite* new_sprite(sfz::PrintItem name, const PixMap& content) = 0;
     virtual void fill_rect(const Rect& rect, const RgbColor& color) = 0;
+    virtual void dither_rect(const Rect& rect, const RgbColor& color) = 0;
     virtual void draw_point(const Point& at, const RgbColor& color) = 0;
     virtual void draw_line(const Point& from, const Point& to, const RgbColor& color) = 0;
 
