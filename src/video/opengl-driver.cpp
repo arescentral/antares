@@ -26,6 +26,7 @@
 
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
+#include "game/globals.hpp"
 #include "math/geometry.hpp"
 #include "math/random.hpp"
 #include "ui/card.hpp"
@@ -406,7 +407,7 @@ void OpenGlVideoDriver::MainLoop::draw() {
     glTranslatef(-1.0, 1.0, 0.0);
     glScalef(2.0, -2.0, 1.0);
     glScalef(1.0 / _driver._screen_size.width, 1.0 / _driver._screen_size.height, 1.0);
-    glUniform1i(_driver._uniforms.t, _driver.usecs());
+    glUniform1i(_driver._uniforms.t, globals()->gGameTime);
 
     gl_check();
 
