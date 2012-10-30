@@ -91,7 +91,20 @@ void BriefingScreen::draw() const {
 
     switch (_briefing_point) {
       case STAR_MAP:
-        _star_map->draw(_bounds.left, _bounds.top);
+        {
+            const Point star = _star_rect.center();
+            RgbColor gold = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
+            _star_map->draw(_bounds.left, _bounds.top);
+            draw_vbracket(_star_rect, gold);
+            VideoDriver::driver()->draw_line(
+                    Point(star.h, _bounds.top), Point(star.h, _star_rect.top), gold);
+            VideoDriver::driver()->draw_line(
+                    Point(star.h, _star_rect.bottom), Point(star.h, _bounds.bottom), gold);
+            VideoDriver::driver()->draw_line(
+                    Point(_bounds.left, star.v), Point(_star_rect.left, star.v), gold);
+            VideoDriver::driver()->draw_line(
+                    Point(_star_rect.right - 1, star.v), Point(_bounds.right, star.v), gold);
+        }
         break;
 
       case BLANK_SYSTEM_MAP:
@@ -200,29 +213,22 @@ void BriefingScreen::build_star_map() {
     pix.copy(pict.view(pix_bounds));
     pix_bounds.offset(0, -2);
 
-    Rect star_rect(_scenario->star_map_point(), Size(0, 0));
-    star_rect.inset(-kMissionStarPointWidth, -kMissionStarPointHeight);
+    _star_rect = Rect(_scenario->star_map_point(), Size(0, 0));
+    _star_rect.inset(-kMissionStarPointWidth, -kMissionStarPointHeight);
     RgbColor gold = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
 
-    // Move `star_rect` so that it is inside of `pix_bounds`.
-    if (star_rect.left < pix_bounds.left) {
-        star_rect.offset(pix_bounds.left - star_rect.left, 0);
-    } else if (star_rect.right > pix_bounds.right) {
-        star_rect.offset(pix_bounds.right - star_rect.right, 0);
+    // Move `_star_rect` so that it is inside of `pix_bounds`.
+    if (_star_rect.left < pix_bounds.left) {
+        _star_rect.offset(pix_bounds.left - _star_rect.left, 0);
+    } else if (_star_rect.right > pix_bounds.right) {
+        _star_rect.offset(pix_bounds.right - _star_rect.right, 0);
     }
-    if (star_rect.top < pix_bounds.top) {
-        star_rect.offset(0, pix_bounds.top - star_rect.top);
-    } else if (star_rect.bottom > pix_bounds.bottom) {
-        star_rect.offset(0, pix_bounds.bottom - star_rect.bottom);
+    if (_star_rect.top < pix_bounds.top) {
+        _star_rect.offset(0, pix_bounds.top - _star_rect.top);
+    } else if (_star_rect.bottom > pix_bounds.bottom) {
+        _star_rect.offset(0, pix_bounds.bottom - _star_rect.bottom);
     }
-    const Point star = star_rect.center();
-
-    DrawNateVBracket(&pix, star_rect, pix_bounds, gold);
-    // TODO(sfiera): make left and right match.
-    pix.view(Rect(star.h, pix_bounds.top, star.h + 1, star_rect.top)).fill(gold);
-    pix.view(Rect(star.h, star_rect.bottom, star.h + 1, pix_bounds.bottom)).fill(gold);
-    pix.view(Rect(pix_bounds.left, star.v, star_rect.left + 1, star.v + 1)).fill(gold);
-    pix.view(Rect(star_rect.right, star.v, pix_bounds.right, star.v + 1)).fill(gold);
+    _star_rect.offset(_bounds.left, _bounds.top);
 
     _star_map.reset(VideoDriver::driver()->new_sprite("/x/star_map", pix));
 }

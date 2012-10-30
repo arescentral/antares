@@ -70,7 +70,10 @@ class BriefingScreen : public InterfaceScreen {
     mutable interfaceItemType _data_item;
 
     Rect _bounds;
+
     sfz::scoped_ptr<Sprite> _star_map;
+    Rect _star_rect;
+
     sfz::scoped_ptr<Sprite> _system_map;
     sfz::scoped_ptr<Sprite> _brief_point;
     std::vector<inlinePictType> _inline_pict;
