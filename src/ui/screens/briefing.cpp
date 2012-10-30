@@ -84,6 +84,11 @@ void BriefingScreen::become_front() {
 
 void BriefingScreen::draw() const {
     InterfaceScreen::draw();
+    coordPointType corner;
+    int32_t scale;
+    Rect pix_bounds = _bounds.size().as_rect();
+    GetScenarioFullScaleAndCorner(_scenario, 0, &corner, &scale, &pix_bounds);
+
     switch (_briefing_point) {
       case STAR_MAP:
         _star_map->draw(_bounds.left, _bounds.top);
@@ -91,10 +96,12 @@ void BriefingScreen::draw() const {
 
       case BLANK_SYSTEM_MAP:
         _system_map->draw(_bounds.left, _bounds.top);
+        draw_briefing_objects(_bounds.origin(), 32, pix_bounds, corner, scale);
         break;
 
       default:
         _system_map->draw(_bounds.left, _bounds.top);
+        draw_briefing_objects(_bounds.origin(), 32, pix_bounds, corner, scale);
         _brief_point->draw(0, 0);
         draw_interface_item(_data_item);
         vector<inlinePictType> unused;

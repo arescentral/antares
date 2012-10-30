@@ -98,6 +98,7 @@ int32_t evil_scale_by(int32_t value, int32_t scale);
 void SpriteHandlingInit();
 void ResetAllSprites();
 void scale_pix_map(const PixMap& source, PixMap* dest);
+Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t scale);
 void OptScaleSpritePixInPixMap(
         const NatePixTable::Frame& frame, Point where, int32_t scale, Rect *draw_rect,
         const Rect& clip_rect, PixMap* pix);

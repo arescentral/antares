@@ -27,6 +27,7 @@
 #include "game/globals.hpp"
 #include "game/scenario-maker.hpp"
 #include "game/space-object.hpp"
+#include "video/driver.hpp"
 
 using sfz::Exception;
 using sfz::scoped_array;
@@ -452,14 +453,36 @@ struct PixMapRenderer {
     void outline(
             const NatePixTable::Frame& frame, Point where, int32_t scale, Rect* sprite_rect,
             Rect clip_rect, RgbColor outline_color, RgbColor fill_color) const {
-        OutlineScaleSpritePixInPixMap(
-                frame, where, scale, sprite_rect, clip_rect, pix, outline_color, fill_color);
+        *sprite_rect = scale_sprite_rect(frame, where, scale);
+        // OutlineScaleSpritePixInPixMap(
+        //         frame, where, scale, sprite_rect, clip_rect, pix, outline_color, fill_color);
     }
     void draw(
             const NatePixTable::Frame& frame, Point where, int32_t scale,
             Rect* sprite_rect, Rect clip_rect) const {
-        OptScaleSpritePixInPixMap(
-                frame, where, scale, sprite_rect, clip_rect, pix);
+        *sprite_rect = scale_sprite_rect(frame, where, scale);
+        // OptScaleSpritePixInPixMap(
+        //         frame, where, scale, sprite_rect, clip_rect, pix);
+    }
+};
+
+struct DriverRenderer {
+    Point origin;
+    void outline(
+            const NatePixTable::Frame& frame, Point where, int32_t scale, Rect* sprite_rect,
+            Rect clip_rect, RgbColor outline_color, RgbColor fill_color) const {
+        *sprite_rect = scale_sprite_rect(frame, where, scale);
+        Rect draw_rect = *sprite_rect;
+        draw_rect.offset(origin.h, origin.v);
+        frame.sprite().draw_outlined(draw_rect, outline_color, fill_color);
+    }
+    void draw(
+            const NatePixTable::Frame& frame, Point where, int32_t scale,
+            Rect* sprite_rect, Rect clip_rect) const {
+        *sprite_rect = scale_sprite_rect(frame, where, scale);
+        Rect draw_rect = *sprite_rect;
+        draw_rect.offset(origin.h, origin.v);
+        frame.sprite().draw(draw_rect);
     }
 };
 
@@ -467,6 +490,12 @@ void Briefing_Objects_Render(
         PixMap* destmap, long maxSize, Rect *bounds, coordPointType *corner, long scale) {
     PixMapRenderer renderer = {destmap};
     render_briefing_with(renderer, maxSize, bounds, corner, scale);
+}
+
+void draw_briefing_objects(
+        Point origin, long maxSize, Rect bounds, coordPointType corner, long scale) {
+    DriverRenderer renderer = {origin};
+    render_briefing_with(renderer, maxSize, &bounds, &corner, scale);
 }
 
 void BriefPoint_Data_Get(

@@ -373,15 +373,15 @@ def build(bld):
 
     def regtest(name):
         bld.antares_test(
-            target="antares/%s" % name,
+            target="antares/%s" % name.split()[0],
             rule="antares/offscreen %s" % name,
-            expected="test/%s" % name,
+            expected="test/%s" % name.split()[0],
         )
 
     regtest("main-screen")
-    regtest("mission-briefing")
+    regtest("mission-briefing --text")
     regtest("options")
-    regtest("pause")
+    regtest("pause --text")
 
     def replay_test(name):
         bld.antares_test(

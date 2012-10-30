@@ -535,6 +535,15 @@ void scale_pix_map(const PixMap& source, PixMap* dest) {
     }
 }
 
+Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t scale) {
+    Rect draw_rect = Rect(
+            0, 0, evil_scale_by(frame.width(), scale), evil_scale_by(frame.height(), scale));
+    draw_rect.offset(
+            where.h - evil_scale_by(frame.center().h, scale),
+            where.v - evil_scale_by(frame.center().v, scale));
+    return draw_rect;
+}
+
 void OptScaleSpritePixInPixMap(
         const NatePixTable::Frame& frame, Point where, int32_t scale, Rect *draw_rect,
         const Rect& clip_rect, PixMap* pix) {
