@@ -174,6 +174,27 @@ class OpenGlSprite : public Sprite {
         draw_internal(draw_rect);
     }
 
+    virtual void draw_cropped(const Rect& draw_rect, Point origin) const {
+        Rect texture_rect(origin, draw_rect.size());
+        texture_rect.offset(1, 1);
+
+        glUniform1i(_uniforms.color_mode, 2);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
+        gl_check();
+        glBegin(GL_QUADS);
+        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.left, texture_rect.top);
+        glVertex2f(draw_rect.left, draw_rect.top);
+        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.left, texture_rect.bottom);
+        glVertex2f(draw_rect.left, draw_rect.bottom);
+        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.right, texture_rect.bottom);
+        glVertex2f(draw_rect.right, draw_rect.bottom);
+        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.right, texture_rect.top);
+        glVertex2f(draw_rect.right, draw_rect.top);
+        glEnd();
+        gl_check();
+    }
+
     virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const {
         glColor4ub(tint.red, tint.green, tint.blue, 255);
         glUniform1i(_uniforms.color_mode, 3);

@@ -91,6 +91,17 @@ class TextVideoDriver::Sprite : public antares::Sprite {
         _driver.log("draw", args);
     }
 
+    virtual void draw_cropped(const Rect& draw_rect, Point origin) const {
+        if (!world.intersects(draw_rect)) {
+            return;
+        }
+        PrintItem args[] = {
+            draw_rect.left, draw_rect.top, draw_rect.right, draw_rect.bottom,
+            origin.h, origin.v, _name,
+        };
+        _driver.log("crop", args);
+    }
+
     virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const {
         if (!world.intersects(draw_rect)) {
             return;

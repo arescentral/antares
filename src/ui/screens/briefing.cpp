@@ -94,7 +94,7 @@ void BriefingScreen::draw() const {
         {
             const Point star = _star_rect.center();
             RgbColor gold = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
-            _star_map->draw(_bounds.left, _bounds.top);
+            _star_map->draw_cropped(_bounds, Point(0, 2));
             draw_vbracket(_star_rect, gold);
             VideoDriver::driver()->draw_line(
                     Point(star.h, _bounds.top), Point(star.h, _star_rect.top), gold);
@@ -203,15 +203,12 @@ void BriefingScreen::handle_button(int button) {
 
 void BriefingScreen::build_star_map() {
     Picture pict(kStarMapPictId);
+    _star_map.reset(VideoDriver::driver()->new_sprite(format("/pict/{0}", kStarMapPictId), pict));
     Rect pix_bounds = pict.size().as_rect();
     pix_bounds.offset(0, 2);
     pix_bounds.bottom -= 3;
     _bounds = pix_bounds;
     _bounds.center_in(item(MAP_RECT).bounds);
-
-    ArrayPixMap pix(pix_bounds.width(), pix_bounds.height());
-    pix.copy(pict.view(pix_bounds));
-    pix_bounds.offset(0, -2);
 
     _star_rect = Rect(_scenario->star_map_point(), Size(0, 0));
     _star_rect.inset(-kMissionStarPointWidth, -kMissionStarPointHeight);
@@ -229,8 +226,6 @@ void BriefingScreen::build_star_map() {
         _star_rect.offset(0, pix_bounds.bottom - _star_rect.bottom);
     }
     _star_rect.offset(_bounds.left, _bounds.top);
-
-    _star_map.reset(VideoDriver::driver()->new_sprite("/x/star_map", pix));
 }
 
 void BriefingScreen::build_system_map() {

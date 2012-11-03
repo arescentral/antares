@@ -70,6 +70,7 @@ class Sprite {
     virtual ~Sprite();
     virtual sfz::StringSlice name() const = 0;
     virtual void draw(const Rect& draw_rect) const = 0;
+    virtual void draw_cropped(const Rect& draw_rect, Point origin) const = 0;
     virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const = 0;
     virtual void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const = 0;
     virtual void draw_outlined(
