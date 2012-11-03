@@ -84,10 +84,6 @@ void BriefingScreen::become_front() {
 
 void BriefingScreen::draw() const {
     InterfaceScreen::draw();
-    coordPointType corner;
-    int32_t scale;
-    Rect pix_bounds = _bounds.size().as_rect();
-    GetScenarioFullScaleAndCorner(_scenario, 0, &corner, &scale, &pix_bounds);
 
     switch (_briefing_point) {
       case STAR_MAP:
@@ -108,13 +104,11 @@ void BriefingScreen::draw() const {
         break;
 
       case BLANK_SYSTEM_MAP:
-        _system_map->draw(_bounds.left, _bounds.top);
-        draw_briefing_objects(_bounds.origin(), 32, pix_bounds, corner, scale);
+        draw_system_map();
         break;
 
       default:
-        _system_map->draw(_bounds.left, _bounds.top);
-        draw_briefing_objects(_bounds.origin(), 32, pix_bounds, corner, scale);
+        draw_system_map();
         _brief_point->draw(0, 0);
         draw_interface_item(_data_item);
         vector<inlinePictType> unused;
@@ -231,14 +225,15 @@ void BriefingScreen::build_star_map() {
 void BriefingScreen::build_system_map() {
     ArrayPixMap pix(_bounds.width(), _bounds.height());
     Rect pix_bounds = pix.size().as_rect();
+    pix.fill(RgbColor::kClear);
 
     // Draw 500 randomized stars.
     for (int i = 0; i < 500; ++i) {
-        RgbColor star_color;
-        star_color = GetRGBTranslateColorShade(GRAY, Randomize(kVisibleShadeNum) + DARKEST);
-        const int x = pix_bounds.left + Randomize(pix_bounds.width());
-        const int y = pix_bounds.top + Randomize(pix_bounds.height());
-        pix.set(x, y, star_color);
+        Star star;
+        star.shade = Randomize(kVisibleShadeNum);
+        star.location.h = _bounds.left + Randomize(_bounds.width());
+        star.location.v = _bounds.top + Randomize(_bounds.height());
+        _system_stars.push_back(star);
     }
 
     coordPointType corner;
@@ -269,6 +264,21 @@ void BriefingScreen::build_brief_point() {
     } else {
         _brief_point.reset();
     }
+}
+
+void BriefingScreen::draw_system_map() const {
+    for (int i = 0; i < _system_stars.size(); ++i) {
+        const Star& star = _system_stars[i];
+        RgbColor star_color = GetRGBTranslateColorShade(GRAY, star.shade + DARKEST);
+        VideoDriver::driver()->draw_point(star.location, star_color);
+    }
+
+    coordPointType corner;
+    int32_t scale;
+    Rect pix_bounds = _bounds.size().as_rect();
+    GetScenarioFullScaleAndCorner(_scenario, 0, &corner, &scale, &pix_bounds);
+    _system_map->draw(_bounds.left, _bounds.top);
+    draw_briefing_objects(_bounds.origin(), 32, pix_bounds, corner, scale);
 }
 
 void BriefingScreen::show_object_data_key(int index, int key) {

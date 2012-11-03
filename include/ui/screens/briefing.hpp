@@ -61,6 +61,8 @@ class BriefingScreen : public InterfaceScreen {
     void build_system_map();
     void build_brief_point();
 
+    void draw_system_map() const;
+
     void show_object_data_key(int index, int key);
 
     const Scenario* const _scenario;
@@ -74,6 +76,11 @@ class BriefingScreen : public InterfaceScreen {
     sfz::scoped_ptr<Sprite> _star_map;
     Rect _star_rect;
 
+    struct Star {
+        Point location;
+        uint8_t shade;
+    };
+    std::vector<Star> _system_stars;
     sfz::scoped_ptr<Sprite> _system_map;
     sfz::scoped_ptr<Sprite> _brief_point;
     std::vector<inlinePictType> _inline_pict;
