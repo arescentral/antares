@@ -772,21 +772,14 @@ void InstrumentsHandleMouseStillDown() {
     MiniComputerHandleMouseStillDown(where);
 }
 
-void DrawArbitrarySectorLines(coordPointType *corner, int32_t scale, int32_t minSectorSize,
-        Rect *bounds, PixMap* pixBase) {
+void draw_arbitrary_sector_lines(
+        const coordPointType& corner, int32_t scale, int32_t minSectorSize, const Rect& bounds) {
     uint32_t        size, level, x, h, division;
-    Rect        clipRect;
     RgbColor        color;
-
-    clipRect.left = bounds->left;
-    clipRect.right = bounds->right;
-    clipRect.top = bounds->top;
-    clipRect.bottom = bounds->bottom;
 
     size = kSubSectorSize >> 2L;
     level = 1;
-    do
-    {
+    do {
         level <<= 1L;
         size <<= 2L;
         h = size;
@@ -796,65 +789,59 @@ void DrawArbitrarySectorLines(coordPointType *corner, int32_t scale, int32_t min
     level >>= 1L;
     level *= level;
 
-    x = corner->h;
+    x = corner.h;
     x &= size - 1;
     x = size - x;
 
-    division = corner->h + x;
+    division = corner.h + x;
     division >>= kSubSectorShift;
     division &= 0x0000000f;
 
     x *= scale;
     x >>= SHIFT_SCALE;
-    x += bounds->left;
+    x += bounds.left;
 
-    while ((x < implicit_cast<uint32_t>(bounds->right)) && (h > 0)) {
-        if ( !division)
-        {
+    while ((x < implicit_cast<uint32_t>(bounds.right)) && (h > 0)) {
+        if (!division) {
             color = GetRGBTranslateColorShade(GREEN, DARKER);
-        } else if ( !(division & 0x3))
-        {
+        } else if (!(division & 0x3)) {
             color = GetRGBTranslateColorShade(SKY_BLUE, DARKER);
-        } else
-        {
+        } else {
             color = GetRGBTranslateColorShade(BLUE, DARKER);
         }
 
-        pixBase->view(Rect(x, bounds->top, x + 1, bounds->bottom)).fill(color);
+        VideoDriver::driver()->draw_line(
+                Point(x, bounds.top), Point(x, bounds.bottom - 1), color);
         division += level;
         division &= 0x0000000f;
         x += h;
     }
 
-    x = corner->v;
+    x = corner.v;
     x &= size - 1;
     x = size - x;
 
-    division = corner->v + x;
+    division = corner.v + x;
     division >>= kSubSectorShift;
     division &= 0x0000000f;
 
     x *= scale;
     x >>= SHIFT_SCALE;
-    x += bounds->top;
+    x += bounds.top;
 
-    while ((x < implicit_cast<uint32_t>(bounds->bottom)) && (h > 0)) {
-        if ( !division)
-        {
+    while ((x < implicit_cast<uint32_t>(bounds.bottom)) && (h > 0)) {
+        if (!division) {
             color = GetRGBTranslateColorShade(GREEN, DARKER);
-        } else if ( !(division & 0x3))
-        {
+        } else if (!(division & 0x3)) {
             color = GetRGBTranslateColorShade(SKY_BLUE, DARKER);
-        } else
-        {
+        } else {
             color = GetRGBTranslateColorShade(BLUE, DARKER);
         }
 
-        pixBase->view(Rect(bounds->left, x, bounds->right, x + 1)).fill(color);
-
+        VideoDriver::driver()->draw_line(
+                Point(bounds.left, x), Point(bounds.right - 1, x), color);
         division += level;
         division &= 0x0000000f;
-
         x += h;
     }
 }

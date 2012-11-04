@@ -108,11 +108,16 @@ void BriefingScreen::draw() const {
         break;
 
       default:
-        draw_system_map();
-        _brief_point->draw(0, 0);
-        draw_interface_item(_data_item);
-        vector<inlinePictType> unused;
-        draw_text_in_rect(_data_item.bounds, _text, _data_item.style, _data_item.color, unused);
+        {
+            draw_system_map();
+            _brief_point->draw(0, 0);
+            Rect bounds;
+            GetAnyInterfaceItemGraphicBounds(_data_item, &bounds);
+            draw_interface_item(_data_item);
+            vector<inlinePictType> unused;
+            draw_text_in_rect(
+                    _data_item.bounds, _text, _data_item.style, _data_item.color, unused);
+        }
         break;
     }
 }
@@ -239,10 +244,7 @@ void BriefingScreen::build_system_map() {
     coordPointType corner;
     int32_t scale;
     GetScenarioFullScaleAndCorner(_scenario, 0, &corner, &scale, &pix_bounds);
-    DrawArbitrarySectorLines(&corner, scale, 16, &pix_bounds, &pix);
     Briefing_Objects_Render(&pix, 32, &pix_bounds, &corner, scale);
-
-    _system_map.reset(VideoDriver::driver()->new_sprite("/x/system_map", pix));
 }
 
 void BriefingScreen::build_brief_point() {
@@ -277,7 +279,7 @@ void BriefingScreen::draw_system_map() const {
     int32_t scale;
     Rect pix_bounds = _bounds.size().as_rect();
     GetScenarioFullScaleAndCorner(_scenario, 0, &corner, &scale, &pix_bounds);
-    _system_map->draw(_bounds.left, _bounds.top);
+    draw_arbitrary_sector_lines(corner, scale, 16, _bounds);
     draw_briefing_objects(_bounds.origin(), 32, pix_bounds, corner, scale);
 }
 
