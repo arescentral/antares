@@ -27,6 +27,7 @@
 #include "game/globals.hpp"
 #include "game/scenario-maker.hpp"
 #include "game/space-object.hpp"
+#include "video/driver.hpp"
 
 using sfz::Exception;
 using sfz::scoped_array;
@@ -314,8 +315,10 @@ void SpriteBounds_Get(const NatePixTable::Frame& frame, Point where, long scale,
     bounds->bottom = tlong;
 }
 
-void Briefing_Objects_Render(
-        PixMap* destmap, long maxSize, Rect *bounds, coordPointType *corner, long scale) {
+template <typename Renderer>
+static void render_briefing_with(
+        const Renderer& renderer, long maxSize, Rect *bounds,
+        coordPointType *corner, long scale) {
     long        count, thisScale, gridWidth, gridHeight, i, j, color,
                 objectNum;
     Point       where;
@@ -391,8 +394,7 @@ void Briefing_Objects_Render(
                         color = RED;
                     }
 
-                    OptScaleSpritePixInPixMap(
-                            *frame, where, thisScale, &spriteRect, clipRect, destmap);
+                    renderer.draw(*frame, where, thisScale, &spriteRect, clipRect);
 
                     sBounds->bounds = spriteRect;
                     sBounds->objectIndex = count;
@@ -428,8 +430,8 @@ void Briefing_Objects_Render(
                     const RgbColor light_color = GetRGBTranslateColorShade(color, LIGHT);
                     const RgbColor dark_color = GetRGBTranslateColorShade(color, DARK);
 
-                    OutlineScaleSpritePixInPixMap(
-                            *frame, where, thisScale, &spriteRect, clipRect, destmap,
+                    renderer.outline(
+                            *frame, where, thisScale, &spriteRect, clipRect,
                             light_color, dark_color);
 
                     sBounds->bounds = spriteRect;
@@ -444,6 +446,56 @@ void Briefing_Objects_Render(
     if (gridCells != NULL) {
         delete[] gridCells;
     }
+}
+
+struct PixMapRenderer {
+    PixMap* pix;
+    void outline(
+            const NatePixTable::Frame& frame, Point where, int32_t scale, Rect* sprite_rect,
+            Rect clip_rect, RgbColor outline_color, RgbColor fill_color) const {
+        *sprite_rect = scale_sprite_rect(frame, where, scale);
+        // OutlineScaleSpritePixInPixMap(
+        //         frame, where, scale, sprite_rect, clip_rect, pix, outline_color, fill_color);
+    }
+    void draw(
+            const NatePixTable::Frame& frame, Point where, int32_t scale,
+            Rect* sprite_rect, Rect clip_rect) const {
+        *sprite_rect = scale_sprite_rect(frame, where, scale);
+        // OptScaleSpritePixInPixMap(
+        //         frame, where, scale, sprite_rect, clip_rect, pix);
+    }
+};
+
+struct DriverRenderer {
+    Point origin;
+    void outline(
+            const NatePixTable::Frame& frame, Point where, int32_t scale, Rect* sprite_rect,
+            Rect clip_rect, RgbColor outline_color, RgbColor fill_color) const {
+        *sprite_rect = scale_sprite_rect(frame, where, scale);
+        Rect draw_rect = *sprite_rect;
+        draw_rect.offset(origin.h, origin.v);
+        frame.sprite().draw_outlined(draw_rect, outline_color, fill_color);
+    }
+    void draw(
+            const NatePixTable::Frame& frame, Point where, int32_t scale,
+            Rect* sprite_rect, Rect clip_rect) const {
+        *sprite_rect = scale_sprite_rect(frame, where, scale);
+        Rect draw_rect = *sprite_rect;
+        draw_rect.offset(origin.h, origin.v);
+        frame.sprite().draw(draw_rect);
+    }
+};
+
+void Briefing_Objects_Render(
+        PixMap* destmap, long maxSize, Rect *bounds, coordPointType *corner, long scale) {
+    PixMapRenderer renderer = {destmap};
+    render_briefing_with(renderer, maxSize, bounds, corner, scale);
+}
+
+void draw_briefing_objects(
+        Point origin, long maxSize, Rect bounds, coordPointType corner, long scale) {
+    DriverRenderer renderer = {origin};
+    render_briefing_with(renderer, maxSize, &bounds, &corner, scale);
 }
 
 void BriefPoint_Data_Get(

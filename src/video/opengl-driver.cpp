@@ -51,6 +51,8 @@ static const char kShaderColorModeUniform[] = "color_mode";
 static const char kShaderSpriteUniform[] = "sprite";
 static const char kShaderStaticImageUniform[] = "static_image";
 static const char kShaderStaticFractionUniform[] = "static_fraction";
+static const char kShaderUnitUniform[] = "unit";
+static const char kShaderOutlineColorUniform[] = "outline_color";
 static const char kShaderTUniform[] = "t";
 static const GLchar* kShaderSource =
     "#version 120\n"
@@ -58,6 +60,8 @@ static const GLchar* kShaderSource =
     "uniform sampler2DRect sprite;\n"
     "uniform sampler2D static_image;\n"
     "uniform float static_fraction;\n"
+    "uniform vec2 unit;\n"
+    "uniform vec4 outline_color;\n"
     "uniform int t;\n"
     "\n"
     "void main() {\n"
@@ -83,6 +87,23 @@ static const GLchar* kShaderSource =
     "            gl_FragColor = gl_Color * sprite_alpha;\n"
     "        } else {\n"
     "            gl_FragColor = sprite_color;\n"
+    "        }\n"
+    "    } else if (color_mode == 5) {\n"
+    "        float neighborhood =\n"
+    "                texture2DRect(sprite, uv + vec2(-unit.s, -unit.t)).w +\n"
+    "                texture2DRect(sprite, uv + vec2(-unit.s,       0)).w +\n"
+    "                texture2DRect(sprite, uv + vec2(-unit.s,  unit.t)).w +\n"
+    "                texture2DRect(sprite, uv + vec2(      0, -unit.t)).w +\n"
+    "                texture2DRect(sprite, uv + vec2(      0,  unit.t)).w +\n"
+    "                texture2DRect(sprite, uv + vec2( unit.s, -unit.t)).w +\n"
+    "                texture2DRect(sprite, uv + vec2( unit.s,       0)).w +\n"
+    "                texture2DRect(sprite, uv + vec2( unit.s,  unit.t)).w;\n"
+    "        if (sprite_color.w > (neighborhood / 8)) {\n"
+    "            gl_FragColor = outline_color;\n"
+    "        } else if (sprite_color.w > 0) {\n"
+    "            gl_FragColor = gl_Color;\n"
+    "        } else {\n"
+    "            gl_FragColor = vec4(0, 0, 0, 0);\n"
     "        }\n"
     "    }\n"
     "}\n";
@@ -122,6 +143,8 @@ class OpenGlSprite : public Sprite {
         glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
         glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_RECTANGLE_EXT, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 #if defined(__LITTLE_ENDIAN__)
         GLenum type = GL_UNSIGNED_INT_8_8_8_8;
 #elif defined(__BIG_ENDIAN__)
@@ -129,22 +152,17 @@ class OpenGlSprite : public Sprite {
 #else
 #error "Couldn't determine endianness of platform"
 #endif
-        // OpenGL does not have a notion of row_bytes separate from
-        // width.  If they are equal for the input image, pass the data
-        // from the source image directly to OpenGL, as an optimization.
-        // Otherwise, create an ArrayPixMap from it, which always has
-        // this invariant.
-        if (image.row_bytes() == image.size().width) {
-            glTexImage2D(
-                    GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA, _size.width, _size.height,
-                    0, GL_BGRA, type, image.bytes());
-        } else {
-            ArrayPixMap copy(image.size());
-            copy.copy(image);
-            glTexImage2D(
-                    GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA, _size.width, _size.height,
-                    0, GL_BGRA, type, copy.bytes());
-        }
+
+        // Add a 1-pixel clear border.  Color mode 5 (outline) won't work unless we do this.
+        Size size = image.size();
+        size.width += 2;
+        size.height += 2;
+        ArrayPixMap copy(size);
+        copy.fill(RgbColor::kClear);
+        copy.view(Rect(1, 1, size.width - 1, size.height - 1)).copy(image);
+        glTexImage2D(
+                GL_TEXTURE_RECTANGLE_EXT, 0, GL_RGBA, size.width, size.height,
+                0, GL_BGRA, type, copy.bytes());
     }
 
     virtual StringSlice name() const {
@@ -154,6 +172,27 @@ class OpenGlSprite : public Sprite {
     virtual void draw(const Rect& draw_rect) const {
         glUniform1i(_uniforms.color_mode, 2);
         draw_internal(draw_rect);
+    }
+
+    virtual void draw_cropped(const Rect& draw_rect, Point origin) const {
+        Rect texture_rect(origin, draw_rect.size());
+        texture_rect.offset(1, 1);
+
+        glUniform1i(_uniforms.color_mode, 2);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
+        gl_check();
+        glBegin(GL_QUADS);
+        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.left, texture_rect.top);
+        glVertex2f(draw_rect.left, draw_rect.top);
+        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.left, texture_rect.bottom);
+        glVertex2f(draw_rect.left, draw_rect.bottom);
+        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.right, texture_rect.bottom);
+        glVertex2f(draw_rect.right, draw_rect.bottom);
+        glMultiTexCoord2f(GL_TEXTURE0, texture_rect.right, texture_rect.top);
+        glVertex2f(draw_rect.right, draw_rect.top);
+        glEnd();
+        gl_check();
     }
 
     virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const {
@@ -169,6 +208,21 @@ class OpenGlSprite : public Sprite {
         draw_internal(draw_rect);
     }
 
+    virtual void draw_outlined(
+            const Rect& draw_rect, const RgbColor& outline_color,
+            const RgbColor& fill_color) const {
+        glUniform1i(_uniforms.color_mode, 5);
+        glUniform2f(
+                _uniforms.unit,
+                double(_size.width) / draw_rect.width(),
+                double(_size.height) / draw_rect.height());
+        glColor4ub(fill_color.red, fill_color.green, fill_color.blue, fill_color.alpha);
+        glUniform4f(
+                _uniforms.outline_color, outline_color.red / 255.0, outline_color.green / 255.0,
+                outline_color.blue / 255.0, outline_color.alpha / 255.0);
+        draw_internal(draw_rect);
+    }
+
     virtual const Size& size() const {
         return _size;
     }
@@ -181,16 +235,16 @@ class OpenGlSprite : public Sprite {
         glBindTexture(GL_TEXTURE_RECTANGLE_EXT, _texture.id);
         gl_check();
         glBegin(GL_QUADS);
-        glMultiTexCoord2f(GL_TEXTURE0, 0, 0);
+        glMultiTexCoord2f(GL_TEXTURE0, 1, 1);
         glMultiTexCoord2f(GL_TEXTURE1, draw_rect.left, draw_rect.top);
         glVertex2f(draw_rect.left, draw_rect.top);
-        glMultiTexCoord2f(GL_TEXTURE0, 0, h);
+        glMultiTexCoord2f(GL_TEXTURE0, 1, h + 1);
         glMultiTexCoord2f(GL_TEXTURE1, draw_rect.left, draw_rect.bottom);
         glVertex2f(draw_rect.left, draw_rect.bottom);
-        glMultiTexCoord2f(GL_TEXTURE0, w, h);
+        glMultiTexCoord2f(GL_TEXTURE0, w + 1, h + 1);
         glMultiTexCoord2f(GL_TEXTURE1, draw_rect.right, draw_rect.bottom);
         glVertex2f(draw_rect.right, draw_rect.bottom);
-        glMultiTexCoord2f(GL_TEXTURE0, w, 0);
+        glMultiTexCoord2f(GL_TEXTURE0, w + 1, 1);
         glMultiTexCoord2f(GL_TEXTURE1, draw_rect.right, draw_rect.top);
         glVertex2f(draw_rect.right, draw_rect.top);
         glEnd();
@@ -362,6 +416,8 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     driver._uniforms.sprite = glGetUniformLocation(program, kShaderSpriteUniform);
     driver._uniforms.static_image = glGetUniformLocation(program, kShaderStaticImageUniform);
     driver._uniforms.static_fraction = glGetUniformLocation(program, kShaderStaticFractionUniform);
+    driver._uniforms.unit = glGetUniformLocation(program, kShaderUnitUniform);
+    driver._uniforms.outline_color = glGetUniformLocation(program, kShaderOutlineColorUniform);
     driver._uniforms.t = glGetUniformLocation(program, kShaderTUniform);
     glUseProgram(program);
     gl_check();

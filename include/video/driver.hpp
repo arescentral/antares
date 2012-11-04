@@ -70,8 +70,12 @@ class Sprite {
     virtual ~Sprite();
     virtual sfz::StringSlice name() const = 0;
     virtual void draw(const Rect& draw_rect) const = 0;
+    virtual void draw_cropped(const Rect& draw_rect, Point origin) const = 0;
     virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const = 0;
     virtual void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const = 0;
+    virtual void draw_outlined(
+            const Rect& draw_rect, const RgbColor& outline_color,
+            const RgbColor& fill_color) const = 0;
     virtual const Size& size() const = 0;
 
     virtual void draw(int32_t x, int32_t y) const {
@@ -82,6 +86,11 @@ class Sprite {
     }
     virtual void draw_static(int32_t x, int32_t y, const RgbColor& color, uint8_t frac) const {
         draw_static(rect(x, y), color, frac);
+    }
+    virtual void draw_outlined(
+            int32_t x, int32_t y, const RgbColor& outline_color,
+            const RgbColor& fill_color) const {
+        draw_outlined(rect(x, y), outline_color, fill_color);
     }
 
   private:

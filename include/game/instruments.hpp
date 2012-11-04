@@ -41,7 +41,8 @@ void InstrumentsHandleClick();
 void InstrumentsHandleDoubleClick();
 void InstrumentsHandleMouseUp();
 void InstrumentsHandleMouseStillDown();
-void DrawArbitrarySectorLines(coordPointType *, int32_t, int32_t, Rect *, PixMap*);
+void draw_arbitrary_sector_lines(
+        const coordPointType& corner, int32_t scale, int32_t minSectorSize, const Rect& bounds);
 void GetArbitrarySingleSectorBounds(coordPointType*, coordPointType*, int32_t, int32_t, Rect*,
         Rect*);
 

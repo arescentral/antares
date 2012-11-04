@@ -20,6 +20,7 @@
 #define ANTARES_DRAWING_BRIEFING_HPP_
 
 #include "drawing/shapes.hpp"
+#include "math/geometry.hpp"
 
 namespace antares {
 
@@ -27,6 +28,8 @@ struct Scenario;
 
 void Briefing_Objects_Render(
         PixMap* destmap, long maxSize, Rect *bounds, coordPointType *corner, long scale);
+void draw_briefing_objects(
+        Point origin, long maxSize, Rect bounds, coordPointType corner, long scale);
 
 void BriefPoint_Data_Get(
         long whichPoint, const Scenario* scenario, long *headerID, long *headerNumber,

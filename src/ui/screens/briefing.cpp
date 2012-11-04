@@ -49,6 +49,7 @@ const int kBriefingScreenResId = 6000;
 const int kStarMapPictId = 8000;
 const int kMissionStarPointWidth = 16;
 const int kMissionStarPointHeight = 12;
+const int32_t kMissionDataHiliteColor = GOLD;
 
 }  // namespace
 
@@ -84,21 +85,31 @@ void BriefingScreen::become_front() {
 
 void BriefingScreen::draw() const {
     InterfaceScreen::draw();
+
     switch (_briefing_point) {
       case STAR_MAP:
-        _star_map->draw(_bounds.left, _bounds.top);
+        {
+            const Point star = _star_rect.center();
+            RgbColor gold = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
+            _star_map->draw_cropped(_bounds, Point(0, 2));
+            draw_vbracket(_star_rect, gold);
+            VideoDriver::driver()->draw_line(
+                    Point(star.h, _bounds.top), Point(star.h, _star_rect.top), gold);
+            VideoDriver::driver()->draw_line(
+                    Point(star.h, _star_rect.bottom), Point(star.h, _bounds.bottom), gold);
+            VideoDriver::driver()->draw_line(
+                    Point(_bounds.left, star.v), Point(_star_rect.left, star.v), gold);
+            VideoDriver::driver()->draw_line(
+                    Point(_star_rect.right - 1, star.v), Point(_bounds.right, star.v), gold);
+        }
         break;
 
       case BLANK_SYSTEM_MAP:
-        _system_map->draw(_bounds.left, _bounds.top);
+        draw_system_map();
         break;
 
       default:
-        _system_map->draw(_bounds.left, _bounds.top);
-        _brief_point->draw(0, 0);
-        draw_interface_item(_data_item);
-        vector<inlinePictType> unused;
-        draw_text_in_rect(_data_item.bounds, _text, _data_item.style, _data_item.color, unused);
+        draw_brief_point();
         break;
     }
 }
@@ -183,63 +194,49 @@ void BriefingScreen::handle_button(int button) {
 
 void BriefingScreen::build_star_map() {
     Picture pict(kStarMapPictId);
+    _star_map.reset(VideoDriver::driver()->new_sprite(format("/pict/{0}", kStarMapPictId), pict));
     Rect pix_bounds = pict.size().as_rect();
     pix_bounds.offset(0, 2);
     pix_bounds.bottom -= 3;
     _bounds = pix_bounds;
     _bounds.center_in(item(MAP_RECT).bounds);
 
-    ArrayPixMap pix(pix_bounds.width(), pix_bounds.height());
-    pix.copy(pict.view(pix_bounds));
-    pix_bounds.offset(0, -2);
-
-    Rect star_rect(_scenario->star_map_point(), Size(0, 0));
-    star_rect.inset(-kMissionStarPointWidth, -kMissionStarPointHeight);
+    _star_rect = Rect(_scenario->star_map_point(), Size(0, 0));
+    _star_rect.inset(-kMissionStarPointWidth, -kMissionStarPointHeight);
     RgbColor gold = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
 
-    // Move `star_rect` so that it is inside of `pix_bounds`.
-    if (star_rect.left < pix_bounds.left) {
-        star_rect.offset(pix_bounds.left - star_rect.left, 0);
-    } else if (star_rect.right > pix_bounds.right) {
-        star_rect.offset(pix_bounds.right - star_rect.right, 0);
+    // Move `_star_rect` so that it is inside of `pix_bounds`.
+    if (_star_rect.left < pix_bounds.left) {
+        _star_rect.offset(pix_bounds.left - _star_rect.left, 0);
+    } else if (_star_rect.right > pix_bounds.right) {
+        _star_rect.offset(pix_bounds.right - _star_rect.right, 0);
     }
-    if (star_rect.top < pix_bounds.top) {
-        star_rect.offset(0, pix_bounds.top - star_rect.top);
-    } else if (star_rect.bottom > pix_bounds.bottom) {
-        star_rect.offset(0, pix_bounds.bottom - star_rect.bottom);
+    if (_star_rect.top < pix_bounds.top) {
+        _star_rect.offset(0, pix_bounds.top - _star_rect.top);
+    } else if (_star_rect.bottom > pix_bounds.bottom) {
+        _star_rect.offset(0, pix_bounds.bottom - _star_rect.bottom);
     }
-    const Point star = star_rect.center();
-
-    DrawNateVBracket(&pix, star_rect, pix_bounds, gold);
-    // TODO(sfiera): make left and right match.
-    pix.view(Rect(star.h, pix_bounds.top, star.h + 1, star_rect.top)).fill(gold);
-    pix.view(Rect(star.h, star_rect.bottom, star.h + 1, pix_bounds.bottom)).fill(gold);
-    pix.view(Rect(pix_bounds.left, star.v, star_rect.left + 1, star.v + 1)).fill(gold);
-    pix.view(Rect(star_rect.right, star.v, pix_bounds.right, star.v + 1)).fill(gold);
-
-    _star_map.reset(VideoDriver::driver()->new_sprite("/x/star_map", pix));
+    _star_rect.offset(_bounds.left, _bounds.top);
 }
 
 void BriefingScreen::build_system_map() {
     ArrayPixMap pix(_bounds.width(), _bounds.height());
     Rect pix_bounds = pix.size().as_rect();
+    pix.fill(RgbColor::kClear);
 
     // Draw 500 randomized stars.
     for (int i = 0; i < 500; ++i) {
-        RgbColor star_color;
-        star_color = GetRGBTranslateColorShade(GRAY, Randomize(kVisibleShadeNum) + DARKEST);
-        const int x = pix_bounds.left + Randomize(pix_bounds.width());
-        const int y = pix_bounds.top + Randomize(pix_bounds.height());
-        pix.set(x, y, star_color);
+        Star star;
+        star.shade = Randomize(kVisibleShadeNum);
+        star.location.h = _bounds.left + Randomize(_bounds.width());
+        star.location.v = _bounds.top + Randomize(_bounds.height());
+        _system_stars.push_back(star);
     }
 
     coordPointType corner;
     int32_t scale;
     GetScenarioFullScaleAndCorner(_scenario, 0, &corner, &scale, &pix_bounds);
-    DrawArbitrarySectorLines(&corner, scale, 16, &pix_bounds, &pix);
     Briefing_Objects_Render(&pix, 32, &pix_bounds, &corner, scale);
-
-    _system_map.reset(VideoDriver::driver()->new_sprite("/x/system_map", pix));
 }
 
 void BriefingScreen::build_brief_point() {
@@ -251,16 +248,65 @@ void BriefingScreen::build_brief_point() {
 
         vector<inlinePictType> inline_pict;
 
-        ArrayPixMap pix(world.width(), world.height());
-        pix.fill(RgbColor::kClear);
-        UpdateMissionBriefPoint(&_data_item, _briefing_point, _scenario, &corner, scale,
-                &map_rect, inline_pict, &pix, _text);
-        _brief_point.reset(VideoDriver::driver()->new_sprite(
-                    format("/x/brief_point/{0}", _briefing_point), pix));
+        update_mission_brief_point(
+                &_data_item, _briefing_point, _scenario, &corner, scale, &map_rect, inline_pict,
+                _highlight_rect, _highlight_lines, _text);
         swap(inline_pict, _inline_pict);
-    } else {
-        _brief_point.reset();
     }
+}
+
+void BriefingScreen::draw_system_map() const {
+    for (int i = 0; i < _system_stars.size(); ++i) {
+        const Star& star = _system_stars[i];
+        RgbColor star_color = GetRGBTranslateColorShade(GRAY, star.shade + DARKEST);
+        VideoDriver::driver()->draw_point(star.location, star_color);
+    }
+
+    coordPointType corner;
+    int32_t scale;
+    Rect pix_bounds = _bounds.size().as_rect();
+    GetScenarioFullScaleAndCorner(_scenario, 0, &corner, &scale, &pix_bounds);
+    draw_arbitrary_sector_lines(corner, scale, 16, _bounds);
+    draw_briefing_objects(_bounds.origin(), 32, pix_bounds, corner, scale);
+}
+
+void BriefingScreen::draw_brief_point() const {
+    draw_system_map();
+
+    if (!_highlight_rect.empty()) {
+        const RgbColor very_light = GetRGBTranslateColorShade(kMissionDataHiliteColor, VERY_LIGHT);
+        VideoDriver::driver()->draw_line(
+                Point(_highlight_rect.left, _highlight_rect.top),
+                Point(_highlight_rect.right - 1, _highlight_rect.top),
+                very_light);
+        VideoDriver::driver()->draw_line(
+                Point(_highlight_rect.right - 1, _highlight_rect.top),
+                Point(_highlight_rect.right - 1, _highlight_rect.bottom - 1),
+                very_light);
+        VideoDriver::driver()->draw_line(
+                Point(_highlight_rect.right - 1, _highlight_rect.bottom - 1),
+                Point(_highlight_rect.left, _highlight_rect.bottom - 1),
+                very_light);
+        VideoDriver::driver()->draw_line(
+                Point(_highlight_rect.left, _highlight_rect.bottom - 1),
+                Point(_highlight_rect.left, _highlight_rect.top),
+                very_light);
+
+        const RgbColor medium = GetRGBTranslateColorShade(kMissionDataHiliteColor, MEDIUM);
+        for (size_t i = 0; i < _highlight_lines.size(); ++i) {
+            Point p1 = _highlight_lines[i].first;
+            Point p2 = _highlight_lines[i].second;
+            VideoDriver::driver()->draw_line(p1, p2, medium);
+        }
+    }
+
+    Rect bounds;
+    GetAnyInterfaceItemGraphicBounds(_data_item, &bounds);
+    VideoDriver::driver()->fill_rect(bounds, RgbColor::kBlack);
+    draw_interface_item(_data_item);
+    vector<inlinePictType> unused;
+    draw_text_in_rect(
+            _data_item.bounds, _text, _data_item.style, _data_item.color, unused);
 }
 
 void BriefingScreen::show_object_data_key(int index, int key) {

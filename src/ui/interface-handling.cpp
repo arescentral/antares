@@ -36,8 +36,6 @@
 #include "drawing/briefing.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
-#include "drawing/pix-map.hpp"
-#include "drawing/pix-table.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/instruments.hpp"
@@ -63,8 +61,10 @@ using sfz::StringSlice;
 using sfz::read;
 using sfz::scoped_array;
 using sfz::scoped_ptr;
-using std::min;
+using std::make_pair;
 using std::max;
+using std::min;
+using std::pair;
 using std::vector;
 
 namespace macroman = sfz::macroman;
@@ -91,7 +91,6 @@ const int32_t kMissionDataVBuffer       = 40;
 const int32_t kMissionDataTopBuffer     = 30;
 const int32_t kMissionDataBottomBuffer  = 15;
 const int32_t kMissionDataHBuffer       = 41;
-const int32_t kMissionDataHiliteColor   = GOLD;
 const int32_t kMissionLineHJog          = 10;
 const int32_t kMissionBriefPointOffset  = 2;
 
@@ -163,10 +162,10 @@ bool BothCommandAndQ() {
     return command && q;
 }
 
-void UpdateMissionBriefPoint(
+void update_mission_brief_point(
         interfaceItemType *dataItem, long whichBriefPoint, const Scenario* scenario,
         coordPointType *corner, long scale, Rect *bounds, vector<inlinePictType>& inlinePict,
-        PixMap* pix, String& text) {
+        Rect& highlight_rect, vector<pair<Point, Point> >& lines, String& text) {
     if (whichBriefPoint < kMissionBriefPointOffset) {
         // No longer handled here.
         return;
@@ -220,52 +219,50 @@ void UpdateMissionBriefPoint(
             dataItem->bounds.left = dataItem->bounds.right - kMissionDataWidth;
         }
 
-        const RgbColor very_light = GetRGBTranslateColorShade(kMissionDataHiliteColor, VERY_LIGHT);
         hiliteBounds.right++;
         hiliteBounds.bottom++;
-        FrameRect(pix, hiliteBounds, very_light);
-        const RgbColor color = GetRGBTranslateColorShade(kMissionDataHiliteColor, MEDIUM);
+        highlight_rect = hiliteBounds;
         Rect newRect;
         GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
+        lines.clear();
         if (dataItem->bounds.right < hiliteBounds.left) {
             Point p1(hiliteBounds.left, hiliteBounds.top);
             Point p2(newRect.right + kMissionLineHJog, hiliteBounds.top);
             Point p3(newRect.right + kMissionLineHJog, newRect.top);
             Point p4(newRect.right + 2, newRect.top);
-            pix->view(Rect(min(p1.h, p2.h), p2.v, max(p1.h, p2.h) + 1, p1.v + 1)).fill(color);
-            pix->view(Rect(p3.h, p3.v, p2.h + 1, p2.v + 1)).fill(color);
-            pix->view(Rect(p4.h, p4.v, p3.h + 1, p3.v + 1)).fill(color);
+            lines.push_back(make_pair(p1, p2));
+            lines.push_back(make_pair(p2, p3));
+            lines.push_back(make_pair(p3, p4));
 
             Point p5(hiliteBounds.left, hiliteBounds.bottom - 1);
             Point p6(newRect.right + kMissionLineHJog, hiliteBounds.bottom - 1);
             Point p7(newRect.right + kMissionLineHJog, newRect.bottom - 1);
             Point p8(newRect.right + 2, newRect.bottom - 1);
-            pix->view(Rect(min(p5.h, p6.h), p5.v, max(p5.h, p6.h) + 1, p6.v + 1)).fill(color);
-            pix->view(Rect(p6.h, p6.v, p7.h + 1, p7.v + 1)).fill(color);
-            pix->view(Rect(p8.h, p8.v, p7.h + 1, p7.v + 1)).fill(color);
+            lines.push_back(make_pair(p5, p6));
+            lines.push_back(make_pair(p6, p7));
+            lines.push_back(make_pair(p7, p8));
         } else {
             Point p1(hiliteBounds.right, hiliteBounds.top);
             Point p2(newRect.left - kMissionLineHJog, hiliteBounds.top);
             Point p3(newRect.left - kMissionLineHJog, newRect.top);
             Point p4(newRect.left - 3, newRect.top);
-            pix->view(Rect(min(p1.h, p2.h), p2.v, max(p1.h, p2.h) + 1, p1.v + 1)).fill(color);
-            pix->view(Rect(p3.h, p3.v, p2.h + 1, p2.v + 1)).fill(color);
-            pix->view(Rect(p3.h, p3.v, p4.h + 1, p4.v + 1)).fill(color);
+            lines.push_back(make_pair(p1, p2));
+            lines.push_back(make_pair(p2, p3));
+            lines.push_back(make_pair(p3, p4));
 
             Point p5(hiliteBounds.right, hiliteBounds.bottom - 1);
             Point p6(newRect.left - kMissionLineHJog, hiliteBounds.bottom - 1);
             Point p7(newRect.left - kMissionLineHJog, newRect.bottom - 1);
             Point p8(newRect.left - 3, newRect.bottom - 1);
-            pix->view(Rect(min(p5.h, p6.h), p6.v, max(p5.h, p6.h) + 1, p5.v + 1)).fill(color);
-            pix->view(Rect(p6.h, p6.v, p7.h + 1, p7.v + 1)).fill(color);
-            pix->view(Rect(p7.h, p7.v, p8.h + 1, p8.v + 1)).fill(color);
+            lines.push_back(make_pair(p5, p6));
+            lines.push_back(make_pair(p6, p7));
+            lines.push_back(make_pair(p7, p8));
         }
     }
     dataItem->item.labeledRect.label.stringID = headerID;
     dataItem->item.labeledRect.label.stringNumber = headerNumber;
     Rect newRect;
     GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
-    pix->view(newRect).fill(RgbColor::kBlack);
     populate_inline_picts(dataItem->bounds, text, dataItem->style, inlinePict);
 }
 
