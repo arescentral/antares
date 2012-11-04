@@ -144,22 +144,6 @@ void FrameRect(PixMap* pix, const Rect& r, const RgbColor& color) {
     DrawLine(pix, Point(r.right - 1, r.top), Point(r.left, r.top), color);
 }
 
-void DrawNateRectVScan(PixMap* pix, Rect bounds, const RgbColor& color, bool invert) {
-    clip_rect(&bounds, from_origin(pix->size().as_rect()));
-    if (bounds.width() < 0 || bounds.height() < 0) {
-        return;
-    }
-
-    for (int i = bounds.top; i < bounds.bottom; ++i) {
-        RgbColor* bytes = pix->mutable_row(i);
-        for (int j = bounds.left; j < bounds.right; ++j) {
-            if (implicit_cast<bool>((i ^ j) & 0x1) != invert) {
-                bytes[j] = color;
-            }
-        }
-    }
-}
-
 // must be square
 void DrawNateTriangleUpClipped(PixMap *destPix, const RgbColor& color) {
     long count;
