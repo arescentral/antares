@@ -49,6 +49,7 @@ const int kBriefingScreenResId = 6000;
 const int kStarMapPictId = 8000;
 const int kMissionStarPointWidth = 16;
 const int kMissionStarPointHeight = 12;
+const int32_t kMissionDataHiliteColor = GOLD;
 
 }  // namespace
 
@@ -108,16 +109,7 @@ void BriefingScreen::draw() const {
         break;
 
       default:
-        {
-            draw_system_map();
-            _brief_point->draw(0, 0);
-            Rect bounds;
-            GetAnyInterfaceItemGraphicBounds(_data_item, &bounds);
-            draw_interface_item(_data_item);
-            vector<inlinePictType> unused;
-            draw_text_in_rect(
-                    _data_item.bounds, _text, _data_item.style, _data_item.color, unused);
-        }
+        draw_brief_point();
         break;
     }
 }
@@ -256,15 +248,10 @@ void BriefingScreen::build_brief_point() {
 
         vector<inlinePictType> inline_pict;
 
-        ArrayPixMap pix(world.width(), world.height());
-        pix.fill(RgbColor::kClear);
-        UpdateMissionBriefPoint(&_data_item, _briefing_point, _scenario, &corner, scale,
-                &map_rect, inline_pict, &pix, _text);
-        _brief_point.reset(VideoDriver::driver()->new_sprite(
-                    format("/x/brief_point/{0}", _briefing_point), pix));
+        update_mission_brief_point(
+                &_data_item, _briefing_point, _scenario, &corner, scale, &map_rect, inline_pict,
+                _highlight_rect, _highlight_lines, _text);
         swap(inline_pict, _inline_pict);
-    } else {
-        _brief_point.reset();
     }
 }
 
@@ -281,6 +268,45 @@ void BriefingScreen::draw_system_map() const {
     GetScenarioFullScaleAndCorner(_scenario, 0, &corner, &scale, &pix_bounds);
     draw_arbitrary_sector_lines(corner, scale, 16, _bounds);
     draw_briefing_objects(_bounds.origin(), 32, pix_bounds, corner, scale);
+}
+
+void BriefingScreen::draw_brief_point() const {
+    draw_system_map();
+
+    if (!_highlight_rect.empty()) {
+        const RgbColor very_light = GetRGBTranslateColorShade(kMissionDataHiliteColor, VERY_LIGHT);
+        VideoDriver::driver()->draw_line(
+                Point(_highlight_rect.left, _highlight_rect.top),
+                Point(_highlight_rect.right - 1, _highlight_rect.top),
+                very_light);
+        VideoDriver::driver()->draw_line(
+                Point(_highlight_rect.right - 1, _highlight_rect.top),
+                Point(_highlight_rect.right - 1, _highlight_rect.bottom - 1),
+                very_light);
+        VideoDriver::driver()->draw_line(
+                Point(_highlight_rect.right - 1, _highlight_rect.bottom - 1),
+                Point(_highlight_rect.left, _highlight_rect.bottom - 1),
+                very_light);
+        VideoDriver::driver()->draw_line(
+                Point(_highlight_rect.left, _highlight_rect.bottom - 1),
+                Point(_highlight_rect.left, _highlight_rect.top),
+                very_light);
+
+        const RgbColor medium = GetRGBTranslateColorShade(kMissionDataHiliteColor, MEDIUM);
+        for (size_t i = 0; i < _highlight_lines.size(); ++i) {
+            Point p1 = _highlight_lines[i].first;
+            Point p2 = _highlight_lines[i].second;
+            VideoDriver::driver()->draw_line(p1, p2, medium);
+        }
+    }
+
+    Rect bounds;
+    GetAnyInterfaceItemGraphicBounds(_data_item, &bounds);
+    VideoDriver::driver()->fill_rect(bounds, RgbColor::kBlack);
+    draw_interface_item(_data_item);
+    vector<inlinePictType> unused;
+    draw_text_in_rect(
+            _data_item.bounds, _text, _data_item.style, _data_item.color, unused);
 }
 
 void BriefingScreen::show_object_data_key(int index, int key) {

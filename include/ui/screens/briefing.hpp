@@ -62,6 +62,7 @@ class BriefingScreen : public InterfaceScreen {
     void build_brief_point();
 
     void draw_system_map() const;
+    void draw_brief_point() const;
 
     void show_object_data_key(int index, int key);
 
@@ -81,9 +82,9 @@ class BriefingScreen : public InterfaceScreen {
         uint8_t shade;
     };
     std::vector<Star> _system_stars;
-    sfz::scoped_ptr<Sprite> _system_map;
-    sfz::scoped_ptr<Sprite> _brief_point;
     std::vector<inlinePictType> _inline_pict;
+    Rect _highlight_rect;
+    std::vector<std::pair<Point, Point> > _highlight_lines;
     sfz::String _text;
 
     DISALLOW_COPY_AND_ASSIGN(BriefingScreen);
