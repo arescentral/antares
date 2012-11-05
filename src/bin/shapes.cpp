@@ -69,13 +69,13 @@ void draw(Shape shape, PixMap& pix) {
             pix.fill(color);
             break;
         case PLUS:
-            DrawNatePlusClipped(&pix, color);
+            draw_compat_plus(&pix, color);
             break;
         case TRIANGLE:
-            DrawNateTriangleUpClipped(&pix, color);
+            draw_triangle_up(&pix, color);
             break;
         case DIAMOND:
-            DrawNateDiamondClipped(&pix, color);
+            draw_compat_diamond(&pix, color);
             break;
     }
 }

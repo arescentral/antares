@@ -27,6 +27,7 @@
 #include "video/driver.hpp"
 
 using sfz::Exception;
+using std::min;
 
 namespace antares {
 
@@ -145,145 +146,67 @@ void FrameRect(PixMap* pix, const Rect& r, const RgbColor& color) {
 }
 
 // must be square
-void DrawNateTriangleUpClipped(PixMap *destPix, const RgbColor& color) {
-    long count;
-
-    int32_t trueWidth = destPix->size().width;
-    if (trueWidth == 0) {
-        destPix->set(0, 0, color);
-        return;
-    }
-
-    int32_t rightPlus = trueWidth - 1;
-    int32_t drowPlus = destPix->row_bytes() - rightPlus;
-    RgbColor* dbyte = destPix->mutable_row(0);
-
-    for (int x = 0; x < trueWidth; ++x) {
-        *(dbyte++) = color;
-    }
-
-    if (rightPlus > 0) {
-        dbyte += drowPlus - 1;
-        mHBlitz(dbyte, rightPlus + 1, color, count);
-        dbyte--;
-    }
-    drowPlus += 1;
-    rightPlus -= 2;
-    dbyte += drowPlus;
-    drowPlus += 1;
-
-    while (rightPlus >= 0) {
-        mHBlitz(dbyte, rightPlus + 1, color, count);
-        dbyte--;
-
-        if (rightPlus > 0) {
-            dbyte += drowPlus;
-            mHBlitz(dbyte, rightPlus + 1, color, count);
-            dbyte--;
-        }
-
-        drowPlus += 1;
-        rightPlus -= 2;
-        dbyte += drowPlus;
-        drowPlus += 1;
+void draw_triangle_up(PixMap *destPix, const RgbColor& color) {
+    int32_t size = destPix->size().width;
+    Rect r(0, 0, size, 2);
+    for (int32_t i = 0; i < size; i += 2) {
+        r.bottom = min(r.bottom, size);
+        destPix->view(r).fill(color);
+        r.inset(1, 0);
+        r.offset(0, 2);
     }
 }
 
-void DrawNatePlusClipped(PixMap *destPix, const RgbColor& color) {
-    long count;
-
-    int32_t drowPlus = destPix->row_bytes();
-    int32_t trueWidth = destPix->size().width - 1;
-
-    if (trueWidth == 0) {
-        destPix->set(0, 0, color);
+void draw_plus(PixMap::View pix, RgbColor color) {
+    int32_t size = pix.size().width;
+    if (size <= 3) {
+        pix.fill(color);
         return;
     }
+    int32_t half = size / 2;
+    pix.view(Rect(0, half - 1, size, half + 2)).fill(color);
+    pix.view(Rect(half - 1, 0, half + 2, size)).fill(color);
+}
 
-    if ((trueWidth % 2) == 0) {
-        trueWidth--;
+// Compatibility shim.  The original implementation of this function
+// didn't properly fill the rect, so this function trims the rect
+// correspondingly and forwards to draw_plus().
+void draw_compat_plus(PixMap *destPix, const RgbColor& color) {
+    Rect bounds = destPix->size().as_rect();
+    if (bounds.right != 1) {
+        ++bounds.left;
+        --bounds.bottom;
+        if (bounds.right % 2) {
+            --bounds.right;
+            --bounds.bottom;
+        }
     }
-    if (trueWidth < 3) {
-        int32_t half = (trueWidth >> 1) + 1;
+    draw_plus(destPix->view(bounds), color);
+}
 
-        RgbColor* dbyte = destPix->mutable_row(0) + half;
+void draw_diamond(PixMap::View pix, RgbColor color) {
+    int32_t size = pix.size().width;
+    int32_t half = (size + 1) / 2;
+    for (int i = 0; i < half; ++i) {
+        Rect r = pix.size().as_rect();
+        r.inset(i, half - i - 1);
+        pix.view(r).fill(color);
+    }
+}
 
-        for (int x = 1; x < half; ++x) {
-            *dbyte = color;
-            dbyte += drowPlus;
-        }
-        dbyte -= half - 1;
-        for (int x = 0; x < trueWidth; ++x) {
-            *(dbyte++) = color;
-        }
-        dbyte += drowPlus - trueWidth + half - 1;
-        for (int x = 1; x < half; ++x) {
-            *dbyte = color;
-            dbyte += drowPlus;
-        }
+// Compatibility shim.  The original implementation of this function
+// didn't properly fill the rect, so this function trims the rect
+// correspondingly and forwards to draw_diamond().
+void draw_compat_diamond(PixMap *destPix, const RgbColor& color) {
+    Rect bounds = destPix->size().as_rect();
+    if (bounds.right != 1) {
+        ++bounds.left;
+        --bounds.bottom;
+    }
+    if (bounds.right == 3) {
+        destPix->view(bounds).fill(color);
     } else {
-        int32_t half = (trueWidth >> 1) + 1;
-
-        RgbColor* dbyte = destPix->mutable_row(0) + half - 1;
-
-        for (int x = 2; x < half; ++x) {
-            mHBlitz(dbyte, 3, color, count);
-            dbyte += drowPlus - 3;
-        }
-        dbyte -= half - 2;
-        for (int x = 0; x < 3; ++x) {
-            mHBlitz(dbyte, trueWidth, color, count);
-            dbyte += drowPlus - trueWidth;
-        }
-        dbyte += half - 2;
-        for (int x = 2; x < half; ++x) {
-            mHBlitz(dbyte, 3, color, count);
-            dbyte += drowPlus - 3;
-        }
-    }
-}
-
-void DrawNateDiamondClipped(PixMap *destPix, const RgbColor& color) {
-    long count;
-
-    int32_t trueWidth = destPix->size().width - 1;
-    if (trueWidth == 0) {
-        destPix->set(0, 0, color);
-        return;
-    }
-
-    int32_t leftEdge = (trueWidth >> 1) + (trueWidth & 1);
-    int32_t rightPlus = ((trueWidth >> 1) + 1) - leftEdge;
-
-    RgbColor* dbyte = destPix->mutable_bytes() + leftEdge;
-    int32_t drowPlus = destPix->row_bytes() - (rightPlus + 1);
-    while (leftEdge > 0) {
-        mHBlitz(dbyte, rightPlus + 1, color, count);
-        dbyte--;
-
-        dbyte += drowPlus;
-        drowPlus -= 2;
-        rightPlus += 2;
-        leftEdge--;
-    }
-    dbyte++;
-    leftEdge = (trueWidth >> 1) + (trueWidth & 1);
-    drowPlus += 4;
-    rightPlus -= 2;
-    if (trueWidth & 0x1) {
-        dbyte++;
-        drowPlus += 2;
-        rightPlus -= 2;
-        leftEdge--;
-    }
-    while (leftEdge > 0) {
-        mHBlitz(dbyte, rightPlus + 1, color, count);
-        dbyte--;
-
-        dbyte += drowPlus;
-        drowPlus += 2;
-        rightPlus -= 2;
-        leftEdge--;
+        draw_diamond(destPix->view(bounds), color);
     }
 }
 

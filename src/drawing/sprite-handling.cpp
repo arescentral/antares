@@ -79,7 +79,7 @@ Sprite* make_tiny_sprite(uint8_t id) {
         StringSlice shape_name;
         switch (type) {
           case kTriangleUpBlip:
-            DrawNateTriangleUpClipped(&pix, RgbColor::kWhite);
+            draw_triangle_up(&pix, RgbColor::kWhite);
             shape_name = "triangle";
             break;
 
@@ -90,12 +90,12 @@ Sprite* make_tiny_sprite(uint8_t id) {
             break;
 
           case kPlusBlip:
-            DrawNatePlusClipped(&pix, RgbColor::kWhite);
+            draw_compat_plus(&pix, RgbColor::kWhite);
             shape_name = "plus";
             break;
 
           case kDiamondBlip:
-            DrawNateDiamondClipped(&pix, RgbColor::kWhite);
+            draw_compat_diamond(&pix, RgbColor::kWhite);
             shape_name = "diamond";
             break;
 
