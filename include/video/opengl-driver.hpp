@@ -40,6 +40,9 @@ class OpenGlVideoDriver : public VideoDriver {
     virtual void dither_rect(const Rect& rect, const RgbColor& color);
     virtual void draw_point(const Point& at, const RgbColor& color);
     virtual void draw_line(const Point& from, const Point& to, const RgbColor& color);
+    virtual void draw_triangle(const Rect& rect, const RgbColor& color);
+    virtual void draw_diamond(const Rect& rect, const RgbColor& color);
+    virtual void draw_plus(const Rect& rect, const RgbColor& color);
 
     struct Uniforms {
         int color_mode;
@@ -76,6 +79,11 @@ class OpenGlVideoDriver : public VideoDriver {
     const Size _screen_size;
 
     Uniforms _uniforms;
+
+    // TODO(sfiera): don't leak these.
+    std::map<size_t, Sprite*> _triangles;
+    std::map<size_t, Sprite*> _diamonds;
+    std::map<size_t, Sprite*> _pluses;
 
     DISALLOW_COPY_AND_ASSIGN(OpenGlVideoDriver);
 };

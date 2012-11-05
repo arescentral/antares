@@ -65,6 +65,8 @@ enum spriteStyleType {
     spriteColor = 2
 };
 
+typedef void (*draw_tiny_t)(const Rect& rect, const RgbColor& color);
+
 struct spriteType {
     Point           where;
     NatePixTable*   table;
@@ -78,7 +80,7 @@ struct spriteType {
     short           whichLayer;
     RgbColor        tinyColor;
     bool            killMe;
-    Sprite*         tiny_sprite;
+    draw_tiny_t     draw_tiny;
 
     spriteType();
 };

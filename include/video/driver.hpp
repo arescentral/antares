@@ -61,6 +61,9 @@ class VideoDriver {
     virtual void dither_rect(const Rect& rect, const RgbColor& color) = 0;
     virtual void draw_point(const Point& at, const RgbColor& color) = 0;
     virtual void draw_line(const Point& from, const Point& to, const RgbColor& color) = 0;
+    virtual void draw_triangle(const Rect& rect, const RgbColor& color) = 0;
+    virtual void draw_diamond(const Rect& rect, const RgbColor& color) = 0;
+    virtual void draw_plus(const Rect& rect, const RgbColor& color) = 0;
 
     static VideoDriver* driver();
 };

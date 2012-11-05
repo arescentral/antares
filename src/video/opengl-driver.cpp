@@ -26,6 +26,7 @@
 
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
+#include "drawing/shapes.hpp"
 #include "game/globals.hpp"
 #include "math/geometry.hpp"
 #include "math/random.hpp"
@@ -373,6 +374,45 @@ void OpenGlVideoDriver::draw_line(const Point& from, const Point& to, const RgbC
     glVertex2f(x1, y1);
     glVertex2f(x2, y2);
     glEnd();
+}
+
+void OpenGlVideoDriver::draw_triangle(const Rect& rect, const RgbColor& color) {
+    size_t size = min(rect.width(), rect.height());
+    Rect to(0, 0, size, size);
+    to.offset(rect.left, rect.top);
+    if (_triangles.find(size) == _triangles.end()) {
+        ArrayPixMap pix(size, size);
+        pix.fill(RgbColor::kClear);
+        draw_triangle_up(&pix, RgbColor::kWhite);
+        _triangles[size] = new_sprite("", pix);
+    }
+    _triangles[size]->draw_shaded(to, color);
+}
+
+void OpenGlVideoDriver::draw_diamond(const Rect& rect, const RgbColor& color) {
+    size_t size = min(rect.width(), rect.height());
+    Rect to(0, 0, size, size);
+    to.offset(rect.left, rect.top);
+    if (_diamonds.find(size) == _diamonds.end()) {
+        ArrayPixMap pix(size, size);
+        pix.fill(RgbColor::kClear);
+        draw_compat_diamond(&pix, RgbColor::kWhite);
+        _diamonds[size] = new_sprite("", pix);
+    }
+    _diamonds[size]->draw_shaded(to, color);
+}
+
+void OpenGlVideoDriver::draw_plus(const Rect& rect, const RgbColor& color) {
+    size_t size = min(rect.width(), rect.height());
+    Rect to(0, 0, size, size);
+    to.offset(rect.left, rect.top);
+    if (_pluses.find(size) == _pluses.end()) {
+        ArrayPixMap pix(size, size);
+        pix.fill(RgbColor::kClear);
+        draw_compat_plus(&pix, RgbColor::kWhite);
+        _pluses[size] = new_sprite("", pix);
+    }
+    _pluses[size]->draw_shaded(to, color);
 }
 
 OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {

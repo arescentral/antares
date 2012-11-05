@@ -67,46 +67,36 @@ Range<T*> slice(T* array, size_t start, size_t end) {
     return Range<T*>(array + start, array + end);
 }
 
-Sprite* make_tiny_sprite(uint8_t id) {
+static void draw_tiny_square(const Rect& rect, const RgbColor& color) {
+    VideoDriver::driver()->fill_rect(rect, color);
+}
+
+static void draw_tiny_triangle(const Rect& rect, const RgbColor& color) {
+    VideoDriver::driver()->draw_triangle(rect, color);
+}
+
+static void draw_tiny_diamond(const Rect& rect, const RgbColor& color) {
+    VideoDriver::driver()->draw_diamond(rect, color);
+}
+
+static void draw_tiny_plus(const Rect& rect, const RgbColor& color) {
+    VideoDriver::driver()->draw_plus(rect, color);
+}
+
+draw_tiny_t draw_tiny_function(uint8_t id) {
     uint8_t size = id & kBlipSizeMask;
     uint8_t type = id & kBlipTypeMask;
     if (size <= 0) {
         return NULL;
     }
-    if (tiny_sprites.find(id) == tiny_sprites.end()) {
-        ArrayPixMap pix(size * 2, size * 2);
-        pix.fill(RgbColor::kClear);
-        StringSlice shape_name;
-        switch (type) {
-          case kTriangleUpBlip:
-            draw_triangle_up(&pix, RgbColor::kWhite);
-            shape_name = "triangle";
-            break;
-
-          case kFramedSquareBlip:
-          case kSolidSquareBlip:
-            pix.fill(RgbColor::kWhite);
-            shape_name = "square";
-            break;
-
-          case kPlusBlip:
-            draw_compat_plus(&pix, RgbColor::kWhite);
-            shape_name = "plus";
-            break;
-
-          case kDiamondBlip:
-            draw_compat_diamond(&pix, RgbColor::kWhite);
-            shape_name = "diamond";
-            break;
-
-          default:
-            return NULL;
-        }
-        tiny_sprites[id] = VideoDriver::driver()->new_sprite(
-                format("/x/{0}/{1}", shape_name, size),
-                pix);
+    switch (type) {
+        case kTriangleUpBlip: return draw_tiny_triangle;
+        case kFramedSquareBlip:
+        case kSolidSquareBlip: return draw_tiny_square;
+        case kPlusBlip: return draw_tiny_plus;
+        case kDiamondBlip: return draw_tiny_diamond;
+        default: return NULL;
     }
-    return tiny_sprites[id];
 }
 
 }  // namespace
@@ -141,7 +131,7 @@ spriteType::spriteType()
           styleData(0),
           whichLayer(kNoSpriteLayer),
           killMe(false),
-          tiny_sprite(NULL) { }
+          draw_tiny(NULL) { }
 
 void ResetAllSprites() {
     SFZ_FOREACH(int i, range(kMaxSpriteNum), {
@@ -229,7 +219,7 @@ spriteType *AddSprite(
             sprite->whichLayer = layer;
             sprite->tinySize = size;
             sprite->tinyColor = color;
-            sprite->tiny_sprite = make_tiny_sprite(size);
+            sprite->draw_tiny = draw_tiny_function(size);
             sprite->killMe = false;
             sprite->style = spriteNormal;
             sprite->styleColor = RgbColor::kWhite;
@@ -309,11 +299,11 @@ void draw_sprites() {
                         && !aSprite->killMe
                         && (aSprite->tinyColor != kNoTinyColor)
                         && tinySize
-                        && (aSprite->tiny_sprite != NULL)
+                        && (aSprite->draw_tiny != NULL)
                         && (aSprite->whichLayer == layer)) {
-                    aSprite->tiny_sprite->draw_shaded(
-                        aSprite->where.h - tinySize, aSprite->where.v - tinySize,
-                        aSprite->tinyColor);
+                    Rect tiny_rect(-tinySize, -tinySize, tinySize, tinySize);
+                    tiny_rect.offset(aSprite->where.h, aSprite->where.v);
+                    aSprite->draw_tiny(tiny_rect, aSprite->tinyColor);
                 }
             });
         });
