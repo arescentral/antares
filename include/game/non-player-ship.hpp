@@ -22,7 +22,6 @@
 // NonPlayerShip.h
 
 #include "data/space-object.hpp"
-#include "drawing/shapes.hpp"
 
 namespace antares {
 

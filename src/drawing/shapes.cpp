@@ -22,8 +22,6 @@
 
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
-#include "lang/casts.hpp"
-#include "math/macros.hpp"
 #include "video/driver.hpp"
 
 using sfz::Exception;

@@ -19,21 +19,11 @@
 #ifndef ANTARES_DRAWING_SHAPES_HPP_
 #define ANTARES_DRAWING_SHAPES_HPP_
 
-#include <algorithm>
-
 namespace antares {
 
 class PixMap;
 class Rect;
 class RgbColor;
-
-struct coordPointType {
-    uint32_t    h;
-    uint32_t    v;
-};
-
-inline bool operator==(coordPointType x, coordPointType y) { return (x.h == y.h) && (x.v == y.v); }
-inline bool operator!=(coordPointType x, coordPointType y) { return !(x == y); }
 
 void draw_triangle_up(PixMap* destPix, const RgbColor& color);
 void draw_compat_plus(PixMap* destPix, const RgbColor& color);

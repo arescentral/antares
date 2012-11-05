@@ -17,14 +17,11 @@
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include <fcntl.h>
-#include <getopt.h>
 #include <sfz/sfz.hpp>
 
-#include "config/preferences.hpp"
-#include "drawing/build-pix.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
-#include "drawing/text.hpp"
+#include "drawing/shapes.hpp"
 
 using sfz::Optional;
 using sfz::ScopedFd;

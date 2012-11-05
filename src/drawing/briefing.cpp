@@ -21,7 +21,6 @@
 #include "data/scenario.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
-#include "drawing/shapes.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "game/admiral.hpp"
 #include "game/globals.hpp"

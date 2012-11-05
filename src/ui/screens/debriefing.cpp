@@ -25,6 +25,7 @@
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
+#include "drawing/shapes.hpp"
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"

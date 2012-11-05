@@ -25,7 +25,6 @@
 #include "config/keys.hpp"
 #include "data/scenario.hpp"
 #include "drawing/color.hpp"
-#include "drawing/shapes.hpp"
 #include "game/starfield.hpp"
 #include "sound/fx.hpp"
 #include "video/transitions.hpp"

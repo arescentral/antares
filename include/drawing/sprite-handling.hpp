@@ -21,7 +21,6 @@
 
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
-#include "drawing/shapes.hpp"
 
 namespace antares {
 

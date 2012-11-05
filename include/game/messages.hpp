@@ -23,7 +23,6 @@
 #include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
-#include "drawing/shapes.hpp"
 #include "drawing/styled-text.hpp"
 #include "math/geometry.hpp"
 
