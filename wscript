@@ -115,6 +115,14 @@ def build(bld):
     )
 
     bld.program(
+        target="antares/shapes",
+        features="universal32",
+        source="src/bin/shapes.cpp",
+        cxxflags=WARNINGS,
+        use="antares/libantares",
+    )
+
+    bld.program(
         target="antares/ls-scenarios",
         features="universal32",
         source="src/bin/ls-scenarios.cpp",
@@ -369,6 +377,12 @@ def build(bld):
         target="antares/object-data",
         rule="antares/object-data",
         expected="test/object-data",
+    )
+
+    bld.antares_test(
+        target="antares/shapes",
+        rule="antares/shapes",
+        expected="test/shapes",
     )
 
     def regtest(name):
