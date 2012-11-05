@@ -185,11 +185,6 @@ DebriefingScreen::DebriefingScreen(
     _score_bounds = Rect(0, 0, _score->auto_width(), _score->height());
     _score_bounds.center_in(score_area);
 
-    RgbColor bracket_color;
-    bracket_color = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
-    Rect bracket_bounds = _score_bounds;
-    bracket_bounds.inset(-2, -2);
-    DrawNateVBracket(_pix.get(), bracket_bounds, _pix->size().as_rect(), bracket_color);
     _sprite.reset(VideoDriver::driver()->new_sprite("/x/debriefing_screen", *_pix));
 
     _score_bounds.offset(_pix_bounds.left, _pix_bounds.top);
@@ -219,6 +214,11 @@ void DebriefingScreen::draw() const {
 
     vector<inlinePictType> inline_pict;
     draw_text_in_rect(interface_bounds, _message, kLarge, GOLD, inline_pict);
+
+    RgbColor bracket_color = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
+    Rect bracket_bounds = _score_bounds;
+    bracket_bounds.inset(-2, -2);
+    draw_vbracket(bracket_bounds, bracket_color);
 }
 
 void DebriefingScreen::mouse_down(const MouseDownEvent& event) {

@@ -96,21 +96,6 @@ void draw_compat_diamond(PixMap *destPix, const RgbColor& color) {
     }
 }
 
-void DrawNateVBracket(
-        PixMap *destPix, const Rect& destRect, const Rect& clipRect,
-        const RgbColor& color) {
-    destPix->view(
-            Rect(destRect.left, destRect.top, destRect.right, destRect.top + 1)).fill(color);
-    destPix->view(
-            Rect(destRect.left, destRect.bottom - 1, destRect.right, destRect.bottom)).fill(color);
-
-    destPix->set(destRect.left, destRect.top + 1, color);
-    destPix->set(destRect.right - 1, destRect.top + 1, color);
-
-    destPix->set(destRect.left, destRect.bottom - 2, color);
-    destPix->set(destRect.right - 1, destRect.bottom - 2, color);
-}
-
 void draw_vbracket(const Rect& rect, const RgbColor& color) {
     Point ul(rect.left, rect.top);
     Point ur(rect.right - 1, rect.top);

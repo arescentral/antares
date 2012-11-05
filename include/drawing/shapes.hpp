@@ -38,7 +38,6 @@ inline bool operator!=(coordPointType x, coordPointType y) { return !(x == y); }
 void draw_triangle_up(PixMap* destPix, const RgbColor& color);
 void draw_compat_plus(PixMap* destPix, const RgbColor& color);
 void draw_compat_diamond(PixMap* destPix, const RgbColor& color);
-void DrawNateVBracket(PixMap *, const Rect&, const Rect&, const RgbColor& color);
 void draw_vbracket(const Rect& rect, const RgbColor& color);
 void draw_shaded_rect(
         Rect rect,
