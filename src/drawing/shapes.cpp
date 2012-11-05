@@ -31,120 +31,6 @@ using std::min;
 
 namespace antares {
 
-inline void mHBlitz(RgbColor*& mdbyte, long mrunLen, const RgbColor& mcolor, long& mcount) {
-    mcount = mrunLen;
-    while ( mcount-- > 0)
-    {
-        *(mdbyte++) =mcolor;
-    }
-}
-
-inline void mDrawHorizontalRun(
-        RgbColor*& dbyte, long xAdvance, long runLen, const RgbColor& color, long drowPlus, long count) {
-    count = runLen;
-    while ( count-- > 0)
-    {
-        *dbyte = color;
-        dbyte += xAdvance;
-    }
-    dbyte += drowPlus;
-}
-
-inline void mDrawVerticalRun(
-        RgbColor*& dbyte, long xAdvance, long runLen, const RgbColor& color, long drowPlus, long count) {
-    count = runLen;
-    while ( count-- > 0)
-    {
-        *dbyte = color;
-        dbyte += drowPlus;
-    }
-    dbyte += xAdvance;
-}
-
-inline void mCopyHorizontalRun(
-        RgbColor*& dbyte, RgbColor*& sbyte, long xAdvance, long runLen, long drowPlus,
-        long srowPlus, long count) {
-    count = runLen;
-    while ( count-- > 0)
-    {
-        *dbyte = *sbyte;
-        dbyte += xAdvance;
-        sbyte += xAdvance;
-    }
-    dbyte += drowPlus;
-    sbyte += srowPlus;
-}
-
-inline void mCopyVerticalRun(
-        RgbColor*& dbyte, RgbColor*& sbyte, long xAdvance, long runLen, long drowPlus,
-        long srowPlus, long count) {
-    count = runLen;
-    while ( count-- > 0)
-    {
-        *dbyte = *sbyte;
-        dbyte += drowPlus;
-        sbyte += srowPlus;
-    }
-    dbyte += xAdvance;
-    sbyte += xAdvance;
-}
-
-namespace {
-
-Rect from_origin(const Rect& r) {
-    return Rect(0, 0, r.width(), r.height());
-}
-
-bool intersects(const Rect& contained, const Rect& container) {
-    return ((contained.right > container.left)
-            && (contained.left < container.right)
-            && (contained.bottom > container.top)
-            && (contained.top < container.bottom));
-}
-
-void clip_rect(Rect* contained, const Rect& container) {
-    contained->left = std::max(contained->left, container.left);
-    contained->top = std::max(contained->top, container.top);
-    contained->right = std::min(contained->right, container.right);
-    contained->bottom = std::min(contained->bottom, container.bottom);
-}
-
-}  // namespace
-
-void DrawLine(PixMap* pix, const Point& from, const Point& to, const RgbColor& color) {
-    if (to.h != from.h && to.v != from.v) {
-        throw Exception("DrawLine() doesn't do diagonal lines");
-    }
-    if (to.h == from.h) {
-        int step = 1;
-        if (to.v < from.v) {
-            step = -1;
-        }
-        for (int i = from.v; i != to.v; i += step) {
-            if (pix->size().as_rect().contains(Point(from.h, i))) {
-                pix->set(from.h, i, color);
-            }
-        }
-    } else {
-        int step = 1;
-        if (to.h < from.h) {
-            step = -1;
-        }
-        for (int i = from.h; i != to.h; i += step) {
-            if (pix->size().as_rect().contains(Point(i, from.v))) {
-                pix->set(i, from.v, color);
-            }
-        }
-    }
-}
-
-void FrameRect(PixMap* pix, const Rect& r, const RgbColor& color) {
-    DrawLine(pix, Point(r.left, r.top), Point(r.left, r.bottom - 1), color);
-    DrawLine(pix, Point(r.left, r.bottom - 1), Point(r.right - 1, r.bottom - 1), color);
-    DrawLine(pix, Point(r.right - 1, r.bottom - 1), Point(r.right - 1, r.top), color);
-    DrawLine(pix, Point(r.right - 1, r.top), Point(r.left, r.top), color);
-}
-
 // must be square
 void draw_triangle_up(PixMap *destPix, const RgbColor& color) {
     int32_t size = destPix->size().width;
@@ -157,7 +43,7 @@ void draw_triangle_up(PixMap *destPix, const RgbColor& color) {
     }
 }
 
-void draw_plus(PixMap::View pix, RgbColor color) {
+static void draw_plus(PixMap::View pix, RgbColor color) {
     int32_t size = pix.size().width;
     if (size <= 3) {
         pix.fill(color);
@@ -184,7 +70,7 @@ void draw_compat_plus(PixMap *destPix, const RgbColor& color) {
     draw_plus(destPix->view(bounds), color);
 }
 
-void draw_diamond(PixMap::View pix, RgbColor color) {
+static void draw_diamond(PixMap::View pix, RgbColor color) {
     int32_t size = pix.size().width;
     int32_t half = (size + 1) / 2;
     for (int i = 0; i < half; ++i) {
