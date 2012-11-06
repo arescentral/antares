@@ -27,7 +27,6 @@
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/styled-text.hpp"
-#include "drawing/shapes.hpp"
 #include "drawing/text.hpp"
 #include "video/driver.hpp"
 

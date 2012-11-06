@@ -21,7 +21,6 @@
 
 #include <sfz/sfz.hpp>
 
-#include "drawing/shapes.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {

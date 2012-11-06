@@ -188,6 +188,9 @@ Sprite* TextVideoDriver::new_sprite(sfz::PrintItem name, const PixMap& content) 
 }
 
 void TextVideoDriver::fill_rect(const Rect& rect, const RgbColor& color) {
+    if (!world.intersects(rect)) {
+        return;
+    }
     PrintItem args[] = {rect.left, rect.top, rect.right, rect.bottom, hex(color)};
     log("rect", args);
 }
@@ -205,6 +208,30 @@ void TextVideoDriver::draw_point(const Point& at, const RgbColor& color) {
 void TextVideoDriver::draw_line(const Point& from, const Point& to, const RgbColor& color) {
     PrintItem args[] = {from.h, from.v, to.h, to.v, hex(color)};
     log("line", args);
+}
+
+void TextVideoDriver::draw_triangle(const Rect& rect, const RgbColor& color) {
+    if (!world.intersects(rect)) {
+        return;
+    }
+    PrintItem args[] = {rect.left, rect.top, rect.right, rect.bottom, hex(color)};
+    log("triangle", args);
+}
+
+void TextVideoDriver::draw_diamond(const Rect& rect, const RgbColor& color) {
+    if (!world.intersects(rect)) {
+        return;
+    }
+    PrintItem args[] = {rect.left, rect.top, rect.right, rect.bottom, hex(color)};
+    log("diamond", args);
+}
+
+void TextVideoDriver::draw_plus(const Rect& rect, const RgbColor& color) {
+    if (!world.intersects(rect)) {
+        return;
+    }
+    PrintItem args[] = {rect.left, rect.top, rect.right, rect.bottom, hex(color)};
+    log("plus", args);
 }
 
 void TextVideoDriver::loop(Card* initial) {

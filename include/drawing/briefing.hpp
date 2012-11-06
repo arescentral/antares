@@ -19,12 +19,12 @@
 #ifndef ANTARES_DRAWING_BRIEFING_HPP_
 #define ANTARES_DRAWING_BRIEFING_HPP_
 
-#include "drawing/shapes.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {
 
 struct Scenario;
+class PixMap;
 
 void Briefing_Objects_Render(
         PixMap* destmap, long maxSize, Rect *bounds, coordPointType *corner, long scale);

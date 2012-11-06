@@ -25,6 +25,7 @@
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
+#include "drawing/shapes.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "drawing/text.hpp"
 #include "game/admiral.hpp"

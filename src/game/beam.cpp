@@ -24,7 +24,6 @@
 
 #include "data/space-object.hpp"
 #include "drawing/color.hpp"
-#include "drawing/shapes.hpp"
 #include "game/globals.hpp"
 #include "game/motion.hpp"
 #include "game/space-object.hpp"

@@ -21,7 +21,6 @@
 
 #include "data/scenario.hpp"
 #include "data/space-object.hpp"
-#include "drawing/shapes.hpp"
 #include "game/globals.hpp"
 #include "game/space-object.hpp"
 #include "lang/casts.hpp"

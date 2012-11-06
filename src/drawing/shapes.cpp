@@ -22,300 +22,76 @@
 
 #include "drawing/color.hpp"
 #include "drawing/pix-map.hpp"
-#include "lang/casts.hpp"
-#include "math/macros.hpp"
 #include "video/driver.hpp"
 
 using sfz::Exception;
+using std::min;
 
 namespace antares {
 
-inline void mHBlitz(RgbColor*& mdbyte, long mrunLen, const RgbColor& mcolor, long& mcount) {
-    mcount = mrunLen;
-    while ( mcount-- > 0)
-    {
-        *(mdbyte++) =mcolor;
-    }
-}
-
-inline void mDrawHorizontalRun(
-        RgbColor*& dbyte, long xAdvance, long runLen, const RgbColor& color, long drowPlus, long count) {
-    count = runLen;
-    while ( count-- > 0)
-    {
-        *dbyte = color;
-        dbyte += xAdvance;
-    }
-    dbyte += drowPlus;
-}
-
-inline void mDrawVerticalRun(
-        RgbColor*& dbyte, long xAdvance, long runLen, const RgbColor& color, long drowPlus, long count) {
-    count = runLen;
-    while ( count-- > 0)
-    {
-        *dbyte = color;
-        dbyte += drowPlus;
-    }
-    dbyte += xAdvance;
-}
-
-inline void mCopyHorizontalRun(
-        RgbColor*& dbyte, RgbColor*& sbyte, long xAdvance, long runLen, long drowPlus,
-        long srowPlus, long count) {
-    count = runLen;
-    while ( count-- > 0)
-    {
-        *dbyte = *sbyte;
-        dbyte += xAdvance;
-        sbyte += xAdvance;
-    }
-    dbyte += drowPlus;
-    sbyte += srowPlus;
-}
-
-inline void mCopyVerticalRun(
-        RgbColor*& dbyte, RgbColor*& sbyte, long xAdvance, long runLen, long drowPlus,
-        long srowPlus, long count) {
-    count = runLen;
-    while ( count-- > 0)
-    {
-        *dbyte = *sbyte;
-        dbyte += drowPlus;
-        sbyte += srowPlus;
-    }
-    dbyte += xAdvance;
-    sbyte += xAdvance;
-}
-
-namespace {
-
-Rect from_origin(const Rect& r) {
-    return Rect(0, 0, r.width(), r.height());
-}
-
-bool intersects(const Rect& contained, const Rect& container) {
-    return ((contained.right > container.left)
-            && (contained.left < container.right)
-            && (contained.bottom > container.top)
-            && (contained.top < container.bottom));
-}
-
-void clip_rect(Rect* contained, const Rect& container) {
-    contained->left = std::max(contained->left, container.left);
-    contained->top = std::max(contained->top, container.top);
-    contained->right = std::min(contained->right, container.right);
-    contained->bottom = std::min(contained->bottom, container.bottom);
-}
-
-}  // namespace
-
-void DrawLine(PixMap* pix, const Point& from, const Point& to, const RgbColor& color) {
-    if (to.h != from.h && to.v != from.v) {
-        throw Exception("DrawLine() doesn't do diagonal lines");
-    }
-    if (to.h == from.h) {
-        int step = 1;
-        if (to.v < from.v) {
-            step = -1;
-        }
-        for (int i = from.v; i != to.v; i += step) {
-            if (pix->size().as_rect().contains(Point(from.h, i))) {
-                pix->set(from.h, i, color);
-            }
-        }
-    } else {
-        int step = 1;
-        if (to.h < from.h) {
-            step = -1;
-        }
-        for (int i = from.h; i != to.h; i += step) {
-            if (pix->size().as_rect().contains(Point(i, from.v))) {
-                pix->set(i, from.v, color);
-            }
-        }
-    }
-}
-
-void FrameRect(PixMap* pix, const Rect& r, const RgbColor& color) {
-    DrawLine(pix, Point(r.left, r.top), Point(r.left, r.bottom - 1), color);
-    DrawLine(pix, Point(r.left, r.bottom - 1), Point(r.right - 1, r.bottom - 1), color);
-    DrawLine(pix, Point(r.right - 1, r.bottom - 1), Point(r.right - 1, r.top), color);
-    DrawLine(pix, Point(r.right - 1, r.top), Point(r.left, r.top), color);
-}
-
-void DrawNateRectVScan(PixMap* pix, Rect bounds, const RgbColor& color, bool invert) {
-    clip_rect(&bounds, from_origin(pix->size().as_rect()));
-    if (bounds.width() < 0 || bounds.height() < 0) {
-        return;
-    }
-
-    for (int i = bounds.top; i < bounds.bottom; ++i) {
-        RgbColor* bytes = pix->mutable_row(i);
-        for (int j = bounds.left; j < bounds.right; ++j) {
-            if (implicit_cast<bool>((i ^ j) & 0x1) != invert) {
-                bytes[j] = color;
-            }
-        }
-    }
-}
-
 // must be square
-void DrawNateTriangleUpClipped(PixMap *destPix, const RgbColor& color) {
-    long count;
-
-    int32_t trueWidth = destPix->size().width;
-    if (trueWidth == 0) {
-        destPix->set(0, 0, color);
-        return;
-    }
-
-    int32_t rightPlus = trueWidth - 1;
-    int32_t drowPlus = destPix->row_bytes() - rightPlus;
-    RgbColor* dbyte = destPix->mutable_row(0);
-
-    for (int x = 0; x < trueWidth; ++x) {
-        *(dbyte++) = color;
-    }
-
-    if (rightPlus > 0) {
-        dbyte += drowPlus - 1;
-        mHBlitz(dbyte, rightPlus + 1, color, count);
-        dbyte--;
-    }
-    drowPlus += 1;
-    rightPlus -= 2;
-    dbyte += drowPlus;
-    drowPlus += 1;
-
-    while (rightPlus >= 0) {
-        mHBlitz(dbyte, rightPlus + 1, color, count);
-        dbyte--;
-
-        if (rightPlus > 0) {
-            dbyte += drowPlus;
-            mHBlitz(dbyte, rightPlus + 1, color, count);
-            dbyte--;
-        }
-
-        drowPlus += 1;
-        rightPlus -= 2;
-        dbyte += drowPlus;
-        drowPlus += 1;
+void draw_triangle_up(PixMap *destPix, const RgbColor& color) {
+    int32_t size = destPix->size().width;
+    Rect r(0, 0, size, 2);
+    for (int32_t i = 0; i < size; i += 2) {
+        r.bottom = min(r.bottom, size);
+        destPix->view(r).fill(color);
+        r.inset(1, 0);
+        r.offset(0, 2);
     }
 }
 
-void DrawNatePlusClipped(PixMap *destPix, const RgbColor& color) {
-    long count;
-
-    int32_t drowPlus = destPix->row_bytes();
-    int32_t trueWidth = destPix->size().width - 1;
-
-    if (trueWidth == 0) {
-        destPix->set(0, 0, color);
+static void draw_plus(PixMap::View pix, RgbColor color) {
+    int32_t size = pix.size().width;
+    if (size <= 3) {
+        pix.fill(color);
         return;
     }
+    int32_t half = size / 2;
+    pix.view(Rect(0, half - 1, size, half + 2)).fill(color);
+    pix.view(Rect(half - 1, 0, half + 2, size)).fill(color);
+}
 
-    if ((trueWidth % 2) == 0) {
-        trueWidth--;
+// Compatibility shim.  The original implementation of this function
+// didn't properly fill the rect, so this function trims the rect
+// correspondingly and forwards to draw_plus().
+void draw_compat_plus(PixMap *destPix, const RgbColor& color) {
+    Rect bounds = destPix->size().as_rect();
+    if (bounds.right != 1) {
+        ++bounds.left;
+        --bounds.bottom;
+        if (bounds.right % 2) {
+            --bounds.right;
+            --bounds.bottom;
+        }
     }
-    if (trueWidth < 3) {
-        int32_t half = (trueWidth >> 1) + 1;
+    draw_plus(destPix->view(bounds), color);
+}
 
-        RgbColor* dbyte = destPix->mutable_row(0) + half;
+static void draw_diamond(PixMap::View pix, RgbColor color) {
+    int32_t size = pix.size().width;
+    int32_t half = (size + 1) / 2;
+    for (int i = 0; i < half; ++i) {
+        Rect r = pix.size().as_rect();
+        r.inset(i, half - i - 1);
+        pix.view(r).fill(color);
+    }
+}
 
-        for (int x = 1; x < half; ++x) {
-            *dbyte = color;
-            dbyte += drowPlus;
-        }
-        dbyte -= half - 1;
-        for (int x = 0; x < trueWidth; ++x) {
-            *(dbyte++) = color;
-        }
-        dbyte += drowPlus - trueWidth + half - 1;
-        for (int x = 1; x < half; ++x) {
-            *dbyte = color;
-            dbyte += drowPlus;
-        }
+// Compatibility shim.  The original implementation of this function
+// didn't properly fill the rect, so this function trims the rect
+// correspondingly and forwards to draw_diamond().
+void draw_compat_diamond(PixMap *destPix, const RgbColor& color) {
+    Rect bounds = destPix->size().as_rect();
+    if (bounds.right != 1) {
+        ++bounds.left;
+        --bounds.bottom;
+    }
+    if (bounds.right == 3) {
+        destPix->view(bounds).fill(color);
     } else {
-        int32_t half = (trueWidth >> 1) + 1;
-
-        RgbColor* dbyte = destPix->mutable_row(0) + half - 1;
-
-        for (int x = 2; x < half; ++x) {
-            mHBlitz(dbyte, 3, color, count);
-            dbyte += drowPlus - 3;
-        }
-        dbyte -= half - 2;
-        for (int x = 0; x < 3; ++x) {
-            mHBlitz(dbyte, trueWidth, color, count);
-            dbyte += drowPlus - trueWidth;
-        }
-        dbyte += half - 2;
-        for (int x = 2; x < half; ++x) {
-            mHBlitz(dbyte, 3, color, count);
-            dbyte += drowPlus - 3;
-        }
+        draw_diamond(destPix->view(bounds), color);
     }
-}
-
-void DrawNateDiamondClipped(PixMap *destPix, const RgbColor& color) {
-    long count;
-
-    int32_t trueWidth = destPix->size().width - 1;
-    if (trueWidth == 0) {
-        destPix->set(0, 0, color);
-        return;
-    }
-
-    int32_t leftEdge = (trueWidth >> 1) + (trueWidth & 1);
-    int32_t rightPlus = ((trueWidth >> 1) + 1) - leftEdge;
-
-    RgbColor* dbyte = destPix->mutable_bytes() + leftEdge;
-    int32_t drowPlus = destPix->row_bytes() - (rightPlus + 1);
-    while (leftEdge > 0) {
-        mHBlitz(dbyte, rightPlus + 1, color, count);
-        dbyte--;
-
-        dbyte += drowPlus;
-        drowPlus -= 2;
-        rightPlus += 2;
-        leftEdge--;
-    }
-    dbyte++;
-    leftEdge = (trueWidth >> 1) + (trueWidth & 1);
-    drowPlus += 4;
-    rightPlus -= 2;
-    if (trueWidth & 0x1) {
-        dbyte++;
-        drowPlus += 2;
-        rightPlus -= 2;
-        leftEdge--;
-    }
-    while (leftEdge > 0) {
-        mHBlitz(dbyte, rightPlus + 1, color, count);
-        dbyte--;
-
-        dbyte += drowPlus;
-        drowPlus += 2;
-        rightPlus -= 2;
-        leftEdge--;
-    }
-}
-
-void DrawNateVBracket(
-        PixMap *destPix, const Rect& destRect, const Rect& clipRect,
-        const RgbColor& color) {
-    destPix->view(
-            Rect(destRect.left, destRect.top, destRect.right, destRect.top + 1)).fill(color);
-    destPix->view(
-            Rect(destRect.left, destRect.bottom - 1, destRect.right, destRect.bottom)).fill(color);
-
-    destPix->set(destRect.left, destRect.top + 1, color);
-    destPix->set(destRect.right - 1, destRect.top + 1, color);
-
-    destPix->set(destRect.left, destRect.bottom - 2, color);
-    destPix->set(destRect.right - 1, destRect.bottom - 2, color);
 }
 
 void draw_vbracket(const Rect& rect, const RgbColor& color) {

@@ -19,29 +19,15 @@
 #ifndef ANTARES_DRAWING_SHAPES_HPP_
 #define ANTARES_DRAWING_SHAPES_HPP_
 
-#include <algorithm>
-
 namespace antares {
 
 class PixMap;
 class Rect;
 class RgbColor;
 
-struct coordPointType {
-    uint32_t    h;
-    uint32_t    v;
-};
-
-inline bool operator==(coordPointType x, coordPointType y) { return (x.h == y.h) && (x.v == y.v); }
-inline bool operator!=(coordPointType x, coordPointType y) { return !(x == y); }
-
-void FrameRect(PixMap* pix, const Rect& rect, const RgbColor& color);
-void DrawNateRectVScan(PixMap* pix, Rect bounds, const RgbColor& color, bool invert);
-
-void DrawNateTriangleUpClipped(PixMap* destPix, const RgbColor& color);
-void DrawNatePlusClipped(PixMap* destPix, const RgbColor& color);
-void DrawNateDiamondClipped(PixMap* destPix, const RgbColor& color);
-void DrawNateVBracket(PixMap *, const Rect&, const Rect&, const RgbColor& color);
+void draw_triangle_up(PixMap* destPix, const RgbColor& color);
+void draw_compat_plus(PixMap* destPix, const RgbColor& color);
+void draw_compat_diamond(PixMap* destPix, const RgbColor& color);
 void draw_vbracket(const Rect& rect, const RgbColor& color);
 void draw_shaded_rect(
         Rect rect,

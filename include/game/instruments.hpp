@@ -19,7 +19,6 @@
 #ifndef ANTARES_GAME_INSTRUMENTS_HPP_
 #define ANTARES_GAME_INSTRUMENTS_HPP_
 
-#include "drawing/shapes.hpp"
 #include "drawing/sprite-handling.hpp"
 
 namespace antares {

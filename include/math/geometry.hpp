@@ -187,6 +187,14 @@ struct Rect {
 void read_from(sfz::ReadSource in, Rect& r);
 void print_to(sfz::PrintTarget out, Rect r);
 
+struct coordPointType {
+    uint32_t    h;
+    uint32_t    v;
+};
+
+inline bool operator==(coordPointType x, coordPointType y) { return (x.h == y.h) && (x.v == y.v); }
+inline bool operator!=(coordPointType x, coordPointType y) { return !(x == y); }
+
 }  // namespace antares
 
 #endif // ANTARES_MATH_GEOMETRY_HPP_
