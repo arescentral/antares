@@ -38,8 +38,9 @@ namespace macroman = sfz::macroman;
 
 namespace antares {
 
-HelpScreen::HelpScreen()
-        : InterfaceScreen(5012, play_screen, false) {
+HelpScreen::HelpScreen():
+        InterfaceScreen(5012, play_screen, false),
+        _text(computer_font) {
     // TODO(sfiera): top and bottom buffer of 1, not just top buffer of 2.
     offset((world.width() / 2) - (viewport.width() / 2), 2);
 
@@ -52,16 +53,10 @@ HelpScreen::HelpScreen()
 
     RgbColor fore = GetRGBTranslateColorShade(RED, VERY_LIGHT);
     RgbColor back = GetRGBTranslateColorShade(RED, VERY_DARK);
-    StyledText retro_text(computer_font);
-    retro_text.set_fore_color(fore);
-    retro_text.set_back_color(back);
-    retro_text.set_retro_text(text);
-    retro_text.wrap_to(_bounds.width(), 0, 0);
-
-    ArrayPixMap pix(_bounds.width(), _bounds.height());
-    pix.fill(RgbColor::kClear);
-    retro_text.draw(&pix, pix.size().as_rect());
-    _sprite.reset(VideoDriver::driver()->new_sprite("/x/help_screen", pix));
+    _text.set_fore_color(fore);
+    _text.set_back_color(back);
+    _text.set_retro_text(text);
+    _text.wrap_to(_bounds.width(), 0, 0);
 }
 
 HelpScreen::~HelpScreen() { }
@@ -79,7 +74,7 @@ void HelpScreen::handle_button(int button) {
 
 void HelpScreen::draw() const {
     InterfaceScreen::draw();
-    _sprite->draw(_bounds.left, _bounds.top);
+    _text.draw(_bounds);
 }
 
 }  // namespace antares
