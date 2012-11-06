@@ -166,7 +166,6 @@ DebriefingScreen::DebriefingScreen(int text_id)
           _next_update(0),
           _typed_chars(0) {
     initialize(text_id, false);
-    _sprite.reset(VideoDriver::driver()->new_sprite("/x/debriefing_screen", *_pix));
 }
 
 DebriefingScreen::DebriefingScreen(
@@ -186,8 +185,6 @@ DebriefingScreen::DebriefingScreen(
     _score_bounds = Rect(0, 0, _score->auto_width(), _score->height());
     _score_bounds.center_in(score_area);
 
-    _sprite.reset(VideoDriver::driver()->new_sprite("/x/debriefing_screen", *_pix));
-
     _score_bounds.offset(_pix_bounds.left, _pix_bounds.top);
 }
 
@@ -205,7 +202,7 @@ void DebriefingScreen::resign_front() {
 
 void DebriefingScreen::draw() const {
     next()->draw();
-    _sprite->draw(_pix_bounds.left, _pix_bounds.top);
+    VideoDriver::driver()->fill_rect(_pix_bounds, RgbColor::kBlack);
     for (int i = 0; i < _typed_chars; ++i) {
         _score->draw_char(_score_bounds, i);
     }
@@ -276,7 +273,6 @@ void DebriefingScreen::initialize(int text_id, bool do_score) {
     _pix_bounds = pix_bounds(text_bounds);
     _message_bounds = text_bounds;
     _message_bounds.offset(-_pix_bounds.left, -_pix_bounds.top);
-    _pix.reset(new ArrayPixMap(_pix_bounds.width(), _pix_bounds.height()));
 }
 
 void print_to(sfz::PrintTarget out, DebriefingScreen::State state) {
