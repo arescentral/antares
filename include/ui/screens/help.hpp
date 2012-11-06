@@ -21,6 +21,7 @@
 
 #include <sfz/sfz.hpp>
 
+#include "drawing/styled-text.hpp"
 #include "ui/screen.hpp"
 
 namespace antares {
@@ -45,7 +46,7 @@ class HelpScreen : public InterfaceScreen {
     };
 
     Rect _bounds;
-    sfz::scoped_ptr<Sprite> _sprite;
+    StyledText _text;
 
     DISALLOW_COPY_AND_ASSIGN(HelpScreen);
 };
