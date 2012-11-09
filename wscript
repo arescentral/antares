@@ -6,7 +6,7 @@ VERSION = "0.6.0rc1"
 WARNINGS = ["-Wall", "-Werror", "-Wno-sign-compare", "-Wno-deprecated-declarations"]
 
 def common(ctx):
-    ctx.default_sdk = "10.4"
+    ctx.default_sdk = "10.6"
     ctx.default_compiler = "gcc"
     ctx.load("compiler_c compiler_cxx")
     ctx.load("core externals", tooldir="ext/waf-sfiera")
