@@ -1,0 +1,47 @@
+#!/bin/zsh
+
+set -o errexit
+
+progname=$(basename $0)
+usage() {
+    echo >&2 "usage: $progname start VERSION"
+    echo >&2 "       $progname finish VERSION"
+    exit 1
+}
+
+if [[ $# != 2 ]]; then
+    usage
+elif [[ $1 != start && $1 != finish ]]; then
+    usage
+elif [[ $(git rev-parse HEAD) != $(git rev-parse develop) ]]; then
+    echo >&2 "must be on develop"
+    exit 1
+fi
+
+# Check that there is a line 'VERSION = "..."' in the wscript file.
+grep >/dev/null '^VERSION = ".*"$' wscript
+ACTION=$1
+VERSION=$2
+
+update-wscript() {
+    sed -i '' 's/^VERSION = "\(.*\)"$/VERSION = "'$1'"/' wscript
+}
+
+update-readme() {
+    sed -i '' 's/\(Antares[- ]\)\([0-9.]*\)[0-9]/\1'$1'/g' README.rst
+}
+
+if [[ $ACTION == start ]]; then
+    set -o verbose
+    git checkout -b release/$VERSION
+    update-wscript ${VERSION}rc1
+    git commit wscript README.rst -m "Create release branch for $VERSION."
+else
+    set -o verbose
+    update-wscript $VERSION
+    update-readme $VERSION
+    git commit wscript README.rst -m "Release Antares $VERSION."
+    git checkout master
+    git merge --no-ff release/$VERSION
+    git tag $VERSION
+fi
