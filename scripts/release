@@ -11,17 +11,26 @@ usage() {
 
 if [[ $# != 2 ]]; then
     usage
-elif [[ $1 != start && $1 != finish ]]; then
-    usage
-elif [[ $(git rev-parse HEAD) != $(git rev-parse develop) ]]; then
-    echo >&2 "must be on develop"
-    exit 1
 fi
 
 # Check that there is a line 'VERSION = "..."' in the wscript file.
 grep >/dev/null '^VERSION = ".*"$' wscript
 ACTION=$1
 VERSION=$2
+
+if [[ $1 = start ]]; then
+    if [[ $(git rev-parse HEAD) != $(git rev-parse develop) ]]; then
+        echo >&2 "must be on develop"
+        exit 1
+    fi
+elif [[ $1 = finish ]]; then
+    if [[ $(git rev-parse HEAD) != $(git rev-parse release/$VERSION) ]]; then
+        echo >&2 "must be on release/$VERSION"
+        exit 1
+    fi
+else
+    usage
+fi
 
 update-wscript() {
     sed -i '' 's/^VERSION = "\(.*\)"$/VERSION = "'$1'"/' wscript
