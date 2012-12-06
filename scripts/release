@@ -52,5 +52,7 @@ else
     git commit wscript README.rst -m "Release Antares $VERSION."
     git checkout master
     git merge --no-ff release/$VERSION
-    git tag $VERSION
+    git tag v$VERSION
+    git checkout develop
+    git merge --no-ff release/$VERSION
 fi
