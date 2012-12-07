@@ -899,7 +899,7 @@ void draw_mini_ship_data(
     short               whichShape;
     spaceObjectType     *dObject = NULL;
     long                tlong;
-    Rect            lRect, dRect, spriteRect;
+    Rect                lRect, dRect, spriteRect;
 
     lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, 0, 0, kMiniScreenWidth);
     color = GetRGBTranslateColorShade(headerColor, LIGHT);
@@ -913,8 +913,7 @@ void draw_mini_ship_data(
             Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
             text, RgbColor::kBlack);
 
-    if ( newObject.attributes & kIsDestination)
-    {
+    if (newObject.attributes & kIsDestination) {
         lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth);
 
         // get the color for writing the name
@@ -928,8 +927,7 @@ void draw_mini_ship_data(
     } else {
         lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth);
 
-        if ( newObject.whichBaseObject >= 0)
-        {
+        if (newObject.whichBaseObject >= 0) {
             // get the color for writing the name
             color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
@@ -947,9 +945,8 @@ void draw_mini_ship_data(
     dRect.right = kMiniScreenLeft + kMiniIconWidth;
     dRect.bottom = dRect.top + kMiniIconHeight;
 
-    if (( newObject.whichBaseObject >= 0) && ( newObject.pixResID >= 0))
-    {
-        NatePixTable* pixTable = GetPixTable( newObject.pixResID);
+    if ((newObject.whichBaseObject >= 0) && (newObject.pixResID >= 0)) {
+        NatePixTable* pixTable = GetPixTable(newObject.pixResID);
 
         if (pixTable != NULL) {
             if (newObject.attributes & kIsSelfAnimated) {
@@ -981,10 +978,8 @@ void draw_mini_ship_data(
     dRect.right = dRect.left + kMiniBarWidth;
     dRect.bottom = dRect.top + kMiniIconHeight;
 
-    if ( newObject.baseType != NULL)
-    {
-        if (( newObject.baseType->health > 0) && ( newObject.health > 0))
-        {
+    if (newObject.baseType != NULL) {
+        if ((newObject.baseType->health > 0) && (newObject.health > 0)) {
             tlong = newObject.health * kMiniBarHeight;
             tlong /= newObject.baseType->health;
 
@@ -1006,16 +1001,13 @@ void draw_mini_ship_data(
         }
     }
 
-
     dRect.left = kMiniEnergyLeft;
     dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
     dRect.right = dRect.left + kMiniBarWidth;
     dRect.bottom = dRect.top + kMiniIconHeight;
 
-    if ( newObject.baseType != NULL)
-    {
-        if (( newObject.baseType->energy > 0) && ( newObject.energy > 0))
-        {
+    if (newObject.baseType != NULL) {
+        if ((newObject.baseType->energy > 0) && (newObject.energy > 0)) {
             tlong = newObject.energy * kMiniBarHeight;
             tlong /= newObject.baseType->energy;
 
@@ -1043,8 +1035,7 @@ void draw_mini_ship_data(
     color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
     // move to the 1st line in the selection miniscreen, write the name
-    if ( newObject.beamType >= 0)
-    {
+    if (newObject.beamType >= 0) {
         String text(StringList(kSpaceObjectShortNameResID).at(newObject.beamType));
         computer_font->draw_sprite(
                 Point(lRect.left, lRect.top + computer_font->ascent), text, color);
@@ -1056,8 +1047,7 @@ void draw_mini_ship_data(
     color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
     // move to the 1st line in the selection miniscreen, write the name
-    if ( newObject.pulseType >= 0)
-    {
+    if (newObject.pulseType >= 0) {
         String text(StringList(kSpaceObjectShortNameResID).at(newObject.pulseType));
         computer_font->draw_sprite(
                 Point(lRect.left, lRect.top + computer_font->ascent), text, color);
@@ -1071,8 +1061,7 @@ void draw_mini_ship_data(
         color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
         // move to the 1st line in the selection miniscreen, write the name
-        if ( newObject.specialType >= 0)
-        {
+        if (newObject.specialType >= 0) {
             String text(StringList(kSpaceObjectShortNameResID).at(newObject.specialType));
             computer_font->draw_sprite(
                     Point(lRect.left, lRect.top + computer_font->ascent), text, color);
@@ -1082,28 +1071,22 @@ void draw_mini_ship_data(
     lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniDestLineNum, 0, kMiniScreenWidth);
 
     // write the name
-    if ( newObject.destinationObject >= 0)
-    {
-        if ( newObject.destObjectPtr != NULL)
-        {
+    if (newObject.destinationObject >= 0) {
+        if (newObject.destObjectPtr != NULL) {
             dObject = newObject.destObjectPtr;
 
             // get the color for writing the name
-            if ( dObject->owner == globals()->gPlayerAdmiralNumber)
-            {
+            if (dObject->owner == globals()->gPlayerAdmiralNumber) {
                 color = GetRGBTranslateColorShade(GREEN, VERY_LIGHT);
-            } else
-            {
+            } else {
                 color = GetRGBTranslateColorShade(RED, VERY_LIGHT);
             }
 
-            if ( dObject->attributes & kIsDestination)
-            {
+            if (dObject->attributes & kIsDestination) {
                 String text(GetDestBalanceName(dObject->destinationObject));
                 computer_font->draw_sprite(
                         Point(lRect.left, lRect.top + computer_font->ascent), text, color);
-            } else
-            {
+            } else {
                 String text(StringList(kSpaceObjectNameResID).at(dObject->whichBaseObject));
                 computer_font->draw_sprite(
                         Point(lRect.left, lRect.top + computer_font->ascent), text, color);
