@@ -215,6 +215,10 @@ void read_from(ReadSource in, baseObjectType& object) {
     uint8_t section[32];
 
     read(in, object.attributes);
+    if ((object.attributes & kIsSelfAnimated) && (object.attributes & kShapeFromDirection)) {
+        object.attributes ^= kShapeFromDirection;
+    }
+
     read(in, object.baseClass);
     read(in, object.baseRace);
     read(in, object.price);
