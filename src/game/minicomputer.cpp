@@ -895,16 +895,10 @@ void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) 
 void draw_mini_ship_data(
         const spaceObjectType& newObject, unsigned char headerColor,
         short screenTop, short whichString) {
-    RgbColor            color, lightcolor, darkcolor;
-    short               whichShape;
-    spaceObjectType     *dObject = NULL;
-    long                tlong;
-    Rect                lRect, dRect, spriteRect;
-
-    lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, 0, 0, kMiniScreenWidth);
-    color = GetRGBTranslateColorShade(headerColor, LIGHT);
-    lightcolor = GetRGBTranslateColorShade(headerColor, VERY_LIGHT);
-    darkcolor = GetRGBTranslateColorShade(headerColor, MEDIUM);
+    Rect lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, 0, 0, kMiniScreenWidth);
+    RgbColor color = GetRGBTranslateColorShade(headerColor, LIGHT);
+    RgbColor lightcolor = GetRGBTranslateColorShade(headerColor, VERY_LIGHT);
+    RgbColor darkcolor = GetRGBTranslateColorShade(headerColor, MEDIUM);
 
     draw_shaded_rect(lRect, color, lightcolor, darkcolor);
 
@@ -940,6 +934,7 @@ void draw_mini_ship_data(
     }
     // set the rect for drawing the "icon" of the object type
 
+    Rect dRect;
     dRect.left = kMiniIconLeft;
     dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
     dRect.right = kMiniScreenLeft + kMiniIconWidth;
@@ -949,6 +944,7 @@ void draw_mini_ship_data(
         NatePixTable* pixTable = GetPixTable(newObject.pixResID);
 
         if (pixTable != NULL) {
+            short whichShape;
             if (newObject.attributes & kIsSelfAnimated) {
                 whichShape = more_evil_fixed_to_long(newObject.baseType->frame.animation.firstShape);
             } else {
@@ -973,14 +969,15 @@ void draw_mini_ship_data(
     color = GetRGBTranslateColorShade(PALE_GREEN, MEDIUM);
     draw_vbracket(dRect, color);
 
-    dRect.left = kMiniHealthLeft;
-    dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
-    dRect.right = dRect.left + kMiniBarWidth;
-    dRect.bottom = dRect.top + kMiniIconHeight;
-
     if (newObject.baseType != NULL) {
         if ((newObject.baseType->health > 0) && (newObject.health > 0)) {
-            tlong = newObject.health * kMiniBarHeight;
+            Rect dRect;
+            dRect.left = kMiniHealthLeft;
+            dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
+            dRect.right = dRect.left + kMiniBarWidth;
+            dRect.bottom = dRect.top + kMiniIconHeight;
+
+            uint32_t tlong = newObject.health * kMiniBarHeight;
             tlong /= newObject.baseType->health;
 
             color = GetRGBTranslateColorShade(SKY_BLUE, DARK);
@@ -1001,14 +998,15 @@ void draw_mini_ship_data(
         }
     }
 
-    dRect.left = kMiniEnergyLeft;
-    dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
-    dRect.right = dRect.left + kMiniBarWidth;
-    dRect.bottom = dRect.top + kMiniIconHeight;
-
     if (newObject.baseType != NULL) {
         if ((newObject.baseType->energy > 0) && (newObject.energy > 0)) {
-            tlong = newObject.energy * kMiniBarHeight;
+            Rect dRect;
+            dRect.left = kMiniEnergyLeft;
+            dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
+            dRect.right = dRect.left + kMiniBarWidth;
+            dRect.bottom = dRect.top + kMiniIconHeight;
+
+            uint32_t tlong = newObject.energy * kMiniBarHeight;
             tlong /= newObject.baseType->energy;
 
             color = GetRGBTranslateColorShade(YELLOW, DARK);
@@ -1073,7 +1071,7 @@ void draw_mini_ship_data(
     // write the name
     if (newObject.destinationObject >= 0) {
         if (newObject.destObjectPtr != NULL) {
-            dObject = newObject.destObjectPtr;
+            spaceObjectType* dObject = newObject.destObjectPtr;
 
             // get the color for writing the name
             if (dObject->owner == globals()->gPlayerAdmiralNumber) {
