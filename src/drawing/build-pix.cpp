@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "drawing/build-pix.hpp"
 
@@ -25,7 +24,7 @@
 #include "data/picture.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
-#include "drawing/retro-text.hpp"
+#include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 
 using sfz::BytesSlice;
@@ -69,8 +68,10 @@ class PixBuilder {
     void add_text(const StringSlice& text) {
         RgbColor red;
         red = GetRGBTranslateColorShade(RED, VERY_LIGHT);
-        RetroText retro(text, kTitleFontNum, red, RgbColor::kBlack);
-        retro.wrap_to(_pix->size().width - 12, 2);
+        StyledText retro(title_font);
+        retro.set_fore_color(red);
+        retro.set_retro_text(text);
+        retro.wrap_to(_pix->size().width - 11, 0, 2);
 
         Rect dest(0, 0, _pix->size().width, retro.height());
         dest.offset(0, _pix->size().height);

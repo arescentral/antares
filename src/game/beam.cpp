@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "game/beam.hpp"
 
@@ -25,7 +24,6 @@
 
 #include "data/space-object.hpp"
 #include "drawing/color.hpp"
-#include "drawing/shapes.hpp"
 #include "game/globals.hpp"
 #include "game/motion.hpp"
 #include "game/space-object.hpp"

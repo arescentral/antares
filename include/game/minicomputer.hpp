@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_GAME_MINICOMPUTER_HPP_
 #define ANTARES_GAME_MINICOMPUTER_HPP_
@@ -62,16 +61,16 @@ void SetMiniScreenStatusStrList( short);
 void DisposeMiniScreenStatusStrList( void);
 void ClearMiniScreenLines( void);
 void ClearMiniObjectData( void);
-void DrawMiniScreen( void);
-void DrawAndShowMiniScreenLine( long);
-void ShowWholeMiniScreen( void);
+void draw_mini_screen();
 void MakeMiniScreenFromIndString( short);
 void MiniComputerHandleKeys( unsigned long, unsigned long);
 void MiniComputerHandleNull( long);
 long MiniComputerGetPriceOfCurrentSelection( void);
 void UpdateMiniScreenLines( void);
-void UpdatePlayerAmmo(long, long, long);
-void UpdateMiniShipData( spaceObjectType *, spaceObjectType *, unsigned char, short, short);
+void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special);
+void draw_mini_ship_data(
+        const spaceObjectType& newObject, unsigned char headerColor,
+        short screenTop, short whichString);
 void MiniComputerDoAccept( void);
 void MiniComputerExecute( long, long, long);
 void MiniComputerDoCancel( void);

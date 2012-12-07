@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_UI_EVENT_HPP_
 #define ANTARES_UI_EVENT_HPP_
@@ -106,10 +105,6 @@ class MouseEvent : public Event {
 // left, right, and middle buttons).  On some systems, the scroll wheel is implemented as
 // additional buttons above these, but when we support the scroll wheel, we will probably choose to
 // implement it in terms of separate events instead.
-//
-// At present, we only really deal with the first mouse button, as an artifact of Ares' origins on
-// the classic MacOS.  There are plenty of desirable features one could expect from multiple mouse
-// buttons, though.
 class MouseButtonEvent : public MouseEvent {
   public:
     MouseButtonEvent(int64_t at, int button, const Point& where):

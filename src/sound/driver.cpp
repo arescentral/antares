@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "sound/driver.hpp"
 
@@ -44,19 +43,23 @@ namespace {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // SoundDriver
 
-scoped_ptr<SoundDriver> sound_driver;
+SoundDriver* sound_driver = NULL;
 
 }  // namespace
 
-SoundDriver* SoundDriver::driver() {
-    return sound_driver.get();
+SoundDriver::SoundDriver() {
+    if (antares::sound_driver) {
+        throw Exception("SoundDriver is a singleton");
+    }
+    antares::sound_driver = this;
 }
 
-void SoundDriver::set_driver(SoundDriver* driver) {
-    if (!driver) {
-        throw Exception("tried to set NULL SoundDriver");
-    }
-    sound_driver.reset(driver);
+SoundDriver::~SoundDriver() {
+    antares::sound_driver = NULL;
+}
+
+SoundDriver* SoundDriver::driver() {
+    return sound_driver;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "ui/screens/select-level.hpp"
 
@@ -24,8 +23,7 @@
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
-#include "drawing/retro-text.hpp"
+#include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/main.hpp"
@@ -67,7 +65,6 @@ void SelectLevelScreen::become_front() {
     switch (_state) {
       case SELECTING:
         InterfaceScreen::become_front();
-        VideoDriver::driver()->set_game_state(SELECT_LEVEL_INTERFACE);
         break;
 
       case FADING_OUT:
@@ -94,7 +91,6 @@ void SelectLevelScreen::handle_button(int button) {
       case OK:
         _state = FADING_OUT;
         *_cancelled = false;
-        VideoDriver::driver()->set_game_state(UNKNOWN);
         stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::kBlack, 1e6, false, NULL));
         break;
 
@@ -133,16 +129,14 @@ void SelectLevelScreen::draw_level_name() const {
     const String chapter_name((*_scenario)->name());
 
     const interfaceItemType& i = item(NAME);
-    ArrayPixMap pix(i.bounds.width(), i.bounds.height());
 
     RgbColor color = GetRGBTranslateColorShade(AQUA, VERY_LIGHT);
-    RetroText retro(chapter_name, kTitleFontNum, color, RgbColor::kBlack);
-    retro.wrap_to(440, 2);
+    StyledText retro(title_font);
+    retro.set_fore_color(color);
+    retro.set_retro_text(chapter_name);
+    retro.wrap_to(440, 0, 2);
 
-    pix.fill(RgbColor::kBlack);
-    retro.draw(&pix, pix.size().as_rect());
-    scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite("/x/level_name", pix));
-    sprite->draw(i.bounds.left, i.bounds.top);
+    retro.draw(i.bounds);
 }
 
 }  // namespace antares

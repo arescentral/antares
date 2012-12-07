@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "game/motion.hpp"
 
@@ -23,7 +22,6 @@
 
 #include "data/space-object.hpp"
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/pix-table.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "game/globals.hpp"
@@ -555,7 +553,7 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                                 anObject->cloakState = kCloakOnStateMax;
                         }
                         anObject->sprite->style = spriteColor;
-                        anObject->sprite->styleColor = RgbColor::kBlack;
+                        anObject->sprite->styleColor = RgbColor::kClear;
                         anObject->sprite->styleData = anObject->cloakState;
                         if ( anObject->owner == globals()->gPlayerAdmiralNumber)
                             anObject->sprite->styleData -=
@@ -571,7 +569,7 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
                         } else
                         {
                             anObject->sprite->style = spriteColor;
-                            anObject->sprite->styleColor = RgbColor::kBlack;
+                            anObject->sprite->styleColor = RgbColor::kClear;
                             anObject->sprite->styleData = -anObject->cloakState;
                             if ( anObject->owner == globals()->gPlayerAdmiralNumber)
                                 anObject->sprite->styleData -=

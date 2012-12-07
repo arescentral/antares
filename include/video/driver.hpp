@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_VIDEO_DRIVER_HPP_
 #define ANTARES_VIDEO_DRIVER_HPP_
@@ -23,6 +22,7 @@
 #include <stdint.h>
 #include <sfz/sfz.hpp>
 
+#include "drawing/color.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {
@@ -30,7 +30,6 @@ namespace antares {
 class Card;
 class KeyMap;
 class PixMap;
-class RgbColor;
 class Sprite;
 
 enum GameState {
@@ -47,57 +46,60 @@ enum GameState {
 
 class VideoDriver {
   public:
-    virtual ~VideoDriver() { }
-    virtual bool button() = 0;
+    VideoDriver();
+    virtual ~VideoDriver();
+    virtual bool button(int which) = 0;
     virtual Point get_mouse() = 0;
     virtual void get_keys(KeyMap* k) = 0;
 
-    virtual void set_game_state(GameState state) = 0;
-    virtual int get_demo_scenario() = 0;
-    virtual void main_loop_iteration_complete(uint32_t game_time) = 0;
-    virtual int ticks() = 0;
-    virtual int64_t double_click_interval_usecs() = 0;
+    virtual int ticks() const = 0;
+    virtual int usecs() const = 0;
+    virtual int64_t double_click_interval_usecs() const = 0;
 
     virtual Sprite* new_sprite(sfz::PrintItem name, const PixMap& content) = 0;
     virtual void fill_rect(const Rect& rect, const RgbColor& color) = 0;
+    virtual void dither_rect(const Rect& rect, const RgbColor& color) = 0;
     virtual void draw_point(const Point& at, const RgbColor& color) = 0;
     virtual void draw_line(const Point& from, const Point& to, const RgbColor& color) = 0;
-    virtual void set_transition_fraction(double fraction) = 0;
-    virtual void set_transition_to(const RgbColor& color) = 0;
-
-    virtual void start_stencil() = 0;
-    virtual void set_stencil_threshold(uint8_t alpha) = 0;
-    virtual void apply_stencil() = 0;
-    virtual void end_stencil() = 0;
-
-    // Event loop interface.  Should eventually be its own class.
-    virtual void loop(Card* initial) = 0;
+    virtual void draw_triangle(const Rect& rect, const RgbColor& color) = 0;
+    virtual void draw_diamond(const Rect& rect, const RgbColor& color) = 0;
+    virtual void draw_plus(const Rect& rect, const RgbColor& color) = 0;
 
     static VideoDriver* driver();
-    static void set_driver(VideoDriver* mode);
-};
-
-class Stencil {
-  public:
-    Stencil(VideoDriver* driver);
-    ~Stencil();
-
-    void set_threshold(uint8_t alpha);
-    void apply();
-
-  private:
-    VideoDriver* _driver;
-
-    DISALLOW_COPY_AND_ASSIGN(Stencil);
 };
 
 class Sprite {
   public:
     virtual ~Sprite();
     virtual sfz::StringSlice name() const = 0;
-    virtual void draw(int32_t x, int32_t y) const = 0;
     virtual void draw(const Rect& draw_rect) const = 0;
+    virtual void draw_cropped(const Rect& draw_rect, Point origin) const = 0;
+    virtual void draw_shaded(const Rect& draw_rect, const RgbColor& tint) const = 0;
+    virtual void draw_static(const Rect& draw_rect, const RgbColor& color, uint8_t frac) const = 0;
+    virtual void draw_outlined(
+            const Rect& draw_rect, const RgbColor& outline_color,
+            const RgbColor& fill_color) const = 0;
     virtual const Size& size() const = 0;
+
+    virtual void draw(int32_t x, int32_t y) const {
+        draw(rect(x, y));
+    }
+    virtual void draw_shaded(int32_t x, int32_t y, const RgbColor& tint) const {
+        draw_shaded(rect(x, y), tint);
+    }
+    virtual void draw_static(int32_t x, int32_t y, const RgbColor& color, uint8_t frac) const {
+        draw_static(rect(x, y), color, frac);
+    }
+    virtual void draw_outlined(
+            int32_t x, int32_t y, const RgbColor& outline_color,
+            const RgbColor& fill_color) const {
+        draw_outlined(rect(x, y), outline_color, fill_color);
+    }
+
+  private:
+    Rect rect(int32_t x, int32_t y) const {
+        return Rect(x, y, x + size().width, y + size().height);
+    }
 };
 
 }  // namespace antares

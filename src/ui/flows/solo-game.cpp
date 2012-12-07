@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "ui/flows/solo-game.hpp"
 
@@ -81,7 +80,7 @@ void SoloGame::become_front() {
         _state = PLAYING;
         _game_result = NO_GAME;
         globals()->gInputSource.reset(new UserInputSource());
-        stack()->push(new MainPlay(_scenario, false, &_game_result));
+        stack()->push(new MainPlay(_scenario, false, true, &_game_result));
         break;
 
       case PLAYING:

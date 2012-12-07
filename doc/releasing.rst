@@ -1,6 +1,19 @@
 Releasing Antares
 =================
 
+Starting a release
+------------------
+
+1.  Branch ``release/$VERSION`` from ``develop``, or ``hotfix/$VERSION`` from ``master``.
+2.  Update ``VERSION`` in ``wscript`` to ``${VERSION}rc1``.
+
+Finishing a release
+-------------------
+
+1.  Update ``VERSION in ``wscript`` to ``$VERSION``.
+2.  Update link in ``README``.
+3.  Tag the release.
+
 Places to update
 ----------------
 

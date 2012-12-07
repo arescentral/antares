@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_VIDEO_OPEN_GL_DRIVER_HPP_
 #define ANTARES_VIDEO_OPEN_GL_DRIVER_HPP_
@@ -36,33 +35,36 @@ class OpenGlVideoDriver : public VideoDriver {
   public:
     OpenGlVideoDriver(Size screen_size);
 
-    virtual void set_game_state(GameState state);
-    virtual int get_demo_scenario();
-    virtual void main_loop_iteration_complete(uint32_t game_time);
-
     virtual Sprite* new_sprite(sfz::PrintItem name, const PixMap& content);
     virtual void fill_rect(const Rect& rect, const RgbColor& color);
+    virtual void dither_rect(const Rect& rect, const RgbColor& color);
     virtual void draw_point(const Point& at, const RgbColor& color);
     virtual void draw_line(const Point& from, const Point& to, const RgbColor& color);
-    virtual void set_transition_fraction(double fraction);
-    virtual void set_transition_to(const RgbColor& color);
+    virtual void draw_triangle(const Rect& rect, const RgbColor& color);
+    virtual void draw_diamond(const Rect& rect, const RgbColor& color);
+    virtual void draw_plus(const Rect& rect, const RgbColor& color);
 
-    virtual void start_stencil();
-    virtual void set_stencil_threshold(uint8_t alpha);
-    virtual void apply_stencil();
-    virtual void end_stencil();
+    struct Uniforms {
+        int color_mode;
+        int sprite;
+        int static_image;
+        int static_fraction;
+        int unit;
+        int outline_color;
+        int t;
+    };
 
   protected:
     class MainLoop {
       public:
-        MainLoop(const OpenGlVideoDriver& driver, Card* initial);
-        bool done();
+        MainLoop(OpenGlVideoDriver& driver, Card* initial);
         void draw();
+        bool done() const;
         Card* top() const;
 
       private:
         struct Setup {
-            Setup();
+            Setup(OpenGlVideoDriver& driver);
         };
         const Setup _setup;
         const OpenGlVideoDriver& _driver;
@@ -74,18 +76,14 @@ class OpenGlVideoDriver : public VideoDriver {
     Size screen_size() const { return _screen_size; }
 
   private:
-    // Clamps all bytes in the stencil buffer to [0, _stencil_height].  This is done whenever a
-    // transition is made from drawing the stencil buffer to drawing pixels, so that if another
-    // stenciling operation is pushed, incrementing bytes in the stencil buffer is guaranteed to
-    // yield new values.
-    void normalize_stencil();
-
     const Size _screen_size;
 
-    double _transition_fraction;
-    RgbColor _transition_color;
+    Uniforms _uniforms;
 
-    int8_t _stencil_height;
+    // TODO(sfiera): don't leak these.
+    std::map<size_t, Sprite*> _triangles;
+    std::map<size_t, Sprite*> _diamonds;
+    std::map<size_t, Sprite*> _pluses;
 
     DISALLOW_COPY_AND_ASSIGN(OpenGlVideoDriver);
 };

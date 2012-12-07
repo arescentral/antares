@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "ui/event-tracker.hpp"
 
@@ -39,18 +38,18 @@ void EventTracker::key_up(const KeyUpEvent& event) {
 }
 
 void EventTracker::mouse_down(const MouseDownEvent& event) {
-    if (_strict && _button) {
+    if (_strict && _button[event.button()]) {
         throw Exception("Received MouseDownEvent when mouse already down.");
     }
-    _button = true;
+    _button[event.button()] = true;
     _mouse = event.where();
 }
 
 void EventTracker::mouse_up(const MouseUpEvent& event) {
-    if (_strict && !_button) {
+    if (_strict && !_button[event.button()]) {
         throw Exception("Received MouseUpEvent when mouse already up.");
     }
-    _button = false;
+    _button[event.button()] = false;
     _mouse = event.where();
 }
 

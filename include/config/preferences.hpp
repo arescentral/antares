@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_CONFIG_PREFERENCES_HPP_
 #define ANTARES_CONFIG_PREFERENCES_HPP_
@@ -29,7 +28,6 @@ namespace antares {
 class Preferences {
   public:
     static Preferences* preferences();
-    static void set_preferences(Preferences* preferences);
 
     Preferences();
     Preferences(const Preferences& other);
@@ -44,6 +42,7 @@ class Preferences {
     bool play_music_in_game() const;
     bool speech_on() const;
     int volume() const;
+    bool fullscreen() const;
     Size screen_size() const;
     sfz::StringSlice scenario_identifier() const;
 
@@ -52,6 +51,7 @@ class Preferences {
     void set_play_music_in_game(bool on);
     void set_speech_on(bool on);
     void set_volume(int volume);
+    void set_fullscreen(bool fullscreen);
     void set_screen_size(Size size);
     void set_scenario_identifier(sfz::StringSlice id);
 
@@ -63,26 +63,27 @@ class Preferences {
     bool                _play_music_in_game;
     bool                _speech_on;
     int16_t             _volume;
+    bool                _fullscreen;
     Size                _screen_size;
     sfz::String         _scenario_identifier;
 };
 
 class PrefsDriver {
   public:
+    PrefsDriver();
     virtual ~PrefsDriver();
 
     virtual void load(Preferences* preferences) = 0;
     virtual void save(const Preferences& preferences) = 0;
 
     static PrefsDriver* driver();
-    static void set_driver(PrefsDriver* driver);
-
-  private:
-    static PrefsDriver* _driver;
 };
 
 class NullPrefsDriver : public PrefsDriver {
   public:
+    NullPrefsDriver();
+    NullPrefsDriver(Preferences defaults);
+
     virtual void load(Preferences* preferences);
     virtual void save(const Preferences& preferences);
 

@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_DRAWING_TEXT_HPP_
 #define ANTARES_DRAWING_TEXT_HPP_
@@ -27,21 +26,13 @@
 
 namespace antares {
 
-enum {
-    kTacticalFontNum        = 0,
-    kComputerFontNum        = 1,
-    kButtonFontNum          = 2,
-    kMessageFontNum         = 3,
-    kTitleFontNum           = 4,
-    kButtonSmallFontNum     = 5,
-};
-
-class directTextType {
+class Font {
   public:
-    directTextType(int32_t id);
-    ~directTextType();
+    Font(int32_t id);
+    ~Font();
 
     uint8_t char_width(sfz::Rune mchar) const;
+    int32_t string_width(sfz::StringSlice s) const;
 
     void draw(
             Point origin, sfz::StringSlice string, RgbColor color, PixMap* pix,
@@ -59,21 +50,18 @@ class directTextType {
     sfz::Bytes charSet;
     sfz::scoped_array<sfz::scoped_ptr<Sprite> > _sprites;
 
-    DISALLOW_COPY_AND_ASSIGN(directTextType);
+    DISALLOW_COPY_AND_ASSIGN(Font);
 };
 
-extern directTextType* gDirectText;
+extern const Font* tactical_font;
+extern const Font* computer_font;
+extern const Font* button_font;
+extern const Font* message_font;
+extern const Font* title_font;
+extern const Font* small_button_font;
 
 void InitDirectText();
 void DirectTextCleanup();
-
-void mDirectCharWidth(unsigned char& mwidth, uint32_t mchar);
-void mSetDirectFont(long mwhichFont);
-int mDirectFontHeight();
-int mDirectFontAscent();
-void mGetDirectStringDimensions(const sfz::StringSlice& string, long& width, long& height);
-void DrawDirectTextStringClipped(
-        Point origin, sfz::StringSlice string, RgbColor color, PixMap* pix, const Rect& clip);
 
 }  // namespace antares
 

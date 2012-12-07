@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,16 +14,17 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_UI_SCREENS_BRIEFING_HPP_
 #define ANTARES_UI_SCREENS_BRIEFING_HPP_
 
+#include <vector>
 #include <sfz/sfz.hpp>
 
 #include "math/geometry.hpp"
-#include "ui/interface-screen.hpp"
+#include "drawing/interface.hpp"
+#include "ui/screen.hpp"
 
 namespace antares {
 
@@ -38,6 +39,7 @@ class BriefingScreen : public InterfaceScreen {
     virtual void become_front();
     virtual void draw() const;
 
+    virtual void mouse_down(const MouseDownEvent& event);
     virtual void key_down(const KeyDownEvent& event);
 
   protected:
@@ -59,6 +61,11 @@ class BriefingScreen : public InterfaceScreen {
     void build_system_map();
     void build_brief_point();
 
+    void draw_system_map() const;
+    void draw_brief_point() const;
+
+    void show_object_data_key(int index, int key);
+
     const Scenario* const _scenario;
     bool* const _cancelled;
     int _briefing_point;
@@ -66,9 +73,19 @@ class BriefingScreen : public InterfaceScreen {
     mutable interfaceItemType _data_item;
 
     Rect _bounds;
+
     sfz::scoped_ptr<Sprite> _star_map;
-    sfz::scoped_ptr<Sprite> _system_map;
-    sfz::scoped_ptr<Sprite> _brief_point;
+    Rect _star_rect;
+
+    struct Star {
+        Point location;
+        uint8_t shade;
+    };
+    std::vector<Star> _system_stars;
+    std::vector<inlinePictType> _inline_pict;
+    Rect _highlight_rect;
+    std::vector<std::pair<Point, Point> > _highlight_lines;
+    sfz::String _text;
 
     DISALLOW_COPY_AND_ASSIGN(BriefingScreen);
 };

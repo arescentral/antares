@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,15 +14,13 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "game/non-player-ship.hpp"
 
 #include "config/keys.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "game/admiral.hpp"
 #include "game/globals.hpp"
 #include "game/labels.hpp"
@@ -103,7 +101,7 @@ void NonplayerShipThink( long timePass)
     short           h;
     Fixed           fcos, fsin;
     RgbColor        friendSick, foeSick, neutralSick;
-    unsigned long   sickCount = globals()->gGameTime / 9;
+    unsigned long   sickCount = usecs_to_ticks(globals()->gGameTime) / 9;
 
     globals()->gSynchValue = gRandomSeed;
     sickCount &= 0x00000003;

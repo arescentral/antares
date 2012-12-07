@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,12 +14,13 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "cocoa/AntaresExtractDataController.h"
 
 #include "cocoa/c/DataExtractor.h"
+
+static NSString* kAntaresDidInstallScenarioFromPath = @"AntaresDidInstallScenarioFromPath";
 
 static void set_label(const char* status, void* userdata) {
     AntaresExtractDataController* controller = userdata;
@@ -34,9 +35,9 @@ static void set_label(const char* status, void* userdata) {
     if (!(self = [super init])) {
         return NULL;
     }
-    _target = target;
+    _target = [target retain];
     _selector = selector;
-    _path = path;
+    _path = [path retain];
     _scenario = nil;
     if (![NSBundle loadNibNamed:@"ExtractData" owner:self]) {
         [self release];
@@ -49,15 +50,22 @@ static void set_label(const char* status, void* userdata) {
     if (!(self = [super init])) {
         return NULL;
     }
-    _target = target;
+    _target = [target retain];
     _selector = selector;
     _path = nil;
-    _scenario = scenario;
+    _scenario = [scenario retain];
     if (![NSBundle loadNibNamed:@"ExtractData" owner:self]) {
         [self release];
         return nil;
     }
     return self;
+}
+
+- (void)dealloc {
+    [_target release];
+    [_path release];
+    [_scenario release];
+    [super dealloc];
 }
 
 - (void)awakeFromNib {
@@ -75,6 +83,7 @@ static void set_label(const char* status, void* userdata) {
 
 - (void)done {
     [_window close];
+    [[NSDistributedNotificationCenter defaultCenter] postNotificationName:kAntaresDidInstallScenarioFromPath object:[_path stringByStandardizingPath] userInfo:nil deliverImmediately:YES];
     [_target performSelector:_selector withObject:self];
 }
 

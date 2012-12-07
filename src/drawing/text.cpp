@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "drawing/text.hpp"
 
@@ -41,13 +40,9 @@ namespace macroman = sfz::macroman;
 
 namespace antares {
 
-directTextType* gDirectText = NULL;
-long gWhichDirectText = 0;
-scoped_ptr<directTextType>* gDirectTextData;
-
 namespace {
 
-const int kDirectFontNum = 6;
+static const int kDirectFontNum = 6;
 
 enum {
     kTacticalFontResID      = 5000,
@@ -72,7 +67,15 @@ Rune from_mac_roman(uint8_t byte) {
 
 }  // namespace
 
-directTextType::directTextType(int32_t id) {
+const Font* gDirectTextData[kDirectFontNum];
+const Font* tactical_font;
+const Font* computer_font;
+const Font* button_font;
+const Font* message_font;
+const Font* title_font;
+const Font* small_button_font;
+
+Font::Font(int32_t id) {
     Resource defn_rsrc("font-descriptions", "nlFD", id);
     BytesSlice in(defn_rsrc.data());
 
@@ -90,7 +93,7 @@ directTextType::directTextType(int32_t id) {
     if (VideoDriver::driver()) {
         _sprites.reset(new scoped_ptr<Sprite>[256]);
         for (int i = 0; i < 256; i++) {
-            ArrayPixMap pix(char_width(i), height + 1);
+            ArrayPixMap pix(physicalWidth * 8, height + 1);
             pix.fill(RgbColor::kClear);
             String s(1, from_mac_roman(i));
             draw(Point(0, ascent), s, RgbColor::kWhite, &pix, pix.size().as_rect());
@@ -100,9 +103,9 @@ directTextType::directTextType(int32_t id) {
     }
 }
 
-directTextType::~directTextType() { }
+Font::~Font() { }
 
-void directTextType::draw(
+void Font::draw(
         Point origin, sfz::StringSlice string, RgbColor color, PixMap* pix,
         const Rect& clip) const {
     // move the pen to the resulting location
@@ -159,78 +162,47 @@ void directTextType::draw(
         // increase our hposition (our position in pixels)
         origin.h += width;
     }
-    MoveTo(origin.h, origin.v + ascent);
 }
 
-void directTextType::draw_sprite(Point origin, sfz::StringSlice string, RgbColor color) const {
-    // TODO(sfiera): using stencils is a rather inefficient way of doing
-    // this, compared to using GL colors to tint the sprite.  However,
-    // we already have the code to do it with stencils, and don't yet
-    // have tinting.  If we do (and we probably will) then we should
-    // switch to using that here instead.
-    Stencil stencil(VideoDriver::driver());
-    stencil.set_threshold(1);
+void Font::draw_sprite(Point origin, sfz::StringSlice string, RgbColor color) const {
     origin.offset(0, -ascent);
     for (size_t i = 0; i < string.size(); ++i) {
         uint8_t byte = to_mac_roman(string.at(i));
-        _sprites[byte]->draw(origin.h, origin.v);
+        _sprites[byte]->draw_shaded(origin.h, origin.v, color);
         origin.offset(char_width(string.at(i)), 0);
     }
-    stencil.apply();
-    VideoDriver::driver()->fill_rect(world, color);
 }
 
 void InitDirectText() {
-    gDirectTextData = new scoped_ptr<directTextType>[kDirectFontNum];
-    gDirectTextData[0].reset(new directTextType(kTacticalFontResID));
-    gDirectTextData[1].reset(new directTextType(kComputerFontResID));
-    gDirectTextData[2].reset(new directTextType(kButtonFontResID));
-    gDirectTextData[3].reset(new directTextType(kMessageFontResID));
-    gDirectTextData[4].reset(new directTextType(kTitleFontResID));
-    gDirectTextData[5].reset(new directTextType(kButtonSmallFontResID));
-
-    gDirectText = gDirectTextData[0].get();
-    gWhichDirectText = 0;
+    gDirectTextData[0] = tactical_font = new Font(kTacticalFontResID);
+    gDirectTextData[1] = computer_font = new Font(kComputerFontResID);
+    gDirectTextData[2] = button_font = new Font(kButtonFontResID);
+    gDirectTextData[3] = message_font = new Font(kMessageFontResID);
+    gDirectTextData[4] = title_font = new Font(kTitleFontResID);
+    gDirectTextData[5] = small_button_font = new Font(kButtonSmallFontResID);
 }
 
 void DirectTextCleanup() {
-    delete[] gDirectTextData;
+    delete tactical_font;
+    delete computer_font;
+    delete button_font;
+    delete message_font;
+    delete title_font;
+    delete small_button_font;
 }
 
-uint8_t directTextType::char_width(Rune mchar) const {
+uint8_t Font::char_width(Rune mchar) const {
     const uint8_t* widptr =
         charSet.data() + height * physicalWidth * to_mac_roman(mchar) + to_mac_roman(mchar);
     return *widptr;
 }
 
-void mDirectCharWidth(unsigned char& width, uint32_t mchar) {
-    width = gDirectText->char_width(mchar);
-}
-
-void mSetDirectFont(long whichFont) {
-    gWhichDirectText = whichFont;
-    gDirectText = gDirectTextData[gWhichDirectText].get();
-}
-
-int mDirectFontHeight() {
-    return gDirectText->height;
-}
-
-int mDirectFontAscent() {
-    return gDirectText->ascent;
-}
-
-void mGetDirectStringDimensions(const StringSlice& string, long& width, long& height) {
-    height = gDirectText->height;
-    width = 0;
-    for (size_t i = 0; i < string.size(); ++i) {
-        width += gDirectText->char_width(string.at(i));
+int32_t Font::string_width(sfz::StringSlice s) const {
+    int32_t sum = 0;
+    for (int i = 0; i < s.size(); ++i) {
+        sum += char_width(s.at(i));
     }
-}
-
-void DrawDirectTextStringClipped(
-        Point origin, StringSlice string, RgbColor color, PixMap* pix, const Rect& clip) {
-    gDirectText->draw(origin, string, color, pix, clip);
+    return sum;
 }
 
 }  // namespace antares

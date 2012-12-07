@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_COCOA_VIDEO_DRIVER_HPP_
 #define ANTARES_COCOA_VIDEO_DRIVER_HPP_
@@ -37,22 +36,22 @@ class Event;
 
 class CocoaVideoDriver : public OpenGlVideoDriver {
   public:
-    CocoaVideoDriver(Size screen_size);
-    virtual bool button();
+    CocoaVideoDriver(bool fullscreen, Size screen_size);
+    virtual bool button(int which);
     virtual Point get_mouse();
     virtual void get_keys(KeyMap* k);
 
-    virtual void set_game_state(GameState state);
-    virtual void main_loop_iteration_complete(uint32_t game_time);
-    virtual int ticks();
-    virtual int64_t double_click_interval_usecs();
+    virtual int ticks() const;
+    virtual int usecs() const;
+    virtual int64_t double_click_interval_usecs() const;
 
-    virtual void loop(Card* initial);
+    void loop(Card* initial);
 
   private:
     bool wait_next_event(int64_t until, sfz::scoped_ptr<Event>& event);
     void enqueue_events(int64_t until);
 
+    const bool _fullscreen;
     int64_t _start_time;
 
     class EventTranslator {

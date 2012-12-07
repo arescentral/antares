@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_GAME_GLOBALS_HPP_
 #define ANTARES_GAME_GLOBALS_HPP_
@@ -26,7 +25,6 @@
 #include "config/keys.hpp"
 #include "data/scenario.hpp"
 #include "drawing/color.hpp"
-#include "drawing/shapes.hpp"
 #include "game/starfield.hpp"
 #include "sound/fx.hpp"
 #include "video/transitions.hpp"
@@ -39,6 +37,9 @@ const size_t kBarIndicatorNum              = 5;
 const size_t kKeyMapBufferNum              = 256;
 const size_t kHotKeyNum                    = 10;
 
+const int32_t kLeftPanelWidth       = 128;
+const int32_t kRightPanelWidth      = 32;
+const int32_t kSmallScreenWidth     = 640;
 const int32_t kRadarSize                = 110;
 
 enum ZoomType {
@@ -55,7 +56,6 @@ enum ZoomType {
 struct barIndicatorType {
     short           top;
     long            thisValue;
-    long            lastValue;
     unsigned char   color;
     bool         automatic;      // if it's automatic, it is redrawn automatically
 };
@@ -101,7 +101,7 @@ struct aresGlobalType {
     sfz::scoped_ptr<InputSource> gInputSource;
     long            gGameOver;
     sfz::scoped_array<admiralType>       gAdmiralData;
-    long            gGameTime;
+    int64_t         gGameTime;
     uint64_t        gLastTime;
     long            gClosestObject;
     long            gFarthestObject;
@@ -119,6 +119,7 @@ struct aresGlobalType {
     int32_t         gRadarCount;            // = 0;
     int32_t         gRadarSpeed;            // = 30;
     int32_t         gRadarRange;            // kRadarSize * 50;
+    bool            radar_is_functioning;
     int32_t         gWhichScaleNum;         // = 0;
     int32_t         gLastScale;             // = SCALE_SCALE;
     int32_t         gInstrumentTop;         // = 0;
@@ -145,7 +146,6 @@ struct aresGlobalType {
     KeyMap          gLastMessageKeyMap;
     unsigned long   gSerialNumerator;
     unsigned long   gSerialDenominator;
-    long            gLastSelectedBuildPrice;
     bool         gAutoPilotOff;          // hack for turning off auto in netgame
     long            levelNum;
     unsigned long   keyMask;

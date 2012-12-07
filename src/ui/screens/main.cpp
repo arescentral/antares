@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "ui/screens/main.hpp"
 
@@ -55,7 +54,6 @@ MainScreen::~MainScreen() { }
 
 void MainScreen::become_front() {
     InterfaceScreen::become_front();
-    VideoDriver::driver()->set_game_state(MAIN_SCREEN_INTERFACE);
     if (Preferences::preferences()->play_idle_music() && !SongIsPlaying()) {
         LoadSong(kTitleSongID);
         SetSongVolume(kMaxMusicVolume);
@@ -70,13 +68,6 @@ bool MainScreen::next_timer(int64_t& time) {
 
 void MainScreen::fire_timer() {
     Randomize(1);
-
-    int id = VideoDriver::driver()->get_demo_scenario();
-    if (id >= 0) {
-        stack()->push(new ReplayGame(id));
-        return;
-    }
-
     ReplayList replays;
     size_t demo = rand() % (replays.size() + 1);
     if (demo == replays.size()) {

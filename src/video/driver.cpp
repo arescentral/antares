@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,46 +14,35 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "video/driver.hpp"
 
 #include <sfz/sfz.hpp>
 
-using sfz::scoped_ptr;
+using sfz::Exception;
 
 namespace antares {
 
 namespace {
 
-scoped_ptr<VideoDriver> video_driver;
+VideoDriver* video_driver = NULL;
 
 }  // namespace
 
+VideoDriver::VideoDriver() {
+    if (video_driver) {
+        throw Exception("VideoDriver is a singleton");
+    }
+    antares::video_driver = this;
+}
+
+VideoDriver::~VideoDriver() {
+    antares::video_driver = NULL;
+}
+
 VideoDriver* VideoDriver::driver() {
-    return antares::video_driver.get();
-}
-
-void VideoDriver::set_driver(VideoDriver* video_driver) {
-    antares::video_driver.reset(video_driver);
-}
-
-Stencil::Stencil(VideoDriver* driver):
-        _driver(driver) {
-    _driver->start_stencil();
-}
-
-void Stencil::set_threshold(uint8_t alpha) {
-    _driver->set_stencil_threshold(alpha);
-}
-
-void Stencil::apply() {
-    _driver->apply_stencil();
-}
-
-Stencil::~Stencil() {
-    _driver->end_stencil();
+    return antares::video_driver;
 }
 
 Sprite::~Sprite() { }

@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "cocoa/c/AntaresController.h"
 
@@ -36,6 +35,7 @@
 using sfz::CString;
 using sfz::Exception;
 using sfz::String;
+using sfz::StringSlice;
 using antares::AresInit;
 using antares::CardStack;
 using antares::CocoaVideoDriver;
@@ -52,30 +52,38 @@ using antares::world;
 
 namespace utf8 = sfz::utf8;
 
+struct AntaresDrivers {
+    CoreFoundationPrefsDriver prefs;
+    CocoaVideoDriver video;
+    OpenAlSoundDriver sound;
+    DirectoryLedger ledger;
+
+    AntaresDrivers(StringSlice home):
+            video(
+                    Preferences::preferences()->fullscreen(),
+                    Preferences::preferences()->screen_size()),
+            ledger(format("{0}/Library/Application Support/Antares", home)) { }
+};
+
 namespace antares {
 
-extern "C" bool antares_controller_set_drivers(CFStringRef* error_message) {
+extern "C" AntaresDrivers* antares_controller_create_drivers(CFStringRef* error_message) {
     if (getenv("HOME") == NULL) {
         cf::String msg("Couldn't get $HOME");
         *error_message = msg.release();
         return false;
     }
     const String home(utf8::decode(getenv("HOME")));
-
-    Preferences::set_preferences(new Preferences);
-    PrefsDriver::set_driver(new CoreFoundationPrefsDriver);
-    PrefsDriver::driver()->load(Preferences::preferences());
-    VideoDriver::set_driver(new CocoaVideoDriver(Preferences::preferences()->screen_size()));
-    SoundDriver::set_driver(new OpenAlSoundDriver);
-    const String ledger_directory(format("{0}/Library/Application Support/Antares", home));
-    Ledger::set_ledger(new DirectoryLedger(ledger_directory));
-
-    return true;
+    return new AntaresDrivers(home);
 }
 
-extern "C" bool antares_controller_loop(CFStringRef* error_message) {
+extern "C" void antares_controller_destroy_drivers(AntaresDrivers* drivers) {
+    delete drivers;
+}
+
+extern "C" bool antares_controller_loop(AntaresDrivers* drivers, CFStringRef* error_message) {
     try {
-        VideoDriver::driver()->loop(AresInit());
+        drivers->video.loop(AresInit());
     } catch (Exception& e) {
         cf::String msg(e.message());
         *error_message = msg.release();

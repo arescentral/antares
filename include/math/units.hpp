@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_MATH_UNITS_HPP_
 #define ANTARES_MATH_UNITS_HPP_
@@ -28,6 +27,10 @@ namespace antares {
 
 // in microseconds--essentially one tick (1/60th of second)
 const uint64_t kTimeUnit = 16667;
+
+inline int64_t ticks_to_usecs(int64_t ticks) { return ticks * kTimeUnit; }
+inline int64_t usecs_to_ticks(int64_t usecs) { return usecs / kTimeUnit; }
+inline int64_t add_ticks(int64_t usecs, int ticks) { return usecs + (ticks * kTimeUnit); }
 
 // max number of time units to move by at once
 const int32_t kMaxTimePerCycle = 3;

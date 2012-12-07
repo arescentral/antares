@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_SOUND_DRIVER_HPP_
 #define ANTARES_SOUND_DRIVER_HPP_
@@ -51,15 +50,14 @@ class SoundChannel {
 
 class SoundDriver {
   public:
-    SoundDriver() { }
-    virtual ~SoundDriver() { }
+    SoundDriver();
+    virtual ~SoundDriver();
 
     virtual void open_channel(sfz::scoped_ptr<SoundChannel>& channel) = 0;
     virtual void open_sound(sfz::PrintItem path, sfz::scoped_ptr<Sound>& sound) = 0;
     virtual void set_global_volume(uint8_t volume) = 0;
 
     static SoundDriver* driver();
-    static void set_driver(SoundDriver* driver);
 
   private:
     DISALLOW_COPY_AND_ASSIGN(SoundDriver);

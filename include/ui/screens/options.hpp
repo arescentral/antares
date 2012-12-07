@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_UI_SCREENS_OPTIONS_HPP_
 #define ANTARES_UI_SCREENS_OPTIONS_HPP_
@@ -24,7 +23,7 @@
 #include <vector>
 
 #include "config/preferences.hpp"
-#include "ui/interface-screen.hpp"
+#include "ui/screen.hpp"
 
 namespace antares {
 
@@ -49,8 +48,6 @@ class SoundControlScreen : public InterfaceScreen {
   public:
     SoundControlScreen(OptionsScreen::State* state, Preferences* preferences);
     ~SoundControlScreen();
-
-    virtual void become_front();
 
     virtual void draw() const;
 
@@ -90,8 +87,6 @@ class KeyControlScreen : public InterfaceScreen {
   public:
     KeyControlScreen(OptionsScreen::State* state, Preferences* preferences);
     ~KeyControlScreen();
-
-    virtual void become_front();
 
     virtual void key_down(const KeyDownEvent& event);
     virtual void key_up(const KeyUpEvent& event);

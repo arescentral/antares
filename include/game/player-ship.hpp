@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_GAME_PLAYER_SHIP_HPP_
 #define ANTARES_GAME_PLAYER_SHIP_HPP_
@@ -28,7 +27,7 @@ class InputSource;
 
 void ResetPlayerShip( long);
 bool PlayerShipGetKeys(int32_t timePass, InputSource& input_source, bool *enterMessage);
-void PlayerShipHandleClick( Point);
+void PlayerShipHandleClick(Point where, int button);
 void SetPlayerSelectShip( long, bool, long);
 void ChangePlayerShipNumber( long, long);
 void TogglePlayerAutoPilot( spaceObjectType *);

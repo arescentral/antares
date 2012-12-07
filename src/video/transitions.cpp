@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "video/transitions.hpp"
 
@@ -41,17 +40,17 @@ const int32_t kEndAnimation = 255;
 
 }  // namespace
 
-Transitions::Transitions() { }
+Transitions::Transitions():
+        _active(false) { }
 Transitions::~Transitions() { }
 
 void Transitions::start_boolean(int32_t in_speed, int32_t out_speed, uint8_t goal_color) {
     _step = kStartAnimation;
     _in_speed = in_speed;
     _out_speed = out_speed;
-    const RgbColor goal = GetRGBTranslateColor(GetRetroIndex(goal_color));
-    VideoDriver::driver()->set_transition_to(goal);
+    _color = GetRGBTranslateColor(GetRetroIndex(goal_color));
+    _color.alpha = 127;
     if (!_active) {
-        VideoDriver::driver()->set_transition_fraction(0.5);
         _active = true;
     }
 }
@@ -63,9 +62,14 @@ void Transitions::update_boolean(int32_t time_passed) {
         } else if ((_step + _out_speed * time_passed) < kEndAnimation) {
             _step += _out_speed * time_passed;
         } else {
-            VideoDriver::driver()->set_transition_fraction(0.0);
             _active = false;
         }
+    }
+}
+
+void Transitions::draw() const {
+    if (_active) {
+        VideoDriver::driver()->fill_rect(world, _color);
     }
 }
 
@@ -81,17 +85,18 @@ ColorFade::ColorFade(
 
 void ColorFade::become_front() {
     _start = now_usecs();
-    _next_event = _start + kTimeUnit;
-    VideoDriver::driver()->set_transition_to(_color);
-    VideoDriver::driver()->set_transition_fraction(_direction);
-}
-
-void ColorFade::resign_front() {
-    VideoDriver::driver()->set_transition_to(_color);
-    VideoDriver::driver()->set_transition_fraction(0.0);
+    _next_event = add_ticks(_start, 1);
 }
 
 void ColorFade::mouse_down(const MouseDownEvent& event) {
+    static_cast<void>(event);
+    if (_allow_skip) {
+        *_skipped = true;
+        stack()->pop(this);
+    }
+}
+
+void ColorFade::key_down(const KeyDownEvent& event) {
     static_cast<void>(event);
     if (_allow_skip) {
         *_skipped = true;
@@ -107,22 +112,28 @@ bool ColorFade::next_timer(int64_t& time) {
 void ColorFade::fire_timer() {
     int64_t now = now_usecs();
     while (_next_event < now) {
-        _next_event += kTimeUnit;
+        _next_event = add_ticks(_next_event, 1);
     }
     double fraction = static_cast<double>(now - _start) / _duration;
-    if (fraction < 1.0) {
-        if (_direction == TO_COLOR) {
-            VideoDriver::driver()->set_transition_fraction(fraction);
-        } else {
-            VideoDriver::driver()->set_transition_fraction(1.0 - fraction);
-        }
-    } else {
+    if (fraction >= 1.0) {
         stack()->pop(this);
     }
 }
 
 void ColorFade::draw() const {
     next()->draw();
+    int64_t now = now_usecs();
+    double fraction = static_cast<double>(now - _start) / _duration;
+    if (fraction > 1.0) {
+        fraction = 1.0;
+    }
+    RgbColor fill_color = _color;
+    if (_direction == TO_COLOR) {
+        fill_color.alpha = 0xff * fraction;
+    } else {
+        fill_color.alpha = 0xff * (1.0 - fraction);
+    }
+    VideoDriver::driver()->fill_rect(world, fill_color);
 }
 
 PictFade::PictFade(int pict_id, bool* skipped)
@@ -158,13 +169,17 @@ void PictFade::become_front() {
     }
 }
 
-void PictFade::resign_front() {
-    if (_state == NEW) {
-        VideoDriver::driver()->set_transition_fraction(0.0);
+void PictFade::mouse_down(const MouseDownEvent& event) {
+    static_cast<void>(event);
+    *_skipped = true;
+    if (this->skip()) {
+        stack()->pop(this);
+    } else {
+        wane();
     }
 }
 
-void PictFade::mouse_down(const MouseDownEvent& event) {
+void PictFade::key_down(const KeyDownEvent& event) {
     static_cast<void>(event);
     *_skipped = true;
     if (this->skip()) {

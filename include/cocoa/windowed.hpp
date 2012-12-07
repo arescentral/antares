@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,29 +14,35 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#include "drawing/offscreen-gworld.hpp"
+#ifndef ANTARES_COCOA_WINDOWED_HPP_
+#define ANTARES_COCOA_WINDOWED_HPP_
 
-#include "drawing/color.hpp"
-#include "drawing/pix-map.hpp"
-#include "drawing/shapes.hpp"
+#include <sfz/sfz.hpp>
+
+#include "cocoa/c/CocoaVideoDriver.h"
+#include "math/geometry.hpp"
 
 namespace antares {
+namespace cgl {
+class Context;
+class PixelFormat;
+}  // namespace cgl
 
-PixMap*         gOffWorld;
-PixMap*         gRealWorld;
+class CocoaWindowed {
+  public:
+    CocoaWindowed(
+        const cgl::PixelFormat& pixel_format, const cgl::Context& context, Size screen_size);
+    ~CocoaWindowed();
 
-void CreateOffscreenWorld() {
-    const Size size = gRealWorld->size();
-    gOffWorld = new ArrayPixMap(size.width, size.height);
-    gOffWorld->fill(RgbColor::kBlack);
-}
+    AntaresWindow* window() const { return _window; }
 
-void copy_world(PixMap& to, PixMap& from, Rect bounds) {
-    bounds.clip_to(to.size().as_rect());
-    to.view(bounds).copy(from.view(bounds));
-}
+  private:
+    AntaresWindow* _window;
+    DISALLOW_COPY_AND_ASSIGN(CocoaWindowed);
+};
 
 }  // namespace antares
+
+#endif  // ANTARES_COCOA_WINDOWED_HPP_

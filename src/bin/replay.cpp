@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include <sfz/sfz.hpp>
 #include <getopt.h>
@@ -24,7 +23,6 @@
 #include "config/preferences.hpp"
 #include "data/replay.hpp"
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/pix-map.hpp"
 #include "drawing/text.hpp"
 #include "game/admiral.hpp"
@@ -46,6 +44,7 @@
 #include "ui/interface-handling.hpp"
 #include "video/driver.hpp"
 #include "video/offscreen-driver.hpp"
+#include "video/text-driver.hpp"
 
 using sfz::BytesSlice;
 using sfz::MappedFile;
@@ -53,6 +52,7 @@ using sfz::Optional;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::args::store;
+using sfz::args::store_const;
 using sfz::format;
 using sfz::make_linked_ptr;
 using sfz::mkdir;
@@ -82,7 +82,8 @@ class ReplayMaster : public Card {
             gRandomSeed = _random_seed;
             globals()->gInputSource.reset(new ReplayInputSource(&_replay_data));
             stack()->push(new MainPlay(
-                        GetScenarioPtrFromChapter(_replay_data.chapter_id), true, &_game_result));
+                        GetScenarioPtrFromChapter(_replay_data.chapter_id), true, false,
+                        &_game_result));
             break;
 
           case REPLAY:
@@ -118,12 +119,8 @@ void ReplayMaster::init() {
         world.right - kRightPanelWidth, world.bottom);
     viewport = play_screen;
 
-    gRealWorld = new ArrayPixMap(world.width(), world.height());
-    gRealWorld->fill(RgbColor::kBlack);
-    CreateOffscreenWorld();
     InitSpriteCursor();
     RotationInit();
-    InterfaceHandlingInit();
     InitDirectText();
     ScreenLabelInit();
     InitMessageScreen();
@@ -137,13 +134,6 @@ void ReplayMaster::init() {
     InitMotion();
     AdmiralInit();
     InitBeams();
-}
-
-void demo(OffscreenVideoDriver& driver) {
-}
-
-void space_race(OffscreenVideoDriver& driver) {
-    demo(driver);  // 2:50
 }
 
 void usage(StringSlice program_name) {
@@ -166,12 +156,15 @@ void main(int argc, char** argv) {
     int interval = 60;
     int width = 640;
     int height = 480;
+    bool text = false;
     parser.add_argument("-i", "--interval", store(interval))
         .help("take one screenshot per this many ticks (default: 60)");
     parser.add_argument("-w", "--width", store(width))
         .help("screen width (default: 640)");
     parser.add_argument("-h", "--height", store(height))
         .help("screen height (default: 480)");
+    parser.add_argument("-t", "--text", store_const(text, true))
+        .help("produce text output");
 
     parser.add_argument("--help", help(parser, 0))
         .help("display this help screen");
@@ -186,30 +179,36 @@ void main(int argc, char** argv) {
         makedirs(*output_dir, 0755);
     }
 
-    Preferences::set_preferences(new Preferences);
-    Preferences::preferences()->set_screen_size(Size(width, height));
-    Preferences::preferences()->set_play_music_in_game(true);
-    PrefsDriver::set_driver(new NullPrefsDriver);
+    Preferences preferences;
+    preferences.set_screen_size(Size(width, height));
+    preferences.set_play_music_in_game(true);
+    NullPrefsDriver prefs(preferences);
 
-    scoped_ptr<OffscreenVideoDriver> video(new OffscreenVideoDriver(
-                Preferences::preferences()->screen_size(), output_dir));
-    video->schedule_event(make_linked_ptr(new MouseMoveEvent(0, Point(320, 240))));
+    EventScheduler scheduler;
+    scheduler.schedule_event(make_linked_ptr(new MouseMoveEvent(0, Point(320, 240))));
     // TODO(sfiera): add recurring snapshots to OffscreenVideoDriver.
     for (int64_t i = 1; i < 72000; i += interval) {
-        video->schedule_snapshot(i);
+        scheduler.schedule_snapshot(i);
     }
-    VideoDriver::set_driver(video.release());
 
+    scoped_ptr<SoundDriver> sound;
     if (output_dir.has()) {
         String out(format("{0}/sound.log", *output_dir));
-        SoundDriver::set_driver(new LogSoundDriver(out));
+        sound.reset(new LogSoundDriver(out));
     } else {
-        SoundDriver::set_driver(new NullSoundDriver);
+        sound.reset(new NullSoundDriver);
     }
-    Ledger::set_ledger(new NullLedger);
+    NullLedger ledger;
 
+    Size screen_size = Preferences::preferences()->screen_size();
     MappedFile replay_file(replay_path);
-    VideoDriver::driver()->loop(new ReplayMaster(replay_file.data()));
+    if (text) {
+        TextVideoDriver video(screen_size, scheduler, output_dir);
+        video.loop(new ReplayMaster(replay_file.data()));
+    } else {
+        OffscreenVideoDriver video(screen_size, scheduler, output_dir);
+        video.loop(new ReplayMaster(replay_file.data()));
+    }
 }
 
 }  // namespace antares

@@ -1,11 +1,13 @@
 # -*- mode: python -*-
 
 APPNAME = "Antares"
-VERSION = "0.5.1"
+VERSION = "0.6.0"
 
-WARNINGS = ["-Wall", "-Werror", "-Wno-sign-compare"]
+WARNINGS = ["-Wall", "-Werror", "-Wno-sign-compare", "-Wno-deprecated-declarations"]
 
 def common(ctx):
+    ctx.default_sdk = "10.6"
+    ctx.default_compiler = "gcc"
     ctx.load("compiler_c compiler_cxx")
     ctx.load("core externals", tooldir="ext/waf-sfiera")
     ctx.load("antares_test", tooldir="tools")
@@ -42,6 +44,7 @@ def build(bld):
 
     bld.program(
         target="antares/Antares",
+        features="universal32",
         mac_app=True,
         mac_plist="antares/Info.plist",
         mac_resources=[
@@ -64,7 +67,6 @@ def build(bld):
         ],
         cflags=WARNINGS,
         cxxflags=WARNINGS,
-        arch="i386 ppc",
         use=[
             "antares/libantares",
             "antares/system/cocoa",
@@ -74,9 +76,11 @@ def build(bld):
 
     bld.program(
         target="antares/offscreen",
+        features="universal32",
         source=[
             "src/bin/offscreen.cpp",
             "src/video/offscreen-driver.cpp",
+            "src/video/text-driver.cpp",
         ],
         cxxflags=WARNINGS,
         use=[
@@ -88,9 +92,11 @@ def build(bld):
 
     bld.program(
         target="antares/replay",
+        features="universal32",
         source=[
             "src/bin/replay.cpp",
             "src/video/offscreen-driver.cpp",
+            "src/video/text-driver.cpp",
         ],
         cxxflags=WARNINGS,
         use=[
@@ -102,19 +108,23 @@ def build(bld):
 
     bld.program(
         target="antares/build-pix",
+        features="universal32",
         source="src/bin/build-pix.cpp",
         cxxflags=WARNINGS,
         use="antares/libantares",
     )
 
-    bld.platform(
-        target="antares/build-pix",
-        platform="darwin",
-        arch="i386 ppc",
+    bld.program(
+        target="antares/shapes",
+        features="universal32",
+        source="src/bin/shapes.cpp",
+        cxxflags=WARNINGS,
+        use="antares/libantares",
     )
 
     bld.program(
         target="antares/ls-scenarios",
+        features="universal32",
         source="src/bin/ls-scenarios.cpp",
         cxxflags=WARNINGS,
         use="antares/libantares",
@@ -122,19 +132,15 @@ def build(bld):
 
     bld.program(
         target="antares/object-data",
+        features="universal32",
         source="src/bin/object-data.cpp",
         cxxflags=WARNINGS,
         use="antares/libantares",
     )
 
-    bld.platform(
-        target="antares/object-data",
-        platform="darwin",
-        arch="i386 ppc",
-    )
-
     bld.program(
         target="antares/extract-data",
+        features="universal32",
         source=[
             "src/bin/extract-data.cpp",
         ],
@@ -144,13 +150,6 @@ def build(bld):
         ],
     )
 
-    bld.program(
-        target="antares/hash-data",
-        source="src/bin/hash-data.cpp",
-        cxxflags=WARNINGS,
-        use="libsfz/libsfz",
-    )
-
     bld.platform(
         target="antares/extract-data",
         source=[
@@ -158,7 +157,6 @@ def build(bld):
             "src/cocoa/http.cpp",
         ],
         platform="darwin",
-        arch="i386 ppc",
         use="antares/system/core-foundation",
     )
 
@@ -178,6 +176,7 @@ def build(bld):
 
     bld.stlib(
         target="antares/libantares-config",
+        features="universal32",
         source=[
             "src/config/keys.cpp",
             "src/config/ledger.cpp",
@@ -189,14 +188,9 @@ def build(bld):
         use="libsfz/libsfz",
     )
 
-    bld.platform(
-        target="antares/libantares-config",
-        platform="darwin",
-        arch="i386 ppc",
-    )
-
     bld.stlib(
         target="antares/libantares-data",
+        features="universal32",
         source=[
             "src/data/extractor.cpp",
             "src/data/interface.cpp",
@@ -221,27 +215,20 @@ def build(bld):
         ],
     )
 
-    bld.platform(
-        target="antares/libantares-data",
-        platform="darwin",
-        arch="i386 ppc",
-    )
-
     bld.stlib(
         target="antares/libantares-drawing",
+        features="universal32",
         source=[
             "src/drawing/briefing.cpp",
             "src/drawing/build-pix.cpp",
             "src/drawing/color.cpp",
             "src/drawing/interface.cpp",
-            "src/drawing/interface-text.cpp",
             "src/drawing/libpng-pix-map.cpp",
-            "src/drawing/offscreen-gworld.cpp",
             "src/drawing/pix-map.cpp",
             "src/drawing/pix-table.cpp",
-            "src/drawing/retro-text.cpp",
             "src/drawing/shapes.cpp",
             "src/drawing/sprite-handling.cpp",
+            "src/drawing/styled-text.cpp",
             "src/drawing/text.cpp",
         ],
         cxxflags=WARNINGS,
@@ -253,14 +240,9 @@ def build(bld):
         ],
     )
 
-    bld.platform(
-        target="antares/libantares-drawing",
-        platform="darwin",
-        arch="i386 ppc",
-    )
-
     bld.stlib(
         target="antares/libantares-game",
+        features="universal32",
         source=[
             "src/game/admiral.cpp",
             "src/game/beam.cpp",
@@ -287,14 +269,9 @@ def build(bld):
         use="libsfz/libsfz",
     )
 
-    bld.platform(
-        target="antares/libantares-game",
-        platform="darwin",
-        arch="i386 ppc",
-    )
-
     bld.stlib(
         target="antares/libantares-math",
+        features="universal32",
         source=[
             "src/math/fixed.cpp",
             "src/math/geometry.cpp",
@@ -308,14 +285,9 @@ def build(bld):
         use="libsfz/libsfz",
     )
 
-    bld.platform(
-        target="antares/libantares-math",
-        platform="darwin",
-        arch="i386 ppc",
-    )
-
     bld.stlib(
         target="antares/libantares-sound",
+        features="universal32",
         source=[
             "src/sound/driver.cpp",
             "src/sound/fx.cpp",
@@ -331,7 +303,6 @@ def build(bld):
         target="antares/libantares-sound",
         platform="darwin",
         source="src/sound/openal-driver.cpp",
-        arch="i386 ppc",
         use=[
             "antares/system/audio-toolbox",
             "antares/system/openal",
@@ -340,19 +311,23 @@ def build(bld):
 
     bld.stlib(
         target="antares/libantares-ui",
+        features="universal32",
         source=[
             "src/ui/card.cpp",
             "src/ui/event.cpp",
+            "src/ui/event-scheduler.cpp",
             "src/ui/event-tracker.cpp",
             "src/ui/flows/master.cpp",
             "src/ui/flows/replay-game.cpp",
             "src/ui/flows/solo-game.cpp",
             "src/ui/interface-handling.cpp",
-            "src/ui/interface-screen.cpp",
+            "src/ui/screen.cpp",
             "src/ui/screens/briefing.cpp",
             "src/ui/screens/debriefing.cpp",
             "src/ui/screens/help.cpp",
+            "src/ui/screens/loading.cpp",
             "src/ui/screens/main.cpp",
+            "src/ui/screens/object-data.cpp",
             "src/ui/screens/options.cpp",
             "src/ui/screens/play-again.cpp",
             "src/ui/screens/scroll-text.cpp",
@@ -364,14 +339,9 @@ def build(bld):
         use="libsfz/libsfz",
     )
 
-    bld.platform(
-        target="antares/libantares-ui",
-        platform="darwin",
-        arch="i386 ppc",
-    )
-
     bld.stlib(
         target="antares/libantares-video",
+        features="universal32",
         source=[
             "src/video/driver.cpp",
             "src/video/transitions.cpp",
@@ -390,9 +360,10 @@ def build(bld):
         platform="darwin",
         source=[
             "src/cocoa/core-opengl.cpp",
+            "src/cocoa/fullscreen.cpp",
             "src/video/opengl-driver.cpp",
+            "src/cocoa/windowed.cpp",
         ],
-        arch="i386 ppc",
         use="antares/system/opengl",
     )
 
@@ -408,22 +379,28 @@ def build(bld):
         expected="test/object-data",
     )
 
+    bld.antares_test(
+        target="antares/shapes",
+        rule="antares/shapes",
+        expected="test/shapes",
+    )
+
     def regtest(name):
         bld.antares_test(
-            target="antares/%s" % name,
+            target="antares/%s" % name.split()[0],
             rule="antares/offscreen %s" % name,
-            expected="test/%s" % name,
+            expected="test/%s" % name.split()[0],
         )
 
     regtest("main-screen")
-    regtest("mission-briefing")
+    regtest("mission-briefing --text")
     regtest("options")
-    regtest("pause")
+    regtest("pause --text")
 
     def replay_test(name):
         bld.antares_test(
             target="antares/replay/%s" % name,
-            rule="antares/replay",
+            rule="antares/replay --text",
             srcs="test/%s.NLRP" % name,
             expected="test/%s" % name,
         )

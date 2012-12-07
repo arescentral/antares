@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "cocoa/prefs-driver.hpp"
 
@@ -41,6 +40,7 @@ const char kIdleMusicPreference[]       = "PlayIdleMusic";
 const char kGameMusicPreference[]       = "PlayGameMusic";
 const char kSpeechOnPreference[]        = "SpeechOn";
 const char kVolumePreference[]          = "Volume";
+const char kFullscreenPreference[]      = "Fullscreen";
 const char kScreenWidthPreference[]     = "ScreenWidth";
 const char kScreenHeightPreference[]    = "ScreenHeight";
 const char kScenarioPreference[]        = "Scenario";
@@ -109,6 +109,9 @@ void CoreFoundationPrefsDriver::load(Preferences* preferences) {
     if (cf::get_preference(kSpeechOnPreference, bool_value)) {
         preferences->set_speech_on(bool_value.c_obj() == kCFBooleanTrue);
     }
+    if (cf::get_preference(kFullscreenPreference, bool_value)) {
+        preferences->set_fullscreen(bool_value.c_obj() == kCFBooleanTrue);
+    }
 
     cf::Number number_value;
     double double_value;
@@ -153,6 +156,9 @@ void CoreFoundationPrefsDriver::save(const Preferences& preferences) {
 
     cf::Boolean speech_on(preferences.speech_on());
     cf::set_preference(kSpeechOnPreference, speech_on);
+
+    cf::Boolean fullscreen(preferences.fullscreen());
+    cf::set_preference(kFullscreenPreference, fullscreen);
 
     double volume_double = 0.125 * preferences.volume();
     cf::Number volume(CFNumberCreate(NULL, kCFNumberDoubleType, &volume_double));

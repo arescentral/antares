@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_GAME_MESSAGES_HPP_
 #define ANTARES_GAME_MESSAGES_HPP_
@@ -24,7 +23,7 @@
 #include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
-#include "drawing/shapes.hpp"
+#include "drawing/styled-text.hpp"
 #include "math/geometry.hpp"
 
 namespace antares {
@@ -90,7 +89,10 @@ struct longMessageType {
     sfz::String             stringMessage;
     sfz::String             lastStringMessage;
     bool                 newStringMessage;
-    retroTextSpecType       retroTextSpec;
+    sfz::String             text;
+    sfz::scoped_ptr<StyledText> retro_text;
+    Point                   retro_origin;
+    int32_t                 at_char;
     bool                 labelMessage;
     bool                 lastLabelMessage;
     short                   labelMessageID;
@@ -106,15 +108,14 @@ void ClearMessage( void);
 void AddMessage(const sfz::PrintItem& message);
 void StartLongMessage( short, short);
 void ClipToCurrentLongMessage( void);
-void DrawCurrentLongMessage( long);
+void DrawCurrentLongMessage(int32_t time_pass);
 void EndLongMessage( void);
 void AdvanceCurrentLongMessage( void);
 void PreviousCurrentLongMessage( void);
 void ReplayLastLongMessage( void);
 void DrawMessageScreen(int32_t by_units);
 void SetStatusString(const sfz::StringSlice& status, unsigned char color);
-long DetermineDirectTextHeightInWidth( retroTextSpecType *, long);
-void DrawRetroTextCharInRect( retroTextSpecType *, long, const Rect&, const Rect&, PixMap *);
+void draw_message();
 
 }  // namespace antares
 

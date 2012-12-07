@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,15 +14,13 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_DRAWING_SPRITE_HANDLING_HPP_
 #define ANTARES_DRAWING_SPRITE_HANDLING_HPP_
 
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
-#include "drawing/shapes.hpp"
 
 namespace antares {
 
@@ -67,6 +65,8 @@ enum spriteStyleType {
     spriteColor = 2
 };
 
+typedef void (*draw_tiny_t)(const Rect& rect, const RgbColor& color);
+
 struct spriteType {
     Point           where;
     NatePixTable*   table;
@@ -80,6 +80,7 @@ struct spriteType {
     short           whichLayer;
     RgbColor        tinyColor;
     bool            killMe;
+    draw_tiny_t     draw_tiny;
 
     spriteType();
 };
@@ -97,17 +98,7 @@ int32_t evil_scale_by(int32_t value, int32_t scale);
 
 void SpriteHandlingInit();
 void ResetAllSprites();
-void scale_pix_map(const PixMap& source, PixMap* dest);
-void OptScaleSpritePixInPixMap(
-        const NatePixTable::Frame& frame, Point where, int32_t scale, Rect *draw_rect,
-        const Rect& clip_rect, PixMap* pix);
-void ColorScaleSpritePixInPixMap(
-        const NatePixTable::Frame& frame, Point where, int32_t scale, Rect *draw_rect,
-        const Rect& clip_rect, PixMap* pix, int16_t static_value, const RgbColor& color,
-        uint8_t color_amount);
-void OutlineScaleSpritePixInPixMap(
-        const NatePixTable::Frame& frame, Point where, int32_t scale, Rect *draw_rect,
-        const Rect& clip_rect, PixMap* pix, const RgbColor& colorOut, const RgbColor& colorIn);
+Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t scale);
 void ResetAllPixTables();
 void SetAllPixTablesNoKeep();
 void KeepPixTable(int16_t resource_id);

@@ -1,6 +1,6 @@
 [submodule "test"]
 	path = test
-	url = git://github.com/arescentral/antares-test-data
+	url = https://code.google.com/p/antares.testdata-text/
 [submodule "ext/libsfz"]
 	path = ext/libsfz
 	url = git://github.com/sfiera/libsfz.git

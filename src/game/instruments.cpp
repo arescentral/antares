@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "game/instruments.hpp"
 
@@ -24,7 +23,6 @@
 #include "data/picture.hpp"
 #include "data/space-object.hpp"
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/shapes.hpp"
 #include "game/admiral.hpp"
 #include "game/cursor.hpp"
@@ -41,6 +39,7 @@
 #include "math/units.hpp"
 #include "video/driver.hpp"
 
+using sfz::format;
 using sfz::range;
 using sfz::scoped_array;
 using sfz::scoped_ptr;
@@ -48,6 +47,8 @@ using std::min;
 using std::max;
 
 namespace antares {
+
+const int32_t kPanelHeight      = 480;
 
 const int32_t kRadarBlipNum     = 50;
 const uint8_t kRadarColor     = GREEN;
@@ -124,10 +125,13 @@ coordPointType          gLastGlobalCorner;
 
 namespace {
 
+scoped_ptr<Sprite> left_instrument_sprite;
+scoped_ptr<Sprite> right_instrument_sprite;
 scoped_array<Point> gRadarBlipData;
 scoped_array<int32_t> gScaleList;
 scoped_array<int32_t> gSectorLineData;
 bool should_draw_sector_lines = false;
+Rect view_range;
 
 struct SiteData {
     Point a, b, c;
@@ -148,6 +152,10 @@ T clamp(T value, T min, T max) {
 
 }  // namespace
 
+static void draw_bar_indicator(int16_t, int32_t, int32_t);
+static void draw_money();
+static void draw_build_time_bar(int32_t value);
+
 void InstrumentInit() {
     globals()->gInstrumentTop = (world.height() / 2) - ( kPanelHeight / 2);
 
@@ -155,6 +163,32 @@ void InstrumentInit() {
     gScaleList.reset(new int32_t[kScaleListNum]);
     gSectorLineData.reset(new int32_t[kMaxSectorLine * 4]);
     ResetInstruments();
+
+    // Initialize and crop left and right instrument picts.
+    {
+        Picture pict(kInstLeftPictID);
+        ArrayPixMap pix_map(128, min(world.height(), pict.size().height));
+        Rect from(Point(0, 0), pix_map.size());
+        Rect to(Point(0, 0), pix_map.size());
+        if (pict.size().height > world.height()) {
+            from.offset(0, (pict.size().height - world.height()) / 2);
+        }
+        pix_map.view(to).copy(pict.view(from));
+        left_instrument_sprite.reset(VideoDriver::driver()->new_sprite(
+                    format("/pictures/{0}.png", kInstLeftPictID), pix_map));
+    }
+    {
+        Picture pict(kInstRightPictID);
+        ArrayPixMap pix_map(32, min(world.height(), pict.size().height));
+        Rect from(Point(0, 0), pix_map.size());
+        Rect to(Point(0, 0), pix_map.size());
+        if (pict.size().height > world.height()) {
+            from.offset(0, (pict.size().height - world.height()) / 2);
+        }
+        pix_map.view(to).copy(pict.view(from));
+        right_instrument_sprite.reset(VideoDriver::driver()->new_sprite(
+                    format("/pictures/{0}.png", kInstRightPictID), pix_map));
+    }
 
     MiniScreenInit();
 }
@@ -184,7 +218,7 @@ void ResetInstruments() {
 
     for ( i = 0; i < kBarIndicatorNum; i++)
     {
-        globals()->gBarIndicator[i].lastValue = globals()->gBarIndicator[i].thisValue = -1;
+        globals()->gBarIndicator[i].thisValue = -1;
     }
     // the shield bar
     globals()->gBarIndicator[kShieldBar].top = 359 + globals()->gInstrumentTop;
@@ -217,13 +251,12 @@ void ResetInstruments() {
 }
 
 void UpdateRadar(int32_t unitsDone) {
-    bool radar_is_functioning;
     if (gScrollStarObject == NULL) {
-        radar_is_functioning = false;
+        globals()->radar_is_functioning = false;
     } else if (gScrollStarObject->offlineTime <= 0) {
-        radar_is_functioning = true;
+        globals()->radar_is_functioning = true;
     } else {
-        radar_is_functioning = (Randomize(gScrollStarObject->offlineTime) < 5);
+        globals()->radar_is_functioning = (Randomize(gScrollStarObject->offlineTime) < 5);
     }
 
     if (unitsDone < 0) {
@@ -232,22 +265,6 @@ void UpdateRadar(int32_t unitsDone) {
     globals()->gRadarCount -= unitsDone;
     if (globals()->gMouseActive) {
         globals()->gMouseTimeout += unitsDone;
-    }
-
-    RgbColor color;
-    if (globals()->gRadarCount <= 0) {
-        color = GetRGBTranslateColorShade(kRadarColor, VERY_DARK);
-    } else {
-        color = GetRGBTranslateColorShade(kRadarColor, ((kRadarColorSteps * globals()->gRadarCount) / globals()->gRadarSpeed) + 1);
-    }
-
-    if (radar_is_functioning) {
-        for (int rcount = 0; rcount < kRadarBlipNum; rcount++) {
-            Point* lp = gRadarBlipData.get() + rcount;
-            if (lp->h >= 0) {
-                gRealWorld->set(lp->h, lp->v, color);
-            }
-        }
     }
 
     if ((gScrollStarObject == NULL) || !gScrollStarObject->active) {
@@ -262,20 +279,17 @@ void UpdateRadar(int32_t unitsDone) {
     const RgbColor darkest = GetRGBTranslateColorShade(kRadarColor, DARKEST);
     const RgbColor very_dark = GetRGBTranslateColorShade(kRadarColor, VERY_DARK);
 
-    if (radar_is_functioning) {
+    if (globals()->radar_is_functioning) {
         if (globals()->gRadarCount <= 0) {
             Rect radar = bounds;
-            FrameRect(gOffWorld, radar, very_light);
             radar.inset(1, 1);
-            gOffWorld->view(radar).fill(darkest);
 
             int32_t dx = gScrollStarObject->location.h - gGlobalCorner.h;
             dx = dx * kRadarSize / globals()->gRadarRange;
-            Rect view_range(-dx, -dx, dx, dx);
+            view_range = Rect(-dx, -dx, dx, dx);
             view_range.center_in(bounds);
             view_range.offset(1, 1);
             view_range.clip_to(radar);
-            gOffWorld->view(view_range).fill(very_dark);
 
             for (int i = 0; i < kRadarBlipNum; ++i) {
                 Point* lp = gRadarBlipData.get() + i;
@@ -311,8 +325,6 @@ void UpdateRadar(int32_t unitsDone) {
                 }
             }
         }
-    } else {
-        gRealWorld->view(bounds).fill(darkest);
     }
 
     uint32_t bestScale = MIN_SCALE;
@@ -387,155 +399,179 @@ void UpdateRadar(int32_t unitsDone) {
     absolute_scale >>= kScaleListShift;
 
     gAbsoluteScale = absolute_scale;
+}
 
-    baseObjectType* base = gScrollStarObject->baseType;
-    UpdateBarIndicator(kShieldBar, gScrollStarObject->health, base->health, gRealWorld);
-    UpdateBarIndicator(kEnergyBar, gScrollStarObject->energy, base->energy, gRealWorld);
-    UpdateBarIndicator(kBatteryBar, gScrollStarObject->battery, base->energy * 5, gRealWorld);
-    UpdateMoney();
+void draw_radar() {
+    Rect bounds(kRadarLeft, kRadarTop, kRadarRight, kRadarBottom);
+    bounds.offset(0, globals()->gInstrumentTop);
+    bounds.inset(1, 1);
+
+    const RgbColor very_light = GetRGBTranslateColorShade(kRadarColor, VERY_LIGHT);
+    const RgbColor darkest = GetRGBTranslateColorShade(kRadarColor, DARKEST);
+    const RgbColor very_dark = GetRGBTranslateColorShade(kRadarColor, VERY_DARK);
+    if (globals()->radar_is_functioning) {
+        Rect radar = bounds;
+        VideoDriver::driver()->fill_rect(radar, very_light);
+        radar.inset(1, 1);
+        VideoDriver::driver()->fill_rect(radar, darkest);
+        if ((view_range.width() > 0) && (view_range.height() > 0)) {
+            VideoDriver::driver()->fill_rect(view_range, very_dark);
+        }
+
+        RgbColor color;
+        if (globals()->gRadarCount <= 0) {
+            color = very_dark;
+        } else {
+            color = GetRGBTranslateColorShade(kRadarColor, ((kRadarColorSteps * globals()->gRadarCount) / globals()->gRadarSpeed) + 1);
+        }
+
+        for (int rcount = 0; rcount < kRadarBlipNum; rcount++) {
+            Point* lp = gRadarBlipData.get() + rcount;
+            if (lp->h >= 0) {
+                VideoDriver::driver()->draw_point(*lp, color);
+            }
+        }
+    } else {
+        VideoDriver::driver()->fill_rect(bounds, darkest);
+    }
 }
 
 // SHOW ME THE MONEY
-void UpdateMoney() {
+static void draw_money() {
     const admiralType* const admiral = mGetAdmiralPtr(globals()->gPlayerAdmiralNumber);
     const int cash = clamp(admiral->cash, 0, kMaxMoneyValue - 1);
     globals()->gBarIndicator[kFineMoneyBar].thisValue
         = (cash % kFineMoneyBarMod) / kFineMoneyBarValue;
     const int price = MiniComputerGetPriceOfCurrentSelection() / kFineMoneyBarValue;
 
-    if ((globals()->gBarIndicator[kFineMoneyBar].thisValue !=
-                globals()->gBarIndicator[kFineMoneyBar].lastValue) ||
-            (price != globals()->gLastSelectedBuildPrice)) {
-        Rect box(0, 0, kFineMoneyBarWidth, kFineMoneyBarHeight - 1);
-        box.offset(kFineMoneyLeft + kFineMoneyHBuffer + play_screen.right,
-                kFineMoneyTop + globals()->gInstrumentTop + kFineMoneyVBuffer);
+    Rect box(0, 0, kFineMoneyBarWidth, kFineMoneyBarHeight - 1);
+    box.offset(kFineMoneyLeft + kFineMoneyHBuffer + play_screen.right,
+            kFineMoneyTop + globals()->gInstrumentTop + kFineMoneyVBuffer);
 
-        // First section of the money bar: when we can afford the current selection, displays the
-        // money which will remain after it is purchased.  When we cannot, displays the money we
-        // currently have.
-        int first_threshold;
-        RgbColor first_color_major;
-        RgbColor first_color_minor;
+    // First section of the money bar: when we can afford the current selection, displays the
+    // money which will remain after it is purchased.  When we cannot, displays the money we
+    // currently have.
+    int first_threshold;
+    RgbColor first_color_major;
+    RgbColor first_color_minor;
 
-        // Second section of the money bar: when we can afford the current selection, displays the
-        // amount which will be deducted after it is purchased.  When we cannot, displays the
-        // amount of additional money which we need to amass before it can be purchased.
-        int second_threshold;
-        RgbColor second_color_major;
-        RgbColor second_color_minor;
+    // Second section of the money bar: when we can afford the current selection, displays the
+    // amount which will be deducted after it is purchased.  When we cannot, displays the
+    // amount of additional money which we need to amass before it can be purchased.
+    int second_threshold;
+    RgbColor second_color_major;
+    RgbColor second_color_minor;
 
-        // Third section: money we don't have and don't need for the current selection.
-        RgbColor third_color = GetRGBTranslateColorShade(kFineMoneyColor, VERY_DARK);
+    // Third section: money we don't have and don't need for the current selection.
+    RgbColor third_color = GetRGBTranslateColorShade(kFineMoneyColor, VERY_DARK);
 
-        if (globals()->gBarIndicator[kFineMoneyBar].thisValue < price) {
-            first_color_major = GetRGBTranslateColorShade(kFineMoneyColor, VERY_LIGHT);
-            first_color_minor = GetRGBTranslateColorShade(kFineMoneyColor, LIGHT);
-            second_color_major = GetRGBTranslateColorShade(kFineMoneyNeedColor, MEDIUM);
-            second_color_minor = GetRGBTranslateColorShade(kFineMoneyNeedColor, DARK);
-            first_threshold = globals()->gBarIndicator[kFineMoneyBar].thisValue;
-            second_threshold = price;
-        } else {
-            first_color_major = GetRGBTranslateColorShade(kFineMoneyColor, VERY_LIGHT);
-            first_color_minor = GetRGBTranslateColorShade(kFineMoneyColor, LIGHT);
-            second_color_major = GetRGBTranslateColorShade(kFineMoneyUseColor, VERY_LIGHT);
-            second_color_minor = GetRGBTranslateColorShade(kFineMoneyUseColor, LIGHT);
-            first_threshold = globals()->gBarIndicator[kFineMoneyBar].thisValue - price;
-            second_threshold = globals()->gBarIndicator[kFineMoneyBar].thisValue;
-        }
-
-        for (int i = 0; i < kFineMoneyBarNum; ++i) {
-            if (i < first_threshold) {
-                if ((i % 5) != 0) {
-                    gOffWorld->view(box).fill(first_color_minor);
-                } else {
-                    gOffWorld->view(box).fill(first_color_major);
-                }
-            } else if (i < second_threshold) {
-                if ((i % 5) != 0) {
-                    gOffWorld->view(box).fill(second_color_minor);
-                } else {
-                    gOffWorld->view(box).fill(second_color_major);
-                }
-            } else {
-                gOffWorld->view(box).fill(third_color);
-            }
-            box.offset(0, kFineMoneyBarHeight);
-        }
-        globals()->gBarIndicator[kFineMoneyBar].thisValue = second_threshold;
+    if (globals()->gBarIndicator[kFineMoneyBar].thisValue < price) {
+        first_color_major = GetRGBTranslateColorShade(kFineMoneyColor, VERY_LIGHT);
+        first_color_minor = GetRGBTranslateColorShade(kFineMoneyColor, LIGHT);
+        second_color_major = GetRGBTranslateColorShade(kFineMoneyNeedColor, MEDIUM);
+        second_color_minor = GetRGBTranslateColorShade(kFineMoneyNeedColor, DARK);
+        first_threshold = globals()->gBarIndicator[kFineMoneyBar].thisValue;
+        second_threshold = price;
+    } else {
+        first_color_major = GetRGBTranslateColorShade(kFineMoneyColor, VERY_LIGHT);
+        first_color_minor = GetRGBTranslateColorShade(kFineMoneyColor, LIGHT);
+        second_color_major = GetRGBTranslateColorShade(kFineMoneyUseColor, VERY_LIGHT);
+        second_color_minor = GetRGBTranslateColorShade(kFineMoneyUseColor, LIGHT);
+        first_threshold = globals()->gBarIndicator[kFineMoneyBar].thisValue - price;
+        second_threshold = globals()->gBarIndicator[kFineMoneyBar].thisValue;
     }
 
-    globals()->gLastSelectedBuildPrice = price;
+    for (int i = 0; i < kFineMoneyBarNum; ++i) {
+        if (i < first_threshold) {
+            if ((i % 5) != 0) {
+                VideoDriver::driver()->fill_rect(box, first_color_minor);
+            } else {
+                VideoDriver::driver()->fill_rect(box, first_color_major);
+            }
+        } else if (i < second_threshold) {
+            if ((i % 5) != 0) {
+                VideoDriver::driver()->fill_rect(box, second_color_minor);
+            } else {
+                VideoDriver::driver()->fill_rect(box, second_color_major);
+            }
+        } else {
+            VideoDriver::driver()->fill_rect(box, third_color);
+        }
+        box.offset(0, kFineMoneyBarHeight);
+    }
+    globals()->gBarIndicator[kFineMoneyBar].thisValue = second_threshold;
 
     barIndicatorType* gross = globals()->gBarIndicator + kGrossMoneyBar;
     gross->thisValue = (admiral->cash / kGrossMoneyBarValue);
-    if (gross->thisValue != gross->lastValue) {
-        Rect box(0, 0, kGrossMoneyBarWidth, kGrossMoneyBarHeight - 1);
-        box.offset(play_screen.right + kGrossMoneyLeft + kGrossMoneyHBuffer,
-                kGrossMoneyTop + globals()->gInstrumentTop + kGrossMoneyVBuffer);
 
-        const RgbColor light = GetRGBTranslateColorShade(kGrossMoneyColor, VERY_LIGHT);
-        const RgbColor dark = GetRGBTranslateColorShade(kGrossMoneyColor, VERY_DARK);
-        for (int i = 0; i < kGrossMoneyBarNum; ++i) {
-            if (i < gross->thisValue) {
-                gOffWorld->view(box).fill(light);
-            } else {
-                gOffWorld->view(box).fill(dark);
-            }
-            box.offset(0, kGrossMoneyBarHeight);
+    box = Rect(0, 0, kGrossMoneyBarWidth, kGrossMoneyBarHeight - 1);
+    box.offset(play_screen.right + kGrossMoneyLeft + kGrossMoneyHBuffer,
+            kGrossMoneyTop + globals()->gInstrumentTop + kGrossMoneyVBuffer);
+
+    const RgbColor light = GetRGBTranslateColorShade(kGrossMoneyColor, VERY_LIGHT);
+    const RgbColor dark = GetRGBTranslateColorShade(kGrossMoneyColor, VERY_DARK);
+    for (int i = 0; i < kGrossMoneyBarNum; ++i) {
+        if (i < gross->thisValue) {
+            VideoDriver::driver()->fill_rect(box, light);
+        } else {
+            VideoDriver::driver()->fill_rect(box, dark);
         }
+        box.offset(0, kGrossMoneyBarHeight);
     }
 }
 
 void DrawInstrumentPanel() {
-    scoped_ptr<Picture> pict;
-    Rect            tRect;
-
     globals()->gZoomMode = kNearestFoeZoom;
-    tRect = world;
-    gOffWorld->view(tRect).fill(RgbColor::kBlack);
 
-    {
-        Picture left_instruments(kInstLeftPictID);
-        const int32_t width = viewport.left;
-        const int32_t height = min(left_instruments.size().height, world.height());
-
-        Rect source_rect(0, 0, width, height);
-        source_rect.center_in(left_instruments.size().as_rect());
-        Rect dest_rect(0, 0, width, height);
-        dest_rect.center_in(Rect(0, 0, width, world.height()));
-
-        gOffWorld->view(dest_rect).copy(left_instruments.view(source_rect));
-    }
-
-    {
-        Picture right_instruments(kInstRightPictID);
-        const int32_t width = right_instruments.size().width;
-        const int32_t height = min(right_instruments.size().height, world.height());
-
-        Rect source_rect(world.width() - width, 0, world.width(), height);
-        source_rect.center_in(right_instruments.size().as_rect());
-        Rect dest_rect(world.width() - width, 0, world.width(), height);
-        dest_rect.center_in(Rect(world.width() - width, 0, world.width(), world.height()));
-
-        gOffWorld->view(dest_rect).copy(right_instruments.view(source_rect));
-    }
-
-    tRect = world;
-    copy_world(*gRealWorld, *gOffWorld, tRect);
     MakeMiniScreenFromIndString(1);
-    DrawMiniScreen();
     ResetInstruments();
     ClearMiniObjectData();
-    ShowWholeMiniScreen();
-    UpdatePlayerAmmo(-1, -1, -1);
     UpdateRadar(100);
+}
+
+void draw_instruments() {
+    Rect left_rect(world.left, world.top, viewport.left, world.bottom);
+    Rect right_rect(viewport.right, world.top, world.right, world.bottom);
+
+    if (world.height() > 768) {
+        left_rect.inset(0, (world.height() - 768) / 2);
+        right_rect.inset(0, (world.height() - 768) / 2);
+    }
+
+    left_instrument_sprite->draw(left_rect.left, left_rect.top);
+    right_instrument_sprite->draw(right_rect.left, right_rect.top);
+
+    if (globals()->gPlayerShipNumber >= 0) {
+        spaceObjectType* player = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
+        if (player->active) {
+            draw_player_ammo(
+                ((player->pulseType >= 0) && (player->pulseBase->frame.weapon.ammo > 0))
+                ? player->pulseAmmo
+                : -1,
+                ((player->beamType >= 0) && (player->beamBase->frame.weapon.ammo > 0))
+                ? player->beamAmmo
+                : -1,
+                ((player->specialType >= 0) && (player->specialBase->frame.weapon.ammo > 0))
+                ? player->specialAmmo
+                : -1);
+        }
+    }
+
+    baseObjectType* base = gScrollStarObject->baseType;
+    draw_bar_indicator(kShieldBar, gScrollStarObject->health, base->health);
+    draw_bar_indicator(kEnergyBar, gScrollStarObject->energy, base->energy);
+    draw_bar_indicator(kBatteryBar, gScrollStarObject->battery, base->energy * 5);
+    draw_build_time_bar(globals()->gMiniScreenData.buildTimeBarValue);
+    draw_money();
+    draw_radar();
+    draw_mini_screen();
 }
 
 void EraseSite() {
     globals()->old_cursor_coord = globals()->cursor_coord;
 }
 
-void update_site() {
+void update_site(bool replay) {
     if (gScrollStarObject == NULL) {
         should_draw_site = false;
     } else if (gScrollStarObject->offlineTime <= 0) {
@@ -580,7 +616,11 @@ void update_site() {
         should_draw_site = false;
     }
 
-    // do the cursor, too
+    // Do the cursor, too, unless this is a replay.
+    if (replay) {
+        HideSpriteCursor();
+        return;
+    }
     Point cursor_coord = VideoDriver::driver()->get_mouse();
     MoveSpriteCursor(cursor_coord);
     HideSpriteCursor();
@@ -606,11 +646,6 @@ void update_site() {
 
 void draw_site() {
     if (should_draw_site) {
-        Stencil stencil(VideoDriver::driver());
-        Rect clip = viewport;
-        VideoDriver::driver()->fill_rect(clip, RgbColor::kWhite);
-        stencil.apply();
-
         const RgbColor light = GetRGBTranslateColorShade(PALE_GREEN, MEDIUM);
         const RgbColor dark = GetRGBTranslateColorShade(PALE_GREEN, DARKER + kSlightlyDarkerColor);
         VideoDriver::driver()->draw_line(site_data.a, site_data.b, light);
@@ -709,7 +744,7 @@ void draw_sector_lines() {
 
 void InstrumentsHandleClick() {
     const Point where = globals()->cursor_coord;
-    PlayerShipHandleClick(where);
+    PlayerShipHandleClick(where, 0);
     MiniComputerHandleClick(where);
     if (!SpriteCursorVisible()) {
         globals()->gMouseActive = true;
@@ -719,7 +754,7 @@ void InstrumentsHandleClick() {
 
 void InstrumentsHandleDoubleClick() {
     const Point where = globals()->cursor_coord;
-    PlayerShipHandleClick(where);
+    PlayerShipHandleClick(where, 0);
     MiniComputerHandleDoubleClick(where);
     if (!SpriteCursorVisible()) {
         globals()->gMouseActive = true;
@@ -737,21 +772,14 @@ void InstrumentsHandleMouseStillDown() {
     MiniComputerHandleMouseStillDown(where);
 }
 
-void DrawArbitrarySectorLines(coordPointType *corner, int32_t scale, int32_t minSectorSize,
-        Rect *bounds, PixMap* pixBase) {
+void draw_arbitrary_sector_lines(
+        const coordPointType& corner, int32_t scale, int32_t minSectorSize, const Rect& bounds) {
     uint32_t        size, level, x, h, division;
-    Rect        clipRect;
     RgbColor        color;
-
-    clipRect.left = bounds->left;
-    clipRect.right = bounds->right;
-    clipRect.top = bounds->top;
-    clipRect.bottom = bounds->bottom;
 
     size = kSubSectorSize >> 2L;
     level = 1;
-    do
-    {
+    do {
         level <<= 1L;
         size <<= 2L;
         h = size;
@@ -761,65 +789,59 @@ void DrawArbitrarySectorLines(coordPointType *corner, int32_t scale, int32_t min
     level >>= 1L;
     level *= level;
 
-    x = corner->h;
+    x = corner.h;
     x &= size - 1;
     x = size - x;
 
-    division = corner->h + x;
+    division = corner.h + x;
     division >>= kSubSectorShift;
     division &= 0x0000000f;
 
     x *= scale;
     x >>= SHIFT_SCALE;
-    x += bounds->left;
+    x += bounds.left;
 
-    while ((x < implicit_cast<uint32_t>(bounds->right)) && (h > 0)) {
-        if ( !division)
-        {
+    while ((x < implicit_cast<uint32_t>(bounds.right)) && (h > 0)) {
+        if (!division) {
             color = GetRGBTranslateColorShade(GREEN, DARKER);
-        } else if ( !(division & 0x3))
-        {
+        } else if (!(division & 0x3)) {
             color = GetRGBTranslateColorShade(SKY_BLUE, DARKER);
-        } else
-        {
+        } else {
             color = GetRGBTranslateColorShade(BLUE, DARKER);
         }
 
-        DrawNateLine( pixBase, clipRect, x, bounds->top, x, bounds->bottom, color);
+        VideoDriver::driver()->draw_line(
+                Point(x, bounds.top), Point(x, bounds.bottom - 1), color);
         division += level;
         division &= 0x0000000f;
         x += h;
     }
 
-    x = corner->v;
+    x = corner.v;
     x &= size - 1;
     x = size - x;
 
-    division = corner->v + x;
+    division = corner.v + x;
     division >>= kSubSectorShift;
     division &= 0x0000000f;
 
     x *= scale;
     x >>= SHIFT_SCALE;
-    x += bounds->top;
+    x += bounds.top;
 
-    while ((x < implicit_cast<uint32_t>(bounds->bottom)) && (h > 0)) {
-        if ( !division)
-        {
+    while ((x < implicit_cast<uint32_t>(bounds.bottom)) && (h > 0)) {
+        if (!division) {
             color = GetRGBTranslateColorShade(GREEN, DARKER);
-        } else if ( !(division & 0x3))
-        {
+        } else if (!(division & 0x3)) {
             color = GetRGBTranslateColorShade(SKY_BLUE, DARKER);
-        } else
-        {
+        } else {
             color = GetRGBTranslateColorShade(BLUE, DARKER);
         }
 
-        DrawNateLine( pixBase, clipRect, bounds->left, x, bounds->right, x, color);
-
+        VideoDriver::driver()->draw_line(
+                Point(bounds.left, x), Point(bounds.right - 1, x), color);
         division += level;
         division &= 0x0000000f;
-
         x += h;
     }
 }
@@ -915,62 +937,56 @@ void GetArbitrarySingleSectorBounds(coordPointType *corner, coordPointType *loca
     }
 }
 
-void UpdateBarIndicator(int16_t which, int32_t value, int32_t max, PixMap* pixMap) {
-    int32_t         graphicValue;
-    Rect        tRect, clipRect;
+static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
+    if (value > max) {
+        value = max;
+    }
+
+    int32_t graphicValue;
+    globals()->gBarIndicator[which].thisValue;
+    if (max > 0) {
+        graphicValue = (kBarIndicatorHeight * value) / max;
+        if (graphicValue < 0) {
+            graphicValue = 0;
+        } else if (graphicValue > kBarIndicatorHeight) {
+            graphicValue = kBarIndicatorHeight;
+        }
+    } else {
+        graphicValue = 0;
+    }
+
     RgbColor        color, lightColor, darkColor;
     Rect            rrect;
 
-    if ( value > max) value = max;
-
-    if ( value != globals()->gBarIndicator[ which].thisValue)
-    {
-        globals()->gBarIndicator[ which].lastValue = globals()->gBarIndicator[ which].thisValue;
-        if ( max > 0)
-        {
-            graphicValue = kBarIndicatorHeight * value;
-            graphicValue /= max;
-            if ( graphicValue < 0) graphicValue = 0;
-            if ( graphicValue > kBarIndicatorHeight) graphicValue = kBarIndicatorHeight;
-        } else graphicValue = 0;
-
-
-        tRect.left = kBarIndicatorLeft + play_screen.right;
-        tRect.right =  tRect.left + kBarIndicatorWidth;
-        tRect.top = globals()->gBarIndicator[ which].top,
-        tRect.bottom = tRect.top + kBarIndicatorHeight - graphicValue;
-        clipRect.left = play_screen.right;
-        clipRect.top = globals()->gInstrumentTop;
-        clipRect.right = clipRect.left + kRightPanelWidth;
-        clipRect.bottom = clipRect.top + kPanelHeight;
-
-        if (graphicValue < kBarIndicatorHeight) {
-            color = GetRGBTranslateColorShade(globals()->gBarIndicator[which].color, DARK);
-            lightColor = GetRGBTranslateColorShade(globals()->gBarIndicator[which].color, MEDIUM);
-            darkColor = GetRGBTranslateColorShade(globals()->gBarIndicator[which].color, DARKER);
-            DrawNateShadedRect(pixMap, &tRect, clipRect, color, lightColor, darkColor);
-        }
-
-        if ( graphicValue > 0)
-        {
-            tRect.top = tRect.bottom;//tRect.bottom - graphicValue;
-            tRect.bottom = globals()->gBarIndicator[which].top + kBarIndicatorHeight;
-            color = GetRGBTranslateColorShade(globals()->gBarIndicator[which].color, LIGHTER);
-            lightColor = GetRGBTranslateColorShade(globals()->gBarIndicator[which].color, VERY_LIGHT);
-            darkColor = GetRGBTranslateColorShade(globals()->gBarIndicator[which].color, MEDIUM);
-            DrawNateShadedRect(pixMap, &tRect, clipRect, color, lightColor, darkColor);
-        }
-        rrect = Rect(tRect.left, globals()->gBarIndicator[ which].top,
-            tRect.right, globals()->gBarIndicator[ which].top + kBarIndicatorHeight);
-        copy_world(*gOffWorld, *gRealWorld, rrect);
-
-        globals()->gBarIndicator[ which].thisValue = value;
+    int8_t hue = globals()->gBarIndicator[which].color;
+    Rect bar(0, 0, kBarIndicatorWidth, kBarIndicatorHeight);
+    bar.offset(
+            kBarIndicatorLeft + play_screen.right,
+            globals()->gBarIndicator[which].top);
+    if (graphicValue < kBarIndicatorHeight) {
+        Rect top_bar = bar;
+        top_bar.bottom = top_bar.bottom - graphicValue;
+        const RgbColor fill_color = GetRGBTranslateColorShade(hue, DARK);
+        const RgbColor light_color = GetRGBTranslateColorShade(hue, MEDIUM);
+        const RgbColor dark_color = GetRGBTranslateColorShade(hue, DARKER);
+        draw_shaded_rect(top_bar, fill_color, light_color, dark_color);
     }
+
+    if (graphicValue > 0) {
+        Rect bottom_bar = bar;
+        bottom_bar.top = bottom_bar.bottom - graphicValue;
+        const RgbColor fill_color = GetRGBTranslateColorShade(hue, LIGHTER);
+        const RgbColor light_color = GetRGBTranslateColorShade(hue, VERY_LIGHT);
+        const RgbColor dark_color = GetRGBTranslateColorShade(hue, MEDIUM);
+        draw_shaded_rect(bottom_bar, fill_color, light_color, dark_color);
+    }
+
+    globals()->gBarIndicator[which].thisValue = value;
 }
 
-void DrawBuildTimeBar(int32_t value) {
+void draw_build_time_bar(int32_t value) {
     if (value < 0) {
-        value = 0;
+        return;
     }
     value = kMiniBuildTimeHeight - value;
 
@@ -978,7 +994,7 @@ void DrawBuildTimeBar(int32_t value) {
 
     {
         const RgbColor color = GetRGBTranslateColorShade(PALE_PURPLE, MEDIUM);
-        DrawNateVBracket(gOffWorld, clip, clip, color);
+        draw_vbracket(clip, color);
     }
 
     Rect bar = clip;
@@ -986,13 +1002,13 @@ void DrawBuildTimeBar(int32_t value) {
 
     {
         const RgbColor color = GetRGBTranslateColorShade(PALE_PURPLE, DARK);
-        DrawNateRect(gOffWorld, &bar, color);
+        VideoDriver::driver()->fill_rect(bar, color);
     }
 
     if (value > 0) {
         bar.top += value;
         const RgbColor color = GetRGBTranslateColorShade(PALE_PURPLE, LIGHT);
-        DrawNateRect(gOffWorld, &bar, color);
+        VideoDriver::driver()->fill_rect(bar, color);
     }
 }
 

@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,15 +14,13 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_GAME_SCENARIO_MAKER_HPP_
 #define ANTARES_GAME_SCENARIO_MAKER_HPP_
 
 #include "data/scenario.hpp"
 #include "data/space-object.hpp"
-#include "drawing/shapes.hpp"
 #include "game/globals.hpp"
 #include "game/space-object.hpp"
 #include "lang/casts.hpp"
@@ -46,7 +44,8 @@ Scenario* mGetScenario(int32_t num);
 int32_t mGetRealAdmiralNum(int32_t mplayernum);
 
 void ScenarioMakerInit();
-bool ConstructScenario(const Scenario* scenario);
+bool start_construct_scenario(const Scenario* scenario, int32_t* max);
+void construct_scenario(const Scenario* scenario, int32_t* current);
 void DeclareWinner(int32_t whichPlayer, int32_t nextLevel, int32_t textID);
 void CheckScenarioConditions(int32_t timePass);
 int32_t GetRealAdmiralNumber(int32_t whichAdmiral);

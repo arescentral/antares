@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_VIDEO_TRANSITIONS_HPP_
 #define ANTARES_VIDEO_TRANSITIONS_HPP_
@@ -36,12 +35,14 @@ class Transitions {
 
     void start_boolean(int32_t in_speed, int32_t out_speed, uint8_t goal_color);
     void update_boolean(int32_t time_passed);
+    void draw() const;
 
   private:
     bool _active;
     int32_t _step;
     int32_t _in_speed;
     int32_t _out_speed;
+    RgbColor _color;
 
     DISALLOW_COPY_AND_ASSIGN(Transitions);
 };
@@ -57,9 +58,9 @@ class ColorFade : public Card {
             bool* skipped);
 
     virtual void become_front();
-    virtual void resign_front();
 
     virtual void mouse_down(const MouseDownEvent& event);
+    virtual void key_down(const KeyDownEvent& event);
     virtual bool next_timer(int64_t& time);
     virtual void fire_timer();
 
@@ -85,9 +86,9 @@ class PictFade : public Card {
     ~PictFade();
 
     virtual void become_front();
-    virtual void resign_front();
 
     virtual void mouse_down(const MouseDownEvent& event);
+    virtual void key_down(const KeyDownEvent& event);
     virtual bool next_timer(int64_t& time);
     virtual void fire_timer();
 

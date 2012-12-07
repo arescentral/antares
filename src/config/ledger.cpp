@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "config/ledger.hpp"
 
@@ -30,6 +29,7 @@ using sfz::Exception;
 using sfz::Json;
 using sfz::JsonVisitor;
 using sfz::MappedFile;
+using sfz::PrintItem;
 using sfz::Rune;
 using sfz::ScopedFd;
 using sfz::String;
@@ -49,20 +49,25 @@ namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-Ledger::~Ledger() { }
-
 namespace {
 
 Ledger* ledger;
 
 }  // namespace
 
-Ledger* Ledger::ledger() {
-    return ::antares::ledger;
+Ledger::Ledger() {
+    if (antares::ledger) {
+        throw Exception("Ledger is a singleton");
+    }
+    antares::ledger = this;
 }
 
-void Ledger::set_ledger(Ledger* ledger) {
-    ::antares::ledger = ledger;
+Ledger::~Ledger() {
+    antares::ledger = NULL;
+}
+
+Ledger* Ledger::ledger() {
+    return ::antares::ledger;
 }
 
 NullLedger::NullLedger() {
@@ -77,7 +82,7 @@ void NullLedger::unlocked_chapters(std::vector<int>* chapters) {
     *chapters = std::vector<int>(_chapters.begin(), _chapters.end());
 }
 
-DirectoryLedger::DirectoryLedger(const String& directory)
+DirectoryLedger::DirectoryLedger(PrintItem directory)
         : _directory(directory) {
     load();
 }

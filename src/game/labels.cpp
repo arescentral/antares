@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "game/labels.hpp"
 
@@ -23,7 +22,6 @@
 #include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/pix-map.hpp"
 #include "drawing/text.hpp"
 #include "game/cursor.hpp"
@@ -140,8 +138,6 @@ void RemoveScreenLabel(long which) {
 }
 
 void draw_labels() {
-    mSetDirectFont(kTacticalFontNum);
-
     for (int i = 0; i < kMaxLabelNum; ++i) {
         screenLabelType* const label = globals()->gScreenLabelData.get() + i;
 
@@ -165,36 +161,28 @@ void draw_labels() {
         }
         const RgbColor light = GetRGBTranslateColorShade(label->color, VERY_LIGHT);
         const RgbColor dark = GetRGBTranslateColorShade(label->color, VERY_DARK);
-        ArrayPixMap pix(label->thisRect.width(), label->thisRect.height());
-        pix.fill(RgbColor::kClear);
-        DrawNateRectVScan(&pix, pix.size().as_rect(), dark, (at.h ^ at.v) & 0x1);
-
-        scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite(
-                    format("/x/screen_label: {0}", quote(text)), pix));
-        sprite->draw(at.h, at.v);
-        at.offset(kLabelInnerSpace, kLabelInnerSpace + gDirectText->ascent);
+        VideoDriver::driver()->dither_rect(label->thisRect, dark);
+        at.offset(kLabelInnerSpace, kLabelInnerSpace + tactical_font->ascent);
 
         if (label->lineNum > 1) {
             for (int j = 1; j <= label->lineNum; j++) {
                 StringSlice line = String_Get_Nth_Line(text, j);
 
-                gDirectText->draw_sprite(Point(at.h + 1, at.v + 1), line, RgbColor::kBlack);
-                gDirectText->draw_sprite(Point(at.h - 1, at.v - 1), line, RgbColor::kBlack);
-                gDirectText->draw_sprite(at, line, light);
+                tactical_font->draw_sprite(Point(at.h + 1, at.v + 1), line, RgbColor::kBlack);
+                tactical_font->draw_sprite(Point(at.h - 1, at.v - 1), line, RgbColor::kBlack);
+                tactical_font->draw_sprite(at, line, light);
 
                 at.offset(0, label->lineHeight);
             }
         } else {
-            gDirectText->draw_sprite(Point(at.h + 1, at.v + 1), text, RgbColor::kBlack);
-            gDirectText->draw_sprite(at, text, light);
+            tactical_font->draw_sprite(Point(at.h + 1, at.v + 1), text, RgbColor::kBlack);
+            tactical_font->draw_sprite(at, text, light);
         }
     }
 }
 
 void update_all_label_contents(int32_t units_done) {
     Rect clip = viewport;
-    mSetDirectFont(kTacticalFontNum);
-
     for (int i = 0; i < kMaxLabelNum; ++i) {
         screenLabelType* const label = globals()->gScreenLabelData.get() + i;
         if (!label->active || label->killMe || (label->text.empty()) || !label->visible) {
@@ -423,8 +411,6 @@ String* GetScreenLabelStringPtr( long which) {
 
 // do this if you mess with its string
 void RecalcScreenLabelSize(long which) {
-    mSetDirectFont(kTacticalFontNum);
-
     screenLabelType *label = globals()->gScreenLabelData.get() + which;
     int lineNum = String_Count_Lines(label->text);
 
@@ -433,22 +419,19 @@ void RecalcScreenLabelSize(long which) {
         int maxWidth = 0;
         for (int i = 1; i <= lineNum; i++) {
             StringSlice text = String_Get_Nth_Line(label->text, i);
-            mGetDirectStringDimensions(text, label->width, label->height);
-            label->width += kLabelTotalInnerSpace;
-            if (label->width > maxWidth) {
-                maxWidth = label->width;
+            int32_t width = tactical_font->string_width(text);
+            if (width > maxWidth) {
+                maxWidth = width;
             }
         }
-        label->width = maxWidth;
-        label->lineHeight = label->height;
-        label->height = label->height * lineNum;
-        label->height += kLabelTotalInnerSpace;
+        label->width = maxWidth + kLabelTotalInnerSpace;
+        label->height = (tactical_font->height * lineNum) + kLabelTotalInnerSpace;
+        label->lineHeight = tactical_font->height;
     } else {
         label->lineNum = 1;
-        mGetDirectStringDimensions(label->text, label->width, label->height);
-        label->width += kLabelTotalInnerSpace;
-        label->lineHeight = label->height;
-        label->height += kLabelTotalInnerSpace;
+        label->width = tactical_font->string_width(label->text) + kLabelTotalInnerSpace;
+        label->height = tactical_font->height + kLabelTotalInnerSpace;
+        label->lineHeight = tactical_font->height;
     }
 }
 
@@ -477,7 +460,7 @@ static StringSlice String_Get_Nth_Line(const StringSlice& source, long nth) {
 }
 
 static void Auto_Animate_Line( Point *source, Point *dest) {
-    switch ((globals()->gGameTime >> 3) & 0x03) {
+    switch ((usecs_to_ticks(globals()->gGameTime) >> 3) & 0x03) {
         case 0:
             dest->h = source->h + ((dest->h - source->h) >> 2);
             dest->v = source->v + ((dest->v - source->v) >> 2);

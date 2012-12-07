@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "game/space-object.hpp"
 
@@ -25,7 +24,6 @@
 #include "data/space-object.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "game/admiral.hpp"
 #include "game/beam.hpp"
@@ -1023,7 +1021,6 @@ void AddActionToQueue( objectActionType *action, long actionNumber, long actionT
     }
 
     if ( queueNumber == kActionQueueLength) return;
-//  delayTime += globals()->gGameTime;
     actionQueue->action = action;
     actionQueue->actionNum = actionNumber;
     actionQueue->scheduledTime = delayTime;
@@ -1100,7 +1097,6 @@ void ExecuteActionQueue( long unitsToDo)
     while (( gFirstActionQueue != NULL) &&
         ( gFirstActionQueue->action != NULL) &&
         ( gFirstActionQueue->scheduledTime <= 0))
-//      ( gFirstActionQueue->scheduledTime <= globals()->gGameTime))
     {
         subjectid = -1;
         directid = -1;

@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "ui/screens/options.hpp"
 
@@ -28,8 +27,7 @@
 #include "data/interface.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
-#include "drawing/retro-text.hpp"
+#include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/main.hpp"
 #include "game/scenario-maker.hpp"
@@ -89,11 +87,6 @@ SoundControlScreen::SoundControlScreen(OptionsScreen::State* state, Preferences*
           _preferences(preferences) { }
 
 SoundControlScreen::~SoundControlScreen() { }
-
-void SoundControlScreen::become_front() {
-    InterfaceScreen::become_front();
-    VideoDriver::driver()->set_game_state(OPTIONS_INTERFACE);
-}
 
 void SoundControlScreen::adjust_interface() {
     mutable_item(IDLE_MUSIC)->item.checkboxButton.on = _preferences->play_idle_music();
@@ -237,11 +230,6 @@ KeyControlScreen::KeyControlScreen(OptionsScreen::State* state, Preferences* pre
 
 KeyControlScreen::~KeyControlScreen() { }
 
-void KeyControlScreen::become_front() {
-    InterfaceScreen::become_front();
-    VideoDriver::driver()->set_game_state(KEY_CONTROL_INTERFACE);
-}
-
 void KeyControlScreen::key_down(const KeyDownEvent& event) {
     if (_selected_key >= 0) {
         switch (event.key()) {
@@ -367,9 +355,8 @@ void KeyControlScreen::draw() const {
 
         const interfaceItemType& box = item(CONFLICT_TEXT);
         ArrayPixMap pix(box.bounds.width(), box.bounds.height());
-        DrawInterfaceTextInRect(pix.size().as_rect(), text, box.style, box.color, &pix, NULL);
-        scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite("/x/key_control_screen", pix));
-        sprite->draw(box.bounds.left, box.bounds.top);
+        vector<inlinePictType> pict;
+        draw_text_in_rect(box.bounds, text, box.style, box.color, pict);
     }
 }
 

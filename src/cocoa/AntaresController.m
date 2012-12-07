@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "cocoa/AntaresController.h"
 
@@ -28,6 +27,7 @@
 #define kScreenWidth @"ScreenWidth"
 #define kScreenHeight @"ScreenHeight"
 #define kScenario @"Scenario"
+#define kFullscreen @"Fullscreen"
 
 #define kIdentifier @"Identifier"
 #define kTitle @"Title"
@@ -77,8 +77,14 @@ static NSURL* url(const char* utf8_bytes) {
     return [NSURL URLWithString:str(utf8_bytes)];
 }
 
-@implementation AntaresController
+@interface AntaresController (Private)
+- (NSURL*)authorURL;
+- (void)setAuthorURL:(NSURL*)authorURL;
+- (NSURL*)downloadURL;
+- (void)setDownloadURL:(NSURL*)downloadURL;
+@end
 
+@implementation AntaresController
 - (void)application:(NSApplication*)app openFile:(NSString*)filename {
     [_window orderOut:self];
     AntaresExtractDataController* extract = [[[AntaresExtractDataController alloc]
@@ -178,9 +184,9 @@ static NSURL* url(const char* utf8_bytes) {
     NSString* version = [[sender representedObject] objectForKey:kVersion];
 
     [_scenario_button setTitle:title];
-    _download_url = [[sender representedObject] objectForKey:kDownloadURL];
+    [self setDownloadURL:[[sender representedObject] objectForKey:kDownloadURL]];
     [_author_button setTitle:author];
-    _author_url = [[sender representedObject] objectForKey:kAuthorURL];
+    [self setAuthorURL:[[sender representedObject] objectForKey:kAuthorURL]];
     [_version_label setStringValue:version];
 
     [[NSUserDefaults standardUserDefaults] setObject:identifier forKey:kScenario];
@@ -244,6 +250,11 @@ static NSURL* url(const char* utf8_bytes) {
 - (void)awakeFromNib {
     [self updateResolutionList];
     [self updateScenarioList];
+    bool windowed = 
+        [[NSUserDefaults standardUserDefaults] objectForKey:kFullscreen]
+        && ![[NSUserDefaults standardUserDefaults] boolForKey:kFullscreen];
+    [_window_checkbox setIntValue:windowed];
+    [self setWindowedFrom:_window_checkbox];
     [_window center];
     [_window makeKeyAndOrderFront:self];
 }
@@ -256,11 +267,17 @@ static NSURL* url(const char* utf8_bytes) {
     [[NSWorkspace sharedWorkspace] openURL:_author_url];
 }
 
+- (IBAction)setWindowedFrom:(id)sender {
+    bool fullscreen = ![sender intValue];
+    [[NSUserDefaults standardUserDefaults] setBool:fullscreen forKey:kFullscreen];
+}
+
 - (IBAction)settingsDone:(id)sender {
     [_window close];
 
     CFStringRef error_message;
-    if (!antares_controller_set_drivers(&error_message)) {
+    drivers = antares_controller_create_drivers(&error_message);
+    if (!drivers) {
         NSLog(@"%@", error_message);
         CFRelease(error_message);
         exit(1);
@@ -283,12 +300,46 @@ static NSURL* url(const char* utf8_bytes) {
 
 - (void)extractDone:(id)sender {
     CFStringRef error_message;
-    if (!antares_controller_loop(&error_message)) {
+    if (!antares_controller_loop(drivers, &error_message)) {
         NSLog(@"%@", error_message);
         CFRelease(error_message);
         exit(1);
     }
+    antares_controller_destroy_drivers(drivers);
     [NSApp terminate:self];
 }
 
+- (void)dealloc {
+    [_download_url release];
+    [_author_url release];
+    [super dealloc];
+}
+
+- (NSURL*)authorURL {
+    @synchronized (self) {
+        return [[_author_url retain] autorelease];
+    }
+}
+
+- (void)setAuthorURL:(NSURL*)authorURL {
+    @synchronized (self) {
+        [authorURL retain];
+        [_author_url release];
+        _author_url = authorURL;
+    }
+}
+
+- (NSURL*)downloadURL {
+    @synchronized (self) {
+        return [[_download_url retain] autorelease];
+    }
+}
+
+- (void)setDownloadURL:(NSURL*)downloadURL {
+    @synchronized (self) {
+        [downloadURL retain];
+        [_download_url release];
+        _download_url = downloadURL;
+    }
+}
 @end

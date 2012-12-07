@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,12 +14,12 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_DRAWING_INTERFACE_HPP_
 #define ANTARES_DRAWING_INTERFACE_HPP_
 
+#include <vector>
 #include <sfz/sfz.hpp>
 
 #include "data/interface.hpp"
@@ -29,42 +29,24 @@ namespace antares {
 const int32_t kInterfaceTextVBuffer = 2;
 const int32_t kInterfaceTextHBuffer = 3;
 
-const size_t kMaxInlinePictNum = 8;  // max # of inline picts it'll keep track of
-
 // the inline pictType struct is for keeping track of picts included in my text boxes.
 struct inlinePictType {
     Rect bounds;
     short id;
 };
 
-void DrawPlayerInterfacePlainRect(
-        const Rect& rect, uint8_t color, interfaceStyleType style, PixMap* pix);
-void DrawPlayerInterfaceTabBox(
-        const Rect& rect, uint8_t color, interfaceStyleType style, PixMap* pix,
-        int top_right_border_size);
-void DrawPlayerInterfaceButton(const interfaceItemType& item, PixMap* pix);
-void DrawPlayerInterfaceTabBoxButton(const interfaceItemType& item, PixMap* pix);
-void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix);
-void DrawPlayerInterfaceCheckBox(const interfaceItemType& item, PixMap* pix);
-void DrawPlayerInterfaceLabeledBox(const interfaceItemType& item, PixMap* pix);
-
-void DrawInterfaceTextRect(const interfaceItemType& item, PixMap* pix);
-void DrawInterfaceTextInRect(
-        const Rect& rect, const sfz::StringSlice& text, interfaceStyleType style,
-        unsigned char textcolor, PixMap* pix, inlinePictType* inlinePict);
+void draw_text_in_rect(
+        Rect tRect, const sfz::StringSlice& text, interfaceStyleType style,
+        unsigned char textcolor, std::vector<inlinePictType>& inlinePict);
+void populate_inline_picts(
+        Rect rect, sfz::StringSlice text, interfaceStyleType style,
+        std::vector<inlinePictType>& inline_pict);
 
 short GetInterfaceTextHeightFromWidth(
         const sfz::StringSlice& text, interfaceStyleType style, short width);
-void DrawInterfacePictureRect(const interfaceItemType& item, PixMap* pix);
-void DrawAnyInterfaceItem(const interfaceItemType& item, PixMap* pix);
+void draw_interface_item(const interfaceItemType& item);
 
 void GetAnyInterfaceItemGraphicBounds(const interfaceItemType& item, Rect* rect);
-void GetAnyInterfaceItemContentBounds(const interfaceItemType& item, Rect* rect);
-
-short GetInterfaceStringWidth(const sfz::StringSlice& s, interfaceStyleType style);
-short GetInterfaceFontHeight(interfaceStyleType style);
-short GetInterfaceFontAscent(interfaceStyleType style);
-short GetInterfaceFontWidth(interfaceStyleType style);
 
 }  // namespace antares
 

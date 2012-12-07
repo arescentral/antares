@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_CONFIG_LEDGER_HPP_
 #define ANTARES_CONFIG_LEDGER_HPP_
@@ -28,10 +27,10 @@ namespace antares {
 
 class Ledger {
   public:
+    Ledger();
     virtual ~Ledger();
 
     static Ledger* ledger();
-    static void set_ledger(Ledger* ledger);
 
     virtual void unlock_chapter(int chapter) = 0;
     virtual void unlocked_chapters(std::vector<int>* chapters) = 0;
@@ -51,7 +50,7 @@ class NullLedger : public Ledger {
 
 class DirectoryLedger : public Ledger {
   public:
-    DirectoryLedger(const sfz::String& directory);
+    DirectoryLedger(sfz::PrintItem directory);
     virtual void unlock_chapter(int chapter);
     virtual void unlocked_chapters(std::vector<int>* chapters);
 

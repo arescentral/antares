@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,20 +14,22 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_DRAWING_BRIEFING_HPP_
 #define ANTARES_DRAWING_BRIEFING_HPP_
 
-#include "drawing/shapes.hpp"
+#include "math/geometry.hpp"
 
 namespace antares {
 
 struct Scenario;
+class PixMap;
 
 void Briefing_Objects_Render(
         PixMap* destmap, long maxSize, Rect *bounds, coordPointType *corner, long scale);
+void draw_briefing_objects(
+        Point origin, long maxSize, Rect bounds, coordPointType corner, long scale);
 
 void BriefPoint_Data_Get(
         long whichPoint, const Scenario* scenario, long *headerID, long *headerNumber,

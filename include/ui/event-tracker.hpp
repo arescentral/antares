@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_UI_EVENT_TRACKER_HPP_
 #define ANTARES_UI_EVENT_TRACKER_HPP_
@@ -29,8 +28,9 @@ namespace antares {
 class EventTracker : public EventReceiver {
   public:
     EventTracker(bool strict):
-            _strict(strict),
-            _button(false) { }
+            _strict(strict) {
+        _button[0] = _button[1] = _button[2] = false;
+    }
 
     virtual void key_down(const KeyDownEvent& event);
     virtual void key_up(const KeyUpEvent& event);
@@ -38,13 +38,13 @@ class EventTracker : public EventReceiver {
     virtual void mouse_up(const MouseUpEvent& event);
     virtual void mouse_move(const MouseMoveEvent& event);
 
-    bool button() const { return _button; }
+    bool button(int which) const { return _button[which]; }
     const Point& mouse() const { return _mouse; }
     const KeyMap& keys() const { return _keys; }
 
   private:
     const bool _strict;
-    bool _button;
+    bool _button[3];
     Point _mouse;
     KeyMap _keys;
 

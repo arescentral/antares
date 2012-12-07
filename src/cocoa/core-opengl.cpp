@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "cocoa/core-opengl.hpp"
 
@@ -42,6 +41,10 @@ PixelFormat::PixelFormat(const CGLPixelFormatAttribute* attrs) {
     }
 }
 
+PixelFormat::~PixelFormat() {
+    CGLReleasePixelFormat(_pixel_format);
+}
+
 CGLPixelFormatObj PixelFormat::c_obj() const { return _pixel_format; }
 
 GLint PixelFormat::npix() const { return _npix; }
@@ -50,9 +53,9 @@ Context::Context(CGLPixelFormatObj pix, CGLContextObj share) {
     check(CGLCreateContext(pix, NULL, &_context));
 }
 
-Context::~Context() { CGLDestroyContext(_context); }
+Context::~Context() { CGLReleaseContext(_context); }
 
-CGLContextObj Context::c_obj() { return _context; }
+CGLContextObj Context::c_obj() const { return _context; }
 
 }  // namespace cgl
 }  // namespace antares

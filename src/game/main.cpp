@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "game/main.hpp"
 
@@ -26,7 +25,6 @@
 #include "config/preferences.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/shapes.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "drawing/text.hpp"
@@ -55,10 +53,12 @@
 #include "ui/screens/briefing.hpp"
 #include "ui/screens/debriefing.hpp"
 #include "ui/screens/help.hpp"
+#include "ui/screens/loading.hpp"
 #include "ui/screens/play-again.hpp"
 #include "video/driver.hpp"
 
 using sfz::Exception;
+using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
 using sfz::scoped_ptr;
@@ -102,13 +102,14 @@ class GamePlay : public Card {
     const Rect _play_area;
     const int64_t _scenario_start_time;
     const bool _command_and_q;
-    bool _mouse_down;
+    bool _left_mouse_down;
+    bool _right_mouse_down;
     bool _entering_message;
     bool _player_paused;
     KeyMap _key_map;
     KeyMap _last_key_map;
     uint32_t _decide_cycle;
-    int _last_click_time;
+    int64_t _last_click_time;
     int _scenario_check_time;
     PlayAgainScreen::Item _play_again;
 };
@@ -117,12 +118,15 @@ Card* AresInit() {
     return new Master;
 }
 
-MainPlay::MainPlay(const Scenario* scenario, bool replay, GameResult* game_result)
-        : _state(NEW),
-          _scenario(scenario),
-          _replay(replay),
-          _cancelled(false),
-          _game_result(game_result) { }
+MainPlay::MainPlay(
+        const Scenario* scenario, bool replay, bool show_loading_screen,
+        GameResult* game_result):
+    _state(NEW),
+    _scenario(scenario),
+    _replay(replay),
+    _show_loading_screen(show_loading_screen),
+    _cancelled(false),
+    _game_result(game_result) { }
 
 void MainPlay::become_front() {
     switch (_state) {
@@ -138,20 +142,37 @@ void MainPlay::become_front() {
                 PlaySong();
             }
 
-            // TODO(sfiera): implement as a Card.
-            if (!ConstructScenario(_scenario)) {
-                *_game_result = QUIT_GAME;
-                stack()->pop(this);
-                return;
-            }
-            if (!_replay) {
-                stack()->push(new BriefingScreen(_scenario, &_cancelled));
+            if (_show_loading_screen) {
+                stack()->push(new LoadingScreen(_scenario, &_cancelled));
                 break;
+            } else {
+                int32_t max;
+                int32_t current = 0;
+                if (!start_construct_scenario(_scenario, &max)) {
+                    *_game_result = QUIT_GAME;
+                    stack()->pop(this);
+                    return;
+                }
+                while (current < max) {
+                    construct_scenario(_scenario, &current);
+                }
             }
         }
         // fall through.
 
       case LOADING:
+        {
+            if (_cancelled) {
+                *_game_result = QUIT_GAME;
+                stack()->pop(this);
+                return;
+            }
+            if (!_replay) {
+                _state = BRIEFING;
+                stack()->push(new BriefingScreen(_scenario, &_cancelled));
+                break;
+            }
+        }
         // fall through
 
       case BRIEFING:
@@ -178,14 +199,12 @@ void MainPlay::become_front() {
             }
             globals()->gLastTime = now_usecs();
 
-            VideoDriver::driver()->set_game_state(PLAY_GAME);
             stack()->push(new GamePlay(_replay, _game_result));
         }
         break;
 
       case PLAYING:
         {
-            VideoDriver::driver()->set_game_state(DONE_GAME);
             if (Preferences::preferences()->play_music_in_game()) {
                 StopAndUnloadSong();
             }
@@ -199,13 +218,16 @@ GamePlay::GamePlay(bool replay, GameResult* game_result)
         : _state(PLAYING),
           _replay(replay),
           _game_result(game_result),
-          _next_timer(now_usecs() + kTimeUnit),
+          _next_timer(add_ticks(now_usecs(), 1)),
           _seconds(0),
           _play_area(viewport.left, viewport.top, viewport.right, viewport.bottom),
-          _scenario_start_time(
-                  (gThisScenario->startTime & kScenario_StartTimeMask) * kScenarioTimeMultiple),
+          _scenario_start_time(add_ticks(
+                      0,
+                      (gThisScenario->startTime & kScenario_StartTimeMask)
+                      * kScenarioTimeMultiple)),
           _command_and_q(BothCommandAndQ()),
-          _mouse_down(false),
+          _left_mouse_down(false),
+          _right_mouse_down(false),
           _entering_message(false),
           _player_paused(false),
           _decide_cycle(0),
@@ -214,21 +236,24 @@ GamePlay::GamePlay(bool replay, GameResult* game_result)
 
 class PauseScreen : public Card {
   public:
-    PauseScreen()
-            : _visible(false),
-              _next_switch(0) {
-        build_image();
+    PauseScreen():
+            _visible(false),
+            _next_switch(0) {
+        const StringList list(3100);
+        _pause_string.assign(list.at(10));
+        long width = title_font->string_width(_pause_string);
+        Rect bounds(0, 0, width, title_font->height);
+        bounds.center_in(play_screen);
+        _text_origin = Point(bounds.left, bounds.top + title_font->ascent);
+
+        bounds.inset(-4, -4);
+        _bracket_bounds = bounds;
     }
 
     virtual void become_front() {
-        VideoDriver::driver()->set_game_state(GAME_PAUSED);
         // TODO(sfiera): cancel any active transition.
         PlayVolumeSound(kComputerBeep4, kMaxSoundVolume, kShortPersistence, kMustPlaySound);
         show_hide();
-    }
-
-    virtual void resign_front() {
-        VideoDriver::driver()->set_game_state(PLAY_GAME);
     }
 
     virtual void key_up(const KeyUpEvent& event) {
@@ -249,9 +274,18 @@ class PauseScreen : public Card {
     virtual void draw() const {
         next()->draw();
         if (_visible) {
-            Rect pause_area = _pause_indicator->size().as_rect();
-            pause_area.center_in(play_screen);
-            _pause_indicator->draw(pause_area.left, pause_area.top);
+            const RgbColor& light_green = GetRGBTranslateColorShade(GREEN, LIGHTER);
+            const RgbColor& dark_green = GetRGBTranslateColorShade(GREEN, DARKER);
+
+            for (int32_t y = _bracket_bounds.top + 2; y < _bracket_bounds.bottom; y += 2) {
+                VideoDriver::driver()->draw_line(
+                        Point(_bracket_bounds.left, y),
+                        Point(_bracket_bounds.right - 1, y),
+                        dark_green);
+            }
+            draw_vbracket(_bracket_bounds, light_green);
+
+            title_font->draw_sprite(_text_origin, _pause_string, light_green);
         }
     }
 
@@ -261,40 +295,11 @@ class PauseScreen : public Card {
         _next_switch = now_usecs() + (1000000 / 3);
     }
 
-    void build_image() {
-        const StringList list(3100);
-        const StringSlice pause_string(list.at(10));
-
-        long width;
-        long height;
-        mSetDirectFont(kTitleFontNum);
-        mGetDirectStringDimensions(pause_string, width, height);
-        width += 8;
-        height += 8;
-
-        ArrayPixMap image(width, height);
-        image.fill(RgbColor::kClear);
-
-        const RgbColor darker = GetRGBTranslateColorShade(GREEN, DARKER);
-        for (int row = 2; row < height; row += 2) {
-            DrawNateLine(&image, image.size().as_rect(), 0, row, width - 1, row, darker);
-        }
-
-        const RgbColor lighter = GetRGBTranslateColorShade(GREEN, LIGHTER);
-        DrawNateVBracket(&image, image.size().as_rect(), image.size().as_rect(), lighter);
-
-        Rect text_area = image.size().as_rect();
-        text_area.inset(4, 4);
-        DrawDirectTextStringClipped(
-                Point(text_area.left, text_area.top + mDirectFontAscent()), pause_string, lighter,
-                &image, text_area);
-
-        _pause_indicator.reset(VideoDriver::driver()->new_sprite("/x/pause_indicator", image));
-    }
-
-    scoped_ptr<Sprite> _pause_indicator;
     bool _visible;
     int64_t _next_switch;
+    String _pause_string;
+    Point _text_origin;
+    Rect _bracket_bounds;
 
     DISALLOW_COPY_AND_ASSIGN(PauseScreen);
 };
@@ -362,25 +367,19 @@ void GamePlay::become_front() {
 }
 
 void GamePlay::draw() const {
-    scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite("/x/real_world", *gRealWorld));
-    sprite->draw(0, 0);
+    globals()->starfield.draw();
+    draw_sector_lines();
+    draw_beams();
+    draw_sprites();
+    draw_labels();
 
-    {
-        Rect clip = viewport;
-        Stencil stencil(VideoDriver::driver());
-        VideoDriver::driver()->fill_rect(clip, RgbColor::kWhite);
-        stencil.apply();
-
-        globals()->starfield.draw();
-        draw_sector_lines();
-        draw_beams();
-        draw_sprites();
-        draw_labels();
-    }
-
+    draw_message();
     draw_site();
     draw_cursor();
+    draw_instruments();
+    draw_sprite_cursor();
     draw_hint_line();
+    globals()->transitions.draw();
 }
 
 bool GamePlay::next_timer(int64_t& time) {
@@ -394,32 +393,30 @@ bool GamePlay::next_timer(int64_t& time) {
 void GamePlay::fire_timer() {
     uint64_t thisTime;
     uint64_t scrapTime;
-    int newGameTime;
     const Rect clip_rect = viewport;
 
     while (_next_timer < now_usecs()) {
-        _next_timer += kTimeUnit;
+        _next_timer = add_ticks(_next_timer, 1);
     }
 
     thisTime = now_usecs();
     scrapTime = thisTime;
     thisTime -= globals()->gLastTime;
-    newGameTime = (thisTime / kTimeUnit) + _scenario_start_time;
+    int64_t newGameTime = thisTime + _scenario_start_time;
 
     if ((mNOFFastMotionKey(_key_map)) && !_entering_message) {
-        newGameTime = globals()->gGameTime + 12;
-        thisTime = (newGameTime - _scenario_start_time) * kTimeUnit;
+        newGameTime = add_ticks(globals()->gGameTime, 12);
+        thisTime = newGameTime - _scenario_start_time;
         globals()->gLastTime = scrapTime - thisTime;
     }
 
-    int unitsPassed = newGameTime - globals()->gGameTime;
+    int unitsPassed = usecs_to_ticks(newGameTime - globals()->gGameTime);
     int unitsDone = unitsPassed;
 
     if (unitsPassed <= 0) {
         return;
     }
 
-    gOffWorld->view(clip_rect).fill(RgbColor::kBlack);
     globals()->starfield.prepare_to_move();
     EraseSite();
 
@@ -427,7 +424,7 @@ void GamePlay::fire_timer() {
         _player_paused = false;
         unitsDone = unitsPassed = 0;
         newGameTime = globals()->gGameTime;
-        thisTime = (newGameTime - _scenario_start_time) * kTimeUnit;
+        thisTime = newGameTime - _scenario_start_time;
         globals()->gLastTime = scrapTime - thisTime;
     }
 
@@ -453,7 +450,7 @@ void GamePlay::fire_timer() {
             MoveSpaceObjects(gSpaceObjectData.get(), kMaxSpaceObject, unitsToDo);
         }
 
-        globals()->gGameTime += unitsToDo;
+        globals()->gGameTime = add_ticks(globals()->gGameTime, unitsToDo);
 
         if ( _decide_cycle == kDecideEveryCycles) {
             // everything in here gets executed once every kDecideEveryCycles
@@ -468,30 +465,43 @@ void GamePlay::fire_timer() {
                 globals()->gGameOver = 1;
             }
 
-            if (VideoDriver::driver()->button()) {
+            if (VideoDriver::driver()->button(0)) {
                 if (_replay) {
                     *_game_result = QUIT_GAME;
                     globals()->gGameOver = 1;
                 } else {
-                    if (!_mouse_down) {
-                        int double_click_interval_ticks
-                            = VideoDriver::driver()->double_click_interval_usecs() / kTimeUnit;
-                        if ((globals()->gGameTime - _last_click_time)
-                                <= double_click_interval_ticks) {
+                    if (!_left_mouse_down) {
+                        int64_t double_click_interval
+                            = VideoDriver::driver()->double_click_interval_usecs();
+                        if ((globals()->gGameTime - _last_click_time) <= double_click_interval) {
                             InstrumentsHandleDoubleClick();
-                            _last_click_time -= double_click_interval_ticks;
+                            _last_click_time -= double_click_interval;
                         } else {
                             InstrumentsHandleClick();
                             _last_click_time = globals()->gGameTime;
                         }
-                        _mouse_down = true;
+                        _left_mouse_down = true;
                     } else {
                         InstrumentsHandleMouseStillDown();
                     }
                 }
-            } else if (_mouse_down) {
-                _mouse_down = false;
+            } else if (_left_mouse_down) {
+                _left_mouse_down = false;
                 InstrumentsHandleMouseUp();
+            }
+
+            if (VideoDriver::driver()->button(1)) {
+                if (_replay) {
+                    *_game_result = QUIT_GAME;
+                    globals()->gGameOver = 1;
+                } else {
+                    if (!_right_mouse_down) {
+                        PlayerShipHandleClick(globals()->cursor_coord, 1);
+                        _right_mouse_down = true;
+                    }
+                }
+            } else if (_right_mouse_down) {
+                _right_mouse_down = false;
             }
 
             CollideSpaceObjects(gSpaceObjectData.get(), kMaxSpaceObject);
@@ -542,26 +552,21 @@ void GamePlay::fire_timer() {
     update_beams();
     update_all_label_positions(unitsDone);
     update_all_label_contents(unitsDone);
-    update_site();
+    update_site(_replay);
 
     CullSprites();
     ShowAllLabels();
     ShowAllBeams();
     globals()->starfield.show();
-    copy_world(*gRealWorld, *gOffWorld, world);
 
     DrawMessageScreen(unitsDone);
     UpdateRadar(unitsDone);
     globals()->transitions.update_boolean(unitsDone);
 
-    VideoDriver::driver()->main_loop_iteration_complete(globals()->gGameTime);
-
     if (globals()->gGameOver > 0) {
         thisTime = now_usecs();
         thisTime -= globals()->gLastTime;
-        newGameTime = thisTime / 1000000; // divide by a million to get seconds
-        _seconds = newGameTime;
-        VideoDriver::driver()->set_transition_fraction(0.0);
+        _seconds = thisTime / 1000000; // divide by a million to get seconds
 
         if (*_game_result == NO_GAME) {
             if (globals()->gScenarioWinner.player == globals()->gPlayerAdmiralNumber) {
@@ -636,16 +641,6 @@ void GamePlay::key_down(const KeyDownEvent& event) {
         _player_paused = true;
         stack()->push(new HelpScreen);
         break;
-    }
-}
-
-void Pause( long time)
-
-{
-    long    starttime = VideoDriver::driver()->ticks();
-
-    while (( VideoDriver::driver()->ticks() - starttime) < time) {
-        // DO NOTHING
     }
 }
 

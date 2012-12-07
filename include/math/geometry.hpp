@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_MATH_GEOMETRY_HPP_
 #define ANTARES_MATH_GEOMETRY_HPP_
@@ -187,6 +186,14 @@ struct Rect {
 
 void read_from(sfz::ReadSource in, Rect& r);
 void print_to(sfz::PrintTarget out, Rect r);
+
+struct coordPointType {
+    uint32_t    h;
+    uint32_t    v;
+};
+
+inline bool operator==(coordPointType x, coordPointType y) { return (x.h == y.h) && (x.v == y.v); }
+inline bool operator!=(coordPointType x, coordPointType y) { return !(x == y); }
 
 }  // namespace antares
 

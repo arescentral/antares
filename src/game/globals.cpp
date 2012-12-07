@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "game/globals.hpp"
 
@@ -63,6 +62,7 @@ aresGlobalType::aresGlobalType() {
     gRadarCount = 0;
     gRadarSpeed = 30;
     gRadarRange = kRadarSize * 50;
+    radar_is_functioning = false;
     gWhichScaleNum = 0;
     gLastScale = SCALE_SCALE;
     gInstrumentTop = 0;
@@ -72,7 +72,6 @@ aresGlobalType::aresGlobalType() {
     gMessageLabelNum = -1;
     gStatusLabelNum = -1;
     gLastSoundTime = 0;
-    gLastSelectedBuildPrice = 0;
     gAutoPilotOff = true;
     levelNum = 31;
     keyMask = 0;

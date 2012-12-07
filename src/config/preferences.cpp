@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "config/preferences.hpp"
 
@@ -44,22 +43,18 @@ T clamp(T value, T lower, T upper) {
     return min(upper, max(lower, value));
 }
 
+Preferences* preferences = NULL;
+
+PrefsDriver* prefs_driver = NULL;
+
 }  // namespace
 
-scoped_ptr<Preferences> Preferences::_preferences;
-
 Preferences* Preferences::preferences() {
-    if (_preferences.get() == NULL) {
-        throw Exception("Called Preferences::preferences() before Preferences::set_preferences()");
+    if (antares::preferences == NULL) {
+        antares::preferences = new Preferences;
+        PrefsDriver::driver()->load(antares::preferences);
     }
-    return _preferences.get();
-}
-
-void Preferences::set_preferences(Preferences* preferences) {
-    if (preferences == NULL) {
-        throw Exception("Called Preferences::set_preferences(NULL)");
-    }
-    _preferences.reset(preferences);
+    return antares::preferences;
 }
 
 Preferences::Preferences() {
@@ -135,6 +130,7 @@ void Preferences::reset() {
 
     set_volume(7);
 
+    set_fullscreen(true);
     set_screen_size(Size(640, 480));
 
     _scenario_identifier.assign("com.biggerplanet.ares");
@@ -148,6 +144,7 @@ void Preferences::copy(const Preferences& preferences) {
     set_play_music_in_game(preferences.play_music_in_game());
     set_speech_on(preferences.speech_on());
     set_volume(preferences.volume());
+    set_fullscreen(preferences.fullscreen());
     set_screen_size(preferences.screen_size());
     set_scenario_identifier(preferences.scenario_identifier());
 }
@@ -170,6 +167,10 @@ bool Preferences::speech_on() const {
 
 int Preferences::volume() const {
     return _volume;
+}
+
+bool Preferences::fullscreen() const {
+    return _fullscreen;
 }
 
 Size Preferences::screen_size() const {
@@ -200,6 +201,10 @@ void Preferences::set_volume(int volume) {
     _volume = clamp(volume, 0, 8);
 }
 
+void Preferences::set_fullscreen(bool fullscreen) {
+    _fullscreen = fullscreen;
+}
+
 void Preferences::set_screen_size(Size size) {
     _screen_size = size;
 }
@@ -208,17 +213,25 @@ void Preferences::set_scenario_identifier(StringSlice id) {
     _scenario_identifier.assign(id);
 }
 
-PrefsDriver* PrefsDriver::_driver = NULL;
+PrefsDriver::PrefsDriver() {
+    if (antares::prefs_driver) {
+        throw Exception("PrefsDriver is a singleton");
+    }
+    antares::prefs_driver = this;
+}
 
-PrefsDriver::~PrefsDriver() { }
+PrefsDriver::~PrefsDriver() {
+    antares::prefs_driver = NULL;
+}
 
 PrefsDriver* PrefsDriver::driver() {
-    return _driver;
+    return prefs_driver;
 }
 
-void PrefsDriver::set_driver(PrefsDriver* driver) {
-    _driver = driver;
-}
+NullPrefsDriver::NullPrefsDriver() { }
+
+NullPrefsDriver::NullPrefsDriver(Preferences defaults):
+        _saved(defaults) { }
 
 void NullPrefsDriver::load(Preferences* preferences) {
     *preferences = _saved;

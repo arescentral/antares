@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,12 +14,10 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "ui/flows/master.hpp"
 
-#include "drawing/offscreen-gworld.hpp"
 #include "drawing/text.hpp"
 #include "game/admiral.hpp"
 #include "game/cheat.hpp"
@@ -129,18 +127,11 @@ void Master::init() {
 
     // TODO(sfiera): set gRandomSeed.
 
-    gRealWorld = new ArrayPixMap(world.width(), world.height());
-    CreateOffscreenWorld();
-
     InitSpriteCursor();
 
     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
 
-    gRealWorld->fill(RgbColor::kBlack);
-
     RotationInit();
-
-    InterfaceHandlingInit();
 
     InitDirectText();
     ScreenLabelInit();

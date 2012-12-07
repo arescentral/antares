@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "video/offscreen-driver.hpp"
 
@@ -40,6 +39,7 @@ using sfz::Exception;
 using sfz::Optional;
 using sfz::ScopedFd;
 using sfz::String;
+using sfz::StringSlice;
 using sfz::WriteTarget;
 using sfz::dec;
 using sfz::format;
@@ -53,7 +53,9 @@ namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-class OffscreenVideoDriver::SnapshotBuffer {
+namespace {
+
+class SnapshotBuffer {
   public:
     SnapshotBuffer(Size screen_size, int32_t bytes_per_pixel):
             _screen_size(screen_size),
@@ -86,112 +88,72 @@ class OffscreenVideoDriver::SnapshotBuffer {
     scoped_array<uint8_t> _data;
 };
 
-void write_to(const WriteTarget& out, const OffscreenVideoDriver::SnapshotBuffer& buffer) {
+void write_to(const WriteTarget& out, const SnapshotBuffer& buffer) {
     buffer.write_to(out);
 }
 
+static const CGLPixelFormatAttribute kAttrs[] = {
+    kCGLPFAColorSize, static_cast<CGLPixelFormatAttribute>(24),
+    // kCGLPFAAccelerated,
+    kCGLPFAOffScreen,
+    kCGLPFARemotePBuffer,
+    static_cast<CGLPixelFormatAttribute>(0),
+};
+
+}  // namespace
+
+class OffscreenVideoDriver::MainLoop : public EventScheduler::MainLoop {
+  public:
+    MainLoop(OffscreenVideoDriver& driver, const Optional<String>& output_dir, Card* initial):
+            _pix(kAttrs),
+            _context(_pix.c_obj(), NULL),
+            _buffer(Preferences::preferences()->screen_size(), 4),
+            _setup(_context, _buffer),
+            _output_dir(output_dir),
+            _loop(driver, initial) {
+    }
+
+    bool takes_snapshots() {
+        return _output_dir.has();
+    }
+
+    void snapshot(int64_t ticks) {
+        String dir(format("{0}/screens", *_output_dir));
+        makedirs(dir, 0755);
+        String path(format("{0}/{1}.png", dir, dec(ticks, 6)));
+        ScopedFd file(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
+        write(file, _buffer);
+    }
+
+    void draw() { _loop.draw(); }
+    bool done() const { return _loop.done(); }
+    Card* top() const { return _loop.top(); }
+
+  private:
+    cgl::PixelFormat _pix;
+    cgl::Context _context;
+    SnapshotBuffer _buffer;
+    struct Setup {
+        Setup(cgl::Context& context, SnapshotBuffer& buffer) {
+            cgl::check(CGLSetCurrentContext(context.c_obj()));
+            cgl::check(CGLSetOffScreen(context.c_obj(), buffer.width(), buffer.height(),
+                        buffer.row_bytes(), buffer.mutable_data()));
+        }
+    };
+    Setup _setup;
+    Optional<String> _output_dir;
+    OpenGlVideoDriver::MainLoop _loop;
+};
+
 OffscreenVideoDriver::OffscreenVideoDriver(
-        Size screen_size, const Optional<String>& output_dir):
+        Size screen_size, EventScheduler& scheduler, const Optional<String>& output_dir):
         OpenGlVideoDriver(screen_size),
-        _demo(0),
         _output_dir(output_dir),
-        _ticks(0),
-        _event_tracker(true) { }
-
-void OffscreenVideoDriver::set_demo_scenario(int demo) {
-    _demo = demo;
-}
-
-int OffscreenVideoDriver::get_demo_scenario() {
-    return _demo;
-}
+        _scheduler(scheduler) { }
 
 void OffscreenVideoDriver::loop(Card* initial) {
-    CGLPixelFormatAttribute attrs[] = {
-        kCGLPFAColorSize, static_cast<CGLPixelFormatAttribute>(24),
-        kCGLPFAStencilSize, static_cast<CGLPixelFormatAttribute>(8),
-        // kCGLPFAAccelerated,
-        kCGLPFAOffScreen,
-        kCGLPFARemotePBuffer,
-        static_cast<CGLPixelFormatAttribute>(0),
-    };
-
-    cgl::PixelFormat pix(attrs);
-    cgl::Context context(pix.c_obj(), NULL);
-    cgl::check(CGLSetCurrentContext(context.c_obj()));
-
-    SnapshotBuffer buffer(Preferences::preferences()->screen_size(), 4);
-    cgl::check(CGLSetOffScreen(context.c_obj(), buffer.width(), buffer.height(),
-                buffer.row_bytes(), buffer.mutable_data()));
-
-    MainLoop loop(*this, initial);
-    while (!loop.done()) {
-        int64_t at_usecs;
-        const bool has_timer = loop.top()->next_timer(at_usecs);
-        const int64_t at_ticks = at_usecs * 60 / 1000000;
-        if (!_event_heap.empty() && (!has_timer || (_event_heap.front()->at() <= at_ticks))) {
-            linked_ptr<Event> event = _event_heap.front();
-            pop_heap(_event_heap.begin(), _event_heap.end(), is_later);
-            _event_heap.pop_back();
-            advance_tick_count(&loop, buffer, event->at());
-            event->send(&_event_tracker);
-            event->send(loop.top());
-        } else {
-            if (!has_timer) {
-                throw Exception("Event heap empty and timer not set to fire.");
-            }
-            advance_tick_count(&loop, buffer, max(_ticks + 1, at_ticks));
-            loop.top()->fire_timer();
-        }
-    }
-}
-
-void OffscreenVideoDriver::schedule_snapshot(int64_t at) {
-    _snapshot_times.push_back(at);
-    push_heap(_snapshot_times.begin(), _snapshot_times.end(), greater<int64_t>());
-}
-
-void OffscreenVideoDriver::schedule_event(linked_ptr<Event> event) {
-    _event_heap.push_back(event);
-    push_heap(_event_heap.begin(), _event_heap.end(), is_later);
-}
-
-void OffscreenVideoDriver::schedule_key(int32_t key, int64_t down, int64_t up) {
-    schedule_event(make_linked_ptr(new KeyDownEvent(down, key)));
-    schedule_event(make_linked_ptr(new KeyUpEvent(up, key)));
-}
-
-void OffscreenVideoDriver::schedule_mouse(
-        int button, const Point& where, int64_t down, int64_t up) {
-    schedule_event(make_linked_ptr(new MouseDownEvent(down, button, where)));
-    schedule_event(make_linked_ptr(new MouseUpEvent(up, button, where)));
-}
-
-void OffscreenVideoDriver::advance_tick_count(
-        MainLoop* loop, const SnapshotBuffer& buffer, int64_t ticks) {
-    if (_output_dir.has() && have_snapshots_before(ticks)) {
-        loop->draw();
-        while (have_snapshots_before(ticks)) {
-            _ticks = _snapshot_times.front();
-            String dir(format("{0}/screens", *_output_dir));
-            makedirs(dir, 0755);
-            String path(format("{0}/{1}.png", dir, dec(_ticks, 6)));
-            ScopedFd file(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-            write(file, buffer);
-
-            pop_heap(_snapshot_times.begin(), _snapshot_times.end(), greater<int64_t>());
-            _snapshot_times.pop_back();
-        }
-    }
-    _ticks = ticks;
-}
-
-bool OffscreenVideoDriver::have_snapshots_before(int64_t ticks) const {
-    return !_snapshot_times.empty() && (_snapshot_times.front() < ticks);
-}
-
-bool OffscreenVideoDriver::is_later(const linked_ptr<Event>& x, const linked_ptr<Event>& y) {
-    return x->at() > y->at();
+    MainLoop loop(*this, _output_dir, initial);
+    _scheduler.loop(loop);
 }
 
 }  // namespace antares

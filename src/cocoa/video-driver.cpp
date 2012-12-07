@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "cocoa/video-driver.hpp"
 
@@ -26,9 +25,12 @@
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
 #include <sfz/sfz.hpp>
+#include <sys/time.h>
 
 #include "cocoa/c/CocoaVideoDriver.h"
 #include "cocoa/core-opengl.hpp"
+#include "cocoa/fullscreen.hpp"
+#include "cocoa/windowed.hpp"
 #include "game/time.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
@@ -42,37 +44,6 @@ using std::queue;
 namespace antares {
 
 namespace {
-
-namespace cg {
-
-class DisplayCapturer {
-  public:
-    DisplayCapturer() {
-        CGDisplayErr err = CGCaptureAllDisplays();
-        if (err != CGDisplayNoErr) {
-            throw Exception("CGCaptureAllDisplays() failed");
-            return;
-        }
-    }
-
-    ~DisplayCapturer() {
-        CGReleaseAllDisplays();
-    }
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(DisplayCapturer);
-};
-
-}  // namespace cg
-
-class MenuBarHider {
-  public:
-    MenuBarHider() { antares_menu_bar_hide(); }
-    ~MenuBarHider() { antares_menu_bar_show(); }
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(MenuBarHider);
-};
 
 int64_t usecs() {
     timeval tv;
@@ -107,9 +78,10 @@ void enqueue_key_up(int32_t key, void* userdata) {
 
 }  // namespace
 
-CocoaVideoDriver::CocoaVideoDriver(Size screen_size)
+CocoaVideoDriver::CocoaVideoDriver(bool fullscreen, Size screen_size)
         : OpenGlVideoDriver(screen_size),
-          _start_time(usecs()),
+          _fullscreen(fullscreen),
+          _start_time(antares::usecs()),
           _translator(screen_size.width, screen_size.height),
           _event_tracker(false) {
     antares_event_translator_set_mouse_down_callback(
@@ -133,7 +105,7 @@ bool CocoaVideoDriver::wait_next_event(int64_t until, scoped_ptr<Event>& event) 
     until += _start_time;
 
     antares_event_translator_enqueue(_translator.c_obj(), until);
-    while (until > usecs()) {
+    while (until > antares::usecs()) {
         if (!_event_queue.empty()) {
             event.reset(_event_queue.front());
             _event_queue.pop();
@@ -145,9 +117,9 @@ bool CocoaVideoDriver::wait_next_event(int64_t until, scoped_ptr<Event>& event) 
     return false;
 }
 
-bool CocoaVideoDriver::button() {
+bool CocoaVideoDriver::button(int which) {
     int32_t button;
-    antares_get_mouse_button(_translator.c_obj(), &button);
+    antares_get_mouse_button(_translator.c_obj(), &button, which);
     return button;
 }
 
@@ -161,16 +133,15 @@ void CocoaVideoDriver::get_keys(KeyMap* keys) {
     keys->copy(_event_tracker.keys());
 }
 
-void CocoaVideoDriver::set_game_state(GameState state) {
+int CocoaVideoDriver::ticks() const {
+    return usecs() * 60 / 1000000;
 }
 
-void CocoaVideoDriver::main_loop_iteration_complete(uint32_t) { }
-
-int CocoaVideoDriver::ticks() {
-    return (usecs() - _start_time) * 60 / 1000000;
+int CocoaVideoDriver::usecs() const {
+    return antares::usecs() - _start_time;
 }
 
-int64_t CocoaVideoDriver::double_click_interval_usecs() {
+int64_t CocoaVideoDriver::double_click_interval_usecs() const {
     return antares_double_click_interval_usecs();
 }
 
@@ -180,7 +151,6 @@ void CocoaVideoDriver::loop(Card* initial) {
                 CGDisplayIDToOpenGLDisplayMask(kCGDirectMainDisplay)),
         kCGLPFAFullScreen,
         kCGLPFAColorSize, static_cast<CGLPixelFormatAttribute>(24),
-        kCGLPFAStencilSize, static_cast<CGLPixelFormatAttribute>(8),
         kCGLPFADoubleBuffer,
         kCGLPFAAccelerated,
         static_cast<CGLPixelFormatAttribute>(0),
@@ -188,22 +158,17 @@ void CocoaVideoDriver::loop(Card* initial) {
 
     cgl::PixelFormat pixel_format(attrs);
     cgl::Context context(pixel_format.c_obj(), NULL);
-    cg::DisplayCapturer capturer;
-
-    // TODO(sfiera): control the resolution of the OpenGL context by setting the resolution of
-    // the backing store, rather than the screen.  Setting the backing store's resolution
-    // independently appears to have only been supported since 10.6, and since we currently
-    // target 10.4, we need to control the screen resolution directly for the time being.
-    CGDisplaySwitchToMode(kCGDirectMainDisplay, CGDisplayBestModeForParameters(
-                kCGDirectMainDisplay, 32, screen_size().width, screen_size().height,
-                NULL));
-
-    cgl::check(CGLSetFullScreen(context.c_obj()));
-    cgl::check(CGLSetCurrentContext(context.c_obj()));
-    MenuBarHider hider;
-
+    scoped_ptr<CocoaFullscreen> fullscreen;
+    scoped_ptr<CocoaWindowed> windowed;
+    if (_fullscreen) {
+        fullscreen.reset(new CocoaFullscreen(context, screen_size()));
+    } else {
+        windowed.reset(new CocoaWindowed(pixel_format, context, screen_size()));
+        antares_event_translator_set_window(_translator.c_obj(), windowed->window());
+    }
     GLint swap_interval = 1;
     CGLSetParameter(context.c_obj(), kCGLCPSwapInterval, &swap_interval);
+    CGLSetCurrentContext(context.c_obj());
 
     MainLoop main_loop(*this, initial);
     while (!main_loop.done()) {

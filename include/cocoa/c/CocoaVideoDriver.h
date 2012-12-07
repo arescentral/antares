@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,13 +14,14 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #ifndef ANTARES_COCOA_C_COCOA_VIDEO_DRIVER_H_
 #define ANTARES_COCOA_C_COCOA_VIDEO_DRIVER_H_
 
 #include <stdint.h>
+#include <OpenGL/OpenGL.h>
+#include <OpenGL/gl.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,13 +31,21 @@ void antares_menu_bar_hide();
 void antares_menu_bar_show();
 int64_t antares_double_click_interval_usecs();
 
+typedef struct AntaresWindow AntaresWindow;
+AntaresWindow* antares_window_create(
+        CGLPixelFormatObj pixel_format, CGLContextObj context,
+        int32_t screen_width, int32_t screen_height);
+void antares_window_destroy(AntaresWindow* window);
+
 typedef struct AntaresEventTranslator AntaresEventTranslator;
 AntaresEventTranslator* antares_event_translator_create(
         int32_t screen_width, int32_t screen_height);
 void antares_event_translator_destroy(AntaresEventTranslator* translator);
 
+void antares_event_translator_set_window(
+        AntaresEventTranslator* translator, AntaresWindow* window);
 void antares_get_mouse_location(AntaresEventTranslator* translator, int32_t* x, int32_t* y);
-void antares_get_mouse_button(AntaresEventTranslator* translator, int32_t* button);
+void antares_get_mouse_button(AntaresEventTranslator* translator, int32_t* button, int which);
 
 void antares_event_translator_set_mouse_down_callback(
         AntaresEventTranslator* translator,

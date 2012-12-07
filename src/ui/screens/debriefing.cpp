@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,18 +14,19 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "ui/screens/debriefing.hpp"
 
+#include <vector>
 #include <sfz/sfz.hpp>
 
 #include "data/resource.hpp"
 #include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/interface.hpp"
-#include "drawing/retro-text.hpp"
+#include "drawing/shapes.hpp"
+#include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/time.hpp"
@@ -39,6 +40,8 @@ using sfz::String;
 using sfz::PrintItem;
 using sfz::dec;
 using sfz::format;
+using sfz::scoped_ptr;
+using std::vector;
 
 namespace macroman = sfz::macroman;
 
@@ -111,9 +114,9 @@ int score(
     return score;
 }
 
-RetroText* score_text(
+void build_score_text(
         int your_length, int par_length, int your_loss, int par_loss, int your_kill,
-        int par_kill) {
+        int par_kill, scoped_ptr<StyledText>& result) {
     Resource rsrc("text", "txt", 6000);
     String text(macroman::decode(rsrc.data()));
 
@@ -149,7 +152,11 @@ RetroText* score_text(
     fore_color = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
     RgbColor back_color;
     back_color = GetRGBTranslateColorShade(GOLD, DARKEST);
-    return new RetroText(text, kButtonFontNum, fore_color, back_color);
+
+    result.reset(new StyledText(button_font));
+    result->set_fore_color(fore_color);
+    result->set_back_color(back_color);
+    result->set_retro_text(text);
 }
 
 }  // namespace
@@ -172,17 +179,13 @@ DebriefingScreen::DebriefingScreen(
     Rect score_area = _message_bounds;
     score_area.top = score_area.bottom - kScoreTableHeight;
 
-    _score.reset(score_text(your_length, par_length, your_loss, par_loss, your_kill, par_kill)),
+    build_score_text(your_length, par_length, your_loss, par_loss, your_kill, par_kill, _score);
     _score->set_tab_width(60);
-    _score->wrap_to(_message_bounds.width(), 2);
+    _score->wrap_to(_message_bounds.width(), 0, 2);
     _score_bounds = Rect(0, 0, _score->auto_width(), _score->height());
     _score_bounds.center_in(score_area);
 
-    RgbColor bracket_color;
-    bracket_color = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
-    Rect bracket_bounds = _score_bounds;
-    bracket_bounds.inset(-2, -2);
-    DrawNateVBracket(_pix.get(), bracket_bounds, _pix->size().as_rect(), bracket_color);
+    _score_bounds.offset(_pix_bounds.left, _pix_bounds.top);
 }
 
 void DebriefingScreen::become_front() {
@@ -199,17 +202,35 @@ void DebriefingScreen::resign_front() {
 
 void DebriefingScreen::draw() const {
     next()->draw();
-    _sprite->draw(_pix_bounds.left, _pix_bounds.top);
+    VideoDriver::driver()->fill_rect(_pix_bounds, RgbColor::kBlack);
+    for (int i = 0; i < _typed_chars; ++i) {
+        _score->draw_char(_score_bounds, i);
+    }
+    Rect interface_bounds = _message_bounds;
+    interface_bounds.offset(_pix_bounds.left, _pix_bounds.top);
+    draw_interface_item(interface_item(interface_bounds));
+
+    vector<inlinePictType> inline_pict;
+    draw_text_in_rect(interface_bounds, _message, kLarge, GOLD, inline_pict);
+
+    RgbColor bracket_color = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
+    Rect bracket_bounds = _score_bounds;
+    bracket_bounds.inset(-2, -2);
+    draw_vbracket(bracket_bounds, bracket_color);
 }
 
 void DebriefingScreen::mouse_down(const MouseDownEvent& event) {
     static_cast<void>(event);
-    stack()->pop(this);
+    if (_state == DONE) {
+        stack()->pop(this);
+    }
 }
 
 void DebriefingScreen::key_down(const KeyDownEvent& event) {
     static_cast<void>(event);
-    stack()->pop(this);
+    if (_state == DONE) {
+        stack()->pop(this);
+    }
 }
 
 bool DebriefingScreen::next_timer(int64_t& time) {
@@ -228,7 +249,6 @@ void DebriefingScreen::fire_timer() {
     int64_t now = now_usecs();
     while (_next_update <= now) {
         if (_typed_chars < _score->size()) {
-            _score->draw_char(_pix.get(), _score_bounds, _typed_chars);
             _next_update += kTypingDelay;
             ++_typed_chars;
         } else {
@@ -237,7 +257,6 @@ void DebriefingScreen::fire_timer() {
             break;
         }
     }
-    _sprite.reset(VideoDriver::driver()->new_sprite("/x/debriefing_screen/1", *_pix));
 }
 
 void DebriefingScreen::initialize(int text_id, bool do_score) {
@@ -254,11 +273,6 @@ void DebriefingScreen::initialize(int text_id, bool do_score) {
     _pix_bounds = pix_bounds(text_bounds);
     _message_bounds = text_bounds;
     _message_bounds.offset(-_pix_bounds.left, -_pix_bounds.top);
-    _pix.reset(new ArrayPixMap(_pix_bounds.width(), _pix_bounds.height()));
-
-    DrawAnyInterfaceItem(interface_item(_message_bounds), _pix.get());
-    DrawInterfaceTextInRect(_message_bounds, _message, kLarge, GOLD, _pix.get(), NULL);
-    _sprite.reset(VideoDriver::driver()->new_sprite("/x/debriefing_screen/2", *_pix));
 }
 
 void print_to(sfz::PrintTarget out, DebriefingScreen::State state) {

@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2011 Ares Central
+// Copyright (C) 2008-2012 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -14,8 +14,7 @@
 // Lesser General Public License for more details.
 //
 // You should have received a copy of the GNU Lesser General Public
-// License along with this program.  If not, see
-// <http://www.gnu.org/licenses/>.
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
 
 #include "ui/screens/scroll-text.hpp"
 
@@ -111,11 +110,11 @@ void ScrollTextScreen::fire_timer() {
 }
 
 void ScrollTextScreen::draw() const {
-    Stencil stencil(VideoDriver::driver());
-    VideoDriver::driver()->fill_rect(_clip, RgbColor::kWhite);
-    stencil.apply();
-
     _sprite->draw(_position.left, _position.top);
+    VideoDriver::driver()->fill_rect(
+            Rect(world.left, world.top, world.right, _clip.top), RgbColor::kBlack);
+    VideoDriver::driver()->fill_rect(
+            Rect(world.left, _clip.bottom, world.right, world.bottom), RgbColor::kBlack);
 }
 
 }  // namespace antares
