@@ -902,7 +902,6 @@ void draw_mini_ship_data(
     Rect            lRect, dRect, spriteRect;
 
     lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, 0, 0, kMiniScreenWidth);
-    VideoDriver::driver()->fill_rect(lRect, RgbColor::kBlack);
     color = GetRGBTranslateColorShade(headerColor, LIGHT);
     lightcolor = GetRGBTranslateColorShade(headerColor, VERY_LIGHT);
     darkcolor = GetRGBTranslateColorShade(headerColor, MEDIUM);
@@ -917,7 +916,6 @@ void draw_mini_ship_data(
     if ( newObject.attributes & kIsDestination)
     {
         lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth);
-        VideoDriver::driver()->fill_rect(lRect, RgbColor::kBlack);
 
         // get the color for writing the name
         color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
@@ -929,7 +927,6 @@ void draw_mini_ship_data(
                 text, color);
     } else {
         lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth);
-        VideoDriver::driver()->fill_rect(lRect, RgbColor::kBlack);
 
         if ( newObject.whichBaseObject >= 0)
         {
@@ -949,10 +946,6 @@ void draw_mini_ship_data(
     dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
     dRect.right = kMiniScreenLeft + kMiniIconWidth;
     dRect.bottom = dRect.top + kMiniIconHeight;
-
-    // erase the area
-
-    VideoDriver::driver()->fill_rect(dRect, RgbColor::kBlack);
 
     if (( newObject.whichBaseObject >= 0) && ( newObject.pixResID >= 0))
     {
@@ -988,10 +981,6 @@ void draw_mini_ship_data(
     dRect.right = dRect.left + kMiniBarWidth;
     dRect.bottom = dRect.top + kMiniIconHeight;
 
-    // erase the area
-
-    VideoDriver::driver()->fill_rect(dRect, RgbColor::kBlack);
-
     if ( newObject.baseType != NULL)
     {
         if (( newObject.baseType->health > 0) && ( newObject.health > 0))
@@ -1023,10 +1012,6 @@ void draw_mini_ship_data(
     dRect.right = dRect.left + kMiniBarWidth;
     dRect.bottom = dRect.top + kMiniIconHeight;
 
-    // erase the area
-
-    VideoDriver::driver()->fill_rect(dRect, RgbColor::kBlack);
-
     if ( newObject.baseType != NULL)
     {
         if (( newObject.baseType->energy > 0) && ( newObject.energy > 0))
@@ -1053,7 +1038,6 @@ void draw_mini_ship_data(
     }
 
     lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
-    VideoDriver::driver()->fill_rect(lRect, RgbColor::kBlack);
 
     // get the color for writing the name
     color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
@@ -1067,7 +1051,6 @@ void draw_mini_ship_data(
     }
 
     lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
-    VideoDriver::driver()->fill_rect(lRect, RgbColor::kBlack);
 
     // get the color for writing the name
     color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
@@ -1083,7 +1066,6 @@ void draw_mini_ship_data(
     // Don't show special weapons of destination objects.
     if (!(newObject.attributes & kIsDestination)) {
         lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
-        VideoDriver::driver()->fill_rect(lRect, RgbColor::kBlack);
 
         // get the color for writing the name
         color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
@@ -1098,7 +1080,6 @@ void draw_mini_ship_data(
     }
 
     lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniDestLineNum, 0, kMiniScreenWidth);
-    VideoDriver::driver()->fill_rect(lRect, RgbColor::kBlack);
 
     // write the name
     if ( newObject.destinationObject >= 0)
