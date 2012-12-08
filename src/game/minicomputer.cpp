@@ -63,7 +63,7 @@ const int32_t kMiniScreenLeft       = 12;
 const int32_t kMiniScreenTop        = 320;
 const int32_t kMiniScreenRight      = 121;
 const int32_t kMiniScreenBottom     = 440;
-const int32_t kMiniScreenWidth      = kMiniScreenRight - kMiniScreenLeft - 1;
+const int32_t kMiniScreenWidth      = kMiniScreenRight - kMiniScreenLeft;
 
 const int32_t kMiniScreenLeftBuffer = 3;
 
