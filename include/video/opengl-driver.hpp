@@ -51,7 +51,7 @@ class OpenGlVideoDriver : public VideoDriver {
         int static_fraction;
         int unit;
         int outline_color;
-        int t;
+        int seed;
     };
 
   protected:
@@ -67,7 +67,7 @@ class OpenGlVideoDriver : public VideoDriver {
             Setup(OpenGlVideoDriver& driver);
         };
         const Setup _setup;
-        const OpenGlVideoDriver& _driver;
+        OpenGlVideoDriver& _driver;
         CardStack _stack;
 
         DISALLOW_COPY_AND_ASSIGN(MainLoop);
@@ -77,6 +77,7 @@ class OpenGlVideoDriver : public VideoDriver {
 
   private:
     const Size _screen_size;
+    int32_t _static_seed;
 
     Uniforms _uniforms;
 

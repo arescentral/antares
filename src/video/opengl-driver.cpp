@@ -54,7 +54,7 @@ static const char kShaderStaticImageUniform[] = "static_image";
 static const char kShaderStaticFractionUniform[] = "static_fraction";
 static const char kShaderUnitUniform[] = "unit";
 static const char kShaderOutlineColorUniform[] = "outline_color";
-static const char kShaderTUniform[] = "t";
+static const char kShaderSeedUniform[] = "seed";
 static const GLchar* kShaderSource =
     "#version 120\n"
     "uniform int color_mode;\n"
@@ -63,7 +63,7 @@ static const GLchar* kShaderSource =
     "uniform float static_fraction;\n"
     "uniform vec2 unit;\n"
     "uniform vec4 outline_color;\n"
-    "uniform int t;\n"
+    "uniform int seed;\n"
     "\n"
     "void main() {\n"
     "    vec2 uv = gl_TexCoord[0].xy;\n"
@@ -81,7 +81,7 @@ static const GLchar* kShaderSource =
     "    } else if (color_mode == 3) {\n"
     "        gl_FragColor = gl_Color * sprite_color;\n"
     "    } else if (color_mode == 4) {\n"
-    "        vec2 uv2 = (gl_TexCoord[1].xy + vec2(mod(t / 256, 256), mod(t, 256))) * vec2(1.0/256, 1.0/256);\n"
+    "        vec2 uv2 = (gl_TexCoord[1].xy + vec2(seed / 256, seed)) * vec2(1.0/256, 1.0/256);\n"
     "        vec4 static_color = texture2D(static_image, uv2);\n"
     "        if (static_color.w <= static_fraction) {\n"
     "            vec4 sprite_alpha = vec4(1, 1, 1, sprite_color.w);\n"
@@ -271,7 +271,8 @@ class OpenGlSprite : public Sprite {
 }  // namespace
 
 OpenGlVideoDriver::OpenGlVideoDriver(Size screen_size)
-        : _screen_size(screen_size) { }
+        : _screen_size(screen_size),
+          _static_seed(0) { }
 
 Sprite* OpenGlVideoDriver::new_sprite(PrintItem name, const PixMap& content) {
     return new OpenGlSprite(name, content, _uniforms);
@@ -458,7 +459,7 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     driver._uniforms.static_fraction = glGetUniformLocation(program, kShaderStaticFractionUniform);
     driver._uniforms.unit = glGetUniformLocation(program, kShaderUnitUniform);
     driver._uniforms.outline_color = glGetUniformLocation(program, kShaderOutlineColorUniform);
-    driver._uniforms.t = glGetUniformLocation(program, kShaderTUniform);
+    driver._uniforms.seed = glGetUniformLocation(program, kShaderSeedUniform);
     glUseProgram(program);
     gl_check();
 
@@ -503,7 +504,10 @@ void OpenGlVideoDriver::MainLoop::draw() {
     glTranslatef(-1.0, 1.0, 0.0);
     glScalef(2.0, -2.0, 1.0);
     glScalef(1.0 / _driver._screen_size.width, 1.0 / _driver._screen_size.height, 1.0);
-    glUniform1i(_driver._uniforms.t, globals()->gGameTime);
+    int32_t seed = XRandomSeeded(256, &_driver._static_seed);
+    seed <<= 8;
+    seed += XRandomSeeded(256, &_driver._static_seed);
+    glUniform1i(_driver._uniforms.seed, seed);
 
     gl_check();
 

@@ -63,7 +63,7 @@ const int32_t kMiniScreenLeft       = 12;
 const int32_t kMiniScreenTop        = 320;
 const int32_t kMiniScreenRight      = 121;
 const int32_t kMiniScreenBottom     = 440;
-const int32_t kMiniScreenWidth      = kMiniScreenRight - kMiniScreenLeft - 1;
+const int32_t kMiniScreenWidth      = kMiniScreenRight - kMiniScreenLeft;
 
 const int32_t kMiniScreenLeftBuffer = 3;
 
@@ -895,25 +895,10 @@ void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) 
 void draw_mini_ship_data(
         const spaceObjectType& newObject, unsigned char headerColor,
         short screenTop, short whichString) {
-    RgbColor            color, lightcolor, darkcolor;
-    short               whichShape;
-    spaceObjectType     *dObject = NULL;
-    long                tlong;
-    Rect                mRect;
-    Rect            lRect, dRect, spriteRect, uRect, clipRect;
-
-    clipRect.left = kMiniScreenLeft;
-    clipRect.top = screenTop + globals()->gInstrumentTop;
-    clipRect.right = kMiniScreenRight;
-    clipRect.bottom = clipRect.top + 64;
-
-    uRect.left = uRect.top = uRect.bottom = -1;
-
-    lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, 0, 0, kMiniScreenWidth);
-    VideoDriver::driver()->fill_rect(lRect, RgbColor::kBlack);
-    color = GetRGBTranslateColorShade(headerColor, LIGHT);
-    lightcolor = GetRGBTranslateColorShade(headerColor, VERY_LIGHT);
-    darkcolor = GetRGBTranslateColorShade(headerColor, MEDIUM);
+    Rect lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, 0, 0, kMiniScreenWidth);
+    RgbColor color = GetRGBTranslateColorShade(headerColor, LIGHT);
+    RgbColor lightcolor = GetRGBTranslateColorShade(headerColor, VERY_LIGHT);
+    RgbColor darkcolor = GetRGBTranslateColorShade(headerColor, MEDIUM);
 
     draw_shaded_rect(lRect, color, lightcolor, darkcolor);
 
@@ -921,13 +906,9 @@ void draw_mini_ship_data(
     computer_font->draw_sprite(
             Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
             text, RgbColor::kBlack);
-    uRect = lRect;
-    uRect = clipRect;
 
-    if ( newObject.attributes & kIsDestination)
-    {
+    if (newObject.attributes & kIsDestination) {
         lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth);
-        VideoDriver::driver()->fill_rect(lRect, RgbColor::kBlack);
 
         // get the color for writing the name
         color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
@@ -937,19 +918,10 @@ void draw_mini_ship_data(
         computer_font->draw_sprite(
                 Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
                 text, color);
-        if ( uRect.left == -1)
-        {
-            uRect = lRect;
-        } else
-        {
-            uRect.enlarge_to(lRect);
-        }
     } else {
         lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniNameLineNum, 0, kMiniScreenWidth);
-        VideoDriver::driver()->fill_rect(lRect, RgbColor::kBlack);
 
-        if ( newObject.whichBaseObject >= 0)
-        {
+        if (newObject.whichBaseObject >= 0) {
             // get the color for writing the name
             color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
@@ -959,31 +931,20 @@ void draw_mini_ship_data(
                     Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
                     text, color);
         }
-
-        if ( uRect.left == -1)
-        {
-            uRect = lRect;
-        } else
-        {
-            uRect.enlarge_to(lRect);
-        }
     }
     // set the rect for drawing the "icon" of the object type
 
+    Rect dRect;
     dRect.left = kMiniIconLeft;
     dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
     dRect.right = kMiniScreenLeft + kMiniIconWidth;
     dRect.bottom = dRect.top + kMiniIconHeight;
 
-    // erase the area
-
-    VideoDriver::driver()->fill_rect(dRect, RgbColor::kBlack);
-
-    if (( newObject.whichBaseObject >= 0) && ( newObject.pixResID >= 0))
-    {
-        NatePixTable* pixTable = GetPixTable( newObject.pixResID);
+    if ((newObject.whichBaseObject >= 0) && (newObject.pixResID >= 0)) {
+        NatePixTable* pixTable = GetPixTable(newObject.pixResID);
 
         if (pixTable != NULL) {
+            short whichShape;
             if (newObject.attributes & kIsSelfAnimated) {
                 whichShape = more_evil_fixed_to_long(newObject.baseType->frame.animation.firstShape);
             } else {
@@ -1008,29 +969,15 @@ void draw_mini_ship_data(
     color = GetRGBTranslateColorShade(PALE_GREEN, MEDIUM);
     draw_vbracket(dRect, color);
 
-    if ( uRect.left == -1)
-    {
-        uRect = dRect;
-    }
-    else
-    {
-        uRect.enlarge_to(dRect);
-    }
+    if (newObject.baseType != NULL) {
+        if ((newObject.baseType->health > 0) && (newObject.health > 0)) {
+            Rect dRect;
+            dRect.left = kMiniHealthLeft;
+            dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
+            dRect.right = dRect.left + kMiniBarWidth;
+            dRect.bottom = dRect.top + kMiniIconHeight;
 
-    dRect.left = kMiniHealthLeft;
-    dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
-    dRect.right = dRect.left + kMiniBarWidth;
-    dRect.bottom = dRect.top + kMiniIconHeight;
-
-    // erase the area
-
-    VideoDriver::driver()->fill_rect(dRect, RgbColor::kBlack);
-
-    if ( newObject.baseType != NULL)
-    {
-        if (( newObject.baseType->health > 0) && ( newObject.health > 0))
-        {
-            tlong = newObject.health * kMiniBarHeight;
+            uint32_t tlong = newObject.health * kMiniBarHeight;
             tlong /= newObject.baseType->health;
 
             color = GetRGBTranslateColorShade(SKY_BLUE, DARK);
@@ -1051,30 +998,15 @@ void draw_mini_ship_data(
         }
     }
 
+    if (newObject.baseType != NULL) {
+        if ((newObject.baseType->energy > 0) && (newObject.energy > 0)) {
+            Rect dRect;
+            dRect.left = kMiniEnergyLeft;
+            dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
+            dRect.right = dRect.left + kMiniBarWidth;
+            dRect.bottom = dRect.top + kMiniIconHeight;
 
-    if ( uRect.left == -1)
-    {
-        uRect = dRect;
-    }
-    else
-    {
-        uRect.enlarge_to(dRect);
-    }
-
-    dRect.left = kMiniEnergyLeft;
-    dRect.top = screenTop + globals()->gInstrumentTop + MiniIconMacLineTop();
-    dRect.right = dRect.left + kMiniBarWidth;
-    dRect.bottom = dRect.top + kMiniIconHeight;
-
-    // erase the area
-
-    VideoDriver::driver()->fill_rect(dRect, RgbColor::kBlack);
-
-    if ( newObject.baseType != NULL)
-    {
-        if (( newObject.baseType->energy > 0) && ( newObject.energy > 0))
-        {
-            tlong = newObject.energy * kMiniBarHeight;
+            uint32_t tlong = newObject.energy * kMiniBarHeight;
             tlong /= newObject.baseType->energy;
 
             color = GetRGBTranslateColorShade(YELLOW, DARK);
@@ -1095,133 +1027,70 @@ void draw_mini_ship_data(
         }
     }
 
-    if ( uRect.left == -1)
-    {
-        uRect = dRect;
-    }
-    else
-    {
-        uRect.enlarge_to(dRect);
-    }
-
     lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon1LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
-    VideoDriver::driver()->fill_rect(lRect, RgbColor::kBlack);
 
     // get the color for writing the name
     color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
     // move to the 1st line in the selection miniscreen, write the name
-    if ( newObject.beamType >= 0)
-    {
+    if (newObject.beamType >= 0) {
         String text(StringList(kSpaceObjectShortNameResID).at(newObject.beamType));
         computer_font->draw_sprite(
                 Point(lRect.left, lRect.top + computer_font->ascent), text, color);
     }
 
-    if ( uRect.left == -1)
-    {
-        uRect = lRect;
-    }
-    else
-    {
-        uRect.enlarge_to(lRect);
-    }
-
     lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon2LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
-    VideoDriver::driver()->fill_rect(lRect, RgbColor::kBlack);
 
     // get the color for writing the name
     color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
     // move to the 1st line in the selection miniscreen, write the name
-    if ( newObject.pulseType >= 0)
-    {
+    if (newObject.pulseType >= 0) {
         String text(StringList(kSpaceObjectShortNameResID).at(newObject.pulseType));
         computer_font->draw_sprite(
                 Point(lRect.left, lRect.top + computer_font->ascent), text, color);
     }
 
-    if ( uRect.left == -1)
-    {
-        uRect = lRect;
-    }
-    else
-    {
-        uRect.enlarge_to(lRect);
-    }
-
     // Don't show special weapons of destination objects.
     if (!(newObject.attributes & kIsDestination)) {
         lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniWeapon3LineNum, kMiniRightColumnLeft, kMiniScreenWidth);
-        VideoDriver::driver()->fill_rect(lRect, RgbColor::kBlack);
 
         // get the color for writing the name
         color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
         // move to the 1st line in the selection miniscreen, write the name
-        if ( newObject.specialType >= 0)
-        {
+        if (newObject.specialType >= 0) {
             String text(StringList(kSpaceObjectShortNameResID).at(newObject.specialType));
             computer_font->draw_sprite(
                     Point(lRect.left, lRect.top + computer_font->ascent), text, color);
         }
-
-        if ( uRect.left == -1)
-        {
-            uRect = lRect;
-        }
-        else
-        {
-            uRect.enlarge_to(lRect);
-        }
     }
 
     lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, kMiniDestLineNum, 0, kMiniScreenWidth);
-    VideoDriver::driver()->fill_rect(lRect, RgbColor::kBlack);
 
     // write the name
-    if ( newObject.destinationObject >= 0)
-    {
-        if ( newObject.destObjectPtr != NULL)
-        {
-            dObject = newObject.destObjectPtr;
+    if (newObject.destinationObject >= 0) {
+        if (newObject.destObjectPtr != NULL) {
+            spaceObjectType* dObject = newObject.destObjectPtr;
 
             // get the color for writing the name
-            if ( dObject->owner == globals()->gPlayerAdmiralNumber)
-            {
+            if (dObject->owner == globals()->gPlayerAdmiralNumber) {
                 color = GetRGBTranslateColorShade(GREEN, VERY_LIGHT);
-            } else
-            {
+            } else {
                 color = GetRGBTranslateColorShade(RED, VERY_LIGHT);
             }
 
-            if ( dObject->attributes & kIsDestination)
-            {
+            if (dObject->attributes & kIsDestination) {
                 String text(GetDestBalanceName(dObject->destinationObject));
                 computer_font->draw_sprite(
                         Point(lRect.left, lRect.top + computer_font->ascent), text, color);
-            } else
-            {
+            } else {
                 String text(StringList(kSpaceObjectNameResID).at(dObject->whichBaseObject));
                 computer_font->draw_sprite(
                         Point(lRect.left, lRect.top + computer_font->ascent), text, color);
             }
         }
     }
-
-    if ( uRect.left == -1)
-    {
-        uRect = lRect;
-    }
-    else
-    {
-        uRect.enlarge_to(lRect);
-    }
-
-    mRect.left = uRect.left;
-    mRect.right = uRect.right;
-    mRect.top = uRect.top;
-    mRect.bottom = uRect.bottom;
 }
 
 void MiniComputerDoAccept( void)
