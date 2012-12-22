@@ -188,6 +188,7 @@ void update_mission_brief_point(
         dataItem->bounds.right = dataItem->bounds.left + kMissionDataWidth;
         dataItem->bounds.top = (bounds->bottom - bounds->top) / 2 - (textHeight / 2) + bounds->top;
         dataItem->bounds.bottom = dataItem->bounds.top + textHeight;
+        highlight_rect = Rect();
     } else {
         if ((hiliteBounds.left + (hiliteBounds.right - hiliteBounds.left) / 2) >
                 (bounds->left + (bounds->right - bounds->left) / 2)) {
