@@ -56,6 +56,10 @@ class TextVideoDriver : public VideoDriver {
     class MainLoop;
     class Sprite;
 
+    void add_arg(sfz::StringSlice arg, std::vector<std::pair<size_t, size_t> >& args);
+    void dup_arg(size_t index, std::vector<std::pair<size_t, size_t> >& args);
+    sfz::StringSlice last_arg(size_t index) const;
+
     template <int size>
     void log(sfz::StringSlice command, sfz::PrintItem (&args)[size]);
 
@@ -64,7 +68,7 @@ class TextVideoDriver : public VideoDriver {
     const sfz::Optional<sfz::String> _output_dir;
 
     sfz::String _log;
-    std::vector<sfz::StringSlice> _last_args;
+    std::vector<std::pair<size_t, size_t> > _last_args;
 
     DISALLOW_COPY_AND_ASSIGN(TextVideoDriver);
 };
