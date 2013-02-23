@@ -166,6 +166,7 @@ class TextVideoDriver::MainLoop : public EventScheduler::MainLoop {
 
     void draw() {
         _driver._log.clear();
+        _driver._last_args.clear();
         _stack.top()->draw();
     }
     bool done() const { return _stack.empty(); }
