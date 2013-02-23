@@ -45,6 +45,8 @@ using sfz::dec;
 using sfz::format;
 using sfz::print;
 using sfz::write;
+using std::make_pair;
+using std::pair;
 using std::vector;
 namespace utf8 = sfz::utf8;
 
@@ -166,6 +168,7 @@ class TextVideoDriver::MainLoop : public EventScheduler::MainLoop {
 
     void draw() {
         _driver._log.clear();
+        _driver._last_args.clear();
         _stack.top()->draw();
     }
     bool done() const { return _stack.empty(); }
@@ -239,29 +242,37 @@ void TextVideoDriver::loop(Card* initial) {
     _scheduler.loop(loop);
 }
 
-static void add_arg(String& log, StringSlice arg, vector<StringSlice>& args) {
-    size_t start = log.size();
-    log.push(arg);
-    args.push_back(log.slice(start));
+void TextVideoDriver::add_arg(StringSlice arg, std::vector<std::pair<size_t, size_t> >& args) {
+    size_t start = _log.size();
+    _log.push(arg);
+    args.push_back(make_pair(start, _log.size() - start));
+}
+
+void TextVideoDriver::dup_arg(size_t index, std::vector<std::pair<size_t, size_t> >& args) {
+    args.push_back(_last_args[index]);
+}
+
+sfz::StringSlice TextVideoDriver::last_arg(size_t index) const {
+    return _log.slice(_last_args[index].first, _last_args[index].second);
 }
 
 template <int size>
 void TextVideoDriver::log(StringSlice command, PrintItem (&args)[size]) {
-    vector<StringSlice> this_args;
-    bool new_command = _last_args.empty() || (command != _last_args[0]);
+    vector<pair<size_t, size_t> > this_args;
+    bool new_command = _last_args.empty() || (command != last_arg(0));
 
     if (new_command) {
-        add_arg(_log, command, this_args);
+        add_arg(command, this_args);
     } else {
-        this_args.push_back(_last_args[0]);
+        dup_arg(0, this_args);
     }
     for (size_t i = 0; i < size; ++i) {
         _log.push("\t");
         String s(args[i]);
-        if (new_command || (s != _last_args[i + 1])) {
-            add_arg(_log, s, this_args);
+        if (new_command || (s != last_arg(i + 1))) {
+            add_arg(s, this_args);
         } else {
-            this_args.push_back(_last_args[i + 1]);
+            dup_arg(i + 1, this_args);
         }
     }
     _log.push("\n");
