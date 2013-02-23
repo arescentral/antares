@@ -43,7 +43,7 @@ using sfz::format;
 using sfz::scoped_ptr;
 using std::vector;
 
-namespace macroman = sfz::macroman;
+namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -118,7 +118,7 @@ void build_score_text(
         int your_length, int par_length, int your_loss, int par_loss, int your_kill,
         int par_kill, scoped_ptr<StyledText>& result) {
     Resource rsrc("text", "txt", 6000);
-    String text(macroman::decode(rsrc.data()));
+    String text(utf8::decode(rsrc.data()));
 
     StringList strings(6000);
 
@@ -261,7 +261,7 @@ void DebriefingScreen::fire_timer() {
 
 void DebriefingScreen::initialize(int text_id, bool do_score) {
     Resource rsrc("text", "txt", text_id);
-    _message.assign(macroman::decode(rsrc.data()));
+    _message.assign(utf8::decode(rsrc.data()));
 
     int text_height = GetInterfaceTextHeightFromWidth(_message, kLarge, kTextWidth);
     Rect text_bounds(0, 0, kTextWidth, text_height);

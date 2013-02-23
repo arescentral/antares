@@ -436,7 +436,7 @@ void RecalcScreenLabelSize(long which) {
 }
 
 static long String_Count_Lines(const StringSlice& s) {
-    static const Rune kCarriageReturn = '\r';
+    static const Rune kCarriageReturn = '\n';
     return 1 + std::count(s.begin(), s.end(), kCarriageReturn);
 }
 
@@ -444,7 +444,7 @@ static StringSlice String_Get_Nth_Line(const StringSlice& source, long nth) {
     if (nth < 1) {
         return StringSlice();
     }
-    const StringSlice::size_type carriage_return = source.find('\r');
+    const StringSlice::size_type carriage_return = source.find('\n');
     if (carriage_return == StringSlice::npos) {
         if (nth == 1) {
             return source;

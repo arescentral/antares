@@ -67,7 +67,7 @@ using std::min;
 using std::pair;
 using std::vector;
 
-namespace macroman = sfz::macroman;
+namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -181,7 +181,7 @@ void update_mission_brief_point(
 
     // TODO(sfiera): catch exception.
     Resource rsrc("text", "txt", contentID);
-    text.assign(macroman::decode(rsrc.data()));
+    text.assign(utf8::decode(rsrc.data()));
     short textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
     if (hiliteBounds.left == hiliteBounds.right) {
         dataItem->bounds.left = (bounds->right - bounds->left) / 2 - (kMissionDataWidth / 2) + bounds->left;
@@ -269,7 +269,7 @@ void update_mission_brief_point(
 
 void CreateObjectDataText(String* text, short id) {
     Resource rsrc("text", "txt", kShipDataTextID);
-    String data(macroman::decode(rsrc.data()));
+    String data(utf8::decode(rsrc.data()));
 
     const baseObjectType& baseObject = gBaseObjectData.get()[id];
 
@@ -334,7 +334,7 @@ void CreateWeaponDataText(String* text, long whichWeapon, const StringSlice& wea
 
     // TODO(sfiera): catch exception.
     Resource rsrc("text", "txt", kWeaponDataTextID);
-    String data(macroman::decode(rsrc.data()));
+    String data(utf8::decode(rsrc.data()));
     // damage; this is tricky--we have to guess by walking through activate actions,
     //  and for all the createObject actions, see which creates the most damaging
     //  object.  We calc this first so we can use isGuided
