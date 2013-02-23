@@ -38,7 +38,7 @@ using sfz::format;
 using sfz::scoped_ptr;
 using std::vector;
 
-namespace macroman = sfz::macroman;
+namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -1076,7 +1076,7 @@ void draw_labeled_box(const interfaceItemType& item) {
 
 void draw_text_rect(const interfaceItemType& item) {
     Resource rsrc("text", "txt", item.item.textRect.textID);
-    String data(macroman::decode(rsrc.data()));
+    String data(utf8::decode(rsrc.data()));
     vector<inlinePictType> inlinePict;
     draw_text_in_rect(item.bounds, data, item.style, item.color, inlinePict);
 }

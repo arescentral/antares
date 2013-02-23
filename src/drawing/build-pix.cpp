@@ -39,6 +39,7 @@ using sfz::string_to_int;
 using std::vector;
 
 namespace macroman = sfz::macroman;
+namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -115,36 +116,34 @@ class PixBuilder {
 PixMap* build_pix(int text_id, int width) {
     scoped_ptr<ArrayPixMap> pix(new ArrayPixMap(width, 0));
     PixBuilder build(pix.get());
-    Resource text("text", "txt", text_id);
+    Resource rsrc("text", "txt", text_id);
 
     vector<linked_ptr<String> > lines;
-    BytesSlice data = text.data();
-    const uint8_t* start = data.data();
-    const uint8_t* const end = start + data.size();
-    bool in_section_header = (start + 2 <= end) && (memcmp(start, "#+", 2) == 0);
-    for (const uint8_t* p = start; p != end; ++p) {
-        if (p + 3 <= end && memcmp(p, "\r#+", 3) == 0) {
-            linked_ptr<String> line(
-                    new String(macroman::decode(data.slice(start - data.data(), p - start))));
+    BytesSlice data = rsrc.data();
+    String text(utf8::decode(data));
+    bool in_section_header = (text.size() >= 2) && (text.slice(0, 2) == "#+");
+    size_t start = 0;
+    const size_t end = text.size();
+    for (size_t i = start; i != end; ++i) {
+        if (((end - i) >= 3) && (text.slice(i, 3) == "\n#+")) {
+            linked_ptr<String> line(new String(text.slice(start, i - start)));
             lines.push_back(line);
-            start = p + 1;
+            start = i + 1;
             in_section_header = true;
-        } else if (in_section_header && (*p == '\r')) {
-            linked_ptr<String> line(
-                    new String(macroman::decode(data.slice(start - data.data(), p - start))));
+        } else if (in_section_header && (text.at(i) == '\n')) {
+            linked_ptr<String> line(new String(text.slice(start, i - start)));
             lines.push_back(line);
-            start = p + 1;
+            start = i + 1;
             in_section_header = false;
         }
     }
     if (start != end) {
-        linked_ptr<String> line(
-                new String(macroman::decode(data.slice(start - data.data(), end - start))));
+        linked_ptr<String> line(new String(text.slice(start)));
         lines.push_back(line);
     }
 
     for (vector<linked_ptr<String> >::const_iterator it = lines.begin(); it != lines.end(); ++it) {
-        if ((*it)->size() >= 2 && (*it)->at(0) == '#' && (*it)->at(1) == '+') {
+        if ((*it)->size() >= 2 && (*it)->slice(0, 2) == "#+") {
             if ((*it)->size() > 2) {
                 if ((*it)->at(2) == 'B') {
                     int32_t id = 2005;

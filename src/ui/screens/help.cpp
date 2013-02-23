@@ -34,7 +34,7 @@ using sfz::Exception;
 using sfz::String;
 using sfz::format;
 
-namespace macroman = sfz::macroman;
+namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -48,7 +48,7 @@ HelpScreen::HelpScreen():
     _bounds.offset(viewport.left, 0);
 
     Resource rsrc("text", "txt", 6002);
-    String text(macroman::decode(rsrc.data()));
+    String text(utf8::decode(rsrc.data()));
     Replace_KeyCode_Strings_With_Actual_Key_Names(&text, 1000, 4);
 
     RgbColor fore = GetRGBTranslateColorShade(RED, VERY_LIGHT);

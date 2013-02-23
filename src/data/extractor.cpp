@@ -28,10 +28,12 @@
 #include "net/http.hpp"
 
 using rezin::AppleDouble;
+using rezin::Options;
 using rezin::ResourceEntry;
 using rezin::ResourceFork;
 using rezin::ResourceType;
 using rezin::Sound;
+using rezin::StringList;
 using rezin::aiff;
 using sfz::Bytes;
 using sfz::BytesSlice;
@@ -54,6 +56,7 @@ using sfz::write;
 using zipxx::ZipArchive;
 using zipxx::ZipFileReader;
 
+namespace macroman = sfz::macroman;
 namespace path = sfz::path;
 namespace utf8 = sfz::utf8;
 
@@ -126,6 +129,23 @@ bool convert_pict(int16_t id, BytesSlice data, WriteTarget out) {
     return false;
 }
 
+bool convert_str(int16_t id, BytesSlice data, WriteTarget out) {
+    static_cast<void>(id);
+    Options options;
+    StringList list(data, options);
+    String string(pretty_print(json(list)));
+    write(out, utf8::encode(string));
+    return true;
+}
+
+bool convert_text(int16_t id, BytesSlice data, WriteTarget out) {
+    static_cast<void>(id);
+    Options options;
+    String string(options.decode(data));
+    write(out, utf8::encode(string));
+    return true;
+}
+
 bool convert_snd(int16_t id, BytesSlice data, WriteTarget out) {
     static_cast<void>(id);
     Sound snd(data);
@@ -148,8 +168,8 @@ const ResourceFile kResourceFiles[] = {
         "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Interfaces",
         {
             { "PICT",  "pictures",           "png",   convert_pict },
-            { "STR#",  "strings",            "STR#",  verbatim },
-            { "TEXT",  "text",               "txt",   verbatim },
+            { "STR#",  "strings",            "json",  convert_str },
+            { "TEXT",  "text",               "txt",   convert_text },
             { "intr",  "interfaces",         "intr",  verbatim },
             { "nlFD",  "font-descriptions",  "nlFD",  verbatim },
             { "nlFM",  "font-bitmaps",       "nlFM",  verbatim },
@@ -159,8 +179,8 @@ const ResourceFile kResourceFiles[] = {
         "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Scenarios",
         {
             { "PICT",  "pictures",                  "png",   convert_pict },
-            { "STR#",  "strings",                   "STR#",  verbatim },
-            { "TEXT",  "text",                      "txt",   verbatim },
+            { "STR#",  "strings",                   "json",  convert_str },
+            { "TEXT",  "text",                      "txt",   convert_text },
             { "bsob",  "objects",                   "bsob",  verbatim },
             { "nlAG",  "scenario-info",             "nlAG",  verbatim },
             { "obac",  "object-actions",            "obac",  verbatim },
@@ -188,8 +208,8 @@ const ResourceFile kResourceFiles[] = {
         {
             { "PICT",  "pictures",        "png",   convert_pict },
             { "NLRP",  "replays",         "NLRP",  convert_nlrp },
-            { "STR#",  "strings",         "STR#",  verbatim },
-            { "TEXT",  "text",            "txt",   verbatim },
+            { "STR#",  "strings",         "json",  convert_str },
+            { "TEXT",  "text",            "txt",   convert_text },
             { "rot ",  "rotation-table",  "rot ",  verbatim },
         },
     },
@@ -215,7 +235,7 @@ const ResourceFile::ExtractedResource kPluginFiles[] = {
 
 const char kFactoryScenario[] = "com.biggerplanet.ares";
 const char kDownloadBase[] = "http://downloads.arescentral.org";
-const char kVersion[] = "3\n";
+const char kVersion[] = "4\n";
 
 const char kPluginVersionFile[] = "data/version";
 const char kPluginVersion[] = "1\n";
@@ -303,14 +323,14 @@ void DataExtractor::extract_factory_scenario(Observer* observer) const {
                 (Sha1::Digest){{0x246c393c, 0xa598af68, 0xa58cfdd1, 0x8e1601c1, 0xf4f30931}});
         download(observer, kDownloadBase, "Antares-Music", "0.3.0",
                 (Sha1::Digest){{0x9a1ceb4e, 0x2e0d4e7d, 0x61ed9934, 0x1274355e, 0xd8238bc4}});
-        download(observer, kDownloadBase, "Antares-Text", "0.3.0",
-                (Sha1::Digest){{0x2b5f3d50, 0xcc243db1, 0x35173461, 0x819f5e1b, 0xabde1519}});
+        download(observer, kDownloadBase, "Antares-Text", "0.6.2",
+                (Sha1::Digest){{0xc68ba13f, 0x02a1c9c4, 0xdaa498d3, 0x32caff3f, 0x7f6367a6}});
 
         String scenario_dir(format("{0}/{1}", _output_dir, kFactoryScenario));
         rmtree(scenario_dir);
         extract_original(observer, "Ares-1.2.0.zip");
         extract_supplemental(observer, "Antares-Music-0.3.0.zip");
-        extract_supplemental(observer, "Antares-Text-0.3.0.zip");
+        extract_supplemental(observer, "Antares-Text-0.6.2.zip");
         write_version(kFactoryScenario);
     }
 }

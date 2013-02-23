@@ -40,6 +40,7 @@ using sfz::make_linked_ptr;
 using sfz::scoped_ptr;
 
 namespace macroman = sfz::macroman;
+namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -70,7 +71,7 @@ const int32_t kMessageCharTopBuffer     = 0;
 const int32_t kMessageCharBottomBuffer  = 0;
 
 // These should be Rune constants, but we operate over bytes for now.
-const uint8_t kReturnChar               = '\r';
+const uint8_t kReturnChar               = '\n';
 const uint8_t kCodeChar                 = '\\';
 const uint8_t kCodeTabChar              = 't';
 const uint8_t kCodeInvertChar           = 'i';
@@ -249,7 +250,7 @@ void ClipToCurrentLongMessage( void)
             } else
             {
                 Resource rsrc("text", "txt", tmessage->currentResID);
-                textData.reset(new String(macroman::decode(rsrc.data())));
+                textData.reset(new String(utf8::decode(rsrc.data())));
                 Replace_KeyCode_Strings_With_Actual_Key_Names(textData.get(), KEY_LONG_NAMES, 0);
                 if (textData->at(0) == '#') {
                     tmessage->labelMessage = true;

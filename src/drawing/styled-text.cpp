@@ -80,8 +80,8 @@ void StyledText::set_retro_text(sfz::StringSlice text) {
 
     for (size_t i = 0; i < text.size(); ++i) {
         switch (text.at(i)) {
-          case '\r':
-            _chars.push_back(StyledChar('\r', LINE_BREAK, fore_color, back_color));
+          case '\n':
+            _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
             break;
 
           case '_':
@@ -148,7 +148,7 @@ void StyledText::set_retro_text(sfz::StringSlice text) {
             break;
         }
     }
-    _chars.push_back(StyledChar('\r', LINE_BREAK, fore_color, back_color));
+    _chars.push_back(StyledChar('\n', LINE_BREAK, fore_color, back_color));
 
     wrap_to(std::numeric_limits<int>::max(), 0, 0);
 }
@@ -156,8 +156,8 @@ void StyledText::set_retro_text(sfz::StringSlice text) {
 void StyledText::set_interface_text(sfz::StringSlice text) {
     for (size_t i = 0; i < text.size(); ++i) {
         switch (text.at(i)) {
-          case '\r':
-            _chars.push_back(StyledChar('\r', LINE_BREAK, _fore_color, _back_color));
+          case '\n':
+            _chars.push_back(StyledChar('\n', LINE_BREAK, _fore_color, _back_color));
             break;
 
           case ' ':
@@ -210,7 +210,7 @@ void StyledText::set_interface_text(sfz::StringSlice text) {
             break;
         }
     }
-    _chars.push_back(StyledChar('\r', LINE_BREAK, _fore_color, _back_color));
+    _chars.push_back(StyledChar('\n', LINE_BREAK, _fore_color, _back_color));
 
     wrap_to(std::numeric_limits<int>::max(), 0, 0);
 }

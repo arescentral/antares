@@ -25,27 +25,76 @@
 using sfz::Bytes;
 using sfz::BytesSlice;
 using sfz::Exception;
+using sfz::Json;
+using sfz::JsonDefaultVisitor;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
 using sfz::quote;
 using sfz::read;
+using sfz::string_to_json;
+using std::vector;
 
 namespace macroman = sfz::macroman;
+namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-StringList::StringList(int id) {
-    Resource rsrc("strings", "STR#", id);
-    BytesSlice in(rsrc.data());
-    uint16_t size;
-    read(in, size);
-    for (size_t i = 0; i < size; ++i) {
-        uint8_t len;
-        read(in, len);
-        _strings.push_back(new String(macroman::decode(in.slice(0, len))));
-        in = in.slice(len);
+namespace {
+
+struct StringListVisitor : public JsonDefaultVisitor {
+    enum State {
+        NEW,
+        ARRAY,
+        DONE,
+    };
+
+    StringListVisitor(State& state, vector<String*>& vec):
+            _state(state),
+            _vec(vec) {
+        _state = NEW;
     }
+    virtual void visit_array(const std::vector<Json>& value) const {
+        switch (_state) {
+          case NEW:
+            _state = ARRAY;
+            for (size_t i = 0; i < value.size(); ++i) {
+                value[i].accept(*this);
+            }
+            _state = DONE;
+            break;
+          default:
+            return JsonDefaultVisitor::visit_array(value);
+        }
+    }
+    virtual void visit_string(const StringSlice& value) const {
+        switch (_state) {
+          case ARRAY:
+            _vec.push_back(new String(value));
+            break;
+          default:
+            return JsonDefaultVisitor::visit_string(value);
+        }
+    }
+    virtual void visit_default(const char* type) const {
+        throw Exception(format("got unexpected JSON {0}", type));
+    }
+
+    State& _state;
+    vector<String*>& _vec;
+};
+
+}  // namespace
+
+StringList::StringList(int id) {
+    Resource rsrc("strings", "json", id);
+    String in(utf8::decode(rsrc.data()));
+    Json strings;
+    if (!string_to_json(in, strings)) {
+        throw Exception(sfz::format("Couldn't parse strings/{0}.json", id));
+    }
+    StringListVisitor::State state;
+    strings.accept(StringListVisitor(state, _strings));
 }
 
 StringList::~StringList() {
