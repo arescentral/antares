@@ -11,7 +11,7 @@ def common(ctx):
     ctx.load("compiler_c compiler_cxx")
     ctx.load("core externals", tooldir="ext/waf-sfiera")
     ctx.load("antares_test", tooldir="tools")
-    ctx.external("libpng libsfz libzipxx rezin")
+    ctx.external("libpng-waf libsfz libzipxx rezin")
 
 def dist(dst):
     dst.algo = "zip"
