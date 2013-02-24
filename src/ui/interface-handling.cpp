@@ -76,16 +76,6 @@ namespace {
 const int32_t kTargetScreenWidth = 640;
 const int32_t kTargetScreenHeight = 480;
 
-inline void mPlayButtonDown() {
-    PlayVolumeSound(kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
-}
-inline void mPlayButtonUp() {
-    PlayVolumeSound(kComputerBeep2, kMediumLowVolume, kShortPersistence, kMustPlaySound);
-}
-inline void mPlayScreenSound() {
-    PlayVolumeSound(kComputerBeep3, kMediumLowVolume, kShortPersistence, kVeryLowPrioritySound);
-}
-
 const int32_t kMissionDataWidth         = 200;
 const int32_t kMissionDataVBuffer       = 40;
 const int32_t kMissionDataTopBuffer     = 30;

@@ -84,23 +84,9 @@ const int16_t kStringMessageID          = 1;
 
 const int32_t kHBuffer                  = 4;
 
-inline int mHexDigitValue(char c) {
-    if ('0' <= c && c <= '9') {
-        return c - '0';
-    } else {
-        return c - 'a' + 10;
-    }
-}
-
 }  // namespace
 
 namespace {
-
-int mac_roman_char_width(Font* font, uint8_t ch) {
-    BytesSlice bytes(&ch, 1);
-    String str(macroman::decode(bytes));
-    return font->char_width(str.at(0));
-}
 
 template <typename T>
 void clear(T& t) {

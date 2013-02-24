@@ -28,7 +28,7 @@
 
 namespace antares {
 
-class Scenario;
+struct Scenario;
 
 class ReplayGame : public Card {
   public:
@@ -50,7 +50,6 @@ class ReplayGame : public Card {
     int32_t _random_seed;
     const Scenario* _scenario;
     GameResult _game_result;
-    long _game_length;
 };
 
 }  // namespace antares

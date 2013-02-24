@@ -204,7 +204,7 @@ void InterfaceScreen::truncate(size_t size) {
 }
 
 void InterfaceScreen::extend(int id, size_t within) {
-    if ((within < 0) || (size() <= within)) {
+    if (size() <= within) {
         throw Exception("interfaces must be extended within existing elements");
     }
     vector<interfaceItemType> new_items;

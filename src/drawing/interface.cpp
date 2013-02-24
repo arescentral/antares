@@ -1124,7 +1124,6 @@ void draw_interface_picture_rect(const interfaceItemType& item) {
         draw_plain_rect(item.bounds, item.color, item.style);
     }
     Picture pict(item.item.pictureRect.pictureID);
-    Rect from = pict.size().as_rect();
     Rect to = pict.size().as_rect();
     to.offset(item.bounds.left, item.bounds.top);
     scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite(

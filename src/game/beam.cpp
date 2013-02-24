@@ -242,8 +242,6 @@ void update_beams() {
 }
 
 void draw_beams() {
-    Rect bounds = viewport;
-
     beamType* const beams = globals()->gBeamData.get();
     SFZ_FOREACH(beamType* beam, range(beams, beams + kBeamNum), {
         if (beam->active) {

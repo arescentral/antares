@@ -56,8 +56,8 @@ const int16_t kWarpThree        = 528;
 const int16_t kWarpFour         = 529;
 const int16_t kTeletype         = 535;
 
-struct Sound;
-struct SoundChannel;
+class Sound;
+class SoundChannel;
 struct spaceObjectType;
 
 enum soundPriorityType {
