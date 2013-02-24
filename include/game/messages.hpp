@@ -99,7 +99,7 @@ struct longMessageType {
 };
 
 class MessageData {
-    std::queue<sfz::linked_ptr<sfz::String> > queue;
+    std::queue<std::shared_ptr<sfz::String> > queue;
 };
 
 void InitMessageScreen( void);

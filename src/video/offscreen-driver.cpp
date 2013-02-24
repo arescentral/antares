@@ -43,12 +43,12 @@ using sfz::StringSlice;
 using sfz::WriteTarget;
 using sfz::dec;
 using sfz::format;
-using sfz::linked_ptr;
-using sfz::make_linked_ptr;
 using sfz::range;
 using sfz::scoped_array;
 using std::greater;
 using std::max;
+using std::shared_ptr;
+
 namespace utf8 = sfz::utf8;
 
 namespace antares {

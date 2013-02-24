@@ -45,7 +45,7 @@ class ScenarioList {
     const Entry& at(size_t index) const;
 
   private:
-    std::vector<sfz::linked_ptr<Entry> > _scenarios;
+    std::vector<std::shared_ptr<Entry> > _scenarios;
 
     DISALLOW_COPY_AND_ASSIGN(ScenarioList);
 };

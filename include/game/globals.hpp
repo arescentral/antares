@@ -126,7 +126,7 @@ struct aresGlobalType {
     barIndicatorType    gBarIndicator[ kBarIndicatorNum];
     bool            gMouseActive;           // = kMouseOff;
     int             gMouseTimeout;
-    std::queue<sfz::linked_ptr<sfz::String> > gMessageData;
+    std::queue<std::shared_ptr<sfz::String> > gMessageData;
     sfz::scoped_array<unsigned char>     gStatusString;
     std::unique_ptr<longMessageType>     gLongMessageData;
     long            gMessageTimeCount;      // = 0;

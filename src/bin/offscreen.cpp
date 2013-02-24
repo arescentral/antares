@@ -39,11 +39,11 @@ using sfz::StringSlice;
 using sfz::args::help;
 using sfz::args::store;
 using sfz::args::store_const;
-using sfz::make_linked_ptr;
 using sfz::makedirs;
 using sfz::print;
 using sfz::quote;
 using sfz::string_to_int;
+using std::shared_ptr;
 using std::unique_ptr;
 
 namespace args = sfz::args;
@@ -203,7 +203,7 @@ void mission_briefing(EventScheduler& scheduler, Ledger& ledger) {
 }
 
 void pause(EventScheduler& scheduler) {
-    scheduler.schedule_event(make_linked_ptr(new MouseMoveEvent(0, Point(320, 240))));
+    scheduler.schedule_event(shared_ptr<Event>(new MouseMoveEvent(0, Point(320, 240))));
 
     // Skip the intro.  Start the first tutorial and skip the prologue.
     scheduler.schedule_key(Keys::Q, 1756, 1757);

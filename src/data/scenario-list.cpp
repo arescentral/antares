@@ -28,8 +28,8 @@ using sfz::MappedFile;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
-using sfz::linked_ptr;
 using sfz::read;
+using std::shared_ptr;
 using std::vector;
 
 namespace utf8 = sfz::utf8;
@@ -61,7 +61,7 @@ void u32_to_version(uint32_t in, Version& out) {
 }  // namespace
 
 ScenarioList::ScenarioList() {
-    linked_ptr<Entry> factory_scenario(new Entry);
+    shared_ptr<Entry> factory_scenario(new Entry);
     factory_scenario->identifier.assign("com.biggerplanet.ares");
     factory_scenario->title.assign("Ares");
     factory_scenario->download_url.assign("http://www.arescentral.com");
@@ -91,7 +91,7 @@ ScenarioList::ScenarioList() {
         BytesSlice data(file.data());
         scenarioInfoType info;
         read(data, info);
-        linked_ptr<Entry> entry(new Entry);
+        shared_ptr<Entry> entry(new Entry);
         entry->identifier.assign(identifier);
         entry->title.assign(info.titleString);
         entry->download_url.assign(info.downloadURLString);
