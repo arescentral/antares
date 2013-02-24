@@ -48,11 +48,11 @@ using sfz::WriteTarget;
 using sfz::format;
 using sfz::makedirs;
 using sfz::quote;
-using sfz::read;
 using sfz::range;
-using sfz::scoped_ptr;
+using sfz::read;
 using sfz::tree_digest;
 using sfz::write;
+using std::unique_ptr;
 using zipxx::ZipArchive;
 using zipxx::ZipFileReader;
 

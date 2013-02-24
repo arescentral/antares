@@ -56,7 +56,7 @@ class Preferences {
     void set_scenario_identifier(sfz::StringSlice id);
 
   private:
-    static sfz::scoped_ptr<Preferences> _preferences;
+    static std::unique_ptr<Preferences> _preferences;
 
     int16_t             _key_map[44];
     bool                _play_idle_music;

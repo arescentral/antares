@@ -34,8 +34,8 @@ using sfz::args::help;
 using sfz::args::store;
 using sfz::dec;
 using sfz::format;
-using sfz::scoped_ptr;
 using sfz::write;
+using std::unique_ptr;
 
 namespace args = sfz::args;
 namespace io = sfz::io;

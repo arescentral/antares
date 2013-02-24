@@ -35,8 +35,8 @@ using sfz::StringSlice;
 using sfz::format;
 using sfz::range;
 using sfz::scoped_array;
-using sfz::scoped_ptr;
 using std::map;
+using std::unique_ptr;
 
 namespace antares {
 
@@ -102,7 +102,7 @@ draw_tiny_t draw_tiny_function(uint8_t id) {
 }  // namespace
 
 struct pixTableType {
-    sfz::scoped_ptr<NatePixTable>   resource;
+    std::unique_ptr<NatePixTable>   resource;
     int                             resID;
     bool                            keepMe;
 };

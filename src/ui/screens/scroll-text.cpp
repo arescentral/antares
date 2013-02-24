@@ -28,7 +28,7 @@
 #include "video/driver.hpp"
 
 using sfz::format;
-using sfz::scoped_ptr;
+using std::unique_ptr;
 
 namespace antares {
 namespace {
@@ -41,7 +41,7 @@ ScrollTextScreen::ScrollTextScreen(int text_id, int width, double speed)
         : _speed(speed),
           _play_song(false),
           _song_id(0) {
-    scoped_ptr<PixMap> pix_map(build_pix(text_id, width));
+    unique_ptr<PixMap> pix_map(build_pix(text_id, width));
     _sprite.reset(VideoDriver::driver()->new_sprite(format("/x/scroll_text/{0}", text_id), *pix_map));
 }
 
@@ -49,7 +49,7 @@ ScrollTextScreen::ScrollTextScreen(int text_id, int width, double speed, int son
         : _speed(speed),
           _play_song(true),
           _song_id(song_id) {
-    scoped_ptr<PixMap> pix_map(build_pix(text_id, width));
+    unique_ptr<PixMap> pix_map(build_pix(text_id, width));
     _sprite.reset(VideoDriver::driver()->new_sprite(format("/x/scroll_text/{0}", text_id), *pix_map));
 }
 

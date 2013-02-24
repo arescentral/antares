@@ -29,7 +29,7 @@ using sfz::ReadSource;
 using sfz::format;
 using sfz::range;
 using sfz::read;
-using sfz::scoped_ptr;
+using std::unique_ptr;
 
 namespace antares {
 

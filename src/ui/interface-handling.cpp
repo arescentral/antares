@@ -60,11 +60,11 @@ using sfz::String;
 using sfz::StringSlice;
 using sfz::read;
 using sfz::scoped_array;
-using sfz::scoped_ptr;
 using std::make_pair;
 using std::max;
 using std::min;
 using std::pair;
+using std::unique_ptr;
 using std::vector;
 
 namespace utf8 = sfz::utf8;

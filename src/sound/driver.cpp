@@ -32,7 +32,7 @@ using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
 using sfz::write;
-using sfz::scoped_ptr;
+using std::unique_ptr;
 
 namespace utf8 = sfz::utf8;
 
@@ -96,13 +96,13 @@ class NullSound : public Sound {
 
 }  // namespace
 
-void NullSoundDriver::open_channel(scoped_ptr<SoundChannel>& channel) {
-    channel.reset(new NullChannel);
+unique_ptr<SoundChannel> NullSoundDriver::open_channel() {
+    return unique_ptr<SoundChannel>(new NullChannel);
 }
 
-void NullSoundDriver::open_sound(PrintItem path, scoped_ptr<Sound>& sound) {
+unique_ptr<Sound> NullSoundDriver::open_sound(PrintItem path) {
     static_cast<void>(path);
-    sound.reset(new NullSound);
+    return unique_ptr<Sound>(new NullSound);
 }
 
 void NullSoundDriver::set_global_volume(uint8_t volume) {
@@ -177,13 +177,13 @@ LogSoundDriver::LogSoundDriver(const StringSlice& path):
         _last_id(-1),
         _active_channel(NULL) { }
 
-void LogSoundDriver::open_channel(scoped_ptr<SoundChannel>& channel) {
-    channel.reset(new LogChannel(*this));
+unique_ptr<SoundChannel> LogSoundDriver::open_channel() {
+    return unique_ptr<SoundChannel>(new LogChannel(*this));
 }
 
-void LogSoundDriver::open_sound(PrintItem path, scoped_ptr<Sound>& sound) {
+unique_ptr<Sound> LogSoundDriver::open_sound(PrintItem path) {
     String path_string(path);
-    sound.reset(new LogSound(*this, path_string));
+    return unique_ptr<Sound>(new LogSound(*this, path_string));
 }
 
 void LogSoundDriver::set_global_volume(uint8_t volume) {

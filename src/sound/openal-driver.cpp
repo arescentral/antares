@@ -29,7 +29,7 @@ using sfz::Exception;
 using sfz::PrintItem;
 using sfz::StringSlice;
 using sfz::format;
-using sfz::scoped_ptr;
+using std::unique_ptr;
 
 namespace antares {
 
@@ -315,16 +315,16 @@ OpenAlSoundDriver::~OpenAlSoundDriver() {
     alcCloseDevice(_device);
 }
 
-void OpenAlSoundDriver::open_channel(scoped_ptr<SoundChannel>& channel) {
-    channel.reset(new OpenAlChannel(*this));
+unique_ptr<SoundChannel> OpenAlSoundDriver::open_channel() {
+    return unique_ptr<SoundChannel>(new OpenAlChannel(*this));
 }
 
-void OpenAlSoundDriver::open_sound(PrintItem path, scoped_ptr<Sound>& sound) {
-    scoped_ptr<OpenAlSound> result(new OpenAlSound(*this));
+unique_ptr<Sound> OpenAlSoundDriver::open_sound(PrintItem path) {
+    unique_ptr<OpenAlSound> result(new OpenAlSound(*this));
     Resource rsrc(path);
     AudioFile audio_file(rsrc.data());
     result->buffer(audio_file);
-    sound.reset(result.release());
+    return unique_ptr<Sound>(result.release());;
 }
 
 void OpenAlSoundDriver::set_global_volume(uint8_t volume) {

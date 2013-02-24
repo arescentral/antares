@@ -56,7 +56,8 @@ using sfz::args::store_const;
 using sfz::format;
 using sfz::make_linked_ptr;
 using sfz::mkdir;
-using sfz::scoped_ptr;
+using std::unique_ptr;
+
 namespace args = sfz::args;
 namespace io = sfz::io;
 namespace path = sfz::path;
@@ -191,7 +192,7 @@ void main(int argc, char** argv) {
         scheduler.schedule_snapshot(i);
     }
 
-    scoped_ptr<SoundDriver> sound;
+    unique_ptr<SoundDriver> sound;
     if (output_dir.has()) {
         String out(format("{0}/sound.log", *output_dir));
         sound.reset(new LogSoundDriver(out));

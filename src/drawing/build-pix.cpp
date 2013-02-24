@@ -34,8 +34,8 @@ using sfz::StringSlice;
 using sfz::format;
 using sfz::linked_ptr;
 using sfz::make_linked_ptr;
-using sfz::scoped_ptr;
 using sfz::string_to_int;
+using std::unique_ptr;
 using std::vector;
 
 namespace macroman = sfz::macroman;
@@ -107,14 +107,14 @@ class PixBuilder {
 
     ArrayPixMap* _pix;
 
-    scoped_ptr<Picture> _background;
+    unique_ptr<Picture> _background;
     int _background_start;
 };
 
 }  // namespace
 
 PixMap* build_pix(int text_id, int width) {
-    scoped_ptr<ArrayPixMap> pix(new ArrayPixMap(width, 0));
+    unique_ptr<ArrayPixMap> pix(new ArrayPixMap(width, 0));
     PixBuilder build(pix.get());
     Resource rsrc("text", "txt", text_id);
 

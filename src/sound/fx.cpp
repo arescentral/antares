@@ -47,7 +47,7 @@ void InitSoundFX() {
         globals()->gChannel[i].soundAge = 0;
         globals()->gChannel[i].soundPriority = kNoSound;
         globals()->gChannel[i].whichSound = -1;
-        SoundDriver::driver()->open_channel(globals()->gChannel[i].channelPtr);
+        globals()->gChannel[i].channelPtr = SoundDriver::driver()->open_channel();
     }
 
     ResetAllSounds();
@@ -219,9 +219,8 @@ int AddSound(int soundID) {
             throw Exception("Can't manage any more sounds");
         }
 
-        SoundDriver::driver()->open_sound(
-                format("/sounds/{0}.aiff", soundID),
-                globals()->gSound[whichSound].soundHandle);
+        globals()->gSound[whichSound].soundHandle = SoundDriver::driver()->open_sound(
+                format("/sounds/{0}.aiff", soundID));
         globals()->gSound[whichSound].id = soundID;
     }
     return whichSound;

@@ -74,11 +74,11 @@ struct smartSoundChannel {
     int32_t             soundAge;
     short               soundVolume;
     soundPriorityType   soundPriority;
-    sfz::scoped_ptr<SoundChannel> channelPtr;
+    std::unique_ptr<SoundChannel> channelPtr;
 };
 
 struct smartSoundHandle {
-    sfz::scoped_ptr<Sound>   soundHandle;
+    std::unique_ptr<Sound>   soundHandle;
     short               id;
     bool             keepMe;
 };

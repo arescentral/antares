@@ -114,7 +114,7 @@ class PictFade : public Card {
     bool* _skipped;
     int64_t _wane_start;
 
-    sfz::scoped_ptr<Sprite> _sprite;
+    std::unique_ptr<Sprite> _sprite;
 
     DISALLOW_COPY_AND_ASSIGN(PictFade);
 };

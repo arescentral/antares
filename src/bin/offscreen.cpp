@@ -39,12 +39,12 @@ using sfz::StringSlice;
 using sfz::args::help;
 using sfz::args::store;
 using sfz::args::store_const;
-using sfz::makedirs;
 using sfz::make_linked_ptr;
+using sfz::makedirs;
 using sfz::print;
 using sfz::quote;
-using sfz::scoped_ptr;
 using sfz::string_to_int;
+using std::unique_ptr;
 
 namespace args = sfz::args;
 namespace io = sfz::io;
@@ -105,7 +105,7 @@ void main(int argc, char* const* argv) {
         exit(1);
     }
 
-    scoped_ptr<SoundDriver> sound;
+    unique_ptr<SoundDriver> sound;
     if (output_dir.has()) {
         String out(format("{0}/sound.log", *output_dir));
         sound.reset(new LogSoundDriver(out));

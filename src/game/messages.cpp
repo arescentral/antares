@@ -37,7 +37,7 @@ using sfz::Exception;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::make_linked_ptr;
-using sfz::scoped_ptr;
+using std::unique_ptr;
 
 namespace macroman = sfz::macroman;
 namespace utf8 = sfz::utf8;
@@ -212,7 +212,7 @@ void ClipToCurrentLongMessage( void)
 
 {
     longMessageType *tmessage;
-    scoped_ptr<String> textData;
+    unique_ptr<String> textData;
 
     tmessage = globals()->gLongMessageData.get();
     if (( tmessage->currentResID != tmessage->lastResID) || ( tmessage->newStringMessage))

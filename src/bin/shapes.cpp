@@ -32,8 +32,8 @@ using sfz::args::store;
 using sfz::dec;
 using sfz::format;
 using sfz::path::dirname;
-using sfz::scoped_ptr;
 using sfz::write;
+using std::unique_ptr;
 
 namespace io = sfz::io;
 namespace utf8 = sfz::utf8;

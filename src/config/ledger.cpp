@@ -39,9 +39,9 @@ using sfz::format;
 using sfz::makedirs;
 using sfz::print;
 using sfz::range;
-using sfz::scoped_ptr;
 using sfz::string_to_int;
 using sfz::write;
+using std::unique_ptr;
 using std::vector;
 
 namespace path = sfz::path;
@@ -168,7 +168,7 @@ void DirectoryLedger::load() {
     }
 
     _chapters.clear();
-    scoped_ptr<MappedFile> file;
+    unique_ptr<MappedFile> file;
     try {
         file.reset(new MappedFile(path));
     } catch (Exception& e) {

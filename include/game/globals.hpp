@@ -98,7 +98,7 @@ struct aresGlobalType {
 
     unsigned long   gActiveCheats[kMaxPlayerNum];
     unsigned long   gSynchValue;
-    sfz::scoped_ptr<InputSource> gInputSource;
+    std::unique_ptr<InputSource> gInputSource;
     long            gGameOver;
     sfz::scoped_array<admiralType>       gAdmiralData;
     int64_t         gGameTime;
@@ -128,18 +128,18 @@ struct aresGlobalType {
     int             gMouseTimeout;
     std::queue<sfz::linked_ptr<sfz::String> > gMessageData;
     sfz::scoped_array<unsigned char>     gStatusString;
-    sfz::scoped_ptr<longMessageType>     gLongMessageData;
+    std::unique_ptr<longMessageType>     gLongMessageData;
     long            gMessageTimeCount;      // = 0;
     long            gMessageLabelNum;       // = -1;
     long            gStatusLabelNum;        // = -1;
     miniComputerDataType    gMiniScreenData;
-    sfz::scoped_ptr<StringList>          gMissionStatusStrList;
+    std::unique_ptr<StringList>          gMissionStatusStrList;
     sfz::scoped_array<screenLabelType>   gScreenLabelData;
     sfz::scoped_array<beamType>          gBeamData;
     smartSoundHandle    gSound[kSoundNum];
     smartSoundChannel   gChannel[kMaxChannelNum];
     long            gLastSoundTime;         // = 0
-    sfz::scoped_ptr<StringList>        gAresCheatStrings;
+    std::unique_ptr<StringList>        gAresCheatStrings;
     KeyMap*         gKeyMapBuffer;          // = NewPtr( sizeof (KeyMap) * (long)kKeyMapBufferNum;
     long            gKeyMapBufferTop;       // = 0;
     long            gKeyMapBufferBottom;    // = 0;

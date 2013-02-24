@@ -67,7 +67,7 @@ class NatePixTable::Frame {
     int16_t _h_offset;
     int16_t _v_offset;
     ArrayPixMap _pix_map;
-    sfz::scoped_ptr<Sprite> _sprite;
+    std::unique_ptr<Sprite> _sprite;
 
     DISALLOW_COPY_AND_ASSIGN(Frame);
 };

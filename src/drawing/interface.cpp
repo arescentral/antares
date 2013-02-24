@@ -35,7 +35,7 @@ using sfz::Exception;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
-using sfz::scoped_ptr;
+using std::unique_ptr;
 using std::vector;
 
 namespace utf8 = sfz::utf8;
@@ -1126,7 +1126,7 @@ void draw_interface_picture_rect(const interfaceItemType& item) {
     Picture pict(item.item.pictureRect.pictureID);
     Rect to = pict.size().as_rect();
     to.offset(item.bounds.left, item.bounds.top);
-    scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite(
+    unique_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite(
             format("/pict/{0}", item.item.pictureRect.pictureID), pict));
     sprite->draw(item.bounds.left, item.bounds.top);
 }

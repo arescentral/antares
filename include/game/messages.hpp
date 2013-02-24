@@ -39,7 +39,7 @@ const uint8_t kStatusWarnColor      = PINK;
 const size_t kMaxLineNumber = 48;
 
 struct retroTextSpecType {
-    sfz::scoped_ptr<sfz::String> text;
+    std::unique_ptr<sfz::String> text;
     long            textLength;
     long            lineLength[kMaxLineNumber];
     long            lineNumber;
@@ -90,7 +90,7 @@ struct longMessageType {
     sfz::String             lastStringMessage;
     bool                 newStringMessage;
     sfz::String             text;
-    sfz::scoped_ptr<StyledText> retro_text;
+    std::unique_ptr<StyledText> retro_text;
     Point                   retro_origin;
     int32_t                 at_char;
     bool                 labelMessage;

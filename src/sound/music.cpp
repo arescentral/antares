@@ -22,22 +22,22 @@
 #include "sound/driver.hpp"
 
 using sfz::format;
-using sfz::scoped_ptr;
+using std::unique_ptr;
 
 namespace antares {
 
 namespace {
 
 bool playing = false;
-scoped_ptr<Sound> song;
-scoped_ptr<SoundChannel> channel;
+unique_ptr<Sound> song;
+unique_ptr<SoundChannel> channel;
 
 }  // namespace
 
 void MusicInit() {
     playing = false;
     song.reset();
-    SoundDriver::driver()->open_channel(channel);
+    channel = SoundDriver::driver()->open_channel();
 }
 
 void MusicCleanup() {
@@ -77,7 +77,7 @@ void StopAndUnloadSong() {
 
 void LoadSong(int id) {
     StopSong();
-    SoundDriver::driver()->open_sound(format("/music/{0}.mp3", id), song);
+    song = SoundDriver::driver()->open_sound(format("/music/{0}.mp3", id));
 }
 
 void SetSongVolume(double volume) {

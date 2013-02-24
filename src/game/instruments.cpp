@@ -42,9 +42,9 @@
 using sfz::format;
 using sfz::range;
 using sfz::scoped_array;
-using sfz::scoped_ptr;
-using std::min;
 using std::max;
+using std::min;
+using std::unique_ptr;
 
 namespace antares {
 
@@ -125,8 +125,8 @@ coordPointType          gLastGlobalCorner;
 
 namespace {
 
-scoped_ptr<Sprite> left_instrument_sprite;
-scoped_ptr<Sprite> right_instrument_sprite;
+unique_ptr<Sprite> left_instrument_sprite;
+unique_ptr<Sprite> right_instrument_sprite;
 scoped_array<Point> gRadarBlipData;
 scoped_array<int32_t> gScaleList;
 scoped_array<int32_t> gSectorLineData;
