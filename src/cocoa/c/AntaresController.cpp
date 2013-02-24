@@ -71,7 +71,7 @@ extern "C" AntaresDrivers* antares_controller_create_drivers(CFStringRef* error_
     if (getenv("HOME") == NULL) {
         cf::String msg("Couldn't get $HOME");
         *error_message = msg.release();
-        return false;
+        return NULL;
     }
     const String home(utf8::decode(getenv("HOME")));
     return new AntaresDrivers(home);

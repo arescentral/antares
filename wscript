@@ -7,7 +7,7 @@ WARNINGS = ["-Wall", "-Werror", "-Wno-sign-compare", "-Wno-deprecated-declaratio
 
 def common(ctx):
     ctx.default_sdk = "10.6"
-    ctx.default_compiler = "gcc"
+    ctx.default_compiler = "clang"
     ctx.load("compiler_c compiler_cxx")
     ctx.load("core externals", tooldir="ext/waf-sfiera")
     ctx.load("antares_test", tooldir="tools")

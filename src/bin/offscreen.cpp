@@ -56,7 +56,6 @@ namespace {
 const int32_t kScreenWidth = 640;
 const int32_t kScreenHeight = 480;
 
-void usage(const StringSlice& program_name);
 void main_screen(EventScheduler& scheduler);
 void options(EventScheduler& scheduler);
 void mission_briefing(EventScheduler& scheduler, Ledger& ledger);
@@ -114,7 +113,6 @@ void main(int argc, char* const* argv) {
         sound.reset(new NullSoundDriver);
     }
 
-    Size screen_size = Preferences::preferences()->screen_size();
     if (text) {
         TextVideoDriver video(Preferences::preferences()->screen_size(), scheduler, output_dir);
         video.loop(AresInit());
@@ -122,15 +120,6 @@ void main(int argc, char* const* argv) {
         OffscreenVideoDriver video(Preferences::preferences()->screen_size(), scheduler, output_dir);
         video.loop(AresInit());
     }
-}
-
-void usage(const StringSlice& program_name) {
-    print(io::err, format(
-                "usage: {0} [<options>] <script>\n"
-                "options:\n"
-                "    -o|--output=<dir>  directory to save dumps to\n",
-                program_name));
-    exit(1);
 }
 
 void main_screen(EventScheduler& scheduler) {

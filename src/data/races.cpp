@@ -63,7 +63,7 @@ void CleanupRaces() {
 }
 
 int16_t GetRaceIDFromNum(size_t raceNum) {
-    if ((0 <= raceNum) && (raceNum < kRaceNum)) {
+    if (raceNum < kRaceNum) {
         return gRaceData[raceNum].id;
     } else {
         return -1;

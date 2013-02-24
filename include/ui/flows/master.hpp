@@ -32,7 +32,7 @@ class Master : public Card {
     Master();
 
     virtual void become_front();
-    virtual void draw();
+    virtual void draw() const;
 
   private:
     static void init();

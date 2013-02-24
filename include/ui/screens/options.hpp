@@ -135,7 +135,7 @@ class KeyControlScreen : public InterfaceScreen {
 
     Tab _tab;
     const size_t _key_start;
-    size_t _selected_key;
+    int32_t _selected_key;
     std::vector<std::pair<size_t, size_t> > _conflicts;
 
     int64_t _next_flash;

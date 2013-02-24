@@ -28,7 +28,7 @@
 
 namespace antares {
 
-class Scenario;
+struct Scenario;
 class Sprite;
 
 class BriefingScreen : public InterfaceScreen {

@@ -69,7 +69,7 @@ namespace {
 
 CFStringRef create_string(const StringSlice& string) {
     Bytes bytes(utf8::encode(string));
-    return CFStringCreateWithBytes(NULL, bytes.data(), bytes.size(), kCFStringEncodingUTF8, NULL);
+    return CFStringCreateWithBytes(NULL, bytes.data(), bytes.size(), kCFStringEncodingUTF8, false);
 }
 
 }  // namespace

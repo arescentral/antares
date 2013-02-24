@@ -110,7 +110,7 @@ void Master::become_front() {
     }
 }
 
-void Master::draw() { }
+void Master::draw() const { }
 
 void Master::init() {
     RgbColor                initialFadeColor;

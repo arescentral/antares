@@ -613,7 +613,7 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
                 SetAdmiralColor(gAdmiralNumbers[i], GetPlayerColor(i));
                 SetAdmiralName(gAdmiralNumbers[i], (anyCharType *)GetPlayerName(i));
             }
-#endif NETSPROCKET_AVAILABLE
+#endif  // NETSPROCKET_AVAILABLE
         } else {
             if (gThisScenario->player[i].playerType == kSingleHumanPlayer) {
                 gAdmiralNumbers[i] = MakeNewAdmiral(

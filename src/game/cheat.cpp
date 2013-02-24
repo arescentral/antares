@@ -87,7 +87,7 @@ void ExecuteCheat( short whichCheat, long whichPlayer)
     if ( GetAllNetPlayersCheating())
 #else
     if ( true)
-#endif NETSPROCKET_AVAILABLE
+#endif  // NETSPROCKET_AVAILABLE
     {
         switch( whichCheat)
         {

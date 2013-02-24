@@ -273,7 +273,7 @@ bool PlayerShipGetKeys(int32_t timePass, InputSource& input_source, bool *enterM
                         3,  // the special screen
                         1   // kSpecialMiniTransfer
                         );
-#endif NETSPROCKET_AVAILABLE
+#endif  // NETSPROCKET_AVAILABLE
             }
         }
         if (((mScale121Key(keyMap)))) {
@@ -371,7 +371,7 @@ bool PlayerShipGetKeys(int32_t timePass, InputSource& input_source, bool *enterM
                                 true)) {
                         StopNetworking();
                     }
-#endif NETSPROCKET_AVAILABLE
+#endif  // NETSPROCKET_AVAILABLE
                 }
             }
         }
@@ -601,7 +601,7 @@ void PlayerShipHandleClick(Point where, int button) {
 #ifdef NETSPROCKET_AVAILABLE
                         if (!SendSelectMessage(globals()->gGameTime + gNetLatency, selectShipNum, true))
                             StopNetworking();
-#endif NETSPROCKET_AVAILABLE
+#endif  // NETSPROCKET_AVAILABLE
                     }
                 }
             } else {
@@ -617,7 +617,7 @@ void PlayerShipHandleClick(Point where, int button) {
 #ifdef NETSPROCKET_AVAILABLE
                         if (!SendSelectMessage(globals()->gGameTime + gNetLatency, selectShipNum, false))
                             StopNetworking();
-#endif NETSPROCKET_AVAILABLE
+#endif  // NETSPROCKET_AVAILABLE
                     }
                 }
             }

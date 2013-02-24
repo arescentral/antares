@@ -204,7 +204,6 @@ void BriefingScreen::build_star_map() {
 
     _star_rect = Rect(_scenario->star_map_point(), Size(0, 0));
     _star_rect.inset(-kMissionStarPointWidth, -kMissionStarPointHeight);
-    RgbColor gold = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
 
     // Move `_star_rect` so that it is inside of `pix_bounds`.
     if (_star_rect.left < pix_bounds.left) {

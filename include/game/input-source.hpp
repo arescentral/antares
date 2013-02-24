@@ -26,7 +26,7 @@
 
 namespace antares {
 
-class ReplayData;
+struct ReplayData;
 
 class InputSource {
   public:

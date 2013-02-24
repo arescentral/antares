@@ -22,7 +22,7 @@
 namespace antares {
 
 class PixMap;
-class Rect;
+struct Rect;
 class RgbColor;
 
 void draw_triangle_up(PixMap* destPix, const RgbColor& color);

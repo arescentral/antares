@@ -1104,7 +1104,7 @@ void MiniComputerDoAccept( void)
         if ( !SendMenuMessage( globals()->gGameTime + gNetLatency, globals()->gMiniScreenData.currentScreen,
             globals()->gMiniScreenData.selectLine))
             StopNetworking();
-#endif NETSPROCKET_AVAILABLE
+#endif  // NETSPROCKET_AVAILABLE
     }
 }
 

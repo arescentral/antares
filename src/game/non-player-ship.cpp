@@ -1815,7 +1815,7 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
     } else closestObject = NULL;
 
     // if we have no target  then
-    if (( anObject->targetObjectNumber == kNoShip))
+    if (anObject->targetObjectNumber == kNoShip)
     {
         // if the closest object is appropriate (if it exists, it should be, then
         if (( closestObject != NULL) &&

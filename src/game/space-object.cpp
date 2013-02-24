@@ -1493,6 +1493,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                                 action->argument.alterObject.minimum);
                             break;
 
+                        /*
                         case 919191://kAlterSpecial:
                             anObject->specialType = action->argument.alterObject.minimum;
                             baseObject = mGetBaseObjectPtr( anObject->specialType);
@@ -1503,6 +1504,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                             if ( baseObject->frame.weapon.range < anObject->shortestWeaponRange)
                                 anObject->shortestWeaponRange = baseObject->frame.weapon.range;
                             break;
+                        */
 
                         case kAlterHidden:
                             l = 0;

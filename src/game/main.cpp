@@ -393,7 +393,6 @@ bool GamePlay::next_timer(int64_t& time) {
 void GamePlay::fire_timer() {
     uint64_t thisTime;
     uint64_t scrapTime;
-    const Rect clip_rect = viewport;
 
     while (_next_timer < now_usecs()) {
         _next_timer = add_ticks(_next_timer, 1);

@@ -275,10 +275,6 @@ void UpdateRadar(int32_t unitsDone) {
     bounds.offset(0, globals()->gInstrumentTop);
     bounds.inset(1, 1);
 
-    const RgbColor very_light = GetRGBTranslateColorShade(kRadarColor, VERY_LIGHT);
-    const RgbColor darkest = GetRGBTranslateColorShade(kRadarColor, DARKEST);
-    const RgbColor very_dark = GetRGBTranslateColorShade(kRadarColor, VERY_DARK);
-
     if (globals()->radar_is_functioning) {
         if (globals()->gRadarCount <= 0) {
             Rect radar = bounds;
@@ -677,8 +673,6 @@ void draw_sector_lines() {
     uint32_t        size, level, x, h, division;
     RgbColor        color;
 
-    Rect clipRect = viewport;
-
     size = kSubSectorSize / 4;
     level = 1;
     do {
@@ -943,7 +937,6 @@ static void draw_bar_indicator(int16_t which, int32_t value, int32_t max) {
     }
 
     int32_t graphicValue;
-    globals()->gBarIndicator[which].thisValue;
     if (max > 0) {
         graphicValue = (kBarIndicatorHeight * value) / max;
         if (graphicValue < 0) {
