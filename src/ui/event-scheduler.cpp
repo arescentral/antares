@@ -66,7 +66,8 @@ void EventScheduler::loop(EventScheduler::MainLoop& loop) {
         const bool has_timer = loop.top()->next_timer(at_usecs);
         const int64_t at_ticks = at_usecs * 60 / 1000000;
         if (!_event_heap.empty() && (!has_timer || (_event_heap.front()->at() <= at_ticks))) {
-            linked_ptr<Event> event = _event_heap.front();
+            linked_ptr<Event> event;
+            swap(event, _event_heap.front());
             pop_heap(_event_heap.begin(), _event_heap.end(), is_later);
             _event_heap.pop_back();
             advance_tick_count(loop, event->at());
