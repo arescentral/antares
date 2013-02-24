@@ -96,14 +96,14 @@ void NatePixTable::Frame::build(BytesSlice in, int32_t id, int32_t frame_number,
 }
 
 void NatePixTable::Frame::fill_pix_map(BytesSlice bytes) {
-    SFZ_FOREACH(uint16_t y, range(_height), {
-        SFZ_FOREACH(uint16_t x, range(_width), {
+    for (uint16_t y: range(_height)) {
+        for (uint16_t x: range(_width)) {
             uint8_t byte = read<uint8_t>(bytes);
             if (byte) {
                 _pix_map.set(x, y, RgbColor::at(byte));
             }
-        });
-    });
+        }
+    }
 }
 
 void NatePixTable::Frame::colorize_pix_map(BytesSlice bytes, uint8_t color) {
@@ -112,14 +112,14 @@ void NatePixTable::Frame::colorize_pix_map(BytesSlice bytes, uint8_t color) {
     // count the # of pixels, and # of pixels that are white
     int white_count = 0;
     int pixel_count = 0;
-    SFZ_FOREACH(uint8_t byte, bytes, {
+    for (uint8_t byte: bytes) {
         if (byte) {
             ++pixel_count;
             if (byte <= 15) {
                 ++white_count;
             }
         }
-    });
+    }
 
     // If more than 1/3 of the opaque pixels in this sprite are in the 'white' band of the
     // color table, then colorize all opaque (non-0x00) pixels.  Otherwise, only colorize

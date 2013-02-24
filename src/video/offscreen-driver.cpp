@@ -70,15 +70,15 @@ class SnapshotBuffer {
     void write_to(const WriteTarget& out) const {
         ArrayPixMap pix(_screen_size.width, _screen_size.height);
         uint8_t* p = _data.get();
-        SFZ_FOREACH(int32_t y, range(_screen_size.height), {
-            SFZ_FOREACH(int32_t x, range(_screen_size.width), {
+        for (int32_t y: range(_screen_size.height)) {
+            for (int32_t x: range(_screen_size.width)) {
                 uint8_t blue = *(p++);
                 uint8_t green = *(p++);
                 uint8_t red = *(p++);
                 ++p;
                 pix.set(x, y, RgbColor(red, green, blue));
-            });
-        });
+            }
+        }
         write(out, pix);
     }
 

@@ -89,14 +89,14 @@ void CoreFoundationPrefsDriver::load(Preferences* preferences) {
 
     cf::Array key_settings;
     if (cf::get_preference(kKeySettingsPreference, key_settings)) {
-        SFZ_FOREACH(int i, range(min<int>(KEY_COUNT, CFArrayGetCount(key_settings.c_obj()))), {
+        for (int i: range(min<int>(KEY_COUNT, CFArrayGetCount(key_settings.c_obj())))) {
             cf::Type item(CFRetain(CFArrayGetValueAtIndex(key_settings.c_obj(), i)));
             cf::Number number;
             int key;
             if (move(number, item) && CFNumberGetValue(number.c_obj(), kCFNumberIntType, &key)) {
                 preferences->set_key(i, key);
             }
-        });
+        }
     }
 
     cf::Boolean bool_value;
@@ -141,11 +141,11 @@ void CoreFoundationPrefsDriver::load(Preferences* preferences) {
 
 void CoreFoundationPrefsDriver::save(const Preferences& preferences) {
     cf::MutableArray key_settings(CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks));
-    SFZ_FOREACH(int i, range<int>(KEY_COUNT), {
+    for (int i: range<int>(KEY_COUNT)) {
         int key = preferences.key(i);
         cf::Number cfkey(CFNumberCreate(NULL, kCFNumberIntType, &key));
         CFArrayAppendValue(key_settings.c_obj(), cfkey.c_obj());
-    });
+    }
     cf::set_preference(kKeySettingsPreference, key_settings);
 
     cf::Boolean play_idle_music(preferences.play_idle_music());

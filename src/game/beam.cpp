@@ -80,16 +80,16 @@ void InitBeams() {
 
 void ResetBeams() {
     beamType* const beams = globals()->gBeamData.get();
-    SFZ_FOREACH(beamType* beam, range(beams, beams + kBeamNum), {
+    for (beamType* beam: range(beams, beams + kBeamNum)) {
         clear(*beam);
-    });
+    }
 }
 
 beamType *AddBeam(
         coordPointType* location, uint8_t color, beamKindType kind, int32_t accuracy,
         int32_t beam_range, int32_t* whichBeam) {
     beamType* const beams = globals()->gBeamData.get();
-    SFZ_FOREACH(beamType* beam, range(beams, beams + kBeamNum), {
+    for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (!beam->active) {
             beam->lastGlobalLocation = *location;
             beam->objectLocation = *location;
@@ -120,7 +120,7 @@ beamType *AddBeam(
             *whichBeam = beam - beams;
             return beam;
         }
-    });
+    }
 
     *whichBeam = -1;
     return NULL;
@@ -185,7 +185,7 @@ void SetSpecialBeamAttributes(spaceObjectType* beamObject, spaceObjectType* sour
 
 void update_beams() {
     beamType* const beams = globals()->gBeamData.get();
-    SFZ_FOREACH(beamType* beam, range(beams, beams + kBeamNum), {
+    for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
             if (beam->lastApparentLocation != beam->objectLocation) {
                 beam->thisLocation = Rect(
@@ -225,35 +225,35 @@ void update_beams() {
                                     abs(beam->thisLocation.height()))
                                 / kBoltPointNum / 2;
 
-                            SFZ_FOREACH(int j, range(1, kBoltPointNum - 1), {
+                            for (int j: range(1, kBoltPointNum - 1)) {
                                 beam->thisBoltPoint[j].h = beam->thisLocation.left
                                     + ((beam->thisLocation.width() * j) / kBoltPointNum)
                                     - inaccuracy + Randomize(inaccuracy * 2);
                                 beam->thisBoltPoint[j].v = beam->thisLocation.top
                                     + ((beam->thisLocation.height() * j) / kBoltPointNum)
                                     - inaccuracy + Randomize(inaccuracy * 2);
-                            });
+                            }
                         }
                     }
                 }
             }
         }
-    });
+    }
 }
 
 void draw_beams() {
     beamType* const beams = globals()->gBeamData.get();
-    SFZ_FOREACH(beamType* beam, range(beams, beams + kBeamNum), {
+    for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
             if ((!beam->killMe) && (beam->active != kObjectToBeFreed)) {
                 if (beam->color) {
                     if ((beam->beamKind == eBoltObjectToObjectKind)
                             || (beam->beamKind == eBoltObjectToRelativeCoordKind)) {
-                        SFZ_FOREACH(int j, range(1, kBoltPointNum), {
+                        for (int j: range(1, kBoltPointNum)) {
                             VideoDriver::driver()->draw_line(
                                     beam->thisBoltPoint[j-1], beam->thisBoltPoint[j],
                                     GetRGBTranslateColor(beam->color));
-                        });
+                        }
                     } else {
                         VideoDriver::driver()->draw_line(
                                 Point(beam->thisLocation.left, beam->thisLocation.top),
@@ -263,12 +263,12 @@ void draw_beams() {
                 }
             }
         }
-    });
+    }
 }
 
 void ShowAllBeams() {
     beamType* const beams = globals()->gBeamData.get();
-    SFZ_FOREACH(beamType* beam, range(beams, beams + kBeamNum), {
+    for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
             if ((beam->killMe) || (beam->active == kObjectToBeFreed)) {
                 beam->active = false;
@@ -276,26 +276,26 @@ void ShowAllBeams() {
             if (beam->color) {
                 if ((beam->beamKind == eBoltObjectToObjectKind)
                         || (beam->beamKind == eBoltObjectToRelativeCoordKind)) {
-                    SFZ_FOREACH(int j, range(kBoltPointNum), {
+                    for (int j: range(kBoltPointNum)) {
                         beam->lastBoltPoint[j] = beam->thisBoltPoint[j];
-                    });
+                    }
                 }
             }
             beam->lastLocation = beam->thisLocation;
         }
-    });
+    }
 }
 
 void CullBeams() {
     beamType* const beams = globals()->gBeamData.get();
-    SFZ_FOREACH(beamType* beam, range(beams, beams + kBeamNum), {
+    for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
                 if ((beam->killMe) || (beam->active == kObjectToBeFreed)) {
                     beam->active = false;
                 }
                 beam->lastLocation = beam->thisLocation;
         }
-    });
+    }
 }
 
 }  // namespace antares

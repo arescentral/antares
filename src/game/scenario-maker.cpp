@@ -1601,11 +1601,11 @@ void GetScenarioFullScaleAndCorner(
 }
 
 const Scenario* GetScenarioPtrFromChapter(int32_t chapter) {
-    SFZ_FOREACH(const Scenario& scenario, gScenarioData, {
+    for (const Scenario& scenario: gScenarioData) {
         if (scenario.chapter_number() == chapter) {
             return &scenario;
         }
-    });
+    }
     return NULL;
 }
 

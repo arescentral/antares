@@ -60,9 +60,9 @@ inline int32_t RandomStarSpeed() {
 Starfield::Starfield():
         _last_clip_bottom(viewport.bottom),
         _warp_stars(false) {
-    SFZ_FOREACH(scrollStarType* star, range(_stars, _stars + kAllStarNum), {
+    for (scrollStarType* star: range(_stars, _stars + kAllStarNum)) {
         star->speed = kNoStar;
-    });
+    }
 }
 
 void Starfield::reset(int32_t which_object) {
@@ -72,17 +72,17 @@ void Starfield::reset(int32_t which_object) {
         return;
     }
 
-    SFZ_FOREACH(scrollStarType* star, range(_stars, _stars + kScrollStarNum), {
+    for (scrollStarType* star: range(_stars, _stars + kScrollStarNum)) {
         star->location.h = Randomize(play_screen.width()) + viewport.left;
         star->location.v = Randomize(play_screen.height()) + viewport.top;
         star->motionFraction.h = star->motionFraction.v = 0;
 
         star->speed = RandomStarSpeed();
         star->age = 0;
-    });
-    SFZ_FOREACH(scrollStarType* star, range(_stars + kSparkStarOffset, _stars + kAllStarNum), {
+    }
+    for (scrollStarType* star: range(_stars + kSparkStarOffset, _stars + kAllStarNum)) {
         star->age = 0;
-    });
+    }
 }
 
 void Starfield::make_sparks(
@@ -92,7 +92,7 @@ void Starfield::make_sparks(
         return;
     }
 
-    SFZ_FOREACH(scrollStarType* spark, range(_stars + kSparkStarOffset, _stars + kAllStarNum), {
+    for (scrollStarType* spark: range(_stars + kSparkStarOffset, _stars + kAllStarNum)) {
         if (spark->speed == kNoStar) {
             spark->velocity.h = Randomize(maxVelocity << 2L) - maxVelocity;
             spark->velocity.v = Randomize(maxVelocity << 2L) - maxVelocity;
@@ -107,7 +107,7 @@ void Starfield::make_sparks(
                 return;
             }
         }
-    });
+    }
 }
 
 // PrepareToMoveScrollStars:
@@ -115,9 +115,9 @@ void Starfield::make_sparks(
 //  are redrawn; the old positions have to be erased right after the new ones are drawn.
 
 void Starfield::prepare_to_move() {
-    SFZ_FOREACH(scrollStarType* star, range(_stars, _stars + kAllStarNum), {
+    for (scrollStarType* star: range(_stars, _stars + kAllStarNum)) {
         star->oldLocation = star->location;
-    });
+    }
 }
 
 void Starfield::move(int32_t by_units) {
@@ -152,7 +152,7 @@ void Starfield::move(int32_t by_units) {
                 gAbsoluteScale),
     };
 
-    SFZ_FOREACH(scrollStarType* star, range(_stars, _stars + kScrollStarNum), {
+    for (scrollStarType* star: range(_stars, _stars + kScrollStarNum)) {
         const fixedPointType* velocity;
         switch (star->speed) {
             case kSlowStarSpeed:
@@ -234,9 +234,9 @@ void Starfield::move(int32_t by_units) {
             star->location.h -= mFixedToLong(velocity->h);
             star->location.v -= mFixedToLong(velocity->v);
         }
-    });
+    }
 
-    SFZ_FOREACH(scrollStarType* star, range(_stars + kSparkStarOffset, _stars + kAllStarNum), {
+    for (scrollStarType* star: range(_stars + kSparkStarOffset, _stars + kAllStarNum)) {
         if (star->speed == kNoStar) {
             continue;
         }
@@ -262,7 +262,7 @@ void Starfield::move(int32_t by_units) {
         }
         star->location.v += v;
         star->motionFraction.v -= mLongToFixed(v);
-    });
+    }
 }
 
 void Starfield::draw() const {
@@ -274,7 +274,7 @@ void Starfield::draw() const {
       default:
         if (!_warp_stars) {
             // we're not warping in any way
-            SFZ_FOREACH(const scrollStarType* star, range(_stars, _stars + kScrollStarNum), {
+            for (const scrollStarType* star: range(_stars, _stars + kScrollStarNum)) {
                 if (star->speed != kNoStar) {
                     const RgbColor* color = &slowColor;
                     if (star->speed == kMediumStarSpeed) {
@@ -285,14 +285,14 @@ void Starfield::draw() const {
 
                     VideoDriver::driver()->draw_point(star->location, *color);
                 }
-            });
+            }
         }
         break;
 
       case kWarpInPresence:
       case kWarpOutPresence:
       case kWarpingPresence:
-        SFZ_FOREACH(const scrollStarType* star, range(_stars, _stars + kScrollStarNum), {
+        for (const scrollStarType* star: range(_stars, _stars + kScrollStarNum)) {
             if (star->speed != kNoStar) {
                 const RgbColor* color = &slowColor;
                 if (star->speed == kMediumStarSpeed) {
@@ -306,18 +306,17 @@ void Starfield::draw() const {
                             star->location, star->oldLocation, *color);
                 }
             }
-        });
+        }
         break;
     }
 
-    SFZ_FOREACH(
-            const scrollStarType* star, range(_stars + kSparkStarOffset, _stars + kAllStarNum), {
+    for (const scrollStarType* star: range(_stars + kSparkStarOffset, _stars + kAllStarNum)) {
         if ((star->speed != kNoStar) && (star->age > 0)) {
             const RgbColor color = GetRGBTranslateColorShade(
                     star->color, (star->age >> kSparkAgeToShadeShift) + 1);
             VideoDriver::driver()->draw_point(star->location, color);
         }
-    });
+    }
 }
 
 void Starfield::show() {
@@ -327,34 +326,34 @@ void Starfield::show() {
         if (_warp_stars) {
             // we were warping but now are not; erase warped stars
             _warp_stars = false;
-            SFZ_FOREACH(scrollStarType* star, range(_stars, _stars + kScrollStarNum), {
+            for (scrollStarType* star: range(_stars, _stars + kScrollStarNum)) {
                 if (star->speed != kNoStar) {
                     if (star->age < 2) {
                         ++star->age;
                     }
                 }
-            });
+            }
         }
     } else {
         // we're warping now
         _warp_stars = true;
 
-        SFZ_FOREACH(scrollStarType* star, range(_stars, _stars + kScrollStarNum), {
+        for (scrollStarType* star: range(_stars, _stars + kScrollStarNum)) {
             if (star->speed != kNoStar) {
                 if (star->age < 2) {
                     ++star->age;
                 }
             }
-        });
+        }
     }
 
-    SFZ_FOREACH(scrollStarType* star, range(_stars + kScrollStarNum, _stars + kAllStarNum), {
+    for (scrollStarType* star: range(_stars + kScrollStarNum, _stars + kAllStarNum)) {
         if (star->speed != kNoStar) {
             if (star->age <= 0) {
                 star->speed = kNoStar;
             }
         }
-    });
+    }
 
     _last_clip_bottom = viewport.bottom;
 }

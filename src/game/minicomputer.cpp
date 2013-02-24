@@ -472,7 +472,7 @@ void MakeMiniScreenFromIndString(short whichString) {
     miniScreenLineType* line = line_begin;
 
     bool escape = false;
-    SFZ_FOREACH(Rune r, string, {
+    for (Rune r: string) {
         if (escape) {
             escape = false;
             switch (r) {
@@ -560,7 +560,7 @@ void MakeMiniScreenFromIndString(short whichString) {
             }
             line->string.assign(excess);
         }
-    });
+    }
 }
 
 void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)

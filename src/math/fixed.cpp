@@ -40,12 +40,13 @@ void print_to(PrintTarget out, const PrintableFixed& fixed) {
     print(out, integral);
     out.push(1, '.');
     double fraction = (value - mLongToFixed(integral)) / 256.0;
-    SFZ_FOREACH(int i, range(3), {
+    for (int i: range(3)) {
+        static_cast<void>(i);
         fraction -= floor(fraction);
         fraction *= 10;
         int digit = fraction;
         out.push(1, '0' + digit);
-    });
+    }
 }
 
 }  // namespace antares

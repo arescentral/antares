@@ -125,9 +125,9 @@ class DirectoryLedger::Visitor : public JsonVisitor {
     virtual void visit_array(const std::vector<Json>& value) const {
         if (_state == UNLOCKED_CHAPTERS) {
             _state = UNLOCKED_CHAPTER;
-            SFZ_FOREACH(const Json& chapter, value, {
+            for (const Json& chapter: value) {
                 chapter.accept(*this);
-            });
+            }
             _state = UNLOCKED_CHAPTERS;
             return;
         }

@@ -238,7 +238,8 @@ void ResetInstruments() {
     }
 
     l = gSectorLineData.get();
-    SFZ_FOREACH(int count, range(kMaxSectorLine), {
+    for (int count: range(kMaxSectorLine)) {
+        static_cast<void>(count);
         *l = -1;
         l++;
         *l = -1;
@@ -247,7 +248,7 @@ void ResetInstruments() {
         l++;
         *l = -1;
         l++;
-    });
+    }
 }
 
 void UpdateRadar(int32_t unitsDone) {
