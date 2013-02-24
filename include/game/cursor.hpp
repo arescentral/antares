@@ -31,7 +31,7 @@ class NatePixTable;
 struct spriteCursorType {
     Point                   where;
     bool                    show;
-    sfz::scoped_ptr<NatePixTable> sprite;
+    std::unique_ptr<NatePixTable> sprite;
 
     bool        thisShowLine;
     Point       thisLineStart;

@@ -31,7 +31,7 @@
 using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::read;
-using sfz::scoped_ptr;
+using std::unique_ptr;
 using std::vector;
 
 namespace antares {

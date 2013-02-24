@@ -62,11 +62,12 @@ void read_from(ReadSource in, ReplayData& replay) {
     read(in, replay.chapter_id);
     read(in, replay.global_seed);
     const uint32_t item_count = read<uint32_t>(in);
-    SFZ_FOREACH(int i, range(item_count), {
+    for (int i: range(item_count)) {
+        static_cast<void>(i);
         ReplayData::Item item;
         read(in, item);
         replay.items.push_back(item);
-    });
+    }
 }
 
 void read_from(ReadSource in, ReplayData::Item& item) {
@@ -93,9 +94,9 @@ void write_to(WriteTarget out, const ReplayData& replay) {
     write(out, replay.chapter_id);
     write(out, replay.global_seed);
     write<uint32_t>(out, replay.items.size());
-    SFZ_FOREACH(const ReplayData::Item& item, replay.items, {
+    for (const ReplayData::Item& item: replay.items) {
         write(out, item);
-    });
+    }
 }
 
 void write_to(WriteTarget out, const ReplayData::Item& item) {

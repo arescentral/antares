@@ -30,9 +30,9 @@ using sfz::Exception;
 using sfz::ReadSource;
 using sfz::StringSlice;
 using sfz::read;
-using sfz::scoped_ptr;
 using std::max;
 using std::min;
+using std::unique_ptr;
 
 namespace antares {
 

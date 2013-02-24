@@ -48,11 +48,11 @@ using sfz::WriteTarget;
 using sfz::format;
 using sfz::makedirs;
 using sfz::quote;
-using sfz::read;
 using sfz::range;
-using sfz::scoped_ptr;
+using sfz::read;
 using sfz::tree_digest;
 using sfz::write;
+using std::unique_ptr;
 using zipxx::ZipArchive;
 using zipxx::ZipFileReader;
 
@@ -414,19 +414,19 @@ void DataExtractor::extract_original(Observer* observer, const StringSlice& file
     rezin::Options options;
     options.line_ending = rezin::Options::CR;
 
-    SFZ_FOREACH(const ResourceFile& resource_file, kResourceFiles, {
+    for (const ResourceFile& resource_file: kResourceFiles) {
         String path(utf8::decode(resource_file.path));
         ZipFileReader file(archive, path);
         AppleDouble apple_double(file.data());
         ResourceFork rsrc(apple_double.at(AppleDouble::RESOURCE_FORK), options);
 
-        SFZ_FOREACH(const ResourceFile::ExtractedResource& conversion, resource_file.resources, {
+        for (const ResourceFile::ExtractedResource& conversion: resource_file.resources) {
             if (!conversion.resource) {
                 continue;
             }
 
             const ResourceType& type = rsrc.at(conversion.resource);
-            SFZ_FOREACH(const ResourceEntry& entry, type, {
+            for (const ResourceEntry& entry: type) {
                 Bytes data;
                 if (conversion.convert(entry.id(), entry.data(), data)) {
                     String output(format("{0}/com.biggerplanet.ares/{1}/{2}.{3}",
@@ -436,9 +436,9 @@ void DataExtractor::extract_original(Observer* observer, const StringSlice& file
                     ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
                     write(fd, data.data(), data.size());
                 }
-            });
-        });
-    });
+            }
+        }
+    }
 }
 
 void DataExtractor::extract_supplemental(Observer* observer, const StringSlice& file) const {
@@ -447,7 +447,7 @@ void DataExtractor::extract_supplemental(Observer* observer, const StringSlice& 
     String full_path(format("{0}/{1}", _downloads_dir, file));
     ZipArchive archive(full_path, 0);
 
-    SFZ_FOREACH(size_t i, range(archive.size()), {
+    for (size_t i: range(archive.size())) {
         ZipFileReader file(archive, i);
 
         // Ignore directories.
@@ -471,7 +471,7 @@ void DataExtractor::extract_supplemental(Observer* observer, const StringSlice& 
         makedirs(path::dirname(output), 0755);
         ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
         write(fd, file.data());
-    });
+    }
 }
 
 void DataExtractor::extract_plugin(Observer* observer) const {
@@ -487,7 +487,7 @@ void DataExtractor::extract_plugin(Observer* observer) const {
     check_version(archive, kPluginVersion);
     check_identifier(archive, _scenario);
 
-    SFZ_FOREACH(size_t i, range(archive.size()), {
+    for (size_t i: range(archive.size())) {
         ZipFileReader file(archive, i);
         StringSlice path = file.path();
 
@@ -516,7 +516,7 @@ void DataExtractor::extract_plugin(Observer* observer) const {
             resource_type.resize(4, ' ');
         }
 
-        SFZ_FOREACH(const ResourceFile::ExtractedResource& conversion, kPluginFiles, {
+        for (const ResourceFile::ExtractedResource& conversion: kPluginFiles) {
             if (conversion.resource == resource_type) {
                 Bytes data;
                 if (conversion.convert(id, file.data(), data)) {
@@ -529,12 +529,12 @@ void DataExtractor::extract_plugin(Observer* observer) const {
                 }
                 goto next;
             }
-        });
+        }
 
         throw Exception(format("unknown resource type {0}", quote(resource_type)));
 
 next:   ;  // labeled continue.
-    });
+    }
 }
 
 }  // namespace antares

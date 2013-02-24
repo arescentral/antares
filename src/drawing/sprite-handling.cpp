@@ -35,8 +35,8 @@ using sfz::StringSlice;
 using sfz::format;
 using sfz::range;
 using sfz::scoped_array;
-using sfz::scoped_ptr;
 using std::map;
+using std::unique_ptr;
 
 namespace antares {
 
@@ -102,7 +102,7 @@ draw_tiny_t draw_tiny_function(uint8_t id) {
 }  // namespace
 
 struct pixTableType {
-    sfz::scoped_ptr<NatePixTable>   resource;
+    std::unique_ptr<NatePixTable>   resource;
     int                             resID;
     bool                            keepMe;
 };
@@ -134,45 +134,43 @@ spriteType::spriteType()
           draw_tiny(NULL) { }
 
 void ResetAllSprites() {
-    SFZ_FOREACH(int i, range(kMaxSpriteNum), {
+    for (int i: range(kMaxSpriteNum)) {
         zero(&gSpriteTable[i]);
-    });
+    }
 }
 
 void ResetAllPixTables() {
-    SFZ_FOREACH(pixTableType* entry, range(gPixTable, gPixTable + kMaxPixTableEntry), {
+    for (pixTableType* entry: range(gPixTable, gPixTable + kMaxPixTableEntry)) {
         entry->resource.reset();
         entry->keepMe = false;
         entry->resID = -1;
-    });
+    }
 }
 
 void SetAllPixTablesNoKeep() {
-    SFZ_FOREACH(
-            pixTableType* entry,
-            range(gPixTable + kMinVolatilePixTable, gPixTable + kMaxPixTableEntry), {
+    for (pixTableType* entry:
+            range(gPixTable + kMinVolatilePixTable, gPixTable + kMaxPixTableEntry)) {
         entry->keepMe = false;
-    });
+    }
 }
 
 void KeepPixTable(short resID) {
-    SFZ_FOREACH(pixTableType* entry, range(gPixTable, gPixTable + kMaxPixTableEntry), {
+    for (pixTableType* entry: range(gPixTable, gPixTable + kMaxPixTableEntry)) {
         if (entry->resID == resID) {
             entry->keepMe = true;
             return;
         }
-    });
+    }
 }
 
 void RemoveAllUnusedPixTables() {
-    SFZ_FOREACH(
-            pixTableType* entry,
-            range(gPixTable + kMinVolatilePixTable, gPixTable + kMaxPixTableEntry), {
+    for (pixTableType* entry:
+            range(gPixTable + kMinVolatilePixTable, gPixTable + kMaxPixTableEntry)) {
         if (!entry->keepMe) {
             entry->resource.reset();
             entry->resID = -1;
         }
-    });
+    }
 }
 
 NatePixTable* AddPixTable(int16_t resource_id) {
@@ -183,31 +181,30 @@ NatePixTable* AddPixTable(int16_t resource_id) {
 
     int16_t real_resource_id = resource_id & ~kSpriteTableColorIDMask;
     int16_t color = (resource_id & kSpriteTableColorIDMask) >> kSpriteTableColorShift;
-    SFZ_FOREACH(pixTableType* entry, range(gPixTable, gPixTable + kMaxPixTableEntry), {
+    for (pixTableType* entry: range(gPixTable, gPixTable + kMaxPixTableEntry)) {
         if (entry->resource.get() == NULL) {
             entry->resID = resource_id;
             entry->resource.reset(new NatePixTable(real_resource_id, color));
             return entry->resource.get();
         }
-    });
+    }
 
     throw Exception("Can't manage any more sprite tables");
 }
 
 NatePixTable* GetPixTable(int16_t resource_id) {
-    SFZ_FOREACH(pixTableType* entry, range(gPixTable, gPixTable + kMaxPixTableEntry), {
+    for (pixTableType* entry: range(gPixTable, gPixTable + kMaxPixTableEntry)) {
         if (entry->resID == resource_id) {
             return entry->resource.get();
         }
-    });
+    }
     return NULL;
 }
 
 spriteType *AddSprite(
         Point where, NatePixTable* table, short resID, short whichShape, int32_t scale, long size,
         short layer, const RgbColor& color, long *whichSprite) {
-    SFZ_FOREACH(
-            spriteType* sprite, range(gSpriteTable.get(), gSpriteTable.get() + kMaxSpriteNum), {
+    for (spriteType* sprite: range(gSpriteTable.get(), gSpriteTable.get() + kMaxSpriteNum)) {
         if (sprite->table == NULL) {
             *whichSprite = sprite - gSpriteTable.get();
 
@@ -227,7 +224,7 @@ spriteType *AddSprite(
 
             return sprite;
         }
-    });
+    }
 
     *whichSprite = kNoSprite;
     return NULL;
@@ -258,8 +255,8 @@ Rect scale_sprite_rect(const NatePixTable::Frame& frame, Point where, int32_t sc
 
 void draw_sprites() {
     if (gAbsoluteScale >= kBlipThreshhold) {
-        SFZ_FOREACH(int layer, range<int>(kFirstSpriteLayer, kLastSpriteLayer + 1), {
-            SFZ_FOREACH(int i, range(kMaxSpriteNum), {
+        for (int layer: range<int>(kFirstSpriteLayer, kLastSpriteLayer + 1)) {
+            for (int i: range(kMaxSpriteNum)) {
                 spriteType* aSprite = &gSpriteTable[i];
                 if ((aSprite->table != NULL)
                         && !aSprite->killMe
@@ -288,11 +285,11 @@ void draw_sprites() {
                         break;
                     }
                 }
-            });
-        });
+            }
+        }
     } else {
-        SFZ_FOREACH(int layer, range<int>(kFirstSpriteLayer, kLastSpriteLayer + 1), {
-            SFZ_FOREACH(int i, range(kMaxSpriteNum), {
+        for (int layer: range<int>(kFirstSpriteLayer, kLastSpriteLayer + 1)) {
+            for (int i: range(kMaxSpriteNum)) {
                 spriteType* aSprite = &gSpriteTable[i];
                 int tinySize = aSprite->tinySize & kBlipSizeMask;
                 if ((aSprite->table != NULL)
@@ -305,8 +302,8 @@ void draw_sprites() {
                     tiny_rect.offset(aSprite->where.h, aSprite->where.v);
                     aSprite->draw_tiny(tiny_rect, aSprite->tinyColor);
                 }
-            });
-        });
+            }
+        }
     }
 }
 
@@ -315,14 +312,14 @@ void draw_sprites() {
 // Asteroids before the player actually starts.
 
 void CullSprites() {
-    SFZ_FOREACH(int i, range(kMaxSpriteNum), {
+    for (int i: range(kMaxSpriteNum)) {
         spriteType* aSprite = &gSpriteTable[i];
         if (aSprite->table != NULL) {
             if (aSprite->killMe) {
                 RemoveSprite(aSprite);
             }
         }
-    });
+    }
 }
 
 }  // namespace antares

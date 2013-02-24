@@ -32,7 +32,7 @@ using sfz::Exception;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
-using sfz::scoped_ptr;
+using std::unique_ptr;
 
 namespace antares {
 
@@ -349,7 +349,7 @@ void StyledText::draw_char(const Rect& bounds, int index) const {
             const inlinePictType& inline_pict = _inline_picts[ch.character];
             corner.offset(inline_pict.bounds.left, inline_pict.bounds.top + _line_spacing);
             Picture pict(inline_pict.id);
-            scoped_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite(
+            unique_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite(
                         format("/pict/{0}"), pict));
             sprite->draw(corner.h, corner.v);
         }

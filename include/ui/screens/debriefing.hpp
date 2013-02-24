@@ -58,12 +58,12 @@ class DebriefingScreen : public Card {
     State _state;
 
     sfz::String _message;
-    sfz::scoped_ptr<StyledText> _score;
+    std::unique_ptr<StyledText> _score;
     Rect _pix_bounds;
     Rect _message_bounds;
     Rect _score_bounds;
-    sfz::scoped_ptr<PixMap> _pix;
-    sfz::scoped_ptr<Sprite> _sprite;
+    std::unique_ptr<PixMap> _pix;
+    std::unique_ptr<Sprite> _sprite;
 
     int64_t _next_update;
     int _typed_chars;

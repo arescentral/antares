@@ -472,7 +472,7 @@ void MakeMiniScreenFromIndString(short whichString) {
     miniScreenLineType* line = line_begin;
 
     bool escape = false;
-    SFZ_FOREACH(Rune r, string, {
+    for (Rune r: string) {
         if (escape) {
             escape = false;
             switch (r) {
@@ -560,7 +560,7 @@ void MakeMiniScreenFromIndString(short whichString) {
             }
             line->string.assign(excess);
         }
-    });
+    }
 }
 
 void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)
@@ -870,9 +870,9 @@ static void draw_player_ammo_in_rect(int32_t value, int8_t hue, const Rect& rect
     if (value >= 0) {
         const RgbColor text_color = GetRGBTranslateColorShade(hue, VERY_LIGHT);
         const char digits[] = {
-            ((value % 1000) / 100) + '0',
-            ((value % 100) / 10) + '0',
-            (value % 10) + '0',
+            char(((value % 1000) / 100) + '0'),
+            char(((value % 100) / 10) + '0'),
+            char((value % 10) + '0'),
             '\0',
         };
         Point origin(rect.left + kMiniAmmoTextHBuffer, rect.bottom - 1);

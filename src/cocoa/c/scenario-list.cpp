@@ -24,8 +24,7 @@
 
 using sfz::CString;
 using sfz::String;
-using sfz::linked_ptr;
-using sfz::make_linked_ptr;
+using std::shared_ptr;
 using std::vector;
 
 struct AntaresScenarioListEntry {
@@ -49,11 +48,11 @@ struct AntaresScenarioListEntry {
 
 struct AntaresScenarioList {
     antares::ScenarioList cxx_obj;
-    vector<linked_ptr<AntaresScenarioListEntry> > entries;
+    vector<shared_ptr<AntaresScenarioListEntry> > entries;
 
     AntaresScenarioList() {
         for (size_t i = 0; i < cxx_obj.size(); ++i) {
-            entries.push_back(make_linked_ptr(new AntaresScenarioListEntry(cxx_obj.at(i))));
+            entries.emplace_back(new AntaresScenarioListEntry(cxx_obj.at(i)));
         }
     }
 };

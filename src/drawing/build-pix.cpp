@@ -32,10 +32,9 @@ using sfz::Exception;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
-using sfz::linked_ptr;
-using sfz::make_linked_ptr;
-using sfz::scoped_ptr;
 using sfz::string_to_int;
+using std::shared_ptr;
+using std::unique_ptr;
 using std::vector;
 
 namespace macroman = sfz::macroman;
@@ -107,18 +106,18 @@ class PixBuilder {
 
     ArrayPixMap* _pix;
 
-    scoped_ptr<Picture> _background;
+    unique_ptr<Picture> _background;
     int _background_start;
 };
 
 }  // namespace
 
 PixMap* build_pix(int text_id, int width) {
-    scoped_ptr<ArrayPixMap> pix(new ArrayPixMap(width, 0));
+    unique_ptr<ArrayPixMap> pix(new ArrayPixMap(width, 0));
     PixBuilder build(pix.get());
     Resource rsrc("text", "txt", text_id);
 
-    vector<linked_ptr<String> > lines;
+    vector<shared_ptr<String> > lines;
     BytesSlice data = rsrc.data();
     String text(utf8::decode(data));
     bool in_section_header = (text.size() >= 2) && (text.slice(0, 2) == "#+");
@@ -126,23 +125,23 @@ PixMap* build_pix(int text_id, int width) {
     const size_t end = text.size();
     for (size_t i = start; i != end; ++i) {
         if (((end - i) >= 3) && (text.slice(i, 3) == "\n#+")) {
-            linked_ptr<String> line(new String(text.slice(start, i - start)));
+            shared_ptr<String> line(new String(text.slice(start, i - start)));
             lines.push_back(line);
             start = i + 1;
             in_section_header = true;
         } else if (in_section_header && (text.at(i) == '\n')) {
-            linked_ptr<String> line(new String(text.slice(start, i - start)));
+            shared_ptr<String> line(new String(text.slice(start, i - start)));
             lines.push_back(line);
             start = i + 1;
             in_section_header = false;
         }
     }
     if (start != end) {
-        linked_ptr<String> line(new String(text.slice(start)));
+        shared_ptr<String> line(new String(text.slice(start)));
         lines.push_back(line);
     }
 
-    for (vector<linked_ptr<String> >::const_iterator it = lines.begin(); it != lines.end(); ++it) {
+    for (vector<shared_ptr<String> >::const_iterator it = lines.begin(); it != lines.end(); ++it) {
         if ((*it)->size() >= 2 && (*it)->slice(0, 2) == "#+") {
             if ((*it)->size() > 2) {
                 if ((*it)->at(2) == 'B') {

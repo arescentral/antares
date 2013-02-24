@@ -6,8 +6,9 @@ VERSION = "0.6.1"
 WARNINGS = ["-Wall", "-Werror", "-Wno-sign-compare", "-Wno-deprecated-declarations"]
 
 def common(ctx):
-    ctx.default_sdk = "10.6"
+    ctx.default_sdk = "10.7"
     ctx.default_compiler = "clang"
+    ctx.cxx_std = "c++11"
     ctx.load("compiler_c compiler_cxx")
     ctx.load("core externals", tooldir="ext/waf-sfiera")
     ctx.load("antares_test", tooldir="tools")

@@ -54,9 +54,10 @@ using sfz::StringSlice;
 using sfz::args::store;
 using sfz::args::store_const;
 using sfz::format;
-using sfz::make_linked_ptr;
 using sfz::mkdir;
-using sfz::scoped_ptr;
+using std::shared_ptr;
+using std::unique_ptr;
+
 namespace args = sfz::args;
 namespace io = sfz::io;
 namespace path = sfz::path;
@@ -185,13 +186,13 @@ void main(int argc, char** argv) {
     NullPrefsDriver prefs(preferences);
 
     EventScheduler scheduler;
-    scheduler.schedule_event(make_linked_ptr(new MouseMoveEvent(0, Point(320, 240))));
+    scheduler.schedule_event(shared_ptr<Event>(new MouseMoveEvent(0, Point(320, 240))));
     // TODO(sfiera): add recurring snapshots to OffscreenVideoDriver.
     for (int64_t i = 1; i < 72000; i += interval) {
         scheduler.schedule_snapshot(i);
     }
 
-    scoped_ptr<SoundDriver> sound;
+    unique_ptr<SoundDriver> sound;
     if (output_dir.has()) {
         String out(format("{0}/sound.log", *output_dir));
         sound.reset(new LogSoundDriver(out));

@@ -39,9 +39,9 @@ using sfz::format;
 using sfz::makedirs;
 using sfz::print;
 using sfz::range;
-using sfz::scoped_ptr;
 using sfz::string_to_int;
 using sfz::write;
+using std::unique_ptr;
 using std::vector;
 
 namespace path = sfz::path;
@@ -125,9 +125,9 @@ class DirectoryLedger::Visitor : public JsonVisitor {
     virtual void visit_array(const std::vector<Json>& value) const {
         if (_state == UNLOCKED_CHAPTERS) {
             _state = UNLOCKED_CHAPTER;
-            SFZ_FOREACH(const Json& chapter, value, {
+            for (const Json& chapter: value) {
                 chapter.accept(*this);
-            });
+            }
             _state = UNLOCKED_CHAPTERS;
             return;
         }
@@ -168,7 +168,7 @@ void DirectoryLedger::load() {
     }
 
     _chapters.clear();
-    scoped_ptr<MappedFile> file;
+    unique_ptr<MappedFile> file;
     try {
         file.reset(new MappedFile(path));
     } catch (Exception& e) {

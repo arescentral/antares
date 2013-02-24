@@ -74,7 +74,7 @@ class BriefingScreen : public InterfaceScreen {
 
     Rect _bounds;
 
-    sfz::scoped_ptr<Sprite> _star_map;
+    std::unique_ptr<Sprite> _star_map;
     Rect _star_rect;
 
     struct Star {

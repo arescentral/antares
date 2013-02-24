@@ -48,7 +48,7 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     void loop(Card* initial);
 
   private:
-    bool wait_next_event(int64_t until, sfz::scoped_ptr<Event>& event);
+    bool wait_next_event(int64_t until, std::unique_ptr<Event>& event);
     void enqueue_events(int64_t until);
 
     const bool _fullscreen;

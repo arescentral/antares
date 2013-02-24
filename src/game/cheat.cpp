@@ -65,9 +65,9 @@ void CleanupAresCheat() {
 
 short GetCheatNumFromString(const StringSlice& s) {
     String code_string;
-    SFZ_FOREACH(Rune r, s, {
+    for (Rune r: s) {
         code_string.append(1, r + kCheatCodeValue);
-    });
+    }
     return globals()->gAresCheatStrings.get()->index_of(code_string) + 1;
 }
 

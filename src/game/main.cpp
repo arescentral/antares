@@ -61,10 +61,10 @@ using sfz::Exception;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
-using sfz::scoped_ptr;
 using sfz::scoped_array;
-using std::min;
 using std::max;
+using std::min;
+using std::unique_ptr;
 
 namespace antares {
 

@@ -37,9 +37,9 @@
 #include "ui/event.hpp"
 
 using sfz::Exception;
-using sfz::scoped_ptr;
 using std::min;
 using std::queue;
+using std::unique_ptr;
 
 namespace antares {
 
@@ -96,7 +96,7 @@ CocoaVideoDriver::CocoaVideoDriver(bool fullscreen, Size screen_size)
             _translator.c_obj(), enqueue_key_up, &_event_queue);
 }
 
-bool CocoaVideoDriver::wait_next_event(int64_t until, scoped_ptr<Event>& event) {
+bool CocoaVideoDriver::wait_next_event(int64_t until, unique_ptr<Event>& event) {
     while (!_event_queue.empty() && _event_queue.front()->at() < until) {
         event.reset(_event_queue.front());
         _event_queue.pop();
@@ -158,8 +158,8 @@ void CocoaVideoDriver::loop(Card* initial) {
 
     cgl::PixelFormat pixel_format(attrs);
     cgl::Context context(pixel_format.c_obj(), NULL);
-    scoped_ptr<CocoaFullscreen> fullscreen;
-    scoped_ptr<CocoaWindowed> windowed;
+    unique_ptr<CocoaFullscreen> fullscreen;
+    unique_ptr<CocoaWindowed> windowed;
     if (_fullscreen) {
         fullscreen.reset(new CocoaFullscreen(context, screen_size()));
     } else {
@@ -175,7 +175,7 @@ void CocoaVideoDriver::loop(Card* initial) {
         main_loop.draw();
         CGLFlushDrawable(context.c_obj());
 
-        scoped_ptr<Event> event;
+        unique_ptr<Event> event;
         int64_t now = now_usecs();
         while (wait_next_event(now, event)) {
             event->send(&_event_tracker);

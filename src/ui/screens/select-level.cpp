@@ -37,8 +37,8 @@ using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::String;
 using sfz::StringSlice;
-using sfz::scoped_ptr;
 using sfz::format;
+using std::unique_ptr;
 
 namespace macroman = sfz::macroman;
 

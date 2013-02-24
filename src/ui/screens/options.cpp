@@ -41,9 +41,9 @@
 using sfz::Exception;
 using sfz::String;
 using sfz::format;
-using sfz::scoped_ptr;
 using std::make_pair;
 using std::pair;
+using std::unique_ptr;
 using std::vector;
 
 namespace antares {

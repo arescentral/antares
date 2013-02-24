@@ -43,12 +43,12 @@ using sfz::StringSlice;
 using sfz::WriteTarget;
 using sfz::dec;
 using sfz::format;
-using sfz::linked_ptr;
-using sfz::make_linked_ptr;
 using sfz::range;
 using sfz::scoped_array;
 using std::greater;
 using std::max;
+using std::shared_ptr;
+
 namespace utf8 = sfz::utf8;
 
 namespace antares {
@@ -70,15 +70,15 @@ class SnapshotBuffer {
     void write_to(const WriteTarget& out) const {
         ArrayPixMap pix(_screen_size.width, _screen_size.height);
         uint8_t* p = _data.get();
-        SFZ_FOREACH(int32_t y, range(_screen_size.height), {
-            SFZ_FOREACH(int32_t x, range(_screen_size.width), {
+        for (int32_t y: range(_screen_size.height)) {
+            for (int32_t x: range(_screen_size.width)) {
                 uint8_t blue = *(p++);
                 uint8_t green = *(p++);
                 uint8_t red = *(p++);
                 ++p;
                 pix.set(x, y, RgbColor(red, green, blue));
-            });
-        });
+            }
+        }
         write(out, pix);
     }
 

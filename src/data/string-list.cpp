@@ -103,9 +103,9 @@ StringList::~StringList() {
 
 void StringList::clear() {
     // TODO(sfiera): make exception-safe.
-    SFZ_FOREACH(String* string, _strings, {
+    for (String* string: _strings) {
         delete string;
-    });
+    }
     _strings.clear();
 }
 

@@ -36,11 +36,11 @@
 
 using sfz::Bytes;
 using sfz::Exception;
-using sfz::String;
 using sfz::PrintItem;
+using sfz::String;
 using sfz::dec;
 using sfz::format;
-using sfz::scoped_ptr;
+using std::unique_ptr;
 using std::vector;
 
 namespace utf8 = sfz::utf8;
@@ -116,7 +116,7 @@ int score(
 
 void build_score_text(
         int your_length, int par_length, int your_loss, int par_loss, int your_kill,
-        int par_kill, scoped_ptr<StyledText>& result) {
+        int par_kill, unique_ptr<StyledText>& result) {
     Resource rsrc("text", "txt", 6000);
     String text(utf8::decode(rsrc.data()));
 

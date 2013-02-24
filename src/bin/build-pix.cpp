@@ -34,8 +34,8 @@ using sfz::args::help;
 using sfz::args::store;
 using sfz::dec;
 using sfz::format;
-using sfz::scoped_ptr;
 using sfz::write;
+using std::unique_ptr;
 
 namespace io = sfz::io;
 namespace utf8 = sfz::utf8;
@@ -50,7 +50,7 @@ class PixBuilder {
             : _output_dir(output_dir) { }
 
     void save(int id, int width) {
-        scoped_ptr<PixMap> pix(build_pix(id, width));
+        unique_ptr<PixMap> pix(build_pix(id, width));
         if (_output_dir.has() && (pix.get() != NULL)) {
             const String path(format("{0}/{1}.png", *_output_dir, dec(id, 5)));
             ScopedFd fd(open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644));

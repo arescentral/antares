@@ -34,7 +34,7 @@ using sfz::StringSlice;
 using sfz::format;
 using sfz::hex;
 using sfz::read;
-using sfz::scoped_ptr;
+using std::unique_ptr;
 
 namespace macroman = sfz::macroman;
 
@@ -91,7 +91,7 @@ Font::Font(int32_t id) {
     charSet.assign(data_rsrc.data());
 
     if (VideoDriver::driver()) {
-        _sprites.reset(new scoped_ptr<Sprite>[256]);
+        _sprites.reset(new unique_ptr<Sprite>[256]);
         for (int i = 0; i < 256; i++) {
             ArrayPixMap pix(physicalWidth * 8, height + 1);
             pix.fill(RgbColor::kClear);

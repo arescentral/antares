@@ -27,7 +27,7 @@
 
 using sfz::Exception;
 using sfz::format;
-using sfz::scoped_ptr;
+using std::unique_ptr;
 
 namespace antares {
 
