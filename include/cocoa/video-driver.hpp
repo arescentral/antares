@@ -67,7 +67,7 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     EventTranslator _translator;
 
     EventTracker _event_tracker;
-    std::queue<Event*> _event_queue;
+    std::queue<std::unique_ptr<Event>> _event_queue;
 
     DISALLOW_COPY_AND_ASSIGN(CocoaVideoDriver);
 };

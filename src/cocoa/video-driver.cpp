@@ -52,28 +52,28 @@ int64_t usecs() {
 }
 
 void enqueue_mouse_down(int button, int32_t x, int32_t y, void* userdata) {
-    queue<Event*>* q = reinterpret_cast<queue<Event*>*>(userdata);
-    q->push(new MouseDownEvent(now_usecs(), button, Point(x, y)));
+    queue<unique_ptr<Event>>* q = reinterpret_cast<queue<unique_ptr<Event>>*>(userdata);
+    q->emplace(new MouseDownEvent(now_usecs(), button, Point(x, y)));
 }
 
 void enqueue_mouse_up(int button, int32_t x, int32_t y, void* userdata) {
-    queue<Event*>* q = reinterpret_cast<queue<Event*>*>(userdata);
-    q->push(new MouseUpEvent(now_usecs(), button, Point(x, y)));
+    queue<unique_ptr<Event>>* q = reinterpret_cast<queue<unique_ptr<Event>>*>(userdata);
+    q->emplace(new MouseUpEvent(now_usecs(), button, Point(x, y)));
 }
 
 void enqueue_mouse_move(int32_t x, int32_t y, void* userdata) {
-    queue<Event*>* q = reinterpret_cast<queue<Event*>*>(userdata);
-    q->push(new MouseMoveEvent(now_usecs(), Point(x, y)));
+    queue<unique_ptr<Event>>* q = reinterpret_cast<queue<unique_ptr<Event>>*>(userdata);
+    q->emplace(new MouseMoveEvent(now_usecs(), Point(x, y)));
 }
 
 void enqueue_key_down(int32_t key, void* userdata) {
-    queue<Event*>* q = reinterpret_cast<queue<Event*>*>(userdata);
-    q->push(new KeyDownEvent(now_usecs(), key));
+    queue<unique_ptr<Event>>* q = reinterpret_cast<queue<unique_ptr<Event>>*>(userdata);
+    q->emplace(new KeyDownEvent(now_usecs(), key));
 }
 
 void enqueue_key_up(int32_t key, void* userdata) {
-    queue<Event*>* q = reinterpret_cast<queue<Event*>*>(userdata);
-    q->push(new KeyUpEvent(now_usecs(), key));
+    queue<unique_ptr<Event>>* q = reinterpret_cast<queue<unique_ptr<Event>>*>(userdata);
+    q->emplace(new KeyUpEvent(now_usecs(), key));
 }
 
 }  // namespace
@@ -98,7 +98,7 @@ CocoaVideoDriver::CocoaVideoDriver(bool fullscreen, Size screen_size)
 
 bool CocoaVideoDriver::wait_next_event(int64_t until, unique_ptr<Event>& event) {
     while (!_event_queue.empty() && _event_queue.front()->at() < until) {
-        event.reset(_event_queue.front());
+        swap(event, _event_queue.front());
         _event_queue.pop();
         return true;
     }
@@ -107,7 +107,7 @@ bool CocoaVideoDriver::wait_next_event(int64_t until, unique_ptr<Event>& event) 
     antares_event_translator_enqueue(_translator.c_obj(), until);
     while (until > antares::usecs()) {
         if (!_event_queue.empty()) {
-            event.reset(_event_queue.front());
+            swap(event, _event_queue.front());
             _event_queue.pop();
             return true;
         }
