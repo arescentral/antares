@@ -70,7 +70,11 @@ template <typename T>
 bool get_preference(const StringSlice& key, T& value) {
     String cfkey(key);
     PropertyList plist(CFPreferencesCopyAppValue(cfkey.c_obj(), kCFPreferencesCurrentApplication));
-    return plist.c_obj() && move(value, plist);
+    if (plist.c_obj()) {
+        value = cast<T>(std::move(plist));
+        return true;
+    }
+    return false;
 }
 
 template <typename T>
@@ -90,10 +94,10 @@ void CoreFoundationPrefsDriver::load(Preferences* preferences) {
     cf::Array key_settings;
     if (cf::get_preference(kKeySettingsPreference, key_settings)) {
         for (int i: range(min<int>(KEY_COUNT, CFArrayGetCount(key_settings.c_obj())))) {
-            cf::Type item(CFRetain(CFArrayGetValueAtIndex(key_settings.c_obj(), i)));
-            cf::Number number;
+            cf::Number number = cf::cast<cf::Number>(cf::Type(
+                    CFRetain(CFArrayGetValueAtIndex(key_settings.c_obj(), i))));
             int key;
-            if (move(number, item) && CFNumberGetValue(number.c_obj(), kCFNumberIntType, &key)) {
+            if (number.c_obj() && CFNumberGetValue(number.c_obj(), kCFNumberIntType, &key)) {
                 preferences->set_key(i, key);
             }
         }
