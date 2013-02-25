@@ -49,7 +49,6 @@ using sfz::PrintTarget;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
-using sfz::scoped_array;
 
 namespace macroman = sfz::macroman;
 

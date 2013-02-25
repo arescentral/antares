@@ -45,7 +45,6 @@ using sfz::Rune;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::bin;
-using sfz::scoped_array;
 using sfz::string_to_int;
 using std::max;
 

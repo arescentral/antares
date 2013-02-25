@@ -86,7 +86,7 @@ struct spriteType {
 };
 
 extern int32_t gAbsoluteScale;
-extern sfz::scoped_array<spriteType> gSpriteTable;
+extern std::unique_ptr<spriteType[]> gSpriteTable;
 
 // Scale `value` by `scale`.
 //

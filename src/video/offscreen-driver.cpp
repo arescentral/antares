@@ -44,10 +44,10 @@ using sfz::WriteTarget;
 using sfz::dec;
 using sfz::format;
 using sfz::range;
-using sfz::scoped_array;
 using std::greater;
 using std::max;
 using std::shared_ptr;
+using std::unique_ptr;
 
 namespace utf8 = sfz::utf8;
 
@@ -85,7 +85,7 @@ class SnapshotBuffer {
   private:
     const Size _screen_size;
     const int32_t _bytes_per_pixel;
-    scoped_array<uint8_t> _data;
+    unique_ptr<uint8_t[]> _data;
 };
 
 void write_to(const WriteTarget& out, const SnapshotBuffer& buffer) {

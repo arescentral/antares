@@ -182,7 +182,7 @@ class ArrayPixMap : public PixMap {
     // An array of pixel data.  Although not required to by the PixMap interface, ArrayPixMap
     // stores all rows of pixels contiguously.  This permits the optimization of `fill()` provided
     // above.
-    sfz::scoped_array<RgbColor> _bytes;
+    std::unique_ptr<RgbColor[]> _bytes;
 
     DISALLOW_COPY_AND_ASSIGN(ArrayPixMap);
 };

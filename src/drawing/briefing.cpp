@@ -29,7 +29,6 @@
 #include "video/driver.hpp"
 
 using sfz::Exception;
-using sfz::scoped_array;
 
 namespace antares {
 

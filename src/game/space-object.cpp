@@ -48,7 +48,7 @@ using sfz::ReadSource;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::read;
-using sfz::scoped_array;
+using std::unique_ptr;
 namespace macroman = sfz::macroman;
 
 namespace antares {
@@ -84,10 +84,10 @@ long gFirstActionQueueNumber = -1;
 baseObjectType kZeroBaseObject;
 spaceObjectType kZeroSpaceObject = {0, &kZeroBaseObject};
 
-scoped_array<spaceObjectType> gSpaceObjectData;
-scoped_array<baseObjectType> gBaseObjectData;
-scoped_array<objectActionType> gObjectActionData;
-scoped_array<actionQueueType> gActionQueueData;
+unique_ptr<spaceObjectType[]> gSpaceObjectData;
+unique_ptr<baseObjectType[]> gBaseObjectData;
+unique_ptr<objectActionType[]> gObjectActionData;
+unique_ptr<actionQueueType[]> gActionQueueData;
 
 void SpaceObjectHandlingInit() {
     bool correctBaseObjectColor = false;

@@ -61,7 +61,6 @@ using sfz::Exception;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
-using sfz::scoped_array;
 using std::max;
 using std::min;
 using std::unique_ptr;

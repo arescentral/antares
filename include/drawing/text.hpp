@@ -48,7 +48,7 @@ class Font {
 
   private:
     sfz::Bytes charSet;
-    sfz::scoped_array<std::unique_ptr<Sprite> > _sprites;
+    std::unique_ptr<std::unique_ptr<Sprite>[]> _sprites;
 
     DISALLOW_COPY_AND_ASSIGN(Font);
 };

@@ -34,7 +34,6 @@
 #include "video/driver.hpp"
 
 using sfz::range;
-using sfz::scoped_array;
 using std::abs;
 using std::max;
 
