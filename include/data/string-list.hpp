@@ -27,15 +27,13 @@ namespace antares {
 class StringList {
   public:
     StringList(int id);
-    ~StringList();
 
-    void clear();
     ssize_t index_of(const sfz::StringSlice& result) const;
     size_t size() const;
     const sfz::String& at(size_t index) const;
 
   private:
-    std::vector<sfz::String*> _strings;
+    std::vector<sfz::String> _strings;
 
     DISALLOW_COPY_AND_ASSIGN(StringList);
 };
