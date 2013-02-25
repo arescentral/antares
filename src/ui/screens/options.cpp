@@ -287,7 +287,7 @@ void KeyControlScreen::adjust_interface() {
     }
 
     if (_flashed_on) {
-        for (vector<pair<size_t, size_t> >::const_iterator it = _conflicts.begin();
+        for (vector<pair<size_t, size_t>>::const_iterator it = _conflicts.begin();
                 it != _conflicts.end(); ++it) {
             flash_on(it->first);
             flash_on(it->second);
@@ -398,7 +398,7 @@ void KeyControlScreen::set_tab(Tab tab) {
 }
 
 void KeyControlScreen::update_conflicts() {
-    vector<pair<size_t, size_t> > new_conflicts;
+    vector<pair<size_t, size_t>> new_conflicts;
     for (size_t i = 0; i < kKeyExtendedControlNum; ++i) {
         for (size_t j = i + 1; j < kKeyExtendedControlNum; ++j) {
             if (_preferences->key(i) == _preferences->key(j)) {

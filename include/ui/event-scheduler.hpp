@@ -64,7 +64,7 @@ class EventScheduler {
 
     int64_t _ticks;
     std::vector<int64_t> _snapshot_times;
-    std::vector<std::unique_ptr<Event> > _event_heap;
+    std::vector<std::unique_ptr<Event>> _event_heap;
     EventTracker _event_tracker;
 
     DISALLOW_COPY_AND_ASSIGN(EventScheduler);

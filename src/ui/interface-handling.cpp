@@ -154,7 +154,7 @@ bool BothCommandAndQ() {
 void update_mission_brief_point(
         interfaceItemType *dataItem, long whichBriefPoint, const Scenario* scenario,
         coordPointType *corner, long scale, Rect *bounds, vector<inlinePictType>& inlinePict,
-        Rect& highlight_rect, vector<pair<Point, Point> >& lines, String& text) {
+        Rect& highlight_rect, vector<pair<Point, Point>>& lines, String& text) {
     if (whichBriefPoint < kMissionBriefPointOffset) {
         // No longer handled here.
         return;
