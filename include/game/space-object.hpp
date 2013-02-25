@@ -28,9 +28,9 @@ const int16_t kObjectActionResID    = 500;
 
 extern spaceObjectType* gRootObject;
 extern long gRootObjectNumber;
-extern sfz::scoped_array<spaceObjectType> gSpaceObjectData;
-extern sfz::scoped_array<baseObjectType> gBaseObjectData;
-extern sfz::scoped_array<objectActionType> gObjectActionData;
+extern std::unique_ptr<spaceObjectType[]> gSpaceObjectData;
+extern std::unique_ptr<baseObjectType[]> gBaseObjectData;
+extern std::unique_ptr<objectActionType[]> gObjectActionData;
 
 void SpaceObjectHandlingInit( void);
 void CleanupSpaceObjectHandling( void);

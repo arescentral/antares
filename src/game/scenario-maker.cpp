@@ -54,7 +54,6 @@ using sfz::String;
 using sfz::StringSlice;
 using sfz::range;
 using sfz::read;
-using sfz::scoped_array;
 using std::vector;
 namespace macroman = sfz::macroman;
 

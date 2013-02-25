@@ -40,7 +40,6 @@
 
 using sfz::Exception;
 using sfz::StringSlice;
-using sfz::scoped_array;
 
 namespace antares {
 

@@ -28,7 +28,7 @@ using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::ReadSource;
 using sfz::read;
-using sfz::scoped_array;
+using std::unique_ptr;
 
 namespace antares {
 
@@ -36,7 +36,7 @@ namespace {
 
 const int16_t kRaceResID = 500;
 
-scoped_array<Race> gRaceData;
+unique_ptr<Race[]> gRaceData;
 
 }  // namespace
 

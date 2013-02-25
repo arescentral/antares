@@ -37,7 +37,7 @@
 #include "sound/fx.hpp"
 
 using sfz::Exception;
-using sfz::scoped_array;
+using std::unique_ptr;
 
 namespace antares {
 
@@ -73,7 +73,7 @@ static Point            cAdjacentUnits[] = {
 };
 
 coordPointType          gGlobalCorner;
-scoped_array<proximityUnitType> gProximityGrid;
+unique_ptr<proximityUnitType[]> gProximityGrid;
 
 // for the macro mRanged, time is assumed to be a long game ticks, velocity a fixed, result long, scratch fixed
 inline void mRange(long& result, long time, Fixed velocity, Fixed& scratch) {

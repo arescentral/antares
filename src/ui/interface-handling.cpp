@@ -59,7 +59,6 @@ using sfz::ReadSource;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::read;
-using sfz::scoped_array;
 using std::make_pair;
 using std::max;
 using std::min;

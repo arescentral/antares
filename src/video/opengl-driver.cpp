@@ -42,6 +42,8 @@ using sfz::format;
 using sfz::print;
 using std::min;
 using std::max;
+using std::unique_ptr;
+
 namespace io = sfz::io;
 
 namespace antares {
@@ -126,7 +128,7 @@ void gl_log(GLint object) {
     if (log_size == 0) {
         return;
     }
-    sfz::scoped_array<GLchar> log(new GLchar[log_size + 1]);
+    unique_ptr<GLchar[]> log(new GLchar[log_size + 1]);
     if (glIsShader(object)) {
         glGetShaderInfoLog(object, log_size, &log_size, log.get());
     } else {
@@ -470,7 +472,7 @@ OpenGlVideoDriver::MainLoop::Setup::Setup(OpenGlVideoDriver& driver) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     size_t size = 256;
-    sfz::scoped_array<uint8_t> static_data(new uint8_t[size * size * 2]);
+    unique_ptr<uint8_t[]> static_data(new uint8_t[size * size * 2]);
     int32_t static_index = 0;
     uint8_t* p = static_data.get();
     for (int i = 0; i < (size * size); ++i) {

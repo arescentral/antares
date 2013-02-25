@@ -62,8 +62,8 @@ struct barIndicatorType {
 
 struct miniScreenLineType;
 struct miniComputerDataType {
-    sfz::scoped_array<miniScreenLineType> lineData;
-    sfz::scoped_array<spaceObjectType> objectData;
+    std::unique_ptr<miniScreenLineType[]> lineData;
+    std::unique_ptr<spaceObjectType[]> objectData;
     long                    selectLine;
     long                    pollTime;
     long                    buildTimeBarValue;
@@ -100,7 +100,7 @@ struct aresGlobalType {
     unsigned long   gSynchValue;
     std::unique_ptr<InputSource> gInputSource;
     long            gGameOver;
-    sfz::scoped_array<admiralType>       gAdmiralData;
+    std::unique_ptr<admiralType[]>       gAdmiralData;
     int64_t         gGameTime;
     uint64_t        gLastTime;
     long            gClosestObject;
@@ -127,15 +127,15 @@ struct aresGlobalType {
     bool            gMouseActive;           // = kMouseOff;
     int             gMouseTimeout;
     std::queue<std::shared_ptr<sfz::String> > gMessageData;
-    sfz::scoped_array<unsigned char>     gStatusString;
+    std::unique_ptr<unsigned char[]>     gStatusString;
     std::unique_ptr<longMessageType>     gLongMessageData;
     long            gMessageTimeCount;      // = 0;
     long            gMessageLabelNum;       // = -1;
     long            gStatusLabelNum;        // = -1;
     miniComputerDataType    gMiniScreenData;
     std::unique_ptr<StringList>          gMissionStatusStrList;
-    sfz::scoped_array<screenLabelType>   gScreenLabelData;
-    sfz::scoped_array<beamType>          gBeamData;
+    std::unique_ptr<screenLabelType[]>   gScreenLabelData;
+    std::unique_ptr<beamType[]>          gBeamData;
     smartSoundHandle    gSound[kSoundNum];
     smartSoundChannel   gChannel[kMaxChannelNum];
     long            gLastSoundTime;         // = 0

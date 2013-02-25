@@ -34,7 +34,6 @@ using sfz::Range;
 using sfz::StringSlice;
 using sfz::format;
 using sfz::range;
-using sfz::scoped_array;
 using std::map;
 using std::unique_ptr;
 
@@ -109,7 +108,7 @@ struct pixTableType {
 pixTableType gPixTable[kMaxPixTableEntry];
 
 int32_t gAbsoluteScale = MIN_SCALE;
-scoped_array<spriteType> gSpriteTable;
+unique_ptr<spriteType[]> gSpriteTable;
 const RgbColor& kNoTinyColor = RgbColor::kBlack;
 
 void SpriteHandlingInit() {

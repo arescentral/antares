@@ -40,7 +40,7 @@ class NatePixTable {
 
   private:
     size_t _size;
-    sfz::scoped_array<Frame> _entries;
+    std::unique_ptr<Frame[]> _entries;
 
     DISALLOW_COPY_AND_ASSIGN(NatePixTable);
 };

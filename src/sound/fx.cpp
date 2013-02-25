@@ -33,7 +33,6 @@
 
 using sfz::Exception;
 using sfz::format;
-using sfz::scoped_array;
 
 namespace antares {
 

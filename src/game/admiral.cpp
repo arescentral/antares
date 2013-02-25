@@ -33,8 +33,8 @@ using sfz::Bytes;
 using sfz::Exception;
 using sfz::String;
 using sfz::StringSlice;
-using sfz::scoped_array;
 using std::min;
+using std::unique_ptr;
 namespace macroman = sfz::macroman;
 
 namespace antares {
@@ -55,7 +55,7 @@ const Fixed kImportantTarget            = 0x00000140;
 const Fixed kSomewhatImportantTarget    = 0x00000120;
 const Fixed kAbsolutelyEssential        = 0x00008000;
 
-scoped_array<destBalanceType> gDestBalanceData;
+unique_ptr<destBalanceType[]> gDestBalanceData;
 
 }  // namespace
 

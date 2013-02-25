@@ -41,7 +41,6 @@
 
 using sfz::format;
 using sfz::range;
-using sfz::scoped_array;
 using std::max;
 using std::min;
 using std::unique_ptr;
@@ -127,9 +126,9 @@ namespace {
 
 unique_ptr<Sprite> left_instrument_sprite;
 unique_ptr<Sprite> right_instrument_sprite;
-scoped_array<Point> gRadarBlipData;
-scoped_array<int32_t> gScaleList;
-scoped_array<int32_t> gSectorLineData;
+unique_ptr<Point[]> gRadarBlipData;
+unique_ptr<int32_t[]> gScaleList;
+unique_ptr<int32_t[]> gSectorLineData;
 bool should_draw_sector_lines = false;
 Rect view_range;
 
