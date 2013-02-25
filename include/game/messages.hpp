@@ -98,10 +98,6 @@ struct longMessageType {
     short                   labelMessageID;
 };
 
-class MessageData {
-    std::queue<std::shared_ptr<sfz::String> > queue;
-};
-
 void InitMessageScreen( void);
 void MessageScreenCleanup( void);
 void ClearMessage( void);

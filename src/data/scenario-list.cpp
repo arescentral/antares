@@ -29,7 +29,6 @@ using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
 using sfz::read;
-using std::shared_ptr;
 using std::vector;
 
 namespace utf8 = sfz::utf8;
@@ -61,14 +60,14 @@ void u32_to_version(uint32_t in, Version& out) {
 }  // namespace
 
 ScenarioList::ScenarioList() {
-    shared_ptr<Entry> factory_scenario(new Entry);
-    factory_scenario->identifier.assign("com.biggerplanet.ares");
-    factory_scenario->title.assign("Ares");
-    factory_scenario->download_url.assign("http://www.arescentral.com");
-    factory_scenario->author.assign("Bigger Planet");
-    factory_scenario->author_url.assign("http://www.biggerplanet.com");
-    u32_to_version(0x01010100, factory_scenario->version);
-    _scenarios.push_back(factory_scenario);
+    _scenarios.emplace_back();
+    Entry& factory_scenario = _scenarios.back();
+    factory_scenario.identifier.assign("com.biggerplanet.ares");
+    factory_scenario.title.assign("Ares");
+    factory_scenario.download_url.assign("http://www.arescentral.com");
+    factory_scenario.author.assign("Bigger Planet");
+    factory_scenario.author_url.assign("http://www.biggerplanet.com");
+    u32_to_version(0x01010100, factory_scenario.version);
 
     ScopedGlob g;
     const String home(utf8::decode(getenv("HOME")));
@@ -83,7 +82,7 @@ ScenarioList::ScenarioList() {
     for (int i = 0; i < g.data.gl_matchc; ++i) {
         const String path(utf8::decode(g.data.gl_pathv[i]));
         StringSlice identifier = path.slice(prefix_len, path.size() - prefix_len - suffix_len);
-        if (identifier == factory_scenario->identifier) {
+        if (identifier == factory_scenario.identifier) {
             continue;
         }
 
@@ -91,14 +90,14 @@ ScenarioList::ScenarioList() {
         BytesSlice data(file.data());
         scenarioInfoType info;
         read(data, info);
-        shared_ptr<Entry> entry(new Entry);
-        entry->identifier.assign(identifier);
-        entry->title.assign(info.titleString);
-        entry->download_url.assign(info.downloadURLString);
-        entry->author.assign(info.authorNameString);
-        entry->author_url.assign(info.authorURLString);
-        u32_to_version(info.version, entry->version);
-        _scenarios.push_back(entry);
+        _scenarios.emplace_back();
+        Entry& entry = _scenarios.back();
+        entry.identifier.assign(identifier);
+        entry.title.assign(info.titleString);
+        entry.download_url.assign(info.downloadURLString);
+        entry.author.assign(info.authorNameString);
+        entry.author_url.assign(info.authorURLString);
+        u32_to_version(info.version, entry.version);
     }
 }
 
@@ -107,7 +106,7 @@ size_t ScenarioList::size() const {
 }
 
 const ScenarioList::Entry& ScenarioList::at(size_t index) const {
-    return *_scenarios.at(index);
+    return _scenarios.at(index);
 }
 
 void print_to(sfz::PrintTarget out, const Version& v) {

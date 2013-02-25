@@ -171,7 +171,7 @@ void ClearMessage( void) {
 }
 
 void AddMessage(const sfz::PrintItem& message) {
-    globals()->gMessageData.emplace(new String(message));
+    globals()->gMessageData.emplace(message);
 }
 
 void StartLongMessage( short startResID, short endResID)
@@ -429,7 +429,7 @@ void DrawMessageScreen(int32_t by_units) {
     }
 
     if (!globals()->gMessageData.empty()) {
-        const String& message = *globals()->gMessageData.front();
+        const String& message = globals()->gMessageData.front();
 
         if (globals()->gMessageTimeCount < kRaiseTime) {
             SetScreenLabelPosition(

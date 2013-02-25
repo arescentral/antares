@@ -33,7 +33,6 @@ using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
 using sfz::string_to_int;
-using std::shared_ptr;
 using std::unique_ptr;
 using std::vector;
 
