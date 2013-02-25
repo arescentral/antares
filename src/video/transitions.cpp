@@ -140,7 +140,7 @@ PictFade::PictFade(int pict_id, bool* skipped)
         : _state(NEW),
           _skipped(skipped) {
     Picture pict(pict_id);
-    _sprite.reset(VideoDriver::driver()->new_sprite(format("/pictures/{0}.png", pict_id), pict));
+    _sprite = VideoDriver::driver()->new_sprite(format("/pictures/{0}.png", pict_id), pict);
 }
 
 PictFade::~PictFade() { }

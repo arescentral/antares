@@ -91,8 +91,8 @@ void NatePixTable::Frame::build(BytesSlice in, int32_t id, int32_t frame_number,
     } else {
         fill_pix_map(in);
     }
-    _sprite.reset(VideoDriver::driver()->new_sprite(
-                format("/sprites/{0}.SMIV/{1}", id, frame_number), _pix_map));
+    _sprite = VideoDriver::driver()->new_sprite(
+                format("/sprites/{0}.SMIV/{1}", id, frame_number), _pix_map);
 }
 
 void NatePixTable::Frame::fill_pix_map(BytesSlice bytes) {

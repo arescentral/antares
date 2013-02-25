@@ -186,8 +186,8 @@ TextVideoDriver::TextVideoDriver(
         _scheduler(scheduler),
         _output_dir(output_dir) { }
 
-Sprite* TextVideoDriver::new_sprite(sfz::PrintItem name, const PixMap& content) {
-    return new Sprite(name, *this, content.size());
+std::unique_ptr<Sprite> TextVideoDriver::new_sprite(sfz::PrintItem name, const PixMap& content) {
+    return std::unique_ptr<antares::Sprite>(new Sprite(name, *this, content.size()));
 }
 
 void TextVideoDriver::fill_rect(const Rect& rect, const RgbColor& color) {

@@ -173,8 +173,8 @@ void InstrumentInit() {
             from.offset(0, (pict.size().height - world.height()) / 2);
         }
         pix_map.view(to).copy(pict.view(from));
-        left_instrument_sprite.reset(VideoDriver::driver()->new_sprite(
-                    format("/pictures/{0}.png", kInstLeftPictID), pix_map));
+        left_instrument_sprite = VideoDriver::driver()->new_sprite(
+                format("/pictures/{0}.png", kInstLeftPictID), pix_map);
     }
     {
         Picture pict(kInstRightPictID);
@@ -185,8 +185,8 @@ void InstrumentInit() {
             from.offset(0, (pict.size().height - world.height()) / 2);
         }
         pix_map.view(to).copy(pict.view(from));
-        right_instrument_sprite.reset(VideoDriver::driver()->new_sprite(
-                    format("/pictures/{0}.png", kInstRightPictID), pix_map));
+        right_instrument_sprite = VideoDriver::driver()->new_sprite(
+                format("/pictures/{0}.png", kInstRightPictID), pix_map);
     }
 
     MiniScreenInit();

@@ -112,7 +112,7 @@ class PixBuilder {
 
 }  // namespace
 
-PixMap* build_pix(int text_id, int width) {
+unique_ptr<PixMap> build_pix(int text_id, int width) {
     unique_ptr<ArrayPixMap> pix(new ArrayPixMap(width, 0));
     PixBuilder build(pix.get());
     Resource rsrc("text", "txt", text_id);
@@ -162,7 +162,7 @@ PixMap* build_pix(int text_id, int width) {
         }
     }
 
-    return pix.release();
+    return unique_ptr<PixMap>(pix.release());
 }
 
 }  // namespace antares

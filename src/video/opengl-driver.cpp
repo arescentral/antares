@@ -276,8 +276,8 @@ OpenGlVideoDriver::OpenGlVideoDriver(Size screen_size)
         : _screen_size(screen_size),
           _static_seed(0) { }
 
-Sprite* OpenGlVideoDriver::new_sprite(PrintItem name, const PixMap& content) {
-    return new OpenGlSprite(name, content, _uniforms);
+unique_ptr<Sprite> OpenGlVideoDriver::new_sprite(PrintItem name, const PixMap& content) {
+    return unique_ptr<Sprite>(new OpenGlSprite(name, content, _uniforms));
 }
 
 void OpenGlVideoDriver::fill_rect(const Rect& rect, const RgbColor& color) {
