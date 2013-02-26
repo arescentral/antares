@@ -92,21 +92,23 @@ class ReplayMaster : public Card {
             break;
 
           case REPLAY:
-            if (_output_path.get() && (globals()->gScenarioWinner.text >= 0)) {
+            if (_output_path.has()) {
                 String path(format("{0}/debriefing.txt", *_output_path));
                 makedirs(path::dirname(path), 0755);
                 ScopedFd outcome(open(path, O_WRONLY | O_CREAT, 0644));
-                Resource rsrc("text", "txt", globals()->gScenarioWinner.text);
-                sfz::write(outcome, rsrc.data());
-                if (_game_result == WIN_GAME) {
-                    sfz::write(outcome, "\n\n");
-                    String text = DebriefingScreen::build_score_text(
-                            _seconds, gThisScenario->parTime,
-                            GetAdmiralLoss(0), gThisScenario->parLosses,
-                            GetAdmiralKill(0), gThisScenario->parKills);
-                    sfz::write(outcome, utf8::encode(text));
+                if ((globals()->gScenarioWinner.text >= 0)) {
+                    Resource rsrc("text", "txt", globals()->gScenarioWinner.text);
+                    sfz::write(outcome, rsrc.data());
+                    if (_game_result == WIN_GAME) {
+                        sfz::write(outcome, "\n\n");
+                        String text = DebriefingScreen::build_score_text(
+                                _seconds, gThisScenario->parTime,
+                                GetAdmiralLoss(0), gThisScenario->parLosses,
+                                GetAdmiralKill(0), gThisScenario->parKills);
+                        sfz::write(outcome, utf8::encode(text));
+                    }
+                    sfz::write(outcome, "\n");
                 }
-                sfz::write(outcome, "\n");
             }
             stack()->pop(this);
             break;

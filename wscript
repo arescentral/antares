@@ -23,6 +23,9 @@ def dist(dst):
 
 def options(opt):
     common(opt)
+    opt.add_option(
+            "--smoke", action="store_true", default=False,
+            help="run tests quickly")
 
 def configure(cnf):
     common(cnf)
@@ -376,19 +379,34 @@ def build(bld):
         )
 
     def regression_test(name):
-        bld.antares_test(
-            target="antares/%s" % name.split()[0],
-            rule="antares/offscreen %s" % name,
-            expected="test/%s" % name.split()[0],
-        )
+        if bld.options.smoke:
+            bld.antares_test(
+                target="antares/%s" % name.split()[0],
+                rule="antares/offscreen %s --text" % name,
+                expected="test/smoke/%s" % name.split()[0],
+            )
+        else:
+            bld.antares_test(
+                target="antares/%s" % name.split()[0],
+                rule="antares/offscreen %s" % name,
+                expected="test/%s" % name.split()[0],
+            )
 
     def replay_test(name):
-        bld.antares_test(
-            target="antares/replay/%s" % name,
-            rule="antares/replay --text",
-            srcs="test/%s.NLRP" % name,
-            expected="test/%s" % name,
-        )
+        if bld.options.smoke:
+            bld.antares_test(
+                target="antares/replay/%s" % name,
+                rule="antares/replay --text --smoke",
+                srcs="test/%s.NLRP" % name,
+                expected="test/smoke/%s" % name,
+            )
+        else:
+            bld.antares_test(
+                target="antares/replay/%s" % name,
+                rule="antares/replay --text",
+                srcs="test/%s.NLRP" % name,
+                expected="test/%s" % name,
+            )
 
     unit_test("build-pix")
     unit_test("object-data")
