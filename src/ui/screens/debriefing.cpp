@@ -114,49 +114,12 @@ int score(
     return score;
 }
 
-void build_score_text(
-        int your_length, int par_length, int your_loss, int par_loss, int your_kill,
-        int par_kill, unique_ptr<StyledText>& result) {
-    Resource rsrc("text", "txt", 6000);
-    String text(utf8::decode(rsrc.data()));
-
-    StringList strings(6000);
-
-    const int your_mins = your_length / 60;
-    const int your_secs = your_length % 60;
-    const int par_mins = par_length / 60;
-    const int par_secs = par_length % 60;
-    const int your_score = score(your_length, par_length, your_loss, par_loss, your_kill, par_kill);
-    const int par_score = 100;
-
-    string_replace(&text, strings.at(0), your_mins);
-    string_replace(&text, strings.at(1), dec(your_secs, 2));
-    if (par_length > 0) {
-        string_replace(&text, strings.at(2), par_mins);
-        String secs_string;
-        print(secs_string, format(":{0}", dec(par_secs, 2)));
-        string_replace(&text, strings.at(3), secs_string);
-    } else {
-        StringList data_strings(6002);
-        string_replace(&text, strings.at(2), data_strings.at(8));  // = "N/A"
-        string_replace(&text, strings.at(3), "");
-    }
-    string_replace(&text, strings.at(4), your_loss);
-    string_replace(&text, strings.at(5), par_loss);
-    string_replace(&text, strings.at(6), your_kill);
-    string_replace(&text, strings.at(7), par_kill);
-    string_replace(&text, strings.at(8), your_score);
-    string_replace(&text, strings.at(9), par_score);
-
-    RgbColor fore_color;
-    fore_color = GetRGBTranslateColorShade(GOLD, VERY_LIGHT);
-    RgbColor back_color;
-    back_color = GetRGBTranslateColorShade(GOLD, DARKEST);
-
-    result.reset(new StyledText(button_font));
-    result->set_fore_color(fore_color);
-    result->set_back_color(back_color);
+unique_ptr<StyledText> style_score_text(String text) {
+    unique_ptr<StyledText> result(new StyledText(button_font));
+    result->set_fore_color(GetRGBTranslateColorShade(GOLD, VERY_LIGHT));
+    result->set_back_color(GetRGBTranslateColorShade(GOLD, DARKEST));
     result->set_retro_text(text);
+    return result;
 }
 
 }  // namespace
@@ -179,7 +142,8 @@ DebriefingScreen::DebriefingScreen(
     Rect score_area = _message_bounds;
     score_area.top = score_area.bottom - kScoreTableHeight;
 
-    build_score_text(your_length, par_length, your_loss, par_loss, your_kill, par_kill, _score);
+    _score = style_score_text(build_score_text(
+                your_length, par_length, your_loss, par_loss, your_kill, par_kill));
     _score->set_tab_width(60);
     _score->wrap_to(_message_bounds.width(), 0, 2);
     _score_bounds = Rect(0, 0, _score->auto_width(), _score->height());
@@ -273,6 +237,42 @@ void DebriefingScreen::initialize(int text_id, bool do_score) {
     _pix_bounds = pix_bounds(text_bounds);
     _message_bounds = text_bounds;
     _message_bounds.offset(-_pix_bounds.left, -_pix_bounds.top);
+}
+
+String DebriefingScreen::build_score_text(
+        int your_length, int par_length, int your_loss, int par_loss, int your_kill,
+        int par_kill) {
+    Resource rsrc("text", "txt", 6000);
+    String text(utf8::decode(rsrc.data()));
+
+    StringList strings(6000);
+
+    const int your_mins = your_length / 60;
+    const int your_secs = your_length % 60;
+    const int par_mins = par_length / 60;
+    const int par_secs = par_length % 60;
+    const int your_score = score(your_length, par_length, your_loss, par_loss, your_kill, par_kill);
+    const int par_score = 100;
+
+    string_replace(&text, strings.at(0), your_mins);
+    string_replace(&text, strings.at(1), dec(your_secs, 2));
+    if (par_length > 0) {
+        string_replace(&text, strings.at(2), par_mins);
+        String secs_string;
+        print(secs_string, format(":{0}", dec(par_secs, 2)));
+        string_replace(&text, strings.at(3), secs_string);
+    } else {
+        StringList data_strings(6002);
+        string_replace(&text, strings.at(2), data_strings.at(8));  // = "N/A"
+        string_replace(&text, strings.at(3), "");
+    }
+    string_replace(&text, strings.at(4), your_loss);
+    string_replace(&text, strings.at(5), par_loss);
+    string_replace(&text, strings.at(6), your_kill);
+    string_replace(&text, strings.at(7), par_kill);
+    string_replace(&text, strings.at(8), your_score);
+    string_replace(&text, strings.at(9), par_score);
+    return text;
 }
 
 void print_to(sfz::PrintTarget out, DebriefingScreen::State state) {
