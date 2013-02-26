@@ -73,7 +73,7 @@ Rect viewport;
 
 class GamePlay : public Card {
   public:
-    GamePlay(bool replay, GameResult* game_result);
+    GamePlay(bool replay, GameResult* game_result, int32_t* seconds);
 
     virtual void become_front();
 
@@ -96,8 +96,8 @@ class GamePlay : public Card {
 
     const bool _replay;
     GameResult* const _game_result;
+    int32_t* const _seconds;
     int64_t _next_timer;
-    long _seconds;
     const Rect _play_area;
     const int64_t _scenario_start_time;
     const bool _command_and_q;
@@ -119,13 +119,14 @@ Card* AresInit() {
 
 MainPlay::MainPlay(
         const Scenario* scenario, bool replay, bool show_loading_screen,
-        GameResult* game_result):
+        GameResult* game_result, int32_t* seconds):
     _state(NEW),
     _scenario(scenario),
     _replay(replay),
     _show_loading_screen(show_loading_screen),
     _cancelled(false),
-    _game_result(game_result) { }
+    _game_result(game_result),
+    _seconds(seconds) { }
 
 void MainPlay::become_front() {
     switch (_state) {
@@ -198,7 +199,7 @@ void MainPlay::become_front() {
             }
             globals()->gLastTime = now_usecs();
 
-            stack()->push(new GamePlay(_replay, _game_result));
+            stack()->push(new GamePlay(_replay, _game_result, _seconds));
         }
         break;
 
@@ -213,12 +214,12 @@ void MainPlay::become_front() {
     }
 }
 
-GamePlay::GamePlay(bool replay, GameResult* game_result)
+GamePlay::GamePlay(bool replay, GameResult* game_result, int32_t* seconds)
         : _state(PLAYING),
           _replay(replay),
           _game_result(game_result),
+          _seconds(seconds),
           _next_timer(add_ticks(now_usecs(), 1)),
-          _seconds(0),
           _play_area(viewport.left, viewport.top, viewport.right, viewport.bottom),
           _scenario_start_time(add_ticks(
                       0,
@@ -564,7 +565,7 @@ void GamePlay::fire_timer() {
     if (globals()->gGameOver > 0) {
         thisTime = now_usecs();
         thisTime -= globals()->gLastTime;
-        _seconds = thisTime / 1000000; // divide by a million to get seconds
+        *_seconds = thisTime / 1000000; // divide by a million to get seconds
 
         if (*_game_result == NO_GAME) {
             if (globals()->gScenarioWinner.player == globals()->gPlayerAdmiralNumber) {
@@ -587,7 +588,7 @@ void GamePlay::fire_timer() {
         } else {
             _state = DEBRIEFING;
             stack()->push(new DebriefingScreen(
-                        globals()->gScenarioWinner.text, _seconds, gThisScenario->parTime,
+                        globals()->gScenarioWinner.text, *_seconds, gThisScenario->parTime,
                         GetAdmiralLoss(0), gThisScenario->parLosses,
                         GetAdmiralKill(0), gThisScenario->parKills));
         }
