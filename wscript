@@ -23,6 +23,9 @@ def dist(dst):
 
 def options(opt):
     common(opt)
+    opt.add_option(
+            "--smoke", action="store_true", default=False,
+            help="run tests quickly")
 
 def configure(cnf):
     common(cnf)
@@ -367,44 +370,52 @@ def build(bld):
         ],
         use="antares/system/opengl",
     )
-
-    bld.antares_test(
-        target="antares/build-pix",
-        rule="antares/build-pix",
-        expected="test/build-pix",
-    )
-
-    bld.antares_test(
-        target="antares/object-data",
-        rule="antares/object-data",
-        expected="test/object-data",
-    )
-
-    bld.antares_test(
-        target="antares/shapes",
-        rule="antares/shapes",
-        expected="test/shapes",
-    )
-
-    def regtest(name):
+    
+    def unit_test(name):
         bld.antares_test(
-            target="antares/%s" % name.split()[0],
-            rule="antares/offscreen %s" % name,
-            expected="test/%s" % name.split()[0],
-        )
-
-    regtest("main-screen")
-    regtest("mission-briefing --text")
-    regtest("options")
-    regtest("pause --text")
-
-    def replay_test(name):
-        bld.antares_test(
-            target="antares/replay/%s" % name,
-            rule="antares/replay --text",
-            srcs="test/%s.NLRP" % name,
+            target="antares/%s" % name,
+            rule="antares/%s" % name,
             expected="test/%s" % name,
         )
+
+    def regression_test(name):
+        if bld.options.smoke:
+            bld.antares_test(
+                target="antares/%s" % name.split()[0],
+                rule="antares/offscreen %s --text" % name,
+                expected="test/smoke/%s" % name.split()[0],
+            )
+        else:
+            bld.antares_test(
+                target="antares/%s" % name.split()[0],
+                rule="antares/offscreen %s" % name,
+                expected="test/%s" % name.split()[0],
+            )
+
+    def replay_test(name):
+        if bld.options.smoke:
+            bld.antares_test(
+                target="antares/replay/%s" % name,
+                rule="antares/replay --text --smoke",
+                srcs="test/%s.NLRP" % name,
+                expected="test/smoke/%s" % name,
+            )
+        else:
+            bld.antares_test(
+                target="antares/replay/%s" % name,
+                rule="antares/replay --text",
+                srcs="test/%s.NLRP" % name,
+                expected="test/%s" % name,
+            )
+
+    unit_test("build-pix")
+    unit_test("object-data")
+    unit_test("shapes")
+
+    regression_test("main-screen")
+    regression_test("mission-briefing --text")
+    regression_test("options")
+    regression_test("pause --text")
 
     replay_test("and-it-feels-so-good")
     replay_test("blood-toil-tears-sweat")

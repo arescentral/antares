@@ -47,6 +47,10 @@ class DebriefingScreen : public Card {
     virtual bool next_timer(int64_t& time);
     virtual void fire_timer();
 
+    static sfz::String build_score_text(
+            int your_length, int par_length, int your_loss, int par_loss, int your_kill,
+            int par_kill);
+    
   private:
     void initialize(int text_id, bool do_score);
 
