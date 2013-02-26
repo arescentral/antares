@@ -40,15 +40,11 @@ const char kAres[] = "com.biggerplanet.ares";
 
 }  // namespace
 
-Resource::Resource(const StringSlice& type, const StringSlice& extension, int id) {
-    const String resource_path(format("{0}/{1}.{2}", type, id, extension));
-    init(resource_path);
-}
+Resource::Resource(const StringSlice& type, const StringSlice& extension, int id):
+        Resource(INTERNAL, String(format("{0}/{1}.{2}", type, id, extension))) { }
 
-Resource::Resource(const sfz::PrintItem& resource_path) {
-    const String resource_path_string(resource_path);
-    init(resource_path_string);
-}
+Resource::Resource(const sfz::PrintItem& resource_path):
+        Resource(INTERNAL, String(resource_path)) { }
 
 Resource::~Resource() { }
 
@@ -56,7 +52,7 @@ BytesSlice Resource::data() const {
     return _file->data();
 }
 
-void Resource::init(const sfz::StringSlice& resource_path) {
+Resource::Resource(Internal, sfz::StringSlice resource_path) {
     const StringSlice scenario_id = Preferences::preferences()->scenario_identifier();
     const String home(utf8::decode(getenv("HOME")));
     const String base(format("{0}/Library/Application Support/Antares/Scenarios", home));

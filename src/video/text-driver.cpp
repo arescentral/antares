@@ -186,8 +186,8 @@ TextVideoDriver::TextVideoDriver(
         _scheduler(scheduler),
         _output_dir(output_dir) { }
 
-Sprite* TextVideoDriver::new_sprite(sfz::PrintItem name, const PixMap& content) {
-    return new Sprite(name, *this, content.size());
+std::unique_ptr<Sprite> TextVideoDriver::new_sprite(sfz::PrintItem name, const PixMap& content) {
+    return std::unique_ptr<antares::Sprite>(new Sprite(name, *this, content.size()));
 }
 
 void TextVideoDriver::fill_rect(const Rect& rect, const RgbColor& color) {
@@ -242,13 +242,13 @@ void TextVideoDriver::loop(Card* initial) {
     _scheduler.loop(loop);
 }
 
-void TextVideoDriver::add_arg(StringSlice arg, std::vector<std::pair<size_t, size_t> >& args) {
+void TextVideoDriver::add_arg(StringSlice arg, std::vector<std::pair<size_t, size_t>>& args) {
     size_t start = _log.size();
     _log.push(arg);
     args.push_back(make_pair(start, _log.size() - start));
 }
 
-void TextVideoDriver::dup_arg(size_t index, std::vector<std::pair<size_t, size_t> >& args) {
+void TextVideoDriver::dup_arg(size_t index, std::vector<std::pair<size_t, size_t>>& args) {
     args.push_back(_last_args[index]);
 }
 
@@ -258,7 +258,7 @@ sfz::StringSlice TextVideoDriver::last_arg(size_t index) const {
 
 template <int size>
 void TextVideoDriver::log(StringSlice command, PrintItem (&args)[size]) {
-    vector<pair<size_t, size_t> > this_args;
+    vector<pair<size_t, size_t>> this_args;
     bool new_command = _last_args.empty() || (command != last_arg(0));
 
     if (new_command) {

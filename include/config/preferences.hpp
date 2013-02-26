@@ -31,7 +31,9 @@ class Preferences {
 
     Preferences();
     Preferences(const Preferences& other);
+    Preferences(Preferences&& other) = default;
     Preferences& operator=(const Preferences& other);
+    Preferences& operator=(Preferences&& other) = default;
     ~Preferences();
 
     void reset();

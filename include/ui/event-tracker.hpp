@@ -28,9 +28,8 @@ namespace antares {
 class EventTracker : public EventReceiver {
   public:
     EventTracker(bool strict):
-            _strict(strict) {
-        _button[0] = _button[1] = _button[2] = false;
-    }
+            _strict(strict),
+            _button{} { }
 
     virtual void key_down(const KeyDownEvent& event);
     virtual void key_up(const KeyUpEvent& event);

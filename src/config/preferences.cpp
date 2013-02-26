@@ -58,21 +58,6 @@ Preferences* Preferences::preferences() {
 }
 
 Preferences::Preferences() {
-    reset();
-}
-
-Preferences::Preferences(const Preferences& other) {
-    copy(other);
-}
-
-Preferences& Preferences::operator=(const Preferences& other) {
-    copy(other);
-    return *this;
-}
-
-Preferences::~Preferences() { }
-
-void Preferences::reset() {
     set_key(kUpKeyNum,              1 + Keys::N8);
     set_key(kDownKeyNum,            1 + Keys::N5);
     set_key(kLeftKeyNum,            1 + Keys::N4);
@@ -134,6 +119,21 @@ void Preferences::reset() {
     set_screen_size(Size(640, 480));
 
     _scenario_identifier.assign("com.biggerplanet.ares");
+}
+
+Preferences::Preferences(const Preferences& other) {
+    copy(other);
+}
+
+Preferences& Preferences::operator=(const Preferences& other) {
+    copy(other);
+    return *this;
+}
+
+Preferences::~Preferences() { }
+
+void Preferences::reset() {
+    *this = Preferences();
 }
 
 void Preferences::copy(const Preferences& preferences) {

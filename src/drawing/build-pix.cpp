@@ -33,7 +33,6 @@ using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
 using sfz::string_to_int;
-using std::shared_ptr;
 using std::unique_ptr;
 using std::vector;
 
@@ -112,12 +111,12 @@ class PixBuilder {
 
 }  // namespace
 
-PixMap* build_pix(int text_id, int width) {
+unique_ptr<PixMap> build_pix(int text_id, int width) {
     unique_ptr<ArrayPixMap> pix(new ArrayPixMap(width, 0));
     PixBuilder build(pix.get());
     Resource rsrc("text", "txt", text_id);
 
-    vector<shared_ptr<String> > lines;
+    vector<String> lines;
     BytesSlice data = rsrc.data();
     String text(utf8::decode(data));
     bool in_section_header = (text.size() >= 2) && (text.slice(0, 2) == "#+");
@@ -125,47 +124,44 @@ PixMap* build_pix(int text_id, int width) {
     const size_t end = text.size();
     for (size_t i = start; i != end; ++i) {
         if (((end - i) >= 3) && (text.slice(i, 3) == "\n#+")) {
-            shared_ptr<String> line(new String(text.slice(start, i - start)));
-            lines.push_back(line);
+            lines.emplace_back(text.slice(start, i - start));
             start = i + 1;
             in_section_header = true;
         } else if (in_section_header && (text.at(i) == '\n')) {
-            shared_ptr<String> line(new String(text.slice(start, i - start)));
-            lines.push_back(line);
+            lines.emplace_back(text.slice(start, i - start));
             start = i + 1;
             in_section_header = false;
         }
     }
     if (start != end) {
-        shared_ptr<String> line(new String(text.slice(start)));
-        lines.push_back(line);
+        lines.emplace_back(text.slice(start));
     }
 
-    for (vector<shared_ptr<String> >::const_iterator it = lines.begin(); it != lines.end(); ++it) {
-        if ((*it)->size() >= 2 && (*it)->slice(0, 2) == "#+") {
-            if ((*it)->size() > 2) {
-                if ((*it)->at(2) == 'B') {
+    for (const auto& line: lines) {
+        if (line.size() >= 2 && line.slice(0, 2) == "#+") {
+            if (line.size() > 2) {
+                if (line.at(2) == 'B') {
                     int32_t id = 2005;
-                    if ((*it)->size() > 3) {
-                        if (!string_to_int((*it)->slice(3), id)) {
-                            throw Exception(format("malformed header line {0}", quote(**it)));
+                    if (line.size() > 3) {
+                        if (!string_to_int(line.slice(3), id)) {
+                            throw Exception(format("malformed header line {0}", quote(line)));
                         }
                     }
                     build.set_background(id);
                 } else {
                     int32_t id;
-                    if (!string_to_int((*it)->slice(2), id)) {
-                        throw Exception(format("malformed header line {0}", quote(**it)));
+                    if (!string_to_int(line.slice(2), id)) {
+                        throw Exception(format("malformed header line {0}", quote(line)));
                     }
                     build.add_picture(id);
                 }
             }
         } else {
-            build.add_text(**it);
+            build.add_text(line);
         }
     }
 
-    return pix.release();
+    return unique_ptr<PixMap>(pix.release());
 }
 
 }  // namespace antares

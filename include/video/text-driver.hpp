@@ -41,7 +41,7 @@ class TextVideoDriver : public VideoDriver {
     virtual int usecs() const { return _scheduler.usecs(); }
     virtual int64_t double_click_interval_usecs() const { return 0.5e6; }
 
-    virtual antares::Sprite* new_sprite(sfz::PrintItem name, const PixMap& content);
+    virtual std::unique_ptr<antares::Sprite> new_sprite(sfz::PrintItem name, const PixMap& content);
     virtual void fill_rect(const Rect& rect, const RgbColor& color);
     virtual void dither_rect(const Rect& rect, const RgbColor& color);
     virtual void draw_point(const Point& at, const RgbColor& color);
@@ -56,8 +56,8 @@ class TextVideoDriver : public VideoDriver {
     class MainLoop;
     class Sprite;
 
-    void add_arg(sfz::StringSlice arg, std::vector<std::pair<size_t, size_t> >& args);
-    void dup_arg(size_t index, std::vector<std::pair<size_t, size_t> >& args);
+    void add_arg(sfz::StringSlice arg, std::vector<std::pair<size_t, size_t>>& args);
+    void dup_arg(size_t index, std::vector<std::pair<size_t, size_t>>& args);
     sfz::StringSlice last_arg(size_t index) const;
 
     template <int size>
@@ -68,7 +68,7 @@ class TextVideoDriver : public VideoDriver {
     const sfz::Optional<sfz::String> _output_dir;
 
     sfz::String _log;
-    std::vector<std::pair<size_t, size_t> > _last_args;
+    std::vector<std::pair<size_t, size_t>> _last_args;
 
     DISALLOW_COPY_AND_ASSIGN(TextVideoDriver);
 };

@@ -49,11 +49,12 @@ struct StringListVisitor : public JsonDefaultVisitor {
         DONE,
     };
 
-    StringListVisitor(State& state, vector<String*>& vec):
+    StringListVisitor(State& state, vector<String>& vec):
             _state(state),
             _vec(vec) {
         _state = NEW;
     }
+    
     virtual void visit_array(const std::vector<Json>& value) const {
         switch (_state) {
           case NEW:
@@ -67,21 +68,23 @@ struct StringListVisitor : public JsonDefaultVisitor {
             return JsonDefaultVisitor::visit_array(value);
         }
     }
+
     virtual void visit_string(const StringSlice& value) const {
         switch (_state) {
           case ARRAY:
-            _vec.push_back(new String(value));
+            _vec.emplace_back(value);
             break;
           default:
             return JsonDefaultVisitor::visit_string(value);
         }
     }
+
     virtual void visit_default(const char* type) const {
         throw Exception(format("got unexpected JSON {0}", type));
     }
 
     State& _state;
-    vector<String*>& _vec;
+    vector<String>& _vec;
 };
 
 }  // namespace
@@ -95,18 +98,6 @@ StringList::StringList(int id) {
     }
     StringListVisitor::State state;
     strings.accept(StringListVisitor(state, _strings));
-}
-
-StringList::~StringList() {
-    clear();
-}
-
-void StringList::clear() {
-    // TODO(sfiera): make exception-safe.
-    for (String* string: _strings) {
-        delete string;
-    }
-    _strings.clear();
 }
 
 ssize_t StringList::index_of(const StringSlice& result) const {
@@ -123,7 +114,7 @@ size_t StringList::size() const {
 }
 
 const String& StringList::at(size_t index) const {
-    return *_strings.at(index);
+    return _strings.at(index);
 }
 
 void string_to_pstring(const String& src, unsigned char* dst) {

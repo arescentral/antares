@@ -70,9 +70,7 @@ Ledger* Ledger::ledger() {
     return ::antares::ledger;
 }
 
-NullLedger::NullLedger() {
-    _chapters.insert(1);
-}
+NullLedger::NullLedger(): _chapters{1} { }
 
 void NullLedger::unlock_chapter(int chapter) {
     _chapters.insert(chapter);

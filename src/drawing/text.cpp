@@ -97,8 +97,8 @@ Font::Font(int32_t id) {
             pix.fill(RgbColor::kClear);
             String s(1, from_mac_roman(i));
             draw(Point(0, ascent), s, RgbColor::kWhite, &pix, pix.size().as_rect());
-            _sprites[i].reset(VideoDriver::driver()->new_sprite(
-                        format("/font/{0}/{1}", id, hex(i, 2)), pix));
+            _sprites[i] = VideoDriver::driver()->new_sprite(
+                        format("/font/{0}/{1}", id, hex(i, 2)), pix);
         }
     }
 }

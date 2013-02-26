@@ -30,7 +30,7 @@
 using sfz::Exception;
 using std::greater;
 using std::max;
-using std::shared_ptr;
+using std::unique_ptr;
 
 namespace antares {
 
@@ -43,20 +43,20 @@ void EventScheduler::schedule_snapshot(int64_t at) {
     push_heap(_snapshot_times.begin(), _snapshot_times.end(), greater<int64_t>());
 }
 
-void EventScheduler::schedule_event(shared_ptr<Event> event) {
-    _event_heap.push_back(event);
+void EventScheduler::schedule_event(unique_ptr<Event> event) {
+    _event_heap.emplace_back(std::move(event));
     push_heap(_event_heap.begin(), _event_heap.end(), is_later);
 }
 
 void EventScheduler::schedule_key(int32_t key, int64_t down, int64_t up) {
-    schedule_event(shared_ptr<Event>(new KeyDownEvent(down, key)));
-    schedule_event(shared_ptr<Event>(new KeyUpEvent(up, key)));
+    schedule_event(unique_ptr<Event>(new KeyDownEvent(down, key)));
+    schedule_event(unique_ptr<Event>(new KeyUpEvent(up, key)));
 }
 
 void EventScheduler::schedule_mouse(
         int button, const Point& where, int64_t down, int64_t up) {
-    schedule_event(shared_ptr<Event>(new MouseDownEvent(down, button, where)));
-    schedule_event(shared_ptr<Event>(new MouseUpEvent(up, button, where)));
+    schedule_event(unique_ptr<Event>(new MouseDownEvent(down, button, where)));
+    schedule_event(unique_ptr<Event>(new MouseUpEvent(up, button, where)));
 }
 
 void EventScheduler::loop(EventScheduler::MainLoop& loop) {
@@ -65,7 +65,7 @@ void EventScheduler::loop(EventScheduler::MainLoop& loop) {
         const bool has_timer = loop.top()->next_timer(at_usecs);
         const int64_t at_ticks = at_usecs * 60 / 1000000;
         if (!_event_heap.empty() && (!has_timer || (_event_heap.front()->at() <= at_ticks))) {
-            shared_ptr<Event> event;
+            unique_ptr<Event> event;
             swap(event, _event_heap.front());
             pop_heap(_event_heap.begin(), _event_heap.end(), is_later);
             _event_heap.pop_back();
@@ -99,7 +99,7 @@ bool EventScheduler::have_snapshots_before(int64_t ticks) const {
     return !_snapshot_times.empty() && (_snapshot_times.front() < ticks);
 }
 
-bool EventScheduler::is_later(const shared_ptr<Event>& x, const shared_ptr<Event>& y) {
+bool EventScheduler::is_later(const unique_ptr<Event>& x, const unique_ptr<Event>& y) {
     return x->at() > y->at();
 }
 

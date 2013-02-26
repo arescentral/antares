@@ -46,7 +46,6 @@ using sfz::format;
 using sfz::range;
 using std::greater;
 using std::max;
-using std::shared_ptr;
 using std::unique_ptr;
 
 namespace utf8 = sfz::utf8;

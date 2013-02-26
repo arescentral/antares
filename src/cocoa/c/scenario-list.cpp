@@ -24,8 +24,9 @@
 
 using sfz::CString;
 using sfz::String;
-using std::shared_ptr;
 using std::vector;
+
+namespace utf8 = sfz::utf8;
 
 struct AntaresScenarioListEntry {
     AntaresScenarioListEntry(const antares::ScenarioList::Entry& entry):
@@ -36,6 +37,16 @@ struct AntaresScenarioListEntry {
             author_url(entry.author_url),
             version_string(entry.version),
             version(version_string) { }
+
+    // TODO(sfiera): give CString a move constructor so we don't need to define this.
+    AntaresScenarioListEntry(AntaresScenarioListEntry&& other):
+        identifier(String(utf8::decode(other.identifier.data()))),
+        title(String(utf8::decode(other.title.data()))),
+        download_url(String(utf8::decode(other.download_url.data()))),
+        author(String(utf8::decode(other.author.data()))),
+        author_url(String(utf8::decode(other.author_url.data()))),
+        version_string(other.version_string),
+        version(String(utf8::decode(other.version.data()))) { }
 
     CString identifier;
     CString title;
@@ -48,11 +59,11 @@ struct AntaresScenarioListEntry {
 
 struct AntaresScenarioList {
     antares::ScenarioList cxx_obj;
-    vector<shared_ptr<AntaresScenarioListEntry> > entries;
+    vector<AntaresScenarioListEntry> entries;
 
     AntaresScenarioList() {
         for (size_t i = 0; i < cxx_obj.size(); ++i) {
-            entries.emplace_back(new AntaresScenarioListEntry(cxx_obj.at(i)));
+            entries.emplace_back(cxx_obj.at(i));
         }
     }
 };
@@ -76,7 +87,7 @@ extern "C" AntaresScenarioListEntry* antares_scenario_list_at(
     if (index >= list->entries.size()) {
         return NULL;
     }
-    return list->entries[index].get();
+    return &list->entries[index];
 }
 
 extern "C" const char* antares_scenario_list_entry_identifier(AntaresScenarioListEntry* entry) {

@@ -25,9 +25,7 @@
 
 namespace antares {
 
-KeyMap::KeyMap() {
-    clear();
-}
+KeyMap::KeyMap(): _data{} {}
 
 bool KeyMap::get(size_t index) const {
     return _data[index >> 3] & (1 << (index & 0x7));
