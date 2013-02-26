@@ -367,36 +367,20 @@ def build(bld):
         ],
         use="antares/system/opengl",
     )
+    
+    def unit_test(name):
+        bld.antares_test(
+            target="antares/%s" % name,
+            rule="antares/%s" % name,
+            expected="test/%s" % name,
+        )
 
-    bld.antares_test(
-        target="antares/build-pix",
-        rule="antares/build-pix",
-        expected="test/build-pix",
-    )
-
-    bld.antares_test(
-        target="antares/object-data",
-        rule="antares/object-data",
-        expected="test/object-data",
-    )
-
-    bld.antares_test(
-        target="antares/shapes",
-        rule="antares/shapes",
-        expected="test/shapes",
-    )
-
-    def regtest(name):
+    def regression_test(name):
         bld.antares_test(
             target="antares/%s" % name.split()[0],
             rule="antares/offscreen %s" % name,
             expected="test/%s" % name.split()[0],
         )
-
-    regtest("main-screen")
-    regtest("mission-briefing --text")
-    regtest("options")
-    regtest("pause --text")
 
     def replay_test(name):
         bld.antares_test(
@@ -405,6 +389,15 @@ def build(bld):
             srcs="test/%s.NLRP" % name,
             expected="test/%s" % name,
         )
+
+    unit_test("build-pix")
+    unit_test("object-data")
+    unit_test("shapes")
+
+    regression_test("main-screen")
+    regression_test("mission-briefing --text")
+    regression_test("options")
+    regression_test("pause --text")
 
     replay_test("and-it-feels-so-good")
     replay_test("blood-toil-tears-sweat")
