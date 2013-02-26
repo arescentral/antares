@@ -43,7 +43,7 @@ struct ScopedGlob {
     ~ScopedGlob() { globfree(&data); }
 };
 
-void u32_to_version(uint32_t in, Version& out) {
+Version u32_to_version(uint32_t in) {
     using std::swap;
     vector<int> components;
     components.push_back((in & 0xff000000) >> 24);
@@ -54,7 +54,7 @@ void u32_to_version(uint32_t in, Version& out) {
     if (in & 0x000000ff) {
         components.push_back(in & 0x000000ff);
     }
-    swap(out.components, components);
+    return Version{components};
 }
 
 }  // namespace
@@ -67,7 +67,7 @@ ScenarioList::ScenarioList() {
     factory_scenario.download_url.assign("http://www.arescentral.com");
     factory_scenario.author.assign("Bigger Planet");
     factory_scenario.author_url.assign("http://www.biggerplanet.com");
-    u32_to_version(0x01010100, factory_scenario.version);
+    factory_scenario.version = u32_to_version(0x01010100);
 
     ScopedGlob g;
     const String home(utf8::decode(getenv("HOME")));
@@ -97,7 +97,7 @@ ScenarioList::ScenarioList() {
         entry.download_url.assign(info.downloadURLString);
         entry.author.assign(info.authorNameString);
         entry.author_url.assign(info.authorURLString);
-        u32_to_version(info.version, entry.version);
+        entry.version = u32_to_version(info.version);
     }
 }
 

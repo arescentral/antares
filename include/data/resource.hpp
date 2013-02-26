@@ -33,7 +33,8 @@ class Resource {
     sfz::BytesSlice data() const;
 
   private:
-    void init(const sfz::StringSlice& resource_path);
+    enum Internal { INTERNAL };
+    Resource(Internal, sfz::StringSlice resource_path);
 
     std::unique_ptr<sfz::MappedFile> _file;
 };

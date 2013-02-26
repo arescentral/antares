@@ -136,12 +136,11 @@ void ColorFade::draw() const {
     VideoDriver::driver()->fill_rect(world, fill_color);
 }
 
-PictFade::PictFade(int pict_id, bool* skipped)
-        : _state(NEW),
-          _skipped(skipped) {
-    Picture pict(pict_id);
-    _sprite = VideoDriver::driver()->new_sprite(format("/pictures/{0}.png", pict_id), pict);
-}
+PictFade::PictFade(int pict_id, bool* skipped):
+        _state(NEW),
+        _skipped(skipped),
+        _sprite(VideoDriver::driver()->new_sprite(
+                    format("/pictures/{0}.png", pict_id), Picture(pict_id))) { }
 
 PictFade::~PictFade() { }
 
