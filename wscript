@@ -127,6 +127,17 @@ def build(bld):
     )
 
     bld.program(
+        target="antares/tint",
+        features="universal32",
+        source=[
+            "src/bin/tint.cpp",
+            "src/video/text-driver.cpp",
+        ],
+        cxxflags=WARNINGS,
+        use="antares/libantares",
+    )
+
+    bld.program(
         target="antares/ls-scenarios",
         features="universal32",
         source="src/bin/ls-scenarios.cpp",
@@ -411,6 +422,7 @@ def build(bld):
     unit_test("build-pix")
     unit_test("object-data")
     unit_test("shapes")
+    unit_test("tint")
 
     regression_test("main-screen")
     regression_test("mission-briefing --text")
