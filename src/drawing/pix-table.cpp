@@ -107,8 +107,6 @@ void NatePixTable::Frame::fill_pix_map(BytesSlice bytes) {
 }
 
 void NatePixTable::Frame::colorize_pix_map(BytesSlice bytes, uint8_t color) {
-    color <<= 4;
-
     // count the # of pixels, and # of pixels that are white
     int white_count = 0;
     int pixel_count = 0;
@@ -129,8 +127,9 @@ void NatePixTable::Frame::colorize_pix_map(BytesSlice bytes, uint8_t color) {
         for (int x = 0; x < _width; ++x) {
             uint8_t byte = read<uint8_t>(bytes);
             if (byte & color_mask) {
-                byte = (byte & 0x0F) | color;
-                _pix_map.set(x, y, RgbColor::at(byte));
+                byte = (byte & 0x0F) | 0x10;
+                uint8_t value = RgbColor::at(byte).red;
+                _pix_map.set(x, y, RgbColor::tint(color, value));
             } else if (byte) {
                 _pix_map.set(x, y, RgbColor::at(byte));
             }

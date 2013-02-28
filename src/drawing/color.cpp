@@ -46,6 +46,7 @@ RgbColor colors[256] = {
     RgbColor(48, 48, 48),
     RgbColor(32, 32, 32),
     RgbColor(16, 16, 16),
+
     RgbColor(8, 8, 8),
     RgbColor(255, 127, 0),
     RgbColor(240, 120, 0),
@@ -62,6 +63,7 @@ RgbColor colors[256] = {
     RgbColor(64, 32, 0),
     RgbColor(48, 24, 0),
     RgbColor(32, 16, 0),
+
     RgbColor(16, 8, 0),
     RgbColor(255, 255, 0),
     RgbColor(240, 240, 0),
@@ -78,6 +80,7 @@ RgbColor colors[256] = {
     RgbColor(64, 64, 0),
     RgbColor(48, 48, 0),
     RgbColor(32, 32, 0),
+
     RgbColor(16, 16, 0),
     RgbColor(0, 0, 255),
     RgbColor(0, 0, 240),
@@ -94,6 +97,7 @@ RgbColor colors[256] = {
     RgbColor(0, 0, 64),
     RgbColor(0, 0, 48),
     RgbColor(0, 0, 32),
+
     RgbColor(0, 0, 16),
     RgbColor(0, 255, 0),
     RgbColor(0, 240, 0),
@@ -110,6 +114,7 @@ RgbColor colors[256] = {
     RgbColor(0, 64, 0),
     RgbColor(0, 48, 0),
     RgbColor(0, 32, 0),
+
     RgbColor(0, 16, 0),
     RgbColor(127, 0, 255),
     RgbColor(120, 0, 240),
@@ -126,6 +131,7 @@ RgbColor colors[256] = {
     RgbColor(32, 0, 64),
     RgbColor(24, 0, 48),
     RgbColor(16, 0, 32),
+
     RgbColor(8, 0, 16),
     RgbColor(127, 127, 255),
     RgbColor(120, 120, 240),
@@ -142,6 +148,7 @@ RgbColor colors[256] = {
     RgbColor(32, 32, 64),
     RgbColor(24, 24, 48),
     RgbColor(16, 16, 32),
+
     RgbColor(8, 8, 16),
     RgbColor(255, 127, 127),
     RgbColor(240, 120, 120),
@@ -158,6 +165,7 @@ RgbColor colors[256] = {
     RgbColor(64, 32, 32),
     RgbColor(48, 24, 24),
     RgbColor(32, 16, 16),
+
     RgbColor(16, 8, 8),
     RgbColor(255, 255, 127),
     RgbColor(240, 240, 120),
@@ -174,6 +182,7 @@ RgbColor colors[256] = {
     RgbColor(64, 64, 32),
     RgbColor(48, 48, 24),
     RgbColor(32, 32, 16),
+
     RgbColor(16, 16, 8),
     RgbColor(0, 255, 255),
     RgbColor(0, 240, 240),
@@ -190,6 +199,7 @@ RgbColor colors[256] = {
     RgbColor(0, 64, 64),
     RgbColor(0, 48, 48),
     RgbColor(0, 32, 32),
+
     RgbColor(0, 16, 16),
     RgbColor(255, 0, 127),
     RgbColor(240, 0, 120),
@@ -206,6 +216,7 @@ RgbColor colors[256] = {
     RgbColor(64, 0, 32),
     RgbColor(48, 0, 24),
     RgbColor(32, 0, 16),
+
     RgbColor(16, 0, 8),
     RgbColor(127, 255, 127),
     RgbColor(120, 240, 120),
@@ -222,6 +233,7 @@ RgbColor colors[256] = {
     RgbColor(32, 64, 32),
     RgbColor(24, 48, 24),
     RgbColor(16, 32, 16),
+
     RgbColor(8, 16, 8),
     RgbColor(255, 127, 255),
     RgbColor(240, 120, 240),
@@ -238,6 +250,7 @@ RgbColor colors[256] = {
     RgbColor(64, 32, 64),
     RgbColor(48, 24, 48),
     RgbColor(32, 16, 32),
+
     RgbColor(16, 8, 16),
     RgbColor(0, 127, 255),
     RgbColor(0, 120, 240),
@@ -254,6 +267,7 @@ RgbColor colors[256] = {
     RgbColor(0, 32, 64),
     RgbColor(0, 24, 48),
     RgbColor(0, 16, 32),
+
     RgbColor(0, 8, 16),
     RgbColor(255, 249, 207),
     RgbColor(240, 234, 195),
@@ -270,6 +284,7 @@ RgbColor colors[256] = {
     RgbColor(75, 73, 61),
     RgbColor(60, 58, 48),
     RgbColor(45, 44, 36),
+
     RgbColor(30, 29, 24),
     RgbColor(255, 0, 0),
     RgbColor(240, 0, 0),
@@ -309,6 +324,52 @@ RgbColor::RgbColor(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue)
           red(red),
           green(green),
           blue(blue) { }
+
+static uint8_t diffuse[][3] = {
+    {255,    255,    255},
+    {255,    128,      0},
+    {255,    255,      0},
+    {  0,      0,    255},
+    {  0,    255,      0},
+    {128,      0,    255},
+    {128,    128,    255},
+    {255,    128,    128},
+    {255,    255,    128},
+    {  0,    255,    255},
+    {255,      0,    128},
+    {128,    255,    128},
+    {255,    128,    255},
+    {  0,    128,    255},
+    {239,    233,    195},
+    {255,      0,      0},
+};
+
+static uint8_t ambient[][3] = {
+    { 0,  0,  0},
+    { 0,  0,  0},
+    { 0,  0,  0},
+    { 0,  0,  0},
+    { 0,  0,  0},
+    { 0,  0,  0},
+    { 0,  0,  0},
+    { 0,  0,  0},
+    { 0,  0,  0},
+    { 0,  0,  0},
+    { 0,  0,  0},
+    { 0,  0,  0},
+    { 0,  0,  0},
+    { 0,  0,  0},
+    {16, 15, 12},
+    { 0,  0,  0},
+};
+
+RgbColor RgbColor::tint(uint8_t color, uint8_t value) {
+    return {
+        (diffuse[color][0] * value / 255) + ambient[color][0],
+        (diffuse[color][1] * value / 255) + ambient[color][1],
+        (diffuse[color][2] * value / 255) + ambient[color][2],
+    };
+}
 
 const RgbColor& RgbColor::at(uint8_t index) {
     return colors[index];
