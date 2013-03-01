@@ -40,8 +40,6 @@ using sfz::StringSlice;
 using sfz::format;
 using std::unique_ptr;
 
-namespace macroman = sfz::macroman;
-
 namespace antares {
 namespace {
 
