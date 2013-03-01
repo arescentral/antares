@@ -384,8 +384,7 @@ void StyledText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
                 char_rect.offset(corner.h, corner.v);
                 pix->view(char_rect).fill(ch.back_color);
             }
-            String str(1, ch.character);
-            _font->draw(Point(corner.h, corner.v + char_adjust), str, ch.fore_color, pix, bounds);
+            _font->draw(Point(corner.h, corner.v + char_adjust), ch.character, ch.fore_color, pix, bounds);
         }
         break;
 

@@ -34,9 +34,7 @@ class Font {
     uint8_t char_width(sfz::Rune mchar) const;
     int32_t string_width(sfz::StringSlice s) const;
 
-    void draw(
-            Point origin, sfz::StringSlice string, RgbColor color, PixMap* pix,
-            const Rect& clip) const;
+    void draw(Point origin, sfz::Rune r, RgbColor color, PixMap* pix, const Rect& clip) const;
 
     void draw_sprite(Point origin, sfz::StringSlice string, RgbColor color) const;
 
@@ -47,8 +45,12 @@ class Font {
     int32_t ascent;
 
   private:
+    void draw_internal(
+            Point origin, uint8_t ch, RgbColor color, PixMap* pix, const Rect& clip) const;
+
     sfz::Bytes charSet;
-    std::unique_ptr<std::unique_ptr<Sprite>[]> _sprites;
+    std::vector<std::unique_ptr<ArrayPixMap>> _pix_maps;
+    std::vector<std::unique_ptr<Sprite>> _sprites;
 
     DISALLOW_COPY_AND_ASSIGN(Font);
 };
