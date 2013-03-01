@@ -25,6 +25,8 @@
 #include <zipxx/zipxx.hpp>
 
 #include "data/replay.hpp"
+#include "drawing/pix-map.hpp"
+#include "math/geometry.hpp"
 #include "net/http.hpp"
 
 using rezin::AppleDouble;
@@ -43,8 +45,10 @@ using sfz::MappedFile;
 using sfz::ScopedFd;
 using sfz::Sha1;
 using sfz::String;
+using sfz::StringMap;
 using sfz::StringSlice;
 using sfz::WriteTarget;
+using sfz::dec;
 using sfz::format;
 using sfz::makedirs;
 using sfz::quote;
@@ -53,6 +57,7 @@ using sfz::read;
 using sfz::tree_digest;
 using sfz::write;
 using std::unique_ptr;
+using std::vector;
 using zipxx::ZipArchive;
 using zipxx::ZipFileReader;
 
@@ -64,8 +69,7 @@ namespace antares {
 
 namespace {
 
-bool verbatim(int16_t id, BytesSlice data, WriteTarget out) {
-    static_cast<void>(id);
+bool verbatim(StringSlice, int16_t, BytesSlice data, WriteTarget out) {
     write(out, data);
     return true;
 }
@@ -88,7 +92,7 @@ int32_t nlrp_chapter(int16_t id) {
     throw Exception(format("invalid replay ID {0}", id));
 }
 
-bool convert_nlrp(int16_t id, BytesSlice data, WriteTarget out) {
+bool convert_nlrp(StringSlice, int16_t id, BytesSlice data, WriteTarget out) {
     ReplayData replay;
     replay.chapter_id = nlrp_chapter(id);
     read(data, replay.global_seed);
@@ -119,8 +123,7 @@ bool convert_nlrp(int16_t id, BytesSlice data, WriteTarget out) {
     return true;
 }
 
-bool convert_pict(int16_t id, BytesSlice data, WriteTarget out) {
-    static_cast<void>(id);
+bool convert_pict(StringSlice, int16_t, BytesSlice data, WriteTarget out) {
     rezin::Picture pict(data);
     if ((pict.version() == 2) && (pict.is_raster())) {
         write(out, png(pict));
@@ -129,8 +132,7 @@ bool convert_pict(int16_t id, BytesSlice data, WriteTarget out) {
     return false;
 }
 
-bool convert_str(int16_t id, BytesSlice data, WriteTarget out) {
-    static_cast<void>(id);
+bool convert_str(StringSlice, int16_t, BytesSlice data, WriteTarget out) {
     Options options;
     StringList list(data, options);
     String string(pretty_print(json(list)));
@@ -138,18 +140,124 @@ bool convert_str(int16_t id, BytesSlice data, WriteTarget out) {
     return true;
 }
 
-bool convert_text(int16_t id, BytesSlice data, WriteTarget out) {
-    static_cast<void>(id);
+bool convert_text(StringSlice, int16_t, BytesSlice data, WriteTarget out) {
     Options options;
     String string(options.decode(data));
     write(out, utf8::encode(string));
     return true;
 }
 
-bool convert_snd(int16_t id, BytesSlice data, WriteTarget out) {
-    static_cast<void>(id);
+bool convert_snd(StringSlice, int16_t, BytesSlice data, WriteTarget out) {
     Sound snd(data);
     write(out, aiff(snd));
+    return true;
+}
+
+String convert_frame(StringSlice dir, int16_t id, BytesSlice data,
+        PixMap& pix, uint32_t i, uint32_t size) {
+    auto width = pix.size().width;
+    auto height = pix.size().height;
+
+    pix.fill(RgbColor::kClear);
+    for (auto y: range(height)) {
+        for (auto x: range(width)) {
+            uint8_t byte = read<uint8_t>(data);
+            if (byte) {
+                pix.set(x, y, RgbColor::at(byte));
+            }
+        }
+    }
+
+    Bytes pix_out;
+    write(pix_out, pix);
+    String output;
+    String local_path;
+    if (size > 1) {
+        local_path.assign(format("sprites/{0}/{1}/image.png", id, dec(i, 2)));
+    } else {
+        local_path.assign(format("sprites/{0}/image.png", id));
+    }
+    output.assign(format("{0}/{1}", path::dirname(dir), local_path));
+    makedirs(path::dirname(output), 0755);
+    ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
+    write(fd, pix_out.data(), pix_out.size());
+    return local_path;
+}
+
+String convert_overlay(StringSlice dir, int16_t id, BytesSlice data,
+        PixMap& pix, uint32_t i, uint32_t size) {
+    auto width = pix.size().width;
+    auto height = pix.size().height;
+
+    int white_count = 0;
+    int pixel_count = 0;
+    for (auto b: data) {
+        if (b) {
+            ++pixel_count;
+            if (b < 0x10) {
+                ++white_count;
+            }
+        }
+    }
+
+    // If more than 1/3 of the opaque pixels in the frame are in the
+    // 'white' band of the color table, then colorize all opaque
+    // (non-0x00) pixels.  Otherwise, only colors pixels which are
+    // opaque and outside of the white band (0x01..0x0F).
+    const uint8_t color_mask = (white_count > (pixel_count / 3)) ? 0xFF : 0xF0;
+    for (auto y: range(height)) {
+        for (auto x: range(width)) {
+            uint8_t byte = read<uint8_t>(data);
+            if (byte & color_mask) {
+                byte = (byte & 0x0f) | 0x10;
+                uint8_t value = RgbColor::at(byte).red;
+                pix.set(x, y, RgbColor(value, 0, 0));
+            } else {
+                pix.set(x, y, RgbColor::kClear);
+            }
+        }
+    }
+
+    Bytes pix_out;
+    write(pix_out, pix);
+    String output;
+    String local_path;
+    if (size > 1) {
+        local_path.assign(format("sprites/{0}/{1}/overlay.png", id, dec(i, 2)));
+    } else {
+        local_path.assign(format("sprites/{0}/overlay.png", id));
+    }
+    output.assign(format("{0}/{1}", path::dirname(dir), local_path));
+    makedirs(path::dirname(output), 0755);
+    ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
+    write(fd, pix_out.data(), pix_out.size());
+    return local_path;
+}
+
+bool convert_smiv(StringSlice dir, int16_t id, BytesSlice data, WriteTarget out) {
+    BytesSlice header = data;
+    header.shift(4);
+    uint32_t size = read<uint32_t>(header);
+    vector<Json> frames;
+    for (auto i: range(size)) {
+        static_cast<void>(i);
+        uint32_t offset = read<uint32_t>(header);
+        BytesSlice frame_data = data.slice(offset);
+        StringMap<Json> frame;
+        auto width = read<uint16_t>(frame_data);
+        auto height = read<uint16_t>(frame_data);
+        frame["x-offset"] = Json::number(read<int16_t>(frame_data));
+        frame["y-offset"] = Json::number(read<int16_t>(frame_data));
+        frame_data = frame_data.slice(0, width * height);
+        ArrayPixMap pix(width, height);
+        frame["image"] = Json::string(convert_frame(dir, id, frame_data, pix, i, size));
+        frame["overlay"] = Json::string(convert_overlay(dir, id, frame_data, pix, i, size));
+
+        frames.push_back(Json::object(frame));
+    }
+
+    String string(pretty_print(Json::array(frames)));
+    write(out, utf8::encode(string));
     return true;
 }
 
@@ -159,7 +267,7 @@ struct ResourceFile {
         const char* resource;
         const char* output_directory;
         const char* output_extension;
-        bool (*convert)(int16_t id, BytesSlice data, WriteTarget out);
+        bool (*convert)(StringSlice dir, int16_t id, BytesSlice data, WriteTarget out);
     } resources[16];
 };
 
@@ -200,7 +308,7 @@ const ResourceFile kResourceFiles[] = {
     {
         "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Sprites",
         {
-            { "SMIV",  "sprites",  "SMIV",  verbatim },
+            { "SMIV",  "sprites",  "json",  convert_smiv },
         },
     },
     {
@@ -218,7 +326,7 @@ const ResourceFile kResourceFiles[] = {
 const ResourceFile::ExtractedResource kPluginFiles[] = {
     { "PICT",   "pictures",                     "png",      convert_pict},
     { "NLRP",   "replays",                      "NLRP",     convert_nlrp },
-    { "SMIV",   "sprites",                      "SMIV",     verbatim },
+    { "SMIV",   "sprites",                      "json",     convert_smiv },
     { "STR#",   "strings",                      "STR#",     verbatim},
     { "TEXT",   "text",                         "txt",      verbatim},
     { "bsob",   "objects",                      "bsob",     verbatim},
@@ -235,7 +343,7 @@ const ResourceFile::ExtractedResource kPluginFiles[] = {
 
 const char kFactoryScenario[] = "com.biggerplanet.ares";
 const char kDownloadBase[] = "http://downloads.arescentral.org";
-const char kVersion[] = "4\n";
+const char kVersion[] = "5\n";
 
 const char kPluginVersionFile[] = "data/version";
 const char kPluginVersion[] = "1\n";
@@ -428,10 +536,10 @@ void DataExtractor::extract_original(Observer* observer, const StringSlice& file
             const ResourceType& type = rsrc.at(conversion.resource);
             for (const ResourceEntry& entry: type) {
                 Bytes data;
-                if (conversion.convert(entry.id(), entry.data(), data)) {
-                    String output(format("{0}/com.biggerplanet.ares/{1}/{2}.{3}",
-                                _output_dir, conversion.output_directory, entry.id(),
-                                conversion.output_extension));
+                String output(format("{0}/com.biggerplanet.ares/{1}/{2}.{3}",
+                            _output_dir, conversion.output_directory, entry.id(),
+                            conversion.output_extension));
+                if (conversion.convert(path::dirname(output), entry.id(), entry.data(), data)) {
                     makedirs(path::dirname(output), 0755);
                     ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
                     write(fd, data.data(), data.size());
@@ -519,10 +627,10 @@ void DataExtractor::extract_plugin(Observer* observer) const {
         for (const ResourceFile::ExtractedResource& conversion: kPluginFiles) {
             if (conversion.resource == resource_type) {
                 Bytes data;
-                if (conversion.convert(id, file.data(), data)) {
-                    String output(format("{0}/{1}/{2}/{3}.{4}",
-                                _output_dir, _scenario, conversion.output_directory, id,
-                                conversion.output_extension));
+                String output(format("{0}/{1}/{2}/{3}.{4}",
+                            _output_dir, _scenario, conversion.output_directory, id,
+                            conversion.output_extension));
+                if (conversion.convert(path::dirname(output), id, file.data(), data)) {
                     makedirs(path::dirname(output), 0755);
                     ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
                     write(fd, data.data(), data.size());
