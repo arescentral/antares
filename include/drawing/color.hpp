@@ -80,6 +80,7 @@ class RgbColor {
     RgbColor();
     RgbColor(uint8_t red, uint8_t green, uint8_t blue);
     RgbColor(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue);
+    static RgbColor tint(uint8_t color, uint8_t value);
 
     static const RgbColor& at(uint8_t index);
 

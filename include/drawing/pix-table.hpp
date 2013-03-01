@@ -40,7 +40,7 @@ class NatePixTable {
 
   private:
     size_t _size;
-    std::unique_ptr<Frame[]> _entries;
+    std::vector<Frame> _frames;
 
     DISALLOW_COPY_AND_ASSIGN(NatePixTable);
 };
@@ -48,7 +48,14 @@ class NatePixTable {
 class NatePixTable::Frame {
   public:
     Frame();
+    Frame(Frame&&) = default;
     ~Frame();
+
+    void load_image(sfz::StringSlice path);
+    void load_overlay(sfz::StringSlice path, uint8_t color);
+    void set_x_offset(int32_t x);
+    void set_y_offset(int32_t y);
+    void build(int16_t id, int frame);
 
     uint16_t width() const;
     uint16_t height() const;
@@ -56,14 +63,7 @@ class NatePixTable::Frame {
     const PixMap& pix_map() const;
     const Sprite& sprite() const;
 
-    void build(sfz::BytesSlice in, int32_t id, int32_t frame_number, uint8_t color);
-
   private:
-    void fill_pix_map(sfz::BytesSlice bytes);
-    void colorize_pix_map(sfz::BytesSlice bytes, uint8_t color);
-
-    uint16_t _width;
-    uint16_t _height;
     int16_t _h_offset;
     int16_t _v_offset;
     ArrayPixMap _pix_map;
