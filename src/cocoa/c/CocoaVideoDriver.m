@@ -238,13 +238,13 @@ static int button_for(NSEvent* event) {
     }
 }
 
-static mouse_down(AntaresEventTranslator* translator, NSEvent* event) {
+static void mouse_down(AntaresEventTranslator* translator, NSEvent* event) {
     NSPoint where = translate_coords(translator, [event window], [event locationInWindow]);
     int button = button_for(event);
     translator->mouse_down_callback(button, where.x, where.y, translator->mouse_down_userdata);
 }
 
-static mouse_up(AntaresEventTranslator* translator, NSEvent* event) {
+static void mouse_up(AntaresEventTranslator* translator, NSEvent* event) {
     NSPoint where = translate_coords(translator, [event window], [event locationInWindow]);
     int button = button_for(event);
     translator->mouse_up_callback(button, where.x, where.y, translator->mouse_up_userdata);
