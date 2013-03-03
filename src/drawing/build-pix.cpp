@@ -36,7 +36,6 @@ using sfz::string_to_int;
 using std::unique_ptr;
 using std::vector;
 
-namespace macroman = sfz::macroman;
 namespace utf8 = sfz::utf8;
 
 namespace antares {

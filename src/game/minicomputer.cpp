@@ -48,8 +48,6 @@ using sfz::bin;
 using sfz::string_to_int;
 using std::max;
 
-namespace macroman = sfz::macroman;
-
 namespace antares {
 
 miniComputerDataType    *gMiniScreenData = NULL;

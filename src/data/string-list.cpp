@@ -35,7 +35,6 @@ using sfz::read;
 using sfz::string_to_json;
 using std::vector;
 
-namespace macroman = sfz::macroman;
 namespace utf8 = sfz::utf8;
 
 namespace antares {
@@ -115,15 +114,6 @@ size_t StringList::size() const {
 
 const String& StringList::at(size_t index) const {
     return _strings.at(index);
-}
-
-void string_to_pstring(const String& src, unsigned char* dst) {
-    Bytes src_bytes(macroman::encode(src));
-    if (src_bytes.size() > 254) {
-        throw Exception(format("{0} is too long to convert to a pstring", quote(src)));
-    }
-    *dst = src_bytes.size();
-    memcpy(dst + 1, src_bytes.data(), src_bytes.size());
 }
 
 }  // namespace antares

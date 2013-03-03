@@ -35,7 +35,6 @@ using sfz::String;
 using sfz::StringSlice;
 using std::min;
 using std::unique_ptr;
-namespace macroman = sfz::macroman;
 
 namespace antares {
 

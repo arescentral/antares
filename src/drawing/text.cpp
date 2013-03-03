@@ -59,12 +59,6 @@ uint8_t to_mac_roman(Rune code) {
     return bytes.at(0);
 }
 
-Rune from_mac_roman(uint8_t byte) {
-    BytesSlice bytes(&byte, 1);
-    String string(macroman::decode(bytes));
-    return string.at(0);
-}
-
 }  // namespace
 
 const Font* gDirectTextData[kDirectFontNum];
@@ -91,23 +85,24 @@ Font::Font(int32_t id) {
     charSet.assign(data_rsrc.data());
 
     if (VideoDriver::driver()) {
-        _sprites.reset(new unique_ptr<Sprite>[256]);
         for (int i = 0; i < 256; i++) {
             ArrayPixMap pix(physicalWidth * 8, height + 1);
             pix.fill(RgbColor::kClear);
-            String s(1, from_mac_roman(i));
-            draw(Point(0, ascent), s, RgbColor::kWhite, &pix, pix.size().as_rect());
-            _sprites[i] = VideoDriver::driver()->new_sprite(
-                        format("/font/{0}/{1}", id, hex(i, 2)), pix);
+            draw_internal(Point(0, ascent), i, RgbColor::kWhite, &pix, pix.size().as_rect());
+            _sprites.emplace_back(VideoDriver::driver()->new_sprite(
+                        format("/font/{0}/{1}", id, hex(i, 2)), pix));
         }
     }
 }
 
 Font::~Font() { }
 
-void Font::draw(
-        Point origin, sfz::StringSlice string, RgbColor color, PixMap* pix,
-        const Rect& clip) const {
+void Font::draw(Point origin, Rune r, RgbColor color, PixMap* pix, const Rect& clip) const {
+    draw_internal(origin, to_mac_roman(r), color, pix, clip);
+}
+
+void Font::draw_internal(
+        Point origin, uint8_t ch, RgbColor color, PixMap* pix, const Rect& clip) const {
     // move the pen to the resulting location
     origin.v -= ascent;
 
@@ -120,48 +115,44 @@ void Font::draw(
     // set hchar = place holder for start of each char we draw
     RgbColor* hchar = pix->mutable_bytes() + (origin.v + topEdge) * rowBytes + origin.h;
 
-    for (size_t i = 0; i < string.size(); ++i) {
-        const uint8_t* sbyte = charSet.data()
-            + height * physicalWidth * to_mac_roman(string.at(i))
-            + to_mac_roman(string.at(i));
+    const uint8_t* sbyte = charSet.data() + height * physicalWidth * ch + ch;
 
-        int width = *sbyte;
-        ++sbyte;
+    int width = *sbyte;
+    ++sbyte;
 
-        if ((origin.h + width >= clip.left) || (origin.h < clip.right)) {
-            // Left and right boundaries of where we draw.
-            int leftEdge = std::max(0, clip.left - origin.h);
-            int rightEdge = width - std::max(0, origin.h + width - clip.right);
+    if ((origin.h + width >= clip.left) || (origin.h < clip.right)) {
+        // Left and right boundaries of where we draw.
+        int leftEdge = std::max(0, clip.left - origin.h);
+        int rightEdge = width - std::max(0, origin.h + width - clip.right);
 
-            // skip over the clipped top rows
-            sbyte += topEdge * physicalWidth;
+        // skip over the clipped top rows
+        sbyte += topEdge * physicalWidth;
 
-            // dbyte = destination pixel
-            RgbColor* dbyte = hchar;
+        // dbyte = destination pixel
+        RgbColor* dbyte = hchar;
 
-            // repeat for every unclipped row
-            for (int y = topEdge; y < bottomEdge; ++y) {
-                // repeat for every byte of data
-                for (int x = leftEdge; x < rightEdge; ++x) {
-                    int byte = x / 8;
-                    int bit = 0x80 >> (x & 0x7);
-                    if (sbyte[byte] & bit) {
-                        dbyte[x] = color;
-                    }
+        // repeat for every unclipped row
+        for (int y = topEdge; y < bottomEdge; ++y) {
+            // repeat for every byte of data
+            for (int x = leftEdge; x < rightEdge; ++x) {
+                int byte = x / 8;
+                int bit = 0x80 >> (x & 0x7);
+                if (sbyte[byte] & bit) {
+                    dbyte[x] = color;
                 }
-                sbyte += physicalWidth;
-                dbyte += rowBytes;
             }
+            sbyte += physicalWidth;
+            dbyte += rowBytes;
         }
-        // else (not on screen) just increase the current character
-
-        // for every char clipped or no:
-        // increase our character pixel starting point by width of this character
-        hchar += width;
-
-        // increase our hposition (our position in pixels)
-        origin.h += width;
     }
+    // else (not on screen) just increase the current character
+
+    // for every char clipped or no:
+    // increase our character pixel starting point by width of this character
+    hchar += width;
+
+    // increase our hposition (our position in pixels)
+    origin.h += width;
 }
 
 void Font::draw_sprite(Point origin, sfz::StringSlice string, RgbColor color) const {

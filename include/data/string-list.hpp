@@ -38,8 +38,6 @@ class StringList {
     DISALLOW_COPY_AND_ASSIGN(StringList);
 };
 
-void string_to_pstring(const sfz::String& src, unsigned char* dest);
-
 }  // namespace antares
 
 #endif // ANTARES_DATA_STRING_LIST_HPP_

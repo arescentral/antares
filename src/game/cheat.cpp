@@ -33,8 +33,6 @@ using sfz::Rune;
 using sfz::String;
 using sfz::StringSlice;
 
-namespace macroman = sfz::macroman;
-
 namespace antares {
 
 const int16_t kCheatStringListID    = 750;

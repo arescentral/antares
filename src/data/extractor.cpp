@@ -61,7 +61,6 @@ using std::vector;
 using zipxx::ZipArchive;
 using zipxx::ZipFileReader;
 
-namespace macroman = sfz::macroman;
 namespace path = sfz::path;
 namespace utf8 = sfz::utf8;
 

@@ -55,7 +55,6 @@ using sfz::StringSlice;
 using sfz::range;
 using sfz::read;
 using std::vector;
-namespace macroman = sfz::macroman;
 
 namespace antares {
 
