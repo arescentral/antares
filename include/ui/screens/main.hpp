@@ -21,6 +21,7 @@
 
 #include <sfz/sfz.hpp>
 
+#include "data/replay-list.hpp"
 #include "ui/screen.hpp"
 
 namespace antares {
@@ -49,6 +50,12 @@ class MainScreen : public InterfaceScreen {
         DEMO = 5,
         REPLAY_INTRO = 6,
     };
+    enum State {
+        NORMAL = 0,
+        QUITTING = 1,
+    };
+    State _state;
+    ReplayList _replays;
 
     DISALLOW_COPY_AND_ASSIGN(MainScreen);
 };

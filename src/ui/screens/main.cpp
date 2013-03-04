@@ -19,7 +19,6 @@
 #include "ui/screens/main.hpp"
 
 #include "config/preferences.hpp"
-#include "data/replay-list.hpp"
 #include "drawing/text.hpp"
 #include "game/globals.hpp"
 #include "game/main.hpp"
@@ -47,17 +46,25 @@ const int kTitleTextScrollWidth = 450;
 
 }  // namespace
 
-MainScreen::MainScreen()
-        : InterfaceScreen(kMainScreenResID, world, true) { }
+MainScreen::MainScreen():
+        InterfaceScreen(kMainScreenResID, world, true),
+        _state(NORMAL) { }
 
 MainScreen::~MainScreen() { }
 
 void MainScreen::become_front() {
-    InterfaceScreen::become_front();
-    if (Preferences::preferences()->play_idle_music() && !SongIsPlaying()) {
-        LoadSong(kTitleSongID);
-        SetSongVolume(kMaxMusicVolume);
-        PlaySong();
+    switch (_state) {
+      case NORMAL:
+        InterfaceScreen::become_front();
+        if (Preferences::preferences()->play_idle_music() && !SongIsPlaying()) {
+            LoadSong(kTitleSongID);
+            SetSongVolume(kMaxMusicVolume);
+            PlaySong();
+        }
+        break;
+      case QUITTING:
+        stack()->pop(this);
+        break;
     }
 }
 
@@ -68,12 +75,11 @@ bool MainScreen::next_timer(int64_t& time) {
 
 void MainScreen::fire_timer() {
     Randomize(1);
-    ReplayList replays;
-    size_t demo = rand() % (replays.size() + 1);
-    if (demo == replays.size()) {
+    size_t demo = rand() % (_replays.size() + 1);
+    if (demo == _replays.size()) {
         stack()->push(new ScrollTextScreen(5600, kTitleTextScrollWidth, 15.0));
     } else {
-        stack()->push(new ReplayGame(replays.at(demo)));
+        stack()->push(new ReplayGame(_replays.at(demo)));
     }
 }
 
@@ -84,8 +90,7 @@ void MainScreen::adjust_interface() {
     // TODO(sfiera): switch on whether or not there is a single-player campaign.
     mutable_item(START_NEW_GAME)->set_status(kActive);
 
-    ReplayList replays;
-    if (replays.size() == 0) {
+    if (_replays.size() == 0) {
         mutable_item(DEMO)->set_status(kDimmed);
     }
 }
@@ -94,14 +99,12 @@ void MainScreen::handle_button(int button) {
     switch (button) {
       case QUIT:
         // 1-second fade-out.
-        stack()->pop(this);
+        _state = QUITTING;
+        stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::kBlack, 1e6, false, NULL));
         break;
 
       case DEMO:
-        {
-            ReplayList replays;
-            stack()->push(new ReplayGame(replays.at(rand() % replays.size())));
-        }
+        stack()->push(new ReplayGame(_replays.at(rand() % _replays.size())));
         break;
 
       case REPLAY_INTRO:
