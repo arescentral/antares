@@ -149,7 +149,6 @@ void CocoaVideoDriver::loop(Card* initial) {
     CGLPixelFormatAttribute attrs[] = {
         kCGLPFADisplayMask, static_cast<CGLPixelFormatAttribute>(
                 CGDisplayIDToOpenGLDisplayMask(kCGDirectMainDisplay)),
-        kCGLPFAFullScreen,
         kCGLPFAColorSize, static_cast<CGLPixelFormatAttribute>(24),
         kCGLPFADoubleBuffer,
         kCGLPFAAccelerated,
@@ -161,7 +160,7 @@ void CocoaVideoDriver::loop(Card* initial) {
     unique_ptr<CocoaFullscreen> fullscreen;
     unique_ptr<CocoaWindowed> windowed;
     if (_fullscreen) {
-        fullscreen.reset(new CocoaFullscreen(context, screen_size()));
+        fullscreen.reset(new CocoaFullscreen(context, screen_size(), attrs[1]));
     } else {
         windowed.reset(new CocoaWindowed(pixel_format, context, screen_size()));
         antares_event_translator_set_window(_translator.c_obj(), windowed->window());
