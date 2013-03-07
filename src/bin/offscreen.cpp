@@ -164,7 +164,6 @@ void options(EventScheduler& scheduler) {
 
     scheduler.schedule_key(Keys::Q, 1800, 1860);
     scheduler.schedule_snapshot(1800);
-    scheduler.schedule_snapshot(1860);
 }
 
 void mission_briefing(EventScheduler& scheduler, Ledger& ledger) {
@@ -198,7 +197,11 @@ void mission_briefing(EventScheduler& scheduler, Ledger& ledger) {
 
     scheduler.schedule_key(Keys::Q, time_ticks + 60, time_ticks + 120);
     scheduler.schedule_snapshot(time_ticks + 60);
+    scheduler.schedule_snapshot(time_ticks + 119);
     scheduler.schedule_snapshot(time_ticks + 120);
+    scheduler.schedule_snapshot(time_ticks + 150);
+    scheduler.schedule_snapshot(time_ticks + 179);
+    scheduler.schedule_snapshot(time_ticks + 180);
 }
 
 void pause(EventScheduler& scheduler) {
@@ -244,7 +247,6 @@ void pause(EventScheduler& scheduler) {
     // Quit game.
     scheduler.schedule_key(Keys::Q, 2440, 2500);
     scheduler.schedule_snapshot(2440);
-    scheduler.schedule_snapshot(2500);
 }
 
 }  // namespace
