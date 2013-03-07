@@ -36,7 +36,7 @@ void print_to(PrintTarget out, const PrintableFixed& fixed) {
         out.push(1, '-');
     }
     const int32_t value = abs(fixed.value);
-    const int32_t integral = mFixedToLong(value);
+    const int32_t integral = abs(value / 256);
     print(out, integral);
     out.push(1, '.');
     double fraction = (value - mLongToFixed(integral)) / 256.0;

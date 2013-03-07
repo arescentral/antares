@@ -381,8 +381,21 @@ def build(bld):
         ],
         use="antares/system/opengl",
     )
-    
+
     def unit_test(name):
+        bld.test(
+            target="antares/%s" % name,
+            features="universal32",
+            source="src/%s.test.cpp" % name,
+            cxxflags=WARNINGS,
+            defines="GTEST_USE_OWN_TR1_TUPLE=1",
+            use=[
+                "antares/libantares",
+                "gmock/gmock-main",
+            ],
+        )
+
+    def data_test(name):
         bld.antares_test(
             target="antares/%s" % name,
             rule="antares/%s" % name,
@@ -419,10 +432,12 @@ def build(bld):
                 expected="test/%s" % name,
             )
 
-    unit_test("build-pix")
-    unit_test("object-data")
-    unit_test("shapes")
-    unit_test("tint")
+    unit_test("math/fixed")
+
+    data_test("build-pix")
+    data_test("object-data")
+    data_test("shapes")
+    data_test("tint")
 
     regression_test("main-screen")
     regression_test("mission-briefing --text")
