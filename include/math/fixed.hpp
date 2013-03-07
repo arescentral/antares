@@ -19,6 +19,7 @@
 #ifndef ANTARES_MATH_FIXED_HPP_
 #define ANTARES_MATH_FIXED_HPP_
 
+#include <math.h>
 #include <sfz/sfz.hpp>
 
 namespace antares {
@@ -53,8 +54,8 @@ inline int32_t more_evil_fixed_to_long(Fixed value) {
 }
 
 inline Fixed mLongToFixed(int32_t m_l)  { return m_l << 8; }
-inline Fixed mFloatToFixed(float m_r)   { return m_r * 256.0; }
-inline float mFixedToFloat(Fixed m_f)   { return m_f / 256.0; }
+inline Fixed mFloatToFixed(float m_r)   { return roundf(m_r * 256.0); }
+inline float mFixedToFloat(Fixed m_f)   { return floorf(m_f * 1e3 / 256.0) / 1e3; }
 inline int32_t mFixedToLong(Fixed m_f)  { return evil_fixed_to_long(m_f); }
 
 struct PrintableFixed {
