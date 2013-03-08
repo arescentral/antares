@@ -22,6 +22,8 @@
 #include <sfz/sfz.hpp>
 
 using sfz::String;
+using sfz::dec;
+using sfz::format;
 
 namespace antares {
 namespace {
@@ -29,27 +31,43 @@ namespace {
 typedef testing::Test FixedTest;
 
 TEST_F(FixedTest, Print) {
-    EXPECT_EQ("0.000", String(fixed(0)));
+    EXPECT_EQ("0.0", String(fixed(0)));
 
-    EXPECT_EQ("1.000", String(fixed(256)));
-    EXPECT_EQ("-1.000", String(fixed(-256)));
+    EXPECT_EQ("1.0", String(fixed(256)));
+    EXPECT_EQ("-1.0", String(fixed(-256)));
     EXPECT_EQ("1.125", String(fixed(288)));
     EXPECT_EQ("-1.125", String(fixed(-288)));
 
     EXPECT_EQ("8388607.996", String(fixed(std::numeric_limits<Fixed>::max())));
     EXPECT_EQ("-8388607.996", String(fixed(-std::numeric_limits<Fixed>::max())));
-    EXPECT_EQ("-8388608.000", String(fixed(std::numeric_limits<Fixed>::min())));
+    EXPECT_EQ("-8388608.0", String(fixed(std::numeric_limits<Fixed>::min())));
 
-    EXPECT_EQ("1.378", String(fixed(353)));
-    EXPECT_EQ("1.382", String(fixed(354)));
-    EXPECT_EQ("1.386", String(fixed(355)));
-    EXPECT_EQ("1.390", String(fixed(356)));
-    EXPECT_EQ("1.394", String(fixed(357)));
-    EXPECT_EQ("1.398", String(fixed(358)));
+    EXPECT_EQ("1.38", String(fixed(353)));
+    EXPECT_EQ("1.383", String(fixed(354)));
+    EXPECT_EQ("1.387", String(fixed(355)));
+    EXPECT_EQ("1.39", String(fixed(356)));
+    EXPECT_EQ("1.395", String(fixed(357)));
+    EXPECT_EQ("1.4", String(fixed(358)));
     EXPECT_EQ("1.402", String(fixed(359)));
     EXPECT_EQ("1.406", String(fixed(360)));
-    EXPECT_EQ("1.410", String(fixed(361)));
+    EXPECT_EQ("1.41", String(fixed(361)));
     EXPECT_EQ("1.414", String(fixed(362)));
+
+    // All 2.x values should be printed with 1 digit of precision.
+    for (int i = 0; i < 10; ++i) {
+        String expected(format("2.{0}", i));
+        EXPECT_EQ(expected, String(fixed(mFloatToFixed(2.0 + (i / 10.0)))));
+    }
+
+    // All 3.xy values should be printed with 2 digits of precision
+    // (except when y is 0).
+    for (int i = 0; i < 100; ++i) {
+        if ((i % 10) == 0) {
+            continue;
+        }
+        String expected(format("3.{0}", dec(i, 2)));
+        EXPECT_EQ(expected, String(fixed(mFloatToFixed(3.0 + (i / 100.0)))));
+    }
 }
 
 TEST_F(FixedTest, FloatToFixed) {
@@ -62,13 +80,18 @@ TEST_F(FixedTest, FloatToFixed) {
     EXPECT_EQ(256, mFloatToFixed(1.0));
 
     EXPECT_EQ(353, mFloatToFixed(1.378));
+    EXPECT_EQ(353, mFloatToFixed(1.38));
     EXPECT_EQ(354, mFloatToFixed(1.382));
     EXPECT_EQ(355, mFloatToFixed(1.386));
     EXPECT_EQ(356, mFloatToFixed(1.390));
+    EXPECT_EQ(356, mFloatToFixed(1.39));
     EXPECT_EQ(357, mFloatToFixed(1.394));
     EXPECT_EQ(358, mFloatToFixed(1.398));
+    EXPECT_EQ(358, mFloatToFixed(1.4));
+    EXPECT_EQ(358, mFloatToFixed(1.40));
     EXPECT_EQ(359, mFloatToFixed(1.402));
     EXPECT_EQ(360, mFloatToFixed(1.406));
+    EXPECT_EQ(361, mFloatToFixed(1.41));
     EXPECT_EQ(361, mFloatToFixed(1.410));
     EXPECT_EQ(362, mFloatToFixed(1.414));
 }
