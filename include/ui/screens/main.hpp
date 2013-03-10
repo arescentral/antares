@@ -36,6 +36,11 @@ class MainScreen : public InterfaceScreen {
     virtual bool next_timer(int64_t& time);
     virtual void fire_timer();
 
+    virtual void mouse_down(const MouseDownEvent& event);
+    virtual void mouse_up(const MouseUpEvent& event);
+    virtual void key_down(const KeyDownEvent& event);
+    virtual void key_up(const KeyUpEvent& event);
+
   protected:
     virtual void adjust_interface();
     virtual void handle_button(int button);
@@ -56,6 +61,7 @@ class MainScreen : public InterfaceScreen {
     };
     State _state;
     ReplayList _replays;
+    int64_t _next_timer;
 
     DISALLOW_COPY_AND_ASSIGN(MainScreen);
 };

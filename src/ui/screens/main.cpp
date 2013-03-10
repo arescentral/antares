@@ -61,6 +61,7 @@ void MainScreen::become_front() {
             SetSongVolume(kMaxMusicVolume);
             PlaySong();
         }
+        _next_timer = now_usecs() + kMainDemoTimeOutTime;
         break;
       case QUITTING:
         stack()->pop(this);
@@ -69,7 +70,7 @@ void MainScreen::become_front() {
 }
 
 bool MainScreen::next_timer(int64_t& time) {
-    time = last_event() + kMainDemoTimeOutTime;
+    time = _next_timer;
     return true;
 }
 
@@ -81,6 +82,26 @@ void MainScreen::fire_timer() {
     } else {
         stack()->push(new ReplayGame(_replays.at(demo)));
     }
+}
+
+void MainScreen::mouse_down(const MouseDownEvent& event) {
+    InterfaceScreen::mouse_down(event);
+    _next_timer = now_usecs() + kMainDemoTimeOutTime;
+}
+
+void MainScreen::mouse_up(const MouseUpEvent& event) {
+    InterfaceScreen::mouse_up(event);
+    _next_timer = now_usecs() + kMainDemoTimeOutTime;
+}
+
+void MainScreen::key_down(const KeyDownEvent& event) {
+    InterfaceScreen::key_down(event);
+    _next_timer = now_usecs() + kMainDemoTimeOutTime;
+}
+
+void MainScreen::key_up(const KeyUpEvent& event) {
+    InterfaceScreen::key_up(event);
+    _next_timer = now_usecs() + kMainDemoTimeOutTime;
 }
 
 void MainScreen::adjust_interface() {
