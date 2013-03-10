@@ -47,16 +47,12 @@ class NatePixTable {
 
 class NatePixTable::Frame {
   public:
-    Frame();
+    Frame(Rect bounds, const PixMap& image, int16_t id, int frame);
+    Frame(Rect bounds, const PixMap& image, int16_t id, int frame,
+          const PixMap& overlay, uint8_t color);
     Frame(Frame&&) = default;
     ~Frame();
-
-    void load_image(sfz::StringSlice path);
-    void load_overlay(sfz::StringSlice path, uint8_t color);
-    void set_x_offset(int32_t x);
-    void set_y_offset(int32_t y);
-    void build(int16_t id, int frame);
-
+    
     uint16_t width() const;
     uint16_t height() const;
     Point center() const;
@@ -64,8 +60,11 @@ class NatePixTable::Frame {
     const Sprite& sprite() const;
 
   private:
-    int16_t _h_offset;
-    int16_t _v_offset;
+    void load_image(const PixMap& pix);
+    void load_overlay(const PixMap& pix, uint8_t color);
+    void build(int16_t id, int frame);
+
+    Rect _bounds;
     ArrayPixMap _pix_map;
     std::unique_ptr<Sprite> _sprite;
 

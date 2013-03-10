@@ -46,14 +46,21 @@ namespace antares {
 namespace {
 
 struct PixTableVisitor : public JsonDefaultVisitor {
-    enum State {
+    enum StateEnum {
         NEW,
-        FRAME,
-        IMAGE,
-        OVERLAY,
-        X_OFFSET,
-        Y_OFFSET,
+        ROWS, COLS,
+        CENTER, CENTER_X, CENTER_Y,
+        FRAMES, FRAME, FRAME_LEFT, FRAME_TOP, FRAME_RIGHT, FRAME_BOTTOM,
+        IMAGE, OVERLAY,
         DONE,
+    };
+    struct State {
+        int rows, cols;
+        Point center;
+        Rect frame;
+        StateEnum state;
+        ArrayPixMap image, overlay;
+        State(): state(NEW), image(0, 0), overlay(0, 0) { }
     };
     State& state;
     int16_t id;
@@ -67,49 +74,86 @@ struct PixTableVisitor : public JsonDefaultVisitor {
             color(color),
             frames(frames) { }
 
-    virtual void visit_array(const std::vector<Json>& value) const {
-        switch (state) {
-          case NEW:
-            state = FRAME;
-            for (const auto& v: value) {
-                frames.emplace_back();
-                v.accept(*this);
-                frames.back().build(id, frames.size() - 1);
-            }
-            state = DONE;
-            break;
-          default:
-            return visit_default("array");
+    bool descend(StateEnum state, const StringMap<Json>& value, StringSlice key) const {
+        auto it = value.find(key);
+        if (it == value.end()) {
+            return false;
         }
+        StateEnum saved_state = this->state.state;
+        this->state.state = state;
+        it->second.accept(*this);
+        this->state.state = saved_state;
+        return true;
     }
 
     virtual void visit_object(const StringMap<Json>& value) const {
-        switch (state) {
-          case FRAME:
-            if (value.find("image") == value.end()) {
+        switch (state.state) {
+          case NEW:
+            state.center = Point(0, 0);
+            descend(CENTER, value, "center");
+
+            if (!descend(ROWS, value, "rows")) {
+                throw Exception("missing rows in sprite json");
+            }
+            if (!descend(COLS, value, "cols")) {
+                throw Exception("missing cols in sprite json");
+            }
+            if (!descend(IMAGE, value, "image")) {
                 throw Exception("missing image in sprite json");
             }
-            state = IMAGE;
-            value.find("image")->second.accept(*this);
 
             if (color) {
-                if (value.find("overlay") == value.end()) {
+                if (!descend(OVERLAY, value, "overlay")) {
                     throw Exception("missing overlay in sprite json");
                 }
-                state = OVERLAY;
-                value.find("overlay")->second.accept(*this);
+                if (state.image.size() != state.overlay.size()) {
+                    throw Exception("size mismatch between image and overlay");
+                }
             }
 
-            if (value.find("x-offset") != value.end()) {
-                state = X_OFFSET;
-                value.find("x-offset")->second.accept(*this);
+            if (state.image.size().width % state.cols) {
+                throw Exception("sprite column count does not evenly split image");
             }
-            if (value.find("y-offset") != value.end()) {
-                state = Y_OFFSET;
-                value.find("y-offset")->second.accept(*this);
+            if (state.image.size().height % state.rows) {
+                throw Exception("sprite row count does not evenly split image");
             }
 
-            state = FRAME;
+            if (!descend(FRAMES, value, "frames")) {
+                throw Exception("missing frames in sprite json");
+            }
+            break;
+
+          case CENTER:
+            descend(CENTER_X, value, "x");
+            descend(CENTER_Y, value, "y");
+            break;
+
+          case FRAME:
+            if (descend(FRAME_LEFT, value, "left") &&
+                    descend(FRAME_TOP, value, "top") &&
+                    descend(FRAME_RIGHT, value, "right") &&
+                    descend(FRAME_BOTTOM, value, "bottom")) {
+                const int frame = frames.size();
+                const int col = frame % state.cols;
+                const int row = frame / state.cols;
+                const int cell_width = state.image.size().width / state.cols;
+                const int cell_height = state.image.size().height / state.rows;
+                const Rect cell(Point(cell_width * col, cell_height * row),
+                                Size(cell_width, cell_height));
+                Rect sprite(state.frame);
+                sprite.offset(state.center.h, state.center.v);
+                auto image = state.image.view(cell).view(sprite);
+                Rect bounds(state.frame);
+                bounds.offset(2 * -bounds.left, 2 * -bounds.top);
+                if (color) {
+                    auto overlay = state.overlay.view(cell).view(sprite);
+                    frames.emplace_back(bounds, image, id, frame, overlay, color);
+                } else {
+                    frames.emplace_back(bounds, image, id, frame);
+                }
+            } else {
+                throw Exception("bad frame rect");
+            }
             break;
 
           default:
@@ -117,27 +161,51 @@ struct PixTableVisitor : public JsonDefaultVisitor {
         }
     }
 
+    virtual void visit_array(const std::vector<Json>& value) const {
+        switch (state.state) {
+          case FRAMES:
+            if (value.size() != (state.rows * state.cols)) {
+                throw Exception("frame count not equal to rows * cols");
+            }
+            state.state = FRAME;
+            for (const auto& v: value) {
+                v.accept(*this);
+            }
+            state.state = DONE;
+            break;
+
+          default:
+            return visit_default("array");
+        }
+    }
+
+    void load_image(ArrayPixMap& image, StringSlice path) const {
+        Resource rsrc(path);
+        BytesSlice data = rsrc.data();
+        read(data, image);
+    }
+
     virtual void visit_string(const StringSlice& value) const {
-        switch (state) {
+        switch (state.state) {
           case IMAGE:
-            frames.back().load_image(value);
-            break;
+            return load_image(state.image, value);
           case OVERLAY:
-            frames.back().load_overlay(value, color);
-            break;
+            return load_image(state.overlay, value);
           default:
             return visit_default("string");
         }
     }
 
     virtual void visit_number(double value) const {
-        switch (state) {
-          case X_OFFSET:
-            frames.back().set_x_offset(value);
-            break;
-          case Y_OFFSET:
-            frames.back().set_y_offset(value);
-            break;
+        switch (state.state) {
+          case ROWS: state.rows = value; break;
+          case COLS: state.cols = value; break;
+          case CENTER_X: state.center.h = value; break;
+          case CENTER_Y: state.center.v = value; break;
+          case FRAME_LEFT: state.frame.left = value; break;
+          case FRAME_TOP: state.frame.top = value; break;
+          case FRAME_RIGHT: state.frame.right = value; break;
+          case FRAME_BOTTOM: state.frame.bottom = value; break;
           default:
             return visit_default("number");
         }
@@ -157,7 +225,7 @@ NatePixTable::NatePixTable(int id, uint8_t color) {
     if (!string_to_json(data, json)) {
         throw Exception("invalid sprite json");
     }
-    PixTableVisitor::State state = PixTableVisitor::NEW;
+    PixTableVisitor::State state;
     json.accept(PixTableVisitor(state, id, color, _frames));
 }
 
@@ -171,30 +239,34 @@ size_t NatePixTable::size() const {
     return _size;
 }
 
-NatePixTable::Frame::Frame()
-        : _h_offset(0),
-          _v_offset(0),
-          _pix_map(0, 0) { }
+NatePixTable::Frame::Frame(
+        Rect bounds, const PixMap& image, int16_t id, int frame,
+        const PixMap& overlay, uint8_t color):
+        _bounds(bounds),
+        _pix_map(bounds.width(), bounds.height()) {
+    load_image(image);
+    load_overlay(overlay, color);
+    build(id, frame);
+}
+
+NatePixTable::Frame::Frame(
+        Rect bounds, const PixMap& image, int16_t id, int frame):
+        _bounds(bounds),
+        _pix_map(bounds.width(), bounds.height()) {
+    load_image(image);
+    build(id, frame);
+}
 
 NatePixTable::Frame::~Frame() { }
 
-void NatePixTable::Frame::load_image(StringSlice path) {
-    Resource rsrc(path);
-    BytesSlice data = rsrc.data();
-    read(data, _pix_map);
+void NatePixTable::Frame::load_image(const PixMap& pix) {
+    _pix_map.copy(pix);
 }
 
-void NatePixTable::Frame::load_overlay(StringSlice path, uint8_t color) {
-    Resource rsrc(path);
-    BytesSlice data = rsrc.data();
-    ArrayPixMap overlay(0, 0);
-    read(data, overlay);
-    if ((overlay.size().width != width()) || (overlay.size().height != height())) {
-        throw Exception("sprite overlay size mismatch");
-    }
+void NatePixTable::Frame::load_overlay(const PixMap& pix, uint8_t color) {
     for (auto x: range(width())) {
         for (auto y: range(height())) {
-            RgbColor over = overlay.get(x, y);
+            RgbColor over = pix.get(x, y);
             uint8_t value = over.red;
             uint8_t frac = over.alpha;
             over = RgbColor::tint(color, value);
@@ -209,17 +281,9 @@ void NatePixTable::Frame::load_overlay(StringSlice path, uint8_t color) {
     }
 }
 
-void NatePixTable::Frame::set_x_offset(int32_t x) {
-    _h_offset = x;
-}
-
-void NatePixTable::Frame::set_y_offset(int32_t y) {
-    _v_offset = y;
-}
-
-uint16_t NatePixTable::Frame::width() const { return _pix_map.size().width; }
-uint16_t NatePixTable::Frame::height() const { return _pix_map.size().height; }
-Point NatePixTable::Frame::center() const { return Point(_h_offset, _v_offset); }
+uint16_t NatePixTable::Frame::width() const { return _bounds.width(); }
+uint16_t NatePixTable::Frame::height() const { return _bounds.height(); }
+Point NatePixTable::Frame::center() const { return _bounds.origin(); }
 const PixMap& NatePixTable::Frame::pix_map() const { return _pix_map; }
 const Sprite& NatePixTable::Frame::sprite() const { return *_sprite; }
 
