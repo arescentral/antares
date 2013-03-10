@@ -58,7 +58,6 @@ class Font {
 extern const Font* tactical_font;
 extern const Font* computer_font;
 extern const Font* button_font;
-extern const Font* message_font;
 extern const Font* title_font;
 extern const Font* small_button_font;
 

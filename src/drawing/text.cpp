@@ -48,7 +48,6 @@ enum {
     kTacticalFontResID      = 5000,
     kComputerFontResID      = 5001,
     kButtonFontResID        = 5002,
-    kMessageFontResID       = 5003,
     kTitleFontResID         = 5004,
     kButtonSmallFontResID   = 5005,
 };
@@ -65,7 +64,6 @@ const Font* gDirectTextData[kDirectFontNum];
 const Font* tactical_font;
 const Font* computer_font;
 const Font* button_font;
-const Font* message_font;
 const Font* title_font;
 const Font* small_button_font;
 
@@ -168,7 +166,6 @@ void InitDirectText() {
     gDirectTextData[0] = tactical_font = new Font(kTacticalFontResID);
     gDirectTextData[1] = computer_font = new Font(kComputerFontResID);
     gDirectTextData[2] = button_font = new Font(kButtonFontResID);
-    gDirectTextData[3] = message_font = new Font(kMessageFontResID);
     gDirectTextData[4] = title_font = new Font(kTitleFontResID);
     gDirectTextData[5] = small_button_font = new Font(kButtonSmallFontResID);
 }
@@ -177,7 +174,6 @@ void DirectTextCleanup() {
     delete tactical_font;
     delete computer_font;
     delete button_font;
-    delete message_font;
     delete title_font;
     delete small_button_font;
 }
