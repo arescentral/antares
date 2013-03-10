@@ -44,7 +44,6 @@ class InterfaceScreen : public Card {
     virtual void key_up(const KeyUpEvent& event);
 
   protected:
-    double last_event() const;
     virtual void adjust_interface();
     virtual void handle_button(int button) = 0;
 
@@ -66,7 +65,6 @@ class InterfaceScreen : public Card {
 
     const Rect _bounds;
     const bool _full_screen;
-    double _last_event;
     std::vector<interfaceItemType> _items;
     int _hit_item;
 

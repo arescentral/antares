@@ -40,7 +40,6 @@ InterfaceScreen::InterfaceScreen(int id, const Rect& bounds, bool full_screen)
         : _state(NORMAL),
           _bounds(bounds),
           _full_screen(full_screen),
-          _last_event(now_usecs()),
           _hit_item(0) {
     Resource rsrc("interfaces", "intr", id);
     BytesSlice in(rsrc.data());
@@ -58,7 +57,6 @@ InterfaceScreen::~InterfaceScreen() { }
 
 void InterfaceScreen::become_front() {
     this->adjust_interface();
-    _last_event = now_usecs();
     // half-second fade from black.
 }
 
@@ -188,10 +186,6 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
         }
         handle_button(hit_item);
     }
-}
-
-double InterfaceScreen::last_event() const {
-    return _last_event;
 }
 
 void InterfaceScreen::adjust_interface() { }
