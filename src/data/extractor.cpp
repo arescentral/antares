@@ -19,6 +19,7 @@
 #include "data/extractor.hpp"
 
 #include <fcntl.h>
+#include <math.h>
 #include <stdint.h>
 #include <rezin/rezin.hpp>
 #include <sfz/sfz.hpp>
@@ -152,8 +153,7 @@ bool convert_snd(StringSlice, int16_t, BytesSlice data, WriteTarget out) {
     return true;
 }
 
-String convert_frame(StringSlice dir, int16_t id, BytesSlice data,
-        PixMap& pix, uint32_t i, uint32_t size) {
+void convert_frame(StringSlice dir, int16_t id, BytesSlice data, PixMap::View pix) {
     auto width = pix.size().width;
     auto height = pix.size().height;
 
@@ -166,25 +166,9 @@ String convert_frame(StringSlice dir, int16_t id, BytesSlice data,
             }
         }
     }
-
-    Bytes pix_out;
-    write(pix_out, pix);
-    String output;
-    String local_path;
-    if (size > 1) {
-        local_path.assign(format("sprites/{0}/{1}/image.png", id, dec(i, 2)));
-    } else {
-        local_path.assign(format("sprites/{0}/image.png", id));
-    }
-    output.assign(format("{0}/{1}", path::dirname(dir), local_path));
-    makedirs(path::dirname(output), 0755);
-    ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-    write(fd, pix_out.data(), pix_out.size());
-    return local_path;
 }
 
-String convert_overlay(StringSlice dir, int16_t id, BytesSlice data,
-        PixMap& pix, uint32_t i, uint32_t size) {
+void convert_overlay(StringSlice dir, int16_t id, BytesSlice data, PixMap::View pix) {
     auto width = pix.size().width;
     auto height = pix.size().height;
 
@@ -216,46 +200,110 @@ String convert_overlay(StringSlice dir, int16_t id, BytesSlice data,
             }
         }
     }
+}
 
-    Bytes pix_out;
-    write(pix_out, pix);
-    String output;
-    String local_path;
-    if (size > 1) {
-        local_path.assign(format("sprites/{0}/{1}/overlay.png", id, dec(i, 2)));
-    } else {
-        local_path.assign(format("sprites/{0}/overlay.png", id));
-    }
-    output.assign(format("{0}/{1}", path::dirname(dir), local_path));
-    makedirs(path::dirname(output), 0755);
-    ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
-    write(fd, pix_out.data(), pix_out.size());
-    return local_path;
+static Json json(const Rect& r) {
+    StringMap<Json> json;
+    json["left"] = Json::number(r.left);
+    json["top"] = Json::number(r.top);
+    json["right"] = Json::number(r.right);
+    json["bottom"] = Json::number(r.bottom);
+    return Json::object(json);
+}
+
+static Json json(const Point& p) {
+    StringMap<Json> json;
+    json["x"] = Json::number(p.h);
+    json["y"] = Json::number(p.v);
+    return Json::object(json);
 }
 
 bool convert_smiv(StringSlice dir, int16_t id, BytesSlice data, WriteTarget out) {
     BytesSlice header = data;
     header.shift(4);
     uint32_t size = read<uint32_t>(header);
+    vector<uint32_t> offsets;
+    vector<Rect> bounds;
+
+    StringMap<Json> object;
     vector<Json> frames;
     for (auto i: range(size)) {
         static_cast<void>(i);
         uint32_t offset = read<uint32_t>(header);
         BytesSlice frame_data = data.slice(offset);
-        StringMap<Json> frame;
         auto width = read<uint16_t>(frame_data);
         auto height = read<uint16_t>(frame_data);
-        frame["x-offset"] = Json::number(read<int16_t>(frame_data));
-        frame["y-offset"] = Json::number(read<int16_t>(frame_data));
-        frame_data = frame_data.slice(0, width * height);
-        ArrayPixMap pix(width, height);
-        frame["image"] = Json::string(convert_frame(dir, id, frame_data, pix, i, size));
-        frame["overlay"] = Json::string(convert_overlay(dir, id, frame_data, pix, i, size));
+        auto x_offset = -read<int16_t>(frame_data);
+        auto y_offset = -read<int16_t>(frame_data);
+        offsets.push_back(offset);
+        bounds.emplace_back(Point(x_offset, y_offset), Size(width, height));
 
-        frames.push_back(Json::object(frame));
+        frames.push_back(json(bounds.back()));
+    }
+    object["frames"] = Json::array(frames);
+
+    Rect max_bounds = bounds[0];
+    for (const auto& rect: bounds) {
+        max_bounds.left = std::min(max_bounds.left, rect.left);
+        max_bounds.top = std::min(max_bounds.top, rect.top);
+        max_bounds.right = std::max(max_bounds.right, rect.right);
+        max_bounds.bottom = std::max(max_bounds.bottom, rect.bottom);
+    }
+    object["center"] = json(Point(-max_bounds.left, -max_bounds.top));
+
+    // Do our best to find a square layout of all the frames.  In the
+    // event of a prime number of frames, we'll end up with one row and
+    // many columns.
+    int rows = sqrt(size);
+    int cols = size;
+    while (rows > 1) {
+        if ((size % rows) == 0) {
+            cols = size / rows;
+            break;
+        } else {
+            --rows;
+        }
+    }
+    object["rows"] = Json::number(rows);
+    object["cols"] = Json::number(cols);
+
+    ArrayPixMap image(max_bounds.width() * cols, max_bounds.height() * rows);
+    ArrayPixMap overlay(max_bounds.width() * cols, max_bounds.height() * rows);
+    image.fill(RgbColor::kClear);
+    overlay.fill(RgbColor::kClear);
+    for (auto i: range(size)) {
+        int col = i % cols;
+        int row = i / cols;
+        
+        StringMap<Json> frame;
+        BytesSlice frame_data = data.slice(offsets[i]);
+        frame_data.shift(8);
+        Rect r = bounds[i];
+        r.offset(max_bounds.width() * col, max_bounds.height() * row);
+        r.offset(-max_bounds.left, -max_bounds.top);
+
+        convert_frame(dir, id, frame_data.slice(0, r.area()), image.view(r));
+        convert_overlay(dir, id, frame_data.slice(0, r.area()), overlay.view(r));
     }
 
-    String string(pretty_print(Json::array(frames)));
+    String sprite_dir(format("{0}/{1}", dir, id));
+    makedirs(sprite_dir, 0755);
+
+    {
+        String output(format("{0}/{1}/image.png", dir, id));
+        ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
+        write(fd, Bytes(image));
+        object["image"] = Json::string(format("sprites/{0}/image.png", id));
+    }
+
+    {
+        String output(format("{0}/{1}/overlay.png", dir, id));
+        ScopedFd fd(open(output, O_WRONLY | O_CREAT | O_TRUNC, 0644));
+        write(fd, Bytes(overlay));
+        object["overlay"] = Json::string(format("sprites/{0}/overlay.png", id));
+    }
+
+    String string(pretty_print(Json::object(object)));
     write(out, utf8::encode(string));
     return true;
 }
@@ -342,7 +390,7 @@ const ResourceFile::ExtractedResource kPluginFiles[] = {
 
 const char kFactoryScenario[] = "com.biggerplanet.ares";
 const char kDownloadBase[] = "http://downloads.arescentral.org";
-const char kVersion[] = "6\n";
+const char kVersion[] = "7\n";
 
 const char kPluginVersionFile[] = "data/version";
 const char kPluginVersion[] = "1\n";
