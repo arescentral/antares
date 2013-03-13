@@ -326,8 +326,6 @@ const ResourceFile kResourceFiles[] = {
             { "STR#",  "strings",            "json",  convert_str },
             { "TEXT",  "text",               "txt",   convert_text },
             { "intr",  "interfaces",         "intr",  verbatim },
-            { "nlFD",  "font-descriptions",  "nlFD",  verbatim },
-            { "nlFM",  "font-bitmaps",       "nlFM",  verbatim },
         },
     },
     {
