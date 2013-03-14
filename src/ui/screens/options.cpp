@@ -75,14 +75,8 @@ void OptionsScreen::become_front() {
     }
 }
 
-namespace {
-
-const int kSoundControlScreenResID = 5007;
-
-}  // namespace
-
 SoundControlScreen::SoundControlScreen(OptionsScreen::State* state, Preferences* preferences)
-        : InterfaceScreen(kSoundControlScreenResID, world, true),
+        : InterfaceScreen(OPTIONS_SOUND, world, true),
           _state(state),
           _preferences(preferences) { }
 
@@ -197,8 +191,13 @@ OptionsScreen::State SoundControlScreen::button_state(int button) {
 namespace {
 
 // Resource IDs of the various interfaces used in the key control interface.
-const int kKeyControlScreenResID    = 5030;
-const int kKeyControlTabIds[] = { 5031, 5032, 5033, 5034, 5035 };
+const InterfaceScreen::Id kKeyControlTabIds[] = {
+    InterfaceScreen::OPTIONS_KEYS_SHIP,
+    InterfaceScreen::OPTIONS_KEYS_COMMAND,
+    InterfaceScreen::OPTIONS_KEYS_SHORTCUT,
+    InterfaceScreen::OPTIONS_KEYS_UTILITY,
+    InterfaceScreen::OPTIONS_KEYS_HOTKEY,
+};
 
 const int64_t kFlashTime = 0.2e6;
 
@@ -218,7 +217,7 @@ size_t get_tab_num(size_t key) {
 }  // namespace
 
 KeyControlScreen::KeyControlScreen(OptionsScreen::State* state, Preferences* preferences)
-        : InterfaceScreen(kKeyControlScreenResID, world, true),
+        : InterfaceScreen(OPTIONS_KEYS, world, true),
           _state(state),
           _preferences(preferences),
           _key_start(size()),

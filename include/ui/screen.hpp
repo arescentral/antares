@@ -30,7 +30,27 @@ namespace antares {
 
 class InterfaceScreen : public Card {
   public:
-    InterfaceScreen(int id, const Rect& bounds, bool full_screen);
+    enum Id {
+        MAIN = 5000,
+        SELECT_LEVEL = 5011,
+        BRIEFING = 6000,
+        LOADING = 6001,
+        HELP = 5012,
+
+        OPTIONS_SOUND = 5007,
+        OPTIONS_KEYS = 5030,
+        OPTIONS_KEYS_SHIP = 5031,
+        OPTIONS_KEYS_COMMAND = 5032,
+        OPTIONS_KEYS_SHORTCUT = 5033,
+        OPTIONS_KEYS_UTILITY = 5034,
+        OPTIONS_KEYS_HOTKEY = 5035,
+
+        PLAY_AGAIN = 5008,
+        PLAY_AGAIN_RESUME = 5009,
+        PLAY_AGAIN_SKIP_RESUME = 5017,
+    };
+
+    InterfaceScreen(Id id, const Rect& bounds, bool full_screen);
     ~InterfaceScreen();
 
     virtual void become_front();
@@ -48,7 +68,7 @@ class InterfaceScreen : public Card {
     virtual void handle_button(int button) = 0;
 
     void truncate(size_t size);
-    void extend(int id, size_t within);
+    void extend(Id id, size_t within);
 
     size_t size() const;
     const interfaceItemType& item(int index) const;

@@ -41,14 +41,9 @@ using sfz::format;
 using std::unique_ptr;
 
 namespace antares {
-namespace {
-
-const int kSelectLevelScreenResID = 5011;
-
-}  // namespace
 
 SelectLevelScreen::SelectLevelScreen(bool* cancelled, const Scenario** scenario)
-        : InterfaceScreen(kSelectLevelScreenResID, world, true),
+        : InterfaceScreen(SELECT_LEVEL, world, true),
           _state(SELECTING),
           _cancelled(cancelled),
           _scenario(scenario) {

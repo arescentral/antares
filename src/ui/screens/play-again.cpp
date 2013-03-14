@@ -31,18 +31,18 @@ namespace antares {
 
 namespace {
 
-int interface_id(bool allow_resume, bool allow_skip) {
+InterfaceScreen::Id interface_id(bool allow_resume, bool allow_skip) {
     if (allow_resume) {
         if (allow_skip) {
-            return 5017;
+            return InterfaceScreen::PLAY_AGAIN_SKIP_RESUME;
         } else {
-            return 5009;
+            return InterfaceScreen::PLAY_AGAIN_RESUME;
         }
     } else {
         if (allow_skip) {
             throw Exception("allow_skip specified without allow_resume");
         } else {
-            return 5008;
+            return InterfaceScreen::PLAY_AGAIN;
         }
     }
 }

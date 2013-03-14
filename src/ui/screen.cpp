@@ -36,7 +36,7 @@ using std::vector;
 
 namespace antares {
 
-InterfaceScreen::InterfaceScreen(int id, const Rect& bounds, bool full_screen)
+InterfaceScreen::InterfaceScreen(Id id, const Rect& bounds, bool full_screen)
         : _state(NORMAL),
           _bounds(bounds),
           _full_screen(full_screen),
@@ -197,7 +197,7 @@ void InterfaceScreen::truncate(size_t size) {
     _items.resize(size);
 }
 
-void InterfaceScreen::extend(int id, size_t within) {
+void InterfaceScreen::extend(Id id, size_t within) {
     if (size() <= within) {
         throw Exception("interfaces must be extended within existing elements");
     }

@@ -46,7 +46,6 @@ enum BriefingPoint {
     BRIEFING_POINT_COUNT,
 };
 
-const int kBriefingScreenResId = 6000;
 const int kStarMapPictId = 8000;
 const int kMissionStarPointWidth = 16;
 const int kMissionStarPointHeight = 12;
@@ -55,7 +54,7 @@ const int32_t kMissionDataHiliteColor = GOLD;
 }  // namespace
 
 BriefingScreen::BriefingScreen(const Scenario* scenario, bool* cancelled)
-        : InterfaceScreen(kBriefingScreenResId, world, true),
+        : InterfaceScreen(BRIEFING, world, true),
           _scenario(scenario),
           _cancelled(cancelled),
           _briefing_point(0),

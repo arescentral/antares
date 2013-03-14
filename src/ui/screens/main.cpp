@@ -40,14 +40,13 @@ namespace antares {
 
 namespace {
 
-const int kMainScreenResID = 5000;
 const int64_t kMainDemoTimeOutTime = 30e6;
 const int kTitleTextScrollWidth = 450;
 
 }  // namespace
 
 MainScreen::MainScreen():
-        InterfaceScreen(kMainScreenResID, world, true),
+        InterfaceScreen(MAIN, world, true),
         _state(NORMAL) { }
 
 MainScreen::~MainScreen() { }
