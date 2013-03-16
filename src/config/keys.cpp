@@ -87,6 +87,18 @@ void GetKeyNumName(int key_num, sfz::String* out) {
     out->assign(strings.at(key_num - 1));
 }
 
+bool GetKeyNameNum(sfz::StringSlice name, int& out) {
+    StringList strings(KEY_NAMES);
+    bool result = false;
+    for (int i = 0; i < strings.size(); ++i) {
+        if (strings.at(i) == name) {
+            out = i + 1;
+            result = true;
+        }
+    }
+    return result;
+}
+
 // returns true if any keys OTHER THAN POWER ON AND CAPS LOCK are down
 
 bool AnyRealKeyDown() {

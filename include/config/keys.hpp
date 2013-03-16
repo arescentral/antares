@@ -181,6 +181,7 @@ void GetKeyMapFromKeyNum(int key_num, KeyMap* key_map);
 int GetKeyNumFromKeyMap(const KeyMap& key_map);
 bool CommandKey( void);
 void GetKeyNumName(int key_num, sfz::String* out);
+bool GetKeyNameNum(sfz::StringSlice name, int& out);
 bool AnyRealKeyDown();
 bool AnyKeyButThisOne(const KeyMap& key_map, int key_num);
 long GetAsciiFromKeyMap(const KeyMap&, const KeyMap&);

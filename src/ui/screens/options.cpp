@@ -190,15 +190,6 @@ OptionsScreen::State SoundControlScreen::button_state(int button) {
 
 namespace {
 
-// Resource IDs of the various interfaces used in the key control interface.
-const InterfaceScreen::Id kKeyControlTabIds[] = {
-    InterfaceScreen::OPTIONS_KEYS_SHIP,
-    InterfaceScreen::OPTIONS_KEYS_COMMAND,
-    InterfaceScreen::OPTIONS_KEYS_SHORTCUT,
-    InterfaceScreen::OPTIONS_KEYS_UTILITY,
-    InterfaceScreen::OPTIONS_KEYS_HOTKEY,
-};
-
 const int64_t kFlashTime = 0.2e6;
 
 // Indices of the keys controlled by each tab.  The "Ship" tab specifies keys 0..7, the "Command"
@@ -316,9 +307,6 @@ void KeyControlScreen::handle_button(int button) {
       case SHORTCUT_TAB:
       case UTILITY_TAB:
       case HOT_KEY_TAB:
-        for (int i = SHIP_TAB; i <= HOT_KEY_TAB; ++i) {
-            mutable_item(i)->item.radioButton.on = (button == i);
-        }
         set_tab(button_tab(button));
         adjust_interface();
         break;
@@ -390,6 +378,24 @@ KeyControlScreen::Tab KeyControlScreen::button_tab(int button) {
 }
 
 void KeyControlScreen::set_tab(Tab tab) {
+    static const int buttons[] = {
+        SHIP_TAB,
+        COMMAND_TAB,
+        SHORTCUT_TAB,
+        UTILITY_TAB,
+        HOT_KEY_TAB,
+    };
+    static const InterfaceScreen::Id kKeyControlTabIds[] = {
+        InterfaceScreen::OPTIONS_KEYS_SHIP,
+        InterfaceScreen::OPTIONS_KEYS_COMMAND,
+        InterfaceScreen::OPTIONS_KEYS_SHORTCUT,
+        InterfaceScreen::OPTIONS_KEYS_UTILITY,
+        InterfaceScreen::OPTIONS_KEYS_HOTKEY,
+    };
+
+    for (int i = SHIP_TAB; i <= HOT_KEY_TAB; ++i) {
+        mutable_item(i)->item.radioButton.on = (buttons[tab] == i);
+    }
     _tab = tab;
     _selected_key = -1;
     truncate(_key_start);
