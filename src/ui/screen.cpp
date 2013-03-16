@@ -53,8 +53,9 @@ struct InterfaceScreenVisitor : public JsonDefaultVisitor {
         ITEM,
         BOUNDS, BOUNDS_LEFT, BOUNDS_TOP, BOUNDS_RIGHT, BOUNDS_BOTTOM,
         LABEL,
-        RECT, BUTTON, CHECKBOX, RADIO, PICTURE, TEXT, TAB_BOX, TAB_BOX_BUTTON,
-        KEY, COLOR, STYLE, ID, INDEX, TOP_RIGHT_BORDER_SIZE,
+        RECT, BUTTON, CHECKBOX, RADIO, PICTURE, TEXT,
+        TAB_BOX, TAB_BOX_TABS, TAB_BOX_TAB,
+        KEY, COLOR, STYLE, ID, INDEX, WIDTH,
         DONE,
     };
     struct State {
@@ -67,7 +68,9 @@ struct InterfaceScreenVisitor : public JsonDefaultVisitor {
         int key;
         int color;
         int style;
+        int next_tab_box_button;
         int top_right_border_size;
+        int width;
         State(): state(NEW) { }
     };
     State& state;
@@ -154,7 +157,7 @@ struct InterfaceScreenVisitor : public JsonDefaultVisitor {
             item.item.tabBox.topRightBorderSize = state.top_right_border_size;
             break;
 
-          case TAB_BOX_BUTTON:
+          case TAB_BOX_TAB:
             item.kind = kTabBoxButton;
             item.item.radioButton.label.stringID = state.id;
             item.item.radioButton.label.stringNumber = state.index + 1;
@@ -187,7 +190,7 @@ struct InterfaceScreenVisitor : public JsonDefaultVisitor {
                     descend(PICTURE, value, "picture") +
                     descend(TEXT, value, "text") +
                     descend(TAB_BOX, value, "tab-box") +
-                    descend(TAB_BOX_BUTTON, value, "tab-box-button");
+                    descend(TAB_BOX_TAB, value, "tab-box-button");
                 if (kind_count == 0) {
                     throw Exception("missing item kind in interface json");
                 } else if (kind_count > 1) {
@@ -252,20 +255,32 @@ struct InterfaceScreenVisitor : public JsonDefaultVisitor {
 
           case TAB_BOX:
             if (!descend(COLOR, value, "color") ||
-                    !descend(STYLE, value, "style") ||
-                    !descend(TOP_RIGHT_BORDER_SIZE, value, "top-right-border-size")) {
+                    !descend(STYLE, value, "style")) {
                 throw Exception("bad tab box");
             }
-            build();
+            {
+                Rect box_bounds = state.bounds;
+                state.bounds.top -= 20;
+                state.bounds.bottom = state.bounds.top + 10;
+                state.next_tab_box_button = state.bounds.left + 22;
+                if (!descend(TAB_BOX_TABS, value, "tabs")) {
+                    throw Exception("bad tab box");
+                }
+                state.bounds = box_bounds;
+                state.top_right_border_size = box_bounds.right - state.next_tab_box_button + 20;
+                build();
+            }
             break;
 
-          case TAB_BOX_BUTTON:
+          case TAB_BOX_TAB:
             state.has_label = true;
             if (!descend(LABEL, value, "label") ||
-                    !descend(COLOR, value, "color") ||
-                    !descend(STYLE, value, "style")) {
-                throw Exception("bad tab box button");
+                    !descend(WIDTH, value, "width")) {
+                throw Exception("bad tab box tab");
             }
+            state.bounds.left = state.next_tab_box_button;
+            state.bounds.right = state.bounds.left + state.width;
+            state.next_tab_box_button += state.width + 37;
             build();
             break;
 
@@ -282,6 +297,14 @@ struct InterfaceScreenVisitor : public JsonDefaultVisitor {
                 v.accept(*this);
             }
             state.state = DONE;
+            break;
+
+          case TAB_BOX_TABS:
+            state.state = TAB_BOX_TAB;
+            for (const auto& v: value) {
+                v.accept(*this);
+            }
+            state.state = TAB_BOX_TABS;
             break;
 
           default:
@@ -342,7 +365,7 @@ struct InterfaceScreenVisitor : public JsonDefaultVisitor {
         switch (state.state) {
           case ID: state.id = value; break;
           case INDEX: state.index = value; break;
-          case TOP_RIGHT_BORDER_SIZE: state.top_right_border_size = value; break;
+          case WIDTH: state.width = value; break;
           case BOUNDS_LEFT: state.bounds.left = value; break;
           case BOUNDS_TOP: state.bounds.top = value; break;
           case BOUNDS_RIGHT: state.bounds.right = value; break;
