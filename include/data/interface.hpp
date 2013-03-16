@@ -140,6 +140,7 @@ struct interfaceItemType {
     uint8_t             color;
     interfaceKindType   kind;
     interfaceStyleType  style;
+    std::vector<interfaceItemType> tab_content;
 
     interfaceItemStatusType status() const;
     void set_status(interfaceItemStatusType status);

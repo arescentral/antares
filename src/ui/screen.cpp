@@ -71,6 +71,7 @@ struct InterfaceScreenVisitor : public JsonDefaultVisitor {
         int next_tab_box_button;
         int top_right_border_size;
         int width;
+        vector<interfaceItemType> tab_content;
         State(): state(NEW) { }
     };
     State& state;
@@ -164,6 +165,7 @@ struct InterfaceScreenVisitor : public JsonDefaultVisitor {
             item.item.radioButton.on = false;
             item.item.radioButton.key = state.has_key ? state.key : 0;
             item.item.radioButton.status = kActive;
+            item.tab_content = state.tab_content;
             break;
 
           default:
@@ -180,7 +182,7 @@ struct InterfaceScreenVisitor : public JsonDefaultVisitor {
                 state.color = GRAY;
                 state.style = kLarge;
                 if (!descend(BOUNDS, value, "bounds")) {
-                    throw Exception("missing bounds in sprite json");
+                    throw Exception("missing bounds in interface json");
                 }
                 int kind_count =
                     descend(RECT, value, "rect") +
@@ -274,9 +276,17 @@ struct InterfaceScreenVisitor : public JsonDefaultVisitor {
 
           case TAB_BOX_TAB:
             state.has_label = true;
+            state.tab_content.clear();
             if (!descend(LABEL, value, "label") ||
                     !descend(WIDTH, value, "width")) {
                 throw Exception("bad tab box tab");
+            }
+            if (value.find("content") == value.end()) {
+                throw Exception("bad tab box tab");
+            } else {
+                State inner_state;
+                value.find("content")->second.accept(
+                        InterfaceScreenVisitor(inner_state, state.tab_content));
             }
             state.bounds.left = state.next_tab_box_button;
             state.bounds.right = state.bounds.left + state.width;
@@ -376,7 +386,7 @@ struct InterfaceScreenVisitor : public JsonDefaultVisitor {
     }
 
     virtual void visit_default(const char* type) const {
-        throw Exception(format("unexpected {0} in sprite json", type));
+        throw Exception(format("unexpected {0} in interface json", type));
     }
 };
 
@@ -546,33 +556,14 @@ void InterfaceScreen::truncate(size_t size) {
     _items.resize(size);
 }
 
-void InterfaceScreen::extend(Id id, size_t within) {
-    if (size() <= within) {
-        throw Exception("interfaces must be extended within existing elements");
+void InterfaceScreen::extend(const std::vector<interfaceItemType>& items) {
+    size_t size = _items.size();
+    _items.insert(_items.end(), items.begin(), items.end());
+    const int offset_x = (_bounds.width() / 2) - 320;
+    const int offset_y = (_bounds.height() / 2) - 240;
+    for (size_t i = size; i < _items.size(); ++i) {
+        _items[i].bounds.offset(offset_x, offset_y);
     }
-    vector<interfaceItemType> new_items;
-
-    Resource rsrc("interfaces", "json", id);
-    String in(utf8::decode(rsrc.data()));
-    Json json;
-    if (!string_to_json(in, json)) {
-        throw Exception("invalid interface JSON");
-    }
-    InterfaceScreenVisitor::State state;
-    json.accept(InterfaceScreenVisitor(state, new_items));
-    Rect all_bounds = new_items[0].bounds;
-    for (const auto& item: new_items) {
-        all_bounds.enlarge_to(item.bounds);
-    }
-
-    Rect centered_bounds(all_bounds);
-    centered_bounds.center_in(_items[within].bounds);
-    const int off_x = centered_bounds.left - all_bounds.left;
-    const int off_y = centered_bounds.top - all_bounds.top;
-    for (vector<interfaceItemType>::iterator it = new_items.begin(); it != new_items.end(); ++it) {
-        it->bounds.offset(off_x, off_y);
-    }
-    _items.insert(_items.end(), new_items.begin(), new_items.end());
 }
 
 size_t InterfaceScreen::size() const {

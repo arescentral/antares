@@ -68,7 +68,7 @@ class InterfaceScreen : public Card {
     virtual void handle_button(int button) = 0;
 
     void truncate(size_t size);
-    void extend(Id id, size_t within);
+    void extend(const std::vector<interfaceItemType>& items);
 
     size_t size() const;
     const interfaceItemType& item(int index) const;

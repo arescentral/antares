@@ -385,21 +385,18 @@ void KeyControlScreen::set_tab(Tab tab) {
         UTILITY_TAB,
         HOT_KEY_TAB,
     };
-    static const InterfaceScreen::Id kKeyControlTabIds[] = {
-        InterfaceScreen::OPTIONS_KEYS_SHIP,
-        InterfaceScreen::OPTIONS_KEYS_COMMAND,
-        InterfaceScreen::OPTIONS_KEYS_SHORTCUT,
-        InterfaceScreen::OPTIONS_KEYS_UTILITY,
-        InterfaceScreen::OPTIONS_KEYS_HOTKEY,
-    };
 
+    truncate(_key_start);
     for (int i = SHIP_TAB; i <= HOT_KEY_TAB; ++i) {
-        mutable_item(i)->item.radioButton.on = (buttons[tab] == i);
+        if (buttons[tab] == i) {
+            mutable_item(i)->item.radioButton.on = true;
+            extend(mutable_item(i)->tab_content);
+        } else {
+            mutable_item(i)->item.radioButton.on = false;
+        }
     }
     _tab = tab;
     _selected_key = -1;
-    truncate(_key_start);
-    extend(kKeyControlTabIds[tab], TAB_BOX);
 }
 
 void KeyControlScreen::update_conflicts() {
