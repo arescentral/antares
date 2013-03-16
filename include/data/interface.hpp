@@ -25,7 +25,7 @@
 
 namespace antares {
 
-enum interfaceKindEnum {
+enum interfaceKindType {
     kPlainRect = 1,
     kLabeledRect = 2,
     kListRect = 3,
@@ -38,26 +38,22 @@ enum interfaceKindEnum {
     kTabBoxTop = 10,
     kTabBoxButton = 11
 };
-typedef uint8_t interfaceKindType;
 
-enum interfaceItemStatusEnum {
+enum interfaceItemStatusType {
     kDimmed = 1,
     kActive = 2,
     kIH_Hilite = 3
 };
-typedef uint8_t interfaceItemStatusType;
 
-enum interfaceStyleEnum {
+enum interfaceStyleType {
     kLarge = 1,
     kSmall = 2
 };
-typedef uint8_t interfaceStyleType;
 
 struct interfaceLabelType {
     short               stringID;
     short               stringNumber;
 };
-void read_from(sfz::ReadSource in, interfaceLabelType& label);
 
 struct interfaceLabeledRectType {
     interfaceLabelType  label;
@@ -66,7 +62,6 @@ struct interfaceLabeledRectType {
     bool                editable;
     // bool             editable;
 };
-void read_from(sfz::ReadSource in, interfaceLabeledRectType& labeled_rect);
 
 struct interfaceListType {
     interfaceLabelType          label;
@@ -75,26 +70,22 @@ struct interfaceListType {
     bool                     (*itemHilited)( short, bool);
     short                       topItem;
 };
-void read_from(sfz::ReadSource in, interfaceListType& list);
 
 struct interfaceTextRectType {
     short               textID;
     uint8_t             visibleBounds;
     // bool             visibleBounds;
 };
-void read_from(sfz::ReadSource in, interfaceTextRectType& text_rect);
 
 struct interfaceTabBoxType {
     short               topRightBorderSize;
 };
-void read_from(sfz::ReadSource in, interfaceTabBoxType& tab_box);
 
 struct interfacePictureRectType {
     short               pictureID;
     uint8_t             visibleBounds;
     // bool             visibleBounds;
 };
-void read_from(sfz::ReadSource in, interfacePictureRectType& picture_rect);
 
 struct interfaceButtonType {
     interfaceLabelType          label;
@@ -103,7 +94,6 @@ struct interfaceButtonType {
     // bool                     defaultButton;
     interfaceItemStatusType     status;
 };
-void read_from(sfz::ReadSource in, interfaceButtonType& button);
 
 struct interfaceRadioType {
     interfaceLabelType          label;
@@ -112,7 +102,6 @@ struct interfaceRadioType {
     // bool                     on;
     interfaceItemStatusType     status;
 }; // also tab box button type
-void read_from(sfz::ReadSource in, interfaceRadioType& radio);
 
 struct interfaceCheckboxType {
     interfaceLabelType          label;
@@ -121,7 +110,6 @@ struct interfaceCheckboxType {
     // bool                     on;
     interfaceItemStatusType     status;
 };
-void read_from(sfz::ReadSource in, interfaceCheckboxType& checkbox);
 
 struct interfaceItemType {
     Rect            bounds;
@@ -147,7 +135,6 @@ struct interfaceItemType {
     int key() const;
     void set_key(int key);
 };
-void read_from(sfz::ReadSource in, interfaceItemType& item);
 
 }  // namespace antares
 

@@ -67,7 +67,7 @@ struct InterfaceScreenVisitor : public JsonDefaultVisitor {
         int16_t index;
         int key;
         int color;
-        int style;
+        interfaceStyleType style;
         int next_tab_box_button;
         int top_right_border_size;
         int width;

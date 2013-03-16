@@ -25,57 +25,6 @@ using sfz::ReadSource;
 
 namespace antares {
 
-void read_from(ReadSource in, interfaceItemType& item) {
-    uint8_t section[22];
-
-    read(in, item.bounds);
-    read(in, section, 22);
-    read(in, item.color);
-    read(in, item.kind);
-    read(in, item.style);
-    in.shift(1);
-
-    BytesSlice sub(section, 22);
-    switch (item.kind) {
-      case kPlainRect:
-      case kPictureRect:
-        read(sub, item.item.pictureRect);
-        break;
-
-      case kLabeledRect:
-        read(sub, item.item.labeledRect);
-        break;
-
-      case kListRect:
-        read(sub, item.item.listRect);
-        break;
-
-      case kTextRect:
-        read(sub, item.item.textRect);
-        break;
-
-      case kPlainButton:
-        read(sub, item.item.plainButton);
-        break;
-
-      case kRadioButton:
-      case kTabBoxButton:
-        read(sub, item.item.radioButton);
-        break;
-
-      case kCheckboxButton:
-        read(sub, item.item.checkboxButton);
-        break;
-
-      case kTabBox:
-        read(sub, item.item.tabBox);
-        break;
-
-      case kTabBoxTop:
-        break;
-    }
-}
-
 interfaceItemStatusType interfaceItemType::status() const {
     switch (kind) {
       case kPlainButton:
@@ -139,63 +88,6 @@ void interfaceItemType::set_key(int key) {
       default:
         break;
     }
-}
-
-void read_from(ReadSource in, interfaceLabelType& label) {
-    read(in, label.stringID);
-    read(in, label.stringNumber);
-}
-
-void read_from(ReadSource in, interfaceLabeledRectType& labeled_rect) {
-    read(in, labeled_rect.label);
-    read(in, labeled_rect.color);
-    in.shift(5);
-    read(in, labeled_rect.editable);
-}
-
-void read_from(ReadSource in, interfaceListType& list) {
-    read(in, list.label);
-    in.shift(12);
-    read(in, list.topItem);
-
-    list.getListLength = NULL;
-    list.getItemString = NULL;
-    list.itemHilited = NULL;
-}
-
-void read_from(ReadSource in, interfaceTextRectType& text_rect) {
-    read(in, text_rect.textID);
-    read(in, text_rect.visibleBounds);
-}
-
-void read_from(ReadSource in, interfaceButtonType& button) {
-    read(in, button.label);
-    read(in, button.key);
-    read(in, button.defaultButton);
-    read(in, button.status);
-}
-
-void read_from(ReadSource in, interfaceRadioType& radio) {
-    read(in, radio.label);
-    read(in, radio.key);
-    read(in, radio.on);
-    read(in, radio.status);
-}
-
-void read_from(ReadSource in, interfaceCheckboxType& checkbox) {
-    read(in, checkbox.label);
-    read(in, checkbox.key);
-    read(in, checkbox.on);
-    read(in, checkbox.status);
-}
-
-void read_from(ReadSource in, interfacePictureRectType& picture_rect) {
-    read(in, picture_rect.pictureID);
-    read(in, picture_rect.visibleBounds);
-}
-
-void read_from(sfz::ReadSource in, interfaceTabBoxType& tab_box) {
-    read(in, tab_box.topRightBorderSize);
 }
 
 }  // namespace antares
