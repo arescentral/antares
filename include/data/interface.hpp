@@ -134,7 +134,10 @@ struct interfaceItemType {
     void set_status(interfaceItemStatusType status);
     int key() const;
     void set_key(int key);
+    void set_label(interfaceLabelType label);
 };
+
+std::vector<interfaceItemType> interface_items(const sfz::Json& json);
 
 }  // namespace antares
 
