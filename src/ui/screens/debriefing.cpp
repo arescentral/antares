@@ -64,14 +64,7 @@ void string_replace(String* s, const String& in, const PrintItem& out) {
 }
 
 interfaceItemType interface_item(const Rect& text_bounds) {
-    interfaceItemType result;
-    result.bounds = text_bounds;
-    result.color = GOLD;
-    result.kind = kLabeledRect;
-    result.style = kLarge;
-    result.item.labeledRect.label.stringID = 2001;
-    result.item.labeledRect.label.stringNumber = 29;
-    return result;
+    return labeled_rect(text_bounds, GOLD, kLarge, 2001, 29);
 }
 
 Rect pix_bounds(const Rect& text_bounds) {

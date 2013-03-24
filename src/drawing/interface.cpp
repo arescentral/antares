@@ -372,10 +372,10 @@ void draw_button(const interfaceItemType& item) {
     unsigned char   shade;
     RgbColor        color;
 
-    if (item.style == kLarge) {
+    if (item.style() == kLarge) {
         thisHBorder = kInterfaceLargeHBorder;
     }
-    tRect = item.bounds;
+    tRect = item.bounds();
 
     uRect = tRect;
     uRect.right++;
@@ -388,16 +388,16 @@ void draw_button(const interfaceItemType& item) {
 
     // top border
 
-    if (item.item.plainButton.status == kDimmed) {
+    if (item.status() == kDimmed) {
         shade = VERY_DARK;
     } else {
         shade = MEDIUM;
     }
 
-    mDrawPuffUpTopBorder(tRect, item.color, shade, thisHBorder);
+    mDrawPuffUpTopBorder(tRect, item.hue(), shade, thisHBorder);
     // bottom border
 
-    mDrawPuffUpBottomBorder(tRect, item.color, shade, thisHBorder);
+    mDrawPuffUpBottomBorder(tRect, item.hue(), shade, thisHBorder);
 
     // side border top
 
@@ -407,68 +407,68 @@ void draw_button(const interfaceItemType& item) {
             tRect.bottom - kInterfaceHTop + 1);
     vRect = Rect(tRect.right, tRect.top + kInterfaceHTop, tRect.right + thisHBorder + 1,
             tRect.bottom - kInterfaceHTop + 1);
-    if (item.item.plainButton.status == kIH_Hilite) {
+    if (item.status() == kIH_Hilite) {
         shade = LIGHT;
-        mDrawPuffUpRect(uRect, item.color, shade);
-        mDrawPuffUpRect(vRect, item.color, shade);
+        mDrawPuffUpRect(uRect, item.hue(), shade);
+        mDrawPuffUpRect(vRect, item.hue(), shade);
     } else {
-        if (item.item.plainButton.status == kDimmed) {
+        if (item.status() == kDimmed) {
             shade = VERY_DARK;
         } else {
             shade = MEDIUM + kSlightlyLighterColor;
         }
-        mDrawPuffUpRect(uRect, item.color, shade);
-        mDrawPuffUpRect(vRect, item.color, shade);
+        mDrawPuffUpRect(uRect, item.hue(), shade);
+        mDrawPuffUpRect(vRect, item.hue(), shade);
     }
 
 
-    if (item.item.plainButton.key == 0)
+    if (item.key() == 0)
     {
         uRect = Rect(tRect.left +  kInterfaceContentBuffer,
             tRect.top + kInterfaceContentBuffer,
             tRect.left +  kInterfaceContentBuffer,
             tRect.bottom - kInterfaceContentBuffer);
 
-        if (item.item.plainButton.status == kIH_Hilite)
+        if (item.status() == kIH_Hilite)
             shade = LIGHT;
         else shade = DARK;//DARKEST + kSlightlyLighterColor;
         uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                         tRect.right - kInterfaceContentBuffer + 1,
                         tRect.bottom - kInterfaceContentBuffer + 1);
 
-        color = GetRGBTranslateColorShade(item.color, shade);
+        color = GetRGBTranslateColorShade(item.hue(), shade);
         VideoDriver::driver()->fill_rect(uRect, color);
 
-        if (item.item.plainButton.status == kIH_Hilite) {
-            color = GetRGBTranslateColorShade(item.color, DARKEST);
-        } else if (item.item.plainButton.status == kDimmed) {
-            color = GetRGBTranslateColorShade(item.color, VERY_DARK);
+        if (item.status() == kIH_Hilite) {
+            color = GetRGBTranslateColorShade(item.hue(), DARKEST);
+        } else if (item.status() == kDimmed) {
+            color = GetRGBTranslateColorShade(item.hue(), VERY_DARK);
         } else {
-            color = GetRGBTranslateColorShade(item.color, LIGHTER);
+            color = GetRGBTranslateColorShade(item.hue(), LIGHTER);
         }
-        StringList strings(item.item.plainButton.label.stringID);
-        StringSlice s = strings.at(item.item.plainButton.label.stringNumber - 1);
-        swidth = GetInterfaceStringWidth(s, item.style);
+        StringList strings(item.label().stringID);
+        StringSlice s = strings.at(item.label().stringNumber - 1);
+        swidth = GetInterfaceStringWidth(s, item.style());
         swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
-        sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
-        DrawInterfaceString(Point(swidth, sheight), s, item.style, color);
+        sheight = GetInterfaceFontAscent(item.style()) + kInterfaceTextVBuffer + tRect.top;
+        DrawInterfaceString(Point(swidth, sheight), s, item.style(), color);
     } else
     {
         // draw the key code
         {
-            if (item.item.plainButton.status == kDimmed)
+            if (item.status() == kDimmed)
                 shade = VERY_DARK;
             else shade = LIGHT;
             String s;
-            GetKeyNumName(item.item.plainButton.key, &s);
-            swidth = GetInterfaceFontWidth(item.style) * kMaxKeyNameLength;
+            GetKeyNumName(item.key(), &s);
+            swidth = GetInterfaceFontWidth(item.style()) * kMaxKeyNameLength;
 
             uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                     tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 1,
                     tRect.bottom - kInterfaceContentBuffer + 1);
-            mDrawPuffUpRect(uRect, item.color, shade);
+            mDrawPuffUpRect(uRect, item.hue(), shade);
 
-            if (item.item.plainButton.status == kIH_Hilite)
+            if (item.status() == kIH_Hilite)
                 shade = LIGHT;
             else shade = DARK;//DARKEST;
             vRect = Rect(
@@ -476,38 +476,38 @@ void draw_button(const interfaceItemType& item) {
                     tRect.top + kInterfaceContentBuffer,
                     tRect.right - kInterfaceContentBuffer + 1,
                     tRect.bottom - kInterfaceContentBuffer + 1);
-            color = GetRGBTranslateColorShade(item.color, shade);
+            color = GetRGBTranslateColorShade(item.hue(), shade);
             VideoDriver::driver()->fill_rect(vRect, color);
 
-            swidth = GetInterfaceStringWidth(s, item.style);
+            swidth = GetInterfaceStringWidth(s, item.style());
             swidth = uRect.left + ( uRect.right - uRect.left) / 2 - swidth / 2;
-            if (item.item.plainButton.status == kDimmed) {
-                color = GetRGBTranslateColorShade(item.color, VERY_DARK);
+            if (item.status() == kDimmed) {
+                color = GetRGBTranslateColorShade(item.hue(), VERY_DARK);
             } else {
-                color = GetRGBTranslateColorShade(item.color, DARKEST);
+                color = GetRGBTranslateColorShade(item.hue(), DARKEST);
             }
 
             DrawInterfaceString(
-                    Point(swidth, uRect.top + GetInterfaceFontAscent(item.style)), s, item.style,
+                    Point(swidth, uRect.top + GetInterfaceFontAscent(item.style())), s, item.style(),
                     color);
         }
 
         // draw the button title
         {
-            if (item.item.plainButton.status == kIH_Hilite) {
-                color = GetRGBTranslateColorShade(item.color, DARKEST);
-            } else if (item.item.plainButton.status == kDimmed) {
-                color = GetRGBTranslateColorShade(item.color, DARKEST + kSlightlyLighterColor);
+            if (item.status() == kIH_Hilite) {
+                color = GetRGBTranslateColorShade(item.hue(), DARKEST);
+            } else if (item.status() == kDimmed) {
+                color = GetRGBTranslateColorShade(item.hue(), DARKEST + kSlightlyLighterColor);
             } else {
-                color = GetRGBTranslateColorShade(item.color, LIGHTER);
+                color = GetRGBTranslateColorShade(item.hue(), LIGHTER);
             }
 
-            StringList strings(item.item.plainButton.label.stringID);
-            StringSlice s = strings.at(item.item.plainButton.label.stringNumber - 1);
-            swidth = GetInterfaceStringWidth(s, item.style);
+            StringList strings(item.label().stringID);
+            StringSlice s = strings.at(item.label().stringNumber - 1);
+            swidth = GetInterfaceStringWidth(s, item.style());
             swidth = uRect.right + ( tRect.right - uRect.right) / 2 - swidth / 2;
-            sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
-            DrawInterfaceString(Point(swidth, sheight), s, item.style, color);
+            sheight = GetInterfaceFontAscent(item.style()) + kInterfaceTextVBuffer + tRect.top;
+            DrawInterfaceString(Point(swidth, sheight), s, item.style(), color);
         }
     }
 }
@@ -518,10 +518,10 @@ void draw_tab_box_button(const interfaceItemType& item) {
     unsigned char   shade;
     RgbColor        color;
 
-    if (item.style == kLarge) {
+    if (item.style() == kLarge) {
         h_border = kInterfaceLargeHBorder;
     }
-    tRect = item.bounds;
+    tRect = item.bounds();
 
     tRect.left -= kInterfaceContentBuffer;
     tRect.top -= kInterfaceContentBuffer;
@@ -530,13 +530,13 @@ void draw_tab_box_button(const interfaceItemType& item) {
 
     // top border
 
-    if (item.item.radioButton.status == kDimmed) {
+    if (item.status() == kDimmed) {
         shade = VERY_DARK;
     } else {
         shade = MEDIUM;
     }
 
-    mDrawPuffUpTopBorder(tRect, item.color, shade, h_border);
+    mDrawPuffUpTopBorder(tRect, item.hue(), shade, h_border);
 
     // side border top
 
@@ -548,49 +548,49 @@ void draw_tab_box_button(const interfaceItemType& item) {
     Rect right(
             tRect.right, tRect.top + kInterfaceHTop, tRect.right + h_border + 1,
             tRect.bottom - kInterfaceHTop + 1);
-    if (!item.item.radioButton.on) {
-        if (item.item.radioButton.status == kIH_Hilite) {
+    if (!item.on()) {
+        if (item.status() == kIH_Hilite) {
             shade = LIGHT;
-            mDrawPuffUpRect(left, item.color, shade);
-            mDrawPuffUpRect(right, item.color, shade);
+            mDrawPuffUpRect(left, item.hue(), shade);
+            mDrawPuffUpRect(right, item.hue(), shade);
         } else {
-            if (item.item.radioButton.status == kDimmed) {
+            if (item.status() == kDimmed) {
                 shade = VERY_DARK;
             }
             else shade = DARK;
-            mDrawPuffUpRect(left, item.color, shade);
-            mDrawPuffUpRect(right, item.color, shade);
+            mDrawPuffUpRect(left, item.hue(), shade);
+            mDrawPuffUpRect(right, item.hue(), shade);
         }
         left = Rect(left.left, left.bottom, left.right, left.bottom + 3);
         right = Rect(right.left, right.bottom, right.right, right.bottom + 3);
         VideoDriver::driver()->fill_rect(left, RgbColor::kBlack);
         VideoDriver::driver()->fill_rect(right, RgbColor::kBlack);
         shade = MEDIUM;
-        color = GetRGBTranslateColorShade(item.color, shade);
+        color = GetRGBTranslateColorShade(item.hue(), shade);
         VideoDriver::driver()->fill_rect(
                 Rect(left.left - 3, left.bottom, right.right + 3, left.bottom + 3), color);
 
-        const RgbColor lighter = GetRGBTranslateColorShade(item.color, shade + kLighterColor);
+        const RgbColor lighter = GetRGBTranslateColorShade(item.hue(), shade + kLighterColor);
         VideoDriver::driver()->fill_rect(
                 Rect(left.left - 3, left.bottom - 1, right.right + 3, left.bottom), lighter);
-        const RgbColor darker = GetRGBTranslateColorShade(item.color, shade + kDarkerColor);
+        const RgbColor darker = GetRGBTranslateColorShade(item.hue(), shade + kDarkerColor);
         VideoDriver::driver()->fill_rect(
                 Rect(left.left - 3, left.bottom + 3, right.right + 3, left.bottom + 4), darker);
     } else {
-        if (item.item.radioButton.status == kIH_Hilite) {
+        if (item.status() == kIH_Hilite) {
             shade = LIGHT;
-        } else if (item.item.radioButton.status == kDimmed) {
+        } else if (item.status() == kDimmed) {
             shade = VERY_DARK;
         } else {
             shade = MEDIUM;
         }
         left.bottom += 7;
         right.bottom += 7;
-        color = GetRGBTranslateColorShade(item.color, shade);
+        color = GetRGBTranslateColorShade(item.hue(), shade);
         VideoDriver::driver()->fill_rect(left, color);
         VideoDriver::driver()->fill_rect(right, color);
 
-        const RgbColor lighter = GetRGBTranslateColorShade(item.color, shade + kLighterColor);
+        const RgbColor lighter = GetRGBTranslateColorShade(item.hue(), shade + kLighterColor);
         VideoDriver::driver()->fill_rect(
                 Rect(left.left, left.top, left.right - 1, left.top + 1), lighter);
         VideoDriver::driver()->fill_rect(
@@ -604,7 +604,7 @@ void draw_tab_box_button(const interfaceItemType& item) {
         VideoDriver::driver()->fill_rect(
                 Rect(right.left, right.top, right.left + 1, right.bottom - 1), lighter);
 
-        const RgbColor darker = GetRGBTranslateColorShade(item.color, shade + kDarkerColor);
+        const RgbColor darker = GetRGBTranslateColorShade(item.hue(), shade + kDarkerColor);
         VideoDriver::driver()->fill_rect(
                 Rect(left.left - 3, left.bottom - 1, left.right, left.bottom), darker);
         VideoDriver::driver()->fill_rect(
@@ -615,7 +615,7 @@ void draw_tab_box_button(const interfaceItemType& item) {
                 Rect(right.left, right.bottom - 1, right.right + 3, right.bottom), darker);
 
         Rect uRect(left.left - 3, left.bottom - 4, left.right - 1, left.bottom - 1);
-        const RgbColor color = GetRGBTranslateColorShade(item.color, shade);
+        const RgbColor color = GetRGBTranslateColorShade(item.hue(), shade);
         VideoDriver::driver()->fill_rect(uRect, color);
         Rect vRect(right.left + 1, right.bottom - 4, right.right + 3, right.bottom - 1);
         VideoDriver::driver()->fill_rect(vRect, color);
@@ -626,15 +626,15 @@ void draw_tab_box_button(const interfaceItemType& item) {
         VideoDriver::driver()->fill_rect(uRect, RgbColor::kBlack);
     }
 
-    if (item.item.radioButton.key == 0) {
+    if (item.key() == 0) {
         Rect uRect(tRect.left +  kInterfaceContentBuffer,
             tRect.top + kInterfaceContentBuffer,
             tRect.left +  kInterfaceContentBuffer,
             tRect.bottom - kInterfaceContentBuffer);
 
-        if (item.item.radioButton.on) {
+        if (item.on()) {
             shade = MEDIUM;
-        } else if (item.item.radioButton.status == kIH_Hilite) {
+        } else if (item.status() == kIH_Hilite) {
             shade = LIGHT;
         } else {
             shade = DARKER;//DARKEST + kSlightlyLighterColor;
@@ -642,49 +642,49 @@ void draw_tab_box_button(const interfaceItemType& item) {
         uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                         tRect.right - kInterfaceContentBuffer + 1,
                         tRect.bottom - kInterfaceContentBuffer + 1);
-        color = GetRGBTranslateColorShade(item.color, shade);
+        color = GetRGBTranslateColorShade(item.hue(), shade);
         VideoDriver::driver()->fill_rect(uRect, color);
 
-        if (!item.item.radioButton.on) {
-            if (item.item.radioButton.status == kIH_Hilite) {
-                color = GetRGBTranslateColorShade(item.color, DARKEST);
-            } else if (item.item.radioButton.status == kDimmed) {
-                color = GetRGBTranslateColorShade(item.color, VERY_DARK);
+        if (!item.on()) {
+            if (item.status() == kIH_Hilite) {
+                color = GetRGBTranslateColorShade(item.hue(), DARKEST);
+            } else if (item.status() == kDimmed) {
+                color = GetRGBTranslateColorShade(item.hue(), VERY_DARK);
             } else {
-                color = GetRGBTranslateColorShade(item.color, LIGHT);
+                color = GetRGBTranslateColorShade(item.hue(), LIGHT);
             }
         } else {
-            color = GetRGBTranslateColorShade(item.color, VERY_LIGHT);
+            color = GetRGBTranslateColorShade(item.hue(), VERY_LIGHT);
         }
 
-        StringList strings(item.item.radioButton.label.stringID);
-        StringSlice s = strings.at(item.item.radioButton.label.stringNumber - 1);
-        swidth = GetInterfaceStringWidth(s, item.style);
+        StringList strings(item.label().stringID);
+        StringSlice s = strings.at(item.label().stringNumber - 1);
+        swidth = GetInterfaceStringWidth(s, item.style());
         swidth = tRect.left + (tRect.right - tRect.left) / 2 - swidth / 2;
-        sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
-        DrawInterfaceString(Point(swidth, sheight), s, item.style, color);
+        sheight = GetInterfaceFontAscent(item.style()) + kInterfaceTextVBuffer + tRect.top;
+        DrawInterfaceString(Point(swidth, sheight), s, item.style(), color);
     } else {
         // draw the key code
-        if (item.item.radioButton.on) {
+        if (item.on()) {
             shade = MEDIUM + kLighterColor;
-        } else if (item.item.radioButton.status == kIH_Hilite) {
+        } else if (item.status() == kIH_Hilite) {
             shade = VERY_LIGHT;
         } else {
             shade = DARK;//DARKEST + kSlightlyLighterColor;
         }
         String s;
-        GetKeyNumName(item.item.radioButton.key, &s);
-        swidth = GetInterfaceFontWidth(item.style) * kMaxKeyNameLength;
+        GetKeyNumName(item.key(), &s);
+        swidth = GetInterfaceFontWidth(item.style()) * kMaxKeyNameLength;
 
         Rect uRect(
                 tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                 tRect.left + kInterfaceContentBuffer + swidth + kInterfaceTextHBuffer * 2 + 1,
                 tRect.bottom - kInterfaceContentBuffer + 1);
-        mDrawPuffUpRect(uRect, item.color, shade);
+        mDrawPuffUpRect(uRect, item.hue(), shade);
 
-        if (item.item.radioButton.on) {
+        if (item.on()) {
             shade = MEDIUM;
-        } else if (item.item.radioButton.status == kIH_Hilite) {
+        } else if (item.status() == kIH_Hilite) {
             shade = VERY_LIGHT;
         } else {
             shade = DARKER;//DARKEST + kSlightlyLighterColor;
@@ -694,41 +694,41 @@ void draw_tab_box_button(const interfaceItemType& item) {
                 tRect.top + kInterfaceContentBuffer,
                 tRect.right - kInterfaceContentBuffer + 1,
                 tRect.bottom - kInterfaceContentBuffer + 1);
-        color = GetRGBTranslateColorShade(item.color, shade);
+        color = GetRGBTranslateColorShade(item.hue(), shade);
         VideoDriver::driver()->fill_rect(vRect, color);
 
-        swidth = GetInterfaceStringWidth(s, item.style);
+        swidth = GetInterfaceStringWidth(s, item.style());
         swidth = uRect.left + (uRect.right - uRect.left) / 2 - swidth / 2;
-        if (item.item.radioButton.status == kDimmed) {
-            color = GetRGBTranslateColorShade(item.color, VERY_DARK);
+        if (item.status() == kDimmed) {
+            color = GetRGBTranslateColorShade(item.hue(), VERY_DARK);
         } else {
-            color = GetRGBTranslateColorShade(item.color, DARKEST);
+            color = GetRGBTranslateColorShade(item.hue(), DARKEST);
         }
 
         DrawInterfaceString(
-                Point(swidth, uRect.top + GetInterfaceFontAscent(item.style)), s, item.style,
+                Point(swidth, uRect.top + GetInterfaceFontAscent(item.style())), s, item.style(),
                 color);
 
         // draw the button title
-        if (!item.item.radioButton.on) {
-            if (item.item.radioButton.status == kIH_Hilite) {
-                color = GetRGBTranslateColorShade(item.color, DARKEST);
-            } else if (item.item.radioButton.status == kDimmed) {
-                color = GetRGBTranslateColorShade(item.color, VERY_DARK);
+        if (!item.on()) {
+            if (item.status() == kIH_Hilite) {
+                color = GetRGBTranslateColorShade(item.hue(), DARKEST);
+            } else if (item.status() == kDimmed) {
+                color = GetRGBTranslateColorShade(item.hue(), VERY_DARK);
             } else {
-                color = GetRGBTranslateColorShade(item.color, LIGHT);
+                color = GetRGBTranslateColorShade(item.hue(), LIGHT);
             }
         } else {
-            color = GetRGBTranslateColorShade(item.color, VERY_LIGHT);
+            color = GetRGBTranslateColorShade(item.hue(), VERY_LIGHT);
         }
 
         {
-            StringList strings(item.item.radioButton.label.stringID);
-            StringSlice s = strings.at(item.item.radioButton.label.stringNumber - 1);
-            swidth = GetInterfaceStringWidth(s, item.style);
+            StringList strings(item.label().stringID);
+            StringSlice s = strings.at(item.label().stringNumber - 1);
+            swidth = GetInterfaceStringWidth(s, item.style());
             swidth = uRect.right + (tRect.right - uRect.right) / 2 - swidth / 2;
-            sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
-            DrawInterfaceString(Point(swidth, sheight), s, item.style, color);
+            sheight = GetInterfaceFontAscent(item.style()) + kInterfaceTextVBuffer + tRect.top;
+            DrawInterfaceString(Point(swidth, sheight), s, item.style(), color);
         }
     }
 }
@@ -740,8 +740,8 @@ void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix) 
     unsigned char   shade;
     RgbColor        color;
 
-    if ( item.style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    tRect = item.bounds;
+    if ( item.style() == kLarge) thisHBorder = kInterfaceLargeHBorder;
+    tRect = item.bounds();
 
     tRect.left -= kInterfaceContentBuffer;
     tRect.top -= kInterfaceContentBuffer;
@@ -750,14 +750,14 @@ void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix) 
 
     // top border
 
-    if ( item.item.radioButton.status == kDimmed)
+    if ( item.status() == kDimmed)
         shade = VERY_DARK;
     else shade = MEDIUM;
 
-    mDrawPuffUpTopBorder( tRect, uRect, item.color, shade, thisHBorder, pix);
+    mDrawPuffUpTopBorder( tRect, uRect, item.hue(), shade, thisHBorder, pix);
     // bottom border
 
-    mDrawPuffUpBottomBorder( tRect, uRect, item.color, shade, thisHBorder, pix);
+    mDrawPuffUpBottomBorder( tRect, uRect, item.hue(), shade, thisHBorder, pix);
 
     // side border top
 
@@ -778,53 +778,53 @@ void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix) 
             *//*tRect.top + vcenter - kInterfaceVLipHeight + 1*//*
             tRect.bottom - kInterfaceHTop + 1);
 
-    if ( item.item.radioButton.status == kIH_Hilite)
+    if ( item.status() == kIH_Hilite)
     {
         shade = LIGHT;
-        mDrawPuffUpRect( uRect, item.color, shade, pix);
-        mDrawPuffUpRect( vRect, item.color, shade, pix);
+        mDrawPuffUpRect( uRect, item.hue(), shade, pix);
+        mDrawPuffUpRect( vRect, item.hue(), shade, pix);
 
         wRect.left += 2;
         wRect.right += 2;
         FrameOval(pix, wRect, RgbColor::kBlack);
         wRect.left -= 2;
         wRect.right -= 2;
-        mDrawPuffUpOval(wRect, item.color, shade, pix);
+        mDrawPuffUpOval(wRect, item.hue(), shade, pix);
 
         wRect.inset(3, 3);
-        mDrawPuffDownOval(wRect, item.color, shade, pix);
+        mDrawPuffDownOval(wRect, item.hue(), shade, pix);
         wRect.inset(1, 1);
 
-        if (!item.item.radioButton.on) {
+        if (!item.on()) {
             PaintOval(pix, wRect, RgbColor::kBlack);
         } else {
-            const RgbColor color = GetRGBTranslateColorShade(item.color, VERY_LIGHT);
+            const RgbColor color = GetRGBTranslateColorShade(item.hue(), VERY_LIGHT);
             PaintOval(pix, wRect, color);
         }
     } else
     {
-        if ( item.item.radioButton.status == kDimmed)
+        if ( item.status() == kDimmed)
             shade = VERY_DARK;
         else shade = MEDIUM + kSlightlyLighterColor;
-        mDrawPuffUpRect( uRect, item.color, shade, pix);
-        mDrawPuffUpRect( vRect, item.color, shade, pix);
+        mDrawPuffUpRect( uRect, item.hue(), shade, pix);
+        mDrawPuffUpRect( vRect, item.hue(), shade, pix);
         wRect.left += 2;
         wRect.right += 2;
         FrameOval(pix, wRect, RgbColor::kBlack);
         wRect.left -= 2;
         wRect.right -= 2;
-        mDrawPuffUpOval(wRect, item.color, shade, pix);
+        mDrawPuffUpOval(wRect, item.hue(), shade, pix);
 
         wRect.inset(3, 3);
-        mDrawPuffDownOval(wRect, item.color, shade, pix);
+        mDrawPuffDownOval(wRect, item.hue(), shade, pix);
         wRect.inset(1, 1);
-        if (!item.item.radioButton.on) {
+        if (!item.on()) {
             PaintOval(pix, wRect, RgbColor::kBlack);
-        } else if (item.item.radioButton.status == kActive) {
-            const RgbColor color = GetRGBTranslateColorShade(item.color, LIGHT);
+        } else if (item.status() == kActive) {
+            const RgbColor color = GetRGBTranslateColorShade(item.hue(), LIGHT);
             PaintOval(pix, wRect, color);
         } else {
-            const RgbColor color = GetRGBTranslateColorShade(item.color, MEDIUM);
+            const RgbColor color = GetRGBTranslateColorShade(item.hue(), MEDIUM);
             PaintOval(pix, wRect, color);
         }
     }
@@ -834,28 +834,28 @@ void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix) 
         tRect.left +  kInterfaceContentBuffer,
         tRect.bottom - kInterfaceContentBuffer);
 
-    if ( item.item.radioButton.status == kIH_Hilite)
+    if ( item.status() == kIH_Hilite)
         shade = LIGHT;
     else shade = DARKEST + kSlightlyLighterColor;
     uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                     tRect.right - kInterfaceContentBuffer + 1,
                     tRect.bottom - kInterfaceContentBuffer + 1);
-    color = GetRGBTranslateColorShade(item.color, shade);
+    color = GetRGBTranslateColorShade(item.hue(), shade);
     pix->view(uRect).fill(color);
 
-    if (item.item.radioButton.status == kIH_Hilite) {
-        color = GetRGBTranslateColorShade(item.color, DARKEST);
-    } else if (item.item.radioButton.status == kDimmed) {
-        color = GetRGBTranslateColorShade(item.color, DARK);
+    if (item.status() == kIH_Hilite) {
+        color = GetRGBTranslateColorShade(item.hue(), DARKEST);
+    } else if (item.status() == kDimmed) {
+        color = GetRGBTranslateColorShade(item.hue(), DARK);
     } else {
-        color = GetRGBTranslateColorShade(item.color, LIGHT);
+        color = GetRGBTranslateColorShade(item.hue(), LIGHT);
     }
-    StringList strings(item.item.radioButton.label.stringID);
-    StringSlice s = strings.at(item.item.radioButton.label.stringNumber - 1);
-    swidth = GetInterfaceStringWidth( s, item.style);
+    StringList strings(item.label().stringID);
+    StringSlice s = strings.at(item.label().stringNumber - 1);
+    swidth = GetInterfaceStringWidth( s, item.style());
     swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
-    sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
-    DrawInterfaceString(Point(swidth, sheight), s, item.style, pix, color);
+    sheight = GetInterfaceFontAscent(item.style()) + kInterfaceTextVBuffer + tRect.top;
+    DrawInterfaceString(Point(swidth, sheight), s, item.style(), pix, color);
 }
 */
 
@@ -865,8 +865,8 @@ void draw_checkbox(const interfaceItemType& item) {
     unsigned char   shade;
     RgbColor        color;
 
-    if ( item.style == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    tRect = item.bounds;
+    if ( item.style() == kLarge) thisHBorder = kInterfaceLargeHBorder;
+    tRect = item.bounds();
 
     tRect.left -= kInterfaceContentBuffer;
     tRect.top -= kInterfaceContentBuffer;
@@ -875,14 +875,14 @@ void draw_checkbox(const interfaceItemType& item) {
 
     // top border
 
-    if ( item.item.checkboxButton.status == kDimmed)
+    if ( item.status() == kDimmed)
         shade = VERY_DARK;
     else shade = MEDIUM;
 
-    mDrawPuffUpTopBorder(tRect, item.color, shade, thisHBorder);
+    mDrawPuffUpTopBorder(tRect, item.hue(), shade, thisHBorder);
     // bottom border
 
-    mDrawPuffUpBottomBorder(tRect, item.color, shade, thisHBorder);
+    mDrawPuffUpBottomBorder(tRect, item.hue(), shade, thisHBorder);
 
     // side border top
 
@@ -903,36 +903,36 @@ void draw_checkbox(const interfaceItemType& item) {
             /*tRect.top + vcenter - kInterfaceVLipHeight + 1*/
             tRect.bottom - kInterfaceHTop + 1);
 
-    if (item.item.checkboxButton.status == kIH_Hilite) {
+    if (item.status() == kIH_Hilite) {
         shade = LIGHT;
-        mDrawPuffUpRect(uRect, item.color, shade);
-        mDrawPuffUpRect(vRect, item.color, shade);
-        mDrawPuffUpRect(wRect, item.color, shade);
+        mDrawPuffUpRect(uRect, item.hue(), shade);
+        mDrawPuffUpRect(vRect, item.hue(), shade);
+        mDrawPuffUpRect(wRect, item.hue(), shade);
         wRect.inset(3, 3);
-        mDrawPuffDownRect(wRect, item.color, shade);
+        mDrawPuffDownRect(wRect, item.hue(), shade);
         wRect.inset(1, 1);
-        if ( !item.item.checkboxButton.on) {
+        if ( !item.on()) {
             color = RgbColor::kBlack;
         } else {
-            color = GetRGBTranslateColorShade(item.color, VERY_LIGHT);
+            color = GetRGBTranslateColorShade(item.hue(), VERY_LIGHT);
         }
         VideoDriver::driver()->fill_rect(wRect, color);
     } else {
-        if ( item.item.checkboxButton.status == kDimmed)
+        if ( item.status() == kDimmed)
             shade = VERY_DARK;
         else shade = MEDIUM + kSlightlyLighterColor;
-        mDrawPuffUpRect( uRect, item.color, shade);
-        mDrawPuffUpRect( vRect, item.color, shade);
-        mDrawPuffUpRect( wRect, item.color, shade);
+        mDrawPuffUpRect( uRect, item.hue(), shade);
+        mDrawPuffUpRect( vRect, item.hue(), shade);
+        mDrawPuffUpRect( wRect, item.hue(), shade);
         wRect.inset(3, 3);
-        mDrawPuffDownRect( wRect, item.color, shade);
+        mDrawPuffDownRect( wRect, item.hue(), shade);
         wRect.inset(1, 1);
-        if (!item.item.checkboxButton.on) {
+        if (!item.on()) {
             color = RgbColor::kBlack;
-        } else if (item.item.checkboxButton.status == kActive) {
-            color = GetRGBTranslateColorShade(item.color, LIGHT);
+        } else if (item.status() == kActive) {
+            color = GetRGBTranslateColorShade(item.hue(), LIGHT);
         } else {
-            color = GetRGBTranslateColorShade(item.color, MEDIUM);
+            color = GetRGBTranslateColorShade(item.hue(), MEDIUM);
         }
         VideoDriver::driver()->fill_rect(wRect, color);
     }
@@ -942,29 +942,29 @@ void draw_checkbox(const interfaceItemType& item) {
         tRect.left +  kInterfaceContentBuffer,
         tRect.bottom - kInterfaceContentBuffer);
 
-    if ( item.item.checkboxButton.status == kIH_Hilite)
+    if ( item.status() == kIH_Hilite)
         shade = LIGHT;
     else shade = DARKEST + kSlightlyLighterColor;
     uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
                     tRect.right - kInterfaceContentBuffer + 1,
                     tRect.bottom - kInterfaceContentBuffer + 1);
-    color = GetRGBTranslateColorShade(item.color, shade);
+    color = GetRGBTranslateColorShade(item.hue(), shade);
     VideoDriver::driver()->fill_rect(uRect, color);
 
-    if (item.item.checkboxButton.status == kIH_Hilite) {
-        color = GetRGBTranslateColorShade(item.color, DARKEST);
-    } else if ( item.item.checkboxButton.status == kDimmed) {
-        color = GetRGBTranslateColorShade(item.color, DARK);
+    if (item.status() == kIH_Hilite) {
+        color = GetRGBTranslateColorShade(item.hue(), DARKEST);
+    } else if ( item.status() == kDimmed) {
+        color = GetRGBTranslateColorShade(item.hue(), DARK);
     } else {
-        color = GetRGBTranslateColorShade(item.color, LIGHT);
+        color = GetRGBTranslateColorShade(item.hue(), LIGHT);
     }
 
-    StringList strings(item.item.checkboxButton.label.stringID);
-    StringSlice s = strings.at(item.item.checkboxButton.label.stringNumber - 1);
-    swidth = GetInterfaceStringWidth( s, item.style);
+    StringList strings(item.label().stringID);
+    StringSlice s = strings.at(item.label().stringNumber - 1);
+    swidth = GetInterfaceStringWidth( s, item.style());
     swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
-    sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
-    DrawInterfaceString(Point(swidth, sheight), s, item.style, color);
+    sheight = GetInterfaceFontAscent(item.style()) + kInterfaceTextVBuffer + tRect.top;
+    DrawInterfaceString(Point(swidth, sheight), s, item.style(), color);
 }
 
 void draw_labeled_box(const interfaceItemType& item) {
@@ -973,45 +973,45 @@ void draw_labeled_box(const interfaceItemType& item) {
     unsigned char   shade;
     RgbColor        color;
 
-    if (item.style == kLarge) {
+    if (item.style() == kLarge) {
         thisHBorder = kInterfaceLargeHBorder;
     }
-    tRect = item.bounds;
+    tRect = item.bounds();
     tRect.left -= kInterfaceContentBuffer;
-    tRect.top -= kInterfaceContentBuffer + GetInterfaceFontHeight(item.style) +
+    tRect.top -= kInterfaceContentBuffer + GetInterfaceFontHeight(item.style()) +
             kInterfaceTextVBuffer * 2 + kLabelBottomHeight;
     tRect.right += kInterfaceContentBuffer;
     tRect.bottom += kInterfaceContentBuffer;
 
     shade = DARK;
 
-    mDrawPuffUpTopBorder(tRect, item.color, shade, thisHBorder);
+    mDrawPuffUpTopBorder(tRect, item.hue(), shade, thisHBorder);
     // bottom border
 
-    mDrawPuffUpBottomBorder(tRect, item.color, shade, thisHBorder);
+    mDrawPuffUpBottomBorder(tRect, item.hue(), shade, thisHBorder);
 
     // draw the string
 
-    StringList strings(item.item.labeledRect.label.stringID);
-    StringSlice s = strings.at(item.item.labeledRect.label.stringNumber - 1);
-    swidth = GetInterfaceStringWidth( s, item.style) + kInterfaceTextHBuffer * 2;
+    StringList strings(item.label().stringID);
+    StringSlice s = strings.at(item.label().stringNumber - 1);
+    swidth = GetInterfaceStringWidth( s, item.style()) + kInterfaceTextHBuffer * 2;
     swidth = ( tRect.right - tRect.left) - swidth;
-    sheight = GetInterfaceFontHeight( item.style) + kInterfaceTextVBuffer * 2;
+    sheight = GetInterfaceFontHeight( item.style()) + kInterfaceTextVBuffer * 2;
 
     uRect = Rect(tRect.left + kInterfaceTextHBuffer - 1,
         tRect.top + kInterfaceHTop,
         tRect.right - swidth - kInterfaceTextHBuffer + 1,
         tRect.top + sheight - kInterfaceHTop);
-    color = GetRGBTranslateColorShade(item.color, VERY_DARK);
+    color = GetRGBTranslateColorShade(item.hue(), VERY_DARK);
     VideoDriver::driver()->fill_rect(uRect, color);
 
-    color = GetRGBTranslateColorShade(item.color, LIGHT);
+    color = GetRGBTranslateColorShade(item.hue(), LIGHT);
 
     DrawInterfaceString(
             Point(
                 tRect.left + kInterfaceTextHBuffer,
-                tRect.top + GetInterfaceFontAscent( item.style) + kInterfaceTextVBuffer),
-            s, item.style, color);
+                tRect.top + GetInterfaceFontAscent( item.style()) + kInterfaceTextVBuffer),
+            s, item.style(), color);
 
     // string left border
 
@@ -1021,7 +1021,7 @@ void draw_labeled_box(const interfaceItemType& item) {
     uRect = Rect(tRect.left - thisHBorder,
             tRect.top + kInterfaceHTop,
             tRect.left + 1, tRect.top + sheight - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, item.color, shade);
+    mDrawPuffUpRect( uRect, item.hue(), shade);
 
     // string right border
 
@@ -1030,16 +1030,16 @@ void draw_labeled_box(const interfaceItemType& item) {
         tRect.top + kInterfaceHTop,
         tRect.right - 2,
         tRect.top + sheight - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, item.color, shade);
+    mDrawPuffUpRect( uRect, item.hue(), shade);
     uRect = Rect(tRect.right,
         tRect.top + kInterfaceHTop,
         tRect.right + thisHBorder + 1,
         tRect.top + sheight - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, item.color, shade);
+    mDrawPuffUpRect( uRect, item.hue(), shade);
 
     // string bottom border
 
-    mDrawPuffUpTBorder(tRect, item.color, DARK, sheight, thisHBorder);
+    mDrawPuffUpTBorder(tRect, item.hue(), DARK, sheight, thisHBorder);
 
     // main part left border
 
@@ -1051,13 +1051,13 @@ void draw_labeled_box(const interfaceItemType& item) {
         tRect.top + kInterfaceHTop,
         tRect.left + 1,
         tRect.top + vcenter - kInterfaceVLipHeight + 1);
-    mDrawPuffUpRect( uRect, item.color, DARKER);
+    mDrawPuffUpRect( uRect, item.hue(), DARKER);
 
     uRect = Rect(tRect.left - thisHBorder,
         tRect.bottom - vcenter + kInterfaceVLipHeight,
         tRect.left + 1,
         tRect.bottom - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, item.color, VERY_DARK);
+    mDrawPuffUpRect( uRect, item.hue(), VERY_DARK);
 
     // right border
 
@@ -1065,20 +1065,20 @@ void draw_labeled_box(const interfaceItemType& item) {
         tRect.top + kInterfaceHTop,
         tRect.right + thisHBorder + 1,
         tRect.top + vcenter - kInterfaceVLipHeight + 1);
-    mDrawPuffUpRect( uRect, item.color, DARKER);
+    mDrawPuffUpRect( uRect, item.hue(), DARKER);
 
     uRect = Rect(tRect.right,
         tRect.bottom - vcenter + kInterfaceVLipHeight,
         tRect.right + thisHBorder + 1,
         tRect.bottom - kInterfaceHTop + 1);
-    mDrawPuffUpRect( uRect, item.color, VERY_DARK);
+    mDrawPuffUpRect( uRect, item.hue(), VERY_DARK);
 }
 
 void draw_text_rect(const interfaceItemType& item) {
-    Resource rsrc("text", "txt", item.item.textRect.textID);
+    Resource rsrc("text", "txt", item.id());
     String data(utf8::decode(rsrc.data()));
     vector<inlinePictType> inlinePict;
-    draw_text_in_rect(item.bounds, data, item.style, item.color, inlinePict);
+    draw_text_in_rect(item.bounds(), data, item.style(), item.hue(), inlinePict);
 }
 
 }  // namespace
@@ -1120,27 +1120,25 @@ short GetInterfaceTextHeightFromWidth(
 }
 
 void draw_interface_picture_rect(const interfaceItemType& item) {
-    if (item.item.pictureRect.visibleBounds) {
-        draw_plain_rect(item.bounds, item.color, item.style);
+    if (item.status() == kActive) {
+        draw_plain_rect(item.bounds(), item.hue(), item.style());
     }
-    Picture pict(item.item.pictureRect.pictureID);
+    Picture pict(item.id());
     Rect to = pict.size().as_rect();
-    to.offset(item.bounds.left, item.bounds.top);
-    unique_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite(
-            format("/pict/{0}", item.item.pictureRect.pictureID), pict));
-    sprite->draw(item.bounds.left, item.bounds.top);
+    to.offset(item.bounds().left, item.bounds().top);
+    unique_ptr<Sprite> sprite =
+        VideoDriver::driver()->new_sprite(format("/pict/{0}", item.id()), pict);
+    sprite->draw(item.bounds().left, item.bounds().top);
 }
 
 void draw_interface_item(const interfaceItemType& item) {
-    switch (item.kind) {
+    switch (item.kind()) {
         case kPlainRect:
-            if (item.item.pictureRect.visibleBounds) {
-                draw_plain_rect(item.bounds, item.color, item.style);
-            }
+            draw_plain_rect(item.bounds(), item.hue(), item.style());
             break;
 
         case kTabBox:
-            draw_tab_box(item.bounds, item.color, item.style, item.item.tabBox.topRightBorderSize);
+            draw_tab_box(item.bounds(), item.hue(), item.style(), item.top_right_border_size());
             break;
 
         case kLabeledRect:
@@ -1183,9 +1181,9 @@ void draw_interface_item(const interfaceItemType& item) {
 void GetAnyInterfaceItemGraphicBounds(const interfaceItemType& item, Rect *bounds) {
     short   thisHBorder = kInterfaceSmallHBorder;
 
-    *bounds = item.bounds;
+    *bounds = item.bounds();
 
-    if (item.style == kLarge) {
+    if (item.style() == kLarge) {
         thisHBorder = kInterfaceLargeHBorder;
     }
 
@@ -1194,7 +1192,7 @@ void GetAnyInterfaceItemGraphicBounds(const interfaceItemType& item, Rect *bound
     bounds->right += kInterfaceContentBuffer + 1;
     bounds->bottom += kInterfaceContentBuffer + 1;
 
-    switch (item.kind) {
+    switch (item.kind()) {
         case kPlainRect:
             bounds->left -= thisHBorder;
             bounds->right += thisHBorder;
@@ -1205,7 +1203,7 @@ void GetAnyInterfaceItemGraphicBounds(const interfaceItemType& item, Rect *bound
         case kLabeledRect:
             bounds->left -= thisHBorder;
             bounds->right += thisHBorder;
-            bounds->top -= GetInterfaceFontHeight(item.style) + kInterfaceTextVBuffer * 2 +
+            bounds->top -= GetInterfaceFontHeight(item.style()) + kInterfaceTextVBuffer * 2 +
                             kLabelBottomHeight + kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
             bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
             break;
@@ -1220,7 +1218,7 @@ void GetAnyInterfaceItemGraphicBounds(const interfaceItemType& item, Rect *bound
         case kListRect:
             bounds->left -= thisHBorder;
             bounds->right += thisHBorder;
-            bounds->top -= GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer * 2 +
+            bounds->top -= GetInterfaceFontAscent(item.style()) + kInterfaceTextVBuffer * 2 +
                             kLabelBottomHeight + kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
             bounds->bottom += kInterfaceVEdgeHeight + kInterfaceVCornerHeight;
             break;

@@ -51,16 +51,12 @@ enum interfaceStyleType {
 };
 
 struct interfaceLabelType {
-    short               stringID;
-    short               stringNumber;
+    int16_t             stringID;
+    int16_t             stringNumber;
 };
 
 struct interfaceLabeledRectType {
     interfaceLabelType  label;
-    unsigned char       color;
-    uint32_t             unused;
-    bool                editable;
-    // bool             editable;
 };
 
 struct interfaceListType {
@@ -72,47 +68,66 @@ struct interfaceListType {
 };
 
 struct interfaceTextRectType {
-    short               textID;
-    uint8_t             visibleBounds;
-    // bool             visibleBounds;
+    int16_t             textID;
+    bool                visibleBounds;
 };
 
 struct interfaceTabBoxType {
-    short               topRightBorderSize;
+    int16_t             topRightBorderSize;
 };
 
 struct interfacePictureRectType {
-    short               pictureID;
-    uint8_t             visibleBounds;
-    // bool             visibleBounds;
+    int16_t             pictureID;
+    bool                visibleBounds;
 };
 
 struct interfaceButtonType {
     interfaceLabelType          label;
-    short                       key;
-    uint8_t                     defaultButton;
-    // bool                     defaultButton;
+    int16_t                     key;
     interfaceItemStatusType     status;
 };
 
 struct interfaceRadioType {
     interfaceLabelType          label;
-    short                       key;
-    uint8_t                     on;
-    // bool                     on;
+    int16_t                     key;
+    bool                        on;
     interfaceItemStatusType     status;
 }; // also tab box button type
 
 struct interfaceCheckboxType {
     interfaceLabelType          label;
-    short                       key;
-    uint8_t                     on;
-    // bool                     on;
+    int16_t                     key;
+    bool                        on;
     interfaceItemStatusType     status;
 };
 
-struct interfaceItemType {
-    Rect            bounds;
+class interfaceItemType {
+  public:
+    interfaceKindType kind() const { return _kind; }
+    const Rect& bounds() const { return _bounds; }
+    uint8_t hue() const { return _hue; }
+    interfaceStyleType style() const { return _style; }
+    interfaceItemStatusType status() const;
+    int key() const;
+    bool on() const;
+    interfaceLabelType label() const;
+    int16_t id() const;
+    int16_t top_right_border_size() const;
+    const std::vector<interfaceItemType>& tab_content() const { return _tab_content; }
+
+    Rect& bounds() { return _bounds; }
+    void set_hue(uint8_t hue);
+    void set_status(interfaceItemStatusType status);
+    void set_key(int key);
+    void set_on(bool on);
+    void set_label(interfaceLabelType label);
+
+  private:
+    friend std::vector<interfaceItemType> interface_items(const sfz::Json& json);
+    friend interfaceItemType labeled_rect(
+            Rect bounds, uint8_t hue, interfaceStyleType style, int16_t str_id, int str_num);
+
+    Rect            _bounds;
     union
     {
         interfaceLabeledRectType    labeledRect;
@@ -123,21 +138,18 @@ struct interfaceItemType {
         interfaceCheckboxType       checkboxButton;
         interfacePictureRectType    pictureRect;
         interfaceTabBoxType         tabBox;
-    } item;
+    } _item;
 
-    uint8_t             color;
-    interfaceKindType   kind;
-    interfaceStyleType  style;
-    std::vector<interfaceItemType> tab_content;
-
-    interfaceItemStatusType status() const;
-    void set_status(interfaceItemStatusType status);
-    int key() const;
-    void set_key(int key);
-    void set_label(interfaceLabelType label);
+    uint8_t             _hue;
+    interfaceKindType   _kind;
+    interfaceStyleType  _style;
+    std::vector<interfaceItemType> _tab_content;
 };
 
 std::vector<interfaceItemType> interface_items(const sfz::Json& json);
+
+interfaceItemType labeled_rect(
+        Rect bounds, uint8_t hue, interfaceStyleType style, int16_t str_id, int str_num);
 
 }  // namespace antares
 

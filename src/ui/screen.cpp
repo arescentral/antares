@@ -59,7 +59,7 @@ InterfaceScreen::InterfaceScreen(Id id, const Rect& bounds, bool full_screen)
     const int offset_x = (_bounds.width() / 2) - 320;
     const int offset_y = (_bounds.height() / 2) - 240;
     for (auto& item: _items) {
-        item.bounds.offset(offset_x, offset_y);
+        item.bounds().offset(offset_x, offset_y);
     }
 }
 
@@ -89,10 +89,10 @@ void InterfaceScreen::draw() const {
 
     for (vector<interfaceItemType>::const_iterator it = _items.begin(); it != _items.end(); ++it) {
         interfaceItemType copy = *it;
-        copy.bounds.left += _bounds.left;
-        copy.bounds.top += _bounds.top;
-        copy.bounds.right += _bounds.left;
-        copy.bounds.bottom += _bounds.top;
+        copy.bounds().left += _bounds.left;
+        copy.bounds().top += _bounds.top;
+        copy.bounds().right += _bounds.left;
+        copy.bounds().bottom += _bounds.top;
         draw_interface_item(copy);
     }
 }
@@ -109,7 +109,7 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
         Rect bounds;
         GetAnyInterfaceItemGraphicBounds(*item, &bounds);
         if (item->status() != kDimmed && bounds.contains(where)) {
-            switch (item->kind) {
+            switch (item->kind()) {
               case kPlainButton:
               case kCheckboxButton:
               case kRadioButton:
@@ -191,8 +191,8 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
         _state = NORMAL;
         interfaceItemType* const item = &_items[hit_item];
         item->set_status(kActive);
-        if (item->kind == kTabBoxButton) {
-            item->item.radioButton.on = true;
+        if (item->kind() == kTabBoxButton) {
+            item->set_on(true);
         }
         handle_button(hit_item);
     }
@@ -213,7 +213,7 @@ void InterfaceScreen::extend(const std::vector<interfaceItemType>& items) {
     const int offset_x = (_bounds.width() / 2) - 320;
     const int offset_y = (_bounds.height() / 2) - 240;
     for (size_t i = size; i < _items.size(); ++i) {
-        _items[i].bounds.offset(offset_x, offset_y);
+        _items[i].bounds().offset(offset_x, offset_y);
     }
 }
 
@@ -231,7 +231,7 @@ interfaceItemType* InterfaceScreen::mutable_item(int i) {
 
 void InterfaceScreen::offset(int offset_x, int offset_y) {
     for (vector<interfaceItemType>::iterator it = _items.begin(); it != _items.end(); ++it) {
-        it->bounds.offset(offset_x, offset_y);
+        it->bounds().offset(offset_x, offset_y);
     }
 }
 

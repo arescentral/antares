@@ -129,7 +129,7 @@ void SelectLevelScreen::draw_level_name() const {
     retro.set_retro_text(chapter_name);
     retro.wrap_to(440, 0, 2);
 
-    retro.draw(i.bounds);
+    retro.draw(i.bounds());
 }
 
 }  // namespace antares

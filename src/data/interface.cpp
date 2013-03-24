@@ -32,41 +32,71 @@ using std::vector;
 
 namespace antares {
 
+void interfaceItemType::set_hue(uint8_t hue) {
+    _hue = hue;
+}
+
 interfaceItemStatusType interfaceItemType::status() const {
-    switch (kind) {
+    switch (_kind) {
       case kPlainButton:
-        return item.plainButton.status;
+        return _item.plainButton.status;
       case kRadioButton:
       case kTabBoxButton:
-        return item.radioButton.status;
+        return _item.radioButton.status;
       case kCheckboxButton:
-        return item.checkboxButton.status;
+        return _item.checkboxButton.status;
       case kTextRect:
-        return item.textRect.visibleBounds ? kActive : kDimmed;
+        return _item.textRect.visibleBounds ? kActive : kDimmed;
       case kPictureRect:
-        return item.pictureRect.visibleBounds ? kActive : kDimmed;
+        return _item.pictureRect.visibleBounds ? kActive : kDimmed;
       default:
         return kDimmed;
     }
 }
 
 void interfaceItemType::set_status(interfaceItemStatusType status) {
-    switch (kind) {
+    switch (_kind) {
       case kPlainButton:
-        item.plainButton.status = status;
+        _item.plainButton.status = status;
         break;
       case kRadioButton:
       case kTabBoxButton:
-        item.radioButton.status = status;
+        _item.radioButton.status = status;
         break;
       case kCheckboxButton:
-        item.checkboxButton.status = status;
+        _item.checkboxButton.status = status;
         break;
       case kTextRect:
-        item.textRect.visibleBounds = (status == kActive);
+        _item.textRect.visibleBounds = (status == kActive);
         break;
       case kPictureRect:
-        item.pictureRect.visibleBounds = (status == kActive);
+        _item.pictureRect.visibleBounds = (status == kActive);
+        break;
+      default:
+        break;
+    }
+}
+
+bool interfaceItemType::on() const {
+    switch (_kind) {
+      case kCheckboxButton:
+        return _item.checkboxButton.on;
+      case kRadioButton:
+      case kTabBoxButton:
+        return _item.radioButton.on;
+      default:
+        return false;
+    }
+}
+
+void interfaceItemType::set_on(bool on) {
+    switch (_kind) {
+      case kCheckboxButton:
+        _item.checkboxButton.on = on;
+        break;
+      case kRadioButton:
+      case kTabBoxButton:
+        _item.radioButton.on = on;
         break;
       default:
         break;
@@ -74,49 +104,87 @@ void interfaceItemType::set_status(interfaceItemStatusType status) {
 }
 
 int interfaceItemType::key() const {
-    switch (kind) {
+    switch (_kind) {
       case kPlainButton:
-        return item.plainButton.key;
+        return _item.plainButton.key;
       case kTabBoxButton:
-        return item.radioButton.key;
+        return _item.radioButton.key;
       default:
         return 0;
     }
 }
 
 void interfaceItemType::set_key(int key) {
-    switch (kind) {
+    switch (_kind) {
       case kPlainButton:
-        item.plainButton.key = key;
+        _item.plainButton.key = key;
         break;
       case kTabBoxButton:
-        item.radioButton.key = key;
+        _item.radioButton.key = key;
         break;
       default:
         break;
     }
 }
 
-void interfaceItemType::set_label(interfaceLabelType label) {
-    switch (kind) {
+interfaceLabelType interfaceItemType::label() const {
+    switch (_kind) {
       case kLabeledRect:
-        item.labeledRect.label = label;
+        return _item.labeledRect.label;
+      case kListRect:
+        return _item.listRect.label;
+      case kPlainButton:
+        return _item.plainButton.label;
+      case kRadioButton:
+      case kTabBoxButton:
+        return _item.radioButton.label;
+      case kCheckboxButton:
+        return _item.checkboxButton.label;
+      default:
+        return interfaceLabelType{};
+    }
+}
+
+void interfaceItemType::set_label(interfaceLabelType label) {
+    switch (_kind) {
+      case kLabeledRect:
+        _item.labeledRect.label = label;
         break;
       case kListRect:
-        item.listRect.label = label;
+        _item.listRect.label = label;
         break;
       case kPlainButton:
-        item.plainButton.label = label;
+        _item.plainButton.label = label;
         break;
       case kRadioButton:
       case kTabBoxButton:
-        item.radioButton.label = label;
+        _item.radioButton.label = label;
         break;
       case kCheckboxButton:
-        item.checkboxButton.label = label;
+        _item.checkboxButton.label = label;
         break;
       default:
         break;
+    }
+}
+
+int16_t interfaceItemType::id() const {
+    switch (_kind) {
+      case kPictureRect:
+        return _item.pictureRect.pictureID;
+      case kTextRect:
+        return _item.textRect.textID;
+      default:
+        return -1;
+    }
+}
+
+int16_t interfaceItemType::top_right_border_size() const {
+    switch (_kind) {
+      case kTabBox:
+        return _item.tabBox.topRightBorderSize;
+      default:
+        return 0;
     }
 }
 
@@ -177,7 +245,7 @@ vector<interfaceItemType> interface_items(const Json& json) {
     for (auto i: range(json.size())) {
         Json item_json = json.at(i);
         interfaceItemType item = {};
-        item.bounds = rect(item_json.get("bounds"));
+        item._bounds = rect(item_json.get("bounds"));
 
         sfz::StringSlice kind;
         for (auto key: {"rect", "button", "checkbox", "radio", "picture", "text", "tab-box"}) {
@@ -193,53 +261,53 @@ vector<interfaceItemType> interface_items(const Json& json) {
         Json sub = item_json.get(kind);
         if (kind == "rect") {
             if (sub.has("label")) {
-                item.kind = kLabeledRect;
+                item._kind = kLabeledRect;
             } else {
-                item.kind = kPlainRect;
-                item.item.pictureRect.visibleBounds = true;
+                item._kind = kPlainRect;
+                item._item.pictureRect.visibleBounds = true;
             }
         } else if (kind == "button") {
-            item.kind = kPlainButton;
+            item._kind = kPlainButton;
             item.set_status(kActive);
         } else if (kind == "checkbox") {
-            item.kind = kCheckboxButton;
+            item._kind = kCheckboxButton;
             item.set_status(kActive);
         } else if (kind == "radio") {
-            item.kind = kRadioButton;
+            item._kind = kRadioButton;
             item.set_status(kActive);
         } else if (kind == "picture") {
-            item.kind = kPictureRect;
-            item.item.pictureRect.pictureID = sub.get("id").number();
+            item._kind = kPictureRect;
+            item._item.pictureRect.pictureID = sub.get("id").number();
         } else if (kind == "text") {
-            item.kind = kTextRect;
-            item.item.textRect.textID = sub.get("id").number();
+            item._kind = kTextRect;
+            item._item.textRect.textID = sub.get("id").number();
         } else if (kind == "tab-box") {
-            item.kind = kTabBox;
+            item._kind = kTabBox;
             interfaceItemType button = {};
-            button.kind = kTabBoxButton;
-            button.bounds = {
-                item.bounds.left + 22,
-                item.bounds.top - 20,
+            button._kind = kTabBoxButton;
+            button._bounds = {
+                item._bounds.left + 22,
+                item._bounds.top - 20,
                 0,
-                item.bounds.top - 10,
+                item._bounds.top - 10,
             };
-            button.color = hue(sub.get("hue"));
-            button.style = style(sub.get("style"));
+            button._hue = hue(sub.get("hue"));
+            button._style = style(sub.get("style"));
             button.set_status(kActive);
             Json tabs = sub.get("tabs");
             for (auto i: range(tabs.size())) {
                 Json tab = tabs.at(i);
-                button.bounds.right = button.bounds.left + tab.get("width").number();
+                button._bounds.right = button._bounds.left + tab.get("width").number();
                 button.set_label(label(tab.get("label")));
-                button.tab_content = interface_items(tab.get("content"));
+                button._tab_content = interface_items(tab.get("content"));
                 items.emplace_back(button);
-                button.bounds.left = button.bounds.right + 37;
+                button._bounds.left = button._bounds.right + 37;
             }
-            item.item.tabBox.topRightBorderSize = item.bounds.right - button.bounds.right - 17;
+            item._item.tabBox.topRightBorderSize = item._bounds.right - button._bounds.right - 17;
         }
 
-        item.color = hue(sub.get("hue"));
-        item.style = style(sub.get("style"));
+        item._hue = hue(sub.get("hue"));
+        item._style = style(sub.get("style"));
         if (sub.has("key")) {
             item.set_key(key(sub.get("key")));
         }
@@ -249,6 +317,18 @@ vector<interfaceItemType> interface_items(const Json& json) {
         items.emplace_back(item);
     }
     return items;
+}
+
+interfaceItemType labeled_rect(
+        Rect bounds, uint8_t hue, interfaceStyleType style, int16_t str_id, int str_num) {
+    interfaceItemType item = {};
+    item._bounds = bounds;
+    item._kind = kLabeledRect;
+    item._hue = hue;
+    item._style = style;
+    item._item.labeledRect.label.stringID = str_id;
+    item._item.labeledRect.label.stringNumber = str_num;
+    return item;
 }
 
 }  // namespace antares
