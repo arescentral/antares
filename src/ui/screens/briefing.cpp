@@ -51,6 +51,12 @@ const int kMissionStarPointWidth = 16;
 const int kMissionStarPointHeight = 12;
 const int32_t kMissionDataHiliteColor = GOLD;
 
+InterfaceItem data_item(const InterfaceItem& map_rect) {
+    Rect bounds(0, 0, 200, 200);
+    bounds.center_in(map_rect.bounds());
+    return labeled_rect(bounds, GOLD, kLarge, 4000, 1);
+}
+
 }  // namespace
 
 BriefingScreen::BriefingScreen(const Scenario* scenario, bool* cancelled)
@@ -58,12 +64,8 @@ BriefingScreen::BriefingScreen(const Scenario* scenario, bool* cancelled)
           _scenario(scenario),
           _cancelled(cancelled),
           _briefing_point(0),
-          _briefing_point_count(_scenario->brief_point_size() + 2) {
-    Rect map_rect = item(MAP_RECT).bounds();
-    Rect bounds(0, 0, 200, 200);
-    bounds.center_in(map_rect);
-
-    _data_item = labeled_rect(bounds, GOLD, kLarge, 4000, 1);
+          _briefing_point_count(_scenario->brief_point_size() + 2),
+          _data_item(data_item(item(MAP_RECT))) {
 
     build_star_map();
     build_system_map();
@@ -150,14 +152,14 @@ void BriefingScreen::key_down(const KeyDownEvent& event) {
 
 void BriefingScreen::adjust_interface() {
     if (_briefing_point > 0) {
-        mutable_item(PREVIOUS)->set_status(kActive);
+        mutable_item(PREVIOUS).set_status(kActive);
     } else {
-        mutable_item(PREVIOUS)->set_status(kDimmed);
+        mutable_item(PREVIOUS).set_status(kDimmed);
     }
     if (_briefing_point < _briefing_point_count - 1) {
-        mutable_item(NEXT)->set_status(kActive);
+        mutable_item(NEXT).set_status(kActive);
     } else {
-        mutable_item(NEXT)->set_status(kDimmed);
+        mutable_item(NEXT).set_status(kDimmed);
     }
 }
 

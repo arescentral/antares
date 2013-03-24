@@ -83,26 +83,26 @@ SoundControlScreen::SoundControlScreen(OptionsScreen::State* state, Preferences*
 SoundControlScreen::~SoundControlScreen() { }
 
 void SoundControlScreen::adjust_interface() {
-    mutable_item(IDLE_MUSIC)->set_on(_preferences->play_idle_music());
-    mutable_item(GAME_MUSIC)->set_on(_preferences->play_music_in_game());
-    mutable_item(SPEECH_ON)->set_on(_preferences->speech_on());
+    mutable_item(IDLE_MUSIC).set_on(_preferences->play_idle_music());
+    mutable_item(GAME_MUSIC).set_on(_preferences->play_music_in_game());
+    mutable_item(SPEECH_ON).set_on(_preferences->speech_on());
 
     if (false) {  // TODO(sfiera): if speech available.
-        mutable_item(SPEECH_ON)->set_status(kActive);
+        mutable_item(SPEECH_ON).set_status(kActive);
     } else {
-        mutable_item(SPEECH_ON)->set_status(kDimmed);
+        mutable_item(SPEECH_ON).set_status(kDimmed);
     }
 
     if (_preferences->volume() > 0) {
-        mutable_item(VOLUME_DOWN)->set_status(kActive);
+        mutable_item(VOLUME_DOWN).set_status(kActive);
     } else {
-        mutable_item(VOLUME_DOWN)->set_status(kDimmed);
+        mutable_item(VOLUME_DOWN).set_status(kDimmed);
     }
 
     if (_preferences->volume() < kMaxVolumePreference) {
-        mutable_item(VOLUME_UP)->set_status(kActive);
+        mutable_item(VOLUME_UP).set_status(kActive);
     } else {
-        mutable_item(VOLUME_UP)->set_status(kDimmed);
+        mutable_item(VOLUME_UP).set_status(kDimmed);
     }
 }
 
@@ -261,19 +261,19 @@ void KeyControlScreen::fire_timer() {
 
 void KeyControlScreen::adjust_interface() {
     for (size_t i = SHIP_TAB; i <= HOT_KEY_TAB; ++i) {
-        mutable_item(i)->set_hue(AQUA);
+        mutable_item(i).set_hue(AQUA);
     }
 
     for (size_t i = _key_start; i < size(); ++i) {
         size_t key = kKeyIndices[_tab] + i - _key_start;
         int key_num = _preferences->key(key);
-        mutable_item(i)->set_key(key_num);
+        mutable_item(i).set_key(key_num);
         if (key == _selected_key) {
-            mutable_item(i)->set_status(kIH_Hilite);
+            mutable_item(i).set_status(kIH_Hilite);
         } else {
-            mutable_item(i)->set_status(kActive);
+            mutable_item(i).set_status(kActive);
         }
-        mutable_item(i)->set_hue(AQUA);
+        mutable_item(i).set_hue(AQUA);
     }
 
     if (_flashed_on) {
@@ -285,11 +285,11 @@ void KeyControlScreen::adjust_interface() {
     }
 
     if (_conflicts.empty()) {
-        mutable_item(DONE)->set_status(kActive);
-        mutable_item(SOUND_CONTROL)->set_status(kActive);
+        mutable_item(DONE).set_status(kActive);
+        mutable_item(SOUND_CONTROL).set_status(kActive);
     } else {
-        mutable_item(DONE)->set_status(kDimmed);
-        mutable_item(SOUND_CONTROL)->set_status(kDimmed);
+        mutable_item(DONE).set_status(kDimmed);
+        mutable_item(SOUND_CONTROL).set_status(kDimmed);
     }
 }
 
@@ -340,7 +340,7 @@ void KeyControlScreen::draw() const {
                     tabs.at(get_tab_num(key_one)), keys.at(key_one),
                     tabs.at(get_tab_num(key_two)), keys.at(key_two)));
 
-        const interfaceItemType& box = item(CONFLICT_TEXT);
+        const InterfaceItem& box = item(CONFLICT_TEXT);
         vector<inlinePictType> pict;
         draw_text_in_rect(box.bounds(), text, box.style(), box.hue(), pict);
     }
@@ -388,10 +388,10 @@ void KeyControlScreen::set_tab(Tab tab) {
     truncate(_key_start);
     for (int i = SHIP_TAB; i <= HOT_KEY_TAB; ++i) {
         if (buttons[tab] == i) {
-            mutable_item(i)->set_on(true);
-            extend(mutable_item(i)->tab_content());
+            mutable_item(i).set_on(true);
+            extend(mutable_item(i).tab_content());
         } else {
-            mutable_item(i)->set_on(false);
+            mutable_item(i).set_on(false);
         }
     }
     _tab = tab;
@@ -421,9 +421,9 @@ void KeyControlScreen::update_conflicts() {
 
 void KeyControlScreen::flash_on(size_t key) {
     if (kKeyIndices[_tab] <= key && key < kKeyIndices[_tab + 1]) {
-        mutable_item(key - kKeyIndices[_tab] + _key_start)->set_hue(GOLD);
+        mutable_item(key - kKeyIndices[_tab] + _key_start).set_hue(GOLD);
     } else {
-        mutable_item(SHIP_TAB + get_tab_num(key))->set_hue(GOLD);
+        mutable_item(SHIP_TAB + get_tab_num(key)).set_hue(GOLD);
     }
 }
 

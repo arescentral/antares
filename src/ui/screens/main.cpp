@@ -105,13 +105,13 @@ void MainScreen::key_up(const KeyUpEvent& event) {
 
 void MainScreen::adjust_interface() {
     // TODO(sfiera): switch on whether or not network games are available.
-    mutable_item(START_NETWORK_GAME)->set_status(kDimmed);
+    mutable_item(START_NETWORK_GAME).set_status(kDimmed);
 
     // TODO(sfiera): switch on whether or not there is a single-player campaign.
-    mutable_item(START_NEW_GAME)->set_status(kActive);
+    mutable_item(START_NEW_GAME).set_status(kActive);
 
     if (_replays.size() == 0) {
-        mutable_item(DEMO)->set_status(kDimmed);
+        mutable_item(DEMO).set_status(kDimmed);
     }
 }
 

@@ -63,7 +63,7 @@ void string_replace(String* s, const String& in, const PrintItem& out) {
     }
 }
 
-interfaceItemType interface_item(const Rect& text_bounds) {
+InterfaceItem interface_item(const Rect& text_bounds) {
     return labeled_rect(text_bounds, GOLD, kLarge, 2001, 29);
 }
 

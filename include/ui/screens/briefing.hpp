@@ -70,7 +70,7 @@ class BriefingScreen : public InterfaceScreen {
     bool* const _cancelled;
     int _briefing_point;
     const int _briefing_point_count;
-    mutable interfaceItemType _data_item;
+    mutable InterfaceItem _data_item;
 
     Rect _bounds;
 

@@ -366,7 +366,7 @@ void draw_tab_box(Rect r, uint8_t color, interfaceStyleType style, int top_right
     mDrawPuffUpRect(uRect, color, VERY_DARK);
 }
 
-void draw_button(const interfaceItemType& item) {
+void draw_button(Rect bounds, const InterfaceItem& item) {
     Rect            tRect, uRect, vRect;
     short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     unsigned char   shade;
@@ -375,7 +375,7 @@ void draw_button(const interfaceItemType& item) {
     if (item.style() == kLarge) {
         thisHBorder = kInterfaceLargeHBorder;
     }
-    tRect = item.bounds();
+    tRect = bounds;
 
     uRect = tRect;
     uRect.right++;
@@ -512,7 +512,7 @@ void draw_button(const interfaceItemType& item) {
     }
 }
 
-void draw_tab_box_button(const interfaceItemType& item) {
+void draw_tab_box_button(Rect bounds, const InterfaceItem& item) {
     Rect            tRect;
     short           vcenter, swidth, sheight, h_border = kInterfaceSmallHBorder;
     unsigned char   shade;
@@ -521,7 +521,7 @@ void draw_tab_box_button(const interfaceItemType& item) {
     if (item.style() == kLarge) {
         h_border = kInterfaceLargeHBorder;
     }
-    tRect = item.bounds();
+    tRect = bounds;
 
     tRect.left -= kInterfaceContentBuffer;
     tRect.top -= kInterfaceContentBuffer;
@@ -734,14 +734,14 @@ void draw_tab_box_button(const interfaceItemType& item) {
 }
 
 /*
-void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix) {
+void DrawPlayerInterfaceRadioButton(Rect bounds, const InterfaceItem& item, PixMap* pix) {
     Rect            tRect, uRect, vRect, wRect;
     short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     unsigned char   shade;
     RgbColor        color;
 
     if ( item.style() == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    tRect = item.bounds();
+    tRect = bounds;
 
     tRect.left -= kInterfaceContentBuffer;
     tRect.top -= kInterfaceContentBuffer;
@@ -859,14 +859,14 @@ void DrawPlayerInterfaceRadioButton(const interfaceItemType& item, PixMap* pix) 
 }
 */
 
-void draw_checkbox(const interfaceItemType& item) {
+void draw_checkbox(Rect bounds, const InterfaceItem& item) {
     Rect            tRect, uRect, vRect, wRect;
     short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     unsigned char   shade;
     RgbColor        color;
 
     if ( item.style() == kLarge) thisHBorder = kInterfaceLargeHBorder;
-    tRect = item.bounds();
+    tRect = bounds;
 
     tRect.left -= kInterfaceContentBuffer;
     tRect.top -= kInterfaceContentBuffer;
@@ -967,7 +967,7 @@ void draw_checkbox(const interfaceItemType& item) {
     DrawInterfaceString(Point(swidth, sheight), s, item.style(), color);
 }
 
-void draw_labeled_box(const interfaceItemType& item) {
+void draw_labeled_box(Rect bounds, const InterfaceItem& item) {
     Rect            tRect, uRect;
     short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     unsigned char   shade;
@@ -976,7 +976,7 @@ void draw_labeled_box(const interfaceItemType& item) {
     if (item.style() == kLarge) {
         thisHBorder = kInterfaceLargeHBorder;
     }
-    tRect = item.bounds();
+    tRect = bounds;
     tRect.left -= kInterfaceContentBuffer;
     tRect.top -= kInterfaceContentBuffer + GetInterfaceFontHeight(item.style()) +
             kInterfaceTextVBuffer * 2 + kLabelBottomHeight;
@@ -1074,11 +1074,11 @@ void draw_labeled_box(const interfaceItemType& item) {
     mDrawPuffUpRect( uRect, item.hue(), VERY_DARK);
 }
 
-void draw_text_rect(const interfaceItemType& item) {
+void draw_text_rect(Rect bounds, const InterfaceItem& item) {
     Resource rsrc("text", "txt", item.id());
     String data(utf8::decode(rsrc.data()));
     vector<inlinePictType> inlinePict;
-    draw_text_in_rect(item.bounds(), data, item.style(), item.hue(), inlinePict);
+    draw_text_in_rect(bounds, data, item.style(), item.hue(), inlinePict);
 }
 
 }  // namespace
@@ -1119,30 +1119,36 @@ short GetInterfaceTextHeightFromWidth(
     return interface_text.height();
 }
 
-void draw_interface_picture_rect(const interfaceItemType& item) {
+void draw_interface_picture_rect(Rect bounds, const InterfaceItem& item) {
     if (item.status() == kActive) {
-        draw_plain_rect(item.bounds(), item.hue(), item.style());
+        draw_plain_rect(bounds, item.hue(), item.style());
     }
     Picture pict(item.id());
     Rect to = pict.size().as_rect();
-    to.offset(item.bounds().left, item.bounds().top);
+    to.offset(bounds.left, bounds.top);
     unique_ptr<Sprite> sprite =
         VideoDriver::driver()->new_sprite(format("/pict/{0}", item.id()), pict);
-    sprite->draw(item.bounds().left, item.bounds().top);
+    sprite->draw(bounds.left, bounds.top);
 }
 
-void draw_interface_item(const interfaceItemType& item) {
+void draw_interface_item(const InterfaceItem& item) {
+    draw_interface_item(item, {0, 0});
+}
+
+void draw_interface_item(const InterfaceItem& item, Point origin) {
+    Rect bounds = item.bounds();
+    bounds.offset(origin.h, origin.v);
     switch (item.kind()) {
         case kPlainRect:
-            draw_plain_rect(item.bounds(), item.hue(), item.style());
+            draw_plain_rect(bounds, item.hue(), item.style());
             break;
 
         case kTabBox:
-            draw_tab_box(item.bounds(), item.hue(), item.style(), item.top_right_border_size());
+            draw_tab_box(bounds, item.hue(), item.style(), item.top_right_border_size());
             break;
 
         case kLabeledRect:
-            draw_labeled_box(item);
+            draw_labeled_box(bounds, item);
             break;
 
         case kListRect:
@@ -1150,11 +1156,11 @@ void draw_interface_item(const interfaceItemType& item) {
             break;
 
         case kTextRect:
-            draw_text_rect(item);
+            draw_text_rect(bounds, item);
             break;
 
         case kPlainButton:
-            draw_button(item);
+            draw_button(bounds, item);
             break;
 
         case kRadioButton:
@@ -1162,15 +1168,15 @@ void draw_interface_item(const interfaceItemType& item) {
             break;
 
         case kTabBoxButton:
-            draw_tab_box_button(item);
+            draw_tab_box_button(bounds, item);
             break;
 
         case kCheckboxButton:
-            draw_checkbox(item);
+            draw_checkbox(bounds, item);
             break;
 
         case kPictureRect:
-            draw_interface_picture_rect(item);
+            draw_interface_picture_rect(bounds, item);
             break;
 
         default:
@@ -1178,7 +1184,7 @@ void draw_interface_item(const interfaceItemType& item) {
     }
 }
 
-void GetAnyInterfaceItemGraphicBounds(const interfaceItemType& item, Rect *bounds) {
+void GetAnyInterfaceItemGraphicBounds(const InterfaceItem& item, Rect *bounds) {
     short   thisHBorder = kInterfaceSmallHBorder;
 
     *bounds = item.bounds();

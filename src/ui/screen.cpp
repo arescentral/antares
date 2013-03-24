@@ -35,6 +35,7 @@ using sfz::String;
 using sfz::StringMap;
 using sfz::StringSlice;
 using sfz::format;
+using sfz::range;
 using sfz::read;
 using sfz::string_to_json;
 using std::unique_ptr;
@@ -59,7 +60,7 @@ InterfaceScreen::InterfaceScreen(Id id, const Rect& bounds, bool full_screen)
     const int offset_x = (_bounds.width() / 2) - 320;
     const int offset_y = (_bounds.height() / 2) - 240;
     for (auto& item: _items) {
-        item.bounds().offset(offset_x, offset_y);
+        item->bounds().offset(offset_x, offset_y);
     }
 }
 
@@ -76,10 +77,10 @@ void InterfaceScreen::draw() const {
         copy_area = _bounds;
     } else {
         next()->draw();
-        GetAnyInterfaceItemGraphicBounds(_items[0], &copy_area);
+        GetAnyInterfaceItemGraphicBounds(*_items[0], &copy_area);
         for (size_t i = 1; i < _items.size(); ++i) {
             Rect r;
-            GetAnyInterfaceItemGraphicBounds(_items[i], &r);
+            GetAnyInterfaceItemGraphicBounds(*_items[i], &r);
             copy_area.enlarge_to(r);
         }
     }
@@ -87,13 +88,8 @@ void InterfaceScreen::draw() const {
     copy_area.offset(_bounds.left, _bounds.top);
     VideoDriver::driver()->fill_rect(copy_area, RgbColor::kBlack);
 
-    for (vector<interfaceItemType>::const_iterator it = _items.begin(); it != _items.end(); ++it) {
-        interfaceItemType copy = *it;
-        copy.bounds().left += _bounds.left;
-        copy.bounds().top += _bounds.top;
-        copy.bounds().right += _bounds.left;
-        copy.bounds().bottom += _bounds.top;
-        draw_interface_item(copy);
+    for (const auto& item: _items) {
+        draw_interface_item(*item, _bounds.origin());
     }
 }
 
@@ -104,8 +100,8 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
     if (event.button() != 0) {
         return;
     }
-    for (size_t i = 0; i < _items.size(); ++i) {
-        interfaceItemType* const item = &_items[i];
+    for (auto i: range(_items.size())) {
+        InterfaceItem* const item = _items[i].get();
         Rect bounds;
         GetAnyInterfaceItemGraphicBounds(*item, &bounds);
         if (item->status() != kDimmed && bounds.contains(where)) {
@@ -149,7 +145,7 @@ void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
         _hit_item = 0;
 
         _state = NORMAL;
-        interfaceItemType* const item = &_items[hit_item];
+        InterfaceItem* const item = _items[hit_item].get();
         Rect bounds;
         GetAnyInterfaceItemGraphicBounds(*item, &bounds);
         item->set_status(kActive);
@@ -168,7 +164,7 @@ void InterfaceScreen::mouse_move(const MouseMoveEvent& event) {
 void InterfaceScreen::key_down(const KeyDownEvent& event) {
     const int32_t key_code = event.key() + 1;
     for (size_t i = 0; i < _items.size(); ++i) {
-        interfaceItemType* const item = &_items[i];
+        InterfaceItem* const item = _items[i].get();
         if (item->status() != kDimmed && item->key() == key_code) {
             _state = KEY_DOWN;
             item->set_status(kIH_Hilite);
@@ -189,7 +185,7 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
         _hit_item = 0;
 
         _state = NORMAL;
-        interfaceItemType* const item = &_items[hit_item];
+        InterfaceItem* const item = _items[hit_item].get();
         item->set_status(kActive);
         if (item->kind() == kTabBoxButton) {
             item->set_on(true);
@@ -207,13 +203,12 @@ void InterfaceScreen::truncate(size_t size) {
     _items.resize(size);
 }
 
-void InterfaceScreen::extend(const std::vector<interfaceItemType>& items) {
-    size_t size = _items.size();
-    _items.insert(_items.end(), items.begin(), items.end());
+void InterfaceScreen::extend(const vector<unique_ptr<InterfaceItem>>& items) {
     const int offset_x = (_bounds.width() / 2) - 320;
     const int offset_y = (_bounds.height() / 2) - 240;
-    for (size_t i = size; i < _items.size(); ++i) {
-        _items[i].bounds().offset(offset_x, offset_y);
+    for (const auto& item: items) {
+        _items.emplace_back(item->clone());
+        _items.back()->bounds().offset(offset_x, offset_y);
     }
 }
 
@@ -221,17 +216,17 @@ size_t InterfaceScreen::size() const {
     return _items.size();
 }
 
-const interfaceItemType& InterfaceScreen::item(int i) const {
-    return _items[i];
+const InterfaceItem& InterfaceScreen::item(int i) const {
+    return *_items[i];
 }
 
-interfaceItemType* InterfaceScreen::mutable_item(int i) {
-    return &_items[i];
+InterfaceItem& InterfaceScreen::mutable_item(int i) {
+    return *_items[i];
 }
 
 void InterfaceScreen::offset(int offset_x, int offset_y) {
-    for (vector<interfaceItemType>::iterator it = _items.begin(); it != _items.end(); ++it) {
-        it->bounds().offset(offset_x, offset_y);
+    for (auto& item: _items) {
+        item->bounds().offset(offset_x, offset_y);
     }
 }
 

@@ -68,11 +68,11 @@ class InterfaceScreen : public Card {
     virtual void handle_button(int button) = 0;
 
     void truncate(size_t size);
-    void extend(const std::vector<interfaceItemType>& items);
+    void extend(const std::vector<std::unique_ptr<InterfaceItem>>& items);
 
     size_t size() const;
-    const interfaceItemType& item(int index) const;
-    interfaceItemType* mutable_item(int index);
+    const InterfaceItem& item(int index) const;
+    InterfaceItem& mutable_item(int index);
     void offset(int offset_x, int offset_y);
 
   private:
@@ -85,7 +85,7 @@ class InterfaceScreen : public Card {
 
     const Rect _bounds;
     const bool _full_screen;
-    std::vector<interfaceItemType> _items;
+    std::vector<std::unique_ptr<InterfaceItem>> _items;
     int _hit_item;
 
     DISALLOW_COPY_AND_ASSIGN(InterfaceScreen);

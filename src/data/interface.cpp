@@ -28,15 +28,38 @@ using sfz::Json;
 using sfz::ReadSource;
 using sfz::StringMap;
 using sfz::range;
+using std::unique_ptr;
 using std::vector;
 
 namespace antares {
 
-void interfaceItemType::set_hue(uint8_t hue) {
+InterfaceItem::InterfaceItem() {
+    memset(&_item, 0, sizeof(_item));
+    _hue = 0;
+    _kind = kPlainRect;
+    _style = kLarge;
+}
+
+InterfaceItem::InterfaceItem(const InterfaceItem& other) {
+    _bounds = other._bounds;
+    memcpy(&_item, &other._item, sizeof(_item));
+    _hue = other._hue;
+    _kind = other._kind;
+    _style = other._style;
+    for (const auto& item: other.tab_content()) {
+        _tab_content.emplace_back(item->clone());
+    }
+}
+
+unique_ptr<InterfaceItem> InterfaceItem::clone() const {
+    return unique_ptr<InterfaceItem>(new InterfaceItem(*this));
+}
+
+void InterfaceItem::set_hue(uint8_t hue) {
     _hue = hue;
 }
 
-interfaceItemStatusType interfaceItemType::status() const {
+interfaceItemStatusType InterfaceItem::status() const {
     switch (_kind) {
       case kPlainButton:
         return _item.plainButton.status;
@@ -54,7 +77,7 @@ interfaceItemStatusType interfaceItemType::status() const {
     }
 }
 
-void interfaceItemType::set_status(interfaceItemStatusType status) {
+void InterfaceItem::set_status(interfaceItemStatusType status) {
     switch (_kind) {
       case kPlainButton:
         _item.plainButton.status = status;
@@ -77,7 +100,7 @@ void interfaceItemType::set_status(interfaceItemStatusType status) {
     }
 }
 
-bool interfaceItemType::on() const {
+bool InterfaceItem::on() const {
     switch (_kind) {
       case kCheckboxButton:
         return _item.checkboxButton.on;
@@ -89,7 +112,7 @@ bool interfaceItemType::on() const {
     }
 }
 
-void interfaceItemType::set_on(bool on) {
+void InterfaceItem::set_on(bool on) {
     switch (_kind) {
       case kCheckboxButton:
         _item.checkboxButton.on = on;
@@ -103,7 +126,7 @@ void interfaceItemType::set_on(bool on) {
     }
 }
 
-int interfaceItemType::key() const {
+int InterfaceItem::key() const {
     switch (_kind) {
       case kPlainButton:
         return _item.plainButton.key;
@@ -114,7 +137,7 @@ int interfaceItemType::key() const {
     }
 }
 
-void interfaceItemType::set_key(int key) {
+void InterfaceItem::set_key(int key) {
     switch (_kind) {
       case kPlainButton:
         _item.plainButton.key = key;
@@ -127,7 +150,7 @@ void interfaceItemType::set_key(int key) {
     }
 }
 
-interfaceLabelType interfaceItemType::label() const {
+interfaceLabelType InterfaceItem::label() const {
     switch (_kind) {
       case kLabeledRect:
         return _item.labeledRect.label;
@@ -145,7 +168,7 @@ interfaceLabelType interfaceItemType::label() const {
     }
 }
 
-void interfaceItemType::set_label(interfaceLabelType label) {
+void InterfaceItem::set_label(interfaceLabelType label) {
     switch (_kind) {
       case kLabeledRect:
         _item.labeledRect.label = label;
@@ -168,7 +191,7 @@ void interfaceItemType::set_label(interfaceLabelType label) {
     }
 }
 
-int16_t interfaceItemType::id() const {
+int16_t InterfaceItem::id() const {
     switch (_kind) {
       case kPictureRect:
         return _item.pictureRect.pictureID;
@@ -179,7 +202,7 @@ int16_t interfaceItemType::id() const {
     }
 }
 
-int16_t interfaceItemType::top_right_border_size() const {
+int16_t InterfaceItem::top_right_border_size() const {
     switch (_kind) {
       case kTabBox:
         return _item.tabBox.topRightBorderSize;
@@ -240,11 +263,11 @@ static int16_t key(const Json& json) {
     return k;
 }
 
-vector<interfaceItemType> interface_items(const Json& json) {
-    vector<interfaceItemType> items;
+vector<unique_ptr<InterfaceItem>> interface_items(const Json& json) {
+    vector<unique_ptr<InterfaceItem>> items;
     for (auto i: range(json.size())) {
         Json item_json = json.at(i);
-        interfaceItemType item = {};
+        InterfaceItem item = {};
         item._bounds = rect(item_json.get("bounds"));
 
         sfz::StringSlice kind;
@@ -283,7 +306,7 @@ vector<interfaceItemType> interface_items(const Json& json) {
             item._item.textRect.textID = sub.get("id").number();
         } else if (kind == "tab-box") {
             item._kind = kTabBox;
-            interfaceItemType button = {};
+            InterfaceItem button = {};
             button._kind = kTabBoxButton;
             button._bounds = {
                 item._bounds.left + 22,
@@ -300,7 +323,7 @@ vector<interfaceItemType> interface_items(const Json& json) {
                 button._bounds.right = button._bounds.left + tab.get("width").number();
                 button.set_label(label(tab.get("label")));
                 button._tab_content = interface_items(tab.get("content"));
-                items.emplace_back(button);
+                items.emplace_back(button.clone());
                 button._bounds.left = button._bounds.right + 37;
             }
             item._item.tabBox.topRightBorderSize = item._bounds.right - button._bounds.right - 17;
@@ -314,14 +337,14 @@ vector<interfaceItemType> interface_items(const Json& json) {
         if (sub.has("label")) {
             item.set_label(label(sub.get("label")));
         }
-        items.emplace_back(item);
+        items.emplace_back(item.clone());
     }
     return items;
 }
 
-interfaceItemType labeled_rect(
+InterfaceItem labeled_rect(
         Rect bounds, uint8_t hue, interfaceStyleType style, int16_t str_id, int str_num) {
-    interfaceItemType item = {};
+    InterfaceItem item = {};
     item._bounds = bounds;
     item._kind = kLabeledRect;
     item._hue = hue;

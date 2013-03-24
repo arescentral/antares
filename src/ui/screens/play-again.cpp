@@ -70,7 +70,7 @@ void PlayAgainScreen::become_front() {
 
 void PlayAgainScreen::adjust_interface() {
     // TODO(sfiera): disable if networked.
-    mutable_item(RESTART)->set_status(kActive);
+    mutable_item(RESTART).set_status(kActive);
 }
 
 void PlayAgainScreen::handle_button(int button) {

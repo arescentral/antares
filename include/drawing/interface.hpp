@@ -44,9 +44,10 @@ void populate_inline_picts(
 
 short GetInterfaceTextHeightFromWidth(
         const sfz::StringSlice& text, interfaceStyleType style, short width);
-void draw_interface_item(const interfaceItemType& item);
+void draw_interface_item(const InterfaceItem& item);
+void draw_interface_item(const InterfaceItem& item, Point origin);
 
-void GetAnyInterfaceItemGraphicBounds(const interfaceItemType& item, Rect* rect);
+void GetAnyInterfaceItemGraphicBounds(const InterfaceItem& item, Rect* rect);
 
 }  // namespace antares
 

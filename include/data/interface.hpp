@@ -101,8 +101,14 @@ struct interfaceCheckboxType {
     interfaceItemStatusType     status;
 };
 
-class interfaceItemType {
+class InterfaceItem {
   public:
+    InterfaceItem(InterfaceItem&&) = default;
+    InterfaceItem& operator=(InterfaceItem&&) = default;
+
+    // TODO(sfiera): don't clone.  It's usually frivolous.
+    std::unique_ptr<InterfaceItem> clone() const;
+
     interfaceKindType kind() const { return _kind; }
     const Rect& bounds() const { return _bounds; }
     uint8_t hue() const { return _hue; }
@@ -113,7 +119,7 @@ class interfaceItemType {
     interfaceLabelType label() const;
     int16_t id() const;
     int16_t top_right_border_size() const;
-    const std::vector<interfaceItemType>& tab_content() const { return _tab_content; }
+    const std::vector<std::unique_ptr<InterfaceItem>>& tab_content() const { return _tab_content; }
 
     Rect& bounds() { return _bounds; }
     void set_hue(uint8_t hue);
@@ -123,9 +129,12 @@ class interfaceItemType {
     void set_label(interfaceLabelType label);
 
   private:
-    friend std::vector<interfaceItemType> interface_items(const sfz::Json& json);
-    friend interfaceItemType labeled_rect(
+    friend std::vector<std::unique_ptr<InterfaceItem>> interface_items(const sfz::Json& json);
+    friend InterfaceItem labeled_rect(
             Rect bounds, uint8_t hue, interfaceStyleType style, int16_t str_id, int str_num);
+
+    InterfaceItem();
+    InterfaceItem(const InterfaceItem&);
 
     Rect            _bounds;
     union
@@ -143,12 +152,12 @@ class interfaceItemType {
     uint8_t             _hue;
     interfaceKindType   _kind;
     interfaceStyleType  _style;
-    std::vector<interfaceItemType> _tab_content;
+    std::vector<std::unique_ptr<InterfaceItem>> _tab_content;
 };
 
-std::vector<interfaceItemType> interface_items(const sfz::Json& json);
+std::vector<std::unique_ptr<InterfaceItem>> interface_items(const sfz::Json& json);
 
-interfaceItemType labeled_rect(
+InterfaceItem labeled_rect(
         Rect bounds, uint8_t hue, interfaceStyleType style, int16_t str_id, int str_num);
 
 }  // namespace antares

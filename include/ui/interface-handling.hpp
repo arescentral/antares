@@ -38,7 +38,7 @@ enum PlayAgainResult {
 
 bool BothCommandAndQ( void);
 void update_mission_brief_point(
-        interfaceItemType *dataItem, long whichBriefPoint, const Scenario* scenario,
+        InterfaceItem *dataItem, long whichBriefPoint, const Scenario* scenario,
         coordPointType *corner, long scale, Rect *bounds, std::vector<inlinePictType>& inlinePict,
         Rect& highlight_rect, std::vector<std::pair<Point, Point>>& lines, sfz::String& text);
 void CreateObjectDataText(sfz::String* text, short id);

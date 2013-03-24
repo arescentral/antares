@@ -68,14 +68,14 @@ void SelectLevelScreen::become_front() {
 
 void SelectLevelScreen::adjust_interface() {
     if (_index > 0) {
-        mutable_item(PREVIOUS)->set_status(kActive);
+        mutable_item(PREVIOUS).set_status(kActive);
     } else {
-        mutable_item(PREVIOUS)->set_status(kDimmed);
+        mutable_item(PREVIOUS).set_status(kDimmed);
     }
     if (_index < _chapters.size() - 1) {
-        mutable_item(NEXT)->set_status(kActive);
+        mutable_item(NEXT).set_status(kActive);
     } else {
-        mutable_item(NEXT)->set_status(kDimmed);
+        mutable_item(NEXT).set_status(kDimmed);
     }
 }
 
@@ -121,7 +121,7 @@ void SelectLevelScreen::draw() const {
 void SelectLevelScreen::draw_level_name() const {
     const String chapter_name((*_scenario)->name());
 
-    const interfaceItemType& i = item(NAME);
+    const InterfaceItem& i = item(NAME);
 
     RgbColor color = GetRGBTranslateColorShade(AQUA, VERY_LIGHT);
     StyledText retro(title_font);
