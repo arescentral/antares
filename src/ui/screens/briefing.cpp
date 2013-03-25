@@ -124,6 +124,7 @@ void BriefingScreen::mouse_down(const MouseDownEvent& event) {
             }
         }
     }
+    InterfaceScreen::mouse_down(event);
 }
 
 void BriefingScreen::key_down(const KeyDownEvent& event) {
