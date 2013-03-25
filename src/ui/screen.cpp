@@ -117,6 +117,7 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
             PlayVolumeSound(
                     kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
             _hit_button = button;
+            return;
         }
     }
 }
@@ -129,18 +130,12 @@ void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
         return;
     }
     if (_state == MOUSE_DOWN) {
-        // Save _hit_button and set it to nullptr before calling
-        // handle_button(), as calling handle_button() can result in the
-        // deletion of `this`.
-        Button& button = *_hit_button;
-        _hit_button = nullptr;
-
         _state = NORMAL;
         Rect bounds;
-        GetAnyInterfaceItemGraphicBounds(button, &bounds);
-        button.status = kActive;
+        GetAnyInterfaceItemGraphicBounds(*_hit_button, &bounds);
+        _hit_button->status = kActive;
         if (bounds.contains(where)) {
-            handle_button(button);
+            handle_button(*_hit_button);
         }
     }
 }
@@ -168,18 +163,12 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
     // TODO(sfiera): verify that the same key that was pressed was released.
     static_cast<void>(event);
     if (_state == KEY_DOWN) {
-        // Save _hit_button and set it to nullptr before calling
-        // handle_button(), as calling handle_button() can result in the
-        // deletion of `this`.
-        Button& button = *_hit_button;
-        _hit_button = nullptr;
-
         _state = NORMAL;
-        button.status = kActive;
-        if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(&button)) {
+        _hit_button->status = kActive;
+        if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_hit_button)) {
             b->on = true;
         }
-        handle_button(button);
+        handle_button(*_hit_button);
     }
 }
 
