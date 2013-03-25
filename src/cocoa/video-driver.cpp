@@ -102,7 +102,11 @@ bool CocoaVideoDriver::wait_next_event(int64_t until, unique_ptr<Event>& event) 
         _event_queue.pop();
         return true;
     }
-    until += _start_time;
+    if (until < (std::numeric_limits<int64_t>::max() - _start_time)) {
+        until = until + _start_time;
+    } else {
+        until = std::numeric_limits<int64_t>::max();
+    }
 
     antares_event_translator_enqueue(_translator.c_obj(), until);
     while (until > antares::usecs()) {
