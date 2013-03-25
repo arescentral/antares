@@ -183,6 +183,8 @@ void CocoaVideoDriver::loop(Card* initial) {
         while (wait_next_event(now, event)) {
             event->send(&_event_tracker);
             event->send(main_loop.top());
+            main_loop.draw();
+            CGLFlushDrawable(context.c_obj());
         }
 
         int64_t at;
