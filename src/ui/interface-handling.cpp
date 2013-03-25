@@ -249,7 +249,7 @@ void update_mission_brief_point(
             lines.push_back(make_pair(p7, p8));
         }
     }
-    dataItem->label = {int16_t(headerID), int16_t(headerNumber)};
+    dataItem->label.assign(StringList(headerID).at(headerNumber - 1));
     Rect newRect;
     GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
     populate_inline_picts(dataItem->bounds(), text, dataItem->style, inlinePict);

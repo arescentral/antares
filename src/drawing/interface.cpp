@@ -22,9 +22,6 @@
 
 #include "config/keys.hpp"
 #include "data/interface.hpp"
-#include "data/picture.hpp"
-#include "data/resource.hpp"
-#include "data/string-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/styled-text.hpp"
 #include "drawing/text.hpp"
@@ -456,8 +453,7 @@ void draw_button(Point origin, const PlainButton& item) {
         } else {
             color = GetRGBTranslateColorShade(item.hue, LIGHTER);
         }
-        StringList strings(item.label.stringID);
-        StringSlice s = strings.at(item.label.stringNumber - 1);
+        StringSlice s = item.label;
         swidth = GetInterfaceStringWidth(s, item.style);
         swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
         sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
@@ -512,8 +508,7 @@ void draw_button(Point origin, const PlainButton& item) {
                 color = GetRGBTranslateColorShade(item.hue, LIGHTER);
             }
 
-            StringList strings(item.label.stringID);
-            StringSlice s = strings.at(item.label.stringNumber - 1);
+            StringSlice s = item.label;
             swidth = GetInterfaceStringWidth(s, item.style);
             swidth = uRect.right + ( tRect.right - uRect.right) / 2 - swidth / 2;
             sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
@@ -668,8 +663,7 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
             color = GetRGBTranslateColorShade(item.hue, VERY_LIGHT);
         }
 
-        StringList strings(item.label.stringID);
-        StringSlice s = strings.at(item.label.stringNumber - 1);
+        StringSlice s = item.label;
         swidth = GetInterfaceStringWidth(s, item.style);
         swidth = tRect.left + (tRect.right - tRect.left) / 2 - swidth / 2;
         sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
@@ -734,8 +728,7 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
         }
 
         {
-            StringList strings(item.label.stringID);
-            StringSlice s = strings.at(item.label.stringNumber - 1);
+            StringSlice s = item.label;
             swidth = GetInterfaceStringWidth(s, item.style);
             swidth = uRect.right + (tRect.right - uRect.right) / 2 - swidth / 2;
             sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
@@ -861,8 +854,7 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButton& item, PixMap
     } else {
         color = GetRGBTranslateColorShade(item.hue, LIGHT);
     }
-    StringList strings(item.label.stringID);
-    StringSlice s = strings.at(item.label.stringNumber - 1);
+    StringSlice s = item.label;
     swidth = GetInterfaceStringWidth( s, item.style);
     swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
     sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
@@ -971,8 +963,7 @@ void draw_checkbox(Point origin, const CheckboxButton& item) {
         color = GetRGBTranslateColorShade(item.hue, LIGHT);
     }
 
-    StringList strings(item.label.stringID);
-    StringSlice s = strings.at(item.label.stringNumber - 1);
+    StringSlice s = item.label;
     swidth = GetInterfaceStringWidth( s, item.style);
     swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
     sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
@@ -1005,8 +996,7 @@ void draw_labeled_box(Point origin, const LabeledRect& item) {
 
     // draw the string
 
-    StringList strings(item.label.stringID);
-    StringSlice s = strings.at(item.label.stringNumber - 1);
+    StringSlice s = item.label;
     swidth = GetInterfaceStringWidth( s, item.style) + kInterfaceTextHBuffer * 2;
     swidth = ( tRect.right - tRect.left) - swidth;
     sheight = GetInterfaceFontHeight( item.style) + kInterfaceTextVBuffer * 2;
@@ -1088,12 +1078,10 @@ void draw_labeled_box(Point origin, const LabeledRect& item) {
 }
 
 void draw_text_rect(Point origin, const TextRect& item) {
-    Resource rsrc("text", "txt", item.rsrc_id);
-    String data(utf8::decode(rsrc.data()));
     vector<inlinePictType> inlinePict;
     Rect bounds = item.bounds();
     bounds.offset(origin.h, origin.v);
-    draw_text_in_rect(bounds, data, item.style, item.hue, inlinePict);
+    draw_text_in_rect(bounds, item.text, item.style, item.hue, inlinePict);
 }
 
 }  // namespace
@@ -1140,12 +1128,7 @@ void draw_picture_rect(Point origin, const PictureRect& item) {
     if (item.visible_bounds) {
         draw_plain_rect(origin, item);
     }
-    Picture pict(item.rsrc_id);
-    Rect to = pict.size().as_rect();
-    to.offset(bounds.left, bounds.top);
-    unique_ptr<Sprite> sprite =
-        VideoDriver::driver()->new_sprite(format("/pict/{0}", item.rsrc_id), pict);
-    sprite->draw(bounds.left, bounds.top);
+    item.sprite->draw(bounds.left, bounds.top);
 }
 
 namespace {

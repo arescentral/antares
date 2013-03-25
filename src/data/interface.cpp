@@ -21,15 +21,21 @@
 #include <sfz/sfz.hpp>
 #include "config/keys.hpp"
 #include "drawing/color.hpp"
+#include "data/resource.hpp"
+#include "data/string-list.hpp"
+#include "video/driver.hpp"
 
 using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::Json;
 using sfz::ReadSource;
 using sfz::StringMap;
+using sfz::format;
 using sfz::range;
 using std::unique_ptr;
 using std::vector;
+
+namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -163,10 +169,13 @@ void PlainRect::accept(const Visitor& visitor) const {
     visitor.visit_plain_rect(*this);
 }
 
+LabeledItem::LabeledItem(int id, Rect bounds, interfaceLabelType label):
+        InterfaceItem(id, bounds),
+        label(StringList(label.stringID).at(label.stringNumber - 1)) { }
+
 LabeledRect::LabeledRect(
         int id, Rect bounds, interfaceLabelType label, uint8_t hue, interfaceStyleType style):
-        InterfaceItem(id, bounds),
-        label(label),
+        LabeledItem(id, bounds, label),
         hue(hue),
         style(style) { }
 
@@ -176,7 +185,7 @@ void LabeledRect::accept(const Visitor& visitor) const {
 
 TextRect::TextRect(int id, Rect bounds, int16_t rsrc_id, uint8_t hue, interfaceStyleType style):
         InterfaceItem(id, bounds),
-        rsrc_id(rsrc_id),
+        text(utf8::decode(Resource("text", "txt", rsrc_id).data())),
         hue(hue),
         style(style) { }
 
@@ -186,7 +195,8 @@ void TextRect::accept(const Visitor& visitor) const {
 
 PictureRect::PictureRect(int id, Rect bounds, int16_t rsrc_id):
         InterfaceItem(id, bounds),
-        rsrc_id(rsrc_id),
+        picture(rsrc_id),
+        sprite(VideoDriver::driver()->new_sprite(format("/pict/{0}", rsrc_id), picture)),
         visible_bounds(false),
         hue(GRAY),
         style(kSmall) { }
@@ -198,9 +208,8 @@ void PictureRect::accept(const Visitor& visitor) const {
 Button::Button(
         int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
         interfaceStyleType style):
-        InterfaceItem(id, bounds),
+        LabeledItem(id, bounds, label),
         key(key),
-        label(label),
         hue(hue),
         style(style),
         status(kActive) { }

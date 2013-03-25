@@ -22,8 +22,11 @@
 #include <sfz/sfz.hpp>
 
 #include "math/geometry.hpp"
+#include "data/picture.hpp"
 
 namespace antares {
+
+class Sprite;
 
 enum interfaceItemStatusType {
     kDimmed = 1,
@@ -73,12 +76,17 @@ struct PlainRect : public InterfaceItem {
     interfaceStyleType          style;
 };
 
-struct LabeledRect : public InterfaceItem {
+struct LabeledItem : public InterfaceItem {
+    LabeledItem(int id, Rect bounds, interfaceLabelType label);
+
+    sfz::String                 label;
+};
+
+struct LabeledRect : public LabeledItem {
     LabeledRect(
             int id, Rect bounds, interfaceLabelType label, uint8_t hue, interfaceStyleType style);
     virtual void accept(const Visitor& visitor) const;
 
-    interfaceLabelType          label;
     uint8_t                     hue;
     interfaceStyleType          style;
 };
@@ -87,7 +95,7 @@ struct TextRect : public InterfaceItem {
     TextRect(int id, Rect bounds, int16_t rsrc_id, uint8_t hue, interfaceStyleType style);
     virtual void accept(const Visitor& visitor) const;
 
-    int16_t                     rsrc_id;
+    sfz::String                 text;
     uint8_t                     hue;
     interfaceStyleType          style;
 };
@@ -96,19 +104,19 @@ struct PictureRect : public InterfaceItem {
     PictureRect(int id, Rect bounds, int16_t rsrc_id);
     virtual void accept(const Visitor& visitor) const;
 
-    int16_t                     rsrc_id;
+    Picture                     picture;
+    std::unique_ptr<Sprite>     sprite;
     bool                        visible_bounds;
     uint8_t                     hue;
     interfaceStyleType          style;
 };
 
-struct Button : public InterfaceItem {
+struct Button : public LabeledItem {
     Button(
             int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
             interfaceStyleType style);
 
     int16_t                     key;
-    interfaceLabelType          label;
     uint8_t                     hue;
     interfaceStyleType          style;
     interfaceItemStatusType     status;
