@@ -36,7 +36,7 @@ class HelpScreen : public InterfaceScreen {
     virtual void draw() const;
 
   protected:
-    virtual void handle_button(int button);
+    virtual void handle_button(Button& button);
 
   private:
     enum Item {

@@ -39,11 +39,6 @@ class InterfaceScreen : public Card {
 
         OPTIONS_SOUND = 5007,
         OPTIONS_KEYS = 5030,
-        OPTIONS_KEYS_SHIP = 5031,
-        OPTIONS_KEYS_COMMAND = 5032,
-        OPTIONS_KEYS_SHORTCUT = 5033,
-        OPTIONS_KEYS_UTILITY = 5034,
-        OPTIONS_KEYS_HOTKEY = 5035,
 
         PLAY_AGAIN = 5008,
         PLAY_AGAIN_RESUME = 5009,
@@ -51,6 +46,7 @@ class InterfaceScreen : public Card {
     };
 
     InterfaceScreen(Id id, const Rect& bounds, bool full_screen);
+    InterfaceScreen(sfz::Json json, const Rect& bounds, bool full_screen);
     ~InterfaceScreen();
 
     virtual void become_front();
@@ -65,10 +61,10 @@ class InterfaceScreen : public Card {
 
   protected:
     virtual void adjust_interface();
-    virtual void handle_button(int button) = 0;
+    virtual void handle_button(Button& button) = 0;
 
     void truncate(size_t size);
-    void extend(const std::vector<std::unique_ptr<InterfaceItem>>& items);
+    void extend(const sfz::Json& json);
 
     size_t size() const;
     const InterfaceItem& item(int index) const;
@@ -83,10 +79,12 @@ class InterfaceScreen : public Card {
     };
     State _state;
 
+    sfz::Json load_json(Id id);
+
     const Rect _bounds;
     const bool _full_screen;
     std::vector<std::unique_ptr<InterfaceItem>> _items;
-    int _hit_item;
+    Button* _hit_button;
 
     DISALLOW_COPY_AND_ASSIGN(InterfaceScreen);
 };

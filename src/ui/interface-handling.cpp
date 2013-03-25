@@ -152,7 +152,7 @@ bool BothCommandAndQ() {
 }
 
 void update_mission_brief_point(
-        InterfaceItem *dataItem, long whichBriefPoint, const Scenario* scenario,
+        LabeledRect *dataItem, long whichBriefPoint, const Scenario* scenario,
         coordPointType *corner, long scale, Rect *bounds, vector<inlinePictType>& inlinePict,
         Rect& highlight_rect, vector<pair<Point, Point>>& lines, String& text) {
     if (whichBriefPoint < kMissionBriefPointOffset) {
@@ -171,7 +171,7 @@ void update_mission_brief_point(
     // TODO(sfiera): catch exception.
     Resource rsrc("text", "txt", contentID);
     text.assign(utf8::decode(rsrc.data()));
-    short textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style(), kMissionDataWidth);
+    short textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
     if (hiliteBounds.left == hiliteBounds.right) {
         dataItem->bounds().left = (bounds->right - bounds->left) / 2 - (kMissionDataWidth / 2) + bounds->left;
         dataItem->bounds().right = dataItem->bounds().left + kMissionDataWidth;
@@ -249,10 +249,10 @@ void update_mission_brief_point(
             lines.push_back(make_pair(p7, p8));
         }
     }
-    dataItem->set_label({int16_t(headerID), int16_t(headerNumber)});
+    dataItem->label = {int16_t(headerID), int16_t(headerNumber)};
     Rect newRect;
     GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
-    populate_inline_picts(dataItem->bounds(), text, dataItem->style(), inlinePict);
+    populate_inline_picts(dataItem->bounds(), text, dataItem->style, inlinePict);
 }
 
 void CreateObjectDataText(String* text, short id) {

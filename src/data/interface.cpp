@@ -33,184 +33,6 @@ using std::vector;
 
 namespace antares {
 
-InterfaceItem::InterfaceItem() {
-    memset(&_item, 0, sizeof(_item));
-    _hue = 0;
-    _kind = kPlainRect;
-    _style = kLarge;
-}
-
-InterfaceItem::InterfaceItem(const InterfaceItem& other) {
-    _bounds = other._bounds;
-    memcpy(&_item, &other._item, sizeof(_item));
-    _hue = other._hue;
-    _kind = other._kind;
-    _style = other._style;
-    for (const auto& item: other.tab_content()) {
-        _tab_content.emplace_back(item->clone());
-    }
-}
-
-unique_ptr<InterfaceItem> InterfaceItem::clone() const {
-    return unique_ptr<InterfaceItem>(new InterfaceItem(*this));
-}
-
-void InterfaceItem::set_hue(uint8_t hue) {
-    _hue = hue;
-}
-
-interfaceItemStatusType InterfaceItem::status() const {
-    switch (_kind) {
-      case kPlainButton:
-        return _item.plainButton.status;
-      case kRadioButton:
-      case kTabBoxButton:
-        return _item.radioButton.status;
-      case kCheckboxButton:
-        return _item.checkboxButton.status;
-      case kTextRect:
-        return _item.textRect.visibleBounds ? kActive : kDimmed;
-      case kPictureRect:
-        return _item.pictureRect.visibleBounds ? kActive : kDimmed;
-      default:
-        return kDimmed;
-    }
-}
-
-void InterfaceItem::set_status(interfaceItemStatusType status) {
-    switch (_kind) {
-      case kPlainButton:
-        _item.plainButton.status = status;
-        break;
-      case kRadioButton:
-      case kTabBoxButton:
-        _item.radioButton.status = status;
-        break;
-      case kCheckboxButton:
-        _item.checkboxButton.status = status;
-        break;
-      case kTextRect:
-        _item.textRect.visibleBounds = (status == kActive);
-        break;
-      case kPictureRect:
-        _item.pictureRect.visibleBounds = (status == kActive);
-        break;
-      default:
-        break;
-    }
-}
-
-bool InterfaceItem::on() const {
-    switch (_kind) {
-      case kCheckboxButton:
-        return _item.checkboxButton.on;
-      case kRadioButton:
-      case kTabBoxButton:
-        return _item.radioButton.on;
-      default:
-        return false;
-    }
-}
-
-void InterfaceItem::set_on(bool on) {
-    switch (_kind) {
-      case kCheckboxButton:
-        _item.checkboxButton.on = on;
-        break;
-      case kRadioButton:
-      case kTabBoxButton:
-        _item.radioButton.on = on;
-        break;
-      default:
-        break;
-    }
-}
-
-int InterfaceItem::key() const {
-    switch (_kind) {
-      case kPlainButton:
-        return _item.plainButton.key;
-      case kTabBoxButton:
-        return _item.radioButton.key;
-      default:
-        return 0;
-    }
-}
-
-void InterfaceItem::set_key(int key) {
-    switch (_kind) {
-      case kPlainButton:
-        _item.plainButton.key = key;
-        break;
-      case kTabBoxButton:
-        _item.radioButton.key = key;
-        break;
-      default:
-        break;
-    }
-}
-
-interfaceLabelType InterfaceItem::label() const {
-    switch (_kind) {
-      case kLabeledRect:
-        return _item.labeledRect.label;
-      case kListRect:
-        return _item.listRect.label;
-      case kPlainButton:
-        return _item.plainButton.label;
-      case kRadioButton:
-      case kTabBoxButton:
-        return _item.radioButton.label;
-      case kCheckboxButton:
-        return _item.checkboxButton.label;
-      default:
-        return interfaceLabelType{};
-    }
-}
-
-void InterfaceItem::set_label(interfaceLabelType label) {
-    switch (_kind) {
-      case kLabeledRect:
-        _item.labeledRect.label = label;
-        break;
-      case kListRect:
-        _item.listRect.label = label;
-        break;
-      case kPlainButton:
-        _item.plainButton.label = label;
-        break;
-      case kRadioButton:
-      case kTabBoxButton:
-        _item.radioButton.label = label;
-        break;
-      case kCheckboxButton:
-        _item.checkboxButton.label = label;
-        break;
-      default:
-        break;
-    }
-}
-
-int16_t InterfaceItem::id() const {
-    switch (_kind) {
-      case kPictureRect:
-        return _item.pictureRect.pictureID;
-      case kTextRect:
-        return _item.textRect.textID;
-      default:
-        return -1;
-    }
-}
-
-int16_t InterfaceItem::top_right_border_size() const {
-    switch (_kind) {
-      case kTabBox:
-        return _item.tabBox.topRightBorderSize;
-      default:
-        return 0;
-    }
-}
-
 static Rect rect(const Json& json) {
     return {
         json.get("left").number(),
@@ -263,12 +85,11 @@ static int16_t key(const Json& json) {
     return k;
 }
 
-vector<unique_ptr<InterfaceItem>> interface_items(const Json& json) {
+vector<unique_ptr<InterfaceItem>> interface_items(int id0, const Json& json) {
     vector<unique_ptr<InterfaceItem>> items;
+    int id = id0;
     for (auto i: range(json.size())) {
         Json item_json = json.at(i);
-        InterfaceItem item = {};
-        item._bounds = rect(item_json.get("bounds"));
 
         sfz::StringSlice kind;
         for (auto key: {"rect", "button", "checkbox", "radio", "picture", "text", "tab-box"}) {
@@ -282,76 +103,160 @@ vector<unique_ptr<InterfaceItem>> interface_items(const Json& json) {
         }
 
         Json sub = item_json.get(kind);
+        Rect bounds = rect(item_json.get("bounds"));
+        int16_t rsrc_id = sub.get("id").number();
+        uint8_t hue = antares::hue(sub.get("hue"));
+        interfaceStyleType style = antares::style(sub.get("style"));
+        int16_t key = sub.has("key") ? antares::key(sub.get("key")) : 0;
+        interfaceLabelType label =
+            sub.has("label") ? antares::label(sub.get("label")) : interfaceLabelType{};
+
         if (kind == "rect") {
             if (sub.has("label")) {
-                item._kind = kLabeledRect;
+                items.emplace_back(new LabeledRect(id++, bounds, label, hue, style));
             } else {
-                item._kind = kPlainRect;
-                item._item.pictureRect.visibleBounds = true;
+                items.emplace_back(new PlainRect(id++, bounds, hue, style));
             }
         } else if (kind == "button") {
-            item._kind = kPlainButton;
-            item.set_status(kActive);
+            items.emplace_back(new PlainButton(id++, bounds, key, label, hue, style));
         } else if (kind == "checkbox") {
-            item._kind = kCheckboxButton;
-            item.set_status(kActive);
+            items.emplace_back(new CheckboxButton(id++, bounds, key, label, hue, style));
         } else if (kind == "radio") {
-            item._kind = kRadioButton;
-            item.set_status(kActive);
+            items.emplace_back(new RadioButton(id++, bounds, key, label, hue, style));
         } else if (kind == "picture") {
-            item._kind = kPictureRect;
-            item._item.pictureRect.pictureID = sub.get("id").number();
+            items.emplace_back(new PictureRect(id++, bounds, rsrc_id));
         } else if (kind == "text") {
-            item._kind = kTextRect;
-            item._item.textRect.textID = sub.get("id").number();
+            items.emplace_back(new TextRect(id++, bounds, rsrc_id, hue, style));
         } else if (kind == "tab-box") {
-            item._kind = kTabBox;
-            InterfaceItem button = {};
-            button._kind = kTabBoxButton;
-            button._bounds = {
-                item._bounds.left + 22,
-                item._bounds.top - 20,
+            Rect button_bounds = {
+                bounds.left + 22,
+                bounds.top - 20,
                 0,
-                item._bounds.top - 10,
+                bounds.top - 10,
             };
-            button._hue = hue(sub.get("hue"));
-            button._style = style(sub.get("style"));
-            button.set_status(kActive);
             Json tabs = sub.get("tabs");
             for (auto i: range(tabs.size())) {
                 Json tab = tabs.at(i);
-                button._bounds.right = button._bounds.left + tab.get("width").number();
-                button.set_label(label(tab.get("label")));
-                button._tab_content = interface_items(tab.get("content"));
-                items.emplace_back(button.clone());
-                button._bounds.left = button._bounds.right + 37;
+                button_bounds.right = button_bounds.left + tab.get("width").number();
+                interfaceLabelType label = antares::label(tab.get("label"));
+                items.emplace_back(new TabBoxButton(
+                            id++, button_bounds, key, label, hue, style, tab.get("content")));
+                button_bounds.left = button_bounds.right + 37;
             }
-            item._item.tabBox.topRightBorderSize = item._bounds.right - button._bounds.right - 17;
+            int16_t top_right_border_size = bounds.right - button_bounds.right - 17;
+            items.emplace_back(new TabBox(id++, bounds, hue, style, top_right_border_size));
         }
-
-        item._hue = hue(sub.get("hue"));
-        item._style = style(sub.get("style"));
-        if (sub.has("key")) {
-            item.set_key(key(sub.get("key")));
-        }
-        if (sub.has("label")) {
-            item.set_label(label(sub.get("label")));
-        }
-        items.emplace_back(item.clone());
     }
     return items;
 }
 
-InterfaceItem labeled_rect(
-        Rect bounds, uint8_t hue, interfaceStyleType style, int16_t str_id, int str_num) {
-    InterfaceItem item = {};
-    item._bounds = bounds;
-    item._kind = kLabeledRect;
-    item._hue = hue;
-    item._style = style;
-    item._item.labeledRect.label.stringID = str_id;
-    item._item.labeledRect.label.stringNumber = str_num;
-    return item;
+InterfaceItem::InterfaceItem(int id, Rect bounds):
+        id(id),
+        _bounds(bounds) { }
+
+PlainRect::PlainRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style):
+        InterfaceItem(id, bounds),
+        hue(hue),
+        style(style) { }
+
+void PlainRect::accept(const Visitor& visitor) const {
+    visitor.visit_plain_rect(*this);
 }
+
+LabeledRect::LabeledRect(
+        int id, Rect bounds, interfaceLabelType label, uint8_t hue, interfaceStyleType style):
+        InterfaceItem(id, bounds),
+        label(label),
+        hue(hue),
+        style(style) { }
+
+void LabeledRect::accept(const Visitor& visitor) const {
+    visitor.visit_labeled_rect(*this);
+}
+
+TextRect::TextRect(int id, Rect bounds, int16_t rsrc_id, uint8_t hue, interfaceStyleType style):
+        InterfaceItem(id, bounds),
+        rsrc_id(rsrc_id),
+        hue(hue),
+        style(style) { }
+
+void TextRect::accept(const Visitor& visitor) const {
+    visitor.visit_text_rect(*this);
+}
+
+PictureRect::PictureRect(int id, Rect bounds, int16_t rsrc_id):
+        InterfaceItem(id, bounds),
+        rsrc_id(rsrc_id),
+        visible_bounds(false),
+        hue(GRAY),
+        style(kSmall) { }
+
+void PictureRect::accept(const Visitor& visitor) const {
+    visitor.visit_picture_rect(*this);
+}
+
+Button::Button(
+        int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
+        interfaceStyleType style):
+        InterfaceItem(id, bounds),
+        key(key),
+        label(label),
+        hue(hue),
+        style(style),
+        status(kActive) { }
+
+PlainButton::PlainButton(
+        int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
+        interfaceStyleType style):
+        Button(id, bounds, key, label, hue, style) { }
+
+void PlainButton::accept(const Visitor& visitor) const {
+    visitor.visit_plain_button(*this);
+}
+
+CheckboxButton::CheckboxButton(
+        int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
+        interfaceStyleType style):
+        Button(id, bounds, key, label, hue, style),
+        on(false) { }
+
+void CheckboxButton::accept(const Visitor& visitor) const {
+    visitor.visit_checkbox_button(*this);
+}
+
+RadioButton::RadioButton(
+        int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
+        interfaceStyleType style):
+        Button(id, bounds, key, label, hue, style),
+        on(false) { }
+
+void RadioButton::accept(const Visitor& visitor) const {
+    visitor.visit_radio_button(*this);
+}
+
+TabBoxButton::TabBoxButton(
+        int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
+        interfaceStyleType style, const Json& tab_content):
+        Button(id, bounds, key, label, hue, style),
+        on(false),
+        tab_content(tab_content) { }
+
+void TabBoxButton::accept(const Visitor& visitor) const {
+    visitor.visit_tab_box_button(*this);
+}
+
+TabBox::TabBox(
+        int id, Rect bounds, uint8_t hue, interfaceStyleType style,
+        int16_t top_right_border_size):
+        InterfaceItem(id, bounds),
+        hue(hue),
+        style(style),
+        top_right_border_size(top_right_border_size) { }
+
+void TabBox::accept(const Visitor& visitor) const {
+    visitor.visit_tab_box(*this);
+}
+
+InterfaceItem::Visitor::~Visitor() { }
 
 }  // namespace antares

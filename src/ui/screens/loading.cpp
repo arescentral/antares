@@ -108,7 +108,7 @@ void LoadingScreen::fire_timer() {
     }
 }
 
-void LoadingScreen::handle_button(int button) {
+void LoadingScreen::handle_button(Button& button) {
 }
 
 void LoadingScreen::draw() const {

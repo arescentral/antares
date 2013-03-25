@@ -63,8 +63,8 @@ void string_replace(String* s, const String& in, const PrintItem& out) {
     }
 }
 
-InterfaceItem interface_item(const Rect& text_bounds) {
-    return labeled_rect(text_bounds, GOLD, kLarge, 2001, 29);
+LabeledRect interface_item(const Rect& text_bounds) {
+    return LabeledRect(0, text_bounds, {2001, 29}, GOLD, kLarge);
 }
 
 Rect pix_bounds(const Rect& text_bounds) {

@@ -70,26 +70,26 @@ void PlayAgainScreen::become_front() {
 
 void PlayAgainScreen::adjust_interface() {
     // TODO(sfiera): disable if networked.
-    mutable_item(RESTART).set_status(kActive);
+    dynamic_cast<Button&>(mutable_item(RESTART)).status = kActive;
 }
 
-void PlayAgainScreen::handle_button(int button) {
-    switch (button) {
+void PlayAgainScreen::handle_button(Button& button) {
+    switch (button.id) {
       case RESTART:
         _state = FADING_OUT;
-        *_button_pressed = static_cast<Item>(button);
+        *_button_pressed = static_cast<Item>(button.id);
         stack()->push(new ColorFade(ColorFade::TO_COLOR, RgbColor::kBlack, 1e6, false, NULL));
         break;
 
       case QUIT:
       case RESUME:
       case SKIP:
-        *_button_pressed = static_cast<Item>(button);
+        *_button_pressed = static_cast<Item>(button.id);
         stack()->pop(this);
         break;
 
       default:
-        throw Exception(format("Got unknown button {0}.", button));
+        throw Exception(format("Got unknown button {0}.", button.id));
     }
 }
 

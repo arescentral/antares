@@ -61,14 +61,14 @@ HelpScreen::HelpScreen():
 
 HelpScreen::~HelpScreen() { }
 
-void HelpScreen::handle_button(int button) {
-    switch (button) {
+void HelpScreen::handle_button(Button& button) {
+    switch (button.id) {
       case DONE:
         stack()->pop(this);
         break;
 
       default:
-        throw Exception(format("Got unknown button {0}.", button));
+        throw Exception(format("Got unknown button {0}.", button.id));
     }
 }
 

@@ -46,17 +46,14 @@ namespace utf8 = sfz::utf8;
 namespace antares {
 
 InterfaceScreen::InterfaceScreen(Id id, const Rect& bounds, bool full_screen)
-        : _state(NORMAL),
-          _bounds(bounds),
-          _full_screen(full_screen),
-          _hit_item(0) {
-    Resource rsrc("interfaces", "json", id);
-    String in(utf8::decode(rsrc.data()));
-    Json json;
-    if (!string_to_json(in, json)) {
-        throw Exception("invalid interface JSON");
-    }
-    _items = interface_items(json);
+        : InterfaceScreen(load_json(id), bounds, full_screen) { }
+
+InterfaceScreen::InterfaceScreen(sfz::Json json, const Rect& bounds, bool full_screen):
+        _state(NORMAL),
+        _bounds(bounds),
+        _full_screen(full_screen),
+        _hit_button(nullptr) {
+    _items = interface_items(0, json);
     const int offset_x = (_bounds.width() / 2) - 320;
     const int offset_y = (_bounds.height() / 2) - 240;
     for (auto& item: _items) {
@@ -65,6 +62,16 @@ InterfaceScreen::InterfaceScreen(Id id, const Rect& bounds, bool full_screen)
 }
 
 InterfaceScreen::~InterfaceScreen() { }
+
+Json InterfaceScreen::load_json(Id id) {
+    Resource rsrc("interfaces", "json", id);
+    String in(utf8::decode(rsrc.data()));
+    Json json;
+    if (!string_to_json(in, json)) {
+        throw Exception("invalid interface JSON");
+    }
+    return json;
+}
 
 void InterfaceScreen::become_front() {
     this->adjust_interface();
@@ -78,9 +85,9 @@ void InterfaceScreen::draw() const {
     } else {
         next()->draw();
         GetAnyInterfaceItemGraphicBounds(*_items[0], &copy_area);
-        for (size_t i = 1; i < _items.size(); ++i) {
+        for (const auto& item: _items) {
             Rect r;
-            GetAnyInterfaceItemGraphicBounds(*_items[i], &r);
+            GetAnyInterfaceItemGraphicBounds(*item, &r);
             copy_area.enlarge_to(r);
         }
     }
@@ -100,35 +107,18 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
     if (event.button() != 0) {
         return;
     }
-    for (auto i: range(_items.size())) {
-        InterfaceItem* const item = _items[i].get();
+    for (auto& item: _items) {
         Rect bounds;
         GetAnyInterfaceItemGraphicBounds(*item, &bounds);
-        if (item->status() != kDimmed && bounds.contains(where)) {
-            switch (item->kind()) {
-              case kPlainButton:
-              case kCheckboxButton:
-              case kRadioButton:
-              case kTabBoxButton:
-                _state = MOUSE_DOWN;
-                item->set_status(kIH_Hilite);
-                PlayVolumeSound(kComputerBeep1, kMediumLoudVolume, kShortPersistence,
-                        kMustPlaySound);
-                _hit_item = i;
-                return;
-
-              case kLabeledRect:
-                return;
-
-              case kListRect:
-                throw Exception("kListRect not yet handled");
-
-              default:
-                break;
-            }
+        Button* button = dynamic_cast<Button*>(item.get());
+        if (button && (button->status != kDimmed) && (bounds.contains(where))) {
+            _state = MOUSE_DOWN;
+            button->status = kIH_Hilite;
+            PlayVolumeSound(
+                    kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
+            _hit_button = button;
         }
     }
-    return;
 }
 
 void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
@@ -139,21 +129,20 @@ void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
         return;
     }
     if (_state == MOUSE_DOWN) {
-        // Save _hit_item and set it to 0 before calling handle_button(), as calling
-        // handle_button() can result in the deletion of `this`.
-        int hit_item = _hit_item;
-        _hit_item = 0;
+        // Save _hit_button and set it to nullptr before calling
+        // handle_button(), as calling handle_button() can result in the
+        // deletion of `this`.
+        Button& button = *_hit_button;
+        _hit_button = nullptr;
 
         _state = NORMAL;
-        InterfaceItem* const item = _items[hit_item].get();
         Rect bounds;
-        GetAnyInterfaceItemGraphicBounds(*item, &bounds);
-        item->set_status(kActive);
+        GetAnyInterfaceItemGraphicBounds(button, &bounds);
+        button.status = kActive;
         if (bounds.contains(where)) {
-            handle_button(hit_item);
+            handle_button(button);
         }
     }
-    return;
 }
 
 void InterfaceScreen::mouse_move(const MouseMoveEvent& event) {
@@ -163,13 +152,13 @@ void InterfaceScreen::mouse_move(const MouseMoveEvent& event) {
 
 void InterfaceScreen::key_down(const KeyDownEvent& event) {
     const int32_t key_code = event.key() + 1;
-    for (size_t i = 0; i < _items.size(); ++i) {
-        InterfaceItem* const item = _items[i].get();
-        if (item->status() != kDimmed && item->key() == key_code) {
+    for (auto& item: _items) {
+        Button* button = dynamic_cast<Button*>(item.get());
+        if (button && button->status != kDimmed && button->key == key_code) {
             _state = KEY_DOWN;
-            item->set_status(kIH_Hilite);
+            button->status = kIH_Hilite;
             PlayVolumeSound(kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
-            _hit_item = i;
+            _hit_button = button;
             return;
         }
     }
@@ -179,18 +168,18 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
     // TODO(sfiera): verify that the same key that was pressed was released.
     static_cast<void>(event);
     if (_state == KEY_DOWN) {
-        // Save _hit_item and set it to 0 before calling handle_button(), as calling
-        // handle_button() can result in the deletion of `this`.
-        int hit_item = _hit_item;
-        _hit_item = 0;
+        // Save _hit_button and set it to nullptr before calling
+        // handle_button(), as calling handle_button() can result in the
+        // deletion of `this`.
+        Button& button = *_hit_button;
+        _hit_button = nullptr;
 
         _state = NORMAL;
-        InterfaceItem* const item = _items[hit_item].get();
-        item->set_status(kActive);
-        if (item->kind() == kTabBoxButton) {
-            item->set_on(true);
+        button.status = kActive;
+        if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(&button)) {
+            b->on = true;
         }
-        handle_button(hit_item);
+        handle_button(button);
     }
 }
 
@@ -203,11 +192,11 @@ void InterfaceScreen::truncate(size_t size) {
     _items.resize(size);
 }
 
-void InterfaceScreen::extend(const vector<unique_ptr<InterfaceItem>>& items) {
+void InterfaceScreen::extend(const Json& json) {
     const int offset_x = (_bounds.width() / 2) - 320;
     const int offset_y = (_bounds.height() / 2) - 240;
-    for (const auto& item: items) {
-        _items.emplace_back(item->clone());
+    for (auto&& item: interface_items(_items.size(), json)) {
+        _items.emplace_back(std::move(item));
         _items.back()->bounds().offset(offset_x, offset_y);
     }
 }
