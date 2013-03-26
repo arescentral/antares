@@ -31,6 +31,7 @@
 
 using sfz::Exception;
 using sfz::Json;
+using sfz::PrintItem;
 using sfz::String;
 using sfz::StringMap;
 using sfz::StringSlice;
@@ -45,8 +46,8 @@ namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-InterfaceScreen::InterfaceScreen(Id id, const Rect& bounds, bool full_screen)
-        : InterfaceScreen(load_json(id), bounds, full_screen) { }
+InterfaceScreen::InterfaceScreen(PrintItem name, const Rect& bounds, bool full_screen)
+        : InterfaceScreen(load_json(name), bounds, full_screen) { }
 
 InterfaceScreen::InterfaceScreen(sfz::Json json, const Rect& bounds, bool full_screen):
         _state(NORMAL),
@@ -63,8 +64,8 @@ InterfaceScreen::InterfaceScreen(sfz::Json json, const Rect& bounds, bool full_s
 
 InterfaceScreen::~InterfaceScreen() { }
 
-Json InterfaceScreen::load_json(Id id) {
-    Resource rsrc("interfaces", "json", id);
+Json InterfaceScreen::load_json(sfz::PrintItem id) {
+    Resource rsrc(sfz::format("interfaces/{0}.json", id));
     String in(utf8::decode(rsrc.data()));
     Json json;
     if (!string_to_json(in, json)) {

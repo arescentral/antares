@@ -35,7 +35,7 @@ static const uint8_t kLoadingScreenColor = PALE_GREEN;
 static const int64_t kTypingDelay = 16667;
 
 LoadingScreen::LoadingScreen(const Scenario* scenario, bool* cancelled):
-        InterfaceScreen(InterfaceScreen::LOADING, world, true),
+        InterfaceScreen("loading", world, true),
         _state(TYPING),
         _scenario(scenario),
         _cancelled(cancelled),

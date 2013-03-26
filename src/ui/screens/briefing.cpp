@@ -60,7 +60,7 @@ LabeledRect data_item(const InterfaceItem& map_rect) {
 }  // namespace
 
 BriefingScreen::BriefingScreen(const Scenario* scenario, bool* cancelled)
-        : InterfaceScreen(BRIEFING, world, true),
+        : InterfaceScreen("briefing", world, true),
           _scenario(scenario),
           _cancelled(cancelled),
           _briefing_point(0),

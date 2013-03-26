@@ -30,22 +30,7 @@ namespace antares {
 
 class InterfaceScreen : public Card {
   public:
-    enum Id {
-        MAIN = 5000,
-        SELECT_LEVEL = 5011,
-        BRIEFING = 6000,
-        LOADING = 6001,
-        HELP = 5012,
-
-        OPTIONS_SOUND = 5007,
-        OPTIONS_KEYS = 5030,
-
-        PLAY_AGAIN = 5008,
-        PLAY_AGAIN_RESUME = 5009,
-        PLAY_AGAIN_SKIP_RESUME = 5017,
-    };
-
-    InterfaceScreen(Id id, const Rect& bounds, bool full_screen);
+    InterfaceScreen(sfz::PrintItem name, const Rect& bounds, bool full_screen);
     InterfaceScreen(sfz::Json json, const Rect& bounds, bool full_screen);
     ~InterfaceScreen();
 
@@ -79,7 +64,7 @@ class InterfaceScreen : public Card {
     };
     State _state;
 
-    sfz::Json load_json(Id id);
+    sfz::Json load_json(sfz::PrintItem id);
 
     const Rect _bounds;
     const bool _full_screen;
