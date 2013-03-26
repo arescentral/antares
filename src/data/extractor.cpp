@@ -362,7 +362,6 @@ const ResourceFile kResourceFiles[] = {
             { "NLRP",  "replays",         "NLRP",  convert_nlrp },
             { "STR#",  "strings",         "json",  convert_str },
             { "TEXT",  "text",            "txt",   convert_text },
-            { "rot ",  "rotation-table",  "rot ",  verbatim },
         },
     },
 };
@@ -386,7 +385,7 @@ const ResourceFile::ExtractedResource kPluginFiles[] = {
 
 const char kFactoryScenario[] = "com.biggerplanet.ares";
 const char kDownloadBase[] = "http://downloads.arescentral.org";
-const char kVersion[] = "8\n";
+const char kVersion[] = "9\n";
 
 const char kPluginVersionFile[] = "data/version";
 const char kPluginVersion[] = "1\n";
