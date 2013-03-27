@@ -92,6 +92,7 @@ struct LabeledRect : public LabeledItem {
 };
 
 struct TextRect : public InterfaceItem {
+    TextRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style);
     TextRect(int id, Rect bounds, int16_t rsrc_id, uint8_t hue, interfaceStyleType style);
     virtual void accept(const Visitor& visitor) const;
 

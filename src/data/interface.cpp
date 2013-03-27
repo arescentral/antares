@@ -132,7 +132,11 @@ vector<unique_ptr<InterfaceItem>> interface_items(int id0, const Json& json) {
         } else if (kind == "picture") {
             items.emplace_back(new PictureRect(id++, bounds, rsrc_id));
         } else if (kind == "text") {
-            items.emplace_back(new TextRect(id++, bounds, rsrc_id, hue, style));
+            if (sub.has("id")) {
+                items.emplace_back(new TextRect(id++, bounds, rsrc_id, hue, style));
+            } else {
+                items.emplace_back(new TextRect(id++, bounds, hue, style));
+            }
         } else if (kind == "tab-box") {
             Rect button_bounds = {
                 bounds.left + 22,
@@ -182,6 +186,11 @@ LabeledRect::LabeledRect(
 void LabeledRect::accept(const Visitor& visitor) const {
     visitor.visit_labeled_rect(*this);
 }
+
+TextRect::TextRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style):
+        InterfaceItem(id, bounds),
+        hue(hue),
+        style(style) { }
 
 TextRect::TextRect(int id, Rect bounds, int16_t rsrc_id, uint8_t hue, interfaceStyleType style):
         InterfaceItem(id, bounds),
