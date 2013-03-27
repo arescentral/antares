@@ -320,14 +320,6 @@ struct ResourceFile {
 
 const ResourceFile kResourceFiles[] = {
     {
-        "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Interfaces",
-        {
-            { "PICT",  "pictures",           "png",   convert_pict },
-            { "STR#",  "strings",            "json",  convert_str },
-            { "TEXT",  "text",               "txt",   convert_text },
-        },
-    },
-    {
         "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Scenarios",
         {
             { "PICT",  "pictures",                  "png",   convert_pict },
@@ -358,10 +350,7 @@ const ResourceFile kResourceFiles[] = {
     {
         "__MACOSX/Ares 1.2.0 ƒ/._Ares",
         {
-            { "PICT",  "pictures",        "png",   convert_pict },
             { "NLRP",  "replays",         "NLRP",  convert_nlrp },
-            { "STR#",  "strings",         "json",  convert_str },
-            { "TEXT",  "text",            "txt",   convert_text },
         },
     },
 };
@@ -385,7 +374,7 @@ const ResourceFile::ExtractedResource kPluginFiles[] = {
 
 const char kFactoryScenario[] = "com.biggerplanet.ares";
 const char kDownloadBase[] = "http://downloads.arescentral.org";
-const char kVersion[] = "9\n";
+const char kVersion[] = "10\n";
 
 const char kPluginVersionFile[] = "data/version";
 const char kPluginVersion[] = "1\n";
@@ -473,14 +462,11 @@ void DataExtractor::extract_factory_scenario(Observer* observer) const {
                 (Sha1::Digest){{0x246c393c, 0xa598af68, 0xa58cfdd1, 0x8e1601c1, 0xf4f30931}});
         download(observer, kDownloadBase, "Antares-Music", "0.3.0",
                 (Sha1::Digest){{0x9a1ceb4e, 0x2e0d4e7d, 0x61ed9934, 0x1274355e, 0xd8238bc4}});
-        download(observer, kDownloadBase, "Antares-Text", "0.6.2",
-                (Sha1::Digest){{0xc68ba13f, 0x02a1c9c4, 0xdaa498d3, 0x32caff3f, 0x7f6367a6}});
 
         String scenario_dir(format("{0}/{1}", _output_dir, kFactoryScenario));
         rmtree(scenario_dir);
         extract_original(observer, "Ares-1.2.0.zip");
         extract_supplemental(observer, "Antares-Music-0.3.0.zip");
-        extract_supplemental(observer, "Antares-Text-0.6.2.zip");
         write_version(kFactoryScenario);
     }
 }
