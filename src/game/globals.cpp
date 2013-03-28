@@ -72,6 +72,8 @@ aresGlobalType::aresGlobalType() {
     gMessageLabelNum = -1;
     gStatusLabelNum = -1;
     gLastSoundTime = 0;
+    key_names.reset(new StringList(KEY_NAMES));
+    key_long_names.reset(new StringList(KEY_LONG_NAMES));
     gAutoPilotOff = true;
     levelNum = 31;
     keyMask = 0;

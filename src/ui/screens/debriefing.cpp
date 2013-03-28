@@ -67,9 +67,9 @@ LabeledRect interface_item(const Rect& text_bounds) {
     return LabeledRect(0, text_bounds, {2001, 29}, GOLD, kLarge);
 }
 
-Rect pix_bounds(const Rect& text_bounds) {
+Rect pix_bounds(const InterfaceItem& item) {
     Rect r;
-    GetAnyInterfaceItemGraphicBounds(interface_item(text_bounds), &r);
+    GetAnyInterfaceItemGraphicBounds(item, &r);
     return r;
 }
 
@@ -117,20 +117,19 @@ unique_ptr<StyledText> style_score_text(String text) {
 
 }  // namespace
 
-DebriefingScreen::DebriefingScreen(int text_id)
-        : _state(DONE),
-          _next_update(0),
-          _typed_chars(0) {
-    initialize(text_id, false);
-}
+DebriefingScreen::DebriefingScreen(int text_id) :
+        _state(DONE),
+        _next_update(0),
+        _typed_chars(0),
+        _data_item(initialize(text_id, false)) { }
 
 DebriefingScreen::DebriefingScreen(
         int text_id, int your_length, int par_length, int your_loss, int par_loss,
-        int your_kill, int par_kill)
-        : _state(TYPING),
-          _next_update(0),
-          _typed_chars(0) {
-    initialize(text_id, true);
+        int your_kill, int par_kill):
+        _state(TYPING),
+        _next_update(0),
+        _typed_chars(0),
+        _data_item(initialize(text_id, true)) {
 
     Rect score_area = _message_bounds;
     score_area.top = score_area.bottom - kScoreTableHeight;
@@ -165,7 +164,7 @@ void DebriefingScreen::draw() const {
     }
     Rect interface_bounds = _message_bounds;
     interface_bounds.offset(_pix_bounds.left, _pix_bounds.top);
-    draw_interface_item(interface_item(interface_bounds));
+    draw_interface_item(_data_item);
 
     vector<inlinePictType> inline_pict;
     draw_text_in_rect(interface_bounds, _message, kLarge, GOLD, inline_pict);
@@ -216,7 +215,7 @@ void DebriefingScreen::fire_timer() {
     }
 }
 
-void DebriefingScreen::initialize(int text_id, bool do_score) {
+LabeledRect DebriefingScreen::initialize(int text_id, bool do_score) {
     Resource rsrc("text", "txt", text_id);
     _message.assign(utf8::decode(rsrc.data()));
 
@@ -227,9 +226,11 @@ void DebriefingScreen::initialize(int text_id, bool do_score) {
     }
     text_bounds.center_in(viewport);
 
-    _pix_bounds = pix_bounds(text_bounds);
+    LabeledRect data_item = interface_item(text_bounds);
+    _pix_bounds = pix_bounds(data_item);
     _message_bounds = text_bounds;
     _message_bounds.offset(-_pix_bounds.left, -_pix_bounds.top);
+    return data_item;
 }
 
 String DebriefingScreen::build_score_text(

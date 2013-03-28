@@ -21,6 +21,7 @@
 #include <strings.h>
 
 #include "data/string-list.hpp"
+#include "game/globals.hpp"
 #include "video/driver.hpp"
 
 namespace antares {
@@ -83,15 +84,13 @@ bool CommandKey() {
 }
 
 void GetKeyNumName(int key_num, sfz::String* out) {
-    StringList strings(KEY_NAMES);
-    out->assign(strings.at(key_num - 1));
+    out->assign(globals()->key_names->at(key_num - 1));
 }
 
 bool GetKeyNameNum(sfz::StringSlice name, int& out) {
-    StringList strings(KEY_NAMES);
     bool result = false;
-    for (int i = 0; i < strings.size(); ++i) {
-        if (strings.at(i) == name) {
+    for (int i = 0; i < globals()->key_names->size(); ++i) {
+        if (globals()->key_names->at(i) == name) {
             out = i + 1;
             result = true;
         }

@@ -52,7 +52,7 @@ class DebriefingScreen : public Card {
             int par_kill);
     
   private:
-    void initialize(int text_id, bool do_score);
+    LabeledRect initialize(int text_id, bool do_score);
 
     enum State {
         TYPING,
@@ -71,6 +71,8 @@ class DebriefingScreen : public Card {
 
     int64_t _next_update;
     int _typed_chars;
+
+    LabeledRect _data_item;
 
     DISALLOW_COPY_AND_ASSIGN(DebriefingScreen);
 };

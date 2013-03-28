@@ -91,6 +91,8 @@ const int32_t kNoLineButton         = -1;
 const int32_t kInLineButton         = kCompAcceptKeyNum;
 const int32_t kOutLineButton        = kCompCancelKeyNum;
 
+static StringList* mini_data_strings;
+
 enum {
     kMainMiniScreen     = 1,
     kBuildMiniScreen    = 2,
@@ -266,6 +268,8 @@ void MiniScreenInit() {
 
     ClearMiniScreenLines();
     ClearMiniObjectData();
+
+    mini_data_strings = new StringList(kMiniDataStringID);
 }
 
 void MiniScreenCleanup() {
@@ -899,7 +903,7 @@ void draw_mini_ship_data(
 
     draw_shaded_rect(lRect, color, lightcolor, darkcolor);
 
-    String text(StringList(kMiniDataStringID).at(whichString - 1));
+    String text(mini_data_strings->at(whichString - 1));
     computer_font->draw_sprite(
             Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
             text, RgbColor::kBlack);

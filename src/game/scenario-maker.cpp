@@ -71,6 +71,7 @@ const int32_t kOwnerMayChangeFlag   = 0x80000000;
 const int32_t kAnyOwnerColorFlag    = 0x0000ffff;
 
 const int16_t kLevelNameID = 4600;
+static StringList* level_names;
 
 vector<Scenario> gScenarioData;
 vector<Scenario::InitialObject> gScenarioInitialData;
@@ -443,8 +444,7 @@ ScenarioName Scenario::name() const {
 }
 
 void print_to(PrintTarget out, ScenarioName name) {
-    StringList strings(kLevelNameID);
-    print(out, strings.at(name.string_id - 1));
+    print(out, level_names->at(name.string_id - 1));
 }
 
 int32_t Scenario::prologue_id() const {
@@ -526,6 +526,8 @@ void ScenarioMakerInit() {
     }
 
     InitRaces();
+
+    level_names = new StringList(kLevelNameID);
 }
 
 bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
