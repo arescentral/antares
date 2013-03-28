@@ -93,7 +93,7 @@ struct LabeledRect : public LabeledItem {
 
 struct TextRect : public InterfaceItem {
     TextRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style);
-    TextRect(int id, Rect bounds, int16_t rsrc_id, uint8_t hue, interfaceStyleType style);
+    TextRect(int id, Rect bounds, sfz::StringSlice name, uint8_t hue, interfaceStyleType style);
     virtual void accept(const Visitor& visitor) const;
 
     sfz::String                 text;
@@ -102,7 +102,7 @@ struct TextRect : public InterfaceItem {
 };
 
 struct PictureRect : public InterfaceItem {
-    PictureRect(int id, Rect bounds, int16_t rsrc_id);
+    PictureRect(int id, Rect bounds, sfz::StringSlice name);
     virtual void accept(const Visitor& visitor) const;
 
     Picture                     picture;

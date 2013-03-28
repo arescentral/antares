@@ -30,6 +30,7 @@ using sfz::Exception;
 using sfz::Json;
 using sfz::ReadSource;
 using sfz::StringMap;
+using sfz::StringSlice;
 using sfz::format;
 using sfz::range;
 using std::unique_ptr;
@@ -110,7 +111,7 @@ vector<unique_ptr<InterfaceItem>> interface_items(int id0, const Json& json) {
 
         Json sub = item_json.get(kind);
         Rect bounds = rect(item_json.get("bounds"));
-        int16_t rsrc_id = sub.get("id").number();
+        StringSlice resource = sub.get("resource").string();
         uint8_t hue = antares::hue(sub.get("hue"));
         interfaceStyleType style = antares::style(sub.get("style"));
         int16_t key = sub.has("key") ? antares::key(sub.get("key")) : 0;
@@ -130,10 +131,10 @@ vector<unique_ptr<InterfaceItem>> interface_items(int id0, const Json& json) {
         } else if (kind == "radio") {
             items.emplace_back(new RadioButton(id++, bounds, key, label, hue, style));
         } else if (kind == "picture") {
-            items.emplace_back(new PictureRect(id++, bounds, rsrc_id));
+            items.emplace_back(new PictureRect(id++, bounds, resource));
         } else if (kind == "text") {
-            if (sub.has("id")) {
-                items.emplace_back(new TextRect(id++, bounds, rsrc_id, hue, style));
+            if (sub.has("resource")) {
+                items.emplace_back(new TextRect(id++, bounds, resource, hue, style));
             } else {
                 items.emplace_back(new TextRect(id++, bounds, hue, style));
             }
@@ -192,9 +193,9 @@ TextRect::TextRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style):
         hue(hue),
         style(style) { }
 
-TextRect::TextRect(int id, Rect bounds, int16_t rsrc_id, uint8_t hue, interfaceStyleType style):
+TextRect::TextRect(int id, Rect bounds, StringSlice resource, uint8_t hue, interfaceStyleType style):
         InterfaceItem(id, bounds),
-        text(utf8::decode(Resource("text", "txt", rsrc_id).data())),
+        text(utf8::decode(Resource(resource).data())),
         hue(hue),
         style(style) { }
 
@@ -202,10 +203,10 @@ void TextRect::accept(const Visitor& visitor) const {
     visitor.visit_text_rect(*this);
 }
 
-PictureRect::PictureRect(int id, Rect bounds, int16_t rsrc_id):
+PictureRect::PictureRect(int id, Rect bounds, StringSlice resource):
         InterfaceItem(id, bounds),
-        picture(rsrc_id),
-        sprite(VideoDriver::driver()->new_sprite(format("/pict/{0}", rsrc_id), picture)),
+        picture(resource),
+        sprite(VideoDriver::driver()->new_sprite(format("/{0}", resource), picture)),
         visible_bounds(false),
         hue(GRAY),
         style(kSmall) { }

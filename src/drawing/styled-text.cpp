@@ -350,7 +350,7 @@ void StyledText::draw_char(const Rect& bounds, int index) const {
             corner.offset(inline_pict.bounds.left, inline_pict.bounds.top + _line_spacing);
             Picture pict(inline_pict.id);
             unique_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite(
-                        format("/pict/{0}"), pict));
+                        format("/pictures/{0}.png", inline_pict.id), pict));
             sprite->draw(corner.h, corner.v);
         }
         break;
