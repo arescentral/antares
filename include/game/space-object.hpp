@@ -86,6 +86,9 @@ inline void mGetBaseObjectFromClassRace(
     }
 }
 
+sfz::StringSlice get_object_name(int16_t id);
+sfz::StringSlice get_object_short_name(int16_t id);
+
 }  // namespace antares
 
 #endif // ANTARES_GAME_SPACE_OBJECT_HPP_

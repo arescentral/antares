@@ -57,9 +57,6 @@ const int32_t kHitStateMax              = 128;
 const int32_t kCloakOnStateMax          = 254;
 const int32_t kCloakOffStateMax         = -252;
 
-const int16_t kSpaceObjectNameResID         = 5000;
-const int16_t kSpaceObjectShortNameResID    = 5001;
-
 const int32_t kEngageRange              = 1048576;  // range at which to engage closest ship
                                                     // about 2 subsectors (512 * 2)^2
 

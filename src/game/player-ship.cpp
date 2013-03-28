@@ -649,8 +649,7 @@ void SetPlayerSelectShip( long whichShip, bool target, long admiralNumber)
                 print(string, hot_key_suffix(selectShip));
                 SetScreenLabelString(gDestinationLabel, string);
             } else {
-                StringList strings(kSpaceObjectNameResID);
-                String string(strings.at(selectShip->whichBaseObject));
+                String string(get_object_name(selectShip->whichBaseObject));
                 print(string, hot_key_suffix(selectShip));
                 SetScreenLabelString(gDestinationLabel, string);
             }
@@ -673,8 +672,7 @@ void SetPlayerSelectShip( long whichShip, bool target, long admiralNumber)
                 print(string, hot_key_suffix(selectShip));
                 SetScreenLabelString(globals()->gSelectionLabel, string);
             } else {
-                StringList strings(kSpaceObjectNameResID);
-                String string(strings.at(selectShip->whichBaseObject));
+                String string(get_object_name(selectShip->whichBaseObject));
                 print(string, hot_key_suffix(selectShip));
                 SetScreenLabelString(globals()->gSelectionLabel, string);
             }
@@ -911,8 +909,7 @@ void Update_LabelStrings_ForHotKeyChange( void)
                 print(string, hot_key_suffix(selectShip));
                 SetScreenLabelString(gDestinationLabel, string);
             } else {
-                StringList strings(kSpaceObjectNameResID);
-                String string(strings.at(selectShip->whichBaseObject));
+                String string(get_object_name(selectShip->whichBaseObject));
                 print(string, hot_key_suffix(selectShip));
                 SetScreenLabelString(gDestinationLabel, string);
             }
@@ -935,8 +932,7 @@ void Update_LabelStrings_ForHotKeyChange( void)
                 print(string, hot_key_suffix(selectShip));
                 SetScreenLabelString(globals()->gSelectionLabel, string);
             } else {
-                StringList strings(kSpaceObjectNameResID);
-                String string(strings.at(selectShip->whichBaseObject));
+                String string(get_object_name(selectShip->whichBaseObject));
                 print(string, hot_key_suffix(selectShip));
                 SetScreenLabelString(globals()->gSelectionLabel, string);
             }

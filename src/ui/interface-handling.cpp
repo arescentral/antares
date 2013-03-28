@@ -276,8 +276,7 @@ void CreateObjectDataText(String* text, short id) {
 
     // ship name
     {
-        StringList names(5000);
-        const StringSlice& name = names.at(id);
+        const StringSlice& name = get_object_name(id);
         find_replace(data, 0, keys.at(kShipTypeStringNum), name);
     }
 
@@ -353,8 +352,7 @@ void CreateWeaponDataText(String* text, long whichWeapon, const StringSlice& wea
 
     // weapon name
     {
-        StringList names(5000);
-        const StringSlice& name = names.at(whichWeapon);
+        const StringSlice& name = get_object_name(whichWeapon);
         find_replace(data, 0, keys.at(kWeaponNameStringNum), name);
     }
 
