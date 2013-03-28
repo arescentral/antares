@@ -214,7 +214,9 @@ KeyControlScreen::KeyControlScreen(OptionsScreen::State* state, Preferences* pre
           _key_start(size()),
           _selected_key(-1),
           _next_flash(0.0),
-          _flashed_on(false) {
+          _flashed_on(false),
+          _tabs(2009),
+          _keys(2005) {
     set_tab(SHIP);
 }
 
@@ -332,13 +334,11 @@ void KeyControlScreen::draw() const {
     if (!_conflicts.empty()) {
         const size_t key_one = _conflicts[0].first;
         const size_t key_two = _conflicts[0].second;
-        StringList tabs(2009);
-        StringList keys(2005);
 
         // TODO(sfiera): permit localization.
         String text(format("{0}: {1} conflicts with {2}: {3}",
-                    tabs.at(get_tab_num(key_one)), keys.at(key_one),
-                    tabs.at(get_tab_num(key_two)), keys.at(key_two)));
+                    _tabs.at(get_tab_num(key_one)), _keys.at(key_one),
+                    _tabs.at(get_tab_num(key_two)), _keys.at(key_two)));
 
         const TextRect& box = dynamic_cast<const TextRect&>(item(CONFLICT_TEXT));
         vector<inlinePictType> pict;
