@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "config/preferences.hpp"
+#include "data/string-list.hpp"
 #include "ui/screen.hpp"
 
 namespace antares {
@@ -53,7 +54,7 @@ class SoundControlScreen : public InterfaceScreen {
 
   protected:
     virtual void adjust_interface();
-    virtual void handle_button(int button);
+    virtual void handle_button(Button& button);
 
   private:
     enum Item {
@@ -98,7 +99,7 @@ class KeyControlScreen : public InterfaceScreen {
 
   protected:
     virtual void adjust_interface();
-    virtual void handle_button(int button);
+    virtual void handle_button(Button& button);
 
   private:
     enum Item {
@@ -140,6 +141,9 @@ class KeyControlScreen : public InterfaceScreen {
 
     int64_t _next_flash;
     bool _flashed_on;
+
+    StringList _tabs;
+    StringList _keys;
 
     DISALLOW_COPY_AND_ASSIGN(KeyControlScreen);
 };

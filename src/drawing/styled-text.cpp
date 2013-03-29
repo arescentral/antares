@@ -350,7 +350,7 @@ void StyledText::draw_char(const Rect& bounds, int index) const {
             corner.offset(inline_pict.bounds.left, inline_pict.bounds.top + _line_spacing);
             Picture pict(inline_pict.id);
             unique_ptr<Sprite> sprite(VideoDriver::driver()->new_sprite(
-                        format("/pict/{0}"), pict));
+                        format("/pictures/{0}.png", inline_pict.id), pict));
             sprite->draw(corner.h, corner.v);
         }
         break;
@@ -384,7 +384,7 @@ void StyledText::draw_char(PixMap* pix, const Rect& bounds, int index) const {
                 char_rect.offset(corner.h, corner.v);
                 pix->view(char_rect).fill(ch.back_color);
             }
-            _font->draw(Point(corner.h, corner.v + char_adjust), ch.character, ch.fore_color, pix, bounds);
+            _font->draw(Point(corner.h, corner.v + char_adjust), ch.character, ch.fore_color, pix);
         }
         break;
 

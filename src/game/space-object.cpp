@@ -60,6 +60,11 @@ const uint8_t kNeutralColor         = SKY_BLUE;
 
 const int32_t kBatteryToEnergyRatio = 5;
 
+static const int16_t kSpaceObjectNameResID          = 5000;
+static const int16_t kSpaceObjectShortNameResID     = 5001;
+static StringList* space_object_names;
+static StringList* space_object_short_names;
+
 struct actionQueueType {
     objectActionType            *action;
     long                            actionNum;
@@ -127,6 +132,9 @@ void SpaceObjectHandlingInit() {
     }
     ResetAllSpaceObjects();
     ResetActionQueueData();
+
+    space_object_names = new StringList(kSpaceObjectNameResID);
+    space_object_short_names = new StringList(kSpaceObjectShortNameResID);
 }
 
 void CleanupSpaceObjectHandling() {
@@ -2408,8 +2416,7 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, bool message)
             }
         } else {
             if (message) {
-                StringList strings(kSpaceObjectNameResID);
-                StringSlice object_name = strings.at(anObject->whichBaseObject);
+                StringSlice object_name = get_object_name(anObject->whichBaseObject);
                 if (owner >= 0) {
                     String new_owner_name(GetAdmiralName(anObject->owner));
                     AddMessage(format("{0} captured by {1}.", object_name, new_owner_name));
@@ -2618,6 +2625,14 @@ void CreateFloatingBodyOfPlayer( spaceObjectType *anObject)
     {
         PlayerShipBodyExpire( anObject, true);
     }
+}
+
+StringSlice get_object_name(int16_t id) {
+    return space_object_names->at(id);
+}
+
+StringSlice get_object_short_name(int16_t id) {
+    return space_object_short_names->at(id);
 }
 
 }  // namespace antares

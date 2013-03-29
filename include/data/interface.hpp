@@ -22,131 +22,166 @@
 #include <sfz/sfz.hpp>
 
 #include "math/geometry.hpp"
+#include "data/picture.hpp"
 
 namespace antares {
 
-enum interfaceKindEnum {
-    kPlainRect = 1,
-    kLabeledRect = 2,
-    kListRect = 3,
-    kTextRect = 4,
-    kPlainButton = 5,
-    kRadioButton = 6,
-    kCheckboxButton = 7,
-    kPictureRect = 8,
-    kTabBox = 9,
-    kTabBoxTop = 10,
-    kTabBoxButton = 11
-};
-typedef uint8_t interfaceKindType;
+class Sprite;
 
-enum interfaceItemStatusEnum {
+enum interfaceItemStatusType {
     kDimmed = 1,
     kActive = 2,
     kIH_Hilite = 3
 };
-typedef uint8_t interfaceItemStatusType;
 
-enum interfaceStyleEnum {
+enum interfaceStyleType {
     kLarge = 1,
     kSmall = 2
 };
-typedef uint8_t interfaceStyleType;
 
 struct interfaceLabelType {
-    short               stringID;
-    short               stringNumber;
+    int16_t             stringID;
+    int16_t             stringNumber;
 };
-void read_from(sfz::ReadSource in, interfaceLabelType& label);
 
-struct interfaceLabeledRectType {
-    interfaceLabelType  label;
-    unsigned char       color;
-    uint32_t             unused;
-    bool                editable;
-    // bool             editable;
+class InterfaceItem {
+  public:
+    class Visitor;
+
+    InterfaceItem(InterfaceItem&&) = default;
+    InterfaceItem& operator=(InterfaceItem&&) = default;
+
+    const int id;
+    const Rect& bounds() const { return _bounds; }
+    Rect& bounds() { return _bounds; }
+    virtual void accept(const Visitor& visitor) const = 0;
+
+  protected:
+    InterfaceItem(int id, Rect bounds);
+
+  private:
+    friend std::vector<std::unique_ptr<InterfaceItem>> interface_items(
+            int id0, const sfz::Json& json);
+
+    Rect                        _bounds;
 };
-void read_from(sfz::ReadSource in, interfaceLabeledRectType& labeled_rect);
 
-struct interfaceListType {
-    interfaceLabelType          label;
-    short                       (*getListLength)( void);
-    sfz::StringSlice            (*getItemString)(short);
-    bool                     (*itemHilited)( short, bool);
-    short                       topItem;
+std::vector<std::unique_ptr<InterfaceItem>> interface_items(int id0, const sfz::Json& json);
+
+struct PlainRect : public InterfaceItem {
+    PlainRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style);
+    virtual void accept(const Visitor& visitor) const;
+
+    uint8_t                     hue;
+    interfaceStyleType          style;
 };
-void read_from(sfz::ReadSource in, interfaceListType& list);
 
-struct interfaceTextRectType {
-    short               textID;
-    uint8_t             visibleBounds;
-    // bool             visibleBounds;
+struct LabeledItem : public InterfaceItem {
+    LabeledItem(int id, Rect bounds, interfaceLabelType label);
+
+    sfz::String                 label;
 };
-void read_from(sfz::ReadSource in, interfaceTextRectType& text_rect);
 
-struct interfaceTabBoxType {
-    short               topRightBorderSize;
+struct LabeledRect : public LabeledItem {
+    LabeledRect(
+            int id, Rect bounds, interfaceLabelType label, uint8_t hue, interfaceStyleType style);
+    virtual void accept(const Visitor& visitor) const;
+
+    uint8_t                     hue;
+    interfaceStyleType          style;
 };
-void read_from(sfz::ReadSource in, interfaceTabBoxType& tab_box);
 
-struct interfacePictureRectType {
-    short               pictureID;
-    uint8_t             visibleBounds;
-    // bool             visibleBounds;
+struct TextRect : public InterfaceItem {
+    TextRect(int id, Rect bounds, uint8_t hue, interfaceStyleType style);
+    TextRect(int id, Rect bounds, sfz::StringSlice name, uint8_t hue, interfaceStyleType style);
+    virtual void accept(const Visitor& visitor) const;
+
+    sfz::String                 text;
+    uint8_t                     hue;
+    interfaceStyleType          style;
 };
-void read_from(sfz::ReadSource in, interfacePictureRectType& picture_rect);
 
-struct interfaceButtonType {
-    interfaceLabelType          label;
-    short                       key;
-    uint8_t                     defaultButton;
-    // bool                     defaultButton;
+struct PictureRect : public InterfaceItem {
+    PictureRect(int id, Rect bounds, sfz::StringSlice name);
+    virtual void accept(const Visitor& visitor) const;
+
+    Picture                     picture;
+    std::unique_ptr<Sprite>     sprite;
+    bool                        visible_bounds;
+    uint8_t                     hue;
+    interfaceStyleType          style;
+};
+
+struct Button : public LabeledItem {
+    Button(
+            int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
+            interfaceStyleType style);
+
+    int16_t                     key;
+    uint8_t                     hue;
+    interfaceStyleType          style;
     interfaceItemStatusType     status;
 };
-void read_from(sfz::ReadSource in, interfaceButtonType& button);
 
-struct interfaceRadioType {
-    interfaceLabelType          label;
-    short                       key;
-    uint8_t                     on;
-    // bool                     on;
-    interfaceItemStatusType     status;
-}; // also tab box button type
-void read_from(sfz::ReadSource in, interfaceRadioType& radio);
-
-struct interfaceCheckboxType {
-    interfaceLabelType          label;
-    short                       key;
-    uint8_t                     on;
-    // bool                     on;
-    interfaceItemStatusType     status;
+struct PlainButton : public Button {
+    PlainButton(
+            int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
+            interfaceStyleType style);
+    virtual void accept(const Visitor& visitor) const;
 };
-void read_from(sfz::ReadSource in, interfaceCheckboxType& checkbox);
 
-struct interfaceItemType {
-    Rect            bounds;
-    union
-    {
-        interfaceLabeledRectType    labeledRect;
-        interfaceListType           listRect;
-        interfaceTextRectType       textRect;
-        interfaceButtonType         plainButton;
-        interfaceRadioType          radioButton;
-        interfaceCheckboxType       checkboxButton;
-        interfacePictureRectType    pictureRect;
-        interfaceTabBoxType         tabBox;
-    } item;
+struct CheckboxButton : public Button {
+    CheckboxButton(
+            int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
+            interfaceStyleType style);
+    virtual void accept(const Visitor& visitor) const;
 
-    uint8_t             color;
-    interfaceKindType   kind;
-    interfaceStyleType  style;
-
-    interfaceItemStatusType status() const;
-    void set_status(interfaceItemStatusType status);
-    int key() const;
-    void set_key(int key);
+    bool                        on;
 };
-void read_from(sfz::ReadSource in, interfaceItemType& item);
+
+struct RadioButton : public Button {
+    RadioButton(
+            int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
+            interfaceStyleType style);
+    virtual void accept(const Visitor& visitor) const;
+
+    bool                        on;
+};
+
+struct TabBoxButton : public Button {
+    TabBoxButton(
+            int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
+            interfaceStyleType style, const sfz::Json& tab_content);
+    virtual void accept(const Visitor& visitor) const;
+
+    bool                        on;
+    sfz::Json                   tab_content;
+};
+
+struct TabBox : public InterfaceItem {
+    TabBox(
+            int id, Rect bounds, uint8_t hue, interfaceStyleType style,
+            int16_t top_right_border_size);
+    virtual void accept(const Visitor& visitor) const;
+
+    uint8_t                     hue;
+    interfaceStyleType          style;
+    int16_t                     top_right_border_size;
+};
+
+class InterfaceItem::Visitor {
+  public:
+    ~Visitor();
+    virtual void visit_plain_rect(const PlainRect&) const = 0;
+    virtual void visit_labeled_rect(const LabeledRect&) const = 0;
+    virtual void visit_text_rect(const TextRect&) const = 0;
+    virtual void visit_picture_rect(const PictureRect&) const = 0;
+    virtual void visit_plain_button(const PlainButton&) const = 0;
+    virtual void visit_radio_button(const RadioButton&) const = 0;
+    virtual void visit_checkbox_button(const CheckboxButton&) const = 0;
+    virtual void visit_tab_box(const TabBox&) const = 0;
+    virtual void visit_tab_box_button(const TabBoxButton&) const = 0;
+};
 
 }  // namespace antares
 

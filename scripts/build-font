@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+
+from __future__ import division
+
+import collections
+import json
+import os
+import struct
+import sys
+
+progname = os.path.basename(sys.argv[0])
+try:
+    _, mode, name, definition, bitmap = sys.argv
+    assert mode in ["json", "ppm"]
+except (ValueError, AssertionError):
+    sys.stderr.write("usage: {0} json NAME DEFINITION BITMAP".format(progname))
+    sys.stderr.write("       {0} ppm NAME DEFINITION BITMAP".format(progname))
+    sys.exit(64)
+
+DESCRIPTION = ">8xIIII"
+
+with open(definition) as f:
+    logical_width, physical_width, height, ascent = struct.unpack(DESCRIPTION, f.read())
+
+image_width = physical_width * 8 * 16
+image_height = height * 16
+widths = []
+chars = []
+with open(bitmap) as f:
+    for i in xrange(255):
+        widths.append(ord(f.read(1)))
+        chars.append(f.read(physical_width * height))
+        assert len(chars[-1]) == (physical_width * height)
+    assert not f.read()
+
+# char = chr(i).decode("mac-roman")
+
+if mode == "json":
+    chars = collections.OrderedDict()
+    for i, width in enumerate(widths):
+        row = i // 16
+        col = i % 16
+        left = physical_width * 8 * col
+        top = height * row
+        chars[chr(i).decode("mac-roman")] = collections.OrderedDict([
+            ("left", left),
+            ("top", top),
+            ("right", left + width),
+            ("bottom", top + height),
+        ])
+
+    json.dump(collections.OrderedDict([
+        ("image", "fonts/{0}.png".format(name)),
+        ("logical-width", logical_width),
+        ("height", height),
+        ("ascent", ascent),
+        ("glyphs", chars),
+    ]), sys.stdout, indent=2)
+    print
+else:  # mode == "ppm"
+    print "P4"
+    print "{0} {1}".format(image_width, image_height)
+    for row in xrange(16):
+        for y in xrange(height):
+            for col in xrange(16):
+                try:
+                    char = chars[(row * 16) + col]
+                except IndexError:
+                    char = "\0" * physical_width * height
+                start = y * physical_width
+                sys.stdout.write(char[start:start + physical_width])

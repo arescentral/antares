@@ -28,15 +28,20 @@
 
 using sfz::Bytes;
 using sfz::BytesSlice;
+using sfz::Exception;
+using sfz::Json;
+using sfz::JsonDefaultVisitor;
 using sfz::Rune;
 using sfz::String;
+using sfz::StringMap;
 using sfz::StringSlice;
 using sfz::format;
 using sfz::hex;
 using sfz::read;
-using std::unique_ptr;
+using sfz::string_to_json;
+using std::map;
 
-namespace macroman = sfz::macroman;
+namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -48,16 +53,127 @@ enum {
     kTacticalFontResID      = 5000,
     kComputerFontResID      = 5001,
     kButtonFontResID        = 5002,
-    kMessageFontResID       = 5003,
     kTitleFontResID         = 5004,
     kButtonSmallFontResID   = 5005,
 };
 
-uint8_t to_mac_roman(Rune code) {
-    String string(1, code);
-    Bytes bytes(macroman::encode(string));
-    return bytes.at(0);
-}
+struct FontVisitor : public JsonDefaultVisitor {
+    enum StateEnum {
+        NEW,
+        IMAGE,
+        LOGICAL_WIDTH, HEIGHT, ASCENT,
+        GLYPHS, GLYPH, GLYPH_LEFT, GLYPH_TOP, GLYPH_RIGHT, GLYPH_BOTTOM,
+        DONE,
+    };
+    struct State {
+        StateEnum state;
+        Rune glyph;
+        Rect glyph_rect;
+        State(): state(NEW) { }
+    };
+    State& state;
+    ArrayPixMap& image;
+    int32_t& logical_width;
+    int32_t& height;
+    int32_t& ascent;
+    map<Rune, Rect>& glyphs;
+
+    FontVisitor(State& state, ArrayPixMap& image,
+                int32_t& logical_width, int32_t& height, int32_t& ascent,
+                map<Rune, Rect>& glyphs):
+            state(state),
+            image(image),
+            logical_width(logical_width),
+            height(height),
+            ascent(ascent),
+            glyphs(glyphs) { }
+
+    bool descend(StateEnum state, const StringMap<Json>& value, StringSlice key) const {
+        auto it = value.find(key);
+        if (it == value.end()) {
+            return false;
+        }
+        StateEnum saved_state = this->state.state;
+        this->state.state = state;
+        it->second.accept(*this);
+        this->state.state = saved_state;
+        return true;
+    }
+
+    virtual void visit_object(const StringMap<Json>& value) const {
+        switch (state.state) {
+          case NEW:
+            if (!descend(IMAGE, value, "image")) {
+                throw Exception("missing image in sprite json");
+            }
+            if (!descend(LOGICAL_WIDTH, value, "logical-width")) {
+                throw Exception("missing logical-width in sprite json");
+            }
+            if (!descend(HEIGHT, value, "height")) {
+                throw Exception("missing height in sprite json");
+            }
+            if (!descend(ASCENT, value, "ascent")) {
+                throw Exception("missing ascent in sprite json");
+            }
+            descend(GLYPHS, value, "glyphs");
+            break;
+
+          case GLYPHS:
+            this->state.state = GLYPH;
+            for (auto kv: value) {
+                state.glyph = kv.first.at(0);
+                kv.second.accept(*this);
+            }
+            break;
+
+          case GLYPH:
+            if (descend(GLYPH_LEFT, value, "left") &&
+                    descend(GLYPH_TOP, value, "top") &&
+                    descend(GLYPH_RIGHT, value, "right") &&
+                    descend(GLYPH_BOTTOM, value, "bottom")) {
+                glyphs[state.glyph] = state.glyph_rect;
+            } else {
+                throw Exception("bad glyph rect");
+            }
+            break;
+
+          default:
+            return visit_default("object");
+        }
+    }
+
+    virtual void visit_string(const StringSlice& value) const {
+        switch (state.state) {
+          case IMAGE:
+            {
+                Resource rsrc(value);
+                BytesSlice data = rsrc.data();
+                read(data, image);
+            }
+            break;
+          default:
+            return visit_default("string");
+        }
+    }
+
+    virtual void visit_number(double value) const {
+        switch (state.state) {
+          case LOGICAL_WIDTH: logical_width = value; break;
+          case HEIGHT: height = value; break;
+          case ASCENT: ascent = value; break;
+          case GLYPH_LEFT: state.glyph_rect.left = value; break;
+          case GLYPH_TOP: state.glyph_rect.top = value; break;
+          case GLYPH_RIGHT: state.glyph_rect.right = value; break;
+          case GLYPH_BOTTOM: state.glyph_rect.bottom = value; break;
+          default:
+            return visit_default("number");
+        }
+    }
+
+    virtual void visit_default(const char* type) const {
+        throw Exception(format("unexpected {0} in sprite json", type));
+    }
+};
 
 }  // namespace
 
@@ -65,127 +181,84 @@ const Font* gDirectTextData[kDirectFontNum];
 const Font* tactical_font;
 const Font* computer_font;
 const Font* button_font;
-const Font* message_font;
 const Font* title_font;
 const Font* small_button_font;
 
-Font::Font(int32_t id) {
-    Resource defn_rsrc("font-descriptions", "nlFD", id);
-    BytesSlice in(defn_rsrc.data());
-
-    in.shift(4);
-    read(in, resID);
-    in.shift(2);
-    read(in, logicalWidth);
-    read(in, physicalWidth);
-    read(in, height);
-    read(in, ascent);
-
-    Resource data_rsrc("font-bitmaps", "nlFM", resID);
-    charSet.assign(data_rsrc.data());
+Font::Font(StringSlice name):
+        _glyph_table(0, 0) {
+    String path(format("fonts/{0}.json", name));
+    Resource rsrc(path);
+    String rsrc_string(utf8::decode(rsrc.data()));
+    Json json;
+    if (!string_to_json(rsrc_string, json)) {
+        throw Exception("invalid JSON");
+    }
+    FontVisitor::State state;
+    json.accept(FontVisitor(state, _glyph_table, logicalWidth, height, ascent, _glyphs));
 
     if (VideoDriver::driver()) {
-        for (int i = 0; i < 256; i++) {
-            ArrayPixMap pix(physicalWidth * 8, height + 1);
+        for (const auto& kv: _glyphs) {
+            ArrayPixMap pix(kv.second.width(), kv.second.height());
             pix.fill(RgbColor::kClear);
-            draw_internal(Point(0, ascent), i, RgbColor::kWhite, &pix, pix.size().as_rect());
-            _sprites.emplace_back(VideoDriver::driver()->new_sprite(
-                        format("/font/{0}/{1}", id, hex(i, 2)), pix));
+            draw_internal(Point(0, ascent), kv.first, RgbColor::kWhite, &pix);
+            _sprites[kv.first] = VideoDriver::driver()->new_sprite(
+                    format("/fonts/{0}/{1}", name, hex(kv.first, 2)), pix);
         }
     }
 }
 
 Font::~Font() { }
 
-void Font::draw(Point origin, Rune r, RgbColor color, PixMap* pix, const Rect& clip) const {
-    draw_internal(origin, to_mac_roman(r), color, pix, clip);
+Rect Font::glyph_rect(Rune r) const {
+    auto it = _glyphs.find(r);
+    if (it == _glyphs.end()) {
+        return Rect();
+    }
+    return it->second;
 }
 
-void Font::draw_internal(
-        Point origin, uint8_t ch, RgbColor color, PixMap* pix, const Rect& clip) const {
-    // move the pen to the resulting location
+void Font::draw(Point origin, Rune r, RgbColor color, PixMap* pix) const {
+    draw_internal(origin, r, color, pix);
+}
+
+void Font::draw_internal(Point origin, Rune r, RgbColor color, PixMap* pix) const {
     origin.v -= ascent;
-
-    // Top and bottom boundaries of where we draw.
-    int topEdge = std::max(0, clip.top - origin.v);
-    int bottomEdge = height - std::max(0, origin.v + height - clip.bottom + 1);
-
-    int rowBytes = pix->row_bytes();
-
-    // set hchar = place holder for start of each char we draw
-    RgbColor* hchar = pix->mutable_bytes() + (origin.v + topEdge) * rowBytes + origin.h;
-
-    const uint8_t* sbyte = charSet.data() + height * physicalWidth * ch + ch;
-
-    int width = *sbyte;
-    ++sbyte;
-
-    if ((origin.h + width >= clip.left) || (origin.h < clip.right)) {
-        // Left and right boundaries of where we draw.
-        int leftEdge = std::max(0, clip.left - origin.h);
-        int rightEdge = width - std::max(0, origin.h + width - clip.right);
-
-        // skip over the clipped top rows
-        sbyte += topEdge * physicalWidth;
-
-        // dbyte = destination pixel
-        RgbColor* dbyte = hchar;
-
-        // repeat for every unclipped row
-        for (int y = topEdge; y < bottomEdge; ++y) {
-            // repeat for every byte of data
-            for (int x = leftEdge; x < rightEdge; ++x) {
-                int byte = x / 8;
-                int bit = 0x80 >> (x & 0x7);
-                if (sbyte[byte] & bit) {
-                    dbyte[x] = color;
-                }
+    Rect glyph = glyph_rect(r);
+    for (size_t y = 0; y < glyph.height(); ++y) {
+        for (size_t x = 0; x < glyph.width(); ++x) {
+            if (_glyph_table.get(glyph.left + x, glyph.top + y).red < 255) {
+                pix->set(origin.h + x, origin.v + y, color);
             }
-            sbyte += physicalWidth;
-            dbyte += rowBytes;
         }
     }
-    // else (not on screen) just increase the current character
-
-    // for every char clipped or no:
-    // increase our character pixel starting point by width of this character
-    hchar += width;
-
-    // increase our hposition (our position in pixels)
-    origin.h += width;
 }
 
 void Font::draw_sprite(Point origin, sfz::StringSlice string, RgbColor color) const {
     origin.offset(0, -ascent);
     for (size_t i = 0; i < string.size(); ++i) {
-        uint8_t byte = to_mac_roman(string.at(i));
-        _sprites[byte]->draw_shaded(origin.h, origin.v, color);
+        _sprites.find(string.at(i))->second->draw_shaded(origin.h, origin.v, color);
         origin.offset(char_width(string.at(i)), 0);
     }
 }
 
 void InitDirectText() {
-    gDirectTextData[0] = tactical_font = new Font(kTacticalFontResID);
-    gDirectTextData[1] = computer_font = new Font(kComputerFontResID);
-    gDirectTextData[2] = button_font = new Font(kButtonFontResID);
-    gDirectTextData[3] = message_font = new Font(kMessageFontResID);
-    gDirectTextData[4] = title_font = new Font(kTitleFontResID);
-    gDirectTextData[5] = small_button_font = new Font(kButtonSmallFontResID);
+    gDirectTextData[0] = tactical_font = new Font("tactical");
+    gDirectTextData[1] = computer_font = new Font("computer");
+    gDirectTextData[2] = button_font = new Font("button");
+    gDirectTextData[4] = title_font = new Font("title");
+    gDirectTextData[5] = small_button_font = new Font("button-small");
 }
 
 void DirectTextCleanup() {
     delete tactical_font;
     delete computer_font;
     delete button_font;
-    delete message_font;
     delete title_font;
     delete small_button_font;
 }
 
 uint8_t Font::char_width(Rune mchar) const {
-    const uint8_t* widptr =
-        charSet.data() + height * physicalWidth * to_mac_roman(mchar) + to_mac_roman(mchar);
-    return *widptr;
+    return glyph_rect(mchar).width();
 }
 
 int32_t Font::string_width(sfz::StringSlice s) const {

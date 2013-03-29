@@ -2164,8 +2164,7 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
         if (anObject->health < 0) {
             if ((anObject->owner == globals()->gPlayerAdmiralNumber)
                     && (anObject->attributes & kCanAcceptDestination)) {
-                StringList strings(5000);
-                const StringSlice& object_name = strings.at(anObject->whichBaseObject);
+                const StringSlice& object_name = get_object_name(anObject->whichBaseObject);
                 int count = CountObjectsOfBaseType(anObject->whichBaseObject, anObject->owner) - 1;
                 AddMessage(format(" {0} destroyed.  {1} remaining. ", object_name, count));
             }

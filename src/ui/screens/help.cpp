@@ -39,12 +39,12 @@ namespace utf8 = sfz::utf8;
 namespace antares {
 
 HelpScreen::HelpScreen():
-        InterfaceScreen(5012, play_screen, false),
+        InterfaceScreen("help", play_screen, false),
         _text(computer_font) {
     // TODO(sfiera): top and bottom buffer of 1, not just top buffer of 2.
     offset((world.width() / 2) - (viewport.width() / 2), 2);
 
-    _bounds = item(BOX).bounds;
+    _bounds = item(BOX).bounds();
     _bounds.offset(viewport.left, 0);
 
     Resource rsrc("text", "txt", 6002);
@@ -61,14 +61,14 @@ HelpScreen::HelpScreen():
 
 HelpScreen::~HelpScreen() { }
 
-void HelpScreen::handle_button(int button) {
-    switch (button) {
+void HelpScreen::handle_button(Button& button) {
+    switch (button.id) {
       case DONE:
         stack()->pop(this);
         break;
 
       default:
-        throw Exception(format("Got unknown button {0}.", button));
+        throw Exception(format("Got unknown button {0}.", button.id));
     }
 }
 

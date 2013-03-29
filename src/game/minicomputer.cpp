@@ -91,6 +91,8 @@ const int32_t kNoLineButton         = -1;
 const int32_t kInLineButton         = kCompAcceptKeyNum;
 const int32_t kOutLineButton        = kCompCancelKeyNum;
 
+static StringList* mini_data_strings;
+
 enum {
     kMainMiniScreen     = 1,
     kBuildMiniScreen    = 2,
@@ -266,6 +268,8 @@ void MiniScreenInit() {
 
     ClearMiniScreenLines();
     ClearMiniObjectData();
+
+    mini_data_strings = new StringList(kMiniDataStringID);
 }
 
 void MiniScreenCleanup() {
@@ -899,7 +903,7 @@ void draw_mini_ship_data(
 
     draw_shaded_rect(lRect, color, lightcolor, darkcolor);
 
-    String text(StringList(kMiniDataStringID).at(whichString - 1));
+    String text(mini_data_strings->at(whichString - 1));
     computer_font->draw_sprite(
             Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
             text, RgbColor::kBlack);
@@ -923,7 +927,7 @@ void draw_mini_ship_data(
             color = GetRGBTranslateColorShade(PALE_GREEN, VERY_LIGHT);
 
             // move to the 1st line in the selection miniscreen, write the name
-            String text(StringList(kSpaceObjectShortNameResID).at(newObject.whichBaseObject));
+            String text(get_object_short_name(newObject.whichBaseObject));
             computer_font->draw_sprite(
                     Point(lRect.left + kMiniScreenLeftBuffer, lRect.top + computer_font->ascent),
                     text, color);
@@ -1031,7 +1035,7 @@ void draw_mini_ship_data(
 
     // move to the 1st line in the selection miniscreen, write the name
     if (newObject.beamType >= 0) {
-        String text(StringList(kSpaceObjectShortNameResID).at(newObject.beamType));
+        String text(get_object_short_name(newObject.beamType));
         computer_font->draw_sprite(
                 Point(lRect.left, lRect.top + computer_font->ascent), text, color);
     }
@@ -1043,7 +1047,7 @@ void draw_mini_ship_data(
 
     // move to the 1st line in the selection miniscreen, write the name
     if (newObject.pulseType >= 0) {
-        String text(StringList(kSpaceObjectShortNameResID).at(newObject.pulseType));
+        String text(get_object_short_name(newObject.pulseType));
         computer_font->draw_sprite(
                 Point(lRect.left, lRect.top + computer_font->ascent), text, color);
     }
@@ -1057,7 +1061,7 @@ void draw_mini_ship_data(
 
         // move to the 1st line in the selection miniscreen, write the name
         if (newObject.specialType >= 0) {
-            String text(StringList(kSpaceObjectShortNameResID).at(newObject.specialType));
+            String text(get_object_short_name(newObject.specialType));
             computer_font->draw_sprite(
                     Point(lRect.left, lRect.top + computer_font->ascent), text, color);
         }
@@ -1082,7 +1086,7 @@ void draw_mini_ship_data(
                 computer_font->draw_sprite(
                         Point(lRect.left, lRect.top + computer_font->ascent), text, color);
             } else {
-                String text(StringList(kSpaceObjectNameResID).at(dObject->whichBaseObject));
+                String text(get_object_name(dObject->whichBaseObject));
                 computer_font->draw_sprite(
                         Point(lRect.left, lRect.top + computer_font->ascent), text, color);
             }
@@ -1348,7 +1352,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
                 line->sourceData = buildObject;
                 if ( buildObject != NULL)
                 {
-                    mCopyBlankLineString(line, StringList(kSpaceObjectNameResID).at(baseNum));
+                    mCopyBlankLineString(line, get_object_name(baseNum));
                     if ( buildObject->price > mFixedToLong(admiral->cash))
                         line->selectable = selectDim;
                     else line->selectable = selectable;

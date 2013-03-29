@@ -44,7 +44,7 @@ class BriefingScreen : public InterfaceScreen {
 
   protected:
     virtual void adjust_interface();
-    virtual void handle_button(int button);
+    virtual void handle_button(Button& button);
 
   private:
     enum Item {
@@ -70,7 +70,7 @@ class BriefingScreen : public InterfaceScreen {
     bool* const _cancelled;
     int _briefing_point;
     const int _briefing_point_count;
-    mutable interfaceItemType _data_item;
+    mutable LabeledRect _data_item;
 
     Rect _bounds;
 

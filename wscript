@@ -55,15 +55,20 @@ def build(bld):
             "resources/Antares.icns",
             "resources/ExtractData.nib",
             "resources/MainMenu.nib",
+            "data/fonts",
+            "data/interfaces",
+            "data/pictures",
+            "data/rotation-table",
+            "data/strings",
+            "data/text",
         ],
         source=[
             "src/cocoa/AntaresController.m",
             "src/cocoa/AntaresExtractDataController.m",
             "src/cocoa/main.m",
             "src/cocoa/video-driver.cpp",
-            "src/cocoa/core-foundation.cpp",
-            "src/cocoa/http.cpp",
             "src/cocoa/prefs-driver.cpp",
+            "src/cocoa/resource.cpp",
             "src/cocoa/c/AntaresController.cpp",
             "src/cocoa/c/CocoaVideoDriver.m",
             "src/cocoa/c/DataExtractor.cpp",
@@ -81,33 +86,17 @@ def build(bld):
     bld.program(
         target="antares/offscreen",
         features="universal32",
-        source=[
-            "src/bin/offscreen.cpp",
-            "src/video/offscreen-driver.cpp",
-            "src/video/text-driver.cpp",
-        ],
+        source="src/bin/offscreen.cpp",
         cxxflags=WARNINGS,
-        use=[
-            "antares/system/opengl",
-            "antares/opengl",
-            "antares/libantares",
-        ],
+        use="antares/libantares-test",
     )
 
     bld.program(
         target="antares/replay",
         features="universal32",
-        source=[
-            "src/bin/replay.cpp",
-            "src/video/offscreen-driver.cpp",
-            "src/video/text-driver.cpp",
-        ],
+        source="src/bin/replay.cpp",
         cxxflags=WARNINGS,
-        use=[
-            "antares/system/opengl",
-            "antares/opengl",
-            "antares/libantares",
-        ],
+        use="antares/libantares-test",
     )
 
     bld.program(
@@ -115,7 +104,7 @@ def build(bld):
         features="universal32",
         source="src/bin/build-pix.cpp",
         cxxflags=WARNINGS,
-        use="antares/libantares",
+        use="antares/libantares-test",
     )
 
     bld.program(
@@ -123,18 +112,15 @@ def build(bld):
         features="universal32",
         source="src/bin/shapes.cpp",
         cxxflags=WARNINGS,
-        use="antares/libantares",
+        use="antares/libantares-test",
     )
 
     bld.program(
         target="antares/tint",
         features="universal32",
-        source=[
-            "src/bin/tint.cpp",
-            "src/video/text-driver.cpp",
-        ],
+        source="src/bin/tint.cpp",
         cxxflags=WARNINGS,
-        use="antares/libantares",
+        use="antares/libantares-test",
     )
 
     bld.program(
@@ -142,7 +128,7 @@ def build(bld):
         features="universal32",
         source="src/bin/ls-scenarios.cpp",
         cxxflags=WARNINGS,
-        use="antares/libantares",
+        use="antares/libantares-test",
     )
 
     bld.program(
@@ -150,33 +136,21 @@ def build(bld):
         features="universal32",
         source="src/bin/object-data.cpp",
         cxxflags=WARNINGS,
-        use="antares/libantares",
+        use="antares/libantares-test",
     )
 
     bld.program(
         target="antares/extract-data",
         features="universal32",
-        source=[
-            "src/bin/extract-data.cpp",
-        ],
+        source="src/bin/extract-data.cpp",
         cxxflags=WARNINGS,
-        use=[
-            "antares/libantares",
-        ],
+        use="antares/libantares-test",
     )
 
-    bld.platform(
-        target="antares/extract-data",
-        source=[
-            "src/cocoa/core-foundation.cpp",
-            "src/cocoa/http.cpp",
-        ],
-        platform="darwin",
-        use="antares/system/core-foundation",
-    )
-
-    bld(
+    bld.stlib(
         target="antares/libantares",
+        features="cxx universal32",
+        source=[],
         use=[
             "antares/libantares-config",
             "antares/libantares-data",
@@ -186,6 +160,35 @@ def build(bld):
             "antares/libantares-sound",
             "antares/libantares-ui",
             "antares/libantares-video",
+        ],
+    )
+
+    bld.platform(
+        target="antares/libantares",
+        source=[
+            "src/cocoa/core-foundation.cpp",
+            "src/cocoa/http.cpp",
+        ],
+        platform="darwin",
+        use="antares/system/core-foundation",
+    )
+
+    bld.stlib(
+        target="antares/libantares-test",
+        features="universal32",
+        source=[
+            "src/video/offscreen-driver.cpp",
+            "src/video/text-driver.cpp",
+            "src/test/resource.cpp",
+        ],
+        defines="ANTARES_DATA=%s" % bld.path.find_dir("data").abspath(),
+        cxxflags=WARNINGS,
+        includes="./include",
+        export_includes="./include",
+        use=[
+            "antares/libantares",
+            "antares/system/opengl",
+            "antares/opengl",
         ],
     )
 

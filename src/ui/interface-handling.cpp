@@ -152,7 +152,7 @@ bool BothCommandAndQ() {
 }
 
 void update_mission_brief_point(
-        interfaceItemType *dataItem, long whichBriefPoint, const Scenario* scenario,
+        LabeledRect *dataItem, long whichBriefPoint, const Scenario* scenario,
         coordPointType *corner, long scale, Rect *bounds, vector<inlinePictType>& inlinePict,
         Rect& highlight_rect, vector<pair<Point, Point>>& lines, String& text) {
     if (whichBriefPoint < kMissionBriefPointOffset) {
@@ -173,40 +173,40 @@ void update_mission_brief_point(
     text.assign(utf8::decode(rsrc.data()));
     short textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
     if (hiliteBounds.left == hiliteBounds.right) {
-        dataItem->bounds.left = (bounds->right - bounds->left) / 2 - (kMissionDataWidth / 2) + bounds->left;
-        dataItem->bounds.right = dataItem->bounds.left + kMissionDataWidth;
-        dataItem->bounds.top = (bounds->bottom - bounds->top) / 2 - (textHeight / 2) + bounds->top;
-        dataItem->bounds.bottom = dataItem->bounds.top + textHeight;
+        dataItem->bounds().left = (bounds->right - bounds->left) / 2 - (kMissionDataWidth / 2) + bounds->left;
+        dataItem->bounds().right = dataItem->bounds().left + kMissionDataWidth;
+        dataItem->bounds().top = (bounds->bottom - bounds->top) / 2 - (textHeight / 2) + bounds->top;
+        dataItem->bounds().bottom = dataItem->bounds().top + textHeight;
         highlight_rect = Rect();
     } else {
         if ((hiliteBounds.left + (hiliteBounds.right - hiliteBounds.left) / 2) >
                 (bounds->left + (bounds->right - bounds->left) / 2)) {
-            dataItem->bounds.right = hiliteBounds.left - kMissionDataHBuffer;
-            dataItem->bounds.left = dataItem->bounds.right - kMissionDataWidth;
+            dataItem->bounds().right = hiliteBounds.left - kMissionDataHBuffer;
+            dataItem->bounds().left = dataItem->bounds().right - kMissionDataWidth;
         } else {
-            dataItem->bounds.left = hiliteBounds.right + kMissionDataHBuffer;
-            dataItem->bounds.right = dataItem->bounds.left + kMissionDataWidth;
+            dataItem->bounds().left = hiliteBounds.right + kMissionDataHBuffer;
+            dataItem->bounds().right = dataItem->bounds().left + kMissionDataWidth;
         }
 
-        dataItem->bounds.top = hiliteBounds.top + (hiliteBounds.bottom - hiliteBounds.top) / 2 -
+        dataItem->bounds().top = hiliteBounds.top + (hiliteBounds.bottom - hiliteBounds.top) / 2 -
                                 textHeight / 2;
-        dataItem->bounds.bottom = dataItem->bounds.top + textHeight;
-        if (dataItem->bounds.top < (bounds->top + kMissionDataTopBuffer)) {
-            dataItem->bounds.top = bounds->top + kMissionDataTopBuffer;
-            dataItem->bounds.bottom = dataItem->bounds.top + textHeight;
+        dataItem->bounds().bottom = dataItem->bounds().top + textHeight;
+        if (dataItem->bounds().top < (bounds->top + kMissionDataTopBuffer)) {
+            dataItem->bounds().top = bounds->top + kMissionDataTopBuffer;
+            dataItem->bounds().bottom = dataItem->bounds().top + textHeight;
         }
-        if (dataItem->bounds.bottom > (bounds->bottom - kMissionDataBottomBuffer)) {
-            dataItem->bounds.bottom = bounds->bottom - kMissionDataBottomBuffer;
-            dataItem->bounds.top = dataItem->bounds.bottom - textHeight;
+        if (dataItem->bounds().bottom > (bounds->bottom - kMissionDataBottomBuffer)) {
+            dataItem->bounds().bottom = bounds->bottom - kMissionDataBottomBuffer;
+            dataItem->bounds().top = dataItem->bounds().bottom - textHeight;
         }
 
-        if (dataItem->bounds.left < (bounds->left + kMissionDataVBuffer)) {
-            dataItem->bounds.left = bounds->left + kMissionDataVBuffer;
-            dataItem->bounds.right = dataItem->bounds.left + kMissionDataWidth;
+        if (dataItem->bounds().left < (bounds->left + kMissionDataVBuffer)) {
+            dataItem->bounds().left = bounds->left + kMissionDataVBuffer;
+            dataItem->bounds().right = dataItem->bounds().left + kMissionDataWidth;
         }
-        if (dataItem->bounds.right > (bounds->right - kMissionDataVBuffer)) {
-            dataItem->bounds.right = bounds->right - kMissionDataVBuffer;
-            dataItem->bounds.left = dataItem->bounds.right - kMissionDataWidth;
+        if (dataItem->bounds().right > (bounds->right - kMissionDataVBuffer)) {
+            dataItem->bounds().right = bounds->right - kMissionDataVBuffer;
+            dataItem->bounds().left = dataItem->bounds().right - kMissionDataWidth;
         }
 
         hiliteBounds.right++;
@@ -215,7 +215,7 @@ void update_mission_brief_point(
         Rect newRect;
         GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
         lines.clear();
-        if (dataItem->bounds.right < hiliteBounds.left) {
+        if (dataItem->bounds().right < hiliteBounds.left) {
             Point p1(hiliteBounds.left, hiliteBounds.top);
             Point p2(newRect.right + kMissionLineHJog, hiliteBounds.top);
             Point p3(newRect.right + kMissionLineHJog, newRect.top);
@@ -249,11 +249,10 @@ void update_mission_brief_point(
             lines.push_back(make_pair(p7, p8));
         }
     }
-    dataItem->item.labeledRect.label.stringID = headerID;
-    dataItem->item.labeledRect.label.stringNumber = headerNumber;
+    dataItem->label.assign(StringList(headerID).at(headerNumber - 1));
     Rect newRect;
     GetAnyInterfaceItemGraphicBounds(*dataItem, &newRect);
-    populate_inline_picts(dataItem->bounds, text, dataItem->style, inlinePict);
+    populate_inline_picts(dataItem->bounds(), text, dataItem->style, inlinePict);
 }
 
 void CreateObjectDataText(String* text, short id) {
@@ -277,8 +276,7 @@ void CreateObjectDataText(String* text, short id) {
 
     // ship name
     {
-        StringList names(5000);
-        const StringSlice& name = names.at(id);
+        const StringSlice& name = get_object_name(id);
         find_replace(data, 0, keys.at(kShipTypeStringNum), name);
     }
 
@@ -354,8 +352,7 @@ void CreateWeaponDataText(String* text, long whichWeapon, const StringSlice& wea
 
     // weapon name
     {
-        StringList names(5000);
-        const StringSlice& name = names.at(whichWeapon);
+        const StringSlice& name = get_object_name(whichWeapon);
         find_replace(data, 0, keys.at(kWeaponNameStringNum), name);
     }
 

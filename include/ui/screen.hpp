@@ -30,7 +30,8 @@ namespace antares {
 
 class InterfaceScreen : public Card {
   public:
-    InterfaceScreen(int id, const Rect& bounds, bool full_screen);
+    InterfaceScreen(sfz::PrintItem name, const Rect& bounds, bool full_screen);
+    InterfaceScreen(sfz::Json json, const Rect& bounds, bool full_screen);
     ~InterfaceScreen();
 
     virtual void become_front();
@@ -45,14 +46,14 @@ class InterfaceScreen : public Card {
 
   protected:
     virtual void adjust_interface();
-    virtual void handle_button(int button) = 0;
+    virtual void handle_button(Button& button) = 0;
 
     void truncate(size_t size);
-    void extend(int id, size_t within);
+    void extend(const sfz::Json& json);
 
     size_t size() const;
-    const interfaceItemType& item(int index) const;
-    interfaceItemType* mutable_item(int index);
+    const InterfaceItem& item(int index) const;
+    InterfaceItem& mutable_item(int index);
     void offset(int offset_x, int offset_y);
 
   private:
@@ -63,10 +64,12 @@ class InterfaceScreen : public Card {
     };
     State _state;
 
+    sfz::Json load_json(sfz::PrintItem id);
+
     const Rect _bounds;
     const bool _full_screen;
-    std::vector<interfaceItemType> _items;
-    int _hit_item;
+    std::vector<std::unique_ptr<InterfaceItem>> _items;
+    Button* _hit_button;
 
     DISALLOW_COPY_AND_ASSIGN(InterfaceScreen);
 };

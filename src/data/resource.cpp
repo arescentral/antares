@@ -25,54 +25,52 @@
 using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::MappedFile;
+using sfz::PrintItem;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
+using std::unique_ptr;
 
 namespace path = sfz::path;
 namespace utf8 = sfz::utf8;
 
 namespace antares {
 
-namespace {
+static const char kFactoryScenarioIdentifier[] = "com.biggerplanet.ares";
 
-const char kAres[] = "com.biggerplanet.ares";
+const sfz::String application_path();
 
-}  // namespace
+static unique_ptr<MappedFile> load_first(sfz::StringSlice resource_path,
+                                         const std::initializer_list<PrintItem>& dirs) {
+    for (const auto& dir: dirs) {
+        String path(sfz::format("{0}/{1}", dir, resource_path));
+        if (path::isfile(path)) {
+            return unique_ptr<MappedFile>(new MappedFile(path));
+        }
+    }
+    throw Exception(format("couldn't find resource {0}", quote(resource_path)));
+}
+
+static unique_ptr<MappedFile> load(sfz::StringSlice resource_path) {
+    const String home(utf8::decode(getenv("HOME")));
+    const String scenarios(format("{0}/Library/Application Support/Antares/Scenarios", home));
+    return load_first(resource_path, {
+        format("{0}/{1}", scenarios, Preferences::preferences()->scenario_identifier()),
+        format("{0}/{1}", scenarios, kFactoryScenarioIdentifier),
+        application_path(),
+    });
+}
 
 Resource::Resource(const StringSlice& type, const StringSlice& extension, int id):
-        Resource(INTERNAL, String(format("{0}/{1}.{2}", type, id, extension))) { }
+        Resource(format("{0}/{1}.{2}", type, id, extension)) { }
 
 Resource::Resource(const sfz::PrintItem& resource_path):
-        Resource(INTERNAL, String(resource_path)) { }
+        _file(load(String(resource_path))) { }
 
 Resource::~Resource() { }
 
 BytesSlice Resource::data() const {
     return _file->data();
-}
-
-Resource::Resource(Internal, sfz::StringSlice resource_path) {
-    const StringSlice scenario_id = Preferences::preferences()->scenario_identifier();
-    const String home(utf8::decode(getenv("HOME")));
-    const String base(format("{0}/Library/Application Support/Antares/Scenarios", home));
-    String p;
-
-    if (scenario_id != kAres) {
-        p.assign(format("{0}/{1}/{2}", base, scenario_id, resource_path));
-        if (path::isfile(p)) {
-            _file.reset(new MappedFile(p));
-            return;
-        }
-    }
-
-    p.assign(format("{0}/{1}/{2}", base, kAres, resource_path));
-    if (path::isfile(p)) {
-        _file.reset(new MappedFile(p));
-        return;
-    }
-
-    throw Exception(format("couldn't find resource {0}", quote(resource_path)));
 }
 
 }  // namespace antares

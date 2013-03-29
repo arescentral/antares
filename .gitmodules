@@ -19,3 +19,6 @@
 [submodule "ext/libpng-waf"]
 	path = ext/libpng-waf
 	url = https://github.com/sfiera/libpng-waf.git
+[submodule "data"]
+	path = data
+	url = https://code.google.com/p/antares.data/
