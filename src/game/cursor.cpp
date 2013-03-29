@@ -41,7 +41,7 @@ Cursor::Cursor():
         _show_crosshairs_until(now_usecs() + kTimeout) { }
 
 bool Cursor::active() const {
-    return _show_crosshairs_until > now_usecs();
+    return show && (_show_crosshairs_until > now_usecs());
 }
 
 Point Cursor::clamped_location() {
