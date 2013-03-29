@@ -289,7 +289,7 @@ class PauseScreen : public Card {
         }
     }
 
-  public:
+  private:
     void show_hide() {
         _visible = !_visible;
         _next_switch = now_usecs() + (1000000 / 3);
