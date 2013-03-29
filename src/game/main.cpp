@@ -236,9 +236,7 @@ GamePlay::GamePlay(bool replay, GameResult* game_result, int32_t* seconds)
 
 class PauseScreen : public Card {
   public:
-    PauseScreen():
-            _visible(false),
-            _next_switch(0) {
+    PauseScreen() {
         const StringList list(3100);
         _pause_string.assign(list.at(10));
         long width = title_font->string_width(_pause_string);
@@ -253,17 +251,25 @@ class PauseScreen : public Card {
     virtual void become_front() {
         // TODO(sfiera): cancel any active transition.
         PlayVolumeSound(kComputerBeep4, kMaxSoundVolume, kShortPersistence, kMustPlaySound);
-        show_hide();
+        _visible = true;
+        _next_switch = now_usecs() + kSwitchAfter;
+        _sleep_at = now_usecs() + kSleepAfter;
     }
+
+    virtual void mouse_up(const MouseUpEvent& event) { wake(); }
+    virtual void mouse_down(const MouseDownEvent& event) { wake(); }
+    virtual void mouse_move(const MouseMoveEvent& event) { wake(); }
+    virtual void key_down(const KeyDownEvent& event) { wake(); }
 
     virtual void key_up(const KeyUpEvent& event) {
         if (event.key() == Keys::CAPS_LOCK) {
             stack()->pop(this);
         }
+        wake();
     }
 
     virtual bool next_timer(int64_t& time) {
-        time = _next_switch;
+        time = std::min(_next_switch, _sleep_at);
         return true;
     }
 
@@ -273,7 +279,7 @@ class PauseScreen : public Card {
 
     virtual void draw() const {
         next()->draw();
-        if (_visible) {
+        if (asleep() || _visible) {
             const RgbColor& light_green = GetRGBTranslateColorShade(GREEN, LIGHTER);
             const RgbColor& dark_green = GetRGBTranslateColorShade(GREEN, DARKER);
 
@@ -287,16 +293,34 @@ class PauseScreen : public Card {
 
             title_font->draw_sprite(_text_origin, _pause_string, light_green);
         }
+        if (asleep()) {
+            VideoDriver::driver()->fill_rect(world, RgbColor(63, 0, 0, 0));
+        }
     }
 
   private:
     void show_hide() {
-        _visible = !_visible;
-        _next_switch = now_usecs() + (1000000 / 3);
+        const int64_t now = now_usecs();
+        while (_next_switch < now) {
+            _visible = !_visible;
+            _next_switch += kSwitchAfter;
+        }
     }
+
+    bool asleep() const {
+        return _sleep_at < now_usecs();
+    }
+
+    void wake() {
+        _sleep_at = now_usecs() + kSleepAfter;
+    }
+
+    static const int64_t kSwitchAfter = 1000000 / 3;
+    static const int64_t kSleepAfter = 60 * 1000000;
 
     bool _visible;
     int64_t _next_switch;
+    int64_t _sleep_at;
     String _pause_string;
     Point _text_origin;
     Rect _bracket_bounds;
