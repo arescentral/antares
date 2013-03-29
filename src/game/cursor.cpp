@@ -23,6 +23,7 @@
 #include "drawing/color.hpp"
 #include "drawing/pix-table.hpp"
 #include "game/globals.hpp"
+#include "game/time.hpp"
 #include "video/driver.hpp"
 
 using sfz::Exception;
@@ -39,32 +40,59 @@ void InitSpriteCursor() {
     cursor = new Cursor;
 }
 
-Cursor::Cursor() {
-    show = false;
-
+Cursor::Cursor():
+        show(true),
+        _show_crosshairs_until(0) {
     thisShowLine = false;
     thisLineStart = Point(-1, -1);
     thisLineEnd = Point(-1, -1);
 }
 
-void ShowSpriteCursor() {
-    cursor->show = true;
+bool Cursor::active() const {
+    return _show_crosshairs_until > now_usecs();
 }
 
-void HideSpriteCursor() {
-    cursor->show = false;
+Point Cursor::clamped_location() const {
+    return clamp(VideoDriver::driver()->get_mouse());
 }
 
-bool SpriteCursorVisible() {
-    return cursor->show;
+Point Cursor::clamp(Point p) {
+    // Do the cursor, too, unless this is a replay.
+    if (p.h > (viewport.right - kCursorBoundsSize - 1)) {
+        p.h = viewport.right - kCursorBoundsSize - 1;
+    }
+    if (p.v < (viewport.top + kCursorBoundsSize)) {
+        p.v = viewport.top + kCursorBoundsSize;
+    } else if (p.v > (play_screen.bottom - kCursorBoundsSize - 1)) {
+        p.v = play_screen.bottom - kCursorBoundsSize - 1;
+    }
+    return p;
+}
+
+void Cursor::mouse_down(const MouseDownEvent& event) {
+    if (event.where().h >= viewport.left) {
+        wake();
+    }
+}
+
+void Cursor::mouse_up(const MouseUpEvent& event) {
+    if (event.where().h >= viewport.left) {
+        wake();
+    }
+}
+
+void Cursor::mouse_move(const MouseMoveEvent& event) {
+    if (event.where().h >= viewport.left) {
+        wake();
+    }
+}
+
+void Cursor::wake() {
+    _show_crosshairs_until = now_usecs() + 1000000;
 }
 
 void SetSpriteCursorTable(short resource_id) {
     cursor->sprite.reset(new NatePixTable(resource_id, 0));
-}
-
-void MoveSpriteCursor(Point where) {
-    cursor->where = where;
 }
 
 void ShowHintLine(Point fromWhere, Point toWhere, unsigned char color, unsigned char brightness) {
@@ -87,29 +115,38 @@ void ResetHintLine() {
     cursor->thisLineColor = cursor->thisLineColorDark = RgbColor::kBlack;
 }
 
-void draw_cursor() {
-    if (globals()->gMouseActive) {
-        const Rect clip_rect = viewport;
-        Point where = globals()->cursor_coord;
-        const RgbColor color = GetRGBTranslateColorShade(SKY_BLUE, MEDIUM);
-        VideoDriver::driver()->draw_line(
-                Point(where.h, clip_rect.top),
-                Point(where.h, (where.v - kCursorBoundsSize)), color);
-        VideoDriver::driver()->draw_line(
-                Point(where.h, (where.v + kCursorBoundsSize)),
-                Point(where.h, clip_rect.bottom - 1), color);
-        VideoDriver::driver()->draw_line(
-                Point(clip_rect.left, where.v),
-                Point((where.h - kCursorBoundsSize), where.v), color);
-        VideoDriver::driver()->draw_line(
-                Point((where.h + kCursorBoundsSize), where.v),
-                Point(clip_rect.right - 1, where.v), color);
+void Cursor::draw() const {
+    if (!show) {
+        return;
     }
-}
 
-void draw_sprite_cursor() {
-    if (cursor->show) {
-        Point where = cursor->where;
+    Point where = VideoDriver::driver()->get_mouse();
+
+    where = clamp(where);
+    if (active()) {
+        const Rect clip_rect = viewport;
+        const RgbColor color = GetRGBTranslateColorShade(SKY_BLUE, MEDIUM);
+
+        Point top_a = Point(where.h, clip_rect.top);
+        Point top_b = Point(where.h, (where.v - kCursorBoundsSize));
+        Point bottom_a = Point(where.h, (where.v + kCursorBoundsSize));
+        Point bottom_b = Point(where.h, clip_rect.bottom - 1);
+        Point left_a = Point(clip_rect.left, where.v);
+        Point left_b = Point((where.h - kCursorBoundsSize), where.v);
+        Point right_a = Point(std::max(viewport.left, where.h + kCursorBoundsSize), where.v);
+        Point right_b = Point(clip_rect.right - 1, where.v);
+
+        if (top_a.h >= viewport.left) {
+            VideoDriver::driver()->draw_line(top_a, top_b, color);
+            VideoDriver::driver()->draw_line(bottom_a, bottom_b, color);
+        }
+        VideoDriver::driver()->draw_line(right_a, right_b, color);
+        if (left_b.h >= viewport.left) {
+            VideoDriver::driver()->draw_line(left_a, left_b, color);
+        }
+    }
+
+    if (where.h < viewport.left) {
         where.offset(-cursor->sprite->at(0).center().h, -cursor->sprite->at(0).center().v);
         cursor->sprite->at(0).sprite().draw(where.h, where.v);
     }

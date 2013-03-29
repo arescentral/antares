@@ -84,6 +84,10 @@ class GamePlay : public Card {
 
     virtual void key_down(const KeyDownEvent& event);
 
+    virtual void mouse_down(const MouseDownEvent& event);
+    virtual void mouse_up(const MouseUpEvent& event);
+    virtual void mouse_move(const MouseMoveEvent& event);
+
   private:
     enum State {
         PLAYING,
@@ -332,7 +336,11 @@ void GamePlay::become_front() {
     switch (_state) {
       case PLAYING:
         SetSpriteCursorTable(500);
-        ShowSpriteCursor();
+        if (_replay) {
+            cursor->show = false;
+        } else {
+            cursor->show = true;
+        }
         ResetHintLine();
 
         CheckScenarioConditions(0);
@@ -399,9 +407,8 @@ void GamePlay::draw() const {
 
     draw_message();
     draw_site();
-    draw_cursor();
     draw_instruments();
-    draw_sprite_cursor();
+    cursor->draw();
     draw_hint_line();
     globals()->transitions.draw();
 }
@@ -519,7 +526,7 @@ void GamePlay::fire_timer() {
                     globals()->gGameOver = 1;
                 } else {
                     if (!_right_mouse_down) {
-                        PlayerShipHandleClick(globals()->cursor_coord, 1);
+                        PlayerShipHandleClick(VideoDriver::driver()->get_mouse(), 1);
                         _right_mouse_down = true;
                     }
                 }
@@ -665,6 +672,18 @@ void GamePlay::key_down(const KeyDownEvent& event) {
         stack()->push(new HelpScreen);
         break;
     }
+}
+
+void GamePlay::mouse_down(const MouseDownEvent& event) {
+    cursor->mouse_down(event);
+}
+
+void GamePlay::mouse_up(const MouseUpEvent& event) {
+    cursor->mouse_up(event);
+}
+
+void GamePlay::mouse_move(const MouseMoveEvent& event) {
+    cursor->mouse_move(event);
 }
 
 }  // namespace antares

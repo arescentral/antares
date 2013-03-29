@@ -23,13 +23,13 @@
 
 #include "drawing/color.hpp"
 #include "math/geometry.hpp"
+#include "ui/event.hpp"
 
 namespace antares {
 
 class NatePixTable;
 
-struct Cursor {
-    Point                   where;
+struct Cursor : public EventReceiver {
     bool                    show;
     std::unique_ptr<NatePixTable> sprite;
 
@@ -40,22 +40,30 @@ struct Cursor {
     RgbColor    thisLineColorDark;
 
     Cursor();
+    Cursor(const Cursor&) = delete;
+
+    bool active() const;
+    void draw() const;
+    Point clamped_location() const;
+
+    virtual void mouse_down(const MouseDownEvent& event);
+    virtual void mouse_up(const MouseUpEvent& event);
+    virtual void mouse_move(const MouseMoveEvent& event);
+
+  private:
+    static Point clamp(Point p);
+    void wake();
+
+    int64_t _show_crosshairs_until;
 };
 extern Cursor* cursor;
 
 void InitSpriteCursor();
-void CleanupSpriteCursor();
-void ShowSpriteCursor();
-void HideSpriteCursor();
-bool SpriteCursorVisible();
 void SetSpriteCursorTable(short resource_id);
-void MoveSpriteCursor( Point);
 void ShowHintLine(Point fromWhere, Point toWhere, unsigned char color, unsigned char brightness);
 void HideHintLine();
 void ResetHintLine();
 
-void draw_cursor();
-void draw_sprite_cursor();
 void draw_hint_line();
 
 }  // namespace antares

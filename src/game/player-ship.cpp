@@ -28,6 +28,7 @@
 #include "drawing/text.hpp"
 #include "game/admiral.hpp"
 #include "game/cheat.hpp"
+#include "game/cursor.hpp"
 #include "game/globals.hpp"
 #include "game/input-source.hpp"
 #include "game/labels.hpp"
@@ -449,8 +450,7 @@ bool PlayerShipGetKeys(int32_t timePass, InputSource& input_source, bool *enterM
 // end new hotkey selection
 
     // for this we check lastKeys against theseKeys & relevent keys now being pressed
-    if ((attributes) && (!(gLastKeys & attributes))
-            && (!globals()->gMouseActive)) {
+    if ((attributes) && (!(gLastKeys & attributes)) && (!cursor->active())) {
         gDestKeyTime = -1;
         nonattributes = 0;
         if (gTheseKeys & kSelectFriendKey) {

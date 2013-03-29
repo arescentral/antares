@@ -207,8 +207,6 @@ void ResetInstruments() {
     globals()->gLastScale = gAbsoluteScale = SCALE_SCALE;
     globals()->gWhichScaleNum = 0;
     gLastGlobalCorner.h = gLastGlobalCorner.v = 0;
-    globals()->gMouseActive = false;
-    globals()->gMouseTimeout = 0;
     l = gScaleList.get();
     for (i = 0; i < kScaleListNum; i++) {
         *l = SCALE_SCALE;
@@ -263,9 +261,6 @@ void UpdateRadar(int32_t unitsDone) {
         unitsDone = 0;
     }
     globals()->gRadarCount -= unitsDone;
-    if (globals()->gMouseActive) {
-        globals()->gMouseTimeout += unitsDone;
-    }
 
     if ((gScrollStarObject == NULL) || !gScrollStarObject->active) {
         return;
@@ -564,7 +559,6 @@ void draw_instruments() {
 }
 
 void EraseSite() {
-    globals()->old_cursor_coord = globals()->cursor_coord;
 }
 
 void update_site(bool replay) {
@@ -610,33 +604,6 @@ void update_site(bool replay) {
         site_data.c = c;
     } else {
         should_draw_site = false;
-    }
-
-    // Do the cursor, too, unless this is a replay.
-    if (replay) {
-        HideSpriteCursor();
-        return;
-    }
-    Point cursor_coord = VideoDriver::driver()->get_mouse();
-    MoveSpriteCursor(cursor_coord);
-    HideSpriteCursor();
-    if (cursor_coord.h < viewport.left) {
-        ShowSpriteCursor();
-    } else if (cursor_coord.h > (viewport.right - kCursorBoundsSize - 1)) {
-        cursor_coord.h = viewport.right - kCursorBoundsSize - 1;
-    }
-    if (cursor_coord.v < (viewport.top + kCursorBoundsSize)) {
-        cursor_coord.v = viewport.top + kCursorBoundsSize;
-    } else if (cursor_coord.v > (play_screen.bottom - kCursorBoundsSize - 1)) {
-        cursor_coord.v = play_screen.bottom - kCursorBoundsSize - 1;
-    }
-
-    globals()->cursor_coord = cursor_coord;
-    if ((cursor_coord != globals()->old_cursor_coord) && (!SpriteCursorVisible())) {
-        globals()->gMouseActive = true;
-        globals()->gMouseTimeout = 0;
-    } else if (globals()->gMouseTimeout > kMouseSleepTime) {
-        globals()->gMouseActive = false;
     }
 }
 
@@ -737,32 +704,24 @@ void draw_sector_lines() {
 }
 
 void InstrumentsHandleClick() {
-    const Point where = globals()->cursor_coord;
+    const Point where = cursor->clamped_location();
     PlayerShipHandleClick(where, 0);
     MiniComputerHandleClick(where);
-    if (!SpriteCursorVisible()) {
-        globals()->gMouseActive = true;
-        globals()->gMouseTimeout = 0;
-    }
 }
 
 void InstrumentsHandleDoubleClick() {
-    const Point where = globals()->cursor_coord;
+    const Point where = cursor->clamped_location();
     PlayerShipHandleClick(where, 0);
     MiniComputerHandleDoubleClick(where);
-    if (!SpriteCursorVisible()) {
-        globals()->gMouseActive = true;
-        globals()->gMouseTimeout = 0;
-    }
 }
 
 void InstrumentsHandleMouseUp() {
-    const Point where = globals()->cursor_coord;
+    const Point where = cursor->clamped_location();
     MiniComputerHandleMouseUp(where);
 }
 
 void InstrumentsHandleMouseStillDown() {
-    const Point where = globals()->cursor_coord;
+    const Point where = cursor->clamped_location();
     MiniComputerHandleMouseStillDown(where);
 }
 
