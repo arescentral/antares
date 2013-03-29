@@ -59,6 +59,7 @@ AntaresWindow* antares_window_create(
         styleMask:(NSTitledWindowMask | NSMiniaturizableWindowMask)
         backing:NSBackingStoreBuffered
         defer:NO];
+    [window->window setAcceptsMouseMovedEvents:YES];
     [window->window setContentView:window->view];
     [window->window makeKeyAndOrderFront:NSApp];
     [window->window center];
