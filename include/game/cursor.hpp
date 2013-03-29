@@ -28,7 +28,7 @@ namespace antares {
 
 class NatePixTable;
 
-struct spriteCursorType {
+struct Cursor {
     Point                   where;
     bool                    show;
     std::unique_ptr<NatePixTable> sprite;
@@ -39,8 +39,9 @@ struct spriteCursorType {
     RgbColor    thisLineColor;
     RgbColor    thisLineColorDark;
 
-    spriteCursorType();
+    Cursor();
 };
+extern Cursor* cursor;
 
 void InitSpriteCursor();
 void CleanupSpriteCursor();

@@ -31,19 +31,15 @@ using std::unique_ptr;
 
 namespace antares {
 
-namespace {
+static const int kCursorBoundsSize = 16;
 
-const int kCursorBoundsSize = 16;
-
-spriteCursorType* gSpriteCursor = NULL;
-
-}  // namespace
+Cursor* cursor = nullptr;
 
 void InitSpriteCursor() {
-    gSpriteCursor = new spriteCursorType;
+    cursor = new Cursor;
 }
 
-spriteCursorType::spriteCursorType() {
+Cursor::Cursor() {
     show = false;
 
     thisShowLine = false;
@@ -52,43 +48,43 @@ spriteCursorType::spriteCursorType() {
 }
 
 void ShowSpriteCursor() {
-    gSpriteCursor->show = true;
+    cursor->show = true;
 }
 
 void HideSpriteCursor() {
-    gSpriteCursor->show = false;
+    cursor->show = false;
 }
 
 bool SpriteCursorVisible() {
-    return gSpriteCursor->show;
+    return cursor->show;
 }
 
 void SetSpriteCursorTable(short resource_id) {
-    gSpriteCursor->sprite.reset(new NatePixTable(resource_id, 0));
+    cursor->sprite.reset(new NatePixTable(resource_id, 0));
 }
 
 void MoveSpriteCursor(Point where) {
-    gSpriteCursor->where = where;
+    cursor->where = where;
 }
 
 void ShowHintLine(Point fromWhere, Point toWhere, unsigned char color, unsigned char brightness) {
-    gSpriteCursor->thisLineStart = fromWhere;
-    gSpriteCursor->thisLineEnd = toWhere;
-    gSpriteCursor->thisShowLine = true;
+    cursor->thisLineStart = fromWhere;
+    cursor->thisLineEnd = toWhere;
+    cursor->thisShowLine = true;
 
-    gSpriteCursor->thisLineColor = GetRGBTranslateColorShade(color, brightness);
-    gSpriteCursor->thisLineColorDark = GetRGBTranslateColorShade(color, VERY_DARK);
+    cursor->thisLineColor = GetRGBTranslateColorShade(color, brightness);
+    cursor->thisLineColorDark = GetRGBTranslateColorShade(color, VERY_DARK);
 }
 
 void HideHintLine() {
-    gSpriteCursor->thisShowLine = false;
+    cursor->thisShowLine = false;
 }
 
 void ResetHintLine() {
-    gSpriteCursor->thisShowLine = false;
-    gSpriteCursor->thisLineStart.h = gSpriteCursor->thisLineStart.v = -1;
-    gSpriteCursor->thisLineEnd.h = gSpriteCursor->thisLineEnd.v = -1;
-    gSpriteCursor->thisLineColor = gSpriteCursor->thisLineColorDark = RgbColor::kBlack;
+    cursor->thisShowLine = false;
+    cursor->thisLineStart.h = cursor->thisLineStart.v = -1;
+    cursor->thisLineEnd.h = cursor->thisLineEnd.v = -1;
+    cursor->thisLineColor = cursor->thisLineColorDark = RgbColor::kBlack;
 }
 
 void draw_cursor() {
@@ -112,29 +108,29 @@ void draw_cursor() {
 }
 
 void draw_sprite_cursor() {
-    if (gSpriteCursor->show) {
-        Point where = gSpriteCursor->where;
-        where.offset(-gSpriteCursor->sprite->at(0).center().h, -gSpriteCursor->sprite->at(0).center().v);
-        gSpriteCursor->sprite->at(0).sprite().draw(where.h, where.v);
+    if (cursor->show) {
+        Point where = cursor->where;
+        where.offset(-cursor->sprite->at(0).center().h, -cursor->sprite->at(0).center().v);
+        cursor->sprite->at(0).sprite().draw(where.h, where.v);
     }
 }
 
 void draw_hint_line() {
-    if (gSpriteCursor->thisShowLine) {
-        Point start = gSpriteCursor->thisLineStart;
-        Point end = gSpriteCursor->thisLineEnd;
+    if (cursor->thisShowLine) {
+        Point start = cursor->thisLineStart;
+        Point end = cursor->thisLineEnd;
 
         start.offset(0, 2);
         end.offset(0, 2);
-        VideoDriver::driver()->draw_line(start, end, gSpriteCursor->thisLineColorDark);
+        VideoDriver::driver()->draw_line(start, end, cursor->thisLineColorDark);
 
         start.offset(0, -1);
         end.offset(0, -1);
-        VideoDriver::driver()->draw_line(start, end, gSpriteCursor->thisLineColor);
+        VideoDriver::driver()->draw_line(start, end, cursor->thisLineColor);
 
         start.offset(0, -1);
         end.offset(0, -1);
-        VideoDriver::driver()->draw_line(start, end, gSpriteCursor->thisLineColor);
+        VideoDriver::driver()->draw_line(start, end, cursor->thisLineColor);
     }
 }
 
