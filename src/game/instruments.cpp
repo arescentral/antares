@@ -703,25 +703,25 @@ void draw_sector_lines() {
     }
 }
 
-void InstrumentsHandleClick() {
-    const Point where = cursor->clamped_location();
+void InstrumentsHandleClick(const Cursor& cursor) {
+    const Point where = cursor.clamped_location();
     PlayerShipHandleClick(where, 0);
     MiniComputerHandleClick(where);
 }
 
-void InstrumentsHandleDoubleClick() {
-    const Point where = cursor->clamped_location();
+void InstrumentsHandleDoubleClick(const Cursor& cursor) {
+    const Point where = cursor.clamped_location();
     PlayerShipHandleClick(where, 0);
     MiniComputerHandleDoubleClick(where);
 }
 
-void InstrumentsHandleMouseUp() {
-    const Point where = cursor->clamped_location();
+void InstrumentsHandleMouseUp(const Cursor& cursor) {
+    const Point where = cursor.clamped_location();
     MiniComputerHandleMouseUp(where);
 }
 
-void InstrumentsHandleMouseStillDown() {
-    const Point where = cursor->clamped_location();
+void InstrumentsHandleMouseStillDown(const Cursor& cursor) {
+    const Point where = cursor.clamped_location();
     MiniComputerHandleMouseStillDown(where);
 }
 

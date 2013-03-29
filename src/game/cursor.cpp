@@ -33,26 +33,18 @@ using std::unique_ptr;
 namespace antares {
 
 static const int kCursorBoundsSize = 16;
-
-Cursor* cursor = nullptr;
-
-void InitSpriteCursor() {
-    cursor = new Cursor;
-}
+static const int kTimeout = 1000000;
 
 Cursor::Cursor():
         show(true),
-        _show_crosshairs_until(0) {
-    thisShowLine = false;
-    thisLineStart = Point(-1, -1);
-    thisLineEnd = Point(-1, -1);
-}
+        _sprite(500, GRAY),
+        _show_crosshairs_until(now_usecs() + kTimeout) { }
 
 bool Cursor::active() const {
     return _show_crosshairs_until > now_usecs();
 }
 
-Point Cursor::clamped_location() const {
+Point Cursor::clamped_location() {
     return clamp(VideoDriver::driver()->get_mouse());
 }
 
@@ -88,31 +80,33 @@ void Cursor::mouse_move(const MouseMoveEvent& event) {
 }
 
 void Cursor::wake() {
-    _show_crosshairs_until = now_usecs() + 1000000;
+    _show_crosshairs_until = now_usecs() + kTimeout;
 }
 
-void SetSpriteCursorTable(short resource_id) {
-    cursor->sprite.reset(new NatePixTable(resource_id, 0));
-}
+static bool show_hint_line = false;
+static Point hint_line_start;
+static Point hint_line_end;
+static RgbColor hint_line_color;
+static RgbColor hint_line_color_dark;
 
 void ShowHintLine(Point fromWhere, Point toWhere, unsigned char color, unsigned char brightness) {
-    cursor->thisLineStart = fromWhere;
-    cursor->thisLineEnd = toWhere;
-    cursor->thisShowLine = true;
+    hint_line_start = fromWhere;
+    hint_line_end = toWhere;
+    show_hint_line = true;
 
-    cursor->thisLineColor = GetRGBTranslateColorShade(color, brightness);
-    cursor->thisLineColorDark = GetRGBTranslateColorShade(color, VERY_DARK);
+    hint_line_color = GetRGBTranslateColorShade(color, brightness);
+    hint_line_color_dark = GetRGBTranslateColorShade(color, VERY_DARK);
 }
 
 void HideHintLine() {
-    cursor->thisShowLine = false;
+    show_hint_line = false;
 }
 
 void ResetHintLine() {
-    cursor->thisShowLine = false;
-    cursor->thisLineStart.h = cursor->thisLineStart.v = -1;
-    cursor->thisLineEnd.h = cursor->thisLineEnd.v = -1;
-    cursor->thisLineColor = cursor->thisLineColorDark = RgbColor::kBlack;
+    show_hint_line = false;
+    hint_line_start.h = hint_line_start.v = -1;
+    hint_line_end.h = hint_line_end.v = -1;
+    hint_line_color = hint_line_color_dark = RgbColor::kBlack;
 }
 
 void Cursor::draw() const {
@@ -147,27 +141,27 @@ void Cursor::draw() const {
     }
 
     if (where.h < viewport.left) {
-        where.offset(-cursor->sprite->at(0).center().h, -cursor->sprite->at(0).center().v);
-        cursor->sprite->at(0).sprite().draw(where.h, where.v);
+        where.offset(-_sprite.at(0).center().h, -_sprite.at(0).center().v);
+        _sprite.at(0).sprite().draw(where.h, where.v);
     }
 }
 
 void draw_hint_line() {
-    if (cursor->thisShowLine) {
-        Point start = cursor->thisLineStart;
-        Point end = cursor->thisLineEnd;
+    if (show_hint_line) {
+        Point start = hint_line_start;
+        Point end = hint_line_end;
 
         start.offset(0, 2);
         end.offset(0, 2);
-        VideoDriver::driver()->draw_line(start, end, cursor->thisLineColorDark);
+        VideoDriver::driver()->draw_line(start, end, hint_line_color_dark);
 
         start.offset(0, -1);
         end.offset(0, -1);
-        VideoDriver::driver()->draw_line(start, end, cursor->thisLineColor);
+        VideoDriver::driver()->draw_line(start, end, hint_line_color);
 
         start.offset(0, -1);
         end.offset(0, -1);
-        VideoDriver::driver()->draw_line(start, end, cursor->thisLineColor);
+        VideoDriver::driver()->draw_line(start, end, hint_line_color);
     }
 }
 

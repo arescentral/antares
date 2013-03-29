@@ -144,7 +144,6 @@ void ReplayMaster::init() {
         world.right - kRightPanelWidth, world.bottom);
     viewport = play_screen;
 
-    InitSpriteCursor();
     RotationInit();
     InitDirectText();
     ScreenLabelInit();

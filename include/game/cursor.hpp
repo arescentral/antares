@@ -22,6 +22,7 @@
 #include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
+#include "drawing/pix-table.hpp"
 #include "math/geometry.hpp"
 #include "ui/event.hpp"
 
@@ -29,22 +30,16 @@ namespace antares {
 
 class NatePixTable;
 
-struct Cursor : public EventReceiver {
-    bool                    show;
-    std::unique_ptr<NatePixTable> sprite;
-
-    bool        thisShowLine;
-    Point       thisLineStart;
-    Point       thisLineEnd;
-    RgbColor    thisLineColor;
-    RgbColor    thisLineColorDark;
-
+class Cursor : public EventReceiver {
+  public:
     Cursor();
     Cursor(const Cursor&) = delete;
 
+    bool                    show;
+
     bool active() const;
     void draw() const;
-    Point clamped_location() const;
+    static Point clamped_location();
 
     virtual void mouse_down(const MouseDownEvent& event);
     virtual void mouse_up(const MouseUpEvent& event);
@@ -54,12 +49,10 @@ struct Cursor : public EventReceiver {
     static Point clamp(Point p);
     void wake();
 
+    NatePixTable _sprite;
     int64_t _show_crosshairs_until;
 };
-extern Cursor* cursor;
 
-void InitSpriteCursor();
-void SetSpriteCursorTable(short resource_id);
 void ShowHintLine(Point fromWhere, Point toWhere, unsigned char color, unsigned char brightness);
 void HideHintLine();
 void ResetHintLine();

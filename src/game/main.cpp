@@ -98,6 +98,7 @@ class GamePlay : public Card {
     };
     State _state;
 
+    Cursor _cursor;
     const bool _replay;
     GameResult* const _game_result;
     int32_t* const _seconds;
@@ -335,11 +336,10 @@ class PauseScreen : public Card {
 void GamePlay::become_front() {
     switch (_state) {
       case PLAYING:
-        SetSpriteCursorTable(500);
         if (_replay) {
-            cursor->show = false;
+            _cursor.show = false;
         } else {
-            cursor->show = true;
+            _cursor.show = true;
         }
         ResetHintLine();
 
@@ -408,7 +408,9 @@ void GamePlay::draw() const {
     draw_message();
     draw_site();
     draw_instruments();
-    cursor->draw();
+    if (stack()->top() == this) {
+        _cursor.draw();
+    }
     draw_hint_line();
     globals()->transitions.draw();
 }
@@ -491,7 +493,8 @@ void GamePlay::fire_timer() {
             ExecuteActionQueue( kDecideEveryCycles);
 
             if (!PlayerShipGetKeys(
-                        kDecideEveryCycles, *globals()->gInputSource, &_entering_message)) {
+                        kDecideEveryCycles, *globals()->gInputSource, _cursor,
+                        &_entering_message)) {
                 globals()->gGameOver = 1;
             }
 
@@ -504,20 +507,20 @@ void GamePlay::fire_timer() {
                         int64_t double_click_interval
                             = VideoDriver::driver()->double_click_interval_usecs();
                         if ((globals()->gGameTime - _last_click_time) <= double_click_interval) {
-                            InstrumentsHandleDoubleClick();
+                            InstrumentsHandleDoubleClick(_cursor);
                             _last_click_time -= double_click_interval;
                         } else {
-                            InstrumentsHandleClick();
+                            InstrumentsHandleClick(_cursor);
                             _last_click_time = globals()->gGameTime;
                         }
                         _left_mouse_down = true;
                     } else {
-                        InstrumentsHandleMouseStillDown();
+                        InstrumentsHandleMouseStillDown(_cursor);
                     }
                 }
             } else if (_left_mouse_down) {
                 _left_mouse_down = false;
-                InstrumentsHandleMouseUp();
+                InstrumentsHandleMouseUp(_cursor);
             }
 
             if (VideoDriver::driver()->button(1)) {
@@ -675,15 +678,15 @@ void GamePlay::key_down(const KeyDownEvent& event) {
 }
 
 void GamePlay::mouse_down(const MouseDownEvent& event) {
-    cursor->mouse_down(event);
+    _cursor.mouse_down(event);
 }
 
 void GamePlay::mouse_up(const MouseUpEvent& event) {
-    cursor->mouse_up(event);
+    _cursor.mouse_up(event);
 }
 
 void GamePlay::mouse_move(const MouseMoveEvent& event) {
-    cursor->mouse_move(event);
+    _cursor.mouse_move(event);
 }
 
 }  // namespace antares
