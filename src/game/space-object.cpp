@@ -354,7 +354,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
 
         if ( destObject->tinySize == 0)
         {
-            tinyColor = kNoTinyColor;
+            tinyColor = RgbColor::kClear;
         } else if ( destObject->owner == globals()->gPlayerAdmiralNumber)
         {
             tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);
