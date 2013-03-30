@@ -48,6 +48,11 @@ class CocoaFullscreen {
         ~MenuBarHider();
     };
     MenuBarHider _menu_bar_hider;
+    struct MouseHider {
+        MouseHider();
+        ~MouseHider();
+    };
+    MouseHider _mouse_hider;
 
     DISALLOW_COPY_AND_ASSIGN(CocoaFullscreen);
 };

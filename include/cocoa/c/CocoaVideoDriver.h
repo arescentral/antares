@@ -29,6 +29,8 @@ extern "C" {
 
 void antares_menu_bar_hide();
 void antares_menu_bar_show();
+void antares_mouse_hide();
+void antares_mouse_show();
 int64_t antares_double_click_interval_usecs();
 
 typedef struct AntaresWindow AntaresWindow;
