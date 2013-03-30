@@ -73,6 +73,14 @@ CocoaFullscreen::MenuBarHider::~MenuBarHider() {
     antares_menu_bar_show();
 }
 
+CocoaFullscreen::MouseHider::MouseHider() {
+    antares_mouse_hide();
+}
+
+CocoaFullscreen::MouseHider::~MouseHider() {
+    antares_mouse_show();
+}
+
 CocoaFullscreen::SetFullscreen::SetFullscreen(
         const cgl::Context& context, uint32_t display_mask) {
     cgl::check(CGLSetFullScreenOnDisplay(context.c_obj(), display_mask));

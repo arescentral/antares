@@ -21,12 +21,28 @@
 #include <Carbon/Carbon.h>
 #include <Cocoa/Cocoa.h>
 
+static bool mouse_visible = true;
+
 void antares_menu_bar_hide() {
     [NSMenu setMenuBarVisible:NO];
 }
 
 void antares_menu_bar_show() {
     [NSMenu setMenuBarVisible:YES];
+}
+
+void antares_mouse_hide() {
+    if (mouse_visible) {
+        [NSCursor hide];
+        mouse_visible = false;
+    }
+}
+
+void antares_mouse_show() {
+    if (mouse_visible) {
+        [NSCursor unhide];
+        mouse_visible = true;
+    }
 }
 
 int64_t antares_double_click_interval_usecs() {
@@ -41,7 +57,6 @@ struct AntaresWindow {
     NSOpenGLContext* context;
     NSOpenGLView* view;
     NSWindow* window;
-    bool cursor_hidden;
 };
 
 AntaresWindow* antares_window_create(
@@ -222,16 +237,16 @@ static void flags_changed(AntaresEventTranslator* translator, int32_t flags) {
 }
 
 static void hide_unhide(AntaresWindow* window, NSPoint location) {
+    if (!window) {
+        return;
+    }
     bool in_window =
         location.x >= 0 && location.y >= 0 &&
         location.x < window->screen_width && location.y < window->screen_height;
-    if (in_window != window->cursor_hidden) {
-        if (in_window) {
-            [NSCursor hide];
-        } else {
-            [NSCursor unhide];
-        }
-        window->cursor_hidden = in_window;
+    if (in_window) {
+        antares_mouse_hide();
+    } else {
+        antares_mouse_show();
     }
 }
 
