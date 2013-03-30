@@ -42,7 +42,7 @@
 // the pair (screen height, screen width).  The case where this ordering
 // differs from (screen width, screen height) is unlikely enough that
 // it's not worth doing anything fancier.
-static int compare_resolutions(id x, id y, void* unused) {
+static NSInteger compare_resolutions(id x, id y, void* unused) {
     (void)unused;
 
     int x_width = [[x objectForKey:(NSString*)kCGDisplayWidth] intValue];
@@ -63,7 +63,7 @@ static int compare_resolutions(id x, id y, void* unused) {
     }
 }
 
-static int compare_scenarios(id x, id y, void* unused) {
+static NSInteger compare_scenarios(id x, id y, void* unused) {
     (void)unused;
 
     return [[x objectForKey:kTitle] caseInsensitiveCompare:[y objectForKey:kTitle]];
