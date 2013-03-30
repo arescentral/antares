@@ -66,8 +66,6 @@ aresGlobalType::aresGlobalType() {
     gWhichScaleNum = 0;
     gLastScale = SCALE_SCALE;
     gInstrumentTop = 0;
-    gMouseActive = false;
-    gMouseTimeout = 0;
     gMessageTimeCount = 0;
     gMessageLabelNum = -1;
     gStatusLabelNum = -1;

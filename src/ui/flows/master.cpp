@@ -127,8 +127,6 @@ void Master::init() {
 
     // TODO(sfiera): set gRandomSeed.
 
-    InitSpriteCursor();
-
     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
 
     RotationInit();

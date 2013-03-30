@@ -28,6 +28,7 @@
 #include "drawing/text.hpp"
 #include "game/admiral.hpp"
 #include "game/cheat.hpp"
+#include "game/cursor.hpp"
 #include "game/globals.hpp"
 #include "game/input-source.hpp"
 #include "game/labels.hpp"
@@ -128,7 +129,8 @@ void ResetPlayerShip(long which) {
     globals()->hotKey_target = false;
 }
 
-bool PlayerShipGetKeys(int32_t timePass, InputSource& input_source, bool *enterMessage) {
+bool PlayerShipGetKeys(
+        int32_t timePass, InputSource& input_source, const GameCursor& cursor, bool *enterMessage) {
     KeyMap          keyMap, *bufMap;
     short           friendOrFoe;
     spaceObjectType *theShip = NULL, *selectShip = NULL;
@@ -449,8 +451,7 @@ bool PlayerShipGetKeys(int32_t timePass, InputSource& input_source, bool *enterM
 // end new hotkey selection
 
     // for this we check lastKeys against theseKeys & relevent keys now being pressed
-    if ((attributes) && (!(gLastKeys & attributes))
-            && (!globals()->gMouseActive)) {
+    if ((attributes) && (!(gLastKeys & attributes)) && (!cursor.active())) {
         gDestKeyTime = -1;
         nonattributes = 0;
         if (gTheseKeys & kSelectFriendKey) {

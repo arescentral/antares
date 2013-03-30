@@ -113,9 +113,6 @@ struct aresGlobalType {
     long            gPlayerAdmiralNumber;
     ScenarioWinnerType gScenarioWinner;
 
-    Point cursor_coord;
-    Point old_cursor_coord;
-
     int32_t         gRadarCount;            // = 0;
     int32_t         gRadarSpeed;            // = 30;
     int32_t         gRadarRange;            // kRadarSize * 50;
@@ -124,8 +121,6 @@ struct aresGlobalType {
     int32_t         gLastScale;             // = SCALE_SCALE;
     int32_t         gInstrumentTop;         // = 0;
     barIndicatorType    gBarIndicator[ kBarIndicatorNum];
-    bool            gMouseActive;           // = kMouseOff;
-    int             gMouseTimeout;
     std::queue<sfz::String> gMessageData;
     std::unique_ptr<unsigned char[]>     gStatusString;
     std::unique_ptr<longMessageType>     gLongMessageData;

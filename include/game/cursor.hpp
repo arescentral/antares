@@ -22,39 +22,52 @@
 #include <sfz/sfz.hpp>
 
 #include "drawing/color.hpp"
+#include "drawing/pix-table.hpp"
 #include "math/geometry.hpp"
+#include "ui/event.hpp"
 
 namespace antares {
 
 class NatePixTable;
 
-struct spriteCursorType {
-    Point                   where;
-    bool                    show;
-    std::unique_ptr<NatePixTable> sprite;
+class Cursor {
+  public:
+    Cursor();
+    Cursor(const Cursor&) = delete;
 
-    bool        thisShowLine;
-    Point       thisLineStart;
-    Point       thisLineEnd;
-    RgbColor    thisLineColor;
-    RgbColor    thisLineColorDark;
+    void draw() const;
+    void draw_at(Point where) const;
 
-    spriteCursorType();
+  private:
+    NatePixTable _sprite;
 };
 
-void InitSpriteCursor();
-void CleanupSpriteCursor();
-void ShowSpriteCursor();
-void HideSpriteCursor();
-bool SpriteCursorVisible();
-void SetSpriteCursorTable(short resource_id);
-void MoveSpriteCursor( Point);
+class GameCursor : public Cursor, public EventReceiver {
+  public:
+    GameCursor();
+    GameCursor(const GameCursor&) = delete;
+
+    bool                    show;
+
+    bool active() const;
+    void draw() const;
+    static Point clamped_location();
+
+    virtual void mouse_down(const MouseDownEvent& event);
+    virtual void mouse_up(const MouseUpEvent& event);
+    virtual void mouse_move(const MouseMoveEvent& event);
+
+  private:
+    static Point clamp(Point p);
+    void wake();
+
+    int64_t _show_crosshairs_until;
+};
+
 void ShowHintLine(Point fromWhere, Point toWhere, unsigned char color, unsigned char brightness);
 void HideHintLine();
 void ResetHintLine();
 
-void draw_cursor();
-void draw_sprite_cursor();
 void draw_hint_line();
 
 }  // namespace antares

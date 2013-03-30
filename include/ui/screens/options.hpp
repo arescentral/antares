@@ -50,7 +50,7 @@ class SoundControlScreen : public InterfaceScreen {
     SoundControlScreen(OptionsScreen::State* state, Preferences* preferences);
     ~SoundControlScreen();
 
-    virtual void draw() const;
+    virtual void overlay() const;
 
   protected:
     virtual void adjust_interface();
@@ -95,7 +95,7 @@ class KeyControlScreen : public InterfaceScreen {
     virtual bool next_timer(int64_t& time);
     virtual void fire_timer();
 
-    virtual void draw() const;
+    virtual void overlay() const;
 
   protected:
     virtual void adjust_interface();

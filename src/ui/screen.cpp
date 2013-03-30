@@ -99,6 +99,10 @@ void InterfaceScreen::draw() const {
     for (const auto& item: _items) {
         draw_interface_item(*item, _bounds.origin());
     }
+    overlay();
+    if (stack()->top() == this) {
+        _cursor.draw();
+    }
 }
 
 void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
@@ -172,6 +176,8 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
         handle_button(*_hit_button);
     }
 }
+
+void InterfaceScreen::overlay() const { }
 
 void InterfaceScreen::adjust_interface() { }
 

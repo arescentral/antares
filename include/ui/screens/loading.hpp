@@ -43,7 +43,7 @@ class LoadingScreen : public InterfaceScreen {
 
   protected:
     virtual void handle_button(Button& button);
-    virtual void draw() const;
+    virtual void overlay() const;
 
   private:
     enum State {
