@@ -48,7 +48,7 @@ def build(bld):
 
     bld.program(
         target="antares/Antares",
-        features="universal32",
+        features="universal",
         mac_app=True,
         mac_plist="antares/Info.plist",
         mac_resources=[
@@ -85,7 +85,7 @@ def build(bld):
 
     bld.program(
         target="antares/offscreen",
-        features="universal32",
+        features="universal",
         source="src/bin/offscreen.cpp",
         cxxflags=WARNINGS,
         use="antares/libantares-test",
@@ -93,7 +93,7 @@ def build(bld):
 
     bld.program(
         target="antares/replay",
-        features="universal32",
+        features="universal",
         source="src/bin/replay.cpp",
         cxxflags=WARNINGS,
         use="antares/libantares-test",
@@ -101,7 +101,7 @@ def build(bld):
 
     bld.program(
         target="antares/build-pix",
-        features="universal32",
+        features="universal",
         source="src/bin/build-pix.cpp",
         cxxflags=WARNINGS,
         use="antares/libantares-test",
@@ -109,7 +109,7 @@ def build(bld):
 
     bld.program(
         target="antares/shapes",
-        features="universal32",
+        features="universal",
         source="src/bin/shapes.cpp",
         cxxflags=WARNINGS,
         use="antares/libantares-test",
@@ -117,7 +117,7 @@ def build(bld):
 
     bld.program(
         target="antares/tint",
-        features="universal32",
+        features="universal",
         source="src/bin/tint.cpp",
         cxxflags=WARNINGS,
         use="antares/libantares-test",
@@ -125,7 +125,7 @@ def build(bld):
 
     bld.program(
         target="antares/ls-scenarios",
-        features="universal32",
+        features="universal",
         source="src/bin/ls-scenarios.cpp",
         cxxflags=WARNINGS,
         use="antares/libantares-test",
@@ -133,7 +133,7 @@ def build(bld):
 
     bld.program(
         target="antares/object-data",
-        features="universal32",
+        features="universal",
         source="src/bin/object-data.cpp",
         cxxflags=WARNINGS,
         use="antares/libantares-test",
@@ -141,7 +141,7 @@ def build(bld):
 
     bld.program(
         target="antares/extract-data",
-        features="universal32",
+        features="universal",
         source="src/bin/extract-data.cpp",
         cxxflags=WARNINGS,
         use="antares/libantares-test",
@@ -149,7 +149,7 @@ def build(bld):
 
     bld.stlib(
         target="antares/libantares",
-        features="cxx universal32",
+        features="cxx universal",
         source=[],
         use=[
             "antares/libantares-config",
@@ -175,7 +175,7 @@ def build(bld):
 
     bld.stlib(
         target="antares/libantares-test",
-        features="universal32",
+        features="universal",
         source=[
             "src/video/offscreen-driver.cpp",
             "src/video/text-driver.cpp",
@@ -194,7 +194,7 @@ def build(bld):
 
     bld.stlib(
         target="antares/libantares-config",
-        features="universal32",
+        features="universal",
         source=[
             "src/config/keys.cpp",
             "src/config/ledger.cpp",
@@ -208,7 +208,7 @@ def build(bld):
 
     bld.stlib(
         target="antares/libantares-data",
-        features="universal32",
+        features="universal",
         source=[
             "src/data/extractor.cpp",
             "src/data/interface.cpp",
@@ -235,7 +235,7 @@ def build(bld):
 
     bld.stlib(
         target="antares/libantares-drawing",
-        features="universal32",
+        features="universal",
         source=[
             "src/drawing/briefing.cpp",
             "src/drawing/build-pix.cpp",
@@ -260,7 +260,7 @@ def build(bld):
 
     bld.stlib(
         target="antares/libantares-game",
-        features="universal32",
+        features="universal",
         source=[
             "src/game/admiral.cpp",
             "src/game/beam.cpp",
@@ -289,7 +289,7 @@ def build(bld):
 
     bld.stlib(
         target="antares/libantares-math",
-        features="universal32",
+        features="universal",
         source=[
             "src/math/fixed.cpp",
             "src/math/geometry.cpp",
@@ -305,7 +305,7 @@ def build(bld):
 
     bld.stlib(
         target="antares/libantares-sound",
-        features="universal32",
+        features="universal",
         source=[
             "src/sound/driver.cpp",
             "src/sound/fx.cpp",
@@ -329,7 +329,7 @@ def build(bld):
 
     bld.stlib(
         target="antares/libantares-ui",
-        features="universal32",
+        features="universal",
         source=[
             "src/ui/card.cpp",
             "src/ui/event.cpp",
@@ -359,7 +359,7 @@ def build(bld):
 
     bld.stlib(
         target="antares/libantares-video",
-        features="universal32",
+        features="universal",
         source=[
             "src/video/driver.cpp",
             "src/video/transitions.cpp",
@@ -388,7 +388,7 @@ def build(bld):
     def unit_test(name):
         bld.test(
             target="antares/%s" % name,
-            features="universal32",
+            features="universal",
             source="src/%s.test.cpp" % name,
             cxxflags=WARNINGS,
             defines="GTEST_USE_OWN_TR1_TUPLE=1",
