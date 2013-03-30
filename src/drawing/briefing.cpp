@@ -322,7 +322,7 @@ static void render_briefing_with(
     Point       where;
     Rect    spriteRect, clipRect;
     baseObjectType  *baseObject = NULL;
-    spaceObjectType *anObject = gSpaceObjectData.get();
+    spaceObjectType *anObject = mGetSpaceObjectPtr(0);
     bool         *gridCells = NULL;
     briefingSpriteBoundsType    *sBounds = NULL;
 

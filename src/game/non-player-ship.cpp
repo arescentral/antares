@@ -462,7 +462,7 @@ void NonplayerShipThink( long timePass)
                 // targetObject is set for all three weapons -- do not change
                 if ( anObject->targetObjectNumber >= 0)
                 {
-                    targetObject = gSpaceObjectData.get() + anObject->targetObjectNumber;
+                    targetObject = mGetSpaceObjectPtr(anObject->targetObjectNumber);
                 } else targetObject = NULL;
 
                 if ( anObject->pulseTime > 0) anObject->pulseTime -= timePass;
@@ -1001,7 +1001,7 @@ unsigned long ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectTy
                             if ( anObject->destinationObject !=
                                 kNoDestinationObject)
                             {
-                                targetObject = gSpaceObjectData.get() + anObject->destinationObject;
+                                targetObject = mGetSpaceObjectPtr(anObject->destinationObject);
                                 if ( targetObject->id != anObject->destObjectDestID) targetObject = NULL;
                             } else targetObject = NULL;
                             if ( targetObject != NULL)
@@ -1469,7 +1469,7 @@ unsigned long ThinkObjectLandingPresence( spaceObjectType *anObject)
                     if ( anObject->destinationObject !=
                         kNoDestinationObject)
                     {
-                        targetObject = gSpaceObjectData.get() + anObject->destinationObject;
+                        targetObject = mGetSpaceObjectPtr(anObject->destinationObject);
                         if ( targetObject->id != anObject->destObjectDestID) targetObject = NULL;
                     } else targetObject = NULL;
                     if ( targetObject != NULL)
@@ -1756,7 +1756,7 @@ void ThinkObjectResolveDestination( spaceObjectType *anObject, coordPointType *d
                     if ( anObject->destinationObject !=
                         kNoDestinationObject)
                     {
-                        (*targetObject) = gSpaceObjectData.get() + anObject->destinationObject;
+                        (*targetObject) = mGetSpaceObjectPtr(anObject->destinationObject);
                         if ( (*targetObject)->id != anObject->destObjectDestID) *targetObject = NULL;
                     } else *targetObject = NULL;
                     if ( *targetObject != NULL)
@@ -1810,7 +1810,7 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
 
     if ( anObject->closestObject != kNoShip)
     {
-        closestObject = gSpaceObjectData.get() + anObject->closestObject;
+        closestObject = mGetSpaceObjectPtr(anObject->closestObject);
     } else closestObject = NULL;
 
     // if we have no target  then
@@ -1843,7 +1843,7 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
     if ( anObject->targetObjectNumber != kNoShip)
     {
         // make sure we're still talking about the same object
-        *targetObject = gSpaceObjectData.get() + anObject->targetObjectNumber;
+        *targetObject = mGetSpaceObjectPtr(anObject->targetObjectNumber);
 
         // if the object is wrong or smells at all funny, then
         if  (
@@ -1875,7 +1875,7 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
             {
                 // make it our target
                 anObject->targetObjectNumber = anObject->closestObject;
-                closestObject = *targetObject = gSpaceObjectData.get() + anObject->targetObjectNumber;
+                closestObject = *targetObject = mGetSpaceObjectPtr(anObject->targetObjectNumber);
                 anObject->targetObjectID = closestObject->id;
                 if ( !((*targetObject)->attributes & kPotentialTarget))
                 {   // cancel
@@ -1935,7 +1935,7 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
                 kRemoteOrHuman))
             {
                 anObject->targetObjectNumber = anObject->closestObject;
-                *targetObject = gSpaceObjectData.get() + anObject->targetObjectNumber;
+                *targetObject = mGetSpaceObjectPtr(anObject->targetObjectNumber);
                 anObject->targetObjectID = (*targetObject)->id;
                 dest->h = (*targetObject)->location.h;
                 dest->v = (*targetObject)->location.v;
@@ -2218,7 +2218,7 @@ long GetManualSelectObject( spaceObjectType *sourceObject, unsigned long inclusi
     whichShip = startShip = currentShipNum;
     if ( whichShip >= 0)
     {
-        anObject = gSpaceObjectData.get() + startShip;
+        anObject = mGetSpaceObjectPtr(startShip);
         if ( anObject->active != kObjectInUse) // if it's not in the loop
         {
             anObject = gRootObject;
@@ -2332,7 +2332,7 @@ long GetSpritePointSelectObject( Rect *bounds, spaceObjectType *sourceObject, un
     long            whichShip = 0, resultShip = -1, closestShip = -1;
     unsigned long   myOwnerFlag = 1 << sourceObject->owner;
 
-    anObject = gSpaceObjectData.get();
+    anObject = mGetSpaceObjectPtr(0);
 
     for ( whichShip = 0; whichShip < kMaxSpaceObject; whichShip++)
     {

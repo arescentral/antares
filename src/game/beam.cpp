@@ -132,7 +132,7 @@ void SetSpecialBeamAttributes(spaceObjectType* beamObject, spaceObjectType* sour
     beam.fromObject = sourceObject;
 
     if (sourceObject->targetObjectNumber >= 0) {
-        spaceObjectType* target = gSpaceObjectData.get() + sourceObject->targetObjectNumber;
+        spaceObjectType* target = mGetSpaceObjectPtr(sourceObject->targetObjectNumber);
 
         if ((target->active) && (target->id == sourceObject->targetObjectID)) {
             const int32_t h = abs(implicit_cast<int32_t>(

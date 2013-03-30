@@ -65,7 +65,7 @@ Starfield::Starfield():
 }
 
 void Starfield::reset(int32_t which_object) {
-    gScrollStarObject = gSpaceObjectData.get() + which_object;
+    gScrollStarObject = mGetSpaceObjectPtr(which_object);
 
     if (gScrollStarObject == NULL) {
         return;

@@ -268,6 +268,38 @@ void ResetActionQueueData( void)
     }
 }
 
+baseObjectType* mGetBaseObjectPtr(long whichObject) {
+    return gBaseObjectData.get() + whichObject;
+}
+
+spaceObjectType* mGetSpaceObjectPtr(long whichObject) {
+    return gSpaceObjectData.get() + whichObject;
+}
+
+objectActionType* mGetObjectActionPtr(long whichAction) {
+    return gObjectActionData.get() + whichAction;
+}
+
+void mGetBaseObjectFromClassRace(
+        baseObjectType*& mbaseObject, long& mcount, int mbaseClass, int mbaseRace) {
+    mcount = 0;
+    if ( mbaseClass >= kLiteralClass)
+    {
+        mcount = mbaseClass - kLiteralClass;
+        mbaseObject = mGetBaseObjectPtr(mcount);
+    }
+    else
+    {
+        mbaseObject = mGetBaseObjectPtr( 0);
+        while (( mcount < globals()->maxBaseObject) && (( mbaseObject->baseClass != mbaseClass) || ( mbaseObject->baseRace != mbaseRace)))
+        {
+            mcount++;
+            mbaseObject++;
+        }
+        if ( mcount >= globals()->maxBaseObject) mbaseObject = NULL;
+    }
+}
+
 /* AddSpaceObject:
     Returns -1 if no object available, otherwise returns object #
 

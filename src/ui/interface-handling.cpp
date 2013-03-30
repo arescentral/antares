@@ -259,7 +259,7 @@ void CreateObjectDataText(String* text, short id) {
     Resource rsrc("text", "txt", kShipDataTextID);
     String data(utf8::decode(rsrc.data()));
 
-    const baseObjectType& baseObject = gBaseObjectData.get()[id];
+    const baseObjectType& baseObject = *mGetBaseObjectPtr(id);
 
     StringList keys(kShipDataKeyStringID);
     StringList values(kShipDataNameID);
@@ -317,7 +317,7 @@ void CreateWeaponDataText(String* text, long whichWeapon, const StringSlice& wea
         return;
     }
 
-    weaponObject = gBaseObjectData.get() + whichWeapon;
+    weaponObject = mGetBaseObjectPtr(whichWeapon);
 
     // TODO(sfiera): catch exception.
     Resource rsrc("text", "txt", kWeaponDataTextID);
@@ -330,13 +330,12 @@ void CreateWeaponDataText(String* text, long whichWeapon, const StringSlice& wea
     isGuided = false;
     if ( weaponObject->activateActionNum > 0)
     {
-        action = gObjectActionData.get() + weaponObject->activateAction;
+        action = mGetObjectActionPtr(weaponObject->activateAction);
         for ( actionNum = 0; actionNum < weaponObject->activateActionNum; actionNum++)
         {
             if (( action->verb == kCreateObject) || ( action->verb == kCreateObjectSetDest))
             {
-                missileObject = gBaseObjectData.get() +
-                    action->argument.createObject.whichBaseType;
+                missileObject = mGetBaseObjectPtr(action->argument.createObject.whichBaseType);
                 if ( missileObject->attributes & kIsGuided) isGuided = true;
                 if ( missileObject->damage > mostDamage) mostDamage = missileObject->damage;
             }

@@ -716,7 +716,7 @@ void MiniComputerHandleNull( long unitsToDo)
         count = GetAdmiralConsiderObject( globals()->gPlayerAdmiralNumber);
         if ( count >= 0)
         {
-            realObject = gSpaceObjectData.get() + count;
+            realObject = mGetSpaceObjectPtr(count);
             mCopyMiniSpaceObject( newObject, *realObject);
         } else
         {
@@ -740,7 +740,7 @@ void MiniComputerHandleNull( long unitsToDo)
         count = GetAdmiralDestinationObject( globals()->gPlayerAdmiralNumber);
         if ( count >= 0)
         {
-            realObject = gSpaceObjectData.get() + count;
+            realObject = mGetSpaceObjectPtr(count);
             mCopyMiniSpaceObject( newObject, *realObject);
         } else
         {
@@ -1181,7 +1181,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                     {
                         if ( l != kNoShip)
                         {
-                            anotherObject = gSpaceObjectData.get() + l;
+                            anotherObject = mGetSpaceObjectPtr(l);
                             if (( anotherObject->active != kObjectInUse) ||
                                 ( !(anotherObject->attributes & kCanThink)) ||
                                 ( anotherObject->attributes & kStaticDestination)
@@ -1207,7 +1207,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                     l = GetAdmiralConsiderObject( whichAdmiral);
                     if (( l != kNoShip))
                     {
-                        anObject = gSpaceObjectData.get() + l;
+                        anObject = mGetSpaceObjectPtr(l);
                         if (( anObject->active) &&
                             (anObject->attributes & ( kCanAcceptDestination)))
                         {
@@ -1220,7 +1220,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                     l = GetAdmiralConsiderObject( whichAdmiral);
                     if (( l != kNoShip))
                     {
-                        anObject = gSpaceObjectData.get() + l;
+                        anObject = mGetSpaceObjectPtr(l);
                         if (( anObject->active) &&
                             (anObject->attributes & ( kCanAcceptDestination)))
                         {
@@ -1233,7 +1233,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                     l = GetAdmiralConsiderObject( whichAdmiral);
                     if (( l != kNoShip))
                     {
-                        anObject = gSpaceObjectData.get() + l;
+                        anObject = mGetSpaceObjectPtr(l);
                         if (( anObject->active) &&
                             (anObject->attributes & ( kCanAcceptDestination)))
                         {
@@ -1246,7 +1246,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                     l = GetAdmiralConsiderObject( whichAdmiral);
                     if (( l != kNoShip))
                     {
-                        anObject = gSpaceObjectData.get() + l;
+                        anObject = mGetSpaceObjectPtr(l);
                         SetObjectLocationDestination( anObject, &(anObject->location));
                     }
                     break;
@@ -1255,7 +1255,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                     l = GetAdmiralConsiderObject( whichAdmiral);
                     if (( l != kNoShip))
                     {
-                        anObject = gSpaceObjectData.get() + l;
+                        anObject = mGetSpaceObjectPtr(l);
                         anotherObject = GetAdmiralFlagship( whichAdmiral);
                         SetObjectLocationDestination( anObject, &(anotherObject->location));
                     }
