@@ -248,7 +248,7 @@ void KeyControlScreen::key_up(const KeyUpEvent& event) {
 }
 
 bool KeyControlScreen::next_timer(int64_t& time) {
-    if (_flashed_on) {
+    if (_next_flash > 0) {
         time = _next_flash;
         return true;
     }
