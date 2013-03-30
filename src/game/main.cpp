@@ -209,6 +209,7 @@ void MainPlay::become_front() {
         break;
 
       case PLAYING:
+        globals()->transitions.reset();
         quiet_all();
         if (Preferences::preferences()->play_music_in_game()) {
             StopAndUnloadSong();
