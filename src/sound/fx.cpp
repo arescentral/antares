@@ -235,6 +235,12 @@ void SoundFXCleanup() {
     }
 }
 
+void quiet_all() {
+    for (int i = 0; i < kMaxChannelNum; i++) {
+        globals()->gChannel[i].channelPtr->quiet();
+    }
+}
+
 //
 // Listing 2-27(S) Playing a sound resource    Sound Manager
 // Inside Macintosh: Sound ,  page 2-57

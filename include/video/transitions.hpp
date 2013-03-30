@@ -33,6 +33,7 @@ class Transitions {
     Transitions();
     ~Transitions();
 
+    void reset();
     void start_boolean(int32_t in_speed, int32_t out_speed, uint8_t goal_color);
     void update_boolean(int32_t time_passed);
     void draw() const;

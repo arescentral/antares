@@ -95,6 +95,7 @@ void PlayLocalizedSound(
         unsigned long sx, unsigned long sy, unsigned long dx, unsigned long dy,
         Fixed hvel, Fixed vvel, short whichSoundID, short amplitude,
         short persistence, soundPriorityType priority);
+void quiet_all();
 void SoundFXCleanup();
 
 void mPlayDistanceSound(

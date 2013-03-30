@@ -209,12 +209,12 @@ void MainPlay::become_front() {
         break;
 
       case PLAYING:
-        {
-            if (Preferences::preferences()->play_music_in_game()) {
-                StopAndUnloadSong();
-            }
-            stack()->pop(this);
+        globals()->transitions.reset();
+        quiet_all();
+        if (Preferences::preferences()->play_music_in_game()) {
+            StopAndUnloadSong();
         }
+        stack()->pop(this);
         break;
     }
 }
