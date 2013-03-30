@@ -313,7 +313,7 @@ bool PlayerShipGetKeys(
         SetStatusString(string, kStatusLabelColor);
     }
 
-    theShip = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
+    theShip = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
 
     if (!theShip->active) {
         return true;
@@ -405,7 +405,7 @@ bool PlayerShipGetKeys(
 
         if (globals()->hotKeyDownTime > 45) {
             if (globals()->lastSelectedObject >= 0) {
-                selectShip = gSpaceObjectData.get() + globals()->lastSelectedObject;
+                selectShip = mGetSpaceObjectPtr(globals()->lastSelectedObject);
 
                 if (selectShip->active) {
                     globals()->hotKey[hot_key].objectNum = globals()->lastSelectedObject;
@@ -420,7 +420,7 @@ bool PlayerShipGetKeys(
         } else {
             globals()->destKeyUsedForSelection = true;
             if (globals()->hotKey[hot_key].objectNum >= 0) {
-                selectShip = gSpaceObjectData.get() + globals()->hotKey[hot_key].objectNum;
+                selectShip = mGetSpaceObjectPtr(globals()->hotKey[hot_key].objectNum);
                 if ((selectShip->active)
                         && (selectShip->id == globals()->hotKey[hot_key].objectID)) {
                     bool is_target = (gTheseKeys & kDestinationKey)
@@ -482,7 +482,7 @@ bool PlayerShipGetKeys(
             }
         }
         if (selectShipNum >= 0) {
-            selectShip = gSpaceObjectData.get() + selectShipNum;
+            selectShip = mGetSpaceObjectPtr(selectShipNum);
             difference = ABS<int>(theShip->location.h - selectShip->location.h);
             dcalc = difference;
             difference =  ABS<int>(theShip->location.v - selectShip->location.v);
@@ -580,7 +580,7 @@ void PlayerShipHandleClick(Point where, int button) {
 
     gDestKeyTime = -1;
     if (globals()->gPlayerShipNumber >= 0) {
-        theShip = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
+        theShip = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
         if ((theShip->active) && (theShip->attributes & kIsHumanControlled)) {
             bounds.left = where.h - kCursorBoundsSize;
             bounds.top = where.v - kCursorBoundsSize;
@@ -627,7 +627,7 @@ void PlayerShipHandleClick(Point where, int button) {
 
 void SetPlayerSelectShip( long whichShip, bool target, long admiralNumber)
 {
-    spaceObjectType *selectShip = gSpaceObjectData.get() + whichShip,
+    spaceObjectType *selectShip = mGetSpaceObjectPtr(whichShip),
                     *theShip = GetAdmiralFlagship( admiralNumber);
 
     if ( admiralNumber == globals()->gPlayerAdmiralNumber)
@@ -704,7 +704,7 @@ void ChangePlayerShipNumber( long whichAdmiral, long newShipNumber)
         }
 
 
-        anObject = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
+        anObject = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
         if (anObject == NULL) {
             throw Exception(format(
                         "whichAdmiral: {0}, newShipNumber: {1}, gPlayerShipNumber: {2}",
@@ -727,7 +727,7 @@ void ChangePlayerShipNumber( long whichAdmiral, long newShipNumber)
     } else
     {
         anObject->attributes &= ~(kIsRemote | kIsPlayerShip);
-        anObject = gSpaceObjectData.get() + newShipNumber;
+        anObject = mGetSpaceObjectPtr(newShipNumber);
         anObject->attributes |= (kIsRemote | kIsPlayerShip);
     }
     SetAdmiralFlagship( whichAdmiral, newShipNumber);
@@ -763,7 +763,7 @@ bool IsPlayerShipOnAutoPilot( void)
     spaceObjectType *theShip;
 
     if ( globals()->gPlayerShipNumber < 0) return false;
-    theShip = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
+    theShip = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
     if ( theShip->attributes & kOnAutoPilot) return true;
     else return false;
 }
@@ -775,7 +775,7 @@ void PlayerShipGiveCommand( long whichAdmiral)
 
     if ( selectShipNum >= 0)
     {
-        selectShip = gSpaceObjectData.get() + selectShipNum;
+        selectShip = mGetSpaceObjectPtr(selectShipNum);
         SetObjectDestination( selectShip, NULL);
         if ( whichAdmiral == globals()->gPlayerAdmiralNumber)
             PlayVolumeSound(  kMorseBeepSound, kMediumVolume, kMediumPersistence, kLowPrioritySound);
@@ -792,7 +792,7 @@ void PlayerShipBodyExpire( spaceObjectType *theShip, bool sourceIsBody)
 
     if ( selectShipNum >= 0)
     {
-        selectShip = gSpaceObjectData.get() + selectShipNum;
+        selectShip = mGetSpaceObjectPtr(selectShipNum);
         if (( selectShip->active != kObjectInUse) ||
             ( !(selectShip->attributes & kCanThink)) ||
             ( selectShip->attributes & kStaticDestination)
@@ -897,7 +897,7 @@ void Update_LabelStrings_ForHotKeyChange( void)
 
     whichShip = GetAdmiralDestinationObject( globals()->gPlayerAdmiralNumber);
     if (whichShip >= 0) {
-        selectShip = gSpaceObjectData.get() + whichShip;
+        selectShip = mGetSpaceObjectPtr(whichShip);
 
 //      if ( admiralNumber == globals()->gPlayerAdmiralNumber)
         {
@@ -919,7 +919,7 @@ void Update_LabelStrings_ForHotKeyChange( void)
 
     whichShip = GetAdmiralConsiderObject( globals()->gPlayerAdmiralNumber);
     if (whichShip >= 0) {
-        selectShip = gSpaceObjectData.get() + whichShip;
+        selectShip = mGetSpaceObjectPtr(whichShip);
 //      if ( admiralNumber == globals()->gPlayerAdmiralNumber)
         {
             SetScreenLabelObject( globals()->gSelectionLabel, selectShip);

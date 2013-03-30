@@ -85,7 +85,7 @@ void AddBaseObjectActionMedia(int32_t whichBase, int32_t whichType, uint8_t colo
 void AddActionMedia(objectActionType *action, uint8_t color);
 
 void SetAllBaseObjectsUnchecked() {
-    baseObjectType  *aBase = gBaseObjectData.get();
+    baseObjectType  *aBase = mGetBaseObjectPtr(0);
     long            count;
 
     for ( count = 0; count < globals()->maxBaseObject; count++)
@@ -139,7 +139,7 @@ void CheckBaseObjectMedia(baseObjectType *aBase, uint8_t color) {
 
 void CheckActionMedia(int32_t whichAction, int32_t actionNum, uint8_t color) {
     baseObjectType      *baseObject;
-    objectActionType    *action = gObjectActionData.get() + whichAction;
+    objectActionType    *action = mGetObjectActionPtr(whichAction);
     bool             OKtoExecute;
     long                count;
 
@@ -172,7 +172,7 @@ void CheckActionMedia(int32_t whichAction, int32_t actionNum, uint8_t color) {
                         break;
 
                     case kAlterOwner:
-                        baseObject = gBaseObjectData.get();
+                        baseObject = mGetBaseObjectPtr(0);
                         for ( count = 0; count < globals()->maxBaseObject; count++)
                         {
                             OKtoExecute = false;
@@ -266,27 +266,27 @@ void mGetActionFromBaseTypeNum(
     if ( (mactionType) == kDestroyActionType)
     {
         if ( mactionNum >= ((mbaseObjPtr)->destroyActionNum & kDestroyActionNotMask)) mactPtr = NULL;
-        else mactPtr = gObjectActionData.get() + (mbaseObjPtr)->destroyAction + implicit_cast<long>(mactionNum);
+        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->destroyAction + implicit_cast<long>(mactionNum));
     } else if ( (mactionType) == kExpireActionType)
     {
         if ( mactionNum >= ((mbaseObjPtr)->expireActionNum  & kDestroyActionNotMask)) mactPtr = NULL;
-        else mactPtr = gObjectActionData.get() + (mbaseObjPtr)->expireAction + implicit_cast<long>(mactionNum);
+        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->expireAction + implicit_cast<long>(mactionNum));
     } else if ( (mactionType) == kCreateActionType)
     {
         if ( mactionNum >= (mbaseObjPtr)->createActionNum) mactPtr = NULL;
-        else mactPtr = gObjectActionData.get() + (mbaseObjPtr)->createAction + implicit_cast<long>(mactionNum);
+        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->createAction + implicit_cast<long>(mactionNum));
     } else if ( (mactionType) == kCollideActionType)
     {
         if ( mactionNum >= (mbaseObjPtr)->collideActionNum) mactPtr = NULL;
-        else mactPtr = gObjectActionData.get() + (mbaseObjPtr)->collideAction + implicit_cast<long>(mactionNum);
+        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->collideAction + implicit_cast<long>(mactionNum));
     } else if ( (mactionType) == kActivateActionType)
     {
         if ( mactionNum >= ((mbaseObjPtr)->activateActionNum & kPeriodicActionNotMask)) mactPtr = NULL;
-        else mactPtr = gObjectActionData.get() + (mbaseObjPtr)->activateAction + implicit_cast<long>(mactionNum);
+        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->activateAction + implicit_cast<long>(mactionNum));
     } else if ( (mactionType) == kArriveActionType)
     {
         if ( mactionNum >= (mbaseObjPtr)->arriveActionNum) mactPtr = NULL;
-        else mactPtr = gObjectActionData.get() + (mbaseObjPtr)->arriveAction + implicit_cast<long>(mactionNum);
+        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->arriveAction + implicit_cast<long>(mactionNum));
     } else mactPtr = NULL;
 }
 
@@ -341,7 +341,7 @@ void AddActionMedia(objectActionType *action, uint8_t color) {
                         break;
 
                     case kAlterOwner:
-                        baseObject = gBaseObjectData.get();
+                        baseObject = mGetBaseObjectPtr(0);
                         for ( count = 0; count < globals()->maxBaseObject; count++)
                         {
                             OKtoExecute = false;
@@ -847,10 +847,10 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             Scenario::Condition* condition = gThisScenario->condition(0);
             for (int i = 0; i < gThisScenario->conditionNum; i++) {
                 condition = gThisScenario->condition(i);
-                objectActionType* action = gObjectActionData.get() + condition->startVerb;
+                objectActionType* action = mGetObjectActionPtr(condition->startVerb);
                 for (int j = 0; j < condition->verbNum; j++) {
                     condition = gThisScenario->condition(i);
-                    action = gObjectActionData.get() + condition->startVerb + j;
+                    action = mGetObjectActionPtr(condition->startVerb + j);
                     AddActionMedia(action, 0);
                 }
             }
@@ -932,7 +932,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                     type, &v, &coord, gScenarioRotation, owner, specialAttributes,
                     initial->spriteIDOverride);
 
-            spaceObjectType* anObject = gSpaceObjectData.get() + newShipNum;
+            spaceObjectType* anObject = mGetSpaceObjectPtr(newShipNum);
             if (anObject->attributes & kIsDestination) {
                 anObject->destinationObject = MakeNewDestination(
                         newShipNum, initial->canBuild, initial->earning, initial->nameResID,
@@ -991,7 +991,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 // now give the mapped initial object the admiral's destination
 
                 initial = gThisScenario->initial(i);
-                spaceObjectType* anObject = gSpaceObjectData.get() + initial->realObjectNumber;
+                spaceObjectType* anObject = mGetSpaceObjectPtr(initial->realObjectNumber);
                 int32_t specialAttributes = anObject->attributes; // preserve the attributes
                 anObject->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
                 SetObjectDestination(anObject, NULL);
@@ -1010,7 +1010,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         if (NETWORK_ON) {
             for (int i = 0; i < gThisScenario->playerNum; i++) {
                 if (GetAdmiralFlagship(i) == NULL) {
-                    spaceObjectType* anObject = gSpaceObjectData.get();
+                    spaceObjectType* anObject = mGetSpaceObjectPtr(0);
                     int32_t count = 0;
                     while ((((anObject->attributes & kCanThink) != kCanThink)
                                 || (anObject->owner != i))
@@ -1041,12 +1041,12 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         globals()->gGameTime = 0;
         for (int64_t i = 0; i < start_ticks; ++i) {
             globals()->gGameTime = add_ticks(globals()->gGameTime, 1);
-            MoveSpaceObjects(gSpaceObjectData.get(), kMaxSpaceObject,
+            MoveSpaceObjects(mGetSpaceObjectPtr(0), kMaxSpaceObject,
                         kDecideEveryCycles);
             NonplayerShipThink(kDecideEveryCycles);
             AdmiralThink();
             ExecuteActionQueue(kDecideEveryCycles);
-            CollideSpaceObjects(gSpaceObjectData.get(), kMaxSpaceObject);
+            CollideSpaceObjects(mGetSpaceObjectPtr(0), kMaxSpaceObject);
             x++;
             if (x == 30) {
                 x = 0;
@@ -1201,7 +1201,7 @@ void CheckScenarioConditions(int32_t timePass) {
                             l = GetAdmiralConsiderObject( globals()->gPlayerAdmiralNumber);
                             if ( l >= 0)
                             {
-                                dObject = gSpaceObjectData.get() + l;
+                                dObject = mGetSpaceObjectPtr(l);
                                 if ( dObject == sObject)
                                 {
                                     conditionTrue = true;
@@ -1216,7 +1216,7 @@ void CheckScenarioConditions(int32_t timePass) {
                             l = GetAdmiralDestinationObject( globals()->gPlayerAdmiralNumber);
                             if ( l >= 0)
                             {
-                                dObject = gSpaceObjectData.get() + l;
+                                dObject = mGetSpaceObjectPtr(l);
                                 if ( dObject == sObject)
                                 {
                                     conditionTrue = true;
@@ -1398,7 +1398,7 @@ void UnhideInitialObject(int32_t whichInitial) {
                                             specialAttributes,
                                             initial->spriteIDOverride);
 
-        anObject = gSpaceObjectData.get() + newShipNum;
+        anObject = mGetSpaceObjectPtr(newShipNum);
         initial = gThisScenario->initial(whichInitial);
 
         if ( anObject->attributes & kIsDestination)
@@ -1458,7 +1458,7 @@ void UnhideInitialObject(int32_t whichInitial) {
                     // now give the mapped initial object the admiral's destination
 
                     initial = gThisScenario->initial(whichInitial);
-                    anObject = gSpaceObjectData.get() + initial->realObjectNumber;
+                    anObject = mGetSpaceObjectPtr(initial->realObjectNumber);
                     specialAttributes = anObject->attributes; // preserve the attributes
                     anObject->attributes &= ~kStaticDestination; // we've got to force this off so we can set dest
                     SetObjectDestination( anObject, NULL);
@@ -1476,7 +1476,7 @@ spaceObjectType *GetObjectFromInitialNumber(int32_t initialNumber) {
     if (initialNumber >= 0) {
         Scenario::InitialObject* initial = gThisScenario->initial(initialNumber);
         if (initial->realObjectNumber >= 0) {
-            spaceObjectType& object = gSpaceObjectData[initial->realObjectNumber];
+            spaceObjectType& object = *mGetSpaceObjectPtr(initial->realObjectNumber);
             if ((object.id != initial->realObjectID) || (object.active != kObjectInUse)) {
                 return NULL;
             }
@@ -1484,7 +1484,7 @@ spaceObjectType *GetObjectFromInitialNumber(int32_t initialNumber) {
         }
         return NULL;
     } else if (initialNumber == -2) {
-        spaceObjectType& object = gSpaceObjectData[globals()->gPlayerShipNumber];
+        spaceObjectType& object = *mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
         if ((!object.active) || (!(object.attributes & kCanThink))) {
             return NULL;
         }

@@ -268,6 +268,47 @@ void ResetActionQueueData( void)
     }
 }
 
+baseObjectType* mGetBaseObjectPtr(long whichObject) {
+    if (whichObject >= 0) {
+        return gBaseObjectData.get() + whichObject;
+    }
+    return nullptr;
+}
+
+spaceObjectType* mGetSpaceObjectPtr(long whichObject) {
+    if (whichObject >= 0) {
+        return gSpaceObjectData.get() + whichObject;
+    }
+    return nullptr;
+}
+
+objectActionType* mGetObjectActionPtr(long whichAction) {
+    if (whichAction >= 0) {
+        return gObjectActionData.get() + whichAction;
+    }
+    return nullptr;
+}
+
+void mGetBaseObjectFromClassRace(
+        baseObjectType*& mbaseObject, long& mcount, int mbaseClass, int mbaseRace) {
+    mcount = 0;
+    if ( mbaseClass >= kLiteralClass)
+    {
+        mcount = mbaseClass - kLiteralClass;
+        mbaseObject = mGetBaseObjectPtr(mcount);
+    }
+    else
+    {
+        mbaseObject = mGetBaseObjectPtr( 0);
+        while (( mcount < globals()->maxBaseObject) && (( mbaseObject->baseClass != mbaseClass) || ( mbaseObject->baseRace != mbaseRace)))
+        {
+            mcount++;
+            mbaseObject++;
+        }
+        if ( mcount >= globals()->maxBaseObject) mbaseObject = NULL;
+    }
+}
+
 /* AddSpaceObject:
     Returns -1 if no object available, otherwise returns object #
 
@@ -354,7 +395,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
 
         if ( destObject->tinySize == 0)
         {
-            tinyColor = kNoTinyColor;
+            tinyColor = RgbColor::kClear;
         } else if ( destObject->owner == globals()->gPlayerAdmiralNumber)
         {
             tinyColor = GetRGBTranslateColorShade(kFriendlyColor, tinyShade);

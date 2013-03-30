@@ -109,7 +109,6 @@ pixTableType gPixTable[kMaxPixTableEntry];
 
 int32_t gAbsoluteScale = MIN_SCALE;
 unique_ptr<spriteType[]> gSpriteTable;
-const RgbColor& kNoTinyColor = RgbColor::kBlack;
 
 void SpriteHandlingInit() {
     ResetAllPixTables();
@@ -293,7 +292,6 @@ void draw_sprites() {
                 int tinySize = aSprite->tinySize & kBlipSizeMask;
                 if ((aSprite->table != NULL)
                         && !aSprite->killMe
-                        && (aSprite->tinyColor != kNoTinyColor)
                         && tinySize
                         && (aSprite->draw_tiny != NULL)
                         && (aSprite->whichLayer == layer)) {

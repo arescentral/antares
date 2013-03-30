@@ -28,9 +28,6 @@ const int16_t kObjectActionResID    = 500;
 
 extern spaceObjectType* gRootObject;
 extern long gRootObjectNumber;
-extern std::unique_ptr<spaceObjectType[]> gSpaceObjectData;
-extern std::unique_ptr<baseObjectType[]> gBaseObjectData;
-extern std::unique_ptr<objectActionType[]> gObjectActionData;
 
 void SpaceObjectHandlingInit( void);
 void CleanupSpaceObjectHandling( void);
@@ -62,29 +59,12 @@ void DestroyObject( spaceObjectType *);
 void ActivateObjectSpecial( spaceObjectType *);
 void CreateFloatingBodyOfPlayer( spaceObjectType *);
 
-inline baseObjectType* mGetBaseObjectPtr(long whichObject) {
-    return gBaseObjectData.get() + whichObject;
-}
+baseObjectType* mGetBaseObjectPtr(long whichObject);
+spaceObjectType* mGetSpaceObjectPtr(long whichObject);
+objectActionType* mGetObjectActionPtr(long whichAction);
 
-inline void mGetBaseObjectFromClassRace(
-        baseObjectType*& mbaseObject, long& mcount, int mbaseClass, int mbaseRace) {
-    mcount = 0;
-    if ( mbaseClass >= kLiteralClass)
-    {
-        mcount = mbaseClass - kLiteralClass;
-        mbaseObject = mGetBaseObjectPtr(mcount);
-    }
-    else
-    {
-        mbaseObject = mGetBaseObjectPtr( 0);
-        while (( mcount < globals()->maxBaseObject) && (( mbaseObject->baseClass != mbaseClass) || ( mbaseObject->baseRace != mbaseRace)))
-        {
-            mcount++;
-            mbaseObject++;
-        }
-        if ( mcount >= globals()->maxBaseObject) mbaseObject = NULL;
-    }
-}
+void mGetBaseObjectFromClassRace(
+        baseObjectType*& mbaseObject, long& mcount, int mbaseClass, int mbaseRace);
 
 sfz::StringSlice get_object_name(int16_t id);
 sfz::StringSlice get_object_short_name(int16_t id);

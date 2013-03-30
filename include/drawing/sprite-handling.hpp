@@ -43,8 +43,6 @@ const int32_t kTimesTwoScale    = SCALE_SCALE * 2;
 
 const int32_t SHIFT_SCALE       = 12;
 
-extern const RgbColor& kNoTinyColor;
-
 enum {
     kNoSpriteLayer      = 0,
     kFirstSpriteLayer   = 1,
@@ -86,7 +84,6 @@ struct spriteType {
 };
 
 extern int32_t gAbsoluteScale;
-extern std::unique_ptr<spriteType[]> gSpriteTable;
 
 // Scale `value` by `scale`.
 //

@@ -293,7 +293,7 @@ void UpdateRadar(int32_t unitsDone) {
 
             const int32_t rrange = globals()->gRadarRange >> 1L;
             for (int oCount = 0; oCount < kMaxSpaceObject; oCount++) {
-                spaceObjectType *anObject = gSpaceObjectData.get() + oCount;
+                spaceObjectType *anObject = mGetSpaceObjectPtr(oCount);
                 if (!anObject->active || (anObject == gScrollStarObject)) {
                     continue;
                 }
@@ -323,7 +323,7 @@ void UpdateRadar(int32_t unitsDone) {
       case kNearestFoeZoom:
       case kNearestAnythingZoom:
         {
-            spaceObjectType* anObject = gSpaceObjectData.get() + globals()->gClosestObject;
+            spaceObjectType* anObject = mGetSpaceObjectPtr(globals()->gClosestObject);
             uint64_t hugeDistance = anObject->distanceFromPlayer;
             if (hugeDistance == 0) { // if this is true, then we haven't calced its distance
                 uint64_t x_distance = ABS<int32_t>(gScrollStarObject->location.h - anObject->location.h);
@@ -361,7 +361,7 @@ void UpdateRadar(int32_t unitsDone) {
 
       case kSmallestZoom:
         {
-            spaceObjectType* anObject = gSpaceObjectData.get() + globals()->gFarthestObject;
+            spaceObjectType* anObject = mGetSpaceObjectPtr(globals()->gFarthestObject);
             uint64_t tempWide = anObject->distanceFromPlayer;
             bestScale = wsqrt(tempWide);
             if (bestScale == 0) bestScale = 1;
@@ -533,7 +533,7 @@ void draw_instruments() {
     right_instrument_sprite->draw(right_rect.left, right_rect.top);
 
     if (globals()->gPlayerShipNumber >= 0) {
-        spaceObjectType* player = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
+        spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
         if (player->active) {
             draw_player_ammo(
                 ((player->pulseType >= 0) && (player->pulseBase->frame.weapon.ammo > 0))

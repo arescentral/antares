@@ -275,7 +275,7 @@ void mPlayDistanceSound(
 
         if (mdistance == 0) {
             if (globals()->gPlayerShipNumber >= 0) {
-                mplayerobjectptr = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
+                mplayerobjectptr = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
             } else {
                 mplayerobjectptr = NULL;
             }
@@ -344,7 +344,7 @@ void mPlayDistanceSound(
                 }
             }
             if (globals()->gPlayerShipNumber >= 0) {
-                mplayerobjectptr = gSpaceObjectData.get() + globals()->gPlayerShipNumber;
+                mplayerobjectptr = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
             } else {
                 mplayerobjectptr = NULL;
             }
