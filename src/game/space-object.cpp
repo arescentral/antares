@@ -269,15 +269,24 @@ void ResetActionQueueData( void)
 }
 
 baseObjectType* mGetBaseObjectPtr(long whichObject) {
-    return gBaseObjectData.get() + whichObject;
+    if (whichObject >= 0) {
+        return gBaseObjectData.get() + whichObject;
+    }
+    return nullptr;
 }
 
 spaceObjectType* mGetSpaceObjectPtr(long whichObject) {
-    return gSpaceObjectData.get() + whichObject;
+    if (whichObject >= 0) {
+        return gSpaceObjectData.get() + whichObject;
+    }
+    return nullptr;
 }
 
 objectActionType* mGetObjectActionPtr(long whichAction) {
-    return gObjectActionData.get() + whichAction;
+    if (whichAction >= 0) {
+        return gObjectActionData.get() + whichAction;
+    }
+    return nullptr;
 }
 
 void mGetBaseObjectFromClassRace(

@@ -826,7 +826,7 @@ void AdmiralThink() {
         }
 
         anObject = mGetSpaceObjectPtr(destBalance->whichObject);
-        if (anObject->owner >= 0) {
+        if (anObject && (anObject->owner >= 0)) {
             PayAdmiral(anObject->owner, destBalance->earn);
         }
         destBalance++;
