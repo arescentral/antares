@@ -213,7 +213,7 @@ KeyControlScreen::KeyControlScreen(OptionsScreen::State* state, Preferences* pre
           _preferences(preferences),
           _key_start(size()),
           _selected_key(-1),
-          _next_flash(0.0),
+          _next_flash(0),
           _flashed_on(false),
           _tabs(2009),
           _keys(2005) {
@@ -415,9 +415,9 @@ void KeyControlScreen::update_conflicts() {
     _conflicts.swap(new_conflicts);
 
     if (_conflicts.empty()) {
-        _next_flash = 0.0;
+        _next_flash = 0;
         _flashed_on = false;
-    } else if (_next_flash == 0.0) {
+    } else if (_next_flash == 0) {
         _next_flash = now_usecs() + kFlashTime;
         _flashed_on = true;
     }
