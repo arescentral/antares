@@ -30,10 +30,22 @@ namespace antares {
 
 class NatePixTable;
 
-class Cursor : public EventReceiver {
+class Cursor {
   public:
     Cursor();
     Cursor(const Cursor&) = delete;
+
+    void draw() const;
+    void draw_at(Point where) const;
+
+  private:
+    NatePixTable _sprite;
+};
+
+class GameCursor : public Cursor, public EventReceiver {
+  public:
+    GameCursor();
+    GameCursor(const GameCursor&) = delete;
 
     bool                    show;
 
@@ -49,7 +61,6 @@ class Cursor : public EventReceiver {
     static Point clamp(Point p);
     void wake();
 
-    NatePixTable _sprite;
     int64_t _show_crosshairs_until;
 };
 

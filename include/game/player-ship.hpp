@@ -23,12 +23,12 @@
 
 namespace antares {
 
-class Cursor;
+class GameCursor;
 class InputSource;
 
 void ResetPlayerShip( long);
 bool PlayerShipGetKeys(
-        int32_t timePass, InputSource& input_source, const Cursor& cursor, bool *enterMessage);
+        int32_t timePass, InputSource& input_source, const GameCursor& cursor, bool *enterMessage);
 void PlayerShipHandleClick(Point where, int button);
 void SetPlayerSelectShip( long, bool, long);
 void ChangePlayerShipNumber( long, long);

@@ -153,9 +153,7 @@ void SoundControlScreen::handle_button(Button& button) {
     }
 }
 
-void SoundControlScreen::draw() const {
-    InterfaceScreen::draw();
-
+void SoundControlScreen::overlay() const {
     const int volume = _preferences->volume();
     Rect bounds = item(VOLUME_BOX).bounds();
 
@@ -331,9 +329,7 @@ void KeyControlScreen::handle_button(Button& button) {
     }
 }
 
-void KeyControlScreen::draw() const {
-    InterfaceScreen::draw();
-
+void KeyControlScreen::overlay() const {
     if (!_conflicts.empty()) {
         const size_t key_one = _conflicts[0].first;
         const size_t key_two = _conflicts[0].second;

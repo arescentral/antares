@@ -72,8 +72,7 @@ void HelpScreen::handle_button(Button& button) {
     }
 }
 
-void HelpScreen::draw() const {
-    InterfaceScreen::draw();
+void HelpScreen::overlay() const {
     _text.draw(_bounds);
 }
 

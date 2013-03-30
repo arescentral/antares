@@ -33,7 +33,7 @@ class HelpScreen : public InterfaceScreen {
     HelpScreen();
     ~HelpScreen();
 
-    virtual void draw() const;
+    virtual void overlay() const;
 
   protected:
     virtual void handle_button(Button& button);

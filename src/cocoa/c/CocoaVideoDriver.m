@@ -41,6 +41,7 @@ struct AntaresWindow {
     NSOpenGLContext* context;
     NSOpenGLView* view;
     NSWindow* window;
+    bool cursor_hidden;
 };
 
 AntaresWindow* antares_window_create(
@@ -220,6 +221,20 @@ static void flags_changed(AntaresEventTranslator* translator, int32_t flags) {
     translator->last_flags = flags;
 }
 
+static void hide_unhide(AntaresWindow* window, NSPoint location) {
+    bool in_window =
+        location.x >= 0 && location.y >= 0 &&
+        location.x < window->screen_width && location.y < window->screen_height;
+    if (in_window != window->cursor_hidden) {
+        if (in_window) {
+            [NSCursor hide];
+        } else {
+            [NSCursor unhide];
+        }
+        window->cursor_hidden = in_window;
+    }
+}
+
 static int button_for(NSEvent* event) {
     switch ([event type]) {
       case NSLeftMouseDown:
@@ -241,14 +256,22 @@ static int button_for(NSEvent* event) {
 
 static void mouse_down(AntaresEventTranslator* translator, NSEvent* event) {
     NSPoint where = translate_coords(translator, [event window], [event locationInWindow]);
+    hide_unhide(translator->window, where);
     int button = button_for(event);
     translator->mouse_down_callback(button, where.x, where.y, translator->mouse_down_userdata);
 }
 
 static void mouse_up(AntaresEventTranslator* translator, NSEvent* event) {
     NSPoint where = translate_coords(translator, [event window], [event locationInWindow]);
+    hide_unhide(translator->window, where);
     int button = button_for(event);
     translator->mouse_up_callback(button, where.x, where.y, translator->mouse_up_userdata);
+}
+
+static void mouse_move(AntaresEventTranslator* translator, NSEvent* event) {
+    NSPoint where = translate_coords(translator, [event window], [event locationInWindow]);
+    hide_unhide(translator->window, where);
+    translator->mouse_move_callback(where.x, where.y, translator->mouse_move_userdata);
 }
 
 void antares_event_translator_enqueue(AntaresEventTranslator* translator, int64_t until) {
@@ -272,11 +295,7 @@ void antares_event_translator_enqueue(AntaresEventTranslator* translator, int64_
           case NSMouseMoved:
           case NSLeftMouseDragged:
           case NSRightMouseDragged:
-            {
-                NSPoint where = translate_coords(
-                        translator, [event window], [event locationInWindow]);
-                translator->mouse_move_callback(where.x, where.y, translator->mouse_move_userdata);
-            }
+            mouse_move(translator, event);
             break;
 
           case NSKeyDown:

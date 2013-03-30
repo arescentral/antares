@@ -113,8 +113,7 @@ void SelectLevelScreen::handle_button(Button& button) {
     }
 }
 
-void SelectLevelScreen::draw() const {
-    InterfaceScreen::draw();
+void SelectLevelScreen::overlay() const {
     draw_level_name();
 }
 

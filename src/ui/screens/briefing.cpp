@@ -80,9 +80,7 @@ void BriefingScreen::become_front() {
     }
 }
 
-void BriefingScreen::draw() const {
-    InterfaceScreen::draw();
-
+void BriefingScreen::overlay() const {
     switch (_briefing_point) {
       case STAR_MAP:
         {

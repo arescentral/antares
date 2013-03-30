@@ -130,7 +130,7 @@ void ResetPlayerShip(long which) {
 }
 
 bool PlayerShipGetKeys(
-        int32_t timePass, InputSource& input_source, const Cursor& cursor, bool *enterMessage) {
+        int32_t timePass, InputSource& input_source, const GameCursor& cursor, bool *enterMessage) {
     KeyMap          keyMap, *bufMap;
     short           friendOrFoe;
     spaceObjectType *theShip = NULL, *selectShip = NULL;

@@ -35,20 +35,32 @@ namespace antares {
 static const int kCursorBoundsSize = 16;
 static const int kTimeout = 1000000;
 
-Cursor::Cursor():
+Cursor::Cursor(): _sprite(500, GRAY) { }
+
+void Cursor::draw() const {
+    draw_at(VideoDriver::driver()->get_mouse());
+}
+
+void Cursor::draw_at(Point where) const {
+    if (world.contains(where)) {
+        where.offset(-_sprite.at(0).center().h, -_sprite.at(0).center().v);
+        _sprite.at(0).sprite().draw(where.h, where.v);
+    }
+}
+
+GameCursor::GameCursor():
         show(true),
-        _sprite(500, GRAY),
         _show_crosshairs_until(now_usecs() + kTimeout) { }
 
-bool Cursor::active() const {
+bool GameCursor::active() const {
     return show && (_show_crosshairs_until > now_usecs());
 }
 
-Point Cursor::clamped_location() {
+Point GameCursor::clamped_location() {
     return clamp(VideoDriver::driver()->get_mouse());
 }
 
-Point Cursor::clamp(Point p) {
+Point GameCursor::clamp(Point p) {
     // Do the cursor, too, unless this is a replay.
     if (p.h > (viewport.right - kCursorBoundsSize - 1)) {
         p.h = viewport.right - kCursorBoundsSize - 1;
@@ -61,25 +73,25 @@ Point Cursor::clamp(Point p) {
     return p;
 }
 
-void Cursor::mouse_down(const MouseDownEvent& event) {
+void GameCursor::mouse_down(const MouseDownEvent& event) {
     if (event.where().h >= viewport.left) {
         wake();
     }
 }
 
-void Cursor::mouse_up(const MouseUpEvent& event) {
+void GameCursor::mouse_up(const MouseUpEvent& event) {
     if (event.where().h >= viewport.left) {
         wake();
     }
 }
 
-void Cursor::mouse_move(const MouseMoveEvent& event) {
+void GameCursor::mouse_move(const MouseMoveEvent& event) {
     if (event.where().h >= viewport.left) {
         wake();
     }
 }
 
-void Cursor::wake() {
+void GameCursor::wake() {
     _show_crosshairs_until = now_usecs() + kTimeout;
 }
 
@@ -109,7 +121,7 @@ void ResetHintLine() {
     hint_line_color = hint_line_color_dark = RgbColor::kBlack;
 }
 
-void Cursor::draw() const {
+void GameCursor::draw() const {
     if (!show) {
         return;
     }
@@ -141,8 +153,7 @@ void Cursor::draw() const {
     }
 
     if (where.h < viewport.left) {
-        where.offset(-_sprite.at(0).center().h, -_sprite.at(0).center().v);
-        _sprite.at(0).sprite().draw(where.h, where.v);
+        draw_at(where);
     }
 }
 

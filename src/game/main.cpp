@@ -98,7 +98,7 @@ class GamePlay : public Card {
     };
     State _state;
 
-    Cursor _cursor;
+    GameCursor _cursor;
     const bool _replay;
     GameResult* const _game_result;
     int32_t* const _seconds;
