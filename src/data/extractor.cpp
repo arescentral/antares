@@ -218,9 +218,9 @@ const ResourceFile kResourceFiles[] = {
 const ResourceFile::ExtractedResource kPluginFiles[] = {
     { "PICT",   "pictures",                     "png",      convert_pict},
     { "NLRP",   "replays",                      "NLRP",     convert_nlrp },
-    { "SMIV",   "sprites",                      "SMIV",     verbatim },
-    { "STR#",   "strings",                      "STR#",     verbatim},
-    { "TEXT",   "text",                         "txt",      verbatim},
+    { "SMIV",   "sprites",                      "json",     verbatim },
+    { "STR#",   "strings",                      "json",     convert_str },
+    { "TEXT",   "text",                         "txt",      convert_text },
     { "bsob",   "objects",                      "bsob",     verbatim},
     { "intr",   "interfaces",                   "intr",     verbatim},
     { "nlAG",   "scenario-info",                "nlAG",     verbatim},
@@ -235,7 +235,7 @@ const ResourceFile::ExtractedResource kPluginFiles[] = {
 
 const char kFactoryScenario[] = "com.biggerplanet.ares";
 const char kDownloadBase[] = "http://downloads.arescentral.org";
-const char kVersion[] = "4\n";
+const char kVersion[] = "11\n";
 
 const char kPluginVersionFile[] = "data/version";
 const char kPluginVersion[] = "1\n";
