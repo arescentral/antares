@@ -341,7 +341,7 @@ void GamePlay::become_front() {
         } else {
             _cursor.show = true;
         }
-        ResetHintLine();
+        HintLine::reset();
 
         CheckScenarioConditions(0);
         break;
@@ -411,7 +411,7 @@ void GamePlay::draw() const {
     if (stack()->top() == this) {
         _cursor.draw();
     }
-    draw_hint_line();
+    HintLine::draw();
     globals()->transitions.draw();
 }
 

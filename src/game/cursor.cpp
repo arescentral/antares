@@ -95,13 +95,13 @@ void GameCursor::wake() {
     _show_crosshairs_until = now_usecs() + kTimeout;
 }
 
-static bool show_hint_line = false;
-static Point hint_line_start;
-static Point hint_line_end;
-static RgbColor hint_line_color;
-static RgbColor hint_line_color_dark;
+bool HintLine::show_hint_line = false;
+Point HintLine::hint_line_start;
+Point HintLine::hint_line_end;
+RgbColor HintLine::hint_line_color;
+RgbColor HintLine::hint_line_color_dark;
 
-void ShowHintLine(Point fromWhere, Point toWhere, unsigned char color, unsigned char brightness) {
+void HintLine::show(Point fromWhere, Point toWhere, unsigned char color, unsigned char brightness) {
     hint_line_start = fromWhere;
     hint_line_end = toWhere;
     show_hint_line = true;
@@ -110,11 +110,11 @@ void ShowHintLine(Point fromWhere, Point toWhere, unsigned char color, unsigned 
     hint_line_color_dark = GetRGBTranslateColorShade(color, VERY_DARK);
 }
 
-void HideHintLine() {
+void HintLine::hide() {
     show_hint_line = false;
 }
 
-void ResetHintLine() {
+void HintLine::reset() {
     show_hint_line = false;
     hint_line_start.h = hint_line_start.v = -1;
     hint_line_end.h = hint_line_end.v = -1;
@@ -157,7 +157,7 @@ void GameCursor::draw() const {
     }
 }
 
-void draw_hint_line() {
+void HintLine::draw() {
     if (show_hint_line) {
         Point start = hint_line_start;
         Point end = hint_line_end;

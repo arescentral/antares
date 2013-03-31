@@ -315,12 +315,12 @@ void Labels::update_positions(int32_t units_done) {
                             source.v = label->where.v + label->height + 2;
                         }
                         Auto_Animate_Line(&source, &dest);
-                        ShowHintLine(source, dest, label->color, DARK);
+                        HintLine::show(source, dest, label->color, DARK);
                     }
                 } else {
                     Labels::set_string(i, "");
                     if (label->attachedHintLine) {
-                        HideHintLine();
+                        HintLine::hide();
                     }
                 }
             } else if (label->keepOnScreenAnyway) {
@@ -339,7 +339,7 @@ void Labels::update_positions(int32_t units_done) {
                         source.h = label->where.h + label->width + 2;
                     }
                     Auto_Animate_Line(&source, &dest);
-                    ShowHintLine(source, dest, label->color, VERY_LIGHT);
+                    HintLine::show(source, dest, label->color, VERY_LIGHT);
                 }
             }
             if (label->age > 0) {
@@ -350,7 +350,7 @@ void Labels::update_positions(int32_t units_done) {
                     label->object = NULL;
                     label->text.clear();
                     if (label->attachedHintLine) {
-                        HideHintLine();
+                        HintLine::hide();
                     }
                 }
             } else if (label->age < 0) {
@@ -411,7 +411,7 @@ void Labels::set_keep_on_screen_anyway(long which, bool keepOnScreenAnyway) {
 void Labels::set_attached_hint_line(long which, bool attachedHintLine, Point toWhere) {
     screenLabelType *label = data + which;
     if (label->attachedHintLine) {
-        HideHintLine();
+        HintLine::hide();
     }
     label->attachedHintLine = attachedHintLine;
     label->attachedToWhere = toWhere;
