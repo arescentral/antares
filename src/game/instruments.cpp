@@ -27,7 +27,6 @@
 #include "game/admiral.hpp"
 #include "game/cursor.hpp"
 #include "game/globals.hpp"
-#include "game/labels.hpp"
 #include "game/minicomputer.hpp"
 #include "game/motion.hpp"
 #include "game/player-ship.hpp"

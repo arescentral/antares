@@ -190,7 +190,7 @@ void CheatFeedback(short whichCheat, bool activate, long whichPlayer) {
     } else {
         feedback.assign(StringList(kCheatFeedbackOffID).at(whichCheat - 1));
     }
-    AddMessage(format("{0}{1}", admiral_name, feedback));
+    Messages::add(format("{0}{1}", admiral_name, feedback));
 }
 
 void CheatFeedbackPlus(
@@ -202,7 +202,7 @@ void CheatFeedbackPlus(
     } else {
         feedback.assign(StringList(kCheatFeedbackOffID).at(whichCheat - 1));
     }
-    AddMessage(format("{0}{1}{2}", admiral_name, feedback, extra));
+    Messages::add(format("{0}{1}{2}", admiral_name, feedback, extra));
 }
 
 }  // namespace antares

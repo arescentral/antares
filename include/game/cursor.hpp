@@ -64,11 +64,20 @@ class GameCursor : public Cursor, public EventReceiver {
     int64_t _show_crosshairs_until;
 };
 
-void ShowHintLine(Point fromWhere, Point toWhere, unsigned char color, unsigned char brightness);
-void HideHintLine();
-void ResetHintLine();
+class HintLine {
+  public:
+    static void show(Point fromWhere, Point toWhere, unsigned char color, unsigned char brightness);
+    static void hide();
+    static void reset();
+    static void draw();
 
-void draw_hint_line();
+  private:
+    static bool show_hint_line;
+    static Point hint_line_start;
+    static Point hint_line_end;
+    static RgbColor hint_line_color;
+    static RgbColor hint_line_color_dark;
+};
 
 }  // namespace antares
 

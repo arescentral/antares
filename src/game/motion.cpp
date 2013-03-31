@@ -25,7 +25,6 @@
 #include "drawing/pix-table.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "game/globals.hpp"
-#include "game/labels.hpp"
 #include "game/non-player-ship.hpp"
 #include "game/player-ship.hpp"
 #include "game/space-object.hpp"

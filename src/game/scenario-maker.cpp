@@ -535,7 +535,7 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     ResetActionQueueData();
     ResetBeams();
     ResetAllSprites();
-    ResetAllLabels();
+    Labels::reset();
     ResetInstruments();
     ResetAllAdmirals();
     ResetAllDestObjectData();
@@ -1032,7 +1032,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 }
             }
         }
-        ClearMessage();
+        Messages::clear();
 
         int x = 0;
         const int64_t start_ticks
@@ -1245,10 +1245,7 @@ void CheckScenarioConditions(int32_t timePass) {
 
                     case kCurrentMessageCondition:
                         {
-                            longMessageType *tmessage;
-
-                            tmessage = globals()->gLongMessageData.get();
-                            if ( tmessage->currentResID == (condition->conditionArgument.location.h +
+                            if (Messages::current() == (condition->conditionArgument.location.h +
                                 condition->conditionArgument.location.v - 1))
                             {
                                 conditionTrue = true;

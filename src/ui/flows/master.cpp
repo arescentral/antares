@@ -132,8 +132,8 @@ void Master::init() {
     RotationInit();
 
     InitDirectText();
-    ScreenLabelInit();
-    InitMessageScreen();
+    Labels::init();
+    Messages::init();
     InstrumentInit();
     SpriteHandlingInit();
     AresCheatInit();

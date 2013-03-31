@@ -79,9 +79,7 @@ struct hotKeyType {
 struct admiralType;
 struct beamType;
 struct destBalanceType;
-struct longMessageType;
 struct proximityUnitType;
-struct screenLabelType;
 struct scrollStarType;
 class InputSource;
 class StringList;
@@ -121,15 +119,8 @@ struct aresGlobalType {
     int32_t         gLastScale;             // = SCALE_SCALE;
     int32_t         gInstrumentTop;         // = 0;
     barIndicatorType    gBarIndicator[ kBarIndicatorNum];
-    std::queue<sfz::String> gMessageData;
-    std::unique_ptr<unsigned char[]>     gStatusString;
-    std::unique_ptr<longMessageType>     gLongMessageData;
-    long            gMessageTimeCount;      // = 0;
-    long            gMessageLabelNum;       // = -1;
-    long            gStatusLabelNum;        // = -1;
     miniComputerDataType    gMiniScreenData;
     std::unique_ptr<StringList>          gMissionStatusStrList;
-    std::unique_ptr<screenLabelType[]>   gScreenLabelData;
     std::unique_ptr<beamType[]>          gBeamData;
     smartSoundHandle    gSound[kSoundNum];
     smartSoundChannel   gChannel[kMaxChannelNum];

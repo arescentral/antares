@@ -341,7 +341,7 @@ void GamePlay::become_front() {
         } else {
             _cursor.show = true;
         }
-        ResetHintLine();
+        HintLine::reset();
 
         CheckScenarioConditions(0);
         break;
@@ -403,15 +403,15 @@ void GamePlay::draw() const {
     draw_sector_lines();
     draw_beams();
     draw_sprites();
-    draw_labels();
+    Labels::draw();
 
-    draw_message();
+    Messages::draw_message();
     draw_site();
     draw_instruments();
     if (stack()->top() == this) {
         _cursor.draw();
     }
-    draw_hint_line();
+    HintLine::draw();
     globals()->transitions.draw();
 }
 
@@ -578,21 +578,21 @@ void GamePlay::fire_timer() {
 
     MiniComputerHandleNull(unitsDone);
 
-    ClipToCurrentLongMessage();
-    DrawCurrentLongMessage( unitsDone);
+    Messages::clip();
+    Messages::draw_long_message( unitsDone);
 
     update_sector_lines();
     update_beams();
-    update_all_label_positions(unitsDone);
-    update_all_label_contents(unitsDone);
+    Labels::update_positions(unitsDone);
+    Labels::update_contents(unitsDone);
     update_site(_replay);
 
     CullSprites();
-    ShowAllLabels();
+    Labels::show_all();
     ShowAllBeams();
     globals()->starfield.show();
 
-    DrawMessageScreen(unitsDone);
+    Messages::draw_message_screen(unitsDone);
     UpdateRadar(unitsDone);
     globals()->transitions.update_boolean(unitsDone);
 

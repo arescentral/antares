@@ -478,7 +478,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
 
     destObject->active = kObjectInUse;
     destObject->nextNearObject = destObject->nextFarObject = NULL;
-    destObject->whichLabel = kNoLabel;
+    destObject->whichLabel = Labels::kNone;
     destObject->entryNumber = whichObject;
     destObject->cloakState = destObject->hitState = 0;
     destObject->duty = eNoDuty;
@@ -2021,7 +2021,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                     break;
 
                 case kDisplayMessage:
-                    StartLongMessage(
+                    Messages::start(
                             action->argument.displayMessage.resID,
                             (action->argument.displayMessage.resID +
                              action->argument.displayMessage.pageNum - 1));
@@ -2064,7 +2064,7 @@ void ExecuteObjectActions( long whichAction, long actionNum,
                         PlayVolumeSound(  kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
                         StringList strings(kMessageStringID);
                         StringSlice string = strings.at(globals()->gZoomMode + kZoomStringOffset - 1);
-                        SetStatusString(string, kStatusLabelColor);
+                        Messages::set_status(string, kStatusLabelColor);
                     }
                     break;
 
@@ -2449,10 +2449,10 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, bool message)
                 String destination_name(GetDestBalanceName(anObject->destinationObject));
                 if (owner >= 0) {
                     String new_owner_name(GetAdmiralName(anObject->owner));
-                    AddMessage(format("{0} captured by {1}.", destination_name, new_owner_name));
+                    Messages::add(format("{0} captured by {1}.", destination_name, new_owner_name));
                 } else if (originalOwner >= 0) { // must be since can't both be -1
                     String old_owner_name(GetAdmiralName(originalOwner));
-                    AddMessage(format("{0} lost by {1}.", destination_name, old_owner_name));
+                    Messages::add(format("{0} lost by {1}.", destination_name, old_owner_name));
                 }
             }
         } else {
@@ -2460,10 +2460,10 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, bool message)
                 StringSlice object_name = get_object_name(anObject->whichBaseObject);
                 if (owner >= 0) {
                     String new_owner_name(GetAdmiralName(anObject->owner));
-                    AddMessage(format("{0} captured by {1}.", object_name, new_owner_name));
+                    Messages::add(format("{0} captured by {1}.", object_name, new_owner_name));
                 } else if (originalOwner >= 0) { // must be since can't both be -1
                     String old_owner_name(GetAdmiralName(originalOwner));
-                    AddMessage(format("{0} lost by {1}.", object_name, old_owner_name));
+                    Messages::add(format("{0} lost by {1}.", object_name, old_owner_name));
                 }
             }
         }
