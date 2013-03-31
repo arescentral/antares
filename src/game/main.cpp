@@ -403,7 +403,7 @@ void GamePlay::draw() const {
     draw_sector_lines();
     draw_beams();
     draw_sprites();
-    draw_labels();
+    Labels::draw();
 
     draw_message();
     draw_site();
@@ -583,12 +583,12 @@ void GamePlay::fire_timer() {
 
     update_sector_lines();
     update_beams();
-    update_all_label_positions(unitsDone);
-    update_all_label_contents(unitsDone);
+    Labels::update_positions(unitsDone);
+    Labels::update_contents(unitsDone);
     update_site(_replay);
 
     CullSprites();
-    ShowAllLabels();
+    Labels::show_all();
     ShowAllBeams();
     globals()->starfield.show();
 

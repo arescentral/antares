@@ -23,7 +23,6 @@
 #include "drawing/color.hpp"
 #include "game/admiral.hpp"
 #include "game/globals.hpp"
-#include "game/labels.hpp"
 #include "game/messages.hpp"
 #include "game/motion.hpp"
 #include "game/player-ship.hpp"

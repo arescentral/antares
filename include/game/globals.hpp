@@ -81,7 +81,6 @@ struct beamType;
 struct destBalanceType;
 struct longMessageType;
 struct proximityUnitType;
-struct screenLabelType;
 struct scrollStarType;
 class InputSource;
 class StringList;
@@ -129,7 +128,6 @@ struct aresGlobalType {
     long            gStatusLabelNum;        // = -1;
     miniComputerDataType    gMiniScreenData;
     std::unique_ptr<StringList>          gMissionStatusStrList;
-    std::unique_ptr<screenLabelType[]>   gScreenLabelData;
     std::unique_ptr<beamType[]>          gBeamData;
     smartSoundHandle    gSound[kSoundNum];
     smartSoundChannel   gChannel[kMaxChannelNum];

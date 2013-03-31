@@ -132,7 +132,7 @@ void Master::init() {
     RotationInit();
 
     InitDirectText();
-    ScreenLabelInit();
+    Labels::init();
     InitMessageScreen();
     InstrumentInit();
     SpriteHandlingInit();

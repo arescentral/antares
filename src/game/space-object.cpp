@@ -478,7 +478,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
 
     destObject->active = kObjectInUse;
     destObject->nextNearObject = destObject->nextFarObject = NULL;
-    destObject->whichLabel = kNoLabel;
+    destObject->whichLabel = Labels::kNone;
     destObject->entryNumber = whichObject;
     destObject->cloakState = destObject->hitState = 0;
     destObject->duty = eNoDuty;

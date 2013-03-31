@@ -535,7 +535,7 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     ResetActionQueueData();
     ResetBeams();
     ResetAllSprites();
-    ResetAllLabels();
+    Labels::reset();
     ResetInstruments();
     ResetAllAdmirals();
     ResetAllDestObjectData();

@@ -106,9 +106,9 @@ HotKeySuffix hot_key_suffix(spaceObjectType* space_object) {
 
 void ResetPlayerShip(long which) {
     globals()->gPlayerShipNumber = which;
-    globals()->gSelectionLabel = AddScreenLabel(0, 0, 0, 10, NULL, true, YELLOW);
-    gDestinationLabel = AddScreenLabel(0, 0, 0, -20, NULL, true, SKY_BLUE);
-    gSendMessageLabel = AddScreenLabel(200, 200, 0, 30, NULL, false, GREEN);
+    globals()->gSelectionLabel = Labels::add(0, 0, 0, 10, NULL, true, YELLOW);
+    gDestinationLabel = Labels::add(0, 0, 0, -20, NULL, true, SKY_BLUE);
+    gSendMessageLabel = Labels::add(200, 200, 0, 30, NULL, false, GREEN);
     globals()->starfield.reset(globals()->gPlayerShipNumber);
     gAlarmCount = -1;
     gLastKeys = gTheseKeys = 0;
@@ -166,7 +166,7 @@ bool PlayerShipGetKeys(
             globals()->gKeyMapBufferBottom = 0;
         }
         if (*enterMessage) {
-            String* message = GetScreenLabelStringPtr(gSendMessageLabel);
+            String* message = Labels::get_string(gSendMessageLabel);
             if (message->empty()) {
                 message->assign("<>");
             }
@@ -192,12 +192,12 @@ bool PlayerShipGetKeys(
                     SendInGameTextMessage(sliced);
 #endif  // NETSPROCKET_AVAILABLE
                 }
-                SetScreenLabelPosition(
+                Labels::set_position(
                         gSendMessageLabel,
                         viewport.left + ((viewport.width() / 2)),
                         viewport.top + ((play_screen.height() / 2)) +
                         kSendMessageVOffset);
-                RecalcScreenLabelSize(gSendMessageLabel);
+                Labels::recalc_size(gSendMessageLabel);
             } else {
                 if ((mDeleteKey(*bufMap)) || (mLeftArrowKey(*bufMap))) {
                     if (message->size() > 2) {
@@ -226,8 +226,8 @@ bool PlayerShipGetKeys(
                 {
                     strlen -= (strlen + width) - (viewport.right);
                 }
-                RecalcScreenLabelSize(gSendMessageLabel);
-                SetScreenLabelPosition(gSendMessageLabel, strlen, viewport.top +
+                Labels::recalc_size(gSendMessageLabel);
+                Labels::set_position(gSendMessageLabel, strlen, viewport.top +
                     ((play_screen.height() / 2) + kSendMessageVOffset));
             }
         } else {
@@ -639,20 +639,20 @@ void SetPlayerSelectShip( long whichShip, bool target, long admiralNumber)
     if (target) {
         SetAdmiralDestinationObject( admiralNumber, whichShip, kObjectDestinationType);
         if (admiralNumber == globals()->gPlayerAdmiralNumber) {
-            SetScreenLabelObject( gDestinationLabel, selectShip);
+            Labels::set_object( gDestinationLabel, selectShip);
             if (whichShip == globals()->gPlayerShipNumber) {
-                SetScreenLabelAge(gDestinationLabel, kLabelOffVisibleTime);
+                Labels::set_age(gDestinationLabel, Labels::kVisibleTime);
             }
             PlayVolumeSound(
                     kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
             if (selectShip->attributes & kIsDestination) {
                 String string(GetDestBalanceName(selectShip->destinationObject));
                 print(string, hot_key_suffix(selectShip));
-                SetScreenLabelString(gDestinationLabel, string);
+                Labels::set_string(gDestinationLabel, string);
             } else {
                 String string(get_object_name(selectShip->whichBaseObject));
                 print(string, hot_key_suffix(selectShip));
-                SetScreenLabelString(gDestinationLabel, string);
+                Labels::set_string(gDestinationLabel, string);
             }
         }
 
@@ -662,20 +662,20 @@ void SetPlayerSelectShip( long whichShip, bool target, long admiralNumber)
     } else {
         SetAdmiralConsiderObject(admiralNumber, whichShip);
         if (admiralNumber == globals()->gPlayerAdmiralNumber) {
-            SetScreenLabelObject(globals()->gSelectionLabel, selectShip);
+            Labels::set_object(globals()->gSelectionLabel, selectShip);
             if (whichShip == globals()->gPlayerShipNumber) {
-                SetScreenLabelAge(globals()->gSelectionLabel, kLabelOffVisibleTime);
+                Labels::set_age(globals()->gSelectionLabel, Labels::kVisibleTime);
             }
             PlayVolumeSound(
                     kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
             if (selectShip->attributes & kIsDestination) {
                 String string(GetDestBalanceName(selectShip->destinationObject));
                 print(string, hot_key_suffix(selectShip));
-                SetScreenLabelString(globals()->gSelectionLabel, string);
+                Labels::set_string(globals()->gSelectionLabel, string);
             } else {
                 String string(get_object_name(selectShip->whichBaseObject));
                 print(string, hot_key_suffix(selectShip));
-                SetScreenLabelString(globals()->gSelectionLabel, string);
+                Labels::set_string(globals()->gSelectionLabel, string);
             }
         }
     }
@@ -718,11 +718,11 @@ void ChangePlayerShipNumber( long whichAdmiral, long newShipNumber)
 
         if ( newShipNumber == GetAdmiralConsiderObject( globals()->gPlayerAdmiralNumber))
         {
-            SetScreenLabelAge( globals()->gSelectionLabel, kLabelOffVisibleTime);
+            Labels::set_age( globals()->gSelectionLabel, Labels::kVisibleTime);
         }
         if ( newShipNumber == GetAdmiralDestinationObject( globals()->gPlayerAdmiralNumber))
         {
-            SetScreenLabelAge( gDestinationLabel, kLabelOffVisibleTime);
+            Labels::set_age( gDestinationLabel, Labels::kVisibleTime);
         }
     } else
     {
@@ -901,18 +901,18 @@ void Update_LabelStrings_ForHotKeyChange( void)
 
 //      if ( admiralNumber == globals()->gPlayerAdmiralNumber)
         {
-            SetScreenLabelObject( gDestinationLabel, selectShip);
+            Labels::set_object( gDestinationLabel, selectShip);
             if (whichShip == globals()->gPlayerShipNumber) {
-                SetScreenLabelAge(gDestinationLabel, kLabelOffVisibleTime);
+                Labels::set_age(gDestinationLabel, Labels::kVisibleTime);
             }
             if (selectShip->attributes & kIsDestination) {
                 String string(GetDestBalanceName(selectShip->destinationObject));
                 print(string, hot_key_suffix(selectShip));
-                SetScreenLabelString(gDestinationLabel, string);
+                Labels::set_string(gDestinationLabel, string);
             } else {
                 String string(get_object_name(selectShip->whichBaseObject));
                 print(string, hot_key_suffix(selectShip));
-                SetScreenLabelString(gDestinationLabel, string);
+                Labels::set_string(gDestinationLabel, string);
             }
         }
     }
@@ -922,20 +922,20 @@ void Update_LabelStrings_ForHotKeyChange( void)
         selectShip = mGetSpaceObjectPtr(whichShip);
 //      if ( admiralNumber == globals()->gPlayerAdmiralNumber)
         {
-            SetScreenLabelObject( globals()->gSelectionLabel, selectShip);
+            Labels::set_object( globals()->gSelectionLabel, selectShip);
             if (whichShip == globals()->gPlayerShipNumber) {
-                SetScreenLabelAge(globals()->gSelectionLabel, kLabelOffVisibleTime);
+                Labels::set_age(globals()->gSelectionLabel, Labels::kVisibleTime);
             }
             PlayVolumeSound(
                     kComputerBeep1, kMediumLoudVolume, kMediumPersistence, kLowPrioritySound);
             if (selectShip->attributes & kIsDestination) {
                 String string(GetDestBalanceName(selectShip->destinationObject));
                 print(string, hot_key_suffix(selectShip));
-                SetScreenLabelString(globals()->gSelectionLabel, string);
+                Labels::set_string(globals()->gSelectionLabel, string);
             } else {
                 String string(get_object_name(selectShip->whichBaseObject));
                 print(string, hot_key_suffix(selectShip));
-                SetScreenLabelString(globals()->gSelectionLabel, string);
+                Labels::set_string(globals()->gSelectionLabel, string);
             }
         }
     }

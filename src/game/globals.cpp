@@ -24,7 +24,6 @@
 #include "game/admiral.hpp"
 #include "game/beam.hpp"
 #include "game/input-source.hpp"
-#include "game/labels.hpp"
 #include "game/messages.hpp"
 #include "game/minicomputer.hpp"
 #include "game/motion.hpp"

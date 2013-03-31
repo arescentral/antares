@@ -104,13 +104,13 @@ void InitMessageScreen() {
     globals()->gStatusString.reset(new unsigned char[kDestinationLength]);
     globals()->gLongMessageData.reset(new longMessageType);
 
-    globals()->gMessageLabelNum = AddScreenLabel(
+    globals()->gMessageLabelNum = Labels::add(
             kMessageScreenLeft, kMessageScreenTop, 0, 0, NULL, false, kMessageColor);
 
     if (globals()->gMessageLabelNum < 0) {
         throw Exception("Couldn't add a screen label.");
     }
-    globals()->gStatusLabelNum = AddScreenLabel(
+    globals()->gStatusLabelNum = Labels::add(
             kStatusLabelLeft, kStatusLabelTop, 0, 0, NULL, false, kStatusLabelColor);
     if (globals()->gStatusLabelNum < 0) {
         throw Exception("Couldn't add a screen label.");
@@ -145,9 +145,9 @@ void ClearMessage( void) {
     longMessageType *tmessage;
 
     globals()->gMessageTimeCount = 0;
-    globals()->gMessageLabelNum = AddScreenLabel(
+    globals()->gMessageLabelNum = Labels::add(
             kMessageScreenLeft, kMessageScreenTop, 0, 0, NULL, false, kMessageColor);
-    globals()->gStatusLabelNum = AddScreenLabel(
+    globals()->gStatusLabelNum = Labels::add(
             kStatusLabelLeft, kStatusLabelTop, 0, 0, NULL, false, kStatusLabelColor);
 
     tmessage = globals()->gLongMessageData.get();
@@ -165,8 +165,8 @@ void ClearMessage( void) {
     tmessage->lastLabelMessage = false;
     tmessage->retro_text.reset();
     viewport.bottom = play_screen.bottom;
-    tmessage->labelMessageID = AddScreenLabel(0, 0, 0, 0, NULL, false, SKY_BLUE);
-    SetScreenLabelKeepOnScreenAnyway( tmessage->labelMessageID, true);
+    tmessage->labelMessageID = Labels::add(0, 0, 0, 0, NULL, false, SKY_BLUE);
+    Labels::set_keep_on_screen_anyway( tmessage->labelMessageID, true);
 }
 
 void AddMessage(const sfz::PrintItem& message) {
@@ -312,14 +312,14 @@ void DrawCurrentLongMessage(int32_t time_pass) {
         // }
 
         if ((tmessage->lastResID >= 0) && (tmessage->lastLabelMessage)) {
-            SetScreenLabelAge(tmessage->labelMessageID, 1);
+            Labels::set_age(tmessage->labelMessageID, 1);
         }
 
         // draw in offscreen world
         if ((tmessage->currentResID >= 0) && ( tmessage->stage == kShowStage)) {
             if (tmessage->retro_text.get() != NULL) {
                 if (tmessage->labelMessage) {
-                    SetScreenLabelAge(tmessage->labelMessageID, 0);
+                    Labels::set_age(tmessage->labelMessageID, 0);
 
                     if (tmessage->retro_text.get() != NULL) {
                         MessageLabel_Set_Special(tmessage->labelMessageID, tmessage->text);
@@ -431,26 +431,26 @@ void DrawMessageScreen(int32_t by_units) {
         const String& message = globals()->gMessageData.front();
 
         if (globals()->gMessageTimeCount < kRaiseTime) {
-            SetScreenLabelPosition(
+            Labels::set_position(
                     globals()->gMessageLabelNum, kMessageScreenLeft,
                     viewport.bottom - globals()->gMessageTimeCount);
         } else if (globals()->gMessageTimeCount > kLowerTime) {
-            SetScreenLabelPosition(
+            Labels::set_position(
                     globals()->gMessageLabelNum, kMessageScreenLeft,
                     viewport.bottom - (kMessageDisplayTime - globals()->gMessageTimeCount));
         }
 
-        SetScreenLabelString(globals()->gMessageLabelNum, message);
+        Labels::set_string(globals()->gMessageLabelNum, message);
     } else {
-        ClearScreenLabelString(globals()->gMessageLabelNum);
+        Labels::clear_string(globals()->gMessageLabelNum);
         globals()->gMessageTimeCount = 0;
     }
 }
 
 void SetStatusString(const StringSlice& status, unsigned char color) {
-    SetScreenLabelColor(globals()->gStatusLabelNum, color);
-    SetScreenLabelString(globals()->gStatusLabelNum, status);
-    SetScreenLabelAge(globals()->gStatusLabelNum, kStatusLabelAge);
+    Labels::set_color(globals()->gStatusLabelNum, color);
+    Labels::set_string(globals()->gStatusLabelNum, status);
+    Labels::set_age(globals()->gStatusLabelNum, kStatusLabelAge);
 }
 
 //
@@ -521,34 +521,34 @@ void MessageLabel_Set_Special(short id, const StringSlice& text) {
         ++it;
     }
 
-    SetScreenLabelString(id, message);
-    SetScreenLabelKeepOnScreenAnyway(id, true);
+    Labels::set_string(id, message);
+    Labels::set_keep_on_screen_anyway(id, true);
 
     switch (whichType) {
       case 'R':
-        SetScreenLabelOffset(id, 0, 0);
-        SetScreenLabelPosition(
-                id, play_screen.right - (GetScreenLabelWidth(id)+10),
+        Labels::set_offset(id, 0, 0);
+        Labels::set_position(
+                id, play_screen.right - (Labels::get_width(id)+10),
                 globals()->gInstrumentTop + value);
         break;
 
       case 'L':
-        SetScreenLabelOffset(id, 0, 0);
-        SetScreenLabelPosition(id, 138, globals()->gInstrumentTop + value);
+        Labels::set_offset(id, 0, 0);
+        Labels::set_position(id, 138, globals()->gInstrumentTop + value);
         break;
 
       case 'O':
         {
             spaceObjectType* o = GetObjectFromInitialNumber(value);
-            SetScreenLabelOffset(id, -(GetScreenLabelWidth(id)/2), 64);
-            SetScreenLabelObject(id, o);
+            Labels::set_offset(id, -(Labels::get_width(id)/2), 64);
+            Labels::set_object(id, o);
 
             hintLine = true;
         }
         break;
     }
     attachPoint.v -= 2;
-    SetScreenLabelAttachedHintLine(id, hintLine, attachPoint);
+    Labels::set_attached_hint_line(id, hintLine, attachPoint);
 }
 
 void draw_message() {
