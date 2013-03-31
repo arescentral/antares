@@ -310,7 +310,7 @@ bool PlayerShipGetKeys(
         PlayVolumeSound(kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
         StringList strings(kMessageStringID);
         StringSlice string = strings.at(globals()->gZoomMode + kZoomStringOffset - 1);
-        SetStatusString(string, kStatusLabelColor);
+        Messages::set_status(string, kStatusLabelColor);
     }
 
     theShip = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
@@ -323,13 +323,13 @@ bool PlayerShipGetKeys(
          if (gAlarmCount < 0) {
             PlayVolumeSound(kKlaxon, kMaxSoundVolume, kLongPersistence, kMustPlaySound);
             gAlarmCount = 0;
-            SetStatusString("WARNING: Shields Low", kStatusWarnColor);
+            Messages::set_status("WARNING: Shields Low", kStatusWarnColor);
          } else {
             gAlarmCount += timePass;
             if (gAlarmCount > 125) {
                 PlayVolumeSound(kKlaxon, kMediumVolume, kMediumLongPersistence, kPrioritySound);
                 gAlarmCount = 0;
-                SetStatusString("WARNING: Shields Low", kStatusWarnColor);
+                Messages::set_status("WARNING: Shields Low", kStatusWarnColor);
             }
         }
     } else {
@@ -347,7 +347,7 @@ bool PlayerShipGetKeys(
     if ((mMessageNextKey(keyMap))
             && (!(mMessageNextKey(gLastKeyMap)))
             && (!*enterMessage)) {
-        AdvanceCurrentLongMessage();
+        Messages::advance();
     }
 
     dcalc = kSelectFriendKey | kSelectFoeKey | kSelectBaseKey;
@@ -742,7 +742,7 @@ void TogglePlayerAutoPilot(spaceObjectType *theShip) {
         {
             StringList strings(kMessageStringID);
             StringSlice string = strings.at(kAutoPilotOffString - 1);
-            SetStatusString(string, kStatusLabelColor);
+            Messages::set_status(string, kStatusLabelColor);
         }
     } else
     {
@@ -753,7 +753,7 @@ void TogglePlayerAutoPilot(spaceObjectType *theShip) {
         {
             StringList strings(kMessageStringID);
             StringSlice string = strings.at(kAutoPilotOnString - 1);
-            SetStatusString(string, kStatusLabelColor);
+            Messages::set_status(string, kStatusLabelColor);
         }
     }
 }

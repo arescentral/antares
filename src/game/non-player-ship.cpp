@@ -2165,7 +2165,7 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
                     && (anObject->attributes & kCanAcceptDestination)) {
                 const StringSlice& object_name = get_object_name(anObject->whichBaseObject);
                 int count = CountObjectsOfBaseType(anObject->whichBaseObject, anObject->owner) - 1;
-                AddMessage(format(" {0} destroyed.  {1} remaining. ", object_name, count));
+                Messages::add(format(" {0} destroyed.  {1} remaining. ", object_name, count));
             }
         }
 

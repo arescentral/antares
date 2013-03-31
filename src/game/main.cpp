@@ -405,7 +405,7 @@ void GamePlay::draw() const {
     draw_sprites();
     Labels::draw();
 
-    draw_message();
+    Messages::draw_message();
     draw_site();
     draw_instruments();
     if (stack()->top() == this) {
@@ -578,8 +578,8 @@ void GamePlay::fire_timer() {
 
     MiniComputerHandleNull(unitsDone);
 
-    ClipToCurrentLongMessage();
-    DrawCurrentLongMessage( unitsDone);
+    Messages::clip();
+    Messages::draw_long_message( unitsDone);
 
     update_sector_lines();
     update_beams();
@@ -592,7 +592,7 @@ void GamePlay::fire_timer() {
     ShowAllBeams();
     globals()->starfield.show();
 
-    DrawMessageScreen(unitsDone);
+    Messages::draw_message_screen(unitsDone);
     UpdateRadar(unitsDone);
     globals()->transitions.update_boolean(unitsDone);
 

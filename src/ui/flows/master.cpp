@@ -133,7 +133,7 @@ void Master::init() {
 
     InitDirectText();
     Labels::init();
-    InitMessageScreen();
+    Messages::init();
     InstrumentInit();
     SpriteHandlingInit();
     AresCheatInit();

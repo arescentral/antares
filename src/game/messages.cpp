@@ -82,10 +82,6 @@ const int16_t kStringMessageID          = 1;
 
 const int32_t kHBuffer                  = 4;
 
-}  // namespace
-
-namespace {
-
 template <typename T>
 void clear(T& t) {
     using std::swap;
@@ -93,30 +89,72 @@ void clear(T& t) {
     swap(t, u);
 }
 
+enum longMessageStageType {
+    kNoStage = 0,
+    kStartStage = 1,
+    kClipStage = 2,
+    kShowStage = 3,
+    kEndStage = 4
+};
+
 }  // namespace
+
+struct Messages::longMessageType {
+    longMessageStageType    stage;
+    long                    charDelayCount;
+    Rect                    pictBounds;
+    long                    pictDelayCount;
+    long                    pictCurrentLeft;
+    long                    pictCurrentTop;
+    long                    time;
+    long                    textHeight;
+    short                   startResID;
+    short                   endResID;
+    short                   currentResID;
+    short                   lastResID;
+    short                   previousStartResID;
+    short                   previousEndResID;
+    short                   pictID;
+    unsigned char           backColor;
+    sfz::String             stringMessage;
+    sfz::String             lastStringMessage;
+    bool                 newStringMessage;
+    sfz::String             text;
+    std::unique_ptr<StyledText> retro_text;
+    Point                   retro_origin;
+    int32_t                 at_char;
+    bool                 labelMessage;
+    bool                 lastLabelMessage;
+    short                   labelMessageID;
+};
+
+std::queue<sfz::String> Messages::message_data;
+Messages::longMessageType* Messages::long_message_data;
+int32_t Messages::time_count;
+int32_t Messages::message_label_num;
+int32_t Messages::status_label_num;
 
 void MessageLabel_Set_Special(short id, const StringSlice& text);
 
-void InitMessageScreen() {
+void Messages::init() {
     longMessageType *tmessage = NULL;
 
-    clear(globals()->gMessageData);
-    globals()->gStatusString.reset(new unsigned char[kDestinationLength]);
-    globals()->gLongMessageData.reset(new longMessageType);
+    antares::clear(message_data);
+    long_message_data = new longMessageType;
 
-    globals()->gMessageLabelNum = Labels::add(
+    message_label_num = Labels::add(
             kMessageScreenLeft, kMessageScreenTop, 0, 0, NULL, false, kMessageColor);
 
-    if (globals()->gMessageLabelNum < 0) {
+    if (message_label_num < 0) {
         throw Exception("Couldn't add a screen label.");
     }
-    globals()->gStatusLabelNum = Labels::add(
+    status_label_num = Labels::add(
             kStatusLabelLeft, kStatusLabelTop, 0, 0, NULL, false, kStatusLabelColor);
-    if (globals()->gStatusLabelNum < 0) {
+    if (status_label_num < 0) {
         throw Exception("Couldn't add a screen label.");
     }
 
-    tmessage = globals()->gLongMessageData.get();
+    tmessage = long_message_data;
     tmessage->startResID =  tmessage->endResID = tmessage->lastResID = tmessage->currentResID =
         -1;
     tmessage->time = 0;
@@ -136,28 +174,23 @@ void InitMessageScreen() {
     tmessage->labelMessageID = -1;
 }
 
-void MessageScreenCleanup() {
-    clear(globals()->gMessageData);
-    globals()->gStatusString.reset();
-}
-
-void ClearMessage( void) {
+void Messages::clear() {
     longMessageType *tmessage;
 
-    globals()->gMessageTimeCount = 0;
-    globals()->gMessageLabelNum = Labels::add(
+    time_count = 0;
+    message_label_num = Labels::add(
             kMessageScreenLeft, kMessageScreenTop, 0, 0, NULL, false, kMessageColor);
-    globals()->gStatusLabelNum = Labels::add(
+    status_label_num = Labels::add(
             kStatusLabelLeft, kStatusLabelTop, 0, 0, NULL, false, kStatusLabelColor);
 
-    tmessage = globals()->gLongMessageData.get();
+    tmessage = long_message_data;
     tmessage->startResID = -1;
     tmessage->endResID = -1;
     tmessage->currentResID = -1;
     tmessage->lastResID = -1;
     tmessage->textHeight = 0;
     tmessage->previousStartResID = tmessage->previousEndResID = -1;
-    tmessage = globals()->gLongMessageData.get();
+    tmessage = long_message_data;
     tmessage->stringMessage.clear();
     tmessage->lastStringMessage.clear();
     tmessage->newStringMessage = false;
@@ -169,23 +202,21 @@ void ClearMessage( void) {
     Labels::set_keep_on_screen_anyway( tmessage->labelMessageID, true);
 }
 
-void AddMessage(const sfz::PrintItem& message) {
-    globals()->gMessageData.emplace(message);
+void Messages::add(const sfz::PrintItem& message) {
+    message_data.emplace(message);
 }
 
-void StartLongMessage( short startResID, short endResID)
-
-{
+void Messages::start(short startResID, short endResID) {
     longMessageType *tmessage;
 
-    tmessage = globals()->gLongMessageData.get();
+    tmessage = long_message_data;
 
     if ( tmessage->currentResID != -1)
     {
         tmessage->startResID = startResID;
         tmessage->endResID = endResID;
         tmessage->currentResID = startResID - 1;
-        AdvanceCurrentLongMessage();
+        advance();
     } else
     {
         tmessage->previousStartResID = tmessage->startResID;
@@ -206,13 +237,13 @@ void StartLongMessage( short startResID, short endResID)
     }
 }
 
-void ClipToCurrentLongMessage( void)
+void Messages::clip( void)
 
 {
     longMessageType *tmessage;
     unique_ptr<String> textData;
 
-    tmessage = globals()->gLongMessageData.get();
+    tmessage = long_message_data;
     if (( tmessage->currentResID != tmessage->lastResID) || ( tmessage->newStringMessage))
     {
 
@@ -291,13 +322,13 @@ void ClipToCurrentLongMessage( void)
     }
 }
 
-void DrawCurrentLongMessage(int32_t time_pass) {
+void Messages::draw_long_message(int32_t time_pass) {
     Rect            tRect, uRect;
     Rect            lRect, cRect;
     longMessageType *tmessage;
     RgbColor        color;
 
-    tmessage = globals()->gLongMessageData.get();
+    tmessage = long_message_data;
     if ((tmessage->currentResID != tmessage->lastResID)
             || (tmessage->newStringMessage)) {
         // TODO(sfiera): figure out what this meant.
@@ -350,12 +381,10 @@ void DrawCurrentLongMessage(int32_t time_pass) {
     }
 }
 
-void EndLongMessage( void)
-
-{
+void Messages::end() {
     longMessageType *tmessage;
 
-    tmessage = globals()->gLongMessageData.get();
+    tmessage = long_message_data;
     tmessage->previousStartResID = tmessage->startResID;
     tmessage->previousEndResID = tmessage->endResID;
     tmessage->startResID = -1;
@@ -366,11 +395,10 @@ void EndLongMessage( void)
     tmessage->lastStringMessage.assign(tmessage->stringMessage);
 }
 
-void AdvanceCurrentLongMessage( void)
-{
+void Messages::advance() {
     longMessageType *tmessage;
 
-    tmessage = globals()->gLongMessageData.get();
+    tmessage = long_message_data;
     if ( tmessage->currentResID != -1)
     {
         if ( tmessage->currentResID < tmessage->endResID)
@@ -380,16 +408,15 @@ void AdvanceCurrentLongMessage( void)
         }
         else
         {
-            EndLongMessage();
+            end();
         }
     }
 }
 
-void PreviousCurrentLongMessage( void)
-{
+void Messages::previous() {
     longMessageType *tmessage;
 
-    tmessage = globals()->gLongMessageData.get();
+    tmessage = long_message_data;
     if ( tmessage->currentResID != -1)
     {
         if ( tmessage->currentResID > tmessage->startResID)
@@ -397,60 +424,60 @@ void PreviousCurrentLongMessage( void)
             tmessage->currentResID--;
             tmessage->stage = kStartStage;
         }
-        else
-        {
-        }
     }
 }
 
-void ReplayLastLongMessage( void)
-{
+void Messages::replay() {
     longMessageType *tmessage;
 
-    tmessage = globals()->gLongMessageData.get();
+    tmessage = long_message_data;
     if (( tmessage->previousStartResID >= 0) && ( tmessage->currentResID < 0))
     {
         tmessage->stringMessage.assign(tmessage->lastStringMessage);
-        StartLongMessage( tmessage->previousStartResID, tmessage->previousEndResID);
+        start( tmessage->previousStartResID, tmessage->previousEndResID);
     }
 }
 
 // WARNING: RELIES ON kMessageNullCharacter (SPACE CHARACTER #32) >> NOT WORLD-READY <<
 
-void DrawMessageScreen(int32_t by_units) {
+void Messages::draw_message_screen(int32_t by_units) {
     // increase the amount of time current message has been shown
-    globals()->gMessageTimeCount += by_units;
+    time_count += by_units;
 
     // if it's been shown for too long, then get the next message
-    if (globals()->gMessageTimeCount > kMessageDisplayTime) {
-        globals()->gMessageTimeCount = 0;
-        globals()->gMessageData.pop();
+    if (time_count > kMessageDisplayTime) {
+        time_count = 0;
+        message_data.pop();
     }
 
-    if (!globals()->gMessageData.empty()) {
-        const String& message = globals()->gMessageData.front();
+    if (!message_data.empty()) {
+        const String& message = message_data.front();
 
-        if (globals()->gMessageTimeCount < kRaiseTime) {
+        if (time_count < kRaiseTime) {
             Labels::set_position(
-                    globals()->gMessageLabelNum, kMessageScreenLeft,
-                    viewport.bottom - globals()->gMessageTimeCount);
-        } else if (globals()->gMessageTimeCount > kLowerTime) {
+                    message_label_num, kMessageScreenLeft,
+                    viewport.bottom - time_count);
+        } else if (time_count > kLowerTime) {
             Labels::set_position(
-                    globals()->gMessageLabelNum, kMessageScreenLeft,
-                    viewport.bottom - (kMessageDisplayTime - globals()->gMessageTimeCount));
+                    message_label_num, kMessageScreenLeft,
+                    viewport.bottom - (kMessageDisplayTime - time_count));
         }
 
-        Labels::set_string(globals()->gMessageLabelNum, message);
+        Labels::set_string(message_label_num, message);
     } else {
-        Labels::clear_string(globals()->gMessageLabelNum);
-        globals()->gMessageTimeCount = 0;
+        Labels::clear_string(message_label_num);
+        time_count = 0;
     }
 }
 
-void SetStatusString(const StringSlice& status, unsigned char color) {
-    Labels::set_color(globals()->gStatusLabelNum, color);
-    Labels::set_string(globals()->gStatusLabelNum, status);
-    Labels::set_age(globals()->gStatusLabelNum, kStatusLabelAge);
+void Messages::set_status(const StringSlice& status, unsigned char color) {
+    Labels::set_color(status_label_num, color);
+    Labels::set_string(status_label_num, status);
+    Labels::set_age(status_label_num, kStatusLabelAge);
+}
+
+int16_t Messages::current() {
+    return long_message_data->currentResID;
 }
 
 //
@@ -551,7 +578,7 @@ void MessageLabel_Set_Special(short id, const StringSlice& text) {
     Labels::set_attached_hint_line(id, hintLine, attachPoint);
 }
 
-void draw_message() {
+void Messages::draw_message() {
     if (viewport.bottom == play_screen.bottom) {
         return;
     }
@@ -563,8 +590,7 @@ void draw_message() {
     message_bounds.inset(0, 1);
     VideoDriver::driver()->fill_rect(message_bounds, dark_blue);
 
-    longMessageType *tmessage = globals()->gLongMessageData.get();
-
+    longMessageType *tmessage = long_message_data;
     Rect bounds(viewport.left, viewport.bottom, viewport.right, play_screen.bottom);
     bounds.inset(kHBuffer, 0);
     bounds.top += kLongMessageVPad;

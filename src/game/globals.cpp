@@ -24,7 +24,6 @@
 #include "game/admiral.hpp"
 #include "game/beam.hpp"
 #include "game/input-source.hpp"
-#include "game/messages.hpp"
 #include "game/minicomputer.hpp"
 #include "game/motion.hpp"
 #include "game/starfield.hpp"
@@ -65,9 +64,6 @@ aresGlobalType::aresGlobalType() {
     gWhichScaleNum = 0;
     gLastScale = SCALE_SCALE;
     gInstrumentTop = 0;
-    gMessageTimeCount = 0;
-    gMessageLabelNum = -1;
-    gStatusLabelNum = -1;
     gLastSoundTime = 0;
     key_names.reset(new StringList(KEY_NAMES));
     key_long_names.reset(new StringList(KEY_LONG_NAMES));

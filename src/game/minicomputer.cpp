@@ -1164,7 +1164,7 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                 {
                     if ( whichAdmiral == globals()->gPlayerAdmiralNumber)
                     {
-                        SetStatusString("Maximum number of ships built", ORANGE);
+                        Messages::set_status("Maximum number of ships built", ORANGE);
                     }
                 }
             }
@@ -1273,15 +1273,15 @@ void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
                 switch ( whichLine)
                 {
                     case kMessageMiniNext:
-                        AdvanceCurrentLongMessage();
+                        Messages::advance();
                         break;
 
                     case kMessageMiniLast:
-                        ReplayLastLongMessage();
+                        Messages::replay();
                         break;
 
                     case kMessageMiniPrevious:
-                        PreviousCurrentLongMessage();
+                        Messages::previous();
                         break;
 
                     default:

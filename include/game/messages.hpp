@@ -36,82 +36,33 @@ const int16_t kAutoPilotOffString   = 10;
 const uint8_t kStatusLabelColor     = AQUA;
 const uint8_t kStatusWarnColor      = PINK;
 
-const size_t kMaxLineNumber = 48;
+class Messages {
+  public:
+    static void init();
+    static void clear();
+    static void add(const sfz::PrintItem& message);
+    static void start( short, short);
+    static void clip();
+    static void end();
+    static void advance();
+    static void previous();
+    static void replay();
+    static void set_status(const sfz::StringSlice& status, unsigned char color);
+    static int16_t current();
 
-struct retroTextSpecType {
-    std::unique_ptr<sfz::String> text;
-    long            textLength;
-    long            lineLength[kMaxLineNumber];
-    long            lineNumber;
-    long            lineCount;
-    long            linePosition;
-    long            thisPosition;
-    long            tabSize;
-    long            xpos;
-    long            ypos;
-    long            autoHeight;
-    long            autoWidth;
-    long            topBuffer;
-    long            bottomBuffer;
-    RgbColor        color;
-    RgbColor        backColor;
-    RgbColor        originalColor;
-    RgbColor        originalBackColor;
-    RgbColor        nextColor;
-    RgbColor        nextBackColor;
+    static void draw_long_message(int32_t time_pass);
+    static void draw_message_screen(int32_t by_units);
+    static void draw_message();
+
+  private:
+    struct longMessageType;
+
+    static std::queue<sfz::String> message_data;
+    static longMessageType* long_message_data;
+    static int32_t time_count;
+    static int32_t message_label_num;
+    static int32_t status_label_num;
 };
-
-enum longMessageStageType {
-    kNoStage = 0,
-    kStartStage = 1,
-    kClipStage = 2,
-    kShowStage = 3,
-    kEndStage = 4
-};
-
-struct longMessageType {
-    longMessageStageType    stage;
-    long                    charDelayCount;
-    Rect                    pictBounds;
-    long                    pictDelayCount;
-    long                    pictCurrentLeft;
-    long                    pictCurrentTop;
-    long                    time;
-    long                    textHeight;
-    short                   startResID;
-    short                   endResID;
-    short                   currentResID;
-    short                   lastResID;
-    short                   previousStartResID;
-    short                   previousEndResID;
-    short                   pictID;
-    unsigned char           backColor;
-    sfz::String             stringMessage;
-    sfz::String             lastStringMessage;
-    bool                 newStringMessage;
-    sfz::String             text;
-    std::unique_ptr<StyledText> retro_text;
-    Point                   retro_origin;
-    int32_t                 at_char;
-    bool                 labelMessage;
-    bool                 lastLabelMessage;
-    short                   labelMessageID;
-};
-
-void InitMessageScreen( void);
-void MessageScreenCleanup( void);
-void ClearMessage( void);
-void AddMessage(const sfz::PrintItem& message);
-void StartLongMessage( short, short);
-void ClipToCurrentLongMessage( void);
-void DrawCurrentLongMessage(int32_t time_pass);
-void EndLongMessage( void);
-void AdvanceCurrentLongMessage( void);
-void PreviousCurrentLongMessage( void);
-void ReplayLastLongMessage( void);
-void DrawMessageScreen(int32_t by_units);
-void SetStatusString(const sfz::StringSlice& status, unsigned char color);
-void draw_message();
 
 }  // namespace antares
 
