@@ -61,6 +61,14 @@ HelpScreen::HelpScreen():
 
 HelpScreen::~HelpScreen() { }
 
+void HelpScreen::key_down(const KeyDownEvent& event) {
+    if (event.key() == Preferences::preferences()->key(kHelpKeyNum) - 1) {
+        stack()->pop(this);
+    } else {
+        InterfaceScreen::key_down(event);
+    }
+}
+
 void HelpScreen::handle_button(Button& button) {
     switch (button.id) {
       case DONE:

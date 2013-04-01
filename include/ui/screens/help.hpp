@@ -33,6 +33,7 @@ class HelpScreen : public InterfaceScreen {
     HelpScreen();
     ~HelpScreen();
 
+    virtual void key_down(const KeyDownEvent& event);
     virtual void overlay() const;
 
   protected:
