@@ -152,7 +152,7 @@ void PlayVolumeSound(
 }
 
 void PlayLocalizedSound(
-        unsigned long sx, unsigned long sy, unsigned long dx, unsigned long dy,
+        uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy,
         Fixed hvel, Fixed vvel, short whichSoundID, short amplitude,
         short persistence, soundPriorityType priority) {
     static_cast<void>(sx);
@@ -265,7 +265,7 @@ void quiet_all() {
 //
 
 void mPlayDistanceSound(
-        long mvolume, spaceObjectType* mobjectptr, long msoundid, long msoundpersistence,
+        int32_t mvolume, spaceObjectType* mobjectptr, int32_t msoundid, int32_t msoundpersistence,
         soundPriorityType msoundpriority) {
     if (mobjectptr->distanceFromPlayer < kMaximumRelevantDistanceSquared) {
         int32_t mdistance = mobjectptr->distanceFromPlayer;

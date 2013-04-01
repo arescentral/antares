@@ -101,13 +101,13 @@ enum longMessageStageType {
 
 struct Messages::longMessageType {
     longMessageStageType    stage;
-    long                    charDelayCount;
+    int32_t                 charDelayCount;
     Rect                    pictBounds;
-    long                    pictDelayCount;
-    long                    pictCurrentLeft;
-    long                    pictCurrentTop;
-    long                    time;
-    long                    textHeight;
+    int32_t                 pictDelayCount;
+    int32_t                 pictCurrentLeft;
+    int32_t                 pictCurrentTop;
+    int32_t                 time;
+    int32_t                 textHeight;
     short                   startResID;
     short                   endResID;
     short                   currentResID;
@@ -495,7 +495,7 @@ int16_t Messages::current() {
 //
 void MessageLabel_Set_Special(short id, const StringSlice& text) {
     char whichType;
-    long value = 0;
+    int32_t value = 0;
     Point attachPoint;
     bool hintLine = false;
 

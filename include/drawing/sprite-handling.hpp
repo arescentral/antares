@@ -74,7 +74,7 @@ struct spriteType {
     spriteStyleType style;
     RgbColor        styleColor;
     short           styleData;
-    long            tinySize;
+    int32_t         tinySize;
     short           whichLayer;
     RgbColor        tinyColor;
     bool            killMe;
@@ -103,8 +103,8 @@ void RemoveAllUnusedPixTables();
 NatePixTable* AddPixTable(int16_t resource_id);
 NatePixTable* GetPixTable(int16_t resource_id);
 spriteType *AddSprite(
-        Point where, NatePixTable* table, short resID, short whichShape, int32_t scale, long size,
-        short layer, const RgbColor& color, long *whichSprite);
+        Point where, NatePixTable* table, short resID, short whichShape, int32_t scale, int32_t size,
+        short layer, const RgbColor& color, int32_t *whichSprite);
 void RemoveSprite(spriteType *);
 void draw_sprites();
 void CullSprites();

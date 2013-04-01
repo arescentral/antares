@@ -35,25 +35,25 @@ class Labels {
     static short add(
             short h, short v, short hoff, short voff, spaceObjectType* object, bool objectLink,
             unsigned char color);
-    static void remove( long);
+    static void remove(int32_t);
     static void draw();
     static void update_contents(int32_t units_done);
     static void update_positions(int32_t units_done);
     static void show_all();
 
-    static void set_position( long, short, short);
-    static void set_object( long, spaceObjectType *);
-    static void set_age( long, long);
-    static void set_string(long which, const sfz::StringSlice& string);
-    static void clear_string(long which);
-    static void set_color( long, unsigned char);
-    static void set_offset( long which, long hoff, long voff);
-    static long get_width( long which);
-    static void set_keep_on_screen_anyway( long which, bool keepOnScreenAnyWay);
-    static void set_attached_hint_line( long which, bool attachedHintLine, Point toWhere);
-    static sfz::String* get_string(long);  // TODO(sfiera): encapsulate.
+    static void set_position(int32_t, short, short);
+    static void set_object(int32_t, spaceObjectType *);
+    static void set_age(int32_t, int32_t);
+    static void set_string(int32_t which, const sfz::StringSlice& string);
+    static void clear_string(int32_t which);
+    static void set_color(int32_t, unsigned char);
+    static void set_offset(int32_t which, int32_t hoff, int32_t voff);
+    static int32_t get_width(int32_t which);
+    static void set_keep_on_screen_anyway(int32_t which, bool keepOnScreenAnyWay);
+    static void set_attached_hint_line(int32_t which, bool attachedHintLine, Point toWhere);
+    static sfz::String* get_string(int32_t);  // TODO(sfiera): encapsulate.
 
-    static void recalc_size( long);
+    static void recalc_size(int32_t);
 
   private:
     struct screenLabelType;

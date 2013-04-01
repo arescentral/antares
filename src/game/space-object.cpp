@@ -67,24 +67,24 @@ static StringList* space_object_short_names;
 
 struct actionQueueType {
     objectActionType            *action;
-    long                            actionNum;
-    long                            actionToDo;
-    long                            scheduledTime;
+    int32_t                         actionNum;
+    int32_t                         actionToDo;
+    int32_t                         scheduledTime;
     actionQueueType         *nextActionQueue;
-    long                            nextActionQueueNum;
+    int32_t                         nextActionQueueNum;
     spaceObjectType         *subjectObject;
-    long                            subjectObjectNum;
-    long                            subjectObjectID;
+    int32_t                         subjectObjectNum;
+    int32_t                         subjectObjectID;
     spaceObjectType         *directObject;
-    long                            directObjectNum;
-    long                            directObjectID;
+    int32_t                         directObjectNum;
+    int32_t                         directObjectID;
     Point                       offset;
 };
 
 spaceObjectType* gRootObject = NULL;
-long gRootObjectNumber = -1;
+int32_t gRootObjectNumber = -1;
 actionQueueType* gFirstActionQueue = NULL;
-long gFirstActionQueueNumber = -1;
+int32_t gFirstActionQueueNumber = -1;
 baseObjectType kZeroBaseObject;
 spaceObjectType kZeroSpaceObject = {0, &kZeroBaseObject};
 
@@ -244,7 +244,7 @@ void ResetAllSpaceObjects() {
 void ResetActionQueueData( void)
 {
     actionQueueType *action = gActionQueueData.get();
-    long            i;
+    int32_t         i;
 
     gFirstActionQueueNumber = -1;
     gFirstActionQueue = NULL;
@@ -268,21 +268,21 @@ void ResetActionQueueData( void)
     }
 }
 
-baseObjectType* mGetBaseObjectPtr(long whichObject) {
+baseObjectType* mGetBaseObjectPtr(int32_t whichObject) {
     if (whichObject >= 0) {
         return gBaseObjectData.get() + whichObject;
     }
     return nullptr;
 }
 
-spaceObjectType* mGetSpaceObjectPtr(long whichObject) {
+spaceObjectType* mGetSpaceObjectPtr(int32_t whichObject) {
     if (whichObject >= 0) {
         return gSpaceObjectData.get() + whichObject;
     }
     return nullptr;
 }
 
-objectActionType* mGetObjectActionPtr(long whichAction) {
+objectActionType* mGetObjectActionPtr(int32_t whichAction) {
     if (whichAction >= 0) {
         return gObjectActionData.get() + whichAction;
     }
@@ -290,7 +290,7 @@ objectActionType* mGetObjectActionPtr(long whichAction) {
 }
 
 void mGetBaseObjectFromClassRace(
-        baseObjectType*& mbaseObject, long& mcount, int mbaseClass, int mbaseRace) {
+        baseObjectType*& mbaseObject, int32_t& mcount, int mbaseClass, int mbaseRace) {
     mcount = 0;
     if ( mbaseClass >= kLiteralClass)
     {
@@ -312,7 +312,7 @@ void mGetBaseObjectFromClassRace(
 /* AddSpaceObject:
     Returns -1 if no object available, otherwise returns object #
 
-int AddSpaceObject( spaceObjectType *sourceObject, long *canBuildType,
+int AddSpaceObject( spaceObjectType *sourceObject, int32_t *canBuildType,
                 short nameResID, short nameStrNum)
 */
 
@@ -323,7 +323,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
     int             whichObject = 0;
     NatePixTable* spriteTable = NULL;
     Point           where;
-    long            scaleCalc;
+    int32_t         scaleCalc;
     RgbColor        tinyColor;
     unsigned char   tinyShade;
     short           whichShape = 0, angle;
@@ -495,7 +495,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
     return ( whichObject);
 }
 
-int AddNumberedSpaceObject( spaceObjectType *sourceObject, long whichObject)
+int AddNumberedSpaceObject( spaceObjectType *sourceObject, int32_t whichObject)
 
 {
 #pragma unused( sourceObject, whichObject)
@@ -503,7 +503,7 @@ int AddNumberedSpaceObject( spaceObjectType *sourceObject, long whichObject)
     Handle          spriteTable = nil;
     Point           where;
     spritePix       oldStyleSprite;
-    long            scaleCalc;
+    int32_t         scaleCalc;
 
     destObject = gSpaceObjectData.get() + whichObject;
 
@@ -618,16 +618,16 @@ void CorrectAllBaseObjectColor( void)
 
 }
 
-void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObject, short seed,
-            long direction, fixedPointType *velocity, long owner, short spriteIDOverride)
+void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, int32_t  whichBaseObject, short seed,
+            int32_t direction, fixedPointType *velocity, int32_t owner, short spriteIDOverride)
 
 {
     baseObjectType  *sObject = mGetBaseObjectPtr( whichBaseObject), *weaponBase = NULL;
     short           i;
-    long            r;
+    int32_t         r;
     Fixed           f;
     fixedPointType  newVel;
-    long            l;
+    int32_t         l;
 
     dObject->offlineTime = 0;
 
@@ -859,13 +859,13 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, long  whichBaseObj
 // Can you change the frame type? Like from a direction frame to a self-animated frame? I'm not sure...
 //
 
-void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
-    long spriteIDOverride, bool relative)
+void ChangeObjectBaseType( spaceObjectType *dObject, int32_t whichBaseObject,
+    int32_t spriteIDOverride, bool relative)
 
 {
     baseObjectType  *sObject = mGetBaseObjectPtr( whichBaseObject), *weaponBase = NULL;
     short           angle;
-    long            r;
+    int32_t         r;
     NatePixTable* spriteTable;
 
     dObject->attributes = sObject->attributes | (dObject->attributes &
@@ -1054,11 +1054,11 @@ void ChangeObjectBaseType( spaceObjectType *dObject, long whichBaseObject,
 
 }
 
-void AddActionToQueue( objectActionType *action, long actionNumber, long actionToDo,
-                        long delayTime, spaceObjectType *subjectObject,
+void AddActionToQueue( objectActionType *action, int32_t actionNumber, int32_t actionToDo,
+                        int32_t delayTime, spaceObjectType *subjectObject,
                         spaceObjectType *directObject, Point* offset)
 {
-    long                queueNumber = 0;
+    int32_t             queueNumber = 0;
     actionQueueType     *actionQueue = gActionQueueData.get(),
                         *nextQueue = gFirstActionQueue, *previousQueue = NULL;
 
@@ -1125,12 +1125,12 @@ void AddActionToQueue( objectActionType *action, long actionNumber, long actionT
     }
 }
 
-void ExecuteActionQueue( long unitsToDo)
+void ExecuteActionQueue( int32_t unitsToDo)
 
 {
 //  actionQueueType     *actionQueue = gFirstActionQueue;
     actionQueueType     *actionQueue = gActionQueueData.get();
-    long                        subjectid, directid, i;
+    int32_t                     subjectid, directid, i;
 
     for ( i = 0; i < kActionQueueLength; i++)
     {
@@ -1188,7 +1188,7 @@ void ExecuteActionQueue( long unitsToDo)
     }
 }
 
-void ExecuteObjectActions( long whichAction, long actionNum,
+void ExecuteObjectActions( int32_t whichAction, int32_t actionNum,
                 spaceObjectType *sObject, spaceObjectType *dObject, Point* offset,
                 bool allowDelay)
 
@@ -1199,8 +1199,8 @@ void ExecuteObjectActions( long whichAction, long actionNum,
     objectActionType    *action = gObjectActionData.get() + whichAction;
     short           end, angle;
     fixedPointType  fpoint, newVel;
-    long            l;
-    unsigned long   ul1;
+    int32_t         l;
+    uint32_t        ul1;
     Fixed           f, f2;
     coordPointType  newLocation;
     Point           location;
@@ -2099,14 +2099,14 @@ void ExecuteObjectActions( long whichAction, long actionNum,
     if ( checkConditions) CheckScenarioConditions( 0);
 }
 
-long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
-            coordPointType *location, long direction, long owner,
-            unsigned long specialAttributes, short spriteIDOverride)
+int32_t CreateAnySpaceObject( int32_t whichBase, fixedPointType *velocity,
+            coordPointType *location, int32_t direction, int32_t owner,
+            uint32_t specialAttributes, short spriteIDOverride)
 
 {
     spaceObjectType *madeObject = NULL, newObject, *player = NULL;
-    long            newObjectNumber;
-    unsigned long   distance, dcalc, difference;
+    int32_t         newObjectNumber;
+    uint32_t        distance, dcalc, difference;
     uint64_t        hugeDistance;
 
     InitSpaceObjectFromBaseObject( &newObject, whichBase, RandomSeeded( 32766, &gRandomSeed, 'so18', whichBase),
@@ -2210,10 +2210,10 @@ long CreateAnySpaceObject( long whichBase, fixedPointType *velocity,
     return( newObjectNumber);
 }
 
-long CountObjectsOfBaseType( long whichType, long owner)
+int32_t CountObjectsOfBaseType( int32_t whichType, int32_t owner)
 
 {
-    long    count, result = 0;
+    int32_t count, result = 0;
 
     spaceObjectType *anObject;
 
@@ -2228,10 +2228,10 @@ long CountObjectsOfBaseType( long whichType, long owner)
     return (result);
 }
 
-long GetNextObjectWithAttributes( long startWith, unsigned long attributes, bool exclude)
+int32_t GetNextObjectWithAttributes( int32_t startWith, uint32_t attributes, bool exclude)
 
 {
-    long    original = startWith;
+    int32_t original = startWith;
     spaceObjectType *anObject;
 
     anObject = gSpaceObjectData.get() + startWith;
@@ -2269,7 +2269,7 @@ long GetNextObjectWithAttributes( long startWith, unsigned long attributes, bool
     }
 }
 
-void AlterObjectHealth( spaceObjectType *anObject, long health)
+void AlterObjectHealth( spaceObjectType *anObject, int32_t health)
 
 {
     if ( health <= 0)
@@ -2288,7 +2288,7 @@ void AlterObjectHealth( spaceObjectType *anObject, long health)
 
 }
 
-void AlterObjectEnergy( spaceObjectType *anObject, long energy)
+void AlterObjectEnergy( spaceObjectType *anObject, int32_t energy)
 
 {
     anObject->energy += energy;
@@ -2309,7 +2309,7 @@ void AlterObjectEnergy( spaceObjectType *anObject, long energy)
 
 }
 
-void AlterObjectBattery( spaceObjectType *anObject, long energy)
+void AlterObjectBattery( spaceObjectType *anObject, int32_t energy)
 
 {
     anObject->battery += energy;
@@ -2322,11 +2322,11 @@ void AlterObjectBattery( spaceObjectType *anObject, long energy)
 }
 
 
-void AlterObjectOwner( spaceObjectType *anObject, long owner, bool message)
+void AlterObjectOwner( spaceObjectType *anObject, int32_t owner, bool message)
 
 {
     spaceObjectType *fixObject = NULL;
-    long            i, originalOwner = anObject->owner;
+    int32_t         i, originalOwner = anObject->owner;
     RgbColor        tinyColor;
     unsigned char   tinyShade;
 
@@ -2473,7 +2473,7 @@ void AlterObjectOwner( spaceObjectType *anObject, long owner, bool message)
 //  if ( anObject->attributes & kIsEndgameObject) CheckEndgame();
 }
 
-void AlterObjectOccupation( spaceObjectType *anObject, long owner, long howMuch, bool message)
+void AlterObjectOccupation( spaceObjectType *anObject, int32_t owner, int32_t howMuch, bool message)
 {
     if ( ( anObject->active) && ( anObject->attributes & kIsDestination) && ( anObject->attributes & kNeutralDeath))
     {
@@ -2486,7 +2486,7 @@ void AlterObjectOccupation( spaceObjectType *anObject, long owner, long howMuch,
 
 void AlterObjectCloakState( spaceObjectType *anObject, bool cloak)
 {
-    long            longscrap = kMaxSoundVolume;
+    int32_t         longscrap = kMaxSoundVolume;
 
     if ( (cloak) && ( anObject->cloakState == 0))
     {
@@ -2630,7 +2630,7 @@ void ActivateObjectSpecial( spaceObjectType *anObject)
 void CreateFloatingBodyOfPlayer( spaceObjectType *anObject)
 
 {
-    long        count;
+    int32_t     count;
 
 //  count = CreateAnySpaceObject( globals()->scenarioFileInfo.playerBodyID, &(anObject->velocity),
 //      &(anObject->location), anObject->direction, anObject->owner, 0, nil, -1, -1, -1);

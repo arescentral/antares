@@ -117,14 +117,14 @@ bool AnyKeyButThisOne(const KeyMap& key_map, int key_num) {
     return others.any();
 }
 
-long GetAsciiFromKeyMap(const KeyMap& sourceKeyMap, const KeyMap& previousKeyMap) {
+int32_t GetAsciiFromKeyMap(const KeyMap& sourceKeyMap, const KeyMap& previousKeyMap) {
     // TODO(sfiera): write a new implementation of this method.
     static_cast<void>(sourceKeyMap);
     static_cast<void>(previousKeyMap);
     return 0;
     /*
     short           whichKeyCode = 0, modifiers = 0, count;
-    long            result;
+    int32_t         result;
     Ptr             KCHRPtr;
     KeyMap          keyMap;
 

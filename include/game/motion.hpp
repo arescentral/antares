@@ -26,7 +26,7 @@ namespace antares {
 const int32_t kUnitsToCheckNumber = 5;
 
 struct adjacentUnitType {
-    long                    adjacentUnit;           // the normal adjacent unit
+    int32_t                 adjacentUnit;           // the normal adjacent unit
     Point                   superOffset;            // the offset of the super unit (for wrap-around)
 };
 
@@ -42,8 +42,8 @@ void InitMotion( void);
 void ResetMotionGlobals( void);
 
 void MotionCleanup( void);
-void MoveSpaceObjects( spaceObjectType *, const long, const long);
-void CollideSpaceObjects( spaceObjectType *, const long);
+void MoveSpaceObjects( spaceObjectType *, const int32_t, const int32_t);
+void CollideSpaceObjects( spaceObjectType *, const int32_t);
 void CorrectPhysicalSpace( spaceObjectType *, spaceObjectType *);
 
 }  // namespace antares

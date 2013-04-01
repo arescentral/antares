@@ -61,7 +61,7 @@ enum {
 void AresCheatInit();
 void CleanupAresCheat();
 short GetCheatNumFromString(const sfz::StringSlice& string);
-void ExecuteCheat( short, long);
+void ExecuteCheat( short, int32_t);
 
 }  // namespace antares
 

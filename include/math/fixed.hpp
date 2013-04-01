@@ -35,7 +35,7 @@ typedef int32_t Fixed;
 //  32,768          division
 //
 
-// Convert a fixed-point number to long.
+// Convert a fixed-point number to int32_t.
 //
 // Both the evil and more evil variants return correct results when `value` is zero or positive
 // (that is, ``value / 256``), but they differ in how wrong they are with negative values.  The

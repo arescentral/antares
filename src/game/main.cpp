@@ -244,7 +244,7 @@ class PauseScreen : public Card {
     PauseScreen() {
         const StringList list(3100);
         _pause_string.assign(list.at(10));
-        long width = title_font->string_width(_pause_string);
+        int32_t width = title_font->string_width(_pause_string);
         Rect bounds(0, 0, width, title_font->height);
         bounds.center_in(play_screen);
         _text_origin = Point(bounds.left, bounds.top + title_font->ascent);

@@ -26,15 +26,15 @@ namespace antares {
 class GameCursor;
 class InputSource;
 
-void ResetPlayerShip( long);
+void ResetPlayerShip(int32_t);
 bool PlayerShipGetKeys(
         int32_t timePass, InputSource& input_source, const GameCursor& cursor, bool *enterMessage);
 void PlayerShipHandleClick(Point where, int button);
-void SetPlayerSelectShip( long, bool, long);
-void ChangePlayerShipNumber( long, long);
+void SetPlayerSelectShip(int32_t, bool, int32_t);
+void ChangePlayerShipNumber(int32_t, int32_t);
 void TogglePlayerAutoPilot( spaceObjectType *);
 bool IsPlayerShipOnAutoPilot( void);
-void PlayerShipGiveCommand( long);
+void PlayerShipGiveCommand(int32_t);
 void PlayerShipBodyExpire( spaceObjectType *, bool);
 void HandleTextMessageKeys(const KeyMap&, const KeyMap&, bool *);
 

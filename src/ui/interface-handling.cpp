@@ -130,7 +130,7 @@ int find_replace(String& data, int pos, const StringSlice& search, const PrintIt
 
 }  // namespace
 
-void CreateWeaponDataText(sfz::String* text, long whichWeapon, const sfz::StringSlice& weaponName);
+void CreateWeaponDataText(sfz::String* text, int32_t whichWeapon, const sfz::StringSlice& weaponName);
 
 //
 // BothCommandAndQ:
@@ -152,8 +152,8 @@ bool BothCommandAndQ() {
 }
 
 void update_mission_brief_point(
-        LabeledRect *dataItem, long whichBriefPoint, const Scenario* scenario,
-        coordPointType *corner, long scale, Rect *bounds, vector<inlinePictType>& inlinePict,
+        LabeledRect *dataItem, int32_t whichBriefPoint, const Scenario* scenario,
+        coordPointType *corner, int32_t scale, Rect *bounds, vector<inlinePictType>& inlinePict,
         Rect& highlight_rect, vector<pair<Point, Point>>& lines, String& text) {
     if (whichBriefPoint < kMissionBriefPointOffset) {
         // No longer handled here.
@@ -163,7 +163,7 @@ void update_mission_brief_point(
     whichBriefPoint -= kMissionBriefPointOffset;
 
     Rect hiliteBounds;
-    long            headerID, headerNumber, contentID;
+    int32_t         headerID, headerNumber, contentID;
     BriefPoint_Data_Get(whichBriefPoint, scenario, &headerID, &headerNumber, &contentID,
             &hiliteBounds, corner, scale, 16, 32, bounds);
     hiliteBounds.offset(bounds->left, bounds->top);
@@ -307,9 +307,9 @@ void CreateObjectDataText(String* text, short id) {
     print(*text, data);
 }
 
-void CreateWeaponDataText(String* text, long whichWeapon, const StringSlice& weaponName) {
+void CreateWeaponDataText(String* text, int32_t whichWeapon, const StringSlice& weaponName) {
     baseObjectType      *weaponObject, *missileObject;
-    long                mostDamage, actionNum;
+    int32_t             mostDamage, actionNum;
     objectActionType    *action;
     bool             isGuided = false;
 

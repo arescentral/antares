@@ -200,8 +200,8 @@ NatePixTable* GetPixTable(int16_t resource_id) {
 }
 
 spriteType *AddSprite(
-        Point where, NatePixTable* table, short resID, short whichShape, int32_t scale, long size,
-        short layer, const RgbColor& color, long *whichSprite) {
+        Point where, NatePixTable* table, short resID, short whichShape, int32_t scale, int32_t size,
+        short layer, const RgbColor& color, int32_t *whichSprite) {
     for (spriteType* sprite: range(gSpriteTable.get(), gSpriteTable.get() + kMaxSpriteNum)) {
         if (sprite->table == NULL) {
             *whichSprite = sprite - gSpriteTable.get();
