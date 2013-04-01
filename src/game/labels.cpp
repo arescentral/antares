@@ -53,19 +53,19 @@ struct Labels::screenLabelType {
     Point               where;
     Point               offset;
     Rect                thisRect;
-    long                width;
-    long                height;
-    long                age;
+    int32_t             width;
+    int32_t             height;
+    int32_t             age;
     sfz::String         text;
-    unsigned char       color;
+    uint8_t             color;
     bool                active;
     bool                killMe;
     bool                visible;
-    long                whichObject;
+    int32_t             whichObject;
     spaceObjectType*    object;
     bool                objectLink;     // true if label requires an object to be seen
-    long                lineNum;
-    long                lineHeight;
+    int32_t             lineNum;
+    int32_t             lineHeight;
     bool                keepOnScreenAnyway; // if not attached to object, keep on screen if it's off
     bool                attachedHintLine;
     Point               attachedToWhere;
@@ -75,8 +75,8 @@ struct Labels::screenLabelType {
 };
 
 // local function prototypes
-static long String_Count_Lines(const StringSlice& s);
-static StringSlice String_Get_Nth_Line(const StringSlice& source, long nth);
+static int32_t String_Count_Lines(const StringSlice& s);
+static StringSlice String_Get_Nth_Line(const StringSlice& source, int32_t nth);
 static void Auto_Animate_Line( Point *source, Point *dest);
 
 Labels::screenLabelType* Labels::data = nullptr;
@@ -111,9 +111,9 @@ Labels::screenLabelType::screenLabelType() {
     zero(*this);
 }
 
-short Labels::add(
-        short h, short v, short hoff, short voff, spaceObjectType* object, bool objectLink,
-        unsigned char color) {
+int16_t Labels::add(
+        int16_t h, int16_t v, int16_t hoff, int16_t voff, spaceObjectType* object, bool objectLink,
+        uint8_t color) {
     screenLabelType* label = NULL;
 
     for (int i = 0; i < kMaxLabelNum; ++i) {
@@ -152,7 +152,7 @@ short Labels::add(
     return label_num;
 }
 
-void Labels::remove(long which) {
+void Labels::remove(int32_t which) {
     screenLabelType *label = data + which;
     label->thisRect = Rect(0, 0, -1, -1);
     label->text.clear();
@@ -248,7 +248,7 @@ void Labels::show_all() {
     }
 }
 
-void Labels::set_position(long which, short h, short v) {
+void Labels::set_position(int32_t which, int16_t h, int16_t v) {
     screenLabelType *label = data + which;
     label->where = label->offset;
     label->where.offset(h, v);
@@ -364,7 +364,7 @@ void Labels::update_positions(int32_t units_done) {
     }
 }
 
-void Labels::set_object(long which, spaceObjectType *object) {
+void Labels::set_object(int32_t which, spaceObjectType *object) {
     screenLabelType *label = data + which;
     label->object = object;
 
@@ -379,36 +379,36 @@ void Labels::set_object(long which, spaceObjectType *object) {
     }
 }
 
-void Labels::set_age(long which, long age) {
+void Labels::set_age(int32_t which, int32_t age) {
     screenLabelType *label = data + which;
     label->age = age;
     label->visible = true;
 }
 
-void Labels::set_string(long which, const StringSlice& string) {
+void Labels::set_string(int32_t which, const StringSlice& string) {
     screenLabelType *label = data + which;
     label->text.assign(string);
     Labels::recalc_size( which);
 }
 
-void Labels::clear_string(long which) {
+void Labels::clear_string(int32_t which) {
     screenLabelType *label = data + which;
     label->text.clear();
     label->width = label->height = 0;
 }
 
-void Labels::set_color(long which, unsigned char color) {
+void Labels::set_color(int32_t which, uint8_t color) {
     screenLabelType *label = data + which;
     label->color = color;
 }
 
-void Labels::set_keep_on_screen_anyway(long which, bool keepOnScreenAnyway) {
+void Labels::set_keep_on_screen_anyway(int32_t which, bool keepOnScreenAnyway) {
     screenLabelType *label = data + which;
     label->keepOnScreenAnyway = keepOnScreenAnyway;
     label->retroCount = 0;
 }
 
-void Labels::set_attached_hint_line(long which, bool attachedHintLine, Point toWhere) {
+void Labels::set_attached_hint_line(int32_t which, bool attachedHintLine, Point toWhere) {
     screenLabelType *label = data + which;
     if (label->attachedHintLine) {
         HintLine::hide();
@@ -418,24 +418,24 @@ void Labels::set_attached_hint_line(long which, bool attachedHintLine, Point toW
     label->retroCount = 0;
 }
 
-void Labels::set_offset(long which, long hoff, long voff) {
+void Labels::set_offset(int32_t which, int32_t hoff, int32_t voff) {
     screenLabelType *label = data + which;
     label->offset.h = hoff;
     label->offset.v = voff;
 }
 
-long Labels::get_width(long which) {
+int32_t Labels::get_width(int32_t which) {
     screenLabelType *label = data + which;
     return label->width;
 }
 
-String* Labels::get_string( long which) {
+String* Labels::get_string( int32_t which) {
     screenLabelType *label = data + which;
     return &label->text;
 }
 
 // do this if you mess with its string
-void Labels::recalc_size(long which) {
+void Labels::recalc_size(int32_t which) {
     screenLabelType *label = data + which;
     int lineNum = String_Count_Lines(label->text);
 
@@ -460,12 +460,12 @@ void Labels::recalc_size(long which) {
     }
 }
 
-static long String_Count_Lines(const StringSlice& s) {
+static int32_t String_Count_Lines(const StringSlice& s) {
     static const Rune kCarriageReturn = '\n';
     return 1 + std::count(s.begin(), s.end(), kCarriageReturn);
 }
 
-static StringSlice String_Get_Nth_Line(const StringSlice& source, long nth) {
+static StringSlice String_Get_Nth_Line(const StringSlice& source, int32_t nth) {
     if (nth < 1) {
         return StringSlice();
     }

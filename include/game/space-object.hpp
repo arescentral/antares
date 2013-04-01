@@ -27,44 +27,44 @@ const int16_t kBaseObjectResID      = 500;
 const int16_t kObjectActionResID    = 500;
 
 extern spaceObjectType* gRootObject;
-extern long gRootObjectNumber;
+extern int32_t gRootObjectNumber;
 
 void SpaceObjectHandlingInit( void);
 void CleanupSpaceObjectHandling( void);
 void ResetAllSpaceObjects( void);
 void ResetActionQueueData( void);
 int AddSpaceObject( spaceObjectType *);
-//int AddSpaceObject( spaceObjectType *, long *, short, short);
-int AddNumberedSpaceObject( spaceObjectType *, long);
+//int AddSpaceObject( spaceObjectType *, int32_t *, int16_t, int16_t);
+int AddNumberedSpaceObject( spaceObjectType *, int32_t);
 void RemoveAllSpaceObjects( void);
 void CorrectAllBaseObjectColor( void);
-void InitSpaceObjectFromBaseObject( spaceObjectType *, long, short, long, fixedPointType *, long,
-                                    short);
-void ChangeObjectBaseType( spaceObjectType *, long, long, bool);
-void AddActionToQueue( objectActionType *, long, long, long, spaceObjectType *,
+void InitSpaceObjectFromBaseObject( spaceObjectType *, int32_t, int16_t, int32_t, fixedPointType *, int32_t,
+                                    int16_t);
+void ChangeObjectBaseType( spaceObjectType *, int32_t, int32_t, bool);
+void AddActionToQueue( objectActionType *, int32_t, int32_t, int32_t, spaceObjectType *,
                         spaceObjectType *, Point*);
-void ExecuteActionQueue( long);
-void ExecuteObjectActions( long, long, spaceObjectType *, spaceObjectType *, Point*, bool);
-long CreateAnySpaceObject( long, fixedPointType *, coordPointType *, long, long, unsigned long,
-                            short);
-long CountObjectsOfBaseType( long, long);
-long GetNextObjectWithAttributes( long, unsigned long, bool);
-void AlterObjectHealth( spaceObjectType *, long);
-void AlterObjectEnergy( spaceObjectType *, long);
-void AlterObjectBattery( spaceObjectType *, long);
-void AlterObjectOwner( spaceObjectType *, long, bool);
-void AlterObjectOccupation( spaceObjectType *, long, long, bool);
+void ExecuteActionQueue(int32_t);
+void ExecuteObjectActions(int32_t, int32_t, spaceObjectType *, spaceObjectType *, Point*, bool);
+int32_t CreateAnySpaceObject(int32_t, fixedPointType *, coordPointType *, int32_t, int32_t, uint32_t,
+                            int16_t);
+int32_t CountObjectsOfBaseType(int32_t, int32_t);
+int32_t GetNextObjectWithAttributes(int32_t, uint32_t, bool);
+void AlterObjectHealth( spaceObjectType *, int32_t);
+void AlterObjectEnergy( spaceObjectType *, int32_t);
+void AlterObjectBattery( spaceObjectType *, int32_t);
+void AlterObjectOwner( spaceObjectType *, int32_t, bool);
+void AlterObjectOccupation( spaceObjectType *, int32_t, int32_t, bool);
 void AlterObjectCloakState( spaceObjectType *, bool);
 void DestroyObject( spaceObjectType *);
 void ActivateObjectSpecial( spaceObjectType *);
 void CreateFloatingBodyOfPlayer( spaceObjectType *);
 
-baseObjectType* mGetBaseObjectPtr(long whichObject);
-spaceObjectType* mGetSpaceObjectPtr(long whichObject);
-objectActionType* mGetObjectActionPtr(long whichAction);
+baseObjectType* mGetBaseObjectPtr(int32_t whichObject);
+spaceObjectType* mGetSpaceObjectPtr(int32_t whichObject);
+objectActionType* mGetObjectActionPtr(int32_t whichAction);
 
 void mGetBaseObjectFromClassRace(
-        baseObjectType*& mbaseObject, long& mcount, int mbaseClass, int mbaseRace);
+        baseObjectType*& mbaseObject, int32_t& mcount, int mbaseClass, int mbaseRace);
 
 sfz::StringSlice get_object_name(int16_t id);
 sfz::StringSlice get_object_short_name(int16_t id);

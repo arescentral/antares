@@ -130,7 +130,7 @@ int find_replace(String& data, int pos, const StringSlice& search, const PrintIt
 
 }  // namespace
 
-void CreateWeaponDataText(sfz::String* text, long whichWeapon, const sfz::StringSlice& weaponName);
+void CreateWeaponDataText(sfz::String* text, int32_t whichWeapon, const sfz::StringSlice& weaponName);
 
 //
 // BothCommandAndQ:
@@ -152,8 +152,8 @@ bool BothCommandAndQ() {
 }
 
 void update_mission_brief_point(
-        LabeledRect *dataItem, long whichBriefPoint, const Scenario* scenario,
-        coordPointType *corner, long scale, Rect *bounds, vector<inlinePictType>& inlinePict,
+        LabeledRect *dataItem, int32_t whichBriefPoint, const Scenario* scenario,
+        coordPointType *corner, int32_t scale, Rect *bounds, vector<inlinePictType>& inlinePict,
         Rect& highlight_rect, vector<pair<Point, Point>>& lines, String& text) {
     if (whichBriefPoint < kMissionBriefPointOffset) {
         // No longer handled here.
@@ -163,7 +163,7 @@ void update_mission_brief_point(
     whichBriefPoint -= kMissionBriefPointOffset;
 
     Rect hiliteBounds;
-    long            headerID, headerNumber, contentID;
+    int32_t         headerID, headerNumber, contentID;
     BriefPoint_Data_Get(whichBriefPoint, scenario, &headerID, &headerNumber, &contentID,
             &hiliteBounds, corner, scale, 16, 32, bounds);
     hiliteBounds.offset(bounds->left, bounds->top);
@@ -171,7 +171,7 @@ void update_mission_brief_point(
     // TODO(sfiera): catch exception.
     Resource rsrc("text", "txt", contentID);
     text.assign(utf8::decode(rsrc.data()));
-    short textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
+    int16_t textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
     if (hiliteBounds.left == hiliteBounds.right) {
         dataItem->bounds().left = (bounds->right - bounds->left) / 2 - (kMissionDataWidth / 2) + bounds->left;
         dataItem->bounds().right = dataItem->bounds().left + kMissionDataWidth;
@@ -255,7 +255,7 @@ void update_mission_brief_point(
     populate_inline_picts(dataItem->bounds(), text, dataItem->style, inlinePict);
 }
 
-void CreateObjectDataText(String* text, short id) {
+void CreateObjectDataText(String* text, int16_t id) {
     Resource rsrc("text", "txt", kShipDataTextID);
     String data(utf8::decode(rsrc.data()));
 
@@ -307,9 +307,9 @@ void CreateObjectDataText(String* text, short id) {
     print(*text, data);
 }
 
-void CreateWeaponDataText(String* text, long whichWeapon, const StringSlice& weaponName) {
+void CreateWeaponDataText(String* text, int32_t whichWeapon, const StringSlice& weaponName) {
     baseObjectType      *weaponObject, *missileObject;
-    long                mostDamage, actionNum;
+    int32_t             mostDamage, actionNum;
     objectActionType    *action;
     bool             isGuided = false;
 
@@ -385,7 +385,7 @@ void CreateWeaponDataText(String* text, long whichWeapon, const StringSlice& wea
     print(*text, data);
 }
 
-void Replace_KeyCode_Strings_With_Actual_Key_Names(String* text, short resID, size_t padTo) {
+void Replace_KeyCode_Strings_With_Actual_Key_Names(String* text, int16_t resID, size_t padTo) {
     StringList keys(kHelpScreenKeyStringID);
     StringList values(resID);
 

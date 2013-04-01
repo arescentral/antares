@@ -198,7 +198,7 @@ const int32_t MiniIconMacLineTop() {
     return computer_font->height * 2;
 }
 
-Rect mini_screen_line_bounds(long mtop, long mlinenum, long mleft, long mright) {
+Rect mini_screen_line_bounds(int32_t mtop, int32_t mlinenum, int32_t mleft, int32_t mright) {
     Rect mbounds;
     mbounds.left = kMiniScreenLeft + mleft;
     mbounds.top = mtop + mlinenum * computer_font->height;
@@ -207,7 +207,7 @@ Rect mini_screen_line_bounds(long mtop, long mlinenum, long mleft, long mright) 
     return mbounds;
 }
 
-inline long mGetLineNumFromV(long mV) {
+inline int32_t mGetLineNumFromV(int32_t mV) {
     return (((mV) - (kMiniScreenTop + globals()->gInstrumentTop)) / computer_font->height);
 }
 
@@ -246,14 +246,14 @@ inline void mCopyBlankLineString(miniScreenLineType* mline, StringSlice mstring)
     }
 }
 
-inline spaceObjectType* mGetMiniObjectPtr(long mwhich) {
+inline spaceObjectType* mGetMiniObjectPtr(int32_t mwhich) {
     return globals()->gMiniScreenData.objectData.get() + mwhich;
 }
 
 }  // namespace
 
 void MiniComputerSetStatusStrings( void);
-long MiniComputerGetStatusValue( long);
+int32_t MiniComputerGetStatusValue( int32_t);
 void MiniComputerMakeStatusString(int32_t which_line, String& string);
 
 void MiniScreenInit() {
@@ -279,7 +279,7 @@ void MiniScreenCleanup() {
 
 #pragma mark -
 
-void SetMiniScreenStatusStrList(short strID) {
+void SetMiniScreenStatusStrList(int16_t strID) {
     DisposeMiniScreenStatusStrList();
     if (strID > 0) {
         globals()->gMissionStatusStrList.reset(new StringList(strID));
@@ -348,8 +348,8 @@ void draw_mini_screen() {
     Rect            lRect, cRect;
     miniScreenLineType  *c;
     RgbColor            color, lightcolor, darkcolor, textcolor;
-    unsigned char lineColor = kMiniScreenColor;
-    long                count, lineCorrect = 0;
+    uint8_t             lineColor = kMiniScreenColor;
+    int32_t                count, lineCorrect = 0;
 
     lRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
                 kMiniScreenBottom + globals()->gInstrumentTop);
@@ -456,7 +456,7 @@ void draw_mini_screen() {
     draw_mini_ship_data(*mGetMiniObjectPtr(kMiniTargetObjectNum), SKY_BLUE, kMiniTargetTop, kMiniTargetObjectNum + 1);
 }
 
-void MakeMiniScreenFromIndString(short whichString) {
+void MakeMiniScreenFromIndString(int16_t whichString) {
     Rect mRect(kMiniScreenLeft, kMiniScreenTop, kMiniScreenRight, kMiniScreenBottom);
     mRect.offset(0, globals()->gInstrumentTop);
 
@@ -564,11 +564,11 @@ void MakeMiniScreenFromIndString(short whichString) {
     }
 }
 
-void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)
+void MiniComputerHandleKeys( uint32_t theseKeys, uint32_t lastKeys)
 
 {
     miniScreenLineType  *line;
-    long                count, scrap;
+    int32_t                count, scrap;
     Rect                mRect;
 
     if (( theseKeys | lastKeys) & kCompAcceptKey)
@@ -697,11 +697,11 @@ void MiniComputerHandleKeys( unsigned long theseKeys, unsigned long lastKeys)
 
 }
 
-void MiniComputerHandleNull( long unitsToDo)
+void MiniComputerHandleNull( int32_t unitsToDo)
 
 {
     destBalanceType     *buildAtObject = NULL;
-    long                count;
+    int32_t                count;
     spaceObjectType     *realObject = NULL, *myObject = NULL, newObject;
 
     globals()->gMiniScreenData.pollTime += unitsToDo;
@@ -784,7 +784,7 @@ void UpdateMiniScreenLines( void)
     admiralType         *admiral = NULL;
     miniScreenLineType  *line = NULL;
     baseObjectType      *buildObject = NULL;
-    long                lineNum, count;
+    int32_t                lineNum, count;
     Rect                mRect;
 
     mRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
@@ -894,8 +894,8 @@ void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) 
 }
 
 void draw_mini_ship_data(
-        const spaceObjectType& newObject, unsigned char headerColor,
-        short screenTop, short whichString) {
+        const spaceObjectType& newObject, uint8_t headerColor,
+        int16_t screenTop, int16_t whichString) {
     Rect lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, 0, 0, kMiniScreenWidth);
     RgbColor color = GetRGBTranslateColorShade(headerColor, LIGHT);
     RgbColor lightcolor = GetRGBTranslateColorShade(headerColor, VERY_LIGHT);
@@ -945,7 +945,7 @@ void draw_mini_ship_data(
         NatePixTable* pixTable = GetPixTable(newObject.pixResID);
 
         if (pixTable != NULL) {
-            short whichShape;
+            int16_t whichShape;
             if (newObject.attributes & kIsSelfAnimated) {
                 whichShape = more_evil_fixed_to_long(newObject.baseType->frame.animation.firstShape);
             } else {
@@ -1109,11 +1109,11 @@ void MiniComputerDoAccept( void)
     }
 }
 
-void MiniComputerExecute( long whichPage, long whichLine, long whichAdmiral)
+void MiniComputerExecute( int32_t whichPage, int32_t whichLine, int32_t whichAdmiral)
 
 {
     spaceObjectType *anObject, *anotherObject;
-    long            l;
+    int32_t            l;
 
     switch ( whichPage)
     {
@@ -1321,7 +1321,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
     admiralType         *admiral = NULL;
     destBalanceType     *buildAtObject = NULL;
     miniScreenLineType  *line = NULL;
-    long                count, baseNum, lineNum, buildAtObjectNum;
+    int32_t                count, baseNum, lineNum, buildAtObjectNum;
     Rect                mRect;
 
     mRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
@@ -1406,7 +1406,7 @@ void MiniComputerSetBuildStrings( void) // sets the ship type strings for the bu
 //  If the selection is not legal, or the current Menu is not the Build Menu,
 //  returns 0
 
-long MiniComputerGetPriceOfCurrentSelection( void)
+int32_t MiniComputerGetPriceOfCurrentSelection( void)
 {
     miniScreenLineType  *line = NULL;
     baseObjectType      *buildObject = NULL;
@@ -1600,7 +1600,7 @@ void MiniComputerMakeStatusString(int32_t which_line, String& string) {
     }
 }
 
-long MiniComputerGetStatusValue( long whichLine)
+int32_t MiniComputerGetStatusValue( int32_t whichLine)
 {
     miniScreenLineType  *line;
 
@@ -1646,7 +1646,7 @@ void MiniComputerHandleClick( Point where)
 
 {
     Rect        mRect;
-    long        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
+    int32_t        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
     miniScreenLineType  *line;
 
     line = globals()->gMiniScreenData.lineData.get();
@@ -1753,7 +1753,7 @@ void MiniComputerHandleDoubleClick( Point where)
 
 {
     Rect        mRect;
-    long        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
+    int32_t        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
     miniScreenLineType  *line;
 
     line = globals()->gMiniScreenData.lineData.get();
@@ -1863,7 +1863,7 @@ void MiniComputerHandleMouseUp( Point where)
 
 {
     Rect        mRect;
-    long        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
+    int32_t        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
     miniScreenLineType  *line;
 
     line = globals()->gMiniScreenData.lineData.get();
@@ -1905,7 +1905,7 @@ void MiniComputerHandleMouseStillDown( Point where)
 
 {
     Rect        mRect;
-    long        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
+    int32_t        lineNum, scrap, inLineButtonLine = -1, outLineButtonLine = -1;
     miniScreenLineType  *line;
 
     line = globals()->gMiniScreenData.lineData.get();
@@ -1958,7 +1958,7 @@ void MiniComputerHandleMouseStillDown( Point where)
 }
 
 // for ambrosia tutorial, a horrific hack
-void MiniComputer_SetScreenAndLineHack( long whichScreen, long whichLine)
+void MiniComputer_SetScreenAndLineHack( int32_t whichScreen, int32_t whichLine)
 {
     Point   w;
 

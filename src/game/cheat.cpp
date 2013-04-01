@@ -50,8 +50,8 @@ const int16_t kBuildFastCheat       = 6;
 const int16_t kRaisePayRateCheat    = 7;  // determines your payscale
 const int16_t kLowerPayRateCheat    = 8;
 
-void CheatFeedback(short whichCheat, bool activate, long whichPlayer);
-void CheatFeedbackPlus(short whichCheat, bool activate, long whichPlayer, PrintItem extra);
+void CheatFeedback(int16_t whichCheat, bool activate, int32_t whichPlayer);
+void CheatFeedbackPlus(int16_t whichCheat, bool activate, int32_t whichPlayer, PrintItem extra);
 
 void AresCheatInit() {
     globals()->gAresCheatStrings.reset(new StringList(kCheatStringListID));
@@ -61,7 +61,7 @@ void CleanupAresCheat() {
     globals()->gAresCheatStrings.reset();
 }
 
-short GetCheatNumFromString(const StringSlice& s) {
+int16_t GetCheatNumFromString(const StringSlice& s) {
     String code_string;
     for (Rune r: s) {
         code_string.append(1, r + kCheatCodeValue);
@@ -69,9 +69,9 @@ short GetCheatNumFromString(const StringSlice& s) {
     return globals()->gAresCheatStrings.get()->index_of(code_string) + 1;
 }
 
-void ExecuteCheat( short whichCheat, long whichPlayer)
+void ExecuteCheat( int16_t whichCheat, int32_t whichPlayer)
 {
-    long                    i;
+    int32_t                    i;
     spaceObjectType *anObject = NULL;
 
     if ( whichCheat == kNameObjectCheat)
@@ -182,7 +182,7 @@ void ExecuteCheat( short whichCheat, long whichPlayer)
     }
 }
 
-void CheatFeedback(short whichCheat, bool activate, long whichPlayer) {
+void CheatFeedback(int16_t whichCheat, bool activate, int32_t whichPlayer) {
     String admiral_name(GetAdmiralName(whichPlayer));
     String feedback;
     if (activate) {
@@ -194,7 +194,7 @@ void CheatFeedback(short whichCheat, bool activate, long whichPlayer) {
 }
 
 void CheatFeedbackPlus(
-        short whichCheat, bool activate, long whichPlayer, PrintItem extra) {
+        int16_t whichCheat, bool activate, int32_t whichPlayer, PrintItem extra) {
     String admiral_name(GetAdmiralName(whichPlayer));
     String feedback;
     if (activate) {

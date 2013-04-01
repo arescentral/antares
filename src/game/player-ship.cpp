@@ -64,7 +64,7 @@ const int32_t kCursorBoundsSize = 16;  // should be same in instruments.c
 
 }  // namespace
 
-long HotKey_GetFromObject( spaceObjectType *object);
+int32_t HotKey_GetFromObject( spaceObjectType *object);
 void Update_LabelStrings_ForHotKeyChange( void);
 
 namespace {
@@ -104,7 +104,7 @@ HotKeySuffix hot_key_suffix(spaceObjectType* space_object) {
 
 }  // namespace
 
-void ResetPlayerShip(long which) {
+void ResetPlayerShip(int32_t which) {
     globals()->gPlayerShipNumber = which;
     globals()->gSelectionLabel = Labels::add(0, 0, 0, 10, NULL, true, YELLOW);
     gDestinationLabel = Labels::add(0, 0, 0, -20, NULL, true, SKY_BLUE);
@@ -132,13 +132,13 @@ void ResetPlayerShip(long which) {
 bool PlayerShipGetKeys(
         int32_t timePass, InputSource& input_source, const GameCursor& cursor, bool *enterMessage) {
     KeyMap          keyMap, *bufMap;
-    short           friendOrFoe;
+    int16_t         friendOrFoe;
     spaceObjectType *theShip = NULL, *selectShip = NULL;
     baseObjectType  *baseObject = NULL;
-    long            selectShipNum;
-    unsigned long   distance, difference, dcalc, attributes, nonattributes;
+    int32_t         selectShipNum;
+    uint32_t        distance, difference, dcalc, attributes, nonattributes;
     uint64_t        hugeDistance;
-    long            width, strlen;
+    int32_t         width, strlen;
 
     gLastKeys = gTheseKeys;
     if (!input_source.next(keyMap)) {
@@ -571,7 +571,7 @@ bool PlayerShipGetKeys(
 
 void PlayerShipHandleClick(Point where, int button) {
     spaceObjectType *theShip = NULL;
-    long            selectShipNum;
+    int32_t         selectShipNum;
     Rect            bounds;
 
     if (globals()->keyMask & kMouseMask) {
@@ -625,7 +625,7 @@ void PlayerShipHandleClick(Point where, int button) {
     }
 }
 
-void SetPlayerSelectShip( long whichShip, bool target, long admiralNumber)
+void SetPlayerSelectShip( int32_t whichShip, bool target, int32_t admiralNumber)
 {
     spaceObjectType *selectShip = mGetSpaceObjectPtr(whichShip),
                     *theShip = GetAdmiralFlagship( admiralNumber);
@@ -685,7 +685,7 @@ void SetPlayerSelectShip( long whichShip, bool target, long admiralNumber)
 // assumes that newShipNumber is the number of a valid (legal, living) ship and that
 // gPlayerShip already points to the current, legal living ship
 
-void ChangePlayerShipNumber( long whichAdmiral, long newShipNumber)
+void ChangePlayerShipNumber( int32_t whichAdmiral, int32_t newShipNumber)
 {
     spaceObjectType *anObject = GetAdmiralFlagship( whichAdmiral);
     if (anObject == NULL) {
@@ -768,10 +768,10 @@ bool IsPlayerShipOnAutoPilot( void)
     else return false;
 }
 
-void PlayerShipGiveCommand( long whichAdmiral)
+void PlayerShipGiveCommand( int32_t whichAdmiral)
 {
     spaceObjectType *selectShip;
-    long selectShipNum = GetAdmiralConsiderObject( whichAdmiral);
+    int32_t selectShipNum = GetAdmiralConsiderObject( whichAdmiral);
 
     if ( selectShipNum >= 0)
     {
@@ -786,7 +786,7 @@ void PlayerShipGiveCommand( long whichAdmiral)
 void PlayerShipBodyExpire( spaceObjectType *theShip, bool sourceIsBody)
 {
     spaceObjectType *selectShip = NULL;
-    long            selectShipNum;
+    int32_t         selectShipNum;
 
     selectShipNum = GetAdmiralConsiderObject( theShip->owner);
 
@@ -870,9 +870,9 @@ void HandleTextMessageKeys(const KeyMap& keyMap, const KeyMap& lastKeyMap, bool 
     }
 }
 
-long HotKey_GetFromObject( spaceObjectType *object)
+int32_t HotKey_GetFromObject( spaceObjectType *object)
 {
-    long    i = 0;
+    int32_t i = 0;
 
     if ( object == NULL) return -1;
     if ( !object->active) return -1;
@@ -893,7 +893,7 @@ long HotKey_GetFromObject( spaceObjectType *object)
 void Update_LabelStrings_ForHotKeyChange( void)
 {
     spaceObjectType *selectShip;
-    long            whichShip;
+    int32_t         whichShip;
 
     whichShip = GetAdmiralDestinationObject( globals()->gPlayerAdmiralNumber);
     if (whichShip >= 0) {

@@ -32,18 +32,18 @@ const int32_t kInterfaceTextHBuffer = 3;
 // the inline pictType struct is for keeping track of picts included in my text boxes.
 struct inlinePictType {
     Rect bounds;
-    short id;
+    int16_t id;
 };
 
 void draw_text_in_rect(
         Rect tRect, const sfz::StringSlice& text, interfaceStyleType style,
-        unsigned char textcolor, std::vector<inlinePictType>& inlinePict);
+        uint8_t textcolor, std::vector<inlinePictType>& inlinePict);
 void populate_inline_picts(
         Rect rect, sfz::StringSlice text, interfaceStyleType style,
         std::vector<inlinePictType>& inline_pict);
 
-short GetInterfaceTextHeightFromWidth(
-        const sfz::StringSlice& text, interfaceStyleType style, short width);
+int16_t GetInterfaceTextHeightFromWidth(
+        const sfz::StringSlice& text, interfaceStyleType style, int16_t width);
 void draw_interface_item(const InterfaceItem& item);
 void draw_interface_item(const InterfaceItem& item, Point origin);
 

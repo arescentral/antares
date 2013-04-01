@@ -54,9 +54,9 @@ enum ZoomType {
 };
 
 struct barIndicatorType {
-    short           top;
-    long            thisValue;
-    unsigned char   color;
+    int16_t         top;
+    int32_t         thisValue;
+    uint8_t         color;
     bool         automatic;      // if it's automatic, it is redrawn automatically
 };
 
@@ -64,16 +64,16 @@ struct miniScreenLineType;
 struct miniComputerDataType {
     std::unique_ptr<miniScreenLineType[]> lineData;
     std::unique_ptr<spaceObjectType[]> objectData;
-    long                    selectLine;
-    long                    pollTime;
-    long                    buildTimeBarValue;
-    long                    currentScreen;
-    long                    clickLine;
+    int32_t                 selectLine;
+    int32_t                 pollTime;
+    int32_t                 buildTimeBarValue;
+    int32_t                 currentScreen;
+    int32_t                 clickLine;
 };
 
 struct hotKeyType {
-    long        objectNum;
-    long        objectID;
+    int32_t     objectNum;
+    int32_t     objectID;
 };
 
 struct admiralType;
@@ -94,21 +94,21 @@ struct aresGlobalType {
     aresGlobalType();
     ~aresGlobalType();
 
-    unsigned long   gActiveCheats[kMaxPlayerNum];
-    unsigned long   gSynchValue;
+    uint32_t        gActiveCheats[kMaxPlayerNum];
+    uint32_t        gSynchValue;
     std::unique_ptr<InputSource> gInputSource;
-    long            gGameOver;
+    int32_t         gGameOver;
     std::unique_ptr<admiralType[]>       gAdmiralData;
     int64_t         gGameTime;
     uint64_t        gLastTime;
-    long            gClosestObject;
-    long            gFarthestObject;
-    long            gCenterScaleH;
-    long            gCenterScaleV;
-    long            gPlayerShipNumber;
-    long            gSelectionLabel;
+    int32_t         gClosestObject;
+    int32_t         gFarthestObject;
+    int32_t         gCenterScaleH;
+    int32_t         gCenterScaleV;
+    int32_t         gPlayerShipNumber;
+    int32_t         gSelectionLabel;
     ZoomType        gZoomMode;
-    long            gPlayerAdmiralNumber;
+    int32_t         gPlayerAdmiralNumber;
     ScenarioWinnerType gScenarioWinner;
 
     int32_t         gRadarCount;            // = 0;
@@ -124,35 +124,35 @@ struct aresGlobalType {
     std::unique_ptr<beamType[]>          gBeamData;
     smartSoundHandle    gSound[kSoundNum];
     smartSoundChannel   gChannel[kMaxChannelNum];
-    long            gLastSoundTime;         // = 0
+    int32_t         gLastSoundTime;         // = 0
     std::unique_ptr<StringList>        gAresCheatStrings;
     std::unique_ptr<StringList>         key_names;
     std::unique_ptr<StringList>         key_long_names;
 
-    KeyMap*         gKeyMapBuffer;          // = NewPtr( sizeof (KeyMap) * (long)kKeyMapBufferNum;
-    long            gKeyMapBufferTop;       // = 0;
-    long            gKeyMapBufferBottom;    // = 0;
+    KeyMap*         gKeyMapBuffer;          // = NewPtr( sizeof (KeyMap) * (int32_t)kKeyMapBufferNum;
+    int32_t         gKeyMapBufferTop;       // = 0;
+    int32_t         gKeyMapBufferBottom;    // = 0;
     KeyMap          gLastMessageKeyMap;
-    unsigned long   gSerialNumerator;
-    unsigned long   gSerialDenominator;
+    uint32_t        gSerialNumerator;
+    uint32_t        gSerialDenominator;
     bool         gAutoPilotOff;          // hack for turning off auto in netgame
-    long            levelNum;
-    unsigned long   keyMask;
+    int32_t         levelNum;
+    uint32_t        keyMask;
     scenarioInfoType    scenarioFileInfo;   // x-ares; for factory +
                                             // 3rd party files
-    long            maxScenarioBrief;
-    long            maxScenarioCondition;
-    long            maxScenarioInitial;
-    long            maxBaseObject;
-    long            maxObjectAction;
-    long            scenarioNum;
+    int32_t         maxScenarioBrief;
+    int32_t         maxScenarioCondition;
+    int32_t         maxScenarioInitial;
+    int32_t         maxBaseObject;
+    int32_t         maxObjectAction;
+    int32_t         scenarioNum;
 
     hotKeyType      hotKey[kHotKeyNum];
-    long            hotKeyDownTime;
-    long            lastHotKey;
+    int32_t         hotKeyDownTime;
+    int32_t         lastHotKey;
 
-    long            lastSelectedObject;
-    long            lastSelectedObjectID;
+    int32_t         lastSelectedObject;
+    int32_t         lastSelectedObjectID;
     bool         destKeyUsedForSelection;
     bool         hotKey_target;
 

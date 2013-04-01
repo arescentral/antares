@@ -86,7 +86,7 @@ void AddActionMedia(objectActionType *action, uint8_t color);
 
 void SetAllBaseObjectsUnchecked() {
     baseObjectType  *aBase = mGetBaseObjectPtr(0);
-    long            count;
+    int32_t         count;
 
     for ( count = 0; count < globals()->maxBaseObject; count++)
     {
@@ -141,7 +141,7 @@ void CheckActionMedia(int32_t whichAction, int32_t actionNum, uint8_t color) {
     baseObjectType      *baseObject;
     objectActionType    *action = mGetObjectActionPtr(whichAction);
     bool             OKtoExecute;
-    long                count;
+    int32_t             count;
 
     while ((actionNum > 0) && (action->verb != kNoAction))
     {
@@ -261,38 +261,38 @@ void AddBaseObjectMedia(int32_t whichBase, uint8_t color) {
 }
 
 void mGetActionFromBaseTypeNum(
-        objectActionType*& mactPtr, baseObjectType* mbaseObjPtr, long mactionType,
-        long mactionNum) {
+        objectActionType*& mactPtr, baseObjectType* mbaseObjPtr, int32_t mactionType,
+        int32_t mactionNum) {
     if ( (mactionType) == kDestroyActionType)
     {
         if ( mactionNum >= ((mbaseObjPtr)->destroyActionNum & kDestroyActionNotMask)) mactPtr = NULL;
-        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->destroyAction + implicit_cast<long>(mactionNum));
+        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->destroyAction + implicit_cast<int32_t>(mactionNum));
     } else if ( (mactionType) == kExpireActionType)
     {
         if ( mactionNum >= ((mbaseObjPtr)->expireActionNum  & kDestroyActionNotMask)) mactPtr = NULL;
-        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->expireAction + implicit_cast<long>(mactionNum));
+        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->expireAction + implicit_cast<int32_t>(mactionNum));
     } else if ( (mactionType) == kCreateActionType)
     {
         if ( mactionNum >= (mbaseObjPtr)->createActionNum) mactPtr = NULL;
-        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->createAction + implicit_cast<long>(mactionNum));
+        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->createAction + implicit_cast<int32_t>(mactionNum));
     } else if ( (mactionType) == kCollideActionType)
     {
         if ( mactionNum >= (mbaseObjPtr)->collideActionNum) mactPtr = NULL;
-        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->collideAction + implicit_cast<long>(mactionNum));
+        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->collideAction + implicit_cast<int32_t>(mactionNum));
     } else if ( (mactionType) == kActivateActionType)
     {
         if ( mactionNum >= ((mbaseObjPtr)->activateActionNum & kPeriodicActionNotMask)) mactPtr = NULL;
-        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->activateAction + implicit_cast<long>(mactionNum));
+        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->activateAction + implicit_cast<int32_t>(mactionNum));
     } else if ( (mactionType) == kArriveActionType)
     {
         if ( mactionNum >= (mbaseObjPtr)->arriveActionNum) mactPtr = NULL;
-        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->arriveAction + implicit_cast<long>(mactionNum));
+        else mactPtr = mGetObjectActionPtr((mbaseObjPtr)->arriveAction + implicit_cast<int32_t>(mactionNum));
     } else mactPtr = NULL;
 }
 
 void AddBaseObjectActionMedia(int32_t whichBase, int32_t whichType, uint8_t color) {
     baseObjectType      *baseObject = NULL;
-    long                count = 0;
+    int32_t             count = 0;
     objectActionType    *action = NULL;
 
     do
@@ -307,7 +307,7 @@ void AddBaseObjectActionMedia(int32_t whichBase, int32_t whichType, uint8_t colo
 
 void AddActionMedia(objectActionType *action, uint8_t color) {
     baseObjectType      *baseObject = NULL;
-    long                count = 0, l1, l2;
+    int32_t             count = 0, l1, l2;
     bool             OKtoExecute;
 
     if ( action != NULL)
@@ -700,7 +700,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 && (!(initial->attributes & kFixedRace))) {
             int32_t baseClass = baseObject->baseClass;
             int32_t race = GetAdmiralRace(initial->owner);
-            long newShipNum;
+            int32_t newShipNum;
             mGetBaseObjectFromClassRace(baseObject, newShipNum, baseClass, race);
             if (baseObject == NULL) {
                 baseObject = mGetBaseObjectPtr(initial->type);
@@ -720,7 +720,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
             if (initial->canBuild[i] != kNoClass) {
                 // check for each player
                 for (int j = 0; j < gThisScenario->playerNum; j++) {
-                    long newShipNum;
+                    int32_t newShipNum;
                     mGetBaseObjectFromClassRace(baseObject, newShipNum, initial->canBuild[i], GetAdmiralRace(j));
                     if (baseObject != NULL) {
                         CheckBaseObjectMedia(baseObject, GetAdmiralColor(j));
@@ -783,7 +783,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         Scenario::InitialObject* initial = gThisScenario->initial(i);
 
         // get the base object equiv
-        long type = initial->type;
+        int32_t type = initial->type;
         baseObjectType* baseObject = mGetBaseObjectPtr(type);
         if (NETWORK_ON && (GetAdmiralRace(initial->owner) >= 0)
                 && (!(initial->attributes & kFixedRace))) {
@@ -827,7 +827,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 for (int k = 0; k < gThisScenario->playerNum; k++) {
                     initial = gThisScenario->initial(i);
                     baseObject = mGetBaseObjectPtr(type);
-                    long newShipNum;
+                    int32_t newShipNum;
                     mGetBaseObjectFromClassRace(
                             baseObject, newShipNum, initial->canBuild[j], GetAdmiralRace(k));
                     if (baseObject != NULL) {
@@ -914,7 +914,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 }
             }
 
-            long type = initial->type;
+            int32_t type = initial->type;
             if (NETWORK_ON && (GetAdmiralRace(initial->owner) >= 0)
                     && (!(initial->attributes & kFixedRace))) {
                 baseObjectType* baseObject = mGetBaseObjectPtr(type);
@@ -927,7 +927,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 }
             }
             fixedPointType v = {0, 0};
-            long newShipNum;
+            int32_t newShipNum;
             initial->realObjectNumber = newShipNum = CreateAnySpaceObject(
                     type, &v, &coord, gScenarioRotation, owner, specialAttributes,
                     initial->spriteIDOverride);
@@ -1068,8 +1068,8 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
 void CheckScenarioConditions(int32_t timePass) {
     Scenario::Condition     *condition = NULL;
     spaceObjectType         *sObject = NULL, *dObject = NULL;
-    long                    i, l, difference;
-    unsigned long           distance, dcalc;
+    int32_t                 i, l, difference;
+    uint32_t                distance, dcalc;
     Point                   offset(0, 0);
     bool                 conditionTrue = false;
 
@@ -1333,7 +1333,7 @@ void CheckScenarioConditions(int32_t timePass) {
 }
 
 int32_t GetRealAdmiralNumber(int32_t whichAdmiral) {
-    long result;
+    int32_t result;
 
     result = mGetRealAdmiralNum( whichAdmiral);
     return( result);
@@ -1344,8 +1344,8 @@ void UnhideInitialObject(int32_t whichInitial) {
     spaceObjectType         *anObject = NULL;
     coordPointType          coord;
     fixedPointType          v = {0, 0};
-    unsigned long           specialAttributes;
-    long                    newShipNum, owner, type, saveDest, baseClass, race;
+    uint32_t                specialAttributes;
+    int32_t                 newShipNum, owner, type, saveDest, baseClass, race;
     baseObjectType          *baseObject;
 
     v.h = 0;
@@ -1525,7 +1525,7 @@ void DeclareWinner(int32_t whichPlayer, int32_t nextLevel, int32_t textID) {
 void GetScenarioFullScaleAndCorner(
         const Scenario* scenario, int32_t rotation, coordPointType *corner, int32_t *scale,
         Rect *bounds) {
-    long            biggest, count, otherCount, mustFit;
+    int32_t         biggest, count, otherCount, mustFit;
     Point           coord, otherCoord, tempCoord;
     Scenario::InitialObject     *initial;
 

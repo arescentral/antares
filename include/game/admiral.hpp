@@ -73,48 +73,48 @@ enum destinationType {
 };
 
 struct destBalanceType {
-    long                whichObject;
-    long                canBuildType[kMaxTypeBaseCanBuild];
-    long                occupied[kMaxPlayerNum];
+    int32_t             whichObject;
+    int32_t             canBuildType[kMaxTypeBaseCanBuild];
+    int32_t             occupied[kMaxPlayerNum];
     Fixed               earn;
-    long                buildTime;
-    long                totalBuildTime;
-    long                buildObjectBaseNum;
+    int32_t             buildTime;
+    int32_t             totalBuildTime;
+    int32_t             buildObjectBaseNum;
     sfz::String         name;
 };
 
 struct admiralBuildType {
     baseObjectType*     base;
-    long                baseNum;
+    int32_t             baseNum;
     Fixed               chanceRange;
 };
 
 struct admiralType {
-    unsigned long       attributes;
-    long                destinationObject;
-    long                destinationObjectID;
-    long                flagship;
-    long                flagshipID;
-    long                considerShip;
-    long                considerShipID;
-    long                considerDestination;
-    long                buildAtObject; // # of destination object to build at
-    long                race;
+    uint32_t            attributes;
+    int32_t             destinationObject;
+    int32_t             destinationObjectID;
+    int32_t             flagship;
+    int32_t             flagshipID;
+    int32_t             considerShip;
+    int32_t             considerShipID;
+    int32_t             considerDestination;
+    int32_t             buildAtObject; // # of destination object to build at
+    int32_t             race;
     destinationType     destType;
     Fixed               cash;
     Fixed               saveGoal;
     Fixed               earningPower;
-    long                kills;
-    long                losses;
-    long                shipsLeft;
-    long                score[kAdmiralScoreNum];
-    long                blitzkrieg;
+    int32_t             kills;
+    int32_t             losses;
+    int32_t             shipsLeft;
+    int32_t             score[kAdmiralScoreNum];
+    int32_t             blitzkrieg;
     Fixed               lastFreeEscortStrength;
     Fixed               thisFreeEscortStrength;
     admiralBuildType    canBuildType[kMaxNumAdmiralCanBuild];
     Fixed               totalBuildChance;
-    long                hopeToBuild;
-    unsigned char       color;
+    int32_t             hopeToBuild;
+    uint8_t             color;
     bool                active;
     sfz::String         name;
 };
@@ -125,62 +125,62 @@ void AdmiralCleanup();
 void ResetAllAdmirals();
 void ResetAllDestObjectData();
 
-destBalanceType* mGetDestObjectBalancePtr(long whichObject);
-admiralType* mGetAdmiralPtr(long mwhichAdmiral);
+destBalanceType* mGetDestObjectBalancePtr(int32_t whichObject);
+admiralType* mGetAdmiralPtr(int32_t mwhichAdmiral);
 
-long MakeNewAdmiral(
-        long flagship, long destinationObject, destinationType dType, unsigned long attributes,
-        long race, short nameResID, short nameStrNum, Fixed earningPower);
-long MakeNewDestination(
-        long whichObject, int32_t* canBuildType, Fixed earn, short nameResID,
-        short nameStrNum);
-void RemoveDestination(long whichDestination);
+int32_t MakeNewAdmiral(
+        int32_t flagship, int32_t destinationObject, destinationType dType, uint32_t attributes,
+        int32_t race, int16_t nameResID, int16_t nameStrNum, Fixed earningPower);
+int32_t MakeNewDestination(
+        int32_t whichObject, int32_t* canBuildType, Fixed earn, int16_t nameResID,
+        int16_t nameStrNum);
+void RemoveDestination(int32_t whichDestination);
 void RecalcAllAdmiralBuildData();
 
-void SetAdmiralAttributes(long whichAdmiral, unsigned long attributes);
-void SetAdmiralColor(long whichAdmiral, unsigned char color);
-unsigned char GetAdmiralColor(long whichAdmiral);
-long GetAdmiralRace(long whichAdmiral);
-void SetAdmiralFlagship(long whichAdmiral, long whichShip);
-spaceObjectType* GetAdmiralFlagship(long whichAdmiral);
-void SetAdmiralEarningPower(long whichAdmiral, Fixed power);
-Fixed GetAdmiralEarningPower(long whichAdmiral);
+void SetAdmiralAttributes(int32_t whichAdmiral, uint32_t attributes);
+void SetAdmiralColor(int32_t whichAdmiral, uint8_t color);
+uint8_t GetAdmiralColor(int32_t whichAdmiral);
+int32_t GetAdmiralRace(int32_t whichAdmiral);
+void SetAdmiralFlagship(int32_t whichAdmiral, int32_t whichShip);
+spaceObjectType* GetAdmiralFlagship(int32_t whichAdmiral);
+void SetAdmiralEarningPower(int32_t whichAdmiral, Fixed power);
+Fixed GetAdmiralEarningPower(int32_t whichAdmiral);
 
-void SetAdmiralDestinationObject(long whichAdmiral, long whichObject, destinationType dType);
-long GetAdmiralDestinationObject(long whichAdmiral);
-void SetAdmiralConsiderObject(long whichAdmiral, long whichObject);
-long GetAdmiralConsiderObject(long whichAdmiral);
+void SetAdmiralDestinationObject(int32_t whichAdmiral, int32_t whichObject, destinationType dType);
+int32_t GetAdmiralDestinationObject(int32_t whichAdmiral);
+void SetAdmiralConsiderObject(int32_t whichAdmiral, int32_t whichObject);
+int32_t GetAdmiralConsiderObject(int32_t whichAdmiral);
 
-bool BaseHasSomethingToBuild(long whichObject);
-long GetAdmiralBuildAtObject(long whichAdmiral);
-void SetAdmiralBuildAtObject(long whichAdmiral, long whichObject);
+bool BaseHasSomethingToBuild(int32_t whichObject);
+int32_t GetAdmiralBuildAtObject(int32_t whichAdmiral);
+void SetAdmiralBuildAtObject(int32_t whichAdmiral, int32_t whichObject);
 
-sfz::StringSlice GetAdmiralBuildAtName(long whichAdmiral);
-void SetAdmiralBuildAtName(long whichAdmiral, sfz::StringSlice name);
-sfz::StringSlice GetDestBalanceName(long whichDestObject);
-sfz::StringSlice GetAdmiralName(long whichAdmiral);
-void SetAdmiralName(long whichAdmiral, sfz::StringSlice name);
+sfz::StringSlice GetAdmiralBuildAtName(int32_t whichAdmiral);
+void SetAdmiralBuildAtName(int32_t whichAdmiral, sfz::StringSlice name);
+sfz::StringSlice GetDestBalanceName(int32_t whichDestObject);
+sfz::StringSlice GetAdmiralName(int32_t whichAdmiral);
+void SetAdmiralName(int32_t whichAdmiral, sfz::StringSlice name);
 
 void SetObjectLocationDestination(spaceObjectType* o, coordPointType* where);
 void SetObjectDestination(spaceObjectType* o, spaceObjectType* overrideObject);
 void RemoveObjectFromDestination(spaceObjectType* o);
 
 void AdmiralThink();
-void AdmiralBuildAtObject(long whichAdmiral, long baseTypeNum, long whichDestObject);
-bool AdmiralScheduleBuild(long whichAdmiral, long buildWhichType);
-void StopBuilding(long whichDestObject);
+void AdmiralBuildAtObject(int32_t whichAdmiral, int32_t baseTypeNum, int32_t whichDestObject);
+bool AdmiralScheduleBuild(int32_t whichAdmiral, int32_t buildWhichType);
+void StopBuilding(int32_t whichDestObject);
 
-void PayAdmiral(long whichAdmiral, Fixed howMuch);
-void PayAdmiralAbsolute(long whichAdmiral, Fixed howMuch);
-void AlterAdmiralScore(long whichAdmiral, long whichScore, long amount);
-long GetAdmiralScore(long whichAdmiral, long whichScore);
-long GetAdmiralShipsLeft(long whichAdmiral);
-long AlterDestinationObjectOccupation(long whichDestination, long whichAdmiral, long amount);
-void ClearAllOccupants(long whichDestination, long whichAdmiral, long fullAmount);
+void PayAdmiral(int32_t whichAdmiral, Fixed howMuch);
+void PayAdmiralAbsolute(int32_t whichAdmiral, Fixed howMuch);
+void AlterAdmiralScore(int32_t whichAdmiral, int32_t whichScore, int32_t amount);
+int32_t GetAdmiralScore(int32_t whichAdmiral, int32_t whichScore);
+int32_t GetAdmiralShipsLeft(int32_t whichAdmiral);
+int32_t AlterDestinationObjectOccupation(int32_t whichDestination, int32_t whichAdmiral, int32_t amount);
+void ClearAllOccupants(int32_t whichDestination, int32_t whichAdmiral, int32_t fullAmount);
 void AddKillToAdmiral(spaceObjectType *anObject);
 
-long GetAdmiralLoss(long whichAdmiral);
-long GetAdmiralKill(long whichAdmiral);
+int32_t GetAdmiralLoss(int32_t whichAdmiral);
+int32_t GetAdmiralKill(int32_t whichAdmiral);
 
 }  // namespace antares
 

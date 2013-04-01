@@ -184,7 +184,7 @@ void GetKeyNumName(int key_num, sfz::String* out);
 bool GetKeyNameNum(sfz::StringSlice name, int& out);
 bool AnyRealKeyDown();
 bool AnyKeyButThisOne(const KeyMap& key_map, int key_num);
-long GetAsciiFromKeyMap(const KeyMap&, const KeyMap&);
+int32_t GetAsciiFromKeyMap(const KeyMap&, const KeyMap&);
 
 enum {
     kUpKeyNum = 0,   // thrust

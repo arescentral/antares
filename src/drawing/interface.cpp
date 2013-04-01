@@ -72,7 +72,7 @@ void DrawInterfaceString(
     interface_font(style)->draw_sprite(p, s, color);
 }
 
-short GetInterfaceStringWidth(const StringSlice& s, interfaceStyleType style) {
+int16_t GetInterfaceStringWidth(const StringSlice& s, interfaceStyleType style) {
     return interface_font(style)->string_width(s);
 }
 
@@ -83,15 +83,15 @@ short GetInterfaceStringWidth(const StringSlice& s, interfaceStyleType style) {
 //  using the width of 'R' which is about as wide as our normal letters get.
 //
 
-short GetInterfaceFontWidth(interfaceStyleType style) {
+int16_t GetInterfaceFontWidth(interfaceStyleType style) {
     return interface_font(style)->logicalWidth;
 }
 
-short GetInterfaceFontHeight(interfaceStyleType style) {
+int16_t GetInterfaceFontHeight(interfaceStyleType style) {
     return interface_font(style)->height;
 }
 
-short GetInterfaceFontAscent( interfaceStyleType style) {
+int16_t GetInterfaceFontAscent( interfaceStyleType style) {
     return interface_font(style)->ascent;
 }
 
@@ -233,7 +233,7 @@ inline void mDrawPuffUpTBorder(Rect r, uint8_t mcolor, int mshade, int msheight,
 template <typename T>
 void draw_plain_rect(Point origin, const T& item) {
     Rect            tRect, uRect;
-    short           vcenter, thisHBorder = kInterfaceSmallHBorder;
+    int16_t         vcenter, thisHBorder = kInterfaceSmallHBorder;
     uint8_t         color = item.hue;
     interfaceStyleType style = item.style;
 
@@ -286,8 +286,8 @@ void draw_plain_rect(Point origin, const T& item) {
 
 void draw_tab_box(Point origin, const TabBox& item) {
     Rect                uRect;
-    short               vcenter, h_border = kInterfaceSmallHBorder;
-    unsigned char       shade;
+    int16_t             vcenter, h_border = kInterfaceSmallHBorder;
+    uint8_t             shade;
     uint8_t             color = item.hue;
     interfaceStyleType  style = item.style;
     int16_t             top_right_border_size = item.top_right_border_size;
@@ -374,8 +374,8 @@ void draw_tab_box(Point origin, const TabBox& item) {
 
 void draw_button(Point origin, const PlainButton& item) {
     Rect            tRect, uRect, vRect;
-    short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
-    unsigned char   shade;
+    int16_t         vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
+    uint8_t         shade;
     RgbColor        color;
 
     if (item.style == kLarge) {
@@ -519,8 +519,8 @@ void draw_button(Point origin, const PlainButton& item) {
 
 void draw_tab_box_button(Point origin, const TabBoxButton& item) {
     Rect            tRect;
-    short           vcenter, swidth, sheight, h_border = kInterfaceSmallHBorder;
-    unsigned char   shade;
+    int16_t         vcenter, swidth, sheight, h_border = kInterfaceSmallHBorder;
+    uint8_t         shade;
     RgbColor        color;
 
     if (item.style == kLarge) {
@@ -740,8 +740,8 @@ void draw_tab_box_button(Point origin, const TabBoxButton& item) {
 /*
 void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButton& item, PixMap* pix) {
     Rect            tRect, uRect, vRect, wRect;
-    short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
-    unsigned char   shade;
+    int16_t         vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
+    uint8_t         shade;
     RgbColor        color;
 
     if ( item.style == kLarge) thisHBorder = kInterfaceLargeHBorder;
@@ -864,8 +864,8 @@ void DrawPlayerInterfaceRadioButton(Rect bounds, const RadioButton& item, PixMap
 
 void draw_checkbox(Point origin, const CheckboxButton& item) {
     Rect            tRect, uRect, vRect, wRect;
-    short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
-    unsigned char   shade;
+    int16_t         vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
+    uint8_t         shade;
     RgbColor        color;
 
     if ( item.style == kLarge) thisHBorder = kInterfaceLargeHBorder;
@@ -972,8 +972,8 @@ void draw_checkbox(Point origin, const CheckboxButton& item) {
 
 void draw_labeled_box(Point origin, const LabeledRect& item) {
     Rect            tRect, uRect;
-    short           vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
-    unsigned char   shade;
+    int16_t         vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
+    uint8_t         shade;
     RgbColor        color;
 
     if (item.style == kLarge) {
@@ -1088,7 +1088,7 @@ void draw_text_rect(Point origin, const TextRect& item) {
 
 void draw_text_in_rect(
         Rect tRect, const StringSlice& text, interfaceStyleType style,
-        unsigned char textcolor, vector<inlinePictType>& inlinePict) {
+        uint8_t textcolor, vector<inlinePictType>& inlinePict) {
     RgbColor color = GetRGBTranslateColorShade(textcolor, VERY_LIGHT);
     StyledText interface_text(interface_font(style));
     interface_text.set_fore_color(color);
@@ -1114,8 +1114,8 @@ void populate_inline_picts(
     }
 }
 
-short GetInterfaceTextHeightFromWidth(
-        const StringSlice& text, interfaceStyleType style, short boundsWidth) {
+int16_t GetInterfaceTextHeightFromWidth(
+        const StringSlice& text, interfaceStyleType style, int16_t boundsWidth) {
     StyledText interface_text(interface_font(style));
     interface_text.set_interface_text(text);
     interface_text.wrap_to(boundsWidth, kInterfaceTextHBuffer, kInterfaceTextVBuffer);

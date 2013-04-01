@@ -101,21 +101,21 @@ enum longMessageStageType {
 
 struct Messages::longMessageType {
     longMessageStageType    stage;
-    long                    charDelayCount;
+    int32_t                 charDelayCount;
     Rect                    pictBounds;
-    long                    pictDelayCount;
-    long                    pictCurrentLeft;
-    long                    pictCurrentTop;
-    long                    time;
-    long                    textHeight;
-    short                   startResID;
-    short                   endResID;
-    short                   currentResID;
-    short                   lastResID;
-    short                   previousStartResID;
-    short                   previousEndResID;
-    short                   pictID;
-    unsigned char           backColor;
+    int32_t                 pictDelayCount;
+    int32_t                 pictCurrentLeft;
+    int32_t                 pictCurrentTop;
+    int32_t                 time;
+    int32_t                 textHeight;
+    int16_t                 startResID;
+    int16_t                 endResID;
+    int16_t                 currentResID;
+    int16_t                 lastResID;
+    int16_t                 previousStartResID;
+    int16_t                 previousEndResID;
+    int16_t                 pictID;
+    uint8_t                 backColor;
     sfz::String             stringMessage;
     sfz::String             lastStringMessage;
     bool                 newStringMessage;
@@ -125,7 +125,7 @@ struct Messages::longMessageType {
     int32_t                 at_char;
     bool                 labelMessage;
     bool                 lastLabelMessage;
-    short                   labelMessageID;
+    int16_t                 labelMessageID;
 };
 
 std::queue<sfz::String> Messages::message_data;
@@ -134,7 +134,7 @@ int32_t Messages::time_count;
 int32_t Messages::message_label_num;
 int32_t Messages::status_label_num;
 
-void MessageLabel_Set_Special(short id, const StringSlice& text);
+void MessageLabel_Set_Special(int16_t id, const StringSlice& text);
 
 void Messages::init() {
     longMessageType *tmessage = NULL;
@@ -206,7 +206,7 @@ void Messages::add(const sfz::PrintItem& message) {
     message_data.emplace(message);
 }
 
-void Messages::start(short startResID, short endResID) {
+void Messages::start(int16_t startResID, int16_t endResID) {
     longMessageType *tmessage;
 
     tmessage = long_message_data;
@@ -470,7 +470,7 @@ void Messages::draw_message_screen(int32_t by_units) {
     }
 }
 
-void Messages::set_status(const StringSlice& status, unsigned char color) {
+void Messages::set_status(const StringSlice& status, uint8_t color) {
     Labels::set_color(status_label_num, color);
     Labels::set_string(status_label_num, status);
     Labels::set_age(status_label_num, kStatusLabelAge);
@@ -493,9 +493,9 @@ int16_t Messages::current() {
 //  t = one of three characters: 'L' for left, 'R' for right, and 'O' for object
 //  nnn... are digits specifying value (distance from top, or initial object #)
 //
-void MessageLabel_Set_Special(short id, const StringSlice& text) {
+void MessageLabel_Set_Special(int16_t id, const StringSlice& text) {
     char whichType;
-    long value = 0;
+    int32_t value = 0;
     Point attachPoint;
     bool hintLine = false;
 

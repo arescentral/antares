@@ -42,7 +42,7 @@ namespace antares {
 
 const int32_t kProximitySuperSize           = 16;   // number of cUnits in cSuperUnits
 const int32_t kProximityGridDataLength      = kProximitySuperSize * kProximitySuperSize;
-const int32_t kProximityUnitAndModulo       = kProximitySuperSize - 1;  // & a long with this and get modulo kCollisionSuperSize
+const int32_t kProximityUnitAndModulo       = kProximitySuperSize - 1;  // & a int32_t with this and get modulo kCollisionSuperSize
 const int32_t kProximityWidthMultiply       = 4;    // for speed = * kCollisionSuperSize
 
 const int32_t kCollisionUnitBitShift        = 7;    // >> 7 = / 128
@@ -74,17 +74,17 @@ static Point            cAdjacentUnits[] = {
 coordPointType          gGlobalCorner;
 unique_ptr<proximityUnitType[]> gProximityGrid;
 
-// for the macro mRanged, time is assumed to be a long game ticks, velocity a fixed, result long, scratch fixed
-inline void mRange(long& result, long time, Fixed velocity, Fixed& scratch) {
+// for the macro mRanged, time is assumed to be a int32_t game ticks, velocity a fixed, result int32_t, scratch fixed
+inline void mRange(int32_t& result, int32_t time, Fixed velocity, Fixed& scratch) {
     scratch = mLongToFixed( time);
     scratch = mMultiplyFixed (scratch, velocity);
     result = mFixedToLong( scratch);
 }
 
 void InitMotion() {
-    short                   x, y, i;
+    int16_t                 x, y, i;
     proximityUnitType       *p;
-    long                    adjacentAdd = 0, ux, uy, sx, sy;
+    int32_t                    adjacentAdd = 0, ux, uy, sx, sy;
 
     globals()->gCenterScaleH = (play_screen.width() / 2) * SCALE_SCALE;
     globals()->gCenterScaleV = (play_screen.height() / 2) * SCALE_SCALE;
@@ -143,7 +143,7 @@ void InitMotion() {
 void ResetMotionGlobals( void)
 {
     proximityUnitType   *proximityObject;
-    long                i;
+    int32_t                i;
 
     gGlobalCorner.h = gGlobalCorner.v = 0;
     globals()->gClosestObject = 0;
@@ -161,14 +161,14 @@ void MotionCleanup() {
     gProximityGrid.reset();
 }
 
-void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const long unitsToDo)
+void MoveSpaceObjects( spaceObjectType *table, const int32_t tableLength, const int32_t unitsToDo)
 
 {
-    long                    i, h, v, jl;
+    int32_t                    i, h, v, jl;
     Fixed                   fh, fv, fa, fb, useThrust;
     Fixed                   aFixed;
-    short                   angle;
-    unsigned long           shortDist, thisDist, longDist;
+    int16_t                 angle;
+    uint32_t                shortDist, thisDist, longDist;
     spaceObjectType         *anObject;
     baseObjectType          *baseObject;
 
@@ -596,19 +596,19 @@ void MoveSpaceObjects( spaceObjectType *table, const long tableLength, const lon
     }
 }
 
-void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
+void CollideSpaceObjects( spaceObjectType *table, const int32_t tableLength)
 
 {
     spaceObjectType         *sObject = NULL, *dObject = NULL, *aObject = NULL, *bObject = NULL,
                             *player = NULL, *taObject, *tbObject;
-    long                    i = 0, j = 0, k, xs, xe, ys, ye, xd, yd, superx, supery, scaleCalc, difference;
-    short                   cs, ce;
+    int32_t                    i = 0, j = 0, k, xs, xe, ys, ye, xd, yd, superx, supery, scaleCalc, difference;
+    int16_t                 cs, ce;
     bool                 beamHit;
-    unsigned long           distance, dcalc/*,
+    uint32_t                distance, dcalc/*,
                             closestDist = kMaximumRelevantDistanceSquared + kMaximumRelevantDistanceSquared*/;
     proximityUnitType       *proximityObject, *currentProximity;
 
-    long                    magicHack1 = 0, magicHack2 = 0, magicHack3 = 0;
+    int32_t                    magicHack1 = 0, magicHack2 = 0, magicHack3 = 0;
     uint64_t                farthestDist, hugeDistance, wideScrap, closestDist;
     farthestDist = 0;
     closestDist = 0x7fffffffffffffffull;
@@ -1295,11 +1295,11 @@ void CollideSpaceObjects( spaceObjectType *table, const long tableLength)
 void CorrectPhysicalSpace( spaceObjectType *aObject, spaceObjectType *bObject)
 
 {
-    long    ah, av, ad, bh, bv, bd, adir = kNoDir, bdir = kNoDir,
+    int32_t    ah, av, ad, bh, bv, bd, adir = kNoDir, bdir = kNoDir,
             h, v;
     fixedPointType  tvel;
     Fixed           force, totalMass, tfix;
-    short           angle;
+    int16_t         angle;
     Fixed           aFixed;
 
     // calculate the new velocities

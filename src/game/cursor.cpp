@@ -101,7 +101,7 @@ Point HintLine::hint_line_end;
 RgbColor HintLine::hint_line_color;
 RgbColor HintLine::hint_line_color_dark;
 
-void HintLine::show(Point fromWhere, Point toWhere, unsigned char color, unsigned char brightness) {
+void HintLine::show(Point fromWhere, Point toWhere, uint8_t color, uint8_t brightness) {
     hint_line_start = fromWhere;
     hint_line_end = toWhere;
     show_hint_line = true;
