@@ -178,6 +178,8 @@ void Messages::clear() {
     longMessageType *tmessage;
 
     time_count = 0;
+    std::queue<sfz::String> empty;
+    swap(message_data, empty);
     message_label_num = Labels::add(
             kMessageScreenLeft, kMessageScreenTop, 0, 0, NULL, false, kMessageColor);
     status_label_num = Labels::add(
