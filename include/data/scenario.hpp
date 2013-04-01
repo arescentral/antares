@@ -226,8 +226,8 @@ void read_from(sfz::ReadSource in, Scenario::Condition::CounterArgument& counter
 // type of tour point: object, absolute, or free-standing
 // either scenario object # & visible --or-- location ((int32_t & bool) or longPoint)
 // range (longPoint)
-// title ID, # (short, short)
-// content ID, # (short, short)
+// title ID, # (int16_t, int16_t)
+// content ID, # (int16_t, int16_t)
 //
 
 struct Scenario::BriefPoint {

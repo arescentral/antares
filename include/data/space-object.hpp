@@ -703,15 +703,15 @@ struct spaceObjectType {
     int32_t                 age;
     int32_t                 naturalScale;
     int32_t                 id;
-    short                   rechargeTime;
-    short                   pulseCharge;
-    short                   beamCharge;
-    short                   specialCharge;
-    short                   active;
+    int16_t                 rechargeTime;
+    int16_t                 pulseCharge;
+    int16_t                 beamCharge;
+    int16_t                 specialCharge;
+    int16_t                 active;
 
     int32_t                 warpEnergyCollected;
 
-    short                   layer;
+    int16_t                 layer;
     spriteType              *sprite;
     int32_t                 whichSprite;
 

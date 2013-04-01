@@ -146,7 +146,7 @@ void CleanupSpaceObjectHandling() {
 
 void ResetAllSpaceObjects() {
     spaceObjectType *anObject = NULL;
-    short           i;
+    int16_t         i;
 
     gRootObject = NULL;
     gRootObjectNumber = -1;
@@ -313,7 +313,7 @@ void mGetBaseObjectFromClassRace(
     Returns -1 if no object available, otherwise returns object #
 
 int AddSpaceObject( spaceObjectType *sourceObject, int32_t *canBuildType,
-                short nameResID, short nameStrNum)
+                int16_t nameResID, int16_t nameStrNum)
 */
 
 int AddSpaceObject( spaceObjectType *sourceObject)
@@ -326,7 +326,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
     int32_t         scaleCalc;
     RgbColor        tinyColor;
     unsigned char   tinyShade;
-    short           whichShape = 0, angle;
+    int16_t         whichShape = 0, angle;
 
     destObject = gSpaceObjectData.get();
 
@@ -585,7 +585,7 @@ void CorrectAllBaseObjectColor( void)
 
 {
     baseObjectType  *aBase = gBaseObjectData.get();
-    short           i;
+    int16_t         i;
 
     for ( i = 0; i < globals()->maxBaseObject; i++)
     {
@@ -618,12 +618,12 @@ void CorrectAllBaseObjectColor( void)
 
 }
 
-void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, int32_t  whichBaseObject, short seed,
-            int32_t direction, fixedPointType *velocity, int32_t owner, short spriteIDOverride)
+void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, int32_t  whichBaseObject, int16_t seed,
+            int32_t direction, fixedPointType *velocity, int32_t owner, int16_t spriteIDOverride)
 
 {
     baseObjectType  *sObject = mGetBaseObjectPtr( whichBaseObject), *weaponBase = NULL;
-    short           i;
+    int16_t         i;
     int32_t         r;
     Fixed           f;
     fixedPointType  newVel;
@@ -864,7 +864,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, int32_t whichBaseObject,
 
 {
     baseObjectType  *sObject = mGetBaseObjectPtr( whichBaseObject), *weaponBase = NULL;
-    short           angle;
+    int16_t         angle;
     int32_t         r;
     NatePixTable* spriteTable;
 
@@ -1197,7 +1197,7 @@ void ExecuteObjectActions( int32_t whichAction, int32_t actionNum,
     spaceObjectType *anObject, *originalSObject = sObject, *originalDObject = dObject;
     baseObjectType  *baseObject;
     objectActionType    *action = gObjectActionData.get() + whichAction;
-    short           end, angle;
+    int16_t         end, angle;
     fixedPointType  fpoint, newVel;
     int32_t         l;
     uint32_t        ul1;
@@ -2101,7 +2101,7 @@ void ExecuteObjectActions( int32_t whichAction, int32_t actionNum,
 
 int32_t CreateAnySpaceObject( int32_t whichBase, fixedPointType *velocity,
             coordPointType *location, int32_t direction, int32_t owner,
-            uint32_t specialAttributes, short spriteIDOverride)
+            uint32_t specialAttributes, int16_t spriteIDOverride)
 
 {
     spaceObjectType *madeObject = NULL, newObject, *player = NULL;
@@ -2504,7 +2504,7 @@ void AlterObjectCloakState( spaceObjectType *anObject, bool cloak)
 void DestroyObject( spaceObjectType *anObject)
 
 {
-    short   energyNum, i;
+    int16_t energyNum, i;
     spaceObjectType *fixObject;
 
     if ( anObject->active == kObjectInUse)
@@ -2593,7 +2593,7 @@ void ActivateObjectSpecial( spaceObjectType *anObject)
 {
     baseObjectType  *weaponObject, *baseObject = anObject->baseType;
     Point           offset;
-    short           h;
+    int16_t         h;
     Fixed           fcos, fsin;
 
     if (( anObject->specialTime <= 0) && ( anObject->specialType != kNoWeapon))

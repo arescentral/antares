@@ -171,7 +171,7 @@ void update_mission_brief_point(
     // TODO(sfiera): catch exception.
     Resource rsrc("text", "txt", contentID);
     text.assign(utf8::decode(rsrc.data()));
-    short textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
+    int16_t textHeight = GetInterfaceTextHeightFromWidth(text, dataItem->style, kMissionDataWidth);
     if (hiliteBounds.left == hiliteBounds.right) {
         dataItem->bounds().left = (bounds->right - bounds->left) / 2 - (kMissionDataWidth / 2) + bounds->left;
         dataItem->bounds().right = dataItem->bounds().left + kMissionDataWidth;
@@ -255,7 +255,7 @@ void update_mission_brief_point(
     populate_inline_picts(dataItem->bounds(), text, dataItem->style, inlinePict);
 }
 
-void CreateObjectDataText(String* text, short id) {
+void CreateObjectDataText(String* text, int16_t id) {
     Resource rsrc("text", "txt", kShipDataTextID);
     String data(utf8::decode(rsrc.data()));
 
@@ -385,7 +385,7 @@ void CreateWeaponDataText(String* text, int32_t whichWeapon, const StringSlice& 
     print(*text, data);
 }
 
-void Replace_KeyCode_Strings_With_Actual_Key_Names(String* text, short resID, size_t padTo) {
+void Replace_KeyCode_Strings_With_Actual_Key_Names(String* text, int16_t resID, size_t padTo) {
     StringList keys(kHelpScreenKeyStringID);
     StringList values(resID);
 

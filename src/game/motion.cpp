@@ -82,7 +82,7 @@ inline void mRange(int32_t& result, int32_t time, Fixed velocity, Fixed& scratch
 }
 
 void InitMotion() {
-    short                   x, y, i;
+    int16_t                 x, y, i;
     proximityUnitType       *p;
     int32_t                    adjacentAdd = 0, ux, uy, sx, sy;
 
@@ -167,7 +167,7 @@ void MoveSpaceObjects( spaceObjectType *table, const int32_t tableLength, const 
     int32_t                    i, h, v, jl;
     Fixed                   fh, fv, fa, fb, useThrust;
     Fixed                   aFixed;
-    short                   angle;
+    int16_t                 angle;
     uint32_t                shortDist, thisDist, longDist;
     spaceObjectType         *anObject;
     baseObjectType          *baseObject;
@@ -602,7 +602,7 @@ void CollideSpaceObjects( spaceObjectType *table, const int32_t tableLength)
     spaceObjectType         *sObject = NULL, *dObject = NULL, *aObject = NULL, *bObject = NULL,
                             *player = NULL, *taObject, *tbObject;
     int32_t                    i = 0, j = 0, k, xs, xe, ys, ye, xd, yd, superx, supery, scaleCalc, difference;
-    short                   cs, ce;
+    int16_t                 cs, ce;
     bool                 beamHit;
     uint32_t                distance, dcalc/*,
                             closestDist = kMaximumRelevantDistanceSquared + kMaximumRelevantDistanceSquared*/;
@@ -1299,7 +1299,7 @@ void CorrectPhysicalSpace( spaceObjectType *aObject, spaceObjectType *bObject)
             h, v;
     fixedPointType  tvel;
     Fixed           force, totalMass, tfix;
-    short           angle;
+    int16_t         angle;
     Fixed           aFixed;
 
     // calculate the new velocities

@@ -25,16 +25,16 @@
 
 namespace antares {
 
-spaceObjectType *HackNewNonplayerShip(int32_t, short, Rect *);
+spaceObjectType *HackNewNonplayerShip(int32_t, int16_t, Rect *);
 void NonplayerShipThink(int32_t);
 void UpdateMyNonplayerShip( void);
 void HackShowShipID( void);
 void HitObject( spaceObjectType *, spaceObjectType *);
 int32_t GetManualSelectObject( spaceObjectType *, uint32_t,
                             uint32_t, uint32_t,
-                            const uint64_t*, int32_t, short);
+                            const uint64_t*, int32_t, int16_t);
 int32_t GetSpritePointSelectObject( Rect *, spaceObjectType *, uint32_t,
-                            uint32_t, uint32_t, int32_t, short);
+                            uint32_t, uint32_t, int32_t, int16_t);
 
 }  // namespace antares
 

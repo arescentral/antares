@@ -279,7 +279,7 @@ void MiniScreenCleanup() {
 
 #pragma mark -
 
-void SetMiniScreenStatusStrList(short strID) {
+void SetMiniScreenStatusStrList(int16_t strID) {
     DisposeMiniScreenStatusStrList();
     if (strID > 0) {
         globals()->gMissionStatusStrList.reset(new StringList(strID));
@@ -456,7 +456,7 @@ void draw_mini_screen() {
     draw_mini_ship_data(*mGetMiniObjectPtr(kMiniTargetObjectNum), SKY_BLUE, kMiniTargetTop, kMiniTargetObjectNum + 1);
 }
 
-void MakeMiniScreenFromIndString(short whichString) {
+void MakeMiniScreenFromIndString(int16_t whichString) {
     Rect mRect(kMiniScreenLeft, kMiniScreenTop, kMiniScreenRight, kMiniScreenBottom);
     mRect.offset(0, globals()->gInstrumentTop);
 
@@ -895,7 +895,7 @@ void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) 
 
 void draw_mini_ship_data(
         const spaceObjectType& newObject, unsigned char headerColor,
-        short screenTop, short whichString) {
+        int16_t screenTop, int16_t whichString) {
     Rect lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, 0, 0, kMiniScreenWidth);
     RgbColor color = GetRGBTranslateColorShade(headerColor, LIGHT);
     RgbColor lightcolor = GetRGBTranslateColorShade(headerColor, VERY_LIGHT);
@@ -945,7 +945,7 @@ void draw_mini_ship_data(
         NatePixTable* pixTable = GetPixTable(newObject.pixResID);
 
         if (pixTable != NULL) {
-            short whichShape;
+            int16_t whichShape;
             if (newObject.attributes & kIsSelfAnimated) {
                 whichShape = more_evil_fixed_to_long(newObject.baseType->frame.animation.firstShape);
             } else {

@@ -68,7 +68,7 @@ void InitSoundFX() {
 }
 
 void PlayVolumeSound(
-        short whichSoundID, uint8_t amplitude, short persistence, soundPriorityType priority) {
+        int16_t whichSoundID, uint8_t amplitude, int16_t persistence, soundPriorityType priority) {
     int32_t oldestSoundTime = -ticks_to_usecs(kLongPersistence), whichChannel = -1;
     // TODO(sfiera): don't play sound at all if the game is muted.
     if (amplitude > 0) {
@@ -153,8 +153,8 @@ void PlayVolumeSound(
 
 void PlayLocalizedSound(
         uint32_t sx, uint32_t sy, uint32_t dx, uint32_t dy,
-        Fixed hvel, Fixed vvel, short whichSoundID, short amplitude,
-        short persistence, soundPriorityType priority) {
+        Fixed hvel, Fixed vvel, int16_t whichSoundID, int16_t amplitude,
+        int16_t persistence, soundPriorityType priority) {
     static_cast<void>(sx);
     static_cast<void>(sy);
     static_cast<void>(dx);
@@ -189,7 +189,7 @@ void ResetAllSounds() {
 }
 
 void KeepSound(int soundID) {
-    short whichSound;
+    int16_t whichSound;
 
     whichSound = 0;
     while ((globals()->gSound[whichSound].id != soundID) && (whichSound < kSoundNum)) {

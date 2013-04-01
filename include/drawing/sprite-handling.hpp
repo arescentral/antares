@@ -68,14 +68,14 @@ typedef void (*draw_tiny_t)(const Rect& rect, const RgbColor& color);
 struct spriteType {
     Point           where;
     NatePixTable*   table;
-    short           resID;
+    int16_t         resID;
     int             whichShape;
     int32_t         scale;
     spriteStyleType style;
     RgbColor        styleColor;
-    short           styleData;
+    int16_t         styleData;
     int32_t         tinySize;
-    short           whichLayer;
+    int16_t         whichLayer;
     RgbColor        tinyColor;
     bool            killMe;
     draw_tiny_t     draw_tiny;
@@ -103,8 +103,8 @@ void RemoveAllUnusedPixTables();
 NatePixTable* AddPixTable(int16_t resource_id);
 NatePixTable* GetPixTable(int16_t resource_id);
 spriteType *AddSprite(
-        Point where, NatePixTable* table, short resID, short whichShape, int32_t scale, int32_t size,
-        short layer, const RgbColor& color, int32_t *whichSprite);
+        Point where, NatePixTable* table, int16_t resID, int16_t whichShape, int32_t scale, int32_t size,
+        int16_t layer, const RgbColor& color, int32_t *whichSprite);
 void RemoveSprite(spriteType *);
 void draw_sprites();
 void CullSprites();

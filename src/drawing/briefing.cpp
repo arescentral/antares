@@ -242,7 +242,7 @@ void GetRealObjectSpriteData(
         if ( baseObject->attributes & kCanThink)
         {
             pixTable = GetPixTable( tlong +
-                (implicit_cast<short>(GetAdmiralColor( owner)) << kSpriteTableColorShift));
+                (implicit_cast<int16_t>(GetAdmiralColor( owner)) << kSpriteTableColorShift));
         } else
         {
             pixTable = GetPixTable( tlong);

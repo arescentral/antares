@@ -41,7 +41,7 @@ class Messages {
     static void init();
     static void clear();
     static void add(const sfz::PrintItem& message);
-    static void start( short, short);
+    static void start( int16_t, int16_t);
     static void clip();
     static void end();
     static void advance();

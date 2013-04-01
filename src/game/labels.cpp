@@ -111,8 +111,8 @@ Labels::screenLabelType::screenLabelType() {
     zero(*this);
 }
 
-short Labels::add(
-        short h, short v, short hoff, short voff, spaceObjectType* object, bool objectLink,
+int16_t Labels::add(
+        int16_t h, int16_t v, int16_t hoff, int16_t voff, spaceObjectType* object, bool objectLink,
         unsigned char color) {
     screenLabelType* label = NULL;
 
@@ -248,7 +248,7 @@ void Labels::show_all() {
     }
 }
 
-void Labels::set_position(int32_t which, short h, short v) {
+void Labels::set_position(int32_t which, int16_t h, int16_t v) {
     screenLabelType *label = data + which;
     label->where = label->offset;
     label->where.offset(h, v);

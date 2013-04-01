@@ -130,10 +130,10 @@ admiralType* mGetAdmiralPtr(int32_t mwhichAdmiral);
 
 int32_t MakeNewAdmiral(
         int32_t flagship, int32_t destinationObject, destinationType dType, uint32_t attributes,
-        int32_t race, short nameResID, short nameStrNum, Fixed earningPower);
+        int32_t race, int16_t nameResID, int16_t nameStrNum, Fixed earningPower);
 int32_t MakeNewDestination(
-        int32_t whichObject, int32_t* canBuildType, Fixed earn, short nameResID,
-        short nameStrNum);
+        int32_t whichObject, int32_t* canBuildType, Fixed earn, int16_t nameResID,
+        int16_t nameStrNum);
 void RemoveDestination(int32_t whichDestination);
 void RecalcAllAdmiralBuildData();
 

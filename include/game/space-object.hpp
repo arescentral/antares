@@ -34,19 +34,19 @@ void CleanupSpaceObjectHandling( void);
 void ResetAllSpaceObjects( void);
 void ResetActionQueueData( void);
 int AddSpaceObject( spaceObjectType *);
-//int AddSpaceObject( spaceObjectType *, int32_t *, short, short);
+//int AddSpaceObject( spaceObjectType *, int32_t *, int16_t, int16_t);
 int AddNumberedSpaceObject( spaceObjectType *, int32_t);
 void RemoveAllSpaceObjects( void);
 void CorrectAllBaseObjectColor( void);
-void InitSpaceObjectFromBaseObject( spaceObjectType *, int32_t, short, int32_t, fixedPointType *, int32_t,
-                                    short);
+void InitSpaceObjectFromBaseObject( spaceObjectType *, int32_t, int16_t, int32_t, fixedPointType *, int32_t,
+                                    int16_t);
 void ChangeObjectBaseType( spaceObjectType *, int32_t, int32_t, bool);
 void AddActionToQueue( objectActionType *, int32_t, int32_t, int32_t, spaceObjectType *,
                         spaceObjectType *, Point*);
 void ExecuteActionQueue(int32_t);
 void ExecuteObjectActions(int32_t, int32_t, spaceObjectType *, spaceObjectType *, Point*, bool);
 int32_t CreateAnySpaceObject(int32_t, fixedPointType *, coordPointType *, int32_t, int32_t, uint32_t,
-                            short);
+                            int16_t);
 int32_t CountObjectsOfBaseType(int32_t, int32_t);
 int32_t GetNextObjectWithAttributes(int32_t, uint32_t, bool);
 void AlterObjectHealth( spaceObjectType *, int32_t);

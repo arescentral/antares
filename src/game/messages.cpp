@@ -108,13 +108,13 @@ struct Messages::longMessageType {
     int32_t                 pictCurrentTop;
     int32_t                 time;
     int32_t                 textHeight;
-    short                   startResID;
-    short                   endResID;
-    short                   currentResID;
-    short                   lastResID;
-    short                   previousStartResID;
-    short                   previousEndResID;
-    short                   pictID;
+    int16_t                 startResID;
+    int16_t                 endResID;
+    int16_t                 currentResID;
+    int16_t                 lastResID;
+    int16_t                 previousStartResID;
+    int16_t                 previousEndResID;
+    int16_t                 pictID;
     unsigned char           backColor;
     sfz::String             stringMessage;
     sfz::String             lastStringMessage;
@@ -125,7 +125,7 @@ struct Messages::longMessageType {
     int32_t                 at_char;
     bool                 labelMessage;
     bool                 lastLabelMessage;
-    short                   labelMessageID;
+    int16_t                 labelMessageID;
 };
 
 std::queue<sfz::String> Messages::message_data;
@@ -134,7 +134,7 @@ int32_t Messages::time_count;
 int32_t Messages::message_label_num;
 int32_t Messages::status_label_num;
 
-void MessageLabel_Set_Special(short id, const StringSlice& text);
+void MessageLabel_Set_Special(int16_t id, const StringSlice& text);
 
 void Messages::init() {
     longMessageType *tmessage = NULL;
@@ -206,7 +206,7 @@ void Messages::add(const sfz::PrintItem& message) {
     message_data.emplace(message);
 }
 
-void Messages::start(short startResID, short endResID) {
+void Messages::start(int16_t startResID, int16_t endResID) {
     longMessageType *tmessage;
 
     tmessage = long_message_data;
@@ -493,7 +493,7 @@ int16_t Messages::current() {
 //  t = one of three characters: 'L' for left, 'R' for right, and 'O' for object
 //  nnn... are digits specifying value (distance from top, or initial object #)
 //
-void MessageLabel_Set_Special(short id, const StringSlice& text) {
+void MessageLabel_Set_Special(int16_t id, const StringSlice& text) {
     char whichType;
     int32_t value = 0;
     Point attachPoint;

@@ -123,7 +123,7 @@ int32_t GetAsciiFromKeyMap(const KeyMap& sourceKeyMap, const KeyMap& previousKey
     static_cast<void>(previousKeyMap);
     return 0;
     /*
-    short           whichKeyCode = 0, modifiers = 0, count;
+    int16_t         whichKeyCode = 0, modifiers = 0, count;
     int32_t         result;
     Ptr             KCHRPtr;
     KeyMap          keyMap;

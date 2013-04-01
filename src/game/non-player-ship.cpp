@@ -73,13 +73,13 @@ uint32_t ThinkObjectWarpingPresence( spaceObjectType *);
 uint32_t ThinkObjectWarpInPresence( spaceObjectType *);
 uint32_t ThinkObjectWarpOutPresence( spaceObjectType *, baseObjectType *);
 uint32_t ThinkObjectLandingPresence( spaceObjectType *);
-void ThinkObjectGetCoordVector( spaceObjectType *, coordPointType *, uint32_t *, short *);
+void ThinkObjectGetCoordVector( spaceObjectType *, coordPointType *, uint32_t *, int16_t *);
 void ThinkObjectGetCoordDistance( spaceObjectType *, coordPointType *, uint32_t *);
 void ThinkObjectResolveDestination( spaceObjectType *, coordPointType *, spaceObjectType **);
 bool ThinkObjectResolveTarget( spaceObjectType *, coordPointType *, uint32_t *, spaceObjectType **);
-uint32_t ThinkObjectEngageTarget( spaceObjectType *, spaceObjectType *, uint32_t, short *, int32_t);
+uint32_t ThinkObjectEngageTarget( spaceObjectType *, spaceObjectType *, uint32_t, int16_t *, int32_t);
 
-spaceObjectType *HackNewNonplayerShip( int32_t owner, short type, Rect *bounds)
+spaceObjectType *HackNewNonplayerShip( int32_t owner, int16_t type, Rect *bounds)
 
 {
 #pragma unused( owner, type, bounds)
@@ -96,7 +96,7 @@ void NonplayerShipThink( int32_t timePass)
     Point           offset;
     int32_t         count, difference;
     uint32_t        keysDown;
-    short           h;
+    int16_t         h;
     Fixed           fcos, fsin;
     RgbColor        friendSick, foeSick, neutralSick;
     uint32_t        sickCount = usecs_to_ticks(globals()->gGameTime) / 9;
@@ -627,7 +627,7 @@ uint32_t ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectType *b
     coordPointType  dest;
     int32_t         difference;
     Fixed           slope;
-    short           angle, theta, beta;
+    int16_t         angle, theta, beta;
     Fixed           calcv, fdist;
     Point           offset;
 
@@ -1325,7 +1325,7 @@ uint32_t ThinkObjectWarpingPresence( spaceObjectType *anObject)
     uint32_t        keysDown = anObject->keysDown & kSpecialKeyMask, distance;
     coordPointType  dest;
     spaceObjectType *targetObject = NULL;
-    short           angle, theta;
+    int16_t         angle, theta;
 
     if ( anObject->energy <= 0)
     {
@@ -1411,7 +1411,7 @@ uint32_t ThinkObjectLandingPresence( spaceObjectType *anObject)
     coordPointType  dest;
     int32_t         difference;
     Fixed           slope;
-    short           angle, theta, shortx, shorty;
+    int16_t         angle, theta, shortx, shorty;
 
     keysDown = 0;
 
@@ -1611,11 +1611,11 @@ uint32_t ThinkObjectLandingPresence( spaceObjectType *anObject)
 }
 
 // this gets the distance & angle between an object and arbitrary coords
-void ThinkObjectGetCoordVector( spaceObjectType *anObject, coordPointType *dest, uint32_t *distance, short *angle)
+void ThinkObjectGetCoordVector( spaceObjectType *anObject, coordPointType *dest, uint32_t *distance, int16_t *angle)
 {
     int32_t         difference;
     uint32_t        dcalc;
-    short           shortx, shorty;
+    int16_t         shortx, shorty;
     Fixed           slope;
 
     difference = ABS<int>( dest->h - anObject->location.h);
@@ -1966,13 +1966,13 @@ bool ThinkObjectResolveTarget( spaceObjectType *anObject, coordPointType *dest,
 }
 
 uint32_t ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *targetObject,
-    uint32_t distance, short *theta, int32_t timePass)
+    uint32_t distance, int16_t *theta, int32_t timePass)
 {
     uint32_t        keysDown = 0;
     baseObjectType  *bestWeapon, *weaponObject;
     coordPointType  dest;
     int32_t         difference;
-    short           angle, beta;
+    int16_t         angle, beta;
     Fixed           slope;
 
     *theta = 0xffff;
@@ -2193,7 +2193,7 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
 
 int32_t GetManualSelectObject( spaceObjectType *sourceObject, uint32_t inclusiveAttributes,
                             uint32_t anyOneAttribute, uint32_t exclusiveAttributes,
-                            const uint64_t* fartherThan, int32_t currentShipNum, short friendOrFoe)
+                            const uint64_t* fartherThan, int32_t currentShipNum, int16_t friendOrFoe)
 
 {
     spaceObjectType *anObject;
@@ -2201,7 +2201,7 @@ int32_t GetManualSelectObject( spaceObjectType *sourceObject, uint32_t inclusive
     uint32_t        distance, dcalc, myOwnerFlag = 1 << sourceObject->owner;
     int32_t         difference;
     Fixed           slope;
-    short           angle;
+    int16_t         angle;
 //  const wide      kMaxAngleDistance = {0, 1073676289}; // kMaximumAngleDistance ^ 2
     uint64_t        wideClosestDistance, wideFartherDistance, thisWideDistance, wideScrap;
     uint8_t         thisDistanceState;
@@ -2324,7 +2324,7 @@ int32_t GetManualSelectObject( spaceObjectType *sourceObject, uint32_t inclusive
 
 int32_t GetSpritePointSelectObject( Rect *bounds, spaceObjectType *sourceObject, uint32_t inclusiveAttributes,
                             uint32_t anyOneAttribute, uint32_t exclusiveAttributes,
-                            int32_t currentShipNum, short friendOrFoe)
+                            int32_t currentShipNum, int16_t friendOrFoe)
 
 {
     spaceObjectType *anObject;

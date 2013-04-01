@@ -54,7 +54,7 @@ enum ZoomType {
 };
 
 struct barIndicatorType {
-    short           top;
+    int16_t         top;
     int32_t         thisValue;
     unsigned char   color;
     bool         automatic;      // if it's automatic, it is redrawn automatically

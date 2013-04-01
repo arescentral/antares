@@ -57,12 +57,12 @@ struct miniScreenLineType {
 
 void MiniScreenInit( void);
 void MiniScreenCleanup( void);
-void SetMiniScreenStatusStrList( short);
+void SetMiniScreenStatusStrList( int16_t);
 void DisposeMiniScreenStatusStrList( void);
 void ClearMiniScreenLines( void);
 void ClearMiniObjectData( void);
 void draw_mini_screen();
-void MakeMiniScreenFromIndString( short);
+void MakeMiniScreenFromIndString( int16_t);
 void MiniComputerHandleKeys(uint32_t, uint32_t);
 void MiniComputerHandleNull(int32_t);
 int32_t MiniComputerGetPriceOfCurrentSelection( void);
@@ -70,7 +70,7 @@ void UpdateMiniScreenLines( void);
 void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special);
 void draw_mini_ship_data(
         const spaceObjectType& newObject, unsigned char headerColor,
-        short screenTop, short whichString);
+        int16_t screenTop, int16_t whichString);
 void MiniComputerDoAccept( void);
 void MiniComputerExecute(int32_t, int32_t, int32_t);
 void MiniComputerDoCancel( void);

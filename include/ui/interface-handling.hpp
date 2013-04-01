@@ -41,8 +41,8 @@ void update_mission_brief_point(
         LabeledRect *dataItem, int32_t whichBriefPoint, const Scenario* scenario,
         coordPointType *corner, int32_t scale, Rect *bounds, std::vector<inlinePictType>& inlinePict,
         Rect& highlight_rect, std::vector<std::pair<Point, Point>>& lines, sfz::String& text);
-void CreateObjectDataText(sfz::String* text, short id);
-void Replace_KeyCode_Strings_With_Actual_Key_Names(sfz::String* text, short resID, size_t padTo);
+void CreateObjectDataText(sfz::String* text, int16_t id);
+void Replace_KeyCode_Strings_With_Actual_Key_Names(sfz::String* text, int16_t resID, size_t padTo);
 
 }  // namespace antares
 
