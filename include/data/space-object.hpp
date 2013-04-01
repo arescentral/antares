@@ -760,8 +760,8 @@ struct spaceObjectType {
     uint32_t                seenByPlayerFlags;
     uint32_t                hostileTowardsFlags;
 
-    unsigned char           shieldColor;
-    unsigned char           originalColor;
+    uint8_t                 shieldColor;
+    uint8_t                 originalColor;
 };
 
 }  // namespace antares

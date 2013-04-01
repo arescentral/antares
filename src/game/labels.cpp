@@ -57,7 +57,7 @@ struct Labels::screenLabelType {
     int32_t             height;
     int32_t             age;
     sfz::String         text;
-    unsigned char       color;
+    uint8_t             color;
     bool                active;
     bool                killMe;
     bool                visible;
@@ -113,7 +113,7 @@ Labels::screenLabelType::screenLabelType() {
 
 int16_t Labels::add(
         int16_t h, int16_t v, int16_t hoff, int16_t voff, spaceObjectType* object, bool objectLink,
-        unsigned char color) {
+        uint8_t color) {
     screenLabelType* label = NULL;
 
     for (int i = 0; i < kMaxLabelNum; ++i) {
@@ -397,7 +397,7 @@ void Labels::clear_string(int32_t which) {
     label->width = label->height = 0;
 }
 
-void Labels::set_color(int32_t which, unsigned char color) {
+void Labels::set_color(int32_t which, uint8_t color) {
     screenLabelType *label = data + which;
     label->color = color;
 }

@@ -325,7 +325,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
     Point           where;
     int32_t         scaleCalc;
     RgbColor        tinyColor;
-    unsigned char   tinyShade;
+    uint8_t         tinyShade;
     int16_t         whichShape = 0, angle;
 
     destObject = gSpaceObjectData.get();
@@ -1206,7 +1206,7 @@ void ExecuteObjectActions( int32_t whichAction, int32_t actionNum,
     Point           location;
     bool         OKtoExecute, checkConditions = false;
     Fixed           aFixed;
-    unsigned char   tinyColor;
+    uint8_t         tinyColor;
 
     if ( whichAction < 0) return;
     while (( action->verb != kNoAction) && ( actionNum > 0))
@@ -2328,7 +2328,7 @@ void AlterObjectOwner( spaceObjectType *anObject, int32_t owner, bool message)
     spaceObjectType *fixObject = NULL;
     int32_t         i, originalOwner = anObject->owner;
     RgbColor        tinyColor;
-    unsigned char   tinyShade;
+    uint8_t         tinyShade;
 
     if ( anObject->owner != owner)
     {

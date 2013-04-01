@@ -34,7 +34,7 @@ class Labels {
     static void reset();
     static int16_t add(
             int16_t h, int16_t v, int16_t hoff, int16_t voff, spaceObjectType* object, bool objectLink,
-            unsigned char color);
+            uint8_t color);
     static void remove(int32_t);
     static void draw();
     static void update_contents(int32_t units_done);
@@ -46,7 +46,7 @@ class Labels {
     static void set_age(int32_t, int32_t);
     static void set_string(int32_t which, const sfz::StringSlice& string);
     static void clear_string(int32_t which);
-    static void set_color(int32_t, unsigned char);
+    static void set_color(int32_t, uint8_t);
     static void set_offset(int32_t which, int32_t hoff, int32_t voff);
     static int32_t get_width(int32_t which);
     static void set_keep_on_screen_anyway(int32_t which, bool keepOnScreenAnyWay);

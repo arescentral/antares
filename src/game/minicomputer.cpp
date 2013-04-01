@@ -348,7 +348,7 @@ void draw_mini_screen() {
     Rect            lRect, cRect;
     miniScreenLineType  *c;
     RgbColor            color, lightcolor, darkcolor, textcolor;
-    unsigned char lineColor = kMiniScreenColor;
+    uint8_t             lineColor = kMiniScreenColor;
     int32_t                count, lineCorrect = 0;
 
     lRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
@@ -894,7 +894,7 @@ void draw_player_ammo(int32_t ammo_one, int32_t ammo_two, int32_t ammo_special) 
 }
 
 void draw_mini_ship_data(
-        const spaceObjectType& newObject, unsigned char headerColor,
+        const spaceObjectType& newObject, uint8_t headerColor,
         int16_t screenTop, int16_t whichString) {
     Rect lRect = mini_screen_line_bounds(screenTop + globals()->gInstrumentTop, 0, 0, kMiniScreenWidth);
     RgbColor color = GetRGBTranslateColorShade(headerColor, LIGHT);

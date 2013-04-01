@@ -115,7 +115,7 @@ struct Messages::longMessageType {
     int16_t                 previousStartResID;
     int16_t                 previousEndResID;
     int16_t                 pictID;
-    unsigned char           backColor;
+    uint8_t                 backColor;
     sfz::String             stringMessage;
     sfz::String             lastStringMessage;
     bool                 newStringMessage;
@@ -470,7 +470,7 @@ void Messages::draw_message_screen(int32_t by_units) {
     }
 }
 
-void Messages::set_status(const StringSlice& status, unsigned char color) {
+void Messages::set_status(const StringSlice& status, uint8_t color) {
     Labels::set_color(status_label_num, color);
     Labels::set_string(status_label_num, status);
     Labels::set_age(status_label_num, kStatusLabelAge);

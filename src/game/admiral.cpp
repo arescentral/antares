@@ -343,12 +343,12 @@ void SetAdmiralAttributes(int32_t whichAdmiral, uint32_t attributes) {
     a->attributes = attributes;
 }
 
-void SetAdmiralColor(int32_t whichAdmiral, unsigned char color) {
+void SetAdmiralColor(int32_t whichAdmiral, uint8_t color) {
     admiralType* a = globals()->gAdmiralData.get() + whichAdmiral;
     a->color = color;
 }
 
-unsigned char GetAdmiralColor(int32_t whichAdmiral) {
+uint8_t GetAdmiralColor(int32_t whichAdmiral) {
     if (whichAdmiral < 0) {
         return 0;
     }

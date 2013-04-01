@@ -47,7 +47,7 @@ class Messages {
     static void advance();
     static void previous();
     static void replay();
-    static void set_status(const sfz::StringSlice& status, unsigned char color);
+    static void set_status(const sfz::StringSlice& status, uint8_t color);
     static int16_t current();
 
     static void draw_long_message(int32_t time_pass);

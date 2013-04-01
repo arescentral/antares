@@ -114,7 +114,7 @@ struct admiralType {
     admiralBuildType    canBuildType[kMaxNumAdmiralCanBuild];
     Fixed               totalBuildChance;
     int32_t             hopeToBuild;
-    unsigned char       color;
+    uint8_t             color;
     bool                active;
     sfz::String         name;
 };
@@ -138,8 +138,8 @@ void RemoveDestination(int32_t whichDestination);
 void RecalcAllAdmiralBuildData();
 
 void SetAdmiralAttributes(int32_t whichAdmiral, uint32_t attributes);
-void SetAdmiralColor(int32_t whichAdmiral, unsigned char color);
-unsigned char GetAdmiralColor(int32_t whichAdmiral);
+void SetAdmiralColor(int32_t whichAdmiral, uint8_t color);
+uint8_t GetAdmiralColor(int32_t whichAdmiral);
 int32_t GetAdmiralRace(int32_t whichAdmiral);
 void SetAdmiralFlagship(int32_t whichAdmiral, int32_t whichShip);
 spaceObjectType* GetAdmiralFlagship(int32_t whichAdmiral);
