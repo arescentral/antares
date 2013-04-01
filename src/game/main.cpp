@@ -667,12 +667,12 @@ void GamePlay::key_down(const KeyDownEvent& event) {
         }
         break;
 
-      case Keys::F1:
-        // Help key is hard-coded to F1 at the moment.
-        // TODO(sfiera): use the help key configured in preferences.
-        _state = HELP;
-        _player_paused = true;
-        stack()->push(new HelpScreen);
+      default:
+        if (event.key() == Preferences::preferences()->key(kHelpKeyNum) - 1) {
+            _state = HELP;
+            _player_paused = true;
+            stack()->push(new HelpScreen);
+        }
         break;
     }
 }
