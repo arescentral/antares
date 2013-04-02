@@ -25,11 +25,6 @@ namespace antares {
 
 extern int32_t gRandomSeed;
 
-int RandomInit();
-void RandomCleanup();
-
-int32_t Random();
-
 int Randomize(int range);
 int16_t XRandomSeeded(int16_t range, int32_t* seed);
 

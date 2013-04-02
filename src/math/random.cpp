@@ -31,14 +31,7 @@ int32_t global_seed = 0x84744901;
 
 int32_t gRandomSeed = 14586;
 
-int RandomInit() {
-    return 0;
-}
-
-void RandomCleanup() {
-}
-
-int32_t Random() {
+static int32_t Random() {
     return XRandomSeeded(0x8000, &global_seed);
 }
 
