@@ -101,7 +101,7 @@ void NonplayerShipThink( int32_t timePass)
     RgbColor        friendSick, foeSick, neutralSick;
     uint32_t        sickCount = usecs_to_ticks(globals()->gGameTime) / 9;
 
-    globals()->gSynchValue = gRandomSeed;
+    globals()->gSynchValue = gRandomSeed.seed;
     sickCount &= 0x00000003;
     if ( sickCount == 0)
     {
@@ -255,7 +255,7 @@ void NonplayerShipThink( int32_t timePass)
                             // to simulate the innaccuracy of battle
                             // (to keep things from wiggling, really)
                             if  (
-                                    XRandomSeeded(baseObject->skillDen, &anObject->randomSeed)
+                                    anObject->randomSeed.next(baseObject->skillDen)
                                     <
                                     baseObject->skillNum
                                 )
@@ -263,7 +263,7 @@ void NonplayerShipThink( int32_t timePass)
                                 anObject->keysDown &= ~kMotionKeyMask;
                                 anObject->keysDown |= keysDown & kMotionKeyMask;
                             }
-                            if (XRandomSeeded(3, &anObject->randomSeed) == 1) {
+                            if (anObject->randomSeed.next(3) == 1) {
                                 anObject->keysDown &= ~kWeaponKeyMask;
                                 anObject->keysDown |= keysDown & kWeaponKeyMask;
                             }
@@ -303,7 +303,7 @@ void NonplayerShipThink( int32_t timePass)
 
                 if ( anObject->offlineTime > 0)
                 {
-                    if (XRandomSeeded(anObject->offlineTime, &(anObject->randomSeed)) > 5) {
+                    if (anObject->randomSeed.next(anObject->offlineTime) > 5) {
                         anObject->keysDown = 0;
                     }
                     anObject->offlineTime--;
@@ -719,7 +719,7 @@ uint32_t ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectType *b
                         {
                             beta = 90;
                             if ( anObject->location.h & 0x00000001)
-//                          if (XRandomSeeded(2, &anObject->randomSeed))
+//                          if (anObject->randomSeed.next(2))
                                 beta = -90;
                             mAddAngle( anObject->directionGoal, beta);
                         }
@@ -745,7 +745,7 @@ uint32_t ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectType *b
                         } else
                         {
                             beta = kEvadeAngle;
-//                          if (XRandomSeeded(2, &anObject->randomSeed))
+//                          if (anObject->randomSeed.next(2))
                             if ( anObject->location.h & 0x00000001)
                                 beta = -kEvadeAngle;
                             mAddAngle( anObject->directionGoal, beta);
@@ -763,7 +763,7 @@ uint32_t ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectType *b
                 } else
                 {
                     beta = kEvadeAngle;
-                    if (XRandomSeeded(2, &anObject->randomSeed)) {
+                    if (anObject->randomSeed.next(2)) {
                         beta = -kEvadeAngle;
                     }
                     mAddAngle( anObject->direction, beta);
@@ -907,7 +907,7 @@ uint32_t ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectType *b
                         } else
                         {
                             beta = kEvadeAngle;
-//                          if (XRandomSeeded(2, &anObject->randomSeed))
+//                          if (anObject->randomSeed.next(2))
                             if ( anObject->location.h & 0x00000001)
                                 beta = -kEvadeAngle;
                             mAddAngle( anObject->directionGoal, beta);
@@ -924,7 +924,7 @@ uint32_t ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectType *b
                     } else
                     {
                         beta = kEvadeAngle;
-                        if (XRandomSeeded(2, &anObject->randomSeed)) {
+                        if (anObject->randomSeed.next(2)) {
                             beta = -kEvadeAngle;
                         }
                         mAddAngle( anObject->direction, beta);
@@ -1240,7 +1240,7 @@ uint32_t ThinkObjectNormalPresence( spaceObjectType *anObject, baseObjectType *b
             if ( targetObject->cloakState > 250)
             {
                 angle -= 45;
-                mAddAngle(angle, XRandomSeeded(90, &anObject->randomSeed));
+                mAddAngle(angle, anObject->randomSeed.next(90));
             }
             anObject->targetAngle = angle;
         }
@@ -1978,9 +1978,9 @@ uint32_t ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *ta
     if ( targetObject->cloakState > 250)
     {
         dest.h -= 70;
-        dest.h += XRandomSeeded(140, &anObject->randomSeed);
+        dest.h += anObject->randomSeed.next(140);
         dest.v -= 70;
-        dest.v += XRandomSeeded(140, &anObject->randomSeed);
+        dest.v += anObject->randomSeed.next(140);
     }
 
     // if target is in our weapon range & we hate the object
@@ -2060,7 +2060,7 @@ uint32_t ThinkObjectEngageTarget( spaceObjectType *anObject, spaceObjectType *ta
     if ( targetObject->cloakState > 250)
     {
         angle -= 45;
-        mAddAngle(angle, XRandomSeeded(90, &anObject->randomSeed));
+        mAddAngle(angle, anObject->randomSeed.next(90));
     }
     anObject->targetAngle = angle;
 

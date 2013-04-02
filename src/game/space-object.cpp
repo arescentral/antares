@@ -618,10 +618,9 @@ void CorrectAllBaseObjectColor( void)
 
 }
 
-void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, int32_t  whichBaseObject, int16_t seed,
-            int32_t direction, fixedPointType *velocity, int32_t owner, int16_t spriteIDOverride)
-
-{
+static void InitSpaceObjectFromBaseObject(
+        spaceObjectType *dObject, int32_t  whichBaseObject, Random seed,
+        int32_t direction, fixedPointType *velocity, int32_t owner, int16_t spriteIDOverride) {
     baseObjectType  *sObject = mGetBaseObjectPtr( whichBaseObject), *weaponBase = NULL;
     int16_t         i;
     int32_t         r;
@@ -649,23 +648,22 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, int32_t  whichBase
     dObject->layer = sObject->pixLayer;
     do
     {
-        dObject->id = XRandomSeeded(32768, &(dObject->randomSeed));
+        dObject->id = dObject->randomSeed.next(32768);
     } while ( dObject->id == -1);
 
     dObject->distanceGrid.h = dObject->distanceGrid.v = dObject->collisionGrid.h = dObject->collisionGrid.v = 0;
     if ( sObject->activateActionNum & kPeriodicActionTimeMask)
     {
         dObject->periodicTime = ((sObject->activateActionNum & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift) +
-            XRandomSeeded(
-                    ((sObject->activateActionNum & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift),
-                    &(dObject->randomSeed));
+            dObject->randomSeed.next(
+                    ((sObject->activateActionNum & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift));
     } else dObject->periodicTime = 0;
 
     r = sObject->initialDirection;
     mAddAngle( r, direction);
     if ( sObject->initialDirectionRange > 0)
     {
-        i = XRandomSeeded(sObject->initialDirectionRange, &(dObject->randomSeed));
+        i = dObject->randomSeed.next(sObject->initialDirectionRange);
         mAddAngle( r, i);
     }
     dObject->direction = r;
@@ -673,7 +671,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, int32_t  whichBase
     f = sObject->initialVelocity;
     if ( sObject->initialVelocityRange > 0)
     {
-        f += XRandomSeeded(sObject->initialVelocityRange, &(dObject->randomSeed));
+        f += dObject->randomSeed.next(sObject->initialVelocityRange);
     }
     GetRotPoint(&newVel.h, &newVel.v, r);
     newVel.h = mMultiplyFixed( newVel.h, f);
@@ -725,21 +723,20 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, int32_t  whichBase
         dObject->frame.animation.thisShape = sObject->frame.animation.frameShape;
         if ( sObject->frame.animation.frameShapeRange > 0)
         {
-            l = XRandomSeeded(sObject->frame.animation.frameShapeRange, &(dObject->randomSeed));
+            l = dObject->randomSeed.next(sObject->frame.animation.frameShapeRange);
             dObject->frame.animation.thisShape += l;
         }
         dObject->frame.animation.frameDirection =
             sObject->frame.animation.frameDirection;
         if ( sObject->frame.animation.frameDirectionRange == -1)
         {
-            if (XRandomSeeded(2, &(dObject->randomSeed)) == 1) {
+            if (dObject->randomSeed.next(2) == 1) {
                 dObject->frame.animation.frameDirection = 1;
             }
         } else if ( sObject->frame.animation.frameDirectionRange > 0)
         {
-            dObject->frame.animation.frameDirection += XRandomSeeded(
-                sObject->frame.animation.frameDirectionRange,
-                &(dObject->randomSeed));
+            dObject->frame.animation.frameDirection += dObject->randomSeed.next(
+                sObject->frame.animation.frameDirectionRange);
         }
         dObject->frame.animation.frameFraction = 0;
         dObject->frame.animation.frameSpeed = sObject->frame.animation.frameSpeed;
@@ -755,8 +752,7 @@ void InitSpaceObjectFromBaseObject( spaceObjectType *dObject, int32_t  whichBase
     // not setting owner
 
     if ( sObject->initialAge >= 0)
-        dObject->age = sObject->initialAge + XRandomSeeded(
-                sObject->initialAgeRange, &(dObject->randomSeed));
+        dObject->age = sObject->initialAge + dObject->randomSeed.next(sObject->initialAgeRange);
     else dObject->age = -1;
     dObject->naturalScale = sObject->naturalScale;
 
@@ -883,21 +879,20 @@ void ChangeObjectBaseType( spaceObjectType *dObject, int32_t whichBaseObject,
         dObject->frame.animation.thisShape = sObject->frame.animation.frameShape;
         if ( sObject->frame.animation.frameShapeRange > 0)
         {
-            r = XRandomSeeded(sObject->frame.animation.frameShapeRange, &(dObject->randomSeed));
+            r = dObject->randomSeed.next(sObject->frame.animation.frameShapeRange);
             dObject->frame.animation.thisShape += r;
         }
         dObject->frame.animation.frameDirection =
             sObject->frame.animation.frameDirection;
         if ( sObject->frame.animation.frameDirectionRange == -1)
         {
-            if (XRandomSeeded(2, &(dObject->randomSeed)) == 1) {
+            if (dObject->randomSeed.next(2) == 1) {
                 dObject->frame.animation.frameDirection = 1;
             }
         } else if ( sObject->frame.animation.frameDirectionRange > 0)
         {
-            dObject->frame.animation.frameDirection += XRandomSeeded(
-                sObject->frame.animation.frameDirectionRange,
-                &(dObject->randomSeed));
+            dObject->frame.animation.frameDirection += dObject->randomSeed.next(
+                sObject->frame.animation.frameDirectionRange);
         }
         dObject->frame.animation.frameFraction = 0;
         dObject->frame.animation.frameSpeed = sObject->frame.animation.frameSpeed;
@@ -908,8 +903,7 @@ void ChangeObjectBaseType( spaceObjectType *dObject, int32_t whichBaseObject,
 
     dObject->maxVelocity = sObject->maxVelocity;
 
-    dObject->age = sObject->initialAge + XRandomSeeded(
-            sObject->initialAgeRange, &(dObject->randomSeed));
+    dObject->age = sObject->initialAge + dObject->randomSeed.next(sObject->initialAgeRange);
 
     dObject->naturalScale = sObject->naturalScale;
 
@@ -947,9 +941,8 @@ void ChangeObjectBaseType( spaceObjectType *dObject, int32_t whichBaseObject,
     if ( sObject->activateActionNum & kPeriodicActionTimeMask)
     {
         dObject->periodicTime = ((sObject->activateActionNum & kPeriodicActionTimeMask) >> kPeriodicActionTimeShift) +
-            XRandomSeeded(
-                    ((sObject->activateActionNum & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift),
-                    &(dObject->randomSeed));
+            dObject->randomSeed.next(
+                    ((sObject->activateActionNum & kPeriodicActionRangeMask) >> kPeriodicActionRangeShift));
     } else dObject->periodicTime = 0;
 
     if ( dObject->pulseType != kNoWeapon)
@@ -1306,9 +1299,8 @@ void ExecuteObjectActions( int32_t whichAction, int32_t actionNum,
                     baseObject = mGetBaseObjectPtr( action->argument.createObject.whichBaseType);
                     end = action->argument.createObject.howManyMinimum;
                     if ( action->argument.createObject.howManyRange > 0)
-                        end += XRandomSeeded(
-                                action->argument.createObject.howManyRange,
-                                &(anObject->randomSeed));
+                        end += anObject->randomSeed.next(
+                                action->argument.createObject.howManyRange);
                     while ( end > 0)
                     {
                         if ( action->argument.createObject.velocityRelative)
@@ -1324,8 +1316,7 @@ void ExecuteObjectActions( int32_t whichAction, int32_t actionNum,
                         /*
                         l += baseObject->initialDirection;
                         if ( baseObject->initialDirectionRange > 0)
-                            l += XRandomSeeded(baseObject->initialDirectionRange,
-                                        &(anObject->randomSeed));
+                            l += anObject->randomSeed.next(baseObject->initialDirectionRange);
                         */
                         newLocation = anObject->location;
                         if ( offset != NULL)
@@ -1336,13 +1327,11 @@ void ExecuteObjectActions( int32_t whichAction, int32_t actionNum,
 
                         if ( action->argument.createObject.randomDistance > 0)
                         {
-                            newLocation.h += XRandomSeeded(
-                                    action->argument.createObject.randomDistance << 1,
-                                    &(anObject->randomSeed))
+                            newLocation.h += anObject->randomSeed.next(
+                                    action->argument.createObject.randomDistance << 1)
                                 - action->argument.createObject.randomDistance;
-                            newLocation.v += XRandomSeeded(
-                                    action->argument.createObject.randomDistance << 1,
-                                    &(anObject->randomSeed))
+                            newLocation.v += anObject->randomSeed.next(
+                                    action->argument.createObject.randomDistance << 1)
                                 - action->argument.createObject.randomDistance;
                         }
 
@@ -1413,9 +1402,8 @@ void ExecuteObjectActions( int32_t whichAction, int32_t actionNum,
                     angle = action->argument.playSound.idMinimum;
                     if ( action->argument.playSound.idRange > 0)
                     {
-                        angle += XRandomSeeded(
-                            action->argument.playSound.idRange + 1,
-                            &(anObject->randomSeed));
+                        angle += anObject->randomSeed.next(
+                            action->argument.playSound.idRange + 1);
                     }
                     if ( !action->argument.playSound.absolute)
                     {
@@ -1570,16 +1558,14 @@ void ExecuteObjectActions( int32_t whichAction, int32_t actionNum,
                                 {
                                     f = mMultiplyFixed( anObject->baseType->frame.rotation.maxTurnRate,
                                                     action->argument.alterObject.minimum +
-                                                    XRandomSeeded(
-                                                        action->argument.alterObject.range,
-                                                        &(anObject->randomSeed)));
+                                                    anObject->randomSeed.next(
+                                                        action->argument.alterObject.range));
                                 } else
                                 {
                                     f = mMultiplyFixed( 2 /*kDefaultTurnRate*/,
                                                     action->argument.alterObject.minimum +
-                                                    XRandomSeeded(
-                                                        action->argument.alterObject.range,
-                                                        &(anObject->randomSeed)));
+                                                    anObject->randomSeed.next(
+                                                        action->argument.alterObject.range));
                                 }
                                 f2 = anObject->baseType->mass;
                                 if ( f2 == 0) f = -1;
@@ -1593,17 +1579,14 @@ void ExecuteObjectActions( int32_t whichAction, int32_t actionNum,
                                         mMultiplyFixed( anObject->baseType->frame.rotation.maxTurnRate,
                                             action->argument.alterObject.minimum);
 
-                                anObject->frame.rotation.turnVelocity += XRandomSeeded( f,
-                                                &(anObject->randomSeed));
+                                anObject->frame.rotation.turnVelocity += anObject->randomSeed(f);
                                 */
                             }
                             break;
 
                         case kAlterOffline:
                             f = action->argument.alterObject.minimum +
-                                XRandomSeeded(
-                                        action->argument.alterObject.range,
-                                        &(anObject->randomSeed));
+                                anObject->randomSeed.next(action->argument.alterObject.range);
                             f2 = anObject->baseType->mass;
                             if ( f2 == 0) anObject->offlineTime = -1;
                             else
@@ -1753,9 +1736,7 @@ void ExecuteObjectActions( int32_t whichAction, int32_t actionNum,
 
                         case kAlterThrust:
                             f = action->argument.alterObject.minimum +
-                                XRandomSeeded(
-                                        action->argument.alterObject.range,
-                                        &(anObject->randomSeed));
+                                anObject->randomSeed.next(action->argument.alterObject.range);
                             if ( action->argument.alterObject.relative)
                             {
                                 anObject->thrust += f;
@@ -1837,9 +1818,7 @@ void ExecuteObjectActions( int32_t whichAction, int32_t actionNum,
 
                         case kAlterAge:
                             l = action->argument.alterObject.minimum +
-                                    XRandomSeeded(
-                                            action->argument.alterObject.range,
-                                            &(anObject->randomSeed));
+                                anObject->randomSeed.next(action->argument.alterObject.range);
 
                             if ( action->argument.alterObject.relative)
                             {
@@ -1872,13 +1851,11 @@ void ExecuteObjectActions( int32_t whichAction, int32_t actionNum,
                             {
                                 newLocation.h = newLocation.v = 0;
                             }
-                            newLocation.h += XRandomSeeded(
-                                    action->argument.alterObject.minimum << 1,
-                                    &(anObject->randomSeed))
+                            newLocation.h += anObject->randomSeed.next(
+                                    action->argument.alterObject.minimum << 1)
                                 - action->argument.alterObject.minimum;
-                            newLocation.v += XRandomSeeded(
-                                    action->argument.alterObject.minimum << 1,
-                                    &(anObject->randomSeed))
+                            newLocation.v += anObject->randomSeed.next(
+                                    action->argument.alterObject.minimum << 1)
                                 - action->argument.alterObject.minimum;
                             anObject->location.h = newLocation.h;
                             anObject->location.v = newLocation.v;
@@ -2108,7 +2085,7 @@ int32_t CreateAnySpaceObject( int32_t whichBase, fixedPointType *velocity,
     uint32_t        distance, dcalc, difference;
     uint64_t        hugeDistance;
 
-    InitSpaceObjectFromBaseObject( &newObject, whichBase, XRandomSeeded(32766, &gRandomSeed),
+    InitSpaceObjectFromBaseObject( &newObject, whichBase, {gRandomSeed.next(32766)},
                                     direction, velocity, owner, spriteIDOverride);
     newObject.location = *location;
     if ( globals()->gPlayerShipNumber >= 0)
@@ -2167,7 +2144,7 @@ int32_t CreateAnySpaceObject( int32_t whichBase, fixedPointType *velocity,
     }
 
     newObject.sprite = NULL;
-    newObject.id = XRandomSeeded(16384, &gRandomSeed);
+    newObject.id = gRandomSeed.next(16384);
 
     if ( newObject.attributes & kCanTurn)
     {

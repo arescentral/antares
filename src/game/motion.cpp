@@ -666,9 +666,9 @@ void CollideSpaceObjects( spaceObjectType *table, const int32_t tableLength)
                         kPeriodicActionNotMask, aObject, NULL, NULL, true);
                     aObject->periodicTime = ((aObject->baseType->activateActionNum & kPeriodicActionTimeMask) >>
                         kPeriodicActionTimeShift) +
-                        XRandomSeeded(((aObject->baseType->activateActionNum & kPeriodicActionRangeMask) >>
-                            kPeriodicActionRangeShift),
-                            &(aObject->randomSeed));
+                        aObject->randomSeed.next(
+                                ((aObject->baseType->activateActionNum & kPeriodicActionRangeMask) >>
+                                 kPeriodicActionRangeShift));
                 }
             }
         }

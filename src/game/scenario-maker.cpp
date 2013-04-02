@@ -568,7 +568,7 @@ bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     {
         int32_t angle = gThisScenario->angle();
         if (angle < 0) {
-            gScenarioRotation = XRandomSeeded(ROT_POS, &gRandomSeed);
+            gScenarioRotation = gRandomSeed.next(ROT_POS);
         } else {
             gScenarioRotation = angle;
         }
