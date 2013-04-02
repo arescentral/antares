@@ -24,6 +24,7 @@
 
 #include "drawing/color.hpp"
 #include "math/geometry.hpp"
+#include "math/random.hpp"
 #include "ui/card.hpp"
 #include "video/driver.hpp"
 
@@ -77,7 +78,7 @@ class OpenGlVideoDriver : public VideoDriver {
 
   private:
     const Size _screen_size;
-    int32_t _static_seed;
+    Random _static_seed;
 
     Uniforms _uniforms;
 

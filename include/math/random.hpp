@@ -23,19 +23,15 @@
 
 namespace antares {
 
-extern int32_t gRandomSeed;
+struct Random {
+    int32_t seed;
 
-int RandomInit();
-void RandomCleanup();
+    int16_t next(int16_t range);
+};
 
-int32_t Random();
+extern Random gRandomSeed;
 
 int Randomize(int range);
-int16_t XRandomSeeded(int16_t range, int32_t* seed);
-
-inline int16_t RandomSeeded(int16_t range, int32_t* seed, int32_t, int32_t) {
-    return XRandomSeeded(range, seed);
-}
 
 }  // namespace antares
 

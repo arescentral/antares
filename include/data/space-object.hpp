@@ -24,6 +24,7 @@
 #include "game/beam.hpp"
 #include "game/globals.hpp"
 #include "math/fixed.hpp"
+#include "math/random.hpp"
 #include "sound/fx.hpp"
 
 namespace antares {
@@ -672,7 +673,7 @@ struct spaceObjectType {
     Point                   scaledCornerOffset;
     Point                   scaledSize;
     Rect                absoluteBounds;
-    int32_t                 randomSeed;
+    Random                  randomSeed;
 
     union
     {

@@ -38,8 +38,6 @@ int AddSpaceObject( spaceObjectType *);
 int AddNumberedSpaceObject( spaceObjectType *, int32_t);
 void RemoveAllSpaceObjects( void);
 void CorrectAllBaseObjectColor( void);
-void InitSpaceObjectFromBaseObject( spaceObjectType *, int32_t, int16_t, int32_t, fixedPointType *, int32_t,
-                                    int16_t);
 void ChangeObjectBaseType( spaceObjectType *, int32_t, int32_t, bool);
 void AddActionToQueue( objectActionType *, int32_t, int32_t, int32_t, spaceObjectType *,
                         spaceObjectType *, Point*);

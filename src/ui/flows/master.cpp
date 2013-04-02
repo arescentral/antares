@@ -66,8 +66,9 @@ class TitleScreenFade : public PictFade {
 
 }  // namespace
 
-Master::Master():
+Master::Master(int32_t seed):
         _state(START),
+        _seed(seed),
         _skipped(false) { }
 
 void Master::become_front() {
@@ -130,6 +131,7 @@ void Master::init() {
     initialFadeColor.red = initialFadeColor.green = initialFadeColor.blue = 0;
 
     RotationInit();
+    gRandomSeed.seed = _seed;
 
     InitDirectText();
     Labels::init();

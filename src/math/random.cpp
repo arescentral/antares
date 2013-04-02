@@ -25,21 +25,14 @@ namespace antares {
 
 namespace {
 
-int32_t global_seed = 0x84744901;
+Random global_seed = {static_cast<int32_t>(0x84744901)};
 
 }  // namespace
 
-int32_t gRandomSeed = 14586;
+Random gRandomSeed = {14586};
 
-int RandomInit() {
-    return 0;
-}
-
-void RandomCleanup() {
-}
-
-int32_t Random() {
-    return XRandomSeeded(0x8000, &global_seed);
+static int32_t Random() {
+    return global_seed.next(0x8000);
 }
 
 int Randomize(int range) {
@@ -55,9 +48,9 @@ int Randomize(int range) {
     return (rawResult * range) / 32768;
 }
 
-int16_t XRandomSeeded(int16_t range, int32_t* seed) {
-    *seed = 1664525 * *seed + 1013904223;
-    int32_t l = *seed & 0x00007fff;
+int16_t Random::next(int16_t range) {
+    seed = 1664525 * seed + 1013904223;
+    int32_t l = seed & 0x00007fff;
     return (l * range) >> 15;
 }
 

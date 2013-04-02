@@ -154,10 +154,10 @@ void SetSpecialBeamAttributes(spaceObjectType* beamObject, spaceObjectType* sour
                         || (beam.beamKind == eBoltObjectToRelativeCoordKind)) {
                     beam.toRelativeCoord.h = target->location.h - sourceObject->location.h
                         - beam.accuracy
-                        + RandomSeeded(beam.accuracy << 1, &(beamObject->randomSeed), 'beam', 1);
+                        + beamObject->randomSeed.next(beam.accuracy << 1);
                     beam.toRelativeCoord.v = target->location.v - sourceObject->location.v
                         - beam.accuracy
-                        + RandomSeeded(beam.accuracy << 1, &(beamObject->randomSeed), 'beam', 1);
+                        + beamObject->randomSeed.next(beam.accuracy << 1);
                 } else {
                     beam.toObjectNumber = target->entryNumber;
                     beam.toObjectID = target->id;

@@ -118,10 +118,6 @@ class GamePlay : public Card {
     PlayAgainScreen::Item _play_again;
 };
 
-Card* AresInit() {
-    return new Master;
-}
-
 MainPlay::MainPlay(
         const Scenario* scenario, bool replay, bool show_loading_screen,
         GameResult* game_result, int32_t* seconds):

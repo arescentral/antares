@@ -27,21 +27,21 @@
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
 #include "game/globals.hpp"
-#include "game/main.hpp"
 #include "sound/openal-driver.hpp"
 #include "ui/card.hpp"
+#include "ui/flows/master.hpp"
 #include "video/driver.hpp"
 
 using sfz::CString;
 using sfz::Exception;
 using sfz::String;
 using sfz::StringSlice;
-using antares::AresInit;
 using antares::CardStack;
 using antares::CocoaVideoDriver;
 using antares::CoreFoundationPrefsDriver;
 using antares::DirectoryLedger;
 using antares::Ledger;
+using antares::Master;
 using antares::NullLedger;
 using antares::OpenAlSoundDriver;
 using antares::Preferences;
@@ -83,7 +83,7 @@ extern "C" void antares_controller_destroy_drivers(AntaresDrivers* drivers) {
 
 extern "C" bool antares_controller_loop(AntaresDrivers* drivers, CFStringRef* error_message) {
     try {
-        drivers->video.loop(AresInit());
+        drivers->video.loop(new Master(time(NULL)));
     } catch (Exception& e) {
         cf::String msg(e.message());
         *error_message = msg.release();
