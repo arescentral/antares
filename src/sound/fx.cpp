@@ -219,7 +219,7 @@ int AddSound(int soundID) {
         }
 
         globals()->gSound[whichSound].soundHandle = SoundDriver::driver()->open_sound(
-                format("/sounds/{0}.aiff", soundID));
+                format("/sounds/{0}", soundID));
         globals()->gSound[whichSound].id = soundID;
     }
     return whichSound;

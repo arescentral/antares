@@ -57,6 +57,7 @@ def build(bld):
             "resources/MainMenu.nib",
             "data/fonts",
             "data/interfaces",
+            "data/music",
             "data/pictures",
             "data/rotation-table",
             "data/strings",

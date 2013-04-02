@@ -40,6 +40,9 @@ class OpenAlSoundDriver : public SoundDriver {
     class OpenAlChannel;
     class OpenAlSound;
 
+    template <typename T>
+    static void read_sound(sfz::BytesSlice data, OpenAlSound& sound);
+
     ALCcontext* _context;
     ALCdevice* _device;
     OpenAlChannel* _active_channel;
