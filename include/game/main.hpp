@@ -32,8 +32,6 @@ enum GameResult {
     QUIT_GAME = 3,
 };
 
-Card* AresInit();
-
 class MainPlay : public Card {
   public:
     MainPlay(

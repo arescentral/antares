@@ -23,9 +23,9 @@
 
 #include "config/ledger.hpp"
 #include "config/preferences.hpp"
-#include "game/main.hpp"
 #include "sound/driver.hpp"
 #include "ui/card.hpp"
+#include "ui/flows/master.hpp"
 #include "video/driver.hpp"
 #include "video/offscreen-driver.hpp"
 #include "video/text-driver.hpp"
@@ -114,10 +114,10 @@ void main(int argc, char* const* argv) {
 
     if (text) {
         TextVideoDriver video(Preferences::preferences()->screen_size(), scheduler, output_dir);
-        video.loop(AresInit());
+        video.loop(new Master(14586));
     } else {
         OffscreenVideoDriver video(Preferences::preferences()->screen_size(), scheduler, output_dir);
-        video.loop(AresInit());
+        video.loop(new Master(14586));
     }
 }
 
