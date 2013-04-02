@@ -838,7 +838,7 @@ void AdmiralThink() {
                 a->blitzkrieg--;
                 if (a->blitzkrieg <= 0) {
                     // Really 48:
-                    a->blitzkrieg = 0 - (RandomSeeded(1200, &gRandomSeed, 'adm1', -1) + 1200);
+                    a->blitzkrieg = 0 - (XRandomSeeded(1200, &gRandomSeed) + 1200);
                     anObject = mGetSpaceObjectPtr(0);
                     for (int j = 0; j < kMaxSpaceObject; j++) {
                         if (anObject->owner == i) {
@@ -851,7 +851,7 @@ void AdmiralThink() {
                 a->blitzkrieg++;
                 if (a->blitzkrieg >= 0) {
                     // Really 48:
-                    a->blitzkrieg = RandomSeeded(1200, &gRandomSeed, 'adm2', -1) + 1200;
+                    a->blitzkrieg = XRandomSeeded(1200, &gRandomSeed) + 1200;
                     anObject = mGetSpaceObjectPtr(0);
                     for (int j = 0; j < kMaxSpaceObject; j++) {
                         if (anObject->owner == i) {
@@ -908,9 +908,9 @@ void AdmiralThink() {
                                     a->destinationObjectID = destObject->id;
                                     anObject->currentTargetValue
                                         = anObject->bestConsideredTargetValue;
-                                    thisValue = RandomSeeded(
-                                            mFloatToFixed(0.5), &(anObject->randomSeed), 'adm3',
-                                            anObject->whichBaseObject) - mFloatToFixed(0.25);
+                                    thisValue = XRandomSeeded(
+                                            mFloatToFixed(0.5), &(anObject->randomSeed))
+                                        - mFloatToFixed(0.25);
                                     thisValue = mMultiplyFixed(
                                             thisValue, anObject->currentTargetValue);
                                     anObject->currentTargetValue += thisValue;
@@ -1155,9 +1155,8 @@ void AdmiralThink() {
                 }
 
                 if (thisValue > 0) {
-                    thisValue += RandomSeeded(
-                            thisValue >> 1, &(anObject->randomSeed), 'adm4',
-                            anObject->whichBaseObject) - (thisValue >> 2);
+                    thisValue += XRandomSeeded(
+                            thisValue >> 1, &(anObject->randomSeed)) - (thisValue >> 2);
                 }
                 if (thisValue > anObject->bestConsideredTargetValue) {
                     anObject->bestConsideredTargetValue = thisValue;
@@ -1202,8 +1201,8 @@ void AdmiralThink() {
                             while ((a->hopeToBuild < 0) && (k < 7)) {
                                 k++;
                                 // choose something to build
-                                thisValue = RandomSeeded(
-                                        a->totalBuildChance, &gRandomSeed, 'adm5', -1);
+                                thisValue = XRandomSeeded(
+                                        a->totalBuildChance, &gRandomSeed);
                                 friendValue = 0xffffffff; // equals the highest qualifying object
                                 for (int j = 0; j < kMaxNumAdmiralCanBuild; ++j) {
                                     if ((a->canBuildType[j].chanceRange <= thisValue)

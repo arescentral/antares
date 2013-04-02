@@ -28,10 +28,6 @@ extern int32_t gRandomSeed;
 int Randomize(int range);
 int16_t XRandomSeeded(int16_t range, int32_t* seed);
 
-inline int16_t RandomSeeded(int16_t range, int32_t* seed, int32_t, int32_t) {
-    return XRandomSeeded(range, seed);
-}
-
 }  // namespace antares
 
 #endif // ANTARES_MATH_RANDOM_HPP_
