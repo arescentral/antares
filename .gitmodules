@@ -22,3 +22,6 @@
 [submodule "data"]
 	path = data
 	url = https://code.google.com/p/antares.data/
+[submodule "ext/libmodplug-waf"]
+	path = ext/libmodplug-waf
+	url = https://github.com/sfiera/libmodplug-waf.git
