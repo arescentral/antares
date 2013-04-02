@@ -77,7 +77,7 @@ void StopAndUnloadSong() {
 
 void LoadSong(int id) {
     StopSong();
-    song = SoundDriver::driver()->open_sound(format("/music/{0}.mp3", id));
+    song = SoundDriver::driver()->open_sound(format("/music/{0}", id));
 }
 
 void SetSongVolume(double volume) {

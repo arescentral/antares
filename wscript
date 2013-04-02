@@ -12,7 +12,7 @@ def common(ctx):
     ctx.load("compiler_c compiler_cxx")
     ctx.load("core externals", tooldir="ext/waf-sfiera")
     ctx.load("antares_test", tooldir="tools")
-    ctx.external("libpng-waf libsfz libzipxx rezin")
+    ctx.external("libmodplug-waf libpng-waf libsfz libzipxx rezin")
 
 def dist(dst):
     dst.algo = "zip"
@@ -57,6 +57,7 @@ def build(bld):
             "resources/MainMenu.nib",
             "data/fonts",
             "data/interfaces",
+            "data/music",
             "data/pictures",
             "data/rotation-table",
             "data/strings",
@@ -314,7 +315,10 @@ def build(bld):
         cxxflags=WARNINGS,
         includes="./include",
         export_includes="./include",
-        use="libsfz/libsfz",
+        use=[
+            "libmodplug/libmodplug",
+            "libsfz/libsfz",
+        ],
     )
 
     bld.platform(
