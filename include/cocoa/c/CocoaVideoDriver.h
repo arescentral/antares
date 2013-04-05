@@ -20,6 +20,7 @@
 #define ANTARES_COCOA_C_COCOA_VIDEO_DRIVER_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/gl.h>
 
@@ -65,7 +66,7 @@ void antares_event_translator_set_key_up_callback(
         AntaresEventTranslator* translator,
         void (*callback)(int32_t key, void* userdata), void* userdata);
 
-void antares_event_translator_enqueue(AntaresEventTranslator* translator, int64_t until);
+bool antares_event_translator_next(AntaresEventTranslator* translator, int64_t until);
 
 #ifdef __cplusplus
 }  // extern "C"

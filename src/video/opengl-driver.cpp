@@ -495,6 +495,10 @@ OpenGlVideoDriver::MainLoop::MainLoop(OpenGlVideoDriver& driver, Card* initial):
         _stack(initial) { }
 
 void OpenGlVideoDriver::MainLoop::draw() {
+    if (done()) {
+        return;
+    }
+
     glClear(GL_COLOR_BUFFER_BIT);
     glLoadIdentity();
     glViewport(0, 0, _driver._screen_size.width, _driver._screen_size.height);

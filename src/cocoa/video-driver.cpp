@@ -38,7 +38,6 @@
 
 using sfz::Exception;
 using std::min;
-using std::queue;
 using std::unique_ptr;
 
 namespace antares {
@@ -51,31 +50,6 @@ int64_t usecs() {
     return tv.tv_sec * 1000000ll + tv.tv_usec;
 }
 
-void enqueue_mouse_down(int button, int32_t x, int32_t y, void* userdata) {
-    queue<unique_ptr<Event>>* q = reinterpret_cast<queue<unique_ptr<Event>>*>(userdata);
-    q->emplace(new MouseDownEvent(now_usecs(), button, Point(x, y)));
-}
-
-void enqueue_mouse_up(int button, int32_t x, int32_t y, void* userdata) {
-    queue<unique_ptr<Event>>* q = reinterpret_cast<queue<unique_ptr<Event>>*>(userdata);
-    q->emplace(new MouseUpEvent(now_usecs(), button, Point(x, y)));
-}
-
-void enqueue_mouse_move(int32_t x, int32_t y, void* userdata) {
-    queue<unique_ptr<Event>>* q = reinterpret_cast<queue<unique_ptr<Event>>*>(userdata);
-    q->emplace(new MouseMoveEvent(now_usecs(), Point(x, y)));
-}
-
-void enqueue_key_down(int32_t key, void* userdata) {
-    queue<unique_ptr<Event>>* q = reinterpret_cast<queue<unique_ptr<Event>>*>(userdata);
-    q->emplace(new KeyDownEvent(now_usecs(), key));
-}
-
-void enqueue_key_up(int32_t key, void* userdata) {
-    queue<unique_ptr<Event>>* q = reinterpret_cast<queue<unique_ptr<Event>>*>(userdata);
-    q->emplace(new KeyUpEvent(now_usecs(), key));
-}
-
 }  // namespace
 
 CocoaVideoDriver::CocoaVideoDriver(bool fullscreen, Size screen_size)
@@ -83,43 +57,7 @@ CocoaVideoDriver::CocoaVideoDriver(bool fullscreen, Size screen_size)
           _fullscreen(fullscreen),
           _start_time(antares::usecs()),
           _translator(screen_size.width, screen_size.height),
-          _event_tracker(false) {
-    antares_event_translator_set_mouse_down_callback(
-            _translator.c_obj(), enqueue_mouse_down, &_event_queue);
-    antares_event_translator_set_mouse_up_callback(
-            _translator.c_obj(), enqueue_mouse_up, &_event_queue);
-    antares_event_translator_set_mouse_move_callback(
-            _translator.c_obj(), enqueue_mouse_move, &_event_queue);
-    antares_event_translator_set_key_down_callback(
-            _translator.c_obj(), enqueue_key_down, &_event_queue);
-    antares_event_translator_set_key_up_callback(
-            _translator.c_obj(), enqueue_key_up, &_event_queue);
-}
-
-bool CocoaVideoDriver::wait_next_event(int64_t until, unique_ptr<Event>& event) {
-    while (!_event_queue.empty() && _event_queue.front()->at() < until) {
-        swap(event, _event_queue.front());
-        _event_queue.pop();
-        return true;
-    }
-    if (until < (std::numeric_limits<int64_t>::max() - _start_time)) {
-        until = until + _start_time;
-    } else {
-        until = std::numeric_limits<int64_t>::max();
-    }
-
-    antares_event_translator_enqueue(_translator.c_obj(), until);
-    while (until > antares::usecs()) {
-        if (!_event_queue.empty()) {
-            swap(event, _event_queue.front());
-            _event_queue.pop();
-            return true;
-        }
-        antares_event_translator_enqueue(_translator.c_obj(), until);
-    }
-
-    return false;
-}
+          _event_tracker(false) { }
 
 bool CocoaVideoDriver::button(int which) {
     int32_t button;
@@ -149,6 +87,44 @@ int64_t CocoaVideoDriver::double_click_interval_usecs() const {
     return antares_double_click_interval_usecs();
 }
 
+struct CocoaVideoDriver::EventBridge {
+    EventTracker& event_tracker;
+    MainLoop& main_loop;
+    cgl::Context& context;
+
+    static void mouse_down(int button, int32_t x, int32_t y, void* userdata) {
+        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
+        self->send(new MouseDownEvent(now_usecs(), button, Point(x, y)));
+    }
+
+    static void mouse_up(int button, int32_t x, int32_t y, void* userdata) {
+        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
+        self->send(new MouseUpEvent(now_usecs(), button, Point(x, y)));
+    }
+
+    static void mouse_move(int32_t x, int32_t y, void* userdata) {
+        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
+        self->send(new MouseMoveEvent(now_usecs(), Point(x, y)));
+    }
+
+    static void key_down(int32_t key, void* userdata) {
+        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
+        self->send(new KeyDownEvent(now_usecs(), key));
+    }
+
+    static void key_up(int32_t key, void* userdata) {
+        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
+        self->send(new KeyUpEvent(now_usecs(), key));
+    }
+
+    void send(Event* event) {
+        event->send(&event_tracker);
+        event->send(main_loop.top());
+        main_loop.draw();
+        CGLFlushDrawable(context.c_obj());
+    }
+};
+
 void CocoaVideoDriver::loop(Card* initial) {
     CGLPixelFormatAttribute attrs[] = {
         kCGLPFADisplayMask, static_cast<CGLPixelFormatAttribute>(
@@ -174,32 +150,38 @@ void CocoaVideoDriver::loop(Card* initial) {
     CGLSetCurrentContext(context.c_obj());
 
     MainLoop main_loop(*this, initial);
-    while (!main_loop.done()) {
-        main_loop.draw();
-        CGLFlushDrawable(context.c_obj());
+    main_loop.draw();
+    CGLFlushDrawable(context.c_obj());
+    EventBridge bridge = {_event_tracker, main_loop, context};
 
-        unique_ptr<Event> event;
-        int64_t now = now_usecs();
-        while (wait_next_event(now, event)) {
-            event->send(&_event_tracker);
-            event->send(main_loop.top());
-            main_loop.draw();
-            CGLFlushDrawable(context.c_obj());
+    antares_event_translator_set_mouse_down_callback(
+            _translator.c_obj(), EventBridge::mouse_down, &bridge);
+    antares_event_translator_set_mouse_up_callback(
+            _translator.c_obj(), EventBridge::mouse_up, &bridge);
+    antares_event_translator_set_mouse_move_callback(
+            _translator.c_obj(), EventBridge::mouse_move, &bridge);
+    antares_event_translator_set_key_down_callback(
+            _translator.c_obj(), EventBridge::key_down, &bridge);
+    antares_event_translator_set_key_up_callback(
+            _translator.c_obj(), EventBridge::key_up, &bridge);
+
+    while (!main_loop.done()) {
+        int64_t now = usecs();
+        while (antares_event_translator_next(_translator.c_obj(), now)) {
+            continue;
         }
 
         int64_t at;
         if (main_loop.top()->next_timer(at)) {
-            if (wait_next_event(at, event)) {
-                event->send(&_event_tracker);
-                event->send(main_loop.top());
-            } else {
+            at += _start_time;
+            if (!antares_event_translator_next(_translator.c_obj(), at)) {
                 main_loop.top()->fire_timer();
+                main_loop.draw();
+                CGLFlushDrawable(context.c_obj());
             }
         } else {
-            if (wait_next_event(std::numeric_limits<int64_t>::max(), event)) {
-                event->send(&_event_tracker);
-                event->send(main_loop.top());
-            }
+            at = std::numeric_limits<int64_t>::max();
+            antares_event_translator_next(_translator.c_obj(), at);
         }
     }
 }

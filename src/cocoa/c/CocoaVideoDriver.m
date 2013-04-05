@@ -289,34 +289,42 @@ static void mouse_move(AntaresEventTranslator* translator, NSEvent* event) {
     translator->mouse_move_callback(where.x, where.y, translator->mouse_move_userdata);
 }
 
-void antares_event_translator_enqueue(AntaresEventTranslator* translator, int64_t until) {
+bool antares_event_translator_next(AntaresEventTranslator* translator, int64_t until) {
     NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
     NSDate* date = [NSDate dateWithTimeIntervalSince1970:(until * 1e-6)];
-    NSEvent* event =
-        [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:date inMode:NSDefaultRunLoopMode
-            dequeue:YES];
-    if (event) {
+    bool result = false;
+    while (!result) {
+        NSEvent* event =
+            [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:date inMode:NSDefaultRunLoopMode
+             dequeue:YES];
+        if (!event) {
+            break;
+        }
         switch ([event type]) {
           case NSLeftMouseDown:
           case NSRightMouseDown:
             mouse_down(translator, event);
+            result = true;
             break;
 
           case NSLeftMouseUp:
           case NSRightMouseUp:
             mouse_up(translator, event);
+            result = true;
             break;
 
           case NSMouseMoved:
           case NSLeftMouseDragged:
           case NSRightMouseDragged:
             mouse_move(translator, event);
+            result = true;
             break;
 
           case NSKeyDown:
             if (![event isARepeat]) {
                 translator->key_down_callback(
                         [event keyCode] & 0xffff, translator->key_down_userdata);
+                result = true;
             }
             break;
 
@@ -324,11 +332,13 @@ void antares_event_translator_enqueue(AntaresEventTranslator* translator, int64_
             if (![event isARepeat]) {
                 translator->key_up_callback(
                         [event keyCode] & 0xffff, translator->key_up_userdata);
+                result = true;
             }
             break;
 
           case NSFlagsChanged:
             flags_changed(translator, [event modifierFlags]);
+            result = true;
             break;
 
           default:
@@ -336,4 +346,5 @@ void antares_event_translator_enqueue(AntaresEventTranslator* translator, int64_
         }
     }
     [pool drain];
+    return result;
 }
