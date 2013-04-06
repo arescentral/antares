@@ -194,11 +194,14 @@ void CocoaVideoDriver::loop(Card* initial) {
     antares_event_translator_set_caps_unlock_callback(
             _translator.c_obj(), EventBridge::caps_unlock, &bridge);
 
+    cf::MutableDictionary criteria(CFDictionaryCreateMutable(
+                NULL, 0,
+                &kCFCopyStringDictionaryKeyCallBacks,
+                &kCFTypeDictionaryValueCallBacks));
+    criteria.set(CFSTR(kIOHIDDeviceUsagePageKey), cf::wrap(kHIDPage_GenericDesktop).c_obj());
+    criteria.set(CFSTR(kIOHIDDeviceUsageKey), cf::wrap(kHIDUsage_GD_Keyboard).c_obj());
+
     auto hid_manager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone);
-    cf::Dictionary criteria({
-            {cf::String(kIOHIDDeviceUsagePageKey), cf::Number::of_int(kHIDPage_GenericDesktop)},
-            {cf::String(kIOHIDDeviceUsageKey), cf::Number::of_int(kHIDUsage_GD_Keyboard)}
-    });
     IOHIDManagerSetDeviceMatching(hid_manager, criteria.c_obj());
     IOHIDManagerScheduleWithRunLoop(hid_manager, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
     IOReturn r = IOHIDManagerOpen(hid_manager, kIOHIDOptionsTypeNone);

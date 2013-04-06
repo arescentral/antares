@@ -69,8 +69,7 @@ namespace antares {
 
 extern "C" AntaresDrivers* antares_controller_create_drivers(CFStringRef* error_message) {
     if (getenv("HOME") == NULL) {
-        cf::String msg("Couldn't get $HOME");
-        *error_message = msg.release();
+        *error_message = cf::wrap("Couldn't get $HOME").release();
         return NULL;
     }
     const String home(utf8::decode(getenv("HOME")));
@@ -85,8 +84,7 @@ extern "C" bool antares_controller_loop(AntaresDrivers* drivers, CFStringRef* er
     try {
         drivers->video.loop(new Master(time(NULL)));
     } catch (Exception& e) {
-        cf::String msg(e.message());
-        *error_message = msg.release();
+        *error_message = cf::wrap(e.message()).release();
         return false;
     }
     return true;
