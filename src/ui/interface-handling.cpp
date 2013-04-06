@@ -145,7 +145,7 @@ bool BothCommandAndQ() {
     for (int i = 0; i < kKeyExtendedControlNum; i++) {
         uint32_t key = Preferences::preferences()->key(i);
         q |= (key == Keys::Q);
-        command |= (key == Keys::COMMAND);
+        command |= (key == Keys::L_COMMAND);
     }
 
     return command && q;

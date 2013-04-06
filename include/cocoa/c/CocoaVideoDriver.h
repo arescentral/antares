@@ -28,6 +28,7 @@
 extern "C" {
 #endif
 
+bool antares_is_active();
 void antares_menu_bar_hide();
 void antares_menu_bar_show();
 void antares_mouse_hide();
@@ -59,14 +60,15 @@ void antares_event_translator_set_mouse_up_callback(
 void antares_event_translator_set_mouse_move_callback(
         AntaresEventTranslator* translator,
         void (*callback)(int32_t x, int32_t y, void* userdata), void* userdata);
-void antares_event_translator_set_key_down_callback(
+void antares_event_translator_set_caps_lock_callback(
         AntaresEventTranslator* translator,
-        void (*callback)(int32_t key, void* userdata), void* userdata);
-void antares_event_translator_set_key_up_callback(
+        void (*callback)(void* userdata), void* userdata);
+void antares_event_translator_set_caps_unlock_callback(
         AntaresEventTranslator* translator,
-        void (*callback)(int32_t key, void* userdata), void* userdata);
+        void (*callback)(void* userdata), void* userdata);
 
 bool antares_event_translator_next(AntaresEventTranslator* translator, int64_t until);
+void antares_event_translator_cancel(AntaresEventTranslator* translator);
 
 #ifdef __cplusplus
 }  // extern "C"

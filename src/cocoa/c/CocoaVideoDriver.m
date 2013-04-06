@@ -20,8 +20,25 @@
 
 #include <Carbon/Carbon.h>
 #include <Cocoa/Cocoa.h>
+#include <mach/mach.h>
+#include <mach/clock.h>
 
 static bool mouse_visible = true;
+
+@implementation NSDate(AntaresAdditions)
+- (NSTimeInterval)timeIntervalSinceSystemStart {
+    clock_serv_t system_clock;
+    kern_return_t status = host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &system_clock);
+    mach_timespec_t now;
+    clock_get_time(system_clock, &now);
+    NSTimeInterval now_secs = now.tv_sec + (now.tv_nsec / 1e9);
+    return now_secs + [self timeIntervalSinceNow];
+}
+@end
+
+bool antares_is_active() {
+    return [NSApp isActive];
+}
 
 void antares_menu_bar_hide() {
     [NSMenu setMenuBarVisible:NO];
@@ -100,11 +117,11 @@ struct AntaresEventTranslator {
     void (*mouse_move_callback)(int32_t x, int32_t y, void* userdata);
     void* mouse_move_userdata;
 
-    void (*key_down_callback)(int32_t key, void* userdata);
-    void* key_down_userdata;
+    void (*caps_lock_callback)(void* userdata);
+    void* caps_lock_userdata;
 
-    void (*key_up_callback)(int32_t key, void* userdata);
-    void* key_up_userdata;
+    void (*caps_unlock_callback)(void* userdata);
+    void* caps_unlock_userdata;
 
     int32_t screen_width;
     int32_t screen_height;
@@ -193,47 +210,18 @@ void antares_event_translator_set_mouse_move_callback(
     translator->mouse_move_userdata = userdata;
 }
 
-void antares_event_translator_set_key_down_callback(
+void antares_event_translator_set_caps_lock_callback(
         AntaresEventTranslator* translator,
-        void (*callback)(int32_t key, void* userdata), void* userdata) {
-    translator->key_down_callback = callback;
-    translator->key_down_userdata = userdata;
+        void (*callback)(void* userdata), void* userdata) {
+    translator->caps_lock_callback = callback;
+    translator->caps_lock_userdata = userdata;
 }
 
-void antares_event_translator_set_key_up_callback(
+void antares_event_translator_set_caps_unlock_callback(
         AntaresEventTranslator* translator,
-        void (*callback)(int32_t key, void* userdata), void* userdata) {
-    translator->key_up_callback = callback;
-    translator->key_up_userdata = userdata;
-}
-
-static void flags_changed(AntaresEventTranslator* translator, int32_t flags) {
-    struct ModifierFlag {
-        uint32_t bit;
-        uint32_t code;
-    };
-    static const int modifier_flag_count = 5;
-    static const struct ModifierFlag modifier_flags[5] = {
-        {NSAlphaShiftKeyMask, 0x39},  // caps lock.
-        {NSShiftKeyMask,      0x38},
-        {NSControlKeyMask,    0x3b},
-        {NSAlternateKeyMask,  0x3a},  // option.
-        {NSCommandKeyMask,    0x37},
-    };
-
-    int i;
-    for (i = 0; i < modifier_flag_count; ++i) {
-        if ((translator->last_flags ^ flags) & modifier_flags[i].bit) {
-            if (flags & modifier_flags[i].bit) {
-                translator->key_down_callback(
-                        modifier_flags[i].code, translator->key_down_userdata);
-            } else {
-                translator->key_up_callback(
-                        modifier_flags[i].code, translator->key_up_userdata);
-            }
-        }
-    }
-    translator->last_flags = flags;
+        void (*callback)(void* userdata), void* userdata) {
+    translator->caps_unlock_callback = callback;
+    translator->caps_unlock_userdata = userdata;
 }
 
 static void hide_unhide(AntaresWindow* window, NSPoint location) {
@@ -292,59 +280,66 @@ static void mouse_move(AntaresEventTranslator* translator, NSEvent* event) {
 bool antares_event_translator_next(AntaresEventTranslator* translator, int64_t until) {
     NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
     NSDate* date = [NSDate dateWithTimeIntervalSince1970:(until * 1e-6)];
-    bool result = false;
-    while (!result) {
+    bool waiting = true;
+    while (waiting) {
         NSEvent* event =
             [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:date inMode:NSDefaultRunLoopMode
              dequeue:YES];
         if (!event) {
             break;
         }
+        // Put events after `until` back in the queue.
+        if ([event timestamp] > [date timeIntervalSinceSystemStart]) {
+            [NSApp postEvent:event atStart:true];
+            break;
+        }
+
+        [NSApp sendEvent:event];
         switch ([event type]) {
           case NSLeftMouseDown:
           case NSRightMouseDown:
             mouse_down(translator, event);
-            result = true;
+            waiting = false;
             break;
 
           case NSLeftMouseUp:
           case NSRightMouseUp:
             mouse_up(translator, event);
-            result = true;
+            waiting = false;
             break;
 
           case NSMouseMoved:
           case NSLeftMouseDragged:
           case NSRightMouseDragged:
             mouse_move(translator, event);
-            result = true;
+            waiting = false;
             break;
 
-          case NSKeyDown:
-            if (![event isARepeat]) {
-                translator->key_down_callback(
-                        [event keyCode] & 0xffff, translator->key_down_userdata);
-                result = true;
-            }
-            break;
-
-          case NSKeyUp:
-            if (![event isARepeat]) {
-                translator->key_up_callback(
-                        [event keyCode] & 0xffff, translator->key_up_userdata);
-                result = true;
-            }
+          case NSApplicationDefined:
+            waiting = false;
             break;
 
           case NSFlagsChanged:
-            flags_changed(translator, [event modifierFlags]);
-            result = true;
+            if ([event modifierFlags] & NSAlphaShiftKeyMask) {
+                translator->caps_lock_callback(translator->caps_lock_userdata);
+            } else {
+                translator->caps_unlock_callback(translator->caps_unlock_userdata);
+            }
             break;
 
+          case NSKeyDown:
+          case NSKeyUp:
           default:
             break;
         }
     }
     [pool drain];
-    return result;
+    return !waiting;
+}
+
+void antares_event_translator_cancel(AntaresEventTranslator* translator) {
+    NSEvent* event = [NSEvent
+        otherEventWithType:NSApplicationDefined location:NSMakePoint(0, 0) modifierFlags:0
+        timestamp:0.0 windowNumber:0 context:nil subtype:0 data1:0 data2:0];
+    [NSApp postEvent:event atStart:true];
 }

@@ -25,6 +25,7 @@ using sfz::Bytes;
 using sfz::BytesSlice;
 using sfz::CString;
 using sfz::StringSlice;
+using std::unique_ptr;
 
 namespace utf8 = sfz::utf8;
 
@@ -61,6 +62,10 @@ Number::Number() { }
 
 Number::Number(type c_obj):
     Object<CFNumberRef>(c_obj) { }
+
+Number Number::of_int(int i) {
+    return Number(CFNumberCreate(NULL, kCFNumberIntType, &i));
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // String
@@ -109,6 +114,31 @@ MutableArray::MutableArray() { }
 
 MutableArray::MutableArray(type c_obj):
     Object<CFMutableArrayRef>(c_obj) { }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// Dictionary
+
+CFTypeID Dictionary::type_id() { return CFDictionaryGetTypeID(); }
+
+Dictionary::Dictionary() { }
+
+Dictionary::Dictionary(type c_obj):
+    Object<CFDictionaryRef>(c_obj) { }
+
+Dictionary::Dictionary(std::initializer_list<std::pair<cf::String, cf::Number>> items) {
+    unique_ptr<CFStringRef[]> keys(new CFStringRef[items.size()]);
+    unique_ptr<CFTypeRef[]> values(new CFTypeRef[items.size()]);
+    CFStringRef* k = keys.get();
+    CFTypeRef* v = values.get();
+    for (const auto& item: items) {
+        *(k++) = item.first.c_obj();
+        *(v++) = item.second.c_obj();
+    }
+    reset(CFDictionaryCreate(
+            NULL, (const void**)keys.get(), (const void**)values.get(), items.size(),
+            &kCFCopyStringDictionaryKeyCallBacks,
+            &kCFTypeDictionaryValueCallBacks));
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Data

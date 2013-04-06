@@ -87,6 +87,20 @@ class KeyUpEvent : public KeyEvent {
     virtual void send(EventReceiver* receiver) const;
 };
 
+// Generated when caps lock is enabled.
+class CapsLockEvent : public Event {
+  public:
+    CapsLockEvent(int64_t at): Event(at) { }
+    virtual void send(EventReceiver* receiver) const;
+};
+
+// Generated when caps lock is enabled.
+class CapsUnlockEvent : public Event {
+  public:
+    CapsUnlockEvent(int64_t at): Event(at) { }
+    virtual void send(EventReceiver* receiver) const;
+};
+
 // Superclass for events involving the mouse (moved, button press, button release).
 //
 // The location of the mouse event, `where()`, is described in coordinates from the upper-left
@@ -155,6 +169,8 @@ class EventReceiver {
 
     virtual void key_down(const KeyDownEvent& event);
     virtual void key_up(const KeyUpEvent& event);
+    virtual void caps_lock(const CapsLockEvent& event);
+    virtual void caps_unlock(const CapsUnlockEvent& event);
     virtual void mouse_down(const MouseDownEvent& event);
     virtual void mouse_up(const MouseUpEvent& event);
     virtual void mouse_move(const MouseMoveEvent& event);

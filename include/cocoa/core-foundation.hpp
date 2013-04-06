@@ -20,6 +20,7 @@
 #define ANTARES_COCOA_CORE_FOUNDATION_HPP_
 
 #include <algorithm>
+#include <initializer_list>
 #include <CoreFoundation/CoreFoundation.h>
 #include <sfz/sfz.hpp>
 
@@ -108,6 +109,8 @@ class Number : public Object<CFNumberRef> {
     Number(type c_obj);
     Number(Number&&) = default;
     Number& operator=(Number&&) = default;
+
+    static Number of_int(int i);
 };
 
 class String : public Object<CFStringRef> {
@@ -137,6 +140,16 @@ class MutableArray : public Object<CFMutableArrayRef> {
     MutableArray(type c_obj);
     MutableArray(MutableArray&&) = default;
     MutableArray& operator=(MutableArray&&) = default;
+};
+
+class Dictionary : public Object<CFDictionaryRef> {
+  public:
+    static CFTypeID type_id();
+    Dictionary();
+    Dictionary(type c_obj);
+    Dictionary(std::initializer_list<std::pair<cf::String, cf::Number>> items);
+    Dictionary(Dictionary&&) = default;
+    Dictionary& operator=(Dictionary&&) = default;
 };
 
 class Data : public Object<CFDataRef> {
