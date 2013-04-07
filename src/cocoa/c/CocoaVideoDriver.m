@@ -56,7 +56,7 @@ void antares_mouse_hide() {
 }
 
 void antares_mouse_show() {
-    if (mouse_visible) {
+    if (!mouse_visible) {
         [NSCursor unhide];
         mouse_visible = true;
     }
