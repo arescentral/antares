@@ -99,27 +99,27 @@ struct CocoaVideoDriver::EventBridge {
 
     static void mouse_down(int button, int32_t x, int32_t y, void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->send(new MouseDownEvent(now_usecs(), button, Point(x, y)));
+        self->send(MouseDownEvent(now_usecs(), button, Point(x, y)));
     }
 
     static void mouse_up(int button, int32_t x, int32_t y, void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->send(new MouseUpEvent(now_usecs(), button, Point(x, y)));
+        self->send(MouseUpEvent(now_usecs(), button, Point(x, y)));
     }
 
     static void mouse_move(int32_t x, int32_t y, void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->send(new MouseMoveEvent(now_usecs(), Point(x, y)));
+        self->send(MouseMoveEvent(now_usecs(), Point(x, y)));
     }
 
     static void caps_lock(void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->send(new CapsLockEvent(now_usecs()));
+        self->send(CapsLockEvent(now_usecs()));
     }
 
     static void caps_unlock(void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->send(new CapsUnlockEvent(now_usecs()));
+        self->send(CapsUnlockEvent(now_usecs()));
     }
 
     static void hid_event(void* userdata, IOReturn result, void* sender, IOHIDValueRef value) {
@@ -155,9 +155,9 @@ struct CocoaVideoDriver::EventBridge {
         }
 
         if (down) {
-            send(new KeyDownEvent(now_usecs(), scan_code));
+            send(KeyDownEvent(now_usecs(), scan_code));
         } else {
-            send(new KeyUpEvent(now_usecs(), scan_code));
+            send(KeyUpEvent(now_usecs(), scan_code));
         }
         antares_event_translator_cancel(translator.c_obj());
     }
@@ -169,9 +169,9 @@ struct CocoaVideoDriver::EventBridge {
         bool down = IOHIDValueGetIntegerValue(value);
         uint16_t usage = IOHIDElementGetUsage(element);
         if (down) {
-            send(new GamepadButtonDownEvent(now_usecs(), usage));
+            send(GamepadButtonDownEvent(now_usecs(), usage));
         } else {
-            send(new GamepadButtonUpEvent(now_usecs(), usage));
+            send(GamepadButtonUpEvent(now_usecs(), usage));
         }
         antares_event_translator_cancel(translator.c_obj());
     }
@@ -199,7 +199,7 @@ struct CocoaVideoDriver::EventBridge {
                 static int x_component[] = {0, 0, -1, 3, 3, -1};
                 double x = gamepad[x_component[usage]];
                 double y = gamepad[x_component[usage] + 1];
-                send(new GamepadStickEvent(now_usecs(), x, y));
+                send(GamepadStickEvent(now_usecs(), x, y));
             }
             break;
           case kHIDUsage_GD_Z:
@@ -209,9 +209,9 @@ struct CocoaVideoDriver::EventBridge {
         }
     }
 
-    void send(Event* event) {
-        event->send(&event_tracker);
-        event->send(main_loop.top());
+    void send(const Event& event) {
+        event.send(&event_tracker);
+        event.send(main_loop.top());
         main_loop.draw();
         CGLFlushDrawable(context.c_obj());
     }
