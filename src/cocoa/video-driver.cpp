@@ -95,6 +95,8 @@ struct CocoaVideoDriver::EventBridge {
     cgl::Context& context;
     EventTranslator& translator;
 
+    double gamepad[6];
+
     static void mouse_down(int button, int32_t x, int32_t y, void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
         self->send(new MouseDownEvent(now_usecs(), button, Point(x, y)));
@@ -120,8 +122,30 @@ struct CocoaVideoDriver::EventBridge {
         self->send(new CapsUnlockEvent(now_usecs()));
     }
 
-    static void key_event(void* userdata, IOReturn result, void* sender, IOHIDValueRef value) {
+    static void hid_event(void* userdata, IOReturn result, void* sender, IOHIDValueRef value) {
+        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
         IOHIDElementRef element = IOHIDValueGetElement(value);
+        uint32_t usage_page = IOHIDElementGetUsagePage(element);
+        switch (usage_page) {
+          case kHIDPage_KeyboardOrKeypad:
+            self->key_event(result, element, value);
+            break;
+          case kHIDPage_GenericDesktop:
+            self->analog_event(result, element, value);
+            break;
+          case kHIDPage_Button:
+            self->button_event(result, element, value);
+            break;
+          default:
+            sfz::print(sfz::io::err, sfz::format("{0}\n", usage_page));
+            break;
+        }
+    }
+
+    void key_event(IOReturn result, IOHIDElementRef element, IOHIDValueRef value) {
+        if (!antares_is_active()) {
+            return;
+        }
         bool down = IOHIDValueGetIntegerValue(value);
         uint16_t scan_code = IOHIDElementGetUsage(element);
         if ((scan_code < 4) || (231 < scan_code)) {
@@ -130,27 +154,66 @@ struct CocoaVideoDriver::EventBridge {
             return;
         }
 
-        EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        bool cancel;
         if (down) {
-            cancel = self->send(new KeyDownEvent(now_usecs(), scan_code));
+            send(new KeyDownEvent(now_usecs(), scan_code));
         } else {
-            cancel = self->send(new KeyUpEvent(now_usecs(), scan_code));
+            send(new KeyUpEvent(now_usecs(), scan_code));
         }
-        if (cancel) {
-            antares_event_translator_cancel(self->translator.c_obj());
+        antares_event_translator_cancel(translator.c_obj());
+    }
+
+    void button_event(IOReturn result, IOHIDElementRef element, IOHIDValueRef value) {
+        if (!antares_is_active()) {
+            return;
+        }
+        bool down = IOHIDValueGetIntegerValue(value);
+        uint16_t usage = IOHIDElementGetUsage(element);
+        if (down) {
+            send(new GamepadButtonDownEvent(now_usecs(), usage));
+        } else {
+            send(new GamepadButtonUpEvent(now_usecs(), usage));
+        }
+        antares_event_translator_cancel(translator.c_obj());
+    }
+
+    void analog_event(IOReturn result, IOHIDElementRef element, IOHIDValueRef value) {
+        int int_value = IOHIDValueGetIntegerValue(value);
+        uint16_t usage = IOHIDElementGetUsage(element);
+        switch (usage) {
+          case kHIDUsage_GD_X:
+          case kHIDUsage_GD_Y:
+          case kHIDUsage_GD_Rx:
+          case kHIDUsage_GD_Ry:
+            {
+                int min = IOHIDElementGetLogicalMin(element);
+                int max = IOHIDElementGetLogicalMax(element);
+                double double_value = int_value;
+                if (int_value < 0) {
+                    double_value = -(double_value / min);
+                } else {
+                    double_value = (double_value / max);
+                }
+
+                usage -= kHIDUsage_GD_X;
+                gamepad[usage] = double_value;
+                static int x_component[] = {0, 0, -1, 3, 3, -1};
+                double x = gamepad[x_component[usage]];
+                double y = gamepad[x_component[usage] + 1];
+                send(new GamepadStickEvent(now_usecs(), x, y));
+            }
+            break;
+          case kHIDUsage_GD_Z:
+          case kHIDUsage_GD_Rz:
+            button_event(result, element, value);
+            break;
         }
     }
 
-    bool send(Event* event) {
-        if (antares_is_active()) {
-            event->send(&event_tracker);
-            event->send(main_loop.top());
-            main_loop.draw();
-            CGLFlushDrawable(context.c_obj());
-            return true;
-        }
-        return false;
+    void send(Event* event) {
+        event->send(&event_tracker);
+        event->send(main_loop.top());
+        main_loop.draw();
+        CGLFlushDrawable(context.c_obj());
     }
 };
 
@@ -194,21 +257,30 @@ void CocoaVideoDriver::loop(Card* initial) {
     antares_event_translator_set_caps_unlock_callback(
             _translator.c_obj(), EventBridge::caps_unlock, &bridge);
 
-    cf::MutableDictionary criteria(CFDictionaryCreateMutable(
+    cf::MutableDictionary keyboard(CFDictionaryCreateMutable(
                 NULL, 0,
                 &kCFCopyStringDictionaryKeyCallBacks,
                 &kCFTypeDictionaryValueCallBacks));
-    criteria.set(CFSTR(kIOHIDDeviceUsagePageKey), cf::wrap(kHIDPage_GenericDesktop).c_obj());
-    criteria.set(CFSTR(kIOHIDDeviceUsageKey), cf::wrap(kHIDUsage_GD_Keyboard).c_obj());
+    keyboard.set(CFSTR(kIOHIDDeviceUsagePageKey), cf::wrap(kHIDPage_GenericDesktop).c_obj());
+    keyboard.set(CFSTR(kIOHIDDeviceUsageKey), cf::wrap(kHIDUsage_GD_Keyboard).c_obj());
+    cf::MutableDictionary gamepad(CFDictionaryCreateMutable(
+                NULL, 0,
+                &kCFCopyStringDictionaryKeyCallBacks,
+                &kCFTypeDictionaryValueCallBacks));
+    gamepad.set(CFSTR(kIOHIDDeviceUsagePageKey), cf::wrap(kHIDPage_GenericDesktop).c_obj());
+    gamepad.set(CFSTR(kIOHIDDeviceUsageKey), cf::wrap(kHIDUsage_GD_GamePad).c_obj());
+    cf::MutableArray criteria(CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks));
+    criteria.append(keyboard.c_obj());
+    criteria.append(gamepad.c_obj());
 
     auto hid_manager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone);
-    IOHIDManagerSetDeviceMatching(hid_manager, criteria.c_obj());
+    IOHIDManagerSetDeviceMatchingMultiple(hid_manager, criteria.c_obj());
     IOHIDManagerScheduleWithRunLoop(hid_manager, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
     IOReturn r = IOHIDManagerOpen(hid_manager, kIOHIDOptionsTypeNone);
     if (r != 0) {
         throw Exception("IOHIDManagerOpen");
     }
-    IOHIDManagerRegisterInputValueCallback(hid_manager, EventBridge::key_event, &bridge);
+    IOHIDManagerRegisterInputValueCallback(hid_manager, EventBridge::hid_event, &bridge);
 
     while (!main_loop.done()) {
         int64_t at;

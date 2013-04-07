@@ -90,6 +90,11 @@ void ScrollTextScreen::key_down(const KeyDownEvent& event) {
     stack()->pop(this);
 }
 
+void ScrollTextScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
+    static_cast<void>(event);
+    stack()->pop(this);
+}
+
 bool ScrollTextScreen::next_timer(int64_t& time) {
     time = _next_shift;
     return true;

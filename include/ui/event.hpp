@@ -87,6 +87,32 @@ class KeyUpEvent : public KeyEvent {
     virtual void send(EventReceiver* receiver) const;
 };
 
+class GamepadButtonEvent : public Event {
+  public:
+    GamepadButtonEvent(int64_t at, uint32_t button): Event(at), button(button) { }
+    const uint32_t button;
+};
+
+class GamepadButtonDownEvent : public GamepadButtonEvent {
+  public:
+    GamepadButtonDownEvent(int64_t at, uint32_t button): GamepadButtonEvent(at, button) { }
+    virtual void send(EventReceiver* receiver) const;
+};
+
+class GamepadButtonUpEvent : public GamepadButtonEvent {
+  public:
+    GamepadButtonUpEvent(int64_t at, uint32_t button): GamepadButtonEvent(at, button) { }
+    virtual void send(EventReceiver* receiver) const;
+};
+
+class GamepadStickEvent : public Event {
+  public:
+    GamepadStickEvent(int64_t at, double x, double y): Event(at), x(x), y(y) { }
+    virtual void send(EventReceiver* receiver) const;
+    const double x;
+    const double y;
+};
+
 // Generated when caps lock is enabled.
 class CapsLockEvent : public Event {
   public:
@@ -169,6 +195,9 @@ class EventReceiver {
 
     virtual void key_down(const KeyDownEvent& event);
     virtual void key_up(const KeyUpEvent& event);
+    virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
+    virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
+    virtual void gamepad_stick(const GamepadStickEvent& event);
     virtual void caps_lock(const CapsLockEvent& event);
     virtual void caps_unlock(const CapsUnlockEvent& event);
     virtual void mouse_down(const MouseDownEvent& event);

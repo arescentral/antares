@@ -62,6 +62,7 @@ class ColorFade : public Card {
 
     virtual void mouse_down(const MouseDownEvent& event);
     virtual void key_down(const KeyDownEvent& event);
+    virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
     virtual bool next_timer(int64_t& time);
     virtual void fire_timer();
 
