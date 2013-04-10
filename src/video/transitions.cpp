@@ -108,6 +108,14 @@ void ColorFade::key_down(const KeyDownEvent& event) {
     }
 }
 
+void ColorFade::gamepad_button_down(const GamepadButtonDownEvent& event) {
+    static_cast<void>(event);
+    if (_allow_skip) {
+        *_skipped = true;
+        stack()->pop(this);
+    }
+}
+
 bool ColorFade::next_timer(int64_t& time) {
     time = _next_event;
     return true;

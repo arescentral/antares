@@ -48,11 +48,10 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     void loop(Card* initial);
 
   private:
-    bool wait_next_event(int64_t until, std::unique_ptr<Event>& event);
-    void enqueue_events(int64_t until);
-
     const bool _fullscreen;
     int64_t _start_time;
+
+    struct EventBridge;
 
     class EventTranslator {
       public:
@@ -67,7 +66,6 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     EventTranslator _translator;
 
     EventTracker _event_tracker;
-    std::queue<std::unique_ptr<Event>> _event_queue;
 
     DISALLOW_COPY_AND_ASSIGN(CocoaVideoDriver);
 };

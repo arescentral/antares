@@ -103,6 +103,16 @@ void MainScreen::key_up(const KeyUpEvent& event) {
     _next_timer = now_usecs() + kMainDemoTimeOutTime;
 }
 
+void MainScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
+    InterfaceScreen::gamepad_button_down(event);
+    _next_timer = now_usecs() + kMainDemoTimeOutTime;
+}
+
+void MainScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
+    InterfaceScreen::gamepad_button_up(event);
+    _next_timer = now_usecs() + kMainDemoTimeOutTime;
+}
+
 void MainScreen::adjust_interface() {
     // TODO(sfiera): switch on whether or not network games are available.
     dynamic_cast<PlainButton&>(mutable_item(START_NETWORK_GAME)).status = kDimmed;

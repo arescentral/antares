@@ -20,6 +20,7 @@
 #define ANTARES_COCOA_CORE_FOUNDATION_HPP_
 
 #include <algorithm>
+#include <initializer_list>
 #include <CoreFoundation/CoreFoundation.h>
 #include <sfz/sfz.hpp>
 
@@ -95,11 +96,12 @@ class Boolean : public UnownedObject<CFBooleanRef> {
   public:
     static CFTypeID type_id();
     Boolean();
-    Boolean(bool value);
     Boolean(type c_obj);
     Boolean(Boolean&&) = default;
     Boolean& operator=(Boolean&&) = default;
 };
+Boolean wrap(bool value);
+bool unwrap(const Boolean& cfvalue, bool& value);
 
 class Number : public Object<CFNumberRef> {
   public:
@@ -109,17 +111,30 @@ class Number : public Object<CFNumberRef> {
     Number(Number&&) = default;
     Number& operator=(Number&&) = default;
 };
+Number wrap(short value);
+Number wrap(int value);
+Number wrap(long value);
+Number wrap(long long value);
+Number wrap(float value);
+Number wrap(double value);
+bool unwrap(const Number& cfvalue, short& value);
+bool unwrap(const Number& cfvalue, int& value);
+bool unwrap(const Number& cfvalue, long& value);
+bool unwrap(const Number& cfvalue, long long& value);
+bool unwrap(const Number& cfvalue, float& value);
+bool unwrap(const Number& cfvalue, double& value);
 
 class String : public Object<CFStringRef> {
   public:
     static CFTypeID type_id();
     String();
     String(type c_obj);
-    String(const sfz::StringSlice& string);
     String(String&&) = default;
     String& operator=(String&&) = default;
 };
-void print_to(sfz::PrintTarget out, const String& string);
+String wrap(const char* value);
+String wrap(sfz::StringSlice value);
+bool unwrap(const String& cfvalue, sfz::String& value);
 
 class Array : public Object<CFArrayRef> {
   public:
@@ -128,6 +143,8 @@ class Array : public Object<CFArrayRef> {
     Array(type c_obj);
     Array(Array&&) = default;
     Array& operator=(Array&&) = default;
+    size_t size() const;
+    const void* get(size_t index) const;
 };
 
 class MutableArray : public Object<CFMutableArrayRef> {
@@ -137,6 +154,28 @@ class MutableArray : public Object<CFMutableArrayRef> {
     MutableArray(type c_obj);
     MutableArray(MutableArray&&) = default;
     MutableArray& operator=(MutableArray&&) = default;
+    size_t size() const;
+    const void* get(size_t index) const;
+    void append(const void* key);
+};
+
+class Dictionary : public Object<CFDictionaryRef> {
+  public:
+    static CFTypeID type_id();
+    Dictionary();
+    Dictionary(type c_obj);
+    Dictionary(Dictionary&&) = default;
+    Dictionary& operator=(Dictionary&&) = default;
+};
+
+class MutableDictionary : public Object<CFMutableDictionaryRef> {
+  public:
+    static CFTypeID type_id();
+    MutableDictionary();
+    MutableDictionary(type c_obj);
+    MutableDictionary(MutableDictionary&&) = default;
+    MutableDictionary& operator=(MutableDictionary&&) = default;
+    void set(const void* key, const void* value);
 };
 
 class Data : public Object<CFDataRef> {

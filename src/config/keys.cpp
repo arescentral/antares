@@ -69,7 +69,7 @@ void GetKeyMapFromKeyNum(int key_num, KeyMap* key_map) {
 }
 
 int GetKeyNumFromKeyMap(const KeyMap& key_map) {
-    for (int i = 0; i < 128; ++i) {
+    for (int i = 0; i < 256; ++i) {
         if (key_map.get(i)) {
             return i + 1;
         }
@@ -80,7 +80,7 @@ int GetKeyNumFromKeyMap(const KeyMap& key_map) {
 bool CommandKey() {
     KeyMap key_map;
     VideoDriver::driver()->get_keys(&key_map);
-    return key_map.get(Keys::COMMAND);
+    return key_map.get(Keys::L_COMMAND);
 }
 
 void GetKeyNumName(int key_num, sfz::String* out) {

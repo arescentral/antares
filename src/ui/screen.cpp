@@ -20,6 +20,7 @@
 
 #include <sfz/sfz.hpp>
 
+#include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "data/resource.hpp"
 #include "drawing/color.hpp"
@@ -175,6 +176,29 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
         }
         handle_button(*_hit_button);
     }
+}
+
+template <typename KeyEvent, typename GamepadEvent>
+static void translate_gamepad_button(EventReceiver& receiver, const GamepadEvent& event) {
+    uint32_t key_equivalent;
+    switch (event.button) {
+      case Gamepad::A: key_equivalent = Keys::RETURN; break;
+      case Gamepad::B: key_equivalent = Keys::ESCAPE; break;
+      case Gamepad::LEFT: key_equivalent = Keys::LEFT_ARROW; break;
+      case Gamepad::RIGHT: key_equivalent = Keys::RIGHT_ARROW; break;
+      case Gamepad::UP: key_equivalent = Keys::UP_ARROW; break;
+      case Gamepad::DOWN: key_equivalent = Keys::DOWN_ARROW; break;
+      default: return;
+    }
+    KeyEvent(event.at(), key_equivalent).send(&receiver);
+}
+
+void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
+    translate_gamepad_button<KeyDownEvent>(*this, event);
+}
+
+void InterfaceScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
+    translate_gamepad_button<KeyUpEvent>(*this, event);
 }
 
 void InterfaceScreen::overlay() const { }

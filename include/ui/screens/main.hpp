@@ -40,6 +40,8 @@ class MainScreen : public InterfaceScreen {
     virtual void mouse_up(const MouseUpEvent& event);
     virtual void key_down(const KeyDownEvent& event);
     virtual void key_up(const KeyUpEvent& event);
+    virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
+    virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
 
   protected:
     virtual void adjust_interface();

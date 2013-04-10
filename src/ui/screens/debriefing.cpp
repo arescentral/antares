@@ -189,6 +189,13 @@ void DebriefingScreen::key_down(const KeyDownEvent& event) {
     }
 }
 
+void DebriefingScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
+    static_cast<void>(event);
+    if (_state == DONE) {
+        stack()->pop(this);
+    }
+}
+
 bool DebriefingScreen::next_timer(int64_t& time) {
     if (_state == TYPING) {
         time = _next_update;

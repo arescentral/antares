@@ -68,8 +68,8 @@ namespace {
 
 template <typename T>
 bool get_preference(const StringSlice& key, T& value) {
-    String cfkey(key);
-    PropertyList plist(CFPreferencesCopyAppValue(cfkey.c_obj(), kCFPreferencesCurrentApplication));
+    PropertyList plist(CFPreferencesCopyAppValue(
+                cf::wrap(key).c_obj(), kCFPreferencesCurrentApplication));
     if (plist.c_obj()) {
         value = cast<T>(std::move(plist));
         return true;
@@ -79,8 +79,8 @@ bool get_preference(const StringSlice& key, T& value) {
 
 template <typename T>
 void set_preference(const StringSlice& key, const T& value) {
-    String cfkey(key);
-    CFPreferencesSetAppValue(cfkey.c_obj(), value.c_obj(), kCFPreferencesCurrentApplication);
+    CFPreferencesSetAppValue(
+            cf::wrap(key).c_obj(), value.c_obj(), kCFPreferencesCurrentApplication);
 }
 
 }  // namespace
@@ -93,90 +93,77 @@ void CoreFoundationPrefsDriver::load(Preferences* preferences) {
 
     cf::Array key_settings;
     if (cf::get_preference(kKeySettingsPreference, key_settings)) {
-        for (int i: range(min<int>(KEY_COUNT, CFArrayGetCount(key_settings.c_obj())))) {
-            cf::Number number = cf::cast<cf::Number>(cf::Type(
-                    CFRetain(CFArrayGetValueAtIndex(key_settings.c_obj(), i))));
+        for (int i: range(min<int>(KEY_COUNT, key_settings.size()))) {
+            cf::Number number = cf::cast<cf::Number>(cf::Type(CFRetain(key_settings.get(i))));
             int key;
-            if (number.c_obj() && CFNumberGetValue(number.c_obj(), kCFNumberIntType, &key)) {
+            if (cf::unwrap(number, key)) {
                 preferences->set_key(i, key);
             }
         }
     }
 
-    cf::Boolean bool_value;
-    if (cf::get_preference(kIdleMusicPreference, bool_value)) {
-        preferences->set_play_idle_music(bool_value.c_obj() == kCFBooleanTrue);
-    }
-    if (cf::get_preference(kGameMusicPreference, bool_value)) {
-        preferences->set_play_music_in_game(bool_value.c_obj() == kCFBooleanTrue);
-    }
-    if (cf::get_preference(kSpeechOnPreference, bool_value)) {
-        preferences->set_speech_on(bool_value.c_obj() == kCFBooleanTrue);
-    }
-    if (cf::get_preference(kFullscreenPreference, bool_value)) {
-        preferences->set_fullscreen(bool_value.c_obj() == kCFBooleanTrue);
-    }
-
-    cf::Number number_value;
-    double double_value;
-    if (cf::get_preference(kVolumePreference, number_value)
-            && CFNumberGetValue(number_value.c_obj(), kCFNumberDoubleType, &double_value)) {
-        preferences->set_volume(clamp<int>(8 * double_value, 0, 8));
+    {
+        cf::Boolean cfbool;
+        bool val;
+        if (cf::get_preference(kIdleMusicPreference, cfbool) && cf::unwrap(cfbool, val)) {
+            preferences->set_play_idle_music(val);
+        }
+        if (cf::get_preference(kGameMusicPreference, cfbool) && cf::unwrap(cfbool, val)) {
+            preferences->set_play_music_in_game(val);
+        }
+        if (cf::get_preference(kSpeechOnPreference, cfbool) && cf::unwrap(cfbool, val)) {
+            preferences->set_speech_on(val);
+        }
+        if (cf::get_preference(kFullscreenPreference, cfbool) && cf::unwrap(cfbool, val)) {
+            preferences->set_fullscreen(val);
+        }
     }
 
-    Size screen_size = preferences->screen_size();
-    int32_t int_value;
-    if (cf::get_preference(kScreenWidthPreference, number_value)
-            && CFNumberGetValue(number_value.c_obj(), kCFNumberSInt32Type, &int_value)) {
-        screen_size.width = int_value;
+    {
+        cf::Number cfnum;
+        double val;
+        if (cf::get_preference(kVolumePreference, cfnum) && cf::unwrap(cfnum, val)) {
+            preferences->set_volume(clamp<int>(8 * val, 0, 8));
+        }
     }
-    if (cf::get_preference(kScreenHeightPreference, number_value)
-            && CFNumberGetValue(number_value.c_obj(), kCFNumberSInt32Type, &int_value)) {
-        screen_size.height = int_value;
-    }
-    preferences->set_screen_size(screen_size);
 
-    cf::String string_value;
-    if (cf::get_preference(kScenarioPreference, string_value)) {
-        String id(string_value);
+    {
+        cf::Number cfnum;
+        Size screen_size = preferences->screen_size();
+        int32_t val;
+        if (cf::get_preference(kScreenWidthPreference, cfnum) && cf::unwrap(cfnum, val)) {
+            screen_size.width = val;
+        }
+        if (cf::get_preference(kScreenHeightPreference, cfnum) && cf::unwrap(cfnum, val)) {
+            screen_size.height = val;
+        }
+        preferences->set_screen_size(screen_size);
+    }
+
+    cf::String cfstr;
+    String id;
+    if (cf::get_preference(kScenarioPreference, cfstr) && cf::unwrap(cfstr, id)) {
         preferences->set_scenario_identifier(id);
     }
 }
 
 void CoreFoundationPrefsDriver::save(const Preferences& preferences) {
+    const Size screen_size = preferences.screen_size();
+
     cf::MutableArray key_settings(CFArrayCreateMutable(NULL, 0, &kCFTypeArrayCallBacks));
     for (int i: range<int>(KEY_COUNT)) {
         int key = preferences.key(i);
-        cf::Number cfkey(CFNumberCreate(NULL, kCFNumberIntType, &key));
-        CFArrayAppendValue(key_settings.c_obj(), cfkey.c_obj());
+        key_settings.append(cf::wrap(key).c_obj());
     }
     cf::set_preference(kKeySettingsPreference, key_settings);
-
-    cf::Boolean play_idle_music(preferences.play_idle_music());
-    cf::set_preference(kIdleMusicPreference, play_idle_music);
-
-    cf::Boolean play_music_in_game(preferences.play_music_in_game());
-    cf::set_preference(kGameMusicPreference, play_music_in_game);
-
-    cf::Boolean speech_on(preferences.speech_on());
-    cf::set_preference(kSpeechOnPreference, speech_on);
-
-    cf::Boolean fullscreen(preferences.fullscreen());
-    cf::set_preference(kFullscreenPreference, fullscreen);
-
-    double volume_double = 0.125 * preferences.volume();
-    cf::Number volume(CFNumberCreate(NULL, kCFNumberDoubleType, &volume_double));
-    cf::set_preference(kVolumePreference, volume);
-
-    const Size screen_size = preferences.screen_size();
-    cf::Number screen_width(CFNumberCreate(NULL, kCFNumberSInt32Type, &screen_size.width));
-    cf::Number screen_height(CFNumberCreate(NULL, kCFNumberSInt32Type, &screen_size.height));
-    cf::set_preference(kScreenWidthPreference, screen_width);
-    cf::set_preference(kScreenHeightPreference, screen_height);
-
-    cf::String scenario(preferences.scenario_identifier());
-    cf::set_preference(kScenarioPreference, scenario);
-
+    cf::set_preference(kIdleMusicPreference, cf::wrap(preferences.play_idle_music()));
+    cf::set_preference(kGameMusicPreference, cf::wrap(preferences.play_music_in_game()));
+    cf::set_preference(kSpeechOnPreference, cf::wrap(preferences.speech_on()));
+    cf::set_preference(kFullscreenPreference, cf::wrap(preferences.fullscreen()));
+    cf::set_preference(kVolumePreference, cf::wrap(0.125 * preferences.volume()));
+    cf::set_preference(kScreenWidthPreference, cf::wrap(screen_size.width));
+    cf::set_preference(kScreenHeightPreference, cf::wrap(screen_size.height));
+    cf::set_preference(kScenarioPreference, cf::wrap(preferences.scenario_identifier()));
     CFPreferencesAppSynchronize(kCFPreferencesCurrentApplication);
 }
 

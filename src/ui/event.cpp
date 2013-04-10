@@ -39,6 +39,26 @@ void KeyUpEvent::send(EventReceiver* receiver) const {
     receiver->key_up(*this);
 }
 
+void GamepadButtonDownEvent::send(EventReceiver* receiver) const {
+    receiver->gamepad_button_down(*this);
+}
+
+void GamepadButtonUpEvent::send(EventReceiver* receiver) const {
+    receiver->gamepad_button_up(*this);
+}
+
+void GamepadStickEvent::send(EventReceiver* receiver) const {
+    receiver->gamepad_stick(*this);
+}
+
+void CapsLockEvent::send(EventReceiver* receiver) const {
+    receiver->caps_lock(*this);
+}
+
+void CapsUnlockEvent::send(EventReceiver* receiver) const {
+    receiver->caps_unlock(*this);
+}
+
 void MouseDownEvent::send(EventReceiver* receiver) const {
     receiver->mouse_down(*this);
 }
@@ -55,6 +75,11 @@ EventReceiver::~EventReceiver() { }
 
 void EventReceiver::key_down(const KeyDownEvent& event) { }
 void EventReceiver::key_up(const KeyUpEvent& event) { }
+void EventReceiver::gamepad_button_down(const GamepadButtonDownEvent& event) { }
+void EventReceiver::gamepad_button_up(const GamepadButtonUpEvent& event) { }
+void EventReceiver::gamepad_stick(const GamepadStickEvent& event) { }
+void EventReceiver::caps_lock(const CapsLockEvent& event) { }
+void EventReceiver::caps_unlock(const CapsUnlockEvent& event) { }
 void EventReceiver::mouse_down(const MouseDownEvent& event) { }
 void EventReceiver::mouse_up(const MouseUpEvent& event) { }
 void EventReceiver::mouse_move(const MouseMoveEvent& event) { }

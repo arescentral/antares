@@ -40,6 +40,7 @@ def configure(cnf):
     cnf.env.append_value("FRAMEWORK_antares/system/cocoa", "Cocoa")
     cnf.env.append_value("FRAMEWORK_antares/system/carbon", "Carbon")
     cnf.env.append_value("FRAMEWORK_antares/system/core-foundation", "CoreFoundation")
+    cnf.env.append_value("FRAMEWORK_antares/system/io-kit", "IOKit")
     cnf.env.append_value("FRAMEWORK_antares/system/openal", "OpenAL")
     cnf.env.append_value("FRAMEWORK_antares/system/opengl", "OpenGL")
 
@@ -178,7 +179,10 @@ def build(bld):
             "src/cocoa/http.cpp",
         ],
         platform="darwin",
-        use="antares/system/core-foundation",
+        use=[
+            "antares/system/core-foundation",
+            "antares/system/io-kit",
+        ],
     )
 
     bld.stlib(
