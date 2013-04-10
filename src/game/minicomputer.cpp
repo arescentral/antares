@@ -45,6 +45,7 @@ using sfz::Rune;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::bin;
+using sfz::range;
 using sfz::string_to_int;
 using std::max;
 
@@ -564,137 +565,75 @@ void MakeMiniScreenFromIndString(int16_t whichString) {
     }
 }
 
-void MiniComputerHandleKeys( uint32_t theseKeys, uint32_t lastKeys)
-
-{
-    miniScreenLineType  *line;
-    int32_t                count, scrap;
-    Rect                mRect;
-
-    if (( theseKeys | lastKeys) & kCompAcceptKey)
-    {
-        // find out which line, if any, contains this button
-        line = globals()->gMiniScreenData.lineData.get();
-        count = 0;
-        while (( line->whichButton !=kInLineButton) && ( count < kMiniScreenTrueLineNum))
-        {
-            count++;
-            line++;
+static void minicomputer_handle_action(int32_t button, bool key_down, void (*action)()) {
+    // find out which line, if any, contains this button
+    for (size_t i: range(kMiniScreenTrueLineNum)) {
+        miniScreenLineType& line = globals()->gMiniScreenData.lineData[i];
+        if (line.whichButton != button) {
+            continue;
         }
-
         // hilite/unhilite this button
-        if ( count < kMiniScreenTrueLineNum)
-        {
-            if (( theseKeys & kCompAcceptKey) && ( line->lineKind != buttonOnLineKind))
-            {
-                line->lineKind = buttonOnLineKind;
+        if (key_down) {
+            if (line.lineKind != buttonOnLineKind) {
+                line.lineKind = buttonOnLineKind;
                 mPlayBeep3();
-            } else if ((!( theseKeys & kCompAcceptKey)) && ( line->lineKind != buttonOffLineKind))
-            {
-                line->lineKind = buttonOffLineKind;
-                MiniComputerDoAccept();
+            }
+        } else {
+            if (line.lineKind != buttonOffLineKind) {
+                line.lineKind = buttonOffLineKind;
+                if (action) {
+                    action();
+                }
             }
         }
     }
+}
 
-    if (( theseKeys | lastKeys) & kCompCancelKey)
-    {
-        // find out which line, if any, contains this button
-        line = globals()->gMiniScreenData.lineData.get();
-        count = 0;
-        while (( line->whichButton !=kOutLineButton) && ( count < kMiniScreenTrueLineNum))
-        {
-            count++;
-            line++;
-        }
-
-        if ( count < kMiniScreenCharHeight)
-        {
-            mRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
-                        kMiniScreenBottom + globals()->gInstrumentTop);
-        } else
-        {
-            mRect = Rect(kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
-                        kButBoxBottom + globals()->gInstrumentTop);
-        }
-
-        // hilite/unhilite this button
-        if ( count < kMiniScreenTrueLineNum)
-        {
-            if (( theseKeys & kCompCancelKey) && ( line->lineKind != buttonOnLineKind))
-            {
-                line->lineKind = buttonOnLineKind;
-                mPlayBeep3();
-            } else if ((!( theseKeys & kCompCancelKey)) && ( line->lineKind != buttonOffLineKind))
-            {
-                line->lineKind = buttonOffLineKind;
-                MiniComputerDoCancel();
-            }
-        }
+static void minicomputer_handle_move(int direction) {
+    if (globals()->gMiniScreenData.selectLine == kMiniScreenNoLineSelected) {
+        return;
     }
-    if (( theseKeys & kCompUpKey) && ( !(lastKeys & kCompUpKey)) && ( globals()->gMiniScreenData.selectLine !=
-            kMiniScreenNoLineSelected))
-    {
-        scrap = globals()->gMiniScreenData.selectLine;
-        line = globals()->gMiniScreenData.lineData.get() + globals()->gMiniScreenData.selectLine;
-        line->hiliteLeft = line->hiliteRight = 0;
-        do
-        {
-            line--;
-            globals()->gMiniScreenData.selectLine--;
-            if ( globals()->gMiniScreenData.selectLine < 0)
-            {
-                globals()->gMiniScreenData.selectLine = kMiniScreenTrueLineNum - 1;
-                line = globals()->gMiniScreenData.lineData.get() + kMiniScreenTrueLineNum - 1L;
-            }
-        } while ( line->selectable == cannotSelect);
-
-        if ( globals()->gMiniScreenData.selectLine < kMiniScreenCharHeight)
-        {
-            mRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
-                        kMiniScreenBottom + globals()->gInstrumentTop);
-        } else
-        {
-            mRect = Rect(kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
-                        kButBoxBottom + globals()->gInstrumentTop);
+    miniScreenLineType* line = globals()->gMiniScreenData.lineData.get() + globals()->gMiniScreenData.selectLine;
+    line->hiliteLeft = line->hiliteRight = 0;
+    do {
+        line += direction;
+        globals()->gMiniScreenData.selectLine += direction;
+        if (globals()->gMiniScreenData.selectLine < 0) {
+            globals()->gMiniScreenData.selectLine += kMiniScreenCharHeight;
+            line += kMiniScreenCharHeight;
+        } else if (globals()->gMiniScreenData.selectLine >= kMiniScreenCharHeight) {
+            globals()->gMiniScreenData.selectLine -= kMiniScreenCharHeight;
+            line -= kMiniScreenCharHeight;
         }
+    } while (line->selectable == cannotSelect);
 
-        line->hiliteLeft = mRect.left;
-        line->hiliteRight = mRect.right;
+    line->hiliteLeft = kMiniScreenLeft;
+    line->hiliteRight = kMiniScreenRight;
+}
+
+void minicomputer_handle_keys(uint32_t new_keys, uint32_t old_keys, bool cancel) {
+    if ((new_keys ^ old_keys) & kCompAcceptKey) {
+        minicomputer_handle_action(
+                kInLineButton, new_keys & kCompAcceptKey, MiniComputerDoAccept);
     }
 
-    if (( theseKeys & kCompDownKey) && ( !(lastKeys & kCompDownKey)) && ( globals()->gMiniScreenData.selectLine !=
-            kMiniScreenNoLineSelected))
-    {
-        scrap = globals()->gMiniScreenData.selectLine;
-        line = globals()->gMiniScreenData.lineData.get() + globals()->gMiniScreenData.selectLine;
-        line->hiliteLeft = line->hiliteRight = 0;
-        do
-        {
-            line++;
-            globals()->gMiniScreenData.selectLine++;
-            if ( globals()->gMiniScreenData.selectLine >= kMiniScreenTrueLineNum)
-            {
-                globals()->gMiniScreenData.selectLine = 0;
-                line = globals()->gMiniScreenData.lineData.get();
-            }
-        } while ( line->selectable == cannotSelect);
-
-        if ( globals()->gMiniScreenData.selectLine < kMiniScreenCharHeight)
-        {
-            mRect = Rect(kMiniScreenLeft, kMiniScreenTop + globals()->gInstrumentTop, kMiniScreenRight,
-                        kMiniScreenBottom + globals()->gInstrumentTop);
-        } else
-        {
-            mRect = Rect(kButBoxLeft, kButBoxTop + globals()->gInstrumentTop, kButBoxRight,
-                        kButBoxBottom + globals()->gInstrumentTop);
-        }
-
-        line->hiliteLeft = mRect.left;
-        line->hiliteRight = mRect.right;
+    if ((new_keys ^ old_keys) & kCompCancelKey) {
+        minicomputer_handle_action(
+                kOutLineButton, new_keys & kCompCancelKey, MiniComputerDoCancel);
     }
 
+    if ((new_keys & ~old_keys) & kCompUpKey) {
+        minicomputer_handle_move(-1);
+    }
 
+    if ((new_keys & ~old_keys) & kCompDownKey) {
+        minicomputer_handle_move(+1);
+    }
+}
+
+void minicomputer_cancel() {
+    minicomputer_handle_action(kInLineButton, false, NULL);
+    minicomputer_handle_action(kOutLineButton, false, NULL);
 }
 
 void MiniComputerHandleNull( int32_t unitsToDo)

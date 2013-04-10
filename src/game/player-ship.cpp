@@ -342,7 +342,7 @@ bool PlayerShipGetKeys(
 
     baseObject = theShip->baseType;
 
-    MiniComputerHandleKeys(gTheseKeys, gLastKeys);
+    minicomputer_handle_keys(gTheseKeys, gLastKeys, false);
 
     if ((mMessageNextKey(keyMap))
             && (!(mMessageNextKey(gLastKeyMap)))

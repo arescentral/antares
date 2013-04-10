@@ -76,6 +76,7 @@ class GamePlay : public Card {
     GamePlay(bool replay, GameResult* game_result, int32_t* seconds);
 
     virtual void become_front();
+    virtual void resign_front();
 
     virtual void draw() const;
 
@@ -391,6 +392,10 @@ void GamePlay::become_front() {
         }
         break;
     }
+}
+
+void GamePlay::resign_front() {
+    minicomputer_cancel();
 }
 
 void GamePlay::draw() const {
