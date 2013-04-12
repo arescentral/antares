@@ -34,12 +34,28 @@ class PlayerShip : public EventReceiver {
     virtual void key_down(const KeyDownEvent& event);
     virtual void key_up(const KeyUpEvent& event);
 
+    virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
+    virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
+
     void update(int64_t timePass, const GameCursor& cursor, bool enter_message);
 
   private:
+    bool active() const;
+
     uint32_t gTheseKeys;
     uint32_t gLastKeys;
     KeyMap _keys;
+
+    enum GamepadState {
+        NO_BUMPER               = 0,
+        SELECT_BUMPER           = 1,
+        TARGET_BUMPER           = 2,
+        EITHER_BUMPER           = SELECT_BUMPER | TARGET_BUMPER,
+        OVERRIDE                = 4,
+        SELECT_BUMPER_OVERRIDE  = SELECT_BUMPER | OVERRIDE,
+        TARGET_BUMPER_OVERRIDE  = TARGET_BUMPER | OVERRIDE,
+    };
+    GamepadState _gamepad_state;
 };
 
 void ResetPlayerShip(int32_t);

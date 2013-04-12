@@ -20,6 +20,7 @@
 
 #include <sfz/sfz.hpp>
 
+#include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
 #include "data/space-object.hpp"
@@ -129,7 +130,8 @@ void ResetPlayerShip(int32_t which) {
 
 PlayerShip::PlayerShip():
     gTheseKeys(0),
-    gLastKeys(0) { }
+    gLastKeys(0),
+    _gamepad_state(NO_BUMPER) { }
 
 void PlayerShip::update_keys(const KeyMap& keys) {
     for (int i = 0; i < 256; ++i) {
@@ -185,14 +187,19 @@ static void zoom_out() {
     }
 }
 
+static void engage_autopilot() {
+    spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
+    if (!(player->attributes & kOnAutoPilot)) {
+        player->keysDown |= kAutoPilotKey;
+    }
+    player->keysDown |= kAdoptTargetKey;
+}
+
+
 void PlayerShip::key_down(const KeyDownEvent& event) {
     _keys.set(event.key(), true);
 
-    if (globals()->gPlayerShipNumber < 0) {
-        return;
-    }
-    spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
-    if (!(player->active && (player->attributes & kIsHumanControlled))) {
+    if (!active()) {
         return;
     }
 
@@ -241,11 +248,7 @@ void PlayerShip::key_down(const KeyDownEvent& event) {
 void PlayerShip::key_up(const KeyUpEvent& event) {
     _keys.set(event.key(), false);
 
-    if (globals()->gPlayerShipNumber < 0) {
-        return;
-    }
-    spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
-    if (!(player->active && (player->attributes & kIsHumanControlled))) {
+    if (!active()) {
         return;
     }
 
@@ -259,6 +262,135 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
         }
         break;
     }
+}
+
+void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
+    if (!active()) {
+        return;
+    }
+
+    if (_gamepad_state) {
+        switch (event.button) {
+          case Gamepad::LB:
+            if (_gamepad_state & SELECT_BUMPER) {
+                _gamepad_state = TARGET_BUMPER_OVERRIDE;
+            } else {
+                _gamepad_state = TARGET_BUMPER;
+            }
+            return;
+          case Gamepad::RB:
+            if (_gamepad_state & TARGET_BUMPER) {
+                _gamepad_state = SELECT_BUMPER_OVERRIDE;
+            } else {
+                _gamepad_state = SELECT_BUMPER;
+            }
+            return;
+          case Gamepad::A:
+            // Select friendly
+            return;
+          case Gamepad::B:
+            // Select hostile
+            return;
+          case Gamepad::X:
+            // Select base
+            return;
+          case Gamepad::Y:
+            // Order to go
+            return;
+          case Gamepad::LSB:
+            if (_gamepad_state & TARGET_BUMPER) {
+                engage_autopilot();
+            } else {
+                MiniComputerExecute(3, 1, globals()->gPlayerAdmiralNumber);
+            }
+            return;
+        }
+    }
+
+    switch (event.button) {
+      case Gamepad::LB:
+        _gamepad_state = TARGET_BUMPER;
+        break;
+      case Gamepad::RB:
+        _gamepad_state = SELECT_BUMPER;
+        break;
+      case Gamepad::A:
+        minicomputer_handle_keys(kCompAcceptKey, 0, false);
+        break;
+      case Gamepad::B:
+        minicomputer_handle_keys(kCompCancelKey, 0, false);
+        break;
+      case Gamepad::X:
+        zoom_out();
+        break;
+      case Gamepad::Y:
+        zoom_in();
+        break;
+      case Gamepad::BACK:
+        Messages::advance();
+        break;
+      case Gamepad::LT:    // fire special
+      case Gamepad::RT:    // fire primary and secondary
+      case Gamepad::RSB:   // warp
+      case Gamepad::UP:    // accelerate
+      case Gamepad::DOWN:  // decelerate
+        break;
+    }
+}
+
+void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
+    if (!active()) {
+        return;
+    }
+
+    if (_gamepad_state) {
+        switch (event.button) {
+          case Gamepad::LB:
+            if (_gamepad_state & OVERRIDE) {
+                _gamepad_state = SELECT_BUMPER;
+            } else {
+                _gamepad_state = NO_BUMPER;
+            }
+            return;
+          case Gamepad::RB:
+            if (_gamepad_state & OVERRIDE) {
+                _gamepad_state = TARGET_BUMPER;
+            } else {
+                _gamepad_state = NO_BUMPER;
+            }
+            return;
+          case Gamepad::A:
+          case Gamepad::B:
+          case Gamepad::X:
+          case Gamepad::Y:
+          case Gamepad::LSB:
+            return;
+        }
+    }
+
+    switch (event.button) {
+      case Gamepad::LB:
+      case Gamepad::RB:
+        _gamepad_state = NO_BUMPER;
+        break;
+      case Gamepad::A:
+        minicomputer_handle_keys(0, kCompAcceptKey, false);
+        break;
+      case Gamepad::B:
+        minicomputer_handle_keys(0, kCompCancelKey, false);
+        break;
+    }
+}
+
+bool PlayerShip::active() const {
+    if (globals()->gPlayerShipNumber < 0) {
+        return false;
+    }
+    spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
+    if (!(player->active && (player->attributes & kIsHumanControlled))) {
+        return false;
+    }
+    return true;
 }
 
 void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_message) {
@@ -606,10 +738,7 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
             && (gTheseKeys & kDestinationKey)) {
         gDestKeyTime = -1;
         if (!(gLastKeys & kWarpKey)) {
-            if (!(theShip->attributes & kOnAutoPilot)) {
-                theShip->keysDown |= kAutoPilotKey;
-            }
-            theShip->keysDown |= kAdoptTargetKey;
+            engage_autopilot();
         }
         theShip->keysDown &= ~kWarpKey;
     }

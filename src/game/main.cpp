@@ -21,6 +21,7 @@
 #include <math.h>
 #include <algorithm>
 
+#include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
 #include "data/string-list.hpp"
@@ -90,6 +91,9 @@ class GamePlay : public Card {
     virtual void mouse_down(const MouseDownEvent& event);
     virtual void mouse_up(const MouseUpEvent& event);
     virtual void mouse_move(const MouseMoveEvent& event);
+
+    virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
+    virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
 
   private:
     enum State {
@@ -695,6 +699,35 @@ void GamePlay::mouse_up(const MouseUpEvent& event) {
 
 void GamePlay::mouse_move(const MouseMoveEvent& event) {
     _cursor.mouse_move(event);
+}
+
+void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
+    if (globals()->gInputSource) {
+        *_game_result = QUIT_GAME;
+        globals()->gGameOver = 1;
+        return;
+    }
+
+    switch (event.button) {
+      case Gamepad::START:
+        {
+            _state  = PLAY_AGAIN;
+            _player_paused = true;
+            bool is_training = gThisScenario->startTime & kScenario_IsTraining_Bit;
+            stack()->push(new PlayAgainScreen(true, is_training, &_play_again));
+        }
+        break;
+    }
+
+    _player_ship.gamepad_button_down(event);
+}
+
+void GamePlay::gamepad_button_up(const GamepadButtonUpEvent& event) {
+    if (globals()->gInputSource) {
+        return;
+    }
+
+    _player_ship.gamepad_button_up(event);
 }
 
 }  // namespace antares
