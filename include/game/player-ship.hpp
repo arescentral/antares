@@ -28,6 +28,8 @@ class InputSource;
 
 class PlayerShip : public EventReceiver {
   public:
+    PlayerShip();
+
     void update_keys(const KeyMap& keys);
     virtual void key_down(const KeyDownEvent& event);
     virtual void key_up(const KeyUpEvent& event);
@@ -35,6 +37,8 @@ class PlayerShip : public EventReceiver {
     void update(int64_t timePass, const GameCursor& cursor, bool enter_message);
 
   private:
+    uint32_t gTheseKeys;
+    uint32_t gLastKeys;
     KeyMap _keys;
 };
 

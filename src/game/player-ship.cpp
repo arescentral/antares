@@ -71,8 +71,6 @@ void Update_LabelStrings_ForHotKeyChange( void);
 namespace {
 
 KeyMap gLastKeyMap;
-uint32_t gLastKeys = 0;
-uint32_t gTheseKeys = 0;
 int32_t gDestKeyTime = 0;
 int32_t gDestinationLabel = -1;
 int32_t gAlarmCount = -1;
@@ -112,7 +110,6 @@ void ResetPlayerShip(int32_t which) {
     gSendMessageLabel = Labels::add(200, 200, 0, 30, NULL, false, GREEN);
     globals()->starfield.reset(globals()->gPlayerShipNumber);
     gAlarmCount = -1;
-    gLastKeys = gTheseKeys = 0;
     globals()->gAutoPilotOff = true;
     globals()->keyMask = 0;
     gLastKeyMap.clear();
@@ -130,6 +127,10 @@ void ResetPlayerShip(int32_t which) {
     globals()->hotKey_target = false;
 }
 
+PlayerShip::PlayerShip():
+    gTheseKeys(0),
+    gLastKeys(0) { }
+
 void PlayerShip::update_keys(const KeyMap& keys) {
     for (int i = 0; i < 256; ++i) {
         if (keys.get(i) && ! _keys.get(i)) {
@@ -140,12 +141,124 @@ void PlayerShip::update_keys(const KeyMap& keys) {
     }
 }
 
+static int key_num(uint32_t key) {
+    for (int i = 0; i < kKeyExtendedControlNum; ++i) {
+        if (key == (Preferences::preferences()->key(i) - 1)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+static void zoom_to(ZoomType zoom) {
+    if (globals()->gZoomMode != zoom) {
+        globals()->gZoomMode = zoom;
+        PlayVolumeSound(kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
+        StringList strings(kMessageStringID);
+        StringSlice string = strings.at(globals()->gZoomMode + kZoomStringOffset - 1);
+        Messages::set_status(string, kStatusLabelColor);
+    }
+}
+
+static void zoom_shortcut(ZoomType zoom) {
+    if (globals()->keyMask & kShortcutZoomMask) {
+        return;
+    }
+    zoom_to(zoom);
+}
+
+static void zoom_in() {
+    if (globals()->keyMask & kZoomInKey) {
+        return;
+    }
+    if (globals()->gZoomMode > kTimesTwoZoom) {
+        zoom_to(static_cast<ZoomType>(globals()->gZoomMode - 1));
+    }
+}
+
+static void zoom_out() {
+    if (globals()->keyMask & kZoomOutKey) {
+        return;
+    }
+    if (globals()->gZoomMode < kSmallestZoom) {
+        zoom_to(static_cast<ZoomType>(globals()->gZoomMode + 1));
+    }
+}
+
 void PlayerShip::key_down(const KeyDownEvent& event) {
     _keys.set(event.key(), true);
+
+    if (globals()->gPlayerShipNumber < 0) {
+        return;
+    }
+    spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
+    if (!(player->active && (player->attributes & kIsHumanControlled))) {
+        return;
+    }
+
+    int key = key_num(event.key());
+    switch (key) {
+      case kZoomOutKeyNum:
+        zoom_out();
+        break;
+      case kZoomInKeyNum:
+        zoom_in();
+        break;
+      case kScale121KeyNum:
+        zoom_shortcut(kActualSizeZoom);
+        break;
+      case kScale122KeyNum:
+        zoom_shortcut(kHalfSizeZoom);
+        break;
+      case kScale124KeyNum:
+        zoom_shortcut(kQuarterSizeZoom);
+        break;
+      case kScale1216KeyNum:
+        zoom_shortcut(kEighthSizeZoom);
+        break;
+      case kScaleHostileKeyNum:
+        zoom_shortcut(kNearestFoeZoom);
+        break;
+      case kScaleObjectKeyNum:
+        zoom_shortcut(kNearestAnythingZoom);
+        break;
+      case kScaleAllKeyNum:
+        zoom_shortcut(kSmallestZoom);
+        break;
+      case kTransferKeyNum:
+        MiniComputerExecute(3, 1, globals()->gPlayerAdmiralNumber);
+        break;
+      default:
+        if (key < kKeyControlNum) {
+            if (!(gTheseKeys & (0x01 << key) & ~globals()->keyMask)) {
+                gTheseKeys ^= (0x01 << key) & ~globals()->keyMask;
+            }
+        }
+        break;
+    }
 }
 
 void PlayerShip::key_up(const KeyUpEvent& event) {
     _keys.set(event.key(), false);
+
+    if (globals()->gPlayerShipNumber < 0) {
+        return;
+    }
+    spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
+    if (!(player->active && (player->attributes & kIsHumanControlled))) {
+        return;
+    }
+
+    int key = key_num(event.key());
+    switch (key) {
+      default:
+        if (key < kKeyControlNum) {
+            if (gTheseKeys & (0x01 << key) & ~globals()->keyMask) {
+                gTheseKeys ^= (0x01 << key) & ~globals()->keyMask;
+            }
+        }
+        break;
+    }
 }
 
 void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_message) {
@@ -155,14 +268,6 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
     int32_t         selectShipNum;
     uint32_t        distance, difference, dcalc, attributes, nonattributes;
     uint64_t        hugeDistance;
-
-    gLastKeys = gTheseKeys;
-    gTheseKeys = 0;
-    for (int i = 0; i < kKeyControlNum; ++i) {
-        if (_keys.get(Preferences::preferences()->key(i) - 1)) {
-            gTheseKeys |= (0x01 << i) & ~globals()->keyMask;
-        }
-    }
 
     if (globals()->gPlayerShipNumber < 0) {
         return;
@@ -256,77 +361,6 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
     // TERRIBLE HACK:
     //  this implements the often requested feature of having a shortcut for
     //  transfering control.
-
-    int old_zoom = globals()->gZoomMode;
-
-    if ((gTheseKeys & kZoomOutKey) && (!(gLastKeys & kZoomOutKey)))
-    {
-        reinterpret_cast<int&>(globals()->gZoomMode)++;
-        if (globals()->gZoomMode > kSmallestZoom)
-        {
-             globals()->gZoomMode = kSmallestZoom;
-        }
-    }
-    if ((gTheseKeys & kZoomInKey) && (!(gLastKeys & kZoomInKey)))
-    {
-        reinterpret_cast<int&>(globals()->gZoomMode)--;
-        if (globals()->gZoomMode < kTimesTwoZoom)
-        {
-            globals()->gZoomMode = kTimesTwoZoom;
-        }
-    }
-
-    if (!enter_message) {
-        if ((mTransferKey(_keys))
-                && (!(mTransferKey(gLastKeyMap)))) {
-            if (!NETWORK_ON) {
-                MiniComputerExecute(
-                        3, 1, globals()->gPlayerAdmiralNumber);
-            } else {
-#ifdef NETSPROCKET_AVAILABLE
-                SendMenuMessage(
-                        globals()->gGameTime + gNetLatency,
-                        3,  // the special screen
-                        1   // kSpecialMiniTransfer
-                        );
-#endif  // NETSPROCKET_AVAILABLE
-            }
-        }
-        if (((mScale121Key(_keys)))) {
-            globals()->gZoomMode = kActualSizeZoom;
-        }
-
-        if (((mScale122Key(_keys)))) {
-            globals()->gZoomMode = kHalfSizeZoom;
-        }
-
-        if (((mScale124Key(_keys)))) {
-            globals()->gZoomMode = kQuarterSizeZoom;
-        }
-
-        if (((mScale1216Key(_keys)))) {
-            globals()->gZoomMode = kEighthSizeZoom;
-        }
-
-        if (((mScaleHostileKey(_keys)))) {
-            globals()->gZoomMode = kNearestFoeZoom;
-        }
-
-        if (((mScaleObjectKey(_keys)))) {
-            globals()->gZoomMode = kNearestAnythingZoom;
-        }
-
-        if (((mScaleAllKey(_keys)))) {
-            globals()->gZoomMode = kSmallestZoom;
-        }
-    }
-
-    if (globals()->gZoomMode != old_zoom) {
-        PlayVolumeSound(kComputerBeep3, kMediumVolume, kMediumPersistence, kLowPrioritySound);
-        StringList strings(kMessageStringID);
-        StringSlice string = strings.at(globals()->gZoomMode + kZoomStringOffset - 1);
-        Messages::set_status(string, kStatusLabelColor);
-    }
 
     theShip = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
 
@@ -581,6 +615,7 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
     }
 
     gLastKeyMap.copy(_keys);
+    gLastKeys = gTheseKeys;
 }
 
 void PlayerShipHandleClick(Point where, int button) {
