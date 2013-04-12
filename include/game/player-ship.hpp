@@ -26,9 +26,19 @@ namespace antares {
 class GameCursor;
 class InputSource;
 
+class PlayerShip : public EventReceiver {
+  public:
+    void update_keys(const KeyMap& keys);
+    virtual void key_down(const KeyDownEvent& event);
+    virtual void key_up(const KeyUpEvent& event);
+
+    void update(int64_t timePass, const GameCursor& cursor, bool enter_message);
+
+  private:
+    KeyMap _keys;
+};
+
 void ResetPlayerShip(int32_t);
-bool PlayerShipGetKeys(
-        int32_t timePass, InputSource& input_source, const GameCursor& cursor, bool *enterMessage);
 void PlayerShipHandleClick(Point where, int button);
 void SetPlayerSelectShip(int32_t, bool, int32_t);
 void ChangePlayerShipNumber(int32_t, int32_t);

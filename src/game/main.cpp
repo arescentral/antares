@@ -84,6 +84,7 @@ class GamePlay : public Card {
     virtual void fire_timer();
 
     virtual void key_down(const KeyDownEvent& event);
+    virtual void key_up(const KeyUpEvent& event);
     virtual void caps_lock(const CapsLockEvent& event);
 
     virtual void mouse_down(const MouseDownEvent& event);
@@ -118,6 +119,7 @@ class GamePlay : public Card {
     int64_t _last_click_time;
     int _scenario_check_time;
     PlayAgainScreen::Item _play_again;
+    PlayerShip _player_ship;
 };
 
 MainPlay::MainPlay(
@@ -392,6 +394,11 @@ void GamePlay::become_front() {
         }
         break;
     }
+    if ((_state == PLAYING) && !globals()->gInputSource) {
+        KeyMap keys;
+        VideoDriver::driver()->get_keys(&keys);
+        _player_ship.update_keys(keys);
+    }
 }
 
 void GamePlay::resign_front() {
@@ -492,11 +499,10 @@ void GamePlay::fire_timer() {
             AdmiralThink();
             ExecuteActionQueue( kDecideEveryCycles);
 
-            if (!PlayerShipGetKeys(
-                        kDecideEveryCycles, *globals()->gInputSource, _cursor,
-                        &_entering_message)) {
+            if (globals()->gInputSource && !globals()->gInputSource->next(_player_ship)) {
                 globals()->gGameOver = 1;
             }
+            _player_ship.update(kDecideEveryCycles, _cursor, _entering_message);
 
             if (VideoDriver::driver()->button(0)) {
                 if (_replay) {
@@ -643,7 +649,7 @@ void GamePlay::caps_lock(const CapsLockEvent& event) {
 }
 
 void GamePlay::key_down(const KeyDownEvent& event) {
-    if (_replay) {
+    if (globals()->gInputSource) {
         *_game_result = QUIT_GAME;
         globals()->gGameOver = 1;
         return;
@@ -667,6 +673,16 @@ void GamePlay::key_down(const KeyDownEvent& event) {
         }
         break;
     }
+
+    _player_ship.key_down(event);
+}
+
+void GamePlay::key_up(const KeyUpEvent& event) {
+    if (globals()->gInputSource) {
+        return;
+    }
+
+    _player_ship.key_up(event);
 }
 
 void GamePlay::mouse_down(const MouseDownEvent& event) {

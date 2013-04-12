@@ -23,8 +23,7 @@
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
 #include "data/replay.hpp"
-#include "game/globals.hpp"
-#include "video/driver.hpp"
+#include "game/time.hpp"
 
 using sfz::BytesSlice;
 using sfz::read;
@@ -33,33 +32,26 @@ namespace antares {
 
 InputSource::~InputSource() { }
 
-UserInputSource::UserInputSource() { }
-
-bool UserInputSource::next(KeyMap& key_map) {
-    VideoDriver::driver()->get_keys(&key_map);
-    return true;
-}
-
 ReplayInputSource::ReplayInputSource(ReplayData* data):
         _data(data),
         _data_index(0),
         _wait_ticks(0) {
-    advance();
+    EventReceiver receiver;
+    advance(receiver);
 }
 
-bool ReplayInputSource::next(KeyMap& key_map) {
+bool ReplayInputSource::next(EventReceiver& receiver) {
     if (_wait_ticks == 0) {
-        if (!advance()) {
+        if (!advance(receiver)) {
             return false;
         }
     }
     --_wait_ticks;
-
-    key_map.copy(_key_map);
     return true;
 }
 
-bool ReplayInputSource::advance() {
+bool ReplayInputSource::advance(EventReceiver& receiver) {
+    int key;
     while (_data_index < _data->items.size()) {
         const ReplayData::Item& item = _data->items[_data_index++];
         switch (item.type) {
@@ -67,10 +59,12 @@ bool ReplayInputSource::advance() {
             _wait_ticks += item.data.wait;
             return true;
           case ReplayData::Item::KEY_DOWN:
-            _key_map.set(Preferences::preferences()->key(item.data.key_down) - 1, true);
+            key = Preferences::preferences()->key(item.data.key_down) - 1;
+            receiver.key_down(KeyDownEvent(now_usecs(), key));
             break;
           case ReplayData::Item::KEY_UP:
-            _key_map.set(Preferences::preferences()->key(item.data.key_up) - 1, false);
+            key = Preferences::preferences()->key(item.data.key_up) - 1;
+            receiver.key_up(KeyUpEvent(now_usecs(), key));
             break;
         }
     }

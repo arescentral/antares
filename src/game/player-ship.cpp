@@ -38,6 +38,7 @@
 #include "game/scenario-maker.hpp"
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
+#include "game/time.hpp"
 #include "math/macros.hpp"
 #include "math/rotation.hpp"
 #include "math/special.hpp"
@@ -129,36 +130,49 @@ void ResetPlayerShip(int32_t which) {
     globals()->hotKey_target = false;
 }
 
-bool PlayerShipGetKeys(
-        int32_t timePass, InputSource& input_source, const GameCursor& cursor, bool *enterMessage) {
-    KeyMap          keyMap, *bufMap;
+void PlayerShip::update_keys(const KeyMap& keys) {
+    for (int i = 0; i < 256; ++i) {
+        if (keys.get(i) && ! _keys.get(i)) {
+            key_down(KeyDownEvent(now_usecs(), i));
+        } else if (_keys.get(i) && ! keys.get(i)) {
+            key_up(KeyUpEvent(now_usecs(), i));
+        }
+    }
+}
+
+void PlayerShip::key_down(const KeyDownEvent& event) {
+    _keys.set(event.key(), true);
+}
+
+void PlayerShip::key_up(const KeyUpEvent& event) {
+    _keys.set(event.key(), false);
+}
+
+void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_message) {
     int16_t         friendOrFoe;
     spaceObjectType *theShip = NULL, *selectShip = NULL;
     baseObjectType  *baseObject = NULL;
     int32_t         selectShipNum;
     uint32_t        distance, difference, dcalc, attributes, nonattributes;
     uint64_t        hugeDistance;
-    int32_t         width, strlen;
 
     gLastKeys = gTheseKeys;
-    if (!input_source.next(keyMap)) {
-        return false;
-    }
     gTheseKeys = 0;
     for (int i = 0; i < kKeyControlNum; ++i) {
-        if (keyMap.get(Preferences::preferences()->key(i) - 1)) {
+        if (_keys.get(Preferences::preferences()->key(i) - 1)) {
             gTheseKeys |= (0x01 << i) & ~globals()->keyMask;
         }
     }
 
     if (globals()->gPlayerShipNumber < 0) {
-        return true;
+        return;
     }
 
-    if (*enterMessage) {
+    if (enter_message) {
         gTheseKeys = 0;
     }
 
+    /*
     while ((globals()->gKeyMapBufferBottom != globals()->gKeyMapBufferTop)) {
         bufMap = globals()->gKeyMapBuffer + globals()->gKeyMapBufferBottom;
         globals()->gKeyMapBufferBottom++;
@@ -237,6 +251,7 @@ bool PlayerShipGetKeys(
         }
         globals()->gLastMessageKeyMap.copy(*bufMap);
     }
+    */
 
     // TERRIBLE HACK:
     //  this implements the often requested feature of having a shortcut for
@@ -261,8 +276,8 @@ bool PlayerShipGetKeys(
         }
     }
 
-    if (!*enterMessage) {
-        if ((mTransferKey(keyMap))
+    if (!enter_message) {
+        if ((mTransferKey(_keys))
                 && (!(mTransferKey(gLastKeyMap)))) {
             if (!NETWORK_ON) {
                 MiniComputerExecute(
@@ -277,31 +292,31 @@ bool PlayerShipGetKeys(
 #endif  // NETSPROCKET_AVAILABLE
             }
         }
-        if (((mScale121Key(keyMap)))) {
+        if (((mScale121Key(_keys)))) {
             globals()->gZoomMode = kActualSizeZoom;
         }
 
-        if (((mScale122Key(keyMap)))) {
+        if (((mScale122Key(_keys)))) {
             globals()->gZoomMode = kHalfSizeZoom;
         }
 
-        if (((mScale124Key(keyMap)))) {
+        if (((mScale124Key(_keys)))) {
             globals()->gZoomMode = kQuarterSizeZoom;
         }
 
-        if (((mScale1216Key(keyMap)))) {
+        if (((mScale1216Key(_keys)))) {
             globals()->gZoomMode = kEighthSizeZoom;
         }
 
-        if (((mScaleHostileKey(keyMap)))) {
+        if (((mScaleHostileKey(_keys)))) {
             globals()->gZoomMode = kNearestFoeZoom;
         }
 
-        if (((mScaleObjectKey(keyMap)))) {
+        if (((mScaleObjectKey(_keys)))) {
             globals()->gZoomMode = kNearestAnythingZoom;
         }
 
-        if (((mScaleAllKey(keyMap)))) {
+        if (((mScaleAllKey(_keys)))) {
             globals()->gZoomMode = kSmallestZoom;
         }
     }
@@ -316,7 +331,7 @@ bool PlayerShipGetKeys(
     theShip = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
 
     if (!theShip->active) {
-        return true;
+        return;
     }
 
     if (theShip->health < (theShip->baseType->health >> 2L)) {
@@ -337,16 +352,16 @@ bool PlayerShipGetKeys(
     }
 
     if (!(theShip->attributes & kIsHumanControlled)) {
-        return true;
+        return;
     }
 
     baseObject = theShip->baseType;
 
     minicomputer_handle_keys(gTheseKeys, gLastKeys, false);
 
-    if ((mMessageNextKey(keyMap))
+    if ((mMessageNextKey(_keys))
             && (!(mMessageNextKey(gLastKeyMap)))
-            && (!*enterMessage)) {
+            && (!enter_message)) {
         Messages::advance();
     }
 
@@ -383,7 +398,7 @@ bool PlayerShipGetKeys(
 // NEW -- do hot key selection
     int hot_key = -1;
     for (int i = 0; i < kHotKeyNum; i++) {
-        if (mCheckKeyMap(keyMap, kFirstHotKeyNum + i)) {
+        if (mCheckKeyMap(_keys, kFirstHotKeyNum + i)) {
             hot_key = i;
         }
     }
@@ -565,8 +580,7 @@ bool PlayerShipGetKeys(
         theShip->keysDown &= ~kWarpKey;
     }
 
-    gLastKeyMap.copy(keyMap);
-    return true;
+    gLastKeyMap.copy(_keys);
 }
 
 void PlayerShipHandleClick(Point where, int button) {
