@@ -336,6 +336,23 @@ void PlayerShip::key_up(const KeyUpEvent& event) {
 }
 
 void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
+    switch (event.button) {
+      case Gamepad::LB:
+        if (_gamepad_state & SELECT_BUMPER) {
+            _gamepad_state = TARGET_BUMPER_OVERRIDE;
+        } else if (!(_gamepad_state & TARGET_BUMPER)) {
+            _gamepad_state = TARGET_BUMPER;
+        }
+        return;
+      case Gamepad::RB:
+        if (_gamepad_state & TARGET_BUMPER) {
+            _gamepad_state = SELECT_BUMPER_OVERRIDE;
+        } else if (!(_gamepad_state & SELECT_BUMPER)) {
+            _gamepad_state = SELECT_BUMPER;
+        }
+        return;
+    }
+
     if (!active()) {
         return;
     }
@@ -343,20 +360,6 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
     spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
     if (_gamepad_state) {
         switch (event.button) {
-          case Gamepad::LB:
-            if (_gamepad_state & SELECT_BUMPER) {
-                _gamepad_state = TARGET_BUMPER_OVERRIDE;
-            } else {
-                _gamepad_state = TARGET_BUMPER;
-            }
-            return;
-          case Gamepad::RB:
-            if (_gamepad_state & TARGET_BUMPER) {
-                _gamepad_state = SELECT_BUMPER_OVERRIDE;
-            } else {
-                _gamepad_state = SELECT_BUMPER;
-            }
-            return;
           case Gamepad::A:
             if (_control_active) {
                 if (_gamepad_state & SELECT_BUMPER) {
@@ -396,12 +399,6 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
     }
 
     switch (event.button) {
-      case Gamepad::LB:
-        _gamepad_state = TARGET_BUMPER;
-        break;
-      case Gamepad::RB:
-        _gamepad_state = SELECT_BUMPER;
-        break;
       case Gamepad::A:
         minicomputer_handle_keys(kCompAcceptKey, 0, false);
         break;
@@ -427,26 +424,29 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
 }
 
 void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
+    switch (event.button) {
+      case Gamepad::LB:
+        if (_gamepad_state & OVERRIDE) {
+            _gamepad_state = SELECT_BUMPER;
+        } else {
+            _gamepad_state = NO_BUMPER;
+        }
+        return;
+      case Gamepad::RB:
+        if (_gamepad_state & OVERRIDE) {
+            _gamepad_state = TARGET_BUMPER;
+        } else {
+            _gamepad_state = NO_BUMPER;
+        }
+        return;
+    }
+
     if (!active()) {
         return;
     }
 
     if (_gamepad_state) {
         switch (event.button) {
-          case Gamepad::LB:
-            if (_gamepad_state & OVERRIDE) {
-                _gamepad_state = SELECT_BUMPER;
-            } else {
-                _gamepad_state = NO_BUMPER;
-            }
-            return;
-          case Gamepad::RB:
-            if (_gamepad_state & OVERRIDE) {
-                _gamepad_state = TARGET_BUMPER;
-            } else {
-                _gamepad_state = NO_BUMPER;
-            }
-            return;
           case Gamepad::A:
           case Gamepad::B:
           case Gamepad::X:
@@ -457,10 +457,6 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
     }
 
     switch (event.button) {
-      case Gamepad::LB:
-      case Gamepad::RB:
-        _gamepad_state = NO_BUMPER;
-        break;
       case Gamepad::A:
         minicomputer_handle_keys(0, kCompAcceptKey, false);
         break;
