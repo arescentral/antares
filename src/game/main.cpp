@@ -94,6 +94,7 @@ class GamePlay : public Card {
 
     virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
     virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
+    virtual void gamepad_stick(const GamepadStickEvent& event);
 
   private:
     enum State {
@@ -417,7 +418,7 @@ void GamePlay::draw() const {
     Labels::draw();
 
     Messages::draw_message();
-    draw_site();
+    draw_site(_player_ship);
     draw_instruments();
     if (stack()->top() == this) {
         _cursor.draw();
@@ -728,6 +729,10 @@ void GamePlay::gamepad_button_up(const GamepadButtonUpEvent& event) {
     }
 
     _player_ship.gamepad_button_up(event);
+}
+
+void GamePlay::gamepad_stick(const GamepadStickEvent& event) {
+    _player_ship.gamepad_stick(event);
 }
 
 }  // namespace antares

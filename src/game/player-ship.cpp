@@ -32,6 +32,7 @@
 #include "game/cursor.hpp"
 #include "game/globals.hpp"
 #include "game/input-source.hpp"
+#include "game/instruments.hpp"
 #include "game/labels.hpp"
 #include "game/messages.hpp"
 #include "game/minicomputer.hpp"
@@ -131,7 +132,9 @@ void ResetPlayerShip(int32_t which) {
 PlayerShip::PlayerShip():
     gTheseKeys(0),
     gLastKeys(0),
-    _gamepad_state(NO_BUMPER) { }
+    _gamepad_state(NO_BUMPER),
+    _show_control(false),
+    _control_direction(0) { }
 
 void PlayerShip::update_keys(const KeyMap& keys) {
     for (int i = 0; i < 256; ++i) {
@@ -379,6 +382,18 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
       case Gamepad::B:
         minicomputer_handle_keys(0, kCompCancelKey, false);
         break;
+    }
+}
+
+void PlayerShip::gamepad_stick(const GamepadStickEvent& event) {
+    if (!active()) {
+        return;
+    }
+    if ((event.x * event.x + event.y * event.y) < 0.90) {
+        _show_control = false;
+    } else {
+        _show_control = true;
+        _control_direction = GetAngleFromVector(-event.x * 32768, -event.y * 32768);
     }
 }
 
@@ -745,6 +760,26 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
 
     gLastKeyMap.copy(_keys);
     gLastKeys = gTheseKeys;
+}
+
+bool PlayerShip::show_select() const {
+    return _show_control && (_gamepad_state & SELECT_BUMPER);
+}
+
+bool PlayerShip::show_target() const {
+    return _show_control && (_gamepad_state & TARGET_BUMPER);
+}
+
+int32_t PlayerShip::control_direction() const {
+    return _control_direction;
+}
+
+bool PlayerShip::show_right_stick() const {
+    return false;
+}
+
+int32_t PlayerShip::goal_direction() const {
+    return 0;
 }
 
 void PlayerShipHandleClick(Point where, int button) {

@@ -36,8 +36,15 @@ class PlayerShip : public EventReceiver {
 
     virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
     virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
+    virtual void gamepad_stick(const GamepadStickEvent& event);
 
     void update(int64_t timePass, const GameCursor& cursor, bool enter_message);
+
+    bool show_select() const;
+    bool show_target() const;
+    int32_t control_direction() const;
+    bool show_right_stick() const;
+    int32_t goal_direction() const;
 
   private:
     bool active() const;
@@ -56,6 +63,8 @@ class PlayerShip : public EventReceiver {
         TARGET_BUMPER_OVERRIDE  = TARGET_BUMPER | OVERRIDE,
     };
     GamepadState _gamepad_state;
+    bool _show_control;
+    int32_t _control_direction;
 };
 
 void ResetPlayerShip(int32_t);
