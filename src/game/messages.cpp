@@ -449,7 +449,9 @@ void Messages::draw_message_screen(int32_t by_units) {
     // if it's been shown for too long, then get the next message
     if (time_count > kMessageDisplayTime) {
         time_count = 0;
-        message_data.pop();
+        if (!message_data.empty()) {
+            message_data.pop();
+        }
     }
 
     if (!message_data.empty()) {
