@@ -63,7 +63,7 @@ class PlayerShip : public EventReceiver {
         TARGET_BUMPER_OVERRIDE  = TARGET_BUMPER | OVERRIDE,
     };
     GamepadState _gamepad_state;
-    bool _show_control;
+    bool _control_active;
     int32_t _control_direction;
 };
 

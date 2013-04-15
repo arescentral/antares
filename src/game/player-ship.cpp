@@ -133,7 +133,7 @@ PlayerShip::PlayerShip():
     gTheseKeys(0),
     gLastKeys(0),
     _gamepad_state(NO_BUMPER),
-    _show_control(false),
+    _control_active(false),
     _control_direction(0) { }
 
 void PlayerShip::update_keys(const KeyMap& keys) {
@@ -198,6 +198,74 @@ static void engage_autopilot() {
     player->keysDown |= kAdoptTargetKey;
 }
 
+static void pick_object(
+        spaceObjectType* origin_ship, int32_t direction, bool destination,
+        int32_t attributes, int32_t nonattributes, int32_t select_ship_num, int friend_or_foe) {
+    uint64_t huge_distance;
+    if (select_ship_num >= 0) {
+        spaceObjectType* select_ship = mGetSpaceObjectPtr(select_ship_num);
+        uint32_t difference = ABS<int>(origin_ship->location.h - select_ship->location.h);
+        uint32_t dcalc = difference;
+        difference =  ABS<int>(origin_ship->location.v - select_ship->location.v);
+        uint32_t distance = difference;
+
+        if ((dcalc > kMaximumRelevantDistance)
+                || (distance > kMaximumRelevantDistance)) {
+            huge_distance = dcalc;  // must be positive
+            MyWideMul(huge_distance, huge_distance, &huge_distance);
+            select_ship->distanceFromPlayer = distance;
+            MyWideMul(select_ship->distanceFromPlayer, select_ship->distanceFromPlayer, &select_ship->distanceFromPlayer);
+            select_ship->distanceFromPlayer += huge_distance;
+        } else {
+            select_ship->distanceFromPlayer = distance * distance + dcalc * dcalc;
+        }
+        huge_distance = select_ship->distanceFromPlayer;
+    } else {
+        huge_distance = 0;
+    }
+
+    select_ship_num = GetManualSelectObject(
+            origin_ship, direction, 0, attributes, nonattributes, &huge_distance, select_ship_num,
+            friend_or_foe);
+
+    if (select_ship_num >= 0) {
+        if (destination) {
+            SetPlayerSelectShip(select_ship_num, true, globals()->gPlayerAdmiralNumber);
+        } else {
+            SetPlayerSelectShip(select_ship_num, false, globals()->gPlayerAdmiralNumber);
+        }
+    }
+}
+
+static void select_friendly(spaceObjectType* origin_ship, int32_t direction) {
+    pick_object(
+            origin_ship, direction, false, kCanBeDestination, kIsDestination,
+            GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber), 1);
+}
+
+static void target_friendly(spaceObjectType* origin_ship, int32_t direction) {
+    pick_object(
+            origin_ship, direction, true, kCanBeDestination, kIsDestination,
+            GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber), 1);
+}
+
+static void target_hostile(spaceObjectType* origin_ship, int32_t direction) {
+    pick_object(
+            origin_ship, direction, true, kCanBeDestination, kIsDestination,
+            GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber), -1);
+}
+
+static void select_base(spaceObjectType* origin_ship, int32_t direction) {
+    pick_object(
+            origin_ship, direction, false, kCanAcceptBuild, 0,
+            GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber), 1);
+}
+
+static void target_base(spaceObjectType* origin_ship, int32_t direction) {
+    pick_object(
+            origin_ship, direction, true, kIsDestination, 0,
+            GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber), 0);
+}
 
 void PlayerShip::key_down(const KeyDownEvent& event) {
     _keys.set(event.key(), true);
@@ -272,6 +340,7 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
         return;
     }
 
+    spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
     if (_gamepad_state) {
         switch (event.button) {
           case Gamepad::LB:
@@ -289,16 +358,32 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
             }
             return;
           case Gamepad::A:
-            // Select friendly
+            if (_control_active) {
+                if (_gamepad_state & SELECT_BUMPER) {
+                    select_friendly(player, _control_direction);
+                } else {
+                    target_friendly(player, _control_direction);
+                }
+            }
             return;
           case Gamepad::B:
-            // Select hostile
+            if (_control_active) {
+                if (_gamepad_state & TARGET_BUMPER) {
+                    target_hostile(player, _control_direction);
+                }
+            }
             return;
           case Gamepad::X:
-            // Select base
+            if (_control_active) {
+                if (_gamepad_state & SELECT_BUMPER) {
+                    select_base(player, _control_direction);
+                } else {
+                    target_base(player, _control_direction);
+                }
+            }
             return;
           case Gamepad::Y:
-            // Order to go
+            player->keysDown |= kGiveCommandKey;
             return;
           case Gamepad::LSB:
             if (_gamepad_state & TARGET_BUMPER) {
@@ -390,9 +475,9 @@ void PlayerShip::gamepad_stick(const GamepadStickEvent& event) {
         return;
     }
     if ((event.x * event.x + event.y * event.y) < 0.90) {
-        _show_control = false;
+        _control_active = false;
     } else {
-        _show_control = true;
+        _control_active = true;
         _control_direction = GetAngleFromVector(-event.x * 32768, -event.y * 32768);
     }
 }
@@ -409,12 +494,9 @@ bool PlayerShip::active() const {
 }
 
 void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_message) {
-    int16_t         friendOrFoe;
     spaceObjectType *theShip = NULL, *selectShip = NULL;
     baseObjectType  *baseObject = NULL;
-    int32_t         selectShipNum;
-    uint32_t        distance, difference, dcalc, attributes, nonattributes;
-    uint64_t        hugeDistance;
+    uint32_t        attributes;
 
     if (globals()->gPlayerShipNumber < 0) {
         return;
@@ -546,7 +628,7 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
         Messages::advance();
     }
 
-    dcalc = kSelectFriendKey | kSelectFoeKey | kSelectBaseKey;
+    uint32_t dcalc = kSelectFriendKey | kSelectFoeKey | kSelectBaseKey;
     attributes = gTheseKeys & dcalc;
 
     if (gTheseKeys & kDestinationKey) {
@@ -649,83 +731,19 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
     // for this we check lastKeys against theseKeys & relevent keys now being pressed
     if ((attributes) && (!(gLastKeys & attributes)) && (!cursor.active())) {
         gDestKeyTime = -1;
-        nonattributes = 0;
         if (gTheseKeys & kSelectFriendKey) {
             if (!(gTheseKeys & kDestinationKey)) {
-                selectShipNum = GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber);
-                attributes = kCanBeDestination;
-                nonattributes = kIsDestination;
+                select_friendly(theShip, theShip->direction);
             } else {
-                selectShipNum = GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber);
-                attributes = kCanBeDestination;
-                nonattributes = kIsDestination;
+                target_friendly(theShip, theShip->direction);
             }
-            friendOrFoe = 1;
         } else if (gTheseKeys & kSelectFoeKey) {
-            selectShipNum = GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber);
-            attributes = kCanBeDestination;
-            nonattributes = kIsDestination;
-            friendOrFoe = -1;
+            target_hostile(theShip, theShip->direction);
         } else {
             if (!(gTheseKeys & kDestinationKey)) {
-                selectShipNum = GetAdmiralConsiderObject(globals()->gPlayerAdmiralNumber);
-                attributes = kCanAcceptBuild;
-                friendOrFoe = 1;
+                select_base(theShip, theShip->direction);
             } else {
-                selectShipNum = GetAdmiralDestinationObject(globals()->gPlayerAdmiralNumber);
-                attributes = kIsDestination;
-                friendOrFoe = 0;
-            }
-        }
-        if (selectShipNum >= 0) {
-            selectShip = mGetSpaceObjectPtr(selectShipNum);
-            difference = ABS<int>(theShip->location.h - selectShip->location.h);
-            dcalc = difference;
-            difference =  ABS<int>(theShip->location.v - selectShip->location.v);
-            distance = difference;
-
-            if ((dcalc > kMaximumRelevantDistance)
-                    || (distance > kMaximumRelevantDistance)) {
-                hugeDistance = dcalc;  // must be positive
-                MyWideMul(hugeDistance, hugeDistance, &hugeDistance);
-                selectShip->distanceFromPlayer = distance;
-                MyWideMul(selectShip->distanceFromPlayer, selectShip->distanceFromPlayer, &selectShip->distanceFromPlayer);
-                selectShip->distanceFromPlayer += hugeDistance;
-            } else {
-                selectShip->distanceFromPlayer = distance * distance + dcalc * dcalc;
-            }
-            hugeDistance = selectShip->distanceFromPlayer;
-        } else {
-            hugeDistance = 0;
-        }
-
-        selectShipNum = GetManualSelectObject(
-                theShip, 0, attributes, nonattributes, &hugeDistance, selectShipNum, friendOrFoe);
-
-        if (selectShipNum >= 0) {
-            if ((gTheseKeys & kDestinationKey)
-                    || (gTheseKeys & kSelectFoeKey)) {
-                if (!NETWORK_ON) {
-                    SetPlayerSelectShip(selectShipNum, true, globals()->gPlayerAdmiralNumber);
-                } else {
-#ifdef NETSPROCKET_AVAILABLE
-                    if (!SendSelectMessage(
-                                globals()->gGameTime + gNetLatency, selectShipNum, true)) {
-                        StopNetworking();
-                    }
-#endif  // NETSPROCKET_AVAILABLE
-                }
-            } else {
-                if (!NETWORK_ON) {
-                    SetPlayerSelectShip(selectShipNum, false, globals()->gPlayerAdmiralNumber);
-                } else {
-#ifdef NETSPROCKET_AVAILABLE
-                    if (!SendSelectMessage(
-                                globals()->gGameTime + gNetLatency, selectShipNum, false)) {
-                        StopNetworking();
-                    }
-#endif  // NETSPROCKET_AVAILABLE
-                }
+                target_base(theShip, theShip->direction);
             }
         }
     }
@@ -763,11 +781,11 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
 }
 
 bool PlayerShip::show_select() const {
-    return _show_control && (_gamepad_state & SELECT_BUMPER);
+    return _control_active && (_gamepad_state & SELECT_BUMPER);
 }
 
 bool PlayerShip::show_target() const {
-    return _show_control && (_gamepad_state & TARGET_BUMPER);
+    return _control_active && (_gamepad_state & TARGET_BUMPER);
 }
 
 int32_t PlayerShip::control_direction() const {
