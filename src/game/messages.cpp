@@ -583,7 +583,7 @@ void MessageLabel_Set_Special(int16_t id, const StringSlice& text) {
 }
 
 void Messages::draw_message() {
-    if (viewport.bottom == play_screen.bottom) {
+    if ((viewport.bottom == play_screen.bottom) || (long_message_data->currentResID < 0)) {
         return;
     }
 
@@ -594,16 +594,16 @@ void Messages::draw_message() {
     message_bounds.inset(0, 1);
     VideoDriver::driver()->fill_rect(message_bounds, dark_blue);
 
-    longMessageType *tmessage = long_message_data;
     Rect bounds(viewport.left, viewport.bottom, viewport.right, play_screen.bottom);
     bounds.inset(kHBuffer, 0);
     bounds.top += kLongMessageVPad;
-    for (int i = 0; i < tmessage->at_char; ++i) {
-        tmessage->retro_text->draw_char(bounds, i);
+    for (int i = 0; i < long_message_data->at_char; ++i) {
+        long_message_data->retro_text->draw_char(bounds, i);
     }
     // The final char is a newline; don't display a cursor rect for it.
-    if ((0 < tmessage->at_char) && (tmessage->at_char < (tmessage->retro_text->size() - 1))) {
-        tmessage->retro_text->draw_cursor(bounds, tmessage->at_char);
+    if ((0 < long_message_data->at_char)
+            && (long_message_data->at_char < (long_message_data->retro_text->size() - 1))) {
+        long_message_data->retro_text->draw_cursor(bounds, long_message_data->at_char);
     }
 }
 
