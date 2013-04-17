@@ -201,6 +201,8 @@ static void translate_gamepad_button(EventReceiver& receiver, const GamepadEvent
     switch (event.button) {
       case Gamepad::A: key_equivalent = Keys::RETURN; break;
       case Gamepad::B: key_equivalent = Keys::ESCAPE; break;
+      case Gamepad::X: key_equivalent = Keys::Q; break;
+      case Gamepad::Y: key_equivalent = Keys::S; break;
       case Gamepad::LEFT: key_equivalent = Keys::LEFT_ARROW; break;
       case Gamepad::RIGHT: key_equivalent = Keys::RIGHT_ARROW; break;
       case Gamepad::UP: key_equivalent = Keys::UP_ARROW; break;
