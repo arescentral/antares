@@ -426,7 +426,11 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
         _gamepad_keys |= kTwoKey;
         break;
       case Gamepad::RSB:
-        _gamepad_keys |= kWarpKey;
+        if (player->presenceState == kWarpingPresence) {
+            _gamepad_keys &= !kWarpKey;
+        } else {
+            _gamepad_keys |= kWarpKey;
+        }
         break;
       case Gamepad::UP:
         _gamepad_keys |= kUpKey;
@@ -470,6 +474,7 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
         }
     }
 
+    spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
     switch (event.button) {
       case Gamepad::A:
         minicomputer_handle_keys(0, kCompAcceptKey, false);
@@ -485,7 +490,9 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
         _gamepad_keys &= ~kTwoKey;
         break;
       case Gamepad::RSB:
-        _gamepad_keys &= ~kWarpKey;
+        if (player->presenceState != kWarpingPresence) {
+            _gamepad_keys &= !kWarpKey;
+        }
         break;
       case Gamepad::UP:
         _gamepad_keys &= ~kUpKey;
