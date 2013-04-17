@@ -136,9 +136,7 @@ PlayerShip::PlayerShip():
     gLastKeys(0),
     _gamepad_state(NO_BUMPER),
     _control_active(false),
-    _control_direction(0),
-    _goal_active(false),
-    _goal_direction(0) { }
+    _control_direction(0) { }
 
 void PlayerShip::update_keys(const KeyMap& keys) {
     for (int i = 0; i < 256; ++i) {
@@ -404,10 +402,10 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
 
     switch (event.button) {
       case Gamepad::A:
-        minicomputer_handle_keys(kCompAcceptKey, 0, false);
+        _gamepad_keys |= kUpKey;
         break;
       case Gamepad::B:
-        minicomputer_handle_keys(kCompCancelKey, 0, false);
+        _gamepad_keys |= kDownKey;
         break;
       case Gamepad::X:
         zoom_out();
@@ -425,7 +423,7 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
         _gamepad_keys |= kOneKey;
         _gamepad_keys |= kTwoKey;
         break;
-      case Gamepad::RSB:
+      case Gamepad::LSB:
         if (player->presenceState == kWarpingPresence) {
             _gamepad_keys &= !kWarpKey;
         } else {
@@ -433,10 +431,16 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
         }
         break;
       case Gamepad::UP:
-        _gamepad_keys |= kUpKey;
+        minicomputer_handle_keys(kCompUpKey, 0, false);
         break;
       case Gamepad::DOWN:
-        _gamepad_keys |= kDownKey;
+        minicomputer_handle_keys(kCompDownKey, 0, false);
+        break;
+      case Gamepad::RIGHT:
+        minicomputer_handle_keys(kCompAcceptKey, 0, false);
+        break;
+      case Gamepad::LEFT:
+        minicomputer_handle_keys(kCompCancelKey, 0, false);
         break;
     }
 }
@@ -477,10 +481,10 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
     spaceObjectType* player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
     switch (event.button) {
       case Gamepad::A:
-        minicomputer_handle_keys(0, kCompAcceptKey, false);
+        _gamepad_keys &= ~kUpKey;
         break;
       case Gamepad::B:
-        minicomputer_handle_keys(0, kCompCancelKey, false);
+        _gamepad_keys &= ~kDownKey;
         break;
       case Gamepad::LT:
         _gamepad_keys &= ~kEnterKey;
@@ -489,16 +493,16 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
         _gamepad_keys &= ~kOneKey;
         _gamepad_keys &= ~kTwoKey;
         break;
-      case Gamepad::RSB:
+      case Gamepad::LSB:
         if (player->presenceState != kWarpingPresence) {
             _gamepad_keys &= !kWarpKey;
         }
         break;
-      case Gamepad::UP:
-        _gamepad_keys &= ~kUpKey;
+      case Gamepad::RIGHT:
+        minicomputer_handle_keys(0, kCompAcceptKey, false);
         break;
-      case Gamepad::DOWN:
-        _gamepad_keys &= ~kDownKey;
+      case Gamepad::LEFT:
+        minicomputer_handle_keys(0, kCompCancelKey, false);
         break;
     }
 }
@@ -517,10 +521,6 @@ void PlayerShip::gamepad_stick(const GamepadStickEvent& event) {
       case Gamepad::LS:
         _control_active = active;
         _control_direction = direction;
-        break;
-      case Gamepad::RS:
-        _goal_active = active;
-        _goal_direction = direction;
         break;
     }
 }
@@ -805,8 +805,8 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
         theShip->keysDown = gTheseKeys | _gamepad_keys;
         globals()->gAutoPilotOff = true;
 
-        if (_goal_active) {
-            int difference = mAngleDifference(_goal_direction, theShip->direction);
+        if ((_gamepad_state == NO_BUMPER) && _control_active) {
+            int difference = mAngleDifference(_control_direction, theShip->direction);
             if (abs(difference) < 15) {
                 // pass
             } else if (difference < 0) {

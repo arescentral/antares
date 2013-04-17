@@ -66,8 +66,6 @@ class PlayerShip : public EventReceiver {
     GamepadState _gamepad_state;
     bool _control_active;
     int32_t _control_direction;
-    bool _goal_active;
-    int32_t _goal_direction;
 };
 
 void ResetPlayerShip(int32_t);
