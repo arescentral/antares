@@ -41,6 +41,7 @@
 #include "game/space-object.hpp"
 #include "game/starfield.hpp"
 #include "game/time.hpp"
+#include "math/fixed.hpp"
 #include "math/macros.hpp"
 #include "math/rotation.hpp"
 #include "math/special.hpp"
@@ -131,10 +132,13 @@ void ResetPlayerShip(int32_t which) {
 
 PlayerShip::PlayerShip():
     gTheseKeys(0),
+    _gamepad_keys(0),
     gLastKeys(0),
     _gamepad_state(NO_BUMPER),
     _control_active(false),
-    _control_direction(0) { }
+    _control_direction(0),
+    _goal_active(false),
+    _goal_direction(0) { }
 
 void PlayerShip::update_keys(const KeyMap& keys) {
     for (int i = 0; i < 256; ++i) {
@@ -414,11 +418,21 @@ void PlayerShip::gamepad_button_down(const GamepadButtonDownEvent& event) {
       case Gamepad::BACK:
         Messages::advance();
         break;
-      case Gamepad::LT:    // fire special
-      case Gamepad::RT:    // fire primary and secondary
-      case Gamepad::RSB:   // warp
-      case Gamepad::UP:    // accelerate
-      case Gamepad::DOWN:  // decelerate
+      case Gamepad::LT:
+        _gamepad_keys |= kEnterKey;
+        break;
+      case Gamepad::RT:
+        _gamepad_keys |= kOneKey;
+        _gamepad_keys |= kTwoKey;
+        break;
+      case Gamepad::RSB:
+        _gamepad_keys |= kWarpKey;
+        break;
+      case Gamepad::UP:
+        _gamepad_keys |= kUpKey;
+        break;
+      case Gamepad::DOWN:
+        _gamepad_keys |= kDownKey;
         break;
     }
 }
@@ -463,18 +477,44 @@ void PlayerShip::gamepad_button_up(const GamepadButtonUpEvent& event) {
       case Gamepad::B:
         minicomputer_handle_keys(0, kCompCancelKey, false);
         break;
+      case Gamepad::LT:
+        _gamepad_keys &= ~kEnterKey;
+        break;
+      case Gamepad::RT:
+        _gamepad_keys &= ~kOneKey;
+        _gamepad_keys &= ~kTwoKey;
+        break;
+      case Gamepad::RSB:
+        _gamepad_keys &= ~kWarpKey;
+        break;
+      case Gamepad::UP:
+        _gamepad_keys &= ~kUpKey;
+        break;
+      case Gamepad::DOWN:
+        _gamepad_keys &= ~kDownKey;
+        break;
     }
 }
 
 void PlayerShip::gamepad_stick(const GamepadStickEvent& event) {
-    if (!active()) {
-        return;
-    }
+    bool active;
+    int direction = 0;
     if ((event.x * event.x + event.y * event.y) < 0.90) {
-        _control_active = false;
+        active = false;
     } else {
-        _control_active = true;
-        _control_direction = GetAngleFromVector(-event.x * 32768, -event.y * 32768);
+        active = true;
+        direction = GetAngleFromVector(event.x * 32768, event.y * 32768);
+        mAddAngle(direction, ROT_180);
+    }
+    switch (event.stick) {
+      case Gamepad::LS:
+        _control_active = active;
+        _control_direction = direction;
+        break;
+      case Gamepad::RS:
+        _goal_active = active;
+        _goal_direction = direction;
+        break;
     }
 }
 
@@ -755,8 +795,19 @@ void PlayerShip::update(int64_t timePass, const GameCursor& cursor, bool enter_m
                 | (gTheseKeys & (kMiscKeyMask));
         }
     } else {
-        theShip->keysDown = gTheseKeys;
+        theShip->keysDown = gTheseKeys | _gamepad_keys;
         globals()->gAutoPilotOff = true;
+
+        if (_goal_active) {
+            int difference = mAngleDifference(_goal_direction, theShip->direction);
+            if (abs(difference) < 15) {
+                // pass
+            } else if (difference < 0) {
+                theShip->keysDown |= kRightKey;
+            } else {
+                theShip->keysDown |= kLeftKey;
+            }
+        }
     }
 
     if ((gTheseKeys & kOrderKey) && (!(gLastKeys & kOrderKey))) {

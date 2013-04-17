@@ -199,7 +199,7 @@ struct CocoaVideoDriver::EventBridge {
                 static int x_component[] = {0, 0, -1, 3, 3, -1};
                 double x = gamepad[x_component[usage]];
                 double y = gamepad[x_component[usage] + 1];
-                send(GamepadStickEvent(now_usecs(), x, y));
+                send(GamepadStickEvent(now_usecs(), kHIDUsage_GD_X + x_component[usage], x, y));
             }
             break;
           case kHIDUsage_GD_Z:

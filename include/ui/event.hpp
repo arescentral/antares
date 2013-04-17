@@ -107,8 +107,10 @@ class GamepadButtonUpEvent : public GamepadButtonEvent {
 
 class GamepadStickEvent : public Event {
   public:
-    GamepadStickEvent(int64_t at, double x, double y): Event(at), x(x), y(y) { }
+    GamepadStickEvent(int64_t at, int stick, double x, double y):
+            Event(at), stick(stick), x(x), y(y) { }
     virtual void send(EventReceiver* receiver) const;
+    const int stick;
     const double x;
     const double y;
 };
