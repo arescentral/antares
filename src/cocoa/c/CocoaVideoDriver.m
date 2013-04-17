@@ -338,8 +338,11 @@ bool antares_event_translator_next(AntaresEventTranslator* translator, int64_t u
 }
 
 void antares_event_translator_cancel(AntaresEventTranslator* translator) {
+    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
     NSEvent* event = [NSEvent
         otherEventWithType:NSApplicationDefined location:NSMakePoint(0, 0) modifierFlags:0
-        timestamp:0.0 windowNumber:0 context:nil subtype:0 data1:0 data2:0];
+        timestamp:[[NSDate date] timeIntervalSinceSystemStart] windowNumber:0 context:nil subtype:0
+        data1:0 data2:0];
     [NSApp postEvent:event atStart:true];
+    [pool drain];
 }

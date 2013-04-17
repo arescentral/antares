@@ -94,32 +94,33 @@ struct CocoaVideoDriver::EventBridge {
     MainLoop& main_loop;
     cgl::Context& context;
     EventTranslator& translator;
+    std::queue<Event*> event_queue;
 
     double gamepad[6];
 
     static void mouse_down(int button, int32_t x, int32_t y, void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->send(MouseDownEvent(now_usecs(), button, Point(x, y)));
+        self->enqueue(new MouseDownEvent(now_usecs(), button, Point(x, y)));
     }
 
     static void mouse_up(int button, int32_t x, int32_t y, void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->send(MouseUpEvent(now_usecs(), button, Point(x, y)));
+        self->enqueue(new MouseUpEvent(now_usecs(), button, Point(x, y)));
     }
 
     static void mouse_move(int32_t x, int32_t y, void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->send(MouseMoveEvent(now_usecs(), Point(x, y)));
+        self->enqueue(new MouseMoveEvent(now_usecs(), Point(x, y)));
     }
 
     static void caps_lock(void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->send(CapsLockEvent(now_usecs()));
+        self->enqueue(new CapsLockEvent(now_usecs()));
     }
 
     static void caps_unlock(void* userdata) {
         EventBridge* self = reinterpret_cast<EventBridge*>(userdata);
-        self->send(CapsUnlockEvent(now_usecs()));
+        self->enqueue(new CapsUnlockEvent(now_usecs()));
     }
 
     static void hid_event(void* userdata, IOReturn result, void* sender, IOHIDValueRef value) {
@@ -155,11 +156,10 @@ struct CocoaVideoDriver::EventBridge {
         }
 
         if (down) {
-            send(KeyDownEvent(now_usecs(), scan_code));
+            enqueue(new KeyDownEvent(now_usecs(), scan_code));
         } else {
-            send(KeyUpEvent(now_usecs(), scan_code));
+            enqueue(new KeyUpEvent(now_usecs(), scan_code));
         }
-        antares_event_translator_cancel(translator.c_obj());
     }
 
     void button_event(IOReturn result, IOHIDElementRef element, IOHIDValueRef value) {
@@ -169,11 +169,10 @@ struct CocoaVideoDriver::EventBridge {
         bool down = IOHIDValueGetIntegerValue(value);
         uint16_t usage = IOHIDElementGetUsage(element);
         if (down) {
-            send(GamepadButtonDownEvent(now_usecs(), usage));
+            enqueue(new GamepadButtonDownEvent(now_usecs(), usage));
         } else {
-            send(GamepadButtonUpEvent(now_usecs(), usage));
+            enqueue(new GamepadButtonUpEvent(now_usecs(), usage));
         }
-        antares_event_translator_cancel(translator.c_obj());
     }
 
     void analog_event(IOReturn result, IOHIDElementRef element, IOHIDValueRef value) {
@@ -199,7 +198,8 @@ struct CocoaVideoDriver::EventBridge {
                 static int x_component[] = {0, 0, -1, 3, 3, -1};
                 double x = gamepad[x_component[usage]];
                 double y = gamepad[x_component[usage] + 1];
-                send(GamepadStickEvent(now_usecs(), kHIDUsage_GD_X + x_component[usage], x, y));
+                enqueue(new GamepadStickEvent(
+                            now_usecs(), kHIDUsage_GD_X + x_component[usage], x, y));
             }
             break;
           case kHIDUsage_GD_Z:
@@ -209,9 +209,20 @@ struct CocoaVideoDriver::EventBridge {
         }
     }
 
-    void send(const Event& event) {
-        event.send(&event_tracker);
-        event.send(main_loop.top());
+    void enqueue(Event* event) {
+        event_queue.emplace(event);
+        antares_event_translator_cancel(translator.c_obj());
+    }
+
+    void send_all() {
+        if (event_queue.empty()) {
+            return;
+        }
+        while (!event_queue.empty()) {
+            event_queue.front()->send(&event_tracker);
+            event_queue.front()->send(main_loop.top());
+            event_queue.pop();
+        }
         main_loop.draw();
         CGLFlushDrawable(context.c_obj());
     }
@@ -286,7 +297,9 @@ void CocoaVideoDriver::loop(Card* initial) {
         int64_t at;
         if (main_loop.top()->next_timer(at)) {
             at += _start_time;
-            if (!antares_event_translator_next(_translator.c_obj(), at)) {
+            if (antares_event_translator_next(_translator.c_obj(), at)) {
+                bridge.send_all();
+            } else {
                 main_loop.top()->fire_timer();
                 main_loop.draw();
                 CGLFlushDrawable(context.c_obj());
@@ -294,6 +307,7 @@ void CocoaVideoDriver::loop(Card* initial) {
         } else {
             at = std::numeric_limits<int64_t>::max();
             antares_event_translator_next(_translator.c_obj(), at);
+            bridge.send_all();
         }
     }
 }
