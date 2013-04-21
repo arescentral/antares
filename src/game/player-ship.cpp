@@ -171,7 +171,13 @@ static void zoom_shortcut(ZoomType zoom) {
     if (globals()->keyMask & kShortcutZoomMask) {
         return;
     }
-    zoom_to(zoom);
+    ZoomType previous = globals()->gPreviousZoomMode;
+    globals()->gPreviousZoomMode = globals()->gZoomMode;
+    if (globals()->gZoomMode == zoom) {
+        zoom_to(previous);
+    } else {
+        zoom_to(zoom);
+    }
 }
 
 static void zoom_in() {
