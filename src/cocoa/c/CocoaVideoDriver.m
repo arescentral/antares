@@ -294,7 +294,18 @@ bool antares_event_translator_next(AntaresEventTranslator* translator, int64_t u
             break;
         }
 
-        [NSApp sendEvent:event];
+        // Send non-key events.
+        switch ([event type]) {
+          case NSKeyDown:
+          case NSKeyUp:
+            break;
+
+          default:
+            [NSApp sendEvent:event];
+            break;
+        };
+
+        // Handle events.
         switch ([event type]) {
           case NSLeftMouseDown:
           case NSRightMouseDown:
@@ -327,8 +338,6 @@ bool antares_event_translator_next(AntaresEventTranslator* translator, int64_t u
             }
             break;
 
-          case NSKeyDown:
-          case NSKeyUp:
           default:
             break;
         }
