@@ -2185,11 +2185,10 @@ void HitObject( spaceObjectType *anObject, spaceObjectType *sObject)
 //  For the human player selecting a ship.  If friend or foe = 0, will get any ship.  If it's
 //  positive, will get only friendly ships.  If it's negative, only unfriendly ships.
 
-int32_t GetManualSelectObject( spaceObjectType *sourceObject, uint32_t inclusiveAttributes,
-                            uint32_t anyOneAttribute, uint32_t exclusiveAttributes,
-                            const uint64_t* fartherThan, int32_t currentShipNum, int16_t friendOrFoe)
-
-{
+int32_t GetManualSelectObject(
+        spaceObjectType *sourceObject, int32_t direction, uint32_t inclusiveAttributes,
+        uint32_t anyOneAttribute, uint32_t exclusiveAttributes,
+        const uint64_t* fartherThan, int32_t currentShipNum, int16_t friendOrFoe) {
     spaceObjectType *anObject;
     int32_t         whichShip = 0, resultShip = -1, closestShip = -1, startShip = -1, hdif, vdif;
     uint32_t        distance, dcalc, myOwnerFlag = 1 << sourceObject->owner;
@@ -2285,7 +2284,7 @@ int32_t GetManualSelectObject( spaceObjectType *sourceObject, uint32_t inclusive
                         ( vdif > 0))
                     angle = 0;
 
-                angle = mAngleDifference( angle, sourceObject->direction);
+                angle = mAngleDifference( angle, direction);
 
                 if ( ABS( angle) < 30)
                 {

@@ -80,7 +80,7 @@ void SoloGame::become_front() {
         _state = PLAYING;
         _game_result = NO_GAME;
         _seconds = 0;
-        globals()->gInputSource.reset(new UserInputSource());
+        globals()->gInputSource.reset();
         stack()->push(new MainPlay(_scenario, false, true, &_game_result, &_seconds));
         break;
 

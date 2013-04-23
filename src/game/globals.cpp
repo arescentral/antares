@@ -57,6 +57,7 @@ aresGlobalType::aresGlobalType() {
     gPlayerShipNumber = 0;
     gSelectionLabel = -1;
     gZoomMode = kTimesTwoZoom;
+    gPreviousZoomMode = kNearestFoeZoom;
     gRadarCount = 0;
     gRadarSpeed = 30;
     gRadarRange = kRadarSize * 50;

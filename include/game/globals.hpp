@@ -108,6 +108,7 @@ struct aresGlobalType {
     int32_t         gPlayerShipNumber;
     int32_t         gSelectionLabel;
     ZoomType        gZoomMode;
+    ZoomType        gPreviousZoomMode;
     int32_t         gPlayerAdmiralNumber;
     ScenarioWinnerType gScenarioWinner;
 

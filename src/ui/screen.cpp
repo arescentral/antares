@@ -80,6 +80,21 @@ void InterfaceScreen::become_front() {
     // half-second fade from black.
 }
 
+void InterfaceScreen::resign_front() {
+    become_normal();
+}
+
+void InterfaceScreen::become_normal() {
+    _state = NORMAL;
+    _hit_button = nullptr;
+    for (auto& item: _items) {
+        Button* button = dynamic_cast<Button*>(item.get());
+        if (button && button->status == kIH_Hilite) {
+            button->status = kActive;
+        }
+    }
+}
+
 void InterfaceScreen::draw() const {
     Rect copy_area;
     if (_full_screen) {
@@ -118,6 +133,7 @@ void InterfaceScreen::mouse_down(const MouseDownEvent& event) {
         GetAnyInterfaceItemGraphicBounds(*item, &bounds);
         Button* button = dynamic_cast<Button*>(item.get());
         if (button && (button->status != kDimmed) && (bounds.contains(where))) {
+            become_normal();
             _state = MOUSE_DOWN;
             button->status = kIH_Hilite;
             PlayVolumeSound(
@@ -156,19 +172,20 @@ void InterfaceScreen::key_down(const KeyDownEvent& event) {
     for (auto& item: _items) {
         Button* button = dynamic_cast<Button*>(item.get());
         if (button && button->status != kDimmed && button->key == key_code) {
+            become_normal();
             _state = KEY_DOWN;
             button->status = kIH_Hilite;
             PlayVolumeSound(kComputerBeep1, kMediumLoudVolume, kShortPersistence, kMustPlaySound);
             _hit_button = button;
+            _pressed_key = key_code;
             return;
         }
     }
 }
 
 void InterfaceScreen::key_up(const KeyUpEvent& event) {
-    // TODO(sfiera): verify that the same key that was pressed was released.
-    static_cast<void>(event);
-    if (_state == KEY_DOWN) {
+    const int32_t key_code = event.key() + 1;
+    if ((_state == KEY_DOWN) && (_pressed_key == key_code)) {
         _state = NORMAL;
         _hit_button->status = kActive;
         if (TabBoxButton* b = dynamic_cast<TabBoxButton*>(_hit_button)) {
@@ -184,6 +201,8 @@ static void translate_gamepad_button(EventReceiver& receiver, const GamepadEvent
     switch (event.button) {
       case Gamepad::A: key_equivalent = Keys::RETURN; break;
       case Gamepad::B: key_equivalent = Keys::ESCAPE; break;
+      case Gamepad::X: key_equivalent = Keys::Q; break;
+      case Gamepad::Y: key_equivalent = Keys::S; break;
       case Gamepad::LEFT: key_equivalent = Keys::LEFT_ARROW; break;
       case Gamepad::RIGHT: key_equivalent = Keys::RIGHT_ARROW; break;
       case Gamepad::UP: key_equivalent = Keys::UP_ARROW; break;

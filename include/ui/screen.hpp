@@ -36,6 +36,7 @@ class InterfaceScreen : public Card {
     ~InterfaceScreen();
 
     virtual void become_front();
+    virtual void resign_front();
 
     virtual void draw() const;
 
@@ -69,11 +70,13 @@ class InterfaceScreen : public Card {
     State _state;
 
     sfz::Json load_json(sfz::PrintItem id);
+    void become_normal();
 
     const Rect _bounds;
     const bool _full_screen;
     std::vector<std::unique_ptr<InterfaceItem>> _items;
     Button* _hit_button;
+    uint32_t _pressed_key;
     Cursor _cursor;
 
     DISALLOW_COPY_AND_ASSIGN(InterfaceScreen);

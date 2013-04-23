@@ -26,9 +26,49 @@ namespace antares {
 class GameCursor;
 class InputSource;
 
+class PlayerShip : public EventReceiver {
+  public:
+    PlayerShip();
+
+    void update_keys(const KeyMap& keys);
+    virtual void key_down(const KeyDownEvent& event);
+    virtual void key_up(const KeyUpEvent& event);
+
+    virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
+    virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
+    virtual void gamepad_stick(const GamepadStickEvent& event);
+
+    void update(int64_t timePass, const GameCursor& cursor, bool enter_message);
+
+    bool show_select() const;
+    bool show_target() const;
+    int32_t control_direction() const;
+    bool show_right_stick() const;
+    int32_t goal_direction() const;
+
+  private:
+    bool active() const;
+
+    uint32_t gTheseKeys;
+    uint32_t _gamepad_keys;
+    uint32_t gLastKeys;
+    KeyMap _keys;
+
+    enum GamepadState {
+        NO_BUMPER               = 0,
+        SELECT_BUMPER           = 1,
+        TARGET_BUMPER           = 2,
+        EITHER_BUMPER           = SELECT_BUMPER | TARGET_BUMPER,
+        OVERRIDE                = 4,
+        SELECT_BUMPER_OVERRIDE  = SELECT_BUMPER | OVERRIDE,
+        TARGET_BUMPER_OVERRIDE  = TARGET_BUMPER | OVERRIDE,
+    };
+    GamepadState _gamepad_state;
+    bool _control_active;
+    int32_t _control_direction;
+};
+
 void ResetPlayerShip(int32_t);
-bool PlayerShipGetKeys(
-        int32_t timePass, InputSource& input_source, const GameCursor& cursor, bool *enterMessage);
 void PlayerShipHandleClick(Point where, int button);
 void SetPlayerSelectShip(int32_t, bool, int32_t);
 void ChangePlayerShipNumber(int32_t, int32_t);

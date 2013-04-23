@@ -132,10 +132,11 @@ bool should_draw_sector_lines = false;
 Rect view_range;
 
 struct SiteData {
+    bool should_draw;
     Point a, b, c;
+    RgbColor light, dark;
 };
-SiteData site_data;
-bool should_draw_site = false;
+SiteData site;
 
 template <typename T>
 T clamp(T value, T min, T max) {
@@ -187,6 +188,9 @@ void InstrumentInit() {
         right_instrument_sprite = VideoDriver::driver()->new_sprite(
                 format("/pictures/{0}.png", kInstRightPictID), pix_map);
     }
+
+    site.light = GetRGBTranslateColorShade(PALE_GREEN, MEDIUM);
+    site.dark = GetRGBTranslateColorShade(PALE_GREEN, DARKER + kSlightlyDarkerColor);
 
     MiniScreenInit();
 }
@@ -560,59 +564,79 @@ void draw_instruments() {
 void EraseSite() {
 }
 
+static void update_triangle(SiteData& site, int32_t direction, int32_t distance, int32_t size) {
+    int count;
+    Fixed fa, fb, fc;
+    GetRotPoint(&fa, &fb, direction);
+
+    fc = mLongToFixed(-distance);
+    fa = mMultiplyFixed(fc, fa);
+    fb = mMultiplyFixed(fc, fb);
+
+    Point a(mFixedToLong(fa), mFixedToLong(fb));
+    a.offset(gScrollStarObject->sprite->where.h, gScrollStarObject->sprite->where.v);
+    site.a = a;
+
+    count = direction;
+    mAddAngle(count, 30);
+    GetRotPoint(&fa, &fb, count);
+    fc = mLongToFixed(size);
+    fa = mMultiplyFixed(fc, fa);
+    fb = mMultiplyFixed(fc, fb);
+
+    Point b(a.h + mFixedToLong(fa), a.v + mFixedToLong(fb));
+    site.b = b;
+
+    count = direction;
+    mAddAngle(count, -30);
+    GetRotPoint(&fa, &fb, count);
+    fc = mLongToFixed(size);
+    fa = mMultiplyFixed(fc, fa);
+    fb = mMultiplyFixed(fc, fb);
+
+    Point c(a.h + mFixedToLong(fa), a.v + mFixedToLong(fb));
+    site.c = c;
+}
+
 void update_site(bool replay) {
     if (gScrollStarObject == NULL) {
-        should_draw_site = false;
+        site.should_draw = false;
+    } else if (!(gScrollStarObject->active && (gScrollStarObject->sprite != NULL))) {
+        site.should_draw = false;
     } else if (gScrollStarObject->offlineTime <= 0) {
-        should_draw_site = true;
+        site.should_draw = true;
     } else {
-        should_draw_site = (Randomize(gScrollStarObject->offlineTime) < 5);
+        site.should_draw = (Randomize(gScrollStarObject->offlineTime) < 5);
     }
 
-    if (should_draw_site && gScrollStarObject->active && (gScrollStarObject->sprite != NULL)) {
-        int count;
-        Fixed fa, fb, fc;
-        GetRotPoint(&fa, &fb, gScrollStarObject->direction);
-
-        fc = mLongToFixed(-kSiteDistance);
-        fa = mMultiplyFixed(fc, fa);
-        fb = mMultiplyFixed(fc, fb);
-
-        Point a(mFixedToLong(fa), mFixedToLong(fb));
-        a.offset(gScrollStarObject->sprite->where.h, gScrollStarObject->sprite->where.v);
-        site_data.a = a;
-
-        count = gScrollStarObject->direction;
-        mAddAngle(count, 30);
-        GetRotPoint(&fa, &fb, count);
-        fc = mLongToFixed(kSiteSize);
-        fa = mMultiplyFixed(fc, fa);
-        fb = mMultiplyFixed(fc, fb);
-
-        Point b(a.h + mFixedToLong(fa), a.v + mFixedToLong(fb));
-        site_data.b = b;
-
-        count = gScrollStarObject->direction;
-        mAddAngle(count, -30);
-        GetRotPoint(&fa, &fb, count);
-        fc = mLongToFixed(kSiteSize);
-        fa = mMultiplyFixed(fc, fa);
-        fb = mMultiplyFixed(fc, fb);
-
-        Point c(a.h + mFixedToLong(fa), a.v + mFixedToLong(fb));
-        site_data.c = c;
-    } else {
-        should_draw_site = false;
+    if (site.should_draw) {
+        update_triangle(site, gScrollStarObject->direction, kSiteDistance, kSiteSize);
     }
 }
 
-void draw_site() {
-    if (should_draw_site) {
-        const RgbColor light = GetRGBTranslateColorShade(PALE_GREEN, MEDIUM);
-        const RgbColor dark = GetRGBTranslateColorShade(PALE_GREEN, DARKER + kSlightlyDarkerColor);
-        VideoDriver::driver()->draw_line(site_data.a, site_data.b, light);
-        VideoDriver::driver()->draw_line(site_data.a, site_data.c, light);
-        VideoDriver::driver()->draw_line(site_data.b, site_data.c, dark);
+void draw_site(const PlayerShip& player) {
+    if (site.should_draw) {
+        VideoDriver::driver()->draw_line(site.a, site.b, site.light);
+        VideoDriver::driver()->draw_line(site.a, site.c, site.light);
+        VideoDriver::driver()->draw_line(site.b, site.c, site.dark);
+
+        SiteData control;
+        if (player.show_select()) {
+            control.light = GetRGBTranslateColorShade(YELLOW, MEDIUM);
+            control.dark = GetRGBTranslateColorShade(YELLOW, DARKER + kSlightlyDarkerColor);
+            control.should_draw = true;
+        } else if (player.show_target()) {
+            control.light = GetRGBTranslateColorShade(SKY_BLUE, MEDIUM);
+            control.dark = GetRGBTranslateColorShade(SKY_BLUE, DARKER + kSlightlyDarkerColor);
+            control.should_draw = true;
+        }
+        if (control.should_draw) {
+            update_triangle(
+                    control, player.control_direction(), kSiteDistance - 3, kSiteSize - 6);
+            VideoDriver::driver()->draw_line(control.a, control.b, control.light);
+            VideoDriver::driver()->draw_line(control.a, control.c, control.light);
+            VideoDriver::driver()->draw_line(control.b, control.c, control.dark);
+        }
     }
 }
 

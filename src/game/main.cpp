@@ -21,6 +21,7 @@
 #include <math.h>
 #include <algorithm>
 
+#include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
 #include "data/string-list.hpp"
@@ -76,6 +77,7 @@ class GamePlay : public Card {
     GamePlay(bool replay, GameResult* game_result, int32_t* seconds);
 
     virtual void become_front();
+    virtual void resign_front();
 
     virtual void draw() const;
 
@@ -83,11 +85,16 @@ class GamePlay : public Card {
     virtual void fire_timer();
 
     virtual void key_down(const KeyDownEvent& event);
+    virtual void key_up(const KeyUpEvent& event);
     virtual void caps_lock(const CapsLockEvent& event);
 
     virtual void mouse_down(const MouseDownEvent& event);
     virtual void mouse_up(const MouseUpEvent& event);
     virtual void mouse_move(const MouseMoveEvent& event);
+
+    virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
+    virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
+    virtual void gamepad_stick(const GamepadStickEvent& event);
 
   private:
     enum State {
@@ -117,6 +124,7 @@ class GamePlay : public Card {
     int64_t _last_click_time;
     int _scenario_check_time;
     PlayAgainScreen::Item _play_again;
+    PlayerShip _player_ship;
 };
 
 MainPlay::MainPlay(
@@ -391,6 +399,15 @@ void GamePlay::become_front() {
         }
         break;
     }
+    if ((_state == PLAYING) && !globals()->gInputSource) {
+        KeyMap keys;
+        VideoDriver::driver()->get_keys(&keys);
+        _player_ship.update_keys(keys);
+    }
+}
+
+void GamePlay::resign_front() {
+    minicomputer_cancel();
 }
 
 void GamePlay::draw() const {
@@ -401,7 +418,7 @@ void GamePlay::draw() const {
     Labels::draw();
 
     Messages::draw_message();
-    draw_site();
+    draw_site(_player_ship);
     draw_instruments();
     if (stack()->top() == this) {
         _cursor.draw();
@@ -487,11 +504,10 @@ void GamePlay::fire_timer() {
             AdmiralThink();
             ExecuteActionQueue( kDecideEveryCycles);
 
-            if (!PlayerShipGetKeys(
-                        kDecideEveryCycles, *globals()->gInputSource, _cursor,
-                        &_entering_message)) {
+            if (globals()->gInputSource && !globals()->gInputSource->next(_player_ship)) {
                 globals()->gGameOver = 1;
             }
+            _player_ship.update(kDecideEveryCycles, _cursor, _entering_message);
 
             if (VideoDriver::driver()->button(0)) {
                 if (_replay) {
@@ -638,7 +654,7 @@ void GamePlay::caps_lock(const CapsLockEvent& event) {
 }
 
 void GamePlay::key_down(const KeyDownEvent& event) {
-    if (_replay) {
+    if (globals()->gInputSource) {
         *_game_result = QUIT_GAME;
         globals()->gGameOver = 1;
         return;
@@ -662,6 +678,16 @@ void GamePlay::key_down(const KeyDownEvent& event) {
         }
         break;
     }
+
+    _player_ship.key_down(event);
+}
+
+void GamePlay::key_up(const KeyUpEvent& event) {
+    if (globals()->gInputSource) {
+        return;
+    }
+
+    _player_ship.key_up(event);
 }
 
 void GamePlay::mouse_down(const MouseDownEvent& event) {
@@ -674,6 +700,39 @@ void GamePlay::mouse_up(const MouseUpEvent& event) {
 
 void GamePlay::mouse_move(const MouseMoveEvent& event) {
     _cursor.mouse_move(event);
+}
+
+void GamePlay::gamepad_button_down(const GamepadButtonDownEvent& event) {
+    if (globals()->gInputSource) {
+        *_game_result = QUIT_GAME;
+        globals()->gGameOver = 1;
+        return;
+    }
+
+    switch (event.button) {
+      case Gamepad::START:
+        {
+            _state  = PLAY_AGAIN;
+            _player_paused = true;
+            bool is_training = gThisScenario->startTime & kScenario_IsTraining_Bit;
+            stack()->push(new PlayAgainScreen(true, is_training, &_play_again));
+        }
+        break;
+    }
+
+    _player_ship.gamepad_button_down(event);
+}
+
+void GamePlay::gamepad_button_up(const GamepadButtonUpEvent& event) {
+    if (globals()->gInputSource) {
+        return;
+    }
+
+    _player_ship.gamepad_button_up(event);
+}
+
+void GamePlay::gamepad_stick(const GamepadStickEvent& event) {
+    _player_ship.gamepad_stick(event);
 }
 
 }  // namespace antares
