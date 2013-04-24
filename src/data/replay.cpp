@@ -20,13 +20,18 @@
 
 #include <sfz/sfz.hpp>
 
+using sfz::Bytes;
+using sfz::BytesSlice;
 using sfz::Exception;
 using sfz::ReadSource;
+using sfz::String;
 using sfz::WriteTarget;
 using sfz::format;
 using sfz::range;
 using sfz::read;
 using sfz::write;
+
+namespace utf8 = sfz::utf8;
 
 namespace antares {
 
@@ -37,80 +42,210 @@ ReplayData::ReplayData(sfz::BytesSlice in) {
     read(in, *this);
 }
 
-void ReplayData::wait(uint32_t ticks) {
-    Item item;
-    item.type = Item::WAIT;
-    item.data.wait = ticks;
-    items.push_back(item);
+void ReplayData::key_down(uint64_t at, uint32_t key) {
+    if (actions.empty() || (actions.back().at != at)) {
+        actions.emplace_back();
+        actions.back().at = at;
+    }
+    Action& action = actions.back();
+    action.keys_down.push_back(key);
 }
 
-void ReplayData::key_down(uint32_t key) {
-    Item item;
-    item.type = Item::KEY_DOWN;
-    item.data.key_down = key;
-    items.push_back(item);
+void ReplayData::key_up(uint64_t at, uint32_t key) {
+    if (actions.empty() || (actions.back().at != at)) {
+        actions.emplace_back();
+        actions.back().at = at;
+    }
+    Action& action = actions.back();
+    action.keys_up.push_back(key);
 }
 
-void ReplayData::key_up(uint32_t key) {
-    Item item;
-    item.type = Item::KEY_UP;
-    item.data.key_up = key;
-    items.push_back(item);
-}
+enum {
+    VARINT = 0,
+    FIXED64 = 1,
+    LENGTH_DELIMITED = 2,
+    FIXED32 = 5,
+};
 
-void read_from(ReadSource in, ReplayData& replay) {
-    read(in, replay.chapter_id);
-    read(in, replay.global_seed);
-    const uint32_t item_count = read<uint32_t>(in);
-    for (int i: range(item_count)) {
-        static_cast<void>(i);
-        ReplayData::Item item;
-        read(in, item);
-        replay.items.push_back(item);
+enum {
+    SCENARIO             = (0x01 << 3) | LENGTH_DELIMITED,
+    CHAPTER              = (0x02 << 3) | VARINT,
+    GLOBAL_SEED          = (0x03 << 3) | VARINT,
+    DURATION             = (0x04 << 3) | VARINT,
+    ACTION               = (0x05 << 3) | LENGTH_DELIMITED,
+
+    SCENARIO_IDENTIFIER  = (0x01 << 3) | LENGTH_DELIMITED,
+    SCENARIO_VERSION     = (0x02 << 3) | LENGTH_DELIMITED,
+
+    ACTION_AT            = (0x01 << 3) | VARINT,
+    ACTION_KEY_DOWN      = (0x02 << 3) | VARINT,
+    ACTION_KEY_UP        = (0x03 << 3) | VARINT,
+};
+
+static void write_varint(WriteTarget out, uint64_t value) {
+    if (value == 0) {
+        out.push(1, '\0');
+    }
+    while (value != 0) {
+        uint8_t byte = value & 0x7f;
+        value >>= 7;
+        if (value) {
+            byte |= 0x80;
+        }
+        out.push(1, byte);
     }
 }
 
-void read_from(ReadSource in, ReplayData::Item& item) {
-    const uint8_t type = read<uint8_t>(in);
-    switch (type) {
-      case ReplayData::Item::WAIT:
-        item.type = ReplayData::Item::WAIT;
-        read(in, item.data.wait);
-        break;
-      case ReplayData::Item::KEY_DOWN:
-        item.type = ReplayData::Item::KEY_DOWN;
-        read(in, item.data.key_down);
-        break;
-      case ReplayData::Item::KEY_UP:
-        item.type = ReplayData::Item::KEY_UP;
-        read(in, item.data.key_up);
-        break;
-      default:
-        throw Exception(format("Illegal replay item type {0}", type));
+static void tag_varint(WriteTarget out, uint64_t tag, uint64_t value) {
+    write_varint(out, tag);
+    write_varint(out, value);
+}
+
+template <typename T>
+static T read_varint(ReadSource in);
+
+template <>
+uint64_t read_varint<uint64_t>(ReadSource in) {
+    uint64_t byte;
+    uint64_t value = 0;
+    int shift = 0;
+    do {
+        byte = read<uint8_t>(in);
+        value |= (byte & 0x7f) << shift;
+        shift += 7;
+    } while (byte & 0x80);
+    return value;
+}
+
+template <>
+int64_t read_varint<int64_t>(ReadSource in) {
+    uint64_t u64 = read_varint<uint64_t>(in);
+    int64_t s64 = u64 & 0x7fffffffffffffffULL;
+    if (u64 & 0x8000000000000000ULL) {
+        s64 += -0x8000000000000000ULL;
+    }
+    return s64;
+}
+
+template <>
+size_t read_varint<size_t>(ReadSource in) {
+    return read_varint<uint64_t>(in);
+}
+
+template <>
+int32_t read_varint<int32_t>(ReadSource in) {
+    return read_varint<int64_t>(in);
+}
+
+template <>
+uint8_t read_varint<uint8_t>(ReadSource in) {
+    return read_varint<int64_t>(in);
+}
+
+static void tag_string(WriteTarget out, uint64_t tag, const String& s) {
+    write_varint(out, tag);
+    write_varint(out, s.size());
+    write(out, utf8::encode(s));
+}
+
+static String read_string(ReadSource in) {
+    Bytes bytes(read_varint<size_t>(in), '\0');
+    in.shift(bytes.data(), bytes.size());
+    return String(utf8::decode(bytes));
+}
+
+template <typename T>
+static void tag_message(WriteTarget out, uint64_t tag, const T& message) {
+    Bytes bytes;
+    write(bytes, message);
+    write_varint(out, tag);
+    write_varint(out, bytes.size());
+    write(out, bytes);
+}
+
+template <typename T>
+static T read_message(ReadSource in) {
+    Bytes bytes(read_varint<size_t>(in), '\0');
+    in.shift(bytes.data(), bytes.size());
+    T message;
+    BytesSlice slice = bytes;
+    read(slice, message);
+    return message;
+}
+
+void read_from(ReadSource in, ReplayData& replay) {
+    while (!in.empty()) {
+        switch (read_varint<uint64_t>(in)) {
+          case SCENARIO:
+            replay.scenario = read_message<ReplayData::Scenario>(in);
+            break;
+          case CHAPTER:
+            replay.chapter_id = read_varint<int32_t>(in);
+            break;
+          case GLOBAL_SEED:
+            replay.global_seed = read_varint<int32_t>(in);
+            break;
+          case DURATION:
+            replay.duration = read_varint<uint64_t>(in);
+            break;
+          case ACTION:
+            replay.actions.push_back(read_message<ReplayData::Action>(in));
+            break;
+        }
+    }
+}
+
+void read_from(ReadSource in, ReplayData::Scenario& scenario) {
+    while (!in.empty()) {
+        switch (read_varint<uint64_t>(in)) {
+          case SCENARIO_IDENTIFIER:
+            scenario.identifier = read_string(in);
+            break;
+          case SCENARIO_VERSION:
+            scenario.version = read_string(in);
+            break;
+        }
+    }
+}
+
+void read_from(ReadSource in, ReplayData::Action& action) {
+    while (!in.empty()) {
+        switch (read_varint<uint64_t>(in)) {
+          case ACTION_AT:
+            action.at = read_varint<uint64_t>(in);
+            break;
+          case ACTION_KEY_DOWN:
+            action.keys_down.push_back(read_varint<uint8_t>(in));
+            break;
+          case ACTION_KEY_UP:
+            action.keys_up.push_back(read_varint<uint8_t>(in));
+            break;
+        }
     }
 }
 
 void write_to(WriteTarget out, const ReplayData& replay) {
-    write(out, replay.chapter_id);
-    write(out, replay.global_seed);
-    write<uint32_t>(out, replay.items.size());
-    for (const ReplayData::Item& item: replay.items) {
-        write(out, item);
+    tag_message(out, SCENARIO, replay.scenario);
+    tag_varint(out, CHAPTER, replay.chapter_id);
+    tag_varint(out, GLOBAL_SEED, replay.global_seed);
+    tag_varint(out, DURATION, replay.duration);
+    for (const ReplayData::Action& action: replay.actions) {
+        tag_message(out, ACTION, action);
     }
 }
 
-void write_to(WriteTarget out, const ReplayData::Item& item) {
-    write<uint8_t>(out, item.type);
-    switch (item.type) {
-      case ReplayData::Item::WAIT:
-        write(out, item.data.wait);
-        break;
-      case ReplayData::Item::KEY_DOWN:
-        write(out, item.data.key_down);
-        break;
-      case ReplayData::Item::KEY_UP:
-        write(out, item.data.key_up);
-        break;
+void write_to(WriteTarget out, const ReplayData::Scenario& scenario) {
+    tag_string(out, SCENARIO_IDENTIFIER, scenario.identifier);
+    tag_string(out, SCENARIO_VERSION, scenario.version);
+}
+
+void write_to(WriteTarget out, const ReplayData::Action& action) {
+    tag_varint(out, ACTION_AT, action.at);
+    for (uint8_t key: action.keys_down) {
+        tag_varint(out, ACTION_KEY_DOWN, key);
+    }
+    for (uint8_t key: action.keys_up) {
+        tag_varint(out, ACTION_KEY_UP, key);
     }
 }
 

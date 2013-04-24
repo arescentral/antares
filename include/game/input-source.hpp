@@ -47,7 +47,7 @@ class ReplayInputSource : public InputSource {
 
     const ReplayData* _data;
     size_t _data_index;
-    uint32_t _wait_ticks;
+    uint64_t _at;
     KeyMap _key_map;
 
     DISALLOW_COPY_AND_ASSIGN(ReplayInputSource);

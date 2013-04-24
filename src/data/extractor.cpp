@@ -94,30 +94,32 @@ int32_t nlrp_chapter(int16_t id) {
 
 bool convert_nlrp(StringSlice, int16_t id, BytesSlice data, WriteTarget out) {
     ReplayData replay;
+    replay.scenario.identifier.assign("com.biggerplanet.ares");
+    replay.scenario.version.assign("1.1.1");
     replay.chapter_id = nlrp_chapter(id);
     read(data, replay.global_seed);
 
-    int correction = 0;
     uint32_t keys = 0;
+    uint32_t at = 0;
     while (!data.empty()) {
-        const uint32_t ticks = read<uint32_t>(data) + correction;
+        const uint32_t ticks = read<uint32_t>(data) + 1;
         const uint32_t new_keys = read<uint32_t>(data);
         const uint32_t keys_down = new_keys & ~keys;
         const uint32_t keys_up = keys & ~new_keys;
 
         for (int i = 0; i < 19; ++i) {
             if (keys_down & (1 << i)) {
-                replay.key_down(i);
+                replay.key_down(at, i);
             }
             if (keys_up & (1 << i)) {
-                replay.key_up(i);
+                replay.key_up(at, i);
             }
         }
-        replay.wait(ticks);
+        at += ticks;
 
-        correction = 1;
         keys = new_keys;
     }
+    replay.duration = at;
 
     write(out, replay);
     return true;
@@ -374,7 +376,7 @@ const ResourceFile::ExtractedResource kPluginFiles[] = {
 
 const char kFactoryScenario[] = "com.biggerplanet.ares";
 const char kDownloadBase[] = "http://downloads.arescentral.org";
-const char kVersion[] = "12\n";
+const char kVersion[] = "13\n";
 
 const char kPluginVersionFile[] = "data/version";
 const char kPluginVersion[] = "1\n";
