@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <sfz/sfz.hpp>
+#include "config/dirs.hpp"
 #include "config/preferences.hpp"
 
 using sfz::BytesSlice;
@@ -52,11 +53,9 @@ static unique_ptr<MappedFile> load_first(sfz::StringSlice resource_path,
 }
 
 static unique_ptr<MappedFile> load(sfz::StringSlice resource_path) {
-    const String home(utf8::decode(getenv("HOME")));
-    const String scenarios(format("{0}/Library/Application Support/Antares/Scenarios", home));
     return load_first(resource_path, {
-        format("{0}/{1}", scenarios, Preferences::preferences()->scenario_identifier()),
-        format("{0}/{1}", scenarios, kFactoryScenarioIdentifier),
+        format("{0}/{1}", dirs().scenarios, Preferences::preferences()->scenario_identifier()),
+        format("{0}/{1}", dirs().scenarios, kFactoryScenarioIdentifier),
         application_path(),
     });
 }

@@ -50,7 +50,7 @@ class NullLedger : public Ledger {
 
 class DirectoryLedger : public Ledger {
   public:
-    DirectoryLedger(sfz::PrintItem directory);
+    DirectoryLedger();
     virtual void unlock_chapter(int chapter);
     virtual void unlocked_chapters(std::vector<int>* chapters);
 
@@ -60,7 +60,6 @@ class DirectoryLedger : public Ledger {
     void load();
     void save();
 
-    const sfz::String _directory;
     std::set<int> _chapters;
 
     DISALLOW_COPY_AND_ASSIGN(DirectoryLedger);

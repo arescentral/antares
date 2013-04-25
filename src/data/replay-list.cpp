@@ -20,6 +20,7 @@
 
 #include <glob.h>
 #include <sfz/sfz.hpp>
+#include "config/dirs.hpp"
 #include "config/preferences.hpp"
 
 using sfz::CString;
@@ -47,10 +48,8 @@ struct ScopedGlob {
 
 ReplayList::ReplayList() {
     ScopedGlob g;
-    const String home(utf8::decode(getenv("HOME")));
-    const StringSlice scenarios("Library/Application Support/Antares/Scenarios");
     const StringSlice scenario = Preferences::preferences()->scenario_identifier();
-    String str(format("{0}/{1}/{2}/replays/*.NLRP", home, scenarios, scenario));
+    String str(format("{0}/{1}/replays/*.NLRP", dirs().scenarios, scenario));
     CString c_str(str);
     glob(c_str.data(), 0, NULL, &g.data);
 
