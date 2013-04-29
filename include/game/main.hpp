@@ -19,6 +19,7 @@
 #ifndef ANTARES_GAME_MAIN_HPP_
 #define ANTARES_GAME_MAIN_HPP_
 
+#include "data/replay.hpp"
 #include "ui/card.hpp"
 #include "ui/interface-handling.hpp"
 
@@ -55,6 +56,7 @@ class MainPlay : public Card {
     bool _cancelled;
     GameResult* const _game_result;
     int32_t* const _seconds;
+    ReplayBuilder _replay_builder;
 };
 
 }  // namespace antares

@@ -1,0 +1,91 @@
+// Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
+// Copyright (C) 2013 The Antares Authors
+//
+// This file is part of Antares, a tactical space combat game.
+//
+// Antares is free software: you can redistribute it and/or modify it
+// under the terms of the Lesser GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Antares is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with Antares.  If not, see http://www.gnu.org/licenses/
+
+package antares.pb;
+
+message Replay {
+    optional Scenario  scenario     = 1;
+    optional int32     chapter      = 2;
+    optional int32     global_seed  = 3;
+    optional uint64    duration     = 4;
+    repeated Action    action       = 5;
+
+    message Scenario {
+        optional string  identifier  = 1;
+        optional string  version     = 2;
+    }
+
+    message Action {
+        optional uint64 at        = 1;
+        repeated Key    key_down  = 2;
+        repeated Key    key_up    = 3;
+    }
+}
+
+enum Key {
+    ACCELERATE           = 0;
+    DECELERATE           = 1;
+    TURN_CW              = 2;
+    TURN_CCW             = 3;
+    WARP                 = 7;
+
+    FIRE_PRIMARY         = 4;
+    FIRE_SECONDARY       = 5;
+    FIRE_SPECIAL         = 6;
+
+    SELECT_FRIENDLY      = 8;
+    SELECT_HOSTILE       = 9;
+    SELECT_BASE          = 10;
+    TARGET               = 11;
+    ORDER_TO_GO          = 12;
+    TRANSFER_CONTROL     = 19;
+
+    SCALE_IN             = 13;
+    SCALE_OUT            = 14;
+    ZOOM_1_TO_1          = 20;
+    ZOOM_1_TO_2          = 21;
+    ZOOM_1_TO_4          = 22;
+    ZOOM_1_TO_16         = 23;
+    ZOOM_HOSTILE         = 24;
+    ZOOM_OBJECT          = 25;
+    ZOOM_ALL             = 26;
+
+    COMPUTER_PREVIOUS    = 15;
+    COMPUTER_NEXT        = 16;
+    COMPUTER_ACCEPT      = 17;
+    COMPUTER_CANCEL      = 18;
+
+    MESSAGE_NEXT         = 27;
+    HELP                 = 28;
+    VOLUME_DOWN          = 29;
+    VOLUME_UP            = 30;
+    MUTE_MUSIC           = 31;
+    EXPERT_NET_SETTINGS  = 32;
+    FAST_MOTION          = 33;
+
+    HOTKEY_1             = 34;
+    HOTKEY_2             = 35;
+    HOTKEY_3             = 36;
+    HOTKEY_4             = 37;
+    HOTKEY_5             = 38;
+    HOTKEY_6             = 39;
+    HOTKEY_7             = 40;
+    HOTKEY_8             = 41;
+    HOTKEY_9             = 42;
+    HOTKEY_10            = 43;
+}

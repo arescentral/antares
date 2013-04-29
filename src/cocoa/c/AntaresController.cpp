@@ -58,22 +58,16 @@ struct AntaresDrivers {
     OpenAlSoundDriver sound;
     DirectoryLedger ledger;
 
-    AntaresDrivers(StringSlice home):
+    AntaresDrivers():
             video(
                     Preferences::preferences()->fullscreen(),
-                    Preferences::preferences()->screen_size()),
-            ledger(format("{0}/Library/Application Support/Antares", home)) { }
+                    Preferences::preferences()->screen_size()) { }
 };
 
 namespace antares {
 
 extern "C" AntaresDrivers* antares_controller_create_drivers(CFStringRef* error_message) {
-    if (getenv("HOME") == NULL) {
-        *error_message = cf::wrap("Couldn't get $HOME").release();
-        return NULL;
-    }
-    const String home(utf8::decode(getenv("HOME")));
-    return new AntaresDrivers(home);
+    return new AntaresDrivers();
 }
 
 extern "C" void antares_controller_destroy_drivers(AntaresDrivers* drivers) {

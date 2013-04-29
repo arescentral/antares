@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+
+if [[ $# != 2 ]]; then
+    echo >&2 "usage: $(basename $0) encode MESSAGE_TYPE"
+    echo >&2 "       $(basename $0) encode MESSAGE_TYPE"
+    exit 64
+fi
+
+protoc --$1=$2 proto/*

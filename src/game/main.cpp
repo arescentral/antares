@@ -18,13 +18,16 @@
 
 #include "game/main.hpp"
 
+#include <fcntl.h>
 #include <math.h>
 #include <algorithm>
 
 #include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "config/preferences.hpp"
+#include "data/replay.hpp"
 #include "data/string-list.hpp"
+#include "data/scenario-list.hpp"
 #include "drawing/color.hpp"
 #include "drawing/shapes.hpp"
 #include "drawing/sprite-handling.hpp"
@@ -59,12 +62,17 @@
 #include "video/driver.hpp"
 
 using sfz::Exception;
+using sfz::ScopedFd;
 using sfz::String;
 using sfz::StringSlice;
 using sfz::format;
+using sfz::makedirs;
+using sfz::open;
 using std::max;
 using std::min;
 using std::unique_ptr;
+
+namespace path = sfz::path;
 
 namespace antares {
 
@@ -74,7 +82,8 @@ Rect viewport;
 
 class GamePlay : public Card {
   public:
-    GamePlay(bool replay, GameResult* game_result, int32_t* seconds);
+    GamePlay(
+            bool replay, ReplayBuilder& replay_builder, GameResult* game_result, int32_t* seconds);
 
     virtual void become_front();
     virtual void resign_front();
@@ -125,6 +134,7 @@ class GamePlay : public Card {
     int _scenario_check_time;
     PlayAgainScreen::Item _play_again;
     PlayerShip _player_ship;
+    ReplayBuilder& _replay_builder;
 };
 
 MainPlay::MainPlay(
@@ -145,6 +155,12 @@ void MainPlay::become_front() {
             _state = LOADING;
             RemoveAllSpaceObjects();
             globals()->gGameOver = 0;
+
+            _replay_builder.init(
+                    Preferences::preferences()->scenario_identifier(),
+                    String(u32_to_version(globals()->scenarioFileInfo.version)),
+                    _scenario->chapter_number(),
+                    gRandomSeed.seed);
 
             if (Preferences::preferences()->play_idle_music()) {
                 LoadSong(3000);
@@ -209,7 +225,10 @@ void MainPlay::become_front() {
             }
             globals()->gLastTime = now_usecs();
 
-            stack()->push(new GamePlay(_replay, _game_result, _seconds));
+            if (!_replay) {
+                _replay_builder.start();
+            }
+            stack()->push(new GamePlay(_replay, _replay_builder, _game_result, _seconds));
         }
         break;
 
@@ -219,30 +238,39 @@ void MainPlay::become_front() {
         if (Preferences::preferences()->play_music_in_game()) {
             StopAndUnloadSong();
         }
+        _replay_builder.finish();
         stack()->pop(this);
         break;
     }
 }
 
-GamePlay::GamePlay(bool replay, GameResult* game_result, int32_t* seconds)
-        : _state(PLAYING),
-          _replay(replay),
-          _game_result(game_result),
-          _seconds(seconds),
-          _next_timer(add_ticks(now_usecs(), 1)),
-          _play_area(viewport.left, viewport.top, viewport.right, viewport.bottom),
-          _scenario_start_time(add_ticks(
-                      0,
-                      (gThisScenario->startTime & kScenario_StartTimeMask)
-                      * kScenarioTimeMultiple)),
-          _command_and_q(BothCommandAndQ()),
-          _left_mouse_down(false),
-          _right_mouse_down(false),
-          _entering_message(false),
-          _player_paused(false),
-          _decide_cycle(0),
-          _last_click_time(0),
-          _scenario_check_time(0) { }
+int new_replay_file() {
+    String path;
+    makedirs(path::basename(path), 0755);
+    return open(path, O_WRONLY | O_CREAT | O_EXCL, 0644);
+}
+
+GamePlay::GamePlay(
+        bool replay, ReplayBuilder& replay_builder, GameResult* game_result, int32_t* seconds):
+        _state(PLAYING),
+        _replay(replay),
+        _game_result(game_result),
+        _seconds(seconds),
+        _next_timer(add_ticks(now_usecs(), 1)),
+        _play_area(viewport.left, viewport.top, viewport.right, viewport.bottom),
+        _scenario_start_time(add_ticks(
+                    0,
+                    (gThisScenario->startTime & kScenario_StartTimeMask)
+                    * kScenarioTimeMultiple)),
+        _command_and_q(BothCommandAndQ()),
+        _left_mouse_down(false),
+        _right_mouse_down(false),
+        _entering_message(false),
+        _player_paused(false),
+        _decide_cycle(0),
+        _last_click_time(0),
+        _scenario_check_time(0),
+        _replay_builder(replay_builder) { }
 
 class PauseScreen : public Card {
   public:
@@ -507,6 +535,7 @@ void GamePlay::fire_timer() {
             if (globals()->gInputSource && !globals()->gInputSource->next(_player_ship)) {
                 globals()->gGameOver = 1;
             }
+            _replay_builder.next();
             _player_ship.update(kDecideEveryCycles, _cursor, _entering_message);
 
             if (VideoDriver::driver()->button(0)) {
@@ -680,6 +709,7 @@ void GamePlay::key_down(const KeyDownEvent& event) {
     }
 
     _player_ship.key_down(event);
+    _replay_builder.key_down(event);
 }
 
 void GamePlay::key_up(const KeyUpEvent& event) {
@@ -688,6 +718,7 @@ void GamePlay::key_up(const KeyUpEvent& event) {
     }
 
     _player_ship.key_up(event);
+    _replay_builder.key_up(event);
 }
 
 void GamePlay::mouse_down(const MouseDownEvent& event) {

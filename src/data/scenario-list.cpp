@@ -20,6 +20,7 @@
 
 #include <glob.h>
 #include <sfz/sfz.hpp>
+#include "config/dirs.hpp"
 #include "data/scenario.hpp"
 
 using sfz::BytesSlice;
@@ -43,6 +44,8 @@ struct ScopedGlob {
     ~ScopedGlob() { globfree(&data); }
 };
 
+}  // namespace
+
 Version u32_to_version(uint32_t in) {
     using std::swap;
     vector<int> components;
@@ -57,8 +60,6 @@ Version u32_to_version(uint32_t in) {
     return Version{components};
 }
 
-}  // namespace
-
 ScenarioList::ScenarioList() {
     _scenarios.emplace_back();
     Entry& factory_scenario = _scenarios.back();
@@ -70,14 +71,12 @@ ScenarioList::ScenarioList() {
     factory_scenario.version = u32_to_version(0x01010100);
 
     ScopedGlob g;
-    const String home(utf8::decode(getenv("HOME")));
-    const StringSlice scenarios("Library/Application Support/Antares/Scenarios");
     const StringSlice info("scenario-info/128.nlAG");
-    String str(format("{0}/{1}/*/{2}", home, scenarios, info));
+    String str(format("{0}/*/{1}", dirs().scenarios, info));
     CString c_str(str);
     glob(c_str.data(), 0, NULL, &g.data);
 
-    size_t prefix_len = home.size() + scenarios.size() + 2;
+    size_t prefix_len = dirs().scenarios.size() + 1;
     size_t suffix_len = info.size() + 1;
     for (int i = 0; i < g.data.gl_matchc; ++i) {
         const String path(utf8::decode(g.data.gl_pathv[i]));

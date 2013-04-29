@@ -35,40 +35,39 @@ InputSource::~InputSource() { }
 ReplayInputSource::ReplayInputSource(ReplayData* data):
         _data(data),
         _data_index(0),
-        _wait_ticks(0) {
+        _at(0) {
     EventReceiver receiver;
     advance(receiver);
 }
 
 bool ReplayInputSource::next(EventReceiver& receiver) {
-    if (_wait_ticks == 0) {
-        if (!advance(receiver)) {
-            return false;
-        }
+    if (!advance(receiver)) {
+        return false;
     }
-    --_wait_ticks;
     return true;
 }
 
 bool ReplayInputSource::advance(EventReceiver& receiver) {
-    int key;
-    while (_data_index < _data->items.size()) {
-        const ReplayData::Item& item = _data->items[_data_index++];
-        switch (item.type) {
-          case ReplayData::Item::WAIT:
-            _wait_ticks += item.data.wait;
-            return true;
-          case ReplayData::Item::KEY_DOWN:
-            key = Preferences::preferences()->key(item.data.key_down) - 1;
-            receiver.key_down(KeyDownEvent(now_usecs(), key));
-            break;
-          case ReplayData::Item::KEY_UP:
-            key = Preferences::preferences()->key(item.data.key_up) - 1;
-            receiver.key_up(KeyUpEvent(now_usecs(), key));
-            break;
-        }
+    if (_at >= _data->duration) {
+        return false;
     }
-    return false;
+    while ((_data_index < _data->actions.size())
+            && (_at >= _data->actions[_data_index].at)) {
+        const ReplayData::Action& action = _data->actions[_data_index];
+        if (_at == action.at) {
+            for (uint8_t key: action.keys_down) {
+                int code = Preferences::preferences()->key(key) - 1;
+                receiver.key_down(KeyDownEvent(now_usecs(), code));
+            }
+            for (uint8_t key: action.keys_up) {
+                int code = Preferences::preferences()->key(key) - 1;
+                receiver.key_up(KeyUpEvent(now_usecs(), code));
+            }
+        }
+        ++_data_index;
+    }
+    ++_at;
+    return true;
 }
 
 }  // namespace antares

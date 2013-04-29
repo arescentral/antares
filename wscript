@@ -218,6 +218,12 @@ def build(bld):
         use="libsfz/libsfz",
     )
 
+    bld.platform(
+        target="antares/libantares-config",
+        platform="darwin",
+        source="src/config/mac-dirs.cpp",
+    )
+
     bld.stlib(
         target="antares/libantares-data",
         features="universal",

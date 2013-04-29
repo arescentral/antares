@@ -1,5 +1,5 @@
 // Copyright (C) 1997, 1999-2001, 2008 Nathan Lamont
-// Copyright (C) 2008-2012 The Antares Authors
+// Copyright (C) 2013 The Antares Authors
 //
 // This file is part of Antares, a tactical space combat game.
 //
@@ -16,43 +16,24 @@
 // You should have received a copy of the GNU Lesser General Public
 // License along with Antares.  If not, see http://www.gnu.org/licenses/
 
-#ifndef ANTARES_GAME_INPUT_SOURCE_HPP_
-#define ANTARES_GAME_INPUT_SOURCE_HPP_
+#ifndef ANTARES_CONFIG_DIRS_HPP_
+#define ANTARES_CONFIG_DIRS_HPP_
 
-#include <stdint.h>
 #include <sfz/sfz.hpp>
-
-#include "config/keys.hpp"
-#include "ui/event.hpp"
 
 namespace antares {
 
-struct ReplayData;
+struct Directories {
+    sfz::String root;
 
-class InputSource {
-  public:
-    virtual ~InputSource();
-
-    virtual bool next(EventReceiver& key_map) = 0;
+    sfz::String downloads;
+    sfz::String registry;
+    sfz::String replays;
+    sfz::String scenarios;
 };
 
-class ReplayInputSource : public InputSource {
-  public:
-    explicit ReplayInputSource(ReplayData* data);
-
-    virtual bool next(EventReceiver& receiver);
-
-  private:
-    bool advance(EventReceiver& receiver);
-
-    const ReplayData* _data;
-    size_t _data_index;
-    uint64_t _at;
-    KeyMap _key_map;
-
-    DISALLOW_COPY_AND_ASSIGN(ReplayInputSource);
-};
+const Directories& dirs();
 
 }  // namespace antares
 
-#endif  // ANTARES_GAME_INPUT_SOURCE_HPP_
+#endif // ANTARES_CONFIG_DIRS_HPP_
