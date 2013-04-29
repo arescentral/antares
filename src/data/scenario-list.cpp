@@ -44,6 +44,8 @@ struct ScopedGlob {
     ~ScopedGlob() { globfree(&data); }
 };
 
+}  // namespace
+
 Version u32_to_version(uint32_t in) {
     using std::swap;
     vector<int> components;
@@ -57,8 +59,6 @@ Version u32_to_version(uint32_t in) {
     }
     return Version{components};
 }
-
-}  // namespace
 
 ScenarioList::ScenarioList() {
     _scenarios.emplace_back();

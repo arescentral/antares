@@ -24,7 +24,6 @@
 #include <sfz/sfz.hpp>
 
 #include "data/resource.hpp"
-#include "game/main.hpp"
 #include "ui/card.hpp"
 
 namespace antares {
@@ -59,6 +58,27 @@ void read_from(sfz::ReadSource in, ReplayData::Action& action);
 void write_to(sfz::WriteTarget out, const ReplayData& replay);
 void write_to(sfz::WriteTarget out, const ReplayData::Scenario& scenario);
 void write_to(sfz::WriteTarget out, const ReplayData::Action& action);
+
+class ReplayBuilder : public EventReceiver {
+  public:
+    ReplayBuilder();
+
+    void init(
+            sfz::StringSlice scenario_identifier, sfz::StringSlice scenario_version,
+            int32_t chapter_id, int32_t global_seed);
+    void start();
+    virtual void key_down(const KeyDownEvent& key);
+    virtual void key_up(const KeyUpEvent& key);
+    void next();
+    void finish();
+
+  private:
+    std::unique_ptr<sfz::ScopedFd> _file;
+    ReplayData::Scenario _scenario;
+    int32_t _chapter_id;
+    int32_t _global_seed;
+    uint64_t _at;
+};
 
 }  // namespace antares
 

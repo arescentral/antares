@@ -18,19 +18,31 @@
 
 #include "data/replay.hpp"
 
+#include <fcntl.h>
+#include <glob.h>
+#include <unistd.h>
 #include <sfz/sfz.hpp>
+
+#include "config/dirs.hpp"
+#include "config/keys.hpp"
+#include "config/preferences.hpp"
 
 using sfz::Bytes;
 using sfz::BytesSlice;
+using sfz::CString;
 using sfz::Exception;
 using sfz::ReadSource;
+using sfz::ScopedFd;
 using sfz::String;
+using sfz::StringSlice;
 using sfz::WriteTarget;
 using sfz::format;
 using sfz::range;
 using sfz::read;
 using sfz::write;
+using std::map;
 
+namespace path = sfz::path;
 namespace utf8 = sfz::utf8;
 
 namespace antares {
@@ -247,6 +259,115 @@ void write_to(WriteTarget out, const ReplayData::Action& action) {
     for (uint8_t key: action.keys_up) {
         tag_varint(out, ACTION_KEY_UP, key);
     }
+}
+
+ReplayBuilder::ReplayBuilder() { }
+
+namespace {
+
+// TODO(sfiera): put globbing in a central location.
+struct ScopedGlob {
+    glob_t data;
+    ScopedGlob() { memset(&data, sizeof(data), 0); }
+    ~ScopedGlob() { globfree(&data); }
+};
+
+}  // namespace
+
+// Deletes the oldest replay until there are fewer than `count` in the replays folder.
+static void cull_replays(size_t count) {
+    if (path::isdir(dirs().replays)) {
+        ScopedGlob g;
+        String str(format("{0}/*.nlrp", dirs().replays));
+        CString c_str(str);
+        glob(c_str.data(), 0, NULL, &g.data);
+
+        map<int64_t, const char*> files;
+        for (int i = 0; i < g.data.gl_matchc; ++i) {
+            struct stat st;
+            if (stat(g.data.gl_pathv[i], &st) < 0) {
+                continue;
+            }
+            files[st.st_mtimespec.tv_sec] = g.data.gl_pathv[i];
+        }
+        while (files.size() >= count) {
+            if (unlink(files.begin()->second) < 0) {
+                break;
+            }
+        }
+    } else {
+        makedirs(dirs().replays, 0755);
+    }
+}
+
+void ReplayBuilder::init(
+        StringSlice scenario_identifier, StringSlice scenario_version,
+        int32_t chapter_id, int32_t global_seed) {
+    _scenario.identifier.assign(scenario_identifier);
+    _scenario.version.assign(scenario_version);
+    _chapter_id = chapter_id;
+    _global_seed = global_seed;
+}
+
+void ReplayBuilder::start() {
+    _at = 1;
+    cull_replays(10);
+    time_t t;
+    struct tm tm;
+    char buffer[1024];
+    if ((time(&t) < 0)
+            || !localtime_r(&t, &tm)
+            || (strftime(buffer, 1024, "%+", &tm) <= 0)) {
+        return;
+    }
+    sfz::String path(format("{0}/Replay {1}.nlrp", dirs().replays, utf8::decode(buffer)));
+    int fd = open(path, O_WRONLY | O_CREAT | O_EXCL, 0644);
+    if (fd >= 0) {
+        _file.reset(new ScopedFd(fd));
+        tag_message(*_file, SCENARIO, _scenario);
+        tag_varint(*_file, CHAPTER, _chapter_id);
+        tag_varint(*_file, GLOBAL_SEED, _global_seed);
+    }
+}
+
+void ReplayBuilder::key_down(const KeyDownEvent& event) {
+    if (!_file) {
+        return;
+    }
+    for (int i: range(KEY_COUNT)) {
+        if (event.key() == Preferences::preferences()->key(i) - 1) {
+            ReplayData::Action action = {};
+            action.at = _at;
+            action.keys_down.push_back(i);
+            tag_message(*_file, ACTION, action);
+        }
+    }
+}
+
+void ReplayBuilder::key_up(const KeyUpEvent& event) {
+    if (!_file) {
+        return;
+    }
+    for (int i: range(KEY_COUNT)) {
+        if (event.key() == Preferences::preferences()->key(i) - 1) {
+            ReplayData::Action action = {};
+            action.at = _at;
+            action.keys_up.push_back(i);
+            tag_message(*_file, ACTION, action);
+            break;
+        }
+    }
+}
+
+void ReplayBuilder::next() {
+    ++_at;
+}
+
+void ReplayBuilder::finish() {
+    if (!_file) {
+        return;
+    }
+    tag_varint(*_file, DURATION, _at);
 }
 
 }  // namespace antares
