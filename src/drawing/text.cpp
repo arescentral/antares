@@ -249,14 +249,6 @@ void InitDirectText() {
     gDirectTextData[5] = small_button_font = new Font("button-small");
 }
 
-void DirectTextCleanup() {
-    delete tactical_font;
-    delete computer_font;
-    delete button_font;
-    delete title_font;
-    delete small_button_font;
-}
-
 uint8_t Font::char_width(Rune mchar) const {
     return glyph_rect(mchar).width();
 }

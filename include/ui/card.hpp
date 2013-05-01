@@ -121,25 +121,14 @@ class Card : public EventReceiver {
     Card* next() const;
 
   private:
-    // CardStack needs access to `set_stack()`.
     friend class CardStack;
-
-    // Sets the stack.
-    //
-    // After a CardStack pushes a Card to the top, it calls this method to set `_stack` to point to
-    // itself, then calls `become_front()`.  This method is called at most once per object, since
-    // Card objects are deleted after they are removed from the stack (exactly once, if one assumes
-    // that every Card gets pushed to a stack at some point).
-    //
-    // @param [in] stack    The stack that this Card is now in.
-    void set_stack(CardStack* stack);
 
     // The containing stack.  Initially NULL and set by `set_stack()`.
     CardStack* _stack;
 
     // The next card down on the stack.  Is NULL for the bottom-most card, and non-NULL for every
     // card above it.
-    Card* _next;
+    std::unique_ptr<Card> _next;
 };
 
 // A stack of Card objects that constitutes an application.
@@ -183,7 +172,7 @@ class CardStack {
 
   private:
     // A linked list of cards.  The card here is on top.
-    Card* _top;
+    std::unique_ptr<Card> _top;
 };
 
 }  // namespace antares
