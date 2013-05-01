@@ -60,7 +60,6 @@ extern const Font* title_font;
 extern const Font* small_button_font;
 
 void InitDirectText();
-void DirectTextCleanup();
 
 }  // namespace antares
 
