@@ -221,7 +221,6 @@ const uint32_t kDestroyActionNotMask        = 0x7fffffff;
 const uint32_t kDestroyActionDontDieFlag    = 0x80000000;
 
 struct spaceObjectType;
-typedef spaceObjectType *spaceObjectTypePtr;
 
 enum objectVerbIDEnum {
     kNoAction = 0,
@@ -634,20 +633,20 @@ struct spaceObjectType {
     coordPointType          location;
     coordPointType          lastLocation;
     int32_t                 lastDir;
-    spaceObjectTypePtr      collideObject;
+    spaceObjectType*        collideObject;
     Point                   collisionGrid;
-    spaceObjectTypePtr      nextNearObject;
+    spaceObjectType*        nextNearObject;
     Point                   distanceGrid;
-    spaceObjectTypePtr      nextFarObject;
-    spaceObjectTypePtr      previousObject;
+    spaceObjectType*        nextFarObject;
+    spaceObjectType*        previousObject;
     int32_t                 previousObjectNumber;
-    spaceObjectTypePtr      nextObject;
+    spaceObjectType*        nextObject;
     int32_t                 nextObjectNumber;
 
     int32_t                 runTimeFlags;       // distance from origin to destination
     coordPointType          destinationLocation;// coords of our destination ( or kNoDestination)
     int32_t                 destinationObject;  // which object?  or kNoDestinationObject -- or, if we're a dest, our corresponding destBalance for AI
-    spaceObjectTypePtr      destObjectPtr;      // ptr to destination object
+    spaceObjectType*        destObjectPtr;      // ptr to destination object
     int32_t                 destObjectDest;     // # of our destination's destination in case it dies
     int32_t                 destObjectID;       // ID of our dest object
     int32_t                 destObjectDestID;   // id of our dest's destination

@@ -31,8 +31,8 @@ struct adjacentUnitType {
 };
 
 struct proximityUnitType {
-    spaceObjectTypePtr      nearObject;                         // for collision checking
-    spaceObjectTypePtr      farObject;                          // for distance checking
+    spaceObjectType*        nearObject;                         // for collision checking
+    spaceObjectType*        farObject;                          // for distance checking
     adjacentUnitType        unitsToCheck[kUnitsToCheckNumber];  // adjacent units to check
 };
 
