@@ -519,7 +519,7 @@ void GamePlay::fire_timer() {
         if (unitsToDo > 0) {
             // executed arbitrarily, but at least once every kDecideEveryCycles
             globals()->starfield.move(unitsToDo);
-            MoveSpaceObjects(mGetSpaceObjectPtr(0), kMaxSpaceObject, unitsToDo);
+            MoveSpaceObjects(unitsToDo);
         }
 
         globals()->gGameTime = add_ticks(globals()->gGameTime, unitsToDo);
@@ -577,7 +577,7 @@ void GamePlay::fire_timer() {
                 _right_mouse_down = false;
             }
 
-            CollideSpaceObjects(mGetSpaceObjectPtr(0), kMaxSpaceObject);
+            CollideSpaceObjects();
             _decide_cycle = 0;
             _scenario_check_time++;
             if (_scenario_check_time == 30) {
