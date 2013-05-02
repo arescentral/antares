@@ -145,7 +145,7 @@ void Master::init() {
     MusicInit();
     InitMotion();
     AdmiralInit();
-    InitBeams();
+    Beams::init();
 
     if (Preferences::preferences()->play_idle_music()) {
         LoadSong( kTitleSongID);

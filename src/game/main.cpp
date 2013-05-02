@@ -441,7 +441,7 @@ void GamePlay::resign_front() {
 void GamePlay::draw() const {
     globals()->starfield.draw();
     draw_sector_lines();
-    draw_beams();
+    Beams::draw();
     draw_sprites();
     Labels::draw();
 
@@ -615,14 +615,14 @@ void GamePlay::fire_timer() {
     Messages::draw_long_message( unitsDone);
 
     update_sector_lines();
-    update_beams();
+    Beams::update();
     Labels::update_positions(unitsDone);
     Labels::update_contents(unitsDone);
     update_site(_replay);
 
     CullSprites();
     Labels::show_all();
-    ShowAllBeams();
+    Beams::show_all();
     globals()->starfield.show();
 
     Messages::draw_message_screen(unitsDone);

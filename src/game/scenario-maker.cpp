@@ -533,7 +533,7 @@ void ScenarioMakerInit() {
 bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     ResetAllSpaceObjects();
     ResetActionQueueData();
-    ResetBeams();
+    Beams::reset();
     ResetAllSprites();
     Labels::reset();
     ResetInstruments();
@@ -1026,7 +1026,7 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
                 CheckScenarioConditions(0);
             }
             CullSprites();
-            CullBeams();
+            Beams::cull();
             if ((i % kScenarioTimeMultiple) == 0) {
                 (*current)++;
             }

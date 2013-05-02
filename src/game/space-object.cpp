@@ -457,7 +457,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
 
     if ( destObject->attributes & kIsBeam)
     {
-        destObject->frame.beam.beam = AddBeam( &(destObject->location),
+        destObject->frame.beam.beam = Beams::add( &(destObject->location),
             destObject->baseType->frame.beam.color,
             destObject->baseType->frame.beam.kind,
             destObject->baseType->frame.beam.accuracy,
@@ -1387,8 +1387,7 @@ void ExecuteObjectActions( int32_t whichAction, int32_t actionNum,
                                     eKineticBeamKind)
                                 // special beams need special post-creation acts
                                 {
-                                        SetSpecialBeamAttributes( newObject,
-                                        anObject);
+                                    Beams::set_attributes(newObject, anObject);
                                 }
                             }
                         }

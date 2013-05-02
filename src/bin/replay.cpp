@@ -157,7 +157,7 @@ void ReplayMaster::init() {
     MusicInit();
     InitMotion();
     AdmiralInit();
-    InitBeams();
+    Beams::init();
 }
 
 void usage(StringSlice program_name) {
