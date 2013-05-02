@@ -186,15 +186,13 @@ OptionsScreen::State SoundControlScreen::button_state(int button) {
     }
 }
 
-namespace {
-
-const int64_t kFlashTime = 0.2e6;
+static const int64_t kFlashTime = 0.2e6;
 
 // Indices of the keys controlled by each tab.  The "Ship" tab specifies keys 0..7, the "Command"
 // tab specifies keys 8..18, and so on.
-const size_t kKeyIndices[] = { 0, 8, 19, 28, 34, 44 };
+static const size_t kKeyIndices[] = { 0, 8, 19, 28, 34, 44 };
 
-size_t get_tab_num(size_t key) {
+static size_t get_tab_num(size_t key) {
     for (size_t i = 1; i < 5; ++i) {
         if (key < kKeyIndices[i]) {
             return i - 1;
@@ -202,8 +200,6 @@ size_t get_tab_num(size_t key) {
     }
     return 4;
 }
-
-}  // namespace
 
 KeyControlScreen::KeyControlScreen(OptionsScreen::State* state, Preferences* preferences)
         : InterfaceScreen("options/keys", world, true),

@@ -72,7 +72,7 @@ static Point            cAdjacentUnits[] = {
 };
 
 coordPointType          gGlobalCorner;
-unique_ptr<proximityUnitType[]> gProximityGrid;
+static unique_ptr<proximityUnitType[]> gProximityGrid;
 
 // for the macro mRanged, time is assumed to be a int32_t game ticks, velocity a fixed, result int32_t, scratch fixed
 inline void mRange(int32_t& result, int32_t time, Fixed velocity, Fixed& scratch) {

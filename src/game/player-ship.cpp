@@ -73,11 +73,11 @@ void Update_LabelStrings_ForHotKeyChange( void);
 
 namespace {
 
-KeyMap gLastKeyMap;
-int32_t gDestKeyTime = 0;
-int32_t gDestinationLabel = -1;
-int32_t gAlarmCount = -1;
-int32_t gSendMessageLabel = -1;
+static KeyMap gLastKeyMap;
+static int32_t gDestKeyTime = 0;
+static int32_t gDestinationLabel = -1;
+static int32_t gAlarmCount = -1;
+static int32_t gSendMessageLabel = -1;
 
 struct HotKeySuffix {
     spaceObjectType* space_object;

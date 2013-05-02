@@ -119,24 +119,23 @@ const int32_t kMouseSleepTime       = 58;
 
 const int32_t kSectorLineBrightness = DARKER;
 
-coordPointType          gLastGlobalCorner;
-
 namespace {
 
-unique_ptr<Sprite> left_instrument_sprite;
-unique_ptr<Sprite> right_instrument_sprite;
-unique_ptr<Point[]> gRadarBlipData;
-unique_ptr<int32_t[]> gScaleList;
-unique_ptr<int32_t[]> gSectorLineData;
-bool should_draw_sector_lines = false;
-Rect view_range;
+static coordPointType          gLastGlobalCorner;
+static unique_ptr<Sprite> left_instrument_sprite;
+static unique_ptr<Sprite> right_instrument_sprite;
+static unique_ptr<Point[]> gRadarBlipData;
+static unique_ptr<int32_t[]> gScaleList;
+static unique_ptr<int32_t[]> gSectorLineData;
+static bool should_draw_sector_lines = false;
+static Rect view_range;
 
 struct SiteData {
     bool should_draw;
     Point a, b, c;
     RgbColor light, dark;
 };
-SiteData site;
+static SiteData site;
 
 template <typename T>
 T clamp(T value, T min, T max) {

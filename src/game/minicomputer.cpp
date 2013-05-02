@@ -51,8 +51,6 @@ using std::max;
 
 namespace antares {
 
-miniComputerDataType    *gMiniScreenData = NULL;
-
 namespace {
 
 const int32_t kMiniScreenCharWidth = 25;

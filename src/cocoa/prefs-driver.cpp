@@ -35,15 +35,15 @@ namespace antares {
 
 namespace {
 
-const char kKeySettingsPreference[]     = "KeySettings";
-const char kIdleMusicPreference[]       = "PlayIdleMusic";
-const char kGameMusicPreference[]       = "PlayGameMusic";
-const char kSpeechOnPreference[]        = "SpeechOn";
-const char kVolumePreference[]          = "Volume";
-const char kFullscreenPreference[]      = "Fullscreen";
-const char kScreenWidthPreference[]     = "ScreenWidth";
-const char kScreenHeightPreference[]    = "ScreenHeight";
-const char kScenarioPreference[]        = "Scenario";
+static const char kKeySettingsPreference[]     = "KeySettings";
+static const char kIdleMusicPreference[]       = "PlayIdleMusic";
+static const char kGameMusicPreference[]       = "PlayGameMusic";
+static const char kSpeechOnPreference[]        = "SpeechOn";
+static const char kVolumePreference[]          = "Volume";
+static const char kFullscreenPreference[]      = "Fullscreen";
+static const char kScreenWidthPreference[]     = "ScreenWidth";
+static const char kScreenHeightPreference[]    = "ScreenHeight";
+static const char kScenarioPreference[]        = "Scenario";
 
 template <typename T>
 T clamp(T value, T min, T max) {

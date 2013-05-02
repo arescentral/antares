@@ -39,7 +39,7 @@ void KeyMap::set(size_t index, bool value) {
 }
 
 bool KeyMap::any() const {
-    const Data zero = { };
+    static const Data zero = { };
     return memcmp(_data, zero, kDataSize) == 0;
 }
 

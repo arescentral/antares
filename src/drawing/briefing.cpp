@@ -39,8 +39,7 @@ struct briefingSpriteBoundsType {
     int32_t objectIndex;
 };
 
-
-briefingSpriteBoundsType* gBriefingSpriteBounds = NULL;
+static briefingSpriteBoundsType* gBriefingSpriteBounds = NULL;
 
 Point BriefingSprite_GetBestLocation(
         const NatePixTable::Frame& frame, int32_t scale, Point fromWhere, bool *grid, int32_t gridWidth,
