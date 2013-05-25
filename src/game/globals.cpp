@@ -22,7 +22,6 @@
 #include "drawing/color.hpp"
 #include "drawing/sprite-handling.hpp"
 #include "game/admiral.hpp"
-#include "game/beam.hpp"
 #include "game/input-source.hpp"
 #include "game/minicomputer.hpp"
 #include "game/motion.hpp"

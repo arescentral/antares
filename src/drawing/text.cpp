@@ -177,7 +177,6 @@ struct FontVisitor : public JsonDefaultVisitor {
 
 }  // namespace
 
-const Font* gDirectTextData[kDirectFontNum];
 const Font* tactical_font;
 const Font* computer_font;
 const Font* button_font;
@@ -242,11 +241,11 @@ void Font::draw_sprite(Point origin, sfz::StringSlice string, RgbColor color) co
 }
 
 void InitDirectText() {
-    gDirectTextData[0] = tactical_font = new Font("tactical");
-    gDirectTextData[1] = computer_font = new Font("computer");
-    gDirectTextData[2] = button_font = new Font("button");
-    gDirectTextData[4] = title_font = new Font("title");
-    gDirectTextData[5] = small_button_font = new Font("button-small");
+    tactical_font = new Font("tactical");
+    computer_font = new Font("computer");
+    button_font = new Font("button");
+    title_font = new Font("title");
+    small_button_font = new Font("button-small");
 }
 
 uint8_t Font::char_width(Rune mchar) const {

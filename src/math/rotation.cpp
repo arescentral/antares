@@ -30,7 +30,7 @@ using sfz::read;
 namespace antares {
 
 const int kRotTableSize = 720;
-int32_t gRotTable[kRotTableSize];
+static int32_t gRotTable[kRotTableSize];
 
 void RotationInit() {
     Resource rsrc("rotation-table");

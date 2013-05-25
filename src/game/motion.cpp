@@ -72,7 +72,7 @@ static Point            cAdjacentUnits[] = {
 };
 
 coordPointType          gGlobalCorner;
-unique_ptr<proximityUnitType[]> gProximityGrid;
+static unique_ptr<proximityUnitType[]> gProximityGrid;
 
 // for the macro mRanged, time is assumed to be a int32_t game ticks, velocity a fixed, result int32_t, scratch fixed
 inline void mRange(int32_t& result, int32_t time, Fixed velocity, Fixed& scratch) {
@@ -161,9 +161,7 @@ void MotionCleanup() {
     gProximityGrid.reset();
 }
 
-void MoveSpaceObjects( spaceObjectType *table, const int32_t tableLength, const int32_t unitsToDo)
-
-{
+void MoveSpaceObjects(const int32_t unitsToDo) {
     int32_t                    i, h, v, jl;
     Fixed                   fh, fv, fa, fb, useThrust;
     Fixed                   aFixed;
@@ -171,8 +169,6 @@ void MoveSpaceObjects( spaceObjectType *table, const int32_t tableLength, const 
     uint32_t                shortDist, thisDist, longDist;
     spaceObjectType         *anObject;
     baseObjectType          *baseObject;
-
-#pragma unused( table, tableLength)
 
     if ( unitsToDo == 0) return;
 
@@ -596,9 +592,7 @@ void MoveSpaceObjects( spaceObjectType *table, const int32_t tableLength, const 
     }
 }
 
-void CollideSpaceObjects( spaceObjectType *table, const int32_t tableLength)
-
-{
+void CollideSpaceObjects() {
     spaceObjectType         *sObject = NULL, *dObject = NULL, *aObject = NULL, *bObject = NULL,
                             *player = NULL, *taObject, *tbObject;
     int32_t                    i = 0, j = 0, k, xs, xe, ys, ye, xd, yd, superx, supery, scaleCalc, difference;
@@ -615,7 +609,7 @@ void CollideSpaceObjects( spaceObjectType *table, const int32_t tableLength)
 
     // set up player info so we can find closest ship (for scaling)
     if ( globals()->gPlayerShipNumber >= 0)
-        player = table + globals()->gPlayerShipNumber;
+        player = mGetSpaceObjectPtr(globals()->gPlayerShipNumber);
     else player = NULL;
     globals()->gClosestObject = 0;
     globals()->gFarthestObject = 0;
@@ -1189,11 +1183,10 @@ void CollideSpaceObjects( spaceObjectType *table, const int32_t tableLength)
     }
 
 // here, it doesn't matter in what order we step through the table
-    aObject = table;
     dcalc = 1ul << globals()->gPlayerAdmiralNumber;
 
-    for ( i = 0; i < tableLength; i++)
-    {
+    for (i = 0; i < kMaxSpaceObject; i++) {
+        aObject = mGetSpaceObjectPtr(i);
         if (aObject->active == kObjectToBeFreed)
         {
             if ( aObject->attributes & kIsBeam)
@@ -1284,7 +1277,6 @@ void CollideSpaceObjects( spaceObjectType *table, const int32_t tableLength)
         aObject->lastDir = aObject->direction;
         aObject++;
     }
-
 }
 
 // CorrectPhysicalSpace-- takes 2 objects that are colliding and moves them back 1

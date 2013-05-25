@@ -83,15 +83,16 @@ struct actionQueueType {
 
 spaceObjectType* gRootObject = NULL;
 int32_t gRootObjectNumber = -1;
-actionQueueType* gFirstActionQueue = NULL;
-int32_t gFirstActionQueueNumber = -1;
-baseObjectType kZeroBaseObject;
-spaceObjectType kZeroSpaceObject = {0, &kZeroBaseObject};
 
-unique_ptr<spaceObjectType[]> gSpaceObjectData;
-unique_ptr<baseObjectType[]> gBaseObjectData;
-unique_ptr<objectActionType[]> gObjectActionData;
-unique_ptr<actionQueueType[]> gActionQueueData;
+static actionQueueType* gFirstActionQueue = NULL;
+static int32_t gFirstActionQueueNumber = -1;
+static baseObjectType kZeroBaseObject;
+static spaceObjectType kZeroSpaceObject = {0, &kZeroBaseObject};
+
+static unique_ptr<spaceObjectType[]> gSpaceObjectData;
+static unique_ptr<baseObjectType[]> gBaseObjectData;
+static unique_ptr<objectActionType[]> gObjectActionData;
+static unique_ptr<actionQueueType[]> gActionQueueData;
 
 void SpaceObjectHandlingInit() {
     bool correctBaseObjectColor = false;
@@ -456,7 +457,7 @@ int AddSpaceObject( spaceObjectType *sourceObject)
 
     if ( destObject->attributes & kIsBeam)
     {
-        destObject->frame.beam.beam = AddBeam( &(destObject->location),
+        destObject->frame.beam.beam = Beams::add( &(destObject->location),
             destObject->baseType->frame.beam.color,
             destObject->baseType->frame.beam.kind,
             destObject->baseType->frame.beam.accuracy,
@@ -1386,8 +1387,7 @@ void ExecuteObjectActions( int32_t whichAction, int32_t actionNum,
                                     eKineticBeamKind)
                                 // special beams need special post-creation acts
                                 {
-                                        SetSpecialBeamAttributes( newObject,
-                                        anObject);
+                                    Beams::set_attributes(newObject, anObject);
                                 }
                             }
                         }

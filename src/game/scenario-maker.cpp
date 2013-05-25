@@ -533,7 +533,7 @@ void ScenarioMakerInit() {
 bool start_construct_scenario(const Scenario* scenario, int32_t* max) {
     ResetAllSpaceObjects();
     ResetActionQueueData();
-    ResetBeams();
+    Beams::reset();
     ResetAllSprites();
     Labels::reset();
     ResetInstruments();
@@ -1006,32 +1006,6 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
     if (step == 0) {
         // set up all the admiral's destination objects
         RecalcAllAdmiralBuildData();
-
-        if (NETWORK_ON) {
-            for (int i = 0; i < gThisScenario->playerNum; i++) {
-                if (GetAdmiralFlagship(i) == NULL) {
-                    spaceObjectType* anObject = mGetSpaceObjectPtr(0);
-                    int32_t count = 0;
-                    while ((((anObject->attributes & kCanThink) != kCanThink)
-                                || (anObject->owner != i))
-                            && (count < kMaxSpaceObject)) {
-                        count++;
-                        anObject++;
-                    }
-
-                    if (count < kMaxSpaceObject) {
-                        SetAdmiralFlagship(i, count);
-                        anObject->attributes |= kIsPlayerShip;
-                        if (i != globals()->gPlayerAdmiralNumber) {
-                            anObject->attributes |= kIsRemote;
-                        } else {
-                            anObject->attributes |= kIsHumanControlled;
-                            ResetPlayerShip(count);
-                        }
-                    }
-                }
-            }
-        }
         Messages::clear();
 
         int x = 0;
@@ -1041,19 +1015,18 @@ void construct_scenario(const Scenario* scenario, int32_t* current) {
         globals()->gGameTime = 0;
         for (int64_t i = 0; i < start_ticks; ++i) {
             globals()->gGameTime = add_ticks(globals()->gGameTime, 1);
-            MoveSpaceObjects(mGetSpaceObjectPtr(0), kMaxSpaceObject,
-                        kDecideEveryCycles);
+            MoveSpaceObjects(kDecideEveryCycles);
             NonplayerShipThink(kDecideEveryCycles);
             AdmiralThink();
             ExecuteActionQueue(kDecideEveryCycles);
-            CollideSpaceObjects(mGetSpaceObjectPtr(0), kMaxSpaceObject);
+            CollideSpaceObjects();
             x++;
             if (x == 30) {
                 x = 0;
                 CheckScenarioConditions(0);
             }
             CullSprites();
-            CullBeams();
+            Beams::cull();
             if ((i % kScenarioTimeMultiple) == 0) {
                 (*current)++;
             }

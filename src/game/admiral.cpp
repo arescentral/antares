@@ -839,12 +839,11 @@ void AdmiralThink() {
                 if (a->blitzkrieg <= 0) {
                     // Really 48:
                     a->blitzkrieg = 0 - (gRandomSeed.next(1200) + 1200);
-                    anObject = mGetSpaceObjectPtr(0);
                     for (int j = 0; j < kMaxSpaceObject; j++) {
+                        anObject = mGetSpaceObjectPtr(j);
                         if (anObject->owner == i) {
                             anObject->currentTargetValue = 0x00000000;
                         }
-                        anObject++;
                     }
                 }
             } else {
@@ -852,12 +851,11 @@ void AdmiralThink() {
                 if (a->blitzkrieg >= 0) {
                     // Really 48:
                     a->blitzkrieg = gRandomSeed.next(1200) + 1200;
-                    anObject = mGetSpaceObjectPtr(0);
                     for (int j = 0; j < kMaxSpaceObject; j++) {
+                        anObject = mGetSpaceObjectPtr(j);
                         if (anObject->owner == i) {
                             anObject->currentTargetValue = 0x00000000;
                         }
-                        anObject++;
                     }
                 }
             }
@@ -1213,9 +1211,8 @@ void AdmiralThink() {
                                     mGetBaseObjectFromClassRace(
                                             baseObject, baseNum, a->hopeToBuild, a->race);
                                     if (baseObject->buildFlags & kSufficientEscortsExist) {
-                                        anObject = mGetSpaceObjectPtr(0);
-                                        int j = 0;
-                                        while (j < kMaxSpaceObject) {
+                                        for (int j = 0; j < kMaxSpaceObject; ++j) {
+                                            anObject = mGetSpaceObjectPtr(j);
                                             if ((anObject->active)
                                                     && (anObject->owner == i)
                                                     && (anObject->whichBaseObject == baseNum)
@@ -1224,15 +1221,13 @@ void AdmiralThink() {
                                                 a->hopeToBuild = -1;
                                                 j = kMaxSpaceObject;
                                             }
-                                            j++;
-                                            anObject++;
                                         }
                                     }
 
                                     if (baseObject->buildFlags & kMatchingFoeExists) {
                                         thisValue = 0;
-                                        anObject = mGetSpaceObjectPtr(0);
                                         for (int j = 0; j < kMaxSpaceObject; j++) {
+                                            anObject = mGetSpaceObjectPtr(j);
                                             if ((anObject->active)
                                                     && (anObject->owner != i)
                                                     && ((anObject->baseType->buildFlags
@@ -1241,7 +1236,6 @@ void AdmiralThink() {
                                                             & kLevelKeyTagMask))) {
                                                 thisValue = 1;
                                             }
-                                            anObject++;
                                         }
                                         if (!thisValue) {
                                             a->hopeToBuild = -1;

@@ -31,19 +31,19 @@ struct adjacentUnitType {
 };
 
 struct proximityUnitType {
-    spaceObjectTypePtr      nearObject;                         // for collision checking
-    spaceObjectTypePtr      farObject;                          // for distance checking
+    spaceObjectType*        nearObject;                         // for collision checking
+    spaceObjectType*        farObject;                          // for distance checking
     adjacentUnitType        unitsToCheck[kUnitsToCheckNumber];  // adjacent units to check
 };
 
 extern coordPointType gGlobalCorner;
 
-void InitMotion( void);
-void ResetMotionGlobals( void);
+void InitMotion();
+void ResetMotionGlobals();
 
-void MotionCleanup( void);
-void MoveSpaceObjects( spaceObjectType *, const int32_t, const int32_t);
-void CollideSpaceObjects( spaceObjectType *, const int32_t);
+void MotionCleanup();
+void MoveSpaceObjects(const int32_t unitsToDo);
+void CollideSpaceObjects();
 void CorrectPhysicalSpace( spaceObjectType *, spaceObjectType *);
 
 }  // namespace antares

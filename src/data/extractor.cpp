@@ -320,7 +320,7 @@ struct ResourceFile {
     } resources[16];
 };
 
-const ResourceFile kResourceFiles[] = {
+static const ResourceFile kResourceFiles[] = {
     {
         "__MACOSX/Ares 1.2.0 ƒ/Ares Data ƒ/._Ares Scenarios",
         {
@@ -357,7 +357,7 @@ const ResourceFile kResourceFiles[] = {
     },
 };
 
-const ResourceFile::ExtractedResource kPluginFiles[] = {
+static const ResourceFile::ExtractedResource kPluginFiles[] = {
     { "PICT",   "pictures",                     "png",      convert_pict},
     { "NLRP",   "replays",                      "NLRP",     convert_nlrp },
     { "SMIV",   "sprites",                      "json",     convert_smiv },
@@ -374,13 +374,13 @@ const ResourceFile::ExtractedResource kPluginFiles[] = {
     { "snro",   "scenarios",                    "snro",     verbatim},
 };
 
-const char kFactoryScenario[] = "com.biggerplanet.ares";
-const char kDownloadBase[] = "http://downloads.arescentral.org";
-const char kVersion[] = "13\n";
+static const char kFactoryScenario[] = "com.biggerplanet.ares";
+static const char kDownloadBase[] = "http://downloads.arescentral.org";
+static const char kVersion[] = "13\n";
 
-const char kPluginVersionFile[] = "data/version";
-const char kPluginVersion[] = "1\n";
-const char kPluginIdentifierFile[] = "data/identifier";
+static const char kPluginVersionFile[] = "data/version";
+static const char kPluginVersion[] = "1\n";
+static const char kPluginIdentifierFile[] = "data/identifier";
 
 void check_version(ZipArchive& archive, StringSlice expected) {
     ZipFileReader version_file(archive, kPluginVersionFile);

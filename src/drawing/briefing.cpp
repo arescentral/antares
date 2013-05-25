@@ -39,8 +39,7 @@ struct briefingSpriteBoundsType {
     int32_t objectIndex;
 };
 
-
-briefingSpriteBoundsType* gBriefingSpriteBounds = NULL;
+static briefingSpriteBoundsType* gBriefingSpriteBounds = NULL;
 
 Point BriefingSprite_GetBestLocation(
         const NatePixTable::Frame& frame, int32_t scale, Point fromWhere, bool *grid, int32_t gridWidth,
@@ -317,12 +316,10 @@ template <typename Renderer>
 static void render_briefing_with(
         const Renderer& renderer, int32_t maxSize, Rect *bounds,
         coordPointType *corner, int32_t scale) {
-    int32_t        count, thisScale, gridWidth, gridHeight, i, j, color,
-                objectNum;
+    int32_t        count, thisScale, gridWidth, gridHeight, i, j, color;
     Point       where;
     Rect    spriteRect, clipRect;
     baseObjectType  *baseObject = NULL;
-    spaceObjectType *anObject = mGetSpaceObjectPtr(0);
     bool         *gridCells = NULL;
     briefingSpriteBoundsType    *sBounds = NULL;
 
@@ -344,23 +341,14 @@ static void render_briefing_with(
         delete[] gBriefingSpriteBounds;
     }
 
-    objectNum = 1;  // extra 1 for last null briefingSpriteBounds
-
-    for ( count = 0; count < kMaxSpaceObject; count++)
-    {
-        if (( anObject->active == kObjectInUse) && ( anObject->sprite != NULL))
-        {
-            objectNum++;
-        }
-    }
-
-    gBriefingSpriteBounds = new briefingSpriteBoundsType[objectNum];
+    gBriefingSpriteBounds = new briefingSpriteBoundsType[kMaxSpaceObject];
 
     if ( gBriefingSpriteBounds == NULL) return;
     sBounds = gBriefingSpriteBounds;
 
     for ( count = 0; count < kMaxSpaceObject; count++)
     {
+        spaceObjectType *anObject = mGetSpaceObjectPtr(count);
         if (( anObject->active == kObjectInUse) && ( anObject->sprite != NULL))
         {
             baseObject = anObject->baseType;
@@ -438,7 +426,6 @@ static void render_briefing_with(
                 }
             }
         }
-        anObject++;
     }
     sBounds->objectIndex = -1;
     if (gridCells != NULL) {

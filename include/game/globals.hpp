@@ -77,7 +77,6 @@ struct hotKeyType {
 };
 
 struct admiralType;
-struct beamType;
 struct destBalanceType;
 struct proximityUnitType;
 struct scrollStarType;
@@ -122,7 +121,6 @@ struct aresGlobalType {
     barIndicatorType    gBarIndicator[ kBarIndicatorNum];
     miniComputerDataType    gMiniScreenData;
     std::unique_ptr<StringList>          gMissionStatusStrList;
-    std::unique_ptr<beamType[]>          gBeamData;
     smartSoundHandle    gSound[kSoundNum];
     smartSoundChannel   gChannel[kMaxChannelNum];
     int32_t         gLastSoundTime;         // = 0

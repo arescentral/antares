@@ -68,16 +68,21 @@ struct beamType {
     beamType();
 };
 
-void InitBeams();
-void ResetBeams();
-beamType* AddBeam(
-        coordPointType* location, uint8_t color, beamKindType kind, int32_t accuracy,
-        int32_t beam_range, int32_t* whichBeam);
-void SetSpecialBeamAttributes(spaceObjectType* beamObject, spaceObjectType* sourceObject);
-void update_beams();
-void draw_beams();
-void ShowAllBeams();
-void CullBeams();
+class Beams {
+  public:
+    static void init();
+    static void reset();
+    static beamType* add(
+            coordPointType* location, uint8_t color, beamKindType kind, int32_t accuracy,
+            int32_t beam_range, int32_t* whichBeam);
+    static void set_attributes(spaceObjectType* beamObject, spaceObjectType* sourceObject);
+    static void update();
+    static void draw();
+    static void show_all();
+    static void cull();
+  private:
+    static std::unique_ptr<beamType[]> _data;
+};
 
 }  // namespace antares
 

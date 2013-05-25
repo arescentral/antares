@@ -29,7 +29,7 @@ using sfz::write;
 
 namespace antares {
 
-RgbColor colors[256] = {
+static RgbColor colors[256] = {
     RgbColor(255, 255, 255),
     RgbColor(32, 0, 0),
     RgbColor(224, 224, 224),

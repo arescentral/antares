@@ -2320,14 +2320,12 @@ int32_t GetSpritePointSelectObject( Rect *bounds, spaceObjectType *sourceObject,
                             int32_t currentShipNum, int16_t friendOrFoe)
 
 {
-    spaceObjectType *anObject;
-    int32_t         whichShip = 0, resultShip = -1, closestShip = -1;
+    int32_t         resultShip = -1, closestShip = -1;
     uint32_t        myOwnerFlag = 1 << sourceObject->owner;
 
-    anObject = mGetSpaceObjectPtr(0);
 
-    for ( whichShip = 0; whichShip < kMaxSpaceObject; whichShip++)
-    {
+    for (int32_t whichShip = 0; whichShip < kMaxSpaceObject; whichShip++) {
+        spaceObjectType* anObject = mGetSpaceObjectPtr(whichShip);
         if (( anObject->active) && ( anObject->sprite != NULL) &&
             ( anObject->seenByPlayerFlags & myOwnerFlag) &&
             (( anObject->attributes & inclusiveAttributes) == inclusiveAttributes) &&
@@ -2357,7 +2355,6 @@ int32_t GetSpritePointSelectObject( Rect *bounds, spaceObjectType *sourceObject,
                 }
             }
         }
-        anObject++;
     }
     if ((( resultShip == -1) && ( closestShip != -1)) || ( resultShip == currentShipNum)) resultShip = closestShip;
 

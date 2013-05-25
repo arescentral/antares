@@ -195,7 +195,7 @@ struct CocoaVideoDriver::EventBridge {
 
                 usage -= kHIDUsage_GD_X;
                 gamepad[usage] = double_value;
-                static int x_component[] = {0, 0, -1, 3, 3, -1};
+                static const int x_component[] = {0, 0, -1, 3, 3, -1};
                 double x = gamepad[x_component[usage]];
                 double y = gamepad[x_component[usage] + 1];
                 enqueue(new GamepadStickEvent(

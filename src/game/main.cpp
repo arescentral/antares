@@ -441,7 +441,7 @@ void GamePlay::resign_front() {
 void GamePlay::draw() const {
     globals()->starfield.draw();
     draw_sector_lines();
-    draw_beams();
+    Beams::draw();
     draw_sprites();
     Labels::draw();
 
@@ -519,7 +519,7 @@ void GamePlay::fire_timer() {
         if (unitsToDo > 0) {
             // executed arbitrarily, but at least once every kDecideEveryCycles
             globals()->starfield.move(unitsToDo);
-            MoveSpaceObjects(mGetSpaceObjectPtr(0), kMaxSpaceObject, unitsToDo);
+            MoveSpaceObjects(unitsToDo);
         }
 
         globals()->gGameTime = add_ticks(globals()->gGameTime, unitsToDo);
@@ -577,7 +577,7 @@ void GamePlay::fire_timer() {
                 _right_mouse_down = false;
             }
 
-            CollideSpaceObjects(mGetSpaceObjectPtr(0), kMaxSpaceObject);
+            CollideSpaceObjects();
             _decide_cycle = 0;
             _scenario_check_time++;
             if (_scenario_check_time == 30) {
@@ -615,14 +615,14 @@ void GamePlay::fire_timer() {
     Messages::draw_long_message( unitsDone);
 
     update_sector_lines();
-    update_beams();
+    Beams::update();
     Labels::update_positions(unitsDone);
     Labels::update_contents(unitsDone);
     update_site(_replay);
 
     CullSprites();
     Labels::show_all();
-    ShowAllBeams();
+    Beams::show_all();
     globals()->starfield.show();
 
     Messages::draw_message_screen(unitsDone);

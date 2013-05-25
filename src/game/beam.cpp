@@ -24,7 +24,6 @@
 
 #include "data/space-object.hpp"
 #include "drawing/color.hpp"
-#include "game/globals.hpp"
 #include "game/motion.hpp"
 #include "game/space-object.hpp"
 #include "lang/casts.hpp"
@@ -69,25 +68,27 @@ int32_t scale(int32_t value, int32_t scale) {
 
 }  // namespace
 
+std::unique_ptr<beamType[]> Beams::_data;
+
 beamType::beamType():
         killMe(false),
         active(false) { }
 
-void InitBeams() {
-    globals()->gBeamData.reset(new beamType[kBeamNum]);
+void Beams::init() {
+    _data.reset(new beamType[kBeamNum]);
 }
 
-void ResetBeams() {
-    beamType* const beams = globals()->gBeamData.get();
+void Beams::reset() {
+    beamType* const beams = _data.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         clear(*beam);
     }
 }
 
-beamType *AddBeam(
+beamType* Beams::add(
         coordPointType* location, uint8_t color, beamKindType kind, int32_t accuracy,
         int32_t beam_range, int32_t* whichBeam) {
-    beamType* const beams = globals()->gBeamData.get();
+    beamType* const beams = _data.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (!beam->active) {
             beam->lastGlobalLocation = *location;
@@ -125,7 +126,7 @@ beamType *AddBeam(
     return NULL;
 }
 
-void SetSpecialBeamAttributes(spaceObjectType* beamObject, spaceObjectType* sourceObject) {
+void Beams::set_attributes(spaceObjectType* beamObject, spaceObjectType* sourceObject) {
     beamType& beam = *beamObject->frame.beam.beam;
     beam.fromObjectNumber = sourceObject->entryNumber;
     beam.fromObjectID = sourceObject->id;
@@ -182,8 +183,8 @@ void SetSpecialBeamAttributes(spaceObjectType* beamObject, spaceObjectType* sour
     }
 }
 
-void update_beams() {
-    beamType* const beams = globals()->gBeamData.get();
+void Beams::update() {
+    beamType* const beams = _data.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
             if (beam->lastApparentLocation != beam->objectLocation) {
@@ -240,8 +241,8 @@ void update_beams() {
     }
 }
 
-void draw_beams() {
-    beamType* const beams = globals()->gBeamData.get();
+void Beams::draw() {
+    beamType* const beams = _data.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
             if ((!beam->killMe) && (beam->active != kObjectToBeFreed)) {
@@ -265,8 +266,8 @@ void draw_beams() {
     }
 }
 
-void ShowAllBeams() {
-    beamType* const beams = globals()->gBeamData.get();
+void Beams::show_all() {
+    beamType* const beams = _data.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
             if ((beam->killMe) || (beam->active == kObjectToBeFreed)) {
@@ -285,8 +286,8 @@ void ShowAllBeams() {
     }
 }
 
-void CullBeams() {
-    beamType* const beams = globals()->gBeamData.get();
+void Beams::cull() {
+    beamType* const beams = _data.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
                 if ((beam->killMe) || (beam->active == kObjectToBeFreed)) {

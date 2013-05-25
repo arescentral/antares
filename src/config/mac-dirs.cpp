@@ -48,7 +48,7 @@ Directories mac_dirs() {
 };
 
 const Directories& dirs() {
-    static Directories dirs = mac_dirs();
+    static const Directories dirs = mac_dirs();
     return dirs;
 }
 
