@@ -24,7 +24,7 @@ def dist(dst):
     dst.algo = "zip"
     dst.excl = (
         " test **/.* **/*.zip **/*.pyc **/build ext/*/ext"
-        " ext/libsfz/waf ext/libzipxx/waf ext/rezin/waf"
+        " ext/gmock-waf/waf ext/libpng-waf/waf ext/libsfz/waf ext/libzipxx/waf ext/rezin/waf"
     )
 
 def options(opt):
