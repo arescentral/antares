@@ -619,7 +619,7 @@ void draw_site(const PlayerShip& player) {
         VideoDriver::driver()->draw_line(site.a, site.c, site.light);
         VideoDriver::driver()->draw_line(site.b, site.c, site.dark);
 
-        SiteData control;
+        SiteData control = {};
         if (player.show_select()) {
             control.light = GetRGBTranslateColorShade(YELLOW, MEDIUM);
             control.dark = GetRGBTranslateColorShade(YELLOW, DARKER + kSlightlyDarkerColor);
