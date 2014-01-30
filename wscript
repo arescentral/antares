@@ -12,8 +12,7 @@ def sign(ctx):
     subprocess.call(["codesign", "-s", "-", "-f", "--entitlements", entitlements, app])
 
 def common(ctx):
-    ctx.default_sdk = "10.7"
-    ctx.default_compiler = "clang"
+    ctx.default_sdk = "10.8"
     ctx.cxx_std = "c++11"
     ctx.load("compiler_c compiler_cxx")
     ctx.load("core externals", tooldir="ext/waf-sfiera")
