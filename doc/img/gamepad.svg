@@ -3,8 +3,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="758" height="550" version="1.0">
   <g transform="translate(379,0)">
     <g>
-      <path d="M 279,57 L 275,41 C 273,33 273,32 270,30 C 237,8 199,-3 161,3 C 154,4 145,21 145,21 z" style="fill:#cccccc" />
-      <path d="M -279,57 L -275,41 C -273,33 -273,32 -270,30 C -237,8 -199,-3 -161,3 C -154,4 -145,21 -145,21 z" style="fill:#cccccc" />
+      <path d="M 279,57 L 275,41 C 273,33 273,32 270,30 C 237,8 199,-3 161,3 C 154,4 145,21 145,21 z" style="fill:#cccccc" id="rt" />
+      <path d="M -279,57 L -275,41 C -273,33 -273,32 -270,30 C -237,8 -199,-3 -161,3 C -154,4 -145,21 -145,21 z" style="fill:#cccccc" id="lt" />
     </g>
     <g>
       <rect x="13" y="391" width="25" height="16" rx="3" ry="3" style="fill:#4d4d4d" />
