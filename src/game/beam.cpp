@@ -197,7 +197,7 @@ void Beams::update() {
                 beam->lastApparentLocation = beam->objectLocation;
             }
 
-            if ((!beam->killMe) && (beam->active != kObjectToBeFreed)) {
+            if (!beam->killMe) {
                 if (beam->color) {
                     if (beam->beamKind != eKineticBeamKind) {
                         beam->boltState++;
@@ -245,7 +245,7 @@ void Beams::draw() {
     beamType* const beams = _data.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
-            if ((!beam->killMe) && (beam->active != kObjectToBeFreed)) {
+            if (!beam->killMe) {
                 if (beam->color) {
                     if ((beam->beamKind == eBoltObjectToObjectKind)
                             || (beam->beamKind == eBoltObjectToRelativeCoordKind)) {
@@ -270,7 +270,7 @@ void Beams::show_all() {
     beamType* const beams = _data.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
-            if ((beam->killMe) || (beam->active == kObjectToBeFreed)) {
+            if (beam->killMe) {
                 beam->active = false;
             }
             if (beam->color) {
@@ -290,7 +290,7 @@ void Beams::cull() {
     beamType* const beams = _data.get();
     for (beamType* beam: range(beams, beams + kBeamNum)) {
         if (beam->active) {
-                if ((beam->killMe) || (beam->active == kObjectToBeFreed)) {
+                if (beam->killMe) {
                     beam->active = false;
                 }
                 beam->lastLocation = beam->thisLocation;

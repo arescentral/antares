@@ -5,15 +5,8 @@ VERSION = "0.6.1"
 
 WARNINGS = ["-Wall", "-Werror", "-Wno-sign-compare", "-Wno-deprecated-declarations"]
 
-def sign(ctx):
-    entitlements = "resources/entitlements.plist"
-    app = "build/antares/Antares.app"
-    import subprocess
-    subprocess.call(["codesign", "-s", "-", "-f", "--entitlements", entitlements, app])
-
 def common(ctx):
-    ctx.default_sdk = "10.7"
-    ctx.default_compiler = "clang"
+    ctx.default_sdk = "10.8"
     ctx.cxx_std = "c++11"
     ctx.load("compiler_c compiler_cxx")
     ctx.load("core externals", tooldir="ext/waf-sfiera")
@@ -32,6 +25,9 @@ def options(opt):
     opt.add_option(
             "--smoke", action="store_true", default=False,
             help="run tests quickly")
+    opt.add_option(
+            "--identity", action="store", default="-",
+            help="code-signing identity")
 
 def configure(cnf):
     common(cnf)
@@ -89,6 +85,14 @@ def build(bld):
             "antares/libantares",
             "antares/system/cocoa",
             "antares/system/carbon",
+        ],
+    )
+
+    bld(
+        rule="codesign -s %s -f --entitlements ${SRC}" % bld.options.identity, 
+        source=[
+            "resources/entitlements.plist",
+            "antares/Antares",
         ],
     )
 
