@@ -1,0 +1,6 @@
+quiet	3	0
+amp	3	0	255
+loop	3	0	/music/4001
+quiet	0	902
+amp	0	902	192
+play	0	902	/sounds/507
