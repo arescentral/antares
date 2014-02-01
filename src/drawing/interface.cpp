@@ -20,6 +20,7 @@
 
 #include <sfz/sfz.hpp>
 
+#include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "data/interface.hpp"
 #include "drawing/color.hpp"
@@ -372,7 +373,7 @@ void draw_tab_box(Point origin, const TabBox& item) {
     mDrawPuffUpRect(uRect, color, VERY_DARK);
 }
 
-void draw_button(Point origin, const PlainButton& item) {
+void draw_button(Point origin, Shortcut shortcut, const PlainButton& item) {
     Rect            tRect, uRect, vRect;
     int16_t         vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     uint8_t         shade;
@@ -429,8 +430,17 @@ void draw_button(Point origin, const PlainButton& item) {
     }
 
 
-    if (item.key == 0)
-    {
+    bool draw_shortcut = false;
+    String shortcut_text;
+    if ((shortcut == KEY_SHORTCUT) && item.key) {
+        draw_shortcut = true;
+        GetKeyNumName(item.key, &shortcut_text);
+    } else if ((shortcut == GAMEPAD_SHORTCUT) && item.gamepad) {
+        draw_shortcut = true;
+        Gamepad::name(item.gamepad, shortcut_text);
+    }
+
+    if (!draw_shortcut) {
         uRect = Rect(tRect.left +  kInterfaceContentBuffer,
             tRect.top + kInterfaceContentBuffer,
             tRect.left +  kInterfaceContentBuffer,
@@ -453,20 +463,16 @@ void draw_button(Point origin, const PlainButton& item) {
         } else {
             color = GetRGBTranslateColorShade(item.hue, LIGHTER);
         }
-        StringSlice s = item.label;
-        swidth = GetInterfaceStringWidth(s, item.style);
+        swidth = GetInterfaceStringWidth(item.label, item.style);
         swidth = tRect.left + ( tRect.right - tRect.left) / 2 - swidth / 2;
         sheight = GetInterfaceFontAscent(item.style) + kInterfaceTextVBuffer + tRect.top;
-        DrawInterfaceString(Point(swidth, sheight), s, item.style, color);
-    } else
-    {
+        DrawInterfaceString(Point(swidth, sheight), item.label, item.style, color);
+    } else {
         // draw the key code
         {
             if (item.status == kDimmed)
                 shade = VERY_DARK;
             else shade = LIGHT;
-            String s;
-            GetKeyNumName(item.key, &s);
             swidth = GetInterfaceFontWidth(item.style) * kMaxKeyNameLength;
 
             uRect = Rect(tRect.left +  kInterfaceContentBuffer, tRect.top + kInterfaceContentBuffer,
@@ -485,7 +491,7 @@ void draw_button(Point origin, const PlainButton& item) {
             color = GetRGBTranslateColorShade(item.hue, shade);
             VideoDriver::driver()->fill_rect(vRect, color);
 
-            swidth = GetInterfaceStringWidth(s, item.style);
+            swidth = GetInterfaceStringWidth(shortcut_text, item.style);
             swidth = uRect.left + ( uRect.right - uRect.left) / 2 - swidth / 2;
             if (item.status == kDimmed) {
                 color = GetRGBTranslateColorShade(item.hue, VERY_DARK);
@@ -494,8 +500,8 @@ void draw_button(Point origin, const PlainButton& item) {
             }
 
             DrawInterfaceString(
-                    Point(swidth, uRect.top + GetInterfaceFontAscent(item.style)), s, item.style,
-                    color);
+                    Point(swidth, uRect.top + GetInterfaceFontAscent(item.style)),
+                    shortcut_text, item.style, color);
         }
 
         // draw the button title
@@ -1135,13 +1141,16 @@ namespace {
 
 struct DrawInterfaceItemVisitor : InterfaceItem::Visitor {
     Point p;
-    DrawInterfaceItemVisitor(Point origin): p(origin) { }
+    Shortcut shortcut;
+    DrawInterfaceItemVisitor(Point p, Shortcut shortcut):
+            p(p),
+            shortcut(shortcut) { }
 
     virtual void visit_plain_rect(const PlainRect& i) const { draw_plain_rect(p, i); }
     virtual void visit_labeled_rect(const LabeledRect& i) const { draw_labeled_box(p, i); }
     virtual void visit_text_rect(const TextRect& i) const { draw_text_rect(p, i); }
     virtual void visit_picture_rect(const PictureRect& i) const { draw_picture_rect(p, i); }
-    virtual void visit_plain_button(const PlainButton& i) const { draw_button(p, i); }
+    virtual void visit_plain_button(const PlainButton& i) const { draw_button(p, shortcut, i); }
     virtual void visit_radio_button(const RadioButton& i) const { }
     virtual void visit_checkbox_button(const CheckboxButton& i) const { draw_checkbox(p, i); }
     virtual void visit_tab_box(const TabBox& i) const { draw_tab_box(p, i); }
@@ -1255,12 +1264,12 @@ struct GetBoundsInterfaceItemVisitor : InterfaceItem::Visitor {
 
 } // namespace
 
-void draw_interface_item(const InterfaceItem& item) {
-    item.accept(DrawInterfaceItemVisitor({0, 0}));
+void draw_interface_item(const InterfaceItem& item, Shortcut shortcut) {
+    item.accept(DrawInterfaceItemVisitor({0, 0}, shortcut));
 }
 
-void draw_interface_item(const InterfaceItem& item, Point origin) {
-    item.accept(DrawInterfaceItemVisitor(origin));
+void draw_interface_item(const InterfaceItem& item, Shortcut shortcut, Point origin) {
+    item.accept(DrawInterfaceItemVisitor(origin, shortcut));
 }
 
 void GetAnyInterfaceItemGraphicBounds(const InterfaceItem& item, Rect *bounds) {

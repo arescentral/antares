@@ -164,7 +164,7 @@ void DebriefingScreen::draw() const {
     }
     Rect interface_bounds = _message_bounds;
     interface_bounds.offset(_pix_bounds.left, _pix_bounds.top);
-    draw_interface_item(_data_item);
+    draw_interface_item(_data_item, KEY_SHORTCUT);
 
     vector<inlinePictType> inline_pict;
     draw_text_in_rect(interface_bounds, _message, kLarge, GOLD, inline_pict);

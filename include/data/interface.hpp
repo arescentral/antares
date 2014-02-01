@@ -114,10 +114,11 @@ struct PictureRect : public InterfaceItem {
 
 struct Button : public LabeledItem {
     Button(
-            int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
-            interfaceStyleType style);
+            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
+            uint8_t hue, interfaceStyleType style);
 
     int16_t                     key;
+    int16_t                     gamepad;
     uint8_t                     hue;
     interfaceStyleType          style;
     interfaceItemStatusType     status;
@@ -125,15 +126,15 @@ struct Button : public LabeledItem {
 
 struct PlainButton : public Button {
     PlainButton(
-            int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
-            interfaceStyleType style);
+            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
+            uint8_t hue, interfaceStyleType style);
     virtual void accept(const Visitor& visitor) const;
 };
 
 struct CheckboxButton : public Button {
     CheckboxButton(
-            int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
-            interfaceStyleType style);
+            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
+            uint8_t hue, interfaceStyleType style);
     virtual void accept(const Visitor& visitor) const;
 
     bool                        on;
@@ -141,8 +142,8 @@ struct CheckboxButton : public Button {
 
 struct RadioButton : public Button {
     RadioButton(
-            int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
-            interfaceStyleType style);
+            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
+            uint8_t hue, interfaceStyleType style);
     virtual void accept(const Visitor& visitor) const;
 
     bool                        on;
@@ -150,8 +151,8 @@ struct RadioButton : public Button {
 
 struct TabBoxButton : public Button {
     TabBoxButton(
-            int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
-            interfaceStyleType style, const sfz::Json& tab_content);
+            int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label,
+            uint8_t hue, interfaceStyleType style, const sfz::Json& tab_content);
     virtual void accept(const Visitor& visitor) const;
 
     bool                        on;

@@ -23,6 +23,7 @@
 #include <sfz/sfz.hpp>
 
 #include "data/interface.hpp"
+#include "drawing/interface.hpp"
 #include "game/cursor.hpp"
 #include "math/geometry.hpp"
 #include "ui/card.hpp"
@@ -47,6 +48,7 @@ class InterfaceScreen : public Card {
     virtual void key_up(const KeyUpEvent& event);
     virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
     virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
+    virtual void gamepad_stick(const GamepadStickEvent& event);
 
   protected:
     virtual void overlay() const;
@@ -66,6 +68,7 @@ class InterfaceScreen : public Card {
         NORMAL,
         MOUSE_DOWN,
         KEY_DOWN,
+        GAMEPAD_DOWN,
     };
     State _state;
 
@@ -76,8 +79,9 @@ class InterfaceScreen : public Card {
     const bool _full_screen;
     std::vector<std::unique_ptr<InterfaceItem>> _items;
     Button* _hit_button;
-    uint32_t _pressed_key;
+    uint32_t _pressed;
     Cursor _cursor;
+    Shortcut _shortcut;
 
     DISALLOW_COPY_AND_ASSIGN(InterfaceScreen);
 };

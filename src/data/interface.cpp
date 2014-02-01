@@ -19,6 +19,7 @@
 #include "data/interface.hpp"
 
 #include <sfz/sfz.hpp>
+#include "config/gamepad.hpp"
 #include "config/keys.hpp"
 #include "drawing/color.hpp"
 #include "data/resource.hpp"
@@ -115,6 +116,7 @@ vector<unique_ptr<InterfaceItem>> interface_items(int id0, const Json& json) {
         uint8_t hue = antares::hue(sub.get("hue"));
         interfaceStyleType style = antares::style(sub.get("style"));
         int16_t key = sub.has("key") ? antares::key(sub.get("key")) : 0;
+        int16_t gamepad = sub.has("gamepad") ? Gamepad::num(sub.get("gamepad").string()) : 0;
         interfaceLabelType label =
             sub.has("label") ? antares::label(sub.get("label")) : interfaceLabelType{};
 
@@ -125,11 +127,11 @@ vector<unique_ptr<InterfaceItem>> interface_items(int id0, const Json& json) {
                 items.emplace_back(new PlainRect(id++, bounds, hue, style));
             }
         } else if (kind == "button") {
-            items.emplace_back(new PlainButton(id++, bounds, key, label, hue, style));
+            items.emplace_back(new PlainButton(id++, bounds, key, gamepad, label, hue, style));
         } else if (kind == "checkbox") {
-            items.emplace_back(new CheckboxButton(id++, bounds, key, label, hue, style));
+            items.emplace_back(new CheckboxButton(id++, bounds, key, gamepad, label, hue, style));
         } else if (kind == "radio") {
-            items.emplace_back(new RadioButton(id++, bounds, key, label, hue, style));
+            items.emplace_back(new RadioButton(id++, bounds, key, gamepad, label, hue, style));
         } else if (kind == "picture") {
             items.emplace_back(new PictureRect(id++, bounds, resource));
         } else if (kind == "text") {
@@ -151,7 +153,7 @@ vector<unique_ptr<InterfaceItem>> interface_items(int id0, const Json& json) {
                 button_bounds.right = button_bounds.left + tab.get("width").number();
                 interfaceLabelType label = antares::label(tab.get("label"));
                 items.emplace_back(new TabBoxButton(
-                            id++, button_bounds, key, label, hue, style, tab.get("content")));
+                            id++, button_bounds, key, gamepad, label, hue, style, tab.get("content")));
                 button_bounds.left = button_bounds.right + 37;
             }
             int16_t top_right_border_size = bounds.right - button_bounds.right - 17;
@@ -216,27 +218,28 @@ void PictureRect::accept(const Visitor& visitor) const {
 }
 
 Button::Button(
-        int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
+        int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, uint8_t hue,
         interfaceStyleType style):
         LabeledItem(id, bounds, label),
         key(key),
+        gamepad(gamepad),
         hue(hue),
         style(style),
         status(kActive) { }
 
 PlainButton::PlainButton(
-        int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
+        int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, uint8_t hue,
         interfaceStyleType style):
-        Button(id, bounds, key, label, hue, style) { }
+        Button(id, bounds, key, gamepad, label, hue, style) { }
 
 void PlainButton::accept(const Visitor& visitor) const {
     visitor.visit_plain_button(*this);
 }
 
 CheckboxButton::CheckboxButton(
-        int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
+        int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, uint8_t hue,
         interfaceStyleType style):
-        Button(id, bounds, key, label, hue, style),
+        Button(id, bounds, key, gamepad, label, hue, style),
         on(false) { }
 
 void CheckboxButton::accept(const Visitor& visitor) const {
@@ -244,9 +247,9 @@ void CheckboxButton::accept(const Visitor& visitor) const {
 }
 
 RadioButton::RadioButton(
-        int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
+        int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, uint8_t hue,
         interfaceStyleType style):
-        Button(id, bounds, key, label, hue, style),
+        Button(id, bounds, key, gamepad, label, hue, style),
         on(false) { }
 
 void RadioButton::accept(const Visitor& visitor) const {
@@ -254,9 +257,9 @@ void RadioButton::accept(const Visitor& visitor) const {
 }
 
 TabBoxButton::TabBoxButton(
-        int id, Rect bounds, int16_t key, interfaceLabelType label, uint8_t hue,
+        int id, Rect bounds, int16_t key, int16_t gamepad, interfaceLabelType label, uint8_t hue,
         interfaceStyleType style, const Json& tab_content):
-        Button(id, bounds, key, label, hue, style),
+        Button(id, bounds, key, gamepad, label, hue, style),
         on(false),
         tab_content(tab_content) { }
 
