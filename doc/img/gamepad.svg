@@ -3,8 +3,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="758" height="550" version="1.0">
   <g transform="translate(379,0)">
     <g>
-      <path d="M 279,57 L 275,41 C 273,33 273,32 270,30 C 237,8 199,-3 161,3 C 154,4 145,21 145,21 z" style="fill:#cccccc" id="rt" />
-      <path d="M -279,57 L -275,41 C -273,33 -273,32 -270,30 C -237,8 -199,-3 -161,3 C -154,4 -145,21 -145,21 z" style="fill:#cccccc" id="lt" />
+      <path d="M 279,57 L 275,41 C 273,33 273,32 270,30 C 237,8 199,-3 161,3 C 154,4 145,21 145,21 z" style="fill:#cccccc" id="rb" />
+      <path d="M -279,57 L -275,41 C -273,33 -273,32 -270,30 C -237,8 -199,-3 -161,3 C -154,4 -145,21 -145,21 z" style="fill:#cccccc" id="lb" />
     </g>
     <g>
       <rect x="13" y="391" width="25" height="16" rx="3" ry="3" style="fill:#4d4d4d" />
@@ -52,10 +52,10 @@
       <circle cx="0" cy="28" r="4.5" style="fill:#9b9b9b" />
     </g>
     <g transform="translate(216,130)">
-      <circle cx="54" cy="0" r="26" style="fill:#cc0000" />
-      <circle cx="0" cy="54" r="26" style="fill:#66cc66" />
-      <circle cx="-54" cy="0" r="26" style="fill:#0066cc" />
-      <circle cx="0" cy="-54" r="26" style="fill:#eecc00" />
+      <circle cx="54" cy="0" r="26" style="fill:#cc0000" id="b" />
+      <circle cx="0" cy="54" r="26" style="fill:#66cc66" id="a" />
+      <circle cx="-54" cy="0" r="26" style="fill:#0066cc" id="x" />
+      <circle cx="0" cy="-54" r="26" style="fill:#eecc00" id="y" />
     </g>
   </g>
 </svg>

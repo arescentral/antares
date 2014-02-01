@@ -13,8 +13,7 @@
         <xsl:apply-templates select="rt"/>
         <g transform="translate(-379,-275)">
           <xsl:apply-templates select="document('gamepad.svg')/*/*" mode="copy">
-            <xsl:with-param name="highlight" select="@highlight"/>
-            <xsl:with-param name="highlight-color" select="@highlight-color"/>
+            <xsl:with-param name="gamepad" select="."/>
           </xsl:apply-templates>
         </g>
         <xsl:apply-templates select="back"/>
@@ -193,21 +192,21 @@
   </xsl:template>
 
   <xsl:template match="@*|node()" mode="copy">
-    <xsl:param name="highlight"/>
-    <xsl:param name="highlight-color">#cc0000</xsl:param>
+    <xsl:param name="gamepad"/>
     <xsl:copy>
       <xsl:apply-templates select="@*[name() != 'id']" mode="copy"/>
-      <xsl:if test="@id = $highlight">
-        <xsl:attribute name="style">
-          <xsl:text>fill:</xsl:text>
-          <xsl:value-of select="$highlight-color"/>
-        </xsl:attribute>
-      </xsl:if>
+      <xsl:apply-templates select="$gamepad" mode="style">
+        <xsl:with-param name="button" select="@id"/>
+      </xsl:apply-templates>
       <xsl:apply-templates select="node()" mode="copy">
-        <xsl:with-param name="highlight" select="$highlight"/>
-        <xsl:with-param name="highlight-color" select="$highlight-color"/>
+        <xsl:with-param name="gamepad" select="$gamepad"/>
       </xsl:apply-templates>
     </xsl:copy>
+  </xsl:template>
+
+  <xsl:template match="*" mode="style">
+    <xsl:param name="button"/>
+    <xsl:copy-of select="*[name()=$button]/@style"/>
   </xsl:template>
 
 </xsl:stylesheet>
