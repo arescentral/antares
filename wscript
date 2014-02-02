@@ -40,6 +40,8 @@ def configure(cnf):
     cnf.env.append_value("FRAMEWORK_antares/system/openal", "OpenAL")
     cnf.env.append_value("FRAMEWORK_antares/system/opengl", "OpenGL")
 
+    cnf.env["IDENTITY"] = cnf.options.identity
+
 def build(bld):
     common(bld)
 
@@ -92,7 +94,7 @@ def build(bld):
 
     bld(
         rule=("codesign -s %s -f --entitlements ${SRC}" %
-              pipes.quote(bld.options.identity)),
+              pipes.quote(bld.env["IDENTITY"])),
         source=[
             "resources/entitlements.plist",
             "antares/Antares",
