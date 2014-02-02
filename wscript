@@ -88,8 +88,11 @@ def build(bld):
         ],
     )
 
+    import pipes
+
     bld(
-        rule="codesign -s %s -f --entitlements ${SRC}" % bld.options.identity, 
+        rule=("codesign -s %s -f --entitlements ${SRC}" %
+              pipes.quote(bld.options.identity)),
         source=[
             "resources/entitlements.plist",
             "antares/Antares",
