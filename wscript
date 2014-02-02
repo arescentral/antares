@@ -93,7 +93,7 @@ def build(bld):
     import pipes
 
     bld(
-        rule=("codesign -s %s -f --entitlements ${SRC}" %
+        rule=("codesign -s %s -f --entitlements ${SRC[0].abspath()} antares/Antares.app" %
               pipes.quote(bld.env["IDENTITY"])),
         source=[
             "resources/entitlements.plist",
