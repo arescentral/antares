@@ -23,6 +23,7 @@
 #include <sfz/sfz.hpp>
 
 #include "data/interface.hpp"
+#include "ui/event.hpp"
 
 namespace antares {
 
@@ -35,11 +36,6 @@ struct inlinePictType {
     int16_t id;
 };
 
-enum Shortcut {
-    KEY_SHORTCUT,
-    GAMEPAD_SHORTCUT,
-};
-
 void draw_text_in_rect(
         Rect tRect, const sfz::StringSlice& text, interfaceStyleType style,
         uint8_t textcolor, std::vector<inlinePictType>& inlinePict);
@@ -49,8 +45,8 @@ void populate_inline_picts(
 
 int16_t GetInterfaceTextHeightFromWidth(
         const sfz::StringSlice& text, interfaceStyleType style, int16_t width);
-void draw_interface_item(const InterfaceItem& item, Shortcut shortcut);
-void draw_interface_item(const InterfaceItem& item, Shortcut shortcut, Point origin);
+void draw_interface_item(const InterfaceItem& item, InputMode mode);
+void draw_interface_item(const InterfaceItem& item, InputMode mode, Point origin);
 
 void GetAnyInterfaceItemGraphicBounds(const InterfaceItem& item, Rect* rect);
 

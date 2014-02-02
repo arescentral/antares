@@ -40,6 +40,7 @@ class CocoaVideoDriver : public OpenGlVideoDriver {
     virtual bool button(int which);
     virtual Point get_mouse();
     virtual void get_keys(KeyMap* k);
+    virtual InputMode input_mode() const;
 
     virtual int ticks() const;
     virtual int usecs() const;

@@ -48,7 +48,6 @@ class InterfaceScreen : public Card {
     virtual void key_up(const KeyUpEvent& event);
     virtual void gamepad_button_down(const GamepadButtonDownEvent& event);
     virtual void gamepad_button_up(const GamepadButtonUpEvent& event);
-    virtual void gamepad_stick(const GamepadStickEvent& event);
 
   protected:
     virtual void overlay() const;
@@ -81,7 +80,6 @@ class InterfaceScreen : public Card {
     Button* _hit_button;
     uint32_t _pressed;
     Cursor _cursor;
-    Shortcut _shortcut;
 
     DISALLOW_COPY_AND_ASSIGN(InterfaceScreen);
 };

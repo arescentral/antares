@@ -54,8 +54,7 @@ InterfaceScreen::InterfaceScreen(sfz::Json json, const Rect& bounds, bool full_s
         _state(NORMAL),
         _bounds(bounds),
         _full_screen(full_screen),
-        _hit_button(nullptr),
-        _shortcut(KEY_SHORTCUT) {
+        _hit_button(nullptr) {
     _items = interface_items(0, json);
     const int offset_x = (_bounds.width() / 2) - 320;
     const int offset_y = (_bounds.height() / 2) - 240;
@@ -114,7 +113,7 @@ void InterfaceScreen::draw() const {
     VideoDriver::driver()->fill_rect(copy_area, RgbColor::kBlack);
 
     for (const auto& item: _items) {
-        draw_interface_item(*item, _shortcut, _bounds.origin());
+        draw_interface_item(*item, VideoDriver::driver()->input_mode(), _bounds.origin());
     }
     overlay();
     if (stack()->top() == this) {
@@ -164,13 +163,11 @@ void InterfaceScreen::mouse_up(const MouseUpEvent& event) {
 }
 
 void InterfaceScreen::mouse_move(const MouseMoveEvent& event) {
-    _shortcut = KEY_SHORTCUT;
     // TODO(sfiera): highlight and un-highlight clicked button as dragged in and out.
     static_cast<void>(event);
 }
 
 void InterfaceScreen::key_down(const KeyDownEvent& event) {
-    _shortcut = KEY_SHORTCUT;
     const int32_t key_code = event.key() + 1;
     for (auto& item: _items) {
         Button* button = dynamic_cast<Button*>(item.get());
@@ -199,7 +196,6 @@ void InterfaceScreen::key_up(const KeyUpEvent& event) {
 }
 
 void InterfaceScreen::gamepad_button_down(const GamepadButtonDownEvent& event) {
-    _shortcut = GAMEPAD_SHORTCUT;
     for (auto& item: _items) {
         Button* button = dynamic_cast<Button*>(item.get());
         if (button && button->status != kDimmed && button->gamepad == event.button) {
@@ -223,10 +219,6 @@ void InterfaceScreen::gamepad_button_up(const GamepadButtonUpEvent& event) {
         }
         handle_button(*_hit_button);
     }
-}
-
-void InterfaceScreen::gamepad_stick(const GamepadStickEvent& event) {
-    _shortcut = GAMEPAD_SHORTCUT;
 }
 
 void InterfaceScreen::overlay() const { }

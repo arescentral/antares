@@ -24,6 +24,7 @@
 
 #include "drawing/color.hpp"
 #include "math/geometry.hpp"
+#include "ui/event.hpp"
 
 namespace antares {
 
@@ -51,6 +52,7 @@ class VideoDriver {
     virtual bool button(int which) = 0;
     virtual Point get_mouse() = 0;
     virtual void get_keys(KeyMap* k) = 0;
+    virtual InputMode input_mode() const = 0;
 
     virtual int ticks() const = 0;
     virtual int usecs() const = 0;

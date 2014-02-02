@@ -77,6 +77,10 @@ void CocoaVideoDriver::get_keys(KeyMap* keys) {
     keys->copy(_event_tracker.keys());
 }
 
+InputMode CocoaVideoDriver::input_mode() const {
+    return _event_tracker.input_mode();
+}
+
 int CocoaVideoDriver::ticks() const {
     return usecs() * 60 / 1000000;
 }

@@ -373,7 +373,7 @@ void draw_tab_box(Point origin, const TabBox& item) {
     mDrawPuffUpRect(uRect, color, VERY_DARK);
 }
 
-void draw_button(Point origin, Shortcut shortcut, const PlainButton& item) {
+void draw_button(Point origin, InputMode mode, const PlainButton& item) {
     Rect            tRect, uRect, vRect;
     int16_t         vcenter, swidth, sheight, thisHBorder = kInterfaceSmallHBorder;
     uint8_t         shade;
@@ -432,10 +432,10 @@ void draw_button(Point origin, Shortcut shortcut, const PlainButton& item) {
 
     bool draw_shortcut = false;
     String shortcut_text;
-    if ((shortcut == KEY_SHORTCUT) && item.key) {
+    if ((mode == KEYBOARD_MOUSE) && item.key) {
         draw_shortcut = true;
         GetKeyNumName(item.key, &shortcut_text);
-    } else if ((shortcut == GAMEPAD_SHORTCUT) && item.gamepad) {
+    } else if ((mode == GAMEPAD) && item.gamepad) {
         draw_shortcut = true;
         Gamepad::name(item.gamepad, shortcut_text);
     }
@@ -1141,16 +1141,16 @@ namespace {
 
 struct DrawInterfaceItemVisitor : InterfaceItem::Visitor {
     Point p;
-    Shortcut shortcut;
-    DrawInterfaceItemVisitor(Point p, Shortcut shortcut):
+    InputMode mode;
+    DrawInterfaceItemVisitor(Point p, InputMode mode):
             p(p),
-            shortcut(shortcut) { }
+            mode(mode) { }
 
     virtual void visit_plain_rect(const PlainRect& i) const { draw_plain_rect(p, i); }
     virtual void visit_labeled_rect(const LabeledRect& i) const { draw_labeled_box(p, i); }
     virtual void visit_text_rect(const TextRect& i) const { draw_text_rect(p, i); }
     virtual void visit_picture_rect(const PictureRect& i) const { draw_picture_rect(p, i); }
-    virtual void visit_plain_button(const PlainButton& i) const { draw_button(p, shortcut, i); }
+    virtual void visit_plain_button(const PlainButton& i) const { draw_button(p, mode, i); }
     virtual void visit_radio_button(const RadioButton& i) const { }
     virtual void visit_checkbox_button(const CheckboxButton& i) const { draw_checkbox(p, i); }
     virtual void visit_tab_box(const TabBox& i) const { draw_tab_box(p, i); }
@@ -1264,12 +1264,12 @@ struct GetBoundsInterfaceItemVisitor : InterfaceItem::Visitor {
 
 } // namespace
 
-void draw_interface_item(const InterfaceItem& item, Shortcut shortcut) {
-    item.accept(DrawInterfaceItemVisitor({0, 0}, shortcut));
+void draw_interface_item(const InterfaceItem& item, InputMode mode) {
+    item.accept(DrawInterfaceItemVisitor({0, 0}, mode));
 }
 
-void draw_interface_item(const InterfaceItem& item, Shortcut shortcut, Point origin) {
-    item.accept(DrawInterfaceItemVisitor(origin, shortcut));
+void draw_interface_item(const InterfaceItem& item, InputMode mode, Point origin) {
+    item.accept(DrawInterfaceItemVisitor(origin, mode));
 }
 
 void GetAnyInterfaceItemGraphicBounds(const InterfaceItem& item, Rect *bounds) {
